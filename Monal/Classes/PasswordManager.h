@@ -23,7 +23,7 @@
 @property (nonatomic, retain) NSMutableDictionary *genericPasswordQuery;
 
 - (void)mySetObject:(id)inObject forKey:(id)key;
-- (id)myObjectForKey:(id)key;
+- (id)myObjectForKey:(id)key; 
 - (void)resetKeychainItem;
 
 

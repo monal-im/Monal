@@ -57,7 +57,7 @@
 				<object class="NSPSMatrix" key="NSFrameMatrix"/>
 				<string key="NSFrameSize">{320, 480}</string>
 				<reference key="NSSuperview"/>
-				<reference key="NSWindow"/>
+				<reference key="NSNextKeyView"/>
 				<object class="NSColor" key="IBUIBackgroundColor" id="130166252">
 					<int key="NSColorSpace">1</int>
 					<bytes key="NSRGB">MSAxIDEAA</bytes>
@@ -86,7 +86,6 @@
 							<string key="NSResourceName">joingroup.png</string>
 						</object>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-						<reference key="IBUITabBar" ref="832762935"/>
 					</object>
 					<reference key="IBUIParentViewController" ref="207588495"/>
 					<string key="IBUINibName">GroupChat</string>
@@ -108,7 +107,6 @@
 								<string key="NSResourceName">Buddies.png</string>
 							</object>
 							<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-							<reference key="IBUITabBar" ref="832762935"/>
 						</object>
 						<reference key="IBUIParentViewController" ref="207588495"/>
 						<object class="IBUISimulatedTabBarMetrics" key="IBUISimulatedBottomBarMetrics"/>
@@ -175,7 +173,6 @@
 								<string key="NSResourceName">active.png</string>
 							</object>
 							<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-							<reference key="IBUITabBar" ref="832762935"/>
 						</object>
 						<reference key="IBUIParentViewController" ref="207588495"/>
 						<object class="IBUISimulatedTabBarMetrics" key="IBUISimulatedBottomBarMetrics"/>
@@ -225,7 +222,6 @@
 								<string key="NSResourceName">status.png</string>
 							</object>
 							<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-							<reference key="IBUITabBar" ref="832762935"/>
 						</object>
 						<reference key="IBUIParentViewController" ref="207588495"/>
 						<object class="IBUISimulatedTabBarMetrics" key="IBUISimulatedBottomBarMetrics"/>
@@ -278,7 +274,6 @@
 								<string key="NSResourceName">accounts.png</string>
 							</object>
 							<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-							<reference key="IBUITabBar" ref="832762935"/>
 						</object>
 						<reference key="IBUIParentViewController" ref="207588495"/>
 						<object class="IBUISimulatedTabBarMetrics" key="IBUISimulatedBottomBarMetrics"/>
@@ -326,7 +321,6 @@
 								<string key="NSResourceName">chatlog.png</string>
 							</object>
 							<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-							<reference key="IBUITabBar" ref="832762935"/>
 						</object>
 						<reference key="IBUIParentViewController" ref="207588495"/>
 						<string key="IBUINibName">Loglist</string>
@@ -347,7 +341,6 @@
 								<string key="NSResourceName">Search.png</string>
 							</object>
 							<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-							<reference key="IBUITabBar" ref="832762935"/>
 						</object>
 						<reference key="IBUIToolbarItems" ref="0"/>
 						<reference key="IBUIParentViewController" ref="207588495"/>
@@ -368,7 +361,6 @@
 								<string key="NSResourceName">help.png</string>
 							</object>
 							<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-							<reference key="IBUITabBar" ref="832762935"/>
 						</object>
 						<reference key="IBUIToolbarItems" ref="0"/>
 						<reference key="IBUIParentViewController" ref="207588495"/>
@@ -388,7 +380,6 @@
 								<string key="NSResourceName">web.png</string>
 							</object>
 							<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-							<reference key="IBUITabBar" ref="832762935"/>
 						</object>
 						<reference key="IBUIToolbarItems" ref="0"/>
 						<reference key="IBUIParentViewController" ref="207588495"/>
@@ -409,7 +400,6 @@
 								<string key="NSResourceName">about.png</string>
 							</object>
 							<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-							<reference key="IBUITabBar" ref="832762935"/>
 						</object>
 						<reference key="IBUIToolbarItems" ref="0"/>
 						<reference key="IBUIParentViewController" ref="207588495"/>
@@ -427,27 +417,13 @@
 					<int key="NSvFlags">266</int>
 					<string key="NSFrame">{{0, 431}, {320, 49}}</string>
 					<reference key="NSSuperview"/>
-					<reference key="NSWindow"/>
+					<reference key="NSNextKeyView"/>
 					<object class="NSColor" key="IBUIBackgroundColor">
 						<int key="NSColorSpace">3</int>
 						<bytes key="NSWhite">MCAwAA</bytes>
 					</object>
 					<bool key="IBUIClearsContextBeforeDrawing">NO</bool>
 					<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-					<object class="NSMutableArray" key="IBUIItems">
-						<bool key="EncodedWithXMLCoder">YES</bool>
-						<reference ref="879645971"/>
-						<reference ref="836822372"/>
-						<reference ref="179828351"/>
-						<reference ref="135994381"/>
-						<reference ref="951975030"/>
-						<reference ref="506062235"/>
-						<reference ref="857168803"/>
-						<reference ref="1035495910"/>
-						<reference ref="33314457"/>
-						<reference ref="932881914"/>
-					</object>
-					<reference key="IBUISelectedItem" ref="506062235"/>
 				</object>
 			</object>
 			<object class="IBUIView" id="373050824">

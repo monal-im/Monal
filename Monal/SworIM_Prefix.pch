@@ -1,0 +1,15 @@
+//
+// Prefix header for all source files of the 'SworIM' target in the 'SworIM' project
+//
+
+
+#ifdef __OBJC__
+    #import <Foundation/Foundation.h>
+    #import <UIKit/UIKit.h>
+#endif
+//#define _SHOWLOG
+#ifdef _SHOWLOG
+#define debug_NSLog(format, ...) NSLog(format, ## __VA_ARGS__)
+#else
+#define debug_NSLog(format, ...)
+#endif

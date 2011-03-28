@@ -1,0 +1,162 @@
+
+
+/* HEADER */
+.incomingheader_left {
+	width:2px;
+	height:21px;
+	position: absolute;
+	left:0px;
+	top:0px;
+}
+
+.incomingheader_center {
+	height:21px;
+	position:absolute;
+	left:2px;
+	right:3px;
+	top:0px;
+}
+
+.incomingheader_right {
+	width:4px;
+	height:21px;
+	position: absolute;
+	right:0px;
+	top:0px;
+}
+
+.outgoingheader_left {
+	width:2px;
+	height:21px;
+	position: absolute;
+	left:0px;
+	top:0px;
+}
+
+.outgoingheader_center {
+	height:21px;
+	position:absolute;
+	left:2px;
+	right:3px;
+	top:0px;
+}
+
+.outgoingheader_right {
+	width:4px;
+	height:21px;
+	position: absolute;
+	right:0px;
+	top:0px;
+}
+
+.outgoingheader_ctx_left {
+	background: url("images/ctx_left.png") top right no-repeat;
+	width:2px;
+	height:21px;
+	position: absolute;
+	left:0px;
+	top:0px;
+}
+
+.outgoingheader_ctx_center {
+	background: url("images/ctx_fill.png") top right repeat-x;
+	height:21px;
+	position:absolute;
+	left:2px;
+	right:3px;
+	top:0px;
+}
+
+.outgoingheader_ctx_right {
+	background: url("images/ctx_right.png") top right no-repeat;
+	width:4px;
+	height:21px;
+	position: absolute;
+	right:0px;
+	top:0px;
+}
+
+/* MESSAGE */
+.outgoing_left {
+	float: left;
+	margin 0px;
+	width:39px;
+	padding: 3px 0px 0px 0px;
+}
+.outgoing_right {
+	width:auto;
+	margin: 11px 5px 0px 39px;
+	position: relative;
+}
+.outgoing_right[background="Incoming/buddy_icon.png"],
+.outgoing_right[background="Outgoing/buddy_icon.png"] {
+	margin: 11px 5px 0px 0px !important;
+}
+
+.outgoing_buddyicon {
+	height: 38px;
+	width: 38px;
+	background: #FFF;
+	border: 0px;
+	z-index: 1 !important;
+	position: absolute;
+	left:1px;
+	top:1px;
+}
+.outgoing_iconoverlay {
+	height: 41px;
+	width: 39px;
+	background: url("images/icon_overlay.png") top right no-repeat;
+	z-index: 2 !important;
+	position: absolute;
+	left:0px;
+	top:0px;
+
+}
+.outgoingmessage_top {
+	position: relative;
+	overflow:hidden;
+}
+
+.outgoingmessage_left {
+	background: url("images/message_left.png") top right repeat-y;
+	width:2px;
+	height: 100%;
+	position: absolute;
+	left: 0px;
+	top:21px;
+}
+
+.outgoingmessage_right {
+	background: url("images/message_right.png") top right repeat-y;
+	width:3px;
+	height: 100%;
+	position: absolute;
+	right: 0px;
+	top:21px;
+}
+.outgoingmessage_bottomleft {
+	background: url("images/message_bottomleft.png") top right no-repeat;
+	width:3px;
+	height:4px;
+	position: absolute;
+	left:-1px;
+}
+
+.outgoingmessage_bottomcenter {
+	background: url("images/message_bottom.png") bottom left repeat-x;
+	height: 4px;
+	position: absolute;
+	right:3px;
+	left:2px;
+}
+
+
+.outgoingmessage_bottomright {
+	background: url("images/message_bottomright.png") top right no-repeat;
+	width:3px;
+	height:4px;
+	position: absolute;
+	right:0px;
+}
+

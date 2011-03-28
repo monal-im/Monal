@@ -1,0 +1,293 @@
+* {
+		word-wrap: break-word;
+		word-break:break-word;
+}
+
+#header1 { 
+	position: fixed; 
+	top: 0px; 
+	left: 0px; 
+	right: 0px; 
+	margin: 0; 
+	padding: 10px; 
+	overflow: auto; 
+	color: white; 
+	font-family: Lucida Grande; 
+	text-align: center; 
+	font-size: 10px; 
+	font-weight: regular; 
+	background: rgba(0,0,0,.65); 
+	z-index: 999; 
+}
+
+#heading { 
+	position: fixed; 
+	top: 0px; 
+	left: 0px; 
+	margin: 0; 
+	padding: 5px;
+	font-weight: regular; 
+	background-color:#fbfbed;
+	z-index: 999;
+	width:100%;
+	height:45px;
+	border-bottom:2px solid #d5d5d5;
+	background:url("images/steelHeading.jpg") repeat-x top left;
+	
+}
+
+#heading .conversationIncomingIcon {
+	position:absolute;
+	left:5px;
+	top:5px;
+}
+
+#heading .conversationIncomingIcon img {
+	width:48px;
+	height:48px;
+}
+
+#heading .conversationWith {
+	position:relative;
+	left:60px;
+	margin:5px 0 0 0;
+	font: bold 16px Myriad Pro, Myriad, Lucida Grande, Trebuchet MS, Arial;
+	overflow:hide;
+}
+
+#heading .conversationTime {
+	position:relative;
+	left:60px;
+	color:#6d6d6d;
+	font: bold 10px Myriad Pro, Myriad, Lucida Grande, Trebuchet MS, Arial;
+}
+
+body {
+/*margin-top: 65px;*/
+	background-color: white;
+	color: black;
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+.status_container {
+	font: 10px Myriad, Lucida Grande, Arial;
+}
+
+
+body {
+}
+
+.followUp {
+	clear:right;
+	height:1px;
+	font-size:1px;
+	line-height:1px;
+	margin:4px 0 4px 0;
+}
+
+.chatItem {
+	opacity:0.96;
+}
+
+.tableBubble {
+	width:100%;
+}
+
+.tableBubble .tl {
+	height:8px;
+}
+
+.tableBubble .tr {
+	width:8px;
+	height:8px;
+}
+
+.message {
+	padding:0 1em 0 1.25em;
+	word-wrap: break-word;
+}
+
+.tableBubble .message {
+	font-size:11px;
+}
+
+.tableBubble .message img {
+	vertical-align:middle;
+}
+
+.tableBubble .messageRight {
+	width:1px;
+}
+
+.tableBubble .bl {
+	height:10px;
+}
+
+.tableBubble .br {
+	width:8px;
+	height:10px;
+}
+
+.tableBubble .timeStamp {
+	margin:2px;
+	margin-left:7px;
+	text-align:right;
+	float:right;
+}
+
+.myBubble .indicator {
+	position:absolute;
+	top:8px;
+	left:0;
+	width:13px;
+	height:11px;
+}
+
+.myBubble {
+	position:relative;
+	padding-left:10px;
+	margin-left:33px;
+	margin-right:10px;
+}
+
+.chatItem .avatar {
+	width:26px;
+	height:26px;
+	float:left;
+}
+
+/****** STatus  ******/
+
+.statusMessage {
+	opacity:0.8;
+	color:#676767;
+}
+
+.statusMessage .myBubble .indicator {
+	background:url("images/steelIndicator.png") no-repeat top left;
+}
+
+.statusMessage .tableBubble .tl {
+	background:url("images/steelCurves.png") no-repeat top left;
+}
+
+.statusMessage .tableBubble .tr {
+	background:url("images/steelCurves.png") no-repeat top right;
+}
+
+.statusMessage .tableBubble .head {
+	background:url("images/steelCurves.png") no-repeat -10px 0;
+}
+
+.statusMessage .tableBubble .message {
+	background:url("images/steelBackground.png") repeat-y top left;
+}
+
+.statusMessage .tableBubble .messageRight {
+	background:url("images/steelBackground.png") repeat-y top right;
+}
+
+.statusMessage .tableBubble .bl {
+	background:url("images/steelCurves.png") no-repeat bottom left;
+}
+
+.statusMessage .tableBubble .br {
+	background:url("images/steelCurves.png") no-repeat bottom right;
+}
+
+.statusMessage .followUp {
+	background-color:#f4f0a7;
+	border-bottom:1px solid #fff;
+}
+
+.statusMessage .timeStamp {
+	color:#676767;
+}
+
+
+/*incoming */
+
+.incomingItem .myBubble .indicator {
+	background:url("images/yellowIndicator.png") no-repeat top left;
+}
+
+.incomingItem .tableBubble .tl {
+	background:url("images/yellowCurves.png") no-repeat top left;
+}
+
+.incomingItem .tableBubble .tr {
+	background:url("images/yellowCurves.png") no-repeat top right;
+}
+
+.incomingItem .tableBubble .head {
+	background:url("images/yellowCurves.png") no-repeat -10px 0;
+}
+
+.incomingItem .tableBubble .message {
+	background:url("images/yellowBackground.png") repeat-y top left;
+}
+
+.incomingItem .tableBubble .messageRight {
+	background:url("images/yellowBackground.png") repeat-y top right;
+}
+
+.incomingItem .tableBubble .bl {
+	background:url("images/yellowCurves.png") no-repeat bottom left;
+}
+
+.incomingItem .tableBubble .br {
+	background:url("images/yellowCurves.png") no-repeat bottom right;
+}
+
+.incomingItem .followUp {
+	background-color:#f4f0a7;
+	border-bottom:1px solid #fff;
+}
+
+.incomingItem .timeStamp {
+	color:#bdb410;
+}
+
+/* outgoing */
+
+
+.outgoingItem .myBubble .indicator {
+	background:url("images/greenIndicator.png") no-repeat top left;
+}
+
+.outgoingItem .tableBubble .tl {
+	background:url("images/greenCurves.png") no-repeat top left;
+}
+
+.outgoingItem .tableBubble .tr {
+	background:url("images/greenCurves.png") no-repeat top right;
+}
+
+.outgoingItem .tableBubble .head {
+	background:url("images/greenCurves.png") no-repeat -10px 0;
+}
+
+.outgoingItem .tableBubble .message {
+	background:url("images/greenBackground.png") repeat-y top left;
+}
+
+.outgoingItem .tableBubble .messageRight {
+	background:url("images/greenBackground.png") repeat-y top right;
+}
+
+.outgoingItem .tableBubble .bl {
+	background:url("images/greenCurves.png") no-repeat bottom left;
+}
+
+.outgoingItem .tableBubble .br {
+	background:url("images/greenCurves.png") no-repeat bottom right;
+}
+
+.outgoingItem .followUp {
+	background-color:#e2efc4;
+	border-bottom:1px solid #fff;
+}
+
+.outgoingItem .timeStamp {
+	color:#9ecf35;
+}

@@ -1,0 +1,29 @@
+/Users/anurodhp/Development/Monal files/Monal development/Classes/status.m:20: warning: cannot find interface declaration for 'status'
+/Users/anurodhp/Development/Monal files/Monal development/Classes/status.m: In function '-[status viewDidAppear:]':
+/Users/anurodhp/Development/Monal files/Monal development/Classes/status.m:29: error: 'theTable' undeclared (first use in this function)
+/Users/anurodhp/Development/Monal files/Monal development/Classes/status.m:29: error: (Each undeclared identifier is reported only once
+/Users/anurodhp/Development/Monal files/Monal development/Classes/status.m:29: error: for each function it appears in.)
+/Users/anurodhp/Development/Monal files/Monal development/Classes/status.m: In function '-[status tableView:cellForRowAtIndexPath:]':
+/Users/anurodhp/Development/Monal files/Monal development/Classes/status.m:77: error: 'thelist' undeclared (first use in this function)
+/Users/anurodhp/Development/Monal files/Monal development/Classes/status.m:82: warning: unused variable 'buddystatus'
+/Users/anurodhp/Development/Monal files/Monal development/Classes/status.m:115: error: 'thelist2' undeclared (first use in this function)
+/Users/anurodhp/Development/Monal files/Monal development/Classes/status.m: In function '-[status tableView:numberOfRowsInSection:]':
+/Users/anurodhp/Development/Monal files/Monal development/Classes/status.m:155: error: 'thelist' undeclared (first use in this function)
+/Users/anurodhp/Development/Monal files/Monal development/Classes/status.m:158: error: 'thelist2' undeclared (first use in this function)
+/Users/anurodhp/Development/Monal files/Monal development/Classes/status.m: In function '-[status tableView:targetIndexPathForMoveFromRowAtIndexPath:toProposedIndexPath:]':
+/Users/anurodhp/Development/Monal files/Monal development/Classes/status.m:173: warning: control reaches end of non-void function
+/Users/anurodhp/Development/Monal files/Monal development/Classes/status.m: In function '-[status numberOfSectionsInTableView:]':
+/Users/anurodhp/Development/Monal files/Monal development/Classes/status.m:182: error: 'sectionArray' undeclared (first use in this function)
+/Users/anurodhp/Development/Monal files/Monal development/Classes/status.m:184: warning: control reaches end of non-void function
+/Users/anurodhp/Development/Monal files/Monal development/Classes/status.m: In function '-[status tableView:titleForHeaderInSection:]':
+/Users/anurodhp/Development/Monal files/Monal development/Classes/status.m:191: error: 'sectionArray' undeclared (first use in this function)
+/Users/anurodhp/Development/Monal files/Monal development/Classes/status.m:192: warning: control reaches end of non-void function
+/Users/anurodhp/Development/Monal files/Monal development/Classes/status.m: In function '-[status tableView:didSelectRowAtIndexPath:]':
+/Users/anurodhp/Development/Monal files/Monal development/Classes/status.m:209: error: 'thelist' undeclared (first use in this function)
+/Users/anurodhp/Development/Monal files/Monal development/Classes/status.m:212: error: 'db' undeclared (first use in this function)
+/Users/anurodhp/Development/Monal files/Monal development/Classes/status.m:213: error: 'viewController' undeclared (first use in this function)
+/Users/anurodhp/Development/Monal files/Monal development/Classes/status.m: In function '-[status dealloc]':
+/Users/anurodhp/Development/Monal files/Monal development/Classes/status.m:257: error: 'sectionArray' undeclared (first use in this function)
+/Users/anurodhp/Development/Monal files/Monal development/Classes/status.m:258: error: 'thelist2' undeclared (first use in this function)
+/Users/anurodhp/Development/Monal files/Monal development/Classes/status.m:259: error: 'thelist' undeclared (first use in this function)
+/Users/anurodhp/Development/Monal files/Monal development/Classes/status.m:260: error: no super class declared in @interface for 'status'

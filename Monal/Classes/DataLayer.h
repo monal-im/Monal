@@ -1,0 +1,127 @@
+//
+//  DataLayer.h
+//  SworIM
+//
+//  Created by Anurodh Pokharel on 3/28/09.
+//  Copyright 2009 __MyCompanyName__. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+#import <sqlite3.h>
+#import "PasswordManager.h"
+
+@interface DataLayer : NSObject {
+
+	NSString* dbPath;
+	sqlite3* database; 
+}
+
+-(void) initDB;
+-(void) version; 
+
+//lowest level command handlers
+-(NSObject*) executeScalar:(NSString*) query; 
+-(NSArray*) executeReader:(NSString*) query; 
+-(BOOL) executeNonQuery:(NSString*) query; 
+
+// Buddy Commands
+-(BOOL) addBuddy:(NSString*) buddy :(NSString*) accountNo:(NSString*) fullName:(NSString*) nickName;
+-(BOOL) removeBuddy:(NSString*) buddy :(NSString*) accountNo; 
+-(BOOL) clearBuddies:(NSString*) accountNo; 
+
+-(BOOL) resetBuddies;
+-(NSArray*) onlineBuddies:(NSString*) accountNo;
+-(NSArray*) offlineBuddies:(NSString*) accountNo;
+
+-(NSArray*) newBuddies:(NSString*) accountNo;
+-(NSArray*) removedBuddies:(NSString*) accountNo;
+-(NSArray*) updatedBuddies:(NSString*) accountNo;
+-(BOOL) markBuddiesRead:(NSString*) accountNo;
+
+-(BOOL) setOnlineBuddy:(NSString*) buddy :(NSString*) accountNo; 
+-(BOOL) setOfflineBuddy:(NSString*) buddy :(NSString*) accountNo;
+
+-(BOOL) setFullName:(NSString*) buddy :(NSString*) accountNo:(NSString*) fullName;
+-(NSString*) fullName:(NSString*) buddy :(NSString*) accountNo; 
+
+-(BOOL) setFileName:(NSString*) buddy :(NSString*) accountNo:(NSString*) fileName;
+-(BOOL) setBuddyState:(NSString*) buddy :(NSString*) accountNo:(NSString*) thestate;
+-(NSString*) buddyState:(NSString*) buddy :(NSString*) accountNo; 
+
+-(BOOL) setBuddyStatus:(NSString*) buddy :(NSString*) accountNo:(NSString*) theStatus;
+-(NSString*) buddyStatus:(NSString*) buddy :(NSString*) accountNo; 
+
+
+-(BOOL) setBuddyHash:(NSString*) buddy :(NSString*) accountNo:(NSString*) theHash;
+-(NSString*) buddyHash:(NSString*) buddy :(NSString*) accountNo; 
+
+-(bool) isBuddyMuc:(NSString*) buddy :(NSString*) accountNo;
+
+-(bool) isBuddyAdded:(NSString*) buddy :(NSString*) accountNo ;
+-(bool) isBuddyRemoved:(NSString*) buddy :(NSString*) accountNo ;
+
+-(bool) isBuddyInList:(NSString*) buddy :(NSString*) accountNo ;
+
+//vcard commands
+
+-(BOOL) setIconName:(NSString*) buddy :(NSString*) accountNo:(NSString*) icon;
+-(NSString*) iconName:(NSString*) buddy :(NSString*) accountNo; 
+ 
+
+-(BOOL) setNickName:(NSString*) buddy :(NSString*) accountNo:(NSString*) nickName;
+
+
+//account commands
+-(NSArray*) protocolList;
+-(NSArray*) accountList;
+-(NSArray*) enabledAccountList;
+
+-(NSArray*) accountVals:(NSString*) accountNo; 
+-(BOOL) addAccount: (NSString*) name :(NSString*) theProtocol :(NSString*) username: (NSString*) password: (NSString*) server
+				  : (NSString*) otherport: (bool) secure: (NSString*) resource: (NSString*) thedomain:(bool) enabled;
+-(BOOL) updateAccount: (NSString*) name :(NSString*) theProtocol :(NSString*) username: (NSString*) password: (NSString*) server
+					 : (NSString*) otherport: (bool) secure: (NSString*) resource: (NSString*) thedomain: (bool) enabled: (NSString*) accountNo;
+-(BOOL) removeAccount:(NSString*) accountNo; 
+
+-(BOOL) removeEnabledAccount; 
+
+
+
+
+
+
+//message Commands
+-(BOOL) addMessage:(NSString*) from :(NSString*) to :(NSString*) accountNo:(NSString*) message:(NSString*) actualfrom ;
+-(BOOL) clearMessages:(NSString*) accountNo; 
+
+//message history
+-(NSArray*) messageHistory:(NSString*) buddy :(NSString*) accountNo;
+-(NSArray*) messageHistoryAll:(NSString*) buddy :(NSString*) accountNo;
+-(BOOL) messageHistoryClean:(NSString*) buddy :(NSString*) accountNo;
+-(BOOL) messageHistoryCleanAll:(NSString*) accountNo;
+
+-(NSArray*) messageHistoryBuddies:(NSString*) accountNo;
+-(BOOL) markAsRead:(NSString*) buddy :(NSString*) accountNo;
+-(BOOL) addMessageHistory:(NSString*) from :(NSString*) to :(NSString*) accountNo:(NSString*) message:(NSString*) actualfrom ;
+
+
+
+//new messages
+-(NSArray*) unreadMessagesForBuddy:(NSString*) buddy :(NSString*) accountNo;
+-(NSArray*) unreadMessages:(NSString*) accountNo;
+//active chats
+-(NSArray*) activeBuddies:(NSString*) accountNo;
+-(bool) removeActiveBuddies:(NSString*) buddyname:(NSString*) accountNo;
+-(bool) addActiveBuddies:(NSString*) buddyname:(NSString*) accountNo;
+
+//count unread
+-(int) countUnnoticedMessages:(NSString*) accountNo; 
+-(NSArray*) unnoticedMessages:(NSString*) accountNo;
+-(BOOL) markAsNoticed:(NSString*) accountNo;
+
+
+-(int) countUnreadMessages:(NSString*) accountNo; 
+-(int) countUserUnreadMessages:(NSString*) buddy :(NSString*) accountNo;
+-(int) countOtherUnreadMessages:(NSString*) buddy :(NSString*) accountNo;
+
+@end

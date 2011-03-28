@@ -1,0 +1,35 @@
+<head>
+<link rel="stylesheet" type="text/css" href="main.css" />
+<link rel="stylesheet" type="text/css" href="regular.css" />
+<link rel="stylesheet" type="text/css" href="Variants/Blue - Grey.css" />
+
+
+<script type="text/javascript">
+
+function pagescroll()
+{
+//alert("herE"); 
+document.getElementById('bottom').scrollIntoView(true);
+}
+
+function InsertMessage(message){
+	//alert(message); 
+
+document.getElementById('content').innerHTML+=message;
+
+pagescroll();
+}
+
+function InsertNextMessage(message, lastdiv){
+	//alert(message); 
+
+document.getElementById(lastdiv).innerHTML+=message;
+
+pagescroll();
+}
+
+
+
+</script></head>
+<body onload="pagescroll()">
+<div id="content">

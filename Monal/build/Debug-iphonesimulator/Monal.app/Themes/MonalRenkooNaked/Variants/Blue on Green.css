@@ -1,0 +1,90 @@
+@import url("../main.css");
+
+/* outgoing */
+
+
+.outgoingItem .timeStamp {
+		color:#7fc5f8;
+}
+
+.outgoingItem .myBubble .indicator {
+	background:url("../images/blueIndicator.png") no-repeat top left;
+}
+
+.outgoingItem .tableBubble .tl {
+	background:url("../images/blueCurves.png") no-repeat top left;
+}
+
+.outgoingItem .tableBubble .tr {
+	background:url("../images/blueCurves.png") no-repeat top right;
+}
+
+.outgoingItem .tableBubble .head {
+	background:url("../images/blueCurves.png") no-repeat -10px 0;
+}
+
+.outgoingItem .tableBubble .message {
+	background:url("../images/blueBackground.png") repeat-y top left;
+}
+
+.outgoingItem .tableBubble .messageRight {
+	background:url("../images/blueBackground.png") repeat-y top right;
+}
+
+.outgoingItem .tableBubble .bl {
+	background:url("../images/blueCurves.png") no-repeat bottom left;
+}
+
+.outgoingItem .tableBubble .br {
+	background:url("../images/blueCurves.png") no-repeat bottom right;
+}
+
+.outgoingItem .followUp {
+	background-color:#ddf0fe;
+	border-bottom:1px solid #fff;
+}
+
+/*incoming */
+
+.incomingItem .myBubble .indicator {
+	background:url("../images/greenIndicator.png") no-repeat top left;
+}
+
+.incomingItem .timeStamp {
+	color:#9ecf35;
+}
+
+.incomingItem .tableBubble .tl {
+	background:url("../images/greenCurves.png") no-repeat top left;
+}
+
+.incomingItem .tableBubble .tr {
+	background:url("../images/greenCurves.png") no-repeat top right;
+}
+
+.incomingItem .tableBubble .head {
+	background:url("../images/greenCurves.png") no-repeat -10px 0;
+}
+
+.incomingItem .tableBubble .message {
+	background:url("../images/greenBackground.png") repeat-y top left;
+}
+
+.incomingItem .tableBubble .messageRight {
+	background:url("../images/greenBackground.png") repeat-y top right;
+}
+
+.incomingItem .tableBubble .bl {
+	background:url("../images/greenCurves.png") no-repeat bottom left;
+}
+
+.incomingItem .tableBubble .br {
+	background:url("../images/greenCurves.png") no-repeat bottom right;
+}
+
+.incomingItem .followUp {
+	background-color:#e2efc4;
+	border-bottom:1px solid #fff;
+}
+
+

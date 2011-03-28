@@ -50,7 +50,7 @@
 	free(name);
 	
 	return machine;
-	//return @"iPad"; 
+	//return @"iPad";  
 }
 
 

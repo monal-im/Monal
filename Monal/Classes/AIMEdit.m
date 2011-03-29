@@ -67,10 +67,10 @@
 - (void)viewDidLoad 
 {
     NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
-    UITapGestureRecognizer *gestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(hideKeyboard)];
+   /* UITapGestureRecognizer *gestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(hideKeyboard)];
     gestureRecognizer.cancelsTouchesInView=false; //this prevents it from blocking the button
     [theTable addGestureRecognizer:gestureRecognizer];
-    
+    */
     
 	if(originIndex.section==0)
 	{

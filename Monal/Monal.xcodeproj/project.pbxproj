@@ -43,6 +43,7 @@
 		263F5658121B50740027D85D /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 263F5657121B50740027D85D /* Default.png */; };
 		263F568D121B5E970027D85D /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 263F568C121B5E970027D85D /* MediaPlayer.framework */; };
 		2642783D13425E0D0022B817 /* delete_button.png in Resources */ = {isa = PBXBuildFile; fileRef = 2642783C13425E0D0022B817 /* delete_button.png */; };
+		2642783F134288250022B817 /* libSystem.B.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2642783E134288250022B817 /* libSystem.B.dylib */; settings = {ATTRIBUTES = (Weak, ); }; };
 		26432924133D66A9005632E1 /* download.png in Resources */ = {isa = PBXBuildFile; fileRef = 26432923133D66A9005632E1 /* download.png */; };
 		264A051B1287067700189A87 /* google.png in Resources */ = {isa = PBXBuildFile; fileRef = 264A051A1287067700189A87 /* google.png */; };
 		2651DAA20FC2847200009D7E /* noicon.png in Resources */ = {isa = PBXBuildFile; fileRef = 2651DAA10FC2847200009D7E /* noicon.png */; };
@@ -160,6 +161,7 @@
 		263F5657121B50740027D85D /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
 		263F568C121B5E970027D85D /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
 		2642783C13425E0D0022B817 /* delete_button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = delete_button.png; sourceTree = "<group>"; };
+		2642783E134288250022B817 /* libSystem.B.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libSystem.B.dylib; path = usr/lib/libSystem.B.dylib; sourceTree = SDKROOT; };
 		26432923133D66A9005632E1 /* download.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = download.png; sourceTree = "<group>"; };
 		264A051A1287067700189A87 /* google.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = google.png; sourceTree = "<group>"; };
 		2651DAA10FC2847200009D7E /* noicon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = noicon.png; sourceTree = "<group>"; };
@@ -249,6 +251,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2642783F134288250022B817 /* libSystem.B.dylib in Frameworks */,
 				1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */,
 				1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */,
 				288765A50DF7441C002DB57D /* CoreGraphics.framework in Frameworks */,
@@ -602,6 +605,7 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				2642783E134288250022B817 /* libSystem.B.dylib */,
 				26F7BB441115F95000712672 /* SystemConfiguration.framework */,
 				2601D9D80FBF265A004DB939 /* AudioToolbox.framework */,
 				2601D9D30FBF262E004DB939 /* libsqlite3.dylib */,
@@ -823,7 +827,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Anurodh Pokharel (NVHUCKM9V3)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
@@ -833,6 +837,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				ONLY_ACTIVE_ARCH = NO;
 				PREBINDING = NO;
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

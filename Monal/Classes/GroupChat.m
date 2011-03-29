@@ -70,12 +70,12 @@
     //this is only really for xmpp
     if([jabber isKindOfClass:[xmpp class]])
         server.text=jabber.chatServer; 
-    
+   /* 
     UITapGestureRecognizer *gestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(hideKeyboard)]; // hides the kkyeboard when you tap outside the editing area
     gestureRecognizer.cancelsTouchesInView=false; //this prevents it from blocking the button 
     
     
-     [scroll addGestureRecognizer:gestureRecognizer];
+     [scroll addGestureRecognizer:gestureRecognizer];*/
     
 	[pool release];
 }

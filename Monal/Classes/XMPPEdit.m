@@ -69,10 +69,12 @@
 - (void)viewDidLoad 
 {
     NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
-    UITapGestureRecognizer *gestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(hideKeyboard)]; // hides the kkyeboard when you tap outside the editing area
+  /*  UITapGestureRecognizer *gestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(hideKeyboard)]; // hides the kkyeboard when you tap outside the editing area
     gestureRecognizer.cancelsTouchesInView=false; //this prevents it from blocking the button 
     
-    [theTable addGestureRecognizer:gestureRecognizer];
+    [theTable addGestureRecognizer:gestureRecognizer];*/
+    
+    // worked in OS4 but not in OS3.. was preventing keybaord in textfield
     
 	if(originIndex.section==0)
 	{

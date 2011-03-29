@@ -7,7 +7,7 @@
     #import <Foundation/Foundation.h>
     #import <UIKit/UIKit.h>
 #endif
-#define _SHOWLOG
+//#define _SHOWLOG
 #ifdef _SHOWLOG
 #define debug_NSLog(format, ...) NSLog(format, ## __VA_ARGS__)
 #else

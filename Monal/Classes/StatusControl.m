@@ -333,12 +333,13 @@
 	debug_NSLog(@"status did  appear");
     currentStatus.text=jabber.statusMessage; 
     debug_NSLog(@"current message %@", jabber.statusMessage);
-    
+   
+    /*
     UITapGestureRecognizer *gestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(hideKeyboard)];
       gestureRecognizer.cancelsTouchesInView=false; //this prevents it from blocking the button
     
     [theTable addGestureRecognizer:gestureRecognizer];
-    
+    */
 	
     //for id 
     priority.tag=1; 

@@ -714,7 +714,23 @@ if([buddyFullName isEqualToString:@""])
 	
 	if([machine hasPrefix:@"iPad"] )
 	{//if ipad..
-			self.hidesBottomBarWhenPushed=false; 
+			self.hidesBottomBarWhenPushed=false;
+        
+        //if vertical or upsidedown
+        UIInterfaceOrientation orientation =[[UIApplication sharedApplication] statusBarOrientation];
+        
+        
+            if
+                ((orientation==UIInterfaceOrientationPortraitUpsideDown) || 
+                 (orientation==UIInterfaceOrientationPortrait)
+                 )
+            {
+            // add button for the popout buddylist
+                
+                
+            }
+        
+        
 	}
 	else
 	{

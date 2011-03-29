@@ -632,14 +632,14 @@ NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 	buddyAdd* addwin=[[buddyAdd alloc] autorelease];
 	if([[tools machine] isEqualToString:@"iPad"])
     {
-        [addwin init:nil];
+        [addwin init:nil:nil];
     addwin.bbiOpenPopOver=buddyNavigationController.navigationBar.topItem.leftBarButtonItem;
         [addwin showiPad:jabber];
         
     }
     else
     {
-        [addwin init:buddyNavigationController];
+        [addwin init:buddyNavigationController:tabcontroller];
         [addwin show:jabber];
     }
     

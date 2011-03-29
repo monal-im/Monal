@@ -16,9 +16,10 @@
 
 
 
--(void) init:(UINavigationController*) nav
+-(void) init:(UINavigationController*) nav:(UITabBarController*) tab
 {
 	navigationController=nav;
+    tabbarcontroller=tab;
 	[self initWithNibName:@"BuddyAdd" bundle:nil];
 	
 	
@@ -57,8 +58,11 @@
     }
     else
     {
-	[navigationController popViewControllerAnimated:true];
-	}
+	if(tabbarcontroller==nil)
+        [navigationController popViewControllerAnimated:true];
+	else
+        [tabbarcontroller dismissModalViewControllerAnimated:YES];
+    }
 	
 }
 
@@ -84,8 +88,10 @@
 -(void) show:(protocol*)account:(NSString*) name
 {
    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+// always nav
     [navigationController pushViewController:self animated:YES];
-	 buddyName.text=name; 
+	
+    buddyName.text=name; 
     
 	jabber=account;
     [pool release];
@@ -96,9 +102,14 @@
 {
 
 NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	[navigationController popViewControllerAnimated:false]; //  getof aythign on top 
-	[navigationController pushViewController:self animated:YES];
 	
+   
+        [navigationController presentModalViewController:self animated:YES];
+    /*{
+    [navigationController popViewControllerAnimated:false]; //  getof aythign on top 
+	[navigationController pushViewController:self animated:YES];
+	}*/
+    
 	jabber=account;
 		
 	[pool release];
@@ -129,7 +140,10 @@ NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     else
     {
         //if iphone
-        [scroll setContentSize:CGSizeMake(320, 509)];    
+       // if(tabbarcontroller==nil) 
+        [scroll setContentSize:CGSizeMake(320, 509)];  
+        //else
+          //  [scroll setAlpha:.5]; 
     
     }
     

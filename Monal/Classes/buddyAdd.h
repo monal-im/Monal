@@ -16,6 +16,7 @@
 	protocol* jabber;
 	
 	UINavigationController* navigationController;
+    UITabBarController* tabbarcontroller;
 	
 	IBOutlet UITextField* buddyName; 
 //	IBOutlet UIButton* cancelButton;
@@ -28,7 +29,7 @@ IBOutlet UIScrollView* scroll;
 
 
 
--(void) init:(UINavigationController*) nav;
+-(void) init:(UINavigationController*) nav:(UITabBarController*) tab;
 -(void) show:(protocol*)account; 
 -(void) show:(protocol*)account:(NSString*) name; 
 

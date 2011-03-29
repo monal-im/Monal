@@ -183,7 +183,7 @@ thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
     buddyAdd* addwin=[[buddyAdd alloc] autorelease];
 	 SworIMAppDelegate *app=[[UIApplication sharedApplication] delegate];
     
-	[addwin init:app.morenav];
+	[addwin init:app.morenav:nil];
     
 	
 	

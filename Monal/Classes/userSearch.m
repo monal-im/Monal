@@ -80,13 +80,66 @@
 }
 
 
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+	
+	debug_NSLog(@"clicked button %d", buttonIndex); 
+    if(buttonIndex==0)
+    {
+    //add
+        [jabber addBuddy:contact];
+    }
+    
+    [pool release];
+}
+
+//clicked blue button
+- (void)tableView:(UITableView *)tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath *)indexPath {
+    
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    
+	//add buddy
+    debug_NSLog(@"Clicked add contact");
+    
+    UIAlertView *addAlert = [[UIAlertView alloc] 
+                                initWithTitle:@"Add Contact" 
+                             message:[NSString stringWithFormat:@"Are you sure you want to add %@ as a contact?",
+                                      [thelist objectAtIndex:indexPath.row]]
+                                delegate:self cancelButtonTitle:@"Yes"
+                                otherButtonTitles: @"No",nil];
+    [addAlert show];
+    
+    contact=[thelist objectAtIndex:indexPath.row];
+    
+	[pool release];
+}
 
 
 
 
 
+- (void) accessoryButtonTapped: (UIControl *) button withEvent: (UIEvent *) event
+{
+    NSIndexPath * indexPath = [currentTable indexPathForRowAtPoint: [[[event touchesForView: button] anyObject] locationInView: currentTable]];
+    if ( indexPath == nil )
+        return;
+    
+    [currentTable.delegate tableView: currentTable accessoryButtonTappedForRowWithIndexPath: indexPath];
+}
 
 
+- (UIButton *) makeDetailDisclosureButton
+{
+    UIButton * button = [UIButton buttonWithType: UIButtonTypeContactAdd] ;
+    
+    
+    [button addTarget: self
+               action: @selector(accessoryButtonTapped:withEvent:)
+     forControlEvents: UIControlEventTouchUpInside];
+    
+    return ( button );
+}
 
 
 
@@ -102,13 +155,14 @@
 	static NSString *identifier = @"MyCell";
 	UITableViewCell* thecell =[[[UITableViewCell alloc] initWithStyle:  UITableViewCellStyleSubtitle  reuseIdentifier:identifier] autorelease];
 	
-	
-thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+	thecell.accessoryView=[self makeDetailDisclosureButton];
+
 
     //sanity check for sync is important
     if(indexPath.row<[thelist count])
     {
 		thecell.textLabel.text=[thelist objectAtIndex:indexPath.row];
+      
 	}
 	
 		
@@ -137,17 +191,25 @@ thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 		
 // action here
 	
-    
+  /*  
     buddyAdd* addwin=[[buddyAdd alloc] autorelease];
 	 SworIMAppDelegate *app=[[UIApplication sharedApplication] delegate];
     
-	[addwin init:app.morenav:nil];
+    if([[tools machine] isEqualToString:@"iPad"])
+    {
+        [addwin init:app.morenav:nil];
     
+    }
+    else
+    {
+	[addwin init:app.morenav:nil];
+    }
 	
 	
 	[addwin show:jabber:[thelist objectAtIndex:[newIndexPath indexAtPosition:1]]];
     
-    
+    */
+
 		[tableView deselectRowAtIndexPath:newIndexPath animated:true];
 
 	[pool release];

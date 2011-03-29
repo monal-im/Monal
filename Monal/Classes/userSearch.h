@@ -22,6 +22,7 @@
     IBOutlet UITableView* currentTable; 
     IBOutlet UISearchDisplayController* searchDisplayController;
    
+    NSString* contact;
     
     NSArray* thelist; 
     DataLayer* db; 

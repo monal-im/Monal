@@ -16,13 +16,12 @@
 #import "buddyAdd.h"
 
 
-@interface userSearch : UIViewController <UITableViewDataSource, UITableViewDelegate, UITextFieldDelegate> {
+@interface userSearch : UIViewController <UITableViewDataSource, UITableViewDelegate, UISearchBarDelegate> {
 
   
     IBOutlet UITableView* currentTable; 
-  
-    IBOutlet UITextField* serverField; 
-    IBOutlet UITextField* searchField; 
+    IBOutlet UISearchDisplayController* searchDisplayController;
+   
     
     NSArray* thelist; 
     DataLayer* db; 
@@ -44,6 +43,10 @@
 }
 
 -(void) showUsers:(id)sender; 
+
+#pragma mark search bar delegate
+- (void)searchBarTextDidEndEditing:(UISearchBar *)searchBar; 
+
 
 //table view delegat methods
 //required

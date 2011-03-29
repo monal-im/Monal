@@ -15,12 +15,7 @@
 
 
 
-#pragma mark view stuff
-- (void) hideKeyboard 
-{
-    [searchField resignFirstResponder]; 
-    [serverField resignFirstResponder];
-}
+
 
 -(BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation 
 {
@@ -34,6 +29,7 @@
     //read db and load into table 
 	thelist=jabber.userSearchItems; 
     [currentTable reloadData];
+    [self.searchDisplayController.searchResultsTableView reloadData];
 }
 
 
@@ -42,19 +38,17 @@
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	debug_NSLog(@"user search did appear");
 	
-    UITapGestureRecognizer *gestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(hideKeyboard)];
+  /*  UITapGestureRecognizer *gestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(hideKeyboard)];
     gestureRecognizer.cancelsTouchesInView=false; //this prevents it from blocking the button
     
     [self.view addGestureRecognizer:gestureRecognizer];
-    
+    */
     
     SworIMAppDelegate *app=[[UIApplication sharedApplication] delegate];
 	
 	db=app.db;
 	jabber=(xmpp*) app.jabber;
 	accountno=app.accountno; 
-	
-	serverField.text=jabber.userSearchServer; 
 	
 	
 	if(accountno==nil) {
@@ -89,41 +83,9 @@
 
 
 
-#pragma mark uitextfield delegate
 
 
 
-//text delatgate fn
-- (BOOL)textFieldShouldReturn:(UITextField *)textField
-{
-	
-	
-    switch(textField.tag)
-	{// status
-        case 0:
-        {
-            
-            debug_NSLog(@"Setting search server"); 
-            
-            break; 
-            
-            
-        }
-        case 1:
-        {
-            //priority
-			debug_NSLog(@"Setting search term"); 
-            [jabber userSearch:textField.text]; 
-            
-        }
-	}
-    
-	//hide keyboard
-	[textField resignFirstResponder];
-	
-	
-	return true;
-}
 
 
 
@@ -143,8 +105,11 @@
 	
 thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 
+    //sanity check for sync is important
+    if(indexPath.row<[thelist count])
+    {
 		thecell.textLabel.text=[thelist objectAtIndex:indexPath.row];
-	
+	}
 	
 		
 	[thecell retain];
@@ -161,13 +126,6 @@ thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 }
 
 
-
-
-
-
-
-
- 
 
 
 #pragma mark table view delegate methods
@@ -196,6 +154,39 @@ thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 }
 
 
+#pragma mark search bar controller delegate
+
+- (BOOL)searchDisplayController:(UISearchDisplayController *)controller shouldReloadTableForSearchString:(NSString *)searchString
+{
+    
+    
+    // reload when we have data
+    return NO;
+}
+
+
+
+#pragma mark search bar  delegate
+
+
+- (void)searchBarSearchButtonClicked:(UISearchBar *)searchBar
+{
+    debug_NSLog(@"Setting search term"); 
+    [jabber userSearch:searchBar.text]; 
+    // clear tables
+    thelist=[[NSArray alloc] init];
+     [currentTable reloadData];
+     [self.searchDisplayController.searchResultsTableView reloadData];
+
+}
+
+- (void)searchBarCancelButtonClicked:(UISearchBar *)searchBar
+{
+     debug_NSLog(@"clicked cancel"); 
+    //SworIMAppDelegate *app=[[UIApplication sharedApplication] delegate];
+    
+  //  [app.morenav popViewControllerAnimated:YES];
+}
 
 
 -(void)dealloc

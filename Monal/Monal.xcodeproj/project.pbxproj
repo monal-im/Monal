@@ -42,6 +42,7 @@
 		263566B9133BDAD10095CD33 /* help.png in Resources */ = {isa = PBXBuildFile; fileRef = 263566B8133BDAD00095CD33 /* help.png */; };
 		263F5658121B50740027D85D /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 263F5657121B50740027D85D /* Default.png */; };
 		263F568D121B5E970027D85D /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 263F568C121B5E970027D85D /* MediaPlayer.framework */; };
+		2642783D13425E0D0022B817 /* delete_button.png in Resources */ = {isa = PBXBuildFile; fileRef = 2642783C13425E0D0022B817 /* delete_button.png */; };
 		26432924133D66A9005632E1 /* download.png in Resources */ = {isa = PBXBuildFile; fileRef = 26432923133D66A9005632E1 /* download.png */; };
 		264A051B1287067700189A87 /* google.png in Resources */ = {isa = PBXBuildFile; fileRef = 264A051A1287067700189A87 /* google.png */; };
 		2651DAA20FC2847200009D7E /* noicon.png in Resources */ = {isa = PBXBuildFile; fileRef = 2651DAA10FC2847200009D7E /* noicon.png */; };
@@ -158,6 +159,7 @@
 		263566B8133BDAD00095CD33 /* help.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = help.png; sourceTree = "<group>"; };
 		263F5657121B50740027D85D /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
 		263F568C121B5E970027D85D /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
+		2642783C13425E0D0022B817 /* delete_button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = delete_button.png; sourceTree = "<group>"; };
 		26432923133D66A9005632E1 /* download.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = download.png; sourceTree = "<group>"; };
 		264A051A1287067700189A87 /* google.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = google.png; sourceTree = "<group>"; };
 		2651DAA10FC2847200009D7E /* noicon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = noicon.png; sourceTree = "<group>"; };
@@ -355,6 +357,7 @@
 		261C2E22134176F2000675A4 /* buttons */ = {
 			isa = PBXGroup;
 			children = (
+				2642783C13425E0D0022B817 /* delete_button.png */,
 				261C2E29134178CE000675A4 /* red_button_gloss.png */,
 				261C2E2A134178CE000675A4 /* block_button_gloss.png */,
 				261C2E2B134178CE000675A4 /* red_button.png */,
@@ -722,6 +725,7 @@
 				261C2E2C134178CE000675A4 /* red_button_gloss.png in Resources */,
 				261C2E2D134178CE000675A4 /* block_button_gloss.png in Resources */,
 				261C2E2E134178CE000675A4 /* red_button.png in Resources */,
+				2642783D13425E0D0022B817 /* delete_button.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

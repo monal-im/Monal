@@ -351,7 +351,7 @@ NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 					
 				{
 					NSString* ver=[[UIDevice currentDevice] systemVersion];
-					if([ver characterAtIndex:0]=='4')
+					if([ver characterAtIndex:0]!='3')
 					{
 						
 						
@@ -1569,7 +1569,7 @@ void (^myBlock)(void) = ^(void){
 	
 	
 	NSString* ver=[[UIDevice currentDevice] systemVersion];
-	if([ver characterAtIndex:0]=='4')
+	if([ver characterAtIndex:0]!='3')
 	{
 	
 		//this is task completion MT
@@ -1747,7 +1747,7 @@ void (^myBlock)(void) = ^(void){
 	
 	
 	NSString* ver=[[UIDevice currentDevice] systemVersion];
-	if([ver characterAtIndex:0]=='4')
+	if([ver characterAtIndex:0]!='3')
 	{
 	
         // when the screen unlocks or the person comes back, stop anymore popups

@@ -1646,9 +1646,9 @@ if([buddyFullName isEqualToString:@""])
 			[pool release];
             return YES;
 		}
-		
+		else
 		//OS4 and above but no MT
-		if([ver characterAtIndex:0]=='4')
+		//if([ver characterAtIndex:0]=='4')
 		{
 			NSString* machine=[tools machine]; 
 			if([machine isEqual:@"iPhone1,2"] || [machine isEqual:@"iPod2,1"])

@@ -189,6 +189,10 @@ thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 		
 		thecell.textLabel.text=[NSString stringWithFormat:@"%@@%@",[[thelist objectAtIndex:indexPath.row] objectAtIndex:1],
 						[[thelist objectAtIndex:indexPath.row] objectAtIndex:9]];
+        
+       
+       
+        
 		//buddyname.font=[UIFont boldSystemFontOfSize:14];
 		//cellRectangle = CGRectMake(45,[tableView rowHeight]-statusHeight-3,230,statusHeight); 
 		

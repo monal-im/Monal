@@ -30,10 +30,6 @@
 		261256881129185800161B30 /* XMPPEdit.m in Sources */ = {isa = PBXBuildFile; fileRef = 261256871129185800161B30 /* XMPPEdit.m */; };
 		2612568B1129187A00161B30 /* AIMEdit.m in Sources */ = {isa = PBXBuildFile; fileRef = 261256891129187A00161B30 /* AIMEdit.m */; };
 		2614ED41121BD3160034556C /* MyTabController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2614ED40121BD3160034556C /* MyTabController.m */; };
-		261C2E2613417700000675A4 /* black_button.png in Resources */ = {isa = PBXBuildFile; fileRef = 261C2E2413417700000675A4 /* black_button.png */; };
-		261C2E2C134178CE000675A4 /* red_button_gloss.png in Resources */ = {isa = PBXBuildFile; fileRef = 261C2E29134178CE000675A4 /* red_button_gloss.png */; };
-		261C2E2D134178CE000675A4 /* block_button_gloss.png in Resources */ = {isa = PBXBuildFile; fileRef = 261C2E2A134178CE000675A4 /* block_button_gloss.png */; };
-		261C2E2E134178CE000675A4 /* red_button.png in Resources */ = {isa = PBXBuildFile; fileRef = 261C2E2B134178CE000675A4 /* red_button.png */; };
 		261ED6C41240257F00C14F6A /* BuddyAdd.xib in Resources */ = {isa = PBXBuildFile; fileRef = 261ED6C31240257F00C14F6A /* BuddyAdd.xib */; };
 		261FD43A122349F2003DDC3A /* activechats.m in Sources */ = {isa = PBXBuildFile; fileRef = 261FD439122349F2003DDC3A /* activechats.m */; };
 		261FD56F1223527C003DDC3A /* active.png in Resources */ = {isa = PBXBuildFile; fileRef = 261FD56E1223527C003DDC3A /* active.png */; };
@@ -42,8 +38,6 @@
 		263566B9133BDAD10095CD33 /* help.png in Resources */ = {isa = PBXBuildFile; fileRef = 263566B8133BDAD00095CD33 /* help.png */; };
 		263F5658121B50740027D85D /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 263F5657121B50740027D85D /* Default.png */; };
 		263F568D121B5E970027D85D /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 263F568C121B5E970027D85D /* MediaPlayer.framework */; };
-		2642783D13425E0D0022B817 /* delete_button.png in Resources */ = {isa = PBXBuildFile; fileRef = 2642783C13425E0D0022B817 /* delete_button.png */; };
-		2642783F134288250022B817 /* libSystem.B.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2642783E134288250022B817 /* libSystem.B.dylib */; settings = {ATTRIBUTES = (Weak, ); }; };
 		26432924133D66A9005632E1 /* download.png in Resources */ = {isa = PBXBuildFile; fileRef = 26432923133D66A9005632E1 /* download.png */; };
 		264A051B1287067700189A87 /* google.png in Resources */ = {isa = PBXBuildFile; fileRef = 264A051A1287067700189A87 /* google.png */; };
 		2651DAA20FC2847200009D7E /* noicon.png in Resources */ = {isa = PBXBuildFile; fileRef = 2651DAA10FC2847200009D7E /* noicon.png */; };
@@ -102,6 +96,7 @@
 		26F1AB351323CA590044FA18 /* GroupChat.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26F1AB341323CA590044FA18 /* GroupChat.xib */; };
 		26F1AB381323CC330044FA18 /* GroupChat.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F1AB371323CC330044FA18 /* GroupChat.m */; };
 		26F1AB3A1323D0280044FA18 /* joingroup.png in Resources */ = {isa = PBXBuildFile; fileRef = 26F1AB391323D0270044FA18 /* joingroup.png */; };
+		26F1AB3D132460630044FA18 /* delete_button.png in Resources */ = {isa = PBXBuildFile; fileRef = 26F1AB3C132460630044FA18 /* delete_button.png */; };
 		26F425E711AB4A1800C40676 /* Monal_crop_72.png in Resources */ = {isa = PBXBuildFile; fileRef = 26F425E611AB4A1800C40676 /* Monal_crop_72.png */; };
 		26F7BB431115F8DB00712672 /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F7BB411115F8DB00712672 /* Reachability.m */; };
 		26F7BB451115F95000712672 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26F7BB441115F95000712672 /* SystemConfiguration.framework */; };
@@ -144,10 +139,6 @@
 		2612568A1129187A00161B30 /* AIMEdit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AIMEdit.h; path = Classes/AIMEdit.h; sourceTree = "<group>"; };
 		2614ED3F121BD3160034556C /* MyTabController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyTabController.h; sourceTree = "<group>"; };
 		2614ED40121BD3160034556C /* MyTabController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MyTabController.m; sourceTree = "<group>"; };
-		261C2E2413417700000675A4 /* black_button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = black_button.png; sourceTree = "<group>"; };
-		261C2E29134178CE000675A4 /* red_button_gloss.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = red_button_gloss.png; sourceTree = "<group>"; };
-		261C2E2A134178CE000675A4 /* block_button_gloss.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = block_button_gloss.png; sourceTree = "<group>"; };
-		261C2E2B134178CE000675A4 /* red_button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = red_button.png; sourceTree = "<group>"; };
 		261ED6C31240257F00C14F6A /* BuddyAdd.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = BuddyAdd.xib; sourceTree = "<group>"; };
 		261FD438122349F2003DDC3A /* activechats.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = activechats.h; sourceTree = "<group>"; };
 		261FD439122349F2003DDC3A /* activechats.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = activechats.m; sourceTree = "<group>"; };
@@ -160,8 +151,6 @@
 		263566B8133BDAD00095CD33 /* help.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = help.png; sourceTree = "<group>"; };
 		263F5657121B50740027D85D /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
 		263F568C121B5E970027D85D /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
-		2642783C13425E0D0022B817 /* delete_button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = delete_button.png; sourceTree = "<group>"; };
-		2642783E134288250022B817 /* libSystem.B.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libSystem.B.dylib; path = usr/lib/libSystem.B.dylib; sourceTree = SDKROOT; };
 		26432923133D66A9005632E1 /* download.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = download.png; sourceTree = "<group>"; };
 		264A051A1287067700189A87 /* google.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = google.png; sourceTree = "<group>"; };
 		2651DAA10FC2847200009D7E /* noicon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = noicon.png; sourceTree = "<group>"; };
@@ -233,6 +222,7 @@
 		26F1AB361323CC320044FA18 /* GroupChat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GroupChat.h; path = Classes/GroupChat.h; sourceTree = "<group>"; };
 		26F1AB371323CC330044FA18 /* GroupChat.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GroupChat.m; path = Classes/GroupChat.m; sourceTree = "<group>"; };
 		26F1AB391323D0270044FA18 /* joingroup.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = joingroup.png; sourceTree = "<group>"; };
+		26F1AB3C132460630044FA18 /* delete_button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = delete_button.png; sourceTree = "<group>"; };
 		26F425E611AB4A1800C40676 /* Monal_crop_72.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Monal_crop_72.png; sourceTree = "<group>"; };
 		26F7BB411115F8DB00712672 /* Reachability.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Reachability.m; sourceTree = "<group>"; };
 		26F7BB421115F8DB00712672 /* Reachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Reachability.h; sourceTree = "<group>"; };
@@ -251,7 +241,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2642783F134288250022B817 /* libSystem.B.dylib in Frameworks */,
 				1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */,
 				1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */,
 				288765A50DF7441C002DB57D /* CoreGraphics.framework in Frameworks */,
@@ -294,7 +283,6 @@
 		2601D9BC0FBF25D1004DB939 /* Icons */ = {
 			isa = PBXGroup;
 			children = (
-				261C2E22134176F2000675A4 /* buttons */,
 				269A2E61132030510044B1C8 /* App */,
 				269A2E60132030240044B1C8 /* Better Quality */,
 				26690E4E127C9D5300051D13 /* list */,
@@ -357,18 +345,6 @@
 			name = Tabbar;
 			sourceTree = "<group>";
 		};
-		261C2E22134176F2000675A4 /* buttons */ = {
-			isa = PBXGroup;
-			children = (
-				2642783C13425E0D0022B817 /* delete_button.png */,
-				261C2E29134178CE000675A4 /* red_button_gloss.png */,
-				261C2E2A134178CE000675A4 /* block_button_gloss.png */,
-				261C2E2B134178CE000675A4 /* red_button.png */,
-				261C2E2413417700000675A4 /* black_button.png */,
-			);
-			name = buttons;
-			sourceTree = "<group>";
-		};
 		265D8B6110FD896400F37CF7 /* Sounds */ = {
 			isa = PBXGroup;
 			children = (
@@ -414,6 +390,7 @@
 			isa = PBXGroup;
 			children = (
 				2684F88B1236F5EC003BF137 /* stop.png */,
+				26F1AB3C132460630044FA18 /* delete_button.png */,
 				2684F88C1236F5EC003BF137 /* reload.png */,
 				2679887612330E8300F90902 /* back.png */,
 				2679887712330E8300F90902 /* forward.png */,
@@ -605,7 +582,6 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				2642783E134288250022B817 /* libSystem.B.dylib */,
 				26F7BB441115F95000712672 /* SystemConfiguration.framework */,
 				2601D9D80FBF265A004DB939 /* AudioToolbox.framework */,
 				2601D9D30FBF262E004DB939 /* libsqlite3.dylib */,
@@ -721,15 +697,11 @@
 				26E5BA8B132287D400D8C57A /* Settings.xib in Resources */,
 				26F1AB351323CA590044FA18 /* GroupChat.xib in Resources */,
 				26F1AB3A1323D0280044FA18 /* joingroup.png in Resources */,
+				26F1AB3D132460630044FA18 /* delete_button.png in Resources */,
 				26DC0A8B1339259900E60BFD /* SearchUser.xib in Resources */,
 				26DC0A8F133928DA00E60BFD /* about.png in Resources */,
 				263566B9133BDAD10095CD33 /* help.png in Resources */,
 				26432924133D66A9005632E1 /* download.png in Resources */,
-				261C2E2613417700000675A4 /* black_button.png in Resources */,
-				261C2E2C134178CE000675A4 /* red_button_gloss.png in Resources */,
-				261C2E2D134178CE000675A4 /* block_button_gloss.png in Resources */,
-				261C2E2E134178CE000675A4 /* red_button.png in Resources */,
-				2642783D13425E0D0022B817 /* delete_button.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -798,7 +770,7 @@
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_VERSION = "";
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 3.1.2;
@@ -827,9 +799,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Anurodh Pokharel (NVHUCKM9V3)";
 				GCC_C_LANGUAGE_STANDARD = c99;
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_VERSION = "";
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 3.1.2;
@@ -837,7 +809,6 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				ONLY_ACTIVE_ARCH = NO;
 				PREBINDING = NO;
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

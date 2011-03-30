@@ -128,7 +128,7 @@ NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 {
     popOverController = [[UIPopoverController alloc] initWithContentViewController:self];
   
-    popOverController.popoverContentSize = CGSizeMake(316, 158);
+    popOverController.popoverContentSize = CGSizeMake(316, 203);
     [popOverController presentPopoverFromBarButtonItem:bbiOpenPopOver permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
  	jabber=account;
     
@@ -143,7 +143,7 @@ NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     
     if([[tools machine] isEqualToString:@"iPad"])
     {
-        [scroll setContentSize:CGSizeMake(316, 158)];
+        [scroll setContentSize:CGSizeMake(316, 203)];
   
     }
     else

@@ -27,6 +27,25 @@
 	
 }
 
+-(IBAction) closePress
+{
+    if(([[tools machine] isEqualToString:@"iPad"])
+       &&(navigationController==nil))
+    {
+        if ([popOverController isPopoverVisible]) {
+            
+            [popOverController dismissPopoverAnimated:YES];
+            
+        } 
+    }
+    else
+    {
+        if(tabbarcontroller==nil)
+            [navigationController popViewControllerAnimated:true];
+        else
+            [tabbarcontroller dismissModalViewControllerAnimated:YES];
+    }
+}
 
 -(IBAction) addPress
 {
@@ -85,17 +104,7 @@
 }
 
 
--(void) show:(protocol*)account:(NSString*) name
-{
-   NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-// always nav
-    [navigationController pushViewController:self animated:YES];
-	
-    buddyName.text=name; 
-    
-	jabber=account;
-    [pool release];
-}
+
 
 -(void) show:(protocol*)account
 
@@ -141,7 +150,7 @@ NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     {
         //if iphone
        // if(tabbarcontroller==nil) 
-        [scroll setContentSize:CGSizeMake(320, 509)];  
+        [scroll setContentSize:CGSizeMake(320, 440)];  
         //else
           //  [scroll setAlpha:.5]; 
     

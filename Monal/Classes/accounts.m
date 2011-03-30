@@ -180,32 +180,23 @@ thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 
 	if(indexPath.section==0)
 	{
-		//NSInteger statusHeight=15;
-		
-		//CGRect cellRectangle = CGRectMake(45,0,240,[tableView rowHeight]-statusHeight-3);  // 285 ->290 is basically my imaginary  border
-		
-		//Initialize the label with the rectangle.
-		//buddyname = [[[UILabel alloc] initWithFrame:cellRectangle] autorelease];
-		
+	
+        
+		if([[[thelist objectAtIndex:indexPath.row] objectAtIndex:9] length]>0)
+        {
 		thecell.textLabel.text=[NSString stringWithFormat:@"%@@%@",[[thelist objectAtIndex:indexPath.row] objectAtIndex:1],
 						[[thelist objectAtIndex:indexPath.row] objectAtIndex:9]];
-        
+        }
+        else
+        {
+        // some account have no domain
+            thecell.textLabel.text=[NSString stringWithFormat:@"%@",[[thelist objectAtIndex:indexPath.row] objectAtIndex:1]];
+            
+        }
        
        
         
-		//buddyname.font=[UIFont boldSystemFontOfSize:14];
-		//cellRectangle = CGRectMake(45,[tableView rowHeight]-statusHeight-3,230,statusHeight); 
-		
-       // buddyname.backgroundColor = [UIColor clearColor];
-        
-		//UILabel* buddystatus = [[[UILabel alloc] initWithFrame:cellRectangle] autorelease];
-		
-		//buddystatus.text=[[thelist objectAtIndex:indexPath.row] objectAtIndex:9];
-	
-		//buddystatus.font=[UIFont systemFontOfSize:12];
-	
-		//Add the label as a sub view to the cell.
-		//[thecell.contentView addSubview:buddystatus];
+
 		
 		
 		UIImage* image;

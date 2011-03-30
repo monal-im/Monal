@@ -31,12 +31,12 @@ IBOutlet UIScrollView* scroll;
 
 -(void) init:(UINavigationController*) nav:(UITabBarController*) tab;
 -(void) show:(protocol*)account; 
--(void) show:(protocol*)account:(NSString*) name; 
+
 
 -(void) showiPad:(protocol*)account; 
 
 -(IBAction) addPress;
-//-(IBAction) cancelPress;
+-(IBAction) closePress;
 
 -(IBAction)togglePopOverController;
 

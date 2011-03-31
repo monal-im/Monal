@@ -152,13 +152,42 @@
 }
 
 
--(void) show:(NSString*) buddy:(NSString*) status:(NSString*) message:(NSString*) fullname:(NSString*) domain 
+-(void) show:(NSString*) buddy:(NSString*) status:(NSString*) message:(NSString*) fullname:(NSString*) domain : (UITableView*) table: (CGRect) cellRect
 {
 
 NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    
+    // for ipad lanscape use popout
+    
+    NSString* machine=[tools machine]; 
+    UIInterfaceOrientation orientation =[[UIApplication sharedApplication] statusBarOrientation];
+    if(([machine hasPrefix:@"iPad"] )
+	
+        &&
+            (((orientation==UIInterfaceOrientationLandscapeLeft) || 
+               (orientation==UIInterfaceOrientationLandscapeRight)
+               )))
+        {
+            
+            
+            popOverController = [[UIPopoverController alloc] initWithContentViewController:self];
+            
+            popOverController.popoverContentSize = CGSizeMake(320, 480);
+            
+            if(orientation==UIInterfaceOrientationLandscapeRight)
+            [popOverController presentPopoverFromRect:cellRect 
+                                               inView:table permittedArrowDirections:UIPopoverArrowDirectionRight animated:YES];
+            
+            if(orientation==UIInterfaceOrientationLandscapeLeft)
+            [popOverController presentPopoverFromRect:cellRect 
+                                               inView:table permittedArrowDirections:UIPopoverArrowDirectionLeft animated:YES];
+        }
+    else
+    {
+    
 	[navigationController popViewControllerAnimated:false]; //  getof aythign on top 
 	[navigationController pushViewController:self animated:YES];
-	
+	}
 	
 	buddyIcon=[self setIcon: buddy];
 	buddyIconView.image= buddyIcon;

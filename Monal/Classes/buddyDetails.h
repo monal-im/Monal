@@ -25,7 +25,7 @@
 
 	 NSString* iconPath; 
 	
-	
+	   UIPopoverController* popOverController; 
 
 	UIImageView* buddyIconView; 
 	UIImageView* protocolImage; 
@@ -41,13 +41,15 @@
 	
 	IBOutlet UITableViewCell* topcell; 
 	IBOutlet UITableViewCell* bottomcell; 
+ 
+    
 }
 
 
 
 
 -(void) init: (protocol*) jabberIn:(UINavigationController*) nav:(NSString*)username; 
--(void) show:(NSString*) buddy:(NSString*) status:(NSString*) message:(NSString*) fullname:(NSString*) domain ;
+-(void) show:(NSString*) buddy:(NSString*) status:(NSString*) message:(NSString*) fullname:(NSString*) domain : (UITableView*) table: (CGRect) cellRect;
 -(UIImage*) setIcon:(NSString*) msguser;
 
 

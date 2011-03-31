@@ -18,6 +18,7 @@
 @synthesize tabController;
 @synthesize accountno;
 @synthesize buddyName;
+@synthesize contactList; 
 
 
 -(void) hideKeyboard
@@ -150,6 +151,33 @@
 }
 
 
+- (void)viewDidAppear:(BOOL)animated
+{
+    NSString* machine=[tools machine]; 
+    if([machine hasPrefix:@"iPad"] )
+	{
+        //refresh UI
+        
+        
+        
+        //if vertical or upsidedown
+        UIInterfaceOrientation orientation =[[UIApplication sharedApplication] statusBarOrientation];
+        
+        
+        if
+            ((orientation==UIInterfaceOrientationPortraitUpsideDown) || 
+             (orientation==UIInterfaceOrientationPortrait)
+             )
+        {
+            contactsButton= [[[UIBarButtonItem alloc] initWithTitle:@"Show Contacts"
+                                                              style:UIBarButtonItemStyleBordered
+                                                             target:self action:@selector(popContacts)] autorelease];
+            navController.navigationBar.topItem.rightBarButtonItem =contactsButton; 
+            
+        }
+    }
+    
+}
 
 - (void)viewWillDisappear:(BOOL)animated 
 {
@@ -646,6 +674,21 @@
 
 }
 
+-(void) popContacts
+{
+    debug_NSLog(@"pop out contacts"); 
+    
+    UITableViewController* tbv = [UITableViewController alloc]; 
+    tbv.tableView=contactList; 
+    popOverController = [[UIPopoverController alloc] initWithContentViewController:tbv];
+    
+    popOverController.popoverContentSize = CGSizeMake(320, 480);
+    [popOverController presentPopoverFromBarButtonItem:contactsButton permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
+ 	
+    
+  
+}
+
 -(void) show:(NSString*) buddy:(NSString*) fullname:(UINavigationController*) vc
 {
 	
@@ -716,20 +759,7 @@ if([buddyFullName isEqualToString:@""])
 	{//if ipad..
 			self.hidesBottomBarWhenPushed=false;
         
-        //if vertical or upsidedown
-        UIInterfaceOrientation orientation =[[UIApplication sharedApplication] statusBarOrientation];
-        
-        
-            if
-                ((orientation==UIInterfaceOrientationPortraitUpsideDown) || 
-                 (orientation==UIInterfaceOrientationPortrait)
-                 )
-            {
-            // add button for the popout buddylist
-                
-                
-            }
-        
+              
         
 	}
 	else
@@ -876,10 +906,32 @@ if([buddyFullName isEqualToString:@""])
 	{
 	//refresh UI
 	
-		// for the landscape view really
-		jabber.messagesFlag=true; 
-	[[NSNotificationCenter defaultCenter] 
-	 postNotificationName: @"UpdateUI" object: self];	
+	
+        
+        //if vertical or upsidedown
+        UIInterfaceOrientation orientation =[[UIApplication sharedApplication] statusBarOrientation];
+        
+        
+        if
+            ((orientation==UIInterfaceOrientationPortraitUpsideDown) || 
+             (orientation==UIInterfaceOrientationPortrait)
+             )
+        {
+            contactsButton= [[[UIBarButtonItem alloc] initWithTitle:@"Show Contacts"
+                                                         style:UIBarButtonItemStyleBordered
+                                                        target:self action:@selector(popContacts)] autorelease];
+            vc.navigationBar.topItem.rightBarButtonItem =contactsButton; 
+            
+        }
+        else
+        {
+        	// for the landscape view really
+            jabber.messagesFlag=true; 
+            [[NSNotificationCenter defaultCenter] 
+             postNotificationName: @"UpdateUI" object: self];
+        }
+
+        
 	}
 	
 	[pool release]; 

@@ -49,8 +49,8 @@
 	// Done with this
 	free(name);
 	
-	//return machine;
-	return @"iPad";  
+	return machine;
+	//return @"iPad";  
 }
 
 

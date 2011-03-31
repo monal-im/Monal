@@ -28,6 +28,7 @@
 	
 	chatwin=chatWin;
 	
+    
 	//self.tableView=currentTable;
 	
 	
@@ -275,7 +276,8 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
 	}
 	@catch(NSException* err) {}
 	
-	
+ 
+    
 	buddyDetails* detailwin=[[buddyDetails alloc] autorelease];
 	
 	[detailwin init:jabber:viewController:@""];
@@ -288,6 +290,8 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
 				   :[row objectAtIndex:2]
 	 :[row objectAtIndex:5]
 	 :jabber.domain
+                   :tableView
+                   :[tableView rectForRowAtIndexPath:indexPath] 
 	 ];
 
 	[pool release];
@@ -576,6 +580,8 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
 {
 	debug_NSLog(@"selected row %d max %d", [newIndexPath indexAtPosition:1], [thelist count]); 
 
+    
+    chatwin.contactList=tableView; 
 	// ipad stuff
 	if(tabcontroller.selectedIndex!=0)
 		@try

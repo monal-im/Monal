@@ -16,14 +16,16 @@
 
 @interface chat : UIViewController <UITextViewDelegate,UIWebViewDelegate,UIAlertViewDelegate>{
 
-	 UITextView *chatInput;
-	UIWebView* chatView;
-	protocol* jabber;
+	
+    protocol* jabber;
 	UINavigationController* navController; 
 	
 	UITabBarController* tabController; 
-
-	
+     UIBarButtonItem* contactsButton; // ipad portrait button 
+     UIPopoverController *popOverController;
+    UITableView* contactList; 
+    
+    
 	//dataset for current chat window
 	//NSArray* thelist; 
 	
@@ -110,4 +112,6 @@
 @property (nonatomic, retain) NSString* iconPath; 
 @property (nonatomic, retain) NSString* domain; 
 @property (nonatomic, retain)	UITabBarController* tabController; 
+@property (nonatomic, retain)  UITableView* contactList;
+
 @end

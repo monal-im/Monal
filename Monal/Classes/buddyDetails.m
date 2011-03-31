@@ -174,13 +174,14 @@ NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
             
             popOverController.popoverContentSize = CGSizeMake(320, 480);
             
-            if(orientation==UIInterfaceOrientationLandscapeRight)
-            [popOverController presentPopoverFromRect:cellRect 
-                                               inView:table permittedArrowDirections:UIPopoverArrowDirectionRight animated:YES];
-            
-            if(orientation==UIInterfaceOrientationLandscapeLeft)
+           // if(orientation==UIInterfaceOrientationLandscapeRight)
             [popOverController presentPopoverFromRect:cellRect 
                                                inView:table permittedArrowDirections:UIPopoverArrowDirectionLeft animated:YES];
+            
+           /* if(orientation==UIInterfaceOrientationLandscapeLeft)
+            [popOverController presentPopoverFromRect:cellRect 
+                                               inView:table permittedArrowDirections:UIPopoverArrowDirectionLeft animated:YES];*/
+            
         }
     else
     {

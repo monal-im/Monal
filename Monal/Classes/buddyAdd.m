@@ -21,8 +21,7 @@
 	navigationController=nav;
     tabbarcontroller=tab;
 	[self initWithNibName:@"BuddyAdd" bundle:nil];
-	
-	
+	 
 	self.title=@"Add Contact "; 
 	
 }
@@ -35,6 +34,8 @@
         if ([popOverController isPopoverVisible]) {
             
             [popOverController dismissPopoverAnimated:YES];
+            [popOverController release]; 
+          
             
         } 
     }
@@ -72,6 +73,8 @@
         if ([popOverController isPopoverVisible]) {
             
             [popOverController dismissPopoverAnimated:YES];
+            [popOverController release]; 
+       
             
         } 
     }
@@ -126,6 +129,8 @@ NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
 -(void) showiPad:(protocol*)account
 {
+  
+    
     popOverController = [[UIPopoverController alloc] initWithContentViewController:self];
   
     popOverController.popoverContentSize = CGSizeMake(316, 203);

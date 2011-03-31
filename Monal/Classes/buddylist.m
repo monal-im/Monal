@@ -268,6 +268,16 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
 
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
+  /*  NSString* machine=[tools machine]; 
+    UIInterfaceOrientation orientation =[[UIApplication sharedApplication] statusBarOrientation];
+    if(([machine hasPrefix:@"iPad"] )
+       
+       &&
+       (!((orientation==UIInterfaceOrientationLandscapeLeft) || 
+         (orientation==UIInterfaceOrientationLandscapeRight)
+         )))
+    {
+        
 	// ipad stuff
 	if(tabcontroller.selectedIndex!=0)
 	@try
@@ -275,7 +285,7 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
 		tabcontroller.selectedIndex = 0;
 	}
 	@catch(NSException* err) {}
-	
+	}*/
  
     
 	buddyDetails* detailwin=[[buddyDetails alloc] autorelease];

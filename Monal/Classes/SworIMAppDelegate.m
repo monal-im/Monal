@@ -630,7 +630,7 @@ NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 	
 	
 	buddyAdd* addwin=[[buddyAdd alloc] autorelease];
-	if([[tools machine] isEqualToString:@"iPad"])
+	if([[tools machine] hasPrefix:@"iPad"])
     {
         [addwin init:nil:nil];
     addwin.bbiOpenPopOver=buddyNavigationController.navigationBar.topItem.leftBarButtonItem;

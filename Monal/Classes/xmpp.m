@@ -99,33 +99,7 @@
 	// outer state machien
 	loginstate=0; 
 	
-	//if no domain is specified
-	if([domain isEqualToString:@""])
-	{
-		//get domain to use from server
-		/*NSArray* elements= [server componentsSeparatedByString:@"."];
-		
-		[domain release];
-		if([elements count]>=2)
-		{
-			
-			domain=[NSString stringWithFormat:@"%@.%@", [elements objectAtIndex:[elements count]-2], [elements objectAtIndex:[elements count]-1]];
-		}
-		else
-		{*/
-			domain=server;
-		//}
-		
-	/*	if([domain isEqualToString:@"google.com"] )
-		{
-			//if(![domain isEqualToString:server]) 
-			[domain release];
-			domain=@"gmail.com";
-			
-		}*/
-		
-		[domain retain];
-	}
+
 	
     
 	serverDiscoItems=[[NSMutableArray alloc] init];
@@ -422,11 +396,15 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 	
 		
 		
+		NSString* xmpprequest;
+	  if([domain length]>0)
 		
-	
-		
-		NSString* xmpprequest=[NSString stringWithFormat:
+		 xmpprequest=[NSString stringWithFormat:
 							   @"<stream:stream to='%@' xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams'  version='1.0'>",domain];
+        else
+            xmpprequest=[NSString stringWithFormat:
+                         @"<stream:stream  xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams'  version='1.0'>"];
+            
 		[self talk:xmpprequest];
 		[xmpprequest retain]; 
 		loginstate=1; // reset everything
@@ -1608,6 +1586,8 @@ debug_NSLog(@"ended this element: %@", elementName);
 		[[NSNotificationCenter defaultCenter] 
 		 postNotificationName: @"XMPPMech" object: self];
 		
+        debug_NSLog(@" posted mechanisms notification to login"); 
+        
 			[[NSNotificationCenter defaultCenter] removeObserver:self  name: @"XMPPMech" object:self]; // no longer needed
 		[pool release];
 		return; 
@@ -1779,8 +1759,14 @@ debug_NSLog(@"ended this element: %@", elementName);
 		sessionkey=[NSString stringWithFormat:@"monal%d",random()%100000]; 
 		[sessionkey retain];
 		
-		NSString* xmpprequest2=[NSString stringWithFormat:
+		NSString* xmpprequest2; 
+        if([domain length]>0)
+        xmpprequest2=[NSString stringWithFormat:
 								@"<stream:stream to='%@' xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams'  version='1.0'>",domain];
+        else
+            xmpprequest2=[NSString stringWithFormat:
+                          @"<stream:stream  xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams'  version='1.0'>"];
+            
 		
 		[self talk:xmpprequest2];		
 		
@@ -3517,8 +3503,14 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 //	NSString* xmpprequest1=[NSString stringWithFormat:@"<?xml version='1.0'?>"];
 //	[self talk:xmpprequest1];
 	//send stream star
-	NSString* xmpprequest=[NSString stringWithFormat:
+	NSString* xmpprequest; 
+      if([domain length]>0)
+          xmpprequest=[NSString stringWithFormat:
 						   @"<stream:stream to='%@' xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams'  version='1.0'>",domain];
+    else
+        xmpprequest=[NSString stringWithFormat:
+                     @"<stream:stream  xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams'  version='1.0'>"];
+        
 	[self talk:xmpprequest];
 
 	

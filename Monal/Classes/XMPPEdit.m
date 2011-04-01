@@ -74,7 +74,7 @@
     
     [theTable addGestureRecognizer:gestureRecognizer];*/
     
-    // worked in OS4 but not in OS3.. was preventing keybaord in textfield
+    // gesture stuff worked in OS4 but not in OS3.. was preventing keybaord in textfield
     
 	if(originIndex.section==0)
 	{
@@ -82,9 +82,12 @@
 			debug_NSLog(@"reading account number %@", accountno); 
 		NSArray* settings=[[db accountVals:accountno] objectAtIndex:0]; //only one row
 		
-	
+        //allow blank domains.. dont show @ if so
+	if([[settings objectAtIndex:9] length]>0)
 		userText.text=[NSString stringWithFormat:@"%@@%@",[settings objectAtIndex:5],[settings objectAtIndex:9]];
-		
+		else
+            userText.text=[NSString stringWithFormat:@"%@",[settings objectAtIndex:5]];
+        
 		PasswordManager* pass= [PasswordManager alloc] ; 
 		[pass init:[NSString stringWithFormat:@"%@",accountno]];
 		passText.text=[pass getPassword];	

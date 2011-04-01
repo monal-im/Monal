@@ -1003,7 +1003,8 @@ buddylistDS.tabcontroller=tabcontroller;
 		}
 	else // everything else is XMPP
 	{
-	
+        debug_NSLog(@" domain: %@", [[enabledAccounts objectAtIndex:0] objectAtIndex: 9]); 
+        
 	jabber= [[xmpp alloc] 
 			 init
 			 :[[enabledAccounts objectAtIndex:0] objectAtIndex: 3]

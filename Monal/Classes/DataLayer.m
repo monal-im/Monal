@@ -1915,14 +1915,29 @@
 			counter++; 
 		}
 		
-	
-		
-		
+
 		//wipe passwords 
-		[self executeNonQuery:@"update dbversion set dbversion='1.072'; "];
+		
 		[self executeNonQuery:@"update account set password=''; "];
+        
+
 		
 	}
+    
+    
+    if([dbversion doubleValue]<1.073)
+    {
+        debug_NSLog(@"Database version <1.073 detected. Performing upgrade on passwords. ");
+        
+        //set defaults on upgrade
+        [[NSUserDefaults standardUserDefaults] setBool:true forKey:@"OfflineContact"];
+        [[NSUserDefaults standardUserDefaults] setBool:true forKey:@"MessagePreview"];
+        [[NSUserDefaults standardUserDefaults] setBool:true forKey:@"Logging"];
+        
+        [self executeNonQuery:@"update dbversion set dbversion='1.073'; "];
+        debug_NSLog(@"Upgrade to 1.073 success ");
+        
+    }
 	
 	
 [pool release];

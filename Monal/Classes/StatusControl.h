@@ -63,18 +63,22 @@ IBOutlet UITextField* statusval;
 	IBOutlet	UISwitch* MessagePreview; 
     IBOutlet	UISwitch* Logging; 
 	
-      IBOutlet	UISwitch* OfflineContact; 
+    IBOutlet	UISwitch* OfflineContact; 
+    
+    
+    
+	
+    
     
 	IBOutlet  MyTabController* tabcontroller; 
 
+    UITableView* contactsTable; 
  
 
 }
 
 
 
-
--(void) init: (protocol*) jabberIn:(UINavigationController*) nav:(NSString*)username; 
 
 
 -(IBAction) setAway; 
@@ -83,6 +87,11 @@ IBOutlet UITextField* statusval;
 -(IBAction) soundOn; 
 -(IBAction) vibrateOn; 
 
+-(IBAction) offlineContacs; 
+
+-(IBAction) previewOn; 
+-(IBAction) loggingOn; 
+
 
 -(IBAction) musicOn;
 
@@ -90,6 +99,8 @@ IBOutlet UITextField* statusval;
 
 
 @property (nonatomic, retain)  protocol* jabber;
+
+@property (nonatomic, retain)  UITableView* contactsTable; 
 
 
  

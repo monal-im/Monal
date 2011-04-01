@@ -549,8 +549,10 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
 	
-	
+	if ([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
 	return 2;
+    else
+        return 1;
 	
 }
 

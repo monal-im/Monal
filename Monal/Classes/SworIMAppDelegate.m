@@ -378,8 +378,12 @@ NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 							alarm.timeZone = [NSTimeZone defaultTimeZone];
 							alarm.repeatInterval = 0;
 							
+                            if([[NSUserDefaults standardUserDefaults] boolForKey:@"MessagePreview"])
 							alarm.alertBody = [NSString stringWithFormat: @"Message from %@: %@", msgfrom, msgMess];
+							else
+                                alarm.alertBody = [NSString stringWithFormat: @"Message from %@:", msgfrom];
 							
+                            
 							[app scheduleLocalNotification:alarm];
 							
 						//	[app presentLocalNotificationNow:alarm];
@@ -710,6 +714,7 @@ NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 	
 	 statuscon.jabber=jabber; 
      statuscon.iconPath=iconPath; 
+    statuscon.contactsTable=buddyTable;
     joinGroup.jabber=jabber;
     
    
@@ -1400,6 +1405,12 @@ buddylistDS.tabcontroller=tabcontroller;
 		//defaults
         [[NSUserDefaults standardUserDefaults] setBool:true forKey:@"Visible"]; 
 	[[NSUserDefaults standardUserDefaults] setBool:true forKey:@"Sound"];
+        
+        	[[NSUserDefaults standardUserDefaults] setBool:true forKey:@"OfflineContact"];
+        	[[NSUserDefaults standardUserDefaults] setBool:true forKey:@"MessagePreview"];
+        	[[NSUserDefaults standardUserDefaults] setBool:true forKey:@"Logging"];
+        
+
 		
 		
 		UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Welcome"
@@ -1764,11 +1775,20 @@ void (^myBlock)(void) = ^(void){
 
 - (void)applicationWillTerminate:(UIApplication *)application
 {
+ 
+    debug_NSLog(@"will terminate"); 
+    //clean out messages if logging off
+    if(![[NSUserDefaults standardUserDefaults] boolForKey:@"Logging"])
+    {
+        [db messageHistoryCleanAll:jabber.accountNumber];
+    }
+	
 	// 	[db resetBuddies]; // forget buddy states
 	
-	debug_NSLog(@"will terminate"); 
-	[jabber disconnect]; 
 	
+	[jabber disconnect]; 
+    
+  
 }
 
 

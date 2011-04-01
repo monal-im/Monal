@@ -150,6 +150,12 @@
 	if ( (buttonIndex==0) && (sheet=2))
 	{
 		debug_NSLog(@"closgin active chats for %@",[[thelist objectAtIndex:[currentPath indexAtPosition:1]] objectAtIndex:0]);
+        
+        //clean out messages if logging off
+        if(![[NSUserDefaults standardUserDefaults] boolForKey:@"Logging"])
+        {
+            [db messageHistoryClean:[[thelist objectAtIndex:[currentPath indexAtPosition:1]] objectAtIndex:0]:accountno];
+        }
 		
         //if it is muc close channel
         [jabber closeMuc:[[thelist objectAtIndex:[currentPath indexAtPosition:1]] objectAtIndex:0]];

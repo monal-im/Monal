@@ -13,6 +13,7 @@
 
 @synthesize jabber; 
 @synthesize iconPath; 
+@synthesize contactsTable;
 
 
 
@@ -216,6 +217,24 @@
 
 #pragma mark status actions
 
+-(IBAction) offlineContacs
+{
+[[NSUserDefaults standardUserDefaults] setBool:OfflineContact.on forKey:@"OfflineContact"];
+    [contactsTable reloadData];
+    
+}
+
+-(IBAction) previewOn
+{
+[[NSUserDefaults standardUserDefaults] setBool:MessagePreview.on forKey:@"MessagePreview"];
+}
+-(IBAction) loggingOn
+{
+[[NSUserDefaults standardUserDefaults] setBool:Logging.on forKey:@"Logging"];
+}
+
+
+
 -(IBAction) musicOn
 {	
     [[NSUserDefaults standardUserDefaults] setBool:MusicStatus.on forKey:@"MusicStatus"];
@@ -389,6 +408,10 @@
 	
 	vibrateSwitch.on=[[NSUserDefaults standardUserDefaults] boolForKey:@"Vibrate"];
 	soundSwitch.on=[[NSUserDefaults standardUserDefaults] boolForKey:@"Sound"];
+    
+    OfflineContact.on=[[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"];
+	MessagePreview.on=[[NSUserDefaults standardUserDefaults] boolForKey:@"MessagePreview"];
+    Logging.on=[[NSUserDefaults standardUserDefaults] boolForKey:@"Logging"];
     
 	statusval.text=[[NSUserDefaults standardUserDefaults] stringForKey:@"StatusMessage"];
 	priority.text=[[NSUserDefaults standardUserDefaults] stringForKey:@"XMPPPriority"];

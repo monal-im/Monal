@@ -92,6 +92,7 @@
 	
 	
 	// server attributes
+    BOOL legacyAuth; 
 	BOOL SASLSupported; 
 	BOOL SASLPlain; 
 	BOOL SASLCRAM_MD5; 

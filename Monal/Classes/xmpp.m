@@ -340,6 +340,21 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 		
 	}
 	
+    if(([State isEqualToString:@"Features"]) &&([elementName isEqualToString:@"auth"]))
+	{
+        debug_NSLog(@"Supports legacy auth"); 
+        legacyAuth=true; 
+        [pool release];
+		return; 
+    }
+    
+    if(([State isEqualToString:@"Features"]) &&([elementName isEqualToString:@"register"]))
+	{
+        debug_NSLog(@"Supports user registration"); 
+        [pool release];
+		return; 
+    }
+    
 	if(([State isEqualToString:@"Features"]) &&([elementName isEqualToString:@"starttls"]))
 	{
 	
@@ -748,9 +763,28 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
         
         else
 		//iq resutl vc2 
-		if( ([[attributeDict objectForKey:@"type"] isEqualToString:@"result"]>0))
+		if( [[attributeDict objectForKey:@"type"] isEqualToString:@"result"])
         {
 		
+            	if( [[attributeDict objectForKey:@"id"] isEqualToString:@"auth2"])
+                {
+                    debug_NSLog(@"legacy login success");
+                    loggedin=true; 
+                //successful legacy login
+                    [self setAvailable]; 
+                    
+                    // this has to come after set available becasue the post login functions in appdelegate set default status and messages
+                    [[NSNotificationCenter defaultCenter] 
+                     postNotificationName: @"LoggedIn" object: self];
+                    
+                    // send command to download the roster
+                    [self getBuddies];
+                    
+                    
+                    [pool release]; 
+                    return; 
+                    
+                }
             
 			if(loggedin==false)
 			{
@@ -1573,6 +1607,12 @@ debug_NSLog(@"ended this element: %@", elementName);
 		
 		[State release]; 
 	
+        if(SASLSupported!=true) 
+        {
+        //initialte login if it nevre triggered through MECHs
+            [self login:nil]; 
+        }
+        
 		[pool release];
 		return;
 		//[parser abortParsing]; 
@@ -3032,6 +3072,8 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	
 }
 
+#pragma mark core fucntions
+
 -(bool) talk: (NSString*) xmpprequest;
 {
 	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
@@ -3535,7 +3577,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	
 	//checking fro sasl support
 
-	if(SASLSupported!=true)
+	/*if(SASLSupported!=true)
 	{
 		//exit on fail
 		UIAlertView *addError = [[UIAlertView alloc] 
@@ -3550,9 +3592,12 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 		
 		[pool release];
 		return false; 
-	}
+	}*/
 	
-	if((SASLPlain!=true) && (SASLDIGEST_MD5!=true))
+    
+    //no sasl method and lo negacy
+    if((legacyAuth!=true) &&(SASLSupported==true)
+	&& (SASLPlain!=true) && (SASLDIGEST_MD5!=true))
 	{
 		//exit on fail
 		UIAlertView *addError = [[UIAlertView alloc] 
@@ -3659,7 +3704,15 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 		val= [self talk:xmpprequest];
 	}
 	
-/*else if(SSL==true)
+    //legacy auth possible and no other path available
+    
+ if((legacyAuth==true)
+    &&((SASLSupported!=true) ||
+       (  (SASLSupported==true)
+        && (SASLPlain!=true) && (SASLDIGEST_MD5!=true)
+       )
+    )
+    )
 {
 	
 
@@ -3673,7 +3726,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	 
 	 
 	
-}*/
+}
 
 	
 	[pool release]; 

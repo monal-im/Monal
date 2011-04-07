@@ -1552,6 +1552,23 @@
 	
 }
 
+-(bool) removeAllActiveBuddies:(NSString*) accountNo
+{
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
+	
+	
+	NSString* query=[NSString stringWithFormat:@"delete from activechats where  account_id=%@ ",  accountNo ];
+	//	debug_NSLog(query); 
+    
+	
+	bool result=[self executeNonQuery:query];
+	[pool release]; 
+	return result; 
+	
+}
+
+
 
 -(bool) addActiveBuddies:(NSString*) buddyname:(NSString*) accountNo;
 {

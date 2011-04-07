@@ -118,16 +118,19 @@
 							<double key="NSSize">15</double>
 							<int key="NSfFlags">16</int>
 						</object>
-						<int key="IBUIButtonType">1</int>
 						<string key="IBUINormalTitle">Join</string>
 						<reference key="IBUIHighlightedTitleColor" ref="229823896"/>
 						<object class="NSColor" key="IBUINormalTitleColor">
 							<int key="NSColorSpace">1</int>
-							<bytes key="NSRGB">MC4xOTYwNzg0MzQ2IDAuMzA5ODAzOTMyOSAwLjUyMTU2ODY1NgA</bytes>
+							<bytes key="NSRGB">MSAxIDEAA</bytes>
 						</object>
 						<object class="NSColor" key="IBUINormalTitleShadowColor">
 							<int key="NSColorSpace">3</int>
 							<bytes key="NSWhite">MC41AA</bytes>
+						</object>
+						<object class="NSCustomResource" key="IBUINormalBackgroundImage">
+							<string key="NSClassName">NSImage</string>
+							<string key="NSResourceName">black_button.png</string>
 						</object>
 					</object>
 					<object class="IBUILabel" id="357229456">
@@ -190,7 +193,7 @@
 						<int key="IBUIContentMode">7</int>
 						<bool key="IBUIUserInteractionEnabled">NO</bool>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-						<string key="IBUIText">Password</string>
+						<string key="IBUIText">Password:</string>
 						<reference key="IBUIFont" ref="964210367"/>
 						<reference key="IBUITextColor" ref="747214636"/>
 						<reference key="IBUIHighlightedColor" ref="229823896"/>
@@ -231,8 +234,8 @@
 				<reference key="NSWindow"/>
 				<reference key="NSNextKeyView" ref="331254272"/>
 				<object class="NSColor" key="IBUIBackgroundColor">
-					<int key="NSColorSpace">1</int>
-					<bytes key="NSRGB">MSAxIDEAA</bytes>
+					<int key="NSColorSpace">3</int>
+					<bytes key="NSWhite">MC42NjY2NjY2ODY1AA</bytes>
 				</object>
 				<bool key="IBUIClipsSubviews">YES</bool>
 				<bool key="IBUIMultipleTouchEnabled">YES</bool>
@@ -353,9 +356,9 @@
 							<reference ref="331254272"/>
 							<reference ref="357229456"/>
 							<reference ref="1007750279"/>
-							<reference ref="875401362"/>
 							<reference ref="772169874"/>
 							<reference ref="879093769"/>
+							<reference ref="875401362"/>
 						</object>
 						<reference key="parent" ref="0"/>
 					</object>
@@ -555,6 +558,10 @@
 		</object>
 		<bool key="IBDocument.PluginDeclaredDependenciesTrackSystemTargetVersion">YES</bool>
 		<int key="IBDocument.defaultPropertyAccessControl">3</int>
+		<object class="NSMutableDictionary" key="IBDocument.LastKnownImageSizes">
+			<string key="NS.key.0">black_button.png</string>
+			<string key="NS.object.0">{174, 44}</string>
+		</object>
 		<string key="IBCocoaTouchPluginVersion">300</string>
 	</data>
 </archive>

@@ -112,6 +112,7 @@
 //active chats
 -(NSArray*) activeBuddies:(NSString*) accountNo;
 -(bool) removeActiveBuddies:(NSString*) buddyname:(NSString*) accountNo;
+-(bool) removeAllActiveBuddies:(NSString*) accountNo;
 -(bool) addActiveBuddies:(NSString*) buddyname:(NSString*) accountNo;
 
 //count unread

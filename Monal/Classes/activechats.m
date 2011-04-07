@@ -22,7 +22,23 @@
 	return YES;
 }
 
-
+-(void) closeall
+{
+	UIActionSheet *popupQuery = [[UIActionSheet alloc] initWithTitle:@"Are you sure you want to close all active chats?"
+                                                            delegate:self 
+                                                   cancelButtonTitle:@"No" 
+                                              destructiveButtonTitle:@"Yes" 
+                                                   otherButtonTitles:nil, nil];
+    
+    popupQuery.actionSheetStyle =  UIActionSheetStyleBlackOpaque;
+    
+    //[popupQuery showInView:tableView];
+    [popupQuery showFromTabBar:tabcontroller.tabBar];
+    
+    popupQuery.tag=1; 
+    
+    [popupQuery release];
+}
 
 
 
@@ -94,14 +110,27 @@
 	[currentTable reloadData];
 	[thelist retain];
 	
-	// hide + and edit buttons
+	// hide + and edit buttons and add the close btutton
 	
 	
 
+
+    
 	
+	UIBarButtonItem* closeAll= [[[UIBarButtonItem alloc] initWithTitle:@"Close All"
+                                              style:UIBarButtonItemStyleBordered
+                                             target:self action:@selector(closeall)] autorelease];
+	
+	
+	
+	
+	viewController.navigationBar.topItem.rightBarButtonItem=closeAll;
+ 
+    
+    
 	
 	[viewController.navigationItem setLeftBarButtonItem:nil];
-	[viewController.navigationItem setRightBarButtonItem:nil];
+
 	
 	
 	
@@ -143,8 +172,46 @@
 	//button click handler
 	
 
-	
-	
+if(actionSheet.tag==1)
+{
+    debug_NSLog(@"closgin all active chats for %@",[[thelist objectAtIndex:[currentPath indexAtPosition:1]] objectAtIndex:0]);
+    
+    //clean out messages if logging off
+   if(![[NSUserDefaults standardUserDefaults] boolForKey:@"Logging"])
+    {
+        [db messageHistoryCleanAll:accountno];
+    }
+    
+    //if it is muc close channel
+   //  [jabber closeMuc:[[thelist objectAtIndex:[currentPath indexAtPosition:1]] objectAtIndex:0]];
+    
+    // delete from tables 
+    if(	[db removeAllActiveBuddies:accountno])
+    {
+        
+        //	delete from datasource
+        [thelist removeAllObjects];
+        
+        //del from table
+        [currentTable reloadData];			
+    }
+    else
+    {
+        
+        //show deletion error message
+        UIAlertView *deleteAlert = [[UIAlertView alloc] 
+                                    initWithTitle:@"Chat Close  Error" 
+                                    message:@"Could not clsoe all chat. Please report this to the developer. "
+                                    delegate:self cancelButtonTitle:@"Close"
+                                    otherButtonTitles: nil];
+        [deleteAlert show];
+        
+    }
+ 
+    
+}
+	else
+    {
 	
 	//if yes pressed on delete
 	if ( (buttonIndex==0) && (sheet=2))
@@ -175,7 +242,7 @@
 			
 			//show deletion error message
 			UIAlertView *deleteAlert = [[UIAlertView alloc] 
-										initWithTitle:@"Chat Close Removal Error" 
+										initWithTitle:@"Chat Close  Error" 
 										message:@"Could not clsoe this chat. Please report this to the developer. "
 										delegate:self cancelButtonTitle:@"Close"
 										otherButtonTitles: nil];
@@ -185,7 +252,8 @@
 		
 		
 	}
-	
+	}
+    
 	sheet=0; 
 	
 }

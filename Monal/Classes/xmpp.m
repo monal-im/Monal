@@ -1607,11 +1607,21 @@ debug_NSLog(@"ended this element: %@", elementName);
 		
 		[State release]; 
 	
-        if(SASLSupported!=true) 
+       /* if(SASLSupported!=true) 
         {
         //initialte login if it nevre triggered through MECHs
             [self login:nil]; 
         }
+        else
+        {*/
+            
+            [[NSNotificationCenter defaultCenter] 
+             postNotificationName: @"XMPPMech" object: self];
+            
+            debug_NSLog(@" posted mechanisms notification to login"); 
+            
+			[[NSNotificationCenter defaultCenter] removeObserver:self  name: @"XMPPMech" object:self]; // no longer needed
+        //}
         
 		[pool release];
 		return;
@@ -1623,12 +1633,9 @@ debug_NSLog(@"ended this element: %@", elementName);
 	{
 		debug_NSLog(@" got mechanisms"); 
 	
-		[[NSNotificationCenter defaultCenter] 
-		 postNotificationName: @"XMPPMech" object: self];
-		
-        debug_NSLog(@" posted mechanisms notification to login"); 
+        [State release]; 
+		State=@"Features";
         
-			[[NSNotificationCenter defaultCenter] removeObserver:self  name: @"XMPPMech" object:self]; // no longer needed
 		[pool release];
 		return; 
 	}	

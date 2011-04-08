@@ -1561,7 +1561,7 @@ debug_NSLog(@"Entering background");
 	
 	
 	 //******* viop removed for now 
-	
+
 void (^myBlock)(void) = ^(void){
 		debug_NSLog(@"OS keep alive hander called"); 
 		[self keepAlive];
@@ -1584,14 +1584,7 @@ void (^myBlock)(void) = ^(void){
 	if([ver characterAtIndex:0]!='3')
 	{
 	
-		//this is task completion MT
-		/*
-		suspendTimer=[NSTimer scheduledTimerWithTimeInterval:60
-													  target:self
-													selector:	@selector(suspendAlert)
-													userInfo:nil
-													 repeats:YES];
-		*/
+		
 	 backGround=true; 
 	
         
@@ -1606,6 +1599,7 @@ void (^myBlock)(void) = ^(void){
 		[[UIApplication sharedApplication] endBackgroundTask:bgTask];
 		 bgTask=UIBackgroundTaskInvalid;
     }];*/
+
 	}
 
     [[NSUserDefaults standardUserDefaults] synchronize];
@@ -1651,19 +1645,15 @@ void (^myBlock)(void) = ^(void){
     
     
     
-	//thread to update buddylist, messages
 
-
-	//[self uiUpdater]; 
-	/*	jabber.messagesFlag=true;
-		[self uiUpdater]; 
-	 */
-	
 
 	
 	      //******** this needs to be removed when i go back to VOIP socket
-	/* 
-	 [suspendTimer invalidate];
+
+
+	
+	/*
+
 	 
 	if((bgTask!=UIBackgroundTaskInvalid) && (bgTask!=nil))
 	{

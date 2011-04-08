@@ -218,14 +218,16 @@ if(actionSheet.tag==1)
 	{
 		debug_NSLog(@"closgin active chats for %@",[[thelist objectAtIndex:[currentPath indexAtPosition:1]] objectAtIndex:0]);
         
+     
+		
+        //if it is muc close channel
+        [jabber closeMuc:[[thelist objectAtIndex:[currentPath indexAtPosition:1]] objectAtIndex:0]];
+        
         //clean out messages if logging off
         if(![[NSUserDefaults standardUserDefaults] boolForKey:@"Logging"])
         {
             [db messageHistoryClean:[[thelist objectAtIndex:[currentPath indexAtPosition:1]] objectAtIndex:0]:accountno];
         }
-		
-        //if it is muc close channel
-        [jabber closeMuc:[[thelist objectAtIndex:[currentPath indexAtPosition:1]] objectAtIndex:0]];
         
 		// delete from tables 
 		if(	[db removeActiveBuddies:[[thelist objectAtIndex:[currentPath indexAtPosition:1]] objectAtIndex:0]:accountno])

@@ -31,7 +31,7 @@
 	<key>CFBundleURLTypes</key>
 	<array/>
 	<key>CFBundleVersion</key>
-	<string>2.0.3.6</string>
+	<string>2.0.4</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSMainNibFile</key>
@@ -41,9 +41,7 @@
 	<key>SBUsesNetwork</key>
 	<true/>
 	<key>UIBackgroundModes</key>
-	<array>
-		<string>voip</string>
-	</array>
+	<array/>
 	<key>UIFileSharingEnabled</key>
 	<true/>
 	<key>UIPrerenderedIcon</key>

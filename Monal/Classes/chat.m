@@ -192,7 +192,8 @@
 	
 	[chatView performSelectorOnMainThread:@selector(stopLoading) withObject:nil waitUntilDone:NO];
 	
-	
+    if(popOverController!=nil)
+	[popOverController dismissPopoverAnimated:true]; 
 	
 	
 	[HTMLPage release]; 

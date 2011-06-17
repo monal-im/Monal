@@ -379,7 +379,7 @@ NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 							alarm.repeatInterval = 0;
 							
                             if([[NSUserDefaults standardUserDefaults] boolForKey:@"MessagePreview"])
-							alarm.alertBody = [NSString stringWithFormat: @"Message from %@: %@", msgfrom, msgMess];
+							alarm.alertBody = [NSString stringWithFormat: @"%@: %@", msgfrom, msgMess];
 							else
                                 alarm.alertBody = [NSString stringWithFormat: @"Message from %@:", msgfrom];
 							

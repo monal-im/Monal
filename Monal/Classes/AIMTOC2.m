@@ -890,7 +890,7 @@ debug_NSLog(@"frame type %u", hdr.type);
 
 
 	
-	[self performSelectorOnMainThread:@selector(setRunLoop)  withObject:nil waitUntilDone:YES];
+	[self performSelectorOnMainThread :@selector(setRunLoop)  withObject:nil waitUntilDone:YES];
 	
 	
 	// iOS4 VOIP socket.. one for all sockets doesnt matter what style connection it is

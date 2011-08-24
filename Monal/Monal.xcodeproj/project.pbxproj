@@ -34,6 +34,8 @@
 		261FD43A122349F2003DDC3A /* activechats.m in Sources */ = {isa = PBXBuildFile; fileRef = 261FD439122349F2003DDC3A /* activechats.m */; };
 		261FD56F1223527C003DDC3A /* active.png in Resources */ = {isa = PBXBuildFile; fileRef = 261FD56E1223527C003DDC3A /* active.png */; };
 		26277888110179D100023C8A /* tools.m in Sources */ = {isa = PBXBuildFile; fileRef = 26277887110179D100023C8A /* tools.m */; };
+		2628E50514049BAC0064131E /* askTempPass.m in Sources */ = {isa = PBXBuildFile; fileRef = 2628E50414049BAC0064131E /* askTempPass.m */; };
+		2628E50714049DB50064131E /* askTempPass.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2628E50614049DB50064131E /* askTempPass.xib */; };
 		26292F4F1309CAE100097280 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26292F4E1309CAE100097280 /* CFNetwork.framework */; };
 		263566B9133BDAD10095CD33 /* help.png in Resources */ = {isa = PBXBuildFile; fileRef = 263566B8133BDAD00095CD33 /* help.png */; };
 		263F5658121B50740027D85D /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 263F5657121B50740027D85D /* Default.png */; };
@@ -150,6 +152,9 @@
 		262648FD1126FA80009689CC /* AIMTOC2.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AIMTOC2.m; path = Classes/AIMTOC2.m; sourceTree = "<group>"; };
 		26277886110179D100023C8A /* tools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tools.h; sourceTree = "<group>"; };
 		26277887110179D100023C8A /* tools.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = tools.m; sourceTree = "<group>"; };
+		2628E50314049BAC0064131E /* askTempPass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = askTempPass.h; sourceTree = "<group>"; };
+		2628E50414049BAC0064131E /* askTempPass.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = askTempPass.m; sourceTree = "<group>"; };
+		2628E50614049DB50064131E /* askTempPass.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = askTempPass.xib; sourceTree = "<group>"; };
 		26292F4E1309CAE100097280 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		263566B8133BDAD00095CD33 /* help.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = help.png; sourceTree = "<group>"; };
 		263F5657121B50740027D85D /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
@@ -352,6 +357,17 @@
 			name = Tabbar;
 			sourceTree = "<group>";
 		};
+		2628E50114049B380064131E /* ModalViews */ = {
+			isa = PBXGroup;
+			children = (
+				2628E50314049BAC0064131E /* askTempPass.h */,
+				2628E50414049BAC0064131E /* askTempPass.m */,
+				26C0382412403DC00010A285 /* buddyAdd.h */,
+				26C0382512403DC00010A285 /* buddyAdd.m */,
+			);
+			name = ModalViews;
+			sourceTree = "<group>";
+		};
 		265D8B6110FD896400F37CF7 /* Sounds */ = {
 			isa = PBXGroup;
 			children = (
@@ -494,8 +510,7 @@
 		26EC1C7312295B8800EAF934 /* Core UI */ = {
 			isa = PBXGroup;
 			children = (
-				26C0382412403DC00010A285 /* buddyAdd.h */,
-				26C0382512403DC00010A285 /* buddyAdd.m */,
+				2628E50114049B380064131E /* ModalViews */,
 				265571AF122157D500F994E8 /* SlidingMessageViewController.h */,
 				265571B0122157D500F994E8 /* SlidingMessageViewController.m */,
 				2601D9AA0FBF255D004DB939 /* chat.h */,
@@ -583,6 +598,7 @@
 				26610B0F12293FB000591435 /* iPhone */,
 				2601D9CA0FBF25EF004DB939 /* sworim.sqlite */,
 				26DE9C050FEEFD00000596F6 /* DB definitions */,
+				2628E50614049DB50064131E /* askTempPass.xib */,
 				26E5BA8A132287D400D8C57A /* Settings.xib */,
 				26DC0A8A1339259900E60BFD /* SearchUser.xib */,
 				26F1AB341323CA590044FA18 /* GroupChat.xib */,
@@ -725,6 +741,7 @@
 				266286AB1342C04C00EAFC92 /* block_button_gloss.png in Resources */,
 				266286AE1342C05D00EAFC92 /* red_button_gloss.png in Resources */,
 				266286AF1342C05D00EAFC92 /* red_button.png in Resources */,
+				2628E50714049DB50064131E /* askTempPass.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -764,6 +781,7 @@
 				26F1AB381323CC330044FA18 /* GroupChat.m in Sources */,
 				26DC0A9213392A4F00E60BFD /* userSearch.m in Sources */,
 				26731E77133F3F17008098EB /* iqSearch.m in Sources */,
+				2628E50514049BAC0064131E /* askTempPass.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

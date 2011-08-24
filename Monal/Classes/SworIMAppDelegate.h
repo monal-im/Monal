@@ -26,6 +26,7 @@
 #import "StatusControl.h"
 
 #import "GroupChat.h"
+#import "askTempPass.h"
 
 
 @interface SworIMAppDelegate : UIViewController <UIApplicationDelegate, 

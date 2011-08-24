@@ -991,9 +991,19 @@ buddylistDS.tabcontroller=tabcontroller;
 	}
 	
 	NSString* accountNo=[NSString stringWithFormat:@"%@",[[enabledAccounts objectAtIndex:0] objectAtIndex: 0]];
-	bool secure=false; 
+	bool secure=false;
 	if([[[enabledAccounts objectAtIndex:0] objectAtIndex: 7] intValue]==1) secure=true; 
 	
+    
+   
+        
+        // show a modal view if no password is supplied. 
+    askTempPass* passDialog = [askTempPass alloc];
+    [passDialog init:tabcontroller];
+    [passDialog show];
+     
+   
+    
 	//AIM is 3
 		if([[[enabledAccounts objectAtIndex:0] objectAtIndex: 2] intValue]==3) 
 		{

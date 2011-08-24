@@ -41,9 +41,7 @@
 	<key>SBUsesNetwork</key>
 	<true/>
 	<key>UIBackgroundModes</key>
-	<array>
-		<string>voip</string>
-	</array>
+	<array/>
 	<key>UIFileSharingEnabled</key>
 	<true/>
 	<key>UIPrerenderedIcon</key>

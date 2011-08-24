@@ -892,7 +892,7 @@ debug_NSLog(@"frame type %u", hdr.type);
 	
 	[self performSelectorOnMainThread :@selector(setRunLoop)  withObject:nil waitUntilDone:YES];
 	
-	
+	/*
 	// iOS4 VOIP socket.. one for all sockets doesnt matter what style connection it is
 	if([tools isBackgroundSupported])
 	{
@@ -906,7 +906,7 @@ debug_NSLog(@"frame type %u", hdr.type);
 			debug_NSLog(@"could not set VOIP properties on streams.");
 		
 	}
-	
+	*/
 	
 	[iStream open];
 	[oStream open];

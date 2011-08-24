@@ -21,13 +21,14 @@
 	[self initWithNibName:@"askTempPass" bundle:nil];
 	 
 	self.title=@"Enter Password"; 
+   
   
 }
 
 -(IBAction) closePress
 {
             [tabbarcontroller dismissModalViewControllerAnimated:YES];
-
+//dont connect 
     
 }
 
@@ -36,10 +37,14 @@
    
     
 
+   [ [[UIApplication sharedApplication] delegate] setTempPass:[passwordField text]];
 
-
+    [[NSNotificationCenter defaultCenter] 
+	 postNotificationName: @"Reconnect" object: self];
+    
         [tabbarcontroller dismissModalViewControllerAnimated:YES];
 
+    
 	
 }
 

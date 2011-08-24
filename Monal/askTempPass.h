@@ -21,7 +21,7 @@
 	IBOutlet UITextField* passwordField; 
 //	IBOutlet UIButton* cancelButton;
 IBOutlet UIScrollView* scroll; 
-  
+    UIViewController* theApp; 
 
   
 }
@@ -29,7 +29,7 @@ IBOutlet UIScrollView* scroll;
 
 
 
--(void) init:(UITabBarController*) tab; 
+-(void) init:(UITabBarController*) tab;
 -(void) show; 
 
 

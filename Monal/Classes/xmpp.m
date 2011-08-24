@@ -19,7 +19,7 @@
 @synthesize userSearchServer; 
 @synthesize userSearchItems; 
 
--(id)init:(NSString*) theserver:(unsigned short) theport:(NSString*) theaccount: (NSString*) theresource: (NSString*) thedomain:(BOOL) SSLsetting : (DataLayer*) thedb:(NSString*) accountNo
+-(id)init:(NSString*) theserver:(unsigned short) theport:(NSString*) theaccount: (NSString*) theresource: (NSString*) thedomain:(BOOL) SSLsetting : (DataLayer*) thedb:(NSString*) accountNo:(NSString*) tempPass
 {
 	self = [super init];
 	loggedin=false; 
@@ -34,6 +34,9 @@
 	
 	debug_NSLog(@"%@  %@", account, resource); 
 	
+    theTempPass=[NSString stringWithString:tempPass];
+    [theTempPass retain];
+    
 	accountNumber=accountNo;
 	SSL=SSLsetting;
 	[server retain]; 
@@ -1730,11 +1733,17 @@ debug_NSLog(@"ended this element: %@", elementName);
 		PasswordManager* pass= [PasswordManager alloc] ; 
 		[pass init:accountNumber];
 	
-		
+        NSString* password=[pass getPassword];
+        if([password length]==0)
+        {
+            if(theTempPass!=NULL)
+                password=theTempPass; 
+            
+        }
 		
 		
 		// ****** digest stuff going on here...
-		NSString* X= [NSString stringWithFormat:@"%@:%@:%@", account, realm, [pass getPassword]];
+		NSString* X= [NSString stringWithFormat:@"%@:%@:%@", account, realm, password ];
 		NSString* Y= [self MD5_16:X];
 		
 		/*NSString* A1= [NSString stringWithFormat:@"%@:%@:%@:%@@%@/%@", 
@@ -3653,6 +3662,14 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	debug_NSLog(@"accno %@", accountNumber); 
 	[pass init:accountNumber];
 	NSString* password=[pass getPassword] ;
+    
+    if([password length]==0)
+    {
+        if(theTempPass!=NULL)
+        password=theTempPass; 
+        
+    }
+        
 	
 	//only sasl plain if SSL is true
 	if((SASLPlain==true) & (SSL==true))

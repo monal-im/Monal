@@ -16,7 +16,7 @@
 @synthesize theset; 
 
 //port, server, domain and resource are ignored here 
--(void )init:(NSString*) theserver:(unsigned short) theport:(NSString*) theaccount: (NSString*) theresource: (NSString*) thedomain:(BOOL) SSLsetting : (DataLayer*) thedb:(NSString*) accountNo
+-(void )init:(NSString*) theserver:(unsigned short) theport:(NSString*) theaccount: (NSString*) theresource: (NSString*) thedomain:(BOOL) SSLsetting : (DataLayer*) thedb:(NSString*) accountNo:(NSString*) tempPass; 
 {
 	accountNumber=accountNo;
 	[accountNumber retain];
@@ -24,6 +24,10 @@
 	port=theport; 
 	[server retain];
     statusMessage=nil; 
+    
+    theTempPass= [NSString stringWithString:tempPass];
+    [theTempPass retain];
+    
     
 	return [self init2:theaccount:thedb];
 	
@@ -975,6 +979,13 @@ debug_NSLog(@"frame type %u", hdr.type);
 	[passMan init:[NSString stringWithFormat:@"%@", accountNumber]];
 	debug_NSLog(@" accno %@", accountNumber ); 
 	NSString* passval =[passMan getPassword];
+    
+    if([passval length]==0)
+    {
+        if(theTempPass!=NULL)
+            passval=theTempPass; 
+        
+    }
 	
 	
 	if([passval length]==0) passval=@" "; // stop crashing 

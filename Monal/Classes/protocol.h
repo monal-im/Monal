@@ -78,10 +78,12 @@
 	bool streamError;
 	bool messagesFlag;
 	bool presenceFlag;
+    
+    NSString* theTempPass; 
 	
 }
 
--(id)init:(NSString*) theserver:(unsigned short) theport:(NSString*) theaccount: (NSString*) theresource:(NSString*) thedomain: (BOOL) SSLsetting : (DataLayer*) thedb:(NSString*) accontNo;
+-(id)init:(NSString*) theserver:(unsigned short) theport:(NSString*) theaccount: (NSString*) theresource:(NSString*) thedomain: (BOOL) SSLsetting : (DataLayer*) thedb:(NSString*) accontNo:(NSString*) tempPass; 
 -(bool) connect;
 -(void) disconnect;
 

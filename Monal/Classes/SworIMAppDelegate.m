@@ -870,6 +870,13 @@ buddylistDS.tabcontroller=tabcontroller;
 	
 }
 
+-(void) setTempPass:(NSString*) thePass
+{
+    tempPass=[NSString stringWithString:thePass];
+    [tempPass retain];
+
+}
+
 -(void) reconnect
 {
 	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
@@ -999,18 +1006,19 @@ buddylistDS.tabcontroller=tabcontroller;
     PasswordManager* passMan= [PasswordManager alloc] ; 
     [passMan init:accountNo];    
     
-    if([[passMan getPassword] length]==0)
+    if(([[passMan getPassword] length]==0) && ([tempPass length]==0))
     {
         
         
         // show a modal view if no password is supplied. 
     askTempPass* passDialog = [askTempPass alloc];
-        [passDialog init:tabcontroller];
+        [passDialog init:tabcontroller ];
     [passDialog show];
      
        // we should have some kinf of signaling that starts the stuff below.. 
     }
-   
+    else // no point if there is no password set
+    {
     
 	//AIM is 3
 		if([[[enabledAccounts objectAtIndex:0] objectAtIndex: 2] intValue]==3) 
@@ -1024,7 +1032,7 @@ buddylistDS.tabcontroller=tabcontroller;
 					 :[[enabledAccounts objectAtIndex:0] objectAtIndex: 8]
 					 : [[enabledAccounts objectAtIndex:0] objectAtIndex: 9]
 					 : secure
-			: db : accountNo];
+                     : db : accountNo:tempPass];
 		}
 	else // everything else is XMPP
 	{
@@ -1039,8 +1047,12 @@ buddylistDS.tabcontroller=tabcontroller;
 			 :[[enabledAccounts objectAtIndex:0] objectAtIndex: 8]
 			 : [[enabledAccounts objectAtIndex:0] objectAtIndex: 9]
 			 : secure
-			 : db: accountNo ];
+			 : db: accountNo:tempPass ];
 	}
+        
+        //erase temppass here
+        [tempPass release]; 
+        tempPass=NULL; 
 
 
 	accountno=[NSString stringWithFormat:@"%@",[[enabledAccounts objectAtIndex:0] objectAtIndex: 0] ];
@@ -1085,12 +1097,12 @@ buddylistDS.tabcontroller=tabcontroller;
 	
 	
 
-	
+	  }
 	
 	
 		
 	connectLock=false; 
-
+  
 
 }
 

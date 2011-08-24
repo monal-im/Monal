@@ -112,6 +112,8 @@ IBOutlet	UIActivityIndicatorView* activitySun;
 
 	bool playing; 
 	bool buddylistdirty;
+    
+    NSString* tempPass; 
 	
 }
 
@@ -133,6 +135,7 @@ IBOutlet	UIActivityIndicatorView* activitySun;
 
 -(void) reloadBuddies:(NSArray*) indexpaths;
 
+-(void) setTempPass:(NSString*) thePass; 
 
 @property (nonatomic, retain) DataLayer* db;
 @property (nonatomic, retain)  chat* chatwin;

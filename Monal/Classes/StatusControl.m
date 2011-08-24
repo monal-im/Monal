@@ -71,8 +71,11 @@
             {
                 case 0:
                 {thecell=alertcell; break;}
-                case 1:
-                { thecell=vibratecell; break;}
+                    
+                    
+                    //now redundant 
+                /*case 1:
+                { thecell=vibratecell; break;}*/
               
             
             }
@@ -146,7 +149,7 @@
         }
         case 3:
         {
-            toreturn =2;
+            toreturn =1; //removed vibrate
             break; 
         }
             

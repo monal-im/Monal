@@ -1408,6 +1408,7 @@ if([buddyFullName isEqualToString:@""])
 	NSString* linktext; 
 	NSRange urlpos; 
 	bool hasHttp=true; 
+    bool hasHttps=true; 
 	
 	//find http
 	urlpos=[body rangeOfString:@"http://" options:NSCaseInsensitiveSearch]; 
@@ -1416,6 +1417,15 @@ if([buddyFullName isEqualToString:@""])
 		hasHttp=false;
 		//find  www
 			urlpos=[body rangeOfString:@"www." options:NSCaseInsensitiveSearch]; 
+	}
+    
+    //find http
+	urlpos=[body rangeOfString:@"https://" options:NSCaseInsensitiveSearch]; 
+	if(urlpos.location==NSNotFound)
+	{
+		hasHttps=false;
+		//find  www
+        //urlpos=[body rangeOfString:@"www." options:NSCaseInsensitiveSearch]; 
 	}
 	
 	if(urlpos.location!=NSNotFound)
@@ -1440,13 +1450,14 @@ if([buddyFullName isEqualToString:@""])
 	
 	// replace linktext with <a href=linktext> linktext  </a>
 	
+            
 	
-	if(hasHttp==true)
+	if((hasHttp==true) || (hasHttps==true))
 	[body replaceOccurrencesOfString:linktext
 						  withString:[NSString stringWithFormat:@"<a href=%@> %@ </a>",linktext, linktext]
 							 options:NSCaseInsensitiveSearch
 							   range:NSMakeRange(0, [body length])];
-	else
+	else 
 		[body replaceOccurrencesOfString:linktext
 							  withString:[NSString stringWithFormat:@"<a href=http://%@> %@ </a>",linktext, linktext]
 								 options:NSCaseInsensitiveSearch

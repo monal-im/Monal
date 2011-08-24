@@ -277,16 +277,18 @@ NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 		int unnoticed=[db countUnnoticedMessages:accountno];	
 		
 		debug_NSLog(@"count of unnoticed messages %d", unnoticed); 
-		if(unnoticed>0)
+		
+       if(unnoticed>0)
 		{
 			
-			
-			if(screenLock||backGround) // only when not active (bg or lock screen)
+			// redundant. it is attached to the alert now 
+		 /*	if(screenLock||backGround) // only when not active (bg or lock screen)
 			{
 				//vibration by default for iphone
 				
 				
-				
+			
+                
 				// make sure it is visible ie iphone
 				if(
 				   ( [[NSUserDefaults standardUserDefaults] boolForKey:@"Vibrate"]==true))
@@ -315,7 +317,7 @@ NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 				}
 				
 				
-			}
+			}*/
 			
 			
 			
@@ -382,7 +384,12 @@ NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 							alarm.alertBody = [NSString stringWithFormat: @"%@: %@", msgfrom, msgMess];
 							else
                                 alarm.alertBody = [NSString stringWithFormat: @"Message from %@:", msgfrom];
-							
+						
+                            if( [[NSUserDefaults standardUserDefaults] boolForKey:@"Sound"]==true)
+                            {
+                            alarm.soundName=UILocalNotificationDefaultSoundName; 
+                            }
+                            
                             
 							[app scheduleLocalNotification:alarm];
 							

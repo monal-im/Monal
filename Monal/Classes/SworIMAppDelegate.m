@@ -288,7 +288,7 @@ NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 				
 				
 				// make sure it is visible ie iphone
-				if(//(vibrateenabled==true) &&
+				if(
 				   ( [[NSUserDefaults standardUserDefaults] boolForKey:@"Vibrate"]==true))
 				{
                     
@@ -296,7 +296,7 @@ NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 					
 				}
 				if(
-                  // (soundenbaled==true) &&
+                  
 				   ( [[NSUserDefaults standardUserDefaults] boolForKey:@"Sound"]==true))
 				{
 					
@@ -1560,8 +1560,9 @@ debug_NSLog(@"Entering background");
 	if(jabber.loggedin!=true) return; 
 	
 	
-	 //******* viop removed for now 
+	 //******* VOIP .. to be removed when going to normal task completion ********  
 
+    /*
 void (^myBlock)(void) = ^(void){
 		debug_NSLog(@"OS keep alive hander called"); 
 		[self keepAlive];
@@ -1574,7 +1575,8 @@ void (^myBlock)(void) = ^(void){
 	 debug_NSLog(@"set keep alive hander"); 
 	 }
 	
-
+*/
+    
 	buddylistdirty=false; // reset 
 	
 	
@@ -1589,7 +1591,7 @@ void (^myBlock)(void) = ^(void){
 	
         
         //******** this needs to be removed when i go back to VOIP socket
-	/* bgTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^{
+	 bgTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^{
        debug_NSLog(@"OS background expire hander"); 
 		 
 		 // Clear out the old notification before scheduling a new one
@@ -1598,7 +1600,7 @@ void (^myBlock)(void) = ^(void){
 		 
 		[[UIApplication sharedApplication] endBackgroundTask:bgTask];
 		 bgTask=UIBackgroundTaskInvalid;
-    }];*/
+    }];
 
 	}
 
@@ -1652,7 +1654,7 @@ void (^myBlock)(void) = ^(void){
 
 
 	
-	/*
+	
 
 	 
 	if((bgTask!=UIBackgroundTaskInvalid) && (bgTask!=nil))
@@ -1660,7 +1662,7 @@ void (^myBlock)(void) = ^(void){
 		[[UIApplication sharedApplication] endBackgroundTask:bgTask];
 		 bgTask=UIBackgroundTaskInvalid;
 	};
-	 */
+	 
 	
 }
 

@@ -27,6 +27,7 @@
 
 #import "GroupChat.h"
 #import "askTempPass.h"
+#import "PasswordManager.h"
 
 
 @interface SworIMAppDelegate : UIViewController <UIApplicationDelegate, 

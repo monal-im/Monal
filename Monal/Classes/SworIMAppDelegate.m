@@ -996,12 +996,20 @@ buddylistDS.tabcontroller=tabcontroller;
 	
     
    
+    PasswordManager* passMan= [PasswordManager alloc] ; 
+    [passMan init:accountNo];    
+    
+    if([[passMan getPassword] length]==0)
+    {
+        
         
         // show a modal view if no password is supplied. 
     askTempPass* passDialog = [askTempPass alloc];
-    [passDialog init:tabcontroller];
+        [passDialog init:tabcontroller];
     [passDialog show];
      
+       // we should have some kinf of signaling that starts the stuff below.. 
+    }
    
     
 	//AIM is 3

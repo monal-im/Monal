@@ -14,19 +14,20 @@
 
 
 
--(void) init:(UITabBarController*) tab
+-(void) init:(UITabBarController*) tab; 
 {
 	
     tabbarcontroller=tab;
 	[self initWithNibName:@"askTempPass" bundle:nil];
 	 
 	self.title=@"Enter Password"; 
-	
+  
 }
 
 -(IBAction) closePress
 {
             [tabbarcontroller dismissModalViewControllerAnimated:YES];
+
     
 }
 
@@ -38,7 +39,7 @@
 
 
         [tabbarcontroller dismissModalViewControllerAnimated:YES];
-    
+
 	
 }
 

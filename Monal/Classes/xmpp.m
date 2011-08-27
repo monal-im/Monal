@@ -757,7 +757,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 			[presenceUserid retain];
 			debug_NSLog(@"iq set id: %@", presenceUserid); 
             
-            //set jingle call jid var 
+            //set jingle call my own  jid var 
             jingleCall.me =responseUser; 
             
           
@@ -874,7 +874,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
                
                 
                 //send ack of message
-                [self talk:[jingleCall ack:presenceUser:presenceUserid]]; 
+                [self talk:[jingleCall ack:presenceUserFull:presenceUserid]]; 
             }
         
         /*

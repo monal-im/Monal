@@ -383,7 +383,7 @@ NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
                             if([[NSUserDefaults standardUserDefaults] boolForKey:@"MessagePreview"])
 							alarm.alertBody = [NSString stringWithFormat: @"%@: %@", msgfrom, msgMess];
 							else
-                                alarm.alertBody = [NSString stringWithFormat: @"Message from %@:", msgfrom];
+                                alarm.alertBody = [NSString stringWithFormat: @"%@:", msgfrom];
 						
                             if( [[NSUserDefaults standardUserDefaults] boolForKey:@"Sound"]==true)
                             {

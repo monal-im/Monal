@@ -1,22 +1,20 @@
 //
-//  userSearch.m
+//  iqJingle.m
 //  Monal
 //
-//  Created by Anurodh Pokharel on 3/27/11.
-//  Copyright 2011 __MyCompanyName__. All rights reserved.
+//  Created by Anurodh Pokharel on 8/27/11.
+//  Copyright (c) 2011 __MyCompanyName__. All rights reserved.
 //
 
-#import "userSearch.h"
+#import "iqJingle.h"
 
+@implementation iqJingle
 
-@implementation iqSearch
-
-@synthesize userFields; 
 
 -(id) init
 {
     self = [super init];
-    userFields=[[[NSMutableArray alloc] init] retain]; 
+   
     return self; 
 }
 
@@ -26,7 +24,7 @@
     int counter=0; 
     NSMutableString* query=[[NSMutableString alloc] init];
     [query appendFormat:@"<iq type='set' to='%@' id='search2' > <query xmlns='jabber:iq:search'>", to]; 
-    while(counter<[userFields count])
+   /* while(counter<[userFields count])
     {
         
         [query appendFormat:@"<%@>%@</%@>", [userFields objectAtIndex:counter],
@@ -37,6 +35,7 @@
     
     [query appendFormat:@"</query></iq>"]; 
     [query retain]; 
+    */
     
     [pool release]; 
     return query;
@@ -45,7 +44,8 @@
 
 -(void) dealloc
 {
-    [userFields release];
-    
+       
 }
+
+
 @end

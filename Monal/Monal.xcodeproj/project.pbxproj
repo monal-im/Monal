@@ -98,6 +98,7 @@
 		26EC1D5112296D6000EAF934 /* MainWindowIpad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26EC1D5012296D6000EAF934 /* MainWindowIpad.xib */; };
 		26EC1DB2122978A100EAF934 /* AboutiPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26EC1DB1122978A100EAF934 /* AboutiPad.xib */; };
 		26EF9AB51320450300FA6FB2 /* Monal_crop_114.png in Resources */ = {isa = PBXBuildFile; fileRef = 26EF9AB41320450300FA6FB2 /* Monal_crop_114.png */; };
+		26F0D38D14093DC600A302B9 /* iqJingle.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F0D38C14093DC600A302B9 /* iqJingle.m */; };
 		26F1AB351323CA590044FA18 /* GroupChat.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26F1AB341323CA590044FA18 /* GroupChat.xib */; };
 		26F1AB381323CC330044FA18 /* GroupChat.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F1AB371323CC330044FA18 /* GroupChat.m */; };
 		26F1AB3A1323D0280044FA18 /* joingroup.png in Resources */ = {isa = PBXBuildFile; fileRef = 26F1AB391323D0270044FA18 /* joingroup.png */; };
@@ -229,6 +230,8 @@
 		26EC1D5012296D6000EAF934 /* MainWindowIpad.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = MainWindowIpad.xib; sourceTree = "<group>"; };
 		26EC1DB1122978A100EAF934 /* AboutiPad.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = AboutiPad.xib; sourceTree = "<group>"; };
 		26EF9AB41320450300FA6FB2 /* Monal_crop_114.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Monal_crop_114.png; sourceTree = "<group>"; };
+		26F0D38B14093DC600A302B9 /* iqJingle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iqJingle.h; sourceTree = "<group>"; };
+		26F0D38C14093DC600A302B9 /* iqJingle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = iqJingle.m; sourceTree = "<group>"; };
 		26F1AB341323CA590044FA18 /* GroupChat.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = GroupChat.xib; sourceTree = "<group>"; };
 		26F1AB361323CC320044FA18 /* GroupChat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GroupChat.h; path = Classes/GroupChat.h; sourceTree = "<group>"; };
 		26F1AB371323CC330044FA18 /* GroupChat.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GroupChat.m; path = Classes/GroupChat.m; sourceTree = "<group>"; };
@@ -368,13 +371,6 @@
 			name = ModalViews;
 			sourceTree = "<group>";
 		};
-		265D8B6110FD896400F37CF7 /* Sounds */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = Sounds;
-			sourceTree = "<group>";
-		};
 		26610B0F12293FB000591435 /* iPhone */ = {
 			isa = PBXGroup;
 			children = (
@@ -436,6 +432,8 @@
 			children = (
 				26731E75133F3F17008098EB /* iqSearch.h */,
 				26731E76133F3F17008098EB /* iqSearch.m */,
+				26F0D38B14093DC600A302B9 /* iqJingle.h */,
+				26F0D38C14093DC600A302B9 /* iqJingle.m */,
 			);
 			name = "xmpp Objects";
 			sourceTree = "<group>";
@@ -570,7 +568,6 @@
 			children = (
 				26AD60DA11A95CB700C39051 /* Emoticons */,
 				26EB845D111644AD005446DD /* Themes */,
-				265D8B6110FD896400F37CF7 /* Sounds */,
 				2601D9BC0FBF25D1004DB939 /* Icons */,
 				29B97315FDCFA39411CA2CEA /* Other Sources */,
 				080E96DDFE201D6D7F000001 /* Classes */,
@@ -782,6 +779,7 @@
 				26DC0A9213392A4F00E60BFD /* userSearch.m in Sources */,
 				26731E77133F3F17008098EB /* iqSearch.m in Sources */,
 				2628E50514049BAC0064131E /* askTempPass.m in Sources */,
+				26F0D38D14093DC600A302B9 /* iqJingle.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -760,8 +760,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
             //set jingle call jid var 
             jingleCall.me =responseUser; 
             
-            //send ack of message
-               [self talk:[jingleCall ack:presenceUser]]; 
+          
             
             
             if(State!=nil) [State release]; 
@@ -870,15 +869,22 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
       //  {
             if(	[[attributeDict objectForKey:@"action"] isEqualToString:@"session-initiate"])
             {
-                debug_NSLog(@"got Jingle session initiate"); 
+                debug_NSLog(@"got Jingle session initiate sending ack"); 
                 
-                // see if existing session 
+               
                 
-                // else ask if they want to accept call
-                
-                [self talk:[jingleCall acceptJingle: [attributeDict objectForKey:@"initiator"]
-                                                 :[attributeDict objectForKey:@"sid"] ]]; 
+                //send ack of message
+                [self talk:[jingleCall ack:presenceUser:presenceUserid]]; 
             }
+        
+        /*
+         // see if existing session 
+         
+         // else ask if user is want to accept call
+         
+         [self talk:[jingleCall acceptJingle: [attributeDict objectForKey:@"initiator"]
+         :[attributeDict objectForKey:@"sid"] ]]; 
+        */
             
             if(	[[attributeDict objectForKey:@"action"] isEqualToString:@"session-accept"])
             {

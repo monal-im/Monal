@@ -23,12 +23,12 @@
     return self; 
 }
 
--(NSString*) ack:(NSString*) to
+-(NSString*) ack:(NSString*) to:(NSString*) theid
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     
     NSMutableString* query=[[NSMutableString alloc] init];
-    [query appendFormat:@"<iq to='%@' type='result'>", to]; 
+    [query appendFormat:@"<iq to='%@' id='%@' type='result'>", to, theid]; 
     
     
 

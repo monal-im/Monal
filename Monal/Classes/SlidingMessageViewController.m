@@ -41,7 +41,7 @@
 /*-------------------------------------------------------------
  *
  *------------------------------------------------------------*/
-- (void)hideMsg;
+- (void)hideMsg
 {
 	debug_NSLog(@"hiding message"); 
 	// Slide the view down off screen
@@ -100,18 +100,23 @@
 	
 	self.view.frame = frame;
 	
+ 
 	// To autorelease the Msg, define stop selector
 	[UIView setAnimationDelegate:self];
-	[UIView setAnimationDidStopSelector:@selector(animationDidStop:finished:context:)];
+    NSString* name=@"slider";
+	[UIView setAnimationDidStopSelector:@selector(animationDidStop:name:finished:context:)];
 	
 	[UIView commitAnimations];
 }
 
-- (void)animationDidStop:(NSString*)animationID finished:(BOOL)finished context:(void *)context 
+- (void) animationDidStop:(NSString *)animationID finished:(NSNumber *)finished context:(void *)context
 {
 	// Release
+    
+    debug_NSLog(@"released slider"); 
 	[self release];
 }
+ 
 
 /**************************************************************************
  *
@@ -411,6 +416,7 @@
 	[slider hideMsg];
 	[pool release]; 
 	debug_NSLog(@"sldier hide thread end"); 
+   
 	[NSThread exit];
 }
 

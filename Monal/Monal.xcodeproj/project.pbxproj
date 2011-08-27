@@ -99,7 +99,6 @@
 		26EC1DB2122978A100EAF934 /* AboutiPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26EC1DB1122978A100EAF934 /* AboutiPad.xib */; };
 		26EF9AB51320450300FA6FB2 /* Monal_crop_114.png in Resources */ = {isa = PBXBuildFile; fileRef = 26EF9AB41320450300FA6FB2 /* Monal_crop_114.png */; };
 		26F0D38D14093DC600A302B9 /* iqJingle.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F0D38C14093DC600A302B9 /* iqJingle.m */; };
-		26F0D39014097D3200A302B9 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26F0D38F14097D3200A302B9 /* AVFoundation.framework */; };
 		26F1AB351323CA590044FA18 /* GroupChat.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26F1AB341323CA590044FA18 /* GroupChat.xib */; };
 		26F1AB381323CC330044FA18 /* GroupChat.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F1AB371323CC330044FA18 /* GroupChat.m */; };
 		26F1AB3A1323D0280044FA18 /* joingroup.png in Resources */ = {isa = PBXBuildFile; fileRef = 26F1AB391323D0270044FA18 /* joingroup.png */; };
@@ -233,7 +232,6 @@
 		26EF9AB41320450300FA6FB2 /* Monal_crop_114.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Monal_crop_114.png; sourceTree = "<group>"; };
 		26F0D38B14093DC600A302B9 /* iqJingle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iqJingle.h; sourceTree = "<group>"; };
 		26F0D38C14093DC600A302B9 /* iqJingle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = iqJingle.m; sourceTree = "<group>"; };
-		26F0D38F14097D3200A302B9 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		26F1AB341323CA590044FA18 /* GroupChat.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = GroupChat.xib; sourceTree = "<group>"; };
 		26F1AB361323CC320044FA18 /* GroupChat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GroupChat.h; path = Classes/GroupChat.h; sourceTree = "<group>"; };
 		26F1AB371323CC330044FA18 /* GroupChat.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GroupChat.m; path = Classes/GroupChat.m; sourceTree = "<group>"; };
@@ -257,7 +255,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				26F0D39014097D3200A302B9 /* AVFoundation.framework in Frameworks */,
 				1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */,
 				1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */,
 				288765A50DF7441C002DB57D /* CoreGraphics.framework in Frameworks */,
@@ -615,7 +612,6 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				26F0D38F14097D3200A302B9 /* AVFoundation.framework */,
 				26F7BB441115F95000712672 /* SystemConfiguration.framework */,
 				2601D9D80FBF265A004DB939 /* AudioToolbox.framework */,
 				2601D9D30FBF262E004DB939 /* libsqlite3.dylib */,

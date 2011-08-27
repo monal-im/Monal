@@ -765,7 +765,6 @@ NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 		
 			
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showLoggedIn:) name: @"LoggedIn" object:nil];		
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showLoginFailed:) name: @"LoginFailed" object:nil];
 		
 		
 		
@@ -882,6 +881,9 @@ buddylistDS.tabcontroller=tabcontroller;
 	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 	/// check reachbility
 	debug_NSLog(@"checking reachability"); 
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showLoginFailed:) name: @"LoginFailed" object:nil];
+    
 	
     Reachability* wifireach = [[Reachability reachabilityForLocalWiFi] retain];	
     NetworkStatus reachable1 =[wifireach currentReachabilityStatus]; 

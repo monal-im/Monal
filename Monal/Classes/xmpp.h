@@ -15,7 +15,7 @@
 
 //stanza objects 
 #import "iqSearch.h"
-
+#import "iqJingle.h"
 
 #import <unistd.h>
 #import <sys/types.h>
@@ -113,6 +113,7 @@
     //stanza objects
     
     iqSearch* iqsearch; 
+    iqJingle* jingleCall; 
  
 
 }

@@ -29,6 +29,9 @@
 {
             [tabbarcontroller dismissModalViewControllerAnimated:YES];
 //dont connect 
+  //send login error signal  
+    [[NSNotificationCenter defaultCenter] 
+     postNotificationName: @"LoginFailed" object: self];
     
 }
 

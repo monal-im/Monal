@@ -9,10 +9,22 @@
 #import <Foundation/Foundation.h>
 
 @interface iqJingle : NSObject
+{
+    NSString* me; 
+    NSString* otherParty; 
+    NSString* thesid; 
+    
+
+}
+
+-(NSString*) ack:(NSString*) to; 
+-(NSString*) acceptJingle:(NSString*) to  :(NSString*) sid;
+-(NSString*) initiateJingle:(NSString*) to  :(NSString*) sid;
+-(NSString*) terminateJingle:(NSString*) to  :(NSString*) sid;
+
+-(id) init: (NSString*) ownid; 
 
 
--(id) init; 
--(NSString*) constructUserSearch:(NSString*) to :(NSString*) request;
 
 
 

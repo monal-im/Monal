@@ -34,8 +34,11 @@
 	
 	debug_NSLog(@"%@  %@", account, resource); 
 	
+    if(tempPass==nil) theTempPass=nil; else
+    {
     theTempPass=[NSString stringWithString:tempPass];
     [theTempPass retain];
+    }
     
 	accountNumber=accountNo;
 	SSL=SSLsetting;
@@ -51,7 +54,7 @@
     userSearchServer=@""; // blank for start
     
     iqsearch=[[[iqSearch alloc] init] retain]; 
-    
+    jingleCall=[[[iqJingle alloc] init:account] retain]; 
     
     messageUser=@"";
 	
@@ -739,6 +742,30 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
         [presenceUserFull retain];
         debug_NSLog(@"iq from full user : %@", presenceUserFull); 
         
+        
+        //iq set request
+        if( [[attributeDict objectForKey:@"type"] isEqualToString:@"set"])
+		{
+			if(presenceUser!=nil) [presenceUser release]; 
+			presenceUser=[[(NSString*)[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
+			[presenceUser retain];
+            debug_NSLog(@"iq set user: %@", presenceUser); 
+			
+			if(presenceUserid!=nil) [presenceUserid release]; 
+			//if they are requesting stuff.. they are online		
+			presenceUserid=[attributeDict objectForKey:@"id"];
+			[presenceUserid retain];
+			debug_NSLog(@"iq set id: %@", presenceUserid); 
+            
+            //send ack of message
+               [self talk:[jingleCall ack:presenceUser]]; 
+            
+            
+            if(State!=nil) [State release]; 
+            State=@"iqSet";
+            [State retain];
+        }
+        
 	
 		//iq get request
 	//	if(([[attributeDict objectForKey:@"get"] length]>0))
@@ -749,13 +776,13 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 			if(presenceUser!=nil) [presenceUser release]; 
 			presenceUser=[[(NSString*)[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
 			[presenceUser retain];
-				debug_NSLog(@"get user: %@", presenceUser); 
+				debug_NSLog(@"iq get user: %@", presenceUser); 
 			
 			if(presenceUserid!=nil) [presenceUserid release]; 
 			//if they are requesting stuff.. they are online		
 			presenceUserid=[attributeDict objectForKey:@"id"];
 			[presenceUserid retain];
-			debug_NSLog(@"get id: %@", presenceUserid); 
+			debug_NSLog(@"iq get id: %@", presenceUserid); 
             
             if(State!=nil) [State release]; 
             State=@"iqGet";
@@ -826,6 +853,49 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 	}
 	
 
+    //iqSet->jingle
+    if(([State isEqualToString:@"iqSet"]) && ([elementName isEqualToString: @"jingle"]))
+	{
+        debug_NSLog(@"got Jingle request"); 
+     
+        
+        if(	[[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:jingle:1"])
+        {
+            if(	[[attributeDict objectForKey:@"action"] isEqualToString:@"session-initiate"])
+            {
+                debug_NSLog(@"got Jingle session initiate"); 
+                
+                // see if existing session 
+                
+                // else ask if they want to accept call
+                
+                [self talk:[jingleCall acceptJingle: [attributeDict objectForKey:@"initiator"]
+                                                 :[attributeDict objectForKey:@"sid"] ]]; 
+            }
+            
+            if(	[[attributeDict objectForKey:@"action"] isEqualToString:@"session-accept"])
+            {
+                debug_NSLog(@"got Jingle session accept"); 
+            }
+            
+            if(	[[attributeDict objectForKey:@"action"] isEqualToString:@"session-terminate"])
+            {
+                debug_NSLog(@"got Jingle session terminate"); 
+            }
+            
+            
+        
+        }
+            
+		
+        
+        
+        
+        [State release]; 
+        State=nil; 
+        return;
+        
+    }
     
 
 
@@ -2980,7 +3050,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	
 	
 		NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
-	NSString*	xmpprequest=[NSString stringWithFormat: @"<iq  type='result'  to='%@' id='%@' ><query xmlns='http://jabber.org/protocol/disco#info'> <feature var='http://jabber.org/protocol/disco#items'/> <feature var='http://jabber.org/protocol/disco#info'/> <identity category='client' type='phone' name='monal'/><feature var='http://jabber.org/protocol/si/profile/file-transfer'/> <feature var='http://jabber.org/protocol/si'/> <feature var='jabber:iq:version'/> <feature var='http://jabber.org/protocol/muc#user'/></query></iq>"
+	NSString*	xmpprequest=[NSString stringWithFormat: @"<iq  type='result'  to='%@' id='%@' ><query xmlns='http://jabber.org/protocol/disco#info'> <feature var='http://jabber.org/protocol/disco#items'/> <feature var='http://jabber.org/protocol/disco#info'/> <identity category='client' type='phone' name='monal'/><feature var='http://jabber.org/protocol/si/profile/file-transfer'/> <feature var='http://jabber.org/protocol/si'/> <feature var='jabber:iq:version'/> <feature var='http://jabber.org/protocol/muc#user'/> <feature var='urn:xmpp:jingle:1'/> <feature var='urn:xmpp:jingle:apps:rtp:1'/> <feature var='urn:xmpp:jingle:apps:rtp:audio'/> </query></iq>"
 							 , to,userid,[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"]];
 	
     //<feature var='urn:xmpp:time'/>
@@ -3005,11 +3075,12 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	if(statusMessage!=nil) [statusMessage release]; 
 	statusMessage=[NSString stringWithString:status];
 	[statusMessage retain];
+ 
 	
 	if(away!=true)
-	xmpprequest=[NSString stringWithFormat: @"<presence> <status>%@</status>  <priority>%d</priority> <c  ext=\"moodn nickn tunen avatar \" xmlns=\"http://jabber.org/protocol/caps\"/> </presence>",status, XMPPPriority];
+	xmpprequest=[NSString stringWithFormat: @"<presence> <status>%@</status>   </presence>",status, XMPPPriority];
 	else
-	xmpprequest=[NSString stringWithFormat: @"<presence> <show>away</show> <status>%@</status> <c  ext=\"moodn nickn tunen avatar \" xmlns=\"http://jabber.org/protocol/caps\"/> </presence>",status];
+	xmpprequest=[NSString stringWithFormat: @"<presence> <show>away</show> <status>%@</status>  </presence>",status];
 	
 	
 
@@ -3053,16 +3124,21 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 
 -(NSInteger) setAvailable
 {
-	
+    /*
+     voice-v1: indicates the user is capable of sending and receiving voice media.
+     video-v1: indicates the user is capable of receiving video media.
+     camera-v1: indicates the user is capable of sending video media.
+     */
 	
 	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
 	NSString*	xmpprequest; 
 	
 	if((statusMessage==nil)
 		|| ([statusMessage isEqualToString:@""]))
-		xmpprequest=[NSString stringWithFormat: @"<presence> <priority>%d</priority>  </presence>",XMPPPriority];
+		xmpprequest=[NSString stringWithFormat: @"<presence> <priority>%d</priority> <c   xmlns=\"http://jabber.org/protocol/caps\"  node=\"http://monal.im\" ver=\"%@\"  ext=\"moodn nickn tunen avatar voice-v1\" />  </presence>",XMPPPriority, [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"]];
 	else
-		xmpprequest=[NSString stringWithFormat: @"<presence><priority>%d</priority>   <status>%@</status></presence>",XMPPPriority,  statusMessage];
+		xmpprequest=[NSString stringWithFormat: @"<presence><priority>%d</priority> <c  ext=\"moodn nickn tunen avatar voice-v1\" xmlns=\"http://jabber.org/protocol/caps\" ver=\"1.0\"  />   <status>%@</status></presence>",XMPPPriority,
+                     [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"],   statusMessage];
 	
 	
 	away=false; 
@@ -3821,7 +3897,9 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	[iStream release];
 	[oStream release];
 	
-	
+	[iqsearch release]; 
+    [jingleCall release];
+    
 	[server release]; 	
 	[accountNumber release];
 	

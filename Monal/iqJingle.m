@@ -9,14 +9,13 @@
 #import "iqJingle.h"
 
 @implementation iqJingle
-
+@synthesize me; 
 
 -(id) init: (NSString*) ownid
 {
     self = [super init];
    
-    me=[NSString stringWithString:ownid];
-    [me retain]; 
+   
     
     thesid=nil; 
     otherParty=nil; 
@@ -127,7 +126,7 @@
 
 -(void) dealloc
 {
-    [me release]; 
+   
     if(otherParty!=nil) [otherParty release]; 
     if(thesid!=nil) [thesid release];   
 }

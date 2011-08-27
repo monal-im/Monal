@@ -1407,6 +1407,7 @@ if([buddyFullName isEqualToString:@""])
 	
 	NSString* linktext; 
 	NSRange urlpos; 
+    NSRange urlpos2; 
 	bool hasHttp=true; 
     bool hasHttps=true; 
 	
@@ -1420,15 +1421,15 @@ if([buddyFullName isEqualToString:@""])
 	}
     
     //find http
-	urlpos=[body rangeOfString:@"https://" options:NSCaseInsensitiveSearch]; 
-	if(urlpos.location==NSNotFound)
+	urlpos2=[body rangeOfString:@"https://" options:NSCaseInsensitiveSearch]; 
+	if(urlpos2.location==NSNotFound)
 	{
 		hasHttps=false;
 		//find  www
         //urlpos=[body rangeOfString:@"www." options:NSCaseInsensitiveSearch]; 
 	}
 	
-	if(urlpos.location!=NSNotFound)
+	if((hasHttp==true) || (hasHttps==true))
 	{
 	// look for <a already there
 		NSRange ahrefPos=[body rangeOfString:@"<a" options:NSCaseInsensitiveSearch]; 
@@ -1436,7 +1437,12 @@ if([buddyFullName isEqualToString:@""])
 		{
 	
 	//get length
+            if(urlpos.location!=NSNotFound)
 			linkstart=urlpos.location; 
+            else
+                if(urlpos2.location!=NSNotFound)
+                    linkstart=urlpos2.location; 
+                
 	//find space after that
 			urlpos=[body rangeOfString:@" " options:NSCaseInsensitiveSearch range:NSMakeRange(linkstart, [body length]-linkstart)];
 	if(urlpos.location==NSNotFound)

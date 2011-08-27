@@ -54,7 +54,7 @@
     userSearchServer=@""; // blank for start
     
     iqsearch=[[[iqSearch alloc] init] retain]; 
-    jingleCall=[[[iqJingle alloc] init:account] retain]; 
+    jingleCall=[[[iqJingle alloc] init] retain]; 
     
     messageUser=@"";
 	
@@ -757,6 +757,9 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 			[presenceUserid retain];
 			debug_NSLog(@"iq set id: %@", presenceUserid); 
             
+            //set jingle call jid var 
+            jingleCall.me =responseUser; 
+            
             //send ack of message
                [self talk:[jingleCall ack:presenceUser]]; 
             
@@ -854,13 +857,17 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 	
 
     //iqSet->jingle
-    if(([State isEqualToString:@"iqSet"]) && ([elementName isEqualToString: @"jingle"]))
+    if(([State isEqualToString:@"iqSet"]) 
+       && (([elementName isEqualToString: @"jingle"]) ||
+           ([elementName isEqualToString: @"jin:jingle"])
+       )
+       )
 	{
         debug_NSLog(@"got Jingle request"); 
      
         
-        if(	[[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:jingle:1"])
-        {
+       // if(	[[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:jingle:1"])
+      //  {
             if(	[[attributeDict objectForKey:@"action"] isEqualToString:@"session-initiate"])
             {
                 debug_NSLog(@"got Jingle session initiate"); 
@@ -885,7 +892,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
             
             
         
-        }
+      //  }
             
 		
         

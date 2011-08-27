@@ -22,10 +22,11 @@
 -(NSString*) initiateJingle:(NSString*) to  :(NSString*) sid;
 -(NSString*) terminateJingle:(NSString*) to  :(NSString*) sid;
 
--(id) init: (NSString*) ownid; 
+-(id) init; 
 
 
 
+@property (nonatomic, retain) NSString* me; 
 
 
 @end

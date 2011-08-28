@@ -44,6 +44,16 @@
 	return YES;
 }
 
+-(IBAction) callPress
+{      
+    callScreen* call = [callScreen alloc] ;
+    [call init:navigationController];
+    [call show];
+  //  [navigationController popViewControllerAnimated:false];
+  //  [navigationController pushViewController:call animated:false];
+    
+}
+
 
 #pragma mark tableview stuff
 

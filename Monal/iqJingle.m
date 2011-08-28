@@ -46,7 +46,7 @@
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     
     NSMutableString* query=[[NSMutableString alloc] init];
-    [query appendFormat:@"<iq      to='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-accept'  responder='%@' sid='%@'> <content creator='initiator' name='this-is-a-stub'> <description xmlns='urn:xmpp:jingle:apps:stub:0'/> <transport xmlns='urn:xmpp:jingle:transports:stub:0'/> </content> </jingle> </iq>", to, me,  sid]; 
+    [query appendFormat:@"<iq      to='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-accept'  responder='%@' sid='%@'> <content creator='initiator' name='audio'> <description xmlns='urn:xmpp:jingle:apps:rtp:1'/> <transport xmlns:p=\"http://www.google.com/transport/p2p\"/> </content> </jingle> </iq>", to, me,  sid]; 
     
     
     otherParty=[NSString stringWithString:to]; 

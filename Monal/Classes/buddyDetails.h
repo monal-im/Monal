@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "xmpp.h"
+#import "callScreen.h"
 
 
 
@@ -41,7 +42,9 @@
 	
 	IBOutlet UITableViewCell* topcell; 
 	IBOutlet UITableViewCell* bottomcell; 
- 
+
+    
+    IBOutlet UIButton* callButton; 
     
 }
 
@@ -52,6 +55,7 @@
 -(void) show:(NSString*) buddy:(NSString*) status:(NSString*) message:(NSString*) fullname:(NSString*) domain : (UITableView*) table: (CGRect) cellRect;
 -(UIImage*) setIcon:(NSString*) msguser;
 
+-(IBAction) callPress;
 
 
 @property (nonatomic, retain) NSString* iconPath; 

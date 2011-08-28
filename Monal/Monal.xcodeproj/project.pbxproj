@@ -30,6 +30,7 @@
 		261256881129185800161B30 /* XMPPEdit.m in Sources */ = {isa = PBXBuildFile; fileRef = 261256871129185800161B30 /* XMPPEdit.m */; };
 		2612568B1129187A00161B30 /* AIMEdit.m in Sources */ = {isa = PBXBuildFile; fileRef = 261256891129187A00161B30 /* AIMEdit.m */; };
 		2614ED41121BD3160034556C /* MyTabController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2614ED40121BD3160034556C /* MyTabController.m */; };
+		261AB9351409BFB8006F5155 /* callScreen.m in Sources */ = {isa = PBXBuildFile; fileRef = 261AB9341409BFB8006F5155 /* callScreen.m */; };
 		261ED6C41240257F00C14F6A /* BuddyAdd.xib in Resources */ = {isa = PBXBuildFile; fileRef = 261ED6C31240257F00C14F6A /* BuddyAdd.xib */; };
 		261FD43A122349F2003DDC3A /* activechats.m in Sources */ = {isa = PBXBuildFile; fileRef = 261FD439122349F2003DDC3A /* activechats.m */; };
 		261FD56F1223527C003DDC3A /* active.png in Resources */ = {isa = PBXBuildFile; fileRef = 261FD56E1223527C003DDC3A /* active.png */; };
@@ -49,6 +50,7 @@
 		265F1B2B123040540065C5FE /* web.xib in Resources */ = {isa = PBXBuildFile; fileRef = 265F1B2A123040540065C5FE /* web.xib */; };
 		265F1B83123044CE0065C5FE /* web.png in Resources */ = {isa = PBXBuildFile; fileRef = 265F1B82123044CE0065C5FE /* web.png */; };
 		265F1C1B12306D600065C5FE /* Scroller.m in Sources */ = {isa = PBXBuildFile; fileRef = 265F1C1A12306D600065C5FE /* Scroller.m */; };
+		265FB90C1409B0BF00696BDB /* green_button.png in Resources */ = {isa = PBXBuildFile; fileRef = 265FB90A1409B0BF00696BDB /* green_button.png */; };
 		266109FA122919C000591435 /* AboutVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 266109F9122919C000591435 /* AboutVC.m */; };
 		26610A7012292F3900591435 /* Loglist.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26610A6F12292F3900591435 /* Loglist.xib */; };
 		26610B0D12293FA600591435 /* ActiveChats.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26610B0C12293FA600591435 /* ActiveChats.xib */; };
@@ -82,6 +84,7 @@
 		26D1847310F9972400340C52 /* XMPPEdit.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26D1847210F9972400340C52 /* XMPPEdit.xib */; };
 		26D5ADDD1229B8FE006C9639 /* chatviewiPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26D5ADDC1229B8FE006C9639 /* chatviewiPad.xib */; };
 		26D5AE651229D135006C9639 /* chatsicon.png in Resources */ = {isa = PBXBuildFile; fileRef = 26D5AE641229D135006C9639 /* chatsicon.png */; };
+		26D92C9E1409B5410014E1EA /* callScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26D92C9D1409B5410014E1EA /* callScreen.xib */; };
 		26DC0A8B1339259900E60BFD /* SearchUser.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26DC0A8A1339259900E60BFD /* SearchUser.xib */; };
 		26DC0A8F133928DA00E60BFD /* about.png in Resources */ = {isa = PBXBuildFile; fileRef = 26DC0A8E133928DA00E60BFD /* about.png */; };
 		26DC0A9213392A4F00E60BFD /* userSearch.m in Sources */ = {isa = PBXBuildFile; fileRef = 26DC0A9113392A4F00E60BFD /* userSearch.m */; };
@@ -145,6 +148,9 @@
 		2612568A1129187A00161B30 /* AIMEdit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AIMEdit.h; path = Classes/AIMEdit.h; sourceTree = "<group>"; };
 		2614ED3F121BD3160034556C /* MyTabController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyTabController.h; sourceTree = "<group>"; };
 		2614ED40121BD3160034556C /* MyTabController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MyTabController.m; sourceTree = "<group>"; };
+		261AB9331409BFB8006F5155 /* callScreen.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = callScreen.h; sourceTree = "<group>"; };
+		261AB9341409BFB8006F5155 /* callScreen.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = callScreen.m; sourceTree = "<group>"; };
+		261AB9371409C2B8006F5155 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		261ED6C31240257F00C14F6A /* BuddyAdd.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = BuddyAdd.xib; sourceTree = "<group>"; };
 		261FD438122349F2003DDC3A /* activechats.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = activechats.h; sourceTree = "<group>"; };
 		261FD439122349F2003DDC3A /* activechats.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = activechats.m; sourceTree = "<group>"; };
@@ -171,6 +177,7 @@
 		265F1B82123044CE0065C5FE /* web.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = web.png; sourceTree = "<group>"; };
 		265F1C1912306D600065C5FE /* Scroller.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Scroller.h; path = ../Scroller.h; sourceTree = "<group>"; };
 		265F1C1A12306D600065C5FE /* Scroller.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Scroller.m; path = ../Scroller.m; sourceTree = "<group>"; };
+		265FB90A1409B0BF00696BDB /* green_button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = green_button.png; path = "../../../../Library/Application Support/iPhone Simulator/5.0/Applications/751D274A-6A0E-4F82-8E55-2CD09A55F18A/Documents/green_button.png"; sourceTree = "<group>"; };
 		266109F8122919C000591435 /* AboutVC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AboutVC.h; sourceTree = "<group>"; };
 		266109F9122919C000591435 /* AboutVC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AboutVC.m; sourceTree = "<group>"; };
 		26610A6F12292F3900591435 /* Loglist.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = Loglist.xib; sourceTree = "<group>"; };
@@ -209,6 +216,7 @@
 		26D1847210F9972400340C52 /* XMPPEdit.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = XMPPEdit.xib; sourceTree = "<group>"; };
 		26D5ADDC1229B8FE006C9639 /* chatviewiPad.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = chatviewiPad.xib; sourceTree = "<group>"; };
 		26D5AE641229D135006C9639 /* chatsicon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = chatsicon.png; sourceTree = "<group>"; };
+		26D92C9D1409B5410014E1EA /* callScreen.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = callScreen.xib; sourceTree = "<group>"; };
 		26DC0A8A1339259900E60BFD /* SearchUser.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SearchUser.xib; sourceTree = "<group>"; };
 		26DC0A8E133928DA00E60BFD /* about.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = about.png; sourceTree = "<group>"; };
 		26DC0A9013392A4E00E60BFD /* userSearch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = userSearch.h; path = Classes/userSearch.h; sourceTree = "<group>"; };
@@ -367,6 +375,8 @@
 				2628E50414049BAC0064131E /* askTempPass.m */,
 				26C0382412403DC00010A285 /* buddyAdd.h */,
 				26C0382512403DC00010A285 /* buddyAdd.m */,
+				261AB9331409BFB8006F5155 /* callScreen.h */,
+				261AB9341409BFB8006F5155 /* callScreen.m */,
 			);
 			name = ModalViews;
 			sourceTree = "<group>";
@@ -397,6 +407,7 @@
 		266286A71342C03400EAFC92 /* Buttons */ = {
 			isa = PBXGroup;
 			children = (
+				265FB90A1409B0BF00696BDB /* green_button.png */,
 				266286AC1342C05D00EAFC92 /* red_button_gloss.png */,
 				266286AD1342C05D00EAFC92 /* red_button.png */,
 				266286A81342C04C00EAFC92 /* black_button.png */,
@@ -605,6 +616,7 @@
 				26610A6F12292F3900591435 /* Loglist.xib */,
 				26610B0C12293FA600591435 /* ActiveChats.xib */,
 				265F1B2A123040540065C5FE /* web.xib */,
+				26D92C9D1409B5410014E1EA /* callScreen.xib */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -612,6 +624,7 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				261AB9371409C2B8006F5155 /* QuartzCore.framework */,
 				26F7BB441115F95000712672 /* SystemConfiguration.framework */,
 				2601D9D80FBF265A004DB939 /* AudioToolbox.framework */,
 				2601D9D30FBF262E004DB939 /* libsqlite3.dylib */,
@@ -739,6 +752,8 @@
 				266286AE1342C05D00EAFC92 /* red_button_gloss.png in Resources */,
 				266286AF1342C05D00EAFC92 /* red_button.png in Resources */,
 				2628E50714049DB50064131E /* askTempPass.xib in Resources */,
+				265FB90C1409B0BF00696BDB /* green_button.png in Resources */,
+				26D92C9E1409B5410014E1EA /* callScreen.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -780,6 +795,7 @@
 				26731E77133F3F17008098EB /* iqSearch.m in Sources */,
 				2628E50514049BAC0064131E /* askTempPass.m in Sources */,
 				26F0D38D14093DC600A302B9 /* iqJingle.m in Sources */,
+				261AB9351409BFB8006F5155 /* callScreen.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

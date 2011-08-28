@@ -875,16 +875,12 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
                 
                 //send ack of message
                 [self talk:[jingleCall ack:presenceUserFull:presenceUserid]]; 
+                //just start the call 
+                [self talk:[jingleCall acceptJingle: [attributeDict objectForKey:@"initiator"]
+                                                   :[attributeDict objectForKey:@"sid"] ]];
             }
         
-        /*
-         // see if existing session 
-         
-         // else ask if user is want to accept call
-         
-         [self talk:[jingleCall acceptJingle: [attributeDict objectForKey:@"initiator"]
-         :[attributeDict objectForKey:@"sid"] ]]; 
-        */
+     
             
             if(	[[attributeDict objectForKey:@"action"] isEqualToString:@"session-accept"])
             {

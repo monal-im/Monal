@@ -49,8 +49,18 @@
     callScreen* call = [callScreen alloc] ;
     [call init:navigationController];
     [call show];
-  //  [navigationController popViewControllerAnimated:false];
-  //  [navigationController pushViewController:call animated:false];
+  
+    NSString* machine=[tools machine]; 
+   
+    if([machine hasPrefix:@"iPad"] )
+       {
+       //nothign rightn ow
+       }
+       else
+       {
+           [navigationController popViewControllerAnimated:false];
+       }
+  
     
 }
 
@@ -237,6 +247,12 @@ NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 }
 
 -(void) viewDidLoad
+{
+	debug_NSLog(@"buddy details did  load");
+	//[scroll setContentSize:CGSizeMake(320, 509)];
+}
+
+-(void) viewDidAppear:(BOOL)animated
 {
 	debug_NSLog(@"buddy details did  appear");
 	//[scroll setContentSize:CGSizeMake(320, 509)];

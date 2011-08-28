@@ -949,12 +949,13 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
         if(	[[attributeDict objectForKey:@"type"] isEqualToString:@"stun"])
         {
             debug_NSLog(@"got Jingle stun candidate.. sending accept"); 
-            [jingleCall acceptJingle:presenceUserFull 
+            [self talk: [jingleCall acceptJingle:presenceUserFull 
                                     :[attributeDict objectForKey:@"address"]
                                     :[attributeDict objectForKey:@"port"]
                                     :[attributeDict objectForKey:@"username"]
                                     :[attributeDict objectForKey:@"password"]
-             ];
+              :[attributeDict objectForKey:@"preference"]
+             ]];
             
         }
         
@@ -1829,6 +1830,12 @@ debug_NSLog(@"ended this element: %@", elementName);
 		[self setAvailable]; 
 		loggedin=true; 
 		
+        NSRange pos=[server rangeOfString:@"google"]; 
+		// for google connections 
+        if(pos.location!=NSNotFound)
+        {
+            [self talk:[jingleCall getGoogleInfo]];
+        }
 
         
         
@@ -3212,9 +3219,9 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	
 	if((statusMessage==nil)
 		|| ([statusMessage isEqualToString:@""]))
-		xmpprequest=[NSString stringWithFormat: @"<presence> <priority>%d</priority> <c   xmlns=\"http://jabber.org/protocol/caps\"  node=\"http://monal.im\" ver=\"%@\"  ext=\"moodn nickn tunen avatar voice-v1\" />  </presence>",XMPPPriority, [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"]];
+		xmpprequest=[NSString stringWithFormat: @"<presence> <priority>%d</priority> <c   xmlns=\"http://jabber.org/protocol/caps\"  node=\"http://monal.im\" ver=\"%@\"  ext='avatar voice-v1' />  </presence>",XMPPPriority, [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"]];
 	else
-		xmpprequest=[NSString stringWithFormat: @"<presence><priority>%d</priority> <c  ext=\"moodn nickn tunen avatar voice-v1\" xmlns=\"http://jabber.org/protocol/caps\" ver=\"1.0\"  />   <status>%@</status></presence>",XMPPPriority,
+		xmpprequest=[NSString stringWithFormat: @"<presence><priority>%d</priority> <c  ext='avatar voice-v1' xmlns=\"http://jabber.org/protocol/caps\" ver=\"1.0\"  />   <status>%@</status></presence>",XMPPPriority,
                      [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"],   statusMessage];
 	
 	

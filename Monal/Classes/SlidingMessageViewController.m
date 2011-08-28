@@ -103,18 +103,19 @@
  
 	// To autorelease the Msg, define stop selector
 	[UIView setAnimationDelegate:self];
-    NSString* name=@"slider";
-	[UIView setAnimationDidStopSelector:@selector(animationDidStop:name:finished:context:)];
+   
+	[UIView setAnimationDidStopSelector:@selector(releaser)]; 
 	
 	[UIView commitAnimations];
 }
 
-- (void) animationDidStop:(NSString *)animationID finished:(NSNumber *)finished context:(void *)context
+-(void) releaser
 {
 	// Release
-    
+    [self release]; 
+        
     debug_NSLog(@"released slider"); 
-	[self release];
+	
 }
  
 
@@ -417,6 +418,7 @@
 	[pool release]; 
 	debug_NSLog(@"sldier hide thread end"); 
    
+    [self release];
 	[NSThread exit];
 }
 
@@ -536,7 +538,7 @@
 	[titleLabel release];
 	[msgLabel release];
 	[icon release];
-	[super dealloc];
+	/*[super dealloc]; */
 }
 
 @end

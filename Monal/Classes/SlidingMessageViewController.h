@@ -28,7 +28,7 @@
 	float rotate;
 }
 
-
+-(void) releaser; 
 -(id) correctSlider:(NSString *)title :(NSString *)msg:(NSString*)userfilename;
 -(id) commonInit:(NSString *)title :(NSString *)msg:(NSString*)userfilename;
 - (id)initWithTitle:(NSString *)title message:(NSString *)msg:(NSString*)userfilename;

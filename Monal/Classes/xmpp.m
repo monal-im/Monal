@@ -757,8 +757,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 			[presenceUserid retain];
 			debug_NSLog(@"iq set id: %@", presenceUserid); 
             
-            //set jingle call my own  jid var 
-            jingleCall.me =responseUser; 
+          
             
           
             
@@ -876,8 +875,8 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
                 //send ack of message
                 [self talk:[jingleCall ack:presenceUserFull:presenceUserid]]; 
                 //just start the call 
-                [self talk:[jingleCall acceptJingle: [attributeDict objectForKey:@"initiator"]
-                                                   :[attributeDict objectForKey:@"sid"] ]];
+               /* [self talk:[jingleCall acceptJingle: [attributeDict objectForKey:@"initiator"]
+                                                   :[attributeDict objectForKey:@"sid"] ]];*/
             }
         
      
@@ -1765,14 +1764,24 @@ debug_NSLog(@"ended this element: %@", elementName);
 		[messageBuffer release];
 		messageBuffer =nil;
 		
+        //set jingle call my own  jid var 
+        jingleCall.me =responseUser; 
+        
 		[self setAvailable]; 
 		loggedin=true; 
 		
+
+        
+        
 		
 		// this has to come after set available becasue the post login functions in appdelegate set default status and messages
 		[[NSNotificationCenter defaultCenter] 
 		 postNotificationName: @"LoggedIn" object: self];
 		
+         //send jingle call --testing
+        //[self talk:  [jingleCall initiateJingle:@"monaltest@gmail.com"]];
+      
+        
 		// send command to download the roster
 		[self getBuddies];
 

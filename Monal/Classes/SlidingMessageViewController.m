@@ -112,9 +112,11 @@
 -(void) releaser
 {
 	// Release
-    [self release]; 
-        
-    debug_NSLog(@"released slider"); 
+    //[self release]; 
+    if ([self.view superview])
+		[self.view removeFromSuperview];
+    
+    debug_NSLog(@"removed  slider"); 
 	
 }
  
@@ -418,7 +420,7 @@
 	[pool release]; 
 	debug_NSLog(@"sldier hide thread end"); 
    
-    [self release];
+    
 	[NSThread exit];
 }
 
@@ -533,12 +535,11 @@
  *------------------------------------------------------------*/
 - (void)dealloc 
 {
-	if ([self.view superview])
-		[self.view removeFromSuperview];
+
 	[titleLabel release];
 	[msgLabel release];
 	[icon release];
-	/*[super dealloc]; */
+	[super dealloc]; 
 }
 
 @end

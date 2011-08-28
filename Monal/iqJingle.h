@@ -17,7 +17,7 @@
 
 }
 
--(NSString*) ack:(NSString*) to; 
+-(NSString*) ack:(NSString*) to:(NSString*) theid;
 -(NSString*) acceptJingle:(NSString*) to  :(NSString*) sid;
 -(NSString*) initiateJingle:(NSString*) to ;
 -(NSString*) terminateJingle:(NSString*) to  :(NSString*) sid;

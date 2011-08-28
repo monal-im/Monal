@@ -32,6 +32,7 @@
 	
 
 	buddyIcon=nil; 
+    protocolImage=nil; 
 	
 	self.title=@"Contact Details"; 
 	//fullName.font=[UIFont boldSystemFontOfSize:16];
@@ -50,9 +51,9 @@
     [call init:navigationController];
     [call show];
   
-    NSString* machine=[tools machine]; 
+     /* NSString* machine=[tools machine]; 
    
-    if([machine hasPrefix:@"iPad"] )
+  if([machine hasPrefix:@"iPad"] )
        {
        //nothign rightn ow
        }
@@ -60,7 +61,7 @@
        {
            [navigationController popViewControllerAnimated:false];
        }
-  
+  */
     
 }
 
@@ -177,6 +178,12 @@
 
 NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     
+    if(buddyIcon!=nil)
+        [buddyIcon release]; 
+    
+    if(protocolImage!=nil)
+    [protocolImage release]; 
+    
     // for ipad lanscape use popout
     
     NSString* machine=[tools machine]; 
@@ -211,6 +218,7 @@ NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	}
 	
 	buddyIcon=[self setIcon: buddy];
+    
 	buddyIconView.image= buddyIcon;
 	fullName.text=fullname;
 	buddyName.text=buddy;
@@ -242,7 +250,11 @@ NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 		protocolImage.image=[UIImage imageNamed:@"XMPP.png"];
 	}
 	//we want to put other protcols here later
-	
+    
+    
+	[buddyIcon retain]; 
+    [protocolImage retain]; 
+    
 	[pool release];
 }
 
@@ -262,7 +274,7 @@ NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 {
 	debug_NSLog(@"buddy details did  disappear");
 	
-	[buddyIcon release];
+   
 	
 	
 }

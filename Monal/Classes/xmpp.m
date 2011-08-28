@@ -879,7 +879,12 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
                                                    :[attributeDict objectForKey:@"sid"] ]];*/
             }
         
-     
+        if(	[[attributeDict objectForKey:@"action"] isEqualToString:@"transport-info"])
+        {
+         // set Sid
+           // [attributeDict objectForKey:@"sid"]
+        }
+        
             
             if(	[[attributeDict objectForKey:@"action"] isEqualToString:@"session-accept"])
             {

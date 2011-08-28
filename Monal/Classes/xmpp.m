@@ -853,6 +853,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 		return;
 	}
 	
+    
 
     //iqSet->jingle
     if(([State isEqualToString:@"iqSet"]) 
@@ -939,7 +940,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
     if(([State isEqualToString:@"jingleTransport"]) 
        && (([elementName isEqualToString: @"candidate"]) ||
            ([elementName isEqualToString: @"p:candidate"])
-           )
+                      )
        )
 	{
         debug_NSLog(@"got Jingle transport candidate"); 
@@ -954,8 +955,8 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
                                     :[attributeDict objectForKey:@"port"]
                                     :[attributeDict objectForKey:@"username"]
                                     :[attributeDict objectForKey:@"password"]
-              :[attributeDict objectForKey:@"preference"]
-             ]];
+             
+                                                :presenceUserid             ]];
             
         }
         

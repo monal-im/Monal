@@ -50,14 +50,19 @@ return  @"<iq type='get'  > <query xmlns='google:jingleinfo'/> </iq>";
 }
 
 
--(NSString*) acceptJingle:(NSString*) to:(NSString*) address: (NSString*) port: (NSString*) username: (NSString*) pass: (NSString*) pref
+-(NSString*) acceptJingle:(NSString*) to:(NSString*) address: (NSString*) port: (NSString*) username: (NSString*) pass:  (NSString*)idval
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     
    
     
     NSMutableString* query=[[NSMutableString alloc] init];
-    [query appendFormat:@"<iq      to='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-accept'  responder='%@' sid='%@'> <content creator='initiator' name='voice'><description xmlns:rtp=\"urn:xmpp:jingle:apps:rtp:1\" media=\"audio\"> <rtp:payload-type id=\"8\" name=\"PCMA\" clockrate=\"8000\"><rtp:parameter name=\"bitrate\" value=\"64000\"/> </description> <transport xmlns='urn:xmpp:jingle:transports:ice-udp:1'> <candidate address=\"%@\" port=\"%@\" name=\"rtp\"  preference=\"%@\" protocol=\"udp\" generation=\"0\" network=\"en1\" type=\"stun\"/></transport> </content> </jingle> </iq>", to, me,  thesid, address, port, pref]; 
+   /* [query appendFormat:@"<iq      to='%@'  id='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-accept'  responder='%@' sid='%@'> <content creator='initiator' name='voice'><description xmlns=\"urn:xmpp:jingle:apps:rtp:1\" media=\"audio\"> <payload-type id=\"8\" name=\"PCMA\" clockrate=\"8000\"><parameter name=\"bitrate\" value=\"64000\"/> </description> <transport xmlns='urn:xmpp:jingle:transports:ice-udp:1'> <candidate address=\"%@\" port=\"%@\" name=\"rtp\"   protocol=\"udp\" generation=\"0\" network=\"en1\" type=\"stun\"/></transport> </content> </jingle> </iq>", to, idval,  me,  thesid, address, port]; 
+    */
+   
+    
+    [query appendFormat:  @" <iq type='set' to='%@' id='%@' from='%@'><ses:session type='accept' id='%@' initiator='%@' xmlns:ses='http://www.google.com/session'><pho:description xmlns:pho='http://www.google.com/session/phone'><pho:payload-type id='8' name='PCMA' clockrate='8000'/><pho:payload-type id='99' name='telephone-event' clockrate='8000'/></pho:description></ses:session></iq>", to, idval, me,thesid,to]; 
+    
     
     theaddress=[NSString stringWithString:address]; 
     theport=[NSString stringWithString:port]; 

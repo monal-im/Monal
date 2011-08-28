@@ -861,23 +861,32 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
        )
        )
 	{
-        debug_NSLog(@"got Jingle request"); 
-     
+        debug_NSLog(@"got Jingle message, sent ack"); 
+        //send ack of message
+        [self talk:[jingleCall ack:presenceUserFull:presenceUserid]]; 
         
        // if(	[[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:jingle:1"])
       //  {
             if(	[[attributeDict objectForKey:@"action"] isEqualToString:@"session-initiate"])
             {
-                debug_NSLog(@"got Jingle session initiate sending ack"); 
+                debug_NSLog(@"got Jingle session initiate "); 
                 
+                jingleCall.thesid= [attributeDict objectForKey:@"sid"] ;
                
                 
-                //send ack of message
-                [self talk:[jingleCall ack:presenceUserFull:presenceUserid]]; 
-                //just start the call 
-               /* [self talk:[jingleCall acceptJingle: [attributeDict objectForKey:@"initiator"]
-                                                   :[attributeDict objectForKey:@"sid"] ]];*/
+                
+                
             }
+        
+        if(	[[attributeDict objectForKey:@"action"] isEqualToString:@"transport-info"])
+        {
+            debug_NSLog(@"got Jingle transport info.  reading candidates ");
+         
+              
+        }
+        
+        
+
         
         if(	[[attributeDict objectForKey:@"action"] isEqualToString:@"transport-info"])
         {
@@ -899,16 +908,61 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
             
         
       //  }
-            
-		
+      
+        if(State!=nil) [State release]; 
+        State=@"jingleAction";
+        [State retain];
         
-        
-        
-        [State release]; 
-        State=nil; 
-        return;
+        return; 
         
     }
+
+    //iqSet->jingle->transport
+    if(([State isEqualToString:@"jingleAction"]) 
+       && (([elementName isEqualToString: @"transport"]) ||
+           ([elementName isEqualToString: @"p:transport"])
+           )
+       )
+	{
+        debug_NSLog(@"got Jingle transport list"); 
+        
+        if(State!=nil) [State release]; 
+        State=@"jingleTransport";
+        [State retain];
+        
+        return; 
+        
+    }
+    
+    
+    //iqSet->jingle->transport->candidate
+    if(([State isEqualToString:@"jingleTransport"]) 
+       && (([elementName isEqualToString: @"candidate"]) ||
+           ([elementName isEqualToString: @"p:candidate"])
+           )
+       )
+	{
+        debug_NSLog(@"got Jingle transport candidate"); 
+        
+       /* if(State!=nil) [State release]; 
+        State=nil;*/
+        if(	[[attributeDict objectForKey:@"type"] isEqualToString:@"stun"])
+        {
+            debug_NSLog(@"got Jingle stun candidate.. sending accept"); 
+            [jingleCall acceptJingle:presenceUserFull 
+                                    :[attributeDict objectForKey:@"address"]
+                                    :[attributeDict objectForKey:@"port"]
+                                    :[attributeDict objectForKey:@"username"]
+                                    :[attributeDict objectForKey:@"password"]
+             ];
+            
+        }
+        
+        
+        return; 
+        
+    }
+    
     
 
 

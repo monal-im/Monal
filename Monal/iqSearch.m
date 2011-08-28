@@ -46,6 +46,7 @@
 -(void) dealloc
 {
     [userFields release];
+      [super dealloc];
     
 }
 @end

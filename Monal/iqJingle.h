@@ -13,12 +13,16 @@
     NSString* me; 
     NSString* otherParty; 
     NSString* thesid; 
+    NSString* theaddress; 
+    NSString* theport; 
+    NSString* theusername;
+    NSString* thepass; 
     
 
 }
 
--(NSString*) ack:(NSString*) to:(NSString*) theid;
--(NSString*) acceptJingle:(NSString*) to  :(NSString*) sid;
+-(NSString*) ack:(NSString*) to:(NSString*) iqid;
+-(NSString*) acceptJingle:(NSString*) to:(NSString*) address: (NSString*) port: (NSString*) username: (NSString*) pass;
 -(NSString*) initiateJingle:(NSString*) to ;
 -(NSString*) terminateJingle:(NSString*) to  :(NSString*) sid;
 
@@ -27,6 +31,6 @@
 
 
 @property (nonatomic, retain) NSString* me; 
-
+@property (nonatomic, retain) NSString* thesid; 
 
 @end

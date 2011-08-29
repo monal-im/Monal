@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 //RTP library (jrtlb obj-c wrapper)
-#import "RTP.h"
+#import "RTP.hh"
 
 
 @interface iqJingle : NSObject

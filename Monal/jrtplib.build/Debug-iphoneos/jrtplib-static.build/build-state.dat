@@ -1,0 +1,1848 @@
+Tjrtplib-static
+v4
+r1
+cCheck dependencies
+cPhaseScriptExecution "CMake ReRun" /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Script-2E883DF02E883DF02E883DF0.sh
+cCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcpapppacket.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpapppacket.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+cCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcpbyepacket.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpbyepacket.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+cCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcpcompoundpacket.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpcompoundpacket.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+cCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcpcompoundpacketbuilder.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpcompoundpacketbuilder.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+cCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcppacket.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcppacket.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+cCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcppacketbuilder.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcppacketbuilder.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+cCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcprrpacket.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcprrpacket.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+cCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcpscheduler.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpscheduler.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+cCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcpsdesinfo.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpsdesinfo.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+cCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcpsdespacket.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpsdespacket.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+cCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcpsrpacket.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpsrpacket.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+cCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpcollisionlist.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpcollisionlist.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+cCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpdebug.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpdebug.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+cCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtperrors.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtperrors.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+cCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpinternalsourcedata.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpinternalsourcedata.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+cCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpipv4address.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpipv4address.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+cCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpipv6address.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpipv6address.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+cCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtplibraryversion.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtplibraryversion.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+cCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtppacket.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtppacket.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+cCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtppacketbuilder.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtppacketbuilder.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+cCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtppollthread.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtppollthread.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+cCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtprandom.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtprandom.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+cCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtprandomrand48.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtprandomrand48.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+cCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtprandomrands.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtprandomrands.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+cCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtprandomurandom.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtprandomurandom.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+cCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpsession.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsession.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+cCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpsessionparams.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsessionparams.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+cCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpsessionsources.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsessionsources.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+cCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpsourcedata.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsourcedata.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+cCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpsources.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsources.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+cCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtptimeutilities.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtptimeutilities.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+cCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpudpv4transmitter.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpudpv4transmitter.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+cCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpudpv6transmitter.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpudpv6transmitter.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+cCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpbyteaddress.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpbyteaddress.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+cCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpexternaltransmitter.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpexternaltransmitter.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+cCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpfaketransmitter.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/extratransmitters/rtpfaketransmitter.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+cLibtool /Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug/libjrtp.a normal armv7
+cPhaseScriptExecution "CMake PostBuild Rules" /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Script-2E8844A02E8844A02E8844A0.sh
+
+N/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk
+c000000004E500D580000000000000110
+t1313869144
+s272
+
+N/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk/usr/include/arpa/inet.h
+c000000004E487B610000000000001533
+t1313373025
+s5427
+
+N/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk/usr/include/ifaddrs.h
+c000000004E487B6100000000000008F5
+t1313373025
+s2293
+
+N/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk/usr/include/math.h
+c000000004E487B0E00000000000004F1
+t1313372942
+s1265
+
+N/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk/usr/include/net/if.h
+c000000004E487E2E0000000000003DE8
+t1313373742
+s15848
+
+N/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk/usr/include/netdb.h
+c000000004E487B61000000000000307F
+t1313373025
+s12415
+
+N/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk/usr/include/netinet/in.h
+c000000004E487E2E0000000000006BC9
+t1313373742
+s27593
+
+N/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk/usr/include/stdint.h
+c000000004E487B2D00000000000018EF
+t1313372973
+s6383
+
+N/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk/usr/include/stdio.h
+c000000004E487B2F0000000000004763
+t1313372975
+s18275
+
+N/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk/usr/include/stdlib.h
+c000000004E487B2F00000000000030A7
+t1313372975
+s12455
+
+N/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk/usr/include/string.h
+c000000004E487B2F0000000000001A3A
+t1313372975
+s6714
+
+N/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk/usr/include/sys/filio.h
+c000000004E487E340000000000001073
+t1313373748
+s4211
+
+N/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk/usr/include/sys/ioctl.h
+c000000004E487E34000000000000116C
+t1313373748
+s4460
+
+N/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk/usr/include/sys/socket.h
+c000000004E487E380000000000005B28
+t1313373752
+s23336
+
+N/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk/usr/include/sys/sockio.h
+c000000004E487E3900000000000022F1
+t1313373753
+s8945
+
+N/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk/usr/include/sys/time.h
+c000000004E487E390000000000001E64
+t1313373753
+s7780
+
+N/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk/usr/include/sys/timeb.h
+c000000004E487E3900000000000010C2
+t1313373753
+s4290
+
+N/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk/usr/include/sys/types.h
+c000000004E487E390000000000002905
+t1313373753
+s10501
+
+N/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk/usr/include/time.h
+c000000004E487B2F000000000000178E
+t1313372975
+s6030
+
+N/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk/usr/include/unistd.h
+c000000004E487B2F00000000000066D1
+t1313372975
+s26321
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug/libjrtp.a
+t1314580828
+s2893480
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/extratransmitters/rtpfaketransmitter.cpp
+c000000004E29E6E7000000000000968A
+t1311368935
+s38538
+i"rtpfaketransmitter.h"
+i"rtprawpacket.h"
+i"rtpipv4address.h"
+i"rtptimeutilities.h"
+i<stdio.h>
+i<sys/socket.h>
+i<net/if.h>
+i<string.h>
+i<netdb.h>
+i<unistd.h>
+i<sys/filio.h>
+i<iostream>
+i"rtpdebug.h"
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/extratransmitters/rtpfaketransmitter.h
+c000000004E2D835B0000000000002331
+t1311605595
+s9009
+i"rtpconfig.h"
+i"rtptransmitter.h"
+i"rtpipv4destination.h"
+i"rtphashtable.h"
+i"rtpkeyhashtable.h"
+i<list>
+i<jthread/jmutex.h>
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/jrtp.LinkFileList
+c000000004E5AEB20000000000000125C
+t1314581280
+s4700
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcpapppacket.o
+t2
+s0
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcpbyepacket.o
+t2
+s0
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcpcompoundpacket.o
+t2
+s0
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcpcompoundpacketbuilder.o
+t2
+s0
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcppacket.o
+t2
+s0
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcppacketbuilder.o
+t2
+s0
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcprrpacket.o
+t2
+s0
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcpscheduler.o
+t2
+s0
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcpsdesinfo.o
+t2
+s0
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcpsdespacket.o
+t2
+s0
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcpsrpacket.o
+t2
+s0
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpbyteaddress.o
+t2
+s0
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpcollisionlist.o
+t2
+s0
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpdebug.o
+t2
+s0
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtperrors.o
+t2
+s0
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpexternaltransmitter.o
+t2
+s0
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpfaketransmitter.o
+t2
+s0
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpinternalsourcedata.o
+t2
+s0
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpipv4address.o
+t2
+s0
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpipv6address.o
+t2
+s0
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtplibraryversion.o
+t2
+s0
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtppacket.o
+t2
+s0
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtppacketbuilder.o
+t2
+s0
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtppollthread.o
+t2
+s0
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtprandom.o
+t2
+s0
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtprandomrand48.o
+t2
+s0
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtprandomrands.o
+t2
+s0
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtprandomurandom.o
+t2
+s0
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpsession.o
+t2
+s0
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpsessionparams.o
+t2
+s0
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpsessionsources.o
+t2
+s0
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpsourcedata.o
+t2
+s0
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpsources.o
+t2
+s0
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtptimeutilities.o
+t2
+s0
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpudpv4transmitter.o
+t2
+s0
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpudpv6transmitter.o
+t2
+s0
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Script-2E883DF02E883DF02E883DF0.sh
+c000000004E5AEB20000000000000007E
+t1314581280
+s126
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Script-2E8844A02E8844A02E8844A0.sh
+c000000004E5AEB2000000000000000AB
+t1314581280
+s171
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpapppacket.cpp
+c000000004E29E6E70000000000000A89
+t1311368935
+s2697
+i"rtcpapppacket.h"
+i<string.h>
+i<iostream>
+i<string>
+i"rtpdebug.h"
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpapppacket.h
+c000000004E29E6E70000000000000E62
+t1311368935
+s3682
+i"rtpconfig.h"
+i"rtcppacket.h"
+i"rtpstructs.h"
+i<netinet/in.h>
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpbyepacket.cpp
+c000000004E29E6E70000000000000B7F
+t1311368935
+s2943
+i"rtcpbyepacket.h"
+i<iostream>
+i<string.h>
+i"rtpdebug.h"
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpbyepacket.h
+c000000004E29E6E70000000000000FBC
+t1311368935
+s4028
+i"rtpconfig.h"
+i"rtcppacket.h"
+i"rtpstructs.h"
+i<netinet/in.h>
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpcompoundpacket.cpp
+c000000004E29E6E70000000000001708
+t1311368935
+s5896
+i"rtcpcompoundpacket.h"
+i"rtprawpacket.h"
+i"rtperrors.h"
+i"rtpstructs.h"
+i"rtpdefines.h"
+i"rtcpsrpacket.h"
+i"rtcprrpacket.h"
+i"rtcpsdespacket.h"
+i"rtcpbyepacket.h"
+i"rtcpapppacket.h"
+i"rtcpunknownpacket.h"
+i<netinet/in.h>
+i"rtpdebug.h"
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpcompoundpacket.h
+c000000004E29E6E7000000000000102F
+t1311368935
+s4143
+i"rtpconfig.h"
+i"rtptypes.h"
+i"rtpmemoryobject.h"
+i<list>
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpcompoundpacketbuilder.cpp
+c000000004E29E6E700000000000058DA
+t1311368935
+s22746
+i"rtcpcompoundpacketbuilder.h"
+i"rtcpsrpacket.h"
+i"rtcprrpacket.h"
+i"rtcpsdespacket.h"
+i"rtcpbyepacket.h"
+i"rtcpapppacket.h"
+i"rtcpunknownpacket.h"
+i<netinet/in.h>
+i<string.h>
+i"rtpdebug.h"
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpcompoundpacketbuilder.h
+c000000004E29E6E70000000000002F71
+t1311368935
+s12145
+i"rtpconfig.h"
+i"rtcpcompoundpacket.h"
+i"rtptimeutilities.h"
+i"rtcpsdespacket.h"
+i"rtperrors.h"
+i<list>
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcppacket.cpp
+c000000004E29E6E700000000000008B0
+t1311368935
+s2224
+i"rtcppacket.h"
+i<iostream>
+i"rtpdebug.h"
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcppacket.h
+c000000004E29E6E70000000000000BA4
+t1311368935
+s2980
+i"rtpconfig.h"
+i"rtptypes.h"
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcppacketbuilder.cpp
+c000000004E29E6E700000000000049A3
+t1311368935
+s18851
+i"rtcppacketbuilder.h"
+i"rtpsources.h"
+i"rtppacketbuilder.h"
+i"rtcpscheduler.h"
+i"rtpsourcedata.h"
+i"rtcpcompoundpacketbuilder.h"
+i"rtpmemorymanager.h"
+i"rtpdebug.h"
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcppacketbuilder.h
+c000000004E29E6E70000000000002DF5
+t1311368935
+s11765
+i"rtpconfig.h"
+i"rtptypes.h"
+i"rtperrors.h"
+i"rtcpsdesinfo.h"
+i"rtptimeutilities.h"
+i"rtpmemoryobject.h"
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcprrpacket.cpp
+c000000004E29E6E70000000000000C89
+t1311368935
+s3209
+i"rtcprrpacket.h"
+i<iostream>
+i"rtpdebug.h"
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcprrpacket.h
+c000000004E29E6E70000000000001970
+t1311368935
+s6512
+i"rtpconfig.h"
+i"rtcppacket.h"
+i"rtpstructs.h"
+i<netinet/in.h>
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpscheduler.cpp
+c000000004E29E6E700000000000029BE
+t1311368935
+s10686
+i"rtcpscheduler.h"
+i"rtpsources.h"
+i"rtpdefines.h"
+i"rtcppacket.h"
+i"rtppacket.h"
+i"rtcpcompoundpacket.h"
+i"rtpsourcedata.h"
+i"rtpdebug.h"
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpscheduler.h
+c000000004E29E6E70000000000001C95
+t1311368935
+s7317
+i"rtpconfig.h"
+i"rtptimeutilities.h"
+i"rtprandom.h"
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpsdesinfo.cpp
+c000000004E29E6E70000000000001163
+t1311368935
+s4451
+i"rtcpsdesinfo.h"
+i"rtpdebug.h"
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpsdesinfo.h
+c000000004E29E6E7000000000000205D
+t1311368935
+s8285
+i"rtpconfig.h"
+i"rtperrors.h"
+i"rtpdefines.h"
+i"rtptypes.h"
+i"rtpmemoryobject.h"
+i<string.h>
+i<list>
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpsdespacket.cpp
+c000000004E29E6E7000000000000167A
+t1311368935
+s5754
+i"rtcpsdespacket.h"
+i<iostream>
+i<string.h>
+i"rtpdebug.h"
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpsdespacket.h
+c000000004E29E6E70000000000002A8D
+t1311368935
+s10893
+i"rtpconfig.h"
+i"rtcppacket.h"
+i"rtpstructs.h"
+i"rtpdefines.h"
+i<netinet/in.h>
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpsrpacket.cpp
+c000000004E29E6E70000000000000E41
+t1311368935
+s3649
+i"rtcpsrpacket.h"
+i<iostream>
+i"rtpdebug.h"
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpsrpacket.h
+c000000004E29E6E70000000000001EF6
+t1311368935
+s7926
+i"rtpconfig.h"
+i"rtcppacket.h"
+i"rtptimeutilities.h"
+i"rtpstructs.h"
+i<netinet/in.h>
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpunknownpacket.h
+c000000004E29E6E70000000000000AE6
+t1311368935
+s2790
+i"rtpconfig.h"
+i"rtcppacket.h"
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpaddress.h
+c000000004E29E6E70000000000000DD4
+t1311368935
+s3540
+i"rtpconfig.h"
+i<string>
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpbyteaddress.cpp
+c000000004E29E6E70000000000000BED
+t1311368935
+s3053
+i"rtpbyteaddress.h"
+i"rtpmemorymanager.h"
+i"rtpdefines.h"
+i<stdio.h>
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpbyteaddress.h
+c000000004E29E6E70000000000000EA0
+t1311368935
+s3744
+i"rtpconfig.h"
+i"rtpaddress.h"
+i"rtptypes.h"
+i<string.h>
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpcollisionlist.cpp
+c000000004E29E6E70000000000000E39
+t1311368935
+s3641
+i"rtpcollisionlist.h"
+i"rtperrors.h"
+i"rtpmemorymanager.h"
+i<iostream>
+i"rtpdebug.h"
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpcollisionlist.h
+c000000004E29E6E70000000000000C83
+t1311368935
+s3203
+i"rtpconfig.h"
+i"rtpaddress.h"
+i"rtptimeutilities.h"
+i"rtpmemoryobject.h"
+i<list>
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpconfig.h
+c000000004E5AE92A000000000000080F
+t1314580778
+s2063
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpdebug.cpp
+c000000004D4927B80000000000000ED2
+t1296639928
+s3794
+i"rtpconfig.h"
+i"rtptypes.h"
+i<stdlib.h>
+i<stdio.h>
+i<string.h>
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpdebug.h
+c000000004D4927B80000000000000754
+t1296639928
+s1876
+i"rtpconfig.h"
+i"rtptypes.h"
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpdefines.h
+c000000004D4927B80000000000000C1A
+t1296639928
+s3098
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtperrors.cpp
+c000000004E29E6E70000000000004DAC
+t1311368935
+s19884
+i"rtperrors.h"
+i"rtpdefines.h"
+i<stdio.h>
+i"rtpdebug.h"
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtperrors.h
+c000000004E29E6E70000000000002ADC
+t1311368935
+s10972
+i<string>
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpexternaltransmitter.cpp
+c000000004E29E6E70000000000004B48
+t1311368935
+s19272
+i"rtpexternaltransmitter.h"
+i"rtprawpacket.h"
+i"rtptimeutilities.h"
+i"rtpdefines.h"
+i"rtperrors.h"
+i<stdio.h>
+i<string.h>
+i<iostream>
+i"rtpdebug.h"
+i<iostream>
+i<sys/socket.h>
+i<netinet/in.h>
+i<arpa/inet.h>
+i<sys/ioctl.h>
+i<net/if.h>
+i<string.h>
+i<netdb.h>
+i<unistd.h>
+i<sys/filio.h>
+i<sys/sockio.h>
+i<ifaddrs.h>
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpexternaltransmitter.h
+c000000004E2D835B0000000000002350
+t1311605595
+s9040
+i"rtpconfig.h"
+i"rtptransmitter.h"
+i<list>
+i<jthread/jmutex.h>
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtphashtable.h
+c000000004E29E6E7000000000000216C
+t1311368935
+s8556
+i"rtperrors.h"
+i"rtpmemoryobject.h"
+i<iostream>
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpinternalsourcedata.cpp
+c000000004E29E6E70000000000001C8E
+t1311368935
+s7310
+i"rtpinternalsourcedata.h"
+i"rtppacket.h"
+i<string.h>
+i"rtpdebug.h"
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpinternalsourcedata.h
+c000000004E29E6E7000000000000123D
+t1311368935
+s4669
+i"rtpconfig.h"
+i"rtpsourcedata.h"
+i"rtpaddress.h"
+i"rtptimeutilities.h"
+i"rtpsources.h"
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpipv4address.cpp
+c000000004E29E6E70000000000000AAE
+t1311368935
+s2734
+i"rtpipv4address.h"
+i"rtpmemorymanager.h"
+i"rtpdefines.h"
+i<stdio.h>
+i"rtpdebug.h"
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpipv4address.h
+c000000004E29E6E70000000000000FE2
+t1311368935
+s4066
+i"rtpconfig.h"
+i"rtpaddress.h"
+i"rtptypes.h"
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpipv4destination.h
+c000000004E29E6E70000000000000DE3
+t1311368935
+s3555
+i"rtpconfig.h"
+i<netinet/in.h>
+i<arpa/inet.h>
+i<sys/socket.h>
+i"rtpdefines.h"
+i<stdio.h>
+i<string>
+i<string.h>
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpipv6address.cpp
+c000000004E29E6E70000000000000C7B
+t1311368935
+s3195
+i"rtpipv6address.h"
+i"rtpmemorymanager.h"
+i"rtpdefines.h"
+i<stdio.h>
+i"rtpdebug.h"
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpipv6address.h
+c000000004E29E6E700000000000010B3
+t1311368935
+s4275
+i"rtpconfig.h"
+i"rtpaddress.h"
+i"rtptypes.h"
+i<netinet/in.h>
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpipv6destination.h
+c000000004E29E6E70000000000000DD3
+t1311368935
+s3539
+i"rtpconfig.h"
+i"rtptypes.h"
+i<string.h>
+i<netinet/in.h>
+i<arpa/inet.h>
+i<sys/socket.h>
+i"rtpdefines.h"
+i<stdio.h>
+i<string>
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpkeyhashtable.h
+c000000004E29E6E70000000000002288
+t1311368935
+s8840
+i"rtpconfig.h"
+i"rtperrors.h"
+i"rtpmemoryobject.h"
+i<iostream>
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtplibraryversion.cpp
+c000000004E29E6E70000000000000733
+t1311368935
+s1843
+i"rtplibraryversion.h"
+i"rtpdefines.h"
+i<stdio.h>
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtplibraryversion.h
+c000000004E29E6E700000000000009A5
+t1311368935
+s2469
+i<string>
+i<stdio.h>
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpmemorymanager.h
+c000000004E29E6E70000000000001DEC
+t1311368935
+s7660
+i"rtpconfig.h"
+i"rtptypes.h"
+i<new>
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpmemoryobject.h
+c000000004E29E6E70000000000000961
+t1311368935
+s2401
+i"rtpconfig.h"
+i"rtpmemorymanager.h"
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtppacket.cpp
+c000000004E29E6E70000000000002B50
+t1311368935
+s11088
+i"rtppacket.h"
+i"rtpstructs.h"
+i"rtpdefines.h"
+i"rtperrors.h"
+i"rtprawpacket.h"
+i<netinet/in.h>
+i<string.h>
+i<stdio.h>
+i"rtpdebug.h"
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtppacket.h
+c000000004E29E6E70000000000001D96
+t1311368935
+s7574
+i"rtpconfig.h"
+i"rtptypes.h"
+i"rtptimeutilities.h"
+i"rtpmemoryobject.h"
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtppacketbuilder.cpp
+c000000004E29E6E70000000000001B71
+t1311368935
+s7025
+i"rtppacketbuilder.h"
+i"rtperrors.h"
+i"rtppacket.h"
+i"rtpsources.h"
+i<time.h>
+i<stdlib.h>
+i<iostream>
+i"rtpdebug.h"
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtppacketbuilder.h
+c000000004E29E6E7000000000000288E
+t1311368935
+s10382
+i"rtpconfig.h"
+i"rtperrors.h"
+i"rtpdefines.h"
+i"rtprandom.h"
+i"rtptimeutilities.h"
+i"rtptypes.h"
+i"rtpmemoryobject.h"
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtppollthread.cpp
+c000000004E29E6E7000000000000101B
+t1311368935
+s4123
+i"rtppollthread.h"
+i"rtpsession.h"
+i"rtcpscheduler.h"
+i"rtperrors.h"
+i"rtprawpacket.h"
+i<time.h>
+i<iostream>
+i"rtpdebug.h"
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtppollthread.h
+c000000004E2D835B0000000000000890
+t1311605595
+s2192
+i"rtpconfig.h"
+i"rtptransmitter.h"
+i<jthread/jthread.h>
+i<jthread/jmutex.h>
+i<list>
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtprandom.cpp
+c000000004E29E6E70000000000000984
+t1311368935
+s2436
+i"rtprandom.h"
+i<time.h>
+i<unistd.h>
+i<process.h>
+i<windows.h>
+i<kfuncs.h>
+i<stdlib.h>
+i"rtpdebug.h"
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtprandom.h
+c000000004E29E6E70000000000000933
+t1311368935
+s2355
+i"rtpconfig.h"
+i"rtptypes.h"
+i<stdlib.h>
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtprandomrand48.cpp
+c000000004E29E6E70000000000000D2E
+t1311368935
+s3374
+i"rtprandomrand48.h"
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtprandomrand48.h
+c000000004E2D835B00000000000008BB
+t1311605595
+s2235
+i"rtpconfig.h"
+i"rtprandom.h"
+i<jthread/jmutex.h>
+i<stdio.h>
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtprandomrands.cpp
+c000000004E29E6E7000000000000102C
+t1311368935
+s4140
+i"rtprandomrands.h"
+i"rtperrors.h"
+i<math.h>
+i<stdlib.h>
+i"rtpdebug.h"
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtprandomrands.h
+c000000004E29E6E70000000000000811
+t1311368935
+s2065
+i"rtpconfig.h"
+i"rtprandom.h"
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtprandomurandom.cpp
+c000000004E29E6E70000000000000ADC
+t1311368935
+s2780
+i"rtprandomurandom.h"
+i"rtperrors.h"
+i"rtpdebug.h"
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtprandomurandom.h
+c000000004E29E6E7000000000000081D
+t1311368935
+s2077
+i"rtpconfig.h"
+i"rtprandom.h"
+i<stdio.h>
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtprawpacket.h
+c000000004E29E6E700000000000010F0
+t1311368935
+s4336
+i"rtpconfig.h"
+i"rtptimeutilities.h"
+i"rtpaddress.h"
+i"rtptypes.h"
+i"rtpmemoryobject.h"
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsession.cpp
+c000000004E29E6E700000000000093B6
+t1311368935
+s37814
+i"rtpsession.h"
+i"rtperrors.h"
+i"rtppollthread.h"
+i"rtpudpv4transmitter.h"
+i"rtpudpv6transmitter.h"
+i"rtpexternaltransmitter.h"
+i"rtpsessionparams.h"
+i"rtpdefines.h"
+i"rtprawpacket.h"
+i"rtppacket.h"
+i"rtptimeutilities.h"
+i"rtpmemorymanager.h"
+i"rtprandomrand48.h"
+i"rtprandomrands.h"
+i"rtprandomurandom.h"
+i"rtcpcompoundpacket.h"
+i<unistd.h>
+i<stdlib.h>
+i<winbase.h>
+i<iostream>
+i"rtpdebug.h"
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsession.h
+c000000004E2D835B0000000000006760
+t1311605595
+s26464
+i"rtpconfig.h"
+i"rtplibraryversion.h"
+i"rtppacketbuilder.h"
+i"rtpsessionsources.h"
+i"rtptransmitter.h"
+i"rtpcollisionlist.h"
+i"rtcpscheduler.h"
+i"rtcppacketbuilder.h"
+i"rtptimeutilities.h"
+i"rtcpcompoundpacketbuilder.h"
+i"rtpmemoryobject.h"
+i<list>
+i<jthread/jmutex.h>
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsessionparams.cpp
+c000000004E29E6E70000000000000B6E
+t1311368935
+s2926
+i"rtpconfig.h"
+i"rtpsessionparams.h"
+i"rtpdefines.h"
+i"rtperrors.h"
+i"rtpdebug.h"
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsessionparams.h
+c000000004E29E6E70000000000002AB8
+t1311368935
+s10936
+i"rtpconfig.h"
+i"rtptypes.h"
+i"rtptransmitter.h"
+i"rtptimeutilities.h"
+i"rtpsources.h"
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsessionsources.cpp
+c000000004E29E6E70000000000000F0D
+t1311368935
+s3853
+i"rtpsessionsources.h"
+i"rtpsession.h"
+i"rtpsourcedata.h"
+i"rtpdebug.h"
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsessionsources.h
+c000000004E29E6E70000000000000CE0
+t1311368935
+s3296
+i"rtpconfig.h"
+i"rtpsources.h"
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsourcedata.cpp
+c000000004E29E6E70000000000003E2C
+t1311368935
+s15916
+i"rtpsourcedata.h"
+i"rtpdefines.h"
+i"rtpaddress.h"
+i"rtpmemorymanager.h"
+i<netinet/in.h>
+i<iostream>
+i<string>
+i"rtpdebug.h"
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsourcedata.h
+c000000004E29E6E70000000000004F96
+t1311368935
+s20374
+i"rtpconfig.h"
+i"rtptimeutilities.h"
+i"rtppacket.h"
+i"rtcpsdesinfo.h"
+i"rtptypes.h"
+i"rtpsources.h"
+i"rtpmemoryobject.h"
+i<list>
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsources.cpp
+c000000004E29E6E700000000000082DF
+t1311368935
+s33503
+i"rtpsources.h"
+i"rtperrors.h"
+i"rtprawpacket.h"
+i"rtpinternalsourcedata.h"
+i"rtptimeutilities.h"
+i"rtpdefines.h"
+i"rtcpcompoundpacket.h"
+i"rtcppacket.h"
+i"rtcpapppacket.h"
+i"rtcpbyepacket.h"
+i"rtcpsdespacket.h"
+i"rtcpsrpacket.h"
+i"rtcprrpacket.h"
+i"rtptransmitter.h"
+i<iostream>
+i"rtpdebug.h"
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsources.h
+c000000004E29E6E70000000000004550
+t1311368935
+s17744
+i"rtpconfig.h"
+i"rtpkeyhashtable.h"
+i"rtcpsdespacket.h"
+i"rtptypes.h"
+i"rtpmemoryobject.h"
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpstructs.h
+c000000004E29E6E70000000000000B3E
+t1311368935
+s2878
+i"rtpconfig.h"
+i"rtptypes.h"
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtptimeutilities.cpp
+c000000004E29E6E7000000000000078B
+t1311368935
+s1931
+i"rtptimeutilities.h"
+i<iostream>
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtptimeutilities.h
+c000000004E29E6E70000000000002140
+t1311368935
+s8512
+i"rtpconfig.h"
+i"rtptypes.h"
+i<sys/time.h>
+i<time.h>
+i<sys/timeb.h>
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtptransmitter.h
+c000000004E29E6E70000000000002CE6
+t1311368935
+s11494
+i"rtpconfig.h"
+i"rtptypes.h"
+i"rtpmemoryobject.h"
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtptypes.h
+c000000004E5AE90D000000000000002C
+t1314580749
+s44
+i<stdint.h>
+i<sys/types.h>
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpudpv4transmitter.cpp
+c000000004E2D835B000000000000AC2E
+t1311605595
+s44078
+i"rtpudpv4transmitter.h"
+i"rtprawpacket.h"
+i"rtpipv4address.h"
+i"rtptimeutilities.h"
+i"rtpdefines.h"
+i<stdio.h>
+i<sys/socket.h>
+i<netinet/in.h>
+i<arpa/inet.h>
+i<sys/ioctl.h>
+i<net/if.h>
+i<string.h>
+i<netdb.h>
+i<unistd.h>
+i<sys/filio.h>
+i<sys/sockio.h>
+i<ifaddrs.h>
+i<iostream>
+i"rtpdebug.h"
+i<iostream>
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpudpv4transmitter.h
+c000000004E2D835B0000000000002ABC
+t1311605595
+s10940
+i"rtpconfig.h"
+i"rtptransmitter.h"
+i"rtpipv4destination.h"
+i"rtphashtable.h"
+i"rtpkeyhashtable.h"
+i<list>
+i<jthread/jmutex.h>
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpudpv6transmitter.cpp
+c000000004E29E6E7000000000000AA07
+t1311368935
+s43527
+i"rtpudpv6transmitter.h"
+i"rtprawpacket.h"
+i"rtpipv6address.h"
+i"rtptimeutilities.h"
+i"rtpdefines.h"
+i<stdio.h>
+i<sys/socket.h>
+i<netinet/in.h>
+i<arpa/inet.h>
+i<sys/ioctl.h>
+i<net/if.h>
+i<string.h>
+i<netdb.h>
+i<unistd.h>
+i<sys/filio.h>
+i<sys/sockio.h>
+i<ifaddrs.h>
+i"rtpdebug.h"
+
+N/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpudpv6transmitter.h
+c000000004E2D835B0000000000002CB2
+t1311605595
+s11442
+i"rtpconfig.h"
+i"rtptransmitter.h"
+i"rtpipv6destination.h"
+i"rtphashtable.h"
+i"rtpkeyhashtable.h"
+i<netinet/in.h>
+i<string.h>
+i<list>
+i<jthread/jmutex.h>
+
+CBuild AST from /Users/anurodhp/Desktop/jrtplib-3.9.0/src/extratransmitters/rtpfaketransmitter.cpp
+r0
+
+CBuild AST from /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpapppacket.cpp
+r0
+
+CBuild AST from /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpbyepacket.cpp
+r0
+
+CBuild AST from /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpcompoundpacket.cpp
+r0
+
+CBuild AST from /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpcompoundpacketbuilder.cpp
+r0
+
+CBuild AST from /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcppacket.cpp
+r0
+
+CBuild AST from /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcppacketbuilder.cpp
+r0
+
+CBuild AST from /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcprrpacket.cpp
+r0
+
+CBuild AST from /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpscheduler.cpp
+r0
+
+CBuild AST from /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpsdesinfo.cpp
+r0
+
+CBuild AST from /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpsdespacket.cpp
+r0
+
+CBuild AST from /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpsrpacket.cpp
+r0
+
+CBuild AST from /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpbyteaddress.cpp
+r0
+
+CBuild AST from /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpcollisionlist.cpp
+r0
+
+CBuild AST from /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpdebug.cpp
+r0
+
+CBuild AST from /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtperrors.cpp
+r0
+
+CBuild AST from /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpexternaltransmitter.cpp
+r0
+
+CBuild AST from /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpinternalsourcedata.cpp
+r0
+
+CBuild AST from /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpipv4address.cpp
+r0
+
+CBuild AST from /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpipv6address.cpp
+r0
+
+CBuild AST from /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtplibraryversion.cpp
+r0
+
+CBuild AST from /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtppacket.cpp
+r0
+
+CBuild AST from /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtppacketbuilder.cpp
+r0
+
+CBuild AST from /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtppollthread.cpp
+r0
+
+CBuild AST from /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtprandom.cpp
+r0
+
+CBuild AST from /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtprandomrand48.cpp
+r0
+
+CBuild AST from /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtprandomrands.cpp
+r0
+
+CBuild AST from /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtprandomurandom.cpp
+r0
+
+CBuild AST from /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsession.cpp
+r0
+
+CBuild AST from /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsessionparams.cpp
+r0
+
+CBuild AST from /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsessionsources.cpp
+r0
+
+CBuild AST from /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsourcedata.cpp
+r0
+
+CBuild AST from /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsources.cpp
+r0
+
+CBuild AST from /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtptimeutilities.cpp
+r0
+
+CBuild AST from /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpudpv4transmitter.cpp
+r0
+
+CBuild AST from /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpudpv6transmitter.cpp
+r0
+
+CCheck dependencies
+r0
+lSLF04#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection18"Check dependencies6d5847a0220bb441^c712eaa0220bb441^---0#1#0#--18"Check dependencies36"2639AC5A-F182-4F8D-BEB5-A1BD44A8A583-
+
+CCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcpapppacket.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpapppacket.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+s336274081.114634
+e336274081.675797
+r1
+xCompileC
+xsrc/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcpapppacket.o
+x/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpapppacket.cpp
+xnormal
+xarmv7
+xc++
+xcom.apple.compilers.llvmgcc42
+lSLF04#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection67"Compile /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpapppacket.cpp677e1da1220bb441^5919ada1220bb441^---0#0#0#-19%DVTDocumentLocation2@75"file://localhost/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpapppacket.cpp0000000000000000^1299"CompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcpapppacket.o src/rtcpapppacket.cpp normal armv7 c++ com.apple.compilers.llvmgcc42    cd /Users/anurodhp/Desktop/jrtplib-3.9.0    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/llvm-gcc-4.2 -x c++ -arch armv7 -fmessage-length=0 -pipe -Wno-trigraphs -fpascal-strings -O0 "-DCMAKE_INTDIR=\"Debug\"" -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk -gdwarf-2 -mthumb -miphoneos-version-min=5.0 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug/include -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources/armv7 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -F/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug -c /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpapppacket.cpp -o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcpapppacket.o36"281C4609-C2CC-4F6A-93BD-42D32DD6DD32-
+
+CCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcpbyepacket.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpbyepacket.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+s336274081.903565
+e336274082.097327
+r1
+xCompileC
+xsrc/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcpbyepacket.o
+x/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpbyepacket.cpp
+xnormal
+xarmv7
+xc++
+xcom.apple.compilers.llvmgcc42
+lSLF04#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection67"Compile /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpbyepacket.cpp747de7a1220bb441^732a19a2220bb441^---0#0#0#-19%DVTDocumentLocation2@75"file://localhost/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpbyepacket.cpp0000000000000000^1299"CompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcpbyepacket.o src/rtcpbyepacket.cpp normal armv7 c++ com.apple.compilers.llvmgcc42    cd /Users/anurodhp/Desktop/jrtplib-3.9.0    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/llvm-gcc-4.2 -x c++ -arch armv7 -fmessage-length=0 -pipe -Wno-trigraphs -fpascal-strings -O0 "-DCMAKE_INTDIR=\"Debug\"" -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk -gdwarf-2 -mthumb -miphoneos-version-min=5.0 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug/include -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources/armv7 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -F/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug -c /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpbyepacket.cpp -o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcpbyepacket.o36"FEEC24C8-A455-4A74-8416-45C8F8FA931A-
+
+CCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcpcompoundpacket.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpcompoundpacket.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+s336274082.099255
+e336274083.027613
+r1
+xCompileC
+xsrc/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcpcompoundpacket.o
+x/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpcompoundpacket.cpp
+xnormal
+xarmv7
+xc++
+xcom.apple.compilers.llvmgcc42
+lSLF04#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection72"Compile /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpcompoundpacket.cppb08c19a2220bb441^252307a3220bb441^---0#0#0#-19%DVTDocumentLocation2@80"file://localhost/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpcompoundpacket.cpp0000000000000000^1319"CompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcpcompoundpacket.o src/rtcpcompoundpacket.cpp normal armv7 c++ com.apple.compilers.llvmgcc42    cd /Users/anurodhp/Desktop/jrtplib-3.9.0    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/llvm-gcc-4.2 -x c++ -arch armv7 -fmessage-length=0 -pipe -Wno-trigraphs -fpascal-strings -O0 "-DCMAKE_INTDIR=\"Debug\"" -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk -gdwarf-2 -mthumb -miphoneos-version-min=5.0 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug/include -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources/armv7 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -F/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug -c /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpcompoundpacket.cpp -o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcpcompoundpacket.o36"7D526DAD-00B2-440B-AF9E-2441A4B11FA1-
+
+CCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcpcompoundpacketbuilder.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpcompoundpacketbuilder.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+s336274083.029473
+e336274084.426529
+r1
+xCompileC
+xsrc/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcpcompoundpacketbuilder.o
+x/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpcompoundpacketbuilder.cpp
+xnormal
+xarmv7
+xc++
+xcom.apple.compilers.llvmgcc42
+lSLF04#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection79"Compile /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpcompoundpacketbuilder.cpp60b007a3220bb441^39436da4220bb441^---0#0#0#-19%DVTDocumentLocation2@87"file://localhost/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpcompoundpacketbuilder.cpp0000000000000000^1347"CompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcpcompoundpacketbuilder.o src/rtcpcompoundpacketbuilder.cpp normal armv7 c++ com.apple.compilers.llvmgcc42    cd /Users/anurodhp/Desktop/jrtplib-3.9.0    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/llvm-gcc-4.2 -x c++ -arch armv7 -fmessage-length=0 -pipe -Wno-trigraphs -fpascal-strings -O0 "-DCMAKE_INTDIR=\"Debug\"" -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk -gdwarf-2 -mthumb -miphoneos-version-min=5.0 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug/include -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources/armv7 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -F/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug -c /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpcompoundpacketbuilder.cpp -o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcpcompoundpacketbuilder.o36"71B94ED1-D26A-40A7-874B-187594E3E30F-
+
+CCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcppacket.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcppacket.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+s336274084.428463
+e336274084.545016
+r1
+xCompileC
+xsrc/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcppacket.o
+x/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcppacket.cpp
+xnormal
+xarmv7
+xc++
+xcom.apple.compilers.llvmgcc42
+lSLF04#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection64"Compile /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcppacket.cpp46d36da4220bb441^c4058ca4220bb441^---0#0#0#-19%DVTDocumentLocation2@72"file://localhost/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcppacket.cpp0000000000000000^1287"CompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcppacket.o src/rtcppacket.cpp normal armv7 c++ com.apple.compilers.llvmgcc42    cd /Users/anurodhp/Desktop/jrtplib-3.9.0    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/llvm-gcc-4.2 -x c++ -arch armv7 -fmessage-length=0 -pipe -Wno-trigraphs -fpascal-strings -O0 "-DCMAKE_INTDIR=\"Debug\"" -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk -gdwarf-2 -mthumb -miphoneos-version-min=5.0 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug/include -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources/armv7 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -F/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug -c /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcppacket.cpp -o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcppacket.o36"7F43257C-78E3-42E0-87AD-1295583E01A1-
+
+CCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcppacketbuilder.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcppacketbuilder.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+s336274084.548616
+e336274085.818184
+r1
+xCompileC
+xsrc/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcppacketbuilder.o
+x/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcppacketbuilder.cpp
+xnormal
+xarmv7
+xc++
+xcom.apple.compilers.llvmgcc42
+lSLF04#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection71"Compile /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcppacketbuilder.cppd09d8ca4220bb441^f085d1a5220bb441^---0#0#0#-19%DVTDocumentLocation2@79"file://localhost/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcppacketbuilder.cpp0000000000000000^1315"CompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcppacketbuilder.o src/rtcppacketbuilder.cpp normal armv7 c++ com.apple.compilers.llvmgcc42    cd /Users/anurodhp/Desktop/jrtplib-3.9.0    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/llvm-gcc-4.2 -x c++ -arch armv7 -fmessage-length=0 -pipe -Wno-trigraphs -fpascal-strings -O0 "-DCMAKE_INTDIR=\"Debug\"" -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk -gdwarf-2 -mthumb -miphoneos-version-min=5.0 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug/include -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources/armv7 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -F/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug -c /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcppacketbuilder.cpp -o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcppacketbuilder.o36"6D3718A7-4BB9-4AF9-AB26-CCBCC6CB0BD7-
+
+CCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcprrpacket.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcprrpacket.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+s336274085.820044
+e336274086.033148
+r1
+xCompileC
+xsrc/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcprrpacket.o
+x/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcprrpacket.cpp
+xnormal
+xarmv7
+xc++
+xcom.apple.compilers.llvmgcc42
+lSLF04#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection66"Compile /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcprrpacket.cppf912d2a5220bb441^d28d08a6220bb441^---0#0#0#-19%DVTDocumentLocation2@74"file://localhost/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcprrpacket.cpp0000000000000000^1295"CompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcprrpacket.o src/rtcprrpacket.cpp normal armv7 c++ com.apple.compilers.llvmgcc42    cd /Users/anurodhp/Desktop/jrtplib-3.9.0    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/llvm-gcc-4.2 -x c++ -arch armv7 -fmessage-length=0 -pipe -Wno-trigraphs -fpascal-strings -O0 "-DCMAKE_INTDIR=\"Debug\"" -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk -gdwarf-2 -mthumb -miphoneos-version-min=5.0 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug/include -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources/armv7 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -F/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug -c /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcprrpacket.cpp -o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcprrpacket.o36"650942D2-B437-4B72-92DF-7620D2FDFBC1-
+
+CCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcpscheduler.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpscheduler.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+s336274086.035076
+e336274086.978006
+r1
+xCompileC
+xsrc/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcpscheduler.o
+x/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpscheduler.cpp
+xnormal
+xarmv7
+xc++
+xcom.apple.compilers.llvmgcc42
+o/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpscheduler.h: In constructor 'jrtplib::RTCPScheduler::RTCPScheduler(jrtplib::RTPSources&, jrtplib::RTPRandom&)':
+o/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpscheduler.h:183: warning: 'jrtplib::RTCPScheduler::rtprand' will be initialized after
+o/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpscheduler.h:167: warning:   'jrtplib::RTPSources& jrtplib::RTCPScheduler::sources'
+o/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpscheduler.cpp:90: warning:   when initialized here
+lSLF04#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection67"Compile /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpscheduler.cppb81e09a6220bb441^5073faa6220bb441^-516"/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpscheduler.h: In constructor 'jrtplib::RTCPScheduler::RTCPScheduler(jrtplib::RTPSources&, jrtplib::RTPRandom&)':/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpscheduler.h:183: warning: 'jrtplib::RTCPScheduler::rtprand' will be initialized after/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpscheduler.h:167: warning:   'jrtplib::RTPSources& jrtplib::RTCPScheduler::sources'/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpscheduler.cpp:90: warning:   when initialized here3(21%IDEActivityLogMessage2@59"'jrtplib::RTCPScheduler::rtprand' will be initialized after-336274086#158#132#-1#-23%DVTTextDocumentLocation3@73"file://localhost/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpscheduler.h0000000000000000^182#4294967295#182#4294967295#4294967295#0#20"LLVM GCC 4.2 Warning--2@54"'jrtplib::RTPSources& jrtplib::RTCPScheduler::sources'-336274086#290#129#-1#-3@73"file://localhost/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpscheduler.h0000000000000000^166#4294967295#166#4294967295#4294967295#0#20"LLVM GCC 4.2 Warning--2@21"When initialized here-336274086#419#97#-1#-3@75"file://localhost/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpscheduler.cpp0000000000000000^89#4294967295#89#4294967295#4294967295#0#20"LLVM GCC 4.2 Warning--0#0#0#-19%DVTDocumentLocation4@75"file://localhost/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpscheduler.cpp0000000000000000^1299"CompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcpscheduler.o src/rtcpscheduler.cpp normal armv7 c++ com.apple.compilers.llvmgcc42    cd /Users/anurodhp/Desktop/jrtplib-3.9.0    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/llvm-gcc-4.2 -x c++ -arch armv7 -fmessage-length=0 -pipe -Wno-trigraphs -fpascal-strings -O0 "-DCMAKE_INTDIR=\"Debug\"" -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk -gdwarf-2 -mthumb -miphoneos-version-min=5.0 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug/include -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources/armv7 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -F/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug -c /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpscheduler.cpp -o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcpscheduler.o36"D5DF7F01-3D77-4DB0-8BC3-9E625C6FA60C-
+
+CCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcpsdesinfo.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpsdesinfo.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+s336274086.979717
+e336274087.921709
+r1
+xCompileC
+xsrc/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcpsdesinfo.o
+x/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpsdesinfo.cpp
+xnormal
+xarmv7
+xc++
+xcom.apple.compilers.llvmgcc42
+lSLF04#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection66"Compile /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpsdesinfo.cpp0ff2faa6220bb441^5707eca7220bb441^---0#0#0#-19%DVTDocumentLocation2@74"file://localhost/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpsdesinfo.cpp0000000000000000^1295"CompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcpsdesinfo.o src/rtcpsdesinfo.cpp normal armv7 c++ com.apple.compilers.llvmgcc42    cd /Users/anurodhp/Desktop/jrtplib-3.9.0    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/llvm-gcc-4.2 -x c++ -arch armv7 -fmessage-length=0 -pipe -Wno-trigraphs -fpascal-strings -O0 "-DCMAKE_INTDIR=\"Debug\"" -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk -gdwarf-2 -mthumb -miphoneos-version-min=5.0 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug/include -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources/armv7 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -F/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug -c /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpsdesinfo.cpp -o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcpsdesinfo.o36"0207F447-0552-40FF-8DDB-9266C7DBA0E6-
+
+CCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcpsdespacket.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpsdespacket.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+s336274087.923776
+e336274088.160124
+r1
+xCompileC
+xsrc/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcpsdespacket.o
+x/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpsdespacket.cpp
+xnormal
+xarmv7
+xc++
+xcom.apple.compilers.llvmgcc42
+lSLF04#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection68"Compile /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpsdespacket.cpp06a1eca7220bb441^1d3e29a8220bb441^---0#0#0#-19%DVTDocumentLocation2@76"file://localhost/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpsdespacket.cpp0000000000000000^1303"CompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcpsdespacket.o src/rtcpsdespacket.cpp normal armv7 c++ com.apple.compilers.llvmgcc42    cd /Users/anurodhp/Desktop/jrtplib-3.9.0    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/llvm-gcc-4.2 -x c++ -arch armv7 -fmessage-length=0 -pipe -Wno-trigraphs -fpascal-strings -O0 "-DCMAKE_INTDIR=\"Debug\"" -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk -gdwarf-2 -mthumb -miphoneos-version-min=5.0 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug/include -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources/armv7 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -F/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug -c /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpsdespacket.cpp -o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcpsdespacket.o36"5647ACC4-9BA8-43AF-B752-90D661DCCCF7-
+
+CCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcpsrpacket.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpsrpacket.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+s336274088.162082
+e336274088.387124
+r1
+xCompileC
+xsrc/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcpsrpacket.o
+x/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpsrpacket.cpp
+xnormal
+xarmv7
+xc++
+xcom.apple.compilers.llvmgcc42
+lSLF04#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection66"Compile /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpsrpacket.cpp73a229a8220bb441^cb2f63a8220bb441^---0#0#0#-19%DVTDocumentLocation2@74"file://localhost/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpsrpacket.cpp0000000000000000^1295"CompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcpsrpacket.o src/rtcpsrpacket.cpp normal armv7 c++ com.apple.compilers.llvmgcc42    cd /Users/anurodhp/Desktop/jrtplib-3.9.0    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/llvm-gcc-4.2 -x c++ -arch armv7 -fmessage-length=0 -pipe -Wno-trigraphs -fpascal-strings -O0 "-DCMAKE_INTDIR=\"Debug\"" -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk -gdwarf-2 -mthumb -miphoneos-version-min=5.0 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug/include -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources/armv7 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -F/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug -c /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtcpsrpacket.cpp -o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcpsrpacket.o36"1E9643C7-B9D0-41DB-B9A0-482EFC2935CF-
+
+CCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpbyteaddress.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpbyteaddress.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+s336274105.482588
+e336274106.200986
+r1
+xCompileC
+xsrc/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpbyteaddress.o
+x/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpbyteaddress.cpp
+xnormal
+xarmv7
+xc++
+xcom.apple.compilers.llvmgcc42
+lSLF04#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection68"Compile /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpbyteaddress.cppcdae7bb9220bb441^2b8633ba220bb441^---0#0#0#-19%DVTDocumentLocation2@76"file://localhost/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpbyteaddress.cpp0000000000000000^1303"CompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpbyteaddress.o src/rtpbyteaddress.cpp normal armv7 c++ com.apple.compilers.llvmgcc42    cd /Users/anurodhp/Desktop/jrtplib-3.9.0    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/llvm-gcc-4.2 -x c++ -arch armv7 -fmessage-length=0 -pipe -Wno-trigraphs -fpascal-strings -O0 "-DCMAKE_INTDIR=\"Debug\"" -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk -gdwarf-2 -mthumb -miphoneos-version-min=5.0 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug/include -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources/armv7 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -F/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug -c /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpbyteaddress.cpp -o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpbyteaddress.o36"F8AC8B47-16FB-4060-BCC0-1B5F2B690F5B-
+
+CCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpcollisionlist.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpcollisionlist.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+s336274088.389277
+e336274088.988393
+r1
+xCompileC
+xsrc/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpcollisionlist.o
+x/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpcollisionlist.cpp
+xnormal
+xarmv7
+xc++
+xcom.apple.compilers.llvmgcc42
+lSLF04#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection70"Compile /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpcollisionlist.cpp3dd763a8220bb441^6919fda8220bb441^---0#0#0#-19%DVTDocumentLocation2@78"file://localhost/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpcollisionlist.cpp0000000000000000^1311"CompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpcollisionlist.o src/rtpcollisionlist.cpp normal armv7 c++ com.apple.compilers.llvmgcc42    cd /Users/anurodhp/Desktop/jrtplib-3.9.0    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/llvm-gcc-4.2 -x c++ -arch armv7 -fmessage-length=0 -pipe -Wno-trigraphs -fpascal-strings -O0 "-DCMAKE_INTDIR=\"Debug\"" -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk -gdwarf-2 -mthumb -miphoneos-version-min=5.0 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug/include -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources/armv7 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -F/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug -c /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpcollisionlist.cpp -o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpcollisionlist.o36"380F2AFE-32E4-435C-8674-CDF9CE8ACE33-
+
+CCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpdebug.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpdebug.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+s336274088.990318
+e336274089.094771
+r1
+xCompileC
+xsrc/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpdebug.o
+x/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpdebug.cpp
+xnormal
+xarmv7
+xc++
+xcom.apple.compilers.llvmgcc42
+lSLF04#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection62"Compile /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpdebug.cppbda8fda8220bb441^8b5418a9220bb441^---0#0#0#-19%DVTDocumentLocation2@70"file://localhost/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpdebug.cpp0000000000000000^1279"CompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpdebug.o src/rtpdebug.cpp normal armv7 c++ com.apple.compilers.llvmgcc42    cd /Users/anurodhp/Desktop/jrtplib-3.9.0    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/llvm-gcc-4.2 -x c++ -arch armv7 -fmessage-length=0 -pipe -Wno-trigraphs -fpascal-strings -O0 "-DCMAKE_INTDIR=\"Debug\"" -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk -gdwarf-2 -mthumb -miphoneos-version-min=5.0 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug/include -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources/armv7 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -F/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug -c /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpdebug.cpp -o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpdebug.o36"A9C883CC-5541-4045-9D88-04EFFF5867AE-
+
+CCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtperrors.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtperrors.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+s336274089.096702
+e336274089.763141
+r1
+xCompileC
+xsrc/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtperrors.o
+x/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtperrors.cpp
+xnormal
+xarmv7
+xc++
+xcom.apple.compilers.llvmgcc42
+lSLF04#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection63"Compile /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtperrors.cpp71e518a9220bb441^1a6fc3a9220bb441^---0#0#0#-19%DVTDocumentLocation2@71"file://localhost/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtperrors.cpp0000000000000000^1283"CompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtperrors.o src/rtperrors.cpp normal armv7 c++ com.apple.compilers.llvmgcc42    cd /Users/anurodhp/Desktop/jrtplib-3.9.0    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/llvm-gcc-4.2 -x c++ -arch armv7 -fmessage-length=0 -pipe -Wno-trigraphs -fpascal-strings -O0 "-DCMAKE_INTDIR=\"Debug\"" -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk -gdwarf-2 -mthumb -miphoneos-version-min=5.0 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug/include -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources/armv7 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -F/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug -c /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtperrors.cpp -o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtperrors.o36"7446906A-D674-453D-B6DB-8374B8E13EB6-
+
+CCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpexternaltransmitter.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpexternaltransmitter.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+s336274106.203110
+e336274107.254932
+r1
+xCompileC
+xsrc/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpexternaltransmitter.o
+x/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpexternaltransmitter.cpp
+xnormal
+xarmv7
+xc++
+xcom.apple.compilers.llvmgcc42
+lSLF04#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection76"Compile /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpexternaltransmitter.cppcc2634ba220bb441^eb5441bb220bb441^---0#0#0#-19%DVTDocumentLocation2@84"file://localhost/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpexternaltransmitter.cpp0000000000000000^1335"CompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpexternaltransmitter.o src/rtpexternaltransmitter.cpp normal armv7 c++ com.apple.compilers.llvmgcc42    cd /Users/anurodhp/Desktop/jrtplib-3.9.0    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/llvm-gcc-4.2 -x c++ -arch armv7 -fmessage-length=0 -pipe -Wno-trigraphs -fpascal-strings -O0 "-DCMAKE_INTDIR=\"Debug\"" -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk -gdwarf-2 -mthumb -miphoneos-version-min=5.0 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug/include -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources/armv7 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -F/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug -c /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpexternaltransmitter.cpp -o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpexternaltransmitter.o36"4500D0D6-5B56-4B75-9F07-967939203CD1-
+
+CCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpfaketransmitter.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/extratransmitters/rtpfaketransmitter.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+s336274107.256636
+e336274108.946113
+r1
+xCompileC
+xsrc/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpfaketransmitter.o
+x/Users/anurodhp/Desktop/jrtplib-3.9.0/src/extratransmitters/rtpfaketransmitter.cpp
+xnormal
+xarmv7
+xc++
+xcom.apple.compilers.llvmgcc42
+lSLF04#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection90"Compile /Users/anurodhp/Desktop/jrtplib-3.9.0/src/extratransmitters/rtpfaketransmitter.cpp02d741bb220bb441^2b51f2bc220bb441^---0#0#0#-19%DVTDocumentLocation2@98"file://localhost/Users/anurodhp/Desktop/jrtplib-3.9.0/src/extratransmitters/rtpfaketransmitter.cpp0000000000000000^1355"CompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpfaketransmitter.o src/extratransmitters/rtpfaketransmitter.cpp normal armv7 c++ com.apple.compilers.llvmgcc42    cd /Users/anurodhp/Desktop/jrtplib-3.9.0    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/llvm-gcc-4.2 -x c++ -arch armv7 -fmessage-length=0 -pipe -Wno-trigraphs -fpascal-strings -O0 "-DCMAKE_INTDIR=\"Debug\"" -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk -gdwarf-2 -mthumb -miphoneos-version-min=5.0 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug/include -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources/armv7 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -F/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug -c /Users/anurodhp/Desktop/jrtplib-3.9.0/src/extratransmitters/rtpfaketransmitter.cpp -o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpfaketransmitter.o36"9C230C2A-B0BD-4BC8-A409-22F82537880C-
+
+CCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpinternalsourcedata.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpinternalsourcedata.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+s336274089.765105
+e336274090.685957
+r1
+xCompileC
+xsrc/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpinternalsourcedata.o
+x/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpinternalsourcedata.cpp
+xnormal
+xarmv7
+xc++
+xcom.apple.compilers.llvmgcc42
+lSLF04#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection75"Compile /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpinternalsourcedata.cppc102c4a9220bb441^b4acafaa220bb441^---0#0#0#-19%DVTDocumentLocation2@83"file://localhost/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpinternalsourcedata.cpp0000000000000000^1331"CompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpinternalsourcedata.o src/rtpinternalsourcedata.cpp normal armv7 c++ com.apple.compilers.llvmgcc42    cd /Users/anurodhp/Desktop/jrtplib-3.9.0    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/llvm-gcc-4.2 -x c++ -arch armv7 -fmessage-length=0 -pipe -Wno-trigraphs -fpascal-strings -O0 "-DCMAKE_INTDIR=\"Debug\"" -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk -gdwarf-2 -mthumb -miphoneos-version-min=5.0 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug/include -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources/armv7 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -F/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug -c /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpinternalsourcedata.cpp -o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpinternalsourcedata.o36"0EF5D6B6-FA88-476D-9ADA-057F7B4A422D-
+
+CCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpipv4address.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpipv4address.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+s336274090.688053
+e336274091.128152
+r1
+xCompileC
+xsrc/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpipv4address.o
+x/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpipv4address.cpp
+xnormal
+xarmv7
+xc++
+xcom.apple.compilers.llvmgcc42
+lSLF04#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection68"Compile /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpipv4address.cpp2349b0aa220bb441^abe720ab220bb441^---0#0#0#-19%DVTDocumentLocation2@76"file://localhost/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpipv4address.cpp0000000000000000^1303"CompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpipv4address.o src/rtpipv4address.cpp normal armv7 c++ com.apple.compilers.llvmgcc42    cd /Users/anurodhp/Desktop/jrtplib-3.9.0    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/llvm-gcc-4.2 -x c++ -arch armv7 -fmessage-length=0 -pipe -Wno-trigraphs -fpascal-strings -O0 "-DCMAKE_INTDIR=\"Debug\"" -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk -gdwarf-2 -mthumb -miphoneos-version-min=5.0 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug/include -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources/armv7 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -F/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug -c /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpipv4address.cpp -o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpipv4address.o36"7634E8F6-EA59-44C5-A9E1-EDFFE68CEE45-
+
+CCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpipv6address.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpipv6address.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+s336274091.130263
+e336274091.854882
+r1
+xCompileC
+xsrc/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpipv6address.o
+x/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpipv6address.cpp
+xnormal
+xarmv7
+xc++
+xcom.apple.compilers.llvmgcc42
+lSLF04#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection68"Compile /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpipv6address.cpp027e21ab220bb441^d5ebdaab220bb441^---0#0#0#-19%DVTDocumentLocation2@76"file://localhost/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpipv6address.cpp0000000000000000^1303"CompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpipv6address.o src/rtpipv6address.cpp normal armv7 c++ com.apple.compilers.llvmgcc42    cd /Users/anurodhp/Desktop/jrtplib-3.9.0    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/llvm-gcc-4.2 -x c++ -arch armv7 -fmessage-length=0 -pipe -Wno-trigraphs -fpascal-strings -O0 "-DCMAKE_INTDIR=\"Debug\"" -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk -gdwarf-2 -mthumb -miphoneos-version-min=5.0 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug/include -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources/armv7 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -F/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug -c /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpipv6address.cpp -o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpipv6address.o36"87176CBB-DDFE-43F5-A29C-EDFE9B7987B8-
+
+CCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtplibraryversion.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtplibraryversion.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+s336274091.856817
+e336274092.365727
+r1
+xCompileC
+xsrc/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtplibraryversion.o
+x/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtplibraryversion.cpp
+xnormal
+xarmv7
+xc++
+xcom.apple.compilers.llvmgcc42
+lSLF04#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection71"Compile /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtplibraryversion.cpp9a7cdbab220bb441^14b45dac220bb441^---0#0#0#-19%DVTDocumentLocation2@79"file://localhost/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtplibraryversion.cpp0000000000000000^1315"CompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtplibraryversion.o src/rtplibraryversion.cpp normal armv7 c++ com.apple.compilers.llvmgcc42    cd /Users/anurodhp/Desktop/jrtplib-3.9.0    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/llvm-gcc-4.2 -x c++ -arch armv7 -fmessage-length=0 -pipe -Wno-trigraphs -fpascal-strings -O0 "-DCMAKE_INTDIR=\"Debug\"" -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk -gdwarf-2 -mthumb -miphoneos-version-min=5.0 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug/include -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources/armv7 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -F/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug -c /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtplibraryversion.cpp -o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtplibraryversion.o36"35D0CBC0-6476-4E67-8A82-06A4FEAF6FC4-
+
+CCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtppacket.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtppacket.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+s336274092.367451
+e336274092.926265
+r1
+xCompileC
+xsrc/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtppacket.o
+x/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtppacket.cpp
+xnormal
+xarmv7
+xc++
+xcom.apple.compilers.llvmgcc42
+lSLF04#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection63"Compile /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtppacket.cpp93355eac220bb441^ba31edac220bb441^---0#0#0#-19%DVTDocumentLocation2@71"file://localhost/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtppacket.cpp0000000000000000^1283"CompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtppacket.o src/rtppacket.cpp normal armv7 c++ com.apple.compilers.llvmgcc42    cd /Users/anurodhp/Desktop/jrtplib-3.9.0    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/llvm-gcc-4.2 -x c++ -arch armv7 -fmessage-length=0 -pipe -Wno-trigraphs -fpascal-strings -O0 "-DCMAKE_INTDIR=\"Debug\"" -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk -gdwarf-2 -mthumb -miphoneos-version-min=5.0 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug/include -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources/armv7 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -F/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug -c /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtppacket.cpp -o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtppacket.o36"A890460C-07AA-4EC7-B701-A6571BC6B015-
+
+CCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtppacketbuilder.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtppacketbuilder.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+s336274092.928069
+e336274093.707199
+r1
+xCompileC
+xsrc/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtppacketbuilder.o
+x/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtppacketbuilder.cpp
+xnormal
+xarmv7
+xc++
+xcom.apple.compilers.llvmgcc42
+lSLF04#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection70"Compile /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtppacketbuilder.cppb6b9edac220bb441^261db5ad220bb441^---0#0#0#-19%DVTDocumentLocation2@78"file://localhost/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtppacketbuilder.cpp0000000000000000^1311"CompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtppacketbuilder.o src/rtppacketbuilder.cpp normal armv7 c++ com.apple.compilers.llvmgcc42    cd /Users/anurodhp/Desktop/jrtplib-3.9.0    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/llvm-gcc-4.2 -x c++ -arch armv7 -fmessage-length=0 -pipe -Wno-trigraphs -fpascal-strings -O0 "-DCMAKE_INTDIR=\"Debug\"" -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk -gdwarf-2 -mthumb -miphoneos-version-min=5.0 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug/include -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources/armv7 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -F/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug -c /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtppacketbuilder.cpp -o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtppacketbuilder.o36"78406066-A2AD-4AEC-BB38-34385DED2BDE-
+
+CCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtppollthread.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtppollthread.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+s336274093.709179
+e336274093.810112
+r1
+xCompileC
+xsrc/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtppollthread.o
+x/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtppollthread.cpp
+xnormal
+xarmv7
+xc++
+xcom.apple.compilers.llvmgcc42
+lSLF04#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection67"Compile /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtppollthread.cpp53b1b5ad220bb441^8675cfad220bb441^---0#0#0#-19%DVTDocumentLocation2@75"file://localhost/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtppollthread.cpp0000000000000000^1299"CompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtppollthread.o src/rtppollthread.cpp normal armv7 c++ com.apple.compilers.llvmgcc42    cd /Users/anurodhp/Desktop/jrtplib-3.9.0    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/llvm-gcc-4.2 -x c++ -arch armv7 -fmessage-length=0 -pipe -Wno-trigraphs -fpascal-strings -O0 "-DCMAKE_INTDIR=\"Debug\"" -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk -gdwarf-2 -mthumb -miphoneos-version-min=5.0 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug/include -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources/armv7 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -F/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug -c /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtppollthread.cpp -o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtppollthread.o36"218B9818-F378-4942-A4D5-C28B0F9DCF33-
+
+CCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtprandom.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtprandom.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+s336274093.812039
+e336274094.030490
+r1
+xCompileC
+xsrc/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtprandom.o
+x/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtprandom.cpp
+xnormal
+xarmv7
+xc++
+xcom.apple.compilers.llvmgcc42
+lSLF04#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection63"Compile /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtprandom.cpp7105d0ad220bb441^59e007ae220bb441^---0#0#0#-19%DVTDocumentLocation2@71"file://localhost/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtprandom.cpp0000000000000000^1283"CompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtprandom.o src/rtprandom.cpp normal armv7 c++ com.apple.compilers.llvmgcc42    cd /Users/anurodhp/Desktop/jrtplib-3.9.0    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/llvm-gcc-4.2 -x c++ -arch armv7 -fmessage-length=0 -pipe -Wno-trigraphs -fpascal-strings -O0 "-DCMAKE_INTDIR=\"Debug\"" -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk -gdwarf-2 -mthumb -miphoneos-version-min=5.0 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug/include -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources/armv7 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -F/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug -c /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtprandom.cpp -o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtprandom.o36"07D83625-E63E-4F57-AE32-E1267CEEAE2E-
+
+CCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtprandomrand48.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtprandomrand48.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+s336274094.032422
+e336274094.308350
+r1
+xCompileC
+xsrc/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtprandomrand48.o
+x/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtprandomrand48.cpp
+xnormal
+xarmv7
+xc++
+xcom.apple.compilers.llvmgcc42
+lSLF04#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection69"Compile /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtprandomrand48.cppda7008ae220bb441^4f024fae220bb441^---0#0#0#-19%DVTDocumentLocation2@77"file://localhost/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtprandomrand48.cpp0000000000000000^1307"CompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtprandomrand48.o src/rtprandomrand48.cpp normal armv7 c++ com.apple.compilers.llvmgcc42    cd /Users/anurodhp/Desktop/jrtplib-3.9.0    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/llvm-gcc-4.2 -x c++ -arch armv7 -fmessage-length=0 -pipe -Wno-trigraphs -fpascal-strings -O0 "-DCMAKE_INTDIR=\"Debug\"" -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk -gdwarf-2 -mthumb -miphoneos-version-min=5.0 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug/include -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources/armv7 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -F/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug -c /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtprandomrand48.cpp -o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtprandomrand48.o36"F02B6C9F-4763-4F34-9A15-0582C34B3778-
+
+CCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtprandomrands.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtprandomrands.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+s336274094.310350
+e336274094.798390
+r1
+xCompileC
+xsrc/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtprandomrands.o
+x/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtprandomrands.cpp
+xnormal
+xarmv7
+xc++
+xcom.apple.compilers.llvmgcc42
+lSLF04#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection68"Compile /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtprandomrands.cpp8f5152ae220bb441^7175ccae220bb441^---0#0#0#-19%DVTDocumentLocation2@76"file://localhost/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtprandomrands.cpp0000000000000000^1303"CompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtprandomrands.o src/rtprandomrands.cpp normal armv7 c++ com.apple.compilers.llvmgcc42    cd /Users/anurodhp/Desktop/jrtplib-3.9.0    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/llvm-gcc-4.2 -x c++ -arch armv7 -fmessage-length=0 -pipe -Wno-trigraphs -fpascal-strings -O0 "-DCMAKE_INTDIR=\"Debug\"" -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk -gdwarf-2 -mthumb -miphoneos-version-min=5.0 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug/include -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources/armv7 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -F/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug -c /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtprandomrands.cpp -o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtprandomrands.o36"B23BE37F-FFA8-4F7F-B9A1-F9D5694CE7F9-
+
+CCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtprandomurandom.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtprandomurandom.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+s336274094.800348
+e336274095.245293
+r1
+xCompileC
+xsrc/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtprandomurandom.o
+x/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtprandomurandom.cpp
+xnormal
+xarmv7
+xc++
+xcom.apple.compilers.llvmgcc42
+lSLF04#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection70"Compile /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtprandomurandom.cppb807cdae220bb441^b5df3eaf220bb441^---0#0#0#-19%DVTDocumentLocation2@78"file://localhost/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtprandomurandom.cpp0000000000000000^1311"CompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtprandomurandom.o src/rtprandomurandom.cpp normal armv7 c++ com.apple.compilers.llvmgcc42    cd /Users/anurodhp/Desktop/jrtplib-3.9.0    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/llvm-gcc-4.2 -x c++ -arch armv7 -fmessage-length=0 -pipe -Wno-trigraphs -fpascal-strings -O0 "-DCMAKE_INTDIR=\"Debug\"" -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk -gdwarf-2 -mthumb -miphoneos-version-min=5.0 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug/include -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources/armv7 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -F/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug -c /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtprandomurandom.cpp -o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtprandomurandom.o36"2B0632CD-DDA6-4C65-903F-9A0EBAA0B609-
+
+CCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpsession.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsession.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+s336274095.247172
+e336274097.193389
+r1
+xCompileC
+xsrc/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpsession.o
+x/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsession.cpp
+xnormal
+xarmv7
+xc++
+xcom.apple.compilers.llvmgcc42
+o/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsession.h: In constructor 'jrtplib::RTPSession::RTPSession(jrtplib::RTPRandom*, jrtplib::RTPMemoryManager*)':
+o/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsession.h:559: warning: 'jrtplib::RTPSession::sources' will be initialized after
+o/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsession.h:540: warning:   'jrtplib::RTPRandom* jrtplib::RTPSession::rtprnd'
+o/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsession.cpp:87: warning:   when initialized here
+lSLF04#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection64"Compile /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsession.cpp4c6b3faf220bb441^089431b1220bb441^-496"/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsession.h: In constructor 'jrtplib::RTPSession::RTPSession(jrtplib::RTPRandom*, jrtplib::RTPMemoryManager*)':/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsession.h:559: warning: 'jrtplib::RTPSession::sources' will be initialized after/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsession.h:540: warning:   'jrtplib::RTPRandom* jrtplib::RTPSession::rtprnd'/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsession.cpp:87: warning:   when initialized here3(21%IDEActivityLogMessage2@56"'jrtplib::RTPSession::sources' will be initialized after-336274096#155#126#-1#-23%DVTTextDocumentLocation3@70"file://localhost/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsession.h0000000000000000^558#4294967295#558#4294967295#4294967295#0#20"LLVM GCC 4.2 Warning--2@49"'jrtplib::RTPRandom* jrtplib::RTPSession::rtprnd'-336274096#281#121#-1#-3@70"file://localhost/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsession.h0000000000000000^539#4294967295#539#4294967295#4294967295#0#20"LLVM GCC 4.2 Warning--2@21"When initialized here-336274096#402#94#-1#-3@72"file://localhost/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsession.cpp0000000000000000^86#4294967295#86#4294967295#4294967295#0#20"LLVM GCC 4.2 Warning--0#0#0#-19%DVTDocumentLocation4@72"file://localhost/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsession.cpp0000000000000000^1287"CompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpsession.o src/rtpsession.cpp normal armv7 c++ com.apple.compilers.llvmgcc42    cd /Users/anurodhp/Desktop/jrtplib-3.9.0    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/llvm-gcc-4.2 -x c++ -arch armv7 -fmessage-length=0 -pipe -Wno-trigraphs -fpascal-strings -O0 "-DCMAKE_INTDIR=\"Debug\"" -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk -gdwarf-2 -mthumb -miphoneos-version-min=5.0 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug/include -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources/armv7 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -F/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug -c /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsession.cpp -o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpsession.o36"2E20F98D-193F-4844-90BC-20AF556D915B-
+
+CCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpsessionparams.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsessionparams.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+s336274097.195548
+e336274098.056140
+r1
+xCompileC
+xsrc/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpsessionparams.o
+x/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsessionparams.cpp
+xnormal
+xarmv7
+xc++
+xcom.apple.compilers.llvmgcc42
+lSLF04#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection70"Compile /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsessionparams.cpp7b3332b1220bb441^69710eb2220bb441^---0#0#0#-19%DVTDocumentLocation2@78"file://localhost/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsessionparams.cpp0000000000000000^1311"CompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpsessionparams.o src/rtpsessionparams.cpp normal armv7 c++ com.apple.compilers.llvmgcc42    cd /Users/anurodhp/Desktop/jrtplib-3.9.0    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/llvm-gcc-4.2 -x c++ -arch armv7 -fmessage-length=0 -pipe -Wno-trigraphs -fpascal-strings -O0 "-DCMAKE_INTDIR=\"Debug\"" -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk -gdwarf-2 -mthumb -miphoneos-version-min=5.0 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug/include -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources/armv7 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -F/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug -c /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsessionparams.cpp -o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpsessionparams.o36"DEF6B6A8-9686-4122-A3BC-EC9804DB0369-
+
+CCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpsessionsources.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsessionsources.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+s336274098.058792
+e336274098.865096
+r1
+xCompileC
+xsrc/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpsessionsources.o
+x/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsessionsources.cpp
+xnormal
+xarmv7
+xc++
+xcom.apple.compilers.llvmgcc42
+lSLF04#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection71"Compile /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsessionsources.cpp12330fb2220bb441^f488ddb2220bb441^---0#0#0#-19%DVTDocumentLocation2@79"file://localhost/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsessionsources.cpp0000000000000000^1315"CompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpsessionsources.o src/rtpsessionsources.cpp normal armv7 c++ com.apple.compilers.llvmgcc42    cd /Users/anurodhp/Desktop/jrtplib-3.9.0    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/llvm-gcc-4.2 -x c++ -arch armv7 -fmessage-length=0 -pipe -Wno-trigraphs -fpascal-strings -O0 "-DCMAKE_INTDIR=\"Debug\"" -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk -gdwarf-2 -mthumb -miphoneos-version-min=5.0 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug/include -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources/armv7 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -F/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug -c /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsessionsources.cpp -o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpsessionsources.o36"0EA38D3A-BC50-4159-9EF8-C0804EA3B021-
+
+CCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpsourcedata.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsourcedata.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+s336274098.867023
+e336274100.020012
+r1
+xCompileC
+xsrc/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpsourcedata.o
+x/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsourcedata.cpp
+xnormal
+xarmv7
+xc++
+xcom.apple.compilers.llvmgcc42
+lSLF04#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection67"Compile /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsourcedata.cpp0119deb2220bb441^873105b4220bb441^---0#0#0#-19%DVTDocumentLocation2@75"file://localhost/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsourcedata.cpp0000000000000000^1299"CompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpsourcedata.o src/rtpsourcedata.cpp normal armv7 c++ com.apple.compilers.llvmgcc42    cd /Users/anurodhp/Desktop/jrtplib-3.9.0    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/llvm-gcc-4.2 -x c++ -arch armv7 -fmessage-length=0 -pipe -Wno-trigraphs -fpascal-strings -O0 "-DCMAKE_INTDIR=\"Debug\"" -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk -gdwarf-2 -mthumb -miphoneos-version-min=5.0 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug/include -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources/armv7 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -F/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug -c /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsourcedata.cpp -o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpsourcedata.o36"A9F0CCB7-33D0-48AC-ACB5-08540B9DE96B-
+
+CCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpsources.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsources.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+s336274100.022264
+e336274101.235608
+r1
+xCompileC
+xsrc/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpsources.o
+x/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsources.cpp
+xnormal
+xarmv7
+xc++
+xcom.apple.compilers.llvmgcc42
+lSLF04#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection64"Compile /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsources.cpp51d805b4220bb441^f6623cb5220bb441^---0#0#0#-19%DVTDocumentLocation2@72"file://localhost/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsources.cpp0000000000000000^1287"CompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpsources.o src/rtpsources.cpp normal armv7 c++ com.apple.compilers.llvmgcc42    cd /Users/anurodhp/Desktop/jrtplib-3.9.0    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/llvm-gcc-4.2 -x c++ -arch armv7 -fmessage-length=0 -pipe -Wno-trigraphs -fpascal-strings -O0 "-DCMAKE_INTDIR=\"Debug\"" -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk -gdwarf-2 -mthumb -miphoneos-version-min=5.0 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug/include -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources/armv7 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -F/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug -c /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpsources.cpp -o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpsources.o36"756EF1C7-0BB0-483B-8FF1-2A8BA3A3D2B4-
+
+CCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtptimeutilities.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtptimeutilities.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+s336274101.237679
+e336274101.340302
+r1
+xCompileC
+xsrc/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtptimeutilities.o
+x/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtptimeutilities.cpp
+xnormal
+xarmv7
+xc++
+xcom.apple.compilers.llvmgcc42
+lSLF04#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection70"Compile /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtptimeutilities.cpp030a3db5220bb441^fd2f57b5220bb441^---0#0#0#-19%DVTDocumentLocation2@78"file://localhost/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtptimeutilities.cpp0000000000000000^1311"CompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtptimeutilities.o src/rtptimeutilities.cpp normal armv7 c++ com.apple.compilers.llvmgcc42    cd /Users/anurodhp/Desktop/jrtplib-3.9.0    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/llvm-gcc-4.2 -x c++ -arch armv7 -fmessage-length=0 -pipe -Wno-trigraphs -fpascal-strings -O0 "-DCMAKE_INTDIR=\"Debug\"" -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk -gdwarf-2 -mthumb -miphoneos-version-min=5.0 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug/include -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources/armv7 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -F/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug -c /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtptimeutilities.cpp -o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtptimeutilities.o36"0296EC34-EA2D-45A6-A8B5-4FA47D64904D-
+
+CCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpudpv4transmitter.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpudpv4transmitter.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+s336274101.342227
+e336274103.737087
+r1
+xCompileC
+xsrc/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpudpv4transmitter.o
+x/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpudpv4transmitter.cpp
+xnormal
+xarmv7
+xc++
+xcom.apple.compilers.llvmgcc42
+lSLF04#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection73"Compile /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpudpv4transmitter.cppf9bf57b5220bb441^37c4bcb7220bb441^---0#0#0#-19%DVTDocumentLocation2@81"file://localhost/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpudpv4transmitter.cpp0000000000000000^1323"CompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpudpv4transmitter.o src/rtpudpv4transmitter.cpp normal armv7 c++ com.apple.compilers.llvmgcc42    cd /Users/anurodhp/Desktop/jrtplib-3.9.0    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/llvm-gcc-4.2 -x c++ -arch armv7 -fmessage-length=0 -pipe -Wno-trigraphs -fpascal-strings -O0 "-DCMAKE_INTDIR=\"Debug\"" -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk -gdwarf-2 -mthumb -miphoneos-version-min=5.0 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug/include -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources/armv7 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -F/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug -c /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpudpv4transmitter.cpp -o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpudpv4transmitter.o36"04A77EBE-ED63-410A-8FDB-B28DD9D6FD48-
+
+CCompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpudpv6transmitter.o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpudpv6transmitter.cpp normal armv7 c++ com.apple.compilers.llvmgcc42
+s336274103.739104
+e336274105.480659
+r1
+xCompileC
+xsrc/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpudpv6transmitter.o
+x/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpudpv6transmitter.cpp
+xnormal
+xarmv7
+xc++
+xcom.apple.compilers.llvmgcc42
+lSLF04#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection73"Compile /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpudpv6transmitter.cppf759bdb7220bb441^c11e7bb9220bb441^---0#0#0#-19%DVTDocumentLocation2@81"file://localhost/Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpudpv6transmitter.cpp0000000000000000^1323"CompileC src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpudpv6transmitter.o src/rtpudpv6transmitter.cpp normal armv7 c++ com.apple.compilers.llvmgcc42    cd /Users/anurodhp/Desktop/jrtplib-3.9.0    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/llvm-gcc-4.2 -x c++ -arch armv7 -fmessage-length=0 -pipe -Wno-trigraphs -fpascal-strings -O0 "-DCMAKE_INTDIR=\"Debug\"" -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk -gdwarf-2 -mthumb -miphoneos-version-min=5.0 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug/include -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources/armv7 -I/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -F/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug -c /Users/anurodhp/Desktop/jrtplib-3.9.0/src/rtpudpv6transmitter.cpp -o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpudpv6transmitter.o36"274B6441-7042-4B95-9F8D-24F011CE09C5-
+
+CLibtool /Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug/libjrtp.a normal armv7
+s336274108.948427
+e336274109.071005
+r1
+xLibtool
+x/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug/libjrtp.a
+xnormal
+xarmv7
+o/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/libtool: file: /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtcppacket.o has no symbols
+o/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/libtool: file: /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtpdebug.o has no symbols
+o/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/libtool: file: /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtppollthread.o has no symbols
+o/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/libtool: file: /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/rtptimeutilities.o has no symbols
+lSLF04#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection40"Libtool src/Debug/libjrtp.a normal armv78decf2bc220bb441^c44112bd220bb441^---0#0#0#--680"Libtool src/Debug/libjrtp.a normal armv7    cd /Users/anurodhp/Desktop/jrtplib-3.9.0    setenv IPHONEOS_DEPLOYMENT_TARGET 5.0    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/libtool -static -arch_only armv7 -syslibroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk -L/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug -filelist /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/jrtp.LinkFileList -o /Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug/libjrtp.a36"3E620193-AFFE-4434-88FC-50E57E54837A-
+
+CPhaseScriptExecution "CMake PostBuild Rules" /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Script-2E8844A02E8844A02E8844A0.sh
+s336274109.074799
+e336274109.205937
+r1
+xPhaseScriptExecution
+xCMake PostBuild Rules
+x/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Script-2E8844A02E8844A02E8844A0.sh
+oecho "Depend check for xcode"
+oDepend check for xcode
+ocd /Users/anurodhp/Desktop/jrtplib-3.9.0 && make -C /Users/anurodhp/Desktop/jrtplib-3.9.0 -f /Users/anurodhp/Desktop/jrtplib-3.9.0/CMakeScripts/XCODE_DEPEND_HELPER.make PostBuild.jrtplib-static.Debug
+o/bin/rm -f /Users/anurodhp/Desktop/jrtplib-3.9.0/examples/Debug/example1
+o/bin/rm -f /Users/anurodhp/Desktop/jrtplib-3.9.0/examples/Debug/example2
+o/bin/rm -f /Users/anurodhp/Desktop/jrtplib-3.9.0/examples/Debug/example3
+o/bin/rm -f /Users/anurodhp/Desktop/jrtplib-3.9.0/examples/Debug/example4
+o/bin/rm -f /Users/anurodhp/Desktop/jrtplib-3.9.0/examples/Debug/example5
+lSLF04#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection47"Run custom shell script 'CMake PostBuild Rules'29b414bd220bb441^a3ca34bd220bb441^-618"echo "Depend check for xcode"Depend check for xcodecd /Users/anurodhp/Desktop/jrtplib-3.9.0 && make -C /Users/anurodhp/Desktop/jrtplib-3.9.0 -f /Users/anurodhp/Desktop/jrtplib-3.9.0/CMakeScripts/XCODE_DEPEND_HELPER.make PostBuild.jrtplib-static.Debug/bin/rm -f /Users/anurodhp/Desktop/jrtplib-3.9.0/examples/Debug/example1/bin/rm -f /Users/anurodhp/Desktop/jrtplib-3.9.0/examples/Debug/example2/bin/rm -f /Users/anurodhp/Desktop/jrtplib-3.9.0/examples/Debug/example3/bin/rm -f /Users/anurodhp/Desktop/jrtplib-3.9.0/examples/Debug/example4/bin/rm -f /Users/anurodhp/Desktop/jrtplib-3.9.0/examples/Debug/example58(21%IDEActivityLogMessage2@30"echo "Depend check for xcode"-336274109#0#30#-0#-----2@23"Depend check for xcode-336274109#30#23#-0#-----2@200"cd /Users/anurodhp/Desktop/jrtplib-3.9.0 && make -C /Users/anurodhp/Desktop/jrtplib-3.9.0 -f /Users/anurodhp/Desktop/jrtplib-3.9.0/CMakeScripts/XCODE_DEPEND_HELPER.make PostBuild.jrtplib-static.Debug-336274109#53#200#-0#-----2@73"/bin/rm -f /Users/anurodhp/Desktop/jrtplib-3.9.0/examples/Debug/example1-336274109#253#73#-0#-----2@73"/bin/rm -f /Users/anurodhp/Desktop/jrtplib-3.9.0/examples/Debug/example2-336274109#326#73#-0#-----2@73"/bin/rm -f /Users/anurodhp/Desktop/jrtplib-3.9.0/examples/Debug/example3-336274109#399#73#-0#-----2@73"/bin/rm -f /Users/anurodhp/Desktop/jrtplib-3.9.0/examples/Debug/example4-336274109#472#73#-0#-----2@73"/bin/rm -f /Users/anurodhp/Desktop/jrtplib-3.9.0/examples/Debug/example5-336274109#545#73#-0#-----0#0#0#--16405"PhaseScriptExecution "CMake PostBuild Rules" src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Script-2E8844A02E8844A02E8844A0.sh    cd /Users/anurodhp/Desktop/jrtplib-3.9.0    setenv ACTION build    setenv AD_HOC_CODE_SIGNING_ALLOWED NO    setenv ALTERNATE_GROUP staff    setenv ALTERNATE_MODE u+w,go-w,a+rX    setenv ALTERNATE_OWNER anurodhp    setenv ALWAYS_SEARCH_USER_PATHS YES    setenv APPLE_INTERNAL_DEVELOPER_DIR /AppleInternal/Developer    setenv APPLE_INTERNAL_DIR /AppleInternal    setenv APPLE_INTERNAL_DOCUMENTATION_DIR /AppleInternal/Documentation    setenv APPLE_INTERNAL_LIBRARY_DIR /AppleInternal/Library    setenv APPLE_INTERNAL_TOOLS /AppleInternal/Developer/Tools    setenv APPLY_RULES_IN_COPY_FILES NO    setenv ARCHS armv7    setenv ARCHS_STANDARD_32_64_BIT armv7    setenv ARCHS_STANDARD_32_BIT armv7    setenv ARCHS_UNIVERSAL_IPHONE_OS armv7    setenv AVAILABLE_PLATFORMS "macosx iphoneos iphonesimulator"    setenv BUILD_COMPONENTS "headers build"    setenv BUILD_DIR /Users/anurodhp/Desktop/jrtplib-3.9.0/src    setenv BUILD_ROOT /Users/anurodhp/Desktop/jrtplib-3.9.0/src    setenv BUILD_STYLE     setenv BUILD_VARIANTS normal    setenv BUILT_PRODUCTS_DIR /Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug    setenv CACHE_ROOT /var/folders/NY/NYEjXtIAGGS6bY4L-OXnc++++TM/-Caches-/com.apple.Xcode.502    setenv CCHROOT /var/folders/NY/NYEjXtIAGGS6bY4L-OXnc++++TM/-Caches-/com.apple.Xcode.502    setenv CHMOD /bin/chmod    setenv CHOWN /usr/sbin/chown    setenv CLASS_FILE_DIR /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/JavaClasses    setenv CLEAN_PRECOMPS YES    setenv CLONE_HEADERS NO    setenv CODESIGNING_FOLDER_PATH /Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug/libjrtp.a    setenv CODE_SIGNING_ALLOWED NO    setenv CODE_SIGNING_REQUIRED YES    setenv CODE_SIGN_CONTEXT_CLASS XCiPhoneOSCodeSignContext    setenv COMMAND_MODE legacy    setenv COMPOSITE_SDK_DIRS /var/folders/NY/NYEjXtIAGGS6bY4L-OXnc++++TM/-Caches-/com.apple.Xcode.502/CompositeSDKs    setenv COMPRESS_PNG_FILES YES    setenv CONFIGURATION Debug    setenv CONFIGURATION_BUILD_DIR /Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug    setenv CONFIGURATION_TEMP_DIR /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos    setenv COPYING_PRESERVES_HFS_DATA NO    setenv COPY_PHASE_STRIP YES    setenv COPY_RESOURCES_FROM_STATIC_FRAMEWORKS YES    setenv CP /bin/cp    setenv CURRENT_ARCH armv7    setenv CURRENT_VARIANT normal    setenv DEAD_CODE_STRIPPING YES    setenv DEBUGGING_SYMBOLS YES    setenv DEBUG_INFORMATION_FORMAT dwarf-with-dsym    setenv DEPLOYMENT_LOCATION NO    setenv DEPLOYMENT_POSTPROCESSING NO    setenv DERIVED_FILES_DIR /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources    setenv DERIVED_FILE_DIR /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources    setenv DERIVED_SOURCES_DIR /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources    setenv DEVELOPER_APPLICATIONS_DIR /Developer/Applications    setenv DEVELOPER_BIN_DIR /Developer/usr/bin    setenv DEVELOPER_DIR /Developer    setenv DEVELOPER_FRAMEWORKS_DIR /Developer/Library/Frameworks    setenv DEVELOPER_FRAMEWORKS_DIR_QUOTED "\"/Developer/Library/Frameworks\""    setenv DEVELOPER_LIBRARY_DIR /Developer/Library    setenv DEVELOPER_SDK_DIR /Developer/SDKs    setenv DEVELOPER_TOOLS_DIR /Developer/Tools    setenv DEVELOPER_USR_DIR /Developer/usr    setenv DEVELOPMENT_LANGUAGE English    setenv DO_HEADER_SCANNING_IN_JAM NO    setenv DSTROOT /tmp/jrtplib.dst    setenv DWARF_DSYM_FILE_NAME libjrtp.a.dSYM    setenv DWARF_DSYM_FILE_SHOULD_ACCOMPANY_PRODUCT NO    setenv DWARF_DSYM_FOLDER_PATH /Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug    setenv EFFECTIVE_PLATFORM_NAME -iphoneos    setenv EMBEDDED_PROFILE_NAME embedded.mobileprovision    setenv ENABLE_HEADER_DEPENDENCIES YES    setenv ENABLE_OPENMP_SUPPORT NO    setenv ENTITLEMENTS_REQUIRED YES    setenv EXCLUDED_INSTALLSRC_SUBDIRECTORY_PATTERNS ".DS_Store .svn .git .hg CVS"    setenv EXCLUDED_RECURSIVE_SEARCH_PATH_SUBDIRECTORIES "*.nib *.lproj *.framework *.gch (*) .DS_Store CVS .svn .git .hg *.xcodeproj *.xcode *.pbproj *.pbxproj"    setenv EXECUTABLE_EXTENSION a    setenv EXECUTABLE_NAME libjrtp.a    setenv EXECUTABLE_PATH libjrtp.a    setenv EXECUTABLE_PREFIX lib    setenv EXECUTABLE_SUFFIX .a    setenv FILE_LIST /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects/LinkFileList    setenv FIXED_FILES_DIR /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/FixedFiles    setenv FRAMEWORK_FLAG_PREFIX -framework    setenv FRAMEWORK_SEARCH_PATHS "\"/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug\" "    setenv FRAMEWORK_VERSION A    setenv FULL_PRODUCT_NAME libjrtp.a    setenv GCC3_VERSION 3.3    setenv GCC_ENABLE_SYMBOL_SEPARATION NO    setenv GCC_GENERATE_DEBUGGING_SYMBOLS YES    setenv GCC_INLINES_ARE_PRIVATE_EXTERN NO    setenv GCC_OPTIMIZATION_LEVEL 0    setenv GCC_PFE_FILE_C_DIALECTS "c objective-c c++ objective-c++"    setenv GCC_PREPROCESSOR_DEFINITIONS "'CMAKE_INTDIR=\"Debug\"'"    setenv GCC_SYMBOLS_PRIVATE_EXTERN NO    setenv GCC_THUMB_SUPPORT YES    setenv GCC_TREAT_WARNINGS_AS_ERRORS NO    setenv GCC_VERSION com.apple.compilers.llvmgcc42    setenv GCC_VERSION_IDENTIFIER com_apple_compilers_llvmgcc42    setenv GENERATE_MASTER_OBJECT_FILE NO    setenv GENERATE_PKGINFO_FILE NO    setenv GENERATE_PROFILING_CODE NO    setenv GID 20    setenv GROUP staff    setenv HEADERMAP_INCLUDES_FLAT_ENTRIES_FOR_TARGET_BEING_BUILT YES    setenv HEADERMAP_INCLUDES_FRAMEWORK_ENTRIES_FOR_ALL_PRODUCT_TYPES YES    setenv HEADERMAP_INCLUDES_NONPUBLIC_NONPRIVATE_HEADERS YES    setenv HEADERMAP_INCLUDES_PROJECT_HEADERS YES    setenv HEADER_SEARCH_PATHS "\"/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug/include\" /Users/anurodhp/Desktop/jrtplib-3.9.0/src"    setenv ICONV /usr/bin/iconv    setenv INFOPLIST_EXPAND_BUILD_SETTINGS YES    setenv INFOPLIST_OUTPUT_FORMAT binary    setenv INFOPLIST_PREPROCESS NO    setenv INSTALL_DIR /tmp/jrtplib.dst    setenv INSTALL_GROUP staff    setenv INSTALL_MODE_FLAG u+w,go-w,a+rX    setenv INSTALL_OWNER anurodhp    setenv INSTALL_ROOT /tmp/jrtplib.dst    setenv IPHONEOS_DEPLOYMENT_TARGET 5.0    setenv JAVAC_DEFAULT_FLAGS "-J-Xms64m -J-XX:NewSize=4M -J-Dfile.encoding=UTF8"    setenv JAVA_APP_STUB /System/Library/Frameworks/JavaVM.framework/Resources/MacOS/JavaApplicationStub    setenv JAVA_ARCHIVE_CLASSES YES    setenv JAVA_ARCHIVE_TYPE JAR    setenv JAVA_COMPILER /usr/bin/javac    setenv JAVA_FRAMEWORK_RESOURCES_DIRS Resources    setenv JAVA_JAR_FLAGS cv    setenv JAVA_SOURCE_SUBDIR .    setenv JAVA_USE_DEPENDENCIES YES    setenv JAVA_ZIP_FLAGS -urg    setenv JIKES_DEFAULT_FLAGS "+E +OLDCSO"    setenv KEEP_PRIVATE_EXTERNS NO    setenv LD_GENERATE_MAP_FILE NO    setenv LD_MAP_FILE_PATH /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/jrtp-LinkMap-normal-armv7.txt    setenv LD_NO_PIE NO    setenv LD_OPENMP_FLAGS -fopenmp    setenv LEGACY_DEVELOPER_DIR /Developer/Library/Xcode/PrivatePlugIns/Xcode3Core.ideplugin/Contents/SharedSupport/Developer    setenv LEX /Developer/usr/bin/lex    setenv LIBRARY_FLAG_NOSPACE YES    setenv LIBRARY_FLAG_PREFIX -l    setenv LIBRARY_SEARCH_PATHS "\"/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug\" "    setenv LIBRARY_STYLE STATIC    setenv LINKER_DISPLAYS_MANGLED_NAMES NO    setenv LINK_FILE_LIST_normal_armv7 /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/jrtp.LinkFileList    setenv LINK_WITH_STANDARD_LIBRARIES YES    setenv LOCAL_ADMIN_APPS_DIR /Applications/Utilities    setenv LOCAL_APPS_DIR /Applications    setenv LOCAL_DEVELOPER_DIR /Library/Developer    setenv LOCAL_LIBRARY_DIR /Library    setenv MACH_O_TYPE staticlib    setenv MAC_OS_X_PRODUCT_BUILD_VERSION 10K549    setenv MAC_OS_X_VERSION_ACTUAL 1068    setenv MAC_OS_X_VERSION_MAJOR 1060    setenv MAC_OS_X_VERSION_MINOR 0608    setenv NATIVE_ARCH armv7    setenv NATIVE_ARCH_32_BIT i386    setenv NATIVE_ARCH_64_BIT x86_64    setenv NATIVE_ARCH_ACTUAL i386    setenv NO_COMMON YES    setenv OBJECT_FILE_DIR /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects    setenv OBJECT_FILE_DIR_normal /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal    setenv OBJROOT /Users/anurodhp/Desktop/jrtplib-3.9.0/src    setenv ONLY_ACTIVE_ARCH YES    setenv OPTIMIZATION_LEVEL 0    setenv OS MACOS    setenv OSAC /usr/bin/osacompile    setenv OTHER_CFLAGS "    "    setenv OTHER_CPLUSPLUSFLAGS "    "    setenv PACKAGE_TYPE com.apple.package-type.static-library    setenv PASCAL_STRINGS YES    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    setenv PATH_PREFIXES_EXCLUDED_FROM_HEADER_DEPENDENCIES "/usr/include /usr/local/include /System/Library/Frameworks /System/Library/PrivateFrameworks /Developer/Headers /Developer/SDKs /Developer/Platforms"    setenv PFE_FILE_C_DIALECTS c++    setenv PKGINFO_FILE_PATH /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/PkgInfo    setenv PLATFORM_DEVELOPER_APPLICATIONS_DIR /Developer/Platforms/iPhoneOS.platform/Developer/Applications    setenv PLATFORM_DEVELOPER_BIN_DIR /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin    setenv PLATFORM_DEVELOPER_LIBRARY_DIR /Developer/Library/Xcode/PrivatePlugIns/Xcode3Core.ideplugin/Contents/SharedSupport/Developer/Library    setenv PLATFORM_DEVELOPER_SDK_DIR /Developer/Platforms/iPhoneOS.platform/Developer/SDKs    setenv PLATFORM_DEVELOPER_TOOLS_DIR /Developer/Platforms/iPhoneOS.platform/Developer/Tools    setenv PLATFORM_DEVELOPER_USR_DIR /Developer/Platforms/iPhoneOS.platform/Developer/usr    setenv PLATFORM_DIR /Developer/Platforms/iPhoneOS.platform    setenv PLATFORM_NAME iphoneos    setenv PLATFORM_PREFERRED_ARCH armv7    setenv PLATFORM_PRODUCT_BUILD_VERSION 9A5302b    setenv PLIST_FILE_OUTPUT_FORMAT binary    setenv PREBINDING NO    setenv PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR YES    setenv PRECOMP_DESTINATION_DIR /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/PrefixHeaders    setenv PRESERVE_DEAD_CODE_INITS_AND_TERMS NO    setenv PRIVATE_HEADERS_FOLDER_PATH /usr/local/include    setenv PRODUCT_NAME jrtp    setenv PRODUCT_SETTINGS_PATH     setenv PRODUCT_TYPE com.apple.product-type.library.static    setenv PROFILING_CODE NO    setenv PROJECT jrtplib    setenv PROJECT_DERIVED_FILE_DIR /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/DerivedSources    setenv PROJECT_DIR /Users/anurodhp/Desktop/jrtplib-3.9.0    setenv PROJECT_FILE_PATH /Users/anurodhp/Desktop/jrtplib-3.9.0/jrtplib.xcodeproj    setenv PROJECT_NAME jrtplib    setenv PROJECT_TEMP_DIR /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build    setenv PUBLIC_HEADERS_FOLDER_PATH /usr/local/include    setenv RECURSIVE_SEARCH_PATHS_FOLLOW_SYMLINKS YES    setenv REMOVE_CVS_FROM_RESOURCES YES    setenv REMOVE_GIT_FROM_RESOURCES YES    setenv REMOVE_HG_FROM_RESOURCES YES    setenv REMOVE_SVN_FROM_RESOURCES YES    setenv REZ_COLLECTOR_DIR /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/ResourceManagerResources    setenv REZ_EXECUTABLE YES    setenv REZ_OBJECTS_DIR /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/ResourceManagerResources/Objects    setenv REZ_SEARCH_PATHS "\"/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug\" "    setenv RUN_CLANG_STATIC_ANALYZER NO    setenv SCAN_ALL_SOURCE_FILES_FOR_INCLUDES NO    setenv SCRIPT_INPUT_FILE_COUNT 0    setenv SCRIPT_OUTPUT_FILE_COUNT 0    setenv SDKROOT /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk    setenv SDK_DIR /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk    setenv SDK_NAME iphoneos5.0    setenv SDK_PRODUCT_BUILD_VERSION 9A5302b    setenv SED /usr/bin/sed    setenv SEPARATE_STRIP YES    setenv SEPARATE_SYMBOL_EDIT NO    setenv SET_DIR_MODE_OWNER_GROUP YES    setenv SET_FILE_MODE_OWNER_GROUP NO    setenv SHARED_DERIVED_FILE_DIR /Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug/DerivedSources    setenv SHARED_PRECOMPS_DIR /var/folders/NY/NYEjXtIAGGS6bY4L-OXnc++++TM/-Caches-/com.apple.Xcode.502/SharedPrecompiledHeaders    setenv SKIP_INSTALL YES    setenv SOURCE_ROOT /Users/anurodhp/Desktop/jrtplib-3.9.0    setenv SRCROOT /Users/anurodhp/Desktop/jrtplib-3.9.0    setenv STRINGS_FILE_OUTPUT_ENCODING binary    setenv STRIP_INSTALLED_PRODUCT YES    setenv STRIP_STYLE debugging    setenv SUPPORTED_DEVICE_FAMILIES 1,2    setenv SUPPORTED_PLATFORMS "iphoneos iphonesimulator"    setenv SYMROOT /Users/anurodhp/Desktop/jrtplib-3.9.0/src    setenv SYSTEM_ADMIN_APPS_DIR /Applications/Utilities    setenv SYSTEM_APPS_DIR /Applications    setenv SYSTEM_CORE_SERVICES_DIR /System/Library/CoreServices    setenv SYSTEM_DEMOS_DIR /Applications/Extras    setenv SYSTEM_DEVELOPER_APPS_DIR /Developer/Applications    setenv SYSTEM_DEVELOPER_BIN_DIR /Developer/usr/bin    setenv SYSTEM_DEVELOPER_DEMOS_DIR "/Developer/Applications/Utilities/Built Examples"    setenv SYSTEM_DEVELOPER_DIR /Developer    setenv SYSTEM_DEVELOPER_DOC_DIR "/Developer/ADC Reference Library"    setenv SYSTEM_DEVELOPER_GRAPHICS_TOOLS_DIR "/Developer/Applications/Graphics Tools"    setenv SYSTEM_DEVELOPER_JAVA_TOOLS_DIR "/Developer/Applications/Java Tools"    setenv SYSTEM_DEVELOPER_PERFORMANCE_TOOLS_DIR "/Developer/Applications/Performance Tools"    setenv SYSTEM_DEVELOPER_RELEASENOTES_DIR "/Developer/ADC Reference Library/releasenotes"    setenv SYSTEM_DEVELOPER_TOOLS /Developer/Tools    setenv SYSTEM_DEVELOPER_TOOLS_DOC_DIR "/Developer/ADC Reference Library/documentation/DeveloperTools"    setenv SYSTEM_DEVELOPER_TOOLS_RELEASENOTES_DIR "/Developer/ADC Reference Library/releasenotes/DeveloperTools"    setenv SYSTEM_DEVELOPER_USR_DIR /Developer/usr    setenv SYSTEM_DEVELOPER_UTILITIES_DIR /Developer/Applications/Utilities    setenv SYSTEM_DOCUMENTATION_DIR /Library/Documentation    setenv SYSTEM_LIBRARY_DIR /System/Library    setenv TARGETED_DEVICE_FAMILY 1    setenv TARGETNAME jrtplib-static    setenv TARGET_BUILD_DIR /Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug    setenv TARGET_NAME jrtplib-static    setenv TARGET_TEMP_DIR /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build    setenv TEMP_DIR /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build    setenv TEMP_FILES_DIR /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build    setenv TEMP_FILE_DIR /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build    setenv TEMP_ROOT /Users/anurodhp/Desktop/jrtplib-3.9.0/src    setenv TEST_AFTER_BUILD NO    setenv UID 502    setenv UNSTRIPPED_PRODUCT NO    setenv USER anurodhp    setenv USER_APPS_DIR /Users/anurodhp/Applications    setenv USER_LIBRARY_DIR /Users/anurodhp/Library    setenv USE_DYNAMIC_NO_PIC YES    setenv USE_HEADERMAP NO    setenv USE_HEADER_SYMLINKS NO    setenv VALIDATE_PRODUCT NO    setenv VALID_ARCHS "armv6 armv7"    setenv VERBOSE_PBXCP NO    setenv VERSION_INFO_BUILDER anurodhp    setenv VERSION_INFO_FILE jrtp_vers.c    setenv VERSION_INFO_STRING "\"@(#)PROGRAM:jrtp  PROJECT:jrtplib-\""    setenv WARNING_CFLAGS "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas"    setenv XCODE_APP_SUPPORT_DIR /Developer/Library/Xcode    setenv XCODE_PRODUCT_BUILD_VERSION 4C5163c    setenv XCODE_VERSION_ACTUAL 0420    setenv XCODE_VERSION_MAJOR 0400    setenv XCODE_VERSION_MINOR 0420    setenv YACC /Developer/usr/bin/yacc    /bin/sh -c /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Script-2E8844A02E8844A02E8844A0.sh36"DE44A91A-A8E5-489C-8988-DDB85E180CBF-
+
+CPhaseScriptExecution "CMake ReRun" /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Script-2E883DF02E883DF02E883DF0.sh
+s336274080.958333
+e336274081.104342
+r1
+xPhaseScriptExecution
+xCMake ReRun
+x/Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Script-2E883DF02E883DF02E883DF0.sh
+omake: `CMakeFiles/cmake.check_cache' is up to date.
+lSLF04#21%IDEActivityLogSection1@2#32"com.apple.dt.IDE.BuildLogSection37"Run custom shell script 'CMake ReRun'c6faf6a0220bb441^37c21aa1220bb441^-52"make: `CMakeFiles/cmake.check_cache' is up to date.1(21%IDEActivityLogMessage2@52"make: `CMakeFiles/cmake.check_cache' is up to date.-336274081#0#52#-0#-----0#0#0#--16395"PhaseScriptExecution "CMake ReRun" src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Script-2E883DF02E883DF02E883DF0.sh    cd /Users/anurodhp/Desktop/jrtplib-3.9.0    setenv ACTION build    setenv AD_HOC_CODE_SIGNING_ALLOWED NO    setenv ALTERNATE_GROUP staff    setenv ALTERNATE_MODE u+w,go-w,a+rX    setenv ALTERNATE_OWNER anurodhp    setenv ALWAYS_SEARCH_USER_PATHS YES    setenv APPLE_INTERNAL_DEVELOPER_DIR /AppleInternal/Developer    setenv APPLE_INTERNAL_DIR /AppleInternal    setenv APPLE_INTERNAL_DOCUMENTATION_DIR /AppleInternal/Documentation    setenv APPLE_INTERNAL_LIBRARY_DIR /AppleInternal/Library    setenv APPLE_INTERNAL_TOOLS /AppleInternal/Developer/Tools    setenv APPLY_RULES_IN_COPY_FILES NO    setenv ARCHS armv7    setenv ARCHS_STANDARD_32_64_BIT armv7    setenv ARCHS_STANDARD_32_BIT armv7    setenv ARCHS_UNIVERSAL_IPHONE_OS armv7    setenv AVAILABLE_PLATFORMS "macosx iphoneos iphonesimulator"    setenv BUILD_COMPONENTS "headers build"    setenv BUILD_DIR /Users/anurodhp/Desktop/jrtplib-3.9.0/src    setenv BUILD_ROOT /Users/anurodhp/Desktop/jrtplib-3.9.0/src    setenv BUILD_STYLE     setenv BUILD_VARIANTS normal    setenv BUILT_PRODUCTS_DIR /Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug    setenv CACHE_ROOT /var/folders/NY/NYEjXtIAGGS6bY4L-OXnc++++TM/-Caches-/com.apple.Xcode.502    setenv CCHROOT /var/folders/NY/NYEjXtIAGGS6bY4L-OXnc++++TM/-Caches-/com.apple.Xcode.502    setenv CHMOD /bin/chmod    setenv CHOWN /usr/sbin/chown    setenv CLASS_FILE_DIR /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/JavaClasses    setenv CLEAN_PRECOMPS YES    setenv CLONE_HEADERS NO    setenv CODESIGNING_FOLDER_PATH /Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug/libjrtp.a    setenv CODE_SIGNING_ALLOWED NO    setenv CODE_SIGNING_REQUIRED YES    setenv CODE_SIGN_CONTEXT_CLASS XCiPhoneOSCodeSignContext    setenv COMMAND_MODE legacy    setenv COMPOSITE_SDK_DIRS /var/folders/NY/NYEjXtIAGGS6bY4L-OXnc++++TM/-Caches-/com.apple.Xcode.502/CompositeSDKs    setenv COMPRESS_PNG_FILES YES    setenv CONFIGURATION Debug    setenv CONFIGURATION_BUILD_DIR /Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug    setenv CONFIGURATION_TEMP_DIR /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos    setenv COPYING_PRESERVES_HFS_DATA NO    setenv COPY_PHASE_STRIP YES    setenv COPY_RESOURCES_FROM_STATIC_FRAMEWORKS YES    setenv CP /bin/cp    setenv CURRENT_ARCH armv7    setenv CURRENT_VARIANT normal    setenv DEAD_CODE_STRIPPING YES    setenv DEBUGGING_SYMBOLS YES    setenv DEBUG_INFORMATION_FORMAT dwarf-with-dsym    setenv DEPLOYMENT_LOCATION NO    setenv DEPLOYMENT_POSTPROCESSING NO    setenv DERIVED_FILES_DIR /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources    setenv DERIVED_FILE_DIR /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources    setenv DERIVED_SOURCES_DIR /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/DerivedSources    setenv DEVELOPER_APPLICATIONS_DIR /Developer/Applications    setenv DEVELOPER_BIN_DIR /Developer/usr/bin    setenv DEVELOPER_DIR /Developer    setenv DEVELOPER_FRAMEWORKS_DIR /Developer/Library/Frameworks    setenv DEVELOPER_FRAMEWORKS_DIR_QUOTED "\"/Developer/Library/Frameworks\""    setenv DEVELOPER_LIBRARY_DIR /Developer/Library    setenv DEVELOPER_SDK_DIR /Developer/SDKs    setenv DEVELOPER_TOOLS_DIR /Developer/Tools    setenv DEVELOPER_USR_DIR /Developer/usr    setenv DEVELOPMENT_LANGUAGE English    setenv DO_HEADER_SCANNING_IN_JAM NO    setenv DSTROOT /tmp/jrtplib.dst    setenv DWARF_DSYM_FILE_NAME libjrtp.a.dSYM    setenv DWARF_DSYM_FILE_SHOULD_ACCOMPANY_PRODUCT NO    setenv DWARF_DSYM_FOLDER_PATH /Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug    setenv EFFECTIVE_PLATFORM_NAME -iphoneos    setenv EMBEDDED_PROFILE_NAME embedded.mobileprovision    setenv ENABLE_HEADER_DEPENDENCIES YES    setenv ENABLE_OPENMP_SUPPORT NO    setenv ENTITLEMENTS_REQUIRED YES    setenv EXCLUDED_INSTALLSRC_SUBDIRECTORY_PATTERNS ".DS_Store .svn .git .hg CVS"    setenv EXCLUDED_RECURSIVE_SEARCH_PATH_SUBDIRECTORIES "*.nib *.lproj *.framework *.gch (*) .DS_Store CVS .svn .git .hg *.xcodeproj *.xcode *.pbproj *.pbxproj"    setenv EXECUTABLE_EXTENSION a    setenv EXECUTABLE_NAME libjrtp.a    setenv EXECUTABLE_PATH libjrtp.a    setenv EXECUTABLE_PREFIX lib    setenv EXECUTABLE_SUFFIX .a    setenv FILE_LIST /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects/LinkFileList    setenv FIXED_FILES_DIR /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/FixedFiles    setenv FRAMEWORK_FLAG_PREFIX -framework    setenv FRAMEWORK_SEARCH_PATHS "\"/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug\" "    setenv FRAMEWORK_VERSION A    setenv FULL_PRODUCT_NAME libjrtp.a    setenv GCC3_VERSION 3.3    setenv GCC_ENABLE_SYMBOL_SEPARATION NO    setenv GCC_GENERATE_DEBUGGING_SYMBOLS YES    setenv GCC_INLINES_ARE_PRIVATE_EXTERN NO    setenv GCC_OPTIMIZATION_LEVEL 0    setenv GCC_PFE_FILE_C_DIALECTS "c objective-c c++ objective-c++"    setenv GCC_PREPROCESSOR_DEFINITIONS "'CMAKE_INTDIR=\"Debug\"'"    setenv GCC_SYMBOLS_PRIVATE_EXTERN NO    setenv GCC_THUMB_SUPPORT YES    setenv GCC_TREAT_WARNINGS_AS_ERRORS NO    setenv GCC_VERSION com.apple.compilers.llvmgcc42    setenv GCC_VERSION_IDENTIFIER com_apple_compilers_llvmgcc42    setenv GENERATE_MASTER_OBJECT_FILE NO    setenv GENERATE_PKGINFO_FILE NO    setenv GENERATE_PROFILING_CODE NO    setenv GID 20    setenv GROUP staff    setenv HEADERMAP_INCLUDES_FLAT_ENTRIES_FOR_TARGET_BEING_BUILT YES    setenv HEADERMAP_INCLUDES_FRAMEWORK_ENTRIES_FOR_ALL_PRODUCT_TYPES YES    setenv HEADERMAP_INCLUDES_NONPUBLIC_NONPRIVATE_HEADERS YES    setenv HEADERMAP_INCLUDES_PROJECT_HEADERS YES    setenv HEADER_SEARCH_PATHS "\"/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug/include\" /Users/anurodhp/Desktop/jrtplib-3.9.0/src"    setenv ICONV /usr/bin/iconv    setenv INFOPLIST_EXPAND_BUILD_SETTINGS YES    setenv INFOPLIST_OUTPUT_FORMAT binary    setenv INFOPLIST_PREPROCESS NO    setenv INSTALL_DIR /tmp/jrtplib.dst    setenv INSTALL_GROUP staff    setenv INSTALL_MODE_FLAG u+w,go-w,a+rX    setenv INSTALL_OWNER anurodhp    setenv INSTALL_ROOT /tmp/jrtplib.dst    setenv IPHONEOS_DEPLOYMENT_TARGET 5.0    setenv JAVAC_DEFAULT_FLAGS "-J-Xms64m -J-XX:NewSize=4M -J-Dfile.encoding=UTF8"    setenv JAVA_APP_STUB /System/Library/Frameworks/JavaVM.framework/Resources/MacOS/JavaApplicationStub    setenv JAVA_ARCHIVE_CLASSES YES    setenv JAVA_ARCHIVE_TYPE JAR    setenv JAVA_COMPILER /usr/bin/javac    setenv JAVA_FRAMEWORK_RESOURCES_DIRS Resources    setenv JAVA_JAR_FLAGS cv    setenv JAVA_SOURCE_SUBDIR .    setenv JAVA_USE_DEPENDENCIES YES    setenv JAVA_ZIP_FLAGS -urg    setenv JIKES_DEFAULT_FLAGS "+E +OLDCSO"    setenv KEEP_PRIVATE_EXTERNS NO    setenv LD_GENERATE_MAP_FILE NO    setenv LD_MAP_FILE_PATH /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/jrtp-LinkMap-normal-armv7.txt    setenv LD_NO_PIE NO    setenv LD_OPENMP_FLAGS -fopenmp    setenv LEGACY_DEVELOPER_DIR /Developer/Library/Xcode/PrivatePlugIns/Xcode3Core.ideplugin/Contents/SharedSupport/Developer    setenv LEX /Developer/usr/bin/lex    setenv LIBRARY_FLAG_NOSPACE YES    setenv LIBRARY_FLAG_PREFIX -l    setenv LIBRARY_SEARCH_PATHS "\"/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug\" "    setenv LIBRARY_STYLE STATIC    setenv LINKER_DISPLAYS_MANGLED_NAMES NO    setenv LINK_FILE_LIST_normal_armv7 /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal/armv7/jrtp.LinkFileList    setenv LINK_WITH_STANDARD_LIBRARIES YES    setenv LOCAL_ADMIN_APPS_DIR /Applications/Utilities    setenv LOCAL_APPS_DIR /Applications    setenv LOCAL_DEVELOPER_DIR /Library/Developer    setenv LOCAL_LIBRARY_DIR /Library    setenv MACH_O_TYPE staticlib    setenv MAC_OS_X_PRODUCT_BUILD_VERSION 10K549    setenv MAC_OS_X_VERSION_ACTUAL 1068    setenv MAC_OS_X_VERSION_MAJOR 1060    setenv MAC_OS_X_VERSION_MINOR 0608    setenv NATIVE_ARCH armv7    setenv NATIVE_ARCH_32_BIT i386    setenv NATIVE_ARCH_64_BIT x86_64    setenv NATIVE_ARCH_ACTUAL i386    setenv NO_COMMON YES    setenv OBJECT_FILE_DIR /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects    setenv OBJECT_FILE_DIR_normal /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Objects-normal    setenv OBJROOT /Users/anurodhp/Desktop/jrtplib-3.9.0/src    setenv ONLY_ACTIVE_ARCH YES    setenv OPTIMIZATION_LEVEL 0    setenv OS MACOS    setenv OSAC /usr/bin/osacompile    setenv OTHER_CFLAGS "    "    setenv OTHER_CPLUSPLUSFLAGS "    "    setenv PACKAGE_TYPE com.apple.package-type.static-library    setenv PASCAL_STRINGS YES    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    setenv PATH_PREFIXES_EXCLUDED_FROM_HEADER_DEPENDENCIES "/usr/include /usr/local/include /System/Library/Frameworks /System/Library/PrivateFrameworks /Developer/Headers /Developer/SDKs /Developer/Platforms"    setenv PFE_FILE_C_DIALECTS c++    setenv PKGINFO_FILE_PATH /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/PkgInfo    setenv PLATFORM_DEVELOPER_APPLICATIONS_DIR /Developer/Platforms/iPhoneOS.platform/Developer/Applications    setenv PLATFORM_DEVELOPER_BIN_DIR /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin    setenv PLATFORM_DEVELOPER_LIBRARY_DIR /Developer/Library/Xcode/PrivatePlugIns/Xcode3Core.ideplugin/Contents/SharedSupport/Developer/Library    setenv PLATFORM_DEVELOPER_SDK_DIR /Developer/Platforms/iPhoneOS.platform/Developer/SDKs    setenv PLATFORM_DEVELOPER_TOOLS_DIR /Developer/Platforms/iPhoneOS.platform/Developer/Tools    setenv PLATFORM_DEVELOPER_USR_DIR /Developer/Platforms/iPhoneOS.platform/Developer/usr    setenv PLATFORM_DIR /Developer/Platforms/iPhoneOS.platform    setenv PLATFORM_NAME iphoneos    setenv PLATFORM_PREFERRED_ARCH armv7    setenv PLATFORM_PRODUCT_BUILD_VERSION 9A5302b    setenv PLIST_FILE_OUTPUT_FORMAT binary    setenv PREBINDING NO    setenv PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR YES    setenv PRECOMP_DESTINATION_DIR /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/PrefixHeaders    setenv PRESERVE_DEAD_CODE_INITS_AND_TERMS NO    setenv PRIVATE_HEADERS_FOLDER_PATH /usr/local/include    setenv PRODUCT_NAME jrtp    setenv PRODUCT_SETTINGS_PATH     setenv PRODUCT_TYPE com.apple.product-type.library.static    setenv PROFILING_CODE NO    setenv PROJECT jrtplib    setenv PROJECT_DERIVED_FILE_DIR /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/DerivedSources    setenv PROJECT_DIR /Users/anurodhp/Desktop/jrtplib-3.9.0    setenv PROJECT_FILE_PATH /Users/anurodhp/Desktop/jrtplib-3.9.0/jrtplib.xcodeproj    setenv PROJECT_NAME jrtplib    setenv PROJECT_TEMP_DIR /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build    setenv PUBLIC_HEADERS_FOLDER_PATH /usr/local/include    setenv RECURSIVE_SEARCH_PATHS_FOLLOW_SYMLINKS YES    setenv REMOVE_CVS_FROM_RESOURCES YES    setenv REMOVE_GIT_FROM_RESOURCES YES    setenv REMOVE_HG_FROM_RESOURCES YES    setenv REMOVE_SVN_FROM_RESOURCES YES    setenv REZ_COLLECTOR_DIR /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/ResourceManagerResources    setenv REZ_EXECUTABLE YES    setenv REZ_OBJECTS_DIR /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/ResourceManagerResources/Objects    setenv REZ_SEARCH_PATHS "\"/Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug\" "    setenv RUN_CLANG_STATIC_ANALYZER NO    setenv SCAN_ALL_SOURCE_FILES_FOR_INCLUDES NO    setenv SCRIPT_INPUT_FILE_COUNT 0    setenv SCRIPT_OUTPUT_FILE_COUNT 0    setenv SDKROOT /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk    setenv SDK_DIR /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.0.sdk    setenv SDK_NAME iphoneos5.0    setenv SDK_PRODUCT_BUILD_VERSION 9A5302b    setenv SED /usr/bin/sed    setenv SEPARATE_STRIP YES    setenv SEPARATE_SYMBOL_EDIT NO    setenv SET_DIR_MODE_OWNER_GROUP YES    setenv SET_FILE_MODE_OWNER_GROUP NO    setenv SHARED_DERIVED_FILE_DIR /Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug/DerivedSources    setenv SHARED_PRECOMPS_DIR /var/folders/NY/NYEjXtIAGGS6bY4L-OXnc++++TM/-Caches-/com.apple.Xcode.502/SharedPrecompiledHeaders    setenv SKIP_INSTALL YES    setenv SOURCE_ROOT /Users/anurodhp/Desktop/jrtplib-3.9.0    setenv SRCROOT /Users/anurodhp/Desktop/jrtplib-3.9.0    setenv STRINGS_FILE_OUTPUT_ENCODING binary    setenv STRIP_INSTALLED_PRODUCT YES    setenv STRIP_STYLE debugging    setenv SUPPORTED_DEVICE_FAMILIES 1,2    setenv SUPPORTED_PLATFORMS "iphoneos iphonesimulator"    setenv SYMROOT /Users/anurodhp/Desktop/jrtplib-3.9.0/src    setenv SYSTEM_ADMIN_APPS_DIR /Applications/Utilities    setenv SYSTEM_APPS_DIR /Applications    setenv SYSTEM_CORE_SERVICES_DIR /System/Library/CoreServices    setenv SYSTEM_DEMOS_DIR /Applications/Extras    setenv SYSTEM_DEVELOPER_APPS_DIR /Developer/Applications    setenv SYSTEM_DEVELOPER_BIN_DIR /Developer/usr/bin    setenv SYSTEM_DEVELOPER_DEMOS_DIR "/Developer/Applications/Utilities/Built Examples"    setenv SYSTEM_DEVELOPER_DIR /Developer    setenv SYSTEM_DEVELOPER_DOC_DIR "/Developer/ADC Reference Library"    setenv SYSTEM_DEVELOPER_GRAPHICS_TOOLS_DIR "/Developer/Applications/Graphics Tools"    setenv SYSTEM_DEVELOPER_JAVA_TOOLS_DIR "/Developer/Applications/Java Tools"    setenv SYSTEM_DEVELOPER_PERFORMANCE_TOOLS_DIR "/Developer/Applications/Performance Tools"    setenv SYSTEM_DEVELOPER_RELEASENOTES_DIR "/Developer/ADC Reference Library/releasenotes"    setenv SYSTEM_DEVELOPER_TOOLS /Developer/Tools    setenv SYSTEM_DEVELOPER_TOOLS_DOC_DIR "/Developer/ADC Reference Library/documentation/DeveloperTools"    setenv SYSTEM_DEVELOPER_TOOLS_RELEASENOTES_DIR "/Developer/ADC Reference Library/releasenotes/DeveloperTools"    setenv SYSTEM_DEVELOPER_USR_DIR /Developer/usr    setenv SYSTEM_DEVELOPER_UTILITIES_DIR /Developer/Applications/Utilities    setenv SYSTEM_DOCUMENTATION_DIR /Library/Documentation    setenv SYSTEM_LIBRARY_DIR /System/Library    setenv TARGETED_DEVICE_FAMILY 1    setenv TARGETNAME jrtplib-static    setenv TARGET_BUILD_DIR /Users/anurodhp/Desktop/jrtplib-3.9.0/src/Debug    setenv TARGET_NAME jrtplib-static    setenv TARGET_TEMP_DIR /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build    setenv TEMP_DIR /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build    setenv TEMP_FILES_DIR /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build    setenv TEMP_FILE_DIR /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build    setenv TEMP_ROOT /Users/anurodhp/Desktop/jrtplib-3.9.0/src    setenv TEST_AFTER_BUILD NO    setenv UID 502    setenv UNSTRIPPED_PRODUCT NO    setenv USER anurodhp    setenv USER_APPS_DIR /Users/anurodhp/Applications    setenv USER_LIBRARY_DIR /Users/anurodhp/Library    setenv USE_DYNAMIC_NO_PIC YES    setenv USE_HEADERMAP NO    setenv USE_HEADER_SYMLINKS NO    setenv VALIDATE_PRODUCT NO    setenv VALID_ARCHS "armv6 armv7"    setenv VERBOSE_PBXCP NO    setenv VERSION_INFO_BUILDER anurodhp    setenv VERSION_INFO_FILE jrtp_vers.c    setenv VERSION_INFO_STRING "\"@(#)PROGRAM:jrtp  PROJECT:jrtplib-\""    setenv WARNING_CFLAGS "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas"    setenv XCODE_APP_SUPPORT_DIR /Developer/Library/Xcode    setenv XCODE_PRODUCT_BUILD_VERSION 4C5163c    setenv XCODE_VERSION_ACTUAL 0420    setenv XCODE_VERSION_MAJOR 0400    setenv XCODE_VERSION_MINOR 0420    setenv YACC /Developer/usr/bin/yacc    /bin/sh -c /Users/anurodhp/Desktop/jrtplib-3.9.0/src/jrtplib.build/Debug-iphoneos/jrtplib-static.build/Script-2E883DF02E883DF02E883DF0.sh36"98BB6CB4-7A98-4575-AA62-5100AB1805C8-
+

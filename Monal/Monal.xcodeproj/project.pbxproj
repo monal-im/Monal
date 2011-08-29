@@ -67,6 +67,204 @@
 		2684F88D1236F5EC003BF137 /* stop.png in Resources */ = {isa = PBXBuildFile; fileRef = 2684F88B1236F5EC003BF137 /* stop.png */; };
 		2684F88E1236F5EC003BF137 /* reload.png in Resources */ = {isa = PBXBuildFile; fileRef = 2684F88C1236F5EC003BF137 /* reload.png */; };
 		268BCCC5140B19B70025E4D1 /* green_button.png in Resources */ = {isa = PBXBuildFile; fileRef = 268BCCC4140B19B70025E4D1 /* green_button.png */; };
+		268BCE4D140B265E0025E4D1 /* rtcpapppacket.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD5A140B265D0025E4D1 /* rtcpapppacket.h */; };
+		268BCE4E140B265E0025E4D1 /* rtcpbyepacket.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD5B140B265D0025E4D1 /* rtcpbyepacket.h */; };
+		268BCE4F140B265E0025E4D1 /* rtcpcompoundpacket.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD5C140B265D0025E4D1 /* rtcpcompoundpacket.h */; };
+		268BCE50140B265E0025E4D1 /* rtcpcompoundpacketbuilder.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD5D140B265D0025E4D1 /* rtcpcompoundpacketbuilder.h */; };
+		268BCE51140B265E0025E4D1 /* rtcppacket.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD5E140B265D0025E4D1 /* rtcppacket.h */; };
+		268BCE52140B265E0025E4D1 /* rtcppacketbuilder.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD5F140B265D0025E4D1 /* rtcppacketbuilder.h */; };
+		268BCE53140B265E0025E4D1 /* rtcprrpacket.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD60140B265D0025E4D1 /* rtcprrpacket.h */; };
+		268BCE54140B265E0025E4D1 /* rtcpscheduler.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD61140B265D0025E4D1 /* rtcpscheduler.h */; };
+		268BCE55140B265E0025E4D1 /* rtcpsdesinfo.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD62140B265D0025E4D1 /* rtcpsdesinfo.h */; };
+		268BCE56140B265E0025E4D1 /* rtcpsdespacket.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD63140B265D0025E4D1 /* rtcpsdespacket.h */; };
+		268BCE57140B265E0025E4D1 /* rtcpsrpacket.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD64140B265D0025E4D1 /* rtcpsrpacket.h */; };
+		268BCE58140B265E0025E4D1 /* rtcpunknownpacket.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD65140B265D0025E4D1 /* rtcpunknownpacket.h */; };
+		268BCE59140B265E0025E4D1 /* rtpaddress.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD66140B265D0025E4D1 /* rtpaddress.h */; };
+		268BCE5A140B265E0025E4D1 /* rtpbyteaddress.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD67140B265D0025E4D1 /* rtpbyteaddress.h */; };
+		268BCE5B140B265E0025E4D1 /* rtpcollisionlist.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD68140B265D0025E4D1 /* rtpcollisionlist.h */; };
+		268BCE5C140B265E0025E4D1 /* rtpconfig.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD69140B265D0025E4D1 /* rtpconfig.h */; };
+		268BCE5D140B265E0025E4D1 /* rtpdebug.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD6A140B265D0025E4D1 /* rtpdebug.h */; };
+		268BCE5E140B265E0025E4D1 /* rtpdefines.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD6B140B265D0025E4D1 /* rtpdefines.h */; };
+		268BCE5F140B265E0025E4D1 /* rtperrors.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD6C140B265D0025E4D1 /* rtperrors.h */; };
+		268BCE60140B265E0025E4D1 /* rtpexternaltransmitter.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD6D140B265D0025E4D1 /* rtpexternaltransmitter.h */; };
+		268BCE61140B265E0025E4D1 /* rtphashtable.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD6E140B265D0025E4D1 /* rtphashtable.h */; };
+		268BCE62140B265E0025E4D1 /* rtpinternalsourcedata.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD6F140B265D0025E4D1 /* rtpinternalsourcedata.h */; };
+		268BCE63140B265E0025E4D1 /* rtpipv4address.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD70140B265D0025E4D1 /* rtpipv4address.h */; };
+		268BCE64140B265E0025E4D1 /* rtpipv4destination.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD71140B265D0025E4D1 /* rtpipv4destination.h */; };
+		268BCE65140B265E0025E4D1 /* rtpipv6address.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD72140B265D0025E4D1 /* rtpipv6address.h */; };
+		268BCE66140B265E0025E4D1 /* rtpipv6destination.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD73140B265D0025E4D1 /* rtpipv6destination.h */; };
+		268BCE67140B265E0025E4D1 /* rtpkeyhashtable.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD74140B265D0025E4D1 /* rtpkeyhashtable.h */; };
+		268BCE68140B265E0025E4D1 /* rtplibraryversion.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD75140B265D0025E4D1 /* rtplibraryversion.h */; };
+		268BCE69140B265E0025E4D1 /* rtpmemorymanager.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD76140B265D0025E4D1 /* rtpmemorymanager.h */; };
+		268BCE6A140B265E0025E4D1 /* rtpmemoryobject.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD77140B265D0025E4D1 /* rtpmemoryobject.h */; };
+		268BCE6B140B265E0025E4D1 /* rtppacket.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD78140B265D0025E4D1 /* rtppacket.h */; };
+		268BCE6C140B265E0025E4D1 /* rtppacketbuilder.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD79140B265D0025E4D1 /* rtppacketbuilder.h */; };
+		268BCE6D140B265E0025E4D1 /* rtppollthread.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD7A140B265D0025E4D1 /* rtppollthread.h */; };
+		268BCE6E140B265E0025E4D1 /* rtprandom.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD7B140B265D0025E4D1 /* rtprandom.h */; };
+		268BCE6F140B265E0025E4D1 /* rtprandomrand48.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD7C140B265D0025E4D1 /* rtprandomrand48.h */; };
+		268BCE70140B265E0025E4D1 /* rtprandomrands.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD7D140B265D0025E4D1 /* rtprandomrands.h */; };
+		268BCE71140B265E0025E4D1 /* rtprandomurandom.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD7E140B265D0025E4D1 /* rtprandomurandom.h */; };
+		268BCE72140B265E0025E4D1 /* rtprawpacket.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD7F140B265D0025E4D1 /* rtprawpacket.h */; };
+		268BCE73140B265E0025E4D1 /* rtpsession.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD80140B265D0025E4D1 /* rtpsession.h */; };
+		268BCE74140B265E0025E4D1 /* rtpsessionparams.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD81140B265D0025E4D1 /* rtpsessionparams.h */; };
+		268BCE75140B265E0025E4D1 /* rtpsessionsources.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD82140B265D0025E4D1 /* rtpsessionsources.h */; };
+		268BCE76140B265E0025E4D1 /* rtpsourcedata.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD83140B265D0025E4D1 /* rtpsourcedata.h */; };
+		268BCE77140B265E0025E4D1 /* rtpsources.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD84140B265D0025E4D1 /* rtpsources.h */; };
+		268BCE78140B265E0025E4D1 /* rtpstructs.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD85140B265D0025E4D1 /* rtpstructs.h */; };
+		268BCE79140B265E0025E4D1 /* rtptimeutilities.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD86140B265D0025E4D1 /* rtptimeutilities.h */; };
+		268BCE7A140B265E0025E4D1 /* rtptransmitter.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD87140B265D0025E4D1 /* rtptransmitter.h */; };
+		268BCE7B140B265E0025E4D1 /* rtptypes_win.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD88140B265D0025E4D1 /* rtptypes_win.h */; };
+		268BCE7C140B265E0025E4D1 /* rtptypes.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD89140B265D0025E4D1 /* rtptypes.h */; };
+		268BCE7D140B265E0025E4D1 /* rtpudpv4transmitter.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD8A140B265D0025E4D1 /* rtpudpv4transmitter.h */; };
+		268BCE7E140B265E0025E4D1 /* rtpudpv6transmitter.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCD8B140B265D0025E4D1 /* rtpudpv6transmitter.h */; };
+		268BCE7F140B265E0025E4D1 /* rtcpapppacket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 268BCD8C140B265D0025E4D1 /* rtcpapppacket.cpp */; };
+		268BCE80140B265E0025E4D1 /* rtcpbyepacket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 268BCD8D140B265D0025E4D1 /* rtcpbyepacket.cpp */; };
+		268BCE81140B265E0025E4D1 /* rtcpcompoundpacket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 268BCD8E140B265D0025E4D1 /* rtcpcompoundpacket.cpp */; };
+		268BCE82140B265E0025E4D1 /* rtcpcompoundpacketbuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 268BCD8F140B265D0025E4D1 /* rtcpcompoundpacketbuilder.cpp */; };
+		268BCE83140B265E0025E4D1 /* rtcppacket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 268BCD90140B265D0025E4D1 /* rtcppacket.cpp */; };
+		268BCE84140B265E0025E4D1 /* rtcppacketbuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 268BCD91140B265D0025E4D1 /* rtcppacketbuilder.cpp */; };
+		268BCE85140B265E0025E4D1 /* rtcprrpacket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 268BCD92140B265D0025E4D1 /* rtcprrpacket.cpp */; };
+		268BCE86140B265E0025E4D1 /* rtcpscheduler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 268BCD93140B265D0025E4D1 /* rtcpscheduler.cpp */; };
+		268BCE87140B265E0025E4D1 /* rtcpsdesinfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 268BCD94140B265D0025E4D1 /* rtcpsdesinfo.cpp */; };
+		268BCE88140B265E0025E4D1 /* rtcpsdespacket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 268BCD95140B265D0025E4D1 /* rtcpsdespacket.cpp */; };
+		268BCE89140B265E0025E4D1 /* rtcpsrpacket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 268BCD96140B265D0025E4D1 /* rtcpsrpacket.cpp */; };
+		268BCE8A140B265E0025E4D1 /* rtpbyteaddress.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 268BCD97140B265D0025E4D1 /* rtpbyteaddress.cpp */; };
+		268BCE8B140B265E0025E4D1 /* rtpcollisionlist.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 268BCD98140B265D0025E4D1 /* rtpcollisionlist.cpp */; };
+		268BCE8C140B265E0025E4D1 /* rtpdebug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 268BCD99140B265D0025E4D1 /* rtpdebug.cpp */; };
+		268BCE8D140B265E0025E4D1 /* rtperrors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 268BCD9A140B265D0025E4D1 /* rtperrors.cpp */; };
+		268BCE8E140B265E0025E4D1 /* rtpexternaltransmitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 268BCD9B140B265D0025E4D1 /* rtpexternaltransmitter.cpp */; };
+		268BCE8F140B265E0025E4D1 /* rtpinternalsourcedata.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 268BCD9C140B265D0025E4D1 /* rtpinternalsourcedata.cpp */; };
+		268BCE90140B265E0025E4D1 /* rtpipv4address.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 268BCD9D140B265D0025E4D1 /* rtpipv4address.cpp */; };
+		268BCE91140B265E0025E4D1 /* rtpipv6address.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 268BCD9E140B265D0025E4D1 /* rtpipv6address.cpp */; };
+		268BCE92140B265E0025E4D1 /* rtplibraryversion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 268BCD9F140B265D0025E4D1 /* rtplibraryversion.cpp */; };
+		268BCE93140B265E0025E4D1 /* rtppacket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 268BCDA0140B265D0025E4D1 /* rtppacket.cpp */; };
+		268BCE94140B265E0025E4D1 /* rtppacketbuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 268BCDA1140B265D0025E4D1 /* rtppacketbuilder.cpp */; };
+		268BCE95140B265E0025E4D1 /* rtppollthread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 268BCDA2140B265D0025E4D1 /* rtppollthread.cpp */; };
+		268BCE96140B265E0025E4D1 /* rtprandom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 268BCDA3140B265D0025E4D1 /* rtprandom.cpp */; };
+		268BCE97140B265E0025E4D1 /* rtprandomrand48.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 268BCDA4140B265D0025E4D1 /* rtprandomrand48.cpp */; };
+		268BCE98140B265E0025E4D1 /* rtprandomrands.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 268BCDA5140B265D0025E4D1 /* rtprandomrands.cpp */; };
+		268BCE99140B265E0025E4D1 /* rtprandomurandom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 268BCDA6140B265D0025E4D1 /* rtprandomurandom.cpp */; };
+		268BCE9A140B265E0025E4D1 /* rtpsession.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 268BCDA7140B265D0025E4D1 /* rtpsession.cpp */; };
+		268BCE9B140B265E0025E4D1 /* rtpsessionparams.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 268BCDA8140B265D0025E4D1 /* rtpsessionparams.cpp */; };
+		268BCE9C140B265E0025E4D1 /* rtpsessionsources.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 268BCDA9140B265D0025E4D1 /* rtpsessionsources.cpp */; };
+		268BCE9D140B265E0025E4D1 /* rtpsourcedata.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 268BCDAA140B265D0025E4D1 /* rtpsourcedata.cpp */; };
+		268BCE9E140B265E0025E4D1 /* rtpsources.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 268BCDAB140B265D0025E4D1 /* rtpsources.cpp */; };
+		268BCE9F140B265E0025E4D1 /* rtptimeutilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 268BCDAC140B265D0025E4D1 /* rtptimeutilities.cpp */; };
+		268BCEA0140B265E0025E4D1 /* rtpudpv4transmitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 268BCDAD140B265D0025E4D1 /* rtpudpv4transmitter.cpp */; };
+		268BCEA1140B265E0025E4D1 /* rtpudpv6transmitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 268BCDAE140B265D0025E4D1 /* rtpudpv6transmitter.cpp */; };
+		268BCEA2140B265E0025E4D1 /* libjrtp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCDBD140B265D0025E4D1 /* libjrtp.a */; };
+		268BCEA3140B265F0025E4D1 /* libjrtp.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCDBE140B265D0025E4D1 /* libjrtp.dylib */; };
+		268BCEA4140B265F0025E4D1 /* rtpfaketransmitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 268BCDC0140B265D0025E4D1 /* rtpfaketransmitter.cpp */; };
+		268BCEA5140B265F0025E4D1 /* rtpfaketransmitter.h in Headers */ = {isa = PBXBuildFile; fileRef = 268BCDC1140B265D0025E4D1 /* rtpfaketransmitter.h */; };
+		268BCEA6140B265F0025E4D1 /* rtcpapppacket.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCDCC140B265D0025E4D1 /* rtcpapppacket.o */; };
+		268BCEA7140B265F0025E4D1 /* rtcpbyepacket.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCDCD140B265D0025E4D1 /* rtcpbyepacket.o */; };
+		268BCEA8140B265F0025E4D1 /* rtcpcompoundpacket.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCDCE140B265D0025E4D1 /* rtcpcompoundpacket.o */; };
+		268BCEA9140B265F0025E4D1 /* rtcpcompoundpacketbuilder.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCDCF140B265D0025E4D1 /* rtcpcompoundpacketbuilder.o */; };
+		268BCEAA140B265F0025E4D1 /* rtcppacket.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCDD0140B265D0025E4D1 /* rtcppacket.o */; };
+		268BCEAB140B265F0025E4D1 /* rtcppacketbuilder.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCDD1140B265D0025E4D1 /* rtcppacketbuilder.o */; };
+		268BCEAC140B265F0025E4D1 /* rtcprrpacket.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCDD2140B265D0025E4D1 /* rtcprrpacket.o */; };
+		268BCEAD140B265F0025E4D1 /* rtcpscheduler.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCDD3140B265D0025E4D1 /* rtcpscheduler.o */; };
+		268BCEAE140B265F0025E4D1 /* rtcpsdesinfo.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCDD4140B265D0025E4D1 /* rtcpsdesinfo.o */; };
+		268BCEAF140B265F0025E4D1 /* rtcpsdespacket.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCDD5140B265D0025E4D1 /* rtcpsdespacket.o */; };
+		268BCEB0140B265F0025E4D1 /* rtcpsrpacket.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCDD6140B265D0025E4D1 /* rtcpsrpacket.o */; };
+		268BCEB1140B265F0025E4D1 /* rtpbyteaddress.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCDD7140B265D0025E4D1 /* rtpbyteaddress.o */; };
+		268BCEB2140B265F0025E4D1 /* rtpcollisionlist.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCDD8140B265D0025E4D1 /* rtpcollisionlist.o */; };
+		268BCEB3140B265F0025E4D1 /* rtpdebug.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCDD9140B265D0025E4D1 /* rtpdebug.o */; };
+		268BCEB4140B265F0025E4D1 /* rtperrors.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCDDA140B265D0025E4D1 /* rtperrors.o */; };
+		268BCEB5140B265F0025E4D1 /* rtpexternaltransmitter.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCDDB140B265D0025E4D1 /* rtpexternaltransmitter.o */; };
+		268BCEB6140B265F0025E4D1 /* rtpfaketransmitter.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCDDC140B265D0025E4D1 /* rtpfaketransmitter.o */; };
+		268BCEB7140B265F0025E4D1 /* rtpinternalsourcedata.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCDDD140B265D0025E4D1 /* rtpinternalsourcedata.o */; };
+		268BCEB8140B265F0025E4D1 /* rtpipv4address.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCDDE140B265D0025E4D1 /* rtpipv4address.o */; };
+		268BCEB9140B265F0025E4D1 /* rtpipv6address.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCDDF140B265D0025E4D1 /* rtpipv6address.o */; };
+		268BCEBA140B265F0025E4D1 /* rtplibraryversion.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCDE0140B265D0025E4D1 /* rtplibraryversion.o */; };
+		268BCEBB140B265F0025E4D1 /* rtppacket.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCDE1140B265D0025E4D1 /* rtppacket.o */; };
+		268BCEBC140B265F0025E4D1 /* rtppacketbuilder.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCDE2140B265D0025E4D1 /* rtppacketbuilder.o */; };
+		268BCEBD140B265F0025E4D1 /* rtppollthread.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCDE3140B265D0025E4D1 /* rtppollthread.o */; };
+		268BCEBE140B265F0025E4D1 /* rtprandom.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCDE4140B265D0025E4D1 /* rtprandom.o */; };
+		268BCEBF140B265F0025E4D1 /* rtprandomrand48.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCDE5140B265D0025E4D1 /* rtprandomrand48.o */; };
+		268BCEC0140B265F0025E4D1 /* rtprandomrands.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCDE6140B265D0025E4D1 /* rtprandomrands.o */; };
+		268BCEC1140B265F0025E4D1 /* rtprandomurandom.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCDE7140B265D0025E4D1 /* rtprandomurandom.o */; };
+		268BCEC2140B265F0025E4D1 /* rtpsession.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCDE8140B265D0025E4D1 /* rtpsession.o */; };
+		268BCEC3140B265F0025E4D1 /* rtpsessionparams.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCDE9140B265D0025E4D1 /* rtpsessionparams.o */; };
+		268BCEC4140B265F0025E4D1 /* rtpsessionsources.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCDEA140B265D0025E4D1 /* rtpsessionsources.o */; };
+		268BCEC5140B265F0025E4D1 /* rtpsourcedata.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCDEB140B265D0025E4D1 /* rtpsourcedata.o */; };
+		268BCEC6140B265F0025E4D1 /* rtpsources.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCDEC140B265D0025E4D1 /* rtpsources.o */; };
+		268BCEC7140B265F0025E4D1 /* rtptimeutilities.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCDED140B265D0025E4D1 /* rtptimeutilities.o */; };
+		268BCEC8140B265F0025E4D1 /* rtpudpv4transmitter.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCDEE140B265D0025E4D1 /* rtpudpv4transmitter.o */; };
+		268BCEC9140B265F0025E4D1 /* rtpudpv6transmitter.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCDEF140B265D0025E4D1 /* rtpudpv6transmitter.o */; };
+		268BCECA140B265F0025E4D1 /* rtcpapppacket.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCDF8140B265D0025E4D1 /* rtcpapppacket.o */; };
+		268BCECB140B265F0025E4D1 /* rtcpbyepacket.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCDF9140B265D0025E4D1 /* rtcpbyepacket.o */; };
+		268BCECC140B265F0025E4D1 /* rtcpcompoundpacket.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCDFA140B265D0025E4D1 /* rtcpcompoundpacket.o */; };
+		268BCECD140B265F0025E4D1 /* rtcpcompoundpacketbuilder.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCDFB140B265D0025E4D1 /* rtcpcompoundpacketbuilder.o */; };
+		268BCECE140B265F0025E4D1 /* rtcppacket.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCDFC140B265D0025E4D1 /* rtcppacket.o */; };
+		268BCECF140B265F0025E4D1 /* rtcppacketbuilder.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCDFD140B265D0025E4D1 /* rtcppacketbuilder.o */; };
+		268BCED0140B265F0025E4D1 /* rtcprrpacket.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCDFE140B265D0025E4D1 /* rtcprrpacket.o */; };
+		268BCED1140B265F0025E4D1 /* rtcpscheduler.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCDFF140B265D0025E4D1 /* rtcpscheduler.o */; };
+		268BCED2140B265F0025E4D1 /* rtcpsdesinfo.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE00140B265D0025E4D1 /* rtcpsdesinfo.o */; };
+		268BCED3140B265F0025E4D1 /* rtcpsdespacket.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE01140B265D0025E4D1 /* rtcpsdespacket.o */; };
+		268BCED4140B265F0025E4D1 /* rtcpsrpacket.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE02140B265D0025E4D1 /* rtcpsrpacket.o */; };
+		268BCED5140B265F0025E4D1 /* rtpbyteaddress.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE03140B265D0025E4D1 /* rtpbyteaddress.o */; };
+		268BCED6140B265F0025E4D1 /* rtpcollisionlist.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE04140B265D0025E4D1 /* rtpcollisionlist.o */; };
+		268BCED7140B265F0025E4D1 /* rtpdebug.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE05140B265D0025E4D1 /* rtpdebug.o */; };
+		268BCED8140B265F0025E4D1 /* rtperrors.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE06140B265D0025E4D1 /* rtperrors.o */; };
+		268BCED9140B265F0025E4D1 /* rtpexternaltransmitter.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE07140B265D0025E4D1 /* rtpexternaltransmitter.o */; };
+		268BCEDA140B265F0025E4D1 /* rtpfaketransmitter.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE08140B265D0025E4D1 /* rtpfaketransmitter.o */; };
+		268BCEDB140B265F0025E4D1 /* rtpinternalsourcedata.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE09140B265D0025E4D1 /* rtpinternalsourcedata.o */; };
+		268BCEDC140B265F0025E4D1 /* rtpipv4address.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE0A140B265D0025E4D1 /* rtpipv4address.o */; };
+		268BCEDD140B265F0025E4D1 /* rtpipv6address.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE0B140B265D0025E4D1 /* rtpipv6address.o */; };
+		268BCEDE140B265F0025E4D1 /* rtplibraryversion.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE0C140B265D0025E4D1 /* rtplibraryversion.o */; };
+		268BCEDF140B265F0025E4D1 /* rtppacket.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE0D140B265D0025E4D1 /* rtppacket.o */; };
+		268BCEE0140B265F0025E4D1 /* rtppacketbuilder.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE0E140B265D0025E4D1 /* rtppacketbuilder.o */; };
+		268BCEE1140B265F0025E4D1 /* rtppollthread.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE0F140B265D0025E4D1 /* rtppollthread.o */; };
+		268BCEE2140B265F0025E4D1 /* rtprandom.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE10140B265D0025E4D1 /* rtprandom.o */; };
+		268BCEE3140B265F0025E4D1 /* rtprandomrand48.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE11140B265D0025E4D1 /* rtprandomrand48.o */; };
+		268BCEE4140B265F0025E4D1 /* rtprandomrands.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE12140B265D0025E4D1 /* rtprandomrands.o */; };
+		268BCEE5140B265F0025E4D1 /* rtprandomurandom.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE13140B265D0025E4D1 /* rtprandomurandom.o */; };
+		268BCEE6140B265F0025E4D1 /* rtpsession.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE14140B265D0025E4D1 /* rtpsession.o */; };
+		268BCEE7140B265F0025E4D1 /* rtpsessionparams.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE15140B265D0025E4D1 /* rtpsessionparams.o */; };
+		268BCEE8140B265F0025E4D1 /* rtpsessionsources.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE16140B265D0025E4D1 /* rtpsessionsources.o */; };
+		268BCEE9140B265F0025E4D1 /* rtpsourcedata.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE17140B265D0025E4D1 /* rtpsourcedata.o */; };
+		268BCEEA140B265F0025E4D1 /* rtpsources.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE18140B265D0025E4D1 /* rtpsources.o */; };
+		268BCEEB140B265F0025E4D1 /* rtptimeutilities.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE19140B265D0025E4D1 /* rtptimeutilities.o */; };
+		268BCEEC140B265F0025E4D1 /* rtpudpv4transmitter.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE1A140B265D0025E4D1 /* rtpudpv4transmitter.o */; };
+		268BCEED140B265F0025E4D1 /* rtpudpv6transmitter.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE1B140B265D0025E4D1 /* rtpudpv6transmitter.o */; };
+		268BCEEE140B265F0025E4D1 /* rtcpapppacket.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE25140B265D0025E4D1 /* rtcpapppacket.o */; };
+		268BCEEF140B265F0025E4D1 /* rtcpbyepacket.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE26140B265D0025E4D1 /* rtcpbyepacket.o */; };
+		268BCEF0140B265F0025E4D1 /* rtcpcompoundpacket.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE27140B265D0025E4D1 /* rtcpcompoundpacket.o */; };
+		268BCEF1140B265F0025E4D1 /* rtcpcompoundpacketbuilder.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE28140B265D0025E4D1 /* rtcpcompoundpacketbuilder.o */; };
+		268BCEF2140B265F0025E4D1 /* rtcppacket.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE29140B265D0025E4D1 /* rtcppacket.o */; };
+		268BCEF3140B265F0025E4D1 /* rtcppacketbuilder.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE2A140B265D0025E4D1 /* rtcppacketbuilder.o */; };
+		268BCEF4140B265F0025E4D1 /* rtcprrpacket.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE2B140B265D0025E4D1 /* rtcprrpacket.o */; };
+		268BCEF5140B265F0025E4D1 /* rtcpscheduler.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE2C140B265D0025E4D1 /* rtcpscheduler.o */; };
+		268BCEF6140B265F0025E4D1 /* rtcpsdesinfo.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE2D140B265D0025E4D1 /* rtcpsdesinfo.o */; };
+		268BCEF7140B265F0025E4D1 /* rtcpsdespacket.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE2E140B265D0025E4D1 /* rtcpsdespacket.o */; };
+		268BCEF8140B265F0025E4D1 /* rtcpsrpacket.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE2F140B265D0025E4D1 /* rtcpsrpacket.o */; };
+		268BCEF9140B265F0025E4D1 /* rtpbyteaddress.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE30140B265D0025E4D1 /* rtpbyteaddress.o */; };
+		268BCEFA140B265F0025E4D1 /* rtpcollisionlist.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE31140B265D0025E4D1 /* rtpcollisionlist.o */; };
+		268BCEFB140B265F0025E4D1 /* rtpdebug.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE32140B265D0025E4D1 /* rtpdebug.o */; };
+		268BCEFC140B265F0025E4D1 /* rtperrors.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE33140B265D0025E4D1 /* rtperrors.o */; };
+		268BCEFD140B265F0025E4D1 /* rtpexternaltransmitter.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE34140B265D0025E4D1 /* rtpexternaltransmitter.o */; };
+		268BCEFE140B265F0025E4D1 /* rtpfaketransmitter.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE35140B265D0025E4D1 /* rtpfaketransmitter.o */; };
+		268BCEFF140B265F0025E4D1 /* rtpinternalsourcedata.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE36140B265D0025E4D1 /* rtpinternalsourcedata.o */; };
+		268BCF00140B265F0025E4D1 /* rtpipv4address.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE37140B265D0025E4D1 /* rtpipv4address.o */; };
+		268BCF01140B265F0025E4D1 /* rtpipv6address.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE38140B265D0025E4D1 /* rtpipv6address.o */; };
+		268BCF02140B265F0025E4D1 /* rtplibraryversion.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE39140B265D0025E4D1 /* rtplibraryversion.o */; };
+		268BCF03140B265F0025E4D1 /* rtppacket.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE3A140B265D0025E4D1 /* rtppacket.o */; };
+		268BCF04140B265F0025E4D1 /* rtppacketbuilder.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE3B140B265D0025E4D1 /* rtppacketbuilder.o */; };
+		268BCF05140B265F0025E4D1 /* rtppollthread.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE3C140B265D0025E4D1 /* rtppollthread.o */; };
+		268BCF06140B265F0025E4D1 /* rtprandom.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE3D140B265D0025E4D1 /* rtprandom.o */; };
+		268BCF07140B265F0025E4D1 /* rtprandomrand48.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE3E140B265D0025E4D1 /* rtprandomrand48.o */; };
+		268BCF08140B265F0025E4D1 /* rtprandomrands.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE3F140B265D0025E4D1 /* rtprandomrands.o */; };
+		268BCF09140B265F0025E4D1 /* rtprandomurandom.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE40140B265D0025E4D1 /* rtprandomurandom.o */; };
+		268BCF0A140B265F0025E4D1 /* rtpsession.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE41140B265D0025E4D1 /* rtpsession.o */; };
+		268BCF0B140B265F0025E4D1 /* rtpsessionparams.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE42140B265D0025E4D1 /* rtpsessionparams.o */; };
+		268BCF0C140B265F0025E4D1 /* rtpsessionsources.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE43140B265D0025E4D1 /* rtpsessionsources.o */; };
+		268BCF0D140B265F0025E4D1 /* rtpsourcedata.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE44140B265D0025E4D1 /* rtpsourcedata.o */; };
+		268BCF0E140B265F0025E4D1 /* rtpsources.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE45140B265D0025E4D1 /* rtpsources.o */; };
+		268BCF0F140B265F0025E4D1 /* rtptimeutilities.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE46140B265D0025E4D1 /* rtptimeutilities.o */; };
+		268BCF10140B265F0025E4D1 /* rtpudpv4transmitter.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE47140B265D0025E4D1 /* rtpudpv4transmitter.o */; };
+		268BCF11140B265F0025E4D1 /* rtpudpv6transmitter.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCE48140B265D0025E4D1 /* rtpudpv6transmitter.o */; };
+		268BCF12140B29180025E4D1 /* libjrtplib-static.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */; };
 		269A2E5613202D800044B1C8 /* noicon_64.png in Resources */ = {isa = PBXBuildFile; fileRef = 269A2E5513202D800044B1C8 /* noicon_64.png */; };
 		269A2E62132030770044B1C8 /* Monal_crop_256.png in Resources */ = {isa = PBXBuildFile; fileRef = 26EB85D911166F1B005446DD /* Monal_crop_256.png */; };
 		269F0F1A105DDEFB00FF96F8 /* status.png in Resources */ = {isa = PBXBuildFile; fileRef = 269F0F19105DDEFB00FF96F8 /* status.png */; };
@@ -95,42 +293,6 @@
 		26E2787310FA85C600B7B998 /* AIM.png in Resources */ = {isa = PBXBuildFile; fileRef = 26E2786E10FA85C600B7B998 /* AIM.png */; };
 		26E5BA8B132287D400D8C57A /* Settings.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26E5BA8A132287D400D8C57A /* Settings.xib */; };
 		26E5BA8E13228D7400D8C57A /* StatusControl.m in Sources */ = {isa = PBXBuildFile; fileRef = 26E5BA8D13228D7400D8C57A /* StatusControl.m */; };
-		26E7D486140B05D300EE6C93 /* rtcpapppacket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E7D45C140B05D200EE6C93 /* rtcpapppacket.cpp */; };
-		26E7D487140B05D300EE6C93 /* rtcpbyepacket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E7D45D140B05D200EE6C93 /* rtcpbyepacket.cpp */; };
-		26E7D488140B05D300EE6C93 /* rtcpcompoundpacket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E7D45E140B05D200EE6C93 /* rtcpcompoundpacket.cpp */; };
-		26E7D489140B05D300EE6C93 /* rtcpcompoundpacketbuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E7D45F140B05D200EE6C93 /* rtcpcompoundpacketbuilder.cpp */; };
-		26E7D48A140B05D300EE6C93 /* rtcppacket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E7D460140B05D200EE6C93 /* rtcppacket.cpp */; };
-		26E7D48B140B05D300EE6C93 /* rtcppacketbuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E7D461140B05D200EE6C93 /* rtcppacketbuilder.cpp */; };
-		26E7D48C140B05D300EE6C93 /* rtcprrpacket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E7D462140B05D200EE6C93 /* rtcprrpacket.cpp */; };
-		26E7D48D140B05D300EE6C93 /* rtcpscheduler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E7D463140B05D200EE6C93 /* rtcpscheduler.cpp */; };
-		26E7D48E140B05D300EE6C93 /* rtcpsdesinfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E7D464140B05D200EE6C93 /* rtcpsdesinfo.cpp */; };
-		26E7D48F140B05D300EE6C93 /* rtcpsdespacket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E7D465140B05D200EE6C93 /* rtcpsdespacket.cpp */; };
-		26E7D490140B05D300EE6C93 /* rtcpsrpacket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E7D466140B05D200EE6C93 /* rtcpsrpacket.cpp */; };
-		26E7D491140B05D300EE6C93 /* rtpbyteaddress.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E7D467140B05D200EE6C93 /* rtpbyteaddress.cpp */; };
-		26E7D492140B05D300EE6C93 /* rtpcollisionlist.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E7D468140B05D200EE6C93 /* rtpcollisionlist.cpp */; };
-		26E7D493140B05D300EE6C93 /* rtpdebug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E7D469140B05D200EE6C93 /* rtpdebug.cpp */; };
-		26E7D494140B05D300EE6C93 /* rtperrors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E7D46A140B05D200EE6C93 /* rtperrors.cpp */; };
-		26E7D495140B05D300EE6C93 /* rtpexternaltransmitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E7D46B140B05D200EE6C93 /* rtpexternaltransmitter.cpp */; };
-		26E7D496140B05D300EE6C93 /* rtpinternalsourcedata.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E7D46C140B05D200EE6C93 /* rtpinternalsourcedata.cpp */; };
-		26E7D497140B05D300EE6C93 /* rtpipv4address.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E7D46D140B05D200EE6C93 /* rtpipv4address.cpp */; };
-		26E7D498140B05D300EE6C93 /* rtpipv6address.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E7D46E140B05D200EE6C93 /* rtpipv6address.cpp */; };
-		26E7D499140B05D300EE6C93 /* rtplibraryversion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E7D46F140B05D200EE6C93 /* rtplibraryversion.cpp */; };
-		26E7D49A140B05D300EE6C93 /* rtppacket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E7D470140B05D200EE6C93 /* rtppacket.cpp */; };
-		26E7D49B140B05D300EE6C93 /* rtppacketbuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E7D471140B05D200EE6C93 /* rtppacketbuilder.cpp */; };
-		26E7D49C140B05D300EE6C93 /* rtppollthread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E7D472140B05D200EE6C93 /* rtppollthread.cpp */; };
-		26E7D49D140B05D300EE6C93 /* rtprandom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E7D473140B05D300EE6C93 /* rtprandom.cpp */; };
-		26E7D49E140B05D300EE6C93 /* rtprandomrand48.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E7D474140B05D300EE6C93 /* rtprandomrand48.cpp */; };
-		26E7D49F140B05D300EE6C93 /* rtprandomrands.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E7D475140B05D300EE6C93 /* rtprandomrands.cpp */; };
-		26E7D4A0140B05D300EE6C93 /* rtprandomurandom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E7D476140B05D300EE6C93 /* rtprandomurandom.cpp */; };
-		26E7D4A1140B05D300EE6C93 /* rtpsession.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E7D477140B05D300EE6C93 /* rtpsession.cpp */; };
-		26E7D4A2140B05D300EE6C93 /* rtpsessionparams.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E7D478140B05D300EE6C93 /* rtpsessionparams.cpp */; };
-		26E7D4A3140B05D300EE6C93 /* rtpsessionsources.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E7D479140B05D300EE6C93 /* rtpsessionsources.cpp */; };
-		26E7D4A4140B05D300EE6C93 /* rtpsourcedata.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E7D47A140B05D300EE6C93 /* rtpsourcedata.cpp */; };
-		26E7D4A5140B05D300EE6C93 /* rtpsources.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E7D47B140B05D300EE6C93 /* rtpsources.cpp */; };
-		26E7D4A6140B05D300EE6C93 /* rtptimeutilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E7D47C140B05D300EE6C93 /* rtptimeutilities.cpp */; };
-		26E7D4A7140B05D300EE6C93 /* rtpudpv4transmitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E7D47D140B05D300EE6C93 /* rtpudpv4transmitter.cpp */; };
-		26E7D4A8140B05D300EE6C93 /* rtpudpv6transmitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E7D47E140B05D300EE6C93 /* rtpudpv6transmitter.cpp */; };
-		26E7D4AB140B05D300EE6C93 /* rtpfaketransmitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E7D482140B05D300EE6C93 /* rtpfaketransmitter.cpp */; };
 		26E7D4B0140B067100EE6C93 /* RTP.m in Sources */ = {isa = PBXBuildFile; fileRef = 26E7D4AF140B067100EE6C93 /* RTP.m */; };
 		26EB845E111644AD005446DD /* Themes in Resources */ = {isa = PBXBuildFile; fileRef = 26EB845D111644AD005446DD /* Themes */; };
 		26EB85D711166DE7005446DD /* Monal_crop_57.png in Resources */ = {isa = PBXBuildFile; fileRef = 26EB85D611166DE7005446DD /* Monal_crop_57.png */; };
@@ -224,8 +386,6 @@
 		266286AD1342C05D00EAFC92 /* red_button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = red_button.png; sourceTree = "<group>"; };
 		26690E54127C9D5C00051D13 /* away.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = away.png; sourceTree = "<group>"; };
 		26690E55127C9D5C00051D13 /* available.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = available.png; sourceTree = "<group>"; };
-		266AB866140B115700896BC3 /* rtpconfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpconfig.h; sourceTree = "<group>"; };
-		266AB867140B115700896BC3 /* rtptypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtptypes.h; sourceTree = "<group>"; };
 		266B28C212248A1B00B9B217 /* TabMoreController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TabMoreController.h; sourceTree = "<group>"; };
 		266B28C312248A1B00B9B217 /* TabMoreController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TabMoreController.m; sourceTree = "<group>"; };
 		26731E75133F3F17008098EB /* iqSearch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iqSearch.h; sourceTree = "<group>"; };
@@ -236,6 +396,234 @@
 		2684F88B1236F5EC003BF137 /* stop.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = stop.png; sourceTree = "<group>"; };
 		2684F88C1236F5EC003BF137 /* reload.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = reload.png; sourceTree = "<group>"; };
 		268BCCC4140B19B70025E4D1 /* green_button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = green_button.png; sourceTree = "<group>"; };
+		268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libjrtplib-static.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		268BCD5A140B265D0025E4D1 /* rtcpapppacket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtcpapppacket.h; sourceTree = "<group>"; };
+		268BCD5B140B265D0025E4D1 /* rtcpbyepacket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtcpbyepacket.h; sourceTree = "<group>"; };
+		268BCD5C140B265D0025E4D1 /* rtcpcompoundpacket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtcpcompoundpacket.h; sourceTree = "<group>"; };
+		268BCD5D140B265D0025E4D1 /* rtcpcompoundpacketbuilder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtcpcompoundpacketbuilder.h; sourceTree = "<group>"; };
+		268BCD5E140B265D0025E4D1 /* rtcppacket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtcppacket.h; sourceTree = "<group>"; };
+		268BCD5F140B265D0025E4D1 /* rtcppacketbuilder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtcppacketbuilder.h; sourceTree = "<group>"; };
+		268BCD60140B265D0025E4D1 /* rtcprrpacket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtcprrpacket.h; sourceTree = "<group>"; };
+		268BCD61140B265D0025E4D1 /* rtcpscheduler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtcpscheduler.h; sourceTree = "<group>"; };
+		268BCD62140B265D0025E4D1 /* rtcpsdesinfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtcpsdesinfo.h; sourceTree = "<group>"; };
+		268BCD63140B265D0025E4D1 /* rtcpsdespacket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtcpsdespacket.h; sourceTree = "<group>"; };
+		268BCD64140B265D0025E4D1 /* rtcpsrpacket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtcpsrpacket.h; sourceTree = "<group>"; };
+		268BCD65140B265D0025E4D1 /* rtcpunknownpacket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtcpunknownpacket.h; sourceTree = "<group>"; };
+		268BCD66140B265D0025E4D1 /* rtpaddress.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpaddress.h; sourceTree = "<group>"; };
+		268BCD67140B265D0025E4D1 /* rtpbyteaddress.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpbyteaddress.h; sourceTree = "<group>"; };
+		268BCD68140B265D0025E4D1 /* rtpcollisionlist.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpcollisionlist.h; sourceTree = "<group>"; };
+		268BCD69140B265D0025E4D1 /* rtpconfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpconfig.h; sourceTree = "<group>"; };
+		268BCD6A140B265D0025E4D1 /* rtpdebug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpdebug.h; sourceTree = "<group>"; };
+		268BCD6B140B265D0025E4D1 /* rtpdefines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpdefines.h; sourceTree = "<group>"; };
+		268BCD6C140B265D0025E4D1 /* rtperrors.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtperrors.h; sourceTree = "<group>"; };
+		268BCD6D140B265D0025E4D1 /* rtpexternaltransmitter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpexternaltransmitter.h; sourceTree = "<group>"; };
+		268BCD6E140B265D0025E4D1 /* rtphashtable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtphashtable.h; sourceTree = "<group>"; };
+		268BCD6F140B265D0025E4D1 /* rtpinternalsourcedata.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpinternalsourcedata.h; sourceTree = "<group>"; };
+		268BCD70140B265D0025E4D1 /* rtpipv4address.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpipv4address.h; sourceTree = "<group>"; };
+		268BCD71140B265D0025E4D1 /* rtpipv4destination.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpipv4destination.h; sourceTree = "<group>"; };
+		268BCD72140B265D0025E4D1 /* rtpipv6address.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpipv6address.h; sourceTree = "<group>"; };
+		268BCD73140B265D0025E4D1 /* rtpipv6destination.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpipv6destination.h; sourceTree = "<group>"; };
+		268BCD74140B265D0025E4D1 /* rtpkeyhashtable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpkeyhashtable.h; sourceTree = "<group>"; };
+		268BCD75140B265D0025E4D1 /* rtplibraryversion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtplibraryversion.h; sourceTree = "<group>"; };
+		268BCD76140B265D0025E4D1 /* rtpmemorymanager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpmemorymanager.h; sourceTree = "<group>"; };
+		268BCD77140B265D0025E4D1 /* rtpmemoryobject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpmemoryobject.h; sourceTree = "<group>"; };
+		268BCD78140B265D0025E4D1 /* rtppacket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtppacket.h; sourceTree = "<group>"; };
+		268BCD79140B265D0025E4D1 /* rtppacketbuilder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtppacketbuilder.h; sourceTree = "<group>"; };
+		268BCD7A140B265D0025E4D1 /* rtppollthread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtppollthread.h; sourceTree = "<group>"; };
+		268BCD7B140B265D0025E4D1 /* rtprandom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtprandom.h; sourceTree = "<group>"; };
+		268BCD7C140B265D0025E4D1 /* rtprandomrand48.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtprandomrand48.h; sourceTree = "<group>"; };
+		268BCD7D140B265D0025E4D1 /* rtprandomrands.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtprandomrands.h; sourceTree = "<group>"; };
+		268BCD7E140B265D0025E4D1 /* rtprandomurandom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtprandomurandom.h; sourceTree = "<group>"; };
+		268BCD7F140B265D0025E4D1 /* rtprawpacket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtprawpacket.h; sourceTree = "<group>"; };
+		268BCD80140B265D0025E4D1 /* rtpsession.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpsession.h; sourceTree = "<group>"; };
+		268BCD81140B265D0025E4D1 /* rtpsessionparams.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpsessionparams.h; sourceTree = "<group>"; };
+		268BCD82140B265D0025E4D1 /* rtpsessionsources.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpsessionsources.h; sourceTree = "<group>"; };
+		268BCD83140B265D0025E4D1 /* rtpsourcedata.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpsourcedata.h; sourceTree = "<group>"; };
+		268BCD84140B265D0025E4D1 /* rtpsources.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpsources.h; sourceTree = "<group>"; };
+		268BCD85140B265D0025E4D1 /* rtpstructs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpstructs.h; sourceTree = "<group>"; };
+		268BCD86140B265D0025E4D1 /* rtptimeutilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtptimeutilities.h; sourceTree = "<group>"; };
+		268BCD87140B265D0025E4D1 /* rtptransmitter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtptransmitter.h; sourceTree = "<group>"; };
+		268BCD88140B265D0025E4D1 /* rtptypes_win.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtptypes_win.h; sourceTree = "<group>"; };
+		268BCD89140B265D0025E4D1 /* rtptypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtptypes.h; sourceTree = "<group>"; };
+		268BCD8A140B265D0025E4D1 /* rtpudpv4transmitter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpudpv4transmitter.h; sourceTree = "<group>"; };
+		268BCD8B140B265D0025E4D1 /* rtpudpv6transmitter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpudpv6transmitter.h; sourceTree = "<group>"; };
+		268BCD8C140B265D0025E4D1 /* rtcpapppacket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtcpapppacket.cpp; sourceTree = "<group>"; };
+		268BCD8D140B265D0025E4D1 /* rtcpbyepacket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtcpbyepacket.cpp; sourceTree = "<group>"; };
+		268BCD8E140B265D0025E4D1 /* rtcpcompoundpacket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtcpcompoundpacket.cpp; sourceTree = "<group>"; };
+		268BCD8F140B265D0025E4D1 /* rtcpcompoundpacketbuilder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtcpcompoundpacketbuilder.cpp; sourceTree = "<group>"; };
+		268BCD90140B265D0025E4D1 /* rtcppacket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtcppacket.cpp; sourceTree = "<group>"; };
+		268BCD91140B265D0025E4D1 /* rtcppacketbuilder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtcppacketbuilder.cpp; sourceTree = "<group>"; };
+		268BCD92140B265D0025E4D1 /* rtcprrpacket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtcprrpacket.cpp; sourceTree = "<group>"; };
+		268BCD93140B265D0025E4D1 /* rtcpscheduler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtcpscheduler.cpp; sourceTree = "<group>"; };
+		268BCD94140B265D0025E4D1 /* rtcpsdesinfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtcpsdesinfo.cpp; sourceTree = "<group>"; };
+		268BCD95140B265D0025E4D1 /* rtcpsdespacket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtcpsdespacket.cpp; sourceTree = "<group>"; };
+		268BCD96140B265D0025E4D1 /* rtcpsrpacket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtcpsrpacket.cpp; sourceTree = "<group>"; };
+		268BCD97140B265D0025E4D1 /* rtpbyteaddress.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtpbyteaddress.cpp; sourceTree = "<group>"; };
+		268BCD98140B265D0025E4D1 /* rtpcollisionlist.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtpcollisionlist.cpp; sourceTree = "<group>"; };
+		268BCD99140B265D0025E4D1 /* rtpdebug.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtpdebug.cpp; sourceTree = "<group>"; };
+		268BCD9A140B265D0025E4D1 /* rtperrors.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtperrors.cpp; sourceTree = "<group>"; };
+		268BCD9B140B265D0025E4D1 /* rtpexternaltransmitter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtpexternaltransmitter.cpp; sourceTree = "<group>"; };
+		268BCD9C140B265D0025E4D1 /* rtpinternalsourcedata.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtpinternalsourcedata.cpp; sourceTree = "<group>"; };
+		268BCD9D140B265D0025E4D1 /* rtpipv4address.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtpipv4address.cpp; sourceTree = "<group>"; };
+		268BCD9E140B265D0025E4D1 /* rtpipv6address.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtpipv6address.cpp; sourceTree = "<group>"; };
+		268BCD9F140B265D0025E4D1 /* rtplibraryversion.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtplibraryversion.cpp; sourceTree = "<group>"; };
+		268BCDA0140B265D0025E4D1 /* rtppacket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtppacket.cpp; sourceTree = "<group>"; };
+		268BCDA1140B265D0025E4D1 /* rtppacketbuilder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtppacketbuilder.cpp; sourceTree = "<group>"; };
+		268BCDA2140B265D0025E4D1 /* rtppollthread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtppollthread.cpp; sourceTree = "<group>"; };
+		268BCDA3140B265D0025E4D1 /* rtprandom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtprandom.cpp; sourceTree = "<group>"; };
+		268BCDA4140B265D0025E4D1 /* rtprandomrand48.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtprandomrand48.cpp; sourceTree = "<group>"; };
+		268BCDA5140B265D0025E4D1 /* rtprandomrands.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtprandomrands.cpp; sourceTree = "<group>"; };
+		268BCDA6140B265D0025E4D1 /* rtprandomurandom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtprandomurandom.cpp; sourceTree = "<group>"; };
+		268BCDA7140B265D0025E4D1 /* rtpsession.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtpsession.cpp; sourceTree = "<group>"; };
+		268BCDA8140B265D0025E4D1 /* rtpsessionparams.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtpsessionparams.cpp; sourceTree = "<group>"; };
+		268BCDA9140B265D0025E4D1 /* rtpsessionsources.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtpsessionsources.cpp; sourceTree = "<group>"; };
+		268BCDAA140B265D0025E4D1 /* rtpsourcedata.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtpsourcedata.cpp; sourceTree = "<group>"; };
+		268BCDAB140B265D0025E4D1 /* rtpsources.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtpsources.cpp; sourceTree = "<group>"; };
+		268BCDAC140B265D0025E4D1 /* rtptimeutilities.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtptimeutilities.cpp; sourceTree = "<group>"; };
+		268BCDAD140B265D0025E4D1 /* rtpudpv4transmitter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtpudpv4transmitter.cpp; sourceTree = "<group>"; };
+		268BCDAE140B265D0025E4D1 /* rtpudpv6transmitter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtpudpv6transmitter.cpp; sourceTree = "<group>"; };
+		268BCDAF140B265D0025E4D1 /* cmake_install.cmake */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = cmake_install.cmake; sourceTree = "<group>"; };
+		268BCDB0140B265D0025E4D1 /* rtpconfig.h.in */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = rtpconfig.h.in; sourceTree = "<group>"; };
+		268BCDB1140B265D0025E4D1 /* rtptypes.h.in */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = rtptypes.h.in; sourceTree = "<group>"; };
+		268BCDB4140B265D0025E4D1 /* jrtplib-shared_postBuildPhase.makeDebug */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "jrtplib-shared_postBuildPhase.makeDebug"; sourceTree = "<group>"; };
+		268BCDB5140B265D0025E4D1 /* jrtplib-shared_postBuildPhase.makeMinSizeRel */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "jrtplib-shared_postBuildPhase.makeMinSizeRel"; sourceTree = "<group>"; };
+		268BCDB6140B265D0025E4D1 /* jrtplib-shared_postBuildPhase.makeRelease */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "jrtplib-shared_postBuildPhase.makeRelease"; sourceTree = "<group>"; };
+		268BCDB7140B265D0025E4D1 /* jrtplib-shared_postBuildPhase.makeRelWithDebInfo */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "jrtplib-shared_postBuildPhase.makeRelWithDebInfo"; sourceTree = "<group>"; };
+		268BCDB8140B265D0025E4D1 /* jrtplib-static_postBuildPhase.makeDebug */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "jrtplib-static_postBuildPhase.makeDebug"; sourceTree = "<group>"; };
+		268BCDB9140B265D0025E4D1 /* jrtplib-static_postBuildPhase.makeMinSizeRel */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "jrtplib-static_postBuildPhase.makeMinSizeRel"; sourceTree = "<group>"; };
+		268BCDBA140B265D0025E4D1 /* jrtplib-static_postBuildPhase.makeRelease */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "jrtplib-static_postBuildPhase.makeRelease"; sourceTree = "<group>"; };
+		268BCDBB140B265D0025E4D1 /* jrtplib-static_postBuildPhase.makeRelWithDebInfo */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "jrtplib-static_postBuildPhase.makeRelWithDebInfo"; sourceTree = "<group>"; };
+		268BCDBD140B265D0025E4D1 /* libjrtp.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libjrtp.a; sourceTree = "<group>"; };
+		268BCDBE140B265D0025E4D1 /* libjrtp.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libjrtp.dylib; sourceTree = "<group>"; };
+		268BCDC0140B265D0025E4D1 /* rtpfaketransmitter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtpfaketransmitter.cpp; sourceTree = "<group>"; };
+		268BCDC1140B265D0025E4D1 /* rtpfaketransmitter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpfaketransmitter.h; sourceTree = "<group>"; };
+		268BCDC5140B265D0025E4D1 /* build-state.dat */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "build-state.dat"; sourceTree = "<group>"; };
+		268BCDC6140B265D0025E4D1 /* build-state~.dat */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "build-state~.dat"; sourceTree = "<group>"; };
+		268BCDC7140B265D0025E4D1 /* jrtplib-shared.dep */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "jrtplib-shared.dep"; sourceTree = "<group>"; };
+		268BCDC8140B265D0025E4D1 /* jrtplib-shared~.dep */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "jrtplib-shared~.dep"; sourceTree = "<group>"; };
+		268BCDCB140B265D0025E4D1 /* jrtp.LinkFileList */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = jrtp.LinkFileList; sourceTree = "<group>"; };
+		268BCDCC140B265D0025E4D1 /* rtcpapppacket.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtcpapppacket.o; sourceTree = "<group>"; };
+		268BCDCD140B265D0025E4D1 /* rtcpbyepacket.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtcpbyepacket.o; sourceTree = "<group>"; };
+		268BCDCE140B265D0025E4D1 /* rtcpcompoundpacket.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtcpcompoundpacket.o; sourceTree = "<group>"; };
+		268BCDCF140B265D0025E4D1 /* rtcpcompoundpacketbuilder.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtcpcompoundpacketbuilder.o; sourceTree = "<group>"; };
+		268BCDD0140B265D0025E4D1 /* rtcppacket.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtcppacket.o; sourceTree = "<group>"; };
+		268BCDD1140B265D0025E4D1 /* rtcppacketbuilder.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtcppacketbuilder.o; sourceTree = "<group>"; };
+		268BCDD2140B265D0025E4D1 /* rtcprrpacket.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtcprrpacket.o; sourceTree = "<group>"; };
+		268BCDD3140B265D0025E4D1 /* rtcpscheduler.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtcpscheduler.o; sourceTree = "<group>"; };
+		268BCDD4140B265D0025E4D1 /* rtcpsdesinfo.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtcpsdesinfo.o; sourceTree = "<group>"; };
+		268BCDD5140B265D0025E4D1 /* rtcpsdespacket.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtcpsdespacket.o; sourceTree = "<group>"; };
+		268BCDD6140B265D0025E4D1 /* rtcpsrpacket.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtcpsrpacket.o; sourceTree = "<group>"; };
+		268BCDD7140B265D0025E4D1 /* rtpbyteaddress.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtpbyteaddress.o; sourceTree = "<group>"; };
+		268BCDD8140B265D0025E4D1 /* rtpcollisionlist.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtpcollisionlist.o; sourceTree = "<group>"; };
+		268BCDD9140B265D0025E4D1 /* rtpdebug.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtpdebug.o; sourceTree = "<group>"; };
+		268BCDDA140B265D0025E4D1 /* rtperrors.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtperrors.o; sourceTree = "<group>"; };
+		268BCDDB140B265D0025E4D1 /* rtpexternaltransmitter.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtpexternaltransmitter.o; sourceTree = "<group>"; };
+		268BCDDC140B265D0025E4D1 /* rtpfaketransmitter.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtpfaketransmitter.o; sourceTree = "<group>"; };
+		268BCDDD140B265D0025E4D1 /* rtpinternalsourcedata.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtpinternalsourcedata.o; sourceTree = "<group>"; };
+		268BCDDE140B265D0025E4D1 /* rtpipv4address.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtpipv4address.o; sourceTree = "<group>"; };
+		268BCDDF140B265D0025E4D1 /* rtpipv6address.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtpipv6address.o; sourceTree = "<group>"; };
+		268BCDE0140B265D0025E4D1 /* rtplibraryversion.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtplibraryversion.o; sourceTree = "<group>"; };
+		268BCDE1140B265D0025E4D1 /* rtppacket.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtppacket.o; sourceTree = "<group>"; };
+		268BCDE2140B265D0025E4D1 /* rtppacketbuilder.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtppacketbuilder.o; sourceTree = "<group>"; };
+		268BCDE3140B265D0025E4D1 /* rtppollthread.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtppollthread.o; sourceTree = "<group>"; };
+		268BCDE4140B265D0025E4D1 /* rtprandom.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtprandom.o; sourceTree = "<group>"; };
+		268BCDE5140B265D0025E4D1 /* rtprandomrand48.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtprandomrand48.o; sourceTree = "<group>"; };
+		268BCDE6140B265D0025E4D1 /* rtprandomrands.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtprandomrands.o; sourceTree = "<group>"; };
+		268BCDE7140B265D0025E4D1 /* rtprandomurandom.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtprandomurandom.o; sourceTree = "<group>"; };
+		268BCDE8140B265D0025E4D1 /* rtpsession.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtpsession.o; sourceTree = "<group>"; };
+		268BCDE9140B265D0025E4D1 /* rtpsessionparams.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtpsessionparams.o; sourceTree = "<group>"; };
+		268BCDEA140B265D0025E4D1 /* rtpsessionsources.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtpsessionsources.o; sourceTree = "<group>"; };
+		268BCDEB140B265D0025E4D1 /* rtpsourcedata.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtpsourcedata.o; sourceTree = "<group>"; };
+		268BCDEC140B265D0025E4D1 /* rtpsources.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtpsources.o; sourceTree = "<group>"; };
+		268BCDED140B265D0025E4D1 /* rtptimeutilities.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtptimeutilities.o; sourceTree = "<group>"; };
+		268BCDEE140B265D0025E4D1 /* rtpudpv4transmitter.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtpudpv4transmitter.o; sourceTree = "<group>"; };
+		268BCDEF140B265D0025E4D1 /* rtpudpv6transmitter.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtpudpv6transmitter.o; sourceTree = "<group>"; };
+		268BCDF0140B265D0025E4D1 /* Script-2EF1A6402EF1A6402EF1A640.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "Script-2EF1A6402EF1A6402EF1A640.sh"; sourceTree = "<group>"; };
+		268BCDF1140B265D0025E4D1 /* Script-2EF1ACF02EF1ACF02EF1ACF0.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "Script-2EF1ACF02EF1ACF02EF1ACF0.sh"; sourceTree = "<group>"; };
+		268BCDF3140B265D0025E4D1 /* build-state.dat */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "build-state.dat"; sourceTree = "<group>"; };
+		268BCDF4140B265D0025E4D1 /* jrtplib-static.dep */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "jrtplib-static.dep"; sourceTree = "<group>"; };
+		268BCDF7140B265D0025E4D1 /* jrtp.LinkFileList */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = jrtp.LinkFileList; sourceTree = "<group>"; };
+		268BCDF8140B265D0025E4D1 /* rtcpapppacket.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtcpapppacket.o; sourceTree = "<group>"; };
+		268BCDF9140B265D0025E4D1 /* rtcpbyepacket.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtcpbyepacket.o; sourceTree = "<group>"; };
+		268BCDFA140B265D0025E4D1 /* rtcpcompoundpacket.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtcpcompoundpacket.o; sourceTree = "<group>"; };
+		268BCDFB140B265D0025E4D1 /* rtcpcompoundpacketbuilder.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtcpcompoundpacketbuilder.o; sourceTree = "<group>"; };
+		268BCDFC140B265D0025E4D1 /* rtcppacket.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtcppacket.o; sourceTree = "<group>"; };
+		268BCDFD140B265D0025E4D1 /* rtcppacketbuilder.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtcppacketbuilder.o; sourceTree = "<group>"; };
+		268BCDFE140B265D0025E4D1 /* rtcprrpacket.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtcprrpacket.o; sourceTree = "<group>"; };
+		268BCDFF140B265D0025E4D1 /* rtcpscheduler.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtcpscheduler.o; sourceTree = "<group>"; };
+		268BCE00140B265D0025E4D1 /* rtcpsdesinfo.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtcpsdesinfo.o; sourceTree = "<group>"; };
+		268BCE01140B265D0025E4D1 /* rtcpsdespacket.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtcpsdespacket.o; sourceTree = "<group>"; };
+		268BCE02140B265D0025E4D1 /* rtcpsrpacket.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtcpsrpacket.o; sourceTree = "<group>"; };
+		268BCE03140B265D0025E4D1 /* rtpbyteaddress.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtpbyteaddress.o; sourceTree = "<group>"; };
+		268BCE04140B265D0025E4D1 /* rtpcollisionlist.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtpcollisionlist.o; sourceTree = "<group>"; };
+		268BCE05140B265D0025E4D1 /* rtpdebug.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtpdebug.o; sourceTree = "<group>"; };
+		268BCE06140B265D0025E4D1 /* rtperrors.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtperrors.o; sourceTree = "<group>"; };
+		268BCE07140B265D0025E4D1 /* rtpexternaltransmitter.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtpexternaltransmitter.o; sourceTree = "<group>"; };
+		268BCE08140B265D0025E4D1 /* rtpfaketransmitter.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtpfaketransmitter.o; sourceTree = "<group>"; };
+		268BCE09140B265D0025E4D1 /* rtpinternalsourcedata.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtpinternalsourcedata.o; sourceTree = "<group>"; };
+		268BCE0A140B265D0025E4D1 /* rtpipv4address.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtpipv4address.o; sourceTree = "<group>"; };
+		268BCE0B140B265D0025E4D1 /* rtpipv6address.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtpipv6address.o; sourceTree = "<group>"; };
+		268BCE0C140B265D0025E4D1 /* rtplibraryversion.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtplibraryversion.o; sourceTree = "<group>"; };
+		268BCE0D140B265D0025E4D1 /* rtppacket.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtppacket.o; sourceTree = "<group>"; };
+		268BCE0E140B265D0025E4D1 /* rtppacketbuilder.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtppacketbuilder.o; sourceTree = "<group>"; };
+		268BCE0F140B265D0025E4D1 /* rtppollthread.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtppollthread.o; sourceTree = "<group>"; };
+		268BCE10140B265D0025E4D1 /* rtprandom.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtprandom.o; sourceTree = "<group>"; };
+		268BCE11140B265D0025E4D1 /* rtprandomrand48.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtprandomrand48.o; sourceTree = "<group>"; };
+		268BCE12140B265D0025E4D1 /* rtprandomrands.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtprandomrands.o; sourceTree = "<group>"; };
+		268BCE13140B265D0025E4D1 /* rtprandomurandom.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtprandomurandom.o; sourceTree = "<group>"; };
+		268BCE14140B265D0025E4D1 /* rtpsession.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtpsession.o; sourceTree = "<group>"; };
+		268BCE15140B265D0025E4D1 /* rtpsessionparams.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtpsessionparams.o; sourceTree = "<group>"; };
+		268BCE16140B265D0025E4D1 /* rtpsessionsources.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtpsessionsources.o; sourceTree = "<group>"; };
+		268BCE17140B265D0025E4D1 /* rtpsourcedata.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtpsourcedata.o; sourceTree = "<group>"; };
+		268BCE18140B265D0025E4D1 /* rtpsources.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtpsources.o; sourceTree = "<group>"; };
+		268BCE19140B265D0025E4D1 /* rtptimeutilities.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtptimeutilities.o; sourceTree = "<group>"; };
+		268BCE1A140B265D0025E4D1 /* rtpudpv4transmitter.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtpudpv4transmitter.o; sourceTree = "<group>"; };
+		268BCE1B140B265D0025E4D1 /* rtpudpv6transmitter.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtpudpv6transmitter.o; sourceTree = "<group>"; };
+		268BCE1C140B265D0025E4D1 /* Script-2E883DF02E883DF02E883DF0.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "Script-2E883DF02E883DF02E883DF0.sh"; sourceTree = "<group>"; };
+		268BCE1D140B265D0025E4D1 /* Script-2E8844A02E8844A02E8844A0.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "Script-2E8844A02E8844A02E8844A0.sh"; sourceTree = "<group>"; };
+		268BCE20140B265D0025E4D1 /* build-state.dat */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "build-state.dat"; sourceTree = "<group>"; };
+		268BCE21140B265D0025E4D1 /* jrtplib-static.dep */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "jrtplib-static.dep"; sourceTree = "<group>"; };
+		268BCE24140B265D0025E4D1 /* jrtp.LinkFileList */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = jrtp.LinkFileList; sourceTree = "<group>"; };
+		268BCE25140B265D0025E4D1 /* rtcpapppacket.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtcpapppacket.o; sourceTree = "<group>"; };
+		268BCE26140B265D0025E4D1 /* rtcpbyepacket.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtcpbyepacket.o; sourceTree = "<group>"; };
+		268BCE27140B265D0025E4D1 /* rtcpcompoundpacket.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtcpcompoundpacket.o; sourceTree = "<group>"; };
+		268BCE28140B265D0025E4D1 /* rtcpcompoundpacketbuilder.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtcpcompoundpacketbuilder.o; sourceTree = "<group>"; };
+		268BCE29140B265D0025E4D1 /* rtcppacket.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtcppacket.o; sourceTree = "<group>"; };
+		268BCE2A140B265D0025E4D1 /* rtcppacketbuilder.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtcppacketbuilder.o; sourceTree = "<group>"; };
+		268BCE2B140B265D0025E4D1 /* rtcprrpacket.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtcprrpacket.o; sourceTree = "<group>"; };
+		268BCE2C140B265D0025E4D1 /* rtcpscheduler.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtcpscheduler.o; sourceTree = "<group>"; };
+		268BCE2D140B265D0025E4D1 /* rtcpsdesinfo.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtcpsdesinfo.o; sourceTree = "<group>"; };
+		268BCE2E140B265D0025E4D1 /* rtcpsdespacket.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtcpsdespacket.o; sourceTree = "<group>"; };
+		268BCE2F140B265D0025E4D1 /* rtcpsrpacket.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtcpsrpacket.o; sourceTree = "<group>"; };
+		268BCE30140B265D0025E4D1 /* rtpbyteaddress.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtpbyteaddress.o; sourceTree = "<group>"; };
+		268BCE31140B265D0025E4D1 /* rtpcollisionlist.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtpcollisionlist.o; sourceTree = "<group>"; };
+		268BCE32140B265D0025E4D1 /* rtpdebug.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtpdebug.o; sourceTree = "<group>"; };
+		268BCE33140B265D0025E4D1 /* rtperrors.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtperrors.o; sourceTree = "<group>"; };
+		268BCE34140B265D0025E4D1 /* rtpexternaltransmitter.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtpexternaltransmitter.o; sourceTree = "<group>"; };
+		268BCE35140B265D0025E4D1 /* rtpfaketransmitter.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtpfaketransmitter.o; sourceTree = "<group>"; };
+		268BCE36140B265D0025E4D1 /* rtpinternalsourcedata.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtpinternalsourcedata.o; sourceTree = "<group>"; };
+		268BCE37140B265D0025E4D1 /* rtpipv4address.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtpipv4address.o; sourceTree = "<group>"; };
+		268BCE38140B265D0025E4D1 /* rtpipv6address.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtpipv6address.o; sourceTree = "<group>"; };
+		268BCE39140B265D0025E4D1 /* rtplibraryversion.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtplibraryversion.o; sourceTree = "<group>"; };
+		268BCE3A140B265D0025E4D1 /* rtppacket.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtppacket.o; sourceTree = "<group>"; };
+		268BCE3B140B265D0025E4D1 /* rtppacketbuilder.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtppacketbuilder.o; sourceTree = "<group>"; };
+		268BCE3C140B265D0025E4D1 /* rtppollthread.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtppollthread.o; sourceTree = "<group>"; };
+		268BCE3D140B265D0025E4D1 /* rtprandom.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtprandom.o; sourceTree = "<group>"; };
+		268BCE3E140B265D0025E4D1 /* rtprandomrand48.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtprandomrand48.o; sourceTree = "<group>"; };
+		268BCE3F140B265D0025E4D1 /* rtprandomrands.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtprandomrands.o; sourceTree = "<group>"; };
+		268BCE40140B265D0025E4D1 /* rtprandomurandom.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtprandomurandom.o; sourceTree = "<group>"; };
+		268BCE41140B265D0025E4D1 /* rtpsession.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtpsession.o; sourceTree = "<group>"; };
+		268BCE42140B265D0025E4D1 /* rtpsessionparams.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtpsessionparams.o; sourceTree = "<group>"; };
+		268BCE43140B265D0025E4D1 /* rtpsessionsources.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtpsessionsources.o; sourceTree = "<group>"; };
+		268BCE44140B265D0025E4D1 /* rtpsourcedata.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtpsourcedata.o; sourceTree = "<group>"; };
+		268BCE45140B265D0025E4D1 /* rtpsources.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtpsources.o; sourceTree = "<group>"; };
+		268BCE46140B265D0025E4D1 /* rtptimeutilities.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtptimeutilities.o; sourceTree = "<group>"; };
+		268BCE47140B265D0025E4D1 /* rtpudpv4transmitter.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtpudpv4transmitter.o; sourceTree = "<group>"; };
+		268BCE48140B265D0025E4D1 /* rtpudpv6transmitter.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = rtpudpv6transmitter.o; sourceTree = "<group>"; };
+		268BCE49140B265D0025E4D1 /* Script-2E883DF02E883DF02E883DF0.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "Script-2E883DF02E883DF02E883DF0.sh"; sourceTree = "<group>"; };
+		268BCE4A140B265D0025E4D1 /* Script-2E8844A02E8844A02E8844A0.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "Script-2E8844A02E8844A02E8844A0.sh"; sourceTree = "<group>"; };
+		268BCE4B140B265D0025E4D1 /* CMakeLists.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CMakeLists.txt; sourceTree = "<group>"; };
+		268BCE4C140B265E0025E4D1 /* errcodecommand */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = errcodecommand; sourceTree = "<group>"; };
 		269A2E5513202D800044B1C8 /* noicon_64.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = noicon_64.png; sourceTree = "<group>"; };
 		269F0F19105DDEFB00FF96F8 /* status.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = status.png; sourceTree = "<group>"; };
 		26A942AD130B52520034CDF7 /* offline.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = offline.png; sourceTree = "<group>"; };
@@ -270,91 +658,6 @@
 		26E5BA8A132287D400D8C57A /* Settings.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = Settings.xib; sourceTree = "<group>"; };
 		26E5BA8C13228D7400D8C57A /* StatusControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StatusControl.h; sourceTree = "<group>"; };
 		26E5BA8D13228D7400D8C57A /* StatusControl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StatusControl.m; sourceTree = "<group>"; };
-		26E7D42C140B05D200EE6C93 /* rtcpapppacket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtcpapppacket.h; sourceTree = "<group>"; };
-		26E7D42D140B05D200EE6C93 /* rtcpbyepacket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtcpbyepacket.h; sourceTree = "<group>"; };
-		26E7D42E140B05D200EE6C93 /* rtcpcompoundpacket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtcpcompoundpacket.h; sourceTree = "<group>"; };
-		26E7D42F140B05D200EE6C93 /* rtcpcompoundpacketbuilder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtcpcompoundpacketbuilder.h; sourceTree = "<group>"; };
-		26E7D430140B05D200EE6C93 /* rtcppacket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtcppacket.h; sourceTree = "<group>"; };
-		26E7D431140B05D200EE6C93 /* rtcppacketbuilder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtcppacketbuilder.h; sourceTree = "<group>"; };
-		26E7D432140B05D200EE6C93 /* rtcprrpacket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtcprrpacket.h; sourceTree = "<group>"; };
-		26E7D433140B05D200EE6C93 /* rtcpscheduler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtcpscheduler.h; sourceTree = "<group>"; };
-		26E7D434140B05D200EE6C93 /* rtcpsdesinfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtcpsdesinfo.h; sourceTree = "<group>"; };
-		26E7D435140B05D200EE6C93 /* rtcpsdespacket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtcpsdespacket.h; sourceTree = "<group>"; };
-		26E7D436140B05D200EE6C93 /* rtcpsrpacket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtcpsrpacket.h; sourceTree = "<group>"; };
-		26E7D437140B05D200EE6C93 /* rtcpunknownpacket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtcpunknownpacket.h; sourceTree = "<group>"; };
-		26E7D438140B05D200EE6C93 /* rtpaddress.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpaddress.h; sourceTree = "<group>"; };
-		26E7D439140B05D200EE6C93 /* rtpbyteaddress.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpbyteaddress.h; sourceTree = "<group>"; };
-		26E7D43A140B05D200EE6C93 /* rtpcollisionlist.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpcollisionlist.h; sourceTree = "<group>"; };
-		26E7D43B140B05D200EE6C93 /* rtpdebug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpdebug.h; sourceTree = "<group>"; };
-		26E7D43C140B05D200EE6C93 /* rtpdefines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpdefines.h; sourceTree = "<group>"; };
-		26E7D43D140B05D200EE6C93 /* rtperrors.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtperrors.h; sourceTree = "<group>"; };
-		26E7D43E140B05D200EE6C93 /* rtpexternaltransmitter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpexternaltransmitter.h; sourceTree = "<group>"; };
-		26E7D43F140B05D200EE6C93 /* rtphashtable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtphashtable.h; sourceTree = "<group>"; };
-		26E7D440140B05D200EE6C93 /* rtpinternalsourcedata.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpinternalsourcedata.h; sourceTree = "<group>"; };
-		26E7D441140B05D200EE6C93 /* rtpipv4address.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpipv4address.h; sourceTree = "<group>"; };
-		26E7D442140B05D200EE6C93 /* rtpipv4destination.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpipv4destination.h; sourceTree = "<group>"; };
-		26E7D443140B05D200EE6C93 /* rtpipv6address.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpipv6address.h; sourceTree = "<group>"; };
-		26E7D444140B05D200EE6C93 /* rtpipv6destination.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpipv6destination.h; sourceTree = "<group>"; };
-		26E7D445140B05D200EE6C93 /* rtpkeyhashtable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpkeyhashtable.h; sourceTree = "<group>"; };
-		26E7D446140B05D200EE6C93 /* rtplibraryversion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtplibraryversion.h; sourceTree = "<group>"; };
-		26E7D447140B05D200EE6C93 /* rtpmemorymanager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpmemorymanager.h; sourceTree = "<group>"; };
-		26E7D448140B05D200EE6C93 /* rtpmemoryobject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpmemoryobject.h; sourceTree = "<group>"; };
-		26E7D449140B05D200EE6C93 /* rtppacket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtppacket.h; sourceTree = "<group>"; };
-		26E7D44A140B05D200EE6C93 /* rtppacketbuilder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtppacketbuilder.h; sourceTree = "<group>"; };
-		26E7D44B140B05D200EE6C93 /* rtppollthread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtppollthread.h; sourceTree = "<group>"; };
-		26E7D44C140B05D200EE6C93 /* rtprandom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtprandom.h; sourceTree = "<group>"; };
-		26E7D44D140B05D200EE6C93 /* rtprandomrand48.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtprandomrand48.h; sourceTree = "<group>"; };
-		26E7D44E140B05D200EE6C93 /* rtprandomrands.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtprandomrands.h; sourceTree = "<group>"; };
-		26E7D44F140B05D200EE6C93 /* rtprandomurandom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtprandomurandom.h; sourceTree = "<group>"; };
-		26E7D450140B05D200EE6C93 /* rtprawpacket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtprawpacket.h; sourceTree = "<group>"; };
-		26E7D451140B05D200EE6C93 /* rtpsession.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpsession.h; sourceTree = "<group>"; };
-		26E7D452140B05D200EE6C93 /* rtpsessionparams.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpsessionparams.h; sourceTree = "<group>"; };
-		26E7D453140B05D200EE6C93 /* rtpsessionsources.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpsessionsources.h; sourceTree = "<group>"; };
-		26E7D454140B05D200EE6C93 /* rtpsourcedata.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpsourcedata.h; sourceTree = "<group>"; };
-		26E7D455140B05D200EE6C93 /* rtpsources.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpsources.h; sourceTree = "<group>"; };
-		26E7D456140B05D200EE6C93 /* rtpstructs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpstructs.h; sourceTree = "<group>"; };
-		26E7D457140B05D200EE6C93 /* rtptimeutilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtptimeutilities.h; sourceTree = "<group>"; };
-		26E7D458140B05D200EE6C93 /* rtptransmitter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtptransmitter.h; sourceTree = "<group>"; };
-		26E7D459140B05D200EE6C93 /* rtptypes_win.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtptypes_win.h; sourceTree = "<group>"; };
-		26E7D45A140B05D200EE6C93 /* rtpudpv4transmitter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpudpv4transmitter.h; sourceTree = "<group>"; };
-		26E7D45B140B05D200EE6C93 /* rtpudpv6transmitter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpudpv6transmitter.h; sourceTree = "<group>"; };
-		26E7D45C140B05D200EE6C93 /* rtcpapppacket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtcpapppacket.cpp; sourceTree = "<group>"; };
-		26E7D45D140B05D200EE6C93 /* rtcpbyepacket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtcpbyepacket.cpp; sourceTree = "<group>"; };
-		26E7D45E140B05D200EE6C93 /* rtcpcompoundpacket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtcpcompoundpacket.cpp; sourceTree = "<group>"; };
-		26E7D45F140B05D200EE6C93 /* rtcpcompoundpacketbuilder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtcpcompoundpacketbuilder.cpp; sourceTree = "<group>"; };
-		26E7D460140B05D200EE6C93 /* rtcppacket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtcppacket.cpp; sourceTree = "<group>"; };
-		26E7D461140B05D200EE6C93 /* rtcppacketbuilder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtcppacketbuilder.cpp; sourceTree = "<group>"; };
-		26E7D462140B05D200EE6C93 /* rtcprrpacket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtcprrpacket.cpp; sourceTree = "<group>"; };
-		26E7D463140B05D200EE6C93 /* rtcpscheduler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtcpscheduler.cpp; sourceTree = "<group>"; };
-		26E7D464140B05D200EE6C93 /* rtcpsdesinfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtcpsdesinfo.cpp; sourceTree = "<group>"; };
-		26E7D465140B05D200EE6C93 /* rtcpsdespacket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtcpsdespacket.cpp; sourceTree = "<group>"; };
-		26E7D466140B05D200EE6C93 /* rtcpsrpacket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtcpsrpacket.cpp; sourceTree = "<group>"; };
-		26E7D467140B05D200EE6C93 /* rtpbyteaddress.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtpbyteaddress.cpp; sourceTree = "<group>"; };
-		26E7D468140B05D200EE6C93 /* rtpcollisionlist.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtpcollisionlist.cpp; sourceTree = "<group>"; };
-		26E7D469140B05D200EE6C93 /* rtpdebug.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtpdebug.cpp; sourceTree = "<group>"; };
-		26E7D46A140B05D200EE6C93 /* rtperrors.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtperrors.cpp; sourceTree = "<group>"; };
-		26E7D46B140B05D200EE6C93 /* rtpexternaltransmitter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtpexternaltransmitter.cpp; sourceTree = "<group>"; };
-		26E7D46C140B05D200EE6C93 /* rtpinternalsourcedata.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtpinternalsourcedata.cpp; sourceTree = "<group>"; };
-		26E7D46D140B05D200EE6C93 /* rtpipv4address.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtpipv4address.cpp; sourceTree = "<group>"; };
-		26E7D46E140B05D200EE6C93 /* rtpipv6address.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtpipv6address.cpp; sourceTree = "<group>"; };
-		26E7D46F140B05D200EE6C93 /* rtplibraryversion.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtplibraryversion.cpp; sourceTree = "<group>"; };
-		26E7D470140B05D200EE6C93 /* rtppacket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtppacket.cpp; sourceTree = "<group>"; };
-		26E7D471140B05D200EE6C93 /* rtppacketbuilder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtppacketbuilder.cpp; sourceTree = "<group>"; };
-		26E7D472140B05D200EE6C93 /* rtppollthread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtppollthread.cpp; sourceTree = "<group>"; };
-		26E7D473140B05D300EE6C93 /* rtprandom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtprandom.cpp; sourceTree = "<group>"; };
-		26E7D474140B05D300EE6C93 /* rtprandomrand48.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtprandomrand48.cpp; sourceTree = "<group>"; };
-		26E7D475140B05D300EE6C93 /* rtprandomrands.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtprandomrands.cpp; sourceTree = "<group>"; };
-		26E7D476140B05D300EE6C93 /* rtprandomurandom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtprandomurandom.cpp; sourceTree = "<group>"; };
-		26E7D477140B05D300EE6C93 /* rtpsession.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtpsession.cpp; sourceTree = "<group>"; };
-		26E7D478140B05D300EE6C93 /* rtpsessionparams.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtpsessionparams.cpp; sourceTree = "<group>"; };
-		26E7D479140B05D300EE6C93 /* rtpsessionsources.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtpsessionsources.cpp; sourceTree = "<group>"; };
-		26E7D47A140B05D300EE6C93 /* rtpsourcedata.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtpsourcedata.cpp; sourceTree = "<group>"; };
-		26E7D47B140B05D300EE6C93 /* rtpsources.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtpsources.cpp; sourceTree = "<group>"; };
-		26E7D47C140B05D300EE6C93 /* rtptimeutilities.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtptimeutilities.cpp; sourceTree = "<group>"; };
-		26E7D47D140B05D300EE6C93 /* rtpudpv4transmitter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtpudpv4transmitter.cpp; sourceTree = "<group>"; };
-		26E7D47E140B05D300EE6C93 /* rtpudpv6transmitter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtpudpv6transmitter.cpp; sourceTree = "<group>"; };
-		26E7D482140B05D300EE6C93 /* rtpfaketransmitter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtpfaketransmitter.cpp; sourceTree = "<group>"; };
-		26E7D483140B05D300EE6C93 /* rtpfaketransmitter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpfaketransmitter.h; sourceTree = "<group>"; };
 		26E7D4AE140B067100EE6C93 /* RTP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RTP.h; sourceTree = "<group>"; };
 		26E7D4AF140B067100EE6C93 /* RTP.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RTP.m; sourceTree = "<group>"; };
 		26EB845D111644AD005446DD /* Themes */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Themes; sourceTree = "<group>"; };
@@ -389,6 +692,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				268BCF12140B29180025E4D1 /* libjrtplib-static.a in Frameworks */,
 				1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */,
 				1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */,
 				288765A50DF7441C002DB57D /* CoreGraphics.framework in Frameworks */,
@@ -398,6 +702,123 @@
 				263F568D121B5E970027D85D /* MediaPlayer.framework in Frameworks */,
 				26292F4F1309CAE100097280 /* CFNetwork.framework in Frameworks */,
 				26B69A75131C522F002FCBEB /* Security.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		268BCD53140B25CC0025E4D1 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				268BCEA2140B265E0025E4D1 /* libjrtp.a in Frameworks */,
+				268BCEA3140B265F0025E4D1 /* libjrtp.dylib in Frameworks */,
+				268BCEA6140B265F0025E4D1 /* rtcpapppacket.o in Frameworks */,
+				268BCEA7140B265F0025E4D1 /* rtcpbyepacket.o in Frameworks */,
+				268BCEA8140B265F0025E4D1 /* rtcpcompoundpacket.o in Frameworks */,
+				268BCEA9140B265F0025E4D1 /* rtcpcompoundpacketbuilder.o in Frameworks */,
+				268BCEAA140B265F0025E4D1 /* rtcppacket.o in Frameworks */,
+				268BCEAB140B265F0025E4D1 /* rtcppacketbuilder.o in Frameworks */,
+				268BCEAC140B265F0025E4D1 /* rtcprrpacket.o in Frameworks */,
+				268BCEAD140B265F0025E4D1 /* rtcpscheduler.o in Frameworks */,
+				268BCEAE140B265F0025E4D1 /* rtcpsdesinfo.o in Frameworks */,
+				268BCEAF140B265F0025E4D1 /* rtcpsdespacket.o in Frameworks */,
+				268BCEB0140B265F0025E4D1 /* rtcpsrpacket.o in Frameworks */,
+				268BCEB1140B265F0025E4D1 /* rtpbyteaddress.o in Frameworks */,
+				268BCEB2140B265F0025E4D1 /* rtpcollisionlist.o in Frameworks */,
+				268BCEB3140B265F0025E4D1 /* rtpdebug.o in Frameworks */,
+				268BCEB4140B265F0025E4D1 /* rtperrors.o in Frameworks */,
+				268BCEB5140B265F0025E4D1 /* rtpexternaltransmitter.o in Frameworks */,
+				268BCEB6140B265F0025E4D1 /* rtpfaketransmitter.o in Frameworks */,
+				268BCEB7140B265F0025E4D1 /* rtpinternalsourcedata.o in Frameworks */,
+				268BCEB8140B265F0025E4D1 /* rtpipv4address.o in Frameworks */,
+				268BCEB9140B265F0025E4D1 /* rtpipv6address.o in Frameworks */,
+				268BCEBA140B265F0025E4D1 /* rtplibraryversion.o in Frameworks */,
+				268BCEBB140B265F0025E4D1 /* rtppacket.o in Frameworks */,
+				268BCEBC140B265F0025E4D1 /* rtppacketbuilder.o in Frameworks */,
+				268BCEBD140B265F0025E4D1 /* rtppollthread.o in Frameworks */,
+				268BCEBE140B265F0025E4D1 /* rtprandom.o in Frameworks */,
+				268BCEBF140B265F0025E4D1 /* rtprandomrand48.o in Frameworks */,
+				268BCEC0140B265F0025E4D1 /* rtprandomrands.o in Frameworks */,
+				268BCEC1140B265F0025E4D1 /* rtprandomurandom.o in Frameworks */,
+				268BCEC2140B265F0025E4D1 /* rtpsession.o in Frameworks */,
+				268BCEC3140B265F0025E4D1 /* rtpsessionparams.o in Frameworks */,
+				268BCEC4140B265F0025E4D1 /* rtpsessionsources.o in Frameworks */,
+				268BCEC5140B265F0025E4D1 /* rtpsourcedata.o in Frameworks */,
+				268BCEC6140B265F0025E4D1 /* rtpsources.o in Frameworks */,
+				268BCEC7140B265F0025E4D1 /* rtptimeutilities.o in Frameworks */,
+				268BCEC8140B265F0025E4D1 /* rtpudpv4transmitter.o in Frameworks */,
+				268BCEC9140B265F0025E4D1 /* rtpudpv6transmitter.o in Frameworks */,
+				268BCECA140B265F0025E4D1 /* rtcpapppacket.o in Frameworks */,
+				268BCECB140B265F0025E4D1 /* rtcpbyepacket.o in Frameworks */,
+				268BCECC140B265F0025E4D1 /* rtcpcompoundpacket.o in Frameworks */,
+				268BCECD140B265F0025E4D1 /* rtcpcompoundpacketbuilder.o in Frameworks */,
+				268BCECE140B265F0025E4D1 /* rtcppacket.o in Frameworks */,
+				268BCECF140B265F0025E4D1 /* rtcppacketbuilder.o in Frameworks */,
+				268BCED0140B265F0025E4D1 /* rtcprrpacket.o in Frameworks */,
+				268BCED1140B265F0025E4D1 /* rtcpscheduler.o in Frameworks */,
+				268BCED2140B265F0025E4D1 /* rtcpsdesinfo.o in Frameworks */,
+				268BCED3140B265F0025E4D1 /* rtcpsdespacket.o in Frameworks */,
+				268BCED4140B265F0025E4D1 /* rtcpsrpacket.o in Frameworks */,
+				268BCED5140B265F0025E4D1 /* rtpbyteaddress.o in Frameworks */,
+				268BCED6140B265F0025E4D1 /* rtpcollisionlist.o in Frameworks */,
+				268BCED7140B265F0025E4D1 /* rtpdebug.o in Frameworks */,
+				268BCED8140B265F0025E4D1 /* rtperrors.o in Frameworks */,
+				268BCED9140B265F0025E4D1 /* rtpexternaltransmitter.o in Frameworks */,
+				268BCEDA140B265F0025E4D1 /* rtpfaketransmitter.o in Frameworks */,
+				268BCEDB140B265F0025E4D1 /* rtpinternalsourcedata.o in Frameworks */,
+				268BCEDC140B265F0025E4D1 /* rtpipv4address.o in Frameworks */,
+				268BCEDD140B265F0025E4D1 /* rtpipv6address.o in Frameworks */,
+				268BCEDE140B265F0025E4D1 /* rtplibraryversion.o in Frameworks */,
+				268BCEDF140B265F0025E4D1 /* rtppacket.o in Frameworks */,
+				268BCEE0140B265F0025E4D1 /* rtppacketbuilder.o in Frameworks */,
+				268BCEE1140B265F0025E4D1 /* rtppollthread.o in Frameworks */,
+				268BCEE2140B265F0025E4D1 /* rtprandom.o in Frameworks */,
+				268BCEE3140B265F0025E4D1 /* rtprandomrand48.o in Frameworks */,
+				268BCEE4140B265F0025E4D1 /* rtprandomrands.o in Frameworks */,
+				268BCEE5140B265F0025E4D1 /* rtprandomurandom.o in Frameworks */,
+				268BCEE6140B265F0025E4D1 /* rtpsession.o in Frameworks */,
+				268BCEE7140B265F0025E4D1 /* rtpsessionparams.o in Frameworks */,
+				268BCEE8140B265F0025E4D1 /* rtpsessionsources.o in Frameworks */,
+				268BCEE9140B265F0025E4D1 /* rtpsourcedata.o in Frameworks */,
+				268BCEEA140B265F0025E4D1 /* rtpsources.o in Frameworks */,
+				268BCEEB140B265F0025E4D1 /* rtptimeutilities.o in Frameworks */,
+				268BCEEC140B265F0025E4D1 /* rtpudpv4transmitter.o in Frameworks */,
+				268BCEED140B265F0025E4D1 /* rtpudpv6transmitter.o in Frameworks */,
+				268BCEEE140B265F0025E4D1 /* rtcpapppacket.o in Frameworks */,
+				268BCEEF140B265F0025E4D1 /* rtcpbyepacket.o in Frameworks */,
+				268BCEF0140B265F0025E4D1 /* rtcpcompoundpacket.o in Frameworks */,
+				268BCEF1140B265F0025E4D1 /* rtcpcompoundpacketbuilder.o in Frameworks */,
+				268BCEF2140B265F0025E4D1 /* rtcppacket.o in Frameworks */,
+				268BCEF3140B265F0025E4D1 /* rtcppacketbuilder.o in Frameworks */,
+				268BCEF4140B265F0025E4D1 /* rtcprrpacket.o in Frameworks */,
+				268BCEF5140B265F0025E4D1 /* rtcpscheduler.o in Frameworks */,
+				268BCEF6140B265F0025E4D1 /* rtcpsdesinfo.o in Frameworks */,
+				268BCEF7140B265F0025E4D1 /* rtcpsdespacket.o in Frameworks */,
+				268BCEF8140B265F0025E4D1 /* rtcpsrpacket.o in Frameworks */,
+				268BCEF9140B265F0025E4D1 /* rtpbyteaddress.o in Frameworks */,
+				268BCEFA140B265F0025E4D1 /* rtpcollisionlist.o in Frameworks */,
+				268BCEFB140B265F0025E4D1 /* rtpdebug.o in Frameworks */,
+				268BCEFC140B265F0025E4D1 /* rtperrors.o in Frameworks */,
+				268BCEFD140B265F0025E4D1 /* rtpexternaltransmitter.o in Frameworks */,
+				268BCEFE140B265F0025E4D1 /* rtpfaketransmitter.o in Frameworks */,
+				268BCEFF140B265F0025E4D1 /* rtpinternalsourcedata.o in Frameworks */,
+				268BCF00140B265F0025E4D1 /* rtpipv4address.o in Frameworks */,
+				268BCF01140B265F0025E4D1 /* rtpipv6address.o in Frameworks */,
+				268BCF02140B265F0025E4D1 /* rtplibraryversion.o in Frameworks */,
+				268BCF03140B265F0025E4D1 /* rtppacket.o in Frameworks */,
+				268BCF04140B265F0025E4D1 /* rtppacketbuilder.o in Frameworks */,
+				268BCF05140B265F0025E4D1 /* rtppollthread.o in Frameworks */,
+				268BCF06140B265F0025E4D1 /* rtprandom.o in Frameworks */,
+				268BCF07140B265F0025E4D1 /* rtprandomrand48.o in Frameworks */,
+				268BCF08140B265F0025E4D1 /* rtprandomrands.o in Frameworks */,
+				268BCF09140B265F0025E4D1 /* rtprandomurandom.o in Frameworks */,
+				268BCF0A140B265F0025E4D1 /* rtpsession.o in Frameworks */,
+				268BCF0B140B265F0025E4D1 /* rtpsessionparams.o in Frameworks */,
+				268BCF0C140B265F0025E4D1 /* rtpsessionsources.o in Frameworks */,
+				268BCF0D140B265F0025E4D1 /* rtpsourcedata.o in Frameworks */,
+				268BCF0E140B265F0025E4D1 /* rtpsources.o in Frameworks */,
+				268BCF0F140B265F0025E4D1 /* rtptimeutilities.o in Frameworks */,
+				268BCF10140B265F0025E4D1 /* rtpudpv4transmitter.o in Frameworks */,
+				268BCF11140B265F0025E4D1 /* rtpudpv6transmitter.o in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -424,6 +845,7 @@
 			isa = PBXGroup;
 			children = (
 				26080210110ABA4E005E194D /* Monal.app */,
+				268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -584,6 +1006,368 @@
 			name = Table;
 			sourceTree = "<group>";
 		};
+		268BCCFD140B23E10025E4D1 /* jrtplib-static */ = {
+			isa = PBXGroup;
+			children = (
+				268BCD5A140B265D0025E4D1 /* rtcpapppacket.h */,
+				268BCD5B140B265D0025E4D1 /* rtcpbyepacket.h */,
+				268BCD5C140B265D0025E4D1 /* rtcpcompoundpacket.h */,
+				268BCD5D140B265D0025E4D1 /* rtcpcompoundpacketbuilder.h */,
+				268BCD5E140B265D0025E4D1 /* rtcppacket.h */,
+				268BCD5F140B265D0025E4D1 /* rtcppacketbuilder.h */,
+				268BCD60140B265D0025E4D1 /* rtcprrpacket.h */,
+				268BCD61140B265D0025E4D1 /* rtcpscheduler.h */,
+				268BCD62140B265D0025E4D1 /* rtcpsdesinfo.h */,
+				268BCD63140B265D0025E4D1 /* rtcpsdespacket.h */,
+				268BCD64140B265D0025E4D1 /* rtcpsrpacket.h */,
+				268BCD65140B265D0025E4D1 /* rtcpunknownpacket.h */,
+				268BCD66140B265D0025E4D1 /* rtpaddress.h */,
+				268BCD67140B265D0025E4D1 /* rtpbyteaddress.h */,
+				268BCD68140B265D0025E4D1 /* rtpcollisionlist.h */,
+				268BCD69140B265D0025E4D1 /* rtpconfig.h */,
+				268BCD6A140B265D0025E4D1 /* rtpdebug.h */,
+				268BCD6B140B265D0025E4D1 /* rtpdefines.h */,
+				268BCD6C140B265D0025E4D1 /* rtperrors.h */,
+				268BCD6D140B265D0025E4D1 /* rtpexternaltransmitter.h */,
+				268BCD6E140B265D0025E4D1 /* rtphashtable.h */,
+				268BCD6F140B265D0025E4D1 /* rtpinternalsourcedata.h */,
+				268BCD70140B265D0025E4D1 /* rtpipv4address.h */,
+				268BCD71140B265D0025E4D1 /* rtpipv4destination.h */,
+				268BCD72140B265D0025E4D1 /* rtpipv6address.h */,
+				268BCD73140B265D0025E4D1 /* rtpipv6destination.h */,
+				268BCD74140B265D0025E4D1 /* rtpkeyhashtable.h */,
+				268BCD75140B265D0025E4D1 /* rtplibraryversion.h */,
+				268BCD76140B265D0025E4D1 /* rtpmemorymanager.h */,
+				268BCD77140B265D0025E4D1 /* rtpmemoryobject.h */,
+				268BCD78140B265D0025E4D1 /* rtppacket.h */,
+				268BCD79140B265D0025E4D1 /* rtppacketbuilder.h */,
+				268BCD7A140B265D0025E4D1 /* rtppollthread.h */,
+				268BCD7B140B265D0025E4D1 /* rtprandom.h */,
+				268BCD7C140B265D0025E4D1 /* rtprandomrand48.h */,
+				268BCD7D140B265D0025E4D1 /* rtprandomrands.h */,
+				268BCD7E140B265D0025E4D1 /* rtprandomurandom.h */,
+				268BCD7F140B265D0025E4D1 /* rtprawpacket.h */,
+				268BCD80140B265D0025E4D1 /* rtpsession.h */,
+				268BCD81140B265D0025E4D1 /* rtpsessionparams.h */,
+				268BCD82140B265D0025E4D1 /* rtpsessionsources.h */,
+				268BCD83140B265D0025E4D1 /* rtpsourcedata.h */,
+				268BCD84140B265D0025E4D1 /* rtpsources.h */,
+				268BCD85140B265D0025E4D1 /* rtpstructs.h */,
+				268BCD86140B265D0025E4D1 /* rtptimeutilities.h */,
+				268BCD87140B265D0025E4D1 /* rtptransmitter.h */,
+				268BCD88140B265D0025E4D1 /* rtptypes_win.h */,
+				268BCD89140B265D0025E4D1 /* rtptypes.h */,
+				268BCD8A140B265D0025E4D1 /* rtpudpv4transmitter.h */,
+				268BCD8B140B265D0025E4D1 /* rtpudpv6transmitter.h */,
+				268BCD8C140B265D0025E4D1 /* rtcpapppacket.cpp */,
+				268BCD8D140B265D0025E4D1 /* rtcpbyepacket.cpp */,
+				268BCD8E140B265D0025E4D1 /* rtcpcompoundpacket.cpp */,
+				268BCD8F140B265D0025E4D1 /* rtcpcompoundpacketbuilder.cpp */,
+				268BCD90140B265D0025E4D1 /* rtcppacket.cpp */,
+				268BCD91140B265D0025E4D1 /* rtcppacketbuilder.cpp */,
+				268BCD92140B265D0025E4D1 /* rtcprrpacket.cpp */,
+				268BCD93140B265D0025E4D1 /* rtcpscheduler.cpp */,
+				268BCD94140B265D0025E4D1 /* rtcpsdesinfo.cpp */,
+				268BCD95140B265D0025E4D1 /* rtcpsdespacket.cpp */,
+				268BCD96140B265D0025E4D1 /* rtcpsrpacket.cpp */,
+				268BCD97140B265D0025E4D1 /* rtpbyteaddress.cpp */,
+				268BCD98140B265D0025E4D1 /* rtpcollisionlist.cpp */,
+				268BCD99140B265D0025E4D1 /* rtpdebug.cpp */,
+				268BCD9A140B265D0025E4D1 /* rtperrors.cpp */,
+				268BCD9B140B265D0025E4D1 /* rtpexternaltransmitter.cpp */,
+				268BCD9C140B265D0025E4D1 /* rtpinternalsourcedata.cpp */,
+				268BCD9D140B265D0025E4D1 /* rtpipv4address.cpp */,
+				268BCD9E140B265D0025E4D1 /* rtpipv6address.cpp */,
+				268BCD9F140B265D0025E4D1 /* rtplibraryversion.cpp */,
+				268BCDA0140B265D0025E4D1 /* rtppacket.cpp */,
+				268BCDA1140B265D0025E4D1 /* rtppacketbuilder.cpp */,
+				268BCDA2140B265D0025E4D1 /* rtppollthread.cpp */,
+				268BCDA3140B265D0025E4D1 /* rtprandom.cpp */,
+				268BCDA4140B265D0025E4D1 /* rtprandomrand48.cpp */,
+				268BCDA5140B265D0025E4D1 /* rtprandomrands.cpp */,
+				268BCDA6140B265D0025E4D1 /* rtprandomurandom.cpp */,
+				268BCDA7140B265D0025E4D1 /* rtpsession.cpp */,
+				268BCDA8140B265D0025E4D1 /* rtpsessionparams.cpp */,
+				268BCDA9140B265D0025E4D1 /* rtpsessionsources.cpp */,
+				268BCDAA140B265D0025E4D1 /* rtpsourcedata.cpp */,
+				268BCDAB140B265D0025E4D1 /* rtpsources.cpp */,
+				268BCDAC140B265D0025E4D1 /* rtptimeutilities.cpp */,
+				268BCDAD140B265D0025E4D1 /* rtpudpv4transmitter.cpp */,
+				268BCDAE140B265D0025E4D1 /* rtpudpv6transmitter.cpp */,
+				268BCDAF140B265D0025E4D1 /* cmake_install.cmake */,
+				268BCDB0140B265D0025E4D1 /* rtpconfig.h.in */,
+				268BCDB1140B265D0025E4D1 /* rtptypes.h.in */,
+				268BCDB2140B265D0025E4D1 /* CMakeFiles */,
+				268BCDB3140B265D0025E4D1 /* CMakeScripts */,
+				268BCDBC140B265D0025E4D1 /* Debug */,
+				268BCDBF140B265D0025E4D1 /* extratransmitters */,
+				268BCDC2140B265D0025E4D1 /* jrtplib.build */,
+				268BCE4B140B265D0025E4D1 /* CMakeLists.txt */,
+				268BCE4C140B265E0025E4D1 /* errcodecommand */,
+			);
+			name = "jrtplib-static";
+			sourceTree = "<group>";
+		};
+		268BCDB2140B265D0025E4D1 /* CMakeFiles */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = CMakeFiles;
+			sourceTree = "<group>";
+		};
+		268BCDB3140B265D0025E4D1 /* CMakeScripts */ = {
+			isa = PBXGroup;
+			children = (
+				268BCDB4140B265D0025E4D1 /* jrtplib-shared_postBuildPhase.makeDebug */,
+				268BCDB5140B265D0025E4D1 /* jrtplib-shared_postBuildPhase.makeMinSizeRel */,
+				268BCDB6140B265D0025E4D1 /* jrtplib-shared_postBuildPhase.makeRelease */,
+				268BCDB7140B265D0025E4D1 /* jrtplib-shared_postBuildPhase.makeRelWithDebInfo */,
+				268BCDB8140B265D0025E4D1 /* jrtplib-static_postBuildPhase.makeDebug */,
+				268BCDB9140B265D0025E4D1 /* jrtplib-static_postBuildPhase.makeMinSizeRel */,
+				268BCDBA140B265D0025E4D1 /* jrtplib-static_postBuildPhase.makeRelease */,
+				268BCDBB140B265D0025E4D1 /* jrtplib-static_postBuildPhase.makeRelWithDebInfo */,
+			);
+			path = CMakeScripts;
+			sourceTree = "<group>";
+		};
+		268BCDBC140B265D0025E4D1 /* Debug */ = {
+			isa = PBXGroup;
+			children = (
+				268BCDBD140B265D0025E4D1 /* libjrtp.a */,
+				268BCDBE140B265D0025E4D1 /* libjrtp.dylib */,
+			);
+			path = Debug;
+			sourceTree = "<group>";
+		};
+		268BCDBF140B265D0025E4D1 /* extratransmitters */ = {
+			isa = PBXGroup;
+			children = (
+				268BCDC0140B265D0025E4D1 /* rtpfaketransmitter.cpp */,
+				268BCDC1140B265D0025E4D1 /* rtpfaketransmitter.h */,
+			);
+			path = extratransmitters;
+			sourceTree = "<group>";
+		};
+		268BCDC2140B265D0025E4D1 /* jrtplib.build */ = {
+			isa = PBXGroup;
+			children = (
+				268BCDC3140B265D0025E4D1 /* Debug */,
+				268BCE1E140B265D0025E4D1 /* Debug-iphoneos */,
+			);
+			path = jrtplib.build;
+			sourceTree = "<group>";
+		};
+		268BCDC3140B265D0025E4D1 /* Debug */ = {
+			isa = PBXGroup;
+			children = (
+				268BCDC4140B265D0025E4D1 /* jrtplib-shared.build */,
+				268BCDF2140B265D0025E4D1 /* jrtplib-static.build */,
+			);
+			path = Debug;
+			sourceTree = "<group>";
+		};
+		268BCDC4140B265D0025E4D1 /* jrtplib-shared.build */ = {
+			isa = PBXGroup;
+			children = (
+				268BCDC5140B265D0025E4D1 /* build-state.dat */,
+				268BCDC6140B265D0025E4D1 /* build-state~.dat */,
+				268BCDC7140B265D0025E4D1 /* jrtplib-shared.dep */,
+				268BCDC8140B265D0025E4D1 /* jrtplib-shared~.dep */,
+				268BCDC9140B265D0025E4D1 /* Objects-normal */,
+				268BCDF0140B265D0025E4D1 /* Script-2EF1A6402EF1A6402EF1A640.sh */,
+				268BCDF1140B265D0025E4D1 /* Script-2EF1ACF02EF1ACF02EF1ACF0.sh */,
+			);
+			path = "jrtplib-shared.build";
+			sourceTree = "<group>";
+		};
+		268BCDC9140B265D0025E4D1 /* Objects-normal */ = {
+			isa = PBXGroup;
+			children = (
+				268BCDCA140B265D0025E4D1 /* i386 */,
+			);
+			path = "Objects-normal";
+			sourceTree = "<group>";
+		};
+		268BCDCA140B265D0025E4D1 /* i386 */ = {
+			isa = PBXGroup;
+			children = (
+				268BCDCB140B265D0025E4D1 /* jrtp.LinkFileList */,
+				268BCDCC140B265D0025E4D1 /* rtcpapppacket.o */,
+				268BCDCD140B265D0025E4D1 /* rtcpbyepacket.o */,
+				268BCDCE140B265D0025E4D1 /* rtcpcompoundpacket.o */,
+				268BCDCF140B265D0025E4D1 /* rtcpcompoundpacketbuilder.o */,
+				268BCDD0140B265D0025E4D1 /* rtcppacket.o */,
+				268BCDD1140B265D0025E4D1 /* rtcppacketbuilder.o */,
+				268BCDD2140B265D0025E4D1 /* rtcprrpacket.o */,
+				268BCDD3140B265D0025E4D1 /* rtcpscheduler.o */,
+				268BCDD4140B265D0025E4D1 /* rtcpsdesinfo.o */,
+				268BCDD5140B265D0025E4D1 /* rtcpsdespacket.o */,
+				268BCDD6140B265D0025E4D1 /* rtcpsrpacket.o */,
+				268BCDD7140B265D0025E4D1 /* rtpbyteaddress.o */,
+				268BCDD8140B265D0025E4D1 /* rtpcollisionlist.o */,
+				268BCDD9140B265D0025E4D1 /* rtpdebug.o */,
+				268BCDDA140B265D0025E4D1 /* rtperrors.o */,
+				268BCDDB140B265D0025E4D1 /* rtpexternaltransmitter.o */,
+				268BCDDC140B265D0025E4D1 /* rtpfaketransmitter.o */,
+				268BCDDD140B265D0025E4D1 /* rtpinternalsourcedata.o */,
+				268BCDDE140B265D0025E4D1 /* rtpipv4address.o */,
+				268BCDDF140B265D0025E4D1 /* rtpipv6address.o */,
+				268BCDE0140B265D0025E4D1 /* rtplibraryversion.o */,
+				268BCDE1140B265D0025E4D1 /* rtppacket.o */,
+				268BCDE2140B265D0025E4D1 /* rtppacketbuilder.o */,
+				268BCDE3140B265D0025E4D1 /* rtppollthread.o */,
+				268BCDE4140B265D0025E4D1 /* rtprandom.o */,
+				268BCDE5140B265D0025E4D1 /* rtprandomrand48.o */,
+				268BCDE6140B265D0025E4D1 /* rtprandomrands.o */,
+				268BCDE7140B265D0025E4D1 /* rtprandomurandom.o */,
+				268BCDE8140B265D0025E4D1 /* rtpsession.o */,
+				268BCDE9140B265D0025E4D1 /* rtpsessionparams.o */,
+				268BCDEA140B265D0025E4D1 /* rtpsessionsources.o */,
+				268BCDEB140B265D0025E4D1 /* rtpsourcedata.o */,
+				268BCDEC140B265D0025E4D1 /* rtpsources.o */,
+				268BCDED140B265D0025E4D1 /* rtptimeutilities.o */,
+				268BCDEE140B265D0025E4D1 /* rtpudpv4transmitter.o */,
+				268BCDEF140B265D0025E4D1 /* rtpudpv6transmitter.o */,
+			);
+			path = i386;
+			sourceTree = "<group>";
+		};
+		268BCDF2140B265D0025E4D1 /* jrtplib-static.build */ = {
+			isa = PBXGroup;
+			children = (
+				268BCDF3140B265D0025E4D1 /* build-state.dat */,
+				268BCDF4140B265D0025E4D1 /* jrtplib-static.dep */,
+				268BCDF5140B265D0025E4D1 /* Objects-normal */,
+				268BCE1C140B265D0025E4D1 /* Script-2E883DF02E883DF02E883DF0.sh */,
+				268BCE1D140B265D0025E4D1 /* Script-2E8844A02E8844A02E8844A0.sh */,
+			);
+			path = "jrtplib-static.build";
+			sourceTree = "<group>";
+		};
+		268BCDF5140B265D0025E4D1 /* Objects-normal */ = {
+			isa = PBXGroup;
+			children = (
+				268BCDF6140B265D0025E4D1 /* i386 */,
+			);
+			path = "Objects-normal";
+			sourceTree = "<group>";
+		};
+		268BCDF6140B265D0025E4D1 /* i386 */ = {
+			isa = PBXGroup;
+			children = (
+				268BCDF7140B265D0025E4D1 /* jrtp.LinkFileList */,
+				268BCDF8140B265D0025E4D1 /* rtcpapppacket.o */,
+				268BCDF9140B265D0025E4D1 /* rtcpbyepacket.o */,
+				268BCDFA140B265D0025E4D1 /* rtcpcompoundpacket.o */,
+				268BCDFB140B265D0025E4D1 /* rtcpcompoundpacketbuilder.o */,
+				268BCDFC140B265D0025E4D1 /* rtcppacket.o */,
+				268BCDFD140B265D0025E4D1 /* rtcppacketbuilder.o */,
+				268BCDFE140B265D0025E4D1 /* rtcprrpacket.o */,
+				268BCDFF140B265D0025E4D1 /* rtcpscheduler.o */,
+				268BCE00140B265D0025E4D1 /* rtcpsdesinfo.o */,
+				268BCE01140B265D0025E4D1 /* rtcpsdespacket.o */,
+				268BCE02140B265D0025E4D1 /* rtcpsrpacket.o */,
+				268BCE03140B265D0025E4D1 /* rtpbyteaddress.o */,
+				268BCE04140B265D0025E4D1 /* rtpcollisionlist.o */,
+				268BCE05140B265D0025E4D1 /* rtpdebug.o */,
+				268BCE06140B265D0025E4D1 /* rtperrors.o */,
+				268BCE07140B265D0025E4D1 /* rtpexternaltransmitter.o */,
+				268BCE08140B265D0025E4D1 /* rtpfaketransmitter.o */,
+				268BCE09140B265D0025E4D1 /* rtpinternalsourcedata.o */,
+				268BCE0A140B265D0025E4D1 /* rtpipv4address.o */,
+				268BCE0B140B265D0025E4D1 /* rtpipv6address.o */,
+				268BCE0C140B265D0025E4D1 /* rtplibraryversion.o */,
+				268BCE0D140B265D0025E4D1 /* rtppacket.o */,
+				268BCE0E140B265D0025E4D1 /* rtppacketbuilder.o */,
+				268BCE0F140B265D0025E4D1 /* rtppollthread.o */,
+				268BCE10140B265D0025E4D1 /* rtprandom.o */,
+				268BCE11140B265D0025E4D1 /* rtprandomrand48.o */,
+				268BCE12140B265D0025E4D1 /* rtprandomrands.o */,
+				268BCE13140B265D0025E4D1 /* rtprandomurandom.o */,
+				268BCE14140B265D0025E4D1 /* rtpsession.o */,
+				268BCE15140B265D0025E4D1 /* rtpsessionparams.o */,
+				268BCE16140B265D0025E4D1 /* rtpsessionsources.o */,
+				268BCE17140B265D0025E4D1 /* rtpsourcedata.o */,
+				268BCE18140B265D0025E4D1 /* rtpsources.o */,
+				268BCE19140B265D0025E4D1 /* rtptimeutilities.o */,
+				268BCE1A140B265D0025E4D1 /* rtpudpv4transmitter.o */,
+				268BCE1B140B265D0025E4D1 /* rtpudpv6transmitter.o */,
+			);
+			path = i386;
+			sourceTree = "<group>";
+		};
+		268BCE1E140B265D0025E4D1 /* Debug-iphoneos */ = {
+			isa = PBXGroup;
+			children = (
+				268BCE1F140B265D0025E4D1 /* jrtplib-static.build */,
+			);
+			path = "Debug-iphoneos";
+			sourceTree = "<group>";
+		};
+		268BCE1F140B265D0025E4D1 /* jrtplib-static.build */ = {
+			isa = PBXGroup;
+			children = (
+				268BCE20140B265D0025E4D1 /* build-state.dat */,
+				268BCE21140B265D0025E4D1 /* jrtplib-static.dep */,
+				268BCE22140B265D0025E4D1 /* Objects-normal */,
+				268BCE49140B265D0025E4D1 /* Script-2E883DF02E883DF02E883DF0.sh */,
+				268BCE4A140B265D0025E4D1 /* Script-2E8844A02E8844A02E8844A0.sh */,
+			);
+			path = "jrtplib-static.build";
+			sourceTree = "<group>";
+		};
+		268BCE22140B265D0025E4D1 /* Objects-normal */ = {
+			isa = PBXGroup;
+			children = (
+				268BCE23140B265D0025E4D1 /* armv7 */,
+			);
+			path = "Objects-normal";
+			sourceTree = "<group>";
+		};
+		268BCE23140B265D0025E4D1 /* armv7 */ = {
+			isa = PBXGroup;
+			children = (
+				268BCE24140B265D0025E4D1 /* jrtp.LinkFileList */,
+				268BCE25140B265D0025E4D1 /* rtcpapppacket.o */,
+				268BCE26140B265D0025E4D1 /* rtcpbyepacket.o */,
+				268BCE27140B265D0025E4D1 /* rtcpcompoundpacket.o */,
+				268BCE28140B265D0025E4D1 /* rtcpcompoundpacketbuilder.o */,
+				268BCE29140B265D0025E4D1 /* rtcppacket.o */,
+				268BCE2A140B265D0025E4D1 /* rtcppacketbuilder.o */,
+				268BCE2B140B265D0025E4D1 /* rtcprrpacket.o */,
+				268BCE2C140B265D0025E4D1 /* rtcpscheduler.o */,
+				268BCE2D140B265D0025E4D1 /* rtcpsdesinfo.o */,
+				268BCE2E140B265D0025E4D1 /* rtcpsdespacket.o */,
+				268BCE2F140B265D0025E4D1 /* rtcpsrpacket.o */,
+				268BCE30140B265D0025E4D1 /* rtpbyteaddress.o */,
+				268BCE31140B265D0025E4D1 /* rtpcollisionlist.o */,
+				268BCE32140B265D0025E4D1 /* rtpdebug.o */,
+				268BCE33140B265D0025E4D1 /* rtperrors.o */,
+				268BCE34140B265D0025E4D1 /* rtpexternaltransmitter.o */,
+				268BCE35140B265D0025E4D1 /* rtpfaketransmitter.o */,
+				268BCE36140B265D0025E4D1 /* rtpinternalsourcedata.o */,
+				268BCE37140B265D0025E4D1 /* rtpipv4address.o */,
+				268BCE38140B265D0025E4D1 /* rtpipv6address.o */,
+				268BCE39140B265D0025E4D1 /* rtplibraryversion.o */,
+				268BCE3A140B265D0025E4D1 /* rtppacket.o */,
+				268BCE3B140B265D0025E4D1 /* rtppacketbuilder.o */,
+				268BCE3C140B265D0025E4D1 /* rtppollthread.o */,
+				268BCE3D140B265D0025E4D1 /* rtprandom.o */,
+				268BCE3E140B265D0025E4D1 /* rtprandomrand48.o */,
+				268BCE3F140B265D0025E4D1 /* rtprandomrands.o */,
+				268BCE40140B265D0025E4D1 /* rtprandomurandom.o */,
+				268BCE41140B265D0025E4D1 /* rtpsession.o */,
+				268BCE42140B265D0025E4D1 /* rtpsessionparams.o */,
+				268BCE43140B265D0025E4D1 /* rtpsessionsources.o */,
+				268BCE44140B265D0025E4D1 /* rtpsourcedata.o */,
+				268BCE45140B265D0025E4D1 /* rtpsources.o */,
+				268BCE46140B265D0025E4D1 /* rtptimeutilities.o */,
+				268BCE47140B265D0025E4D1 /* rtpudpv4transmitter.o */,
+				268BCE48140B265D0025E4D1 /* rtpudpv6transmitter.o */,
+			);
+			path = armv7;
+			sourceTree = "<group>";
+		};
 		269A2E60132030240044B1C8 /* Better Quality */ = {
 			isa = PBXGroup;
 			children = (
@@ -616,7 +1400,6 @@
 		26C40BCB0FD09E8400435376 /* Protocols */ = {
 			isa = PBXGroup;
 			children = (
-				26E7D42A140B05A600EE6C93 /* jRTPlib */,
 				26731E74133F3EE2008098EB /* xmpp Objects */,
 				262648FC1126FA80009689CC /* AIMTOC2.h */,
 				262648FD1126FA80009689CC /* AIMTOC2.m */,
@@ -643,108 +1426,6 @@
 			);
 			name = "Account Manager";
 			path = ..;
-			sourceTree = "<group>";
-		};
-		26E7D42A140B05A600EE6C93 /* jRTPlib */ = {
-			isa = PBXGroup;
-			children = (
-				266AB866140B115700896BC3 /* rtpconfig.h */,
-				266AB867140B115700896BC3 /* rtptypes.h */,
-				26E7D42C140B05D200EE6C93 /* rtcpapppacket.h */,
-				26E7D42D140B05D200EE6C93 /* rtcpbyepacket.h */,
-				26E7D42E140B05D200EE6C93 /* rtcpcompoundpacket.h */,
-				26E7D42F140B05D200EE6C93 /* rtcpcompoundpacketbuilder.h */,
-				26E7D430140B05D200EE6C93 /* rtcppacket.h */,
-				26E7D431140B05D200EE6C93 /* rtcppacketbuilder.h */,
-				26E7D432140B05D200EE6C93 /* rtcprrpacket.h */,
-				26E7D433140B05D200EE6C93 /* rtcpscheduler.h */,
-				26E7D434140B05D200EE6C93 /* rtcpsdesinfo.h */,
-				26E7D435140B05D200EE6C93 /* rtcpsdespacket.h */,
-				26E7D436140B05D200EE6C93 /* rtcpsrpacket.h */,
-				26E7D437140B05D200EE6C93 /* rtcpunknownpacket.h */,
-				26E7D438140B05D200EE6C93 /* rtpaddress.h */,
-				26E7D439140B05D200EE6C93 /* rtpbyteaddress.h */,
-				26E7D43A140B05D200EE6C93 /* rtpcollisionlist.h */,
-				26E7D43B140B05D200EE6C93 /* rtpdebug.h */,
-				26E7D43C140B05D200EE6C93 /* rtpdefines.h */,
-				26E7D43D140B05D200EE6C93 /* rtperrors.h */,
-				26E7D43E140B05D200EE6C93 /* rtpexternaltransmitter.h */,
-				26E7D43F140B05D200EE6C93 /* rtphashtable.h */,
-				26E7D440140B05D200EE6C93 /* rtpinternalsourcedata.h */,
-				26E7D441140B05D200EE6C93 /* rtpipv4address.h */,
-				26E7D442140B05D200EE6C93 /* rtpipv4destination.h */,
-				26E7D443140B05D200EE6C93 /* rtpipv6address.h */,
-				26E7D444140B05D200EE6C93 /* rtpipv6destination.h */,
-				26E7D445140B05D200EE6C93 /* rtpkeyhashtable.h */,
-				26E7D446140B05D200EE6C93 /* rtplibraryversion.h */,
-				26E7D447140B05D200EE6C93 /* rtpmemorymanager.h */,
-				26E7D448140B05D200EE6C93 /* rtpmemoryobject.h */,
-				26E7D449140B05D200EE6C93 /* rtppacket.h */,
-				26E7D44A140B05D200EE6C93 /* rtppacketbuilder.h */,
-				26E7D44B140B05D200EE6C93 /* rtppollthread.h */,
-				26E7D44C140B05D200EE6C93 /* rtprandom.h */,
-				26E7D44D140B05D200EE6C93 /* rtprandomrand48.h */,
-				26E7D44E140B05D200EE6C93 /* rtprandomrands.h */,
-				26E7D44F140B05D200EE6C93 /* rtprandomurandom.h */,
-				26E7D450140B05D200EE6C93 /* rtprawpacket.h */,
-				26E7D451140B05D200EE6C93 /* rtpsession.h */,
-				26E7D452140B05D200EE6C93 /* rtpsessionparams.h */,
-				26E7D453140B05D200EE6C93 /* rtpsessionsources.h */,
-				26E7D454140B05D200EE6C93 /* rtpsourcedata.h */,
-				26E7D455140B05D200EE6C93 /* rtpsources.h */,
-				26E7D456140B05D200EE6C93 /* rtpstructs.h */,
-				26E7D457140B05D200EE6C93 /* rtptimeutilities.h */,
-				26E7D458140B05D200EE6C93 /* rtptransmitter.h */,
-				26E7D459140B05D200EE6C93 /* rtptypes_win.h */,
-				26E7D45A140B05D200EE6C93 /* rtpudpv4transmitter.h */,
-				26E7D45B140B05D200EE6C93 /* rtpudpv6transmitter.h */,
-				26E7D45C140B05D200EE6C93 /* rtcpapppacket.cpp */,
-				26E7D45D140B05D200EE6C93 /* rtcpbyepacket.cpp */,
-				26E7D45E140B05D200EE6C93 /* rtcpcompoundpacket.cpp */,
-				26E7D45F140B05D200EE6C93 /* rtcpcompoundpacketbuilder.cpp */,
-				26E7D460140B05D200EE6C93 /* rtcppacket.cpp */,
-				26E7D461140B05D200EE6C93 /* rtcppacketbuilder.cpp */,
-				26E7D462140B05D200EE6C93 /* rtcprrpacket.cpp */,
-				26E7D463140B05D200EE6C93 /* rtcpscheduler.cpp */,
-				26E7D464140B05D200EE6C93 /* rtcpsdesinfo.cpp */,
-				26E7D465140B05D200EE6C93 /* rtcpsdespacket.cpp */,
-				26E7D466140B05D200EE6C93 /* rtcpsrpacket.cpp */,
-				26E7D467140B05D200EE6C93 /* rtpbyteaddress.cpp */,
-				26E7D468140B05D200EE6C93 /* rtpcollisionlist.cpp */,
-				26E7D469140B05D200EE6C93 /* rtpdebug.cpp */,
-				26E7D46A140B05D200EE6C93 /* rtperrors.cpp */,
-				26E7D46B140B05D200EE6C93 /* rtpexternaltransmitter.cpp */,
-				26E7D46C140B05D200EE6C93 /* rtpinternalsourcedata.cpp */,
-				26E7D46D140B05D200EE6C93 /* rtpipv4address.cpp */,
-				26E7D46E140B05D200EE6C93 /* rtpipv6address.cpp */,
-				26E7D46F140B05D200EE6C93 /* rtplibraryversion.cpp */,
-				26E7D470140B05D200EE6C93 /* rtppacket.cpp */,
-				26E7D471140B05D200EE6C93 /* rtppacketbuilder.cpp */,
-				26E7D472140B05D200EE6C93 /* rtppollthread.cpp */,
-				26E7D473140B05D300EE6C93 /* rtprandom.cpp */,
-				26E7D474140B05D300EE6C93 /* rtprandomrand48.cpp */,
-				26E7D475140B05D300EE6C93 /* rtprandomrands.cpp */,
-				26E7D476140B05D300EE6C93 /* rtprandomurandom.cpp */,
-				26E7D477140B05D300EE6C93 /* rtpsession.cpp */,
-				26E7D478140B05D300EE6C93 /* rtpsessionparams.cpp */,
-				26E7D479140B05D300EE6C93 /* rtpsessionsources.cpp */,
-				26E7D47A140B05D300EE6C93 /* rtpsourcedata.cpp */,
-				26E7D47B140B05D300EE6C93 /* rtpsources.cpp */,
-				26E7D47C140B05D300EE6C93 /* rtptimeutilities.cpp */,
-				26E7D47D140B05D300EE6C93 /* rtpudpv4transmitter.cpp */,
-				26E7D47E140B05D300EE6C93 /* rtpudpv6transmitter.cpp */,
-				26E7D481140B05D300EE6C93 /* extratransmitters */,
-			);
-			name = jRTPlib;
-			sourceTree = "<group>";
-		};
-		26E7D481140B05D300EE6C93 /* extratransmitters */ = {
-			isa = PBXGroup;
-			children = (
-				26E7D482140B05D300EE6C93 /* rtpfaketransmitter.cpp */,
-				26E7D483140B05D300EE6C93 /* rtpfaketransmitter.h */,
-			);
-			path = extratransmitters;
 			sourceTree = "<group>";
 		};
 		26EC1C7312295B8800EAF934 /* Core UI */ = {
@@ -808,6 +1489,7 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
+				268BCCFD140B23E10025E4D1 /* jrtplib-static */,
 				26AD60DA11A95CB700C39051 /* Emoticons */,
 				26EB845D111644AD005446DD /* Themes */,
 				2601D9BC0FBF25D1004DB939 /* Icons */,
@@ -871,6 +1553,67 @@
 		};
 /* End PBXGroup section */
 
+/* Begin PBXHeadersBuildPhase section */
+		268BCD54140B25CC0025E4D1 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				268BCE4D140B265E0025E4D1 /* rtcpapppacket.h in Headers */,
+				268BCE4E140B265E0025E4D1 /* rtcpbyepacket.h in Headers */,
+				268BCE4F140B265E0025E4D1 /* rtcpcompoundpacket.h in Headers */,
+				268BCE50140B265E0025E4D1 /* rtcpcompoundpacketbuilder.h in Headers */,
+				268BCE51140B265E0025E4D1 /* rtcppacket.h in Headers */,
+				268BCE52140B265E0025E4D1 /* rtcppacketbuilder.h in Headers */,
+				268BCE53140B265E0025E4D1 /* rtcprrpacket.h in Headers */,
+				268BCE54140B265E0025E4D1 /* rtcpscheduler.h in Headers */,
+				268BCE55140B265E0025E4D1 /* rtcpsdesinfo.h in Headers */,
+				268BCE56140B265E0025E4D1 /* rtcpsdespacket.h in Headers */,
+				268BCE57140B265E0025E4D1 /* rtcpsrpacket.h in Headers */,
+				268BCE58140B265E0025E4D1 /* rtcpunknownpacket.h in Headers */,
+				268BCE59140B265E0025E4D1 /* rtpaddress.h in Headers */,
+				268BCE5A140B265E0025E4D1 /* rtpbyteaddress.h in Headers */,
+				268BCE5B140B265E0025E4D1 /* rtpcollisionlist.h in Headers */,
+				268BCE5C140B265E0025E4D1 /* rtpconfig.h in Headers */,
+				268BCE5D140B265E0025E4D1 /* rtpdebug.h in Headers */,
+				268BCE5E140B265E0025E4D1 /* rtpdefines.h in Headers */,
+				268BCE5F140B265E0025E4D1 /* rtperrors.h in Headers */,
+				268BCE60140B265E0025E4D1 /* rtpexternaltransmitter.h in Headers */,
+				268BCE61140B265E0025E4D1 /* rtphashtable.h in Headers */,
+				268BCE62140B265E0025E4D1 /* rtpinternalsourcedata.h in Headers */,
+				268BCE63140B265E0025E4D1 /* rtpipv4address.h in Headers */,
+				268BCE64140B265E0025E4D1 /* rtpipv4destination.h in Headers */,
+				268BCE65140B265E0025E4D1 /* rtpipv6address.h in Headers */,
+				268BCE66140B265E0025E4D1 /* rtpipv6destination.h in Headers */,
+				268BCE67140B265E0025E4D1 /* rtpkeyhashtable.h in Headers */,
+				268BCE68140B265E0025E4D1 /* rtplibraryversion.h in Headers */,
+				268BCE69140B265E0025E4D1 /* rtpmemorymanager.h in Headers */,
+				268BCE6A140B265E0025E4D1 /* rtpmemoryobject.h in Headers */,
+				268BCE6B140B265E0025E4D1 /* rtppacket.h in Headers */,
+				268BCE6C140B265E0025E4D1 /* rtppacketbuilder.h in Headers */,
+				268BCE6D140B265E0025E4D1 /* rtppollthread.h in Headers */,
+				268BCE6E140B265E0025E4D1 /* rtprandom.h in Headers */,
+				268BCE6F140B265E0025E4D1 /* rtprandomrand48.h in Headers */,
+				268BCE70140B265E0025E4D1 /* rtprandomrands.h in Headers */,
+				268BCE71140B265E0025E4D1 /* rtprandomurandom.h in Headers */,
+				268BCE72140B265E0025E4D1 /* rtprawpacket.h in Headers */,
+				268BCE73140B265E0025E4D1 /* rtpsession.h in Headers */,
+				268BCE74140B265E0025E4D1 /* rtpsessionparams.h in Headers */,
+				268BCE75140B265E0025E4D1 /* rtpsessionsources.h in Headers */,
+				268BCE76140B265E0025E4D1 /* rtpsourcedata.h in Headers */,
+				268BCE77140B265E0025E4D1 /* rtpsources.h in Headers */,
+				268BCE78140B265E0025E4D1 /* rtpstructs.h in Headers */,
+				268BCE79140B265E0025E4D1 /* rtptimeutilities.h in Headers */,
+				268BCE7A140B265E0025E4D1 /* rtptransmitter.h in Headers */,
+				268BCE7B140B265E0025E4D1 /* rtptypes_win.h in Headers */,
+				268BCE7C140B265E0025E4D1 /* rtptypes.h in Headers */,
+				268BCE7D140B265E0025E4D1 /* rtpudpv4transmitter.h in Headers */,
+				268BCE7E140B265E0025E4D1 /* rtpudpv6transmitter.h in Headers */,
+				268BCEA5140B265F0025E4D1 /* rtpfaketransmitter.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
 /* Begin PBXNativeTarget section */
 		1D6058900D05DD3D006BFB54 /* Monal */ = {
 			isa = PBXNativeTarget;
@@ -888,6 +1631,23 @@
 			productName = SworIM;
 			productReference = 26080210110ABA4E005E194D /* Monal.app */;
 			productType = "com.apple.product-type.application";
+		};
+		268BCD55140B25CC0025E4D1 /* jrtplib-static */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 268BCD57140B25CC0025E4D1 /* Build configuration list for PBXNativeTarget "jrtplib-static" */;
+			buildPhases = (
+				268BCD52140B25CC0025E4D1 /* Sources */,
+				268BCD53140B25CC0025E4D1 /* Frameworks */,
+				268BCD54140B25CC0025E4D1 /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "jrtplib-static";
+			productName = "jrtplib-static";
+			productReference = 268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */;
+			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
 
@@ -912,6 +1672,7 @@
 			projectRoot = "";
 			targets = (
 				1D6058900D05DD3D006BFB54 /* Monal */,
+				268BCD55140B25CC0025E4D1 /* jrtplib-static */,
 			);
 		};
 /* End PBXProject section */
@@ -1027,43 +1788,50 @@
 				2628E50514049BAC0064131E /* askTempPass.m in Sources */,
 				26F0D38D14093DC600A302B9 /* iqJingle.m in Sources */,
 				261AB9351409BFB8006F5155 /* callScreen.m in Sources */,
-				26E7D486140B05D300EE6C93 /* rtcpapppacket.cpp in Sources */,
-				26E7D487140B05D300EE6C93 /* rtcpbyepacket.cpp in Sources */,
-				26E7D488140B05D300EE6C93 /* rtcpcompoundpacket.cpp in Sources */,
-				26E7D489140B05D300EE6C93 /* rtcpcompoundpacketbuilder.cpp in Sources */,
-				26E7D48A140B05D300EE6C93 /* rtcppacket.cpp in Sources */,
-				26E7D48B140B05D300EE6C93 /* rtcppacketbuilder.cpp in Sources */,
-				26E7D48C140B05D300EE6C93 /* rtcprrpacket.cpp in Sources */,
-				26E7D48D140B05D300EE6C93 /* rtcpscheduler.cpp in Sources */,
-				26E7D48E140B05D300EE6C93 /* rtcpsdesinfo.cpp in Sources */,
-				26E7D48F140B05D300EE6C93 /* rtcpsdespacket.cpp in Sources */,
-				26E7D490140B05D300EE6C93 /* rtcpsrpacket.cpp in Sources */,
-				26E7D491140B05D300EE6C93 /* rtpbyteaddress.cpp in Sources */,
-				26E7D492140B05D300EE6C93 /* rtpcollisionlist.cpp in Sources */,
-				26E7D493140B05D300EE6C93 /* rtpdebug.cpp in Sources */,
-				26E7D494140B05D300EE6C93 /* rtperrors.cpp in Sources */,
-				26E7D495140B05D300EE6C93 /* rtpexternaltransmitter.cpp in Sources */,
-				26E7D496140B05D300EE6C93 /* rtpinternalsourcedata.cpp in Sources */,
-				26E7D497140B05D300EE6C93 /* rtpipv4address.cpp in Sources */,
-				26E7D498140B05D300EE6C93 /* rtpipv6address.cpp in Sources */,
-				26E7D499140B05D300EE6C93 /* rtplibraryversion.cpp in Sources */,
-				26E7D49A140B05D300EE6C93 /* rtppacket.cpp in Sources */,
-				26E7D49B140B05D300EE6C93 /* rtppacketbuilder.cpp in Sources */,
-				26E7D49C140B05D300EE6C93 /* rtppollthread.cpp in Sources */,
-				26E7D49D140B05D300EE6C93 /* rtprandom.cpp in Sources */,
-				26E7D49E140B05D300EE6C93 /* rtprandomrand48.cpp in Sources */,
-				26E7D49F140B05D300EE6C93 /* rtprandomrands.cpp in Sources */,
-				26E7D4A0140B05D300EE6C93 /* rtprandomurandom.cpp in Sources */,
-				26E7D4A1140B05D300EE6C93 /* rtpsession.cpp in Sources */,
-				26E7D4A2140B05D300EE6C93 /* rtpsessionparams.cpp in Sources */,
-				26E7D4A3140B05D300EE6C93 /* rtpsessionsources.cpp in Sources */,
-				26E7D4A4140B05D300EE6C93 /* rtpsourcedata.cpp in Sources */,
-				26E7D4A5140B05D300EE6C93 /* rtpsources.cpp in Sources */,
-				26E7D4A6140B05D300EE6C93 /* rtptimeutilities.cpp in Sources */,
-				26E7D4A7140B05D300EE6C93 /* rtpudpv4transmitter.cpp in Sources */,
-				26E7D4A8140B05D300EE6C93 /* rtpudpv6transmitter.cpp in Sources */,
-				26E7D4AB140B05D300EE6C93 /* rtpfaketransmitter.cpp in Sources */,
 				26E7D4B0140B067100EE6C93 /* RTP.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		268BCD52140B25CC0025E4D1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				268BCE7F140B265E0025E4D1 /* rtcpapppacket.cpp in Sources */,
+				268BCE80140B265E0025E4D1 /* rtcpbyepacket.cpp in Sources */,
+				268BCE81140B265E0025E4D1 /* rtcpcompoundpacket.cpp in Sources */,
+				268BCE82140B265E0025E4D1 /* rtcpcompoundpacketbuilder.cpp in Sources */,
+				268BCE83140B265E0025E4D1 /* rtcppacket.cpp in Sources */,
+				268BCE84140B265E0025E4D1 /* rtcppacketbuilder.cpp in Sources */,
+				268BCE85140B265E0025E4D1 /* rtcprrpacket.cpp in Sources */,
+				268BCE86140B265E0025E4D1 /* rtcpscheduler.cpp in Sources */,
+				268BCE87140B265E0025E4D1 /* rtcpsdesinfo.cpp in Sources */,
+				268BCE88140B265E0025E4D1 /* rtcpsdespacket.cpp in Sources */,
+				268BCE89140B265E0025E4D1 /* rtcpsrpacket.cpp in Sources */,
+				268BCE8A140B265E0025E4D1 /* rtpbyteaddress.cpp in Sources */,
+				268BCE8B140B265E0025E4D1 /* rtpcollisionlist.cpp in Sources */,
+				268BCE8C140B265E0025E4D1 /* rtpdebug.cpp in Sources */,
+				268BCE8D140B265E0025E4D1 /* rtperrors.cpp in Sources */,
+				268BCE8E140B265E0025E4D1 /* rtpexternaltransmitter.cpp in Sources */,
+				268BCE8F140B265E0025E4D1 /* rtpinternalsourcedata.cpp in Sources */,
+				268BCE90140B265E0025E4D1 /* rtpipv4address.cpp in Sources */,
+				268BCE91140B265E0025E4D1 /* rtpipv6address.cpp in Sources */,
+				268BCE92140B265E0025E4D1 /* rtplibraryversion.cpp in Sources */,
+				268BCE93140B265E0025E4D1 /* rtppacket.cpp in Sources */,
+				268BCE94140B265E0025E4D1 /* rtppacketbuilder.cpp in Sources */,
+				268BCE95140B265E0025E4D1 /* rtppollthread.cpp in Sources */,
+				268BCE96140B265E0025E4D1 /* rtprandom.cpp in Sources */,
+				268BCE97140B265E0025E4D1 /* rtprandomrand48.cpp in Sources */,
+				268BCE98140B265E0025E4D1 /* rtprandomrands.cpp in Sources */,
+				268BCE99140B265E0025E4D1 /* rtprandomurandom.cpp in Sources */,
+				268BCE9A140B265E0025E4D1 /* rtpsession.cpp in Sources */,
+				268BCE9B140B265E0025E4D1 /* rtpsessionparams.cpp in Sources */,
+				268BCE9C140B265E0025E4D1 /* rtpsessionsources.cpp in Sources */,
+				268BCE9D140B265E0025E4D1 /* rtpsourcedata.cpp in Sources */,
+				268BCE9E140B265E0025E4D1 /* rtpsources.cpp in Sources */,
+				268BCE9F140B265E0025E4D1 /* rtptimeutilities.cpp in Sources */,
+				268BCEA0140B265E0025E4D1 /* rtpudpv4transmitter.cpp in Sources */,
+				268BCEA1140B265E0025E4D1 /* rtpudpv6transmitter.cpp in Sources */,
+				268BCEA4140B265F0025E4D1 /* rtpfaketransmitter.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1119,6 +1887,61 @@
 			};
 			name = Distribution;
 		};
+		268BCD58140B25CC0025E4D1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				COPY_PHASE_STRIP = NO;
+				EXECUTABLE_PREFIX = lib;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/Debug\"",
+				);
+				ONLY_ACTIVE_ARCH = NO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		268BCD59140B25CC0025E4D1 /* Distribution */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				EXECUTABLE_PREFIX = lib;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/Debug\"",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				ONLY_ACTIVE_ARCH = NO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+			};
+			name = Distribution;
+		};
 		C01FCF4F08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1150,6 +1973,14 @@
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
+		};
+		268BCD57140B25CC0025E4D1 /* Build configuration list for PBXNativeTarget "jrtplib-static" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				268BCD58140B25CC0025E4D1 /* Debug */,
+				268BCD59140B25CC0025E4D1 /* Distribution */,
+			);
+			defaultConfigurationIsVisible = 0;
 		};
 		C01FCF4E08A954540054247B /* Build configuration list for PBXProject "Monal" */ = {
 			isa = XCConfigurationList;

@@ -11,11 +11,15 @@
 
 #import <CoreFoundation/CoreFoundation.h>
 
+
 #import "protocol.h"
 
 //stanza objects 
 #import "iqSearch.h"
 #import "iqJingle.h"
+
+
+
 
 #import <unistd.h>
 #import <sys/types.h>

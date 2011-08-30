@@ -3586,7 +3586,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	[self performSelectorOnMainThread:@selector(setRunLoop)  withObject:nil waitUntilDone:YES];
 	
 	
-	/*
+	
 	
 	// iOS4 VOIP socket.. one for all sockets doesnt matter what style connection it is
 	if([tools isBackgroundSupported])
@@ -3602,7 +3602,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 		
 	}
 	
-*/
+
 	
 	
 	if((SSL==true)  && (port==5223))

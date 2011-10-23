@@ -26,8 +26,8 @@
 }
 
 
-- (void)loadView {
-	self.view = [[[UIView alloc] initWithFrame:[[UIScreen mainScreen] applicationFrame]] autorelease];
+- (void)makeView {
+	//self.view = [[[UIView alloc] initWithFrame:[[UIScreen mainScreen] applicationFrame]] autorelease];
    
     chatView =[[UIWebView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height-40)];
     containerView = [[UIView alloc] initWithFrame:CGRectMake(0, self.view.frame.size.height - 40, self.view.frame.size.width, 40)];
@@ -37,7 +37,7 @@
     
 	chatInput.minNumberOfLines = 1;
 	chatInput.maxNumberOfLines = 6;
-	//chatInput.returnKeyType = UIReturnKeyGo; //just as an example
+	
 	chatInput.font = [UIFont systemFontOfSize:15.0f];
 	chatInput.delegate = self;
     chatInput.internalTextView.scrollIndicatorInsets = UIEdgeInsetsMake(5, 0, 5, 0);
@@ -51,7 +51,7 @@
     UIImage *rawEntryBackground = [UIImage imageNamed:@"MessageEntryInputField.png"];
     UIImage *entryBackground = [rawEntryBackground stretchableImageWithLeftCapWidth:13 topCapHeight:22];
     UIImageView *entryImageView = [[[UIImageView alloc] initWithImage:entryBackground] autorelease];
-    entryImageView.frame = CGRectMake(5, 0, 248, 40);
+    entryImageView.frame = CGRectMake(5, 0, self.view.frame.size.width-72, 40);
     entryImageView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
     
     UIImage *rawBackground = [UIImage imageNamed:@"MessageEntryBackground.png"];
@@ -105,7 +105,12 @@
     
     [chatInput setText:@""];
 
-	[chatInput resignFirstResponder];
+   /* if([machine hasPrefix:@"iPad"] )
+	{ 
+        // no need to dismiss on every message for the ipad. 
+    }
+    else
+	[chatInput resignFirstResponder];*/
 }
 
 
@@ -127,6 +132,9 @@
 	{
 	[self initWithNibName:@"chatview" bundle:nil];
 	}
+    
+    [self makeView];
+    
 		
 		jabber=jabberIn;
 //	thelist;

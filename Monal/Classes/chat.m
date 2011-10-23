@@ -1492,6 +1492,8 @@ if([buddyFullName isEqualToString:@""])
 	{
 		NSDateFormatter* formatter = [[[NSDateFormatter alloc] init] autorelease];
 	[formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+        
+        
 	NSDate* sourceDate=[formatter dateFromString:time];
 
 	NSTimeZone* sourceTimeZone = [NSTimeZone timeZoneWithAbbreviation:@"GMT"];
@@ -1505,10 +1507,33 @@ if([buddyFullName isEqualToString:@""])
 	
 	NSDate* destinationDate = [[[NSDate alloc] initWithTimeInterval:interval sinceDate:sourceDate] autorelease];
 	
-	// note: if it isnt the same day we want to show tehful day
-	
-
-	dateString = [dateFormatter stringFromDate:destinationDate];
+        
+        NSDateFormatter* tmpformatter= [[[NSDateFormatter alloc] init] autorelease];
+        
+        [tmpformatter setDateFormat:@"yyyy"];
+        int thisyear = [[tmpformatter stringFromDate:[NSDate date]] intValue];
+           int msgyear = [[tmpformatter stringFromDate:sourceDate] intValue];
+        
+        [tmpformatter setDateFormat:@"MM"];
+        int thismonth = [[tmpformatter stringFromDate:[NSDate date]] intValue];
+           int msgmonth = [[tmpformatter stringFromDate:sourceDate] intValue];
+        
+        [tmpformatter setDateFormat:@"dd"];
+        int thisday = [[tmpformatter stringFromDate:[NSDate date]] intValue];
+           int msgday = [[tmpformatter stringFromDate:sourceDate] intValue];
+        
+        
+    if ((thisday!=msgday) || (thismonth!=msgmonth) || (thisyear!=msgyear))
+        {
+        
+	// note: if it isnt the same day we want to show the full  day
+	 [formatter setDateStyle: kCFDateFormatterMediumStyle];
+        }
+        
+        [formatter setTimeStyle: kCFDateFormatterMediumStyle];
+        [formatter setLocale:[NSLocale currentLocale] ];
+        
+	dateString = [formatter stringFromDate:destinationDate];
 	}
 	else
 	{

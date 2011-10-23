@@ -21,6 +21,7 @@
     NSString* theusername;
     NSString* thepass; 
     
+    
 
 }
 -(NSString*) getGoogleInfo;
@@ -28,9 +29,9 @@
 -(NSString*) ack:(NSString*) to:(NSString*) iqid;
 -(NSString*) acceptJingle:(NSString*) to:(NSString*) address: (NSString*) port: (NSString*) username: (NSString*) pass:  (NSString*)idval; 
 -(NSString*) initiateJingle:(NSString*) to ;
--(NSString*) terminateJingle:(NSString*) to  :(NSString*) sid;
-
+-(NSString*) terminateJingle;
 -(id) init; 
+
 
 
 

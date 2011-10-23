@@ -3021,12 +3021,12 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 #pragma mark Jinge Call 
 -(bool) startCallUser:(NSString*) buddy
 {
-
+   return [self talk:[jingleCall initiateJingle:buddy]]; 
 }
 
 -(bool) endCall
 {
-    
+  return [self talk:[jingleCall terminateJingle]];
 }
 
 

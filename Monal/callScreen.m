@@ -23,7 +23,7 @@
    
 }
 
--(void) show:(xmpp*) conn
+-(void) show:(xmpp*) conn:(NSString*) name
 {
     
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
@@ -38,6 +38,7 @@
         self.modalPresentationStyle=UIModalPresentationFormSheet; 
     }
     
+    buddyName.text=name; 
     
 	[pool release];
      

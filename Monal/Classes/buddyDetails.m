@@ -49,10 +49,10 @@
 {      
     callScreen* call = [callScreen alloc] ;
     [call init:navigationController];
-    [call show];
+    [call show:jabber:buddyName.text];
     
     // send jingle stuff
-    [jabber startCallUser:buddyName];
+    [jabber startCallUser:buddyName.text];
     
   
      /* NSString* machine=[tools machine]; 

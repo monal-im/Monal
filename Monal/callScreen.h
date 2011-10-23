@@ -28,7 +28,7 @@
 }
 
 -(void) init:(UINavigationController*) nav;
--(void) show; 
+-(void) show:(xmpp*) conn:(NSString*) name;
 
 
 -(IBAction) endPress;

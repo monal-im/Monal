@@ -657,6 +657,7 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
 		
 		
 		currentPath= indexPath;
+        [currentPath retain];
 		currentTable=tableView;
 		//ask if sure
 		UIActionSheet *popupQuery = [[UIActionSheet alloc] initWithTitle:@"Are you sure you want to remove this contact?"
@@ -694,7 +695,7 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
 	//if yes pressed on delete
 	if ( buttonIndex==0 )
 	{
-		debug_NSLog(@"deleting buddy");
+		debug_NSLog(@"deleting buddy %d", currentPath.section);
 		
 		NSMutableArray* theArray; 
 		if(currentPath.section==0) theArray = thelist; 

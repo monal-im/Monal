@@ -324,6 +324,7 @@ thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 	
 		
 		currentPath= indexPath;
+          [currentPath retain];
 		currentTable=tableView;
 		//ask if sure
 	  UIActionSheet *popupQuery = [[UIActionSheet alloc] initWithTitle:@"Are you sure you want to clear  logs for his contact?"

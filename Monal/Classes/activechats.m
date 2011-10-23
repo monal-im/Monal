@@ -380,6 +380,7 @@ if(actionSheet.tag==1)
 		
 		
 		currentPath= indexPath;
+        [currentPath retain];
 		currentTable=tableView;
 		//ask if sure
 		UIActionSheet *popupQuery = [[UIActionSheet alloc] initWithTitle:@"Are you sure you want to close this chat?"

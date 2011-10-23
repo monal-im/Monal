@@ -1537,6 +1537,8 @@ if([buddyFullName isEqualToString:@""])
 	}
 	else
 	{
+        [dateFormatter setLocale:[NSLocale currentLocale] ];
+         [dateFormatter setTimeStyle: kCFDateFormatterMediumStyle];
 		dateString =  [dateFormatter stringFromDate:[NSDate date]];
 	}
 	

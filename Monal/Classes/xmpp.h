@@ -18,7 +18,7 @@
 #import "iqSearch.h"
 #import "iqJingle.h"
 
-
+#import "RTP.hh"
 
 
 #import <unistd.h>
@@ -149,6 +149,9 @@
 -(bool) requestSearchInfo;
 -(bool) userSearch:(NSString*) buddy; 
 
+#pragma mark Jinge Call 
+-(bool) startCallUser:(NSString*) buddy; 
+-(bool) endCall; 
 
 #pragma mark service discovery
 -(bool) queryDiscoItems:(NSString*) to:(NSString*) userid;

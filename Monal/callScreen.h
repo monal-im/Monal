@@ -9,6 +9,7 @@
 
 #import <UIKit/UIKit.h>
 #import "tools.h"
+#import "xmpp.h"
 
 
 @interface callScreen : UIViewController
@@ -22,6 +23,7 @@
     IBOutlet UIButton* endButton; 
     IBOutlet UIView* topPanel; 
     IBOutlet UIView* bottomPanel; 
+    xmpp* jabber;
     
 }
 

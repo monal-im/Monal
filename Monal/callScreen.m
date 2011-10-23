@@ -23,7 +23,7 @@
    
 }
 
--(void) show
+-(void) show:(xmpp*) conn
 {
     
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
@@ -50,6 +50,8 @@
     
       [navigationController dismissModalViewControllerAnimated:YES];
    //terminate voip call here too 
+    
+    [jabber endCall];
     
    
 }

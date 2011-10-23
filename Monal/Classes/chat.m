@@ -27,7 +27,7 @@
 
 
 - (void)makeView {
-	//self.view = [[[UIView alloc] initWithFrame:[[UIScreen mainScreen] applicationFrame]] autorelease];
+	
    
     chatView =[[UIWebView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height-40)];
     containerView = [[UIView alloc] initWithFrame:CGRectMake(0, self.view.frame.size.height - 40, self.view.frame.size.width, 40)];
@@ -588,7 +588,15 @@
 	if(buddyName!=nil) [buddyName release]; 
 	if(buddyFullName!=nil) [buddyFullName release]; 
 	
+    
+    //removeing the input stuff
 	[chatInput resignFirstResponder];
+    containerView.hidden=true;  
+  
+    [chatView setFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height)];
+    
+    
+
 	
 	buddyName=buddy; 
 	buddyFullName=fullname; 
@@ -621,17 +629,8 @@
 	}
 	
 	debug_NSLog(@"show log"); 
-	//[chatInput setEnabled:false];
-	//[chatInput setText:@"Input disabled in log view"];
-	chatInput.hidden=true; 
-	//	chatInput.editable=false;
-	
-	//expand web biew
-	
-	CGRect r;
-	r=self.view.frame;
-	
-		//chatView.frame =r; 
+
+
 	
 	
 
@@ -789,11 +788,11 @@
 	
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
-	CGRect r;
-	r=self.view.frame;
-	r.size.height=r.size.height-chatInput.frame.size.height-5; 
+    containerView.hidden=false;
+    [chatView setFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height-40)];
+
 	
-	//chatView.frame =r; 
+	
 	
 	msgthread=false;
 	
@@ -1159,19 +1158,17 @@ if([buddyFullName isEqualToString:@""])
 
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	
-	
-			if([jabber message:buddyName:text:groupchat])
+    NSMutableString* brtext= [NSMutableString stringWithString:text];
+    /*[brtext replaceOccurrencesOfString:@"\n" withString:@"<br>"
+                                               options:NSCaseInsensitiveSearch
+                                                 range:NSMakeRange(0, [text length])];
+    
+	*/
+    
+			if([jabber message:buddyName:brtext:groupchat])
 			{
 				if(!groupchat)
-				[self addMessage:buddyName:text];
-				
-				
-				//clear the message text
-				
-				
-				//hide keyboard.. 
-				//not hiudden for rapid chat
-				//[textField resignFirstResponder];
+				[self addMessage:buddyName:brtext];
 				
 				
 				
@@ -1468,7 +1465,12 @@ if([buddyFullName isEqualToString:@""])
 							   range:NSMakeRange(0, [body length])];
 	}
 	
-	
+	//handle carriage return 
+    [body replaceOccurrencesOfString:@"\n"
+                          withString:[NSString stringWithFormat:@"<br>",[[NSBundle mainBundle] resourcePath]]
+                             options:NSCaseInsensitiveSearch
+                               range:NSMakeRange(0, [body length])];
+    
 	
 	//this is link handling text
 	

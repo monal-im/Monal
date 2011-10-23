@@ -10,11 +10,12 @@
 #import "protocol.h"
 #import "DataLayer.h"
 #import "tools.h"
+#import "HPGrowingTextView.h"
 
 
 
 
-@interface chat : UIViewController <UITextViewDelegate,UIWebViewDelegate,UIAlertViewDelegate>{
+@interface chat : UIViewController <HPGrowingTextViewDelegate,UIWebViewDelegate,UIAlertViewDelegate>{
 
 	
     protocol* jabber;
@@ -23,6 +24,10 @@
 	UITabBarController* tabController; 
      UIBarButtonItem* contactsButton; // ipad portrait button 
      UIPopoverController *popOverController;
+    
+    UIView *containerView;
+    HPGrowingTextView *chatInput;
+    
     UITableView* contactList; 
     
     
@@ -64,7 +69,7 @@
 	NSString* lastDiv; 
 	
 	IBOutlet  UIActivityIndicatorView* spinner;
-	
+    UIWebView* chatView;
 	bool firstmsg;
 	bool groupchat;
 	
@@ -74,8 +79,8 @@
 }
 
 @property (nonatomic, retain)  NSString* buddyName; 
-@property (nonatomic, retain) IBOutlet UITextView *chatInput;
-@property (nonatomic, retain) IBOutlet UIWebView* chatView;
+
+
 @property (nonatomic, retain)  NSString* accountno; 
 
 -(void) init: (protocol*) jabberIn:(UINavigationController*) nav:(NSString*)username: (DataLayer*) thedb; 
@@ -92,11 +97,7 @@
 -(NSString*) setIcon:(NSString*) msguser;
 
 
-//textfield delegate
 
-- (BOOL)textFieldShouldReturn:(UITextField *)textField;
-- (void)textFieldDidBeginEditing:(UITextField *)textField;
-- (void)textFieldDidEndEditing:(UITextField *)textField;
 
 -(void) handleInput:(NSString *)text;
 //notification 

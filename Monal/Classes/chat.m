@@ -11,8 +11,7 @@
 
 @implementation chat
 
-@synthesize chatInput;
-@synthesize chatView;
+
 @synthesize iconPath; 
 @synthesize domain; 
 @synthesize tabController;
@@ -27,8 +26,95 @@
 }
 
 
+- (void)loadView {
+	self.view = [[[UIView alloc] initWithFrame:[[UIScreen mainScreen] applicationFrame]] autorelease];
+   
+    chatView =[[UIWebView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height-40)];
+    containerView = [[UIView alloc] initWithFrame:CGRectMake(0, self.view.frame.size.height - 40, self.view.frame.size.width, 40)];
+    
+	chatInput = [[HPGrowingTextView alloc] initWithFrame:CGRectMake(6, 3, self.view.frame.size.width-80, 40)];
+    chatInput.contentInset = UIEdgeInsetsMake(0, 5, 0, 5);
+    
+	chatInput.minNumberOfLines = 1;
+	chatInput.maxNumberOfLines = 6;
+	//chatInput.returnKeyType = UIReturnKeyGo; //just as an example
+	chatInput.font = [UIFont systemFontOfSize:15.0f];
+	chatInput.delegate = self;
+    chatInput.internalTextView.scrollIndicatorInsets = UIEdgeInsetsMake(5, 0, 5, 0);
+    chatInput.backgroundColor = [UIColor whiteColor];
+    
+   
+   [self.view addSubview:chatView];
+    [self.view addSubview:containerView];
+     
+	
+    UIImage *rawEntryBackground = [UIImage imageNamed:@"MessageEntryInputField.png"];
+    UIImage *entryBackground = [rawEntryBackground stretchableImageWithLeftCapWidth:13 topCapHeight:22];
+    UIImageView *entryImageView = [[[UIImageView alloc] initWithImage:entryBackground] autorelease];
+    entryImageView.frame = CGRectMake(5, 0, 248, 40);
+    entryImageView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+    
+    UIImage *rawBackground = [UIImage imageNamed:@"MessageEntryBackground.png"];
+    UIImage *background = [rawBackground stretchableImageWithLeftCapWidth:13 topCapHeight:22];
+    UIImageView *imageView = [[[UIImageView alloc] initWithImage:background] autorelease];
+    imageView.frame = CGRectMake(0, 0, containerView.frame.size.width, containerView.frame.size.height);
+    imageView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+    
+    chatInput.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+    
+    // view hierachy
+    
+    [containerView addSubview:imageView];
+    [containerView addSubview:chatInput];
+    [containerView addSubview:entryImageView];
+    
+    UIImage *sendBtnBackground = [[UIImage imageNamed:@"MessageEntrySendButton.png"] stretchableImageWithLeftCapWidth:13 topCapHeight:0];
+    UIImage *selectedSendBtnBackground = [[UIImage imageNamed:@"MessageEntrySendButton.png"] stretchableImageWithLeftCapWidth:13 topCapHeight:0];
+    
+	UIButton *doneBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+	doneBtn.frame = CGRectMake(containerView.frame.size.width - 69, 8, 63, 27);
+    doneBtn.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleLeftMargin;
+	[doneBtn setTitle:@"Send" forState:UIControlStateNormal];
+    
+    [doneBtn setTitleShadowColor:[UIColor colorWithWhite:0 alpha:0.4] forState:UIControlStateNormal];
+    doneBtn.titleLabel.shadowOffset = CGSizeMake (0.0, -1.0);
+    doneBtn.titleLabel.font = [UIFont boldSystemFontOfSize:18.0f];
+    
+    [doneBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+	[doneBtn addTarget:self action:@selector(resignTextView) forControlEvents:UIControlEventTouchUpInside];
+    [doneBtn setBackgroundImage:sendBtnBackground forState:UIControlStateNormal];
+    [doneBtn setBackgroundImage:selectedSendBtnBackground forState:UIControlStateSelected];
+	[containerView addSubview:doneBtn];
+    containerView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
+    chatView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    
+    
+    chatInput.delegate=self;
+}
+
+-(void)resignTextView
+{
+    
+    if(([chatInput text]!=nil) && (![[chatInput text] isEqualToString:@""]) )
+    {
+        debug_NSLog(@"Sending message"); 
+        // this should call the xmpp message 
+        [NSThread detachNewThreadSelector:@selector(handleInput:) toTarget:self withObject:[chatInput text]];
+        
+    }
+    
+    [chatInput setText:@""];
+
+	[chatInput resignFirstResponder];
+}
+
+
 -(void) init: (protocol*) jabberIn:(UINavigationController*) nav:(NSString*)username: (DataLayer*) thedb
 {
+  
+    
+  
+    
 	//navigationController=nav;
 	
 	// if ipad then bigger input box
@@ -1113,43 +1199,8 @@ if([buddyFullName isEqualToString:@""])
 
 
 
-/**** Textview delegeate functions ****/
-- (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text {
-	if([text isEqualToString:@"\n"]) 
-	{
-		if(([textView text]!=nil) && (![[textView text] isEqualToString:@""]) )
-		{
-			debug_NSLog(@"Sending message"); 
-			// this should call the xmpp message 
-			[NSThread detachNewThreadSelector:@selector(handleInput:) toTarget:self withObject:[textView text]];
+# pragma mark Textview delegeate functions 
 
-		}
-			 [textView setText:@""];
-				return NO;
-		 
-    }
-	
-	// iphone vertical
-	
-	
-	UIInterfaceOrientation orientation =[[UIApplication sharedApplication] statusBarOrientation];
-	
-	int thresh=50; 
-		
-			if((orientation==UIInterfaceOrientationLandscapeLeft) || (orientation==UIInterfaceOrientationLandscapeRight) )
-			{
-				thresh=100;
-			}
-
-	if([chatInput.text length]>thresh) 
-		[chatInput setScrollEnabled:YES];
-	else [chatInput setScrollEnabled:NO];
-	
-	
-	
-    	
-    return YES;
-}
 
 
 
@@ -1229,7 +1280,18 @@ if([buddyFullName isEqualToString:@""])
 	
 	
 }
+- (void)growingTextView:(HPGrowingTextView *)growingTextView willChangeHeight:(float)height
+{
+    float diff = (growingTextView.frame.size.height - height);
+    
+	CGRect r = containerView.frame;
+    r.size.height -= diff;
+    r.origin.y += diff;
+	containerView.frame = r;
+}
 
+
+ /*
 - (void)textViewDidBeginEditing:(UITextView *)textView
 {
 	
@@ -1243,7 +1305,7 @@ if([buddyFullName isEqualToString:@""])
 - (void)textViewDidEndEditing:(UITextView *)textView
 {
 	
-}
+}*/
 
 #pragma mark HTML generation
 
@@ -1780,6 +1842,8 @@ if([buddyFullName isEqualToString:@""])
 {
 	chatView.delegate=nil; 
 	
+    [chatInput release];
+	[containerView release];
 	
 	[webroot release];
 	if(HTMLPage!=nil) [HTMLPage release];

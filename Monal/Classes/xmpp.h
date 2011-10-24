@@ -18,8 +18,6 @@
 #import "iqSearch.h"
 #import "iqJingle.h"
 
-#import "RTP.hh"
-
 
 #import <unistd.h>
 #import <sys/types.h>
@@ -150,6 +148,8 @@
 -(bool) userSearch:(NSString*) buddy; 
 
 #pragma mark Jinge Call 
+-(bool)rejectCallUser:(NSString*) buddy;
+-(bool) acceptCallUser:(NSString*) buddy;
 -(bool) startCallUser:(NSString*) buddy; 
 -(bool) endCall; 
 

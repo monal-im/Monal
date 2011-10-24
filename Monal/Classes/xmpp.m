@@ -957,6 +957,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
                                     :[attributeDict objectForKey:@"password"]
              
                                                 :presenceUserid             ]];
+            [jingleCall connect]; 
             
         }
         
@@ -3019,6 +3020,16 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	
 }
 #pragma mark Jinge Call 
+-(bool)rejectCallUser:(NSString*) buddy
+{
+
+}
+
+-(bool) acceptCallUser:(NSString*) buddy
+{
+   // return [self talk:[jingleCall initiateJingle:buddy]]; 
+}
+
 -(bool) startCallUser:(NSString*) buddy
 {
    return [self talk:[jingleCall initiateJingle:buddy]]; 

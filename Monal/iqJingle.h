@@ -21,7 +21,7 @@
     NSString* theusername;
     NSString* thepass; 
     
-    
+    RTP* rtp;     
 
 }
 -(NSString*) getGoogleInfo;
@@ -32,7 +32,7 @@
 -(NSString*) terminateJingle;
 -(id) init; 
 
-
+-(void) connect; 
 
 
 @property (nonatomic, retain) NSString* me; 

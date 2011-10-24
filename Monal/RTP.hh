@@ -10,4 +10,6 @@
 
 @interface RTP : NSObject
 
+-(void) RTPConnect:(NSString*) IP:(int) port;  
+
 @end

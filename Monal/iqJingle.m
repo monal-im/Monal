@@ -50,6 +50,12 @@ return  @"<iq type='get'  > <query xmlns='google:jingleinfo'/> </iq>";
 }
 
 
+-(void) connect
+{
+    rtp =[RTP alloc];
+    [rtp RTPConnect:theaddress:[theport intValue]];
+}
+
 -(NSString*) acceptJingle:(NSString*) to:(NSString*) address: (NSString*) port: (NSString*) username: (NSString*) pass:  (NSString*)idval
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
@@ -79,6 +85,7 @@ return  @"<iq type='get'  > <query xmlns='google:jingleinfo'/> </iq>";
   
     
     [query retain]; 
+    
     
     
     [pool release]; 

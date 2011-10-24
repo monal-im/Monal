@@ -898,7 +898,7 @@ debug_NSLog(@"frame type %u", hdr.type);
 	
 	
 	// iOS4 VOIP socket.. one for all sockets doesnt matter what style connection it is
-	if([tools isBackgroundSupported])
+/*	if([tools isBackgroundSupported])
 	{
 		
 		if((CFReadStreamSetProperty((CFReadStreamRef)iStream, 
@@ -910,7 +910,8 @@ debug_NSLog(@"frame type %u", hdr.type);
 			debug_NSLog(@"could not set VOIP properties on streams.");
 		
 	}
-	
+	*/
+    
 	
 	[iStream open];
 	[oStream open];

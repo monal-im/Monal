@@ -1601,7 +1601,7 @@ debug_NSLog(@"Entering background");
 	
 	 //******* VOIP .. to be removed when going to normal task completion ********  
 
-   
+   /*
 void (^myBlock)(void) = ^(void){
 		debug_NSLog(@"OS keep alive hander called"); 
 		[self keepAlive];
@@ -1613,7 +1613,7 @@ void (^myBlock)(void) = ^(void){
 	 {
 	 debug_NSLog(@"set keep alive hander"); 
 	 }
-	
+	*/
 
 	buddylistdirty=false; // reset 
 	
@@ -1629,7 +1629,7 @@ void (^myBlock)(void) = ^(void){
 	
         
         //******** this needs to be removed when i go back to VOIP socket
-/*	 bgTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^{
+	 bgTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^{
        debug_NSLog(@"OS background expire hander"); 
 		 
 		 // Clear out the old notification before scheduling a new one
@@ -1639,7 +1639,7 @@ void (^myBlock)(void) = ^(void){
 		[[UIApplication sharedApplication] endBackgroundTask:bgTask];
 		 bgTask=UIBackgroundTaskInvalid;
  
-    }];*/
+    }];
 
 	}
 

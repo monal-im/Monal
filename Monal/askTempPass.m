@@ -40,8 +40,11 @@
    
     
 
-   [ [[UIApplication sharedApplication] delegate] setTempPass:[passwordField text]];
+  // [ [[UIApplication sharedApplication] delegate] setTempPass:[passwordField text]];
 
+    SworIMAppDelegate *app=[[UIApplication sharedApplication] delegate];
+    [app setTempPass:[passwordField text]];
+    
     [[NSNotificationCenter defaultCenter] 
 	 postNotificationName: @"Reconnect" object: self];
     

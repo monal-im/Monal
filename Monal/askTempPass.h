@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "tools.h"
-
+#import "SworIMAppDelegate.h"
 
 
 @interface askTempPass : UIViewController<UITextFieldDelegate>{

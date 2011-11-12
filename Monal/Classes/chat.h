@@ -39,7 +39,7 @@
 	NSString*  lastuser;
 	
 		DataLayer* db;
-
+    bool dontscroll;
 
 	 NSString* iconPath; 
 	 NSString* domain; 

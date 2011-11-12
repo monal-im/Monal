@@ -95,6 +95,11 @@
 -(void)resignTextView
 {
     
+    dontscroll=true; 
+    [chatInput.internalTextView resignFirstResponder];
+    [chatInput.internalTextView becomeFirstResponder];
+    dontscroll=false; 
+    
     if(([chatInput text]!=nil) && (![[chatInput text] isEqualToString:@""]) )
     {
         debug_NSLog(@"Sending message"); 
@@ -117,7 +122,7 @@
 -(void) init: (protocol*) jabberIn:(UINavigationController*) nav:(NSString*)username: (DataLayer*) thedb
 {
   
-    
+     dontscroll=false; 
   
     
 	//navigationController=nav;
@@ -1157,6 +1162,8 @@ if([buddyFullName isEqualToString:@""])
 {
 
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    
+ 
 	
     NSMutableString* brtext= [NSMutableString stringWithString:text];
     /*[brtext replaceOccurrencesOfString:@"\n" withString:@"<br>"
@@ -1217,6 +1224,8 @@ if([buddyFullName isEqualToString:@""])
 
 -(void) keyboardWillHide:(NSNotification *) note
 {
+    if(dontscroll==false)
+    {
 	//bigger text view
 	//CGRect oldTextFrame= chatInput.frame; 
 	//chatInput.frame=CGRectMake(oldTextFrame.origin.x, oldTextFrame.origin.y, oldTextFrame.size.width, oldTextFrame.size.height-30);
@@ -1233,13 +1242,13 @@ if([buddyFullName isEqualToString:@""])
 	
 	debug_NSLog(@"kbd will hide scroll: %f", oldFrame.size.height); 
 
-	
+	}
 	
 }
 
 -(void) keyboardDidShow:(NSNotification *) note
 {
-	
+	if(dontscroll==false)
 	//[chatView  stringByEvaluatingJavaScriptFromString:@" document.getElementById('bottom').scrollIntoView(true)"];
 	[chatView performSelectorOnMainThread:@selector(stringByEvaluatingJavaScriptFromString:) withObject:@" document.getElementById('bottom').scrollIntoView(true)" waitUntilDone:NO];
 	
@@ -1248,6 +1257,8 @@ if([buddyFullName isEqualToString:@""])
 
 -(void) keyboardWillShow:(NSNotification *) note
 {
+    if(dontscroll==false)
+    {
 	//bigger text view
 	//CGRect oldTextFrame= chatInput.frame; 
 	//chatInput.frame=CGRectMake(oldTextFrame.origin.x, oldTextFrame.origin.y, oldTextFrame.size.width, oldTextFrame.size.height+30);
@@ -1281,7 +1292,7 @@ if([buddyFullName isEqualToString:@""])
 	
 	
 	debug_NSLog(@"kbd will show : %d  scroll: %f", t.size.height, r.size.height); 
-	
+	}
 	
 	
 }

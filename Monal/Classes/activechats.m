@@ -172,7 +172,7 @@
 	//button click handler
 	
 
-if(actionSheet.tag==1)
+if((actionSheet.tag==1) && (buttonIndex==0)) 
 {
     debug_NSLog(@"closgin all active chats for %@",[[thelist objectAtIndex:[currentPath indexAtPosition:1]] objectAtIndex:0]);
     

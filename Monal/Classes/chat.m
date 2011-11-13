@@ -29,7 +29,11 @@
 - (void)makeView {
 	
    
-    chatView =[[UIWebView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height-40)];
+    chatView =[[UIWebView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height-40-20)];
+    
+    pages = [[UIPageControl alloc] init]; 
+    pages.frame=CGRectMake(0, self.view.frame.size.height - 40-20, self.view.frame.size.width, 20);
+    
     containerView = [[UIView alloc] initWithFrame:CGRectMake(0, self.view.frame.size.height - 40, self.view.frame.size.width, 40)];
     
 	chatInput = [[HPGrowingTextView alloc] initWithFrame:CGRectMake(6, 3, self.view.frame.size.width-80, 40)];
@@ -43,8 +47,16 @@
     chatInput.internalTextView.scrollIndicatorInsets = UIEdgeInsetsMake(5, 0, 5, 0);
     chatInput.backgroundColor = [UIColor whiteColor];
     
+    //page control 
+    pages.backgroundColor = [UIColor darkGrayColor];
+    
+    pages.hidesForSinglePage=false; 
+    pages.numberOfPages=4; 
+    pages.currentPage=1; 
    
+    
    [self.view addSubview:chatView];
+    [self.view addSubview:pages];
     [self.view addSubview:containerView];
      
 	
@@ -61,7 +73,7 @@
     imageView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
     
     chatInput.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-    
+   
     // view hierachy
     
     [containerView addSubview:imageView];
@@ -85,9 +97,22 @@
     [doneBtn setBackgroundImage:sendBtnBackground forState:UIControlStateNormal];
     [doneBtn setBackgroundImage:selectedSendBtnBackground forState:UIControlStateSelected];
 	[containerView addSubview:doneBtn];
+    
+    
     containerView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
     chatView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    pages.autoresizingMask= UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
+
     
+    // add swipe recognizer
+    
+    UISwipeGestureRecognizer* swipe = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipeDetected:)];
+    [swipe setDirection:(UISwipeGestureRecognizerDirectionRight )]; 
+    [self.view addGestureRecognizer:swipe]; 
+    
+    UISwipeGestureRecognizer* swipe2 = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipeDetected:)];
+    [swipe2 setDirection:( UISwipeGestureRecognizerDirectionLeft)]; 
+    [self.view addGestureRecognizer:swipe2];
     
     chatInput.delegate=self;
 }
@@ -597,6 +622,7 @@
     //removeing the input stuff
 	[chatInput resignFirstResponder];
     containerView.hidden=true;  
+    pages.hidden=true; 
   
     [chatView setFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height)];
     
@@ -793,8 +819,9 @@
 	
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
+    pages.hidden=false; 
     containerView.hidden=false;
-    [chatView setFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height-40)];
+    [chatView setFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height-40-20)];
 
 	
 	
@@ -1206,6 +1233,33 @@ if([buddyFullName isEqualToString:@""])
 	[pool release];
 	[NSThread exit]; 
 	
+}
+
+#pragma mark gestures
+- (void)swipeDetected:(UISwipeGestureRecognizer *)recognizer {
+     debug_NSLog(@"pages was   %d", pages.currentPage);
+    
+    if(recognizer.direction==UISwipeGestureRecognizerDirectionRight)
+    {
+        debug_NSLog(@"swiped  right in chat"); 
+        pages.currentPage--; 
+        if(pages.currentPage<0) pages.currentPage=pages.numberOfPages-1; 
+    }
+        else
+             if(recognizer.direction==UISwipeGestureRecognizerDirectionLeft)
+             {
+                 debug_NSLog(@"swiped   left in chat "); 
+                 
+                 pages.currentPage++; 
+                 if(pages.currentPage==pages.numberOfPages) pages.currentPage=0; 
+                
+             }
+            
+    
+    debug_NSLog(@"pages now set to %d", pages.currentPage);
+    [pages updateCurrentPageDisplay];
+    
+    
 }
 
 

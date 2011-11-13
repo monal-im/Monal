@@ -76,6 +76,8 @@
 	bool wasaway; 
 	bool wasoffline; 
 	bool msgthread;
+    UIPageControl* pages; 
+ 
 }
 
 @property (nonatomic, retain)  NSString* buddyName; 
@@ -96,6 +98,7 @@
 
 -(NSString*) setIcon:(NSString*) msguser;
 
+- (void)swipeDetected:(UISwipeGestureRecognizer *)recognizer;
 
 
 

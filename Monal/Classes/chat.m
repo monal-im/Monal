@@ -51,8 +51,8 @@
     pages.backgroundColor = [UIColor darkGrayColor];
     
     pages.hidesForSinglePage=false; 
-    pages.numberOfPages=4; 
-    pages.currentPage=1; 
+    pages.numberOfPages=0; 
+    pages.currentPage=0; 
    
     
    [self.view addSubview:chatView];
@@ -149,7 +149,7 @@
   
      dontscroll=false; 
   
-    
+    activeChats=nil; 
 	//navigationController=nav;
 	
 	// if ipad then bigger input box
@@ -823,8 +823,24 @@
     containerView.hidden=false;
     [chatView setFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height-40-20)];
 
-	
-	
+	//query to get pages and position
+    if(activeChats!=nil) [activeChats release]; 
+	 activeChats=[db activeBuddies:accountno]; 
+        [activeChats retain];
+    pages.numberOfPages=[activeChats count];
+    //set pos
+    int dotCounter=0; 
+    while(dotCounter<pages.numberOfPages)
+    {
+    if([buddy isEqualToString:[[activeChats objectAtIndex:dotCounter] objectAtIndex:0]])
+    {
+        pages.currentPage=dotCounter; 
+        break;
+    }
+        dotCounter++;
+        
+    }
+    
 	
 	msgthread=false;
 	
@@ -1242,16 +1258,19 @@ if([buddyFullName isEqualToString:@""])
     if(recognizer.direction==UISwipeGestureRecognizerDirectionRight)
     {
         debug_NSLog(@"swiped  right in chat"); 
-        pages.currentPage--; 
-        if(pages.currentPage<0) pages.currentPage=pages.numberOfPages-1; 
+       
+        if(pages.currentPage==0) pages.currentPage=pages.numberOfPages-1; 
+        else
+             pages.currentPage--; 
     }
         else
              if(recognizer.direction==UISwipeGestureRecognizerDirectionLeft)
              {
                  debug_NSLog(@"swiped   left in chat "); 
                  
+                 if(pages.currentPage==pages.numberOfPages-1) pages.currentPage=0; 
+                else
                  pages.currentPage++; 
-                 if(pages.currentPage==pages.numberOfPages) pages.currentPage=0; 
                 
              }
             
@@ -1259,6 +1278,13 @@ if([buddyFullName isEqualToString:@""])
     debug_NSLog(@"pages now set to %d", pages.currentPage);
     [pages updateCurrentPageDisplay];
     
+    //dont keep reloading if only one page
+    if(pages.numberOfPages!=0)
+    {
+    
+    [self show:[[activeChats objectAtIndex:pages.currentPage] objectAtIndex:0]
+              :[[activeChats objectAtIndex:pages.currentPage] objectAtIndex:1] :navController];
+    }
     
 }
 

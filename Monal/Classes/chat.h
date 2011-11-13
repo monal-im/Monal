@@ -77,6 +77,7 @@
 	bool wasoffline; 
 	bool msgthread;
     UIPageControl* pages; 
+    NSArray* activeChats; 
  
 }
 

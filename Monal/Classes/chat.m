@@ -36,7 +36,7 @@
     chatInput.contentInset = UIEdgeInsetsMake(0, 5, 0, 5);
     
 	chatInput.minNumberOfLines = 1;
-	chatInput.maxNumberOfLines = 6;
+	chatInput.maxNumberOfLines = 8;
 	
 	chatInput.font = [UIFont systemFontOfSize:15.0f];
 	chatInput.delegate = self;

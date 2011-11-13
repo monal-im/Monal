@@ -48,7 +48,7 @@
     chatInput.backgroundColor = [UIColor whiteColor];
     
     //page control 
-    pages.backgroundColor = [UIColor darkGrayColor];
+    pages.backgroundColor = [UIColor colorWithRed:.4 green:0.435 blue:0.498 alpha:1];
     
     pages.hidesForSinglePage=false; 
     pages.numberOfPages=0; 
@@ -852,6 +852,8 @@
 	
 	buddyName=buddy; 
 	buddyFullName=fullname; 
+    
+    debug_NSLog(@"id: %@,  full: %@", buddyName, buddyFullName);
 	[buddyName retain]; 
 	[buddyFullName retain];
 if([buddyFullName isEqualToString:@""])	
@@ -1283,7 +1285,7 @@ if([buddyFullName isEqualToString:@""])
     {
     
     [self show:[[activeChats objectAtIndex:pages.currentPage] objectAtIndex:0]
-              :[[activeChats objectAtIndex:pages.currentPage] objectAtIndex:1] :navController];
+              :[[activeChats objectAtIndex:pages.currentPage] objectAtIndex:2] :navController];
     }
     
 }

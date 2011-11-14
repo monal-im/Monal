@@ -95,10 +95,16 @@
 -(void) signalOffline;
 -(void) hideKeyboard; 
 
+
+
 -(void) htmlonMainThread:(NSString*) theText; 
 
 -(NSString*) setIcon:(NSString*) msguser;
 
+
+#pragma mark gesture stuff
+
+-(void) showSignal:(NSNotification*) note; 
 - (void)swipeDetected:(UISwipeGestureRecognizer *)recognizer;
 
 

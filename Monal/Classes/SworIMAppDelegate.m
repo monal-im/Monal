@@ -449,7 +449,7 @@ NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 						
 						
 						
-						SlidingMessageViewController* slider = [[SlidingMessageViewController alloc] correctSlider:msgfrom :msgMess:fullfile];
+						SlidingMessageViewController* slider = [[SlidingMessageViewController alloc] correctSlider:msgfrom :msgMess:fullfile:msgusr];
 						
 						[window addSubview:slider.view];
 						

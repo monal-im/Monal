@@ -184,6 +184,12 @@
 	[nc addObserver:self selector:@selector(keyboardWillHide:) name: UIKeyboardWillHideNotification object:nil];
 	
 	[nc addObserver:self selector:@selector(keyboardDidShow:) name: UIKeyboardDidShowNotification object:nil];
+   
+    // handle messages to view someuser
+    
+    [nc addObserver:self selector:@selector(showSignal:) name: @"showSignal" object:nil];
+	
+    
 	
 	buddyIcon=nil; 
 	myIcon=nil; 
@@ -208,6 +214,9 @@
 	
 	bottomHTML=[NSString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalStockholm/bottom.html", [[NSBundle mainBundle] resourcePath]]]; 
 	[bottomHTML retain]; 
+    
+    
+    
 	
 	
 
@@ -230,13 +239,13 @@
 	bottomHTML=[NSString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalRenkooNaked/bottom.html", [[NSBundle mainBundle] resourcePath]]]; 
 	[bottomHTML retain]; */
 	
+    
+    
 	
 	
 
 	
 }
-
-
 
 
 
@@ -814,6 +823,7 @@
   
 }
 
+//note fullname is overridden and ignored
 -(void) show:(NSString*) buddy:(NSString*) fullname:(UINavigationController*) vc
 {
 	
@@ -841,6 +851,11 @@
         
     }
     
+    if(dotCounter==pages.numberOfPages)
+    {
+        debug_NSLog(@"unable to find item.. abort show"); 
+        return;
+    }
 	
 	msgthread=false;
 	
@@ -851,7 +866,7 @@
 	if(buddyFullName!=nil) [buddyFullName release]; 
 	
 	buddyName=buddy; 
-	buddyFullName=fullname; 
+	buddyFullName=[[activeChats objectAtIndex:dotCounter] objectAtIndex:2]; //doesnt matter what full name is passed we will always check
     
     debug_NSLog(@"id: %@,  full: %@", buddyName, buddyFullName);
 	[buddyName retain]; 
@@ -1254,6 +1269,22 @@ if([buddyFullName isEqualToString:@""])
 }
 
 #pragma mark gestures
+
+//handles the taop on the sliding message notifiction
+-(void) showSignal:(NSNotification*) note
+{
+
+   
+       debug_NSLog(@"show signal reached  chatwin %@", [[note userInfo] objectForKey:@"username"] );
+    
+    //drop extension and . on file name to get username 
+    [self show: [[note userInfo] objectForKey:@"username"] 
+              :@"" :navController];
+
+}
+
+
+//handle swipe 
 - (void)swipeDetected:(UISwipeGestureRecognizer *)recognizer {
      debug_NSLog(@"pages was   %d", pages.currentPage);
     

@@ -134,9 +134,11 @@
  *
  *------------------------------------------------------------*/
 
--(id) correctSlider:(NSString *)title :(NSString *)msg:(NSString*)userfilename
+-(id) correctSlider:(NSString *)title :(NSString *)msg:(NSString*)userfilename:(NSString*) user
 {
 	
+    username=user; 
+    [username retain];
 	//Note: this assumes its in chatwin
 	
 	UIInterfaceOrientation orientation =[[UIApplication sharedApplication] statusBarOrientation];
@@ -183,6 +185,8 @@
 		[self.view addSubview:icon];
 	}
 	
+   
+    
 	// Title
 	titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, 5, 280, 30)] ;
 	titleLabel.font = [UIFont boldSystemFontOfSize:17];
@@ -427,6 +431,9 @@
 - (void)showMsg
 {
 	//  UIView *view = self.view;
+    
+  
+    
 	CGRect frame = self.view.frame;
 	[UIView beginAnimations:nil context:NULL];
 	[UIView setAnimationDuration:.75];
@@ -513,7 +520,12 @@
 	// determine the size of the title and msg labels and 
 	// set this value accordingly
 	
-	
+    tapHandler = [UIButton buttonWithType:UIButtonTypeCustom];
+    tapHandler.frame=frame; 
+    [tapHandler addTarget:self action:@selector(tapped) forControlEvents:UIControlEventTouchUpInside];
+    
+    [self.view addSubview:tapHandler]; 
+    
 	self.view.frame = frame;
 	
 	[UIView commitAnimations];
@@ -523,6 +535,20 @@
 	// Hide the view after the requested delay
 //	[self performSelector:@selector(hideMsg) withObject:nil afterDelay:delay];
 	
+}
+
+-(void) tapped
+{
+    debug_NSLog(@"tapped popup");
+    // show the user 
+    NSArray* vals= [[NSArray alloc] initWithObjects:username, nil]; 
+    NSArray* keys= [[NSArray alloc] initWithObjects:@"username", nil]; 
+    NSDictionary* dic =  [[NSDictionary alloc] initWithObjects:vals forKeys:keys];
+    
+    [[NSNotificationCenter defaultCenter] 
+	 postNotificationName: @"showSignal" object:nil userInfo:dic ];
+   
+    
 }
 
 #pragma mark -
@@ -535,7 +561,8 @@
  *------------------------------------------------------------*/
 - (void)dealloc 
 {
-
+    [username release];
+    [tapHandler release];
 	[titleLabel release];
 	[msgLabel release];
 	[icon release];

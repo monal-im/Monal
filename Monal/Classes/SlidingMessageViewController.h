@@ -20,6 +20,8 @@
 	UILabel   *titleLabel;              
 	UILabel   *msgLabel;
 	UIImageView   *icon;
+    UIButton* tapHandler;
+    NSString* username;
 	int x; 
 	int y; 
 	int width; 
@@ -29,7 +31,7 @@
 }
 
 -(void) releaser; 
--(id) correctSlider:(NSString *)title :(NSString *)msg:(NSString*)userfilename;
+-(id) correctSlider:(NSString *)title :(NSString *)msg:(NSString*)userfilename:(NSString*) user;
 -(id) commonInit:(NSString *)title :(NSString *)msg:(NSString*)userfilename;
 - (id)initWithTitle:(NSString *)title message:(NSString *)msg:(NSString*)userfilename;
 - (id)initTopWithTitle:(NSString *)title message:(NSString *)msg:(NSString*)userfilename;

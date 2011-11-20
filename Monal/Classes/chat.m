@@ -851,11 +851,12 @@
         
     }
     
-    if(dotCounter==pages.numberOfPages)
+   /* if(dotCounter==pages.numberOfPages)
     {
         debug_NSLog(@"unable to find item.. abort show"); 
         return;
-    }
+    }*/
+    
 	
 	msgthread=false;
 	
@@ -866,7 +867,13 @@
 	if(buddyFullName!=nil) [buddyFullName release]; 
 	
 	buddyName=buddy; 
+    if(dotCounter<pages.numberOfPages)
+    {
+    
 	buddyFullName=[[activeChats objectAtIndex:dotCounter] objectAtIndex:2]; //doesnt matter what full name is passed we will always check
+    }
+    else 
+        buddyFullName=fullname; 
     
     debug_NSLog(@"id: %@,  full: %@", buddyName, buddyFullName);
 	[buddyName retain]; 

@@ -139,6 +139,7 @@
 		26432924133D66A9005632E1 /* download.png in Resources */ = {isa = PBXBuildFile; fileRef = 26432923133D66A9005632E1 /* download.png */; };
 		264A051B1287067700189A87 /* google.png in Resources */ = {isa = PBXBuildFile; fileRef = 264A051A1287067700189A87 /* google.png */; };
 		2651DAA20FC2847200009D7E /* noicon.png in Resources */ = {isa = PBXBuildFile; fileRef = 2651DAA10FC2847200009D7E /* noicon.png */; };
+		2654BEC81481499000DDC346 /* loglistDate.m in Sources */ = {isa = PBXBuildFile; fileRef = 2654BEC71481499000DDC346 /* loglistDate.m */; };
 		265571B1122157D500F994E8 /* SlidingMessageViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 265571B0122157D500F994E8 /* SlidingMessageViewController.m */; };
 		265579A71231D05A0043863D /* AIMTOC2.m in Sources */ = {isa = PBXBuildFile; fileRef = 262648FD1126FA80009689CC /* AIMTOC2.m */; };
 		265F1AE512303A670065C5FE /* WebBrowserVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 265F1AE412303A670065C5FE /* WebBrowserVC.m */; };
@@ -363,6 +364,8 @@
 		26432923133D66A9005632E1 /* download.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = download.png; sourceTree = "<group>"; };
 		264A051A1287067700189A87 /* google.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = google.png; sourceTree = "<group>"; };
 		2651DAA10FC2847200009D7E /* noicon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = noicon.png; sourceTree = "<group>"; };
+		2654BEC61481499000DDC346 /* loglistDate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = loglistDate.h; path = Classes/loglistDate.h; sourceTree = "<group>"; };
+		2654BEC71481499000DDC346 /* loglistDate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = loglistDate.m; path = Classes/loglistDate.m; sourceTree = "<group>"; };
 		265571AF122157D500F994E8 /* SlidingMessageViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SlidingMessageViewController.h; path = Classes/SlidingMessageViewController.h; sourceTree = "<group>"; };
 		265571B0122157D500F994E8 /* SlidingMessageViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SlidingMessageViewController.m; path = Classes/SlidingMessageViewController.m; sourceTree = "<group>"; };
 		265F1AE312303A670065C5FE /* WebBrowserVC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WebBrowserVC.h; path = Classes/WebBrowserVC.h; sourceTree = "<group>"; };
@@ -874,6 +877,8 @@
 		26F1AB3B13244B800044FA18 /* More */ = {
 			isa = PBXGroup;
 			children = (
+				2654BEC61481499000DDC346 /* loglistDate.h */,
+				2654BEC71481499000DDC346 /* loglistDate.m */,
 				26DC0A9013392A4E00E60BFD /* userSearch.h */,
 				26DC0A9113392A4F00E60BFD /* userSearch.m */,
 				26C1FB330FBF505800525E69 /* loglist.m */,
@@ -1214,6 +1219,7 @@
 				26E7D4B0140B067100EE6C93 /* RTP.mm in Sources */,
 				2640AF4014548E7700CB4F60 /* HPGrowingTextView.m in Sources */,
 				2640AF4114548E7700CB4F60 /* HPTextViewInternal.m in Sources */,
+				2654BEC81481499000DDC346 /* loglistDate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

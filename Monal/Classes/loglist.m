@@ -356,14 +356,20 @@ thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 {
 	debug_NSLog(@"selected log row %d max %d", [newIndexPath indexAtPosition:1], [thelist count]); 
 		
-	[chatwin showLog:[[thelist objectAtIndex:[newIndexPath indexAtPosition:1]] objectAtIndex:0]
+	/*[chatwin showLog:[[thelist objectAtIndex:[newIndexPath indexAtPosition:1]] objectAtIndex:0]
 					:[[thelist objectAtIndex:[newIndexPath indexAtPosition:1]] objectAtIndex:2]
 					:viewController
 	 
-	];
+	];*/
+ 
 	
 		[tableView deselectRowAtIndexPath:newIndexPath animated:true];
-
+ //slide in the date list
+    
+    loglistDate*  dateList = [loglistDate alloc]; 
+    [dateList setup:[[thelist objectAtIndex:[newIndexPath indexAtPosition:1]] objectAtIndex:0]]; 
+    [viewController pushViewController:dateList animated:YES];
+    
 	
 }
 

@@ -88,7 +88,7 @@
 
 -(void) init: (protocol*) jabberIn:(UINavigationController*) nav:(NSString*)username: (DataLayer*) thedb; 
 -(void) show:(NSString*) buddy:(NSString*) fullname:(UINavigationController*) vc;
--(void) showLog:(NSString*) buddy:(NSString*) fullname:(UINavigationController*) vc;
+-(void) showLogDate:(NSString*) buddy:(NSString*) fullname:(UINavigationController*) vc:(NSString*) date;
 -(void) addMessage:(NSString*) to:(NSString*) message;
 -(void) signalNewMessages; 
 -(void) signalStatus;

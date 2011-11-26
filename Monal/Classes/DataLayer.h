@@ -96,7 +96,11 @@
 
 //message history
 -(NSArray*) messageHistory:(NSString*) buddy :(NSString*) accountNo;
--(NSArray*) messageHistoryAll:(NSString*) buddy :(NSString*) accountNo;
+-(NSArray*) messageHistoryAll:(NSString*) buddy :(NSString*) accountNo; //we're going to stop using this.. 
+
+-(NSArray*) messageHistoryListDates:(NSString*) buddy :(NSString*) accountNo; 
+-(NSArray*) messageHistoryDate:(NSString*) buddy :(NSString*) accountNo:(NSString*) date; 
+
 -(BOOL) messageHistoryClean:(NSString*) buddy :(NSString*) accountNo;
 -(BOOL) messageHistoryCleanAll:(NSString*) accountNo;
 

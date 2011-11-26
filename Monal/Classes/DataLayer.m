@@ -1239,6 +1239,72 @@
 	}
 }
 
+-(NSArray*) messageHistoryListDates:(NSString*) buddy :(NSString*) accountNo
+{
+    //returns a list of  buddy's with message history
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	NSString* query1=[NSString stringWithFormat:@"select username, domain from account where account_id=%@", accountNo];
+	//debug_NSLog(query); 
+	NSArray* user = [self executeReader:query1];
+	
+	if(user!=nil)
+	{
+        
+        NSString* query=[NSString stringWithFormat:@"select distinct date(timestamp) from message_history where account_id=%@ and  message_from='%@' or  message_to='%@'   order by timestamp desc", accountNo, buddy, buddy  ];
+        //debug_NSLog(query); 
+        NSArray* toReturn = [self executeReader:query];
+        
+        if(toReturn!=nil)
+        {
+            
+            debug_NSLog(@" count: %d",  [toReturn count] ); 
+            [toReturn retain];
+            [pool release];
+            
+            return toReturn; //[toReturn autorelease];
+        }
+        else 
+        {
+            debug_NSLog(@"message history buddy date list is empty or failed to read"); 
+            [pool release];
+            return nil; 
+        }
+        
+	} else return nil; 
+	
+}
+
+-(NSArray*) messageHistoryDate:(NSString*) buddy :(NSString*) accountNo:(NSString*) date
+{
+	//returns a buddy's message history
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
+	
+	//NSArray* parts=[[[NSDate date] description] componentsSeparatedByString:@" "]; 
+	
+	
+	NSString* query=[NSString stringWithFormat:@"select message_from, message, thetime from (select message_from, message, timestamp as thetime, message_history_id from message_history where account_id=%@ and (message_from='%@' or message_to='%@')  and date(timestamp)='%@' order by message_history_id desc) order by message_history_id asc ", accountNo, buddy, buddy, date];
+	debug_NSLog(query); 
+	NSArray* toReturn = [self executeReader:query];
+	
+	if(toReturn!=nil)
+	{
+		
+		debug_NSLog(@" count: %d",  [toReturn count] ); 
+		[toReturn retain];
+		[pool release];
+		
+		return toReturn; //[toReturn autorelease];
+	}
+	else 
+	{
+		debug_NSLog(@"message history is empty or failed to read"); 
+		[pool release];
+		return nil; 
+	}
+	
+}
+
 
 
 -(NSArray*) messageHistoryAll:(NSString*) buddy :(NSString*) accountNo

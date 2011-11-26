@@ -621,7 +621,7 @@
 	
 }
 
--(void) showLog:(NSString*) buddy:(NSString*) fullname:(UINavigationController*) vc
+-(void) showLogDate:(NSString*) buddy:(NSString*) fullname:(UINavigationController*) vc:(NSString*) date
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	if(buddyName!=nil) [buddyName release]; 
@@ -676,7 +676,7 @@
 
 	
 	//populate the list
-	NSArray* thelist =[db messageHistoryAll:buddyName: accountno];
+	NSArray* thelist =[db messageHistoryDate :buddyName: accountno:date];
 	//[thelist retain];
 	
 	if(myIcon!=nil) [myIcon release]; 

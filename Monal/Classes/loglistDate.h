@@ -12,27 +12,29 @@
 #import "tools.h"
 
 #import "SworIMAppDelegate.h"
-#import "loglistDate.h"
 
 
 
-@interface loglist : UIViewController <UITableViewDataSource, UITableViewDelegate,UIActionSheetDelegate> {
+@interface loglistDate : UIViewController <UITableViewDataSource, UITableViewDelegate> {
 
 		NSArray* thelist; 
 	chat* chatwin;
 	NSIndexPath* currentPath; 
-	IBOutlet UITableView* currentTable; 
+	 UITableView* currentTable; 
 	DataLayer* db; 
 	NSString* iconPath; 
 	 UINavigationController* viewController; 
 
 	NSString* accountno; 
 	int sheet;
+    
+    NSString* thebuddy; 
 	
 
 	
 }
 
+-(void) setup:(NSString*) buddy; 
 
 //table view delegat methods
 //required

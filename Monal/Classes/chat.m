@@ -106,6 +106,14 @@
     
     // add swipe recognizer
     
+    NSString* ver=[[UIDevice currentDevice] systemVersion];
+    if([ver characterAtIndex:0]=='3')
+    {
+        //nothing for ios versin 3 
+    }
+    else
+    {
+    
     UISwipeGestureRecognizer* swipe = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipeDetected:)];
     [swipe setDirection:(UISwipeGestureRecognizerDirectionRight )]; 
     [self.view addGestureRecognizer:swipe]; 
@@ -113,6 +121,7 @@
     UISwipeGestureRecognizer* swipe2 = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipeDetected:)];
     [swipe2 setDirection:( UISwipeGestureRecognizerDirectionLeft)]; 
     [self.view addGestureRecognizer:swipe2];
+    }
     
     chatInput.delegate=self;
 }

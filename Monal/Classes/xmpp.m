@@ -328,11 +328,27 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 	if([elementName isEqualToString:@"stream:error"])
 	{
 		loginstate++;  
+        
+        if(State!=nil) [State release]; 
+        State=@"StreamError"; 
+        [State retain];
 	
 		[pool release];
 		return; 
 		
 	}
+    
+    
+    if(([State isEqualToString:@"StreamError"]) &&([elementName isEqualToString:@"host-unknown"]))
+	{
+   
+        //legit error 
+        [[NSNotificationCenter defaultCenter] 
+         postNotificationName: @"LoginFailed" object: self];
+        [pool release]; 
+        return; 
+        
+    }
 	
 	
 	//getting login mechanisms
@@ -389,8 +405,9 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 								  [NSNumber numberWithBool:YES], @"kCFStreamSSLAllowsAnyRoot",
 								  [NSNumber numberWithBool:NO], @"kCFStreamSSLValidatesCertificateChain",
 								  [NSNull null],@"kCFStreamSSLPeerName",
-								  @"kCFStreamSocketSecurityLevelNegotiatedSSL", 
-								  @"kCFStreamSocketSecurityLevelTLSv1",
+								  @"kCFStreamSocketSecurityLevelNegotiatedSSL",
+                                  @"kCFStreamSSLLevel",
+                                  //@"kCFStreamSocketSecurityLevelTLSv1",
 								  
 								  nil ];
 	
@@ -3382,7 +3399,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 
 - (void)stream:(NSStream *)stream handleEvent:(NSStreamEvent)eventCode
 {
-	debug_NSLog(@"has event"); 
+	debug_NSLog(@"%@ has event", stream); 
 	switch(eventCode) 
 	{
 			//for writing
@@ -3406,6 +3423,11 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 		{
 			debug_NSLog(@"Stream errror");
 			streamError=true;
+            
+            NSError* error=[stream streamError];
+          
+            
+            debug_NSLog(@"Stream error code=%d domain=%@ userinfo:%@ local desc:%@",error.code,error.domain,error.userInfo,  error.localizedDescription);
 			
 		//[[NSNotificationCenter defaultCenter] 
 		//	 postNotificationName: @"LoginFailed" object: self];
@@ -3416,13 +3438,13 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 			
 			[UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
 					
-			
+			break; 
 		
 		} 
 		case NSStreamEventNone:
 		{
 			debug_NSLog(@"Stream event none");
-			
+			break; 
 			
 		}
 			
@@ -3431,14 +3453,15 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 		{
 			debug_NSLog(@"Stream open completed");
 			streamOpen++; //this should be called twice, once for each stream
-			
+            debug_NSLog(@"streamopen: %d", streamOpen); 
+			break; 
 		}
 			
 			
 		case NSStreamEventEndEncountered:
 		{
 			debug_NSLog(@"Stream end encoutered");
-			
+			break; 
 		}
 			
 			
@@ -3585,7 +3608,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	//				  outputStream:&oStream];
 	
 	CFStreamCreatePairWithSocketToHost(NULL, (CFStringRef)server, port, &iStream, &oStream);
-	
+	 debug_NSLog(@"stream  created to  server: %@ port: %d", server, port);
     
 	[iStream retain];
 	[oStream retain];
@@ -3644,7 +3667,8 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 								  [NSNumber numberWithBool:YES], @"kCFStreamSSLAllowsAnyRoot",
 								  [NSNumber numberWithBool:NO], @"kCFStreamSSLValidatesCertificateChain",
 								  [NSNull null],@"kCFStreamSSLPeerName",
-								  @"kCFStreamSocketSecurityLevelNegotiatedSSL", 
+								// @"kCFStreamSocketSecurityLevelNegotiatedSSL", 
+                                  kCFStreamSocketSecurityLevelSSLv3,
 								  @"kCFStreamSSLLevel",
 								  nil ];
 		CFReadStreamSetProperty((CFReadStreamRef)iStream, 
@@ -3680,12 +3704,12 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	NSString* threadname=[NSString stringWithFormat:@"monal%d",random()%100000]; 
 	
 	
-	while(streamOpen<2)
+	while(streamOpen<2) 
 	{
-		debug_NSLog(@"connect thread sleeping onlock"); 
+		debug_NSLog(@"stream open %d, connect thread sleeping onlock", streamOpen); 
 		usleep(600000); 
 		int seconds=[[NSDate date] timeIntervalSinceDate:now];
-		if(seconds>3)
+		if(seconds>5)
 		{
 			debug_NSLog(@"connect thread timing out.. sending reconnect "); 
 			

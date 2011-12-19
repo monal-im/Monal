@@ -1284,7 +1284,7 @@ if([buddyFullName isEqualToString:@""])
 	
 }
 
-#pragma mark gestures
+
 
 //handles the taop on the sliding message notifiction
 -(void) showSignal:(NSNotification*) note
@@ -1298,7 +1298,7 @@ if([buddyFullName isEqualToString:@""])
               :@"" :navController];
 
 }
-
+#pragma mark gestures
 
 //handle swipe 
 - (void)swipeDetected:(UISwipeGestureRecognizer *)recognizer {

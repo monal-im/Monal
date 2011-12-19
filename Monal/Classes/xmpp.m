@@ -116,7 +116,7 @@
 	
 	serverList=[[NSMutableArray alloc] init];
 
-	
+	if(port!=443) // quick hack to enable gtalk on 443
 	[NSThread detachNewThreadSelector:@selector(dnsDiscover) toTarget:self withObject:nil];
 	
 	//setting own name value
@@ -3633,7 +3633,8 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 	streamError=false;
 	streamOpen=0; 
-	if((SSL==true) && (port==5223)) debug_NSLog(@"Using Old style SSL");
+	if((SSL==true) && ((port==5223) || (port==443) )) debug_NSLog(@"Using Old style SSL");
+       //443 for gtalk 
 	
 	
 	if(DNSthreadreturn==false) sleep(2); // sleep to let it finsih
@@ -3710,7 +3711,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 
 	
 	
-	if((SSL==true)  && (port==5223))
+	if((SSL==true)  && ((port==5223) || (port==443)))
 	{
 		// do ssl stuff here
 		debug_NSLog(@"securing connection.."); 

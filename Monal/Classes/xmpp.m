@@ -400,14 +400,16 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 		
 		NSDictionary *settings = [ [NSDictionary alloc ] 
 								  initWithObjectsAndKeys:
-								  [NSNumber numberWithBool:YES], @"kCFStreamSSLAllowsExpiredCertificates",
-								  [NSNumber numberWithBool:YES], @"kCFStreamSSLAllowsExpiredRoots",
-								  [NSNumber numberWithBool:YES], @"kCFStreamSSLAllowsAnyRoot",
-								  [NSNumber numberWithBool:NO], @"kCFStreamSSLValidatesCertificateChain",
-								  [NSNull null],@"kCFStreamSSLPeerName",
-								  @"kCFStreamSocketSecurityLevelNegotiatedSSL",
-                                  @"kCFStreamSSLLevel",
-                                  //@"kCFStreamSocketSecurityLevelTLSv1",
+								  [NSNumber numberWithBool:YES], kCFStreamSSLAllowsExpiredCertificates,
+								  [NSNumber numberWithBool:YES], kCFStreamSSLAllowsExpiredRoots,
+								  [NSNumber numberWithBool:YES], kCFStreamSSLAllowsAnyRoot,
+								 [NSNumber numberWithBool:NO], kCFStreamSSLValidatesCertificateChain,
+								  [NSNull null],kCFStreamSSLPeerName,
+								//  kCFStreamSocketSecurityLevelNegotiatedSSL,
+                                 // kCFStreamSocketSecurityLevelTLSv1,
+                                  kCFStreamSocketSecurityLevelSSLv3,
+                                  kCFStreamSSLLevel,
+                                 
 								  
 								  nil ];
 	
@@ -536,6 +538,32 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 		return; 
 		
 	}
+    
+    if([State isEqualToString:@"Failure"])
+	{
+  
+       /* UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"XMPP Failure"
+														 message:elementName
+														delegate:self cancelButtonTitle:nil
+											   otherButtonTitles:@"Close", nil] autorelease];
+		[alert show];*/
+        
+        if ([elementName isEqualToString:@"not-authorized"])
+        {
+            UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"XMPP Failure"
+                                                             message:elementName
+                                                            delegate:self cancelButtonTitle:nil
+                                                   otherButtonTitles:@"Close", nil] autorelease];
+            [alert show];
+            
+            fatal=true; 
+        }
+        
+        
+        [pool release]; 
+        return; 
+        
+    }
 	
 	
 	// Digest MD5 handler
@@ -572,14 +600,6 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 	
 	
 	
-	if([State isEqualToString:@"Failure"])
-	{
-		//fatal=true; 
-		
-		[pool release];
-		//[parser abortParsing];
-		return;
-	}
 	
 	
 	
@@ -2203,7 +2223,7 @@ debug_NSLog(@"ended this element: %@", elementName);
 			
 		}
 	
-		
+		if(vCardPhotoType!=nil)
 		[vCardPhotoType release];
 		
 		
@@ -3423,12 +3443,14 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 		{
 			debug_NSLog(@"Stream errror");
 			streamError=true;
-            
-            NSError* error=[stream streamError];
+         
           
+            NSError* st_error= [stream streamError];
             
-            debug_NSLog(@"Stream error code=%d domain=%@ userinfo:%@ local desc:%@",error.code,error.domain,error.userInfo,  error.localizedDescription);
-			
+            
+           debug_NSLog(@"Stream error code=%d domain=%@   local desc:%@ ",st_error.code,st_error.domain,  st_error.localizedDescription);
+            
+      
 		//[[NSNotificationCenter defaultCenter] 
 		//	 postNotificationName: @"LoginFailed" object: self];
 
@@ -3886,7 +3908,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	
 		
 		
-		
+		//@%@
 		//********sasl plain
 		NSString* saslplain=[self base64Encoding: [NSString stringWithFormat:@"\0%@\0%@",  account, password ]];
 		
@@ -3895,15 +3917,15 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 		NSString*	xmpprequest; 
 		
 		// for regular 
-		xmpprequest=	[NSString stringWithFormat:@"<auth xmlns='urn:ietf:params:xml:ns:xmpp-sasl' mechanism='PLAIN'>%@</auth>",saslplain];
+	/*	xmpprequest=	[NSString stringWithFormat:@"<auth xmlns='urn:ietf:params:xml:ns:xmpp-sasl' mechanism='PLAIN'>%@</auth>",saslplain];
 		
 		NSRange pos=[server rangeOfString:@"google"]; 
 		// for google connections 
-		 if(pos.location!=NSNotFound)
-			{
+		 if(pos.location!=NSNotFound)*/
+			//{
 		
 		xmpprequest=	[NSString stringWithFormat:@"<auth xmlns='urn:ietf:params:xml:ns:xmpp-sasl' xmlns:ga='http://www.google.com/talk/protocol/auth' ga:client-uses-full-bind-result='true'  mechanism='PLAIN'>%@</auth>",saslplain];
-			}
+			//}
 		
 		val= [self talk:xmpprequest];
 	}
@@ -3984,6 +4006,8 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	   
 	   ||([[alertView title] isEqualToString: @"Login Error"])
         ||([[alertView title] isEqualToString: @"Error"])
+        ||([[alertView title] isEqualToString: @"XMPP Error"])
+        ||([[alertView title] isEqualToString: @"XMPP Failure"])
 	  
 	   )
 	{

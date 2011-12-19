@@ -747,6 +747,20 @@ NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 }
 
 
+//the cancel button on the front 
+-(IBAction) CancelLogin;
+{
+    
+	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+	
+    [self disconnect];
+	[activitySun stopAnimating];
+	[activityView removeFromSuperview];
+	
+    [pool release];
+}
+
+
 -(void) Connect
 {
 	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
@@ -814,6 +828,8 @@ NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 		return true; 
 	}
 }
+
+
 
 -(void) disconnect
 {

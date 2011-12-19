@@ -137,6 +137,8 @@ IBOutlet	UIActivityIndicatorView* activitySun;
 
 -(void) setTempPass:(NSString*) thePass; 
 
+-(IBAction) CancelLogin;
+
 @property (nonatomic, retain) DataLayer* db;
 @property (nonatomic, retain)  chat* chatwin;
 @property (nonatomic, retain)  protocol* jabber;
@@ -151,6 +153,8 @@ IBOutlet	UIActivityIndicatorView* activitySun;
 @property (nonatomic, retain)  NSString* iconPath; 
 @property (nonatomic,retain) UITabBarItem* activeTab; 
 @property (nonatomic,retain)IBOutlet UITabBarController* tabcontroller; 
+
+
 
 @end
 

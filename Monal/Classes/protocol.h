@@ -32,7 +32,7 @@
 	NSString* domain; 
 
    
-	
+	NSString* ownName; 
 	
 	NSString* sessionid; 
 	NSString* State;
@@ -165,5 +165,5 @@
 @property (nonatomic) bool presenceFlag; 
 
 @property (nonatomic, retain) NSString* statusMessage;
-
+@property (nonatomic, retain) NSString* ownName;
 @end

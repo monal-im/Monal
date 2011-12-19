@@ -84,9 +84,9 @@ IBOutlet	UIActivityIndicatorView* activitySun;
 
 	UITextField* nameField;
 	BOOL listLoad;  
-	int gotOwnIcon; 
 	
-	BOOL inIconThread; 
+	
+	
 
 	
 	NSString* accountno;

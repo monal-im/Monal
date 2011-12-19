@@ -18,6 +18,7 @@
 
 @synthesize account; 
 @synthesize domain; 
+@synthesize ownName; 
 
 @synthesize  presenceFlag;
 @synthesize messagesFlag;

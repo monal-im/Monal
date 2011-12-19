@@ -24,7 +24,7 @@
 	port=theport; 
 	[server retain];
     statusMessage=nil; 
-    
+    ownName=[NSString stringWithString:account]; 
     theTempPass= [NSString stringWithString:tempPass];
     [theTempPass retain];
     
@@ -1085,7 +1085,7 @@ int b = userFirst * 746512;
 -(void) dealloc
 {
 	
-	
+	[ownName release];
 	[iStream release];
 	[oStream release];
 	

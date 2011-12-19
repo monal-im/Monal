@@ -61,6 +61,8 @@
 	responseUser=@""; 
 	[responseUser retain];
 	
+   
+    
 	loginstate=0; 
 	keepAliveCounter=0;
 
@@ -85,6 +87,8 @@
 	presencePhoto=nil;
 	presenceType=nil;
 	theset=nil;
+  
+   
 	
 	lastEndedElement=nil;
 	vCardUser=nil; 
@@ -115,7 +119,22 @@
 	
 	[NSThread detachNewThreadSelector:@selector(dnsDiscover) toTarget:self withObject:nil];
 	
-	
+	//setting own name value
+    ownName=[NSString stringWithString:account];
+    
+    //now check to see if own name was already set.. 
+    NSString* ownName_temp=[db fullName:[NSString stringWithFormat:@"%@@%@",account, domain] :accountNo]; 
+    if(ownName_temp!=nil)
+    {
+        [ownName release]; 
+        ownName=ownName_temp; 
+        [ownName retain];
+    }
+    
+    
+    
+    
+    
 	//discover the SRV server if there is one for local
 	/*
 	// override the server used if found
@@ -128,6 +147,14 @@
 	
 //	[resolver stop];
 	*/
+    
+    
+    
+    
+    
+    
+    [ownName retain];
+    
 	
 	return self;
 
@@ -2050,6 +2077,14 @@ debug_NSLog(@"ended this element: %@", elementName);
 		
 			[db setOnlineBuddy:vCardUser :accountNumber];
 
+            // if it is self then set the ownname value
+            if([vCardUser isEqualToString:responseUser])
+            {
+                [ownName release];
+                ownName=vCardFullName; 
+                [ownName retain];
+            }
+            
 		[vCardUser release];
 		vCardUser=nil; 
 		}
@@ -2060,6 +2095,9 @@ debug_NSLog(@"ended this element: %@", elementName);
 		vCardFullName=nil; 	
 		}
 		
+        
+        
+        
 		[pool release]; 
 		return;
 	}
@@ -2871,7 +2909,7 @@ if(messageBuffer!=nil)	[messageBuffer retain];
    
 	vCardDone=false; 
 
-	NSString*	xmpprequest=[NSString stringWithFormat: @"<iq type='get' to='%@'><vCard xmlns='vcard-temp'/></iq>", buddy];
+	NSString*	xmpprequest=[NSString stringWithFormat: @"<iq type='get' to='%@' id='v1'><vCard xmlns='vcard-temp'/></iq>", buddy];
 	
 	NSDate *now = [NSDate date];
 	if ([self talk:xmpprequest])
@@ -3419,7 +3457,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 
 - (void)stream:(NSStream *)stream handleEvent:(NSStreamEvent)eventCode
 {
-	debug_NSLog(@"%@ has event", stream); 
+	debug_NSLog(@"has event"); 
 	switch(eventCode) 
 	{
 			//for writing
@@ -4047,7 +4085,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 
 -(void) dealloc
 {
-	
+	 [ownName release];
 	[serverList release];
 	[iStream release];
 	[oStream release];

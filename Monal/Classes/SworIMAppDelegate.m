@@ -1338,7 +1338,7 @@ buddylistDS.tabcontroller=tabcontroller;
 	
 	
 
-	gotOwnIcon=0;
+	
 	uiIter=0; 
 	
 	activityView.layer.cornerRadius = 10; // round corners on login view iphone 3 and above only
@@ -1403,7 +1403,7 @@ buddylistDS.tabcontroller=tabcontroller;
 		
 		
 	}
-	inIconThread=false; 
+	
 	
 
 	//start keep alive 5 min

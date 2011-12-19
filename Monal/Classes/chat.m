@@ -733,7 +733,7 @@
 									 range:NSMakeRange(0, [inHTML length])];
 	
 	[outHTML replaceOccurrencesOfString:@"%sender%"
-							 withString:myuser
+							 withString:jabber.ownName
 								options:NSCaseInsensitiveSearch
 								  range:NSMakeRange(0, [outHTML length])];
 	
@@ -1051,7 +1051,7 @@ if([buddyFullName isEqualToString:@""])
 								  range:NSMakeRange(0, [outHTML length])];
 	
 	[outHTML replaceOccurrencesOfString:@"%sender%"
-							 withString:[NSString stringWithFormat:@"%@@%@",myuser, domain]
+							 withString:jabber.ownName
 								options:NSCaseInsensitiveSearch
 								  range:NSMakeRange(0, [outHTML length])];
 	

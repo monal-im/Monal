@@ -1439,6 +1439,26 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
     
 	
 	//****** begin presence state machine
+    
+    //handle presence error
+    
+    if(([State isEqualToString:@"presence"])  && ([presenceType isEqualToString:@"error"]))
+    {
+       /* UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Presence error"
+														 message:[NSString stringWithFormat:@"Message: %@",elementName  ]
+														delegate:self cancelButtonTitle:nil
+											   otherButtonTitles:@"Close", nil] autorelease];
+		[alert show];
+        
+        [State release]; 
+        State=nil; 
+        presenceType=nil; 
+        */
+        
+		return;
+    }
+    
+    
 	if([elementName isEqualToString:@"presence"])
 	{
 		if(State!=nil) [State release]; 
@@ -1490,6 +1510,8 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
 		
 		//what type?
 		debug_NSLog(@" presence notice %@",[attributeDict objectForKey:@"type"] ); 
+     
+        
 		
 		if([[attributeDict objectForKey:@"type"] isEqualToString:@"error"])
 		{

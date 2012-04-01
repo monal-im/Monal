@@ -24,7 +24,6 @@
 	
 	debug_NSLog(@"Clear Logs");
 	
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 	
 
 	
@@ -40,11 +39,10 @@
     SworIMAppDelegate *app=[[UIApplication sharedApplication] delegate];
     [popupQuery showFromTabBar:app.tabcontroller.tabBar];
     
-	[popupQuery release];
 	
 	
 	sheet=1; 
-	[pool release];
+	;
 	
 	
 }
@@ -57,7 +55,7 @@
 
 -(void)viewDidAppear:(BOOL)animated 
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	debug_NSLog(@"chat log did appear");
 	
 	SworIMAppDelegate *app=[[UIApplication sharedApplication] delegate];
@@ -70,7 +68,7 @@
 	
 	
 	if(accountno==nil) {
-		[pool release];
+		;
 		return; 
 	}
 // refresh log
@@ -79,7 +77,7 @@
 	
 		if((thelist==nil) || ([thelist count]==0))
 		{
-			[pool release];
+			;
 			return; 
 		}
 	
@@ -122,7 +120,7 @@
 	
 
 	debug_NSLog(@"exiting with acctno %@", accountno);
-	[pool release];
+	;
 
 }
 
@@ -240,10 +238,10 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
 	
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	static NSString *identifier = @"MyCell";
-	UITableViewCell* thecell =[[[UITableViewCell alloc] initWithStyle:  UITableViewCellStyleSubtitle  reuseIdentifier:identifier] autorelease];
+	UITableViewCell* thecell =[[UITableViewCell alloc] initWithStyle:  UITableViewCellStyleSubtitle  reuseIdentifier:identifier];
 	
 	
 thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
@@ -289,8 +287,7 @@ thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 	
 	
 		
-	[thecell retain];
-	[pool release];
+	;
 	return thecell;
 }
 
@@ -324,7 +321,6 @@ thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 	
 		
 		currentPath= indexPath;
-          [currentPath retain];
 		currentTable=tableView;
 		//ask if sure
 	  UIActionSheet *popupQuery = [[UIActionSheet alloc] initWithTitle:@"Are you sure you want to clear  logs for his contact?"
@@ -339,7 +335,6 @@ thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
       SworIMAppDelegate *app=[[UIApplication sharedApplication] delegate];
       [popupQuery showFromTabBar:app.tabcontroller.tabBar];
       
-	  [popupQuery release];
 	  
 		
 	  sheet=2; 
@@ -376,11 +371,6 @@ thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 
 
 
--(void)dealloc
-{
-	[thelist release];
-	[super dealloc];
-}
 
 
 @end

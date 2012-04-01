@@ -138,7 +138,6 @@
 {
 	
     username=user; 
-    [username retain];
 	//Note: this assumes its in chatwin
 	
 	UIInterfaceOrientation orientation =[[UIApplication sharedApplication] statusBarOrientation];
@@ -167,8 +166,7 @@
 {
 	// Notice the view y coordinate is offscreen (480)
 	// This hides the view
-	self.view = [[[UIView alloc] initWithFrame:CGRectMake(x, y, width, height)] 
-				 autorelease];
+	self.view = [[UIView alloc] initWithFrame:CGRectMake(x, y, width, height)];
 	[self.view setBackgroundColor:[UIColor blackColor]];
 	[self.view setAlpha:.87];
 	
@@ -416,12 +414,11 @@
 
 - (void)slideKiller:(SlidingMessageViewController*)slider
 {
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];		
 	
 	debug_NSLog(@"sldier hide thread start"); 
 	sleep(3); //wait 3 seconds and then die
 	[slider hideMsg];
-	[pool release]; 
+	; 
 	debug_NSLog(@"sldier hide thread end"); 
    
     
@@ -559,14 +556,5 @@
 /*-------------------------------------------------------------
  *
  *------------------------------------------------------------*/
-- (void)dealloc 
-{
-    [username release];
-    [tapHandler release];
-	[titleLabel release];
-	[msgLabel release];
-	[icon release];
-	[super dealloc]; 
-}
 
 @end

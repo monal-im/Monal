@@ -16,7 +16,7 @@
 
 -(void) setup:(NSString*) buddy
 {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    
  
     
     SworIMAppDelegate *app=[[UIApplication sharedApplication] delegate];
@@ -29,7 +29,7 @@
 	
     if((thelist==nil) || ([thelist count]==0))
     {
-        [pool release];
+        ;
         return; 
     }
     
@@ -52,13 +52,11 @@
     [currentTable setDelegate:self]; 
     [currentTable setDataSource:self];
     
-    [currentTable retain];
     
     self.view=currentTable;
     
     thebuddy=buddy; 
-    [buddy retain]; 
-    [pool release];
+    ;
 }
 
 
@@ -74,11 +72,11 @@
 
 -(void)viewDidAppear:(BOOL)animated 
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	debug_NSLog(@"chat  log date list did appear");
 	
 
-	[pool release];
+	;
 
 }
 
@@ -122,18 +120,17 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
 	
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	static NSString *identifier = @"MyCell";
-	UITableViewCell* thecell =[[[UITableViewCell alloc] initWithStyle:  UITableViewCellStyleSubtitle  reuseIdentifier:identifier] autorelease];
+	UITableViewCell* thecell =[[UITableViewCell alloc] initWithStyle:  UITableViewCellStyleSubtitle  reuseIdentifier:identifier];
 	
 	
 thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 	thecell.textLabel.text=[[thelist objectAtIndex:[indexPath indexAtPosition:1]] objectAtIndex:0];
 	
 
-	[thecell retain];
-	[pool release];
+	;
 	return thecell;
 }
 
@@ -181,13 +178,6 @@ thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 
 
 
--(void)dealloc
-{
-    [thebuddy release]; 
-    [currentTable release];
-	[thelist release];
-	[super dealloc];
-}
 
 
 @end

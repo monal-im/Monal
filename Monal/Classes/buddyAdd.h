@@ -40,7 +40,7 @@ IBOutlet UIScrollView* scroll;
 
 -(IBAction)togglePopOverController;
 
-@property (nonatomic, retain) UIPopoverController *popOverController;
-@property (nonatomic, retain) UIBarButtonItem *bbiOpenPopOver;
+@property (nonatomic) UIPopoverController *popOverController;
+@property (nonatomic) UIBarButtonItem *bbiOpenPopOver;
 
 @end

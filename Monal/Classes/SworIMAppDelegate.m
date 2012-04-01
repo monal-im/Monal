@@ -37,7 +37,6 @@
 -(void)initalMusicWatcher
 {
 
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];		
 	debug_NSLog(@"music watcher thread"); 
 	[[MPMusicPlayerController iPodMusicPlayer] beginGeneratingPlaybackNotifications];
 	
@@ -46,7 +45,7 @@
 	//call once to update current song if any 
 	[self handleNowPlayingItemChanged];
 	
-	[pool release]; 
+	; 
 	[NSThread exit];
 }
 
@@ -66,7 +65,6 @@
 	if(jabber==nil) return; 
 	if(jabber.loggedin!=true) return; 
 	
-NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];		
 	
 	if((uiIter==1) && ([[NSUserDefaults standardUserDefaults] boolForKey:@"MusicStatus"]==true))
 	{
@@ -79,7 +77,7 @@ NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 	
 
 	
-		NSMutableArray* indexPaths=[[[NSMutableArray alloc] init] autorelease];
+		NSMutableArray* indexPaths=[[NSMutableArray alloc] init];
 	
 	NSArray* dblist=nil;
 	NSArray* dblistOffline=[db offlineBuddies:accountno]; 
@@ -369,7 +367,7 @@ NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 							[app cancelAllLocalNotifications];
 						
 						// Create a new notification
-						UILocalNotification* alarm = [[[UILocalNotification alloc] init] autorelease];
+						UILocalNotification* alarm = [[UILocalNotification alloc] init];
 						if (alarm)
 						{
 							//setting badge
@@ -502,7 +500,7 @@ NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 	
 	
 // after everything has been added and removed
-	NSMutableArray* indexPaths2=[[[NSMutableArray alloc] init] autorelease];
+	NSMutableArray* indexPaths2=[[NSMutableArray alloc] init];
 	
 	int totalunread=0;
 	if(buddylistDS!=nil)
@@ -588,7 +586,7 @@ NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 	
 	listLoad=true; 
 
-	[pool release];	
+	;	
 	
 }
 
@@ -610,7 +608,6 @@ NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 //alert view delegate
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
 {
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 	//login or initial error
 	if(([[alertView title] isEqualToString:@"Login Error"])
 		||([[alertView title] isEqualToString:@"Error in Inititation"]))
@@ -618,13 +615,13 @@ NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 		
 		[activitySun stopAnimating];
 	//	[activityView removeFromSuperview];
-		[pool release]; 
+		; 
 		return; 
 	}
 	
 	
 	
-	[pool release];
+	;
 }
 
 
@@ -635,12 +632,11 @@ NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 		if(jabber.loggedin!=true) return; 
 	debug_NSLog(@"adding buddy");
 	
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 	
 
 	
 	
-	buddyAdd* addwin=[[buddyAdd alloc] autorelease];
+	buddyAdd* addwin=[buddyAdd alloc];
 	if([[tools machine] hasPrefix:@"iPad"])
     {
         [addwin init:nil:nil];
@@ -658,7 +654,7 @@ NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
    
 		
     
-	[pool release];
+	;
 	
 	
 }
@@ -738,12 +734,11 @@ NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 -(void) showLoginFailed:(id)sender
 {
 	
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 	[activityMsg setText:@"Error Logging in"];
 	[activitySun stopAnimating];
 	
 	
-		[pool release];
+		;
 }
 
 
@@ -751,19 +746,17 @@ NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 -(IBAction) CancelLogin;
 {
     
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 	
     [self disconnect];
 	[activitySun stopAnimating];
 	[activityView removeFromSuperview];
 	
-    [pool release];
+    ;
 }
 
 
 -(void) Connect
 {
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 	//connection
 	[db resetBuddies]; // forget buddy states
 	activeTab.badgeValue=nil; 
@@ -809,7 +802,7 @@ NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 		
 		
 	}
-	[pool release];
+	;
 	[NSThread exit];
 }
 
@@ -839,13 +832,9 @@ NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 	
 
 	
-	[accountno release]; 
-	[chatwin release]; 
 
-	[buddylistDS release];
 	
 	[jabber disconnect]; 	// ***make sure all listener threads are dead***
-	[jabber release]; 
 	jabber=nil ; 
 	
 	
@@ -888,23 +877,21 @@ buddylistDS.tabcontroller=tabcontroller;
 -(void) setTempPass:(NSString*) thePass
 {
     tempPass=[NSString stringWithString:thePass];
-    [tempPass retain];
 
 }
 
 -(void) reconnect
 {
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 	/// check reachbility
 	debug_NSLog(@"checking reachability"); 
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showLoginFailed:) name: @"LoginFailed" object:nil];
     
 	
-    Reachability* wifireach = [[Reachability reachabilityForLocalWiFi] retain];	
+    Reachability* wifireach = [Reachability reachabilityForLocalWiFi];	
     NetworkStatus reachable1 =[wifireach currentReachabilityStatus]; 
     
-	Reachability* internetReach = [[Reachability reachabilityForInternetConnection] retain];	
+	Reachability* internetReach = [Reachability reachabilityForInternetConnection];	
 	NetworkStatus reachable=[internetReach currentReachabilityStatus]; 
 	if(((reachable==NotReachable) || ([internetReach connectionRequired]))&&
        ((reachable1==NotReachable) || ([wifireach connectionRequired]))
@@ -931,14 +918,14 @@ buddylistDS.tabcontroller=tabcontroller;
                     else
                     {
                     
-					UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Network Error"
+					UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Network Error"
 																	message:@"Could not detect a network connection. If you are connected, try clicking 'reconnect' in the accounts tab to try again."
 																   delegate:self cancelButtonTitle:nil
-														  otherButtonTitles:@"Close", nil] autorelease];
+														  otherButtonTitles:@"Close", nil];
 					[alert show];
 					}
                     
-					[pool release];
+					;
 					return; 
 				}
 			}
@@ -946,7 +933,7 @@ buddylistDS.tabcontroller=tabcontroller;
 		}
 	}
 	
-	[pool release]; 
+	; 
 	
 	//pop the tabbar view controller if need be
 	//if(navigationController.topViewController!=tabcontroller)
@@ -960,10 +947,10 @@ buddylistDS.tabcontroller=tabcontroller;
 		}
 		@catch(NSException* err) {}
 		
-		UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Enable an account"
+		UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Enable an account"
 														message:@"You need to enable at least one account"
 													   delegate:self cancelButtonTitle:nil
-											  otherButtonTitles:@"Close", nil] autorelease];
+											  otherButtonTitles:@"Close", nil];
 		[alert show];
 		
 		
@@ -1002,15 +989,11 @@ buddylistDS.tabcontroller=tabcontroller;
 	
 		debug_NSLog(@"disconnecting"); 
 		
-		[accountno release]; 
-		[chatwin release]; 
 	
-		[buddylistDS release];
 		
 		
 		
 		[jabber disconnect]; 	// ***make sure all listener threads are dead***
-		[jabber release]; 
 		debug_NSLog(@"reconnecting "); 
 		
 	}
@@ -1069,12 +1052,10 @@ buddylistDS.tabcontroller=tabcontroller;
 	}
         
         //erase temppass here
-        [tempPass release]; 
         tempPass=NULL; 
 
 
 	accountno=[NSString stringWithFormat:@"%@",[[enabledAccounts objectAtIndex:0] objectAtIndex: 0] ];
-	[accountno retain];
 	debug_NSLog(@"account number %@", accountno); 
 	
 	chatwin = [chat alloc]; 
@@ -1129,7 +1110,6 @@ buddylistDS.tabcontroller=tabcontroller;
 -(void) toggleMusic
 {
     
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
     
 	
 	if([[NSUserDefaults standardUserDefaults] boolForKey:@"MusicStatus"]==true)
@@ -1163,7 +1143,7 @@ buddylistDS.tabcontroller=tabcontroller;
 		[jabber setStatus:@""];
 	}
     
-	[pool release];
+	;
 
 }
 
@@ -1177,7 +1157,6 @@ buddylistDS.tabcontroller=tabcontroller;
 	if(jabber==nil) return; 
 	if(jabber.loggedin!=true) return; 
 	
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 	
 	
 	if([[MPMusicPlayerController iPodMusicPlayer] playbackState]==MPMusicPlaybackStatePlaying)
@@ -1212,7 +1191,7 @@ buddylistDS.tabcontroller=tabcontroller;
 		{
 			slider = 
 			[[SlidingMessageViewController alloc]
-			 correctSlider:@"♫ Status" :[NSString stringWithFormat: @"%@-%@",title,artist]: @""];
+			 correctSlider:@"♫ Status" :[NSString stringWithFormat: @"%@-%@",title,artist]: @"": @""];
 		}
 		[window addSubview:slider.view];
 		
@@ -1244,7 +1223,6 @@ buddylistDS.tabcontroller=tabcontroller;
 	if(jabber==nil) return; 
 	if(jabber.loggedin!=true) return; 
 	
-		NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 	
 	
 	if([[MPMusicPlayerController iPodMusicPlayer] playbackState]==MPMusicPlaybackStatePlaying)
@@ -1279,7 +1257,7 @@ buddylistDS.tabcontroller=tabcontroller;
 		{
 			slider = 
 			[[SlidingMessageViewController alloc]
-			 correctSlider:@"♫ Status" :[NSString stringWithFormat: @"%@-%@",title,artist]: @""];
+			 correctSlider:@"♫ Status" :[NSString stringWithFormat: @"%@-%@",title,artist]: @"":@""];
 		}
 		[window addSubview:slider.view];
 		
@@ -1291,7 +1269,7 @@ buddylistDS.tabcontroller=tabcontroller;
 			
 	
 
-	[pool release];
+	;
 		
 
 }
@@ -1302,7 +1280,6 @@ buddylistDS.tabcontroller=tabcontroller;
 - (void)applicationDidFinishLaunching:(UIApplication *)application 
 {
 
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 	
     vibrateenabled=false; 
 	uithreadrunning=false;
@@ -1347,7 +1324,6 @@ buddylistDS.tabcontroller=tabcontroller;
    
     
 	lasttitle=@""; 
-	[lasttitle retain];
 	bgTask=nil; 
 	screenLock=false; 
 		backGround=false; 
@@ -1408,7 +1384,6 @@ buddylistDS.tabcontroller=tabcontroller;
 	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
 	NSString *documentsDirectory = [paths objectAtIndex:0];
 	iconPath = [documentsDirectory stringByAppendingPathComponent:filename];
-	[iconPath retain];
 	debug_NSLog(@"checking : %@",iconPath);
 	if( ![fileManager fileExistsAtPath:iconPath])
 	{
@@ -1469,15 +1444,15 @@ buddylistDS.tabcontroller=tabcontroller;
 
 		
 		
-		UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Welcome"
+		UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Welcome"
 														message:@"Welcome to Monal. Please set up an account. You may have multiple accounts set up,  but only one can be logged in at once.  "
 													   delegate:self cancelButtonTitle:nil
-											  otherButtonTitles:@"Close", nil] autorelease];
+											  otherButtonTitles:@"Close", nil];
 		[alert show];
 		
 
 	
-		[pool release];
+		;
 		
 	
 		return; 
@@ -1512,13 +1487,13 @@ buddylistDS.tabcontroller=tabcontroller;
 			[window makeKeyAndVisible];
 			
 		}
-		UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Enable an account"
+		UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Enable an account"
 														message:@"You should set an account to login"
 													   delegate:self cancelButtonTitle:nil
-											  otherButtonTitles:@"Close", nil] autorelease];
+											  otherButtonTitles:@"Close", nil];
 		[alert show];
 		
-		[pool release];
+		;
 		
 		
 		return; 
@@ -1569,7 +1544,7 @@ buddylistDS.tabcontroller=tabcontroller;
 	}
 
 	
-	[pool release];
+	;
 	
 	}
 
@@ -1842,14 +1817,5 @@ void (^myBlock)(void) = ^(void){
 
 #pragma mark cleanup
 
-- (void)dealloc {
-	
-	[tabcontroller release];
-	[window release];
-	[chatwin release]; 
-	[buddylistDS release];
-	
-	[super dealloc];
-}
 
 @end

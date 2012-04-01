@@ -79,7 +79,7 @@
 
 {
 
-NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+
 	
    
         [tabbarcontroller presentModalViewController:self animated:YES];
@@ -95,7 +95,7 @@ NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     }
 
 		
-	[pool release];
+	;
 }
 
 
@@ -135,8 +135,4 @@ NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
 
 
--(void) dealloc
-{
-			[super dealloc]; 
-}
 @end

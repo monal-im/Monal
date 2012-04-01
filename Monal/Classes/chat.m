@@ -62,13 +62,13 @@
 	
     UIImage *rawEntryBackground = [UIImage imageNamed:@"MessageEntryInputField.png"];
     UIImage *entryBackground = [rawEntryBackground stretchableImageWithLeftCapWidth:13 topCapHeight:22];
-    UIImageView *entryImageView = [[[UIImageView alloc] initWithImage:entryBackground] autorelease];
+    UIImageView *entryImageView = [[UIImageView alloc] initWithImage:entryBackground];
     entryImageView.frame = CGRectMake(5, 0, self.view.frame.size.width-72, 40);
     entryImageView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
     
     UIImage *rawBackground = [UIImage imageNamed:@"MessageEntryBackground.png"];
     UIImage *background = [rawBackground stretchableImageWithLeftCapWidth:13 topCapHeight:22];
-    UIImageView *imageView = [[[UIImageView alloc] initWithImage:background] autorelease];
+    UIImageView *imageView = [[UIImageView alloc] initWithImage:background];
     imageView.frame = CGRectMake(0, 0, containerView.frame.size.width, containerView.frame.size.height);
     imageView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
     
@@ -178,7 +178,6 @@
 		jabber=jabberIn;
 //	thelist;
 	myuser=[NSString stringWithString:username];
-	[myuser retain];
 	db=thedb;
 
 
@@ -217,13 +216,10 @@
 	lastDiv=nil; 
 	
 	webroot=[NSString stringWithFormat:@"%@/Themes/MonalStockholm/", [[NSBundle mainBundle] resourcePath]];
-	[webroot retain];
 	
 	topHTML=[NSString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalStockholm/top.html", [[NSBundle mainBundle] resourcePath]]]; 
-	[topHTML retain]; 
 	
 	bottomHTML=[NSString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalStockholm/bottom.html", [[NSBundle mainBundle] resourcePath]]]; 
-	[bottomHTML retain]; 
     
     
     
@@ -312,9 +308,9 @@
              (orientation==UIInterfaceOrientationPortrait)
              )
         {
-            contactsButton= [[[UIBarButtonItem alloc] initWithTitle:@"Show Contacts"
+            contactsButton= [[UIBarButtonItem alloc] initWithTitle:@"Show Contacts"
                                                               style:UIBarButtonItemStyleBordered
-                                                             target:self action:@selector(popContacts)] autorelease];
+                                                             target:self action:@selector(popContacts)];
             navController.navigationBar.topItem.rightBarButtonItem =contactsButton; 
             
         }
@@ -339,18 +335,13 @@
 	[popOverController dismissPopoverAnimated:true]; 
 	
 	
-	[HTMLPage release]; 
-	[inHTML release]; 
-	[outHTML release]; 
 	
 	HTMLPage =nil; 
 	inHTML =nil;
 	outHTML  =nil;
 
 	
-	if(lastFrom!=nil)	[lastFrom release]; 
 	lastFrom =nil; 
-		if(lastDiv!=nil) [lastDiv release];
 	lastDiv=nil;
 	
 
@@ -376,7 +367,7 @@
 	
 	if(groupchat==true) return; // doesnt parse names right at the moment
 	
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	debug_NSLog(@"status signal"); 
 	NSString* state=[db buddyState:buddyName: accountno];
@@ -389,7 +380,7 @@
 	}
 		else
 		{
-			[pool release]; 
+			; 
 			return; 
 		}
 	}
@@ -402,7 +393,7 @@
 		}
 		else
 		{
-			[pool release]; 
+			; 
 			return; 
 		}
 	}
@@ -428,7 +419,6 @@
 	*/
 	
 	
-	if(lastFrom!=nil) [lastFrom release]; 
 	lastFrom=	@"";
 	
 	NSString* jsstring= [NSString stringWithFormat:@"InsertMessage('%@');",statusmessage ]; 
@@ -438,14 +428,14 @@
 	[chatView performSelectorOnMainThread:@selector(stringByEvaluatingJavaScriptFromString:) withObject:jsstring waitUntilDone:NO];
 	
 	
-	[pool release];
+	;
 }
 
 -(void) signalOffline
 {
 	if(groupchat==true) return; // doesnt parse names right at the moment
 	
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	debug_NSLog(@"offline signal"); 
 	NSString* state=@"";
 	int count=[db isBuddyOnline:buddyName: accountno];
@@ -457,7 +447,7 @@
 		}
 		else
 		{
-			[pool release]; 
+			; 
 			return; 
 		}
 	}
@@ -471,7 +461,7 @@
 		}
 		else
 		{
-			[pool release]; 
+			; 
 			return;
 		}
 	}	
@@ -493,13 +483,13 @@
 	[chatView performSelectorOnMainThread:@selector(stringByEvaluatingJavaScriptFromString:) withObject:jsstring waitUntilDone:NO];
 	
 	
-	[pool release];
+	;
 }
 
 
 -(void) signalNewMessages
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	debug_NSLog(@"new message signal"); 
 	
 	while(msgthread==true)
@@ -522,7 +512,7 @@
 		{
 			//multi threaded sanity checkf
 			debug_NSLog(@"MT ni check failed. returning");
-			[pool release]; 
+			; 
 			msgthread=false;
 			return;
 		}
@@ -531,7 +521,7 @@
 		{
 			//multi threaded sanity checkf
 			debug_NSLog(@"MT count check failed. returning");
-			[pool release]; 
+			; 
 			msgthread=false;
 			return;
 		}
@@ -555,7 +545,6 @@
 		
 		if(groupchat==true)
 		{
-			if(inHTML!=nil) [inHTML release];
 			inHTML=[NSMutableString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalStockholm/Incoming/Content.html", [[NSBundle mainBundle] resourcePath]]]; 
 			
 			unichar asciiChar = 10; 
@@ -581,7 +570,6 @@
 									   options:NSCaseInsensitiveSearch
 										 range:NSMakeRange(0, [inHTML length])];
 			
-			[inHTML retain]; 
 	
 			
 			
@@ -614,9 +602,7 @@
 		[chatView performSelectorOnMainThread:@selector(stringByEvaluatingJavaScriptFromString:) withObject:thejsstring waitUntilDone:NO];
 			debug_NSLog(thejsstring); 
 		
-		if(lastFrom!=nil) [lastFrom release]; 
 		lastFrom=	[NSString stringWithString:[therow objectAtIndex:0]];
-			[lastFrom retain];
 			
 			
 			msgcount++; 
@@ -625,7 +611,7 @@
 	
 	
 	
-	[pool release];
+	;
 		
 	msgthread=false;
 	
@@ -633,9 +619,7 @@
 
 -(void) showLogDate:(NSString*) buddy:(NSString*) fullname:(UINavigationController*) vc:(NSString*) date
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	if(buddyName!=nil) [buddyName release]; 
-	if(buddyFullName!=nil) [buddyFullName release]; 
+	
 	
     
     //removeing the input stuff
@@ -650,8 +634,6 @@
 	
 	buddyName=buddy; 
 	buddyFullName=fullname; 
-	[buddyName retain]; 
-	[buddyFullName retain];
 	if([buddyFullName isEqualToString:@""])	
 		self.title=buddyName;
 	else
@@ -689,15 +671,11 @@
 	NSArray* thelist =[db messageHistoryDate :buddyName: accountno:date];
 	//[thelist retain];
 	
-	if(myIcon!=nil) [myIcon release]; 
-	if(buddyIcon!=nil) [buddyIcon release]; 
 	
 	myIcon = [self setIcon: [NSString stringWithFormat:@"%@@%@",myuser,domain]];
 	buddyIcon= [self setIcon: buddy];
 	
 	
-	if(inHTML!=nil) [inHTML release];
-	if(outHTML!=nil) [outHTML release];
 	inHTML=[NSMutableString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalStockholm/Incoming/Content.html", [[NSBundle mainBundle] resourcePath]]]; 
 	outHTML=[NSMutableString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalStockholm/Outgoing/Content.html", [[NSBundle mainBundle] resourcePath]]];  
 	
@@ -707,17 +685,11 @@
 	
 	
 	
-	if(inNextHTML!=nil) [inNextHTML release];
-	if(outNextHTML!=nil) [outNextHTML release];
 	inNextHTML=[NSMutableString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalStockholm/Incoming/NextContent.html", [[NSBundle mainBundle] resourcePath]]]; 
 	outNextHTML=[NSMutableString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalStockholm/Outgoing/NextContent.html", [[NSBundle mainBundle] resourcePath]]];  
 	
-	[inNextHTML retain]; 
-	[outNextHTML retain];
 	
 	
-	[inHTML retain]; 
-	[outHTML retain]; 
 	
 
 
@@ -751,11 +723,9 @@
 	
 	
 	
-	if(HTMLPage!=nil) [HTMLPage release];
 	HTMLPage=[self createPage:thelist];
 	
 	
-	[HTMLPage retain];
 	//[chatView  loadHTMLString: HTMLPage baseURL:[NSURL fileURLWithPath:webroot]];
 	
 	[self performSelectorOnMainThread:@selector(htmlonMainThread:) withObject:HTMLPage waitUntilDone:NO];
@@ -765,14 +735,14 @@
 	
 	
 	//debug_NSLog(@" HTML LOG: %@", HTMLPage); 
-	[pool release];
+	;
 	
 }
 
 
 -(NSString*) setIcon:(NSString*) msguser
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	NSFileManager* fileManager = [NSFileManager defaultManager]; 
 	NSString* theimage; 
@@ -805,8 +775,7 @@
 		
 	}
 	
-	[theimage retain]; 
-	[pool release]; 
+	; 
 	return theimage; 
 }
 
@@ -837,16 +806,14 @@
 -(void) show:(NSString*) buddy:(NSString*) fullname:(UINavigationController*) vc
 {
 	
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 
     pages.hidden=false; 
     containerView.hidden=false;
     [chatView setFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height-40-20)];
 
 	//query to get pages and position
-    if(activeChats!=nil) [activeChats release]; 
 	 activeChats=[db activeBuddies:accountno]; 
-        [activeChats retain];
     pages.numberOfPages=[activeChats count];
     //set pos
     int dotCounter=0; 
@@ -873,8 +840,6 @@
 	firstmsg=true; 
 	// replace parts of the string
 	
-	if(buddyName!=nil) [buddyName release]; 
-	if(buddyFullName!=nil) [buddyFullName release]; 
 	
 	buddyName=buddy; 
     if(dotCounter<pages.numberOfPages)
@@ -886,8 +851,6 @@
         buddyFullName=fullname; 
     
     debug_NSLog(@"id: %@,  full: %@", buddyName, buddyFullName);
-	[buddyName retain]; 
-	[buddyFullName retain];
 if([buddyFullName isEqualToString:@""])	
 	self.title=buddyName;
 	else
@@ -974,8 +937,6 @@ if([buddyFullName isEqualToString:@""])
 	
 	//get icons 
 	// need a faster methos here.. 
-	if(myIcon!=nil) [myIcon release]; 
-	if(buddyIcon!=nil) [buddyIcon release]; 
 	
 	
 	myIcon = [self setIcon: [NSString stringWithFormat:@"%@@%@",myuser,domain]];
@@ -985,8 +946,6 @@ if([buddyFullName isEqualToString:@""])
 	[chatInput resignFirstResponder];
 	
 	
-	if(inHTML!=nil) [inHTML release];
-	if(outHTML!=nil) [outHTML release];
 	inHTML=[NSMutableString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalStockholm/Incoming/Content.html", [[NSBundle mainBundle] resourcePath]]]; 
 	outHTML=[NSMutableString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalStockholm/Outgoing/Content.html", [[NSBundle mainBundle] resourcePath]]];  
 
@@ -996,17 +955,11 @@ if([buddyFullName isEqualToString:@""])
 	*/
 	
 	
-	if(inNextHTML!=nil) [inNextHTML release];
-	if(outNextHTML!=nil) [outNextHTML release];
 	inNextHTML=[NSMutableString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalStockholm/Incoming/NextContent.html", [[NSBundle mainBundle] resourcePath]]]; 
 	outNextHTML=[NSMutableString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalStockholm/Outgoing/NextContent.html", [[NSBundle mainBundle] resourcePath]]];  
 	
-	[inNextHTML retain]; 
-	[outNextHTML retain];
 	
 	
-	[inHTML retain]; 
-	[outHTML retain]; 
 	
 	
 	unichar asciiChar = 10; 
@@ -1067,11 +1020,9 @@ if([buddyFullName isEqualToString:@""])
 								  range:NSMakeRange(0, [outHTML length])];
 	
 	
-	if(HTMLPage!=nil) [HTMLPage release];
 	HTMLPage=[self createPage:thelist];
 	
 	
-	[HTMLPage retain];
 	//[chatView  loadHTMLString: HTMLPage baseURL:[NSURL fileURLWithPath:webroot]];
 	[self performSelectorOnMainThread:@selector(htmlonMainThread:) withObject:HTMLPage waitUntilDone:NO];
 	
@@ -1093,9 +1044,9 @@ if([buddyFullName isEqualToString:@""])
              (orientation==UIInterfaceOrientationPortrait)
              )
         {
-            contactsButton= [[[UIBarButtonItem alloc] initWithTitle:@"Show Contacts"
+            contactsButton= [[UIBarButtonItem alloc] initWithTitle:@"Show Contacts"
                                                          style:UIBarButtonItemStyleBordered
-                                                        target:self action:@selector(popContacts)] autorelease];
+                                                        target:self action:@selector(popContacts)];
             vc.navigationBar.topItem.rightBarButtonItem =contactsButton; 
             
         }
@@ -1110,14 +1061,14 @@ if([buddyFullName isEqualToString:@""])
         
 	}
 	
-	[pool release]; 
+	; 
 	
 }
 
 //always messages going out
 -(void) addMessage:(NSString*) to:(NSString*) message
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	
 
@@ -1176,9 +1127,7 @@ if([buddyFullName isEqualToString:@""])
 	else
 		debug_NSLog(@"failed to add message"); 
 	
-	if(lastFrom!=nil) [lastFrom release]; 
 	lastFrom=	[NSString stringWithString:myuser];
-	[lastFrom retain];
 	
 	// make sure its in active
 	if(firstmsg==true)
@@ -1189,14 +1138,13 @@ if([buddyFullName isEqualToString:@""])
 	
 	
 	msgthread=false;
-	[pool release];
+	;
 	
 }
 
 
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
 {
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 	
 	debug_NSLog(@"clicked button %d", buttonIndex); 
 	//login or initial error
@@ -1230,7 +1178,7 @@ if([buddyFullName isEqualToString:@""])
 	
 	
 	
-	[pool release];
+	;
 }
 
 
@@ -1238,7 +1186,7 @@ if([buddyFullName isEqualToString:@""])
 -(void) handleInput:(NSString *)text
 {
 
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
     
  
 	
@@ -1264,10 +1212,10 @@ if([buddyFullName isEqualToString:@""])
 				
 				debug_NSLog(@"Message failed to send"); 
 				
-				UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Message Send Failed"
+				UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Message Send Failed"
 																 message:@"Could not send the message. You may be disconnected."
 																delegate:self cancelButtonTitle:@"Close"
-													   otherButtonTitles:@"Reconnect", nil] autorelease];
+													   otherButtonTitles:@"Reconnect", nil];
 				[alert show];
 				
 				
@@ -1280,7 +1228,7 @@ if([buddyFullName isEqualToString:@""])
    
 	
 	
-	[pool release];
+	;
 	[NSThread exit]; 
 	
 }
@@ -1688,7 +1636,7 @@ if([buddyFullName isEqualToString:@""])
 
 -(NSString*) makeMessageHTML:(NSString*) from:(NSString*) themessage:(NSString*) time:(BOOL) liveChat
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	NSDateFormatter* dateFormatter = [[NSDateFormatter alloc] init];
 	[dateFormatter setDateFormat:@"HH:mm:ss"];
@@ -1700,7 +1648,7 @@ if([buddyFullName isEqualToString:@""])
 	NSString *dateString;
 	if(time!=nil)
 	{
-		NSDateFormatter* formatter = [[[NSDateFormatter alloc] init] autorelease];
+		NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
 	[formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
         
         
@@ -1715,10 +1663,10 @@ if([buddyFullName isEqualToString:@""])
 	NSInteger destinationGMTOffset = [destinationTimeZone secondsFromGMTForDate:sourceDate];
 	NSTimeInterval interval = destinationGMTOffset - sourceGMTOffset;
 	
-	NSDate* destinationDate = [[[NSDate alloc] initWithTimeInterval:interval sinceDate:sourceDate] autorelease];
+	NSDate* destinationDate = [[NSDate alloc] initWithTimeInterval:interval sinceDate:sourceDate];
 	
         
-        NSDateFormatter* tmpformatter= [[[NSDateFormatter alloc] init] autorelease];
+        NSDateFormatter* tmpformatter= [[NSDateFormatter alloc] init];
         
         [tmpformatter setDateFormat:@"yyyy"];
         int thisyear = [[tmpformatter stringFromDate:[NSDate date]] intValue];
@@ -1764,9 +1712,7 @@ if([buddyFullName isEqualToString:@""])
         */
         {
 			//new block
-			if(lastDiv!=nil) [lastDiv release];
 			lastDiv=[NSString stringWithFormat:@"insert%@",dateString];
-			[lastDiv retain];
 			
 			tmpout=[NSMutableString stringWithString:outHTML]; 
 			if(liveChat==true)
@@ -1798,8 +1744,7 @@ if([buddyFullName isEqualToString:@""])
 		
 		
 		
-		[tmpout retain]; 
-		[pool release];
+		;
 		return tmpout;
 		
 		
@@ -1815,9 +1760,7 @@ if([buddyFullName isEqualToString:@""])
 		//else
 		{
 			//new block
-			if(lastDiv!=nil) [lastDiv release];
 			lastDiv=[NSString stringWithFormat:@"insert%@",dateString];
-			[lastDiv retain];
 			
 			tmpin=[NSMutableString stringWithString:inHTML];
 			
@@ -1846,9 +1789,8 @@ if([buddyFullName isEqualToString:@""])
 								  options:NSCaseInsensitiveSearch
 									range:NSMakeRange(0, [tmpin length])];
 		
-		[tmpin retain];
-		[pool release];
-		return [tmpin autorelease];
+		;
+		return tmpin;
 		
 	}		
 }
@@ -1857,8 +1799,8 @@ if([buddyFullName isEqualToString:@""])
 //this is the first time creation 
 -(NSMutableString*) createPage:(NSArray*)thelist
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	NSMutableString* page=[[[NSMutableString alloc] initWithString:topHTML] autorelease];
+	
+	NSMutableString* page=[[NSMutableString alloc] initWithString:topHTML];
 	// prefix
 	debug_NSLog(@"creating page Called");
 	
@@ -1904,7 +1846,6 @@ if([buddyFullName isEqualToString:@""])
 				nextInsertPoint=0;
 			}
 		
-		if(lastFrom!=nil) [lastFrom release]; 
 		lastFrom=	[NSString stringWithString:from];
 		
 		counter++; 
@@ -1912,15 +1853,13 @@ if([buddyFullName isEqualToString:@""])
 	//dont append when swingin back into chat
 	if(lastFrom!=nil)
 	{
-		[lastFrom release]; 
 		lastFrom=nil; 
 	}
 	[page appendString:bottomHTML]; 
 //	debug_NSLog(@"got page %@", page); 
 	//suffix
-	[page retain];
-	[pool release];
-	return [page autorelease]; 
+	;
+	return page; 
 }
 
 
@@ -1941,7 +1880,7 @@ if([buddyFullName isEqualToString:@""])
 
 
 - (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	if (navigationType == UIWebViewNavigationTypeLinkClicked) {
         NSURL *url = [request URL];
 		
@@ -1950,7 +1889,7 @@ if([buddyFullName isEqualToString:@""])
 		if([ver characterAtIndex:0]=='3')
 		{
 			
-			[pool release];
+			;
             return YES;
 		}
 		else
@@ -1960,7 +1899,7 @@ if([buddyFullName isEqualToString:@""])
 			NSString* machine=[tools machine]; 
 			if([machine isEqual:@"iPhone1,2"] || [machine isEqual:@"iPod2,1"])
 			{
-				[pool release]; 
+				; 
 				return YES; 
 			}
 		}
@@ -1975,12 +1914,12 @@ if([buddyFullName isEqualToString:@""])
 			//load in safari
             [[UIApplication sharedApplication] openURL:url];
             
-			[pool release];
+			;
             return NO;
         }
     }
     
-	[pool release];
+	;
     return YES; 
 }
 
@@ -1990,17 +1929,9 @@ if([buddyFullName isEqualToString:@""])
 {
 	chatView.delegate=nil; 
 	
-    [chatInput release];
-	[containerView release];
 	
-	[webroot release];
-	if(HTMLPage!=nil) [HTMLPage release];
-	if(inHTML!=nil)[inHTML release]; 
-	if(outHTML!=nil)[outHTML release]; 
 	//if(statusHTML!=nil)[statusHTML release]; 
 	
 	//[thelist release];
-	[myuser release];
-	[super dealloc]; 
 }
 @end

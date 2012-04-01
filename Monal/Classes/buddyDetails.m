@@ -75,7 +75,7 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
 	
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	
 	UITableViewCell* thecell; 
@@ -92,7 +92,7 @@
 			thecell=bottomcell; 
 		}
 
-	[pool release];
+	;
 
 	
 //tableView.frame.size.width;
@@ -142,7 +142,7 @@
 
 -(UIImage*) setIcon:(NSString*) msguser
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	NSFileManager* fileManager = [NSFileManager defaultManager]; 
 	UIImage* theimage; 
@@ -171,8 +171,7 @@
 		
 	}
 	
-	[theimage retain]; 
-	[pool release]; 
+	; 
 	return theimage; 
 }
 
@@ -180,13 +179,9 @@
 -(void) show:(NSString*) buddy:(NSString*) status:(NSString*) message:(NSString*) fullname:(NSString*) domain : (UITableView*) table: (CGRect) cellRect
 {
 
-NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+
     
-    if(buddyIcon!=nil)
-        [buddyIcon release]; 
     
-    if(protocolImage!=nil)
-    [protocolImage release]; 
     
     // for ipad lanscape use popout
     
@@ -256,10 +251,8 @@ NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	//we want to put other protcols here later
     
     
-	[buddyIcon retain]; 
-    [protocolImage retain]; 
     
-	[pool release];
+	;
 }
 
 -(void) viewDidLoad
@@ -284,8 +277,4 @@ NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 }
 
 
--(void) dealloc
-{
-			[super dealloc]; 
-}
 @end

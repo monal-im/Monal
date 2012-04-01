@@ -30,7 +30,7 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
 	
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	
 	UITableViewCell* thecell=statuscell;//default 
@@ -103,7 +103,7 @@
         debug_NSLog(@"got cell for section  %d row %d", indexPath.section, indexPath.row);
  
     
-	[pool release];
+	;
 
 	
 //tableView.frame.size.width;
@@ -349,7 +349,7 @@
 {
     
     if(jabber==nil) return; 
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    
 
   
 	debug_NSLog(@"status did  appear");
@@ -420,7 +420,7 @@
 	priority.text=[[NSUserDefaults standardUserDefaults] stringForKey:@"XMPPPriority"];
 
     
-    [pool release];
+    ;
 	
 }
 
@@ -434,8 +434,4 @@
 }
 
 
--(void) dealloc
-{
-			[super dealloc]; 
-}
 @end

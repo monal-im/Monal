@@ -24,8 +24,7 @@
 
  -(void)reconnectClicked
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	if(enabledList!=nil)[enabledList release]; 
+	
 
 	NSArray* enabledAccounts=[db enabledAccountList]; 
 		enabledList=enabledAccounts;
@@ -33,7 +32,7 @@
 	[[NSNotificationCenter defaultCenter] 
 	 postNotificationName: @"Reconnect" object: self];
 	
-	[pool release];
+	;
 }
 
 -(BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation 
@@ -44,12 +43,12 @@
 - (void)viewDidAppear:(BOOL)animated
 {
 	debug_NSLog(@"accuounts appeared"); 
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	SworIMAppDelegate *app=[[UIApplication sharedApplication] delegate];
 	
 	
-	sectionArray =  [[NSArray arrayWithObjects:@"Accounts\n(Only one can be set to login)", @"Add New Account", nil] retain];
+	sectionArray =  [NSArray arrayWithObjects:@"Accounts\n(Only one can be set to login)", @"Add New Account", nil];
 	viewController=app.accountsNavigationController;
 	
 	db=app.db;
@@ -64,14 +63,14 @@ if(first!=true)
 	first=true; 
 }
 	
-	reconnect= [[[UIBarButtonItem alloc] initWithTitle:@"Reconnect"
+	reconnect= [[UIBarButtonItem alloc] initWithTitle:@"Reconnect"
 style:UIBarButtonItemStyleBordered
-									   target:self action:@selector(reconnectClicked)] autorelease];
+									   target:self action:@selector(reconnectClicked)];
 
 	
-	logoff= [[[UIBarButtonItem alloc] initWithTitle:@"Logoff"
+	logoff= [[UIBarButtonItem alloc] initWithTitle:@"Logoff"
 												style:UIBarButtonItemStyleBordered
-											   target:self action:@selector(logoffClicked)] autorelease];
+											   target:self action:@selector(logoffClicked)];
 	
 	
 	
@@ -94,21 +93,21 @@ style:UIBarButtonItemStyleBordered
 	}
 	
 	[theTable reloadData];
-	[pool release]; 
+	; 
 	
 }
 
 
 -(void)viewDidDisappear:(BOOL)animated
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 
 
 	
 	viewController.navigationBar.topItem.leftBarButtonItem=nil; 
 	viewController.navigationBar.topItem.rightBarButtonItem=nil; 
 	
-	[pool release]; 
+	; 
 	return;
 }
 
@@ -116,7 +115,7 @@ style:UIBarButtonItemStyleBordered
 
 - (void)refreshAccounts
 {
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		
 	debug_NSLog(@"refreshing accounts "); 
 	thelist=[db accountList];
 	
@@ -137,22 +136,18 @@ style:UIBarButtonItemStyleBordered
 	{
 			debug_NSLog(@"enabed has changed. from %d to %d sending notification to disconnect and reconnect",
 						[[[enabledList objectAtIndex:0] objectAtIndex: 0] intValue], [[[enabledAccounts objectAtIndex:0] objectAtIndex: 0] intValue] ); 
-		[enabledList release]; 
 	
 	}
 		enabledList=enabledAccounts;
-		[enabledList retain];
 
 		[[NSNotificationCenter defaultCenter] 
 		 postNotificationName: @"Reconnect" object: self];
 	}	
 	} else
 	{
-		[enabledList release]; 
 		enabledList= enabledAccounts;
-		[enabledList retain];
 	}
- [pool release]; 
+ ; 
 		return; 
 }
 
@@ -167,9 +162,9 @@ style:UIBarButtonItemStyleBordered
 {
 
 	
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	static NSString *identifier = @"MyCell";
-	UITableViewCell* thecell = [[[UITableViewCell alloc]initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:identifier] autorelease];
+	UITableViewCell* thecell = [[UITableViewCell alloc]initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:identifier];
 thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 	
 
@@ -260,8 +255,7 @@ thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 	
 
 		
-	[thecell retain];
-	[pool release];
+	;
 	return thecell;
 }
 
@@ -326,14 +320,14 @@ thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 		//identify protocol
 		if([[[thelist objectAtIndex:newIndexPath.row] objectAtIndex:2] intValue]!=3) //proocol 3 is AIM (counts from 1)
 		{
-			XMPPEdit* xmppedit=[[XMPPEdit alloc] retain]; 
+			XMPPEdit* xmppedit=[XMPPEdit alloc]; 
 			xmppedit.db=db;
 		[xmppedit initList:viewController:newIndexPath:[NSString stringWithFormat:@"%@",[[thelist objectAtIndex:newIndexPath.row] objectAtIndex:0]]];
 		[viewController pushViewController:xmppedit animated:YES];	
 		}
 		else
 		{
-			AIMEdit* aimedit=[[AIMEdit alloc] retain]; 
+			AIMEdit* aimedit=[AIMEdit alloc]; 
 			aimedit.db=db;
 			[aimedit initList:viewController:newIndexPath:[NSString stringWithFormat:@"%@",[[thelist objectAtIndex:newIndexPath.row] objectAtIndex:0]]];
 			[viewController pushViewController:aimedit animated:YES];	
@@ -343,14 +337,14 @@ thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 	{
 		if(newIndexPath.row!=2) //  row 2 is AIM
 		{
-		XMPPEdit* xmppedit=[[XMPPEdit alloc] retain]; 
+		XMPPEdit* xmppedit=[XMPPEdit alloc]; 
 		xmppedit.db=db;
 		[xmppedit initList:viewController:newIndexPath:@"-1"];
 		[viewController pushViewController:xmppedit animated:YES];
 		}
 		else
 		{
-		AIMEdit* aimedit=[[AIMEdit alloc] retain]; 
+		AIMEdit* aimedit=[AIMEdit alloc]; 
 		aimedit.db=db;
 		[aimedit initList:viewController:newIndexPath:@"-1"];
 			[viewController pushViewController:aimedit animated:YES];
@@ -370,13 +364,6 @@ thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 
 
 
--(void)dealloc
-{
-	[sectionArray release];
-	[thelist2 release];
-	[thelist release];
-	[super dealloc];
-}
 
 
 @end

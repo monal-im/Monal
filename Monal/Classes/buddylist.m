@@ -57,7 +57,6 @@
 
 -(NSArray*) add:(NSArray*) list:(NSArray*) dblist
 {
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
 	NSMutableArray* indexes= [[NSMutableArray alloc] init];
 	int counter=0; 
 	[self setList:dblist];
@@ -79,9 +78,8 @@
 		counter++; 
 	}
 	
-	[indexes retain]; 
-	[pool release];
-	return [indexes autorelease] ;
+	;
+	return indexes ;
 }
 
 
@@ -90,7 +88,6 @@
 
 -(NSArray*) remove:(NSArray*) list:(NSArray*) dblist
 {
-		NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
 NSMutableArray* indexes= [[NSMutableArray alloc] init];
 	int counter=0; 
 	
@@ -112,16 +109,14 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
 		counter++; 
 	}
 
-	[indexes retain]; 
 	[self setList:dblist]; // set to new list with everything removed
-	[pool release];
-	return [indexes autorelease] ;
+	;
+	return indexes ;
 }
 
 
 -(NSArray*) update:(NSArray*) list;
 {
-		NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
 	NSMutableArray* indexes= [[NSMutableArray alloc] init];
 	int counter=0; 
 	while(counter<[list count])
@@ -153,9 +148,8 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
 		counter++; 
 	}
 	
-	[indexes retain]; 
-	[pool release]; 
-	return [indexes autorelease] ;
+	; 
+	return indexes ;
 }
 
 
@@ -190,7 +184,6 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
 
 -(NSArray*) addOffline:(NSArray*) list:(NSArray*) dblist
 {
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
 	NSMutableArray* indexes= [[NSMutableArray alloc] init];
 	int counter=0; 
 	[self setOfflineList:dblist];
@@ -212,9 +205,8 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
 		counter++; 
 	}
 	
-	[indexes retain]; 
-	[pool release];
-	return [indexes autorelease] ;
+	;
+	return indexes ;
 }
 
 
@@ -223,7 +215,6 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
 
 -(NSArray*) removeOffline:(NSArray*) list:(NSArray*) dblist
 {
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
 	NSMutableArray* indexes= [[NSMutableArray alloc] init];
 	int counter=0; 
 	
@@ -245,10 +236,9 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
 		counter++; 
 	}
 	
-	[indexes retain]; 
 	[self setOfflineList:dblist]; // set to new list with everything removed
-	[pool release];
-	return [indexes autorelease] ;
+	;
+	return indexes ;
 }
 
 
@@ -266,7 +256,7 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
 //clicked blue button
 - (void)tableView:(UITableView *)tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath *)indexPath {
 
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 
   /*  NSString* machine=[tools machine]; 
     UIInterfaceOrientation orientation =[[UIApplication sharedApplication] statusBarOrientation];
@@ -288,7 +278,7 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
 	}*/
  
     
-	buddyDetails* detailwin=[[buddyDetails alloc] autorelease];
+	buddyDetails* detailwin=[buddyDetails alloc];
 	
 	[detailwin init:jabber:viewController:@""];
 	detailwin.iconPath=iconPath; 
@@ -304,7 +294,7 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
                    :[tableView rectForRowAtIndexPath:indexPath] 
 	 ];
 
-	[pool release];
+	;
 }
 
 
@@ -317,12 +307,12 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
 	
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	
 	
 	static NSString *identifier = @"MyCell";
-	CustomCell* thecell = [[[CustomCell alloc]initWithFrame: CGRectMake(45,0,tableView.frame.size.width,[tableView rowHeight]) reuseIdentifier:identifier] autorelease];
+	CustomCell* thecell = [[CustomCell alloc]initWithFrame: CGRectMake(45,0,tableView.frame.size.width,[tableView rowHeight]) reuseIdentifier:identifier];
 	
 
 	
@@ -385,7 +375,7 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
 	
 	
 	//Initialize the label with the rectangle.
-	UILabel* buddyname = [[[UILabel alloc] initWithFrame:cellRectangle] autorelease];
+	UILabel* buddyname = [[UILabel alloc] initWithFrame:cellRectangle];
 	buddyname.font=[UIFont boldSystemFontOfSize:18.0f];
 	if([[[thelist objectAtIndex:[indexPath indexAtPosition:1]] objectAtIndex:5] isEqualToString:@""])
 		buddyname.text=[[thelist objectAtIndex:[indexPath indexAtPosition:1]] objectAtIndex:0];
@@ -433,7 +423,7 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
 	
 	
 	
-	UILabel* buddystatus = [[[UILabel alloc] initWithFrame:cellRectangle] autorelease];
+	UILabel* buddystatus = [[UILabel alloc] initWithFrame:cellRectangle];
 		buddystatus.autoresizingMask   = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleRightMargin;
 	
 	buddystatus.text=[[thelist objectAtIndex:[indexPath indexAtPosition:1]] objectAtIndex:2];
@@ -507,7 +497,7 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
 			
 			
 			//Initialize the label with the rectangle.
-			UILabel* buddyname = [[[UILabel alloc] initWithFrame:cellRectangle] autorelease];
+			UILabel* buddyname = [[UILabel alloc] initWithFrame:cellRectangle];
 			buddyname.font=[UIFont boldSystemFontOfSize:18.0f];
 			if([[[theOfflineList objectAtIndex:[indexPath indexAtPosition:1]] objectAtIndex:5] isEqualToString:@""])
 				buddyname.text=[[theOfflineList objectAtIndex:[indexPath indexAtPosition:1]] objectAtIndex:0];
@@ -539,9 +529,8 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
 
 
 	
-	[thecell retain];
-	[pool release];
-	return [thecell autorelease];
+	;
+	return thecell;
 }
 
 
@@ -657,7 +646,6 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
 		
 		
 		currentPath= indexPath;
-        [currentPath retain];
 		currentTable=tableView;
 		//ask if sure
 		UIActionSheet *popupQuery = [[UIActionSheet alloc] initWithTitle:@"Are you sure you want to remove this contact?"
@@ -673,7 +661,6 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
 		[popupQuery showFromTabBar:tabcontroller.tabBar];
         
         
-		[popupQuery release];
 		
 		
 		
@@ -747,11 +734,13 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
 {
 	debug_NSLog(@"buddy list ddid  appear");
 	
+    
+    //needed to remove for ARC 
+	//id *app=[[UIApplication sharedApplication] delegate];
 	
 	// show +
 	viewController.navigationBar.topItem.leftBarButtonItem=plusButton;
-	viewController.navigationBar.topItem.rightBarButtonItem=[[[UIApplication sharedApplication] delegate]
-															 editButtonItem];
+	//viewController.navigationBar.topItem.rightBarButtonItem=[app editButtonItem];
 
 	
 }
@@ -770,23 +759,15 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
 
 -(void) setList:(NSArray*) list
 {
-	[thelist release];
 	thelist =list;
 }
 
 -(void) setOfflineList:(NSArray*) list
 {
-	[theOfflineList release];
 	theOfflineList =list;
 }
 
 
--(void)dealloc
-{
-	[thelist release];
-	[theOfflineList release];
-	[super dealloc];
-}
 
 
 

@@ -62,10 +62,10 @@
 	BOOL animateHeightChange;
 	
 	//uitextview properties
-	NSObject <HPGrowingTextViewDelegate> *delegate;
+	NSObject <HPGrowingTextViewDelegate> *__unsafe_unretained delegate;
 	NSString *text;
-	UIFont *font;
-	UIColor *textColor;
+	UIFont *__unsafe_unretained font;
+	UIColor *__unsafe_unretained textColor;
 	UITextAlignment textAlignment; 
 	NSRange selectedRange;
 	BOOL editable;
@@ -79,14 +79,14 @@
 @property int maxNumberOfLines;
 @property int minNumberOfLines;
 @property BOOL animateHeightChange;
-@property (retain) UITextView *internalTextView;	
+@property  UITextView *internalTextView;	
 
 
 //uitextview properties
-@property(assign) NSObject<HPGrowingTextViewDelegate> *delegate;
-@property(nonatomic,assign) NSString *text;
-@property(nonatomic,assign) UIFont *font;
-@property(nonatomic,assign) UIColor *textColor;
+@property(unsafe_unretained) NSObject<HPGrowingTextViewDelegate> *delegate;
+@property(nonatomic,unsafe_unretained) NSString *text;
+@property(nonatomic,unsafe_unretained) UIFont *font;
+@property(nonatomic,unsafe_unretained) UIColor *textColor;
 @property(nonatomic) UITextAlignment textAlignment;    // default is UITextAlignmentLeft
 @property(nonatomic) NSRange selectedRange;            // only ranges of length 0 are supported
 @property(nonatomic,getter=isEditable) BOOL editable;

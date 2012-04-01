@@ -23,7 +23,7 @@
 {
 
 
-	sectionArray =  [[NSArray arrayWithObjects:@"Account", @"Advanced Settings", nil] retain];
+	sectionArray =  [NSArray arrayWithObjects:@"Account", @"Advanced Settings", nil];
 	navigationController=nav;
 	NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
 	[nc addObserver:self selector:@selector(keyboardWillShow:) name: UIKeyboardWillShowNotification object:nil];
@@ -33,11 +33,9 @@
 	[self initWithNibName:@"AIMEdit" bundle:nil];
 
 	originIndex=indexPath; 
-	[originIndex retain];
 	if(![accountnum isEqualToString:@"-1"])
 	{
 		accountno=accountnum; 
-		[accountno retain];
 			editing=true; 
 	} else accountno=nil; 
 	
@@ -66,7 +64,6 @@
 
 - (void)viewDidLoad 
 {
-    NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
    /* UITapGestureRecognizer *gestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(hideKeyboard)];
     gestureRecognizer.cancelsTouchesInView=false; //this prevents it from blocking the button
     [theTable addGestureRecognizer:gestureRecognizer];
@@ -105,7 +102,7 @@
 		
 	}
     
-    [pool release];
+    ;
 }
 
 
@@ -178,7 +175,6 @@ else
 
 -(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex 
 {
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 	if(buttonIndex==0)
 	{
 		[db removeAccount:accountno];
@@ -186,7 +182,7 @@ else
 		//[[NSNotificationCenter defaultCenter] postNotificationName: @"UpdateAccounts" object: self];
 	}
 	
-	[pool release];
+	;
 }
 
 - (IBAction) delClicked: (id) sender
@@ -209,7 +205,6 @@ else
     SworIMAppDelegate *app=[[UIApplication sharedApplication] delegate];
     [popupQuery showFromTabBar:app.tabcontroller.tabBar];
 	
-    [popupQuery release];
 	
 	
 }
@@ -223,7 +218,7 @@ else
 {
 
 	
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	debug_NSLog(@"aim edit view section %d, row %d", indexPath.section, indexPath.row); 
 
@@ -254,7 +249,7 @@ else
 				if(editing==true)
 				{
 				static NSString *identifier = @"MyCell";
-				thecell = [[[UITableViewCell alloc]initWithFrame:CGRectZero reuseIdentifier:identifier] autorelease];
+				thecell = [[UITableViewCell alloc]initWithFrame:CGRectZero reuseIdentifier:identifier];
 				//thecell.selection=false; 
 				CGRect cellRectangle = CGRectMake(45,0,225,[tableView rowHeight]-3);  
 				
@@ -277,7 +272,6 @@ else
 				//[theButton release];
 				
 				
-				[thecell retain];
 				}
 				break;
 			}
@@ -288,7 +282,7 @@ else
 
 	
 
-	[pool release];
+	;
 	return thecell;
 }
 
@@ -436,13 +430,6 @@ else
 
 
 
--(void)dealloc
-{
-	[sectionArray release];
-	[originIndex release]; 
-	if(accountno!=nil) [accountno release];
-	[super dealloc];
-}
 
 
 @end

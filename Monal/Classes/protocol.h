@@ -22,14 +22,14 @@
 
 @interface protocol : NSObject  <UIAlertViewDelegate, NSStreamDelegate>{
 	
-	unsigned short port; 
-	NSString* server; 
+	unsigned short __strong port; 
+	NSString* __strong server; 
 	BOOL SSL; 
-	NSString*  account; 
+	NSString*  __strong account; 
 
-	NSString* resource; 
+	NSString* __strong resource; 
 	
-	NSString* domain; 
+	NSString* __strong domain; 
 
    
 	NSString* ownName; 
@@ -73,7 +73,7 @@
 		BOOL loggedin; 
 		bool listenerthread; 
 	
-		NSString* accountNumber;
+		NSString* __strong accountNumber;
 	
 	bool streamError;
 	bool messagesFlag;
@@ -147,6 +147,12 @@
 -(bool) keepAlive;
 
 
+#pragma mark Jinge Call 
+-(bool)rejectCallUser:(NSString*) buddy;
+-(bool) acceptCallUser:(NSString*) buddy;
+-(bool) startCallUser:(NSString*) buddy; 
+-(bool) endCall; 
+
 
 - (NSString *)base64Encoding:(NSString*) string;
 - (NSData*)dataWithBase64EncodedString:(NSString *)string;
@@ -157,13 +163,13 @@
 
 
 @property (nonatomic, readonly)  BOOL loggedin;
-@property (nonatomic, readonly)  NSString* accountNumber;
-@property (nonatomic, readonly)  NSString* account;
-@property (nonatomic, readonly)  NSString* domain;
+@property (strong)  NSString* accountNumber;
+@property (strong)  NSString* account;
+@property (strong)  NSString* domain;
 
 @property (nonatomic )  bool messagesFlag; 
 @property (nonatomic) bool presenceFlag; 
 
-@property (nonatomic, retain) NSString* statusMessage;
-@property (nonatomic, retain) NSString* ownName;
+@property (nonatomic) NSString* statusMessage;
+@property (nonatomic) NSString* ownName;
 @end

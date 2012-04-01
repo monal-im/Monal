@@ -81,7 +81,7 @@
 	BOOL  errorState; 
 	
 	int parserCol;
-	NSMutableData* theset;
+	NSMutableData*  theset;
 
 
 	BOOL fatal; 
@@ -211,11 +211,11 @@ typedef struct
 } srv_rdata;
 
 
-@property (nonatomic, retain)  NSMutableArray* userSearchItems;
-@property (nonatomic, retain)  NSMutableArray* serverList;
-@property (nonatomic, readonly) NSMutableData* theset;
-@property (nonatomic, retain)  NSString* chatServer;
-@property (nonatomic, retain)  NSString*  chatSearchServer;
-@property (nonatomic, retain)  NSString* userSearchServer;
+@property (nonatomic)  NSMutableArray* userSearchItems;
+@property (nonatomic)  NSMutableArray* serverList;
+@property (strong) NSMutableData* theset;
+@property (nonatomic)  NSString* chatServer;
+@property (nonatomic)  NSString*  chatSearchServer;
+@property (nonatomic)  NSString* userSearchServer;
 
 @end

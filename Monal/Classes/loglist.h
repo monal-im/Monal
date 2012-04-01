@@ -18,7 +18,7 @@
 
 @interface loglist : UIViewController <UITableViewDataSource, UITableViewDelegate,UIActionSheetDelegate> {
 
-		NSArray* thelist; 
+		NSMutableArray* thelist; 
 	chat* chatwin;
 	NSIndexPath* currentPath; 
 	IBOutlet UITableView* currentTable; 

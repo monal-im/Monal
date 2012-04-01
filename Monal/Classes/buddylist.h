@@ -77,14 +77,14 @@
 
 -(NSInteger) count;
 
-@property (nonatomic, retain) NSArray* theOfflineList;
-@property (nonatomic, retain) NSArray* thelist;
-@property (nonatomic, retain)  protocol* jabber;
-@property (nonatomic, retain) NSString* iconPath; 
+@property (nonatomic) NSArray* theOfflineList;
+@property (nonatomic) NSArray* thelist;
+@property (nonatomic)  protocol* jabber;
+@property (nonatomic) NSString* iconPath; 
 
-@property (nonatomic, retain) UITabBarController* tabcontroller;
-@property (nonatomic, retain) UIBarButtonItem* plusButton;
-@property (nonatomic, retain)  UINavigationController* viewController; 
+@property (nonatomic) UITabBarController* tabcontroller;
+@property (nonatomic) UIBarButtonItem* plusButton;
+@property (nonatomic)  UINavigationController* viewController; 
 
 
 @end

@@ -35,7 +35,7 @@
 -(void) connect; 
 
 
-@property (nonatomic, retain) NSString* me; 
-@property (nonatomic, retain) NSString* thesid; 
+@property (nonatomic) NSString* me; 
+@property (nonatomic) NSString* thesid; 
 
 @end

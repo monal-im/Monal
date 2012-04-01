@@ -58,13 +58,13 @@
 -(IBAction) callPress;
 
 
-@property (nonatomic, retain) NSString* iconPath; 
+@property (nonatomic) NSString* iconPath; 
 //@property (nonatomic, retain) NSString* domain; 
 
-@property (nonatomic, retain) IBOutlet UIImageView* buddyIconView;
-@property (nonatomic, retain) IBOutlet UIImageView* protocolImage;
-@property (nonatomic, retain) IBOutlet UILabel* buddyName;
-@property (nonatomic, retain) IBOutlet UILabel* fullName;
-@property (nonatomic, retain) IBOutlet UILabel* buddyStatus;
-@property (nonatomic, retain) IBOutlet UITextView* buddyMessage; 
+@property (nonatomic) IBOutlet UIImageView* buddyIconView;
+@property (nonatomic) IBOutlet UIImageView* protocolImage;
+@property (nonatomic) IBOutlet UILabel* buddyName;
+@property (nonatomic) IBOutlet UILabel* fullName;
+@property (nonatomic) IBOutlet UILabel* buddyStatus;
+@property (nonatomic) IBOutlet UITextView* buddyMessage; 
 @end

@@ -37,7 +37,6 @@
     
     popupQuery.tag=1; 
     
-    [popupQuery release];
 }
 
 
@@ -45,7 +44,7 @@
 -(void)viewDidAppear:(BOOL)animated 
 {
 	
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	debug_NSLog(@"active chats did appear");
 	SworIMAppDelegate *app=[[UIApplication sharedApplication] delegate];
 	
@@ -108,7 +107,6 @@
 	}
 	
 	[currentTable reloadData];
-	[thelist retain];
 	
 	// hide + and edit buttons and add the close btutton
 	
@@ -117,9 +115,9 @@
 
     
 	
-	UIBarButtonItem* closeAll= [[[UIBarButtonItem alloc] initWithTitle:@"Close All"
+	UIBarButtonItem* closeAll= [[UIBarButtonItem alloc] initWithTitle:@"Close All"
                                               style:UIBarButtonItemStyleBordered
-                                             target:self action:@selector(closeall)] autorelease];
+                                             target:self action:@selector(closeall)];
 	
 	
 	
@@ -138,15 +136,13 @@
 	
 	
 	debug_NSLog(@"exiting with acctno %@", accountno);
-	[pool release];
+	;
 	
 }
 
 -(void)viewDidDisappear:(BOOL)animated
 {
 	debug_NSLog(@"active chats  did disappear");
-	if(thelist!=nil)
-		[thelist release];
 	thelist=nil; 
 	
 	viewController.navigationItem.leftBarButtonItem=nil; 
@@ -273,11 +269,11 @@ if((actionSheet.tag==1) && (buttonIndex==0))
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
 	
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	
 	static NSString *identifier = @"MyCell";
-	CustomCell* thecell = [[[CustomCell alloc]initWithFrame: CGRectMake(45,0,265,[tableView rowHeight]) reuseIdentifier:identifier] autorelease];
+	CustomCell* thecell = [[CustomCell alloc]initWithFrame: CGRectMake(45,0,265,[tableView rowHeight]) reuseIdentifier:identifier];
 	
 	thecell.accessoryType =  UITableViewCellAccessoryDisclosureIndicator;;
 	
@@ -316,7 +312,7 @@ if((actionSheet.tag==1) && (buttonIndex==0))
 		cellRectangle = CGRectMake(51,0,187,[tableView rowHeight]);
 	
 	//Initialize the label with the rectangle.
-	UILabel* buddyname = [[[UILabel alloc] initWithFrame:cellRectangle] autorelease];
+	UILabel* buddyname = [[UILabel alloc] initWithFrame:cellRectangle];
 	buddyname.font=[UIFont boldSystemFontOfSize:18.0f];
 	
 		buddyname.textColor = [UIColor blackColor];
@@ -345,8 +341,7 @@ if((actionSheet.tag==1) && (buttonIndex==0))
 	if([thecell.text isEqualToString:@"0"]) thecell.text=nil; 
 	
 	
-	[thecell retain];
-	[pool release];
+	;
 	return thecell;
 }
 
@@ -380,7 +375,6 @@ if((actionSheet.tag==1) && (buttonIndex==0))
 		
 		
 		currentPath= indexPath;
-        [currentPath retain];
 		currentTable=tableView;
 		//ask if sure
 		UIActionSheet *popupQuery = [[UIActionSheet alloc] initWithTitle:@"Are you sure you want to close this chat?"
@@ -394,7 +388,6 @@ if((actionSheet.tag==1) && (buttonIndex==0))
 		//[popupQuery showInView:tableView];
         	[popupQuery showFromTabBar:tabcontroller.tabBar];
 		
-		[popupQuery release];
 		
 		
 		sheet=2; 
@@ -425,11 +418,6 @@ if((actionSheet.tag==1) && (buttonIndex==0))
 
 
 
--(void)dealloc
-{
-	[thelist release];
-	[super dealloc];
-}
 
 
 @end

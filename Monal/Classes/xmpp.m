@@ -37,29 +37,24 @@
     if(tempPass==nil) theTempPass=nil; else
     {
     theTempPass=[NSString stringWithString:tempPass];
-    [theTempPass retain];
     }
     
 	accountNumber=accountNo;
+    
+    debug_NSLog(@" accno %@", accountNumber);
 	SSL=SSLsetting;
-	[server retain]; 
 	
-	[accountNumber retain];
-	[domain retain];
-	[resource retain];
-	[account retain]; 
 		
     chatServer=@""; // blank for start
     chatSearchServer=@""; // blank for start
     userSearchServer=@""; // blank for start
     
-    iqsearch=[[[iqSearch alloc] init] retain]; 
-    jingleCall=[[[iqJingle alloc] init] retain]; 
+    iqsearch=[[iqSearch alloc] init]; 
+    jingleCall=[[iqJingle alloc] init]; 
     
     messageUser=@"";
 	
 	responseUser=@""; 
-	[responseUser retain];
 	
    
     
@@ -74,7 +69,7 @@
 	
 //	buddyListKeys=[NSArray arrayWithObjects:@"username", @"status", @"message", @"icon", @"count",@"fullname", nil];
 	
-	userSearchItems=[[[NSMutableArray alloc] init] retain]; 
+	userSearchItems=[[NSMutableArray alloc] init]; 
 	
 	
 	State=nil; 
@@ -126,9 +121,7 @@
     NSString* ownName_temp=[db fullName:[NSString stringWithFormat:@"%@@%@",account, domain] :accountNo]; 
     if(ownName_temp!=nil)
     {
-        [ownName release]; 
         ownName=ownName_temp; 
-        [ownName retain];
     }
     
     
@@ -153,7 +146,6 @@
     
     
     
-    [ownName retain];
     
 	
 	return self;
@@ -162,7 +154,6 @@
 
 -(void) dnsDiscover
 {
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
 	
 	DNSServiceRef sdRef;
 	DNSServiceErrorType res;
@@ -175,7 +166,7 @@
 							  kDNSServiceType_SRV,
 							  kDNSServiceClass_IN,
 							  query_cb,
-							  self
+							  (__bridge void *)(self)
 							  );
 	if(res==kDNSServiceErr_NoError)
 	{
@@ -185,7 +176,7 @@
 		DNSServiceRefDeallocate(sdRef);
 	}
 	DNSthreadreturn=true; 
-	[pool release];
+	;
 	[NSThread exit]; 
 }
 
@@ -240,7 +231,6 @@ char *ConvertDomainNameToCString_withescape(const domainname *const name, char *
 // print arbitrary rdata in a readable manned 
 void print_rdata(int type, int len, const u_char *rdata, void* context)
 {
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
     int i;
     srv_rdata *srv;
     char targetstr[MAX_CSTRING];
@@ -249,18 +239,21 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
     switch (type)
 	{
         case T_TXT:
+        {
             // print all the alphanumeric and punctuation characters
             for (i = 0; i < len; i++)
                 if (rdata[i] >= 32 && rdata[i] <= 127) printf("%c", rdata[i]);
             printf("\n");
-				[pool release]; 
+				; 
             return;
+        }
         case T_SRV:
+        {
             srv = (srv_rdata *)rdata;
             ConvertDomainNameToCString_withescape(&srv->target, targetstr, 0);
             debug_NSLog(@"pri=%d, w=%d, port=%d, target=%s\n", ntohs(srv->priority), ntohs(srv->weight), ntohs(srv->port), targetstr);
 			
-			xmpp* client=(xmpp*) context; 
+			xmpp* client=(__bridge xmpp*) context; 
 			int portval=ntohs(srv->port);
 			NSString* theserver=[NSString stringWithUTF8String:targetstr];
 			NSNumber* num=[NSNumber numberWithInt:ntohs(srv->priority)];
@@ -269,23 +262,30 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 			
 			[client.serverList addObject:row];
 			debug_NSLog(@"DISCOVERY: server  %@", theserver); 
-			[pool release]; 
+			; 
             return;
+        }
         case T_A:
+        {
             assert(len == 4);
             memcpy(&in, rdata, sizeof(in));
             debug_NSLog(@"%s\n", inet_ntoa(in));
-				[pool release]; 
+				; 
             return;
+        }
         case T_PTR:
+        {
             ConvertDomainNameToCString_withescape((domainname *)rdata, targetstr, 0);
             debug_NSLog(@"%s\n", targetstr);
-				[pool release]; 
+				; 
             return;
+        }
         default:
+        {
             debug_NSLog(@"ERROR: I dont know how to print RData of type %d\n", type);
-				[pool release]; 
+				; 
             return;
+        }
 	}
 }
 
@@ -345,7 +345,6 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 }
 
 - (void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict{			
-   		NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 	 debug_NSLog(@"began this element: %@", elementName);
 
 	
@@ -356,11 +355,9 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 	{
 		loginstate++;  
         
-        if(State!=nil) [State release]; 
         State=@"StreamError"; 
-        [State retain];
 	
-		[pool release];
+		;
 		return; 
 		
 	}
@@ -372,7 +369,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
         //legit error 
         [[NSNotificationCenter defaultCenter] 
          postNotificationName: @"LoginFailed" object: self];
-        [pool release]; 
+        ; 
         return; 
         
     }
@@ -381,10 +378,8 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 	//getting login mechanisms
 	if([elementName isEqualToString:@"stream:features"])
 	{
-	    if(State!=nil) [State release]; 
 		State=@"Features";
-		[State retain];
-			[pool release];
+			;
 		return; 
 		
 	}
@@ -393,14 +388,14 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 	{
         debug_NSLog(@"Supports legacy auth"); 
         legacyAuth=true; 
-        [pool release];
+        ;
 		return; 
     }
     
     if(([State isEqualToString:@"Features"]) &&([elementName isEqualToString:@"register"]))
 	{
         debug_NSLog(@"Supports user registration"); 
-        [pool release];
+        ;
 		return; 
     }
     
@@ -414,7 +409,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 		[self talk:xmpprequest];
 	}
 	
-		[pool release];
+		;
 		return; 
 	}
 		
@@ -443,10 +438,10 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 		
 		
 
-		if ( 	CFReadStreamSetProperty((CFReadStreamRef)iStream, 
-										@"kCFStreamPropertySSLSettings", (CFTypeRef)settings) &&
-			CFWriteStreamSetProperty((CFWriteStreamRef)oStream, 
-									 @"kCFStreamPropertySSLSettings", (CFTypeRef)settings)	 )
+		if ( 	CFReadStreamSetProperty((__bridge CFReadStreamRef)iStream, 
+										@"kCFStreamPropertySSLSettings", (__bridge CFTypeRef)settings) &&
+			CFWriteStreamSetProperty((__bridge CFWriteStreamRef)oStream, 
+									 @"kCFStreamPropertySSLSettings", (__bridge CFTypeRef)settings)	 )
 			
 		{
 			debug_NSLog(@"Set TLS properties on streams.");
@@ -473,11 +468,10 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
                          @"<stream:stream  xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams'  version='1.0'>"];
             
 		[self talk:xmpprequest];
-		[xmpprequest retain]; 
 		loginstate=1; // reset everything
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(login:) name: @"XMPPMech" object:self];
 		
-		[pool release];
+		;
 		return; 
 		
 	} 
@@ -490,7 +484,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 	NSString* bindString=[NSString stringWithFormat:@"<iq id='%@' type='set' ><bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'><resource>%@</resource></bind></iq>", sessionkey,resource];
 		[self talk:bindString]; 
 		
-			[pool release];
+			;
 		return;
 		}
 	
@@ -511,11 +505,9 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 			SASLSupported=true; 
 		}
 		
-		[State release]; 
 		State=@"Mechanisms";
-		[State retain];
 		
-		[pool release];
+		;
 		return;
 		
 	
@@ -524,11 +516,9 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 	if(([State isEqualToString:@"Mechanisms"]) && [elementName isEqualToString:@"mechanism"])
 	{
 		debug_NSLog(@"Reading mechanism"); 
-		[State release]; 
 		State=@"Mechanism";
-		[State retain];
 		
-		[pool release];
+		;
 		return;
 		
 		
@@ -558,10 +548,8 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 	
 	if([elementName isEqualToString:@"failure"])
 	{
-		if(State!=nil) [State release]; 
 		State=@"Failure";
-		[State retain];
-		[pool release]; 
+		; 
 		return; 
 		
 	}
@@ -577,17 +565,17 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
         
         if ([elementName isEqualToString:@"not-authorized"])
         {
-            UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"XMPP Failure"
+            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"XMPP Failure"
                                                              message:elementName
                                                             delegate:self cancelButtonTitle:nil
-                                                   otherButtonTitles:@"Close", nil] autorelease];
+                                                   otherButtonTitles:@"Close", nil];
             [alert show];
             
             fatal=true; 
         }
         
         
-        [pool release]; 
+        ; 
         return; 
         
     }
@@ -604,22 +592,19 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 				//this is a challenge after our response .. finsih up digest
 				NSString* xmppcmd= @"<response xmlns='urn:ietf:params:xml:ns:xmpp-sasl'/>";
 				[self talk:xmppcmd]; //this should get us a success
-				[pool release]; 
+				; 
 				return; 
 				
 			}
 		
-		if(State!=nil) [State release]; 
 		State=@"DigestChallenge";
-		[State retain];
 		
 		if(messageBuffer!=nil) 
 		{
-			[messageBuffer release]; 
 			messageBuffer=nil; 
 		}
 		
-		[pool release]; 
+		; 
 		return;
 		
 	}
@@ -635,10 +620,8 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 	   )
 		
 	{
-		if(State!=nil) [State release]; 
 		State=@"error";  // this would be an iq error
-		[State retain];
-		[pool release];
+		;
 		return; 
 	}
     
@@ -653,14 +636,14 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
             NSString* askmsg=[NSString stringWithFormat:@"%@ says, you were not authorized to access this resource. Check your password.", presenceUser]; 
             //ask for authorization 
             
-            UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Error"
+            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"
                                                              message:askmsg
                                                             delegate:self cancelButtonTitle:@"Close"
-                                                   otherButtonTitles:nil, nil] autorelease];
+                                                   otherButtonTitles:nil, nil];
             [alert show];
             
         }
-        [pool release]; 
+        ; 
         return; 
     }
     
@@ -668,9 +651,8 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 	if([elementName isEqualToString:@"error"] ) // this would be a returning error code
 		
 	{
-		if(State!=nil) [State release]; 
 		State=@"errormsg"; 
-		[pool release];
+		;
 		return; 
 	}
 	
@@ -688,19 +670,15 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 		 )
 		
 	{
-		if(State!=nil) [State release]; 
 		State=@"SASLmechanisms";  // this would be an iq error
-		[State retain];
-		[pool release];
+		;
 		return; 
 	}
 	
 	if(([elementName isEqualToString:@"mechanism"]) && ([State isEqualToString:@"SASLmechanisms"]))
 	{
-		if(State!=nil) [State release]; 
 		State=@"SASLmethod"; 
-		[State retain];
-			[pool release];
+			;
 		return; 
 	}
 		
@@ -712,14 +690,12 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 		
 	{
 		loginstate++;
-		if(State!=nil) [State release]; 
 		State=@"SASLSuccess"; 
-		[State retain];
 		
 		//start tracking messages now
 	
 		
-		[pool release];
+		;
 		return; 
 		
 	}
@@ -728,17 +704,14 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 	if(([elementName isEqualToString:@"jid"]) && [State isEqualToString:@"Bind"]
 	   )
 	{
-		if(State!=nil) [State release]; 
 		State=@"Jid"; 
-		[State retain];
 		
 		if(messageBuffer!=nil) 
 		{
-			[messageBuffer release]; 
 			messageBuffer=nil; 
 		}
 		
-		[pool release];
+		;
 		return;
 	}
 
@@ -763,12 +736,10 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
         
 		
 		debug_NSLog(@"startign bind "); 
-		if(State!=nil) [State release]; 
 		State=@"Bind"; 
-		[State retain];
 	
 		
-			[pool release];
+			;
 		return; 
 	}
 	
@@ -783,7 +754,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 		[responseUser release];
 		responseUser=[attributeDict objectForKey:@"to"];
 		[responseUser retain];
-		[pool release];
+		;
 		return;
 	}
 	*/
@@ -794,31 +765,23 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 	//******* begin roster state machine
 	if([elementName isEqualToString:@"iq"])
 	{
-		if(State!=nil) [State release]; 
 		State=@"iq";
-		[State retain];
 		
         // who is the stanza from.. despite the name presence user it is used for other requests too 
         
-        if(presenceUserFull!=nil) [presenceUserFull release]; 
         //if they are requesting stuff.. they are online		
         presenceUserFull=[attributeDict objectForKey:@"from"];
-        [presenceUserFull retain];
         debug_NSLog(@"iq from full user : %@", presenceUserFull); 
         
         
         //iq set request
         if( [[attributeDict objectForKey:@"type"] isEqualToString:@"set"])
 		{
-			if(presenceUser!=nil) [presenceUser release]; 
 			presenceUser=[[(NSString*)[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
-			[presenceUser retain];
             debug_NSLog(@"iq set user: %@", presenceUser); 
 			
-			if(presenceUserid!=nil) [presenceUserid release]; 
 			//if they are requesting stuff.. they are online		
 			presenceUserid=[attributeDict objectForKey:@"id"];
-			[presenceUserid retain];
 			debug_NSLog(@"iq set id: %@", presenceUserid); 
             
           
@@ -826,9 +789,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
           
             
             
-            if(State!=nil) [State release]; 
             State=@"iqSet";
-            [State retain];
         }
         
 	
@@ -838,20 +799,14 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 		{
 			
 			
-			if(presenceUser!=nil) [presenceUser release]; 
 			presenceUser=[[(NSString*)[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
-			[presenceUser retain];
 				debug_NSLog(@"iq get user: %@", presenceUser); 
 			
-			if(presenceUserid!=nil) [presenceUserid release]; 
 			//if they are requesting stuff.. they are online		
 			presenceUserid=[attributeDict objectForKey:@"id"];
-			[presenceUserid retain];
 			debug_NSLog(@"iq get id: %@", presenceUserid); 
             
-            if(State!=nil) [State release]; 
             State=@"iqGet";
-            [State retain];
 			
 		}
 		
@@ -876,7 +831,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
                     [self getBuddies];
                     
                     
-                    [pool release]; 
+                    ; 
                     return; 
                     
                 }
@@ -897,10 +852,8 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 			else
 			{
 				
-			if(vCardUser!=nil) [vCardUser release]; 
 			//request from a user 		
 			vCardUser=[[(NSString*)[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
-			[vCardUser retain];
 			debug_NSLog(@"result from user: %@", vCardUser); 
 			}
 			
@@ -913,7 +866,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 			
 		}
 		
-		[pool release];
+		;
 		return;
 	}
 	
@@ -974,9 +927,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
         
       //  }
       
-        if(State!=nil) [State release]; 
         State=@"jingleAction";
-        [State retain];
         
         return; 
         
@@ -991,9 +942,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 	{
         debug_NSLog(@"got Jingle transport list"); 
         
-        if(State!=nil) [State release]; 
         State=@"jingleTransport";
-        [State retain];
         
         return; 
         
@@ -1039,7 +988,6 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
         debug_NSLog(@"got time request"); 
         //respond with time info
     [self sendTime:presenceUserFull:presenceUserid];
-        [State release]; 
         State=nil; 
         return;
         
@@ -1055,7 +1003,6 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
             debug_NSLog(@"got version request"); 
 			//respond with version info
 			[self sendVersion:presenceUserFull:presenceUserid];
-			[State release]; 
 			State=nil; 
 			return;
 		}
@@ -1067,7 +1014,6 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 			//respond with last activity
 			
 			[self sendLast:presenceUserFull:presenceUserid];
-			[State release]; 
 			State=nil; 
 			return;
 		}
@@ -1080,7 +1026,6 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
             debug_NSLog(@"got disco info request"); 
 			
 			[self sendDiscoInfo:presenceUserFull:presenceUserid];
-            [State release]; 
 			State=nil; 
 			return;
 		}
@@ -1097,29 +1042,23 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 		{
 			
 			debug_NSLog(@"result is roster"); 
-			[State release]; 
 			State=@"roster";
-			[State retain];
 		}
 		
 		if(	[[attributeDict objectForKey:@"xmlns"] isEqualToString:@"http://jabber.org/protocol/disco#info"])//going to disco info
 		{
-			[State release]; 
 			State=@"discoinfo";
 			 debug_NSLog(@"got disco info"); 
 			
 		
-			[State retain];
 		}
         
         if(	[[attributeDict objectForKey:@"xmlns"] isEqualToString:@"http://jabber.org/protocol/disco#items"])//going to disco info
 		{
-			[State release]; 
 			State=@"discoitems";
             debug_NSLog(@"got disco items"); 
 			
 			
-			[State retain];
 		}
         
 		
@@ -1127,9 +1066,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
      
              if(	[[attributeDict objectForKey:@"xmlns"] isEqualToString:@"jabber:iq:search"])
         {
-            if(State!=nil) [State release]; 
             State=@"UserSearch";
-            [State retain];
             
            
         }
@@ -1146,7 +1083,7 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
     debug_NSLog(@"got user search item"); 
     [userSearchItems addObject:[attributeDict objectForKey:@"jid"]];
     
-    [pool release]; 
+    ; 
     return; 
 }
     //standard NS fields
@@ -1154,7 +1091,7 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
     {
         [iqsearch.userFields addObject:@"first"]; 
         
-        [pool release]; 
+        ; 
         return; 
     }
     
@@ -1162,7 +1099,7 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
     {
         [iqsearch.userFields addObject:@"last"]; 
         
-        [pool release]; 
+        ; 
         return; 
     }
     
@@ -1170,7 +1107,7 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
     {
         [iqsearch.userFields addObject:@"nick"]; 
         
-        [pool release]; 
+        ; 
         return; 
     }
     
@@ -1178,7 +1115,7 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
     {
         [iqsearch.userFields addObject:@"email"]; 
         
-        [pool release]; 
+        ; 
         return; 
     }
 
@@ -1200,7 +1137,7 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
                 if([attributeDict objectForKey:@"jid"]!=nil)
 			   [db setFullName:[attributeDict objectForKey:@"jid"]  :accountNumber:[attributeDict objectForKey:@"jid"] ];
 		  
-		  [pool release]; 
+		  ; 
 		  return;
 	  }
     
@@ -1215,7 +1152,7 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
         //query the service fro more info
         [self queryDiscoInfo:[attributeDict objectForKey:@"jid"] : sessionkey ];
         
-        [pool release];
+        ;
         return; 
         
         
@@ -1234,9 +1171,8 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
                 // send message enabling offline messages 
               //  if(chatServer!=nil) [chatServer release]; 
                 chatServer= presenceUserFull;
-                [chatServer retain];
                 
-                [pool release]; 
+                ; 
                 return; 
             }
             
@@ -1249,9 +1185,8 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
             // send message enabling offline messages 
             //  if(chatServer!=nil) [chatServer release]; 
             chatSearchServer= presenceUserFull;
-            [chatSearchServer retain];
             
-            [pool release]; 
+            ; 
             return; 
         }
         
@@ -1264,10 +1199,9 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
             // send message enabling offline messages 
             //  if(chatServer!=nil) [chatServer release]; 
             userSearchServer= presenceUserFull;
-            [userSearchServer retain];
             [self requestSearchInfo]; 
             
-            [pool release]; 
+            ; 
             return; 
         }
             
@@ -1293,7 +1227,7 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
 			 // send message enabling offline messages 
 			 
 		
-			 [pool release]; 
+			 ; 
 			 return; 
 		 }
          
@@ -1305,7 +1239,7 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
 			 // send message enabling offline messages 
 			 
 			 [self talk:@"<iq type='get' id='fetch1'><offline xmlns='http://jabber.org/protocol/offline'><fetch/></offline></iq>"];
-			 [pool release]; 
+			 ; 
 			 return; 
 		 }
 		 
@@ -1316,7 +1250,7 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
 			 // send message enabling offline messages 
 			 
 			// [self talk:@"<iq type='get' id='fetch1'><offline xmlns='http://jabber.org/protocol/offline'><fetch/></offline></iq>"];
-			 [pool release]; 
+			 ; 
 			 return; 
 		 }
 		 
@@ -1336,10 +1270,8 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
 	
 		
 		debug_NSLog(@"vcard"); 
-		 [State release]; 
 		 State=@"vCard";
-		 [State retain];
-			[pool release];
+			;
 		return; 
 		
 	}
@@ -1348,17 +1280,14 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
 	if(([State isEqualToString:@"vCard"]) && ([elementName isEqualToString: @"FN"]))
 	{
 		debug_NSLog(@"vcard FN"); 
-		[State release]; 
 		State=@"vCardFN";
-		[State retain];
 		
 		if(messageBuffer!=nil) 
 		{
-			[messageBuffer release]; 
 			messageBuffer=nil; 
 		}
 		
-		[pool release];
+		;
 		return; 
 		
 	}
@@ -1366,17 +1295,14 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
 	if(([State isEqualToString:@"vCard"]) && ([elementName isEqualToString: @"NICKNAME"]))
 	{
 		debug_NSLog(@"vcard Nickname"); 
-		[State release]; 
 		State=@"vCardNickname";
-		[State retain];
 		
 		if(messageBuffer!=nil) 
 		{
-			[messageBuffer release]; 
 			messageBuffer=nil; 
 		}
 		
-		[pool release];
+		;
 		return; 
 		
 	}
@@ -1388,10 +1314,8 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
 		) && ([elementName isEqualToString: @"PHOTO"]))
 	{
 				debug_NSLog(@"vcard photo"); 
-		[State release]; 
 		State=@"vCardPhoto";
-		[State retain];
-			[pool release];
+			;
 		return; 
 		
 	}
@@ -1400,16 +1324,13 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
 	if(([State isEqualToString:@"vCardPhoto"]) && ([elementName isEqualToString: @"TYPE"]))
 	{
 		
-		[State release]; 
 		State=@"vCardPhotoType";
-		[State retain];
 		
 		if(messageBuffer!=nil) 
 		{
-			[messageBuffer release]; 
 			messageBuffer=nil; 
 		}
-			[pool release];
+			;
 		return; 
 		
 	}
@@ -1419,16 +1340,13 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
 	{
 		
 	//	NSLog(@"binval"); 
-		[State release]; 
 		State=@"vCardPhotoBinval";
-		[State retain];
 		
 		if(messageBuffer!=nil) 
 		{
-			[messageBuffer release]; 
 			messageBuffer=nil; 
 		}
-			[pool release];
+			;
 		return; 
 		
 	}
@@ -1461,9 +1379,7 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
     
 	if([elementName isEqualToString:@"presence"])
 	{
-		if(State!=nil) [State release]; 
 		State=@"presence";
-		[State retain];
 	
 		//reset all vars on the opening of a new presence block
 	
@@ -1502,7 +1418,6 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
 		
 		//remove any  resource markers and get user
 		presenceUser=[[(NSString*)[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
-		[presenceUser retain];
 		debug_NSLog(@"Presence from %@", presenceUser); 
 		
 		
@@ -1519,7 +1434,7 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
             
             
             //we are done, parse next element
-            [pool release]; 
+            ; 
             return; 
 			
 		}
@@ -1571,10 +1486,10 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
 			NSString* askmsg=[NSString stringWithFormat:@"This user would like to add you to his/her list. Allow?"]; 
 			//ask for authorization 
 			
-			UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:presenceUser
+			UIAlertView *alert = [[UIAlertView alloc] initWithTitle:presenceUser
 															message:askmsg
 														   delegate:self cancelButtonTitle:@"Yes"
-												  otherButtonTitles:@"No", nil] autorelease];
+												  otherButtonTitles:@"No", nil];
 			[alert show];
 						
 			presenceType=@"subscribe";
@@ -1614,7 +1529,7 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
 				}
 		}
 		
-	[pool release];
+	;
 		return;
 	}
 	
@@ -1627,20 +1542,16 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
 	   && ([State isEqualToString:@"presence"]))
 		
 	{
-		if(State!=nil)  [State release]; 
 		State=@"Photo";
-		[State retain];
-		[pool release];		
+		;		
 		return;
 	}
 	
 	
 	if(([elementName isEqualToString:@"status"]) && ([State isEqualToString:@"presence"]))
 	{
-		if(State!=nil)  [State release]; 
 		State=@"Status";
-		[State retain];
-		[pool release];
+		;
 		return;
 	}
 	
@@ -1649,10 +1560,8 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
 
 	if(([elementName isEqualToString:@"show"]) && ([State isEqualToString:@"presence"]))
 	{
-		if(State!=nil)  [State release]; 
 		State=@"Show";
- [State retain];
-		[pool release];
+		;
 		return;
 	}
 	
@@ -1660,10 +1569,8 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
 	
 	if(([elementName isEqualToString:@"photo"]) && ([State isEqualToString:@"presence"]))
 	{
-		if(State!=nil) [State release]; 
 		State=@"PresencePhoto";
- [State retain];
-			[pool release];
+			;
 		return;
 	}
 	
@@ -1678,14 +1585,14 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
 	{
 		debug_NSLog(@"ignoring message error"); 
 		
-		UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Message error"
+		UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Message error"
 														 message:@"Message could no be delivered"
 														delegate:self cancelButtonTitle:nil
-											   otherButtonTitles:@"Close", nil] autorelease];
+											   otherButtonTitles:@"Close", nil];
 		[alert show];
 		
 		
-		[pool release];
+		;
 		return;
 	}
 	
@@ -1693,11 +1600,7 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
 	
 	if(([elementName isEqualToString:@"message"])  && ([[attributeDict objectForKey:@"type"] isEqualToString:@"groupchat"]))
 	{
-		if(State!=nil) [State release]; 
 		State=@"Message";
-		[State retain];
-		if(messageUser!=nil) [messageUser release];
-		if(mucUser!=nil) [mucUser  release];
 		NSArray*  parts=[[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/"];
 		
 		if([parts count]>1)
@@ -1717,42 +1620,33 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
         messageUser=[attributeDict objectForKey:@"from"]; 
         mucUser=    [attributeDict objectForKey:@"from"]; 
 		}
-        [messageUser retain];
-        [mucUser retain]; 
         
         
-		[pool release];
+		;
 		return;
 	}
 	else
 	if(([elementName isEqualToString:@"message"]) )//&& ([[attributeDict objectForKey:@"type"] isEqualToString:@"chat"]))
 	{
-		if(State!=nil) [State release]; 
 		State=@"Message";
-		[State retain];
-		if(messageUser!=nil) [messageUser release];
 	  messageUser=[[(NSString*)[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
 		
-		[messageUser retain];
 	
 		
-		[pool release];
+		;
 		return;
 	}
 	
 	//message->body
 	if(([State isEqualToString:@"Message"]) && ([elementName isEqualToString: @"body"]))
 	{
-		if(State!=nil) [State release]; 
 		State=@"MessageBody";
-		[State retain];
 		
 		if(messageBuffer!=nil) 
 		{
-			[messageBuffer release];
 			messageBuffer=nil; 
 		}
-		[pool release];
+		;
 		return; 
 	}
 	
@@ -1764,21 +1658,19 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
 		//   )
 	   )
 	{
-		if(State!=nil) [State release]; 
 		State=@"MucUser";
-		[State retain];
 		
-		[pool release];
+		;
 		
        // [self joinMuc:messageUser:@""]; // since we dont have a pw, leave it blank
         
         NSString* askmsg=[NSString stringWithFormat:@"%@: You have been invited to this group chat. Join? ", messageUser]; 
         //ask for authorization 
         
-        UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Invite"
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Invite"
                                                          message:askmsg
                                                         delegate:self cancelButtonTitle:@"Yes"
-                                               otherButtonTitles:@"No", nil] autorelease];
+                                               otherButtonTitles:@"No", nil];
         [alert show];
         
 		return; 
@@ -1792,40 +1684,36 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
 	
 		
 		
-		[pool release];
+		;
 		return; 
 	}
 	
 	if(([State isEqualToString:@"MucUser"]) && (([elementName isEqualToString: @"user:reason"])) || ([elementName isEqualToString: @"reason"]))
 	{
 		debug_NSLog(@"user reason set"); 
-		if(State!=nil) [State release]; 
 		State=@"MucUserReason";
-		[State retain];
 		
 		if(messageBuffer!=nil) 
 		{
-			[messageBuffer release];
 			messageBuffer=nil; 
 		}
-		[pool release];	
+		;	
 		
 
 		return; 
 	}
 	
 	
-	[pool release];
+	;
 	
 }
 
 
 - (void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName{     
   
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
-	if(lastEndedElement!=nil) [lastEndedElement release]; 
+	if(lastEndedElement!=nil) 
 	lastEndedElement=elementName;
-	[lastEndedElement retain]; 
+	
 	
 debug_NSLog(@"ended this element: %@", elementName);
 
@@ -1834,7 +1722,7 @@ debug_NSLog(@"ended this element: %@", elementName);
 	if([elementName isEqualToString:@"stream:features"])
 	{
 		
-		[State release]; 
+		
 	
        /* if(SASLSupported!=true) 
         {
@@ -1852,7 +1740,7 @@ debug_NSLog(@"ended this element: %@", elementName);
 			[[NSNotificationCenter defaultCenter] removeObserver:self  name: @"XMPPMech" object:self]; // no longer needed
         //}
         
-		[pool release];
+		;
 		return;
 		//[parser abortParsing]; 
 		
@@ -1862,17 +1750,15 @@ debug_NSLog(@"ended this element: %@", elementName);
 	{
 		debug_NSLog(@" got mechanisms"); 
 	
-        [State release]; 
 		State=@"Features";
         
-		[pool release];
+		;
 		return; 
 	}	
 	
 	if( ([elementName isEqualToString:@"mechanism"]) && ([State isEqualToString:@"Mechanism"])) 
 	{
 		
-		[State release]; 
 		State=@"Mechanisms"; 
 		
 		debug_NSLog(@"got login mechanism: %@", messageBuffer); 
@@ -1894,9 +1780,8 @@ debug_NSLog(@"ended this element: %@", elementName);
 			SASLDIGEST_MD5=true; 
 		}
 		
-		[messageBuffer release];
 		messageBuffer =nil;
-	[pool release];
+	;
 		return; 
 		
 	}
@@ -1904,12 +1789,9 @@ debug_NSLog(@"ended this element: %@", elementName);
 
 	if([elementName isEqualToString:@"jid"])  
 	{
-		[responseUser release];
 		responseUser=messageBuffer;
-		[responseUser retain];
 	
 		debug_NSLog(@"read JID to get user:%@", responseUser); 
-		[messageBuffer release];
 		messageBuffer =nil;
 		
         //set jingle call my own  jid var 
@@ -1939,7 +1821,7 @@ debug_NSLog(@"ended this element: %@", elementName);
 		// send command to download the roster
 		[self getBuddies];
 
-		[pool release];
+		;
 		return;
 	}
 
@@ -2030,12 +1912,10 @@ debug_NSLog(@"ended this element: %@", elementName);
 
 		[self talk:xmppcmd];
 		
-		[State release]; 
 		State=@"DigestClientResponse"; 
-		[State retain];
 		
 		
-		[pool release];
+		;
 		return; 
 		
 	}
@@ -2046,7 +1926,6 @@ debug_NSLog(@"ended this element: %@", elementName);
 	   )
 		
 	{
-		if(State!=nil) [State release]; 
 		State=nil; 
 		
 		
@@ -2055,7 +1934,6 @@ debug_NSLog(@"ended this element: %@", elementName);
 		srand([[NSDate date] timeIntervalSince1970]);
 		// make up a random session key (id)
 		sessionkey=[NSString stringWithFormat:@"monal%d",random()%100000]; 
-		[sessionkey retain];
 		
 		NSString* xmpprequest2; 
         if([domain length]>0)
@@ -2069,7 +1947,7 @@ debug_NSLog(@"ended this element: %@", elementName);
 		[self talk:xmpprequest2];		
 		
 		
-		[pool release];
+		;
 		
 		return;
 		
@@ -2102,25 +1980,21 @@ debug_NSLog(@"ended this element: %@", elementName);
             // if it is self then set the ownname value
             if([vCardUser isEqualToString:responseUser])
             {
-                [ownName release];
                 ownName=vCardFullName; 
-                [ownName retain];
             }
             
-		[vCardUser release];
 		vCardUser=nil; 
 		}
 		
 		if(vCardFullName!=nil)
 		{
-		[vCardFullName release];
 		vCardFullName=nil; 	
 		}
 		
         
         
         
-		[pool release]; 
+		; 
 		return;
 	}
 	
@@ -2130,9 +2004,7 @@ debug_NSLog(@"ended this element: %@", elementName);
 		{
 		vCardFullName=[NSString stringWithString:messageBuffer];
 		
-		[vCardFullName retain];
 			
-			[messageBuffer release];
 			messageBuffer =nil;
 	
 		debug_NSLog(@"Got full name %@ for %@,  account %@", vCardFullName, vCardUser, accountNumber); 
@@ -2145,10 +2017,9 @@ debug_NSLog(@"ended this element: %@", elementName);
 		}
 		
 		//we dont wantt o record last ended element because it might trim
-		if(lastEndedElement!=nil) [lastEndedElement release]; 
 		//lastEndedElement=nil;
 	
-		[pool release];
+		;
 		lastEndedElement=nil;
 		return; 
 	}
@@ -2161,7 +2032,6 @@ debug_NSLog(@"ended this element: %@", elementName);
 			
 		
 			
-			[messageBuffer release];
 			messageBuffer =nil;
 			
 			debug_NSLog(@"Got nick name %@ for %@,  account %@", vCardNickName, vCardUser, accountNumber); 
@@ -2172,10 +2042,9 @@ debug_NSLog(@"ended this element: %@", elementName);
 		}
 		
 		//we dont wantt o record last ended element because it might trim
-		if(lastEndedElement!=nil) [lastEndedElement release]; 
 		//lastEndedElement=nil;
 		
-		[pool release];
+		;
 		lastEndedElement=nil;
 		return; 
 	}
@@ -2186,8 +2055,7 @@ debug_NSLog(@"ended this element: %@", elementName);
 	{
 		vCardPhotoType=[NSString stringWithString:messageBuffer];
 		debug_NSLog(@"Photo type: %@",vCardPhotoType) ; 
-		[vCardPhotoType retain];
-	[pool release];
+	;
 		return; 
 	}
 	
@@ -2196,11 +2064,9 @@ debug_NSLog(@"ended this element: %@", elementName);
 	if ( ([State isEqualToString:@"vCardPhotoBinval"])  && ([elementName isEqualToString:@"iq"]))
 	{
 
-		[State release];
 		State=@"";
-		[State retain];
 		
-		[pool release];
+		;
 		
 		return;
 	
@@ -2215,7 +2081,6 @@ debug_NSLog(@"ended this element: %@", elementName);
 	{
 		if(vCardUser!=nil) 
 		{
-			[vCardUser release]; 
 			vCardUser=nil; 
 		}
 	}
@@ -2228,7 +2093,6 @@ debug_NSLog(@"ended this element: %@", elementName);
 		
 		
 		vCardPhotoBinval=[NSString stringWithString:messageBuffer];
-		[messageBuffer release];
 		messageBuffer =nil;
 		
 		NSString* extension=nil; 
@@ -2283,11 +2147,9 @@ debug_NSLog(@"ended this element: %@", elementName);
 			
 		}
 	
-		if(vCardPhotoType!=nil)
-		[vCardPhotoType release];
 		
 		
-		[pool release];
+		;
 		return; 
 	}
 	
@@ -2323,19 +2185,17 @@ debug_NSLog(@"ended this element: %@", elementName);
 		 */
 		
 		
-		UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"XMPP error"
+		UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"XMPP error"
 														message:elementName
 													   delegate:self cancelButtonTitle:nil
-											  otherButtonTitles:@"Close", nil] autorelease];
+											  otherButtonTitles:@"Close", nil];
 		[alert show];
 		
 		
 		
 		errorState=true; 
-		[State release];
 		State=@"";
-		[State retain];
-		[pool release];
+		;
 		return; 
 	}
 	
@@ -2375,12 +2235,9 @@ debug_NSLog(@"ended this element: %@", elementName);
 			
 		}
 		}
-		[messageBuffer release];
 		messageBuffer =nil;
 		
-		[State release];
 		State=@"presence"; 
-		[State retain];
 		
 	}
 	
@@ -2394,13 +2251,10 @@ debug_NSLog(@"ended this element: %@", elementName);
 		 presenceShow=[NSString stringWithString:messageBuffer];
 			debug_NSLog(@"got show:%@",presenceShow); 
 			[db setBuddyState:presenceUser :accountNumber:presenceShow];
-		[messageBuffer release];
 		messageBuffer =nil;
 		}
 		
-		[State release];
 		State=@"presence"; 
-		[State retain];
 	
 	}
 	
@@ -2414,12 +2268,9 @@ debug_NSLog(@"ended this element: %@", elementName);
 		presenceStatus=[NSString stringWithString:messageBuffer];
 			debug_NSLog(@"got status:%@",presenceStatus); 
 			[db setBuddyStatus:presenceUser :accountNumber:presenceStatus];
-		[messageBuffer release];
 		messageBuffer =nil;
 		}	
-		[State release];
 		State=@"presence"; 
-		[State retain];
 	}
 	
 	
@@ -2428,13 +2279,10 @@ debug_NSLog(@"ended this element: %@", elementName);
 		if(messageBuffer!=nil)
 		{
 		presencePhoto=[NSString stringWithString:messageBuffer];
-		[messageBuffer release];
 		messageBuffer =nil;
 		}
 			// grab buffer string
-		[State release];
 		State=@"presence"; 
-		[State retain];
 	}
 	
 	
@@ -2458,16 +2306,12 @@ debug_NSLog(@"ended this element: %@", elementName);
 		   }
 		   
 		  
-		   [State release];
 		   State=@"";
-		   [State retain];
 		   
 		   
-		   [presenceUser release];
 		   presenceUser=@"";
-		   [State retain];
 		   
-		   [pool release];
+		   ;
 		   return;
 		   
 		   
@@ -2486,9 +2330,8 @@ debug_NSLog(@"ended this element: %@", elementName);
 			
 		}
 		
-		[messageBuffer release];
 		messageBuffer =nil;
-			[pool release];
+			;
 		return;
 	}
 	
@@ -2496,11 +2339,9 @@ debug_NSLog(@"ended this element: %@", elementName);
 	   && ([elementName isEqualToString:@"body"]) )
 	{
 				
-		if(State!=nil) [State release]; 
 		State=@"Message";
-		[State retain];
 		
-		[pool release];
+		;
 		return;
 	}
 	
@@ -2512,7 +2353,6 @@ debug_NSLog(@"ended this element: %@", elementName);
 		{
 		//add message from user
 		NSString* messagetext=[NSString stringWithFormat:messageBuffer];
-		[messageBuffer release];
 		messageBuffer =nil;
 		//NSArray* objects	=[NSArray arrayWithObjects:messageUser,messagetext,nil];
 		//NSArray* keys =[NSArray arrayWithObjects:@"from", @"message",nil];
@@ -2534,7 +2374,7 @@ debug_NSLog(@"ended this element: %@", elementName);
 		
 		//debug_NSLog(@"messge ended aborting pasrsing"); 
 		//trimAtLast=true; 
-		[pool release];
+		;
 		//[parser abortParsing]; 
 	}
     
@@ -2550,7 +2390,6 @@ debug_NSLog(@"ended this element: %@", elementName);
 }
 
 - (void)parser:(NSXMLParser *)parser foundCharacters:(NSString *)string{
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 
 	
 	//meshanisms->mechanism (SASLmechanisms->SASLmethod)
@@ -2576,8 +2415,7 @@ debug_NSLog(@"ended this element: %@", elementName);
 	{
 		if(messageBuffer==nil)
 		{
-			messageBuffer=[[[NSMutableString alloc] initWithString:string] autorelease];
-			
+			messageBuffer=[[NSMutableString alloc] initWithString:string] 		;	
 		
 			
 		}
@@ -2591,8 +2429,7 @@ debug_NSLog(@"ended this element: %@", elementName);
 
 
 	
-if(messageBuffer!=nil)	[messageBuffer retain]; 
-	[pool release];
+
 }
 
 - (void)parser:(NSXMLParser *)parser foundIgnorableWhitespace:(NSString *)whitespaceString
@@ -2618,7 +2455,6 @@ if(messageBuffer!=nil)	[messageBuffer retain];
 //says when the next stanza starts (ie you want to chop off there
 -(int) nextStanza:(NSString*) theString
 {
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 	
 	/*
 	 XMPP stanzas recognized
@@ -2664,7 +2500,7 @@ if(messageBuffer!=nil)	[messageBuffer retain];
 	 
 	if(minpos<2)
 	{
-		[pool release];
+		;
 		return minpos;
 	
 	} 
@@ -2676,7 +2512,7 @@ if(messageBuffer!=nil)	[messageBuffer retain];
 	
 	if (startrange.location==NSNotFound) 
 	{
-		[pool release]; 
+		; 
 		return minpos;
 	}
 	int startpos=startrange.location; 
@@ -2699,14 +2535,13 @@ if(messageBuffer!=nil)	[messageBuffer retain];
 			stanzacounter++;
 	}
 	 
-	[pool release];
+	;
 	//minpos++; 
 	return minpos;
 }
 
 -(void) listenerThread
 {
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 	
 	listenThreadCounter++; 
 	srand([[NSDate date] timeIntervalSince1970]);
@@ -2723,7 +2558,7 @@ if(messageBuffer!=nil)	[messageBuffer retain];
 		if(seconds>5) // longer time out because more data is grabbed in one
 		{
 			debug_NSLog(@"%@ listener thread timing out", threadname); 
-			[pool release]; 
+			; 
 			listenThreadCounter--; 
 			[NSThread exit]; 
 		}
@@ -2742,8 +2577,8 @@ if(messageBuffer!=nil)	[messageBuffer retain];
 	{
 			[UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
 		if(theset==nil)
-			theset =[[[NSMutableData alloc]initWithData:response] autorelease];
-		else [theset appendData:response];
+			theset =[[NSMutableData alloc]initWithData:response] ;
+        else [theset appendData:response];
 	}
 	
 
@@ -2761,7 +2596,11 @@ if(messageBuffer!=nil)	[messageBuffer retain];
 	 */
 	
 	
-	NSMutableString* block=[[[NSMutableString alloc] initWithData:theset encoding:NSUTF8StringEncoding] autorelease]; 
+	NSMutableString* block=nil; 
+    
+    if(theset!=nil) block= [[NSMutableString alloc] initWithData:theset encoding:NSUTF8StringEncoding]; 
+    else  block =[[NSMutableString alloc] init];
+    
 //fix %
 	[block replaceOccurrencesOfString:@"%" withString:@"%%"
 							  options:NSCaseInsensitiveSearch
@@ -2821,11 +2660,11 @@ if(messageBuffer!=nil)	[messageBuffer retain];
 
 		UInt8* utf8stanza=[stanza UTF8String]; 
 	
-	NSData* stanzaData=[[[NSData alloc] initWithBytes:utf8stanza length:strlen(utf8stanza)] autorelease] ;
+	NSData* stanzaData=[[NSData alloc] initWithBytes:utf8stanza length:strlen(utf8stanza)] ;
 		
 		
 		//xml parsing 
-	NSXMLParser* parser = [[[NSXMLParser alloc] initWithData:stanzaData] autorelease];
+	NSXMLParser* parser = [[NSXMLParser alloc] initWithData:stanzaData];
 	[parser setShouldProcessNamespaces:NO];
     [parser setShouldReportNamespacePrefixes:NO];
     [parser setShouldResolveExternalEntities:NO];
@@ -2848,14 +2687,12 @@ if(messageBuffer!=nil)	[messageBuffer retain];
 		else if((parserCol>0) && ([block rangeOfString:@"<"].location!=NSNotFound ) )
 		{
 			debug_NSLog(@"recovering from a possible bad stanza");
-			[State release];
 			State=@""; 
 			parserCol=0; 
 		}
 		
 		else if(parserCol>0)
 		{
-			[State release];
 			State=@""; 
 		}
 		
@@ -2866,7 +2703,7 @@ if(messageBuffer!=nil)	[messageBuffer retain];
 	if([block length]>0)
     {
         UInt8* utf8stanza=[block UTF8String]; 
-        theset=[[[NSMutableData alloc] initWithBytes:utf8stanza length:strlen(utf8stanza)] autorelease] ;
+        theset=[[NSMutableData alloc] initWithBytes:utf8stanza length:strlen(utf8stanza)] ;
 	
     }
     else
@@ -2877,8 +2714,7 @@ if(messageBuffer!=nil)	[messageBuffer retain];
 	
 	debug_NSLog(@"about to leave listener"); 
 	
-	if(theset!=nil) [theset retain]; 
-	[pool release];
+	;
 	
 
 	
@@ -2905,13 +2741,12 @@ if(messageBuffer!=nil)	[messageBuffer retain];
 //this is the xmpp listener thread for incoming communication
 -(void) listener
 {
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
 	if(listenThreadCounter<3)
 	{
 	debug_NSLog(@" detaching new listener thread"); 
 		[NSThread detachNewThreadSelector:@selector(listenerThread) toTarget:self withObject:nil];
 	}
-	[pool release];
+	;
 
 }
 
@@ -2926,8 +2761,7 @@ if(messageBuffer!=nil)	[messageBuffer retain];
 {
     if([db isBuddyMuc:buddy:accountNumber]!=true) // no muc vcard
     {
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
-   
+	  
    
 	vCardDone=false; 
 
@@ -2946,7 +2780,7 @@ if(messageBuffer!=nil)	[messageBuffer retain];
 	}*/
 		
        
-    [pool release]; 
+    ; 
          }
 	return ;
 }
@@ -2957,8 +2791,7 @@ if(messageBuffer!=nil)	[messageBuffer retain];
 -(bool) removeBuddy:(NSString*) buddy
 {
 
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
-    bool val=false; 
+	   bool val=false; 
     
  
     //regular contact 
@@ -2973,7 +2806,7 @@ if(messageBuffer!=nil)	[messageBuffer retain];
     
     // remove from database 
     [db removeBuddy:buddy :accountNumber];
-	[pool release]; 
+	; 
 	return val;  
 	 
 }
@@ -2981,13 +2814,12 @@ if(messageBuffer!=nil)	[messageBuffer retain];
 -(bool) addBuddy:(NSString*) buddy
 {
 
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
 	NSString*	xmpprequest1=[NSString stringWithFormat: @"<iq type='set'> <query xmlns='jabber:iq:roster'> <item jid='%@'/> </query> </iq>", buddy];
 	[self talk:xmpprequest1];
 	NSString*	xmpprequest=[NSString stringWithFormat: @"<presence to='%@' type='subscribe'/>", buddy];
 	
 	bool val= [self talk:xmpprequest];
-	[pool release]; 
+	; 
 	return val; 
 	
 	 
@@ -2999,11 +2831,10 @@ if(messageBuffer!=nil)	[messageBuffer retain];
 
 
 
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
 	NSString*	xmpprequest=[NSString stringWithFormat: @"<presence to='%@' type='subscribed'/>", buddy];
 	
 	bool val= [self talk:xmpprequest];
-[pool release]; 
+; 
 	return val; 
 	
 }
@@ -3011,11 +2842,10 @@ if(messageBuffer!=nil)	[messageBuffer retain];
 -(bool)sendDenied:(NSString*) buddy
 {
 
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
 	NSString*	xmpprequest=[NSString stringWithFormat: @"<presence to='%@' type='unsubscribed'/>", buddy];
 	
 	bool val= [self talk:xmpprequest];
-	[pool release]; 
+	; 
 	return val; 
 	
 }
@@ -3023,7 +2853,6 @@ if(messageBuffer!=nil)	[messageBuffer retain];
 
 -(NSInteger) getBuddies
 {
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
 	NSString* xmpprequest;
 	NSRange pos=[server rangeOfString:@"google"]; 
 	if(pos.location!=NSNotFound)
@@ -3033,7 +2862,7 @@ if(messageBuffer!=nil)	[messageBuffer retain];
 
 	
 	bool val= [self talk:xmpprequest];
-	[pool release]; 
+	; 
 	return val; 
 }
 
@@ -3041,7 +2870,7 @@ if(messageBuffer!=nil)	[messageBuffer retain];
 {
 
 	//<x xmlns='jabber:x:event'><offline/></x>
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
+		
 	
 	NSString*	xmpprequest; 
 	
@@ -3053,7 +2882,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 		 , to, content];
 	
 	bool val= [self talk:xmpprequest];
-	[pool release]; 
+	; 
 	return val; 
 	
 }
@@ -3063,12 +2892,11 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 {
 	
 	
-		NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
 	NSString*	xmpprequest=[NSString stringWithFormat: @"<iq  type='result'  to='%@' id='%@' ><query xmlns='jabber:iq:last' seconds='0'/></iq>"
 							 , to,userid];
 	
 	bool val= [self talk:xmpprequest];
-		[pool release]; 
+		; 
 	return val; 
 	
 }
@@ -3078,12 +2906,11 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 {
 	
 	
-		NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
-	NSString*	xmpprequest=[NSString stringWithFormat: @"<iq  type='result'  to='%@' id='%@' ><query xmlns='jabber:iq:version'><name>Monal</name><version>%@</version><os>iOS</os></query></iq>"
+		NSString*	xmpprequest=[NSString stringWithFormat: @"<iq  type='result'  to='%@' id='%@' ><query xmlns='jabber:iq:version'><name>Monal</name><version>%@</version><os>iOS</os></query></iq>"
 							 , to,userid,[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"]];
 	
 	bool val= [self talk:xmpprequest];
-		[pool release]; 
+		; 
 	return val; 
 	
 }
@@ -3095,7 +2922,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	
     //we can eenable this later. 
 	/*
-    NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
+    	
     NSString* timezone =[NSString stringWithFormat:@"%d:%d",[[NSTimeZone localTimeZone] secondsFromGMT]/3600, ([[NSTimeZone localTimeZone] secondsFromGMT]%3600)/60];
     
 
@@ -3111,7 +2938,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 							 , to,userid,timezone, time];
 	
 	bool val= [self talk:xmpprequest];
-    [pool release]; */
+    ; */
     
 	return true;  
 	
@@ -3142,19 +2969,17 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 
 -(bool) requestSearchInfo
 {
-    NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
     bool val=false; 
     NSString*	xmpprequest1=[NSString stringWithFormat: @"<iq type='get' to='%@' id='search1'> <query xmlns='jabber:iq:search'/> </iq>", userSearchServer];
     val=  [self talk:xmpprequest1];
     
-    [pool release]; 
+    ; 
 	return val;  
 }
 
 
 -(bool) userSearch:(NSString*) buddy
 {
-    NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
     bool val=false; 
     
     
@@ -3166,7 +2991,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
     
     val= [self talk:xmpprequest2];
     
-    [pool release]; 
+    ; 
 	return val;  
     
 }
@@ -3176,7 +3001,6 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 
 -(void) joinMuc:(NSString*) to :(NSString*) password
 {
-    NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
     NSString* passwordclause; 
     
     if([password isEqualToString:@""])
@@ -3195,13 +3019,12 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
     [self talk:query2];*/
     
     
-    [pool release]; 
+    ; 
 }
 
 
 -(bool) closeMuc:(NSString*) buddy
 {
-    NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
     bool val=false; 
     // see if it is a muc name and not a buddy 
     if([db isBuddyMuc:buddy :accountNumber])
@@ -3213,7 +3036,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
         NSString*	xmpprequest1=[NSString stringWithFormat: @"<presence  to='%@/%@@%@' type='unavailable'></presence>", buddy, account, domain];
         val= [self talk:xmpprequest1];
     }
-    [pool release]; 
+    ; 
 	return val;  
     
 }
@@ -3222,26 +3045,24 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 
 -(bool) queryDiscoItems:(NSString*) to:(NSString*) userid
 {
-    NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
     NSString* discoQuery1=
     [NSString stringWithFormat:@"<iq id='%@' type='get' to='%@'><query xmlns='http://jabber.org/protocol/disco#items' /></iq>",userid, to];
     
     
     bool val= [self talk:discoQuery1];
-    [pool release]; 
+    ; 
 	return val;
 }
 
 -(bool) queryDiscoInfo:(NSString*) to:(NSString*) userid
 {
-    NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
     NSString* discoQuery=
     [NSString stringWithFormat: @"<iq id='%@' type='get' to='%@'><query xmlns='http://jabber.org/protocol/disco#info'/></iq>",userid, to];		
     
     [self talk:discoQuery];
     
     bool val= [self talk:discoQuery];;
-    [pool release]; 
+    ; 
 	return val;
 
 }
@@ -3253,7 +3074,6 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 {
 	
 	
-		NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
 	NSString*	xmpprequest=[NSString stringWithFormat: @"<iq  type='result'  to='%@' id='%@' ><query xmlns='http://jabber.org/protocol/disco#info'> <feature var='http://jabber.org/protocol/disco#items'/> <feature var='http://jabber.org/protocol/disco#info'/> <identity category='client' type='phone' name='monal'/><feature var='http://jabber.org/protocol/si/profile/file-transfer'/> <feature var='http://jabber.org/protocol/si'/> <feature var='jabber:iq:version'/> <feature var='http://jabber.org/protocol/muc#user'/> <feature var='urn:xmpp:jingle:1'/> <feature var='urn:xmpp:jingle:apps:rtp:1'/> <feature var='urn:xmpp:jingle:apps:rtp:audio'/> </query></iq>"
 							 , to,userid,[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"]];
 	
@@ -3261,7 +3081,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
     
     
 	bool val= [self talk:xmpprequest];
-		[pool release]; 
+		; 
 	return val; 
 	
 }
@@ -3273,12 +3093,9 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 {
 		
 	
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
 	NSString*	xmpprequest; 
 	
-	if(statusMessage!=nil) [statusMessage release]; 
 	statusMessage=[NSString stringWithString:status];
-	[statusMessage retain];
  
 	
 	if(away!=true)
@@ -3289,7 +3106,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	
 
 	bool val= [self talk:xmpprequest];
-	[pool release]; 
+	; 
 	return val; 
 	
 	
@@ -3299,7 +3116,6 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 {
 	 
 	
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
 	NSString*	xmpprequest;
 	bool val=false; 
 	debug_NSLog(@"status %@", statusMessage); 
@@ -3316,7 +3132,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	 val= [self talk:xmpprequest];
 	}
 	else val=true;
-	[pool release]; 
+	; 
 	return val; 
 	
 }
@@ -3334,7 +3150,6 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
      camera-v1: indicates the user is capable of sending video media.
      */
 	
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
 	NSString*	xmpprequest; 
 	
 	if((statusMessage==nil)
@@ -3347,7 +3162,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	
 	away=false; 
 	bool val= [self talk:xmpprequest];
-	[pool release]; 
+	; 
 	return val; 
 	
 }
@@ -3358,12 +3173,11 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	
 	
 	
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
 	// note XMPP doesnt have invisible .. need to add later
 	NSString*	xmpprequest=[NSString stringWithFormat: @"<presence type=\"unavailable\"> <priority>-5</priority> </presence>"];
 
 	bool val= [self talk:xmpprequest];
-	[pool release]; 
+	; 
 	return val; 
 	
 }
@@ -3372,7 +3186,6 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 
 -(bool) talk: (NSString*) xmpprequest;
 {
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
 	
 
 	
@@ -3387,7 +3200,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	if([oStream write:rawstring maxLength:len]!=-1)
 	{
 		//debug_NSLog(@"sending: ok"); 
-		[pool release];
+		;
 		[UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
 		
 		return true; 
@@ -3396,7 +3209,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 		{
 				debug_NSLog(@"sending: failed"); 
 			[UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
-			[pool release];
+			;
 		
 		return false; 
 		}
@@ -3406,7 +3219,6 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 
 -(bool) keepAlive
 {
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
 	//NSString* query =[NSString stringWithFormat:@"<iq id='%@' type='get'><ping xmlns='urn:xmpp:ping'/></iq>", sessionkey];
 	
 	NSString* query =[NSString stringWithFormat:@" "]; // white space ping because it is less resource intensive and more support
@@ -3421,7 +3233,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	}
 	
 	
-	[pool release]; 
+	; 
 	
 	
 	return val;
@@ -3438,8 +3250,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 
 -(NSMutableData*) readData
 {
-		NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
-	NSMutableData* data= [[NSMutableData alloc] autorelease];
+	NSMutableData* data= [NSMutableData alloc];
 	uint8_t* buf=malloc(51200);
 	 int len = 0;
 	
@@ -3447,7 +3258,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	if(![iStream hasBytesAvailable]) 
 	{
 		free(buf);
-		[pool release]; 
+		; 
 		return nil; 
 	}
 	
@@ -3461,14 +3272,13 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 
 		free(buf); 
 		//debug_NSLog(@"read %d bytes", len); 
-		[data retain]; 
-		[pool release]; 
-		return [data autorelease];
+		; 
+		return data;
 	} 
 	else 
 	{
 		free(buf); 
-		[pool release];
+		;
 		return nil; 	
 	}
 }
@@ -3623,13 +3433,10 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	
 	if(loggedin==true)
 	{
-	if(messageUser!=nil) [messageUser release];
-	if(lastEndedElement!=nil) [lastEndedElement release];
         
         messageUser=nil; 
         lastEndedElement=nil;
 	}
-	if(theset!=nil) [theset release];
 	
 	parserCol=0;
 		loggedin=false; 
@@ -3652,7 +3459,6 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 
 -(bool) connect
 {
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 	streamError=false;
 	streamOpen=0; 
 	if((SSL==true) && ((port==5223) || (port==443) )) debug_NSLog(@"Using Old style SSL");
@@ -3664,7 +3470,6 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	if([serverList count]>0)
 	{
 		 debug_NSLog(@"Using discovered server, port for domain");
-		[server release]; 
 		int counter=0; 
 		int min=0; 
 		while(counter<[serverList count])
@@ -3689,23 +3494,27 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
         // iStream and oStream are instance variables
       //  [NSStream getStreamsToHost:host port:port inputStream:&iStream
 	//				  outputStream:&oStream];
+    
+    CFReadStreamRef readRef= NULL; 
+    CFWriteStreamRef writeRef= NULL; 
 	
-	CFStreamCreatePairWithSocketToHost(NULL, (CFStringRef)server, port, &iStream, &oStream);
+	CFStreamCreatePairWithSocketToHost(NULL, (__bridge CFStringRef)server, port, &readRef, &writeRef);
 	 debug_NSLog(@"stream  created to  server: %@ port: %d", server, port);
     
-	[iStream retain];
-	[oStream retain];
+    iStream= (__bridge NSInputStream*)readRef; 
+    oStream= (__bridge NSOutputStream*) writeRef; 
+    
 	if((iStream==nil) || (oStream==nil))
 	{
 		debug_NSLog(@"Connection failed");
-		UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Connection Error"
+		UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Connection Error"
 														message:@"Could not connect to the server."
 													   delegate:self cancelButtonTitle:nil
-											  otherButtonTitles:@"Close", nil] autorelease];
+											  otherButtonTitles:@"Close", nil];
 		[alert show];
 		
 		
-		[pool release];
+		;
 		return false;
 	}
 		else
@@ -3754,10 +3563,10 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
                                   kCFStreamSocketSecurityLevelSSLv3,
 								  @"kCFStreamSSLLevel",
 								  nil ];
-		CFReadStreamSetProperty((CFReadStreamRef)iStream, 
-								@"kCFStreamPropertySSLSettings", (CFTypeRef)settings);
-		CFWriteStreamSetProperty((CFWriteStreamRef)oStream, 
-								 @"kCFStreamPropertySSLSettings", (CFTypeRef)settings);
+		CFReadStreamSetProperty((__bridge CFReadStreamRef)iStream, 
+								@"kCFStreamPropertySSLSettings", (__bridge CFTypeRef)settings);
+		CFWriteStreamSetProperty((__bridge CFWriteStreamRef)oStream, 
+								 @"kCFStreamPropertySSLSettings", (__bridge CFTypeRef)settings);
 		
 	
 	
@@ -3777,7 +3586,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	if([oStream streamStatus]== NSStreamStatusError)
 	 {
 	 debug_NSLog(@"stream connect error"); 
-	 [pool release]; 
+	 ; 
 	 return false;
 	 }
 
@@ -3803,7 +3612,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 			[UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
             */
             
-			[pool release]; 
+			; 
 		return false; 
 		}
 		
@@ -3818,7 +3627,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	if(streamError==true)
 	{
 		debug_NSLog(@"stream talking error"); 
-		[pool release]; 
+		; 
 		return false;
 	}
 	
@@ -3838,7 +3647,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	
 
 	
-	[pool release];
+	;
 	return true;
 }
 
@@ -3846,7 +3655,6 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 //this is done as a new thread to prevent the writing from blocking the whole app on connect
 -(void)initilize
 {
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 	//send XML start
 //	NSString* xmpprequest1=[NSString stringWithFormat:@"<?xml version='1.0'?>"];
 //	[self talk:xmpprequest1];
@@ -3866,7 +3674,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	
 	
 	
-	[pool release];
+	;
 	[NSThread exit];
 }
 
@@ -3874,7 +3682,6 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 -(bool) login:(id)sender
 {
 	
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 		
 
 		debug_NSLog(@"beginning login procedures"); 
@@ -3896,7 +3703,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 		[[NSNotificationCenter defaultCenter] 
 		 postNotificationName: @"LoginFailed" object: self];
 		
-		[pool release];
+		;
 		return false; 
 	}*/
 	
@@ -3912,12 +3719,11 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 								 delegate:nil cancelButtonTitle:@"Close"
 								 otherButtonTitles: nil];
 		[addError show];
-		[addError release];
 		
 		[[NSNotificationCenter defaultCenter] 
 		 postNotificationName: @"LoginFailed" object: self];
 		
-		[pool release];
+		;
 		return false; 
 	}
  
@@ -3935,7 +3741,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 		[[NSNotificationCenter defaultCenter] 
 		 postNotificationName: @"LoginFailed" object: self];
 		
-		[pool release];
+		;
 		return false; 
 		
 		
@@ -3945,11 +3751,11 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
  
 	bool val; 
 
-	
+	debug_NSLog(@"accno %@", accountNumber); 
 	//use saslplain if it is available instead ofdigest md5
 
 	PasswordManager* pass= [PasswordManager alloc] ; 
-	debug_NSLog(@"accno %@", accountNumber); 
+	
 	[pass init:accountNumber];
 	NSString* password=[pass getPassword] ;
     
@@ -4043,7 +3849,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 }
 
 	
-	[pool release]; 
+	; 
 	return val; 
 }
 	
@@ -4059,7 +3865,6 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
 {
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 	
 	debug_NSLog(@"clicked button %d", buttonIndex); 
 	//login or initial error
@@ -4072,7 +3877,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	  
 	   )
 	{
-		[pool release];
+		;
 		return; 
 	}
 	
@@ -4085,7 +3890,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
        
         }
         
-        [pool release]; 
+        ; 
         return; 
     }
 	
@@ -4102,33 +3907,10 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	
 	
 	
-	[pool release];
+	;
 }
 
 
--(void) dealloc
-{
-	 [ownName release];
-	[serverList release];
-	[iStream release];
-	[oStream release];
-	
-	[iqsearch release]; 
-    [jingleCall release];
-    
-	[server release]; 	
-	[accountNumber release];
-	
-	[account release]; 
-	
-	[State release]; 
-	
-	if(responseUser!=nil) [responseUser release];
-	
-	
-	
-	[super dealloc]; 
-}
 	
 
 @end

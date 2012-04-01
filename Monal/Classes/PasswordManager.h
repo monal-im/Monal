@@ -12,15 +12,15 @@
 
 
 @interface PasswordManager : NSObject {
-    NSMutableDictionary        *keychainData;
-   NSMutableDictionary        *genericPasswordQuery;
+  __strong   NSMutableDictionary        *keychainData;
+  __strong  NSMutableDictionary        *genericPasswordQuery;
 	
 
 	
 }
 
-@property (nonatomic, retain) NSMutableDictionary *keychainData;
-@property (nonatomic, retain) NSMutableDictionary *genericPasswordQuery;
+@property (nonatomic) NSMutableDictionary *keychainData;
+@property (nonatomic) NSMutableDictionary *genericPasswordQuery;
 
 - (void)mySetObject:(id)inObject forKey:(id)key;
 - (id)myObjectForKey:(id)key; 

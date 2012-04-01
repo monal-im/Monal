@@ -34,7 +34,7 @@ return  @"<iq type='get'  > <query xmlns='google:jingleinfo'/> </iq>";
 
 -(NSString*) ack:(NSString*) to:(NSString*) iqid
 {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    
     
     NSMutableString* query=[[NSMutableString alloc] init];
     [query appendFormat:@"<iq to='%@' from='%@' id='%@' type='result'/>", to, me, iqid]; 
@@ -42,10 +42,9 @@ return  @"<iq type='get'  > <query xmlns='google:jingleinfo'/> </iq>";
     
 
     
-    [query retain]; 
     
     
-    [pool release]; 
+    ; 
     return query;
 }
 
@@ -58,7 +57,7 @@ return  @"<iq type='get'  > <query xmlns='google:jingleinfo'/> </iq>";
 
 -(NSString*) acceptJingle:(NSString*) to:(NSString*) address: (NSString*) port: (NSString*) username: (NSString*) pass:  (NSString*)idval
 {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    
     
    
     
@@ -74,27 +73,21 @@ return  @"<iq type='get'  > <query xmlns='google:jingleinfo'/> </iq>";
     theport=[NSString stringWithString:port]; 
     theusername=[NSString stringWithString:username]; 
     thepass=[NSString stringWithString:pass]; 
-    [theaddress retain]; 
-    [theport retain]; 
-    [theusername retain]; 
-    [thepass retain]; 
     
     
     otherParty=[NSString stringWithString:to]; 
-    [otherParty retain]; 
   
     
-    [query retain]; 
     
     
     
-    [pool release]; 
+    ; 
     return query;
 }
 
 -(NSString*) initiateJingle:(NSString*) to  
 {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    
  
     NSString* sid=@"sfghj569"; //something random 
  NSMutableString* query=[[NSMutableString alloc] init];
@@ -103,43 +96,31 @@ return  @"<iq type='get'  > <query xmlns='google:jingleinfo'/> </iq>";
 
     otherParty=[NSString stringWithString:to]; 
     //thesid =[NSString stringWithString:sid]; 
-    [otherParty retain]; 
     //[thesid retain];
     
-    [query retain]; 
     
     
-    [pool release]; 
+    ; 
     return query;
 }
 
 -(NSString*) terminateJingle
 {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    
     
     NSMutableString* query=[[NSMutableString alloc] init];
     [query appendFormat:@"<iq      to='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-terminate' sid='%@'> <reason> <success/> </reason> </jingle> </iq>", otherParty, thesid]; 
     
     
-    [query retain]; 
-    if(otherParty!=nil) [otherParty release]; 
-    if(thesid!=nil) [thesid release]; 
     
     
-    [pool release]; 
+    ; 
     return query;
 }
 
 
 
 
--(void) dealloc
-{
-   
-    if(otherParty!=nil) [otherParty release]; 
-    if(thesid!=nil) [thesid release];   
-    [super dealloc];
-}
 
 
 @end

@@ -18,6 +18,6 @@
 -(id) init; 
 -(NSString*) constructUserSearch:(NSString*) to :(NSString*) request;
 
-@property (nonatomic, retain) NSMutableArray* userFields; 
+@property (nonatomic) NSMutableArray* userFields; 
 
 @end

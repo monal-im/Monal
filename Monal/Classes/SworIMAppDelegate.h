@@ -139,20 +139,20 @@ IBOutlet	UIActivityIndicatorView* activitySun;
 
 -(IBAction) CancelLogin;
 
-@property (nonatomic, retain) DataLayer* db;
-@property (nonatomic, retain)  chat* chatwin;
-@property (nonatomic, retain)  protocol* jabber;
-@property (nonatomic, retain) NSString* accountno; 
-@property (nonatomic, retain)  UINavigationController* morenav; 
-@property (nonatomic, retain)  UINavigationController* activeNavigationController; 
-@property (nonatomic, retain)  UINavigationController* accountsNavigationController; 
+@property (nonatomic) DataLayer* db;
+@property (nonatomic)  chat* chatwin;
+@property (nonatomic)  protocol* jabber;
+@property (nonatomic) NSString* accountno; 
+@property (nonatomic)  UINavigationController* morenav; 
+@property (nonatomic)  UINavigationController* activeNavigationController; 
+@property (nonatomic)  UINavigationController* accountsNavigationController; 
 
-@property (nonatomic, retain)  UINavigationController* logsNavigationControlleriPad; 
-@property (nonatomic, retain)  UINavigationController* aboutNavigationControlleriPad; 
+@property (nonatomic)  UINavigationController* logsNavigationControlleriPad; 
+@property (nonatomic)  UINavigationController* aboutNavigationControlleriPad; 
 
-@property (nonatomic, retain)  NSString* iconPath; 
-@property (nonatomic,retain) UITabBarItem* activeTab; 
-@property (nonatomic,retain)IBOutlet UITabBarController* tabcontroller; 
+@property (nonatomic)  NSString* iconPath; 
+@property (nonatomic) UITabBarItem* activeTab; 
+@property (nonatomic)IBOutlet UITabBarController* tabcontroller; 
 
 
 

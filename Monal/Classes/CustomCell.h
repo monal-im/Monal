@@ -17,9 +17,9 @@ NSString* text;
 }
 - (void)drawRect:(CGRect)rect; 
 
-@property (nonatomic, retain) NSString* text;
-@property (nonatomic, retain) UILabel* buddyname;
-@property (nonatomic, retain) UILabel* buddystatus;
+@property (nonatomic) NSString* text;
+@property (nonatomic) UILabel* buddyname;
+@property (nonatomic) UILabel* buddystatus;
 
 
 @end

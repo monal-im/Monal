@@ -16,13 +16,13 @@
 -(id) init
 {
     self = [super init];
-    userFields=[[[NSMutableArray alloc] init] retain]; 
+    userFields=[[NSMutableArray alloc] init]; 
     return self; 
 }
 
 -(NSString*) constructUserSearch:(NSString*) to :(NSString*) request
 {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    
     int counter=0; 
     NSMutableString* query=[[NSMutableString alloc] init];
     [query appendFormat:@"<iq type='set' to='%@' id='search2' > <query xmlns='jabber:iq:search'>", to]; 
@@ -36,17 +36,10 @@
     }
     
     [query appendFormat:@"</query></iq>"]; 
-    [query retain]; 
     
-    [pool release]; 
+    ; 
     return query;
 }
 
 
--(void) dealloc
-{
-    [userFields release];
-      [super dealloc];
-    
-}
 @end

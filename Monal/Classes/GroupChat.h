@@ -27,7 +27,7 @@ IBOutlet UIScrollView* scroll;
 
 -(IBAction) join;
 
-@property (nonatomic, retain) protocol* jabber; 
-@property (nonatomic, retain) UINavigationController* nav; 
+@property (nonatomic) protocol* jabber; 
+@property (nonatomic) UINavigationController* nav; 
 
 @end

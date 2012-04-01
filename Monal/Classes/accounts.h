@@ -57,7 +57,7 @@
 
 
  
-@property (nonatomic, retain) IBOutlet UITableView* theTable;
+@property (nonatomic) IBOutlet UITableView* theTable;
 
 @end
 

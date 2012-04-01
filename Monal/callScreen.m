@@ -26,7 +26,7 @@
 -(void) show:(xmpp*) conn:(NSString*) name
 {
     
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    
 	
     
     [navigationController presentModalViewController:self animated:YES];
@@ -40,7 +40,7 @@
     
     buddyName.text=name; 
     
-	[pool release];
+	;
      
 }
 

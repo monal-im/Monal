@@ -44,7 +44,7 @@
 
 -(void)viewDidAppear:(BOOL)animated 
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
     if([self.title isEqualToString:@"Help"])
     {
@@ -57,13 +57,13 @@
         }
 	}
     
-    [pool release];
+    ;
 }
 
 #pragma mark textfield delegate
 - (BOOL)textFieldShouldEndEditing:(UITextField *)textField
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	NSString* thetext=[textField text]; 
 	if([thetext length]>=4) 
 	{
@@ -78,7 +78,7 @@
 	[web loadRequest:request]; 
 		
 	}
-	[pool release];
+	;
 	return true; 
 }
 
@@ -125,9 +125,6 @@
 
 
 
-- (void)dealloc {
-    [super dealloc];
-}
 
 
 @end

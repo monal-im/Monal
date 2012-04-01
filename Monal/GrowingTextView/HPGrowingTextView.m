@@ -315,10 +315,6 @@
 	return [internalTextView resignFirstResponder];
 }
 
-- (void)dealloc {
-	[internalTextView release];
-    [super dealloc];
-}
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

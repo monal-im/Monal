@@ -62,7 +62,7 @@
 
 -(void) viewDidAppear:(BOOL)animated
 {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    
 
 	debug_NSLog(@"groupchat did  appear");
     	[scroll setContentSize:CGSizeMake(320, 509)];
@@ -77,7 +77,7 @@
     
      [scroll addGestureRecognizer:gestureRecognizer];*/
     
-	[pool release];
+	;
 }
 
 -(void)viewDidDisappear:(BOOL)animated
@@ -90,10 +90,6 @@
 }
 
 
--(void) dealloc
-{
-			[super dealloc]; 
-}
 
 
 @end

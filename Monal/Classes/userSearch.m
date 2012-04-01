@@ -35,7 +35,7 @@
 
 -(void)viewDidAppear:(BOOL)animated 
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	debug_NSLog(@"user search did appear");
 	
   /*  UITapGestureRecognizer *gestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(hideKeyboard)];
@@ -52,14 +52,14 @@
 	
 	
 	if(accountno==nil) {
-		[pool release];
+		;
 		return; 
 	}
     
 //register to hear notification
    	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showUsers:) name: @"UserSearchResult" object:nil];	 
     
-	[pool release];
+	;
     return;     
 
 }
@@ -82,7 +82,6 @@
 
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
 {
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 	
 	debug_NSLog(@"clicked button %d", buttonIndex); 
     if(buttonIndex==0)
@@ -91,13 +90,13 @@
         [jabber addBuddy:contact];
     }
     
-    [pool release];
+    ;
 }
 
 //clicked blue button
 - (void)tableView:(UITableView *)tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath *)indexPath {
     
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
     
 	//add buddy
     debug_NSLog(@"Clicked add contact");
@@ -112,7 +111,7 @@
     
     contact=[thelist objectAtIndex:indexPath.row];
     
-	[pool release];
+	;
 }
 
 
@@ -150,10 +149,10 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
 	
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	static NSString *identifier = @"MyCell";
-	UITableViewCell* thecell =[[[UITableViewCell alloc] initWithStyle:  UITableViewCellStyleSubtitle  reuseIdentifier:identifier] autorelease];
+	UITableViewCell* thecell =[[UITableViewCell alloc] initWithStyle:  UITableViewCellStyleSubtitle  reuseIdentifier:identifier];
 	
 	thecell.accessoryView=[self makeDetailDisclosureButton];
 
@@ -166,8 +165,7 @@
 	}
 	
 		
-	[thecell retain];
-	[pool release];
+	;
 	return thecell;
 }
 
@@ -186,7 +184,7 @@
 //required
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)newIndexPath
 {
-    	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    	
 	debug_NSLog(@"selected log row %d max %d", [newIndexPath indexAtPosition:1], [thelist count]); 
 		
 // action here
@@ -212,7 +210,7 @@
 
 		[tableView deselectRowAtIndexPath:newIndexPath animated:true];
 
-	[pool release];
+	;
 }
 
 
@@ -251,11 +249,6 @@
 }
 
 
--(void)dealloc
-{
-	[thelist release];
-	[super dealloc];
-}
 
 
 @end

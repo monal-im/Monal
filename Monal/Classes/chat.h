@@ -81,10 +81,10 @@
  
 }
 
-@property (nonatomic, retain)  NSString* buddyName; 
+@property (nonatomic)  NSString* buddyName; 
 
 
-@property (nonatomic, retain)  NSString* accountno; 
+@property (nonatomic)  NSString* accountno; 
 
 -(void) init: (protocol*) jabberIn:(UINavigationController*) nav:(NSString*)username: (DataLayer*) thedb; 
 -(void) show:(NSString*) buddy:(NSString*) fullname:(UINavigationController*) vc;
@@ -120,9 +120,9 @@
 -(NSString*) makeMessageHTML:(NSString*) from:(NSString*) themessage:(NSString*) time:(BOOL) liveChat;
 -(NSString*) emoticonsHTML:(NSString*) message; 
 
-@property (nonatomic, retain) NSString* iconPath; 
-@property (nonatomic, retain) NSString* domain; 
-@property (nonatomic, retain)	UITabBarController* tabController; 
-@property (nonatomic, retain)  UITableView* contactList;
+@property (nonatomic) NSString* iconPath; 
+@property (nonatomic) NSString* domain; 
+@property (nonatomic)	UITabBarController* tabController; 
+@property (nonatomic)  UITableView* contactList;
 
 @end

@@ -16,17 +16,17 @@
 @synthesize theset; 
 
 //port, server, domain and resource are ignored here 
--(void )init:(NSString*) theserver:(unsigned short) theport:(NSString*) theaccount: (NSString*) theresource: (NSString*) thedomain:(BOOL) SSLsetting : (DataLayer*) thedb:(NSString*) accountNo:(NSString*) tempPass; 
+-(id )init:(NSString*) theserver:(unsigned short) theport:(NSString*) theaccount: (NSString*) theresource: (NSString*) thedomain:(BOOL) SSLsetting : (DataLayer*) thedb:(NSString*) accountNo:(NSString*) tempPass; 
 {
 	accountNumber=accountNo;
-	[accountNumber retain];
+	
 	server=theserver; 
 	port=theport; 
-	[server retain];
+	
     statusMessage=nil; 
     ownName=[NSString stringWithString:account]; 
     theTempPass= [NSString stringWithString:tempPass];
-    [theTempPass retain];
+
     
     
 	return [self init2:theaccount:thedb];
@@ -55,17 +55,11 @@ self = [super init];
 	account=theaccount; 
 
 
-	[authHost retain]; 
-	
-	
-	 
-	
-	[domain retain];
-	[account retain]; 
+
 	
 	
 	responseUser=@""; 
-	[responseUser retain];
+
 	
 	loginstate=0; 
 	
@@ -76,14 +70,8 @@ self = [super init];
 	
 
 	//buddyListKeys=[NSArray arrayWithObjects:@"username", @"status", @"message", @"icon", @"count",@"fullname", nil];
-	//[buddyListKeys retain];
 	
 	
-	/*[buddyListAdded retain]; 
-	[buddyListRemoved retain];
-	[roster retain];
-	[buddiesOnline retain];
-	*/
 	
 	
 	State=nil; 
@@ -122,7 +110,7 @@ self = [super init];
 
 -(void) parseData:(short) length
 {
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+	
 	int offset=sizeof(struct sflap_hdr); 
 	
 	NSString* msg =[[NSString alloc] initWithData:[theset subdataWithRange:NSMakeRange(offset, ntohs(length))] encoding:NSASCIIStringEncoding];
@@ -160,7 +148,7 @@ self = [super init];
 	{
 			debug_NSLog(@"config data ok sending init done"); 
 			NSString*	xmpprequest=	[NSString stringWithFormat:@"toc_init_done"];
-		 [xmpprequest retain]; 
+		 
 		 [self sflapTalk:SFLAP_DATA :xmpprequest];
 		
 	}
@@ -270,14 +258,14 @@ self = [super init];
 	//	debug_NSLog(@"%d messages messge body: %@ from %@",[messagesIn count], [row objectForKey:@"message"], [row objectForKey:@"from"] );
 	}
 	
-		[pool release]; 
+		; 
 	return; 
 	
 }
 
 -(void) listenerThread
 {
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	listenThreadCounter++; 
 	srand([[NSDate date] timeIntervalSince1970]);
@@ -294,7 +282,7 @@ self = [super init];
 		if(seconds>5)
 		{
 			debug_NSLog(@"%@ listener thread timing out", threadname); 
-			[pool release]; 
+			; 
 			listenThreadCounter--; 
 			[NSThread exit]; 
 		}
@@ -337,11 +325,11 @@ self = [super init];
 		
 		debug_NSLog(@"got FLAP SIGNON .. sequence: %d releaseing theset", hdr->seqno); 
 			// clearing data
-			[theset release]; 
+			
 			theset=nil;
 			[self login];
 		
-			[theset release]; 
+			 
 			theset=nil;
 			break;
 			
@@ -359,7 +347,7 @@ self = [super init];
 				if(fatal==true)
 				{
 					debug_NSLog(@"Got fatal error. ending");
-					[theset release]; 
+					
 					theset=nil;
 					break; 
 				}
@@ -372,7 +360,7 @@ self = [super init];
 			short length=ntohs(hdr->length);
 			debug_NSLog(@"trimming"); 
 			NSData* subset=[theset subdataWithRange:NSMakeRange(offset+length, [theset length]-offset-length)];
-			[theset release]; 
+		
 			theset=[[NSMutableData alloc] initWithData:subset] ;
 			
 			
@@ -380,7 +368,7 @@ self = [super init];
 			if([theset length]==0)
 			{
 				debug_NSLog(@"the set released"); 
-				[theset release]; 
+				 
 				theset=nil;
 				
 				break;
@@ -421,13 +409,13 @@ self = [super init];
 //this is the xmpp listener thread for incoming communication
 -(void) listener
 {
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
+		
 	if(listenThreadCounter<3)
 	{
 	debug_NSLog(@" detaching new listener thread"); 
 		[NSThread detachNewThreadSelector:@selector(listenerThread) toTarget:self withObject:nil];
 	}
-	[pool release];
+	;
 
 }
 
@@ -441,20 +429,20 @@ self = [super init];
 
 -(void) getVcard:(NSString*) buddy
 {
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
+		
 	
-	[pool release];
+	;
 	return ;
 }
 
 -(bool) removeBuddy:(NSString*) buddy
 {
 
-	//	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
+	//		
 	NSString*	xmpprequest=[NSString stringWithFormat: @"toc2_remove_buddy %@", buddy];
 	
 	bool val= [self sflapTalk:SFLAP_DATA: xmpprequest];
-	//	[pool release]; 
+	//	; 
 	return val; 
 	 
 }
@@ -462,11 +450,11 @@ self = [super init];
 -(bool) addBuddy:(NSString*) buddy
 {
 
-//	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
+//		
 	NSString*	xmpprequest1=[NSString stringWithFormat: @"toc2_new_buddies g:Buddies\nb:%@:%@\n", buddy,buddy];
 	bool val=[self sflapTalk:SFLAP_DATA: xmpprequest1];
 
-//	[pool release]; 
+//	; 
 	return val; 
 	
 	 
@@ -478,11 +466,11 @@ self = [super init];
 
 
 
-//	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
+//		
 	NSString*	xmpprequest=[NSString stringWithFormat: @"<presence to='%@' type='subscribed'/>", buddy];
 	
 	bool val= [self talk:xmpprequest];
-//	[pool release]; 
+//	; 
 	return val; 
 	
 }
@@ -490,11 +478,11 @@ self = [super init];
 -(bool)sendDenied:(NSString*) buddy
 {
 
-//	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
+//		
 	NSString*	xmpprequest=[NSString stringWithFormat: @"<presence to='%@' type='unsubscribed'/>", buddy];
 	
 	bool val= [self talk:xmpprequest];
-//	[pool release]; 
+//	; 
 	return val; 
 	
 }
@@ -511,12 +499,12 @@ self = [super init];
 	// note remember to make name lowercase 
 	//remember to escape content
 	
-//	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
+//		
 	NSString*	xmpprequest=[NSString stringWithFormat: @"toc_send_im %@ \"%@\""
 							 , to, content];
 	
 	bool val= [self sflapTalk:SFLAP_DATA: xmpprequest];
-//	[pool release]; 
+//	; 
 	return val; 
 	
 }
@@ -532,17 +520,17 @@ self = [super init];
 {
 		
 	
-//	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
+//		
 	NSString*	xmpprequest=[NSString stringWithFormat: @"toc_set_away %@",status];
 
 	bool val= [self sflapTalk:SFLAP_DATA: xmpprequest];
 
-   	if(statusMessage!=nil) [statusMessage release]; 
+   
 	statusMessage=[NSString stringWithString:status];
-	[statusMessage retain];
+
     
     
-//	[pool release]; 
+//	; 
 	return val; 
 	
 	
@@ -552,12 +540,12 @@ self = [super init];
 {
 	 
 	
-//	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
+//		
 	NSString*	xmpprequest=[NSString stringWithFormat: @"toc_set_away %@"];
 	
 	bool val= [self sflapTalk:SFLAP_DATA: xmpprequest];
 
-//	[pool release]; 
+//	; 
 	return val; 
 	
 }
@@ -566,12 +554,12 @@ self = [super init];
 {
 	
 	
-//	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
+//		
 	NSString*	xmpprequest=[NSString stringWithFormat: @"toc_set_away"];
 
 	bool val= [self sflapTalk:SFLAP_DATA: xmpprequest];
 
-//	[pool release]; 
+//	; 
 	return val; 
 	
 }
@@ -583,12 +571,12 @@ self = [super init];
 	
 	//there is no invisible in TOC
     
-//	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
+//		
 	// note XMPP doesnt have invisible .. need to add later
 /*	NSString*	xmpprequest=[NSString stringWithFormat: @"<presence type=\"unavailable\"> <priority>5</priority> </presence>"];
 
 	bool val= [self talk:xmpprequest];
-	//[pool release]; 
+	//; 
  */
 	return true; 
 	
@@ -661,7 +649,7 @@ debug_NSLog(@"frame type %u", hdr.type);
 
 -(bool) talk: (NSData*) thecommand;
 {
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
+		
 	if(oStream==nil) return false; 
 	debug_NSLog(@"ostream ok..");
 	if(thecommand==nil) return false; 
@@ -674,13 +662,13 @@ debug_NSLog(@"frame type %u", hdr.type);
 	if(wrote!=-1)
 	{
 		debug_NSLog(@"sending: %d bytes ok", wrote); 
-		[pool release];
+		;
 		return true; 
 	}
 		else
 		{
 				debug_NSLog(@"sending: failed"); 
-			[pool release];
+			;
 		return false; 
 		}
 	
@@ -689,19 +677,19 @@ debug_NSLog(@"frame type %u", hdr.type);
 
 -(bool) keepAlive
 {
-	//NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
+	//	
 	NSString* query =[NSString stringWithFormat:@""];
 	
 	bool val= [self sflapTalk:SFLAP_KEEP_ALIVE: query];
-	//[pool release]; 
+	//; 
 	return val; 
 }
 
 
 -(NSMutableData*) readData
 {
-		NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];	
-	NSMutableData* data= [[NSMutableData alloc] autorelease];
+			
+	NSMutableData* data= [NSMutableData alloc] ;
 	uint8_t* buf=malloc(5120);
 	 int len = 0;
 	
@@ -715,14 +703,14 @@ debug_NSLog(@"frame type %u", hdr.type);
 
 		free(buf); 
 		debug_NSLog(@"read %d bytes", len); 
-		[data retain]; 
-		[pool release]; 
-		return [data autorelease];
+		
+		; 
+		return data ;
 	} 
 	else 
 	{
 		free(buf); 
-		[pool release];
+		;
 		return nil; 	
 	}
 }
@@ -841,12 +829,8 @@ debug_NSLog(@"frame type %u", hdr.type);
 	
 	debug_NSLog(@"Connections closed"); 
 	
-	if(loggedin==true)
-	{
-	if(messageUser!=nil) [messageUser release];
-	if(lastEndedElement!=nil) [lastEndedElement release];
-	}
-	if(theset!=nil) [theset release];
+	
+
 	
 	parserCol=0;
 		loggedin=false; 
@@ -858,7 +842,7 @@ debug_NSLog(@"frame type %u", hdr.type);
 
 -(bool) connect
 {
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+	
 
 	
 	
@@ -870,22 +854,27 @@ debug_NSLog(@"frame type %u", hdr.type);
        // [NSStream getStreamsToHost:host port:port inputStream:&iStream
 		//			  outputStream:&oStream];
 	
-	CFStreamCreatePairWithSocketToHost(NULL, (CFStringRef)server, port, &iStream, &oStream);
+    CFReadStreamRef readRef= NULL; 
+    CFWriteStreamRef writeRef= NULL; 
 	
+	CFStreamCreatePairWithSocketToHost(NULL, (__bridge CFStringRef)server, port, &readRef, &writeRef);
+    debug_NSLog(@"stream  created to  server: %@ port: %d", server, port);
     
-	[iStream retain];
-	[oStream retain];
+    iStream= (__bridge NSInputStream*)readRef; 
+    oStream= (__bridge NSOutputStream*) writeRef; 
+    
+
 	if((iStream==nil) || (oStream==nil))
 	{
 		debug_NSLog(@"Connection failed");
-		UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Connection Error"
+		UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Connection Error"
 														message:@"Could not connect to the AIM server."
 													   delegate:self cancelButtonTitle:nil
-											  otherButtonTitles:@"Close", nil] autorelease];
+											  otherButtonTitles:@"Close", nil] ;
 		[alert show];
 		
 		
-		[pool release];
+		;
 		return false;
 	}
 		else
@@ -928,7 +917,7 @@ debug_NSLog(@"frame type %u", hdr.type);
 	
 
 	
-	[pool release];
+	;
 	return true;
 }
 
@@ -936,7 +925,7 @@ debug_NSLog(@"frame type %u", hdr.type);
 //this is done as a new thread to prevent the writing from blocking the whole app on connect
 -(void)initilize
 {
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	debug_NSLog(@"beginning login procedures"); 
 	NSString*	xmpprequest1=@"FLAPON\r\n\r\n\0";
@@ -948,7 +937,7 @@ debug_NSLog(@"frame type %u", hdr.type);
 
 
 	
-	[pool release];
+	;
 	[NSThread exit];
 }
 
@@ -956,7 +945,7 @@ debug_NSLog(@"frame type %u", hdr.type);
 -(bool) login
 {
 	
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+	
 		
 	debug_NSLog(@"Sending Login command"); 
 	
@@ -973,7 +962,7 @@ debug_NSLog(@"frame type %u", hdr.type);
 	
 	
 	NSData* cmddata= [NSData dataWithBytes:serialized length:packsize];
-	[cmddata retain];
+	
 	[self sflapTalk:SFLAP_SIGNON:cmddata];
 	
 	PasswordManager* passMan= [PasswordManager alloc] ; 
@@ -995,13 +984,13 @@ debug_NSLog(@"frame type %u", hdr.type);
 	NSString*	xmpprequest=	[NSString stringWithFormat:@"toc2_signon %@ %u %@ %@ english-US \"TIC:TOC2:MONAL\" 160 %@",
 	authHost, authPort,account, [self roast:passval],[self coded:account:passval] ];
 	
-		[xmpprequest retain]; 
+		 
 	bool val= [self sflapTalk:SFLAP_DATA:xmpprequest];
 
 	
 
 	
-	[pool release]; 
+	; 
 	return val; 
 }
 	
@@ -1012,10 +1001,10 @@ debug_NSLog(@"frame type %u", hdr.type);
 
 -(NSString*) roast:(NSString*) pass
 {
-		NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+		
 	NSString* roaststring = @"Tic/Toc";
 
-	NSMutableString* toreturn=[[[NSMutableString alloc] init] autorelease];
+	NSMutableString* toreturn=[[NSMutableString alloc] init] ;
 	[toreturn appendString:@"0x"];
 	int i=0; 
 	while(i<[pass length])
@@ -1029,14 +1018,13 @@ debug_NSLog(@"frame type %u", hdr.type);
 		
 		i++;
 	}
-	[toreturn retain];
-	[pool release]; 
+	 
 	return toreturn; 
 }
 
 -(NSString*) coded:(NSString*)user:(NSString*) thepass
 {
-		NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+		
 	int userFirst= (int)  [user characterAtIndex:0]-96;
 	int passFirst= (int) [thepass characterAtIndex:0]-96;
 	
@@ -1048,8 +1036,7 @@ int b = userFirst * 746512;
 	
 	
 	NSString* val=[NSString stringWithFormat:@"%u", value];
-	[val retain]; 
-	[pool release];
+	
 	return val; 
 }
 
@@ -1061,7 +1048,7 @@ int b = userFirst * 746512;
 
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
 {
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	debug_NSLog(@"clicked button %d", buttonIndex); 
 	//login or initial error
@@ -1078,30 +1065,11 @@ int b = userFirst * 746512;
 	
 	
 	
-	[pool release];
+	;
 }
 
 
--(void) dealloc
-{
-	
-	[ownName release];
-	[iStream release];
-	[oStream release];
-	
-	
-	[server release]; 	
 
-	[account release]; 
-	
-	[State release]; 
-	
-	if(responseUser!=nil) [responseUser release];
-	
-	
-	
-	[super dealloc]; 
-}
 	
 
 @end

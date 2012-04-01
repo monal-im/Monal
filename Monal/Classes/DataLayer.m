@@ -153,7 +153,7 @@
 
 
 -(NSArray*) executeReader:(NSString*) query
-{	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+{	
 
 	/*sqlite3_stmt *statement1;
 	if (sqlite3_prepare_v2(database, [@"begin"  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement1, NULL) == SQLITE_OK) {
@@ -168,7 +168,7 @@
 		while (sqlite3_step(statement) == SQLITE_ROW) {
 	//while there are rows		
 				//debug_NSLog(@" has rows"); 
-			NSMutableArray* row= [[[NSMutableArray alloc] init] autorelease]; 
+			NSMutableArray* row= [[NSMutableArray alloc] init]; 
 			int counter=0; 
 			 while(counter< sqlite3_column_count(statement) )
 			 {
@@ -234,9 +234,9 @@
 		 if (sqlite3_prepare_v2(database, [@"end"  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement2, NULL) == SQLITE_OK) {
 		 sqlite3_step(statement2);
 		 }*/
-		[pool release];
+		;
 		
-		return [toReturn autorelease]; 
+		return toReturn; 
 	}  
 	debug_NSLog(@"reader nil with sql not ok: %@", query ); 
 	/*sqlite3_stmt *statement2;
@@ -244,7 +244,7 @@
 	 sqlite3_step(statement2);
 	 }*/
 	
-	[pool release];
+	;
 		return nil; 
 }
 
@@ -255,7 +255,7 @@
 -(NSArray*) protocolList
 {
 	//returns a buddy's message history
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	
 
@@ -268,15 +268,14 @@
 	{
 		
 		debug_NSLog(@" count: %d",  [toReturn count] ); 
-		[toReturn retain];
-		[pool release];
+		;
 		
 		return toReturn; //[toReturn autorelease];
 	}
 	else 
 	{
 		debug_NSLog(@"protocol list  is empty or failed to read"); 
-		[pool release];
+		;
 		return nil; 
 	}
 }
@@ -284,7 +283,7 @@
 -(NSArray*) accountList
 {
 	//returns a buddy's message history
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	
 	NSString* query=[NSString stringWithFormat:@"select * from account order by account_id asc "];
@@ -294,15 +293,14 @@
 	{
 		
 		debug_NSLog(@" count: %d",  [toReturn count] ); 
-		[toReturn retain];
-		[pool release];
+		;
 		
 		return toReturn; //[toReturn autorelease];
 	}
 	else 
 	{
 		debug_NSLog(@"account list  is empty or failed to read"); 
-		[pool release];
+		;
 		return nil; 
 	}
 	
@@ -311,7 +309,7 @@
 -(NSArray*) enabledAccountList
 {
 	//returns a buddy's message history
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	
 	NSString* query=[NSString stringWithFormat:@"select * from account where enabled=1 order by account_id asc "];
@@ -321,15 +319,14 @@
 	{
 		
 		debug_NSLog(@" count: %d",  [toReturn count] ); 
-		[toReturn retain];
-		[pool release];
+		;
 		
 		return toReturn; //[toReturn autorelease];
 	}
 	else 
 	{
 		debug_NSLog(@"account list  is empty or failed to read"); 
-		[pool release];
+		;
 		return nil; 
 	}
 	
@@ -338,7 +335,7 @@
 -(NSArray*) accountVals:(NSString*) accountNo
 {
 	//returns a buddy's message history
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	
 	NSString* query=[NSString stringWithFormat:@"select * from account where  account_id=%@ ", accountNo];
@@ -348,15 +345,14 @@
 	{
 		
 		debug_NSLog(@" count: %d",  [toReturn count] ); 
-		[toReturn retain];
-		[pool release];
+		;
 		
 		return toReturn; //[toReturn autorelease];
 	}
 	else 
 	{
 		debug_NSLog(@"account list  is empty or failed to read"); 
-		[pool release];
+		;
 		return nil; 
 	}
 	
@@ -367,7 +363,7 @@
 {
 
 	
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	if(enabled==true) [self removeEnabledAccount];//reset all 
 	
 	NSString* query=
@@ -376,12 +372,12 @@
 
 	if([self executeNonQuery:query]!=false) 
 	{
-		[pool release];
+		;
 		return true; 
 	}
 	else 
 	{
-		[pool release];
+		;
 		return false; 
 	}
 }
@@ -391,7 +387,7 @@
 {
 	
 	
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	if(enabled==true) [self removeEnabledAccount];//reset all 
 	
 	NSString* query=
@@ -402,12 +398,12 @@
 	
 	if([self executeNonQuery:query]!=false) 
 	{
-		[pool release];
+		;
 		return true; 
 	}
 	else 
 	{
-		[pool release];
+		;
 		return false; 
 	}
 }
@@ -415,7 +411,7 @@
 -(BOOL) removeAccount:(NSString*) accountNo
 {
 	
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	// remove all other traces of the account_id
 	NSString* query1=[NSString stringWithFormat:@"delete from buddylist  where account_id=%@ ;", accountNo];
 	[self executeNonQuery:query1];
@@ -430,12 +426,12 @@
 	NSString* query=[NSString stringWithFormat:@"delete from account  where account_id=%@ ;", accountNo];
 	if([self executeNonQuery:query]!=false) 
 	{
-		[pool release];
+		;
 		return true; 
 	}
 	else 
 	{
-		[pool release];
+		;
 		return false; 
 	}
 }
@@ -443,17 +439,17 @@
 
 -(BOOL) removeEnabledAccount
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 
 	NSString* query=[NSString stringWithFormat:@"update account set enabled=0  ;"];
 	if([self executeNonQuery:query]!=false) 
 	{
-		[pool release];
+		;
 		return true; 
 	}
 	else 
 	{
-		[pool release];
+		;
 		return false; 
 	}
 }
@@ -472,7 +468,7 @@
 {
 	if([self isBuddyInList:buddy :accountNo]) return false; // hard condition check ..no dupes!
 	
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		
 	
 	// no blank full names
 	NSString* actualfull; 
@@ -484,46 +480,46 @@
 	NSString* query=[NSString stringWithFormat:@"insert into buddylist values(null, %@, '%@', '%@','%@','','','','','',0, 0, 1);", accountNo, buddy, actualfull, nickName];
 	if([self executeNonQuery:query]!=false) 
 	{
-		[pool release];
+		;
 		return true; 
 	}
 	else 
 	{
-		[pool release];
+		;
 		return false; 
 	}
 	
 }
 -(BOOL) removeBuddy:(NSString*) buddy :(NSString*) accountNo
 {
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		
 	//clean up logs 
 	[self messageHistoryClean:buddy :accountNo];
 	
 	NSString* query=[NSString stringWithFormat:@"delete from buddylist  where account_id=%@ and buddy_name='%@';", accountNo, buddy];
 	if([self executeNonQuery:query]!=false) 
 	{
-		[pool release];
+		;
 		return true; 
 	}
 	else 
 	{
-		[pool release];
+		;
 		return false; 
 	}
 } 
 -(BOOL) clearBuddies:(NSString*) accountNo
 {
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		
 	NSString* query=[NSString stringWithFormat:@"delete from buddylist  where account_id=%@ ;", accountNo];
 	if([self executeNonQuery:query]!=false) 
 	{
-		[pool release];
+		;
 		return true; 
 	}
 	else 
 	{
-		[pool release];
+		;
 		return false; 
 	}
 }
@@ -533,17 +529,17 @@
 
 -(BOOL) resetBuddies
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	NSString* query=[NSString stringWithFormat:@"update buddylist set dirty=0, new=0, online=0, state='', status='';   "];
 	if([self executeNonQuery:query]!=false) 
 	{
-		[pool release];
+		;
 		return true; 
 	}
 	else 
 	{
-		[pool release];
+		;
 		return false; 
 	}
 	
@@ -552,7 +548,7 @@
 -(NSArray*) onlineBuddies:(NSString*) accountNo
 {
 	
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	NSString* query1=[NSString stringWithFormat:@"select username, domain from account where account_id=%@", accountNo];
 	//debug_NSLog(query); 
@@ -571,15 +567,14 @@
 	{
 		
 		debug_NSLog(@" count: %d",  [toReturn count] ); 
-		[toReturn retain];
-		[pool release];
+		;
 		
 		return toReturn; //[toReturn autorelease];
 	}
 	else 
 	{
 		debug_NSLog(@"buddylist is empty or failed to read"); 
-		[pool release];
+		;
 		return nil; 
 	}
 	} else return nil; 
@@ -589,7 +584,7 @@
 -(NSArray*) offlineBuddies:(NSString*) accountNo
 {
 	
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	NSString* query1=[NSString stringWithFormat:@"select username, domain from account where account_id=%@", accountNo];
 	//debug_NSLog(query); 
@@ -608,15 +603,14 @@
 			{
 				
 				debug_NSLog(@" count: %d",  [toReturn count] ); 
-				[toReturn retain];
-				[pool release];
+				;
 				
 				return toReturn; //[toReturn autorelease];
 			}
 			else 
 			{
 				debug_NSLog(@"buddylist is empty or failed to read"); 
-				[pool release];
+				;
 				return nil; 
 			}
 		} else return nil; 
@@ -627,7 +621,7 @@
 -(NSArray*) newBuddies:(NSString*) accountNo;
 {
 	//get domain
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	NSString* query1=[NSString stringWithFormat:@"select username, domain from account where account_id=%@", accountNo];
 	//debug_NSLog(query); 
@@ -646,15 +640,14 @@
 		{
 			
 			debug_NSLog(@" count: %d",  [toReturn count] ); 
-			[toReturn retain];
-			[pool release];
+			;
 			
 			return toReturn; //[toReturn autorelease];
 		}
 		else 
 		{
 			debug_NSLog(@"buddylist is empty or failed to read"); 
-			[pool release];
+			;
 			return nil; 
 		}
 	} else return nil; 
@@ -665,7 +658,7 @@
 -(NSArray*) removedBuddies:(NSString*) accountNo;
 {
 	//returns a buddy's message history
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	NSString* query1=[NSString stringWithFormat:@"select username, domain  from account where account_id=%@", accountNo];
 	//debug_NSLog(query); 
@@ -684,15 +677,14 @@
 		{
 			
 			debug_NSLog(@" count: %d",  [toReturn count] ); 
-			[toReturn retain];
-			[pool release];
+			;
 			
 			return toReturn; //[toReturn autorelease];
 		}
 		else 
 		{
 			debug_NSLog(@"buddylist is empty or failed to read"); 
-			[pool release];
+			;
 			return nil; 
 		}
 	} else return nil; 
@@ -702,7 +694,7 @@
 -(NSArray*) updatedBuddies:(NSString*) accountNo;
 {
 	//returns a buddy's message history
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	NSString* query1=[NSString stringWithFormat:@"select username, domain  from account where account_id=%@", accountNo];
 	//debug_NSLog(query); 
@@ -721,15 +713,14 @@
 		{
 			
 			debug_NSLog(@" count: %d",  [toReturn count] ); 
-			[toReturn retain];
-			[pool release];
+			;
 			
 			return toReturn; //[toReturn autorelease];
 		}
 		else 
 		{
 			debug_NSLog(@"buddylist is empty or failed to read"); 
-			[pool release];
+			;
 			return nil; 
 		}
 	} else return nil; 
@@ -739,19 +730,19 @@
 
 -(BOOL) markBuddiesRead:(NSString*) accountNo
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	NSString* query=[NSString stringWithFormat:@"update buddylist set dirty=0, new=0 where account_id=%@ and (new!=0 or dirty!=0)  ;", accountNo];
 	if([self executeNonQuery:query]!=false) 
 	{
 		
-		[pool release];
+		;
 		return true; 
 	}
 	else 
 	{
 		
-		[pool release];
+		;
 		return false; 
 	}
 }
@@ -759,7 +750,7 @@
 
 -(BOOL) setOnlineBuddy:(NSString*) buddy :(NSString*) accountNo
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 		if([self isBuddyOnline:buddy:accountNo]) return false; // pervent setting something as new
 		
 	
@@ -768,12 +759,12 @@
 	if([self executeNonQuery:query]!=false) 
 	{
 		
-		[pool release];
+		;
 		return true; 
 	}
 	else 
 	{
-				[pool release];
+				;
 		return false; 
 	}
 	
@@ -781,19 +772,19 @@
 
 -(BOOL) setOfflineBuddy:(NSString*) buddy :(NSString*) accountNo
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	NSString* query=[NSString stringWithFormat:@"update buddylist set online=0, dirty=1  where account_id=%@ and  buddy_name='%@';", accountNo, buddy];
 	if([self executeNonQuery:query]!=false) 
 	{
 		
-		[pool release];
+		;
 		return true; 
 	}
 	else 
 	{
 		
-		[pool release];
+		;
 		return false; 
 	}
 	
@@ -801,7 +792,7 @@
 
 -(BOOL) setFullName:(NSString*) buddy :(NSString*) accountNo:(NSString*) fullName
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	NSString* toPass;
 	//data length check
 	
@@ -817,27 +808,27 @@
 	if([self executeNonQuery:query]!=false) 
 	{
 		
-		[pool release];
+		;
 		return true; 
 	}
 	else 
 	{
 		
-		[pool release];
+		;
 		return false; 
 	}
 	
 	}
 	else
 	{
-		[pool release];
+		;
 		return true; 
 	}
 }
 
 -(BOOL) setNickName:(NSString*) buddy :(NSString*) accountNo:(NSString*) nickName
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	NSString* toPass;
 	//data length check
 	
@@ -846,13 +837,13 @@
 	if([self executeNonQuery:query]!=false) 
 	{
 		
-		[pool release];
+		;
 		return true; 
 	}
 	else 
 	{
 		
-		[pool release];
+		;
 		return false; 
 	}
 }
@@ -861,17 +852,16 @@
 -(NSString*) fullName:(NSString*) buddy :(NSString*) accountNo
 {
 	
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	NSString* query=[NSString stringWithFormat:@"select full_name from buddylist where account_id=%@ and buddy_name='%@'", accountNo, buddy];
 	NSString* iconname= [self executeScalar:query];
-	[iconname retain];
-	[pool release] ; 
+	 ; 
 	return iconname; 
 }
 
 -(BOOL) setBuddyState:(NSString*) buddy :(NSString*) accountNo:(NSString*) thestate
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	NSString* toPass;
 	//data length check
 	
@@ -880,13 +870,13 @@
 	if([self executeNonQuery:query]!=false) 
 	{
 		
-		[pool release];
+		;
 		return true; 
 	}
 	else 
 	{
 		
-		[pool release];
+		;
 		return false; 
 	}
 }
@@ -894,16 +884,15 @@
 -(NSString*) buddyState:(NSString*) buddy :(NSString*) accountNo; 
 {
 	
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	NSString* query=[NSString stringWithFormat:@"select state from buddylist where account_id=%@ and buddy_name='%@'", accountNo, buddy];
 	NSString* iconname= [self executeScalar:query];
-	[iconname retain];
-	[pool release] ; 
+	 ; 
 	return iconname; 
 }
 -(BOOL) setBuddyStatus:(NSString*) buddy :(NSString*) accountNo:(NSString*) theStatus
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	NSString* toPass;
 	//data length check
@@ -915,13 +904,13 @@
 	if([self executeNonQuery:query]!=false) 
 	{
 		
-		[pool release];
+		;
 		return true; 
 	}
 	else 
 	{
 		
-		[pool release];
+		;
 		return false; 
 	}
 }
@@ -929,29 +918,28 @@
 -(NSString*) buddyStatus:(NSString*) buddy :(NSString*) accountNo; 
 {
 	
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	NSString* query=[NSString stringWithFormat:@"select status from buddylist where account_id=%@ and buddy_name='%@'", accountNo, buddy];
 	NSString* iconname= [self executeScalar:query];
-	[iconname retain];
-	[pool release] ; 
+	 ; 
 	return iconname; 
 }
 
 -(BOOL) setBuddyHash:(NSString*) buddy :(NSString*) accountNo:(NSString*) theHash
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	NSString* toPass;
 	//data length check
 	NSString* query=[NSString stringWithFormat:@"update buddylist set iconhash='%@', dirty=1 where account_id=%@ and  buddy_name='%@';",theHash,
 					 accountNo, buddy];
 	if([self executeNonQuery:query]!=false) 
 	{
-		[pool release];
+		;
 		return true; 
 	}
 	else 
 	{
-		[pool release];
+		;
 		return false; 
 	}
 }
@@ -959,7 +947,7 @@
 -(NSString*) buddyHash:(NSString*) buddy :(NSString*) accountNo
 {
 	
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	//if there isnt a file name icon wasnt downloaded
 	
@@ -968,15 +956,14 @@
 	NSString* filename= [self executeScalar:query2];
 	if([filename isEqualToString:@""])
 	{
-		[pool  release]; 
+		
 		return @"";
 	}
 	
 	
 	NSString* query=[NSString stringWithFormat:@"select iconhash from buddylist where account_id=%@ and buddy_name='%@'", accountNo, buddy];
 	NSString* iconname= [self executeScalar:query];
-	[iconname retain];
-	[pool release] ; 
+	 ; 
 	return iconname; 
 }
 
@@ -985,7 +972,7 @@
 {
 	// count # of meaages in message table
 	
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	
 	NSString* query=[NSString stringWithFormat:@"select count(buddy_id) from buddylist where account_id=%@ and buddy_name='%@' ", accountNo, buddy];
@@ -995,16 +982,16 @@
 	{
 		int val=[count integerValue];
 		if(val>0) {
-			[pool release];
+			;
 			return true; } else 
 			{
-				[pool release];
+				;
 				return false;
 			}
 	}
 	else 
 	{
-		[pool release];
+		;
 		return false; 
 	}
 	
@@ -1015,7 +1002,7 @@
 {
 	// count # of meaages in message table
 	
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	
 	NSString* query=[NSString stringWithFormat:@"select count(buddy_id) from buddylist where account_id=%@ and buddy_name='%@' and online=1 ", accountNo, buddy];
@@ -1025,16 +1012,16 @@
 	{
 		int val=[count integerValue];
 		if(val>0) {
-			[pool release];
+			;
 			return true; } else 
 			{
-				[pool release];
+				;
 				return false;
 			}
 	}
 	else 
 	{
-		[pool release];
+		;
 		return false; 
 	}
 	
@@ -1045,7 +1032,7 @@
 {
 	// seeif it is muc chat name
 	
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	
 	NSString* query=[NSString stringWithFormat:@"SELECT	message_history_id from message_history where account_id=%@ and message_from!=actual_from and message_from='%@'  limit 1", accountNo, buddy];
@@ -1055,16 +1042,16 @@
 	{
 		int val=[count integerValue];
 		if(val>0) {
-		[pool release];
+		;
 			return true; } else 
 			{
-				[pool release];
+				;
 				return false;
 			}
 	}
 	else 
 	{
-		[pool release];
+		;
 		return false; 
 	}
 	
@@ -1078,7 +1065,7 @@
 {
 	// count # of meaages in message table
 	
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	
 	NSString* query=[NSString stringWithFormat:@"select count(buddy_id) from buddylist where account_id=%@ and buddy_name='%@' and online=1 and new=1", accountNo, buddy];
@@ -1088,16 +1075,16 @@
 	{
 		int val=[count integerValue];
 		if(val>0) {
-            [pool release];
+            ;
 			return true; } else 
 			{
-				[pool release];
+				;
 				return false;
 			}
 	}
 	else 
 	{
-		[pool release];
+		;
 		return false; 
 	}
 	
@@ -1110,7 +1097,7 @@
 {
 	// count # of meaages in message table
 	
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	
 	NSString* query=[NSString stringWithFormat:@"select count(buddy_id) from buddylist where account_id=%@ and buddy_name='%@' and online=0 and dirty=1", accountNo, buddy];
@@ -1120,17 +1107,17 @@
 	{
 		int val=[count integerValue];
 		if(val>0) {
-			[pool release];
+			;
 			return true; } else 
 			{
-				[pool release];
+				;
 				return false;
 			}
 	
 	}
 	else 
 	{
-		[pool release];
+		;
 		return false; 
 	}
 	
@@ -1143,28 +1130,28 @@
 
 -(BOOL) setIconName:(NSString*) buddy :(NSString*) accountNo:(NSString*) icon
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	NSString* query=[NSString stringWithFormat:@"update buddylist set filename='%@',dirty=1 where account_id=%@ and  buddy_name='%@';",icon, accountNo, buddy];
 	if([self executeNonQuery:query]!=false) 
 	{
-		[pool release];
+		;
 		return true; 
 	}
 	else 
 	{
-		[pool release];
+		;
 		return false; 
 	}
 }
 
 -(NSString*) iconName:(NSString*) buddy :(NSString*) accountNo
 {
-	/*NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	/*
 	 NSString* query=[NSString stringWithFormat:@"select data  from buddyicon as A inner join buddylist as B on a.buddyid=b.buddyid where account_id=%@ and buddy_name='%@'", accountNo, buddy];
 	 NSString* iconname= [self executeScalar:query];
 	 [iconname retain];
-	 [pool release] ; 
+	  ; 
 	 return iconname; */
 }
 
@@ -1177,10 +1164,10 @@
 {
 	//MEssaes coming in. in messages table, to is always the local user
 	
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	
 	
-	NSDateFormatter* formatter = [[[NSDateFormatter alloc] init] autorelease];
+	
+	NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
 	[formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
 	NSDate* sourceDate=[NSDate date];
 	
@@ -1191,7 +1178,7 @@
 	NSInteger destinationGMTOffset = [destinationTimeZone secondsFromGMTForDate:sourceDate];
 	NSTimeInterval interval = destinationGMTOffset - sourceGMTOffset;
 	
-	NSDate* destinationDate = [[[NSDate alloc] initWithTimeInterval:interval sinceDate:sourceDate] autorelease];
+	NSDate* destinationDate = [[NSDate alloc] initWithTimeInterval:interval sinceDate:sourceDate];
 	
 	// note: if it isnt the same day we want to show tehful day
 	
@@ -1207,13 +1194,13 @@
 	if([self executeNonQuery:query]!=false) 
 	{
 		
-		[pool release];
+		;
 		return true; 
 	}
 	else 
 	{
 		debug_NSLog(@"failed to insert "); 
-		[pool release];
+		;
 		return false; 
 	}
 	
@@ -1224,17 +1211,17 @@
 
 -(BOOL) clearMessages:(NSString*) accountNo
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	NSString* query=[NSString stringWithFormat:@"delete from messages where account_id=%@", accountNo];
 	if([self executeNonQuery:query]!=false) 
 	{
-		[pool release];
+		;
 		return true; 
 	}
 	else 
 	{
-		[pool release];
+		;
 		return false; 
 	}
 }
@@ -1242,7 +1229,7 @@
 -(NSArray*) messageHistoryListDates:(NSString*) buddy :(NSString*) accountNo
 {
     //returns a list of  buddy's with message history
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	NSString* query1=[NSString stringWithFormat:@"select username, domain from account where account_id=%@", accountNo];
 	//debug_NSLog(query); 
 	NSArray* user = [self executeReader:query1];
@@ -1258,15 +1245,14 @@
         {
             
             debug_NSLog(@" count: %d",  [toReturn count] ); 
-            [toReturn retain];
-            [pool release];
+            ;
             
             return toReturn; //[toReturn autorelease];
         }
         else 
         {
             debug_NSLog(@"message history buddy date list is empty or failed to read"); 
-            [pool release];
+            ;
             return nil; 
         }
         
@@ -1277,7 +1263,7 @@
 -(NSArray*) messageHistoryDate:(NSString*) buddy :(NSString*) accountNo:(NSString*) date
 {
 	//returns a buddy's message history
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	
 	//NSArray* parts=[[[NSDate date] description] componentsSeparatedByString:@" "]; 
@@ -1291,15 +1277,14 @@
 	{
 		
 		debug_NSLog(@" count: %d",  [toReturn count] ); 
-		[toReturn retain];
-		[pool release];
+		;
 		
 		return toReturn; //[toReturn autorelease];
 	}
 	else 
 	{
 		debug_NSLog(@"message history is empty or failed to read"); 
-		[pool release];
+		;
 		return nil; 
 	}
 	
@@ -1310,7 +1295,7 @@
 -(NSArray*) messageHistoryAll:(NSString*) buddy :(NSString*) accountNo
 {
 	//returns a buddy's message history
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	
 	//NSArray* parts=[[[NSDate date] description] componentsSeparatedByString:@" "]; 
@@ -1324,15 +1309,14 @@
 	{
 		
 		debug_NSLog(@" count: %d",  [toReturn count] ); 
-		[toReturn retain];
-		[pool release];
+		;
 		
 		return toReturn; //[toReturn autorelease];
 	}
 	else 
 	{
 		debug_NSLog(@"message history is empty or failed to read"); 
-		[pool release];
+		;
 		return nil; 
 	}
 	
@@ -1341,7 +1325,7 @@
 -(BOOL) messageHistoryClean:(NSString*) buddy :(NSString*) accountNo
 {
 	//returns a buddy's message history
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	
 	NSString* query=[NSString stringWithFormat:@"delete from message_history where account_id=%@ and (message_from='%@' or message_to='%@') ",accountNo, buddy, buddy];
@@ -1351,13 +1335,13 @@
 	{
 		debug_NSLog(@" cleaned messages for %@",  buddy ); 
 		
-		[pool release];
+		;
 		return true; 
 	}
 	else 
 	{
 		debug_NSLog(@"message history failed to clean"); 
-		[pool release];
+		;
 		return false; 
 	}
 	
@@ -1367,7 +1351,7 @@
 -(BOOL) messageHistoryCleanAll:(NSString*) accountNo
 {
 	//returns a buddy's message history
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	
 	NSString* query=[NSString stringWithFormat:@"delete from message_history where account_id=%@  ",accountNo];
@@ -1378,13 +1362,13 @@
 		
 		debug_NSLog(@" cleaned messages " ); 
 		
-		[pool release];
+		;
 		return true; 
 	}
 	else 
 	{
 		debug_NSLog(@"message history failed to clean all"); 
-		[pool release];
+		;
 		return false; 
 	}
 	
@@ -1393,7 +1377,7 @@
 -(NSArray*) messageHistoryBuddies:(NSString*) accountNo
 {
 	//returns a list of  buddy's with message history
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	NSString* query1=[NSString stringWithFormat:@"select username, domain from account where account_id=%@", accountNo];
 	//debug_NSLog(query); 
 	NSArray* user = [self executeReader:query1];
@@ -1409,15 +1393,14 @@
 	{
 		
 		debug_NSLog(@" count: %d",  [toReturn count] ); 
-		[toReturn retain];
-		[pool release];
+		;
 		
 		return toReturn; //[toReturn autorelease];
 	}
 	else 
 	{
 		debug_NSLog(@"message history buddy list is empty or failed to read"); 
-		[pool release];
+		;
 		return nil; 
 	}
 	
@@ -1427,7 +1410,7 @@
 -(NSArray*) unreadMessagesForBuddy:(NSString*) buddy :(NSString*) accountNo
 {
 	//returns a buddy's message history
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	
 	//NSArray* parts=[[[NSDate date] description] componentsSeparatedByString:@" "]; 
@@ -1441,15 +1424,14 @@
 	{
 		
 		debug_NSLog(@" message list  count: %d",  [toReturn count] ); 
-		[toReturn retain];
-		[pool release];
+		;
 		
 		return toReturn; //[toReturn autorelease];
 	}
 	else 
 	{
 		debug_NSLog(@"message list  is empty or failed to read"); 
-		[pool release];
+		;
 		return nil; 
 	}
 }
@@ -1458,7 +1440,7 @@
 -(NSArray*) messageHistory:(NSString*) buddy :(NSString*) accountNo
 {
 	//returns a buddy's message history
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	
 	//NSArray* parts=[[[NSDate date] description] componentsSeparatedByString:@" "]; 
@@ -1472,15 +1454,14 @@
 	{
 		
 		debug_NSLog(@" message history count: %d",  [toReturn count] ); 
-		[toReturn retain];
-		[pool release];
+		;
 	
 		return toReturn; //[toReturn autorelease];
 	}
 	else 
 	{
 		debug_NSLog(@"message history is empty or failed to read"); 
-		[pool release];
+		;
 		return nil; 
 	}
 	
@@ -1490,7 +1471,7 @@
 	
 	//called when a buddy is clicked
 		//moves messages from a buddy from messages to history (thus marking them as read) 
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 
 	
 	NSString* query2=[NSString stringWithFormat:@"  insert into message_history (account_id,message_from, message_to, timestamp, message, actual_from) select account_id,message_from, message_to, timestamp, message, actual_from  from messages where account_id=%@ and message_from='%@';", accountNo, buddy];
@@ -1501,20 +1482,20 @@
 	NSString* query=[NSString stringWithFormat:@"delete from messages where account_id=%@ and message_from='%@'; ", accountNo, buddy];
 	if([self executeNonQuery:query]!=false) 
 	{
-		[pool release];
+		;
 		return true; 
 	}
 	else 
 	{
 			debug_NSLog(@"Messages clean  failed"); 
-		[pool release];
+		;
 		return false; 
 	}
 	}
 	else 
 	{
 		debug_NSLog(@"Message history insert failed"); 
-		[pool release]; 
+		; 
 		return false; 
 	}
 	
@@ -1524,7 +1505,7 @@
 {
 	//MEssaes_history ging out, from is always the local user
 	
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	
 	NSArray* parts=[[[NSDate date] description] componentsSeparatedByString:@" "]; 
@@ -1535,12 +1516,12 @@
 	
 	if([self executeNonQuery:query]!=false) 
 	{
-		[pool release];
+		;
 		return true; 
 	}
 	else 
 	{
-		[pool release];
+		;
 		return false; 
 	}
 	
@@ -1552,7 +1533,7 @@
 {
 	// count # of meaages in message table
 	
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	
 	NSString* query=[NSString stringWithFormat:@"select count(message_id) from  messages where account_id=%@", accountNo];
@@ -1561,12 +1542,12 @@
 	if(count!=nil) 
 	{
 		int val=[count integerValue];
-		[pool release];
+		;
 		return val; 
 	}
 	else 
 	{
-		[pool release];
+		;
 		return 0; 
 	}
 	
@@ -1576,7 +1557,7 @@
 #pragma mark active chats
 -(NSArray*) activeBuddies:(NSString*) accountNo
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	
 	
@@ -1588,15 +1569,14 @@
 	{
 		
 		debug_NSLog(@" count: %d",  [toReturn count] ); 
-		[toReturn retain];
-		[pool release];
+		;
 		
 		return toReturn; //[toReturn autorelease];
 	}
 	else 
 	{
 		debug_NSLog(@"message history is empty or failed to read"); 
-		[pool release];
+		;
 		return nil; 
 	}
 	
@@ -1604,7 +1584,7 @@
 
 -(bool) removeActiveBuddies:(NSString*) buddyname:(NSString*) accountNo
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	
 	
@@ -1613,14 +1593,14 @@
 
 	
 	bool result=[self executeNonQuery:query];
-	[pool release]; 
+	; 
 	return result; 
 	
 }
 
 -(bool) removeAllActiveBuddies:(NSString*) accountNo
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	
 	
@@ -1629,7 +1609,7 @@
     
 	
 	bool result=[self executeNonQuery:query];
-	[pool release]; 
+	; 
 	return result; 
 	
 }
@@ -1638,7 +1618,7 @@
 
 -(bool) addActiveBuddies:(NSString*) buddyname:(NSString*) accountNo;
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	//check if in active chat already 
 	
@@ -1650,7 +1630,7 @@
 	{
 		int val=[count integerValue];
 		if(val>0) {
-			[pool release];
+			;
 			return false; 
 			} else 
 			{
@@ -1660,7 +1640,7 @@
 				
 				
 				bool result=[self executeNonQuery:query2];
-				[pool release]; 
+				; 
 				return result; 
 			}
 	}
@@ -1672,11 +1652,11 @@
 		
 		
 		bool result=[self executeNonQuery:query2];
-		[pool release];
+		;
 		return result; 
 	}*/
 	
-	[pool release];
+	;
 	return false; 
 	
 }
@@ -1686,7 +1666,7 @@
 
 -(NSArray*) unreadMessages:(NSString*) accountNo
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	
 	
@@ -1698,15 +1678,14 @@
 	{
 		
 		debug_NSLog(@" unread msg count: %d",  [toReturn count] ); 
-		[toReturn retain];
-		[pool release];
+		;
 		
 		return toReturn; //[toReturn autorelease];
 	}
 	else 
 	{
 		debug_NSLog(@"message history is empty or failed to read"); 
-		[pool release];
+		;
 		return nil; 
 	}
 }
@@ -1715,7 +1694,7 @@
 {
 	// count # messages from a specific user in messages table
 	
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	
 	NSString* query=[NSString stringWithFormat:@"select count(message_id) from  messages where account_id=%@ and message_from='%@'", accountNo, buddy];
@@ -1724,12 +1703,12 @@
 	if(count!=nil) 
 	{
 		int val=[count integerValue];
-		[pool release];
+		;
 		return val; 
 	}
 	else 
 	{
-		[pool release];
+		;
 		return 0; 
 	}
 }
@@ -1738,7 +1717,7 @@
 {
 	// count # messages from a specific user in messages table
 	
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	
 	NSString* query=[NSString stringWithFormat:@"select count(message_id) from  messages where account_id=%@ and not message_from='%@'", accountNo, buddy];
@@ -1747,12 +1726,12 @@
 	if(count!=nil) 
 	{
 		int val=[count integerValue];
-		[pool release];
+		;
 		return val; 
 	}
 	else 
 	{
-		[pool release];
+		;
 		return 0; 
 	}
 }
@@ -1762,20 +1741,20 @@
 //messages for which a notification has not been shown
 -(BOOL) markAsNoticed:(NSString*) accountNo
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	
 	NSString* query=[NSString stringWithFormat:@"update messages set notice=1  where account_id=%@", accountNo ];
 	
 	bool result=[self executeNonQuery:query];
 	
-	[pool release];
+	;
 	return result; 
 }
 
 -(int) countUnnoticedMessages:(NSString*) accountNo
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	
 	
@@ -1784,12 +1763,12 @@
 	if(count!=nil) 
 	{
 		int val=[count integerValue];
-		[pool release];
+		;
 		return val; 
 	}
 	else 
 	{
-		[pool release];
+		;
 		return 0; 
 	}
 }
@@ -1797,7 +1776,7 @@
 
 -(NSArray*) unnoticedMessages:(NSString*) accountNo
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	
 	
 	
@@ -1809,15 +1788,14 @@
 	{
 		
 		debug_NSLog(@" count: %d",  [toReturn count] ); 
-		[toReturn retain];
-		[pool release];
+		;
 		
 		return toReturn; //[toReturn autorelease];
 	}
 	else 
 	{
 		debug_NSLog(@"message history is empty or failed to read"); 
-		[pool release];
+		;
 		return nil; 
 	}
 }
@@ -1826,7 +1804,6 @@
 
 -(void) initDB
 {
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 	NSFileManager* fileManager = [NSFileManager defaultManager]; 
 	
 	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
@@ -1859,13 +1836,12 @@
 	[self executeNonQuery:@"pragma truncate;"];
 	
 	[self version];
-	[pool release];
+	;
 	
 }
 
 -(void) version
 {
-		NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 	// checking db version and upgrading if necessary
 	debug_NSLog(@"Database version check");
 	
@@ -2023,7 +1999,7 @@
     }
 	
 	
-[pool release];
+;
 	return; 
 	
 
@@ -2033,7 +2009,6 @@
 -(void) dealloc
 {
 	sqlite3_close(database); 
-	[super dealloc]; 
 }
 
 

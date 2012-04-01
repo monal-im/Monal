@@ -34,7 +34,6 @@
         if ([popOverController isPopoverVisible]) {
             
             [popOverController dismissPopoverAnimated:YES];
-            [popOverController release]; 
           
             
         } 
@@ -64,7 +63,6 @@
 								 delegate:self cancelButtonTitle:@"Close"
 								 otherButtonTitles: nil] ;
 		[addError show];
-		[addError release];
 	}
 
 	 if(([[tools machine] isEqualToString:@"iPad"])
@@ -73,7 +71,6 @@
         if ([popOverController isPopoverVisible]) {
             
             [popOverController dismissPopoverAnimated:YES];
-            [popOverController release]; 
        
             
         } 
@@ -113,7 +110,7 @@
 
 {
 
-NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+
 	
    
         [navigationController presentModalViewController:self animated:YES];
@@ -124,7 +121,7 @@ NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     
 	jabber=account;
 		
-	[pool release];
+	;
 }
 
 -(void) showiPad:(protocol*)account
@@ -175,8 +172,4 @@ NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
 
 
--(void) dealloc
-{
-			[super dealloc]; 
-}
 @end

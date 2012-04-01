@@ -14,7 +14,7 @@
 @implementation protocol
 
 @synthesize loggedin; 
-@synthesize accountNumber; 
+@synthesize  accountNumber; 
 
 @synthesize account; 
 @synthesize domain; 
@@ -188,7 +188,7 @@
 		else characters[length++] = '=';	
 	}
 	
-	return [[[NSString alloc] initWithBytesNoCopy:characters length:length encoding:NSASCIIStringEncoding freeWhenDone:YES] autorelease];
+	return [[NSString alloc] initWithBytesNoCopy:characters length:length encoding:NSASCIIStringEncoding freeWhenDone:YES];
 }		
 
 

@@ -79,7 +79,7 @@ IBOutlet UITableViewCell* usernameCell;
 -(void) save; 
 
 
-@property (nonatomic, retain) DataLayer* db; 
+@property (nonatomic) DataLayer* db; 
 
 
 

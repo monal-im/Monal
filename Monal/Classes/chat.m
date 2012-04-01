@@ -194,6 +194,7 @@
 	
 	[nc addObserver:self selector:@selector(keyboardDidShow:) name: UIKeyboardDidShowNotification object:nil];
    
+    
     // handle messages to view someuser
     
     [nc addObserver:self selector:@selector(showSignal:) name: @"showSignal" object:nil];
@@ -1353,12 +1354,9 @@ if([buddyFullName isEqualToString:@""])
 
 -(void) keyboardWillHide:(NSNotification *) note
 {
+    
     if(dontscroll==false)
-    {
-	//bigger text view
-	//CGRect oldTextFrame= chatInput.frame; 
-	//chatInput.frame=CGRectMake(oldTextFrame.origin.x, oldTextFrame.origin.y, oldTextFrame.size.width, oldTextFrame.size.height-30);
-	
+    {	
 	
 	//move down
 	[UIView beginAnimations:nil context:NULL];

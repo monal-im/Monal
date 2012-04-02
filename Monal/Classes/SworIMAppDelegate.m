@@ -10,7 +10,7 @@
 
 @implementation SworIMAppDelegate
 
-@synthesize db;
+
 @synthesize chatwin;
 @synthesize accountno; 
 @synthesize morenav; 

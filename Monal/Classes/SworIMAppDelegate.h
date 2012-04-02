@@ -139,7 +139,7 @@ IBOutlet	UIActivityIndicatorView* activitySun;
 
 -(IBAction) CancelLogin;
 
-@property (nonatomic) DataLayer* db;
+
 @property (nonatomic)  chat* chatwin;
 @property (nonatomic)  protocol* jabber;
 @property (nonatomic) NSString* accountno; 

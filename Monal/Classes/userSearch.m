@@ -46,7 +46,7 @@
     
     SworIMAppDelegate *app=[[UIApplication sharedApplication] delegate];
 	
-	db=app.db;
+		db=[DataLayer sharedInstance];
 	jabber=(xmpp*) app.jabber;
 	accountno=app.accountno; 
 	

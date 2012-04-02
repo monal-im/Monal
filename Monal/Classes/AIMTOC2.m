@@ -92,7 +92,7 @@ self = [super init];
 	
 
 	
-	db=thedb;
+		db=[DataLayer sharedInstance];
 	
 	loggedin=false; 
 	

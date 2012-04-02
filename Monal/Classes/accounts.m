@@ -51,7 +51,7 @@
 	sectionArray =  [NSArray arrayWithObjects:@"Accounts\n(Only one can be set to login)", @"Add New Account", nil];
 	viewController=app.accountsNavigationController;
 	
-	db=app.db;
+	db=[DataLayer sharedInstance];
 	iconPath=app.iconPath; 
 	
 	/*thelist=[db accountList]; //accounts*/
@@ -321,7 +321,7 @@ thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 		if([[[thelist objectAtIndex:newIndexPath.row] objectAtIndex:2] intValue]!=3) //proocol 3 is AIM (counts from 1)
 		{
 			XMPPEdit* xmppedit=[XMPPEdit alloc]; 
-			xmppedit.db=db;
+			xmppedit.db=[DataLayer sharedInstance];
 		[xmppedit initList:viewController:newIndexPath:[NSString stringWithFormat:@"%@",[[thelist objectAtIndex:newIndexPath.row] objectAtIndex:0]]];
 		[viewController pushViewController:xmppedit animated:YES];	
 		}
@@ -338,7 +338,7 @@ thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 		if(newIndexPath.row!=2) //  row 2 is AIM
 		{
 		XMPPEdit* xmppedit=[XMPPEdit alloc]; 
-		xmppedit.db=db;
+		xmppedit.db=[DataLayer sharedInstance];
 		[xmppedit initList:viewController:newIndexPath:@"-1"];
 		[viewController pushViewController:xmppedit animated:YES];
 		}

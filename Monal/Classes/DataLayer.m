@@ -11,6 +11,18 @@
 
 @implementation DataLayer
 
+static DataLayer *sharedInstance=nil;
+
++ (DataLayer* )sharedInstance
+{
+    if (sharedInstance == nil) {
+        sharedInstance = [DataLayer alloc] ;
+        [sharedInstance initDB];
+    }
+    
+    return sharedInstance;
+}
+
 
 //lowest level command handlers
 -(NSObject*) executeScalar:(NSString*) query

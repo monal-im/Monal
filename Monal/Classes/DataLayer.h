@@ -16,6 +16,9 @@
 	sqlite3* database; 
 }
 
+
++ (id)sharedInstance;
+
 -(void) initDB;
 -(void) version; 
 

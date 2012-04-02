@@ -48,7 +48,7 @@
 	debug_NSLog(@"active chats did appear");
 	SworIMAppDelegate *app=[[UIApplication sharedApplication] delegate];
 	
-	db=app.db;
+		db=[DataLayer sharedInstance];
 	chatwin=app.chatwin;
 	accountno=app.accountno; 
 	viewController=app.activeNavigationController; 

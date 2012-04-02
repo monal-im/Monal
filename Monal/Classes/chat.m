@@ -178,7 +178,7 @@
 		jabber=jabberIn;
 //	thelist;
 	myuser=[NSString stringWithString:username];
-	db=thedb;
+		db=[DataLayer sharedInstance];
 
 
 	chatView.delegate=self;

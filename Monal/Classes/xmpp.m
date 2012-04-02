@@ -93,7 +93,7 @@
 	
 	mucUser=nil;
 	
-	db=thedb;
+		db=[DataLayer sharedInstance];
 	
 	loggedin=false; 
 	

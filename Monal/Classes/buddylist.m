@@ -740,7 +740,7 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
 	
 	// show +
 	viewController.navigationBar.topItem.leftBarButtonItem=plusButton;
-	//viewController.navigationBar.topItem.rightBarButtonItem=[app editButtonItem];
+	viewController.navigationBar.topItem.rightBarButtonItem=[self editButtonItem];
 
 	
 }
@@ -768,7 +768,25 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
 }
 
 
-
+- (void)setEditing:(BOOL)editing animated:(BOOL)animated
+{
+    
+	debug_NSLog(@"Set editing called "); 
+    
+    if(viewController.navigationBar.topItem.rightBarButtonItem.style==UIBarStyleBlack)
+    {
+    viewController.navigationBar.topItem.rightBarButtonItem.style = UIBarButtonItemStyleDone;
+     viewController.navigationBar.topItem.rightBarButtonItem.title=@"Done";
+    }
+    else {
+        viewController.navigationBar.topItem.rightBarButtonItem.style = UIBarStyleBlack;
+             viewController.navigationBar.topItem.rightBarButtonItem.title=@"Edit";
+    }
+    
+    
+	[[NSNotificationCenter defaultCenter] 
+     postNotificationName: @"buddyEdit" object: self];
+}
 
 
 

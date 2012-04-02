@@ -780,7 +780,7 @@
 		
 		
 		
-		
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(setEdit:) name: @"buddyEdit" object:nil];
 		
 		
 	}
@@ -1551,14 +1551,31 @@ buddylistDS.tabcontroller=tabcontroller;
 
 
 // view delegate function
+
 - (void)setEditing:(BOOL)editing animated:(BOOL)animated
 {
-
-	debug_NSLog(@"Set editing called "); 
-	[super setEditing:editing animated:animated]; // this changes it to Done/Edit
+   // [super setEditing:editing animated:animated]; // this changes it to Done/Edit
 	[buddyTable setEditing:editing animated:animated];
 	
+}
+
+- (void)setEdit:(id)sender
+{
+
+	debug_NSLog(@"AppSet editing called "); 
+    BOOL editing;  
+    if(buddyTable.editing==YES) 
+    {
+       
+        editing=NO; 
+    }
+    else {
+        editing=YES;
+            }   
 	
+	[self setEditing:editing animated:YES];
+    
+    
 }
 
 

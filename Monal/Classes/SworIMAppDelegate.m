@@ -1277,6 +1277,10 @@ buddylistDS.tabcontroller=tabcontroller;
 
 #pragma mark app load
 
+
+
+
+
 - (void)applicationDidFinishLaunching:(UIApplication *)application 
 {
 
@@ -1585,15 +1589,32 @@ buddylistDS.tabcontroller=tabcontroller;
 
 
 #pragma mark multi tasking os4 stuff *****
-
-//this should come up when a notification happens and you click on view
-- (void)application:(UIApplication *)application 
-didReceiveLocalNotification:(UILocalNotification *)notification 
-{
-	[[UIApplication sharedApplication] cancelAllLocalNotifications];
-	debug_NSLog(@"got notification.. dismissing all scheduled ones"); 
-	
+//called when resuming from a notification swipe /tap
+- (void)application:(UIApplication *)application didReceiveLocalNotification:(UILocalNotification *)notification {
+    if (application.applicationState == UIApplicationStateInactive ) {
+        
+        //app resumed from background.. we want to indentify and show message
+        
+        debug_NSLog(@"local notification from inactive");
+        
+        debug_NSLog(@"inactive Notification Body: %@",notification.alertBody);
+        debug_NSLog(@"userinfo %@", notification.userInfo);
+        
+        
+        //id conversation
+        
+        //reset to root
+        
+        //push the conversation
+        
+        
+    }
+    
+    if(application.applicationState == UIApplicationStateActive ) { 
+        // app is active, dont need to do anything 
+    }
 }
+
 
 - (void)applicationDidEnterBackground:(UIApplication *)application
 {

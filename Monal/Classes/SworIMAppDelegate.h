@@ -29,9 +29,11 @@
 #import "askTempPass.h"
 #import "PasswordManager.h"
 
+#import "MGSplitViewController.h"
+
 
 @interface SworIMAppDelegate : UIViewController <UIApplicationDelegate, 
-UINavigationControllerDelegate,UIAlertViewDelegate> {
+UINavigationControllerDelegate,UIAlertViewDelegate, MGSplitViewControllerDelegate> {
     
     IBOutlet UIWindow *window;
    IBOutlet  UINavigationController *buddyNavigationController;
@@ -43,11 +45,10 @@ UINavigationControllerDelegate,UIAlertViewDelegate> {
 	// ipad specific stuff
 	IBOutlet  UINavigationController *aboutNavigationControlleriPad;
 	IBOutlet  UINavigationController *logsNavigationControlleriPad;
-	IBOutlet UISplitViewController* split; 
+	IBOutlet MGSplitViewController* split; 
 
 
-	IBOutlet UITableView* buddyTable1; //same as noral one 
-	IBOutlet UITableView* buddyTable2; // extra ipad one
+
 	
 	
 	IBOutlet UITabBarController *tabcontroller; 

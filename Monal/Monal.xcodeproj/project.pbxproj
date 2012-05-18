@@ -200,6 +200,9 @@
 		26DC0A8F133928DA00E60BFD /* about.png in Resources */ = {isa = PBXBuildFile; fileRef = 26DC0A8E133928DA00E60BFD /* about.png */; };
 		26DC0A9213392A4F00E60BFD /* userSearch.m in Sources */ = {isa = PBXBuildFile; fileRef = 26DC0A9113392A4F00E60BFD /* userSearch.m */; };
 		26DE9C040FEEFCF5000596F6 /* protocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 26DE9C020FEEFCF5000596F6 /* protocol.m */; };
+		26DFD4AF15666B7D007A1621 /* MGSplitCornersView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26DFD4AA15666B7D007A1621 /* MGSplitCornersView.m */; };
+		26DFD4B015666B7D007A1621 /* MGSplitDividerView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26DFD4AC15666B7D007A1621 /* MGSplitDividerView.m */; };
+		26DFD4B115666B7D007A1621 /* MGSplitViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26DFD4AE15666B7D007A1621 /* MGSplitViewController.m */; };
 		26E2786F10FA85C600B7B998 /* XMPP.png in Resources */ = {isa = PBXBuildFile; fileRef = 26E2786A10FA85C600B7B998 /* XMPP.png */; };
 		26E2787010FA85C600B7B998 /* MSN.png in Resources */ = {isa = PBXBuildFile; fileRef = 26E2786B10FA85C600B7B998 /* MSN.png */; };
 		26E2787210FA85C600B7B998 /* Facebook.png in Resources */ = {isa = PBXBuildFile; fileRef = 26E2786D10FA85C600B7B998 /* Facebook.png */; };
@@ -450,6 +453,12 @@
 		26DE9C020FEEFCF5000596F6 /* protocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = protocol.m; path = Classes/protocol.m; sourceTree = "<group>"; };
 		26DE9C030FEEFCF5000596F6 /* protocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = protocol.h; path = Classes/protocol.h; sourceTree = "<group>"; };
 		26DE9C050FEEFD00000596F6 /* DB definitions */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "DB definitions"; sourceTree = "<group>"; };
+		26DFD4A915666B7D007A1621 /* MGSplitCornersView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGSplitCornersView.h; sourceTree = "<group>"; };
+		26DFD4AA15666B7D007A1621 /* MGSplitCornersView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MGSplitCornersView.m; sourceTree = "<group>"; };
+		26DFD4AB15666B7D007A1621 /* MGSplitDividerView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGSplitDividerView.h; sourceTree = "<group>"; };
+		26DFD4AC15666B7D007A1621 /* MGSplitDividerView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MGSplitDividerView.m; sourceTree = "<group>"; };
+		26DFD4AD15666B7D007A1621 /* MGSplitViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGSplitViewController.h; sourceTree = "<group>"; };
+		26DFD4AE15666B7D007A1621 /* MGSplitViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MGSplitViewController.m; sourceTree = "<group>"; };
 		26E2786A10FA85C600B7B998 /* XMPP.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = XMPP.png; sourceTree = "<group>"; };
 		26E2786B10FA85C600B7B998 /* MSN.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = MSN.png; sourceTree = "<group>"; };
 		26E2786D10FA85C600B7B998 /* Facebook.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Facebook.png; sourceTree = "<group>"; };
@@ -539,7 +548,7 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		2601D9BC0FBF25D1004DB939 /* Icons */ = {
+		2601D9BC0FBF25D1004DB939 /* Assets */ = {
 			isa = PBXGroup;
 			children = (
 				266286A71342C03400EAFC92 /* Buttons */,
@@ -553,7 +562,7 @@
 				2651DAA10FC2847200009D7E /* noicon.png */,
 				263707621488785E00DB8D57 /* noicon@2x.png */,
 			);
-			name = Icons;
+			name = Assets;
 			sourceTree = "<group>";
 		};
 		260447A00FEEC73500B3B5A7 /* tab bar */ = {
@@ -888,6 +897,28 @@
 			path = ..;
 			sourceTree = "<group>";
 		};
+		26DFD4A615666B6C007A1621 /* 3rd Party */ = {
+			isa = PBXGroup;
+			children = (
+				26DFD4A815666B7D007A1621 /* MGSplitViewController */,
+				268BCCFD140B23E10025E4D1 /* jrtplib-static */,
+			);
+			name = "3rd Party";
+			sourceTree = "<group>";
+		};
+		26DFD4A815666B7D007A1621 /* MGSplitViewController */ = {
+			isa = PBXGroup;
+			children = (
+				26DFD4A915666B7D007A1621 /* MGSplitCornersView.h */,
+				26DFD4AA15666B7D007A1621 /* MGSplitCornersView.m */,
+				26DFD4AB15666B7D007A1621 /* MGSplitDividerView.h */,
+				26DFD4AC15666B7D007A1621 /* MGSplitDividerView.m */,
+				26DFD4AD15666B7D007A1621 /* MGSplitViewController.h */,
+				26DFD4AE15666B7D007A1621 /* MGSplitViewController.m */,
+			);
+			path = MGSplitViewController;
+			sourceTree = "<group>";
+		};
 		26EC1C7312295B8800EAF934 /* Core UI */ = {
 			isa = PBXGroup;
 			children = (
@@ -952,10 +983,10 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
-				268BCCFD140B23E10025E4D1 /* jrtplib-static */,
+				26DFD4A615666B6C007A1621 /* 3rd Party */,
 				26AD60DA11A95CB700C39051 /* Emoticons */,
 				26EB845D111644AD005446DD /* Themes */,
-				2601D9BC0FBF25D1004DB939 /* Icons */,
+				2601D9BC0FBF25D1004DB939 /* Assets */,
 				29B97315FDCFA39411CA2CEA /* Other Sources */,
 				080E96DDFE201D6D7F000001 /* Classes */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
@@ -1276,6 +1307,9 @@
 				2640AF4014548E7700CB4F60 /* HPGrowingTextView.m in Sources */,
 				2640AF4114548E7700CB4F60 /* HPTextViewInternal.m in Sources */,
 				2654BEC81481499000DDC346 /* loglistDate.m in Sources */,
+				26DFD4AF15666B7D007A1621 /* MGSplitCornersView.m in Sources */,
+				26DFD4B015666B7D007A1621 /* MGSplitDividerView.m in Sources */,
+				26DFD4B115666B7D007A1621 /* MGSplitViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

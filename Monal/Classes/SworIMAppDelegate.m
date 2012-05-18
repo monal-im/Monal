@@ -1296,7 +1296,7 @@ buddylistDS.tabcontroller=tabcontroller;
 	if([machine hasPrefix:@"iPad"] )
 	{//if ipad..
 	//default
-	buddyTable=buddyTable1;
+	//buddyTable=buddyTable1;
        
 	}
     
@@ -1424,7 +1424,8 @@ buddylistDS.tabcontroller=tabcontroller;
 		if([machine hasPrefix:@"iPad"] )
 		{//if ipad..
 			
-			[window addSubview:split.view];
+            [split toggleMasterView:self];
+			[window setRootViewController:split];
 			[window makeKeyAndVisible];
 		}
 		else
@@ -1432,7 +1433,7 @@ buddylistDS.tabcontroller=tabcontroller;
 		{
 			//if iphone
 			
-			[window addSubview:tabcontroller.view];
+			[window setRootViewController:tabcontroller.view];
 			[window makeKeyAndVisible];
 			
 		}
@@ -1476,8 +1477,8 @@ buddylistDS.tabcontroller=tabcontroller;
 	
 		if([machine hasPrefix:@"iPad"] )
 		{//if ipad..
-			
-			[window addSubview:split.view];
+			 [split toggleMasterView:self];
+			[window setRootViewController:split];
 			
 
 			[window makeKeyAndVisible];
@@ -1513,7 +1514,8 @@ buddylistDS.tabcontroller=tabcontroller;
 	if([machine hasPrefix:@"iPad"] )
 	{//if ipad..
 		
-		[window addSubview:split.view];
+         [split toggleMasterView:self];
+		[window setRootViewController:split];
 		[window makeKeyAndVisible];
 	}
 	else
@@ -1736,6 +1738,7 @@ void (^myBlock)(void) = ^(void){
 
 #pragma mark ipad stuff
 
+/*
 - (void)splitViewController:(UISplitViewController*)svc
 	 willHideViewController:(UIViewController *)aViewController
 		  withBarButtonItem:(UIBarButtonItem*)barButtonItem
@@ -1799,6 +1802,7 @@ void (^myBlock)(void) = ^(void){
 	[super didReceiveMemoryWarning];
 
 }
+ */
 
 
 - (void)applicationDidBecomeActive:(UIApplication *)application
@@ -1853,7 +1857,7 @@ void (^myBlock)(void) = ^(void){
 }
 
 
-#pragma mark cleanup
+
 
 
 @end

@@ -183,16 +183,17 @@
     
     
     
-    // for ipad lanscape use popout
+    // for ipad  use popout
     
     NSString* machine=[tools machine]; 
     UIInterfaceOrientation orientation =[[UIApplication sharedApplication] statusBarOrientation];
     if(([machine hasPrefix:@"iPad"] )
 	
-        &&
-            (((orientation==UIInterfaceOrientationLandscapeLeft) || 
-               (orientation==UIInterfaceOrientationLandscapeRight)
-               )))
+       // &&
+        //    (((orientation==UIInterfaceOrientationLandscapeLeft) || 
+       //        (orientation==UIInterfaceOrientationLandscapeRight)
+          //     ))
+        )
         {
             
             

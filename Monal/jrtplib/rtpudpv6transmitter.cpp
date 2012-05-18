@@ -189,8 +189,8 @@ int RTPUDPv6Transmitter::Create(size_t maximumpacketsize,const RTPTransmissionPa
 		params = (const RTPUDPv6TransmissionParams *)transparams;
 	}
 
-	// Check if portbase is even
-	if (params->GetPortbase()%2 != 0)
+	// Check if portbase is even //modified by Anu seems google talk uses odd...
+	if (params->GetPortbase()%1 != 0)
 	{
 		MAINMUTEX_UNLOCK
 		return ERR_RTP_UDPV6TRANS_PORTBASENOTEVEN;

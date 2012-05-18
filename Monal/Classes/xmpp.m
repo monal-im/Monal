@@ -960,9 +960,9 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
         
        /* if(State!=nil) [State release]; 
         State=nil;*/
-        if(	[[attributeDict objectForKey:@"type"] isEqualToString:@"stun"])
+        if(	[[attributeDict objectForKey:@"type"] isEqualToString:@"local"]) //should be stun really 
         {
-            debug_NSLog(@"got Jingle stun candidate.. sending accept"); 
+            debug_NSLog(@"got Jingle local candidate.. sending accept"); 
             [self talk: [jingleCall acceptJingle:presenceUserFull 
                                     :[attributeDict objectForKey:@"address"]
                                     :[attributeDict objectForKey:@"port"]

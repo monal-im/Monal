@@ -73,7 +73,7 @@ void checkerror(int rtperr)
 	
 	for (i = 1 ; i <= num ; i++)
 	{
-		printf("\nSending packet %d/%d\n",i,num);
+		debug_NSLog(@"\nSending packet %d/%d\n",i,num);
 		
 		// send the packet
 		status = sess.SendPacket((void *)"1234567890",10,0,false,10);
@@ -91,7 +91,7 @@ void checkerror(int rtperr)
 				while ((pack = sess.GetNextPacket()) != NULL)
 				{
 					// You can examine the data here
-					printf("Got packet !\n");
+					debug_NSLog(@"Got packet !\n");
 					
 					// we don't longer need the packet, so
 					// we'll delete it

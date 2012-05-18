@@ -71,12 +71,13 @@ void checkerror(int rtperr)
 	status = sess.AddDestination(addr);
 	checkerror(status);
 	
-	for (i = 1 ; i <= num ; i++)
+	//for (i = 1 ; i <= num ; i++)
 	{
 		debug_NSLog(@"\nSending packet %d/%d\n",i,num);
 		
 		// send the packet
-		status = sess.SendPacket((void *)"1234567890",10,0,false,10);
+		
+        status = sess.SendPacket((void *)"1234567890",10,0,false,10);
 		checkerror(status);
 		
 		sess.BeginDataAccess();
@@ -110,7 +111,7 @@ void checkerror(int rtperr)
 		jrtplib::RTPTime::Wait(jrtplib::RTPTime(1,0));
 	}
 	
-	sess.BYEDestroy(jrtplib::RTPTime(10,0),0,0);
+	//sess.BYEDestroy(jrtplib::RTPTime(10,0),0,0);
 }
 
 @end

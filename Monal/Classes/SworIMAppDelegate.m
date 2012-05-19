@@ -1433,7 +1433,7 @@ buddylistDS.tabcontroller=tabcontroller;
 		{
 			//if iphone
 			
-			[window setRootViewController:tabcontroller.view];
+			[window setRootViewController:tabcontroller];
 			[window makeKeyAndVisible];
 			
 		}
@@ -1488,7 +1488,7 @@ buddylistDS.tabcontroller=tabcontroller;
 		{
 			//if iphone
 			
-			[window addSubview:tabcontroller.view];
+			[window setRootViewController:tabcontroller];
 			[window makeKeyAndVisible];
 			
 		}
@@ -1523,7 +1523,7 @@ buddylistDS.tabcontroller=tabcontroller;
 	{
 		//if iphone
 		
-		[window addSubview:tabcontroller.view];
+		[window setRootViewController:tabcontroller];
 		[window makeKeyAndVisible];
 		
 	}

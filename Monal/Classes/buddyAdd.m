@@ -141,7 +141,8 @@
 {
 	debug_NSLog(@"buddy add did  appear");
     
-   
+    //[theTable setBackgroundView:nil];
+   // [theTable setBackgroundView:[[UIView alloc] init] ];
     self.view.backgroundColor = [[UIColor alloc] initWithPatternImage:[UIImage imageNamed:@"carbon3.jpg"]];
 
     

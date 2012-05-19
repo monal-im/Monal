@@ -55,7 +55,6 @@
 				<object class="NSPSMatrix" key="NSFrameMatrix"/>
 				<string key="NSFrameSize">{768, 1024}</string>
 				<reference key="NSSuperview"/>
-				<reference key="NSNextKeyView"/>
 				<object class="NSColor" key="IBUIBackgroundColor" id="130166252">
 					<int key="NSColorSpace">1</int>
 					<bytes key="NSRGB">MSAxIDEAA</bytes>
@@ -121,7 +120,6 @@
 							<int key="NSvFlags">274</int>
 							<string key="NSFrame">{{0, 64}, {320, 699}}</string>
 							<reference key="NSSuperview"/>
-							<reference key="NSNextKeyView"/>
 							<reference key="IBUIBackgroundColor" ref="130166252"/>
 							<bool key="IBUIOpaque">NO</bool>
 							<bool key="IBUIClipsSubviews">YES</bool>
@@ -572,7 +570,6 @@
 					<int key="NSvFlags">266</int>
 					<string key="NSFrame">{{0, 975}, {768, 49}}</string>
 					<reference key="NSSuperview"/>
-					<reference key="NSNextKeyView"/>
 					<object class="NSColor" key="IBUIBackgroundColor">
 						<int key="NSColorSpace">3</int>
 						<bytes key="NSWhite">MCAwAA</bytes>
@@ -633,7 +630,6 @@
 						<int key="NSvFlags">292</int>
 						<string key="NSFrame">{{20, 137}, {215, 37}}</string>
 						<reference key="NSSuperview" ref="373050824"/>
-						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:241</string>
 						<bool key="IBUIOpaque">NO</bool>
 						<string key="targetRuntimeIdentifier">IBIPadFramework</string>
@@ -787,6 +783,14 @@
 						<reference key="destination" ref="467149819"/>
 					</object>
 					<int key="connectionID">696</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">tabcontroller</string>
+						<reference key="source" ref="664661524"/>
+						<reference key="destination" ref="999326593"/>
+					</object>
+					<int key="connectionID">707</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchEventConnection" key="connection">
@@ -1480,7 +1484,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">706</int>
+			<int key="maxID">707</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes"/>
 		<int key="IBDocument.localizationMode">0</int>

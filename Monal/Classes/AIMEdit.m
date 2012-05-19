@@ -65,6 +65,8 @@
 - (void)viewDidLoad 
 {
     [super viewDidLoad];
+    [theTable setBackgroundView:nil];
+    [theTable setBackgroundView:[[UIView alloc] init] ];
     theTable.backgroundColor = [[UIColor alloc] initWithPatternImage:[UIImage imageNamed:@"carbon3.jpg"]];
     
     

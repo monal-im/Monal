@@ -142,6 +142,8 @@
 	debug_NSLog(@"buddy add did  appear");
     
    
+    self.view.backgroundColor = [[UIColor alloc] initWithPatternImage:[UIImage imageNamed:@"carbon3.jpg"]];
+
     
     if([[tools machine] isEqualToString:@"iPad"])
     {

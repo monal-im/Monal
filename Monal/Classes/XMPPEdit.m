@@ -64,12 +64,18 @@
 	
 }
 
+
+
 - (void)viewDidLoad 
 {
-  /*  UITapGestureRecognizer *gestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(hideKeyboard)]; // hides the kkyeboard when you tap outside the editing area
+    [super viewDidLoad];
+    theTable.backgroundColor = [[UIColor alloc] initWithPatternImage:[UIImage imageNamed:@"carbon3.jpg"]];
+    
+    
+    UITapGestureRecognizer *gestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(hideKeyboard)]; // hides the kkyeboard when you tap outside the editing area
     gestureRecognizer.cancelsTouchesInView=false; //this prevents it from blocking the button 
     
-    [theTable addGestureRecognizer:gestureRecognizer];*/
+    [theTable addGestureRecognizer:gestureRecognizer];
     
     // gesture stuff worked in OS4 but not in OS3.. was preventing keybaord in textfield
     
@@ -302,6 +308,20 @@ else
 #pragma mark table view datasource methods
 
 //required
+- (UIView *) tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section 
+{
+    UIView *headerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, tableView.bounds.size.width, 30)] ;
+    
+    UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(10, 3, tableView.bounds.size.width - 10, 18)] ;
+    label.text = [self tableView:theTable titleForHeaderInSection:section];
+    label.textColor = [UIColor whiteColor];
+    label.backgroundColor = [UIColor clearColor];
+    [headerView addSubview:label];
+    
+    // [headerView setBackgroundColor:[UIColor clearColor]];
+    return headerView;
+}
+
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {

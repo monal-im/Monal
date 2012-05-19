@@ -174,6 +174,21 @@
 	
 }
 
+- (UIView *) tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section 
+{
+    UIView *headerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, tableView.bounds.size.width, 30)] ;
+     
+    UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(10, 3, tableView.bounds.size.width - 10, 18)] ;
+    label.text = [self tableView:theTable titleForHeaderInSection:section];
+    label.textColor = [UIColor whiteColor];
+    label.backgroundColor = [UIColor clearColor];
+    [headerView addSubview:label];
+    
+       // [headerView setBackgroundColor:[UIColor clearColor]];
+    return headerView;
+}
+
+
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section 
 {
 	NSString* toreturn; 
@@ -345,12 +360,19 @@
 }
 
 
+-(void) viewDidLoad
+{
+    [super viewDidLoad];
+    theTable.backgroundColor = [[UIColor alloc] initWithPatternImage:[UIImage imageNamed:@"carbon3.jpg"]];
+
+}
+
 -(void) viewDidAppear:(BOOL)animated
 {
     
     if(jabber==nil) return; 
     
-
+   
   
 	debug_NSLog(@"status did  appear");
     currentStatus.text=jabber.statusMessage; 

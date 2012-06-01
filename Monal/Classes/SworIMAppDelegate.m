@@ -1393,8 +1393,13 @@ buddylistDS.tabcontroller=tabcontroller;
 	{
 		// The buddy icon dir
 		
-		if([fileManager createDirectoryAtPath:iconPath attributes:nil]) debug_NSLog(@"created dir : %@",iconPath);  else
+		if([fileManager createDirectoryAtPath:iconPath attributes:nil]) 
+        {
+            debug_NSLog(@"created dir : %@",iconPath); 
+        }else
+        {
 			debug_NSLog(@"coud not create : %@",iconPath) ;
+        }
 		
 		
 	}

@@ -600,7 +600,7 @@
 	*/
 		
 		[chatView performSelectorOnMainThread:@selector(stringByEvaluatingJavaScriptFromString:) withObject:thejsstring waitUntilDone:NO];
-			debug_NSLog(thejsstring); 
+			debug_NSLog(@"%@",thejsstring); 
 		
 		lastFrom=	[NSString stringWithString:[therow objectAtIndex:0]];
 			
@@ -749,7 +749,7 @@
 	//note: default to png  we want to check a table/array to  look  up  what the file name really is...
 	NSString* buddyfile = [NSString stringWithFormat:@"%@/%@.png", iconPath,msguser ]; 
 	
-	debug_NSLog(buddyfile);
+	debug_NSLog(@"%@",buddyfile);
 	if([fileManager fileExistsAtPath:buddyfile])
 	{
 		
@@ -762,7 +762,7 @@
 		//jpg
 		
 		NSString* buddyfile2 = [NSString stringWithFormat:@"%@/%@.jpg", iconPath,msguser]; 
-		debug_NSLog(buddyfile2);
+		debug_NSLog(@"%@",buddyfile2);
 		if([fileManager fileExistsAtPath:buddyfile2])
 		{
 			theimage= buddyfile2;

@@ -416,7 +416,7 @@
     
     
     //****ipod, ipad vs iphone
-	debug_NSLog([UIDevice currentDevice].model); 
+	debug_NSLog(@"%@",[UIDevice currentDevice].model); 
 	if([[UIDevice currentDevice].model isEqualToString:@"iPhone"])
 	{
         //for vibrataion 

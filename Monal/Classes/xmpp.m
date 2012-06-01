@@ -2132,7 +2132,14 @@ debug_NSLog(@"ended this element: %@", elementName);
 			//[fileManager copyItemAtPath:defaultDBPath toPath:writableDBPath error:&error];
 			if([[self dataWithBase64EncodedString:vCardPhotoBinval] writeToFile:writablePath 
 							   atomically:NO 
-				] ) debug_NSLog(@"wrote file"); else  debug_NSLog(@"failed to write"); 
+				] )
+            {
+                debug_NSLog(@"wrote file"); 
+            }
+            else 
+            {
+                debug_NSLog(@"failed to write"); 
+            }
 			
 		
 			//set db entry
@@ -2636,7 +2643,10 @@ debug_NSLog(@"ended this element: %@", elementName);
 		   )
 		{
 			debug_NSLog(@"last char is: %c", [stanza characterAtIndex:[stanza length]-1]); 
-			if([stanza length]<[block length]) debug_NSLog(@"malformed xml .. recovering"); 
+			if([stanza length]<[block length]) 
+            {
+                debug_NSLog(@"malformed xml .. recovering"); 
+            }
 			else
 			{
 				debug_NSLog(@" there is more to read"); 

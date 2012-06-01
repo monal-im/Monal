@@ -278,7 +278,7 @@ thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 	
 
 	
-	debug_NSLog([[thelist objectAtIndex:[indexPath indexAtPosition:1]] objectAtIndex:0]); 
+	debug_NSLog(@"%@",[[thelist objectAtIndex:[indexPath indexAtPosition:1]] objectAtIndex:0]); 
 	
 	if([[[thelist objectAtIndex:[indexPath indexAtPosition:1]] objectAtIndex:2] isEqualToString:@""])
 		thecell.textLabel.text =[[thelist objectAtIndex:[indexPath indexAtPosition:1]] objectAtIndex:0];

@@ -254,7 +254,7 @@ thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
            // buddyname.backgroundColor = [UIColor clearColor];
 
 			NSString* buddyfile = [NSString stringWithFormat:@"%@.png", thecell.textLabel.text]; 
-			debug_NSLog(buddyfile);
+			debug_NSLog(@"%@",buddyfile);
 			if([buddyfile isEqualToString:@"GTalk.png"])
 				buddyfile=[NSString stringWithString:@"google.png"];
 			

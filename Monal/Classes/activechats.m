@@ -322,7 +322,7 @@ if((actionSheet.tag==1) && (buttonIndex==0))
 
 	//Initialize the label with the rectangle.
 	
-	debug_NSLog([[thelist objectAtIndex:[indexPath indexAtPosition:1]] objectAtIndex:0]); 
+	debug_NSLog(@"%@",[[thelist objectAtIndex:[indexPath indexAtPosition:1]] objectAtIndex:0]); 
 	
 	if([[[thelist objectAtIndex:[indexPath indexAtPosition:1]] objectAtIndex:2] isEqualToString:@""])
 		buddyname.text =[[thelist objectAtIndex:[indexPath indexAtPosition:1]] objectAtIndex:0];

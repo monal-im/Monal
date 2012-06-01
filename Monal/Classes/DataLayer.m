@@ -1202,7 +1202,7 @@ static DataLayer *sharedInstance=nil;
 	 
     
 	NSString* query=[NSString stringWithFormat:@"insert into messages values (null, %@, '%@',  '%@', '%@', '%@', %d, '%@');", accountNo, from, to, 	dateString, [message stringByReplacingOccurrencesOfString:@"'" withString:@"''"], notice, actualfrom];
-	debug_NSLog(query); 
+	debug_NSLog(@"%@",query); 
 	if([self executeNonQuery:query]!=false) 
 	{
 		
@@ -1282,7 +1282,7 @@ static DataLayer *sharedInstance=nil;
 	
 	
 	NSString* query=[NSString stringWithFormat:@"select message_from, message, thetime from (select message_from, message, timestamp as thetime, message_history_id from message_history where account_id=%@ and (message_from='%@' or message_to='%@')  and date(timestamp)='%@' order by message_history_id desc) order by message_history_id asc ", accountNo, buddy, buddy, date];
-	debug_NSLog(query); 
+	debug_NSLog(@"%@",query); 
 	NSArray* toReturn = [self executeReader:query];
 	
 	if(toReturn!=nil)
@@ -1459,7 +1459,7 @@ static DataLayer *sharedInstance=nil;
 	
 	
 	NSString* query=[NSString stringWithFormat:@"select af, message, thetime from (select ifnull(actual_from, message_from) as af, message,     timestamp  as thetime, message_history_id from message_history where account_id=%@ and (message_from='%@' or message_to='%@') order by message_history_id desc limit 10) order by message_history_id asc",accountNo, buddy, buddy];
-	debug_NSLog(query); 
+	debug_NSLog(@"%@", query); 
 	NSArray* toReturn = [self executeReader:query];
 		
 	if(toReturn!=nil)

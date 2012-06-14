@@ -10,7 +10,7 @@
 #import <AVFoundation/AVFoundation.h>
 #import <CoreAudio/CoreAudioTypes.h>
 
-@interface RTP : NSObject <AVAudioRecorderDelegate>
+@interface RTP : NSObject <AVAudioRecorderDelegate, AVAudioPlayerDelegate>
 {
     NSURL * recordedTmpFile;
     AVAudioRecorder * recorder;

@@ -83,22 +83,13 @@ void checkerror(int rtperr)
     [audioSession setActive:YES error: &error];
     
     //Begin the recording session.
-    //Error handling removed. Please add to your own code.
-    
-    //Setup the dictionary object with all the recording settings that this 
-    //Recording sessoin will use
-    //Its not clear to me which of these are required and which are the bare minimum.
-    //This is a good resource: http://www.totodotnet.net/tag/avaudiorecorder/
+ 
     NSMutableDictionary* recordSetting = [[NSMutableDictionary alloc] init];
     [recordSetting setValue :[NSNumber numberWithInt:kAudioFormatALaw] forKey:AVFormatIDKey]; // PCMA Audio
     [recordSetting setValue:[NSNumber numberWithFloat:8000] forKey:AVSampleRateKey]; 
     [recordSetting setValue:[NSNumber numberWithInt: 1] forKey:AVNumberOfChannelsKey];
 
-    //Now that we have our settings we are going to instanciate an instance of our recorder instance.
-    //Generate a temp file for use by the recording.
-    //This sample was one I found online and seems to be a good choice for making a tmp file that
-    //will not overwrite an existing one.
-    //I know this is a mess of collapsed things into 1 call. I can break it out if need be.
+  
     recordedTmpFile = [NSURL fileURLWithPath:[NSTemporaryDirectory() stringByAppendingPathComponent: [NSString stringWithString: @"temp_voip.caf"]]];
     
     debug_NSLog(@"Using File called: %@",recordedTmpFile);
@@ -117,6 +108,8 @@ void checkerror(int rtperr)
     //There is an optional method for doing the recording for a limited time see 
     [recorder recordForDuration:(NSTimeInterval) 3];
     
+    //load intodata
+    NSData* audioData= [NSData dataWithContentsOfURL:recordedTmpFile];
     
     
 	//for (i = 1 ; i <= num ; i++)
@@ -125,7 +118,7 @@ void checkerror(int rtperr)
 		
 		// send the packet
 		
-        status = sess.SendPacket((void *)"1234567890",10,0,false,10);
+        status = sess.SendPacket((void *)[audioData bytes],[audioData length],0,false,10);
 		checkerror(status);
 		
 		sess.BeginDataAccess();

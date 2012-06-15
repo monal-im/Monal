@@ -79,7 +79,8 @@
         // The kSecAttrGeneric attribute is used to store a unique string that is used
         // to easily identify and find this keychain item. The string is first
         // converted to an NSData object:
-		
+        
+		 [keychainData setObject:@"Monal" forKey:(__bridge id)kSecAttrService];
        [genericPasswordQuery setObject:accountno forKey:(__bridge id)kSecAttrAccount ];
 		
 		// Return the attributes of the first match only:
@@ -105,6 +106,7 @@
             // Put default values into the keychain if no matching
             // keychain item is found:
             [self resetKeychainItem];
+             [keychainData setObject:@"Monal" forKey:(__bridge id)kSecAttrService];
 			[keychainData setObject:accountno forKey:(__bridge id)kSecAttrAccount ];
 			debug_NSLog(@"reset keychain"); 
         } else {
@@ -161,6 +163,7 @@
     [keychainData setObject:@"Service" forKey:(id)kSecAttrService];
     [keychainData setObject:@"Your comment here." forKey:(id)kSecAttrComment];*/
 	
+    [keychainData setObject:@"Monal" forKey:(__bridge id)kSecAttrService];
 	[keychainData setObject:@"Account" forKey:(__bridge id)kSecAttrAccount];
     [keychainData setObject:@"password" forKey:(__bridge id)kSecValueData];
 }

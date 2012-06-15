@@ -3165,9 +3165,9 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	
 	if((statusMessage==nil)
 		|| ([statusMessage isEqualToString:@""]))
-		xmpprequest=[NSString stringWithFormat: @"<presence> <priority>%d</priority> <c   xmlns=\"http://jabber.org/protocol/caps\"  node=\"http://monal.im\" ver=\"%@\"  ext='avatar pmuc-v1 voice-v1  video-v1 camera-v1' />  </presence>",XMPPPriority, [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"]];
+		xmpprequest=[NSString stringWithFormat: @"<presence> <priority>%d</priority> <c  node=\"http://monal.im\" ver=\"%@\"  xmlns=\"http://jabber.org/protocol/caps\"    ext='pmuc-v1 voice-v1  video-v1 camera-v1' />  </presence>",XMPPPriority, [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"]];
 	else
-		xmpprequest=[NSString stringWithFormat: @"<presence><priority>%d</priority> <c  ext='avatar pmuc-v1 voice-v1  video-v1 camera-v1' xmlns=\"http://jabber.org/protocol/caps\" ver=\"1.0\"  />   <status>%@</status></presence>",XMPPPriority,
+		xmpprequest=[NSString stringWithFormat: @"<presence><priority>%d</priority> <c  node=\"http://monal.im\" ver=\"%@\"  xmlns=\"http://jabber.org/protocol/caps\"    ext='pmuc-v1 voice-v1  video-v1 camera-v1' />    <status>%@</status></presence>",XMPPPriority,
                      [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"],   statusMessage];
 	
 	

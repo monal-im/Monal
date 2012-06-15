@@ -69,17 +69,21 @@ void checkerror(int rtperr)
     //We call this to start the recording process and initialize 
     //the subsstems so that when we actually say "record" it starts right away.
     [recorder prepareToRecord];
+
     //Start the actual Recording
     //[recorder record];
     
     //There is an optional method for doing the recording for a limited time see 
     [recorder recordForDuration:(NSTimeInterval) 10];
     
+    
+
+    
     //load intodata
     int max_packet=1054; 
     NSError* errorPtr=nil; 
-    NSData* audioData=[NSData dataWithContentsOfFile:@"/Users/anurodhp/Desktop/temp_voip.caf"
-                                              options:NSDataReadingUncached error:&errorPtr ]; 
+    NSData* audioData=[NSData dataWithContentsOfFile:@"/var/folders/tm/7xv6g0416rs6zb1453pvjd800000gp/T/temp_voip.caf"
+                                              options:NSDataReadingMapped error:&errorPtr ]; 
     
     
     if(errorPtr!=nil)
@@ -149,7 +153,7 @@ void checkerror(int rtperr)
         debug_NSLog(@"Sending packet %d/%d\n  starting %d sized %d "
                     ,i,packet_num, start,  end );
         
-        status = sess.SendPacket((void *)bytes,end,0,false,1);
+        status = sess.SendPacket((void *)bytes,end,8,false,8); // pt=8  is PCMA ,  timestamp 8 is 8Khz
 		checkerror(status);
 		
 		sess.BeginDataAccess();

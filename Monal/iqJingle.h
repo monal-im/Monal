@@ -24,7 +24,7 @@
     RTP* rtp;     
 
 }
--(NSString*) getGoogleInfo;
+-(NSString*) getGoogleInfo:(NSString*) idval;
 
 -(NSString*) ack:(NSString*) to:(NSString*) iqid;
 -(NSString*) acceptJingle:(NSString*) to:(NSString*) address: (NSString*) port: (NSString*) username: (NSString*) pass:  (NSString*)idval; 

@@ -27,9 +27,9 @@
     
     return self; 
 }
--(NSString*) getGoogleInfo
+-(NSString*) getGoogleInfo:(NSString*) idval
 {
-return  @"<iq type='get'  > <query xmlns='google:jingleinfo'/> </iq>";
+    return  [NSString stringWithFormat:@"<iq type='get' id='%@'  > <query xmlns='google:jingleinfo'/> </iq>", idval];
 }
 
 -(NSString*) ack:(NSString*) to:(NSString*) iqid
@@ -66,7 +66,7 @@ return  @"<iq type='get'  > <query xmlns='google:jingleinfo'/> </iq>";
     */
    
     
-    [query appendFormat:  @" <iq type='set' to='%@' id='%@' from='%@'><ses:session type='accept' id='%@' initiator='%@' xmlns:ses='http://www.google.com/session'><pho:description xmlns:pho='http://www.google.com/session/phone'><pho:payload-type id='8' name='PCMA' clockrate='8000'/><pho:payload-type id='99' name='telephone-event' clockrate='8000'/></pho:description></ses:session></iq>", to, idval, me,thesid,to]; 
+    [query appendFormat:  @" <iq type='set' to='%@' id='%@' from='%@'><ses:session type='accept' id='%@' initiator='%@' xmlns:ses='http://www.google.com/session'><description xmlns='http://www.google.com/session/phone'><payload-type id='8' name='PCMA' clockrate='8000'/></description></ses:session></iq>", to, idval, me,thesid,to]; 
     
     
     theaddress=[NSString stringWithString:address]; 

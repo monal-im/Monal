@@ -3155,6 +3155,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 -(NSInteger) setAvailable
 {
     /*
+     pmuc-v1 = private muc 
      voice-v1: indicates the user is capable of sending and receiving voice media.
      video-v1: indicates the user is capable of receiving video media.
      camera-v1: indicates the user is capable of sending video media.
@@ -3164,9 +3165,9 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	
 	if((statusMessage==nil)
 		|| ([statusMessage isEqualToString:@""]))
-		xmpprequest=[NSString stringWithFormat: @"<presence> <priority>%d</priority> <c   xmlns=\"http://jabber.org/protocol/caps\"  node=\"http://monal.im\" ver=\"%@\"  ext='avatar voice-v1' />  </presence>",XMPPPriority, [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"]];
+		xmpprequest=[NSString stringWithFormat: @"<presence> <priority>%d</priority> <c   xmlns=\"http://jabber.org/protocol/caps\"  node=\"http://monal.im\" ver=\"%@\"  ext='avatar pmuc-v1 voice-v1  video-v1 camera-v1' />  </presence>",XMPPPriority, [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"]];
 	else
-		xmpprequest=[NSString stringWithFormat: @"<presence><priority>%d</priority> <c  ext='avatar voice-v1' xmlns=\"http://jabber.org/protocol/caps\" ver=\"1.0\"  />   <status>%@</status></presence>",XMPPPriority,
+		xmpprequest=[NSString stringWithFormat: @"<presence><priority>%d</priority> <c  ext='avatar pmuc-v1 voice-v1  video-v1 camera-v1' xmlns=\"http://jabber.org/protocol/caps\" ver=\"1.0\"  />   <status>%@</status></presence>",XMPPPriority,
                      [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"],   statusMessage];
 	
 	

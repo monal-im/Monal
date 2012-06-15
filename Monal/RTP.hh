@@ -7,8 +7,15 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <AVFoundation/AVFoundation.h>
+#import <CoreAudio/CoreAudioTypes.h>
 
-@interface RTP : NSObject
+@interface RTP : NSObject <AVAudioRecorderDelegate, AVAudioPlayerDelegate>
+{
+    NSURL * recordedTmpFile;
+    AVAudioRecorder * recorder;
+  
+}
 
 -(void) RTPConnect:(NSString*) IP:(int) port;  
 

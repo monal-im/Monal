@@ -71,13 +71,54 @@ void checkerror(int rtperr)
 	status = sess.AddDestination(addr);
 	checkerror(status);
 	
+    
+    //Instanciate an instance of the AVAudioSession object.
+    AVAudioSession * audioSession = [AVAudioSession sharedInstance];
+    //Setup the audioSession for playback and record. 
+    //We could just use record and then switch it to playback leter, but
+    //since we are going to do both lets set it up once.
+      NSError * error;
+    [audioSession setCategory:AVAudioSessionCategoryPlayAndRecord error: &error];
+    //Activate the session
+    [audioSession setActive:YES error: &error];
+    
+    //Begin the recording session.
+ 
+    NSMutableDictionary* recordSetting = [[NSMutableDictionary alloc] init];
+    [recordSetting setValue :[NSNumber numberWithInt:kAudioFormatALaw] forKey:AVFormatIDKey]; // PCMA Audio
+    [recordSetting setValue:[NSNumber numberWithFloat:8000] forKey:AVSampleRateKey]; 
+    [recordSetting setValue:[NSNumber numberWithInt: 1] forKey:AVNumberOfChannelsKey];
+
+  
+    recordedTmpFile = [NSURL fileURLWithPath:[NSTemporaryDirectory() stringByAppendingPathComponent: [NSString stringWithString: @"temp_voip.caf"]]];
+    
+    debug_NSLog(@"Using File called: %@",recordedTmpFile);
+    
+    //Setup the recorder to use this file and record to it.
+    recorder = [[ AVAudioRecorder alloc] initWithURL:recordedTmpFile settings:recordSetting error:&error];
+    //Use the recorder to start the recording.
+    //Im not sure why we set the delegate to self yet. 
+    //Found this in antother example, but Im fuzzy on this still.
+    [recorder setDelegate:self];
+    //We call this to start the recording process and initialize 
+    //the subsstems so that when we actually say "record" it starts right away.
+    [recorder prepareToRecord];
+    //Start the actual Recording
+    [recorder record];
+    //There is an optional method for doing the recording for a limited time see 
+    [recorder recordForDuration:(NSTimeInterval) 3];
+    
+    //load intodata
+    NSData* audioData= [NSData dataWithContentsOfURL:recordedTmpFile];
+    
+    
 	//for (i = 1 ; i <= num ; i++)
 	{
 		debug_NSLog(@"\nSending packet %d/%d\n",i,num);
 		
 		// send the packet
 		
-        status = sess.SendPacket((void *)"1234567890",10,0,false,10);
+        status = sess.SendPacket((void *)[audioData bytes],[audioData length],0,false,10);
 		checkerror(status);
 		
 		sess.BeginDataAccess();

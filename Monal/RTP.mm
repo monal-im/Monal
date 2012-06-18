@@ -51,9 +51,22 @@ void AudioInputCallback(
 	static int count = 0;
 	RecordState* recordState = (RecordState*)inUserData;	
     
-    //reenquue buffer to collect more
-	AudioQueueEnqueueBuffer(recordState->queue, inBuffer, 0, NULL);
+  /*  if(!recordState->recording)
+    {
+        debug_NSLog(@"error not recording");
+        return;
+    }
+    */   
     
+    //reenquue buffer to collect more
+	OSStatus status= AudioQueueEnqueueBuffer(recordState->queue, inBuffer, 0, NULL);
+    if(status==0)
+    {
+    debug_NSLog("audio reenqueue ok")
+    }
+    else {
+        debug_NSLog(@"audio reenqueue error %d", status);
+    }
 	++count;
 	debug_NSLog("Got buffer %d\n", count);
 }

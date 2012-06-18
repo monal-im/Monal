@@ -53,6 +53,11 @@
 {
     rtp =[RTP alloc];
     [rtp RTPConnect:theaddress:[theport intValue]];
+    
+    	
+	
+  
+    
 }
 
 -(NSString*) acceptJingle:(NSString*) to:(NSString*) address: (NSString*) port: (NSString*) username: (NSString*) pass:  (NSString*)idval

@@ -25,6 +25,9 @@
 
 @implementation RTP
 
+
+#pragma mark RTP
+
 void checkerror(int rtperr)
 {
 	if (rtperr < 0)
@@ -35,6 +38,7 @@ void checkerror(int rtperr)
 	}
 }
 
+#pragma mark audio Queue
 
 void AudioInputCallback(
                         void *inUserData, // 1
@@ -46,14 +50,18 @@ void AudioInputCallback(
 {
 	static int count = 0;
 	RecordState* recordState = (RecordState*)inUserData;	
+    
+    //reenquue buffer to collect more
 	AudioQueueEnqueueBuffer(recordState->queue, inBuffer, 0, NULL);
     
 	++count;
 	debug_NSLog("Got buffer %d\n", count);
 }
 
--(void) RTPConnect:(NSString*) IP:(int) port; 
-{    
+#pragma mark RTP cocoa wrapper 
+
+-(void) setupAudio
+{
     
     //********* Audio Queue ********/
     
@@ -71,16 +79,25 @@ void AudioInputCallback(
     kLinearPCMFormatFlagIsBigEndian |
     kLinearPCMFormatFlagIsSignedInteger |
     kLinearPCMFormatFlagIsPacked;
-
-
+    
+    
     OSStatus audioStatus = AudioQueueNewInput(
-                                         &recordState.dataFormat, // 1
-                                         AudioInputCallback, // 2
-                                         &recordState,  // 3
-                                         CFRunLoopGetCurrent(),  // 4
-                                         kCFRunLoopCommonModes, // 5
-                                         0,  // 6
-                                         &recordState.queue);  // 7
+                                              &recordState.dataFormat, // 1
+                                              AudioInputCallback, // 2
+                                              &recordState,  // 3
+                                              CFRunLoopGetCurrent(),  // 4
+                                              kCFRunLoopCommonModes, // 5
+                                              0,  // 6
+                                              &recordState.queue);  // 7
+    
+    if(audioStatus==0)
+    {
+        debug_NSLog(@"new queue started ok");
+    }
+    else {
+        debug_NSLog(@"new queue start failed");
+        return; 
+    }   
     
     
     for(int i = 0; i < NUM_BUFFERS; i++)
@@ -92,15 +109,24 @@ void AudioInputCallback(
     }
     
     
-     audioStatus = AudioQueueStart(recordState.queue, NULL);
-
+    audioStatus = AudioQueueStart(recordState.queue, NULL);
+    
     if(audioStatus==0)
     {
         debug_NSLog(@"record started ok");
     }
     else {
         debug_NSLog(@"error starting record");
-    }   
+        return;
+    }  
+}
+
+-(void) RTPConnect:(NSString*) IP:(int) port; 
+{    
+ 
+    //needs to be run in main thread
+    [self performSelectorOnMainThread :@selector(setupAudio)  withObject:nil waitUntilDone:YES];
+   
     
     //******* RTP *****/
     

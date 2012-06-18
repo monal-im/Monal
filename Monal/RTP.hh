@@ -26,6 +26,9 @@ typedef struct
     AudioQueueBufferRef buffers[NUM_BUFFERS];
 } RecordState;
 
+-(void) setupAudio; 
+
 -(void) RTPConnect:(NSString*) IP:(int) port;  
+
 
 @end

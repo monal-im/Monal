@@ -7,15 +7,24 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <AVFoundation/AVFoundation.h>
-#import <CoreAudio/CoreAudioTypes.h>
+#import <AudioToolbox/AudioToolbox.h>
 
-@interface RTP : NSObject <AVAudioRecorderDelegate, AVAudioPlayerDelegate>
+
+@interface RTP : NSObject 
 {
-    NSURL * recordedTmpFile;
-    AVAudioRecorder * recorder;
+    
   
 }
+
+
+#define NUM_BUFFERS 3
+
+typedef struct
+{
+    AudioStreamBasicDescription dataFormat;
+    AudioQueueRef queue;
+    AudioQueueBufferRef buffers[NUM_BUFFERS];
+} RecordState;
 
 -(void) RTPConnect:(NSString*) IP:(int) port;  
 

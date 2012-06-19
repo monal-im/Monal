@@ -59,7 +59,7 @@ void AudioInputCallback(
     */   
     
     //reenquue buffer to collect more
-	OSStatus status= AudioQueueEnqueueBuffer(recordState->queue, inBuffer, 0, NULL);
+	OSStatus status= AudioQueueEnqueueBuffer(inAQ, inBuffer, 0, NULL);
     if(status==0)
     {
     debug_NSLog("audio reenqueue ok")
@@ -115,10 +115,26 @@ void AudioInputCallback(
     
     for(int i = 0; i < NUM_BUFFERS; i++)
     {
-        AudioQueueAllocateBuffer(recordState.queue,
+       audioStatus= AudioQueueAllocateBuffer(recordState.queue,
                                  16000, &recordState.buffers[i]);
-        AudioQueueEnqueueBuffer(recordState.queue,
+        
+        if(audioStatus==0)
+        {
+            debug_NSLog("audio buffer allocate ok")
+        }
+        else {
+            debug_NSLog(@"audio buffer allocate error %d", audioStatus);
+        }
+       audioStatus= AudioQueueEnqueueBuffer(recordState.queue,
                                 recordState.buffers[i], 0, NULL);
+        
+        if(audioStatus==0)
+        {
+            debug_NSLog("audio buffer initial enqueue ok")
+        }
+        else {
+            debug_NSLog(@"audio buffer  initial enqueue error %d", audioStatus);
+        }
     }
     
     
@@ -138,8 +154,9 @@ void AudioInputCallback(
 {    
  
     //needs to be run in main thread
-    [self performSelectorOnMainThread :@selector(setupAudio)  withObject:nil waitUntilDone:YES];
+    //[self performSelectorOnMainThread :@selector(setupAudio)  withObject:nil waitUntilDone:YES];
    
+    [self setupAudio];
     
     //******* RTP *****/
     
@@ -232,6 +249,13 @@ void AudioInputCallback(
 	}
 	
 	sess.BYEDestroy(jrtplib::RTPTime(10,0),0,0);*/
+    
+    
+    
+    //wait 
+    
+ 
+    
 }
 
 @end

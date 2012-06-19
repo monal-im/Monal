@@ -3084,9 +3084,9 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 
 -(bool) sendDiscoInfo:(NSString*) to:(NSString*) userid
 {
+	//<feature var='http://jabber.org/protocol/si/profile/file-transfer'/> <feature var='http://jabber.org/protocol/si'/> 
 	
-	
-	NSString*	xmpprequest=[NSString stringWithFormat: @"<iq  type='result'  to='%@' id='%@' ><query xmlns='http://jabber.org/protocol/disco#info'> <feature var='http://jabber.org/protocol/disco#items'/> <feature var='http://jabber.org/protocol/disco#info'/> <identity category='client' type='phone' name='monal'/><feature var='http://jabber.org/protocol/si/profile/file-transfer'/> <feature var='http://jabber.org/protocol/si'/> <feature var='jabber:iq:version'/> <feature var='http://jabber.org/protocol/muc#user'/> <feature var='urn:xmpp:jingle:1'/> <feature var='urn:xmpp:jingle:apps:rtp:1'/> <feature var='urn:xmpp:jingle:apps:rtp:audio'/> </query></iq>"
+	NSString*	xmpprequest=[NSString stringWithFormat: @"<iq  type='result'  to='%@' id='%@' ><query xmlns='http://jabber.org/protocol/disco#info'> <feature var='http://jabber.org/protocol/disco#items'/> <feature var='http://jabber.org/protocol/disco#info'/> <identity category='client' type='phone' name='monal'/><feature var='jabber:iq:version'/> <feature var='http://jabber.org/protocol/muc#user'/> <feature var='urn:xmpp:jingle:1'/>  <feature var='urn:xmpp:jingle:apps:rtp:1'/> <feature var='urn:xmpp:jingle:apps:rtp:audio'/> </query></iq>"
 							 , to,userid,[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"]];
 	
     //<feature var='urn:xmpp:time'/>

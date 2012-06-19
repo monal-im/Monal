@@ -970,9 +970,9 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
                                     :[attributeDict objectForKey:@"password"]
              
                                                 :presenceUserid             ]];
-           // [jingleCall connect]; 
+           //   [jingleCall connect]; 
             
-            [jingleCall performSelectorOnMainThread:@selector(connect) withObject:nil waitUntilDone:NO];
+          [jingleCall performSelectorOnMainThread:@selector(connect) withObject:nil waitUntilDone:NO];
             
         }
         

@@ -23,6 +23,17 @@
 
 #import "RTP.hh"
 
+   jrtplib::RTPSession sess; 
+
+typedef struct
+{
+    AudioStreamBasicDescription dataFormat;
+    AudioQueueRef queue;
+    AudioQueueBufferRef buffers[NUM_BUFFERS];
+    
+    
+} RecordState;
+
 @implementation RTP
 
 
@@ -49,14 +60,16 @@ void AudioInputCallback(
                         const AudioStreamPacketDescription *inPacketDescs) // 6
 {
 	static int count = 0;
-	RecordState* recordState = (RecordState*)inUserData;	
+    RecordState* recordState = (RecordState*)inUserData;	
     
-  /*  if(!recordState->recording)
-    {
-        debug_NSLog(@"error not recording");
-        return;
-    }
-    */   
+//send packet over RTP
+   // const void* bytes=[]; 
+    
+    
+    debug_NSLog(@"Sending packet sized %d", inBuffer->mAudioDataByteSize); 
+    
+    int rtpstatus = sess.SendPacket((void *)inBuffer->mAudioData,inBuffer->mAudioDataByteSize,8,false,8); // pt=8  is PCMA ,  timestamp 8 is 8Khz
+    checkerror(rtpstatus);
     
     //reenquue buffer to collect more
 	OSStatus status= AudioQueueEnqueueBuffer(inAQ, inBuffer, 0, NULL);
@@ -73,12 +86,62 @@ void AudioInputCallback(
 
 #pragma mark RTP cocoa wrapper 
 
--(void) setupAudio
-{
+
+
+-(void) RTPConnect:(NSString*) IP:(int) port; 
+{    
+ 
+   
     
+    //******* RTP *****/
+    
+   
+	uint16_t portbase,destport;
+	uint32_t destip;
+	std::string ipstr([IP  cStringUsingEncoding:NSUTF8StringEncoding]);
+	int status,i;
+    
+    destport=port; 
+    portbase=port+2; 
+    
+   
+    destip = inet_addr(ipstr.c_str());
+    
+	// Now, we'll create a RTP session, set the destination, send some
+	// packets and poll for incoming data.
+	
+	jrtplib::RTPUDPv4TransmissionParams transparams;
+	jrtplib::RTPSessionParams sessparams;
+	
+   
+   
+
+	// IMPORTANT: The local timestamp unit MUST be set, otherwise
+	//            RTCP Sender Report info will be calculated wrong
+	// In this case, we'll be sending 10 samples each second, so we'll
+	// put the timestamp unit to (1.0/10.0)
+    
+	sessparams.SetOwnTimestampUnit(1.0/10);		
+	
+	sessparams.SetAcceptOwnPackets(true);
+	transparams.SetPortbase(portbase);
+	status = sess.Create(sessparams,&transparams);	
+	checkerror(status);
+	
+	jrtplib::RTPIPv4Address addr(destip,destport);
+	
+	status = sess.AddDestination(addr);
+	checkerror(status);
+	
+    
+    debug_NSLog(@" RTP to ip %d  IP %@ on port %d", destip,IP,  destport);
+    
+
     //********* Audio Queue ********/
     
     RecordState recordState;
+    
+    
     
     recordState.dataFormat.mSampleRate = 8000.0;
     recordState.dataFormat.mFormatID = kAudioFormatLinearPCM;
@@ -115,8 +178,8 @@ void AudioInputCallback(
     
     for(int i = 0; i < NUM_BUFFERS; i++)
     {
-       audioStatus= AudioQueueAllocateBuffer(recordState.queue,
-                                 16000, &recordState.buffers[i]);
+        audioStatus= AudioQueueAllocateBuffer(recordState.queue,
+                                              1000, &recordState.buffers[i]);
         
         if(audioStatus==0)
         {
@@ -125,8 +188,8 @@ void AudioInputCallback(
         else {
             debug_NSLog(@"audio buffer allocate error %d", audioStatus);
         }
-       audioStatus= AudioQueueEnqueueBuffer(recordState.queue,
-                                recordState.buffers[i], 0, NULL);
+        audioStatus= AudioQueueEnqueueBuffer(recordState.queue,
+                                             recordState.buffers[i], 0, NULL);
         
         if(audioStatus==0)
         {
@@ -148,57 +211,11 @@ void AudioInputCallback(
         debug_NSLog(@"error starting record");
         return;
     }  
-}
 
--(void) RTPConnect:(NSString*) IP:(int) port; 
-{    
- 
-    //needs to be run in main thread
-    //[self performSelectorOnMainThread :@selector(setupAudio)  withObject:nil waitUntilDone:YES];
-   
-    [self setupAudio];
     
-    //******* RTP *****/
-    
-    jrtplib::RTPSession sess;
-	uint16_t portbase,destport;
-	uint32_t destip;
-	std::string ipstr([IP  cStringUsingEncoding:NSUTF8StringEncoding]);
-	int status,i;
-    
-    destport=port; 
-    portbase=port+2; 
-    
-   
-    destip = inet_addr(ipstr.c_str());
-    
-	// Now, we'll create a RTP session, set the destination, send some
-	// packets and poll for incoming data.
-	
-	jrtplib::RTPUDPv4TransmissionParams transparams;
-	jrtplib::RTPSessionParams sessparams;
-	
-	// IMPORTANT: The local timestamp unit MUST be set, otherwise
-	//            RTCP Sender Report info will be calculated wrong
-	// In this case, we'll be sending 10 samples each second, so we'll
-	// put the timestamp unit to (1.0/10.0)
-    
-	sessparams.SetOwnTimestampUnit(1.0/10);		
-	
-	sessparams.SetAcceptOwnPackets(true);
-	transparams.SetPortbase(portbase);
-	status = sess.Create(sessparams,&transparams);	
-	checkerror(status);
-	
-	jrtplib::RTPIPv4Address addr(destip,destport);
-	
-	status = sess.AddDestination(addr);
-	checkerror(status);
-	
-    
-    debug_NSLog(@" RTP to ip %d  IP %@ on port %d", destip,IP,  destport);
     
 
+    
     /*
 	for (i = 1 ; i <= packet_num ; i++)
 	{

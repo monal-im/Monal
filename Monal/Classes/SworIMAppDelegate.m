@@ -1346,8 +1346,8 @@ buddylistDS.tabcontroller=tabcontroller;
 	
 	
 	// initilize database
-	db = [DataLayer alloc] ;
-	[db initDB];
+	db = [DataLayer sharedInstance] ;
+
 	
 	
 		

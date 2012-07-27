@@ -11,11 +11,6 @@
 
 @implementation accounts  
 
-
-
-
-
-
  -(void)logoffClicked
 {
 	[[NSNotificationCenter defaultCenter] 
@@ -40,21 +35,19 @@
 	return YES;
 }
 
-- (void)viewDidAppear:(BOOL)animated
+- (void)viewWillAppear:(BOOL)animated
 {
-	debug_NSLog(@"accuounts appeared"); 
 	
+    debug_NSLog(@"accuounts will  appear");
 	
 	SworIMAppDelegate *app=[[UIApplication sharedApplication] delegate];
-	
 	
 	sectionArray =  [NSArray arrayWithObjects:@"Accounts\n(Only one can be set to login)", @"Add New Account", nil];
 	viewController=app.accountsNavigationController;
 	
 	db=[DataLayer sharedInstance];
 	iconPath=app.iconPath; 
-	
-	/*thelist=[db accountList]; //accounts*/
+
 
 if(first!=true)
 {
@@ -92,8 +85,7 @@ style:UIBarButtonItemStyleBordered
 		 postNotificationName: @"Disconnect" object: self];
 	}
 	
-	[theTable reloadData];
-	; 
+	[theTable reloadData]; 
 	
 }
 
@@ -105,13 +97,11 @@ style:UIBarButtonItemStyleBordered
     [theTable setBackgroundView:[[UIView alloc] init] ];
     theTable.backgroundColor = [[UIColor alloc] initWithPatternImage:[UIImage imageNamed:@"carbon3.jpg"]];
     
+   
 }
 
 -(void)viewDidDisappear:(BOOL)animated
 {
-	
-
-
 	
 	viewController.navigationBar.topItem.leftBarButtonItem=nil; 
 	viewController.navigationBar.topItem.rightBarButtonItem=nil; 
@@ -127,8 +117,7 @@ style:UIBarButtonItemStyleBordered
 		
 	debug_NSLog(@"refreshing accounts "); 
 	thelist=[db accountList];
-	
-	//[theTable reloadData];
+
 	
 	debug_NSLog(@"check to see if enabled account changed"); 
 	

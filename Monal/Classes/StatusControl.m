@@ -369,14 +369,14 @@
 
 }
 
--(void) viewDidAppear:(BOOL)animated
+-(void) viewWillAppear:(BOOL)animated
 {
     
     if(jabber==nil) return; 
     
    
   
-	debug_NSLog(@"status did  appear");
+	debug_NSLog(@"status will   appear");
     currentStatus.text=jabber.statusMessage; 
     debug_NSLog(@"current message %@", jabber.statusMessage);
    

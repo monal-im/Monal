@@ -905,6 +905,7 @@
 		26DFD4A615666B6C007A1621 /* 3rd Party */ = {
 			isa = PBXGroup;
 			children = (
+				2640AF3B14548E7600CB4F60 /* GrowingTextView */,
 				26DFD4A815666B7D007A1621 /* MGSplitViewController */,
 				268BCCFD140B23E10025E4D1 /* jrtplib-static */,
 			);
@@ -927,10 +928,9 @@
 		26EC1C7312295B8800EAF934 /* Core UI */ = {
 			isa = PBXGroup;
 			children = (
-				2640AF3B14548E7600CB4F60 /* GrowingTextView */,
 				2628E50114049B380064131E /* ModalViews */,
-				265571AF122157D500F994E8 /* SlidingMessageViewController.h */,
 				265571B0122157D500F994E8 /* SlidingMessageViewController.m */,
+				265571AF122157D500F994E8 /* SlidingMessageViewController.h */,
 				2601D9AA0FBF255D004DB939 /* chat.h */,
 				2601D9A90FBF255D004DB939 /* chat.m */,
 				2601D9AB0FBF255D004DB939 /* buddylist.m */,

@@ -1,0 +1,39 @@
+
+Monal is a multi protocol IM client that supports XMPP (Jabber) and AIM.   It will connect to any XMPP  chat server e.g. Google talk, facebook chat. It is a direct client and does not transmit your password to a 3rd party.  Monal has been tested heavily with google talk, facebook, openfire  and ejabberd servers.  Monal will work with corporate XMPP servers that require VPN.
+
+2.0.7 changelog
+
+This is a bug fix update.
+
+1. major stability fixes
+2. added tap gesture to dismiss keyboard
+3. added improved 2 pane iPad view in portrait mode
+4. several UI enhancements/cosmetic changes
+
+
+      
+you can connect to any jabber server or use the settings for google, facebook or  AIM servers
+
+to test the  XMPP protocol (used by google, facebook etc) set the 
+username: sworim
+password: imtest
+
+username:radicalninja
+password: imtest
+
+domain: jabbim.com
+server to: jabbim.com
+port: 5222
+ssl:on
+
+
+to Test AIM
+user: monalxmpp
+pass: imtest
+
+
+feel free to send yourself messages 
+
+
+
+

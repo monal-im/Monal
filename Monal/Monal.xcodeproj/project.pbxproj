@@ -424,6 +424,7 @@
 		26727DCB1568353A0010E17A /* carbon3.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = carbon3.jpg; sourceTree = "<group>"; };
 		26731E75133F3F17008098EB /* iqSearch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iqSearch.h; sourceTree = "<group>"; };
 		26731E76133F3F17008098EB /* iqSearch.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = iqSearch.m; sourceTree = "<group>"; };
+		2675143315C23822006A36A3 /* changelog.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = changelog.txt; sourceTree = "<group>"; };
 		2679887612330E8300F90902 /* back.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = back.png; sourceTree = "<group>"; };
 		2679887712330E8300F90902 /* forward.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = forward.png; sourceTree = "<group>"; };
 		267D96021225E56200B328E3 /* About.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = About.xib; sourceTree = "<group>"; };
@@ -987,6 +988,7 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
+				2675143315C23822006A36A3 /* changelog.txt */,
 				26DFD4A615666B6C007A1621 /* 3rd Party */,
 				26AD60DA11A95CB700C39051 /* Emoticons */,
 				26EB845D111644AD005446DD /* Themes */,

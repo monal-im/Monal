@@ -1362,10 +1362,9 @@ static DataLayer *sharedInstance=nil;
 
 -(BOOL) messageHistoryCleanAll:(NSString*) accountNo
 {
-	//returns a buddy's message history
+	//cleans a buddy's message history
 	
-	
-	
+
 	NSString* query=[NSString stringWithFormat:@"delete from message_history where account_id=%@  ",accountNo];
 	//debug_NSLog(query); 
 	if( [self executeNonQuery:query])

@@ -31,11 +31,11 @@
                                                    otherButtonTitles:nil, nil];
     
     popupQuery.actionSheetStyle =  UIActionSheetStyleBlackOpaque;
-    
+     popupQuery.tag=1; 
     //[popupQuery showInView:tableView];
     [popupQuery showFromTabBar:tabcontroller.tabBar];
     
-    popupQuery.tag=1; 
+   
     
 }
 
@@ -170,7 +170,7 @@
 
 if((actionSheet.tag==1) && (buttonIndex==0)) 
 {
-    debug_NSLog(@"closgin all active chats for %@",[[thelist objectAtIndex:[currentPath indexAtPosition:1]] objectAtIndex:0]);
+    debug_NSLog(@"closing all active chats ");
     
     //clean out messages if logging off
    if(![[NSUserDefaults standardUserDefaults] boolForKey:@"Logging"])

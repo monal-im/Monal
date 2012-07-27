@@ -16,7 +16,7 @@
 @synthesize theset; 
 
 //port, server, domain and resource are ignored here 
--(id )init:(NSString*) theserver:(unsigned short) theport:(NSString*) theaccount: (NSString*) theresource: (NSString*) thedomain:(BOOL) SSLsetting : (DataLayer*) thedb:(NSString*) accountNo:(NSString*) tempPass; 
+-(id )init:(NSString*) theserver:(unsigned short) theport:(NSString*) theaccount: (NSString*) theresource: (NSString*) thedomain:(BOOL) SSLsetting : (DataLayer*) thedb:(NSString*) accountNo:(NSString*) tempPass
 {
 	accountNumber=accountNo;
 	
@@ -24,10 +24,12 @@
 	port=theport; 
 	
     statusMessage=nil; 
-    ownName=[NSString stringWithString:account]; 
-    theTempPass= [NSString stringWithString:tempPass];
-
+    ownName=theaccount;
     
+    if(tempPass==nil) theTempPass=nil; else
+    {
+        theTempPass=[NSString stringWithString:tempPass];
+    }
     
 	return [self init2:theaccount:thedb];
 	

@@ -132,7 +132,7 @@ AAgACAAIAAEAAQABAAE</bytes>
 						<reference key="source" ref="372490531"/>
 						<reference key="destination" ref="38903510"/>
 					</object>
-					<int key="connectionID">5</int>
+					<int key="connectionID">8</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchOutletConnection" key="connection">
@@ -211,7 +211,7 @@ AAgACAAIAAEAAQABAAE</bytes>
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">7</int>
+			<int key="maxID">8</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">

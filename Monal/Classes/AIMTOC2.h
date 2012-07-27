@@ -69,7 +69,7 @@ short mySequenceNo;
 	
 }
 
--(id)init:(NSString*) theserver:(unsigned short) theport:(NSString*) theaccount: (NSString*) theresource:(NSString*) thedomain: (BOOL) SSLsetting : (DataLayer*) thedb:(NSString*) accountNo;
+
 -(id)init2:(NSString*) theaccount:(DataLayer*) thedb;
 -(bool) connect;
 -(void) disconnect;

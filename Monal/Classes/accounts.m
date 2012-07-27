@@ -40,22 +40,6 @@
 	
     debug_NSLog(@"accuounts will  appear");
 	
-	SworIMAppDelegate *app=[[UIApplication sharedApplication] delegate];
-	
-	sectionArray =  [NSArray arrayWithObjects:@"Accounts\n(Only one can be set to login)", @"Add New Account", nil];
-	viewController=app.accountsNavigationController;
-	
-	db=[DataLayer sharedInstance];
-	iconPath=app.iconPath; 
-
-
-if(first!=true)
-{
-	thelist2=[db protocolList]; // protocols
-	enabledList=[db enabledAccountList];
-	first=true; 
-}
-	
 	reconnect= [[UIBarButtonItem alloc] initWithTitle:@"Reconnect"
 style:UIBarButtonItemStyleBordered
 									   target:self action:@selector(reconnectClicked)];
@@ -71,7 +55,16 @@ style:UIBarButtonItemStyleBordered
 	viewController.navigationBar.topItem.rightBarButtonItem=reconnect;
 		viewController.navigationBar.topItem.leftBarButtonItem=logoff;
 	
-	debug_NSLog(@" accounts did appear"); 
+
+
+    if(first!=true)
+    {
+        thelist2=[db protocolList]; // protocols
+        enabledList=[db enabledAccountList];
+        first=true; 
+    }
+    
+	debug_NSLog(@" accounts did appear");
 	[self refreshAccounts]; 
 	
 	
@@ -85,8 +78,7 @@ style:UIBarButtonItemStyleBordered
 		 postNotificationName: @"Disconnect" object: self];
 	}
 	
-	[theTable reloadData]; 
-	
+	[theTable performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:NO];
 }
 
 
@@ -97,7 +89,15 @@ style:UIBarButtonItemStyleBordered
     [theTable setBackgroundView:[[UIView alloc] init] ];
     theTable.backgroundColor = [[UIColor alloc] initWithPatternImage:[UIImage imageNamed:@"carbon3.jpg"]];
     
-   
+	SworIMAppDelegate *app=[[UIApplication sharedApplication] delegate];
+    viewController=app.accountsNavigationController;
+	
+	db=[DataLayer sharedInstance];
+	iconPath=app.iconPath;
+
+    sectionArray =  [NSArray arrayWithObjects:@"Accounts\n(Only one can be set to login)", @"Add New Account", nil];
+    
+
 }
 
 -(void)viewDidDisappear:(BOOL)animated

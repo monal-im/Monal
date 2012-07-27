@@ -197,7 +197,7 @@ if((actionSheet.tag==1) && (buttonIndex==0))
         //show deletion error message
         UIAlertView *deleteAlert = [[UIAlertView alloc] 
                                     initWithTitle:@"Chat Close  Error" 
-                                    message:@"Could not clsoe all chat. Please report this to the developer. "
+                                    message:@"Could not close all chats. Please report this to the developer. "
                                     delegate:self cancelButtonTitle:@"Close"
                                     otherButtonTitles: nil];
         [deleteAlert show];
@@ -212,7 +212,7 @@ if((actionSheet.tag==1) && (buttonIndex==0))
 	//if yes pressed on delete
 	if ( (buttonIndex==0) && (sheet=2))
 	{
-		debug_NSLog(@"closgin active chats for %@",[[thelist objectAtIndex:[currentPath indexAtPosition:1]] objectAtIndex:0]);
+		debug_NSLog(@"closing active chats for %@",[[thelist objectAtIndex:[currentPath indexAtPosition:1]] objectAtIndex:0]);
         
      
 		

@@ -5,7 +5,7 @@ Monal is a multi protocol IM client that supports XMPP (Jabber) and AIM.   It wi
 
 This is a bug fix update.
 
-1. major stability fixes
+1. major bugfixes to improve stability 
 2. added tap gesture to dismiss keyboard
 3. added improved 2 pane iPad view in portrait mode
 4. several UI enhancements/cosmetic changes

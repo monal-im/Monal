@@ -573,13 +573,7 @@ self = [super init];
 	
 	//there is no invisible in TOC
     
-//		
-	// note XMPP doesnt have invisible .. need to add later
-/*	NSString*	xmpprequest=[NSString stringWithFormat: @"<presence type=\"unavailable\"> <priority>5</priority> </presence>"];
 
-	bool val= [self talk:xmpprequest];
-	//; 
- */
 	return true; 
 	
 }

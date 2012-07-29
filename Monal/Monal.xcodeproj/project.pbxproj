@@ -39,6 +39,8 @@
 		2628E50714049DB50064131E /* askTempPass.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2628E50614049DB50064131E /* askTempPass.xib */; };
 		26292F4F1309CAE100097280 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26292F4E1309CAE100097280 /* CFNetwork.framework */; };
 		262DE4AF15C4E2C60040A66B /* MBProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = 262DE4AE15C4E2C60040A66B /* MBProgressHUD.m */; };
+		262DE4CC15C4FAA00040A66B /* default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 262DE4CA15C4FAA00040A66B /* default@2x.png */; };
+		262DE4CD15C4FAA00040A66B /* default.png in Resources */ = {isa = PBXBuildFile; fileRef = 262DE4CB15C4FAA00040A66B /* default.png */; };
 		263566B9133BDAD10095CD33 /* help.png in Resources */ = {isa = PBXBuildFile; fileRef = 263566B8133BDAD00095CD33 /* help.png */; };
 		26370742148873FB00DB8D57 /* accounts@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26370741148873FB00DB8D57 /* accounts@2x.png */; };
 		263707451488743300DB8D57 /* chatlog@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 263707441488743300DB8D57 /* chatlog@2x.png */; };
@@ -56,7 +58,6 @@
 		263707601488773800DB8D57 /* enabled.png in Resources */ = {isa = PBXBuildFile; fileRef = 2637075C1488773800DB8D57 /* enabled.png */; };
 		263707611488773800DB8D57 /* enabled@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2637075D1488773800DB8D57 /* enabled@2x.png */; };
 		263707631488785E00DB8D57 /* noicon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 263707621488785E00DB8D57 /* noicon@2x.png */; };
-		263F5658121B50740027D85D /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 263F5657121B50740027D85D /* Default.png */; };
 		263F568D121B5E970027D85D /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 263F568C121B5E970027D85D /* MediaPlayer.framework */; };
 		26400712140B43BB00CF1107 /* rtcpapppacket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006BB140B43BB00CF1107 /* rtcpapppacket.cpp */; };
 		26400713140B43BB00CF1107 /* rtcpapppacket.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006BC140B43BB00CF1107 /* rtcpapppacket.hh */; };
@@ -281,6 +282,8 @@
 		26292F4E1309CAE100097280 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		262DE4AD15C4E2C60040A66B /* MBProgressHUD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MBProgressHUD.h; sourceTree = "<group>"; };
 		262DE4AE15C4E2C60040A66B /* MBProgressHUD.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MBProgressHUD.m; sourceTree = "<group>"; };
+		262DE4CA15C4FAA00040A66B /* default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "default@2x.png"; sourceTree = "<group>"; };
+		262DE4CB15C4FAA00040A66B /* default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = default.png; sourceTree = "<group>"; };
 		263566B8133BDAD00095CD33 /* help.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = help.png; sourceTree = "<group>"; };
 		26370741148873FB00DB8D57 /* accounts@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "accounts@2x.png"; sourceTree = "<group>"; };
 		263707441488743300DB8D57 /* chatlog@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "chatlog@2x.png"; sourceTree = "<group>"; };
@@ -298,7 +301,6 @@
 		2637075C1488773800DB8D57 /* enabled.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = enabled.png; sourceTree = "<group>"; };
 		2637075D1488773800DB8D57 /* enabled@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "enabled@2x.png"; sourceTree = "<group>"; };
 		263707621488785E00DB8D57 /* noicon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "noicon@2x.png"; sourceTree = "<group>"; };
-		263F5657121B50740027D85D /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
 		263F568C121B5E970027D85D /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
 		264006BB140B43BB00CF1107 /* rtcpapppacket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = rtcpapppacket.cpp; path = jrtplib/rtcpapppacket.cpp; sourceTree = "<group>"; };
 		264006BC140B43BB00CF1107 /* rtcpapppacket.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = rtcpapppacket.hh; path = jrtplib/rtcpapppacket.hh; sourceTree = "<group>"; };
@@ -556,6 +558,7 @@
 		2601D9BC0FBF25D1004DB939 /* Assets */ = {
 			isa = PBXGroup;
 			children = (
+				262DE4C815C4FA940040A66B /* Splash Screens */,
 				26727DCB1568353A0010E17A /* carbon3.jpg */,
 				266286A71342C03400EAFC92 /* Buttons */,
 				269A2E61132030510044B1C8 /* App */,
@@ -654,6 +657,15 @@
 			path = MBProgressHUd;
 			sourceTree = "<group>";
 		};
+		262DE4C815C4FA940040A66B /* Splash Screens */ = {
+			isa = PBXGroup;
+			children = (
+				262DE4CA15C4FAA00040A66B /* default@2x.png */,
+				262DE4CB15C4FAA00040A66B /* default.png */,
+			);
+			name = "Splash Screens";
+			sourceTree = "<group>";
+		};
 		2640AF3B14548E7600CB4F60 /* GrowingTextView */ = {
 			isa = PBXGroup;
 			children = (
@@ -685,7 +697,6 @@
 			children = (
 				2601D9CF0FBF260B004DB939 /* chatview.xib */,
 				267D96021225E56200B328E3 /* About.xib */,
-				263F5657121B50740027D85D /* Default.png */,
 				28AD733E0D9D9553002E5188 /* MainWindow.xib */,
 			);
 			name = iPhone;
@@ -1212,7 +1223,6 @@
 				26EB85D711166DE7005446DD /* Monal_crop_57.png in Resources */,
 				26AD610111A95CB700C39051 /* Emoticons in Resources */,
 				26F425E711AB4A1800C40676 /* Monal_crop_72.png in Resources */,
-				263F5658121B50740027D85D /* Default.png in Resources */,
 				261FD56F1223527C003DDC3A /* active.png in Resources */,
 				267D96031225E56200B328E3 /* About.xib in Resources */,
 				26610A7012292F3900591435 /* Loglist.xib in Resources */,
@@ -1278,6 +1288,8 @@
 				263707611488773800DB8D57 /* enabled@2x.png in Resources */,
 				263707631488785E00DB8D57 /* noicon@2x.png in Resources */,
 				26727DCC1568353A0010E17A /* carbon3.jpg in Resources */,
+				262DE4CC15C4FAA00040A66B /* default@2x.png in Resources */,
+				262DE4CD15C4FAA00040A66B /* default.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

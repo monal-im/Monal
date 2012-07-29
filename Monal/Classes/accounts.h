@@ -18,7 +18,7 @@
 
 @interface accounts : UIViewController <UITableViewDataSource, UITableViewDelegate> {
 
-	IBOutlet UITableView* theTable; 
+	 UITableView* theTable; 
 	NSMutableArray* thelist; //account list
 	NSMutableArray* thelist2; //protocol list
 	NSMutableArray* enabledList; //enabled accounts

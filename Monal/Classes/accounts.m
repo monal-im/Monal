@@ -38,7 +38,7 @@
 - (void)viewWillAppear:(BOOL)animated
 {
 	
-    debug_NSLog(@"accuounts will  appear");
+    debug_NSLog(@"accounts will  appear");
 	
 	reconnect= [[UIBarButtonItem alloc] initWithTitle:@"Reconnect"
 style:UIBarButtonItemStyleBordered
@@ -78,6 +78,7 @@ style:UIBarButtonItemStyleBordered
 		 postNotificationName: @"Disconnect" object: self];
 	}
 	
+  
 	[theTable performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:NO];
 }
 
@@ -85,6 +86,11 @@ style:UIBarButtonItemStyleBordered
 -(void) viewDidLoad
 {
     [super viewDidLoad];
+    theTable = [[UITableView alloc] initWithFrame: self.view.frame style:UITableViewStyleGrouped];
+    self.view=theTable;
+    
+    [theTable setDelegate:self];
+    [theTable setDataSource:self];
     [theTable setBackgroundView:nil];
     [theTable setBackgroundView:[[UIView alloc] init] ];
     theTable.backgroundColor = [[UIColor alloc] initWithPatternImage:[UIImage imageNamed:@"carbon3.jpg"]];

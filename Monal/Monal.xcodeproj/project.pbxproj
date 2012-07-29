@@ -214,7 +214,6 @@
 		26E7D4B0140B067100EE6C93 /* RTP.mm in Sources */ = {isa = PBXBuildFile; fileRef = 26E7D4AF140B067100EE6C93 /* RTP.mm */; };
 		26EB845E111644AD005446DD /* Themes in Resources */ = {isa = PBXBuildFile; fileRef = 26EB845D111644AD005446DD /* Themes */; };
 		26EB85D711166DE7005446DD /* Monal_crop_57.png in Resources */ = {isa = PBXBuildFile; fileRef = 26EB85D611166DE7005446DD /* Monal_crop_57.png */; };
-		26EC1C8612295CD500EAF934 /* Accounts.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26EC1C8512295CD500EAF934 /* Accounts.xib */; };
 		26EC1D5112296D6000EAF934 /* MainWindowIpad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26EC1D5012296D6000EAF934 /* MainWindowIpad.xib */; };
 		26EC1DB2122978A100EAF934 /* AboutiPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26EC1DB1122978A100EAF934 /* AboutiPad.xib */; };
 		26EF9AB51320450300FA6FB2 /* Monal_crop_114.png in Resources */ = {isa = PBXBuildFile; fileRef = 26EF9AB41320450300FA6FB2 /* Monal_crop_114.png */; };
@@ -478,7 +477,6 @@
 		26EB845D111644AD005446DD /* Themes */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Themes; sourceTree = "<group>"; };
 		26EB85D611166DE7005446DD /* Monal_crop_57.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Monal_crop_57.png; sourceTree = "<group>"; };
 		26EB85D911166F1B005446DD /* Monal_crop_256.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Monal_crop_256.png; sourceTree = "<group>"; };
-		26EC1C8512295CD500EAF934 /* Accounts.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = Accounts.xib; sourceTree = "<group>"; };
 		26EC1D5012296D6000EAF934 /* MainWindowIpad.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = MainWindowIpad.xib; sourceTree = "<group>"; };
 		26EC1DB1122978A100EAF934 /* AboutiPad.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = AboutiPad.xib; sourceTree = "<group>"; };
 		26EF9AB41320450300FA6FB2 /* Monal_crop_114.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Monal_crop_114.png; sourceTree = "<group>"; };
@@ -960,7 +958,6 @@
 			children = (
 				26D1847210F9972400340C52 /* XMPPEdit.xib */,
 				260A71881114A1D200D01271 /* AIMEdit.xib */,
-				26EC1C8512295CD500EAF934 /* Accounts.xib */,
 			);
 			name = Accounts;
 			sourceTree = "<group>";
@@ -1220,7 +1217,6 @@
 				267D96031225E56200B328E3 /* About.xib in Resources */,
 				26610A7012292F3900591435 /* Loglist.xib in Resources */,
 				26610B0D12293FA600591435 /* ActiveChats.xib in Resources */,
-				26EC1C8612295CD500EAF934 /* Accounts.xib in Resources */,
 				26EC1D5112296D6000EAF934 /* MainWindowIpad.xib in Resources */,
 				26EC1DB2122978A100EAF934 /* AboutiPad.xib in Resources */,
 				26D5ADDD1229B8FE006C9639 /* chatviewiPad.xib in Resources */,

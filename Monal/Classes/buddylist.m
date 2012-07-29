@@ -739,8 +739,8 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
 	//id *app=[[UIApplication sharedApplication] delegate];
 	
 	// show +
-//	viewController.navigationBar.topItem.leftBarButtonItem=plusButton;
-//	viewController.navigationBar.topItem.rightBarButtonItem=[self editButtonItem];
+	viewController.navigationBar.topItem.leftBarButtonItem=plusButton;
+	viewController.navigationBar.topItem.rightBarButtonItem=[self editButtonItem];
 
 	
 }

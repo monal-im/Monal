@@ -165,7 +165,6 @@
 		265F1B83123044CE0065C5FE /* web.png in Resources */ = {isa = PBXBuildFile; fileRef = 265F1B82123044CE0065C5FE /* web.png */; };
 		265F1C1B12306D600065C5FE /* Scroller.m in Sources */ = {isa = PBXBuildFile; fileRef = 265F1C1A12306D600065C5FE /* Scroller.m */; };
 		266109FA122919C000591435 /* AboutVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 266109F9122919C000591435 /* AboutVC.m */; };
-		26610A7012292F3900591435 /* Loglist.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26610A6F12292F3900591435 /* Loglist.xib */; };
 		26610B0D12293FA600591435 /* ActiveChats.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26610B0C12293FA600591435 /* ActiveChats.xib */; };
 		266286AA1342C04C00EAFC92 /* black_button.png in Resources */ = {isa = PBXBuildFile; fileRef = 266286A81342C04C00EAFC92 /* black_button.png */; };
 		266286AB1342C04C00EAFC92 /* block_button_gloss.png in Resources */ = {isa = PBXBuildFile; fileRef = 266286A91342C04C00EAFC92 /* block_button_gloss.png */; };
@@ -415,7 +414,6 @@
 		265F1C1A12306D600065C5FE /* Scroller.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Scroller.m; path = ../Scroller.m; sourceTree = "<group>"; };
 		266109F8122919C000591435 /* AboutVC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AboutVC.h; sourceTree = "<group>"; };
 		266109F9122919C000591435 /* AboutVC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AboutVC.m; sourceTree = "<group>"; };
-		26610A6F12292F3900591435 /* Loglist.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = Loglist.xib; sourceTree = "<group>"; };
 		26610B0C12293FA600591435 /* ActiveChats.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ActiveChats.xib; sourceTree = "<group>"; };
 		266286A81342C04C00EAFC92 /* black_button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = black_button.png; sourceTree = "<group>"; };
 		266286A91342C04C00EAFC92 /* block_button_gloss.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = block_button_gloss.png; sourceTree = "<group>"; };
@@ -1047,7 +1045,6 @@
 				261ED6C31240257F00C14F6A /* BuddyAdd.xib */,
 				8D1107310486CEB800E47090 /* SworIM-Info.plist */,
 				260447F50FEED62100B3B5A7 /* BuddyDetails.xib */,
-				26610A6F12292F3900591435 /* Loglist.xib */,
 				26610B0C12293FA600591435 /* ActiveChats.xib */,
 				265F1B2A123040540065C5FE /* web.xib */,
 				26D92C9D1409B5410014E1EA /* callScreen.xib */,
@@ -1225,7 +1222,6 @@
 				26F425E711AB4A1800C40676 /* Monal_crop_72.png in Resources */,
 				261FD56F1223527C003DDC3A /* active.png in Resources */,
 				267D96031225E56200B328E3 /* About.xib in Resources */,
-				26610A7012292F3900591435 /* Loglist.xib in Resources */,
 				26610B0D12293FA600591435 /* ActiveChats.xib in Resources */,
 				26EC1D5112296D6000EAF934 /* MainWindowIpad.xib in Resources */,
 				26EC1DB2122978A100EAF934 /* AboutiPad.xib in Resources */,

@@ -21,7 +21,7 @@
 		NSMutableArray* thelist; 
 	chat* chatwin;
 	NSIndexPath* currentPath; 
-	IBOutlet UITableView* currentTable; 
+	 UITableView* currentTable; 
 	DataLayer* db; 
 	NSString* iconPath; 
 	 UINavigationController* viewController; 

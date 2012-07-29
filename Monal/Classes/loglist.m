@@ -13,12 +13,6 @@
 
 
 
-
-
-
-
-
-
 -(void) clearLogs
 {
 	
@@ -53,35 +47,18 @@
 }
 
 
--(void)viewDidAppear:(BOOL)animated 
+
+-(void) viewDidLoad
 {
+    
+    [super viewDidLoad];
+    currentTable = [[UITableView alloc] initWithFrame: self.view.frame style:UITableViewStylePlain];
+    self.view=currentTable;
+
+    
+    SworIMAppDelegate *app=[[UIApplication sharedApplication] delegate];
 	
-	debug_NSLog(@"chat log did appear");
-	
-	SworIMAppDelegate *app=[[UIApplication sharedApplication] delegate];
-	
-		db=[DataLayer sharedInstance];
-	chatwin=app.chatwin;
-	accountno=app.accountno; 
-	
-	
-	
-	
-	if(accountno==nil) {
-		;
-		return; 
-	}
-// refresh log
-	if(thelist==nil)
-	thelist=[db messageHistoryBuddies:accountno]; // change this to active account later when we have multiple acounts
-	
-		if((thelist==nil) || ([thelist count]==0))
-		{
-			;
-			return; 
-		}
-	
-	NSString* machine=[tools machine]; 
+    NSString* machine=[tools machine];
 	if([machine hasPrefix:@"iPad"] )
 	{//if pad..
 		viewController=app.logsNavigationControlleriPad;
@@ -90,54 +67,76 @@
 		
 	{
 		//if iphone
-		viewController=app.morenav; 
+		viewController=app.morenav;
 		
 	}
 	
-	iconPath=app.iconPath; 
+	iconPath=app.iconPath;
 	
+    
+    db=[DataLayer sharedInstance];
+	chatwin=app.chatwin;
+	accountno=app.accountno;
 	
-	[currentTable setDelegate:self]; 
+    [currentTable setDelegate:self];
 	[currentTable setDataSource:self];
-	[currentTable reloadData];
-
-	
-// hide + and edit buttons
-
-	UIBarButtonItem* clearLogButton = [UIBarButtonItem alloc]; 
-	[clearLogButton initWithTitle:@"Clear Logs" style:UIBarButtonItemStylePlain
-										 
-										 target:self action:@selector(clearLogs)];
-	
-	
-	
-	//[viewController.navigationBar.topItem setLeftBarButtonItem:nil];
-	viewController.navigationBar.topItem.rightBarButtonItem=clearLogButton;
-	
-	
-	
-	//viewController.navigationItem.rightBarButtonItem=[app editButtonItem];
 	
 
+
+}
+
+-(void)viewWillAppear:(BOOL)animated
+{
+ 	debug_NSLog(@"chat log will appear");
+    
+    if(accountno==nil) {
+		;
+		return;
+	}
+    // refresh log
+	if(thelist==nil)
+        thelist=[db messageHistoryBuddies:accountno]; // change this to active account later when we have multiple acounts
+	
+    if((thelist==nil) || ([thelist count]==0))
+    {
+        ;
+        return; 
+    }
+	
+    
+    
+
+	
+    
 	debug_NSLog(@"exiting with acctno %@", accountno);
-	;
+
+    
+
+	[currentTable reloadData];
+}
+
+
+-(void)viewDidAppear:(BOOL)animated 
+
+{
+
+	
+	debug_NSLog(@"chat log did appear");
+    
+    UIBarButtonItem* clearLogButton = [UIBarButtonItem alloc];
+	[clearLogButton initWithTitle:@"Clear Logs" style:UIBarButtonItemStylePlain
+     
+                           target:self action:@selector(clearLogs)];
+    
+    viewController.navigationBar.topItem.rightBarButtonItem=clearLogButton;
+
 
 }
 
 -(void)viewWillDisappear:(BOOL)animated
 {
 	debug_NSLog(@"chat log will disappear");
-	//if(thelist!=nil)
-	//[thelist release];
-	//thelist=nil;
-		
 	
-	// viewController.navigationBar.topItem.leftBarButtonItem=nil; 
-	viewController.navigationBar.topItem.rightBarButtonItem=nil; 
-	//reset the edit button to not editing	
-	/*[app setEditing:false animated:false]; // this changes it to Done
-	[currentTable setEditing:false animated:false];
-	 */
 }
 
 
@@ -230,7 +229,7 @@
 
 
 
-
+#pragma mark tableview methods
 //table view datasource methods
 
 //required

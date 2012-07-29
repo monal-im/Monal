@@ -13,7 +13,7 @@
 @interface WebBrowserVC : UIViewController <UIWebViewDelegate,UITextFieldDelegate,MBProgressHUDDelegate>{
 	IBOutlet UITextField* url;
 	IBOutlet UIWebView* web; 
-	IBOutlet  UIActivityIndicatorView* spinner;
+	
 	IBOutlet UIButton* stopRef;
     
     MBProgressHUD* HUD ;

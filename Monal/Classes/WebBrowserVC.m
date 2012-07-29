@@ -60,9 +60,7 @@
         //if something hadnt been loaded yet. 
         if([url.text isEqualToString:@""])
         {
-        
-            
-              [HUD showWhileExecuting:@selector(myProgressTask:) onTarget:self withObject:@"http://monal.im/topics/help/" animated:YES];
+            [self myProgressTask:@"http://monal.im/topics/help/"];
 
         }
 	}
@@ -72,6 +70,7 @@
 
 -(void)myProgressTask:(NSString*) thetext
 {
+    [HUD show:YES];
     NSURLRequest* request= [NSURLRequest requestWithURL:[NSURL URLWithString:thetext]];
 	[web loadRequest:request];
 }
@@ -89,9 +88,9 @@
 		[textField setText:thetext];
 	}
 	
-        [HUD showWhileExecuting:@selector(myProgressTask:) onTarget:self withObject:thetext animated:YES];
         
-	//[url resignFirstResponder];
+        [self myProgressTask:thetext];
+   
 
 		
 	}

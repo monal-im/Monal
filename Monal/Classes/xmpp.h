@@ -115,7 +115,10 @@
     //stanza objects
     
     iqSearch* iqsearch; 
-    iqJingle* jingleCall; 
+    iqJingle* jingleCall;
+    
+    //client attributes
+    NSString* verHash;
  
 
 }

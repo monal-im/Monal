@@ -145,7 +145,7 @@
     
     
     
-    
+    verHash=@"VUFD6HcFmUT2NxJkBGCiKlZnS3M=" ; // pukled from pidgin .. need to make my own later
     
 	
 	return self;
@@ -3086,7 +3086,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 {
 	//<feature var='http://jabber.org/protocol/si/profile/file-transfer'/> <feature var='http://jabber.org/protocol/si'/> 
 	
-	NSString*	xmpprequest=[NSString stringWithFormat: @"<iq  type='result'  to='%@' id='%@' ><query xmlns='http://jabber.org/protocol/disco#info'> <feature var='http://jabber.org/protocol/disco#items'/> <feature var='http://jabber.org/protocol/disco#info'/> <identity category='client' type='phone' name='monal'/><feature var='jabber:iq:version'/> <feature var='http://jabber.org/protocol/muc#user'/> <feature var='urn:xmpp:jingle:1'/>  <feature var='urn:xmpp:jingle:apps:rtp:1'/> <feature var='urn:xmpp:jingle:apps:rtp:audio'/> </query></iq>"
+	NSString*	xmpprequest=[NSString stringWithFormat: @"<iq  type='result'  to='%@' id='%@' ><query xmlns='http://jabber.org/protocol/disco#info'> <feature var='http://jabber.org/protocol/disco#items'/> <feature var='http://jabber.org/protocol/disco#info'/> <identity category='client' type='phone' name='monal'/><feature var='jabber:iq:version'/> <feature var='http://jabber.org/protocol/muc#user'/> <feature var='urn:xmpp:jingle:1'/> <feature var='urn:xmpp:jingle:transports:raw-udp:0'/> <feature var='urn:xmpp:jingle:transports:raw-udp:1'/>  <feature var='urn:xmpp:jingle:apps:rtp:1'/> <feature var='urn:xmpp:jingle:apps:rtp:audio'/>   </query></iq>"
 							 , to,userid,[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"]];
 	
     //<feature var='urn:xmpp:time'/>
@@ -3111,11 +3111,13 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
  
 	
 	if(away!=true)
-	xmpprequest=[NSString stringWithFormat: @"<presence> <status>%@</status>   </presence>",status, XMPPPriority];
-	else
-	xmpprequest=[NSString stringWithFormat: @"<presence> <show>away</show> <status>%@</status>  </presence>",status];
-	
-	
+        xmpprequest=[NSString stringWithFormat: @"<presence> <status>%@</status>  <priority>%d</priority> <caps:c  node=\"http://monal.im/caps\" ver=\"%@\"  xmlns:caps=\"http://jabber.org/protocol/caps\"    ext='pmuc-v1 voice-v1' />  </presence>",status, XMPPPriority,verHash ];
+    else
+        xmpprequest=[NSString stringWithFormat: @"<presence> <show>away</show> <status>%@</status>  <priority>%d</priority> <caps:c  node=\"http://monal.im/caps\" ver=\"%@\"  xmlns:caps=\"http://jabber.org/protocol/caps\"    ext='pmuc-v1 voice-v1' />    < /presence>",statusMessage,XMPPPriority,
+                   verHash ];
+    
+    
+    
 
 	bool val= [self talk:xmpprequest];
 	; 
@@ -3133,12 +3135,16 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	debug_NSLog(@"status %@", statusMessage); 
 	if(away!=true) // no need to resend if away is already set
 	{
-	if((statusMessage==nil)||
-		([statusMessage isEqualToString:@""]))                                                                                 
-	xmpprequest=[NSString stringWithFormat: @"<presence><show>away</show><status>Away</status></presence>"];
-	else
-		xmpprequest=[NSString stringWithFormat: @"<presence><show>away</show><status>%@</status></presence>", statusMessage];
-	
+
+        
+        if((statusMessage==nil)
+           || ([statusMessage isEqualToString:@""]))
+            xmpprequest=[NSString stringWithFormat: @"<presence> <show>away</show><priority>%d</priority> <caps:c  node=\"http://monal.im/caps\" ver=\"%@\"  xmlns:caps=\"http://jabber.org/protocol/caps\"    ext='pmuc-v1 voice-v1' />  </presence>",XMPPPriority, verHash];
+        else
+            xmpprequest=[NSString stringWithFormat: @"<presence> <show>away</show> <priority>%d</priority> <caps:c  node=\"http://monal.im/caps\" ver=\"%@\"  xmlns:caps=\"http://jabber.org/protocol/caps\"    ext='pmuc-v1 voice-v1' />    <status>%@</status></presence>",XMPPPriority,
+                        verHash,   statusMessage];
+        
+        
 		
 	away=true; 
 	 val= [self talk:xmpprequest];
@@ -3167,10 +3173,10 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	
 	if((statusMessage==nil)
 		|| ([statusMessage isEqualToString:@""]))
-		xmpprequest=[NSString stringWithFormat: @"<presence> <priority>%d</priority> <caps:c  node=\"http://monal.im/caps\" ver=\"%@\"  xmlns:caps=\"http://jabber.org/protocol/caps\"    ext='pmuc-v1 voice-v1' />  </presence>",XMPPPriority, [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"]];
+		xmpprequest=[NSString stringWithFormat: @"<presence> <priority>%d</priority> <caps:c  node=\"http://monal.im/caps\" ver=\"%@\"  xmlns:caps=\"http://jabber.org/protocol/caps\"    ext='pmuc-v1 voice-v1' />  </presence>",XMPPPriority, verHash];
 	else
 		xmpprequest=[NSString stringWithFormat: @"<presence><priority>%d</priority> <caps:c  node=\"http://monal.im/caps\" ver=\"%@\"  xmlns:caps=\"http://jabber.org/protocol/caps\"    ext='pmuc-v1 voice-v1' />    <status>%@</status></presence>",XMPPPriority,
-                     [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"],   statusMessage];
+                    verHash,   statusMessage];
 	
 	
 	away=false; 

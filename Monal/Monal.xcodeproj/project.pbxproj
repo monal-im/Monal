@@ -556,8 +556,8 @@
 		2601D9BC0FBF25D1004DB939 /* Assets */ = {
 			isa = PBXGroup;
 			children = (
-				262DE4C815C4FA940040A66B /* Splash Screens */,
 				26727DCB1568353A0010E17A /* carbon3.jpg */,
+				262DE4C815C4FA940040A66B /* Splash Screens */,
 				266286A71342C03400EAFC92 /* Buttons */,
 				269A2E61132030510044B1C8 /* App */,
 				269A2E60132030240044B1C8 /* Better Quality */,

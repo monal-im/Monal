@@ -41,10 +41,15 @@
 
 -(void) viewDidLoad
 {
+    [super viewDidLoad];
+    currentTable = [[UITableView alloc] initWithFrame: self.view.frame style:UITableViewStylePlain];
+    self.view=currentTable;
     
+    [currentTable setDelegate:self];
+	[currentTable setDataSource:self];
 }
 
--(void)viewDidAppear:(BOOL)animated 
+-(void)viewWillAppear:(BOOL)animated
 {
 	
 	
@@ -60,8 +65,7 @@
 	tabcontroller=app.tabcontroller; 
     jabber=app.jabber; 
     
-	[currentTable setDelegate:self]; 
-	[currentTable setDataSource:self];
+	
 	
 	
 	// refresh log

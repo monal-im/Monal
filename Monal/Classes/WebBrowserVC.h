@@ -7,13 +7,16 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "MBProgressHud.h"
 
 
-@interface WebBrowserVC : UIViewController <UIWebViewDelegate,UITextFieldDelegate>{
+@interface WebBrowserVC : UIViewController <UIWebViewDelegate,UITextFieldDelegate,MBProgressHUDDelegate>{
 	IBOutlet UITextField* url;
 	IBOutlet UIWebView* web; 
 	IBOutlet  UIActivityIndicatorView* spinner;
-	IBOutlet UIButton* stopRef; 
+	IBOutlet UIButton* stopRef;
+    
+    MBProgressHUD* HUD ;
 }
 -(IBAction) goBack;
 -(IBAction) goForward;

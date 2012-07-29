@@ -30,6 +30,9 @@
 
 -(IBAction) stopRefresh;
 {
+    
+
+    
 	if(web.loading)
 	   {
 		   [web stopLoading]; 
@@ -44,7 +47,13 @@
 
 -(void)viewDidAppear:(BOOL)animated 
 {
+    HUD = [[MBProgressHUD alloc] initWithView:self.navigationController.view];
+	[web addSubview:HUD];
 	
+	HUD.dimBackground = YES;
+    // Regiser for HUD callbacks so we can remove it from the window at the right time
+	HUD.delegate = self;
+    
 	
     if([self.title isEqualToString:@"Help"])
     {
@@ -52,12 +61,19 @@
         if([url.text isEqualToString:@""])
         {
         
-    NSURLRequest* request= [NSURLRequest requestWithURL:[NSURL URLWithString:@"http://monal.im/topics/help/"]];
-	[web loadRequest:request]; 
+            
+              [HUD showWhileExecuting:@selector(myProgressTask:) onTarget:self withObject:@"http://monal.im/topics/help/" animated:YES];
+
         }
 	}
     
     ;
+}
+
+-(void)myProgressTask:(NSString*) thetext
+{
+    NSURLRequest* request= [NSURLRequest requestWithURL:[NSURL URLWithString:thetext]];
+	[web loadRequest:request];
 }
 
 #pragma mark textfield delegate
@@ -65,7 +81,7 @@
 {
 	
 	NSString* thetext=[textField text]; 
-	if([thetext length]>=4) 
+	if([thetext length]>=4)
 	{
 	if(!([thetext hasPrefix:@"http://"]))
 	{
@@ -73,9 +89,10 @@
 		[textField setText:thetext];
 	}
 	
+        [HUD showWhileExecuting:@selector(myProgressTask:) onTarget:self withObject:thetext animated:YES];
+        
 	//[url resignFirstResponder];
-	NSURLRequest* request= [NSURLRequest requestWithURL:[NSURL URLWithString:thetext]];
-	[web loadRequest:request]; 
+
 		
 	}
 	;
@@ -98,20 +115,20 @@
 
 - (void)webViewDidFinishLoad:(UIWebView *)webView
 {
-	[spinner stopAnimating];
+	[HUD hide:YES];
 	 [stopRef setImage:[UIImage imageNamed:@"reload.png"] forState: UIControlStateNormal ];
 	
 }
 
 - (void)webViewDidStartLoad:(UIWebView *)webView
 {
-	[spinner startAnimating];
+	[HUD show:YES];
 	 [stopRef setImage:[UIImage imageNamed:@"stop.png"] forState: UIControlStateNormal ];
 }
 
 - (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error
 {
-	[spinner stopAnimating];
+	[HUD hide:YES];
 	 [stopRef setImage:[UIImage imageNamed:@"reload.png"] forState: UIControlStateNormal ];
 	
 /*	UIAlertView *addError = [[UIAlertView alloc] 

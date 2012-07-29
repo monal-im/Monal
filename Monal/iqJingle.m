@@ -74,10 +74,11 @@
     [query appendFormat:  @" <iq type='set' to='%@' id='%@' from='%@'><ses:session type='accept' id='%@' initiator='%@' xmlns:ses='http://www.google.com/session'><description xmlns='http://www.google.com/session/phone'><payload-type id='8' name='PCMA' clockrate='8000'/></description></ses:session></iq>", to, idval, me,thesid,to]; 
     
     
-    theaddress=[NSString stringWithString:address]; 
-    theport=[NSString stringWithString:port]; 
-    theusername=[NSString stringWithString:username]; 
-    thepass=[NSString stringWithString:pass]; 
+    theaddress=address;
+    theport=port; 
+    theusername=username; 
+    thepass=pass;
+
     
     
     otherParty=[NSString stringWithString:to]; 

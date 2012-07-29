@@ -938,6 +938,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
        && (([elementName isEqualToString: @"transport"]) ||
            ([elementName isEqualToString: @"p:transport"])
            )
+       && (	[[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:jingle:transports:raw-udp:1"]) // for now direct raw udp 
        )
 	{
         debug_NSLog(@"got Jingle transport list"); 
@@ -960,11 +961,15 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
         
        /* if(State!=nil) [State release]; 
         State=nil;*/
-        if(	[[attributeDict objectForKey:@"type"] isEqualToString:@"local"]) //should be stun really 
+        if(	[[attributeDict objectForKey:@"generation"] isEqualToString:@"0"]) 
         {
+            NSString* jingleAddress=[attributeDict objectForKey:@"address"];
+            if(jingleAddress==nil) jingleAddress=[attributeDict objectForKey:@"ip"];
+            
+            
             debug_NSLog(@"got Jingle local candidate.. sending accept"); 
             [self talk: [jingleCall acceptJingle:presenceUserFull 
-                                    :[attributeDict objectForKey:@"address"]
+                                    :jingleAddress
                                     :[attributeDict objectForKey:@"port"]
                                     :[attributeDict objectForKey:@"username"]
                                     :[attributeDict objectForKey:@"password"]

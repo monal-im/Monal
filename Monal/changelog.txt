@@ -10,6 +10,7 @@ This is a bug fix update.
 3. added improved 2 pane iPad view in portrait mode
 4. several UI enhancements/cosmetic changes
 5. fixed crashing issue with AIM 
+6. added more retina graphics
 
 
 

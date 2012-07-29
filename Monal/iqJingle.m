@@ -67,11 +67,12 @@
    
     
     NSMutableString* query=[[NSMutableString alloc] init];
-   /* [query appendFormat:@"<iq      to='%@'  id='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-accept'  responder='%@' sid='%@'> <content creator='initiator' name='voice'><description xmlns=\"urn:xmpp:jingle:apps:rtp:1\" media=\"audio\"> <payload-type id=\"8\" name=\"PCMA\" clockrate=\"8000\"><parameter name=\"bitrate\" value=\"64000\"/> </description> <transport xmlns='urn:xmpp:jingle:transports:ice-udp:1'> <candidate address=\"%@\" port=\"%@\" name=\"rtp\"   protocol=\"udp\" generation=\"0\" network=\"en1\" type=\"stun\"/></transport> </content> </jingle> </iq>", to, idval,  me,  thesid, address, port]; 
-    */
+    [query appendFormat:@"<iq      to='%@'  id='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-accept'  responder='%@' sid='%@'> <content creator='initiator' name=\"audio-session\" senders=\"both\"><description xmlns=\"urn:xmpp:jingle:apps:rtp:1\" media=\"audio\"> <payload-type id=\"8\" name=\"PCMA\" clockrate=\"8000\"/></description> <transport xmlns='urn:xmpp:jingle:transports:raw-udp:1'> <candidate ip=\"%@\" port=\"%@\"    generation=\"0\" /></transport> </content> </jingle> </iq>", to, idval,  me,  thesid, address, port]; 
+    
    
     
-    [query appendFormat:  @" <iq type='set' to='%@' id='%@' from='%@'><ses:session type='accept' id='%@' initiator='%@' xmlns:ses='http://www.google.com/session'><description xmlns='http://www.google.com/session/phone'><payload-type id='8' name='PCMA' clockrate='8000'/></description></ses:session></iq>", to, idval, me,thesid,to]; 
+   /* [query appendFormat:  @" <iq type='set' to='%@' id='%@' from='%@'><ses:session type='accept' id='%@' initiator='%@' xmlns:ses='http://www.google.com/session'><description xmlns='http://www.google.com/session/phone'><payload-type id='8' name='PCMA' clockrate='8000'/></description></ses:session></iq>", to, idval, me,thesid,to];
+    */
     
     
     theaddress=address;
@@ -97,7 +98,7 @@
  
     NSString* sid=@"sfghj569"; //something random 
  NSMutableString* query=[[NSMutableString alloc] init];
-       [query appendFormat:@" <iq to='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-initiate' initiator='%@' sid='%@'> <content creator='initiator' name='audio'> <description xmlns='urn:xmpp:jingle:apps:rtp:1'/> <transport xmlns:p=\"http://www.google.com/transport/p2p\"/> </content> </jingle> </iq>", to,me, sid]; 
+       [query appendFormat:@" <iq to='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-initiate' initiator='%@' sid='%@'> <content creator='initiator' name='audio'> <description xmlns='urn:xmpp:jingle:apps:rtp:1'/> <transport xmlns=\"urn:xmpp:jingle:transports:raw-udp:1\"/> </content> </jingle> </iq>", to,me, sid]; 
     
 
     otherParty=[NSString stringWithString:to]; 

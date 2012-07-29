@@ -895,16 +895,8 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
                 
                 
             }
-        
-        if(	[[attributeDict objectForKey:@"action"] isEqualToString:@"transport-info"])
-        {
-            debug_NSLog(@"got Jingle transport info.  reading candidates ");
-         
-              
-        }
-        
-        
-
+  
+  
         
         if(	[[attributeDict objectForKey:@"action"] isEqualToString:@"transport-info"])
         {
@@ -932,9 +924,31 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
         return; 
         
     }
+    
+    
+    if(([State isEqualToString:@"jingleAction"])
+       &&(	[elementName isEqualToString:@"content"]))
+    {
+        debug_NSLog(@"got Jingle content ");
+        State=@"jingleContent";
+        
+        
+    }
+    
+    
+    if(([State isEqualToString:@"jingleContent"])
+       &&(	[elementName isEqualToString:@"description"])
+       && (	[[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:jingle:apps:rtp:1"]) )// we co rtp
+    {
+        debug_NSLog(@"got Jingle content description RTP");
+     //   State=@"jingleContentDescription";
+        
+        
+    }
+    
 
-    //iqSet->jingle->transport
-    if(([State isEqualToString:@"jingleAction"]) 
+    //iqSet->jingle->content->transport
+    if(([State isEqualToString:@"jingleContent"])
        && (([elementName isEqualToString: @"transport"]) ||
            ([elementName isEqualToString: @"p:transport"])
            )
@@ -950,7 +964,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
     }
     
     
-    //iqSet->jingle->transport->candidate
+    //iqSet->jingle->content->transport->candidate
     if(([State isEqualToString:@"jingleTransport"]) 
        && (([elementName isEqualToString: @"candidate"]) ||
            ([elementName isEqualToString: @"p:candidate"])
@@ -974,7 +988,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
                                     :[attributeDict objectForKey:@"username"]
                                     :[attributeDict objectForKey:@"password"]
              
-                                                :presenceUserid             ]];
+                                                :sessionkey             ]];
            //   [jingleCall connect]; 
             
           [jingleCall performSelectorOnMainThread:@selector(connect) withObject:nil waitUntilDone:NO];

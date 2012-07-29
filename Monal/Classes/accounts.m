@@ -91,6 +91,7 @@ style:UIBarButtonItemStyleBordered
     
     [theTable setDelegate:self];
     [theTable setDataSource:self];
+   
     [theTable setBackgroundView:nil];
     [theTable setBackgroundView:[[UIView alloc] init] ];
     theTable.backgroundColor = [[UIColor alloc] initWithPatternImage:[UIImage imageNamed:@"carbon3.jpg"]];

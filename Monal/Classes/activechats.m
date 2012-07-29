@@ -39,7 +39,10 @@
     
 }
 
-
+-(void) viewDidLoad
+{
+    
+}
 
 -(void)viewDidAppear:(BOOL)animated 
 {
@@ -49,6 +52,7 @@
 	SworIMAppDelegate *app=[[UIApplication sharedApplication] delegate];
 	
 		db=[DataLayer sharedInstance];
+    
 	chatwin=app.chatwin;
 	accountno=app.accountno; 
 	viewController=app.activeNavigationController; 

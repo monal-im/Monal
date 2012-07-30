@@ -10,7 +10,7 @@
 
 #import "DataLayer.h"
 #import "XMPPEdit.h"
-#import "AIMEdit.h"
+
 
 #import "SworIMAppDelegate.h"
 

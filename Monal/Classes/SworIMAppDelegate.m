@@ -1021,22 +1021,7 @@ buddylistDS.tabcontroller=tabcontroller;
     else // no point if there is no password set
     {
     
-	//AIM is 3
-		if([[[enabledAccounts objectAtIndex:0] objectAtIndex: 2] intValue]==3) 
-		{
-			jabber= [[AIMTOC2 alloc] 
-					 init
-					 :[[enabledAccounts objectAtIndex:0] objectAtIndex: 3]
-					 :[[[enabledAccounts objectAtIndex:0] objectAtIndex: 4] intValue]
-					 : [[enabledAccounts objectAtIndex:0] objectAtIndex: 5]
-					// : [[enabledAccounts objectAtIndex:0] objectAtIndex: 6]
-					 :[[enabledAccounts objectAtIndex:0] objectAtIndex: 8]
-					 : [[enabledAccounts objectAtIndex:0] objectAtIndex: 9]
-					 : secure
-                     : db : accountNo:tempPass];
-		}
-	else // everything else is XMPP
-	{
+	
         debug_NSLog(@" domain: %@", [[enabledAccounts objectAtIndex:0] objectAtIndex: 9]); 
         
 	jabber= [[xmpp alloc] 
@@ -1049,7 +1034,7 @@ buddylistDS.tabcontroller=tabcontroller;
 			 : [[enabledAccounts objectAtIndex:0] objectAtIndex: 9]
 			 : secure
 			 : db: accountNo:tempPass ];
-	}
+	
         
         //erase temppass here
         tempPass=NULL; 
@@ -1075,12 +1060,7 @@ buddylistDS.tabcontroller=tabcontroller;
 	
 	
 	buddylistDS.viewController=buddyNavigationController;
-	
-	
-	
-
-
-	
+ 
 	//buddy list
     [buddyTable setDelegate:buddylistDS]; 
 	[buddyTable setDataSource:buddylistDS];

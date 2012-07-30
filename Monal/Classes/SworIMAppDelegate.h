@@ -13,7 +13,6 @@
 #import <CoreFoundation/CoreFoundation.h>
 
 #import "xmpp.h"
-#import "AIMTOC2.h"
 #import "buddylist.h"
 #import  "chat.h"
 #import "DataLayer.h"

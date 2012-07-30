@@ -336,38 +336,22 @@ thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 	if(newIndexPath.section==0)
 	{
 		debug_NSLog(@"selected account with protocol %d", [[[thelist objectAtIndex:newIndexPath.row] objectAtIndex:2] intValue]);
-		//identify protocol
-		if([[[thelist objectAtIndex:newIndexPath.row] objectAtIndex:2] intValue]!=3) //proocol 3 is AIM (counts from 1)
-		{
+		
 			XMPPEdit* xmppedit=[XMPPEdit alloc]; 
 			xmppedit.db=[DataLayer sharedInstance];
 		[xmppedit initList:viewController:newIndexPath:[NSString stringWithFormat:@"%@",[[thelist objectAtIndex:newIndexPath.row] objectAtIndex:0]]];
 		[viewController pushViewController:xmppedit animated:YES];	
-		}
-		else
-		{
-			AIMEdit* aimedit=[AIMEdit alloc]; 
-			aimedit.db=db;
-			[aimedit initList:viewController:newIndexPath:[NSString stringWithFormat:@"%@",[[thelist objectAtIndex:newIndexPath.row] objectAtIndex:0]]];
-			[viewController pushViewController:aimedit animated:YES];	
-		}
+		
+	
 	}
 	else
 	{
-		if(newIndexPath.row!=2) //  row 2 is AIM
-		{
+		
 		XMPPEdit* xmppedit=[XMPPEdit alloc]; 
 		xmppedit.db=[DataLayer sharedInstance];
 		[xmppedit initList:viewController:newIndexPath:@"-1"];
 		[viewController pushViewController:xmppedit animated:YES];
-		}
-		else
-		{
-		AIMEdit* aimedit=[AIMEdit alloc]; 
-		aimedit.db=db;
-		[aimedit initList:viewController:newIndexPath:@"-1"];
-			[viewController pushViewController:aimedit animated:YES];
-		}
+		
 			
 	}
 		

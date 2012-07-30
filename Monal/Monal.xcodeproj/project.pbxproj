@@ -25,10 +25,8 @@
 		2601D9D90FBF265A004DB939 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2601D9D80FBF265A004DB939 /* AudioToolbox.framework */; };
 		260447F60FEED62100B3B5A7 /* BuddyDetails.xib in Resources */ = {isa = PBXBuildFile; fileRef = 260447F50FEED62100B3B5A7 /* BuddyDetails.xib */; };
 		2604482E0FEEDCA800B3B5A7 /* buddyDetails.m in Sources */ = {isa = PBXBuildFile; fileRef = 2604482C0FEEDCA800B3B5A7 /* buddyDetails.m */; };
-		260A71891114A1D300D01271 /* AIMEdit.xib in Resources */ = {isa = PBXBuildFile; fileRef = 260A71881114A1D200D01271 /* AIMEdit.xib */; };
 		260E8BA611023DE5004E24FF /* CustomCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 260E8BA511023DE5004E24FF /* CustomCell.m */; };
 		261256881129185800161B30 /* XMPPEdit.m in Sources */ = {isa = PBXBuildFile; fileRef = 261256871129185800161B30 /* XMPPEdit.m */; };
-		2612568B1129187A00161B30 /* AIMEdit.m in Sources */ = {isa = PBXBuildFile; fileRef = 261256891129187A00161B30 /* AIMEdit.m */; };
 		2614ED41121BD3160034556C /* MyTabController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2614ED40121BD3160034556C /* MyTabController.m */; };
 		261AB9351409BFB8006F5155 /* callScreen.m in Sources */ = {isa = PBXBuildFile; fileRef = 261AB9341409BFB8006F5155 /* callScreen.m */; };
 		261ED6C41240257F00C14F6A /* BuddyAdd.xib in Resources */ = {isa = PBXBuildFile; fileRef = 261ED6C31240257F00C14F6A /* BuddyAdd.xib */; };
@@ -159,7 +157,6 @@
 		2651DAA20FC2847200009D7E /* noicon.png in Resources */ = {isa = PBXBuildFile; fileRef = 2651DAA10FC2847200009D7E /* noicon.png */; };
 		2654BEC81481499000DDC346 /* loglistDate.m in Sources */ = {isa = PBXBuildFile; fileRef = 2654BEC71481499000DDC346 /* loglistDate.m */; };
 		265571B1122157D500F994E8 /* SlidingMessageViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 265571B0122157D500F994E8 /* SlidingMessageViewController.m */; };
-		265579A71231D05A0043863D /* AIMTOC2.m in Sources */ = {isa = PBXBuildFile; fileRef = 262648FD1126FA80009689CC /* AIMTOC2.m */; };
 		265F1AE512303A670065C5FE /* WebBrowserVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 265F1AE412303A670065C5FE /* WebBrowserVC.m */; };
 		265F1B2B123040540065C5FE /* web.xib in Resources */ = {isa = PBXBuildFile; fileRef = 265F1B2A123040540065C5FE /* web.xib */; };
 		265F1B83123044CE0065C5FE /* web.png in Resources */ = {isa = PBXBuildFile; fileRef = 265F1B82123044CE0065C5FE /* web.png */; };
@@ -208,7 +205,6 @@
 		26E2786F10FA85C600B7B998 /* XMPP.png in Resources */ = {isa = PBXBuildFile; fileRef = 26E2786A10FA85C600B7B998 /* XMPP.png */; };
 		26E2787010FA85C600B7B998 /* MSN.png in Resources */ = {isa = PBXBuildFile; fileRef = 26E2786B10FA85C600B7B998 /* MSN.png */; };
 		26E2787210FA85C600B7B998 /* Facebook.png in Resources */ = {isa = PBXBuildFile; fileRef = 26E2786D10FA85C600B7B998 /* Facebook.png */; };
-		26E2787310FA85C600B7B998 /* AIM.png in Resources */ = {isa = PBXBuildFile; fileRef = 26E2786E10FA85C600B7B998 /* AIM.png */; };
 		26E5BA8B132287D400D8C57A /* Settings.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26E5BA8A132287D400D8C57A /* Settings.xib */; };
 		26E5BA8E13228D7400D8C57A /* StatusControl.m in Sources */ = {isa = PBXBuildFile; fileRef = 26E5BA8D13228D7400D8C57A /* StatusControl.m */; };
 		26E7D4B0140B067100EE6C93 /* RTP.mm in Sources */ = {isa = PBXBuildFile; fileRef = 26E7D4AF140B067100EE6C93 /* RTP.mm */; };
@@ -255,13 +251,10 @@
 		2604482C0FEEDCA800B3B5A7 /* buddyDetails.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = buddyDetails.m; path = Classes/buddyDetails.m; sourceTree = "<group>"; };
 		2604482D0FEEDCA800B3B5A7 /* buddyDetails.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = buddyDetails.h; path = Classes/buddyDetails.h; sourceTree = "<group>"; };
 		26080210110ABA4E005E194D /* Monal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Monal.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		260A71881114A1D200D01271 /* AIMEdit.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = AIMEdit.xib; sourceTree = "<group>"; };
 		260E8BA411023DE5004E24FF /* CustomCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CustomCell.h; sourceTree = "<group>"; };
 		260E8BA511023DE5004E24FF /* CustomCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CustomCell.m; sourceTree = "<group>"; };
 		261256861129185800161B30 /* XMPPEdit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPEdit.h; path = Classes/XMPPEdit.h; sourceTree = "<group>"; };
 		261256871129185800161B30 /* XMPPEdit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPEdit.m; path = Classes/XMPPEdit.m; sourceTree = "<group>"; };
-		261256891129187A00161B30 /* AIMEdit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = AIMEdit.m; path = Classes/AIMEdit.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
-		2612568A1129187A00161B30 /* AIMEdit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AIMEdit.h; path = Classes/AIMEdit.h; sourceTree = "<group>"; };
 		2614ED3F121BD3160034556C /* MyTabController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyTabController.h; sourceTree = "<group>"; };
 		2614ED40121BD3160034556C /* MyTabController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MyTabController.m; sourceTree = "<group>"; };
 		261AB9331409BFB8006F5155 /* callScreen.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = callScreen.h; sourceTree = "<group>"; };
@@ -271,8 +264,6 @@
 		261FD438122349F2003DDC3A /* activechats.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = activechats.h; sourceTree = "<group>"; };
 		261FD439122349F2003DDC3A /* activechats.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = activechats.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		261FD56E1223527C003DDC3A /* active.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = active.png; sourceTree = "<group>"; };
-		262648FC1126FA80009689CC /* AIMTOC2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AIMTOC2.h; path = Classes/AIMTOC2.h; sourceTree = "<group>"; };
-		262648FD1126FA80009689CC /* AIMTOC2.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AIMTOC2.m; path = Classes/AIMTOC2.m; sourceTree = "<group>"; };
 		26277886110179D100023C8A /* tools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tools.h; sourceTree = "<group>"; };
 		26277887110179D100023C8A /* tools.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = tools.m; sourceTree = "<group>"; };
 		2628E50314049BAC0064131E /* askTempPass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = askTempPass.h; sourceTree = "<group>"; };
@@ -468,7 +459,6 @@
 		26E2786A10FA85C600B7B998 /* XMPP.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = XMPP.png; sourceTree = "<group>"; };
 		26E2786B10FA85C600B7B998 /* MSN.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = MSN.png; sourceTree = "<group>"; };
 		26E2786D10FA85C600B7B998 /* Facebook.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Facebook.png; sourceTree = "<group>"; };
-		26E2786E10FA85C600B7B998 /* AIM.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = AIM.png; sourceTree = "<group>"; };
 		26E5BA8A132287D400D8C57A /* Settings.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = Settings.xib; sourceTree = "<group>"; };
 		26E5BA8C13228D7400D8C57A /* StatusControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StatusControl.h; sourceTree = "<group>"; };
 		26E5BA8D13228D7400D8C57A /* StatusControl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StatusControl.m; sourceTree = "<group>"; };
@@ -609,7 +599,6 @@
 				26E2786A10FA85C600B7B998 /* XMPP.png */,
 				26E2786B10FA85C600B7B998 /* MSN.png */,
 				26E2786D10FA85C600B7B998 /* Facebook.png */,
-				26E2786E10FA85C600B7B998 /* AIM.png */,
 			);
 			name = Protocol;
 			sourceTree = "<group>";
@@ -894,8 +883,6 @@
 			isa = PBXGroup;
 			children = (
 				26731E74133F3EE2008098EB /* xmpp Objects */,
-				262648FC1126FA80009689CC /* AIMTOC2.h */,
-				262648FD1126FA80009689CC /* AIMTOC2.m */,
 				26DE9C020FEEFCF5000596F6 /* protocol.m */,
 				26DE9C030FEEFCF5000596F6 /* protocol.h */,
 				2601D9A30FBF255D004DB939 /* xmpp.m */,
@@ -910,8 +897,6 @@
 		26D184DF10F99FD200340C52 /* Account Manager */ = {
 			isa = PBXGroup;
 			children = (
-				261256891129187A00161B30 /* AIMEdit.m */,
-				2612568A1129187A00161B30 /* AIMEdit.h */,
 				261256861129185800161B30 /* XMPPEdit.h */,
 				261256871129185800161B30 /* XMPPEdit.m */,
 				26F9763B10F9779000FA1B69 /* accounts.h */,
@@ -966,7 +951,6 @@
 			isa = PBXGroup;
 			children = (
 				26D1847210F9972400340C52 /* XMPPEdit.xib */,
-				260A71881114A1D200D01271 /* AIMEdit.xib */,
 			);
 			name = Accounts;
 			sourceTree = "<group>";
@@ -1214,8 +1198,6 @@
 				26E2786F10FA85C600B7B998 /* XMPP.png in Resources */,
 				26E2787010FA85C600B7B998 /* MSN.png in Resources */,
 				26E2787210FA85C600B7B998 /* Facebook.png in Resources */,
-				26E2787310FA85C600B7B998 /* AIM.png in Resources */,
-				260A71891114A1D300D01271 /* AIMEdit.xib in Resources */,
 				26EB845E111644AD005446DD /* Themes in Resources */,
 				26EB85D711166DE7005446DD /* Monal_crop_57.png in Resources */,
 				26AD610111A95CB700C39051 /* Emoticons in Resources */,
@@ -1310,7 +1292,6 @@
 				260E8BA611023DE5004E24FF /* CustomCell.m in Sources */,
 				26F7BB431115F8DB00712672 /* Reachability.m in Sources */,
 				261256881129185800161B30 /* XMPPEdit.m in Sources */,
-				2612568B1129187A00161B30 /* AIMEdit.m in Sources */,
 				2614ED41121BD3160034556C /* MyTabController.m in Sources */,
 				265571B1122157D500F994E8 /* SlidingMessageViewController.m in Sources */,
 				261FD43A122349F2003DDC3A /* activechats.m in Sources */,
@@ -1318,7 +1299,6 @@
 				266109FA122919C000591435 /* AboutVC.m in Sources */,
 				265F1AE512303A670065C5FE /* WebBrowserVC.m in Sources */,
 				265F1C1B12306D600065C5FE /* Scroller.m in Sources */,
-				265579A71231D05A0043863D /* AIMTOC2.m in Sources */,
 				26C0382612403DC00010A285 /* buddyAdd.m in Sources */,
 				26B69A82131C5495002FCBEB /* PasswordManager.m in Sources */,
 				26E5BA8E13228D7400D8C57A /* StatusControl.m in Sources */,

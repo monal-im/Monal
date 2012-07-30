@@ -9,7 +9,7 @@ This is a bug fix update.
 2. added tap gesture to dismiss keyboard
 3. added improved 2 pane iPad view in portrait mode
 4. several UI enhancements/cosmetic changes
-5. fixed crashing issue with AIM 
+5. Removed AIM support due to AOL turning off servers
 6. added more retina graphics
 
 

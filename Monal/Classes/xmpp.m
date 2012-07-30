@@ -912,7 +912,8 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
             
             if(	[[attributeDict objectForKey:@"action"] isEqualToString:@"session-terminate"])
             {
-                debug_NSLog(@"got Jingle session terminate"); 
+                debug_NSLog(@"got Jingle session terminate");
+                [self endCall];
             }
             
             

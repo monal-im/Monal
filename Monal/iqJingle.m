@@ -32,6 +32,7 @@
     return  [NSString stringWithFormat:@"<iq type='get' id='%@'  > <query xmlns='google:jingleinfo'/> </iq>", idval];
 }
 
+
 -(NSString*) ack:(NSString*) to:(NSString*) iqid
 {
     
@@ -39,12 +40,7 @@
     NSMutableString* query=[[NSMutableString alloc] init];
     [query appendFormat:@"<iq to='%@' from='%@' id='%@' type='result'/>", to, me, iqid]; 
     
-    
-
-    
-    
-    
-    ; 
+ 
     return query;
 }
 
@@ -54,10 +50,7 @@
     rtp =[RTP alloc];
     [rtp RTPConnect:theaddress:[theport intValue]];
     
-    	
-	
-  
-    
+
 }
 
 -(NSString*) acceptJingle:(NSString*) to:(NSString*) address: (NSString*) port: (NSString*) username: (NSString*) pass:  (NSString*)idval
@@ -119,9 +112,9 @@
     [query appendFormat:@"<iq      to='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-terminate' sid='%@'> <reason> <success/> </reason> </jingle> </iq>", otherParty, thesid]; 
     
     
+    [rtp RTPDisconnect];
     
-    
-    ; 
+   
     return query;
 }
 

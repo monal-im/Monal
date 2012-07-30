@@ -23,7 +23,8 @@
 
 #import "RTP.hh"
 
-   jrtplib::RTPSession sess; 
+   jrtplib::RTPSession sess;
+ 
 
 typedef struct
 {
@@ -33,6 +34,8 @@ typedef struct
     
     
 } RecordState;
+
+RecordState recordState;
 
 @implementation RTP
 
@@ -70,6 +73,7 @@ void AudioInputCallback(
     
     int rtpstatus = sess.SendPacket((void *)inBuffer->mAudioData,inBuffer->mAudioDataByteSize,8,false,8); // pt=8  is PCMA ,  timestamp 8 is 8Khz
     checkerror(rtpstatus);
+       if(rtpstatus!=0) return; // gradually stop reenqueing
     
     //reenquue buffer to collect more
 	OSStatus status= AudioQueueEnqueueBuffer(inAQ, inBuffer, 0, NULL);
@@ -115,6 +119,7 @@ void AudioInputCallback(
 	
    
    
+   
 
 	// IMPORTANT: The local timestamp unit MUST be set, otherwise
 	//            RTCP Sender Report info will be calculated wrong
@@ -139,10 +144,9 @@ void AudioInputCallback(
 
     //********* Audio Queue ********/
     
-    RecordState recordState;
+   
     
-    
-    
+
     recordState.dataFormat.mSampleRate = 8000.0;
     recordState.dataFormat.mFormatID = kAudioFormatLinearPCM;
     recordState.dataFormat.mFramesPerPacket = 1;
@@ -201,7 +205,7 @@ void AudioInputCallback(
     }
     
     
-    audioStatus = AudioQueueStart(recordState.queue, NULL);
+//   audioStatus = AudioQueueStart(recordState.queue, NULL);
     
     if(audioStatus==0)
     {
@@ -212,28 +216,9 @@ void AudioInputCallback(
         return;
     }  
 
-    
-    
-
-    
-    /*
-	for (i = 1 ; i <= packet_num ; i++)
-	{
-		
-		
-		// send the packet
-		
-        
-        
-       const void* bytes=[[audioData subdataWithRange:NSMakeRange(start, end)] bytes]; 
-        
-        
-        debug_NSLog(@"Sending packet %d/%d\n  starting %d sized %d "
-                    ,i,packet_num, start,  end );
-        
-        status = sess.SendPacket((void *)bytes,packetSize,8,false,8); // pt=8  is PCMA ,  timestamp 8 is 8Khz
-		checkerror(status);
-		
+  
+		while(1)
+        {
 		sess.BeginDataAccess();
 		
 		// check incoming packets
@@ -260,19 +245,32 @@ void AudioInputCallback(
 #ifndef RTP_SUPPORT_THREAD
 		status = sess.Poll();
 		checkerror(status);
+            if(status!=0) break; 
 #endif // RTP_SUPPORT_THREAD
 		
+            //wait
 		jrtplib::RTPTime::Wait(jrtplib::RTPTime(1,0));
-	}
-	
-	sess.BYEDestroy(jrtplib::RTPTime(10,0),0,0);*/
-    
-    
-    
-    //wait 
+        }
+
     
  
     
+}
+
+-(void) RTPDisconnect
+{
+   OSStatus  audioStatus = AudioQueueStop(recordState.queue, YES);
+    
+    if(audioStatus==0)
+    {
+        debug_NSLog(@"record stopped ok");
+    }
+    else {
+        debug_NSLog(@"error stopping record");
+        return;
+    }
+
+    sess.Destroy();
 }
 
 @end

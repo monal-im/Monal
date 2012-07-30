@@ -27,5 +27,6 @@
 
 -(void) RTPConnect:(NSString*) IP:(int) port;  
 -(void) RTPDisconnect;
+-(void) listenThread;
 
 @end

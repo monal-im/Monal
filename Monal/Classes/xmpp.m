@@ -976,7 +976,9 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
         
        /* if(State!=nil) [State release]; 
         State=nil;*/
-        if(	[[attributeDict objectForKey:@"generation"] isEqualToString:@"0"]) 
+        if((	[[attributeDict objectForKey:@"generation"] isEqualToString:@"0"])
+            &&
+           ( [[attributeDict objectForKey:@"component"] isEqualToString:@"1"]) )
         {
             NSString* jingleAddress=[attributeDict objectForKey:@"address"];
             if(jingleAddress==nil) jingleAddress=[attributeDict objectForKey:@"ip"];

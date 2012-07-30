@@ -217,8 +217,17 @@ void AudioInputCallback(
     }  
 
   
-		while(1)
-        {
+	
+    [NSThread detachNewThreadSelector:@selector(listenThread) toTarget:self withObject:nil];
+ 
+    
+}
+
+-(void) listenThread
+{
+    debug_NSLog(@"entered RTP listen thread");
+    while(1)
+    {
 		sess.BeginDataAccess();
 		
 		// check incoming packets
@@ -243,18 +252,18 @@ void AudioInputCallback(
 		sess.EndDataAccess();
         
 #ifndef RTP_SUPPORT_THREAD
-		status = sess.Poll();
+		OSStatus status = sess.Poll();
 		checkerror(status);
-            if(status!=0) break; 
+        if(status!=0) break;
 #endif // RTP_SUPPORT_THREAD
 		
-            //wait
+        //wait
 		jrtplib::RTPTime::Wait(jrtplib::RTPTime(1,0));
-        }
+    }
+    
+    debug_NSLog(@"leaving RTP listen thread");
+    [NSThread exit];
 
-    
- 
-    
 }
 
 -(void) RTPDisconnect

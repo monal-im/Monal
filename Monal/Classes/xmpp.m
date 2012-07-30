@@ -953,7 +953,10 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
        && (([elementName isEqualToString: @"transport"]) ||
            ([elementName isEqualToString: @"p:transport"])
            )
-       && (	[[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:jingle:transports:raw-udp:1"]) // for now direct raw udp 
+       &&( (	[[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:jingle:transports:raw-udp:1"])
+          //||(	[[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:jingle:transports:ice-udp:1"])
+          )
+       
        )
 	{
         debug_NSLog(@"got Jingle transport list"); 
@@ -966,7 +969,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
     
     
     //iqSet->jingle->content->transport->candidate
-    if(([State isEqualToString:@"jingleTransport"]) 
+    if(([State isEqualToString:@"jingleTransport"])
        && (([elementName isEqualToString: @"candidate"]) ||
            ([elementName isEqualToString: @"p:candidate"])
                       )

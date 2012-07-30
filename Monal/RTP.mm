@@ -79,7 +79,7 @@ void AudioInputCallback(
 	OSStatus status= AudioQueueEnqueueBuffer(inAQ, inBuffer, 0, NULL);
     if(status==0)
     {
-    debug_NSLog("audio reenqueue ok")
+   // debug_NSLog("audio reenqueue ok")
     }
     else {
         debug_NSLog(@"audio reenqueue error %d", status);
@@ -187,7 +187,7 @@ void AudioInputCallback(
         
         if(audioStatus==0)
         {
-            debug_NSLog("audio buffer allocate ok")
+          // debug_NSLog("audio buffer allocate ok")
         }
         else {
             debug_NSLog(@"audio buffer allocate error %d", audioStatus);
@@ -197,7 +197,7 @@ void AudioInputCallback(
         
         if(audioStatus==0)
         {
-            debug_NSLog("audio buffer initial enqueue ok")
+           // debug_NSLog("audio buffer initial enqueue ok")
         }
         else {
             debug_NSLog(@"audio buffer  initial enqueue error %d", audioStatus);
@@ -205,7 +205,7 @@ void AudioInputCallback(
     }
     
     
-//   audioStatus = AudioQueueStart(recordState.queue, NULL);
+   audioStatus = AudioQueueStart(recordState.queue, NULL);
     
     if(audioStatus==0)
     {

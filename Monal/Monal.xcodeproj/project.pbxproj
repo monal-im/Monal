@@ -203,7 +203,6 @@
 		26DFD4B015666B7D007A1621 /* MGSplitDividerView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26DFD4AC15666B7D007A1621 /* MGSplitDividerView.m */; };
 		26DFD4B115666B7D007A1621 /* MGSplitViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26DFD4AE15666B7D007A1621 /* MGSplitViewController.m */; };
 		26E2786F10FA85C600B7B998 /* XMPP.png in Resources */ = {isa = PBXBuildFile; fileRef = 26E2786A10FA85C600B7B998 /* XMPP.png */; };
-		26E2787010FA85C600B7B998 /* MSN.png in Resources */ = {isa = PBXBuildFile; fileRef = 26E2786B10FA85C600B7B998 /* MSN.png */; };
 		26E2787210FA85C600B7B998 /* Facebook.png in Resources */ = {isa = PBXBuildFile; fileRef = 26E2786D10FA85C600B7B998 /* Facebook.png */; };
 		26E5BA8B132287D400D8C57A /* Settings.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26E5BA8A132287D400D8C57A /* Settings.xib */; };
 		26E5BA8E13228D7400D8C57A /* StatusControl.m in Sources */ = {isa = PBXBuildFile; fileRef = 26E5BA8D13228D7400D8C57A /* StatusControl.m */; };
@@ -457,7 +456,6 @@
 		26DFD4AD15666B7D007A1621 /* MGSplitViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGSplitViewController.h; sourceTree = "<group>"; };
 		26DFD4AE15666B7D007A1621 /* MGSplitViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MGSplitViewController.m; sourceTree = "<group>"; };
 		26E2786A10FA85C600B7B998 /* XMPP.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = XMPP.png; sourceTree = "<group>"; };
-		26E2786B10FA85C600B7B998 /* MSN.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = MSN.png; sourceTree = "<group>"; };
 		26E2786D10FA85C600B7B998 /* Facebook.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Facebook.png; sourceTree = "<group>"; };
 		26E5BA8A132287D400D8C57A /* Settings.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = Settings.xib; sourceTree = "<group>"; };
 		26E5BA8C13228D7400D8C57A /* StatusControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StatusControl.h; sourceTree = "<group>"; };
@@ -597,7 +595,6 @@
 			children = (
 				264A051A1287067700189A87 /* google.png */,
 				26E2786A10FA85C600B7B998 /* XMPP.png */,
-				26E2786B10FA85C600B7B998 /* MSN.png */,
 				26E2786D10FA85C600B7B998 /* Facebook.png */,
 			);
 			name = Protocol;
@@ -1196,7 +1193,6 @@
 				269F0F1A105DDEFB00FF96F8 /* status.png in Resources */,
 				26D1847310F9972400340C52 /* XMPPEdit.xib in Resources */,
 				26E2786F10FA85C600B7B998 /* XMPP.png in Resources */,
-				26E2787010FA85C600B7B998 /* MSN.png in Resources */,
 				26E2787210FA85C600B7B998 /* Facebook.png in Resources */,
 				26EB845E111644AD005446DD /* Themes in Resources */,
 				26EB85D711166DE7005446DD /* Monal_crop_57.png in Resources */,

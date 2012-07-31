@@ -913,6 +913,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
             if(	[[attributeDict objectForKey:@"action"] isEqualToString:@"session-terminate"])
             {
                 debug_NSLog(@"got Jingle session terminate");
+                jingleCall.didReceiveTerminate=YES; 
                 [self endCall];
             }
             
@@ -981,7 +982,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
         State=nil;*/
         if((	[[attributeDict objectForKey:@"generation"] isEqualToString:@"0"])
             &&
-           ( [[attributeDict objectForKey:@"component"] isEqualToString:@"1"]) )
+           ( [[attributeDict objectForKey:@"component"] isEqualToString:@"1"]) ) // compoennt 1 os RTP
         {
             NSString* jingleAddress=[attributeDict objectForKey:@"address"];
             if(jingleAddress==nil) jingleAddress=[attributeDict objectForKey:@"ip"];

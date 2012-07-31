@@ -6,6 +6,9 @@
 //  Copyright (c) 2011 __MyCompanyName__. All rights reserved.
 //
 
+#include <ifaddrs.h>
+#include <arpa/inet.h>
+
 #import <Foundation/Foundation.h>
 //RTP library (jrtlb obj-c wrapper)
 #import "RTP.hh"
@@ -17,11 +20,14 @@
     NSString* otherParty; 
     NSString* thesid; 
     NSString* theaddress; 
-    NSString* theport; 
+    NSString* destinationPort;
+    NSString* localPort;
     NSString* theusername;
     NSString* thepass; 
     
-    RTP* rtp;     
+    RTP* rtp;
+    
+    BOOL didReceiveTerminate; 
 
 }
 -(NSString*) getGoogleInfo:(NSString*) idval;
@@ -32,10 +38,11 @@
 -(NSString*) terminateJingle;
 -(id) init; 
 
--(void) connect; 
+-(int) connect;
 
 
 @property (nonatomic) NSString* me; 
-@property (nonatomic) NSString* thesid; 
+@property (nonatomic) NSString* thesid;
+@property (nonatomic) BOOL didReceiveTerminate; 
 
 @end

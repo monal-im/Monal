@@ -10,7 +10,8 @@
 
 @implementation iqJingle
 @synthesize me; 
-@synthesize thesid; 
+@synthesize thesid;
+@synthesize didReceiveTerminate; 
 
 -(id) init
 {
@@ -21,9 +22,11 @@
     thesid=nil; 
     otherParty=nil; 
     theaddress=nil; 
-    theport=nil; 
+    destinationPort=nil;
+    localPort=nil;
     theusername=nil;
-    thepass=nil; 
+    thepass=nil;
+    didReceiveTerminate=NO;
     
     return self; 
 }
@@ -45,22 +48,65 @@
 }
 
 
--(void) connect
+-(int) connect
 {
     rtp =[RTP alloc];
-    [rtp RTPConnect:theaddress:[theport intValue]];
+    
+    return [rtp RTPConnect:theaddress:[destinationPort intValue]:[localPort intValue]];
     
 
+}
+
+
+- (NSString *)getOwnIPAddress
+{
+    NSString *address = @"error";
+    struct ifaddrs *interfaces = NULL;
+    struct ifaddrs *temp_addr = NULL;
+    int success = 0;
+    
+    // retrieve the current interfaces - returns 0 on success
+    success = getifaddrs(&interfaces);
+    if (success == 0)
+    {
+        // Loop through linked list of interfaces
+        temp_addr = interfaces;
+        while(temp_addr != NULL)
+        {
+            if(temp_addr->ifa_addr->sa_family == AF_INET)
+            {
+                // Check if interface is en0 which is the wifi connection on the iPhone
+                if([[NSString stringWithUTF8String:temp_addr->ifa_name] isEqualToString:@"en0"])
+                {
+                    // Get NSString from C String
+                    address = [NSString stringWithUTF8String:inet_ntoa(((struct sockaddr_in *)temp_addr->ifa_addr)->sin_addr)];
+                }
+            }
+            
+            temp_addr = temp_addr->ifa_next;
+        }
+    }
+    
+    // Free memory
+    freeifaddrs(interfaces);
+    
+    return address;
 }
 
 -(NSString*) acceptJingle:(NSString*) to:(NSString*) address: (NSString*) port: (NSString*) username: (NSString*) pass:  (NSString*)idval
 {
     
     
+    NSString* ownIP= [self getOwnIPAddress];
+   NSString* localPort=@"5004";
    
     
+    //create the listener and get the port number before sending to the 
+    
+    
+    
     NSMutableString* query=[[NSMutableString alloc] init];
-    [query appendFormat:@"<iq      to='%@'  id='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-accept'  responder='%@' sid='%@'> <content creator='initiator' name=\"audio-session\" senders=\"both\"><description xmlns=\"urn:xmpp:jingle:apps:rtp:1\" media=\"audio\"> <payload-type id=\"8\" name=\"PCMA\" clockrate=\"8000\"/></description> <transport xmlns='urn:xmpp:jingle:transports:raw-udp:1'> <candidate ip=\"%@\" port=\"%@\"    generation=\"0\" /></transport> </content> </jingle> </iq>", to, idval,  me,  thesid, address, port]; 
+    [query appendFormat:@"<iq      to='%@'  id='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-accept'  responder='%@' sid='%@'> <content creator='initiator' name=\"audio-session\" senders=\"both\"><description xmlns=\"urn:xmpp:jingle:apps:rtp:1\" media=\"audio\"> <payload-type id=\"8\" name=\"PCMA\" clockrate=\"8000\"/></description> <transport xmlns='urn:xmpp:jingle:transports:raw-udp:1'><candidate type=\"host\" network=\"0\" component=\"1\" ip=\"%@\" port=\"%@\"    generation=\"0\" protocol=\"udp'\" /></transport> </content> </jingle> </iq>", to, idval,  me,  thesid, ownIP, localPort];
     
    
     
@@ -69,19 +115,14 @@
     
     
     theaddress=address;
-    theport=port; 
+    destinationPort=port;
     theusername=username; 
     thepass=pass;
 
     
     
     otherParty=[NSString stringWithString:to]; 
-  
-    
-    
-    
-    
-    ; 
+ 
     return query;
 }
 
@@ -107,10 +148,12 @@
 -(NSString*) terminateJingle
 {
     
-    
+   
     NSMutableString* query=[[NSMutableString alloc] init];
+     if(!didReceiveTerminate)
     [query appendFormat:@"<iq      to='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-terminate' sid='%@'> <reason> <success/> </reason> </jingle> </iq>", otherParty, thesid]; 
-    
+    else
+        query=@"";
     
     [rtp RTPDisconnect];
     

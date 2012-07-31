@@ -92,8 +92,8 @@ void AudioInputCallback(
 
 
 
--(void) RTPConnect:(NSString*) IP:(int) port; 
-{    
+-(int) RTPConnect:(NSString*) IP:(int) destPort:(int) localPort
+{
  
    
     
@@ -105,8 +105,8 @@ void AudioInputCallback(
 	std::string ipstr([IP  cStringUsingEncoding:NSUTF8StringEncoding]);
 	int status,i;
     
-    destport=port; 
-    portbase=port+2; 
+    destport=destPort;
+    portbase=localPort;
     
    
     destip = inet_addr(ipstr.c_str());
@@ -133,11 +133,14 @@ void AudioInputCallback(
 	status = sess.Create(sessparams,&transparams);	
 	checkerror(status);
 	
+    if(status!=0) return status;
+    
 	jrtplib::RTPIPv4Address addr(destip,destport);
 	
 	status = sess.AddDestination(addr);
 	checkerror(status);
-	
+    
+	if(status!=0) return status;
     
     debug_NSLog(@" RTP to ip %d  IP %@ on port %d", destip,IP,  destport);
     
@@ -176,7 +179,7 @@ void AudioInputCallback(
     }
     else {
         debug_NSLog(@"new queue start failed");
-        return; 
+        return -1;
     }   
     
     
@@ -213,13 +216,14 @@ void AudioInputCallback(
     }
     else {
         debug_NSLog(@"error starting record");
-        return;
+        return -1;
     }  
 
   
 	
     [NSThread detachNewThreadSelector:@selector(listenThread) toTarget:self withObject:nil];
  
+    return 0;
     
 }
 

@@ -356,8 +356,6 @@ thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 	}
 		
 	
-	
-	
 		[tableView deselectRowAtIndexPath:newIndexPath animated:true];
 	
 

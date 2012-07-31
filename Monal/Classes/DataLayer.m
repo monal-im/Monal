@@ -2009,8 +2009,23 @@ static DataLayer *sharedInstance=nil;
         
     }
 	
+
+    
+    if([dbversion doubleValue]<1.074)
+    {
+        debug_NSLog(@"Database version <1.074 detected. Performing upgrade on protocols. ");
+        
+
+        [self executeNonQuery:@"delete from protolcol where protocol_name='AIM' "];
+        [self executeNonQuery:@"delete from protolcol where protocol_name='MSN' "];
+        
+        [self executeNonQuery:@"update dbversion set dbversion='1.074'; "];
+        debug_NSLog(@"Upgrade to 1.074 success ");
+        
+    }
 	
-;
+    
+
 	return; 
 	
 

@@ -98,7 +98,7 @@
     
     
     NSString* ownIP= [self getOwnIPAddress];
-   NSString* localPort=@"5004";
+    NSString* localPort=[NSString stringWithFormat:@"%d",[localPort intValue]+2];
    
     
     //create the listener and get the port number before sending to the 

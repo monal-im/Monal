@@ -130,20 +130,16 @@
 
 -(NSString*) initiateJingle:(NSString*) to  
 {
-    
+        NSString* ownIP= [self getOwnIPAddress];
+    localPort=@"50002"; // some random val
  
-    NSString* sid=@"sfghj569"; //something random 
+    thesid=@"sfghj569"; //something random
  NSMutableString* query=[[NSMutableString alloc] init];
-       [query appendFormat:@" <iq to='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-initiate' initiator='%@' sid='%@'> <content creator='initiator' name='audio'> <description xmlns='urn:xmpp:jingle:apps:rtp:1'/> <transport xmlns=\"urn:xmpp:jingle:transports:raw-udp:1\"/> </content> </jingle> </iq>", to,me, sid]; 
+    [query appendFormat:@" <iq to='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-initiate' initiator='%@' sid='%@'> <content creator='initiator'  name=\"audio-session\" senders=\"both\"> <description xmlns=\"urn:xmpp:jingle:apps:rtp:1\" media=\"audio\"> <payload-type id=\"8\" name=\"PCMA\" clockrate=\"8000\"/></description> <transport xmlns='urn:xmpp:jingle:transports:raw-udp:1'><candidate type=\"host\" network=\"0\" component=\"1\" ip=\"%@\" port=\"%@\"   id=\"monal001\" generation=\"0\" protocol=\"udp\" priority=\"1\" /></transport> </content> </jingle> </iq>", to, me,  thesid, ownIP, localPort];
     
 
     otherParty=[NSString stringWithString:to]; 
-    //thesid =[NSString stringWithString:sid]; 
-    //[thesid retain];
-    
-    
-    
-    ; 
+ 
     return query;
 }
 

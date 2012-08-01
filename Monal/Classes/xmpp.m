@@ -907,7 +907,9 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
             
             if(	[[attributeDict objectForKey:@"action"] isEqualToString:@"session-accept"])
             {
-                debug_NSLog(@"got Jingle session accept"); 
+                debug_NSLog(@"got Jingle session accept");
+                
+                
             }
             
             if(	[[attributeDict objectForKey:@"action"] isEqualToString:@"session-terminate"])
@@ -978,8 +980,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 	{
         debug_NSLog(@"got Jingle transport candidate"); 
         
-       /* if(State!=nil) [State release]; 
-        State=nil;*/
+       
         if((	[[attributeDict objectForKey:@"generation"] isEqualToString:@"0"])
             &&
            ( [[attributeDict objectForKey:@"component"] isEqualToString:@"1"]) ) // compoennt 1 os RTP
@@ -996,8 +997,6 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
                                     :[attributeDict objectForKey:@"password"]
              
                                                 :sessionkey             ]];
-           //   [jingleCall connect]; 
-            
           [jingleCall performSelectorOnMainThread:@selector(connect) withObject:nil waitUntilDone:NO];
             
         }

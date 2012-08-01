@@ -164,7 +164,7 @@ void AudioInputCallback(
     kLinearPCMFormatFlagIsPacked;
     
     
-    OSStatus audioStatus = AudioQueueNewInput(
+    OSStatus audioStatus= AudioQueueNewInput(
                                               &recordState.dataFormat, // 1
                                               AudioInputCallback, // 2
                                               &recordState,  // 3
@@ -172,6 +172,8 @@ void AudioInputCallback(
                                               kCFRunLoopCommonModes, // 5
                                               0,  // 6
                                               &recordState.queue);  // 7
+    
+    
     
     if(audioStatus==0)
     {
@@ -208,7 +210,7 @@ void AudioInputCallback(
     }
     
     
-   audioStatus = AudioQueueStart(recordState.queue, NULL);
+   //audioStatus = AudioQueueStart(recordState.queue, NULL);
     
     if(audioStatus==0)
     {
@@ -254,12 +256,11 @@ void AudioInputCallback(
 		}
 		
 		sess.EndDataAccess();
-        
-#ifndef RTP_SUPPORT_THREAD
+    
 		OSStatus status = sess.Poll();
 		checkerror(status);
         if(status!=0) break;
-#endif // RTP_SUPPORT_THREAD
+
 		
         //wait
 		jrtplib::RTPTime::Wait(jrtplib::RTPTime(1,0));
@@ -280,10 +281,10 @@ void AudioInputCallback(
     }
     else {
         debug_NSLog(@"error stopping record");
-        return;
+
     }
 
-    sess.Destroy();
+    sess.BYEDestroy(jrtplib::RTPTime(10,0),0,0);
 }
 
 @end

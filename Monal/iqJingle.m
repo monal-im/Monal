@@ -43,7 +43,7 @@
 
 -(NSString*) ack:(NSString*) to:(NSString*) iqid
 {
-    
+    if (activeCall==YES) return @"";
     
     NSMutableString* query=[[NSMutableString alloc] init];
     [query appendFormat:@"<iq to='%@' from='%@' id='%@' type='result'/>", to, me, iqid]; 
@@ -103,6 +103,7 @@
 -(NSString*) acceptJingle:(NSString*) to:(NSString*) address: (NSString*) port: (NSString*) username: (NSString*) pass:  (NSString*)idval
 {
     
+     if (activeCall==YES) return @"";
     
     NSString* ownIP= [self getOwnIPAddress];
     int localPortInt=[port intValue]+2;

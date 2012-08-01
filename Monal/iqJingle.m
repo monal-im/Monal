@@ -98,7 +98,9 @@
     
     
     NSString* ownIP= [self getOwnIPAddress];
-    NSString* localPort=[NSString stringWithFormat:@"%d",[localPort intValue]+2];
+    int localPortInt=[port intValue]+2;
+    // local port can be the othersides port +2 shoudl be rnadom .. needs to be even for RTP
+   localPort=[NSString stringWithFormat:@"%d",localPortInt];
    
     
     //create the listener and get the port number before sending to the 
@@ -106,7 +108,7 @@
     
     
     NSMutableString* query=[[NSMutableString alloc] init];
-    [query appendFormat:@"<iq      to='%@'  id='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-accept'  responder='%@' sid='%@'> <content creator='initiator' name=\"audio-session\" senders=\"both\"><description xmlns=\"urn:xmpp:jingle:apps:rtp:1\" media=\"audio\"> <payload-type id=\"8\" name=\"PCMA\" clockrate=\"8000\"/></description> <transport xmlns='urn:xmpp:jingle:transports:raw-udp:1'><candidate type=\"host\" network=\"0\" component=\"1\" ip=\"%@\" port=\"%@\"    generation=\"0\" protocol=\"udp'\" /></transport> </content> </jingle> </iq>", to, idval,  me,  thesid, ownIP, localPort];
+    [query appendFormat:@"<iq      to='%@'  id='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-accept'  responder='%@' sid='%@'> <content creator='initiator' name=\"audio-session\" senders=\"both\"><description xmlns=\"urn:xmpp:jingle:apps:rtp:1\" media=\"audio\"> <payload-type id=\"8\" name=\"PCMA\" clockrate=\"8000\"/></description> <transport xmlns='urn:xmpp:jingle:transports:raw-udp:1'><candidate type=\"host\" network=\"0\" component=\"1\" ip=\"%@\" port=\"%@\"   id=\"monal001\" generation=\"0\" protocol=\"udp\" priority=\"1\" /></transport> </content> </jingle> </iq>", to, idval,  me,  thesid, ownIP, localPort];
     
    
     

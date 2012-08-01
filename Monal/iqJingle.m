@@ -13,20 +13,25 @@
 @synthesize thesid;
 @synthesize didReceiveTerminate; 
 
--(id) init
+-(void) resetVals
 {
-    self = [super init];
-   
-   
-    
-    thesid=nil; 
-    otherParty=nil; 
-    theaddress=nil; 
+    thesid=nil;
+    otherParty=nil;
+    theaddress=nil;
     destinationPort=nil;
     localPort=nil;
     theusername=nil;
     thepass=nil;
     didReceiveTerminate=NO;
+    
+    activeCall=NO;
+}
+
+-(id) init
+{
+    self = [super init];
+
+    [self resetVals];
     
     return self; 
 }
@@ -50,6 +55,8 @@
 
 -(int) connect
 {
+    activeCall=YES; 
+    
     rtp =[RTP alloc];
     
     return [rtp RTPConnect:theaddress:[destinationPort intValue]:[localPort intValue]];
@@ -148,7 +155,8 @@
 -(NSString*) terminateJingle
 {
     
-   
+    [self resetVals];
+    
     NSMutableString* query=[[NSMutableString alloc] init];
      if(!didReceiveTerminate)
     [query appendFormat:@"<iq      to='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-terminate' sid='%@'> <reason> <success/> </reason> </jingle> </iq>", otherParty, thesid]; 

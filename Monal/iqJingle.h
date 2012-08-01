@@ -27,7 +27,8 @@
     
     RTP* rtp;
     
-    BOOL didReceiveTerminate; 
+    BOOL didReceiveTerminate;
+    BOOL activeCall; 
 
 }
 -(NSString*) getGoogleInfo:(NSString*) idval;
@@ -36,9 +37,12 @@
 -(NSString*) acceptJingle:(NSString*) to:(NSString*) address: (NSString*) port: (NSString*) username: (NSString*) pass:  (NSString*)idval; 
 -(NSString*) initiateJingle:(NSString*) to  :(NSString*)iqid;
 -(NSString*) terminateJingle;
--(id) init; 
+
+-(void) resetVals;
+-(id) init;
 
 -(int) connect;
+
 
 
 @property (nonatomic) NSString* me; 

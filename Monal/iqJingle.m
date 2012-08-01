@@ -133,11 +133,13 @@
         NSString* ownIP= [self getOwnIPAddress];
     localPort=@"50002"; // some random val
  
-    thesid=@"sfghj569"; //something random
+    thesid=@"Monal3sdfg"; //something random
  NSMutableString* query=[[NSMutableString alloc] init];
-    [query appendFormat:@" <iq to='%@' id='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-initiate' initiator='%@' sid='%@'> <content creator='initiator'  name=\"audio-session\" senders=\"both\" responder='%@'> <description xmlns=\"urn:xmpp:jingle:apps:rtp:1\" media=\"audio\"> <payload-type id=\"8\" name=\"PCMA\" clockrate=\"8000\"/></description> <transport xmlns='urn:xmpp:jingle:transports:raw-udp:1'><candidate type=\"host\" network=\"0\" component=\"1\" ip=\"%@\" port=\"%@\"   id=\"monal001\" generation=\"0\" protocol=\"udp\" /></transport> </content> </jingle> </iq>", to, iqid, me,  thesid, to, ownIP, localPort];
+    [query appendFormat:@" <iq to='%@' id='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-initiate' initiator='%@' responder='%@' sid='%@'> <content creator='initiator'  name=\"audio-session\" senders=\"both\" responder='%@'> <description xmlns=\"urn:xmpp:jingle:apps:rtp:1\" media=\"audio\"> <payload-type id=\"8\" name=\"PCMA\" clockrate=\"8000\" channels='0'/></description> <transport xmlns='urn:xmpp:jingle:transports:raw-udp:1'><candidate component=\"1\" ip=\"%@\" port=\"%@\"   id=\"monal001\" generation=\"0\"  /></transport> </content> </jingle> </iq>", to, iqid, me, to,  thesid, to, ownIP, localPort];
     
-
+//Note this needs the resource id after to  inorder to work.. 
+    
+    
     otherParty=[NSString stringWithString:to]; 
  
     return query;

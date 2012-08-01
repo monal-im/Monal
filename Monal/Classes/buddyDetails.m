@@ -47,12 +47,14 @@
 
 -(IBAction) callPress
 {      
+    // send jingle stuff
+    [jabber startCallUser:buddyName.text];
+    
     callScreen* call = [callScreen alloc] ;
     [call init:navigationController];
     [call show:jabber:buddyName.text];
     
-    // send jingle stuff
-    [jabber startCallUser:buddyName.text];
+   
     
   
      /* NSString* machine=[tools machine]; 

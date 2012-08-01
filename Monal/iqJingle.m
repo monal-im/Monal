@@ -76,7 +76,7 @@
             if(temp_addr->ifa_addr->sa_family == AF_INET)
             {
                 // Check if interface is en0 which is the wifi connection on the iPhone
-                if([[NSString stringWithUTF8String:temp_addr->ifa_name] isEqualToString:@"en0"])
+               // if([[NSString stringWithUTF8String:temp_addr->ifa_name] isEqualToString:@"en0"])
                 {
                     // Get NSString from C String
                     address = [NSString stringWithUTF8String:inet_ntoa(((struct sockaddr_in *)temp_addr->ifa_addr)->sin_addr)];
@@ -128,14 +128,14 @@
     return query;
 }
 
--(NSString*) initiateJingle:(NSString*) to  
+-(NSString*) initiateJingle:(NSString*) to  :(NSString*)iqid
 {
         NSString* ownIP= [self getOwnIPAddress];
     localPort=@"50002"; // some random val
  
     thesid=@"sfghj569"; //something random
  NSMutableString* query=[[NSMutableString alloc] init];
-    [query appendFormat:@" <iq to='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-initiate' initiator='%@' sid='%@'> <content creator='initiator'  name=\"audio-session\" senders=\"both\"> <description xmlns=\"urn:xmpp:jingle:apps:rtp:1\" media=\"audio\"> <payload-type id=\"8\" name=\"PCMA\" clockrate=\"8000\"/></description> <transport xmlns='urn:xmpp:jingle:transports:raw-udp:1'><candidate type=\"host\" network=\"0\" component=\"1\" ip=\"%@\" port=\"%@\"   id=\"monal001\" generation=\"0\" protocol=\"udp\" priority=\"1\" /></transport> </content> </jingle> </iq>", to, me,  thesid, ownIP, localPort];
+    [query appendFormat:@" <iq to='%@' id='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-initiate' initiator='%@' sid='%@'> <content creator='initiator'  name=\"audio-session\" senders=\"both\" responder='%@'> <description xmlns=\"urn:xmpp:jingle:apps:rtp:1\" media=\"audio\"> <payload-type id=\"8\" name=\"PCMA\" clockrate=\"8000\"/></description> <transport xmlns='urn:xmpp:jingle:transports:raw-udp:1'><candidate type=\"host\" network=\"0\" component=\"1\" ip=\"%@\" port=\"%@\"   id=\"monal001\" generation=\"0\" protocol=\"udp\" /></transport> </content> </jingle> </iq>", to, iqid, me,  thesid, to, ownIP, localPort];
     
 
     otherParty=[NSString stringWithString:to]; 

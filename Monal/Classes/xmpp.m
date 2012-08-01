@@ -2993,7 +2993,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 
 -(bool) startCallUser:(NSString*) buddy
 {
-   return [self talk:[jingleCall initiateJingle:buddy]]; 
+    return [self talk:[jingleCall initiateJingle:buddy:sessionkey]];
 }
 
 -(bool) endCall

@@ -34,7 +34,7 @@
 
 -(NSString*) ack:(NSString*) to:(NSString*) iqid;
 -(NSString*) acceptJingle:(NSString*) to:(NSString*) address: (NSString*) port: (NSString*) username: (NSString*) pass:  (NSString*)idval; 
--(NSString*) initiateJingle:(NSString*) to ;
+-(NSString*) initiateJingle:(NSString*) to  :(NSString*)iqid;
 -(NSString*) terminateJingle;
 -(id) init; 
 

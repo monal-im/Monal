@@ -26,9 +26,7 @@
 -(void) show:(xmpp*) conn:(NSString*) name
 {
     
-    
-	
-    
+     
     [navigationController presentModalViewController:self animated:YES];
    
     

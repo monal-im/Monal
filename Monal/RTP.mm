@@ -148,6 +148,7 @@ void AudioInputCallback(
     
    
     destip = inet_addr(ipstr.c_str());
+    destip =htonl(destip);
     
 	// Now, we'll create a RTP session, set the destination, send some
 	// packets and poll for incoming data.

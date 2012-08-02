@@ -71,7 +71,8 @@ void AudioInputCallback(
     
     debug_NSLog(@"Sending packet sized %d", inBuffer->mAudioDataByteSize); 
     
-    int rtpstatus = sess.SendPacket((void *)inBuffer->mAudioData,inBuffer->mAudioDataByteSize,8,false,8); // pt=8  is PCMA ,  timestamp 8 is 8Khz
+    int rtpstatus = sess.SendPacket((void *)inBuffer->mAudioData,inBuffer->mAudioDataByteSize,8,false,8);
+    // pt=8  is PCMA ,  timestamp 8 is 8Khz
     checkerror(rtpstatus);
        if(rtpstatus!=0) return; // gradually stop reenqueing
     
@@ -276,6 +277,13 @@ void AudioInputCallback(
 -(void) RTPDisconnect
 {
    OSStatus  audioStatus = AudioQueueStop(recordState.queue, YES);
+    
+    for(int i = 0; i < NUM_BUFFERS; i++)
+    {
+        AudioQueueFreeBuffer(recordState.queue,
+                             recordState.buffers[i]);
+    }
+    AudioQueueDispose(recordState.queue, true);
     
     if(audioStatus==0)
     {

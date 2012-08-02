@@ -1617,7 +1617,7 @@ debug_NSLog(@"Entering background");
 	
 	 //******* VOIP .. to be removed when going to normal task completion ********  
 
-   /*
+ 
 void (^myBlock)(void) = ^(void){
 		debug_NSLog(@"OS keep alive hander called"); 
 		[self keepAlive];
@@ -1629,13 +1629,13 @@ void (^myBlock)(void) = ^(void){
 	 {
 	 debug_NSLog(@"set keep alive hander"); 
 	 }
-	*/
+
 
 	buddylistdirty=false; // reset 
 	
 	
 	
-	
+	/*
 	NSString* ver=[[UIDevice currentDevice] systemVersion];
 	if([ver characterAtIndex:0]!='3')
 	{
@@ -1658,7 +1658,8 @@ void (^myBlock)(void) = ^(void){
     }];
 
 	}
-
+*/
+    
     [[NSUserDefaults standardUserDefaults] synchronize];
     
 }
@@ -1710,13 +1711,13 @@ void (^myBlock)(void) = ^(void){
 
 	
 	
-
+/*
 	 
 	if((bgTask!=UIBackgroundTaskInvalid) && (bgTask!=nil))
 	{
 		[[UIApplication sharedApplication] endBackgroundTask:bgTask];
 		 bgTask=UIBackgroundTaskInvalid;
-	};
+	};*/
 	 
 	
 }

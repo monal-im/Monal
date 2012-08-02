@@ -999,7 +999,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
                                     :[attributeDict objectForKey:@"password"]
              
                                                 :sessionkey             ]];
-          [jingleCall performSelectorOnMainThread:@selector(connect) withObject:nil waitUntilDone:NO];
+         // [jingleCall performSelectorOnMainThread:@selector(connect) withObject:nil waitUntilDone:NO];
             
         }
         
@@ -3282,14 +3282,15 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	; 
 	
 	
-	return val;
-	/* if(val!=true)
+	//return val;
+    
+	 if(val!=true)
  {
 	 keepAliveCounter++ ;
  } else keepAliveCounter=0;
 	
 	if(keepAliveCounter>1) return false; else return true; // needs 2 concurrent keep alive send fails
-*/	
+
 
 }
 

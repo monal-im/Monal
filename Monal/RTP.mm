@@ -166,7 +166,7 @@ void AudioInputCallback(
 	// In this case, we'll be sending 10 samples each second, so we'll
 	// put the timestamp unit to (1.0/10.0)
     
-	sessparams.SetOwnTimestampUnit(1.0/recordState.dataFormat.mSampleRate );		
+	sessparams.SetOwnTimestampUnit(1.0/recordState.dataFormat.mSampleRate );
 	
 	sessparams.SetAcceptOwnPackets(true);
 	transparams.SetPortbase(portbase);

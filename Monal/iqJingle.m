@@ -84,7 +84,7 @@
             if(temp_addr->ifa_addr->sa_family == AF_INET)
             {
                 // Check if interface is en0 which is the wifi connection on the iPhone
-               // if([[NSString stringWithUTF8String:temp_addr->ifa_name] isEqualToString:@"en0"])
+                if([[NSString stringWithUTF8String:temp_addr->ifa_name] isEqualToString:@"en0"])
                 {
                     // Get NSString from C String
                     address = [NSString stringWithUTF8String:inet_ntoa(((struct sockaddr_in *)temp_addr->ifa_addr)->sin_addr)];
@@ -112,6 +112,8 @@
           thepass=pass;
           otherParty=[NSString stringWithString:to];
           
+           [self performSelectorOnMainThread:@selector(connect) withObject:nil waitUntilDone:NO];
+          
           return @"";
       }
     
@@ -121,29 +123,24 @@
     int localPortInt=[port intValue]+2;
     // local port can be the othersides port +2 shoudl be rnadom .. needs to be even for RTP
    localPort=[NSString stringWithFormat:@"%d",localPortInt];
+
+    theaddress=address;
+    destinationPort=port;
+    theusername=username;
+    thepass=pass;
+    
+    //create the listener and get the port number before sending to the accept
+     [self performSelectorOnMainThread:@selector(connect) withObject:nil waitUntilDone:NO];
+    
    
-    
-    //create the listener and get the port number before sending to the 
-    
-    
-    
     NSMutableString* query=[[NSMutableString alloc] init];
     [query appendFormat:@"<iq      to='%@'  id='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-accept'  responder='%@' sid='%@'> <content creator='initiator' name=\"audio-session\" senders=\"both\"><description xmlns=\"urn:xmpp:jingle:apps:rtp:1\" media=\"audio\"> <payload-type id=\"8\" name=\"PCMA\" clockrate=\"8000\"/></description> <transport xmlns='urn:xmpp:jingle:transports:raw-udp:1'><candidate type=\"host\" network=\"0\" component=\"1\" ip=\"%@\" port=\"%@\"   id=\"monal001\" generation=\"0\" protocol=\"udp\" priority=\"1\" /></transport> </content> </jingle> </iq>", to, idval,  me,  thesid, ownIP, localPort];
     
-   
     
    /* [query appendFormat:  @" <iq type='set' to='%@' id='%@' from='%@'><ses:session type='accept' id='%@' initiator='%@' xmlns:ses='http://www.google.com/session'><description xmlns='http://www.google.com/session/phone'><payload-type id='8' name='PCMA' clockrate='8000'/></description></ses:session></iq>", to, idval, me,thesid,to];
     */
     
-    
-    theaddress=address;
-    destinationPort=port;
-    theusername=username; 
-    thepass=pass;
-
-    
-    
-    otherParty=[NSString stringWithString:to]; 
+   otherParty=[NSString stringWithString:to]; 
  
   
     

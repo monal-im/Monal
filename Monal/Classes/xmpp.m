@@ -892,7 +892,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
                 jingleCall.thesid= [attributeDict objectForKey:@"sid"] ;
                
                 
-                
+                    State=@"jingleAction";
                 
             }
   
@@ -923,7 +923,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
         
       //  }
       
-        State=@"jingleAction";
+    
         
         return; 
         

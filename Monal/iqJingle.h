@@ -28,7 +28,8 @@
     RTP* rtp;
     
     BOOL didReceiveTerminate;
-    BOOL activeCall; 
+    BOOL activeCall;
+    BOOL didStartCall; 
 
 }
 -(NSString*) getGoogleInfo:(NSString*) idval;

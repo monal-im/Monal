@@ -95,7 +95,45 @@ void AudioInputCallback(
 -(int) RTPConnect:(NSString*) IP:(int) destPort:(int) localPort
 {
  
-   
+    //********* Audio Queue ********/
+    
+    
+    
+    
+    recordState.dataFormat.mSampleRate = 8000.0;
+    recordState.dataFormat.mFormatID = kAudioFormatLinearPCM;
+    recordState.dataFormat.mFramesPerPacket = 1;
+    recordState.dataFormat.mChannelsPerFrame = 1;
+    recordState.dataFormat.mBytesPerFrame = 2;
+    recordState.dataFormat.mBytesPerPacket = 2;
+    recordState.dataFormat.mBitsPerChannel = 16;
+    recordState.dataFormat.mReserved = 0;
+    recordState.dataFormat.mFormatFlags =
+    kLinearPCMFormatFlagIsBigEndian |
+    kLinearPCMFormatFlagIsSignedInteger |
+    kLinearPCMFormatFlagIsPacked;
+    
+    
+    OSStatus audioStatus= AudioQueueNewInput(
+                                             &recordState.dataFormat, // 1
+                                             AudioInputCallback, // 2
+                                             &recordState,  // 3
+                                             CFRunLoopGetCurrent(),  // 4
+                                             kCFRunLoopCommonModes, // 5
+                                             0,  // 6
+                                             &recordState.queue);  // 7
+    
+    
+    
+    if(audioStatus==0)
+    {
+        debug_NSLog(@"new queue started ok");
+    }
+    else {
+        debug_NSLog(@"new queue start failed");
+        return -1;
+    }
+    
     
     //******* RTP *****/
     
@@ -126,7 +164,7 @@ void AudioInputCallback(
 	// In this case, we'll be sending 10 samples each second, so we'll
 	// put the timestamp unit to (1.0/10.0)
     
-	sessparams.SetOwnTimestampUnit(1.0/10);		
+	sessparams.SetOwnTimestampUnit(1.0/recordState.dataFormat.mSampleRate );		
 	
 	sessparams.SetAcceptOwnPackets(true);
 	transparams.SetPortbase(portbase);
@@ -145,44 +183,7 @@ void AudioInputCallback(
     debug_NSLog(@" RTP to ip %d  IP %@ on port %d", destip,IP,  destport);
     
 
-    //********* Audio Queue ********/
-    
-   
-    
-
-    recordState.dataFormat.mSampleRate = 8000.0;
-    recordState.dataFormat.mFormatID = kAudioFormatLinearPCM;
-    recordState.dataFormat.mFramesPerPacket = 1;
-    recordState.dataFormat.mChannelsPerFrame = 1;
-    recordState.dataFormat.mBytesPerFrame = 2;
-    recordState.dataFormat.mBytesPerPacket = 2;
-    recordState.dataFormat.mBitsPerChannel = 16;
-    recordState.dataFormat.mReserved = 0;
-    recordState.dataFormat.mFormatFlags =
-    kLinearPCMFormatFlagIsBigEndian |
-    kLinearPCMFormatFlagIsSignedInteger |
-    kLinearPCMFormatFlagIsPacked;
-    
-    
-    OSStatus audioStatus= AudioQueueNewInput(
-                                              &recordState.dataFormat, // 1
-                                              AudioInputCallback, // 2
-                                              &recordState,  // 3
-                                              CFRunLoopGetCurrent(),  // 4
-                                              kCFRunLoopCommonModes, // 5
-                                              0,  // 6
-                                              &recordState.queue);  // 7
-    
-    
-    
-    if(audioStatus==0)
-    {
-        debug_NSLog(@"new queue started ok");
-    }
-    else {
-        debug_NSLog(@"new queue start failed");
-        return -1;
-    }   
+  
     
     
     for(int i = 0; i < NUM_BUFFERS; i++)

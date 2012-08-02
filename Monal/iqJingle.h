@@ -13,6 +13,10 @@
 //RTP library (jrtlb obj-c wrapper)
 #import "RTP.hh"
 
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <net/if.h>
+#include <ifaddrs.h>
 
 @interface iqJingle : NSObject
 {

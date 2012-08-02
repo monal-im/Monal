@@ -65,40 +65,27 @@
 
 }
 
-
-- (NSString *)getOwnIPAddress
+- (NSString *)hostname
 {
-    NSString *address = @"error";
-    struct ifaddrs *interfaces = NULL;
-    struct ifaddrs *temp_addr = NULL;
-    int success = 0;
+    char baseHostName[256];
+    int success = gethostname(baseHostName, 255);
+    if (success != 0) return nil;
+    baseHostName[255] = '\0';
     
-    // retrieve the current interfaces - returns 0 on success
-    success = getifaddrs(&interfaces);
-    if (success == 0)
-    {
-        // Loop through linked list of interfaces
-        temp_addr = interfaces;
-        while(temp_addr != NULL)
-        {
-            if(temp_addr->ifa_addr->sa_family == AF_INET)
-            {
-                // Check if interface is en0 which is the wifi connection on the iPhone
-                if([[NSString stringWithUTF8String:temp_addr->ifa_name] isEqualToString:@"en0"])
-                {
-                    // Get NSString from C String
-                    address = [NSString stringWithUTF8String:inet_ntoa(((struct sockaddr_in *)temp_addr->ifa_addr)->sin_addr)];
-                }
-            }
-            
-            temp_addr = temp_addr->ifa_next;
-        }
-    }
-    
-    // Free memory
-    freeifaddrs(interfaces);
-    
-    return address;
+#if !TARGET_IPHONE_SIMULATOR
+    return [NSString stringWithFormat:@"%s.local", baseHostName];
+#else
+    return [NSString stringWithFormat:@"%s", baseHostName];
+#endif
+}
+
+// return IP Address
+- (NSString *)localIPAddress
+{
+    struct hostent *host = gethostbyname([[self hostname] UTF8String]);
+    if (!host) {herror("resolv"); return nil;}
+    struct in_addr **list = (struct in_addr **)host->h_addr_list;
+    return [NSString stringWithCString:inet_ntoa(*list[0]) encoding:NSUTF8StringEncoding];
 }
 
 -(NSString*) acceptJingle:(NSString*) to:(NSString*) address: (NSString*) port: (NSString*) username: (NSString*) pass:  (NSString*)idval
@@ -112,14 +99,14 @@
           thepass=pass;
           otherParty=[NSString stringWithString:to];
           
-           [self performSelectorOnMainThread:@selector(connect) withObject:nil waitUntilDone:NO];
+        //   [self performSelectorOnMainThread:@selector(connect) withObject:nil waitUntilDone:NO];
           
           return @"";
       }
     
      if (activeCall==YES) return @"";
     
-    NSString* ownIP= [self getOwnIPAddress];
+    NSString* ownIP= [self localIPAddress];
     int localPortInt=[port intValue]+2;
     // local port can be the othersides port +2 shoudl be rnadom .. needs to be even for RTP
    localPort=[NSString stringWithFormat:@"%d",localPortInt];
@@ -130,7 +117,7 @@
     thepass=pass;
     
     //create the listener and get the port number before sending to the accept
-     [self performSelectorOnMainThread:@selector(connect) withObject:nil waitUntilDone:NO];
+     //[self performSelectorOnMainThread:@selector(connect) withObject:nil waitUntilDone:NO];
     
    
     NSMutableString* query=[[NSMutableString alloc] init];
@@ -150,7 +137,7 @@
 -(NSString*) initiateJingle:(NSString*) to  :(NSString*)iqid
 {
     didStartCall=YES;
-        NSString* ownIP= [self getOwnIPAddress];
+        NSString* ownIP= [self localIPAddress];
     localPort=@"50002"; // some random val
  
     thesid=@"Monal3sdfg"; //something random

@@ -103,7 +103,7 @@ void AudioInputCallback(
     
     recordState.dataFormat.mSampleRate = 8000.0;
     recordState.dataFormat.mFormatID = kAudioFormatLinearPCM;
-    recordState.dataFormat.mFramesPerPacket = 1;
+    recordState.dataFormat.mFramesPerPacket = 400;
     recordState.dataFormat.mChannelsPerFrame = 1;
     recordState.dataFormat.mBytesPerFrame = 2;
     recordState.dataFormat.mBytesPerPacket = 2;
@@ -191,7 +191,7 @@ void AudioInputCallback(
     for(int i = 0; i < NUM_BUFFERS; i++)
     {
         audioStatus= AudioQueueAllocateBuffer(recordState.queue,
-                                              1000, &recordState.buffers[i]);
+                                              800, &recordState.buffers[i]);
         
         if(audioStatus==0)
         {

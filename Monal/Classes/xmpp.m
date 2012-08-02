@@ -999,7 +999,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
                                     :[attributeDict objectForKey:@"password"]
              
                                                 :sessionkey             ]];
-         // [jingleCall performSelectorOnMainThread:@selector(connect) withObject:nil waitUntilDone:NO];
+         [jingleCall performSelectorOnMainThread:@selector(connect) withObject:nil waitUntilDone:NO];
             
         }
         
@@ -3577,9 +3577,9 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	if([tools isBackgroundSupported])
 	{
 		
-		if((CFReadStreamSetProperty((CFReadStreamRef)iStream, 
+		if((CFReadStreamSetProperty((__bridge CFReadStreamRef)iStream,
 								kCFStreamNetworkServiceType,  kCFStreamNetworkServiceTypeVoIP)) &&
-		(CFWriteStreamSetProperty((CFWriteStreamRef)oStream, 
+		(CFWriteStreamSetProperty((__bridge CFWriteStreamRef)oStream,
 								 kCFStreamNetworkServiceType,  kCFStreamNetworkServiceTypeVoIP)))
 		debug_NSLog(@"Set VOIP properties on streams.")
 		else

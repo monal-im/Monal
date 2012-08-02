@@ -19,7 +19,7 @@
 }
 
 
-#define NUM_BUFFERS 48
+#define NUM_BUFFERS 3
 
 
 

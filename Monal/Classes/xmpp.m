@@ -3265,9 +3265,10 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 
 -(bool) keepAlive
 {
-	//NSString* query =[NSString stringWithFormat:@"<iq id='%@' type='get'><ping xmlns='urn:xmpp:ping'/></iq>", sessionkey];
+	NSString* query =[NSString stringWithFormat:@"<iq id='%@' type='get'><ping xmlns='urn:xmpp:ping'/></iq>", sessionkey];
 	
-	NSString* query =[NSString stringWithFormat:@" "]; // white space ping because it is less resource intensive and more support
+//	NSString* query =[NSString stringWithFormat:@" "];
+    // white space ping because it is less resource intensive and more support
 	
 	
 	bool val= [self talk:query];

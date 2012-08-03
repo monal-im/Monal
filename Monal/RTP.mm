@@ -72,7 +72,7 @@ void AudioInputCallback(
     
   //  debug_NSLog(@"Sending packet sized %d", inBuffer->mAudioDataByteSize);
     
-    int rtpstatus = sess.SendPacket((void *)inBuffer->mAudioData,inBuffer->mAudioDataByteSize,8,false, inNumberPacketDescriptions/320 );
+    int rtpstatus = sess.SendPacket((void *)inBuffer->mAudioData,inBuffer->mAudioDataByteSize,8,false, inNumberPacketDescriptions/100 );
     // pt=8  is PCMA ,  timestamp 8 is 8Khz
     checkerror(rtpstatus);
        if(rtpstatus!=0) return; // gradually stop reenqueing
@@ -165,7 +165,7 @@ void AudioInputCallback(
 	// In this case, we'll be sending 10 samples each second, so we'll
 	// put the timestamp unit to (1.0/10.0)
     
-	sessparams.SetOwnTimestampUnit(1.0/320 );
+	sessparams.SetOwnTimestampUnit(1.0/100 );
 	
 	sessparams.SetAcceptOwnPackets(true);
 	transparams.SetPortbase(portbase);
@@ -190,7 +190,7 @@ void AudioInputCallback(
     for(int i = 0; i < NUM_BUFFERS; i++)
     {
         audioStatus= AudioQueueAllocateBuffer(recordState.queue,
-                                              50, &recordState.buffers[i]);
+                                              160, &recordState.buffers[i]);
         
         if(audioStatus==0)
         {

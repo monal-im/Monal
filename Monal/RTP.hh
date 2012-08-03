@@ -19,8 +19,8 @@
 }
 
 
-#define NUM_BUFFERS 300
-// 2 byte (16 bit)  8000 khz    for  16 x 1000 byte buffer (48=3 seconds) 
+#define NUM_BUFFERS 100
+// 2 byte (16 bit)  8000 khz    stoing 160 in a buffer 
 
 
 

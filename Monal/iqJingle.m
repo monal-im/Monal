@@ -106,6 +106,7 @@
     
      if (activeCall==YES) return @"";
     
+  
     NSString* ownIP= [self localIPAddress];
     int localPortInt=[port intValue]+2;
     // local port can be the othersides port +2 shoudl be rnadom .. needs to be even for RTP

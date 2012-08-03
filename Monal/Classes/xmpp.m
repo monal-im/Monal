@@ -890,6 +890,12 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
                 debug_NSLog(@"got Jingle session initiate "); 
                 
                 jingleCall.thesid= [attributeDict objectForKey:@"sid"] ;
+                
+                 UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Incoming Call"
+                                                                  message:[NSString stringWithFormat:@"Call from %@" , presenceUser]
+                 delegate:self cancelButtonTitle:@"Decline"
+                 otherButtonTitles:@"Answer",  nil] ;
+                 [alert show];
                
                 
                 

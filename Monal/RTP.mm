@@ -103,7 +103,7 @@ void AudioInputCallback(
     
     recordState.dataFormat.mSampleRate = 8000.0;
     recordState.dataFormat.mFormatID = kAudioFormatLinearPCM;
-    recordState.dataFormat.mFramesPerPacket = 400;
+    recordState.dataFormat.mFramesPerPacket = 1;
     recordState.dataFormat.mChannelsPerFrame = 1;
     recordState.dataFormat.mBytesPerFrame = 2;
     recordState.dataFormat.mBytesPerPacket = 2;
@@ -157,10 +157,7 @@ void AudioInputCallback(
 	jrtplib::RTPUDPv4TransmissionParams transparams;
 	jrtplib::RTPSessionParams sessparams;
 	
-   
-   
-   
-
+  
 	// IMPORTANT: The local timestamp unit MUST be set, otherwise
 	//            RTCP Sender Report info will be calculated wrong
 	// In this case, we'll be sending 10 samples each second, so we'll
@@ -191,7 +188,7 @@ void AudioInputCallback(
     for(int i = 0; i < NUM_BUFFERS; i++)
     {
         audioStatus= AudioQueueAllocateBuffer(recordState.queue,
-                                              800, &recordState.buffers[i]);
+                                              100, &recordState.buffers[i]);
         
         if(audioStatus==0)
         {

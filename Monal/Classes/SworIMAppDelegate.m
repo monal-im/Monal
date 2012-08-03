@@ -1635,7 +1635,7 @@ void (^myBlock)(void) = ^(void){
 	
 	
 	
-	/*
+	
 	NSString* ver=[[UIDevice currentDevice] systemVersion];
 	if([ver characterAtIndex:0]!='3')
 	{
@@ -1643,7 +1643,7 @@ void (^myBlock)(void) = ^(void){
 		
 	 backGround=true; 
 	
-        
+     /*   
         //******** this needs to be removed when i go back to VOIP socket
 	 bgTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^{
        debug_NSLog(@"OS background expire hander"); 
@@ -1655,10 +1655,10 @@ void (^myBlock)(void) = ^(void){
 		[[UIApplication sharedApplication] endBackgroundTask:bgTask];
 		 bgTask=UIBackgroundTaskInvalid;
  
-    }];
+    }];*/
 
 	}
-*/
+
     
     [[NSUserDefaults standardUserDefaults] synchronize];
     

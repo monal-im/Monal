@@ -18,6 +18,7 @@
 #include <net/if.h>
 #include <ifaddrs.h>
 
+
 @interface iqJingle : NSObject
 {
     NSString* me; 

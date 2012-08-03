@@ -18,7 +18,6 @@
 #import "iqSearch.h"
 #import "iqJingle.h"
 
-
 #import <unistd.h>
 #import <sys/types.h>
 #import <sys/socket.h>

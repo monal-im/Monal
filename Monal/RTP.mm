@@ -31,6 +31,7 @@ typedef struct
     AudioStreamBasicDescription dataFormat;
     AudioQueueRef queue;
     AudioQueueBufferRef buffers[NUM_BUFFERS];
+    SInt64 currentPacket;
     
     
 } RecordState;
@@ -69,12 +70,13 @@ void AudioInputCallback(
    // const void* bytes=[]; 
     
     
-    debug_NSLog(@"Sending packet sized %d", inBuffer->mAudioDataByteSize); 
+  //  debug_NSLog(@"Sending packet sized %d", inBuffer->mAudioDataByteSize);
     
-    int rtpstatus = sess.SendPacket((void *)inBuffer->mAudioData,inBuffer->mAudioDataByteSize,8,false,8);
+    int rtpstatus = sess.SendPacket((void *)inBuffer->mAudioData,inBuffer->mAudioDataByteSize,8,false, inNumberPacketDescriptions/320 );
     // pt=8  is PCMA ,  timestamp 8 is 8Khz
     checkerror(rtpstatus);
        if(rtpstatus!=0) return; // gradually stop reenqueing
+    recordState->currentPacket += inNumberPacketDescriptions;
     
     //reenquue buffer to collect more
 	OSStatus status= AudioQueueEnqueueBuffer(inAQ, inBuffer, 0, NULL);
@@ -86,7 +88,7 @@ void AudioInputCallback(
         debug_NSLog(@"audio reenqueue error %d", status);
     }
 	++count;
-	debug_NSLog("Got buffer %d\n", count);
+	//debug_NSLog("Sent %d audio packets, current packet %d \n", inNumberPacketDescriptions, recordState->currentPacket );
 }
 
 #pragma mark RTP cocoa wrapper 
@@ -163,7 +165,7 @@ void AudioInputCallback(
 	// In this case, we'll be sending 10 samples each second, so we'll
 	// put the timestamp unit to (1.0/10.0)
     
-	sessparams.SetOwnTimestampUnit(1.0/recordState.dataFormat.mSampleRate );
+	sessparams.SetOwnTimestampUnit(1.0/320 );
 	
 	sessparams.SetAcceptOwnPackets(true);
 	transparams.SetPortbase(portbase);
@@ -183,12 +185,12 @@ void AudioInputCallback(
     
 
   
-    
+    //48 -> 30ms
     
     for(int i = 0; i < NUM_BUFFERS; i++)
     {
         audioStatus= AudioQueueAllocateBuffer(recordState.queue,
-                                              100, &recordState.buffers[i]);
+                                              50, &recordState.buffers[i]);
         
         if(audioStatus==0)
         {

@@ -939,7 +939,9 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
     
     
     if(([State isEqualToString:@"jingleAction"])
-       &&(	[elementName isEqualToString:@"content"]))
+       &&(	[elementName isEqualToString:@"content"]
+       || 	[elementName isEqualToString:@"jin:content"]
+       ))
     {
         debug_NSLog(@"got Jingle content ");
         State=@"jingleContent";
@@ -949,7 +951,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
     
     
     if(([State isEqualToString:@"jingleContent"])
-       &&(	[elementName isEqualToString:@"description"])
+       &&(	[elementName isEqualToString:@"description"] || [elementName isEqualToString:@"rtp:description"] )
        && (	[[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:jingle:apps:rtp:1"]) )// we co rtp
     {
         debug_NSLog(@"got Jingle content description RTP");
@@ -964,9 +966,9 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
        && (([elementName isEqualToString: @"transport"]) ||
            ([elementName isEqualToString: @"p:transport"])
            )
-       &&( (	[[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:jingle:transports:raw-udp:1"])
+     //  &&( (	[[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:jingle:transports:raw-udp:1"])
           //||(	[[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:jingle:transports:ice-udp:1"])
-          )
+       //   )
        
        )
 	{
@@ -991,13 +993,12 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
        
         if((	[[attributeDict objectForKey:@"generation"] isEqualToString:@"0"])
             &&
-           ( [[attributeDict objectForKey:@"component"] isEqualToString:@"1"]) ) // compoennt 1 os RTP
+           ( [[attributeDict objectForKey:@"component"] isEqualToString:@"1"]  || // compoennt 1 os RTP
+            [[attributeDict objectForKey:@"preference"] isEqualToString:@"1"]) )
         {
             NSString* jingleAddress=[attributeDict objectForKey:@"address"];
-            if(jingleAddress==nil) jingleAddress=[attributeDict objectForKey:@"ip"];
-            
-            
-            debug_NSLog(@"got Jingle local candidate.. sending accept"); 
+        
+            debug_NSLog(@"got Jingle local candidate.. sending accept");
             [self talk: [jingleCall acceptJingle:presenceUserFull 
                                     :jingleAddress
                                     :[attributeDict objectForKey:@"port"]

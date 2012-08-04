@@ -326,35 +326,12 @@ void AudioInputCallback(
     }
     
     
-    //******** ouput ******
-    
-    playState.dataFormat.mSampleRate = 8000.0;
-	playState.dataFormat.mFormatID = kAudioFormatLinearPCM;
-	playState.dataFormat.mFramesPerPacket = 1;
-    playState.dataFormat.mChannelsPerFrame = 1;
-	playState.dataFormat.mBytesPerFrame = 2;
-	playState.dataFormat.mBytesPerPacket = 2;
-	playState.dataFormat.mBitsPerChannel = 16;
-	playState.dataFormat.mReserved = 0;
-	playState.dataFormat.mFormatFlags = kLinearPCMFormatFlagIsBigEndian |
-    kLinearPCMFormatFlagIsSignedInteger |
-    kLinearPCMFormatFlagIsPacked;
-    
-    
-      audioStatus = AudioQueueNewOutput(
-                                 &playState.dataFormat,
-                                 AudioOutputCallback,
-                                 &playState,
-                                 CFRunLoopGetCurrent(),
-                                 kCFRunLoopCommonModes,
-                                 0,
-                                 &playState.queue);
-    
+//***** ouput ******
     
     AudioFileTypeID fileTypeHint =kAudioFileWAVEType;
     
     // create an audio file stream parser
-    audioStatus = AudioFileStreamOpen(self, ASPropertyListenerProc, ASPacketsProc,
+     audioStatus = AudioFileStreamOpen(self, ASPropertyListenerProc, ASPacketsProc,
                               fileTypeHint, &audioFileStream);
     
     

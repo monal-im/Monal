@@ -351,6 +351,14 @@ void AudioInputCallback(
                                  &playState.queue);
     
     
+    AudioFileTypeID fileTypeHint =kAudioFileWAVEType;
+    
+    // create an audio file stream parser
+    audioStatus = AudioFileStreamOpen(self, ASPropertyListenerProc, ASPacketsProc,
+                              fileTypeHint, &audioFileStream);
+    
+    
+    
     if(audioStatus==0)
     {
         debug_NSLog(@"new audio out queue started ok");

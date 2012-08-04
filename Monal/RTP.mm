@@ -130,10 +130,10 @@ void AudioInputCallback(
     
     if(audioStatus==0)
     {
-        debug_NSLog(@"new queue started ok");
+        debug_NSLog(@"new audio queue started ok");
     }
     else {
-        debug_NSLog(@"new queue start failed");
+        debug_NSLog(@"new audio queue start failed");
         return -1;
     }
     

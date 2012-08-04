@@ -990,24 +990,41 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 	{
         debug_NSLog(@"got Jingle transport candidate"); 
         
-       
+        
         if((	[[attributeDict objectForKey:@"generation"] isEqualToString:@"0"])
-            &&
-           ( [[attributeDict objectForKey:@"component"] isEqualToString:@"1"]  || // compoennt 1 os RTP
+           &&
+           ( [[attributeDict objectForKey:@"component"] isEqualToString:@"1"]  || 
             [[attributeDict objectForKey:@"preference"] isEqualToString:@"1"]) )
         {
             NSString* jingleAddress=[attributeDict objectForKey:@"address"];
+            
+            jingleCandiatePort1=[attributeDict objectForKey:@"port"];
+            
+        }
+
+        
+       
+        if((	[[attributeDict objectForKey:@"generation"] isEqualToString:@"0"])
+            &&
+           ( [[attributeDict objectForKey:@"component"] isEqualToString:@"2"]  || 
+            [[attributeDict objectForKey:@"preference"] isEqualToString:@"1"]) )
+        {
+            NSString* jingleAddress=[attributeDict objectForKey:@"address"];
+            if(jingleAddress==nil) jingleAddress=[attributeDict objectForKey:@"ip"];
         
             debug_NSLog(@"got Jingle local candidate.. sending accept");
             [self talk: [jingleCall acceptJingle:presenceUserFull 
                                     :jingleAddress
+                                    :jingleCandiatePort1
                                     :[attributeDict objectForKey:@"port"]
                                     :[attributeDict objectForKey:@"username"]
                                     :[attributeDict objectForKey:@"password"]
              
                                                 :sessionkey             ]];
-         [jingleCall performSelectorOnMainThread:@selector(connect) withObject:nil waitUntilDone:NO];
             
+            [jingleCall performSelectorOnMainThread:@selector(connect) withObject:nil waitUntilDone:NO];
+
+                    
         }
         
         

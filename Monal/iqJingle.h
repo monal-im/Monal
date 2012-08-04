@@ -26,11 +26,16 @@
     NSString* thesid; 
     NSString* theaddress; 
     NSString* destinationPort;
+    NSString* destinationPort2;
+    
     NSString* localPort;
+    NSString* localPort2;
     NSString* theusername;
     NSString* thepass; 
     
     RTP* rtp;
+    RTP* rtp2;
+    
     
     BOOL didReceiveTerminate;
     BOOL activeCall;
@@ -40,7 +45,7 @@
 -(NSString*) getGoogleInfo:(NSString*) idval;
 
 -(NSString*) ack:(NSString*) to:(NSString*) iqid;
--(NSString*) acceptJingle:(NSString*) to:(NSString*) address: (NSString*) port: (NSString*) username: (NSString*) pass:  (NSString*)idval; 
+-(NSString*) acceptJingle:(NSString*) to:(NSString*) address: (NSString*) port: (NSString*) port2: (NSString*) username: (NSString*) pass:  (NSString*)idval;
 -(NSString*) initiateJingle:(NSString*) to  :(NSString*)iqid;
 -(NSString*) terminateJingle;
 

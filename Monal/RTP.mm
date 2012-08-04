@@ -41,17 +41,7 @@ typedef struct
 RecordState recordState;
 
 
-typedef struct
-{
-    AudioStreamBasicDescription dataFormat;
-    AudioQueueRef  queue;
-    AudioQueueBufferRef buffers[NUM_BUFFERS];
-    AudioFileID audioFile;
-    SInt64 currentPacket;
-    bool  playing;
-} PlayState;
 
-PlayState playState;
 
   NSMutableArray* packetInBuffer;
   int readpos; 
@@ -109,28 +99,8 @@ void checkerror(int rtperr)
                     packCount++;
                     
                   
+         
                     
-                    //start playback after thre are 20 packets
-                    
-                    
-                    if(packCount>100 && playState.playing==NO)
-                    {
-                    OSStatus status = AudioQueueStart(playState.queue, NULL);
-                    if(status == 0)
-                        {
-                        playState.playing=YES;
-                        debug_NSLog(@"Started play back ");
-                        
-                        
-                        for(int i = 0; i < NUM_BUFFERS; i++)
-                        {
-                            
-                            AudioOutputCallback(&playState, playState.queue, playState.buffers[i]);
-                        }
-                        
-                        
-                        }
-                    }
                     
                 }
             } while (sess.GotoNextSourceWithData());
@@ -202,44 +172,7 @@ int  AudioReadPackets (
     
 }
 
-void AudioOutputCallback(
-                         void* inUserData,
-                         AudioQueueRef outAQ,
-                         AudioQueueBufferRef outBuffer)
-{
-    PlayState* playState = (PlayState*)inUserData;
-    if(!playState->playing)
-    {
-        debug_NSLog(@"Not playing, returning\n");
-        return;
-    }
-    
-    debug_NSLog(@"Queuing buffer %d for playback\n", playState->currentPacket);
-    
-    AudioStreamPacketDescription* packetDescs;
-    
-    UInt32 bytesRead;
-    UInt32 numPackets;
-    OSStatus status;
-    status = AudioReadPackets( &bytesRead,
-                                  packetDescs,
-                                  &numPackets,
-                                  outBuffer->mAudioData);
-    
-    if(numPackets)
-    {
-        outBuffer->mAudioDataByteSize = bytesRead;
-        status = AudioQueueEnqueueBuffer(
-                                         playState->queue,
-                                         outBuffer,
-                                         0,
-                                         packetDescs);
-        
-        playState->currentPacket += numPackets;
-    }
-    
-    
-}
+
 
 #pragma mark audio input Queue
 
@@ -331,9 +264,7 @@ void AudioInputCallback(
     AudioFileTypeID fileTypeHint =kAudioFileWAVEType;
     
     // create an audio file stream parser
-     audioStatus = AudioFileStreamOpen(self, ASPropertyListenerProc, ASPacketsProc,
-                              fileTypeHint, &audioFileStream);
-    
+   
     
     
     if(audioStatus==0)
@@ -432,21 +363,7 @@ void AudioInputCallback(
     }  
 
   
-    // ouput
-    
-    if(status == 0)
-    {
-       
-        for(int i = 0; i < NUM_BUFFERS; i++)
-        {
-            
-                AudioQueueAllocateBuffer(playState.queue, 160, &playState.buffers[i]);
-            //    AudioOutputCallback(&playState, playState.queue, playState.buffers[i]);
-            }
-       
-        
-        
-    }
+
     
     
    
@@ -486,16 +403,7 @@ void AudioInputCallback(
 
     }
 
-    //output
-    playState.playing = false;
-    
-    for(int i = 0; i < NUM_BUFFERS; i++)
-    {
-        AudioQueueFreeBuffer(playState.queue, playState.buffers[i]);
-    }
-    
-    AudioQueueDispose(playState.queue, true);
-        
+  
     
     sess.BYEDestroy(jrtplib::RTPTime(10,0),0,0);
 }

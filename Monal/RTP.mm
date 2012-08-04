@@ -12,6 +12,7 @@
 #include "rtpipv4address.hh"
 #include "rtpsessionparams.hh"
 #include "rtperrors.hh"
+#include "rtppacket.hh"
 
 
 #include <netinet/in.h>
@@ -20,6 +21,7 @@
 #include <stdlib.h>
 #include  <stdio.h>
 #include <string>
+#include <string.h>
 
 #import "RTP.hh"
 
@@ -38,6 +40,22 @@ typedef struct
 
 RecordState recordState;
 
+
+typedef struct
+{
+    AudioStreamBasicDescription dataFormat;
+    AudioQueueRef  queue;
+    AudioQueueBufferRef buffers[NUM_BUFFERS];
+    AudioFileID audioFile;
+    SInt64 currentPacket;
+    bool  playing;
+} PlayState;
+
+PlayState playState;
+
+  NSMutableArray* packetInBuffer;
+  int readpos; 
+
 @implementation RTP
 
 
@@ -53,7 +71,177 @@ void checkerror(int rtperr)
 	}
 }
 
-#pragma mark audio Queue
+#pragma mark audio output Queue
+
+-(void) listenThread
+{
+    debug_NSLog(@"entered RTP listen thread");
+    //create an input buffer
+    packetInBuffer=[[NSMutableArray alloc] init];
+    
+    readpos=0;
+    
+    int packCount=0; 
+    
+    while(1)
+    {
+        sess.BeginDataAccess();
+        
+        // check incoming packets
+        if (sess.GotoFirstSourceWithData())
+        {
+            do
+            {
+                jrtplib::RTPPacket *pack;
+                
+                while ((pack = sess.GetNextPacket()) != NULL)
+                {
+                    // You can examine the data here
+                   // debug_NSLog(@"Got packet !\n");
+                    
+                    NSData* data= [NSData dataWithBytes:pack->GetPayloadData() length:pack->GetPayloadLength()];
+                    [packetInBuffer addObject:data];
+                    
+                    // we don't longer need the packet, so
+                    // we'll delete it
+                    sess.DeletePacket(pack);
+                    
+                    packCount++;
+                    
+                  
+                    
+                    //start playback after thre are 20 packets
+                    
+                    
+                    if(packCount>100 && playState.playing==NO)
+                    {
+                    OSStatus status = AudioQueueStart(playState.queue, NULL);
+                    if(status == 0)
+                        {
+                        playState.playing=YES;
+                        debug_NSLog(@"Started play back ");
+                        
+                        
+                        for(int i = 0; i < NUM_BUFFERS; i++)
+                        {
+                            
+                            AudioOutputCallback(&playState, playState.queue, playState.buffers[i]);
+                        }
+                        
+                        
+                        }
+                    }
+                    
+                }
+            } while (sess.GotoNextSourceWithData());
+        }
+        
+        sess.EndDataAccess();
+        
+        OSStatus status = sess.Poll();
+        checkerror(status);
+        if(status!=0) break;
+        
+        
+        //wait
+        jrtplib::RTPTime::Wait(jrtplib::RTPTime(1,0));
+        
+       
+        
+    }
+    
+    debug_NSLog(@"leaving RTP listen thread");
+    [NSThread exit];
+    
+}
+
+
+
+int  AudioReadPackets (
+                          UInt32                       *outNumBytes,
+                          AudioStreamPacketDescription *outPacketDescriptions,
+                          UInt32                       *ioNumPackets,
+                          void                         *outBuffer
+                          )
+{
+ 
+    
+    
+    if(readpos>=[packetInBuffer count]) return 0 ;
+    
+    NSData* thepacket=[packetInBuffer objectAtIndex:readpos];
+        
+    UInt32  payloadLength=[thepacket length];
+                outNumBytes= &payloadLength;
+                
+                UInt32 numpackets=payloadLength/2;
+                ioNumPackets=&numpackets;
+                
+                std::memcpy(outBuffer, [thepacket bytes], payloadLength);
+                
+                AudioStreamPacketDescription pacdesc[numpackets];
+                
+                
+                int packCounter=0;
+                while(packCounter<numpackets)
+                {
+                    pacdesc[packCounter].mStartOffset=2*packCounter;
+                    pacdesc[packCounter].mVariableFramesInPacket=0;
+                    pacdesc[packCounter].mDataByteSize=2;
+                    
+                    packCounter++; 
+                }
+        
+                outPacketDescriptions=pacdesc;
+      
+    
+   readpos++;
+    
+   return 0;
+	
+    
+}
+
+void AudioOutputCallback(
+                         void* inUserData,
+                         AudioQueueRef outAQ,
+                         AudioQueueBufferRef outBuffer)
+{
+    PlayState* playState = (PlayState*)inUserData;
+    if(!playState->playing)
+    {
+        debug_NSLog(@"Not playing, returning\n");
+        return;
+    }
+    
+    debug_NSLog(@"Queuing buffer %d for playback\n", playState->currentPacket);
+    
+    AudioStreamPacketDescription* packetDescs;
+    
+    UInt32 bytesRead;
+    UInt32 numPackets;
+    OSStatus status;
+    status = AudioReadPackets( &bytesRead,
+                                  packetDescs,
+                                  &numPackets,
+                                  outBuffer->mAudioData);
+    
+    if(numPackets)
+    {
+        outBuffer->mAudioDataByteSize = bytesRead;
+        status = AudioQueueEnqueueBuffer(
+                                         playState->queue,
+                                         outBuffer,
+                                         0,
+                                         packetDescs);
+        
+        playState->currentPacket += numPackets;
+    }
+    
+    
+}
+
+#pragma mark audio input Queue
 
 void AudioInputCallback(
                         void *inUserData, // 1
@@ -130,10 +318,45 @@ void AudioInputCallback(
     
     if(audioStatus==0)
     {
-        debug_NSLog(@"new audio queue started ok");
+        debug_NSLog(@"new audio in queue started ok");
     }
     else {
-        debug_NSLog(@"new audio queue start failed");
+        debug_NSLog(@"new audio in queue start failed");
+        return -1;
+    }
+    
+    
+    //******** ouput ******
+    
+    playState.dataFormat.mSampleRate = 8000.0;
+	playState.dataFormat.mFormatID = kAudioFormatLinearPCM;
+	playState.dataFormat.mFramesPerPacket = 1;
+    playState.dataFormat.mChannelsPerFrame = 1;
+	playState.dataFormat.mBytesPerFrame = 2;
+	playState.dataFormat.mBytesPerPacket = 2;
+	playState.dataFormat.mBitsPerChannel = 16;
+	playState.dataFormat.mReserved = 0;
+	playState.dataFormat.mFormatFlags = kLinearPCMFormatFlagIsBigEndian |
+    kLinearPCMFormatFlagIsSignedInteger |
+    kLinearPCMFormatFlagIsPacked;
+    
+    
+      audioStatus = AudioQueueNewOutput(
+                                 &playState.dataFormat,
+                                 AudioOutputCallback,
+                                 &playState,
+                                 CFRunLoopGetCurrent(),
+                                 kCFRunLoopCommonModes,
+                                 0,
+                                 &playState.queue);
+    
+    
+    if(audioStatus==0)
+    {
+        debug_NSLog(@"new audio out queue started ok");
+    }
+    else {
+        debug_NSLog(@"new audio out queue start failed");
         return -1;
     }
     
@@ -185,7 +408,7 @@ void AudioInputCallback(
     
 
   
-    //48 -> 30ms
+
     
     for(int i = 0; i < NUM_BUFFERS; i++)
     {
@@ -197,7 +420,7 @@ void AudioInputCallback(
           // debug_NSLog("audio buffer allocate ok")
         }
         else {
-            debug_NSLog(@"audio buffer allocate error %d", audioStatus);
+            debug_NSLog(@"audio in  buffer allocate error %d", audioStatus);
         }
         audioStatus= AudioQueueEnqueueBuffer(recordState.queue,
                                              recordState.buffers[i], 0, NULL);
@@ -207,7 +430,7 @@ void AudioInputCallback(
            // debug_NSLog("audio buffer initial enqueue ok")
         }
         else {
-            debug_NSLog(@"audio buffer  initial enqueue error %d", audioStatus);
+            debug_NSLog(@"audio in buffer  initial enqueue error %d", audioStatus);
         }
     }
     
@@ -224,57 +447,42 @@ void AudioInputCallback(
     }  
 
   
-	
+    // ouput
+    
+    if(status == 0)
+    {
+       
+        for(int i = 0; i < NUM_BUFFERS; i++)
+        {
+            
+                AudioQueueAllocateBuffer(playState.queue, 160, &playState.buffers[i]);
+            //    AudioOutputCallback(&playState, playState.queue, playState.buffers[i]);
+            }
+       
+        
+        
+    }
+    
+    
+   
+    
     [NSThread detachNewThreadSelector:@selector(listenThread) toTarget:self withObject:nil];
- 
+
+
+   
+  
+
+    
     return 0;
     
 }
 
--(void) listenThread
-{
-    debug_NSLog(@"entered RTP listen thread");
-    while(1)
-    {
-		sess.BeginDataAccess();
-		
-		// check incoming packets
-		if (sess.GotoFirstSourceWithData())
-		{
-			do
-			{
-				jrtplib::RTPPacket *pack;
-				
-				while ((pack = sess.GetNextPacket()) != NULL)
-				{
-					// You can examine the data here
-					debug_NSLog(@"Got packet !\n");
-					
-					// we don't longer need the packet, so
-					// we'll delete it
-					sess.DeletePacket(pack);
-				}
-			} while (sess.GotoNextSourceWithData());
-		}
-		
-		sess.EndDataAccess();
-    
-		OSStatus status = sess.Poll();
-		checkerror(status);
-        if(status!=0) break;
 
-		
-        //wait
-		jrtplib::RTPTime::Wait(jrtplib::RTPTime(1,0));
-    }
-    
-    debug_NSLog(@"leaving RTP listen thread");
-    [NSThread exit];
-
-}
 
 -(void) RTPDisconnect
 {
+    
+    //input
    OSStatus  audioStatus = AudioQueueStop(recordState.queue, YES);
     
     for(int i = 0; i < NUM_BUFFERS; i++)
@@ -293,6 +501,17 @@ void AudioInputCallback(
 
     }
 
+    //output
+    playState.playing = false;
+    
+    for(int i = 0; i < NUM_BUFFERS; i++)
+    {
+        AudioQueueFreeBuffer(playState.queue, playState.buffers[i]);
+    }
+    
+    AudioQueueDispose(playState.queue, true);
+        
+    
     sess.BYEDestroy(jrtplib::RTPTime(10,0),0,0);
 }
 

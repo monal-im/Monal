@@ -25,11 +25,8 @@
 
 #import "RTP.hh"
 
-#import <AudioToolbox/AudioToolbox.h>b
-
 jrtplib::RTPSession sess;
 
-NSMutableData* pcmBuffer;
 
 typedef struct
 {
@@ -56,6 +53,8 @@ typedef struct
 
 PlayState playState;
 
+NSMutableArray* packetInBuffer;
+int readpos;
 
 @implementation RTP
 
@@ -64,27 +63,23 @@ PlayState playState;
 
 void checkerror(int rtperr)
 {
-	if (rtperr < 0)
-	{
+    if (rtperr < 0)
+    {
         std::string msg= jrtplib::RTPGetErrorString(rtperr);
-		debug_NSLog(@"ERROR: %s" ,msg.c_str()  );
-		return;
-	}
+        debug_NSLog(@"ERROR: %s" ,msg.c_str()  );
+        return;
+    }
 }
 
 #pragma mark audio output Queue
-
-
-
-
 
 -(void) listenThread
 {
     debug_NSLog(@"entered RTP listen thread");
     //create an input buffer
-
+    packetInBuffer=[[NSMutableArray alloc] init];
     
-    pcmBuffer=[NSMutableData alloc];
+    readpos=0;
     
     int packCount=0;
     
@@ -102,26 +97,10 @@ void checkerror(int rtperr)
                 while ((pack = sess.GetNextPacket()) != NULL)
                 {
                     // You can examine the data here
-                   //  debug_NSLog(@"Got packet !\n");
-                  
-                    debug_NSLog(@"got packet "); 
-                 
-                  
-                    uint8_t* bufin =pack->GetPayloadData();
+                    // debug_NSLog(@"Got packet !\n");
                     
-                    int counter=0;
-                     while(counter<pack->GetPayloadLength())
-                     {
-                         uint16_t data= bufin[counter]; //alaw_to_linear(bufin[counter]) ;
-                         
-                         [pcmBuffer appendBytes:(void*)&data length:1];
-                       
-                         counter++;
-                     }
-                   // debug_NSLog(@"got packet %@", pcmBuffer);
-                    
-                    
-                    
+                    NSData* data= [NSData dataWithBytes:pack->GetPayloadData() length:pack->GetPayloadLength()];
+                    [packetInBuffer addObject:data];
                     
                     // we don't longer need the packet, so
                     // we'll delete it
@@ -131,25 +110,10 @@ void checkerror(int rtperr)
                     
                     
                     
-                    if(packCount==500)
-                    {
-                        
-                        
-                        
-                        
-                        NSString *applicationDocumentsDir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-
-                        
-                        NSString *storePath = [applicationDocumentsDir stringByAppendingPathComponent:@"sample.au"];
-                        [pcmBuffer writeToFile:storePath atomically:NO];
-                        
-                    }
+                    //start playback after thre are 20 packets
                     
                     
-                    //start playback after thre are 50 packets
-                    
-                    
-                   /* if(packCount>50 && playState.playing==NO)
+                    if(packCount>100 && playState.playing==NO)
                     {
                         OSStatus status = AudioQueueStart(playState.queue, NULL);
                         if(status == 0)
@@ -166,7 +130,7 @@ void checkerror(int rtperr)
                             
                             
                         }
-                    }*/
+                    }
                     
                 }
             } while (sess.GotoNextSourceWithData());
@@ -193,7 +157,6 @@ void checkerror(int rtperr)
 
 
 
-
 int  AudioReadPackets (
                        UInt32                       *outNumBytes,
                        AudioStreamPacketDescription *outPacketDescriptions,
@@ -203,7 +166,7 @@ int  AudioReadPackets (
 {
     
     
-/*
+    
     if(readpos>=[packetInBuffer count]) return 0 ;
     
     NSData* thepacket=[packetInBuffer objectAtIndex:readpos];
@@ -213,7 +176,6 @@ int  AudioReadPackets (
     
     UInt32 numpackets=payloadLength/2;
     ioNumPackets=&numpackets;
-    
     
     std::memcpy(outBuffer, [thepacket bytes], payloadLength);
     
@@ -231,12 +193,12 @@ int  AudioReadPackets (
     }
     
     outPacketDescriptions=pacdesc;
-
     
-    readpos++;*/
+    
+    readpos++;
     
     return 0;
-	
+    
     
 }
 
@@ -289,7 +251,7 @@ void AudioInputCallback(
                         UInt32 inNumberPacketDescriptions, // 5
                         const AudioStreamPacketDescription *inPacketDescs) // 6
 {
-	static int count = 0;
+    static int count = 0;
     RecordState* recordState = (RecordState*)inUserData;
     
     //send packet over RTP
@@ -298,14 +260,14 @@ void AudioInputCallback(
     
     //  debug_NSLog(@"Sending packet sized %d", inBuffer->mAudioDataByteSize);
     
-    int rtpstatus = sess.SendPacket((void *)inBuffer->mAudioData,inBuffer->mAudioDataByteSize,8,false, 160/1000000 );
+    int rtpstatus = sess.SendPacket((void *)inBuffer->mAudioData,inBuffer->mAudioDataByteSize,8,false, inNumberPacketDescriptions/100 );
     // pt=8  is PCMA ,  timestamp 8 is 8Khz
     checkerror(rtpstatus);
     if(rtpstatus!=0) return; // gradually stop reenqueing
     recordState->currentPacket += inNumberPacketDescriptions;
     
     //reenquue buffer to collect more
-	OSStatus status= AudioQueueEnqueueBuffer(inAQ, inBuffer, 0, NULL);
+    OSStatus status= AudioQueueEnqueueBuffer(inAQ, inBuffer, 0, NULL);
     if(status==0)
     {
         // debug_NSLog("audio reenqueue ok")
@@ -313,11 +275,12 @@ void AudioInputCallback(
     else {
         debug_NSLog(@"audio reenqueue error %d", status);
     }
-	++count;
-	//debug_NSLog("Sent %d audio packets, current packet %d \n", inNumberPacketDescriptions, recordState->currentPacket );
+    ++count;
+    //debug_NSLog("Sent %d audio packets, current packet %d \n", inNumberPacketDescriptions, recordState->currentPacket );
 }
 
 #pragma mark RTP cocoa wrapper
+
 
 
 -(int) RTPConnect:(NSString*) IP:(int) destPort:(int) localPort
@@ -329,20 +292,20 @@ void AudioInputCallback(
     
     
     recordState.dataFormat.mSampleRate = 8000.0;
-    recordState.dataFormat.mFormatID = kAudioFormatLinearPCM;
+    recordState.dataFormat.mFormatID = kAudioFormatALaw;
     recordState.dataFormat.mFramesPerPacket = 1;
     recordState.dataFormat.mChannelsPerFrame = 1;
     recordState.dataFormat.mBytesPerFrame = 2;
     recordState.dataFormat.mBytesPerPacket = 2;
     recordState.dataFormat.mBitsPerChannel = 16;
     recordState.dataFormat.mReserved = 0;
-    recordState.dataFormat.mFormatFlags =
+  /* recordState.dataFormat.mFormatFlags =
     kLinearPCMFormatFlagIsBigEndian |
     kLinearPCMFormatFlagIsSignedInteger |
-    kLinearPCMFormatFlagIsPacked;
+    kLinearPCMFormatFlagIsPacked;*/
     
     
-    OSStatus audioStatus= AudioQueueNewInput(
+   OSStatus audioStatus= AudioQueueNewInput(
                                              &recordState.dataFormat, // 1
                                              AudioInputCallback, // 2
                                              &recordState,  // 3
@@ -350,6 +313,7 @@ void AudioInputCallback(
                                              kCFRunLoopCommonModes, // 5
                                              0,  // 6
                                              &recordState.queue);  // 7
+    
     
     
     
@@ -363,31 +327,35 @@ void AudioInputCallback(
     }
     
     
-    //***** ouput ******
+    //******** ouput ******
     
-    
-
     playState.dataFormat.mSampleRate = 8000.0;
-	playState.dataFormat.mFormatID = kAudioFormatLinearPCM;
-	playState.dataFormat.mFramesPerPacket = 1;
-	playState.dataFormat.mChannelsPerFrame = 1;
-	playState.dataFormat.mBytesPerFrame = 2;
-	playState.dataFormat.mBytesPerPacket = 2;
-	playState.dataFormat.mBitsPerChannel = 16;
-	playState.dataFormat.mReserved = 0;
-	playState.dataFormat.mFormatFlags = kLinearPCMFormatFlagIsBigEndian |
+    playState.dataFormat.mFormatID = kAudioFormatLinearPCM;
+      playState.dataFormat.mFramesPerPacket = 1;
+    playState.dataFormat.mChannelsPerFrame = 1;
+    playState.dataFormat.mBytesPerFrame = 2;
+    playState.dataFormat.mBytesPerPacket = 2;
+    playState.dataFormat.mBitsPerChannel = 16;
+    playState.dataFormat.mReserved = 0;
+  playState.dataFormat.mFormatFlags = kLinearPCMFormatFlagIsBigEndian |
     kLinearPCMFormatFlagIsSignedInteger |
     kLinearPCMFormatFlagIsPacked;
     
-   /* audioStatus = AudioQueueNewOutput(
-                                 &playState.dataFormat,
-                                 AudioOutputCallback,
-                                 &playState,
-                                 CFRunLoopGetCurrent(),
-                                 kCFRunLoopCommonModes,
-                                 0,
-                                 &playState.queue);
-    */
+    
+    
+  /*  audioStatus = AudioQueueNewOutput(
+                                      &playState.dataFormat,
+                                      AudioOutputCallback,
+                                      &playState,
+                                      CFRunLoopGetCurrent(),
+                                      kCFRunLoopCommonModes,
+                                      0,
+                                      &playState.queue);
+    
+   
+   */
+   
+    
     
     if(audioStatus==0)
     {
@@ -398,16 +366,19 @@ void AudioInputCallback(
         return -1;
     }
     
- 
-
+    
+    // ****** conversion ******
+    
+    audioStatus=AudioConverterNew(
+    
     
     //******* RTP *****/
     
     
-	uint16_t portbase,destport;
-	uint32_t destip;
-	std::string ipstr([IP  cStringUsingEncoding:NSUTF8StringEncoding]);
-	int status,i;
+    uint16_t portbase,destport;
+    uint32_t destip;
+    std::string ipstr([IP  cStringUsingEncoding:NSUTF8StringEncoding]);
+    int status,i;
     
     destport=destPort;
     portbase=localPort;
@@ -416,33 +387,33 @@ void AudioInputCallback(
     destip = inet_addr(ipstr.c_str());
     destip =htonl(destip);
     
-	// Now, we'll create a RTP session, set the destination, send some
-	// packets and poll for incoming data.
-	
-	jrtplib::RTPUDPv4TransmissionParams transparams;
-	jrtplib::RTPSessionParams sessparams;
-	
+    // Now, we'll create a RTP session, set the destination, send some
+    // packets and poll for incoming data.
     
-	// IMPORTANT: The local timestamp unit MUST be set, otherwise
-	//            RTCP Sender Report info will be calculated wrong
-	// In this case, we'll be sending 10 samples each second, so we'll
-	// put the timestamp unit to (1.0/10.0)
+    jrtplib::RTPUDPv4TransmissionParams transparams;
+    jrtplib::RTPSessionParams sessparams;
     
-	sessparams.SetOwnTimestampUnit(1.0/100 );
-	
-	sessparams.SetAcceptOwnPackets(true);
-	transparams.SetPortbase(portbase);
-	status = sess.Create(sessparams,&transparams);
-	checkerror(status);
-	
+    
+    // IMPORTANT: The local timestamp unit MUST be set, otherwise
+    //            RTCP Sender Report info will be calculated wrong
+    // In this case, we'll be sending 10 samples each second, so we'll
+    // put the timestamp unit to (1.0/10.0)
+    
+    sessparams.SetOwnTimestampUnit(1.0/100 );
+    
+    sessparams.SetAcceptOwnPackets(true);
+    transparams.SetPortbase(portbase);
+    status = sess.Create(sessparams,&transparams);
+    checkerror(status);
+    
     if(status!=0) return status;
     
-	jrtplib::RTPIPv4Address addr(destip,destport);
-	
-	status = sess.AddDestination(addr);
-	checkerror(status);
+    jrtplib::RTPIPv4Address addr(destip,destport);
     
-	if(status!=0) return status;
+    status = sess.AddDestination(addr);
+    checkerror(status);
+    
+    if(status!=0) return status;
     
     debug_NSLog(@" RTP to ip %d  IP %@ on port %d", destip,IP,  destport);
     
@@ -487,7 +458,7 @@ void AudioInputCallback(
     }
     
     
-    // ****ouput**********
+    // ouput
     
     if(status == 0)
     {
@@ -496,7 +467,7 @@ void AudioInputCallback(
         {
             
             AudioQueueAllocateBuffer(playState.queue, 160, &playState.buffers[i]);
-            //    AudioOutputCallback(&playState, playState.queue, playState.buffers[i]);
+             //   AudioOutputCallback(&playState, playState.queue, playState.buffers[i]);
         }
         
         

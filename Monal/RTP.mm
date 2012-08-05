@@ -109,8 +109,8 @@ void checkerror(int rtperr)
                     
                     
                     
-                    debug_NSLog(@"got packet size %d, data: \n %s ",  pack->GetPayloadLength(),
-                                pack->GetPayloadData());
+                   // debug_NSLog(@"got packet size %d, data: \n %s ",  pack->GetPayloadLength(),
+                     //           pack->GetPayloadData());
                     
                     
                     [pcmBuffer appendBytes:pack->GetPayloadData() length:pack->GetPayloadLength()];

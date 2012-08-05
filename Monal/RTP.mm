@@ -104,19 +104,24 @@ void checkerror(int rtperr)
                     // You can examine the data here
                    //  debug_NSLog(@"Got packet !\n");
                   
-                    
+                    debug_NSLog(@"got packet "); 
                  
-                    short* buf=new short[300];
+                  
+                    uint8_t* bufin =pack->GetPayloadData();
                     
-                    alaw_expand(80, pack->GetPayloadData(), buf);
+                    int counter=0;
+                     while(counter<pack->GetPayloadLength())
+                     {
+                         uint16_t data= bufin[counter]; //alaw_to_linear(bufin[counter]) ;
+                         
+                         [pcmBuffer appendBytes:(void*)&data length:1];
+                       
+                         counter++;
+                     }
+                   // debug_NSLog(@"got packet %@", pcmBuffer);
                     
-                    debug_NSLog(@"got packet size %d, data: \n %s ",  pack->GetPayloadLength(),
-                               buf);
                     
                     
-                    
-                    
-                    [pcmBuffer appendBytes:buf length:pack->GetPayloadLength()];
                     
                     // we don't longer need the packet, so
                     // we'll delete it
@@ -128,15 +133,7 @@ void checkerror(int rtperr)
                     
                     if(packCount==500)
                     {
-                        NSError* err; 
-                        AVAudioPlayer* avplayer=[AVAudioPlayer  alloc ];
-                        if([avplayer initWithData:pcmBuffer error:&err]!=nil)
-                                     {
-                                         [avplayer play];
-                                     }
-                                     else{
-                                         debug_NSLog(@"error with avplayer %@", [err localizedDescription]);
-                                     }
+                        
                         
                         
                         

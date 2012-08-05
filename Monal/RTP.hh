@@ -8,9 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <AudioToolbox/AudioToolbox.h>
-
-#import "AudioStreamer/AudioStreamer.h"
-
+#import <AVFoundation/AVFoundation.h>
 
 
 @interface RTP : NSObject 
@@ -20,7 +18,7 @@
 }
 
 
-#define NUM_BUFFERS 100
+#define NUM_BUFFERS 200
 // 2 byte (16 bit)  8000 khz    stoing 160 in a buffer 
 
 

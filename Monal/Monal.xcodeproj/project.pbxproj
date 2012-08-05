@@ -11,6 +11,7 @@
 		1D60589B0D05DD56006BFB54 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; };
 		1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
 		1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF5F4DF0D08C38300B7A737 /* UIKit.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
+		2601741215CED3ED00683661 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 264FF3E4158A855D00D97B86 /* AVFoundation.framework */; };
 		2601D9AE0FBF255D004DB939 /* xmpp.m in Sources */ = {isa = PBXBuildFile; fileRef = 2601D9A30FBF255D004DB939 /* xmpp.m */; };
 		2601D9B00FBF255D004DB939 /* DataLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 2601D9A70FBF255D004DB939 /* DataLayer.m */; };
 		2601D9B10FBF255D004DB939 /* chat.m in Sources */ = {isa = PBXBuildFile; fileRef = 2601D9A90FBF255D004DB939 /* chat.m */; };
@@ -204,7 +205,6 @@
 		26DFD4B115666B7D007A1621 /* MGSplitViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26DFD4AE15666B7D007A1621 /* MGSplitViewController.m */; };
 		26E2786F10FA85C600B7B998 /* XMPP.png in Resources */ = {isa = PBXBuildFile; fileRef = 26E2786A10FA85C600B7B998 /* XMPP.png */; };
 		26E2787210FA85C600B7B998 /* Facebook.png in Resources */ = {isa = PBXBuildFile; fileRef = 26E2786D10FA85C600B7B998 /* Facebook.png */; };
-		26E30C5F15CDC344008FAD56 /* AudioStreamer.m in Sources */ = {isa = PBXBuildFile; fileRef = 26E30C5E15CDC344008FAD56 /* AudioStreamer.m */; };
 		26E5BA8B132287D400D8C57A /* Settings.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26E5BA8A132287D400D8C57A /* Settings.xib */; };
 		26E5BA8E13228D7400D8C57A /* StatusControl.m in Sources */ = {isa = PBXBuildFile; fileRef = 26E5BA8D13228D7400D8C57A /* StatusControl.m */; };
 		26E7D4B0140B067100EE6C93 /* RTP.mm in Sources */ = {isa = PBXBuildFile; fileRef = 26E7D4AF140B067100EE6C93 /* RTP.mm */; };
@@ -458,8 +458,6 @@
 		26DFD4AE15666B7D007A1621 /* MGSplitViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MGSplitViewController.m; sourceTree = "<group>"; };
 		26E2786A10FA85C600B7B998 /* XMPP.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = XMPP.png; sourceTree = "<group>"; };
 		26E2786D10FA85C600B7B998 /* Facebook.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Facebook.png; sourceTree = "<group>"; };
-		26E30C5D15CDC344008FAD56 /* AudioStreamer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AudioStreamer.h; sourceTree = "<group>"; };
-		26E30C5E15CDC344008FAD56 /* AudioStreamer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AudioStreamer.m; sourceTree = "<group>"; };
 		26E5BA8A132287D400D8C57A /* Settings.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = Settings.xib; sourceTree = "<group>"; };
 		26E5BA8C13228D7400D8C57A /* StatusControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StatusControl.h; sourceTree = "<group>"; };
 		26E5BA8D13228D7400D8C57A /* StatusControl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StatusControl.m; sourceTree = "<group>"; };
@@ -496,6 +494,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2601741215CED3ED00683661 /* AVFoundation.framework in Frameworks */,
 				2601D9D90FBF265A004DB939 /* AudioToolbox.framework in Frameworks */,
 				268BCF12140B29180025E4D1 /* libjrtplib-static.a in Frameworks */,
 				1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */,
@@ -909,7 +908,6 @@
 		26DFD4A615666B6C007A1621 /* 3rd Party */ = {
 			isa = PBXGroup;
 			children = (
-				26E30C5C15CDC344008FAD56 /* AudioStreamer */,
 				262DE4AC15C4E2C60040A66B /* MBProgressHUd */,
 				2640AF3B14548E7600CB4F60 /* GrowingTextView */,
 				26DFD4A815666B7D007A1621 /* MGSplitViewController */,
@@ -929,15 +927,6 @@
 				26DFD4AE15666B7D007A1621 /* MGSplitViewController.m */,
 			);
 			path = MGSplitViewController;
-			sourceTree = "<group>";
-		};
-		26E30C5C15CDC344008FAD56 /* AudioStreamer */ = {
-			isa = PBXGroup;
-			children = (
-				26E30C5D15CDC344008FAD56 /* AudioStreamer.h */,
-				26E30C5E15CDC344008FAD56 /* AudioStreamer.m */,
-			);
-			path = AudioStreamer;
 			sourceTree = "<group>";
 		};
 		26EC1C7312295B8800EAF934 /* Core UI */ = {
@@ -1325,7 +1314,6 @@
 				26DFD4B015666B7D007A1621 /* MGSplitDividerView.m in Sources */,
 				26DFD4B115666B7D007A1621 /* MGSplitViewController.m in Sources */,
 				262DE4AF15C4E2C60040A66B /* MBProgressHUD.m in Sources */,
-				26E30C5F15CDC344008FAD56 /* AudioStreamer.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -106,14 +106,17 @@ void checkerror(int rtperr)
                   
                     
                  
+                    short* buf=new short[300];
+                    
+                    alaw_expand(80, pack->GetPayloadData(), buf);
+                    
+                    debug_NSLog(@"got packet size %d, data: \n %s ",  pack->GetPayloadLength(),
+                               buf);
                     
                     
                     
-                   // debug_NSLog(@"got packet size %d, data: \n %s ",  pack->GetPayloadLength(),
-                     //           pack->GetPayloadData());
                     
-                    
-                    [pcmBuffer appendBytes:pack->GetPayloadData() length:pack->GetPayloadLength()];
+                    [pcmBuffer appendBytes:buf length:pack->GetPayloadLength()];
                     
                     // we don't longer need the packet, so
                     // we'll delete it

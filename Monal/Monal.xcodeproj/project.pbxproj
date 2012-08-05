@@ -12,7 +12,6 @@
 		1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
 		1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF5F4DF0D08C38300B7A737 /* UIKit.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		2601741215CED3ED00683661 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 264FF3E4158A855D00D97B86 /* AVFoundation.framework */; };
-		2601741715CEEFD200683661 /* G711.c in Sources */ = {isa = PBXBuildFile; fileRef = 2601741515CEEFD200683661 /* G711.c */; };
 		2601D9AE0FBF255D004DB939 /* xmpp.m in Sources */ = {isa = PBXBuildFile; fileRef = 2601D9A30FBF255D004DB939 /* xmpp.m */; };
 		2601D9B00FBF255D004DB939 /* DataLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 2601D9A70FBF255D004DB939 /* DataLayer.m */; };
 		2601D9B10FBF255D004DB939 /* chat.m in Sources */ = {isa = PBXBuildFile; fileRef = 2601D9A90FBF255D004DB939 /* chat.m */; };
@@ -232,8 +231,6 @@
 		1D3623240D0F684500981E51 /* SworIMAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SworIMAppDelegate.h; sourceTree = "<group>"; };
 		1D3623250D0F684500981E51 /* SworIMAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SworIMAppDelegate.m; sourceTree = "<group>"; };
 		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
-		2601741515CEEFD200683661 /* G711.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = G711.c; sourceTree = "<group>"; };
-		2601741615CEEFD200683661 /* G711.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = G711.h; sourceTree = "<group>"; };
 		2601D9A30FBF255D004DB939 /* xmpp.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = xmpp.m; path = Classes/xmpp.m; sourceTree = "<group>"; };
 		2601D9A40FBF255D004DB939 /* xmpp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = xmpp.h; path = Classes/xmpp.h; sourceTree = "<group>"; };
 		2601D9A70FBF255D004DB939 /* DataLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DataLayer.m; sourceTree = "<group>"; };
@@ -544,15 +541,6 @@
 				268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		2601741415CEEFD200683661 /* G711 */ = {
-			isa = PBXGroup;
-			children = (
-				2601741515CEEFD200683661 /* G711.c */,
-				2601741615CEEFD200683661 /* G711.h */,
-			);
-			path = G711;
 			sourceTree = "<group>";
 		};
 		2601D9BC0FBF25D1004DB939 /* Assets */ = {
@@ -920,7 +908,6 @@
 		26DFD4A615666B6C007A1621 /* 3rd Party */ = {
 			isa = PBXGroup;
 			children = (
-				2601741415CEEFD200683661 /* G711 */,
 				262DE4AC15C4E2C60040A66B /* MBProgressHUd */,
 				2640AF3B14548E7600CB4F60 /* GrowingTextView */,
 				26DFD4A815666B7D007A1621 /* MGSplitViewController */,
@@ -1327,7 +1314,6 @@
 				26DFD4B015666B7D007A1621 /* MGSplitDividerView.m in Sources */,
 				26DFD4B115666B7D007A1621 /* MGSplitViewController.m in Sources */,
 				262DE4AF15C4E2C60040A66B /* MBProgressHUD.m in Sources */,
-				2601741715CEEFD200683661 /* G711.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

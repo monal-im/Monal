@@ -1,3 +1,4 @@
+
 //
 //  RTP.m
 //  Monal
@@ -24,8 +25,6 @@
 #include <string.h>
 
 #import "RTP.hh"
-
-
 
 jrtplib::RTPSession sess;
 
@@ -100,6 +99,7 @@ int16_t ALaw_Decode(int8_t number)
 }
 
 
+
 -(void) listenThread
 {
     debug_NSLog(@"entered RTP listen thread");
@@ -124,38 +124,38 @@ int16_t ALaw_Decode(int8_t number)
                 while ((pack = sess.GetNextPacket()) != NULL)
                 {
                     // You can examine the data here
-                   //  debug_NSLog(@"Got packet !\n");
-                    
+                    // debug_NSLog(@"Got packet !\n");
                     //8 bit 160 bytes = 320 byes 16 bit
-                  /* int16_t* linear_buffer= (int16_t*)malloc(320);
                     
-                    int counter=0;
-                
-                    while(counter<pack->GetPayloadLength())
-                    {
-                        int8_t val = pack->GetPayloadData()[counter];
-                        linear_buffer[counter]=ALaw_Decode(val);
-                        counter++;
-                    }
+                    /* int16_t* linear_buffer= (int16_t*)malloc(320);
+                     
+                     int counter=0;
+                     
+                     while(counter<pack->GetPayloadLength())
+                     {
+                     int8_t val = pack->GetPayloadData()[counter];
+                     linear_buffer[counter]=ALaw_Decode(val);
+                     counter++;
+                     }
+                     
+                     */
                     
-                    */
                     
-                 NSData* data= [NSData dataWithBytes:pack->GetPayloadData() length:pack->GetPacketLength()];
-                    debug_NSLog(@"lpcm %@", data)
-
-                   [packetInBuffer addObject:data];
-               
-               //     debug_NSLog(@"pcma %s", pack->GetPayloadData());
-                               
-                  packCount++;
+                    NSData* data= [NSData dataWithBytes:pack->GetPayloadData() length:pack->GetPayloadLength()];
+                    [packetInBuffer addObject:data];
                     
-                  
-                   
-                     sess.DeletePacket(pack);
+                    // we don't longer need the packet, so
+                    // we'll delete it
+                    sess.DeletePacket(pack);
+                    
+                    packCount++;
+                    
+                    
+                    
                     //start playback after thre are 20 packets
                     
                     
-                     if(packCount>100 && playState.playing==NO)
+                    if(packCount>100 && playState.playing==NO)
                     {
                         OSStatus status = AudioQueueStart(playState.queue, NULL);
                         if(status == 0)
@@ -163,7 +163,8 @@ int16_t ALaw_Decode(int8_t number)
                             playState.playing=YES;
                             debug_NSLog(@"Started play back ");
                             
-                           for(int i = 0; i < NUM_BUFFERS; i++)
+                            
+                            for(int i = 0; i < NUM_BUFFERS; i++)
                             {
                                 
                                 AudioOutputCallback(&playState, playState.queue, playState.buffers[i]);
@@ -254,7 +255,7 @@ void AudioOutputCallback(
         debug_NSLog(@"Not playing, returning\n");
         return;
     }
-
+    
     debug_NSLog(@"Queuing buffer %d for playback\n", playState->currentPacket);
     
     AudioStreamPacketDescription* packetDescs;
@@ -267,7 +268,6 @@ void AudioOutputCallback(
                               &numPackets,
                               outBuffer->mAudioData);
     
-
     if(numPackets)
     {
         outBuffer->mAudioDataByteSize = bytesRead;
@@ -303,7 +303,7 @@ void AudioInputCallback(
     //  debug_NSLog(@"Sending packet sized %d", inBuffer->mAudioDataByteSize);
     
     int rtpstatus = sess.SendPacket((void *)inBuffer->mAudioData,inBuffer->mAudioDataByteSize,8,false, 80 );
-    // pt=8  is PCMA ,  timestamp 80 is 8Khz becaue 100 packets
+    // pt=8  is PCMA ,  timestamp 80 is for  8Khz records at 5 ms
     checkerror(rtpstatus);
     if(rtpstatus!=0) return; // gradually stop reenqueing
     recordState->currentPacket += inNumberPacketDescriptions;
@@ -330,7 +330,9 @@ void AudioInputCallback(
     
     //********* Audio Queue ********/
     
-   
+    
+    
+    
     recordState.dataFormat.mSampleRate = 8000.0;
     recordState.dataFormat.mFormatID = kAudioFormatALaw;
     recordState.dataFormat.mFramesPerPacket = 1;
@@ -339,14 +341,13 @@ void AudioInputCallback(
     recordState.dataFormat.mBytesPerPacket = 2;
     recordState.dataFormat.mBitsPerChannel = 16;
     recordState.dataFormat.mReserved = 0;
-  /* recordState.dataFormat.mFormatFlags =
-    kLinearPCMFormatFlagIsBigEndian |
-    kLinearPCMFormatFlagIsSignedInteger |
-    kLinearPCMFormatFlagIsPacked;*/
+    /* recordState.dataFormat.mFormatFlags =
+     kLinearPCMFormatFlagIsBigEndian |
+     kLinearPCMFormatFlagIsSignedInteger |
+     kLinearPCMFormatFlagIsPacked;*/
     
     
-    OSStatus audioStatus;
-   /* = AudioQueueNewInput(
+    OSStatus audioStatus= AudioQueueNewInput(
                                              &recordState.dataFormat, // 1
                                              AudioInputCallback, // 2
                                              &recordState,  // 3
@@ -365,36 +366,37 @@ void AudioInputCallback(
     else {
         debug_NSLog(@"new audio in queue start failed");
         return -1;
-    }*/
+    }
     
     
     //******** ouput ******
     
     playState.dataFormat.mSampleRate = 8000.0;
     playState.dataFormat.mFormatID = kAudioFormatLinearPCM;
-      playState.dataFormat.mFramesPerPacket = 1;
+    playState.dataFormat.mFramesPerPacket = 1;
     playState.dataFormat.mChannelsPerFrame = 1;
     playState.dataFormat.mBytesPerFrame = 2;
     playState.dataFormat.mBytesPerPacket = 2;
     playState.dataFormat.mBitsPerChannel = 16;
     playState.dataFormat.mReserved = 0;
-  playState.dataFormat.mFormatFlags = kLinearPCMFormatFlagIsBigEndian |
+    playState.dataFormat.mFormatFlags = kLinearPCMFormatFlagIsBigEndian |
     kLinearPCMFormatFlagIsSignedInteger |
     kLinearPCMFormatFlagIsPacked;
     
     
     
-  audioStatus = AudioQueueNewOutput(&playState.dataFormat,
-                                      AudioOutputCallback,
-                                      &playState,
-                                      CFRunLoopGetCurrent(),
-                                      kCFRunLoopCommonModes,
-                                      0,
-                                      &playState.queue);
+    audioStatus = AudioQueueNewOutput(
+     &playState.dataFormat,
+     AudioOutputCallback,
+     &playState,
+     CFRunLoopGetCurrent(),
+     kCFRunLoopCommonModes,
+     0,
+     &playState.queue);
+     
+     
     
-   
-   
-   
+    
     
     
     if(audioStatus==0)
@@ -407,159 +409,161 @@ void AudioInputCallback(
     }
     
     
-
-    
-    //******* RTP *****/
-    
-    
-    uint16_t portbase,destport;
-    uint32_t destip;
-    std::string ipstr([IP  cStringUsingEncoding:NSUTF8StringEncoding]);
-    int status,i;
-    
-    destport=destPort;
-    portbase=localPort;
-    
-    
-    destip = inet_addr(ipstr.c_str());
-    destip =htonl(destip);
-    
-    // Now, we'll create a RTP session, set the destination, send some
-    // packets and poll for incoming data.
-    
-    jrtplib::RTPUDPv4TransmissionParams transparams;
-    jrtplib::RTPSessionParams sessparams;
-    
-    
-    // IMPORTANT: The local timestamp unit MUST be set, otherwise
-    //            RTCP Sender Report info will be calculated wrong
-    // In this case, we'll be sending 10 samples each second, so we'll
-    // put the timestamp unit to (1.0/10.0)
-    
-    sessparams.SetOwnTimestampUnit(1.0/100 );
-    
-    sessparams.SetAcceptOwnPackets(true);
-    transparams.SetPortbase(portbase);
-    status = sess.Create(sessparams,&transparams);
-    checkerror(status);
-    
-    if(status!=0) return status;
-    
-    jrtplib::RTPIPv4Address addr(destip,destport);
-    
-    status = sess.AddDestination(addr);
-    checkerror(status);
-    
-    if(status!=0) return status;
-    
-    debug_NSLog(@" RTP to ip %d  IP %@ on port %d", destip,IP,  destport);
-    
-    
-    
-    
-    
-    for(int i = 0; i < NUM_BUFFERS; i++)
+ 
+                                  
+                                  
+                                  //******* RTP *****/
+                                  
+                                  
+                                  uint16_t portbase,destport;
+                                  uint32_t destip;
+                                  std::string ipstr([IP  cStringUsingEncoding:NSUTF8StringEncoding]);
+                                  int status,i;
+                                  
+                                  destport=destPort;
+                                  portbase=localPort;
+                                  
+                                  
+                                  destip = inet_addr(ipstr.c_str());
+                                  destip =htonl(destip);
+                                  
+                                  // Now, we'll create a RTP session, set the destination, send some
+                                  // packets and poll for incoming data.
+                                  
+                                  jrtplib::RTPUDPv4TransmissionParams transparams;
+                                  jrtplib::RTPSessionParams sessparams;
+                                  
+                                  
+                                  // IMPORTANT: The local timestamp unit MUST be set, otherwise
+                                  //            RTCP Sender Report info will be calculated wrong
+                                  // In this case, we'll be sending 10 samples each second, so we'll
+                                  // put the timestamp unit to (1.0/10.0)
+                                  
+                                  sessparams.SetOwnTimestampUnit(1.0/100 );
+                                  
+                                  sessparams.SetAcceptOwnPackets(true);
+                                  transparams.SetPortbase(portbase);
+                                  status = sess.Create(sessparams,&transparams);
+                                  checkerror(status);
+                                  
+                                  if(status!=0) return status;
+                                  
+                                  jrtplib::RTPIPv4Address addr(destip,destport);
+                                  
+                                  status = sess.AddDestination(addr);
+                                  checkerror(status);
+                                  
+                                  if(status!=0) return status;
+                                  
+                                  debug_NSLog(@" RTP to ip %d  IP %@ on port %d", destip,IP,  destport);
+                                  
+                                  
+                                  
+                                  
+                                  
+                                  for(int i = 0; i < NUM_BUFFERS; i++)
+                                  {
+                                      audioStatus= AudioQueueAllocateBuffer(recordState.queue,
+                                                                            160, &recordState.buffers[i]);
+                                      
+                                      if(audioStatus==0)
+                                      {
+                                          // debug_NSLog("audio buffer allocate ok")
+                                      }
+                                      else {
+                                          debug_NSLog(@"audio in  buffer allocate error %d", audioStatus);
+                                      }
+                                      audioStatus= AudioQueueEnqueueBuffer(recordState.queue,
+                                                                           recordState.buffers[i], 0, NULL);
+                                      
+                                      if(audioStatus==0)
+                                      {
+                                          // debug_NSLog("audio buffer initial enqueue ok")
+                                      }
+                                      else {
+                                          debug_NSLog(@"audio in buffer  initial enqueue error %d", audioStatus);
+                                      }
+                                  }
+                                  
+                                  
+                                  audioStatus = AudioQueueStart(recordState.queue, NULL);
+                                  
+                                  if(audioStatus==0)
+                                  {
+                                      debug_NSLog(@"record started ok");
+                                  }
+                                  else {
+                                      debug_NSLog(@"error starting record");
+                                      return -1;
+                                  }
+                                  
+                                  
+                                  // ouput
+                                  
+                                  if(status == 0)
+                                  {
+                                      
+                                      for(int i = 0; i < NUM_BUFFERS; i++)
+                                      {
+                                          
+                                          AudioQueueAllocateBuffer(playState.queue, 160, &playState.buffers[i]);
+                                          //   AudioOutputCallback(&playState, playState.queue, playState.buffers[i]);
+                                      }
+                                      
+                                      
+                                      
+                                  }
+                                  
+                                  
+                                  
+                                  
+                                  [NSThread detachNewThreadSelector:@selector(listenThread) toTarget:self withObject:nil];
+                                  
+                                  
+                                  
+                                  
+                                  
+                                  
+                                  return 0;
+                                  
+                                  }
+                                  
+                                  
+                                  
+                                  -(void) RTPDisconnect
     {
-        audioStatus= AudioQueueAllocateBuffer(recordState.queue,
-                                              160, &recordState.buffers[i]);
         
-        if(audioStatus==0)
-        {
-            // debug_NSLog("audio buffer allocate ok")
-        }
-        else {
-            debug_NSLog(@"audio in  buffer allocate error %d", audioStatus);
-        }
-        audioStatus= AudioQueueEnqueueBuffer(recordState.queue,
-                                             recordState.buffers[i], 0, NULL);
-        
-        if(audioStatus==0)
-        {
-            // debug_NSLog("audio buffer initial enqueue ok")
-        }
-        else {
-            debug_NSLog(@"audio in buffer  initial enqueue error %d", audioStatus);
-        }
-    }
-    
-    
-   /* audioStatus = AudioQueueStart(recordState.queue, NULL);
-    
-    if(audioStatus==0)
-    {
-        debug_NSLog(@"record started ok");
-    }
-    else {
-        debug_NSLog(@"error starting record");
-        return -1;
-    }
-    */
-    
-    // ouput
-    
-    if(status == 0)
-    {
+        //input
+        OSStatus  audioStatus = AudioQueueStop(recordState.queue, YES);
         
         for(int i = 0; i < NUM_BUFFERS; i++)
         {
+            AudioQueueFreeBuffer(recordState.queue,
+                                 recordState.buffers[i]);
+        }
+        AudioQueueDispose(recordState.queue, true);
+        
+        if(audioStatus==0)
+        {
+            debug_NSLog(@"record stopped ok");
+        }
+        else {
+            debug_NSLog(@"error stopping record");
             
-            AudioQueueAllocateBuffer(playState.queue, 160, &playState.buffers[i]);
-             //   AudioOutputCallback(&playState, playState.queue, playState.buffers[i]);
         }
         
+        //output
+        playState.playing = false;
+        
+        for(int i = 0; i < NUM_BUFFERS; i++)
+        {
+            AudioQueueFreeBuffer(playState.queue, playState.buffers[i]);
+        }
+        
+        AudioQueueDispose(playState.queue, true);
         
         
+        sess.BYEDestroy(jrtplib::RTPTime(10,0),0,0);
     }
-      
-    
-    
-    [NSThread detachNewThreadSelector:@selector(listenThread) toTarget:self withObject:nil];
-    
-    
-    
-    
-    
-    
-    return 0;
-    
-}
-
-
-
--(void) RTPDisconnect
-{
-    
-    //input
-    OSStatus  audioStatus = AudioQueueStop(recordState.queue, YES);
-    
-    for(int i = 0; i < NUM_BUFFERS; i++)
-    {
-        AudioQueueFreeBuffer(recordState.queue,
-                             recordState.buffers[i]);
-    }
-    AudioQueueDispose(recordState.queue, true);
-    
-    if(audioStatus==0)
-    {
-        debug_NSLog(@"record stopped ok");
-    }
-    else {
-        debug_NSLog(@"error stopping record");
-        
-    }
-    
-    //output
-    playState.playing = false;
-    
-    for(int i = 0; i < NUM_BUFFERS; i++)
-    {
-        AudioQueueFreeBuffer(playState.queue, playState.buffers[i]);
-    }
-    
-    AudioQueueDispose(playState.queue, true);
-    
-    
-    sess.BYEDestroy(jrtplib::RTPTime(10,0),0,0);
-}
-
-@end
+                                  
+                                  @end

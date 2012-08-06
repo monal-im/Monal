@@ -127,7 +127,7 @@ int16_t ALaw_Decode(int8_t number)
                     // debug_NSLog(@"Got packet !\n");
                     //8 bit 160 bytes = 320 byes 16 bit
                     
-                    /* int16_t* linear_buffer= (int16_t*)malloc(320);
+                    int16_t* linear_buffer= (int16_t*)malloc(320);
                      
                      int counter=0;
                      
@@ -138,10 +138,12 @@ int16_t ALaw_Decode(int8_t number)
                      counter++;
                      }
                      
-                     */
+                     
                     
                     
-                    NSData* data= [NSData dataWithBytes:pack->GetPayloadData() length:pack->GetPayloadLength()];
+                   NSData* data= [NSData dataWithBytes:pack->GetPayloadData() length:pack->GetPayloadLength()];
+                  //    NSData* data= [NSData dataWithBytes:linear_buffer length:320];
+                    
                     [packetInBuffer addObject:data];
                     
                     // we don't longer need the packet, so
@@ -347,7 +349,7 @@ void AudioInputCallback(
      kLinearPCMFormatFlagIsPacked;*/
     
     
-    OSStatus audioStatus= AudioQueueNewInput(
+    OSStatus audioStatus;/* = AudioQueueNewInput(
                                              &recordState.dataFormat, // 1
                                              AudioInputCallback, // 2
                                              &recordState,  // 3
@@ -356,7 +358,7 @@ void AudioInputCallback(
                                              0,  // 6
                                              &recordState.queue);  // 7
     
-    
+   
     
     
     if(audioStatus==0)
@@ -365,8 +367,8 @@ void AudioInputCallback(
     }
     else {
         debug_NSLog(@"new audio in queue start failed");
-        return -1;
-    }
+       return -1;
+    } */
     
     
     //******** ouput ******
@@ -486,7 +488,7 @@ void AudioInputCallback(
                                   }
                                   
                                   
-                                  audioStatus = AudioQueueStart(recordState.queue, NULL);
+                                 // audioStatus = AudioQueueStart(recordState.queue, NULL);
                                   
                                   if(audioStatus==0)
                                   {
@@ -494,7 +496,7 @@ void AudioInputCallback(
                                   }
                                   else {
                                       debug_NSLog(@"error starting record");
-                                      return -1;
+                                      //return -1;
                                   }
                                   
                                   

@@ -25,6 +25,8 @@
 
 #import "RTP.hh"
 
+
+
 jrtplib::RTPSession sess;
 
 
@@ -73,6 +75,31 @@ void checkerror(int rtperr)
 
 #pragma mark audio output Queue
 
+int16_t ALaw_Decode(int8_t number)
+{
+    uint8_t sign = 0x00;
+    uint8_t position = 0;
+    int16_t decoded = 0;
+    number^=0x55;
+    if(number&0x80)
+    {
+        number&=~(1<<7);
+        sign = -1;
+    }
+    position = ((number & 0xF0) >>4) + 4;
+    if(position!=4)
+    {
+        decoded = ((1<<position)|((number&0x0F)<<(position-4))
+                   |(1<<(position-5)));
+    }
+    else
+    {
+        decoded = (number<<1)|1;
+    }
+    return (sign==0)?(decoded):(-decoded);
+}
+
+
 -(void) listenThread
 {
     debug_NSLog(@"entered RTP listen thread");
@@ -97,23 +124,38 @@ void checkerror(int rtperr)
                 while ((pack = sess.GetNextPacket()) != NULL)
                 {
                     // You can examine the data here
-                    // debug_NSLog(@"Got packet !\n");
+                   //  debug_NSLog(@"Got packet !\n");
                     
-                    NSData* data= [NSData dataWithBytes:pack->GetPayloadData() length:pack->GetPayloadLength()];
-                    [packetInBuffer addObject:data];
+                    //8 bit 160 bytes = 320 byes 16 bit
+                  /* int16_t* linear_buffer= (int16_t*)malloc(320);
                     
-                    // we don't longer need the packet, so
-                    // we'll delete it
-                    sess.DeletePacket(pack);
+                    int counter=0;
+                
+                    while(counter<pack->GetPayloadLength())
+                    {
+                        int8_t val = pack->GetPayloadData()[counter];
+                        linear_buffer[counter]=ALaw_Decode(val);
+                        counter++;
+                    }
                     
-                    packCount++;
+                    */
                     
+                 NSData* data= [NSData dataWithBytes:pack->GetPayloadData() length:pack->GetPacketLength()];
+                    debug_NSLog(@"lpcm %@", data)
+
+                   [packetInBuffer addObject:data];
+               
+               //     debug_NSLog(@"pcma %s", pack->GetPayloadData());
+                               
+                  packCount++;
                     
-                    
+                  
+                   
+                     sess.DeletePacket(pack);
                     //start playback after thre are 20 packets
                     
                     
-                    if(packCount>100 && playState.playing==NO)
+                     if(packCount>100 && playState.playing==NO)
                     {
                         OSStatus status = AudioQueueStart(playState.queue, NULL);
                         if(status == 0)
@@ -121,8 +163,7 @@ void checkerror(int rtperr)
                             playState.playing=YES;
                             debug_NSLog(@"Started play back ");
                             
-                            
-                            for(int i = 0; i < NUM_BUFFERS; i++)
+                           for(int i = 0; i < NUM_BUFFERS; i++)
                             {
                                 
                                 AudioOutputCallback(&playState, playState.queue, playState.buffers[i]);
@@ -213,7 +254,7 @@ void AudioOutputCallback(
         debug_NSLog(@"Not playing, returning\n");
         return;
     }
-    
+
     debug_NSLog(@"Queuing buffer %d for playback\n", playState->currentPacket);
     
     AudioStreamPacketDescription* packetDescs;
@@ -226,6 +267,7 @@ void AudioOutputCallback(
                               &numPackets,
                               outBuffer->mAudioData);
     
+    numPackets=80; 
     if(numPackets)
     {
         outBuffer->mAudioDataByteSize = bytesRead;
@@ -260,8 +302,8 @@ void AudioInputCallback(
     
     //  debug_NSLog(@"Sending packet sized %d", inBuffer->mAudioDataByteSize);
     
-    int rtpstatus = sess.SendPacket((void *)inBuffer->mAudioData,inBuffer->mAudioDataByteSize,8,false, inNumberPacketDescriptions/100 );
-    // pt=8  is PCMA ,  timestamp 8 is 8Khz
+    int rtpstatus = sess.SendPacket((void *)inBuffer->mAudioData,inBuffer->mAudioDataByteSize,8,false, 80 );
+    // pt=8  is PCMA ,  timestamp 80 is 8Khz becaue 100 packets
     checkerror(rtpstatus);
     if(rtpstatus!=0) return; // gradually stop reenqueing
     recordState->currentPacket += inNumberPacketDescriptions;
@@ -288,9 +330,7 @@ void AudioInputCallback(
     
     //********* Audio Queue ********/
     
-    
-    
-    
+   
     recordState.dataFormat.mSampleRate = 8000.0;
     recordState.dataFormat.mFormatID = kAudioFormatALaw;
     recordState.dataFormat.mFramesPerPacket = 1;
@@ -305,7 +345,8 @@ void AudioInputCallback(
     kLinearPCMFormatFlagIsPacked;*/
     
     
-   OSStatus audioStatus= AudioQueueNewInput(
+    OSStatus audioStatus;
+   /* = AudioQueueNewInput(
                                              &recordState.dataFormat, // 1
                                              AudioInputCallback, // 2
                                              &recordState,  // 3
@@ -324,7 +365,7 @@ void AudioInputCallback(
     else {
         debug_NSLog(@"new audio in queue start failed");
         return -1;
-    }
+    }*/
     
     
     //******** ouput ******
@@ -343,8 +384,7 @@ void AudioInputCallback(
     
     
     
-  /*  audioStatus = AudioQueueNewOutput(
-                                      &playState.dataFormat,
+  audioStatus = AudioQueueNewOutput(&playState.dataFormat,
                                       AudioOutputCallback,
                                       &playState,
                                       CFRunLoopGetCurrent(),
@@ -353,7 +393,7 @@ void AudioInputCallback(
                                       &playState.queue);
     
    
-   */
+   
    
     
     
@@ -367,10 +407,7 @@ void AudioInputCallback(
     }
     
     
-    // ****** conversion ******
-    
-  //  audioStatus=AudioConverterNew(
-    
+
     
     //******* RTP *****/
     
@@ -446,7 +483,7 @@ void AudioInputCallback(
     }
     
     
-    audioStatus = AudioQueueStart(recordState.queue, NULL);
+   /* audioStatus = AudioQueueStart(recordState.queue, NULL);
     
     if(audioStatus==0)
     {
@@ -456,7 +493,7 @@ void AudioInputCallback(
         debug_NSLog(@"error starting record");
         return -1;
     }
-    
+    */
     
     // ouput
     
@@ -473,8 +510,7 @@ void AudioInputCallback(
         
         
     }
-    
-    
+      
     
     
     [NSThread detachNewThreadSelector:@selector(listenThread) toTarget:self withObject:nil];

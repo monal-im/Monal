@@ -267,7 +267,7 @@ void AudioOutputCallback(
                               &numPackets,
                               outBuffer->mAudioData);
     
-    numPackets=80; 
+
     if(numPackets)
     {
         outBuffer->mAudioDataByteSize = bytesRead;

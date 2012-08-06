@@ -369,7 +369,7 @@ void AudioInputCallback(
     
     // ****** conversion ******
     
-    audioStatus=AudioConverterNew(
+  //  audioStatus=AudioConverterNew(
     
     
     //******* RTP *****/

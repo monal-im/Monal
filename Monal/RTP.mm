@@ -186,6 +186,13 @@ void AudioOutputCallback(
     if(readpos>=[packetInBuffer count])
     {
         debug_NSLog("read past array size");
+        
+        /*void* pbuffer=outBuffer->mAudioData;
+        uint16_t silence[8]={0,0,0,0,0,0,0,0};
+        bytesRead=8;
+        memcpy(pbuffer, silence, bytesRead);
+        */
+        
         AudioQueueEnqueueBuffer(
                                 playState->queue,
                                 outBuffer,
@@ -269,7 +276,7 @@ void AudioOutputCallback(
         checkerror(rtpstatus);
         if(rtpstatus!=0) break; //  stop sending
                 
-            sentpos++; 
+            sentpos++;
                 }
             
         }

@@ -259,14 +259,19 @@ void AudioOutputCallback(
          if(disconnecting) break; 
         
         //let it bufer a little
-        if([packetOutBuffer count]>10)
+        if([packetOutBuffer count]>30)
         {
+            if(sentpos<[packetOutBuffer count])
+            {
             NSData* data= [packetOutBuffer objectAtIndex:sentpos];
-        int rtpstatus = sess.SendPacket((void *)[data bytes],[data length],8,false, 80 );
-        // pt=8  is PCMA ,  timestamp 80 is for  8Khz records at 5 ms
+        int rtpstatus = sess.SendPacket((void *)[data bytes],[data length],8,false, [data length] );
+        // pt=8  is PCMA ,  timestamp 2x80 =160 is for 2x 8Khz records at 5 ms
         checkerror(rtpstatus);
         if(rtpstatus!=0) break; //  stop sending
-            sentpos++;
+                
+            sentpos++; 
+                }
+            
         }
         
        

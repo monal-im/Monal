@@ -17,8 +17,8 @@
 }
 
 
-#define NUM_BUFFERS 300
-// 2 byte (16 bit)  8000 khz    stoing 160 in a buffer 
+#define NUM_BUFFERS 200
+// 2 byte (16 bit)  8000 khz
 
 
 -(int) RTPConnect:(NSString*) IP:(int) destPort:(int) localPort;

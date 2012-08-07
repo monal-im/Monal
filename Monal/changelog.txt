@@ -1,23 +1,35 @@
 
-Monal is a multi protocol IM client that supports XMPP (Jabber) and AIM.   It will connect to any XMPP  chat server e.g. Google talk, facebook chat. It is a direct client and does not transmit your password to a 3rd party.  Monal has been tested heavily with google talk, facebook, openfire  and ejabberd servers.  Monal will work with corporate XMPP servers that require VPN.
+Monal is an XMPP/Jabber IM client.  It can  connect to any standard  XMPP  chat server such as  Google talk or facebook chat.
+Notable features:
+
+★ Free and No Ads!
+★ Strong focus on privacy. Does not phone home and does not have "metrics" software. 
+★ A direct client and does not transmit your password to a 3rd party.
+★ Standard XMPP Jingle VOIP. Allows voice conversation with any other user with a program that supports it (Google Talk)
+★ Will work with corporate XMPP servers that require VPN
+★ MUC multi user chat
+★ Tested heavily with google talk, facebook, openfire, prosody   and ejabberd servers. 
+
 
 2.0.7 changelog
 
-This is a bug fix update.
+This is a major update that adds many features and fixes bugs. 
 
-1. major bugfixes to improve stability 
-2. added tap gesture to dismiss keyboard
-3. added improved 2 pane iPad view in portrait mode
+1. Added XMPP jingle VOIP features. 
+2. Remains open in the background until you logout
+3. major bugfixes to improve stability
 4. several UI enhancements/cosmetic changes
 5. Removed AIM support due to AOL turning off servers
 6. added more retina graphics
+7. added tap gesture to dismiss keyboard
+4. added improved 2 pane iPad view in portrait mode
 
 
 
       
 you can connect to any jabber server or use the settings for google, facebook or  AIM servers
 
-to test the  XMPP protocol (used by google, facebook etc) set the 
+to test the  XMPP protocol (used by google, facebook etc) use the credentials below. To test the VOIP features, talk to a client with pidgin on linux or another monal user.  The option to call appears after the tapping on the disclosure indicator on the contacts list. 
 username: sworim
 password: imtest
 

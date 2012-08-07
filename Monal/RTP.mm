@@ -258,7 +258,7 @@ void AudioInputCallback(
     
    //   debug_NSLog(@"Sending packet sized %d", inBuffer->mAudioDataByteSize);
     
-    int rtpstatus = sess.SendPacket((void *)inBuffer->mAudioData,inBuffer->mAudioDataByteSize,8,false, inBuffer->mAudioDataByteSize );
+    int rtpstatus = sess.SendPacket((void *)inBuffer->mAudioData,inBuffer->mAudioDataByteSize,8,false, 80 );
     // pt=8  is PCMA ,  timestamp 80 is for  8Khz records at 5 ms
     checkerror(rtpstatus);
     if(rtpstatus!=0) return; // gradually stop reenqueing

@@ -110,10 +110,10 @@ void checkerror(int rtperr)
                     
                     
                     
-                    //start playback after thre are 20 packets
+                    //start playback after thre are 30 packets
                     
                     
-                    if(packCount>100 && playState.playing==NO)
+                    if(packCount>30 && playState.playing==NO)
                     {
                         OSStatus status = AudioQueueStart(playState.queue, NULL);
                         if(status == 0)
@@ -170,7 +170,7 @@ void AudioOutputCallback(
         return;
     }
     
-    debug_NSLog(@"Queuing buffer %lld for playback\n", playState->currentPacket);
+   // debug_NSLog(@"Queuing buffer %lld for playback\n", playState->currentPacket);
     
 
     
@@ -193,33 +193,10 @@ void AudioOutputCallback(
     {
     
     NSData* thepacket=[packetInBuffer objectAtIndex:readpos];
-    debug_NSLog(" packet bytes %@", thepacket);
+ 
+   bytesRead= [thepacket length];
     
-    int alawPacketSize=[thepacket length];
-    
-    // convert from alaw to linear PCM
-    int8_t* alawbuffer=(int8_t*)[thepacket bytes];
-    
-    //for every 8 bits we get 16 back
-   /* int16_t pcmbuffer[alawPacketSize];
-    
-    //convert bufer to linear
-    int bufferpos=0;
-    while(bufferpos<=alawPacketSize)
-    {
-        
-        uint8_t bufferval=alawbuffer[bufferpos];
-        pcmbuffer[bufferpos]=ALawDecompressTable[bufferval];
-        
-        // debug_NSLog(" %d ==> %d", bufferval, pcmbuffer[bufferpos] );
-        
-        bufferpos++;
-    }
-    */
-    
-   bytesRead= alawPacketSize;
-    
-   numPackets=alawPacketSize/2;
+   numPackets=bytesRead/2;
   
  
     //set packet descriptor for each audio packet
@@ -239,7 +216,7 @@ void AudioOutputCallback(
     
     readpos++;
     
-    debug_NSLog(" read %d pcm, %d packets bytes: \n %s", bytesRead,numPackets, outBuffer->mAudioData  )
+ //   debug_NSLog(" read %d pcm, %d packets bytes: \n %s", bytesRead,numPackets, outBuffer->mAudioData  )
     
     
     if(numPackets)
@@ -480,7 +457,7 @@ void AudioInputCallback(
         {
             
             AudioQueueAllocateBuffer(playState.queue, 160, &playState.buffers[i]);
-            //   AudioOutputCallback(&playState, playState.queue, playState.buffers[i]);
+          
         }
         
         

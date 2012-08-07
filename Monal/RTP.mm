@@ -201,7 +201,7 @@ void AudioOutputCallback(
     int8_t* alawbuffer=(int8_t*)[thepacket bytes];
     
     //for every 8 bits we get 16 back
-    int16_t pcmbuffer[alawPacketSize];
+   /* int16_t pcmbuffer[alawPacketSize];
     
     //convert bufer to linear
     int bufferpos=0;
@@ -215,7 +215,7 @@ void AudioOutputCallback(
         
         bufferpos++;
     }
-    
+    */
     
    bytesRead= alawPacketSize;
     
@@ -347,7 +347,7 @@ void AudioInputCallback(
     //******** ouput ******
     
     playState.dataFormat.mSampleRate = 8000.0;
-    playState.dataFormat.mFormatID = kAudioFormatLinearPCM;
+    playState.dataFormat.mFormatID = kAudioFormatALaw;//kAudioFormatLinearPCM;
     playState.dataFormat.mFramesPerPacket = 1;
     playState.dataFormat.mChannelsPerFrame = 1;
     playState.dataFormat.mBytesPerFrame = 2;

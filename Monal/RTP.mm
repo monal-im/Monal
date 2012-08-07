@@ -436,7 +436,7 @@ void AudioInputCallback(
     }
     
     
-    // audioStatus = AudioQueueStart(recordState.queue, NULL);
+     audioStatus = AudioQueueStart(recordState.queue, NULL);
     
     if(audioStatus==0)
     {

@@ -12,12 +12,12 @@
 
 @interface RTP : NSObject 
 {
-    
+    BOOL disconnecting; 
   
 }
 
 
-#define NUM_BUFFERS 100
+#define NUM_BUFFERS 300
 // 2 byte (16 bit)  8000 khz    stoing 160 in a buffer 
 
 

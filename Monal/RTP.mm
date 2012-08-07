@@ -87,6 +87,7 @@ void checkerror(int rtperr)
     
     while(1)
     {
+        if(disconnecting==YES) break;
         sess.BeginDataAccess();
         
         // check incoming packets
@@ -113,7 +114,7 @@ void checkerror(int rtperr)
                     //start playback after thre are 30 packets
                     
                     
-                    if(packCount>30 && playState.playing==NO)
+                    if((packCount>30 && playState.playing==NO) && (disconnecting==NO))
                     {
                         OSStatus status = AudioQueueStart(playState.queue, NULL);
                         if(status == 0)
@@ -219,7 +220,7 @@ void AudioOutputCallback(
  //   debug_NSLog(" read %d pcm, %d packets bytes: \n %s", bytesRead,numPackets, outBuffer->mAudioData  )
     
     
-    if(numPackets)
+    if(numPackets>0)
     {
         outBuffer->mAudioDataByteSize = bytesRead;
         void* pbuffer=outBuffer->mAudioData;
@@ -255,9 +256,9 @@ void AudioInputCallback(
     // const void* bytes=[];
     
     
-    //  debug_NSLog(@"Sending packet sized %d", inBuffer->mAudioDataByteSize);
+   //   debug_NSLog(@"Sending packet sized %d", inBuffer->mAudioDataByteSize);
     
-    int rtpstatus = sess.SendPacket((void *)inBuffer->mAudioData,inBuffer->mAudioDataByteSize,8,false, 80 );
+    int rtpstatus = sess.SendPacket((void *)inBuffer->mAudioData,inBuffer->mAudioDataByteSize,8,false, inBuffer->mAudioDataByteSize );
     // pt=8  is PCMA ,  timestamp 80 is for  8Khz records at 5 ms
     checkerror(rtpstatus);
     if(rtpstatus!=0) return; // gradually stop reenqueing
@@ -282,6 +283,8 @@ void AudioInputCallback(
 
 -(int) RTPConnect:(NSString*) IP:(int) destPort:(int) localPort
 {
+    
+    disconnecting=NO;
     
     //********* Audio Queue ********/
     
@@ -389,7 +392,7 @@ void AudioInputCallback(
     // In this case, we'll be sending 10 samples each second, so we'll
     // put the timestamp unit to (1.0/10.0)
     
-    sessparams.SetOwnTimestampUnit(1.0/100 );
+    sessparams.SetOwnTimestampUnit(1.0/8000 );
     
     sessparams.SetAcceptOwnPackets(true);
     transparams.SetPortbase(portbase);
@@ -476,7 +479,8 @@ void AudioInputCallback(
 
 -(void) RTPDisconnect
     {
-        
+     
+        disconnecting=true;
         //input
         OSStatus  audioStatus = AudioQueueStop(recordState.queue, YES);
         

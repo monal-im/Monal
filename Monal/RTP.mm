@@ -57,6 +57,9 @@ PlayState playState;
 NSMutableArray* packetInBuffer;
 int readpos;
 
+NSMutableArray* packetOutBuffer;
+int sentpos; 
+
 @implementation RTP
 
 
@@ -241,6 +244,40 @@ void AudioOutputCallback(
 
 #pragma mark audio input Queue
 
+-(void) sendThread
+{
+    debug_NSLog(@"entered RTP send thread");
+    //create an output buffer
+    packetOutBuffer=[[NSMutableArray alloc] init];
+    
+    sentpos=0;
+    
+    int packCount=0;
+    
+    while(1)
+    {
+         if(disconnecting) break; 
+        
+        //let it bufer a little
+        if([packetOutBuffer count]>10)
+        {
+            NSData* data= [packetOutBuffer objectAtIndex:sentpos];
+        int rtpstatus = sess.SendPacket((void *)[data bytes],[data length],8,false, 80 );
+        // pt=8  is PCMA ,  timestamp 80 is for  8Khz records at 5 ms
+        checkerror(rtpstatus);
+        if(rtpstatus!=0) break; //  stop sending
+            sentpos++;
+        }
+        
+       
+    }
+    
+    debug_NSLog(@"leaving RTP send thread");
+
+    [NSThread exit];
+}
+
+
 void AudioInputCallback(
                         void *inUserData, // 1
                         AudioQueueRef inAQ, // 2
@@ -252,16 +289,10 @@ void AudioInputCallback(
     static int count = 0;
     RecordState* recordState = (RecordState*)inUserData;
     
-    //send packet over RTP
-    // const void* bytes=[];
-    
-    
-   //   debug_NSLog(@"Sending packet sized %d", inBuffer->mAudioDataByteSize);
-    
-    int rtpstatus = sess.SendPacket((void *)inBuffer->mAudioData,inBuffer->mAudioDataByteSize,8,false, 80 );
-    // pt=8  is PCMA ,  timestamp 80 is for  8Khz records at 5 ms
-    checkerror(rtpstatus);
-    if(rtpstatus!=0) return; // gradually stop reenqueing
+    NSData* data= [NSData dataWithBytes:inBuffer->mAudioData length:inBuffer->mAudioDataByteSize];
+    [packetOutBuffer addObject:data];
+  
+ 
     recordState->currentPacket += inNumberPacketDescriptions;
     
     //reenquue buffer to collect more
@@ -470,7 +501,8 @@ void AudioInputCallback(
    
     [NSThread detachNewThreadSelector:@selector(listenThread) toTarget:self withObject:nil];
     
-   
+    [NSThread detachNewThreadSelector:@selector(sendThread) toTarget:self withObject:nil];
+    
     return 0;
     
 }

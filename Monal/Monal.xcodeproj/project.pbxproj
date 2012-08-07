@@ -179,6 +179,7 @@
 		2684F88E1236F5EC003BF137 /* reload.png in Resources */ = {isa = PBXBuildFile; fileRef = 2684F88C1236F5EC003BF137 /* reload.png */; };
 		268BCCC5140B19B70025E4D1 /* green_button.png in Resources */ = {isa = PBXBuildFile; fileRef = 268BCCC4140B19B70025E4D1 /* green_button.png */; };
 		268BCF12140B29180025E4D1 /* libjrtplib-static.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */; };
+		268E700515D0D979002E63CD /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 264FF3E4158A855D00D97B86 /* AVFoundation.framework */; };
 		269A2E5613202D800044B1C8 /* noicon_64.png in Resources */ = {isa = PBXBuildFile; fileRef = 269A2E5513202D800044B1C8 /* noicon_64.png */; };
 		269A2E62132030770044B1C8 /* Monal_crop_256.png in Resources */ = {isa = PBXBuildFile; fileRef = 26EB85D911166F1B005446DD /* Monal_crop_256.png */; };
 		269F0F1A105DDEFB00FF96F8 /* status.png in Resources */ = {isa = PBXBuildFile; fileRef = 269F0F19105DDEFB00FF96F8 /* status.png */; };
@@ -493,6 +494,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				268E700515D0D979002E63CD /* AVFoundation.framework in Frameworks */,
 				2601D9D90FBF265A004DB939 /* AudioToolbox.framework in Frameworks */,
 				268BCF12140B29180025E4D1 /* libjrtplib-static.a in Frameworks */,
 				1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */,

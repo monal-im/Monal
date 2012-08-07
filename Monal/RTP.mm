@@ -33,7 +33,7 @@ typedef struct
 {
     AudioStreamBasicDescription dataFormat;
     AudioQueueRef queue;
-    AudioQueueBufferRef buffers[NUM_BUFFERS];
+    AudioQueueBufferRef buffers[NUM_BUFFERS_REC];
     SInt64 currentPacket;
     
     
@@ -259,7 +259,7 @@ void AudioOutputCallback(
          if(disconnecting) break; 
         
         //let it bufer a little
-        if([packetOutBuffer count]>30)
+        if([packetOutBuffer count]>300)
         {
             if(sentpos<[packetOutBuffer count])
             {
@@ -323,12 +323,7 @@ void AudioInputCallback(
     disconnecting=NO;
     
     
-    UInt32 sessionCategory = kAudioSessionCategory_PlayAndRecord;
-    AudioSessionSetProperty (
-                             kAudioSessionProperty_AudioCategory,
-                             sizeof (sessionCategory),
-                             &sessionCategory
-                             );
+    [[AVAudioSession sharedInstance] setCategory: AVAudioSessionCategoryPlayAndRecord error: nil];
     
     //********* Audio Queue ********/
     
@@ -459,7 +454,7 @@ void AudioInputCallback(
     
     
     
-    for(int i = 0; i < NUM_BUFFERS; i++)
+    for(int i = 0; i < NUM_BUFFERS_REC; i++)
     {
         audioStatus= AudioQueueAllocateBuffer(recordState.queue,
                                               160, &recordState.buffers[i]);
@@ -530,7 +525,7 @@ void AudioInputCallback(
         //input
         OSStatus  audioStatus = AudioQueueStop(recordState.queue, YES);
         
-        for(int i = 0; i < NUM_BUFFERS; i++)
+        for(int i = 0; i < NUM_BUFFERS_REC; i++)
         {
             AudioQueueFreeBuffer(recordState.queue,
                                  recordState.buffers[i]);

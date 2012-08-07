@@ -322,8 +322,17 @@ void AudioInputCallback(
     
     disconnecting=NO;
     
+    
+    UInt32 sessionCategory = kAudioSessionCategory_PlayAndRecord;
+    AudioSessionSetProperty (
+                             kAudioSessionProperty_AudioCategory,
+                             sizeof (sessionCategory),
+                             &sessionCategory
+                             );
+    
     //********* Audio Queue ********/
     
+   
     
     
     

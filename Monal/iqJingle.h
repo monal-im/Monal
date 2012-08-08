@@ -6,6 +6,8 @@
 //  Copyright (c) 2011 __MyCompanyName__. All rights reserved.
 //
 
+//http://xmpp.org/extensions/xep-0166.html 
+
 #include <ifaddrs.h>
 #include <arpa/inet.h>
 
@@ -48,6 +50,7 @@
 
 -(NSString*) ack:(NSString*) to:(NSString*) iqid;
 -(NSString*) acceptJingle;
+-(NSString*) rejectJingle; 
 -(NSString*) initiateJingle:(NSString*) to  :(NSString*)iqid;
 -(NSString*) terminateJingle;
 

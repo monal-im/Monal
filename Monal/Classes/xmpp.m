@@ -892,7 +892,17 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
                 jingleCall.thesid= [attributeDict objectForKey:@"sid"] ;
                 
               
-               
+                UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Incoming Call"
+                                                                message:[NSString stringWithFormat:@"Call from %@" , presenceUser]
+                                                               delegate:self cancelButtonTitle:@"Decline"
+                                                      otherButtonTitles:@"Answer",  nil] ;
+                alert.tag=3;
+                
+                
+                //we want to set data into the jingle object here..
+                
+                
+                [alert show];
                 
                 
             }
@@ -986,17 +996,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 	{
         debug_NSLog(@"got Jingle transport candidate"); 
         
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Incoming Call"
-                                                        message:[NSString stringWithFormat:@"Call from %@" , presenceUser]
-                                                       delegate:self cancelButtonTitle:@"Decline"
-                                              otherButtonTitles:@"Answer",  nil] ;
-        alert.tag=3;
-        
-        
-        //we want to set data into the jingle object here..
-        
-        
-        [alert show];
+     
         
         
         if((	[[attributeDict objectForKey:@"generation"] isEqualToString:@"0"])
@@ -3987,7 +3987,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
     {
         
         
-            if(buttonIndex==0)
+            if(buttonIndex==1) //default is not to accept
             {
                 debug_NSLog(@"sending jingle accept");
                 [self talk: [jingleCall acceptJingle]];
@@ -3996,6 +3996,12 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 
                 
             }
+            else
+            {
+                  debug_NSLog(@"sending jingle reject");
+                  [self talk: [jingleCall rejectJingle]];
+            }
+        
             
             ; 
             return; 

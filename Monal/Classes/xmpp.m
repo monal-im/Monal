@@ -145,8 +145,10 @@
     
     
     
-    verHash=@"VUFD6HcFmUT2NxJkBGCiKlZnS3M=" ; // pukled from pidgin .. need to make my own later
+    verHash=@"VUFD6HcFmUT2NxJkBGCiKlZnS3M=" ; // plucked from pidgin .. need to make my own later
     
+    
+    messageoutBuffer=[[NSMutableString alloc] init];
 	
 	return self;
 
@@ -3265,34 +3267,11 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 
 -(bool) talk: (NSString*) xmpprequest;
 {
+	debug_NSLog(@" adding message to buffer %@", xmpprequest);
+//to to add locking and unlocking..
+     [messageoutBuffer appendString:xmpprequest];
 	
-
-	
-	
-	[UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
-	if(oStream==nil) return false; 
-	if(xmpprequest==nil) return false; 
-		debug_NSLog(@"sending: %@ ", xmpprequest);
-	const uint8_t * rawstring =
-	(const uint8_t *)[xmpprequest UTF8String];
-	 int len= strlen(rawstring); 
-	if([oStream write:rawstring maxLength:len]!=-1)
-	{
-		//debug_NSLog(@"sending: ok"); 
-		;
-		[UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
-		
-		return true; 
-	}
-		else
-		{
-            NSError* error= [oStream streamError];
-				debug_NSLog(@"sending: failed with error %d domain %@",error.code, error.domain);
-			[UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
-			;
-		
-		return false; 
-		}
+    return YES;
 	
 }
 
@@ -3377,10 +3356,44 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 			//for writing
 	case NSStreamEventHasSpaceAvailable:
 	{
-		debug_NSLog(@"Stream has space to write"); 
+		debug_NSLog(@"Stream has space to write: %@", messageoutBuffer);
 	
         
+        if([messageoutBuffer length]>0)
+        {
+        
+        // want to lock and unlock here. to prevent read and write to the buffer at the same time
+            
         ///we want to get whatever is in the output queue and send it out.
+        
+        [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
+        if(oStream==nil) break ;
+       
+		debug_NSLog(@"sending: %@ ", messageoutBuffer);
+        const uint8_t * rawstring =
+        (const uint8_t *)[messageoutBuffer UTF8String];
+        int len= strlen(rawstring);
+        if([oStream write:rawstring maxLength:len]!=-1)
+        {
+            //debug_NSLog(@"sending: ok");
+            ;
+            [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+            
+            
+            [messageoutBuffer setString:@""];
+            break ;
+        }
+		else
+		{
+            NSError* error= [oStream streamError];
+            debug_NSLog(@"sending: failed with error %d domain %@",error.code, error.domain);
+			[UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+			;
+            
+            break ;
+		}
+        }
+        
         
 		
 		break;
@@ -3666,45 +3679,16 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	[oStream open];
 	debug_NSLog(@"connection created");
 	
-	
-	//check status before talking.. to prevent block
-	if([oStream streamStatus]== NSStreamStatusError)
-	 {
-	 debug_NSLog(@"stream connect error"); 
-	 ; 
-	 return false;
-	 }
-
+    if(streamError==true)
+	{
+		debug_NSLog(@"stream talking error");
+		;
+		return false;
+	}
 	
 	NSDate *now = [NSDate date];
 	
 	NSString* threadname=[NSString stringWithFormat:@"monal%d",random()%100000]; 
-	
-	
-	while(streamOpen<2) 
-	{
-		debug_NSLog(@"stream open %d, connect thread sleeping onlock", streamOpen); 
-		usleep(600000); 
-		int seconds=[[NSDate date] timeIntervalSinceDate:now];
-		if(seconds>5)
-		{
-			debug_NSLog(@"connect thread timing out.. sending reconnect "); 
-			
-           // sleep(2); 
-            /*[[NSNotificationCenter defaultCenter] 
-			 postNotificationName: @"Reconnect" object: self];
-			
-			[UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
-            */
-            
-			; 
-		return false; 
-		}
-		
-	}
-	
-	
-	
 	
 	
 	[self talk:@"<?xml version='1.0'?>"]; 
@@ -3722,7 +3706,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(login:) name: @"XMPPMech" object:self];
 
 	}
-	
+
 	
 	
 
@@ -3732,7 +3716,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	
 
 	
-	;
+	
 	return true;
 }
 

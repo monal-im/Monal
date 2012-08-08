@@ -116,11 +116,14 @@
     iqSearch* iqsearch; 
     iqJingle* jingleCall;
     
-
     
     //client attributes
     NSString* verHash;
- 
+    
+    
+    // Data bufer
+    NSMutableString* messageoutBuffer;
+    
 
 }
 -(void) setRunLoop; 

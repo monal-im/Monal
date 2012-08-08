@@ -3379,6 +3379,9 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	{
 		debug_NSLog(@"Stream has space to write"); 
 	
+        
+        ///we want to get whatever is in the output queue and send it out.
+        
 		
 		break;
 	}

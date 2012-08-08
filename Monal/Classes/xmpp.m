@@ -891,11 +891,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
                 
                 jingleCall.thesid= [attributeDict objectForKey:@"sid"] ;
                 
-                 UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Incoming Call"
-                                                                  message:[NSString stringWithFormat:@"Call from %@" , presenceUser]
-                 delegate:self cancelButtonTitle:@"Decline"
-                 otherButtonTitles:@"Answer",  nil] ;
-                 [alert show];
+              
                
                 
                 
@@ -990,6 +986,18 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 	{
         debug_NSLog(@"got Jingle transport candidate"); 
         
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Incoming Call"
+                                                        message:[NSString stringWithFormat:@"Call from %@" , presenceUser]
+                                                       delegate:self cancelButtonTitle:@"Decline"
+                                              otherButtonTitles:@"Answer",  nil] ;
+        alert.tag=3;
+        
+        
+        //we want to set data into the jingle object here..
+        
+        
+        [alert show];
+        
         
         if((	[[attributeDict objectForKey:@"generation"] isEqualToString:@"0"])
            &&
@@ -998,7 +1006,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
         {
             NSString* jingleAddress=[attributeDict objectForKey:@"address"];
             
-            jingleCandiatePort1=[attributeDict objectForKey:@"port"];
+            jingleCall.destinationPort=[attributeDict objectForKey:@"port"];
             
         }
 
@@ -1012,18 +1020,16 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
             NSString* jingleAddress=[attributeDict objectForKey:@"address"];
             if(jingleAddress==nil) jingleAddress=[attributeDict objectForKey:@"ip"];
         
-            debug_NSLog(@"got Jingle local candidate.. sending accept");
-            [self talk: [jingleCall acceptJingle:presenceUserFull 
-                                    :jingleAddress
-                                    :jingleCandiatePort1
-                                    :[attributeDict objectForKey:@"port"]
-                                    :[attributeDict objectForKey:@"username"]
-                                    :[attributeDict objectForKey:@"password"]
-             
-                                                :sessionkey             ]];
+            jingleCall.destinationPort2=[attributeDict objectForKey:@"port"];
+            jingleCall.theaddress=jingleAddress;
+            jingleCall.theusername=[attributeDict objectForKey:@"username"];
+            jingleCall.thepass=[attributeDict objectForKey:@"password"];
+            jingleCall.otherParty=presenceUserFull;
+           
+            jingleCall.idval=sessionkey;
             
-            [jingleCall performSelectorOnMainThread:@selector(connect) withObject:nil waitUntilDone:NO];
-
+            debug_NSLog(@"got Jingle local candidate..");
+           
                     
         }
         
@@ -1543,6 +1549,7 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
 															message:askmsg
 														   delegate:self cancelButtonTitle:@"Yes"
 												  otherButtonTitles:@"No", nil];
+            alert.tag=1; 
 			[alert show];
 						
 			presenceType=@"subscribe";
@@ -1724,6 +1731,8 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
                                                          message:askmsg
                                                         delegate:self cancelButtonTitle:@"Yes"
                                                otherButtonTitles:@"No", nil];
+        alert.tag=2;
+        
         [alert show];
         
 		return; 
@@ -3940,21 +3949,26 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	
 	debug_NSLog(@"clicked button %d", buttonIndex); 
 	//login or initial error
-	if(([[alertView title] isEqualToString:@"Connection Error"])
-	   
-	   ||([[alertView title] isEqualToString: @"Login Error"])
-        ||([[alertView title] isEqualToString: @"Error"])
-        ||([[alertView title] isEqualToString: @"XMPP Error"])
-        ||([[alertView title] isEqualToString: @"XMPP Failure"])
-	  
-	   )
-	{
-		;
-		return; 
+
+	
+    if(alertView.tag==1) // add contact
+    {
+        //otherwise request
+        if(buttonIndex==0)
+        {
+            [self sendAuthorized:[alertView title]];
+            [self addBuddy:[alertView title]];
+        }
+        else
+            [self sendDenied:[alertView title]];
+        
 	}
 	
-    if([[alertView title] isEqualToString:@"Invite"])
+    
+    if(alertView.tag==2) //Muc invite
     {
+    
+  
     
         if(buttonIndex==0) 
         {
@@ -3964,22 +3978,34 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
         
         ; 
         return; 
+    
     }
 	
-	//otherwise request 
-	if(buttonIndex==0) 
-	{
-		[self sendAuthorized:[alertView title]];
-		[self addBuddy:[alertView title]];
-	}
-	else
-		[self sendDenied:[alertView title]];
+
+    
+    if(alertView.tag==3) //Jingle Call
+    {
+        
+        
+            if(buttonIndex==0)
+            {
+                debug_NSLog(@"sending jingle accept");
+                [self talk: [jingleCall acceptJingle]];
+                
+                [jingleCall performSelectorOnMainThread:@selector(connect) withObject:nil waitUntilDone:NO];
+
+                
+            }
+            
+            ; 
+            return; 
+        
+    }
+    
 	
-	
-	
-	
-	
-	;
+	//everything else
+    
+    return; 
 }
 
 

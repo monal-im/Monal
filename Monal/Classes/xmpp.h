@@ -116,8 +116,7 @@
     iqSearch* iqsearch; 
     iqJingle* jingleCall;
     
-    NSString* jingleCandiatePort1; 
-    
+
     
     //client attributes
     NSString* verHash;

@@ -11,7 +11,21 @@
 @implementation iqJingle
 @synthesize me; 
 @synthesize thesid;
-@synthesize didReceiveTerminate; 
+@synthesize didReceiveTerminate;
+
+
+
+@synthesize otherParty;
+@synthesize theaddress;
+@synthesize destinationPort;
+@synthesize  destinationPort2;
+
+@synthesize  localPort;
+@synthesize  localPort2;
+@synthesize  theusername;
+@synthesize  thepass;
+
+@synthesize idval;
 
 -(void) resetVals
 {
@@ -95,18 +109,11 @@
     return [NSString stringWithCString:inet_ntoa(*list[0]) encoding:NSUTF8StringEncoding];
 }
 
--(NSString*) acceptJingle:(NSString*) to:(NSString*) address: (NSString*) port: (NSString*) port2: (NSString*) username: (NSString*) pass:  (NSString*)idval
+-(NSString*) acceptJingle
 {
     
       if(didStartCall==YES)
       {
-          theaddress=address;
-          destinationPort=port;
-          destinationPort2=port2;
-          
-          theusername=username;
-          thepass=pass;
-          otherParty=[NSString stringWithString:to];
           
         //  [self performSelectorOnMainThread:@selector(connect) withObject:nil waitUntilDone:NO];
 
@@ -114,28 +121,20 @@
       }
     
      if (activeCall==YES) return @"";
-    
-   // [self performSelectorOnMainThread:@selector(connect) withObject:nil waitUntilDone:NO];
 
   
     NSString* ownIP= [self localIPAddress];
-    int localPortInt=[port intValue]+2;
+    int localPortInt=[destinationPort intValue]+2;
     // local port can be the othersides port +2 shoudl be rnadom .. needs to be even for RTP
    localPort=[NSString stringWithFormat:@"%d",localPortInt];
 
    localPort2=[NSString stringWithFormat:@"%d",localPortInt+10];
     
     
-    theaddress=address;
-    destinationPort=port;
-      destinationPort2=port2;
-    theusername=username;
-    thepass=pass;
-    
-    
+
    
     NSMutableString* query=[[NSMutableString alloc] init];
-    [query appendFormat:@"<iq      to='%@'  id='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-accept'  responder='%@' sid='%@'> <content creator='initiator' name=\"audio-session\" senders=\"both\"><description xmlns=\"urn:xmpp:jingle:apps:rtp:1\" media=\"audio\"> <payload-type id=\"8\" name=\"PCMA\" clockrate=\"8000\"/></description> <transport xmlns='urn:xmpp:jingle:transports:raw-udp:1'><candidate type=\"host\" network=\"0\" component=\"1\" ip=\"%@\" port=\"%@\"   id=\"monal001\" generation=\"0\" protocol=\"udp\" priority=\"1\" /> <candidate type=\"host\" network=\"0\" component=\"2\" ip=\"%@\" port=\"%@\"   id=\"monal002\" generation=\"0\" protocol=\"udp\" priority=\"2\" /> </transport> </content> </jingle> </iq>", to, idval,  me,  thesid, ownIP, localPort, ownIP, localPort2];
+    [query appendFormat:@"<iq      to='%@'  id='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-accept'  responder='%@' sid='%@'> <content creator='initiator' name=\"audio-session\" senders=\"both\"><description xmlns=\"urn:xmpp:jingle:apps:rtp:1\" media=\"audio\"> <payload-type id=\"8\" name=\"PCMA\" clockrate=\"8000\"/></description> <transport xmlns='urn:xmpp:jingle:transports:raw-udp:1'><candidate type=\"host\" network=\"0\" component=\"1\" ip=\"%@\" port=\"%@\"   id=\"monal001\" generation=\"0\" protocol=\"udp\" priority=\"1\" /> <candidate type=\"host\" network=\"0\" component=\"2\" ip=\"%@\" port=\"%@\"   id=\"monal002\" generation=\"0\" protocol=\"udp\" priority=\"2\" /> </transport> </content> </jingle> </iq>", theaddress, idval,  me,  thesid, ownIP, localPort, ownIP, localPort2];
       
     
     
@@ -145,7 +144,6 @@
     
 
     
-   otherParty=[NSString stringWithString:to]; 
  
   
     

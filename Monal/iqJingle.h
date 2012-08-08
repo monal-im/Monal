@@ -33,6 +33,8 @@
     NSString* theusername;
     NSString* thepass; 
     
+    NSString* idval;
+    
     RTP* rtp;
     RTP* rtp2;
     
@@ -45,7 +47,7 @@
 -(NSString*) getGoogleInfo:(NSString*) idval;
 
 -(NSString*) ack:(NSString*) to:(NSString*) iqid;
--(NSString*) acceptJingle:(NSString*) to:(NSString*) address: (NSString*) port: (NSString*) port2: (NSString*) username: (NSString*) pass:  (NSString*)idval;
+-(NSString*) acceptJingle;
 -(NSString*) initiateJingle:(NSString*) to  :(NSString*)iqid;
 -(NSString*) terminateJingle;
 
@@ -58,6 +60,20 @@
 
 @property (nonatomic) NSString* me; 
 @property (nonatomic) NSString* thesid;
-@property (nonatomic) BOOL didReceiveTerminate; 
+@property (nonatomic)   NSString* otherParty; 
+
+@property (nonatomic) NSString* theaddress;
+@property (nonatomic) NSString* destinationPort;
+@property (nonatomic) NSString* destinationPort2;
+
+@property (nonatomic) NSString* localPort;
+@property (nonatomic) NSString* localPort2;
+@property (nonatomic) NSString* theusername;
+@property (nonatomic) NSString* thepass;
+
+@property (nonatomic) NSString* idval;
+
+
+@property (nonatomic) BOOL didReceiveTerminate;
 
 @end

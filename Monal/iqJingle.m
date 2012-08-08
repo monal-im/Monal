@@ -172,7 +172,7 @@
 {
    
  NSMutableString* query=[[NSMutableString alloc] init];
-    [query appendFormat:@"<iq      to='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-terminate' sid='%@'> <reason> <decline/> </reason> </jingle> </iq>", otherParty, thesid];
+    [query appendFormat:@"<iq   id='%@'   to='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-terminate'  initiator='%@' responder='%@' sid='%@'> <reason> <decline/> </reason> </jingle> </iq>", idval, otherParty, otherParty, me,  thesid];
    
    
      [self resetVals];
@@ -187,7 +187,8 @@
     
     NSMutableString* query=[[NSMutableString alloc] init];
      if(!didReceiveTerminate)
-    [query appendFormat:@"<iq      to='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-terminate' sid='%@'> <reason> <success/> </reason> </jingle> </iq>", otherParty, thesid]; 
+         [query appendFormat:@"<iq   id='%@'   to='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-terminate'  initiator='%@' responder='%@' sid='%@'> <reason> <success/> </reason> </jingle> </iq>", idval, otherParty, otherParty, me,  thesid];
+    
     else
         query=@"";
     

@@ -3286,7 +3286,8 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	}
 		else
 		{
-				debug_NSLog(@"sending: failed"); 
+            NSError* error= [oStream streamError];
+				debug_NSLog(@"sending: failed with error %d domain %@",error.code, error.domain);
 			[UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
 			;
 		

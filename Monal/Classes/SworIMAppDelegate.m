@@ -665,19 +665,6 @@
 {
 		debug_NSLog(@"keep alive starts");
 	if(jabber==nil) return; 
-	
-    
-    // keep alive is more forgiving than reachability
-/*	Reachability* internetReach = [[Reachability reachabilityForInternetConnection] retain];
-	
-	reachable=[internetReach currentReachabilityStatus]; 
-	if((reachable==NotReachable) || ([internetReach connectionRequired]))
-	{
-		[self reconnect];
-		return; 
-	}
-*/
-	
     
 	//if there is a stream error then always run keep alive
 	if(jabber.streamError==false)
@@ -686,14 +673,27 @@
 	}
 	debug_NSLog(@"keep alive.. "); 
 	
-	if(![jabber keepAlive])
-	{
-		debug_NSLog(@"Connection drop detected. Reconnecting.."); 
-		// reconnect.. 
-		[self reconnect];
-	}
-	
-	
+	[jabber keepAlive];
+    
+    //if we are in the background and there is a disconnect..  start a 10 min task to fix it. 
+    
+    if((jabber.streamError) && (backGround==YES))
+    {
+        
+        //ios4 background  10 min max  task
+         bgTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^{
+         debug_NSLog(@"OS background expire hander");
+		 
+             [self reconnect];
+		 
+         [[UIApplication sharedApplication] endBackgroundTask:bgTask];
+		 bgTask=UIBackgroundTaskInvalid;
+         
+         }];
+        
+        
+    }
+
 	
 }
 
@@ -727,6 +727,19 @@
 	//update ui
 	[[NSNotificationCenter defaultCenter] 
 	 postNotificationName: @"UpdateUI" object: self];
+    
+    
+  
+    //ios4 auto reconnect   
+    if(backGround==YES)
+    {
+    if((bgTask!=UIBackgroundTaskInvalid) && (bgTask!=nil))
+    {
+        [[UIApplication sharedApplication] endBackgroundTask:bgTask];
+        bgTask=UIBackgroundTaskInvalid;
+    };
+    }
+    
 	
 }
 
@@ -737,8 +750,16 @@
 	[activityMsg setText:@"Error Logging in"];
 	[activitySun stopAnimating];
 	
-	
-		;
+    
+    //ios4 auto reconnect 
+    if(backGround==YES)
+    {
+        if((bgTask!=UIBackgroundTaskInvalid) && (bgTask!=nil))
+        {
+            [[UIApplication sharedApplication] endBackgroundTask:bgTask];
+            bgTask=UIBackgroundTaskInvalid;
+        };
+    }
 }
 
 
@@ -1575,7 +1596,7 @@ buddylistDS.tabcontroller=tabcontroller;
 
 
 
-#pragma mark multi tasking os4 stuff *****
+#pragma mark multi tasking post ios4 stuff *****
 //called when resuming from a notification swipe /tap
 - (void)application:(UIApplication *)application didReceiveLocalNotification:(UILocalNotification *)notification {
     if (application.applicationState == UIApplicationStateInactive ) {
@@ -1643,19 +1664,7 @@ void (^myBlock)(void) = ^(void){
 		
 	 backGround=true; 
 	
-     /*   
-        //******** this needs to be removed when i go back to VOIP socket
-	 bgTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^{
-       debug_NSLog(@"OS background expire hander"); 
-		 
-		 // Clear out the old notification before scheduling a new one
-			 [[UIApplication sharedApplication] cancelAllLocalNotifications];
-		
-		 
-		[[UIApplication sharedApplication] endBackgroundTask:bgTask];
-		 bgTask=UIBackgroundTaskInvalid;
- 
-    }];*/
+
 
 	}
 

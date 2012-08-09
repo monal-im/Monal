@@ -149,7 +149,9 @@
     
     
     messageoutBuffer=[[NSMutableString alloc] init];
-	
+    outBufferLock=[NSLock new];
+    
+    
 	return self;
 
 }
@@ -420,7 +422,8 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 	{
 		debug_NSLog(@"Got SartTLS procced");
 		//trying to switch to TLS
-	
+        
+        
 		
 		NSDictionary *settings = [ [NSDictionary alloc ] 
 								  initWithObjectsAndKeys:
@@ -429,8 +432,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 								  [NSNumber numberWithBool:YES], kCFStreamSSLAllowsAnyRoot,
 								 [NSNumber numberWithBool:NO], kCFStreamSSLValidatesCertificateChain,
 								  [NSNull null],kCFStreamSSLPeerName,
-								//  kCFStreamSocketSecurityLevelNegotiatedSSL,
-                                 // kCFStreamSocketSecurityLevelTLSv1,
+							
                                   kCFStreamSocketSecurityLevelSSLv3,
                                   kCFStreamSSLLevel,
                                  
@@ -473,10 +475,9 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 		loginstate=1; // reset everything
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(login:) name: @"XMPPMech" object:self];
 		
-		;
 		return; 
 		
-	} 
+	}
 		
 	// state >1 at the end of sasl and then reset to 1 in bind. so if it is 1 then bind was already sent
 	if(([State isEqualToString:@"Features"]) && ([elementName isEqualToString:@"bind"])
@@ -3267,10 +3268,25 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 
 -(bool) talk: (NSString*) xmpprequest;
 {
-	debug_NSLog(@" adding message to buffer %@", xmpprequest);
-//to to add locking and unlocking..
+	debug_NSLog(@" adding message to buffer %@ has space %d", xmpprequest, streamHasSpace);
+//Need to add locking and unlocking here
+    debug_NSLog(@"locking write stream in talk");
+    [outBufferLock lock];
+    debug_NSLog(@"locked write stream in talk");
+    
      [messageoutBuffer appendString:xmpprequest];
 	
+    if(streamHasSpace)
+    {
+        [self writeToStream] ;
+         
+    }
+    
+    debug_NSLog(@"unlocking write stream in talk");
+    
+    [outBufferLock unlock];
+    debug_NSLog(@"unlocked write stream in talk");
+    
     return YES;
 	
 }
@@ -3346,29 +3362,22 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 
 
 
-//delegat function for nsstream
 
-- (void)stream:(NSStream *)stream handleEvent:(NSStreamEvent)eventCode
+-(void) writeToStream
 {
-	debug_NSLog(@"has event"); 
-	switch(eventCode) 
-	{
-			//for writing
-	case NSStreamEventHasSpaceAvailable:
-	{
-		debug_NSLog(@"Stream has space to write: %@", messageoutBuffer);
-	
+      if(oStream==nil) return ;
+
+ 
+    if([messageoutBuffer length]>0)
+    {
         
-        if([messageoutBuffer length]>0)
-        {
-        
-        // want to lock and unlock here. to prevent read and write to the buffer at the same time
-            
+            streamHasSpace=NO;
+      
         ///we want to get whatever is in the output queue and send it out.
         
         [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
-        if(oStream==nil) break ;
-       
+      
+        
 		debug_NSLog(@"sending: %@ ", messageoutBuffer);
         const uint8_t * rawstring =
         (const uint8_t *)[messageoutBuffer UTF8String];
@@ -3381,22 +3390,55 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
             
             
             [messageoutBuffer setString:@""];
-            break ;
+            
         }
 		else
 		{
             NSError* error= [oStream streamError];
             debug_NSLog(@"sending: failed with error %d domain %@",error.code, error.domain);
 			[UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
-			;
+			
             
-            break ;
 		}
+    }
+    
+
+
+    return ;
+}
+
+
+
+//delegat function for nsstream
+- (void)stream:(NSStream *)stream handleEvent:(NSStreamEvent)eventCode
+{
+	debug_NSLog(@"has event"); 
+	switch(eventCode) 
+	{
+			//for writing
+	case NSStreamEventHasSpaceAvailable:
+	{
+        debug_NSLog(@"locking write stream in event");
+        [outBufferLock lock];
+        debug_NSLog(@"locked write stream in event ");
+        
+		debug_NSLog(@"Stream has space to write");
+        if(messageoutBuffer.length>0)
+        {
+        
+            [self writeToStream];
+		
+        }
+        else
+        {
+            streamHasSpace=YES;
         }
         
+        debug_NSLog(@"unlocking write stream in event");
+        [outBufferLock unlock];
+        debug_NSLog(@"unlocked write stream in event");
         
-		
-		break;
+        break;
 	}
 			
 			//for reading
@@ -3409,7 +3451,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 			
 		case NSStreamEventErrorOccurred:
 		{
-			debug_NSLog(@"Stream errror");
+			debug_NSLog(@"Stream error");
 			streamError=true;
          
           
@@ -3417,7 +3459,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
             
             
            debug_NSLog(@"Stream error code=%d domain=%@   local desc:%@ ",st_error.code,st_error.domain,  st_error.localizedDescription);
-            
+          /*  
       
 		//[[NSNotificationCenter defaultCenter] 
 		//	 postNotificationName: @"LoginFailed" object: self];
@@ -3427,7 +3469,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 			 postNotificationName: @"Reconnect" object: self];
 			
 			[UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
-					
+				*/	
 			break; 
 		
 		} 
@@ -3587,18 +3629,13 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	oStream=nil;
 	
 
-	// block commented out for being non piblic iphone API
-       // NSHost *host = [NSHost hostWithName:server];
-        // iStream and oStream are instance variables
-      //  [NSStream getStreamsToHost:host port:port inputStream:&iStream
-	//				  outputStream:&oStream];
-    
     CFReadStreamRef readRef= NULL; 
     CFWriteStreamRef writeRef= NULL; 
 	
-	CFStreamCreatePairWithSocketToHost(NULL, (__bridge CFStringRef)server, port, &readRef, &writeRef);
-	 debug_NSLog(@"stream  created to  server: %@ port: %d", server, port);
+    debug_NSLog(@"stream  creating to  server: %@ port: %d", server, port);
     
+	CFStreamCreatePairWithSocketToHost(NULL, (__bridge CFStringRef)server, port, &readRef, &writeRef);
+	
     iStream= (__bridge NSInputStream*)readRef; 
     oStream= (__bridge NSOutputStream*) writeRef; 
     
@@ -3611,8 +3648,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 											  otherButtonTitles:@"Close", nil];
 		[alert show];
 		
-		
-		;
+	
 		return false;
 	}
 		else
@@ -3657,7 +3693,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 								  [NSNumber numberWithBool:YES], @"kCFStreamSSLAllowsAnyRoot",
 								  [NSNumber numberWithBool:NO], @"kCFStreamSSLValidatesCertificateChain",
 								  [NSNull null],@"kCFStreamSSLPeerName",
-								// @"kCFStreamSocketSecurityLevelNegotiatedSSL", 
+								
                                   kCFStreamSocketSecurityLevelSSLv3,
 								  @"kCFStreamSSLLevel",
 								  nil ];
@@ -3667,9 +3703,6 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 								 @"kCFStreamPropertySSLSettings", (__bridge CFTypeRef)settings);
 		
 	
-	
-		
-		
 		debug_NSLog(@"connection secured"); 
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(login:) name: @"XMPPMech" object:self];
 		// for new style this is only done AFTER start tls is sent to not conflict with the earlier mech

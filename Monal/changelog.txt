@@ -17,12 +17,12 @@ This is a major update that adds many features and fixes bugs.
 
 1. Added XMPP jingle VOIP features.  (XEP-0166)
 2. Remains open in the background until you logout
-3. major bugfixes to improve stability
+3. major bugfixes to improve stability and speed
 4. several UI enhancements/cosmetic changes
 5. Removed AIM support due to AOL turning off servers
 6. added more retina graphics
 7. added tap gesture to dismiss keyboard
-4. added improved 2 pane iPad view in portrait mode
+8. added improved 2 pane iPad view in portrait mode
 
 
 

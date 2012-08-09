@@ -123,6 +123,8 @@
     
     // Data bufer
     NSMutableString* messageoutBuffer;
+    BOOL streamHasSpace;
+    NSLock* outBufferLock; 
     
 
 }

@@ -3461,9 +3461,17 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
            debug_NSLog(@"Stream error code=%d domain=%@   local desc:%@ ",st_error.code,st_error.domain,  st_error.localizedDescription);
            
       
-		//[[NSNotificationCenter defaultCenter] 
-		//	 postNotificationName: @"LoginFailed" object: self];
-
+            if(st_error.code==61)// Connection refused
+            {
+            
+		[[NSNotificationCenter defaultCenter]
+			 postNotificationName: @"LoginFailed" object: self];
+                break; 
+            }
+            
+            
+            
+            
 			//reconnect 
 			[[NSNotificationCenter defaultCenter] 
 			 postNotificationName: @"Reconnect" object: self];

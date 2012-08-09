@@ -3459,7 +3459,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
             
             
            debug_NSLog(@"Stream error code=%d domain=%@   local desc:%@ ",st_error.code,st_error.domain,  st_error.localizedDescription);
-          /*  
+           
       
 		//[[NSNotificationCenter defaultCenter] 
 		//	 postNotificationName: @"LoginFailed" object: self];
@@ -3469,7 +3469,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 			 postNotificationName: @"Reconnect" object: self];
 			
 			[UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
-				*/	
+				
 			break; 
 		
 		} 
@@ -3636,7 +3636,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
     
 	CFStreamCreatePairWithSocketToHost(NULL, (__bridge CFStringRef)server, port, &readRef, &writeRef);
 	
-    iStream= (__bridge NSInputStream*)readRef; 
+    iStream= (__bridge NSInputStream*)readRef;
     oStream= (__bridge NSOutputStream*) writeRef; 
     
 	if((iStream==nil) || (oStream==nil))

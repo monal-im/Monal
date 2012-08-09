@@ -20,7 +20,6 @@
 		2601D9C80FBF25E3004DB939 /* chatlog.png in Resources */ = {isa = PBXBuildFile; fileRef = 2601D9C20FBF25E3004DB939 /* chatlog.png */; };
 		2601D9C90FBF25E3004DB939 /* accounts.png in Resources */ = {isa = PBXBuildFile; fileRef = 2601D9C30FBF25E3004DB939 /* accounts.png */; };
 		2601D9CB0FBF25EF004DB939 /* sworim.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 2601D9CA0FBF25EF004DB939 /* sworim.sqlite */; };
-		2601D9D00FBF260B004DB939 /* chatview.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2601D9CF0FBF260B004DB939 /* chatview.xib */; };
 		2601D9D40FBF262E004DB939 /* libsqlite3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2601D9D30FBF262E004DB939 /* libsqlite3.dylib */; };
 		2601D9D90FBF265A004DB939 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2601D9D80FBF265A004DB939 /* AudioToolbox.framework */; };
 		260447F60FEED62100B3B5A7 /* BuddyDetails.xib in Resources */ = {isa = PBXBuildFile; fileRef = 260447F50FEED62100B3B5A7 /* BuddyDetails.xib */; };
@@ -193,7 +192,6 @@
 		26C76BE913204C3800EAF270 /* Default-Landscape~ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = 26C76BE41320466A00EAF270 /* Default-Landscape~ipad.png */; };
 		26C76BEB1320544200EAF270 /* google_g.png in Resources */ = {isa = PBXBuildFile; fileRef = 26C76BEA1320544200EAF270 /* google_g.png */; };
 		26D1847310F9972400340C52 /* XMPPEdit.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26D1847210F9972400340C52 /* XMPPEdit.xib */; };
-		26D5ADDD1229B8FE006C9639 /* chatviewiPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26D5ADDC1229B8FE006C9639 /* chatviewiPad.xib */; };
 		26D5AE651229D135006C9639 /* chatsicon.png in Resources */ = {isa = PBXBuildFile; fileRef = 26D5AE641229D135006C9639 /* chatsicon.png */; };
 		26D92C9E1409B5410014E1EA /* callScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26D92C9D1409B5410014E1EA /* callScreen.xib */; };
 		26DC0A8B1339259900E60BFD /* SearchUser.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26DC0A8A1339259900E60BFD /* SearchUser.xib */; };
@@ -244,7 +242,6 @@
 		2601D9C20FBF25E3004DB939 /* chatlog.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = chatlog.png; sourceTree = "<group>"; };
 		2601D9C30FBF25E3004DB939 /* accounts.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = accounts.png; sourceTree = "<group>"; };
 		2601D9CA0FBF25EF004DB939 /* sworim.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = sworim.sqlite; sourceTree = "<group>"; };
-		2601D9CF0FBF260B004DB939 /* chatview.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = chatview.xib; sourceTree = "<group>"; };
 		2601D9D30FBF262E004DB939 /* libsqlite3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.dylib; path = usr/lib/libsqlite3.dylib; sourceTree = SDKROOT; };
 		2601D9D80FBF265A004DB939 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		260447F50FEED62100B3B5A7 /* BuddyDetails.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = BuddyDetails.xib; sourceTree = "<group>"; };
@@ -440,7 +437,6 @@
 		26C76BE51320466A00EAF270 /* Default-Portrait~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-Portrait~ipad.png"; sourceTree = "<group>"; };
 		26C76BEA1320544200EAF270 /* google_g.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = google_g.png; sourceTree = "<group>"; };
 		26D1847210F9972400340C52 /* XMPPEdit.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = XMPPEdit.xib; sourceTree = "<group>"; };
-		26D5ADDC1229B8FE006C9639 /* chatviewiPad.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = chatviewiPad.xib; sourceTree = "<group>"; };
 		26D5AE641229D135006C9639 /* chatsicon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = chatsicon.png; sourceTree = "<group>"; };
 		26D92C9D1409B5410014E1EA /* callScreen.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = callScreen.xib; sourceTree = "<group>"; };
 		26DC0A8A1339259900E60BFD /* SearchUser.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SearchUser.xib; sourceTree = "<group>"; };
@@ -681,7 +677,6 @@
 		26610B0F12293FB000591435 /* iPhone */ = {
 			isa = PBXGroup;
 			children = (
-				2601D9CF0FBF260B004DB939 /* chatview.xib */,
 				267D96021225E56200B328E3 /* About.xib */,
 				28AD733E0D9D9553002E5188 /* MainWindow.xib */,
 			);
@@ -693,7 +688,6 @@
 			children = (
 				26C76BE41320466A00EAF270 /* Default-Landscape~ipad.png */,
 				26C76BE51320466A00EAF270 /* Default-Portrait~ipad.png */,
-				26D5ADDC1229B8FE006C9639 /* chatviewiPad.xib */,
 				26EC1DB1122978A100EAF934 /* AboutiPad.xib */,
 				26EC1D5012296D6000EAF934 /* MainWindowIpad.xib */,
 			);
@@ -1189,7 +1183,6 @@
 				2601D9C80FBF25E3004DB939 /* chatlog.png in Resources */,
 				2601D9C90FBF25E3004DB939 /* accounts.png in Resources */,
 				2601D9CB0FBF25EF004DB939 /* sworim.sqlite in Resources */,
-				2601D9D00FBF260B004DB939 /* chatview.xib in Resources */,
 				2651DAA20FC2847200009D7E /* noicon.png in Resources */,
 				260447F60FEED62100B3B5A7 /* BuddyDetails.xib in Resources */,
 				269F0F1A105DDEFB00FF96F8 /* status.png in Resources */,
@@ -1205,7 +1198,6 @@
 				26610B0D12293FA600591435 /* ActiveChats.xib in Resources */,
 				26EC1D5112296D6000EAF934 /* MainWindowIpad.xib in Resources */,
 				26EC1DB2122978A100EAF934 /* AboutiPad.xib in Resources */,
-				26D5ADDD1229B8FE006C9639 /* chatviewiPad.xib in Resources */,
 				26D5AE651229D135006C9639 /* chatsicon.png in Resources */,
 				265F1B2B123040540065C5FE /* web.xib in Resources */,
 				265F1B83123044CE0065C5FE /* web.png in Resources */,

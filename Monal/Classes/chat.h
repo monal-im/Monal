@@ -40,6 +40,8 @@
 	
 		DataLayer* db;
     bool dontscroll;
+    
+    bool keyboardVisible; 
 
 	 NSString* iconPath; 
 	 NSString* domain; 

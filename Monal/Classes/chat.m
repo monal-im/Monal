@@ -156,21 +156,12 @@
 -(void) init: (protocol*) jabberIn:(UINavigationController*) nav:(NSString*)username: (DataLayer*) thedb
 {
   
-     dontscroll=false; 
+     keyboardVisible=NO;
+    
+    dontscroll=false;
   
     activeChats=nil; 
 	//navigationController=nav;
-	
-	// if ipad then bigger input box
-	NSString* machine=[tools machine]; 
-	if([machine hasPrefix:@"iPad"] )
-	{//if ipad..
-		[self initWithNibName:@"chatviewiPad" bundle:nil];
-	}
-	else
-	{
-	[self initWithNibName:@"chatview" bundle:nil];
-	}
     
     [self makeView];
     
@@ -289,6 +280,7 @@
 	return YES;
 }
 
+#pragma mark view state
 
 - (void)viewDidAppear:(BOOL)animated
 {
@@ -359,6 +351,8 @@
 	 postNotificationName: @"UpdateUI" object: self];	
 	
 }
+
+#pragma mark message signals
 
 
 //this gets called if the currently chatting user went offline, online or away, back etc
@@ -1302,7 +1296,7 @@ if([buddyFullName isEqualToString:@""])
 
 -(void) keyboardWillHide:(NSNotification *) note
 {
-    
+     keyboardVisible=NO;
     if(dontscroll==false)
     {	
 	
@@ -1332,6 +1326,7 @@ if([buddyFullName isEqualToString:@""])
 
 -(void) keyboardWillShow:(NSNotification *) note
 {
+    keyboardVisible=YES; 
     if(dontscroll==false)
     {
 	//bigger text view
@@ -1371,6 +1366,9 @@ if([buddyFullName isEqualToString:@""])
 	
 	
 }
+
+
+
 - (void)growingTextView:(HPGrowingTextView *)growingTextView willChangeHeight:(float)height
 {
     float diff = (growingTextView.frame.size.height - height);

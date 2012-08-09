@@ -3667,9 +3667,13 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 								kCFStreamNetworkServiceType,  kCFStreamNetworkServiceTypeVoIP)) &&
 		(CFWriteStreamSetProperty((__bridge CFWriteStreamRef)oStream,
 								 kCFStreamNetworkServiceType,  kCFStreamNetworkServiceTypeVoIP)))
+        {
 		debug_NSLog(@"Set VOIP properties on streams.")
+        }
 		else
+        {
 			debug_NSLog(@"could not set VOIP properties on streams.");
+        }
 		
 	}
 	

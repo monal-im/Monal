@@ -3270,9 +3270,9 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 {
 	debug_NSLog(@" adding message to buffer %@ has space %d", xmpprequest, streamHasSpace);
 //Need to add locking and unlocking here
-    debug_NSLog(@"locking write stream in talk");
+//debug_NSLog(@"locking write stream in talk");
     [outBufferLock lock];
-    debug_NSLog(@"locked write stream in talk");
+   // debug_NSLog(@"locked write stream in talk");
     
      [messageoutBuffer appendString:xmpprequest];
 	
@@ -3282,10 +3282,10 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
          
     }
     
-    debug_NSLog(@"unlocking write stream in talk");
+  //  debug_NSLog(@"unlocking write stream in talk");
     
     [outBufferLock unlock];
-    debug_NSLog(@"unlocked write stream in talk");
+   // debug_NSLog(@"unlocked write stream in talk");
     
     return YES;
 	
@@ -3418,9 +3418,9 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 			//for writing
 	case NSStreamEventHasSpaceAvailable:
 	{
-        debug_NSLog(@"locking write stream in event");
+        //debug_NSLog(@"locking write stream in event");
         [outBufferLock lock];
-        debug_NSLog(@"locked write stream in event ");
+      //  debug_NSLog(@"locked write stream in event ");
         
 		debug_NSLog(@"Stream has space to write");
         if(messageoutBuffer.length>0)
@@ -3434,9 +3434,9 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
             streamHasSpace=YES;
         }
         
-        debug_NSLog(@"unlocking write stream in event");
+       // debug_NSLog(@"unlocking write stream in event");
         [outBufferLock unlock];
-        debug_NSLog(@"unlocked write stream in event");
+      //  debug_NSLog(@"unlocked write stream in event");
         
         break;
 	}

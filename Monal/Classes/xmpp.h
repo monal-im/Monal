@@ -126,6 +126,9 @@
     BOOL streamHasSpace;
     NSLock* outBufferLock; 
     
+    
+     NSTimer* connectionTimeoutTimer;
+    
 
 }
 -(void) setRunLoop; 

@@ -3409,7 +3409,8 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 
 
 
-//delegat function for nsstream
+#pragma mark delegat function for nsstream
+
 - (void)stream:(NSStream *)stream handleEvent:(NSStreamEvent)eventCode
 {
 	debug_NSLog(@"has event"); 
@@ -3479,7 +3480,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
             }
             
             
-            
+            [self stopConnectionTimeoutTimer];
             
 			//reconnect 
 			[[NSNotificationCenter defaultCenter] 
@@ -3502,7 +3503,9 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 		{
 			debug_NSLog(@"Stream open completed");
 			streamOpen++; //this should be called twice, once for each stream
-            debug_NSLog(@"streamopen: %d", streamOpen); 
+            debug_NSLog(@"streamopen: %d", streamOpen);
+            [self stopConnectionTimeoutTimer];
+            
 			break; 
 		}
 			
@@ -3520,6 +3523,57 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	
 }
 
+#pragma mark connection timeouts
+// Call this when you successfully connect
+- (void)stopConnectionTimeoutTimer
+{
+    if (connectionTimeoutTimer)
+    {
+        [connectionTimeoutTimer invalidate];
+       
+        connectionTimeoutTimer = nil;
+    }
+}
+
+- (void)startConnectionTimeoutTimer
+{
+    [self stopConnectionTimeoutTimer]; // Or make sure any existing timer is stopped before this method is called
+    
+    NSTimeInterval interval = 4.0; // Measured in seconds, is a double
+    
+  /*  connectionTimeoutTimer = [NSTimer scheduledTimerWithTimeInterval:interval
+                                                                   target:self
+                                                                 selector:@selector(handleConnectionTimeout:)
+                                                                 userInfo:nil
+         
+                                                             repeats:NO];
+    */
+    
+    
+    connectionTimeoutTimer=[NSTimer timerWithTimeInterval:interval
+                                                   target:self
+                                                 selector:@selector(handleConnectionTimeout)
+                                                 userInfo:nil
+                                                  repeats:NO];
+   
+    NSRunLoop * theRunLoop = [NSRunLoop currentRunLoop];
+    [theRunLoop addTimer:connectionTimeoutTimer forMode:NSRunLoopCommonModes];
+    
+   
+}
+
+
+- (void)handleConnectionTimeout
+{
+    [[NSNotificationCenter defaultCenter]
+     postNotificationName: @"LoginFailed" object: self];
+    
+    [self disconnect];
+}
+
+
+
+#pragma mark connection
 
 -(void) disconnect
 {
@@ -3601,6 +3655,10 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	debug_NSLog(@"All closed and cleaned up"); 
 	
 }
+
+
+
+
 
 
 -(void) setRunLoop
@@ -3731,6 +3789,10 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	
 	[iStream open];
 	[oStream open];
+
+    
+    [self performSelectorOnMainThread:@selector(startConnectionTimeoutTimer)  withObject:nil waitUntilDone:YES];
+	
 	debug_NSLog(@"connection created");
 	
     if(streamError==true)

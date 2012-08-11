@@ -55,14 +55,6 @@ style:UIBarButtonItemStyleBordered
 	viewController.navigationBar.topItem.rightBarButtonItem=reconnect;
 		viewController.navigationBar.topItem.leftBarButtonItem=logoff;
 	
-
-
-    if(first!=true)
-    {
-        thelist2=[db protocolList]; // protocols
-        enabledList=[db enabledAccountList];
-        first=true; 
-    }
     
 	debug_NSLog(@" accounts did appear");
 	[self refreshAccounts]; 
@@ -105,6 +97,7 @@ style:UIBarButtonItemStyleBordered
     sectionArray =  [NSArray arrayWithObjects:@"Accounts\n(Only one can be set to login)", @"Add New Account", nil];
     
 
+     thelist2=[db protocolList]; // protocols
 }
 
 -(void)viewDidDisappear:(BOOL)animated
@@ -130,6 +123,8 @@ style:UIBarButtonItemStyleBordered
 	
 	NSArray* enabledAccounts=[db enabledAccountList]; 
 	
+    
+    debug_NSLog(@"enabled old %@ and new %@",[[enabledList objectAtIndex:0] objectAtIndex: 0] ,[[enabledAccounts objectAtIndex:0] objectAtIndex: 0] )
 	// seperate enumeration of if to stop crashing
 	if(enabledAccounts!=nil)
 	if([enabledAccounts count]>0)

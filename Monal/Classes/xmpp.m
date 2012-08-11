@@ -3470,6 +3470,15 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
             }
             
             
+            if(st_error.code==64)// Host is down
+            {
+                
+                [[NSNotificationCenter defaultCenter]
+                 postNotificationName: @"LoginFailed" object: self];
+                break;
+            }
+            
+            
             
             
 			//reconnect 

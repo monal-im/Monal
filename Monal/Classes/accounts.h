@@ -31,7 +31,7 @@
 	UINavigationController* viewController; 
 	UIBarButtonItem* reconnect;
 	UIBarButtonItem* logoff;
-	bool first; 
+	
 	}
 
 

@@ -57,16 +57,18 @@
     [resourceText resignFirstResponder]; 
 }
 
-- (void)viewDidDisappear:(BOOL)animated
+#pragma mark view lifecylce
+
+- (void)viewWillDisappear:(BOOL)animated
 {
-	debug_NSLog(@"view did hide"); 
+	debug_NSLog(@"xmpp edit view will hide"); 
 	[self save];
 	
 }
 
 
 
-- (void)viewDidLoad 
+- (void)viewDidLoad
 {
     [super viewDidLoad];
     [theTable setBackgroundView:nil];
@@ -262,7 +264,7 @@ else
 	
 }
 	
-	//[[NSNotificationCenter defaultCenter] postNotificationName: @"UpdateAccounts" object: self];
+	
 	
 }
 
@@ -274,7 +276,7 @@ else
 	{
 		[db removeAccount:accountno];
 		[navigationController popViewControllerAnimated:true];
-		//[[NSNotificationCenter defaultCenter] postNotificationName: @"UpdateAccounts" object: self];
+		
 	}
 	
 	;
@@ -448,7 +450,7 @@ else
  
 
 
-
+#pragma mark table view delegate
 
 //table view delegate methods
 //required
@@ -460,9 +462,9 @@ else
 	
 }
 
+#pragma mark txtview delegate
 
 
-//text view delegate
 
 -(void) keyboardWillHide:(NSNotification *) note
 {
@@ -478,6 +480,8 @@ else
 	
 	
 }
+
+
 
 -(void) keyboardWillShow:(NSNotification *) note
 {

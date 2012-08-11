@@ -613,9 +613,8 @@
 		||([[alertView title] isEqualToString:@"Error in Inititation"]))
 	{
 		
-		[activitySun stopAnimating];
-	//	[activityView removeFromSuperview];
-		; 
+		loginProgressHud.labelText = @"Login Error";
+        [loginProgressHud hide:YES afterDelay:5];
 		return; 
 	}
 	
@@ -711,18 +710,17 @@
 	if(([[NSUserDefaults standardUserDefaults] boolForKey:@"Away"]==true) ) {[statuscon setAway];}
 	if([[NSUserDefaults standardUserDefaults] boolForKey:@"Visible"]==false) { [statuscon invisible];}
 	
-	[activityMsg setText:@"Logged in"];
-	[activitySun stopAnimating];
-	[activityView removeFromSuperview];
+    
+    [loginProgressHud hide:YES];
 	
 	 statuscon.jabber=jabber; 
-     statuscon.iconPath=iconPath; 
+     statuscon.iconPath=iconPath;
     statuscon.contactsTable=buddyTable;
     joinGroup.jabber=jabber;
     
    
         //there is no morenav on ipad
-        //joinGroup.nav=morenav; 
+        //joinGroup.nav=morenav;
    
 	//update ui
 	[[NSNotificationCenter defaultCenter] 
@@ -747,8 +745,8 @@
 -(void) showLoginFailed:(id)sender
 {
 	
-	[activityMsg setText:@"Error Logging in"];
-	[activitySun stopAnimating];
+    loginProgressHud.labelText = @"Login Failed";
+    [loginProgressHud hide:YES afterDelay:5];
 	
     
     //ios4 auto reconnect 
@@ -769,10 +767,10 @@
     
 	
     [self disconnect];
-	[activitySun stopAnimating];
-	[activityView removeFromSuperview];
+
+    [loginProgressHud hide:YES ];
 	
-    ;
+    
 }
 
 
@@ -995,25 +993,19 @@ buddylistDS.tabcontroller=tabcontroller;
 	}
 	@catch(NSException* err) {}
 	 
-	 //login progress notification
-	[buddyTable addSubview: activityView];
-	activityView.center=buddyTable.center; 
-	[activitySun startAnimating];
-	[activityMsg setText:@"Logging in..."];	
-		
-	
+
+    
+   loginProgressHud= [MBProgressHUD showHUDAddedTo:buddyTable animated:YES];
+    loginProgressHud.mode = MBProgressHUDModeIndeterminate;
+    
+    loginProgressHud.labelText = @"Connecting";
+    loginProgressHud.dimBackground=YES;
+    
+ 	
 	if(jabber!=nil)
 	{
-		
-		
-		
 	
 		debug_NSLog(@"disconnecting"); 
-		
-	
-		
-		
-		
 		[jabber disconnect]; 	// ***make sure all listener threads are dead***
 		debug_NSLog(@"reconnecting "); 
 		
@@ -1337,9 +1329,7 @@ buddylistDS.tabcontroller=tabcontroller;
 
 	
 	uiIter=0; 
-	
-	activityView.layer.cornerRadius = 10; // round corners on login view iphone 3 and above only
-	
+
     statuscon.jabber=nil; 
    
     

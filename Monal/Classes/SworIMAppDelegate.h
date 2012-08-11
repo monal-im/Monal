@@ -30,6 +30,8 @@
 
 #import "MGSplitViewController.h"
 
+#import "MBProgressHud.h"
+
 
 @interface SworIMAppDelegate : UIViewController <UIApplicationDelegate, 
 UINavigationControllerDelegate,UIAlertViewDelegate, MGSplitViewControllerDelegate> {
@@ -78,14 +80,12 @@ UINavigationControllerDelegate,UIAlertViewDelegate, MGSplitViewControllerDelegat
 	DataLayer* db;
 	NSString* iconPath; 
 	
-IBOutlet	UIView* activityView;
-IBOutlet	UILabel* activityMsg;
-IBOutlet	UIActivityIndicatorView* activitySun; 
+
 
 	UITextField* nameField;
 	BOOL listLoad;  
 	
-	
+	MBProgressHUD* loginProgressHud;
 	
 
 	

@@ -3443,7 +3443,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	}
 			
 			//for reading
-			case  NSStreamEventHasBytesAvailable:
+    case  NSStreamEventHasBytesAvailable:
 		{
 			debug_NSLog(@"Stream has bytes to read"); 
 			[self listener];

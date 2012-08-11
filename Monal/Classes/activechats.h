@@ -48,16 +48,10 @@
 
 //table manipulation functions
 
-
-//others
--(void) dealloc;
-
-
 //buddylist functions
 
 
 -(int) indexofString:(NSString*)name;
-
 -(NSInteger) count;
 
 

@@ -1596,8 +1596,8 @@ static DataLayer *sharedInstance=nil;
 -(bool) removeActiveBuddies:(NSString*) buddyname:(NSString*) accountNo
 {
 	
-	
-	
+	//mark messages as read
+	[self markAsRead: buddyname : accountNo];
 	
 	NSString* query=[NSString stringWithFormat:@"delete from activechats where buddy_name='%@' and account_id=%@ ", buddyname, accountNo ];
 	//	debug_NSLog(query); 
@@ -1612,8 +1612,20 @@ static DataLayer *sharedInstance=nil;
 -(bool) removeAllActiveBuddies:(NSString*) accountNo
 {
 	
-	
-	
+	NSString* query2=[NSString stringWithFormat:@"  insert into message_history (account_id,message_from, message_to, timestamp, message, actual_from) select a.account_id,message_from, message_to, timestamp, message, actual_from  from messages  as a inner join activechats as b on a.account_id=b.account_id and a.message_from=b.buddy_name where a.account_id=%@ ", accountNo];
+    
+	if([self executeNonQuery:query2]!=false)
+    {
+    
+    }
+    
+    NSString* query3=[NSString stringWithFormat:@"delete from messages where account_id=%@ and message_from in (select buddy_name from activechats where account_id=%@); ", accountNo, accountNo];
+    
+    if([self executeNonQuery:query3]!=false)
+    {
+        
+    }
+    
 	
 	NSString* query=[NSString stringWithFormat:@"delete from activechats where  account_id=%@ ",  accountNo ];
 	//	debug_NSLog(query); 

@@ -3541,23 +3541,13 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
     
     NSTimeInterval interval = 4.0; // Measured in seconds, is a double
     
-  /*  connectionTimeoutTimer = [NSTimer scheduledTimerWithTimeInterval:interval
+    connectionTimeoutTimer = [NSTimer scheduledTimerWithTimeInterval:interval
                                                                    target:self
-                                                                 selector:@selector(handleConnectionTimeout:)
+                                                                 selector:@selector(handleConnectionTimeout)
                                                                  userInfo:nil
          
                                                              repeats:NO];
-    */
-    
-    
-    connectionTimeoutTimer=[NSTimer timerWithTimeInterval:interval
-                                                   target:self
-                                                 selector:@selector(handleConnectionTimeout)
-                                                 userInfo:nil
-                                                  repeats:NO];
-   
-    NSRunLoop * theRunLoop = [NSRunLoop currentRunLoop];
-    [theRunLoop addTimer:connectionTimeoutTimer forMode:NSRunLoopCommonModes];
+
     
    
 }

@@ -56,7 +56,14 @@ style:UIBarButtonItemStyleBordered
 		viewController.navigationBar.topItem.leftBarButtonItem=logoff;
 	
     
-	debug_NSLog(@" accounts did appear");
+    if(first!=true)
+    {
+        thelist2=[db protocolList]; // protocols
+        enabledList=[db enabledAccountList];
+        first=true;
+    }
+    
+	debug_NSLog(@" accounts will appear");
 	[self refreshAccounts]; 
 	
 	

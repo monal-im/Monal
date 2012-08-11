@@ -32,6 +32,8 @@
 	UIBarButtonItem* reconnect;
 	UIBarButtonItem* logoff;
 	
+    
+    BOOL first; 
 	}
 
 

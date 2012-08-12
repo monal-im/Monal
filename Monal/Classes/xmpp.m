@@ -1185,6 +1185,9 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
 	//iq->query->item  (roster)
 	  if(([State isEqualToString:@"roster"]) && ([elementName isEqualToString: @"item"]))
 	  {
+          
+          if([[attributeDict objectForKey:@"subscribed"] isEqualToString:@"both"])
+          {
 		  if([attributeDict objectForKey:@"name"]!=nil)
 		  {
 		  debug_NSLog(@"setting full name for %@ to %@",[attributeDict objectForKey:@"jid"], [attributeDict objectForKey:@"name"] ); 
@@ -1199,7 +1202,7 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
                 if([attributeDict objectForKey:@"jid"]!=nil)
 			   [db setFullName:[attributeDict objectForKey:@"jid"]  :accountNumber:[attributeDict objectForKey:@"jid"] ];
 		  
-		  ; 
+		  }
 		  return;
 	  }
     
@@ -2881,7 +2884,7 @@ debug_NSLog(@"ended this element: %@", elementName);
     
     // remove from database 
     [db removeBuddy:buddy :accountNumber];
-	; 
+
 	return val;  
 	 
 }

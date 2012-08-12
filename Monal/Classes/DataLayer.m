@@ -1858,13 +1858,17 @@ static DataLayer *sharedInstance=nil;
 	//truncate faster than del 
 	[self executeNonQuery:@"pragma truncate;"];
 	
+    
+    dbversionCheck=[NSLock alloc];
 	[self version];
-	;
+	
 	
 }
 
 -(void) version
 {
+    [dbversionCheck lock];
+    
 	// checking db version and upgrading if necessary
 	debug_NSLog(@"Database version check");
 	
@@ -2031,14 +2035,34 @@ static DataLayer *sharedInstance=nil;
         [self executeNonQuery:@"delete from protocol where protocol_id=3 "];
         [self executeNonQuery:@"delete from protocol where protocol_id=4 "];
         
+        
+        [self executeNonQuery:@" create table legacy_caps(capid integer not null primary key autoincrement,captext  varchar(20))"];
+        
+       
+       
+        
+        [self executeNonQuery:@" insert into legacy_caps values (null,'pmuc-v1');"];
+        [self executeNonQuery:@" insert into legacy_caps values (null,'voice-v1');"];
+        [self executeNonQuery:@" insert into legacy_caps values (null,'camera-v1');"];
+        [self executeNonQuery:@" insert into legacy_caps values (null, 'video-v1');"];
+        
+        
+        
+         [self executeNonQuery:@"create table buddy_resources(buddyid integer,resource varchar(255),ver varchar(20))"];
+        
+         [self executeNonQuery:@"create table ver_info(ver varchar(20),cap varchar(255))"];
+
+        
+        
         [self executeNonQuery:@"update dbversion set dbversion='1.074'; "];
         debug_NSLog(@"Upgrade to 1.074 success ");
         
     }
 	
-    
+    [dbversionCheck unlock];
 
-	return; 
+
+	return;
 	
 
 	

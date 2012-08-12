@@ -1,4 +1,35 @@
--- 1.071 update script-- 
+- 1.074-- 
+
+create table legacy_caps
+(
+capid integer not null primary key autoincrement, 
+captext  varchar(20)
+);
+
+
+
+insert into legacy_caps values (null,'pmuc-v1');
+insert into legacy_caps values  (null,'voice-v1');
+insert into legacy_caps values (null,'camera-v1');
+insert into legacy_caps values (null,'video-v1');
+
+
+
+create table buddy_resources
+(
+buddyid integer, 
+resource varchar(255),
+ver varchar(20)
+);
+
+create table ver_info
+(
+ver varchar(20),
+cap varchar(255)
+);
+
+
+-- 1.071 update script--
 update dbversion set dbversion='1.071'; 
 
 drop table buddylistOnline; 

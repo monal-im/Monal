@@ -13,7 +13,8 @@
 @interface DataLayer : NSObject {
 
 	NSString* dbPath;
-	sqlite3* database; 
+	sqlite3* database;
+    NSLock* dbversionCheck; 
 }
 
 

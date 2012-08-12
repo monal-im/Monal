@@ -710,8 +710,10 @@
 	if(([[NSUserDefaults standardUserDefaults] boolForKey:@"Away"]==true) ) {[statuscon setAway];}
 	if([[NSUserDefaults standardUserDefaults] boolForKey:@"Visible"]==false) { [statuscon invisible];}
 	
-    
-    [loginProgressHud hide:YES];
+    loginProgressHud.labelText = @"Success";
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [loginProgressHud hide:YES ];
+    });
 	
 	 statuscon.jabber=jabber; 
      statuscon.iconPath=iconPath;
@@ -746,8 +748,11 @@
 {
 	
     loginProgressHud.labelText = @"Login Failed";
-    [loginProgressHud hide:YES afterDelay:5];
-	
+   
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+      [loginProgressHud hide:YES afterDelay:5];
+    });
     
     //ios4 auto reconnect 
     if(backGround==YES)
@@ -768,7 +773,9 @@
 	
     [self disconnect];
 
-    [loginProgressHud hide:YES ];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [loginProgressHud hide:YES ];
+    });
 	
     
 }

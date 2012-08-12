@@ -1186,7 +1186,7 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
 	  if(([State isEqualToString:@"roster"]) && ([elementName isEqualToString: @"item"]))
 	  {
           
-          if([[attributeDict objectForKey:@"subscribed"] isEqualToString:@"both"])
+          if([[attributeDict objectForKey:@"subscription"] isEqualToString:@"both"])
           {
 		  if([attributeDict objectForKey:@"name"]!=nil)
 		  {

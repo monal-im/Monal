@@ -741,6 +741,7 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
 	// show +
 	viewController.navigationBar.topItem.leftBarButtonItem=plusButton;
 	viewController.navigationBar.topItem.rightBarButtonItem=[self editButtonItem];
+    viewController.navigationBar.topItem.rightBarButtonItem.title=@"Remove";
 
 	
 }
@@ -780,7 +781,7 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
     }
     else {
         viewController.navigationBar.topItem.rightBarButtonItem.style = UIBarStyleBlack;
-             viewController.navigationBar.topItem.rightBarButtonItem.title=@"Edit";
+             viewController.navigationBar.topItem.rightBarButtonItem.title=@"Remove";
     }
     
     

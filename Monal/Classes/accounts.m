@@ -131,7 +131,7 @@ style:UIBarButtonItemStyleBordered
 	NSArray* enabledAccounts=[db enabledAccountList]; 
 	
     
-    debug_NSLog(@"enabled old %@ and new %@",[[enabledList objectAtIndex:0] objectAtIndex: 0] ,[[enabledAccounts objectAtIndex:0] objectAtIndex: 0] )
+  //  debug_NSLog(@"enabled old %@ and new %@",[[enabledList objectAtIndex:0] objectAtIndex: 0] ,[[enabledAccounts objectAtIndex:0] objectAtIndex: 0] )
 	// seperate enumeration of if to stop crashing
 	if(enabledAccounts!=nil)
 	if([enabledAccounts count]>0)

@@ -50,7 +50,10 @@
     userSearchServer=@""; // blank for start
     
     iqsearch=[[iqSearch alloc] init]; 
-    jingleCall=[[iqJingle alloc] init]; 
+    jingleCall=[[iqJingle alloc] init];
+    presenceObj=[[presence alloc] init];
+    iqObj=[[iq alloc] init];
+    
     
     messageUser=@"";
 	
@@ -65,7 +68,7 @@
 	
 	listenThreadCounter=0; 
 	
-	streamOpen=0; 
+	
 	
 //	buddyListKeys=[NSArray arrayWithObjects:@"username", @"status", @"message", @"icon", @"count",@"fullname", nil];
 	
@@ -73,14 +76,7 @@
 	
 	
 	State=nil; 
-	presenceUser=nil;
-		presenceUserid=nil; 
 
-	presenceUserFull=nil;
-	presenceShow=nil;
-	presenceStatus=nil; 
-	presencePhoto=nil;
-	presenceType=nil;
 	theset=nil;
   
    
@@ -636,7 +632,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
         //also code 401 but that is deprecated
         if([[attributeDict objectForKey:@"type"] isEqualToString:@"auth"])
         {
-            NSString* askmsg=[NSString stringWithFormat:@"%@ says, you were not authorized to access this resource. Check your password.", presenceUser]; 
+            NSString* askmsg=[NSString stringWithFormat:@"%@ says, you were not authorized to access this resource. Check your password.", presenceObj.user];
             //ask for authorization 
             
             UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"
@@ -770,28 +766,33 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 	{
 		State=@"iq";
 		
+        [iqObj reset];
+        
         // who is the stanza from.. despite the name presence user it is used for other requests too 
         
-        //if they are requesting stuff.. they are online		
-        presenceUserFull=[attributeDict objectForKey:@"from"];
-        debug_NSLog(@"iq from full user : %@", presenceUserFull); 
+        //if they are requesting stuff.. they are online
+		
+         iqObj.type=[attributeDict objectForKey:@"type"];
+        
+        iqObj.from=[attributeDict objectForKey:@"from"];
+        debug_NSLog(@"iq from full user : %@", iqObj.from);
+        
+        iqObj.user=[[(NSString*)[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
+        
+        if([[[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/" ] count ] >1)
+            iqObj.resource=[[(NSString*)[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/" ] objectAtIndex:1];
+        debug_NSLog(@"iq  user: %@", iqObj.user);
+        
+        //if they are requesting stuff.. they are online
+        iqObj.idval=[attributeDict objectForKey:@"id"];
+        debug_NSLog(@"iq  id: %@", iqObj.idval);
         
         
         //iq set request
         if( [[attributeDict objectForKey:@"type"] isEqualToString:@"set"])
 		{
-			presenceUser=[[(NSString*)[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
-            debug_NSLog(@"iq set user: %@", presenceUser); 
-			
-			//if they are requesting stuff.. they are online		
-			presenceUserid=[attributeDict objectForKey:@"id"];
-			debug_NSLog(@"iq set id: %@", presenceUserid); 
-            
-          
-            
-          
-            
-            
+		
+            debug_NSLog(@"iq set"); 
             State=@"iqSet";
         }
         
@@ -801,14 +802,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 		if( [[attributeDict objectForKey:@"type"] isEqualToString:@"get"])
 		{
 			
-			
-			presenceUser=[[(NSString*)[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
-				debug_NSLog(@"iq get user: %@", presenceUser); 
-			
-			//if they are requesting stuff.. they are online		
-			presenceUserid=[attributeDict objectForKey:@"id"];
-			debug_NSLog(@"iq get id: %@", presenceUserid); 
-            
+		  debug_NSLog(@"iq get"); 
             State=@"iqGet";
 			
 		}
@@ -884,7 +878,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 	{
         debug_NSLog(@"got Jingle message, sent ack"); 
         //send ack of message
-        [self talk:[jingleCall ack:presenceUserFull:presenceUserid]]; 
+        [self talk:[jingleCall ack:iqObj.from:iqObj.idval]];
         
        // if(	[[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:jingle:1"])
       //  {
@@ -896,7 +890,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
                 
               
                 UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Incoming Call"
-                                                                message:[NSString stringWithFormat:@"Call from %@" , presenceUser]
+                                                                message:[NSString stringWithFormat:@"Call from %@" , iqObj.user]
                                                                delegate:self cancelButtonTitle:@"Decline"
                                                       otherButtonTitles:@"Answer",  nil] ;
                 alert.tag=3;
@@ -1027,7 +1021,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
             jingleCall.theaddress=jingleAddress;
             jingleCall.theusername=[attributeDict objectForKey:@"username"];
             jingleCall.thepass=[attributeDict objectForKey:@"password"];
-            jingleCall.otherParty=presenceUserFull;
+            jingleCall.otherParty=iqObj.from;
            
             jingleCall.idval=sessionkey;
             
@@ -1049,7 +1043,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 	{
         debug_NSLog(@"got time request"); 
         //respond with time info
-    [self sendTime:presenceUserFull:presenceUserid];
+    [self sendTime:iqObj.from:iqObj.idval];
         State=nil; 
         return;
         
@@ -1064,7 +1058,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 		{
             debug_NSLog(@"got version request"); 
 			//respond with version info
-			[self sendVersion:presenceUserFull:presenceUserid];
+			[self sendVersion:iqObj.from:iqObj.idval];
 			State=nil; 
 			return;
 		}
@@ -1075,7 +1069,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
             debug_NSLog(@"got last activity request"); 
 			//respond with last activity
 			
-			[self sendLast:presenceUserFull:presenceUserid];
+			[self sendLast:iqObj.from:iqObj.idval];
 			State=nil; 
 			return;
 		}
@@ -1087,7 +1081,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 			
             debug_NSLog(@"got disco info request"); 
 			
-			[self sendDiscoInfo:presenceUserFull:presenceUserid];
+			[self sendDiscoInfo:iqObj.from:iqObj.idval];
 			State=nil; 
 			return;
 		}
@@ -1232,12 +1226,12 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
             
             if(	[[attributeDict objectForKey:@"category"] isEqualToString:@ "conference"])
             {
-                debug_NSLog(@"Identity: conference server as %@", presenceUserFull); 
+                debug_NSLog(@"Identity: conference server as %@", iqObj.from);
                 // send message enabling offline messages 
               //  if(chatServer!=nil) [chatServer release]; 
-                chatServer= presenceUserFull;
+                chatServer= iqObj.from;
                 
-                ; 
+                
                 return; 
             }
             
@@ -1246,12 +1240,12 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
            && 
            [[attributeDict objectForKey:@"type"] isEqualToString:@ "chatroom"])
         {
-            debug_NSLog(@"Identity: conference search server as %@", presenceUserFull); 
+            debug_NSLog(@"Identity: conference search server as %@", iqObj.from); 
             // send message enabling offline messages 
             //  if(chatServer!=nil) [chatServer release]; 
-            chatSearchServer= presenceUserFull;
+            chatSearchServer= iqObj.from;
             
-            ; 
+            
             return; 
         }
         
@@ -1260,13 +1254,13 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
            && 
            [[attributeDict objectForKey:@"type"] isEqualToString:@ "user"])
         {
-            debug_NSLog(@"Identity: user search server as %@", presenceUserFull); 
+            debug_NSLog(@"Identity: user search server as %@", iqObj.from); 
             // send message enabling offline messages 
             //  if(chatServer!=nil) [chatServer release]; 
-            userSearchServer= presenceUserFull;
+            userSearchServer= iqObj.from;
             [self requestSearchInfo]; 
             
-            ; 
+             
             return; 
         }
             
@@ -1425,7 +1419,7 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
     
     //handle presence error
     
-    if(([State isEqualToString:@"presence"])  && ([presenceType isEqualToString:@"error"]))
+    if(([State isEqualToString:@"presence"])  && ([presenceObj.type isEqualToString:@"error"]))
     {
        /* UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Presence error"
 														 message:[NSString stringWithFormat:@"Message: %@",elementName  ]
@@ -1445,99 +1439,49 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
 	if([elementName isEqualToString:@"presence"])
 	{
 		State=@"presence";
-	
-		//reset all vars on the opening of a new presence block
-	
-		if(presenceUser!=nil) 
-		{
-			//[presenceUser release];
-			presenceUser=nil;
-		}
- 
-			if(presenceShow!=nil) 
-		{
-			//[presenceShow release];
-			presenceShow=nil;
-		}
-		
-		
-		if(presenceStatus!=nil) 
-		{
-		//	[presenceStatus release];
-			presenceStatus=nil;
-		}
-		
-		if(presencePhoto!=nil) 
-		{
-			//[presencePhoto release];
-			presencePhoto=nil;
-		}
 
-		if(presenceType!=nil) 
-		{
-			//[presenceType release];
-			presenceType=nil;
-		}
+        [presenceObj reset];
 		
-		
-		
+        
+        presenceObj.type=[attributeDict objectForKey:@"type"];
+        presenceObj.user =[[(NSString*)[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
+        if([[(NSString*)[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/" ] count]>1)
+            presenceObj.resource=[[(NSString*)[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/" ] objectAtIndex:1];
+		presenceObj.from =[attributeDict objectForKey:@"from"] ;
+        presenceObj.idval =[attributeDict objectForKey:@"id"] ;
+        
 		//remove any  resource markers and get user
-		presenceUser=[[(NSString*)[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
-		debug_NSLog(@"Presence from %@", presenceUser); 
+		debug_NSLog(@"Presence from %@", presenceObj.user);
 		
 		
 		//get photo hash
 		
 		//what type?
-		debug_NSLog(@" presence notice %@",[attributeDict objectForKey:@"type"] ); 
+		debug_NSLog(@" presence notice %@", presenceObj.type); 
      
         
 		
 		if([[attributeDict objectForKey:@"type"] isEqualToString:@"error"])
 		{
-			presenceType=@"error";
-            
-            
+			
             //we are done, parse next element
             ; 
             return; 
 			
 		}
-		else
-			
-			if([[attributeDict objectForKey:@"type"] isEqualToString:@"subscribed"])
-			{
-				presenceType=@"subscribed";
-			}
-			else
-				
-				if([[attributeDict objectForKey:@"type"] isEqualToString:@"unsubscribed"])
-				{
-					presenceType=@"unsubscribed";
-				}
-				else
-					if([[attributeDict objectForKey:@"type"] isEqualToString:@"unsubscribe"])
-					{
-						presenceType=@"unsubscribe";
-					}
-					else
-						if([[attributeDict objectForKey:@"type"] isEqualToString:@"probe"])
-						{
-							presenceType=@"probe";
-						}
-						else
+
 		
 		if([[attributeDict objectForKey:@"type"] isEqualToString:@"unavailable"])
 		{
 				
 		
-			presenceType=@"unavailable";
+		
 			//a buddy logout 
 			//make sure not already there
-				if(![self isInRemove:presenceUser])
+				if(![self isInRemove:presenceObj.user])
 				{
 					debug_NSLog(@"removing from list"); 
-					[db setOfflineBuddy:presenceUser :accountNumber]; 
+					[db setOfflineBuddy:presenceObj.user :accountNumber];
 					//remove from online list
 				}
 			
@@ -1551,43 +1495,43 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
 			NSString* askmsg=[NSString stringWithFormat:@"This user would like to add you to his/her list. Allow?"]; 
 			//ask for authorization 
 			
-			UIAlertView *alert = [[UIAlertView alloc] initWithTitle:presenceUser
+			UIAlertView *alert = [[UIAlertView alloc] initWithTitle:presenceObj.user
 															message:askmsg
 														   delegate:self cancelButtonTitle:@"Yes"
 												  otherButtonTitles:@"No", nil];
             alert.tag=1; 
 			[alert show];
 						
-			presenceType=@"subscribe";
+		
 			
 		}
         
      
 			
-		if(presenceType ==nil)
+		if( presenceObj.type ==nil)
 		{
 			
 			debug_NSLog(@"presence priority notice"); 	
 			
-			if((presenceUser!=nil) && ([[presenceUser stringByTrimmingCharactersInSet:
+			if((presenceObj.user!=nil) && ([[presenceObj.user stringByTrimmingCharactersInSet:
 										 [NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0))
-				if(![db isBuddyInList:presenceUser:accountNumber]){
+				if(![db isBuddyInList:presenceObj.user:accountNumber]){
 					
 					debug_NSLog(@"Buddy not already in list"); 
 					
 					
-					[db addBuddy:presenceUser :accountNumber :@"" :@""];
-					[db setOnlineBuddy:presenceUser :accountNumber];
+					[db addBuddy:presenceObj.user :accountNumber :@"" :@""];
+					[db setOnlineBuddy:presenceObj.user :accountNumber];
 					
 					
-					debug_NSLog(@"Buddy added to  list"); 
+					debug_NSLog(@"Buddy added to  list");
 					
 					
 				}
 				else
 				{
 					debug_NSLog(@"Buddy already in list, showing as online now"); 
-					[db setOnlineBuddy:presenceUser :accountNumber];
+					[db setOnlineBuddy:presenceObj.user :accountNumber];
 					
 					
 					
@@ -1881,10 +1825,8 @@ debug_NSLog(@"ended this element: %@", elementName);
 		// this has to come after set available becasue the post login functions in appdelegate set default status and messages
 		[[NSNotificationCenter defaultCenter] 
 		 postNotificationName: @"LoggedIn" object: self];
-		
-         //send jingle call --testing
-        //[self talk:  [jingleCall initiateJingle:@"monaltest@gmail.com"]];
-      
+
+            
         
 		// send command to download the roster
 		[self getBuddies];
@@ -2282,7 +2224,7 @@ debug_NSLog(@"ended this element: %@", elementName);
 	{
 		
 		// see if user is online first.
-		if([db isBuddyInList:presenceUser :accountNumber])
+		if([db isBuddyInList:iqObj.user :accountNumber])
 		{
 		
 		// grab buffer string
@@ -2291,17 +2233,17 @@ debug_NSLog(@"ended this element: %@", elementName);
 			NSString* hash =[NSString stringWithString:messageBuffer];
 			debug_NSLog(@"got photo hash:%@",hash); 
 			// check current hash
-			if([hash isEqualToString:[db buddyHash:presenceUser :accountNumber]])
+			if([hash isEqualToString:[db buddyHash:iqObj.user :accountNumber]])
 			{
 				// same nothing
-				debug_NSLog(@"hash same");  
+				debug_NSLog(@"hash same");
 			}
 			else
 			{
 			//differnt-> update  and call vcard
-				[db setBuddyHash:presenceUser :accountNumber:hash];
+				[db setBuddyHash:iqObj.user :accountNumber:hash];
 					debug_NSLog(@"hash different"); 
-				[self getVcard:presenceUser];
+				[self getVcard:iqObj.user];
 				 	debug_NSLog(@"requested vcard"); 
 			}
 		
@@ -2323,9 +2265,9 @@ debug_NSLog(@"ended this element: %@", elementName);
 		// grab buffer string
 		if(messageBuffer!=nil)
 		{
-		 presenceShow=[NSString stringWithString:messageBuffer];
-			debug_NSLog(@"got show:%@",presenceShow); 
-			[db setBuddyState:presenceUser :accountNumber:presenceShow];
+		 presenceObj.show=[NSString stringWithString:messageBuffer];
+			debug_NSLog(@"got show:%@",presenceObj.show); 
+			[db setBuddyState:presenceObj.user :accountNumber:presenceObj.show];
 		messageBuffer =nil;
 		}
 		
@@ -2340,9 +2282,9 @@ debug_NSLog(@"ended this element: %@", elementName);
 			// grab buffer string
 		if(messageBuffer!=nil)
 		{
-		presenceStatus=[NSString stringWithString:messageBuffer];
-			debug_NSLog(@"got status:%@",presenceStatus); 
-			[db setBuddyStatus:presenceUser :accountNumber:presenceStatus];
+		presenceObj.status=[NSString stringWithString:messageBuffer];
+			debug_NSLog(@"got status:%@",presenceObj.status);
+			[db setBuddyStatus:presenceObj.user  :accountNumber:presenceObj.status];
 		messageBuffer =nil;
 		}	
 		State=@"presence"; 
@@ -2353,7 +2295,7 @@ debug_NSLog(@"ended this element: %@", elementName);
 	{
 		if(messageBuffer!=nil)
 		{
-		presencePhoto=[NSString stringWithString:messageBuffer];
+		presenceObj.photo=[NSString stringWithString:messageBuffer];
 		messageBuffer =nil;
 		}
 			// grab buffer string
@@ -2363,30 +2305,27 @@ debug_NSLog(@"ended this element: %@", elementName);
 	
 	if([elementName isEqualToString:@"presence"]) 
 	   {
-		   if(presenceShow==nil) 
+		   if(presenceObj.show==nil) 
 		   {
 			   
 			   
 			   debug_NSLog(@"setting blank state"); 
-			   [db setBuddyState:presenceUser :accountNumber:@""];
+			   [db setBuddyState:presenceObj.user :accountNumber:@""];
 		   }
 		   
 		   
-		   if(presenceStatus==nil) 
+		   if(presenceObj.status==nil) 
 		   {
 			   
 			  
 			    debug_NSLog(@"setting blank status");
-			   [db setBuddyStatus:presenceUser :accountNumber:@""];
+			   [db setBuddyStatus:presenceObj.user :accountNumber:@""];
 		   }
 		   
 		  
 		   State=@"";
 		   
-		   
-		   presenceUser=@"";
-		   
-		   ;
+
 		   return;
 		   
 		   
@@ -3505,8 +3444,8 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 		case NSStreamEventOpenCompleted:
 		{
 			debug_NSLog(@"Stream open completed");
-			streamOpen++; //this should be called twice, once for each stream
-            debug_NSLog(@"streamopen: %d", streamOpen);
+			
+            
             [self stopConnectionTimeoutTimer];
             
 			break; 
@@ -3571,9 +3510,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 -(void) disconnect
 {
 
-	
-	
-			[[NSNotificationCenter defaultCenter] removeObserver:self  name: @"XMPPMech" object:self]; // no longer needed
+	[[NSNotificationCenter defaultCenter] removeObserver:self  name: @"XMPPMech" object:self]; // no longer needed
 	debug_NSLog(@"removing streams"); 
 
 	//prevent any new read or write
@@ -3587,7 +3524,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 					   forMode:NSDefaultRunLoopMode];
 	debug_NSLog(@"removed streams"); 
 	
-	streamOpen=0; 
+
 	NSDate *now = [NSDate date];
 		
 	// wait on all threads to end 
@@ -3668,7 +3605,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 -(bool) connect
 {
 	streamError=false;
-	streamOpen=0; 
+	 
 	if((SSL==true) && ((port==5223) || (port==443) )) debug_NSLog(@"Using Old style SSL");
        //443 for gtalk 
 	

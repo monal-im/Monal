@@ -7,17 +7,21 @@
 //
 
 #import <UIKit/UIKit.h>
-
-
 #import <CoreFoundation/CoreFoundation.h>
 
 
 #import "protocol.h"
 
-//stanza objects 
+//xmpp stanza objects
+#import "iq.h"
+#import "presence.h"
 #import "iqSearch.h"
 #import "iqJingle.h"
 
+
+
+
+// networking objects
 #import <unistd.h>
 #import <sys/types.h>
 #import <sys/socket.h>
@@ -115,6 +119,8 @@
     
     iqSearch* iqsearch; 
     iqJingle* jingleCall;
+    presence* presenceObj;
+    iq* iqObj; 
     
     
     //client attributes

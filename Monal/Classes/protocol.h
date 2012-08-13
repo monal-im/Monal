@@ -26,24 +26,15 @@
 	NSString* __strong server; 
 	BOOL SSL; 
 	NSString*  __strong account; 
-
-	NSString* __strong resource; 
-	
+	NSString* __strong resource;
 	NSString* __strong domain; 
-
+	NSString* __strong accountNumber;
    
 	NSString* ownName; 
 	
 	NSString* sessionid; 
 	NSString* State;
-	NSString* presenceUser; 
-	NSString* presenceUserid; 
-	NSString* presenceUserFull; 
 	
-	NSString* presenceShow; 
-	NSString* presenceStatus; 
-	NSString* presencePhoto; 
-	NSString* presenceType; 
 	
 	
 	NSString* vCardPhotoBinval; 
@@ -52,28 +43,16 @@
 	NSString* vCardUser; 
 	BOOL vCardDone; 
 	
-	int streamOpen; 
+	
 
 	BOOL away; 
 	NSString* statusMessage;
-
-	//NSMutableArray* buddyListAdded;
-	//NSMutableArray* buddyListRemoved;
-	//NSMutableArray* buddyListUpdated;
-	//NSMutableArray* messagesIn;
-	
-	//NSMutableArray* buddyListKeys; 
-	
-	//NSMutableArray* buddiesOnline; // those who are online only
-	//NSMutableArray* roster; // this is the full list of everyone
-	
-
 		
 		DataLayer* db;
 		BOOL loggedin; 
 		bool listenerthread; 
 	
-		NSString* __strong accountNumber;
+	
 	
 	bool streamError;
 	bool messagesFlag;

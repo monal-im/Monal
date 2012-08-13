@@ -192,6 +192,8 @@
 		26C76BE913204C3800EAF270 /* Default-Landscape~ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = 26C76BE41320466A00EAF270 /* Default-Landscape~ipad.png */; };
 		26C76BEB1320544200EAF270 /* google_g.png in Resources */ = {isa = PBXBuildFile; fileRef = 26C76BEA1320544200EAF270 /* google_g.png */; };
 		26D1847310F9972400340C52 /* XMPPEdit.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26D1847210F9972400340C52 /* XMPPEdit.xib */; };
+		26D3C27B15D84DD100568DDC /* presence.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D3C27A15D84DD100568DDC /* presence.m */; };
+		26D3C27E15D84E6800568DDC /* iq.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D3C27D15D84E6800568DDC /* iq.m */; };
 		26D5AE651229D135006C9639 /* chatsicon.png in Resources */ = {isa = PBXBuildFile; fileRef = 26D5AE641229D135006C9639 /* chatsicon.png */; };
 		26D92C9E1409B5410014E1EA /* callScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26D92C9D1409B5410014E1EA /* callScreen.xib */; };
 		26DC0A8B1339259900E60BFD /* SearchUser.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26DC0A8A1339259900E60BFD /* SearchUser.xib */; };
@@ -437,6 +439,10 @@
 		26C76BE51320466A00EAF270 /* Default-Portrait~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-Portrait~ipad.png"; sourceTree = "<group>"; };
 		26C76BEA1320544200EAF270 /* google_g.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = google_g.png; sourceTree = "<group>"; };
 		26D1847210F9972400340C52 /* XMPPEdit.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = XMPPEdit.xib; sourceTree = "<group>"; };
+		26D3C27915D84DD100568DDC /* presence.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = presence.h; sourceTree = "<group>"; };
+		26D3C27A15D84DD100568DDC /* presence.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = presence.m; sourceTree = "<group>"; };
+		26D3C27C15D84E6800568DDC /* iq.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iq.h; sourceTree = "<group>"; };
+		26D3C27D15D84E6800568DDC /* iq.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = iq.m; sourceTree = "<group>"; };
 		26D5AE641229D135006C9639 /* chatsicon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = chatsicon.png; sourceTree = "<group>"; };
 		26D92C9D1409B5410014E1EA /* callScreen.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = callScreen.xib; sourceTree = "<group>"; };
 		26DC0A8A1339259900E60BFD /* SearchUser.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SearchUser.xib; sourceTree = "<group>"; };
@@ -736,6 +742,10 @@
 				26731E76133F3F17008098EB /* iqSearch.m */,
 				26F0D38B14093DC600A302B9 /* iqJingle.h */,
 				26F0D38C14093DC600A302B9 /* iqJingle.m */,
+				26D3C27915D84DD100568DDC /* presence.h */,
+				26D3C27A15D84DD100568DDC /* presence.m */,
+				26D3C27C15D84E6800568DDC /* iq.h */,
+				26D3C27D15D84E6800568DDC /* iq.m */,
 			);
 			name = "xmpp Objects";
 			sourceTree = "<group>";
@@ -989,7 +999,7 @@
 				26AD60DA11A95CB700C39051 /* Emoticons */,
 				26EB845D111644AD005446DD /* Themes */,
 				2601D9BC0FBF25D1004DB939 /* Assets */,
-				29B97315FDCFA39411CA2CEA /* Other Sources */,
+				29B97315FDCFA39411CA2CEA /* Root Sources */,
 				080E96DDFE201D6D7F000001 /* Classes */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
@@ -998,13 +1008,13 @@
 			name = CustomTemplate;
 			sourceTree = "<group>";
 		};
-		29B97315FDCFA39411CA2CEA /* Other Sources */ = {
+		29B97315FDCFA39411CA2CEA /* Root Sources */ = {
 			isa = PBXGroup;
 			children = (
 				32CA4F630368D1EE00C91783 /* SworIM_Prefix.pch */,
 				29B97316FDCFA39411CA2CEA /* main.m */,
 			);
-			name = "Other Sources";
+			name = "Root Sources";
 			sourceTree = "<group>";
 		};
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
@@ -1306,6 +1316,8 @@
 				26DFD4B015666B7D007A1621 /* MGSplitDividerView.m in Sources */,
 				26DFD4B115666B7D007A1621 /* MGSplitViewController.m in Sources */,
 				262DE4AF15C4E2C60040A66B /* MBProgressHUD.m in Sources */,
+				26D3C27B15D84DD100568DDC /* presence.m in Sources */,
+				26D3C27E15D84E6800568DDC /* iq.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

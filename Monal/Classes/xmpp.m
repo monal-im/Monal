@@ -1481,7 +1481,7 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
 				if(![self isInRemove:presenceObj.user])
 				{
 					debug_NSLog(@"removing from list"); 
-					[db setOfflineBuddy:presenceObj.user :accountNumber];
+					[db setOfflineBuddy:presenceObj.user:presenceObj.resource :accountNumber];
 					//remove from online list
 				}
 			
@@ -1521,7 +1521,7 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
 					
 					
 					[db addBuddy:presenceObj.user :accountNumber :@"" :@""];
-					[db setOnlineBuddy:presenceObj.user :accountNumber];
+					[db setOnlineBuddy:presenceObj.user : presenceObj.resource: accountNumber];
 					
 					
 					debug_NSLog(@"Buddy added to  list");
@@ -1531,7 +1531,7 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
 				else
 				{
 					debug_NSLog(@"Buddy already in list, showing as online now"); 
-					[db setOnlineBuddy:presenceObj.user :accountNumber];
+					[db setOnlineBuddy:presenceObj.user :presenceObj.resource:accountNumber];
 					
 					
 					
@@ -1977,15 +1977,9 @@ debug_NSLog(@"ended this element: %@", elementName);
 		if(vCardUser!=nil)
 		{
 			// insert into ot update table 	
-		//trigger update
-	
-		
-		//note that these "" fields might wipe out status and stuff.. thi sis just to trigger count>0
-		//NSArray* elements =[NSArray arrayWithObjects:vCardUser,@"", @"", @"" ,@"0",userfull,nil];
-		//NSMutableDictionary* row = [NSMutableDictionary dictionaryWithObjects:elements forKeys:buddyListKeys];
 		
 		
-			[db setOnlineBuddy:vCardUser :accountNumber];
+			[db setOnlineBuddy:vCardUser :presenceObj.resource: accountNumber];
 
             // if it is self then set the ownname value
             if([vCardUser isEqualToString:responseUser])

@@ -760,7 +760,7 @@ static DataLayer *sharedInstance=nil;
 }
 
 
--(BOOL) setOnlineBuddy:(NSString*) buddy :(NSString*) accountNo
+-(BOOL) setOnlineBuddy:(NSString*) buddy :(NSString*) resource : (NSString*) accountNo
 {
 	
 		if([self isBuddyOnline:buddy:accountNo]) return false; // pervent setting something as new
@@ -782,7 +782,7 @@ static DataLayer *sharedInstance=nil;
 	
 }
 
--(BOOL) setOfflineBuddy:(NSString*) buddy :(NSString*) accountNo
+-(BOOL) setOfflineBuddy:(NSString*) buddy :(NSString*) resource :(NSString*) accountNo
 {
 	
 	

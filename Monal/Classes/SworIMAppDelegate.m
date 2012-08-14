@@ -766,19 +766,6 @@
 }
 
 
-//the cancel button on the front 
--(IBAction) CancelLogin;
-{
-    
-	
-    [self disconnect];
-
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [loginProgressHud hide:YES ];
-    });
-	
-    
-}
 
 
 -(void) Connect
@@ -1707,12 +1694,7 @@ void (^myBlock)(void) = ^(void){
             activeTab.badgeValue=nil; 
         }
     
-    
-    
-
-
-	
-	      //******** this needs to be removed when i go back to VOIP socket
+         //******** this needs to be removed when i go back to VOIP socket
 
 
 	

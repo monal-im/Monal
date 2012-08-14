@@ -2218,7 +2218,7 @@ debug_NSLog(@"ended this element: %@", elementName);
 	{
 		
 		// see if user is online first.
-		if([db isBuddyInList:iqObj.user :accountNumber])
+		if([db isBuddyInList:presenceObj.user :accountNumber])
 		{
 		
 		// grab buffer string
@@ -2227,7 +2227,7 @@ debug_NSLog(@"ended this element: %@", elementName);
 			NSString* hash =[NSString stringWithString:messageBuffer];
 			debug_NSLog(@"got photo hash:%@",hash); 
 			// check current hash
-			if([hash isEqualToString:[db buddyHash:iqObj.user :accountNumber]])
+			if([hash isEqualToString:[db buddyHash:presenceObj.user :accountNumber]])
 			{
 				// same nothing
 				debug_NSLog(@"hash same");
@@ -2235,9 +2235,9 @@ debug_NSLog(@"ended this element: %@", elementName);
 			else
 			{
 			//differnt-> update  and call vcard
-				[db setBuddyHash:iqObj.user :accountNumber:hash];
+				[db setBuddyHash:presenceObj.user :accountNumber:hash];
 					debug_NSLog(@"hash different"); 
-				[self getVcard:iqObj.user];
+				[self getVcard:presenceObj.user];
 				 	debug_NSLog(@"requested vcard"); 
 			}
 		

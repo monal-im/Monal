@@ -1580,7 +1580,7 @@ buddylistDS.tabcontroller=tabcontroller;
 
 
 
-#pragma mark multi tasking post ios4 stuff *****
+#pragma mark multi tasking post ios4 stuff 
 //called when resuming from a notification swipe /tap
 - (void)application:(UIApplication *)application didReceiveLocalNotification:(UILocalNotification *)notification {
     if (application.applicationState == UIApplicationStateInactive ) {

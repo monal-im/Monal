@@ -138,7 +138,7 @@
 		{
 			serverText.text=@"chat.facebook.com"; 
 			userText.text=@"@chat.facebook.com"; 
-			sslSwitch.on=false;
+			sslSwitch.on=true;
 		}
 		
 		

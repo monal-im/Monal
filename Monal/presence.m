@@ -20,6 +20,7 @@
 @synthesize status;
 @synthesize  photo;
 @synthesize type;
+@synthesize ver; 
 
 -(void) reset
 {
@@ -33,6 +34,7 @@
 	status=nil;
 	photo=nil;
 	type=nil;
+    ver=nil; 
 }
 
 @end

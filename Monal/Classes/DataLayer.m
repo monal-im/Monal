@@ -543,6 +543,10 @@ static DataLayer *sharedInstance=nil;
 {
 	
 	
+    NSString* query2=[NSString stringWithFormat:@"delete from  buddy_resources ;   "];
+	[self executeNonQuery:query2];
+
+    
 	NSString* query=[NSString stringWithFormat:@"update buddylist set dirty=0, new=0, online=0, state='', status='';   "];
 	if([self executeNonQuery:query]!=false) 
 	{
@@ -759,14 +763,53 @@ static DataLayer *sharedInstance=nil;
 	}
 }
 
+-(BOOL) setResourceOnline:(NSString*) buddy :(NSString*) resource : (NSString*) accountNo
+{
+    
+
+    
+    //get buddyid for name and account
+    
+    NSString* query1=[NSString stringWithFormat:@" select buddy_id from buddylist where account_id=%@ and  buddy_name='%@';", accountNo, buddy ];
+	
+    NSString* buddyid = [self executeScalar:query1];
+
+    if(buddyid==nil) return NO; 
+    
+//make sure not already there
+    
+    //see how many left
+    NSString* query3=[NSString stringWithFormat:@" select count(buddy_id) from buddy_resources where buddy_id=%@ and resource='%@';", buddyid, resource ];
+	
+    NSString* resourceCount = [self executeScalar:query3];
+   	
+    if([resourceCount integerValue]  >0) return false;
+    
+    NSString* query=[NSString stringWithFormat:@"insert into buddy_resources values (%@, '%@', '')", buddyid, resource ];
+	if([self executeNonQuery:query]!=false)
+	{
+		
+		;
+		return true;
+	}
+	else
+	{
+        ;
+		return false;
+	}
+}
+
+
+
 
 -(BOOL) setOnlineBuddy:(NSString*) buddy :(NSString*) resource : (NSString*) accountNo
 {
-	
-		if([self isBuddyOnline:buddy:accountNo]) return false; // pervent setting something as new
+    
+    [self setResourceOnline:buddy:resource:accountNo];
+    
+    if([self isBuddyOnline:buddy:accountNo]) return false; // pervent setting something as new
 		
-	
-	
+
 	NSString* query=[NSString stringWithFormat:@"update buddylist set online=1, new=1  where account_id=%@ and  buddy_name='%@';", accountNo, buddy];
 	if([self executeNonQuery:query]!=false) 
 	{
@@ -784,7 +827,28 @@ static DataLayer *sharedInstance=nil;
 
 -(BOOL) setOfflineBuddy:(NSString*) buddy :(NSString*) resource :(NSString*) accountNo
 {
+    
+    
+    NSString* query1=[NSString stringWithFormat:@" select buddy_id from buddylist where account_id=%@ and  buddy_name='%@';", accountNo, buddy ];
 	
+    NSString* buddyid = [self executeScalar:query1];
+    
+    if(buddyid==nil) return NO;
+    
+    
+    NSString* query2=[NSString stringWithFormat:@"delete from   buddy_resources where buddy_id=%@ and resource='%@'", buddyid, resource ];
+	if([self executeNonQuery:query2]==false) return false;
+
+
+    //see how many left
+    NSString* query3=[NSString stringWithFormat:@" select count(buddy_id) from buddy_resources where buddy_id=%@;", buddyid ];
+	
+    NSString* resourceCount = [self executeScalar:query3];
+    
+    
+    if([resourceCount integerValue]<1)
+    {
+    
 	
 	NSString* query=[NSString stringWithFormat:@"update buddylist set online=0, dirty=1  where account_id=%@ and  buddy_name='%@';", accountNo, buddy];
 	if([self executeNonQuery:query]!=false) 
@@ -799,7 +863,9 @@ static DataLayer *sharedInstance=nil;
 		;
 		return false; 
 	}
-	
+	}
+    else return YES; 
+    
 }
 
 -(BOOL) setFullName:(NSString*) buddy :(NSString*) accountNo:(NSString*) fullName
@@ -2048,7 +2114,7 @@ static DataLayer *sharedInstance=nil;
         
         
         
-         [self executeNonQuery:@"create table buddy_resources(buddyid integer,resource varchar(255),ver varchar(20))"];
+         [self executeNonQuery:@"create table buddy_resources(buddy_id integer,resource varchar(255),ver varchar(20))"];
         
          [self executeNonQuery:@"create table ver_info(ver varchar(20),cap varchar(255))"];
 

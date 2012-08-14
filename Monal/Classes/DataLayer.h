@@ -42,6 +42,9 @@
 -(NSArray*) updatedBuddies:(NSString*) accountNo;
 -(BOOL) markBuddiesRead:(NSString*) accountNo;
 
+
+-(BOOL) setResourceOnline:(NSString*) buddy :(NSString*) resource : (NSString*) accountNo;
+
 -(BOOL) setOnlineBuddy:(NSString*) buddy : (NSString*) resource :(NSString*) accountNo;
 -(BOOL) setOfflineBuddy:(NSString*) buddy :(NSString*) resource :(NSString*) accountNo;
 

@@ -28,5 +28,7 @@
 @property (nonatomic) NSString* status;
 @property (nonatomic) NSString* photo;
 
+@property (nonatomic) NSString* ver;
+
 
 @end

@@ -17,7 +17,7 @@ insert into legacy_caps values (null,'video-v1');
 
 create table buddy_resources
 (
-buddyid integer, 
+buddy_id integer, 
 resource varchar(255),
 ver varchar(20)
 );

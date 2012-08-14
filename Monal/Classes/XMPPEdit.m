@@ -134,7 +134,7 @@
 		sslSwitch.on=true; 
 		
 	
-		if(originIndex.row==3)
+		if(originIndex.row==2)
 		{
 			serverText.text=@"chat.facebook.com"; 
 			userText.text=@"@chat.facebook.com"; 

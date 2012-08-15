@@ -1481,7 +1481,7 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
 				if(![self isInRemove:presenceObj.user])
 				{
 					debug_NSLog(@"removing from list"); 
-					[db setOfflineBuddy:presenceObj.user:presenceObj.resource :accountNumber];
+					[db setOfflineBuddy:presenceObj :accountNumber];
 					//remove from online list
 				}
 			
@@ -1521,7 +1521,7 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
 					
 					
 					[db addBuddy:presenceObj.user :accountNumber :@"" :@""];
-					[db setOnlineBuddy:presenceObj.user : presenceObj.resource: accountNumber];
+					[db setOnlineBuddy:presenceObj: accountNumber];
 					
 					
 					debug_NSLog(@"Buddy added to  list");
@@ -1531,7 +1531,7 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
 				else
 				{
 					debug_NSLog(@"Buddy already in list, showing as online now"); 
-					[db setOnlineBuddy:presenceObj.user :presenceObj.resource:accountNumber];
+					[db setOnlineBuddy:presenceObj:accountNumber];
 					
 					
 					
@@ -2002,7 +2002,7 @@ debug_NSLog(@"ended this element: %@", elementName);
 			// insert into ot update table 	
 		
 		
-			[db setOnlineBuddy:vCardUser :presenceObj.resource: accountNumber];
+		//	[db setOnlineBuddy:vCardUser :presenceObj.resource: accountNumber];
 
             // if it is self then set the ownname value
             if([vCardUser isEqualToString:responseUser])
@@ -2284,7 +2284,7 @@ debug_NSLog(@"ended this element: %@", elementName);
 		{
 		 presenceObj.show=[NSString stringWithString:messageBuffer];
 			debug_NSLog(@"got show:%@",presenceObj.show); 
-			[db setBuddyState:presenceObj.user :accountNumber:presenceObj.show];
+			[db setBuddyState:presenceObj:accountNumber];
 		messageBuffer =nil;
 		}
 		
@@ -2301,7 +2301,7 @@ debug_NSLog(@"ended this element: %@", elementName);
 		{
 		presenceObj.status=[NSString stringWithString:messageBuffer];
 			debug_NSLog(@"got status:%@",presenceObj.status);
-			[db setBuddyStatus:presenceObj.user  :accountNumber:presenceObj.status];
+			[db setBuddyStatus:presenceObj:accountNumber];
 		messageBuffer =nil;
 		}	
 		State=@"presence"; 
@@ -2325,18 +2325,18 @@ debug_NSLog(@"ended this element: %@", elementName);
 		   if(presenceObj.show==nil) 
 		   {
 			   
-			   
-			   debug_NSLog(@"setting blank state"); 
-			   [db setBuddyState:presenceObj.user :accountNumber:@""];
+			   presenceObj.show=@"";
+			   debug_NSLog(@"setting blank state");
+			   [db setBuddyState:presenceObj:accountNumber];
 		   }
 		   
 		   
 		   if(presenceObj.status==nil) 
 		   {
 			   
-			  
+			  presenceObj.status=@"";
 			    debug_NSLog(@"setting blank status");
-			   [db setBuddyStatus:presenceObj.user :accountNumber:@""];
+			   [db setBuddyStatus:presenceObj:accountNumber];
 		   }
 		   
 		  

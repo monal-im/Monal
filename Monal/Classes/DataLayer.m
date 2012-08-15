@@ -763,14 +763,16 @@ static DataLayer *sharedInstance=nil;
 	}
 }
 
--(BOOL) setResourceOnline:(NSString*) buddy :(NSString*) resource : (NSString*) accountNo
+#pragma mark presence functions 
+
+-(BOOL) setResourceOnline:(presence*)presenceObj: (NSString*) accountNo
 {
     
 
     
     //get buddyid for name and account
     
-    NSString* query1=[NSString stringWithFormat:@" select buddy_id from buddylist where account_id=%@ and  buddy_name='%@';", accountNo, buddy ];
+    NSString* query1=[NSString stringWithFormat:@" select buddy_id from buddylist where account_id=%@ and  buddy_name='%@';", accountNo, presenceObj.user ];
 	
     NSString* buddyid = [self executeScalar:query1];
 
@@ -779,13 +781,13 @@ static DataLayer *sharedInstance=nil;
 //make sure not already there
     
     //see how many left
-    NSString* query3=[NSString stringWithFormat:@" select count(buddy_id) from buddy_resources where buddy_id=%@ and resource='%@';", buddyid, resource ];
+    NSString* query3=[NSString stringWithFormat:@" select count(buddy_id) from buddy_resources where buddy_id=%@ and resource='%@';", buddyid, presenceObj.resource ];
 	
     NSString* resourceCount = [self executeScalar:query3];
    	
     if([resourceCount integerValue]  >0) return false;
     
-    NSString* query=[NSString stringWithFormat:@"insert into buddy_resources values (%@, '%@', '')", buddyid, resource ];
+    NSString* query=[NSString stringWithFormat:@"insert into buddy_resources values (%@, '%@', '')", buddyid, presenceObj.resource ];
 	if([self executeNonQuery:query]!=false)
 	{
 		
@@ -802,15 +804,15 @@ static DataLayer *sharedInstance=nil;
 
 
 
--(BOOL) setOnlineBuddy:(NSString*) buddy :(NSString*) resource : (NSString*) accountNo
+-(BOOL) setOnlineBuddy:(presence*)presenceObj: (NSString*) accountNo
 {
     
-    [self setResourceOnline:buddy:resource:accountNo];
+    [self setResourceOnline:presenceObj:accountNo];
     
-    if([self isBuddyOnline:buddy:accountNo]) return false; // pervent setting something as new
+    if([self isBuddyOnline:presenceObj.user:accountNo]) return false; // pervent setting something as new
 		
 
-	NSString* query=[NSString stringWithFormat:@"update buddylist set online=1, new=1  where account_id=%@ and  buddy_name='%@';", accountNo, buddy];
+	NSString* query=[NSString stringWithFormat:@"update buddylist set online=1, new=1  where account_id=%@ and  buddy_name='%@';", accountNo, presenceObj.user];
 	if([self executeNonQuery:query]!=false) 
 	{
 		
@@ -825,18 +827,18 @@ static DataLayer *sharedInstance=nil;
 	
 }
 
--(BOOL) setOfflineBuddy:(NSString*) buddy :(NSString*) resource :(NSString*) accountNo
+-(BOOL) setOfflineBuddy:(presence*)presenceObj: (NSString*) accountNo
 {
     
     
-    NSString* query1=[NSString stringWithFormat:@" select buddy_id from buddylist where account_id=%@ and  buddy_name='%@';", accountNo, buddy ];
+    NSString* query1=[NSString stringWithFormat:@" select buddy_id from buddylist where account_id=%@ and  buddy_name='%@';", accountNo, presenceObj.user ];
 	
     NSString* buddyid = [self executeScalar:query1];
     
     if(buddyid==nil) return NO;
     
     
-    NSString* query2=[NSString stringWithFormat:@"delete from   buddy_resources where buddy_id=%@ and resource='%@'", buddyid, resource ];
+    NSString* query2=[NSString stringWithFormat:@"delete from   buddy_resources where buddy_id=%@ and resource='%@'", buddyid, presenceObj.resource ];
 	if([self executeNonQuery:query2]==false) return false;
 
 
@@ -850,7 +852,7 @@ static DataLayer *sharedInstance=nil;
     {
     
 	
-	NSString* query=[NSString stringWithFormat:@"update buddylist set online=0, dirty=1  where account_id=%@ and  buddy_name='%@';", accountNo, buddy];
+	NSString* query=[NSString stringWithFormat:@"update buddylist set online=0, dirty=1  where account_id=%@ and  buddy_name='%@';", accountNo, presenceObj.user];
 	if([self executeNonQuery:query]!=false) 
 	{
 		
@@ -867,6 +869,80 @@ static DataLayer *sharedInstance=nil;
     else return YES; 
     
 }
+
+
+-(BOOL) setBuddyState:(presence*)presenceObj: (NSString*) accountNo
+{
+	
+	NSString* toPass;
+	//data length check
+	
+	if([presenceObj.show length]>20) toPass=[presenceObj.show substringToIndex:19]; else toPass=presenceObj.show;
+	NSString* query=[NSString stringWithFormat:@"update buddylist set state='%@', dirty=1 where account_id=%@ and  buddy_name='%@';",toPass, accountNo, presenceObj.show];
+	if([self executeNonQuery:query]!=false)
+	{
+		
+		;
+		return true;
+	}
+	else
+	{
+		
+		;
+		return false;
+	}
+}
+
+-(NSString*) buddyState:(NSString*) buddy :(NSString*) accountNo
+{
+	
+	
+	NSString* query=[NSString stringWithFormat:@"select state from buddylist where account_id=%@ and buddy_name='%@'", accountNo, buddy];
+	NSString* iconname= [self executeScalar:query];
+    ;
+	return iconname;
+}
+
+
+-(BOOL) setBuddyStatus:(presence*)presenceObj: (NSString*) accountNo
+{
+	
+	
+	NSString* toPass;
+	//data length check
+	if([presenceObj.status length]>200) toPass=[[presenceObj.status substringToIndex:199] stringByReplacingOccurrencesOfString:@"'"
+																								  withString:@"''"];
+	else toPass=[presenceObj.status  stringByReplacingOccurrencesOfString:@"'"
+                                                      withString:@"''"];;
+	NSString* query=[NSString stringWithFormat:@"update buddylist set status='%@', dirty=1 where account_id=%@ and  buddy_name='%@';",[toPass stringByReplacingOccurrencesOfString:@"'" withString:@"''"], accountNo, presenceObj.user];
+	if([self executeNonQuery:query]!=false)
+	{
+		
+		;
+		return true;
+	}
+	else
+	{
+		
+		;
+		return false;
+	}
+}
+
+-(NSString*) buddyStatus:(NSString*) buddy :(NSString*) accountNo
+{
+	
+	
+	NSString* query=[NSString stringWithFormat:@"select status from buddylist where account_id=%@ and buddy_name='%@'", accountNo, buddy];
+	NSString* iconname= [self executeScalar:query];
+    ; 
+	return iconname; 
+}
+
+
+
+#pragma mark Contact info
+
 
 -(BOOL) setFullName:(NSString*) buddy :(NSString*) accountNo:(NSString*) fullName
 {
@@ -937,71 +1013,7 @@ static DataLayer *sharedInstance=nil;
 	return iconname; 
 }
 
--(BOOL) setBuddyState:(NSString*) buddy :(NSString*) accountNo:(NSString*) thestate
-{
-	
-	NSString* toPass;
-	//data length check
-	
-	if([thestate length]>20) toPass=[thestate substringToIndex:19]; else toPass=thestate;
-	NSString* query=[NSString stringWithFormat:@"update buddylist set state='%@', dirty=1 where account_id=%@ and  buddy_name='%@';",toPass, accountNo, buddy];
-	if([self executeNonQuery:query]!=false) 
-	{
-		
-		;
-		return true; 
-	}
-	else 
-	{
-		
-		;
-		return false; 
-	}
-}
 
--(NSString*) buddyState:(NSString*) buddy :(NSString*) accountNo; 
-{
-	
-	
-	NSString* query=[NSString stringWithFormat:@"select state from buddylist where account_id=%@ and buddy_name='%@'", accountNo, buddy];
-	NSString* iconname= [self executeScalar:query];
-	 ; 
-	return iconname; 
-}
--(BOOL) setBuddyStatus:(NSString*) buddy :(NSString*) accountNo:(NSString*) theStatus
-{
-	
-	
-	NSString* toPass;
-	//data length check
-	if([theStatus length]>200) toPass=[[theStatus substringToIndex:199] stringByReplacingOccurrencesOfString:@"'"
-																								  withString:@"''"];
-	else toPass=[theStatus  stringByReplacingOccurrencesOfString:@"'"
-																			withString:@"''"];;
-	NSString* query=[NSString stringWithFormat:@"update buddylist set status='%@', dirty=1 where account_id=%@ and  buddy_name='%@';",[toPass stringByReplacingOccurrencesOfString:@"'" withString:@"''"], accountNo, buddy];
-	if([self executeNonQuery:query]!=false) 
-	{
-		
-		;
-		return true; 
-	}
-	else 
-	{
-		
-		;
-		return false; 
-	}
-}
-
--(NSString*) buddyStatus:(NSString*) buddy :(NSString*) accountNo; 
-{
-	
-	
-	NSString* query=[NSString stringWithFormat:@"select status from buddylist where account_id=%@ and buddy_name='%@'", accountNo, buddy];
-	NSString* iconname= [self executeScalar:query];
-	 ; 
-	return iconname; 
-}
 
 -(BOOL) setBuddyHash:(NSString*) buddy :(NSString*) accountNo:(NSString*) theHash
 {

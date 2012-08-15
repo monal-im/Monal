@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <sqlite3.h>
 #import "PasswordManager.h"
+#import "presence.h"
 
 @interface DataLayer : NSObject {
 
@@ -43,20 +44,25 @@
 -(BOOL) markBuddiesRead:(NSString*) accountNo;
 
 
--(BOOL) setResourceOnline:(NSString*) buddy :(NSString*) resource : (NSString*) accountNo;
+#pragma mark  presence functions
+-(BOOL) setResourceOnline:(presence*)presenceObj: (NSString*) accountNo;
+-(BOOL) setOnlineBuddy:(presence*)presenceObj: (NSString*) accountNo;
+-(BOOL) setOfflineBuddy:(presence*)presenceObj: (NSString*) accountNo;
 
--(BOOL) setOnlineBuddy:(NSString*) buddy : (NSString*) resource :(NSString*) accountNo;
--(BOOL) setOfflineBuddy:(NSString*) buddy :(NSString*) resource :(NSString*) accountNo;
+-(BOOL) setBuddyStatus:(presence*)presenceObj: (NSString*) accountNo;
+-(NSString*) buddyStatus:(NSString*) buddy :(NSString*) accountNo;
+
+-(BOOL) setBuddyState:(presence*)presenceObj: (NSString*) accountNo;
+-(NSString*) buddyState:(NSString*) buddy :(NSString*) accountNo;
+
+
+#pragma mark Contact info
 
 -(BOOL) setFullName:(NSString*) buddy :(NSString*) accountNo:(NSString*) fullName;
 -(NSString*) fullName:(NSString*) buddy :(NSString*) accountNo; 
 
 -(BOOL) setFileName:(NSString*) buddy :(NSString*) accountNo:(NSString*) fileName;
--(BOOL) setBuddyState:(NSString*) buddy :(NSString*) accountNo:(NSString*) thestate;
--(NSString*) buddyState:(NSString*) buddy :(NSString*) accountNo; 
 
--(BOOL) setBuddyStatus:(NSString*) buddy :(NSString*) accountNo:(NSString*) theStatus;
--(NSString*) buddyStatus:(NSString*) buddy :(NSString*) accountNo; 
 
 
 -(BOOL) setBuddyHash:(NSString*) buddy :(NSString*) accountNo:(NSString*) theHash;

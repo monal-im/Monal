@@ -20,6 +20,7 @@
 #include <CommonCrypto/CommonDigest.h>
 
 
+
 @interface protocol : NSObject  <UIAlertViewDelegate, NSStreamDelegate>{
 	
 	unsigned short __strong port; 
@@ -135,8 +136,12 @@
 
 - (NSString *)base64Encoding:(NSString*) string;
 - (NSData*)dataWithBase64EncodedString:(NSString *)string;
-- (NSString *) MD5:(NSString*)string ;
+
+- (NSData *) MD5:(NSString*)string ;
+- (NSData *) DataMD5:(NSData*)datain;
+
 - (NSString *) MD5_16:(NSString*)string ;
+- (NSString *)hexadecimalString:(NSData*) data; 
 
 @property (nonatomic, readonly) bool streamError;
 

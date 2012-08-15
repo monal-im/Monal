@@ -1852,6 +1852,7 @@ debug_NSLog(@"ended this element: %@", elementName);
 		
 		NSString* realm=[[realmparts objectAtIndex:1] substringWithRange:NSMakeRange(1, [[realmparts objectAtIndex:1] length]-2)] ;
 		NSString* nonce=[nonceparts objectAtIndex:1] ;
+        nonce=[nonce substringWithRange:NSMakeRange(1, [nonce length]-2)]; 
 		
 		//if there is no realm
 		if(![[realmparts objectAtIndex:0]  isEqualToString:@"realm"])
@@ -1862,7 +1863,7 @@ debug_NSLog(@"ended this element: %@", elementName);
 		
 		
 		
-		NSString* cononce=[self MD5: [NSString stringWithFormat:@"%d",random()%100000]]; 
+		NSData* cnonce=[self MD5: [NSString stringWithFormat:@"%d",arc4random()%100000]];
 	
 		PasswordManager* pass= [PasswordManager alloc] ; 
 		[pass init:accountNumber];
@@ -1875,41 +1876,63 @@ debug_NSLog(@"ended this element: %@", elementName);
             
         }
 		
-		
+        
+  
+        
 		// ****** digest stuff going on here...
 		NSString* X= [NSString stringWithFormat:@"%@:%@:%@", account, realm, password ];
-		NSString* Y= [self MD5_16:X];
-		
-		/*NSString* A1= [NSString stringWithFormat:@"%@:%@:%@:%@@%@/%@", 
+        debug_NSLog(@"X: %@", X);
+        
+		NSData* Y= [self MD5:X];
+       
+        
+		debug_NSLog(@"Y: %@",Y )
+        
+        
+		/*
+		NSString* A1= [NSString stringWithFormat:@"%@:%@:%@:%@@%@/%@",
 					   Y,[nonce substringWithRange:NSMakeRange(1, [nonce length]-2)],cononce,account,domain,resource];
 		 */
 		
 		//  if you have the authzid  here you need it below too but it wont work on som servers
 		// so best not include it
 		
-		NSString* A1= [NSString stringWithFormat:@"%@:%@:%@", 
-					   Y,[nonce substringWithRange:NSMakeRange(1, [nonce length]-2)],cononce];
+		NSData* A1= [[NSString stringWithFormat:@":%@:%@",
+					   nonce,[self hexadecimalString:cnonce]]
+                     dataUsingEncoding:NSUTF8StringEncoding];
 		
+		debug_NSLog(@"A1: %@",[[NSString alloc]initWithData:A1 encoding:NSUTF8StringEncoding] )
+        
+        NSMutableData *HA1data = [NSMutableData dataWithCapacity:([Y length] + [A1 length])];
+        [HA1data appendData:Y];
+        [HA1data appendData:A1];
+        
+       
+        debug_NSLog(@" ha1data: %@",HA1data  );
 		
+		NSData* HA1=[self DataMD5:HA1data];
 		
-		NSString* HA1=[self MD5:A1];
-		
+    
 		
 		
 		NSString* A2=[NSString stringWithFormat:@"AUTHENTICATE:xmpp/%@", server]; 
-		NSString* HA2=[self MD5:A2];
+		NSData* HA2=[self MD5:A2];
 		
 	
 		
-		NSString* KD=[NSString stringWithFormat:@"%@:%@:00000001:%@:auth:%@", HA1, [nonce substringWithRange:NSMakeRange(1, [nonce length]-2)], cononce, HA2];
+		NSString* KD=[NSString stringWithFormat:@"%@:%@:00000001:%@:auth:%@", [self hexadecimalString:HA1], nonce, [self hexadecimalString:cnonce], [self hexadecimalString:HA2]];
+		
+             debug_NSLog(@" ha1: %@", [self hexadecimalString:HA1] );
+             debug_NSLog(@" ha2: %@", [self hexadecimalString:HA2] );
+        
+       //  debug_NSLog(@" KD: %@", KD );
+		
+		NSData* responseData=[self MD5:KD];
 		
 		
-		NSString* responseData=[self MD5:KD];
 		
-		
-		
-		NSString* response=[NSString stringWithFormat:@"username=\"%@\",realm=\"%@\",nonce=%@,cnonce=\"%@\",nc=00000001,qop=auth,digest-uri=\"xmpp/%@\",response=%@,charset=utf-8",
-						   account,realm, nonce, cononce, server, responseData];
+		NSString* response=[NSString stringWithFormat:@"username=\"%@\",realm=\"%@\",nonce=\"%@\",cnonce=\"%@\",nc=00000001,qop=auth,digest-uri=\"xmpp/%@\",response=%@,charset=utf-8",
+						   account,realm, nonce, [self hexadecimalString:cnonce], server, [self hexadecimalString:responseData]];
 		//,authzid=\"%@@%@/%@\"  ,account,domain, resource
 		
 		
@@ -3907,23 +3930,6 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	}
 	
 
-	
-	else if((SASLPlain==true) & (SSL==false))
-	{
-	
-		 
-		
-		//sasls plain wihtout SSL
-		NSString* saslplain=[self base64Encoding: [NSString stringWithFormat:@"\0%@\0%@",  account,  password]];
-		
-		
-		//[xmpprequest release];
-		NSString*	xmpprequest; 
-		xmpprequest=	[NSString stringWithFormat:@"<auth xmlns='urn:ietf:params:xml:ns:xmpp-sasl' mechanism='PLAIN'>%@</auth>",saslplain];
-		
-		val= [self talk:xmpprequest];
-		
-	}
 	else if(SASLDIGEST_MD5==true)
 	{
 		NSString*	xmpprequest; 
@@ -3931,6 +3937,23 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 		xmpprequest=	[NSString stringWithFormat:@"<auth xmlns='urn:ietf:params:xml:ns:xmpp-sasl' mechanism='DIGEST-MD5'/>"];
 		
 		val= [self talk:xmpprequest];
+	}
+    
+    else if((SASLPlain==true) & (SSL==false))
+	{
+        
+        
+		
+		//sasls plain wihtout SSL
+		NSString* saslplain=[self base64Encoding: [NSString stringWithFormat:@"\0%@\0%@",  account,  password]];
+		
+		
+		//[xmpprequest release];
+		NSString*	xmpprequest;
+		xmpprequest=	[NSString stringWithFormat:@"<auth xmlns='urn:ietf:params:xml:ns:xmpp-sasl' mechanism='PLAIN'>%@</auth>",saslplain];
+		
+		val= [self talk:xmpprequest];
+		
 	}
 	
     //legacy auth possible and no other path available

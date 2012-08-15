@@ -600,7 +600,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 		
 		if(messageBuffer!=nil) 
 		{
-			messageBuffer=nil; 
+			messageBuffer=nil;
 		}
 		
 		; 
@@ -609,8 +609,16 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 	}
 	
 	
-	
-	
+	//getting presence details
+	if(([State isEqualToString:@"presence"])&&([elementName isEqualToString:@"c"]))
+    {
+        presenceObj.ver=[attributeDict objectForKey:@"ver"];
+        
+        [db setResourceVer:presenceObj: account];
+        
+        
+
+    }
 	
 	
 	

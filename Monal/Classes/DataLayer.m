@@ -763,6 +763,37 @@ static DataLayer *sharedInstance=nil;
 	}
 }
 
+#pragma mark Ver string and Capabilities  
+
+-(BOOL) setResourceVer:(presence*)presenceObj: (NSString*) accountNo
+{
+    
+    
+    
+    //get buddyid for name and account
+    
+    NSString* query1=[NSString stringWithFormat:@" select buddy_id from buddylist where account_id=%@ and  buddy_name='%@';", accountNo, presenceObj.user ];
+	
+    NSString* buddyid = [self executeScalar:query1];
+    
+    if(buddyid==nil) return NO;
+    
+
+    
+    NSString* query=[NSString stringWithFormat:@"update buddy_resources set ver='%@' where buddyid=%@ and resource='%@'", presenceObj.ver, buddyid, presenceObj.resource ];
+	if([self executeNonQuery:query]!=false)
+	{
+		
+		;
+		return true;
+	}
+	else
+	{
+        ;
+		return false;
+	}
+}
+
 #pragma mark presence functions 
 
 -(BOOL) setResourceOnline:(presence*)presenceObj: (NSString*) accountNo

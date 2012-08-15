@@ -43,6 +43,9 @@
 -(NSArray*) updatedBuddies:(NSString*) accountNo;
 -(BOOL) markBuddiesRead:(NSString*) accountNo;
 
+#pragma mark Ver string and Capabilities
+-(BOOL) setResourceVer:(presence*)presenceObj: (NSString*) accountNo;
+
 
 #pragma mark  presence functions
 -(BOOL) setResourceOnline:(presence*)presenceObj: (NSString*) accountNo;

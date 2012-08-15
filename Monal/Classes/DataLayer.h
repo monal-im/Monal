@@ -45,7 +45,7 @@
 
 #pragma mark Ver string and Capabilities
 -(BOOL) setResourceVer:(presence*)presenceObj: (NSString*) accountNo;
-
+-(NSArray*) capsforVer:(NSString*) verString;
 
 #pragma mark  presence functions
 -(BOOL) setResourceOnline:(presence*)presenceObj: (NSString*) accountNo;

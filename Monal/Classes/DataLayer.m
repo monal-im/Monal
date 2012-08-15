@@ -780,7 +780,7 @@ static DataLayer *sharedInstance=nil;
     
 
     
-    NSString* query=[NSString stringWithFormat:@"update buddy_resources set ver='%@' where buddyid=%@ and resource='%@'", presenceObj.ver, buddyid, presenceObj.resource ];
+    NSString* query=[NSString stringWithFormat:@"update buddy_resources set ver='%@' where buddy_id=%@ and resource='%@'", presenceObj.ver, buddyid, presenceObj.resource ];
 	if([self executeNonQuery:query]!=false)
 	{
 		
@@ -792,6 +792,34 @@ static DataLayer *sharedInstance=nil;
         ;
 		return false;
 	}
+}
+
+-(NSArray*) capsforVer:(NSString*) verString
+{
+   
+            
+            NSString* query=[NSString stringWithFormat:@"select cap from ver_info where ver='%@'", verString];
+                             
+                             //debug_NSLog(query);
+            NSArray* toReturn = [self executeReader:query];
+            
+            if(toReturn!=nil)
+            {
+                
+                if([toReturn count]==0) return nil;
+                
+                debug_NSLog(@" caps  count: %d",  [toReturn count] );
+                ;
+                
+                return toReturn; //[toReturn autorelease];
+            }
+            else 
+            {
+                debug_NSLog(@"caps list is empty"); 
+                ;
+                return nil; 
+            }
+       
 }
 
 #pragma mark presence functions 

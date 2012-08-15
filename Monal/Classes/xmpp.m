@@ -610,12 +610,19 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 	
 	
 	//getting presence details
-	if(([State isEqualToString:@"presence"])&&([elementName isEqualToString:@"c"]))
+	if(([State isEqualToString:@"presence"])&&(([elementName isEqualToString:@"c"])|| ([elementName isEqualToString:@"caps:c"])) )
     {
         presenceObj.ver=[attributeDict objectForKey:@"ver"];
         
-        [db setResourceVer:presenceObj: account];
+        [db setResourceVer:presenceObj: accountNumber];
         
+        //check for ver for caps. If not then request it  from this one
+        
+        if([db capsforVer:presenceObj.ver]==nil)
+        {
+            //request caps
+            [self queryDiscoInfo:presenceObj.from:sessionkey];
+        }
         
 
     }
@@ -2009,8 +2016,9 @@ debug_NSLog(@"ended this element: %@", elementName);
 		{
 			// insert into ot update table 	
 		
-		
-		//	[db setOnlineBuddy:vCardUser :presenceObj.resource: accountNumber];
+            
+            presenceObj.from =iqObj.from;
+			[db setOnlineBuddy :presenceObj: accountNumber];
 
             // if it is self then set the ownname value
             if([vCardUser isEqualToString:responseUser])

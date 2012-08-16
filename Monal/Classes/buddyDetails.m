@@ -42,7 +42,7 @@
 
 -(BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation 
 {
-	return NO;
+	return YES;
 }
 
 -(IBAction) callPress
@@ -53,22 +53,7 @@
     callScreen* call = [callScreen alloc] ;
     [call init:navigationController];
     [call show:jabber:buddyName.text];
-    
    
-    
-  
-     /* NSString* machine=[tools machine]; 
-   
-  if([machine hasPrefix:@"iPad"] )
-       {
-       //nothign rightn ow
-       }
-       else
-       {
-           [navigationController popViewControllerAnimated:false];
-       }
-  */
-    
 }
 
 

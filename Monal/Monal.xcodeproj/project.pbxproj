@@ -195,7 +195,6 @@
 		26D3C27B15D84DD100568DDC /* presence.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D3C27A15D84DD100568DDC /* presence.m */; };
 		26D3C27E15D84E6800568DDC /* iq.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D3C27D15D84E6800568DDC /* iq.m */; };
 		26D5AE651229D135006C9639 /* chatsicon.png in Resources */ = {isa = PBXBuildFile; fileRef = 26D5AE641229D135006C9639 /* chatsicon.png */; };
-		26D92C9E1409B5410014E1EA /* callScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26D92C9D1409B5410014E1EA /* callScreen.xib */; };
 		26DC0A8B1339259900E60BFD /* SearchUser.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26DC0A8A1339259900E60BFD /* SearchUser.xib */; };
 		26DC0A8F133928DA00E60BFD /* about.png in Resources */ = {isa = PBXBuildFile; fileRef = 26DC0A8E133928DA00E60BFD /* about.png */; };
 		26DC0A9213392A4F00E60BFD /* userSearch.m in Sources */ = {isa = PBXBuildFile; fileRef = 26DC0A9113392A4F00E60BFD /* userSearch.m */; };
@@ -444,7 +443,6 @@
 		26D3C27C15D84E6800568DDC /* iq.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iq.h; sourceTree = "<group>"; };
 		26D3C27D15D84E6800568DDC /* iq.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = iq.m; sourceTree = "<group>"; };
 		26D5AE641229D135006C9639 /* chatsicon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = chatsicon.png; sourceTree = "<group>"; };
-		26D92C9D1409B5410014E1EA /* callScreen.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = callScreen.xib; sourceTree = "<group>"; };
 		26DC0A8A1339259900E60BFD /* SearchUser.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SearchUser.xib; sourceTree = "<group>"; };
 		26DC0A8E133928DA00E60BFD /* about.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = about.png; sourceTree = "<group>"; };
 		26DC0A9013392A4E00E60BFD /* userSearch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = userSearch.h; path = Classes/userSearch.h; sourceTree = "<group>"; };
@@ -1034,7 +1032,6 @@
 				260447F50FEED62100B3B5A7 /* BuddyDetails.xib */,
 				26610B0C12293FA600591435 /* ActiveChats.xib */,
 				265F1B2A123040540065C5FE /* web.xib */,
-				26D92C9D1409B5410014E1EA /* callScreen.xib */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -1239,7 +1236,6 @@
 				266286AE1342C05D00EAFC92 /* red_button_gloss.png in Resources */,
 				266286AF1342C05D00EAFC92 /* red_button.png in Resources */,
 				2628E50714049DB50064131E /* askTempPass.xib in Resources */,
-				26D92C9E1409B5410014E1EA /* callScreen.xib in Resources */,
 				268BCCC5140B19B70025E4D1 /* green_button.png in Resources */,
 				2640AF501454910000CB4F60 /* MessageEntryBackground.png in Resources */,
 				2640AF511454910000CB4F60 /* MessageEntryBackground@2x.png in Resources */,

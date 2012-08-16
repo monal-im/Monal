@@ -18,11 +18,10 @@
 	
 	UINavigationController* navigationController;
  
-	IBOutlet UILabel* buddyName; 
+	 UILabel* buddyName; 
 
-    IBOutlet UIButton* endButton; 
-    IBOutlet UIView* topPanel; 
-    IBOutlet UIView* bottomPanel; 
+     UIButton* endButton; 
+
     xmpp* jabber;
     
 }
@@ -31,7 +30,7 @@
 -(void) show:(xmpp*) conn:(NSString*) name;
 
 
--(IBAction) endPress;
+-(void) endPress;
 
 
 @end

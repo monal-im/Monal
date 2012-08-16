@@ -14,11 +14,8 @@
 {
    navigationController=nav;
     
-	[self initWithNibName:@"callScreen" bundle:nil];
-    
-	//self.title=@" "; 
-    
-   
+	//[self initWithNibName:@"callScreen" bundle:nil];
+ 
     
    
 }
@@ -26,8 +23,6 @@
 -(void) show:(xmpp*) conn:(NSString*) name
 {
     
-     
-    [navigationController presentModalViewController:self animated:YES];
    
     
     //for ipad show differently 
@@ -36,14 +31,18 @@
         self.modalPresentationStyle=UIModalPresentationFormSheet; 
     }
     
+    
+    [navigationController presentModalViewController:self animated:YES];
+    
+    
     buddyName.text=name; 
     
-	;
+	
      
 }
 
 
--(IBAction) endPress
+-(void) endPress
 {
  debug_NSLog(@"end pressed"); 
     
@@ -60,17 +59,67 @@
 - (void)viewDidLoad
 {
     debug_NSLog(@"call screen did  appear");
+    
+    [super viewDidLoad];
+    
+    self.view.backgroundColor = [UIColor blackColor];
+    
+    endButton = [[UIButton alloc] initWithFrame:CGRectMake(20, self.view.frame.size.height-75, self.view.frame.size.width-40, 50)];
+    [endButton setTitle:@"End Call" forState:UIControlStateNormal];
+    [endButton setBackgroundImage:[UIImage imageNamed:@"red_button_gloss"] forState:UIControlStateNormal];
+    [endButton addTarget:self action:@selector(endPress) forControlEvents:UIControlEventTouchUpInside];
+   
+    UILabel* messageLabel =[[UILabel alloc] initWithFrame:CGRectMake(0, 20,  self.view.frame.size.width, 50)];
+    messageLabel.text=@"Calling";
+    [messageLabel setFont:[UIFont systemFontOfSize:30]];
+    messageLabel.backgroundColor = [UIColor blackColor];;
+    messageLabel.textColor=[UIColor whiteColor];
+    messageLabel.textAlignment=UITextAlignmentCenter;
+    
+    
+
+    UILabel* nameLabel =[[UILabel alloc] initWithFrame:CGRectMake(0, 80,  self.view.frame.size.width, 50)];
+    nameLabel.text=@"contactname";
+    [nameLabel setFont:[UIFont systemFontOfSize:25]];
+    nameLabel.backgroundColor = [UIColor blackColor];;
+    nameLabel.textColor=[UIColor whiteColor];
+    nameLabel.textAlignment=UITextAlignmentCenter;
+    
+    
+    
+    [self.view addSubview:nameLabel];
+    [self.view addSubview:messageLabel];
+    [self.view addSubview:endButton];
+    
 }
 
 - (void)viewDidUnload
 {
- debug_NSLog(@"call screen did  disappear");
+ debug_NSLog(@"call screen did  unload");
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
-    // Return YES for supported orientations
-    return true;
+    return NO;
+}
+
+
+
+-(void) viewDidAppear:(BOOL)animated
+{
+	debug_NSLog(@"call screen did  appear");
+	
+    [UIDevice currentDevice].proximityMonitoringEnabled=YES;
+}
+
+-(void)viewDidDisappear:(BOOL)animated
+{
+	debug_NSLog(@"call screen did  disappear");
+    
+    [UIDevice currentDevice].proximityMonitoringEnabled=NO;
+    
+	
+	
 }
 
 @end

@@ -3,7 +3,7 @@ Monal is an XMPP/Jabber IM client.  It can  connect to any standard  XMPP  chat 
 Notable features:
 
 ★ Free and No Ads!
-★ Strong focus on privacy. Does not phone home and does not have "metrics" software. Does not read any persosnal information. 
+★ Strong focus on privacy. Does not phone home and does not have "metrics" software. Does not read any personal information. 
 ★ A direct client and does not transmit your password to a 3rd party.
 ★ Standard XMPP Jingle VOIP. Allows voice conversation with any other user with a program that supports it (Google Talk)
 ★ Will work with corporate XMPP servers that require VPN

@@ -244,12 +244,8 @@
 	buddyMessage.text=message;
 		buddyStatus.text=status;
 
-	if([domain isEqualToString:@"AIM"])
-	{
-		//gtalk
-		protocolImage.image=[UIImage imageNamed:@"AIM.png"];
-	}
-	else
+	
+	
 	if([domain isEqualToString:@"gmail.com"])
 	{
 		//gtalk
@@ -266,11 +262,14 @@
 		//xmpp
 		protocolImage.image=[UIImage imageNamed:@"XMPP.png"];
 	}
-	//we want to put other protcols here later
+	
+// see if this user  has  jingle call
+
+
+
     
     
-    
-	;
+	
 }
 
 -(void) viewDidLoad

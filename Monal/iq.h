@@ -22,4 +22,7 @@
 @property (nonatomic) NSString* resource;
 
 @property (nonatomic) NSString* type;
+
+//not in an iq stanza but useful to ahve in the object
+@property (nonatomic) NSString* ver;
 @end

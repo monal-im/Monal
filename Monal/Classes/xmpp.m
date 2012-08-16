@@ -617,7 +617,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
         [db setResourceVer:presenceObj: accountNumber];
         
         //check for ver for caps. If not then request it  from this one
-        
+        debug_NSLog(@"requesting ver caps");
         if([db capsforVer:presenceObj.ver]==nil)
         {
             //request caps
@@ -1096,8 +1096,12 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 			
             debug_NSLog(@"got disco info request"); 
 			
+            if(iqObj.from!=nil)
+            {
 			[self sendDiscoInfo:iqObj.from:iqObj.idval];
-			State=nil; 
+            }
+            
+			State=nil;
 			return;
 		}
         
@@ -1224,7 +1228,7 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
             debug_NSLog(@"Disco Item: %@ %@",[attributeDict objectForKey:@"name"], [attributeDict objectForKey:@"jid"]   ); 
         
         //query the service fro more info
-        [self queryDiscoInfo:[attributeDict objectForKey:@"jid"] : sessionkey ];
+     //   [self queryDiscoInfo:[attributeDict objectForKey:@"jid"] : sessionkey ];
         
         ;
         return; 
@@ -1237,6 +1241,15 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
     {
         
         
+        if(	[[attributeDict objectForKey:@"category"] isEqualToString:@ "client"])
+        {
+            
+            debug_NSLog(@"Identity: client   as %@", [attributeDict objectForKey:@"category"]);
+           
+            
+            
+            return;
+        }
             
             
             if(	[[attributeDict objectForKey:@"category"] isEqualToString:@ "conference"])
@@ -1287,6 +1300,64 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
 	//iq->query->feature
 	 if(([State isEqualToString:@"discoinfo"]) && ([elementName isEqualToString: @"feature"]))
 	 {
+         //  for jingle info
+         /*
+          <feature var='urn:xmpp:jingle:apps:rtp:1'/>
+          <feature var='urn:xmpp:jingle:apps:rtp:audio'/>
+          <feature var='urn:xmpp:jingle:apps:rtp:video'/>
+          <feature var='urn:xmpp:jingle:transports:raw-udp:1'/>
+          <feature var='urn:xmpp:jingle:transports:ice-udp:1'/>
+          
+          */
+         
+         if(iqObj.ver==nil)
+         {
+             iqObj.ver=[db getVerForUser:iqObj.user Resource:iqObj.resource];
+             
+         }
+         
+         
+         if(	[[attributeDict objectForKey:@"var"] isEqualToString:@"urn:xmpp:jingle:apps:rtp:1"])
+		 {
+             debug_NSLog(@"FEATURE: jingle RTP");
+             [db setFeature:[attributeDict objectForKey:@"var"] forVer:iqObj.ver];
+             
+             
+		 }
+         
+         if(	[[attributeDict objectForKey:@"var"] isEqualToString:@"urn:xmpp:jingle:apps:rtp:audio"])
+		 {
+             debug_NSLog(@"FEATURE: jingle RTP audio");
+               [db setFeature:[attributeDict objectForKey:@"var"] forVer:iqObj.ver];
+             
+		 }
+         
+         if(	[[attributeDict objectForKey:@"var"] isEqualToString:@"urn:xmpp:jingle:apps:rtp:video"])
+		 {
+             debug_NSLog(@"FEATURE: jingle RTP video");
+               [db setFeature:[attributeDict objectForKey:@"var"] forVer:iqObj.ver];
+             
+		 }
+         
+         if(	[[attributeDict objectForKey:@"var"] isEqualToString:@"urn:xmpp:jingle:transports:raw-udp:1"])
+		 {
+             debug_NSLog(@"FEATURE: jingle raw udp");
+               [db setFeature:[attributeDict objectForKey:@"var"] forVer:iqObj.ver];
+             
+		 }
+         
+         
+         if(	[[attributeDict objectForKey:@"var"] isEqualToString:@"urn:xmpp:jingle:transports:ice-udp:1"])
+		 {
+             debug_NSLog(@"FEATURE: jingle ide udp");
+               [db setFeature:[attributeDict objectForKey:@"var"] forVer:iqObj.ver];
+             
+		 }
+         
+         
+         //other features
+         
+         
 		
 		 if(	[[attributeDict objectForKey:@"var"] isEqualToString:@"http://jabber.org/protocol/disco#info"])
 		 {

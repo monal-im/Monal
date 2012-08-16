@@ -15,7 +15,8 @@
 @synthesize to ;
 @synthesize  idval;
 @synthesize  resource;
-@synthesize type; 
+@synthesize type;
+@synthesize ver;
 
 -(void) reset
 {
@@ -27,6 +28,7 @@
     
 
 	type=nil;
+    ver=nil; 
 }
 
 @end

@@ -822,6 +822,34 @@ static DataLayer *sharedInstance=nil;
        
 }
 
+-(NSString*)getVerForUser:(NSString*)user Resource:(NSString*) resource
+{
+    NSString* query1=[NSString stringWithFormat:@" select ver from buddy_resources as A inner join buddylist as B on a.buddy_id=b.buddy_id where resource='%@' and buddy_name='%@'", resource, user ];
+	
+    NSString* ver = [self executeScalar:query1];
+    
+    return ver;
+
+}
+
+-(BOOL)setFeature:(NSString*)feature  forVer:(NSString*) ver
+{
+    NSString* query=[NSString stringWithFormat:@"insert into ver_info values ('%@', '%@')", ver,feature];
+	if([self executeNonQuery:query]!=false)
+	{
+		
+		;
+		return true;
+	}
+	else
+	{
+        ;
+		return false;
+	}
+}
+
+
+
 #pragma mark presence functions 
 
 -(BOOL) setResourceOnline:(presence*)presenceObj: (NSString*) accountNo
@@ -2187,7 +2215,7 @@ static DataLayer *sharedInstance=nil;
         
          [self executeNonQuery:@"create table buddy_resources(buddy_id integer,resource varchar(255),ver varchar(20))"];
         
-         [self executeNonQuery:@"create table ver_info(ver varchar(20),cap varchar(255))"];
+         [self executeNonQuery:@"create table ver_info(ver varchar(20),cap varchar(255), primary key (ver,cap))"];
 
         
         

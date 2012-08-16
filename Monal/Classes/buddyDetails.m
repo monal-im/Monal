@@ -52,15 +52,18 @@
     // send jingle stuff
     [jabber startCallUser:buddyName.text];
     
-    callScreen* call = [callScreen alloc] ;
+    call = [callScreen alloc] ;
     
     if([[tools machine] isEqualToString:@"iPad"])
     {
         call.splitViewController=splitViewController;
     }
+    else
+    {
     
+    call.navigationController=navigationController;
+    }
     
-    call.navigationController=navigationController; 
     [call show:jabber:buddyName.text];
    
 }

@@ -21,7 +21,8 @@
     UIButton* endButton; 
 
     xmpp* jabber;
-    
+
+    UINavigationController* modalNav;
 }
 
 -(void) show:(xmpp*) conn:(NSString*) name;

@@ -20,12 +20,13 @@
   //for ipad show differently 
     if([[tools machine] isEqualToString:@"iPad"])
     {
-        self.modalPresentationStyle=UIModalPresentationFormSheet;
         
-        UINavigationController* nav = [[UINavigationController alloc] initWithRootViewController:self];
-        nav.navigationBarHidden=YES;
+    modalNav = [[UINavigationController alloc] init];
+       [ modalNav.view addSubview:self.view];
+     
+        modalNav.modalPresentationStyle=UIModalPresentationFormSheet;
   
-        [splitViewController presentModalViewController:nav animated:YES];
+        [splitViewController presentModalViewController:modalNav animated:YES];
     }
     
     else
@@ -51,7 +52,7 @@
     
     if([[tools machine] isEqualToString:@"iPad"])
     {
-         [splitViewController dismissModalViewControllerAnimated:YES];
+        [splitViewController dismissModalViewControllerAnimated:YES];
     }
     
     else
@@ -71,16 +72,14 @@
 
 - (void)viewDidLoad
 {
-    debug_NSLog(@"call screen did  appear");
+    debug_NSLog(@"call screen did  load");
     
    // [super viewDidLoad];
     
     self.view.backgroundColor = [UIColor blackColor];
-    
-    self.view.autoresizingMask=YES;
     self.view.autoresizesSubviews=YES;
-
     
+   
     endButton = [[UIButton alloc] initWithFrame:CGRectMake(20, self.view.frame.size.height-75, self.view.frame.size.width-40, 50)];
     [endButton setTitle:@"End Call" forState:UIControlStateNormal];
     [endButton setBackgroundImage:[UIImage imageNamed:@"red_button_gloss"] forState:UIControlStateNormal];
@@ -107,7 +106,6 @@
     [self.view addSubview:nameLabel];
     [self.view addSubview:messageLabel];
     [self.view addSubview:endButton];
-
     
 }
 
@@ -123,13 +121,25 @@
 
 
 
--(void) viewDidAppear:(BOOL)animated
+-(void) viewWillAppear:(BOOL)animated
 {
     
+      
 	debug_NSLog(@"call screen did  appear");
 	
-   
- 
+    if([[tools machine] isEqualToString:@"iPad"])
+    {
+    self.view.frame = modalNav.view.frame;
+    }
+    
+    endButton.frame=CGRectMake(20, self.view.frame.size.height-75, self.view.frame.size.width-40, 50);
+    messageLabel.frame=CGRectMake(0, 20,  self.view.frame.size.width, 50);
+  
+    
+    
+    nameLabel.frame=CGRectMake(0, 80,  self.view.frame.size.width, 50);
+    
+    
     
     [UIDevice currentDevice].proximityMonitoringEnabled=YES;
 }

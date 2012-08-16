@@ -43,7 +43,10 @@
 	IBOutlet UITableViewCell* bottomcell; 
 
     
-    IBOutlet UIButton* callButton; 
+    IBOutlet UIButton* callButton;
+    
+    callScreen*  call;
+    
     
 }
 

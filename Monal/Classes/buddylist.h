@@ -91,6 +91,7 @@
 @property (nonatomic) UIBarButtonItem* plusButton;
 @property (nonatomic)  UINavigationController* viewController; 
 
+@property MGSplitViewController* splitViewController; 
 
 @end
 

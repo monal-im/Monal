@@ -17,7 +17,9 @@
 @synthesize plusButton;
 @synthesize viewController; 
 @synthesize tabcontroller;
-@synthesize theOfflineList; 
+@synthesize theOfflineList;
+
+@synthesize splitViewController; 
 
 -(void)initList:(chat*) chatWin
 {
@@ -258,28 +260,13 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
 
 	
 
-  /*  NSString* machine=[tools machine]; 
-    UIInterfaceOrientation orientation =[[UIApplication sharedApplication] statusBarOrientation];
-    if(([machine hasPrefix:@"iPad"] )
-       
-       &&
-       (!((orientation==UIInterfaceOrientationLandscapeLeft) || 
-         (orientation==UIInterfaceOrientationLandscapeRight)
-         )))
-    {
-        
-	// ipad stuff
-	if(tabcontroller.selectedIndex!=0)
-	@try
-	{
-		tabcontroller.selectedIndex = 0;
-	}
-	@catch(NSException* err) {}
-	}*/
+
  
     
 	buddyDetails* detailwin=[buddyDetails alloc];
 	
+    detailwin.splitViewController=splitViewController;
+    
 	[detailwin init:jabber:viewController:@""];
 	detailwin.iconPath=iconPath; 
 	

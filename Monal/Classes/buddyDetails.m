@@ -21,6 +21,8 @@
 @synthesize buddyStatus;
 @synthesize buddyMessage;
 
+@synthesize splitViewController; 
+
 
 -(void) init: (protocol*) jabberIn:(UINavigationController*) nav:(NSString*)username
 {
@@ -51,7 +53,14 @@
     [jabber startCallUser:buddyName.text];
     
     callScreen* call = [callScreen alloc] ;
-    [call init:navigationController];
+    
+    if([[tools machine] isEqualToString:@"iPad"])
+    {
+        call.splitViewController=splitViewController;
+    }
+    
+    
+    call.navigationController=navigationController; 
     [call show:jabber:buddyName.text];
    
 }

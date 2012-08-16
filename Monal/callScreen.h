@@ -10,27 +10,26 @@
 #import <UIKit/UIKit.h>
 #import "tools.h"
 #import "xmpp.h"
+#import "MGSplitViewController/MGSplitViewController.h"
 
 
 @interface callScreen : UIViewController
 {
-   
-	
-	UINavigationController* navigationController;
- 
-	 UILabel* buddyName; 
 
-     UIButton* endButton; 
+	UILabel* messageLabel;
+    UILabel* nameLabel;
+    UIButton* endButton; 
 
     xmpp* jabber;
     
 }
 
--(void) init:(UINavigationController*) nav;
 -(void) show:(xmpp*) conn:(NSString*) name;
-
-
 -(void) endPress;
+
+
+@property (nonatomic) UINavigationController* navigationController;
+@property (nonatomic) MGSplitViewController* splitViewController;
 
 
 @end

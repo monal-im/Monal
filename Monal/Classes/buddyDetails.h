@@ -11,7 +11,6 @@
 #import "callScreen.h"
 
 
-
 @interface buddyDetails : UIViewController{
 
 	protocol* jabber;
@@ -66,5 +65,8 @@
 @property (nonatomic) IBOutlet UILabel* buddyName;
 @property (nonatomic) IBOutlet UILabel* fullName;
 @property (nonatomic) IBOutlet UILabel* buddyStatus;
-@property (nonatomic) IBOutlet UITextView* buddyMessage; 
+@property (nonatomic) IBOutlet UITextView* buddyMessage;
+
+@property MGSplitViewController* splitViewController; 
+
 @end

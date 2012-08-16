@@ -862,6 +862,8 @@
 	
 	
 	buddylistDS=[buddylist alloc];
+
+    
 	[buddylistDS initList:chatwin];
 buddylistDS.tabcontroller=tabcontroller;
 	buddylistDS.iconPath=iconPath; 
@@ -1064,7 +1066,8 @@ buddylistDS.tabcontroller=tabcontroller;
 	buddylistDS.tabcontroller=tabcontroller;
 	buddylistDS.iconPath=iconPath; 
 	buddylistDS.jabber=jabber;
-	
+    buddylistDS.splitViewController=split;
+        
 	
 	buddylistDS.viewController=buddyNavigationController;
  

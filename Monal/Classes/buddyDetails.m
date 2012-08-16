@@ -289,12 +289,15 @@
 {
 	debug_NSLog(@"buddy details did  appear");
 	//[scroll setContentSize:CGSizeMake(320, 509)];
+    
+    [UIDevice currentDevice].proximityMonitoringEnabled=YES; 
 }
 
 -(void)viewDidDisappear:(BOOL)animated
 {
 	debug_NSLog(@"buddy details did  disappear");
-	
+    
+   [UIDevice currentDevice].proximityMonitoringEnabled=NO;
    
 	
 	

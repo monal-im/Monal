@@ -3077,7 +3077,11 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 
 -(bool) startCallUser:(NSString*) buddy
 {
-    return [self talk:[jingleCall initiateJingle:buddy:sessionkey]];
+    //get the resource for the budy
+    
+    NSArray* resources= [db getResourcesForUser:buddy];
+    
+    return [self talk:[jingleCall initiateJingle:buddy:sessionkey:[[resources objectAtIndex:0] objectAtIndex:0]]];
 }
 
 -(bool) endCall
@@ -3094,7 +3098,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
     NSString*	xmpprequest1=[NSString stringWithFormat: @"<iq type='get' to='%@' id='search1'> <query xmlns='jabber:iq:search'/> </iq>", userSearchServer];
     val=  [self talk:xmpprequest1];
     
-    ; 
+    
 	return val;  
 }
 

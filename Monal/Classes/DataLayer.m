@@ -561,6 +561,17 @@ static DataLayer *sharedInstance=nil;
 	
 }
 
+-(NSArray*)getResourcesForUser:(NSString*)user 
+{
+    NSString* query1=[NSString stringWithFormat:@" select resource from buddy_resources as A inner join buddylist as B on a.buddy_id=b.buddy_id where  buddy_name='%@'  ", user ];
+	
+    NSArray* resources = [self executeReader:query1];
+    
+    return resources;
+    
+}
+
+
 -(NSArray*) onlineBuddies:(NSString*) accountNo
 {
 	

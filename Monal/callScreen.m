@@ -38,6 +38,11 @@
     
     nameLabel.text=name;
     
+    
+    // check for two resources here.. for for now jsut grab the first
+    //need to change the xmpp function to take  resource
+    
+    [jabber startCallUser:name];
 	
      
 }
@@ -116,6 +121,10 @@
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
+    if(interfaceOrientation==UIInterfaceOrientationPortrait)
+        return YES;
+        else
+    
     return NO;
 }
 

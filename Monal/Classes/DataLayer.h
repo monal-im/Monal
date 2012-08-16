@@ -75,6 +75,8 @@
 -(BOOL) setBuddyHash:(NSString*) buddy :(NSString*) accountNo:(NSString*) theHash;
 -(NSString*) buddyHash:(NSString*) buddy :(NSString*) accountNo; 
 
+-(NSArray*)getResourcesForUser:(NSString*)user ;
+
 -(bool) isBuddyOnline:(NSString*) buddy :(NSString*) accountNo ;
 -(bool) isBuddyMuc:(NSString*) buddy :(NSString*) accountNo;
 

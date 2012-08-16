@@ -51,7 +51,7 @@
 -(NSString*) ack:(NSString*) to:(NSString*) iqid;
 -(NSString*) acceptJingle;
 -(NSString*) rejectJingle; 
--(NSString*) initiateJingle:(NSString*) to  :(NSString*)iqid;
+-(NSString*) initiateJingle:(NSString*) to  :(NSString*)iqid:(NSString*) resource;
 -(NSString*) terminateJingle;
 
 -(void) resetVals;

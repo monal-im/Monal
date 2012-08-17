@@ -27,6 +27,8 @@
 
 @synthesize idval;
 
+@synthesize action;
+
 -(void) resetVals
 {
     thesid=nil;
@@ -155,15 +157,14 @@
     didStartCall=YES;
         NSString* ownIP= [self localIPAddress];
     localPort=@"50002"; // some random val
-    
+   localPort2=@"50012"; // some random val
     otherParty=to;
     debug_NSLog(@"resource id %@", resource); 
  
     thesid=@"Monal3sdfg"; //something random
  NSMutableString* query=[[NSMutableString alloc] init];
-    [query appendFormat:@" <iq to='%@/%@' id='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-initiate' initiator='%@' responder='%@' sid='%@'> <content creator='initiator'  name=\"audio-session\" senders=\"both\" responder='%@'> <description xmlns=\"urn:xmpp:jingle:apps:rtp:1\" media=\"audio\"> <payload-type id=\"8\" name=\"PCMA\" clockrate=\"8000\" channels='0'/></description> <transport xmlns='urn:xmpp:jingle:transports:raw-udp:1'><candidate component=\"1\" ip=\"%@\" port=\"%@\"   id=\"monal001\" generation=\"0\"  /></transport> </content> </jingle> </iq>", otherParty, resource, iqid, me, to,  thesid, to, ownIP, localPort];
+    [query appendFormat:@" <iq to='%@/%@' id='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-initiate' initiator='%@' responder='%@' sid='%@'> <content creator='initiator'  name=\"audio-session\" senders=\"both\" responder='%@'> <description xmlns=\"urn:xmpp:jingle:apps:rtp:1\" media=\"audio\"> <payload-type id=\"8\" name=\"PCMA\" clockrate=\"8000\" channels='0'/></description> <transport xmlns='urn:xmpp:jingle:transports:raw-udp:1'><candidate component=\"1\" ip=\"%@\" port=\"%@\"   id=\"monal001\" generation=\"0\" preference=1  /><transport xmlns='urn:xmpp:jingle:transports:raw-udp:1'><candidate component=\"2\" ip=\"%@\" port=\"%@\"   id=\"monal002\" generation=\"0\" preference=2 /></transport> </content> </jingle> </iq>", otherParty, resource, iqid, me, to,  thesid, to, ownIP, localPort,ownIP,localPort2];
     
-
     return query;
 }
 

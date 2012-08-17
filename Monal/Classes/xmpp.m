@@ -891,7 +891,12 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
        )
        )
 	{
-        debug_NSLog(@"got Jingle message, sent ack"); 
+     
+        [jingleCall resetVals];
+        jingleCall.action=[attributeDict objectForKey:@"action"];
+        
+      
+        debug_NSLog(@"got Jingle message, sent ack");
         //send ack of message
         [self talk:[jingleCall ack:iqObj.from:iqObj.idval]];
         
@@ -901,22 +906,11 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
             {
                 debug_NSLog(@"got Jingle session initiate "); 
                 
-                jingleCall.thesid= [attributeDict objectForKey:@"sid"] ;
-                
-              
-                UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Incoming Call"
-                                                                message:[NSString stringWithFormat:@"Call from %@" , iqObj.user]
-                                                               delegate:self cancelButtonTitle:@"Decline"
-                                                      otherButtonTitles:@"Answer",  nil] ;
-                alert.tag=3;
+                jingleCall.thesid= [attributeDict objectForKey:@"sid"];
                 
                 
-                //we want to set data into the jingle object here..
                 
-                
-                [alert show];
-                
-                
+               
             }
   
   
@@ -1041,6 +1035,19 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
             jingleCall.idval=sessionkey;
             
             debug_NSLog(@"got Jingle local candidate..");
+            
+            
+            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Incoming Call"
+                                                            message:[NSString stringWithFormat:@"Call from %@" , iqObj.user]
+                                                           delegate:self cancelButtonTitle:@"Decline"
+                                                  otherButtonTitles:@"Answer",  nil] ;
+            alert.tag=3;
+            
+            
+            //we want to set data into the jingle object here..
+            
+            
+            [alert show];
            
                     
         }
@@ -3065,15 +3072,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	
 }
 #pragma mark Jinge Call 
--(bool)rejectCallUser:(NSString*) buddy
-{
 
-}
-
--(bool) acceptCallUser:(NSString*) buddy
-{
-   // return [self talk:[jingleCall initiateJingle:buddy]]; 
-}
 
 -(bool) startCallUser:(NSString*) buddy
 {

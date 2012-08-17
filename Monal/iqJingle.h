@@ -43,7 +43,10 @@
     
     BOOL didReceiveTerminate;
     BOOL activeCall;
-    BOOL didStartCall; 
+    BOOL didStartCall;
+    
+    // jingle object elements
+    NSString* action; 
 
 }
 -(NSString*) getGoogleInfo:(NSString*) idval;
@@ -78,5 +81,7 @@
 
 
 @property (nonatomic) BOOL didReceiveTerminate;
+
+@property (nonatomic) NSString* action;
 
 @end

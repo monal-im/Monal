@@ -117,7 +117,7 @@ void checkerror(int rtperr)
                     //start playback after thre are 30 packets
                     
                     
-                    if((packCount>30 && playState.playing==NO) && (disconnecting==NO))
+                    if((packCount>50 && playState.playing==NO) && (disconnecting==NO))
                     {
                         OSStatus status = AudioQueueStart(playState.queue, NULL);
                         if(status == 0)
@@ -433,6 +433,8 @@ void AudioInputCallback(
     jrtplib::RTPUDPv4TransmissionParams transparams;
     jrtplib::RTPSessionParams sessparams;
     
+    debug_NSLog(@" RTP to ip %d  IP %@ on port %d and potbase %d", destip,IP,  destport, portbase);
+    
     
     // IMPORTANT: The local timestamp unit MUST be set, otherwise
     //            RTCP Sender Report info will be calculated wrong
@@ -448,6 +450,8 @@ void AudioInputCallback(
     
     if(status!=0) return status;
     
+    
+    
     jrtplib::RTPIPv4Address addr(destip,destport);
     
     status = sess.AddDestination(addr);
@@ -455,7 +459,6 @@ void AudioInputCallback(
     
     if(status!=0) return status;
     
-    debug_NSLog(@" RTP to ip %d  IP %@ on port %d", destip,IP,  destport);
     
     
     

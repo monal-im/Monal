@@ -892,7 +892,10 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
        )
 	{
      
+        if(jingleCall.activeCall==NO)
         [jingleCall resetVals];
+           
+           
         jingleCall.action=[attributeDict objectForKey:@"action"];
         
       
@@ -997,8 +1000,8 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
     if(([State isEqualToString:@"jingleTransport"])
        && (([elementName isEqualToString: @"candidate"]) ||
            ([elementName isEqualToString: @"p:candidate"])
-                      )
-       )
+                      ))
+       
 	{
         debug_NSLog(@"got Jingle transport candidate"); 
         
@@ -1034,6 +1037,9 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
            
             jingleCall.idval=sessionkey;
             
+            
+            if( [jingleCall.action isEqualToString:@"session-initiate"])
+            {
             debug_NSLog(@"got Jingle local candidate..");
             
             
@@ -1042,12 +1048,21 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
                                                            delegate:self cancelButtonTitle:@"Decline"
                                                   otherButtonTitles:@"Answer",  nil] ;
             alert.tag=3;
+                 [alert show];
+            }
             
+            if( [jingleCall.action isEqualToString:@"session-accept"])
+            {
+                debug_NSLog(@"connecting to jingle");
+                
+                [jingleCall performSelectorOnMainThread:@selector(connect) withObject:nil waitUntilDone:NO];
+
+            }
             
             //we want to set data into the jingle object here..
             
             
-            [alert show];
+           
            
                     
         }

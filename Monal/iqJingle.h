@@ -42,7 +42,7 @@
     
     
     BOOL didReceiveTerminate;
-    BOOL activeCall;
+
     BOOL didStartCall;
     
     // jingle object elements
@@ -83,5 +83,7 @@
 @property (nonatomic) BOOL didReceiveTerminate;
 
 @property (nonatomic) NSString* action;
+
+@property (nonatomic)     BOOL activeCall;
 
 @end

@@ -37,6 +37,12 @@
     
     NSString* idval;
     
+    //jingle state objects
+    NSString* activeResource;
+    NSString* initiator;
+    NSString* responder; 
+    
+    
     RTP* rtp;
     RTP* rtp2;
     

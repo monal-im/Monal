@@ -38,9 +38,10 @@
     
     nameLabel.text=name;
     
-    
+    jabber=conn; 
     // check for two resources here.. for for now jsut grab the first
     //need to change the xmpp function to take  resource
+    
     
     [jabber startCallUser:name];
 	

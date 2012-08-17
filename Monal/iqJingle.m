@@ -48,6 +48,10 @@
     
     activeCall=NO;
     didStartCall=NO;
+    
+    activeResource=nil;
+    initiator=nil;
+    responder=nil; 
 }
 
 -(id) init
@@ -143,6 +147,8 @@
     [query appendFormat:@"<iq      to='%@'  id='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-accept'  responder='%@' sid='%@'> <content creator='initiator' name=\"audio-session\" senders=\"both\"><description xmlns=\"urn:xmpp:jingle:apps:rtp:1\" media=\"audio\"> <payload-type id=\"8\" name=\"PCMA\" clockrate=\"8000\"/></description> <transport xmlns='urn:xmpp:jingle:transports:raw-udp:1'><candidate type=\"host\" network=\"0\" component=\"1\" ip=\"%@\" port=\"%@\"   id=\"monal001\" generation=\"0\" protocol=\"udp\" priority=\"1\" /> <candidate type=\"host\" network=\"0\" component=\"2\" ip=\"%@\" port=\"%@\"   id=\"monal002\" generation=\"0\" protocol=\"udp\" priority=\"2\" /> </transport> </content> </jingle> </iq>", otherParty, idval,  me,  thesid, ownIP, localPort, ownIP, localPort2];
       
     
+    initiator=otherParty;
+    responder=me; 
     
   /*  NSMutableString* query=[[NSMutableString alloc] init];
     [query appendFormat:@"<iq      to='%@'  id='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-accept'  responder='%@' sid='%@'> <content creator='initiator' name=\"audio-session\" senders=\"both\"><description xmlns=\"urn:xmpp:jingle:apps:rtp:1\" media=\"audio\"> <payload-type name='SPEEX' clockrate='8000' id='98' channels='1'/></description> <transport xmlns='urn:xmpp:jingle:transports:raw-udp:1'><candidate type=\"host\" network=\"0\" component=\"1\" ip=\"%@\" port=\"%@\"   id=\"monal001\" generation=\"0\" protocol=\"udp\" priority=\"1\" /></transport> </content> </jingle> </iq>", to, idval,  me,  thesid, ownIP, localPort];
@@ -161,6 +167,8 @@
     didStartCall=YES;
     activeCall=YES;
     
+   
+    
         NSString* ownIP= [self localIPAddress];
     localPort=@"7078"; // some random val
    localPort2=@"7079"; // some random val
@@ -170,6 +178,10 @@
     thesid=@"Monal3sdfg"; //something random
  NSMutableString* query=[[NSMutableString alloc] init];
     [query appendFormat:@" <iq to='%@/%@' id='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-initiate' initiator='%@' responder='%@' sid='%@'> <content creator='initiator'  name=\"audio-session\" senders=\"both\" responder='%@'> <description xmlns=\"urn:xmpp:jingle:apps:rtp:1\" media=\"audio\"> <payload-type id=\"8\" name=\"PCMA\" clockrate=\"8000\" channels='0'/></description> <transport xmlns='urn:xmpp:jingle:transports:raw-udp:1'><candidate component=\"1\" ip=\"%@\" port=\"%@\"   id=\"monal001\" generation=\"0\"   /><candidate component=\"2\" ip=\"%@\" port=\"%@\"   id=\"monal002\" generation=\"0\"  /> </transport> </content> </jingle> </iq>", otherParty, resource, iqid, me, to,  thesid, to, ownIP, localPort,ownIP,localPort2];
+    
+    initiator=me;
+    responder=otherParty;
+     activeResource=resource;
     
     return query;
 }
@@ -193,7 +205,7 @@
     
     NSMutableString* query=[[NSMutableString alloc] init];
      if(!didReceiveTerminate)
-         [query appendFormat:@"<iq   id='%@'   to='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-terminate'  initiator='%@' responder='%@' sid='%@'> <reason> <success/> </reason> </jingle> </iq>", idval, otherParty, otherParty, me,  thesid];
+         [query appendFormat:@"<iq   id='%@'   to='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-terminate'  initiator='%@' responder='%@' sid='%@'> <reason> <success/> </reason> </jingle> </iq>", idval, otherParty, initiator, responder,  thesid];
     
     else
         query=@"";

@@ -117,7 +117,7 @@ void checkerror(int rtperr)
                     //start playback after thre are 30 packets
                     
                     
-                    if((packCount>50 && playState.playing==NO) && (disconnecting==NO))
+                    if((packCount>30 && playState.playing==NO) && (disconnecting==NO))
                     {
                         OSStatus status = AudioQueueStart(playState.queue, NULL);
                         if(status == 0)
@@ -128,7 +128,9 @@ void checkerror(int rtperr)
                             
                             for(int i = 0; i < NUM_BUFFERS; i++)
                             {
+                               
                                 
+                                // needs a proper circular buffer before i use this again.. 
                                AudioOutputCallback(&playState, playState.queue, playState.buffers[i]);
                             }
                             

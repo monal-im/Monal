@@ -990,12 +990,14 @@ buddylistDS.tabcontroller=tabcontroller;
 	@catch(NSException* err) {}
 	 
 
-    
+    dispatch_async(dispatch_get_main_queue(), ^{
    loginProgressHud= [MBProgressHUD showHUDAddedTo:buddyTable animated:YES];
     loginProgressHud.mode = MBProgressHUDModeIndeterminate;
+    loginProgressHud.removeFromSuperViewOnHide=YES; 
     
     loginProgressHud.labelText = @"Connecting";
     loginProgressHud.dimBackground=YES;
+    });
     
  	
 	if(jabber!=nil)

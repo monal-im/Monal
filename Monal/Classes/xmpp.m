@@ -908,6 +908,8 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
             if(	[[attributeDict objectForKey:@"action"] isEqualToString:@"session-initiate"])
             {
                 debug_NSLog(@"got Jingle session initiate "); 
+                if( jingleCall.waitingOnUserAccept==YES)  return;
+                
                 
                 jingleCall.thesid= [attributeDict objectForKey:@"sid"];
                 
@@ -1041,7 +1043,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
             if( [jingleCall.action isEqualToString:@"session-initiate"])
             {
             debug_NSLog(@"got Jingle local candidate..");
-            
+                jingleCall.waitingOnUserAccept=YES;
             
             UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Incoming Call"
                                                             message:[NSString stringWithFormat:@"Call from %@" , iqObj.user]
@@ -3094,8 +3096,24 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
     //get the resource for the budy
     
     NSArray* resources= [db getResourcesForUser:buddy];
+    NSString* buddyResource;
     
-    return [self talk:[jingleCall initiateJingle:buddy:sessionkey:[[resources objectAtIndex:0] objectAtIndex:0]]];
+    if([resources count]>0)
+    {
+        buddyResource=[[resources objectAtIndex:0] objectAtIndex:0];
+    
+    }
+    else
+    {
+    //see if it has resource it came from
+        NSArray* parts=[buddy  componentsSeparatedByString:@"/"];
+        if([parts count]>1)
+        buddyResource=[parts objectAtIndex:1];
+        
+    }
+    
+    
+    return [self talk:[jingleCall initiateJingle:buddy:sessionkey:buddyResource]];
 }
 
 -(bool) endCall
@@ -4098,7 +4116,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 
 
 
-
+#pragma mark alertview
 
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
 {
@@ -4151,10 +4169,17 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
                 [jingleCall performSelectorOnMainThread:@selector(connect) withObject:nil waitUntilDone:NO];
 
                 
+                //send notification to show call screen
+                NSDictionary* infoDict= [NSDictionary dictionaryWithObject:jingleCall.otherParty forKey:@"Name"];
+                
+                [[NSNotificationCenter defaultCenter]
+                 postNotificationName: @"ShowCall" object:self userInfo: infoDict];
+                
+                
             }
             else
             {
-                  debug_NSLog(@"sending jingle reject");
+                                  debug_NSLog(@"sending jingle reject");
                   [self talk: [jingleCall rejectJingle]];
             }
         

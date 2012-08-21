@@ -30,6 +30,7 @@
 @synthesize action;
 
 @synthesize activeCall;
+@synthesize waitingOnUserAccept;
 
 -(void) resetVals
 {
@@ -48,6 +49,8 @@
     
     activeCall=NO;
     didStartCall=NO;
+    waitingOnUserAccept=NO; 
+    
     
     activeResource=nil;
     initiator=nil;

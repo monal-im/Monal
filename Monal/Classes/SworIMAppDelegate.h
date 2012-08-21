@@ -26,11 +26,14 @@
 
 #import "GroupChat.h"
 #import "askTempPass.h"
+#import "CallScreen.h"
+
 #import "PasswordManager.h"
 
 #import "MGSplitViewController.h"
-
 #import "MBProgressHud.h"
+
+
 
 
 @interface SworIMAppDelegate : UIViewController <UIApplicationDelegate, 
@@ -74,8 +77,9 @@ UINavigationControllerDelegate,UIAlertViewDelegate, MGSplitViewControllerDelegat
 	
 
 	chat* chatwin;
-
-	Reachability* reach; 
+    callScreen* call;
+    
+	Reachability* reach;
 
 	DataLayer* db;
 	NSString* iconPath; 
@@ -132,6 +136,8 @@ UINavigationControllerDelegate,UIAlertViewDelegate, MGSplitViewControllerDelegat
 
 -(void) addBuddy;
 
+
+-(void) ShowCall:(NSNotification*) notification;
 
 -(void) reloadBuddies:(NSArray*) indexpaths;
 

@@ -91,5 +91,6 @@
 @property (nonatomic) NSString* action;
 
 @property (nonatomic)     BOOL activeCall;
+@property (nonatomic)     BOOL waitingOnUserAccept;
 
 @end

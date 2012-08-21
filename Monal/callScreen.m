@@ -135,7 +135,7 @@
 {
     
       
-	debug_NSLog(@"call screen did  appear");
+	debug_NSLog(@"call screen will  appear");
 	
     if([[tools machine] isEqualToString:@"iPad"])
     {
@@ -151,14 +151,14 @@
     
     
     
-    [UIDevice currentDevice].proximityMonitoringEnabled=YES;
+   // [UIDevice currentDevice].proximityMonitoringEnabled=YES;
 }
 
 -(void)viewDidDisappear:(BOOL)animated
 {
 	debug_NSLog(@"call screen did  disappear");
     
-    [UIDevice currentDevice].proximityMonitoringEnabled=NO;
+  //  [UIDevice currentDevice].proximityMonitoringEnabled=NO;
     
 	
 	

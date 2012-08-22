@@ -939,6 +939,15 @@ buddylistDS.tabcontroller=tabcontroller;
 
 -(void) reconnect
 {
+    //hide anyhud there might be
+    
+    if(loginProgressHud!=nil)
+    {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [loginProgressHud hide:YES ];
+    });
+    }
+    
 	/// check reachbility
 	debug_NSLog(@"checking reachability"); 
     

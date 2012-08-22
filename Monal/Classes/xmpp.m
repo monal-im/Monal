@@ -2727,7 +2727,7 @@ debug_NSLog(@"ended this element: %@", elementName);
 	}
 	
 
-	debug_NSLog(@" intial get:%@", [[NSString alloc] initWithData:theset encoding:NSUTF8StringEncoding] ); // xmpp is utf-8 encoded
+	//debug_NSLog(@" intial get:%@", [[NSString alloc] initWithData:theset encoding:NSUTF8StringEncoding] ); // xmpp is utf-8 encoded
 	
 	
 	/*

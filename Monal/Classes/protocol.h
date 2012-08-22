@@ -134,7 +134,9 @@
 -(bool) endCall; 
 
 
-- (NSString *)base64Encoding:(NSString*) string;
+- (NSString *)encodeBase64WithString:(NSString *)strData ;
+- (NSString *)encodeBase64WithData:(NSData *)objData;
+
 - (NSData*)dataWithBase64EncodedString:(NSString *)string;
 
 - (NSData *) MD5:(NSString*)string ;

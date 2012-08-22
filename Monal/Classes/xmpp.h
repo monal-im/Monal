@@ -10,6 +10,7 @@
 #import <CoreFoundation/CoreFoundation.h>
 
 
+
 #import "protocol.h"
 
 //xmpp stanza objects
@@ -160,6 +161,7 @@
 
 -(bool) sendLast:(NSString*) to:(NSString*) userid;
 -(bool) sendVersion:(NSString*) to:(NSString*) userid;
+-(NSString*)getVersionString;
 
 #pragma mark User Search
 

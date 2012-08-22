@@ -138,7 +138,8 @@
     
     
     
-    verHash=@"VUFD6HcFmUT2NxJkBGCiKlZnS3M=" ; // plucked from pidgin .. need to make my own later
+    verHash=[self getVersionString];
+    //@"VUFD6HcFmUT2NxJkBGCiKlZnS3M=" ; // plucked from pidgin .. need to make my own later
     
     
     messageoutBuffer=[[NSMutableString alloc] init];
@@ -150,6 +151,8 @@
 	return self;
 
 }
+
+
 
 -(void) dnsDiscover
 {
@@ -2064,7 +2067,7 @@ debug_NSLog(@"ended this element: %@", elementName);
 		
 		debug_NSLog(@"sending  response to %@", response);
 		
-		NSString* encoded=[self base64Encoding:response];
+		NSString* encoded=[self encodeBase64WithString:response];
 		
 		
 		NSString* xmppcmd = [NSString stringWithFormat:@"<response xmlns='urn:ietf:params:xml:ns:xmpp-sasl'>%@</response>", encoded];
@@ -3047,6 +3050,25 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	
 }
 
+-(NSString*)getVersionString
+{
+    
+    NSString* unhashed=[NSString stringWithFormat:@"client/pc//Monal %@<http://jabber.org/protocol/caps<http://jabber.org/protocol/disco#info<http://jabber.org/protocol/disco#items<http://jabber.org/protocol/muc<<http://jabber.org/protocol/offline<", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"] ];
+    NSData* hashed; 
+    
+    unsigned char digest[CC_SHA1_DIGEST_LENGTH];
+    NSData *stringBytes = [unhashed dataUsingEncoding: NSUTF8StringEncoding]; /* or some other encoding */
+    if (CC_SHA1([stringBytes bytes], [stringBytes length], digest)) {
+        hashed =[NSData dataWithBytes:digest length:CC_SHA1_DIGEST_LENGTH];
+    }
+    
+    NSString* hashedBase64= [self encodeBase64WithData:hashed];
+ 
+    
+    return hashedBase64;
+    
+}
+
 
 -(bool) sendTime:(NSString*) to:(NSString*) userid
 {
@@ -4007,7 +4029,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 		
 		//@%@
 		//********sasl plain
-		NSString* saslplain=[self base64Encoding: [NSString stringWithFormat:@"\0%@\0%@",  account, password ]];
+		NSString* saslplain=[self encodeBase64WithString: [NSString stringWithFormat:@"\0%@\0%@",  account, password ]];
 		
 		
 		//[xmpprequest release];
@@ -4043,7 +4065,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
         
 		
 		//sasls plain wihtout SSL
-		NSString* saslplain=[self base64Encoding: [NSString stringWithFormat:@"\0%@\0%@",  account,  password]];
+		NSString* saslplain=[self encodeBase64WithString: [NSString stringWithFormat:@"\0%@\0%@",  account,  password]];
 		
 		
 		//[xmpprequest release];

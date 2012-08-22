@@ -814,6 +814,8 @@
 {
 	//connection
 	[db resetBuddies]; // forget buddy states
+    [db clearLegacyCaps];
+    
 	activeTab.badgeValue=nil; 
 	
 	

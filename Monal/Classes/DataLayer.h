@@ -52,6 +52,11 @@
 
 -(BOOL)setFeature:(NSString*)feature  forVer:(NSString*) ver;
 
+#pragma mark legacy caps
+-(void) clearLegacyCaps;
+-(BOOL) setLegacyCap:(NSString*)cap forUser:(presence*)presenceObj accountNo:(NSString*) acctNo;
+-(BOOL) checkLegacyCap:(NSString*)cap forUser:(NSString*) user accountNo:(NSString*) acctNo;
+
 
 
 #pragma mark  presence functions

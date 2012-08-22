@@ -623,6 +623,20 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
             [self queryDiscoInfo:presenceObj.from:sessionkey];
         }
         
+        //legacy caps
+         NSString* ext=[attributeDict objectForKey:@"ext"];
+        if(ext!=nil)
+        {
+            NSArray* caps =[ext componentsSeparatedByString:@" "];
+            
+                int capsIter=0;
+                while (capsIter<[caps count])
+                {
+                    [db setLegacyCap:[caps objectAtIndex:capsIter] forUser:presenceObj accountNo:accountNumber];
+                    capsIter++;
+                }
+            
+        }
 
     }
 	

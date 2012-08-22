@@ -867,7 +867,61 @@ static DataLayer *sharedInstance=nil;
 	}
 }
 
+#pragma mark legacy caps
 
+-(void) clearLegacyCaps
+{
+    NSString* query=[NSString stringWithFormat:@"delete from buddy_resources_legacy_caps"];
+    
+    //debug_NSLog(@"%@", query);
+   [self executeNonQuery:query];
+    
+    return;
+}
+
+-(BOOL) setLegacyCap:(NSString*)cap forUser:(presence*)presenceObj accountNo:(NSString*) acctNo
+{
+    if (presenceObj.resource==nil) return NO;
+    
+    NSString* query1=[NSString stringWithFormat:@" select buddy_id from buddylist where account_id=%@ and  buddy_name='%@';", acctNo, presenceObj.user ];
+	
+    NSString* buddyid = [self executeScalar:query1];
+    
+    if(buddyid==nil) return NO;
+    
+    
+    NSString* query2=[NSString stringWithFormat:@" select capid  from legacy_caps  where captext='%@';", cap ];
+	
+    NSString* capid = [self executeScalar:query2];
+    
+    if(capid==nil) return NO; 
+    
+    
+    NSString* query=[NSString stringWithFormat:@"insert into buddy_resources_legacy_caps values (%@,'%@',%@)", buddyid, presenceObj.resource, capid ];
+	if([self executeNonQuery:query]!=false)
+	{
+		
+		;
+		return true;
+	}
+	else
+	{
+        ;
+		return false;
+	}
+    
+    
+}
+
+-(BOOL) checkLegacyCap:(NSString*)cap forUser:(NSString*) user accountNo:(NSString*) acctNo
+{
+    NSString* query=[NSString stringWithFormat:@"select count(*) from buddylist as a inner join buddy_resources_legacy_caps as b on a.buddy_id=b.buddy_id  inner join legacy_caps as c on c.capid=b.capid where buddy_name='%@' and account_id=%@ and captext='%@'", user, acctNo,cap ];
+    
+    //debug_NSLog(@"%@", query);
+    NSNumber* count = [self executeScalar:query];
+    
+    if([count integerValue]>0) return YES; else return NO;
+}
 
 #pragma mark presence functions 
 
@@ -2043,7 +2097,7 @@ static DataLayer *sharedInstance=nil;
 	[self executeNonQuery:@"pragma truncate;"];
 	
     
-    dbversionCheck=[NSLock alloc];
+    dbversionCheck=[NSLock new];
 	[self version];
 	
 	

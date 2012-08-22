@@ -137,7 +137,8 @@ UINavigationControllerDelegate,UIAlertViewDelegate, MGSplitViewControllerDelegat
 -(void) addBuddy;
 
 
--(void) ShowCall:(NSNotification*) notification;
+-(void) showCall:(NSNotification*) notification;
+-(void) dismissCall;
 
 -(void) reloadBuddies:(NSArray*) indexpaths;
 

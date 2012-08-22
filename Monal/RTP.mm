@@ -337,6 +337,7 @@ void AudioInputCallback(
     {
         debug_NSLog(@"audio session category err: %@", [err localizedDescription]);
     }
+    
     [[AVAudioSession sharedInstance] setMode:AVAudioSessionModeVoiceChat error:&err];
     if(err!=nil)
     {

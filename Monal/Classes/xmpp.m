@@ -3118,6 +3118,9 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 
 -(bool) endCall
 {
+    [[NSNotificationCenter defaultCenter]
+     postNotificationName: @"DismissCall" object:self userInfo: nil];
+    
   return [self talk:[jingleCall terminateJingle]];
 }
 

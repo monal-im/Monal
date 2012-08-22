@@ -619,35 +619,10 @@
 	}
 	
 	
-	
-	;
 }
 
 
--(void) ShowCall:(NSNotification*) notification
-{
-   
-    NSDictionary* dict= [notification userInfo];
-    if(dict==nil) return;
-    
-    call = [callScreen alloc] ;
-    
-    if([[tools machine] isEqualToString:@"iPad"])
-    {
-        call.splitViewController=split;
-    }
-    else
-    {
-        
-        call.navigationController=buddyNavigationController;
-    }
-    
-    NSString* buddyName=[dict objectForKey:@"Name"];
-    
-        dispatch_async(dispatch_get_main_queue(), ^{
-    [call show:jabber:buddyName];
-        }); 
-}
+
 
 -(void) addBuddy
 {
@@ -682,7 +657,48 @@
 	
 }
 
-#pragma mark connectivity 
+#pragma mark cal modal view
+
+-(void) dismissCall
+{
+    
+    if([[tools machine] isEqualToString:@"iPad"])
+    {
+        [split dismissModalViewControllerAnimated:YES];
+    }
+    else
+    {
+        
+        [buddyNavigationController dismissModalViewControllerAnimated:YES];
+    }
+}
+
+-(void) showCall:(NSNotification*) notification
+{
+    
+    NSDictionary* dict= [notification userInfo];
+    if(dict==nil) return;
+    
+    call = [callScreen alloc] ;
+    
+    if([[tools machine] isEqualToString:@"iPad"])
+    {
+        call.splitViewController=split;
+    }
+    else
+    {
+        
+        call.navigationController=buddyNavigationController;
+    }
+    
+    NSString* buddyName=[dict objectForKey:@"Name"];
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [call show:jabber:buddyName];
+    });
+}
+
+#pragma mark connectivity
 
 -(void) keepAlive
 {
@@ -1390,7 +1406,8 @@ buddylistDS.tabcontroller=tabcontroller;
 	
 	
 	
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(ShowCall:) name: @"ShowCall" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showCall:) name: @"ShowCall" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(dismissCall) name: @"DismissCall" object:nil];
 	
 	
 

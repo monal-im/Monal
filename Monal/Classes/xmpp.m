@@ -892,8 +892,8 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
        )
 	{
      
-        if(jingleCall.activeCall==NO)
-        [jingleCall resetVals];
+        if(jingleCall.waitingOnUserAccept==NO) // implies we also have active call 
+            [jingleCall resetVals];
            
            
         jingleCall.action=[attributeDict objectForKey:@"action"];

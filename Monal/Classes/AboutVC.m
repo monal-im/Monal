@@ -18,7 +18,7 @@
 
 
 
--(void)viewDidAppear:(BOOL)animated 
+-(void)viewWillAppear:(BOOL)animated
 {
 [versionText setText:[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"]];
 

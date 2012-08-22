@@ -778,9 +778,7 @@ static DataLayer *sharedInstance=nil;
 
 -(BOOL) setResourceVer:(presence*)presenceObj: (NSString*) accountNo
 {
-    
-    
-    
+  
     //get buddyid for name and account
     
     NSString* query1=[NSString stringWithFormat:@" select buddy_id from buddylist where account_id=%@ and  buddy_name='%@';", accountNo, presenceObj.user ];
@@ -803,6 +801,16 @@ static DataLayer *sharedInstance=nil;
         ;
 		return false;
 	}
+}
+
+-(BOOL) checkCap:(NSString*)cap forUser:(NSString*) user accountNo:(NSString*) acctNo
+{
+    NSString* query=[NSString stringWithFormat:@"select count(*) from buddylist as a inner join buddy_resources as b on a.buddy_id=b.buddy_id  inner join ver_info as c  on  b.ver=c.ver where buddy_name='%@' and account_id=%@ and cap='%@'", user, acctNo,cap ];
+    
+    //debug_NSLog(@"%@", query);
+    NSNumber* count = [self executeScalar:query];
+    
+    if([count integerValue]>0) return YES; else return NO;
 }
 
 -(NSArray*) capsforVer:(NSString*) verString

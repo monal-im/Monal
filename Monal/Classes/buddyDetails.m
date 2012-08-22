@@ -38,6 +38,8 @@
 	
 	self.title=@"Contact Details"; 
 	//fullName.font=[UIFont boldSystemFontOfSize:16];
+    
+    db=[DataLayer sharedInstance];
 
 	
 }
@@ -262,6 +264,21 @@
 	
 // see if this user  has  jingle call
 
+    // check caps for audio
+    BOOL hasAudio=NO;
+    
+    hasAudio=[db checkCap:@"urn:xmpp:jingle:apps:rtp:audio" forUser:buddy accountNo:jabber.accountNumber];
+    
+    
+    if(!hasAudio)
+    {
+        // check legacy cap as well
+    }
+    
+    if(!hasAudio)
+    {
+        callButton.hidden=YES;
+    }
 
 
     
@@ -277,24 +294,25 @@
     
     theTable.backgroundColor = [[UIColor alloc] initWithPatternImage:[UIImage imageNamed:@"carbon3.jpg"]];
     debug_NSLog(@"buddy details did  load");
-	//[scroll setContentSize:CGSizeMake(320, 509)];
+
 }
 
 
 
--(void) viewDidAppear:(BOOL)animated
+-(void) viewWillAppear:(BOOL)animated
 {
-	debug_NSLog(@"buddy details did  appear");
-	//[scroll setContentSize:CGSizeMake(320, 509)];
-    
-    [UIDevice currentDevice].proximityMonitoringEnabled=YES; 
+	debug_NSLog(@"buddy details will  appear");
+	
+  
+  
+
 }
 
 -(void)viewDidDisappear:(BOOL)animated
 {
 	debug_NSLog(@"buddy details did  disappear");
     
-   [UIDevice currentDevice].proximityMonitoringEnabled=NO;
+ 
    
 	
 	

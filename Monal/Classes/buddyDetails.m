@@ -273,6 +273,8 @@
     if(!hasAudio)
     {
         // check legacy cap as well
+        hasAudio=[db checkLegacyCap:@"voice-v1"  forUser:buddy accountNo:jabber.accountNumber];
+        
     }
     
     if(!hasAudio)

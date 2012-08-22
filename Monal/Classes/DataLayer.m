@@ -1002,6 +1002,11 @@ static DataLayer *sharedInstance=nil;
 	if([self executeNonQuery:query2]==false) return false;
 
 
+    NSString* query4=[NSString stringWithFormat:@"delete from   buddy_resources_legacy_caps where buddy_id=%@ and resource='%@'",
+                      buddyid, presenceObj.resource ];
+	if([self executeNonQuery:query4]==false) return false;
+
+    
     //see how many left
     NSString* query3=[NSString stringWithFormat:@" select count(buddy_id) from buddy_resources where buddy_id=%@;", buddyid ];
 	

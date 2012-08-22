@@ -2236,7 +2236,7 @@ static DataLayer *sharedInstance=nil;
         
          [self executeNonQuery:@"create table ver_info(ver varchar(20),cap varchar(255), primary key (ver,cap))"];
 
-        
+        [self executeNonQuery:@"create table buddy_resources_legacy_caps (buddy_id integer,resource varchar(255),capid  integer);"];
         
         [self executeNonQuery:@"update dbversion set dbversion='1.074'; "];
         debug_NSLog(@"Upgrade to 1.074 success ");

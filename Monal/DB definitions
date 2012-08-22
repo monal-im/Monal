@@ -30,6 +30,13 @@ cap varchar(255),
 );
 
 
+create table buddy_resources_legacy_caps
+(
+buddy_id integer, 
+resource varchar(255),
+capid  integer
+);
+
 -- 1.071 update script--
 update dbversion set dbversion='1.071'; 
 

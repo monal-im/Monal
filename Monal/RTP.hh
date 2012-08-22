@@ -25,6 +25,8 @@
 
 #define NUM_BUFFERS_REC 500
 
+#define kBufferLength 16000
+
 
 -(int) RTPConnect:(NSString*) IP:(int) destPort:(int) localPort;
 -(void) RTPDisconnect;

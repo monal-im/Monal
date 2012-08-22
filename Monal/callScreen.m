@@ -130,6 +130,10 @@
 }
 
 
+-(void)proximityStateDidChange
+{
+   debug_NSLog(@"proximity %d", [ [UIDevice currentDevice] proximityState]) ;
+}
 
 -(void) viewWillAppear:(BOOL)animated
 {
@@ -151,14 +155,19 @@
     
     
     
-   // [UIDevice currentDevice].proximityMonitoringEnabled=YES;
+   [UIDevice currentDevice].proximityMonitoringEnabled=YES;
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(proximityStateDidChange)
+                                                 name:@"ProximityChange'" object:nil];
+
+    
 }
 
 -(void)viewDidDisappear:(BOOL)animated
 {
 	debug_NSLog(@"call screen did  disappear");
     
-  //  [UIDevice currentDevice].proximityMonitoringEnabled=NO;
+    [UIDevice currentDevice].proximityMonitoringEnabled=NO;
     
 	
 	

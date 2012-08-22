@@ -521,11 +521,9 @@
 		080E96DDFE201D6D7F000001 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
-				267D96301225ED3800B328E3 /* Table */,
-				2614ED3D121BD2970034556C /* Tabbar */,
 				26F7BB3A1115F8A300712672 /* tools */,
 				26C40BCB0FD09E8400435376 /* Protocols */,
-				26EC1C7312295B8800EAF934 /* Core UI */,
+				26EC1C7312295B8800EAF934 /* UI */,
 				2601D9A70FBF255D004DB939 /* DataLayer.m */,
 				2601D9A80FBF255D004DB939 /* DataLayer.h */,
 				1D3623240D0F684500981E51 /* SworIMAppDelegate.h */,
@@ -619,6 +617,7 @@
 				265F1C1A12306D600065C5FE /* Scroller.m */,
 			);
 			name = Tabbar;
+			path = Classes;
 			sourceTree = "<group>";
 		};
 		2628E50114049B380064131E /* ModalViews */ = {
@@ -755,6 +754,7 @@
 				260E8BA511023DE5004E24FF /* CustomCell.m */,
 			);
 			name = Table;
+			path = Classes;
 			sourceTree = "<group>";
 		};
 		268BCCFD140B23E10025E4D1 /* jrtplib-static */ = {
@@ -931,9 +931,11 @@
 			path = MGSplitViewController;
 			sourceTree = "<group>";
 		};
-		26EC1C7312295B8800EAF934 /* Core UI */ = {
+		26EC1C7312295B8800EAF934 /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				267D96301225ED3800B328E3 /* Table */,
+				2614ED3D121BD2970034556C /* Tabbar */,
 				2628E50114049B380064131E /* ModalViews */,
 				265571B0122157D500F994E8 /* SlidingMessageViewController.m */,
 				265571AF122157D500F994E8 /* SlidingMessageViewController.h */,
@@ -944,7 +946,7 @@
 				2604482C0FEEDCA800B3B5A7 /* buddyDetails.m */,
 				2604482D0FEEDCA800B3B5A7 /* buddyDetails.h */,
 			);
-			name = "Core UI";
+			name = UI;
 			path = ..;
 			sourceTree = "<group>";
 		};

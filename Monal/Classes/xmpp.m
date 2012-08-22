@@ -2670,7 +2670,7 @@ debug_NSLog(@"ended this element: %@", elementName);
 									 options:NSCaseInsensitiveSearch range:NSMakeRange(startpos, [theString length]-startpos)]; 
 		if((pos.location<minpos) && (pos.location!=NSNotFound)) 
 		{
-			minpos=pos.location; 
+			minpos=pos.location;
 		
 			
 		}
@@ -2854,14 +2854,7 @@ debug_NSLog(@"ended this element: %@", elementName);
     else
 		theset=nil; 
 	
-	
-		
-	
 	debug_NSLog(@"about to leave listener"); 
-	
-	;
-	
-
 	
 	
 	// do not update anything since many objects are destoyed

@@ -1079,7 +1079,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
                     alarm.repeatInterval = 0;
                     
                    
-                        alarm.alertBody = [NSString stringWithFormat: @"Incoming call from: %@:", jingleCall.otherParty];
+                        alarm.alertBody = [NSString stringWithFormat: @"Incoming call from: %@:", iqObj.user];
                     
                     if( [[NSUserDefaults standardUserDefaults] boolForKey:@"Sound"]==true)
                     {

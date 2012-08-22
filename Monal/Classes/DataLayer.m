@@ -2220,15 +2220,15 @@ static DataLayer *sharedInstance=nil;
         [self executeNonQuery:@"delete from protocol where protocol_id=4 "];
         
         
-        [self executeNonQuery:@" create table legacy_caps(capid integer not null primary key autoincrement,captext  varchar(20))"];
+        [self executeNonQuery:@" create table legacy_caps(capid integer not null primary key ,captext  varchar(20))"];
         
        
        
         
-        [self executeNonQuery:@" insert into legacy_caps values (null,'pmuc-v1');"];
-        [self executeNonQuery:@" insert into legacy_caps values (null,'voice-v1');"];
-        [self executeNonQuery:@" insert into legacy_caps values (null,'camera-v1');"];
-        [self executeNonQuery:@" insert into legacy_caps values (null, 'video-v1');"];
+        [self executeNonQuery:@" insert into legacy_caps values (1,'pmuc-v1');"];
+        [self executeNonQuery:@" insert into legacy_caps values (2,'voice-v1');"];
+        [self executeNonQuery:@" insert into legacy_caps values (3,'camera-v1');"];
+        [self executeNonQuery:@" insert into legacy_caps values (4, 'video-v1');"];
         
         
         

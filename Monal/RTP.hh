@@ -25,7 +25,7 @@
 
 #define NUM_BUFFERS_REC 500
 
-#define kBufferLength 16000
+#define kBufferLength 32000 // 200 packets of 160 Bytes == 2 sec
 
 
 -(int) RTPConnect:(NSString*) IP:(int) destPort:(int) localPort;

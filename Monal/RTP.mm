@@ -54,10 +54,10 @@ typedef struct
 
 PlayState playState;
 
-TPCircularBuffer packetInBuffer;
+NSMutableArray* packetInBuffer;
 int readpos;
 
-TPCircularBuffer packetOutBuffer;
+NSMutableArray* packetOutBuffer;
 int sentpos; 
 
 @implementation RTP
@@ -82,7 +82,7 @@ void checkerror(int rtperr)
 {
     debug_NSLog(@"entered RTP listen thread");
     //create an input buffer
-  
+    packetInBuffer=[[NSMutableArray alloc] init];
     
     readpos=0;
     
@@ -104,10 +104,9 @@ void checkerror(int rtperr)
                 {
                
                     
-            
-                    
-                    // Put audio into circular buffer
-                    TPCircularBufferProduceBytes(&packetInBuffer,pack->GetPayloadData(), pack->GetPayloadLength());
+                   NSData* data= [NSData dataWithBytes:pack->GetPayloadData() length:pack->GetPayloadLength()];
+                   
+                    [packetInBuffer addObject:data];
              
                     sess.DeletePacket(pack);
                     
@@ -131,7 +130,7 @@ void checkerror(int rtperr)
                             {
                                
                                 
-                                // needs a proper circular buffer
+                                // needs a proper circular buffer before i use this again.. 
                                AudioOutputCallback(&playState, playState.queue, playState.buffers[i]);
                             }
                             
@@ -186,25 +185,33 @@ void AudioOutputCallback(
     OSStatus status;
     
     
+    if(readpos>=[packetInBuffer count])
+    {
+        debug_NSLog("read past array size");
+        
+        /*void* pbuffer=outBuffer->mAudioData;
+        uint16_t silence[8]={0,0,0,0,0,0,0,0};
+        bytesRead=8;
+        memcpy(pbuffer, silence, bytesRead);
+        */
+        
+        AudioQueueEnqueueBuffer(
+                                playState->queue,
+                                outBuffer,
+                                0,
+                                nil);
+        
+    }
+    else
+    {
+    
+    NSData* thepacket=[packetInBuffer objectAtIndex:readpos];
+ 
+   bytesRead= [thepacket length];
+    
+   numPackets=bytesRead/2;
   
-    int bytesToCopy = 160;
-       
-    void *targetBuffer = outBuffer->mAudioData;
-    
-    
-    // Pull audio from playthrough buffer
-    int32_t availableBytes;
-    void *buffer = TPCircularBufferTail(&packetInBuffer, &availableBytes);
-    
-    if(availableBytes<1) availableBytes=0;
-    
-    bytesRead= MIN(bytesToCopy, availableBytes);
-    numPackets=bytesRead/2;
-    
-    memcpy(targetBuffer, buffer, MIN(bytesToCopy, availableBytes));
-    TPCircularBufferConsume(&packetInBuffer, numPackets);
-    
-
+ 
     //set packet descriptor for each audio packet
    
       AudioStreamPacketDescription packetDescs[numPackets];
@@ -224,9 +231,12 @@ void AudioOutputCallback(
     
  //   debug_NSLog(" read %d pcm, %d packets bytes: \n %s", bytesRead,numPackets, outBuffer->mAudioData  )
     
-  
+    
+    if(numPackets>0)
+    {
         outBuffer->mAudioDataByteSize = bytesRead;
-       
+        void* pbuffer=outBuffer->mAudioData;
+        memcpy(pbuffer, [thepacket bytes], bytesRead); 
         
         status = AudioQueueEnqueueBuffer(
                                          playState->queue,
@@ -236,9 +246,9 @@ void AudioOutputCallback(
         
         playState->currentPacket += numPackets;
     
+    }
     
-    
-    
+    }
 }
 
 #pragma mark audio input Queue
@@ -247,9 +257,7 @@ void AudioOutputCallback(
 {
     debug_NSLog(@"entered RTP send thread");
     //create an output buffer
-  
-    
-     TPCircularBufferInit(&packetOutBuffer, kBufferLength);
+    packetOutBuffer=[[NSMutableArray alloc] init];
     
     sentpos=0;
     
@@ -259,28 +267,22 @@ void AudioOutputCallback(
     {
          if(disconnecting) break; 
         
-        
-           
-        
-        int bytesToCopy = 160;
-        
-      
-        // Pull audio from playthrough buffer
-        int32_t availableBytes;
-        void *buffer = TPCircularBufferTail(&packetOutBuffer, &availableBytes);
-        
-        int bytesRead= MIN(bytesToCopy, availableBytes);
-        int numPackets=bytesRead/2;
-        
-        TPCircularBufferConsume(&packetOutBuffer, numPackets);
-        
-        
-        int rtpstatus = sess.SendPacket(buffer,bytesRead,8,false, bytesRead );
+        //let it bufer a little
+        if([packetOutBuffer count]>300)
+        {
+            if(sentpos<[packetOutBuffer count])
+            {
+            NSData* data= [packetOutBuffer objectAtIndex:sentpos];
+        int rtpstatus = sess.SendPacket((void *)[data bytes],[data length],8,false, [data length] );
         // pt=8  is PCMA ,  timestamp 2x80 =160 is for 2x 8Khz records at 5 ms
         checkerror(rtpstatus);
         if(rtpstatus!=0) break; //  stop sending
                 
-                   
+            sentpos++;
+                }
+            
+        }
+        
        
     }
     
@@ -301,9 +303,9 @@ void AudioInputCallback(
     static int count = 0;
     RecordState* recordState = (RecordState*)inUserData;
     
- 
-    
-     TPCircularBufferProduceBytes(&packetOutBuffer, inBuffer->mAudioData, inBuffer->mAudioDataByteSize);
+    NSData* data= [NSData dataWithBytes:inBuffer->mAudioData length:inBuffer->mAudioDataByteSize];
+    [packetOutBuffer addObject:data];
+  
  
     recordState->currentPacket += inNumberPacketDescriptions;
     
@@ -329,27 +331,14 @@ void AudioInputCallback(
     
     disconnecting=NO;
     
-    NSError* err; 
-    [[AVAudioSession sharedInstance] setCategory: AVAudioSessionCategoryPlayAndRecord error: &err];
-    if(err!=nil)
-    {
-        debug_NSLog(@"audio session category err: %@", [err localizedDescription]);
-    }
     
-    [[AVAudioSession sharedInstance] setMode:AVAudioSessionModeVoiceChat error:&err];
-    if(err!=nil)
-    {
-        debug_NSLog(@"audio session mode err: %@", [err localizedDescription]);
-    }
-    
-    
-    //*****set up buffer****
-    
-     TPCircularBufferInit(&packetInBuffer, kBufferLength);
-     TPCircularBufferInit(&packetOutBuffer, kBufferLength);
+    [[AVAudioSession sharedInstance] setCategory: AVAudioSessionCategoryPlayAndRecord error: nil];
     
     //********* Audio Queue ********/
-
+    
+   
+    
+    
     
     recordState.dataFormat.mSampleRate = 8000.0;
     recordState.dataFormat.mFormatID = kAudioFormatALaw;
@@ -387,13 +376,16 @@ void AudioInputCallback(
     //******** ouput ******
     
     playState.dataFormat.mSampleRate = 8000.0;
-    playState.dataFormat.mFormatID = kAudioFormatALaw;
+    playState.dataFormat.mFormatID = kAudioFormatALaw;//kAudioFormatLinearPCM;
     playState.dataFormat.mFramesPerPacket = 1;
     playState.dataFormat.mChannelsPerFrame = 1;
     playState.dataFormat.mBytesPerFrame = 2;
     playState.dataFormat.mBytesPerPacket = 2;
     playState.dataFormat.mBitsPerChannel = 16;
     playState.dataFormat.mReserved = 0;
+
+    
+    
     
     audioStatus = AudioQueueNewOutput(
      &playState.dataFormat,

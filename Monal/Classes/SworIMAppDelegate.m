@@ -661,9 +661,10 @@
 
 -(void) dismissCall
 {
-    
+    dispatch_async(dispatch_get_main_queue(), ^{
     if([[tools machine] isEqualToString:@"iPad"])
     {
+        
         [split dismissModalViewControllerAnimated:YES];
     }
     else
@@ -671,6 +672,7 @@
         
         [buddyNavigationController dismissModalViewControllerAnimated:YES];
     }
+    }); 
 }
 
 -(void) showCall:(NSNotification*) notification

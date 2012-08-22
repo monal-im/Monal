@@ -130,7 +130,7 @@ void checkerror(int rtperr)
                             {
                                
                                 
-                                // needs a proper circular buffer before i use this again.. 
+                                // needs a proper circular buffer
                                AudioOutputCallback(&playState, playState.queue, playState.buffers[i]);
                             }
                             
@@ -331,14 +331,20 @@ void AudioInputCallback(
     
     disconnecting=NO;
     
-    
-    [[AVAudioSession sharedInstance] setCategory: AVAudioSessionCategoryPlayAndRecord error: nil];
+    NSError* err; 
+    [[AVAudioSession sharedInstance] setCategory: AVAudioSessionCategoryPlayAndRecord error: &err];
+    if(err!=nil)
+    {
+        debug_NSLog(@"audio session category err: %@", [err localizedDescription]);
+    }
+    [[AVAudioSession sharedInstance] setMode:AVAudioSessionModeVoiceChat error:&err];
+    if(err!=nil)
+    {
+        debug_NSLog(@"audio session mode err: %@", [err localizedDescription]);
+    }
     
     //********* Audio Queue ********/
-    
-   
-    
-    
+
     
     recordState.dataFormat.mSampleRate = 8000.0;
     recordState.dataFormat.mFormatID = kAudioFormatALaw;
@@ -376,16 +382,13 @@ void AudioInputCallback(
     //******** ouput ******
     
     playState.dataFormat.mSampleRate = 8000.0;
-    playState.dataFormat.mFormatID = kAudioFormatALaw;//kAudioFormatLinearPCM;
+    playState.dataFormat.mFormatID = kAudioFormatALaw;
     playState.dataFormat.mFramesPerPacket = 1;
     playState.dataFormat.mChannelsPerFrame = 1;
     playState.dataFormat.mBytesPerFrame = 2;
     playState.dataFormat.mBytesPerPacket = 2;
     playState.dataFormat.mBitsPerChannel = 16;
     playState.dataFormat.mReserved = 0;
-
-    
-    
     
     audioStatus = AudioQueueNewOutput(
      &playState.dataFormat,

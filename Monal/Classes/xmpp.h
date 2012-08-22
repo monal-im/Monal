@@ -92,8 +92,6 @@
 	
 	NSString* lastEndedElement; 
 	
-	int listenThreadCounter; 
-	
 	
 	
 	// server attributes
@@ -134,6 +132,9 @@
     
     
      NSTimer* connectionTimeoutTimer;
+    
+    NSLock* inThreadLock;
+    BOOL streamHasBytes;
     
 
 }

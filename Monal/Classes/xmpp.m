@@ -65,10 +65,7 @@
 	keepAliveCounter=0;
 
 	errorState=0; 
-	
-	listenThreadCounter=0; 
-	
-	
+
 	
 //	buddyListKeys=[NSArray arrayWithObjects:@"username", @"status", @"message", @"icon", @"count",@"fullname", nil];
 	
@@ -147,6 +144,8 @@
     messageoutBuffer=[[NSMutableString alloc] init];
     outBufferLock=[NSLock new];
     
+    
+    inThreadLock=[NSLock new];
     
 	return self;
 
@@ -2688,35 +2687,9 @@ debug_NSLog(@"ended this element: %@", elementName);
 -(void) listenerThread
 {
 	
-	listenThreadCounter++; 
-	srand([[NSDate date] timeIntervalSince1970]);
-	NSDate *now = [NSDate date];
-	
-	NSString* threadname=[NSString stringWithFormat:@"monal%d",random()%100000]; 
-	
-	
-	while(listenerthread==true)
-	{
-		debug_NSLog(@"%@ listener thread sleeping onlock", threadname); 
-		usleep(500000); 
-		int seconds=[[NSDate date] timeIntervalSinceDate:now];
-		if(seconds>5) // longer time out because more data is grabbed in one
-		{
-			debug_NSLog(@"%@ listener thread timing out", threadname); 
-			; 
-			listenThreadCounter--; 
-			[NSThread exit]; 
-		}
-		
-	}
-
-	listenerthread=true;
-		debug_NSLog(@"%@ listener thread got lock", threadname); 
-	
-
-	
-	debug_NSLog(@"sleeping to get data.. "); 
-	usleep(250000); // gives it a second to gather some data
+    [inThreadLock lock];
+    
+ 
 	NSMutableData* response=[self readData];
 	if(response!=nil)
 	{
@@ -2869,12 +2842,14 @@ debug_NSLog(@"ended this element: %@", elementName);
 		
 		//unlock only after UI update to prevent modification of the same status vars by 2 threads
 		debug_NSLog(@" unlocking thread"); 
-		listenerthread=false;
-		
-	listenThreadCounter--; 
+	
 		debug_NSLog(@" left listener thread"); 
 	[UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
-		[NSThread exit]; 
+		
+    
+    [inThreadLock unlock];
+    
+    [NSThread exit];
 	
 	
 }
@@ -2882,12 +2857,14 @@ debug_NSLog(@"ended this element: %@", elementName);
 //this is the xmpp listener thread for incoming communication
 -(void) listener
 {
-	if(listenThreadCounter<3)
-	{
-	debug_NSLog(@" detaching new listener thread"); 
+//	if(listenThreadCounter<3)
+//	{
+
+    
+	debug_NSLog(@" detaching new listener thread");
 		[NSThread detachNewThreadSelector:@selector(listenerThread) toTarget:self withObject:nil];
-	}
-	;
+	//}
+	
 
 }
 
@@ -3668,23 +3645,8 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 		
 	// wait on all threads to end 
 	disconnecting=true; 
-	listenerthread=true; // lock out other threads
 	
-// remove any threads that might have been waiting 
-	while(listenThreadCounter>0)
-	{
-		debug_NSLog(@" threads locked out waiting on timeout. left: %d", listenThreadCounter); 
-		sleep(2); 
-		
-		int seconds=[[NSDate date] timeIntervalSinceDate:now];
-		if(seconds>5)
-		{
-			debug_NSLog(@"discocnnect wait timing out. breaking." ); 
-			
-			break; 
-		}
-	}
-	
+
 	
 	@try
 	{

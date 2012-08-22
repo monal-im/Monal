@@ -51,7 +51,7 @@
 		
 		DataLayer* db;
 		BOOL loggedin; 
-		bool listenerthread; 
+	
 	
 	
 	

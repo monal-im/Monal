@@ -1064,6 +1064,40 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
             debug_NSLog(@"got Jingle local candidate..");
                 jingleCall.waitingOnUserAccept=YES;
             
+                
+                UIApplication* app = [UIApplication sharedApplication];
+                NSDate* theDate=[NSDate dateWithTimeIntervalSinceNow:0]; //immediate fire
+
+                UILocalNotification* alarm = [[UILocalNotification alloc] init];
+                if (alarm)
+                {
+                    //setting badge
+                    
+                    //scehdule info
+                    alarm.fireDate = theDate;
+                    alarm.timeZone = [NSTimeZone defaultTimeZone];
+                    alarm.repeatInterval = 0;
+                    
+                   
+                        alarm.alertBody = [NSString stringWithFormat: @"Incoming call from: %@:", jingleCall.otherParty];
+                    
+                    if( [[NSUserDefaults standardUserDefaults] boolForKey:@"Sound"]==true)
+                    {
+                        alarm.soundName=UILocalNotificationDefaultSoundName;
+                    }
+                    
+                    
+                    [app scheduleLocalNotification:alarm];
+                    
+                    //	[app presentLocalNotificationNow:alarm];
+                    debug_NSLog(@"Scheduled local message alert "); 
+                    
+                    
+                    
+                }
+                
+                
+                
             UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Incoming Call"
                                                             message:[NSString stringWithFormat:@"Call from %@" , iqObj.user]
                                                            delegate:self cancelButtonTitle:@"Decline"

@@ -2026,8 +2026,9 @@ debug_NSLog(@"ended this element: %@", elementName);
 		
 		
 		
-		NSData* cnonce=[self MD5: [NSString stringWithFormat:@"%d",arc4random()%100000]];
-	
+		NSData* cnonce_Data=[self MD5: [NSString stringWithFormat:@"%d",arc4random()%100000]];
+        NSString* cnonce =[self hexadecimalString:cnonce_Data];
+        
 		PasswordManager* pass= [PasswordManager alloc] ; 
 		[pass init:accountNumber];
 	
@@ -2039,18 +2040,20 @@ debug_NSLog(@"ended this element: %@", elementName);
             
         }
 		
-        
+       nonce=@"E8CB71A76EC5759A78D7C403B8EB9F59";
+        cnonce=@"722e5309134575069555dd8e15";
   
         
 		// ****** digest stuff going on here...
 		NSString* X= [NSString stringWithFormat:@"%@:%@:%@", account, realm, password ];
         debug_NSLog(@"X: %@", X);
         
-		NSData* Y= [self MD5:X];
+		NSData* Y_Data= [self MD5:X];
        
+        NSString* Y =[[NSString alloc] initWithData:Y_Data encoding:NSASCIIStringEncoding];
+		debug_NSLog(@"Y: %@", Y);
         
-		debug_NSLog(@"Y: %@",Y )
-        
+        // above is correct
         
 		/*
 		NSString* A1= [NSString stringWithFormat:@"%@:%@:%@:%@@%@/%@",
@@ -2060,46 +2063,53 @@ debug_NSLog(@"ended this element: %@", elementName);
 		//  if you have the authzid  here you need it below too but it wont work on som servers
 		// so best not include it
 		
-		NSData* A1= [[NSString stringWithFormat:@":%@:%@",
-					   nonce,[self hexadecimalString:cnonce]]
-                     dataUsingEncoding:NSUTF8StringEncoding];
+        NSString* A1=[NSString stringWithFormat:@"%@:%@:%@",
+                      Y,nonce,cnonce]; 
+		//NSData* A1= [
+          //           dataUsingEncoding:NSUTF8StringEncoding];
 		
-		debug_NSLog(@"A1: %@",[[NSString alloc]initWithData:A1 encoding:NSUTF8StringEncoding] )
+		/*debug_NSLog(@"A1: %@",[[NSString alloc]initWithData:A1 encoding:NSUTF8StringEncoding] )
         
         NSMutableData *HA1data = [NSMutableData dataWithCapacity:([Y length] + [A1 length])];
         [HA1data appendData:Y];
-        [HA1data appendData:A1];
+        [HA1data appendData:A1];*/
         
        
-        debug_NSLog(@" ha1data: %@",HA1data  );
+        debug_NSLog(@" A1 : %@",A1  );
 		
-		NSData* HA1=[self DataMD5:HA1data];
+		NSData* HA1=[self MD5:A1];
 		
     
+		  //below is correct
 		
-		
-		NSString* A2=[NSString stringWithFormat:@"AUTHENTICATE:xmpp/%@", server]; 
+		NSString* A2=[NSString stringWithFormat:@"AUTHENTICATE:xmpp/%@", realm];
+        debug_NSLog(@"%@", A2);
 		NSData* HA2=[self MD5:A2];
 		
 	
-		
-		NSString* KD=[NSString stringWithFormat:@"%@:%@:00000001:%@:auth:%@", [self hexadecimalString:HA1], nonce, [self hexadecimalString:cnonce], [self hexadecimalString:HA2]];
-		
-             debug_NSLog(@" ha1: %@", [self hexadecimalString:HA1] );
-             debug_NSLog(@" ha2: %@", [self hexadecimalString:HA2] );
         
-       //  debug_NSLog(@" KD: %@", KD );
+      
+		
+		NSString* KD=[NSString stringWithFormat:@"%@:%@:00000001:%@:auth:%@",
+                      [self hexadecimalString:HA1], nonce,
+                     cnonce,
+                      [self hexadecimalString:HA2]];
+		
+            // debug_NSLog(@" ha1: %@", [self hexadecimalString:HA1] );
+             //debug_NSLog(@" ha2: %@", [self hexadecimalString:HA2] );
+        
+         debug_NSLog(@" KD: %@", KD );
 		
 		NSData* responseData=[self MD5:KD];
 		
 		
 		
 		NSString* response=[NSString stringWithFormat:@"username=\"%@\",realm=\"%@\",nonce=\"%@\",cnonce=\"%@\",nc=00000001,qop=auth,digest-uri=\"xmpp/%@\",response=%@,charset=utf-8",
-						   account,realm, nonce, [self hexadecimalString:cnonce], server, [self hexadecimalString:responseData]];
+						   account,realm, nonce, cnonce, realm, [self hexadecimalString:responseData]];
 		//,authzid=\"%@@%@/%@\"  ,account,domain, resource
 		
 		
-		debug_NSLog(@"sending  response to %@", response);
+		debug_NSLog(@"sending  response :  %@", response);
 		
 		NSString* encoded=[self encodeBase64WithString:response];
 		
@@ -2111,7 +2121,6 @@ debug_NSLog(@"ended this element: %@", elementName);
 		State=@"DigestClientResponse"; 
 		
 		
-		;
 		return; 
 		
 	}

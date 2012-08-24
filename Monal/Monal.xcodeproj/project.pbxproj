@@ -165,7 +165,6 @@
 		2651DAA20FC2847200009D7E /* noicon.png in Resources */ = {isa = PBXBuildFile; fileRef = 2651DAA10FC2847200009D7E /* noicon.png */; };
 		2654BEC81481499000DDC346 /* loglistDate.m in Sources */ = {isa = PBXBuildFile; fileRef = 2654BEC71481499000DDC346 /* loglistDate.m */; };
 		265571B1122157D500F994E8 /* SlidingMessageViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 265571B0122157D500F994E8 /* SlidingMessageViewController.m */; };
-		2658508A15E7D8E40070A2A7 /* README.markdown in Resources */ = {isa = PBXBuildFile; fileRef = 2658508515E7D8E40070A2A7 /* README.markdown */; };
 		2658508B15E7D8E40070A2A7 /* TPCircularBuffer+AudioBufferList.c in Sources */ = {isa = PBXBuildFile; fileRef = 2658508615E7D8E40070A2A7 /* TPCircularBuffer+AudioBufferList.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		2658508C15E7D8E40070A2A7 /* TPCircularBuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 2658508815E7D8E40070A2A7 /* TPCircularBuffer.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		265F1AE512303A670065C5FE /* WebBrowserVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 265F1AE412303A670065C5FE /* WebBrowserVC.m */; };
@@ -414,7 +413,6 @@
 		2654BEC71481499000DDC346 /* loglistDate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = loglistDate.m; path = Classes/loglistDate.m; sourceTree = "<group>"; };
 		265571AF122157D500F994E8 /* SlidingMessageViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SlidingMessageViewController.h; path = Classes/SlidingMessageViewController.h; sourceTree = "<group>"; };
 		265571B0122157D500F994E8 /* SlidingMessageViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SlidingMessageViewController.m; path = Classes/SlidingMessageViewController.m; sourceTree = "<group>"; };
-		2658508515E7D8E40070A2A7 /* README.markdown */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.markdown; sourceTree = "<group>"; };
 		2658508615E7D8E40070A2A7 /* TPCircularBuffer+AudioBufferList.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "TPCircularBuffer+AudioBufferList.c"; sourceTree = "<group>"; };
 		2658508715E7D8E40070A2A7 /* TPCircularBuffer+AudioBufferList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "TPCircularBuffer+AudioBufferList.h"; sourceTree = "<group>"; };
 		2658508815E7D8E40070A2A7 /* TPCircularBuffer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = TPCircularBuffer.c; sourceTree = "<group>"; };
@@ -708,7 +706,6 @@
 		2658508415E7D8E40070A2A7 /* TPCircularBuffer */ = {
 			isa = PBXGroup;
 			children = (
-				2658508515E7D8E40070A2A7 /* README.markdown */,
 				2658508615E7D8E40070A2A7 /* TPCircularBuffer+AudioBufferList.c */,
 				2658508715E7D8E40070A2A7 /* TPCircularBuffer+AudioBufferList.h */,
 				2658508815E7D8E40070A2A7 /* TPCircularBuffer.c */,
@@ -1317,7 +1314,6 @@
 				26C314B015E72CF1003A73AA /* Default-Landscape@2x~ipad.png in Resources */,
 				26C314B115E72CF1003A73AA /* Default-Landscape~ipad.png in Resources */,
 				26C314B215E72CF1003A73AA /* Default@2x~iphone.png in Resources */,
-				2658508A15E7D8E40070A2A7 /* README.markdown in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

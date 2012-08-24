@@ -107,10 +107,10 @@ void checkerror(int rtperr)
                     
                     
                     
-                    //start playback after thre are 30 packets
+                    //start playback after thre are 300 packets
                     
                     
-                    if((packCount>30 && playState.playing==NO) && (disconnecting==NO))
+                    if((packCount>300 && playState.playing==NO) && (disconnecting==NO))
                     {
                         OSStatus status = AudioQueueStart(playState.queue, NULL);
                         if(status == 0)

@@ -212,16 +212,15 @@
 		26E5BA8E13228D7400D8C57A /* StatusControl.m in Sources */ = {isa = PBXBuildFile; fileRef = 26E5BA8D13228D7400D8C57A /* StatusControl.m */; };
 		26E7D4B0140B067100EE6C93 /* RTP.mm in Sources */ = {isa = PBXBuildFile; fileRef = 26E7D4AF140B067100EE6C93 /* RTP.mm */; };
 		26EB845E111644AD005446DD /* Themes in Resources */ = {isa = PBXBuildFile; fileRef = 26EB845D111644AD005446DD /* Themes */; };
-		26EB85D711166DE7005446DD /* Monal_crop_57.png in Resources */ = {isa = PBXBuildFile; fileRef = 26EB85D611166DE7005446DD /* Monal_crop_57.png */; };
+		26EB85D711166DE7005446DD /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 26EB85D611166DE7005446DD /* Icon.png */; };
 		26EC1D5112296D6000EAF934 /* MainWindowIpad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26EC1D5012296D6000EAF934 /* MainWindowIpad.xib */; };
 		26EC1DB2122978A100EAF934 /* AboutiPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26EC1DB1122978A100EAF934 /* AboutiPad.xib */; };
-		26EF9AB51320450300FA6FB2 /* Monal_crop_114.png in Resources */ = {isa = PBXBuildFile; fileRef = 26EF9AB41320450300FA6FB2 /* Monal_crop_114.png */; };
+		26EF9AB51320450300FA6FB2 /* icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26EF9AB41320450300FA6FB2 /* icon@2x.png */; };
 		26F0D38D14093DC600A302B9 /* iqJingle.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F0D38C14093DC600A302B9 /* iqJingle.m */; };
 		26F1AB351323CA590044FA18 /* GroupChat.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26F1AB341323CA590044FA18 /* GroupChat.xib */; };
 		26F1AB381323CC330044FA18 /* GroupChat.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F1AB371323CC330044FA18 /* GroupChat.m */; };
 		26F1AB3A1323D0280044FA18 /* joingroup.png in Resources */ = {isa = PBXBuildFile; fileRef = 26F1AB391323D0270044FA18 /* joingroup.png */; };
 		26F1AB3D132460630044FA18 /* delete_button.png in Resources */ = {isa = PBXBuildFile; fileRef = 26F1AB3C132460630044FA18 /* delete_button.png */; };
-		26F425E711AB4A1800C40676 /* Monal_crop_72.png in Resources */ = {isa = PBXBuildFile; fileRef = 26F425E611AB4A1800C40676 /* Monal_crop_72.png */; };
 		26F7BB431115F8DB00712672 /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F7BB411115F8DB00712672 /* Reachability.m */; };
 		26F7BB451115F95000712672 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26F7BB441115F95000712672 /* SystemConfiguration.framework */; };
 		26F9763D10F9779000FA1B69 /* accounts.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F9763C10F9779000FA1B69 /* accounts.m */; };
@@ -474,11 +473,11 @@
 		26E7D4AE140B067100EE6C93 /* RTP.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = RTP.hh; sourceTree = "<group>"; };
 		26E7D4AF140B067100EE6C93 /* RTP.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = RTP.mm; sourceTree = "<group>"; };
 		26EB845D111644AD005446DD /* Themes */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Themes; sourceTree = "<group>"; };
-		26EB85D611166DE7005446DD /* Monal_crop_57.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Monal_crop_57.png; sourceTree = "<group>"; };
+		26EB85D611166DE7005446DD /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
 		26EB85D911166F1B005446DD /* Monal_crop_256.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Monal_crop_256.png; sourceTree = "<group>"; };
 		26EC1D5012296D6000EAF934 /* MainWindowIpad.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = MainWindowIpad.xib; sourceTree = "<group>"; };
 		26EC1DB1122978A100EAF934 /* AboutiPad.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = AboutiPad.xib; sourceTree = "<group>"; };
-		26EF9AB41320450300FA6FB2 /* Monal_crop_114.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Monal_crop_114.png; sourceTree = "<group>"; };
+		26EF9AB41320450300FA6FB2 /* icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon@2x.png"; sourceTree = "<group>"; };
 		26F0D38B14093DC600A302B9 /* iqJingle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iqJingle.h; sourceTree = "<group>"; };
 		26F0D38C14093DC600A302B9 /* iqJingle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = iqJingle.m; sourceTree = "<group>"; };
 		26F1AB341323CA590044FA18 /* GroupChat.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = GroupChat.xib; sourceTree = "<group>"; };
@@ -486,7 +485,7 @@
 		26F1AB371323CC330044FA18 /* GroupChat.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GroupChat.m; path = Classes/GroupChat.m; sourceTree = "<group>"; };
 		26F1AB391323D0270044FA18 /* joingroup.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = joingroup.png; sourceTree = "<group>"; };
 		26F1AB3C132460630044FA18 /* delete_button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = delete_button.png; sourceTree = "<group>"; };
-		26F425E611AB4A1800C40676 /* Monal_crop_72.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Monal_crop_72.png; sourceTree = "<group>"; };
+		26F425E611AB4A1800C40676 /* Icon-72.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-72.png"; sourceTree = "<group>"; };
 		26F7BB411115F8DB00712672 /* Reachability.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Reachability.m; sourceTree = "<group>"; };
 		26F7BB421115F8DB00712672 /* Reachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Reachability.h; sourceTree = "<group>"; };
 		26F7BB441115F95000712672 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
@@ -884,10 +883,10 @@
 		269A2E61132030510044B1C8 /* App */ = {
 			isa = PBXGroup;
 			children = (
-				26F425E611AB4A1800C40676 /* Monal_crop_72.png */,
+				26F425E611AB4A1800C40676 /* Icon-72.png */,
 				26EB85D911166F1B005446DD /* Monal_crop_256.png */,
-				26EF9AB41320450300FA6FB2 /* Monal_crop_114.png */,
-				26EB85D611166DE7005446DD /* Monal_crop_57.png */,
+				26EF9AB41320450300FA6FB2 /* icon@2x.png */,
+				26EB85D611166DE7005446DD /* Icon.png */,
 			);
 			name = App;
 			sourceTree = "<group>";
@@ -1222,9 +1221,8 @@
 				26D1847310F9972400340C52 /* XMPPEdit.xib in Resources */,
 				26E2786F10FA85C600B7B998 /* XMPP.png in Resources */,
 				26EB845E111644AD005446DD /* Themes in Resources */,
-				26EB85D711166DE7005446DD /* Monal_crop_57.png in Resources */,
+				26EB85D711166DE7005446DD /* Icon.png in Resources */,
 				26AD610111A95CB700C39051 /* Emoticons in Resources */,
-				26F425E711AB4A1800C40676 /* Monal_crop_72.png in Resources */,
 				261FD56F1223527C003DDC3A /* active.png in Resources */,
 				267D96031225E56200B328E3 /* About.xib in Resources */,
 				26610B0D12293FA600591435 /* ActiveChats.xib in Resources */,
@@ -1243,7 +1241,7 @@
 				264A051B1287067700189A87 /* google.png in Resources */,
 				26A942AE130B52520034CDF7 /* offline.png in Resources */,
 				269A2E62132030770044B1C8 /* Monal_crop_256.png in Resources */,
-				26EF9AB51320450300FA6FB2 /* Monal_crop_114.png in Resources */,
+				26EF9AB51320450300FA6FB2 /* icon@2x.png in Resources */,
 				26C76BE71320466A00EAF270 /* Default-Portrait~ipad.png in Resources */,
 				26C76BE913204C3800EAF270 /* Default-Landscape~ipad.png in Resources */,
 				26C76BEB1320544200EAF270 /* google_g.png in Resources */,

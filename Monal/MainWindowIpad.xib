@@ -2,13 +2,13 @@
 <archive type="com.apple.InterfaceBuilder3.CocoaTouch.iPad.XIB" version="7.10">
 	<data>
 		<int key="IBDocument.SystemTarget">800</int>
-		<string key="IBDocument.SystemVersion">12A269</string>
-		<string key="IBDocument.InterfaceBuilderVersion">2549</string>
+		<string key="IBDocument.SystemVersion">12B19</string>
+		<string key="IBDocument.InterfaceBuilderVersion">2818</string>
 		<string key="IBDocument.AppKitVersion">1187</string>
 		<string key="IBDocument.HIToolboxVersion">624.00</string>
 		<object class="NSMutableDictionary" key="IBDocument.PluginVersions">
 			<string key="NS.key.0">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
-			<string key="NS.object.0">1498</string>
+			<string key="NS.object.0">1900</string>
 		</object>
 		<object class="NSArray" key="IBDocument.IntegratedClassDependencies">
 			<bool key="EncodedWithXMLCoder">YES</bool>
@@ -112,10 +112,10 @@
 					<bool key="EncodedWithXMLCoder">YES</bool>
 					<object class="IBUIViewController" id="379238692">
 						<object class="IBUITableView" key="IBUIView" id="467149819">
-							<nil key="NSNextResponder"/>
+							<reference key="NSNextResponder"/>
 							<int key="NSvFlags">274</int>
 							<string key="NSFrame">{{0, 64}, {320, 699}}</string>
-							<reference key="IBUIBackgroundColor" ref="130166252"/>
+							<reference key="NSSuperview"/>
 							<bool key="IBUIOpaque">NO</bool>
 							<bool key="IBUIClipsSubviews">YES</bool>
 							<bool key="IBUIClearsContextBeforeDrawing">NO</bool>
@@ -128,6 +128,7 @@
 							<float key="IBUIRowHeight">44</float>
 							<float key="IBUISectionHeaderHeight">27</float>
 							<float key="IBUISectionFooterHeight">27</float>
+							<reference key="IBUIBackgroundColor" ref="130166252"/>
 						</object>
 						<object class="IBUINavigationItem" key="IBUINavigationItem" id="391851809">
 							<string key="IBUITitle">Contacts</string>
@@ -154,45 +155,45 @@
 				</object>
 				<string key="targetRuntimeIdentifier">IBIPadFramework</string>
 				<bool key="IBUIHorizontal">NO</bool>
-				<object class="IBUINavigationController" key="IBUISelectedViewController" id="289593068">
-					<string key="IBUITitle">Accounts</string>
-					<object class="IBUITabBarItem" key="IBUITabBarItem" id="358848212">
-						<string key="IBUITitle">Accounts</string>
+				<object class="IBUINavigationController" key="IBUISelectedViewController" id="137071232">
+					<string key="IBUITitle">Chat Logs</string>
+					<object class="IBUITabBarItem" key="IBUITabBarItem" id="779438119">
+						<string key="IBUITitle">Chat Logs</string>
 						<object class="NSCustomResource" key="IBUIImage">
 							<string key="NSClassName">NSImage</string>
-							<string key="NSResourceName">accounts.png</string>
+							<string key="NSResourceName">chatlog.png</string>
 						</object>
 						<string key="targetRuntimeIdentifier">IBIPadFramework</string>
 					</object>
 					<reference key="IBUIParentViewController" ref="999326593"/>
 					<object class="IBUISimulatedTabBarMetrics" key="IBUISimulatedBottomBarMetrics"/>
-					<reference key="IBUISimulatedStatusBarMetrics" ref="742029341"/>
+					<object class="IBUISimulatedStatusBarMetrics" key="IBUISimulatedStatusBarMetrics">
+						<int key="IBUIStatusBarStyle">2</int>
+					</object>
 					<object class="IBUISimulatedOrientationMetrics" key="IBUISimulatedOrientationMetrics">
 						<int key="IBUIInterfaceOrientation">1</int>
 						<int key="interfaceOrientation">1</int>
 					</object>
 					<string key="targetRuntimeIdentifier">IBIPadFramework</string>
 					<bool key="IBUIHorizontal">NO</bool>
-					<object class="IBUINavigationBar" key="IBUINavigationBar" id="816897561">
+					<object class="IBUINavigationBar" key="IBUINavigationBar" id="64139188">
 						<nil key="NSNextResponder"/>
 						<int key="NSvFlags">256</int>
 						<string key="NSFrameSize">{0, 0}</string>
-						<bool key="IBUIOpaque">NO</bool>
 						<bool key="IBUIClipsSubviews">YES</bool>
 						<bool key="IBUIMultipleTouchEnabled">YES</bool>
 						<string key="targetRuntimeIdentifier">IBIPadFramework</string>
+						<int key="IBUIBarStyle">1</int>
 					</object>
 					<object class="NSMutableArray" key="IBUIViewControllers">
 						<bool key="EncodedWithXMLCoder">YES</bool>
-						<object class="IBUIViewController" id="108043454">
-							<object class="NSArray" key="IBUIToolbarItems" id="0">
-								<bool key="EncodedWithXMLCoder">YES</bool>
-							</object>
-							<object class="IBUINavigationItem" key="IBUINavigationItem" id="634194696">
-								<string key="IBUITitle">Accounts</string>
+						<object class="IBUIViewController" id="589235868">
+							<string key="IBUITitle">Loglist</string>
+							<object class="IBUINavigationItem" key="IBUINavigationItem" id="512325865">
+								<string key="IBUITitle">Chat Logs</string>
 								<string key="targetRuntimeIdentifier">IBIPadFramework</string>
 							</object>
-							<reference key="IBUIParentViewController" ref="289593068"/>
+							<reference key="IBUIParentViewController" ref="137071232"/>
 							<object class="IBUISimulatedOrientationMetrics" key="IBUISimulatedOrientationMetrics">
 								<int key="IBUIInterfaceOrientation">1</int>
 								<int key="interfaceOrientation">1</int>
@@ -299,47 +300,45 @@
 							</object>
 						</object>
 					</object>
-					<reference ref="289593068"/>
-					<object class="IBUINavigationController" id="137071232">
-						<string key="IBUITitle">Chat Logs</string>
-						<object class="IBUITabBarItem" key="IBUITabBarItem" id="779438119">
-							<string key="IBUITitle">Chat Logs</string>
+					<object class="IBUINavigationController" id="289593068">
+						<string key="IBUITitle">Accounts</string>
+						<object class="IBUITabBarItem" key="IBUITabBarItem" id="358848212">
+							<string key="IBUITitle">Accounts</string>
 							<object class="NSCustomResource" key="IBUIImage">
 								<string key="NSClassName">NSImage</string>
-								<string key="NSResourceName">chatlog.png</string>
+								<string key="NSResourceName">accounts.png</string>
 							</object>
 							<string key="targetRuntimeIdentifier">IBIPadFramework</string>
 						</object>
 						<reference key="IBUIParentViewController" ref="999326593"/>
 						<object class="IBUISimulatedTabBarMetrics" key="IBUISimulatedBottomBarMetrics"/>
-						<object class="IBUISimulatedStatusBarMetrics" key="IBUISimulatedStatusBarMetrics">
-							<int key="IBUIStatusBarStyle">2</int>
-						</object>
+						<reference key="IBUISimulatedStatusBarMetrics" ref="742029341"/>
 						<object class="IBUISimulatedOrientationMetrics" key="IBUISimulatedOrientationMetrics">
 							<int key="IBUIInterfaceOrientation">1</int>
 							<int key="interfaceOrientation">1</int>
 						</object>
 						<string key="targetRuntimeIdentifier">IBIPadFramework</string>
 						<bool key="IBUIHorizontal">NO</bool>
-						<object class="IBUINavigationBar" key="IBUINavigationBar" id="64139188">
+						<object class="IBUINavigationBar" key="IBUINavigationBar" id="816897561">
 							<nil key="NSNextResponder"/>
 							<int key="NSvFlags">256</int>
 							<string key="NSFrameSize">{0, 0}</string>
+							<bool key="IBUIOpaque">NO</bool>
 							<bool key="IBUIClipsSubviews">YES</bool>
 							<bool key="IBUIMultipleTouchEnabled">YES</bool>
 							<string key="targetRuntimeIdentifier">IBIPadFramework</string>
-							<int key="IBUIBarStyle">1</int>
 						</object>
 						<object class="NSMutableArray" key="IBUIViewControllers">
 							<bool key="EncodedWithXMLCoder">YES</bool>
-							<object class="IBUIViewController" id="589235868">
-								<string key="IBUITitle">Loglist</string>
-								<object class="IBUINavigationItem" key="IBUINavigationItem" id="512325865">
-									<string key="IBUITitle">Chat Logs</string>
+							<object class="IBUIViewController" id="108043454">
+								<object class="NSArray" key="IBUIToolbarItems" id="0">
+									<bool key="EncodedWithXMLCoder">YES</bool>
+								</object>
+								<object class="IBUINavigationItem" key="IBUINavigationItem" id="634194696">
+									<string key="IBUITitle">Accounts</string>
 									<string key="targetRuntimeIdentifier">IBIPadFramework</string>
 								</object>
-								<reference key="IBUIParentViewController" ref="137071232"/>
-								<string key="IBUINibName">Loglist</string>
+								<reference key="IBUIParentViewController" ref="289593068"/>
 								<object class="IBUISimulatedOrientationMetrics" key="IBUISimulatedOrientationMetrics">
 									<int key="IBUIInterfaceOrientation">1</int>
 									<int key="interfaceOrientation">1</int>
@@ -349,6 +348,7 @@
 							</object>
 						</object>
 					</object>
+					<reference ref="137071232"/>
 					<object class="IBUINavigationController" id="879317909">
 						<string key="IBUITitle">Group Chat</string>
 						<object class="IBUITabBarItem" key="IBUITabBarItem" id="168756524">
@@ -1323,7 +1323,7 @@
 		</object>
 		<object class="NSMutableDictionary" key="IBDocument.PluginDeclaredDependencyDefaults">
 			<string key="NS.key.0">com.apple.InterfaceBuilder.CocoaTouchPlugin.iPhoneOS</string>
-			<real value="1296" key="NS.object.0"/>
+			<real value="1536" key="NS.object.0"/>
 		</object>
 		<object class="NSMutableDictionary" key="IBDocument.PluginDeclaredDevelopmentDependencies">
 			<string key="NS.key.0">com.apple.InterfaceBuilder.CocoaTouchPlugin.InterfaceBuilder3</string>
@@ -1358,6 +1358,6 @@
 				<string>{26, 26}</string>
 			</object>
 		</object>
-		<string key="IBCocoaTouchPluginVersion">1498</string>
+		<string key="IBCocoaTouchPluginVersion">1900</string>
 	</data>
 </archive>

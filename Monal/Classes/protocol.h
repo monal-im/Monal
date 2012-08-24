@@ -142,7 +142,7 @@
 - (NSData *) MD5:(NSString*)string ;
 - (NSData *) DataMD5:(NSData*)datain;
 
-- (NSString *) MD5_16:(NSString*)string ;
+
 - (NSString *)hexadecimalString:(NSData*) data; 
 
 @property (nonatomic, readonly) bool streamError;

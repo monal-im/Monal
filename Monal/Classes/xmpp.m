@@ -2040,18 +2040,17 @@ debug_NSLog(@"ended this element: %@", elementName);
             
         }
 		
-       nonce=@"E8CB71A76EC5759A78D7C403B8EB9F59";
-        cnonce=@"722e5309134575069555dd8e15";
+  //  nonce=@"580F35C1AE408E7DA57DE4DEDC5B9CA7";
+    //    cnonce=@"B9E01AE3-29E5-4FE5-9AA0-72F99742428A";
   
         
 		// ****** digest stuff going on here...
 		NSString* X= [NSString stringWithFormat:@"%@:%@:%@", account, realm, password ];
         debug_NSLog(@"X: %@", X);
         
-		NSData* Y_Data= [self MD5:X];
+		NSData* Y = [self MD5:X];
        
-        NSString* Y =[[NSString alloc] initWithData:Y_Data encoding:NSASCIIStringEncoding];
-		debug_NSLog(@"Y: %@", Y);
+    
         
         // above is correct
         
@@ -2063,23 +2062,27 @@ debug_NSLog(@"ended this element: %@", elementName);
 		//  if you have the authzid  here you need it below too but it wont work on som servers
 		// so best not include it
 		
-        NSString* A1=[NSString stringWithFormat:@"%@:%@:%@",
-                      Y,nonce,cnonce]; 
-		//NSData* A1= [
-          //           dataUsingEncoding:NSUTF8StringEncoding];
+        NSString* A1Str=[NSString stringWithFormat:@":%@:%@",
+                      nonce,cnonce]; 
+		NSData* A1= [A1Str
+                     dataUsingEncoding:NSUTF8StringEncoding];
 		
-		/*debug_NSLog(@"A1: %@",[[NSString alloc]initWithData:A1 encoding:NSUTF8StringEncoding] )
+	
         
         NSMutableData *HA1data = [NSMutableData dataWithCapacity:([Y length] + [A1 length])];
         [HA1data appendData:Y];
-        [HA1data appendData:A1];*/
+        [HA1data appendData:A1];
         
        
-        debug_NSLog(@" A1 : %@",A1  );
+        debug_NSLog(@" HA1data : %@",HA1data  );
 		
-		NSData* HA1=[self MD5:A1];
+        
+        //this hash is wrong.. 
+		NSData* HA1=[self DataMD5:HA1data];
 		
     
+        
+        
 		  //below is correct
 		
 		NSString* A2=[NSString stringWithFormat:@"AUTHENTICATE:xmpp/%@", realm];
@@ -2100,16 +2103,18 @@ debug_NSLog(@"ended this element: %@", elementName);
         
          debug_NSLog(@" KD: %@", KD );
 		
+       
+        
 		NSData* responseData=[self MD5:KD];
 		
-		
+		 // above this is ok 
 		
 		NSString* response=[NSString stringWithFormat:@"username=\"%@\",realm=\"%@\",nonce=\"%@\",cnonce=\"%@\",nc=00000001,qop=auth,digest-uri=\"xmpp/%@\",response=%@,charset=utf-8",
 						   account,realm, nonce, cnonce, realm, [self hexadecimalString:responseData]];
 		//,authzid=\"%@@%@/%@\"  ,account,domain, resource
 		
 		
-		debug_NSLog(@"sending  response :  %@", response);
+		debug_NSLog(@"  response :  %@", response);
 		
 		NSString* encoded=[self encodeBase64WithString:response];
 		

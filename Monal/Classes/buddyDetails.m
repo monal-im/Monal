@@ -254,7 +254,7 @@
 	if([domain isEqualToString:@"chat.facebook.com"])
 	{
 		//gtalk
-		protocolImage.image=[UIImage imageNamed:@"Facebook.png"];
+		protocolImage.image=[UIImage imageNamed:@"Facebook_big.png"];
 	}
 	else
 	{

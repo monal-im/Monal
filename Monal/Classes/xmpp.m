@@ -4027,7 +4027,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 		return false; 
 	}
  
-/*	if((SSL==false) && ((SASLPlain==true) && (SASLDIGEST_MD5!=true)))
+	/*if((SSL==false) && ((SASLPlain==true) && (SASLDIGEST_MD5!=true)))
 	{
 		UIAlertView *addError = [[UIAlertView alloc] 
 								 initWithTitle:@"Insecure Login" 

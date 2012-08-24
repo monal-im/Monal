@@ -26,6 +26,9 @@ This is a major update that adds many features and fixes bugs.
 9. Properly times out when connection fails
 10. Closing an active chat marks the messages as read
 11. Properly able to handle resource ids and other users logged into multiple machines
+12. Fixed digest-md5 
+13. Fixed Facebook login
+
 
 
 

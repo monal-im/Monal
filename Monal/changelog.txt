@@ -16,7 +16,7 @@ Notable features:
 This is a major update that adds many features and fixes bugs. 
 
 1. Added XMPP jingle VOIP features.  (XEP-0166)
-2. Remains open in the background until you logout
+2. Remains open in the background until you logout or lose connection
 3. Many major bugfixes to improve stability and speed
 4. Several UI enhancements/cosmetic changes
 5. Removed AIM support due to AOL turning off supported servers

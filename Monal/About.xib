@@ -170,7 +170,7 @@
 					<object class="IBUILabel" id="609659229">
 						<reference key="NSNextResponder" ref="33432271"/>
 						<int key="NSvFlags">293</int>
-						<string key="NSFrame">{{13, 113}, {273, 43}}</string>
+						<string key="NSFrame">{{13, 126}, {273, 43}}</string>
 						<reference key="NSSuperview" ref="33432271"/>
 						<reference key="NSWindow"/>
 						<reference key="NSNextKeyView" ref="1896777"/>
@@ -183,28 +183,6 @@
 						<float key="IBUIMinimumFontSize">10</float>
 						<int key="IBUINumberOfLines">2</int>
 						<string key="IBUIText">Application Icon by Ayush Pokharel</string>
-						<reference key="IBUITextColor" ref="832216064"/>
-						<reference key="IBUIFontDescription" ref="318853262"/>
-						<reference key="IBUIFont" ref="82678468"/>
-						<int key="IBUIAutoshrinkMode">2</int>
-						<double key="preferredMaxLayoutWidth">273</double>
-					</object>
-					<object class="IBUILabel" id="239069490">
-						<reference key="NSNextResponder" ref="33432271"/>
-						<int key="NSvFlags">293</int>
-						<string key="NSFrame">{{13, 92}, {273, 43}}</string>
-						<reference key="NSSuperview" ref="33432271"/>
-						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="609659229"/>
-						<bool key="IBUIOpaque">NO</bool>
-						<bool key="IBUIClipsSubviews">YES</bool>
-						<bool key="IBUIUserInteractionEnabled">NO</bool>
-						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-						<nil key="IBUIHighlightedColor"/>
-						<int key="IBUIBaselineAdjustment">1</int>
-						<float key="IBUIMinimumFontSize">10</float>
-						<int key="IBUINumberOfLines">2</int>
-						<string key="IBUIText">QA Test: Amul Pokharel</string>
 						<reference key="IBUITextColor" ref="832216064"/>
 						<reference key="IBUIFontDescription" ref="318853262"/>
 						<reference key="IBUIFont" ref="82678468"/>
@@ -233,7 +211,7 @@
 						<int key="IBUIBaselineAdjustment">1</int>
 						<float key="IBUIMinimumFontSize">5</float>
 						<int key="IBUINumberOfLines">4</int>
-						<string key="IBUIText">Icons from Joseph Wain's Glyphish icon set and  are used under the creative commons attribution license</string>
+						<string key="IBUIText">Icons from Joseph Wain's Glyphish icon set </string>
 						<reference key="IBUITextColor" ref="832216064"/>
 						<reference key="IBUIFontDescription" ref="318853262"/>
 						<reference key="IBUIFont" ref="82678468"/>
@@ -307,7 +285,7 @@
 						<string key="NSFrame">{{12, 65}, {223, 32}}</string>
 						<reference key="NSSuperview" ref="33432271"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="239069490"/>
+						<reference key="NSNextKeyView"/>
 						<object class="NSColor" key="IBUIBackgroundColor">
 							<int key="NSColorSpace">1</int>
 							<bytes key="NSRGB">MSAxIDEgMAA</bytes>
@@ -416,14 +394,13 @@
 							<reference ref="1070626817"/>
 							<reference ref="238605037"/>
 							<reference ref="699976145"/>
-							<reference ref="609659229"/>
 							<reference ref="707970835"/>
 							<reference ref="904491720"/>
 							<reference ref="832769944"/>
-							<reference ref="239069490"/>
 							<reference ref="753994040"/>
 							<reference ref="1896777"/>
 							<reference ref="427659220"/>
+							<reference ref="609659229"/>
 						</object>
 						<reference key="parent" ref="0"/>
 					</object>
@@ -473,11 +450,6 @@
 						<reference key="parent" ref="33432271"/>
 					</object>
 					<object class="IBObjectRecord">
-						<int key="objectID">50</int>
-						<reference key="object" ref="239069490"/>
-						<reference key="parent" ref="33432271"/>
-					</object>
-					<object class="IBObjectRecord">
 						<int key="objectID">51</int>
 						<reference key="object" ref="427659220"/>
 						<reference key="parent" ref="33432271"/>
@@ -499,7 +471,6 @@
 					<string>46.IBPluginDependency</string>
 					<string>47.IBPluginDependency</string>
 					<string>5.IBPluginDependency</string>
-					<string>50.IBPluginDependency</string>
 					<string>51.IBPluginDependency</string>
 					<string>7.IBPluginDependency</string>
 					<string>8.IBPluginDependency</string>
@@ -510,7 +481,6 @@
 					<string>AboutVC</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>UIResponder</string>
-					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>

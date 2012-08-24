@@ -40,8 +40,6 @@
 		2614ED41121BD3160034556C /* MyTabController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2614ED40121BD3160034556C /* MyTabController.m */; };
 		261AB9351409BFB8006F5155 /* callScreen.m in Sources */ = {isa = PBXBuildFile; fileRef = 261AB9341409BFB8006F5155 /* callScreen.m */; };
 		261ED6C41240257F00C14F6A /* BuddyAdd.xib in Resources */ = {isa = PBXBuildFile; fileRef = 261ED6C31240257F00C14F6A /* BuddyAdd.xib */; };
-		261FB98B15E479AE00B069A1 /* TPCircularBuffer+AudioBufferList.c in Sources */ = {isa = PBXBuildFile; fileRef = 261FB98715E479AE00B069A1 /* TPCircularBuffer+AudioBufferList.c */; };
-		261FB98C15E479AE00B069A1 /* TPCircularBuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 261FB98915E479AE00B069A1 /* TPCircularBuffer.c */; };
 		261FD43A122349F2003DDC3A /* activechats.m in Sources */ = {isa = PBXBuildFile; fileRef = 261FD439122349F2003DDC3A /* activechats.m */; };
 		261FD56F1223527C003DDC3A /* active.png in Resources */ = {isa = PBXBuildFile; fileRef = 261FD56E1223527C003DDC3A /* active.png */; };
 		26277888110179D100023C8A /* tools.m in Sources */ = {isa = PBXBuildFile; fileRef = 26277887110179D100023C8A /* tools.m */; };
@@ -279,10 +277,6 @@
 		261AB9341409BFB8006F5155 /* callScreen.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = callScreen.m; sourceTree = "<group>"; };
 		261AB9371409C2B8006F5155 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		261ED6C31240257F00C14F6A /* BuddyAdd.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = BuddyAdd.xib; sourceTree = "<group>"; };
-		261FB98715E479AE00B069A1 /* TPCircularBuffer+AudioBufferList.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "TPCircularBuffer+AudioBufferList.c"; sourceTree = "<group>"; };
-		261FB98815E479AE00B069A1 /* TPCircularBuffer+AudioBufferList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "TPCircularBuffer+AudioBufferList.h"; sourceTree = "<group>"; };
-		261FB98915E479AE00B069A1 /* TPCircularBuffer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = TPCircularBuffer.c; sourceTree = "<group>"; };
-		261FB98A15E479AE00B069A1 /* TPCircularBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TPCircularBuffer.h; sourceTree = "<group>"; };
 		261FD438122349F2003DDC3A /* activechats.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = activechats.h; sourceTree = "<group>"; };
 		261FD439122349F2003DDC3A /* activechats.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = activechats.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		261FD56E1223527C003DDC3A /* active.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = active.png; sourceTree = "<group>"; };
@@ -642,17 +636,6 @@
 			path = Classes;
 			sourceTree = "<group>";
 		};
-		261FB98615E479AE00B069A1 /* TPCircularBuffer */ = {
-			isa = PBXGroup;
-			children = (
-				261FB98715E479AE00B069A1 /* TPCircularBuffer+AudioBufferList.c */,
-				261FB98815E479AE00B069A1 /* TPCircularBuffer+AudioBufferList.h */,
-				261FB98915E479AE00B069A1 /* TPCircularBuffer.c */,
-				261FB98A15E479AE00B069A1 /* TPCircularBuffer.h */,
-			);
-			path = TPCircularBuffer;
-			sourceTree = "<group>";
-		};
 		2628E50114049B380064131E /* ModalViews */ = {
 			isa = PBXGroup;
 			children = (
@@ -950,7 +933,6 @@
 		26DFD4A615666B6C007A1621 /* 3rd Party */ = {
 			isa = PBXGroup;
 			children = (
-				261FB98615E479AE00B069A1 /* TPCircularBuffer */,
 				262DE4AC15C4E2C60040A66B /* MBProgressHUd */,
 				2640AF3B14548E7600CB4F60 /* GrowingTextView */,
 				26DFD4A815666B7D007A1621 /* MGSplitViewController */,
@@ -1364,8 +1346,6 @@
 				262DE4AF15C4E2C60040A66B /* MBProgressHUD.m in Sources */,
 				26D3C27B15D84DD100568DDC /* presence.m in Sources */,
 				26D3C27E15D84E6800568DDC /* iq.m in Sources */,
-				261FB98B15E479AE00B069A1 /* TPCircularBuffer+AudioBufferList.c in Sources */,
-				261FB98C15E479AE00B069A1 /* TPCircularBuffer.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

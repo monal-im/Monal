@@ -717,9 +717,9 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
 	return YES;
 }
 
--(void)viewDidAppear:(BOOL)animated 
+-(void)viewWillAppear:(BOOL)animated
 {
-	debug_NSLog(@"buddy list ddid  appear");
+	debug_NSLog(@"buddy list will  appear");
 	
     
     //needed to remove for ARC 

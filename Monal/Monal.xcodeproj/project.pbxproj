@@ -49,8 +49,6 @@
 		2628E50714049DB50064131E /* askTempPass.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2628E50614049DB50064131E /* askTempPass.xib */; };
 		26292F4F1309CAE100097280 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26292F4E1309CAE100097280 /* CFNetwork.framework */; };
 		262DE4AF15C4E2C60040A66B /* MBProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = 262DE4AE15C4E2C60040A66B /* MBProgressHUD.m */; };
-		262DE4CC15C4FAA00040A66B /* default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 262DE4CA15C4FAA00040A66B /* default@2x.png */; };
-		262DE4CD15C4FAA00040A66B /* default.png in Resources */ = {isa = PBXBuildFile; fileRef = 262DE4CB15C4FAA00040A66B /* default.png */; };
 		263566B9133BDAD10095CD33 /* help.png in Resources */ = {isa = PBXBuildFile; fileRef = 263566B8133BDAD00095CD33 /* help.png */; };
 		26370742148873FB00DB8D57 /* accounts@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26370741148873FB00DB8D57 /* accounts@2x.png */; };
 		263707451488743300DB8D57 /* chatlog@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 263707441488743300DB8D57 /* chatlog@2x.png */; };
@@ -292,8 +290,6 @@
 		26292F4E1309CAE100097280 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		262DE4AD15C4E2C60040A66B /* MBProgressHUD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MBProgressHUD.h; sourceTree = "<group>"; };
 		262DE4AE15C4E2C60040A66B /* MBProgressHUD.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MBProgressHUD.m; sourceTree = "<group>"; };
-		262DE4CA15C4FAA00040A66B /* default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "default@2x.png"; sourceTree = "<group>"; };
-		262DE4CB15C4FAA00040A66B /* default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = default.png; sourceTree = "<group>"; };
 		263566B8133BDAD00095CD33 /* help.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = help.png; sourceTree = "<group>"; };
 		26370741148873FB00DB8D57 /* accounts@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "accounts@2x.png"; sourceTree = "<group>"; };
 		263707441488743300DB8D57 /* chatlog@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "chatlog@2x.png"; sourceTree = "<group>"; };
@@ -674,8 +670,6 @@
 		262DE4C815C4FA940040A66B /* Splash Screens */ = {
 			isa = PBXGroup;
 			children = (
-				262DE4CA15C4FAA00040A66B /* default@2x.png */,
-				262DE4CB15C4FAA00040A66B /* default.png */,
 			);
 			name = "Splash Screens";
 			sourceTree = "<group>";
@@ -1293,8 +1287,6 @@
 				263707611488773800DB8D57 /* enabled@2x.png in Resources */,
 				263707631488785E00DB8D57 /* noicon@2x.png in Resources */,
 				26727DCC1568353A0010E17A /* carbon3.jpg in Resources */,
-				262DE4CC15C4FAA00040A66B /* default@2x.png in Resources */,
-				262DE4CD15C4FAA00040A66B /* default.png in Resources */,
 				260A2CC515E713EC00DB103B /* Facebook.png in Resources */,
 				260A2CC615E713EC00DB103B /* Facebook@2x.png in Resources */,
 				260A2CC915E7140000DB103B /* Facebook_big.png in Resources */,

@@ -1507,10 +1507,6 @@ buddylistDS.tabcontroller=tabcontroller;
 		[alert show];
 		
 
-	
-		;
-		
-	
 		return; 
 		
 	}

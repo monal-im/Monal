@@ -103,7 +103,7 @@
 						<nil key="IBUIHighlightedColor"/>
 						<int key="IBUIBaselineAdjustment">1</int>
 						<float key="IBUIMinimumFontSize">10</float>
-						<string key="IBUIText">(c) 2009-2011 Anurodh Pokharel</string>
+						<string key="IBUIText">(c) 2009-2012 Anurodh Pokharel</string>
 						<object class="NSColor" key="IBUITextColor">
 							<int key="NSColorSpace">1</int>
 							<bytes key="NSRGB">MC4wMDU0MzQ4MTExMTUgMC4wMDU0MzQ4MTExMTUgMC4wMDU0MzQ4MTExMTUAA</bytes>

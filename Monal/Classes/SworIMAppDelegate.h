@@ -40,10 +40,10 @@
 UINavigationControllerDelegate,UIAlertViewDelegate, MGSplitViewControllerDelegate> {
     
     IBOutlet UIWindow *window;
-   IBOutlet  UINavigationController *buddyNavigationController;
-	  IBOutlet  UINavigationController *accountsNavigationController;
-	  IBOutlet  UINavigationController *statusNavigationController;
-	  IBOutlet  UINavigationController *activeNavigationController;
+    IBOutlet  UINavigationController *buddyNavigationController;
+    IBOutlet  UINavigationController *accountsNavigationController;
+    IBOutlet  UINavigationController *statusNavigationController;
+    IBOutlet  UINavigationController *activeNavigationController;
 	
 	
 	// ipad specific stuff
@@ -52,9 +52,6 @@ UINavigationControllerDelegate,UIAlertViewDelegate, MGSplitViewControllerDelegat
 	IBOutlet MGSplitViewController* split; 
 
 
-
-	
-	
 	IBOutlet UITabBarController *tabcontroller; 
 	IBOutlet UITabBarItem* buddyTab; 
 	IBOutlet UITabBarItem* activeTab; 
@@ -64,34 +61,33 @@ UINavigationControllerDelegate,UIAlertViewDelegate, MGSplitViewControllerDelegat
 
 	
     IBOutlet statusControl* statuscon; 
-	IBOutlet GroupChat* joinGroup; 
-	
-	
+	IBOutlet GroupChat* joinGroup;
+    
+    IBOutlet buddylist* buddylistDS;
+    
+	MBProgressHUD* loginProgressHud;
 
-	
+	TabMoreController* moreControl;
+	UINavigationController* morenav;
+    
+    chat* chatwin;
+    callScreen* call;
+    
+    
 	bool vibrateenabled; 
     bool uithreadrunning; 
 	
 	protocol* jabber;
-	IBOutlet buddylist* buddylistDS;
-	
 
-	chat* chatwin;
-    callScreen* call;
-    
+  
 	Reachability* reach;
 
 	DataLayer* db;
 	NSString* iconPath; 
 	
-
-
 	UITextField* nameField;
 	BOOL listLoad;  
 	
-	MBProgressHUD* loginProgressHud;
-	
-
 	
 	NSString* accountno;
 	
@@ -110,8 +106,7 @@ UINavigationControllerDelegate,UIAlertViewDelegate, MGSplitViewControllerDelegat
 	
 	NSString * lasttitle; 
 	
-	TabMoreController* moreControl; 
-	UINavigationController* morenav;
+	
 	
 
 	bool playing; 

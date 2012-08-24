@@ -195,6 +195,8 @@
 		26B69A82131C5495002FCBEB /* PasswordManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B69A81131C5495002FCBEB /* PasswordManager.m */; };
 		26C0382612403DC00010A285 /* buddyAdd.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C0382512403DC00010A285 /* buddyAdd.m */; };
 		26C1FB340FBF505800525E69 /* loglist.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C1FB330FBF505800525E69 /* loglist.m */; };
+		26C3149B15E729D8003A73AA /* default.png in Resources */ = {isa = PBXBuildFile; fileRef = 26C3149915E729D8003A73AA /* default.png */; };
+		26C3149C15E729D8003A73AA /* default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26C3149A15E729D8003A73AA /* default@2x.png */; };
 		26C76BE71320466A00EAF270 /* Default-Portrait~ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = 26C76BE51320466A00EAF270 /* Default-Portrait~ipad.png */; };
 		26C76BE913204C3800EAF270 /* Default-Landscape~ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = 26C76BE41320466A00EAF270 /* Default-Landscape~ipad.png */; };
 		26C76BEB1320544200EAF270 /* google_g.png in Resources */ = {isa = PBXBuildFile; fileRef = 26C76BEA1320544200EAF270 /* google_g.png */; };
@@ -448,6 +450,8 @@
 		26C0382512403DC00010A285 /* buddyAdd.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = buddyAdd.m; path = Classes/buddyAdd.m; sourceTree = "<group>"; };
 		26C1FB320FBF505800525E69 /* loglist.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = loglist.h; path = Classes/loglist.h; sourceTree = "<group>"; };
 		26C1FB330FBF505800525E69 /* loglist.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = loglist.m; path = Classes/loglist.m; sourceTree = "<group>"; };
+		26C3149915E729D8003A73AA /* default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = default.png; sourceTree = "<group>"; };
+		26C3149A15E729D8003A73AA /* default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "default@2x.png"; sourceTree = "<group>"; };
 		26C76BE41320466A00EAF270 /* Default-Landscape~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-Landscape~ipad.png"; sourceTree = "<group>"; };
 		26C76BE51320466A00EAF270 /* Default-Portrait~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-Portrait~ipad.png"; sourceTree = "<group>"; };
 		26C76BEA1320544200EAF270 /* google_g.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = google_g.png; sourceTree = "<group>"; };
@@ -670,6 +674,8 @@
 		262DE4C815C4FA940040A66B /* Splash Screens */ = {
 			isa = PBXGroup;
 			children = (
+				26C3149915E729D8003A73AA /* default.png */,
+				26C3149A15E729D8003A73AA /* default@2x.png */,
 			);
 			name = "Splash Screens";
 			sourceTree = "<group>";
@@ -1298,6 +1304,8 @@
 				260A2CD615E71FC200DB103B /* forward.png in Resources */,
 				260A2CD715E71FC200DB103B /* stop@2x.png in Resources */,
 				260A2CD815E71FC200DB103B /* back@2x.png in Resources */,
+				26C3149B15E729D8003A73AA /* default.png in Resources */,
+				26C3149C15E729D8003A73AA /* default@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

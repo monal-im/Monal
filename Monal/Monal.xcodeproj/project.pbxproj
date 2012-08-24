@@ -165,6 +165,9 @@
 		2651DAA20FC2847200009D7E /* noicon.png in Resources */ = {isa = PBXBuildFile; fileRef = 2651DAA10FC2847200009D7E /* noicon.png */; };
 		2654BEC81481499000DDC346 /* loglistDate.m in Sources */ = {isa = PBXBuildFile; fileRef = 2654BEC71481499000DDC346 /* loglistDate.m */; };
 		265571B1122157D500F994E8 /* SlidingMessageViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 265571B0122157D500F994E8 /* SlidingMessageViewController.m */; };
+		2658508A15E7D8E40070A2A7 /* README.markdown in Resources */ = {isa = PBXBuildFile; fileRef = 2658508515E7D8E40070A2A7 /* README.markdown */; };
+		2658508B15E7D8E40070A2A7 /* TPCircularBuffer+AudioBufferList.c in Sources */ = {isa = PBXBuildFile; fileRef = 2658508615E7D8E40070A2A7 /* TPCircularBuffer+AudioBufferList.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		2658508C15E7D8E40070A2A7 /* TPCircularBuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 2658508815E7D8E40070A2A7 /* TPCircularBuffer.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		265F1AE512303A670065C5FE /* WebBrowserVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 265F1AE412303A670065C5FE /* WebBrowserVC.m */; };
 		265F1B2B123040540065C5FE /* web.xib in Resources */ = {isa = PBXBuildFile; fileRef = 265F1B2A123040540065C5FE /* web.xib */; };
 		265F1B83123044CE0065C5FE /* web.png in Resources */ = {isa = PBXBuildFile; fileRef = 265F1B82123044CE0065C5FE /* web.png */; };
@@ -411,6 +414,11 @@
 		2654BEC71481499000DDC346 /* loglistDate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = loglistDate.m; path = Classes/loglistDate.m; sourceTree = "<group>"; };
 		265571AF122157D500F994E8 /* SlidingMessageViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SlidingMessageViewController.h; path = Classes/SlidingMessageViewController.h; sourceTree = "<group>"; };
 		265571B0122157D500F994E8 /* SlidingMessageViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SlidingMessageViewController.m; path = Classes/SlidingMessageViewController.m; sourceTree = "<group>"; };
+		2658508515E7D8E40070A2A7 /* README.markdown */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.markdown; sourceTree = "<group>"; };
+		2658508615E7D8E40070A2A7 /* TPCircularBuffer+AudioBufferList.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "TPCircularBuffer+AudioBufferList.c"; sourceTree = "<group>"; };
+		2658508715E7D8E40070A2A7 /* TPCircularBuffer+AudioBufferList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "TPCircularBuffer+AudioBufferList.h"; sourceTree = "<group>"; };
+		2658508815E7D8E40070A2A7 /* TPCircularBuffer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = TPCircularBuffer.c; sourceTree = "<group>"; };
+		2658508915E7D8E40070A2A7 /* TPCircularBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TPCircularBuffer.h; sourceTree = "<group>"; };
 		265F1AE312303A670065C5FE /* WebBrowserVC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WebBrowserVC.h; path = Classes/WebBrowserVC.h; sourceTree = "<group>"; };
 		265F1AE412303A670065C5FE /* WebBrowserVC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = WebBrowserVC.m; path = Classes/WebBrowserVC.m; sourceTree = "<group>"; };
 		265F1B2A123040540065C5FE /* web.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = web.xib; sourceTree = "<group>"; };
@@ -697,6 +705,18 @@
 			name = ChatButtons;
 			sourceTree = "<group>";
 		};
+		2658508415E7D8E40070A2A7 /* TPCircularBuffer */ = {
+			isa = PBXGroup;
+			children = (
+				2658508515E7D8E40070A2A7 /* README.markdown */,
+				2658508615E7D8E40070A2A7 /* TPCircularBuffer+AudioBufferList.c */,
+				2658508715E7D8E40070A2A7 /* TPCircularBuffer+AudioBufferList.h */,
+				2658508815E7D8E40070A2A7 /* TPCircularBuffer.c */,
+				2658508915E7D8E40070A2A7 /* TPCircularBuffer.h */,
+			);
+			path = TPCircularBuffer;
+			sourceTree = "<group>";
+		};
 		26610B0F12293FB000591435 /* iPhone */ = {
 			isa = PBXGroup;
 			children = (
@@ -933,6 +953,7 @@
 		26DFD4A615666B6C007A1621 /* 3rd Party */ = {
 			isa = PBXGroup;
 			children = (
+				2658508415E7D8E40070A2A7 /* TPCircularBuffer */,
 				262DE4AC15C4E2C60040A66B /* MBProgressHUd */,
 				2640AF3B14548E7600CB4F60 /* GrowingTextView */,
 				26DFD4A815666B7D007A1621 /* MGSplitViewController */,
@@ -1296,6 +1317,7 @@
 				26C314B015E72CF1003A73AA /* Default-Landscape@2x~ipad.png in Resources */,
 				26C314B115E72CF1003A73AA /* Default-Landscape~ipad.png in Resources */,
 				26C314B215E72CF1003A73AA /* Default@2x~iphone.png in Resources */,
+				2658508A15E7D8E40070A2A7 /* README.markdown in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1346,6 +1368,8 @@
 				262DE4AF15C4E2C60040A66B /* MBProgressHUD.m in Sources */,
 				26D3C27B15D84DD100568DDC /* presence.m in Sources */,
 				26D3C27E15D84E6800568DDC /* iq.m in Sources */,
+				2658508B15E7D8E40070A2A7 /* TPCircularBuffer+AudioBufferList.c in Sources */,
+				2658508C15E7D8E40070A2A7 /* TPCircularBuffer.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

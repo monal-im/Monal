@@ -58,7 +58,11 @@ NSMutableArray* packetInBuffer;
 int readpos;
 
 NSMutableArray* packetOutBuffer;
-int sentpos; 
+int sentpos;
+
+TPCircularBuffer packetInCurcularBuffer;
+TPCircularBuffer packetOutCircularBuffer;
+int packCount;
 
 @implementation RTP
 
@@ -257,28 +261,48 @@ void AudioOutputCallback(
 {
     debug_NSLog(@"entered RTP send thread");
     //create an output buffer
-    packetOutBuffer=[[NSMutableArray alloc] init];
+   // packetOutBuffer=[[NSMutableArray alloc] init];
     
     sentpos=0;
     
-    int packCount=0;
+  
     
     while(1)
     {
          if(disconnecting) break; 
         
         //let it bufer a little
-        if([packetOutBuffer count]>300)
+      //  if([packetOutBuffer count]>300)
+       if(packCount>300)
         {
-            if(sentpos<[packetOutBuffer count])
+            //if(sentpos<[packetOutBuffer count])
             {
-            NSData* data= [packetOutBuffer objectAtIndex:sentpos];
-        int rtpstatus = sess.SendPacket((void *)[data bytes],[data length],8,false, [data length] );
-        // pt=8  is PCMA ,  timestamp 2x80 =160 is for 2x 8Khz records at 5 ms
-        checkerror(rtpstatus);
-        if(rtpstatus!=0) break; //  stop sending
+               
+                uint32_t bytesToCopy=160;
+                int32_t availableBytes;
+                void *buffer = TPCircularBufferTail(&packetOutCircularBuffer, &availableBytes);
                 
-            sentpos++;
+                
+                if(availableBytes>=bytesToCopy)
+                {
+                    void *targetBuffer = malloc(160);
+                
+                    memcpy(targetBuffer, buffer, bytesToCopy );
+                
+                    //  NSData* data= [packetOutBuffer objectAtIndex:sentpos];
+
+                    int rtpstatus = sess.SendPacket(targetBuffer,bytesToCopy,8,false, bytesToCopy);
+                    // pt=8  is PCMA ,  timestamp 2x80 =160 is for 2x 8Khz records at 5 ms
+                    checkerror(rtpstatus);
+                    if(rtpstatus!=0) break; //  stop sending
+                
+                    sentpos++;
+                
+                    //clean up
+                    TPCircularBufferConsume(&packetOutCircularBuffer, bytesToCopy);
+                    free(targetBuffer);
+                }
+                
                 }
             
         }
@@ -300,12 +324,14 @@ void AudioInputCallback(
                         UInt32 inNumberPacketDescriptions, // 5
                         const AudioStreamPacketDescription *inPacketDescs) // 6
 {
-    static int count = 0;
+   static int count = 0;
     RecordState* recordState = (RecordState*)inUserData;
     
-    NSData* data= [NSData dataWithBytes:inBuffer->mAudioData length:inBuffer->mAudioDataByteSize];
-    [packetOutBuffer addObject:data];
+  //  NSData* data= [NSData dataWithBytes:inBuffer->mAudioData length:inBuffer->mAudioDataByteSize];
+   // [packetOutBuffer addObject:data];
   
+    
+     TPCircularBufferProduceBytes(&packetOutCircularBuffer,inBuffer->mAudioData, inBuffer->mAudioDataByteSize);
  
     recordState->currentPacket += inNumberPacketDescriptions;
     
@@ -319,6 +345,8 @@ void AudioInputCallback(
         debug_NSLog(@"audio reenqueue error %d", status);
     }
     ++count;
+    
+    packCount++; 
     //debug_NSLog("Sent %d audio packets, current packet %d \n", inNumberPacketDescriptions, recordState->currentPacket );
 }
 
@@ -328,6 +356,14 @@ void AudioInputCallback(
 
 -(int) RTPConnect:(NSString*) IP:(int) destPort:(int) localPort
 {
+    
+    
+    TPCircularBufferInit(&packetInCurcularBuffer, kBufferLength);
+ 
+    
+    
+    TPCircularBufferInit(&packetOutCircularBuffer, kBufferLength);
+      packCount=0;
     
     disconnecting=NO;
     

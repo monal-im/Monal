@@ -46,6 +46,8 @@
 		2628E50514049BAC0064131E /* askTempPass.m in Sources */ = {isa = PBXBuildFile; fileRef = 2628E50414049BAC0064131E /* askTempPass.m */; };
 		2628E50714049DB50064131E /* askTempPass.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2628E50614049DB50064131E /* askTempPass.xib */; };
 		26292F4F1309CAE100097280 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26292F4E1309CAE100097280 /* CFNetwork.framework */; };
+		262B4BD915E84227006B0112 /* Icon-72.png in Resources */ = {isa = PBXBuildFile; fileRef = 26F425E611AB4A1800C40676 /* Icon-72.png */; };
+		262B4BDB15E8452A006B0112 /* Monal_crop_144.png in Resources */ = {isa = PBXBuildFile; fileRef = 262B4BDA15E8452A006B0112 /* Monal_crop_144.png */; };
 		262DE4AF15C4E2C60040A66B /* MBProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = 262DE4AE15C4E2C60040A66B /* MBProgressHUD.m */; };
 		263566B9133BDAD10095CD33 /* help.png in Resources */ = {isa = PBXBuildFile; fileRef = 263566B8133BDAD00095CD33 /* help.png */; };
 		26370742148873FB00DB8D57 /* accounts@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26370741148873FB00DB8D57 /* accounts@2x.png */; };
@@ -288,6 +290,7 @@
 		2628E50414049BAC0064131E /* askTempPass.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = askTempPass.m; sourceTree = "<group>"; };
 		2628E50614049DB50064131E /* askTempPass.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = askTempPass.xib; sourceTree = "<group>"; };
 		26292F4E1309CAE100097280 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
+		262B4BDA15E8452A006B0112 /* Monal_crop_144.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Monal_crop_144.png; sourceTree = "<group>"; };
 		262DE4AD15C4E2C60040A66B /* MBProgressHUD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MBProgressHUD.h; sourceTree = "<group>"; };
 		262DE4AE15C4E2C60040A66B /* MBProgressHUD.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MBProgressHUD.m; sourceTree = "<group>"; };
 		263566B8133BDAD00095CD33 /* help.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = help.png; sourceTree = "<group>"; };
@@ -901,6 +904,7 @@
 		269A2E61132030510044B1C8 /* App */ = {
 			isa = PBXGroup;
 			children = (
+				262B4BDA15E8452A006B0112 /* Monal_crop_144.png */,
 				26F425E611AB4A1800C40676 /* Icon-72.png */,
 				26EB85D911166F1B005446DD /* Monal_crop_256.png */,
 				26EF9AB41320450300FA6FB2 /* icon@2x.png */,
@@ -1314,6 +1318,8 @@
 				26C314B015E72CF1003A73AA /* Default-Landscape@2x~ipad.png in Resources */,
 				26C314B115E72CF1003A73AA /* Default-Landscape~ipad.png in Resources */,
 				26C314B215E72CF1003A73AA /* Default@2x~iphone.png in Resources */,
+				262B4BD915E84227006B0112 /* Icon-72.png in Resources */,
+				262B4BDB15E8452A006B0112 /* Monal_crop_144.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

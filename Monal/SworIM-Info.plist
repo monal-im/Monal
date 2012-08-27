@@ -9,11 +9,13 @@
 	<key>CFBundleExecutable</key>
 	<string>${EXECUTABLE_NAME}</string>
 	<key>CFBundleIconFile</key>
-	<string>Monal_crop_57.png</string>
+	<string>Icon.png</string>
 	<key>CFBundleIconFiles</key>
 	<array>
-		<string>Monal_crop_57.png</string>
-		<string>Monal_crop_114.png</string>
+		<string>Icon.png</string>
+		<string>icon@2x.png</string>
+		<string>Icon-72.png</string>
+		<string>Monal_crop_144.png</string>
 	</array>
 	<key>CFBundleIcons</key>
 	<dict>
@@ -23,6 +25,10 @@
 			<array>
 				<string>Monal_crop_57.png</string>
 				<string>Monal_crop_114.png</string>
+				<string>Icon.png</string>
+				<string>icon@2x.png</string>
+				<string>Icon-72.png</string>
+				<string>Monal_crop_144.png</string>
 			</array>
 			<key>UIPrerenderedIcon</key>
 			<true/>

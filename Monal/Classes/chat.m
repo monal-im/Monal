@@ -282,7 +282,7 @@
 
 #pragma mark view state
 
-- (void)viewDidAppear:(BOOL)animated
+- (void)viewWillAppear:(BOOL)animated
 {
     NSString* machine=[tools machine]; 
     if([machine hasPrefix:@"iPad"] )

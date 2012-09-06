@@ -49,7 +49,7 @@
 	[currentTable setDataSource:self];
 }
 
--(void)viewWillAppear:(BOOL)animated
+-(void)viewDidAppear:(BOOL)animated
 {
 	
 	
@@ -148,9 +148,9 @@
 	
 }
 
--(void)viewDidDisappear:(BOOL)animated
+-(void)viewWillDisappear:(BOOL)animated
 {
-	debug_NSLog(@"active chats  did disappear");
+	debug_NSLog(@"active chats  will disappear");
 	thelist=nil; 
 	
 	viewController.navigationItem.leftBarButtonItem=nil; 

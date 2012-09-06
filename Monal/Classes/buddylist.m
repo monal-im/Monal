@@ -717,9 +717,9 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
 	return YES;
 }
 
--(void)viewWillAppear:(BOOL)animated
+-(void)viewDidAppear:(BOOL)animated
 {
-	debug_NSLog(@"buddy list will  appear");
+	debug_NSLog(@"buddy list did  appear");
 	
     
     //needed to remove for ARC 
@@ -733,9 +733,9 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
 	
 }
 
--(void)viewDidDisappear:(BOOL)animated
+-(void)viewWillDisappear:(BOOL)animated
 {
-	debug_NSLog(@"buddy list ddid  disappear");
+	debug_NSLog(@"buddy list will  disappear");
 	//reset the edit button to not editing
 	/*[app setEditing:false animated:false]; // this changes it to Done
 	[currentTable setEditing:false animated:false];*/

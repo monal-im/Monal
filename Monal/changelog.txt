@@ -13,7 +13,8 @@ Notable features:
 
 2.0.8 changelog
 
-This is  update that  fixes bugs. 
+This is  update that  fixes bugs.
+1. fixes issue with navigation buttons in contact list  
 
 
 

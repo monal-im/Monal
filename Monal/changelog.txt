@@ -15,7 +15,7 @@ Notable features:
 
 This is  update that  fixes bugs.
 1. fixes issue with navigation buttons in contact list  
-
+2. correctly sets away status on contacts 
 
 
 

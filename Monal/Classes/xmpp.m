@@ -799,10 +799,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 		
         [iqObj reset];
         
-        // who is the stanza from.. despite the name presence user it is used for other requests too 
-        
-        //if they are requesting stuff.. they are online
-		
+      
          iqObj.type=[attributeDict objectForKey:@"type"];
         
         iqObj.from=[attributeDict objectForKey:@"from"];

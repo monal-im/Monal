@@ -78,7 +78,12 @@ style:UIBarButtonItemStyleBordered
 	}
 	
   
-	[theTable performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:NO];
+ dispatch_async(dispatch_get_main_queue(), ^{
+    
+        [theTable reloadData];
+    });
+    
+    
 }
 
 

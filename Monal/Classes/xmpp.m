@@ -1107,7 +1107,12 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
             {
                 debug_NSLog(@"connecting to jingle");
                 
-                [jingleCall performSelectorOnMainThread:@selector(connect) withObject:nil waitUntilDone:NO];
+                
+                
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    
+                    [jingleCall connect];
+                });
 
             }
             
@@ -3841,9 +3846,12 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 		else
 	debug_NSLog(@"streams created ok");
 
-	[self performSelectorOnMainThread:@selector(setRunLoop)  withObject:nil waitUntilDone:YES];
 	
-	
+    dispatch_async(dispatch_get_main_queue(), ^{
+        
+        [self setRunLoop];
+        
+    });
 	
 	
 	// iOS4 VOIP socket.. one for all sockets doesnt matter what style connection it is
@@ -3903,7 +3911,12 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	[oStream open];
 
     
-    [self performSelectorOnMainThread:@selector(startConnectionTimeoutTimer)  withObject:nil waitUntilDone:YES];
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        
+        [self startConnectionTimeoutTimer];
+        
+    });
 	
 	debug_NSLog(@"connection created");
 	
@@ -4208,8 +4221,11 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
                 debug_NSLog(@"sending jingle accept");
                 [self talk: [jingleCall acceptJingle]];
                 
-                [jingleCall performSelectorOnMainThread:@selector(connect) withObject:nil waitUntilDone:NO];
-
+            
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    
+                    [jingleCall connect];
+                });
                 
                 //send notification to show call screen
                 NSDictionary* infoDict= [NSDictionary dictionaryWithObject:jingleCall.otherParty forKey:@"Name"];

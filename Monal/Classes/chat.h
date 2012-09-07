@@ -99,8 +99,6 @@
 
 
 
--(void) htmlonMainThread:(NSString*) theText; 
-
 -(NSString*) setIcon:(NSString*) msguser;
 
 

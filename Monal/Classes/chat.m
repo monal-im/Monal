@@ -321,7 +321,11 @@
 	debug_NSLog(@"chat view did hide"); 
 	//[chatView stopLoading]; 
 	
-	[chatView performSelectorOnMainThread:@selector(stopLoading) withObject:nil waitUntilDone:NO];
+	dispatch_async(dispatch_get_main_queue(), ^{
+        
+        [chatView stopLoading];
+    });
+    
 	
     if(popOverController!=nil)
 	[popOverController dismissPopoverAnimated:true]; 
@@ -418,11 +422,10 @@
 	NSString* jsstring= [NSString stringWithFormat:@"InsertMessage('%@');",statusmessage ]; 
 	
 
-	
-	[chatView performSelectorOnMainThread:@selector(stringByEvaluatingJavaScriptFromString:) withObject:jsstring waitUntilDone:NO];
-	
-	
-	;
+  dispatch_async(dispatch_get_main_queue(), ^{
+        
+        [chatView stringByEvaluatingJavaScriptFromString:jsstring];
+    });
 }
 
 -(void) signalOffline
@@ -474,10 +477,12 @@
 	
 	NSString* jsstring= [NSString stringWithFormat:@"InsertMessage('%@');",statusmessage ]; 
 	
-	[chatView performSelectorOnMainThread:@selector(stringByEvaluatingJavaScriptFromString:) withObject:jsstring waitUntilDone:NO];
 	
 	
-	;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        
+        [chatView stringByEvaluatingJavaScriptFromString:jsstring];
+    });
 }
 
 
@@ -593,8 +598,13 @@
 		else debug_NSLog(@"new message in js ok %@", thejsstring); 
 	*/
 		
-		[chatView performSelectorOnMainThread:@selector(stringByEvaluatingJavaScriptFromString:) withObject:thejsstring waitUntilDone:NO];
-			debug_NSLog(@"%@",thejsstring); 
+		
+            dispatch_async(dispatch_get_main_queue(), ^{
+                
+                [chatView stringByEvaluatingJavaScriptFromString:thejsstring];
+            });
+            
+            debug_NSLog(@"%@",thejsstring);
 		
 		lastFrom=	[NSString stringWithString:[therow objectAtIndex:0]];
 			
@@ -720,11 +730,12 @@
 	HTMLPage=[self createPage:thelist];
 	
 	
-	//[chatView  loadHTMLString: HTMLPage baseURL:[NSURL fileURLWithPath:webroot]];
 	
-	[self performSelectorOnMainThread:@selector(htmlonMainThread:) withObject:HTMLPage waitUntilDone:NO];
-	
-	
+    dispatch_async(dispatch_get_main_queue(), ^{
+        
+        [chatView  loadHTMLString: HTMLPage baseURL:[NSURL fileURLWithPath:webroot]];
+        
+    });
 	
 	
 	
@@ -774,12 +785,6 @@
 }
 
 
--(void) htmlonMainThread:(NSString*) theText
-{
-	[chatView  loadHTMLString: theText baseURL:[NSURL fileURLWithPath:webroot]];
-	
-
-}
 
 -(void) popContacts
 {
@@ -1017,10 +1022,11 @@ if([buddyFullName isEqualToString:@""])
 	HTMLPage=[self createPage:thelist];
 	
 	
-	//[chatView  loadHTMLString: HTMLPage baseURL:[NSURL fileURLWithPath:webroot]];
-	[self performSelectorOnMainThread:@selector(htmlonMainThread:) withObject:HTMLPage waitUntilDone:NO];
-	
-
+    dispatch_async(dispatch_get_main_queue(), ^{
+        
+        [chatView  loadHTMLString: HTMLPage baseURL:[NSURL fileURLWithPath:webroot]];
+        
+    });
 	
 	
 	if([machine hasPrefix:@"iPad"] )
@@ -1113,9 +1119,14 @@ if([buddyFullName isEqualToString:@""])
 		else debug_NSLog(@"new message js ok %@", jsstring); */
 			
 			
-			[chatView performSelectorOnMainThread:@selector(stringByEvaluatingJavaScriptFromString:) withObject:jsstring waitUntilDone:NO];
 			
-		}
+            dispatch_async(dispatch_get_main_queue(), ^{
+                
+                [chatView stringByEvaluatingJavaScriptFromString:jsstring];
+                
+            });
+        
+        }
 		
 	}
 	else
@@ -1318,9 +1329,13 @@ if([buddyFullName isEqualToString:@""])
 -(void) keyboardDidShow:(NSNotification *) note
 {
 	if(dontscroll==false)
-	//[chatView  stringByEvaluatingJavaScriptFromString:@" document.getElementById('bottom').scrollIntoView(true)"];
-	[chatView performSelectorOnMainThread:@selector(stringByEvaluatingJavaScriptFromString:) withObject:@" document.getElementById('bottom').scrollIntoView(true)" waitUntilDone:NO];
-	
+
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        
+        [chatView  stringByEvaluatingJavaScriptFromString:@" document.getElementById('bottom').scrollIntoView(true)"];
+        
+    });
 
 }
 

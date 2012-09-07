@@ -35,7 +35,7 @@
 -(BOOL) clearBuddies:(NSString*) accountNo; 
 
 -(BOOL) resetBuddies;
--(NSArray*) onlineBuddies:(NSString*) accountNo;
+-(NSArray*) onlineBuddies:(NSString*) accountNo sortedBy:(NSString*) sort; 
 -(NSArray*) offlineBuddies:(NSString*) accountNo;
 
 -(NSArray*) newBuddies:(NSString*) accountNo;

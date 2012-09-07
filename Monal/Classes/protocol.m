@@ -91,7 +91,10 @@
 
 -(NSArray*) getBuddyListArray
 {
-	return [db onlineBuddies:accountNumber]; 
+    if([[NSUserDefaults standardUserDefaults] boolForKey:@"SortContacts"]==YES)
+	return [db onlineBuddies:accountNumber sortedBy:@"State"];
+    else
+        return [db onlineBuddies:accountNumber sortedBy:@"Name"];
 }
 
 -(NSArray*) getBuddyListAdded

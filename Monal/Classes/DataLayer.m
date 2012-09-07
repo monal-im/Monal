@@ -572,7 +572,7 @@ static DataLayer *sharedInstance=nil;
 }
 
 
--(NSArray*) onlineBuddies:(NSString*) accountNo
+-(NSArray*) onlineBuddies:(NSString*) accountNo sortedBy:(NSString*) sort
 {
 	
 	
@@ -585,8 +585,18 @@ static DataLayer *sharedInstance=nil;
 		if([user count]>0)//sanity check
 	{
 
-	NSString* query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, ifnull(full_name, buddy_name) as full_name from buddylist where account_id=%@ and online=1  and buddy_name!='%@'  and buddy_name!='%@@%@'  order by full_name COLLATE NOCASE ", accountNo
+	NSString* query=@"";
+        
+        if([sort isEqualToString:@"Name"])
+        query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, ifnull(full_name, buddy_name) as full_name from buddylist where account_id=%@ and online=1  and buddy_name!='%@'  and buddy_name!='%@@%@'  order by full_name COLLATE NOCASE asc ", accountNo
 					 , [[user objectAtIndex:0] objectAtIndex:0], [[user objectAtIndex:0] objectAtIndex:0],  [[user objectAtIndex:0] objectAtIndex:1]  ];
+        
+        if([sort isEqualToString:@"State"])
+            query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, ifnull(full_name, buddy_name) as full_name from buddylist where account_id=%@ and online=1  and buddy_name!='%@'  and buddy_name!='%@@%@'  order by state,full_name COLLATE NOCASE  asc ", accountNo
+                   , [[user objectAtIndex:0] objectAtIndex:0], [[user objectAtIndex:0] objectAtIndex:0],  [[user objectAtIndex:0] objectAtIndex:1]  ];
+        
+        
+        
 	//debug_NSLog(query); 
 	NSArray* toReturn = [self executeReader:query];
 	

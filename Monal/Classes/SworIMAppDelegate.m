@@ -114,7 +114,9 @@
 //	bool setDblist=false; 
 
 	
-	 bool needtoupdate=false; 
+	 bool needtoupdate=false;
+        needtoupdate=buddylistDS.refresh; 
+        
 	
 	//([buddylistDS count]==0) || buddy list empty 
 	
@@ -766,6 +768,7 @@
 	 statuscon.jabber=jabber; 
      statuscon.iconPath=iconPath;
     statuscon.contactsTable=buddyTable;
+    statuscon.buddylistDS=buddylistDS; 
     joinGroup.jabber=jabber;
     
    

@@ -19,7 +19,8 @@
 @synthesize tabcontroller;
 @synthesize theOfflineList;
 
-@synthesize splitViewController; 
+@synthesize splitViewController;
+@synthesize refresh; 
 
 -(void)initList:(chat*) chatWin
 {

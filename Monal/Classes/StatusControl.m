@@ -14,6 +14,7 @@
 @synthesize jabber; 
 @synthesize iconPath; 
 @synthesize contactsTable;
+@synthesize buddylistDS; 
 
 
 
@@ -93,6 +94,8 @@
                 {thecell=loggingcell; break;}
                 case 2:
                 {thecell=offlinecontactcell; break;}
+                case 3:
+                {thecell=sortstatuscell; break;}
             }
             break; 
         }
@@ -155,7 +158,7 @@
             
         case 4:
         {
-            toreturn =3;
+            toreturn =4;
             break; 
         }
       
@@ -234,6 +237,20 @@
 
 
 #pragma mark status actions
+
+//contacts sort by status
+-(IBAction) sortContacts
+{
+    [[NSUserDefaults standardUserDefaults] setBool:sortSwitch.on forKey:@"SortContacts"];
+ 
+    buddylistDS.thelist=nil;
+    buddylistDS.refresh=YES;
+    [[NSNotificationCenter defaultCenter]
+	 postNotificationName: @"UpdateUI" object: self];
+    
+    
+    
+}
 
 -(IBAction) offlineContacs
 {
@@ -437,6 +454,9 @@
 	soundSwitch.on=[[NSUserDefaults standardUserDefaults] boolForKey:@"Sound"];
     
     OfflineContact.on=[[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"];
+    
+     sortSwitch.on=[[NSUserDefaults standardUserDefaults] boolForKey:@"SortContacts"];
+    
 	MessagePreview.on=[[NSUserDefaults standardUserDefaults] boolForKey:@"MessagePreview"];
     Logging.on=[[NSUserDefaults standardUserDefaults] boolForKey:@"Logging"];
     

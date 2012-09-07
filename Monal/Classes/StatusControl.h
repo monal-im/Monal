@@ -10,7 +10,7 @@
 
 #import "protocol.h"
 #import "MyTabController.h"
-
+#import "buddylist.h"
 
 
 @interface statusControl : UIViewController <UITextFieldDelegate>{
@@ -19,7 +19,8 @@
 	
 
     NSString* iconPath; 
-    protocol* jabber;  
+    protocol* jabber;
+    buddylist* buddylistDS; 
 	
 
 	IBOutlet UIImageView* ownIcon; 
@@ -42,7 +43,9 @@
       IBOutlet UITableViewCell* previewcell; 
       IBOutlet UITableViewCell* loggingcell; 
     IBOutlet UITableViewCell* offlinecontactcell; 
+       IBOutlet UITableViewCell* sortstatuscell;
     
+        IBOutlet UISwitch *sortSwitch;
     
     IBOutlet UISwitch *vibrateSwitch;
 	IBOutlet UILabel *vibrateLabel;
@@ -87,7 +90,8 @@ IBOutlet UITextField* statusval;
 -(IBAction) soundOn; 
 -(IBAction) vibrateOn; 
 
--(IBAction) offlineContacs; 
+-(IBAction) offlineContacs;
+-(IBAction) sortContacts;
 
 -(IBAction) previewOn; 
 -(IBAction) loggingOn; 
@@ -101,7 +105,7 @@ IBOutlet UITextField* statusval;
 @property (nonatomic, retain)  protocol* jabber;
 
 @property (nonatomic, retain)  UITableView* contactsTable; 
-
+@property (nonatomic,retain) buddylist* buddylistDS; 
 
  
 @end

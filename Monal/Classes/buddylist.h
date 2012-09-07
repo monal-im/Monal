@@ -33,6 +33,7 @@
 
 	UITabBarController* tabcontroller;
     
+    BOOL refresh; 
    
 	
 	
@@ -92,6 +93,7 @@
 @property (nonatomic)  UINavigationController* viewController; 
 
 @property MGSplitViewController* splitViewController; 
+@property (nonatomic) BOOL refresh; 
 
 @end
 

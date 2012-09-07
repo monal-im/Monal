@@ -2,13 +2,13 @@
 <archive type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="7.10">
 	<data>
 		<int key="IBDocument.SystemTarget">768</int>
-		<string key="IBDocument.SystemVersion">11E53</string>
-		<string key="IBDocument.InterfaceBuilderVersion">2182</string>
-		<string key="IBDocument.AppKitVersion">1138.47</string>
-		<string key="IBDocument.HIToolboxVersion">569.00</string>
+		<string key="IBDocument.SystemVersion">12B19</string>
+		<string key="IBDocument.InterfaceBuilderVersion">2549</string>
+		<string key="IBDocument.AppKitVersion">1187</string>
+		<string key="IBDocument.HIToolboxVersion">624.00</string>
 		<object class="NSMutableDictionary" key="IBDocument.PluginVersions">
 			<string key="NS.key.0">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
-			<string key="NS.object.0">1181</string>
+			<string key="NS.object.0">1498</string>
 		</object>
 		<object class="NSArray" key="IBDocument.IntegratedClassDependencies">
 			<bool key="EncodedWithXMLCoder">YES</bool>
@@ -16,9 +16,9 @@
 			<string>IBUIImageView</string>
 			<string>IBUILabel</string>
 			<string>IBUISwitch</string>
-			<string>IBUITextField</string>
 			<string>IBUITableView</string>
 			<string>IBUITableViewCell</string>
+			<string>IBUITextField</string>
 		</object>
 		<object class="NSArray" key="IBDocument.PluginDependencies">
 			<bool key="EncodedWithXMLCoder">YES</bool>
@@ -863,6 +863,71 @@ AAgACAAIAAEAAQABAAE</bytes>
 				<int key="IBUISelectionStyle">0</int>
 				<reference key="IBUIContentView" ref="642230919"/>
 			</object>
+			<object class="IBUITableViewCell" id="975319233">
+				<reference key="NSNextResponder"/>
+				<int key="NSvFlags">292</int>
+				<object class="NSMutableArray" key="NSSubviews">
+					<bool key="EncodedWithXMLCoder">YES</bool>
+					<object class="IBUIView" id="53904874">
+						<reference key="NSNextResponder" ref="975319233"/>
+						<int key="NSvFlags">256</int>
+						<object class="NSMutableArray" key="NSSubviews">
+							<bool key="EncodedWithXMLCoder">YES</bool>
+							<object class="IBUISwitch" id="1041027641">
+								<reference key="NSNextResponder" ref="53904874"/>
+								<int key="NSvFlags">289</int>
+								<string key="NSFrame">{{206, 8}, {94, 27}}</string>
+								<reference key="NSSuperview" ref="53904874"/>
+								<reference key="NSWindow"/>
+								<bool key="IBUIOpaque">NO</bool>
+								<bool key="IBUIClipsSubviews">YES</bool>
+								<bool key="IBUIMultipleTouchEnabled">YES</bool>
+								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+								<int key="IBUIContentHorizontalAlignment">0</int>
+								<int key="IBUIContentVerticalAlignment">0</int>
+								<bool key="IBUIOn">YES</bool>
+							</object>
+							<object class="IBUILabel" id="539245213">
+								<reference key="NSNextResponder" ref="53904874"/>
+								<int key="NSvFlags">292</int>
+								<string key="NSFrame">{{20, 12}, {135, 21}}</string>
+								<reference key="NSSuperview" ref="53904874"/>
+								<reference key="NSWindow"/>
+								<reference key="NSNextKeyView" ref="1041027641"/>
+								<bool key="IBUIOpaque">NO</bool>
+								<bool key="IBUIClipsSubviews">YES</bool>
+								<bool key="IBUIUserInteractionEnabled">NO</bool>
+								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+								<string key="IBUIText">Sort by Status</string>
+								<reference key="IBUITextColor" ref="1071949748"/>
+								<nil key="IBUIHighlightedColor"/>
+								<int key="IBUIBaselineAdjustment">1</int>
+								<float key="IBUIMinimumFontSize">10</float>
+								<reference key="IBUIFontDescription" ref="194613534"/>
+								<reference key="IBUIFont" ref="134502525"/>
+							</object>
+						</object>
+						<string key="NSFrameSize">{320, 43}</string>
+						<reference key="NSSuperview" ref="975319233"/>
+						<reference key="NSWindow"/>
+						<reference key="NSNextKeyView" ref="539245213"/>
+						<reference key="IBUIBackgroundColor" ref="774234917"/>
+						<bool key="IBUIOpaque">NO</bool>
+						<bool key="IBUIClipsSubviews">YES</bool>
+						<int key="IBUIContentMode">4</int>
+						<bool key="IBUIMultipleTouchEnabled">YES</bool>
+						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+					</object>
+				</object>
+				<string key="NSFrameSize">{320, 44}</string>
+				<reference key="NSSuperview"/>
+				<reference key="NSWindow"/>
+				<reference key="NSNextKeyView" ref="53904874"/>
+				<reference key="IBUIBackgroundColor" ref="631785641"/>
+				<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+				<int key="IBUISelectionStyle">0</int>
+				<reference key="IBUIContentView" ref="53904874"/>
+			</object>
 		</object>
 		<object class="IBObjectContainer" key="IBDocument.Objects">
 			<object class="NSMutableArray" key="connectionRecords">
@@ -1085,6 +1150,22 @@ AAgACAAIAAEAAQABAAE</bytes>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">sortstatuscell</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="975319233"/>
+					</object>
+					<int key="connectionID">152</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">sortSwitch</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="1041027641"/>
+					</object>
+					<int key="connectionID">154</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
 						<string key="label">delegate</string>
 						<reference key="source" ref="536701546"/>
 						<reference key="destination" ref="372490531"/>
@@ -1186,6 +1267,24 @@ AAgACAAIAAEAAQABAAE</bytes>
 						<int key="IBEventType">13</int>
 					</object>
 					<int key="connectionID">144</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchEventConnection" key="connection">
+						<string key="label">offlineContacs</string>
+						<reference key="source" ref="1041027641"/>
+						<reference key="destination" ref="372490531"/>
+						<int key="IBEventType">13</int>
+					</object>
+					<int key="connectionID">151</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchEventConnection" key="connection">
+						<string key="label">sortContacts</string>
+						<reference key="source" ref="1041027641"/>
+						<reference key="destination" ref="372490531"/>
+						<int key="IBEventType">13</int>
+					</object>
+					<int key="connectionID">155</int>
 				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -1436,6 +1535,27 @@ AAgACAAIAAEAAQABAAE</bytes>
 						<reference key="parent" ref="546612399"/>
 						<string key="objectName">Label - Logging</string>
 					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">148</int>
+						<reference key="object" ref="975319233"/>
+						<object class="NSMutableArray" key="children">
+							<bool key="EncodedWithXMLCoder">YES</bool>
+							<reference ref="539245213"/>
+							<reference ref="1041027641"/>
+						</object>
+						<reference key="parent" ref="0"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">149</int>
+						<reference key="object" ref="539245213"/>
+						<reference key="parent" ref="975319233"/>
+						<string key="objectName">Label - Logging</string>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">150</int>
+						<reference key="object" ref="1041027641"/>
+						<reference key="parent" ref="975319233"/>
+					</object>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="flattenedProperties">
@@ -1458,6 +1578,9 @@ AAgACAAIAAEAAQABAAE</bytes>
 					<string>135.IBPluginDependency</string>
 					<string>136.IBPluginDependency</string>
 					<string>137.IBPluginDependency</string>
+					<string>148.IBPluginDependency</string>
+					<string>149.IBPluginDependency</string>
+					<string>150.IBPluginDependency</string>
 					<string>36.IBPluginDependency</string>
 					<string>46.IBPluginDependency</string>
 					<string>47.IBPluginDependency</string>
@@ -1519,6 +1642,9 @@ AAgACAAIAAEAAQABAAE</bytes>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
+					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
+					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
+					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="unlocalizedProperties">
@@ -1533,7 +1659,7 @@ AAgACAAIAAEAAQABAAE</bytes>
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">147</int>
+			<int key="maxID">155</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -1559,11 +1685,13 @@ AAgACAAIAAEAAQABAAE</bytes>
 							<string>offlineContacs</string>
 							<string>previewOn</string>
 							<string>setAway</string>
+							<string>sortContacts</string>
 							<string>soundOn</string>
 							<string>vibrateOn</string>
 						</object>
 						<object class="NSArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>id</string>
 							<string>id</string>
 							<string>id</string>
 							<string>id</string>
@@ -1584,6 +1712,7 @@ AAgACAAIAAEAAQABAAE</bytes>
 							<string>offlineContacs</string>
 							<string>previewOn</string>
 							<string>setAway</string>
+							<string>sortContacts</string>
 							<string>soundOn</string>
 							<string>vibrateOn</string>
 						</object>
@@ -1611,6 +1740,10 @@ AAgACAAIAAEAAQABAAE</bytes>
 							</object>
 							<object class="IBActionInfo">
 								<string key="name">setAway</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">sortContacts</string>
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">
@@ -1643,6 +1776,8 @@ AAgACAAIAAEAAQABAAE</bytes>
 							<string>previewcell</string>
 							<string>priority</string>
 							<string>prioritycell</string>
+							<string>sortSwitch</string>
+							<string>sortstatuscell</string>
 							<string>soundLabel</string>
 							<string>soundSwitch</string>
 							<string>statuscell</string>
@@ -1672,6 +1807,8 @@ AAgACAAIAAEAAQABAAE</bytes>
 							<string>UIImageView</string>
 							<string>UITableViewCell</string>
 							<string>UITextField</string>
+							<string>UITableViewCell</string>
+							<string>UISwitch</string>
 							<string>UITableViewCell</string>
 							<string>UILabel</string>
 							<string>UISwitch</string>
@@ -1706,6 +1843,8 @@ AAgACAAIAAEAAQABAAE</bytes>
 							<string>previewcell</string>
 							<string>priority</string>
 							<string>prioritycell</string>
+							<string>sortSwitch</string>
+							<string>sortstatuscell</string>
 							<string>soundLabel</string>
 							<string>soundSwitch</string>
 							<string>statuscell</string>
@@ -1785,6 +1924,14 @@ AAgACAAIAAEAAQABAAE</bytes>
 								<string key="candidateClassName">UITableViewCell</string>
 							</object>
 							<object class="IBToOneOutletInfo">
+								<string key="name">sortSwitch</string>
+								<string key="candidateClassName">UISwitch</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">sortstatuscell</string>
+								<string key="candidateClassName">UITableViewCell</string>
+							</object>
+							<object class="IBToOneOutletInfo">
 								<string key="name">soundLabel</string>
 								<string key="candidateClassName">UILabel</string>
 							</object>
@@ -1853,6 +2000,6 @@ AAgACAAIAAEAAQABAAE</bytes>
 		</object>
 		<bool key="IBDocument.PluginDeclaredDependenciesTrackSystemTargetVersion">YES</bool>
 		<int key="IBDocument.defaultPropertyAccessControl">3</int>
-		<string key="IBCocoaTouchPluginVersion">1181</string>
+		<string key="IBCocoaTouchPluginVersion">1498</string>
 	</data>
 </archive>

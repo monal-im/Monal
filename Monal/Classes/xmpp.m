@@ -4108,14 +4108,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	}
 	
 
-	else if(SASLDIGEST_MD5==true)
-	{
-		NSString*	xmpprequest; 
-		//initiate
-		xmpprequest=	[NSString stringWithFormat:@"<auth xmlns='urn:ietf:params:xml:ns:xmpp-sasl' mechanism='DIGEST-MD5'/>"];
-		
-		val= [self talk:xmpprequest];
-	}
+
     
     else if((SASLPlain==true) & (SSL==false))
 	{
@@ -4134,6 +4127,15 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 		
 	}
 	
+    else if(SASLDIGEST_MD5==true)
+	{
+		NSString*	xmpprequest;
+		//initiate
+		xmpprequest=	[NSString stringWithFormat:@"<auth xmlns='urn:ietf:params:xml:ns:xmpp-sasl' mechanism='DIGEST-MD5'/>"];
+		
+		val= [self talk:xmpprequest];
+	}
+    
     //legacy auth possible and no other path available
     
  if((legacyAuth==true)

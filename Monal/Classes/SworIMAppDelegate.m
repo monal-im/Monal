@@ -217,9 +217,7 @@
 								
 							{
 								
-								//[chatwin performSelectorOnMainThread:@selector(signalStatus)
-								//						  withObject:nil  
-								//					   waitUntilDone:NO];
+							
 								[chatwin signalStatus];
 								
 							}
@@ -478,7 +476,6 @@
 			   || ([activeNavigationController visibleViewController]==chatwin))
 			{
 				
-				//[chatwin performSelectorOnMainThread:@selector(signalNewMessages) withObject:nil waitUntilDone:NO];
 				[chatwin signalNewMessages];
 		
 			

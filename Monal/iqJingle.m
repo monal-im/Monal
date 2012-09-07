@@ -128,8 +128,7 @@
       if(didStartCall==YES)
       {
           
-        //  [self performSelectorOnMainThread:@selector(connect) withObject:nil waitUntilDone:NO];
-
+       
           return @"";
       }
     

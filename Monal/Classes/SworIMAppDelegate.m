@@ -592,8 +592,16 @@
     dispatch_async(dispatch_get_main_queue(), ^{
     
      [buddyTable beginUpdates];
+        UITableViewRowAnimation rowAnimation;
+        
+      /*  if([indexpaths count]<3)
+            rowAnimation=UITableViewRowAnimationRight;
+        else*/
+        rowAnimation=UITableViewRowAnimationNone;
+          
+            
      [buddyTable reloadRowsAtIndexPaths: indexpaths
-     withRowAnimation:UITableViewRowAnimationNone];
+                       withRowAnimation:rowAnimation];
      
      
      

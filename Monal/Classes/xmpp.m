@@ -3346,9 +3346,9 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
         
         if((statusMessage==nil)
            || ([statusMessage isEqualToString:@""]))
-            xmpprequest=[NSString stringWithFormat: @"<presence> <show>away</show><priority>%d</priority> <caps:c  node=\"http://monal.im/caps\" ver=\"%@\"  xmlns:caps=\"http://jabber.org/protocol/caps\"    ext='pmuc-v1 voice-v1' />  </presence>",XMPPPriority, verHash];
+            xmpprequest=[NSString stringWithFormat: @"<presence> <show>away</show><priority>%d</priority> <c  node=\"http://monal.im/caps\" ver=\"%@\"  xmlns=\"http://jabber.org/protocol/caps\" />  </presence>",XMPPPriority, verHash];
         else
-            xmpprequest=[NSString stringWithFormat: @"<presence> <show>away</show> <priority>%d</priority> <caps:c  node=\"http://monal.im/caps\" ver=\"%@\"  xmlns:caps=\"http://jabber.org/protocol/caps\"    ext='pmuc-v1 voice-v1' />    <status>%@</status></presence>",XMPPPriority,
+            xmpprequest=[NSString stringWithFormat: @"<presence> <show>away</show> <priority>%d</priority> <c  node=\"http://monal.im/caps\" ver=\"%@\"  xmlns=\"http://jabber.org/protocol/caps\"  />    <status>%@</status></presence>",XMPPPriority,
                         verHash,   statusMessage];
         
         

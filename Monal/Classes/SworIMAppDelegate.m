@@ -494,7 +494,7 @@
 	//could be count or update
 	if([indexPaths count]>0)
 	{
-		[self performSelectorOnMainThread:@selector(reloadBuddies:) withObject:indexPaths waitUntilDone:NO];
+	   [self reloadBuddies:indexPaths];
 	}
 	
 	
@@ -572,7 +572,7 @@
 	if([indexPaths2 count]>0)
 	{
 		
-		 [self performSelectorOnMainThread:@selector(reloadBuddies:) withObject:indexPaths2 waitUntilDone:NO];
+		[self reloadBuddies:indexPaths2];
 		
 	}
 		
@@ -592,7 +592,7 @@
 
 -(void) reloadBuddies:(NSArray*) indexpaths
 {
-    
+    dispatch_async(dispatch_get_main_queue(), ^{
     
      [buddyTable beginUpdates];
      [buddyTable reloadRowsAtIndexPaths: indexpaths
@@ -601,6 +601,7 @@
      
      
      [buddyTable endUpdates];
+    });
     
      
 }

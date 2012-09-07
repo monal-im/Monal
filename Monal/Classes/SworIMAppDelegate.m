@@ -115,14 +115,14 @@
 
 	
 	 bool needtoupdate=false;
-        needtoupdate=buddylistDS.refresh; 
-        
+        needtoupdate=buddylistDS.refresh; //this is set by settings 
+        buddylistDS.refresh=NO;
 	
 	//([buddylistDS count]==0) || buddy list empty 
 	
 	if ( (([buddyListAdded count]>0) ||
 									 ([buddyListRemoved count]>0)  ) 
-	    //||( setDblist==true)
+	    ||( [[NSUserDefaults standardUserDefaults] boolForKey:@"SortContacts"]==YES)
 		)
 	{
 		debug_NSLog(@"messages read, messages in, or both added and removed. setting quick " ); 
@@ -278,45 +278,6 @@
 		
        if(unnoticed>0)
 		{
-			
-			// redundant. it is attached to the alert now 
-		 /*	if(screenLock||backGround) // only when not active (bg or lock screen)
-			{
-				//vibration by default for iphone
-				
-				
-			
-                
-				// make sure it is visible ie iphone
-				if(
-				   ( [[NSUserDefaults standardUserDefaults] boolForKey:@"Vibrate"]==true))
-				{
-                    
-					AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
-					
-				}
-				if(
-                  
-				   ( [[NSUserDefaults standardUserDefaults] boolForKey:@"Sound"]==true))
-				{
-					
-					
-					SystemSoundID pmph;
-					id sndpath = [[NSBundle mainBundle] 
-								  pathForResource:@"Tritone" 
-								  ofType:@"aif" 
-								  inDirectory:@"/"];
-					CFURLRef baseURL = (CFURLRef) [[[NSURL alloc] initFileURLWithPath:sndpath] autorelease];
-					AudioServicesCreateSystemSoundID (baseURL, &pmph);
-                  
-					AudioServicesPlaySystemSound(pmph);	
-					
-					
-				}
-				
-				
-			}*/
-			
 			
 			
 			

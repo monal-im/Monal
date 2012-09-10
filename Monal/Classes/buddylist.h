@@ -79,7 +79,7 @@
 -(void) setList:(NSArray*) list; 
 -(void) setOfflineList:(NSArray*) list; 
 
-
+-(void) showChatForUser:(NSString*)user withFullName:(NSString*)fullname;
 
 -(NSInteger) count;
 

@@ -564,6 +564,16 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
 
 
 #pragma mark tableview delegate 
+
+-(void) showChatForUser:(NSString*)user withFullName:(NSString*)fullname
+{
+	[chatwin show:user				 :fullname
+				 :viewController];
+    
+   
+}
+
+
 //required
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)newIndexPath
 {
@@ -590,9 +600,9 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
 	{
 		
 		
-	[chatwin show:[[thelist objectAtIndex:[newIndexPath indexAtPosition:1]] objectAtIndex:0]
-				 :[[thelist objectAtIndex:[newIndexPath indexAtPosition:1]] objectAtIndex:5]
-				 :viewController];
+	[self showChatForUser: [[thelist objectAtIndex:[newIndexPath indexAtPosition:1]] objectAtIndex:0]
+				 withFullName:[[thelist objectAtIndex:[newIndexPath indexAtPosition:1]] objectAtIndex:5]
+     ];
 	}
 	}
 	else if(newIndexPath.section==1) //online
@@ -601,11 +611,10 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
 		   ([newIndexPath indexAtPosition:1]<[theOfflineList count])
 		   ) 		
 		{
-			
-			
-			[chatwin show:[[theOfflineList objectAtIndex:[newIndexPath indexAtPosition:1]] objectAtIndex:0]
-						 :[[theOfflineList objectAtIndex:[newIndexPath indexAtPosition:1]] objectAtIndex:5]
-						 :viewController];
+            
+            [self showChatForUser: [[theOfflineList objectAtIndex:[newIndexPath indexAtPosition:1]] objectAtIndex:0]
+                     withFullName:[[theOfflineList objectAtIndex:[newIndexPath indexAtPosition:1]] objectAtIndex:5]
+             ];
 	}
 	}
 	

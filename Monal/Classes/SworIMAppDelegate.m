@@ -349,6 +349,7 @@
                             alarm.soundName=UILocalNotificationDefaultSoundName; 
                             }
                             
+                            alarm.userInfo=[NSDictionary dictionaryWithObject:msgfrom forKey:@"username"];
                             
 							[app scheduleLocalNotification:alarm];
 							
@@ -1617,14 +1618,27 @@ buddylistDS.tabcontroller=tabcontroller;
         debug_NSLog(@"local notification from inactive");
         
         debug_NSLog(@"inactive Notification Body: %@",notification.alertBody);
-        debug_NSLog(@"userinfo %@", notification.userInfo);
+       
+        NSString* messageFrom=[notification.userInfo objectForKey:@"username"];
         
+        debug_NSLog(@"conversation swiped for  %@", messageFrom);
         
         //id conversation
+       
         
         //reset to root
+        @try
+        {
+            tabcontroller.selectedIndex = 0;
+        }
+        @catch(NSException* err) {}
         
         //push the conversation
+        
+        NSString* messageFromFullName =[db fullName:messageFrom :accountno];
+        
+        [buddylistDS showChatForUser:messageFrom withFullName:messageFromFullName];
+      
         
         
     }

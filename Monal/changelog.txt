@@ -18,6 +18,7 @@ This is  update that  fixes bugs.
 2. correctly sets away status on contacts 
 3. option to sort online contacts by status
 4. set the prinority based on presence 
+5. swiping on a notification takes you to the conversation
 
 
 

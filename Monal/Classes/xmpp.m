@@ -2798,10 +2798,10 @@ debug_NSLog(@"ended this element: %@", elementName);
 	while(parserCol==0)
 	{
 		itercount++; 
-		//if(itercount%3==3) {
+		
             [[NSNotificationCenter defaultCenter]
 							 postNotificationName: @"UpdateUI" object: self];	
-		//}
+		
 		
 	int blockpos=[self nextStanza:block];
 		debug_NSLog(@"%d pos ",blockpos);

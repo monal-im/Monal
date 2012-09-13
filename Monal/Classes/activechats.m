@@ -279,10 +279,19 @@ if((actionSheet.tag==1) && (buttonIndex==0))
 	
 	
 	
-	
-	static NSString *identifier = @"MyCell";
-	CustomCell* thecell = [[CustomCell alloc]initWithFrame: CGRectMake(45,0,265,[tableView rowHeight]) reuseIdentifier:identifier];
-	
+    static NSString *identifier = @"MyCell";
+    CustomCell *thecell = [tableView dequeueReusableCellWithIdentifier:identifier];
+    
+    if (thecell == nil)
+    {
+        thecell = [[CustomCell alloc]initWithFrame: CGRectMake(45,0,tableView.frame.size.width,[tableView rowHeight]) reuseIdentifier:identifier]; debug_NSLog(@"new cell ");
+    }
+    else
+    {
+        debug_NSLog(@"reused cell");
+    }
+    
+    
 	thecell.accessoryType =  UITableViewCellAccessoryDisclosureIndicator;;
 	
 	

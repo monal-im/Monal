@@ -12,14 +12,12 @@
 
 @interface  CustomCell:UITableViewCell
 {
-NSString* text; 
-	UIColor* oldColor; 
+    NSString* text; 
+    UIImageView* statusOrb;
 }
 - (void)drawRect:(CGRect)rect; 
 
 @property (nonatomic) NSString* text;
-@property (nonatomic) UILabel* buddyname;
-@property (nonatomic) UILabel* buddystatus;
-
+@property (nonatomic) UIImageView* statusOrb;
 
 @end

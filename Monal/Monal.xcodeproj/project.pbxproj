@@ -186,6 +186,7 @@
 		26731E77133F3F17008098EB /* iqSearch.m in Sources */ = {isa = PBXBuildFile; fileRef = 26731E76133F3F17008098EB /* iqSearch.m */; };
 		267D96031225E56200B328E3 /* About.xib in Resources */ = {isa = PBXBuildFile; fileRef = 267D96021225E56200B328E3 /* About.xib */; };
 		2684F88E1236F5EC003BF137 /* reload.png in Resources */ = {isa = PBXBuildFile; fileRef = 2684F88C1236F5EC003BF137 /* reload.png */; };
+		2689B6E716017A4B0087CA58 /* MLActiveChatCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2689B6E616017A4B0087CA58 /* MLActiveChatCell.m */; };
 		268BCCC5140B19B70025E4D1 /* green_button.png in Resources */ = {isa = PBXBuildFile; fileRef = 268BCCC4140B19B70025E4D1 /* green_button.png */; };
 		268BCF12140B29180025E4D1 /* libjrtplib-static.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */; };
 		268E700515D0D979002E63CD /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 264FF3E4158A855D00D97B86 /* AVFoundation.framework */; };
@@ -443,6 +444,8 @@
 		2675143315C23822006A36A3 /* changelog.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = changelog.txt; sourceTree = "<group>"; };
 		267D96021225E56200B328E3 /* About.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = About.xib; sourceTree = "<group>"; };
 		2684F88C1236F5EC003BF137 /* reload.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = reload.png; sourceTree = "<group>"; };
+		2689B6E516017A4B0087CA58 /* MLActiveChatCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLActiveChatCell.h; sourceTree = "<group>"; };
+		2689B6E616017A4B0087CA58 /* MLActiveChatCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLActiveChatCell.m; sourceTree = "<group>"; };
 		268BCCC4140B19B70025E4D1 /* green_button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = green_button.png; sourceTree = "<group>"; };
 		268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libjrtplib-static.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		269F0F19105DDEFB00FF96F8 /* status.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = status.png; sourceTree = "<group>"; };
@@ -794,6 +797,8 @@
 			children = (
 				260E8BA411023DE5004E24FF /* CustomCell.h */,
 				260E8BA511023DE5004E24FF /* CustomCell.m */,
+				2689B6E516017A4B0087CA58 /* MLActiveChatCell.h */,
+				2689B6E616017A4B0087CA58 /* MLActiveChatCell.m */,
 			);
 			name = Table;
 			path = Classes;
@@ -1372,6 +1377,7 @@
 				26D3C27E15D84E6800568DDC /* iq.m in Sources */,
 				2658508B15E7D8E40070A2A7 /* TPCircularBuffer+AudioBufferList.c in Sources */,
 				2658508C15E7D8E40070A2A7 /* TPCircularBuffer.c in Sources */,
+				2689B6E716017A4B0087CA58 /* MLActiveChatCell.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

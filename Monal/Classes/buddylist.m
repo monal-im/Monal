@@ -304,12 +304,15 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
     
     if (thecell == nil)
     {
-        thecell = [[CustomCell alloc]initWithFrame: CGRectMake(45,0,tableView.frame.size.width,[tableView rowHeight]) reuseIdentifier:identifier]; debug_NSLog(@"new cell ");
+        thecell = [[CustomCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:identifier]; debug_NSLog(@"new cell ");
     }
     else
     {
         debug_NSLog(@"reused cell");
         
+        thecell.detailTextLabel.text=nil;
+         thecell.accessoryType = UITableViewCellAccessoryNone;
+       thecell.imageView.alpha=1.0;
     }
     
 	
@@ -347,24 +350,9 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
 	}
 	
 	
-	UIImage* statusOrb; 
-	CGRect orbRectangle = CGRectMake(51-13+8,([tableView rowHeight]/2) -7,15,15);
+	UIImage* statusOrbImage; 
 	
-	NSInteger statusHeight=16;
-	CGRect cellRectangle ; 
-	
-	// if there is a status
-	if([[[thelist objectAtIndex:[indexPath indexAtPosition:1]] objectAtIndex:2] length]>0)
-	{
-	 cellRectangle = CGRectMake(51+13,0,cellwidth-51-13-35-40,[tableView rowHeight]-statusHeight-2);  // 285 ->290 is basically my imaginary  border
-		
-		
-	}
-	else
-	{
-		 cellRectangle = CGRectMake(51+13,0,cellwidth-51-13-35-40,[tableView rowHeight]);
-		
-	}
+
 	//51 icon 
 	//13 orb
 	//35 disclosure badge
@@ -372,12 +360,13 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
 	
 	
 	//Initialize the label with the rectangle.
-	UILabel* buddyname = [[UILabel alloc] initWithFrame:cellRectangle];
-	buddyname.font=[UIFont boldSystemFontOfSize:18.0f];
+	
 	if([[[thelist objectAtIndex:[indexPath indexAtPosition:1]] objectAtIndex:5] isEqualToString:@""])
-		buddyname.text=[[thelist objectAtIndex:[indexPath indexAtPosition:1]] objectAtIndex:0];
+		thecell.textLabel.text=[[thelist objectAtIndex:[indexPath indexAtPosition:1]] objectAtIndex:0];
 	else
-		buddyname.text=[[thelist objectAtIndex:[indexPath indexAtPosition:1]] objectAtIndex:5];
+		thecell.textLabel.text=[[thelist objectAtIndex:[indexPath indexAtPosition:1]] objectAtIndex:5];
+        
+        
 	//if the person is away change the text color 
 	if(([[[thelist objectAtIndex:[indexPath indexAtPosition:1]] objectAtIndex:1] isEqualToString:@"Away"])||
 	   ([[[thelist objectAtIndex:[indexPath indexAtPosition:1]] objectAtIndex:1] isEqualToString:@"away"])||
@@ -385,52 +374,26 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
 	   ([[[thelist objectAtIndex:[indexPath indexAtPosition:1]] objectAtIndex:1] isEqualToString:@"xa"]) ||
 	   ([[[thelist objectAtIndex:[indexPath indexAtPosition:1]] objectAtIndex:1] isEqualToString:@"Do Not Disturb"]))
 	{
-		statusOrb=[UIImage imageNamed:@"away.png"];
+		statusOrbImage=[UIImage imageNamed:@"away.png"];
 			
-		buddyname.textColor = [UIColor grayColor];
+		thecell.textLabel.textColor = [UIColor grayColor];
 	} else
 	{
 		
-		statusOrb=[UIImage imageNamed:@"available.png"];
-		buddyname.textColor = [UIColor blackColor];
-		
+		statusOrbImage=[UIImage imageNamed:@"available.png"];
+		thecell.textLabel.textColor = [UIColor blackColor];
 		
 	}
+     thecell.statusOrb.image=statusOrbImage; 
 	
-	UIImageView* orbView = [ [ UIImageView alloc ] initWithImage: statusOrb ];
-	orbView.frame = orbRectangle; // Set the frame in which the UIImage should be drawn in.
-	
-	[ thecell addSubview: orbView ];
-	
-	
-	//buddyname.font=[UIFont SystemFontOfSize:16];
-	debug_NSLog(@"cell status: %@",[[thelist objectAtIndex:[indexPath indexAtPosition:1]] objectAtIndex:1]); 
-	
-	buddyname.autoresizingMask   = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleRightMargin;	
-	//Add the label as a sub view to the cell.
-	thecell.buddyname=buddyname;
-	[thecell.contentView addSubview:buddyname];
-	
-	
+
 	if([[[thelist objectAtIndex:[indexPath indexAtPosition:1]] objectAtIndex:2] length]>0)
 	{
 	//add a  message
-	
-	cellRectangle = CGRectMake(51+13,[tableView rowHeight]-statusHeight-4,cellwidth-51-13-35-40,statusHeight); 
-	
-	
-	
-	UILabel* buddystatus = [[UILabel alloc] initWithFrame:cellRectangle];
-		buddystatus.autoresizingMask   = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleRightMargin;
-	
-	buddystatus.text=[[thelist objectAtIndex:[indexPath indexAtPosition:1]] objectAtIndex:2];
-	debug_NSLog(@"cell message: %@",buddystatus.text); 
-	buddystatus.font=[UIFont systemFontOfSize:13];
-	buddystatus.textColor= [UIColor grayColor];
-	//buddystatus.textColor=[UIColor darkGrayColor];
-	//Add the label as a sub view to the cell.
-	thecell.buddystatus=buddystatus;
-	[thecell.contentView addSubview:buddystatus];
+
+        
+        thecell.detailTextLabel.text=[[thelist objectAtIndex:[indexPath indexAtPosition:1]] objectAtIndex:2];
+        
 	}
 	
 		// add the count label 
@@ -446,7 +409,7 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
 		if(indexPath.section==1)//offline
 		{
 			
-			 thecell.accessoryType = UITableViewCellAccessoryNone; //needed for reused cells
+			
 			
 			if([[[theOfflineList objectAtIndex:[indexPath indexAtPosition:1]] objectAtIndex:3] length]>3)// at least extension 
 			{
@@ -478,13 +441,7 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
 			thecell.imageView.alpha=0.5; 
 			
 			UIImage* statusOrb; 
-			CGRect orbRectangle = CGRectMake(51-13+8,([tableView rowHeight]/2) -7,15,15);
 			
-			NSInteger statusHeight=16;
-			CGRect cellRectangle ; 
-			
-			
-				cellRectangle = CGRectMake(51+13,0,cellwidth-51-13-35-45,[tableView rowHeight]);
 				
 			
 			//51 icon 
@@ -493,35 +450,17 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
 			//45 counter
 			
 			
-			//Initialize the label with the rectangle.
-			UILabel* buddyname = [[UILabel alloc] initWithFrame:cellRectangle];
-			buddyname.font=[UIFont boldSystemFontOfSize:18.0f];
 			if([[[theOfflineList objectAtIndex:[indexPath indexAtPosition:1]] objectAtIndex:5] isEqualToString:@""])
-				buddyname.text=[[theOfflineList objectAtIndex:[indexPath indexAtPosition:1]] objectAtIndex:0];
+				thecell.textLabel.text=[[theOfflineList objectAtIndex:[indexPath indexAtPosition:1]] objectAtIndex:0];
 			else
-				buddyname.text=[[theOfflineList objectAtIndex:[indexPath indexAtPosition:1]] objectAtIndex:5];
-			//if the person is away change the text color 
-			
-				buddyname.textColor = [UIColor grayColor];
-			buddyname.autoresizingMask   = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleRightMargin;
+				thecell.textLabel.text=[[theOfflineList objectAtIndex:[indexPath indexAtPosition:1]] objectAtIndex:5];
 			
 			
-			
-			statusOrb=[UIImage imageNamed:@"offline.png"];
-			UIImageView* orbView = [ [ UIImageView alloc ] initWithImage: statusOrb ];
-			orbView.frame = orbRectangle; // Set the frame in which the UIImage should be drawn in.
+			UIImage* statusOrbImage=[UIImage imageNamed:@"offline.png"];
 			
 			
 			
-			[ thecell addSubview: orbView ];
-			
-			
-			
-			//Add the label as a sub view to the cell.
-			thecell.buddyname=buddyname;
-			[thecell.contentView addSubview:buddyname];
-			
-			
+			     thecell.statusOrb.image=statusOrbImage; 			
 		}
 
 

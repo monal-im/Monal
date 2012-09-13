@@ -280,15 +280,17 @@ if((actionSheet.tag==1) && (buttonIndex==0))
 	
 	
     static NSString *identifier = @"MyCell";
-    CustomCell *thecell = [tableView dequeueReusableCellWithIdentifier:identifier];
+    MLActiveChatCell *thecell = [tableView dequeueReusableCellWithIdentifier:identifier];
     
     if (thecell == nil)
     {
-        thecell = [[CustomCell alloc]initWithFrame: CGRectMake(45,0,tableView.frame.size.width,[tableView rowHeight]) reuseIdentifier:identifier]; debug_NSLog(@"new cell ");
+        thecell = [[MLActiveChatCell alloc]initWithFrame: CGRectMake(45,0,tableView.frame.size.width,[tableView rowHeight]) reuseIdentifier:identifier]; debug_NSLog(@"new cell ");
+        
     }
     else
     {
         debug_NSLog(@"reused cell");
+       
        
     }
     
@@ -323,43 +325,25 @@ if((actionSheet.tag==1) && (buttonIndex==0))
 	}
 	
 	
-	NSInteger statusHeight=16;
-	CGRect cellRectangle ; 
+    //Initialize the label with the rectangle.
 	
-	
-		cellRectangle = CGRectMake(51,0,187,[tableView rowHeight]);
-	
-	//Initialize the label with the rectangle.
-	UILabel* buddyname = [[UILabel alloc] initWithFrame:cellRectangle];
-	buddyname.font=[UIFont boldSystemFontOfSize:18.0f];
-	
-		buddyname.textColor = [UIColor blackColor];
-		
-	buddyname.autoresizingMask   = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleRightMargin;
-
-
-	//Initialize the label with the rectangle.
-	
-	debug_NSLog(@"%@",[[thelist objectAtIndex:[indexPath indexAtPosition:1]] objectAtIndex:0]); 
+	debug_NSLog(@"%@",[[thelist objectAtIndex:[indexPath indexAtPosition:1]] objectAtIndex:0]);
 	
 	if([[[thelist objectAtIndex:[indexPath indexAtPosition:1]] objectAtIndex:2] isEqualToString:@""])
-		buddyname.text =[[thelist objectAtIndex:[indexPath indexAtPosition:1]] objectAtIndex:0];
+		thecell.textLabel.text =[[thelist objectAtIndex:[indexPath indexAtPosition:1]] objectAtIndex:0];
 	else
-		buddyname.text=[[thelist objectAtIndex:[indexPath indexAtPosition:1]] objectAtIndex:2];
+		thecell.textLabel.text=[[thelist objectAtIndex:[indexPath indexAtPosition:1]] objectAtIndex:2];
 	
+
 	
-	//Add the label as a sub view to the cell.
-	thecell.buddyname=buddyname;
-	[thecell.contentView addSubview:buddyname];
-	
-	
-	//count 
+	//count
 	thecell.text=[NSString stringWithFormat:@"%@", [[thelist objectAtIndex:[indexPath indexAtPosition:1]] objectAtIndex:4]];
 	
-	if([thecell.text isEqualToString:@"0"]) thecell.text=nil; 
+	if([thecell.text isEqualToString:@"0"]) thecell.text=nil;
+
 	
 	
-	;
+
 	return thecell;
 }
 

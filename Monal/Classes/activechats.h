@@ -11,7 +11,7 @@
 #import "DataLayer.h"
 #import "tools.h"
 #import "SworIMAppDelegate.h"
-#import "CustomCell.h"
+#import "MLActiveChatCell.h"
 #import "protocol.h"
 
 

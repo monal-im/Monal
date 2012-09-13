@@ -1893,9 +1893,20 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
 	
 	
 debug_NSLog(@"ended this element: %@", elementName);
-
+    
+    
+    
+// ****** update the UI
+    
+    if([elementName isEqualToString:@"presence"] ||[elementName isEqualToString:@"message"])
+	{
+    
+    [[NSNotificationCenter defaultCenter]
+     postNotificationName: @"UpdateUI" object: self];
+    
+    }
 	
-	//******* login functons ******* 
+	//******* login functons *******
 	if([elementName isEqualToString:@"stream:features"])
 	{
 		
@@ -2799,8 +2810,7 @@ debug_NSLog(@"ended this element: %@", elementName);
 	{
 		itercount++; 
 		
-            [[NSNotificationCenter defaultCenter]
-							 postNotificationName: @"UpdateUI" object: self];	
+    
 		
 		
 	int blockpos=[self nextStanza:block];

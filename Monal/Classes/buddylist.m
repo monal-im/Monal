@@ -309,6 +309,7 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
     else
     {
         debug_NSLog(@"reused cell");
+        
     }
     
 	
@@ -445,7 +446,7 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
 		if(indexPath.section==1)//offline
 		{
 			
-			
+			 thecell.accessoryType = UITableViewCellAccessoryNone; //needed for reused cells
 			
 			if([[[theOfflineList objectAtIndex:[indexPath indexAtPosition:1]] objectAtIndex:3] length]>3)// at least extension 
 			{

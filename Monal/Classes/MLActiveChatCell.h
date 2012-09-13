@@ -7,15 +7,14 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "DDBadgeViewCell.h"
 
-@interface MLActiveChatCell : UITableViewCell
+@interface MLActiveChatCell : DDBadgeViewCell
 {
-    NSString* text;
+  
 
 }
-- (void)drawRect:(CGRect)rect;
 
-@property (nonatomic) NSString* text;
 
 
 @end

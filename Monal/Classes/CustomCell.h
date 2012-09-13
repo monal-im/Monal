@@ -7,17 +7,18 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "DDBadgeViewCell.h"
 
 
 
-@interface  CustomCell:UITableViewCell
+@interface  CustomCell:DDBadgeViewCell
 {
-    NSString* text; 
+   
     UIImageView* statusOrb;
 }
 - (void)drawRect:(CGRect)rect; 
 
-@property (nonatomic) NSString* text;
+
 @property (nonatomic) UIImageView* statusOrb;
 
 @end

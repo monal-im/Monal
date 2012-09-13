@@ -311,12 +311,18 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
         debug_NSLog(@"reused cell");
         
         thecell.detailTextLabel.text=nil;
-         thecell.accessoryType = UITableViewCellAccessoryNone;
-       thecell.imageView.alpha=1.0;
+        thecell.accessoryType = UITableViewCellAccessoryNone;
+        thecell.imageView.alpha=1.0;
+        
+        
+        thecell.badgeText =nil;
+        thecell.badgeColor = [UIColor whiteColor];
+        thecell.badgeHighlightedColor = [UIColor blueColor];
+        thecell.textLabel.textColor = [UIColor blackColor];
     }
     
 	
-	int cellwidth=tableView.frame.size.width;
+
 	
 	if(indexPath.section==0) //online
 	{
@@ -396,12 +402,21 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
         
 	}
 	
-		// add the count label 
-		
-		thecell.text=[NSString stringWithFormat:@"%@", [[thelist objectAtIndex:[indexPath indexAtPosition:1]] objectAtIndex:4]];
-		
-		if([thecell.text isEqualToString:@"0"]) thecell.text=nil; 
-		
+        //count
+        thecell.badgeText =[NSString stringWithFormat:@"%@", [[thelist objectAtIndex:[indexPath indexAtPosition:1]] objectAtIndex:4]];
+        
+        if([thecell.badgeText isEqualToString:@"0"])
+        {
+            thecell.badgeText =nil;
+            thecell.badgeColor = [UIColor whiteColor];
+            thecell.badgeHighlightedColor = [UIColor blueColor];
+        
+        }
+        else{
+            
+            thecell.badgeColor = [UIColor darkGrayColor];
+            thecell.badgeHighlightedColor = [UIColor lightGrayColor];
+        }
 		
 		
 	}
@@ -464,8 +479,6 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
 		}
 
 
-	
-	;
 	return thecell;
 }
 

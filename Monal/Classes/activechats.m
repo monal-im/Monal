@@ -291,7 +291,7 @@ if((actionSheet.tag==1) && (buttonIndex==0))
     {
         debug_NSLog(@"reused cell");
        
-       
+        thecell.text=nil; 
     }
     
     
@@ -337,11 +337,21 @@ if((actionSheet.tag==1) && (buttonIndex==0))
 
 	
 	//count
-	thecell.text=[NSString stringWithFormat:@"%@", [[thelist objectAtIndex:[indexPath indexAtPosition:1]] objectAtIndex:4]];
+	thecell.badgeText =[NSString stringWithFormat:@"%@", [[thelist objectAtIndex:[indexPath indexAtPosition:1]] objectAtIndex:4]];
 	
-	if([thecell.text isEqualToString:@"0"]) thecell.text=nil;
+	if([thecell.badgeText isEqualToString:@"0"])
+    {
+        thecell.badgeText =nil;
+        thecell.badgeColor = [UIColor whiteColor];
+        thecell.badgeHighlightedColor = [UIColor blueColor];
+        
+    }
 
-	
+	else{
+
+    thecell.badgeColor = [UIColor darkGrayColor];
+    thecell.badgeHighlightedColor = [UIColor lightGrayColor];
+    }
 	
 
 	return thecell;

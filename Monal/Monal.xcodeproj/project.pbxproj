@@ -187,6 +187,7 @@
 		267D96031225E56200B328E3 /* About.xib in Resources */ = {isa = PBXBuildFile; fileRef = 267D96021225E56200B328E3 /* About.xib */; };
 		2684F88E1236F5EC003BF137 /* reload.png in Resources */ = {isa = PBXBuildFile; fileRef = 2684F88C1236F5EC003BF137 /* reload.png */; };
 		2689B6E716017A4B0087CA58 /* MLActiveChatCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2689B6E616017A4B0087CA58 /* MLActiveChatCell.m */; };
+		2689B6EC1601914E0087CA58 /* DDBadgeViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2689B6EB1601914E0087CA58 /* DDBadgeViewCell.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		268BCCC5140B19B70025E4D1 /* green_button.png in Resources */ = {isa = PBXBuildFile; fileRef = 268BCCC4140B19B70025E4D1 /* green_button.png */; };
 		268BCF12140B29180025E4D1 /* libjrtplib-static.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */; };
 		268E700515D0D979002E63CD /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 264FF3E4158A855D00D97B86 /* AVFoundation.framework */; };
@@ -446,6 +447,8 @@
 		2684F88C1236F5EC003BF137 /* reload.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = reload.png; sourceTree = "<group>"; };
 		2689B6E516017A4B0087CA58 /* MLActiveChatCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLActiveChatCell.h; sourceTree = "<group>"; };
 		2689B6E616017A4B0087CA58 /* MLActiveChatCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLActiveChatCell.m; sourceTree = "<group>"; };
+		2689B6EA1601914E0087CA58 /* DDBadgeViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDBadgeViewCell.h; sourceTree = "<group>"; };
+		2689B6EB1601914E0087CA58 /* DDBadgeViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDBadgeViewCell.m; sourceTree = "<group>"; };
 		268BCCC4140B19B70025E4D1 /* green_button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = green_button.png; sourceTree = "<group>"; };
 		268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libjrtplib-static.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		269F0F19105DDEFB00FF96F8 /* status.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = status.png; sourceTree = "<group>"; };
@@ -804,6 +807,15 @@
 			path = Classes;
 			sourceTree = "<group>";
 		};
+		2689B6E91601914E0087CA58 /* DDBadgeViewCell */ = {
+			isa = PBXGroup;
+			children = (
+				2689B6EA1601914E0087CA58 /* DDBadgeViewCell.h */,
+				2689B6EB1601914E0087CA58 /* DDBadgeViewCell.m */,
+			);
+			path = DDBadgeViewCell;
+			sourceTree = "<group>";
+		};
 		268BCCFD140B23E10025E4D1 /* jrtplib-static */ = {
 			isa = PBXGroup;
 			children = (
@@ -959,6 +971,7 @@
 		26DFD4A615666B6C007A1621 /* 3rd Party */ = {
 			isa = PBXGroup;
 			children = (
+				2689B6E91601914E0087CA58 /* DDBadgeViewCell */,
 				2658508415E7D8E40070A2A7 /* TPCircularBuffer */,
 				262DE4AC15C4E2C60040A66B /* MBProgressHUd */,
 				2640AF3B14548E7600CB4F60 /* GrowingTextView */,
@@ -1378,6 +1391,7 @@
 				2658508B15E7D8E40070A2A7 /* TPCircularBuffer+AudioBufferList.c in Sources */,
 				2658508C15E7D8E40070A2A7 /* TPCircularBuffer.c in Sources */,
 				2689B6E716017A4B0087CA58 /* MLActiveChatCell.m in Sources */,
+				2689B6EC1601914E0087CA58 /* DDBadgeViewCell.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

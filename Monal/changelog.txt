@@ -19,7 +19,7 @@ This is  update that  fixes bugs.
 3. option to sort online contacts by status
 4. set the priority based on presence 
 5. swiping on a notification takes you to the conversation
-
+6. misc bug fixes
 
 
       

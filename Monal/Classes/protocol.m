@@ -91,30 +91,43 @@
 
 -(NSArray*) getBuddyListArray
 {
-    if([[NSUserDefaults standardUserDefaults] boolForKey:@"SortContacts"]==YES)
-	return [db onlineBuddies:accountNumber sortedBy:@"State"];
-    else
-        return [db onlineBuddies:accountNumber sortedBy:@"Name"];
+    return buddyListArray;
 }
 
 -(NSArray*) getBuddyListAdded
 {
-	return [db newBuddies:accountNumber]; 
+	return buddyListAdded;
 }
 
 -(NSArray*) getBuddyListRemoved
 {
-	return [db removedBuddies:accountNumber]; 
+	return buddyListRemoved;
 }
 
 -(NSArray*) getBuddyListUpdated
 {
-	return [db updatedBuddies:accountNumber]; 
+	return  buddyListUpdated;
 }
 
 -(NSArray*) getMessagesIn
 {
 	return [db unreadMessages:accountNumber];
+}
+
+
+//gets snapshot. good for  updating UI
+-(void) getSnapShotList
+{
+    buddyListAdded=[db newBuddies:accountNumber];
+    buddyListUpdated=[db removedBuddies:accountNumber];
+    buddyListRemoved=[db removedBuddies:accountNumber];
+    
+    
+    
+    if([[NSUserDefaults standardUserDefaults] boolForKey:@"SortContacts"]==YES)
+        buddyListArray= [db onlineBuddies:accountNumber sortedBy:@"State"];
+    else
+         buddyListArray=  [db onlineBuddies:accountNumber sortedBy:@"Name"];
 }
 
 

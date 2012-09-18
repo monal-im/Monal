@@ -245,6 +245,8 @@
  
     buddylistDS.thelist=nil;
     buddylistDS.refresh=YES;
+    
+    [jabber getSnapShotList];
     [[NSNotificationCenter defaultCenter]
 	 postNotificationName: @"UpdateUI" object: self];
     

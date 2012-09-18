@@ -59,7 +59,13 @@
 	bool messagesFlag;
 	bool presenceFlag;
     
-    NSString* theTempPass; 
+    NSString* theTempPass;
+    
+    NSString* buddyListAdded;
+    NSString* buddyListRemoved;
+    NSString* buddyListUpdated;
+    NSString* buddyListArray;
+    
 	
 }
 
@@ -106,7 +112,8 @@
 -(NSArray*) getBuddyListArray;
 -(NSArray*) getBuddyListAdded; 
 -(NSArray*) getBuddyListRemoved; 
--(NSArray*) getBuddyListUpdated; 
+-(NSArray*) getBuddyListUpdated;
+-(void) getSnapShotList;
 
 -(NSArray*) getRoster;
 

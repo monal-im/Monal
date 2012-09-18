@@ -1900,7 +1900,7 @@ debug_NSLog(@"ended this element: %@", elementName);
     
     if([elementName isEqualToString:@"presence"] ||[elementName isEqualToString:@"message"])
 	{
-    
+     [self getSnapShotList];
     [[NSNotificationCenter defaultCenter]
      postNotificationName: @"UpdateUI" object: self];
     
@@ -2912,10 +2912,13 @@ debug_NSLog(@"ended this element: %@", elementName);
 	
 	
 	// do not update anything since many objects are destoyed
-		if(disconnecting!=true)
-		[[NSNotificationCenter defaultCenter] 
+	/*	if(disconnecting!=true)
+        {
+            [self getSnapShotList];
+		[[NSNotificationCenter defaultCenter]
 		
-		 postNotificationName: @"UpdateUI" object: self];	
+		 postNotificationName: @"UpdateUI" object: self];
+        }*/
 		
 		
 		//unlock only after UI update to prevent modification of the same status vars by 2 threads

@@ -131,7 +131,9 @@
         
         //this determines whether we should just reload here or later
         if([buddyListUpdated count]==0)
+              dispatch_async(dispatch_get_main_queue(), ^{
          [buddyTable reloadData];
+              }); 
         else
             needtoupdate=true; 
 		
@@ -155,7 +157,9 @@
             if(hasSetLists==true)
             {
                 if([buddyListUpdated count]==0)
+                      dispatch_async(dispatch_get_main_queue(), ^{
                     [buddyTable reloadData];
+                      });
                 else
                     needtoupdate=true; 
             }
@@ -242,7 +246,9 @@
 		
         if(needtoupdate==true)
         {
+              dispatch_async(dispatch_get_main_queue(), ^{
               [buddyTable reloadData];
+              });
             //multiple changes, just refresh
         }
 		else
@@ -555,7 +561,7 @@
 {
     dispatch_async(dispatch_get_main_queue(), ^{
     
-     [buddyTable beginUpdates];
+    [buddyTable beginUpdates];
         UITableViewRowAnimation rowAnimation;
         
       /*  if([indexpaths count]<3)
@@ -570,6 +576,7 @@
      
      
      [buddyTable endUpdates];
+        
     });
     
      
@@ -889,7 +896,7 @@ buddylistDS.tabcontroller=tabcontroller;
 	
 	
 
-	
+	    dispatch_async(dispatch_get_main_queue(), ^{
 	
 	//buddy list
     [buddyTable setDelegate:buddylistDS]; 
@@ -897,7 +904,8 @@ buddylistDS.tabcontroller=tabcontroller;
 	
 	
 	
-	[buddyTable reloadData]; 
+	[buddyTable reloadData];
+        });
 	
 	
 	
@@ -1101,9 +1109,10 @@ buddylistDS.tabcontroller=tabcontroller;
 	[buddyTable setDataSource:buddylistDS];
 	
 
-
+  dispatch_async(dispatch_get_main_queue(), ^{
 	
-	[buddyTable reloadData]; 
+	[buddyTable reloadData];
+  });
 
 
 	//[self Connect];

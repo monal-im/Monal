@@ -33,9 +33,7 @@ port: 5222
 ssl:on
 
 
-to Test AIM
-user: monalxmpp
-pass: imtest
+
 
 
 feel free to send yourself messages 

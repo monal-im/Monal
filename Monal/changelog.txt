@@ -11,7 +11,7 @@ Notable features:
 ★ Tested heavily with google talk, facebook, openfire, prosody   and ejabberd servers. 
 
 
-2.0.8 changelog
+2.0.8.1 changelog
 
 This is  update that  fixes bugs.
 1. fixes issue with navigation buttons in contact list  
@@ -38,9 +38,7 @@ port: 5222
 ssl:on
 
 
-to Test AIM
-user: monalxmpp
-pass: imtest
+
 
 
 feel free to send yourself messages 

@@ -1898,13 +1898,13 @@ debug_NSLog(@"ended this element: %@", elementName);
     
 // ****** update the UI
     
-    if([elementName isEqualToString:@"presence"] ||[elementName isEqualToString:@"message"])
+ /*   if([elementName isEqualToString:@"presence"] ||[elementName isEqualToString:@"message"])
 	{
      [self getSnapShotList];
     [[NSNotificationCenter defaultCenter]
      postNotificationName: @"UpdateUI" object: self];
     
-    }
+    }*/
 	
 	//******* login functons *******
 	if([elementName isEqualToString:@"stream:features"])
@@ -2912,13 +2912,13 @@ debug_NSLog(@"ended this element: %@", elementName);
 	
 	
 	// do not update anything since many objects are destoyed
-	/*	if(disconnecting!=true)
+		if(disconnecting!=true)
         {
             [self getSnapShotList];
 		[[NSNotificationCenter defaultCenter]
 		
 		 postNotificationName: @"UpdateUI" object: self];
-        }*/
+        }
 		
 		
 		//unlock only after UI update to prevent modification of the same status vars by 2 threads

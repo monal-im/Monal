@@ -1832,7 +1832,11 @@ void (^myBlock)(void) = ^(void){
 
 - (void)applicationDidBecomeActive:(UIApplication *)application
 {
-	debug_NSLog(@"Becoming Active"); 
+	debug_NSLog(@"Becoming Active");
+    
+    if(jabber==nil) return;
+    if(jabber.loggedin!=YES) return; 
+    
 	
 	//reset
 	[[UIApplication sharedApplication] setApplicationIconBadgeNumber:0];

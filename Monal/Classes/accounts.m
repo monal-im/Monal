@@ -35,10 +35,17 @@
 	return YES;
 }
 
-- (void)viewWillAppear:(BOOL)animated
+- (void)viewDidAppear:(BOOL)animated
 {
 	
-    debug_NSLog(@"accounts will  appear");
+    sectionArray =  [NSArray arrayWithObjects:[NSString stringWithFormat:@"Accounts\n(Only one can be set to login)"],
+                     [NSString stringWithFormat:@"Add New Account"], nil];
+    
+    
+    debug_NSLog(@"accounts did  appear");
+    
+   
+    
 	
 	reconnect= [[UIBarButtonItem alloc] initWithTitle:@"Reconnect"
 style:UIBarButtonItemStyleBordered
@@ -77,12 +84,15 @@ style:UIBarButtonItemStyleBordered
 		 postNotificationName: @"Disconnect" object: self];
 	}
 	
+    debug_NSLog(@"reloading table");
   
- dispatch_async(dispatch_get_main_queue(), ^{
-    
+
         [theTable reloadData];
-    });
+ 
     
+    
+    debug_NSLog(@"done reloading table");
+
     
 }
 
@@ -90,6 +100,15 @@ style:UIBarButtonItemStyleBordered
 -(void) viewDidLoad
 {
     [super viewDidLoad];
+    
+	
+    sectionArray =  [NSArray arrayWithObjects:[NSString stringWithFormat:@"Accounts\n(Only one can be set to login)"],
+                     [NSString stringWithFormat:@"Add New Account"], nil];
+    
+    
+    thelist2=[db protocolList]; // protocols
+    
+    
     theTable = [[UITableView alloc] initWithFrame: self.view.frame style:UITableViewStyleGrouped];
     self.view=theTable;
     
@@ -106,10 +125,7 @@ style:UIBarButtonItemStyleBordered
 	db=[DataLayer sharedInstance];
 	iconPath=app.iconPath;
 
-    sectionArray =  [NSArray arrayWithObjects:@"Accounts\n(Only one can be set to login)", @"Add New Account", nil];
-    
-
-     thelist2=[db protocolList]; // protocols
+  
 }
 
 -(void)viewDidDisappear:(BOOL)animated
@@ -152,7 +168,7 @@ style:UIBarButtonItemStyleBordered
 	}
 		enabledList=enabledAccounts;
 
-		[[NSNotificationCenter defaultCenter] 
+		[[NSNotificationCenter defaultCenter]
 		 postNotificationName: @"Reconnect" object: self];
 	}	
 	} else
@@ -289,6 +305,8 @@ thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
+    
+    debug_NSLog(@"number of rows in section %d %d",[thelist count],[thelist2 count]);
 	if(section==0)
 		return [thelist count];
 		else
@@ -316,17 +334,19 @@ thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
 	
+		return [sectionArray count];
 	
-	return [sectionArray count];
-	
+ 
 }
 
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
 	
 	
-	
+	debug_NSLog(@"returning  section header:  %@",  [sectionArray objectAtIndex:section]);
+
 	return [sectionArray objectAtIndex:section];
+ 
 }
 
 

@@ -29,8 +29,7 @@
 	[nc addObserver:self selector:@selector(keyboardWillShow:) name: UIKeyboardWillShowNotification object:nil];
 	[nc addObserver:self selector:@selector(keyboardWillHide:) name: UIKeyboardWillHideNotification object:nil];
 	
-		debug_NSLog(@"xmpp edit loading nib"); 
-	[self initWithNibName:@"XMPPEdit" bundle:nil];
+	
 
 	originIndex=indexPath; 
 	if(![accountnum isEqualToString:@"-1"])
@@ -41,7 +40,8 @@
 	
 	debug_NSLog(@"got account number %@", accountno); 
     
- 
+    debug_NSLog(@"xmpp edit loading nib");
+	[self initWithNibName:@"XMPPEdit" bundle:nil];
 	
 	
 }
@@ -68,9 +68,15 @@
 
 
 
-- (void)viewDidLoad
+- (void) viewWillAppear:(BOOL)animated
 {
     [super viewDidLoad];
+    
+    return;
+    
+ sectionArray =  [NSArray arrayWithObjects: nil];
+    
+    
     [theTable setBackgroundView:nil];
     [theTable setBackgroundView:[[UIView alloc] init] ];
     theTable.backgroundColor = [[UIColor alloc] initWithPatternImage:[UIImage imageNamed:@"carbon3.jpg"]];

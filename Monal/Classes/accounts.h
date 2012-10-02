@@ -31,7 +31,7 @@
 	UINavigationController* navController;
 	UIBarButtonItem* reconnect;
 	UIBarButtonItem* logoff;
-	
+	XMPPEdit* xmppedit;
     
     BOOL first; 
 	}

@@ -128,13 +128,19 @@ style:UIBarButtonItemStyleBordered
   
 }
 
+-(void)viewWillDisappear:(BOOL)animated
+{
+    debug_NSLog(@"accounts will disappear");
+    
+}
+
 -(void)viewDidDisappear:(BOOL)animated
 {
 	
 	navController.navigationBar.topItem.leftBarButtonItem=nil; 
 	navController.navigationBar.topItem.rightBarButtonItem=nil;
 	
-	; 
+	
 	return;
 }
 
@@ -356,15 +362,13 @@ thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 {
 	debug_NSLog(@"selected log section %d , row %d,  max %d", newIndexPath.section, newIndexPath.row, [thelist count]); 
 		
-	//	[chatwin showLog:[[thelist objectAtIndex:[newIndexPath indexAtPosition:1]] objectAtIndex:0]];
-	
 	
 	
 	if(newIndexPath.section==0)
 	{
 		debug_NSLog(@"selected account with protocol %d", [[[thelist objectAtIndex:newIndexPath.row] objectAtIndex:2] intValue]);
 		
-			XMPPEdit* xmppedit=[XMPPEdit alloc]; 
+			 xmppedit=[XMPPEdit alloc]; 
 			xmppedit.db=[DataLayer sharedInstance];
 		[xmppedit initList:navController:newIndexPath:[NSString stringWithFormat:@"%@",[[thelist objectAtIndex:newIndexPath.row] objectAtIndex:0]]];
 		[navController pushViewController:xmppedit animated:YES];	
@@ -374,7 +378,7 @@ thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 	else
 	{
 		
-		XMPPEdit* xmppedit=[XMPPEdit alloc]; 
+		 xmppedit=[XMPPEdit alloc]; 
 		xmppedit.db=[DataLayer sharedInstance];
 		[xmppedit initList:navController:newIndexPath:@"-1"];
 		[navController pushViewController:xmppedit animated:YES];

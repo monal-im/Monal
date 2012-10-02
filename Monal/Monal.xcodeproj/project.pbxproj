@@ -39,7 +39,6 @@
 		260AA97D161B37C8009C5CB6 /* MLActiveChatCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 260AA97B161B37C8009C5CB6 /* MLActiveChatCell.m */; };
 		260AA97E161B37C8009C5CB6 /* MLActiveChatCell.h in Headers */ = {isa = PBXBuildFile; fileRef = 260AA97C161B37C8009C5CB6 /* MLActiveChatCell.h */; };
 		260E8BA611023DE5004E24FF /* CustomCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 260E8BA511023DE5004E24FF /* CustomCell.m */; };
-		261256881129185800161B30 /* XMPPEdit.m in Sources */ = {isa = PBXBuildFile; fileRef = 261256871129185800161B30 /* XMPPEdit.m */; };
 		2614ED41121BD3160034556C /* MyTabController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2614ED40121BD3160034556C /* MyTabController.m */; };
 		261AB9351409BFB8006F5155 /* callScreen.m in Sources */ = {isa = PBXBuildFile; fileRef = 261AB9341409BFB8006F5155 /* callScreen.m */; };
 		261ED6C41240257F00C14F6A /* BuddyAdd.xib in Resources */ = {isa = PBXBuildFile; fileRef = 261ED6C31240257F00C14F6A /* BuddyAdd.xib */; };
@@ -1363,7 +1362,6 @@
 				26277888110179D100023C8A /* tools.m in Sources */,
 				260E8BA611023DE5004E24FF /* CustomCell.m in Sources */,
 				26F7BB431115F8DB00712672 /* Reachability.m in Sources */,
-				261256881129185800161B30 /* XMPPEdit.m in Sources */,
 				2614ED41121BD3160034556C /* MyTabController.m in Sources */,
 				265571B1122157D500F994E8 /* SlidingMessageViewController.m in Sources */,
 				261FD43A122349F2003DDC3A /* activechats.m in Sources */,

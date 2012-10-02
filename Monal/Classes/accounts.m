@@ -59,8 +59,8 @@ style:UIBarButtonItemStyleBordered
 	
 	
 	
-	viewController.navigationBar.topItem.rightBarButtonItem=reconnect;
-		viewController.navigationBar.topItem.leftBarButtonItem=logoff;
+	navController.navigationBar.topItem.rightBarButtonItem=reconnect;
+		navController.navigationBar.topItem.leftBarButtonItem=logoff;
 	
     
     if(first!=true)
@@ -120,7 +120,7 @@ style:UIBarButtonItemStyleBordered
     theTable.backgroundColor = [[UIColor alloc] initWithPatternImage:[UIImage imageNamed:@"carbon3.jpg"]];
     
 	SworIMAppDelegate *app=[[UIApplication sharedApplication] delegate];
-    viewController=app.accountsNavigationController;
+    navController=app.accountsNavigationController;
 	
 	db=[DataLayer sharedInstance];
 	iconPath=app.iconPath;
@@ -131,8 +131,8 @@ style:UIBarButtonItemStyleBordered
 -(void)viewDidDisappear:(BOOL)animated
 {
 	
-	viewController.navigationBar.topItem.leftBarButtonItem=nil; 
-	viewController.navigationBar.topItem.rightBarButtonItem=nil; 
+	navController.navigationBar.topItem.leftBarButtonItem=nil; 
+	navController.navigationBar.topItem.rightBarButtonItem=nil;
 	
 	; 
 	return;
@@ -366,8 +366,8 @@ thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 		
 			XMPPEdit* xmppedit=[XMPPEdit alloc]; 
 			xmppedit.db=[DataLayer sharedInstance];
-		[xmppedit initList:viewController:newIndexPath:[NSString stringWithFormat:@"%@",[[thelist objectAtIndex:newIndexPath.row] objectAtIndex:0]]];
-		[viewController pushViewController:xmppedit animated:YES];	
+		[xmppedit initList:navController:newIndexPath:[NSString stringWithFormat:@"%@",[[thelist objectAtIndex:newIndexPath.row] objectAtIndex:0]]];
+		[navController pushViewController:xmppedit animated:YES];	
 		
 	
 	}
@@ -376,8 +376,8 @@ thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 		
 		XMPPEdit* xmppedit=[XMPPEdit alloc]; 
 		xmppedit.db=[DataLayer sharedInstance];
-		[xmppedit initList:viewController:newIndexPath:@"-1"];
-		[viewController pushViewController:xmppedit animated:YES];
+		[xmppedit initList:navController:newIndexPath:@"-1"];
+		[navController pushViewController:xmppedit animated:YES];
 		
 			
 	}

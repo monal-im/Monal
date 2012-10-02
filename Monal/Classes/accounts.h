@@ -28,7 +28,7 @@
 	NSString* iconPath; 
 	NSArray* sectionArray; 
 	
-	UINavigationController* viewController; 
+	UINavigationController* navController;
 	UIBarButtonItem* reconnect;
 	UIBarButtonItem* logoff;
 	

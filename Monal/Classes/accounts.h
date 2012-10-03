@@ -23,7 +23,7 @@
 	NSMutableArray* thelist2; //protocol list
 	NSMutableArray* enabledList; //enabled accounts
 	NSIndexPath* currentPath; 
-	UITableView* currentTable; 
+	
 	DataLayer* db; 
 	NSString* iconPath; 
 
@@ -59,7 +59,7 @@
 
 
 @property (nonatomic, retain ) 	NSArray* sectionArray; 
-@property (nonatomic, assign) IBOutlet UITableView* theTable;
+@property (nonatomic, retain) IBOutlet UITableView* theTable;
 
 @end
 

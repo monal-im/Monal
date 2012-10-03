@@ -21,16 +21,14 @@
     protocol* jabber;
 	UINavigationController* navController; 
 	
-	UITabBarController* tabController; 
+
      UIBarButtonItem* contactsButton; // ipad portrait button 
      UIPopoverController *popOverController;
     
     UIView *containerView;
     HPGrowingTextView *chatInput;
     
-    UITableView* contactList; 
-    
-    
+
 	//dataset for current chat window
 	//NSArray* thelist; 
 	
@@ -43,8 +41,7 @@
     
     bool keyboardVisible; 
 
-	 NSString* iconPath; 
-	 NSString* domain; 
+	
 	
 	CGRect oldFrame;
 	NSString* myIcon; 
@@ -83,10 +80,10 @@
  
 }
 
-@property (nonatomic)  NSString* buddyName; 
+@property (nonatomic,strong)  NSString* buddyName;
 
 
-@property (nonatomic)  NSString* accountno; 
+@property (nonatomic,strong)  NSString* accountno;
 
 -(void) init: (protocol*) jabberIn:(UINavigationController*) nav:(NSString*)username: (DataLayer*) thedb; 
 -(void) show:(NSString*) buddy:(NSString*) fullname:(UINavigationController*) vc;
@@ -120,9 +117,9 @@
 -(NSString*) makeMessageHTML:(NSString*) from:(NSString*) themessage:(NSString*) time:(BOOL) liveChat;
 -(NSString*) emoticonsHTML:(NSString*) message; 
 
-@property (nonatomic) NSString* iconPath; 
-@property (nonatomic) NSString* domain; 
-@property (nonatomic)	UITabBarController* tabController; 
-@property (nonatomic)  UITableView* contactList;
+@property (nonatomic,strong) NSString* iconPath;
+@property (nonatomic,strong) NSString* domain;
+@property (nonatomic,strong)	UITabBarController* tabController;
+@property (nonatomic,strong)  UITableView* contactList;
 
 @end

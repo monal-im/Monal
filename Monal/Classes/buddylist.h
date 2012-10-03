@@ -18,20 +18,16 @@
 
 @interface buddylist : UIViewController <UITableViewDataSource, UITableViewDelegate, UIActionSheetDelegate> {
 
-		NSMutableArray* thelist; 
-	NSMutableArray* theOfflineList; 
+	
 	
 	chat* chatwin;
 	
 	NSIndexPath* currentPath; 
 	UITableView* currentTable; 
-	protocol* jabber;	
-	NSString* iconPath; 
+		
 	
-	UIBarButtonItem* plusButton; 
-	UINavigationController* viewController; 
-
-	UITabBarController* tabcontroller;
+	
+	
     
     BOOL refresh; 
    
@@ -83,17 +79,17 @@
 
 -(NSInteger) count;
 
-@property (nonatomic) NSArray* theOfflineList;
-@property (nonatomic) NSArray* thelist;
-@property (nonatomic)  protocol* jabber;
-@property (nonatomic) NSString* iconPath; 
+@property (nonatomic,strong) NSArray* theOfflineList;
+@property (nonatomic,strong) NSArray* thelist;
+@property (nonatomic,strong)  protocol* jabber;
+@property (nonatomic, strong) NSString* iconPath;
 
-@property (nonatomic) UITabBarController* tabcontroller;
-@property (nonatomic) UIBarButtonItem* plusButton;
-@property (nonatomic)  UINavigationController* viewController; 
+@property (nonatomic,strong) UITabBarController* tabcontroller;
+@property (nonatomic,strong) UIBarButtonItem* plusButton;
+@property (nonatomic,strong)  UINavigationController* viewController;
 
-@property MGSplitViewController* splitViewController; 
-@property (nonatomic) BOOL refresh; 
+@property (nonatomic, strong)MGSplitViewController* splitViewController;
+@property (nonatomic) BOOL refresh;
 
 @end
 

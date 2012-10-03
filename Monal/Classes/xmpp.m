@@ -24,7 +24,7 @@
 	self = [super init];
 	loggedin=false; 
 	away=false; 
-	statusMessage=nil; 
+	 self.statusMessage=nil;
 	domain=thedomain;
 	server=theserver; 
 	port=(unsigned short)theport; 
@@ -138,7 +138,7 @@
     
     
     
-    verHash=[self getVersionString];
+    self.verHash=[self getVersionString];
     //@"VUFD6HcFmUT2NxJkBGCiKlZnS3M=" ; // plucked from pidgin .. need to make my own later
     
     
@@ -168,7 +168,7 @@
 							  kDNSServiceType_SRV,
 							  kDNSServiceClass_IN,
 							  query_cb,
-							  (__bridge void *)(self)
+							  ( __bridge void *)(self)
 							  );
 	if(res==kDNSServiceErr_NoError)
 	{
@@ -482,7 +482,9 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 	   && (loginstate!=1) )
 	{
 		loginstate=1; //reset for new stream
-	NSString* bindString=[NSString stringWithFormat:@"<iq id='%@' type='set' ><bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'><resource>%@</resource></bind></iq>", sessionkey,resource];
+        
+        debug_NSLog(@"%@", self.sessionKey);
+	NSString* bindString=[NSString stringWithFormat:@"<iq id='%@' type='set' ><bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'><resource>%@</resource></bind></iq>", _sessionKey,resource];
 		[self talk:bindString]; 
 		
 			;
@@ -623,7 +625,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
         if([db capsforVer:presenceObj.ver]==nil)
         {
             //request caps
-            [self queryDiscoInfo:presenceObj.from:sessionkey];
+            [self queryDiscoInfo:presenceObj.from:_sessionKey];
         }
         
         //legacy caps
@@ -753,12 +755,12 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 	{
 		
 
-		NSString* sessionQuery=[NSString stringWithFormat:@"<iq id='%@' type='set'><session xmlns='urn:ietf:params:xml:ns:xmpp-session'/></iq>", sessionkey];
+		NSString* sessionQuery=[NSString stringWithFormat:@"<iq id='%@' type='set'><session xmlns='urn:ietf:params:xml:ns:xmpp-session'/></iq>", _sessionKey];
 		[self talk:sessionQuery];
         
-        [self queryDiscoItems:domain : sessionkey ];
+        [self queryDiscoItems:domain : _sessionKey ];
         
-        [self queryDiscoInfo:domain : sessionkey ];
+        [self queryDiscoInfo:domain : _sessionKey ];
 		
 	
 		
@@ -1053,7 +1055,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
             jingleCall.thepass=[attributeDict objectForKey:@"password"];
             jingleCall.otherParty=iqObj.from;
            
-            jingleCall.idval=sessionkey;
+            jingleCall.idval=_sessionKey;
             
             
             if( [jingleCall.action isEqualToString:@"session-initiate"])
@@ -1992,7 +1994,7 @@ debug_NSLog(@"ended this element: %@", elementName);
 		// for google connections 
         if(pos.location!=NSNotFound)
         {
-            [self talk:[jingleCall getGoogleInfo:sessionkey]];
+            [self talk:[jingleCall getGoogleInfo:_sessionKey]];
         }
 
         
@@ -2156,8 +2158,9 @@ debug_NSLog(@"ended this element: %@", elementName);
 		
 		srand([[NSDate date] timeIntervalSince1970]);
 		// make up a random session key (id)
-		sessionkey=[NSString stringWithFormat:@"monal%d",random()%100000]; 
-		
+		_sessionKey=[NSString stringWithFormat:@"monal%ld",random()%100000];
+		debug_NSLog(@"session key: %@", _sessionKey);
+        
 		NSString* xmpprequest2; 
         if([domain length]>0)
         xmpprequest2=[NSString stringWithFormat:
@@ -3055,9 +3058,9 @@ debug_NSLog(@"ended this element: %@", elementName);
 	NSString* xmpprequest;
 	NSRange pos=[server rangeOfString:@"google"]; 
 	if(pos.location!=NSNotFound)
-		xmpprequest=[NSString stringWithFormat: @"<iq id='%@' from='%@' type='get'><query xmlns='jabber:iq:roster' xmlns:gr='google:roster' gr:ext='2'/></iq>",sessionkey, responseUser];
+		xmpprequest=[NSString stringWithFormat: @"<iq id='%@' from='%@' type='get'><query xmlns='jabber:iq:roster' xmlns:gr='google:roster' gr:ext='2'/></iq>",_sessionKey, responseUser];
 	else
-		xmpprequest=[NSString stringWithFormat: @"<iq id='%@'  from='%@' type='get' ><query xmlns='jabber:iq:roster'/></iq>",sessionkey, responseUser];
+		xmpprequest=[NSString stringWithFormat: @"<iq id='%@'  from='%@' type='get' ><query xmlns='jabber:iq:roster'/></iq>",_sessionKey, responseUser];
 
 	
 	bool val= [self talk:xmpprequest];
@@ -3186,7 +3189,7 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
     }
     
     
-    return [self talk:[jingleCall initiateJingle:buddy:sessionkey:buddyResource]];
+    return [self talk:[jingleCall initiateJingle:buddy:_sessionKey:buddyResource]];
 }
 
 -(bool) endCall
@@ -3328,14 +3331,14 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	
 	NSString*	xmpprequest; 
 	
-	statusMessage=[NSString stringWithString:status];
+	 self.statusMessage=[NSString stringWithString:status];
  
 	
 	if(away!=true)
-        xmpprequest=[NSString stringWithFormat: @"<presence> <status>%@</status>  <priority>%d</priority> <caps:c  node=\"http://monal.im/caps\" ver=\"%@\"  xmlns:caps=\"http://jabber.org/protocol/caps\"    ext='pmuc-v1 voice-v1' />  </presence>",status, XMPPPriority,verHash ];
+        xmpprequest=[NSString stringWithFormat: @"<presence> <status>%@</status>  <priority>%d</priority> <caps:c  node=\"http://monal.im/caps\" ver=\"%@\"  xmlns:caps=\"http://jabber.org/protocol/caps\"    ext='pmuc-v1 voice-v1' />  </presence>",status, XMPPPriority,self.verHash ];
     else
-        xmpprequest=[NSString stringWithFormat: @"<presence> <show>away</show> <status>%@</status>  <priority>%d</priority> <caps:c  node=\"http://monal.im/caps\" ver=\"%@\"  xmlns:caps=\"http://jabber.org/protocol/caps\"    ext='pmuc-v1 voice-v1' />    < /presence>",statusMessage,XMPPPriority,
-                   verHash ];
+        xmpprequest=[NSString stringWithFormat: @"<presence> <show>away</show> <status>%@</status>  <priority>%d</priority> <caps:c  node=\"http://monal.im/caps\" ver=\"%@\"  xmlns:caps=\"http://jabber.org/protocol/caps\"    ext='pmuc-v1 voice-v1' />    < /presence>", self.statusMessage,XMPPPriority,
+                   self.verHash ];
     
     
     
@@ -3353,17 +3356,17 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	
 	NSString*	xmpprequest;
 	bool val=false; 
-	debug_NSLog(@"status %@", statusMessage); 
+	debug_NSLog(@"status %@",  self.statusMessage); 
 	if(away!=true) // no need to resend if away is already set
 	{
 
         
-        if((statusMessage==nil)
-           || ([statusMessage isEqualToString:@""]))
-            xmpprequest=[NSString stringWithFormat: @"<presence> <show>away</show><priority>%d</priority> <c  node=\"http://monal.im/caps\" ver=\"%@\"  xmlns=\"http://jabber.org/protocol/caps\" />  </presence>",0, verHash];
+        if(( self.statusMessage==nil)
+           || ([ self.statusMessage isEqualToString:@""]))
+            xmpprequest=[NSString stringWithFormat: @"<presence> <show>away</show><priority>%d</priority> <c  node=\"http://monal.im/caps\" ver=\"%@\"  xmlns=\"http://jabber.org/protocol/caps\" />  </presence>",0, self.verHash];
         else
             xmpprequest=[NSString stringWithFormat: @"<presence> <show>away</show> <priority>%d</priority> <c  node=\"http://monal.im/caps\" ver=\"%@\"  xmlns=\"http://jabber.org/protocol/caps\"  />    <status>%@</status></presence>",0,
-                        verHash,   statusMessage];
+                        self.verHash,    self.statusMessage];
         
         
 		
@@ -3389,15 +3392,16 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
      video-v1: indicates the user is capable of receiving video media.
      camera-v1: indicates the user is capable of sending video media.
      */
-	
+	debug_NSLog(" %@ ", self.verHash);
+    
 	NSString*	xmpprequest; 
 	
-	if((statusMessage==nil)
-		|| ([statusMessage isEqualToString:@""]))
-		xmpprequest=[NSString stringWithFormat: @"<presence> <priority>%d</priority> <caps:c  node=\"http://monal.im/caps\" ver=\"%@\"  xmlns:caps=\"http://jabber.org/protocol/caps\"    ext='pmuc-v1 voice-v1' />  </presence>",XMPPPriority, verHash];
+	if(( self.statusMessage==nil)
+		|| ([ self.statusMessage isEqualToString:@""]))
+		xmpprequest=[NSString stringWithFormat: @"<presence> <priority>%d</priority> <caps:c  node=\"http://monal.im/caps\" ver=\"%@\"  xmlns:caps=\"http://jabber.org/protocol/caps\"    ext='pmuc-v1 voice-v1' />  </presence>",XMPPPriority, self.verHash];
 	else
 		xmpprequest=[NSString stringWithFormat: @"<presence><priority>%d</priority> <caps:c  node=\"http://monal.im/caps\" ver=\"%@\"  xmlns:caps=\"http://jabber.org/protocol/caps\"    ext='pmuc-v1 voice-v1' />    <status>%@</status></presence>",XMPPPriority,
-                    verHash,   statusMessage];
+                    self.verHash,    self.statusMessage];
 	
 	
 	away=false; 

@@ -18,7 +18,7 @@
 
 @interface accounts : UIViewController <UITableViewDataSource, UITableViewDelegate> {
 
-	 UITableView* theTable; 
+	 
 	NSMutableArray* thelist; //account list
 	NSMutableArray* thelist2; //protocol list
 	NSMutableArray* enabledList; //enabled accounts
@@ -26,7 +26,7 @@
 	UITableView* currentTable; 
 	DataLayer* db; 
 	NSString* iconPath; 
-	NSArray* sectionArray; 
+
 	
 	UINavigationController* navController;
 	UIBarButtonItem* reconnect;
@@ -54,12 +54,12 @@
 
 //others
 -(void)initList:(UINavigationController*) nav; 
--(void) dealloc;
+
 - (void)refreshAccounts;
 
 
- 
-@property (nonatomic) IBOutlet UITableView* theTable;
+@property (nonatomic, retain ) 	NSArray* sectionArray; 
+@property (nonatomic, assign) IBOutlet UITableView* theTable;
 
 @end
 

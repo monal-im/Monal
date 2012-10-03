@@ -13,6 +13,7 @@
 
 
 @synthesize db;
+@synthesize sectionArray; 
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
 	
@@ -24,7 +25,7 @@
     debug_NSLog(@"xmpp edit loading nib");
 	[self initWithNibName:@"XMPPEdit" bundle:nil];
     
-	sectionArray =  [NSArray arrayWithObjects:@"Account", @"Advanced Settings", nil];
+	self.sectionArray =  [NSArray arrayWithObjects:@"Account", @"Advanced Settings", nil];
 	navigationController=nav;
 	NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
 	[nc addObserver:self selector:@selector(keyboardWillShow:) name: UIKeyboardWillShowNotification object:nil];
@@ -212,7 +213,7 @@
 	else
 	{
 		user=userText.text;
-		domain= [NSString stringWithString:@""];
+		domain= @"";
 	}
 	
 	if(!editing)
@@ -414,7 +415,7 @@
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
 	
 	//debug_NSLog(@"xmpp edit counting # of sections %d",  [sectionArray count]);
-	return [sectionArray count];
+	return [self.sectionArray count];
 	
 }
 
@@ -423,7 +424,7 @@
 	
 	
 	//debug_NSLog(@"xmpp edit title for  section %d", section);
-	return [sectionArray objectAtIndex:section];
+	return [self.sectionArray objectAtIndex:section];
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section

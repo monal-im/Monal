@@ -41,21 +41,17 @@ UINavigationControllerDelegate,UIAlertViewDelegate, MGSplitViewControllerDelegat
     
     IBOutlet UIWindow *window;
     IBOutlet  UINavigationController *buddyNavigationController;
-    IBOutlet  UINavigationController *accountsNavigationController;
     IBOutlet  UINavigationController *statusNavigationController;
-    IBOutlet  UINavigationController *activeNavigationController;
+  
 	
 	
 	// ipad specific stuff
-	IBOutlet  UINavigationController *aboutNavigationControlleriPad;
-	IBOutlet  UINavigationController *logsNavigationControlleriPad;
+
 	IBOutlet MGSplitViewController* split; 
 
 
-	IBOutlet UITabBarController *tabcontroller; 
 	IBOutlet UITabBarItem* buddyTab; 
-	IBOutlet UITabBarItem* activeTab; 
-	
+
 	
 	IBOutlet UITableView* buddyTable; 
 
@@ -70,27 +66,25 @@ UINavigationControllerDelegate,UIAlertViewDelegate, MGSplitViewControllerDelegat
 	TabMoreController* moreControl;
 	UINavigationController* morenav;
     
-    chat* chatwin;
+   
     callScreen* call;
     
     
 	bool vibrateenabled; 
     bool uithreadrunning; 
 	
-	protocol* jabber;
+	
 
   
 	Reachability* reach;
 
 	DataLayer* db;
-	NSString* iconPath; 
+
 	
 	UITextField* nameField;
 	BOOL listLoad;  
 	
-	
-	NSString* accountno;
-	
+
 	int uiIter; 
 	
 	
@@ -142,19 +136,19 @@ UINavigationControllerDelegate,UIAlertViewDelegate, MGSplitViewControllerDelegat
 -(IBAction) CancelLogin;
 
 
-@property (nonatomic)  chat* chatwin;
-@property (nonatomic)  protocol* jabber;
-@property (nonatomic) NSString* accountno; 
-@property (nonatomic)  UINavigationController* morenav; 
-@property (nonatomic)  UINavigationController* activeNavigationController; 
-@property (nonatomic)  UINavigationController* accountsNavigationController; 
+@property (nonatomic, retain)  chat* chatwin;
+@property (nonatomic, retain )  protocol* jabber;
+@property (nonatomic, retain) NSString* accountno;
+@property (nonatomic, assign)  UINavigationController* morenav;
+@property (nonatomic, assign)  UINavigationController* activeNavigationController; 
+@property (nonatomic, assign)  UINavigationController* accountsNavigationController; 
 
-@property (nonatomic)  UINavigationController* logsNavigationControlleriPad; 
-@property (nonatomic)  UINavigationController* aboutNavigationControlleriPad; 
+@property (nonatomic, assign)  UINavigationController* logsNavigationControlleriPad; 
+@property (nonatomic, assign)  UINavigationController* aboutNavigationControlleriPad; 
 
-@property (nonatomic)  NSString* iconPath; 
-@property (nonatomic) UITabBarItem* activeTab; 
-@property (nonatomic)IBOutlet UITabBarController* tabcontroller; 
+@property (nonatomic, strong)  NSString* iconPath;
+@property (nonatomic, assign) UITabBarItem* activeTab; 
+@property (nonatomic, retain)IBOutlet UITabBarController* tabcontroller;
 
 
 

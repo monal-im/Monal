@@ -47,7 +47,7 @@
 	
 
 	BOOL away; 
-	NSString* statusMessage;
+
 		
 		DataLayer* db;
 		BOOL loggedin; 
@@ -163,6 +163,6 @@
 @property (nonatomic )  bool messagesFlag; 
 @property (nonatomic) bool presenceFlag; 
 
-@property (nonatomic) NSString* statusMessage;
-@property (nonatomic) NSString* ownName;
+@property (nonatomic, assign) NSString* statusMessage;
+@property (nonatomic,assign ) NSString* ownName;
 @end

@@ -9,7 +9,11 @@
 #import "accounts.h"
 
 
+
 @implementation accounts  
+
+@synthesize theTable;
+@synthesize sectionArray;
 
  -(void)logoffClicked
 {
@@ -35,11 +39,9 @@
 	return YES;
 }
 
-- (void)viewDidAppear:(BOOL)animated
+- (void)viewWillAppear:(BOOL)animated
 {
 	
-    sectionArray =  [NSArray arrayWithObjects:[NSString stringWithFormat:@"Accounts\n(Only one can be set to login)"],
-                     [NSString stringWithFormat:@"Add New Account"], nil];
     
     
     debug_NSLog(@"accounts did  appear");
@@ -91,7 +93,7 @@ style:UIBarButtonItemStyleBordered
  
     
     
-    debug_NSLog(@"done reloading table");
+    debug_NSLog(@"done reload table call");
 
     
 }
@@ -102,21 +104,21 @@ style:UIBarButtonItemStyleBordered
     [super viewDidLoad];
     
 	
-    sectionArray =  [NSArray arrayWithObjects:[NSString stringWithFormat:@"Accounts\n(Only one can be set to login)"],
+    self.sectionArray =  [NSArray arrayWithObjects:[NSString stringWithFormat:@"Accounts\n(Only one can be set to login)"],
                      [NSString stringWithFormat:@"Add New Account"], nil];
     
     
     thelist2=[db protocolList]; // protocols
     
     
-    theTable = [[UITableView alloc] initWithFrame: self.view.frame style:UITableViewStyleGrouped];
+    self.theTable = [[UITableView alloc] initWithFrame: self.view.frame style:UITableViewStyleGrouped];
     self.view=theTable;
     
-    [theTable setDelegate:self];
-    [theTable setDataSource:self];
+    [self.theTable setDelegate:self];
+    [self.theTable setDataSource:self];
    
-    [theTable setBackgroundView:nil];
-    [theTable setBackgroundView:[[UIView alloc] init] ];
+    [self.theTable setBackgroundView:nil];
+    [self.theTable setBackgroundView:[[UIView alloc] init] ];
     theTable.backgroundColor = [[UIColor alloc] initWithPatternImage:[UIImage imageNamed:@"carbon3.jpg"]];
     
 	SworIMAppDelegate *app=[[UIApplication sharedApplication] delegate];
@@ -311,7 +313,7 @@ thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    
+     debug_NSLog(@"checking number of rows in section ");
     debug_NSLog(@"number of rows in section %d %d",[thelist count],[thelist2 count]);
 	if(section==0)
 		return [thelist count];
@@ -340,7 +342,7 @@ thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
 	
-		return [sectionArray count];
+		return [self.sectionArray count];
 	
  
 }
@@ -349,9 +351,9 @@ thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
 	
 	
-	debug_NSLog(@"returning  section header:  %@",  [sectionArray objectAtIndex:section]);
+	debug_NSLog(@"returning  section header:  %@",  [self.sectionArray objectAtIndex:section]);
 
-	return [sectionArray objectAtIndex:section];
+	return [self.sectionArray objectAtIndex:section];
  
 }
 

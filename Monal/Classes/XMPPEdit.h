@@ -19,7 +19,7 @@
 	DataLayer* db; 
 	CGRect oldFrame;
 
-	NSArray* sectionArray; 
+	
 	UINavigationController* navigationController;
 	
 	IBOutlet UITableView* theTable; 
@@ -79,7 +79,9 @@ IBOutlet UITableViewCell* usernameCell;
 -(void) save; 
 
 
-@property (nonatomic) DataLayer* db; 
+@property (nonatomic, assign) DataLayer* db;
+
+@property (nonatomic, retain ) 	NSArray* sectionArray;
 
 
 

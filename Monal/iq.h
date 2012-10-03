@@ -15,14 +15,14 @@
 
 -(void) reset;
 
-@property (nonatomic)  NSString* user;
-@property (nonatomic)  NSString* from;
-@property (nonatomic)  NSString* to;
-@property (nonatomic) NSString* idval;
-@property (nonatomic) NSString* resource;
+@property (nonatomic,strong)  NSString* user;
+@property (nonatomic,strong)  NSString* from;
+@property (nonatomic,strong)  NSString* to;
+@property (nonatomic,strong) NSString* idval;
+@property (nonatomic,strong) NSString* resource;
 
-@property (nonatomic) NSString* type;
+@property (nonatomic,strong) NSString* type;
 
 //not in an iq stanza but useful to ahve in the object
-@property (nonatomic) NSString* ver;
+@property (nonatomic,strong) NSString* ver;
 @end

@@ -373,7 +373,7 @@
 	{
 		if(wasaway==true)
 	{
-		state=[NSString stringWithString:@"Available"]; 
+		state=[NSString stringWithString:@"Available"];
 		wasaway=false;
 	}
 		else
@@ -439,7 +439,7 @@
 	if(count>0) 
 	{if(wasoffline==true)
 		{
-		state=[NSString stringWithString:@"Online"]; 
+		state=@"Online";
 			wasoffline=false; 
 		}
 		else
@@ -453,7 +453,7 @@
 	{
 		if(wasoffline==false)
 		{
-		state=[NSString stringWithString:@"Offline"]; 
+		state=@"Offline";
 			wasoffline=true; 
 		}
 		else

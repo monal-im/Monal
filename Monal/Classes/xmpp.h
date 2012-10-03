@@ -104,7 +104,6 @@
 	
 	BOOL ClearSupported; 
 	
-	NSString* sessionkey;
 	
 	int keepAliveCounter;
 	bool disconnecting; 
@@ -122,8 +121,7 @@
     iq* iqObj; 
     
     
-    //client attributes
-    NSString* verHash;
+ 
     
     
     // Data bufer
@@ -232,11 +230,14 @@ typedef struct
 } srv_rdata;
 
 
-@property (nonatomic)  NSMutableArray* userSearchItems;
-@property (nonatomic)  NSMutableArray* serverList;
+@property (nonatomic, retain)  NSMutableArray* userSearchItems;
+@property (nonatomic,retain)  NSMutableArray* serverList;
 @property (strong) NSMutableData* theset;
-@property (nonatomic)  NSString* chatServer;
-@property (nonatomic)  NSString*  chatSearchServer;
-@property (nonatomic)  NSString* userSearchServer;
+@property (nonatomic, retain)  NSString* chatServer;
+@property (nonatomic,retain)  NSString*  chatSearchServer;
+@property (nonatomic, retain)  NSString* userSearchServer;
+
+@property (nonatomic, retain) NSString* verHash;
+@property (nonatomic, retain) NSString* sessionKey;
 
 @end

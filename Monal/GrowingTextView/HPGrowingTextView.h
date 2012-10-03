@@ -79,7 +79,7 @@
 @property int maxNumberOfLines;
 @property int minNumberOfLines;
 @property BOOL animateHeightChange;
-@property  UITextView *internalTextView;	
+@property (nonatomic, strong)  UITextView *internalTextView;
 
 
 //uitextview properties

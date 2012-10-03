@@ -16,19 +16,19 @@
 -(void) reset;
 
 
-@property (nonatomic)  NSString* user;
-@property (nonatomic)  NSString* from;
-@property (nonatomic)  NSString* to;
-@property (nonatomic) NSString* idval;
-@property (nonatomic) NSString* resource;
+@property (nonatomic,strong)  NSString* user;
+@property (nonatomic,strong)  NSString* from;
+@property (nonatomic,strong)  NSString* to;
+@property (nonatomic,strong) NSString* idval;
+@property (nonatomic,strong) NSString* resource;
 
-@property (nonatomic) NSString* type;
+@property (nonatomic,strong) NSString* type;
 
-@property (nonatomic) NSString* show;
-@property (nonatomic) NSString* status;
-@property (nonatomic) NSString* photo;
+@property (nonatomic,strong) NSString* show;
+@property (nonatomic,strong) NSString* status;
+@property (nonatomic,strong) NSString* photo;
 
-@property (nonatomic) NSString* ver;
+@property (nonatomic,strong) NSString* ver;
 
 
 @end

@@ -163,6 +163,6 @@
 @property (nonatomic )  bool messagesFlag; 
 @property (nonatomic) bool presenceFlag; 
 
-@property (nonatomic, weak) NSString* statusMessage;
-@property (nonatomic,weak ) NSString* ownName;
+@property (nonatomic, strong) NSString* statusMessage;
+@property (nonatomic,strong ) NSString* ownName;
 @end

@@ -108,13 +108,13 @@
 	[NSThread detachNewThreadSelector:@selector(dnsDiscover) toTarget:self withObject:nil];
 	
 	//setting own name value
-    ownName=[NSString stringWithString:account];
+    self.ownName=[NSString stringWithString:account];
     
     //now check to see if own name was already set.. 
     NSString* ownName_temp=[db fullName:[NSString stringWithFormat:@"%@@%@",account, domain] :accountNo]; 
     if(ownName_temp!=nil)
     {
-        ownName=ownName_temp; 
+        self.ownName=ownName_temp;
     }
     
     
@@ -2201,7 +2201,7 @@ debug_NSLog(@"ended this element: %@", elementName);
             // if it is self then set the ownname value
             if([vCardUser isEqualToString:responseUser])
             {
-                ownName=vCardFullName; 
+                self.ownName=vCardFullName;
             }
             
 		vCardUser=nil; 

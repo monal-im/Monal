@@ -16,7 +16,6 @@
 @interface XMPPEdit: UIViewController <UITableViewDataSource, UITableViewDelegate,UITextFieldDelegate,UIActionSheetDelegate> {
 
 
-	DataLayer* db; 
 	CGRect oldFrame;
 
 	
@@ -79,7 +78,7 @@ IBOutlet UITableViewCell* usernameCell;
 -(void) save; 
 
 
-@property (nonatomic, assign) DataLayer* db;
+@property (nonatomic, weak) DataLayer* db;
 
 @property (nonatomic, retain ) 	NSArray* sectionArray;
 

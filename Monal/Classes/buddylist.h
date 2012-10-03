@@ -79,16 +79,16 @@
 
 -(NSInteger) count;
 
-@property (nonatomic,strong) NSArray* theOfflineList;
-@property (nonatomic,strong) NSArray* thelist;
-@property (nonatomic,strong)  protocol* jabber;
-@property (nonatomic, strong) NSString* iconPath;
+@property (nonatomic,weak) NSArray* theOfflineList;
+@property (nonatomic,weak) NSMutableArray* thelist;
+@property (nonatomic,weak)  protocol* jabber;
+@property (nonatomic, weak) NSString* iconPath;
 
-@property (nonatomic,strong) UITabBarController* tabcontroller;
-@property (nonatomic,strong) UIBarButtonItem* plusButton;
-@property (nonatomic,strong)  UINavigationController* viewController;
+@property (nonatomic,weak) UITabBarController* tabcontroller;
+@property (nonatomic,weak) UIBarButtonItem* plusButton;
+@property (nonatomic,weak)  UINavigationController* viewController;
 
-@property (nonatomic, strong)MGSplitViewController* splitViewController;
+@property (nonatomic, weak)MGSplitViewController* splitViewController;
 @property (nonatomic) BOOL refresh;
 
 @end

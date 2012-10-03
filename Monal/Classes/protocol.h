@@ -31,7 +31,7 @@
 	NSString* __strong domain; 
 	NSString* __strong accountNumber;
    
-	NSString* ownName; 
+	
 	
 	NSString* sessionid; 
 	NSString* State;
@@ -163,6 +163,6 @@
 @property (nonatomic )  bool messagesFlag; 
 @property (nonatomic) bool presenceFlag; 
 
-@property (nonatomic, assign) NSString* statusMessage;
-@property (nonatomic,assign ) NSString* ownName;
+@property (nonatomic, weak) NSString* statusMessage;
+@property (nonatomic,weak ) NSString* ownName;
 @end

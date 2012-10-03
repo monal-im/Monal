@@ -64,7 +64,7 @@ UINavigationControllerDelegate,UIAlertViewDelegate, MGSplitViewControllerDelegat
 	MBProgressHUD* loginProgressHud;
 
 	TabMoreController* moreControl;
-	UINavigationController* morenav;
+
     
    
     callScreen* call;
@@ -139,7 +139,7 @@ UINavigationControllerDelegate,UIAlertViewDelegate, MGSplitViewControllerDelegat
 @property (nonatomic, retain)  chat* chatwin;
 @property (nonatomic, retain )  protocol* jabber;
 @property (nonatomic, retain) NSString* accountno;
-@property (nonatomic, assign)  UINavigationController* morenav;
+@property (nonatomic, weak)  UINavigationController* morenav;
 @property (nonatomic, assign)  UINavigationController* activeNavigationController; 
 @property (nonatomic, assign)  UINavigationController* accountsNavigationController; 
 

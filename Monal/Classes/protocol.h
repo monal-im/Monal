@@ -23,7 +23,7 @@
 
 @interface protocol : NSObject  <UIAlertViewDelegate, NSStreamDelegate>{
 	
-	unsigned short __strong port; 
+	unsigned short  port; 
 	NSString* __strong server; 
 	BOOL SSL; 
 	NSString*  __strong account; 

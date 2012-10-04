@@ -455,7 +455,7 @@ NSMutableArray* indexes= [[NSMutableArray alloc] init];
 			[thecell.imageView setAlpha:YES];
 			thecell.imageView.alpha=0.5; 
 			
-			UIImage* statusOrb; 
+			
 			
 				
 			

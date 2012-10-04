@@ -1903,7 +1903,7 @@ debug_NSLog(@"ended this element: %@", elementName);
  /*   if([elementName isEqualToString:@"presence"] ||[elementName isEqualToString:@"message"])
 	{
      [self getSnapShotList];
-    [[NSNotificationCenter defaultCenter]
+  [[NSNotificationCenter defaultCenter]
      postNotificationName: @"UpdateUI" object: self];
     
     }*/

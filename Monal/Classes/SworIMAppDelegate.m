@@ -1309,6 +1309,17 @@ buddylistDS.tabcontroller=tabcontroller;
 {
 
 	
+    //rating
+    [Appirater setAppId:@"317711500"];
+    
+    [Appirater setDaysUntilPrompt:5];
+    [Appirater setUsesUntilPrompt:10];
+    [Appirater setSignificantEventsUntilPrompt:5];
+    [Appirater setTimeBeforeReminding:2];
+   // [Appirater setDebug:YES];
+    
+    [Appirater appLaunched:YES];
+    
     vibrateenabled=false; 
 	uithreadrunning=false;
 
@@ -1712,7 +1723,10 @@ void (^myBlock)(void) = ^(void){
 
 - (void)applicationWillEnterForeground:(UIApplication *)application
 {
-	debug_NSLog(@"Entering foreground"); 
+	debug_NSLog(@"Entering foreground");
+    
+     [Appirater appEnteredForeground:YES];
+    
 	// nothing special if not logged in
 	if(jabber==nil) return; 
 	if(jabber.loggedin!=true) return; 

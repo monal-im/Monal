@@ -32,7 +32,7 @@
 
 #import "MGSplitViewController.h"
 #import "MBProgressHud.h"
-
+#import "Appirater.h"
 
 
 

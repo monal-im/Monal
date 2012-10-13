@@ -14,7 +14,7 @@ Notable features:
 2.0.9 changelog
 
 This is  update that  fixes bugs.
-1.
+1. iphone 5 screen support
 
 
       

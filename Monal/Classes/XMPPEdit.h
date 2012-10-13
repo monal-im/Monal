@@ -13,7 +13,7 @@
 
 
 
-@interface XMPPEdit: UIViewController <UITableViewDataSource, UITableViewDelegate,UITextFieldDelegate,UIActionSheetDelegate> {
+@interface XMPPEdit: UITableViewController <UITableViewDataSource, UITableViewDelegate,UITextFieldDelegate,UIActionSheetDelegate> {
 
 
 	CGRect oldFrame;

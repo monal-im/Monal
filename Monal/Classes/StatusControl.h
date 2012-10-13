@@ -13,7 +13,7 @@
 #import "buddylist.h"
 
 
-@interface statusControl : UIViewController <UITextFieldDelegate>{
+@interface statusControl : UITableViewController <UITextFieldDelegate>{
 
 
 	

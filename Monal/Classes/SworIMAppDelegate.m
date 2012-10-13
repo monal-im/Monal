@@ -1316,7 +1316,7 @@ buddylistDS.tabcontroller=tabcontroller;
     [Appirater setUsesUntilPrompt:10];
     [Appirater setSignificantEventsUntilPrompt:5];
     [Appirater setTimeBeforeReminding:2];
-   // [Appirater setDebug:YES];
+    //[Appirater setDebug:YES];
     
     [Appirater appLaunched:YES];
     

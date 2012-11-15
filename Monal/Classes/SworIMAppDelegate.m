@@ -1552,7 +1552,8 @@ buddylistDS.tabcontroller=tabcontroller;
 	if([machine hasPrefix:@"iPad"] )
 	{//if ipad..
 		
-         [split toggleMasterView:self];
+        
+        [split toggleMasterView:self];
 		[window setRootViewController:split];
 		[window makeKeyAndVisible];
 	}

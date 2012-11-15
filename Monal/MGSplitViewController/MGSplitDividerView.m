@@ -31,6 +31,7 @@
 - (void)dealloc
 {
 	self.splitViewController = nil;
+	[super dealloc];
 }
 
 

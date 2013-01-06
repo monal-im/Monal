@@ -219,9 +219,9 @@
 		26DC0A8F133928DA00E60BFD /* about.png in Resources */ = {isa = PBXBuildFile; fileRef = 26DC0A8E133928DA00E60BFD /* about.png */; };
 		26DC0A9213392A4F00E60BFD /* userSearch.m in Sources */ = {isa = PBXBuildFile; fileRef = 26DC0A9113392A4F00E60BFD /* userSearch.m */; };
 		26DE9C040FEEFCF5000596F6 /* protocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 26DE9C020FEEFCF5000596F6 /* protocol.m */; };
-		26DFD4AF15666B7D007A1621 /* MGSplitCornersView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26DFD4AA15666B7D007A1621 /* MGSplitCornersView.m */; };
-		26DFD4B015666B7D007A1621 /* MGSplitDividerView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26DFD4AC15666B7D007A1621 /* MGSplitDividerView.m */; };
-		26DFD4B115666B7D007A1621 /* MGSplitViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26DFD4AE15666B7D007A1621 /* MGSplitViewController.m */; };
+		26DFD4AF15666B7D007A1621 /* MGSplitCornersView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26DFD4AA15666B7D007A1621 /* MGSplitCornersView.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		26DFD4B015666B7D007A1621 /* MGSplitDividerView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26DFD4AC15666B7D007A1621 /* MGSplitDividerView.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		26DFD4B115666B7D007A1621 /* MGSplitViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26DFD4AE15666B7D007A1621 /* MGSplitViewController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		26E2786F10FA85C600B7B998 /* XMPP.png in Resources */ = {isa = PBXBuildFile; fileRef = 26E2786A10FA85C600B7B998 /* XMPP.png */; };
 		26E5BA8B132287D400D8C57A /* Settings.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26E5BA8A132287D400D8C57A /* Settings.xib */; };
 		26E5BA8E13228D7400D8C57A /* StatusControl.m in Sources */ = {isa = PBXBuildFile; fileRef = 26E5BA8D13228D7400D8C57A /* StatusControl.m */; };
@@ -1534,6 +1534,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_OBJCPP_ARC_ABI = NO;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -1576,6 +1577,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_OBJCPP_ARC_ABI = NO;
 				COPY_PHASE_STRIP = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = SworIM_Prefix.pch;

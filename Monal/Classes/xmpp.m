@@ -568,12 +568,13 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
         
         if ([elementName isEqualToString:@"not-authorized"])
         {
+            dispatch_async(dispatch_get_main_queue(), ^{ 
             UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"XMPP Failure"
                                                              message:elementName
                                                             delegate:self cancelButtonTitle:nil
                                                    otherButtonTitles:@"Close", nil];
             [alert show];
-            
+            }); 
             fatal=true; 
         }
         
@@ -666,14 +667,15 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
         if([[attributeDict objectForKey:@"type"] isEqualToString:@"auth"])
         {
             NSString* askmsg=[NSString stringWithFormat:@"%@ says, you were not authorized to access this resource. Check your password.", presenceObj.user];
-            //ask for authorization 
+            //ask for authorization
+            dispatch_async(dispatch_get_main_queue(), ^{ 
             
             UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"
                                                              message:askmsg
                                                             delegate:self cancelButtonTitle:@"Close"
                                                    otherButtonTitles:nil, nil];
             [alert show];
-            
+            });
         }
         ; 
         return; 
@@ -1096,13 +1098,14 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
                 }
                 
                 
-                
+                dispatch_async(dispatch_get_main_queue(), ^{ 
             UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Incoming Call"
                                                             message:[NSString stringWithFormat:@"Call from %@" , iqObj.user]
                                                            delegate:self cancelButtonTitle:@"Decline"
                                                   otherButtonTitles:@"Answer",  nil] ;
             alert.tag=3;
                  [alert show];
+                });
             }
             
             if( [jingleCall.action isEqualToString:@"session-accept"])
@@ -1662,12 +1665,14 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
 			NSString* askmsg=[NSString stringWithFormat:@"This user would like to add you to his/her list. Allow?"]; 
 			//ask for authorization 
 			
+            dispatch_async(dispatch_get_main_queue(), ^{ 
 			UIAlertView *alert = [[UIAlertView alloc] initWithTitle:presenceObj.user
 															message:askmsg
 														   delegate:self cancelButtonTitle:@"Yes"
 												  otherButtonTitles:@"No", nil];
             alert.tag=1; 
 			[alert show];
+            });
 						
 		
 			
@@ -1761,14 +1766,14 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
 	if(([elementName isEqualToString:@"message"])  && ([[attributeDict objectForKey:@"type"] isEqualToString:@"error"]))
 	{
 		debug_NSLog(@"ignoring message error"); 
-		
+		dispatch_async(dispatch_get_main_queue(), ^{ 
 		UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Message error"
 														 message:@"Message could no be delivered"
 														delegate:self cancelButtonTitle:nil
 											   otherButtonTitles:@"Close", nil];
 		[alert show];
 		
-		
+		});
 		;
 		return;
 	}
@@ -1844,6 +1849,7 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
         NSString* askmsg=[NSString stringWithFormat:@"%@: You have been invited to this group chat. Join? ", messageUser]; 
         //ask for authorization 
         
+        dispatch_async(dispatch_get_main_queue(), ^{ 
         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Invite"
                                                          message:askmsg
                                                         delegate:self cancelButtonTitle:@"Yes"
@@ -1851,7 +1857,7 @@ if(([State isEqualToString:@"UserSearch"]) && ([elementName isEqualToString: @"i
         alert.tag=2;
         
         [alert show];
-        
+        });
 		return; 
 	}
 	
@@ -2412,6 +2418,7 @@ debug_NSLog(@"ended this element: %@", elementName);
 		 
 		 */
 		
+        dispatch_async(dispatch_get_main_queue(), ^{ 
 		
 		UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"XMPP error"
 														message:elementName
@@ -2419,7 +2426,7 @@ debug_NSLog(@"ended this element: %@", elementName);
 											  otherButtonTitles:@"Close", nil];
 		[alert show];
 		
-		
+		});
 		
 		errorState=true; 
 		State=@"";
@@ -3852,13 +3859,14 @@ xmpprequest=[NSString stringWithFormat: @"<message type='groupchat' to='%@' ><bo
 	if((iStream==nil) || (oStream==nil))
 	{
 		debug_NSLog(@"Connection failed");
+        dispatch_async(dispatch_get_main_queue(), ^{ 
 		UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Connection Error"
 														message:@"Could not connect to the server."
 													   delegate:self cancelButtonTitle:nil
 											  otherButtonTitles:@"Close", nil];
 		[alert show];
 		
-	
+        });
 		return false;
 	}
 		else

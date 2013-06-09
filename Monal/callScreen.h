@@ -10,7 +10,7 @@
 #import <UIKit/UIKit.h>
 #import "tools.h"
 #import "xmpp.h"
-#import "MGSplitViewController/MGSplitViewController.h"
+
 
 
 @interface callScreen : UIViewController
@@ -30,7 +30,7 @@
 
 
 @property (nonatomic) UINavigationController* navigationController;
-@property (nonatomic) MGSplitViewController* splitViewController;
+@property (nonatomic) UISplitViewController* splitViewController;
 
 
 @end

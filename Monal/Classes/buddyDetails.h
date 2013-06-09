@@ -70,6 +70,6 @@
 @property (nonatomic) IBOutlet UILabel* buddyStatus;
 @property (nonatomic) IBOutlet UITextView* buddyMessage;
 
-@property MGSplitViewController* splitViewController; 
+@property UISplitViewController* splitViewController;
 
 @end

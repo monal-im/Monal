@@ -30,14 +30,14 @@
 
 #import "PasswordManager.h"
 
-#import "MGSplitViewController.h"
+
 #import "MBProgressHud.h"
 #import "Appirater.h"
 
 
 
 @interface SworIMAppDelegate : UIViewController <UIApplicationDelegate, 
-UINavigationControllerDelegate,UIAlertViewDelegate, MGSplitViewControllerDelegate> {
+UINavigationControllerDelegate,UIAlertViewDelegate, UISplitViewControllerDelegate> {
     
     IBOutlet UIWindow *window;
     IBOutlet  UINavigationController *buddyNavigationController;
@@ -47,7 +47,7 @@ UINavigationControllerDelegate,UIAlertViewDelegate, MGSplitViewControllerDelegat
 	
 	// ipad specific stuff
 
-	IBOutlet MGSplitViewController* split; 
+	IBOutlet UISplitViewController* split; 
 
 
 	IBOutlet UITabBarItem* buddyTab; 

@@ -88,7 +88,7 @@
 @property (nonatomic,strong) UIBarButtonItem* plusButton;
 @property (nonatomic,strong)  UINavigationController* viewController;
 
-@property (nonatomic, weak)MGSplitViewController* splitViewController;
+@property (nonatomic, weak)UISplitViewController* splitViewController;
 @property (nonatomic) BOOL refresh;
 
 @end

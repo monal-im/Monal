@@ -219,9 +219,6 @@
 		26DC0A8F133928DA00E60BFD /* about.png in Resources */ = {isa = PBXBuildFile; fileRef = 26DC0A8E133928DA00E60BFD /* about.png */; };
 		26DC0A9213392A4F00E60BFD /* userSearch.m in Sources */ = {isa = PBXBuildFile; fileRef = 26DC0A9113392A4F00E60BFD /* userSearch.m */; };
 		26DE9C040FEEFCF5000596F6 /* protocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 26DE9C020FEEFCF5000596F6 /* protocol.m */; };
-		26DFD4AF15666B7D007A1621 /* MGSplitCornersView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26DFD4AA15666B7D007A1621 /* MGSplitCornersView.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		26DFD4B015666B7D007A1621 /* MGSplitDividerView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26DFD4AC15666B7D007A1621 /* MGSplitDividerView.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		26DFD4B115666B7D007A1621 /* MGSplitViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26DFD4AE15666B7D007A1621 /* MGSplitViewController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		26E2786F10FA85C600B7B998 /* XMPP.png in Resources */ = {isa = PBXBuildFile; fileRef = 26E2786A10FA85C600B7B998 /* XMPP.png */; };
 		26E5BA8B132287D400D8C57A /* Settings.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26E5BA8A132287D400D8C57A /* Settings.xib */; };
 		26E5BA8E13228D7400D8C57A /* StatusControl.m in Sources */ = {isa = PBXBuildFile; fileRef = 26E5BA8D13228D7400D8C57A /* StatusControl.m */; };
@@ -508,12 +505,6 @@
 		26DE9C020FEEFCF5000596F6 /* protocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = protocol.m; path = Classes/protocol.m; sourceTree = "<group>"; };
 		26DE9C030FEEFCF5000596F6 /* protocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = protocol.h; path = Classes/protocol.h; sourceTree = "<group>"; };
 		26DE9C050FEEFD00000596F6 /* DB definitions */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "DB definitions"; sourceTree = "<group>"; };
-		26DFD4A915666B7D007A1621 /* MGSplitCornersView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGSplitCornersView.h; sourceTree = "<group>"; };
-		26DFD4AA15666B7D007A1621 /* MGSplitCornersView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MGSplitCornersView.m; sourceTree = "<group>"; };
-		26DFD4AB15666B7D007A1621 /* MGSplitDividerView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGSplitDividerView.h; sourceTree = "<group>"; };
-		26DFD4AC15666B7D007A1621 /* MGSplitDividerView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MGSplitDividerView.m; sourceTree = "<group>"; };
-		26DFD4AD15666B7D007A1621 /* MGSplitViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGSplitViewController.h; sourceTree = "<group>"; };
-		26DFD4AE15666B7D007A1621 /* MGSplitViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MGSplitViewController.m; sourceTree = "<group>"; };
 		26E2786A10FA85C600B7B998 /* XMPP.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = XMPP.png; sourceTree = "<group>"; };
 		26E5BA8A132287D400D8C57A /* Settings.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = Settings.xib; sourceTree = "<group>"; };
 		26E5BA8C13228D7400D8C57A /* StatusControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StatusControl.h; sourceTree = "<group>"; };
@@ -1017,23 +1008,9 @@
 				2658508415E7D8E40070A2A7 /* TPCircularBuffer */,
 				262DE4AC15C4E2C60040A66B /* MBProgressHUd */,
 				2640AF3B14548E7600CB4F60 /* GrowingTextView */,
-				26DFD4A815666B7D007A1621 /* MGSplitViewController */,
 				268BCCFD140B23E10025E4D1 /* jrtplib-static */,
 			);
 			name = "3rd Party";
-			sourceTree = "<group>";
-		};
-		26DFD4A815666B7D007A1621 /* MGSplitViewController */ = {
-			isa = PBXGroup;
-			children = (
-				26DFD4A915666B7D007A1621 /* MGSplitCornersView.h */,
-				26DFD4AA15666B7D007A1621 /* MGSplitCornersView.m */,
-				26DFD4AB15666B7D007A1621 /* MGSplitDividerView.h */,
-				26DFD4AC15666B7D007A1621 /* MGSplitDividerView.m */,
-				26DFD4AD15666B7D007A1621 /* MGSplitViewController.h */,
-				26DFD4AE15666B7D007A1621 /* MGSplitViewController.m */,
-			);
-			path = MGSplitViewController;
 			sourceTree = "<group>";
 		};
 		26EC1C7312295B8800EAF934 /* UI */ = {
@@ -1444,9 +1421,6 @@
 				2640AF4014548E7700CB4F60 /* HPGrowingTextView.m in Sources */,
 				2640AF4114548E7700CB4F60 /* HPTextViewInternal.m in Sources */,
 				2654BEC81481499000DDC346 /* loglistDate.m in Sources */,
-				26DFD4AF15666B7D007A1621 /* MGSplitCornersView.m in Sources */,
-				26DFD4B015666B7D007A1621 /* MGSplitDividerView.m in Sources */,
-				26DFD4B115666B7D007A1621 /* MGSplitViewController.m in Sources */,
 				262DE4AF15C4E2C60040A66B /* MBProgressHUD.m in Sources */,
 				26D3C27B15D84DD100568DDC /* presence.m in Sources */,
 				26D3C27E15D84E6800568DDC /* iq.m in Sources */,

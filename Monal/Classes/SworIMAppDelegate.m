@@ -1452,6 +1452,9 @@ buddylistDS.tabcontroller=tabcontroller;
 	
 
 	
+    split.delegate=self;
+    split.viewControllers=[NSArray arrayWithObjects:buddyNavigationController,tabcontroller, nil];
+    
 	//account table
 
 	NSArray* accountList=[db accountList];
@@ -1466,7 +1469,7 @@ buddylistDS.tabcontroller=tabcontroller;
 		if([machine hasPrefix:@"iPad"] )
 		{//if ipad..
 			
-            [split toggleMasterView:self];
+            
 			[window setRootViewController:split];
 			[window makeKeyAndVisible];
 		}
@@ -1515,10 +1518,8 @@ buddylistDS.tabcontroller=tabcontroller;
 	
 		if([machine hasPrefix:@"iPad"] )
 		{//if ipad..
-			 [split toggleMasterView:self];
+			 
 			[window setRootViewController:split];
-			
-
 			[window makeKeyAndVisible];
 		}
 		else
@@ -1552,8 +1553,6 @@ buddylistDS.tabcontroller=tabcontroller;
 	if([machine hasPrefix:@"iPad"] )
 	{//if ipad..
 		
-        
-        [split toggleMasterView:self];
 		[window setRootViewController:split];
 		[window makeKeyAndVisible];
 	}
@@ -1588,10 +1587,11 @@ buddylistDS.tabcontroller=tabcontroller;
 	
 	}
 
-	
-	;
+
+
 	
 	}
+
 
 
 
@@ -1900,7 +1900,19 @@ void (^myBlock)(void) = ^(void){
   
 }
 
+- (BOOL)splitViewController: (UISplitViewController*)svc shouldHideViewController:(UIViewController *)vc inOrientation:(UIInterfaceOrientation)orientation
+{
+    return NO;
+}
 
+#pragma mark rotation 
+- (BOOL)shouldAutorotate{
+    return YES;
+}
+
+- (NSUInteger)supportedInterfaceOrientations{
+    return UIInterfaceOrientationMaskAll;
+}
 
 
 

@@ -7,12 +7,12 @@
 //
 
 #import <UIKit/UIKit.h>
-
+#import "MonalAppDelegate.h"
 
 
 int main(int argc, char *argv[]) {
     
-    int retVal = UIApplicationMain(argc, argv, nil, nil);
+    int retVal = UIApplicationMain(argc, argv, nil, NSStringFromClass([MonalAppDelegate class]));
     ;
     return retVal;
 }

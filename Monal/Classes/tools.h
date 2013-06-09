@@ -11,9 +11,9 @@
 
 @interface tools : NSObject {
 }
-+ (NSString *)machine;
-+(UIImage*)  resizedImage:(UIImage *)inImage: (CGRect) thumbRect;
+
++(UIImage*)  resizedImage:(UIImage *)inImage withRect: (CGRect) thumbRect;
 + (float)degreesToRadians:(float)degrees;
 + (NSString *)flattenHTML:(NSString *)html trimWhiteSpace:(BOOL)trim;
-+(BOOL) isBackgroundSupported;
+
 @end

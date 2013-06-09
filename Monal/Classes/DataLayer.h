@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <sqlite3.h>
 #import "PasswordManager.h"
-#import "presence.h"
+//#import "presence.h"
 
 @interface DataLayer : NSObject {
 
@@ -44,7 +44,7 @@
 -(BOOL) markBuddiesRead:(NSString*) accountNo;
 
 #pragma mark Ver string and Capabilities
--(BOOL) setResourceVer:(presence*)presenceObj: (NSString*) accountNo;
+//-(BOOL) setResourceVer:(presence*)presenceObj: (NSString*) accountNo;
 -(NSArray*) capsforVer:(NSString*) verString;
 -(NSString*)getVerForUser:(NSString*)user Resource:(NSString*) resource;
 
@@ -54,21 +54,21 @@
 
 #pragma mark legacy caps
 -(void) clearLegacyCaps;
--(BOOL) setLegacyCap:(NSString*)cap forUser:(presence*)presenceObj accountNo:(NSString*) acctNo;
+//-(BOOL) setLegacyCap:(NSString*)cap forUser:(presence*)presenceObj accountNo:(NSString*) acctNo;
 -(BOOL) checkLegacyCap:(NSString*)cap forUser:(NSString*) user accountNo:(NSString*) acctNo;
 
 
 
 #pragma mark  presence functions
--(BOOL) setResourceOnline:(presence*)presenceObj: (NSString*) accountNo;
--(BOOL) setOnlineBuddy:(presence*)presenceObj: (NSString*) accountNo;
--(BOOL) setOfflineBuddy:(presence*)presenceObj: (NSString*) accountNo;
-
--(BOOL) setBuddyStatus:(presence*)presenceObj: (NSString*) accountNo;
--(NSString*) buddyStatus:(NSString*) buddy :(NSString*) accountNo;
-
--(BOOL) setBuddyState:(presence*)presenceObj: (NSString*) accountNo;
--(NSString*) buddyState:(NSString*) buddy :(NSString*) accountNo;
+//-(BOOL) setResourceOnline:(presence*)presenceObj: (NSString*) accountNo;
+//-(BOOL) setOnlineBuddy:(presence*)presenceObj: (NSString*) accountNo;
+//-(BOOL) setOfflineBuddy:(presence*)presenceObj: (NSString*) accountNo;
+//
+//-(BOOL) setBuddyStatus:(presence*)presenceObj: (NSString*) accountNo;
+//-(NSString*) buddyStatus:(NSString*) buddy :(NSString*) accountNo;
+//
+//-(BOOL) setBuddyState:(presence*)presenceObj: (NSString*) accountNo;
+//-(NSString*) buddyState:(NSString*) buddy :(NSString*) accountNo;
 
 
 #pragma mark Contact info

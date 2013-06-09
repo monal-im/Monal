@@ -17,35 +17,9 @@
 }
 
 
-+(BOOL) isBackgroundSupported
-{
-
-	UIDevice* device = [UIDevice currentDevice];
-	BOOL backgroundSupported = NO;
-	if ([device respondsToSelector:@selector(isMultitaskingSupported)])
-		backgroundSupported = device.multitaskingSupported;
-	
-	return backgroundSupported; 
-}
-
-//tells me what machien it is
-+ (NSString *)machine
-{
-	  NSString *deviceType = [UIDevice currentDevice].model;
-	
-    if([deviceType isEqualToString:@"iPad"] || [deviceType isEqualToString:@"iPad Simulator"] )
-    {
-        return @"iPad";  
-    }
-    else 
-        return deviceType; 
-  
-}
-
-
 // Return a scaled down copy of the image.  
 
-+(UIImage*)  resizedImage:(UIImage *)inImage :(CGRect)thumbRect
++(UIImage*)  resizedImage:(UIImage *)inImage withRect:(CGRect)thumbRect
 {
 	CGImageRef			imageRef = [inImage CGImage];
 	CGImageAlphaInfo	alphaInfo = CGImageGetAlphaInfo(imageRef);

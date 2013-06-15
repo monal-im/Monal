@@ -25,7 +25,7 @@
  {
      
      _navigationController=[[UINavigationController alloc] initWithRootViewController:contactsVC];
-     _navigationController.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Contacts",@"") image:nil tag:0];
+     _navigationController.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Contacts",@"") image:[UIImage imageNamed:@"Buddies"] tag:0];
      _tabBarController.viewControllers=[NSArray arrayWithObjects:_navigationController, nil];
     
      _navigationController.navigationBarHidden=NO;

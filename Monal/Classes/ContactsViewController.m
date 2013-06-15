@@ -28,10 +28,7 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
     self.navigationItem.title=NSLocalizedString(@"Contacts",@"");
-    self.navigationController.navigationBarHidden=NO;
 
-    CGRect viewFrame = CGRectMake(0, 0, 80, [[UIScreen mainScreen] bounds].size.height);
-    self.view= [[UIView alloc] initWithFrame:viewFrame];
     self.view.backgroundColor=[UIColor lightGrayColor];
     self.view.autoresizingMask=UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
     

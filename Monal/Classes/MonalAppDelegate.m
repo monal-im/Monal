@@ -14,25 +14,22 @@
 
 - (void)applicationDidFinishLaunching:(UIApplication *)application
 {
-    self.window=[[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+    
+    self.window=[[UIWindow alloc] init];
     self.window.screen=[UIScreen mainScreen];
-    
-   
-    _tabBarController=[[UITabBarController alloc] init];
 
-    
+    _tabBarController=[[UITabBarController alloc] init];
     ContactsViewController* contactsVC = [[ContactsViewController alloc] init];
-    
-    
     
  if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone)
  {
-     
      contactsVC.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Contacts",@"") image:nil tag:0];
-     _tabBarController.viewControllers=[NSArray arrayWithObjects:contactsVC, nil];
+     _navigationController=[[UINavigationController alloc] initWithRootViewController:contactsVC];
+     _tabBarController.viewControllers=[NSArray arrayWithObjects:_navigationController, nil];
+    
+     _navigationController.navigationBarHidden=NO;
+    self.window.rootViewController=_tabBarController;
      
-     _navigationController=[[UINavigationController alloc] initWithRootViewController:_tabBarController];
-    self.window.rootViewController=_navigationController;
  }
  else
  {

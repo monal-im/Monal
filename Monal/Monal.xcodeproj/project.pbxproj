@@ -31,6 +31,7 @@
 		260A2CD615E71FC200DB103B /* forward.png in Resources */ = {isa = PBXBuildFile; fileRef = 260A2CD015E71FC200DB103B /* forward.png */; };
 		260A2CD715E71FC200DB103B /* stop@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 260A2CD115E71FC200DB103B /* stop@2x.png */; };
 		260A2CD815E71FC200DB103B /* back@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 260A2CD215E71FC200DB103B /* back@2x.png */; };
+		261A6281176C055400059090 /* ContactsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A627F176C055400059090 /* ContactsViewController.m */; };
 		261ED6C41240257F00C14F6A /* BuddyAdd.xib in Resources */ = {isa = PBXBuildFile; fileRef = 261ED6C31240257F00C14F6A /* BuddyAdd.xib */; };
 		261FD56F1223527C003DDC3A /* active.png in Resources */ = {isa = PBXBuildFile; fileRef = 261FD56E1223527C003DDC3A /* active.png */; };
 		26277888110179D100023C8A /* tools.m in Sources */ = {isa = PBXBuildFile; fileRef = 26277887110179D100023C8A /* tools.m */; };
@@ -231,6 +232,8 @@
 		260A2CD015E71FC200DB103B /* forward.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = forward.png; sourceTree = "<group>"; };
 		260A2CD115E71FC200DB103B /* stop@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stop@2x.png"; sourceTree = "<group>"; };
 		260A2CD215E71FC200DB103B /* back@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "back@2x.png"; sourceTree = "<group>"; };
+		261A627E176C055400059090 /* ContactsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContactsViewController.h; sourceTree = "<group>"; };
+		261A627F176C055400059090 /* ContactsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ContactsViewController.m; sourceTree = "<group>"; };
 		261AB9371409C2B8006F5155 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		261ED6C31240257F00C14F6A /* BuddyAdd.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = BuddyAdd.xib; sourceTree = "<group>"; };
 		261FD56E1223527C003DDC3A /* active.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = active.png; sourceTree = "<group>"; };
@@ -678,6 +681,8 @@
 		26715E5E17650AF900684F3D /* View Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				261A627E176C055400059090 /* ContactsViewController.h */,
+				261A627F176C055400059090 /* ContactsViewController.m */,
 			);
 			name = "View Controllers";
 			sourceTree = "<group>";
@@ -1165,6 +1170,7 @@
 				2658508C15E7D8E40070A2A7 /* TPCircularBuffer.c in Sources */,
 				2689B6EC1601914E0087CA58 /* DDBadgeViewCell.m in Sources */,
 				26BAFC551626537D0073728B /* Appirater.m in Sources */,
+				261A6281176C055400059090 /* ContactsViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

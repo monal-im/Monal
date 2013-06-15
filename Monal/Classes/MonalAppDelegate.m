@@ -7,6 +7,7 @@
 //
 
 #import "MonalAppDelegate.h"
+#import "ContactsViewController.h"
 
 @implementation MonalAppDelegate
 
@@ -18,19 +19,30 @@
     
    
     _tabBarController=[[UITabBarController alloc] init];
-  
+
+    
+    ContactsViewController* contactsVC = [[ContactsViewController alloc] init];
+    
+    
     
  if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone)
  {
+     
+     contactsVC.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Contacts",@"") image:nil tag:0];
+     _tabBarController.viewControllers=[NSArray arrayWithObjects:contactsVC, nil];
+     
      _navigationController=[[UINavigationController alloc] initWithRootViewController:_tabBarController];
     self.window.rootViewController=_navigationController;
  }
  else
  {
+     
+     UINavigationController* navigationControllerContacts=[[UINavigationController alloc] initWithRootViewController:contactsVC];
+     
      _navigationController=[[UINavigationController alloc] init];
      _splitViewController=[[UISplitViewController alloc] init];
      self.window.rootViewController=_splitViewController;
-     _splitViewController.viewControllers=[NSArray arrayWithObjects:_navigationController,_tabBarController,nil];
+     _splitViewController.viewControllers=[NSArray arrayWithObjects:navigationControllerContacts, _navigationController,nil];
      _splitViewController.delegate=self; 
  }
     

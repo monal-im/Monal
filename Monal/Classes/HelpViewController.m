@@ -27,6 +27,9 @@
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
+    self.navigationItem.title=NSLocalizedString(@"Help",@"");
+    self.view.backgroundColor=[UIColor lightGrayColor];
+    self.view.autoresizingMask=UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
 }
 
 - (void)didReceiveMemoryWarning

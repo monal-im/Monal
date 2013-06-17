@@ -18,7 +18,7 @@
 }
 
 @property (nonatomic, strong) UIWindow* window;
-@property (nonatomic, strong) UINavigationController* navigationController;
+@property (nonatomic, strong) UINavigationController* chatNav;
 @property (nonatomic, strong) UITabBarController* tabBarController;
 @property (nonatomic, strong) UISplitViewController* splitViewController;
 

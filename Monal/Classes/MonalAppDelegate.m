@@ -7,7 +7,16 @@
 //
 
 #import "MonalAppDelegate.h"
+
+// tab bar
 #import "ContactsViewController.h"
+#import "ActiveChatsViewController.h"
+#import "AccountsViewController.h"
+#import "ChatLogsViewController.h"
+#import "GroupChatViewController.h"
+#import "SearchUsersViewController.h"
+#import "HelpViewController.h"
+#import "AboutViewController.h"
 
 @implementation MonalAppDelegate
 
@@ -21,26 +30,50 @@
     _tabBarController=[[UITabBarController alloc] init];
     ContactsViewController* contactsVC = [[ContactsViewController alloc] init];
     
+     ActiveChatsViewController* activeChatsVC = [[ActiveChatsViewController alloc] init];
+    UINavigationController* activeChatNav=[[UINavigationController alloc] initWithRootViewController:activeChatsVC];
+    
+     AccountsViewController* accountsVC = [[AccountsViewController alloc] init];
+    UINavigationController* accountsNav=[[UINavigationController alloc] initWithRootViewController:accountsVC];
+   
+     ChatLogsViewController* chatLogVC = [[ChatLogsViewController alloc] init];
+    UINavigationController* chatLogNav=[[UINavigationController alloc] initWithRootViewController:chatLogVC];
+    
+     GroupChatViewController* groupChatVC = [[GroupChatViewController alloc] init];
+    UINavigationController* groupChatNav=[[UINavigationController alloc] initWithRootViewController:groupChatVC];
+    
+     HelpViewController* helpVC = [[HelpViewController alloc] init];
+    UINavigationController* helpNav=[[UINavigationController alloc] initWithRootViewController:helpVC];
+    
+     AboutViewController* aboutVC = [[AboutViewController alloc] init];
+    UINavigationController* aboutNav=[[UINavigationController alloc] initWithRootViewController:aboutVC];
+    
+    
  if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone)
  {
      
-     _navigationController=[[UINavigationController alloc] initWithRootViewController:contactsVC];
-     _navigationController.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Contacts",@"") image:[UIImage imageNamed:@"Buddies"] tag:0];
-     _tabBarController.viewControllers=[NSArray arrayWithObjects:_navigationController, nil];
+     _chatNav=[[UINavigationController alloc] initWithRootViewController:contactsVC];
+     _chatNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Contacts",@"") image:[UIImage imageNamed:@"Buddies"] tag:0];
+     
+     
+     _tabBarController.viewControllers=[NSArray arrayWithObjects:_chatNav,activeChatNav,accountsNav, chatLogNav, groupChatNav,  helpNav, aboutNav, nil];
     
-     _navigationController.navigationBarHidden=NO;
     self.window.rootViewController=_tabBarController;
      
  }
  else
  {
      
+     //this is a dummy nav controllre not really used for anything
      UINavigationController* navigationControllerContacts=[[UINavigationController alloc] initWithRootViewController:contactsVC];
      
-     _navigationController=[[UINavigationController alloc] init];
+     _chatNav=[[UINavigationController alloc] init];
      _splitViewController=[[UISplitViewController alloc] init];
      self.window.rootViewController=_splitViewController;
-     _splitViewController.viewControllers=[NSArray arrayWithObjects:navigationControllerContacts, _navigationController,nil];
+     
+     _tabBarController.viewControllers=[NSArray arrayWithObjects:_chatNav, activeChatNav,accountsNav, chatLogNav, groupChatNav,  helpNav, aboutNav, nil];
+     
+     _splitViewController.viewControllers=[NSArray arrayWithObjects:navigationControllerContacts, _chatNav,nil];
      _splitViewController.delegate=self; 
  }
     

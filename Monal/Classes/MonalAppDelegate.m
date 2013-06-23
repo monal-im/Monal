@@ -33,35 +33,35 @@
    
      ActiveChatsViewController* activeChatsVC = [[ActiveChatsViewController alloc] init];
     UINavigationController* activeChatNav=[[UINavigationController alloc] initWithRootViewController:activeChatsVC];
-    activeChatNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Active Chats",@"") image:[UIImage imageNamed:@"Buddies"] tag:0];
+    activeChatNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Active Chats",@"") image:[UIImage imageNamed:@"active"] tag:0];
     
     SettingsViewController* settingsVC = [[SettingsViewController alloc] init];
     UINavigationController* settingsNav=[[UINavigationController alloc] initWithRootViewController:settingsVC];
-    settingsNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Settings",@"") image:[UIImage imageNamed:@"Buddies"] tag:0];
+    settingsNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Settings",@"") image:[UIImage imageNamed:@"status"] tag:0];
     
      AccountsViewController* accountsVC = [[AccountsViewController alloc] init];
     UINavigationController* accountsNav=[[UINavigationController alloc] initWithRootViewController:accountsVC];
-    accountsNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Accounts",@"") image:[UIImage imageNamed:@"Buddies"] tag:0];
+    accountsNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Accounts",@"") image:[UIImage imageNamed:@"accounts"] tag:0];
     
      ChatLogsViewController* chatLogVC = [[ChatLogsViewController alloc] init];
     UINavigationController* chatLogNav=[[UINavigationController alloc] initWithRootViewController:chatLogVC];
-    chatLogNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Chat Logs",@"") image:[UIImage imageNamed:@"Buddies"] tag:0];
+    chatLogNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Chat Logs",@"") image:[UIImage imageNamed:@"chatlog"] tag:0];
     
     SearchUsersViewController* searchUsersVC = [[SearchUsersViewController alloc] init];
     UINavigationController* searchUsersNav=[[UINavigationController alloc] initWithRootViewController:searchUsersVC];
-    searchUsersNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Search Users",@"") image:[UIImage imageNamed:@"Buddies"] tag:0];
+    searchUsersNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Search Users",@"") image:[UIImage imageNamed:@"search"] tag:0];
     
      GroupChatViewController* groupChatVC = [[GroupChatViewController alloc] init];
     UINavigationController* groupChatNav=[[UINavigationController alloc] initWithRootViewController:groupChatVC];
-    groupChatNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Group Chat",@"") image:[UIImage imageNamed:@"Buddies"] tag:0];
+    groupChatNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Group Chat",@"") image:[UIImage imageNamed:@"joingroup"] tag:0];
     
      HelpViewController* helpVC = [[HelpViewController alloc] init];
     UINavigationController* helpNav=[[UINavigationController alloc] initWithRootViewController:helpVC];
-    helpNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Help",@"") image:[UIImage imageNamed:@"Buddies"] tag:0];
+    helpNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Help",@"") image:[UIImage imageNamed:@"help"] tag:0];
     
      AboutViewController* aboutVC = [[AboutViewController alloc] init];
     UINavigationController* aboutNav=[[UINavigationController alloc] initWithRootViewController:aboutVC];
-    aboutNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"About",@"") image:[UIImage imageNamed:@"Buddies"] tag:0];
+    aboutNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"About",@"") image:[UIImage imageNamed:@"about"] tag:0];
     
     
  if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone)

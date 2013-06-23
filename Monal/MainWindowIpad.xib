@@ -2,10 +2,10 @@
 <archive type="com.apple.InterfaceBuilder3.CocoaTouch.iPad.XIB" version="7.10">
 	<data>
 		<int key="IBDocument.SystemTarget">1296</int>
-		<string key="IBDocument.SystemVersion">12E55</string>
+		<string key="IBDocument.SystemVersion">12C60</string>
 		<string key="IBDocument.InterfaceBuilderVersion">3084</string>
-		<string key="IBDocument.AppKitVersion">1187.39</string>
-		<string key="IBDocument.HIToolboxVersion">626.00</string>
+		<string key="IBDocument.AppKitVersion">1187.34</string>
+		<string key="IBDocument.HIToolboxVersion">625.00</string>
 		<object class="NSMutableDictionary" key="IBDocument.PluginVersions">
 			<string key="NS.key.0">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 			<string key="NS.object.0">2083</string>
@@ -135,10 +135,9 @@
 					<bool key="EncodedWithXMLCoder">YES</bool>
 					<object class="IBUIViewController" id="379238692">
 						<object class="IBUITableView" key="IBUIView" id="467149819">
-							<reference key="NSNextResponder"/>
+							<nil key="NSNextResponder"/>
 							<int key="NSvFlags">274</int>
 							<string key="NSFrame">{{0, 64}, {320, 699}}</string>
-							<reference key="NSSuperview"/>
 							<reference key="IBUIBackgroundColor" ref="130166252"/>
 							<bool key="IBUIOpaque">NO</bool>
 							<bool key="IBUIClipsSubviews">YES</bool>
@@ -178,13 +177,13 @@
 				</object>
 				<string key="targetRuntimeIdentifier">IBIPadFramework</string>
 				<bool key="IBUIHorizontal">NO</bool>
-				<object class="IBUINavigationController" key="IBUISelectedViewController" id="488522243">
-					<string key="IBUITitle">Settings</string>
-					<object class="IBUITabBarItem" key="IBUITabBarItem" id="960660103">
-						<string key="IBUITitle">Settings</string>
+				<object class="IBUINavigationController" key="IBUISelectedViewController" id="289593068">
+					<string key="IBUITitle">Accounts</string>
+					<object class="IBUITabBarItem" key="IBUITabBarItem" id="358848212">
+						<string key="IBUITitle">Accounts</string>
 						<object class="NSCustomResource" key="IBUIImage">
 							<string key="NSClassName">NSImage</string>
-							<string key="NSResourceName">status.png</string>
+							<string key="NSResourceName">accounts.png</string>
 						</object>
 						<string key="targetRuntimeIdentifier">IBIPadFramework</string>
 					</object>
@@ -197,7 +196,7 @@
 					</object>
 					<string key="targetRuntimeIdentifier">IBIPadFramework</string>
 					<bool key="IBUIHorizontal">NO</bool>
-					<object class="IBUINavigationBar" key="IBUINavigationBar" id="857477043">
+					<object class="IBUINavigationBar" key="IBUINavigationBar" id="816897561">
 						<nil key="NSNextResponder"/>
 						<int key="NSvFlags">256</int>
 						<string key="NSFrameSize">{0, 0}</string>
@@ -205,17 +204,18 @@
 						<bool key="IBUIClipsSubviews">YES</bool>
 						<bool key="IBUIMultipleTouchEnabled">YES</bool>
 						<string key="targetRuntimeIdentifier">IBIPadFramework</string>
-						<int key="IBUIBarStyle">1</int>
 					</object>
 					<object class="NSMutableArray" key="IBUIViewControllers">
 						<bool key="EncodedWithXMLCoder">YES</bool>
-						<object class="IBUIViewController" id="945781533">
-							<object class="IBUINavigationItem" key="IBUINavigationItem" id="942435896">
-								<string key="IBUITitle">Status</string>
+						<object class="IBUIViewController" id="108043454">
+							<object class="NSArray" key="IBUIToolbarItems" id="0">
+								<bool key="EncodedWithXMLCoder">YES</bool>
+							</object>
+							<object class="IBUINavigationItem" key="IBUINavigationItem" id="634194696">
+								<string key="IBUITitle">Accounts</string>
 								<string key="targetRuntimeIdentifier">IBIPadFramework</string>
 							</object>
-							<reference key="IBUIParentViewController" ref="488522243"/>
-							<string key="IBUINibName">Settings</string>
+							<reference key="IBUIParentViewController" ref="289593068"/>
 							<object class="IBUISimulatedOrientationMetrics" key="IBUISimulatedOrientationMetrics">
 								<int key="IBUIInterfaceOrientation">1</int>
 								<int key="interfaceOrientation">1</int>
@@ -276,14 +276,13 @@
 							</object>
 						</object>
 					</object>
-					<reference ref="488522243"/>
-					<object class="IBUINavigationController" id="289593068">
-						<string key="IBUITitle">Accounts</string>
-						<object class="IBUITabBarItem" key="IBUITabBarItem" id="358848212">
-							<string key="IBUITitle">Accounts</string>
+					<object class="IBUINavigationController" id="488522243">
+						<string key="IBUITitle">Settings</string>
+						<object class="IBUITabBarItem" key="IBUITabBarItem" id="960660103">
+							<string key="IBUITitle">Settings</string>
 							<object class="NSCustomResource" key="IBUIImage">
 								<string key="NSClassName">NSImage</string>
-								<string key="NSResourceName">accounts.png</string>
+								<string key="NSResourceName">status.png</string>
 							</object>
 							<string key="targetRuntimeIdentifier">IBIPadFramework</string>
 						</object>
@@ -296,7 +295,7 @@
 						</object>
 						<string key="targetRuntimeIdentifier">IBIPadFramework</string>
 						<bool key="IBUIHorizontal">NO</bool>
-						<object class="IBUINavigationBar" key="IBUINavigationBar" id="816897561">
+						<object class="IBUINavigationBar" key="IBUINavigationBar" id="857477043">
 							<nil key="NSNextResponder"/>
 							<int key="NSvFlags">256</int>
 							<string key="NSFrameSize">{0, 0}</string>
@@ -304,18 +303,17 @@
 							<bool key="IBUIClipsSubviews">YES</bool>
 							<bool key="IBUIMultipleTouchEnabled">YES</bool>
 							<string key="targetRuntimeIdentifier">IBIPadFramework</string>
+							<int key="IBUIBarStyle">1</int>
 						</object>
 						<object class="NSMutableArray" key="IBUIViewControllers">
 							<bool key="EncodedWithXMLCoder">YES</bool>
-							<object class="IBUIViewController" id="108043454">
-								<object class="NSArray" key="IBUIToolbarItems" id="0">
-									<bool key="EncodedWithXMLCoder">YES</bool>
-								</object>
-								<object class="IBUINavigationItem" key="IBUINavigationItem" id="634194696">
-									<string key="IBUITitle">Accounts</string>
+							<object class="IBUIViewController" id="945781533">
+								<object class="IBUINavigationItem" key="IBUINavigationItem" id="942435896">
+									<string key="IBUITitle">Status</string>
 									<string key="targetRuntimeIdentifier">IBIPadFramework</string>
 								</object>
-								<reference key="IBUIParentViewController" ref="289593068"/>
+								<reference key="IBUIParentViewController" ref="488522243"/>
+								<string key="IBUINibName">Settings</string>
 								<object class="IBUISimulatedOrientationMetrics" key="IBUISimulatedOrientationMetrics">
 									<int key="IBUIInterfaceOrientation">1</int>
 									<int key="interfaceOrientation">1</int>
@@ -325,6 +323,7 @@
 							</object>
 						</object>
 					</object>
+					<reference ref="289593068"/>
 					<object class="IBUINavigationController" id="137071232">
 						<string key="IBUITitle">Chat Logs</string>
 						<object class="IBUITabBarItem" key="IBUITabBarItem" id="779438119">

@@ -171,7 +171,6 @@
 		26610B0D12293FA600591435 /* ActiveChats.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26610B0C12293FA600591435 /* ActiveChats.xib */; };
 		26690E56127C9D5C00051D13 /* away.png in Resources */ = {isa = PBXBuildFile; fileRef = 26690E54127C9D5C00051D13 /* away.png */; };
 		26690E57127C9D5C00051D13 /* available.png in Resources */ = {isa = PBXBuildFile; fileRef = 26690E55127C9D5C00051D13 /* available.png */; };
-		267D96031225E56200B328E3 /* About.xib in Resources */ = {isa = PBXBuildFile; fileRef = 267D96021225E56200B328E3 /* About.xib */; };
 		2684F88E1236F5EC003BF137 /* reload.png in Resources */ = {isa = PBXBuildFile; fileRef = 2684F88C1236F5EC003BF137 /* reload.png */; };
 		2689B6EC1601914E0087CA58 /* DDBadgeViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2689B6EB1601914E0087CA58 /* DDBadgeViewCell.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		268BCF12140B29180025E4D1 /* libjrtplib-static.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */; };
@@ -202,15 +201,12 @@
 		26E5BA8B132287D400D8C57A /* Settings.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26E5BA8A132287D400D8C57A /* Settings.xib */; };
 		26EB845E111644AD005446DD /* Themes in Resources */ = {isa = PBXBuildFile; fileRef = 26EB845D111644AD005446DD /* Themes */; };
 		26EB85D711166DE7005446DD /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 26EB85D611166DE7005446DD /* Icon.png */; };
-		26EC1D5112296D6000EAF934 /* MainWindowIpad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26EC1D5012296D6000EAF934 /* MainWindowIpad.xib */; };
-		26EC1DB2122978A100EAF934 /* AboutiPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26EC1DB1122978A100EAF934 /* AboutiPad.xib */; };
 		26EF9AB51320450300FA6FB2 /* icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26EF9AB41320450300FA6FB2 /* icon@2x.png */; };
 		26F1AB351323CA590044FA18 /* GroupChat.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26F1AB341323CA590044FA18 /* GroupChat.xib */; };
 		26F1AB3A1323D0280044FA18 /* joingroup.png in Resources */ = {isa = PBXBuildFile; fileRef = 26F1AB391323D0270044FA18 /* joingroup.png */; };
 		26F7BB431115F8DB00712672 /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F7BB411115F8DB00712672 /* Reachability.m */; };
 		26F7BB451115F95000712672 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26F7BB441115F95000712672 /* SystemConfiguration.framework */; };
 		288765A50DF7441C002DB57D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 288765A40DF7441C002DB57D /* CoreGraphics.framework */; };
-		28AD733F0D9D9553002E5188 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 28AD733E0D9D9553002E5188 /* MainWindow.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -1101,7 +1097,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				28AD733F0D9D9553002E5188 /* MainWindow.xib in Resources */,
 				2601D9C40FBF25E3004DB939 /* Search.png in Resources */,
 				2601D9C50FBF25E3004DB939 /* Buddies.png in Resources */,
 				2601D9C80FBF25E3004DB939 /* chatlog.png in Resources */,
@@ -1116,10 +1111,7 @@
 				26EB85D711166DE7005446DD /* Icon.png in Resources */,
 				26AD610111A95CB700C39051 /* Emoticons in Resources */,
 				261FD56F1223527C003DDC3A /* active.png in Resources */,
-				267D96031225E56200B328E3 /* About.xib in Resources */,
 				26610B0D12293FA600591435 /* ActiveChats.xib in Resources */,
-				26EC1D5112296D6000EAF934 /* MainWindowIpad.xib in Resources */,
-				26EC1DB2122978A100EAF934 /* AboutiPad.xib in Resources */,
 				26D5AE651229D135006C9639 /* chatsicon.png in Resources */,
 				265F1B2B123040540065C5FE /* web.xib in Resources */,
 				265F1B83123044CE0065C5FE /* web.png in Resources */,

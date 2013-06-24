@@ -8,6 +8,8 @@
 
 #import <UIKit/UIKit.h>
 
-@interface ActiveChatsViewController : UIViewController
+@interface ActiveChatsViewController : UIViewController <UITableViewDataSource, UITableViewDelegate>
 
+
+@property (nonatomic, strong) UITableView* chatListTable;
 @end

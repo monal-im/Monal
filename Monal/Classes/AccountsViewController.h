@@ -9,5 +9,9 @@
 #import <UIKit/UIKit.h>
 
 @interface AccountsViewController : UIViewController
+<UITableViewDataSource, UITableViewDelegate>
+
+
+@property (nonatomic, strong) UITableView* accountsTable;
 
 @end

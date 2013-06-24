@@ -30,6 +30,12 @@
     self.navigationItem.title=NSLocalizedString(@"Settings",@"");
     self.view.backgroundColor=[UIColor lightGrayColor];
     self.view.autoresizingMask=UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
+    
+    _settingsTable=[[UITableView alloc] initWithFrame:CGRectZero style:UITableViewStyleGrouped];
+    _settingsTable.delegate=self;
+    _settingsTable.dataSource=self;
+
+    self.view=_settingsTable;
 }
 
 - (void)didReceiveMemoryWarning
@@ -37,5 +43,17 @@
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
+
+#pragma mark tableview datasource delegate
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return 0;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return nil;
+}
+
 
 @end

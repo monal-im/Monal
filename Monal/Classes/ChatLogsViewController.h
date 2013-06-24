@@ -8,6 +8,9 @@
 
 #import <UIKit/UIKit.h>
 
-@interface ChatLogsViewController : UIViewController
+@interface ChatLogsViewController : UIViewController <UITableViewDataSource, UITableViewDelegate>
+
+
+@property (nonatomic, strong) UITableView* chatLogTable;
 
 @end

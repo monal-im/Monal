@@ -31,12 +31,30 @@
     self.view.backgroundColor=[UIColor lightGrayColor];
     self.view.autoresizingMask=UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
     
+    _chatListTable=[[UITableView alloc] init];
+    _chatListTable.delegate=self;
+    _chatListTable.dataSource=self;
+    
+    self.view=_chatListTable; 
+    
 }
 
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+
+#pragma mark tableview datasource delegate
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return 0;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return nil;
 }
 
 @end

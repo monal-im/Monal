@@ -30,6 +30,12 @@
     self.navigationItem.title=NSLocalizedString(@"Chat Logs",@"");
     self.view.backgroundColor=[UIColor lightGrayColor];
     self.view.autoresizingMask=UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
+    
+    _chatLogTable=[[UITableView alloc] init];
+    _chatLogTable.delegate=self;
+    _chatLogTable.dataSource=self;
+    
+    self.view=_chatLogTable;
 }
 
 - (void)didReceiveMemoryWarning
@@ -37,5 +43,19 @@
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
+
+
+
+#pragma mark tableview datasource delegate
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return 0;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return nil;
+}
+
 
 @end

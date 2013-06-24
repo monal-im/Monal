@@ -30,6 +30,13 @@
     self.navigationItem.title=NSLocalizedString(@"Accounts",@"");
     self.view.backgroundColor=[UIColor lightGrayColor];
     self.view.autoresizingMask=UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
+    
+    _accountsTable=[[UITableView alloc] initWithFrame:CGRectZero style:UITableViewStyleGrouped];
+    _accountsTable.delegate=self;
+    _accountsTable.dataSource=self;
+    
+    self.view=_accountsTable;
+    
 }
 
 - (void)didReceiveMemoryWarning
@@ -37,5 +44,18 @@
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
+
+#pragma mark tableview datasource delegate
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return 0;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return nil;
+}
+
+
 
 @end

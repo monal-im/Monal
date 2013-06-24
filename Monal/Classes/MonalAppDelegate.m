@@ -33,34 +33,42 @@
    
      ActiveChatsViewController* activeChatsVC = [[ActiveChatsViewController alloc] init];
     UINavigationController* activeChatNav=[[UINavigationController alloc] initWithRootViewController:activeChatsVC];
+    activeChatNav.navigationBar.tintColor=[UIColor blackColor];
     activeChatNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Active Chats",@"") image:[UIImage imageNamed:@"active"] tag:0];
     
     SettingsViewController* settingsVC = [[SettingsViewController alloc] init];
     UINavigationController* settingsNav=[[UINavigationController alloc] initWithRootViewController:settingsVC];
+    settingsNav.navigationBar.tintColor=[UIColor blackColor];
     settingsNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Settings",@"") image:[UIImage imageNamed:@"status"] tag:0];
     
      AccountsViewController* accountsVC = [[AccountsViewController alloc] init];
     UINavigationController* accountsNav=[[UINavigationController alloc] initWithRootViewController:accountsVC];
+    accountsNav.navigationBar.tintColor=[UIColor blackColor];
     accountsNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Accounts",@"") image:[UIImage imageNamed:@"accounts"] tag:0];
     
-     ChatLogsViewController* chatLogVC = [[ChatLogsViewController alloc] init];
+    ChatLogsViewController* chatLogVC = [[ChatLogsViewController alloc] init];
     UINavigationController* chatLogNav=[[UINavigationController alloc] initWithRootViewController:chatLogVC];
+    chatLogNav.navigationBar.tintColor=[UIColor blackColor];
     chatLogNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Chat Logs",@"") image:[UIImage imageNamed:@"chatlog"] tag:0];
     
     SearchUsersViewController* searchUsersVC = [[SearchUsersViewController alloc] init];
     UINavigationController* searchUsersNav=[[UINavigationController alloc] initWithRootViewController:searchUsersVC];
+    searchUsersNav.navigationBar.tintColor=[UIColor blackColor];
     searchUsersNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Search Users",@"") image:[UIImage imageNamed:@"search"] tag:0];
     
-     GroupChatViewController* groupChatVC = [[GroupChatViewController alloc] init];
+    GroupChatViewController* groupChatVC = [[GroupChatViewController alloc] init];
     UINavigationController* groupChatNav=[[UINavigationController alloc] initWithRootViewController:groupChatVC];
+    groupChatNav.navigationBar.tintColor=[UIColor blackColor];
     groupChatNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Group Chat",@"") image:[UIImage imageNamed:@"joingroup"] tag:0];
     
-     HelpViewController* helpVC = [[HelpViewController alloc] init];
+    HelpViewController* helpVC = [[HelpViewController alloc] init];
     UINavigationController* helpNav=[[UINavigationController alloc] initWithRootViewController:helpVC];
+    helpNav.navigationBar.tintColor=[UIColor blackColor];
     helpNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Help",@"") image:[UIImage imageNamed:@"help"] tag:0];
     
-     AboutViewController* aboutVC = [[AboutViewController alloc] init];
+    AboutViewController* aboutVC = [[AboutViewController alloc] init];
     UINavigationController* aboutNav=[[UINavigationController alloc] initWithRootViewController:aboutVC];
+    aboutNav.navigationBar.tintColor=[UIColor blackColor];
     aboutNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"About",@"") image:[UIImage imageNamed:@"about"] tag:0];
     
     
@@ -80,7 +88,8 @@
      
      //this is a dummy nav controllre not really used for anything
      UINavigationController* navigationControllerContacts=[[UINavigationController alloc] initWithRootViewController:contactsVC];
-    
+    navigationControllerContacts.navigationBar.tintColor=[UIColor blackColor];
+     
      _chatNav=activeChatNav; 
     _splitViewController=[[UISplitViewController alloc] init];
      self.window.rootViewController=_splitViewController;
@@ -90,6 +99,8 @@
      _splitViewController.viewControllers=[NSArray arrayWithObjects:navigationControllerContacts, _tabBarController,nil];
      _splitViewController.delegate=self; 
  }
+    
+     _chatNav.navigationBar.tintColor=[UIColor blackColor];
     
    
     [self.window makeKeyAndVisible];

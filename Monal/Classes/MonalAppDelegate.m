@@ -101,7 +101,7 @@
  }
     
      _chatNav.navigationBar.tintColor=[UIColor blackColor];
-    
+    _tabBarController.moreNavigationController.navigationBar.tintColor=[UIColor blackColor];
    
     [self.window makeKeyAndVisible];
     

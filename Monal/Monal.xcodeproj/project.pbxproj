@@ -701,25 +701,8 @@
 		26715E5E17650AF900684F3D /* View Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				26DB52121777EA5100B50353 /* Tab views */,
 				26DB52111777C83100B50353 /* Modal views */,
-				261A627E176C055400059090 /* ContactsViewController.h */,
-				261A627F176C055400059090 /* ContactsViewController.m */,
-				261A6283176C156500059090 /* ActiveChatsViewController.h */,
-				261A6284176C156500059090 /* ActiveChatsViewController.m */,
-				261A6286176C157D00059090 /* SettingsViewController.h */,
-				261A6287176C157D00059090 /* SettingsViewController.m */,
-				261A6289176C159000059090 /* AccountsViewController.h */,
-				261A628A176C159000059090 /* AccountsViewController.m */,
-				261A628C176C15AD00059090 /* ChatLogsViewController.h */,
-				261A628D176C15AD00059090 /* ChatLogsViewController.m */,
-				261A628F176C15D400059090 /* GroupChatViewController.h */,
-				261A6290176C15D400059090 /* GroupChatViewController.m */,
-				261A6292176C15FC00059090 /* SearchUsersViewController.h */,
-				261A6293176C15FC00059090 /* SearchUsersViewController.m */,
-				261A6295176C160900059090 /* HelpViewController.h */,
-				261A6296176C160900059090 /* HelpViewController.m */,
-				261A6298176C162200059090 /* AboutViewController.h */,
-				261A6299176C162200059090 /* AboutViewController.m */,
 			);
 			name = "View Controllers";
 			sourceTree = "<group>";
@@ -876,6 +859,31 @@
 			children = (
 			);
 			name = "Modal views";
+			sourceTree = "<group>";
+		};
+		26DB52121777EA5100B50353 /* Tab views */ = {
+			isa = PBXGroup;
+			children = (
+				261A627E176C055400059090 /* ContactsViewController.h */,
+				261A627F176C055400059090 /* ContactsViewController.m */,
+				261A6283176C156500059090 /* ActiveChatsViewController.h */,
+				261A6284176C156500059090 /* ActiveChatsViewController.m */,
+				261A6286176C157D00059090 /* SettingsViewController.h */,
+				261A6287176C157D00059090 /* SettingsViewController.m */,
+				261A6289176C159000059090 /* AccountsViewController.h */,
+				261A628A176C159000059090 /* AccountsViewController.m */,
+				261A628C176C15AD00059090 /* ChatLogsViewController.h */,
+				261A628D176C15AD00059090 /* ChatLogsViewController.m */,
+				261A628F176C15D400059090 /* GroupChatViewController.h */,
+				261A6290176C15D400059090 /* GroupChatViewController.m */,
+				261A6292176C15FC00059090 /* SearchUsersViewController.h */,
+				261A6293176C15FC00059090 /* SearchUsersViewController.m */,
+				261A6295176C160900059090 /* HelpViewController.h */,
+				261A6296176C160900059090 /* HelpViewController.m */,
+				261A6298176C162200059090 /* AboutViewController.h */,
+				261A6299176C162200059090 /* AboutViewController.m */,
+			);
+			name = "Tab views";
 			sourceTree = "<group>";
 		};
 		26DFD4A615666B6C007A1621 /* 3rd Party */ = {

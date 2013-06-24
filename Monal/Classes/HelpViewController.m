@@ -30,12 +30,34 @@
     self.navigationItem.title=NSLocalizedString(@"Help",@"");
     self.view.backgroundColor=[UIColor lightGrayColor];
     self.view.autoresizingMask=UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
+
+    _webView=[[UIWebView alloc] init];
+    _webView.delegate=self; 
+    self.view=_webView;
+
 }
+
+-(void) viewWillAppear:(BOOL)animated
+{
+    NSURL *websiteUrl = [NSURL URLWithString:kMonalHelpURL];
+    NSURLRequest *urlRequest = [NSURLRequest requestWithURL:websiteUrl];
+    [_webView loadRequest:urlRequest];
+    
+    UIBarButtonItem* rightButton =[[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"back"] style:UIBarButtonItemStyleBordered target:self action:@selector(goBack)];
+    self.navigationItem.rightBarButtonItem=rightButton; 
+     
+}
+
 
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+-(void) goBack
+{
+    [_webView goBack];
 }
 
 @end

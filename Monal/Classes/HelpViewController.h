@@ -8,6 +8,12 @@
 
 #import <UIKit/UIKit.h>
 
-@interface HelpViewController : UIViewController
+#define kMonalHelpURL @"http://monal.im/help"
+
+@interface HelpViewController : UIViewController <UIWebViewDelegate>
+
+@property (nonatomic, strong) UIWebView* webView;
+
+-(void) goBack;
 
 @end

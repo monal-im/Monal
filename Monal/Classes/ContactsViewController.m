@@ -31,6 +31,18 @@
     self.view.backgroundColor=[UIColor lightGrayColor];
     self.view.autoresizingMask=UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
    
+    _contactsTable=[[UITableView alloc] init];
+    _contactsTable.delegate=self;
+    _contactsTable.dataSource=self;
+    
+    self.view=_contactsTable;
+    
+    
+    
+}
+
+-(void) viewWillAppear:(BOOL)animated
+{
     
 }
 
@@ -38,6 +50,17 @@
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+#pragma mark tableview datasource delegate
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return 0; 
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return nil;
 }
 
 @end

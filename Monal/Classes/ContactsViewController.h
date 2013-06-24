@@ -13,6 +13,6 @@
     
 }
 
-
+@property (nonatomic, strong) UITableView* contactsTable;
 
 @end

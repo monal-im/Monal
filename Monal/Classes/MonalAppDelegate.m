@@ -78,7 +78,7 @@
      _chatNav=[[UINavigationController alloc] initWithRootViewController:contactsVC];
      _chatNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Contacts",@"") image:[UIImage imageNamed:@"Buddies"] tag:0];
      
-     _tabBarController.viewControllers=[NSArray arrayWithObjects:_chatNav,activeChatNav, settingsNav,  accountsNav, chatLogNav, groupChatNav,  helpNav, aboutNav, nil];
+     _tabBarController.viewControllers=[NSArray arrayWithObjects:_chatNav,activeChatNav, settingsNav,  accountsNav, chatLogNav, groupChatNav, searchUsersNav, helpNav, aboutNav, nil];
     
     self.window.rootViewController=_tabBarController;
      
@@ -86,7 +86,7 @@
  else
  {
      
-     //this is a dummy nav controllre not really used for anything
+     //this is a dummy nav controller not really used for anything
      UINavigationController* navigationControllerContacts=[[UINavigationController alloc] initWithRootViewController:contactsVC];
     navigationControllerContacts.navigationBar.tintColor=[UIColor blackColor];
      
@@ -94,7 +94,7 @@
     _splitViewController=[[UISplitViewController alloc] init];
      self.window.rootViewController=_splitViewController;
      
-     _tabBarController.viewControllers=[NSArray arrayWithObjects: activeChatNav,  settingsNav, accountsNav, chatLogNav, groupChatNav,  helpNav, aboutNav, nil];
+     _tabBarController.viewControllers=[NSArray arrayWithObjects: activeChatNav,  settingsNav, accountsNav, chatLogNav, groupChatNav, searchUsersNav,  helpNav, aboutNav, nil];
      
      _splitViewController.viewControllers=[NSArray arrayWithObjects:navigationControllerContacts, _tabBarController,nil];
      _splitViewController.delegate=self; 

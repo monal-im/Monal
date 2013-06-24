@@ -701,6 +701,7 @@
 		26715E5E17650AF900684F3D /* View Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				26DB52111777C83100B50353 /* Modal views */,
 				261A627E176C055400059090 /* ContactsViewController.h */,
 				261A627F176C055400059090 /* ContactsViewController.m */,
 				261A6283176C156500059090 /* ActiveChatsViewController.h */,
@@ -868,6 +869,13 @@
 				2637075D1488773800DB8D57 /* enabled@2x.png */,
 			);
 			name = Accounts;
+			sourceTree = "<group>";
+		};
+		26DB52111777C83100B50353 /* Modal views */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = "Modal views";
 			sourceTree = "<group>";
 		};
 		26DFD4A615666B6C007A1621 /* 3rd Party */ = {

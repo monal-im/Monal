@@ -46,13 +46,101 @@
 }
 
 #pragma mark tableview datasource delegate
+-(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    return 2;
+}
+
+- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
+{
+    switch (section) {
+        case 0:
+        {
+            return @"Accounts";
+            break;
+        }
+            
+        case 1:
+        {
+            return @"Add New Account";
+            break;
+        }
+            
+        default:
+        {
+            return  nil;
+        }
+            break;
+    }
+}
+
+
+- (NSString *)tableView:(UITableView *)tableView titleForFooterInSection:(NSInteger)section
+{
+    switch (section) {
+        case 0:
+        {
+            return @"Only one can be enabled at a time.";
+            break;
+        }
+    }
+    
+    return nil;
+}
+
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return 0;
+    switch (section) {
+        case 0:
+        {
+            return 1;
+            break;
+        }
+        case 1:
+        {
+            return 3;
+            break;
+        }
+            
+        default:
+        {
+            return 0;
+        }
+            break;
+    }
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    switch (indexPath.section) {
+        case 0:
+        {
+            UITableViewCell* cell =[tableView dequeueReusableCellWithIdentifier:@"AccountCell"];
+            if(cell==nil)
+            {
+                cell=[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"AccountCell"];
+            }
+            return cell;
+            break;
+        }
+        case 1:
+        {
+            UITableViewCell* cell =[tableView dequeueReusableCellWithIdentifier:@"ProtocolCell"];
+            if(cell==nil)
+            {
+                cell=[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"ProtocolCell"];
+            }
+            return cell;
+            break;
+        }
+            
+        default:
+        {
+            return 0;
+        }
+            break;
+    }
+    
     return nil;
 }
 

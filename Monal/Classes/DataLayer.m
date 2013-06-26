@@ -15,18 +15,24 @@ static DataLayer *sharedInstance=nil;
 
 + (DataLayer* )sharedInstance
 {
-    if (sharedInstance == nil) {
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
         sharedInstance = [DataLayer alloc] ;
         [sharedInstance initDB];
-    }
-    
+    });
     return sharedInstance;
+    
 }
 
 
 //lowest level command handlers
 -(NSObject*) executeScalar:(NSString*) query
-{/*
+{
+    NSObject* __block toReturn;
+    dispatch_sync(_dbQueue, ^{
+        
+   
+    /*
 	sqlite3_stmt *statement1;
 	if (sqlite3_prepare_v2(database, [@"begin"  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement1, NULL) == SQLITE_OK) {
 		sqlite3_step(statement1);
@@ -50,7 +56,8 @@ static DataLayer *sharedInstance=nil;
 					if (sqlite3_prepare_v2(database, [@"end"  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement2, NULL) == SQLITE_OK) {
 						sqlite3_step(statement2);
 					}*/
-					return returnInt; 
+					toReturn= returnInt;
+                    break; 
 				}
 					
 				case (SQLITE_FLOAT):
@@ -61,7 +68,8 @@ static DataLayer *sharedInstance=nil;
 					if (sqlite3_prepare_v2(database, [@"end"  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement2, NULL) == SQLITE_OK) {
 						sqlite3_step(statement2);
 					}*/
-					return returnInt;
+					toReturn= returnInt;
+                    break; 
 				}
 					
 				case (SQLITE_TEXT):
@@ -73,7 +81,8 @@ static DataLayer *sharedInstance=nil;
 					 if (sqlite3_prepare_v2(database, [@"end"  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement2, NULL) == SQLITE_OK) {
 					 sqlite3_step(statement2);
 					 }*/
-					return [returnString  stringByReplacingOccurrencesOfString:@"''" withString:@"'"]; 
+					toReturn= [returnString  stringByReplacingOccurrencesOfString:@"''" withString:@"'"];
+                    break;
 					
 				}
 					
@@ -87,7 +96,7 @@ static DataLayer *sharedInstance=nil;
 					 if (sqlite3_prepare_v2(database, [@"end"  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement2, NULL) == SQLITE_OK) {
 					 sqlite3_step(statement2);
 					 }*/
-					return [returnString  stringByReplacingOccurrencesOfString:@"''" withString:@"'"]; 
+					toReturn= [returnString  stringByReplacingOccurrencesOfString:@"''" withString:@"'"];
 
 					
 					
@@ -95,7 +104,8 @@ static DataLayer *sharedInstance=nil;
 					
 					//char* data= sqlite3_value_text(statement); 
 					///NSData* returnData =[NSData dataWithBytes:]
-					return nil;
+					toReturn= nil;
+                    break;
 				}
 				
 				case (SQLITE_NULL):
@@ -106,7 +116,8 @@ static DataLayer *sharedInstance=nil;
 					 if (sqlite3_prepare_v2(database, [@"end"  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement2, NULL) == SQLITE_OK) {
 					 sqlite3_step(statement2);
 					 }*/
-					return nil;
+					toReturn= nil;
+                    break;
 				}
 					
 			
@@ -121,8 +132,9 @@ static DataLayer *sharedInstance=nil;
 			 if (sqlite3_prepare_v2(database, [@"end"  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement2, NULL) == SQLITE_OK) {
 			 sqlite3_step(statement2);
 			 }*/
-			return nil;}; 
+			toReturn= nil;};
 	}
+    else{
 	//if noting else
 	debug_NSLog(@"returning nil with out OK %@", query); 
 	/*sqlite3_stmt *statement2;
@@ -130,29 +142,36 @@ static DataLayer *sharedInstance=nil;
 	 sqlite3_step(statement2);
 	 }*/
 	
-	return nil;
+	toReturn= nil;
+    }
+         });
+    
+    return toReturn; 
 }
+
 -(BOOL) executeNonQuery:(NSString*) query
 {
 	
+    BOOL __block toReturn;
+    dispatch_sync(_dbQueue, ^{
 	/*sqlite3_stmt *statement1;
 	if (sqlite3_prepare_v2(database, [@"begin"  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement1, NULL) == SQLITE_OK) {
 		sqlite3_step(statement1);
 	}*/
-	bool val=false; 
+	 
 	sqlite3_stmt *statement;
 	if (sqlite3_prepare_v2(database, [query  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK) 
 	{
 		if(sqlite3_step(statement)==SQLITE_DONE) 
-		val=true;
+		toReturn=true;
 		else 
-			val=false;
+			toReturn=false;
 	}	
 	
 	else 
 	{
 		debug_NSLog(@"nonquery returning false with out OK %@", query); 
-		val=false;
+		toReturn=false;
 	}
 	
 	
@@ -160,20 +179,25 @@ static DataLayer *sharedInstance=nil;
 	 if (sqlite3_prepare_v2(database, [@"end"  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement2, NULL) == SQLITE_OK) {
 	 sqlite3_step(statement2);
 	 }*/
-	return val; 
+
+    });
+    
+    return toReturn; 
 }
 
 
 -(NSArray*) executeReader:(NSString*) query
 {	
 
+  	NSMutableArray* __block toReturn =  [[NSMutableArray alloc] init] ;
+    dispatch_sync(_dbQueue, ^{
 	/*sqlite3_stmt *statement1;
 	if (sqlite3_prepare_v2(database, [@"begin"  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement1, NULL) == SQLITE_OK) {
 		sqlite3_step(statement1);
 	}
 	*/
 	
-	NSMutableArray* toReturn =  [[NSMutableArray alloc] init] ; 
+
 	sqlite3_stmt *statement;
 	if (sqlite3_prepare_v2(database, [query cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK) {
 	
@@ -246,18 +270,23 @@ static DataLayer *sharedInstance=nil;
 		 if (sqlite3_prepare_v2(database, [@"end"  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement2, NULL) == SQLITE_OK) {
 		 sqlite3_step(statement2);
 		 }*/
-		;
 		
-		return toReturn; 
-	}  
-	debug_NSLog(@"reader nil with sql not ok: %@", query ); 
+		
+	}
+    else
+    {
+	debug_NSLog(@"reader nil with sql not ok: %@", query );
 	/*sqlite3_stmt *statement2;
 	 if (sqlite3_prepare_v2(database, [@"end"  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement2, NULL) == SQLITE_OK) {
 	 sqlite3_step(statement2);
 	 }*/
 	
-	;
-		return nil; 
+	
+		toReturn= nil;
+    }
+    });
+    
+    return toReturn; 
 }
 
 
@@ -266,13 +295,7 @@ static DataLayer *sharedInstance=nil;
 
 -(NSArray*) protocolList
 {
-	//returns a buddy's message history
-	
-	
-	
 
-	
-	
 	NSString* query=[NSString stringWithFormat:@"select * from protocol where protocol_id<=3 or protocol_id=5 order by protocol_id asc"];
 	NSArray* toReturn = [self executeReader:query];
 	
@@ -2080,6 +2103,8 @@ static DataLayer *sharedInstance=nil;
 
 -(void) initDB
 {
+    _dbQueue = dispatch_queue_create(kMonalDBQueue, DISPATCH_QUEUE_SERIAL);
+    
 	NSFileManager* fileManager = [NSFileManager defaultManager]; 
 	
 	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);

@@ -7,6 +7,7 @@
 //
 
 #import "AccountsViewController.h"
+#import "DataLayer.h"
 
 @interface AccountsViewController ()
 
@@ -14,15 +15,8 @@
 
 @implementation AccountsViewController
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
-{
-    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-    if (self) {
-        // Custom initialization
-    }
-    return self;
-}
 
+#pragma mark View life cycle
 - (void)viewDidLoad
 {
     [super viewDidLoad];
@@ -37,13 +31,25 @@
     
     self.view=_accountsTable;
     
+    _protocolList=[[DataLayer sharedInstance] protocolList]; 
+    
 }
 
+-(void) viewWillAppear:(BOOL)animated
+{
+    
+    _accountList=[[DataLayer sharedInstance] accountList];
+    
+}
+
+#pragma mark memory management
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
+
+
 
 #pragma mark tableview datasource delegate
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
@@ -93,12 +99,12 @@
     switch (section) {
         case 0:
         {
-            return 1;
+            return [_accountList count];
             break;
         }
         case 1:
         {
-            return 3;
+            return [_protocolList count];
             break;
         }
             

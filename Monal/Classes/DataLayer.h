@@ -11,11 +11,15 @@
 #import "PasswordManager.h"
 //#import "presence.h"
 
+#define kMonalDBQueue "im.monal.dbQueue"
+
 @interface DataLayer : NSObject {
 
 	NSString* dbPath;
 	sqlite3* database;
-    NSLock* dbversionCheck; 
+    NSLock* dbversionCheck;
+    
+    dispatch_queue_t _dbQueue ;
 }
 
 

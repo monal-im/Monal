@@ -50,8 +50,9 @@
 }
 
 
+#pragma mark tableview delegate
 
-#pragma mark tableview datasource delegate
+#pragma mark tableview datasource
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
     return 2;
@@ -136,6 +137,11 @@
             {
                 cell=[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"ProtocolCell"];
             }
+            NSString* protocol =[[_protocolList objectAtIndex:indexPath.row] objectAtIndex:1];
+            cell.textLabel.text=protocol;
+            cell.imageView.image=[UIImage imageNamed:protocol];
+            
+            
             return cell;
             break;
         }

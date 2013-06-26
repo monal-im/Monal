@@ -155,7 +155,6 @@
 		2640AF561454910000CB4F60 /* MessageEntrySendButtonPressed.png in Resources */ = {isa = PBXBuildFile; fileRef = 2640AF4E1454910000CB4F60 /* MessageEntrySendButtonPressed.png */; };
 		2640AF571454910000CB4F60 /* MessageEntrySendButtonPressed@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2640AF4F1454910000CB4F60 /* MessageEntrySendButtonPressed@2x.png */; };
 		26432924133D66A9005632E1 /* download.png in Resources */ = {isa = PBXBuildFile; fileRef = 26432923133D66A9005632E1 /* download.png */; };
-		264A051B1287067700189A87 /* google.png in Resources */ = {isa = PBXBuildFile; fileRef = 264A051A1287067700189A87 /* google.png */; };
 		2651DAA20FC2847200009D7E /* noicon.png in Resources */ = {isa = PBXBuildFile; fileRef = 2651DAA10FC2847200009D7E /* noicon.png */; };
 		2658508B15E7D8E40070A2A7 /* TPCircularBuffer+AudioBufferList.c in Sources */ = {isa = PBXBuildFile; fileRef = 2658508615E7D8E40070A2A7 /* TPCircularBuffer+AudioBufferList.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		2658508C15E7D8E40070A2A7 /* TPCircularBuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 2658508815E7D8E40070A2A7 /* TPCircularBuffer.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
@@ -167,6 +166,7 @@
 		2689B6EC1601914E0087CA58 /* DDBadgeViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2689B6EB1601914E0087CA58 /* DDBadgeViewCell.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		268BCF12140B29180025E4D1 /* libjrtplib-static.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */; };
 		268E700515D0D979002E63CD /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 264FF3E4158A855D00D97B86 /* AVFoundation.framework */; };
+		2696BC71177AA28B002F8EEF /* GTalk.png in Resources */ = {isa = PBXBuildFile; fileRef = 2696BC70177AA28B002F8EEF /* GTalk.png */; };
 		269A2E62132030770044B1C8 /* Monal_crop_256.png in Resources */ = {isa = PBXBuildFile; fileRef = 26EB85D911166F1B005446DD /* Monal_crop_256.png */; };
 		269F0F1A105DDEFB00FF96F8 /* status.png in Resources */ = {isa = PBXBuildFile; fileRef = 269F0F19105DDEFB00FF96F8 /* status.png */; };
 		26A942AE130B52520034CDF7 /* offline.png in Resources */ = {isa = PBXBuildFile; fileRef = 26A942AD130B52520034CDF7 /* offline.png */; };
@@ -365,7 +365,6 @@
 		2640AF4E1454910000CB4F60 /* MessageEntrySendButtonPressed.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = MessageEntrySendButtonPressed.png; sourceTree = "<group>"; };
 		2640AF4F1454910000CB4F60 /* MessageEntrySendButtonPressed@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "MessageEntrySendButtonPressed@2x.png"; sourceTree = "<group>"; };
 		26432923133D66A9005632E1 /* download.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = download.png; sourceTree = "<group>"; };
-		264A051A1287067700189A87 /* google.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = google.png; sourceTree = "<group>"; };
 		264FF3E4158A855D00D97B86 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		2651DAA10FC2847200009D7E /* noicon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = noicon.png; sourceTree = "<group>"; };
 		2658508615E7D8E40070A2A7 /* TPCircularBuffer+AudioBufferList.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "TPCircularBuffer+AudioBufferList.c"; sourceTree = "<group>"; };
@@ -382,6 +381,7 @@
 		2689B6EA1601914E0087CA58 /* DDBadgeViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDBadgeViewCell.h; sourceTree = "<group>"; };
 		2689B6EB1601914E0087CA58 /* DDBadgeViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDBadgeViewCell.m; sourceTree = "<group>"; };
 		268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libjrtplib-static.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		2696BC70177AA28B002F8EEF /* GTalk.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = GTalk.png; sourceTree = "<group>"; };
 		269F0F19105DDEFB00FF96F8 /* status.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = status.png; sourceTree = "<group>"; };
 		26A942AD130B52520034CDF7 /* offline.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = offline.png; sourceTree = "<group>"; };
 		26AD60DA11A95CB700C39051 /* Emoticons */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Emoticons; sourceTree = "<group>"; };
@@ -541,9 +541,9 @@
 		260447B80FEEC7AD00B3B5A7 /* Protocol */ = {
 			isa = PBXGroup;
 			children = (
+				2696BC70177AA28B002F8EEF /* GTalk.png */,
 				260A2CC315E713EC00DB103B /* Facebook.png */,
 				260A2CC415E713EC00DB103B /* Facebook@2x.png */,
-				264A051A1287067700189A87 /* google.png */,
 				26E2786A10FA85C600B7B998 /* XMPP.png */,
 			);
 			name = Protocol;
@@ -1106,7 +1106,6 @@
 				261ED6C41240257F00C14F6A /* BuddyAdd.xib in Resources */,
 				26690E56127C9D5C00051D13 /* away.png in Resources */,
 				26690E57127C9D5C00051D13 /* available.png in Resources */,
-				264A051B1287067700189A87 /* google.png in Resources */,
 				26A942AE130B52520034CDF7 /* offline.png in Resources */,
 				269A2E62132030770044B1C8 /* Monal_crop_256.png in Resources */,
 				26EF9AB51320450300FA6FB2 /* icon@2x.png in Resources */,
@@ -1159,6 +1158,7 @@
 				26BAFC561626537D0073728B /* AppiraterLocalizable.strings in Resources */,
 				26BAFC571626537D0073728B /* README.md in Resources */,
 				26DB380B162A0AC100982A05 /* Default-568h@2x.png in Resources */,
+				2696BC71177AA28B002F8EEF /* GTalk.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

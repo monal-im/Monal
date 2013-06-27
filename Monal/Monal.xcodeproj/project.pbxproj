@@ -416,7 +416,7 @@
 		26C314AB15E72CF1003A73AA /* Default-Landscape~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-Landscape~ipad.png"; sourceTree = "<group>"; };
 		26C314AC15E72CF1003A73AA /* Default@2x~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x~iphone.png"; sourceTree = "<group>"; };
 		26C76BEA1320544200EAF270 /* google_g.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = google_g.png; sourceTree = "<group>"; };
-		26D1847210F9972400340C52 /* XMPPEdit.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = XMPPEdit.xib; sourceTree = "<group>"; };
+		26D1847210F9972400340C52 /* XMPPEdit.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = XMPPEdit.xib; path = ../XMPPEdit.xib; sourceTree = "<group>"; };
 		26D5AE641229D135006C9639 /* chatsicon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = chatsicon.png; sourceTree = "<group>"; };
 		26DB380A162A0AC100982A05 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		26DC0A8A1339259900E60BFD /* SearchUser.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SearchUser.xib; sourceTree = "<group>"; };
@@ -639,7 +639,6 @@
 			children = (
 				2628E50614049DB50064131E /* askTempPass.xib */,
 				26E5BA8A132287D400D8C57A /* Settings.xib */,
-				26D1847210F9972400340C52 /* XMPPEdit.xib */,
 				26DC0A8A1339259900E60BFD /* SearchUser.xib */,
 				26F1AB341323CA590044FA18 /* GroupChat.xib */,
 				261ED6C31240257F00C14F6A /* BuddyAdd.xib */,
@@ -674,7 +673,6 @@
 			isa = PBXGroup;
 			children = (
 				26DB52121777EA5100B50353 /* Tab views */,
-				26DB52111777C83100B50353 /* Modal views */,
 			);
 			name = "View Controllers";
 			sourceTree = "<group>";
@@ -836,6 +834,7 @@
 		26DB52121777EA5100B50353 /* Tab views */ = {
 			isa = PBXGroup;
 			children = (
+				26DB52111777C83100B50353 /* Modal views */,
 				261A627E176C055400059090 /* ContactsViewController.h */,
 				261A627F176C055400059090 /* ContactsViewController.m */,
 				261A6283176C156500059090 /* ActiveChatsViewController.h */,
@@ -852,6 +851,7 @@
 				261A6293176C15FC00059090 /* SearchUsersViewController.m */,
 				261A6295176C160900059090 /* HelpViewController.h */,
 				261A6296176C160900059090 /* HelpViewController.m */,
+				26D1847210F9972400340C52 /* XMPPEdit.xib */,
 				261A6298176C162200059090 /* AboutViewController.h */,
 				261A6299176C162200059090 /* AboutViewController.m */,
 			);

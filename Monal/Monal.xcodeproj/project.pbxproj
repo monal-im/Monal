@@ -42,6 +42,7 @@
 		262B4BDB15E8452A006B0112 /* Monal_crop_144.png in Resources */ = {isa = PBXBuildFile; fileRef = 262B4BDA15E8452A006B0112 /* Monal_crop_144.png */; };
 		262DE4AF15C4E2C60040A66B /* MBProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = 262DE4AE15C4E2C60040A66B /* MBProgressHUD.m */; };
 		263566B9133BDAD10095CD33 /* help.png in Resources */ = {isa = PBXBuildFile; fileRef = 263566B8133BDAD00095CD33 /* help.png */; };
+		2636C43F177BD58C001CA71F /* XMPPEdit.m in Sources */ = {isa = PBXBuildFile; fileRef = 2636C43E177BD58C001CA71F /* XMPPEdit.m */; };
 		26370742148873FB00DB8D57 /* accounts@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26370741148873FB00DB8D57 /* accounts@2x.png */; };
 		263707451488743300DB8D57 /* chatlog@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 263707441488743300DB8D57 /* chatlog@2x.png */; };
 		263707471488747400DB8D57 /* active@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 263707461488747300DB8D57 /* active@2x.png */; };
@@ -250,6 +251,8 @@
 		262DE4AD15C4E2C60040A66B /* MBProgressHUD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MBProgressHUD.h; sourceTree = "<group>"; };
 		262DE4AE15C4E2C60040A66B /* MBProgressHUD.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MBProgressHUD.m; sourceTree = "<group>"; };
 		263566B8133BDAD00095CD33 /* help.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = help.png; sourceTree = "<group>"; };
+		2636C43D177BD58C001CA71F /* XMPPEdit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPEdit.h; sourceTree = "<group>"; };
+		2636C43E177BD58C001CA71F /* XMPPEdit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPEdit.m; sourceTree = "<group>"; };
 		26370741148873FB00DB8D57 /* accounts@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "accounts@2x.png"; sourceTree = "<group>"; };
 		263707441488743300DB8D57 /* chatlog@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "chatlog@2x.png"; sourceTree = "<group>"; };
 		263707461488747300DB8D57 /* active@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "active@2x.png"; sourceTree = "<group>"; };
@@ -572,6 +575,16 @@
 			name = "Launch Images";
 			sourceTree = "<group>";
 		};
+		2636C440177BD595001CA71F /* Older UI code */ = {
+			isa = PBXGroup;
+			children = (
+				26D1847210F9972400340C52 /* XMPPEdit.xib */,
+				2636C43D177BD58C001CA71F /* XMPPEdit.h */,
+				2636C43E177BD58C001CA71F /* XMPPEdit.m */,
+			);
+			name = "Older UI code";
+			sourceTree = "<group>";
+		};
 		2640AF3B14548E7600CB4F60 /* GrowingTextView */ = {
 			isa = PBXGroup;
 			children = (
@@ -834,6 +847,7 @@
 		26DB52121777EA5100B50353 /* Tab views */ = {
 			isa = PBXGroup;
 			children = (
+				2636C440177BD595001CA71F /* Older UI code */,
 				26DB52111777C83100B50353 /* Modal views */,
 				261A627E176C055400059090 /* ContactsViewController.h */,
 				261A627F176C055400059090 /* ContactsViewController.m */,
@@ -851,7 +865,6 @@
 				261A6293176C15FC00059090 /* SearchUsersViewController.m */,
 				261A6295176C160900059090 /* HelpViewController.h */,
 				261A6296176C160900059090 /* HelpViewController.m */,
-				26D1847210F9972400340C52 /* XMPPEdit.xib */,
 				261A6298176C162200059090 /* AboutViewController.h */,
 				261A6299176C162200059090 /* AboutViewController.m */,
 			);
@@ -1191,6 +1204,7 @@
 				261A6294176C15FC00059090 /* SearchUsersViewController.m in Sources */,
 				261A6297176C160900059090 /* HelpViewController.m in Sources */,
 				261A629A176C162200059090 /* AboutViewController.m in Sources */,
+				2636C43F177BD58C001CA71F /* XMPPEdit.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

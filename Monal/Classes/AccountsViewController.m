@@ -8,6 +8,7 @@
 
 #import "AccountsViewController.h"
 #import "DataLayer.h"
+#import "XMPPEdit.h"
 
 @interface AccountsViewController ()
 
@@ -37,9 +38,8 @@
 
 -(void) viewWillAppear:(BOOL)animated
 {
-    
     _accountList=[[DataLayer sharedInstance] accountList];
-    
+    [self.accountsTable reloadData];
 }
 
 #pragma mark memory management
@@ -51,6 +51,24 @@
 
 
 #pragma mark tableview delegate
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath;
+{
+    XMPPEdit* editor =[[XMPPEdit alloc] init];
+    editor.originIndex=indexPath; 
+    if(indexPath.section==0)
+    {
+        //existing
+        editor.accountno=[NSString stringWithFormat:@"%@",[[_accountList objectAtIndex:indexPath.row]objectAtIndex:0]];
+    }
+    else if(indexPath.section==1)
+    {
+        editor.accountno=@"-1";
+    }
+    
+    [self.navigationController pushViewController:editor animated:YES];
+    
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+}
 
 #pragma mark tableview datasource
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
@@ -127,6 +145,9 @@
             {
                 cell=[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"AccountCell"];
             }
+            cell.textLabel.text=[[_accountList objectAtIndex:indexPath.row] objectAtIndex:1];;
+            cell.imageView.image=[UIImage imageNamed:@"disabled"];
+            
             return cell;
             break;
         }

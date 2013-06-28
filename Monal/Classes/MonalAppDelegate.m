@@ -119,6 +119,8 @@
     //[Appirater setDebug:YES];
     [Appirater appLaunched:YES];
     
+    [[[Reachability alloc] init] startNotifer];
+    
     
 }
 

@@ -145,8 +145,12 @@
             {
                 cell=[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"AccountCell"];
             }
-            cell.textLabel.text=[[_accountList objectAtIndex:indexPath.row] objectAtIndex:1];;
-            cell.imageView.image=[UIImage imageNamed:@"disabled"];
+            cell.textLabel.text=[NSString stringWithFormat:@"%@@%@", [[_accountList objectAtIndex:indexPath.row] objectAtIndex:5],
+                                 [[_accountList objectAtIndex:indexPath.row] objectAtIndex:9]];
+            if([[[_accountList objectAtIndex:indexPath.row] objectAtIndex:10] boolValue] ==YES)
+                   cell.imageView.image=[UIImage imageNamed:@"enabled"];
+                else
+                    cell.imageView.image=[UIImage imageNamed:@"disabled"];
             
             return cell;
             break;

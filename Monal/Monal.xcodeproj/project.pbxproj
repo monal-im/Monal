@@ -22,8 +22,6 @@
 		260447F60FEED62100B3B5A7 /* BuddyDetails.xib in Resources */ = {isa = PBXBuildFile; fileRef = 260447F50FEED62100B3B5A7 /* BuddyDetails.xib */; };
 		260A2CC515E713EC00DB103B /* Facebook.png in Resources */ = {isa = PBXBuildFile; fileRef = 260A2CC315E713EC00DB103B /* Facebook.png */; };
 		260A2CC615E713EC00DB103B /* Facebook@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 260A2CC415E713EC00DB103B /* Facebook@2x.png */; };
-		260A2CC915E7140000DB103B /* Facebook_big.png in Resources */ = {isa = PBXBuildFile; fileRef = 260A2CC715E7140000DB103B /* Facebook_big.png */; };
-		260A2CCA15E7140000DB103B /* Facebook_big@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 260A2CC815E7140000DB103B /* Facebook_big@2x.png */; };
 		261A6281176C055400059090 /* ContactsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A627F176C055400059090 /* ContactsViewController.m */; };
 		261A6285176C156500059090 /* ActiveChatsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A6284176C156500059090 /* ActiveChatsViewController.m */; };
 		261A6288176C157D00059090 /* SettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A6287176C157D00059090 /* SettingsViewController.m */; };
@@ -167,7 +165,6 @@
 		2689B6EC1601914E0087CA58 /* DDBadgeViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2689B6EB1601914E0087CA58 /* DDBadgeViewCell.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		268BCF12140B29180025E4D1 /* libjrtplib-static.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */; };
 		268E700515D0D979002E63CD /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 264FF3E4158A855D00D97B86 /* AVFoundation.framework */; };
-		2696BC71177AA28B002F8EEF /* GTalk.png in Resources */ = {isa = PBXBuildFile; fileRef = 2696BC70177AA28B002F8EEF /* GTalk.png */; };
 		269A2E62132030770044B1C8 /* Monal_crop_256.png in Resources */ = {isa = PBXBuildFile; fileRef = 26EB85D911166F1B005446DD /* Monal_crop_256.png */; };
 		269F0F1A105DDEFB00FF96F8 /* status.png in Resources */ = {isa = PBXBuildFile; fileRef = 269F0F19105DDEFB00FF96F8 /* status.png */; };
 		26A942AE130B52520034CDF7 /* offline.png in Resources */ = {isa = PBXBuildFile; fileRef = 26A942AD130B52520034CDF7 /* offline.png */; };
@@ -178,6 +175,10 @@
 		26BAFC551626537D0073728B /* Appirater.m in Sources */ = {isa = PBXBuildFile; fileRef = 26BAFC401626537D0073728B /* Appirater.m */; };
 		26BAFC561626537D0073728B /* AppiraterLocalizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 26BAFC421626537D0073728B /* AppiraterLocalizable.strings */; };
 		26BAFC571626537D0073728B /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 26BAFC4F1626537D0073728B /* README.md */; };
+		26C30590177D1A59007B92A1 /* xmpp.png in Resources */ = {isa = PBXBuildFile; fileRef = 26C3058E177D1A59007B92A1 /* xmpp.png */; };
+		26C30591177D1A59007B92A1 /* xmpp@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26C3058F177D1A59007B92A1 /* xmpp@2x.png */; };
+		26C30594177D1C09007B92A1 /* Gtalk.png in Resources */ = {isa = PBXBuildFile; fileRef = 26C30592177D1C09007B92A1 /* Gtalk.png */; };
+		26C30595177D1C09007B92A1 /* Gtalk@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26C30593177D1C09007B92A1 /* Gtalk@2x.png */; };
 		26C314AD15E72CF1003A73AA /* Default~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = 26C314A715E72CF1003A73AA /* Default~iphone.png */; };
 		26C314AE15E72CF1003A73AA /* Default-Portrait@2x~ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = 26C314A815E72CF1003A73AA /* Default-Portrait@2x~ipad.png */; };
 		26C314AF15E72CF1003A73AA /* Default-Portrait~ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = 26C314A915E72CF1003A73AA /* Default-Portrait~ipad.png */; };
@@ -190,7 +191,6 @@
 		26DB380B162A0AC100982A05 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26DB380A162A0AC100982A05 /* Default-568h@2x.png */; };
 		26DC0A8B1339259900E60BFD /* SearchUser.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26DC0A8A1339259900E60BFD /* SearchUser.xib */; };
 		26DC0A8F133928DA00E60BFD /* about.png in Resources */ = {isa = PBXBuildFile; fileRef = 26DC0A8E133928DA00E60BFD /* about.png */; };
-		26E2786F10FA85C600B7B998 /* XMPP.png in Resources */ = {isa = PBXBuildFile; fileRef = 26E2786A10FA85C600B7B998 /* XMPP.png */; };
 		26E5BA8B132287D400D8C57A /* Settings.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26E5BA8A132287D400D8C57A /* Settings.xib */; };
 		26EB845E111644AD005446DD /* Themes in Resources */ = {isa = PBXBuildFile; fileRef = 26EB845D111644AD005446DD /* Themes */; };
 		26EB85D711166DE7005446DD /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 26EB85D611166DE7005446DD /* Icon.png */; };
@@ -220,8 +220,6 @@
 		26080210110ABA4E005E194D /* Monal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Monal.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		260A2CC315E713EC00DB103B /* Facebook.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Facebook.png; sourceTree = "<group>"; };
 		260A2CC415E713EC00DB103B /* Facebook@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Facebook@2x.png"; sourceTree = "<group>"; };
-		260A2CC715E7140000DB103B /* Facebook_big.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Facebook_big.png; sourceTree = "<group>"; };
-		260A2CC815E7140000DB103B /* Facebook_big@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Facebook_big@2x.png"; sourceTree = "<group>"; };
 		261A627E176C055400059090 /* ContactsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContactsViewController.h; sourceTree = "<group>"; };
 		261A627F176C055400059090 /* ContactsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ContactsViewController.m; sourceTree = "<group>"; };
 		261A6283176C156500059090 /* ActiveChatsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActiveChatsViewController.h; sourceTree = "<group>"; };
@@ -384,7 +382,6 @@
 		2689B6EA1601914E0087CA58 /* DDBadgeViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDBadgeViewCell.h; sourceTree = "<group>"; };
 		2689B6EB1601914E0087CA58 /* DDBadgeViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDBadgeViewCell.m; sourceTree = "<group>"; };
 		268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libjrtplib-static.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		2696BC70177AA28B002F8EEF /* GTalk.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = GTalk.png; sourceTree = "<group>"; };
 		269F0F19105DDEFB00FF96F8 /* status.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = status.png; sourceTree = "<group>"; };
 		26A942AD130B52520034CDF7 /* offline.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = offline.png; sourceTree = "<group>"; };
 		26AD60DA11A95CB700C39051 /* Emoticons */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Emoticons; sourceTree = "<group>"; };
@@ -412,6 +409,10 @@
 		26BAFC511626537D0073728B /* sv */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = sv; path = sv.lproj/AppiraterLocalizable.strings; sourceTree = "<group>"; };
 		26BAFC521626537D0073728B /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/AppiraterLocalizable.strings"; sourceTree = "<group>"; };
 		26BAFC531626537D0073728B /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/AppiraterLocalizable.strings"; sourceTree = "<group>"; };
+		26C3058E177D1A59007B92A1 /* xmpp.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = xmpp.png; sourceTree = "<group>"; };
+		26C3058F177D1A59007B92A1 /* xmpp@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "xmpp@2x.png"; sourceTree = "<group>"; };
+		26C30592177D1C09007B92A1 /* Gtalk.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Gtalk.png; sourceTree = "<group>"; };
+		26C30593177D1C09007B92A1 /* Gtalk@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Gtalk@2x.png"; sourceTree = "<group>"; };
 		26C314A715E72CF1003A73AA /* Default~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default~iphone.png"; sourceTree = "<group>"; };
 		26C314A815E72CF1003A73AA /* Default-Portrait@2x~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-Portrait@2x~ipad.png"; sourceTree = "<group>"; };
 		26C314A915E72CF1003A73AA /* Default-Portrait~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-Portrait~ipad.png"; sourceTree = "<group>"; };
@@ -425,7 +426,6 @@
 		26DC0A8A1339259900E60BFD /* SearchUser.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SearchUser.xib; sourceTree = "<group>"; };
 		26DC0A8E133928DA00E60BFD /* about.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = about.png; sourceTree = "<group>"; };
 		26DE9C050FEEFD00000596F6 /* DB definitions */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "DB definitions"; sourceTree = "<group>"; };
-		26E2786A10FA85C600B7B998 /* XMPP.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = XMPP.png; sourceTree = "<group>"; };
 		26E5BA8A132287D400D8C57A /* Settings.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = Settings.xib; sourceTree = "<group>"; };
 		26EB845D111644AD005446DD /* Themes */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Themes; sourceTree = "<group>"; };
 		26EB85D611166DE7005446DD /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
@@ -544,10 +544,12 @@
 		260447B80FEEC7AD00B3B5A7 /* Protocol */ = {
 			isa = PBXGroup;
 			children = (
-				2696BC70177AA28B002F8EEF /* GTalk.png */,
+				26C30592177D1C09007B92A1 /* Gtalk.png */,
+				26C30593177D1C09007B92A1 /* Gtalk@2x.png */,
+				26C3058E177D1A59007B92A1 /* xmpp.png */,
+				26C3058F177D1A59007B92A1 /* xmpp@2x.png */,
 				260A2CC315E713EC00DB103B /* Facebook.png */,
 				260A2CC415E713EC00DB103B /* Facebook@2x.png */,
-				26E2786A10FA85C600B7B998 /* XMPP.png */,
 			);
 			name = Protocol;
 			sourceTree = "<group>";
@@ -794,8 +796,6 @@
 		269A2E60132030240044B1C8 /* Protocol Detail View */ = {
 			isa = PBXGroup;
 			children = (
-				260A2CC715E7140000DB103B /* Facebook_big.png */,
-				260A2CC815E7140000DB103B /* Facebook_big@2x.png */,
 				26C76BEA1320544200EAF270 /* google_g.png */,
 			);
 			name = "Protocol Detail View";
@@ -1107,7 +1107,6 @@
 				260447F60FEED62100B3B5A7 /* BuddyDetails.xib in Resources */,
 				269F0F1A105DDEFB00FF96F8 /* status.png in Resources */,
 				26D1847310F9972400340C52 /* XMPPEdit.xib in Resources */,
-				26E2786F10FA85C600B7B998 /* XMPP.png in Resources */,
 				26EB845E111644AD005446DD /* Themes in Resources */,
 				26EB85D711166DE7005446DD /* Icon.png in Resources */,
 				26AD610111A95CB700C39051 /* Emoticons in Resources */,
@@ -1157,8 +1156,6 @@
 				263707631488785E00DB8D57 /* noicon@2x.png in Resources */,
 				260A2CC515E713EC00DB103B /* Facebook.png in Resources */,
 				260A2CC615E713EC00DB103B /* Facebook@2x.png in Resources */,
-				260A2CC915E7140000DB103B /* Facebook_big.png in Resources */,
-				260A2CCA15E7140000DB103B /* Facebook_big@2x.png in Resources */,
 				26C314AD15E72CF1003A73AA /* Default~iphone.png in Resources */,
 				26C314AE15E72CF1003A73AA /* Default-Portrait@2x~ipad.png in Resources */,
 				26C314AF15E72CF1003A73AA /* Default-Portrait~ipad.png in Resources */,
@@ -1171,7 +1168,10 @@
 				26BAFC561626537D0073728B /* AppiraterLocalizable.strings in Resources */,
 				26BAFC571626537D0073728B /* README.md in Resources */,
 				26DB380B162A0AC100982A05 /* Default-568h@2x.png in Resources */,
-				2696BC71177AA28B002F8EEF /* GTalk.png in Resources */,
+				26C30590177D1A59007B92A1 /* xmpp.png in Resources */,
+				26C30591177D1A59007B92A1 /* xmpp@2x.png in Resources */,
+				26C30594177D1C09007B92A1 /* Gtalk.png in Resources */,
+				26C30595177D1C09007B92A1 /* Gtalk@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

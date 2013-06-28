@@ -68,6 +68,7 @@
 		26352EA2177D1D6300E2C8FF /* whiteButton@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26352E85177D1D6300E2C8FF /* whiteButton@2x.png */; };
 		26352EA3177D1D6300E2C8FF /* whiteButtonHighlight.png in Resources */ = {isa = PBXBuildFile; fileRef = 26352E86177D1D6300E2C8FF /* whiteButtonHighlight.png */; };
 		26352EA4177D1D6300E2C8FF /* whiteButtonHighlight@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26352E87177D1D6300E2C8FF /* whiteButtonHighlight@2x.png */; };
+		26352EA8177D222600E2C8FF /* MLXMPPManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26352EA7177D222600E2C8FF /* MLXMPPManager.m */; };
 		263566B9133BDAD10095CD33 /* help.png in Resources */ = {isa = PBXBuildFile; fileRef = 263566B8133BDAD00095CD33 /* help.png */; };
 		2636C43F177BD58C001CA71F /* XMPPEdit.m in Sources */ = {isa = PBXBuildFile; fileRef = 2636C43E177BD58C001CA71F /* XMPPEdit.m */; };
 		26370742148873FB00DB8D57 /* accounts@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26370741148873FB00DB8D57 /* accounts@2x.png */; };
@@ -305,6 +306,8 @@
 		26352E85177D1D6300E2C8FF /* whiteButton@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "whiteButton@2x.png"; sourceTree = "<group>"; };
 		26352E86177D1D6300E2C8FF /* whiteButtonHighlight.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = whiteButtonHighlight.png; sourceTree = "<group>"; };
 		26352E87177D1D6300E2C8FF /* whiteButtonHighlight@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "whiteButtonHighlight@2x.png"; sourceTree = "<group>"; };
+		26352EA6177D222600E2C8FF /* MLXMPPManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLXMPPManager.h; sourceTree = "<group>"; };
+		26352EA7177D222600E2C8FF /* MLXMPPManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLXMPPManager.m; sourceTree = "<group>"; };
 		263566B8133BDAD00095CD33 /* help.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = help.png; sourceTree = "<group>"; };
 		2636C43D177BD58C001CA71F /* XMPPEdit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPEdit.h; sourceTree = "<group>"; };
 		2636C43E177BD58C001CA71F /* XMPPEdit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPEdit.m; sourceTree = "<group>"; };
@@ -532,6 +535,7 @@
 		080E96DDFE201D6D7F000001 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				26352EA5177D21FC00E2C8FF /* Managers */,
 				26715E5E17650AF900684F3D /* View Controllers */,
 				26F7BB3A1115F8A300712672 /* tools */,
 				2601D9A70FBF255D004DB939 /* DataLayer.m */,
@@ -666,6 +670,15 @@
 				26352E87177D1D6300E2C8FF /* whiteButtonHighlight@2x.png */,
 			);
 			path = buttons;
+			sourceTree = "<group>";
+		};
+		26352EA5177D21FC00E2C8FF /* Managers */ = {
+			isa = PBXGroup;
+			children = (
+				26352EA6177D222600E2C8FF /* MLXMPPManager.h */,
+				26352EA7177D222600E2C8FF /* MLXMPPManager.m */,
+			);
+			name = Managers;
 			sourceTree = "<group>";
 		};
 		2636C440177BD595001CA71F /* Older UI code */ = {
@@ -1301,6 +1314,7 @@
 				261A6297176C160900059090 /* HelpViewController.m in Sources */,
 				261A629A176C162200059090 /* AboutViewController.m in Sources */,
 				2636C43F177BD58C001CA71F /* XMPPEdit.m in Sources */,
+				26352EA8177D222600E2C8FF /* MLXMPPManager.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

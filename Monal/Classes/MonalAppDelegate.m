@@ -112,13 +112,11 @@
 
     //rating
     [Appirater setAppId:@"317711500"];
-    
     [Appirater setDaysUntilPrompt:5];
     [Appirater setUsesUntilPrompt:10];
     [Appirater setSignificantEventsUntilPrompt:5];
     [Appirater setTimeBeforeReminding:2];
     //[Appirater setDebug:YES];
-    
     [Appirater appLaunched:YES];
     
     

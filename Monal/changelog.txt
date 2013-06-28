@@ -11,10 +11,11 @@ Notable features:
 ★ Tested heavily with google talk, facebook, openfire, prosody   and ejabberd servers. 
 
 
-2.0.9 changelog
+2.1.0 changelog
 
 This is  update that  fixes bugs.
-1. iphone 5 screen support
+1. stability related bug fixes
+2. fixed opening app in landscape mode
 
 
       

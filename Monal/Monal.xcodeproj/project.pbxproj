@@ -559,8 +559,7 @@
 				262DE4C815C4FA940040A66B /* Launch Images */,
 				269A2E61132030510044B1C8 /* App */,
 				26690E4E127C9D5300051D13 /* Contact List */,
-				2669CA76121F2AD400CD7C58 /* HelpUI */,
-				26BD6FA0110411EB008583BB /* Accounts */,
+				26BD6FA0110411EB008583BB /* Account Status */,
 				260447B80FEEC7AD00B3B5A7 /* Protocol */,
 				260447A00FEEC73500B3B5A7 /* tab bar */,
 			);
@@ -724,13 +723,6 @@
 				263707621488785E00DB8D57 /* noicon@2x.png */,
 			);
 			name = "Contact List";
-			sourceTree = "<group>";
-		};
-		2669CA76121F2AD400CD7C58 /* HelpUI */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = HelpUI;
 			sourceTree = "<group>";
 		};
 		26715E5B176506AD00684F3D /* old nibs */ = {
@@ -902,7 +894,7 @@
 			path = appirator;
 			sourceTree = "<group>";
 		};
-		26BD6FA0110411EB008583BB /* Accounts */ = {
+		26BD6FA0110411EB008583BB /* Account Status */ = {
 			isa = PBXGroup;
 			children = (
 				2637075A1488773800DB8D57 /* disabled.png */,
@@ -910,7 +902,7 @@
 				2637075C1488773800DB8D57 /* enabled.png */,
 				2637075D1488773800DB8D57 /* enabled@2x.png */,
 			);
-			name = Accounts;
+			name = "Account Status";
 			sourceTree = "<group>";
 		};
 		26DB52111777C83100B50353 /* Modal views */ = {

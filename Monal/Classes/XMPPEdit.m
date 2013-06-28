@@ -346,17 +346,19 @@
                     static NSString *identifier = @"MyCell";
                     thecell = [[UITableViewCell alloc]initWithFrame:CGRectZero reuseIdentifier:identifier];
                     //thecell.selection=false;
-                    CGRect cellRectangle = CGRectMake(45,0,225,[tableView rowHeight]-3);
+                    CGRect cellRectangle = CGRectMake(32,3,225,[tableView rowHeight]-6);
                     
                     //Initialize the label with the rectangle.
                     UIButton* theButton= [UIButton buttonWithType:UIButtonTypeRoundedRect];
-					[theButton setBackgroundImage:[[UIImage imageNamed:@"delete_button.png"]
-                                                   stretchableImageWithLeftCapWidth:10.0 topCapHeight:0.0] forState:UIControlStateNormal];
+					[theButton setBackgroundImage:[[UIImage imageNamed:@"orangeButton"]
+                                                   stretchableImageWithLeftCapWidth:5 topCapHeight:5] forState:UIControlStateNormal];
+                    
+                    
                     theButton.frame=cellRectangle;
                     
 					[theButton setTitle:@"Delete" forState: UIControlStateNormal ];
 					[theButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-					[theButton setFont:[UIFont boldSystemFontOfSize:14.0]];
+					[theButton setFont:[UIFont boldSystemFontOfSize:17.0]];
                     [theButton addTarget:self action:@selector(delClicked:) forControlEvents:UIControlEventTouchUpInside];
 					
 					

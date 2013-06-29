@@ -27,12 +27,11 @@
 -(void) setRunLoop
 {
 	[_oStream setDelegate:self];
-    [_oStream scheduleInRunLoop:[NSRunLoop currentRunLoop]
-					   forMode:NSDefaultRunLoopMode];
+    [_oStream scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
 	
 	[_iStream setDelegate:self];
-    [_iStream scheduleInRunLoop:[NSRunLoop currentRunLoop]
-					   forMode:NSDefaultRunLoopMode];
+   [_iStream scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
+    [[NSRunLoop currentRunLoop]run];
 }
 
 -(void) createStreams
@@ -55,12 +54,6 @@
     else
         debug_NSLog(@"streams created ok");
     
-	
-    dispatch_sync(dispatch_get_main_queue(), ^{
-        [self setRunLoop];
-    });
-	
-    
     if((CFReadStreamSetProperty((__bridge CFReadStreamRef)_iStream,
                                 kCFStreamNetworkServiceType,  kCFStreamNetworkServiceTypeVoIP)) &&
        (CFWriteStreamSetProperty((__bridge CFWriteStreamRef)_oStream,
@@ -73,20 +66,11 @@
         debug_NSLog(@"could not set VOIP properties on streams.");
     }
     
-	
-    
-    
-	
-	
-    if((_SSL==YES)  && (_oldStyleSSL==YES))
+   if((_SSL==YES)  && (_oldStyleSSL==YES))
 	{
 		// do ssl stuff here
 		debug_NSLog(@"securing connection.. for old style");
-        
-		
-		
-        
-		
+  	
 		//allowing it to accept the peers cert if the host doesnt match.
 		NSDictionary *settings = [ [NSDictionary alloc ]
 								  initWithObjectsAndKeys:
@@ -103,15 +87,16 @@
 								@"kCFStreamPropertySSLSettings", (__bridge CFTypeRef)settings);
 		CFWriteStreamSetProperty((__bridge CFWriteStreamRef)_oStream,
 								 @"kCFStreamPropertySSLSettings", (__bridge CFTypeRef)settings);
-		
-        
-		debug_NSLog(@"connection secured");
+
+        debug_NSLog(@"connection secured");
 		//[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(login:) name: @"XMPPMech" object:self];
 		// for new style this is only done AFTER start tls is sent to not conflict with the earlier mech
 	}
 	
-	[_iStream open];
-	[_oStream open];
+    [self setRunLoop];
+    
+    [_iStream open];
+    [_oStream open];
     
 
 }
@@ -148,6 +133,81 @@
  
     
 }
+
+#pragma mark nsstream delegate
+
+- (void)stream:(NSStream *)stream handleEvent:(NSStreamEvent)eventCode
+{
+	debug_NSLog(@"Stream has event");
+	switch(eventCode)
+	{
+			//for writing
+        case NSStreamEventHasSpaceAvailable:
+        {
+            debug_NSLog(@"Stream has space to write");
+            
+            break;
+        }
+			
+			//for reading
+        case  NSStreamEventHasBytesAvailable:
+		{
+			debug_NSLog(@"Stream has bytes to read");
+			
+			break;
+		}
+			
+		case NSStreamEventErrorOccurred:
+		{
+			debug_NSLog(@"Stream error");
+            NSError* st_error= [stream streamError];
+            
+            debug_NSLog(@"Stream error code=%d domain=%@   local desc:%@ ",st_error.code,st_error.domain,  st_error.localizedDescription);
+            
+            
+            if(st_error.code==61)// Connection refused
+            {
+                break;
+            }
+            
+            
+            if(st_error.code==64)// Host is down
+            {
+                break;
+            }
+            
+			break;
+            
+		}
+		case NSStreamEventNone:
+		{
+			debug_NSLog(@"Stream event none");
+			break;
+			
+		}
+			
+			
+		case NSStreamEventOpenCompleted:
+		{
+			debug_NSLog(@"Stream open completed");
+			
+            break; 
+		}
+			
+			
+		case NSStreamEventEndEncountered:
+		{
+			debug_NSLog(@"Stream end encoutered");
+			break; 
+		}
+			
+			
+            
+			
+	}
+	
+}
+
 #pragma mark XMPP
 
 
@@ -171,7 +231,7 @@
 							  );
 	if(res==kDNSServiceErr_NoError)
 	{
-		int sock= DNSServiceRefSockFD(sdRef);
+		DNSServiceRefSockFD(sdRef);
 		
 		DNSServiceProcessResult(sdRef);
 		DNSServiceRefDeallocate(sdRef);

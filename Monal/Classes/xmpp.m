@@ -12,6 +12,10 @@
 
 #define kXMPPReadSize 51200 // bytes
 
+#define kMonalNetReadQueue "im.monal.netReadQueue"
+#define kMonalNetWriteQueue "im.monal.netWriteQueue"
+
+
 @implementation xmpp
 
 -(id) init
@@ -20,10 +24,15 @@
     
     _discoveredServerList=[[NSMutableArray alloc] init];
     _inputBuffer=[[NSMutableData alloc] init];
+    _outputQueue=[[NSMutableArray alloc] init];
     _port=5552;
     _SSL=YES;
     _oldStyleSSL=NO;
     _resource=@"Monal";
+    
+    _netReadQueue = dispatch_queue_create(kMonalNetReadQueue, DISPATCH_QUEUE_SERIAL);
+    _netWriteQueue = dispatch_queue_create(kMonalNetWriteQueue, DISPATCH_QUEUE_SERIAL);
+    
     return self;
 }
 
@@ -97,6 +106,16 @@
 		// for new style this is only done AFTER start tls is sent to not conflict with the earlier mech
 	}
 	
+    //start stream
+    XMLNode* stream = [[XMLNode alloc] init];
+    stream.element=@"stream";
+    [stream.attributes setObject:@"jabber:client" forKey:@"xmlns"];
+    [stream.attributes setObject:@"http://etherx.jabber.org/streams" forKey:@"xmlns:stream"];
+    [stream.attributes setObject:@"1.0" forKey:@"version"];
+    if(_domain)
+    [stream.attributes setObject:_domain forKey:@"to"];
+    [self send:stream];
+    
     [self setRunLoop];
     
 #warning this needs to time out propery
@@ -181,6 +200,17 @@
 }
 
 
+
+
+#pragma mark XMPP
+
+-(void) send:(XMLNode*) stanza
+{
+    dispatch_sync(_netWriteQueue, ^{
+        [_outputQueue addObject:stanza];
+    });
+}
+
 #pragma mark nsstream delegate
 
 - (void)stream:(NSStream *)stream handleEvent:(NSStreamEvent)eventCode
@@ -192,6 +222,7 @@
         case NSStreamEventHasSpaceAvailable:
         {
             debug_NSLog(@"Stream has space to write");
+            [self writeFromQueue];
             
             break;
         }
@@ -200,6 +231,7 @@
         case  NSStreamEventHasBytesAvailable:
 		{
 			debug_NSLog(@"Stream has bytes to read");
+            [self readToBuffer];
 			
 			break;
 		}
@@ -238,14 +270,14 @@
 		{
 			debug_NSLog(@"Stream open completed");
 			
-            break; 
+            break;
 		}
 			
 			
 		case NSStreamEventEndEncountered:
 		{
 			debug_NSLog(@"Stream end encoutered");
-			break; 
+			break;
 		}
 			
 			
@@ -255,10 +287,46 @@
 	
 }
 
-#pragma mark XMPP
-
+#pragma mark network I/O
 -(void) writeFromQueue
 {
+    dispatch_async(dispatch_get_main_queue(),
+                   ^{
+                       [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
+                   });
+    
+    dispatch_sync(_netWriteQueue, ^{
+        for(XMLNode* node in _outputQueue)
+        {
+            [self writeToStream:node.XMLString];
+        }
+        
+        [_outputQueue removeAllObjects];
+    });
+    
+    dispatch_async(dispatch_get_main_queue(),
+                   ^{
+                       [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+                   });
+    
+}
+
+-(void) writeToStream:(NSString*) messageOut
+{
+    debug_NSLog(@"sending: %@ ", messageOut);
+    const uint8_t * rawstring = (const uint8_t *)[messageOut UTF8String];
+    int len= strlen(rawstring);
+    if([_oStream write:rawstring maxLength:len]!=-1)
+    {
+        //     debug_NSLog(@"sending: ok");
+    }
+    else
+    {
+        NSError* error= [_oStream streamError];
+        debug_NSLog(@"sending: failed with error %d domain %@",error.code, error.domain);
+    }
+    
+    return;
     
 }
 

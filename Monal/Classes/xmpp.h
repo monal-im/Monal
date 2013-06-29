@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "XMLNode.h"
 
 // networking objects
 #import <unistd.h>
@@ -60,11 +61,19 @@ typedef struct
     NSInputStream *_iStream;
     NSOutputStream *_oStream;
     NSMutableData* _inputBuffer; 
-	
+	NSMutableArray* _outputQueue;
+    
+    dispatch_queue_t _netReadQueue ;
+    dispatch_queue_t _netWriteQueue ;
 }
 
 -(void) connect;
 -(void) disconnect;
+
+/**
+ Adds the stanza to the output Queue
+ */
+-(void) send:(XMLNode*) stanza;
 
 // connection attributes
 @property (nonatomic,strong) NSString* username;

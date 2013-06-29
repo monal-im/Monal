@@ -48,7 +48,7 @@
         _editing=true;
 	} 
 	
-	debug_NSLog(@"got account number %@", accountno);
+	debug_NSLog(@"got account number %@", _accountno);
     
 
     UITapGestureRecognizer *gestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(hideKeyboard)]; // hides the kkyeboard when you tap outside the editing area

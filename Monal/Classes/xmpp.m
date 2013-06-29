@@ -16,8 +16,24 @@
     self=[super init];
     
     _discoveredServerList=[[NSMutableArray alloc] init];
+    _port=5552;
+    _SSL=YES;
+    _resource=@"Monal";
     return self;
 }
+
+-(void) connect
+{
+    //allow gtalk on 443
+    if(self.port!=443)
+    {
+    // do DNS discovery
+    [self dnsDiscover];
+        
+    }
+    
+}
+#pragma mark XMPP
 
 
 #pragma mark DNS 
@@ -203,6 +219,6 @@ void query_cb(const DNSServiceRef DNSServiceRef, const DNSServiceFlags flags, co
  }
  */
 
-#pragma mark XMPP
+
 
 @end

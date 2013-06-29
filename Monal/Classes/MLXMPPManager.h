@@ -7,6 +7,9 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "xmpp.h"
+
+#define kMonalNetQueue "im.monal.netQueue"
 
 /**
  A manager to control all of the active XMPP connections
@@ -14,6 +17,7 @@
 @interface MLXMPPManager : NSObject
 {
     NSArray* _accountList;
+    dispatch_queue_t _netQueue ;
 }
 
 + (MLXMPPManager* )sharedInstance;

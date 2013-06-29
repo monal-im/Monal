@@ -59,13 +59,15 @@ typedef struct
   
 }
 
+-(void) connect;
+
 // connection attributes
 @property (nonatomic,strong) NSString* username;
 @property (nonatomic,strong) NSString* domain;
 @property (nonatomic,strong, readonly) NSString* jid;
 @property (nonatomic,strong) NSString* password;
 @property (nonatomic,strong) NSString* server;
-@property (nonatomic,assign) uint port;
+@property (nonatomic,assign) NSInteger port;
 @property (nonatomic,strong) NSString* resource;
 @property (nonatomic,assign) BOOL SSL;
 

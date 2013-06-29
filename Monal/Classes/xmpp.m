@@ -32,6 +32,16 @@
         
     }
     
+    if([_discoveredServerList count]>0)
+    {
+        //sort by priority
+        NSSortDescriptor *descriptor = [[NSSortDescriptor alloc] initWithKey:@"priority"  ascending:YES];
+        NSArray* sortArray =[NSArray arrayWithObjects:descriptor,nil];
+        [_discoveredServerList sortUsingDescriptors:sortArray];
+        
+        // take the top one
+    }
+    
 }
 #pragma mark XMPP
 
@@ -142,8 +152,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 			NSString* theserver=[NSString stringWithUTF8String:targetstr];
 			NSNumber* num=[NSNumber numberWithInt:ntohs(srv->priority)];
 			NSNumber* theport=[NSNumber numberWithInt:portval];
-			NSArray* row=[NSArray arrayWithObjects:num,theserver,theport,nil];
-			
+			NSDictionary* row=[NSDictionary dictionaryWithObjectsAndKeys:num,@"priority", theserver, @"server", theport, @"port",nil];
 			[client.discoveredServerList addObject:row];
 			debug_NSLog(@"DISCOVERY: server  %@", theserver);
 			;

@@ -60,7 +60,7 @@ typedef struct
     
     NSInputStream *_iStream;
     NSOutputStream *_oStream;
-    NSMutableData* _inputBuffer; 
+    NSMutableString* _inputBuffer;
 	NSMutableArray* _outputQueue;
     
     dispatch_queue_t _netReadQueue ;

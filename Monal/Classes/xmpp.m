@@ -23,7 +23,7 @@
     self=[super init];
     
     _discoveredServerList=[[NSMutableArray alloc] init];
-    _inputBuffer=[[NSMutableData alloc] init];
+    _inputBuffer=[[NSMutableString alloc] init];
     _outputQueue=[[NSMutableArray alloc] init];
     _port=5552;
     _SSL=YES;
@@ -97,9 +97,9 @@
 								  @"kCFStreamSSLLevel",
 								  nil ];
 		CFReadStreamSetProperty((__bridge CFReadStreamRef)_iStream,
-								@"kCFStreamPropertySSLSettings", (__bridge CFTypeRef)settings);
+								kCFStreamPropertySSLSettings, (__bridge CFTypeRef)settings);
 		CFWriteStreamSetProperty((__bridge CFWriteStreamRef)_oStream,
-								 @"kCFStreamPropertySSLSettings", (__bridge CFTypeRef)settings);
+								 kCFStreamPropertySSLSettings, (__bridge CFTypeRef)settings);
 
         debug_NSLog(@"connection secured");
 		//[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(login:) name: @"XMPPMech" object:self];
@@ -108,7 +108,7 @@
 	
     //start stream
     XMLNode* stream = [[XMLNode alloc] init];
-    stream.element=@"stream";
+    stream.element=@"stream:stream";
     [stream.attributes setObject:@"jabber:client" forKey:@"xmlns"];
     [stream.attributes setObject:@"http://etherx.jabber.org/streams" forKey:@"xmlns:stream"];
     [stream.attributes setObject:@"1.0" forKey:@"version"];
@@ -133,7 +133,7 @@
     }
     
     //allow gtalk on 443
-    if(_oldStyleSSL==NO);
+    if(_oldStyleSSL==NO)
     {
     // do DNS discovery
         #warning  this needs to time it self out properly
@@ -315,7 +315,7 @@
 {
     debug_NSLog(@"sending: %@ ", messageOut);
     const uint8_t * rawstring = (const uint8_t *)[messageOut UTF8String];
-    int len= strlen(rawstring);
+    int len= strlen((char*)rawstring);
     if([_oStream write:rawstring maxLength:len]!=-1)
     {
         //     debug_NSLog(@"sending: ok");
@@ -343,7 +343,10 @@
 	
 	len = [_iStream read:buf maxLength:kXMPPReadSize];
 	if(len>0) {
-		[_inputBuffer appendBytes:(const void *)buf length:len];
+		//[_inputBuffer appendBytes:(const void *)buf length:len];
+        NSString* newString=[NSString stringWithUTF8String:(char*)buf];
+        if(newString)
+            [_inputBuffer appendString:newString];
         free(buf);
 	}
 	else
@@ -352,6 +355,8 @@
 		return;
 	}
 
+    debug_NSLog(@"read buffer: %@ ", _inputBuffer);
+ 
 }
 
 #pragma mark DNS 

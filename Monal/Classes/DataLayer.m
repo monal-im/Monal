@@ -204,33 +204,33 @@ static DataLayer *sharedInstance=nil;
 		while (sqlite3_step(statement) == SQLITE_ROW) {
 	//while there are rows		
 				//debug_NSLog(@" has rows"); 
-			NSMutableArray* row= [[NSMutableArray alloc] init]; 
+			NSMutableDictionary* row= [[NSMutableDictionary alloc] init];
 			int counter=0; 
 			 while(counter< sqlite3_column_count(statement) )
 			 {
-				 
+				 NSString* columnName=[NSString stringWithUTF8String:sqlite3_column_name(statement,counter)];
+                 
 				 switch(sqlite3_column_type(statement,counter))
 				 {
 						 // SQLITE_INTEGER, SQLITE_FLOAT, SQLITE_TEXT, SQLITE_BLOB, or SQLITE_NULL
 					 case (SQLITE_INTEGER):
 					 {
 						 NSNumber* returnInt= [NSNumber numberWithInt:sqlite3_column_int(statement,counter)];
-						 [row addObject:returnInt];
+                         [row setObject:returnInt forKey:columnName];
 						 break; 
 					 }
 						 
 					 case (SQLITE_FLOAT):
 					 {
 						 NSNumber* returnInt= [NSNumber numberWithDouble:sqlite3_column_double(statement,counter)];
-							 [row addObject:returnInt];
+                        [row setObject:returnInt forKey:columnName];
 						  break; 
 					 }
 						 
 					 case (SQLITE_TEXT):
 					 {
 						 NSString* returnString = [NSString stringWithUTF8String:sqlite3_column_text(statement,counter)];
-						 //	debug_NSLog(@"got string %@", returnString); 
-						 	 [row addObject:[returnString stringByReplacingOccurrencesOfString:@"''" withString:@"'"]];
+                          [row setObject:[returnString stringByReplacingOccurrencesOfString:@"''" withString:@"'"] forKey:columnName];
 						  break; 
 						 
 					 }
@@ -239,8 +239,7 @@ static DataLayer *sharedInstance=nil;
 					 {
 						 //trat as string for now 					
 						 NSString* returnblob = [NSString stringWithUTF8String:sqlite3_column_text(statement,counter)];
-						//debug_NSLog(@"got blob %@", returnblob); 
-						 [row addObject:[returnblob stringByReplacingOccurrencesOfString:@"''" withString:@"'"]];
+						[row setObject:[returnblob stringByReplacingOccurrencesOfString:@"''" withString:@"'"] forKey:columnName];
 						  break; 
 						 
 						 
@@ -254,7 +253,8 @@ static DataLayer *sharedInstance=nil;
 					 case (SQLITE_NULL):
 					 {
 						 debug_NSLog(@"return nil with sql null"); 
-						  [row addObject:@""];
+						  
+                          [row setObject:@"" forKey:columnName];
 						  break; 
 					 }
 						 

@@ -58,7 +58,7 @@
     if(indexPath.section==0)
     {
         //existing
-        editor.accountno=[NSString stringWithFormat:@"%@",[[_accountList objectAtIndex:indexPath.row]objectAtIndex:0]];
+        editor.accountno=[NSString stringWithFormat:@"%@",[[_accountList objectAtIndex:indexPath.row] objectForKey:@"account_id"]];
     }
     else if(indexPath.section==1)
     {
@@ -145,9 +145,9 @@
             {
                 cell=[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"AccountCell"];
             }
-            cell.textLabel.text=[NSString stringWithFormat:@"%@@%@", [[_accountList objectAtIndex:indexPath.row] objectAtIndex:5],
-                                 [[_accountList objectAtIndex:indexPath.row] objectAtIndex:9]];
-            if([[[_accountList objectAtIndex:indexPath.row] objectAtIndex:10] boolValue] ==YES)
+            cell.textLabel.text=[NSString stringWithFormat:@"%@@%@", [[_accountList objectAtIndex:indexPath.row] objectForKey:@"username"],
+                                 [[_accountList objectAtIndex:indexPath.row] objectForKey:@"domain"]];
+            if([[[_accountList objectAtIndex:indexPath.row] objectForKey:@"enabled"] boolValue] ==YES)
                    cell.imageView.image=[UIImage imageNamed:@"enabled"];
                 else
                     cell.imageView.image=[UIImage imageNamed:@"disabled"];
@@ -162,7 +162,7 @@
             {
                 cell=[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"ProtocolCell"];
             }
-            NSString* protocol =[[_protocolList objectAtIndex:indexPath.row] objectAtIndex:1];
+            NSString* protocol =[[_protocolList objectAtIndex:indexPath.row] objectForKey:@"protocol_name"];
             cell.textLabel.text=protocol;
             cell.imageView.image=[UIImage imageNamed:protocol];
             

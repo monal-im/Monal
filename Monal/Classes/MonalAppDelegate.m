@@ -119,7 +119,7 @@
     //[Appirater setDebug:YES];
     [Appirater appLaunched:YES];
     
-    [[[Reachability alloc] init] startNotifier];
+ //  [[[Reachability alloc] init] startNotifier];
     
     
 }

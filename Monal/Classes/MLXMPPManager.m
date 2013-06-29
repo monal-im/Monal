@@ -7,6 +7,7 @@
 //
 
 #import "MLXMPPManager.h"
+#import "DataLayer.h"
 
 @implementation MLXMPPManager
 
@@ -22,6 +23,14 @@
     return sharedInstance;
 }
 
+-(void)connectIfNecessary
+{
+    _accountList=[[DataLayer sharedInstance] accountList];
+    for (NSArray* account in _accountList)
+    {
+        
+    }
+}
 
 
 @end

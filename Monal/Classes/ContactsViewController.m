@@ -7,6 +7,7 @@
 //
 
 #import "ContactsViewController.h"
+#import "MLXMPPManager.h"
 
 @interface ContactsViewController ()
 
@@ -37,7 +38,9 @@
     
     self.view=_contactsTable;
     
+    // should any accounts connect?
     
+    [[MLXMPPManager sharedInstance] connectIfNecessary];
     
 }
 

@@ -31,7 +31,7 @@
 	
 	[_iStream setDelegate:self];
    [_iStream scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
-    [[NSRunLoop currentRunLoop]run];
+  
 }
 
 -(void) createStreams

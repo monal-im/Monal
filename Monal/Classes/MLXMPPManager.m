@@ -57,12 +57,14 @@
             xmppAccount.password=[account objectForKey:@"password"];
             xmppAccount.domain=[account objectForKey:@"domain"];
             xmppAccount.resource=[account objectForKey:@"resource"];
-            xmppAccount.SSL=[[account objectForKey:@"secure"] boolValue];
+      
+            xmppAccount.server=[account objectForKey:@"server"];
             xmppAccount.port=[[account objectForKey:@"other_port"] integerValue];
-            
+            xmppAccount.SSL=[[account objectForKey:@"secure"] boolValue];
             dispatch_async(_netQueue,
                    ^{
                        [xmppAccount connect];
+                       [[NSRunLoop currentRunLoop]run];
                    });
 
         

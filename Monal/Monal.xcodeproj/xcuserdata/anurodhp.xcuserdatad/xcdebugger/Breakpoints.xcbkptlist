@@ -34,11 +34,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Classes/xmpp.m"
-         timestampString = "394204083.585886"
+         timestampString = "394212367.942334"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "3383"
-         endingLineNumber = "3383">
+         startingLineNumber = "3497"
+         endingLineNumber = "3497">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -97,22 +97,22 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Classes/xmpp.m"
-         timestampString = "394204083.585886"
+         timestampString = "394212367.942334"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "1215"
-         endingLineNumber = "1215">
+         startingLineNumber = "1329"
+         endingLineNumber = "1329">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Classes/xmpp.m"
-         timestampString = "394204083.585886"
+         timestampString = "394212367.942334"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "1264"
-         endingLineNumber = "1264">
+         startingLineNumber = "1378"
+         endingLineNumber = "1378">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -197,121 +197,121 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Classes/xmpp.m"
-         timestampString = "394204083.585886"
+         timestampString = "394212367.942334"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "1300"
-         endingLineNumber = "1300">
+         startingLineNumber = "1414"
+         endingLineNumber = "1414">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Classes/xmpp.m"
-         timestampString = "394204083.585886"
+         timestampString = "394212367.942334"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "1301"
-         endingLineNumber = "1301">
+         startingLineNumber = "1415"
+         endingLineNumber = "1415">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Classes/xmpp.m"
-         timestampString = "394204083.585886"
+         timestampString = "394212367.942334"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "3628"
-         endingLineNumber = "3628">
+         startingLineNumber = "3742"
+         endingLineNumber = "3742">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Classes/xmpp.m"
-         timestampString = "394204083.585886"
+         timestampString = "394212367.942334"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "3657"
-         endingLineNumber = "3657">
+         startingLineNumber = "3771"
+         endingLineNumber = "3771">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Classes/xmpp.m"
-         timestampString = "394204083.585886"
+         timestampString = "394212367.942334"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "689"
-         endingLineNumber = "689">
+         startingLineNumber = "803"
+         endingLineNumber = "803">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Classes/xmpp.m"
-         timestampString = "394204083.585886"
+         timestampString = "394212367.942334"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "4198"
-         endingLineNumber = "4198">
+         startingLineNumber = "4312"
+         endingLineNumber = "4312">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Classes/xmpp.m"
-         timestampString = "394204083.585886"
+         timestampString = "394212367.942334"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "678"
-         endingLineNumber = "678">
+         startingLineNumber = "792"
+         endingLineNumber = "792">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Classes/xmpp.m"
-         timestampString = "394204083.585886"
+         timestampString = "394212367.942334"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "3722"
-         endingLineNumber = "3722">
+         startingLineNumber = "3836"
+         endingLineNumber = "3836">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Classes/xmpp.m"
-         timestampString = "394204083.585886"
+         timestampString = "394212367.942334"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "3786"
-         endingLineNumber = "3786">
+         startingLineNumber = "3900"
+         endingLineNumber = "3900">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Classes/xmpp.m"
-         timestampString = "394204083.585886"
+         timestampString = "394212367.942334"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "809"
-         endingLineNumber = "809">
+         startingLineNumber = "923"
+         endingLineNumber = "923">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Classes/xmpp.m"
-         timestampString = "394204083.585886"
+         timestampString = "394212367.942334"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "3813"
-         endingLineNumber = "3813">
+         startingLineNumber = "3927"
+         endingLineNumber = "3927">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -409,33 +409,33 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Classes/xmpp.m"
-         timestampString = "394204083.585886"
+         timestampString = "394212367.942334"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "3895"
-         endingLineNumber = "3895">
+         startingLineNumber = "4009"
+         endingLineNumber = "4009">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Classes/xmpp.m"
-         timestampString = "394204083.585886"
+         timestampString = "394212367.942334"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "3881"
-         endingLineNumber = "3881">
+         startingLineNumber = "3995"
+         endingLineNumber = "3995">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Classes/xmpp.m"
-         timestampString = "394204083.585886"
+         timestampString = "394212367.942334"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "3991"
-         endingLineNumber = "3991">
+         startingLineNumber = "4105"
+         endingLineNumber = "4105">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -507,22 +507,22 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Classes/xmpp.m"
-         timestampString = "394204083.585886"
+         timestampString = "394212367.942334"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "3203"
-         endingLineNumber = "3203">
+         startingLineNumber = "3317"
+         endingLineNumber = "3317">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Classes/xmpp.m"
-         timestampString = "394204083.585886"
+         timestampString = "394212367.942334"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "3204"
-         endingLineNumber = "3204">
+         startingLineNumber = "3318"
+         endingLineNumber = "3318">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -607,33 +607,33 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Classes/xmpp.m"
-         timestampString = "394204083.585886"
+         timestampString = "394212367.942334"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "2564"
-         endingLineNumber = "2564">
+         startingLineNumber = "2678"
+         endingLineNumber = "2678">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Classes/xmpp.m"
-         timestampString = "394204083.585886"
+         timestampString = "394212367.942334"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "2568"
-         endingLineNumber = "2568">
+         startingLineNumber = "2682"
+         endingLineNumber = "2682">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Classes/xmpp.m"
-         timestampString = "394204083.585886"
+         timestampString = "394212367.942334"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "2569"
-         endingLineNumber = "2569">
+         startingLineNumber = "2683"
+         endingLineNumber = "2683">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -653,11 +653,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Classes/xmpp.m"
-         timestampString = "394204083.585886"
+         timestampString = "394212367.942334"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "828"
-         endingLineNumber = "828">
+         startingLineNumber = "942"
+         endingLineNumber = "942">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -677,66 +677,66 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Classes/xmpp.m"
-         timestampString = "394204083.585886"
+         timestampString = "394212367.942334"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "837"
-         endingLineNumber = "837">
+         startingLineNumber = "951"
+         endingLineNumber = "951">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Classes/xmpp.m"
-         timestampString = "394204083.585886"
+         timestampString = "394212367.942334"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "1353"
-         endingLineNumber = "1353">
+         startingLineNumber = "1467"
+         endingLineNumber = "1467">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Classes/xmpp.m"
-         timestampString = "394204083.585886"
+         timestampString = "394212367.942334"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "3450"
-         endingLineNumber = "3450">
+         startingLineNumber = "3564"
+         endingLineNumber = "3564">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Classes/xmpp.m"
-         timestampString = "394204083.585886"
+         timestampString = "394212367.942334"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "838"
-         endingLineNumber = "838">
+         startingLineNumber = "952"
+         endingLineNumber = "952">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Classes/xmpp.m"
-         timestampString = "394204083.585886"
+         timestampString = "394212367.942334"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "972"
-         endingLineNumber = "972">
+         startingLineNumber = "1086"
+         endingLineNumber = "1086">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Classes/xmpp.m"
-         timestampString = "394204083.585886"
+         timestampString = "394212367.942334"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "1574"
-         endingLineNumber = "1574">
+         startingLineNumber = "1688"
+         endingLineNumber = "1688">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -808,11 +808,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Classes/xmpp.m"
-         timestampString = "394204083.585886"
+         timestampString = "394212367.942334"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "1261"
-         endingLineNumber = "1261">
+         startingLineNumber = "1375"
+         endingLineNumber = "1375">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -845,22 +845,22 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Classes/xmpp.m"
-         timestampString = "394204083.585886"
+         timestampString = "394212367.942334"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "1283"
-         endingLineNumber = "1283">
+         startingLineNumber = "1397"
+         endingLineNumber = "1397">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Classes/xmpp.m"
-         timestampString = "394204083.585886"
+         timestampString = "394212367.942334"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "3354"
-         endingLineNumber = "3354">
+         startingLineNumber = "3468"
+         endingLineNumber = "3468">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -932,11 +932,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Classes/xmpp.m"
-         timestampString = "394204083.585886"
+         timestampString = "394212367.942334"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "4393"
-         endingLineNumber = "4393">
+         startingLineNumber = "4507"
+         endingLineNumber = "4507">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -956,22 +956,22 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Classes/xmpp.m"
-         timestampString = "394204083.585886"
+         timestampString = "394212367.942334"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "1137"
-         endingLineNumber = "1137">
+         startingLineNumber = "1251"
+         endingLineNumber = "1251">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Classes/xmpp.m"
-         timestampString = "394204083.585886"
+         timestampString = "394212367.942334"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "1270"
-         endingLineNumber = "1270">
+         startingLineNumber = "1384"
+         endingLineNumber = "1384">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -1017,33 +1017,33 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Classes/xmpp.m"
-         timestampString = "394204083.585886"
+         timestampString = "394212367.942334"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "841"
-         endingLineNumber = "841">
+         startingLineNumber = "955"
+         endingLineNumber = "955">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Classes/xmpp.m"
-         timestampString = "394204083.585886"
+         timestampString = "394212367.942334"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "842"
-         endingLineNumber = "842">
+         startingLineNumber = "956"
+         endingLineNumber = "956">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Classes/xmpp.m"
-         timestampString = "394204083.585886"
+         timestampString = "394212367.942334"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "3800"
-         endingLineNumber = "3800">
+         startingLineNumber = "3914"
+         endingLineNumber = "3914">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -1076,55 +1076,55 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Classes/xmpp.m"
-         timestampString = "394204083.585886"
+         timestampString = "394212367.942334"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "3788"
-         endingLineNumber = "3788">
+         startingLineNumber = "3902"
+         endingLineNumber = "3902">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Classes/xmpp.m"
-         timestampString = "394204083.585886"
+         timestampString = "394212367.942334"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "3288"
-         endingLineNumber = "3288">
+         startingLineNumber = "3402"
+         endingLineNumber = "3402">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Classes/xmpp.m"
-         timestampString = "394204083.585886"
+         timestampString = "394212367.942334"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "2265"
-         endingLineNumber = "2265">
+         startingLineNumber = "2379"
+         endingLineNumber = "2379">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Classes/xmpp.m"
-         timestampString = "394204083.585886"
+         timestampString = "394212367.942334"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "2328"
-         endingLineNumber = "2328">
+         startingLineNumber = "2442"
+         endingLineNumber = "2442">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Classes/xmpp.m"
-         timestampString = "394204083.585886"
+         timestampString = "394212367.942334"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "2330"
-         endingLineNumber = "2330">
+         startingLineNumber = "2444"
+         endingLineNumber = "2444">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"

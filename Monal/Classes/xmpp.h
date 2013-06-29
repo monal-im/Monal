@@ -54,9 +54,12 @@ typedef struct
 
 
 
-@interface xmpp : NSObject
+@interface xmpp : NSObject <NSStreamDelegate>
 {
-  
+    
+    NSInputStream *_iStream;
+    NSOutputStream *_oStream;
+	
 }
 
 -(void) connect;
@@ -70,6 +73,7 @@ typedef struct
 @property (nonatomic,assign) NSInteger port;
 @property (nonatomic,strong) NSString* resource;
 @property (nonatomic,assign) BOOL SSL;
+@property (nonatomic,assign) BOOL oldStyleSSL;
 
 // discovered properties
 @property (nonatomic,strong)  NSMutableArray* discoveredServerList;

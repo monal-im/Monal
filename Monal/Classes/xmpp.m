@@ -18,20 +18,119 @@
     _discoveredServerList=[[NSMutableArray alloc] init];
     _port=5552;
     _SSL=YES;
+    _oldStyleSSL=NO;
     _resource=@"Monal";
     return self;
 }
 
+
+-(void) setRunLoop
+{
+	[_oStream setDelegate:self];
+    [_oStream scheduleInRunLoop:[NSRunLoop currentRunLoop]
+					   forMode:NSDefaultRunLoopMode];
+	
+	[_iStream setDelegate:self];
+    [_iStream scheduleInRunLoop:[NSRunLoop currentRunLoop]
+					   forMode:NSDefaultRunLoopMode];
+}
+
+-(void) createStreams
+{
+    CFReadStreamRef readRef= NULL;
+    CFWriteStreamRef writeRef= NULL;
+	
+    debug_NSLog(@"stream  creating to  server: %@ port: %d", _server, _port);
+    
+	CFStreamCreatePairWithSocketToHost(NULL, (__bridge CFStringRef)_server, _port, &readRef, &writeRef);
+	
+    _iStream= (__bridge NSInputStream*)readRef;
+    _oStream= (__bridge NSOutputStream*) writeRef;
+    
+	if((_iStream==nil) || (_oStream==nil))
+	{
+		debug_NSLog(@"Connection failed");
+		return;
+	}
+    else
+        debug_NSLog(@"streams created ok");
+    
+	
+    dispatch_sync(dispatch_get_main_queue(), ^{
+        [self setRunLoop];
+    });
+	
+    
+    if((CFReadStreamSetProperty((__bridge CFReadStreamRef)_iStream,
+                                kCFStreamNetworkServiceType,  kCFStreamNetworkServiceTypeVoIP)) &&
+       (CFWriteStreamSetProperty((__bridge CFWriteStreamRef)_oStream,
+                                 kCFStreamNetworkServiceType,  kCFStreamNetworkServiceTypeVoIP)))
+    {
+        debug_NSLog(@"Set VOIP properties on streams.")
+    }
+    else
+    {
+        debug_NSLog(@"could not set VOIP properties on streams.");
+    }
+    
+	
+    
+    
+	
+	
+    if((_SSL==YES)  && (_oldStyleSSL==YES))
+	{
+		// do ssl stuff here
+		debug_NSLog(@"securing connection.. for old style");
+        
+		
+		
+        
+		
+		//allowing it to accept the peers cert if the host doesnt match.
+		NSDictionary *settings = [ [NSDictionary alloc ]
+								  initWithObjectsAndKeys:
+								  [NSNumber numberWithBool:YES], @"kCFStreamSSLAllowsExpiredCertificates",
+								  [NSNumber numberWithBool:YES], @"kCFStreamSSLAllowsExpiredRoots",
+								  [NSNumber numberWithBool:YES], @"kCFStreamSSLAllowsAnyRoot",
+								  [NSNumber numberWithBool:NO], @"kCFStreamSSLValidatesCertificateChain",
+								  [NSNull null],@"kCFStreamSSLPeerName",
+                                  
+                                  kCFStreamSocketSecurityLevelSSLv3,
+								  @"kCFStreamSSLLevel",
+								  nil ];
+		CFReadStreamSetProperty((__bridge CFReadStreamRef)_iStream,
+								@"kCFStreamPropertySSLSettings", (__bridge CFTypeRef)settings);
+		CFWriteStreamSetProperty((__bridge CFWriteStreamRef)_oStream,
+								 @"kCFStreamPropertySSLSettings", (__bridge CFTypeRef)settings);
+		
+        
+		debug_NSLog(@"connection secured");
+		//[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(login:) name: @"XMPPMech" object:self];
+		// for new style this is only done AFTER start tls is sent to not conflict with the earlier mech
+	}
+	
+	[_iStream open];
+	[_oStream open];
+    
+
+}
+
 -(void) connect
 {
+    if((_port==5553) || (_port==443))
+    {
+        _oldStyleSSL=YES;
+    }
+    
     //allow gtalk on 443
-    if(self.port!=443)
+    if(_oldStyleSSL==NO);
     {
     // do DNS discovery
     [self dnsDiscover];
         
     }
-    
+
     if([_discoveredServerList count]>0)
     {
         //sort by priority
@@ -40,7 +139,13 @@
         [_discoveredServerList sortUsingDescriptors:sortArray];
         
         // take the top one
+        
+        _server=[[_discoveredServerList objectAtIndex:0] objectForKey:@"server"];
+        _port=[[[_discoveredServerList objectAtIndex:0] objectForKey:@"port"] integerValue];
     }
+
+    [self createStreams];
+ 
     
 }
 #pragma mark XMPP

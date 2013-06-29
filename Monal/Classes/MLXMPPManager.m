@@ -36,6 +36,11 @@
         if([[account objectForKey:@"enabled"] boolValue]==YES)
         {
             debug_NSLog(@"enabling account %@",[account objectForKey:@"account_name"] )
+            
+            if([[account objectForKey:@"password"] isEqualToString:@""])
+                {
+                    //need to request a password
+                }
         }
     }
 }

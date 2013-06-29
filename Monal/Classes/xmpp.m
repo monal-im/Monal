@@ -32,6 +32,25 @@
     
     _netReadQueue = dispatch_queue_create(kMonalNetReadQueue, DISPATCH_QUEUE_SERIAL);
     _netWriteQueue = dispatch_queue_create(kMonalNetWriteQueue, DISPATCH_QUEUE_SERIAL);
+   
+    //placing more common at top to reduce iteration
+   _stanzaTypes=[NSArray arrayWithObjects:
+                 @"iq",
+                 @"message",
+                 @"presence",
+                        @"stream",
+					  @"features",
+                      //	@"<error",
+                      //  @"<starttls",
+					  @"proceed",
+					  @"failure",
+                      // @"<mechanisms",
+					  @"challenge",
+					  @"response",
+					  @"success",
+					  //@"<auth",
+                      // @"<bind",
+					  nil];
     
     return self;
 }
@@ -204,6 +223,86 @@
 
 #pragma mark XMPP
 
+-(NSMutableDictionary*) nextStanza
+{
+	int stanzacounter=0;
+	int maxPos=[_inputBuffer length];
+	debug_NSLog(@"maxPos %d", maxPos);
+
+	if(maxPos<2)
+	{
+		return nil;
+	}
+	//accouting for white space
+	NSRange startrange=[_inputBuffer rangeOfString:@"<"
+										options:NSCaseInsensitiveSearch range:NSMakeRange(0, [_inputBuffer length])];
+	if (startrange.location==NSNotFound)
+	{
+		return nil;
+	}
+    
+    NSMutableDictionary* toReturn=nil;
+    
+	int startpos=startrange.location;
+	startpos++;
+	debug_NSLog(@"start pos%d", startpos);
+	
+	if(maxPos>startpos)
+        while(stanzacounter<[_stanzaTypes count])
+        {
+        //look for the beginning of stanza
+            NSRange pos=[_inputBuffer rangeOfString:[NSString stringWithFormat:@"<%@",[_stanzaTypes objectAtIndex:stanzacounter]]
+                                         options:NSCaseInsensitiveSearch range:NSMakeRange(startpos, maxPos-startpos)];
+            if((pos.location<maxPos) && (pos.location!=NSNotFound)) 
+            {
+                //we need to find the end of this stanza
+                NSRange closePos=[_inputBuffer rangeOfString:[NSString stringWithFormat:@"</%@",[_stanzaTypes objectAtIndex:stanzacounter]]
+                                                options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, maxPos-pos.location)];
+                
+              if((closePos.location<maxPos) && (closePos.location!=NSNotFound))
+              {
+                  //we have the start of the stanza close
+                  
+                  NSRange endPos=[_inputBuffer rangeOfString:@">"
+                                                       options:NSCaseInsensitiveSearch range:NSMakeRange(closePos.location, maxPos-closePos.location)];
+                  
+                
+               toReturn= [[NSMutableDictionary alloc]init];
+                [toReturn setObject:[NSNumber numberWithInt:pos.location] forKey:@"startPosition"];
+                [toReturn setObject:[NSNumber numberWithInt:endPos.location+1] forKey:@"endPosition"]; //+1 to inclde closing <
+                [toReturn setObject: [_stanzaTypes objectAtIndex:stanzacounter] forKey:@"stanzaType"];
+                break;
+              }
+                
+            }
+			stanzacounter++;
+        }
+
+	return  toReturn;
+}
+
+-(void) processInput
+{
+    
+    NSMutableDictionary* nextStanzaPos=[self nextStanza];
+    while (nextStanzaPos)
+    {
+    NSInteger startPosition=[[nextStanzaPos objectForKey:@"startPosition"] integerValue];
+    NSInteger endPosition=[[nextStanzaPos objectForKey:@"endPosition"] integerValue];
+        [nextStanzaPos setObject:[_inputBuffer substringWithRange:NSMakeRange(startPosition,endPosition-startPosition)] forKey:@"stanzaString"];
+        debug_NSLog(@"got stanza %@", [nextStanzaPos objectForKey:@"stanzaString"]);
+        
+    XMLNode* stanzaXML= [XMLNode nodeFromDictionary:nextStanzaPos];
+        
+    dispatch_sync(_netReadQueue, ^{
+        [_inputBuffer deleteCharactersInRange:NSMakeRange(startPosition, endPosition-startPosition) ];
+    });
+        
+    nextStanzaPos=[self nextStanza];
+    }
+}
+
+
 -(void) send:(XMLNode*) stanza
 {
     dispatch_sync(_netWriteQueue, ^{
@@ -346,7 +445,11 @@
 		//[_inputBuffer appendBytes:(const void *)buf length:len];
         NSString* newString=[NSString stringWithUTF8String:(char*)buf];
         if(newString)
+        {
+            dispatch_sync(_netReadQueue, ^{
             [_inputBuffer appendString:newString];
+            });
+        }
         free(buf);
 	}
 	else
@@ -356,6 +459,7 @@
 	}
 
     debug_NSLog(@"read buffer: %@ ", _inputBuffer);
+    [self processInput];
  
 }
 

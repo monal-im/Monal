@@ -16,7 +16,12 @@
 /**
  Generates an XML String suitable for writing based on the node
  */
--(NSString*) XMLString; 
+-(NSString*) XMLString;
+
+/**
+ Generates a node object after parsing a string.
+ */
++(XMLNode*) nodeFromDictionary:(NSDictionary*) dictionary;
 
 @property (nonatomic,strong) NSString* element;
 @property (nonatomic,strong) NSMutableDictionary* attributes;

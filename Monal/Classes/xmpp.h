@@ -65,6 +65,8 @@ typedef struct
     
     dispatch_queue_t _netReadQueue ;
     dispatch_queue_t _netWriteQueue ;
+    
+    NSArray* _stanzaTypes; 
 }
 
 -(void) connect;

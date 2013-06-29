@@ -26,12 +26,16 @@
     
     NSMutableString* outputString=[[NSMutableString alloc] init];
     
+    if([_element isEqualToString:@"stream:stream"])
+        [outputString appendString:[NSString stringWithFormat:@"<?xml version='1.0'?>"]];
+
+    
     [outputString appendString:[NSString stringWithFormat:@"<%@",_element]];
     
     //set attributes
     for(NSString* key in [_attributes allKeys])
     {
-        [outputString appendString:[NSString stringWithFormat:@" '%@'='%@' ",key, [_attributes objectForKey:key]]];
+        [outputString appendString:[NSString stringWithFormat:@" %@='%@' ",key, [_attributes objectForKey:key]]];
     }
     [outputString appendString:[NSString stringWithFormat:@">"]];
     
@@ -44,5 +48,54 @@
     return (NSString*)outputString ;
 }
 
+
++(XMLNode*) nodeFromDictionary:(NSDictionary*) dictionary
+{
+    
+    
+    if([[dictionary objectForKey:@"stanzaType"] isEqualToString:@"iq"])
+    {
+        
+    }
+    else  if([[dictionary objectForKey:@"stanzaType"] isEqualToString:@"message"])
+    {
+        
+    }
+    else  if([[dictionary objectForKey:@"stanzaType"] isEqualToString:@"presence"])
+    {
+        
+    }
+    else  if([[dictionary objectForKey:@"stanzaType"] isEqualToString:@"stream"])
+    {
+        
+    }
+    else  if([[dictionary objectForKey:@"stanzaType"] isEqualToString:@"features"])
+    {
+        
+    }
+    else  if([[dictionary objectForKey:@"stanzaType"] isEqualToString:@"proceed"])
+    {
+        
+    }
+    else  if([[dictionary objectForKey:@"stanzaType"] isEqualToString:@"failure"])
+    {
+        
+    }
+    else  if([[dictionary objectForKey:@"stanzaType"] isEqualToString:@"challenge"])
+    {
+        
+    }
+    else  if([[dictionary objectForKey:@"stanzaType"] isEqualToString:@"response"])
+    {
+        
+    }
+    else  if([[dictionary objectForKey:@"stanzaType"] isEqualToString:@"success"])
+    {
+        
+    }
+    
+    return nil; 
+    
+}
 
 @end

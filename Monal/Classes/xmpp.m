@@ -10,6 +10,9 @@
 #import "DataLayer.h"
 
 
+#import "ParseStream.h"
+
+
 #define kXMPPReadSize 51200 // bytes
 
 #define kMonalNetReadQueue "im.monal.netReadQueue"
@@ -34,23 +37,18 @@
     _netWriteQueue = dispatch_queue_create(kMonalNetWriteQueue, DISPATCH_QUEUE_SERIAL);
    
     //placing more common at top to reduce iteration
-   _stanzaTypes=[NSArray arrayWithObjects:
-                 @"iq",
-                 @"message",
-                 @"presence",
-                        @"stream",
-					  @"features",
-                      //	@"<error",
-                      //  @"<starttls",
-					  @"proceed",
-					  @"failure",
-                      // @"<mechanisms",
-					  @"challenge",
-					  @"response",
-					  @"success",
-					  //@"<auth",
-                      // @"<bind",
-					  nil];
+    _stanzaTypes=[NSArray arrayWithObjects:
+                  @"iq",
+                  @"message",
+                  @"presence",
+                  @"stream",
+                  @"features",
+                  @"proceed",
+                  @"failure",
+                  @"challenge",
+                  @"response",
+                  @"success",
+                  nil];
     
     return self;
 }
@@ -292,7 +290,63 @@
         [nextStanzaPos setObject:[_inputBuffer substringWithRange:NSMakeRange(startPosition,endPosition-startPosition)] forKey:@"stanzaString"];
         debug_NSLog(@"got stanza %@", [nextStanzaPos objectForKey:@"stanzaString"]);
         
-    XMLNode* stanzaXML= [XMLNode nodeFromDictionary:nextStanzaPos];
+        
+    
+        if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"iq"])
+        {
+            
+        }
+        else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"message"])
+        {
+            
+        }
+        else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"presence"])
+        {
+            
+        }
+        else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"stream"])
+        {
+            ParseStream* streamNode= [[ParseStream alloc]  initWithDictionary:nextStanzaPos];
+            //perform logic to handle stream
+            if(!streamNode.error)
+            {
+                if(streamNode.callStartTLS)
+                {
+                    XMLNode* startTLS= [[XMLNode alloc] init];
+                    startTLS.element=@"starttls";
+                    [startTLS.attributes setObject:@"urn:ietf:params:xml:ns:xmpp-tls" forKey:@"xmlns"];
+                    [self send:startTLS];
+                    [self writeFromQueue];
+                   
+                }
+            }
+            
+        }
+        else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"features"])
+        {
+            
+        }
+        else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"proceed"])
+        {
+            
+        }
+        else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"failure"])
+        {
+            
+        }
+        else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"challenge"])
+        {
+            
+        }
+        else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"response"])
+        {
+            
+        }
+        else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"success"])
+        {
+            
+        }
+
         
     dispatch_sync(_netReadQueue, ^{
         [_inputBuffer deleteCharactersInRange:NSMakeRange(startPosition, endPosition-startPosition) ];
@@ -308,6 +362,7 @@
     dispatch_sync(_netWriteQueue, ^{
         [_outputQueue addObject:stanza];
     });
+ 
 }
 
 #pragma mark nsstream delegate

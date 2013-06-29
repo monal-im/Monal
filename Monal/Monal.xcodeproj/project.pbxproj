@@ -22,6 +22,7 @@
 		260447F60FEED62100B3B5A7 /* BuddyDetails.xib in Resources */ = {isa = PBXBuildFile; fileRef = 260447F50FEED62100B3B5A7 /* BuddyDetails.xib */; };
 		260A2CC515E713EC00DB103B /* Facebook.png in Resources */ = {isa = PBXBuildFile; fileRef = 260A2CC315E713EC00DB103B /* Facebook.png */; };
 		260A2CC615E713EC00DB103B /* Facebook@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 260A2CC415E713EC00DB103B /* Facebook@2x.png */; };
+		260C51D1177F08F50039634B /* xmpp.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D0177F08F50039634B /* xmpp.m */; };
 		261A6281176C055400059090 /* ContactsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A627F176C055400059090 /* ContactsViewController.m */; };
 		261A6285176C156500059090 /* ActiveChatsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A6284176C156500059090 /* ActiveChatsViewController.m */; };
 		261A6288176C157D00059090 /* SettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A6287176C157D00059090 /* SettingsViewController.m */; };
@@ -249,6 +250,8 @@
 		26080210110ABA4E005E194D /* Monal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Monal.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		260A2CC315E713EC00DB103B /* Facebook.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Facebook.png; sourceTree = "<group>"; };
 		260A2CC415E713EC00DB103B /* Facebook@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Facebook@2x.png"; sourceTree = "<group>"; };
+		260C51CF177F08F50039634B /* xmpp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = xmpp.h; sourceTree = "<group>"; };
+		260C51D0177F08F50039634B /* xmpp.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = xmpp.m; sourceTree = "<group>"; };
 		261A627E176C055400059090 /* ContactsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContactsViewController.h; sourceTree = "<group>"; };
 		261A627F176C055400059090 /* ContactsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ContactsViewController.m; sourceTree = "<group>"; };
 		261A6283176C156500059090 /* ActiveChatsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActiveChatsViewController.h; sourceTree = "<group>"; };
@@ -535,6 +538,7 @@
 		080E96DDFE201D6D7F000001 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				260C51CE177F08CF0039634B /* XMPP */,
 				26352EA5177D21FC00E2C8FF /* Managers */,
 				26715E5E17650AF900684F3D /* View Controllers */,
 				26F7BB3A1115F8A300712672 /* tools */,
@@ -611,6 +615,15 @@
 				260A2CC415E713EC00DB103B /* Facebook@2x.png */,
 			);
 			name = Protocol;
+			sourceTree = "<group>";
+		};
+		260C51CE177F08CF0039634B /* XMPP */ = {
+			isa = PBXGroup;
+			children = (
+				260C51CF177F08F50039634B /* xmpp.h */,
+				260C51D0177F08F50039634B /* xmpp.m */,
+			);
+			name = XMPP;
 			sourceTree = "<group>";
 		};
 		262DE4AC15C4E2C60040A66B /* MBProgressHUd */ = {
@@ -1315,6 +1328,7 @@
 				261A629A176C162200059090 /* AboutViewController.m in Sources */,
 				2636C43F177BD58C001CA71F /* XMPPEdit.m in Sources */,
 				26352EA8177D222600E2C8FF /* MLXMPPManager.m in Sources */,
+				260C51D1177F08F50039634B /* xmpp.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

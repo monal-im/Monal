@@ -38,9 +38,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "3172"
-         endingLineNumber = "3172"
-         landmarkName = "-startCallUser:"
-         landmarkType = "5">
+         endingLineNumber = "3172">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -103,9 +101,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "1004"
-         endingLineNumber = "1004"
-         landmarkName = "-parser:didStartElement:namespaceURI:qualifiedName:attributes:"
-         landmarkType = "5">
+         endingLineNumber = "1004">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -116,9 +112,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "1053"
-         endingLineNumber = "1053"
-         landmarkName = "-parser:didStartElement:namespaceURI:qualifiedName:attributes:"
-         landmarkType = "5">
+         endingLineNumber = "1053">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -207,9 +201,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "1089"
-         endingLineNumber = "1089"
-         landmarkName = "-parser:didStartElement:namespaceURI:qualifiedName:attributes:"
-         landmarkType = "5">
+         endingLineNumber = "1089">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -220,9 +212,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "1090"
-         endingLineNumber = "1090"
-         landmarkName = "-parser:didStartElement:namespaceURI:qualifiedName:attributes:"
-         landmarkType = "5">
+         endingLineNumber = "1090">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -233,9 +223,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "3417"
-         endingLineNumber = "3417"
-         landmarkName = "-talk:"
-         landmarkType = "5">
+         endingLineNumber = "3417">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -246,9 +234,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "3446"
-         endingLineNumber = "3446"
-         landmarkName = "-keepAlive"
-         landmarkType = "5">
+         endingLineNumber = "3446">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -259,9 +245,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "478"
-         endingLineNumber = "478"
-         landmarkName = "-parser:didStartElement:namespaceURI:qualifiedName:attributes:"
-         landmarkType = "5">
+         endingLineNumber = "478">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -272,9 +256,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "3987"
-         endingLineNumber = "3987"
-         landmarkName = "-login:"
-         landmarkType = "5">
+         endingLineNumber = "3987">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -285,9 +267,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "467"
-         endingLineNumber = "467"
-         landmarkName = "-parser:didStartElement:namespaceURI:qualifiedName:attributes:"
-         landmarkType = "5">
+         endingLineNumber = "467">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -298,9 +278,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "3511"
-         endingLineNumber = "3511"
-         landmarkName = "-writeToStream"
-         landmarkType = "5">
+         endingLineNumber = "3511">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -311,9 +289,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "3575"
-         endingLineNumber = "3575"
-         landmarkName = "-stream:handleEvent:"
-         landmarkType = "5">
+         endingLineNumber = "3575">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -324,9 +300,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "598"
-         endingLineNumber = "598"
-         landmarkName = "-parser:didStartElement:namespaceURI:qualifiedName:attributes:"
-         landmarkType = "5">
+         endingLineNumber = "598">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -337,9 +311,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "3602"
-         endingLineNumber = "3602"
-         landmarkName = "-stream:handleEvent:"
-         landmarkType = "5">
+         endingLineNumber = "3602">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -441,9 +413,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "3684"
-         endingLineNumber = "3684"
-         landmarkName = "-startConnectionTimeoutTimer"
-         landmarkType = "5">
+         endingLineNumber = "3684">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -454,9 +424,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "3670"
-         endingLineNumber = "3670"
-         landmarkName = "-stopConnectionTimeoutTimer"
-         landmarkType = "5">
+         endingLineNumber = "3670">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -467,9 +435,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "3780"
-         endingLineNumber = "3780"
-         landmarkName = "-setRunLoop"
-         landmarkType = "5">
+         endingLineNumber = "3780">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -545,9 +511,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "2992"
-         endingLineNumber = "2992"
-         landmarkName = "-removeBuddy:"
-         landmarkType = "5">
+         endingLineNumber = "2992">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -558,9 +522,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "2993"
-         endingLineNumber = "2993"
-         landmarkName = "-removeBuddy:"
-         landmarkType = "5">
+         endingLineNumber = "2993">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -649,9 +611,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "2353"
-         endingLineNumber = "2353"
-         landmarkName = "-parser:didEndElement:namespaceURI:qualifiedName:"
-         landmarkType = "5">
+         endingLineNumber = "2353">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -662,9 +622,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "2357"
-         endingLineNumber = "2357"
-         landmarkName = "-parser:didEndElement:namespaceURI:qualifiedName:"
-         landmarkType = "5">
+         endingLineNumber = "2357">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -675,9 +633,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "2358"
-         endingLineNumber = "2358"
-         landmarkName = "-parser:didEndElement:namespaceURI:qualifiedName:"
-         landmarkType = "5">
+         endingLineNumber = "2358">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -701,9 +657,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "617"
-         endingLineNumber = "617"
-         landmarkName = "-parser:didStartElement:namespaceURI:qualifiedName:attributes:"
-         landmarkType = "5">
+         endingLineNumber = "617">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -727,9 +681,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "626"
-         endingLineNumber = "626"
-         landmarkName = "-parser:didStartElement:namespaceURI:qualifiedName:attributes:"
-         landmarkType = "5">
+         endingLineNumber = "626">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -740,9 +692,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "1142"
-         endingLineNumber = "1142"
-         landmarkName = "-parser:didStartElement:namespaceURI:qualifiedName:attributes:"
-         landmarkType = "5">
+         endingLineNumber = "1142">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -753,9 +703,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "3239"
-         endingLineNumber = "3239"
-         landmarkName = "-joinMuc::"
-         landmarkType = "5">
+         endingLineNumber = "3239">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -766,9 +714,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "627"
-         endingLineNumber = "627"
-         landmarkName = "-parser:didStartElement:namespaceURI:qualifiedName:attributes:"
-         landmarkType = "5">
+         endingLineNumber = "627">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -779,9 +725,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "761"
-         endingLineNumber = "761"
-         landmarkName = "-parser:didStartElement:namespaceURI:qualifiedName:attributes:"
-         landmarkType = "5">
+         endingLineNumber = "761">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -792,9 +736,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "1363"
-         endingLineNumber = "1363"
-         landmarkName = "-parser:didStartElement:namespaceURI:qualifiedName:attributes:"
-         landmarkType = "5">
+         endingLineNumber = "1363">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -870,9 +812,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "1050"
-         endingLineNumber = "1050"
-         landmarkName = "-parser:didStartElement:namespaceURI:qualifiedName:attributes:"
-         landmarkType = "5">
+         endingLineNumber = "1050">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -909,9 +849,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "1072"
-         endingLineNumber = "1072"
-         landmarkName = "-parser:didStartElement:namespaceURI:qualifiedName:attributes:"
-         landmarkType = "5">
+         endingLineNumber = "1072">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -922,9 +860,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "3143"
-         endingLineNumber = "3143"
-         landmarkName = "-sendTime::"
-         landmarkType = "5">
+         endingLineNumber = "3143">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -1000,9 +936,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "4182"
-         endingLineNumber = "4182"
-         landmarkName = "-alertView:clickedButtonAtIndex:"
-         landmarkType = "5">
+         endingLineNumber = "4182">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -1026,9 +960,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "926"
-         endingLineNumber = "926"
-         landmarkName = "-parser:didStartElement:namespaceURI:qualifiedName:attributes:"
-         landmarkType = "5">
+         endingLineNumber = "926">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -1039,9 +971,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "1059"
-         endingLineNumber = "1059"
-         landmarkName = "-parser:didStartElement:namespaceURI:qualifiedName:attributes:"
-         landmarkType = "5">
+         endingLineNumber = "1059">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -1091,9 +1021,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "630"
-         endingLineNumber = "630"
-         landmarkName = "-parser:didStartElement:namespaceURI:qualifiedName:attributes:"
-         landmarkType = "5">
+         endingLineNumber = "630">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -1104,9 +1032,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "631"
-         endingLineNumber = "631"
-         landmarkName = "-parser:didStartElement:namespaceURI:qualifiedName:attributes:"
-         landmarkType = "5">
+         endingLineNumber = "631">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -1117,9 +1043,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "3589"
-         endingLineNumber = "3589"
-         landmarkName = "-stream:handleEvent:"
-         landmarkType = "5">
+         endingLineNumber = "3589">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -1156,9 +1080,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "3577"
-         endingLineNumber = "3577"
-         landmarkName = "-stream:handleEvent:"
-         landmarkType = "5">
+         endingLineNumber = "3577">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -1169,9 +1091,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "3077"
-         endingLineNumber = "3077"
-         landmarkName = "-sendLast::"
-         landmarkType = "5">
+         endingLineNumber = "3077">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -1182,9 +1102,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "2054"
-         endingLineNumber = "2054"
-         landmarkName = "-parser:didEndElement:namespaceURI:qualifiedName:"
-         landmarkType = "5">
+         endingLineNumber = "2054">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -1195,9 +1113,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "2117"
-         endingLineNumber = "2117"
-         landmarkName = "-parser:didEndElement:namespaceURI:qualifiedName:"
-         landmarkType = "5">
+         endingLineNumber = "2117">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -1208,9 +1124,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "2119"
-         endingLineNumber = "2119"
-         landmarkName = "-parser:didEndElement:namespaceURI:qualifiedName:"
-         landmarkType = "5">
+         endingLineNumber = "2119">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -1269,11 +1183,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Classes/XMPPEdit.m"
-         timestampString = "393997042.422647"
+         timestampString = "394201727.638854"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "220"
-         endingLineNumber = "220"
+         startingLineNumber = "216"
+         endingLineNumber = "216"
          landmarkName = "-save"
          landmarkType = "5">
       </FileBreakpoint>

@@ -60,31 +60,27 @@
 	{
 		//edit
         debug_NSLog(@"reading account number %@", _accountno);
-		NSArray* settings=[[_db accountVals:_accountno] objectAtIndex:0]; //only one row
+		NSDictionary* settings=[[_db accountVals:_accountno] objectAtIndex:0]; //only one row
 		
         //allow blank domains.. dont show @ if so
-        if([[settings objectAtIndex:9] length]>0)
-            userText.text=[NSString stringWithFormat:@"%@@%@",[settings objectAtIndex:5],[settings objectAtIndex:9]];
+        if([[settings objectForKey:@"domain"] length]>0)
+            userText.text=[NSString stringWithFormat:@"%@@%@",[settings objectForKey:@"username"],[settings objectForKey:@"domain"]];
 		else
-            userText.text=[NSString stringWithFormat:@"%@",[settings objectAtIndex:5]];
+            userText.text=[NSString stringWithFormat:@"%@",[settings objectForKey:@"username"]];
         
 		PasswordManager* pass= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",_accountno]];
 		passText.text=[pass getPassword];
         
-		serverText.text=[settings objectAtIndex:3];
+		serverText.text=[settings objectForKey:@"server"];
 		
-		portText.text=[NSString stringWithFormat:@"%@", [settings objectAtIndex:4]];
-		resourceText.text=[settings objectAtIndex:8];
+		portText.text=[NSString stringWithFormat:@"%@", [settings objectForKey:@"other_port"]];
+		resourceText.text=[settings objectForKey:@"resource"];
 		
-		if([[settings objectAtIndex:7] intValue]==1)
-			sslSwitch.on=true; else sslSwitch.on=false;
+        sslSwitch.on=[[settings objectForKey:@"secure"] boolValue];
+		enableSwitch.on=[[settings objectForKey:@"enabled"] boolValue];
 		
-		
-		if([[settings objectAtIndex:10] intValue]==1)
-			enableSwitch.on=true; else enableSwitch.on=false;
-		
-		debug_NSLog(@"SSL val %@", [settings objectAtIndex:7]);
-		if([[settings objectAtIndex:9] isEqualToString:@"gmail.com"])
+	
+		if([[settings objectForKey:@"domain"] isEqualToString:@"gmail.com"])
 		{
 			JIDLabel.text=@"Gtalk ID";
 		}
@@ -130,14 +126,14 @@
 	debug_NSLog(@"xmpp edit view will hide");
 	[self save];
 	
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
+   
     
 }
 
-
-
-
-
+-(void) dealloc
+{
+     [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
 
 #pragma mark actions
 

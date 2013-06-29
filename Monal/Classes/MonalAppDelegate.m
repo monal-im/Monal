@@ -118,8 +118,7 @@
     [Appirater setTimeBeforeReminding:2];
     //[Appirater setDebug:YES];
     [Appirater appLaunched:YES];
-    
- //  [[[Reachability alloc] init] startNotifier];
+
     
     
 }

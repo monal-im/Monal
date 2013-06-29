@@ -25,10 +25,18 @@
 
 -(void)connectIfNecessary
 {
+    
+//    hostReach = [[Reachability reachabilityWithHostName: @"www.apple.com"] retain];
+//	[hostReach startNotifier];
+//
+    
     _accountList=[[DataLayer sharedInstance] accountList];
-    for (NSArray* account in _accountList)
+    for (NSDictionary* account in _accountList)
     {
-        
+        if([[account objectForKey:@"enabled"] boolValue]==YES)
+        {
+            debug_NSLog(@"enabling account %@",[account objectForKey:@"account_name"] )
+        }
     }
 }
 

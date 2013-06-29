@@ -59,10 +59,12 @@ typedef struct
     
     NSInputStream *_iStream;
     NSOutputStream *_oStream;
+    NSMutableData* _inputBuffer; 
 	
 }
 
 -(void) connect;
+-(void) disconnect;
 
 // connection attributes
 @property (nonatomic,strong) NSString* username;

@@ -9,6 +9,9 @@
 #import "xmpp.h"
 #import "DataLayer.h"
 
+
+#define kXMPPReadSize 51200 // bytes
+
 @implementation xmpp
 
 -(id) init
@@ -16,6 +19,7 @@
     self=[super init];
     
     _discoveredServerList=[[NSMutableArray alloc] init];
+    _inputBuffer=[[NSMutableData alloc] init];
     _port=5552;
     _SSL=YES;
     _oldStyleSSL=NO;
@@ -95,6 +99,7 @@
 	
     [self setRunLoop];
     
+#warning this needs to time out propery
     [_iStream open];
     [_oStream open];
     
@@ -112,7 +117,9 @@
     if(_oldStyleSSL==NO);
     {
     // do DNS discovery
+        #warning  this needs to time it self out properly
     [self dnsDiscover];
+
         
     }
 
@@ -133,6 +140,46 @@
  
     
 }
+
+-(void) disconnect
+{
+    debug_NSLog(@"removing streams");
+    
+	//prevent any new read or write
+	[_iStream setDelegate:nil];
+	[_oStream setDelegate:nil];
+	
+	[_oStream removeFromRunLoop:[NSRunLoop currentRunLoop]
+					   forMode:NSDefaultRunLoopMode];
+	
+	[_iStream removeFromRunLoop:[NSRunLoop currentRunLoop]
+					   forMode:NSDefaultRunLoopMode];
+	debug_NSLog(@"removed streams");
+	
+	@try
+	{
+        [_iStream close];
+	}
+	@catch(id theException)
+	{
+		debug_NSLog(@"Exception in istream close");
+	}
+	
+	@try
+	{
+		[_oStream close];
+	}
+	@catch(id theException)
+	{
+		debug_NSLog(@"Exception in ostream close");
+	}
+	
+	debug_NSLog(@"Connections closed");
+	
+	debug_NSLog(@"All closed and cleaned up"); 
+	
+}
+
 
 #pragma mark nsstream delegate
 
@@ -210,6 +257,34 @@
 
 #pragma mark XMPP
 
+-(void) writeFromQueue
+{
+    
+}
+
+-(void) readToBuffer
+{
+	uint8_t* buf=malloc(kXMPPReadSize);
+    int len = 0;
+
+	if(![_iStream hasBytesAvailable])
+	{
+		free(buf);
+		return;
+	}
+	
+	len = [_iStream read:buf maxLength:kXMPPReadSize];
+	if(len>0) {
+		[_inputBuffer appendBytes:(const void *)buf length:len];
+        free(buf);
+	}
+	else
+	{
+		free(buf);
+		return;
+	}
+
+}
 
 #pragma mark DNS 
 

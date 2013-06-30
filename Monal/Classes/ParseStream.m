@@ -92,6 +92,15 @@
     }
 	
 	
+    //***** sasl success...
+	if(([elementName isEqualToString:@"success"]) &&  ([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:ietf:params:xml:ns:xmpp-sasl"])
+	   )
+		
+	{
+		_SASLSuccess=YES;
+        return;
+	}
+    
     
 //	// first time it is read loginstate  will always be 1
 //	

@@ -480,7 +480,25 @@
         }
         else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"success"])
         {
-            
+            ParseStream* streamNode= [[ParseStream alloc]  initWithDictionary:nextStanzaPos];
+            //perform logic to handle proceed
+            if(!streamNode.error)
+            {
+                if(streamNode.SASLSuccess)
+                {
+                    debug_NSLog(@"Got SASL Success");
+                    
+                    srand([[NSDate date] timeIntervalSince1970]);
+                    // make up a random session key (id)
+                    _sessionKey=[NSString stringWithFormat:@"monal%ld",random()%100000];
+                    debug_NSLog(@"session key: %@", _sessionKey);
+                    
+                    [self startStream];
+                    [self writeFromQueue];
+                    
+
+                }
+            }
         }
 
         

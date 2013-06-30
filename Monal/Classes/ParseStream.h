@@ -20,6 +20,7 @@
 
 //Auth mechanisms
 @property (nonatomic,readonly, assign) BOOL supportsSASL;
+@property (nonatomic,readonly, assign) BOOL SASLSuccess;
 @property (nonatomic,readonly, assign) BOOL SASLPlain;
 @property (nonatomic,readonly, assign) BOOL SASLCRAM_MD5;
 @property (nonatomic,readonly, assign) BOOL SASLDIGEST_MD5;

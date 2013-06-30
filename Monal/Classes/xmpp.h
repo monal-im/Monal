@@ -67,10 +67,12 @@ typedef struct
     dispatch_queue_t _netWriteQueue ;
     
     NSArray* _stanzaTypes;
+    NSString* _sessionKey;
     
     BOOL _startTLSComplete;
     
     BOOL _streamHasSpace;
+  
 }
 
 -(void) connect;

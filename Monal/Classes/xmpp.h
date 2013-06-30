@@ -69,6 +69,8 @@ typedef struct
     NSArray* _stanzaTypes;
     
     BOOL _startTLSComplete;
+    
+    BOOL _streamHasSpace;
 }
 
 -(void) connect;

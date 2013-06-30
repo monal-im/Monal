@@ -46,6 +46,9 @@
         
     //set children here
     
+    if(_data)
+    [outputString appendString:_data];
+        
     //dont close stream 
     if((![_element isEqualToString:@"stream:stream"]) ) 
         [outputString appendString:[NSString stringWithFormat:@"</%@>", _element]];

@@ -8,7 +8,7 @@
 
 #import "xmpp.h"
 #import "DataLayer.h"
-
+#import "EncodingTools.h"
 
 #import "ParseStream.h"
 
@@ -366,8 +366,11 @@
             ParseStream* streamNode= [[ParseStream alloc]  initWithDictionary:nextStanzaPos];
             
             //perform logic to handle stream
-            if(!streamNode.error)
+            if(streamNode.error)
             {
+                return;
+                
+            }
                 if(streamNode.callStartTLS)
                 {
                     XMLNode* startTLS= [[XMLNode alloc] init];
@@ -377,12 +380,40 @@
                     [self writeFromQueue];
                     
                 }
-            }
             
-            if ((_SSL && _startTLSComplete) || (!_SSL || !_startTLSComplete))
+            
+            if ((_SSL && _startTLSComplete) || (!_SSL && !_startTLSComplete))
             {
                 //look at menchanisms presented
                 
+                if(streamNode.SASLPlain)
+                {
+                    NSString* saslplain=[EncodingTools encodeBase64WithString: [NSString stringWithFormat:@"\0%@\0%@",  _username, _password ]];
+
+                    XMLNode* saslXML= [[XMLNode alloc]init];
+                    saslXML.element=@"auth";
+                    [saslXML.attributes setObject: @"urn:ietf:params:xml:ns:xmpp-sasl"  forKey:@"xmlns"];
+                    [saslXML.attributes setObject: @"PLAIN"forKey: @"mechanism"];
+                    
+                    [saslXML.attributes setObject:@"http://www.google.com/talk/protocol/auth" forKey: @"xmlns:ga"];
+                    [saslXML.attributes setObject:@"true" forKey: @"ga:client-uses-full-bind-result"];
+                    
+                    saslXML.data=saslplain;
+                    [self send:saslXML];
+                    [self writeFromQueue];
+                    
+                    
+                }
+                else
+                if(streamNode.SASLDIGEST_MD5)
+                {
+                    
+                }
+                else
+                {
+                //no supported auth mechanism
+                    [self disconnect];
+                }
             }
             
         }
@@ -474,12 +505,13 @@
 
 - (void)stream:(NSStream *)stream handleEvent:(NSStreamEvent)eventCode
 {
-	debug_NSLog(@"Stream has event");
+	//debug_NSLog(@"Stream has event");
 	switch(eventCode)
 	{
 			//for writing
         case NSStreamEventHasSpaceAvailable:
         {
+            _streamHasSpace=YES;
             debug_NSLog(@"Stream has space to write");
             [self writeFromQueue];
             
@@ -519,7 +551,7 @@
 		}
 		case NSStreamEventNone:
 		{
-			debug_NSLog(@"Stream event none");
+            //debug_NSLog(@"Stream event none");
 			break;
 			
 		}
@@ -549,6 +581,8 @@
 #pragma mark network I/O
 -(void) writeFromQueue
 {
+    if(!_streamHasSpace) return;
+    
     dispatch_async(dispatch_get_main_queue(),
                    ^{
                        [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
@@ -572,6 +606,7 @@
 
 -(void) writeToStream:(NSString*) messageOut
 {
+    _streamHasSpace=NO;
     debug_NSLog(@"sending: %@ ", messageOut);
     const uint8_t * rawstring = (const uint8_t *)[messageOut UTF8String];
     int len= strlen((char*)rawstring);

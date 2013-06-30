@@ -52,13 +52,24 @@
         xmpp* xmppAccount=[[xmpp alloc] init];
             
             xmppAccount.username=[account objectForKey:@"username"];
-            xmppAccount.password=[account objectForKey:@"password"];
             xmppAccount.domain=[account objectForKey:@"domain"];
             xmppAccount.resource=[account objectForKey:@"resource"];
       
             xmppAccount.server=[account objectForKey:@"server"];
             xmppAccount.port=[[account objectForKey:@"other_port"] integerValue];
             xmppAccount.SSL=[[account objectForKey:@"secure"] boolValue];
+            
+            PasswordManager* passMan= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",[account objectForKey:@"account_id"]]];
+            xmppAccount.password=[passMan getPassword] ;
+             
+            if(([xmppAccount.password length]==0) //&& ([tempPass length]==0)
+               )
+            {
+                // no password error
+            }
+            
+            
+            
             dispatch_async(_netQueue,
                    ^{
                        [xmppAccount connect];

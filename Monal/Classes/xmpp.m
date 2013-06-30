@@ -12,7 +12,6 @@
 
 #import "ParseStream.h"
 
-
 #define kXMPPReadSize 51200 // bytes
 
 #define kMonalNetReadQueue "im.monal.netReadQueue"
@@ -41,6 +40,7 @@
                   @"iq",
                   @"message",
                   @"presence",
+                  @"stream:stream",
                   @"stream",
                   @"features",
                   @"proceed",
@@ -124,14 +124,7 @@
 	}
 	
     //start stream
-    XMLNode* stream = [[XMLNode alloc] init];
-    stream.element=@"stream:stream";
-    [stream.attributes setObject:@"jabber:client" forKey:@"xmlns"];
-    [stream.attributes setObject:@"http://etherx.jabber.org/streams" forKey:@"xmlns:stream"];
-    [stream.attributes setObject:@"1.0" forKey:@"version"];
-    if(_domain)
-    [stream.attributes setObject:_domain forKey:@"to"];
-    [self send:stream];
+    [self startStream];
     
     [self setRunLoop];
     
@@ -221,6 +214,18 @@
 
 #pragma mark XMPP
 
+-(void) startStream
+{
+    XMLNode* stream = [[XMLNode alloc] init];
+    stream.element=@"stream:stream";
+    [stream.attributes setObject:@"jabber:client" forKey:@"xmlns"];
+    [stream.attributes setObject:@"http://etherx.jabber.org/streams" forKey:@"xmlns:stream"];
+    [stream.attributes setObject:@"1.0" forKey:@"version"];
+    if(_domain)
+        [stream.attributes setObject:_domain forKey:@"to"];
+    [self send:stream];
+}
+
 -(NSMutableDictionary*) nextStanza
 {
 	int stanzacounter=0;
@@ -242,7 +247,6 @@
     NSMutableDictionary* toReturn=nil;
     
 	int startpos=startrange.location;
-	startpos++;
 	debug_NSLog(@"start pos%d", startpos);
 	
 	if(maxPos>startpos)
@@ -253,6 +257,27 @@
                                          options:NSCaseInsensitiveSearch range:NSMakeRange(startpos, maxPos-startpos)];
             if((pos.location<maxPos) && (pos.location!=NSNotFound)) 
             {
+               
+                if([[_stanzaTypes objectAtIndex:stanzacounter] isEqualToString:@"stream:stream"])
+                    {
+                        //no children and one line stanza
+                        NSRange endPos=[_inputBuffer rangeOfString:@">"
+                                                           options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, maxPos-pos.location)];
+                        
+                        if((endPos.location<maxPos) && (endPos.location!=NSNotFound))
+                        {
+                            
+                            toReturn= [[NSMutableDictionary alloc]init];
+                            [toReturn setObject:[NSNumber numberWithInt:pos.location] forKey:@"startPosition"];
+                            [toReturn setObject:[NSNumber numberWithInt:endPos.location+1] forKey:@"endPosition"]; //+2 to inclde closing />
+                            [toReturn setObject: [_stanzaTypes objectAtIndex:stanzacounter] forKey:@"stanzaType"];
+                            break;
+                        }
+
+                        
+                    }
+                else
+                    {
                 //we need to find the end of this stanza
                 NSRange closePos=[_inputBuffer rangeOfString:[NSString stringWithFormat:@"</%@",[_stanzaTypes objectAtIndex:stanzacounter]]
                                                 options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, maxPos-pos.location)];
@@ -271,7 +296,35 @@
                 [toReturn setObject: [_stanzaTypes objectAtIndex:stanzacounter] forKey:@"stanzaType"];
                 break;
               }
+                else
+                {
+                //no children and one line stanzas
+                NSRange endPos=[_inputBuffer rangeOfString:@"/>"
+                                                     options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, maxPos-pos.location)];
+                    
+                    if((endPos.location<maxPos) && (endPos.location!=NSNotFound))
+                    {
+                    
+                    toReturn= [[NSMutableDictionary alloc]init];
+                    [toReturn setObject:[NSNumber numberWithInt:pos.location] forKey:@"startPosition"];
+                    [toReturn setObject:[NSNumber numberWithInt:endPos.location+2] forKey:@"endPosition"]; //+2 to inclde closing />
+                    [toReturn setObject: [_stanzaTypes objectAtIndex:stanzacounter] forKey:@"stanzaType"];
+                    break;
+                    }
+                    else
+                    if([[_stanzaTypes objectAtIndex:stanzacounter] isEqualToString:@"stream"])
+                    {
+                        //stream will have no terminal.
+                        toReturn= [[NSMutableDictionary alloc]init];
+                        [toReturn setObject:[NSNumber numberWithInt:pos.location] forKey:@"startPosition"];
+                        [toReturn setObject:[NSNumber numberWithInt:maxPos] forKey:@"endPosition"]; //+2 to inclde closing />
+                        [toReturn setObject: [_stanzaTypes objectAtIndex:stanzacounter] forKey:@"stanzaType"];
+                        
+                    }
+                    
+                }
                 
+                    }
             }
 			stanzacounter++;
         }
@@ -304,9 +357,14 @@
         {
             
         }
+        else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"stream:stream"])
+        {
+            ParseStream* streamNode= [[ParseStream alloc]  initWithDictionary:nextStanzaPos];
+        }
         else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"stream"])
         {
             ParseStream* streamNode= [[ParseStream alloc]  initWithDictionary:nextStanzaPos];
+            
             //perform logic to handle stream
             if(!streamNode.error)
             {
@@ -317,8 +375,14 @@
                     [startTLS.attributes setObject:@"urn:ietf:params:xml:ns:xmpp-tls" forKey:@"xmlns"];
                     [self send:startTLS];
                     [self writeFromQueue];
-                   
+                    
                 }
+            }
+            
+            if ((_SSL && _startTLSComplete) || (!_SSL || !_startTLSComplete))
+            {
+                //look at menchanisms presented
+                
             }
             
         }
@@ -329,6 +393,47 @@
         else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"proceed"])
         {
             
+            ParseStream* streamNode= [[ParseStream alloc]  initWithDictionary:nextStanzaPos];
+            //perform logic to handle proceed 
+            if(!streamNode.error)
+            {
+                if(streamNode.startTLSProceed)
+                {
+                    NSDictionary *settings = [ [NSDictionary alloc ]
+                                              initWithObjectsAndKeys:
+                                              [NSNumber numberWithBool:YES], kCFStreamSSLAllowsExpiredCertificates,
+                                              [NSNumber numberWithBool:YES], kCFStreamSSLAllowsExpiredRoots,
+                                              [NSNumber numberWithBool:YES], kCFStreamSSLAllowsAnyRoot,
+                                              [NSNumber numberWithBool:NO], kCFStreamSSLValidatesCertificateChain,
+                                              [NSNull null],kCFStreamSSLPeerName,
+                                              
+                                              kCFStreamSocketSecurityLevelSSLv3,
+                                              kCFStreamSSLLevel,
+                                              
+                                              
+                                              nil ];
+                    
+                    if ( 	CFReadStreamSetProperty((__bridge CFReadStreamRef)_iStream,
+                                                    kCFStreamPropertySSLSettings, (__bridge CFTypeRef)settings) &&
+                        CFWriteStreamSetProperty((__bridge CFWriteStreamRef)_oStream,
+                                                 kCFStreamPropertySSLSettings, (__bridge CFTypeRef)settings)	 )
+                        
+                    {
+                        debug_NSLog(@"Set TLS properties on streams.");
+                    }
+                    else
+                    {
+                        debug_NSLog(@"not sure.. Could not confirm Set TLS properties on streams.");
+                        //fatal=true;
+                    }
+
+                    
+                    [self startStream];
+                    [self writeFromQueue];
+                    
+                    _startTLSComplete=YES;
+                }
+            }
         }
         else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"failure"])
         {

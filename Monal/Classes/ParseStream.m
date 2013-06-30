@@ -75,127 +75,85 @@
 	{
 		debug_NSLog(@"Got SartTLS procced");
 		//trying to switch to TLS
-        
         _startTLSProceed=YES;
-        
-		
-//		NSDictionary *settings = [ [NSDictionary alloc ]
-//								  initWithObjectsAndKeys:
-//								  [NSNumber numberWithBool:YES], kCFStreamSSLAllowsExpiredCertificates,
-//								  [NSNumber numberWithBool:YES], kCFStreamSSLAllowsExpiredRoots,
-//								  [NSNumber numberWithBool:YES], kCFStreamSSLAllowsAnyRoot,
-//                                  [NSNumber numberWithBool:NO], kCFStreamSSLValidatesCertificateChain,
-//								  [NSNull null],kCFStreamSSLPeerName,
-//                                  
-//                                  kCFStreamSocketSecurityLevelSSLv3,
-//                                  kCFStreamSSLLevel,
-//                                  
-//								  
-//								  nil ];
-//        
-//		
-//		
-//        
-//		if ( 	CFReadStreamSetProperty((__bridge CFReadStreamRef)iStream,
-//										@"kCFStreamPropertySSLSettings", (__bridge CFTypeRef)settings) &&
-//			CFWriteStreamSetProperty((__bridge CFWriteStreamRef)oStream,
-//									 @"kCFStreamPropertySSLSettings", (__bridge CFTypeRef)settings)	 )
-//			
-//		{
-//			debug_NSLog(@"Set TLS properties on streams.");
-//			
-//			
-//		}
-//		else
-//		{
-//			debug_NSLog(@"not sure.. Could not confirm Set TLS properties on streams.");
-//			//fatal=true;
-//		}
-//		
-//		
-//        
-//		
-//		
-//		NSString* xmpprequest;
-//        if([domain length]>0)
-//            
-//            xmpprequest=[NSString stringWithFormat:
-//                         @"<stream:stream to='%@' xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams'  version='1.0'>",domain];
-//        else
-//            xmpprequest=[NSString stringWithFormat:
-//                         @"<stream:stream  xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams'  version='1.0'>"];
-//        
-//		[self talk:xmpprequest];
-//		loginstate=1; // reset everything
-//		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(login:) name: @"XMPPMech" object:self];
-//		
 		return;
 		
 	}
     
 	// state >1 at the end of sasl and then reset to 1 in bind. so if it is 1 then bind was already sent
-//	if(([State isEqualToString:@"Features"]) && ([elementName isEqualToString:@"bind"])
-//	   && (loginstate!=1) )
-//	{
-//		loginstate=1; //reset for new stream
-//        
+	if(([State isEqualToString:@"Features"]) && ([elementName isEqualToString:@"bind"]))
+	{
+
 //        debug_NSLog(@"%@", self.sessionKey);
 //        NSString* bindString=[NSString stringWithFormat:@"<iq id='%@' type='set' ><bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'><resource>%@</resource></bind></iq>", _sessionKey,resource];
 //		[self talk:bindString];
-//		
-//        ;
-//		return;
-//    }
-//	
-//	
-//    
-//	
-//	
-//    
+
+		return;
+    }
+	
+	
+    
 //	// first time it is read loginstate  will always be 1
 //	
-//	if(([State isEqualToString:@"Features"]) && [elementName isEqualToString:@"mechanisms"] && (loginstate<2))
-//	{
-//		loginstate++;
-//		debug_NSLog(@"mechanisms xmlns:%@ ", [attributeDict objectForKey:@"xmlns"]);
-//		if([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:ietf:params:xml:ns:xmpp-sasl"])
-//		{
-//			debug_NSLog(@"SASL supported");
-//			SASLSupported=true;
-//		}
-//		
-//		State=@"Mechanisms";
-//		
-//		;
-//		return;
-//		
-//        
-//	}
-//	
-//	if(([State isEqualToString:@"Mechanisms"]) && [elementName isEqualToString:@"mechanism"])
-//	{
-//		debug_NSLog(@"Reading mechanism"); 
-//		State=@"Mechanism";
-//		
-//		;
-//		return;
-//		
-//		
-//	}
-//	
+	if(([State isEqualToString:@"Features"]) && [elementName isEqualToString:@"mechanisms"] )
+	{
+	
+		debug_NSLog(@"mechanisms xmlns:%@ ", [attributeDict objectForKey:@"xmlns"]);
+		if([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:ietf:params:xml:ns:xmpp-sasl"])
+		{
+			debug_NSLog(@"SASL supported");
+			_supportsSASL=YES;
+		}
+		State=@"Mechanisms";
+		return;
+	}
+
+	if(([State isEqualToString:@"Mechanisms"]) && [elementName isEqualToString:@"mechanism"])
+	{
+		debug_NSLog(@"Reading mechanism"); 
+		State=@"Mechanism";
+		return;
+	}
 	
 }
 
 
 - (void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName
 {
-    
+    if( ([elementName isEqualToString:@"mechanism"]) && ([State isEqualToString:@"Mechanism"]))
+	{
+		
+		State=@"Mechanisms";
+		
+		debug_NSLog(@"got login mechanism: %@", _messageBuffer);
+		if([_messageBuffer isEqualToString:@"PLAIN"])
+		{
+			debug_NSLog(@"SASL PLAIN is supported");
+			_SASLPlain=YES;
+		}
+		
+		if([_messageBuffer isEqualToString:@"CRAM-MD5"])
+		{
+			debug_NSLog(@"SASL CRAM-MD5 is supported");
+			_SASLCRAM_MD5=YES;
+		}
+		
+		if([_messageBuffer isEqualToString:@"DIGEST-MD5"])
+		{
+			debug_NSLog(@"SASL DIGEST-MD5 is supported");
+			_SASLDIGEST_MD5=YES;
+		}
+        
+        _messageBuffer=nil; 
+		return;
+		
+	}
 }
 
 
 - (void)parser:(NSXMLParser *)parser foundCharacters:(NSString *)string
 {
-    
+    _messageBuffer=string; 
 }
 
 

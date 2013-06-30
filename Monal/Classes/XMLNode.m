@@ -38,16 +38,18 @@
         [outputString appendString:[NSString stringWithFormat:@" %@='%@' ",key, [_attributes objectForKey:key]]];
     }
     
-    if (![_element isEqualToString:@"starttls"])
-    [outputString appendString:[NSString stringWithFormat:@">"]];
-    else
+    if ([_element isEqualToString:@"starttls"])
     [outputString appendString:[NSString stringWithFormat:@"/>"]];
+    else
+    {
+    [outputString appendString:[NSString stringWithFormat:@">"]];
         
     //set children here
     
-    //dont close stream
+    //dont close stream 
     if((![_element isEqualToString:@"stream:stream"]) ) 
         [outputString appendString:[NSString stringWithFormat:@"</%@>", _element]];
+    }
     
     return (NSString*)outputString ;
 }

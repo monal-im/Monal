@@ -66,7 +66,9 @@ typedef struct
     dispatch_queue_t _netReadQueue ;
     dispatch_queue_t _netWriteQueue ;
     
-    NSArray* _stanzaTypes; 
+    NSArray* _stanzaTypes;
+    
+    BOOL _startTLSComplete;
 }
 
 -(void) connect;

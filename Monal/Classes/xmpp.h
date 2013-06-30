@@ -94,6 +94,8 @@ typedef struct
 @property (nonatomic,assign) BOOL SSL;
 @property (nonatomic,assign) BOOL oldStyleSSL;
 
+@property (nonatomic,assign,readonly) BOOL loggedIn;
+
 // discovered properties
 @property (nonatomic,strong)  NSMutableArray* discoveredServerList;
 

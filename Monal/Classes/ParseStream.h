@@ -29,6 +29,9 @@
 @property (nonatomic,readonly, assign) BOOL callStartTLS;
 @property (nonatomic,readonly, assign) BOOL startTLSProceed;
 
+@property (nonatomic,readonly, assign) BOOL bind;
+
+
 @property (nonatomic,readonly, assign) BOOL error;
 
 

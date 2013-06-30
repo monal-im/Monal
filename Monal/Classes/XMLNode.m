@@ -14,7 +14,7 @@
 {
     self=[super init];
     _attributes=[[NSMutableDictionary alloc] init];
-    _children=[[NSMutableDictionary alloc] init];
+    _children=[[NSMutableArray alloc] init];
     _data=nil; 
     
     return self; 
@@ -22,13 +22,13 @@
 
 -(NSString*) XMLString
 {
-    if(!_element) return nil; // sanity check 
+    if(!_element) return nil; // sanity check
     
     NSMutableString* outputString=[[NSMutableString alloc] init];
     
     if([_element isEqualToString:@"stream:stream"])
         [outputString appendString:[NSString stringWithFormat:@"<?xml version='1.0'?>"]];
-
+    
     
     [outputString appendString:[NSString stringWithFormat:@"<%@",_element]];
     
@@ -39,19 +39,24 @@
     }
     
     if ([_element isEqualToString:@"starttls"])
-    [outputString appendString:[NSString stringWithFormat:@"/>"]];
+        [outputString appendString:[NSString stringWithFormat:@"/>"]];
     else
     {
-    [outputString appendString:[NSString stringWithFormat:@">"]];
+        [outputString appendString:[NSString stringWithFormat:@">"]];
         
-    //set children here
-    
-    if(_data)
-    [outputString appendString:_data];
+        //set children here
+        for(XMLNode* child in _children)
+        {
+            [outputString appendString:[child XMLString]];
+        }
         
-    //dont close stream 
-    if((![_element isEqualToString:@"stream:stream"]) ) 
-        [outputString appendString:[NSString stringWithFormat:@"</%@>", _element]];
+        
+        if(_data)
+            [outputString appendString:_data];
+        
+        //dont close stream
+        if((![_element isEqualToString:@"stream:stream"]) )
+            [outputString appendString:[NSString stringWithFormat:@"</%@>", _element]];
     }
     
     return (NSString*)outputString ;

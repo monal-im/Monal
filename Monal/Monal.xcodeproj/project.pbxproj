@@ -219,6 +219,7 @@
 		26C314B015E72CF1003A73AA /* Default-Landscape@2x~ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = 26C314AA15E72CF1003A73AA /* Default-Landscape@2x~ipad.png */; };
 		26C314B115E72CF1003A73AA /* Default-Landscape~ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = 26C314AB15E72CF1003A73AA /* Default-Landscape~ipad.png */; };
 		26C314B215E72CF1003A73AA /* Default@2x~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = 26C314AC15E72CF1003A73AA /* Default@2x~iphone.png */; };
+		26CF3EAA1780D6B7002B7085 /* XMPPIQ.m in Sources */ = {isa = PBXBuildFile; fileRef = 26CF3EA91780D6B7002B7085 /* XMPPIQ.m */; };
 		26D1847310F9972400340C52 /* XMPPEdit.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26D1847210F9972400340C52 /* XMPPEdit.xib */; };
 		26D5AE651229D135006C9639 /* chatsicon.png in Resources */ = {isa = PBXBuildFile; fileRef = 26D5AE641229D135006C9639 /* chatsicon.png */; };
 		26DB380B162A0AC100982A05 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26DB380A162A0AC100982A05 /* Default-568h@2x.png */; };
@@ -491,6 +492,8 @@
 		26C314AA15E72CF1003A73AA /* Default-Landscape@2x~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-Landscape@2x~ipad.png"; sourceTree = "<group>"; };
 		26C314AB15E72CF1003A73AA /* Default-Landscape~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-Landscape~ipad.png"; sourceTree = "<group>"; };
 		26C314AC15E72CF1003A73AA /* Default@2x~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x~iphone.png"; sourceTree = "<group>"; };
+		26CF3EA81780D6B7002B7085 /* XMPPIQ.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPIQ.h; sourceTree = "<group>"; };
+		26CF3EA91780D6B7002B7085 /* XMPPIQ.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPIQ.m; sourceTree = "<group>"; };
 		26D1847210F9972400340C52 /* XMPPEdit.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = XMPPEdit.xib; path = ../XMPPEdit.xib; sourceTree = "<group>"; };
 		26D5AE641229D135006C9639 /* chatsicon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = chatsicon.png; sourceTree = "<group>"; };
 		26DB380A162A0AC100982A05 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
@@ -635,6 +638,8 @@
 				260C51D3177F44AD0039634B /* XMLNode.m */,
 				263F1278177F867B0025B235 /* ParseStream.h */,
 				263F1279177F867B0025B235 /* ParseStream.m */,
+				26CF3EA81780D6B7002B7085 /* XMPPIQ.h */,
+				26CF3EA91780D6B7002B7085 /* XMPPIQ.m */,
 			);
 			name = XMPP;
 			sourceTree = "<group>";
@@ -1347,6 +1352,7 @@
 				260C51D4177F44AD0039634B /* XMLNode.m in Sources */,
 				263F127A177F867B0025B235 /* ParseStream.m in Sources */,
 				260C6C94178080730004E2E1 /* EncodingTools.m in Sources */,
+				26CF3EAA1780D6B7002B7085 /* XMPPIQ.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

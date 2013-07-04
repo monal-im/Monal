@@ -7,13 +7,10 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "XMPPParser.h"
 
-@interface ParseStream : NSObject <NSXMLParserDelegate>
-{
-    NSString* State;
-    NSString* _messageBuffer; 
-}
 
+@interface ParseStream :XMPPParser
 
 @property (nonatomic,readonly, assign) BOOL supportsLegacyAuth;
 @property (nonatomic,readonly, assign) BOOL supportsUserReg;
@@ -35,7 +32,4 @@
 @property (nonatomic,readonly, assign) BOOL error;
 
 
-
-
-- (id) initWithDictionary:(NSDictionary*) dictionary;
 @end

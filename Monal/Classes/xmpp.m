@@ -652,8 +652,11 @@
 #pragma mark network I/O
 -(void) writeFromQueue
 {
-    if(!_streamHasSpace) return;
-    
+    if(!_streamHasSpace)
+    {
+        debug_NSLog(@"no space to write. returning. ");
+        return;
+    }    
 //    dispatch_async(dispatch_get_main_queue(),
 //                   ^{
 //                       [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
@@ -677,13 +680,16 @@
 
 -(void) writeToStream:(NSString*) messageOut
 {
-    _streamHasSpace=NO;
+    //we probably want to break these into chunks
     debug_NSLog(@"sending: %@ ", messageOut);
     const uint8_t * rawstring = (const uint8_t *)[messageOut UTF8String];
     int len= strlen((char*)rawstring);
+    debug_NSLog("size : %d",len);
     if([_oStream write:rawstring maxLength:len]!=-1)
     {
         //     debug_NSLog(@"sending: ok");
+        if(len>0)
+            _streamHasSpace=NO; // triggers more has space messages
     }
     else
     {

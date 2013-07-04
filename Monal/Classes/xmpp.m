@@ -382,7 +382,7 @@
                 [discoInfo.children addObject:info];
                 [self send:discoInfo];
                 
-                [self writeFromQueue];
+                
                 
             }
         }
@@ -418,7 +418,7 @@
                     startTLS.element=@"starttls";
                     [startTLS.attributes setObject:@"urn:ietf:params:xml:ns:xmpp-tls" forKey:@"xmlns"];
                     [self send:startTLS];
-                    [self writeFromQueue];
+                
                     
                 }
                 
@@ -441,7 +441,7 @@
                         
                         saslXML.data=saslplain;
                         [self send:saslXML];
-                        [self writeFromQueue];
+                       
                         
                         
                     }
@@ -463,7 +463,7 @@
                 [iqNode setBindWithResource:_resource];
                 
                 [self send:iqNode];
-                [self writeFromQueue];
+             
             }
             
         }
@@ -510,7 +510,7 @@
                     
                     
                     [self startStream];
-                    [self writeFromQueue];
+               
                     
                     _startTLSComplete=YES;
                 }
@@ -544,7 +544,7 @@
                     debug_NSLog(@"session key: %@", _sessionKey);
                     
                     [self startStream];
-                    [self writeFromQueue];
+                  
                     
                     _loggedIn=YES;
                     
@@ -569,6 +569,8 @@
     dispatch_sync(_netWriteQueue, ^{
         [_outputQueue addObject:stanza];
     });
+    
+    [self writeFromQueue];  // try to send if there is space
     
 }
 

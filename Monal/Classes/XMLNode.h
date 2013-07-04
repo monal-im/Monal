@@ -14,6 +14,16 @@
 }
 
 /**
+ Initilizes with an element type
+ */
+-(id) initWithElement:(NSString*)element;
+
+/**
+ Quickly set an XMLNS attribute
+ */
+-(void) setXMLNS:(NSString*) xmlns;
+
+/**
  Generates an XML String suitable for writing based on the node
  */
 -(NSString*) XMLString;

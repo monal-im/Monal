@@ -16,8 +16,20 @@
     _attributes=[[NSMutableDictionary alloc] init];
     _children=[[NSMutableArray alloc] init];
     _data=nil; 
-    
     return self; 
+}
+
+-(id) initWithElement:(NSString*)element
+{
+    self=[self init];
+    self.element=element;
+    return self;
+    
+}
+
+-(void) setXMLNS:(NSString*) xmlns
+{
+    [self.attributes setObject:xmlns forKey:@"xmlns"];
 }
 
 -(NSString*) XMLString

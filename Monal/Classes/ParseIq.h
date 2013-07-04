@@ -10,6 +10,12 @@
 #import "XMPPParser.h"
 
 @interface ParseIq : XMPPParser
+{
+    
+}
+
+@property (nonatomic, assign) BOOL shouldSetBind;
+@property (nonatomic, strong) NSString* jid;
 
 
 @end

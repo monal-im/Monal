@@ -35,4 +35,9 @@
     
 }
 
+-(void) setiqTo:(NSString*) to
+{
+    [self.attributes setObject:to forKey:@"to"];
+}
+
 @end

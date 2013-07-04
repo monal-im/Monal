@@ -12,6 +12,7 @@
 #import "XMPPIQ.h"
 
 #import "ParseStream.h"
+#import "ParseIq.h"
 
 #define kXMPPReadSize 51200 // bytes
 
@@ -219,6 +220,9 @@
 
 -(void) startStream
 {
+    //flush read buffer since its all nont needed
+    _inputBuffer=[[NSMutableString alloc] init];
+    
     XMLNode* stream = [[XMLNode alloc] init];
     stream.element=@"stream:stream";
     [stream.attributes setObject:@"jabber:client" forKey:@"xmlns"];
@@ -350,7 +354,35 @@
         
         if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"iq"])
         {
-            
+            ParseIq* iqNode= [[ParseIq alloc]  initWithDictionary:nextStanzaPos];
+            if(iqNode.shouldSetBind)
+            {
+                _jid=iqNode.jid;
+                debug_NSLog(@"Set jid %@", _jid);
+                
+                XMPPIQ* sessionQuery= [[XMPPIQ alloc] initWithId:_sessionKey andType:kiqSetType];
+                XMLNode* session = [[XMLNode alloc] initWithElement:@"stream"];
+                [session setXMLNS:@"urn:ietf:params:xml:ns:xmpp-session"];
+                [sessionQuery.children addObject:session];
+                [self send:sessionQuery];
+                
+                XMPPIQ* discoItems =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
+                [discoItems setiqTo:_domain];
+                XMLNode* items = [[XMLNode alloc] initWithElement:@"query"];
+                [items setXMLNS:@"http://jabber.org/protocol/disco#items"];
+                [discoItems.children addObject:items];
+                [self send:discoItems];
+                
+                XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
+                [discoInfo setiqTo:_domain];
+                XMLNode* info = [[XMLNode alloc] initWithElement:@"query"];
+                [info setXMLNS:@"http://jabber.org/protocol/disco#info"];
+                [discoInfo.children addObject:info];
+                [self send:discoInfo];
+                
+                [self writeFromQueue];
+                
+            }
         }
         else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"message"])
         {
@@ -521,7 +553,8 @@
         
         
         dispatch_sync(_netReadQueue, ^{
-            [_inputBuffer deleteCharactersInRange:NSMakeRange(startPosition, endPosition-startPosition) ];
+            if(endPosition-startPosition<=[_inputBuffer length])
+                [_inputBuffer deleteCharactersInRange:NSMakeRange(startPosition, endPosition-startPosition) ];
         });
         
         nextStanzaPos=[self nextStanza];
@@ -653,7 +686,9 @@
     else
     {
         NSError* error= [_oStream streamError];
-        debug_NSLog(@"sending: failed with error %d domain %@",error.code, error.domain);
+        debug_NSLog(@"sending: failed with error %d domain %@ message %@",error.code, error.domain, error.userInfo);
+        //try again
+        [self writeToStream:messageOut];
     }
     
     return;

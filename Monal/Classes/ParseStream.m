@@ -60,7 +60,6 @@
 		
 	}
     
-	// state >1 at the end of sasl and then reset to 1 in bind. so if it is 1 then bind was already sent
 	if(([State isEqualToString:@"Features"]) && ([elementName isEqualToString:@"bind"]))
 	{
 

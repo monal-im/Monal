@@ -8,6 +8,7 @@
 
 #import "XMLNode.h"
 
+#define kiqGetType @"get"
 #define kiqSetType @"set"
 #define kiqResultType @"result"
 #define kiqErrorType @"error"
@@ -22,5 +23,9 @@
  */
 -(void) setBindWithResource:(NSString*) resource;
 
+/**
+ set to attribute
+ */
+-(void) setiqTo:(NSString*) to;
 
 @end

@@ -121,13 +121,10 @@
 								 kCFStreamPropertySSLSettings, (__bridge CFTypeRef)settings);
         
         debug_NSLog(@"connection secured");
-		//[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(login:) name: @"XMPPMech" object:self];
-		// for new style this is only done AFTER start tls is sent to not conflict with the earlier mech
 	}
 	
-    //start stream
+
     [self startStream];
-    
     [self setRunLoop];
     
 #warning this needs to time out propery

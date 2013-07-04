@@ -14,8 +14,10 @@
     
 }
 
-@property (nonatomic, assign) BOOL shouldSetBind;
-@property (nonatomic, strong) NSString* jid;
+@property (nonatomic, assign, readonly) BOOL shouldSetBind;
+@property (nonatomic, strong, readonly) NSString* jid;
 
+@property (nonatomic, strong, readonly) NSString* queryXMLNS;
+@property (nonatomic, strong, readonly) NSMutableArray* features;
 
 @end

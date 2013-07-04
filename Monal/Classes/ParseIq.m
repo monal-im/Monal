@@ -10,6 +10,13 @@
 
 @implementation ParseIq
 
+-(id) init{
+    self=[super init];
+    _features=[[NSMutableArray alloc] init];
+
+    return self;
+}
+
 
 #pragma mark NSXMLParser delegate
 
@@ -29,7 +36,17 @@
 	}
 	
 
-    
+    if([elementName isEqualToString:@"query"])
+    {
+        _queryXMLNS=[attributeDict objectForKey:@"xmlns"];
+        return;
+    }
+
+     if([elementName isEqualToString:@"query"])
+     {
+         [_features addObject:[attributeDict objectForKey:@"val"]];
+         return; 
+     }
     
 }
 

@@ -221,7 +221,9 @@
 -(void) startStream
 {
     //flush read buffer since its all nont needed
-    _inputBuffer=[[NSMutableString alloc] init];
+     dispatch_sync(_netReadQueue, ^{
+         _inputBuffer=[[NSMutableString alloc] init];
+     }); 
     
     XMLNode* stream = [[XMLNode alloc] init];
     stream.element=@"stream:stream";
@@ -652,10 +654,10 @@
 {
     if(!_streamHasSpace) return;
     
-    dispatch_async(dispatch_get_main_queue(),
-                   ^{
-                       [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
-                   });
+//    dispatch_async(dispatch_get_main_queue(),
+//                   ^{
+//                       [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
+//                   });
     
     dispatch_sync(_netWriteQueue, ^{
         for(XMLNode* node in _outputQueue)
@@ -666,10 +668,10 @@
         [_outputQueue removeAllObjects];
     });
     
-    dispatch_async(dispatch_get_main_queue(),
-                   ^{
-                       [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
-                   });
+//    dispatch_async(dispatch_get_main_queue(),
+//                   ^{
+//                       [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+//                   });
     
 }
 
@@ -687,8 +689,6 @@
     {
         NSError* error= [_oStream streamError];
         debug_NSLog(@"sending: failed with error %d domain %@ message %@",error.code, error.domain, error.userInfo);
-        //try again
-        [self writeToStream:messageOut];
     }
     
     return;

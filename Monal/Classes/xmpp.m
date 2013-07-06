@@ -10,6 +10,7 @@
 #import "DataLayer.h"
 #import "EncodingTools.h"
 #import "XMPPIQ.h"
+#import "XMPPPresence.h"
 
 #import "ParseStream.h"
 #import "ParseIq.h"
@@ -234,24 +235,33 @@
 
 -(NSMutableDictionary*) nextStanza
 {
+     NSString* __block toReturn=nil;
+    NSString* __block stanzaType=nil;
+    
+     dispatch_sync(_netReadQueue, ^{
 	int stanzacounter=0;
 	int maxPos=[_inputBuffer length];
 	debug_NSLog(@"maxPos %d", maxPos);
     
 	if(maxPos<2)
 	{
-		return nil;
+		toReturn= nil;
+        return; 
 	}
 	//accouting for white space
 	NSRange startrange=[_inputBuffer rangeOfString:@"<"
                                            options:NSCaseInsensitiveSearch range:NSMakeRange(0, [_inputBuffer length])];
 	if (startrange.location==NSNotFound)
 	{
-		return nil;
+		toReturn= nil;
+        return;
 	}
     
-    NSMutableDictionary* toReturn=nil;
-    
+   
+         int finalstart=0;
+         int finalend=0; 
+         
+         
 	int startpos=startrange.location;
 	debug_NSLog(@"start pos%d", startpos);
 	
@@ -263,6 +273,7 @@
                                             options:NSCaseInsensitiveSearch range:NSMakeRange(startpos, maxPos-startpos)];
             if((pos.location<maxPos) && (pos.location!=NSNotFound))
             {
+                stanzaType=[_stanzaTypes objectAtIndex:stanzacounter];
                 
                 if([[_stanzaTypes objectAtIndex:stanzacounter] isEqualToString:@"stream:stream"])
                 {
@@ -273,10 +284,9 @@
                     if((endPos.location<maxPos) && (endPos.location!=NSNotFound))
                     {
                         
-                        toReturn= [[NSMutableDictionary alloc]init];
-                        [toReturn setObject:[NSNumber numberWithInt:pos.location] forKey:@"startPosition"];
-                        [toReturn setObject:[NSNumber numberWithInt:endPos.location+1] forKey:@"endPosition"]; //+2 to inclde closing />
-                        [toReturn setObject: [_stanzaTypes objectAtIndex:stanzacounter] forKey:@"stanzaType"];
+                        finalstart=pos.location;
+                        finalend=endPos.location+1;//+2 to inclde closing />
+                    
                         break;
                     }
                     
@@ -295,11 +305,9 @@
                         NSRange endPos=[_inputBuffer rangeOfString:@">"
                                                            options:NSCaseInsensitiveSearch range:NSMakeRange(closePos.location, maxPos-closePos.location)];
                         
-                        
-                        toReturn= [[NSMutableDictionary alloc]init];
-                        [toReturn setObject:[NSNumber numberWithInt:pos.location] forKey:@"startPosition"];
-                        [toReturn setObject:[NSNumber numberWithInt:endPos.location+1] forKey:@"endPosition"]; //+1 to inclde closing <
-                        [toReturn setObject: [_stanzaTypes objectAtIndex:stanzacounter] forKey:@"stanzaType"];
+                        finalstart=pos.location;
+                        finalend=endPos.location+1; //+1 to inclde closing <
+                    
                         break;
                     }
                     else
@@ -310,22 +318,19 @@
                         
                         if((endPos.location<maxPos) && (endPos.location!=NSNotFound))
                         {
+                           
+                            finalstart=pos.location;
+                            finalend=endPos.location+2; //+2 to inclde closing />
                             
-                            toReturn= [[NSMutableDictionary alloc]init];
-                            [toReturn setObject:[NSNumber numberWithInt:pos.location] forKey:@"startPosition"];
-                            [toReturn setObject:[NSNumber numberWithInt:endPos.location+2] forKey:@"endPosition"]; //+2 to inclde closing />
-                            [toReturn setObject: [_stanzaTypes objectAtIndex:stanzacounter] forKey:@"stanzaType"];
                             break;
                         }
                         else
                             if([[_stanzaTypes objectAtIndex:stanzacounter] isEqualToString:@"stream"])
                             {
+                               
                                 //stream will have no terminal.
-                                toReturn= [[NSMutableDictionary alloc]init];
-                                [toReturn setObject:[NSNumber numberWithInt:pos.location] forKey:@"startPosition"];
-                                [toReturn setObject:[NSNumber numberWithInt:maxPos] forKey:@"endPosition"]; //+2 to inclde closing />
-                                [toReturn setObject: [_stanzaTypes objectAtIndex:stanzacounter] forKey:@"stanzaType"];
-                                
+                                finalstart=pos.location;
+                                finalend=maxPos;                                 
                             }
                         
                     }
@@ -335,23 +340,41 @@
 			stanzacounter++;
         }
     
-	return  toReturn;
+       
+         toReturn=  [_inputBuffer substringWithRange:NSMakeRange(finalstart,finalend-finalstart)];
+         
+        if(finalend-finalstart<=maxPos)
+        {
+            debug_NSLog("to del start %d end %d: %@", finalstart, finalend, _inputBuffer)
+            if(finalend<maxPos)
+            [_inputBuffer deleteCharactersInRange:NSMakeRange(finalstart, finalend-finalstart) ];
+            else
+                _inputBuffer=[[NSMutableString alloc] init];
+            debug_NSLog("result: %@", _inputBuffer)
+        }
+    });
+    
+    NSMutableDictionary* returnDic=nil;
+    
+    if(stanzaType && toReturn)
+    {
+        returnDic=[[NSMutableDictionary alloc]init];
+        [returnDic setObject:toReturn forKey:@"stanzaString"];
+        [returnDic setObject:stanzaType forKey:@"stanzaType"];
+    }
+    
+	return  returnDic;
 }
 
 -(void) processInput
 {
     
-    NSMutableDictionary* nextStanzaPos=[self nextStanza];
+    NSDictionary* nextStanzaPos=[self nextStanza];
     while (nextStanzaPos)
     {
-        NSInteger startPosition=[[nextStanzaPos objectForKey:@"startPosition"] integerValue];
-        NSInteger endPosition=[[nextStanzaPos objectForKey:@"endPosition"] integerValue];
-        [nextStanzaPos setObject:[_inputBuffer substringWithRange:NSMakeRange(startPosition,endPosition-startPosition)] forKey:@"stanzaString"];
-        debug_NSLog(@"got stanza %@", [nextStanzaPos objectForKey:@"stanzaString"]);
+      //  debug_NSLog(@"got stanza %@", nextStanzaPos);
         
-        
-        
-        if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"iq"])
+        if([[nextStanzaPos objectForKey:@"stanzaType"]  isEqualToString:@"iq"])
         {
             ParseIq* iqNode= [[ParseIq alloc]  initWithDictionary:nextStanzaPos];
             if(iqNode.shouldSetBind)
@@ -379,15 +402,18 @@
                 [discoInfo.children addObject:info];
                 [self send:discoInfo];
                 
+                XMPPPresence* presence =[[XMPPPresence alloc] initWithHash:@"xx"]; // TODO change this
+                [presence setPriority:5]; //TODO change later
                 
+                 [self send:presence];
                 
             }
         }
-        else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"message"])
+        else  if([[nextStanzaPos objectForKey:@"stanzaType"]  isEqualToString:@"message"])
         {
             
         }
-        else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"presence"])
+        else  if([[nextStanzaPos objectForKey:@"stanzaType"]  isEqualToString:@"presence"])
         {
             
         }
@@ -415,11 +441,9 @@
                     startTLS.element=@"starttls";
                     [startTLS.attributes setObject:@"urn:ietf:params:xml:ns:xmpp-tls" forKey:@"xmlns"];
                     [self send:startTLS];
-                
-                    
+    
                 }
-                
-                
+   
                 if ((_SSL && _startTLSComplete) || (!_SSL && !_startTLSComplete))
                 {
                     //look at menchanisms presented
@@ -438,9 +462,7 @@
                         
                         saslXML.data=saslplain;
                         [self send:saslXML];
-                       
-                        
-                        
+       
                     }
                     else
                         if(streamNode.SASLDIGEST_MD5)
@@ -505,10 +527,8 @@
                         //fatal=true;
                     }
                     
-                    
                     [self startStream];
                
-                    
                     _startTLSComplete=YES;
                 }
             }
@@ -541,20 +561,14 @@
                     debug_NSLog(@"session key: %@", _sessionKey);
                     
                     [self startStream];
-                  
-                    
                     _loggedIn=YES;
-                    
-                    
+        
                 }
             }
         }
         
         
-        dispatch_sync(_netReadQueue, ^{
-            if(endPosition-startPosition<=[_inputBuffer length])
-                [_inputBuffer deleteCharactersInRange:NSMakeRange(startPosition, endPosition-startPosition) ];
-        });
+    
         
         nextStanzaPos=[self nextStanza];
     }
@@ -717,8 +731,11 @@
         NSString* newString=[NSString stringWithUTF8String:(char*)buf];
         if(newString)
         {
+            debug_NSLog(@"got new string %@", newString);
+            debug_NSLog(@"inputBuffer %@", _inputBuffer)
             dispatch_sync(_netReadQueue, ^{
                 [_inputBuffer appendString:newString];
+                 debug_NSLog(@"new inputBuffer %@", _inputBuffer)
             });
         }
         free(buf);
@@ -729,7 +746,7 @@
 		return;
 	}
     
-    debug_NSLog(@"read buffer: %@ ", _inputBuffer);
+   
     [self processInput];
     
 }

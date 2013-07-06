@@ -93,11 +93,14 @@ typedef struct
 @property (nonatomic,strong) NSString* resource;
 @property (nonatomic,assign) BOOL SSL;
 @property (nonatomic,assign) BOOL oldStyleSSL;
+@property (nonatomic,assign) NSInteger priority;
 
 @property (nonatomic,assign,readonly) BOOL loggedIn;
 
 // discovered properties
 @property (nonatomic,strong)  NSMutableArray* discoveredServerList;
 
+//calculated
+@property (nonatomic,strong, readonly) NSString* versionHash;
 
 @end

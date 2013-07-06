@@ -34,6 +34,7 @@
 		261A6294176C15FC00059090 /* SearchUsersViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A6293176C15FC00059090 /* SearchUsersViewController.m */; };
 		261A6297176C160900059090 /* HelpViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A6296176C160900059090 /* HelpViewController.m */; };
 		261A629A176C162200059090 /* AboutViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A6299176C162200059090 /* AboutViewController.m */; };
+		261AC91D1788A49C00E05657 /* ParsePresence.m in Sources */ = {isa = PBXBuildFile; fileRef = 261AC91C1788A49C00E05657 /* ParsePresence.m */; };
 		261ED6C41240257F00C14F6A /* BuddyAdd.xib in Resources */ = {isa = PBXBuildFile; fileRef = 261ED6C31240257F00C14F6A /* BuddyAdd.xib */; };
 		261FD56F1223527C003DDC3A /* active.png in Resources */ = {isa = PBXBuildFile; fileRef = 261FD56E1223527C003DDC3A /* active.png */; };
 		26277888110179D100023C8A /* tools.m in Sources */ = {isa = PBXBuildFile; fileRef = 26277887110179D100023C8A /* tools.m */; };
@@ -282,6 +283,8 @@
 		261A6298176C162200059090 /* AboutViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AboutViewController.h; sourceTree = "<group>"; };
 		261A6299176C162200059090 /* AboutViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AboutViewController.m; sourceTree = "<group>"; };
 		261AB9371409C2B8006F5155 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		261AC91B1788A49C00E05657 /* ParsePresence.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParsePresence.h; sourceTree = "<group>"; };
+		261AC91C1788A49C00E05657 /* ParsePresence.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParsePresence.m; sourceTree = "<group>"; };
 		261ED6C31240257F00C14F6A /* BuddyAdd.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = BuddyAdd.xib; sourceTree = "<group>"; };
 		261FD56E1223527C003DDC3A /* active.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = active.png; sourceTree = "<group>"; };
 		26277886110179D100023C8A /* tools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tools.h; sourceTree = "<group>"; };
@@ -976,6 +979,8 @@
 				26CF3EAC1780DE5C002B7085 /* ParseIq.m */,
 				26CF3EB01780DFD9002B7085 /* XMPPParser.h */,
 				26CF3EB11780DFD9002B7085 /* XMPPParser.m */,
+				261AC91B1788A49C00E05657 /* ParsePresence.h */,
+				261AC91C1788A49C00E05657 /* ParsePresence.m */,
 			);
 			name = Parsers;
 			sourceTree = "<group>";
@@ -1387,6 +1392,7 @@
 				26CF3EAD1780DE5D002B7085 /* ParseIq.m in Sources */,
 				26CF3EB21780DFD9002B7085 /* XMPPParser.m in Sources */,
 				264E345B1787BAB100BC7BD0 /* XMPPPresence.m in Sources */,
+				261AC91D1788A49C00E05657 /* ParsePresence.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

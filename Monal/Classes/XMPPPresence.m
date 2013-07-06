@@ -27,16 +27,22 @@
     return self;
 }
 
--(void) setAway
+-(void) setShow:(NSString*) showVal
 {
     XMLNode* show =[[XMLNode alloc] init];
     show.element=@"show";
-    show.data=@"away";
+    show.data=showVal;
     [self.children addObject:show];
 }
 
--(void) setClientPriority
+-(void) setAway
 {
+    [self setShow:@"away"];
+}
+
+-(void) setPriority:(NSInteger)priority
+{
+    _priority=priority; 
     XMLNode* priorityNode =[[XMLNode alloc] init];
     priorityNode.element=@"priority";
     priorityNode.data=[NSString stringWithFormat:@"%d",_priority];

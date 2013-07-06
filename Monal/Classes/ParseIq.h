@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "XMPPParser.h"
+#import "XMPPIQ.h" // for the constants
 
 @interface ParseIq : XMPPParser
 {

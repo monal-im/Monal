@@ -21,6 +21,8 @@
 #define kextcamera @"camera-v1"
 
 
+#define kpresenceUnavailable @"unavailable"
+
 @interface XMPPPresence : XMLNode
 {
     
@@ -34,7 +36,19 @@
  */
 -(id) initWithHash:(NSString*) version;
 
+/**
+ sets a show child with away
+ */
 -(void) setAway;
--(void) setClientPriority;
+
+/**
+ creates and sets the priority child
+ */
+-(void) setPriority:(NSInteger)priority;
+
+/**
+ creates and sets the show child
+ */
+-(void) setShow:(NSString*) showVal;
 
 @end

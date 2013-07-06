@@ -14,6 +14,7 @@
 
 #import "ParseStream.h"
 #import "ParseIq.h"
+#import "ParsePresence.h"
 
 #define kXMPPReadSize 51200 // bytes
 

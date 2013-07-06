@@ -47,7 +47,7 @@
 	{
         debug_NSLog(@"Using new style SSL");
         _callStartTLS=YES;
-		return;
+		[parser abortParsing];
 	}
     
     
@@ -56,7 +56,7 @@
 		debug_NSLog(@"Got SartTLS procced");
 		//trying to switch to TLS
         _startTLSProceed=YES;
-		return;
+		[parser abortParsing];
 		
 	}
     

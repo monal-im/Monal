@@ -137,6 +137,8 @@
 
 -(void) connect
 {
+    _xmppQueue=dispatch_get_current_queue();
+    
     if((_port==5553) || (_port==443))
     {
         _oldStyleSSL=YES;
@@ -219,9 +221,12 @@
 -(void) startStream
 {
     //flush read buffer since its all nont needed
+    debug_NSLog(@"waiting read queue");
      dispatch_sync(_netReadQueue, ^{
          _inputBuffer=[[NSMutableString alloc] init];
      }); 
+    
+    debug_NSLog(@" got read queue");
     
     XMLNode* stream = [[XMLNode alloc] init];
     stream.element=@"stream:stream";
@@ -588,11 +593,12 @@
 
 -(void) send:(XMLNode*) stanza
 {
-    dispatch_sync(_netWriteQueue, ^{
-        [_outputQueue addObject:stanza];
-
-        [self writeFromQueue];  // try to send if there is space
-     });
+    dispatch_async(_xmppQueue, ^{
+        dispatch_sync(_netWriteQueue, ^{
+            [_outputQueue addObject:stanza];
+                [self writeFromQueue];  // try to send if there is space
+        });
+    });
 }
 
 #pragma mark nsstream delegate
@@ -605,13 +611,14 @@
 			//for writing
         case NSStreamEventHasSpaceAvailable:
         {
-            dispatch_sync(_netWriteQueue, ^{
-            _streamHasSpace=YES;
-            
-            debug_NSLog(@"Stream has space to write");
-            [self writeFromQueue];
+            dispatch_async(_xmppQueue, ^{
+                dispatch_sync(_netWriteQueue, ^{
+                    _streamHasSpace=YES;
+                    
+                    debug_NSLog(@"Stream has space to write");
+                    [self writeFromQueue];
+                });
             });
-                
             break;
         }
 			
@@ -619,7 +626,10 @@
         case  NSStreamEventHasBytesAvailable:
 		{
 			debug_NSLog(@"Stream has bytes to read");
-            [self readToBuffer];
+            dispatch_async(_xmppQueue, ^{
+                [self readToBuffer];
+            });
+            
 			
 			break;
 		}
@@ -664,12 +674,9 @@
 			
 		case NSStreamEventEndEncountered:
 		{
-			debug_NSLog(@"Stream end encoutered");
+			debug_NSLog(@"%@ Stream end encoutered", [stream class] );
 			break;
 		}
-			
-			
-            
 			
 	}
 	
@@ -727,17 +734,18 @@
 	
     uint8_t* buf=malloc(kXMPPReadSize);
     int len = 0;
-    
-    debug_NSLog(@"reading");
+
 	len = [_iStream read:buf maxLength:kXMPPReadSize];
-     debug_NSLog(@"done reading");
+     debug_NSLog(@"done reading %d", len);
 	if(len>0) {
-		//[_inputBuffer appendBytes:(const void *)buf length:len];
-        NSString* newString=[NSString stringWithUTF8String:(char*)buf];
-        if(newString)
+        NSData* data = [NSData dataWithBytes:(const void *)buf length:len];
+       //  debug_NSLog(@" got raw string %s nsdata %@", buf, data);
+        if(data)
         {
+           // debug_NSLog(@"waiting on net read queue");
             dispatch_sync(_netReadQueue, ^{
-                [_inputBuffer appendString:newString];
+                 // debug_NSLog(@"got net read queue");
+                [_inputBuffer appendString:[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]];
             });
              
         }

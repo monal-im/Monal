@@ -63,6 +63,7 @@ typedef struct
     NSMutableString* _inputBuffer;
 	NSMutableArray* _outputQueue;
     
+    dispatch_queue_t _xmppQueue; 
     dispatch_queue_t _netReadQueue ;
     dispatch_queue_t _netWriteQueue ;
     

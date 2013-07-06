@@ -26,7 +26,7 @@
 -(id) init
 {
     self=[super init];
-    _netQueue = dispatch_queue_create(kMonalNetQueue, DISPATCH_QUEUE_SERIAL);
+    _netQueue = dispatch_queue_create(kMonalNetQueue, DISPATCH_QUEUE_CONCURRENT);
     return self; 
 }
 

@@ -579,10 +579,9 @@
 {
     dispatch_sync(_netWriteQueue, ^{
         [_outputQueue addObject:stanza];
-    });
-    
-    [self writeFromQueue];  // try to send if there is space
-    
+
+        [self writeFromQueue];  // try to send if there is space
+     });
 }
 
 #pragma mark nsstream delegate
@@ -595,10 +594,13 @@
 			//for writing
         case NSStreamEventHasSpaceAvailable:
         {
+            dispatch_sync(_netWriteQueue, ^{
             _streamHasSpace=YES;
+            
             debug_NSLog(@"Stream has space to write");
             [self writeFromQueue];
-            
+            });
+                
             break;
         }
 			
@@ -670,29 +672,20 @@
         debug_NSLog(@"no space to write. returning. ");
         return;
     }    
-//    dispatch_async(dispatch_get_main_queue(),
-//                   ^{
-//                       [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
-//                   });
-    
-    dispatch_sync(_netWriteQueue, ^{
+   
         for(XMLNode* node in _outputQueue)
         {
             [self writeToStream:node.XMLString];
         }
         
         [_outputQueue removeAllObjects];
-    });
-    
-//    dispatch_async(dispatch_get_main_queue(),
-//                   ^{
-//                       [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
-//                   });
-    
+
 }
 
 -(void) writeToStream:(NSString*) messageOut
 {
+     _streamHasSpace=NO; // triggers more has space messages
+    
     //we probably want to break these into chunks
     debug_NSLog(@"sending: %@ ", messageOut);
     const uint8_t * rawstring = (const uint8_t *)[messageOut UTF8String];
@@ -700,9 +693,7 @@
     debug_NSLog("size : %d",len);
     if([_oStream write:rawstring maxLength:len]!=-1)
     {
-        //     debug_NSLog(@"sending: ok");
-        if(len>0)
-            _streamHasSpace=NO; // triggers more has space messages
+      
     }
     else
     {
@@ -716,27 +707,28 @@
 
 -(void) readToBuffer
 {
-	uint8_t* buf=malloc(kXMPPReadSize);
-    int len = 0;
     
 	if(![_iStream hasBytesAvailable])
 	{
-		free(buf);
+        debug_NSLog(@"no bytes  to read");
 		return;
 	}
 	
+    uint8_t* buf=malloc(kXMPPReadSize);
+    int len = 0;
+    
+    debug_NSLog(@"reading");
 	len = [_iStream read:buf maxLength:kXMPPReadSize];
+     debug_NSLog(@"done reading");
 	if(len>0) {
 		//[_inputBuffer appendBytes:(const void *)buf length:len];
         NSString* newString=[NSString stringWithUTF8String:(char*)buf];
         if(newString)
         {
-            debug_NSLog(@"got new string %@", newString);
-            debug_NSLog(@"inputBuffer %@", _inputBuffer)
             dispatch_sync(_netReadQueue, ^{
                 [_inputBuffer appendString:newString];
-                 debug_NSLog(@"new inputBuffer %@", _inputBuffer)
             });
+             
         }
         free(buf);
 	}

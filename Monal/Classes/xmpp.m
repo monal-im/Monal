@@ -342,16 +342,27 @@
     
        
          toReturn=  [_inputBuffer substringWithRange:NSMakeRange(finalstart,finalend-finalstart)];
-         
+         if([toReturn length]==0) toReturn=nil;
+        
+         if(!stanzaType)
+         {
+             //this is junk data no stanza start
+              _inputBuffer=[[NSMutableString alloc] init];
+             debug_NSLog("wiped input buffer with no start");
+             
+         }
+         else{
         if(finalend-finalstart<=maxPos)
         {
             debug_NSLog("to del start %d end %d: %@", finalstart, finalend, _inputBuffer)
             if(finalend<maxPos)
-            [_inputBuffer deleteCharactersInRange:NSMakeRange(finalstart, finalend-finalstart) ];
+                [_inputBuffer deleteCharactersInRange:NSMakeRange(finalstart, finalend-finalstart) ];
             else
                 _inputBuffer=[[NSMutableString alloc] init];
+            
             debug_NSLog("result: %@", _inputBuffer)
         }
+         }
     });
     
     NSMutableDictionary* returnDic=nil;

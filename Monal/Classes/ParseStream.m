@@ -63,11 +63,7 @@
 	if(([State isEqualToString:@"Features"]) && ([elementName isEqualToString:@"bind"]))
 	{
 
-//        debug_NSLog(@"%@", self.sessionKey);
-//        NSString* bindString=[NSString stringWithFormat:@"<iq id='%@' type='set' ><bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'><resource>%@</resource></bind></iq>", _sessionKey,resource];
-//		[self talk:bindString];
         _bind=YES;
-
 		return;
     }
 	
@@ -78,12 +74,10 @@
 		
 	{
 		_SASLSuccess=YES;
-        return;
+        [parser abortParsing];
 	}
     
-    
-//	// first time it is read loginstate  will always be 1
-//	
+	
 	if(([State isEqualToString:@"Features"]) && [elementName isEqualToString:@"mechanisms"] )
 	{
 	

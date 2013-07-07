@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <sqlite3.h>
 #import "PasswordManager.h"
-//#import "presence.h"
+#import "ParsePresence.h"
 
 #define kMonalDBQueue "im.monal.dbQueue"
 
@@ -48,7 +48,7 @@
 -(BOOL) markBuddiesRead:(NSString*) accountNo;
 
 #pragma mark Ver string and Capabilities
-//-(BOOL) setResourceVer:(presence*)presenceObj: (NSString*) accountNo;
+-(BOOL) setResourceVer:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
 -(NSArray*) capsforVer:(NSString*) verString;
 -(NSString*)getVerForUser:(NSString*)user Resource:(NSString*) resource;
 
@@ -64,15 +64,15 @@
 
 
 #pragma mark  presence functions
-//-(BOOL) setResourceOnline:(presence*)presenceObj: (NSString*) accountNo;
-//-(BOOL) setOnlineBuddy:(presence*)presenceObj: (NSString*) accountNo;
-//-(BOOL) setOfflineBuddy:(presence*)presenceObj: (NSString*) accountNo;
-//
-//-(BOOL) setBuddyStatus:(presence*)presenceObj: (NSString*) accountNo;
-//-(NSString*) buddyStatus:(NSString*) buddy :(NSString*) accountNo;
-//
-//-(BOOL) setBuddyState:(presence*)presenceObj: (NSString*) accountNo;
-//-(NSString*) buddyState:(NSString*) buddy :(NSString*) accountNo;
+-(BOOL) setResourceOnline:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
+-(BOOL) setOnlineBuddy:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
+-(BOOL) setOfflineBuddy:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
+
+-(BOOL) setBuddyStatus:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
+-(NSString*) buddyStatus:(NSString*) buddy :(NSString*) accountNo;
+
+-(BOOL) setBuddyState:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
+-(NSString*) buddyState:(NSString*) buddy :(NSString*) accountNo;
 
 
 #pragma mark Contact info
@@ -119,11 +119,6 @@
 -(BOOL) removeAccount:(NSString*) accountNo; 
 
 -(BOOL) removeEnabledAccount; 
-
-
-
-
-
 
 //message Commands
 -(BOOL) addMessage:(NSString*) from :(NSString*) to :(NSString*) accountNo:(NSString*) message:(NSString*) actualfrom ;

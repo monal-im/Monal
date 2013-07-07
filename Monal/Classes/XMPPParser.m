@@ -29,4 +29,30 @@
     
 }
 
+
+#pragma mark common parser delegate functions
+- (void)parserDidStartDocument:(NSXMLParser *)parser{
+	debug_NSLog(@"parsing iq");
+}
+
+
+- (void)parser:(NSXMLParser *)parser foundCharacters:(NSString *)string
+{
+    _messageBuffer=string;
+}
+
+
+- (void)parser:(NSXMLParser *)parser foundIgnorableWhitespace:(NSString *)whitespaceString
+{
+	debug_NSLog(@"found ignorable whitespace: %@", whitespaceString);
+}
+
+- (void)parser:(NSXMLParser *)parser parseErrorOccurred:(NSError *)parseError
+{
+	debug_NSLog(@"Error: line: %d , col: %d desc: %@ ",[parser lineNumber],
+                [parser columnNumber], [parseError localizedDescription]);
+	
+    
+}
+
 @end

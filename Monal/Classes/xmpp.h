@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "XMLNode.h"
+#import "EncodingTools.h"
 
 // networking objects
 #import <unistd.h>
@@ -95,6 +96,9 @@ typedef struct
 @property (nonatomic,assign) BOOL SSL;
 @property (nonatomic,assign) BOOL oldStyleSSL;
 @property (nonatomic,assign) NSInteger priority;
+
+// DB info
+@property (nonatomic,strong) NSString* accountNo;
 
 @property (nonatomic,assign,readonly) BOOL loggedIn;
 

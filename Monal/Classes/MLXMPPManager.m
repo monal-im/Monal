@@ -59,6 +59,8 @@
             xmppAccount.port=[[account objectForKey:@"other_port"] integerValue];
             xmppAccount.SSL=[[account objectForKey:@"secure"] boolValue];
             
+            xmppAccount.accountNo=[NSString stringWithFormat:@"%@",[account objectForKey:@"account_id"]];
+            
             PasswordManager* passMan= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",[account objectForKey:@"account_id"]]];
             xmppAccount.password=[passMan getPassword] ;
              
@@ -67,9 +69,7 @@
             {
                 // no password error
             }
-            
-            
-            
+          
             dispatch_async(_netQueue,
                    ^{
                        [xmppAccount connect];

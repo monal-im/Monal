@@ -6,12 +6,17 @@
 //
 //
 
+#import <CommonCrypto/CommonCrypto.h>
+
 #import "xmpp.h"
 #import "DataLayer.h"
 #import "EncodingTools.h"
+
+//objects
 #import "XMPPIQ.h"
 #import "XMPPPresence.h"
 
+//parsers
 #import "ParseStream.h"
 #import "ParseIq.h"
 #import "ParsePresence.h"
@@ -53,6 +58,9 @@
                   @"response",
                   @"success",
                   nil];
+    
+    
+    _versionHash=[self getVersionString];
     
     return self;
 }
@@ -419,7 +427,7 @@
                 [discoInfo.children addObject:info];
                 [self send:discoInfo];
                 
-                XMPPPresence* presence =[[XMPPPresence alloc] initWithHash:@"xx"]; // TODO change this
+                XMPPPresence* presence =[[XMPPPresence alloc] initWithHash:_versionHash]; 
                 [presence setPriority:5]; //TODO change later
                 
                  [self send:presence];
@@ -432,6 +440,71 @@
         }
         else  if([[nextStanzaPos objectForKey:@"stanzaType"]  isEqualToString:@"presence"])
         {
+         ParsePresence* presenceNode= [[ParsePresence alloc]  initWithDictionary:nextStanzaPos];
+            
+            if([presenceNode.type isEqualToString:kpresenceUnavailable])
+            {
+                
+                 [[DataLayer sharedInstance] setOfflineBuddy:presenceNode forAccount:_accountNo];
+                
+                //a buddy logout
+                //make sure not already there
+//                if(![self isInRemove:presenceObj.user])
+//                {
+//                    debug_NSLog(@"removing from list");
+//                   
+//                    //remove from online list
+//                }
+                
+                
+            }
+            else
+                
+                if([presenceNode.type isEqualToString:kpresencesSubscribe])
+                {
+                    
+//                    NSString* askmsg=[NSString stringWithFormat:@"This user would like to add you to his/her list. Allow?"];
+//                    //ask for authorization
+//                    
+//                    dispatch_async(dispatch_get_main_queue(), ^{
+//                        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:presenceObj.user
+//                                                                        message:askmsg
+//                                                                       delegate:self cancelButtonTitle:@"Yes"
+//                                                              otherButtonTitles:@"No", nil];
+//                        alert.tag=1;
+//                        [alert show];
+//                    });
+//                    
+                    
+                    
+                }
+            
+            
+            
+            if(presenceNode.type ==nil)
+            {
+                debug_NSLog(@"presence priority notice");
+                
+//                if((presenceObj.user!=nil) && ([[presenceObj.user stringByTrimmingCharactersInSet:
+//                                                 [NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0))
+//                    if(![db isBuddyInList:presenceObj.user:accountNumber]){
+//                        
+//                        debug_NSLog(@"Buddy not already in list");
+//
+//                        [db addBuddy:presenceObj.user :accountNumber :@"" :@""];
+//                        [db setOnlineBuddy:presenceObj: accountNumber];
+//
+//                        debug_NSLog(@"Buddy added to  list");
+//                        
+//                        
+//                    }
+//                    else
+//                    {
+//                        debug_NSLog(@"Buddy already in list, showing as online now"); 
+//                        [db setOnlineBuddy:presenceObj:accountNumber];
+//         
+//                    }
+            }
             
         }
         else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"stream:stream"])
@@ -602,6 +675,25 @@
     });
 }
 
+
+-(NSString*)getVersionString
+{
+    
+    NSString* unhashed=[NSString stringWithFormat:@"client/pc//Monal %@<http://jabber.org/protocol/caps<http://jabber.org/protocol/disco#info<http://jabber.org/protocol/disco#items<http://jabber.org/protocol/muc<<http://jabber.org/protocol/offline<", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"] ];
+    NSData* hashed;
+    
+    unsigned char digest[CC_SHA1_DIGEST_LENGTH];
+    NSData *stringBytes = [unhashed dataUsingEncoding: NSUTF8StringEncoding]; /* or some other encoding */
+    if (CC_SHA1([stringBytes bytes], [stringBytes length], digest)) {
+        hashed =[NSData dataWithBytes:digest length:CC_SHA1_DIGEST_LENGTH];
+    }
+    
+    NSString* hashedBase64= [EncodingTools encodeBase64WithData:hashed];
+    
+    
+    return hashedBase64;
+    
+}
 #pragma mark nsstream delegate
 
 - (void)stream:(NSStream *)stream handleEvent:(NSStreamEvent)eventCode

@@ -10,5 +10,14 @@
 #import "XMPPPresence.h" // for the constants
 
 @interface ParsePresence : XMPPParser
+{
+    
+}
+
+@property (nonatomic, strong, readonly) NSString* type;
+@property (nonatomic, strong, readonly) NSString* from; // full name as sent
+@property (nonatomic, strong, readonly) NSString* user; //user part of from
+@property (nonatomic, strong, readonly) NSString* resource; // resource part of from
+@property (nonatomic, strong, readonly) NSString* idval;
 
 @end

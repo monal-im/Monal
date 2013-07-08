@@ -13,6 +13,5 @@
 int main(int argc, char *argv[]) {
     
     int retVal = UIApplicationMain(argc, argv, nil, NSStringFromClass([MonalAppDelegate class]));
-    ;
     return retVal;
 }

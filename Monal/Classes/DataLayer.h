@@ -34,7 +34,7 @@
 -(BOOL) executeNonQuery:(NSString*) query; 
 
 // Buddy Commands
--(BOOL) addBuddy:(NSString*) buddy :(NSString*) accountNo:(NSString*) fullName:(NSString*) nickName;
+-(BOOL) addBuddy:(NSString*) buddy  forAccount:(NSString*) accountNo fullname:(NSString*)fullName nickname:(NSString*) nickName;
 -(BOOL) removeBuddy:(NSString*) buddy :(NSString*) accountNo; 
 -(BOOL) clearBuddies:(NSString*) accountNo; 
 
@@ -89,13 +89,13 @@
 
 -(NSArray*)getResourcesForUser:(NSString*)user ;
 
--(bool) isBuddyOnline:(NSString*) buddy :(NSString*) accountNo ;
--(bool) isBuddyMuc:(NSString*) buddy :(NSString*) accountNo;
+-(bool) isBuddyOnline:(NSString*) buddy forAccount:(NSString*) accountNo ;
+-(bool) isBuddyMuc:(NSString*) buddy forAccount:(NSString*) accountNo;
 
--(bool) isBuddyAdded:(NSString*) buddy :(NSString*) accountNo ;
--(bool) isBuddyRemoved:(NSString*) buddy :(NSString*) accountNo ;
+-(bool) isBuddyAdded:(NSString*) buddy forAccount:(NSString*) accountNo ;
+-(bool) isBuddyRemoved:(NSString*) buddy forAccount:(NSString*) accountNo ;
 
--(bool) isBuddyInList:(NSString*) buddy :(NSString*) accountNo ;
+-(bool) isBuddyInList:(NSString*) buddy forAccount:(NSString*) accountNo ;
 
 //vcard commands
 

@@ -8,6 +8,8 @@
 
 #import "ContactsViewController.h"
 #import "MLXMPPManager.h"
+#import "MLContactCell.h"
+#import "DataLayer.h"
 
 @interface ContactsViewController ()
 
@@ -47,6 +49,19 @@
 -(void) viewWillAppear:(BOOL)animated
 {
     
+    //inefficient temp code
+     _contacts=[[NSMutableArray alloc] init];
+    
+    NSArray* accountList=[[DataLayer sharedInstance] accountList];
+    for (NSDictionary* account in accountList)
+    {
+        if([[account objectForKey:@"enabled"] boolValue]==YES)
+        {
+            [_contacts addObjectsFromArray:
+             [[DataLayer sharedInstance] onlineBuddies:[NSString stringWithFormat:@"%@",[account objectForKey:@"account_id"]] sortedBy:@"Name"] ];
+        }
+    }
+    
 }
 
 - (void)didReceiveMemoryWarning
@@ -55,15 +70,38 @@
     // Dispose of any resources that can be recreated.
 }
 
-#pragma mark tableview datasource delegate
+#pragma mark tableview datasource 
+-(NSInteger) numberOfSectionsInTableView:(UITableView *)tableView
+{
+    return 1; 
+}
+
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return 0; 
+    return [_contacts count];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    return nil;
+    MLContactCell* cell =[tableView dequeueReusableCellWithIdentifier:@"ContactCell"];
+    if(!cell)
+    {
+        cell =[[MLContactCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"ContactCell"];
+    }
+    
+    NSDictionary* row = [_contacts objectAtIndex:indexPath.row];
+    cell.textLabel.text=[row objectForKey:@"buddy_name"];
+    if([row objectForKey:@"status"])
+        cell.detailTextLabel.text=[row objectForKey:@"status"];
+    
+    cell.badgeText=nil;
+    cell.accessoryType = UITableViewCellAccessoryDetailDisclosureButton;
+    
+    
+    return cell; 
 }
+
+#pragma mark tableview delegate
+
 
 @end

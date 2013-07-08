@@ -449,13 +449,13 @@
                 
                 //a buddy logout
                 //make sure not already there
-//                if(![self isInRemove:presenceObj.user])
+//                if(![self isInRemove:presenceNode.user])
 //                {
 //                    debug_NSLog(@"removing from list");
 //                   
 //                    //remove from online list
 //                }
-                
+//                
                 
             }
             else
@@ -463,47 +463,46 @@
                 if([presenceNode.type isEqualToString:kpresencesSubscribe])
                 {
                     
-//                    NSString* askmsg=[NSString stringWithFormat:@"This user would like to add you to his/her list. Allow?"];
-//                    //ask for authorization
-//                    
-//                    dispatch_async(dispatch_get_main_queue(), ^{
-//                        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:presenceObj.user
-//                                                                        message:askmsg
-//                                                                       delegate:self cancelButtonTitle:@"Yes"
-//                                                              otherButtonTitles:@"No", nil];
-//                        alert.tag=1;
-//                        [alert show];
-//                    });
-//                    
+                    NSString* askmsg=[NSString stringWithFormat:@"This user would like to add you to his/her list. Allow?"];
+                    //ask for authorization
                     
-                    
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:presenceNode.user
+                                                                        message:askmsg
+                                                                       delegate:self cancelButtonTitle:@"Yes"
+                                                              otherButtonTitles:@"No", nil];
+                        alert.tag=1;
+                        [alert show];
+                    });
+     
                 }
             
-            
-            
-            if(presenceNode.type ==nil)
+          if(presenceNode.type ==nil)
             {
                 debug_NSLog(@"presence priority notice");
                 
-//                if((presenceObj.user!=nil) && ([[presenceObj.user stringByTrimmingCharactersInSet:
-//                                                 [NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0))
-//                    if(![db isBuddyInList:presenceObj.user:accountNumber]){
-//                        
-//                        debug_NSLog(@"Buddy not already in list");
-//
-//                        [db addBuddy:presenceObj.user :accountNumber :@"" :@""];
-//                        [db setOnlineBuddy:presenceObj: accountNumber];
-//
-//                        debug_NSLog(@"Buddy added to  list");
-//                        
-//                        
-//                    }
-//                    else
-//                    {
-//                        debug_NSLog(@"Buddy already in list, showing as online now"); 
-//                        [db setOnlineBuddy:presenceObj:accountNumber];
-//         
-//                    }
+                if((presenceNode.user!=nil) && ([[presenceNode.user stringByTrimmingCharactersInSet:
+                                                 [NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0))
+                {
+                    if(![[DataLayer sharedInstance] isBuddyInList:presenceNode.user forAccount:_accountNo])
+                    {
+                        
+                        debug_NSLog(@"Buddy not already in list");
+
+                        [[DataLayer sharedInstance] addBuddy:presenceNode.user forAccount:_accountNo fullname:@"" nickname:@"" ];
+                        [[DataLayer sharedInstance] setOnlineBuddy:presenceNode forAccount:_accountNo];
+
+                        debug_NSLog(@"Buddy added to  list");
+                        
+                        
+                    }
+                    else
+                    {
+                        debug_NSLog(@"Buddy already in list, showing as online now"); 
+                        [[DataLayer sharedInstance] setOnlineBuddy:presenceNode forAccount:_accountNo];
+         
+                    }
+                }
             }
             
         }

@@ -8,9 +8,10 @@
 
 #import <UIKit/UIKit.h>
 
+
 @interface ContactsViewController : UIViewController <UITableViewDataSource, UITableViewDelegate>
 {
-    
+    NSMutableArray* _contacts;
 }
 
 @property (nonatomic, strong) UITableView* contactsTable;

@@ -163,15 +163,15 @@ static DataLayer *sharedInstance=nil;
         if (sqlite3_prepare_v2(database, [query  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK)
         {
             if(sqlite3_step(statement)==SQLITE_DONE)
-                toReturn=true;
+                toReturn=YES;
             else
-                toReturn=false;
+                toReturn=NO;
         }
         
         else
         {
-            debug_NSLog(@"nonquery returning false with out OK %@", query);
-            toReturn=false;
+            debug_NSLog(@"nonquery returning NO with out OK %@", query);
+            toReturn=NO;
         }
         
         
@@ -399,21 +399,21 @@ static DataLayer *sharedInstance=nil;
     
 	
 	
-	if(enabled==true) [self removeEnabledAccount];//reset all
+	if(enabled==YES) [self removeEnabledAccount];//reset all
 	
 	NSString* query=
 	[NSString stringWithFormat:@"insert into account values(null, '%@', %@, '%@', '%@', '%@', '%@', %d, '%@', '%@', %d) ",
 	 username, theProtocol,server, otherport, username, password, secure, resource, thedomain, enabled];
     
-	if([self executeNonQuery:query]!=false)
+	if([self executeNonQuery:query]!=NO)
 	{
 		;
-		return true;
+		return YES;
 	}
 	else
 	{
 		;
-		return false;
+		return NO;
 	}
 }
 
@@ -423,7 +423,7 @@ static DataLayer *sharedInstance=nil;
 	
 	
 	
-	if(enabled==true) [self removeEnabledAccount];//reset all
+	if(enabled==YES) [self removeEnabledAccount];//reset all
 	
 	NSString* query=
 	[NSString stringWithFormat:@"update account  set account_name='%@', protocol_id=%@, server='%@', other_port='%@', username='%@', password='%@', secure=%d, resource='%@', domain='%@', enabled=%d where account_id=%@",
@@ -431,15 +431,15 @@ static DataLayer *sharedInstance=nil;
     //debug_NSLog(query);
 	
 	
-	if([self executeNonQuery:query]!=false)
+	if([self executeNonQuery:query]!=NO)
 	{
 		;
-		return true;
+		return YES;
 	}
 	else
 	{
 		;
-		return false;
+		return NO;
 	}
 }
 
@@ -459,15 +459,15 @@ static DataLayer *sharedInstance=nil;
 	
 	
 	NSString* query=[NSString stringWithFormat:@"delete from account  where account_id=%@ ;", accountNo];
-	if([self executeNonQuery:query]!=false)
+	if([self executeNonQuery:query]!=NO)
 	{
 		;
-		return true;
+		return YES;
 	}
 	else
 	{
 		;
-		return false;
+		return NO;
 	}
 }
 
@@ -477,15 +477,15 @@ static DataLayer *sharedInstance=nil;
 	
     
 	NSString* query=[NSString stringWithFormat:@"update account set enabled=0  ;"];
-	if([self executeNonQuery:query]!=false)
+	if([self executeNonQuery:query]!=NO)
 	{
 		;
-		return true;
+		return YES;
 	}
 	else
 	{
 		;
-		return false;
+		return NO;
 	}
 }
 
@@ -499,13 +499,11 @@ static DataLayer *sharedInstance=nil;
 #pragma mark Buddy Commands
 
 
--(BOOL) addBuddy:(NSString*) buddy :(NSString*) accountNo:(NSString*) fullName:(NSString*) nickName
+-(BOOL) addBuddy:(NSString*) buddy  forAccount:(NSString*) accountNo fullname:(NSString*) fullName nickname:(NSString*) nickName
 {
-	if([self isBuddyInList:buddy :accountNo]) return false; // hard condition check ..no dupes!
+	if([self isBuddyInList:buddy forAccount:accountNo]) return NO; // hard condition check ..no dupes!
 	
-    
-	
-	// no blank full names
+  // no blank full names
 	NSString* actualfull;
 	if([fullName isEqualToString:@""])
 		actualfull=buddy;
@@ -513,15 +511,15 @@ static DataLayer *sharedInstance=nil;
 	else actualfull=fullName;
 	
 	NSString* query=[NSString stringWithFormat:@"insert into buddylist values(null, %@, '%@', '%@','%@','','','','','',0, 0, 1);", accountNo, buddy, actualfull, nickName];
-	if([self executeNonQuery:query]!=false)
+	if([self executeNonQuery:query]!=NO)
 	{
 		;
-		return true;
+		return YES;
 	}
 	else
 	{
 		;
-		return false;
+		return NO;
 	}
 	
 }
@@ -532,30 +530,30 @@ static DataLayer *sharedInstance=nil;
 	[self messageHistoryClean:buddy :accountNo];
 	
 	NSString* query=[NSString stringWithFormat:@"delete from buddylist  where account_id=%@ and buddy_name='%@';", accountNo, buddy];
-	if([self executeNonQuery:query]!=false)
+	if([self executeNonQuery:query]!=NO)
 	{
 		;
-		return true;
+		return YES;
 	}
 	else
 	{
 		;
-		return false;
+		return NO;
 	}
 }
 -(BOOL) clearBuddies:(NSString*) accountNo
 {
     
 	NSString* query=[NSString stringWithFormat:@"delete from buddylist  where account_id=%@ ;", accountNo];
-	if([self executeNonQuery:query]!=false)
+	if([self executeNonQuery:query]!=NO)
 	{
 		;
-		return true;
+		return YES;
 	}
 	else
 	{
 		;
-		return false;
+		return NO;
 	}
 }
 
@@ -571,15 +569,15 @@ static DataLayer *sharedInstance=nil;
     
     
 	NSString* query=[NSString stringWithFormat:@"update buddylist set dirty=0, new=0, online=0, state='', status='';   "];
-	if([self executeNonQuery:query]!=false)
+	if([self executeNonQuery:query]!=NO)
 	{
 		;
-		return true;
+		return YES;
 	}
 	else
 	{
 		;
-		return false;
+		return NO;
 	}
 	
 }
@@ -598,53 +596,51 @@ static DataLayer *sharedInstance=nil;
 -(NSArray*) onlineBuddies:(NSString*) accountNo sortedBy:(NSString*) sort
 {
 	
-	
-	
 	NSString* query1=[NSString stringWithFormat:@"select username, domain from account where account_id=%@", accountNo];
 	//debug_NSLog(query);
 	NSArray* user = [self executeReader:query1];
 	
 	if(user!=nil)
+    {
 		if([user count]>0)//sanity check
         {
             
             NSString* query=@"";
             
             if([sort isEqualToString:@"Name"])
+            {
                 query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, ifnull(full_name, buddy_name) as full_name from buddylist where account_id=%@ and online=1  and buddy_name!='%@'  and buddy_name!='%@@%@'  order by full_name COLLATE NOCASE asc ", accountNo
-                       , [[user objectAtIndex:0] objectAtIndex:0], [[user objectAtIndex:0] objectAtIndex:0],  [[user objectAtIndex:0] objectAtIndex:1]  ];
+                       , [[user objectAtIndex:0] objectForKey:@"username"], [[user objectAtIndex:0] objectForKey:@"username"],  [[user objectAtIndex:0] objectForKey:@"domain"]  ];
+            }
             
             if([sort isEqualToString:@"State"])
-                query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, ifnull(full_name, buddy_name) as full_name from buddylist where account_id=%@ and online=1  and buddy_name!='%@'  and buddy_name!='%@@%@'  order by state,full_name COLLATE NOCASE  asc ", accountNo
-                       , [[user objectAtIndex:0] objectAtIndex:0], [[user objectAtIndex:0] objectAtIndex:0],  [[user objectAtIndex:0] objectAtIndex:1]  ];
+            {
+                query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, ifnull(full_name, buddy_name) as full_name from buddylist where account_id=%@ and online=1  and buddy_name!='%@'  and buddy_name!='%@@%@'  order by state,full_name COLLATE NOCASE  asc ",accountNo
+                       , [[user objectAtIndex:0] objectForKey:@"username"], [[user objectAtIndex:0] objectForKey:@"username"],  [[user objectAtIndex:0] objectForKey:@"domain"]  ];
+            }
             
-            
-            
-            //debug_NSLog(query);
+           //debug_NSLog(query);
             NSArray* toReturn = [self executeReader:query];
             
             if(toReturn!=nil)
             {
-                
                 debug_NSLog(@" count: %d",  [toReturn count] );
-                ;
-                
-                return toReturn; //[toReturn autorelease];
+               return toReturn; //[toReturn autorelease];
             }
             else
             {
                 debug_NSLog(@"buddylist is empty or failed to read");
-                ;
                 return nil;
             }
-        } else return nil;
+            
+        }
+    }else return nil;
 	
+    return nil; 
 }
 
 -(NSArray*) offlineBuddies:(NSString*) accountNo
 {
-	
-	
 	
 	NSString* query1=[NSString stringWithFormat:@"select username, domain from account where account_id=%@", accountNo];
 	//debug_NSLog(query);
@@ -793,17 +789,17 @@ static DataLayer *sharedInstance=nil;
 	
 	
 	NSString* query=[NSString stringWithFormat:@"update buddylist set dirty=0, new=0 where account_id=%@ and (new!=0 or dirty!=0)  ;", accountNo];
-	if([self executeNonQuery:query]!=false)
+	if([self executeNonQuery:query]!=NO)
 	{
 		
 		;
-		return true;
+		return YES;
 	}
 	else
 	{
 		
 		;
-		return false;
+		return NO;
 	}
 }
 
@@ -823,16 +819,16 @@ static DataLayer *sharedInstance=nil;
 //
 //
 //    NSString* query=[NSString stringWithFormat:@"update buddy_resources set ver='%@' where buddy_id=%@ and resource='%@'", presenceObj.ver, buddyid, presenceObj.resource ];
-//	if([self executeNonQuery:query]!=false)
+//	if([self executeNonQuery:query]!=NO)
 //	{
 //
 //		;
-//		return true;
+//		return YES;
 //	}
 //	else
 //	{
 //        ;
-//		return false;
+//		return NO;
 //	}
 //}
 
@@ -887,16 +883,16 @@ static DataLayer *sharedInstance=nil;
 -(BOOL)setFeature:(NSString*)feature  forVer:(NSString*) ver
 {
     NSString* query=[NSString stringWithFormat:@"insert into ver_info values ('%@', '%@')", ver,feature];
-	if([self executeNonQuery:query]!=false)
+	if([self executeNonQuery:query]!=NO)
 	{
 		
 		;
-		return true;
+		return YES;
 	}
 	else
 	{
         ;
-		return false;
+		return NO;
 	}
 }
 
@@ -931,16 +927,16 @@ static DataLayer *sharedInstance=nil;
 //
 //
 //    NSString* query=[NSString stringWithFormat:@"insert into buddy_resources_legacy_caps values (%@,'%@',%@)", buddyid, presenceObj.resource, capid ];
-//	if([self executeNonQuery:query]!=false)
+//	if([self executeNonQuery:query]!=NO)
 //	{
 //
 //		;
-//		return true;
+//		return YES;
 //	}
 //	else
 //	{
 //        ;
-//		return false;
+//		return NO;
 //	}
 //
 //
@@ -990,10 +986,10 @@ static DataLayer *sharedInstance=nil;
 -(BOOL) setOnlineBuddy:(ParsePresence *)presenceObj forAccount:(NSString *)accountNo
 {
     [self setResourceOnline:presenceObj forAccount:accountNo];
-    if([self isBuddyOnline:presenceObj.user:accountNo]) return false; // pervent setting something as new
+    if([self isBuddyOnline:presenceObj.user forAccount:accountNo]) return NO; // pervent setting something as new
     
 	NSString* query=[NSString stringWithFormat:@"update buddylist set online=1, new=1  where account_id=%@ and  buddy_name='%@';", accountNo, presenceObj.user];
-	if([self executeNonQuery:query]!=false)
+	if([self executeNonQuery:query]!=NO)
 	{
 		return YES;
 	}
@@ -1012,11 +1008,11 @@ static DataLayer *sharedInstance=nil;
     if(buddyid==nil) return NO;
     
     NSString* query2=[NSString stringWithFormat:@"delete from   buddy_resources where buddy_id=%@ and resource='%@'", buddyid, presenceObj.resource ];
-	if([self executeNonQuery:query2]==false) return false;
+	if([self executeNonQuery:query2]==NO) return NO;
     
     NSString* query4=[NSString stringWithFormat:@"delete from   buddy_resources_legacy_caps where buddy_id=%@ and resource='%@'",
                       buddyid, presenceObj.resource ];
-	if([self executeNonQuery:query4]==false) return false;
+	if([self executeNonQuery:query4]==NO) return NO;
     
     //see how many left
     NSString* query3=[NSString stringWithFormat:@" select count(buddy_id) from buddy_resources where buddy_id=%@;", buddyid ];
@@ -1027,7 +1023,7 @@ static DataLayer *sharedInstance=nil;
         
         
         NSString* query=[NSString stringWithFormat:@"update buddylist set online=0, dirty=1  where account_id=%@ and  buddy_name='%@';", accountNo, presenceObj.user];
-        if([self executeNonQuery:query]!=false)
+        if([self executeNonQuery:query]!=NO)
         {
             return YES;
         }
@@ -1049,17 +1045,17 @@ static DataLayer *sharedInstance=nil;
 //
 //	if([presenceObj.show length]>20) toPass=[presenceObj.show substringToIndex:19]; else toPass=presenceObj.show;
 //	NSString* query=[NSString stringWithFormat:@"update buddylist set state='%@', dirty=1 where account_id=%@ and  buddy_name='%@';",toPass, accountNo, presenceObj.user];
-//	if([self executeNonQuery:query]!=false)
+//	if([self executeNonQuery:query]!=NO)
 //	{
 //
 //		;
-//		return true;
+//		return YES;
 //	}
 //	else
 //	{
 //
 //		;
-//		return false;
+//		return NO;
 //	}
 //}
 
@@ -1085,17 +1081,17 @@ static DataLayer *sharedInstance=nil;
 //	else toPass=[presenceObj.status  stringByReplacingOccurrencesOfString:@"'"
 //                                                      withString:@"''"];;
 //	NSString* query=[NSString stringWithFormat:@"update buddylist set status='%@', dirty=1 where account_id=%@ and  buddy_name='%@';",[toPass stringByReplacingOccurrencesOfString:@"'" withString:@"''"], accountNo, presenceObj.user];
-//	if([self executeNonQuery:query]!=false)
+//	if([self executeNonQuery:query]!=NO)
 //	{
 //
 //		;
-//		return true;
+//		return YES;
 //	}
 //	else
 //	{
 //
 //		;
-//		return false;
+//		return NO;
 //	}
 //}
 
@@ -1105,8 +1101,7 @@ static DataLayer *sharedInstance=nil;
 	
 	NSString* query=[NSString stringWithFormat:@"select status from buddylist where account_id=%@ and buddy_name='%@'", accountNo, buddy];
 	NSString* iconname= [self executeScalar:query];
-    ;
-	return iconname;
+    return iconname;
 }
 
 
@@ -1123,30 +1118,22 @@ static DataLayer *sharedInstance=nil;
 	if([fullName length]>50) toPass=[fullName substringToIndex:49]; else toPass=fullName;
 	// sometimes the buddyname comes from a roster so it might notbe in the lit yet, add first and if that fails (ie already there) then set fullname
 	
-	if(![self addBuddy:buddy : accountNo: fullName:@""])
+	if(![self addBuddy:buddy forAccount: accountNo fullname:fullName nickname:@""])
 	{
-		
-        
-        
-        NSString* query=[NSString stringWithFormat:@"update buddylist set full_name='%@',dirty=1 where account_id=%@ and  buddy_name='%@';",[toPass stringByReplacingOccurrencesOfString:@"'" withString:@"''"], accountNo, buddy];
-        if([self executeNonQuery:query]!=false)
+		NSString* query=[NSString stringWithFormat:@"update buddylist set full_name='%@',dirty=1 where account_id=%@ and  buddy_name='%@';",[toPass stringByReplacingOccurrencesOfString:@"'" withString:@"''"], accountNo, buddy];
+        if([self executeNonQuery:query]!=NO)
         {
-            
-            ;
-            return true;
+           return YES;
         }
         else
         {
-            
-            ;
-            return false;
+           return NO;
         }
         
 	}
 	else
 	{
-		;
-		return true;
+		return YES;
 	}
 }
 
@@ -1158,17 +1145,17 @@ static DataLayer *sharedInstance=nil;
 	
 	if([nickName length]>50) toPass=[nickName substringToIndex:49]; else toPass=nickName;
 	NSString* query=[NSString stringWithFormat:@"update buddylist set nick_name='%@',dirty=1 where account_id=%@ and  buddy_name='%@';",[toPass stringByReplacingOccurrencesOfString:@"'" withString:@"''"], accountNo, buddy];
-	if([self executeNonQuery:query]!=false)
+	if([self executeNonQuery:query]!=NO)
 	{
 		
 		;
-		return true;
+		return YES;
 	}
 	else
 	{
 		
 		;
-		return false;
+		return NO;
 	}
 }
 
@@ -1178,8 +1165,7 @@ static DataLayer *sharedInstance=nil;
 	
 	
 	NSString* query=[NSString stringWithFormat:@"select full_name from buddylist where account_id=%@ and buddy_name='%@'", accountNo, buddy];
-	NSString* iconname= [self executeScalar:query];
-    ;
+	NSString* iconname= (NSString*)[self executeScalar:query];
 	return iconname;
 }
 
@@ -1188,47 +1174,37 @@ static DataLayer *sharedInstance=nil;
 -(BOOL) setBuddyHash:(NSString*) buddy :(NSString*) accountNo:(NSString*) theHash
 {
 	
-	NSString* toPass;
 	//data length check
 	NSString* query=[NSString stringWithFormat:@"update buddylist set iconhash='%@', dirty=1 where account_id=%@ and  buddy_name='%@';",theHash,
 					 accountNo, buddy];
-	if([self executeNonQuery:query]!=false)
+	if([self executeNonQuery:query]!=NO)
 	{
-		;
-		return true;
+		return YES;
 	}
 	else
 	{
-		;
-		return false;
+		return NO;
 	}
 }
 
--(NSString*) buddyHash:(NSString*) buddy :(NSString*) accountNo
+-(NSString*) buddyHash:(NSString*) buddy forAccount:(NSString*) accountNo
 {
-	
-	
-	
-	//if there isnt a file name icon wasnt downloaded
-	
-	
+    //if there isnt a file name icon wasnt downloaded
 	NSString* query2=[NSString stringWithFormat:@"select filename from buddylist where account_id=%@ and buddy_name='%@'", accountNo, buddy];
-	NSString* filename= [self executeScalar:query2];
+	NSString* filename= (NSString*)[self executeScalar:query2];
 	if([filename isEqualToString:@""])
 	{
-		
 		return @"";
 	}
 	
 	
 	NSString* query=[NSString stringWithFormat:@"select iconhash from buddylist where account_id=%@ and buddy_name='%@'", accountNo, buddy];
-	NSString* iconname= [self executeScalar:query];
-    ;
+	NSString* iconname= (NSString*)[self executeScalar:query];
 	return iconname;
 }
 
 
--(bool) isBuddyInList:(NSString*) buddy :(NSString*) accountNo
+-(bool) isBuddyInList:(NSString*) buddy forAccount:(NSString*) accountNo
 {
 	// count # of meaages in message table
 	
@@ -1243,22 +1219,22 @@ static DataLayer *sharedInstance=nil;
 		int val=[count integerValue];
 		if(val>0) {
 			;
-			return true; } else
+			return YES; } else
 			{
 				;
-				return false;
+				return NO;
 			}
 	}
 	else
 	{
 		;
-		return false;
+		return NO;
 	}
 	
 	
 }
 
--(bool) isBuddyOnline:(NSString*) buddy :(NSString*) accountNo
+-(bool) isBuddyOnline:(NSString*) buddy forAccount:(NSString*) accountNo
 {
 	// count # of meaages in message table
 	
@@ -1273,22 +1249,22 @@ static DataLayer *sharedInstance=nil;
 		int val=[count integerValue];
 		if(val>0) {
 			;
-			return true; } else
+			return YES; } else
 			{
 				;
-				return false;
+				return NO;
 			}
 	}
 	else
 	{
 		;
-		return false;
+		return NO;
 	}
 	
 	
 }
 
--(bool) isBuddyMuc:(NSString*) buddy :(NSString*) accountNo
+-(bool) isBuddyMuc:(NSString*) buddy forAccount:(NSString*) accountNo
 {
 	// seeif it is muc chat name
 	
@@ -1303,25 +1279,22 @@ static DataLayer *sharedInstance=nil;
 		int val=[count integerValue];
 		if(val>0) {
             ;
-			return true; } else
+			return YES; } else
 			{
 				;
-				return false;
+				return NO;
 			}
 	}
 	else
 	{
 		;
-		return false;
+		return NO;
 	}
 	
 	
 }
 
-
-
-
--(bool) isBuddyAdded:(NSString*) buddy :(NSString*) accountNo
+-(bool) isBuddyAdded:(NSString*) buddy forAccount:(NSString*) accountNo
 {
 	// count # of meaages in message table
 	
@@ -1336,24 +1309,22 @@ static DataLayer *sharedInstance=nil;
 		int val=[count integerValue];
 		if(val>0) {
             ;
-			return true; } else
+			return YES; } else
 			{
 				;
-				return false;
+				return NO;
 			}
 	}
 	else
 	{
 		;
-		return false;
+		return NO;
 	}
 	
 	
 }
 
-
-
--(bool) isBuddyRemoved:(NSString*) buddy :(NSString*) accountNo
+-(bool) isBuddyRemoved:(NSString*) buddy forAccount:(NSString*) accountNo
 {
 	// count # of meaages in message table
 	
@@ -1368,17 +1339,17 @@ static DataLayer *sharedInstance=nil;
 		int val=[count integerValue];
 		if(val>0) {
 			;
-			return true; } else
+			return YES; } else
 			{
 				;
-				return false;
+				return NO;
 			}
         
 	}
 	else
 	{
 		;
-		return false;
+		return NO;
 	}
 	
 	
@@ -1393,15 +1364,15 @@ static DataLayer *sharedInstance=nil;
 	
 	
 	NSString* query=[NSString stringWithFormat:@"update buddylist set filename='%@',dirty=1 where account_id=%@ and  buddy_name='%@';",icon, accountNo, buddy];
-	if([self executeNonQuery:query]!=false)
+	if([self executeNonQuery:query]!=NO)
 	{
 		;
-		return true;
+		return YES;
 	}
 	else
 	{
 		;
-		return false;
+		return NO;
 	}
 }
 
@@ -1451,17 +1422,17 @@ static DataLayer *sharedInstance=nil;
     
 	NSString* query=[NSString stringWithFormat:@"insert into messages values (null, %@, '%@',  '%@', '%@', '%@', %d, '%@');", accountNo, from, to, 	dateString, [message stringByReplacingOccurrencesOfString:@"'" withString:@"''"], notice, actualfrom];
 	debug_NSLog(@"%@",query);
-	if([self executeNonQuery:query]!=false)
+	if([self executeNonQuery:query]!=NO)
 	{
 		
 		;
-		return true;
+		return YES;
 	}
 	else
 	{
 		debug_NSLog(@"failed to insert ");
 		;
-		return false;
+		return NO;
 	}
 	
 }
@@ -1474,15 +1445,15 @@ static DataLayer *sharedInstance=nil;
 	
 	
 	NSString* query=[NSString stringWithFormat:@"delete from messages where account_id=%@", accountNo];
-	if([self executeNonQuery:query]!=false)
+	if([self executeNonQuery:query]!=NO)
 	{
 		;
-		return true;
+		return YES;
 	}
 	else
 	{
 		;
-		return false;
+		return NO;
 	}
 }
 
@@ -1596,13 +1567,13 @@ static DataLayer *sharedInstance=nil;
 		debug_NSLog(@" cleaned messages for %@",  buddy );
 		
 		;
-		return true;
+		return YES;
 	}
 	else
 	{
 		debug_NSLog(@"message history failed to clean");
 		;
-		return false;
+		return NO;
 	}
 	
 }
@@ -1622,13 +1593,13 @@ static DataLayer *sharedInstance=nil;
 		debug_NSLog(@" cleaned messages " );
 		
 		;
-		return true;
+		return YES;
 	}
 	else
 	{
 		debug_NSLog(@"message history failed to clean all");
 		;
-		return false;
+		return NO;
 	}
 	
 }
@@ -1734,28 +1705,28 @@ static DataLayer *sharedInstance=nil;
     
 	
 	NSString* query2=[NSString stringWithFormat:@"  insert into message_history (account_id,message_from, message_to, timestamp, message, actual_from) select account_id,message_from, message_to, timestamp, message, actual_from  from messages where account_id=%@ and message_from='%@';", accountNo, buddy];
-	if([self executeNonQuery:query2]!=false)
+	if([self executeNonQuery:query2]!=NO)
 	{
         //	debug_NSLog(query2);
         
         NSString* query=[NSString stringWithFormat:@"delete from messages where account_id=%@ and message_from='%@'; ", accountNo, buddy];
-        if([self executeNonQuery:query]!=false)
+        if([self executeNonQuery:query]!=NO)
         {
             ;
-            return true;
+            return YES;
         }
         else
         {
 			debug_NSLog(@"Messages clean  failed");
             ;
-            return false;
+            return NO;
         }
 	}
 	else
 	{
 		debug_NSLog(@"Message history insert failed");
 		;
-		return false;
+		return NO;
 	}
 	
 }
@@ -1773,15 +1744,15 @@ static DataLayer *sharedInstance=nil;
 	NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, %@, '%@',  '%@', '%@ %@', '%@', '%@');", accountNo, from, to,
 					 [parts objectAtIndex:0],[parts objectAtIndex:1], [message stringByReplacingOccurrencesOfString:@"'" withString:@"''"], actualfrom];
 	
-	if([self executeNonQuery:query]!=false)
+	if([self executeNonQuery:query]!=NO)
 	{
 		;
-		return true;
+		return YES;
 	}
 	else
 	{
 		;
-		return false;
+		return NO;
 	}
 	
 }
@@ -1862,14 +1833,14 @@ static DataLayer *sharedInstance=nil;
 	
 	NSString* query2=[NSString stringWithFormat:@"  insert into message_history (account_id,message_from, message_to, timestamp, message, actual_from) select a.account_id,message_from, message_to, timestamp, message, actual_from  from messages  as a inner join activechats as b on a.account_id=b.account_id and a.message_from=b.buddy_name where a.account_id=%@ ", accountNo];
     
-	if([self executeNonQuery:query2]!=false)
+	if([self executeNonQuery:query2]!=NO)
     {
         
     }
     
     NSString* query3=[NSString stringWithFormat:@"delete from messages where account_id=%@ and message_from in (select buddy_name from activechats where account_id=%@); ", accountNo, accountNo];
     
-    if([self executeNonQuery:query3]!=false)
+    if([self executeNonQuery:query3]!=NO)
     {
         
     }
@@ -1902,7 +1873,7 @@ static DataLayer *sharedInstance=nil;
 		int val=[count integerValue];
 		if(val>0) {
 			;
-			return false;
+			return NO;
         } else
         {
             //no
@@ -1928,7 +1899,7 @@ static DataLayer *sharedInstance=nil;
      }*/
 	
 	;
-	return false;
+	return NO;
 	
 }
 
@@ -2123,7 +2094,7 @@ static DataLayer *sharedInstance=nil;
 	debug_NSLog(@"Database version check");
 	
 	//<1.02 has no db version table but gtalk port is 443 . this is an identifier
-	NSNumber* gtalkport= [self executeScalar:@"select default_port from  protocol   where protocol_name='GTalk';"];
+	NSNumber* gtalkport= (NSNumber*)[self executeScalar:@"select default_port from  protocol   where protocol_name='GTalk';"];
 	if([gtalkport intValue]==443)
 	{
         debug_NSLog(@"Database version <1.02 detected. Performing upgrade");
@@ -2180,7 +2151,7 @@ static DataLayer *sharedInstance=nil;
 	}
 	
 	
-	NSNumber* dbversion= [self executeScalar:@"select dbversion from dbversion"];
+	NSNumber* dbversion= (NSNumber*)[self executeScalar:@"select dbversion from dbversion"];
 	debug_NSLog(@"Got db version %@", dbversion);
 	
 	
@@ -2190,7 +2161,7 @@ static DataLayer *sharedInstance=nil;
 		[self executeNonQuery:@"create table buddylistOnline (buddy_id integer not null primary key AUTOINCREMENT,account_id integer not null,buddy_name varchar(50), group_name varchar(100)); "];
 		[self executeNonQuery:@"update dbversion set dbversion='1.07'; "];
 		
-		[[NSUserDefaults standardUserDefaults] setBool:true forKey:@"IdleAlert"];
+		[[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"IdleAlert"];
 		
 		debug_NSLog(@"Upgrade to 1.07 success ");
 		
@@ -2227,7 +2198,7 @@ static DataLayer *sharedInstance=nil;
 		
 		[self executeNonQuery:@"update dbversion set dbversion='1.071'; "];
 		
-		[[NSUserDefaults standardUserDefaults] setBool:true forKey:@"IdleAlert"];
+		[[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"IdleAlert"];
 		
 		debug_NSLog(@"Upgrade to 1.071 success ");
 		
@@ -2242,9 +2213,7 @@ static DataLayer *sharedInstance=nil;
 		while(counter<[rows count])
 		{
 			//debug_NSLog(@" %@ %@",[[rows objectAtIndex:counter] objectAtIndex:0], [[rows objectAtIndex:counter] objectAtIndex:1] );
-            pass= [PasswordManager alloc] ; 
-			
-			[pass init:[NSString stringWithFormat:@"%@",[[rows objectAtIndex:counter] objectAtIndex:0]]];
+            pass=[[PasswordManager alloc]  init:[NSString stringWithFormat:@"%@",[[rows objectAtIndex:counter] objectAtIndex:0]]];
 			[pass setPassword:[[rows objectAtIndex:counter] objectAtIndex:1]] ;
 			//debug_NSLog(@"got:%@", [pass getPassword] ); 
 			
@@ -2255,9 +2224,7 @@ static DataLayer *sharedInstance=nil;
 		//wipe passwords 
 		
 		[self executeNonQuery:@"update account set password=''; "];
-        
-        
-		
+
 	}
     
     
@@ -2266,9 +2233,9 @@ static DataLayer *sharedInstance=nil;
         debug_NSLog(@"Database version <1.073 detected. Performing upgrade on passwords. ");
         
         //set defaults on upgrade
-        [[NSUserDefaults standardUserDefaults] setBool:true forKey:@"OfflineContact"];
-        [[NSUserDefaults standardUserDefaults] setBool:true forKey:@"MessagePreview"];
-        [[NSUserDefaults standardUserDefaults] setBool:true forKey:@"Logging"];
+        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"OfflineContact"];
+        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"MessagePreview"];
+        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"Logging"];
         
         [self executeNonQuery:@"update dbversion set dbversion='1.073'; "];
         debug_NSLog(@"Upgrade to 1.073 success ");
@@ -2284,12 +2251,7 @@ static DataLayer *sharedInstance=nil;
         
         [self executeNonQuery:@"delete from protocol where protocol_id=3 "];
         [self executeNonQuery:@"delete from protocol where protocol_id=4 "];
-        
-        
         [self executeNonQuery:@" create table legacy_caps(capid integer not null primary key ,captext  varchar(20))"];
-        
-        
-        
         
         [self executeNonQuery:@" insert into legacy_caps values (1,'pmuc-v1');"];
         [self executeNonQuery:@" insert into legacy_caps values (2,'voice-v1');"];

@@ -13,7 +13,8 @@
 
 - (void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict
 {
-    
+    if([elementName isEqualToString:@"presence"])
+    {
         _type=[attributeDict objectForKey:@"type"];
         _user =[[(NSString*)[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
         if([[(NSString*)[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/" ] count]>1)
@@ -30,15 +31,14 @@
 		//what type?
 		debug_NSLog(@" presence notice %@", _type);
         
-        
-		
-		if([_type isEqualToString:@"error"])
+        if([_type isEqualToString:@"error"])
 		{
             //we are done, parse next element
             return;
 			
 		}
-        
+    }
+    
 }
 
 - (void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName

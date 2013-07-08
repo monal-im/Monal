@@ -56,7 +56,7 @@ typedef struct
 
 
 
-@interface xmpp : NSObject <NSStreamDelegate>
+@interface xmpp : NSObject <NSStreamDelegate, UIAlertViewDelegate>
 {
     
     NSInputStream *_iStream;
@@ -107,5 +107,7 @@ typedef struct
 
 //calculated
 @property (nonatomic,strong, readonly) NSString* versionHash;
+
+
 
 @end

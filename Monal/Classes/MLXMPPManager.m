@@ -49,7 +49,7 @@
                     //need to request a password
                 }
             
-        xmpp* xmppAccount=[[xmpp alloc] init];
+            xmpp* xmppAccount=[[xmpp alloc] init];
             
             xmppAccount.username=[account objectForKey:@"username"];
             xmppAccount.domain=[account objectForKey:@"domain"];

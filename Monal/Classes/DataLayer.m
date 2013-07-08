@@ -1037,68 +1037,58 @@ static DataLayer *sharedInstance=nil;
 }
 
 
-//-(BOOL) setBuddyState:(presence*)presenceObj: (NSString*) accountNo
-//{
-//
-//	NSString* toPass;
-//	//data length check
-//
-//	if([presenceObj.show length]>20) toPass=[presenceObj.show substringToIndex:19]; else toPass=presenceObj.show;
-//	NSString* query=[NSString stringWithFormat:@"update buddylist set state='%@', dirty=1 where account_id=%@ and  buddy_name='%@';",toPass, accountNo, presenceObj.user];
-//	if([self executeNonQuery:query]!=NO)
-//	{
-//
-//		;
-//		return YES;
-//	}
-//	else
-//	{
-//
-//		;
-//		return NO;
-//	}
-//}
-
--(NSString*) buddyState:(NSString*) buddy :(NSString*) accountNo
+-(BOOL) setBuddyState:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
 {
-	
-	
+
+	NSString* toPass;
+	//data length check
+
+	if([presenceObj.show length]>20) toPass=[presenceObj.show substringToIndex:19]; else toPass=presenceObj.show;
+	NSString* query=[NSString stringWithFormat:@"update buddylist set state='%@', dirty=1 where account_id=%@ and  buddy_name='%@';",toPass, accountNo, presenceObj.user];
+	if([self executeNonQuery:query]!=NO)
+	{
+		return YES;
+	}
+	else
+	{
+		return NO;
+	}
+    
+}
+
+-(NSString*) buddyState:(NSString*) buddy forAccount:(NSString*) accountNo
+{
+
 	NSString* query=[NSString stringWithFormat:@"select state from buddylist where account_id=%@ and buddy_name='%@'", accountNo, buddy];
-	NSString* iconname= [self executeScalar:query];
+	NSString* iconname= (NSString*)[self executeScalar:query];
     ;
 	return iconname;
 }
 
 
-//-(BOOL) setBuddyStatus:(presence*)presenceObj: (NSString*) accountNo
-//{
-//
-//
-//	NSString* toPass;
-//	//data length check
-//	if([presenceObj.status length]>200) toPass=[[presenceObj.status substringToIndex:199] stringByReplacingOccurrencesOfString:@"'"
-//																								  withString:@"''"];
-//	else toPass=[presenceObj.status  stringByReplacingOccurrencesOfString:@"'"
-//                                                      withString:@"''"];;
-//	NSString* query=[NSString stringWithFormat:@"update buddylist set status='%@', dirty=1 where account_id=%@ and  buddy_name='%@';",[toPass stringByReplacingOccurrencesOfString:@"'" withString:@"''"], accountNo, presenceObj.user];
-//	if([self executeNonQuery:query]!=NO)
-//	{
-//
-//		;
-//		return YES;
-//	}
-//	else
-//	{
-//
-//		;
-//		return NO;
-//	}
-//}
-
--(NSString*) buddyStatus:(NSString*) buddy :(NSString*) accountNo
+-(BOOL) setBuddyStatus:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo
 {
-	
-	
+	NSString* toPass;
+	//data length check
+	if([presenceObj.status length]>200) toPass=[[presenceObj.status substringToIndex:199] stringByReplacingOccurrencesOfString:@"'"
+																								  withString:@"''"];
+	else toPass=[presenceObj.status  stringByReplacingOccurrencesOfString:@"'"
+                                                      withString:@"''"];;
+	NSString* query=[NSString stringWithFormat:@"update buddylist set status='%@', dirty=1 where account_id=%@ and  buddy_name='%@';",[toPass stringByReplacingOccurrencesOfString:@"'" withString:@"''"], accountNo, presenceObj.user];
+	if([self executeNonQuery:query]!=NO)
+	{
+
+		return YES;
+	}
+	else
+	{
+
+		return NO;
+	}
+}
+
+-(NSString*) buddyStatus:(NSString*) buddy forAccount:(NSString*) accountNo
+{
 	NSString* query=[NSString stringWithFormat:@"select status from buddylist where account_id=%@ and buddy_name='%@'", accountNo, buddy];
 	NSString* iconname= [self executeScalar:query];
     return iconname;

@@ -69,10 +69,10 @@
 -(BOOL) setOfflineBuddy:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
 
 -(BOOL) setBuddyStatus:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
--(NSString*) buddyStatus:(NSString*) buddy :(NSString*) accountNo;
+-(NSString*) buddyStatus:(NSString*) buddy forAccount:(NSString*) accountNo;
 
 -(BOOL) setBuddyState:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
--(NSString*) buddyState:(NSString*) buddy :(NSString*) accountNo;
+-(NSString*) buddyState:(NSString*) buddy forAccount:(NSString*) accountNo;
 
 
 #pragma mark Contact info

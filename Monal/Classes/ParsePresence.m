@@ -39,11 +39,32 @@
 		}
     }
     
+   if([elementName isEqualToString:@"show"])
+   {
+       _messageBuffer=nil; 
+   }
+    
+     if([elementName isEqualToString:@"status"])
+     {
+         _messageBuffer=nil;
+     }
+    
 }
 
 - (void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName
 {
-   
+    if(_messageBuffer)
+    {
+    if([elementName isEqualToString:@"show"])
+    {
+        _show=_messageBuffer;
+    }
+    
+    if([elementName isEqualToString:@"status"])
+    {
+        _status=_messageBuffer; 
+    }
+    }
 }
 
 @end

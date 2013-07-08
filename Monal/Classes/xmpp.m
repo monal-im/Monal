@@ -503,6 +503,10 @@
          
                     }
                 }
+                
+                [[DataLayer sharedInstance] setBuddyState:presenceNode forAccount:_accountNo];
+                [[DataLayer sharedInstance] setBuddyStatus:presenceNode forAccount:_accountNo];
+                
             }
             
         }

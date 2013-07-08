@@ -90,8 +90,8 @@
     }
     
     NSDictionary* row = [_contacts objectAtIndex:indexPath.row];
-    cell.textLabel.text=[row objectForKey:@"buddy_name"];
-    if([row objectForKey:@"status"])
+    cell.textLabel.text=[row objectForKey:@"full_name"];
+    if(![[row objectForKey:@"status"] isEqualToString:@"(null)"])
         cell.detailTextLabel.text=[row objectForKey:@"status"];
     
     cell.badgeText=nil;

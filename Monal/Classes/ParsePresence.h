@@ -15,9 +15,27 @@
 }
 
 @property (nonatomic, strong, readonly) NSString* type;
-@property (nonatomic, strong, readonly) NSString* from; // full name as sent
-@property (nonatomic, strong, readonly) NSString* user; //user part of from
-@property (nonatomic, strong, readonly) NSString* resource; // resource part of from
+/**
+ full name as sent from server
+ */
+@property (nonatomic, strong, readonly) NSString* from;
+/**
+ username part of from 
+ */
+@property (nonatomic, strong, readonly) NSString* user;
+/**
+ resource part of from
+ */
+@property (nonatomic, strong, readonly) NSString* resource;
 @property (nonatomic, strong, readonly) NSString* idval;
+
+/**
+ the text inside of show tags e.g. away
+ */
+@property (nonatomic, strong, readonly) NSString* show;
+/**
+ text inside of status tags. e.g. this is a status message
+ */
+@property (nonatomic, strong, readonly) NSString* status;
 
 @end

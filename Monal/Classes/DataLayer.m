@@ -591,32 +591,18 @@ static DataLayer *sharedInstance=nil;
     return resources;
     
 }
-
-
--(NSArray*) onlineBuddies:(NSString*) accountNo sortedBy:(NSString*) sort
+-(NSArray*) onlineBuddiesSortedBy:(NSString*) sort
 {
-	
-	NSString* query1=[NSString stringWithFormat:@"select username, domain from account where account_id=%@", accountNo];
-	//debug_NSLog(query);
-	NSArray* user = [self executeReader:query1];
-	
-	if(user!=nil)
-    {
-		if([user count]>0)//sanity check
-        {
-            
-            NSString* query=@"";
+	     NSString* query=@"";
             
             if([sort isEqualToString:@"Name"])
             {
-                query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, ifnull(full_name, buddy_name) as full_name from buddylist where account_id=%@ and online=1  and buddy_name!='%@'  and buddy_name!='%@@%@'  order by full_name COLLATE NOCASE asc ", accountNo
-                       , [[user objectAtIndex:0] objectForKey:@"username"], [[user objectAtIndex:0] objectForKey:@"username"],  [[user objectAtIndex:0] objectForKey:@"domain"]  ];
+                query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, ifnull(full_name, buddy_name) as full_name from buddylist where online=1    order by full_name COLLATE NOCASE asc "];
             }
             
             if([sort isEqualToString:@"State"])
             {
-                query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, ifnull(full_name, buddy_name) as full_name from buddylist where account_id=%@ and online=1  and buddy_name!='%@'  and buddy_name!='%@@%@'  order by state,full_name COLLATE NOCASE  asc ",accountNo
-                       , [[user objectAtIndex:0] objectForKey:@"username"], [[user objectAtIndex:0] objectForKey:@"username"],  [[user objectAtIndex:0] objectForKey:@"domain"]  ];
+                query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, ifnull(full_name, buddy_name) as full_name from buddylist where   online=1   order by state,full_name COLLATE NOCASE  asc "];
             }
             
            //debug_NSLog(query);
@@ -633,25 +619,14 @@ static DataLayer *sharedInstance=nil;
                 return nil;
             }
             
-        }
-    }else return nil;
-	
-    return nil; 
 }
 
--(NSArray*) offlineBuddies:(NSString*) accountNo
+-(NSArray*) offlineBuddies
 {
 	
-	NSString* query1=[NSString stringWithFormat:@"select username, domain from account where account_id=%@", accountNo];
-	//debug_NSLog(query);
-	NSArray* user = [self executeReader:query1];
-	
-	if(user!=nil)
-		if([user count]>0)//sanity check
-		{
+
 			
-			NSString* query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, ifnull(full_name, buddy_name) as full_name from buddylist where account_id=%@ and online=0  and buddy_name!='%@'  and buddy_name!='%@@%@'  order by full_name COLLATE NOCASE ", accountNo
-							 , [[user objectAtIndex:0] objectAtIndex:0], [[user objectAtIndex:0] objectAtIndex:0],  [[user objectAtIndex:0] objectAtIndex:1]  ];
+			NSString* query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, ifnull(full_name, buddy_name) as full_name from buddylist where  online=0 order by full_name COLLATE NOCASE "];
 			//debug_NSLog(query);
 			NSArray* toReturn = [self executeReader:query];
 			
@@ -659,17 +634,14 @@ static DataLayer *sharedInstance=nil;
 			{
 				
 				debug_NSLog(@" count: %d",  [toReturn count] );
-				;
-				
 				return toReturn; //[toReturn autorelease];
 			}
 			else
 			{
 				debug_NSLog(@"buddylist is empty or failed to read");
-				;
 				return nil;
 			}
-		} else return nil;
+		
 	
 }
 

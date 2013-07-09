@@ -10,19 +10,18 @@
 
 @implementation MLContactCell
 
-- (id)initWithFrame:(CGRect)frame
+- (id)init
 {
-    self = [super initWithFrame:frame];
+    self = [super init];
     if (self) {
         // Initialization code
         self.detailTextLabel.text=nil;
         self.accessoryType = UITableViewCellAccessoryNone;
         self.imageView.alpha=1.0;
         
-        
+        self.badgeColor= [UIColor clearColor];
+        self.badgeHighlightedColor=[UIColor clearColor];
         self.badgeText =nil;
-        self.badgeColor = [UIColor whiteColor];
-        self.badgeHighlightedColor = [UIColor blueColor];
         self.textLabel.textColor = [UIColor blackColor];
         
     }
@@ -44,7 +43,6 @@
     textLabelFrame.size.width = self.frame.size.width-51-13-35-45;
     self.textLabel.frame = textLabelFrame;
     
-    
     CGRect detailLabelFrame = self.detailTextLabel.frame;
     detailLabelFrame.origin.x=51+13;
     detailLabelFrame.size.width = self.frame.size.width-51-13-35-45;
@@ -53,6 +51,37 @@
     
 }
 
+-(void) setCount:(NSInteger)count
+{
+    _count=count;
+    
+    if(_count>0)
+    {
+    self.badgeColor=[UIColor darkGrayColor];
+    self.badgeHighlightedColor=[UIColor whiteColor];
+    self.badgeText=[NSString stringWithFormat:@"%d", _count];
+    }
+    else
+    {
+        self.badgeColor= [UIColor clearColor];
+        self.badgeHighlightedColor=[UIColor clearColor];
+        self.badgeText=nil; 
+    }
+    
+    
+}
+
+
+-(void)prepareForReuse
+{
+    [super prepareForReuse];
+    self.textLabel.text=nil;
+    self.detailTextLabel.text=nil;
+    self.imageView.image=nil; 
+    self.badgeColor= [UIColor clearColor];
+    self.badgeHighlightedColor=[UIColor clearColor];
+    self.badgeText=nil;
+}
 
 
 @end

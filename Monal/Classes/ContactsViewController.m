@@ -52,15 +52,9 @@
     //inefficient temp code
      _contacts=[[NSMutableArray alloc] init];
     
-    NSArray* accountList=[[DataLayer sharedInstance] accountList];
-    for (NSDictionary* account in accountList)
-    {
-        if([[account objectForKey:@"enabled"] boolValue]==YES)
-        {
-            [_contacts addObjectsFromArray:
-             [[DataLayer sharedInstance] onlineBuddies:[NSString stringWithFormat:@"%@",[account objectForKey:@"account_id"]] sortedBy:@"Name"] ];
-        }
-    }
+    [_contacts addObjectsFromArray:
+    [[DataLayer sharedInstance] onlineBuddiesSortedBy:@"Name"] ];
+  
     
 }
 
@@ -94,10 +88,10 @@
     if(![[row objectForKey:@"status"] isEqualToString:@"(null)"])
         cell.detailTextLabel.text=[row objectForKey:@"status"];
     
-    cell.badgeText=nil;
     cell.accessoryType = UITableViewCellAccessoryDetailDisclosureButton;
-    
-    
+
+    cell.count=0; 
+   
     return cell; 
 }
 

@@ -21,6 +21,9 @@
 #import "HelpViewController.h"
 #import "AboutViewController.h"
 
+//xmpp
+#import "MLXMPPManager.h"
+
 @implementation MonalAppDelegate
 
 -(void) createRootInterface
@@ -30,6 +33,7 @@
     
     _tabBarController=[[UITabBarController alloc] init];
     ContactsViewController* contactsVC = [[ContactsViewController alloc] init];
+    [MLXMPPManager sharedInstance].contactVC=contactsVC;
     
     ActiveChatsViewController* activeChatsVC = [[ActiveChatsViewController alloc] init];
     UINavigationController* activeChatNav=[[UINavigationController alloc] initWithRootViewController:activeChatsVC];
@@ -119,6 +123,9 @@
     //[Appirater setDebug:YES];
     [Appirater appLaunched:YES];
 
+    
+    // should any accounts connect?
+    [[MLXMPPManager sharedInstance] connectIfNecessary];
     
     
 }

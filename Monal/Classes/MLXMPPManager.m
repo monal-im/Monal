@@ -26,17 +26,15 @@
 -(id) init
 {
     self=[super init];
+    
+    _connectedXMPP=[[NSMutableArray alloc] init];
     _netQueue = dispatch_queue_create(kMonalNetQueue, DISPATCH_QUEUE_CONCURRENT);
     return self; 
 }
 
 -(void)connectIfNecessary
 {
-    
-//    hostReach = [[Reachability reachabilityWithHostName: @"www.apple.com"] retain];
-//	[hostReach startNotifier];
-//
-    
+
     _accountList=[[DataLayer sharedInstance] accountList];
     for (NSDictionary* account in _accountList)
     {
@@ -65,13 +63,21 @@
             
             PasswordManager* passMan= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",[account objectForKey:@"account_id"]]];
             xmppAccount.password=[passMan getPassword] ;
-             
+            
             if(([xmppAccount.password length]==0) //&& ([tempPass length]==0)
                )
             {
                 // no password error
             }
           
+            //sepcifically look for the server since we might not be online or behind firewall
+            Reachability* hostReach = [Reachability reachabilityWithHostName:xmppAccount.server ] ;
+            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reachabilityChanged) name:kReachabilityChangedNotification object:nil];
+            [hostReach startNotifier];
+            
+            NSDictionary* accountRow= [[NSDictionary alloc] initWithObjects:@[xmppAccount, hostReach] forKeys:@[@"xmppAccount", @"hostReach"]];
+            [_connectedXMPP addObject:accountRow];
+            
             dispatch_async(_netQueue,
                    ^{
                        [xmppAccount connect];
@@ -84,6 +90,47 @@
     }
 }
 
+-(void) reachabilityChanged
+{
+    
+    for (NSDictionary* row in _connectedXMPP)
+    {
+    Reachability* hostReach=[row objectForKey:@"hostReach"];
+    xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
+    if([hostReach currentReachabilityStatus]==NotReachable)
+    {
+        debug_NSLog(@"not reachable");
+       
+        if(xmppAccount.loggedIn==YES)
+        {
+        debug_NSLog(@"logging out");
+        dispatch_async(_netQueue,
+                       ^{
+        [xmppAccount disconnect];
+                       });
+        }
+    }
+    else
+    {
+        debug_NSLog(@"reachable");
+        if(xmppAccount.disconnected==YES)
+        {
+            debug_NSLog(@"logging in");
+            dispatch_async(_netQueue,
+                           ^{
+            [xmppAccount connect];
+            [[NSRunLoop currentRunLoop]run];
+                           });
+        }
+        
+    }
+    }
+}
+
+-(void) dealloc
+{
+    [[NSNotificationCenter defaultCenter]  removeObserver:self];
+}
 
 @end
 

@@ -7,7 +7,6 @@
 //
 
 #import "ContactsViewController.h"
-#import "MLXMPPManager.h"
 #import "MLContactCell.h"
 #import "DataLayer.h"
 
@@ -39,10 +38,6 @@
     _contactsTable.dataSource=self;
     
     self.view=_contactsTable;
-    
-    // should any accounts connect?
-    
-    [[MLXMPPManager sharedInstance] connectIfNecessary];
     
 }
 

@@ -102,6 +102,7 @@ typedef struct
 @property (nonatomic,strong) NSString* accountNo;
 
 @property (nonatomic,assign,readonly) BOOL loggedIn;
+@property (nonatomic,assign,readonly) BOOL disconnected; // whether an explicit disconnect had happened 
 
 // discovered properties
 @property (nonatomic,strong)  NSMutableArray* discoveredServerList;

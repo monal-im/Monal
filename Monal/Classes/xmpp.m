@@ -161,13 +161,14 @@
 
 -(void) connect
 {
+    _disconnected=NO; 
     _xmppQueue=dispatch_get_current_queue();
 
     if(_oldStyleSSL==NO)
     {
-        // do DNS discovery
+        // do DNS discovery if it hasn't already been set
 #warning  this needs to time it self out properly
-        [self dnsDiscover];
+       if(!_discoveredServerList) [self dnsDiscover];
         
         
     }
@@ -228,6 +229,11 @@
 	debug_NSLog(@"All closed and cleaned up");
     
     _loggedIn=NO;
+    _disconnected=YES;
+   _startTLSComplete=NO;
+   _streamHasSpace=NO;
+    _inputBuffer=[[NSMutableString alloc] init];
+    _outputQueue=[[NSMutableArray alloc] init];
 	
 }
 

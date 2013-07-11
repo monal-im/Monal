@@ -9,9 +9,12 @@
 #import "DDBadgeViewCell.h"
 
 
-#define kStatusOnline 1;
-#define kStatusOffline 2;
-#define kStatusAway 3; 
+
+typedef enum {
+    kStatusOnline=1,
+    kStatusOffline,
+    kStatusAway
+} statusType;
 
 @interface MLContactCell : DDBadgeViewCell
 {

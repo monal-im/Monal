@@ -50,11 +50,8 @@
 {
     
     //inefficient temp code
-     _contacts=[[NSMutableArray alloc] init];
-    
-    [_contacts addObjectsFromArray:
-    [[DataLayer sharedInstance] onlineBuddiesSortedBy:@"Name"] ];
-  
+    _contacts=[[NSMutableArray alloc] initWithArray:[[DataLayer sharedInstance] onlineBuddiesSortedBy:@"Name"]];
+    [_contactsTable reloadData];
     
 }
 
@@ -87,6 +84,18 @@
     cell.textLabel.text=[row objectForKey:@"full_name"];
     if(![[row objectForKey:@"status"] isEqualToString:@"(null)"])
         cell.detailTextLabel.text=[row objectForKey:@"status"];
+    
+    if(([[row objectForKey:@"state"] isEqualToString:@"away"]) ||
+       ([[row objectForKey:@"state"] isEqualToString:@"dnd"])||
+        ([[row objectForKey:@"state"] isEqualToString:@"xa"])
+       )
+    {
+         cell.status=kStatusAway;
+    }
+    else if([[row objectForKey:@"state"] isEqualToString:@"(null)"])
+        cell.status=kStatusOnline;
+    else if([[row objectForKey:@"state"] isEqualToString:@"offline"])
+        cell.status=kStatusOffline;
     
     cell.accessoryType = UITableViewCellAccessoryDetailDisclosureButton;
 

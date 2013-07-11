@@ -113,18 +113,31 @@
 		// do ssl stuff here
 		debug_NSLog(@"securing connection.. for old style");
         
-		//allowing it to accept the peers cert if the host doesnt match.
-		NSDictionary *settings = [ [NSDictionary alloc ]
-								  initWithObjectsAndKeys:
-								  [NSNumber numberWithBool:YES], @"kCFStreamSSLAllowsExpiredCertificates",
-								  [NSNumber numberWithBool:YES], @"kCFStreamSSLAllowsExpiredRoots",
-								  [NSNumber numberWithBool:YES], @"kCFStreamSSLAllowsAnyRoot",
-								  [NSNumber numberWithBool:NO], @"kCFStreamSSLValidatesCertificateChain",
-								  [NSNull null],@"kCFStreamSSLPeerName",
-                                  
-                                  kCFStreamSocketSecurityLevelSSLv3,
-								  @"kCFStreamSSLLevel",
-								  nil ];
+        NSMutableDictionary *settings = [ [NSMutableDictionary alloc ]
+                                         initWithObjectsAndKeys:
+                                         [NSNull null],kCFStreamSSLPeerName,
+                                         kCFStreamSocketSecurityLevelSSLv3,
+                                         kCFStreamSSLLevel,
+                                         
+                                         
+                                         nil ];
+        
+        if(self.selfSigned)
+        {
+            NSDictionary* secureOFF= [ [NSDictionary alloc ]
+                                      initWithObjectsAndKeys:
+                                      [NSNumber numberWithBool:YES], kCFStreamSSLAllowsExpiredCertificates,
+                                      [NSNumber numberWithBool:YES], kCFStreamSSLAllowsExpiredRoots,
+                                      [NSNumber numberWithBool:YES], kCFStreamSSLAllowsAnyRoot,
+                                      [NSNumber numberWithBool:NO], kCFStreamSSLValidatesCertificateChain, nil];
+            
+            [settings addEntriesFromDictionary:secureOFF];
+            
+            
+            
+        }
+        
+        
 		CFReadStreamSetProperty((__bridge CFReadStreamRef)_iStream,
 								kCFStreamPropertySSLSettings, (__bridge CFTypeRef)settings);
 		CFWriteStreamSetProperty((__bridge CFWriteStreamRef)_oStream,
@@ -147,13 +160,7 @@
 -(void) connect
 {
     _xmppQueue=dispatch_get_current_queue();
-    
-    if((_port==5553) || (_port==443))
-    {
-        _oldStyleSSL=YES;
-    }
-    
-    //allow gtalk on 443
+
     if(_oldStyleSSL==NO)
     {
         // do DNS discovery
@@ -592,12 +599,9 @@
             {
                 if(streamNode.startTLSProceed)
                 {
-                    NSDictionary *settings = [ [NSDictionary alloc ]
+                    NSMutableDictionary *settings = [ [NSMutableDictionary alloc ]
                                               initWithObjectsAndKeys:
-                                              [NSNumber numberWithBool:YES], kCFStreamSSLAllowsExpiredCertificates,
-                                              [NSNumber numberWithBool:YES], kCFStreamSSLAllowsExpiredRoots,
-                                              [NSNumber numberWithBool:YES], kCFStreamSSLAllowsAnyRoot,
-                                              [NSNumber numberWithBool:NO], kCFStreamSSLValidatesCertificateChain,
+                                         
                                               [NSNull null],kCFStreamSSLPeerName,
                                               
                                               kCFStreamSocketSecurityLevelSSLv3,
@@ -605,6 +609,21 @@
                                               
                                               
                                               nil ];
+                    
+                    if(self.selfSigned)
+                    {
+                        NSDictionary* secureOFF= [ [NSDictionary alloc ]
+                                                  initWithObjectsAndKeys:
+                                                  [NSNumber numberWithBool:YES], kCFStreamSSLAllowsExpiredCertificates,
+                                                  [NSNumber numberWithBool:YES], kCFStreamSSLAllowsExpiredRoots,
+                                                  [NSNumber numberWithBool:YES], kCFStreamSSLAllowsAnyRoot,
+                                                  [NSNumber numberWithBool:NO], kCFStreamSSLValidatesCertificateChain, nil]; 
+                        
+                        [settings addEntriesFromDictionary:secureOFF];
+                        
+       
+                        
+                    }
                     
                     if ( 	CFReadStreamSetProperty((__bridge CFReadStreamRef)_iStream,
                                                     kCFStreamPropertySSLSettings, (__bridge CFTypeRef)settings) &&

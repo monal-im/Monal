@@ -328,14 +328,13 @@ static DataLayer *sharedInstance=nil;
 	{
 		
 		debug_NSLog(@" count: %d",  [toReturn count] );
-		;
-		
+	
 		return toReturn; //[toReturn autorelease];
 	}
 	else
 	{
 		debug_NSLog(@"account list  is empty or failed to read");
-		;
+	
 		return nil;
 	}
 	
@@ -418,7 +417,8 @@ static DataLayer *sharedInstance=nil;
 }
 
 -(BOOL) updateAccount: (NSString*) name :(NSString*) theProtocol :(NSString*) username: (NSString*) password: (NSString*) server
-					 : (NSString*) otherport: (bool) secure: (NSString*) resource: (NSString*) thedomain:(bool) enabled:(NSString*) accountNo :(bool) selfsigned: (bool) oldstyle
+					 : (NSString*) otherport: (bool) secure: (NSString*) resource: (NSString*) thedomain:(bool) enabled:(NSString*) accountNo
+                     :(bool) selfsigned: (bool) oldstyle
 {
 	
 	
@@ -427,18 +427,16 @@ static DataLayer *sharedInstance=nil;
 	
 	NSString* query=
 	[NSString stringWithFormat:@"update account  set account_name='%@', protocol_id=%@, server='%@', other_port='%@', username='%@', password='%@', secure=%d, resource='%@', domain='%@', enabled=%d, selfsigned=%d, oldstyleSSL=%d where account_id=%@",
-	 username, theProtocol,server, otherport, username, password, secure, resource, thedomain,enabled,  accountNo, selfsigned, oldstyle];
+	 username, theProtocol,server, otherport, username, password, secure, resource, thedomain,enabled, selfsigned, oldstyle,accountNo];
     //debug_NSLog(query);
 	
 	
 	if([self executeNonQuery:query]!=NO)
 	{
-		;
 		return YES;
 	}
 	else
 	{
-		;
 		return NO;
 	}
 }
@@ -571,12 +569,10 @@ static DataLayer *sharedInstance=nil;
 	NSString* query=[NSString stringWithFormat:@"update buddylist set dirty=0, new=0, online=0, state='', status='';   "];
 	if([self executeNonQuery:query]!=NO)
 	{
-		;
 		return YES;
 	}
 	else
 	{
-		;
 		return NO;
 	}
 	
@@ -2247,6 +2243,7 @@ static DataLayer *sharedInstance=nil;
     
     [dbversionCheck unlock];
     
+    [self resetBuddies];
     
 	return;
 	

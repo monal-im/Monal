@@ -95,6 +95,7 @@ typedef struct
 @property (nonatomic,strong) NSString* resource;
 @property (nonatomic,assign) BOOL SSL;
 @property (nonatomic,assign) BOOL oldStyleSSL;
+@property (nonatomic,assign) BOOL selfSigned;
 @property (nonatomic,assign) NSInteger priority;
 
 // DB info

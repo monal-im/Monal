@@ -111,7 +111,8 @@
 			sslSwitch.on=true;
 		}
 		
-		
+		oldStyleSSLSwitch.on=NO;
+        checkCertSwitch.on=NO;
 		
 	}
     
@@ -210,7 +211,8 @@
              portText.text :
              sslSwitch.on:
              resourceText.text:
-                     domain: enableSwitch.on:
+                     domain:
+             enableSwitch.on:
              checkCertSwitch.on:
              oldStyleSSLSwitch.on
              ];
@@ -412,8 +414,9 @@
     else
     {
         if(_editing==false)
-        {if(section==1)
-            return 4;
+        {
+            if(section==1)
+                return 6;
         }else return 7;
         
     }

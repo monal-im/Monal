@@ -23,5 +23,7 @@ typedef enum {
 
 @property (nonatomic, assign) NSInteger status;
 @property (nonatomic, assign) NSInteger count;
+@property (nonatomic, assign) NSInteger accountNo;
+@property (nonatomic, strong) NSString* username;
 
 @end

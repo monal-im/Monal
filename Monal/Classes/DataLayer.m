@@ -593,12 +593,12 @@ static DataLayer *sharedInstance=nil;
             
             if([sort isEqualToString:@"Name"])
             {
-                query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, ifnull(full_name, buddy_name) as full_name from buddylist where online=1    order by full_name COLLATE NOCASE asc "];
+                query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, ifnull(full_name, buddy_name) as full_name, account_id from buddylist where online=1    order by full_name COLLATE NOCASE asc "];
             }
             
             if([sort isEqualToString:@"State"])
             {
-                query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, ifnull(full_name, buddy_name) as full_name from buddylist where   online=1   order by state,full_name COLLATE NOCASE  asc "];
+                query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, ifnull(full_name, buddy_name) as full_name, account_id from buddylist where   online=1   order by state,full_name COLLATE NOCASE  asc "];
             }
             
            //debug_NSLog(query);
@@ -1864,7 +1864,7 @@ static DataLayer *sharedInstance=nil;
 
 #pragma mark unread messages
 
--(NSArray*) unreadMessages:(NSString*) accountNo
+-(NSArray*) unreadMessagesForAccount:(NSString*) accountNo
 {
 	
 	
@@ -1890,37 +1890,27 @@ static DataLayer *sharedInstance=nil;
 	}
 }
 
--(int) countUserUnreadMessages:(NSString*) buddy :(NSString*) accountNo
+-(int) countUserUnreadMessages:(NSString*) buddy forAccount:(NSString*) accountNo
 {
 	// count # messages from a specific user in messages table
-	
-	
-	
-	
 	NSString* query=[NSString stringWithFormat:@"select count(message_id) from  messages where account_id=%@ and message_from='%@'", accountNo, buddy];
 	
 	NSNumber* count=(NSNumber*)[self executeScalar:query];
 	if(count!=nil)
 	{
 		int val=[count integerValue];
-		;
 		return val;
 	}
 	else
 	{
-		;
 		return 0;
 	}
 }
 
--(int) countOtherUnreadMessages:(NSString*) buddy :(NSString*) accountNo
+-(int) countOtherUnreadMessages:(NSString*) buddy forAccount:(NSString*) accountNo
 {
 	// count # messages from a specific user in messages table
-	
-	
-	
-	
-	NSString* query=[NSString stringWithFormat:@"select count(message_id) from  messages where account_id=%@ and not message_from='%@'", accountNo, buddy];
+NSString* query=[NSString stringWithFormat:@"select count(message_id) from  messages where account_id=%@ and not message_from='%@'", accountNo, buddy];
 	
 	NSNumber* count=(NSNumber*)[self executeScalar:query];
 	if(count!=nil)

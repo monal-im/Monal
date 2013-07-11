@@ -62,6 +62,8 @@
     
     _versionHash=[self getVersionString];
     
+    _fulluser=[NSString stringWithFormat:@"%@@%@", _username, _domain];
+    
     return self;
 }
 
@@ -448,6 +450,7 @@
         else  if([[nextStanzaPos objectForKey:@"stanzaType"]  isEqualToString:@"presence"])
         {
          ParsePresence* presenceNode= [[ParsePresence alloc]  initWithDictionary:nextStanzaPos];
+            if([presenceNode.user isEqualToString:_fulluser]) return; //ignore self 
             
             if([presenceNode.type isEqualToString:kpresenceUnavailable])
             {

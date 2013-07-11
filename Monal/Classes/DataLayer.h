@@ -157,8 +157,8 @@
 -(BOOL) markAsNoticed:(NSString*) accountNo;
 
 
--(int) countUnreadMessages:(NSString*) accountNo; 
--(int) countUserUnreadMessages:(NSString*) buddy :(NSString*) accountNo;
--(int) countOtherUnreadMessages:(NSString*) buddy :(NSString*) accountNo;
+-(int) countUnreadMessagesForAccount:(NSString*) accountNo;
+-(int) countUserUnreadMessages:(NSString*) buddy forAccount:(NSString*) accountNo;
+-(int) countOtherUnreadMessages:(NSString*) buddy forAccount:(NSString*) accountNo;
 
 @end

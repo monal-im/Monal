@@ -58,6 +58,7 @@ typedef struct
 
 @interface xmpp : NSObject <NSStreamDelegate, UIAlertViewDelegate>
 {
+    NSString* _fulluser; // combination of username@domain
     
     NSInputStream *_iStream;
     NSOutputStream *_oStream;
@@ -72,9 +73,8 @@ typedef struct
     NSString* _sessionKey;
     
     BOOL _startTLSComplete;
-    
     BOOL _streamHasSpace;
-  
+    
 }
 
 -(void) connect;

@@ -99,7 +99,10 @@
     
     cell.accessoryType = UITableViewCellAccessoryDetailDisclosureButton;
 
-    cell.count=0; 
+    cell.accountNo=[[row objectForKey:@"account_id"] integerValue];
+    cell.username=[row objectForKey:@"buddy_name"] ;
+    
+    cell.count=[[DataLayer sharedInstance] countUserUnreadMessages:cell.username forAccount:[NSString stringWithFormat:@"%d", cell.accountNo]];
    
     return cell; 
 }

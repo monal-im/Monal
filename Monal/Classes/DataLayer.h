@@ -113,9 +113,11 @@
 
 -(NSArray*) accountVals:(NSString*) accountNo; 
 -(BOOL) addAccount: (NSString*) name :(NSString*) theProtocol :(NSString*) username: (NSString*) password: (NSString*) server
-				  : (NSString*) otherport: (bool) secure: (NSString*) resource: (NSString*) thedomain:(bool) enabled;
+                  : (NSString*) otherport: (bool) secure: (NSString*) resource: (NSString*) thedomain:(bool) enabled :(bool) selfsigned: (bool) oldstyle;
+
 -(BOOL) updateAccount: (NSString*) name :(NSString*) theProtocol :(NSString*) username: (NSString*) password: (NSString*) server
-					 : (NSString*) otherport: (bool) secure: (NSString*) resource: (NSString*) thedomain: (bool) enabled: (NSString*) accountNo;
+					 : (NSString*) otherport: (bool) secure: (NSString*) resource: (NSString*) thedomain: (bool) enabled: (NSString*) accountNo :(bool) selfsigned: (bool) oldstyle;
+
 -(BOOL) removeAccount:(NSString*) accountNo; 
 
 -(BOOL) removeEnabledAccount; 

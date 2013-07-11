@@ -394,7 +394,7 @@ static DataLayer *sharedInstance=nil;
 }
 
 -(BOOL) addAccount: (NSString*) name :(NSString*) theProtocol :(NSString*) username: (NSString*) password: (NSString*) server
-				  : (NSString*) otherport: (bool) secure: (NSString*) resource: (NSString*) thedomain:(bool) enabled
+				  : (NSString*) otherport: (bool) secure: (NSString*) resource: (NSString*) thedomain:(bool) enabled :(bool) selfsigned: (bool) oldstyle
 {
     
 	
@@ -402,8 +402,8 @@ static DataLayer *sharedInstance=nil;
 	if(enabled==YES) [self removeEnabledAccount];//reset all
 	
 	NSString* query=
-	[NSString stringWithFormat:@"insert into account values(null, '%@', %@, '%@', '%@', '%@', '%@', %d, '%@', '%@', %d) ",
-	 username, theProtocol,server, otherport, username, password, secure, resource, thedomain, enabled];
+	[NSString stringWithFormat:@"insert into account values(null, '%@', %@, '%@', '%@', '%@', '%@', %d, '%@', '%@', %d, %d, %d) ",
+	 username, theProtocol,server, otherport, username, password, secure, resource, thedomain, enabled, selfsigned, oldstyle];
     
 	if([self executeNonQuery:query]!=NO)
 	{
@@ -418,7 +418,7 @@ static DataLayer *sharedInstance=nil;
 }
 
 -(BOOL) updateAccount: (NSString*) name :(NSString*) theProtocol :(NSString*) username: (NSString*) password: (NSString*) server
-					 : (NSString*) otherport: (bool) secure: (NSString*) resource: (NSString*) thedomain:(bool) enabled:(NSString*) accountNo
+					 : (NSString*) otherport: (bool) secure: (NSString*) resource: (NSString*) thedomain:(bool) enabled:(NSString*) accountNo :(bool) selfsigned: (bool) oldstyle
 {
 	
 	
@@ -426,8 +426,8 @@ static DataLayer *sharedInstance=nil;
 	if(enabled==YES) [self removeEnabledAccount];//reset all
 	
 	NSString* query=
-	[NSString stringWithFormat:@"update account  set account_name='%@', protocol_id=%@, server='%@', other_port='%@', username='%@', password='%@', secure=%d, resource='%@', domain='%@', enabled=%d where account_id=%@",
-	 username, theProtocol,server, otherport, username, password, secure, resource, thedomain,enabled,  accountNo];
+	[NSString stringWithFormat:@"update account  set account_name='%@', protocol_id=%@, server='%@', other_port='%@', username='%@', password='%@', secure=%d, resource='%@', domain='%@', enabled=%d, selfsigned=%d, oldstyleSSL=%d where account_id=%@",
+	 username, theProtocol,server, otherport, username, password, secure, resource, thedomain,enabled,  accountNo, selfsigned, oldstyle];
     //debug_NSLog(query);
 	
 	
@@ -2233,6 +2233,18 @@ static DataLayer *sharedInstance=nil;
         
     }
 	
+    if([dbversion doubleValue]<1.1)
+    {
+        debug_NSLog(@"Database version <1.1 detected. Performing upgrade on accounts. ");
+     
+         [self executeNonQuery:@"alter table account add column selfsigned bool;"];
+         [self executeNonQuery:@"alter table account add column oldstyleSSL bool; "];
+        
+        [self executeNonQuery:@"update dbversion set dbversion='1.1'; "];
+        debug_NSLog(@"Upgrade to 1.1 success ");
+        
+    }
+    
     [dbversionCheck unlock];
     
     

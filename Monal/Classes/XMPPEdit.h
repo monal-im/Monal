@@ -26,6 +26,10 @@
 	IBOutlet UITableViewCell* resourceCell;
 	IBOutlet UITableViewCell* SSLCell;
     
+    IBOutlet UITableViewCell* oldStyleSSLCell;
+    IBOutlet UITableViewCell* checkCertCell;
+    
+    
 	
 	
 	IBOutlet UITextField* userText;
@@ -37,6 +41,8 @@
     IBOutlet UITextField* resourceText;
     IBOutlet UISwitch* sslSwitch;
     
+    IBOutlet UISwitch* oldStyleSSLSwitch;
+    IBOutlet UISwitch* checkCertSwitch;
 	
 	IBOutlet UILabel* JIDLabel;
     

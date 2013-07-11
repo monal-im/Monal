@@ -78,6 +78,9 @@
 		
         sslSwitch.on=[[settings objectForKey:@"secure"] boolValue];
 		enableSwitch.on=[[settings objectForKey:@"enabled"] boolValue];
+        
+        oldStyleSSLSwitch.on=[[settings objectForKey:@"oldStyleSSL"] boolValue];
+		checkCertSwitch.on=[[settings objectForKey:@"selfsigned"] boolValue];
 		
 	
 		if([[settings objectForKey:@"domain"] isEqualToString:@"gmail.com"])
@@ -207,7 +210,10 @@
              portText.text :
              sslSwitch.on:
              resourceText.text:
-                    domain: enableSwitch.on];
+                     domain: enableSwitch.on:
+             checkCertSwitch.on:
+             oldStyleSSLSwitch.on
+             ];
 			
 			
 			// save password
@@ -234,7 +240,9 @@
          resourceText.text:
                    domain:
          enableSwitch.on:
-         _accountno];
+                _accountno:
+         checkCertSwitch.on:
+         oldStyleSSLSwitch.on];
         
         //save password
         PasswordManager* pass= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",_accountno]];
@@ -333,14 +341,15 @@
                 
             case 2: thecell=resourceCell; break;
             case 3: thecell=SSLCell ;break;
-                
+             case 4: thecell=oldStyleSSLCell ;break;
+                 case 5: thecell=checkCertCell ;break;
 				
-			case 4:
+			case 6:
 			{
 				if(_editing==true)
 				{
-                    static NSString *identifier = @"MyCell";
-                    thecell = [[UITableViewCell alloc]initWithFrame:CGRectZero reuseIdentifier:identifier];
+                    
+                    thecell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"DeleteCell"];
                     //thecell.selection=false;
                     CGRect cellRectangle = CGRectMake(32,3,225,[tableView rowHeight]-6);
                     
@@ -354,10 +363,10 @@
                     
 					[theButton setTitle:@"Delete" forState: UIControlStateNormal ];
 					[theButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-					[theButton setFont:[UIFont boldSystemFontOfSize:17.0]];
+					theButton.titleLabel.font= [UIFont boldSystemFontOfSize:17.0];
                     [theButton addTarget:self action:@selector(delClicked:) forControlEvents:UIControlEventTouchUpInside];
 					
-					
+                    
                     
                     //Add the label as a sub view to the cell.
                     [thecell.contentView addSubview:theButton];
@@ -372,9 +381,8 @@
         
 	}
     
-	
+    thecell.selectionStyle= UITableViewCellSelectionStyleNone;
     
-	;
 	return thecell;
 }
 
@@ -406,7 +414,7 @@
         if(_editing==false)
         {if(section==1)
             return 4;
-        }else return 5;
+        }else return 7;
         
     }
 	

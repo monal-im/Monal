@@ -10,11 +10,12 @@
 #import "MLContactCell.h"
 #import "MLInfoCell.h"
 #import "DataLayer.h"
+#import "chatViewController.h"
 
 
 #define kinfoSection 0
 #define konlineSection 1
-#define kofflineSection 2 
+#define kofflineSection 2
 
 @interface ContactsViewController ()
 
@@ -325,10 +326,14 @@
 #pragma mark tableview delegate
 -(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    [tableView deselectRowAtIndexPath:indexPath animated:NO];
+    
     if((indexPath.section==konlineSection) ||
        (indexPath.section==kofflineSection) )
     {
         //make chat view
+        chatViewController* chatVC = [[chatViewController alloc] initWithContact:[_contacts objectAtIndex:indexPath.row] ];
+        [self.navigationController pushViewController:chatVC animated:YES];
     }
 }
 

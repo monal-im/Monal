@@ -208,6 +208,7 @@
 		2696EECC1791209D00BC54B8 /* available@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2696EECA1791209D00BC54B8 /* available@2x.png */; };
 		2696EECD1791209D00BC54B8 /* away@x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2696EECB1791209D00BC54B8 /* away@x.png */; };
 		2696EECF179120AC00BC54B8 /* offline@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2696EECE179120AC00BC54B8 /* offline@2x.png */; };
+		2696EED21791245A00BC54B8 /* chatViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2696EED11791245A00BC54B8 /* chatViewController.m */; };
 		269A2E62132030770044B1C8 /* Monal_crop_256.png in Resources */ = {isa = PBXBuildFile; fileRef = 26EB85D911166F1B005446DD /* Monal_crop_256.png */; };
 		269F0F1A105DDEFB00FF96F8 /* status.png in Resources */ = {isa = PBXBuildFile; fileRef = 269F0F19105DDEFB00FF96F8 /* status.png */; };
 		26A942AE130B52520034CDF7 /* offline.png in Resources */ = {isa = PBXBuildFile; fileRef = 26A942AD130B52520034CDF7 /* offline.png */; };
@@ -479,6 +480,8 @@
 		2696EECA1791209D00BC54B8 /* available@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "available@2x.png"; sourceTree = "<group>"; };
 		2696EECB1791209D00BC54B8 /* away@x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "away@x.png"; sourceTree = "<group>"; };
 		2696EECE179120AC00BC54B8 /* offline@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "offline@2x.png"; sourceTree = "<group>"; };
+		2696EED01791245A00BC54B8 /* chatViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chatViewController.h; sourceTree = "<group>"; };
+		2696EED11791245A00BC54B8 /* chatViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = chatViewController.m; sourceTree = "<group>"; };
 		269F0F19105DDEFB00FF96F8 /* status.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = status.png; sourceTree = "<group>"; };
 		26A942AD130B52520034CDF7 /* offline.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = offline.png; sourceTree = "<group>"; };
 		26AD60DA11A95CB700C39051 /* Emoticons */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Emoticons; sourceTree = "<group>"; };
@@ -760,6 +763,8 @@
 		2636C440177BD595001CA71F /* Older UI code */ = {
 			isa = PBXGroup;
 			children = (
+				2696EED01791245A00BC54B8 /* chatViewController.h */,
+				2696EED11791245A00BC54B8 /* chatViewController.m */,
 				26D1847210F9972400340C52 /* XMPPEdit.xib */,
 				2636C43D177BD58C001CA71F /* XMPPEdit.h */,
 				2636C43E177BD58C001CA71F /* XMPPEdit.m */,
@@ -1441,6 +1446,7 @@
 				261AC91D1788A49C00E05657 /* ParsePresence.m in Sources */,
 				262797AF178A577300B85D94 /* MLContactCell.m in Sources */,
 				26347D861790FFDE006FF64F /* MLInfoCell.m in Sources */,
+				2696EED21791245A00BC54B8 /* chatViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

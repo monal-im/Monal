@@ -42,22 +42,22 @@
     self.detailTextLabel.frame = detailLabelFrame;
     
     
-    _Cancel=[UIButton buttonWithType:UIButtonTypeRoundedRect];
+//    _Cancel=[UIButton buttonWithType:UIButtonTypeRoundedRect];
+//    
+//    UIImage *buttonImage2 = [[UIImage imageNamed:@"blueButton"]
+//                             resizableImageWithCapInsets:UIEdgeInsetsMake(10, 10, 10, 10)];
+//    UIImage *buttonImageHighlight2 = [[UIImage imageNamed:@"blueButtonHighlight"]
+//                                      resizableImageWithCapInsets:UIEdgeInsetsMake(18, 18, 10, 10)];
     
-    UIImage *buttonImage2 = [[UIImage imageNamed:@"blueButton"]
-                             resizableImageWithCapInsets:UIEdgeInsetsMake(10, 10, 10, 10)];
-    UIImage *buttonImageHighlight2 = [[UIImage imageNamed:@"blueButtonHighlight"]
-                                      resizableImageWithCapInsets:UIEdgeInsetsMake(18, 18, 10, 10)];
-    
-    [_Cancel setBackgroundImage:buttonImage2 forState:UIControlStateNormal];
-    [_Cancel setBackgroundImage:buttonImageHighlight2 forState:UIControlStateSelected];
-    
-
-    [_Cancel  setTitle:@"Cancel" forState:UIControlStateNormal];
-    [_Cancel setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    
-    _Cancel.frame=CGRectMake(textLabelFrame.origin.x+textLabelFrame.size.width+5, textLabelFrame.origin.y+5, 70, 30);
-    [self.contentView addSubview:_Cancel];
+//    [_Cancel setBackgroundImage:buttonImage2 forState:UIControlStateNormal];
+//    [_Cancel setBackgroundImage:buttonImageHighlight2 forState:UIControlStateSelected];
+//    
+//
+//    [_Cancel  setTitle:@"Cancel" forState:UIControlStateNormal];
+//    [_Cancel setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+//    
+//    _Cancel.frame=CGRectMake(textLabelFrame.origin.x+textLabelFrame.size.width+5, textLabelFrame.origin.y+5, 70, 30);
+//    [self.contentView addSubview:_Cancel];
     
 }
 

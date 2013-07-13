@@ -531,6 +531,7 @@
             }
             else if([presenceNode.type isEqualToString:kpresenceUnavailable])
             {
+                [[DataLayer sharedInstance] setOfflineBuddy:presenceNode forAccount:_accountNo];
                 NSDictionary* userDic=@{kusernameKey: presenceNode.user,
                                         kaccountNoKey:_accountNo};
                 [self.contactsVC removeUser:userDic];

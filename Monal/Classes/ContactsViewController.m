@@ -116,7 +116,7 @@
              [_contactsTable beginUpdates];
               NSIndexPath *path1 = [NSIndexPath indexPathForRow:pos inSection:konlineSection];
              [_contactsTable insertRowsAtIndexPaths:@[path1]
-                                   withRowAnimation:UITableViewRowAnimationFade];
+                                   withRowAnimation:UITableViewRowAnimationAutomatic];
              [_contactsTable endUpdates];
                      
         

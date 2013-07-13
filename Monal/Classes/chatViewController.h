@@ -18,13 +18,7 @@
     
 	NSString*  myuser;
 	NSString*  lastuser;
-	
 
-    bool dontscroll;
-    
-    bool keyboardVisible; 
-
-	
 	
 	CGRect oldFrame;
 	NSString* myIcon; 
@@ -66,11 +60,6 @@
 -(id) initWithContact:(NSDictionary*) contact  ;
 -(void) showLogDate:(NSString*) buddy:(NSString*) fullname:(UINavigationController*) vc:(NSString*) date;
 -(void) addMessage:(NSString*) to:(NSString*) message;
--(void) signalNewMessages; 
--(void) signalStatus;
--(void) signalOffline;
--(void) hideKeyboard; 
-
 
 
 -(NSString*) setIcon:(NSString*) msguser;
@@ -91,12 +80,22 @@
 
 //content generation 
 -(NSMutableString*) createPage:(NSArray*)thelist;
--(NSString*) makeMessageHTML:(NSString*) from:(NSString*) themessage:(NSString*) time:(BOOL) liveChat;
+-(NSString*) makeMessageHTMLfrom:(NSString*) from withMessage:(NSString*) themessage andTime:(NSString*) time isLive:(BOOL) liveChat;
 -(NSString*) emoticonsHTML:(NSString*) message; 
 
 @property (nonatomic,strong) NSString* iconPath;
 @property (nonatomic,strong) NSString* domain;
 @property (nonatomic,strong) UITabBarController* tabController;
 @property (nonatomic,strong)  UITableView* contactList;
+
+/**
+ full username with domain e.g. aa@gmail.com
+ */
+@property (nonatomic, strong) NSString* jid;
+
+/**
+ This is the account number of the account this user is for
+ */
+@property (nonatomic, strong) NSString* accountNo;
 
 @end

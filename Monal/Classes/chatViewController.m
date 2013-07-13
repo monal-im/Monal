@@ -102,22 +102,9 @@
     
     self=[super init];
     self.hidesBottomBarWhenPushed=YES;
-     [self makeView];
-  
-    keyboardVisible=NO;
-    
-    dontscroll=false;
-  
-    activeChats=nil; 
-	//navigationController=nav;
-    
-  
-
-	chatView.delegate=self;
-	groupchat=false;
+    [self makeView];
+    chatView.delegate=self;
 	
-	wasaway=false; 
-	wasoffline=false;
 	
 	NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
 	[nc addObserver:self selector:@selector(keyboardWillShow:) name: UIKeyboardWillShowNotification object:nil];
@@ -127,8 +114,6 @@
     
     // handle messages to view someuser
     
-    [nc addObserver:self selector:@selector(showSignal:) name: @"showSignal" object:nil];
-
 	buddyIcon=nil;
 	myIcon=nil; 
 	HTMLPage=nil; 
@@ -145,37 +130,22 @@
 	lastDiv=nil; 
 	
 	webroot=[NSString stringWithFormat:@"%@/Themes/MonalStockholm/", [[NSBundle mainBundle] resourcePath]];
+	NSError* error;
+	topHTML=[NSString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalStockholm/top.html", [[NSBundle mainBundle] resourcePath]] encoding:NSUTF8StringEncoding error:&error];
 	
-	topHTML=[NSString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalStockholm/top.html", [[NSBundle mainBundle] resourcePath]]]; 
-	
-	bottomHTML=[NSString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalStockholm/bottom.html", [[NSBundle mainBundle] resourcePath]]]; 
-    
-    
-    
-	
-	
+	bottomHTML=[NSString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalStockholm/bottom.html", [[NSBundle mainBundle] resourcePath]] encoding:NSUTF8StringEncoding error:&error];
 
-/*	statusHTML=[NSString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalStockholm/Status.html", [[NSBundle mainBundle] resourcePath]]]; 
-	[statusHTML retain]; 
-*/
-	
-	//	[chatView loadHTMLString:topHTML  baseURL:[NSURL fileURLWithPath:webroot]];
+    [chatView loadHTMLString:topHTML  baseURL:[NSURL fileURLWithPath:webroot]];
 	
 	self.view.autoresizesSubviews=true; 
 
-	
-/*		webroot=[NSString stringWithFormat:@"%@/Themes/MonalRenkooNaked/", [[NSBundle mainBundle] resourcePath]];
-	[webroot retain];
-	
-	topHTML=[NSString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalRenkooNaked/top.html", [[NSBundle mainBundle] resourcePath]]]; 
-	[topHTML retain]; 
-	
-	
-	bottomHTML=[NSString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalRenkooNaked/bottom.html", [[NSBundle mainBundle] resourcePath]]]; 
-	[bottomHTML retain]; */
-	
     
-    return self; 
+    self.accountNo=[contact objectForKey:@"account_id"];
+    
+    NSArray* accountVals =[[DataLayer sharedInstance] accountVals:self.accountNo];
+    self.jid=[NSString stringWithFormat:@"%@@%@",[[accountVals objectAtIndex:0] objectForKey:@"username"], [[accountVals objectAtIndex:0] objectForKey:@"domain"]];
+    
+    return self;
 
 }
 
@@ -184,7 +154,7 @@
 
 -(void)viewWillAppear:(BOOL)animated
 {
-
+    
 }
 
 -(void) viewDidLoad
@@ -196,10 +166,9 @@
 -(void)resignTextView
 {
     
-    dontscroll=true;
+  
     [chatInput.internalTextView resignFirstResponder];
     [chatInput.internalTextView becomeFirstResponder];
-    dontscroll=false;
     
     if(([chatInput text]!=nil) && (![[chatInput text] isEqualToString:@""]) )
     {
@@ -735,7 +704,7 @@
 {
     debug_NSLog(@"pop out contacts"); 
     
-    UITableViewController* tbv = [UITableViewController alloc]; 
+//    UITableViewController* tbv = [UITableViewController alloc];
 //    tbv.tableView=contactList; 
 //    popOverController = [[UIPopoverController alloc] initWithContentViewController:tbv];
 //    
@@ -747,268 +716,208 @@
 }
 
 //note fullname is overridden and ignored
-//-(void) show:(NSString*) buddy:(NSString*) fullname:(UINavigationController*) vc
-//{
-//	
-//	
-//
-//    pages.hidden=false; 
-//    containerView.hidden=false;
-//    [chatView setFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height-40-20)];
-//
-//	//query to get pages and position
-//	 activeChats=[db activeBuddies:accountno]; 
-//    pages.numberOfPages=[activeChats count];
-//    //set pos
-//    int dotCounter=0; 
-//    while(dotCounter<pages.numberOfPages)
-//    {
-//    if([buddy isEqualToString:[[activeChats objectAtIndex:dotCounter] objectAtIndex:0]])
-//    {
-//        pages.currentPage=dotCounter; 
-//        break;
-//    }
-//        dotCounter++;
-//        
-//    }
-//    
-//   /* if(dotCounter==pages.numberOfPages)
-//    {
-//        debug_NSLog(@"unable to find item.. abort show"); 
-//        return;
-//    }*/
-//    
-//	
-//	msgthread=false;
-//	
-//	firstmsg=true; 
-//	// replace parts of the string
-//	
-//	
-//	buddyName=buddy; 
-//    if(dotCounter<pages.numberOfPages)
-//    {
-//    
-//	buddyFullName=[[activeChats objectAtIndex:dotCounter] objectAtIndex:2]; //doesnt matter what full name is passed we will always check
-//    }
-//    else 
-//        buddyFullName=fullname; 
-//    
-//    debug_NSLog(@"id: %@,  full: %@", buddyName, buddyFullName);
-//if([buddyFullName isEqualToString:@""])	
-//	self.title=buddyName;
-//	else
-//		self.title=buddyFullName;
-//	
-////first check.. 
-//    if([db isBuddyMuc:buddyFullName:accountno])
+-(void) show:(NSString*) buddy:(NSString*) fullname:(UINavigationController*) vc
+{
+	
+	
+
+    pages.hidden=false; 
+    containerView.hidden=false;
+    [chatView setFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height-40-20)];
+
+	//query to get pages and position
+    activeChats=[[DataLayer sharedInstance] activeBuddies:_accountno];
+    pages.numberOfPages=[activeChats count];
+    //set pos
+    int dotCounter=0; 
+    while(dotCounter<pages.numberOfPages)
+    {
+    if([buddy isEqualToString:[[activeChats objectAtIndex:dotCounter] objectAtIndex:0]])
+    {
+        pages.currentPage=dotCounter; 
+        break;
+    }
+        dotCounter++;
+        
+    }
+    
+   /* if(dotCounter==pages.numberOfPages)
+    {
+        debug_NSLog(@"unable to find item.. abort show"); 
+        return;
+    }*/
+    
+	
+	msgthread=false;
+	
+	firstmsg=true; 
+	// replace parts of the string
+	
+	
+	buddyName=buddy; 
+    if(dotCounter<pages.numberOfPages)
+    {
+    
+	buddyFullName=[[activeChats objectAtIndex:dotCounter] objectAtIndex:2]; //doesnt matter what full name is passed we will always check
+    }
+    else 
+        buddyFullName=fullname; 
+    
+    debug_NSLog(@"id: %@,  full: %@", buddyName, buddyFullName);
+if([buddyFullName isEqualToString:@""])	
+	self.title=buddyName;
+	else
+		self.title=buddyFullName;
+	
+//first check.. 
+//    if([[DataLayer sharedInstance] isBuddyMuc:buddyFullName:_accountno])
 //    {
 //        groupchat=true; 
 //    }
 //    else
-//    {//fallback
-//    
-//	
-//	NSRange startrange=[buddy rangeOfString:@"@conference"
-//						
-//										options:NSCaseInsensitiveSearch range:NSMakeRange(0, [buddy length])];
-//	
-//	
-//	if (startrange.location!=NSNotFound) 
-//	{
-//		groupchat=true; 
-//	}
-//	else 
-//	{
-//
-//	
-//	NSRange startrange2=[buddy rangeOfString:@"@groupchat"
-//						
-//									options:NSCaseInsensitiveSearch range:NSMakeRange(0, [buddy length])];
-//	
-//	
-//	if (startrange2.location!=NSNotFound) 
-//	{
-//		groupchat=true; 
-//	}
-//	else groupchat=false;
-//	}
-//	
-//    }
-//	
-//	NSString* machine=[tools machine]; 
-//	
-//	if([machine hasPrefix:@"iPad"] )
-//	{//if ipad..
-//			self.hidesBottomBarWhenPushed=false;
-//        
-//              
-//        
-//	}
-//	else
-//	{
-//		//ipone 
-//		self.hidesBottomBarWhenPushed=true; 
-//	}
-//		
-//	
-//	
-//	// dont push it agian ( ipad..but stops crash in genreal)
-//	if([vc topViewController]!=self)
-//		{
-//			[vc popViewControllerAnimated:false]; //  getof aythign on top 
-//	[vc pushViewController:self animated:YES];
-//		}
-//	
-//	navController=vc; 
-//	
-//	chatInput.hidden=false; 
-//	//chatInput.editable=true; 
-//	
-//	[chatInput setText:@""];
-//
-//	
-//	[chatInput setDelegate:self];
-//	
-//	
-//	//mark any messages in from this user as  read
-//	[db markAsRead:buddyName :accountno];
-//	
-//	//populate the list
-////	if(thelist!=nil) [thelist release];
-//	NSArray* thelist =[db messageHistory:buddyName: accountno];
-//	//[thelist retain];
-//	
-//	//get icons 
-//	// need a faster methos here.. 
-//	
-//	
-//	myIcon = [self setIcon: [NSString stringWithFormat:@"%@@%@",myuser,domain]];
-//	buddyIcon= [self setIcon: buddy];
-//	
-//	
-//	[chatInput resignFirstResponder];
-//	
-//	
-//	inHTML=[NSMutableString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalStockholm/Incoming/Content.html", [[NSBundle mainBundle] resourcePath]]]; 
-//	outHTML=[NSMutableString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalStockholm/Outgoing/Content.html", [[NSBundle mainBundle] resourcePath]]];  
-//
-///*	
-//	inHTML=[NSMutableString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalRenkooNaked/Incoming/Content.html", [[NSBundle mainBundle] resourcePath]]]; 
-//	outHTML=[NSMutableString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalRenkooNaked/Outgoing/Content.html", [[NSBundle mainBundle] resourcePath]]];  
-//	*/
-//	
-//	
-//	inNextHTML=[NSMutableString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalStockholm/Incoming/NextContent.html", [[NSBundle mainBundle] resourcePath]]]; 
-//	outNextHTML=[NSMutableString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalStockholm/Outgoing/NextContent.html", [[NSBundle mainBundle] resourcePath]]];  
-//	
-//	
-//	
-//	
-//	
-//	unichar asciiChar = 10; 
-//	NSString *newline = [NSString stringWithCharacters:&asciiChar length:1];
-//	
-//	
-//	[outNextHTML replaceOccurrencesOfString:newline
-//							 withString:@""
-//								options:NSCaseInsensitiveSearch
-//								  range:NSMakeRange(0, [outNextHTML length])];
-//	
-//	[inNextHTML replaceOccurrencesOfString:newline
-//							 withString:@""
-//								options:NSCaseInsensitiveSearch
-//								  range:NSMakeRange(0, [inNextHTML length])];
-//	
-//	
-//	[inHTML replaceOccurrencesOfString:newline
-//							withString:@""
-//							   options:NSCaseInsensitiveSearch
-//								 range:NSMakeRange(0, [inHTML length])];
-//	
-//    
-//    if(groupchat!=true) //we want individualized names
-//    {
-//	if([buddyFullName isEqualToString:@""])
-//	[inHTML replaceOccurrencesOfString:@"%sender%"
-//							withString:buddy
-//							   options:NSCaseInsensitiveSearch
-//								 range:NSMakeRange(0, [inHTML length])];
-//	else
-//		[inHTML replaceOccurrencesOfString:@"%sender%"
-//								withString:buddyFullName
-//								   options:NSCaseInsensitiveSearch
-//									 range:NSMakeRange(0, [inHTML length])];
-//	
-//	}
-//	
-//		
-//	[outHTML replaceOccurrencesOfString:newline
-//							 withString:@""
-//								options:NSCaseInsensitiveSearch
-//								  range:NSMakeRange(0, [outHTML length])];
-//	
-//	[outHTML replaceOccurrencesOfString:@"%sender%"
-//							 withString:jabber.ownName
-//								options:NSCaseInsensitiveSearch
-//								  range:NSMakeRange(0, [outHTML length])];
-//	
-//	[inHTML replaceOccurrencesOfString:@"%userIconPath%"
-//							withString:buddyIcon
-//							   options:NSCaseInsensitiveSearch
-//								 range:NSMakeRange(0, [inHTML length])];
-//	
-//	[outHTML replaceOccurrencesOfString:@"%userIconPath%"
-//							 withString:myIcon
-//								options:NSCaseInsensitiveSearch
-//								  range:NSMakeRange(0, [outHTML length])];
-//	
-//	
-//	HTMLPage=[self createPage:thelist];
-//	
-//	
-//    dispatch_async(dispatch_get_main_queue(), ^{
-//        
-//        [chatView  loadHTMLString: HTMLPage baseURL:[NSURL fileURLWithPath:webroot]];
-//        
-//    });
-//	
-//	
-//	if([machine hasPrefix:@"iPad"] )
-//	{
-//	//refresh UI
-//	
-//	
-//        
-//        //if vertical or upsidedown
-//        UIInterfaceOrientation orientation =[[UIApplication sharedApplication] statusBarOrientation];
-//        
-//        
-//        if
-//            ((orientation==UIInterfaceOrientationPortraitUpsideDown) || 
-//             (orientation==UIInterfaceOrientationPortrait)
-//             )
-//        {
-//            contactsButton= [[UIBarButtonItem alloc] initWithTitle:@"Show Contacts"
-//                                                         style:UIBarButtonItemStyleBordered
-//                                                        target:self action:@selector(popContacts)];
-//            vc.navigationBar.topItem.rightBarButtonItem =contactsButton; 
-//            
-//        }
-//        else
-//        {
-//        	// for the landscape view really
-//            jabber.messagesFlag=true; 
-//            [[NSNotificationCenter defaultCenter] 
-//             postNotificationName: @"UpdateUI" object: self];
-//        }
-//
-//        
-//	}
-//	
-//	; 
-//	
-//}
+    {//fallback
+    
+	
+	NSRange startrange=[buddy rangeOfString:@"@conference"
+						
+										options:NSCaseInsensitiveSearch range:NSMakeRange(0, [buddy length])];
+	
+	
+	if (startrange.location!=NSNotFound) 
+	{
+		groupchat=true; 
+	}
+	else 
+	{
+
+	
+	NSRange startrange2=[buddy rangeOfString:@"@groupchat"
+						
+									options:NSCaseInsensitiveSearch range:NSMakeRange(0, [buddy length])];
+	
+	
+	if (startrange2.location!=NSNotFound) 
+	{
+		groupchat=true; 
+	}
+	else groupchat=false;
+	}
+	
+    }
+	
+	
+	chatInput.hidden=false; 
+	//chatInput.editable=true; 
+	
+	[chatInput setText:@""];
+
+	
+	[chatInput setDelegate:self];
+	
+	
+	//mark any messages in from this user as  read
+	[[DataLayer sharedInstance] markAsRead:buddyName :_accountno];
+	
+	//populate the list
+//	if(thelist!=nil) [thelist release];
+	NSArray* thelist =[[DataLayer sharedInstance] messageHistory:buddyName: _accountno];
+	//[thelist retain];
+	
+	//get icons 
+	// need a faster methos here..
+	
+	
+	myIcon = [self setIcon: self.jid];
+	buddyIcon= [self setIcon: buddy];
+	
+	
+	[chatInput resignFirstResponder];
+	
+	
+	inHTML=[NSMutableString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalStockholm/Incoming/Content.html", [[NSBundle mainBundle] resourcePath]]]; 
+	outHTML=[NSMutableString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalStockholm/Outgoing/Content.html", [[NSBundle mainBundle] resourcePath]]];  
+
+/*	
+	inHTML=[NSMutableString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalRenkooNaked/Incoming/Content.html", [[NSBundle mainBundle] resourcePath]]]; 
+	outHTML=[NSMutableString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalRenkooNaked/Outgoing/Content.html", [[NSBundle mainBundle] resourcePath]]];  
+	*/
+	
+	
+	inNextHTML=[NSMutableString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalStockholm/Incoming/NextContent.html", [[NSBundle mainBundle] resourcePath]]]; 
+	outNextHTML=[NSMutableString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalStockholm/Outgoing/NextContent.html", [[NSBundle mainBundle] resourcePath]]];  
+	
+	
+	
+	
+	
+	unichar asciiChar = 10; 
+	NSString *newline = [NSString stringWithCharacters:&asciiChar length:1];
+	
+	
+	[outNextHTML replaceOccurrencesOfString:newline
+							 withString:@""
+								options:NSCaseInsensitiveSearch
+								  range:NSMakeRange(0, [outNextHTML length])];
+	
+	[inNextHTML replaceOccurrencesOfString:newline
+							 withString:@""
+								options:NSCaseInsensitiveSearch
+								  range:NSMakeRange(0, [inNextHTML length])];
+	
+	
+	[inHTML replaceOccurrencesOfString:newline
+							withString:@""
+							   options:NSCaseInsensitiveSearch
+								 range:NSMakeRange(0, [inHTML length])];
+	
+    
+    if(groupchat!=true) //we want individualized names
+    {
+	if([buddyFullName isEqualToString:@""])
+	[inHTML replaceOccurrencesOfString:@"%sender%"
+							withString:buddy
+							   options:NSCaseInsensitiveSearch
+								 range:NSMakeRange(0, [inHTML length])];
+	else
+		[inHTML replaceOccurrencesOfString:@"%sender%"
+								withString:buddyFullName
+								   options:NSCaseInsensitiveSearch
+									 range:NSMakeRange(0, [inHTML length])];
+	
+	}
+	
+		
+	[outHTML replaceOccurrencesOfString:newline
+							 withString:@""
+								options:NSCaseInsensitiveSearch
+								  range:NSMakeRange(0, [outHTML length])];
+	
+	[outHTML replaceOccurrencesOfString:@"%sender%"
+							 withString:self.jid
+								options:NSCaseInsensitiveSearch
+								  range:NSMakeRange(0, [outHTML length])];
+	
+	[inHTML replaceOccurrencesOfString:@"%userIconPath%"
+							withString:buddyIcon
+							   options:NSCaseInsensitiveSearch
+								 range:NSMakeRange(0, [inHTML length])];
+	
+	[outHTML replaceOccurrencesOfString:@"%userIconPath%"
+							 withString:myIcon
+								options:NSCaseInsensitiveSearch
+								  range:NSMakeRange(0, [outHTML length])];
+	
+	
+	HTMLPage=[self createPage:thelist];
+	
+	
+    dispatch_async(dispatch_get_main_queue(), ^{
+        
+        [chatView  loadHTMLString: HTMLPage baseURL:[NSURL fileURLWithPath:webroot]];
+        
+    });
+	
+}
 
 //always messages going out
 //-(void) addMessage:(NSString*) to:(NSString*) message
@@ -1252,9 +1161,9 @@
 
 -(void) keyboardWillHide:(NSNotification *) note
 {
-     keyboardVisible=NO;
-    if(dontscroll==false)
-    {	
+//     keyboardVisible=NO;
+//    if(dontscroll==false)
+//    {	
 	
 	//move down
 	[UIView beginAnimations:nil context:NULL];
@@ -1267,13 +1176,13 @@
 	
 	debug_NSLog(@"kbd will hide scroll: %f", oldFrame.size.height); 
 
-	}
+//	}
 	
 }
 
 -(void) keyboardDidShow:(NSNotification *) note
 {
-	if(dontscroll==false)
+	//if(dontscroll==false)
 
     
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -1286,8 +1195,8 @@
 
 -(void) keyboardWillShow:(NSNotification *) note
 {
-    keyboardVisible=YES; 
-    if(dontscroll==false)
+ //   keyboardVisible=YES;
+   // if(dontscroll==false)
     {
 	//bigger text view
 	//CGRect oldTextFrame= chatInput.frame; 
@@ -1312,12 +1221,6 @@
     [UIView setAnimationDuration:0.3];
 	oldFrame=self.view.frame;
 	self.view.frame =r; 
-	
-	
-	
-	
-	
-	
 	[UIView commitAnimations];
 	
 	
@@ -1378,34 +1281,34 @@
 	{
 	
 	[body replaceOccurrencesOfString:@":)"
-							withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Smile.png>",[[NSBundle mainBundle] resourcePath]]
+							withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Smile.png>"]
 							   options:NSCaseInsensitiveSearch
 								 range:NSMakeRange(0, [body length])];
 	
 	[body replaceOccurrencesOfString:@":-)"
-						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Smile.png>",[[NSBundle mainBundle] resourcePath]]
+						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Smile.png>"]
 							 options:NSCaseInsensitiveSearch
 							   range:NSMakeRange(0, [body length])];
 	
 	
 	[body replaceOccurrencesOfString:@":D"
-						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Grin.png>",[[NSBundle mainBundle] resourcePath]]
+						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Grin.png>"]
 							 options:NSCaseInsensitiveSearch
 							   range:NSMakeRange(0, [body length])];
 	
 	[body replaceOccurrencesOfString:@":-D"
-						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Grin.png>",[[NSBundle mainBundle] resourcePath]]
+						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Grin.png>"]
 							 options:NSCaseInsensitiveSearch
 							   range:NSMakeRange(0, [body length])];
 	
 	
 	[body replaceOccurrencesOfString:@":O"
-						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Surprised.png>",[[NSBundle mainBundle] resourcePath]]
+						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Surprised.png>"]
 							 options:NSCaseInsensitiveSearch
 							   range:NSMakeRange(0, [body length])];
 	
 	[body replaceOccurrencesOfString:@":-O"
-						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Surprised.png>",[[NSBundle mainBundle] resourcePath]]
+						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Surprised.png>"]
 							 options:NSCaseInsensitiveSearch
 							   range:NSMakeRange(0, [body length])];
 	
@@ -1413,12 +1316,12 @@
 	
 	
 	[body replaceOccurrencesOfString:@":*"
-						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Kiss.png>",[[NSBundle mainBundle] resourcePath]]
+						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Kiss.png>"]
 							 options:NSCaseInsensitiveSearch
 							   range:NSMakeRange(0, [body length])];
 	
 	[body replaceOccurrencesOfString:@":-*"
-						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Kiss.png>",[[NSBundle mainBundle] resourcePath]]
+						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Kiss.png>"]
 							 options:NSCaseInsensitiveSearch
 							   range:NSMakeRange(0, [body length])];
 	
@@ -1427,25 +1330,25 @@
 	
 	
 	[body replaceOccurrencesOfString:@":("
-						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Sad.png>",[[NSBundle mainBundle] resourcePath]]
+						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Sad.png>"]
 							 options:NSCaseInsensitiveSearch
 							   range:NSMakeRange(0, [body length])];
 	
 	
 	[body replaceOccurrencesOfString:@":-("
-						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Sad.png>",[[NSBundle mainBundle] resourcePath]]
+						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Sad.png>"]
 							 options:NSCaseInsensitiveSearch
 							   range:NSMakeRange(0, [body length])];
 	
 	
 	[body replaceOccurrencesOfString:@":\'("
-						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Crying.png>",[[NSBundle mainBundle] resourcePath]]
+						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Crying.png>"]
 							 options:NSCaseInsensitiveSearch
 							   range:NSMakeRange(0, [body length])];
 	
 	
 	[body replaceOccurrencesOfString:@":\'-("
-						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Crying.png>",[[NSBundle mainBundle] resourcePath]]
+						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Crying.png>"]
 							 options:NSCaseInsensitiveSearch
 							   range:NSMakeRange(0, [body length])];
 	
@@ -1453,65 +1356,65 @@
 
 	
 	[body replaceOccurrencesOfString:@";-)"
-						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Wink.png>",[[NSBundle mainBundle] resourcePath]]
+						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Wink.png>"]
 							 options:NSCaseInsensitiveSearch
 							   range:NSMakeRange(0, [body length])];
 	
 	
 	[body replaceOccurrencesOfString:@";)"
-						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Wink.png>",[[NSBundle mainBundle] resourcePath]]
+						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Wink.png>"]
 							 options:NSCaseInsensitiveSearch
 							   range:NSMakeRange(0, [body length])];
 	
 	
 	
 	[body replaceOccurrencesOfString:@":-/"
-						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Sarcastic.png>",[[NSBundle mainBundle] resourcePath]]
+						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Sarcastic.png>"]
 							 options:NSCaseInsensitiveSearch
 							   range:NSMakeRange(0, [body length])];
 	
 	
 	[body replaceOccurrencesOfString:@":/"
-						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Sarcastic.png>",[[NSBundle mainBundle] resourcePath]]
+						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Sarcastic.png>"]
 							 options:NSCaseInsensitiveSearch
 							   range:NSMakeRange(0, [body length])];
 	
 
 	
 	[body replaceOccurrencesOfString:@":-\\"
-						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Sarcastic.png>",[[NSBundle mainBundle] resourcePath]]
+						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Sarcastic.png>"]
 							 options:NSCaseInsensitiveSearch
 							   range:NSMakeRange(0, [body length])];
 	
 	
 	[body replaceOccurrencesOfString:@":\\"
-						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Sarcastic.png>",[[NSBundle mainBundle] resourcePath]]
+						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Sarcastic.png>"]
 							 options:NSCaseInsensitiveSearch
 							   range:NSMakeRange(0, [body length])];
 	
 	
 	[body replaceOccurrencesOfString:@":-p"
-						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Tongue.png>",[[NSBundle mainBundle] resourcePath]]
+						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Tongue.png>"]
 							 options:NSCaseInsensitiveSearch
 							   range:NSMakeRange(0, [body length])];
 	
 	
 	[body replaceOccurrencesOfString:@":p"
-						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Tongue.png>",[[NSBundle mainBundle] resourcePath]]
+						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Tongue.png>"]
 							 options:NSCaseInsensitiveSearch
 							   range:NSMakeRange(0, [body length])];
 	
 	
 	//changes to avoid having :// as in  http:// turned into an emoticon
 	[body replaceOccurrencesOfString:@"<img src=../../Emoticons/AdiumEmoticons/Sarcastic.png>/"
-						  withString:[NSString stringWithFormat:@"://",[[NSBundle mainBundle] resourcePath]]
+						  withString:[NSString stringWithFormat:@"://"]
 							 options:NSCaseInsensitiveSearch
 							   range:NSMakeRange(0, [body length])];
 	}
 	
 	//handle carriage return 
     [body replaceOccurrencesOfString:@"\n"
-                          withString:[NSString stringWithFormat:@"<br>",[[NSBundle mainBundle] resourcePath]]
+                          withString:[NSString stringWithFormat:@"<br>"]
                              options:NSCaseInsensitiveSearch
                                range:NSMakeRange(0, [body length])];
     
@@ -1592,10 +1495,9 @@
 
 }
 
--(NSString*) makeMessageHTML:(NSString*) from:(NSString*) themessage:(NSString*) time:(BOOL) liveChat
+-(NSString*) makeMessageHTMLfrom:(NSString*) from withMessage:(NSString*) themessage andTime:(NSString*) time isLive:(BOOL) liveChat
 {
-	
-	
+
 	NSDateFormatter* dateFormatter = [[NSDateFormatter alloc] init];
 	[dateFormatter setDateFormat:@"HH:mm:ss"];
 	
@@ -1696,17 +1598,9 @@
 								withString:dateString
 								   options:NSCaseInsensitiveSearch
 									 range:NSMakeRange(0, [tmpout length])];
-		
-		
-	
-		
-		
-		
-		;
+
 		return tmpout;
-		
-		
-		
+
 	}
 	else
 	{
@@ -1801,7 +1695,7 @@
 		}
 			else*/
 			{
-				[page appendString:[self makeMessageHTML:from:message:time:NO]];
+				[page appendString:[self makeMessageHTMLfrom:from withMessage:message andTime:time isLive:NO]];
 				nextInsertPoint=0;
 			}
 		
@@ -1851,25 +1745,15 @@
         if (![[url scheme] hasPrefix:@"file"]) {
 			//load in safari
             [[UIApplication sharedApplication] openURL:url];
-            
-			;
+
             return NO;
         }
     }
-    
-	;
+
     return YES; 
 }
 
 
 
--(void) dealloc
-{
-	chatView.delegate=nil; 
-	
-	
-	//if(statusHTML!=nil)[statusHTML release]; 
-	
-	//[thelist release];
-}
+
 @end

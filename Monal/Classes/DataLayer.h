@@ -37,9 +37,12 @@
 -(BOOL) addBuddy:(NSString*) buddy  forAccount:(NSString*) accountNo fullname:(NSString*)fullName nickname:(NSString*) nickName;
 -(BOOL) removeBuddy:(NSString*) buddy :(NSString*) accountNo; 
 -(BOOL) clearBuddies:(NSString*) accountNo; 
+-(NSArray*) contactForUsername:(NSString*) username forAccount: (NSString*) accountNo;
+
 
 -(BOOL) resetBuddies;
 -(NSArray*) onlineBuddiesSortedBy:(NSString*) sort;
+
 -(NSArray*) offlineBuddies;
 
 -(NSArray*) newBuddies:(NSString*) accountNo;

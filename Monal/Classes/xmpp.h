@@ -10,6 +10,9 @@
 #import "XMLNode.h"
 #import "EncodingTools.h"
 
+#import "ContactsViewController.h"
+
+
 // networking objects
 #import <unistd.h>
 #import <sys/types.h>
@@ -110,6 +113,9 @@ typedef struct
 //calculated
 @property (nonatomic,strong, readonly) NSString* versionHash;
 
+
+//UI
+@property (nonatomic,weak) ContactsViewController* contactsVC; 
 
 
 @end

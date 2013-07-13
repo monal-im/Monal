@@ -7,7 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
-
+#define kusernameKey @"username"
+#define kaccountNoKey @"accountNo"
 
 @interface ContactsViewController : UIViewController <UITableViewDataSource, UITableViewDelegate>
 {
@@ -16,4 +17,10 @@
 
 @property (nonatomic, strong) UITableView* contactsTable;
 
-@end
+
+//manage user display
+-(void) addUser:(NSDictionary*) user;
+-(void) removeUser:(NSDictionary*) user;
+-(void) updateUser:(NSDictionary*) user;
+
+@end 

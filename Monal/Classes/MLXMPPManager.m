@@ -70,6 +70,7 @@
                 // no password error
             }
           
+            xmppAccount.contactsVC=self.contactVC;
             //sepcifically look for the server since we might not be online or behind firewall
             Reachability* hostReach = [Reachability reachabilityWithHostName:xmppAccount.server ] ;
             [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reachabilityChanged) name:kReachabilityChangedNotification object:nil];

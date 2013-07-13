@@ -27,6 +27,8 @@
 #define kMonalNetWriteQueue "im.monal.netWriteQueue"
 
 
+
+
 @implementation xmpp
 
 -(id) init
@@ -61,9 +63,6 @@
     
     
     _versionHash=[self getVersionString];
-    
-    _fulluser=[NSString stringWithFormat:@"%@@%@", _username, _domain];
-    
     return self;
 }
 
@@ -148,7 +147,7 @@
         debug_NSLog(@"connection secured");
 	}
 	
-
+    
     [self startStream];
     [self setRunLoop];
     
@@ -161,14 +160,16 @@
 
 -(void) connect
 {
-    _disconnected=NO; 
+    _disconnected=NO;
     _xmppQueue=dispatch_get_current_queue();
-
+    
+    _fulluser=[NSString stringWithFormat:@"%@@%@", _username, _domain];
+    
     if(_oldStyleSSL==NO)
     {
         // do DNS discovery if it hasn't already been set
 #warning  this needs to time it self out properly
-       if(!_discoveredServerList) [self dnsDiscover];
+        if(!_discoveredServerList) [self dnsDiscover];
         
         
     }
@@ -230,8 +231,8 @@
     
     _loggedIn=NO;
     _disconnected=YES;
-   _startTLSComplete=NO;
-   _streamHasSpace=NO;
+    _startTLSComplete=NO;
+    _streamHasSpace=NO;
     _inputBuffer=[[NSMutableString alloc] init];
     _outputQueue=[[NSMutableArray alloc] init];
 	
@@ -246,9 +247,9 @@
 {
     //flush read buffer since its all nont needed
     debug_NSLog(@"waiting read queue");
-     dispatch_sync(_netReadQueue, ^{
-         _inputBuffer=[[NSMutableString alloc] init];
-     }); 
+    dispatch_sync(_netReadQueue, ^{
+        _inputBuffer=[[NSMutableString alloc] init];
+    });
     
     debug_NSLog(@" got read queue");
     
@@ -264,134 +265,134 @@
 
 -(NSMutableDictionary*) nextStanza
 {
-     NSString* __block toReturn=nil;
+    NSString* __block toReturn=nil;
     NSString* __block stanzaType=nil;
     
-     dispatch_sync(_netReadQueue, ^{
-	int stanzacounter=0;
-	int maxPos=[_inputBuffer length];
-	debug_NSLog(@"maxPos %d", maxPos);
-    
-	if(maxPos<2)
-	{
-		toReturn= nil;
-        return; 
-	}
-	//accouting for white space
-	NSRange startrange=[_inputBuffer rangeOfString:@"<"
-                                           options:NSCaseInsensitiveSearch range:NSMakeRange(0, [_inputBuffer length])];
-	if (startrange.location==NSNotFound)
-	{
-		toReturn= nil;
-        return;
-	}
-    
-   
-         int finalstart=0;
-         int finalend=0; 
-         
-         
-	int startpos=startrange.location;
-	debug_NSLog(@"start pos%d", startpos);
-	
-	if(maxPos>startpos)
-        while(stanzacounter<[_stanzaTypes count])
+    dispatch_sync(_netReadQueue, ^{
+        int stanzacounter=0;
+        int maxPos=[_inputBuffer length];
+        debug_NSLog(@"maxPos %d", maxPos);
+        
+        if(maxPos<2)
         {
-            //look for the beginning of stanza
-            NSRange pos=[_inputBuffer rangeOfString:[NSString stringWithFormat:@"<%@",[_stanzaTypes objectAtIndex:stanzacounter]]
-                                            options:NSCaseInsensitiveSearch range:NSMakeRange(startpos, maxPos-startpos)];
-            if((pos.location<maxPos) && (pos.location!=NSNotFound))
+            toReturn= nil;
+            return;
+        }
+        //accouting for white space
+        NSRange startrange=[_inputBuffer rangeOfString:@"<"
+                                               options:NSCaseInsensitiveSearch range:NSMakeRange(0, [_inputBuffer length])];
+        if (startrange.location==NSNotFound)
+        {
+            toReturn= nil;
+            return;
+        }
+        
+        
+        int finalstart=0;
+        int finalend=0;
+        
+        
+        int startpos=startrange.location;
+        debug_NSLog(@"start pos%d", startpos);
+        
+        if(maxPos>startpos)
+            while(stanzacounter<[_stanzaTypes count])
             {
-                stanzaType=[_stanzaTypes objectAtIndex:stanzacounter];
-                
-                if([[_stanzaTypes objectAtIndex:stanzacounter] isEqualToString:@"stream:stream"])
+                //look for the beginning of stanza
+                NSRange pos=[_inputBuffer rangeOfString:[NSString stringWithFormat:@"<%@",[_stanzaTypes objectAtIndex:stanzacounter]]
+                                                options:NSCaseInsensitiveSearch range:NSMakeRange(startpos, maxPos-startpos)];
+                if((pos.location<maxPos) && (pos.location!=NSNotFound))
                 {
-                    //no children and one line stanza
-                    NSRange endPos=[_inputBuffer rangeOfString:@">"
-                                                       options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, maxPos-pos.location)];
+                    stanzaType=[_stanzaTypes objectAtIndex:stanzacounter];
                     
-                    if((endPos.location<maxPos) && (endPos.location!=NSNotFound))
+                    if([[_stanzaTypes objectAtIndex:stanzacounter] isEqualToString:@"stream:stream"])
                     {
-                        
-                        finalstart=pos.location;
-                        finalend=endPos.location+1;//+2 to inclde closing />
-                    
-                        break;
-                    }
-                    
-                    
-                }
-                else
-                {
-                    //we need to find the end of this stanza
-                    NSRange closePos=[_inputBuffer rangeOfString:[NSString stringWithFormat:@"</%@",[_stanzaTypes objectAtIndex:stanzacounter]]
-                                                         options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, maxPos-pos.location)];
-                    
-                    if((closePos.location<maxPos) && (closePos.location!=NSNotFound))
-                    {
-                        //we have the start of the stanza close
-                        
+                        //no children and one line stanza
                         NSRange endPos=[_inputBuffer rangeOfString:@">"
-                                                           options:NSCaseInsensitiveSearch range:NSMakeRange(closePos.location, maxPos-closePos.location)];
-                        
-                        finalstart=pos.location;
-                        finalend=endPos.location+1; //+1 to inclde closing <
-                    
-                        break;
-                    }
-                    else
-                    {
-                        //no children and one line stanzas
-                        NSRange endPos=[_inputBuffer rangeOfString:@"/>"
                                                            options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, maxPos-pos.location)];
                         
                         if((endPos.location<maxPos) && (endPos.location!=NSNotFound))
                         {
-                           
+                            
                             finalstart=pos.location;
-                            finalend=endPos.location+2; //+2 to inclde closing />
+                            finalend=endPos.location+1;//+2 to inclde closing />
+                            
+                            break;
+                        }
+                        
+                        
+                    }
+                    else
+                    {
+                        //we need to find the end of this stanza
+                        NSRange closePos=[_inputBuffer rangeOfString:[NSString stringWithFormat:@"</%@",[_stanzaTypes objectAtIndex:stanzacounter]]
+                                                             options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, maxPos-pos.location)];
+                        
+                        if((closePos.location<maxPos) && (closePos.location!=NSNotFound))
+                        {
+                            //we have the start of the stanza close
+                            
+                            NSRange endPos=[_inputBuffer rangeOfString:@">"
+                                                               options:NSCaseInsensitiveSearch range:NSMakeRange(closePos.location, maxPos-closePos.location)];
+                            
+                            finalstart=pos.location;
+                            finalend=endPos.location+1; //+1 to inclde closing <
                             
                             break;
                         }
                         else
-                            if([[_stanzaTypes objectAtIndex:stanzacounter] isEqualToString:@"stream"])
+                        {
+                            //no children and one line stanzas
+                            NSRange endPos=[_inputBuffer rangeOfString:@"/>"
+                                                               options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, maxPos-pos.location)];
+                            
+                            if((endPos.location<maxPos) && (endPos.location!=NSNotFound))
                             {
-                               
-                                //stream will have no terminal.
+                                
                                 finalstart=pos.location;
-                                finalend=maxPos;                                 
+                                finalend=endPos.location+2; //+2 to inclde closing />
+                                
+                                break;
                             }
+                            else
+                                if([[_stanzaTypes objectAtIndex:stanzacounter] isEqualToString:@"stream"])
+                                {
+                                    
+                                    //stream will have no terminal.
+                                    finalstart=pos.location;
+                                    finalend=maxPos;
+                                }
+                            
+                        }
                         
                     }
-                    
                 }
+                stanzacounter++;
             }
-			stanzacounter++;
-        }
-    
-       
-         toReturn=  [_inputBuffer substringWithRange:NSMakeRange(finalstart,finalend-finalstart)];
-         if([toReturn length]==0) toReturn=nil;
         
-         if(!stanzaType)
-         {
-             //this is junk data no stanza start
-              _inputBuffer=[[NSMutableString alloc] init];
-             debug_NSLog("wiped input buffer with no start");
-             
-         }
-         else{
-        if(finalend-finalstart<=maxPos)
+        
+        toReturn=  [_inputBuffer substringWithRange:NSMakeRange(finalstart,finalend-finalstart)];
+        if([toReturn length]==0) toReturn=nil;
+        
+        if(!stanzaType)
         {
-            debug_NSLog("to del start %d end %d: %@", finalstart, finalend, _inputBuffer)
-            if(finalend<maxPos)
-                [_inputBuffer deleteCharactersInRange:NSMakeRange(finalstart, finalend-finalstart) ];
-            else
-                _inputBuffer=[[NSMutableString alloc] init];
+            //this is junk data no stanza start
+            _inputBuffer=[[NSMutableString alloc] init];
+            debug_NSLog("wiped input buffer with no start");
             
-            debug_NSLog("result: %@", _inputBuffer)
         }
-         }
+        else{
+            if(finalend-finalstart<=maxPos)
+            {
+                debug_NSLog("to del start %d end %d: %@", finalstart, finalend, _inputBuffer)
+                if(finalend<maxPos)
+                    [_inputBuffer deleteCharactersInRange:NSMakeRange(finalstart, finalend-finalstart) ];
+                else
+                    _inputBuffer=[[NSMutableString alloc] init];
+                
+                debug_NSLog("result: %@", _inputBuffer)
+            }
+        }
     });
     
     NSMutableDictionary* returnDic=nil;
@@ -412,7 +413,7 @@
     NSDictionary* nextStanzaPos=[self nextStanza];
     while (nextStanzaPos)
     {
-      //  debug_NSLog(@"got stanza %@", nextStanzaPos);
+        //  debug_NSLog(@"got stanza %@", nextStanzaPos);
         
         if([[nextStanzaPos objectForKey:@"stanzaType"]  isEqualToString:@"iq"])
         {
@@ -442,10 +443,10 @@
                 [discoInfo.children addObject:info];
                 [self send:discoInfo];
                 
-                XMPPPresence* presence =[[XMPPPresence alloc] initWithHash:_versionHash]; 
+                XMPPPresence* presence =[[XMPPPresence alloc] initWithHash:_versionHash];
                 [presence setPriority:5]; //TODO change later
                 
-                 [self send:presence];
+                [self send:presence];
                 
             }
         }
@@ -455,23 +456,24 @@
         }
         else  if([[nextStanzaPos objectForKey:@"stanzaType"]  isEqualToString:@"presence"])
         {
-         ParsePresence* presenceNode= [[ParsePresence alloc]  initWithDictionary:nextStanzaPos];
-            if([presenceNode.user isEqualToString:_fulluser]) return; //ignore self 
+            ParsePresence* presenceNode= [[ParsePresence alloc]  initWithDictionary:nextStanzaPos];
+            if([presenceNode.user isEqualToString:_fulluser])
+                return; //ignore self
             
             if([presenceNode.type isEqualToString:kpresenceUnavailable])
             {
                 
-                 [[DataLayer sharedInstance] setOfflineBuddy:presenceNode forAccount:_accountNo];
+                [[DataLayer sharedInstance] setOfflineBuddy:presenceNode forAccount:_accountNo];
                 
                 //a buddy logout
                 //make sure not already there
-//                if(![self isInRemove:presenceNode.user])
-//                {
-//                    debug_NSLog(@"removing from list");
-//                   
-//                    //remove from online list
-//                }
-//                
+                //                if(![self isInRemove:presenceNode.user])
+                //                {
+                //                    debug_NSLog(@"removing from list");
+                //
+                //                    //remove from online list
+                //                }
+                //
                 
             }
             else
@@ -490,38 +492,46 @@
                         alert.tag=1;
                         [alert show];
                     });
-     
+                    
                 }
             
-          if(presenceNode.type ==nil)
+            if(presenceNode.type ==nil)
             {
-                debug_NSLog(@"presence priority notice");
+                debug_NSLog(@"presence priority notice from %@", presenceNode.user);
                 
                 if((presenceNode.user!=nil) && ([[presenceNode.user stringByTrimmingCharactersInSet:
-                                                 [NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0))
+                                                  [NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0))
                 {
                     if(![[DataLayer sharedInstance] isBuddyInList:presenceNode.user forAccount:_accountNo])
                     {
-                        
                         debug_NSLog(@"Buddy not already in list");
-
                         [[DataLayer sharedInstance] addBuddy:presenceNode.user forAccount:_accountNo fullname:@"" nickname:@"" ];
-                        [[DataLayer sharedInstance] setOnlineBuddy:presenceNode forAccount:_accountNo];
-
-                        debug_NSLog(@"Buddy added to  list");
-                        
-                        
                     }
                     else
                     {
-                        debug_NSLog(@"Buddy already in list, showing as online now"); 
-                        [[DataLayer sharedInstance] setOnlineBuddy:presenceNode forAccount:_accountNo];
-         
+                        debug_NSLog(@"Buddy already in list");
                     }
+                    
+                    debug_NSLog(@" showing as online now");
+                    
+                    [[DataLayer sharedInstance] setOnlineBuddy:presenceNode forAccount:_accountNo];
+                    
+                    [[DataLayer sharedInstance] setBuddyState:presenceNode forAccount:_accountNo];
+                    [[DataLayer sharedInstance] setBuddyStatus:presenceNode forAccount:_accountNo];
+                    
+                    NSDictionary* userDic=@{kusernameKey: presenceNode.user,
+                                            kaccountNoKey:_accountNo};
+                    [self.contactsVC addUser:userDic];
+                    
+                }
+                else
+                {
+                    debug_NSLog(@"ERROR: presence priority notice but no user name.");
+                    
                 }
                 
-                [[DataLayer sharedInstance] setBuddyState:presenceNode forAccount:_accountNo];
-                [[DataLayer sharedInstance] setBuddyStatus:presenceNode forAccount:_accountNo];
+                
+                
                 
             }
             
@@ -550,9 +560,9 @@
                     startTLS.element=@"starttls";
                     [startTLS.attributes setObject:@"urn:ietf:params:xml:ns:xmpp-tls" forKey:@"xmlns"];
                     [self send:startTLS];
-    
+                    
                 }
-   
+                
                 if ((_SSL && _startTLSComplete) || (!_SSL && !_startTLSComplete))
                 {
                     //look at menchanisms presented
@@ -571,7 +581,7 @@
                         
                         saslXML.data=saslplain;
                         [self send:saslXML];
-       
+                        
                     }
                     else
                         if(streamNode.SASLDIGEST_MD5)
@@ -591,7 +601,7 @@
                 [iqNode setBindWithResource:_resource];
                 
                 [self send:iqNode];
-             
+                
             }
             
         }
@@ -609,15 +619,11 @@
                 if(streamNode.startTLSProceed)
                 {
                     NSMutableDictionary *settings = [ [NSMutableDictionary alloc ]
-                                              initWithObjectsAndKeys:
-                                         
-                                              [NSNull null],kCFStreamSSLPeerName,
-                                              
-                                              kCFStreamSocketSecurityLevelSSLv3,
-                                              kCFStreamSSLLevel,
-                                              
-                                              
-                                              nil ];
+                                                     initWithObjectsAndKeys:
+                                                     [NSNull null],kCFStreamSSLPeerName,
+                                                     kCFStreamSocketSecurityLevelSSLv3,
+                                                     kCFStreamSSLLevel,
+                                                     nil ];
                     
                     if(self.selfSigned)
                     {
@@ -626,11 +632,11 @@
                                                   [NSNumber numberWithBool:YES], kCFStreamSSLAllowsExpiredCertificates,
                                                   [NSNumber numberWithBool:YES], kCFStreamSSLAllowsExpiredRoots,
                                                   [NSNumber numberWithBool:YES], kCFStreamSSLAllowsAnyRoot,
-                                                  [NSNumber numberWithBool:NO], kCFStreamSSLValidatesCertificateChain, nil]; 
+                                                  [NSNumber numberWithBool:NO], kCFStreamSSLValidatesCertificateChain, nil];
                         
                         [settings addEntriesFromDictionary:secureOFF];
                         
-       
+                        
                         
                     }
                     
@@ -649,7 +655,7 @@
                     }
                     
                     [self startStream];
-               
+                    
                     _startTLSComplete=YES;
                 }
             }
@@ -683,14 +689,11 @@
                     
                     [self startStream];
                     _loggedIn=YES;
-        
+                    
                 }
             }
         }
-        
-        
-    
-        
+       
         nextStanzaPos=[self nextStanza];
     }
 }
@@ -701,7 +704,7 @@
     dispatch_async(_xmppQueue, ^{
         dispatch_sync(_netWriteQueue, ^{
             [_outputQueue addObject:stanza];
-                [self writeFromQueue];  // try to send if there is space
+            [self writeFromQueue];  // try to send if there is space
         });
     });
 }
@@ -813,20 +816,20 @@
     {
         debug_NSLog(@"no space to write. returning. ");
         return;
-    }    
-   
-        for(XMLNode* node in _outputQueue)
-        {
-            [self writeToStream:node.XMLString];
-        }
-        
-        [_outputQueue removeAllObjects];
-
+    }
+    
+    for(XMLNode* node in _outputQueue)
+    {
+        [self writeToStream:node.XMLString];
+    }
+    
+    [_outputQueue removeAllObjects];
+    
 }
 
 -(void) writeToStream:(NSString*) messageOut
 {
-     _streamHasSpace=NO; // triggers more has space messages
+    _streamHasSpace=NO; // triggers more has space messages
     
     //we probably want to break these into chunks
     debug_NSLog(@"sending: %@ ", messageOut);
@@ -835,7 +838,7 @@
     debug_NSLog("size : %d",len);
     if([_oStream write:rawstring maxLength:len]!=-1)
     {
-      
+        
     }
     else
     {
@@ -858,20 +861,20 @@
 	
     uint8_t* buf=malloc(kXMPPReadSize);
     int len = 0;
-
+    
 	len = [_iStream read:buf maxLength:kXMPPReadSize];
-     debug_NSLog(@"done reading %d", len);
+    debug_NSLog(@"done reading %d", len);
 	if(len>0) {
         NSData* data = [NSData dataWithBytes:(const void *)buf length:len];
-       //  debug_NSLog(@" got raw string %s nsdata %@", buf, data);
+        //  debug_NSLog(@" got raw string %s nsdata %@", buf, data);
         if(data)
         {
-           // debug_NSLog(@"waiting on net read queue");
+            // debug_NSLog(@"waiting on net read queue");
             dispatch_sync(_netReadQueue, ^{
-                 // debug_NSLog(@"got net read queue");
+                // debug_NSLog(@"got net read queue");
                 [_inputBuffer appendString:[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]];
             });
-             
+            
         }
         free(buf);
 	}
@@ -881,7 +884,7 @@
 		return;
 	}
     
-   
+    
     [self processInput];
     
 }

@@ -23,8 +23,10 @@
         _idval =[attributeDict objectForKey:@"id"] ;
         
 		//remove any  resource markers and get user
-		debug_NSLog(@"Presence from %@", _user);
+		_user=[_user lowercaseString]; 
+        debug_NSLog(@"Presence from %@", _user);
 		
+        
 		
 		//get photo hash
 		

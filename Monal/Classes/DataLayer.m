@@ -587,10 +587,32 @@ static DataLayer *sharedInstance=nil;
     return resources;
     
 }
+
+-(NSArray*) contactForUsername:(NSString*) username forAccount: (NSString*) accountNo
+{
+    NSString* query= query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, ifnull(full_name, buddy_name) as full_name, account_id from buddylist where buddy_name='%@' and account_id=%@", username, accountNo];
+
+    //debug_NSLog(query);
+    NSArray* toReturn = [self executeReader:query];
+    
+    if(toReturn!=nil)
+    {
+        debug_NSLog(@" count: %d",  [toReturn count] );
+        return toReturn; //[toReturn autorelease];
+    }
+    else
+    {
+        debug_NSLog(@"buddylist is empty or failed to read");
+        return nil;
+    }
+    
+}
+
+
 -(NSArray*) onlineBuddiesSortedBy:(NSString*) sort
 {
 	     NSString* query=@"";
-            
+    
             if([sort isEqualToString:@"Name"])
             {
                 query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, ifnull(full_name, buddy_name) as full_name, account_id from buddylist where online=1    order by full_name COLLATE NOCASE asc "];

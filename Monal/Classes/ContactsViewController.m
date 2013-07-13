@@ -130,6 +130,38 @@
 
 -(void) removeUser:(NSDictionary*) user
 {
+    //mutex to prevent others from modifying contacts at the same time
+    dispatch_sync(dispatch_get_main_queue(),
+                  ^{
+                      //check if  there
+                      int pos=-1;
+                      int counter=0;
+                      for(NSDictionary* row in _contacts)
+                      {
+                          if([[row objectForKey:@"buddy_name"] caseInsensitiveCompare:[user objectForKey:kusernameKey] ]==NSOrderedSame &&
+                             [[row objectForKey:@"account_id"]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
+                          {
+                              pos=counter;
+                              break; 
+                          }
+                           counter++;
+                      }
+                     
+                      //not there
+                      if(pos>=0)
+                      {
+                          [_contacts removeObjectAtIndex:pos];
+                          debug_NSLog(@"removing %@ at pos %d", [user objectForKey:kusernameKey], pos);
+                          [_contactsTable beginUpdates];
+                          NSIndexPath *path1 = [NSIndexPath indexPathForRow:pos inSection:konlineSection];
+                          [_contactsTable deleteRowsAtIndexPaths:@[path1]
+                                                withRowAnimation:UITableViewRowAnimationAutomatic];
+                          [_contactsTable endUpdates];
+                      }
+                      
+                  });
+    
+                      
     
 }
 

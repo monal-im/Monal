@@ -528,10 +528,12 @@
                     debug_NSLog(@"ERROR: presence priority notice but no user name.");
                     
                 }
-                
-                
-                
-                
+            }
+            else if([presenceNode.type isEqualToString:kpresenceUnavailable])
+            {
+                NSDictionary* userDic=@{kusernameKey: presenceNode.user,
+                                        kaccountNoKey:_accountNo};
+                [self.contactsVC removeUser:userDic];
             }
             
         }

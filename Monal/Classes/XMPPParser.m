@@ -32,7 +32,7 @@
 
 #pragma mark common parser delegate functions
 - (void)parserDidStartDocument:(NSXMLParser *)parser{
-	debug_NSLog(@"parsing iq");
+	debug_NSLog(@"parsing start");
 }
 
 

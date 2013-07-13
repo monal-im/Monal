@@ -122,8 +122,7 @@
         counter++; 
     }
 
-    
-    
+
     //not there
     if(pos<0)
     {
@@ -169,8 +168,15 @@
     }else
     {
         debug_NSLog(@"user %@ already in list",[user objectForKey:kusernameKey]);
+        [[_contacts objectAtIndex:pos] setObject:[user objectForKey:kstateKey] forKey:kstateKey];
+        [[_contacts objectAtIndex:pos] setObject:[user objectForKey:kstatusKey] forKey:kstatusKey];
+        
+        NSIndexPath *path1 = [NSIndexPath indexPathForRow:pos inSection:konlineSection];
+        [_contactsTable reloadRowsAtIndexPaths:@[path1]
+                              withRowAnimation:UITableViewRowAnimationAutomatic];
+        [_contactsTable endUpdates];
     }
-                       });
+      });
     
 }
 
@@ -289,7 +295,7 @@
     
     NSDictionary* row = [_contacts objectAtIndex:indexPath.row];
     cell.textLabel.text=[row objectForKey:@"full_name"];
-    if(![[row objectForKey:@"status"] isEqualToString:@"(null)"])
+    if(![[row objectForKey:@"status"] isEqualToString:@"(null)"] && ![[row objectForKey:@"status"] isEqualToString:@""])
         cell.detailTextLabel.text=[row objectForKey:@"status"];
     
     if(([[row objectForKey:@"state"] isEqualToString:@"away"]) ||
@@ -299,7 +305,7 @@
     {
          cell.status=kStatusAway;
     }
-    else if([[row objectForKey:@"state"] isEqualToString:@"(null)"])
+    else if([[row objectForKey:@"state"] isEqualToString:@"(null)"] || [[row objectForKey:@"state"] isEqualToString:@""])
         cell.status=kStatusOnline;
     else if([[row objectForKey:@"state"] isEqualToString:@"offline"])
         cell.status=kStatusOffline;

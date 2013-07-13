@@ -523,8 +523,15 @@
                     [[DataLayer sharedInstance] setBuddyState:presenceNode forAccount:_accountNo];
                     [[DataLayer sharedInstance] setBuddyStatus:presenceNode forAccount:_accountNo];
                     
+                    NSString* state=presenceNode.show;
+                    if(!state) state=@"";
+                    NSString* status=presenceNode.status;
+                    if(!status) status=@"";
                     NSDictionary* userDic=@{kusernameKey: presenceNode.user,
-                                            kaccountNoKey:_accountNo};
+                                            kaccountNoKey:_accountNo,
+                                            kstateKey:state,
+                                            kstatusKey:status
+                                            };
                     [self.contactsVC addUser:userDic];
                     
                 }

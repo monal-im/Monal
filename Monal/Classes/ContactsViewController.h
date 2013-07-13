@@ -8,9 +8,13 @@
 
 #import <UIKit/UIKit.h>
 
+//contact cells
 #define kusernameKey @"username"
 #define kaccountNoKey @"accountNo"
+#define kstateKey @"state"
+#define kstatusKey @"status"
 
+//info cells
 #define kaccountNameKey @"accountName"
 #define kinfoTypeKey @"type"
 #define kinfoStatusKey @"status"
@@ -29,9 +33,15 @@
 -(void) hideConnecting:(NSDictionary*) info;
 
 //manage user display
+/**
+ add or update an online user
+ */
 -(void) addUser:(NSDictionary*) user;
+/**
+ mark user as offline
+ */
 -(void) removeUser:(NSDictionary*) user;
--(void) updateUser:(NSDictionary*) user;
+
 
 
 @end 

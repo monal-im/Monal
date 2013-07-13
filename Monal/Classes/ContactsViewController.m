@@ -14,7 +14,7 @@
 
 #define kinfoSection 0
 #define konlineSection 1
-#define koflineSection 2 
+#define kofflineSection 2 
 
 @interface ContactsViewController ()
 
@@ -233,7 +233,7 @@
         case konlineSection:
             toReturn= NSLocalizedString(@"Online", "");
             break;
-        case koflineSection:
+        case kofflineSection:
               toReturn= NSLocalizedString(@"Offline", "");
             break;
         default:
@@ -259,7 +259,7 @@
         case konlineSection:
             toReturn= [_contacts count];
             break;
-        case koflineSection:
+        case kofflineSection:
             toReturn=[_offlineContacts count];
             break;
         default:
@@ -323,6 +323,14 @@
 }
 
 #pragma mark tableview delegate
+-(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if((indexPath.section==konlineSection) ||
+       (indexPath.section==kofflineSection) )
+    {
+        //make chat view
+    }
+}
 
 
 @end

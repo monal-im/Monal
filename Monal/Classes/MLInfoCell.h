@@ -9,5 +9,12 @@
 #import <UIKit/UIKit.h>
 
 @interface MLInfoCell : UITableViewCell
+{
+    
+}
+
+@property (nonatomic,strong, readonly) UIButton* Cancel;
+@property (nonatomic,strong) NSString* type;
+@property (nonatomic,strong) NSString* accountId;
 
 @end

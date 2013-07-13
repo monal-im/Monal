@@ -42,8 +42,12 @@
     _contacts=[[NSMutableArray alloc] init] ;
     _offlineContacts=[[NSMutableArray alloc] init] ;
     _infoCells=[[NSMutableArray alloc] init] ;
+
+    [ _infoCells insertObject:@{@"accountName":@"test@test.com", @"accountId":@"4",
+     @"type":@"connect", @"status":@"Connecting"} atIndex:0];
     
     [_contactsTable reloadData];
+
     
 }
 
@@ -228,6 +232,11 @@
         {
             cell =[[MLInfoCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"InfoCell"];
         }
+        
+        cell.textLabel.text=[[_infoCells objectAtIndex:indexPath.row] objectForKey:@"accountName"];
+        cell.detailTextLabel.text=[[_infoCells objectAtIndex:indexPath.row] objectForKey:@"status"];
+        cell.type=[[_infoCells objectAtIndex:indexPath.row] objectForKey:@"type"];
+        cell.accountId=[[_infoCells objectAtIndex:indexPath.row] objectForKey:@"acccountId"];
         
         return cell; 
     }

@@ -316,7 +316,7 @@
                             
                             finalstart=pos.location;
                             finalend=endPos.location+1;//+2 to inclde closing />
-                            
+                            debug_NSLog(@"at  1");
                             break;
                         }
                         
@@ -337,7 +337,7 @@
                             
                             finalstart=pos.location;
                             finalend=endPos.location+1; //+1 to inclde closing <
-                            
+                             debug_NSLog(@"at  2");
                             break;
                         }
                         else
@@ -351,7 +351,7 @@
                                 
                                 finalstart=pos.location;
                                 finalend=endPos.location+2; //+2 to inclde closing />
-                                
+                                 debug_NSLog(@"at  3");
                                 break;
                             }
                             else
@@ -361,6 +361,7 @@
                                     //stream will have no terminal.
                                     finalstart=pos.location;
                                     finalend=maxPos;
+                                     debug_NSLog(@"at  4");
                                 }
                             
                         }
@@ -385,10 +386,8 @@
             if(finalend-finalstart<=maxPos)
             {
                 debug_NSLog("to del start %d end %d: %@", finalstart, finalend, _inputBuffer)
-                if(finalend<maxPos)
-                    [_inputBuffer deleteCharactersInRange:NSMakeRange(finalstart, finalend-finalstart) ];
-                else
-                    _inputBuffer=[[NSMutableString alloc] init];
+                [_inputBuffer deleteCharactersInRange:NSMakeRange(finalstart, finalend-finalstart) ];
+               
                 
                 debug_NSLog("result: %@", _inputBuffer)
             }

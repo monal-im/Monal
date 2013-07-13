@@ -59,13 +59,15 @@
 #pragma mark updating user display
 -(void) addUser:(NSDictionary*) user
 {
-    
+      //mutex to prevent others from modifying contacts at the same time
+    dispatch_sync(dispatch_get_main_queue(),
+                  ^{
     //check if already there
     int pos=-1;
     int counter=0; 
     for(NSDictionary* row in _contacts)
     {
-       if([[row objectForKey:@"buddy_name"] isEqualToString:[user objectForKey:kusernameKey]] &&
+       if([[row objectForKey:@"buddy_name"] caseInsensitiveCompare:[user objectForKey:kusernameKey] ]==NSOrderedSame &&
          [[row objectForKey:@"account_id"]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
        {
            pos=counter;
@@ -79,9 +81,6 @@
     //not there
     if(pos<0)
     {
-        //mutex to prevent others from modifying contacts at the same time
-        dispatch_sync(dispatch_get_main_queue(),
-                      ^{
         //insert into tableview
         // for now just online
         NSArray* contactRow=[[DataLayer sharedInstance] contactForUsername:[user objectForKey:kusernameKey] forAccount:[user objectForKey:kaccountNoKey]];
@@ -103,7 +102,7 @@
         int counter=0;
         for(NSDictionary* row in _contacts)
         {
-            if([[row objectForKey:@"buddy_name"] isEqualToString:[user objectForKey:kusernameKey]] &&
+            if([[row objectForKey:@"buddy_name"] caseInsensitiveCompare:[user objectForKey:kusernameKey] ]==NSOrderedSame &&
                [[row objectForKey:@"account_id"]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
             {
                 pos=counter;
@@ -111,6 +110,7 @@
             }
             counter++; 
         }
+         debug_NSLog(@"sorted contacts %@", _contacts); 
 
             debug_NSLog(@"inserting %@ at pos %d", [_contacts objectAtIndex:pos], pos);
              [_contactsTable beginUpdates];
@@ -118,12 +118,13 @@
              [_contactsTable insertRowsAtIndexPaths:@[path1]
                                    withRowAnimation:UITableViewRowAnimationFade];
              [_contactsTable endUpdates];
-                      });
+                     
         
     }else
     {
         debug_NSLog(@"user %@ already in list",[user objectForKey:kusernameKey]);
     }
+                       });
     
 }
 

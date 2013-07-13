@@ -8,10 +8,11 @@
 
 #import "ContactsViewController.h"
 #import "MLContactCell.h"
+#import "MLInfoCell.h"
 #import "DataLayer.h"
 
 
-#define kinfoSetion 0
+#define kinfoSection 0
 #define konlineSection 1
 #define koflineSection 2 
 
@@ -37,16 +38,17 @@
     
     self.view=_contactsTable;
     
-    //inefficient temp code
-    _contacts=[[NSMutableArray alloc] initWithArray:[[DataLayer sharedInstance] onlineBuddiesSortedBy:@"Name"]];
+  
+    _contacts=[[NSMutableArray alloc] init] ;
+    _offlineContacts=[[NSMutableArray alloc] init] ;
+    _infoCells=[[NSMutableArray alloc] init] ;
+    
     [_contactsTable reloadData];
     
 }
 
 -(void) viewWillAppear:(BOOL)animated
 {
-    
-
     
 }
 
@@ -172,6 +174,25 @@
 
 
 #pragma mark tableview datasource 
+-(NSString*) tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
+{
+    NSString* toReturn=nil;
+    switch (section) {
+        case kinfoSection:
+            break;
+        case konlineSection:
+            toReturn= NSLocalizedString(@"Online", "");
+            break;
+        case koflineSection:
+              toReturn= NSLocalizedString(@"Offline", "");
+            break;
+        default:
+            break;
+    }
+
+    return toReturn;
+}
+
 -(NSInteger) numberOfSectionsInTableView:(UITableView *)tableView
 {
     return 3;
@@ -182,11 +203,14 @@
     int toReturn=0;
     
     switch (section) {
-        case kinfoSetion:
+        case kinfoSection:
+            toReturn=[_infoCells count];
             break;
         case konlineSection:
             toReturn= [_contacts count];
+            break;
         case koflineSection:
+            toReturn=[_offlineContacts count];
             break;
         default:
             break;
@@ -197,6 +221,17 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    if(indexPath.section==kinfoSection)
+    {
+        MLInfoCell* cell =[tableView dequeueReusableCellWithIdentifier:@"InfoCell"];
+        if(!cell)
+        {
+            cell =[[MLInfoCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"InfoCell"];
+        }
+        
+        return cell; 
+    }
+    
     MLContactCell* cell =[tableView dequeueReusableCellWithIdentifier:@"ContactCell"];
     if(!cell)
     {

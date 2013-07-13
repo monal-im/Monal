@@ -44,6 +44,7 @@
 		262B4BD915E84227006B0112 /* Icon-72.png in Resources */ = {isa = PBXBuildFile; fileRef = 26F425E611AB4A1800C40676 /* Icon-72.png */; };
 		262B4BDB15E8452A006B0112 /* Monal_crop_144.png in Resources */ = {isa = PBXBuildFile; fileRef = 262B4BDA15E8452A006B0112 /* Monal_crop_144.png */; };
 		262DE4AF15C4E2C60040A66B /* MBProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = 262DE4AE15C4E2C60040A66B /* MBProgressHUD.m */; };
+		26347D861790FFDE006FF64F /* MLInfoCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 26347D851790FFDE006FF64F /* MLInfoCell.m */; };
 		26352E88177D1D6300E2C8FF /* blackButton.png in Resources */ = {isa = PBXBuildFile; fileRef = 26352E6B177D1D6200E2C8FF /* blackButton.png */; };
 		26352E89177D1D6300E2C8FF /* blackButton@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26352E6C177D1D6300E2C8FF /* blackButton@2x.png */; };
 		26352E8A177D1D6300E2C8FF /* blackButtonHighlight.png in Resources */ = {isa = PBXBuildFile; fileRef = 26352E6D177D1D6300E2C8FF /* blackButtonHighlight.png */; };
@@ -297,6 +298,8 @@
 		262B4BDA15E8452A006B0112 /* Monal_crop_144.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Monal_crop_144.png; sourceTree = "<group>"; };
 		262DE4AD15C4E2C60040A66B /* MBProgressHUD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MBProgressHUD.h; sourceTree = "<group>"; };
 		262DE4AE15C4E2C60040A66B /* MBProgressHUD.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MBProgressHUD.m; sourceTree = "<group>"; };
+		26347D841790FFDE006FF64F /* MLInfoCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLInfoCell.h; sourceTree = "<group>"; };
+		26347D851790FFDE006FF64F /* MLInfoCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLInfoCell.m; sourceTree = "<group>"; };
 		26352E6B177D1D6200E2C8FF /* blackButton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = blackButton.png; sourceTree = "<group>"; };
 		26352E6C177D1D6300E2C8FF /* blackButton@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "blackButton@2x.png"; sourceTree = "<group>"; };
 		26352E6D177D1D6300E2C8FF /* blackButtonHighlight.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = blackButtonHighlight.png; sourceTree = "<group>"; };
@@ -660,6 +663,8 @@
 			children = (
 				262797AD178A577300B85D94 /* MLContactCell.h */,
 				262797AE178A577300B85D94 /* MLContactCell.m */,
+				26347D841790FFDE006FF64F /* MLInfoCell.h */,
+				26347D851790FFDE006FF64F /* MLInfoCell.m */,
 			);
 			name = Tableviewcells;
 			sourceTree = "<group>";
@@ -1407,6 +1412,7 @@
 				264E345B1787BAB100BC7BD0 /* XMPPPresence.m in Sources */,
 				261AC91D1788A49C00E05657 /* ParsePresence.m in Sources */,
 				262797AF178A577300B85D94 /* MLContactCell.m in Sources */,
+				26347D861790FFDE006FF64F /* MLInfoCell.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

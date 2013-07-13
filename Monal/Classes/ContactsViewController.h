@@ -12,7 +12,9 @@
 
 @interface ContactsViewController : UIViewController <UITableViewDataSource, UITableViewDelegate>
 {
+    NSMutableArray* _infoCells;
     NSMutableArray* _contacts;
+    NSMutableArray* _offlineContacts;
 }
 
 @property (nonatomic, strong) UITableView* contactsTable;

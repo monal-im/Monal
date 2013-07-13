@@ -43,9 +43,6 @@
     _offlineContacts=[[NSMutableArray alloc] init] ;
     _infoCells=[[NSMutableArray alloc] init] ;
 
-    [ _infoCells insertObject:@{@"accountName":@"test@test.com", @"accountId":@"4",
-     @"type":@"connect", @"status":@"Connecting"} atIndex:0];
-    
     [_contactsTable reloadData];
 
     
@@ -60,6 +57,49 @@
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+#pragma mark updating info display
+-(void) showConnecting:(NSDictionary*) info
+{
+    dispatch_sync(dispatch_get_main_queue(),
+                  ^{
+                      [ _infoCells insertObject:info atIndex:0];
+                      [_contactsTable beginUpdates];
+                      NSIndexPath *path1 = [NSIndexPath indexPathForRow:0 inSection:kinfoSection];
+                      [_contactsTable insertRowsAtIndexPaths:@[path1]
+                                            withRowAnimation:UITableViewRowAnimationAutomatic];
+                      [_contactsTable endUpdates];
+                  });
+}
+
+-(void) hideConnecting:(NSDictionary*) info
+{
+    dispatch_sync(dispatch_get_main_queue(),
+                  ^{
+                      int pos=-1;
+                      int counter=0;
+                      for(NSDictionary* row in _infoCells)
+                      {
+                          if([[row objectForKey:kaccountNoKey] isEqualToString:[info objectForKey:kaccountNoKey]] )
+                          {
+                              pos=counter;
+                              break; 
+                          }
+                          counter++; 
+                      }
+                      
+                      //not there
+                      if(pos>=0)
+                      {
+                          [_infoCells removeObjectAtIndex:pos];
+                          [_contactsTable beginUpdates];
+                          NSIndexPath *path1 = [NSIndexPath indexPathForRow:pos inSection:kinfoSection];
+                          [_contactsTable deleteRowsAtIndexPaths:@[path1]
+                                                withRowAnimation:UITableViewRowAnimationAutomatic];
+                          [_contactsTable endUpdates];
+                      }
+                  });
 }
 
 #pragma mark updating user display

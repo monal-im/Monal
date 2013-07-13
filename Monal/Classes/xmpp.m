@@ -79,6 +79,11 @@
 
 -(void) createStreams
 {
+    
+    NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
+                         kinfoTypeKey:@"connect", kinfoStatusKey:@"Connecting"};
+    [self.contactsVC showConnecting:info];
+    
     CFReadStreamRef readRef= NULL;
     CFWriteStreamRef writeRef= NULL;
 	
@@ -691,6 +696,10 @@
                     
                     [self startStream];
                     _loggedIn=YES;
+                    
+                    NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
+                                         kinfoTypeKey:@"connect", kinfoStatusKey:@"Connecting"};
+                    [self.contactsVC hideConnecting:info];
                     
                 }
             }

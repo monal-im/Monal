@@ -10,24 +10,6 @@
 #import "XMPPPresence.h" // for the constants
 
 @interface ParsePresence : XMPPParser
-{
-    
-}
-
-@property (nonatomic, strong, readonly) NSString* type;
-/**
- full name as sent from server
- */
-@property (nonatomic, strong, readonly) NSString* from;
-/**
- username part of from 
- */
-@property (nonatomic, strong, readonly) NSString* user;
-/**
- resource part of from
- */
-@property (nonatomic, strong, readonly) NSString* resource;
-@property (nonatomic, strong, readonly) NSString* idval;
 
 /**
  the text inside of show tags e.g. away

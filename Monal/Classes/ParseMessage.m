@@ -117,8 +117,11 @@
     
     if([elementName isEqualToString:@"message"])
     {
+        _from=[_from lowercaseString];
+        
         // this is the end of parse
-        if(!_actualFrom) _actualFrom=_from; 
+        if(!_actualFrom) _actualFrom=_from;
+        if(!_messageText) _messageText=_messageBuffer; 
     }
     
 }

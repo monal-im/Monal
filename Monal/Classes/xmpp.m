@@ -461,6 +461,10 @@
             if(messageNode.messageText)
             {
                 [[DataLayer sharedInstance] addMessageFrom:messageNode.from to:_fulluser forAccount:_accountNo withBody:messageNode.messageText actuallyfrom:messageNode.actualFrom];
+                
+                NSDictionary* userDic=nil;
+                
+                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:userDic];
             }
             
         }

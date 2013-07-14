@@ -308,6 +308,7 @@
 		262D9EA617921169009292B4 /* ParseMessage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParseMessage.m; sourceTree = "<group>"; };
 		262D9EA817921E82009292B4 /* XMPPMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPMessage.h; sourceTree = "<group>"; };
 		262D9EA917921E82009292B4 /* XMPPMessage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPMessage.m; sourceTree = "<group>"; };
+		262D9EAB17924532009292B4 /* MLConstants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLConstants.h; sourceTree = "<group>"; };
 		262DE4AD15C4E2C60040A66B /* MBProgressHUD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MBProgressHUD.h; sourceTree = "<group>"; };
 		262DE4AE15C4E2C60040A66B /* MBProgressHUD.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MBProgressHUD.m; sourceTree = "<group>"; };
 		26347D841790FFDE006FF64F /* MLInfoCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLInfoCell.h; sourceTree = "<group>"; };
@@ -592,6 +593,7 @@
 				26715E5E17650AF900684F3D /* View Controllers */,
 				26F7BB3A1115F8A300712672 /* tools */,
 				2601D9A70FBF255D004DB939 /* DataLayer.m */,
+				262D9EAB17924532009292B4 /* MLConstants.h */,
 				2601D9A80FBF255D004DB939 /* DataLayer.h */,
 				1D3623240D0F684500981E51 /* MonalAppDelegate.h */,
 				1D3623250D0F684500981E51 /* MonalAppDelegate.m */,

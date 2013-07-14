@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "MLConstants.h"
 
 //contact cells
 #define kusernameKey @"username"
@@ -37,6 +38,7 @@
  add or update an online user
  */
 -(void) addUser:(NSDictionary*) user;
+
 /**
  mark user as offline
  */

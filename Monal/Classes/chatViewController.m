@@ -120,7 +120,7 @@
 	inHTML=nil; 
 	outHTML=nil;
 	
-	buddyName=nil; 
+	buddyName=[contact objectForKey:@"buddy_name"];
 	buddyFullName=nil; 
 	
 	inNextHTML=nil; 
@@ -140,7 +140,7 @@
 	self.view.autoresizesSubviews=true; 
 
     
-    self.accountNo=[contact objectForKey:@"account_id"];
+    self.accountNo=[NSString stringWithFormat:@"%d",[[contact objectForKey:@"account_id"] integerValue]];
     
     NSArray* accountVals =[[DataLayer sharedInstance] accountVals:self.accountNo];
     self.jid=[NSString stringWithFormat:@"%@@%@",[[accountVals objectAtIndex:0] objectForKey:@"username"], [[accountVals objectAtIndex:0] objectForKey:@"domain"]];
@@ -154,7 +154,7 @@
 
 -(void)viewWillAppear:(BOOL)animated
 {
-    
+    [self show];
 }
 
 -(void) viewDidLoad
@@ -219,8 +219,6 @@
 	
 	return YES;
 }
-
-#pragma mark view state
 
 
 - (void)viewWillDisappear:(BOOL)animated 
@@ -716,23 +714,21 @@
 }
 
 //note fullname is overridden and ignored
--(void) show:(NSString*) buddy:(NSString*) fullname:(UINavigationController*) vc
+-(void) show
 {
 	
-	
-
     pages.hidden=false; 
     containerView.hidden=false;
     [chatView setFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height-40-20)];
 
 	//query to get pages and position
-    activeChats=[[DataLayer sharedInstance] activeBuddies:_accountno];
+    activeChats=[[DataLayer sharedInstance] activeBuddies:_accountNo];
     pages.numberOfPages=[activeChats count];
     //set pos
     int dotCounter=0; 
     while(dotCounter<pages.numberOfPages)
     {
-    if([buddy isEqualToString:[[activeChats objectAtIndex:dotCounter] objectAtIndex:0]])
+    if([buddyName isEqualToString:[[activeChats objectAtIndex:dotCounter] objectAtIndex:0]])
     {
         pages.currentPage=dotCounter; 
         break;
@@ -754,14 +750,16 @@
 	// replace parts of the string
 	
 	
-	buddyName=buddy; 
-    if(dotCounter<pages.numberOfPages)
-    {
+//    if(dotCounter<pages.numberOfPages)
+//    {
+//    
+//	buddyFullName=[[activeChats objectAtIndex:dotCounter] objectAtIndex:2]; //doesnt matter what full name is passed we will always check
+//    }
+//    else 
+//        buddyFullName=fullname;
     
-	buddyFullName=[[activeChats objectAtIndex:dotCounter] objectAtIndex:2]; //doesnt matter what full name is passed we will always check
-    }
-    else 
-        buddyFullName=fullname; 
+    buddyFullName=buddyName;
+    
     
     debug_NSLog(@"id: %@,  full: %@", buddyName, buddyFullName);
 if([buddyFullName isEqualToString:@""])	
@@ -778,9 +776,9 @@ if([buddyFullName isEqualToString:@""])
     {//fallback
     
 	
-	NSRange startrange=[buddy rangeOfString:@"@conference"
+	NSRange startrange=[buddyName rangeOfString:@"@conference"
 						
-										options:NSCaseInsensitiveSearch range:NSMakeRange(0, [buddy length])];
+										options:NSCaseInsensitiveSearch range:NSMakeRange(0, [buddyName length])];
 	
 	
 	if (startrange.location!=NSNotFound) 
@@ -791,9 +789,9 @@ if([buddyFullName isEqualToString:@""])
 	{
 
 	
-	NSRange startrange2=[buddy rangeOfString:@"@groupchat"
+	NSRange startrange2=[buddyName rangeOfString:@"@groupchat"
 						
-									options:NSCaseInsensitiveSearch range:NSMakeRange(0, [buddy length])];
+									options:NSCaseInsensitiveSearch range:NSMakeRange(0, [buddyName length])];
 	
 	
 	if (startrange2.location!=NSNotFound) 
@@ -816,11 +814,11 @@ if([buddyFullName isEqualToString:@""])
 	
 	
 	//mark any messages in from this user as  read
-	[[DataLayer sharedInstance] markAsRead:buddyName :_accountno];
+	[[DataLayer sharedInstance] markAsRead:buddyName :_accountNo];
 	
 	//populate the list
 //	if(thelist!=nil) [thelist release];
-	NSArray* thelist =[[DataLayer sharedInstance] messageHistory:buddyName: _accountno];
+	NSArray* thelist =[[DataLayer sharedInstance] messageHistory:buddyName forAccount: _accountNo];
 	//[thelist retain];
 	
 	//get icons 
@@ -828,7 +826,7 @@ if([buddyFullName isEqualToString:@""])
 	
 	
 	myIcon = [self setIcon: self.jid];
-	buddyIcon= [self setIcon: buddy];
+	buddyIcon= [self setIcon: buddyName];
 	
 	
 	[chatInput resignFirstResponder];
@@ -875,7 +873,7 @@ if([buddyFullName isEqualToString:@""])
     {
 	if([buddyFullName isEqualToString:@""])
 	[inHTML replaceOccurrencesOfString:@"%sender%"
-							withString:buddy
+							withString:buddyName
 							   options:NSCaseInsensitiveSearch
 								 range:NSMakeRange(0, [inHTML length])];
 	else
@@ -1632,10 +1630,10 @@ if([buddyFullName isEqualToString:@""])
                                              range:NSMakeRange(0, [tmpin length])];
         }
         
-//		[tmpin replaceOccurrencesOfString:@"%message%"
-//							   withString:[self emoticonsHTML:message]
-//								  options:NSCaseInsensitiveSearch
-//									range:NSMakeRange(0, [tmpin length])];
+		[tmpin replaceOccurrencesOfString:@"%message%"
+							   withString:[self emoticonsHTML:themessage]
+								  options:NSCaseInsensitiveSearch
+									range:NSMakeRange(0, [tmpin length])];
         
 		[tmpin replaceOccurrencesOfString:@"%time%"
 							   withString:dateString
@@ -1663,43 +1661,43 @@ if([buddyFullName isEqualToString:@""])
 	int nextInsertPoint=0;
 	while(counter<[thelist count])
 	{
-		NSArray* dic =[thelist objectAtIndex:counter];
-		NSString* from =[dic objectAtIndex:0] ; 
-		NSString* message=[dic objectAtIndex:1] ;
-		NSString* time=[dic objectAtIndex:2];
+		NSDictionary* dic =[thelist objectAtIndex:counter];
+		NSString* from =[dic objectForKey:@"af"] ;
+		NSString* message=[dic objectForKey:@"message"] ;
+		NSString* time=[dic objectForKey:@"thetime"];
         //debug_NSLog(@"from %@", from);
 		
-		/*if([from isEqualToString:lastFrom])
-		{
-			// find location of last insert point
-			int insertpoint=0; 
-			
-			if((nextInsertPoint==0) && (groupchat==false))
-			{
-			NSString* target=@"<div id=\"insert\" border=\"1\">"; // this is for stockholm only.. renkoo has another
-			NSRange thepoint=[page rangeOfString:target options:NSBackwardsSearch];
-				if(thepoint.location!=NSNotFound)
-			insertpoint=thepoint.location+thepoint.length;
-				else insertpoint=0; // preventing a segfault really after a sanity check fail
-			}
-			else insertpoint=nextInsertPoint; 
-			
-			
-	
-			
-			NSString* payload=[self makeMessageHTML:from:message:time:NO]; 
-			debug_NSLog(payload);
-			[page insertString:payload atIndex:insertpoint];
-			nextInsertPoint=insertpoint+[payload length];
-			
-		}
-			else*/
+//		if([from isEqualToString:lastFrom])
+//		{
+//			// find location of last insert point
+//			int insertpoint=0; 
+//			
+//			if((nextInsertPoint==0) && (groupchat==false))
+//			{
+//			NSString* target=@"<div id=\"insert\" border=\"1\">"; // this is for stockholm only.. renkoo has another
+//			NSRange thepoint=[page rangeOfString:target options:NSBackwardsSearch];
+//				if(thepoint.location!=NSNotFound)
+//			insertpoint=thepoint.location+thepoint.length;
+//				else insertpoint=0; // preventing a segfault really after a sanity check fail
+//			}
+//			else insertpoint=nextInsertPoint; 
+//			
+//			
+//	
+//			
+//			NSString* payload=[self makeMessageHTMLfrom:from withMessage:message andTime:time isLive:NO];
+//			debug_NSLog(@"%@", payload);
+//			[page insertString:payload atIndex:insertpoint];
+//			nextInsertPoint=insertpoint+[payload length];
+//			
+//		}
+//			else
 			{
 				[page appendString:[self makeMessageHTMLfrom:from withMessage:message andTime:time isLive:NO]];
 				nextInsertPoint=0;
 			}
 		
-		lastFrom=	[NSString stringWithString:from];
+		lastFrom=from;
 		
 		counter++; 
 	}

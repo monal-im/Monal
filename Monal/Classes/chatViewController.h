@@ -55,9 +55,11 @@
 }
 
 @property (nonatomic,strong)  NSString* buddyName;
-@property (nonatomic,strong)  NSString* accountno;
+
 
 -(id) initWithContact:(NSDictionary*) contact  ;
+-(void) show;
+
 -(void) showLogDate:(NSString*) buddy:(NSString*) fullname:(UINavigationController*) vc:(NSString*) date;
 -(void) addMessage:(NSString*) to:(NSString*) message;
 
@@ -89,7 +91,7 @@
 @property (nonatomic,strong)  UITableView* contactList;
 
 /**
- full username with domain e.g. aa@gmail.com
+ full own username with domain e.g. aa@gmail.com
  */
 @property (nonatomic, strong) NSString* jid;
 

@@ -1639,12 +1639,8 @@ static DataLayer *sharedInstance=nil;
 }
 
 //message history
--(NSArray*) messageHistory:(NSString*) buddy :(NSString*) accountNo
+-(NSArray*) messageHistory:(NSString*) buddy forAccount:(NSString*) accountNo
 {
-	//returns a buddy's message history
-	
-	
-	
 	//NSArray* parts=[[[NSDate date] description] componentsSeparatedByString:@" "];
 	
 	
@@ -1656,14 +1652,11 @@ static DataLayer *sharedInstance=nil;
 	{
 		
 		debug_NSLog(@" message history count: %d",  [toReturn count] );
-		;
-        
-		return toReturn; //[toReturn autorelease];
+        return toReturn; //[toReturn autorelease];
 	}
 	else
 	{
 		debug_NSLog(@"message history is empty or failed to read");
-		;
 		return nil;
 	}
 	

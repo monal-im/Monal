@@ -478,25 +478,7 @@
             ParsePresence* presenceNode= [[ParsePresence alloc]  initWithDictionary:nextStanzaPos];
             if([presenceNode.user isEqualToString:_fulluser])
                 return; //ignore self
-            
-            if([presenceNode.type isEqualToString:kpresenceUnavailable])
-            {
-                
-                [[DataLayer sharedInstance] setOfflineBuddy:presenceNode forAccount:_accountNo];
-                
-                //a buddy logout
-                //make sure not already there
-                //                if(![self isInRemove:presenceNode.user])
-                //                {
-                //                    debug_NSLog(@"removing from list");
-                //
-                //                    //remove from online list
-                //                }
-                //
-                
-            }
-            else
-                
+        
                 if([presenceNode.type isEqualToString:kpresencesSubscribe])
                 {
                     
@@ -548,6 +530,7 @@
                                             kstatusKey:status
                                             };
                     [self.contactsVC addUser:userDic];
+                     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactOnlineNotice object:self userInfo:userDic];
                     
                 }
                 else
@@ -562,6 +545,8 @@
                 NSDictionary* userDic=@{kusernameKey: presenceNode.user,
                                         kaccountNoKey:_accountNo};
                 [self.contactsVC removeUser:userDic];
+                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactOfflineNotice object:self userInfo:userDic];
+                
             }
             
         }

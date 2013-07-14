@@ -9,3 +9,5 @@
 #import <Foundation/Foundation.h>
 
 #define kMonalNewMessageNotice @"kMLNewMessageNotice"
+#define kMonalContactOnlineNotice @"kMLContactOnlineNotice"
+#define kMonalContactOfflineNotice @"kMLContactOfflineNotice"

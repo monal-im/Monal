@@ -125,11 +125,11 @@
 
 -(BOOL) removeEnabledAccount; 
 
-//message Commands
--(BOOL) addMessage:(NSString*) from :(NSString*) to :(NSString*) accountNo:(NSString*) message:(NSString*) actualfrom ;
+#pragma mark message Commands
+-(BOOL) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom ;
 -(BOOL) clearMessages:(NSString*) accountNo; 
 
-//message history
+#pragma mark message history
 -(NSArray*) messageHistory:(NSString*) buddy :(NSString*) accountNo;
 -(NSArray*) messageHistoryAll:(NSString*) buddy :(NSString*) accountNo; //we're going to stop using this.. 
 
@@ -143,18 +143,16 @@
 -(BOOL) markAsRead:(NSString*) buddy :(NSString*) accountNo;
 -(BOOL) addMessageHistory:(NSString*) from :(NSString*) to :(NSString*) accountNo:(NSString*) message:(NSString*) actualfrom ;
 
-
-
-//new messages
+#pragma mark new messages
 -(NSArray*) unreadMessagesForBuddy:(NSString*) buddy :(NSString*) accountNo;
 -(NSArray*) unreadMessages:(NSString*) accountNo;
-//active chats
+#pragma mark active chats
 -(NSArray*) activeBuddies:(NSString*) accountNo;
 -(bool) removeActiveBuddies:(NSString*) buddyname:(NSString*) accountNo;
 -(bool) removeAllActiveBuddies:(NSString*) accountNo;
 -(bool) addActiveBuddies:(NSString*) buddyname:(NSString*) accountNo;
 
-//count unread
+#pragma mark count unread
 -(int) countUnnoticedMessages:(NSString*) accountNo; 
 -(NSArray*) unnoticedMessages:(NSString*) accountNo;
 -(BOOL) markAsNoticed:(NSString*) accountNo;

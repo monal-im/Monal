@@ -20,6 +20,7 @@
 #import "ParseStream.h"
 #import "ParseIq.h"
 #import "ParsePresence.h"
+#import "ParseMessage.h"
 
 #define kXMPPReadSize 51200 // bytes
 
@@ -456,6 +457,11 @@
         }
         else  if([[nextStanzaPos objectForKey:@"stanzaType"]  isEqualToString:@"message"])
         {
+             ParseMessage* messageNode= [[ParseMessage alloc]  initWithDictionary:nextStanzaPos];
+            if(messageNode.messageText)
+            {
+                [[DataLayer sharedInstance] addMessageFrom:messageNode.from to:_fulluser forAccount:_accountNo withBody:messageNode.messageText actuallyfrom:messageNode.actualFrom];
+            }
             
         }
         else  if([[nextStanzaPos objectForKey:@"stanzaType"]  isEqualToString:@"presence"])

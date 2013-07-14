@@ -1371,13 +1371,10 @@ static DataLayer *sharedInstance=nil;
 
 
 #pragma mark message Commands
--(BOOL) addMessage:(NSString*) from :(NSString*) to :(NSString*) accountNo:(NSString*) message:(NSString*) actualfrom
+-(BOOL) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom 
 {
 	//MEssaes coming in. in messages table, to is always the local user
-	
-	
-	
-	
+
 	NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
 	[formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
 	NSDate* sourceDate=[NSDate date];
@@ -1391,27 +1388,22 @@ static DataLayer *sharedInstance=nil;
 	
 	NSDate* destinationDate = [[NSDate alloc] initWithTimeInterval:interval sinceDate:sourceDate];
 	
-	// note: if it isnt the same day we want to show tehful day
+	// note: if it isnt the same day we want to show the full  day
 	
-	
-	NSString* dateString = [formatter stringFromDate:destinationDate];
+    NSString* dateString = [formatter stringFromDate:destinationDate];
 	int notice=0;
     
     // in the event it is a message from the room
-    
-    
-	NSString* query=[NSString stringWithFormat:@"insert into messages values (null, %@, '%@',  '%@', '%@', '%@', %d, '%@');", accountNo, from, to, 	dateString, [message stringByReplacingOccurrencesOfString:@"'" withString:@"''"], notice, actualfrom];
+
+    NSString* query=[NSString stringWithFormat:@"insert into messages values (null, %@, '%@',  '%@', '%@', '%@', %d, '%@');", accountNo, from, to, 	dateString, [message stringByReplacingOccurrencesOfString:@"'" withString:@"''"], notice, actualfrom];
 	debug_NSLog(@"%@",query);
 	if([self executeNonQuery:query]!=NO)
 	{
-		
-		;
 		return YES;
 	}
 	else
 	{
 		debug_NSLog(@"failed to insert ");
-		;
 		return NO;
 	}
 	
@@ -1767,11 +1759,8 @@ static DataLayer *sharedInstance=nil;
 #pragma mark active chats
 -(NSArray*) activeBuddies:(NSString*) accountNo
 {
-	
-	
-	
-	
-	NSString* query=[NSString stringWithFormat:@"select distinct a.buddy_name,'', ifnull(full_name, a.buddy_name) as full_name, filename,0 from activechats as a left outer join buddylist as b on a.buddy_name=b.buddy_name and a.account_id=b.account_id where a.account_id=%@ order by full_name COLLATE NOCASE ", accountNo ];
+
+    NSString* query=[NSString stringWithFormat:@"select distinct a.buddy_name,'', ifnull(full_name, a.buddy_name) as full_name, filename,0 from activechats as a left outer join buddylist as b on a.buddy_name=b.buddy_name and a.account_id=b.account_id where a.account_id=%@ order by full_name COLLATE NOCASE ", accountNo ];
 	//	debug_NSLog(query);
 	NSArray* toReturn = [self executeReader:query];
 	

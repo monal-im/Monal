@@ -43,6 +43,8 @@
 		26292F4F1309CAE100097280 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26292F4E1309CAE100097280 /* CFNetwork.framework */; };
 		262B4BD915E84227006B0112 /* Icon-72.png in Resources */ = {isa = PBXBuildFile; fileRef = 26F425E611AB4A1800C40676 /* Icon-72.png */; };
 		262B4BDB15E8452A006B0112 /* Monal_crop_144.png in Resources */ = {isa = PBXBuildFile; fileRef = 262B4BDA15E8452A006B0112 /* Monal_crop_144.png */; };
+		262D9EA717921169009292B4 /* ParseMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 262D9EA617921169009292B4 /* ParseMessage.m */; };
+		262D9EAA17921E82009292B4 /* XMPPMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 262D9EA917921E82009292B4 /* XMPPMessage.m */; };
 		262DE4AF15C4E2C60040A66B /* MBProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = 262DE4AE15C4E2C60040A66B /* MBProgressHUD.m */; };
 		26347D861790FFDE006FF64F /* MLInfoCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 26347D851790FFDE006FF64F /* MLInfoCell.m */; };
 		26347D8A17910733006FF64F /* connect.png in Resources */ = {isa = PBXBuildFile; fileRef = 26347D8817910733006FF64F /* connect.png */; };
@@ -302,6 +304,10 @@
 		2628E50614049DB50064131E /* askTempPass.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = askTempPass.xib; sourceTree = "<group>"; };
 		26292F4E1309CAE100097280 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		262B4BDA15E8452A006B0112 /* Monal_crop_144.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Monal_crop_144.png; sourceTree = "<group>"; };
+		262D9EA517921169009292B4 /* ParseMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParseMessage.h; sourceTree = "<group>"; };
+		262D9EA617921169009292B4 /* ParseMessage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParseMessage.m; sourceTree = "<group>"; };
+		262D9EA817921E82009292B4 /* XMPPMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPMessage.h; sourceTree = "<group>"; };
+		262D9EA917921E82009292B4 /* XMPPMessage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPMessage.m; sourceTree = "<group>"; };
 		262DE4AD15C4E2C60040A66B /* MBProgressHUD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MBProgressHUD.h; sourceTree = "<group>"; };
 		262DE4AE15C4E2C60040A66B /* MBProgressHUD.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MBProgressHUD.m; sourceTree = "<group>"; };
 		26347D841790FFDE006FF64F /* MLInfoCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLInfoCell.h; sourceTree = "<group>"; };
@@ -1011,6 +1017,8 @@
 				26CF3EA91780D6B7002B7085 /* XMPPIQ.m */,
 				264E34591787BAB100BC7BD0 /* XMPPPresence.h */,
 				264E345A1787BAB100BC7BD0 /* XMPPPresence.m */,
+				262D9EA817921E82009292B4 /* XMPPMessage.h */,
+				262D9EA917921E82009292B4 /* XMPPMessage.m */,
 			);
 			name = Nodes;
 			sourceTree = "<group>";
@@ -1026,6 +1034,8 @@
 				26CF3EB11780DFD9002B7085 /* XMPPParser.m */,
 				261AC91B1788A49C00E05657 /* ParsePresence.h */,
 				261AC91C1788A49C00E05657 /* ParsePresence.m */,
+				262D9EA517921169009292B4 /* ParseMessage.h */,
+				262D9EA617921169009292B4 /* ParseMessage.m */,
 			);
 			name = Parsers;
 			sourceTree = "<group>";
@@ -1447,6 +1457,8 @@
 				262797AF178A577300B85D94 /* MLContactCell.m in Sources */,
 				26347D861790FFDE006FF64F /* MLInfoCell.m in Sources */,
 				2696EED21791245A00BC54B8 /* chatViewController.m in Sources */,
+				262D9EA717921169009292B4 /* ParseMessage.m in Sources */,
+				262D9EAA17921E82009292B4 /* XMPPMessage.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

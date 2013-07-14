@@ -32,6 +32,42 @@
     return self; 
 }
 
+-(xmpp*) getAccountForID:(NSString*) accountNo
+{
+    for (NSDictionary* account in _connectedXMPP)
+    {
+        xmpp* xmppAccount=[account objectForKey:@"xmppAccount"];
+        
+        if([xmppAccount.accountNo isEqualToString:accountNo] )
+       {
+           return xmppAccount;
+       }
+    }
+    return nil; 
+}
+
+
+#pragma mark XMPP communication
+-(void)sendMessage:(NSString*) message toContact:(NSString*)contact fromAccount:(NSString*) accountNo withCompletionHandler:(void (^)(BOOL success)) completion
+{
+    dispatch_async(_netQueue,
+                   ^{
+                       BOOL success=NO;
+                       xmpp* account=[self getAccountForID:accountNo];
+                       if(account)
+                       {
+                          success=YES;
+                        [account sendMessage:message toContact:contact];
+                       }
+                       
+                       
+                       if(completion)
+                           completion(success);
+                   });
+}
+
+
+#pragma mark Connection related
 -(void)connectIfNecessary
 {
 

@@ -179,7 +179,10 @@
     {
         debug_NSLog(@"Sending message");
         // this should call the xmpp message
-        [NSThread detachNewThreadSelector:@selector(handleInput:) toTarget:self withObject:[chatInput text]];
+       // [NSThread detachNewThreadSelector:@selector(handleInput:) toTarget:self withObject:[chatInput text]];
+        
+        [[MLXMPPManager sharedInstance] sendMessage:[chatInput text] toContact:buddyName fromAccount:_accountNo withCompletionHandler:nil];
+        [self addMessageto:_buddyName withMessage:[chatInput text]];
         
     }
     
@@ -708,7 +711,7 @@
 
 	//query to get pages and position
     activeChats=[[DataLayer sharedInstance] activeBuddies:_accountNo];
-    pages.numberOfPages=[activeChats count];
+    pages.numberOfPages=0;//[activeChats count];
     //set pos
     int dotCounter=0; 
     while(dotCounter<pages.numberOfPages)
@@ -903,86 +906,51 @@ if([buddyFullName isEqualToString:@""])
 }
 
 //always messages going out
-//-(void) addMessage:(NSString*) to:(NSString*) message
-//{
-//	
-//	
-//	
-//
-//	while(msgthread==true)
-//	{
-//		debug_NSLog(@" addmessage thread sleeping onlock"); 
-//		usleep(500000); 
-//		
-//		
-//	}
-//	
-//	msgthread=true;
-//	debug_NSLog(@" addmessage thread got lock"); 
-//	
-//	//escape message
-//
-//	
-//	if([db addMessageHistory:myuser:to:accountno:message:myuser])
-//	{
-//		debug_NSLog(@"added message"); 
-//		
-//		NSString* new_msg =[message stringByReplacingOccurrencesOfString:@"\\" withString:@"\\\\"];
-//		
-//		//NSArray* parts=[[[NSDate date] description] componentsSeparatedByString:@" "]; 
-//		NSString* jsstring; 
-//	
-//		if(groupchat!=true) //  message will come back 
-//		{
-//	/*	if([lastFrom isEqualToString:myuser])
-//			
-//		{
-//			NSString* html=[self makeMessageHTML:myuser :[new_msg stringByReplacingOccurrencesOfString:@"'" withString:@"\\'"] :nil:YES];
-//			jsstring= [NSString stringWithFormat:@"InsertNextMessage('%@', '%@');", 
-//					   html , 
-//					   lastDiv ]; 
-//			
-//			
-//		}
-//		else*/
-//		{
-//		 jsstring= [NSString stringWithFormat:@"InsertMessage('%@');", [self makeMessageHTML:myuser :[new_msg stringByReplacingOccurrencesOfString:@"'" withString:@"\\'"] :nil:YES]  ]; 
-//		
-//		}
-//		
-//		
-//			/*NSString* result=[chatView stringByEvaluatingJavaScriptFromString:jsstring];
-//		if(result==nil) debug_NSLog(@"new message js failed "); 
-//		else debug_NSLog(@"new message js ok %@", jsstring); */
-//			
-//			
-//			
-//            dispatch_async(dispatch_get_main_queue(), ^{
-//                
-//                [chatView stringByEvaluatingJavaScriptFromString:jsstring];
-//                
-//            });
-//        
-//        }
-//		
-//	}
-//	else
-//		debug_NSLog(@"failed to add message"); 
-//	
-//	lastFrom=	[NSString stringWithString:myuser];
-//	
-//	// make sure its in active
-//	if(firstmsg==true)
-//	{
-//	[db addActiveBuddies:to :accountno];
-//		firstmsg=false; 
-//	}
-//	
-//	
-//	msgthread=false;
-//	;
-//	
-//}
+-(void) addMessageto:(NSString*)to withMessage:(NSString*) message
+{
+	
+	if([[DataLayer sharedInstance] addMessageHistoryFrom:myuser to:to forAccount:_accountNo withMessage:message actuallyFrom:myuser])
+	{
+		debug_NSLog(@"added message"); 
+		
+		NSString* new_msg =[message stringByReplacingOccurrencesOfString:@"\\" withString:@"\\\\"];
+		
+		//NSArray* parts=[[[NSDate date] description] componentsSeparatedByString:@" "]; 
+		NSString* jsstring; 
+	
+		if(groupchat!=true) //  message will come back 
+		{
+	
+		
+            jsstring= [NSString stringWithFormat:@"InsertMessage('%@');",
+                       [self makeMessageHTMLfrom:self.jid
+                                     withMessage:[new_msg stringByReplacingOccurrencesOfString:@"'" withString:@"\\'"]
+                                         andTime:nil isLive:YES]];
+                                                                    
+            dispatch_async(dispatch_get_main_queue(), ^{
+                
+                [chatView stringByEvaluatingJavaScriptFromString:jsstring];
+                
+            });
+        
+        }
+		
+	}
+	else
+		debug_NSLog(@"failed to add message"); 
+	
+	lastFrom=self.jid;
+	
+	// make sure its in active
+	if(firstmsg==true)
+	{
+	[[DataLayer sharedInstance] addActiveBuddies:to :_accountNo];
+		firstmsg=false; 
+	}
+	
+    msgthread=false;
+
+}
 
 //
 //- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
@@ -1543,7 +1511,7 @@ if([buddyFullName isEqualToString:@""])
 		dateString =  [dateFormatter stringFromDate:[NSDate date]];
 	}
 	
-	if([from isEqualToString:myuser])
+	if([from isEqualToString:self.jid])
 	{
 		
 		NSMutableString* tmpout; 
@@ -1568,10 +1536,10 @@ if([buddyFullName isEqualToString:@""])
 		
         
         
-//		[tmpout replaceOccurrencesOfString:@"%message%"
-//								withString:[self emoticonsHTML:message]
-//								   options:NSCaseInsensitiveSearch
-//									 range:NSMakeRange(0, [tmpout length])];
+		[tmpout replaceOccurrencesOfString:@"%message%"
+								withString:[self emoticonsHTML:themessage]
+								   options:NSCaseInsensitiveSearch
+									 range:NSMakeRange(0, [tmpout length])];
 		
 		
 		

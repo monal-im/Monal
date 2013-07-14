@@ -10,6 +10,7 @@
 #import "DataLayer.h"
 #import "HPGrowingTextView.h"
 #import "MLConstants.h"
+#import "MLXMPPManager.h"
 
 
 @interface chatViewController : UIViewController <HPGrowingTextViewDelegate,UIWebViewDelegate>{
@@ -67,8 +68,7 @@
 
 
 -(void) showLogDate:(NSString*) buddy:(NSString*) fullname:(UINavigationController*) vc:(NSString*) date;
--(void) addMessage:(NSString*) to:(NSString*) message;
-
+-(void) addMessageto:(NSString*)to withMessage:(NSString*) message;
 
 -(NSString*) setIcon:(NSString*) msguser;
 

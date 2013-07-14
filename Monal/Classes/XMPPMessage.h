@@ -12,7 +12,15 @@
 #define kMessageChatType @"chat"
 #define kMessageGroupChatType @"groupchat"
 #define kMessageErrorType @"error"
+#define kMessageNormalType @"normal"
 
 @interface XMPPMessage : XMLNode
+{
+    
+}
+/**
+ Sets the body child element
+ */
+-(void) setBody:(NSString*) messageBody;
 
 @end

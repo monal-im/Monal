@@ -1696,16 +1696,11 @@ static DataLayer *sharedInstance=nil;
 	
 }
 
--(BOOL) addMessageHistory:(NSString*) from :(NSString*) to :(NSString*) accountNo:(NSString*) message:(NSString*) actualfrom
+-(BOOL) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom ;
 {
 	//MEssaes_history ging out, from is always the local user
 	
-	
-	
-	
 	NSArray* parts=[[[NSDate date] description] componentsSeparatedByString:@" "];
-	
-    
 	NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, %@, '%@',  '%@', '%@ %@', '%@', '%@');", accountNo, from, to,
 					 [parts objectAtIndex:0],[parts objectAtIndex:1], [message stringByReplacingOccurrencesOfString:@"'" withString:@"''"], actualfrom];
 	
@@ -1727,11 +1722,7 @@ static DataLayer *sharedInstance=nil;
 -(int) countUnreadMessages:(NSString*) accountNo
 {
 	// count # of meaages in message table
-	
-	
-	
-	
-	NSString* query=[NSString stringWithFormat:@"select count(message_id) from  messages where account_id=%@", accountNo];
+    NSString* query=[NSString stringWithFormat:@"select count(message_id) from  messages where account_id=%@", accountNo];
     
 	NSNumber* count=(NSNumber*)[self executeScalar:query];
 	if(count!=nil)

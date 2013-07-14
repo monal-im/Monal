@@ -141,7 +141,7 @@
 
 -(NSArray*) messageHistoryBuddies:(NSString*) accountNo;
 -(BOOL) markAsRead:(NSString*) buddy :(NSString*) accountNo;
--(BOOL) addMessageHistory:(NSString*) from :(NSString*) to :(NSString*) accountNo:(NSString*) message:(NSString*) actualfrom ;
+-(BOOL) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom ;
 
 #pragma mark new messages
 -(NSArray*) unreadMessagesForBuddy:(NSString*) buddy :(NSString*) accountNo;

@@ -716,6 +716,15 @@
     }
 }
 
+-(void) sendMessage:(NSString*) message toContact:(NSString*) contact
+{
+    XMPPMessage* messageNode =[[XMPPMessage alloc] init];
+    [messageNode.attributes setObject:contact forKey:@"to"];
+    [messageNode setBody:message];
+    
+    [self send:messageNode];
+}
+
 
 -(void) send:(XMLNode*) stanza
 {

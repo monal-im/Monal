@@ -10,4 +10,21 @@
 
 @implementation XMPPMessage
 
+-(id) init
+{
+    self= [super init];
+    self.element=@"message";
+    return self;
+}
+
+
+-(void) setBody:(NSString*) messageBody
+{
+    XMLNode* body =[[XMLNode alloc] init];
+    body.element=@"body";
+    body.data=messageBody;
+    [self.children addObject:body];
+}
+
+
 @end

@@ -85,6 +85,12 @@ typedef struct
 -(void) connect;
 -(void) disconnect;
 
+
+/**
+ send a message to a contact
+ */
+-(void) sendMessage:(NSString*) message toContact:(NSString*) contact;
+
 /**
  Adds the stanza to the output Queue
  */

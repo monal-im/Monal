@@ -46,6 +46,12 @@
 
     [_contactsTable reloadData];
 
+     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
+}
+
+-(void) dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     
 }
 
@@ -172,6 +178,7 @@
         [[_contacts objectAtIndex:pos] setObject:[user objectForKey:kstateKey] forKey:kstateKey];
         [[_contacts objectAtIndex:pos] setObject:[user objectForKey:kstatusKey] forKey:kstatusKey];
         
+        [_contactsTable beginUpdates];
         NSIndexPath *path1 = [NSIndexPath indexPathForRow:pos inSection:konlineSection];
         [_contactsTable reloadRowsAtIndexPaths:@[path1]
                               withRowAnimation:UITableViewRowAnimationAutomatic];
@@ -218,10 +225,47 @@
     
 }
 
--(void) updateUser:(NSDictionary*) user
+
+#pragma mark message signals
+
+-(void) handleNewMessage:(NSNotification *)notification
 {
+    debug_NSLog(@"chat view got new message notice %@", notification.userInfo);
+
+    
+    dispatch_sync(dispatch_get_main_queue(),
+                  ^{
+                      
+                      int pos=-1;
+                      int counter=0;
+                      for(NSDictionary* row in _contacts)
+                      {
+                          if([[row objectForKey:@"buddy_name"] caseInsensitiveCompare:[notification.userInfo objectForKey:@"from"] ]==NSOrderedSame &&
+                             [[row objectForKey:@"account_id"]  integerValue]==[[notification.userInfo objectForKey:kaccountNoKey] integerValue] )
+                          {
+                              pos=counter;
+                              break;
+                          }
+                          counter++;
+                      }
+                      
+                      if(pos>=0)
+                      {
+                          
+                          int unreadCount=[[[_contacts objectAtIndex:pos] objectForKey:@"count"] integerValue];
+                          unreadCount++; 
+                          [[_contacts objectAtIndex:pos] setObject:[NSNumber numberWithInt:unreadCount] forKey:@"count"];
+                        
+                          NSIndexPath *path1 = [NSIndexPath indexPathForRow:pos inSection:konlineSection];
+                          [_contactsTable beginUpdates];
+                          [_contactsTable reloadRowsAtIndexPaths:@[path1]
+                                                withRowAnimation:UITableViewRowAnimationAutomatic];
+                          [_contactsTable endUpdates];
+                      }
+                  });
     
 }
+
 
 
 #pragma mark tableview datasource 
@@ -326,15 +370,25 @@
 #pragma mark tableview delegate
 -(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    [tableView deselectRowAtIndexPath:indexPath animated:NO];
+   [tableView deselectRowAtIndexPath:indexPath animated:NO];
     
     if((indexPath.section==konlineSection) ||
        (indexPath.section==kofflineSection) )
     {
+        
+        [[_contacts objectAtIndex:indexPath.row] setObject:[NSNumber numberWithInt:0] forKey:@"count"];
+        
         //make chat view
         chatViewController* chatVC = [[chatViewController alloc] initWithContact:[_contacts objectAtIndex:indexPath.row] ];
         [self.navigationController pushViewController:chatVC animated:YES];
+        
+        [tableView beginUpdates];
+        [tableView reloadRowsAtIndexPaths:@[indexPath]
+                              withRowAnimation:UITableViewRowAnimationAutomatic];
+        [tableView endUpdates];
     }
+    
+    
 }
 
 

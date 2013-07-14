@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "DataLayer.h"
 #import "HPGrowingTextView.h"
+#import "MLConstants.h"
 
 
 @interface chatViewController : UIViewController <HPGrowingTextViewDelegate,UIWebViewDelegate>{
@@ -59,6 +60,11 @@
 
 -(id) initWithContact:(NSDictionary*) contact  ;
 -(void) show;
+/**
+ Receives the new message notice and will update if it is this user. 
+ */
+-(void) handleNewMessage:(NSNotification *)notification;
+
 
 -(void) showLogDate:(NSString*) buddy:(NSString*) fullname:(UINavigationController*) vc:(NSString*) date;
 -(void) addMessage:(NSString*) to:(NSString*) message;

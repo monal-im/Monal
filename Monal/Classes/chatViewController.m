@@ -160,8 +160,13 @@
 -(void) viewDidLoad
 {
         [super viewDidLoad];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
 }
 
+-(void) dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
 
 -(void)resignTextView
 {
@@ -260,13 +265,21 @@
 	
 	
 	lastuser=buddyName;
-
-	[[NSNotificationCenter defaultCenter] 
-	 postNotificationName: @"UpdateUI" object: self];	
-	
 }
 
 #pragma mark message signals
+
+-(void) handleNewMessage:(NSNotification *)notification
+{
+    debug_NSLog(@"chat view got new message notice %@", notification.userInfo);
+    
+    if([[notification.userInfo objectForKey:@"accountNo"] isEqualToString:_accountNo]
+      && [[notification.userInfo objectForKey:@"from"] isEqualToString:buddyName]
+       )
+    {
+        [self signalNewMessages];
+    }
+}
 
 
 //this gets called if the currently chatting user went offline, online or away, back etc
@@ -397,140 +410,112 @@
 {}
 
 -(void) signalNewMessages
-//{
-//	
-//	debug_NSLog(@"new message signal"); 
-//	
-//	while(msgthread==true)
-//		{
-//			debug_NSLog(@" new message thread sleeping onlock"); 
-//			usleep(500000); 
-//			
-//			
-//		}
-//		
-//		msgthread=true;
-//		
-//	debug_NSLog(@" new message  thread got lock"); 
-//	
-//
-//		//populate the list
-//		//[thelist release];
-//		NSArray* thelist =[db unreadMessagesForBuddy:buddyName: accountno] ;
-//		if(thelist==nil)
-//		{
-//			//multi threaded sanity checkf
-//			debug_NSLog(@"MT ni check failed. returning");
-//			; 
-//			msgthread=false;
-//			return;
-//		}
-//		
-//		if([thelist count]==0)
-//		{
-//			//multi threaded sanity checkf
-//			debug_NSLog(@"MT count check failed. returning");
-//			; 
-//			msgthread=false;
-//			return;
-//		}
-//		
-//	if([thelist count]>0)
-//	{
-//		if([db markAsRead:buddyName:accountno])
-//		{
-//			debug_NSLog(@"marked new messages as read");
-//			
-//		}
-//		else
-//			debug_NSLog(@"could not mark new messages as read");
-//	}
-//	
-//		int msgcount=0; 
-//		 
-//		while(msgcount<[thelist count])
-//		{
-//			NSArray* therow=[thelist objectAtIndex:msgcount]; 
-//		
-//		if(groupchat==true)
-//		{
-//			inHTML=[NSMutableString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalStockholm/Incoming/Content.html", [[NSBundle mainBundle] resourcePath]]]; 
-//			
-//			unichar asciiChar = 10; 
-//			NSString *newline = [NSString stringWithCharacters:&asciiChar length:1];
-//		
-//			
-//			
-//			[inHTML replaceOccurrencesOfString:newline
-//									withString:@""
-//									   options:NSCaseInsensitiveSearch
-//										 range:NSMakeRange(0, [inHTML length])];
-//		
-//			
-//			
-//				[inHTML replaceOccurrencesOfString:@"%sender%"
-//										withString:[therow objectAtIndex:0] 
-//										   options:NSCaseInsensitiveSearch
-//											 range:NSMakeRange(0, [inHTML length])];
-//			
-//			
-//			[inHTML replaceOccurrencesOfString:@"%userIconPath%"
-//									withString:buddyIcon
-//									   options:NSCaseInsensitiveSearch
-//										 range:NSMakeRange(0, [inHTML length])];
-//			
-//	
-//			
-//			
-//		}
-//		
-//		
-//		NSString* thejsstring; 
-//		
-//	NSString* msg= [[therow objectAtIndex:1]stringByReplacingOccurrencesOfString:@"\\" withString:@"\\\\"] ;
-//		NSString* messagecontent=[self makeMessageHTML: [therow objectAtIndex:0]
-//														  : [msg stringByReplacingOccurrencesOfString:@"'" withString:@"\\'"] 
-//														  : [therow objectAtIndex:2]:YES];	
-//			
-//	/*	if(([[lastFrom lowercaseString] isEqualToString:[[therow objectAtIndex:0] lowercaseString]]) &&(groupchat==false))
-//		{
-//		
-//			thejsstring= [NSString stringWithFormat:@"InsertNextMessage('%@','%@');", messagecontent,lastDiv]; 
-//		}
-//		else*/
-//		{
-//		
-//			thejsstring= [NSString stringWithFormat:@"InsertMessage('%@');", messagecontent]; 
-//	
-//		}
-//	/*		NSString* result=[chatView stringByEvaluatingJavaScriptFromString:thejsstring];
-//		if(result==nil) debug_NSLog(@"new message in js failed "); 
-//		else debug_NSLog(@"new message in js ok %@", thejsstring); 
-//	*/
-//		
-//		
-//            dispatch_async(dispatch_get_main_queue(), ^{
-//                
-//                [chatView stringByEvaluatingJavaScriptFromString:thejsstring];
-//            });
-//            
-//            debug_NSLog(@"%@",thejsstring);
-//		
-//		lastFrom=	[NSString stringWithString:[therow objectAtIndex:0]];
-//			
-//			
-//			msgcount++; 
-//		}
-//		
-//	
-//	
-//	
-//	;
-//		
-//	msgthread=false;
-//	
-//}
-{}
+{
+
+		//populate the list
+		//[thelist release];
+		NSArray* thelist =[[DataLayer sharedInstance] unreadMessagesForBuddy:buddyName: _accountNo] ;
+
+        if([thelist count]==0)
+		{
+			//multi threaded sanity checkf
+			debug_NSLog(@"got 0 new messages");
+			return;
+		}
+		else
+        {
+		if([[DataLayer sharedInstance] markAsRead:buddyName:_accountNo])
+		{
+			debug_NSLog(@"marked new messages as read");
+		}
+		else
+			debug_NSLog(@"could not mark new messages as read");
+        }
+	
+		int msgcount=0; 
+		 
+		while(msgcount<[thelist count])
+		{
+			NSDictionary* therow=[thelist objectAtIndex:msgcount];
+		
+		if(groupchat==true)
+		{
+			inHTML=[NSMutableString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalStockholm/Incoming/Content.html", [[NSBundle mainBundle] resourcePath]]]; 
+			
+			unichar asciiChar = 10; 
+			NSString *newline = [NSString stringWithCharacters:&asciiChar length:1];
+		
+			
+			
+			[inHTML replaceOccurrencesOfString:newline
+									withString:@""
+									   options:NSCaseInsensitiveSearch
+										 range:NSMakeRange(0, [inHTML length])];
+		
+			
+			
+				[inHTML replaceOccurrencesOfString:@"%sender%"
+										withString:[therow objectForKey:@"af"]
+										   options:NSCaseInsensitiveSearch
+											 range:NSMakeRange(0, [inHTML length])];
+			
+			
+			[inHTML replaceOccurrencesOfString:@"%userIconPath%"
+									withString:buddyIcon
+									   options:NSCaseInsensitiveSearch
+										 range:NSMakeRange(0, [inHTML length])];
+			
+	
+			
+			
+		}
+		
+		
+		NSString* thejsstring; 
+		
+        NSString* msg= [[therow objectForKey:@"message"] stringByReplacingOccurrencesOfString:@"\\" withString:@"\\\\"] ;
+         NSString* messageHTML= [self makeMessageHTMLfrom:[therow objectForKey:@"from"] withMessage:[msg stringByReplacingOccurrencesOfString:@"'" withString:@"\\'"]  andTime:[therow objectForKey:@"thetime"] isLive:YES];
+
+			
+	/*	if(([[lastFrom lowercaseString] isEqualToString:[[therow objectAtIndex:0] lowercaseString]]) &&(groupchat==false))
+		{
+		
+			thejsstring= [NSString stringWithFormat:@"InsertNextMessage('%@','%@');", messagecontent,lastDiv]; 
+		}
+		else*/
+		{
+		
+			thejsstring= [NSString stringWithFormat:@"InsertMessage('%@');", messageHTML];
+	
+		}
+	/*		NSString* result=[chatView stringByEvaluatingJavaScriptFromString:thejsstring];
+		if(result==nil) debug_NSLog(@"new message in js failed "); 
+		else debug_NSLog(@"new message in js ok %@", thejsstring); 
+	*/
+		
+		
+            dispatch_async(dispatch_get_main_queue(), ^{
+                
+                [chatView stringByEvaluatingJavaScriptFromString:thejsstring];
+            });
+            
+            debug_NSLog(@"%@",thejsstring);
+		
+		lastFrom=	[NSString stringWithString:[therow objectForKey:@"af"]];
+			
+			
+			msgcount++; 
+		}
+		
+	
+	
+	
+	;
+		
+	msgthread=false;
+	
+}
+
 
 -(void) showLogDate:(NSString*) buddy:(NSString*) fullname:(UINavigationController*) vc:(NSString*) date
 //{

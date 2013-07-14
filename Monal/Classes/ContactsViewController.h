@@ -44,6 +44,10 @@
  */
 -(void) removeUser:(NSDictionary*) user;
 
+/**
+ Receives the new message notice and will update if it is this user.
+ */
+-(void) handleNewMessage:(NSNotification *)notification;
 
 
 @end 

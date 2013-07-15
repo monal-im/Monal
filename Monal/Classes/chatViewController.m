@@ -170,17 +170,10 @@
 
 -(void)resignTextView
 {
-    
-  
-    [chatInput.internalTextView resignFirstResponder];
-    [chatInput.internalTextView becomeFirstResponder];
-    
+
     if(([chatInput text]!=nil) && (![[chatInput text] isEqualToString:@""]) )
     {
         debug_NSLog(@"Sending message");
-        // this should call the xmpp message
-       // [NSThread detachNewThreadSelector:@selector(handleInput:) toTarget:self withObject:[chatInput text]];
-        
         [[MLXMPPManager sharedInstance] sendMessage:[chatInput text] toContact:_buddyName fromAccount:_accountNo withCompletionHandler:nil];
         [self addMessageto:_buddyName withMessage:[chatInput text]];
         
@@ -188,12 +181,7 @@
     
     [chatInput setText:@""];
     
-    /* if([machine hasPrefix:@"iPad"] )
-     {
-     // no need to dismiss on every message for the ipad.
-     }
-     else
-     [chatInput resignFirstResponder];*/
+ 
 }
 
 
@@ -951,47 +939,6 @@ if([buddyFullName isEqualToString:@""])
     msgthread=false;
 
 }
-
-//
-//- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
-//{
-//	
-//	debug_NSLog(@"clicked button %d", buttonIndex); 
-//	//login or initial error
-//	
-//		
-//		//otherwise 
-//		if(buttonIndex==0) 
-//		{
-//			debug_NSLog(@"do nothing"); 
-//
-//		}
-//		else
-//			
-//		{
-//			debug_NSLog(@"sending reconnect signal"); 
-//			
-//			// pop the top view controller .. if it was a message send failure then it has to have it on top on all devices
-//			[navController popViewControllerAnimated:NO];
-//			
-//			[[NSNotificationCenter defaultCenter] 
-//			 postNotificationName: @"Reconnect" object: self];
-//		}
-//		
-//		 
-//	
-//	
-//	
-//	
-//	
-//	
-//	
-//	
-//	
-//	;
-//}
-
-
 
 //-(void) handleInput:(NSString *)text
 //{

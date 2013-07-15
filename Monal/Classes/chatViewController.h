@@ -18,7 +18,6 @@
     UIView *containerView;
     HPGrowingTextView *chatInput;
     
-	NSString*  myuser;
 	NSString*  lastuser;
 
 	
@@ -26,7 +25,7 @@
 	NSString* myIcon; 
 	NSString* buddyIcon; 
 	NSString* buddyFullName; 
-	NSString* buddyName; ;
+;
 	
 	NSMutableString* HTMLPage; 
 	

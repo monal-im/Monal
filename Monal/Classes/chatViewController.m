@@ -120,11 +120,11 @@
 	inHTML=nil; 
 	outHTML=nil;
 	
-	buddyName=[contact objectForKey:@"buddy_name"];
+	_buddyName=[contact objectForKey:@"buddy_name"];
 	buddyFullName=nil; 
 	
 	inNextHTML=nil; 
-	outNextHTML=nil; 
+	outNextHTML=nil;
 	
 	lastFrom =nil; 
 	lastDiv=nil; 
@@ -181,7 +181,7 @@
         // this should call the xmpp message
        // [NSThread detachNewThreadSelector:@selector(handleInput:) toTarget:self withObject:[chatInput text]];
         
-        [[MLXMPPManager sharedInstance] sendMessage:[chatInput text] toContact:buddyName fromAccount:_accountNo withCompletionHandler:nil];
+        [[MLXMPPManager sharedInstance] sendMessage:[chatInput text] toContact:_buddyName fromAccount:_accountNo withCompletionHandler:nil];
         [self addMessageto:_buddyName withMessage:[chatInput text]];
         
     }
@@ -267,7 +267,7 @@
 	}*/
 	
 	
-	lastuser=buddyName;
+	lastuser=_buddyName;
 }
 
 #pragma mark message signals
@@ -277,7 +277,7 @@
     debug_NSLog(@"chat view got new message notice %@", notification.userInfo);
     
     if([[notification.userInfo objectForKey:@"accountNo"] isEqualToString:_accountNo]
-      && [[notification.userInfo objectForKey:@"from"] isEqualToString:buddyName]
+      && [[notification.userInfo objectForKey:@"from"] isEqualToString:_buddyName]
        )
     {
         [self signalNewMessages];
@@ -417,7 +417,7 @@
 
 		//populate the list
 		//[thelist release];
-		NSArray* thelist =[[DataLayer sharedInstance] unreadMessagesForBuddy:buddyName: _accountNo] ;
+		NSArray* thelist =[[DataLayer sharedInstance] unreadMessagesForBuddy:_buddyName: _accountNo] ;
 
         if([thelist count]==0)
 		{
@@ -427,7 +427,7 @@
 		}
 		else
         {
-		if([[DataLayer sharedInstance] markAsRead:buddyName:_accountNo])
+		if([[DataLayer sharedInstance] markAsRead:_buddyName:_accountNo])
 		{
 			debug_NSLog(@"marked new messages as read");
 		}
@@ -716,7 +716,7 @@
     int dotCounter=0; 
     while(dotCounter<pages.numberOfPages)
     {
-    if([buddyName isEqualToString:[[activeChats objectAtIndex:dotCounter] objectAtIndex:0]])
+    if([_buddyName isEqualToString:[[activeChats objectAtIndex:dotCounter] objectAtIndex:0]])
     {
         pages.currentPage=dotCounter; 
         break;
@@ -746,12 +746,12 @@
 //    else 
 //        buddyFullName=fullname;
     
-    buddyFullName=buddyName;
+    buddyFullName=_buddyName;
     
     
-    debug_NSLog(@"id: %@,  full: %@", buddyName, buddyFullName);
+    debug_NSLog(@"id: %@,  full: %@", _buddyName, buddyFullName);
 if([buddyFullName isEqualToString:@""])	
-	self.title=buddyName;
+	self.title=_buddyName;
 	else
 		self.title=buddyFullName;
 	
@@ -764,9 +764,9 @@ if([buddyFullName isEqualToString:@""])
     {//fallback
     
 	
-	NSRange startrange=[buddyName rangeOfString:@"@conference"
+	NSRange startrange=[_buddyName rangeOfString:@"@conference"
 						
-										options:NSCaseInsensitiveSearch range:NSMakeRange(0, [buddyName length])];
+										options:NSCaseInsensitiveSearch range:NSMakeRange(0, [_buddyName length])];
 	
 	
 	if (startrange.location!=NSNotFound) 
@@ -777,9 +777,9 @@ if([buddyFullName isEqualToString:@""])
 	{
 
 	
-	NSRange startrange2=[buddyName rangeOfString:@"@groupchat"
+	NSRange startrange2=[_buddyName rangeOfString:@"@groupchat"
 						
-									options:NSCaseInsensitiveSearch range:NSMakeRange(0, [buddyName length])];
+									options:NSCaseInsensitiveSearch range:NSMakeRange(0, [_buddyName length])];
 	
 	
 	if (startrange2.location!=NSNotFound) 
@@ -802,11 +802,11 @@ if([buddyFullName isEqualToString:@""])
 	
 	
 	//mark any messages in from this user as  read
-	[[DataLayer sharedInstance] markAsRead:buddyName :_accountNo];
+	[[DataLayer sharedInstance] markAsRead:_buddyName :_accountNo];
 	
 	//populate the list
 //	if(thelist!=nil) [thelist release];
-	NSArray* thelist =[[DataLayer sharedInstance] messageHistory:buddyName forAccount: _accountNo];
+	NSArray* thelist =[[DataLayer sharedInstance] messageHistory:_buddyName forAccount: _accountNo];
 	//[thelist retain];
 	
 	//get icons 
@@ -814,7 +814,7 @@ if([buddyFullName isEqualToString:@""])
 	
 	
 	myIcon = [self setIcon: self.jid];
-	buddyIcon= [self setIcon: buddyName];
+	buddyIcon= [self setIcon: _buddyName];
 	
 	
 	[chatInput resignFirstResponder];
@@ -861,7 +861,7 @@ if([buddyFullName isEqualToString:@""])
     {
 	if([buddyFullName isEqualToString:@""])
 	[inHTML replaceOccurrencesOfString:@"%sender%"
-							withString:buddyName
+							withString:_buddyName
 							   options:NSCaseInsensitiveSearch
 								 range:NSMakeRange(0, [inHTML length])];
 	else
@@ -909,7 +909,7 @@ if([buddyFullName isEqualToString:@""])
 -(void) addMessageto:(NSString*)to withMessage:(NSString*) message
 {
 	
-	if([[DataLayer sharedInstance] addMessageHistoryFrom:myuser to:to forAccount:_accountNo withMessage:message actuallyFrom:myuser])
+	if([[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:_accountNo withMessage:message actuallyFrom:self.jid ])
 	{
 		debug_NSLog(@"added message"); 
 		

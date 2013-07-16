@@ -28,8 +28,8 @@
 
 -(void) createRootInterface
 {
-    self.window=[[UIWindow alloc] init];
-    self.window.screen=[UIScreen mainScreen];
+    self.window=[[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+   // self.window.screen=[UIScreen mainScreen];
     
     _tabBarController=[[UITabBarController alloc] init];
     ContactsViewController* contactsVC = [[ContactsViewController alloc] init];

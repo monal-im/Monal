@@ -273,7 +273,7 @@
     debug_NSLog(@"chat view got new message notice %@", notification.userInfo);
 
     if([[_lastSelectedUser objectForKey:@"buddy_name"] caseInsensitiveCompare:[notification.userInfo objectForKey:@"from"] ]==NSOrderedSame &&
-       [[_lastSelectedUser objectForKey:kaccountNoKey]  integerValue]==[[notification.userInfo objectForKey:kaccountNoKey] integerValue] )
+       [[_lastSelectedUser objectForKey:@"account_id" ]  integerValue]==[[notification.userInfo objectForKey:kaccountNoKey] integerValue] )
     {
         debug_NSLog(@"user currently in chat. not updating");
         return; 
@@ -413,7 +413,7 @@
     NSString* accountNo=[NSString stringWithFormat:@"%d", cell.accountNo];
   cell.count=  [[DataLayer sharedInstance] countUserUnreadMessages:cell.username forAccount:accountNo];
 
-    _lastSelectedUser=@{@"buddy_name":cell.username, kaccountNoKey: accountNo};
+
     return cell; 
 }
 
@@ -436,6 +436,8 @@
         [tableView reloadRowsAtIndexPaths:@[indexPath]
                               withRowAnimation:UITableViewRowAnimationAutomatic];
         [tableView endUpdates];
+        
+        _lastSelectedUser=[_contacts objectAtIndex:indexPath.row];
     }
     
     

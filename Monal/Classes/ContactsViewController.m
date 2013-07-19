@@ -400,9 +400,9 @@
     cell.accountNo=[[row objectForKey:@"account_id"] integerValue];
     cell.username=[row objectForKey:@"buddy_name"] ;
     
-    cell.count=[[row objectForKey:@"count"] integerValue];
+    //cell.count=[[row objectForKey:@"count"] integerValue];
     
-    //[[DataLayer sharedInstance] countUserUnreadMessages:cell.username forAccount:[NSString stringWithFormat:@"%d", cell.accountNo]];
+    [[DataLayer sharedInstance] countUserUnreadMessages:cell.username forAccount:[NSString stringWithFormat:@"%d", cell.accountNo]];
    
     return cell; 
 }

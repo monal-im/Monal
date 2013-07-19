@@ -39,8 +39,12 @@
 -(BOOL) clearBuddies:(NSString*) accountNo; 
 -(NSArray*) contactForUsername:(NSString*) username forAccount: (NSString*) accountNo;
 
+/**
+ called when an account goes offline. removes all of its contacts state info
+ */
+-(BOOL) resetContactsForAccount:(NSString*) accountNo;
+-(BOOL) resetContacts;
 
--(BOOL) resetBuddies;
 -(NSArray*) onlineBuddiesSortedBy:(NSString*) sort;
 
 -(NSArray*) offlineBuddies;

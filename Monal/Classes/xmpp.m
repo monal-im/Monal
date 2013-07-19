@@ -233,6 +233,7 @@
 	}
     
 	[_contactsVC clearContactsForAccount:_accountNo];
+    [[DataLayer sharedInstance] resetContactsForAccount:_accountNo];
     
 	debug_NSLog(@"Connections closed");
 	

@@ -558,7 +558,7 @@ static DataLayer *sharedInstance=nil;
 
 #pragma mark Buddy Property commands
 
--(BOOL) resetBuddies
+-(BOOL) resetContacts
 {
 	
 	
@@ -577,6 +577,27 @@ static DataLayer *sharedInstance=nil;
 	}
 	
 }
+
+-(BOOL) resetContactsForAccount:(NSString*) accountNo
+{
+	
+	
+    NSString* query2=[NSString stringWithFormat:@"delete from  buddy_resources  where buddy_id in (select buddy_id from  buddylist where account_id=%@);   ", accountNo];
+	[self executeNonQuery:query2];
+
+    
+	NSString* query=[NSString stringWithFormat:@"update buddylist set dirty=0, new=0, online=0, state='', status='' where account_id=%@;   ", accountNo];
+	if([self executeNonQuery:query]!=NO)
+	{
+		return YES;
+	}
+	else
+	{
+		return NO;
+	}
+	
+}
+
 
 -(NSArray*)getResourcesForUser:(NSString*)user
 {
@@ -2228,7 +2249,7 @@ NSString* query=[NSString stringWithFormat:@"select count(message_id) from  mess
     
     [dbversionCheck unlock];
     
-    [self resetBuddies];
+    [self resetContacts];
     
 	return;
 	

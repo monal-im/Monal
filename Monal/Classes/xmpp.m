@@ -202,6 +202,7 @@
 {
     debug_NSLog(@"removing streams");
     
+    
 	//prevent any new read or write
 	[_iStream setDelegate:nil];
 	[_oStream setDelegate:nil];
@@ -230,7 +231,9 @@
 	{
 		debug_NSLog(@"Exception in ostream close");
 	}
-	
+    
+	[_contactsVC clearContactsForAccount:_accountNo];
+    
 	debug_NSLog(@"Connections closed");
 	
 	debug_NSLog(@"All closed and cleaned up");
@@ -241,6 +244,7 @@
     _streamHasSpace=NO;
     _inputBuffer=[[NSMutableString alloc] init];
     _outputQueue=[[NSMutableArray alloc] init];
+  
 	
 }
 

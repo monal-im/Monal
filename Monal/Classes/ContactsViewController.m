@@ -225,6 +225,46 @@
     
 }
 
+-(void) clearContactsForAccount: (NSString*) accountNo
+{
+    //mutex to prevent others from modifying contacts at the same time
+    dispatch_sync(dispatch_get_main_queue(),
+                  ^{
+                      NSMutableArray* indexPaths =[[NSMutableArray alloc] init];
+                      NSMutableIndexSet* indexSet = [[NSMutableIndexSet alloc] init];
+                      
+                      int counter=0;
+                      for(NSDictionary* row in _contacts)
+                      {
+                          if([[row objectForKey:@"account_id"]  integerValue]==[accountNo integerValue] )
+                          {
+                              
+                              debug_NSLog(@"removing  pos %d", counter);
+                             
+                              NSIndexPath *path1 = [NSIndexPath indexPathForRow:counter inSection:konlineSection];
+                             [indexPaths addObject:path1];
+                              [indexSet addIndex:counter];
+                              
+                    
+                          }
+                          counter++;
+                      }
+                      
+                      
+                      [_contacts removeObjectsAtIndexes:indexSet];
+                      
+                   [_contactsTable beginUpdates];    
+                      [_contactsTable deleteRowsAtIndexPaths:indexPaths
+                                            withRowAnimation:UITableViewRowAnimationAutomatic];
+                    [_contactsTable endUpdates];
+                    
+                  
+                      
+                  });
+    
+    
+    
+}
 
 #pragma mark message signals
 

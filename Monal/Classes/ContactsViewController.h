@@ -45,6 +45,11 @@
 -(void) removeUser:(NSDictionary*) user;
 
 /**
+ if an account disconnects then clear out those contacts in the list
+ */
+-(void) clearContactsForAccount: (NSString*) accountNo;
+
+/**
  Receives the new message notice and will update if it is this user.
  */
 -(void) handleNewMessage:(NSNotification *)notification;

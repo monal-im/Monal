@@ -292,9 +292,12 @@
                       if(pos>=0)
                       {
                           
-                          int unreadCount=[[[_contacts objectAtIndex:pos] objectForKey:@"count"] integerValue];
-                          unreadCount++; 
-                          [[_contacts objectAtIndex:pos] setObject:[NSNumber numberWithInt:unreadCount] forKey:@"count"];
+//                          int unreadCount=[[[_contacts objectAtIndex:pos] objectForKey:@"count"] integerValue];
+//                          unreadCount++;
+//                         int unreadCount= [[DataLayer sharedInstance] countUserUnreadMessages:[notification.userInfo objectForKey:@"from"] forAccount:[notification.userInfo objectForKey:kaccountNoKey]];
+//                          [[_contacts objectAtIndex:pos] setObject: [NSNumber numberWithInt:unreadCount] forKey:@"count"];
+                          
+                          
                         
                           NSIndexPath *path1 = [NSIndexPath indexPathForRow:pos inSection:konlineSection];
                           [_contactsTable beginUpdates];
@@ -402,7 +405,7 @@
     
     //cell.count=[[row objectForKey:@"count"] integerValue];
     
-    [[DataLayer sharedInstance] countUserUnreadMessages:cell.username forAccount:[NSString stringWithFormat:@"%d", cell.accountNo]];
+  cell.count=  [[DataLayer sharedInstance] countUserUnreadMessages:cell.username forAccount:[NSString stringWithFormat:@"%d", cell.accountNo]];
    
     return cell; 
 }

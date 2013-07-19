@@ -415,13 +415,6 @@
 		}
 		else
         {
-		if([[DataLayer sharedInstance] markAsRead:_buddyName:_accountNo])
-		{
-			debug_NSLog(@"marked new messages as read");
-		}
-		else
-			debug_NSLog(@"could not mark new messages as read");
-        }
 	
 		int msgcount=0; 
 		 
@@ -499,10 +492,15 @@
 		}
 		
 	
-	
-	
-	;
-		
+            if([[DataLayer sharedInstance] markAsRead:_buddyName:_accountNo])
+            {
+                debug_NSLog(@"marked new messages as read");
+            }
+            else
+                debug_NSLog(@"could not mark new messages as read");
+        }
+
+
 	msgthread=false;
 	
 }

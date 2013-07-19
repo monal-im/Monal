@@ -55,9 +55,9 @@
     
 }
 
--(void) viewWillAppear:(BOOL)animated
+-(void) viewDidAppear:(BOOL)animated
 {
-    
+    _lastSelectedUser=nil;
 }
 
 - (void)didReceiveMemoryWarning
@@ -272,6 +272,12 @@
 {
     debug_NSLog(@"chat view got new message notice %@", notification.userInfo);
 
+    if([[_lastSelectedUser objectForKey:@"buddy_name"] caseInsensitiveCompare:[notification.userInfo objectForKey:@"from"] ]==NSOrderedSame &&
+       [[_lastSelectedUser objectForKey:kaccountNoKey]  integerValue]==[[notification.userInfo objectForKey:kaccountNoKey] integerValue] )
+    {
+        debug_NSLog(@"user currently in chat. not updating");
+        return; 
+    }
     
     dispatch_sync(dispatch_get_main_queue(),
                   ^{
@@ -404,9 +410,10 @@
     cell.username=[row objectForKey:@"buddy_name"] ;
     
     //cell.count=[[row objectForKey:@"count"] integerValue];
-    
-  cell.count=  [[DataLayer sharedInstance] countUserUnreadMessages:cell.username forAccount:[NSString stringWithFormat:@"%d", cell.accountNo]];
-   
+    NSString* accountNo=[NSString stringWithFormat:@"%d", cell.accountNo];
+  cell.count=  [[DataLayer sharedInstance] countUserUnreadMessages:cell.username forAccount:accountNo];
+
+    _lastSelectedUser=@{@"buddy_name":cell.username, kaccountNoKey: accountNo};
     return cell; 
 }
 

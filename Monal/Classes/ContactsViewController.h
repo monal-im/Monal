@@ -25,6 +25,7 @@
     NSMutableArray* _infoCells;
     NSMutableArray* _contacts;
     NSMutableArray* _offlineContacts;
+    NSDictionary* _lastSelectedUser;
 }
 
 @property (nonatomic, strong) UITableView* contactsTable;

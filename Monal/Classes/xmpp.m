@@ -67,6 +67,10 @@
     return self;
 }
 
+-(void)dealloc
+{
+    dispatch_source_cancel(_pinger);
+}
 
 -(void) setRunLoop
 {
@@ -202,6 +206,7 @@
 {
     debug_NSLog(@"removing streams");
     
+    dispatch_source_cancel(_pinger);
     
 	//prevent any new read or write
 	[_iStream setDelegate:nil];
@@ -273,6 +278,40 @@
         [stream.attributes setObject:_domain forKey:@"to"];
     [self send:stream];
 }
+
+
+
+-(void) startPing
+{
+    dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
+    
+      dispatch_async(_xmppQueue, ^{
+    _pinger = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,
+                                                     q_background);
+    
+          
+    dispatch_source_set_timer(_pinger,
+                              DISPATCH_TIME_NOW,
+                               60ull * NSEC_PER_SEC
+                              , 1ull * NSEC_PER_SEC);
+    
+    dispatch_source_set_event_handler(_pinger, ^{
+        XMPPIQ* ping =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
+        [ping setiqTo:_domain];
+        [ping setPing];
+        [self send:ping];
+    });
+    
+    dispatch_source_set_cancel_handler(_pinger, ^{
+        NSLog(@"pinger canceled");
+        dispatch_release(_pinger);
+    });
+    
+    dispatch_resume(_pinger);
+      });
+}
+
+
 
 -(NSMutableDictionary*) nextStanza
 {
@@ -457,6 +496,7 @@
                 [presence setPriority:5]; //TODO change later
                 
                 [self send:presence];
+                [self startPing];
                 
             }
         }
@@ -708,6 +748,7 @@
                     
                     [self startStream];
                     _loggedIn=YES;
+                   
                     
                     NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
                                          kinfoTypeKey:@"connect", kinfoStatusKey:@"Connecting"};

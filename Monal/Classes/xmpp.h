@@ -80,6 +80,8 @@ typedef struct
     BOOL _startTLSComplete;
     BOOL _streamHasSpace;
     
+    dispatch_source_t _pinger;
+    
 }
 
 -(void) connect;
@@ -95,6 +97,12 @@ typedef struct
  Adds the stanza to the output Queue
  */
 -(void) send:(XMLNode*) stanza;
+
+/**
+Start the periodic pinger
+ */
+-(void) startPing;
+
 
 // connection attributes
 @property (nonatomic,strong) NSString* username;

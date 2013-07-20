@@ -28,4 +28,9 @@
  */
 -(void) setiqTo:(NSString*) to;
 
+/**
+ makes iq of ping type
+ */
+-(void) setPing;
+
 @end

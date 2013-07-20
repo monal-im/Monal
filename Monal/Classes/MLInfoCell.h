@@ -10,7 +10,7 @@
 
 @interface MLInfoCell : UITableViewCell
 {
-    
+    UIActivityIndicatorView* _spinner;
 }
 
 @property (nonatomic,strong, readonly) UIButton* Cancel;

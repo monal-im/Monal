@@ -66,7 +66,15 @@
     _type=type;
     if([type isEqualToString:@"connect"])
        {
-           self.imageView.image=[UIImage imageNamed:@"connect"];
+           //self.imageView.image=[UIImage imageNamed:@"connect"];
+           _spinner=[[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
+           CGRect frame = _spinner.frame;
+           frame.origin.x+=5;
+           frame.origin.y+=2.5;
+           _spinner.frame=frame; 
+           [self.contentView addSubview:_spinner];
+           [_spinner startAnimating];
+           
        }
 }
 

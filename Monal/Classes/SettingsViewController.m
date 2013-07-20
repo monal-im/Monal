@@ -28,14 +28,21 @@
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     self.navigationItem.title=NSLocalizedString(@"Settings",@"");
-    self.view.backgroundColor=[UIColor lightGrayColor];
-    self.view.autoresizingMask=UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
-    
+   
     _settingsTable=[[UITableView alloc] initWithFrame:CGRectZero style:UITableViewStyleGrouped];
     _settingsTable.delegate=self;
     _settingsTable.dataSource=self;
-
+    _settingsTable.backgroundView=nil;
+    
     self.view=_settingsTable;
+    [self.view setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"debut_dark"]]];
+
+}
+
+-(void) viewWillAppear:(BOOL)animated
+{
+    [[UILabel appearanceWhenContainedIn:[UITableViewHeaderFooterView class], nil] setColor:[UIColor whiteColor]];
+    [[UILabel appearanceWhenContainedIn:[UITableViewHeaderFooterView class], nil] setShadowColor:nil];
 }
 
 - (void)didReceiveMemoryWarning

@@ -240,6 +240,8 @@
 		26E5BA8B132287D400D8C57A /* Settings.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26E5BA8A132287D400D8C57A /* Settings.xib */; };
 		26EB845E111644AD005446DD /* Themes in Resources */ = {isa = PBXBuildFile; fileRef = 26EB845D111644AD005446DD /* Themes */; };
 		26EB85D711166DE7005446DD /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 26EB85D611166DE7005446DD /* Icon.png */; };
+		26EE8B18179B3C77006781F3 /* debut_dark_@2X.png in Resources */ = {isa = PBXBuildFile; fileRef = 26EE8B16179B3C77006781F3 /* debut_dark_@2X.png */; };
+		26EE8B19179B3C78006781F3 /* debut_dark.png in Resources */ = {isa = PBXBuildFile; fileRef = 26EE8B17179B3C77006781F3 /* debut_dark.png */; };
 		26EF9AB51320450300FA6FB2 /* icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26EF9AB41320450300FA6FB2 /* icon@2x.png */; };
 		26F1AB351323CA590044FA18 /* GroupChat.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26F1AB341323CA590044FA18 /* GroupChat.xib */; };
 		26F1AB3A1323D0280044FA18 /* joingroup.png in Resources */ = {isa = PBXBuildFile; fileRef = 26F1AB391323D0270044FA18 /* joingroup.png */; };
@@ -539,6 +541,8 @@
 		26EB85D611166DE7005446DD /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
 		26EB85D911166F1B005446DD /* Monal_crop_256.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Monal_crop_256.png; sourceTree = "<group>"; };
 		26EC1DB1122978A100EAF934 /* AboutiPad.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = AboutiPad.xib; sourceTree = "<group>"; };
+		26EE8B16179B3C77006781F3 /* debut_dark_@2X.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "debut_dark_@2X.png"; sourceTree = "<group>"; };
+		26EE8B17179B3C77006781F3 /* debut_dark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = debut_dark.png; sourceTree = "<group>"; };
 		26EF9AB41320450300FA6FB2 /* icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon@2x.png"; sourceTree = "<group>"; };
 		26F1AB341323CA590044FA18 /* GroupChat.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = GroupChat.xib; sourceTree = "<group>"; };
 		26F1AB391323D0270044FA18 /* joingroup.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = joingroup.png; sourceTree = "<group>"; };
@@ -609,6 +613,7 @@
 		2601D9BC0FBF25D1004DB939 /* Assets */ = {
 			isa = PBXGroup;
 			children = (
+				26EE8B15179B3C6D006781F3 /* background */,
 				26347D8717910728006FF64F /* info cells */,
 				26352E6A177D1D6200E2C8FF /* buttons */,
 				2640AF47145490DC00CB4F60 /* ChatButtons */,
@@ -1084,6 +1089,15 @@
 			name = "3rd Party";
 			sourceTree = "<group>";
 		};
+		26EE8B15179B3C6D006781F3 /* background */ = {
+			isa = PBXGroup;
+			children = (
+				26EE8B16179B3C77006781F3 /* debut_dark_@2X.png */,
+				26EE8B17179B3C77006781F3 /* debut_dark.png */,
+			);
+			name = background;
+			sourceTree = "<group>";
+		};
 		26F7BB3A1115F8A300712672 /* tools */ = {
 			isa = PBXGroup;
 			children = (
@@ -1405,6 +1419,8 @@
 				2696EECF179120AC00BC54B8 /* offline@2x.png in Resources */,
 				26AE97C31794F9DB00D4AD2B /* GTalk.png in Resources */,
 				26AE97C41794F9DB00D4AD2B /* GTalk@2x.png in Resources */,
+				26EE8B18179B3C77006781F3 /* debut_dark_@2X.png in Resources */,
+				26EE8B19179B3C78006781F3 /* debut_dark.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

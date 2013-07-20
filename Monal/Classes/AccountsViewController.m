@@ -32,7 +32,9 @@
     
     self.view=_accountsTable;
     
-    _protocolList=[[DataLayer sharedInstance] protocolList]; 
+    _accountsTable.backgroundView=nil;
+    [self.view setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"debut_dark"]]];
+    _protocolList=[[DataLayer sharedInstance] protocolList];
     
 }
 
@@ -40,6 +42,8 @@
 {
     _accountList=[[DataLayer sharedInstance] accountList];
     [self.accountsTable reloadData];
+    [[UILabel appearanceWhenContainedIn:[UITableViewHeaderFooterView class], nil] setColor:[UIColor whiteColor]];
+    [[UILabel appearanceWhenContainedIn:[UITableViewHeaderFooterView class], nil] setShadowColor:nil];
 }
 
 #pragma mark memory management
@@ -166,7 +170,7 @@
             cell.textLabel.text=protocol;
             cell.imageView.image=[UIImage imageNamed:protocol];
             
-            
+            cell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
             return cell;
             break;
         }

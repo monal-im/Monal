@@ -116,12 +116,16 @@
 		
 	}
     
+    theTable.backgroundView=nil;
+    [theTable setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"debut_dark"]]];
+    
 }
 
 - (void)viewWillAppear:(BOOL)animated
 {
 	debug_NSLog(@"xmpp edit view will appear");
-	
+    [[UILabel appearanceWhenContainedIn:[UITableViewHeaderFooterView class], nil] setColor:[UIColor whiteColor]];
+    [[UILabel appearanceWhenContainedIn:[UITableViewHeaderFooterView class], nil] setShadowColor:nil];
 	
 }
 
@@ -296,21 +300,6 @@
 
 
 #pragma mark table view datasource methods
-
-//required
-- (UIView *) tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
-{
-    UIView *headerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, tableView.bounds.size.width, 30)] ;
-    
-    UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(10, 3, tableView.bounds.size.width - 10, 18)] ;
-    label.text = [self tableView:theTable titleForHeaderInSection:section];
-    label.textColor = [UIColor whiteColor];
-    label.backgroundColor = [UIColor clearColor];
-    [headerView addSubview:label];
-    
-    // [headerView setBackgroundColor:[UIColor clearColor]];
-    return headerView;
-}
 
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath

@@ -181,7 +181,7 @@
         [_contactsTable beginUpdates];
         NSIndexPath *path1 = [NSIndexPath indexPathForRow:pos inSection:konlineSection];
         [_contactsTable reloadRowsAtIndexPaths:@[path1]
-                              withRowAnimation:UITableViewRowAnimationAutomatic];
+                              withRowAnimation:UITableViewRowAnimationNone];
         [_contactsTable endUpdates];
     }
       });
@@ -308,7 +308,7 @@
                           NSIndexPath *path1 = [NSIndexPath indexPathForRow:pos inSection:konlineSection];
                           [_contactsTable beginUpdates];
                           [_contactsTable reloadRowsAtIndexPaths:@[path1]
-                                                withRowAnimation:UITableViewRowAnimationAutomatic];
+                                                withRowAnimation:UITableViewRowAnimationNone];
                           [_contactsTable endUpdates];
                       }
                   });
@@ -434,7 +434,7 @@
         
         [tableView beginUpdates];
         [tableView reloadRowsAtIndexPaths:@[indexPath]
-                              withRowAnimation:UITableViewRowAnimationAutomatic];
+                              withRowAnimation:UITableViewRowAnimationNone];
         [tableView endUpdates];
         
         _lastSelectedUser=[_contacts objectAtIndex:indexPath.row];

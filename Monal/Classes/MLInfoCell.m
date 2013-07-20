@@ -73,9 +73,9 @@
            frame.origin.y+=2.5;
            _spinner.frame=frame; 
            [self.contentView addSubview:_spinner];
-           [_spinner startAnimating];
-           
+    
        }
+    
 }
 
 

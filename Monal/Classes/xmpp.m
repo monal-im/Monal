@@ -161,9 +161,35 @@
     [self startStream];
     [self setRunLoop];
     
-#warning this needs to time out propery
+
+    
+    	dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
+        dispatch_source_t streamTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,q_background
+                                         );
+    
+        dispatch_source_set_timer(streamTimer,
+                                  dispatch_time(DISPATCH_TIME_NOW, 5ull * NSEC_PER_SEC),
+                                  1ull * NSEC_PER_SEC
+                                  , 1ull * NSEC_PER_SEC);
+
+        dispatch_source_set_event_handler(streamTimer, ^{
+           NSLog(@"stream connection timed out");
+            dispatch_source_cancel(streamTimer);
+            [self disconnect];
+        });
+
+        dispatch_source_set_cancel_handler(streamTimer, ^{
+            NSLog(@"stream timer cancelled");
+            dispatch_release(streamTimer);
+        });
+    
+       dispatch_resume(streamTimer);
+    
+    
     [_iStream open];
     [_oStream open];
+    
+    dispatch_source_cancel(streamTimer);
     
     
 }
@@ -205,9 +231,12 @@
 
 -(void) disconnect
 {
-    debug_NSLog(@"removing streams");
+ 
     
-    dispatch_source_cancel(_pinger);
+    debug_NSLog(@"removing streams");
+
+    if(self.loggedIn && _pinger)
+        dispatch_source_cancel(_pinger);
     
 	//prevent any new read or write
 	[_iStream setDelegate:nil];
@@ -220,6 +249,7 @@
                         forMode:NSDefaultRunLoopMode];
 	debug_NSLog(@"removed streams");
 	
+     dispatch_sync(_netReadQueue, ^{
 	@try
 	{
         [_iStream close];
@@ -228,15 +258,20 @@
 	{
 		debug_NSLog(@"Exception in istream close");
 	}
-	
-	@try
-	{
-		[_oStream close];
-	}
-	@catch(id theException)
-	{
-		debug_NSLog(@"Exception in ostream close");
-	}
+     });
+    
+    dispatch_sync(_netWriteQueue, ^{
+       	@try
+        {
+            [_oStream close];
+        }
+        @catch(id theException)
+        {
+            debug_NSLog(@"Exception in ostream close");
+        }
+        
+    });
+
     
 	[_contactsVC clearContactsForAccount:_accountNo];
     [[DataLayer sharedInstance] resetContactsForAccount:_accountNo];
@@ -252,7 +287,19 @@
     _inputBuffer=[[NSMutableString alloc] init];
     _outputQueue=[[NSMutableArray alloc] init];
   
+    
+    NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
+                         kinfoTypeKey:@"connect", kinfoStatusKey:@"Connecting"};
+    [self.contactsVC hideConnecting:info];
 	
+    
+    NSDictionary* info2=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
+                         kinfoTypeKey:@"connect", kinfoStatusKey:@"Disconncted"};
+    [self.contactsVC showConnecting:info2];
+    
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 5 * NSEC_PER_SEC), _xmppQueue,  ^{
+         [self.contactsVC hideConnecting:info2];
+    });
 }
 
 
@@ -840,18 +887,25 @@
             debug_NSLog(@"Stream error code=%d domain=%@   local desc:%@ ",st_error.code,st_error.domain,  st_error.localizedDescription);
             
             
+            if(st_error.code==2)// operation couldnt be completed
+            {
+                
+            }
+            
             if(st_error.code==61)// Connection refused
             {
-                break;
+               
             }
             
             
             if(st_error.code==64)// Host is down
             {
-                break;
+               
             }
             
-			break;
+            [self disconnect];
+            
+            break;
             
 		}
 		case NSStreamEventNone:
@@ -964,28 +1018,6 @@
 
 -(void) dnsDiscover
 {
-    //	dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
-    //    dispatch_source_t dnsTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,q_background
-    //                                     );
-    //
-    //    dispatch_source_set_timer(dnsTimer,
-    //                              dispatch_time(DISPATCH_TIME_NOW, 5ull * NSEC_PER_SEC),
-    //                              1ull * NSEC_PER_SEC
-    //                              , 1ull * NSEC_PER_SEC);
-    //
-    //    dispatch_source_set_event_handler(dnsTimer, ^{
-    //       NSLog(@"DNS connection timed out");
-    //        dispatch_source_cancel(dnsTimer);
-    //    });
-    //
-    //    dispatch_source_set_cancel_handler(dnsTimer, ^{
-    //        NSLog(@"DNS timer cancelled");
-    //        dispatch_release(dnsTimer);
-    //    });
-    //
-    //    dispatch_resume(dnsTimer);
-    
-    
     
 	DNSServiceRef sdRef;
 	DNSServiceErrorType res;
@@ -1012,7 +1044,7 @@
         FD_SET (sock, &set);
         
         /* Initialize the timeout data structure. */
-        timeout.tv_sec = 5ul;
+        timeout.tv_sec = 2ul;
         timeout.tv_usec = 0;
         
         /* select returns 0 if timeout, 1 if input available, -1 if error. */

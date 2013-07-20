@@ -10,11 +10,12 @@
 
 @interface MLInfoCell : UITableViewCell
 {
-    UIActivityIndicatorView* _spinner;
+    
 }
 
 @property (nonatomic,strong, readonly) UIButton* Cancel;
 @property (nonatomic,strong) NSString* type;
 @property (nonatomic,strong) NSString* accountId;
+@property (nonatomic,strong) UIActivityIndicatorView* spinner;
 
 @end

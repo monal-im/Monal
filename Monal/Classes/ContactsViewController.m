@@ -77,6 +77,8 @@
                       [_contactsTable insertRowsAtIndexPaths:@[path1]
                                             withRowAnimation:UITableViewRowAnimationAutomatic];
                       [_contactsTable endUpdates];
+                      
+                     
                   });
 }
 
@@ -378,7 +380,13 @@
         cell.type=[[_infoCells objectAtIndex:indexPath.row] objectForKey:@"type"];
         cell.accountId=[[_infoCells objectAtIndex:indexPath.row] objectForKey:@"acccountId"];
         
-        return cell; 
+        
+        if([cell.detailTextLabel.text isEqualToString:@"Connecting"])
+        {
+            [cell.spinner startAnimating];
+        }
+        
+        return cell;
     }
     
     MLContactCell* cell =[tableView dequeueReusableCellWithIdentifier:@"ContactCell"];

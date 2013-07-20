@@ -178,8 +178,9 @@
     if(_oldStyleSSL==NO)
     {
         // do DNS discovery if it hasn't already been set
-#warning  this needs to time it self out properly
-        if(!_discoveredServerList) [self dnsDiscover];
+
+        if([_discoveredServerList count]==0)
+            [self dnsDiscover];
         
         
     }
@@ -284,12 +285,9 @@
 -(void) startPing
 {
     dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
-    
-      dispatch_async(_xmppQueue, ^{
     _pinger = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,
                                                      q_background);
     
-          
     dispatch_source_set_timer(_pinger,
                               DISPATCH_TIME_NOW,
                                60ull * NSEC_PER_SEC
@@ -308,7 +306,7 @@
     });
     
     dispatch_resume(_pinger);
-      });
+  
 }
 
 
@@ -966,7 +964,29 @@
 
 -(void) dnsDiscover
 {
-	
+    //	dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
+    //    dispatch_source_t dnsTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,q_background
+    //                                     );
+    //
+    //    dispatch_source_set_timer(dnsTimer,
+    //                              dispatch_time(DISPATCH_TIME_NOW, 5ull * NSEC_PER_SEC),
+    //                              1ull * NSEC_PER_SEC
+    //                              , 1ull * NSEC_PER_SEC);
+    //
+    //    dispatch_source_set_event_handler(dnsTimer, ^{
+    //       NSLog(@"DNS connection timed out");
+    //        dispatch_source_cancel(dnsTimer);
+    //    });
+    //
+    //    dispatch_source_set_cancel_handler(dnsTimer, ^{
+    //        NSLog(@"DNS timer cancelled");
+    //        dispatch_release(dnsTimer);
+    //    });
+    //
+    //    dispatch_resume(dnsTimer);
+    
+    
+    
 	DNSServiceRef sdRef;
 	DNSServiceErrorType res;
 	
@@ -982,13 +1002,40 @@
 							  );
 	if(res==kDNSServiceErr_NoError)
 	{
-		DNSServiceRefSockFD(sdRef);
+		int sock=DNSServiceRefSockFD(sdRef);
 		
-		DNSServiceProcessResult(sdRef);
-		DNSServiceRefDeallocate(sdRef);
-	}
-    
+        fd_set set;
+        struct timeval timeout;
+        
+        /* Initialize the file descriptor set. */
+        FD_ZERO (&set);
+        FD_SET (sock, &set);
+        
+        /* Initialize the timeout data structure. */
+        timeout.tv_sec = 5ul;
+        timeout.tv_usec = 0;
+        
+        /* select returns 0 if timeout, 1 if input available, -1 if error. */
+        int ready= select (FD_SETSIZE,&set, NULL, NULL,
+                           &timeout) ;
+        
+        if(ready>0)
+        {
+            
+            DNSServiceProcessResult(sdRef);
+            DNSServiceRefDeallocate(sdRef);
+        }
+        else
+        {
+            debug_NSLog(@"dns call timed out");
+        }
+        
+    }
 }
+
+   
+    
+
 
 
 char *ConvertDomainLabelToCString_withescape(const domainlabel *const label, char *ptr, char esc)

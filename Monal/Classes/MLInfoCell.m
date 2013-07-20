@@ -59,6 +59,8 @@
 //    _Cancel.frame=CGRectMake(textLabelFrame.origin.x+textLabelFrame.size.width+5, textLabelFrame.origin.y+5, 70, 30);
 //    [self.contentView addSubview:_Cancel];
     
+    [self.contentView setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"debut_dark"]]];
+    
 }
 
 -(void)setType:(NSString *)type
@@ -75,6 +77,7 @@
            [self.contentView addSubview:_spinner];
     
        }
+
     
 }
 

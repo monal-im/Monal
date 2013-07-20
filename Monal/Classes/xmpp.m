@@ -288,18 +288,23 @@
     _outputQueue=[[NSMutableArray alloc] init];
   
     
+    dispatch_async(_xmppQueue, ^{
     NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
                          kinfoTypeKey:@"connect", kinfoStatusKey:@"Connecting"};
     [self.contactsVC hideConnecting:info];
 	
     
     NSDictionary* info2=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
-                         kinfoTypeKey:@"connect", kinfoStatusKey:@"Disconncted"};
+                         kinfoTypeKey:@"connect", kinfoStatusKey:@"Disconnected"};
     [self.contactsVC showConnecting:info2];
     
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 5 * NSEC_PER_SEC), _xmppQueue,  ^{
-         [self.contactsVC hideConnecting:info2];
+        
+        NSDictionary* info3=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
+                              kinfoTypeKey:@"connect", kinfoStatusKey:@"Disconnected"};
+         [self.contactsVC hideConnecting:info3];
     });
+    }); 
 }
 
 
@@ -903,7 +908,7 @@
                
             }
             
-            [self disconnect];
+           [self disconnect];
             
             break;
             

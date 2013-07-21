@@ -68,7 +68,7 @@
         }
     }
         
-                   });
+       });
 }
 
 -(void) connectAccountWithDictionary:(NSDictionary*)account

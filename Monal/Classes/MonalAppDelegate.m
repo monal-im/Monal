@@ -174,7 +174,12 @@
 
 -(void) applicationDidEnterBackground:(UIApplication *)application
 {
-    debug_NSLog(@"entering background");
+    UIApplicationState state = [application applicationState];
+    if (state == UIApplicationStateInactive) {
+        debug_NSLog(@"Screen lock");
+    } else if (state == UIApplicationStateBackground) {
+        debug_NSLog(@"Entering BG");
+    }
     
 
 }

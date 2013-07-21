@@ -48,7 +48,6 @@
     detailLabelFrame.size.width = self.frame.size.width-51-13-35-45;
     self.detailTextLabel.frame = detailLabelFrame;
     
-
     [self setOrb];
 }
 

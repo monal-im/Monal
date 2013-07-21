@@ -39,6 +39,9 @@
     
     self.view=_contactsTable;
     
+   // =nil;
+    [_contactsTable.backgroundView setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"debut_dark"]]];
+    
   
     _contacts=[[NSMutableArray alloc] init] ;
     _offlineContacts=[[NSMutableArray alloc] init] ;
@@ -47,6 +50,8 @@
     [_contactsTable reloadData];
 
      [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
+    
+    
 }
 
 -(void) dealloc

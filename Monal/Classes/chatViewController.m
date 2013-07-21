@@ -155,6 +155,8 @@
 -(void)viewWillAppear:(BOOL)animated
 {
     [self show];
+    [MLNotificationManager sharedInstance].currentAccountNo=self.accountNo;
+    [MLNotificationManager sharedInstance].currentContact=self.buddyName;
 }
 
 -(void) viewDidLoad
@@ -221,6 +223,9 @@
 {
 	debug_NSLog(@"chat view will hide");
 		[chatInput resignFirstResponder];
+    
+    [MLNotificationManager sharedInstance].currentAccountNo=self.accountNo;
+    [MLNotificationManager sharedInstance].currentContact=self.buddyName;
 }
 
 - (void)viewDidDisappear:(BOOL)animated

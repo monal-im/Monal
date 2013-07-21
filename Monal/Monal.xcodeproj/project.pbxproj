@@ -244,6 +244,7 @@
 		26EE8B19179B3C78006781F3 /* debut_dark.png in Resources */ = {isa = PBXBuildFile; fileRef = 26EE8B17179B3C77006781F3 /* debut_dark.png */; };
 		26EE8B1C179B55D2006781F3 /* ParseChallenge.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EE8B1B179B55D2006781F3 /* ParseChallenge.m */; };
 		26EE8B1F179B67FA006781F3 /* MLNotificationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EE8B1E179B67FA006781F3 /* MLNotificationManager.m */; };
+		26EE8B22179B7B0E006781F3 /* SlidingMessageViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EE8B21179B7B0D006781F3 /* SlidingMessageViewController.m */; };
 		26EF9AB51320450300FA6FB2 /* icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26EF9AB41320450300FA6FB2 /* icon@2x.png */; };
 		26F1AB351323CA590044FA18 /* GroupChat.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26F1AB341323CA590044FA18 /* GroupChat.xib */; };
 		26F1AB3A1323D0280044FA18 /* joingroup.png in Resources */ = {isa = PBXBuildFile; fileRef = 26F1AB391323D0270044FA18 /* joingroup.png */; };
@@ -549,6 +550,8 @@
 		26EE8B1B179B55D2006781F3 /* ParseChallenge.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParseChallenge.m; sourceTree = "<group>"; };
 		26EE8B1D179B67FA006781F3 /* MLNotificationManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLNotificationManager.h; sourceTree = "<group>"; };
 		26EE8B1E179B67FA006781F3 /* MLNotificationManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLNotificationManager.m; sourceTree = "<group>"; };
+		26EE8B20179B7B0D006781F3 /* SlidingMessageViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SlidingMessageViewController.h; sourceTree = "<group>"; };
+		26EE8B21179B7B0D006781F3 /* SlidingMessageViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SlidingMessageViewController.m; sourceTree = "<group>"; };
 		26EF9AB41320450300FA6FB2 /* icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon@2x.png"; sourceTree = "<group>"; };
 		26F1AB341323CA590044FA18 /* GroupChat.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = GroupChat.xib; sourceTree = "<group>"; };
 		26F1AB391323D0270044FA18 /* joingroup.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = joingroup.png; sourceTree = "<group>"; };
@@ -778,6 +781,8 @@
 		2636C440177BD595001CA71F /* Older UI code */ = {
 			isa = PBXGroup;
 			children = (
+				26EE8B20179B7B0D006781F3 /* SlidingMessageViewController.h */,
+				26EE8B21179B7B0D006781F3 /* SlidingMessageViewController.m */,
 				2696EED01791245A00BC54B8 /* chatViewController.h */,
 				2696EED11791245A00BC54B8 /* chatViewController.m */,
 				26D1847210F9972400340C52 /* XMPPEdit.xib */,
@@ -1481,6 +1486,7 @@
 				262D9EAA17921E82009292B4 /* XMPPMessage.m in Sources */,
 				26EE8B1C179B55D2006781F3 /* ParseChallenge.m in Sources */,
 				26EE8B1F179B67FA006781F3 /* MLNotificationManager.m in Sources */,
+				26EE8B22179B7B0E006781F3 /* SlidingMessageViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

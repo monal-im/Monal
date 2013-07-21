@@ -11,6 +11,7 @@
 #import "HPGrowingTextView.h"
 #import "MLConstants.h"
 #import "MLXMPPManager.h"
+#import "MLNotificationManager.h"
 
 
 @interface chatViewController : UIViewController <HPGrowingTextViewDelegate,UIWebViewDelegate>{

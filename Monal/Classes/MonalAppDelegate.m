@@ -20,6 +20,7 @@
 #import "SearchUsersViewController.h"
 #import "HelpViewController.h"
 #import "AboutViewController.h"
+#import "MLNotificationManager.h"
 
 //xmpp
 #import "MLXMPPManager.h"
@@ -112,7 +113,7 @@
 
 - (void)applicationDidFinishLaunching:(UIApplication *)application
 {
- [self createRootInterface];
+    [self createRootInterface];
 
     //rating
     [Appirater setAppId:@"317711500"];
@@ -122,10 +123,13 @@
     [Appirater setTimeBeforeReminding:2];
     //[Appirater setDebug:YES];
     [Appirater appLaunched:YES];
-
+    
+    [MLNotificationManager sharedInstance].window=self.window;
+    
     
     // should any accounts connect?
     [[MLXMPPManager sharedInstance] connectIfNecessary];
+    
     
     
 }

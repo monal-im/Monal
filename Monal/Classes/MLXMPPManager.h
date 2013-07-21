@@ -10,7 +10,7 @@
 #import "xmpp.h"
 #import "ContactsViewController.h"
 #import "Reachability.h"
-#import "MLNotificationManager.h"
+
 
 #define kMonalNetQueue "im.monal.netQueue"
 

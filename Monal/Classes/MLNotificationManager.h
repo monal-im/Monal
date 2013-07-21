@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "MLConstants.h"
+#import "SlidingMessageViewController.h"
 
 /**
  Singleton object that will handle all sliders, alerts and sounds. listens for new message notification. 
@@ -18,6 +19,19 @@
 }
 
 + (MLNotificationManager* )sharedInstance;
+
+@property (nonatomic, weak) UIWindow* window;
+
+/**
+ if in chat with this user then dont push messages for this user when not locked
+ */
+@property (nonatomic, strong) NSString* currentContact;
+
+/**
+ if in chat with this account's user then dont push messages for this user when not locked
+ */
+@property (nonatomic, strong) NSString* currentAccountNo;
+
 
 /**
  handles the notification. 

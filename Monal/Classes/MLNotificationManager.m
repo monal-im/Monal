@@ -87,6 +87,17 @@
                       }
                       else
                    {
+                       if(![[notification.userInfo objectForKey:@"from"] isEqualToString:self.currentContact] &&
+                          ![[notification.userInfo objectForKey:@"acountNo"] isEqualToString:self.currentAccountNo]
+                          )
+                       {
+                       
+                      SlidingMessageViewController* slidingView= [[SlidingMessageViewController alloc] correctSliderWithTitle:[notification.userInfo objectForKey:@"from"] message:[notification.userInfo objectForKey:@"messageText"] userfilename:[notification.userInfo objectForKey:@"from"] user:[notification.userInfo objectForKey:@"from"]];
+                       
+                       [self.window addSubview:slidingView.view];
+                       
+                       [slidingView showMsg];
+                       }
                        
                    }
                       

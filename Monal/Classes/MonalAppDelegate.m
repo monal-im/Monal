@@ -58,7 +58,7 @@
     SearchUsersViewController* searchUsersVC = [[SearchUsersViewController alloc] init];
     UINavigationController* searchUsersNav=[[UINavigationController alloc] initWithRootViewController:searchUsersVC];
     searchUsersNav.navigationBar.tintColor=[UIColor blackColor];
-    searchUsersNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Search Users",@"") image:[UIImage imageNamed:@"search"] tag:0];
+    searchUsersNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Search Users",@"") image:[UIImage imageNamed:@"Search"] tag:0];
     
     GroupChatViewController* groupChatVC = [[GroupChatViewController alloc] init];
     UINavigationController* groupChatNav=[[UINavigationController alloc] initWithRootViewController:groupChatVC];

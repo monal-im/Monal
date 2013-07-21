@@ -62,11 +62,18 @@
     if([elementName isEqualToString:@"show"])
     {
         _show=_messageBuffer;
+        if(_show==nil)
+            _show=@"";
+        
     }
     
     if([elementName isEqualToString:@"status"])
     {
-        _status=_messageBuffer; 
+        _status=_messageBuffer;
+        if(_status==nil)
+            _status=@"";
+        
+       
     }
     }
 }

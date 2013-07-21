@@ -1059,6 +1059,12 @@
                 
             }
             
+            
+             if(st_error.code==2)// socket not connected
+             {
+                 
+             }
+            
             if(st_error.code==61)// Connection refused
             {
                

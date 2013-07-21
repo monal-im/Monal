@@ -15,7 +15,7 @@
 
 @interface MonalAppDelegate : UIResponder <UIApplicationDelegate, UISplitViewControllerDelegate > {
     
-   
+    UIBackgroundTaskIdentifier _backgroundTask;
   
 }
 

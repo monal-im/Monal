@@ -111,7 +111,7 @@
     [self.window makeKeyAndVisible];
 }
 
-- (void)applicationDidFinishLaunching:(UIApplication *)application
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     [self createRootInterface];
 
@@ -126,23 +126,57 @@
     
     [MLNotificationManager sharedInstance].window=self.window;
     
-    
+    if([[UIApplication sharedApplication] applicationState]==UIApplicationStateBackground)
+    {
+        UIBackgroundTaskIdentifier backgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
+            
+            debug_NSLog(@"XMPP manager bgtask took too long. closing");
+            [[UIApplication sharedApplication] endBackgroundTask:_backgroundTask];
+            _backgroundTask=UIBackgroundTaskInvalid;
+            
+        }];
+        
+        if (backgroundTask != UIBackgroundTaskInvalid) {
+             debug_NSLog(@"XMPP manager connecting in background");
+                [[MLXMPPManager sharedInstance] connectIfNecessary];
+              debug_NSLog(@"XMPP manager completed background task");
+            [[UIApplication sharedApplication] endBackgroundTask:_backgroundTask];
+        }
+    }
+    else
+    {
     // should any accounts connect?
     [[MLXMPPManager sharedInstance] connectIfNecessary];
+    }
     
-    
-    
+    return YES;
 }
 
-#pragma mark backgrounding 
 -(void) applicationDidBecomeActive:(UIApplication *)application
 {
-    [UIApplication sharedApplication].applicationIconBadgeNumber=0; 
+    [UIApplication sharedApplication].applicationIconBadgeNumber=0;
+}
+
+#pragma mark notifiction 
+- (void)application:(UIApplication *)application didReceiveLocalNotification:(UILocalNotification *)notification
+{
+
+}
+
+
+
+
+#pragma mark backgrounding
+- (void)applicationWillEnterForeground:(UIApplication *)application
+{
+    
 }
 
 -(void) applicationDidEnterBackground:(UIApplication *)application
 {
+    debug_NSLog(@"entering background");
     
+
 }
 
 #pragma mark splitview controller delegate

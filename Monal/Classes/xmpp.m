@@ -652,7 +652,7 @@
         }
         else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"stream:stream"])
         {
-            ParseStream* streamNode= [[ParseStream alloc]  initWithDictionary:nextStanzaPos];
+          //  ParseStream* streamNode= [[ParseStream alloc]  initWithDictionary:nextStanzaPos];
         }
         else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"stream"])
         {

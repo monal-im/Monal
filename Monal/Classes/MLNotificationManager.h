@@ -6,8 +6,24 @@
 //
 //
 
-#import "XMPPParser.h"
+#import <Foundation/Foundation.h>
+#import "MLConstants.h"
 
-@interface MLNotificationManager : XMPPParser
+/**
+ Singleton object that will handle all sliders, alerts and sounds. listens for new message notification. 
+ */
+@interface MLNotificationManager : NSObject
+{
+    
+}
+
++ (MLNotificationManager* )sharedInstance;
+
+/**
+ handles the notification. 
+ 1. background will show alert
+ 2. foreground will show slider
+ */
+-(void) handleNewMessage:(NSNotification *)notification;
 
 @end

@@ -128,7 +128,7 @@
     
     if([[UIApplication sharedApplication] applicationState]==UIApplicationStateBackground)
     {
-        UIBackgroundTaskIdentifier backgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
+       _backgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
             
             debug_NSLog(@"XMPP manager bgtask took too long. closing");
             [[UIApplication sharedApplication] endBackgroundTask:_backgroundTask];
@@ -136,7 +136,7 @@
             
         }];
         
-        if (backgroundTask != UIBackgroundTaskInvalid) {
+        if (_backgroundTask != UIBackgroundTaskInvalid) {
              debug_NSLog(@"XMPP manager connecting in background");
                 [[MLXMPPManager sharedInstance] connectIfNecessary];
               debug_NSLog(@"XMPP manager completed background task");

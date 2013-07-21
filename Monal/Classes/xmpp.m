@@ -195,8 +195,9 @@
     
 }
 
--(void) connect
+-(void) connectionTask
 {
+    
     _disconnected=NO;
     _xmppQueue=dispatch_get_current_queue();
     
@@ -205,11 +206,10 @@
     if(_oldStyleSSL==NO)
     {
         // do DNS discovery if it hasn't already been set
-
+        
         if([_discoveredServerList count]==0)
             [self dnsDiscover];
-        
-        
+  
     }
     
     if([_discoveredServerList count]>0)
@@ -227,7 +227,34 @@
     
     [self createStreams];
     
+
+}
+
+-(void) connect
+{
+    if([[UIApplication sharedApplication] applicationState]==UIApplicationStateBackground)
+    {
+        _backgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
+            
+            debug_NSLog(@"XMPP connnect bgtask took too long. closing");
+            [[UIApplication sharedApplication] endBackgroundTask:_backgroundTask];
+            _backgroundTask=UIBackgroundTaskInvalid;
+            
+        }];
+        
+        if (_backgroundTask != UIBackgroundTaskInvalid) {
+            debug_NSLog(@"XMPP connnect bgtask start"); 
+            [self connectionTask];
+            [[UIApplication sharedApplication] endBackgroundTask:_backgroundTask];
+             debug_NSLog(@"XMPP connnect bgtask end");
+        }
+    }
+    else
+    {
+      [self connectionTask];
+    }
     
+     
 }
 
 -(void) disconnect

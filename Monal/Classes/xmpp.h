@@ -82,6 +82,8 @@ typedef struct
     
     dispatch_source_t _pinger;
     
+    UIBackgroundTaskIdentifier _backgroundTask ;
+    
 }
 
 -(void) connect;

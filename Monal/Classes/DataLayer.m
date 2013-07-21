@@ -423,7 +423,7 @@ static DataLayer *sharedInstance=nil;
 	
 	
 	
-	if(enabled==YES) [self removeEnabledAccount];//reset all
+	//if(enabled==YES) [self removeEnabledAccount];//reset all
 	
 	NSString* query=
 	[NSString stringWithFormat:@"update account  set account_name='%@', protocol_id=%@, server='%@', other_port='%@', username='%@', password='%@', secure=%d, resource='%@', domain='%@', enabled=%d, selfsigned=%d, oldstyleSSL=%d where account_id=%@",

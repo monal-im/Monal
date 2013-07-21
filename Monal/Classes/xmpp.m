@@ -25,10 +25,6 @@
 
 #define kXMPPReadSize 51200 // bytes
 
-#define kMonalNetReadQueue "im.monal.netReadQueue"
-#define kMonalNetWriteQueue "im.monal.netWriteQueue"
-
-
 
 
 @implementation xmpp
@@ -45,8 +41,11 @@
     _oldStyleSSL=NO;
     _resource=@"Monal";
     
-    _netReadQueue = dispatch_queue_create(kMonalNetReadQueue, DISPATCH_QUEUE_SERIAL);
-    _netWriteQueue = dispatch_queue_create(kMonalNetWriteQueue, DISPATCH_QUEUE_SERIAL);
+    NSString* monalNetReadQueue =[NSString  stringWithFormat:@"im.monal.netReadQueue.%@", _accountNo];
+     NSString* monalNetWriteQueue =[NSString  stringWithFormat:@"im.monal.netWriteQueue.%@", _accountNo];
+    
+    _netReadQueue = dispatch_queue_create([monalNetReadQueue UTF8String], DISPATCH_QUEUE_SERIAL);
+    _netWriteQueue = dispatch_queue_create([monalNetWriteQueue UTF8String], DISPATCH_QUEUE_SERIAL);
     
     //placing more common at top to reduce iteration
     _stanzaTypes=[NSArray arrayWithObjects:

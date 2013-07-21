@@ -37,7 +37,8 @@
     dispatch_async(dispatch_get_main_queue(),
                   ^{
                       
-                      if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
+                      if(([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
+                         || ([UIApplication sharedApplication].applicationState==UIApplicationStateInactive ))
                       {
                           //increment badge
                           [UIApplication sharedApplication].applicationIconBadgeNumber++;

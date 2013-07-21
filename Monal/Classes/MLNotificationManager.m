@@ -81,7 +81,6 @@
                               
                           }
                           
-                          [UIApplication sharedApplication].applicationIconBadgeNumber++;
    
                       }
                       else

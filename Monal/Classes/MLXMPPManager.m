@@ -28,6 +28,7 @@
     self=[super init];
     
     _connectedXMPP=[[NSMutableArray alloc] init];
+    [MLNotificationManager sharedInstance]; //create
     _netQueue = dispatch_queue_create(kMonalNetQueue, DISPATCH_QUEUE_CONCURRENT);
     return self; 
 }

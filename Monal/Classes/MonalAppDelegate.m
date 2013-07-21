@@ -130,6 +130,17 @@
     
 }
 
+#pragma mark backgrounding 
+-(void) applicationDidBecomeActive:(UIApplication *)application
+{
+    [UIApplication sharedApplication].applicationIconBadgeNumber=0; 
+}
+
+-(void) applicationDidEnterBackground:(UIApplication *)application
+{
+    
+}
+
 #pragma mark splitview controller delegate
 - (BOOL)splitViewController:(UISplitViewController *)svc shouldHideViewController:(UIViewController *)vc inOrientation:(UIInterfaceOrientation)orientation
 {

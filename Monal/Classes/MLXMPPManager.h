@@ -10,11 +10,12 @@
 #import "xmpp.h"
 #import "ContactsViewController.h"
 #import "Reachability.h"
+#import "MLNotificationManager.h"
 
 #define kMonalNetQueue "im.monal.netQueue"
 
 /**
- A manager to control all of the active XMPP connections
+ A singleton to control all of the active XMPP connections
  */
 @interface MLXMPPManager : NSObject
 {

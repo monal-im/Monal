@@ -169,7 +169,9 @@
 #pragma mark backgrounding
 - (void)applicationWillEnterForeground:(UIApplication *)application
 {
-    
+     if (_backgroundTask != UIBackgroundTaskInvalid) {
+          debug_NSLog(@"entering foreground as connect bg task is running");
+     }
 }
 
 -(void) applicationDidEnterBackground:(UIApplication *)application

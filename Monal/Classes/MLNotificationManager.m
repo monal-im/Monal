@@ -57,9 +57,6 @@
                           UILocalNotification* alarm = [[UILocalNotification alloc] init];
                           if (alarm)
                           {
-                              //setting badge
-                              alarm.applicationIconBadgeNumber=[UIApplication sharedApplication].applicationIconBadgeNumber+1;
-                              
                               //scehdule info
                               alarm.fireDate = theDate;
                               alarm.timeZone = [NSTimeZone defaultTimeZone];
@@ -83,6 +80,8 @@
                               debug_NSLog(@"Scheduled local message alert "); 
                               
                           }
+                          
+                          [UIApplication sharedApplication].applicationIconBadgeNumber++;
    
                       }
                       else

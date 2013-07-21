@@ -32,7 +32,7 @@
     return self; 
 }
 
--(xmpp*) getAccountForID:(NSString*) accountNo
+-(xmpp*) getConnectedAccountForID:(NSString*) accountNo
 {
     for (NSDictionary* account in _connectedXMPP)
     {
@@ -46,6 +46,96 @@
     return nil; 
 }
 
+-(void) connectAccount:(NSString*) accountNo
+{
+    dispatch_async(_netQueue, ^{
+
+     _accountList=[[DataLayer sharedInstance] accountList];
+    for (NSDictionary* account in _accountList)
+    {
+        if([[account objectForKey:@"account_id"] integerValue]==[accountNo integerValue])
+        {
+              [self connectAccountWithDictionary:account];
+        }
+    }
+        
+                   });
+}
+
+-(void) connectAccountWithDictionary:(NSDictionary*)account
+{
+    debug_NSLog(@"enabling account %@",[account objectForKey:@"account_name"] )
+    
+    if([[account objectForKey:@"password"] isEqualToString:@""])
+    {
+        //need to request a password
+    }
+    
+    xmpp* xmppAccount=[[xmpp alloc] init];
+    
+    xmppAccount.username=[account objectForKey:@"username"];
+    xmppAccount.domain=[account objectForKey:@"domain"];
+    xmppAccount.resource=[account objectForKey:@"resource"];
+    
+    xmppAccount.server=[account objectForKey:@"server"];
+    xmppAccount.port=[[account objectForKey:@"other_port"] integerValue];
+    xmppAccount.SSL=[[account objectForKey:@"secure"] boolValue];
+    xmppAccount.oldStyleSSL=[[account objectForKey:@"oldStyleSSL"] boolValue];
+    xmppAccount.selfSigned=[[account objectForKey:@"selfsigned"] boolValue];
+    
+    xmppAccount.accountNo=[NSString stringWithFormat:@"%@",[account objectForKey:@"account_id"]];
+    
+    PasswordManager* passMan= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",[account objectForKey:@"account_id"]]];
+    xmppAccount.password=[passMan getPassword] ;
+    
+    if(([xmppAccount.password length]==0) //&& ([tempPass length]==0)
+       )
+    {
+        // no password error
+    }
+    
+    xmppAccount.contactsVC=self.contactVC;
+    //sepcifically look for the server since we might not be online or behind firewall
+    Reachability* hostReach = [Reachability reachabilityWithHostName:xmppAccount.server ] ;
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reachabilityChanged) name:kReachabilityChangedNotification object:nil];
+    [hostReach startNotifier];
+    
+    NSDictionary* accountRow= [[NSDictionary alloc] initWithObjects:@[xmppAccount, hostReach] forKeys:@[@"xmppAccount", @"hostReach"]];
+    [_connectedXMPP addObject:accountRow];
+    
+    dispatch_async(_netQueue,
+                   ^{
+                       [xmppAccount connect];
+                       [[NSRunLoop currentRunLoop]run];
+                       
+                   });
+
+}
+
+
+-(void) disconnectAccount:(NSString*) accountNo
+{
+       dispatch_async(_netQueue, ^{
+           
+           for (NSDictionary* account in _connectedXMPP)
+           {
+               xmpp* xmppAccount=[account objectForKey:@"xmppAccount"];
+               
+               if([xmppAccount.accountNo isEqualToString:accountNo] )
+               {
+                   debug_NSLog(@"got acct cleaning up.. ");
+                   Reachability* hostReach=[account objectForKey:@"hostReach"];
+                   [hostReach stopNotifier];
+                   [ xmppAccount disconnect];
+                   [_connectedXMPP removeObject:account];
+                    debug_NSLog(@"done cleaning up account ");
+                   break;
+               }
+           }
+           
+  
+       });
+}
 
 #pragma mark XMPP communication
 -(void)sendMessage:(NSString*) message toContact:(NSString*)contact fromAccount:(NSString*) accountNo withCompletionHandler:(void (^)(BOOL success)) completion
@@ -53,7 +143,7 @@
     dispatch_async(_netQueue,
                    ^{
                        BOOL success=NO;
-                       xmpp* account=[self getAccountForID:accountNo];
+                       xmpp* account=[self getConnectedAccountForID:accountNo];
                        if(account)
                        {
                           success=YES;
@@ -76,52 +166,7 @@
     {
         if([[account objectForKey:@"enabled"] boolValue]==YES)
         {
-            debug_NSLog(@"enabling account %@",[account objectForKey:@"account_name"] )
-            
-            if([[account objectForKey:@"password"] isEqualToString:@""])
-                {
-                    //need to request a password
-                }
-            
-            xmpp* xmppAccount=[[xmpp alloc] init];
-            
-            xmppAccount.username=[account objectForKey:@"username"];
-            xmppAccount.domain=[account objectForKey:@"domain"];
-            xmppAccount.resource=[account objectForKey:@"resource"];
-      
-            xmppAccount.server=[account objectForKey:@"server"];
-            xmppAccount.port=[[account objectForKey:@"other_port"] integerValue];
-            xmppAccount.SSL=[[account objectForKey:@"secure"] boolValue];
-            xmppAccount.oldStyleSSL=[[account objectForKey:@"oldStyleSSL"] boolValue];
-            xmppAccount.selfSigned=[[account objectForKey:@"selfsigned"] boolValue];
-            
-            xmppAccount.accountNo=[NSString stringWithFormat:@"%@",[account objectForKey:@"account_id"]];
-            
-            PasswordManager* passMan= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",[account objectForKey:@"account_id"]]];
-            xmppAccount.password=[passMan getPassword] ;
-            
-            if(([xmppAccount.password length]==0) //&& ([tempPass length]==0)
-               )
-            {
-                // no password error
-            }
-          
-            xmppAccount.contactsVC=self.contactVC;
-            //sepcifically look for the server since we might not be online or behind firewall
-            Reachability* hostReach = [Reachability reachabilityWithHostName:xmppAccount.server ] ;
-            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reachabilityChanged) name:kReachabilityChangedNotification object:nil];
-            [hostReach startNotifier];
-            
-            NSDictionary* accountRow= [[NSDictionary alloc] initWithObjects:@[xmppAccount, hostReach] forKeys:@[@"xmppAccount", @"hostReach"]];
-            [_connectedXMPP addObject:accountRow];
-            
-            dispatch_async(_netQueue,
-                   ^{
-                       [xmppAccount connect];
-                       [[NSRunLoop currentRunLoop]run];
-
-                   });
-
+            [self connectAccountWithDictionary:account];
         
         }
     }

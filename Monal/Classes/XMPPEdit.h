@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "DataLayer.h"
 #import "PasswordManager.h"
+#import "MLXMPPManager.h"
 
 
 @interface XMPPEdit: UITableViewController <UITableViewDataSource, UITableViewDelegate,UITextFieldDelegate,UIActionSheetDelegate> {

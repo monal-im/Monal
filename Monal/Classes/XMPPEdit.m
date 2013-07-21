@@ -257,6 +257,14 @@
     }
 	
 	
+    if(enableSwitch.on)
+    {
+        [[MLXMPPManager sharedInstance] connectAccount:_accountno];
+    }
+    else
+    {
+        [[MLXMPPManager sharedInstance] disconnectAccount:_accountno];
+    }
 	
 }
 
@@ -267,11 +275,12 @@
 	if(buttonIndex==0)
 	{
 		[_db removeAccount:_accountno];
+        [[MLXMPPManager sharedInstance] disconnectAccount:_accountno];
 		[self.navigationController popViewControllerAnimated:true];
 		
 	}
 	
-	;
+	
 }
 
 - (IBAction) delClicked: (id) sender

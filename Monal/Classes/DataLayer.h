@@ -127,7 +127,10 @@
 
 -(BOOL) removeAccount:(NSString*) accountNo; 
 
--(BOOL) removeEnabledAccount; 
+/**
+ disables account
+ */
+-(BOOL) disableEnabledAccount:(NSString*) accountNo;
 
 #pragma mark message Commands
 -(BOOL) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom ;

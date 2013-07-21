@@ -398,7 +398,7 @@ static DataLayer *sharedInstance=nil;
     
 	
 	
-	if(enabled==YES) [self removeEnabledAccount];//reset all
+	//if(enabled==YES) [self removeEnabledAccount];//reset all
 	
 	NSString* query=
 	[NSString stringWithFormat:@"insert into account values(null, '%@', %@, '%@', '%@', '%@', '%@', %d, '%@', '%@', %d, %d, %d) ",
@@ -470,11 +470,10 @@ static DataLayer *sharedInstance=nil;
 }
 
 
--(BOOL) removeEnabledAccount
+-(BOOL) disableEnabledAccount:(NSString*) accountNo
 {
-	
-    
-	NSString* query=[NSString stringWithFormat:@"update account set enabled=0  ;"];
+
+	NSString* query=[NSString stringWithFormat:@"update account set enabled=0 where account_id=%@  ", accountNo];
 	if([self executeNonQuery:query]!=NO)
 	{
 		;

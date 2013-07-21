@@ -7,7 +7,6 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "xmpp.h"
 #import "ContactsViewController.h"
 #import "Reachability.h"
 
@@ -37,10 +36,6 @@
  */
 -(void)sendMessage:(NSString*) message toContact:(NSString*)contact fromAccount:(NSString*) accountNo withCompletionHandler:(void (^)(BOOL success)) completion;
 
-/**
-convenience functin getting account in connected array with account number/id matching
- */
--(xmpp*) getConnectedAccountForID:(NSString*) accountNo;
 
 /**
  disconnects the specified account

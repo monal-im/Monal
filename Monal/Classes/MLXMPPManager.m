@@ -8,6 +8,15 @@
 
 #import "MLXMPPManager.h"
 #import "DataLayer.h"
+#import "xmpp.h"
+
+
+@interface MLXMPPManager()
+/**
+ convenience functin getting account in connected array with account number/id matching
+ */
+-(xmpp*) getConnectedAccountForID:(NSString*) accountNo;
+@end
 
 
 @implementation MLXMPPManager
@@ -97,41 +106,48 @@
     xmppAccount.contactsVC=self.contactVC;
     //sepcifically look for the server since we might not be online or behind firewall
     Reachability* hostReach = [Reachability reachabilityWithHostName:xmppAccount.server ] ;
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reachabilityChanged) name:kReachabilityChangedNotification object:nil];
-    [hostReach startNotifier];
     
-    NSDictionary* accountRow= [[NSDictionary alloc] initWithObjects:@[xmppAccount, hostReach] forKeys:@[@"xmppAccount", @"hostReach"]];
-    [_connectedXMPP addObject:accountRow];
     
-    dispatch_async(_netQueue,
-                   ^{
-                       [xmppAccount connect];
-                       [[NSRunLoop currentRunLoop]run];
-                       
-                   });
-
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reachabilityChanged) name:kReachabilityChangedNotification object:nil];
+        [hostReach startNotifier];
+        
+        NSDictionary* accountRow= [[NSDictionary alloc] initWithObjects:@[xmppAccount, hostReach] forKeys:@[@"xmppAccount", @"hostReach"]];
+        [_connectedXMPP addObject:accountRow];
+        
+        dispatch_async(_netQueue,
+                       ^{
+                           [xmppAccount connect];
+                           [[NSRunLoop currentRunLoop]run];
+                           
+                       });
+    
+    
 }
 
 
 -(void) disconnectAccount:(NSString*) accountNo
 {
        dispatch_async(_netQueue, ^{
-           
+           int index=0;
+           int pos; 
            for (NSDictionary* account in _connectedXMPP)
            {
                xmpp* xmppAccount=[account objectForKey:@"xmppAccount"];
-               
                if([xmppAccount.accountNo isEqualToString:accountNo] )
                {
                    debug_NSLog(@"got acct cleaning up.. ");
                    Reachability* hostReach=[account objectForKey:@"hostReach"];
                    [hostReach stopNotifier];
                    [ xmppAccount disconnect];
-                   [_connectedXMPP removeObject:account];
                     debug_NSLog(@"done cleaning up account ");
+                   pos=index;
                    break;
                }
+               index++; 
            }
+           
+           if((pos>=0) && (pos<[_connectedXMPP count]))
+               [_connectedXMPP removeObjectAtIndex:index];
            
   
        });

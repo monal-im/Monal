@@ -11,6 +11,7 @@
 #import "xmpp.h"
 #import "DataLayer.h"
 #import "EncodingTools.h"
+#import "MLXMPPManager.h"
 
 //objects
 #import "XMPPIQ.h"
@@ -231,8 +232,9 @@
 
 -(void) disconnect
 {
- 
-    
+
+    BOOL neverLoggedin=NO;
+    if (!self.loggedIn) neverLoggedin=YES;
     debug_NSLog(@"removing streams");
 
     if(self.loggedIn && _pinger)
@@ -287,12 +289,10 @@
     _inputBuffer=[[NSMutableString alloc] init];
     _outputQueue=[[NSMutableArray alloc] init];
   
-   dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0); 
-    NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
-                         kinfoTypeKey:@"connect", kinfoStatusKey:@"Connecting"};
-    [self.contactsVC hideConnecting:info];
 	
-    
+    if(!neverLoggedin)
+    {
+    dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0);
     NSDictionary* info2=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
                          kinfoTypeKey:@"connect", kinfoStatusKey:@"Disconnected"};
     [self.contactsVC showConnecting:info2];
@@ -303,6 +303,13 @@
                               kinfoTypeKey:@"connect", kinfoStatusKey:@"Disconnected"};
          [self.contactsVC hideConnecting:info3];
     });
+    }
+    else
+    {
+               NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
+                             kinfoTypeKey:@"connect", kinfoStatusKey:@"Connecting"};
+        [self.contactsVC hideConnecting:info];
+    }
   
 }
 
@@ -1036,8 +1043,15 @@
                
             }
             
-           [self disconnect];
-            
+            if(self.loggedIn)
+                [self disconnect];
+            else
+            {
+                // account never worked and should be disabled and reachability should be removed
+                [[DataLayer sharedInstance] disableEnabledAccount:_accountNo];
+                [[MLXMPPManager sharedInstance] disconnectAccount:_accountNo];
+                
+            }
             break;
             
 		}

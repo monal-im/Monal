@@ -21,6 +21,7 @@
 #import "ParseIq.h"
 #import "ParsePresence.h"
 #import "ParseMessage.h"
+#import "ParseChallenge.h"
 
 #define kXMPPReadSize 51200 // bytes
 
@@ -624,8 +625,10 @@
                                             kstateKey:state,
                                             kstatusKey:status
                                             };
+                    dispatch_async(_xmppQueue, ^{
                     [self.contactsVC addUser:userDic];
                      [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactOnlineNotice object:self userInfo:userDic];
+                    });
                     
                 }
                 else
@@ -639,8 +642,10 @@
                 [[DataLayer sharedInstance] setOfflineBuddy:presenceNode forAccount:_accountNo];
                 NSDictionary* userDic=@{kusernameKey: presenceNode.user,
                                         kaccountNoKey:_accountNo};
+                dispatch_async(_xmppQueue, ^{
                 [self.contactsVC removeUser:userDic];
                 [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactOfflineNotice object:self userInfo:userDic];
+                });
                 
             }
             
@@ -685,6 +690,7 @@
                         [saslXML.attributes setObject: @"urn:ietf:params:xml:ns:xmpp-sasl"  forKey:@"xmlns"];
                         [saslXML.attributes setObject: @"PLAIN"forKey: @"mechanism"];
                         
+                        //google only uses sasl plain
                         [saslXML.attributes setObject:@"http://www.google.com/talk/protocol/auth" forKey: @"xmlns:ga"];
                         [saslXML.attributes setObject:@"true" forKey: @"ga:client-uses-full-bind-result"];
                         
@@ -695,7 +701,12 @@
                     else
                         if(streamNode.SASLDIGEST_MD5)
                         {
+                            XMLNode* saslXML= [[XMLNode alloc]init];
+                            saslXML.element=@"auth";
+                            [saslXML.attributes setObject: @"urn:ietf:params:xml:ns:xmpp-sasl"  forKey:@"xmlns"];
+                            [saslXML.attributes setObject: @"DIGEST-MD5"forKey: @"mechanism"];
                             
+                            [self send:saslXML];
                         }
                         else
                         {
@@ -775,7 +786,124 @@
         }
         else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"challenge"])
         {
+            ParseChallenge* challengeNode= [[ParseChallenge alloc]  initWithDictionary:nextStanzaPos];
+            if(challengeNode.saslChallenge)
+            {
+                XMLNode* responseXML= [[XMLNode alloc]init];
+                responseXML.element=@"response";
+                [responseXML.attributes setObject: @"urn:ietf:params:xml:ns:xmpp-sasl"  forKey:@"xmlns"];
+                
+                
+                NSString* decoded=[[NSString alloc]  initWithData: (NSData*)[EncodingTools dataWithBase64EncodedString:challengeNode.challengeText] encoding:NSASCIIStringEncoding];
+                debug_NSLog(@"decoded challenge to %@", decoded);
+                NSArray* parts =[decoded componentsSeparatedByString:@","];
+                if([parts count]<2)
+                {
+                    //this is a success message  form challenge
+                    
+                     NSArray* rspparts= [[parts objectAtIndex:0] componentsSeparatedByString:@"="];
+                    if([[rspparts objectAtIndex:0] isEqualToString:@"rspauth"])
+                    {
+                        debug_NSLog(@"digest-md5 success");
+                       
+                    }
+                 
+                }
+            else{
+                
+                NSArray* realmparts= [[parts objectAtIndex:0] componentsSeparatedByString:@"="];
+                NSArray* nonceparts= [[parts objectAtIndex:1] componentsSeparatedByString:@"="];
+                
+                NSString* realm=[[realmparts objectAtIndex:1] substringWithRange:NSMakeRange(1, [[realmparts objectAtIndex:1] length]-2)] ;
+                NSString* nonce=[nonceparts objectAtIndex:1] ;
+                nonce=[nonce substringWithRange:NSMakeRange(1, [nonce length]-2)];
+                
+                //if there is no realm
+                if(![[realmparts objectAtIndex:0]  isEqualToString:@"realm"])
+                {
+                    realm=@"";
+                    nonce=[realmparts objectAtIndex:1];
+                }
+               
+                NSData* cnonce_Data=[EncodingTools MD5: [NSString stringWithFormat:@"%d",arc4random()%100000]];
+                NSString* cnonce =[EncodingTools hexadecimalString:cnonce_Data];
+                
             
+//                if([password length]==0)
+//                {
+//                    if(theTempPass!=NULL)
+//                        password=theTempPass;
+//                    
+//                }
+                
+                //  nonce=@"580F35C1AE408E7DA57DE4DEDC5B9CA7";
+                //    cnonce=@"B9E01AE3-29E5-4FE5-9AA0-72F99742428A";
+                
+                
+                // ****** digest stuff going on here...
+                NSString* X= [NSString stringWithFormat:@"%@:%@:%@", self.username, realm, self.password ];
+                debug_NSLog(@"X: %@", X);
+                
+                NSData* Y = [EncodingTools MD5:X];
+                
+                // above is correct
+                
+                /*
+                 NSString* A1= [NSString stringWithFormat:@"%@:%@:%@:%@@%@/%@",
+                 Y,[nonce substringWithRange:NSMakeRange(1, [nonce length]-2)],cononce,account,domain,resource];
+                 */
+                
+                //  if you have the authzid  here you need it below too but it wont work on som servers
+                // so best not include it
+                
+                NSString* A1Str=[NSString stringWithFormat:@":%@:%@",
+                                 nonce,cnonce];
+                NSData* A1= [A1Str
+                             dataUsingEncoding:NSUTF8StringEncoding];
+                
+                NSMutableData *HA1data = [NSMutableData dataWithCapacity:([Y length] + [A1 length])];
+                [HA1data appendData:Y];
+                [HA1data appendData:A1];
+                debug_NSLog(@" HA1data : %@",HA1data  );
+                
+                
+                //this hash is wrong..
+                NSData* HA1=[EncodingTools DataMD5:HA1data];
+              
+                //below is correct
+                
+                NSString* A2=[NSString stringWithFormat:@"AUTHENTICATE:xmpp/%@", realm];
+                debug_NSLog(@"%@", A2);
+                NSData* HA2=[EncodingTools MD5:A2];
+                
+                NSString* KD=[NSString stringWithFormat:@"%@:%@:00000001:%@:auth:%@",
+                              [EncodingTools hexadecimalString:HA1], nonce,
+                              cnonce,
+                              [EncodingTools hexadecimalString:HA2]];
+                
+                // debug_NSLog(@" ha1: %@", [self hexadecimalString:HA1] );
+                //debug_NSLog(@" ha2: %@", [self hexadecimalString:HA2] );
+                
+                debug_NSLog(@" KD: %@", KD );
+                NSData* responseData=[EncodingTools MD5:KD];
+                // above this is ok
+                NSString* response=[NSString stringWithFormat:@"username=\"%@\",realm=\"%@\",nonce=\"%@\",cnonce=\"%@\",nc=00000001,qop=auth,digest-uri=\"xmpp/%@\",response=%@,charset=utf-8",
+                                    self.username,realm, nonce, cnonce, realm, [EncodingTools hexadecimalString:responseData]];
+                //,authzid=\"%@@%@/%@\"  ,account,domain, resource
+                
+                debug_NSLog(@"  response :  %@", response);
+                NSString* encoded=[EncodingTools encodeBase64WithString:response];
+            
+//                NSString* xmppcmd = [NSString stringWithFormat:@"<response xmlns='urn:ietf:params:xml:ns:xmpp-sasl'>%@</response>", encoded]
+//                [self talk:xmppcmd];
+            
+                responseXML.data=encoded;
+            }
+            
+                [self send:responseXML];
+                return;
+                
+            }
         }
         else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"response"])
         {
@@ -802,7 +930,9 @@
                     
                     NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
                                          kinfoTypeKey:@"connect", kinfoStatusKey:@"Connecting"};
+                    dispatch_async(_xmppQueue, ^{
                     [self.contactsVC hideConnecting:info];
+                    });
                     
                 }
             }
@@ -932,6 +1062,7 @@
 		case NSStreamEventEndEncountered:
 		{
 			debug_NSLog(@"%@ Stream end encoutered", [stream class] );
+            [self disconnect];
 			break;
 		}
 			
@@ -968,7 +1099,7 @@
     debug_NSLog("size : %d",len);
     if([_oStream write:rawstring maxLength:len]!=-1)
     {
-        
+        debug_NSLog(@"done writing ");
     }
     else
     {

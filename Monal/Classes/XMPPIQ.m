@@ -29,9 +29,10 @@
     XMLNode* resourceNode =[[XMLNode alloc] init];
     resourceNode.element=@"resource";
     resourceNode.data=resource;
+    [bindNode.children addObject:resourceNode];
     
     [self.children addObject:bindNode];
-    [self.children addObject:resourceNode];
+    
     
 }
 

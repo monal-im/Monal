@@ -202,12 +202,7 @@ static const short _base64DecodingTable[256] = {
 }
 
 
-
-
-
-
-
-- (NSString *)hexadecimalString:(NSData*) data
++ (NSString *)hexadecimalString:(NSData*) data
 {
     /* Returns hexadecimal string of NSData. Empty string if data is empty.   */
     
@@ -220,7 +215,7 @@ static const short _base64DecodingTable[256] = {
     NSMutableString     *hexString  = [NSMutableString stringWithCapacity:(dataLength * 2)];
     
     for (int i = 0; i < dataLength; ++i)
-        [hexString appendString:[NSString stringWithFormat:@"%02x", (unsigned long)dataBuffer[i]]];
+        [hexString appendString:[NSString stringWithFormat:@"%02x", (unsigned int)dataBuffer[i]]];
     
     return [NSString stringWithString:hexString];
 }

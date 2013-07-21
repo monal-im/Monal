@@ -16,5 +16,6 @@
 
 + (NSData *) MD5:(NSString*)string ;
 + (NSData *) DataMD5:(NSData*)datain;
++ (NSString *)hexadecimalString:(NSData*) data;
 
 @end

@@ -242,6 +242,7 @@
 		26EB85D711166DE7005446DD /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 26EB85D611166DE7005446DD /* Icon.png */; };
 		26EE8B18179B3C77006781F3 /* debut_dark_@2X.png in Resources */ = {isa = PBXBuildFile; fileRef = 26EE8B16179B3C77006781F3 /* debut_dark_@2X.png */; };
 		26EE8B19179B3C78006781F3 /* debut_dark.png in Resources */ = {isa = PBXBuildFile; fileRef = 26EE8B17179B3C77006781F3 /* debut_dark.png */; };
+		26EE8B1C179B55D2006781F3 /* ParseChallenge.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EE8B1B179B55D2006781F3 /* ParseChallenge.m */; };
 		26EF9AB51320450300FA6FB2 /* icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26EF9AB41320450300FA6FB2 /* icon@2x.png */; };
 		26F1AB351323CA590044FA18 /* GroupChat.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26F1AB341323CA590044FA18 /* GroupChat.xib */; };
 		26F1AB3A1323D0280044FA18 /* joingroup.png in Resources */ = {isa = PBXBuildFile; fileRef = 26F1AB391323D0270044FA18 /* joingroup.png */; };
@@ -543,6 +544,8 @@
 		26EC1DB1122978A100EAF934 /* AboutiPad.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = AboutiPad.xib; sourceTree = "<group>"; };
 		26EE8B16179B3C77006781F3 /* debut_dark_@2X.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "debut_dark_@2X.png"; sourceTree = "<group>"; };
 		26EE8B17179B3C77006781F3 /* debut_dark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = debut_dark.png; sourceTree = "<group>"; };
+		26EE8B1A179B55D2006781F3 /* ParseChallenge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParseChallenge.h; sourceTree = "<group>"; };
+		26EE8B1B179B55D2006781F3 /* ParseChallenge.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParseChallenge.m; sourceTree = "<group>"; };
 		26EF9AB41320450300FA6FB2 /* icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon@2x.png"; sourceTree = "<group>"; };
 		26F1AB341323CA590044FA18 /* GroupChat.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = GroupChat.xib; sourceTree = "<group>"; };
 		26F1AB391323D0270044FA18 /* joingroup.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = joingroup.png; sourceTree = "<group>"; };
@@ -1037,6 +1040,8 @@
 				261AC91C1788A49C00E05657 /* ParsePresence.m */,
 				262D9EA517921169009292B4 /* ParseMessage.h */,
 				262D9EA617921169009292B4 /* ParseMessage.m */,
+				26EE8B1A179B55D2006781F3 /* ParseChallenge.h */,
+				26EE8B1B179B55D2006781F3 /* ParseChallenge.m */,
 			);
 			name = Parsers;
 			sourceTree = "<group>";
@@ -1469,6 +1474,7 @@
 				2696EED21791245A00BC54B8 /* chatViewController.m in Sources */,
 				262D9EA717921169009292B4 /* ParseMessage.m in Sources */,
 				262D9EAA17921E82009292B4 /* XMPPMessage.m in Sources */,
+				26EE8B1C179B55D2006781F3 /* ParseChallenge.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

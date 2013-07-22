@@ -232,8 +232,7 @@
 
 -(void) connect
 {
-    if([[UIApplication sharedApplication] applicationState]==UIApplicationStateBackground)
-    {
+   // always scedule task to conect in bg incase user hits home button
         _backgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
             
             debug_NSLog(@"XMPP connnect bgtask took too long. closing");
@@ -245,16 +244,31 @@
         if (_backgroundTask != UIBackgroundTaskInvalid) {
             debug_NSLog(@"XMPP connnect bgtask start"); 
             [self connectionTask];
-            [[UIApplication sharedApplication] endBackgroundTask:_backgroundTask];
-             debug_NSLog(@"XMPP connnect bgtask end");
+            
+             dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0);
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 60ull * NSEC_PER_SEC), q_background,  ^{
+                
+                if(!self.loggedIn)
+                {
+                debug_NSLog(@"XMPP connnect bgtask end");
+                
+                NSDictionary* userDic=@{@"from":@"Info",
+                                        @"actuallyfrom":@"Info",
+                                        @"messageText":@"Connection closed due to prolonged network disruption.",
+                                        @"to":_fulluser,
+                                        @"accountNo":_accountNo
+                                        };
+                
+                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:userDic];
+                }
+                
+                [[UIApplication sharedApplication] endBackgroundTask:_backgroundTask];
+            });
+
+            
+          
         }
-    }
-    else
-    {
-      [self connectionTask];
-    }
     
-     
 }
 
 -(void) disconnect
@@ -1077,12 +1091,16 @@
             }
             
             if(self.loggedIn)
+            {
                 [self disconnect];
+                [self connect]; // reconnect
+            }
+            
             else
             {
                 // account never worked and should be disabled and reachability should be removed
-                [[DataLayer sharedInstance] disableEnabledAccount:_accountNo];
-                [[MLXMPPManager sharedInstance] disconnectAccount:_accountNo];
+//                [[DataLayer sharedInstance] disableEnabledAccount:_accountNo];
+//                [[MLXMPPManager sharedInstance] disconnectAccount:_accountNo];
                 
             }
             break;

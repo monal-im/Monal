@@ -25,6 +25,15 @@
 	}
 	
 	
+    //ignore error message
+	if([elementName isEqualToString:@"body"])
+	{
+		_hasBody=YES;
+		
+		return;
+	}
+	
+	
 	
 	if(([elementName isEqualToString:@"message"])  && ([[attributeDict objectForKey:@"type"] isEqualToString:kMessageGroupChatType]))
 	{

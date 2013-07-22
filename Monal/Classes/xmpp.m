@@ -393,9 +393,11 @@
                               , 1ull * NSEC_PER_SEC);
     
     dispatch_source_set_event_handler(_pinger, ^{
-        XMPPIQ* ping =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
-        [ping setiqTo:_domain];
-        [ping setPing];
+//        XMPPIQ* ping =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
+//        [ping setiqTo:_domain];
+//        [ping setPing];
+
+        XMLNode* ping =[[XMLNode alloc] initWithElement:@"ping"]; // no such element. willprint white space
         [self send:ping];
     });
     

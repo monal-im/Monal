@@ -35,6 +35,8 @@
 -(NSString*) XMLString
 {
     if(!_element) return nil; // sanity check
+ 
+    if([_element isEqualToString:@"ping"]) return @" ";
     
     NSMutableString* outputString=[[NSMutableString alloc] init];
     

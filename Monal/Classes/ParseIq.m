@@ -23,6 +23,11 @@
 - (void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict
 {
 
+    if([elementName isEqualToString:@"iq"])
+    {
+    _from=[[(NSString*)[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
+    }
+    
 	//start sessionafter bind reply
 	if([elementName isEqualToString:@"bind"])
 	{
@@ -35,13 +40,13 @@
     if([elementName isEqualToString:@"query"])
     {
         _queryXMLNS=[attributeDict objectForKey:@"xmlns"];
-        return;
+        if([_queryXMLNS isEqualToString:@"http://jabber.org/protocol/disco#info"]) _discoInfo=YES;
     }
 
      if([elementName isEqualToString:@"query"])
      {
          [_features addObject:[attributeDict objectForKey:@"val"]];
-         return; 
+          
      }
     
 }

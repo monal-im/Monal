@@ -33,4 +33,9 @@
  */
 -(void) setPing;
 
+/**
+ makes a disco info response
+ */
+-(void) setDiscoInfo;
+
 @end

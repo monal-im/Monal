@@ -565,8 +565,11 @@
                 stanzacounter++;
             }
         
-        
+        //if this happens its  probably a stream error.sanity check is  preventing crash
+        if((finalend-finalstart<=maxPos) && finalend!=NSNotFound && finalstart!=NSNotFound)
+        {
         toReturn=  [_inputBuffer substringWithRange:NSMakeRange(finalstart,finalend-finalstart)];
+        }
         if([toReturn length]==0) toReturn=nil;
         
         if(!stanzaType)
@@ -577,7 +580,7 @@
             
         }
         else{
-            if(finalend-finalstart<=maxPos)
+            if((finalend-finalstart<=maxPos) && finalend!=NSNotFound && finalstart!=NSNotFound)
             {
                 debug_NSLog("to del start %d end %d: %@", finalstart, finalend, _inputBuffer)
                 [_inputBuffer deleteCharactersInRange:NSMakeRange(finalstart, finalend-finalstart) ];
@@ -643,6 +646,16 @@
                 [self startPing];
                 
             }
+            
+            if(iqNode.discoInfo)
+            {
+                XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqResultType];
+                [discoInfo setiqTo:iqNode.from];
+                [discoInfo setDiscoInfo];
+                
+                 [self send:discoInfo];
+            }
+            
         }
         else  if([[nextStanzaPos objectForKey:@"stanzaType"]  isEqualToString:@"message"])
         {

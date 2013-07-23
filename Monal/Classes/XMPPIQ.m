@@ -36,6 +36,37 @@
     
 }
 
+-(void) setDiscoInfo
+{
+    
+    XMLNode* queryNode =[[XMLNode alloc] init];
+    queryNode.element=@"query";
+    [queryNode setXMLNS:@"http://jabber.org/protocol/disco#info"];
+    
+   NSArray* features=@[@"http://jabber.org/protocol/disco#info", @"http://jabber.org/protocol/disco#items",@"jabber:iq:version", @"http://jabber.org/protocol/muc#user",@"urn:xmpp:jingle:1",@"urn:xmpp:jingle:transports:raw-udp:0",
+                       @"urn:xmpp:jingle:transports:raw-udp:1",@"urn:xmpp:jingle:apps:rtp:1",@"urn:xmpp:jingle:apps:rtp:audio"];
+    
+    for(NSString* feature in features)
+    {
+    
+    XMLNode* featureNode =[[XMLNode alloc] init];
+    featureNode.element=@"feature";
+        [featureNode.attributes setObject:feature forKey:@"var"];
+    [queryNode.children addObject:featureNode];
+    
+   }
+    
+    XMLNode* identityNode =[[XMLNode alloc] init];
+    identityNode.element=@"identity";
+    [identityNode.attributes setObject:@"client" forKey:@"category"];
+     [identityNode.attributes setObject:@"phone" forKey:@"type"];
+     [identityNode.attributes setObject:@"monal" forKey:@"name"];
+    [queryNode.children addObject:identityNode];
+       
+    [self.children addObject:queryNode];
+    
+}
+
 -(void) setiqTo:(NSString*) to
 {
     [self.attributes setObject:to forKey:@"to"];

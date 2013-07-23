@@ -435,6 +435,12 @@
 
 -(void) sendPing
 {
+    if(!_loggedIn && !_logInStarted)
+    {
+        [self connect]; // try to reconnect
+        return; 
+    }
+    
     XMLNode* ping =[[XMLNode alloc] initWithElement:@"ping"]; // no such element. Node has logic to  print white space
     [self send:ping];
 }

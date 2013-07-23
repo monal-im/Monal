@@ -228,6 +228,8 @@
 			NSString* val = [NSString stringWithFormat:@"%@", [_db executeScalar:@"select max(account_id) from account"]];
             PasswordManager* pass= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",val]];
             [pass setPassword:passText.text] ;
+            
+            [[MLXMPPManager sharedInstance]  connectIfNecessary];
 			
 		}
 	}
@@ -254,17 +256,19 @@
         PasswordManager* pass= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",_accountno]];
         [pass setPassword: passText.text] ;
         
+   
+        if(enableSwitch.on)
+        {
+            [[MLXMPPManager sharedInstance] connectAccount:_accountno];
+        }
+        else
+        {
+            [[MLXMPPManager sharedInstance] disconnectAccount:_accountno];
+        }
     }
 	
 	
-    if(enableSwitch.on)
-    {
-        [[MLXMPPManager sharedInstance] connectAccount:_accountno];
-    }
-    else
-    {
-        [[MLXMPPManager sharedInstance] disconnectAccount:_accountno];
-    }
+   
 	
 }
 

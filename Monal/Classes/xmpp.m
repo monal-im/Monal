@@ -7,7 +7,6 @@
 //
 
 #import <CommonCrypto/CommonCrypto.h>
-
 #import "xmpp.h"
 #import "DataLayer.h"
 #import "EncodingTools.h"
@@ -26,7 +25,7 @@
 
 #define kXMPPReadSize 51200 // bytes
 
-
+#define kConnectTimeout 30ull //seconds
 
 @implementation xmpp
 
@@ -87,7 +86,7 @@
 {
     
     NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
-                         kinfoTypeKey:@"connect", kinfoStatusKey:@"Connecting"};
+                         kinfoTypeKey:@"connect", kinfoStatusKey:@"Opening Connection"};
     [self.contactsVC showConnecting:info];
     
     CFReadStreamRef readRef= NULL;
@@ -190,6 +189,10 @@
     [_iStream open];
     [_oStream open];
     
+    NSDictionary* info2=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
+                          kinfoTypeKey:@"connect", kinfoStatusKey:@"Logging in"};
+    [self.contactsVC updateConnecting:info2];
+    
     dispatch_source_cancel(streamTimer);
     
     
@@ -246,7 +249,7 @@
             [self connectionTask];
             
              dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0);
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 60ull * NSEC_PER_SEC), q_background,  ^{
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, kConnectTimeout * NSEC_PER_SEC), q_background,  ^{
                 
                 if(!self.loggedIn)
                 {
@@ -262,7 +265,14 @@
                 [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:userDic];
                 }
                 
+                NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
+                                     kinfoTypeKey:@"connect", kinfoStatusKey:@""};
+                dispatch_async(_xmppQueue, ^{
+                    [self.contactsVC hideConnecting:info];
+                });
+                
                 [[UIApplication sharedApplication] endBackgroundTask:_backgroundTask];
+                _backgroundTask=UIBackgroundTaskInvalid;
             });
 
             
@@ -274,6 +284,9 @@
 -(void) disconnect
 {
 
+    [[UIApplication sharedApplication] endBackgroundTask:_backgroundTask];
+    _backgroundTask=UIBackgroundTaskInvalid;
+    
     BOOL neverLoggedin=NO;
     if (!self.loggedIn) neverLoggedin=YES;
     debug_NSLog(@"removing streams");
@@ -339,17 +352,23 @@
     [self.contactsVC showConnecting:info2];
     
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 3ull * NSEC_PER_SEC), q_background,  ^{
-        
-        NSDictionary* info3=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
-                              kinfoTypeKey:@"connect", kinfoStatusKey:@"Disconnected"};
-         [self.contactsVC hideConnecting:info3];
+         [self.contactsVC hideConnecting:info2];
     });
     }
     else
     {
                NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
-                             kinfoTypeKey:@"connect", kinfoStatusKey:@"Connecting"};
+                             kinfoTypeKey:@"connect", kinfoStatusKey:@""};
         [self.contactsVC hideConnecting:info];
+        
+        dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0);
+        NSDictionary* info2=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
+                              kinfoTypeKey:@"connect", kinfoStatusKey:@"Could not login."};
+        [self.contactsVC showConnecting:info2];
+        
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 3ull * NSEC_PER_SEC), q_background,  ^{
+            [self.contactsVC hideConnecting:info2];
+        });
     }
   
 }
@@ -815,11 +834,18 @@
                         
                     {
                         debug_NSLog(@"Set TLS properties on streams.");
+                        NSDictionary* info2=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
+                                              kinfoTypeKey:@"connect", kinfoStatusKey:@"Securing Connection"};
+                        [self.contactsVC updateConnecting:info2];
                     }
                     else
                     {
                         debug_NSLog(@"not sure.. Could not confirm Set TLS properties on streams.");
-                        //fatal=true;
+                       
+//                        NSDictionary* info2=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
+//                                              kinfoTypeKey:@"connect", kinfoStatusKey:@"Could not secure connection"};
+//                        [self.contactsVC updateConnecting:info2];
+                        
                     }
                     
                     [self startStream];
@@ -977,7 +1003,7 @@
                    
                     
                     NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
-                                         kinfoTypeKey:@"connect", kinfoStatusKey:@"Connecting"};
+                                         kinfoTypeKey:@"connect", kinfoStatusKey:@""};
                     dispatch_async(_xmppQueue, ^{
                     [self.contactsVC hideConnecting:info];
                     });
@@ -1069,7 +1095,7 @@
             
             debug_NSLog(@"Stream error code=%d domain=%@   local desc:%@ ",st_error.code,st_error.domain,  st_error.localizedDescription);
             
-            
+           
             if(st_error.code==2)// operation couldnt be completed
             {
                 
@@ -1090,6 +1116,11 @@
             if(st_error.code==64)// Host is down
             {
                
+            }
+            
+            if(st_error.code==-9807)// Could not complete operation. SSL peobably
+            {
+                 [self disconnect];
             }
             
             if(self.loggedIn)

@@ -30,8 +30,17 @@
 
 @property (nonatomic, strong) UITableView* contactsTable;
 
-//manage info display
+/**
+ Adds an info cell
+ */
 -(void) showConnecting:(NSDictionary*) info;
+/**
+ updates the text of an info cell 
+ */
+-(void) updateConnecting:(NSDictionary*) info;
+/**
+ removes an info cell 
+ */
 -(void) hideConnecting:(NSDictionary*) info;
 
 //manage user display

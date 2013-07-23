@@ -87,6 +87,39 @@
                   });
 }
 
+-(void) updateConnecting:(NSDictionary*) info
+{
+    dispatch_sync(dispatch_get_main_queue(),
+                  ^{
+                      int pos=-1;
+                      int counter=0;
+                      for(NSDictionary* row in _infoCells)
+                      {
+                          if(([[row objectForKey:kaccountNoKey] isEqualToString:[info objectForKey:kaccountNoKey]] ) &&
+                              ([[row objectForKey:kinfoTypeKey] isEqualToString:[info objectForKey:kinfoTypeKey]] ) )
+                          {
+                              pos=counter;
+                              break;
+                          }
+                          counter++;
+                      }
+                      
+                      //not there
+                      if(pos>=0)
+                      {
+                          [_infoCells removeObjectAtIndex:pos];
+                          [_infoCells insertObject:info atIndex:pos];
+                          
+                          [_contactsTable beginUpdates];
+                          NSIndexPath *path1 = [NSIndexPath indexPathForRow:pos inSection:kinfoSection];
+                          [_contactsTable reloadRowsAtIndexPaths:@[path1]
+                                                withRowAnimation:UITableViewRowAnimationAutomatic];
+                          [_contactsTable endUpdates];
+                      }
+                  });
+}
+
+
 -(void) hideConnecting:(NSDictionary*) info
 {
     dispatch_sync(dispatch_get_main_queue(),
@@ -95,7 +128,8 @@
                       int counter=0;
                       for(NSDictionary* row in _infoCells)
                       {
-                          if([[row objectForKey:kaccountNoKey] isEqualToString:[info objectForKey:kaccountNoKey]] )
+                          if(([[row objectForKey:kaccountNoKey] isEqualToString:[info objectForKey:kaccountNoKey]] )&&
+                              ([[row objectForKey:kinfoTypeKey] isEqualToString:[info objectForKey:kinfoTypeKey]] ))
                           {
                               pos=counter;
                               break; 
@@ -103,7 +137,7 @@
                           counter++; 
                       }
                       
-                      //not there
+                      //its there
                       if(pos>=0)
                       {
                           [_infoCells removeObjectAtIndex:pos];

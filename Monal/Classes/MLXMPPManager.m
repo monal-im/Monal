@@ -73,7 +73,10 @@
 
 -(void) connectAccountWithDictionary:(NSDictionary*)account
 {
-    debug_NSLog(@"enabling account %@",[account objectForKey:@"account_name"] )
+    if ([self getConnectedAccountForID:[account objectForKey:@"account_id"]])
+        return;
+    
+    debug_NSLog(@"connecting account %@",[account objectForKey:@"account_name"] )
     
     if([[account objectForKey:@"password"] isEqualToString:@""])
     {

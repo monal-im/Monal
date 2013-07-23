@@ -485,7 +485,7 @@
         
         //make chat view
         chatViewController* chatVC = [[chatViewController alloc] initWithContact:[_contacts objectAtIndex:indexPath.row] ];
-        [self.navigationController pushViewController:chatVC animated:YES];
+        [self.currentNavController pushViewController:chatVC animated:YES];
         
         [tableView beginUpdates];
         [tableView reloadRowsAtIndexPaths:@[indexPath]

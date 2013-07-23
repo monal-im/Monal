@@ -29,6 +29,10 @@
 }
 
 @property (nonatomic, strong) UITableView* contactsTable;
+/**
+ Nav controller to push using. Ipad will push on another one. 
+ */
+@property (nonatomic, strong) UINavigationController* currentNavController;
 
 /**
  Adds an info cell

@@ -81,6 +81,7 @@
     {
         
         _chatNav=[[UINavigationController alloc] initWithRootViewController:contactsVC];
+        contactsVC.currentNavController=_chatNav;
         _chatNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Contacts",@"") image:[UIImage imageNamed:@"Buddies"] tag:0];
         
         _tabBarController.viewControllers=[NSArray arrayWithObjects:_chatNav,activeChatNav, settingsNav,  accountsNav, chatLogNav, groupChatNav, searchUsersNav, helpNav, aboutNav, nil];
@@ -96,6 +97,7 @@
         navigationControllerContacts.navigationBar.tintColor=[UIColor blackColor];
         
         _chatNav=activeChatNav;
+        contactsVC.currentNavController=_chatNav;
         _splitViewController=[[UISplitViewController alloc] init];
         self.window.rootViewController=_splitViewController;
         

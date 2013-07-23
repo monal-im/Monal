@@ -241,6 +241,7 @@
    // always scedule task to conect in bg incase user hits home button
         _backgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
             
+            // this should never happen unless we fail for 10 min
             debug_NSLog(@"XMPP connnect bgtask took too long. closing");
             [[UIApplication sharedApplication] endBackgroundTask:_backgroundTask];
             _backgroundTask=UIBackgroundTaskInvalid;
@@ -262,6 +263,7 @@
             
             dispatch_source_set_event_handler(_loginCancelOperation, ^{
              
+                //notify user
                 if(!self.loggedIn)
                 {
                     debug_NSLog(@"XMPP connnect bgtask end");
@@ -276,19 +278,25 @@
                     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:userDic];
                 }
                 
+                //hide connecting message
                 NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
                                      kinfoTypeKey:@"connect", kinfoStatusKey:@""};
                 dispatch_async(_xmppQueue, ^{
                     [self.contactsVC hideConnecting:info];
                 });
                 
-                if (_backgroundTask != UIBackgroundTaskInvalid)
-                {
-                    [[UIApplication sharedApplication] endBackgroundTask:_backgroundTask];
-                    _backgroundTask=UIBackgroundTaskInvalid;
-                }
-
                 dispatch_suspend(_loginCancelOperation);
+                
+                UIBackgroundTaskIdentifier oldBGTask=_backgroundTask; 
+                //end background task
+                if (oldBGTask != UIBackgroundTaskInvalid)
+                {
+                    [[UIApplication sharedApplication] endBackgroundTask:oldBGTask];
+                    oldBGTask=UIBackgroundTaskInvalid;
+                }
+               
+                
+                // try again 
                 
             });
             
@@ -425,6 +433,11 @@
 }
 
 
+-(void) sendPing
+{
+    XMLNode* ping =[[XMLNode alloc] initWithElement:@"ping"]; // no such element. Node has logic to  print white space
+    [self send:ping];
+}
 
 -(void) startPing
 {
@@ -442,8 +455,7 @@
 //        [ping setiqTo:_domain];
 //        [ping setPing];
 
-        XMLNode* ping =[[XMLNode alloc] initWithElement:@"ping"]; // no such element. Node has logic to  print white space
-        [self send:ping];
+        [self sendPing];
     });
     
     dispatch_source_set_cancel_handler(_pinger, ^{

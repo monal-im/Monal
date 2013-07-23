@@ -38,7 +38,28 @@
     
     _connectedXMPP=[[NSMutableArray alloc] init];
     _netQueue = dispatch_queue_create(kMonalNetQueue, DISPATCH_QUEUE_CONCURRENT);
-    return self; 
+   
+    NSTimeInterval timeInterval= 600; // 600 seconds
+    BOOL keepAlive=[[UIApplication sharedApplication] setKeepAliveTimeout:timeInterval handler:^{
+        debug_NSLog(@"began background ping");
+        for(NSDictionary* row in _connectedXMPP)
+        {
+             xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
+            [xmppAccount sendPing];
+        }
+        
+    }];
+    
+    if(keepAlive)
+    {
+        debug_NSLog(@"installed keep alive timer");
+    }
+    else
+    {
+         debug_NSLog(@"failed to install keep alive timer");
+    }
+        
+    return self;
 }
 
 -(xmpp*) getConnectedAccountForID:(NSString*) accountNo

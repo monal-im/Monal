@@ -97,6 +97,11 @@ typedef struct
 -(void) sendMessage:(NSString*) message toContact:(NSString*) contact;
 
 /**
+ crafts a ping and sends it
+ */
+-(void) sendPing; 
+
+/**
  Adds the stanza to the output Queue
  */
 -(void) send:(XMLNode*) stanza;

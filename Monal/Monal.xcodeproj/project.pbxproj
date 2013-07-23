@@ -213,6 +213,8 @@
 		269A2E62132030770044B1C8 /* Monal_crop_256.png in Resources */ = {isa = PBXBuildFile; fileRef = 26EB85D911166F1B005446DD /* Monal_crop_256.png */; };
 		269F0F1A105DDEFB00FF96F8 /* status.png in Resources */ = {isa = PBXBuildFile; fileRef = 269F0F19105DDEFB00FF96F8 /* status.png */; };
 		26A942AE130B52520034CDF7 /* offline.png in Resources */ = {isa = PBXBuildFile; fileRef = 26A942AD130B52520034CDF7 /* offline.png */; };
+		26AAE27B179F46E700271345 /* XMPP@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26AAE279179F46E700271345 /* XMPP@2x.png */; };
+		26AAE27C179F46E700271345 /* XMPP.png in Resources */ = {isa = PBXBuildFile; fileRef = 26AAE27A179F46E700271345 /* XMPP.png */; };
 		26AD610111A95CB700C39051 /* Emoticons in Resources */ = {isa = PBXBuildFile; fileRef = 26AD60DA11A95CB700C39051 /* Emoticons */; };
 		26AE97C31794F9DB00D4AD2B /* GTalk.png in Resources */ = {isa = PBXBuildFile; fileRef = 26AE97C11794F9DB00D4AD2B /* GTalk.png */; };
 		26AE97C41794F9DB00D4AD2B /* GTalk@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26AE97C21794F9DB00D4AD2B /* GTalk@2x.png */; };
@@ -493,6 +495,8 @@
 		2696EED11791245A00BC54B8 /* chatViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = chatViewController.m; sourceTree = "<group>"; };
 		269F0F19105DDEFB00FF96F8 /* status.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = status.png; sourceTree = "<group>"; };
 		26A942AD130B52520034CDF7 /* offline.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = offline.png; sourceTree = "<group>"; };
+		26AAE279179F46E700271345 /* XMPP@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "XMPP@2x.png"; sourceTree = "<group>"; };
+		26AAE27A179F46E700271345 /* XMPP.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = XMPP.png; sourceTree = "<group>"; };
 		26AD60DA11A95CB700C39051 /* Emoticons */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Emoticons; sourceTree = "<group>"; };
 		26AE97C11794F9DB00D4AD2B /* GTalk.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = GTalk.png; sourceTree = "<group>"; };
 		26AE97C21794F9DB00D4AD2B /* GTalk@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "GTalk@2x.png"; sourceTree = "<group>"; };
@@ -668,6 +672,8 @@
 		260447B80FEEC7AD00B3B5A7 /* Protocol */ = {
 			isa = PBXGroup;
 			children = (
+				26AAE279179F46E700271345 /* XMPP@2x.png */,
+				26AAE27A179F46E700271345 /* XMPP.png */,
 				26AE97C11794F9DB00D4AD2B /* GTalk.png */,
 				26AE97C21794F9DB00D4AD2B /* GTalk@2x.png */,
 				260A2CC315E713EC00DB103B /* Facebook.png */,
@@ -1433,6 +1439,8 @@
 				26AE97C41794F9DB00D4AD2B /* GTalk@2x.png in Resources */,
 				26EE8B18179B3C77006781F3 /* debut_dark_@2X.png in Resources */,
 				26EE8B19179B3C78006781F3 /* debut_dark.png in Resources */,
+				26AAE27B179F46E700271345 /* XMPP@2x.png in Resources */,
+				26AAE27C179F46E700271345 /* XMPP.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

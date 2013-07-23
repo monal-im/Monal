@@ -27,7 +27,7 @@
 
 #define kXMPPReadSize 51200 // bytes
 
-#define kConnectTimeout 10ull //seconds
+#define kConnectTimeout 20ull //seconds
 
 @implementation xmpp
 

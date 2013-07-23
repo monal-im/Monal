@@ -222,8 +222,6 @@
 		26BAFC551626537D0073728B /* Appirater.m in Sources */ = {isa = PBXBuildFile; fileRef = 26BAFC401626537D0073728B /* Appirater.m */; };
 		26BAFC561626537D0073728B /* AppiraterLocalizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 26BAFC421626537D0073728B /* AppiraterLocalizable.strings */; };
 		26BAFC571626537D0073728B /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 26BAFC4F1626537D0073728B /* README.md */; };
-		26C30590177D1A59007B92A1 /* xmpp.png in Resources */ = {isa = PBXBuildFile; fileRef = 26C3058E177D1A59007B92A1 /* xmpp.png */; };
-		26C30591177D1A59007B92A1 /* xmpp@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26C3058F177D1A59007B92A1 /* xmpp@2x.png */; };
 		26C314AD15E72CF1003A73AA /* Default~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = 26C314A715E72CF1003A73AA /* Default~iphone.png */; };
 		26C314AE15E72CF1003A73AA /* Default-Portrait@2x~ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = 26C314A815E72CF1003A73AA /* Default-Portrait@2x~ipad.png */; };
 		26C314AF15E72CF1003A73AA /* Default-Portrait~ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = 26C314A915E72CF1003A73AA /* Default-Portrait~ipad.png */; };
@@ -522,8 +520,6 @@
 		26BAFC511626537D0073728B /* sv */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = sv; path = sv.lproj/AppiraterLocalizable.strings; sourceTree = "<group>"; };
 		26BAFC521626537D0073728B /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/AppiraterLocalizable.strings"; sourceTree = "<group>"; };
 		26BAFC531626537D0073728B /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/AppiraterLocalizable.strings"; sourceTree = "<group>"; };
-		26C3058E177D1A59007B92A1 /* xmpp.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = xmpp.png; sourceTree = "<group>"; };
-		26C3058F177D1A59007B92A1 /* xmpp@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "xmpp@2x.png"; sourceTree = "<group>"; };
 		26C314A715E72CF1003A73AA /* Default~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default~iphone.png"; sourceTree = "<group>"; };
 		26C314A815E72CF1003A73AA /* Default-Portrait@2x~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-Portrait@2x~ipad.png"; sourceTree = "<group>"; };
 		26C314A915E72CF1003A73AA /* Default-Portrait~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-Portrait~ipad.png"; sourceTree = "<group>"; };
@@ -672,10 +668,8 @@
 		260447B80FEEC7AD00B3B5A7 /* Protocol */ = {
 			isa = PBXGroup;
 			children = (
-				26C3058E177D1A59007B92A1 /* xmpp.png */,
 				26AE97C11794F9DB00D4AD2B /* GTalk.png */,
 				26AE97C21794F9DB00D4AD2B /* GTalk@2x.png */,
-				26C3058F177D1A59007B92A1 /* xmpp@2x.png */,
 				260A2CC315E713EC00DB103B /* Facebook.png */,
 				260A2CC415E713EC00DB103B /* Facebook@2x.png */,
 			);
@@ -1403,8 +1397,6 @@
 				26BAFC561626537D0073728B /* AppiraterLocalizable.strings in Resources */,
 				26BAFC571626537D0073728B /* README.md in Resources */,
 				26DB380B162A0AC100982A05 /* Default-568h@2x.png in Resources */,
-				26C30590177D1A59007B92A1 /* xmpp.png in Resources */,
-				26C30591177D1A59007B92A1 /* xmpp@2x.png in Resources */,
 				26352E88177D1D6300E2C8FF /* blackButton.png in Resources */,
 				26352E89177D1D6300E2C8FF /* blackButton@2x.png in Resources */,
 				26352E8A177D1D6300E2C8FF /* blackButtonHighlight.png in Resources */,

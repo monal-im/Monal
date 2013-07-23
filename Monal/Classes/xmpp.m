@@ -346,8 +346,7 @@
 	
     if(!neverLoggedin)
     {
-    dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0);
-    NSDictionary* info2=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
+       NSDictionary* info2=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
                          kinfoTypeKey:@"connect", kinfoStatusKey:@"Disconnected"};
     [self.contactsVC showConnecting:info2];
     

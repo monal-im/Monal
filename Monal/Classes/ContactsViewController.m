@@ -83,6 +83,14 @@
                                             withRowAnimation:UITableViewRowAnimationAutomatic];
                       [_contactsTable endUpdates];
                       
+                      
+                      dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0);
+                      if([[info objectForKey:kinfoStatusKey] isEqualToString:@"Disconnected"])
+                      {
+                      dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 3ull * NSEC_PER_SEC), q_background,  ^{
+                          [self hideConnecting:info];
+                      });
+                      }
                      
                   });
 }

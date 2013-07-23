@@ -123,6 +123,7 @@ Start the periodic pinger
 // DB info
 @property (nonatomic,strong) NSString* accountNo;
 
+//we should have an enumerator for this
 @property (nonatomic,assign,readonly) BOOL logInStarted;
 @property (nonatomic,assign,readonly) BOOL loggedIn;
 @property (nonatomic,assign,readonly) BOOL disconnected; // whether an explicit disconnect had happened

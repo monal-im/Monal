@@ -36,6 +36,8 @@
     [self.view setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"debut_dark"]]];
     _protocolList=[[DataLayer sharedInstance] protocolList];
     
+    UIBarButtonItem* rightButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Reconnect",@"") style:UIBarButtonItemStyleBordered target:self action:@selector(connectIfNecessary)];
+    self.navigationItem.rightBarButtonItem=rightButton;
 }
 
 -(void) viewWillAppear:(BOOL)animated
@@ -44,6 +46,11 @@
     [self.accountsTable reloadData];
     [[UILabel appearanceWhenContainedIn:[UITableViewHeaderFooterView class], nil] setColor:[UIColor whiteColor]];
     [[UILabel appearanceWhenContainedIn:[UITableViewHeaderFooterView class], nil] setShadowColor:nil];
+}
+
+-(void) connectIfNecessary
+{
+    [[MLXMPPManager sharedInstance] connectIfNecessary];
 }
 
 #pragma mark memory management
@@ -85,13 +92,13 @@
     switch (section) {
         case 0:
         {
-            return @"Accounts";
+            return NSLocalizedString(@"Accounts",@"");
             break;
         }
             
         case 1:
         {
-            return @"Add New Account";
+            return NSLocalizedString(@"Add New Account",@"");
             break;
         }
             

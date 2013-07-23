@@ -73,7 +73,7 @@
 
 -(void) connectAccountWithDictionary:(NSDictionary*)account
 {
-    if ([self getConnectedAccountForID:[account objectForKey:@"account_id"]])
+    if ([self getConnectedAccountForID:[NSString stringWithFormat:@"%@",[account objectForKey:@"account_id"]]])
         return;
     
     debug_NSLog(@"connecting account %@",[account objectForKey:@"account_name"] )

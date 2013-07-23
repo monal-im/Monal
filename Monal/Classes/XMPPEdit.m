@@ -259,6 +259,7 @@
    
         if(enableSwitch.on)
         {
+            debug_NSLog(@"calling connect... ");
             [[MLXMPPManager sharedInstance] connectAccount:_accountno];
         }
         else

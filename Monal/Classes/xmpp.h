@@ -81,9 +81,10 @@ typedef struct
     BOOL _streamHasSpace;
     
     dispatch_source_t _pinger;
+    dispatch_source_t _loginCancelOperation;
     
     UIBackgroundTaskIdentifier _backgroundTask ;
-    
+
 }
 
 -(void) connect;
@@ -122,8 +123,10 @@ Start the periodic pinger
 // DB info
 @property (nonatomic,strong) NSString* accountNo;
 
+@property (nonatomic,assign,readonly) BOOL logInStarted;
 @property (nonatomic,assign,readonly) BOOL loggedIn;
-@property (nonatomic,assign,readonly) BOOL disconnected; // whether an explicit disconnect had happened 
+@property (nonatomic,assign,readonly) BOOL disconnected; // whether an explicit disconnect had happened
+@property (nonatomic,assign,readonly) BOOL loginError;
 
 // discovered properties
 @property (nonatomic,strong)  NSMutableArray* discoveredServerList;

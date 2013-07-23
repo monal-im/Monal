@@ -15,6 +15,7 @@
 //objects
 #import "XMPPIQ.h"
 #import "XMPPPresence.h"
+#import "XMPPMessage.h"
 
 //parsers
 #import "ParseStream.h"
@@ -22,10 +23,11 @@
 #import "ParsePresence.h"
 #import "ParseMessage.h"
 #import "ParseChallenge.h"
+#import "ParseFailure.h"
 
 #define kXMPPReadSize 51200 // bytes
 
-#define kConnectTimeout 30ull //seconds
+#define kConnectTimeout 10ull //seconds
 
 @implementation xmpp
 
@@ -235,6 +237,7 @@
 
 -(void) connect
 {
+    _logInStarted=YES;
    // always scedule task to conect in bg incase user hits home button
         _backgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
             
@@ -248,21 +251,29 @@
             debug_NSLog(@"XMPP connnect bgtask start"); 
             [self connectionTask];
             
-             dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0);
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, kConnectTimeout * NSEC_PER_SEC), q_background,  ^{
-                
+            dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0);
+            _loginCancelOperation = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,
+                                             q_background);
+            
+            dispatch_source_set_timer(_loginCancelOperation,
+                                      dispatch_time(DISPATCH_TIME_NOW, kConnectTimeout* NSEC_PER_SEC),
+                                      kConnectTimeout* NSEC_PER_SEC,
+                                      1ull * NSEC_PER_SEC);
+            
+            dispatch_source_set_event_handler(_loginCancelOperation, ^{
+             
                 if(!self.loggedIn)
                 {
-                debug_NSLog(@"XMPP connnect bgtask end");
-                
-                NSDictionary* userDic=@{@"from":@"Info",
-                                        @"actuallyfrom":@"Info",
-                                        @"messageText":@"Connection closed due to prolonged network disruption.",
-                                        @"to":_fulluser,
-                                        @"accountNo":_accountNo
-                                        };
-                
-                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:userDic];
+                    debug_NSLog(@"XMPP connnect bgtask end");
+                    
+                    NSDictionary* userDic=@{@"from":@"Info",
+                                            @"actuallyfrom":@"Info",
+                                            @"messageText":@"Connection closed. Could not connect.",
+                                            @"to":_fulluser,
+                                            @"accountNo":_accountNo
+                                            };
+                    
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:userDic];
                 }
                 
                 NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
@@ -271,22 +282,40 @@
                     [self.contactsVC hideConnecting:info];
                 });
                 
-                [[UIApplication sharedApplication] endBackgroundTask:_backgroundTask];
-                _backgroundTask=UIBackgroundTaskInvalid;
-            });
+                if (_backgroundTask != UIBackgroundTaskInvalid)
+                {
+                    [[UIApplication sharedApplication] endBackgroundTask:_backgroundTask];
+                    _backgroundTask=UIBackgroundTaskInvalid;
+                }
 
+                dispatch_suspend(_loginCancelOperation);
+                
+            });
             
-          
+            dispatch_source_set_cancel_handler(_loginCancelOperation, ^{
+                NSLog(@"login  canceled");
+                dispatch_release(_loginCancelOperation);
+            });
+            
+            dispatch_resume(_loginCancelOperation);
+            
         }
     
 }
 
 -(void) disconnect
 {
-
+    
+    if(_loginCancelOperation)
+    dispatch_suspend(_loginCancelOperation);
+    
+    if (_backgroundTask != UIBackgroundTaskInvalid)
+    {
     [[UIApplication sharedApplication] endBackgroundTask:_backgroundTask];
     _backgroundTask=UIBackgroundTaskInvalid;
+    }
     
+    _loginError=NO;
     BOOL neverLoggedin=NO;
     if (!self.loggedIn) neverLoggedin=YES;
     debug_NSLog(@"removing streams");
@@ -342,7 +371,7 @@
     _streamHasSpace=NO;
     _inputBuffer=[[NSMutableString alloc] init];
     _outputQueue=[[NSMutableArray alloc] init];
-  
+    _logInStarted=NO; 
 	
     if(!neverLoggedin)
     {
@@ -350,9 +379,7 @@
                          kinfoTypeKey:@"connect", kinfoStatusKey:@"Disconnected"};
     [self.contactsVC showConnecting:info2];
     
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 3ull * NSEC_PER_SEC), q_background,  ^{
-         [self.contactsVC hideConnecting:info2];
-    });
+   
     }
     else
     {
@@ -415,7 +442,7 @@
 //        [ping setiqTo:_domain];
 //        [ping setPing];
 
-        XMLNode* ping =[[XMLNode alloc] initWithElement:@"ping"]; // no such element. willprint white space
+        XMLNode* ping =[[XMLNode alloc] initWithElement:@"ping"]; // no such element. Node has logic to  print white space
         [self send:ping];
     });
     
@@ -855,6 +882,11 @@
         }
         else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"failure"])
         {
+            ParseFailure* failure = [[ParseFailure alloc] initWithDictionary:nextStanzaPos];
+            if(failure.saslError && failure.notAuthorized)
+            {
+                _loginError=YES;
+            }
             
         }
         else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"challenge"])

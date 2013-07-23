@@ -214,7 +214,7 @@
     else
     {
         debug_NSLog(@"reachable");
-        if(xmppAccount.disconnected==YES)
+        if((xmppAccount.disconnected==YES) && (!xmppAccount.logInStarted))
         {
             debug_NSLog(@"logging in");
             dispatch_async(_netQueue,

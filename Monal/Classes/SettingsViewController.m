@@ -35,12 +35,13 @@
     _settingsTable.backgroundView=nil;
     
     self.view=_settingsTable;
+    self.tableView=_settingsTable;
     [self.view setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"debut_dark"]]];
-
 }
 
 -(void) viewWillAppear:(BOOL)animated
 {
+    [super viewWillAppear:animated];
     [[UILabel appearanceWhenContainedIn:[UITableViewHeaderFooterView class], nil] setColor:[UIColor whiteColor]];
     [[UILabel appearanceWhenContainedIn:[UITableViewHeaderFooterView class], nil] setShadowColor:nil];
 }
@@ -146,41 +147,116 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     
-      UITableViewCell* cell=[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"AccountCell"];
-    
-    return cell;
-//    
-//    switch (indexPath.section) {
-//        case 0:
-//        {
-//             cell=[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"AccountCell"];* cell =[tableView dequeueReusableCellWithIdentifier:@"AccountCell"];
-//            if(cell==nil)
-//            {
-//                 cell=[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"AccountCell"];
-//            }
-//            return cell;
-//            break;
-//        }
-//        case 1:
-//        {
-//            UITableViewCell* cell =[tableView dequeueReusableCellWithIdentifier:@"ProtocolCell"];
-//            if(cell==nil)
-//            {
-//                cell=[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"ProtocolCell"];
-//            }
-//            return cell; 
-//            break;
-//        }
-//            
-//        default:
-//        {
-//            
-//        }
-//            break;
-//    }
-//
-//    return nil;
+      MLSettingCell* cell=[[MLSettingCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"AccountCell"];
+   
+    switch (indexPath.section) {
+        case 0:
+        {
+            //own image
+            return cell;
+            break;
+        }
+        case 1:
+        {
+            cell.textEnabled=YES;
+            cell.textField.placeholder=NSLocalizedString(@"Status Message", @"");
+            return cell;
+            break;
+        }
+            
+        case 2:
+        {
+            
+            switch(indexPath.row)
+            {
+                case 0:
+                {
+                    cell.textLabel.text=NSLocalizedString(@"Away", @"");
+                    cell.switchEnabled=YES;
+                    break;
+                }
+                case 1:
+                {
+                    cell.textLabel.text=NSLocalizedString(@"Visible", @"");
+                    cell.switchEnabled=YES;
+                    break;
+                }
+                case 2:
+                {
+                    cell.textLabel.text=NSLocalizedString(@"XMPP Priority", @"");
+                    cell.textField.placeholder=NSLocalizedString(@"Number", @"");
+                    cell.textField.keyboardType=UIKeyboardTypeNumbersAndPunctuation;
+                    cell.textEnabled=YES;
+                    break;
+                }
+                case 3:
+                {
+                    cell.textLabel.text=NSLocalizedString(@"Status iPod 🎵", @"");
+                    cell.switchEnabled=YES;
+                    break;
+                }
+                    
+                  
+            }
+             return cell; 
+            break;
+        }
+            
+        case 3:
+        {
+            cell.textLabel.text=NSLocalizedString(@"Sound Alerts", @"");
+            cell.switchEnabled=YES;
+              return cell;
+            break;
+        }
+            
+        case 4:
+        {
+            switch(indexPath.row)
+            {
+                case 0:
+                {
+                    cell.textLabel.text=NSLocalizedString(@"Message Preview", @"");
+                    cell.switchEnabled=YES;
+                    break; 
+                }
+                case 1:
+                {
+                    cell.textLabel.text=NSLocalizedString(@"Log Chats", @"");
+                    cell.switchEnabled=YES;
+                    break;
+                }
+                case 2:
+                {
+                    cell.textLabel.text=NSLocalizedString(@"Offline Contacts", @"");
+                    cell.switchEnabled=YES;
+                    break;
+                }
+                case 3:
+                {
+                    cell.textLabel.text=NSLocalizedString(@"Sort By Status", @"");
+                    cell.switchEnabled=YES;
+                    break;
+                }
+            }
+            return cell; 
+            break;
+        }
+            
+            
+        default:
+        {
+            
+        }
+            break;
+    }
+
+    return nil;
 }
+
+
+
+
 
 
 @end

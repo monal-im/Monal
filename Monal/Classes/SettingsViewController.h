@@ -7,9 +7,12 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "MLSettingCell.h"
 
-@interface SettingsViewController : UIViewController <UITableViewDataSource, UITableViewDelegate>
-
+@interface SettingsViewController : UITableViewController <UITableViewDataSource, UITableViewDelegate, UITextFieldDelegate>
+{
+    UITextField* _currentField;
+}
 
 @property (nonatomic, strong) UITableView* settingsTable;
 

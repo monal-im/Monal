@@ -278,6 +278,8 @@
                     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:userDic];
                 }
                 
+                _logInStarted=NO;
+                
                 //hide connecting message
                 NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
                                      kinfoTypeKey:@"connect", kinfoStatusKey:@""};

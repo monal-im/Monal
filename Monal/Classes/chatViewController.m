@@ -159,7 +159,7 @@
     [MLNotificationManager sharedInstance].currentContact=self.buddyName;
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshDisplay) name:UIApplicationWillEnterForegroundNotification object:nil];
+//    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshDisplay) name:UIApplicationWillEnterForegroundNotification object:nil];
 }
 
 -(void) viewWillDisappear:(BOOL)animated
@@ -275,11 +275,11 @@
 
 -(void) handleNewMessage:(NSNotification *)notification
 {
-    if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
-    {
-        return;
-    }
-    
+//    if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
+//    {
+//        return;
+//    }
+//    
     
     debug_NSLog(@"chat view got new message notice %@", notification.userInfo);
     

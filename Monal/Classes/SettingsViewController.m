@@ -55,7 +55,7 @@
 #pragma mark tableview datasource delegate
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-    return 5;
+    return 4;
 }
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
@@ -63,29 +63,23 @@
     switch (section) {
         case 0:
         {
-            return @"Current Status";
+            return @"Status";
             break;
         }
             
         case 1:
         {
-            return @"Set Status";
+            return @"Presence";
             break;
         }
             
         case 2:
         {
-            return @"Presence";
-            break;
-        }
-            
-        case 3:
-        {
             return @"Alerts";
             break;
         }
             
-        case 4:
+        case 3:
         {
             return @"General";
             break;
@@ -113,23 +107,17 @@
             
         case 1:
         {
-            return 1;
+            return 4;
             break;
         }
             
         case 2:
         {
-            return 4;
-            break;
-        }
-            
-        case 3:
-        {
             return 1;
             break;
         }
             
-        case 4:
+        case 3:
         {
             return 4;
             break;
@@ -156,15 +144,8 @@
             return cell;
             break;
         }
+   
         case 1:
-        {
-            cell.textEnabled=YES;
-            cell.textField.placeholder=NSLocalizedString(@"Status Message", @"");
-            return cell;
-            break;
-        }
-            
-        case 2:
         {
             
             switch(indexPath.row)
@@ -202,7 +183,7 @@
             break;
         }
             
-        case 3:
+        case 2:
         {
             cell.textLabel.text=NSLocalizedString(@"Sound Alerts", @"");
             cell.switchEnabled=YES;
@@ -210,7 +191,7 @@
             break;
         }
             
-        case 4:
+        case 3:
         {
             switch(indexPath.row)
             {

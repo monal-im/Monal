@@ -356,11 +356,7 @@
 
 -(void) refreshDisplay
 {
-    if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
-    {
-        return;
-    }
-    
+
     _contacts=[NSMutableArray arrayWithArray:[[DataLayer sharedInstance] onlineBuddiesSortedBy:@"Name"]];
     [self.contactsTable reloadData];
 

@@ -484,6 +484,26 @@
         [[_contacts objectAtIndex:indexPath.row] setObject:[NSNumber numberWithInt:0] forKey:@"count"];
         
         //make chat view
+        if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
+        {
+            if([[self.currentNavController topViewController] isKindOfClass:[chatViewController class]])
+            {
+                chatViewController* currentTop=(chatViewController*)[self.currentNavController topViewController];
+                if([currentTop.buddyName isEqualToString:[[_contacts objectAtIndex:indexPath.row] objectForKey:@"buddy_name"]] &&
+                   [currentTop.accountNo isEqualToString:
+                    [NSString stringWithFormat:@"%d",[[[_contacts objectAtIndex:indexPath.row] objectForKey:@"account_id"] integerValue]] ]
+                   )
+                {
+                    // do nothing
+                    return; 
+                }
+                else
+                {
+                    [self.currentNavController  popToRootViewControllerAnimated:NO];
+                }
+            }
+        }
+        
         chatViewController* chatVC = [[chatViewController alloc] initWithContact:[_contacts objectAtIndex:indexPath.row] ];
         [self.currentNavController pushViewController:chatVC animated:YES];
         

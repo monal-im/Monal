@@ -94,9 +94,17 @@
 
 -(void) connectAccountWithDictionary:(NSDictionary*)account
 {
-    if ([self getConnectedAccountForID:[NSString stringWithFormat:@"%@",[account objectForKey:@"account_id"]]])
+    xmpp* existing=[self getConnectedAccountForID:[NSString stringWithFormat:@"%@",[account objectForKey:@"account_id"]]];
+    if(existing)
+    {
+        if(!existing.loggedIn && !existing.logInStarted)
+            dispatch_async(_netQueue,
+                           ^{
+                               [existing connect];
+                           });
+        
         return;
-    
+    }
     debug_NSLog(@"connecting account %@",[account objectForKey:@"account_name"] )
     
     if([[account objectForKey:@"password"] isEqualToString:@""])

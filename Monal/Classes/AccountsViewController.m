@@ -36,8 +36,11 @@
     [self.view setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"debut_dark"]]];
     _protocolList=[[DataLayer sharedInstance] protocolList];
     
-    UIBarButtonItem* rightButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Reconnect",@"") style:UIBarButtonItemStyleBordered target:self action:@selector(connectIfNecessary)];
+    UIBarButtonItem* rightButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Reconnect All",@"") style:UIBarButtonItemStyleBordered target:self action:@selector(connectIfNecessary)];
     self.navigationItem.rightBarButtonItem=rightButton;
+    
+    UIBarButtonItem* leftButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Log out All",@"") style:UIBarButtonItemStyleBordered target:self action:@selector(logoutAll)];
+    self.navigationItem.leftBarButtonItem=leftButton;
 }
 
 -(void) viewWillAppear:(BOOL)animated
@@ -48,9 +51,17 @@
     [[UILabel appearanceWhenContainedIn:[UITableViewHeaderFooterView class], nil] setShadowColor:nil];
 }
 
+
+#pragma mark button actions
+
 -(void) connectIfNecessary
 {
     [[MLXMPPManager sharedInstance] connectIfNecessary];
+}
+
+-(void) logoutAll
+{
+    [[MLXMPPManager sharedInstance] logoutAll];
 }
 
 #pragma mark memory management

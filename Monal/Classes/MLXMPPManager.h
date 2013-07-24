@@ -32,6 +32,11 @@
 -(void)connectIfNecessary;
 
 /**
+ logout all accounts
+ */
+-(void)logoutAll;
+
+/**
  Checks if there are any enabled acconts and connects them if necessary.
  */
 -(void)sendMessage:(NSString*) message toContact:(NSString*)contact fromAccount:(NSString*) accountNo withCompletionHandler:(void (^)(BOOL success)) completion;

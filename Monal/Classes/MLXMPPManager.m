@@ -206,6 +206,21 @@
 
 
 #pragma mark Connection related
+
+-(void)logoutAll
+{
+    
+    _accountList=[[DataLayer sharedInstance] accountList];
+    for (NSDictionary* account in _accountList)
+    {
+        if([[account objectForKey:@"enabled"] boolValue]==YES)
+        {
+            [self disconnectAccount:[NSString stringWithFormat:@"%@",[account objectForKey:@ "account_id"]]];
+            
+        }
+    }
+}
+
 -(void)connectIfNecessary
 {
 

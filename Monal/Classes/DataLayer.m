@@ -513,7 +513,6 @@ static DataLayer *sharedInstance=nil;
             NSString* query=[NSString stringWithFormat:@"insert into buddylist values(null, %@, '%@', '%@','%@','','','','','',0, 0, 1);", accountNo, buddy, actualfull, nickName];
             if([self executeNonQuery:query]!=NO)
             {
-                ;
                 toReturn= YES;
             }
             else

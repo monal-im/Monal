@@ -30,12 +30,29 @@
     self.navigationItem.title=NSLocalizedString(@"About",@"");
     self.view.backgroundColor=[UIColor lightGrayColor];
     self.view.autoresizingMask=UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
+    
+    _webView=[[UIWebView alloc] init];
+    self.view=_webView;
+    
 }
+
+-(void) viewWillAppear:(BOOL)animated
+{
+    NSURL *websiteUrl = [NSURL URLWithString:@""];
+    NSError* error = nil;
+    NSString *path = [[NSBundle mainBundle] pathForResource: @"About" ofType: @"html"];
+    NSString *res = [NSString stringWithContentsOfFile: path encoding:NSUTF8StringEncoding error: &error];
+    NSString* withVer =[NSString stringWithFormat:res, [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"]];
+    
+    [_webView loadHTMLString:withVer baseURL:websiteUrl];
+}
+
 
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
+
 
 @end

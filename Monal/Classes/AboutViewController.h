@@ -10,4 +10,6 @@
 
 @interface AboutViewController : UIViewController
 
+@property (nonatomic, strong) UIWebView* webView;
+
 @end

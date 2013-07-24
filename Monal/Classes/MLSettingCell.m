@@ -36,8 +36,12 @@
        CGRect frame=CGRectMake(self.frame.size.width-_toggleSwitch.frame.size.width-30,
                                textLabelFrame.origin.y+7,_toggleSwitch.frame.size.width,
                                textLabelFrame.size.height);
-      _toggleSwitch.frame=frame; 
+    _toggleSwitch.frame=frame;
+    _toggleSwitch.on=  [[NSUserDefaults standardUserDefaults] boolForKey: _defaultKey];
+      [ _toggleSwitch addTarget:self action:@selector(switchChange) forControlEvents:UIControlEventValueChanged];
     [self.contentView addSubview: _toggleSwitch ];
+      
+    
   }
     
     if(self.textEnabled)
@@ -47,23 +51,19 @@
         CGRect frame=CGRectMake(self.frame.size.width-79-30,
                                 textLabelFrame.origin.y+9,79,
                                 textLabelFrame.size.height*2/3);
-      //  _textField.backgroundColor=[UIColor lightGrayColor];
         _textField.frame=frame;
         _textField.returnKeyType=UIReturnKeyDone;
         _textField.delegate=self;
+        _textField.text= [[NSUserDefaults standardUserDefaults] stringForKey: _defaultKey];
         [self.contentView addSubview: _textField ];
     }
-    
-    
-//    textLabelFrame.origin.x=51+13;
-//    textLabelFrame.size.width = self.frame.size.width-51-13-35-45;
-//    self.textLabel.frame = textLabelFrame;
-//    
-//   
-//    detailLabelFrame.origin.x=51+13;
-//    detailLabelFrame.size.width = self.frame.size.width-51-13-35-45;
-//    self.detailTextLabel.frame = detailLabelFrame;
 
+
+}
+
+-(void) switchChange
+{
+    [[NSUserDefaults standardUserDefaults]  setBool:_toggleSwitch.on forKey: _defaultKey];
 }
 
 #pragma mark uitextfield delegate
@@ -74,6 +74,7 @@
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField
 {
+     [[NSUserDefaults standardUserDefaults]  setObject:_textField.text forKey: _defaultKey];
     [textField resignFirstResponder];
     return YES;
 }

@@ -46,6 +46,11 @@
     [[UILabel appearanceWhenContainedIn:[UITableViewHeaderFooterView class], nil] setShadowColor:nil];
 }
 
+-(void) viewWillDisappear:(BOOL)animated
+{
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
+
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
@@ -153,12 +158,14 @@
                 case 0:
                 {
                     cell.textLabel.text=NSLocalizedString(@"Away", @"");
+                    cell.defaultKey=@"Away";
                     cell.switchEnabled=YES;
                     break;
                 }
                 case 1:
                 {
                     cell.textLabel.text=NSLocalizedString(@"Visible", @"");
+                    cell.defaultKey=@"Visible";
                     cell.switchEnabled=YES;
                     break;
                 }
@@ -167,12 +174,14 @@
                     cell.textLabel.text=NSLocalizedString(@"XMPP Priority", @"");
                     cell.textField.placeholder=NSLocalizedString(@"Number", @"");
                     cell.textField.keyboardType=UIKeyboardTypeNumbersAndPunctuation;
+                       cell.defaultKey=@"XMPPPriority";
                     cell.textEnabled=YES;
                     break;
                 }
                 case 3:
                 {
                     cell.textLabel.text=NSLocalizedString(@"Status iPod 🎵", @"");
+                       cell.defaultKey=@"MusicStatus";
                     cell.switchEnabled=YES;
                     break;
                 }
@@ -186,6 +195,7 @@
         case 2:
         {
             cell.textLabel.text=NSLocalizedString(@"Sound Alerts", @"");
+               cell.defaultKey=@"Sound";
             cell.switchEnabled=YES;
               return cell;
             break;
@@ -198,24 +208,28 @@
                 case 0:
                 {
                     cell.textLabel.text=NSLocalizedString(@"Message Preview", @"");
+                       cell.defaultKey=@"MessagePreview";
                     cell.switchEnabled=YES;
                     break; 
                 }
                 case 1:
                 {
                     cell.textLabel.text=NSLocalizedString(@"Log Chats", @"");
+                       cell.defaultKey=@"Logging";
                     cell.switchEnabled=YES;
                     break;
                 }
                 case 2:
                 {
                     cell.textLabel.text=NSLocalizedString(@"Offline Contacts", @"");
+                       cell.defaultKey=@"OfflineContact";
                     cell.switchEnabled=YES;
                     break;
                 }
                 case 3:
                 {
                     cell.textLabel.text=NSLocalizedString(@"Sort By Status", @"");
+                       cell.defaultKey=@"SortContacts";
                     cell.switchEnabled=YES;
                     break;
                 }

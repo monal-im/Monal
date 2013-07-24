@@ -12,6 +12,7 @@
 #import "ParsePresence.h"
 
 #define kMonalDBQueue "im.monal.dbQueue"
+#define kMonalContactQueue "im.monal.contactQueue"
 
 @interface DataLayer : NSObject {
 
@@ -20,6 +21,7 @@
     NSLock* dbversionCheck;
     
     dispatch_queue_t _dbQueue ;
+    dispatch_queue_t _contactQueue ;
 }
 
 
@@ -147,7 +149,7 @@
 -(BOOL) messageHistoryCleanAll:(NSString*) accountNo;
 
 -(NSArray*) messageHistoryBuddies:(NSString*) accountNo;
--(BOOL) markAsRead:(NSString*) buddy :(NSString*) accountNo;
+-(BOOL) markAsReadBuddy:(NSString*) buddy forAccount:(NSString*) accountNo;
 -(BOOL) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom ;
 
 #pragma mark new messages

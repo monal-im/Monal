@@ -47,11 +47,7 @@
     _offlineContacts=[[NSMutableArray alloc] init] ;
     _infoCells=[[NSMutableArray alloc] init] ;
 
-    [_contactsTable reloadData];
-
-     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
-    
-    
+    [_contactsTable reloadData];   
 }
 
 -(void) dealloc
@@ -60,9 +56,18 @@
     
 }
 
--(void) viewDidAppear:(BOOL)animated
+-(void) viewWillAppear:(BOOL)animated
 {
-    _lastSelectedUser=nil;
+      _lastSelectedUser=nil;
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshDisplay) name:UIApplicationWillEnterForegroundNotification object:nil];
+    [self refreshDisplay];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
+
+}
+
+-(void) viewWillDisappear:(BOOL)animated
+{
+   [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 - (void)didReceiveMemoryWarning
@@ -71,9 +76,13 @@
     // Dispose of any resources that can be recreated.
 }
 
+
+
 #pragma mark updating info display
 -(void) showConnecting:(NSDictionary*) info
 {
+   
+    
     dispatch_sync(dispatch_get_main_queue(),
                   ^{
                       [ _infoCells insertObject:info atIndex:0];
@@ -161,6 +170,17 @@
 #pragma mark updating user display
 -(void) addUser:(NSDictionary*) user
 {
+    
+    if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
+    {
+        return;
+    }
+    
+    if (self.navigationController.topViewController!=self)
+    {
+        return;
+    }
+    
       //mutex to prevent others from modifying contacts at the same time
     dispatch_sync(dispatch_get_main_queue(),
                   ^{
@@ -239,6 +259,17 @@
 
 -(void) removeUser:(NSDictionary*) user
 {
+    
+    if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
+    {
+        return;
+    }
+    
+    if (self.navigationController.topViewController!=self)
+    {
+        return;
+    }
+    
     //mutex to prevent others from modifying contacts at the same time
     dispatch_sync(dispatch_get_main_queue(),
                   ^{
@@ -276,6 +307,12 @@
 
 -(void) clearContactsForAccount: (NSString*) accountNo
 {
+    if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
+    {
+        return;
+    }
+    
+    
     //mutex to prevent others from modifying contacts at the same time
     dispatch_sync(dispatch_get_main_queue(),
                   ^{
@@ -317,17 +354,28 @@
 
 #pragma mark message signals
 
--(void) handleNewMessage:(NSNotification *)notification
+-(void) refreshDisplay
 {
-    debug_NSLog(@"chat view got new message notice %@", notification.userInfo);
-
-    if([[_lastSelectedUser objectForKey:@"buddy_name"] caseInsensitiveCompare:[notification.userInfo objectForKey:@"from"] ]==NSOrderedSame &&
-       [[_lastSelectedUser objectForKey:@"account_id" ]  integerValue]==[[notification.userInfo objectForKey:kaccountNoKey] integerValue] )
+    if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
     {
-        debug_NSLog(@"user currently in chat. not updating");
-        return; 
+        return;
     }
     
+    _contacts=[NSMutableArray arrayWithArray:[[DataLayer sharedInstance] onlineBuddiesSortedBy:@"Name"]];
+    [self.contactsTable reloadData];
+
+}
+
+
+-(void) handleNewMessage:(NSNotification *)notification
+{
+    if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
+    {
+        return;
+    }
+    
+    debug_NSLog(@"chat view got new message notice %@", notification.userInfo);
+
     dispatch_sync(dispatch_get_main_queue(),
                   ^{
                       
@@ -466,7 +514,7 @@
     
     //cell.count=[[row objectForKey:@"count"] integerValue];
     NSString* accountNo=[NSString stringWithFormat:@"%d", cell.accountNo];
-  cell.count=  [[DataLayer sharedInstance] countUserUnreadMessages:cell.username forAccount:accountNo];
+    cell.count=  [[DataLayer sharedInstance] countUserUnreadMessages:cell.username forAccount:accountNo];
 
 
     return cell; 

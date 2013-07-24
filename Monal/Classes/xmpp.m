@@ -736,7 +736,6 @@
                     debug_NSLog(@" showing as online now");
                     
                     [[DataLayer sharedInstance] setOnlineBuddy:presenceNode forAccount:_accountNo];
-                    
                     [[DataLayer sharedInstance] setBuddyState:presenceNode forAccount:_accountNo];
                     [[DataLayer sharedInstance] setBuddyStatus:presenceNode forAccount:_accountNo];
                     

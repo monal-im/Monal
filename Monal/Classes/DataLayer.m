@@ -498,26 +498,32 @@ static DataLayer *sharedInstance=nil;
 
 -(BOOL) addBuddy:(NSString*) buddy  forAccount:(NSString*) accountNo fullname:(NSString*) fullName nickname:(NSString*) nickName
 {
-	if([self isBuddyInList:buddy forAccount:accountNo]) return NO; // hard condition check ..no dupes!
-	
-  // no blank full names
-	NSString* actualfull;
-	if([fullName isEqualToString:@""])
-		actualfull=buddy;
-	
-	else actualfull=fullName;
-	
-	NSString* query=[NSString stringWithFormat:@"insert into buddylist values(null, %@, '%@', '%@','%@','','','','','',0, 0, 1);", accountNo, buddy, actualfull, nickName];
-	if([self executeNonQuery:query]!=NO)
-	{
-		;
-		return YES;
-	}
-	else
-	{
-		;
-		return NO;
-	}
+    __block BOOL toReturn=NO;
+    //this needs to be one atomic operation
+    dispatch_sync(_contactQueue, ^{
+        if(![self isBuddyInList:buddy forAccount:accountNo]) {
+     
+            // no blank full names
+            NSString* actualfull;
+            if([fullName isEqualToString:@""])
+                actualfull=buddy;
+            
+            else actualfull=fullName;
+            
+            NSString* query=[NSString stringWithFormat:@"insert into buddylist values(null, %@, '%@', '%@','%@','','','','','',0, 0, 1);", accountNo, buddy, actualfull, nickName];
+            if([self executeNonQuery:query]!=NO)
+            {
+                ;
+                toReturn= YES;
+            }
+            else
+            {
+                
+            }
+        }
+    }      );
+    
+    return toReturn; 
 	
 }
 -(BOOL) removeBuddy:(NSString*) buddy :(NSString*) accountNo
@@ -967,7 +973,11 @@ static DataLayer *sharedInstance=nil;
 -(BOOL) setResourceOnline:(ParsePresence *)presenceObj forAccount:(NSString *)accountNo
 {
     
-    //get buddyid for name and account
+    //get buddyid for name and accoun
+    if([presenceObj.user  isEqualToString:@"rob.isakson@gmail.com"])
+       {
+           debug_NSLog(@"meh");
+       }
     
     NSString* query1=[NSString stringWithFormat:@" select buddy_id from buddylist where account_id=%@ and  buddy_name='%@';", accountNo, presenceObj.user ];
     NSString* buddyid = (NSString*)[self executeScalar:query1];
@@ -1206,11 +1216,7 @@ static DataLayer *sharedInstance=nil;
 
 -(bool) isBuddyInList:(NSString*) buddy forAccount:(NSString*) accountNo
 {
-	// count # of meaages in message table
-	
-	
-	
-	
+    
 	NSString* query=[NSString stringWithFormat:@"select count(buddy_id) from buddylist where account_id=%@ and buddy_name='%@' ", accountNo, buddy];
 	
 	NSNumber* count=(NSNumber*)[self executeScalar:query];
@@ -1681,7 +1687,7 @@ static DataLayer *sharedInstance=nil;
 	}
 	
 }
--(BOOL) markAsRead:(NSString*) buddy :(NSString*) accountNo
+-(BOOL) markAsReadBuddy:(NSString*) buddy forAccount:(NSString*) accountNo
 {
 	
 	//called when a buddy is clicked
@@ -1789,7 +1795,7 @@ static DataLayer *sharedInstance=nil;
 {
 	
 	//mark messages as read
-	[self markAsRead: buddyname : accountNo];
+	[self markAsReadBuddy:buddyname forAccount:accountNo];
 	
 	NSString* query=[NSString stringWithFormat:@"delete from activechats where buddy_name='%@' and account_id=%@ ", buddyname, accountNo ];
 	//	debug_NSLog(query);
@@ -2010,6 +2016,8 @@ NSString* query=[NSString stringWithFormat:@"select count(message_id) from  mess
 -(void) initDB
 {
     _dbQueue = dispatch_queue_create(kMonalDBQueue, DISPATCH_QUEUE_SERIAL);
+    _contactQueue = dispatch_queue_create(kMonalContactQueue, DISPATCH_QUEUE_SERIAL);
+    
     
 	NSFileManager* fileManager = [NSFileManager defaultManager];
 	

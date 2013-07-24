@@ -157,18 +157,29 @@
     [self show];
     [MLNotificationManager sharedInstance].currentAccountNo=self.accountNo;
     [MLNotificationManager sharedInstance].currentContact=self.buddyName;
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshDisplay) name:UIApplicationWillEnterForegroundNotification object:nil];
+}
+
+-(void) viewWillDisappear:(BOOL)animated
+{
+    [[DataLayer sharedInstance] markAsReadBuddy:self.buddyName forAccount:self.accountNo];
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 -(void) viewDidLoad
 {
         [super viewDidLoad];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
+  
 }
 
 -(void) dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
+
+#pragma mark textview
 
 -(void)resignTextView
 {
@@ -219,15 +230,6 @@
 }
 
 
-- (void)viewWillDisappear:(BOOL)animated 
-{
-	debug_NSLog(@"chat view will hide");
-		[chatInput resignFirstResponder];
-    
-    [MLNotificationManager sharedInstance].currentAccountNo=self.accountNo;
-    [MLNotificationManager sharedInstance].currentContact=self.buddyName;
-}
-
 - (void)viewDidDisappear:(BOOL)animated
 {
 	debug_NSLog(@"chat view did hide"); 
@@ -265,8 +267,20 @@
 
 #pragma mark message signals
 
+
+-(void)refreshDisplay
+{
+    [self show];
+}
+
 -(void) handleNewMessage:(NSNotification *)notification
 {
+    if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
+    {
+        return;
+    }
+    
+    
     debug_NSLog(@"chat view got new message notice %@", notification.userInfo);
     
     if([[notification.userInfo objectForKey:@"accountNo"] isEqualToString:_accountNo]
@@ -496,13 +510,6 @@
 			msgcount++; 
 		}
 		
-	
-            if([[DataLayer sharedInstance] markAsRead:_buddyName:_accountNo])
-            {
-                debug_NSLog(@"marked new messages as read");
-            }
-            else
-                debug_NSLog(@"could not mark new messages as read");
         }
 
 
@@ -791,10 +798,7 @@ if([buddyFullName isEqualToString:@""])
 	
 	[chatInput setDelegate:self];
 	
-	
-	//mark any messages in from this user as  read
-	[[DataLayer sharedInstance] markAsRead:_buddyName :_accountNo];
-	
+
 	//populate the list
 //	if(thelist!=nil) [thelist release];
 	NSArray* thelist =[[DataLayer sharedInstance] messageHistory:_buddyName forAccount: _accountNo];

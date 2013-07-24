@@ -15,9 +15,11 @@ Notable features:
 
 This is  update that  fixes bugs.
 1. stability related bug fixes
-2. fixed opening app in landscape mode for ipad
-3. you must explicity set self signed certs if needed
-4. you must explicity set old style SSL if needed
+2. You may login to mutiple accounts
+3. fixed opening app in landscape mode for ipad
+4. you must explicity set self signed certs if needed
+5. you must explicity set old style SSL if it is needed
+
 
 
       

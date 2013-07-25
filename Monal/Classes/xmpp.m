@@ -237,12 +237,33 @@
 
 -(void) connect
 {
+    if(_loggedIn || _logInStarted)
+    {
+        debug_NSLog(@"assymetrical call to login without a teardown");
+        return;
+    }
+    
     _logInStarted=YES;
    // always scedule task to conect in bg incase user hits home button
         _backgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
             
+            //notify user
+            if(!self.loggedIn)
+            {
+                debug_NSLog(@"XMPP connnect bgtask end");
+                
+                NSDictionary* userDic=@{@"from":@"Info",
+                                        @"actuallyfrom":@"Info",
+                                        @"messageText":@"Connection closed. Could not connect.",
+                                        @"to":_fulluser,
+                                        @"accountNo":_accountNo
+                                        };
+                
+                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:userDic];
+            }
+            
             // this should never happen unless we fail for 10 min
-            debug_NSLog(@"XMPP connnect bgtask took too long. closing");
+            debug_NSLog(@"XMPP connnect bgtask took too long. closing app..");
             [[UIApplication sharedApplication] endBackgroundTask:_backgroundTask];
             _backgroundTask=UIBackgroundTaskInvalid;
             
@@ -262,44 +283,30 @@
                                       1ull * NSEC_PER_SEC);
             
             dispatch_source_set_event_handler(_loginCancelOperation, ^{
-             
-                //notify user
-                if(!self.loggedIn)
-                {
-                    debug_NSLog(@"XMPP connnect bgtask end");
-                    
-                    NSDictionary* userDic=@{@"from":@"Info",
-                                            @"actuallyfrom":@"Info",
-                                            @"messageText":@"Connection closed. Could not connect.",
-                                            @"to":_fulluser,
-                                            @"accountNo":_accountNo
-                                            };
-                    
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:userDic];
-                }
-                
-                _logInStarted=NO;
+    
+                dispatch_suspend(_loginCancelOperation);
+                UIBackgroundTaskIdentifier oldBGTask=_backgroundTask;
                 
                 //hide connecting message
                 NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
                                      kinfoTypeKey:@"connect", kinfoStatusKey:@""};
                 dispatch_async(_xmppQueue, ^{
                     [self.contactsVC hideConnecting:info];
+                    // try again
+                    if(!self.loggedIn)
+                    {
+                    [self disconnect];
+                    [self connect];
+                    }
                 });
                 
-                dispatch_suspend(_loginCancelOperation);
-                
-                UIBackgroundTaskIdentifier oldBGTask=_backgroundTask; 
                 //end background task
                 if (oldBGTask != UIBackgroundTaskInvalid)
                 {
                     [[UIApplication sharedApplication] endBackgroundTask:oldBGTask];
                     oldBGTask=UIBackgroundTaskInvalid;
                 }
-               
-                
-                // try again 
-                
+ 
             });
             
             dispatch_source_set_cancel_handler(_loginCancelOperation, ^{
@@ -439,6 +446,7 @@
 {
     if(!_loggedIn && !_logInStarted)
     {
+        [self disconnect];
         [self connect]; // try to reconnect
         return; 
     }
@@ -1066,7 +1074,7 @@
                     
                     [self startStream];
                     _loggedIn=YES;
-                   
+                    dispatch_suspend(_loginCancelOperation);
                     
                     NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
                                          kinfoTypeKey:@"connect", kinfoStatusKey:@""};
@@ -1184,7 +1192,7 @@
                
             }
             
-            if(st_error.code==-9807)// Could not complete operation. SSL peobably
+            if(st_error.code==-9807)// Could not complete operation. SSL probably
             {
                  [self disconnect];
             }

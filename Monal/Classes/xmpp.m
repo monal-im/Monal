@@ -293,7 +293,7 @@
                 dispatch_async(_xmppQueue, ^{
                     [self.contactsVC hideConnecting:info];
                     // try again
-                    if(!self.loggedIn)
+                    if((!self.loggedIn) && (_loggedInOnce))
                     {
                     [self disconnect];
                     [self connect];
@@ -1197,7 +1197,7 @@
                  [self disconnect];
             }
             
-            if(self.loggedIn)
+            if(_loggedInOnce)
             {
                 [self disconnect];
                 [self connect]; // reconnect
@@ -1205,7 +1205,7 @@
             
             else
             {
-                // account never worked and should be disabled and reachability should be removed
+                // maybe account never worked and should be disabled and reachability should be removed
 //                [[DataLayer sharedInstance] disableEnabledAccount:_accountNo];
 //                [[MLXMPPManager sharedInstance] disconnectAccount:_accountNo];
                 

@@ -42,7 +42,7 @@
     NSError* error = nil;
     NSString *path = [[NSBundle mainBundle] pathForResource: @"About" ofType: @"html"];
     NSString *res = [NSString stringWithContentsOfFile: path encoding:NSUTF8StringEncoding error: &error];
-    NSString* withVer =[NSString stringWithFormat:res, [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"]];
+    NSString* withVer =[NSString stringWithFormat:res, [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]];
     
     [_webView loadHTMLString:withVer baseURL:websiteUrl];
 }

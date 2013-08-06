@@ -333,8 +333,7 @@
     }
     
     _loginError=NO;
-    BOOL neverLoggedin=NO;
-    if (!self.loggedIn) neverLoggedin=YES;
+ 
     debug_NSLog(@"removing streams");
 
     if(self.loggedIn && _pinger)
@@ -390,7 +389,7 @@
     _outputQueue=[[NSMutableArray alloc] init];
     _logInStarted=NO; 
 	
-    if(!neverLoggedin)
+    if(_loggedInOnce)
     {
        NSDictionary* info2=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
                          kinfoTypeKey:@"connect", kinfoStatusKey:@"Disconnected"};
@@ -1074,6 +1073,7 @@
                     
                     [self startStream];
                     _loggedIn=YES;
+                    _loggedInOnce=YES;
                     dispatch_suspend(_loginCancelOperation);
                     
                     NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,

@@ -84,6 +84,9 @@ typedef struct
     dispatch_source_t _loginCancelOperation;
     
     UIBackgroundTaskIdentifier _backgroundTask ;
+    
+    BOOL _loggedInOnce;
+
 
 }
 

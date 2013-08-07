@@ -766,6 +766,9 @@
                      [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactOnlineNotice object:self userInfo:userDic];
                     });
                     
+                    // do not do this in the background
+                    if([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground)
+                    {
                     //check for vcard change
                     if([presenceNode.photoHash isEqualToString:[[DataLayer sharedInstance]  buddyHash:presenceNode.user forAccount:_accountNo]])
                     {
@@ -778,7 +781,12 @@
                         [iqVCard getVcardTo:presenceNode.user];
                         [self send:iqVCard];
                     }
-                    
+                    }
+                    else
+                    {
+                        // just set and request when in foreground if needed
+                         [[DataLayer sharedInstance]  setBuddyHash:presenceNode forAccount:_accountNo];
+                    }
                     
                     
                 }

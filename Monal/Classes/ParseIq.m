@@ -22,10 +22,10 @@
 
 - (void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict
 {
-
+   
     if([elementName isEqualToString:@"iq"])
     {
-    _from=[[(NSString*)[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
+         [super parser:parser didStartElement:elementName namespaceURI:namespaceURI qualifiedName:qName attributes:attributeDict];
     }
     
 	//start sessionafter bind reply
@@ -49,6 +49,12 @@
           
      }
     
+    if([elementName isEqualToString:@"vCard"])
+    {
+        State=@"vCard";
+        _vCard=YES;
+    }
+    
 }
 
 
@@ -60,6 +66,36 @@
         _jid=_messageBuffer;
         return; 
     }
+    
+    if(([elementName isEqualToString:@"FN"]) && [State isEqualToString:@"vCard"]
+	   )
+    {
+        _fullName=_messageBuffer;
+        return;
+    }
+    
+    if(([elementName isEqualToString:@"URL"]) && [State isEqualToString:@"vCard"]
+	   )
+    {
+        _URL=_messageBuffer;
+        return;
+    }
+    
+    if(([elementName isEqualToString:@"TYPE"]) && [State isEqualToString:@"vCard"]
+	   )
+    {
+        _photoType=_messageBuffer;
+        return;
+    }
+    
+    if(([elementName isEqualToString:@"BINVAL"]) && [State isEqualToString:@"vCard"]
+	   )
+    {
+        _photoBinValue=_messageBuffer;
+        return;
+    }
+    
+    
    
 }
 

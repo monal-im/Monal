@@ -35,6 +35,24 @@
 	debug_NSLog(@"parsing start");
 }
 
+- (void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict
+{
+    _type=[attributeDict objectForKey:@"type"];
+    
+    if([attributeDict objectForKey:@"from"])
+    {
+    _user =[[(NSString*)[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
+    if([[(NSString*)[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/" ] count]>1)
+        _resource=[[(NSString*)[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/" ] objectAtIndex:1];
+    _from =[attributeDict objectForKey:@"from"] ;
+    _from=[_from lowercaseString];
+    }
+    
+    _idval =[attributeDict objectForKey:@"id"] ;
+    
+    //remove any  resource markers and get user
+    _user=[_user lowercaseString];
+}
 
 - (void)parser:(NSXMLParser *)parser foundCharacters:(NSString *)string
 {

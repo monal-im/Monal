@@ -244,8 +244,13 @@
     }else
     {
         debug_NSLog(@"user %@ already in list",[user objectForKey:kusernameKey]);
+        if([user objectForKey:kstateKey])
         [[_contacts objectAtIndex:pos] setObject:[user objectForKey:kstateKey] forKey:kstateKey];
+        if([user objectForKey:kstatusKey])
         [[_contacts objectAtIndex:pos] setObject:[user objectForKey:kstatusKey] forKey:kstatusKey];
+
+        if([user objectForKey:kfullNameKey])
+        [[_contacts objectAtIndex:pos] setObject:[user objectForKey:kfullNameKey] forKey:@"full_name"];
         
         [_contactsTable beginUpdates];
         NSIndexPath *path1 = [NSIndexPath indexPathForRow:pos inSection:konlineSection];

@@ -686,6 +686,24 @@
                  [self send:discoInfo];
             }
             
+            if(iqNode.vCard)
+            {
+                if(iqNode.fullName)
+                {
+                    [[DataLayer sharedInstance] setFullName:iqNode.fullName forBuddy:iqNode.user andAccount:_accountNo];
+                
+                NSDictionary* userDic=@{kusernameKey: iqNode.user,
+                                        kfullNameKey: iqNode.fullName,
+                                        kaccountNoKey:_accountNo
+                                        };
+                dispatch_async(_xmppQueue, ^{
+                    [self.contactsVC addUser:userDic];
+                });
+                }
+                
+                
+            }
+            
         }
         else  if([[nextStanzaPos objectForKey:@"stanzaType"]  isEqualToString:@"message"])
         {

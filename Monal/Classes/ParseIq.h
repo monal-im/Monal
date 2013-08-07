@@ -23,4 +23,12 @@
 @property (nonatomic, strong, readonly) NSString* queryXMLNS;
 @property (nonatomic, strong, readonly) NSMutableArray* features;
 
+// vcard releated
+
+@property (nonatomic, assign, readonly) BOOL vCard;
+@property (nonatomic, strong, readonly) NSString* fullName;
+@property (nonatomic, strong, readonly) NSString* URL;
+@property (nonatomic, strong, readonly) NSString* photoType;
+@property (nonatomic, strong, readonly) NSString* photoBinValue;
+
 @end

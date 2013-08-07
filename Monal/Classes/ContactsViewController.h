@@ -11,6 +11,7 @@
 
 //contact cells
 #define kusernameKey @"username"
+#define kfullNameKey @"fullName"
 #define kaccountNoKey @"accountNo"
 #define kstateKey @"state"
 #define kstatusKey @"status"

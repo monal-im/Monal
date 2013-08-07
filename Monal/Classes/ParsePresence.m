@@ -15,25 +15,9 @@
 {
     if([elementName isEqualToString:@"presence"])
     {
-        _type=[attributeDict objectForKey:@"type"];
-        _user =[[(NSString*)[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
-        if([[(NSString*)[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/" ] count]>1)
-            _resource=[[(NSString*)[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/" ] objectAtIndex:1];
-		_from =[attributeDict objectForKey:@"from"] ;
-        _from=[_from lowercaseString];
-        
-        _idval =[attributeDict objectForKey:@"id"] ;
-        
-		//remove any  resource markers and get user
-		_user=[_user lowercaseString];
+         [super parser:parser didStartElement:elementName namespaceURI:namespaceURI qualifiedName:qName attributes:attributeDict];
         debug_NSLog(@"Presence from %@", _user);
-		
-        
-		
-		//get photo hash
-		
-		//what type?
-		debug_NSLog(@" presence notice %@", _type);
+		debug_NSLog(@"Presence type %@", _type);
         
         if([_type isEqualToString:@"error"])
 		{

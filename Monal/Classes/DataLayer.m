@@ -1117,8 +1117,7 @@ static DataLayer *sharedInstance=nil;
 
 #pragma mark Contact info
 
-
--(BOOL) setFullName:(NSString*) buddy :(NSString*) accountNo:(NSString*) fullName
+-(BOOL) setFullName:(NSString*) fullName forBuddy:(NSString*) buddy andAccount:(NSString*) accountNo
 {
 	
 	NSString* toPass;
@@ -1168,8 +1167,7 @@ static DataLayer *sharedInstance=nil;
 	}
 }
 
-
--(NSString*) fullName:(NSString*) buddy :(NSString*) accountNo
+-(NSString*) fullName:(NSString*) buddy forAccount:(NSString*) accountNo
 {
 	
 	

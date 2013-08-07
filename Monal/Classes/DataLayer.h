@@ -86,12 +86,9 @@
 
 #pragma mark Contact info
 
--(BOOL) setFullName:(NSString*) buddy :(NSString*) accountNo:(NSString*) fullName;
--(NSString*) fullName:(NSString*) buddy :(NSString*) accountNo; 
-
--(BOOL) setFileName:(NSString*) buddy :(NSString*) accountNo:(NSString*) fileName;
-
-
+-(BOOL) setFullName:(NSString*) fullName forBuddy:(NSString*) buddy andAccount:(NSString*) accountNo;
+-(NSString*) fullName:(NSString*) buddy forAccount:(NSString*) accountNo; 
+//-(BOOL) setFileName:(NSString*) fileName forBuddy:(NSString*) buddy andAccount:(NSString*) accountNo;
 
 -(BOOL) setBuddyHash:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
 -(NSString*) buddyHash:(NSString*) buddy forAccount:(NSString*) accountNo; 

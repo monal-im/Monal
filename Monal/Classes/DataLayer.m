@@ -1167,7 +1167,7 @@ static DataLayer *sharedInstance=nil;
 	}
 }
 
--(NSString*) fullName:(NSString*) buddy forAccount:(NSString*) accountNo
+-(NSString*) fullName:(NSString*) buddy forAccount:(NSString*) accountNo;
 {
 	
 	
@@ -1196,12 +1196,12 @@ static DataLayer *sharedInstance=nil;
 -(NSString*) buddyHash:(NSString*) buddy forAccount:(NSString*) accountNo
 {
     //if there isnt a file name icon wasnt downloaded
-	NSString* query2=[NSString stringWithFormat:@"select filename from buddylist where account_id=%@ and buddy_name='%@'", accountNo, buddy];
-	NSString* filename= (NSString*)[self executeScalar:query2];
-	if([filename isEqualToString:@""])
-	{
-		return @"";
-	}
+//	NSString* query2=[NSString stringWithFormat:@"select filename from buddylist where account_id=%@ and buddy_name='%@'", accountNo, buddy];
+//	NSString* filename= (NSString*)[self executeScalar:query2];
+//	if([filename isEqualToString:@""])
+//	{
+//		return @"";
+//	}
 	
 	
 	NSString* query=[NSString stringWithFormat:@"select iconhash from buddylist where account_id=%@ and buddy_name='%@'", accountNo, buddy];

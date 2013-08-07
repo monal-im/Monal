@@ -787,23 +787,23 @@
                     // do not do this in the background
                     if([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground)
                     {
-                    //check for vcard change
-                    if([presenceNode.photoHash isEqualToString:[[DataLayer sharedInstance]  buddyHash:presenceNode.user forAccount:_accountNo]])
-                    {
-                        debug_NSLog(@"hash same");
-                    }
-                    else
-                    {
-                        [[DataLayer sharedInstance]  setBuddyHash:presenceNode forAccount:_accountNo];
-                        XMPPIQ* iqVCard= [[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
-                        [iqVCard getVcardTo:presenceNode.user];
-                        [self send:iqVCard];
-                    }
+                        //check for vcard change
+                        if([presenceNode.photoHash isEqualToString:[[DataLayer sharedInstance]  buddyHash:presenceNode.user forAccount:_accountNo]])
+                        {
+                            debug_NSLog(@"photo hash is the  same");
+                        }
+                        else
+                        {
+                            [[DataLayer sharedInstance]  setBuddyHash:presenceNode forAccount:_accountNo];
+                            XMPPIQ* iqVCard= [[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
+                            [iqVCard getVcardTo:presenceNode.user];
+                            [self send:iqVCard];
+                        }
                     }
                     else
                     {
                         // just set and request when in foreground if needed
-                         [[DataLayer sharedInstance]  setBuddyHash:presenceNode forAccount:_accountNo];
+                        [[DataLayer sharedInstance]  setBuddyHash:presenceNode forAccount:_accountNo];
                     }
                     
                     

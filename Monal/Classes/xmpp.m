@@ -723,6 +723,7 @@
                                                                        delegate:self cancelButtonTitle:@"Yes"
                                                               otherButtonTitles:@"No", nil];
                         alert.tag=1;
+                        alert.delegate=self; 
                         [alert show];
                     });
                     
@@ -764,6 +765,21 @@
                     [self.contactsVC addUser:userDic];
                      [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactOnlineNotice object:self userInfo:userDic];
                     });
+                    
+                    //check for vcard change
+                    if([presenceNode.photoHash isEqualToString:[[DataLayer sharedInstance]  buddyHash:presenceNode.user forAccount:_accountNo]])
+                    {
+                        debug_NSLog(@"hash same");
+                    }
+                    else
+                    {
+                        [[DataLayer sharedInstance]  setBuddyHash:presenceNode forAccount:_accountNo];
+                        XMPPIQ* iqVCard= [[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
+                        [iqVCard getVcardTo:presenceNode.user];
+                        [self send:iqVCard];
+                    }
+                    
+                    
                     
                 }
                 else

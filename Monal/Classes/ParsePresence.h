@@ -20,4 +20,9 @@
  */
 @property (nonatomic, strong, readonly) NSString* status;
 
+/**
+the hash inside the photo tag
+ */
+@property (nonatomic, strong, readonly) NSString* photoHash;
+
 @end

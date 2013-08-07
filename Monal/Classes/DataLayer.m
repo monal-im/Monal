@@ -1179,13 +1179,12 @@ static DataLayer *sharedInstance=nil;
 }
 
 
-
--(BOOL) setBuddyHash:(NSString*) buddy :(NSString*) accountNo:(NSString*) theHash
+-(BOOL) setBuddyHash:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
 {
 	
 	//data length check
-	NSString* query=[NSString stringWithFormat:@"update buddylist set iconhash='%@', dirty=1 where account_id=%@ and  buddy_name='%@';",theHash,
-					 accountNo, buddy];
+	NSString* query=[NSString stringWithFormat:@"update buddylist set iconhash='%@', dirty=1 where account_id=%@ and  buddy_name='%@';",presenceObj.photoHash,
+					 accountNo, presenceObj.user];
 	if([self executeNonQuery:query]!=NO)
 	{
 		return YES;

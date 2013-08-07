@@ -93,8 +93,8 @@
 
 
 
--(BOOL) setBuddyHash:(NSString*) buddy :(NSString*) accountNo:(NSString*) theHash;
--(NSString*) buddyHash:(NSString*) buddy :(NSString*) accountNo; 
+-(BOOL) setBuddyHash:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
+-(NSString*) buddyHash:(NSString*) buddy forAccount:(NSString*) accountNo; 
 
 -(NSArray*)getResourcesForUser:(NSString*)user ;
 

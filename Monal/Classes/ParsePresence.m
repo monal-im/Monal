@@ -25,7 +25,7 @@
         _idval =[attributeDict objectForKey:@"id"] ;
         
 		//remove any  resource markers and get user
-		_user=[_user lowercaseString]; 
+		_user=[_user lowercaseString];
         debug_NSLog(@"Presence from %@", _user);
 		
         
@@ -43,15 +43,15 @@
 		}
     }
     
-   if([elementName isEqualToString:@"show"])
-   {
-       _messageBuffer=nil; 
-   }
+    if([elementName isEqualToString:@"show"])
+    {
+        _messageBuffer=nil;
+    }
     
-     if([elementName isEqualToString:@"status"])
-     {
-         _messageBuffer=nil;
-     }
+    if([elementName isEqualToString:@"status"])
+    {
+        _messageBuffer=nil;
+    }
     
 }
 
@@ -59,22 +59,28 @@
 {
     if(_messageBuffer)
     {
-    if([elementName isEqualToString:@"show"])
-    {
-        _show=_messageBuffer;
-        if(_show==nil)
-            _show=@"";
+        if([elementName isEqualToString:@"show"])
+        {
+            _show=_messageBuffer;
+            if(_show==nil)
+                _show=@"";
+            
+        }
         
-    }
-    
-    if([elementName isEqualToString:@"status"])
-    {
-        _status=_messageBuffer;
-        if(_status==nil)
-            _status=@"";
+        if([elementName isEqualToString:@"status"])
+        {
+            _status=_messageBuffer;
+            if(_status==nil)
+                _status=@"";
+            
+            
+        }
         
-       
-    }
+        if([elementName isEqualToString:@"photo"])
+        {
+            _photoHash=_messageBuffer;
+            
+        }
     }
 }
 

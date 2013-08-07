@@ -19,6 +19,7 @@
     return self; 
 }
 
+#pragma mark iq set
 -(void) setBindWithResource:(NSString*) resource
 {
 
@@ -82,4 +83,16 @@
 
 }
 
+#pragma mark iq get
+-(void) getVcardTo:(NSString*) to
+{
+    [self setiqTo:to];
+    [self.attributes setObject:@"v1" forKey:@"id"];
+    
+    XMLNode* vcardNode =[[XMLNode alloc] init];
+    vcardNode.element=@"vCard";
+    [vcardNode setXMLNS:@"vcard-temp"];
+    
+    [self.children addObject:vcardNode];
+}
 @end

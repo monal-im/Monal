@@ -38,4 +38,9 @@
  */
 -(void) setDiscoInfo;
 
+/**
+gets vcard info 
+ */
+-(void) getVcardTo:(NSString*) to;
+
 @end

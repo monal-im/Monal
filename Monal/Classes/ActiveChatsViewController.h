@@ -9,6 +9,10 @@
 #import <UIKit/UIKit.h>
 
 @interface ActiveChatsViewController : UIViewController <UITableViewDataSource, UITableViewDelegate>
+{
+    NSArray* _contacts;
+    NSDictionary* _lastSelectedUser;
+}
 
 
 @property (nonatomic, strong) UITableView* chatListTable;

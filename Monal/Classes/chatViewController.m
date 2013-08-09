@@ -708,7 +708,7 @@
     [chatView setFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height-40-20)];
 
 	//query to get pages and position
-    activeChats=[[DataLayer sharedInstance] activeBuddies:_accountNo];
+  //  activeChats=[[DataLayer sharedInstance] activeBuddies:_accountNo];
     pages.numberOfPages=0;//[activeChats count];
     //set pos
     int dotCounter=0; 

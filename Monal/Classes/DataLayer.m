@@ -455,7 +455,9 @@ static DataLayer *sharedInstance=nil;
 	NSString* query3=[NSString stringWithFormat:@"delete from message_history  where account_id=%@ ;", accountNo];
 	[self executeNonQuery:query3];
 	
-	
+    NSString* query4=[NSString stringWithFormat:@"delete from activechats  where account_id=%@ ;", accountNo];
+	[self executeNonQuery:query4];
+    
 	NSString* query=[NSString stringWithFormat:@"delete from account  where account_id=%@ ;", accountNo];
 	if([self executeNonQuery:query]!=NO)
 	{
@@ -1763,10 +1765,12 @@ static DataLayer *sharedInstance=nil;
 }
 
 #pragma mark active chats
--(NSArray*) activeBuddies:(NSString*) accountNo
+-(NSArray*) activeBuddies
 {
+    
+    
 
-    NSString* query=[NSString stringWithFormat:@"select distinct a.buddy_name,'', ifnull(full_name, a.buddy_name) as full_name, filename,0 from activechats as a left outer join buddylist as b on a.buddy_name=b.buddy_name and a.account_id=b.account_id where a.account_id=%@ order by full_name COLLATE NOCASE ", accountNo ];
+    NSString* query=[NSString stringWithFormat:@"select distinct b.buddy_name,state,status,filename,0 as 'count' , ifnull(b.full_name, b.buddy_name) as full_name, a.account_id from activechats as a inner join buddylist as b on a.buddy_name=b.buddy_name and a.account_id=b.account_id order by full_name COLLATE NOCASE" ];
 	//	debug_NSLog(query);
 	NSArray* toReturn = [self executeReader:query];
 	

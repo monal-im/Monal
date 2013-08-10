@@ -115,7 +115,7 @@
     self.badgeColor= [UIColor clearColor];
     self.badgeHighlightedColor=[UIColor clearColor];
     self.badgeText=nil;
-     self.imageView.image=[UIImage imageNamed:@"noicon"];
+    self.imageView.image=[UIImage imageNamed:@"noicon"];
 }
 
 

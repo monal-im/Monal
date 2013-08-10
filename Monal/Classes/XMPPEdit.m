@@ -7,6 +7,7 @@
 //
 
 #import "XMPPEdit.h"
+#import "tools.h"
 
 
 @implementation XMPPEdit
@@ -30,6 +31,15 @@
 }
 
 #pragma mark view lifecylce
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+    self = [super initWithNibName:@"XMPPEdit" bundle:nibBundleOrNil];
+    if (self) {
+        // Custom initialization
+    }
+    return self;
+}
 
 
 - (void)viewDidLoad
@@ -125,8 +135,11 @@
 {
     [super viewWillAppear:animated];
 	debug_NSLog(@"xmpp edit view will appear");
-    [[UILabel appearanceWhenContainedIn:[UITableViewHeaderFooterView class], nil] setColor:[UIColor whiteColor]];
-    [[UILabel appearanceWhenContainedIn:[UITableViewHeaderFooterView class], nil] setShadowColor:nil];
+//    if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"6.0"))
+//    {
+//    [[UILabel appearanceWhenContainedIn:[UITableViewHeaderFooterView class], nil] setColor:[UIColor whiteColor]];
+//    [[UILabel appearanceWhenContainedIn:[UITableViewHeaderFooterView class], nil] setShadowColor:nil];
+//    }
 	
 }
 
@@ -316,13 +329,10 @@
 
 #pragma mark table view datasource methods
 
-
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     
-	
-	
-	
+
 	debug_NSLog(@"xmpp edit view section %d, row %d", indexPath.section, indexPath.row);
     
 	UITableViewCell* thecell;
@@ -402,11 +412,28 @@
 }
 
 
-- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
-	
-	
-	//debug_NSLog(@"xmpp edit title for  section %d", section);
-	return [self.sectionArray objectAtIndex:section];
+-(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
+{
+    UIView *tempView=[[UIView alloc]initWithFrame:CGRectMake(0,200,300,244)];
+    tempView.backgroundColor=[UIColor clearColor];
+    
+    UILabel *tempLabel=[[UILabel alloc]initWithFrame:CGRectMake(15,0,300,44)];
+    tempLabel.backgroundColor=[UIColor clearColor];
+    tempLabel.shadowColor = [UIColor blackColor];
+    tempLabel.shadowOffset = CGSizeMake(0,2);
+    tempLabel.textColor = [UIColor whiteColor]; //here you can change the text color of header.
+    tempLabel.font = [UIFont boldSystemFontOfSize:17.0f];
+    tempLabel.text=[self tableView:tableView titleForHeaderInSection:section ];
+    
+    [tempView addSubview:tempLabel];
+    
+    return tempView;
+}
+
+
+- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
+{
+    return [self.sectionArray objectAtIndex:section];
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section

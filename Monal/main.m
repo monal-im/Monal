@@ -12,6 +12,8 @@
 
 int main(int argc, char *argv[]) {
     
+    @autoreleasepool {
     int retVal = UIApplicationMain(argc, argv, nil, NSStringFromClass([MonalAppDelegate class]));
     return retVal;
+    }
 }

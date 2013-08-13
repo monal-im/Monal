@@ -22,6 +22,8 @@
 #import "AboutViewController.h"
 #import "MLNotificationManager.h"
 
+#import <Crashlytics/Crashlytics.h>
+
 //xmpp
 #import "MLXMPPManager.h"
 
@@ -150,6 +152,9 @@
     // should any accounts connect?
     [[MLXMPPManager sharedInstance] connectIfNecessary];
     }
+    
+    
+    [Crashlytics startWithAPIKey:@"6e807cf86986312a050437809e762656b44b197c"];
     
     return YES;
 }

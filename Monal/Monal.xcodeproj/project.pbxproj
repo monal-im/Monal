@@ -219,6 +219,7 @@
 		26AD610111A95CB700C39051 /* Emoticons in Resources */ = {isa = PBXBuildFile; fileRef = 26AD60DA11A95CB700C39051 /* Emoticons */; };
 		26AE97C31794F9DB00D4AD2B /* GTalk.png in Resources */ = {isa = PBXBuildFile; fileRef = 26AE97C11794F9DB00D4AD2B /* GTalk.png */; };
 		26AE97C41794F9DB00D4AD2B /* GTalk@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26AE97C21794F9DB00D4AD2B /* GTalk@2x.png */; };
+		26B3F1EE17BAED670028EA88 /* Crashlytics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26B3F1ED17BAED670028EA88 /* Crashlytics.framework */; };
 		26B69A75131C522F002FCBEB /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26B69A74131C522F002FCBEB /* Security.framework */; };
 		26B69A82131C5495002FCBEB /* PasswordManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B69A81131C5495002FCBEB /* PasswordManager.m */; };
 		26BAFC541626537D0073728B /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 26BAFC3E1626537D0073728B /* .gitignore */; };
@@ -502,6 +503,7 @@
 		26AD60DA11A95CB700C39051 /* Emoticons */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Emoticons; sourceTree = "<group>"; };
 		26AE97C11794F9DB00D4AD2B /* GTalk.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = GTalk.png; sourceTree = "<group>"; };
 		26AE97C21794F9DB00D4AD2B /* GTalk@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "GTalk@2x.png"; sourceTree = "<group>"; };
+		26B3F1ED17BAED670028EA88 /* Crashlytics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Crashlytics.framework; sourceTree = "<group>"; };
 		26B69A74131C522F002FCBEB /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		26B69A80131C5495002FCBEB /* PasswordManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PasswordManager.h; sourceTree = "<group>"; };
 		26B69A81131C5495002FCBEB /* PasswordManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PasswordManager.m; sourceTree = "<group>"; };
@@ -585,6 +587,7 @@
 				263F568D121B5E970027D85D /* MediaPlayer.framework in Frameworks */,
 				26292F4F1309CAE100097280 /* CFNetwork.framework in Frameworks */,
 				26B69A75131C522F002FCBEB /* Security.framework in Frameworks */,
+				26B3F1EE17BAED670028EA88 /* Crashlytics.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1101,6 +1104,7 @@
 		26DFD4A615666B6C007A1621 /* 3rd Party */ = {
 			isa = PBXGroup;
 			children = (
+				26B3F1ED17BAED670028EA88 /* Crashlytics.framework */,
 				26BAFC3D1626537D0073728B /* appirator */,
 				2689B6E91601914E0087CA58 /* DDBadgeViewCell */,
 				2658508415E7D8E40070A2A7 /* TPCircularBuffer */,
@@ -1260,6 +1264,7 @@
 				1D60588D0D05DD3D006BFB54 /* Resources */,
 				1D60588E0D05DD3D006BFB54 /* Sources */,
 				1D60588F0D05DD3D006BFB54 /* Frameworks */,
+				26B3F1EC17BAED3A0028EA88 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -1447,6 +1452,22 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		26B3F1EC17BAED3A0028EA88 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "./Crashlytics.framework/run 6e807cf86986312a050437809e762656b44b197c";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		1D60588E0D05DD3D006BFB54 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -1575,6 +1596,10 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				COPY_PHASE_STRIP = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)\"",
+				);
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -1624,6 +1649,10 @@
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGN_IDENTITY = "iPhone Distribution: Anurodh Pokharel (33XS7DE5NZ)";
 				COPY_PHASE_STRIP = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)\"",
+				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = SworIM_Prefix.pch;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
@@ -1732,6 +1761,10 @@
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGN_IDENTITY = "iPhone Distribution: Anurodh Pokharel (33XS7DE5NZ)";
 				COPY_PHASE_STRIP = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)\"",
+				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = SworIM_Prefix.pch;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;

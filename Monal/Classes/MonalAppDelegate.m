@@ -40,32 +40,32 @@
     
     ActiveChatsViewController* activeChatsVC = [[ActiveChatsViewController alloc] init];
     UINavigationController* activeChatNav=[[UINavigationController alloc] initWithRootViewController:activeChatsVC];
-    activeChatNav.navigationBar.tintColor=[UIColor blackColor];
+    activeChatNav.navigationBar.barStyle=UIBarStyleBlackOpaque;
     activeChatNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Active Chats",@"") image:[UIImage imageNamed:@"active"] tag:0];
     
     SettingsViewController* settingsVC = [[SettingsViewController alloc] init];
     UINavigationController* settingsNav=[[UINavigationController alloc] initWithRootViewController:settingsVC];
-    settingsNav.navigationBar.tintColor=[UIColor blackColor];
+    settingsNav.navigationBar.barStyle=UIBarStyleBlackOpaque;
     settingsNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Settings",@"") image:[UIImage imageNamed:@"status"] tag:0];
     
     AccountsViewController* accountsVC = [[AccountsViewController alloc] init];
     UINavigationController* accountsNav=[[UINavigationController alloc] initWithRootViewController:accountsVC];
-    accountsNav.navigationBar.tintColor=[UIColor blackColor];
+    accountsNav.navigationBar.barStyle=UIBarStyleBlackOpaque;
     accountsNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Accounts",@"") image:[UIImage imageNamed:@"accounts"] tag:0];
     
     ChatLogsViewController* chatLogVC = [[ChatLogsViewController alloc] init];
     UINavigationController* chatLogNav=[[UINavigationController alloc] initWithRootViewController:chatLogVC];
-    chatLogNav.navigationBar.tintColor=[UIColor blackColor];
+    chatLogNav.navigationBar.barStyle=UIBarStyleBlackOpaque;
     chatLogNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Chat Logs",@"") image:[UIImage imageNamed:@"chatlog"] tag:0];
     
     SearchUsersViewController* searchUsersVC = [[SearchUsersViewController alloc] init];
     UINavigationController* searchUsersNav=[[UINavigationController alloc] initWithRootViewController:searchUsersVC];
-    searchUsersNav.navigationBar.tintColor=[UIColor blackColor];
+    searchUsersNav.navigationBar.barStyle=UIBarStyleBlackOpaque;
     searchUsersNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Search Users",@"") image:[UIImage imageNamed:@"Search"] tag:0];
     
     GroupChatViewController* groupChatVC = [[GroupChatViewController alloc] init];
     UINavigationController* groupChatNav=[[UINavigationController alloc] initWithRootViewController:groupChatVC];
-    groupChatNav.navigationBar.tintColor=[UIColor blackColor];
+    groupChatNav.navigationBar.barStyle=UIBarStyleBlackOpaque;
     groupChatNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Group Chat",@"") image:[UIImage imageNamed:@"joingroup"] tag:0];
     
     HelpViewController* helpVC = [[HelpViewController alloc] init];
@@ -75,7 +75,7 @@
     
     AboutViewController* aboutVC = [[AboutViewController alloc] init];
     UINavigationController* aboutNav=[[UINavigationController alloc] initWithRootViewController:aboutVC];
-    aboutNav.navigationBar.tintColor=[UIColor blackColor];
+    aboutNav.navigationBar.barStyle=UIBarStyleBlackOpaque;
     aboutNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"About",@"") image:[UIImage imageNamed:@"about"] tag:0];
     
     

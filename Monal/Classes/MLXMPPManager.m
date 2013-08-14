@@ -38,6 +38,7 @@
     
     _connectedXMPP=[[NSMutableArray alloc] init];
     _netQueue = dispatch_queue_create(kMonalNetQueue, DISPATCH_QUEUE_CONCURRENT);
+    _connectedListQueue = dispatch_queue_create(kMonalConnectedListQueue, DISPATCH_QUEUE_SERIAL);
    
     NSTimeInterval timeInterval= 600; // 600 seconds
     BOOL keepAlive=[[UIApplication sharedApplication] setKeepAliveTimeout:timeInterval handler:^{
@@ -64,16 +65,20 @@
 
 -(xmpp*) getConnectedAccountForID:(NSString*) accountNo
 {
-    for (NSDictionary* account in _connectedXMPP)
-    {
-        xmpp* xmppAccount=[account objectForKey:@"xmppAccount"];
-        
-        if([xmppAccount.accountNo isEqualToString:accountNo] )
-       {
-           return xmppAccount;
-       }
-    }
-    return nil; 
+    
+    __block xmpp* toReturn=nil;
+    dispatch_sync(_connectedListQueue, ^{
+        for (NSDictionary* account in _connectedXMPP)
+        {
+            xmpp* xmppAccount=[account objectForKey:@"xmppAccount"];
+            
+            if([xmppAccount.accountNo isEqualToString:accountNo] )
+            {
+                toReturn= xmppAccount;
+            }
+        }
+    });
+    return toReturn;
 }
 
 -(void) connectAccount:(NSString*) accountNo
@@ -144,12 +149,14 @@
         [hostReach startNotifier];
         
         NSDictionary* accountRow= [[NSDictionary alloc] initWithObjects:@[xmppAccount, hostReach] forKeys:@[@"xmppAccount", @"hostReach"]];
+    dispatch_sync(_connectedListQueue, ^{
         [_connectedXMPP addObject:accountRow];
+    });
         
         dispatch_async(_netQueue,
                        ^{
                            [xmppAccount connect];
-                           [[NSRunLoop currentRunLoop]run];
+                           
                            
                        });
     
@@ -159,30 +166,31 @@
 
 -(void) disconnectAccount:(NSString*) accountNo
 {
-       dispatch_async(_netQueue, ^{
-           int index=0;
-           int pos; 
-           for (NSDictionary* account in _connectedXMPP)
-           {
-               xmpp* xmppAccount=[account objectForKey:@"xmppAccount"];
-               if([xmppAccount.accountNo isEqualToString:accountNo] )
-               {
-                   debug_NSLog(@"got acct cleaning up.. ");
-                   Reachability* hostReach=[account objectForKey:@"hostReach"];
-                   [hostReach stopNotifier];
-                   [ xmppAccount disconnect];
+    dispatch_async(_netQueue, ^{
+        dispatch_sync(_connectedListQueue, ^{
+            int index=0;
+            int pos;
+            for (NSDictionary* account in _connectedXMPP)
+            { 
+                xmpp* xmppAccount=[account objectForKey:@"xmppAccount"];
+                if([xmppAccount.accountNo isEqualToString:accountNo] )
+                {
+                    debug_NSLog(@"got acct cleaning up.. ");
+                    Reachability* hostReach=[account objectForKey:@"hostReach"];
+                    [hostReach stopNotifier];
+                    [ xmppAccount disconnect];
                     debug_NSLog(@"done cleaning up account ");
-                   pos=index;
-                   break;
-               }
-               index++; 
-           }
-           
-           if((pos>=0) && (pos<[_connectedXMPP count]))
-               [_connectedXMPP removeObjectAtIndex:index];
-           
-  
-       });
+                    pos=index;
+                    break;
+                }
+                index++;
+            }
+            
+            if((pos>=0) && (pos<[_connectedXMPP count]))
+                [_connectedXMPP removeObjectAtIndex:pos];
+
+        });
+    });
 }
 
 #pragma mark XMPP communication
@@ -238,6 +246,7 @@
 -(void) reachabilityChanged
 {
     
+       dispatch_sync(_connectedListQueue, ^{
     for (NSDictionary* row in _connectedXMPP)
     {
     Reachability* hostReach=[row objectForKey:@"hostReach"];
@@ -264,12 +273,12 @@
             dispatch_async(_netQueue,
                            ^{
             [xmppAccount connect];
-            [[NSRunLoop currentRunLoop]run];
                            });
         }
         
     }
     }
+       });
 }
 
 -(void) dealloc

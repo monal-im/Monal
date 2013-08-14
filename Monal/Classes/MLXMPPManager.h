@@ -12,6 +12,8 @@
 
 
 #define kMonalNetQueue "im.monal.netQueue"
+#define kMonalConnectedListQueue "im.monal.connectedListQueue"
+
 
 /**
  A singleton to control all of the active XMPP connections
@@ -20,6 +22,7 @@
 {
     NSArray* _accountList;
     dispatch_queue_t _netQueue ;
+    dispatch_queue_t _connectedListQueue ;
     NSMutableArray* _connectedXMPP;
     
 }

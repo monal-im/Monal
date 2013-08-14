@@ -93,10 +93,12 @@
                       [_contactsTable endUpdates];
                       
                       
-                      dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0);
+                      dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
                       if([[info objectForKey:kinfoStatusKey] isEqualToString:@"Disconnected"])
                       {
+                          debug_NSLog(@"hiding disconencted timer started");
                       dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 3ull * NSEC_PER_SEC), q_background,  ^{
+                          debug_NSLog(@"hiding disconencted");
                           [self hideConnecting:info];
                       });
                       }

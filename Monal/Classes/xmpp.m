@@ -71,6 +71,7 @@
 
 -(void)dealloc
 {
+    if(_pinger)
     dispatch_source_cancel(_pinger);
 }
 
@@ -165,7 +166,7 @@
     
 
     
-    	dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0);
+    	dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
         dispatch_source_t streamTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,q_background
                                          );
     
@@ -175,13 +176,13 @@
                                   , 1ull * NSEC_PER_SEC);
 
         dispatch_source_set_event_handler(streamTimer, ^{
-           NSLog(@"stream connection timed out");
+           debug_NSLog(@"stream connection timed out");
             dispatch_source_cancel(streamTimer);
             [self disconnect];
         });
 
         dispatch_source_set_cancel_handler(streamTimer, ^{
-            NSLog(@"stream timer cancelled");
+            debug_NSLog(@"stream timer cancelled");
             dispatch_release(streamTimer);
         });
     
@@ -263,7 +264,7 @@
             }
             
             // this should never happen unless we fail for 10 min
-            debug_NSLog(@"XMPP connnect bgtask took too long. closing app..");
+            debug_NSLog(@"XMPP connnect bgtask took too long. closing task");
             [[UIApplication sharedApplication] endBackgroundTask:_backgroundTask];
             _backgroundTask=UIBackgroundTaskInvalid;
             
@@ -273,7 +274,7 @@
             debug_NSLog(@"XMPP connnect bgtask start"); 
             [self connectionTask];
             
-            dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0);
+            dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
             _loginCancelOperation = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,
                                              q_background);
             
@@ -283,14 +284,14 @@
                                       1ull * NSEC_PER_SEC);
             
             dispatch_source_set_event_handler(_loginCancelOperation, ^{
-    
+                debug_NSLog(@"login cancel op");
                 dispatch_suspend(_loginCancelOperation);
                 UIBackgroundTaskIdentifier oldBGTask=_backgroundTask;
-                
-                //hide connecting message
-                NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
-                                     kinfoTypeKey:@"connect", kinfoStatusKey:@""};
+ 
                 dispatch_async(_xmppQueue, ^{
+                    //hide connecting message
+                    NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
+                                         kinfoTypeKey:@"connect", kinfoStatusKey:@""};
                     [self.contactsVC hideConnecting:info];
                     // try again
                     if((!self.loggedIn) && (_loggedInOnce))
@@ -300,9 +301,10 @@
                     }
                 });
                 
-                //end background task
+                //end background task if it wasnt by disconnenct
                 if (oldBGTask != UIBackgroundTaskInvalid)
                 {
+                    debug_NSLog(@"ending old BG task");
                     [[UIApplication sharedApplication] endBackgroundTask:oldBGTask];
                     oldBGTask=UIBackgroundTaskInvalid;
                 }
@@ -310,13 +312,24 @@
             });
             
             dispatch_source_set_cancel_handler(_loginCancelOperation, ^{
-                NSLog(@"login  canceled");
+                debug_NSLog(@"login cancelled");
                 dispatch_release(_loginCancelOperation);
+                
+                if (_backgroundTask != UIBackgroundTaskInvalid)
+                {
+                    debug_NSLog(@"ending old BG task on cancel");
+                    [[UIApplication sharedApplication] endBackgroundTask:_backgroundTask];
+                    _backgroundTask=UIBackgroundTaskInvalid;
+                }
             });
             
             dispatch_resume(_loginCancelOperation);
             
         }
+    
+    dispatch_async(dispatch_get_current_queue(), ^{
+            [[NSRunLoop currentRunLoop]run];
+    });
     
 }
 
@@ -324,7 +337,7 @@
 {
     
     if(_loginCancelOperation)
-    dispatch_suspend(_loginCancelOperation);
+    dispatch_source_cancel(_loginCancelOperation);
     
     if (_backgroundTask != UIBackgroundTaskInvalid)
     {
@@ -381,37 +394,36 @@
 	
 	debug_NSLog(@"All closed and cleaned up");
     
-    _loggedIn=NO;
-    _disconnected=YES;
+  
     _startTLSComplete=NO;
     _streamHasSpace=NO;
     _inputBuffer=[[NSMutableString alloc] init];
     _outputQueue=[[NSMutableArray alloc] init];
-    _logInStarted=NO; 
+    _loggedIn=NO;
+    _disconnected=YES;
+    _logInStarted=NO;
 	
-    if(_loggedInOnce)
-    {
-       NSDictionary* info2=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
-                         kinfoTypeKey:@"connect", kinfoStatusKey:@"Disconnected"};
-    [self.contactsVC showConnecting:info2];
+    //for good measure
+    NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
+                         kinfoTypeKey:@"connect", kinfoStatusKey:@""};
+    [self.contactsVC hideConnecting:info];
     
-   
-    }
-    else
+    NSDictionary* info2=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
+                          kinfoTypeKey:@"connect", kinfoStatusKey:@"Disconnected"};
+    
+    
+    if(!_loggedInOnce)
     {
-               NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
-                             kinfoTypeKey:@"connect", kinfoStatusKey:@""};
-        [self.contactsVC hideConnecting:info];
-        
-        dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0);
-        NSDictionary* info2=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
+       info2=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
                               kinfoTypeKey:@"connect", kinfoStatusKey:@"Could not login."};
-        [self.contactsVC showConnecting:info2];
-        
+    }
+    
+     [self.contactsVC showConnecting:info2];
+        dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 3ull * NSEC_PER_SEC), q_background,  ^{
             [self.contactsVC hideConnecting:info2];
         });
-    }
+    
   
 }
 
@@ -459,7 +471,7 @@
     return;
     
     
-    dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0);
+    dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
     _pinger = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,
                                                      q_background);
     
@@ -1116,7 +1128,7 @@
                     [self startStream];
                     _loggedIn=YES;
                     _loggedInOnce=YES;
-                    dispatch_suspend(_loginCancelOperation);
+                    dispatch_source_cancel(_loginCancelOperation);
                     
                     NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
                                          kinfoTypeKey:@"connect", kinfoStatusKey:@""};
@@ -1242,7 +1254,7 @@
             if(_loggedInOnce)
             {
                 [self disconnect];
-                [self connect]; // reconnect
+    //            [self connect]; // reconnect
             }
             
             else

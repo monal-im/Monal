@@ -70,7 +70,7 @@
     
     HelpViewController* helpVC = [[HelpViewController alloc] init];
     UINavigationController* helpNav=[[UINavigationController alloc] initWithRootViewController:helpVC];
-    helpNav.navigationBar.tintColor=[UIColor blackColor];
+    helpNav.navigationBar.barStyle=UIBarStyleBlackOpaque;
     helpNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Help",@"") image:[UIImage imageNamed:@"help"] tag:0];
     
     AboutViewController* aboutVC = [[AboutViewController alloc] init];
@@ -96,7 +96,7 @@
         
         //this is a dummy nav controller not really used for anything
         UINavigationController* navigationControllerContacts=[[UINavigationController alloc] initWithRootViewController:contactsVC];
-        navigationControllerContacts.navigationBar.tintColor=[UIColor blackColor];
+        navigationControllerContacts.navigationBar.barStyle=UIBarStyleBlackOpaque;
         
         _chatNav=activeChatNav;
         contactsVC.currentNavController=_chatNav;
@@ -109,8 +109,8 @@
         _splitViewController.delegate=self;
     }
     
-    _chatNav.navigationBar.tintColor=[UIColor blackColor];
-    _tabBarController.moreNavigationController.navigationBar.tintColor=[UIColor blackColor];
+    _chatNav.navigationBar.barStyle=UIBarStyleBlackOpaque;
+    _tabBarController.moreNavigationController.navigationBar.barStyle=UIBarStyleBlackOpaque;
     
     [self.window makeKeyAndVisible];
 }

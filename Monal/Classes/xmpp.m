@@ -1128,7 +1128,7 @@
                     [self startStream];
                     _loggedIn=YES;
                     _loggedInOnce=YES;
-                    dispatch_source_cancel(_loginCancelOperation);
+                    dispatch_suspend(_loginCancelOperation); // let it cancel in disconenct
                     
                     NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
                                          kinfoTypeKey:@"connect", kinfoStatusKey:@""};

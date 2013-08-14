@@ -83,8 +83,16 @@ static void PrintReachabilityFlags(SCNetworkReachabilityFlags    flags, const ch
 static void ReachabilityCallback(SCNetworkReachabilityRef target, SCNetworkReachabilityFlags flags, void* info)
 {
 #pragma unused (target, flags)
-    NSCAssert(info != NULL, @"info was NULL in ReachabilityCallback");
-    NSCAssert([(NSObject*) info isKindOfClass: [Reachability class]], @"info was wrong class in ReachabilityCallback");
+    if(info == NULL)
+    {
+        debug_NSLog(@"info was NULL in ReachabilityCallback");
+        return;
+    }
+    
+    if(![(NSObject*) info isKindOfClass: [Reachability class]])
+    {
+         debug_NSLog(@"info was wrong class in ReachabilityCallback");
+    }
     
     //We're on the main RunLoop, so an NSAutoreleasePool is not necessary, but is added defensively
     // in case someon uses the Reachablity object in a different thread.

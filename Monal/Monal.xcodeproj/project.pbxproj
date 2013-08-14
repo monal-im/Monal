@@ -1596,6 +1596,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer: Anurodh Pokharel (NVHUCKM9V3)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Anurodh Pokharel (NVHUCKM9V3)";
 				COPY_PHASE_STRIP = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1613,6 +1614,7 @@
 				OTHER_LDFLAGS = "-lstdc++";
 				PRODUCT_NAME = Monal;
 				PROVISIONING_PROFILE = "";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 			};
 			name = Debug;
 		};
@@ -1649,7 +1651,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ENABLE_OBJC_ARC = YES;
-				CODE_SIGN_IDENTITY = "iPhone Distribution: Anurodh Pokharel (33XS7DE5NZ)";
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				COPY_PHASE_STRIP = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1663,7 +1666,8 @@
 				LLVM_LTO = NO;
 				OTHER_LDFLAGS = "-lstdc++";
 				PRODUCT_NAME = Monal;
-				PROVISIONING_PROFILE = "C87D7BC2-2AC9-4ED4-945E-692EB563956A";
+				PROVISIONING_PROFILE = "";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 			};
 			name = Distribution;
 		};
@@ -1761,7 +1765,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ENABLE_OBJC_ARC = YES;
-				CODE_SIGN_IDENTITY = "iPhone Distribution: Anurodh Pokharel (33XS7DE5NZ)";
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1775,7 +1780,8 @@
 				LLVM_LTO = NO;
 				OTHER_LDFLAGS = "-lstdc++";
 				PRODUCT_NAME = Monal;
-				PROVISIONING_PROFILE = "DCC3D5D0-2C13-42D0-B613-CD8A14A86A0E";
+				PROVISIONING_PROFILE = "";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 			};
 			name = Adhoc;
 		};

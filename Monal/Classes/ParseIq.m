@@ -36,6 +36,11 @@
 		return; 
 	}
 	
+     if([elementName isEqualToString:@"query"])
+     {
+         _queryXMLNS=[attributeDict objectForKey:@"xmlns"];
+         if([_queryXMLNS isEqualToString:@"urn:xmpp:ping"]) _ping=YES;
+     }
 
     if([elementName isEqualToString:@"query"])
     {

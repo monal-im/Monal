@@ -77,12 +77,16 @@
 
 -(void) setRunLoop
 {
+    
+dispatch_async(dispatch_get_current_queue(), ^{
 	[_oStream setDelegate:self];
     [_oStream scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
 	
 	[_iStream setDelegate:self];
     [_iStream scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
     
+        [[NSRunLoop currentRunLoop]run];
+    });
 }
 
 -(void) createStreams
@@ -327,9 +331,7 @@
             
         }
     
-    dispatch_async(dispatch_get_current_queue(), ^{
-            [[NSRunLoop currentRunLoop]run];
-    });
+  
     
 }
 
@@ -453,7 +455,7 @@
 }
 
 
--(void) sendPing
+-(void) sendWhiteSpacePing
 {
     if(!_loggedIn && !_logInStarted)
     {
@@ -462,7 +464,7 @@
         return; 
     }
     
-    XMLNode* ping =[[XMLNode alloc] initWithElement:@"ping"]; // no such element. Node has logic to  print white space
+    XMLNode* ping =[[XMLNode alloc] initWithElement:@"whitePing"]; // no such element. Node has logic to  print white space
     [self send:ping];
 }
 
@@ -715,6 +717,13 @@
                 
                 
             }
+            
+             if(iqNode.ping)
+             {
+                 XMPPIQ* pong =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqResultType];
+                 [pong setiqTo:_domain];
+                 [self send:pong];
+             }
             
         }
         else  if([[nextStanzaPos objectForKey:@"stanzaType"]  isEqualToString:@"message"])
@@ -1254,7 +1263,7 @@
             if(_loggedInOnce)
             {
                 [self disconnect];
-    //            [self connect]; // reconnect
+    //           [self connect]; // reconnect
             }
             
             else

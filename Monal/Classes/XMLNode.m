@@ -36,7 +36,7 @@
 {
     if(!_element) return nil; // sanity check
  
-    if([_element isEqualToString:@"ping"]) return @" ";
+    if([_element isEqualToString:@"whitePing"]) return @" ";
     
     NSMutableString* outputString=[[NSMutableString alloc] init];
     

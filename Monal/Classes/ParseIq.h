@@ -16,6 +16,7 @@
 }
 
 @property (nonatomic, assign, readonly) BOOL discoInfo;
+@property (nonatomic, assign, readonly) BOOL ping;
 
 @property (nonatomic, assign, readonly) BOOL shouldSetBind;
 @property (nonatomic, strong, readonly) NSString* jid;

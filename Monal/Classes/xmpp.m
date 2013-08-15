@@ -71,8 +71,7 @@
 
 -(void)dealloc
 {
-    if(_pinger)
-    dispatch_source_cancel(_pinger);
+  
 }
 
 -(void) setRunLoop
@@ -350,9 +349,6 @@ dispatch_async(dispatch_get_current_queue(), ^{
     _loginError=NO;
  
     debug_NSLog(@"removing streams");
-
-    if(self.loggedIn && _pinger)
-        dispatch_source_cancel(_pinger);
     
 	//prevent any new read or write
 	[_iStream setDelegate:nil];
@@ -467,6 +463,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
     XMPPIQ* ping =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
     [ping setiqTo:_domain];
     [ping setPing];
+    [self send:ping];
 }
 
 -(void) sendWhiteSpacePing
@@ -482,33 +479,6 @@ dispatch_async(dispatch_get_current_queue(), ^{
     [self send:ping];
 }
 
--(void) startPing
-{
-
-    dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-    _pinger = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,
-                                                     q_background);
-    
-    dispatch_source_set_timer(_pinger,
-                              DISPATCH_TIME_NOW,
-                               60ull * NSEC_PER_SEC *5
-                              , 1ull * NSEC_PER_SEC);
-    
-    dispatch_source_set_event_handler(_pinger, ^{
-      
-
-        [self sendPing];
-    //    [self sendWhiteSpacePing];
-    });
-    
-    dispatch_source_set_cancel_handler(_pinger, ^{
-        NSLog(@"pinger canceled");
-        dispatch_release(_pinger);
-    });
-    
-    dispatch_resume(_pinger);
-  
-}
 
 
 
@@ -698,7 +668,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
                 [presence setPriority:5]; //TODO change later
                 
                 [self send:presence];
-                [self startPing];
+               
                 
             }
             

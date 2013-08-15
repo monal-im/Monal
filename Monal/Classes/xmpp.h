@@ -80,7 +80,7 @@ typedef struct
     BOOL _startTLSComplete;
     BOOL _streamHasSpace;
     
-    dispatch_source_t _pinger;
+
     dispatch_source_t _loginCancelOperation;
     
     UIBackgroundTaskIdentifier _backgroundTask ;
@@ -114,10 +114,7 @@ typedef struct
  */
 -(void) send:(XMLNode*) stanza;
 
-/**
-Start the periodic pinger
- */
--(void) startPing;
+
 
 
 // connection attributes

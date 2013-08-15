@@ -100,9 +100,14 @@ typedef struct
 -(void) sendMessage:(NSString*) message toContact:(NSString*) contact;
 
 /**
- crafts a ping and sends it
+ crafts a whitepace ping and sends it
  */
--(void) sendWhiteSpacePing; 
+-(void) sendWhiteSpacePing;
+
+/**
+ crafts a  ping and sends it
+ */
+-(void) sendPing;
 
 /**
  Adds the stanza to the output Queue

@@ -102,7 +102,7 @@ typedef struct
 /**
  crafts a ping and sends it
  */
--(void) sendPing; 
+-(void) sendWhiteSpacePing; 
 
 /**
  Adds the stanza to the output Queue

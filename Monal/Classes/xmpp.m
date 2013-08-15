@@ -487,7 +487,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
 //        [ping setiqTo:_domain];
 //        [ping setPing];
 
-        [self sendPing];
+        [self sendWhiteSpacePing];
     });
     
     dispatch_source_set_cancel_handler(_pinger, ^{

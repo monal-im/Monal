@@ -8,12 +8,17 @@
 
 #import <UIKit/UIKit.h>
 
-@interface ActiveChatsViewController : UIViewController <UITableViewDataSource, UITableViewDelegate>
+@interface ActiveChatsViewController : UITableViewController <UITableViewDataSource, UITableViewDelegate>
 {
     NSArray* _contacts;
     NSDictionary* _lastSelectedUser;
 }
 
-
 @property (nonatomic, strong) UITableView* chatListTable;
+
+/**
+ Closes all active chats
+ */
+-(void) closeAll;
+
 @end

@@ -154,8 +154,8 @@
 -(NSArray*) unreadMessages:(NSString*) accountNo;
 #pragma mark active chats
 -(NSArray*) activeBuddies;
--(bool) removeActiveBuddies:(NSString*) buddyname:(NSString*) accountNo;
--(bool) removeAllActiveBuddies:(NSString*) accountNo;
+-(bool) removeActiveBuddy:(NSString*) buddyname forAccount:(NSString*) accountNo;
+-(bool) removeAllActiveBuddies;
 -(bool) addActiveBuddies:(NSString*) buddyname:(NSString*) accountNo;
 
 #pragma mark count unread

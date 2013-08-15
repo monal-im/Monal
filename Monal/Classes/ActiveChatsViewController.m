@@ -17,6 +17,7 @@
 
 @implementation ActiveChatsViewController
 
+#pragma mark view lifecycle
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -38,7 +39,10 @@
     _chatListTable.delegate=self;
     _chatListTable.dataSource=self;
     
-    self.view=_chatListTable; 
+    self.view=_chatListTable;
+    
+    UIBarButtonItem* rightButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Close All",@"") style:UIBarButtonItemStyleBordered target:self action:@selector(closeAll)];
+    self.navigationItem.rightBarButtonItem=rightButton;
     
 }
 
@@ -54,7 +58,14 @@
     // Dispose of any resources that can be recreated.
 }
 
+-(void) closeAll
+{
+    [[DataLayer sharedInstance] removeAllActiveBuddies];
+    _contacts=[[DataLayer sharedInstance] activeBuddies];
+    [_chatListTable reloadData];
+}
 
+#pragma mark tableview datasource
 
 -(NSInteger) numberOfSectionsInTableView:(UITableView *)tableView
 {
@@ -105,6 +116,33 @@
 }
 
 #pragma mark tableview delegate
+
+- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath 
+{
+    return YES;
+}
+
+- (BOOL)tableView:(UITableView *)tableView shouldIndentWhileEditingRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return YES;
+}
+
+- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
+    if (editingStyle == UITableViewCellEditingStyleDelete) {
+        NSDictionary* contact= [_contacts objectAtIndex:indexPath.row];
+        
+       [ [DataLayer sharedInstance] removeActiveBuddy:[contact objectForKey:@"buddy_name"] forAccount:[contact objectForKey:@"account_id"]];
+        
+        [_chatListTable beginUpdates];
+           _contacts=[[DataLayer sharedInstance] activeBuddies];
+        [_chatListTable deleteRowsAtIndexPaths:@[indexPath]
+                              withRowAnimation:UITableViewRowAnimationAutomatic];
+        [_chatListTable endUpdates];
+        
+        
+    }
+}
+
 -(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     [tableView deselectRowAtIndexPath:indexPath animated:NO];

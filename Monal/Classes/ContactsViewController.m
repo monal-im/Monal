@@ -47,7 +47,10 @@
     _offlineContacts=[[NSMutableArray alloc] init] ;
     _infoCells=[[NSMutableArray alloc] init] ;
 
-    [_contactsTable reloadData];   
+    [_contactsTable reloadData];
+    
+    UIBarButtonItem* rightButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(addContact)];
+    self.navigationItem.rightBarButtonItem=rightButton;
 }
 
 -(void) dealloc
@@ -76,7 +79,16 @@
     // Dispose of any resources that can be recreated.
 }
 
+#pragma mark Actions
+-(void)addContact
+{
+    
+}
 
+-(void)removeContact
+{
+    
+}
 
 #pragma mark updating info display
 -(void) showConnecting:(NSDictionary*) info
@@ -524,6 +536,34 @@
 }
 
 #pragma mark tableview delegate
+
+- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return YES;
+}
+
+- (BOOL)tableView:(UITableView *)tableView shouldIndentWhileEditingRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return YES;
+}
+
+- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
+    if (editingStyle == UITableViewCellEditingStyleDelete) {
+        NSDictionary* contact= [_contacts objectAtIndex:indexPath.row];
+        
+      //make xmpp call
+        
+        [_contactsTable beginUpdates];
+        [_contacts removeObjectAtIndex:indexPath.row];
+        
+        [_contactsTable deleteRowsAtIndexPaths:@[indexPath]
+                              withRowAnimation:UITableViewRowAnimationAutomatic];
+        [_contactsTable endUpdates];
+        
+        
+    }
+}
+
 -(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
    [tableView deselectRowAtIndexPath:indexPath animated:NO];

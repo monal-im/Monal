@@ -69,5 +69,16 @@
  */
 -(void) handleNewMessage:(NSNotification *)notification;
 
+/**
+ Presents a dialog to send a message to an xmppp user to add them as a contact. 
+ */
+-(void)addContact;
+
+/**
+Presents a dialog  to confirm removal of an xmpp contact
+*/
+-(void)removeContact;
+
+
 
 @end 

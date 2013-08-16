@@ -27,6 +27,7 @@
     return self;
 }
 
+#pragma mark own state
 -(void) setShow:(NSString*) showVal
 {
     XMLNode* show =[[XMLNode alloc] init];
@@ -47,6 +48,32 @@
     priorityNode.element=@"priority";
     priorityNode.data=[NSString stringWithFormat:@"%d",_priority];
     [self.children addObject:priorityNode];
+}
+
+
+#pragma mark subscription
+-(void) unsubscribeContact:(NSString*) jid
+{
+    [self.attributes setObject:jid forKey:@"to"];
+    [self.attributes setObject:@"unsubscribe" forKey:@"type"];
+}
+
+-(void) subscribeContact:(NSString*) jid
+{
+    [self.attributes setObject:jid forKey:@"to"];
+    [self.attributes setObject:@"subscribe" forKey:@"type"];
+}
+
+-(void) subscribedContact:(NSString*) jid
+{
+    [self.attributes setObject:jid forKey:@"to"];
+    [self.attributes setObject:@"subscribed" forKey:@"type"];
+}
+
+-(void) unsubscribedContact:(NSString*) jid
+{
+    [self.attributes setObject:jid forKey:@"to"];
+    [self.attributes setObject:@"unsubscribed" forKey:@"type"];
 }
 
 @end

@@ -83,6 +83,20 @@
 
 }
 
+-(void) setRemoveFromRoster:(NSString*) jid
+{
+    XMLNode* queryNode =[[XMLNode alloc] init];
+    queryNode.element=@"query";
+    [queryNode.attributes setObject:@"jabber:iq:roster" forKey:@"xmlns"];
+    [self.children addObject:queryNode];
+    
+    XMLNode* itemNode =[[XMLNode alloc] init];
+    itemNode.element=@"query";
+    [itemNode.attributes setObject:jid forKey:@"jid"];
+    [itemNode.attributes setObject:@"remove" forKey:@"subscription"];
+    [self.children addObject:itemNode];
+}
+
 #pragma mark iq get
 -(void) getVcardTo:(NSString*) to
 {

@@ -29,13 +29,10 @@
 	if([elementName isEqualToString:@"body"])
 	{
 		_hasBody=YES;
-		
 		return;
 	}
-	
-	
-	
-	if(([elementName isEqualToString:@"message"])  && ([[attributeDict objectForKey:@"type"] isEqualToString:kMessageGroupChatType]))
+    
+    if(([elementName isEqualToString:@"message"])  && ([[attributeDict objectForKey:@"type"] isEqualToString:kMessageGroupChatType]))
 	{
 		State=@"Message";
 		NSArray*  parts=[[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/"];

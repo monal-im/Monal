@@ -57,4 +57,24 @@
  */
 -(void) setShow:(NSString*) showVal;
 
+/**
+ unsubscribes from presence notfiction
+ */
+-(void) unsubscribeContact:(NSString*) jid;
+
+/**
+ subscribes from presence notfiction
+ */
+-(void) subscribeContact:(NSString*) jid;
+
+/**
+allow subscription. Called in response to a remote request. 
+ */
+-(void) subscribedContact:(NSString*) jid;
+
+/**
+ do not allow subscription.Called in response to a remote request. 
+ */
+-(void) unsubscribedContact:(NSString*) jid;
+
 @end

@@ -43,4 +43,9 @@ gets vcard info
  */
 -(void) getVcardTo:(NSString*) to;
 
+/**
+removes a contact from the roster
+ */
+-(void) setRemoveFromRoster:(NSString*) jid;
+
 @end

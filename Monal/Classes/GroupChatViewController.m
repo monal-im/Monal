@@ -29,7 +29,15 @@
 	// Do any additional setup after loading the view.
     self.navigationItem.title=NSLocalizedString(@"Group Chat",@"");
     [self.view setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"debut_dark"]]];
-    self.view.autoresizingMask=UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
+  
+        UIImage *buttonImage = [[UIImage imageNamed:@"blueButton"]
+                                 resizableImageWithCapInsets:UIEdgeInsetsMake(18, 18, 18, 18)];
+        UIImage *buttonImageHighlight = [[UIImage imageNamed:@"blueButtonHighlight"]
+                                          resizableImageWithCapInsets:UIEdgeInsetsMake(18, 18, 18, 18)];
+    
+        [_joinButton setBackgroundImage:buttonImage forState:UIControlStateNormal];
+        [_joinButton setBackgroundImage:buttonImageHighlight forState:UIControlStateSelected];
+    
 }
 
 - (void)didReceiveMemoryWarning

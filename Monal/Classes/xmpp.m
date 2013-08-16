@@ -288,9 +288,10 @@ dispatch_async(dispatch_get_current_queue(), ^{
             
             dispatch_source_set_event_handler(_loginCancelOperation, ^{
                 debug_NSLog(@"login cancel op");
-                dispatch_suspend(_loginCancelOperation);
+                
+                
                 UIBackgroundTaskIdentifier oldBGTask=_backgroundTask;
- 
+               
                 dispatch_async(_xmppQueue, ^{
                     //hide connecting message
                     NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
@@ -303,6 +304,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
                     [self connect];
                     }
                 });
+            
                 
                 //end background task if it wasnt by disconnenct
                 if (oldBGTask != UIBackgroundTaskInvalid)
@@ -311,6 +313,8 @@ dispatch_async(dispatch_get_current_queue(), ^{
                     [[UIApplication sharedApplication] endBackgroundTask:oldBGTask];
                     oldBGTask=UIBackgroundTaskInvalid;
                 }
+                
+                dispatch_source_cancel(_loginCancelOperation);
  
             });
             
@@ -336,10 +340,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
 
 -(void) disconnect
 {
-    
-    if(_loginCancelOperation)
-    dispatch_source_cancel(_loginCancelOperation);
-    
+        
     if (_backgroundTask != UIBackgroundTaskInvalid)
     {
     [[UIApplication sharedApplication] endBackgroundTask:_backgroundTask];
@@ -1118,7 +1119,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
                     [self startStream];
                     _loggedIn=YES;
                     _loggedInOnce=YES;
-                    dispatch_suspend(_loginCancelOperation); // let it cancel in disconenct
+                    
                     
                     NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
                                          kinfoTypeKey:@"connect", kinfoStatusKey:@""};

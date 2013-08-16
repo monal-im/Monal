@@ -28,12 +28,18 @@
     
     [super layoutSubviews];  //The default implementation of the layoutSubviews
      CGRect textLabelFrame = self.textLabel.frame;
-
+  
+    //this is to account for padding in the grouped tableview cell
+    int padding =30;
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
+    {
+        padding=80;
+    }
+    
     if(self.switchEnabled)
   {
-     
-
-       CGRect frame=CGRectMake(self.frame.size.width-_toggleSwitch.frame.size.width-30,
+   
+       CGRect frame=CGRectMake(self.frame.size.width-_toggleSwitch.frame.size.width-padding,
                                textLabelFrame.origin.y+7,_toggleSwitch.frame.size.width,
                                textLabelFrame.size.height);
     _toggleSwitch.frame=frame;
@@ -48,7 +54,7 @@
     {
         
         
-        CGRect frame=CGRectMake(self.frame.size.width-79-30,
+        CGRect frame=CGRectMake(self.frame.size.width-79-padding,
                                 textLabelFrame.origin.y+9,79,
                                 textLabelFrame.size.height*2/3);
         _textField.frame=frame;

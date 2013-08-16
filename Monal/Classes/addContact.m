@@ -6,10 +6,10 @@
 //  Copyright 2009 __MyCompanyName__. All rights reserved.
 //
 
-#import "buddyAdd.h"
+#import "addContact.h"
 
 
-@implementation buddyAdd
+@implementation addContact
 
 @synthesize bbiOpenPopOver; 
 @synthesize popOverController; 

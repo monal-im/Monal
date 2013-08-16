@@ -19,8 +19,8 @@
     UITabBarController* tabbarcontroller;
 	
 	IBOutlet UITextField* passwordField; 
-//	IBOutlet UIButton* cancelButton;
-IBOutlet UIScrollView* scroll; 
+    //	IBOutlet UIButton* cancelButton;
+    IBOutlet UIScrollView* scroll; 
     UIViewController* theApp; 
 
   

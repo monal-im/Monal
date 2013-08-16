@@ -11,7 +11,7 @@
 
 
 
-@interface buddyAdd : UIViewController<UITextFieldDelegate>{
+@interface addContact : UIViewController<UITextFieldDelegate>{
 	
 	UINavigationController* navigationController;
     UITabBarController* tabbarcontroller;

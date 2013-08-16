@@ -30,10 +30,7 @@
     IBOutlet UITableViewCell* oldStyleSSLCell;
     IBOutlet UITableViewCell* checkCertCell;
     
-    
-	
-	
-	IBOutlet UITextField* userText;
+    IBOutlet UITextField* userText;
     IBOutlet UITextField* passText;
 	IBOutlet UISwitch* enableSwitch;
 	

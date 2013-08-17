@@ -160,6 +160,8 @@
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
 //    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshDisplay) name:UIApplicationWillEnterForegroundNotification object:nil];
+    
+    thelist =[[DataLayer sharedInstance] messageHistory:_buddyName forAccount: _accountNo];
 }
 
 -(void) viewWillDisappear:(BOOL)animated
@@ -801,7 +803,7 @@ if([buddyFullName isEqualToString:@""])
 
 	//populate the list
 //	if(thelist!=nil) [thelist release];
-	NSArray* thelist =[[DataLayer sharedInstance] messageHistory:_buddyName forAccount: _accountNo];
+
 	//[thelist retain];
 	
 	//get icons 

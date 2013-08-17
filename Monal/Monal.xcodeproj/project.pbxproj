@@ -209,6 +209,8 @@
 		2696EED21791245A00BC54B8 /* chatViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2696EED11791245A00BC54B8 /* chatViewController.m */; };
 		269A2E62132030770044B1C8 /* Monal_crop_256.png in Resources */ = {isa = PBXBuildFile; fileRef = 26EB85D911166F1B005446DD /* Monal_crop_256.png */; };
 		269F0F1A105DDEFB00FF96F8 /* status.png in Resources */ = {isa = PBXBuildFile; fileRef = 269F0F19105DDEFB00FF96F8 /* status.png */; };
+		26A8ADD717C031BA0033990D /* ContactDetails.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EC40FB17BDD8560031304D /* ContactDetails.m */; };
+		26A8ADD817C031BA0033990D /* ContactDetails.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26EC40F817BDD8360031304D /* ContactDetails.xib */; };
 		26A942AE130B52520034CDF7 /* offline.png in Resources */ = {isa = PBXBuildFile; fileRef = 26A942AD130B52520034CDF7 /* offline.png */; };
 		26AAE27B179F46E700271345 /* XMPP@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26AAE279179F46E700271345 /* XMPP@2x.png */; };
 		26AAE27C179F46E700271345 /* XMPP.png in Resources */ = {isa = PBXBuildFile; fileRef = 26AAE27A179F46E700271345 /* XMPP.png */; };
@@ -552,9 +554,9 @@
 		26EB85D611166DE7005446DD /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
 		26EB85D911166F1B005446DD /* Monal_crop_256.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Monal_crop_256.png; sourceTree = "<group>"; };
 		26EC1DB1122978A100EAF934 /* AboutiPad.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = AboutiPad.xib; sourceTree = "<group>"; };
-		26EC40F817BDD8360031304D /* BuddyDetails.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = BuddyDetails.xib; sourceTree = "<group>"; };
-		26EC40FA17BDD8560031304D /* buddyDetails.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = buddyDetails.h; sourceTree = "<group>"; };
-		26EC40FB17BDD8560031304D /* buddyDetails.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = buddyDetails.m; sourceTree = "<group>"; };
+		26EC40F817BDD8360031304D /* ContactDetails.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ContactDetails.xib; sourceTree = "<group>"; };
+		26EC40FA17BDD8560031304D /* ContactDetails.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContactDetails.h; sourceTree = "<group>"; };
+		26EC40FB17BDD8560031304D /* ContactDetails.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ContactDetails.m; sourceTree = "<group>"; };
 		26EC40FD17BDD85F0031304D /* addContact.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = addContact.h; sourceTree = "<group>"; };
 		26EC40FE17BDD85F0031304D /* addContact.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = addContact.m; sourceTree = "<group>"; };
 		26EC410017BDD8800031304D /* askTempPass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = askTempPass.h; sourceTree = "<group>"; };
@@ -813,9 +815,6 @@
 				26EC410917BDD9090031304D /* userSearch.h */,
 				26EC410A17BDD9090031304D /* userSearch.m */,
 				26EC410717BDD8AB0031304D /* userSearch.xib */,
-				26EC40FA17BDD8560031304D /* buddyDetails.h */,
-				26EC40FB17BDD8560031304D /* buddyDetails.m */,
-				26EC40F817BDD8360031304D /* BuddyDetails.xib */,
 				26EE8B20179B7B0D006781F3 /* SlidingMessageViewController.h */,
 				26EE8B21179B7B0D006781F3 /* SlidingMessageViewController.m */,
 				2696EED01791245A00BC54B8 /* chatViewController.h */,
@@ -1096,6 +1095,9 @@
 		26DB52111777C83100B50353 /* Modal views */ = {
 			isa = PBXGroup;
 			children = (
+				26EC40FA17BDD8560031304D /* ContactDetails.h */,
+				26EC40FB17BDD8560031304D /* ContactDetails.m */,
+				26EC40F817BDD8360031304D /* ContactDetails.xib */,
 				26EC410C17BDD9640031304D /* callScreen.h */,
 				26EC410D17BDD9640031304D /* callScreen.m */,
 				26EC410017BDD8800031304D /* askTempPass.h */,
@@ -1484,6 +1486,7 @@
 				26AAE280179F547C00271345 /* back@2x.png in Resources */,
 				26AAE282179F701A00271345 /* About.html in Resources */,
 				26EC411017BDD98E0031304D /* GroupChatViewController.xib in Resources */,
+				26A8ADD817C031BA0033990D /* ContactDetails.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1554,6 +1557,7 @@
 				261E672B179E27BE00CB493E /* ParseFailure.m in Sources */,
 				26AAE285179F7B0200271345 /* MLSettingCell.m in Sources */,
 				26EC411317BDE39E0031304D /* MLIconManager.m in Sources */,
+				26A8ADD717C031BA0033990D /* ContactDetails.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

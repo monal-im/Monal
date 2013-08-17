@@ -11,6 +11,7 @@
 #import "MLInfoCell.h"
 #import "DataLayer.h"
 #import "chatViewController.h"
+#import "ContactDetails.h"
 
 
 #define kinfoSection 0
@@ -562,6 +563,18 @@
         
         
     }
+}
+
+- (void)tableView:(UITableView *)tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath *)indexPath
+{
+    ContactDetails* detailVC = [[ContactDetails alloc]  initWithContact:[_contacts objectAtIndex:indexPath.row] ];
+    [self.currentNavController pushViewController:detailVC animated:YES];
+    
+    //    popOverController = [[UIPopoverController alloc] initWithContentViewController:self];
+    //    popOverController.popoverContentSize = CGSizeMake(320, 480);
+    //    // if(orientation==UIInterfaceOrientationLandscapeRight)
+    //    [popOverController presentPopoverFromRect:cellRect
+    //                                       inView:table permittedArrowDirections:UIPopoverArrowDirectionLeft animated:YES];
 }
 
 -(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath

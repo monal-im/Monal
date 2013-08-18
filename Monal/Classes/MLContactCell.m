@@ -23,7 +23,6 @@
         self.badgeHighlightedColor=[UIColor clearColor];
         self.badgeText =nil;
         self.textLabel.textColor = [UIColor blackColor];
-        self.imageView.image=[UIImage imageNamed:@"noicon"];        
     }
     return self;
 }
@@ -49,6 +48,7 @@
     self.detailTextLabel.frame = detailLabelFrame;
     
     [self setOrb];
+ 
 }
 
 -(void) setOrb

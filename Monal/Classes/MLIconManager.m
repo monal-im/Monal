@@ -11,7 +11,7 @@
 @implementation MLIconManager
 
 
--(void) setIconForContact:(NSString*) contact andAccount:(NSString*) accountNo WithData:(NSData*) data andFileName:(NSString*) fileName
++(void) setIconForContact:(NSString*) contact andAccount:(NSString*) accountNo WithData:(NSData*) data andFileName:(NSString*) fileName
 {
     
 /*vCardPhotoBinval=[NSString stringWithString:messageBuffer];
@@ -80,11 +80,19 @@
     
 }
 
--(UIImage*) getIconForContact:(NSString*) contact andAccount:(NSString*) accountNo
++(UIImage*) getIconForContact:(NSString*) contact andAccount:(NSString*) accountNo
 {
+    UIImage* toreturn=nil; 
     //get filname from DB
     
     //uiimage image named is cached if avaialable
+    
+    if(toreturn==nil)
+    {
+        toreturn=[UIImage imageNamed:@"noicon"];
+    }
+    
+    return toreturn;
     
 }
 

@@ -7,6 +7,7 @@
 //
 
 #import "ContactDetails.h"
+#import "MLIconManager.h"
 
 
 @implementation ContactDetails
@@ -60,6 +61,9 @@
                 _protocolImage.image=[UIImage imageNamed:@"XMPP"];
             }
     }
+    
+    UIImage* contactImage=[MLIconManager getIconForContact:[_contact objectForKey:@"buddy_name"] andAccount:[_contact objectForKey:@"account_id"]];
+    _buddyIconView.image=contactImage;
 }
 
 -(BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation

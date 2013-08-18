@@ -11,7 +11,7 @@
 
 @interface MLIconManager : NSObject
 
--(void) setIconForContact:(NSString*) contact andAccount:(NSString*) accountNo WithData:(NSData*) data andFileName:(NSString*) fileName;
--(UIImage*) getIconForContact:(NSString*) contact andAccount:(NSString*) accountNo;
++(void) setIconForContact:(NSString*) contact andAccount:(NSString*) accountNo WithData:(NSData*) data andFileName:(NSString*) fileName;
++(UIImage*) getIconForContact:(NSString*) contact andAccount:(NSString*) accountNo;
 
 @end

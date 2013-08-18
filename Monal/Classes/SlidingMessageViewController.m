@@ -7,6 +7,7 @@
 //
 
 #import "SlidingMessageViewController.h"
+#import "MLIconManager.h"
 
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -168,15 +169,12 @@
 	//icon
 	icon =[[UIImageView alloc] initWithFrame:CGRectMake(5, 5, 32, 32)] ;
 	
-	if(![userfilename isEqualToString:@""])
-	{
-		if([userfilename isEqualToString:@"noicon"])
-			icon.image=[UIImage imageNamed:@"noicon.png"];
-		else
-			icon.image=[UIImage imageWithContentsOfFile:userfilename];
+
+            //cell.imageView.image=[MLIconManager getIconForContact:[row objectForKey:@"buddy_name"] andAccount:[row objectForKey:@"account_id"]];
+        
 		
 		[self.view addSubview:icon];
-	}
+	
 	
    
     

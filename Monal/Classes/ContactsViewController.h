@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "MLConstants.h"
+#import "MLIconManager.h"
 
 
 //contact cells

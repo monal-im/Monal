@@ -25,6 +25,8 @@
 #import "ParseChallenge.h"
 #import "ParseFailure.h"
 
+#import "MLIconManager.h"
+
 #define kXMPPReadSize 51200 // bytes
 
 #define kConnectTimeout 20ull //seconds

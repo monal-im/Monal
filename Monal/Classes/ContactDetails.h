@@ -15,11 +15,11 @@
     UIPopoverController* _popOverController;
     
     IBOutlet UITableView* _theTable;
-	IBOutlet UIView* _top;
 	IBOutlet UITableViewCell* _topcell;
 	IBOutlet UITableViewCell* _bottomcell;
     IBOutlet UIButton* _callButton;
     
+    NSDictionary* _contact; 
    // callScreen*  call;
     
 }

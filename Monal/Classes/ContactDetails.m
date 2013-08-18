@@ -15,12 +15,51 @@
 -(void) viewDidLoad
 {
     [self.view setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"debut_dark"]]];
+    
+        UIImage *buttonImage2 = [[UIImage imageNamed:@"greenButton"]
+                                 resizableImageWithCapInsets:UIEdgeInsetsMake(18, 18, 18, 18)];
+        UIImage *buttonImageHighlight2 = [[UIImage imageNamed:@"greenButtonHighlight"]
+                                         resizableImageWithCapInsets:UIEdgeInsetsMake(18, 18, 18, 18)];
+    
+        [_callButton setBackgroundImage:buttonImage2 forState:UIControlStateNormal];
+       [_callButton setBackgroundImage:buttonImageHighlight2 forState:UIControlStateSelected];
 
 }
 
 -(void) viewWillAppear:(BOOL)animated
 {
+    _buddyName.text =[_contact objectForKey:@"buddy_name"];
     
+    _buddyMessage.text=[_contact objectForKey:@"status"];
+     if([ _buddyMessage.text isEqualToString:@"(null)"])  _buddyMessage.text=@"";
+    
+    _buddyStatus.text=[_contact objectForKey:@"state"];
+    if([ _buddyStatus.text isEqualToString:@"(null)"])  _buddyStatus.text=@"";
+    
+    _fullName.text=[_contact objectForKey:@"full_name"];
+    if([ _fullName.text isEqualToString:@"(null)"])  _fullName.text=@"";
+    
+    NSArray* parts= [_buddyName.text componentsSeparatedByString:@"@"];
+    if([parts count]>1)
+    {
+    NSString* domain= [parts objectAtIndex:1];
+    	if([domain isEqualToString:@"gmail.com"])
+    	{
+    		//gtalk
+    		_protocolImage.image=[UIImage imageNamed:@"GTalk"];
+    	}
+    	else
+            if([domain isEqualToString:@"chat.facebook.com"])
+            {
+                //gtalk
+                _protocolImage.image=[UIImage imageNamed:@"Facebook"];
+            }
+            else
+            {
+                //xmpp
+                _protocolImage.image=[UIImage imageNamed:@"XMPP"];
+            }
+    }
 }
 
 -(BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -123,24 +162,11 @@
 {
 	
     self=[super init];
+    _contact=contact;
+        
+    self.navigationItem.title=NSLocalizedString(@"Details", @"");
     
-    
-//	if([domain isEqualToString:@"gmail.com"])
-//	{
-//		//gtalk
-//		_protocolImage.image=[UIImage imageNamed:@"google_g.png"];
-//	}
-//	else
-//        if([domain isEqualToString:@"chat.facebook.com"])
-//        {
-//            //gtalk
-//            _protocolImage.image=[UIImage imageNamed:@"Facebook_big.png"];
-//        }
-//        else
-//        {
-//            //xmpp
-//            _protocolImage.image=[UIImage imageNamed:@"XMPP.png"];
-//        }
+
 	
     // see if this user  has  jingle call
     // check caps for audio

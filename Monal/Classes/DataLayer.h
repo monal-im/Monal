@@ -105,11 +105,11 @@
 
 //vcard commands
 
--(BOOL) setIconName:(NSString*) buddy :(NSString*) accountNo:(NSString*) icon;
--(NSString*) iconName:(NSString*) buddy :(NSString*) accountNo; 
+-(BOOL) setIconName:(NSString*) icon forBuddy:(NSString*) buddy inAccount:(NSString*) accountNo;
+-(NSString*) iconName:(NSString*) buddy forAccount:(NSString*) accountNo;
  
 
--(BOOL) setNickName:(NSString*) buddy :(NSString*) accountNo:(NSString*) nickName;
+-(BOOL) setNickName:(NSString*) buddy forAccount:(NSString*) accountNo:(NSString*) nickName;
 
 
 //account commands

@@ -1363,31 +1363,25 @@ static DataLayer *sharedInstance=nil;
 #pragma mark icon Commands
 
 
--(BOOL) setIconName:(NSString*) buddy :(NSString*) accountNo:(NSString*) icon
+-(BOOL) setIconName:(NSString*) icon forBuddy:(NSString*) buddy inAccount:(NSString*) accountNo
 {
-	
 	
 	NSString* query=[NSString stringWithFormat:@"update buddylist set filename='%@',dirty=1 where account_id=%@ and  buddy_name='%@';",icon, accountNo, buddy];
 	if([self executeNonQuery:query]!=NO)
 	{
-		;
 		return YES;
 	}
 	else
 	{
-		;
-		return NO;
+        return NO;
 	}
 }
 
--(NSString*) iconName:(NSString*) buddy :(NSString*) accountNo
-{
-	/*
-	 NSString* query=[NSString stringWithFormat:@"select data  from buddyicon as A inner join buddylist as B on a.buddyid=b.buddyid where account_id=%@ and buddy_name='%@'", accountNo, buddy];
-	 NSString* iconname= [self executeScalar:query];
-	 [iconname retain];
-     ;
-	 return iconname; */
+-(NSString*) iconName:(NSString*) buddy forAccount:(NSString*) accountNo;
+{ 
+	 NSString* query=[NSString stringWithFormat:@"select filename from  buddylist where account_id=%@ and buddy_name='%@'", accountNo, buddy];
+	 NSString* iconname= (NSString*)[self executeScalar:query];
+	 return iconname;
 }
 
 

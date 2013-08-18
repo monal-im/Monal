@@ -61,8 +61,10 @@
                 _protocolImage.image=[UIImage imageNamed:@"XMPP"];
             }
     }
+    NSString* accountNo=[NSString stringWithFormat:@"%@", [_contact objectForKey:@"account_id"]];
+
     
-    UIImage* contactImage=[MLIconManager getIconForContact:[_contact objectForKey:@"buddy_name"] andAccount:[_contact objectForKey:@"account_id"]];
+    UIImage* contactImage=[MLIconManager getIconForContact:[_contact objectForKey:@"buddy_name"] andAccount:accountNo];
     _buddyIconView.image=contactImage;
 }
 

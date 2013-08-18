@@ -689,11 +689,12 @@ dispatch_async(dispatch_get_current_queue(), ^{
                 if(iqNode.fullName)
                 {
                     [[DataLayer sharedInstance] setFullName:iqNode.fullName forBuddy:iqNode.user andAccount:_accountNo];
-                
+                     [MLIconManager setIconForContact:iqNode.user andAccount:_accountNo WithData:iqNode.photoBinValue ];
                 NSDictionary* userDic=@{kusernameKey: iqNode.user,
                                         kfullNameKey: iqNode.fullName,
                                         kaccountNoKey:_accountNo
                                         };
+               
                 dispatch_async(_xmppQueue, ^{
                     [self.contactsVC addUser:userDic];
                 });

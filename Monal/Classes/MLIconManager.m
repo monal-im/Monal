@@ -15,7 +15,7 @@
 
 +(void) setIconForContact:(NSString*) contact andAccount:(NSString*) accountNo WithData:(NSString*) data
 {
-    
+    if(!data) return; 
 //documents directory/buddyicons/account no/contact
     
     NSString* filename=[NSString stringWithFormat:@"%@.png", [contact lowercaseString]];

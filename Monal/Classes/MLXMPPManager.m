@@ -37,6 +37,7 @@
         [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"SortContacts"];
         
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"SetDefaults"];
+        [[NSUserDefaults standardUserDefaults] synchronize];
     }
 }
 

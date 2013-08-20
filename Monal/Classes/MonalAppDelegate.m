@@ -188,8 +188,11 @@
     } else if (state == UIApplicationStateBackground) {
         debug_NSLog(@"Entering BG");
     }
-    
+}
 
+-(void)applicationWillTerminate:(UIApplication *)application
+{
+       [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 #pragma mark splitview controller delegate

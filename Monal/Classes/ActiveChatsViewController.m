@@ -111,7 +111,7 @@
     NSString* accountNo=[NSString stringWithFormat:@"%d", cell.accountNo];
     cell.count=  [[DataLayer sharedInstance] countUserUnreadMessages:cell.username forAccount:accountNo];
     
-    cell.imageView.image=[MLIconManager getIconForContact:[row objectForKey:@"buddy_name"] andAccount:[row objectForKey:@"account_id"]];
+    cell.imageView.image=[MLIconManager getIconForContact:[row objectForKey:@"buddy_name"] andAccount:accountNo];
     return cell;
 }
 

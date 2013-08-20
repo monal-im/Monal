@@ -21,6 +21,24 @@
 
 @implementation MLXMPPManager
 
+-(void) defaultSettings
+{
+    BOOL setDefaults =[[NSUserDefaults standardUserDefaults] boolForKey:@"SetDefaults"];
+    if(!setDefaults)
+    {
+        [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"Away"];
+        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"Visible"];
+        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"MusicStatus"];
+        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"Sound"];
+        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"MessagePreview"];
+        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"Logging"];
+        
+        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"OfflineContact"];
+        [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"SortContacts"];
+        
+        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"SetDefaults"];
+    }
+}
 
 + (MLXMPPManager* )sharedInstance
 {
@@ -60,6 +78,8 @@
     {
          debug_NSLog(@"failed to install keep alive timer");
     }
+    
+    [self defaultSettings];
     
     
 //    

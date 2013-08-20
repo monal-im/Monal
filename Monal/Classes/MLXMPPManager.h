@@ -14,7 +14,6 @@
 #define kMonalNetQueue "im.monal.netQueue"
 #define kMonalConnectedListQueue "im.monal.connectedListQueue"
 
-
 /**
  A singleton to control all of the active XMPP connections
  */

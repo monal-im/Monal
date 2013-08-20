@@ -12,6 +12,7 @@
 #import "DataLayer.h"
 #import "chatViewController.h"
 #import "ContactDetails.h"
+#import "UIAlertView+Blocks.h"
 
 
 #define kinfoSection 0
@@ -551,19 +552,24 @@
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
     if (editingStyle == UITableViewCellEditingStyleDelete) {
         NSDictionary* contact= [_contacts objectAtIndex:indexPath.row];
+        NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"Remove %@ from contacts?", nil),[contact objectForKey:@"full_name"] ];
+        RIButtonItem* cancelButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Cancel", nil) action:^{
+            
+        }];
+                                      
+          RIButtonItem* yesButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Yes", nil) action:^{
+            [[MLXMPPManager sharedInstance] removeContact:contact];
+            
+            [_contactsTable beginUpdates];
+            [_contacts removeObjectAtIndex:indexPath.row];
+            
+            [_contactsTable deleteRowsAtIndexPaths:@[indexPath]
+                                  withRowAnimation:UITableViewRowAnimationAutomatic];
+            [_contactsTable endUpdates];
+        }];
         
-        [[MLXMPPManager sharedInstance] removeContact:contact];
-        
-      //make xmpp call
-        
-        [_contactsTable beginUpdates];
-        [_contacts removeObjectAtIndex:indexPath.row];
-        
-        [_contactsTable deleteRowsAtIndexPaths:@[indexPath]
-                              withRowAnimation:UITableViewRowAnimationAutomatic];
-        [_contactsTable endUpdates];
-        
-        
+        UIAlertView* alert =[[UIAlertView alloc] initWithTitle:@"Remove Contact" message:messageString cancelButtonItem:cancelButton otherButtonItems:yesButton, nil];
+        [alert show]; 
     }
 }
 
@@ -623,6 +629,7 @@
     
     
 }
+
 
 
 @end

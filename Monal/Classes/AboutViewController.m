@@ -47,7 +47,7 @@
                          [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"] ];
     
     
-    [_webView loadHTMLString:withbuild baseURL:websiteUrl];
+    [_webView loadHTMLString:withVer baseURL:websiteUrl];
 }
 
 

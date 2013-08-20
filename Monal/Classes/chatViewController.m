@@ -143,8 +143,11 @@
     NSArray* unread =[[DataLayer sharedInstance] unreadMessages:_buddyName forAccount: _accountNo];
     [_messagelist addObjectsFromArray:unread];
     
+    if([_messagelist count]>0)
+    {
      NSIndexPath *path1 = [NSIndexPath indexPathForRow:[_messagelist count]-1  inSection:0];
     [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:YES];
+    }
 }
 
 -(void) viewWillDisappear:(BOOL)animated

@@ -150,7 +150,7 @@
 -(BOOL) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom ;
 
 #pragma mark new messages
--(NSArray*) unreadMessagesForBuddy:(NSString*) buddy :(NSString*) accountNo;
+-(NSArray*) unreadMessages:(NSString*) buddy forAccount:(NSString*) accountNo;
 -(NSArray*) unreadMessages:(NSString*) accountNo;
 #pragma mark active chats
 -(NSArray*) activeBuddies;

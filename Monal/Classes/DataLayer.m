@@ -1623,7 +1623,7 @@ static DataLayer *sharedInstance=nil;
 	} else return nil;
 }
 
--(NSArray*) unreadMessagesForBuddy:(NSString*) buddy :(NSString*) accountNo
+-(NSArray*) unreadMessages:(NSString*) buddy forAccount:(NSString*) accountNo
 {
 	//returns a buddy's message history
 	

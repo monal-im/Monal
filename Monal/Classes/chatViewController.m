@@ -86,13 +86,13 @@
     _messageTable.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
 //    pages.autoresizingMask= UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
 
-    UISwipeGestureRecognizer* swipe = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipeDetected:)];
-    [swipe setDirection:(UISwipeGestureRecognizerDirectionRight )]; 
-    [self.view addGestureRecognizer:swipe]; 
-    
-    UISwipeGestureRecognizer* swipe2 = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipeDetected:)];
-    [swipe2 setDirection:( UISwipeGestureRecognizerDirectionLeft)]; 
-    [self.view addGestureRecognizer:swipe2];
+//    UISwipeGestureRecognizer* swipe = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipeDetected:)];
+//    [swipe setDirection:(UISwipeGestureRecognizerDirectionRight )]; 
+//    [self.view addGestureRecognizer:swipe]; 
+//    
+//    UISwipeGestureRecognizer* swipe2 = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipeDetected:)];
+//    [swipe2 setDirection:( UISwipeGestureRecognizerDirectionLeft)]; 
+//    [self.view addGestureRecognizer:swipe2];
  
     chatInput.delegate=self;
 }
@@ -129,9 +129,7 @@
 	[nc addObserver:self selector:@selector(keyboardWillShow:) name: UIKeyboardWillShowNotification object:nil];
 	[nc addObserver:self selector:@selector(keyboardWillHide:) name: UIKeyboardWillHideNotification object:nil];
 	[nc addObserver:self selector:@selector(keyboardDidShow:) name: UIKeyboardDidShowNotification object:nil];
-    
-    
-    _messagelist =[[DataLayer sharedInstance] messageHistory:_buddyName forAccount: _accountNo];
+
     self.hidesBottomBarWhenPushed=YES;
     _messageTable.delegate=self;
     _messageTable.dataSource=self;
@@ -141,7 +139,12 @@
 
 -(void)viewWillAppear:(BOOL)animated
 {
-
+    _messagelist =[[DataLayer sharedInstance] messageHistory:_buddyName forAccount: _accountNo];
+    NSArray* unread =[[DataLayer sharedInstance] unreadMessages:_buddyName forAccount: _accountNo];
+    [_messagelist addObjectsFromArray:unread];
+    
+     NSIndexPath *path1 = [NSIndexPath indexPathForRow:[_messagelist count]-1  inSection:0];
+    [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:YES];
 }
 
 -(void) viewWillDisappear:(BOOL)animated
@@ -182,6 +185,52 @@
 {
 }
 
+
+//always messages going out
+-(void) addMessageto:(NSString*)to withMessage:(NSString*) message
+{
+	
+	if([[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:_accountNo withMessage:message actuallyFrom:self.jid ])
+	{
+		debug_NSLog(@"added message");
+        
+		if(groupchat!=true) //  message will come back
+		{
+            dispatch_async(dispatch_get_main_queue(),
+                           ^{
+                               NSDictionary* userInfo = @{@"af": self.jid,
+                                                          @"message": message ,
+                                                          @"thetime": @""  };
+                               [_messagelist addObject:userInfo];
+                               
+                               [_messageTable beginUpdates];
+                               NSIndexPath *path1 = [NSIndexPath indexPathForRow:[_messagelist count]-1  inSection:0];
+                               [_messageTable insertRowsAtIndexPaths:@[path1]
+                                                    withRowAnimation:UITableViewRowAnimationBottom];
+                               [_messageTable endUpdates];
+                               
+                               
+                               [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:YES];
+                           });
+
+            
+        }
+		
+	}
+	else
+		debug_NSLog(@"failed to add message");
+	
+	// make sure its in active
+	if(firstmsg==true)
+	{
+        [[DataLayer sharedInstance] addActiveBuddies:to :_accountNo];
+        firstmsg=false;
+	}
+	
+    msgthread=false;
+    
+}
+
 -(void) handleNewMessage:(NSNotification *)notification
 {
     debug_NSLog(@"chat view got new message notice %@", notification.userInfo);
@@ -200,56 +249,30 @@
                            [_messageTable beginUpdates];
                            NSIndexPath *path1 = [NSIndexPath indexPathForRow:[_messagelist count]-1  inSection:0];
                            [_messageTable insertRowsAtIndexPaths:@[path1]
-                                                 withRowAnimation:UITableViewRowAnimationAutomatic];
+                                                 withRowAnimation:UITableViewRowAnimationTop];
                            [_messageTable endUpdates];
+                           
+                            [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:YES];
                            
                        });
     }
 }
 
+
+#pragma mark MUC display elements
 -(void) popContacts
 {
-    debug_NSLog(@"pop out contacts"); 
+    debug_NSLog(@"pop out contacts");
     
-//    UITableViewController* tbv = [UITableViewController alloc];
-//    tbv.tableView=contactList; 
-//    popOverController = [[UIPopoverController alloc] initWithContentViewController:tbv];
-//    
-//    popOverController.popoverContentSize = CGSizeMake(320, 480);
-//    [popOverController presentPopoverFromBarButtonItem:contactsButton permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
-// 	
-//    
-//  
-}
-
-
-//always messages going out
--(void) addMessageto:(NSString*)to withMessage:(NSString*) message
-{
-	
-	if([[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:_accountNo withMessage:message actuallyFrom:self.jid ])
-	{
-		debug_NSLog(@"added message");
-        
-		if(groupchat!=true) //  message will come back 
-		{
-	
-		        
-        }
-		
-	}
-	else
-		debug_NSLog(@"failed to add message");
-	
-	// make sure its in active
-	if(firstmsg==true)
-	{
-	[[DataLayer sharedInstance] addActiveBuddies:to :_accountNo];
-    firstmsg=false; 
-	}
-	
-    msgthread=false;
-
+    //    UITableViewController* tbv = [UITableViewController alloc];
+    //    tbv.tableView=contactList;
+    //    popOverController = [[UIPopoverController alloc] initWithContentViewController:tbv];
+    //
+    //    popOverController.popoverContentSize = CGSizeMake(320, 480);
+    //    [popOverController presentPopoverFromBarButtonItem:contactsButton permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
+    // 	
+    //    
+    //  
 }
 
 
@@ -329,7 +352,7 @@
     NSDictionary* row= [_messagelist objectAtIndex:indexPath.row];
     
     cell.textLabel.text =[row objectForKey:@"message"];
-    
+    cell.selectionStyle=UITableViewCellSelectionStyleNone;
     return cell;
 }
 
@@ -343,6 +366,11 @@
 - (BOOL)tableView:(UITableView *)tableView shouldIndentWhileEditingRowAtIndexPath:(NSIndexPath *)indexPath
 {
     return YES;
+}
+
+-(void)tableView:(UITableView *)tableView didDeselectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    [chatInput resignFirstResponder];
 }
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -371,6 +399,10 @@
 
 
 # pragma mark Textview delegeate functions
+- (void)textFieldDidBeginEditing:(UITextField *)textField
+{
+}
+
 -(void) keyboardDidHide: (NSNotification *)notif 
 {
 	debug_NSLog(@"kbd did hide "); 
@@ -403,7 +435,7 @@
 	CGRect r,t;
     [[note.userInfo valueForKey:UIKeyboardBoundsUserInfoKey] getValue: &t];
 	r=self.view.frame;
-	r.size.height -=  t.size.height;
+	r.size.height -=  t.size.height -50;
 	
 //		NSString* machine=[tools machine]; 
 //	if([machine hasPrefix:@"iPad"] )
@@ -417,7 +449,11 @@
 	[UIView beginAnimations:nil context:NULL];
     [UIView setAnimationDuration:0.3];
 	oldFrame=self.view.frame;
-	self.view.frame =r; 
+	self.view.frame =r;
+        
+        NSIndexPath *path1 = [NSIndexPath indexPathForRow:[_messagelist count]-1  inSection:0];
+        [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:YES];
+
 	[UIView commitAnimations];
 	
 	

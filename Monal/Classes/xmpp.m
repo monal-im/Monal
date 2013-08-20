@@ -737,6 +737,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
                         
                         RIButtonItem* yesButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Yes", nil) action:^{
                             [self approveToRoster:presenceNode.from];
+                            [self addToRoster:presenceNode.from];
                         
                         }];
                         

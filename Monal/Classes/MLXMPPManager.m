@@ -125,7 +125,7 @@
 {
     
     __block xmpp* toReturn=nil;
-    dispatch_async(_connectedListQueue, ^{
+    dispatch_sync(_connectedListQueue, ^{
         for (NSDictionary* account in _connectedXMPP)
         {
             xmpp* xmppAccount=[account objectForKey:@"xmppAccount"];
@@ -209,7 +209,7 @@
         [hostReach startNotifier];
         
         NSDictionary* accountRow= [[NSDictionary alloc] initWithObjects:@[xmppAccount, hostReach] forKeys:@[@"xmppAccount", @"hostReach"]];
-    dispatch_async(_connectedListQueue, ^{
+    dispatch_sync(_connectedListQueue, ^{
         [_connectedXMPP addObject:accountRow];
     });
         
@@ -227,7 +227,7 @@
 -(void) disconnectAccount:(NSString*) accountNo
 {
     dispatch_async(_netQueue, ^{
-        dispatch_async(_connectedListQueue, ^{
+        dispatch_sync(_connectedListQueue, ^{
             int index=0;
             int pos;
             for (NSDictionary* account in _connectedXMPP)
@@ -287,7 +287,7 @@
 
 -(void) reachabilityChanged
 {
-       dispatch_async(_connectedListQueue, ^{
+       dispatch_sync(_connectedListQueue, ^{
     for (NSDictionary* row in _connectedXMPP)
     {
     Reachability* hostReach=[row objectForKey:@"hostReach"];

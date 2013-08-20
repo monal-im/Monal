@@ -29,7 +29,7 @@ static DataLayer *sharedInstance=nil;
 -(NSObject*) executeScalar:(NSString*) query
 {
     NSObject* __block toReturn;
-    dispatch_async(_dbQueue, ^{
+    dispatch_sync(_dbQueue, ^{
         
         
         /*
@@ -153,7 +153,7 @@ static DataLayer *sharedInstance=nil;
 {
 	
     BOOL __block toReturn;
-    dispatch_async(_dbQueue, ^{
+    dispatch_sync(_dbQueue, ^{
         /*sqlite3_stmt *statement1;
          if (sqlite3_prepare_v2(database, [@"begin"  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement1, NULL) == SQLITE_OK) {
          sqlite3_step(statement1);
@@ -190,7 +190,7 @@ static DataLayer *sharedInstance=nil;
 {
     
   	NSMutableArray* __block toReturn =  [[NSMutableArray alloc] init] ;
-    dispatch_async(_dbQueue, ^{
+    dispatch_sync(_dbQueue, ^{
         /*sqlite3_stmt *statement1;
          if (sqlite3_prepare_v2(database, [@"begin"  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement1, NULL) == SQLITE_OK) {
          sqlite3_step(statement1);
@@ -498,7 +498,7 @@ static DataLayer *sharedInstance=nil;
 {
     __block BOOL toReturn=NO;
     //this needs to be one atomic operation
-    dispatch_async(_contactQueue, ^{
+    dispatch_sync(_contactQueue, ^{
         if(![self isBuddyInList:buddy forAccount:accountNo]) {
      
             // no blank full names

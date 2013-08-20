@@ -61,7 +61,7 @@ typedef struct
 
 
 
-@interface xmpp : NSObject <NSStreamDelegate, UIAlertViewDelegate>
+@interface xmpp : NSObject <NSStreamDelegate>
 {
     NSString* _fulluser; // combination of username@domain
     
@@ -123,6 +123,11 @@ typedef struct
  adds a new contact to the roster
  */
 -(void) addToRoster:(NSString*) contact;
+
+/**
+ adds a new contact to the roster
+ */
+-(void) approveToRoster:(NSString*) contact;
 
 // connection attributes
 @property (nonatomic,strong) NSString* username;

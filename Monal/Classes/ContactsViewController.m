@@ -12,7 +12,7 @@
 #import "DataLayer.h"
 #import "chatViewController.h"
 #import "ContactDetails.h"
-#import "UIAlertView+Blocks.h"
+#import "UIActionSheet+Blocks.h"
 
 
 #define kinfoSection 0
@@ -568,8 +568,8 @@
             [_contactsTable endUpdates];
         }];
         
-        UIAlertView* alert =[[UIAlertView alloc] initWithTitle:@"Remove Contact" message:messageString cancelButtonItem:cancelButton otherButtonItems:yesButton, nil];
-        [alert show]; 
+        UIActionSheet* sheet =[[UIActionSheet alloc] initWithTitle:messageString cancelButtonItem:cancelButton destructiveButtonItem:yesButton otherButtonItems: nil];
+        [sheet showFromTabBar:self.tabBarController.tabBar];
     }
 }
 

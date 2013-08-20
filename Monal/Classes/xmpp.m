@@ -26,6 +26,7 @@
 #import "ParseFailure.h"
 
 #import "MLIconManager.h"
+#import "UIAlertView+Blocks.h"
 
 #define kXMPPReadSize 51200 // bytes
 
@@ -321,23 +322,14 @@ dispatch_async(dispatch_get_current_queue(), ^{
             });
             
             dispatch_source_set_cancel_handler(_loginCancelOperation, ^{
-                debug_NSLog(@"login cancelled");
+                debug_NSLog(@"login timer cancelled");
                 dispatch_release(_loginCancelOperation);
-                
-                if (_backgroundTask != UIBackgroundTaskInvalid)
-                {
-                    debug_NSLog(@"ending old BG task on cancel");
-                    [[UIApplication sharedApplication] endBackgroundTask:_backgroundTask];
-                    _backgroundTask=UIBackgroundTaskInvalid;
-                }
+    
             });
             
             dispatch_resume(_loginCancelOperation);
             
         }
-    
-  
-    
 }
 
 -(void) disconnect
@@ -737,19 +729,22 @@ dispatch_async(dispatch_get_current_queue(), ^{
         
                 if([presenceNode.type isEqualToString:kpresencesSubscribe])
                 {
-                    
-                    NSString* askmsg=[NSString stringWithFormat:@"This user would like to add you to his/her list. Allow?"];
-                    //ask for authorization
-                    
                     dispatch_async(dispatch_get_main_queue(), ^{
-                        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:presenceNode.user
-                                                                        message:askmsg
-                                                                       delegate:self cancelButtonTitle:@"Yes"
-                                                              otherButtonTitles:@"No", nil];
-                        alert.tag=1;
-                        alert.delegate=self; 
-                        [alert show];
+                        NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"Do you wish to allow %@ to add you to their contacts?", nil), presenceNode.from ];
+                        RIButtonItem* cancelButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"No", nil) action:^{
+                            
+                        }];
+                        
+                        RIButtonItem* yesButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Yes", nil) action:^{
+                            [self approveToRoster:presenceNode.from];
+                        
+                        }];
+                        
+                        UIAlertView* alert =[[UIAlertView alloc] initWithTitle:@"Approve Contact" message:messageString cancelButtonItem:cancelButton otherButtonItems:yesButton, nil];
+                        [alert show]; 
                     });
+                                   
+                  
                     
                 }
             
@@ -1199,7 +1194,19 @@ dispatch_async(dispatch_get_current_queue(), ^{
 
 -(void) addToRoster:(NSString*) contact
 {
+    XMPPPresence* presence =[[XMPPPresence alloc] init];
+    [presence subscribeContact:contact];
+    [self send:presence];
     
+  
+}
+
+-(void) approveToRoster:(NSString*) contact
+{
+    
+    XMPPPresence* presence2 =[[XMPPPresence alloc] init];
+    [presence2 subscribedContact:contact];
+    [self send:presence2];
 }
 
 #pragma mark nsstream delegate

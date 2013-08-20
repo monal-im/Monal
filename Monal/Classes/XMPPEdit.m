@@ -19,6 +19,16 @@
 }
 
 
+//this call is needed for tableview controller -7/19/13
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+    self = [super initWithNibName:@"XMPPEdit" bundle:nibBundleOrNil];
+    if (self) {
+        // Custom initialization
+    }
+    return self;
+}
+
 -(void) hideKeyboard
 {
 	[userText resignFirstResponder];
@@ -135,6 +145,7 @@
 
 - (void)viewWillDisappear:(BOOL)animated
 {
+    [super viewWillDisappear:animated];
 	debug_NSLog(@"xmpp edit view will hide");
 	[self save];
 	

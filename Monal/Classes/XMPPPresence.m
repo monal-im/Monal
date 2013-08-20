@@ -10,6 +10,13 @@
 
 @implementation XMPPPresence
 
+-(id) init
+{
+    self=[super init];
+    self.element=@"presence";
+    return self;
+}
+
 -(id) initWithHash:(NSString*) version
 {
     self=[super init];

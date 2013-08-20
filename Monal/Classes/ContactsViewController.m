@@ -552,6 +552,8 @@
     if (editingStyle == UITableViewCellEditingStyleDelete) {
         NSDictionary* contact= [_contacts objectAtIndex:indexPath.row];
         
+        [[MLXMPPManager sharedInstance] removeContact:contact];
+        
       //make xmpp call
         
         [_contactsTable beginUpdates];

@@ -98,6 +98,8 @@
     return self;
 }
 
+
+
 -(xmpp*) getConnectedAccountForID:(NSString*) accountNo
 {
     
@@ -115,6 +117,8 @@
     });
     return toReturn;
 }
+
+#pragma mark Connection related
 
 -(void) connectAccount:(NSString*) accountNo
 {
@@ -228,27 +232,9 @@
     });
 }
 
-#pragma mark XMPP communication
--(void)sendMessage:(NSString*) message toContact:(NSString*)contact fromAccount:(NSString*) accountNo withCompletionHandler:(void (^)(BOOL success)) completion
-{
-    dispatch_async(_netQueue,
-                   ^{
-                       BOOL success=NO;
-                       xmpp* account=[self getConnectedAccountForID:accountNo];
-                       if(account)
-                       {
-                          success=YES;
-                        [account sendMessage:message toContact:contact];
-                       }
-                       
-                       
-                       if(completion)
-                           completion(success);
-                   });
-}
 
 
-#pragma mark Connection related
+
 
 -(void)logoutAll
 {
@@ -289,7 +275,6 @@
     if([hostReach currentReachabilityStatus]==NotReachable)
     {
         debug_NSLog(@"not reachable");
-       
         if(xmppAccount.loggedIn==YES)
         {
         debug_NSLog(@"logging out");
@@ -314,6 +299,48 @@
     }
     }
        });
+}
+
+
+#pragma mark XMPP commands
+-(void)sendMessage:(NSString*) message toContact:(NSString*)contact fromAccount:(NSString*) accountNo withCompletionHandler:(void (^)(BOOL success)) completion
+{
+    dispatch_async(_netQueue,
+                   ^{
+                       BOOL success=NO;
+                       xmpp* account=[self getConnectedAccountForID:accountNo];
+                       if(account)
+                       {
+                           success=YES;
+                           [account sendMessage:message toContact:contact];
+                       }
+                       
+                       
+                       if(completion)
+                           completion(success);
+                   });
+}
+
+
+-(void) removeContact:(NSDictionary*) contact
+{
+    NSString* accountNo=[NSString stringWithFormat:@"%@", [contact objectForKey:@"account_id"]];
+    xmpp* account =[self getConnectedAccountForID:accountNo];
+    if( account)
+    {
+        [account removeFromRoster:[contact objectForKey:@"buddy_name"]];
+    }
+    
+}
+
+-(void) addContact:(NSDictionary*) contact
+{
+    NSString* accountNo=[NSString stringWithFormat:@"%@", [contact objectForKey:@"account_id"]];
+    xmpp* account =[self getConnectedAccountForID:accountNo];
+    if( account)
+    {
+        [account addToRoster:[contact objectForKey:@"buddy_name"]];
+    }
 }
 
 -(void) dealloc

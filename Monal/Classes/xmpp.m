@@ -135,7 +135,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
         NSMutableDictionary *settings = [ [NSMutableDictionary alloc ]
                                          initWithObjectsAndKeys:
                                          [NSNull null],kCFStreamSSLPeerName,
-                                         kCFStreamSocketSecurityLevelSSLv3,
+                                         kCFStreamSocketSecurityLevelNegotiatedSSL,
                                          kCFStreamSSLLevel,
                                          
                                          
@@ -924,7 +924,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
                     NSMutableDictionary *settings = [ [NSMutableDictionary alloc ]
                                                      initWithObjectsAndKeys:
                                                      [NSNull null],kCFStreamSSLPeerName,
-                                                     kCFStreamSocketSecurityLevelSSLv3,
+                                                     kCFStreamSocketSecurityLevelNegotiatedSSL,
                                                      kCFStreamSSLLevel,
                                                      nil ];
                     
@@ -1177,6 +1177,31 @@ dispatch_async(dispatch_get_current_queue(), ^{
     return hashedBase64;
     
 }
+
+#pragma mark XMPP add and remove contact
+-(void) removeFromRoster:(NSString*) contact
+{
+    XMPPIQ* iq = [[XMPPIQ alloc] initWithId:_sessionKey andType:kiqSetType];
+    [iq setRemoveFromRoster:contact];
+    [self send:iq];
+    
+    XMPPPresence* presence =[[XMPPPresence alloc] init];
+    [presence unsubscribeContact:contact];
+    [self send:presence];
+    
+    
+    XMPPPresence* presence2 =[[XMPPPresence alloc] init];
+    [presence2 unsubscribedContact:contact];
+    [self send:presence2];
+    
+}
+
+
+-(void) addToRoster:(NSString*) contact
+{
+    
+}
+
 #pragma mark nsstream delegate
 
 - (void)stream:(NSStream *)stream handleEvent:(NSStreamEvent)eventCode

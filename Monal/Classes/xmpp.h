@@ -114,8 +114,15 @@ typedef struct
  */
 -(void) send:(XMLNode*) stanza;
 
+/**
+ removes a contact from the roster
+ */
+-(void) removeFromRoster:(NSString*) contact;
 
-
+/**
+ adds a new contact to the roster
+ */
+-(void) addToRoster:(NSString*) contact;
 
 // connection attributes
 @property (nonatomic,strong) NSString* username;

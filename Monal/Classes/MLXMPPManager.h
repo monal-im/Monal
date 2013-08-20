@@ -30,6 +30,7 @@
 
 + (MLXMPPManager* )sharedInstance;
 
+#pragma  mark connectivity
 /**
  Checks if there are any enabled acconts and connects them if necessary.  
  */
@@ -41,12 +42,6 @@
 -(void)logoutAll;
 
 /**
- Checks if there are any enabled acconts and connects them if necessary.
- */
--(void)sendMessage:(NSString*) message toContact:(NSString*)contact fromAccount:(NSString*) accountNo withCompletionHandler:(void (^)(BOOL success)) completion;
-
-
-/**
  disconnects the specified account
  */
 -(void) disconnectAccount:(NSString*) accountNo;
@@ -55,6 +50,22 @@
  connects the specified account
  */
 -(void) connectAccount:(NSString*) accountNo;
+
+#pragma mark XMPP commands
+/**
+ Remove a contact from an account
+ */
+-(void) removeContact:(NSDictionary*) contact;
+
+/**
+ Add a contact from an account
+ */
+-(void) addContact:(NSDictionary*) contact;
+
+/**
+ Checks if there are any enabled acconts and connects them if necessary.
+ */
+-(void)sendMessage:(NSString*) message toContact:(NSString*)contact fromAccount:(NSString*) accountNo withCompletionHandler:(void (^)(BOOL success)) completion;
 
 
 

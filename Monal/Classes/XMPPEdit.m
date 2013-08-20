@@ -48,11 +48,6 @@
     _db= [DataLayer sharedInstance];
     
     self.sectionArray =  [NSArray arrayWithObjects:@"Account", @"Advanced Settings", nil];
-	NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
-	[nc addObserver:self selector:@selector(keyboardWillShow:) name: UIKeyboardWillShowNotification object:nil];
-	[nc addObserver:self selector:@selector(keyboardWillHide:) name: UIKeyboardWillHideNotification object:nil];
-	
-	
 	if(![_accountno isEqualToString:@"-1"])
 	{
         _editing=true;
@@ -466,90 +461,11 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)newIndexPath
 {
 	debug_NSLog(@"selected log section %d , row %d", newIndexPath.section, newIndexPath.row);
-    
-	
-	
-}
-
-#pragma mark txtview delegate
-
-
-
--(void) keyboardWillHide:(NSNotification *) note
-{
-	
-    
-	//move down
-	[UIView beginAnimations:nil context:NULL];
-	[UIView setAnimationDuration:0.3];
-	self.view.frame = oldFrame;
-	
-	[UIView commitAnimations];
-	debug_NSLog(@"kbd will hide scroll: %f", oldFrame.size.height);
-	
-	
-}
-
-
-
--(void) keyboardWillShow:(NSNotification *) note
-{
-    
-	CGRect r,t;
-    [[note.userInfo valueForKey:UIKeyboardBoundsUserInfoKey] getValue: &t];
-	r=self.view.frame;
-	r.size.height -=  t.size.height-50; //tabbar
-    
-	//resizing frame for keyboard movie up
-	[UIView beginAnimations:nil context:NULL];
-    [UIView setAnimationDuration:0.3];
-	oldFrame=self.view.frame;
-	self.view.frame =r;
-	
-	
-	[UIView commitAnimations];
-	
-	debug_NSLog(@"kbd will show : %d  scroll: %f ", t.size.height, r.size.height);
-	
-    
-	
 }
 
 - (void)textFieldDidBeginEditing:(UITextField *)textField
 {
-	/*debug_NSLog(@"scolling correct");
-     
-     if(textField==serverText)
-     {
-     debug_NSLog(@"editing server");
-     unsigned  int  indexlist[] = { 1,0  };
-     [theTable scrollToRowAtIndexPath:[NSIndexPath indexPathWithIndexes:indexlist length:2 ]
-     atScrollPosition:UITableViewScrollPositionNone animated:NO];
-     
-     
-     }
-     
-     
-     if(textField==portText)
-     {
-     debug_NSLog(@"editing port");
-     unsigned  int  indexlist[] = { 1,1  };
-     [theTable scrollToRowAtIndexPath:[NSIndexPath indexPathWithIndexes:indexlist length:2 ]
-     atScrollPosition:UITableViewScrollPositionNone animated:NO];
-     }
-     
-     
-     
-     if(textField==resourceText)
-     {
-     debug_NSLog(@"editing resource");
-     unsigned  int  indexlist[] = { 1,2  };
-     [theTable scrollToRowAtIndexPath:[NSIndexPath indexPathWithIndexes:indexlist length:2 ]
-     atScrollPosition:UITableViewScrollPositionNone animated:NO];
-     }
-     
-     */
-    
+
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField

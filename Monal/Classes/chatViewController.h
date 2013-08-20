@@ -14,72 +14,43 @@
 #import "MLNotificationManager.h"
 
 
-@interface chatViewController : UIViewController <HPGrowingTextViewDelegate,UIWebViewDelegate>{
+@interface chatViewController : UIViewController <HPGrowingTextViewDelegate,UITableViewDelegate, UITableViewDataSource>
+{
 
     UIView *containerView;
     HPGrowingTextView *chatInput;
-    
-	NSString*  lastuser;
-
-	
 	CGRect oldFrame;
-	NSString* myIcon; 
-	NSString* buddyIcon; 
-	NSString* buddyFullName; 
-;
-	
-	NSMutableString* HTMLPage; 
-	
-	NSString* topHTML; 
-	NSString* bottomHTML; 
-	NSMutableString* inHTML; 
-	NSMutableString* outHTML; 
-	
-	NSMutableString* inNextHTML; 
-	NSMutableString* outNextHTML; 
-	
-	NSMutableString* statusHTML; 
-
-	NSString* webroot;
-	NSString* lastFrom; 
-	NSString* lastDiv; 
-	
-    UIWebView* chatView;
+	NSString* buddyFullName;
+    
 	bool firstmsg;
 	bool groupchat;
 	
 	bool wasaway; 
 	bool wasoffline; 
 	bool msgthread;
-    UIPageControl* pages; 
-    NSArray* activeChats;
+//    UIPageControl* pages;
     
-    NSArray* thelist;
+    NSArray* activeChats;
+    NSMutableArray* _messagelist;
  
+    UITableView* _messageTable;
 }
 
 @property (nonatomic,strong)  NSString* buddyName;
 
 
 -(id) initWithContact:(NSDictionary*) contact  ;
--(void) show;
+
 /**
  Receives the new message notice and will update if it is this user. 
  */
 -(void) handleNewMessage:(NSNotification *)notification;
-
-
--(void) showLogDate:(NSString*) buddy:(NSString*) fullname:(UINavigationController*) vc:(NSString*) date;
 -(void) addMessageto:(NSString*)to withMessage:(NSString*) message;
-
--(NSString*) setIcon:(NSString*) msguser;
-
 
 #pragma mark gesture stuff
 
 -(void) showSignal:(NSNotification*) note; 
-- (void)swipeDetected:(UISwipeGestureRecognizer *)recognizer;
-
+-(void)swipeDetected:(UISwipeGestureRecognizer *)recognizer;
 
 
 -(void) handleInput:(NSString *)text;
@@ -89,14 +60,8 @@
 
 
 //content generation 
--(NSMutableString*) createPage:(NSArray*)thelist;
--(NSString*) makeMessageHTMLfrom:(NSString*) from withMessage:(NSString*) themessage andTime:(NSString*) time isLive:(BOOL) liveChat;
--(NSString*) emoticonsHTML:(NSString*) message; 
-
-@property (nonatomic,strong) NSString* iconPath;
-@property (nonatomic,strong) NSString* domain;
-@property (nonatomic,strong) UITabBarController* tabController;
-@property (nonatomic,strong)  UITableView* contactList;
+//-(NSString*) makeMessageHTMLfrom:(NSString*) from withMessage:(NSString*) themessage andTime:(NSString*) time isLive:(BOOL) liveChat;
+//-(NSString*) emoticonsHTML:(NSString*) message; 
 
 /**
  full own username with domain e.g. aa@gmail.com

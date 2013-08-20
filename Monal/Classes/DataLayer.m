@@ -29,7 +29,7 @@ static DataLayer *sharedInstance=nil;
 -(NSObject*) executeScalar:(NSString*) query
 {
     NSObject* __block toReturn;
-    dispatch_sync(_dbQueue, ^{
+    dispatch_async(_dbQueue, ^{
         
         
         /*
@@ -153,7 +153,7 @@ static DataLayer *sharedInstance=nil;
 {
 	
     BOOL __block toReturn;
-    dispatch_sync(_dbQueue, ^{
+    dispatch_async(_dbQueue, ^{
         /*sqlite3_stmt *statement1;
          if (sqlite3_prepare_v2(database, [@"begin"  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement1, NULL) == SQLITE_OK) {
          sqlite3_step(statement1);
@@ -190,7 +190,7 @@ static DataLayer *sharedInstance=nil;
 {
     
   	NSMutableArray* __block toReturn =  [[NSMutableArray alloc] init] ;
-    dispatch_sync(_dbQueue, ^{
+    dispatch_async(_dbQueue, ^{
         /*sqlite3_stmt *statement1;
          if (sqlite3_prepare_v2(database, [@"begin"  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement1, NULL) == SQLITE_OK) {
          sqlite3_step(statement1);
@@ -368,10 +368,6 @@ static DataLayer *sharedInstance=nil;
 
 -(NSArray*) accountVals:(NSString*) accountNo
 {
-	//returns a buddy's message history
-	
-	
-	
 	NSString* query=[NSString stringWithFormat:@"select * from account where  account_id=%@ ", accountNo];
 	NSArray* toReturn = [self executeReader:query];
 	
@@ -502,7 +498,7 @@ static DataLayer *sharedInstance=nil;
 {
     __block BOOL toReturn=NO;
     //this needs to be one atomic operation
-    dispatch_sync(_contactQueue, ^{
+    dispatch_async(_contactQueue, ^{
         if(![self isBuddyInList:buddy forAccount:accountNo]) {
      
             // no blank full names
@@ -1657,14 +1653,14 @@ static DataLayer *sharedInstance=nil;
 }
 
 //message history
--(NSArray*) messageHistory:(NSString*) buddy forAccount:(NSString*) accountNo
+-(NSMutableArray*) messageHistory:(NSString*) buddy forAccount:(NSString*) accountNo
 {
 	//NSArray* parts=[[[NSDate date] description] componentsSeparatedByString:@" "];
 	
 	
 	NSString* query=[NSString stringWithFormat:@"select af, message, thetime from (select ifnull(actual_from, message_from) as af, message,     timestamp  as thetime, message_history_id from message_history where account_id=%@ and (message_from='%@' or message_to='%@') order by message_history_id desc limit 10) order by message_history_id asc",accountNo, buddy, buddy];
 	debug_NSLog(@"%@", query);
-	NSArray* toReturn = [self executeReader:query];
+	NSMutableArray* toReturn = [self executeReader:query];
     
 	if(toReturn!=nil)
 	{

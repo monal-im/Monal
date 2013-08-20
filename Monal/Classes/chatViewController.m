@@ -13,11 +13,11 @@
 - (void)makeView {
 	
    
-    chatView =[[UIWebView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height-40-20)];
+    _messageTable =[[UITableView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height-40)];
     
-    pages = [[UIPageControl alloc] init]; 
-    pages.frame=CGRectMake(0, self.view.frame.size.height - 40-20, self.view.frame.size.width, 20);
-    
+//    pages = [[UIPageControl alloc] init]; 
+//    pages.frame=CGRectMake(0, self.view.frame.size.height - 40-20, self.view.frame.size.width, 20);
+//    
     containerView = [[UIView alloc] initWithFrame:CGRectMake(0, self.view.frame.size.height - 40, self.view.frame.size.width, 40)];
     
 	chatInput = [[HPGrowingTextView alloc] initWithFrame:CGRectMake(6, 3, self.view.frame.size.width-80, 40)];
@@ -32,15 +32,15 @@
     chatInput.backgroundColor = [UIColor whiteColor];
     
     //page control 
-    pages.backgroundColor = [UIColor colorWithRed:.4 green:0.435 blue:0.498 alpha:1];
+//    pages.backgroundColor = [UIColor colorWithRed:.4 green:0.435 blue:0.498 alpha:1];
+//    
+//    pages.hidesForSinglePage=false; 
+//    pages.numberOfPages=0; 
+//    pages.currentPage=0; 
+//   
     
-    pages.hidesForSinglePage=false; 
-    pages.numberOfPages=0; 
-    pages.currentPage=0; 
-   
-    
-    [self.view addSubview:chatView];
-    [self.view addSubview:pages];
+    [self.view addSubview:_messageTable];
+//    [self.view addSubview:pages];
     [self.view addSubview:containerView];
      
 	
@@ -83,8 +83,8 @@
 	[containerView addSubview:doneBtn];
     
     containerView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
-    chatView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    pages.autoresizingMask= UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
+    _messageTable.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+//    pages.autoresizingMask= UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
 
     UISwipeGestureRecognizer* swipe = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipeDetected:)];
     [swipe setDirection:(UISwipeGestureRecognizerDirectionRight )]; 
@@ -99,52 +99,15 @@
 
 -(id) initWithContact:(NSDictionary*) contact
 {
-    
     self=[super init];
-    self.hidesBottomBarWhenPushed=YES;
-    [self makeView];
-    chatView.delegate=self;
-	
-	
-	NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
-	[nc addObserver:self selector:@selector(keyboardWillShow:) name: UIKeyboardWillShowNotification object:nil];
-	[nc addObserver:self selector:@selector(keyboardWillHide:) name: UIKeyboardWillHideNotification object:nil];
-	[nc addObserver:self selector:@selector(keyboardDidShow:) name: UIKeyboardDidShowNotification object:nil];
-   
-    
     // handle messages to view someuser
-    
-	buddyIcon=nil;
-	myIcon=nil; 
-	HTMLPage=nil; 
-	inHTML=nil; 
-	outHTML=nil;
-	
-	_buddyName=[contact objectForKey:@"buddy_name"];
-	buddyFullName=nil; 
-	
-	inNextHTML=nil; 
-	outNextHTML=nil;
-	
-	lastFrom =nil; 
-	lastDiv=nil; 
-	
-	webroot=[NSString stringWithFormat:@"%@/Themes/MonalStockholm/", [[NSBundle mainBundle] resourcePath]];
-	NSError* error;
-	topHTML=[NSString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalStockholm/top.html", [[NSBundle mainBundle] resourcePath]] encoding:NSUTF8StringEncoding error:&error];
-	
-	bottomHTML=[NSString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalStockholm/bottom.html", [[NSBundle mainBundle] resourcePath]] encoding:NSUTF8StringEncoding error:&error];
-
-    [chatView loadHTMLString:topHTML  baseURL:[NSURL fileURLWithPath:webroot]];
-	
-	self.view.autoresizesSubviews=true; 
-
-    
+    _buddyName=[contact objectForKey:@"buddy_name"];
+	buddyFullName=[contact objectForKey:@"full_name"];;
     self.accountNo=[NSString stringWithFormat:@"%d",[[contact objectForKey:@"account_id"] integerValue]];
     
+#warning this should be smarter...
     NSArray* accountVals =[[DataLayer sharedInstance] accountVals:self.accountNo];
     self.jid=[NSString stringWithFormat:@"%@@%@",[[accountVals objectAtIndex:0] objectForKey:@"username"], [[accountVals objectAtIndex:0] objectForKey:@"domain"]];
-    
     return self;
 
 }
@@ -152,28 +115,38 @@
 
 #pragma mark view lifecycle
 
--(void)viewWillAppear:(BOOL)animated
+-(void) viewDidLoad
 {
-    [self show];
+    [super viewDidLoad];
+    [self makeView];
+    
     [MLNotificationManager sharedInstance].currentAccountNo=self.accountNo;
     [MLNotificationManager sharedInstance].currentContact=self.buddyName;
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
-//    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshDisplay) name:UIApplicationWillEnterForegroundNotification object:nil];
+    NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+    [nc addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
+    [nc addObserver:self selector:@selector(refreshDisplay) name:UIApplicationWillEnterForegroundNotification object:nil];
+	[nc addObserver:self selector:@selector(keyboardWillShow:) name: UIKeyboardWillShowNotification object:nil];
+	[nc addObserver:self selector:@selector(keyboardWillHide:) name: UIKeyboardWillHideNotification object:nil];
+	[nc addObserver:self selector:@selector(keyboardDidShow:) name: UIKeyboardDidShowNotification object:nil];
     
-    thelist =[[DataLayer sharedInstance] messageHistory:_buddyName forAccount: _accountNo];
+    
+    _messagelist =[[DataLayer sharedInstance] messageHistory:_buddyName forAccount: _accountNo];
+    self.hidesBottomBarWhenPushed=YES;
+    _messageTable.delegate=self;
+    _messageTable.dataSource=self;
+    self.view.autoresizesSubviews=true;
+    
+}
+
+-(void)viewWillAppear:(BOOL)animated
+{
+
 }
 
 -(void) viewWillDisappear:(BOOL)animated
 {
     [[DataLayer sharedInstance] markAsReadBuddy:self.buddyName forAccount:self.accountNo];
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-}
-
--(void) viewDidLoad
-{
-        [super viewDidLoad];
-  
 }
 
 -(void) dealloc
@@ -181,11 +154,17 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
+
+-(BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
+{
+	[chatInput resignFirstResponder];
+	return YES;
+}
+
 #pragma mark textview
 
 -(void)resignTextView
 {
-
     if(([chatInput text]!=nil) && (![[chatInput text] isEqualToString:@""]) )
     {
         debug_NSLog(@"Sending message");
@@ -193,498 +172,40 @@
         [self addMessageto:_buddyName withMessage:[chatInput text]];
         
     }
-    
     [chatInput setText:@""];
-    
- 
 }
 
-
--(BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation 
-{
-	
-	/*UIApplication* app= [UIApplication sharedApplication];
-	 
-	 if((interfaceOrientation==UIInterfaceOrientationPortrait) ||(interfaceOrientation==UIInterfaceOrientationPortraitUpsideDown))
-	 {
-	 
-	 [app setStatusBarHidden:NO animated:NO];
-	 [self.navigationController setNavigationBarHidden:NO animated:NO];
-	 debug_NSLog(@"Becoming Portrait.. "); 
-	 
-	 
-	 
-	 }else if((interfaceOrientation==UIInterfaceOrientationLandscapeLeft) ||(interfaceOrientation==UIInterfaceOrientationLandscapeRight))
-	 
-	 {
-	 
-	 
-	 // landscape
-	 [app setStatusBarHidden:YES animated:NO];
-	 [self.navigationController setNavigationBarHidden:YES animated:NO];
-	 debug_NSLog(@"Becoming Landscape.. "); 
-	 
-	 }*/
-	[chatInput resignFirstResponder];
-	
-	
-	return YES;
-}
-
-
-- (void)viewDidDisappear:(BOOL)animated
-{
-	debug_NSLog(@"chat view did hide"); 
-	//[chatView stopLoading]; 
-	
-	dispatch_async(dispatch_get_main_queue(), ^{
-        
-        [chatView stopLoading];
-    });
-    
-	
-//    if(popOverController!=nil)
-//	[popOverController dismissPopoverAnimated:true]; 
-//	
-//	
-	
-	HTMLPage =nil; 
-	inHTML =nil;
-	outHTML  =nil;
-
-	
-	lastFrom =nil; 
-	lastDiv=nil;
-	
-
-	/*if(thelist!=nil) 
-	{
-		[thelist release];
-		thelist=nil;
-	}*/
-	
-	
-	lastuser=_buddyName;
-}
 
 #pragma mark message signals
 
-
 -(void)refreshDisplay
 {
-    [self show];
 }
 
 -(void) handleNewMessage:(NSNotification *)notification
 {
-//    if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
-//    {
-//        return;
-//    }
-//    
-    
     debug_NSLog(@"chat view got new message notice %@", notification.userInfo);
     
     if([[notification.userInfo objectForKey:@"accountNo"] isEqualToString:_accountNo]
       && [[notification.userInfo objectForKey:@"from"] isEqualToString:_buddyName]
        )
     {
-        [self signalNewMessages];
+        dispatch_async(dispatch_get_main_queue(),
+                       ^{
+                           NSDictionary* userInfo = @{@"af": [notification.userInfo objectForKey:@"actuallyfrom"],
+                                                      @"message": [notification.userInfo objectForKey:@"messageText"],
+                                                      @"thetime": @"" };
+                           [_messagelist addObject:userInfo];
+                           
+                           [_messageTable beginUpdates];
+                           NSIndexPath *path1 = [NSIndexPath indexPathForRow:[_messagelist count]-1  inSection:0];
+                           [_messageTable insertRowsAtIndexPaths:@[path1]
+                                                 withRowAnimation:UITableViewRowAnimationAutomatic];
+                           [_messageTable endUpdates];
+                           
+                       });
     }
 }
-
-
-//this gets called if the currently chatting user went offline, online or away, back etc
--(void) signalStatus
-//{
-//	
-//	if(groupchat==true) return; // doesnt parse names right at the moment
-//	
-//	
-//	
-//	debug_NSLog(@"status signal");
-//	if([state isEqualToString:@""]) 
-//	{
-//		if(wasaway==true)
-//	{
-//		state=[NSString stringWithString:@"Available"];
-//		wasaway=false;
-//	}
-//		else
-//		{
-//			; 
-//			return; 
-//		}
-//	}
-//	else
-//	{
-//		if(wasaway==false)
-//		{
-//			
-//			wasaway=true;
-//		}
-//		else
-//		{
-//			; 
-//			return; 
-//		}
-//	}
-//	
-//	NSString* statusmessage; 
-//	
-//	
-//	if(buddyFullName!=nil)
-//	{
-//		
-//		statusmessage=[NSString stringWithFormat:@"%@ is now %@<br>", buddyFullName, state];
-//	}
-//	statusmessage=[NSString stringWithFormat:@"%@ is now %@<br>", buddyName, state];
-//	
-//	/*NSMutableString* messageHTML= [NSMutableString stringWithString:statusHTML];
-//	
-//	
-//		[messageHTML replaceOccurrencesOfString:@"%message%"
-//									withString:statusmessage
-//									   options:NSCaseInsensitiveSearch
-//										 range:NSMakeRange(0, [messageHTML length])];
-//	
-//	*/
-//	
-//	
-//	lastFrom=	@"";
-//	
-//	NSString* jsstring= [NSString stringWithFormat:@"InsertMessage('%@');",statusmessage ]; 
-//	
-//
-//  dispatch_async(dispatch_get_main_queue(), ^{
-//        
-//        [chatView stringByEvaluatingJavaScriptFromString:jsstring];
-//    });
-//}
-{}
-
--(void) signalOffline
-//{
-//	if(groupchat==true) return; // doesnt parse names right at the moment
-//	
-//	
-//	debug_NSLog(@"offline signal"); 
-//	NSString* state=@"";
-//	int count=[db isBuddyOnline:buddyName: accountno];
-//	if(count>0) 
-//	{if(wasoffline==true)
-//		{
-//		state=@"Online";
-//			wasoffline=false; 
-//		}
-//		else
-//		{
-//			; 
-//			return; 
-//		}
-//	}
-//	else 
-//		
-//	{
-//		if(wasoffline==false)
-//		{
-//		state=@"Offline";
-//			wasoffline=true; 
-//		}
-//		else
-//		{
-//			; 
-//			return;
-//		}
-//	}	
-//	
-//	
-//	NSString* statusmessage; 
-//	
-//	
-//	if(buddyFullName!=nil)
-//	{
-//		statusmessage=[NSString stringWithFormat:@"%@ is now %@<br>", buddyFullName, state];
-//	}
-//	statusmessage=[NSString stringWithFormat:@"%@ is now %@<br>", buddyName, state];
-//	
-//
-//	
-//	NSString* jsstring= [NSString stringWithFormat:@"InsertMessage('%@');",statusmessage ]; 
-//	
-//	
-//	
-//    dispatch_async(dispatch_get_main_queue(), ^{
-//        
-//        [chatView stringByEvaluatingJavaScriptFromString:jsstring];
-//    });
-//}
-{}
-
--(void) signalNewMessages
-{
-
-		//populate the list
-		//[thelist release];
-		NSArray* thelist =[[DataLayer sharedInstance] unreadMessagesForBuddy:_buddyName: _accountNo] ;
-
-        if([thelist count]==0)
-		{
-			//multi threaded sanity checkf
-			debug_NSLog(@"got 0 new messages");
-			return;
-		}
-		else
-        {
-	
-		int msgcount=0; 
-		 
-		while(msgcount<[thelist count])
-		{
-			NSDictionary* therow=[thelist objectAtIndex:msgcount];
-		
-		if(groupchat==true)
-		{
-			inHTML=[NSMutableString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalStockholm/Incoming/Content.html", [[NSBundle mainBundle] resourcePath]]]; 
-			
-			unichar asciiChar = 10; 
-			NSString *newline = [NSString stringWithCharacters:&asciiChar length:1];
-		
-			
-			
-			[inHTML replaceOccurrencesOfString:newline
-									withString:@""
-									   options:NSCaseInsensitiveSearch
-										 range:NSMakeRange(0, [inHTML length])];
-		
-			
-			
-				[inHTML replaceOccurrencesOfString:@"%sender%"
-										withString:[therow objectForKey:@"af"]
-										   options:NSCaseInsensitiveSearch
-											 range:NSMakeRange(0, [inHTML length])];
-			
-			
-			[inHTML replaceOccurrencesOfString:@"%userIconPath%"
-									withString:buddyIcon
-									   options:NSCaseInsensitiveSearch
-										 range:NSMakeRange(0, [inHTML length])];
-			
-	
-			
-			
-		}
-		
-		
-		NSString* thejsstring; 
-		
-        NSString* msg= [[therow objectForKey:@"message"] stringByReplacingOccurrencesOfString:@"\\" withString:@"\\\\"] ;
-         NSString* messageHTML= [self makeMessageHTMLfrom:[therow objectForKey:@"from"] withMessage:[msg stringByReplacingOccurrencesOfString:@"'" withString:@"\\'"]  andTime:[therow objectForKey:@"thetime"] isLive:YES];
-
-			
-	/*	if(([[lastFrom lowercaseString] isEqualToString:[[therow objectAtIndex:0] lowercaseString]]) &&(groupchat==false))
-		{
-		
-			thejsstring= [NSString stringWithFormat:@"InsertNextMessage('%@','%@');", messagecontent,lastDiv]; 
-		}
-		else*/
-		{
-		
-			thejsstring= [NSString stringWithFormat:@"InsertMessage('%@');", messageHTML];
-	
-		}
-	/*		NSString* result=[chatView stringByEvaluatingJavaScriptFromString:thejsstring];
-		if(result==nil) debug_NSLog(@"new message in js failed "); 
-		else debug_NSLog(@"new message in js ok %@", thejsstring); 
-	*/
-		
-		
-            dispatch_async(dispatch_get_main_queue(), ^{
-                
-                [chatView stringByEvaluatingJavaScriptFromString:thejsstring];
-            });
-            
-            debug_NSLog(@"%@",thejsstring);
-		
-		lastFrom=	[NSString stringWithString:[therow objectForKey:@"af"]];
-			
-			
-			msgcount++; 
-		}
-		
-        }
-
-
-	msgthread=false;
-	
-}
-
-
--(void) showLogDate:(NSString*) buddy:(NSString*) fullname:(UINavigationController*) vc:(NSString*) date
-//{
-//	
-//	
-//    
-//    //removeing the input stuff
-//	[chatInput resignFirstResponder];
-//    containerView.hidden=true;  
-//    pages.hidden=true; 
-//  
-//    [chatView setFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height)];
-//    
-//    
-//
-//	
-//	buddyName=buddy; 
-//	buddyFullName=fullname; 
-//	if([buddyFullName isEqualToString:@""])	
-//		self.title=buddyName;
-//	else
-//		self.title=buddyFullName;
-//	
-//	
-//	
-//	NSString* machine=[tools machine]; 
-//	
-//	if([machine hasPrefix:@"iPad"] )
-//	{//if ipad..
-//		self.hidesBottomBarWhenPushed=false; 
-//	}
-//	else
-//	{
-//		//ipone 
-//		self.hidesBottomBarWhenPushed=true; 
-//	}
-//	
-//	
-//	// dont push it agian ( ipad..but stops crash in genreal)
-//	if([vc topViewController]!=self)
-//	{
-//		[vc pushViewController:self animated:YES];
-//	}
-//	
-//	debug_NSLog(@"show log"); 
-//
-//
-//	
-//	
-//
-//	
-//	//populate the list
-//	NSArray* thelist =[db messageHistoryDate :buddyName: accountno:date];
-//	//[thelist retain];
-//	
-//	
-//	myIcon = [self setIcon: [NSString stringWithFormat:@"%@@%@",myuser,domain]];
-//	buddyIcon= [self setIcon: buddy];
-//	
-//	
-//	inHTML=[NSMutableString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalStockholm/Incoming/Content.html", [[NSBundle mainBundle] resourcePath]]]; 
-//	outHTML=[NSMutableString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalStockholm/Outgoing/Content.html", [[NSBundle mainBundle] resourcePath]]];  
-//	
-//	/*inHTML=[NSMutableString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalRenkooNaked/Incoming/Content.html", [[NSBundle mainBundle] resourcePath]]]; 
-//	outHTML=[NSMutableString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalRenkooNaked/Outgoing/Content.html", [[NSBundle mainBundle] resourcePath]]];  
-//	*/
-//	
-//	
-//	
-//	inNextHTML=[NSMutableString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalStockholm/Incoming/NextContent.html", [[NSBundle mainBundle] resourcePath]]]; 
-//	outNextHTML=[NSMutableString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalStockholm/Outgoing/NextContent.html", [[NSBundle mainBundle] resourcePath]]];  
-//	
-//	
-//	
-//	
-//
-//
-//	
-//	if([buddyFullName isEqualToString:@""])
-//		[inHTML replaceOccurrencesOfString:@"%sender%"
-//								withString:buddy
-//								   options:NSCaseInsensitiveSearch
-//									 range:NSMakeRange(0, [inHTML length])];
-//	else
-//		[inHTML replaceOccurrencesOfString:@"%sender%"
-//								withString:buddyFullName
-//								   options:NSCaseInsensitiveSearch
-//									 range:NSMakeRange(0, [inHTML length])];
-//	
-//	[outHTML replaceOccurrencesOfString:@"%sender%"
-//							 withString:jabber.ownName
-//								options:NSCaseInsensitiveSearch
-//								  range:NSMakeRange(0, [outHTML length])];
-//	
-//	[inHTML replaceOccurrencesOfString:@"%userIconPath%"
-//							withString:buddyIcon
-//							   options:NSCaseInsensitiveSearch
-//								 range:NSMakeRange(0, [inHTML length])];
-//	
-//	[outHTML replaceOccurrencesOfString:@"%userIconPath%"
-//							 withString:myIcon
-//								options:NSCaseInsensitiveSearch
-//								  range:NSMakeRange(0, [outHTML length])];
-//	
-//	
-//	
-//	
-//	HTMLPage=[self createPage:thelist];
-//	
-//	
-//	
-//    dispatch_async(dispatch_get_main_queue(), ^{
-//        
-//        [chatView  loadHTMLString: HTMLPage baseURL:[NSURL fileURLWithPath:webroot]];
-//        
-//    });
-//	
-//	
-//	
-//	//debug_NSLog(@" HTML LOG: %@", HTMLPage); 
-//	;
-//	
-//}
-{}
-
-
--(NSString*) setIcon:(NSString*) msguser
-{
-	
-	
-	NSFileManager* fileManager = [NSFileManager defaultManager]; 
-	NSString* theimage; 
-	//note: default to png  we want to check a table/array to  look  up  what the file name really is...
-//	NSString* buddyfile = [NSString stringWithFormat:@"%@/%@.png", iconPath,msguser ];
-	
-//	debug_NSLog(@"%@",buddyfile);
-//	if([fileManager fileExistsAtPath:buddyfile])
-//	{
-//		
-//		theimage= buddyfile;
-//		
-//	}
-//	
-//	else
-//	{
-		//jpg
-		
-	//	NSString* buddyfile2 = [NSString stringWithFormat:@"%@/%@.jpg", _iconPathmsguser];
-//		debug_NSLog(@"%@",buddyfile2);
-//		if([fileManager fileExistsAtPath:buddyfile2])
-//		{
-//			theimage= buddyfile2;
-			
-//		}
-//		else
-		{
-			theimage= [NSString stringWithFormat:@"%@/noicon.png",[[NSBundle mainBundle] resourcePath]];
-		}
-		
-//	}
-//	
-	;
-	return theimage; 
-}
-
-
 
 -(void) popContacts
 {
@@ -701,206 +222,6 @@
 //  
 }
 
-//note fullname is overridden and ignored
--(void) show
-{
-	
-    pages.hidden=false; 
-    containerView.hidden=false;
-    [chatView setFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height-40-20)];
-
-	//query to get pages and position
-  //  activeChats=[[DataLayer sharedInstance] activeBuddies:_accountNo];
-    pages.numberOfPages=0;//[activeChats count];
-    //set pos
-    int dotCounter=0; 
-    while(dotCounter<pages.numberOfPages)
-    {
-    if([_buddyName isEqualToString:[[activeChats objectAtIndex:dotCounter] objectAtIndex:0]])
-    {
-        pages.currentPage=dotCounter; 
-        break;
-    }
-        dotCounter++;
-        
-    }
-    
-   /* if(dotCounter==pages.numberOfPages)
-    {
-        debug_NSLog(@"unable to find item.. abort show"); 
-        return;
-    }*/
-    
-	
-	msgthread=false;
-	
-	firstmsg=true; 
-	// replace parts of the string
-	
-	
-//    if(dotCounter<pages.numberOfPages)
-//    {
-//    
-//	buddyFullName=[[activeChats objectAtIndex:dotCounter] objectAtIndex:2]; //doesnt matter what full name is passed we will always check
-//    }
-//    else 
-//        buddyFullName=fullname;
-    
-    buddyFullName=_buddyName;
-    
-    
-    debug_NSLog(@"id: %@,  full: %@", _buddyName, buddyFullName);
-if([buddyFullName isEqualToString:@""])	
-	self.title=_buddyName;
-	else
-		self.title=buddyFullName;
-	
-//first check.. 
-//    if([[DataLayer sharedInstance] isBuddyMuc:buddyFullName:_accountno])
-//    {
-//        groupchat=true; 
-//    }
-//    else
-    {//fallback
-    
-	
-	NSRange startrange=[_buddyName rangeOfString:@"@conference"
-						
-										options:NSCaseInsensitiveSearch range:NSMakeRange(0, [_buddyName length])];
-	
-	
-	if (startrange.location!=NSNotFound) 
-	{
-		groupchat=true; 
-	}
-	else 
-	{
-
-	
-	NSRange startrange2=[_buddyName rangeOfString:@"@groupchat"
-						
-									options:NSCaseInsensitiveSearch range:NSMakeRange(0, [_buddyName length])];
-	
-	
-	if (startrange2.location!=NSNotFound) 
-	{
-		groupchat=true; 
-	}
-	else groupchat=false;
-	}
-	
-    }
-	
-	
-	chatInput.hidden=false; 
-	//chatInput.editable=true; 
-	
-	[chatInput setText:@""];
-
-	
-	[chatInput setDelegate:self];
-	
-
-	//populate the list
-//	if(thelist!=nil) [thelist release];
-
-	//[thelist retain];
-	
-	//get icons 
-	// need a faster methos here..
-	
-	
-	myIcon = [self setIcon: self.jid];
-	buddyIcon= [self setIcon: _buddyName];
-	
-	
-	[chatInput resignFirstResponder];
-	
-	
-	inHTML=[NSMutableString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalStockholm/Incoming/Content.html", [[NSBundle mainBundle] resourcePath]]]; 
-	outHTML=[NSMutableString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalStockholm/Outgoing/Content.html", [[NSBundle mainBundle] resourcePath]]];  
-
-/*	
-	inHTML=[NSMutableString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalRenkooNaked/Incoming/Content.html", [[NSBundle mainBundle] resourcePath]]]; 
-	outHTML=[NSMutableString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalRenkooNaked/Outgoing/Content.html", [[NSBundle mainBundle] resourcePath]]];  
-	*/
-	
-	
-	inNextHTML=[NSMutableString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalStockholm/Incoming/NextContent.html", [[NSBundle mainBundle] resourcePath]]]; 
-	outNextHTML=[NSMutableString stringWithContentsOfFile:[NSString stringWithFormat:@"%@/Themes/MonalStockholm/Outgoing/NextContent.html", [[NSBundle mainBundle] resourcePath]]];  
-	
-	
-	
-	
-	
-	unichar asciiChar = 10; 
-	NSString *newline = [NSString stringWithCharacters:&asciiChar length:1];
-	
-	
-	[outNextHTML replaceOccurrencesOfString:newline
-							 withString:@""
-								options:NSCaseInsensitiveSearch
-								  range:NSMakeRange(0, [outNextHTML length])];
-	
-	[inNextHTML replaceOccurrencesOfString:newline
-							 withString:@""
-								options:NSCaseInsensitiveSearch
-								  range:NSMakeRange(0, [inNextHTML length])];
-	
-	
-	[inHTML replaceOccurrencesOfString:newline
-							withString:@""
-							   options:NSCaseInsensitiveSearch
-								 range:NSMakeRange(0, [inHTML length])];
-	
-    
-    if(groupchat!=true) //we want individualized names
-    {
-	if([buddyFullName isEqualToString:@""])
-	[inHTML replaceOccurrencesOfString:@"%sender%"
-							withString:_buddyName
-							   options:NSCaseInsensitiveSearch
-								 range:NSMakeRange(0, [inHTML length])];
-	else
-		[inHTML replaceOccurrencesOfString:@"%sender%"
-								withString:buddyFullName
-								   options:NSCaseInsensitiveSearch
-									 range:NSMakeRange(0, [inHTML length])];
-	
-	}
-	
-		
-	[outHTML replaceOccurrencesOfString:newline
-							 withString:@""
-								options:NSCaseInsensitiveSearch
-								  range:NSMakeRange(0, [outHTML length])];
-	
-	[outHTML replaceOccurrencesOfString:@"%sender%"
-							 withString:self.jid
-								options:NSCaseInsensitiveSearch
-								  range:NSMakeRange(0, [outHTML length])];
-	
-	[inHTML replaceOccurrencesOfString:@"%userIconPath%"
-							withString:buddyIcon
-							   options:NSCaseInsensitiveSearch
-								 range:NSMakeRange(0, [inHTML length])];
-	
-	[outHTML replaceOccurrencesOfString:@"%userIconPath%"
-							 withString:myIcon
-								options:NSCaseInsensitiveSearch
-								  range:NSMakeRange(0, [outHTML length])];
-	
-	
-	HTMLPage=[self createPage:thelist];
-	
-	
-    dispatch_async(dispatch_get_main_queue(), ^{
-        
-        [chatView  loadHTMLString: HTMLPage baseURL:[NSURL fileURLWithPath:webroot]];
-        
-    });
-	
-}
 
 //always messages going out
 -(void) addMessageto:(NSString*)to withMessage:(NSString*) message
@@ -908,114 +229,33 @@ if([buddyFullName isEqualToString:@""])
 	
 	if([[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:_accountNo withMessage:message actuallyFrom:self.jid ])
 	{
-		debug_NSLog(@"added message"); 
-		
-		NSString* new_msg =[message stringByReplacingOccurrencesOfString:@"\\" withString:@"\\\\"];
-		
-		//NSArray* parts=[[[NSDate date] description] componentsSeparatedByString:@" "]; 
-		NSString* jsstring; 
-	
+		debug_NSLog(@"added message");
+        
 		if(groupchat!=true) //  message will come back 
 		{
 	
-		
-            jsstring= [NSString stringWithFormat:@"InsertMessage('%@');",
-                       [self makeMessageHTMLfrom:self.jid
-                                     withMessage:[new_msg stringByReplacingOccurrencesOfString:@"'" withString:@"\\'"]
-                                         andTime:nil isLive:YES]];
-                                                                    
-            dispatch_async(dispatch_get_main_queue(), ^{
-                
-                [chatView stringByEvaluatingJavaScriptFromString:jsstring];
-                
-            });
-        
+		        
         }
 		
 	}
 	else
-		debug_NSLog(@"failed to add message"); 
-	
-	lastFrom=self.jid;
+		debug_NSLog(@"failed to add message");
 	
 	// make sure its in active
 	if(firstmsg==true)
 	{
 	[[DataLayer sharedInstance] addActiveBuddies:to :_accountNo];
-		firstmsg=false; 
+    firstmsg=false; 
 	}
 	
     msgthread=false;
 
 }
 
-//-(void) handleInput:(NSString *)text
-//{
-//
-//	
-//    
-// 
-//	
-//    NSMutableString* brtext= [NSMutableString stringWithString:text];
-//    /*[brtext replaceOccurrencesOfString:@"\n" withString:@"<br>"
-//                                               options:NSCaseInsensitiveSearch
-//                                                 range:NSMakeRange(0, [text length])];
-//    
-//	*/
-//    
-//			if([jabber message:buddyName:brtext:groupchat])
-//			{
-//				if(!groupchat)
-//				[self addMessage:buddyName:brtext];
-//				
-//				
-//				
-//			}
-//			else
-//			{
-//				//reset the text value
-//				//[chatInput setText:text];
-//				
-//				debug_NSLog(@"Message failed to send"); 
-//				
-//				UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Message Send Failed"
-//																 message:@"Could not send the message. You may be disconnected."
-//																delegate:self cancelButtonTitle:@"Close"
-//													   otherButtonTitles:@"Reconnect", nil];
-//				[alert show];
-//				
-//				
-//				
-//			}
-//		
-//		
-//		
-//		
-//   
-//	
-//	
-//	;
-//	[NSThread exit]; 
-//	
-//}
 
-
-
-//handles the taop on the sliding message notifiction
-//-(void) showSignal:(NSNotification*) note
-//{
-//
-//   
-//       debug_NSLog(@"show signal reached  chatwin %@", [[note userInfo] objectForKey:@"username"] );
-//    
-//    //drop extension and . on file name to get username 
-//    [self show: [[note userInfo] objectForKey:@"username"] 
-//              :@"" :navController];
-//
-//}
+/*
 #pragma mark gestures
-
-//handle swipe 
+//handle swipe
 - (void)swipeDetected:(UISwipeGestureRecognizer *)recognizer {
      debug_NSLog(@"pages was   %d", pages.currentPage);
     
@@ -1052,51 +292,101 @@ if([buddyFullName isEqualToString:@""])
     
 }
 
+*/
+
+#pragma mark tableview datasource
+
+-(NSInteger) numberOfSectionsInTableView:(UITableView *)tableView
+{
+    return 1;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    int toReturn=0;
+    
+    switch (section) {
+        case 0:
+        {
+            toReturn=[_messagelist count];
+            break;
+        }
+        default:
+            break;
+    }
+    
+    return toReturn;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+        
+    UITableViewCell* cell =[tableView dequeueReusableCellWithIdentifier:@"ContactCell"];
+    if(!cell)
+    {
+        cell =[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"ContactCell"];
+    }
+    NSDictionary* row= [_messagelist objectAtIndex:indexPath.row];
+    
+    cell.textLabel.text =[row objectForKey:@"message"];
+    
+    return cell;
+}
+
+#pragma mark tableview delegate
+
+- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return YES;
+}
+
+- (BOOL)tableView:(UITableView *)tableView shouldIndentWhileEditingRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return YES;
+}
+
+- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
+    if (editingStyle == UITableViewCellEditingStyleDelete) {
+//        NSDictionary* contact= [_contacts objectAtIndex:indexPath.row];
+//        NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"Remove %@ from contacts?", nil),[contact objectForKey:@"full_name"] ];
+//        RIButtonItem* cancelButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Cancel", nil) action:^{
+//            
+//        }];
+//        
+//        RIButtonItem* yesButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Yes", nil) action:^{
+//            [[MLXMPPManager sharedInstance] removeContact:contact];
+//            
+//            [_contactsTable beginUpdates];
+//            [_contacts removeObjectAtIndex:indexPath.row];
+//            
+//            [_contactsTable deleteRowsAtIndexPaths:@[indexPath]
+//                                  withRowAnimation:UITableViewRowAnimationAutomatic];
+//            [_contactsTable endUpdates];
+//        }];
+//        
+//        UIActionSheet* sheet =[[UIActionSheet alloc] initWithTitle:messageString cancelButtonItem:cancelButton destructiveButtonItem:yesButton otherButtonItems: nil];
+//        [sheet showFromTabBar:self.tabBarController.tabBar];
+    }
+}
 
 
-
-# pragma mark Textview delegeate functions 
-
-
-
-
+# pragma mark Textview delegeate functions
 -(void) keyboardDidHide: (NSNotification *)notif 
 {
 	debug_NSLog(@"kbd did hide "); 
-
 }
 
 -(void) keyboardWillHide:(NSNotification *) note
 {
-//     keyboardVisible=NO;
-//    if(dontscroll==false)
-//    {	
-	
-	//move down
 	[UIView beginAnimations:nil context:NULL];
 	[UIView setAnimationDuration:0.3];
 	self.view.frame = oldFrame;
-	
-	
-	
 	[UIView commitAnimations];
-	
-	debug_NSLog(@"kbd will hide scroll: %f", oldFrame.size.height); 
-
-//	}
-	
+	debug_NSLog(@"kbd will hide scroll: %f", oldFrame.size.height);
 }
 
 -(void) keyboardDidShow:(NSNotification *) note
 {
-	//if(dontscroll==false)
-
-    
-    dispatch_async(dispatch_get_main_queue(), ^{
-        
-        [chatView  stringByEvaluatingJavaScriptFromString:@" document.getElementById('bottom').scrollIntoView(true)"];
-        
-    });
 
 }
 
@@ -1137,8 +427,6 @@ if([buddyFullName isEqualToString:@""])
 	
 }
 
-
-
 - (void)growingTextView:(HPGrowingTextView *)growingTextView willChangeHeight:(float)height
 {
     float diff = (growingTextView.frame.size.height - height);
@@ -1149,36 +437,19 @@ if([buddyFullName isEqualToString:@""])
 	containerView.frame = r;
 }
 
-
- /*
-- (void)textViewDidBeginEditing:(UITextView *)textView
-{
-	
-	
-	//[chatInput setFont:[UIFont systemFontOfSize:14]];
-	
-	
-}
-
-
-- (void)textViewDidEndEditing:(UITextView *)textView
-{
-	
-}*/
-
+/*
 #pragma mark HTML generation
-
 
 -(NSString*) emoticonsHTML:(NSString*) message
 {
 	NSMutableString* body=[[NSMutableString alloc] initWithString: message]; 
 
 	//fix % issue
-	/*[body replaceOccurrencesOfString:@"%" withString:@"%%"
-							  options:NSCaseInsensitiveSearch
-								range:NSMakeRange(0, [body length])];
+//[body replaceOccurrencesOfString:@"%" withString:@"%%"
+//							  options:NSCaseInsensitiveSearch
+//								range:NSMakeRange(0, [body length])];
 	
-	*/
+	
 	
 	//only do search if there an emoticon
 	NSRange pos = [message rangeOfString:@":"]; 
@@ -1473,10 +744,10 @@ if([buddyFullName isEqualToString:@""])
 		NSMutableString* tmpout; 
 		
         // commneted out because of the occasional bug
-        /*if([from isEqualToString:lastFrom])
-			tmpout=[NSMutableString stringWithString:outNextHTML]; 
-		else
-        */
+//       if([from isEqualToString:lastFrom])
+//			tmpout=[NSMutableString stringWithString:outNextHTML]; 
+//		else
+ 
         {
 			//new block
 			lastDiv=[NSString stringWithFormat:@"insert%@",dateString];
@@ -1554,113 +825,6 @@ if([buddyFullName isEqualToString:@""])
 		
 	}		
 }
-
-
-//this is the first time creation 
--(NSMutableString*) createPage:(NSArray*)thelist
-{
-	
-	NSMutableString* page=[[NSMutableString alloc] initWithString:topHTML];
-	// prefix
-	debug_NSLog(@"creating page Called");
-	
-	//debug_NSLog(@" page top %@", page); 
-	// iterate through  list
-	int counter=0; 
-	int nextInsertPoint=0;
-	while(counter<[thelist count])
-	{
-		NSDictionary* dic =[thelist objectAtIndex:counter];
-		NSString* from =[dic objectForKey:@"af"] ;
-		NSString* message=[dic objectForKey:@"message"] ;
-		NSString* time=[dic objectForKey:@"thetime"];
-        //debug_NSLog(@"from %@", from);
-		
-//		if([from isEqualToString:lastFrom])
-//		{
-//			// find location of last insert point
-//			int insertpoint=0; 
-//			
-//			if((nextInsertPoint==0) && (groupchat==false))
-//			{
-//			NSString* target=@"<div id=\"insert\" border=\"1\">"; // this is for stockholm only.. renkoo has another
-//			NSRange thepoint=[page rangeOfString:target options:NSBackwardsSearch];
-//				if(thepoint.location!=NSNotFound)
-//			insertpoint=thepoint.location+thepoint.length;
-//				else insertpoint=0; // preventing a segfault really after a sanity check fail
-//			}
-//			else insertpoint=nextInsertPoint; 
-//			
-//			
-//	
-//			
-//			NSString* payload=[self makeMessageHTMLfrom:from withMessage:message andTime:time isLive:NO];
-//			debug_NSLog(@"%@", payload);
-//			[page insertString:payload atIndex:insertpoint];
-//			nextInsertPoint=insertpoint+[payload length];
-//			
-//		}
-//			else
-			{
-				[page appendString:[self makeMessageHTMLfrom:from withMessage:message andTime:time isLive:NO]];
-				nextInsertPoint=0;
-			}
-		
-		lastFrom=from;
-		
-		counter++; 
-	}
-	//dont append when swingin back into chat
-	if(lastFrom!=nil)
-	{
-		lastFrom=nil; 
-	}
-	[page appendString:bottomHTML]; 
-//	debug_NSLog(@"got page %@", page); 
-	//suffix
-	;
-	return page; 
-}
-
-
-
-- (void)webViewDidStartLoad:(UIWebView *)webView
-{
-//	[spinner startAnimating];
-	//	chatInput.editable=false;
-	
-}
-
-- (void)webViewDidFinishLoad:(UIWebView *)webView
-{
-	debug_NSLog(@"webview finished loading"); 
-//	[spinner stopAnimating];
-	//chatInput.editable=true;
-}
-
-
-- (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType {
-	
-	if (navigationType == UIWebViewNavigationTypeLinkClicked) {
-        NSURL *url = [request URL];
-		
-		//if([[UIDevice currentDevice].model isEqualToString:@"iPhone"])
-		debug_NSLog(@"url : %@", [url absoluteString]); 
-		
-		//[url scheme] give if file of http type
-		
-        if (![[url scheme] hasPrefix:@"file"]) {
-			//load in safari
-            [[UIApplication sharedApplication] openURL:url];
-
-            return NO;
-        }
-    }
-
-    return YES; 
-}
-
-
-
+*/
 
 @end

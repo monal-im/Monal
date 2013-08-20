@@ -97,7 +97,7 @@
 {
    
     
-    dispatch_sync(dispatch_get_main_queue(),
+    dispatch_async(dispatch_get_main_queue(),
                   ^{
                       [ _infoCells insertObject:info atIndex:0];
                       [_contactsTable beginUpdates];
@@ -122,7 +122,7 @@
 
 -(void) updateConnecting:(NSDictionary*) info
 {
-    dispatch_sync(dispatch_get_main_queue(),
+    dispatch_async(dispatch_get_main_queue(),
                   ^{
                       int pos=-1;
                       int counter=0;
@@ -155,7 +155,7 @@
 
 -(void) hideConnecting:(NSDictionary*) info
 {
-    dispatch_sync(dispatch_get_main_queue(),
+    dispatch_async(dispatch_get_main_queue(),
                   ^{
                       int pos=-1;
                       int counter=0;
@@ -198,7 +198,7 @@
     }
     
       //mutex to prevent others from modifying contacts at the same time
-    dispatch_sync(dispatch_get_main_queue(),
+    dispatch_async(dispatch_get_main_queue(),
                   ^{
     //check if already there
     int pos=-1;
@@ -292,7 +292,7 @@
     }
     
     //mutex to prevent others from modifying contacts at the same time
-    dispatch_sync(dispatch_get_main_queue(),
+    dispatch_async(dispatch_get_main_queue(),
                   ^{
                       //check if  there
                       int pos=-1;
@@ -335,7 +335,7 @@
     
     
     //mutex to prevent others from modifying contacts at the same time
-    dispatch_sync(dispatch_get_main_queue(),
+    dispatch_async(dispatch_get_main_queue(),
                   ^{
                       NSMutableArray* indexPaths =[[NSMutableArray alloc] init];
                       NSMutableIndexSet* indexSet = [[NSMutableIndexSet alloc] init];
@@ -393,7 +393,7 @@
     
     debug_NSLog(@"chat view got new message notice %@", notification.userInfo);
 
-    dispatch_sync(dispatch_get_main_queue(),
+    dispatch_async(dispatch_get_main_queue(),
                   ^{
                       
                       int pos=-1;

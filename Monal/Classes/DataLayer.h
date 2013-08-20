@@ -136,7 +136,7 @@
 -(BOOL) clearMessages:(NSString*) accountNo; 
 
 #pragma mark message history
--(NSArray*) messageHistory:(NSString*) buddy forAccount:(NSString*) accountNo;
+-(NSMutableArray*) messageHistory:(NSString*) buddy forAccount:(NSString*) accountNo;
 -(NSArray*) messageHistoryAll:(NSString*) buddy forAccount:(NSString*) accountNo; //we're going to stop using this.. 
 
 -(NSArray*) messageHistoryListDates:(NSString*) buddy :(NSString*) accountNo; 

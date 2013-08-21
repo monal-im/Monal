@@ -18,7 +18,7 @@ typedef enum {
 
 @interface MLContactCell : DDBadgeViewCell
 {
-    UIImageView* _statusOrb;
+    UIView* _statusOrb;
 }
 
 @property (nonatomic, assign) NSInteger status;

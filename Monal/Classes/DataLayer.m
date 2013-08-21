@@ -1658,7 +1658,7 @@ static DataLayer *sharedInstance=nil;
 	//NSArray* parts=[[[NSDate date] description] componentsSeparatedByString:@" "];
 	
 	
-	NSString* query=[NSString stringWithFormat:@"select af, message, thetime from (select ifnull(actual_from, message_from) as af, message,     timestamp  as thetime, message_history_id from message_history where account_id=%@ and (message_from='%@' or message_to='%@') order by message_history_id desc limit 10) order by message_history_id asc",accountNo, buddy, buddy];
+	NSString* query=[NSString stringWithFormat:@"select af, message, thetime from (select ifnull(actual_from, message_from) as af, message,     timestamp  as thetime, message_history_id from message_history where account_id=%@ and (message_from='%@' or message_to='%@') order by message_history_id desc limit 20) order by message_history_id asc",accountNo, buddy, buddy];
 	debug_NSLog(@"%@", query);
 	NSMutableArray* toReturn = [self executeReader:query];
     

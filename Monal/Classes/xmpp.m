@@ -308,7 +308,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
                     }
                 });
             
-                
+                 
                 //end background task if it wasnt by disconnenct
                 if (oldBGTask != UIBackgroundTaskInvalid)
                 {

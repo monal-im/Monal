@@ -7,7 +7,6 @@
 //
 
 #import "MLContactCell.h"
-#import <QuartzCore/QuartzCore.h>
 
 @implementation MLContactCell
 
@@ -34,8 +33,7 @@
     [super layoutSubviews];  //The default implementation of the layoutSubviews
     
     CGRect orbRectangle = CGRectMake(51-13+8,(self.frame.size.height/2) -7,15,15);
-	_statusOrb = [[UIView alloc] initWithFrame:orbRectangle];
-    _statusOrb.layer.cornerRadius=orbRectangle.size.height/2; 
+	_statusOrb = [[UIImageView alloc] initWithFrame:orbRectangle];
     [self.contentView addSubview: _statusOrb ];
 
     
@@ -58,19 +56,19 @@
     switch (_status) {
         case kStatusAway:
         {
-            _statusOrb.layer.backgroundColor=[UIColor colorWithRed:.69f green:.23f blue:0.09 alpha:1].CGColor;
+            _statusOrb.image=[UIImage imageNamed:@"away"];
             self.imageView.alpha=1.0f;
             break;
         }
         case kStatusOnline:
         {
-            _statusOrb.layer.backgroundColor=[UIColor colorWithRed:.22f green:.58f blue:0.03 alpha:1].CGColor;
+            _statusOrb.image=[UIImage imageNamed:@"available"];
             self.imageView.alpha=1.0f;
             break;
         }
         case kStatusOffline:
         {
-            _statusOrb.layer.backgroundColor=[UIColor colorWithRed:.35f green:.35f blue:.35f alpha:1].CGColor;
+            _statusOrb.image=[UIImage imageNamed:@"offline"];
             self.imageView.alpha=0.5f;
             break;
         }

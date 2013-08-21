@@ -20,7 +20,7 @@
     UIView *containerView;
     HPGrowingTextView *chatInput;
 	CGRect oldFrame;
-	NSString* buddyFullName;
+	NSString* _contactFullName;
     
 	bool firstmsg;
 	bool groupchat;
@@ -34,9 +34,10 @@
     NSMutableArray* _messagelist;
  
     UITableView* _messageTable;
+    NSDictionary* _contact; 
 }
 
-@property (nonatomic,strong)  NSString* buddyName;
+@property (nonatomic,strong)  NSString* contactName;
 
 
 -(id) initWithContact:(NSDictionary*) contact  ;

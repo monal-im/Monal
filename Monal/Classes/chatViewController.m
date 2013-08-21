@@ -100,9 +100,10 @@
 -(id) initWithContact:(NSDictionary*) contact
 {
     self=[super init];
+    _contact=contact;
     // handle messages to view someuser
-    _buddyName=[contact objectForKey:@"buddy_name"];
-	buddyFullName=[contact objectForKey:@"full_name"];;
+    _contactName=[contact objectForKey:@"buddy_name"];
+	_contactFullName=[contact objectForKey:@"full_name"];;
     self.accountNo=[NSString stringWithFormat:@"%d",[[contact objectForKey:@"account_id"] integerValue]];
     self.hidesBottomBarWhenPushed=YES;
     
@@ -122,7 +123,7 @@
     [self makeView];
     
     [MLNotificationManager sharedInstance].currentAccountNo=self.accountNo;
-    [MLNotificationManager sharedInstance].currentContact=self.buddyName;
+    [MLNotificationManager sharedInstance].currentContact=self.contactName;
     
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
     [nc addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
@@ -140,8 +141,8 @@
 
 -(void)viewWillAppear:(BOOL)animated
 {
-    _messagelist =[[DataLayer sharedInstance] messageHistory:_buddyName forAccount: _accountNo];
-    NSArray* unread =[[DataLayer sharedInstance] unreadMessages:_buddyName forAccount: _accountNo];
+    _messagelist =[[DataLayer sharedInstance] messageHistory:_contactName forAccount: _accountNo];
+    NSArray* unread =[[DataLayer sharedInstance] unreadMessages:_contactName forAccount: _accountNo];
     [_messagelist addObjectsFromArray:unread];
     
     if([_messagelist count]>0)
@@ -149,11 +150,19 @@
      NSIndexPath *path1 = [NSIndexPath indexPathForRow:[_messagelist count]-1  inSection:0];
     [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:YES];
     }
+    
+    if(![_contactFullName isEqualToString:@"(null)"])
+       {
+           self.navigationItem.title=_contactFullName;
+       }
+    else
+        self.navigationItem.title=_contactName;
+    
 }
 
 -(void) viewWillDisappear:(BOOL)animated
 {
-    [[DataLayer sharedInstance] markAsReadBuddy:self.buddyName forAccount:self.accountNo];
+    [[DataLayer sharedInstance] markAsReadBuddy:self.contactName forAccount:self.accountNo];
 }
 
 -(void) dealloc
@@ -168,6 +177,12 @@
 	return YES;
 }
 
+- (BOOL)shouldAutorotate
+{
+   	[chatInput resignFirstResponder];
+    return YES;
+}
+
 #pragma mark textview
 
 -(void)resignTextView
@@ -175,8 +190,8 @@
     if(([chatInput text]!=nil) && (![[chatInput text] isEqualToString:@""]) )
     {
         debug_NSLog(@"Sending message");
-        [[MLXMPPManager sharedInstance] sendMessage:[chatInput text] toContact:_buddyName fromAccount:_accountNo withCompletionHandler:nil];
-        [self addMessageto:_buddyName withMessage:[chatInput text]];
+        [[MLXMPPManager sharedInstance] sendMessage:[chatInput text] toContact:_contactName fromAccount:_accountNo withCompletionHandler:nil];
+        [self addMessageto:_contactName withMessage:[chatInput text]];
         
     }
     [chatInput setText:@""];
@@ -240,7 +255,7 @@
     debug_NSLog(@"chat view got new message notice %@", notification.userInfo);
     
     if([[notification.userInfo objectForKey:@"accountNo"] isEqualToString:_accountNo]
-      && [[notification.userInfo objectForKey:@"from"] isEqualToString:_buddyName]
+      && [[notification.userInfo objectForKey:@"from"] isEqualToString:_contactName]
        )
     {
         dispatch_async(dispatch_get_main_queue(),

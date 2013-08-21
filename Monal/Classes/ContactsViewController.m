@@ -601,7 +601,7 @@
             if([[self.currentNavController topViewController] isKindOfClass:[chatViewController class]])
             {
                 chatViewController* currentTop=(chatViewController*)[self.currentNavController topViewController];
-                if([currentTop.buddyName isEqualToString:[[_contacts objectAtIndex:indexPath.row] objectForKey:@"buddy_name"]] &&
+                if([currentTop.contactName isEqualToString:[[_contacts objectAtIndex:indexPath.row] objectForKey:@"buddy_name"]] &&
                    [currentTop.accountNo isEqualToString:
                     [NSString stringWithFormat:@"%d",[[[_contacts objectAtIndex:indexPath.row] objectForKey:@"account_id"] integerValue]] ]
                    )

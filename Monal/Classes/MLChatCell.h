@@ -10,7 +10,7 @@
 
 @interface MLChatCell : UITableViewCell
 {
-  
+    UIImageView* _bubbleImage;
 }
 
 @property (nonatomic, strong) UITextView* messageView; 

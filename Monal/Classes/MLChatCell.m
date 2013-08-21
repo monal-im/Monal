@@ -7,7 +7,7 @@
 //
 
 #import "MLChatCell.h"
-#import <QuartzCore/QuartzCore.h>
+
 
 #define kChatFont 15.0f
 
@@ -33,7 +33,14 @@
         _messageView.scrollsToTop=NO;
         _messageView.editable=NO;
         _messageView.font=[UIFont systemFontOfSize:kChatFont];
-        _messageView.layer.cornerRadius=5.0f;
+        _messageView.backgroundColor=[UIColor clearColor];
+        
+        _bubbleImage=[[UIImageView alloc] init];
+        
+        //this order fro Z index
+        [self.contentView addSubview:_bubbleImage];
+        [self.contentView addSubview:_messageView];
+        
     }
     return self;
 }
@@ -43,35 +50,39 @@
     
     [super layoutSubviews];  //The default implementation of the layoutSubviews
     CGRect textLabelFrame = self.contentView.frame;
-    textLabelFrame.size.width=textLabelFrame.size.width*.75; 
-
-
-    
+    textLabelFrame.size.width=(textLabelFrame.size.width*.75);
+    UIImage *buttonImage2 ; 
     if(_outBound)
     {
         
         _messageView.textColor=[UIColor whiteColor];
-        _messageView.backgroundColor=[UIColor colorWithRed:0.17f green:0.53f blue:0.98f alpha:1];
+        buttonImage2 = [[UIImage imageNamed:@"blueButton"]
+                                 resizableImageWithCapInsets:UIEdgeInsetsMake(18, 18, 18, 18)];
+        //_messageView.backgroundImage=buttonImage2;
         textLabelFrame.origin.x= self.contentView.frame.size.width-textLabelFrame.size.width;
+        textLabelFrame.size.width-=10; 
         
     }
     else
     {
         _messageView.textColor=[UIColor blackColor];
-        _messageView.backgroundColor=[UIColor lightGrayColor];
-       
-        
+        buttonImage2 = [[UIImage imageNamed:@"greyButton"]
+                                 resizableImageWithCapInsets:UIEdgeInsetsMake(18, 18, 18, 18)];
+        textLabelFrame.origin.x+=10;
     }
     
-    _messageView.frame=textLabelFrame;
-    [self.contentView addSubview:_messageView];
+    _bubbleImage.image=buttonImage2;
+      _messageView.frame=textLabelFrame;
+      _bubbleImage.frame=textLabelFrame;
     
+
 }
 
 -(void)prepareForReuse
 {
     [super prepareForReuse];
     _messageView.text=nil;
+    _bubbleImage.image=nil;
     _outBound=NO; 
 }
 

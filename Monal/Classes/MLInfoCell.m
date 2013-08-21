@@ -8,6 +8,7 @@
 
 #import "MLInfoCell.h"
 
+
 @implementation MLInfoCell
 
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier

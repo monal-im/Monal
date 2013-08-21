@@ -363,19 +363,25 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
         
-    UITableViewCell* cell =[tableView dequeueReusableCellWithIdentifier:@"ContactCell"];
+    MLChatCell* cell =[tableView dequeueReusableCellWithIdentifier:@"ChatCell"];
     if(!cell)
     {
-        cell =[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"ContactCell"];
+        cell =[[MLChatCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"ChatCell"];
     }
     NSDictionary* row= [_messagelist objectAtIndex:indexPath.row];
     
-    cell.textLabel.text =[row objectForKey:@"message"];
+    cell.messageView.text =[row objectForKey:@"message"];
     cell.selectionStyle=UITableViewCellSelectionStyleNone;
     return cell;
 }
 
 #pragma mark tableview delegate
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    NSDictionary* row=[_messagelist objectAtIndex:indexPath.row];
+    return [MLChatCell heightForText:[row objectForKey:@"message"] inWidth:tableView.frame.size.width-20];
+    
+}
 
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
 {

@@ -12,6 +12,7 @@
 #import "MLConstants.h"
 #import "MLXMPPManager.h"
 #import "MLNotificationManager.h"
+#import "MLChatCell.h"
 
 
 @interface chatViewController : UIViewController <HPGrowingTextViewDelegate,UITableViewDelegate, UITableViewDataSource>

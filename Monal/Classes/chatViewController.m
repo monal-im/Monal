@@ -138,6 +138,7 @@
     _messageTable.delegate=self;
     _messageTable.dataSource=self;
     self.view.autoresizesSubviews=true;
+    _messageTable.separatorColor=[UIColor whiteColor];
     
     _tap =[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap)];
     [_messageTable addGestureRecognizer:_tap];
@@ -384,6 +385,12 @@
     
     cell.messageView.text =[row objectForKey:@"message"];
     cell.selectionStyle=UITableViewCellSelectionStyleNone;
+    
+    if([[row objectForKey:@"af"] isEqualToString:_jid])
+    {
+        cell.outBound=YES;
+    }
+    
     return cell;
 }
 

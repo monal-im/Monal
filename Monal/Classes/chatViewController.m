@@ -104,6 +104,7 @@
     _buddyName=[contact objectForKey:@"buddy_name"];
 	buddyFullName=[contact objectForKey:@"full_name"];;
     self.accountNo=[NSString stringWithFormat:@"%d",[[contact objectForKey:@"account_id"] integerValue]];
+    self.hidesBottomBarWhenPushed=YES;
     
 #warning this should be smarter...
     NSArray* accountVals =[[DataLayer sharedInstance] accountVals:self.accountNo];
@@ -427,41 +428,27 @@
 
 -(void) keyboardWillShow:(NSNotification *) note
 {
- //   keyboardVisible=YES;
-   // if(dontscroll==false)
-    {
-	//bigger text view
-	//CGRect oldTextFrame= chatInput.frame; 
-	//chatInput.frame=CGRectMake(oldTextFrame.origin.x, oldTextFrame.origin.y, oldTextFrame.size.width, oldTextFrame.size.height+30);
-	
+    CGRect _keyboardEndFrame;
+    [[note.userInfo valueForKey:UIKeyboardFrameEndUserInfoKey] getValue:&_keyboardEndFrame];
+    CGFloat _keyboardHeight = ([[UIDevice currentDevice] orientation] == UIDeviceOrientationPortrait || [[UIDevice currentDevice] orientation] == UIDeviceOrientationPortraitUpsideDown) ? _keyboardEndFrame.size.height : _keyboardEndFrame.size.width;
     
-	CGRect r,t;
-    [[note.userInfo valueForKey:UIKeyboardBoundsUserInfoKey] getValue: &t];
+    CGRect r;
 	r=self.view.frame;
-	r.size.height -=  t.size.height -50;
-	
-//		NSString* machine=[tools machine]; 
-//	if([machine hasPrefix:@"iPad"] )
-//	{//if ipad..
-//		r.size.height+=50; //tababar
-//	}
-//	
-	
-		
+    r.size.height -=  _keyboardHeight;
+    
 	//resizing frame for keyboard movie up
 	[UIView beginAnimations:nil context:NULL];
     [UIView setAnimationDuration:0.3];
 	oldFrame=self.view.frame;
 	self.view.frame =r;
-        
-        NSIndexPath *path1 = [NSIndexPath indexPathForRow:[_messagelist count]-1  inSection:0];
-        [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:YES];
-
+    
+    if([_messagelist count]>0)
+    {
+    NSIndexPath *path1 = [NSIndexPath indexPathForRow:[_messagelist count]-1  inSection:0];
+    [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:YES];
+    }
+    
 	[UIView commitAnimations];
-	
-	
-	debug_NSLog(@"kbd will show : %d  scroll: %f", t.size.height, r.size.height); 
-	}
 	
 	
 }

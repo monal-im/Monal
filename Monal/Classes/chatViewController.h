@@ -35,7 +35,8 @@
     NSMutableArray* _messagelist;
  
     UITableView* _messageTable;
-    NSDictionary* _contact; 
+    NSDictionary* _contact;
+    UITapGestureRecognizer* _tap;
 }
 
 @property (nonatomic,strong)  NSString* contactName;

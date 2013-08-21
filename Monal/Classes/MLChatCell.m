@@ -28,7 +28,8 @@
         // Initialization code
         _messageView=[[UITextView alloc] init];
         _messageView.scrollEnabled=NO;
-        _messageView.scrollsToTop=NO; 
+        _messageView.scrollsToTop=NO;
+        _messageView.editable=NO;
         _messageView.font=[UIFont systemFontOfSize:kChatFont];
     }
     return self;

@@ -128,6 +128,8 @@
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
     [nc addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
     [nc addObserver:self selector:@selector(refreshDisplay) name:UIApplicationWillEnterForegroundNotification object:nil];
+       [nc addObserver:self selector:@selector(handleTap) name:UIApplicationDidEnterBackgroundNotification object:nil];
+    
 	[nc addObserver:self selector:@selector(keyboardWillShow:) name: UIKeyboardWillShowNotification object:nil];
 	[nc addObserver:self selector:@selector(keyboardWillHide:) name: UIKeyboardWillHideNotification object:nil];
 	[nc addObserver:self selector:@selector(keyboardDidShow:) name: UIKeyboardDidShowNotification object:nil];
@@ -136,6 +138,9 @@
     _messageTable.delegate=self;
     _messageTable.dataSource=self;
     self.view.autoresizesSubviews=true;
+    
+    _tap =[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap)];
+    [_messageTable addGestureRecognizer:_tap];
     
 }
 
@@ -182,6 +187,13 @@
    	[chatInput resignFirstResponder];
     return YES;
 }
+
+#pragma mark gestures
+-(void) handleTap
+{
+    [chatInput resignFirstResponder];
+}
+
 
 #pragma mark textview
 
@@ -447,15 +459,14 @@
 
 }
 
--(void) keyboardWillShow:(NSNotification *) note
+-(void) keyboardWillShow:(NSNotification *) notification
 {
-    CGRect _keyboardEndFrame;
-    [[note.userInfo valueForKey:UIKeyboardFrameEndUserInfoKey] getValue:&_keyboardEndFrame];
-    CGFloat _keyboardHeight = ([[UIDevice currentDevice] orientation] == UIDeviceOrientationPortrait || [[UIDevice currentDevice] orientation] == UIDeviceOrientationPortraitUpsideDown) ? _keyboardEndFrame.size.height : _keyboardEndFrame.size.width;
-    
+   
+    CGSize keyboardSize = [[[notification userInfo] objectForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue].size;
+
     CGRect r;
 	r=self.view.frame;
-    r.size.height -=  _keyboardHeight;
+    r.size.height -= keyboardSize.height; 
     
 	//resizing frame for keyboard movie up
 	[UIView beginAnimations:nil context:NULL];

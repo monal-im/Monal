@@ -12,8 +12,8 @@
 
 - (void)makeView {
 	
-   
-    _messageTable =[[UITableView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height-40)];
+    self.view.backgroundColor=[UIColor whiteColor];
+    _messageTable =[[UITableView alloc] initWithFrame:CGRectMake(0, 2, self.view.frame.size.width, self.view.frame.size.height-42)];
     
 //    pages = [[UIPageControl alloc] init]; 
 //    pages.frame=CGRectMake(0, self.view.frame.size.height - 40-20, self.view.frame.size.width, 20);

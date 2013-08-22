@@ -303,8 +303,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
                     // try again
                     if((!self.loggedIn) && (_loggedInOnce))
                     {
-                    [self disconnect];
-                    [self connect];
+                        [self reconnect];
                     }
                 });
             
@@ -421,7 +420,22 @@ dispatch_async(dispatch_get_current_queue(), ^{
 }
 
 
-
+-(void) reconnect
+{
+   UIBackgroundTaskIdentifier reconnectBackgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
+        
+        debug_NSLog(@"Reconnect bgtask took too long. closing");
+        [[UIApplication sharedApplication] endBackgroundTask:_backgroundTask];
+        _backgroundTask=UIBackgroundTaskInvalid;
+        
+    }];
+    
+    if (reconnectBackgroundTask != UIBackgroundTaskInvalid) {
+        [self disconnect];
+        [self connect];
+    }
+    
+}
 
 #pragma mark XMPP
 
@@ -450,8 +464,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
 {
     if(!_loggedIn && !_logInStarted)
     {
-        [self disconnect];
-        [self connect]; // try to reconnect
+        [self reconnect];
         return;
     }
     
@@ -465,8 +478,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
 {
     if(!_loggedIn && !_logInStarted)
     {
-        [self disconnect];
-        [self connect]; // try to reconnect
+       [self reconnect];
         return; 
     }
     
@@ -1288,8 +1300,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
             
             if(_loggedInOnce)
             {
-                [self disconnect];
-    //           [self connect]; // reconnect
+                [self reconnect];
             }
             
             else

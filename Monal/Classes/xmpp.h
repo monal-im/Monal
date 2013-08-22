@@ -129,6 +129,11 @@ typedef struct
  */
 -(void) approveToRoster:(NSString*) contact;
 
+/**
+ sets up a background task to reconnect if needed
+ */
+-(void) reconnect; 
+
 // connection attributes
 @property (nonatomic,strong) NSString* username;
 @property (nonatomic,strong) NSString* domain;

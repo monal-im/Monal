@@ -157,6 +157,9 @@
     [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:YES];
     }
     
+    if([unread count]==0)
+        _firstmsg=YES;
+    
     if(![_contactFullName isEqualToString:@"(null)"])
        {
            self.navigationItem.title=_contactFullName;
@@ -253,13 +256,13 @@
 		debug_NSLog(@"failed to add message");
 	
 	// make sure its in active
-	if(firstmsg==true)
+	if(_firstmsg==YES)
 	{
-        [[DataLayer sharedInstance] addActiveBuddies:to :_accountNo];
-        firstmsg=false;
+        [[DataLayer sharedInstance] addActiveBuddies:to forAccount:_accountNo];
+        _firstmsg=NO;
 	}
 	
-    msgthread=false;
+
     
 }
 

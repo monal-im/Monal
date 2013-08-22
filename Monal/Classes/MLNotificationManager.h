@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "MLConstants.h"
 #import "SlidingMessageViewController.h"
+#import "DataLayer.h"
 
 /**
  Singleton object that will handle all sliders, alerts and sounds. listens for new message notification. 

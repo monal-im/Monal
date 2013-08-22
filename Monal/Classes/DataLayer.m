@@ -1477,14 +1477,8 @@ static DataLayer *sharedInstance=nil;
 	
 }
 
--(NSArray*) messageHistoryDate:(NSString*) buddy :(NSString*) accountNo:(NSString*) date
+-(NSArray*) messageHistoryDate:(NSString*) buddy forAccount:(NSString*) accountNo forDate:(NSString*) date
 {
-	//returns a buddy's message history
-	
-	
-	
-	//NSArray* parts=[[[NSDate date] description] componentsSeparatedByString:@" "];
-	
 	
 	NSString* query=[NSString stringWithFormat:@"select message_from, message, thetime from (select message_from, message, timestamp as thetime, message_history_id from message_history where account_id=%@ and (message_from='%@' or message_to='%@')  and date(timestamp)='%@' order by message_history_id desc) order by message_history_id asc ", accountNo, buddy, buddy, date];
 	debug_NSLog(@"%@",query);
@@ -1827,12 +1821,8 @@ static DataLayer *sharedInstance=nil;
 
 
 
--(bool) addActiveBuddies:(NSString*) buddyname:(NSString*) accountNo;
+-(bool) addActiveBuddies:(NSString*) buddyname forAccount:(NSString*) accountNo;
 {
-	
-	
-	//check if in active chat already
-	
 	
 	NSString* query=[NSString stringWithFormat:@"select count(buddy_name) from activechats where account_id=%@ and buddy_name='%@' ", accountNo, buddyname];
 	

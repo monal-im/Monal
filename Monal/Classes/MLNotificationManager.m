@@ -40,6 +40,7 @@
                       if(([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
                          || ([UIApplication sharedApplication].applicationState==UIApplicationStateInactive ))
                       {
+                          
                           //increment badge
                           [UIApplication sharedApplication].applicationIconBadgeNumber++;
                           //present notification

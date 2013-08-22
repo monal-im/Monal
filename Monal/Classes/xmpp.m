@@ -709,6 +709,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
             if(messageNode.hasBody)
             {
                 [[DataLayer sharedInstance] addMessageFrom:messageNode.from to:_fulluser forAccount:_accountNo withBody:messageNode.messageText actuallyfrom:messageNode.actualFrom];
+                [[DataLayer sharedInstance] addActiveBuddies:messageNode.from forAccount:_accountNo];
                 
                 NSDictionary* userDic=@{@"from":messageNode.from,
                                          @"actuallyfrom":messageNode.actualFrom,

@@ -140,7 +140,7 @@
 -(NSArray*) messageHistoryAll:(NSString*) buddy forAccount:(NSString*) accountNo; //we're going to stop using this.. 
 
 -(NSArray*) messageHistoryListDates:(NSString*) buddy :(NSString*) accountNo; 
--(NSArray*) messageHistoryDate:(NSString*) buddy :(NSString*) accountNo:(NSString*) date; 
+-(NSArray*) messageHistoryDate:(NSString*) buddy forAccount:(NSString*) accountNo forDate:(NSString*) date;
 
 -(BOOL) messageHistoryClean:(NSString*) buddy :(NSString*) accountNo;
 -(BOOL) messageHistoryCleanAll:(NSString*) accountNo;
@@ -156,7 +156,7 @@
 -(NSArray*) activeBuddies;
 -(bool) removeActiveBuddy:(NSString*) buddyname forAccount:(NSString*) accountNo;
 -(bool) removeAllActiveBuddies;
--(bool) addActiveBuddies:(NSString*) buddyname:(NSString*) accountNo;
+-(bool) addActiveBuddies:(NSString*) buddyname forAccount:(NSString*) accountNo;
 
 #pragma mark count unread
 -(int) countUnnoticedMessages:(NSString*) accountNo; 

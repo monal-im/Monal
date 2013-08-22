@@ -23,12 +23,11 @@
 	CGRect oldFrame;
 	NSString* _contactFullName;
     
-	bool firstmsg;
+	bool _firstmsg;
 	bool groupchat;
 	
 	bool wasaway; 
 	bool wasoffline; 
-	bool msgthread;
 //    UIPageControl* pages;
     
     NSArray* activeChats;

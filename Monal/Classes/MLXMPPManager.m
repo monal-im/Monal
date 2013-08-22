@@ -88,14 +88,14 @@
     dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
     _pinger = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,
                                      q_background);
-    
+     
     dispatch_source_set_timer(_pinger,
                               DISPATCH_TIME_NOW,
                               60ull * NSEC_PER_SEC *5
                               , 1ull * NSEC_PER_SEC);
     
     dispatch_source_set_event_handler(_pinger, ^{
-        
+         
         
         for(NSDictionary* row in _connectedXMPP)
         {

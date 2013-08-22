@@ -34,7 +34,7 @@
         _messageView.editable=NO;
         _messageView.font=[UIFont systemFontOfSize:kChatFont];
         _messageView.backgroundColor=[UIColor clearColor];
-        _messageView.dataDetectorTypes = UIDataDetectorTypeAll;
+      //  _messageView.dataDetectorTypes = UIDataDetectorTypeAll;
         
         _bubbleImage=[[UIImageView alloc] init];
         

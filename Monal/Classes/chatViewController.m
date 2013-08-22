@@ -378,14 +378,24 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-        
-    MLChatCell* cell =[tableView dequeueReusableCellWithIdentifier:@"ChatCell"];
+    MLChatCell* cell;
+    NSDictionary* row= [_messagelist objectAtIndex:indexPath.row];
+    
+    
+    if([[row objectForKey:@"af"] isEqualToString:_jid])
+    {
+    cell=[tableView dequeueReusableCellWithIdentifier:@"ChatCellOut"];
+    }
+    else
+    {
+        cell=[tableView dequeueReusableCellWithIdentifier:@"ChatCellIn"];
+    }
+    
     if(!cell)
     {
         cell =[[MLChatCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"ChatCell"];
     }
-    NSDictionary* row= [_messagelist objectAtIndex:indexPath.row];
-    
+   
     cell.messageView.text =[row objectForKey:@"message"];
     cell.selectionStyle=UITableViewCellSelectionStyleNone;
     
@@ -458,7 +468,6 @@
 -(void) keyboardWillHide:(NSNotification *) note
 {
 	[UIView beginAnimations:nil context:NULL];
-	[UIView setAnimationDuration:0.3];
 	self.view.frame = oldFrame;
 	[UIView commitAnimations];
 	debug_NSLog(@"kbd will hide scroll: %f", oldFrame.size.height);
@@ -480,7 +489,6 @@
     
 	//resizing frame for keyboard movie up
 	[UIView beginAnimations:nil context:NULL];
-    [UIView setAnimationDuration:0.3];
 	oldFrame=self.view.frame;
 	self.view.frame =r;
     

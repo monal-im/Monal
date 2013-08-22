@@ -51,45 +51,58 @@
     [super layoutSubviews];  //The default implementation of the layoutSubviews
     CGRect textLabelFrame = self.contentView.frame;
     textLabelFrame.size.width=(textLabelFrame.size.width*.75);
-    UIImage *buttonImage2 ; 
+    UIImage *buttonImage2 ;
     if(_outBound)
     {
-        
-        _messageView.textColor=[UIColor whiteColor];
-        buttonImage2 = [[UIImage imageNamed:@"blueButton"]
-                                 resizableImageWithCapInsets:UIEdgeInsetsMake(18, 18, 18, 18)];
-        //_messageView.backgroundImage=buttonImage2;
         textLabelFrame.origin.x= self.contentView.frame.size.width-textLabelFrame.size.width;
-        textLabelFrame.size.width-=10; 
+        textLabelFrame.size.width-=10;
         
     }
     else
     {
-        _messageView.textColor=[UIColor blackColor];
-        buttonImage2 = [[UIImage imageNamed:@"greyButton"]
-                                 resizableImageWithCapInsets:UIEdgeInsetsMake(18, 18, 18, 18)];
         textLabelFrame.origin.x+=10;
     }
     
+    if(!_bubbleImage.image)
+    {
+        
+        if(_outBound)
+        {
+            
+            _messageView.textColor=[UIColor whiteColor];
+            buttonImage2 = [[UIImage imageNamed:@"blueButton"]
+                            resizableImageWithCapInsets:UIEdgeInsetsMake(18, 18, 18, 18)];
+            
+        }
+        else
+        {
+            _messageView.textColor=[UIColor blackColor];
+            buttonImage2 = [[UIImage imageNamed:@"greyButton"]
+                            resizableImageWithCapInsets:UIEdgeInsetsMake(18, 18, 18, 18)];
+        }
+        
     _bubbleImage.image=buttonImage2;
-      _messageView.frame=textLabelFrame;
-      _bubbleImage.frame=textLabelFrame;
     
-
+    }
+    
+    
+    _messageView.frame=textLabelFrame;
+    _bubbleImage.frame=textLabelFrame;
+    
+    
 }
 
 -(void)prepareForReuse
 {
     [super prepareForReuse];
     _messageView.text=nil;
-    _bubbleImage.image=nil;
-    _outBound=NO; 
+    _outBound=NO;
 }
 
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated
 {
     [super setSelected:selected animated:animated];
-
+    
     // Configure the view for the selected state
 }
 

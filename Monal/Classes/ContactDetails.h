@@ -26,7 +26,7 @@
 
 @property (nonatomic) IBOutlet UIImageView* buddyIconView;
 @property (nonatomic) IBOutlet UIImageView* protocolImage;
-@property (nonatomic) IBOutlet UILabel* buddyName;
+@property (nonatomic) IBOutlet UITextView* buddyName;
 @property (nonatomic) IBOutlet UILabel* fullName;
 @property (nonatomic) IBOutlet UILabel* buddyStatus;
 @property (nonatomic) IBOutlet UITextView* buddyMessage;

@@ -83,37 +83,37 @@
     [self defaultSettings];
     
     
-//    
-//    //set up regular ping
-//    dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-//    _pinger = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,
-//                                     q_background);
-//    
-//    dispatch_source_set_timer(_pinger,
-//                              DISPATCH_TIME_NOW,
-//                              60ull * NSEC_PER_SEC *5
-//                              , 1ull * NSEC_PER_SEC);
-//    
-//    dispatch_source_set_event_handler(_pinger, ^{
-//        
-//        
-//        for(NSDictionary* row in _connectedXMPP)
-//        {
-//            xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
-//            if(xmppAccount.loggedIn)
-//                [xmppAccount sendPing];
-//        }
-//       
-//    });
-//    
-//    dispatch_source_set_cancel_handler(_pinger, ^{
-//        NSLog(@"pinger canceled");
-//        dispatch_release(_pinger);
-//    });
-//    
-//    dispatch_resume(_pinger);
-//    
-//    
+    
+    //set up regular ping
+    dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    _pinger = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,
+                                     q_background);
+    
+    dispatch_source_set_timer(_pinger,
+                              DISPATCH_TIME_NOW,
+                              60ull * NSEC_PER_SEC *5
+                              , 1ull * NSEC_PER_SEC);
+    
+    dispatch_source_set_event_handler(_pinger, ^{
+        
+        
+        for(NSDictionary* row in _connectedXMPP)
+        {
+            xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
+            if(xmppAccount.loggedIn)
+                [xmppAccount sendPing];
+        }
+       
+    });
+    
+    dispatch_source_set_cancel_handler(_pinger, ^{
+        NSLog(@"pinger canceled");
+        dispatch_release(_pinger);
+    });
+    
+    dispatch_resume(_pinger);
+    
+    
   
     
     return self;

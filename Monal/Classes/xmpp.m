@@ -678,20 +678,27 @@ dispatch_async(dispatch_get_current_queue(), ^{
             
             if(iqNode.vCard)
             {
+                NSString* fullname=iqNode.fullName; 
                 if(iqNode.fullName)
                 {
                     [[DataLayer sharedInstance] setFullName:iqNode.fullName forBuddy:iqNode.user andAccount:_accountNo];
+                }
+                
+                 if(iqNode.photoBinValue)
+                {
                      [MLIconManager setIconForContact:iqNode.user andAccount:_accountNo WithData:iqNode.photoBinValue ];
+                }
+                
+                if(!fullname) fullname=iqNode.user;
+                
                 NSDictionary* userDic=@{kusernameKey: iqNode.user,
-                                        kfullNameKey: iqNode.fullName,
+                                        kfullNameKey: fullname,
                                         kaccountNoKey:_accountNo
                                         };
-               
+                
                 dispatch_async(_xmppQueue, ^{
                     [self.contactsVC addUser:userDic];
                 });
-                }
-                
                 
             }
             

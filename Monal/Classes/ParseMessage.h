@@ -23,4 +23,6 @@
 @property (nonatomic, strong,readonly) NSString* messageText;
 @property (nonatomic, assign, readonly) BOOL hasBody; 
 
+@property (nonatomic, assign, readonly) NSString* avatarData;
+
 @end

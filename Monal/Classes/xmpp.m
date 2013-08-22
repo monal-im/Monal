@@ -740,6 +740,12 @@ dispatch_async(dispatch_get_current_queue(), ^{
                 [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:userDic];
             }
             
+            if(messageNode.avatarData)
+            {
+                [MLIconManager setIconForContact:messageNode.actualFrom andAccount:_accountNo WithData:messageNode.avatarData];
+
+            }
+            
         }
         else  if([[nextStanzaPos objectForKey:@"stanzaType"]  isEqualToString:@"presence"])
         {

@@ -110,6 +110,16 @@
 	}
 	
     
+    
+  
+	if(([elementName isEqualToString:@"data"])  && ([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:avatar:data"]))
+	{
+        State=@"AvatarData";
+		
+		return;
+	}
+	
+    
 }
 
 
@@ -128,6 +138,11 @@
         // this is the end of parse
         if(!_actualFrom) _actualFrom=_from;
         if(!_messageText) _messageText=_messageBuffer; 
+    }
+    
+    if([State isEqualToString:@"AvatarData"])
+    {
+        _avatarData=_messageBuffer;
     }
     
 }

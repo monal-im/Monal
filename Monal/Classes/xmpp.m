@@ -1296,6 +1296,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
             if(st_error.code==-9807)// Could not complete operation. SSL probably
             {
                  [self disconnect];
+                return;
             }
             
             if(_loggedInOnce)

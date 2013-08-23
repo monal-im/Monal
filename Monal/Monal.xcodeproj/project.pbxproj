@@ -219,7 +219,6 @@
 		26AAE280179F547C00271345 /* back@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26AAE27E179F547C00271345 /* back@2x.png */; };
 		26AAE282179F701A00271345 /* About.html in Resources */ = {isa = PBXBuildFile; fileRef = 26AAE281179F701A00271345 /* About.html */; };
 		26AAE285179F7B0200271345 /* MLSettingCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 26AAE284179F7B0200271345 /* MLSettingCell.m */; };
-		26AD610111A95CB700C39051 /* Emoticons in Resources */ = {isa = PBXBuildFile; fileRef = 26AD60DA11A95CB700C39051 /* Emoticons */; };
 		26AE97C31794F9DB00D4AD2B /* GTalk.png in Resources */ = {isa = PBXBuildFile; fileRef = 26AE97C11794F9DB00D4AD2B /* GTalk.png */; };
 		26AE97C41794F9DB00D4AD2B /* GTalk@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26AE97C21794F9DB00D4AD2B /* GTalk@2x.png */; };
 		26B3F1EE17BAED670028EA88 /* Crashlytics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26B3F1ED17BAED670028EA88 /* Crashlytics.framework */; };
@@ -247,7 +246,6 @@
 		26DC0A8F133928DA00E60BFD /* about.png in Resources */ = {isa = PBXBuildFile; fileRef = 26DC0A8E133928DA00E60BFD /* about.png */; };
 		26E2F7DA17C6FD9400C3C8EF /* MLTabBarController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26E2F7D917C6FD9400C3C8EF /* MLTabBarController.m */; };
 		26E5BA8B132287D400D8C57A /* Settings.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26E5BA8A132287D400D8C57A /* Settings.xib */; };
-		26EB845E111644AD005446DD /* Themes in Resources */ = {isa = PBXBuildFile; fileRef = 26EB845D111644AD005446DD /* Themes */; };
 		26EB85D711166DE7005446DD /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 26EB85D611166DE7005446DD /* Icon.png */; };
 		26EC411017BDD98E0031304D /* GroupChatViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26EC410F17BDD98D0031304D /* GroupChatViewController.xib */; };
 		26EC411317BDE39E0031304D /* MLIconManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EC411217BDE39E0031304D /* MLIconManager.m */; };
@@ -511,7 +509,6 @@
 		26AAE281179F701A00271345 /* About.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = About.html; sourceTree = "<group>"; };
 		26AAE283179F7B0200271345 /* MLSettingCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLSettingCell.h; sourceTree = "<group>"; };
 		26AAE284179F7B0200271345 /* MLSettingCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLSettingCell.m; sourceTree = "<group>"; };
-		26AD60DA11A95CB700C39051 /* Emoticons */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Emoticons; sourceTree = "<group>"; };
 		26AE97C11794F9DB00D4AD2B /* GTalk.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = GTalk.png; sourceTree = "<group>"; };
 		26AE97C21794F9DB00D4AD2B /* GTalk@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "GTalk@2x.png"; sourceTree = "<group>"; };
 		26B3F1ED17BAED670028EA88 /* Crashlytics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Crashlytics.framework; sourceTree = "<group>"; };
@@ -565,7 +562,6 @@
 		26E2F7D817C6FD9400C3C8EF /* MLTabBarController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MLTabBarController.h; path = ../MLTabBarController.h; sourceTree = "<group>"; };
 		26E2F7D917C6FD9400C3C8EF /* MLTabBarController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MLTabBarController.m; path = ../MLTabBarController.m; sourceTree = "<group>"; };
 		26E5BA8A132287D400D8C57A /* Settings.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = Settings.xib; sourceTree = "<group>"; };
-		26EB845D111644AD005446DD /* Themes */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Themes; sourceTree = "<group>"; };
 		26EB85D611166DE7005446DD /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
 		26EB85D911166F1B005446DD /* Monal_crop_256.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Monal_crop_256.png; sourceTree = "<group>"; };
 		26EC1DB1122978A100EAF934 /* AboutiPad.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = AboutiPad.xib; sourceTree = "<group>"; };
@@ -1146,8 +1142,8 @@
 				262797AC178A573F00B85D94 /* Tableviewcells */,
 				2636C440177BD595001CA71F /* Older UI code */,
 				26DB52111777C83100B50353 /* Modal views */,
-				2696EED01791245A00BC54B8 /* chatViewController.h */,
 				2696EED11791245A00BC54B8 /* chatViewController.m */,
+				2696EED01791245A00BC54B8 /* chatViewController.h */,
 				261A627E176C055400059090 /* ContactsViewController.h */,
 				261A627F176C055400059090 /* ContactsViewController.m */,
 				261A6283176C156500059090 /* ActiveChatsViewController.h */,
@@ -1215,8 +1211,6 @@
 			children = (
 				2675143315C23822006A36A3 /* changelog.txt */,
 				26DFD4A615666B6C007A1621 /* 3rd Party */,
-				26AD60DA11A95CB700C39051 /* Emoticons */,
-				26EB845D111644AD005446DD /* Themes */,
 				2601D9BC0FBF25D1004DB939 /* Assets */,
 				29B97315FDCFA39411CA2CEA /* Root Sources */,
 				080E96DDFE201D6D7F000001 /* Classes */,
@@ -1421,9 +1415,7 @@
 				260447F60FEED62100B3B5A7 /* BuddyDetails.xib in Resources */,
 				269F0F1A105DDEFB00FF96F8 /* status.png in Resources */,
 				26D1847310F9972400340C52 /* XMPPEdit.xib in Resources */,
-				26EB845E111644AD005446DD /* Themes in Resources */,
 				26EB85D711166DE7005446DD /* Icon.png in Resources */,
-				26AD610111A95CB700C39051 /* Emoticons in Resources */,
 				261FD56F1223527C003DDC3A /* active.png in Resources */,
 				26610B0D12293FA600591435 /* ActiveChats.xib in Resources */,
 				265F1B2B123040540065C5FE /* web.xib in Resources */,

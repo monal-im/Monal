@@ -245,6 +245,7 @@
 		26DB380B162A0AC100982A05 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26DB380A162A0AC100982A05 /* Default-568h@2x.png */; };
 		26DC0A8B1339259900E60BFD /* SearchUser.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26DC0A8A1339259900E60BFD /* SearchUser.xib */; };
 		26DC0A8F133928DA00E60BFD /* about.png in Resources */ = {isa = PBXBuildFile; fileRef = 26DC0A8E133928DA00E60BFD /* about.png */; };
+		26E2F7DA17C6FD9400C3C8EF /* MLTabBarController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26E2F7D917C6FD9400C3C8EF /* MLTabBarController.m */; };
 		26E5BA8B132287D400D8C57A /* Settings.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26E5BA8A132287D400D8C57A /* Settings.xib */; };
 		26EB845E111644AD005446DD /* Themes in Resources */ = {isa = PBXBuildFile; fileRef = 26EB845D111644AD005446DD /* Themes */; };
 		26EB85D711166DE7005446DD /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 26EB85D611166DE7005446DD /* Icon.png */; };
@@ -561,6 +562,8 @@
 		26DC0A8A1339259900E60BFD /* SearchUser.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SearchUser.xib; sourceTree = "<group>"; };
 		26DC0A8E133928DA00E60BFD /* about.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = about.png; sourceTree = "<group>"; };
 		26DE9C050FEEFD00000596F6 /* DB definitions */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "DB definitions"; sourceTree = "<group>"; };
+		26E2F7D817C6FD9400C3C8EF /* MLTabBarController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MLTabBarController.h; path = ../MLTabBarController.h; sourceTree = "<group>"; };
+		26E2F7D917C6FD9400C3C8EF /* MLTabBarController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MLTabBarController.m; path = ../MLTabBarController.m; sourceTree = "<group>"; };
 		26E5BA8A132287D400D8C57A /* Settings.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = Settings.xib; sourceTree = "<group>"; };
 		26EB845D111644AD005446DD /* Themes */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Themes; sourceTree = "<group>"; };
 		26EB85D611166DE7005446DD /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
@@ -926,6 +929,8 @@
 		26715E5E17650AF900684F3D /* View Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				26E2F7D817C6FD9400C3C8EF /* MLTabBarController.h */,
+				26E2F7D917C6FD9400C3C8EF /* MLTabBarController.m */,
 				26DB52121777EA5100B50353 /* Tab views */,
 			);
 			name = "View Controllers";
@@ -1590,6 +1595,7 @@
 				26DA16E117C302BC00D0065E /* UIActionSheet+Blocks.m in Sources */,
 				26DA16E217C302BC00D0065E /* UIAlertView+Blocks.m in Sources */,
 				268DD58617C4541000C673A9 /* MLChatCell.m in Sources */,
+				26E2F7DA17C6FD9400C3C8EF /* MLTabBarController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

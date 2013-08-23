@@ -34,7 +34,7 @@
     self.window=[[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
    // self.window.screen=[UIScreen mainScreen];
     
-    _tabBarController=[[UITabBarController alloc] init];
+    _tabBarController=[[MLTabBarController alloc] init];
     ContactsViewController* contactsVC = [[ContactsViewController alloc] init];
     [MLXMPPManager sharedInstance].contactVC=contactsVC;
     

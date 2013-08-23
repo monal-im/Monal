@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "Appirater.h"
 #import "DataLayer.h"
+#import "MLTabBarController.h"
 
 
 
@@ -21,7 +22,7 @@
 
 @property (nonatomic, strong) UIWindow* window;
 @property (nonatomic, strong) UINavigationController* chatNav;
-@property (nonatomic, strong) UITabBarController* tabBarController;
+@property (nonatomic, strong) MLTabBarController* tabBarController;
 @property (nonatomic, strong) UISplitViewController* splitViewController;
 
 @end

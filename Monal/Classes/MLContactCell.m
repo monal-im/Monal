@@ -109,13 +109,13 @@
 -(void)prepareForReuse
 {
     [super prepareForReuse];
-    self.textLabel.text=nil;
-    self.detailTextLabel.text=nil;
-    self.imageView.image=nil; 
-    self.badgeColor= [UIColor clearColor];
-    self.badgeHighlightedColor=[UIColor clearColor];
-    self.badgeText=nil;
-    self.imageView.image=[UIImage imageNamed:@"noicon"];
+//    self.textLabel.text=nil;
+//    self.detailTextLabel.text=nil;
+//    self.imageView.image=nil; 
+//    self.badgeColor= [UIColor clearColor];
+//    self.badgeHighlightedColor=[UIColor clearColor];
+//    self.badgeText=nil;
+//    self.imageView.image=[UIImage imageNamed:@"noicon"];
 }
 
 

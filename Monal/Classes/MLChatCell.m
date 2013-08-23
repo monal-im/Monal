@@ -96,8 +96,8 @@
 -(void)prepareForReuse
 {
     [super prepareForReuse];
-    _messageView.text=nil;
-    _outBound=NO;
+//    _messageView.text=nil;
+//    _outBound=NO;
 }
 
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated

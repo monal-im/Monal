@@ -59,27 +59,27 @@
     _netQueue = dispatch_queue_create(kMonalNetQueue, DISPATCH_QUEUE_CONCURRENT);
     _connectedListQueue = dispatch_queue_create(kMonalConnectedListQueue, DISPATCH_QUEUE_SERIAL);
    
-    NSTimeInterval timeInterval= 600; // 600 seconds
-    BOOL keepAlive=[[UIApplication sharedApplication] setKeepAliveTimeout:timeInterval handler:^{
-        debug_NSLog(@"began background ping");
-        for(NSDictionary* row in _connectedXMPP)
-        {
-             xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
-            if(xmppAccount.loggedIn)
-                [xmppAccount sendWhiteSpacePing];
-        }
-        
-    }];
-    
-    if(keepAlive)
-    {
-        debug_NSLog(@"installed keep alive timer");
-    }
-    else
-    {
-         debug_NSLog(@"failed to install keep alive timer");
-    }
-    
+//    NSTimeInterval timeInterval= 600; // 600 seconds
+//    BOOL keepAlive=[[UIApplication sharedApplication] setKeepAliveTimeout:timeInterval handler:^{
+//        debug_NSLog(@"began background ping");
+//        for(NSDictionary* row in _connectedXMPP)
+//        {
+//             xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
+//            if(xmppAccount.loggedIn)
+//                [xmppAccount sendWhiteSpacePing];
+//        }
+//        
+//    }];
+//    
+//    if(keepAlive)
+//    {
+//        debug_NSLog(@"installed keep alive timer");
+//    }
+//    else
+//    {
+//         debug_NSLog(@"failed to install keep alive timer");
+//    }
+//    
     [self defaultSettings];
     
     

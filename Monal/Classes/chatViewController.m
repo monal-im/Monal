@@ -475,6 +475,12 @@
 
 -(void) keyboardDidShow:(NSNotification *) note
 {
+    
+    if([_messagelist count]>0)
+    {
+        NSIndexPath *path1 = [NSIndexPath indexPathForRow:[_messagelist count]-1  inSection:0];
+        [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:YES];
+    }
 
 }
 
@@ -485,21 +491,24 @@
 
     CGRect r;
 	r=self.view.frame;
-    r.size.height -= keyboardSize.height; 
-    
-	//resizing frame for keyboard movie up
-	[UIView beginAnimations:nil context:NULL];
-	oldFrame=self.view.frame;
-	self.view.frame =r;
-    
-    if([_messagelist count]>0)
+    UIInterfaceOrientation orientation = [UIApplication sharedApplication].statusBarOrientation;
+
+    if(orientation==UIInterfaceOrientationLandscapeLeft|| orientation==UIInterfaceOrientationLandscapeRight)
     {
-    NSIndexPath *path1 = [NSIndexPath indexPathForRow:[_messagelist count]-1  inSection:0];
-    [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:YES];
+        r.size.height -= keyboardSize.width;
     }
+    else
+    r.size.height -= keyboardSize.height;
+	oldFrame=self.view.frame;
     
-	[UIView commitAnimations];
-	
+    NSTimeInterval animationDuration =[[[notification userInfo] objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
+    [UIView animateWithDuration:animationDuration
+                     animations:^{
+                         	self.view.frame =r;
+                     } completion:^(BOOL finished) {
+                         
+                     }
+     ];
 	
 }
 

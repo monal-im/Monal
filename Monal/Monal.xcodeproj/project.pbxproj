@@ -248,7 +248,7 @@
 		26E5BA8B132287D400D8C57A /* Settings.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26E5BA8A132287D400D8C57A /* Settings.xib */; };
 		26EB85D711166DE7005446DD /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 26EB85D611166DE7005446DD /* Icon.png */; };
 		26EC411017BDD98E0031304D /* GroupChatViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26EC410F17BDD98D0031304D /* GroupChatViewController.xib */; };
-		26EC411317BDE39E0031304D /* MLIconManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EC411217BDE39E0031304D /* MLIconManager.m */; };
+		26EC411317BDE39E0031304D /* MLImageManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EC411217BDE39E0031304D /* MLImageManager.m */; };
 		26EE8B18179B3C77006781F3 /* debut_dark_@2X.png in Resources */ = {isa = PBXBuildFile; fileRef = 26EE8B16179B3C77006781F3 /* debut_dark_@2X.png */; };
 		26EE8B19179B3C78006781F3 /* debut_dark.png in Resources */ = {isa = PBXBuildFile; fileRef = 26EE8B17179B3C77006781F3 /* debut_dark.png */; };
 		26EE8B1C179B55D2006781F3 /* ParseChallenge.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EE8B1B179B55D2006781F3 /* ParseChallenge.m */; };
@@ -580,8 +580,8 @@
 		26EC410C17BDD9640031304D /* callScreen.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = callScreen.h; sourceTree = "<group>"; };
 		26EC410D17BDD9640031304D /* callScreen.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = callScreen.m; sourceTree = "<group>"; };
 		26EC410F17BDD98D0031304D /* GroupChatViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = GroupChatViewController.xib; sourceTree = "<group>"; };
-		26EC411117BDE39E0031304D /* MLIconManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLIconManager.h; sourceTree = "<group>"; };
-		26EC411217BDE39E0031304D /* MLIconManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLIconManager.m; sourceTree = "<group>"; };
+		26EC411117BDE39E0031304D /* MLImageManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLImageManager.h; sourceTree = "<group>"; };
+		26EC411217BDE39E0031304D /* MLImageManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLImageManager.m; sourceTree = "<group>"; };
 		26EE8B16179B3C77006781F3 /* debut_dark_@2X.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "debut_dark_@2X.png"; sourceTree = "<group>"; };
 		26EE8B17179B3C77006781F3 /* debut_dark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = debut_dark.png; sourceTree = "<group>"; };
 		26EE8B1A179B55D2006781F3 /* ParseChallenge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParseChallenge.h; sourceTree = "<group>"; };
@@ -816,8 +816,8 @@
 				26352EA7177D222600E2C8FF /* MLXMPPManager.m */,
 				26EE8B1D179B67FA006781F3 /* MLNotificationManager.h */,
 				26EE8B1E179B67FA006781F3 /* MLNotificationManager.m */,
-				26EC411117BDE39E0031304D /* MLIconManager.h */,
-				26EC411217BDE39E0031304D /* MLIconManager.m */,
+				26EC411117BDE39E0031304D /* MLImageManager.h */,
+				26EC411217BDE39E0031304D /* MLImageManager.m */,
 			);
 			name = Managers;
 			sourceTree = "<group>";
@@ -1581,7 +1581,7 @@
 				26EE8B22179B7B0E006781F3 /* SlidingMessageViewController.m in Sources */,
 				261E672B179E27BE00CB493E /* ParseFailure.m in Sources */,
 				26AAE285179F7B0200271345 /* MLSettingCell.m in Sources */,
-				26EC411317BDE39E0031304D /* MLIconManager.m in Sources */,
+				26EC411317BDE39E0031304D /* MLImageManager.m in Sources */,
 				26A8ADD717C031BA0033990D /* ContactDetails.m in Sources */,
 				26DA16E017C302BC00D0065E /* RIButtonItem.m in Sources */,
 				26DA16E117C302BC00D0065E /* UIActionSheet+Blocks.m in Sources */,

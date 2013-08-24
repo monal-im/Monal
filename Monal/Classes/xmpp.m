@@ -25,7 +25,7 @@
 #import "ParseChallenge.h"
 #import "ParseFailure.h"
 
-#import "MLIconManager.h"
+#import "MLImageManager.h"
 #import "UIAlertView+Blocks.h"
 
 #define kXMPPReadSize 51200 // bytes
@@ -698,7 +698,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
                 
                  if(iqNode.photoBinValue)
                 {
-                     [MLIconManager setIconForContact:iqNode.user andAccount:_accountNo WithData:iqNode.photoBinValue ];
+                     [[MLImageManager sharedInstance] setIconForContact:iqNode.user andAccount:_accountNo WithData:iqNode.photoBinValue ];
                 }
                 
                 if(!fullname) fullname=iqNode.user;
@@ -742,7 +742,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
             
             if(messageNode.avatarData)
             {
-                [MLIconManager setIconForContact:messageNode.actualFrom andAccount:_accountNo WithData:messageNode.avatarData];
+                [[MLImageManager sharedInstance] setIconForContact:messageNode.actualFrom andAccount:_accountNo WithData:messageNode.avatarData];
 
             }
             

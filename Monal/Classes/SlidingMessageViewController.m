@@ -7,7 +7,7 @@
 //
 
 #import "SlidingMessageViewController.h"
-#import "MLIconManager.h"
+#import "MLImageManager.h"
 
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -170,7 +170,7 @@
 	icon =[[UIImageView alloc] initWithFrame:CGRectMake(5, 5, 32, 32)] ;
 	
 
-            //cell.imageView.image=[MLIconManager getIconForContact:[row objectForKey:@"buddy_name"] andAccount:[row objectForKey:@"account_id"]];
+            //cell.imageView.image=[MLImageManager getIconForContact:[row objectForKey:@"buddy_name"] andAccount:[row objectForKey:@"account_id"]];
         
 		
 		[self.view addSubview:icon];

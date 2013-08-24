@@ -7,7 +7,7 @@
 //
 
 #import "ContactDetails.h"
-#import "MLIconManager.h"
+#import "MLImageManager.h"
 
 
 @implementation ContactDetails
@@ -64,7 +64,7 @@
     NSString* accountNo=[NSString stringWithFormat:@"%@", [_contact objectForKey:@"account_id"]];
 
     
-    UIImage* contactImage=[MLIconManager getIconForContact:[_contact objectForKey:@"buddy_name"] andAccount:accountNo];
+    UIImage* contactImage=[[MLImageManager sharedInstance] getIconForContact:[_contact objectForKey:@"buddy_name"] andAccount:accountNo];
     _buddyIconView.image=contactImage;
 }
 

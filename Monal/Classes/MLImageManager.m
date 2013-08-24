@@ -1,19 +1,66 @@
 //
-//  MLIconManager.m
+//  MLImageManager.m
 //  Monal
 //
 //  Created by Anurodh Pokharel on 8/16/13.
 //
 //
 
-#import "MLIconManager.h"
+#import "MLImageManager.h"
 #import "EncodingTools.h"
 #import "DataLayer.h"
 
-@implementation MLIconManager
+@implementation MLImageManager
+
+#pragma mark initilization
++ (MLImageManager* )sharedInstance
+{
+    static dispatch_once_t once;
+    static MLImageManager* sharedInstance;
+    dispatch_once(&once, ^{
+        sharedInstance = [[MLImageManager alloc] init] ;
+    });
+    return sharedInstance;
+}
 
 
-+(void) setIconForContact:(NSString*) contact andAccount:(NSString*) accountNo WithData:(NSString*) data
+-(id) init
+{
+    self=[super init];
+   return self;
+}
+
+#pragma mark chat bubbles
+-(UIImage *) inboundImage
+{
+ if (_inboundImage)
+ {
+     return _inboundImage;
+ }
+ 
+    _inboundImage=[[UIImage imageNamed:@"greyButton"]
+                   resizableImageWithCapInsets:UIEdgeInsetsMake(18, 18, 18, 18)];
+    
+    return _inboundImage;
+    
+}
+
+
+-(UIImage*) outboundImage
+{
+    if (_outboundImage)
+    {
+        return _outboundImage;
+    }
+    
+    _outboundImage=[[UIImage imageNamed:@"blueButton"]
+                   resizableImageWithCapInsets:UIEdgeInsetsMake(18, 18, 18, 18)];
+    
+    return _outboundImage;
+}
+#pragma mark user icons
+
+-(void) setIconForContact:(NSString*) contact andAccount:(NSString*) accountNo WithData:(NSString*) data
 {
     if(!data) return; 
 //documents directory/buddyicons/account no/contact
@@ -46,7 +93,7 @@
     [[DataLayer sharedInstance] setIconName:filename forBuddy:contact inAccount:accountNo];
 }
 
-+(UIImage*) getIconForContact:(NSString*) contact andAccount:(NSString*) accountNo
+-(UIImage*) getIconForContact:(NSString*) contact andAccount:(NSString*) accountNo
 {
     UIImage* toreturn=nil; 
     //get filname from DB

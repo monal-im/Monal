@@ -7,6 +7,7 @@
 //
 
 #import "MLChatCell.h"
+#import "MLImageManager.h"
 
 
 #define kChatFont 15.0f
@@ -71,15 +72,13 @@
         {
             
             _messageView.textColor=[UIColor whiteColor];
-            buttonImage2 = [[UIImage imageNamed:@"blueButton"]
-                            resizableImageWithCapInsets:UIEdgeInsetsMake(18, 18, 18, 18)];
+            buttonImage2 = [[MLImageManager sharedInstance] outboundImage];
             
         }
         else
         {
             _messageView.textColor=[UIColor blackColor];
-            buttonImage2 = [[UIImage imageNamed:@"greyButton"]
-                            resizableImageWithCapInsets:UIEdgeInsetsMake(18, 18, 18, 18)];
+            buttonImage2 = [[MLImageManager sharedInstance] inboundImage];
         }
         
     _bubbleImage.image=buttonImage2;

@@ -425,7 +425,7 @@
 
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    return NO; // for now
+    return YES; // for now
 }
 
 - (BOOL)tableView:(UITableView *)tableView shouldIndentWhileEditingRowAtIndexPath:(NSIndexPath *)indexPath
@@ -440,25 +440,26 @@
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
     if (editingStyle == UITableViewCellEditingStyleDelete) {
-//        NSDictionary* contact= [_contacts objectAtIndex:indexPath.row];
-//        NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"Remove %@ from contacts?", nil),[contact objectForKey:@"full_name"] ];
-//        RIButtonItem* cancelButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Cancel", nil) action:^{
-//            
-//        }];
-//        
-//        RIButtonItem* yesButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Yes", nil) action:^{
-//            [[MLXMPPManager sharedInstance] removeContact:contact];
-//            
-//            [_contactsTable beginUpdates];
-//            [_contacts removeObjectAtIndex:indexPath.row];
-//            
-//            [_contactsTable deleteRowsAtIndexPaths:@[indexPath]
-//                                  withRowAnimation:UITableViewRowAnimationAutomatic];
-//            [_contactsTable endUpdates];
-//        }];
-//        
-//        UIActionSheet* sheet =[[UIActionSheet alloc] initWithTitle:messageString cancelButtonItem:cancelButton destructiveButtonItem:yesButton otherButtonItems: nil];
-//        [sheet showFromTabBar:self.tabBarController.tabBar];
+        NSDictionary* message= [_messagelist objectAtIndex:indexPath.row];
+        
+        debug_NSLog(@"%@", message); 
+        
+        if([message objectForKey:@"message_history_id"])
+        {
+            [[DataLayer sharedInstance] deleteMessageHistory:[NSString stringWithFormat:@"%@",[message objectForKey:@"message_history_id"]]];
+        }
+        else if ([message objectForKey:@"message_id"])
+        {
+             [[DataLayer sharedInstance] deleteMessage:[NSString stringWithFormat:@"%@",[message objectForKey:@"message_id"]]];
+        }
+        else
+        {
+            return;
+        }
+        [_messagelist removeObjectAtIndex:indexPath.row];
+        [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationRight];
+        
+        
     }
 }
 

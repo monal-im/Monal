@@ -134,6 +134,8 @@
 #pragma mark message Commands
 -(BOOL) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom ;
 -(BOOL) clearMessages:(NSString*) accountNo; 
+-(BOOL) deleteMessage:(NSString*) messageNo;
+-(BOOL) deleteMessageHistory:(NSString*) messageNo;
 
 #pragma mark message history
 -(NSMutableArray*) messageHistory:(NSString*) buddy forAccount:(NSString*) accountNo;

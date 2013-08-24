@@ -480,9 +480,6 @@
 	[UIView animateWithDuration:animationDuration
                      animations:^{
                          self.view.frame =oldFrame;
-                         
-                     } completion:^(BOOL finished) {
-                         
                          if([_messagelist count]>0)
                          {
                              NSIndexPath *path1 = [NSIndexPath indexPathForRow:[_messagelist count]-1  inSection:0];
@@ -492,6 +489,10 @@
                                  [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:NO];
                              }
                          }
+                         
+                     } completion:^(BOOL finished) {
+                         
+                         
                      }
      ];
 

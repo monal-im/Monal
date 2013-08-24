@@ -154,7 +154,11 @@
     if([_messagelist count]>0)
     {
      NSIndexPath *path1 = [NSIndexPath indexPathForRow:[_messagelist count]-1  inSection:0];
-    [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:YES];
+        if(![_messageTable.indexPathsForVisibleRows containsObject:path1])
+        {
+            
+            [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:NO];
+        }
     }
     
     if([unread count]==0)
@@ -245,7 +249,11 @@
                                [_messageTable endUpdates];
                                
                                
-                               [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:YES];
+                               if(![_messageTable.indexPathsForVisibleRows containsObject:path1])
+                               {
+                                   
+                                   [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:NO];
+                               }
                            });
 
             
@@ -465,22 +473,35 @@
 	debug_NSLog(@"kbd did hide "); 
 }
 
--(void) keyboardWillHide:(NSNotification *) note
+-(void) keyboardWillHide:(NSNotification *) notification
 {
-	[UIView beginAnimations:nil context:NULL];
-	self.view.frame = oldFrame;
-	[UIView commitAnimations];
+    
+    NSTimeInterval animationDuration =[[[notification userInfo] objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
+	[UIView animateWithDuration:animationDuration
+                     animations:^{
+                         self.view.frame =oldFrame;
+                         
+                     } completion:^(BOOL finished) {
+                         
+                         if([_messagelist count]>0)
+                         {
+                             NSIndexPath *path1 = [NSIndexPath indexPathForRow:[_messagelist count]-1  inSection:0];
+                             if(![_messageTable.indexPathsForVisibleRows containsObject:path1])
+                             {
+                                 
+                                 [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:NO];
+                             }
+                         }
+                     }
+     ];
+
+    
 	debug_NSLog(@"kbd will hide scroll: %f", oldFrame.size.height);
 }
 
 -(void) keyboardDidShow:(NSNotification *) note
 {
     
-    if([_messagelist count]>0)
-    {
-        NSIndexPath *path1 = [NSIndexPath indexPathForRow:[_messagelist count]-1  inSection:0];
-        [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:YES];
-    }
 
 }
 
@@ -505,9 +526,19 @@
     [UIView animateWithDuration:animationDuration
                      animations:^{
                          	self.view.frame =r;
+                         
                      } completion:^(BOOL finished) {
                          
-                     }
+                         if([_messagelist count]>0)
+                         {
+                             NSIndexPath *path1 = [NSIndexPath indexPathForRow:[_messagelist count]-1  inSection:0];
+                             if(![_messageTable.indexPathsForVisibleRows containsObject:path1])
+                             {
+                                 
+                                 [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:NO];
+                             }
+                         }
+                    }
      ];
 	
 }

@@ -7,6 +7,8 @@
 // 
 
 #import <Foundation/Foundation.h>
+#import <QuartzCore/QuartzCore.h>
+
 #import "DataLayer.h"
 #import "HPGrowingTextView.h"
 #import "MLConstants.h"

@@ -95,6 +95,24 @@
 //    [self.view addGestureRecognizer:swipe2];
  
     chatInput.delegate=self;
+    
+    
+    //set up nav bar view
+    _topBarView =[[UIView alloc] initWithFrame:CGRectMake(30, 5, _messageTable.frame.size.width-30, 44)];
+    CGRect imageFrame=CGRectMake(0, 5, 32, 32);
+    CGRect nameFrame=CGRectMake(37, 5, _topBarView.frame.size.width-37, imageFrame.size.height);
+    
+    _topIcon =[[UIImageView alloc] initWithFrame:imageFrame];
+    _topName=[[UILabel alloc] initWithFrame:nameFrame];
+    _topName.font=[UIFont boldSystemFontOfSize:15.0f];
+    _topName.textColor=[UIColor whiteColor];
+    _topName.backgroundColor=[UIColor clearColor];
+    
+    [_topBarView addSubview:_topIcon];
+    [_topBarView addSubview:_topName];
+    
+    self.navigationItem.titleView=_topBarView;
+    
 }
 
 -(id) initWithContact:(NSDictionary*) contact
@@ -110,6 +128,7 @@
 #warning this should be smarter...
     NSArray* accountVals =[[DataLayer sharedInstance] accountVals:self.accountNo];
     self.jid=[NSString stringWithFormat:@"%@@%@",[[accountVals objectAtIndex:0] objectForKey:@"username"], [[accountVals objectAtIndex:0] objectForKey:@"domain"]];
+        
     return self;
 
 }
@@ -143,10 +162,13 @@
     _tap =[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap)];
     [_messageTable addGestureRecognizer:_tap];
     
+  
 }
 
 -(void)viewWillAppear:(BOOL)animated
 {
+    
+    
     _messagelist =[[DataLayer sharedInstance] messageHistory:_contactName forAccount: _accountNo];
     NSArray* unread =[[DataLayer sharedInstance] unreadMessages:_contactName forAccount: _accountNo];
     [_messagelist addObjectsFromArray:unread];
@@ -166,10 +188,12 @@
     
     if(![_contactFullName isEqualToString:@"(null)"])
        {
-           self.navigationItem.title=_contactFullName;
+           _topName.text=_contactFullName;
        }
     else
-        self.navigationItem.title=_contactName;
+        _topName.text=_contactName;
+    
+    _topIcon.image=[[MLImageManager sharedInstance] getIconForContact:_contactName andAccount:_accountNo];
     
 }
 

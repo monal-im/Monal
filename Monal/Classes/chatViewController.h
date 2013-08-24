@@ -32,10 +32,14 @@
     
     NSArray* activeChats;
     NSMutableArray* _messagelist;
- 
-    UITableView* _messageTable;
     NSDictionary* _contact;
+    
     UITapGestureRecognizer* _tap;
+    UITableView* _messageTable;
+    
+    UIView* _topBarView;
+    UILabel* _topName;
+    UIImageView* _topIcon;
 }
 
 @property (nonatomic,strong)  NSString* contactName;

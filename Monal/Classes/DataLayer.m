@@ -2256,6 +2256,23 @@ NSString* query=[NSString stringWithFormat:@"select count(message_id) from  mess
         
     }
     
+    
+    if([dbversion doubleValue]<1.2)
+    {
+        debug_NSLog(@"Database version <1.2 detected. Performing upgrade on accounts. ");
+        
+        [self executeNonQuery:@"update  buddylist set iconhash=NULL;"];
+        [self executeNonQuery:@"alter table message_history  add column unread bool;"];
+        [self executeNonQuery:@" insert into message_history (account_id,message_from, message_to, timestamp, message, actual_from,unread) select account_id,message_from, message_to, timestamp, message, actual_from, 1  from messages ;"];
+        [self executeNonQuery:@""];
+
+        
+        [self executeNonQuery:@"update dbversion set dbversion='1.2'; "];
+        debug_NSLog(@"Upgrade to 1.1 success ");
+        
+    }
+
+    
     [dbversionCheck unlock];
     
     [self resetContacts];

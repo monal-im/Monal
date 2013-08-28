@@ -173,8 +173,7 @@
     [MLNotificationManager sharedInstance].currentContact=self.contactName;
     
     _messagelist =[[DataLayer sharedInstance] messageHistory:_contactName forAccount: _accountNo];
-    NSArray* unread =[[DataLayer sharedInstance] unreadMessages:_contactName forAccount: _accountNo];
-    [_messagelist addObjectsFromArray:unread];
+    int unread =[[DataLayer sharedInstance] countUserUnreadMessages:_contactName forAccount: _accountNo];
     
     if([_messagelist count]>0)
     {
@@ -186,7 +185,7 @@
         }
     }
     
-    if([unread count]==0)
+    if(unread==0)
         _firstmsg=YES;
     
     if(![_contactFullName isEqualToString:@"(null)"])

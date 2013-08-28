@@ -1403,7 +1403,7 @@ static DataLayer *sharedInstance=nil;
     NSString* dateString = [formatter stringFromDate:destinationDate];
     // in the event it is a message from the room
 
-    NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, %@, '%@',  '%@', '%@', '%@', '%@',0);", accountNo, from, to, 	dateString, [message stringByReplacingOccurrencesOfString:@"'" withString:@"''"], actualfrom];
+    NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, %@, '%@',  '%@', '%@', '%@', '%@',1);", accountNo, from, to, 	dateString, [message stringByReplacingOccurrencesOfString:@"'" withString:@"''"], actualfrom];
 	debug_NSLog(@"%@",query);
 	if([self executeNonQuery:query]!=NO)
 	{
@@ -1622,27 +1622,6 @@ static DataLayer *sharedInstance=nil;
 	} else return nil;
 }
 
--(NSArray*) unreadMessages:(NSString*) buddy forAccount:(NSString*) accountNo
-{	
-	NSString* query=[NSString stringWithFormat:@"select af, message, thetime, message_history_id from (select ifnull(actual_from, message_from) as af, message,  timestamp as thetime, message_history_id from message_history where unread=1 and account_id=%@ and (message_from='%@' or message_to='%@') order by message_history_id desc limit 10) order by message_history_id asc", accountNo, buddy, buddy];
-	//debug_NSLog(query);
-	NSArray* toReturn = [self executeReader:query];
-	
-	if(toReturn!=nil)
-	{
-		
-		debug_NSLog(@" message list  count: %d",  [toReturn count] );
-		;
-		
-		return toReturn; //[toReturn autorelease];
-	}
-	else
-	{
-		debug_NSLog(@"message list  is empty or failed to read");
-		;
-		return nil;
-	}
-}
 
 //message history
 -(NSMutableArray*) messageHistory:(NSString*) buddy forAccount:(NSString*) accountNo
@@ -1786,16 +1765,13 @@ static DataLayer *sharedInstance=nil;
 
 
 -(bool) addActiveBuddies:(NSString*) buddyname forAccount:(NSString*) accountNo;
-{
-	
+{	
 	NSString* query=[NSString stringWithFormat:@"select count(buddy_name) from activechats where account_id=%@ and buddy_name='%@' ", accountNo, buddyname];
-	
 	NSNumber* count=(NSNumber*)[self executeScalar:query];
 	if(count!=nil)
 	{
 		int val=[count integerValue];
 		if(val>0) {
-			;
 			return NO;
         } else
         {
@@ -1803,9 +1779,7 @@ static DataLayer *sharedInstance=nil;
             NSString* query2=[NSString stringWithFormat:@"insert into activechats values ( %@,'%@') ",  accountNo,buddyname ];
             //	debug_NSLog(query);
             
-            
             bool result=[self executeNonQuery:query2];
-            ;
             return result;
         }
 	}

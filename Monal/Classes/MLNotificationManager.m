@@ -86,8 +86,8 @@
                       }
                       else
                    {
-                       if(![[notification.userInfo objectForKey:@"from"] isEqualToString:self.currentContact] &&
-                          ![[notification.userInfo objectForKey:@"acountNo"] isEqualToString:self.currentAccountNo] 
+                       if(!([[notification.userInfo objectForKey:@"from"] isEqualToString:self.currentContact] &&
+                          [[notification.userInfo objectForKey:@"acountNo"] isEqualToString:self.currentAccountNo])
                         //  &&![[notification.userInfo objectForKey:@"from"] isEqualToString:@"Info"]
                           )
                        {

@@ -36,6 +36,11 @@
 
     dispatch_async(dispatch_get_main_queue(),
                   ^{
+                     NSString* acctString =[NSString stringWithFormat:@"%d", [[notification.userInfo objectForKey:@"accountNo"] integerValue]];  
+                      NSString* fullName =[[DataLayer sharedInstance] fullName:[notification.userInfo objectForKey:@"from"] forAccount:acctString];
+                      
+                      NSString* nameToShow=[notification.userInfo objectForKey:@"from"];
+                      if(fullName) nameToShow=fullName;
                       
                       if(([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
                          || ([UIApplication sharedApplication].applicationState==UIApplicationStateInactive ))
@@ -64,9 +69,9 @@
                               alarm.repeatInterval = 0;
                               
                               if([[NSUserDefaults standardUserDefaults] boolForKey:@"MessagePreview"])
-                                  alarm.alertBody = [NSString stringWithFormat: @"%@: %@", [notification.userInfo objectForKey:@"from"], [notification.userInfo objectForKey:@"messageText"]];
+                                  alarm.alertBody = [NSString stringWithFormat: @"%@: %@", nameToShow, [notification.userInfo objectForKey:@"messageText"]];
                               else
-                                  alarm.alertBody =  [notification.userInfo objectForKey:@"from"];
+                                  alarm.alertBody =  nameToShow;
                               
                               if( [[NSUserDefaults standardUserDefaults] boolForKey:@"Sound"]==true)
                               {
@@ -86,14 +91,14 @@
                       }
                       else
                    {
-                       NSString* acctString =[NSString stringWithFormat:@"%d", [[notification.userInfo objectForKey:@"accountNo"] integerValue]];
+                      
                        if(!([[notification.userInfo objectForKey:@"from"] isEqualToString:self.currentContact] &&
                           [acctString isEqualToString:self.currentAccountNo])
                         //  &&![[notification.userInfo objectForKey:@"from"] isEqualToString:@"Info"]
                           )
                        {
                        
-                      SlidingMessageViewController* slidingView= [[SlidingMessageViewController alloc] correctSliderWithTitle:[notification.userInfo objectForKey:@"from"] message:[notification.userInfo objectForKey:@"messageText"] userfilename:[notification.userInfo objectForKey:@"from"] user:[notification.userInfo objectForKey:@"from"]];
+                      SlidingMessageViewController* slidingView= [[SlidingMessageViewController alloc] correctSliderWithTitle:nameToShow message:[notification.userInfo objectForKey:@"messageText"] userfilename:[notification.userInfo objectForKey:@"from"] user:[notification.userInfo objectForKey:@"from"]];
                        
                        [self.window addSubview:slidingView.view];
                        

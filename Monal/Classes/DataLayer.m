@@ -444,10 +444,7 @@ static DataLayer *sharedInstance=nil;
 	// remove all other traces of the account_id
 	NSString* query1=[NSString stringWithFormat:@"delete from buddylist  where account_id=%@ ;", accountNo];
 	[self executeNonQuery:query1];
-	
-	NSString* query2=[NSString stringWithFormat:@"delete from messages  where account_id=%@ ;", accountNo];
-	[self executeNonQuery:query2];
-	
+		
 	NSString* query3=[NSString stringWithFormat:@"delete from message_history  where account_id=%@ ;", accountNo];
 	[self executeNonQuery:query3];
 	
@@ -1387,7 +1384,6 @@ static DataLayer *sharedInstance=nil;
 #pragma mark message Commands
 -(BOOL) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom 
 {
-	//MEssaes coming in. in messages table, to is always the local user
 
 	NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
 	[formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
@@ -1409,7 +1405,7 @@ static DataLayer *sharedInstance=nil;
     
     // in the event it is a message from the room
 
-    NSString* query=[NSString stringWithFormat:@"insert into messages values (null, %@, '%@',  '%@', '%@', '%@', %d, '%@');", accountNo, from, to, 	dateString, [message stringByReplacingOccurrencesOfString:@"'" withString:@"''"], notice, actualfrom];
+    NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, %@, '%@',  '%@', '%@', '%@', %d, '%@',0);", accountNo, from, to, 	dateString, [message stringByReplacingOccurrencesOfString:@"'" withString:@"''"], notice, actualfrom];
 	debug_NSLog(@"%@",query);
 	if([self executeNonQuery:query]!=NO)
 	{
@@ -1428,9 +1424,7 @@ static DataLayer *sharedInstance=nil;
 
 -(BOOL) clearMessages:(NSString*) accountNo
 {
-	
-	
-	NSString* query=[NSString stringWithFormat:@"delete from messages where account_id=%@", accountNo];
+	NSString* query=[NSString stringWithFormat:@"delete from message_history where account_id=%@", accountNo];
 	if([self executeNonQuery:query]!=NO)
 	{
 		return YES;
@@ -1441,18 +1435,6 @@ static DataLayer *sharedInstance=nil;
 	}
 }
 
--(BOOL) deleteMessage:(NSString*) messageNo
-{
-    NSString* query=[NSString stringWithFormat:@"delete from messages where message_id=%@", messageNo];
-	if([self executeNonQuery:query]!=NO)
-	{
-		return YES;
-	}
-	else
-	{
-		return NO;
-	}
-}
 
 
 -(BOOL) deleteMessageHistory:(NSString*) messageNo
@@ -1643,15 +1625,8 @@ static DataLayer *sharedInstance=nil;
 }
 
 -(NSArray*) unreadMessages:(NSString*) buddy forAccount:(NSString*) accountNo
-{
-	//returns a buddy's message history
-	
-	
-	
-	//NSArray* parts=[[[NSDate date] description] componentsSeparatedByString:@" "];
-	
-	
-	NSString* query=[NSString stringWithFormat:@"select af, message, thetime, message_id from (select ifnull(actual_from, message_from) as af, message,  timestamp as thetime, message_id from messages where account_id=%@ and (message_from='%@' or message_to='%@') order by message_id desc limit 10) order by message_id asc", accountNo, buddy, buddy];
+{	
+	NSString* query=[NSString stringWithFormat:@"select af, message, thetime, message_history_id from (select ifnull(actual_from, message_from) as af, message,  timestamp as thetime, message_history_id from message_history where unread=1 and account_id=%@ and (message_from='%@' or message_to='%@') order by message_history_id desc limit 10) order by message_history_id asc", accountNo, buddy, buddy];
 	//debug_NSLog(query);
 	NSArray* toReturn = [self executeReader:query];
 	
@@ -1696,34 +1671,15 @@ static DataLayer *sharedInstance=nil;
 }
 -(BOOL) markAsReadBuddy:(NSString*) buddy forAccount:(NSString*) accountNo
 {
-	
-	//called when a buddy is clicked
-    //moves messages from a buddy from messages to history (thus marking them as read)
-	
-    
-	
-	NSString* query2=[NSString stringWithFormat:@"  insert into message_history (account_id,message_from, message_to, timestamp, message, actual_from) select account_id,message_from, message_to, timestamp, message, actual_from  from messages where account_id=%@ and message_from='%@';", accountNo, buddy];
+
+	NSString* query2=[NSString stringWithFormat:@"  update message_history set unread=0 where account_id=%@ and message_from='%@';", accountNo, buddy];
 	if([self executeNonQuery:query2]!=NO)
 	{
-        //	debug_NSLog(query2);
-        
-        NSString* query=[NSString stringWithFormat:@"delete from messages where account_id=%@ and message_from='%@'; ", accountNo, buddy];
-        if([self executeNonQuery:query]!=NO)
-        {
-            ;
-            return YES;
-        }
-        else
-        {
-			debug_NSLog(@"Messages clean  failed");
-            ;
-            return NO;
-        }
-	}
+        return YES;
+    }
 	else
 	{
-		debug_NSLog(@"Message history insert failed");
-		;
+		debug_NSLog(@"Message history update failed");
 		return NO;
 	}
 	
@@ -1731,10 +1687,10 @@ static DataLayer *sharedInstance=nil;
 
 -(BOOL) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom ;
 {
-	//MEssaes_history ging out, from is always the local user
+	//MEssaes_history ging out, from is always the local user. always read
 	
 	NSArray* parts=[[[NSDate date] description] componentsSeparatedByString:@" "];
-	NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, %@, '%@',  '%@', '%@ %@', '%@', '%@');", accountNo, from, to,
+	NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, %@, '%@',  '%@', '%@ %@', '%@', '%@',0);", accountNo, from, to,
 					 [parts objectAtIndex:0],[parts objectAtIndex:1], [message stringByReplacingOccurrencesOfString:@"'" withString:@"''"], actualfrom];
 	
 	if([self executeNonQuery:query]!=NO)
@@ -1752,10 +1708,10 @@ static DataLayer *sharedInstance=nil;
 
 
 //count unread
--(int) countUnreadMessages:(NSString*) accountNo
+-(int) countUnreadMessages
 {
 	// count # of meaages in message table
-    NSString* query=[NSString stringWithFormat:@"select count(message_id) from  messages where account_id=%@", accountNo];
+    NSString* query=[NSString stringWithFormat:@"select count(message_history_id) from  message_history where  unread=1"];
     
 	NSNumber* count=(NSNumber*)[self executeScalar:query];
 	if(count!=nil)
@@ -1818,22 +1774,7 @@ static DataLayer *sharedInstance=nil;
 
 -(bool) removeAllActiveBuddies
 {
-	
-	NSString* query2=[NSString stringWithFormat:@"  insert into message_history (account_id,message_from, message_to, timestamp, message, actual_from) select a.account_id,message_from, message_to, timestamp, message, actual_from  from messages  as a inner join activechats as b on a.account_id=b.account_id and a.message_from=b.buddy_name  "];
-    
-	if([self executeNonQuery:query2]!=NO)
-    {
-        
-    }
-    
-    NSString* query3=[NSString stringWithFormat:@"delete from messages where  message_from in (select buddy_name from activechats ); "];
-    
-    if([self executeNonQuery:query3]!=NO)
-    {
-        
-    }
-    
-	
+		
 	NSString* query=[NSString stringWithFormat:@"delete from activechats " ];
 	//	debug_NSLog(query);
     
@@ -1870,19 +1811,7 @@ static DataLayer *sharedInstance=nil;
             return result;
         }
 	}
-	/*else
-     {
-     //no
-     NSString* query2=[NSString stringWithFormat:@"insert into activechats values ( %@,'%@') ",  accountNo,buddyname ];
-     //	debug_NSLog(query);
-     
-     
-     bool result=[self executeNonQuery:query2];
-     ;
-     return result;
-     }*/
 	
-	;
 	return NO;
 	
 }
@@ -1890,33 +1819,12 @@ static DataLayer *sharedInstance=nil;
 
 #pragma mark unread messages
 
--(NSArray*) unreadMessagesForAccount:(NSString*) accountNo
-{
-	
-	NSString* query=[NSString stringWithFormat:@"select message_from,message from messages where account_id=%@", accountNo ];
-	//	debug_NSLog(query);
-	NSArray* toReturn = [self executeReader:query];
-	
-	if(toReturn!=nil)
-	{
-		
-		debug_NSLog(@" unread msg count: %d",  [toReturn count] );
-		;
-		
-		return toReturn; //[toReturn autorelease];
-	}
-	else
-	{
-		debug_NSLog(@"message history is empty or failed to read");
-		;
-		return nil;
-	}
-}
+
 
 -(int) countUserUnreadMessages:(NSString*) buddy forAccount:(NSString*) accountNo
 {
 	// count # messages from a specific user in messages table
-	NSString* query=[NSString stringWithFormat:@"select count(message_id) from  messages where account_id=%@ and message_from='%@'", accountNo, buddy];
+	NSString* query=[NSString stringWithFormat:@"select count(message_history_id) from  message_history where unread=1 and account_id=%@ and message_from='%@'", accountNo, buddy];
 	
 	NSNumber* count=(NSNumber*)[self executeScalar:query];
 	if(count!=nil)
@@ -1930,88 +1838,8 @@ static DataLayer *sharedInstance=nil;
 	}
 }
 
--(int) countOtherUnreadMessages:(NSString*) buddy forAccount:(NSString*) accountNo
-{
-	// count # messages from a specific user in messages table
-NSString* query=[NSString stringWithFormat:@"select count(message_id) from  messages where account_id=%@ and not message_from='%@'", accountNo, buddy];
-	
-	NSNumber* count=(NSNumber*)[self executeScalar:query];
-	if(count!=nil)
-	{
-		int val=[count integerValue];
-		;
-		return val;
-	}
-	else
-	{
-		;
-		return 0;
-	}
-}
-
-#pragma mark message notice Commands
-
-//messages for which a notification has not been shown
--(BOOL) markAsNoticed:(NSString*) accountNo
-{
-	
-	
-	
-	NSString* query=[NSString stringWithFormat:@"update messages set notice=1  where account_id=%@", accountNo ];
-	
-	bool result=[self executeNonQuery:query];
-	
-	;
-	return result;
-}
-
--(int) countUnnoticedMessages:(NSString*) accountNo
-{
-	
-	
-	
-	
-	NSString* query=[NSString stringWithFormat:@"select count(*) from messages where notice=0  and account_id=%@", accountNo ];
-	NSNumber* count=(NSNumber*)[self executeScalar:query];
-	if(count!=nil)
-	{
-		int val=[count integerValue];
-		;
-		return val;
-	}
-	else
-	{
-		;
-		return 0;
-	}
-}
 
 
--(NSArray*) unnoticedMessages:(NSString*) accountNo
-{
-	
-	
-	
-	
-	NSString* query=[NSString stringWithFormat:@" select message_from,message,filename, full_name  from messages as a left outer join buddylist as b on a.message_from=b.buddy_name  and a.account_id=b.account_id where notice=0 and a.account_id=%@", accountNo ];
-	//	debug_NSLog(query);
-	NSArray* toReturn = [self executeReader:query];
-	
-	if(toReturn!=nil)
-	{
-		
-		debug_NSLog(@" count: %d",  [toReturn count] );
-		;
-		
-		return toReturn; //[toReturn autorelease];
-	}
-	else
-	{
-		debug_NSLog(@"message history is empty or failed to read");
-		;
-		return nil;
-	}
-}
 
 #pragma db Commands
 
@@ -2268,7 +2096,7 @@ NSString* query=[NSString stringWithFormat:@"select count(message_id) from  mess
 
         
         [self executeNonQuery:@"update dbversion set dbversion='1.2'; "];
-        debug_NSLog(@"Upgrade to 1.1 success ");
+        debug_NSLog(@"Upgrade to 1.2 success ");
         
     }
 

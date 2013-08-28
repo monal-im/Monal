@@ -86,8 +86,9 @@
                       }
                       else
                    {
+                       NSString* acctString =[NSString stringWithFormat:@"%d", [[notification.userInfo objectForKey:@"accountNo"] integerValue]];
                        if(!([[notification.userInfo objectForKey:@"from"] isEqualToString:self.currentContact] &&
-                          [[notification.userInfo objectForKey:@"acountNo"] isEqualToString:self.currentAccountNo])
+                          [acctString isEqualToString:self.currentAccountNo])
                         //  &&![[notification.userInfo objectForKey:@"from"] isEqualToString:@"Info"]
                           )
                        {

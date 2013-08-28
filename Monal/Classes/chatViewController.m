@@ -144,9 +144,7 @@
     [super viewDidLoad];
     [self makeView];
     
-    [MLNotificationManager sharedInstance].currentAccountNo=self.accountNo;
-    [MLNotificationManager sharedInstance].currentContact=self.contactName;
-    
+
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
     [nc addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
     [nc addObserver:self selector:@selector(refreshDisplay) name:UIApplicationWillEnterForegroundNotification object:nil];
@@ -171,6 +169,8 @@
 -(void)viewWillAppear:(BOOL)animated
 {
     
+    [MLNotificationManager sharedInstance].currentAccountNo=self.accountNo;
+    [MLNotificationManager sharedInstance].currentContact=self.contactName;
     
     _messagelist =[[DataLayer sharedInstance] messageHistory:_contactName forAccount: _accountNo];
     NSArray* unread =[[DataLayer sharedInstance] unreadMessages:_contactName forAccount: _accountNo];
@@ -202,6 +202,9 @@
 
 -(void) viewWillDisappear:(BOOL)animated
 {
+    [MLNotificationManager sharedInstance].currentAccountNo=nil;
+    [MLNotificationManager sharedInstance].currentContact=nil;
+    
     [[DataLayer sharedInstance] markAsReadBuddy:self.contactName forAccount:self.accountNo];
 }
 

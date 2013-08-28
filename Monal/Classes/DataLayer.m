@@ -1384,7 +1384,7 @@ static DataLayer *sharedInstance=nil;
 #pragma mark message Commands
 -(BOOL) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom 
 {
-
+//this is always from a contact 
 	NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
 	[formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
 	NSDate* sourceDate=[NSDate date];
@@ -1401,11 +1401,9 @@ static DataLayer *sharedInstance=nil;
 	// note: if it isnt the same day we want to show the full  day
 	
     NSString* dateString = [formatter stringFromDate:destinationDate];
-	int notice=0;
-    
     // in the event it is a message from the room
 
-    NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, %@, '%@',  '%@', '%@', '%@', %d, '%@',0);", accountNo, from, to, 	dateString, [message stringByReplacingOccurrencesOfString:@"'" withString:@"''"], notice, actualfrom];
+    NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, %@, '%@',  '%@', '%@', '%@', '%@',0);", accountNo, from, to, 	dateString, [message stringByReplacingOccurrencesOfString:@"'" withString:@"''"], actualfrom];
 	debug_NSLog(@"%@",query);
 	if([self executeNonQuery:query]!=NO)
 	{

@@ -15,13 +15,37 @@
 
 @implementation MLChatCell
 
+
++ (MLChatCell* )sharedInstance
+{
+    static dispatch_once_t once;
+    static MLChatCell* sharedInstance; 
+    dispatch_once(&once, ^{
+        sharedInstance = [[MLChatCell alloc]  init];
+    
+    });
+    return sharedInstance;
+    
+}
+-(id) init{
+    self=[super init];
+    _tempView=[[UITextView alloc] init];
+    _tempView.font=[UIFont systemFontOfSize:kChatFont];
+    return self;
+}
+
 +(CGFloat) heightForText:(NSString*) text inWidth:(CGFloat) width;
 {
     //.75 would define the bubble size
     CGSize size = CGSizeMake(width*.75, MAXFLOAT);
-    CGSize calcSize= [text sizeWithFont:[UIFont systemFontOfSize:kChatFont] constrainedToSize:size lineBreakMode:NSLineBreakByWordWrapping];
+//    CGSize calcSize= [text sizeWithFont:[UIFont systemFontOfSize:kChatFont] constrainedToSize:size];
+//    
+//    return calcSize.height+25;
+    [MLChatCell sharedInstance].tempView.text=text; 
+    CGSize sizeToReturn=  [[MLChatCell sharedInstance].tempView sizeThatFits:size];
     
-    return calcSize.height+15;
+    return sizeToReturn.height;
+    
 }
 
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier

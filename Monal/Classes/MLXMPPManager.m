@@ -81,9 +81,7 @@
 //    }
 //    
     [self defaultSettings];
-    
-    
-    
+
     //set up regular ping
     dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
     _pinger = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,

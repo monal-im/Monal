@@ -161,11 +161,6 @@
 -(bool) addActiveBuddies:(NSString*) buddyname forAccount:(NSString*) accountNo;
 
 #pragma mark count unread
--(int) countUnnoticedMessages:(NSString*) accountNo; 
--(NSArray*) unnoticedMessages:(NSString*) accountNo;
--(BOOL) markAsNoticed:(NSString*) accountNo;
-
-
 -(int) countUnreadMessagesForAccount:(NSString*) accountNo;
 -(int) countUserUnreadMessages:(NSString*) buddy forAccount:(NSString*) accountNo;
 -(int) countOtherUnreadMessages:(NSString*) buddy forAccount:(NSString*) accountNo;

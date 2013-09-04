@@ -559,13 +559,11 @@ static DataLayer *sharedInstance=nil;
 
 -(BOOL) resetContacts
 {
-	
-	
     NSString* query2=[NSString stringWithFormat:@"delete from  buddy_resources ;   "];
 	[self executeNonQuery:query2];
     
     
-	NSString* query=[NSString stringWithFormat:@"update buddylist set dirty=0, new=0, online=0, state='', status='';   "];
+	NSString* query=[NSString stringWithFormat:@"update buddylist set dirty=0, new=0, online=0, state='offline', status='';   "];
 	if([self executeNonQuery:query]!=NO)
 	{
 		return YES;
@@ -585,7 +583,7 @@ static DataLayer *sharedInstance=nil;
 	[self executeNonQuery:query2];
 
     
-	NSString* query=[NSString stringWithFormat:@"update buddylist set dirty=0, new=0, online=0, state='', status='' where account_id=%@;   ", accountNo];
+	NSString* query=[NSString stringWithFormat:@"update buddylist set dirty=0, new=0, online=0, state='offline', status='' where account_id=%@;   ", accountNo];
 	if([self executeNonQuery:query]!=NO)
 	{
 		return YES;
@@ -1710,18 +1708,13 @@ static DataLayer *sharedInstance=nil;
 -(NSArray*) activeBuddies
 {
     
-    
-
     NSString* query=[NSString stringWithFormat:@"select distinct b.buddy_name,state,status,filename,0 as 'count' , ifnull(b.full_name, b.buddy_name) as full_name, a.account_id from activechats as a inner join buddylist as b on a.buddy_name=b.buddy_name and a.account_id=b.account_id order by full_name COLLATE NOCASE" ];
 	//	debug_NSLog(query);
 	NSArray* toReturn = [self executeReader:query];
 	
 	if(toReturn!=nil)
 	{
-		
 		debug_NSLog(@" count: %d",  [toReturn count] );
-		;
-		
 		return toReturn; //[toReturn autorelease];
 	}
 	else
@@ -1946,7 +1939,7 @@ static DataLayer *sharedInstance=nil;
 		[self executeNonQuery:@"drop table buddylistOnline;  "]; 
 		
 		[self executeNonQuery:@"drop table buddylist;  "]; 
-		[self executeNonQuery:@"drop table messages;  "]; 
+		[self executeNonQuery:@"drop table messages;  "];
 		[self executeNonQuery:@"drop table message_history;  "]; 
 		[self executeNonQuery:@"drop table buddyicon;  "]; 
 		

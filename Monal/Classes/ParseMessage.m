@@ -20,7 +20,7 @@
 	if(([elementName isEqualToString:@"message"])  && ([[attributeDict objectForKey:@"type"] isEqualToString:kMessageErrorType]))
 	{
 		debug_NSLog(@" message error");
-		
+		_type=kMessageErrorType;
 		return;
 	}
 	

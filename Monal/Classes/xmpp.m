@@ -727,6 +727,12 @@ dispatch_async(dispatch_get_current_queue(), ^{
         else  if([[nextStanzaPos objectForKey:@"stanzaType"]  isEqualToString:@"message"])
         {
              ParseMessage* messageNode= [[ParseMessage alloc]  initWithDictionary:nextStanzaPos];
+            if([messageNode.type isEqualToString:kMessageErrorType])
+            {
+                //TODO: mark message as error
+                    return;
+            }
+            
             if(messageNode.hasBody)
             {
                 [[DataLayer sharedInstance] addMessageFrom:messageNode.from to:_fulluser forAccount:_accountNo withBody:messageNode.messageText actuallyfrom:messageNode.actualFrom];

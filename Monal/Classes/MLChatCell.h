@@ -13,10 +13,9 @@
     UIImageView* _bubbleImage;
 }
 
-@property (nonatomic, strong) UITextView* messageView; 
 @property (nonatomic, strong) NSString* time;
 @property (nonatomic, assign) BOOL outBound;
-@property (nonatomic, strong) UITextView* tempView;
+
 
 +(CGFloat) heightForText:(NSString*) text inWidth:(CGFloat) width;
 @end

@@ -433,7 +433,7 @@
         cell =[[MLChatCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"ChatCell"];
     }
    
-    cell.messageView.text =[row objectForKey:@"message"];
+    cell.textLabel.text =[row objectForKey:@"message"];
     cell.selectionStyle=UITableViewCellSelectionStyleNone;
     
     if([[row objectForKey:@"af"] isEqualToString:_jid])

@@ -16,36 +16,13 @@
 @implementation MLChatCell
 
 
-+ (MLChatCell* )sharedInstance
-{
-    static dispatch_once_t once;
-    static MLChatCell* sharedInstance; 
-    dispatch_once(&once, ^{
-        sharedInstance = [[MLChatCell alloc]  init];
-    
-    });
-    return sharedInstance;
-    
-}
--(id) init{
-    self=[super init];
-    _tempView=[[UITextView alloc] init];
-    _tempView.font=[UIFont systemFontOfSize:kChatFont];
-    return self;
-}
 
 +(CGFloat) heightForText:(NSString*) text inWidth:(CGFloat) width;
 {
     //.75 would define the bubble size
-    CGSize size = CGSizeMake(width*.75, MAXFLOAT);
-//    CGSize calcSize= [text sizeWithFont:[UIFont systemFontOfSize:kChatFont] constrainedToSize:size];
-//    
-//    return calcSize.height+25;
-    [MLChatCell sharedInstance].tempView.text=text; 
-    CGSize sizeToReturn=  [[MLChatCell sharedInstance].tempView sizeThatFits:size];
-    
-    return sizeToReturn.height;
-    
+    CGSize size = CGSizeMake(width*.75 -10 , MAXFLOAT);
+    CGSize calcSize= [text sizeWithFont:[UIFont systemFontOfSize:kChatFont] constrainedToSize:size lineBreakMode:NSLineBreakByWordWrapping];
+    return calcSize.height+5+5;
 }
 
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
@@ -53,20 +30,16 @@
     self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
     if (self) {
         // Initialization code
-        _messageView=[[UITextView alloc] init];
-        _messageView.scrollEnabled=NO;
-        _messageView.scrollsToTop=NO;
-        _messageView.editable=NO;
-        _messageView.font=[UIFont systemFontOfSize:kChatFont];
-        _messageView.backgroundColor=[UIColor clearColor];
-        //_messageView.dataDetectorTypes = UIDataDetectorTypeAll;
+       
+        self.textLabel.font=[UIFont systemFontOfSize:kChatFont];
+        self.textLabel.backgroundColor=[UIColor clearColor];
+        self.textLabel.lineBreakMode=NSLineBreakByWordWrapping;
+        self.textLabel.numberOfLines=0; 
         
         _bubbleImage=[[UIImageView alloc] init];
         
         //this order fro Z index
-        [self.contentView addSubview:_bubbleImage];
-        [self.contentView addSubview:_messageView];
-        
+        [self.contentView insertSubview:_bubbleImage belowSubview:self.textLabel];
     }
     return self;
 }
@@ -95,13 +68,13 @@
         if(_outBound)
         {
             
-            _messageView.textColor=[UIColor whiteColor];
+            self.textLabel.textColor=[UIColor whiteColor];
             buttonImage2 = [[MLImageManager sharedInstance] outboundImage];
             
         }
         else
         {
-            _messageView.textColor=[UIColor blackColor];
+            self.textLabel.textColor=[UIColor blackColor];
             buttonImage2 = [[MLImageManager sharedInstance] inboundImage];
         }
         
@@ -109,8 +82,13 @@
     
     }
     
+    CGRect finaltextlabelFrame = textLabelFrame;
+    finaltextlabelFrame.origin.x+=5;
+    finaltextlabelFrame.origin.y+=2.5;
+    finaltextlabelFrame.size.width-=10;
+   
     
-    _messageView.frame=textLabelFrame;
+    self.textLabel.frame=finaltextlabelFrame;
     _bubbleImage.frame=textLabelFrame;
     
     

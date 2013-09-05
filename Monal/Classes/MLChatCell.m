@@ -84,7 +84,6 @@
     
     CGRect finaltextlabelFrame = textLabelFrame;
     finaltextlabelFrame.origin.x+=5;
-    finaltextlabelFrame.origin.y+=2.5;
     finaltextlabelFrame.size.width-=10;
    
     

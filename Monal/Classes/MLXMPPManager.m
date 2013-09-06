@@ -117,6 +117,13 @@
     return self;
 }
 
+-(void) dealloc
+{
+    [[NSNotificationCenter defaultCenter]  removeObserver:self];
+    if(_pinger)
+        dispatch_source_cancel(_pinger);
+}
+
 
 
 -(xmpp*) getConnectedAccountForID:(NSString*) accountNo
@@ -361,12 +368,41 @@
     }
 }
 
--(void) dealloc
+#pragma mark XMPP settings
+
+-(void) setStatusMessage:(NSString*) message
 {
-    [[NSNotificationCenter defaultCenter]  removeObserver:self];
-    if(_pinger)
-        dispatch_source_cancel(_pinger);
+    for (NSDictionary* row in _connectedXMPP)
+    {
+        xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
+    }
 }
+
+-(void) setAway:(BOOL) isAway
+{
+    for (NSDictionary* row in _connectedXMPP)
+    {
+        xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
+    }
+}
+
+-(void) setVisible:(BOOL) isVisible
+{
+    for (NSDictionary* row in _connectedXMPP)
+    {
+        xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
+    }
+}
+
+-(void) setPriority:(NSInteger*) priority
+{
+    for (NSDictionary* row in _connectedXMPP)
+    {
+        xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
+    }
+}
+
+
 
 @end
 

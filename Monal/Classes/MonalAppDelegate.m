@@ -155,6 +155,7 @@
     
     
     [Crashlytics startWithAPIKey:@"6e807cf86986312a050437809e762656b44b197c"];
+//    [[Crashlytics sharedInstance] crash];
     
     return YES;
 }

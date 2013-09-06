@@ -66,7 +66,14 @@
  */
 -(void)sendMessage:(NSString*) message toContact:(NSString*)contact fromAccount:(NSString*) accountNo withCompletionHandler:(void (^)(BOOL success)) completion;
 
+#pragma mark XMPP settings
 
+-(void) setStatusMessage:(NSString*) message;
+
+-(void) setAway:(BOOL) isAway;
+-(void) setVisible:(BOOL) isVisible;
+
+-(void) setPriority:(NSInteger*) priority;
 
 @property (nonatomic, weak) ContactsViewController* contactVC;
 

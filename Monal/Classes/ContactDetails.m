@@ -18,11 +18,12 @@
 {
     if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0"))
     {
-     //   [self.view setBackgroundColor:[UIColor blackColor]];
+//        [self.view setBackgroundColor:[UIColor o]];
     }
     else
-    [self.view setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"debut_dark"]]];
-    
+    {
+        [self.view setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"debut_dark"]]];
+    }
         UIImage *buttonImage2 = [[UIImage imageNamed:@"greenButton"]
                                  resizableImageWithCapInsets:UIEdgeInsetsMake(18, 18, 18, 18)];
         UIImage *buttonImageHighlight2 = [[UIImage imageNamed:@"greenButtonHighlight"]
@@ -114,6 +115,16 @@
     [headerView addSubview:label];
     
     // [headerView setBackgroundColor:[UIColor clearColor]];
+    
+    if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0"))
+    {
+        label.textColor=[UIColor darkGrayColor];
+        label.text=  label.text.uppercaseString;
+        label.shadowColor =[UIColor clearColor];
+        label.font=[UIFont systemFontOfSize:[UIFont systemFontSize]];
+        
+    }
+    
     return headerView;
 }
 

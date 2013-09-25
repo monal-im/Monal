@@ -7,6 +7,8 @@
 //
 
 #import "chatViewController.h"
+#import "MLConstants.h"
+#import <QuartzCore/QuartzCore.h>
 
 @implementation chatViewController
 
@@ -42,45 +44,78 @@
     [self.view addSubview:_messageTable];
 //    [self.view addSubview:pages];
     [self.view addSubview:containerView];
-     
-	
+    
+    if(SYSTEM_VERSION_LESS_THAN(@"7.0"))
+    {
+        UIImage *rawBackground = [UIImage imageNamed:@"MessageEntryBackground.png"];
+        UIImage *background = [rawBackground stretchableImageWithLeftCapWidth:13 topCapHeight:22];
+        UIImageView *imageView = [[UIImageView alloc] initWithImage:background];
+        imageView.frame = CGRectMake(0, 0, containerView.frame.size.width, containerView.frame.size.height);
+        imageView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+        [containerView addSubview:imageView];
+        
+    }
+    
+    [containerView addSubview:chatInput];
+    
+    if(SYSTEM_VERSION_LESS_THAN(@"7.0"))
+    {
     UIImage *rawEntryBackground = [UIImage imageNamed:@"MessageEntryInputField.png"];
     UIImage *entryBackground = [rawEntryBackground stretchableImageWithLeftCapWidth:13 topCapHeight:22];
     UIImageView *entryImageView = [[UIImageView alloc] initWithImage:entryBackground];
     entryImageView.frame = CGRectMake(5, 0, self.view.frame.size.width-72, 40);
     entryImageView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
-    
-    UIImage *rawBackground = [UIImage imageNamed:@"MessageEntryBackground.png"];
-    UIImage *background = [rawBackground stretchableImageWithLeftCapWidth:13 topCapHeight:22];
-    UIImageView *imageView = [[UIImageView alloc] initWithImage:background];
-    imageView.frame = CGRectMake(0, 0, containerView.frame.size.width, containerView.frame.size.height);
-    imageView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+                   [containerView addSubview:entryImageView];
+    }
     
     chatInput.autoresizingMask = UIViewAutoresizingFlexibleWidth;
    
     // view hierachy
     
-    [containerView addSubview:imageView];
-    [containerView addSubview:chatInput];
-    [containerView addSubview:entryImageView];
-    
-    UIImage *sendBtnBackground = [[UIImage imageNamed:@"MessageEntrySendButton.png"] stretchableImageWithLeftCapWidth:13 topCapHeight:0];
-    UIImage *selectedSendBtnBackground = [[UIImage imageNamed:@"MessageEntrySendButton.png"] stretchableImageWithLeftCapWidth:13 topCapHeight:0];
-    
+    if(SYSTEM_VERSION_LESS_THAN(@"7.0"))
+    {
+        
+        UIImage *sendBtnBackground = [[UIImage imageNamed:@"MessageEntrySendButton.png"] stretchableImageWithLeftCapWidth:13 topCapHeight:0];
+        UIImage *selectedSendBtnBackground = [[UIImage imageNamed:@"MessageEntrySendButton.png"] stretchableImageWithLeftCapWidth:13 topCapHeight:0];
+        
+        
 	UIButton *doneBtn = [UIButton buttonWithType:UIButtonTypeCustom];
 	doneBtn.frame = CGRectMake(containerView.frame.size.width - 69, 8, 63, 27);
     doneBtn.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleLeftMargin;
 	[doneBtn setTitle:@"Send" forState:UIControlStateNormal];
-    
-    [doneBtn setTitleShadowColor:[UIColor colorWithWhite:0 alpha:0.4] forState:UIControlStateNormal];
-    doneBtn.titleLabel.shadowOffset = CGSizeMake (0.0, -1.0);
-    doneBtn.titleLabel.font = [UIFont boldSystemFontOfSize:18.0f];
-    
-    [doneBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+
 	[doneBtn addTarget:self action:@selector(resignTextView) forControlEvents:UIControlEventTouchUpInside];
-    [doneBtn setBackgroundImage:sendBtnBackground forState:UIControlStateNormal];
-    [doneBtn setBackgroundImage:selectedSendBtnBackground forState:UIControlStateSelected];
-	[containerView addSubview:doneBtn];
+    
+   
+        [doneBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        [doneBtn setTitleShadowColor:[UIColor colorWithWhite:0 alpha:0.4] forState:UIControlStateNormal];
+        doneBtn.titleLabel.shadowOffset = CGSizeMake (0.0, -1.0);
+        doneBtn.titleLabel.font = [UIFont boldSystemFontOfSize:18.0f];
+        [doneBtn setBackgroundImage:sendBtnBackground forState:UIControlStateNormal];
+        [doneBtn setBackgroundImage:selectedSendBtnBackground forState:UIControlStateSelected];
+        
+           [containerView addSubview:doneBtn];
+	}
+    else
+    {
+        
+        UIButton *doneBtn = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+        doneBtn.frame = CGRectMake(containerView.frame.size.width - 69, 8, 63, 27);
+        doneBtn.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleLeftMargin;
+        [doneBtn setTitle:@"Send" forState:UIControlStateNormal];
+        
+        [doneBtn addTarget:self action:@selector(resignTextView) forControlEvents:UIControlEventTouchUpInside];
+       [containerView addSubview:doneBtn];
+        
+        containerView.backgroundColor=[UIColor colorWithRed:0.921 green:0.921 blue:0.945 alpha:1.0];
+        
+        chatInput.layer.cornerRadius=5.0f;
+        chatInput.layer.borderWidth = 1.0f;
+        chatInput.layer.borderColor = [[UIColor lightGrayColor] CGColor];
+        
+    }
+    
+ 
     
     containerView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
     _messageTable.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;

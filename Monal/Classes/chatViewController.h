@@ -57,12 +57,12 @@
 
 #pragma mark gesture stuff
 
--(void) showSignal:(NSNotification*) note; 
--(void)swipeDetected:(UISwipeGestureRecognizer *)recognizer;
+//-(void) showSignal:(NSNotification*) note; 
+//-(void)swipeDetected:(UISwipeGestureRecognizer *)recognizer;
 
 
--(void) handleInput:(NSString *)text;
-//notification 
+//-(void) handleInput:(NSString *)text;
+//notification
 -(void) keyboardWillShow:(NSNotification *) note;
 -(void) keyboardWillHide:(NSNotification *) note;
 

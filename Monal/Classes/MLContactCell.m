@@ -7,6 +7,7 @@
 //
 
 #import "MLContactCell.h"
+#import "MLConstants.h"
 
 @implementation MLContactCell
 
@@ -33,6 +34,12 @@
     [super layoutSubviews];  //The default implementation of the layoutSubviews
     
     CGRect orbRectangle = CGRectMake(51-13+8,(self.frame.size.height/2) -7,15,15);
+    
+
+    if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0"))
+       {
+           orbRectangle = CGRectMake(3,(self.frame.size.height/2) -7,10,10);
+       }
 	_statusOrb = [[UIImageView alloc] initWithFrame:orbRectangle];
     [self.contentView addSubview: _statusOrb ];
 

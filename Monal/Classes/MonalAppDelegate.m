@@ -38,44 +38,49 @@
     ContactsViewController* contactsVC = [[ContactsViewController alloc] init];
     [MLXMPPManager sharedInstance].contactVC=contactsVC;
     
+    UIBarStyle barColor=UIBarStyleBlackOpaque;
+    
+     if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0"))
+         barColor=UIBarStyleDefault;
+    
     ActiveChatsViewController* activeChatsVC = [[ActiveChatsViewController alloc] init];
     UINavigationController* activeChatNav=[[UINavigationController alloc] initWithRootViewController:activeChatsVC];
-    activeChatNav.navigationBar.barStyle=UIBarStyleBlackOpaque;
+    activeChatNav.navigationBar.barStyle=barColor;
     activeChatNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Active Chats",@"") image:[UIImage imageNamed:@"active"] tag:0];
     
     SettingsViewController* settingsVC = [[SettingsViewController alloc] init];
     UINavigationController* settingsNav=[[UINavigationController alloc] initWithRootViewController:settingsVC];
-    settingsNav.navigationBar.barStyle=UIBarStyleBlackOpaque;
+    settingsNav.navigationBar.barStyle=barColor;
     settingsNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Settings",@"") image:[UIImage imageNamed:@"status"] tag:0];
     
     AccountsViewController* accountsVC = [[AccountsViewController alloc] init];
     UINavigationController* accountsNav=[[UINavigationController alloc] initWithRootViewController:accountsVC];
-    accountsNav.navigationBar.barStyle=UIBarStyleBlackOpaque;
+    accountsNav.navigationBar.barStyle=barColor;
     accountsNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Accounts",@"") image:[UIImage imageNamed:@"accounts"] tag:0];
     
     ChatLogsViewController* chatLogVC = [[ChatLogsViewController alloc] init];
     UINavigationController* chatLogNav=[[UINavigationController alloc] initWithRootViewController:chatLogVC];
-    chatLogNav.navigationBar.barStyle=UIBarStyleBlackOpaque;
+    chatLogNav.navigationBar.barStyle=barColor;
     chatLogNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Chat Logs",@"") image:[UIImage imageNamed:@"chatlog"] tag:0];
     
     SearchUsersViewController* searchUsersVC = [[SearchUsersViewController alloc] init];
     UINavigationController* searchUsersNav=[[UINavigationController alloc] initWithRootViewController:searchUsersVC];
-    searchUsersNav.navigationBar.barStyle=UIBarStyleBlackOpaque;
+    searchUsersNav.navigationBar.barStyle=barColor;
     searchUsersNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Search Users",@"") image:[UIImage imageNamed:@"Search"] tag:0];
     
     GroupChatViewController* groupChatVC = [[GroupChatViewController alloc] init];
     UINavigationController* groupChatNav=[[UINavigationController alloc] initWithRootViewController:groupChatVC];
-    groupChatNav.navigationBar.barStyle=UIBarStyleBlackOpaque;
+    groupChatNav.navigationBar.barStyle=barColor;
     groupChatNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Group Chat",@"") image:[UIImage imageNamed:@"joingroup"] tag:0];
     
     HelpViewController* helpVC = [[HelpViewController alloc] init];
     UINavigationController* helpNav=[[UINavigationController alloc] initWithRootViewController:helpVC];
-    helpNav.navigationBar.barStyle=UIBarStyleBlackOpaque;
+    helpNav.navigationBar.barStyle=barColor;
     helpNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Help",@"") image:[UIImage imageNamed:@"help"] tag:0];
     
     AboutViewController* aboutVC = [[AboutViewController alloc] init];
     UINavigationController* aboutNav=[[UINavigationController alloc] initWithRootViewController:aboutVC];
-    aboutNav.navigationBar.barStyle=UIBarStyleBlackOpaque;
+    aboutNav.navigationBar.barStyle=barColor;
     aboutNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"About",@"") image:[UIImage imageNamed:@"about"] tag:0];
     
     
@@ -153,9 +158,11 @@
     [[MLXMPPManager sharedInstance] connectIfNecessary];
     }
     
+
     
     [Crashlytics startWithAPIKey:@"6e807cf86986312a050437809e762656b44b197c"];
-//    [[Crashlytics sharedInstance] crash];
+  //  [Crashlytics sharedInstance].debugMode = YES;
+  // [[Crashlytics sharedInstance] crash];
     
     return YES;
 }

@@ -30,6 +30,26 @@
 
 @implementation HPTextViewInternal
 
+@synthesize placeholder;
+@synthesize placeholderColor;
+@synthesize displayPlaceHolder;
+
+-(void)setText:(NSString *)text
+{
+    BOOL originalValue = self.scrollEnabled;
+    //If one of GrowingTextView's superviews is a scrollView, and self.scrollEnabled == NO,
+    //setting the text programatically will cause UIKit to search upwards until it finds a scrollView with scrollEnabled==yes
+    //then scroll it erratically. Setting scrollEnabled temporarily to YES prevents this.
+    [self setScrollEnabled:YES];
+    [super setText:text];
+    [self setScrollEnabled:originalValue];
+}
+
+- (void)setScrollable:(BOOL)isScrollable
+{
+    [super setScrollEnabled:isScrollable];
+}
+
 -(void)setContentOffset:(CGPoint)s
 {
 	if(self.tracking || self.decelerating){
@@ -78,7 +98,13 @@
     [super setContentSize:contentSize];
 }
 
-
-
+- (void)drawRect:(CGRect)rect
+{
+    [super drawRect:rect];
+    if (displayPlaceHolder && placeholder && placeholderColor) {
+        [placeholderColor set];
+        [placeholder drawInRect:CGRectMake(8.0f, 8.0f, self.frame.size.width - 16.0f, self.frame.size.height - 16.0f) withFont:self.font];
+    }
+}
 
 @end

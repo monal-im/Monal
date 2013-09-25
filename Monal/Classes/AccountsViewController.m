@@ -35,7 +35,14 @@
     self.view=_accountsTable;
     
     _accountsTable.backgroundView=nil;
+    if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0"))
+    {
+      
+    }
+    else
+    {
     [self.view setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"debut_dark"]]];
+    }
     _protocolList=[[DataLayer sharedInstance] protocolList];
     
     UIBarButtonItem* rightButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Reconnect All",@"") style:UIBarButtonItemStyleBordered target:self action:@selector(connectIfNecessary)];
@@ -103,23 +110,30 @@
     return 2;
 }
 
--(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
-{
-    UIView *tempView=[[UIView alloc]initWithFrame:CGRectMake(0,200,300,244)];
-    tempView.backgroundColor=[UIColor clearColor];
-    
-    UILabel *tempLabel=[[UILabel alloc]initWithFrame:CGRectMake(15,0,300,44)];
-    tempLabel.backgroundColor=[UIColor clearColor];
-    tempLabel.shadowColor = [UIColor blackColor];
-    tempLabel.shadowOffset = CGSizeMake(0,2);
-    tempLabel.textColor = [UIColor whiteColor]; //here you can change the text color of header.
-    tempLabel.font = [UIFont boldSystemFontOfSize:17.0f];
-    tempLabel.text=[self tableView:tableView titleForHeaderInSection:section ];
-    
-    [tempView addSubview:tempLabel];
-    
-    return tempView;
-}
+//-(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
+//{
+//    if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0"))
+//    {
+//        
+//    }
+//    else
+//    {
+//    UIView *tempView=[[UIView alloc]initWithFrame:CGRectMake(0,200,300,244)];
+//    tempView.backgroundColor=[UIColor clearColor];
+//    
+//    UILabel *tempLabel=[[UILabel alloc]initWithFrame:CGRectMake(15,0,300,44)];
+//    tempLabel.backgroundColor=[UIColor clearColor];
+//    tempLabel.shadowColor = [UIColor blackColor];
+//    tempLabel.shadowOffset = CGSizeMake(0,2);
+//    tempLabel.textColor = [UIColor whiteColor]; //here you can change the text color of header.
+//    tempLabel.font = [UIFont boldSystemFontOfSize:17.0f];
+//    tempLabel.text=[self tableView:tableView titleForHeaderInSection:section ];
+//    
+//    [tempView addSubview:tempLabel];
+//    }
+//    
+//    return tempView;
+//}
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {

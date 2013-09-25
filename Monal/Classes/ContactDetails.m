@@ -8,6 +8,7 @@
 
 #import "ContactDetails.h"
 #import "MLImageManager.h"
+#import "MLConstants.h"
 
 
 @implementation ContactDetails
@@ -15,6 +16,11 @@
 #pragma mark view lifecycle
 -(void) viewDidLoad
 {
+    if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0"))
+    {
+     //   [self.view setBackgroundColor:[UIColor blackColor]];
+    }
+    else
     [self.view setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"debut_dark"]]];
     
         UIImage *buttonImage2 = [[UIImage imageNamed:@"greenButton"]

@@ -7,6 +7,7 @@
 //
 
 #import "MLInfoCell.h"
+#import "MLConstants.h"
 
 
 @implementation MLInfoCell
@@ -60,6 +61,11 @@
 //    _Cancel.frame=CGRectMake(textLabelFrame.origin.x+textLabelFrame.size.width+5, textLabelFrame.origin.y+5, 70, 30);
 //    [self.contentView addSubview:_Cancel];
     
+    if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0"))
+       {
+           [self.contentView setBackgroundColor:[UIColor darkGrayColor]];
+       }
+       else
     [self.contentView setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"debut_dark"]]];
     
 }

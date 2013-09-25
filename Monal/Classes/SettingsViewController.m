@@ -7,7 +7,8 @@
 //
 
 #import "SettingsViewController.h"
-#import "tools.h"
+#import "MLConstants.h"
+
 
 @interface SettingsViewController ()
 
@@ -37,7 +38,16 @@
     
     self.view=_settingsTable;
     self.tableView=_settingsTable;
-    [self.view setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"debut_dark"]]];
+    
+    if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0"))
+    {
+        
+    }
+    else
+    {
+        [self.view setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"debut_dark"]]];
+    }
+    
 }
 
 -(void) viewWillAppear:(BOOL)animated
@@ -67,23 +77,24 @@
     return 4;
 }
 
--(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
-{
-    UIView *tempView=[[UIView alloc]initWithFrame:CGRectMake(0,200,300,244)];
-    tempView.backgroundColor=[UIColor clearColor];
-    
-    UILabel *tempLabel=[[UILabel alloc]initWithFrame:CGRectMake(15,0,300,44)];
-    tempLabel.backgroundColor=[UIColor clearColor];
-    tempLabel.shadowColor = [UIColor blackColor];
-    tempLabel.shadowOffset = CGSizeMake(0,2);
-    tempLabel.textColor = [UIColor whiteColor]; //here you can change the text color of header.
-    tempLabel.font = [UIFont boldSystemFontOfSize:17.0f];
-    tempLabel.text=[self tableView:tableView titleForHeaderInSection:section ];
-    
-    [tempView addSubview:tempLabel];
-    
-    return tempView;
-}
+//
+//-(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
+//{
+//    UIView *tempView=[[UIView alloc]initWithFrame:CGRectMake(0,200,300,244)];
+//    tempView.backgroundColor=[UIColor clearColor];
+//    
+//    UILabel *tempLabel=[[UILabel alloc]initWithFrame:CGRectMake(15,0,300,44)];
+//    tempLabel.backgroundColor=[UIColor clearColor];
+//    tempLabel.shadowColor = [UIColor blackColor];
+//    tempLabel.shadowOffset = CGSizeMake(0,2);
+//    tempLabel.textColor = [UIColor whiteColor]; //here you can change the text color of header.
+//    tempLabel.font = [UIFont boldSystemFontOfSize:17.0f];
+//    tempLabel.text=[self tableView:tableView titleForHeaderInSection:section ];
+//    
+//    [tempView addSubview:tempLabel];
+//    
+//    return tempView;
+//}
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {

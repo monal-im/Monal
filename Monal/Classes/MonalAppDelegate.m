@@ -88,6 +88,7 @@
     {
         
         _chatNav=[[UINavigationController alloc] initWithRootViewController:contactsVC];
+        _chatNav.navigationBar.barStyle=barColor;
         contactsVC.currentNavController=_chatNav;
         _chatNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Contacts",@"") image:[UIImage imageNamed:@"Buddies"] tag:0];
         
@@ -101,7 +102,7 @@
         
         //this is a dummy nav controller not really used for anything
         UINavigationController* navigationControllerContacts=[[UINavigationController alloc] initWithRootViewController:contactsVC];
-        navigationControllerContacts.navigationBar.barStyle=UIBarStyleBlackOpaque;
+        navigationControllerContacts.navigationBar.barStyle=barColor;
         
         _chatNav=activeChatNav;
         contactsVC.currentNavController=_chatNav;
@@ -114,8 +115,8 @@
         _splitViewController.delegate=self;
     }
     
-    _chatNav.navigationBar.barStyle=UIBarStyleBlackOpaque;
-    _tabBarController.moreNavigationController.navigationBar.barStyle=UIBarStyleBlackOpaque;
+    _chatNav.navigationBar.barStyle=barColor;
+    _tabBarController.moreNavigationController.navigationBar.barStyle=barColor;
     
     [self.window makeKeyAndVisible];
 }

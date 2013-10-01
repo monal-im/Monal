@@ -103,6 +103,10 @@
         doneBtn.frame = CGRectMake(containerView.frame.size.width - 69, 8, 63, 27);
         doneBtn.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleLeftMargin;
         [doneBtn setTitle:@"Send" forState:UIControlStateNormal];
+        if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0"))
+        {
+            doneBtn.titleLabel.font=[UIFont boldSystemFontOfSize:[UIFont systemFontSize]];
+        }
         
         [doneBtn addTarget:self action:@selector(resignTextView) forControlEvents:UIControlEventTouchUpInside];
        [containerView addSubview:doneBtn];

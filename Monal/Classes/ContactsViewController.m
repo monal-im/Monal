@@ -13,6 +13,7 @@
 #import "chatViewController.h"
 #import "ContactDetails.h"
 #import "UIActionSheet+Blocks.h"
+#import "addContact.h"
 
 
 #define kinfoSection 0
@@ -84,13 +85,13 @@
 #pragma mark Actions
 -(void)addContact
 {
+    //present modal view
+    addContact* addcontactView =[[addContact alloc] init];
+    [self.navigationController presentModalViewController:addcontactView animated:YES];
     
 }
 
--(void)removeContact
-{
-    
-}
+
 
 #pragma mark updating info display
 -(void) showConnecting:(NSDictionary*) info

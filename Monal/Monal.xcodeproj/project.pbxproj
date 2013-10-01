@@ -194,6 +194,8 @@
 		26432924133D66A9005632E1 /* download.png in Resources */ = {isa = PBXBuildFile; fileRef = 26432923133D66A9005632E1 /* download.png */; };
 		264E345B1787BAB100BC7BD0 /* XMPPPresence.m in Sources */ = {isa = PBXBuildFile; fileRef = 264E345A1787BAB100BC7BD0 /* XMPPPresence.m */; };
 		2651DAA20FC2847200009D7E /* noicon.png in Resources */ = {isa = PBXBuildFile; fileRef = 2651DAA10FC2847200009D7E /* noicon.png */; };
+		26529F5217FA7B260057F199 /* addContact.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EC40FE17BDD85F0031304D /* addContact.m */; };
+		26529F5317FA7B310057F199 /* addContact.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26EC410517BDD88B0031304D /* addContact.xib */; };
 		2658508B15E7D8E40070A2A7 /* TPCircularBuffer+AudioBufferList.c in Sources */ = {isa = PBXBuildFile; fileRef = 2658508615E7D8E40070A2A7 /* TPCircularBuffer+AudioBufferList.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		2658508C15E7D8E40070A2A7 /* TPCircularBuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 2658508815E7D8E40070A2A7 /* TPCircularBuffer.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		265F1B2B123040540065C5FE /* web.xib in Resources */ = {isa = PBXBuildFile; fileRef = 265F1B2A123040540065C5FE /* web.xib */; };
@@ -1441,6 +1443,7 @@
 				26352E8C177D1D6300E2C8FF /* blueButton.png in Resources */,
 				26352E8D177D1D6300E2C8FF /* blueButton@2x.png in Resources */,
 				26352E8E177D1D6300E2C8FF /* blueButtonHighlight.png in Resources */,
+				26529F5317FA7B310057F199 /* addContact.xib in Resources */,
 				26352E8F177D1D6300E2C8FF /* blueButtonHighlight@2x.png in Resources */,
 				26352E90177D1D6300E2C8FF /* greenButton.png in Resources */,
 				26352E91177D1D6300E2C8FF /* greenButton@2x.png in Resources */,
@@ -1510,6 +1513,7 @@
 				26B69A82131C5495002FCBEB /* PasswordManager.m in Sources */,
 				2640AF4014548E7700CB4F60 /* HPGrowingTextView.m in Sources */,
 				2640AF4114548E7700CB4F60 /* HPTextViewInternal.m in Sources */,
+				26529F5217FA7B260057F199 /* addContact.m in Sources */,
 				262DE4AF15C4E2C60040A66B /* MBProgressHUD.m in Sources */,
 				2658508B15E7D8E40070A2A7 /* TPCircularBuffer+AudioBufferList.c in Sources */,
 				2658508C15E7D8E40070A2A7 /* TPCircularBuffer.c in Sources */,

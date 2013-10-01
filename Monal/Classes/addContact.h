@@ -7,38 +7,17 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "xmpp.h"
-
 
 
 @interface addContact : UIViewController<UITextFieldDelegate>{
-	
-	UINavigationController* navigationController;
-    UITabBarController* tabbarcontroller;
-	
-	IBOutlet UITextField* buddyName; 
-//	IBOutlet UIButton* cancelButton;
-IBOutlet UIScrollView* scroll; 
-
-    UIBarButtonItem *bbiOpenPopOver;
-    UIPopoverController *popOverController;
+		
+	IBOutlet UITextField* _buddyName;
+    IBOutlet UILabel* _caption;
+    IBOutlet UIBarButtonItem* _closeButton;
 }
 
 
-
-
--(void) init:(UINavigationController*) nav:(UITabBarController*) tab;
--(void) show:(protocol*)account; 
-
-
--(void) showiPad:(protocol*)account; 
-
 -(IBAction) addPress;
--(IBAction) closePress;
-
--(IBAction)togglePopOverController;
-
-@property (nonatomic) UIPopoverController *popOverController;
-@property (nonatomic) UIBarButtonItem *bbiOpenPopOver;
+-(void) closeView;
 
 @end

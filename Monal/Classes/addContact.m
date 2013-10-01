@@ -7,55 +7,25 @@
 //
 
 #import "addContact.h"
-
+#import "MLConstants.h"
 
 @implementation addContact
 
-@synthesize bbiOpenPopOver; 
-@synthesize popOverController; 
 
-
-
--(void) init:(UINavigationController*) nav:(UITabBarController*) tab
+-(void) closeView
 {
-	navigationController=nav;
-    tabbarcontroller=tab;
-	[self initWithNibName:@"BuddyAdd" bundle:nil];
-	 
-	self.title=@"Add Contact "; 
-	
-}
-
--(IBAction) closePress
-{
-    if(([[tools machine] isEqualToString:@"iPad"])
-       &&(navigationController==nil))
-    {
-        if ([popOverController isPopoverVisible]) {
-            
-            [popOverController dismissPopoverAnimated:YES];
-          
-            
-        } 
-    }
-    else
-    {
-        if(tabbarcontroller==nil)
-            [navigationController popViewControllerAnimated:true];
-        else
-            [tabbarcontroller dismissModalViewControllerAnimated:YES];
-    }
+    [self dismissModalViewControllerAnimated:YES];
 }
 
 -(IBAction) addPress
 {
    
-    
-	if([jabber addBuddy:[buddyName text]])
-	{
-		
-	}
-	else
+//    
+//	if([jabber addBuddy:[buddyName text]])
+//	{
+//		
+//	}
+//	else
 	{
 		UIAlertView *addError = [[UIAlertView alloc] 
 								 initWithTitle:@"Contact Addition Error" 
@@ -65,23 +35,6 @@
 		[addError show];
 	}
 
-	 if(([[tools machine] isEqualToString:@"iPad"])
-    &&(navigationController==nil))
-    {
-        if ([popOverController isPopoverVisible]) {
-            
-            [popOverController dismissPopoverAnimated:YES];
-       
-            
-        } 
-    }
-    else
-    {
-	if(tabbarcontroller==nil)
-        [navigationController popViewControllerAnimated:true];
-	else
-        [tabbarcontroller dismissModalViewControllerAnimated:YES];
-    }
 	
 }
 
@@ -90,10 +43,8 @@
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField
 {
-	
-	[textField resignFirstResponder];
-	
-	
+        [textField resignFirstResponder];
+
 	return true;
 }
 
@@ -105,70 +56,27 @@
 
 
 
-
--(void) show:(protocol*)account
-
-{
-
-
-	
-   
-        [navigationController presentModalViewController:self animated:YES];
-    /*{
-    [navigationController popViewControllerAnimated:false]; //  getof aythign on top 
-	[navigationController pushViewController:self animated:YES];
-	}*/
-    
-	jabber=account;
-		
-	;
-}
-
--(void) showiPad:(protocol*)account
-{
-  
-    
-    popOverController = [[UIPopoverController alloc] initWithContentViewController:self];
-  
-    popOverController.popoverContentSize = CGSizeMake(316, 203);
-    [popOverController presentPopoverFromBarButtonItem:bbiOpenPopOver permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
- 	jabber=account;
-    
-    navigationController=nil; // so we know it is a popover
-}
-
 -(void) viewDidLoad
 {
-	debug_NSLog(@"buddy add did  appear");
-    
-    //[theTable setBackgroundView:nil];
-   // [theTable setBackgroundView:[[UIView alloc] init] ];
-    self.view.backgroundColor = [[UIColor alloc] initWithPatternImage:[UIImage imageNamed:@"carbon3.jpg"]];
+    self.navigationController.navigationItem.title=@"Add Contact";
+    [_closeButton setAction:@selector(closeView)];
 
+
+     if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0"))
+     {
+         _caption.textColor=[UIColor blackColor];
+         self.view.backgroundColor =[UIColor whiteColor];
+     }
+     else{
+         self.view.backgroundColor = [[UIColor alloc] initWithPatternImage:[UIImage imageNamed:@"debut_dark"]];
+     }
     
-    if([[tools machine] isEqualToString:@"iPad"])
-    {
-        [scroll setContentSize:CGSizeMake(316, 203)];
-  
-    }
-    else
-    {
-        //if iphone
-       // if(tabbarcontroller==nil) 
-        [scroll setContentSize:CGSizeMake(320, 440)];  
-        //else
-          //  [scroll setAlpha:.5]; 
-    
-    }
-    
-    }
+
+}
 
 -(void)viewDidDisappear:(BOOL)animated
 {
 	debug_NSLog(@"buddy add did  disappear");
-	
-
-	
 	
 }
 

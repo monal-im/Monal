@@ -143,7 +143,11 @@
     
     _topName=[[UILabel alloc] initWithFrame:nameFrame];
     _topName.font=[UIFont boldSystemFontOfSize:15.0f];
+    
+    if(SYSTEM_VERSION_LESS_THAN(@"7.0"))
+    {
     _topName.textColor=[UIColor whiteColor];
+    }
     _topName.backgroundColor=[UIColor clearColor];
     
     [_topBarView addSubview:_topIcon];

@@ -1181,7 +1181,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
 -(void) send:(XMLNode*) stanza
 {
     dispatch_async(_xmppQueue, ^{
-        dispatch_sync(_netWriteQueue, ^{
+        dispatch_async(_netWriteQueue, ^{
             [_outputQueue addObject:stanza];
             [self writeFromQueue];  // try to send if there is space
         });
@@ -1255,7 +1255,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
         case NSStreamEventHasSpaceAvailable:
         {
             dispatch_async(_xmppQueue, ^{
-                dispatch_sync(_netWriteQueue, ^{
+                dispatch_async(_netWriteQueue, ^{
                     _streamHasSpace=YES;
                     
                     debug_NSLog(@"Stream has space to write");
@@ -1416,7 +1416,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
         if(data)
         {
             // debug_NSLog(@"waiting on net read queue");
-            dispatch_sync(_netReadQueue, ^{
+            dispatch_async(_netReadQueue, ^{
                 // debug_NSLog(@"got net read queue");
                 [_inputBuffer appendString:[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]];
             });

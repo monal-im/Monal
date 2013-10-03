@@ -231,31 +231,31 @@
 
 -(void) disconnectAccount:(NSString*) accountNo
 {
-    dispatch_async(_netQueue, ^{
-        dispatch_sync(_connectedListQueue, ^{
-            int index=0;
-            int pos;
-            for (NSDictionary* account in _connectedXMPP)
-            { 
-                xmpp* xmppAccount=[account objectForKey:@"xmppAccount"];
-                if([xmppAccount.accountNo isEqualToString:accountNo] )
-                {
-                    debug_NSLog(@"got acct cleaning up.. ");
-                    Reachability* hostReach=[account objectForKey:@"hostReach"];
-                    [hostReach stopNotifier];
-                    [ xmppAccount disconnect];
-                    debug_NSLog(@"done cleaning up account ");
-                    pos=index;
-                    break;
-                }
-                index++;
+    
+    dispatch_async(_connectedListQueue, ^{
+        int index=0;
+        int pos;
+        for (NSDictionary* account in _connectedXMPP)
+        {
+            xmpp* xmppAccount=[account objectForKey:@"xmppAccount"];
+            if([xmppAccount.accountNo isEqualToString:accountNo] )
+            {
+                debug_NSLog(@"got acct cleaning up.. ");
+                Reachability* hostReach=[account objectForKey:@"hostReach"];
+                [hostReach stopNotifier];
+                [ xmppAccount disconnect];
+                debug_NSLog(@"done cleaning up account ");
+                pos=index;
+                break;
             }
-            
-            if((pos>=0) && (pos<[_connectedXMPP count]))
-                [_connectedXMPP removeObjectAtIndex:pos];
-
-        });
+            index++;
+        }
+        
+        if((pos>=0) && (pos<[_connectedXMPP count]))
+            [_connectedXMPP removeObjectAtIndex:pos];
+        
     });
+    
 }
 
 
@@ -292,7 +292,7 @@
 
 -(void) reachabilityChanged
 {
-       dispatch_sync(_connectedListQueue, ^{
+       dispatch_async(_connectedListQueue, ^{
     for (NSDictionary* row in _connectedXMPP)
     {
     Reachability* hostReach=[row objectForKey:@"hostReach"];

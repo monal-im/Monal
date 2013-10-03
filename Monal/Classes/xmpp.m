@@ -424,17 +424,18 @@ dispatch_async(dispatch_get_current_queue(), ^{
 
 -(void) reconnect
 {
-   UIBackgroundTaskIdentifier reconnectBackgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
+   __block UIBackgroundTaskIdentifier reconnectBackgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
         
         debug_NSLog(@"Reconnect bgtask took too long. closing");
-        [[UIApplication sharedApplication] endBackgroundTask:_backgroundTask];
-        _backgroundTask=UIBackgroundTaskInvalid;
+        [[UIApplication sharedApplication] endBackgroundTask:reconnectBackgroundTask];
+        reconnectBackgroundTask=UIBackgroundTaskInvalid;
         
     }];
     
     if (reconnectBackgroundTask != UIBackgroundTaskInvalid) {
         [self disconnect];
         [self connect];
+        [[UIApplication sharedApplication] endBackgroundTask:reconnectBackgroundTask];
     }
     
 }

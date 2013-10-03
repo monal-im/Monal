@@ -21,7 +21,6 @@
 {
     NSArray* _accountList;
     dispatch_queue_t _netQueue ;
-    dispatch_queue_t _connectedListQueue ;
     NSMutableArray* _connectedXMPP;
     dispatch_source_t _pinger;
     

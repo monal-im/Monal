@@ -57,7 +57,6 @@
     
     _connectedXMPP=[[NSMutableArray alloc] init];
     _netQueue = dispatch_queue_create(kMonalNetQueue, DISPATCH_QUEUE_CONCURRENT);
-    _connectedListQueue = dispatch_queue_create(kMonalConnectedListQueue, DISPATCH_QUEUE_SERIAL);
    
 //    NSTimeInterval timeInterval= 600; // 600 seconds
 //    BOOL keepAlive=[[UIApplication sharedApplication] setKeepAliveTimeout:timeInterval handler:^{
@@ -128,9 +127,7 @@
 
 -(xmpp*) getConnectedAccountForID:(NSString*) accountNo
 {
-    
     __block xmpp* toReturn=nil;
-    dispatch_sync(_connectedListQueue, ^{
         for (NSDictionary* account in _connectedXMPP)
         {
             xmpp* xmppAccount=[account objectForKey:@"xmppAccount"];
@@ -140,7 +137,6 @@
                 toReturn= xmppAccount;
             }
         }
-    });
     return toReturn;
 }
 
@@ -214,9 +210,8 @@
         [hostReach startNotifier];
         
         NSDictionary* accountRow= [[NSDictionary alloc] initWithObjects:@[xmppAccount, hostReach] forKeys:@[@"xmppAccount", @"hostReach"]];
-    dispatch_sync(_connectedListQueue, ^{
         [_connectedXMPP addObject:accountRow];
-    });
+   
         
         dispatch_async(_netQueue,
                        ^{
@@ -232,7 +227,7 @@
 -(void) disconnectAccount:(NSString*) accountNo
 {
     
-    dispatch_async(_connectedListQueue, ^{
+dispatch_async(dispatch_get_main_queue(), ^{
         int index=0;
         int pos;
         for (NSDictionary* account in _connectedXMPP)
@@ -292,7 +287,6 @@
 
 -(void) reachabilityChanged
 {
-       dispatch_async(_connectedListQueue, ^{
     for (NSDictionary* row in _connectedXMPP)
     {
     Reachability* hostReach=[row objectForKey:@"hostReach"];
@@ -323,7 +317,7 @@
         
     }
     }
-       });
+ 
 }
 
 

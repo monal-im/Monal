@@ -18,7 +18,6 @@
 		2601D9C90FBF25E3004DB939 /* accounts.png in Resources */ = {isa = PBXBuildFile; fileRef = 2601D9C30FBF25E3004DB939 /* accounts.png */; };
 		2601D9CB0FBF25EF004DB939 /* sworim.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 2601D9CA0FBF25EF004DB939 /* sworim.sqlite */; };
 		2601D9D40FBF262E004DB939 /* libsqlite3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2601D9D30FBF262E004DB939 /* libsqlite3.dylib */; };
-		2601D9D90FBF265A004DB939 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2601D9D80FBF265A004DB939 /* AudioToolbox.framework */; };
 		260447F60FEED62100B3B5A7 /* BuddyDetails.xib in Resources */ = {isa = PBXBuildFile; fileRef = 260447F50FEED62100B3B5A7 /* BuddyDetails.xib */; };
 		260A2CC515E713EC00DB103B /* Facebook.png in Resources */ = {isa = PBXBuildFile; fileRef = 260A2CC315E713EC00DB103B /* Facebook.png */; };
 		260A2CC615E713EC00DB103B /* Facebook@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 260A2CC415E713EC00DB103B /* Facebook@2x.png */; };
@@ -268,7 +267,6 @@
 		2601D9C30FBF25E3004DB939 /* accounts.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = accounts.png; sourceTree = "<group>"; };
 		2601D9CA0FBF25EF004DB939 /* sworim.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = sworim.sqlite; sourceTree = "<group>"; };
 		2601D9D30FBF262E004DB939 /* libsqlite3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.dylib; path = usr/lib/libsqlite3.dylib; sourceTree = SDKROOT; };
-		2601D9D80FBF265A004DB939 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		260447F50FEED62100B3B5A7 /* BuddyDetails.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = BuddyDetails.xib; sourceTree = "<group>"; };
 		26080210110ABA4E005E194D /* Monal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Monal.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		260A2CC315E713EC00DB103B /* Facebook.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Facebook.png; sourceTree = "<group>"; };
@@ -593,7 +591,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				268E700515D0D979002E63CD /* AVFoundation.framework in Frameworks */,
-				2601D9D90FBF265A004DB939 /* AudioToolbox.framework in Frameworks */,
 				268BCF12140B29180025E4D1 /* libjrtplib-static.a in Frameworks */,
 				1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */,
 				1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */,
@@ -1222,7 +1219,6 @@
 				264FF3E4158A855D00D97B86 /* AVFoundation.framework */,
 				261AB9371409C2B8006F5155 /* QuartzCore.framework */,
 				26F7BB441115F95000712672 /* SystemConfiguration.framework */,
-				2601D9D80FBF265A004DB939 /* AudioToolbox.framework */,
 				2601D9D30FBF262E004DB939 /* libsqlite3.dylib */,
 				1DF5F4DF0D08C38300B7A737 /* UIKit.framework */,
 				1D30AB110D05D00D00671497 /* Foundation.framework */,

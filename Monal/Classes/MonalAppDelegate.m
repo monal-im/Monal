@@ -28,6 +28,9 @@
 #import "MLXMPPManager.h"
 
 @implementation MonalAppDelegate
+{
+    UITabBarItem* _activeTab;
+}
 
 -(void) createRootInterface
 {
@@ -47,6 +50,9 @@
     UINavigationController* activeChatNav=[[UINavigationController alloc] initWithRootViewController:activeChatsVC];
     activeChatNav.navigationBar.barStyle=barColor;
     activeChatNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Active Chats",@"") image:[UIImage imageNamed:@"active"] tag:0];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateUnread) name:UIApplicationWillEnterForegroundNotification object:nil];
+    _activeTab=activeChatNav.tabBarItem;
+    
     
     SettingsViewController* settingsVC = [[SettingsViewController alloc] init];
     UINavigationController* settingsNav=[[UINavigationController alloc] initWithRootViewController:settingsVC];
@@ -119,6 +125,16 @@
     _tabBarController.moreNavigationController.navigationBar.barStyle=barColor;
     
     [self.window makeKeyAndVisible];
+}
+
+
+-(void) updateUnread
+{
+//make sure unread badge matches application badge
+    if([UIApplication sharedApplication].applicationIconBadgeNumber>0)
+    _activeTab.badgeValue=[NSString stringWithFormat:@"%d",[UIApplication sharedApplication].applicationIconBadgeNumber];
+    else
+    _activeTab.badgeValue=nil;
 }
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions

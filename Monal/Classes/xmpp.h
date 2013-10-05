@@ -132,8 +132,32 @@ typedef struct
 /**
  sets up a background task to reconnect if needed
  */
--(void) reconnect; 
+-(void) reconnect;
 
+
+#pragma mark set connection attributes
+/**
+sets the status message. makes xmpp call
+ */
+-(void) setStatusMessageText:(NSString*) message;
+
+/**
+sets away xmpp call.
+ */
+-(void) setAway:(BOOL) away;
+
+/**
+ sets visibility xmpp call.
+ */
+-(void) setVisible:(BOOL) visible;
+
+/**
+ sets priority. makes xmpp call. this is differnt from setting the property value itself.
+ */
+-(void) updatePriority:(NSInteger) priority;
+
+
+#pragma  mark properties
 // connection attributes
 @property (nonatomic,strong) NSString* username;
 @property (nonatomic,strong) NSString* domain;
@@ -145,7 +169,13 @@ typedef struct
 @property (nonatomic,assign) BOOL SSL;
 @property (nonatomic,assign) BOOL oldStyleSSL;
 @property (nonatomic,assign) BOOL selfSigned;
+
+// state attributes
 @property (nonatomic,assign) NSInteger priority;
+@property (nonatomic,strong) NSString* statusMessage;
+@property (nonatomic,assign) BOOL awayState;
+@property (nonatomic,assign) BOOL visibleState;
+
 
 // DB info
 @property (nonatomic,strong) NSString* accountNo;

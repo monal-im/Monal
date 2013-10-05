@@ -674,12 +674,20 @@ dispatch_async(dispatch_get_current_queue(), ^{
                 [discoInfo.children addObject:info];
                 [self send:discoInfo];
                 
+                
+                self.priority= [[[NSUserDefaults standardUserDefaults] stringForKey:@"XMPPPriority"] integerValue];
+                self.statusMessage=[[NSUserDefaults standardUserDefaults] stringForKey:@"StatusMessage"];
+                self.awayState=[[NSUserDefaults standardUserDefaults] boolForKey:@"Away"];
+                self.visibleState=[[NSUserDefaults standardUserDefaults] boolForKey:@"Visible"];
+                
                 XMPPPresence* presence =[[XMPPPresence alloc] initWithHash:_versionHash];
-                [presence setPriority:5]; //TODO change later
+                [presence setPriority:self.priority];
+                if(self.statusMessage) [presence setStatus:self.statusMessage];
+                if(self.awayState) [presence setAway];
+                if(!self.visibleState) [presence setInvisible];
                 
                 [self send:presence];
-               
-                
+        
             }
             
             if(iqNode.discoInfo)
@@ -1154,7 +1162,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
                     _loggedIn=YES;
                     _loggedInOnce=YES;
                     
-                    
+                  
                     NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
                                          kinfoTypeKey:@"connect", kinfoStatusKey:@""};
                     dispatch_async(_xmppQueue, ^{
@@ -1169,14 +1177,6 @@ dispatch_async(dispatch_get_current_queue(), ^{
     }
 }
 
--(void) sendMessage:(NSString*) message toContact:(NSString*) contact
-{
-    XMPPMessage* messageNode =[[XMPPMessage alloc] init];
-    [messageNode.attributes setObject:contact forKey:@"to"];
-    [messageNode setBody:message];
-    
-    [self send:messageNode];
-}
 
 
 -(void) send:(XMLNode*) stanza
@@ -1189,6 +1189,76 @@ dispatch_async(dispatch_get_current_queue(), ^{
     });
 }
 
+
+#pragma mark messaging
+
+-(void) sendMessage:(NSString*) message toContact:(NSString*) contact
+{
+    XMPPMessage* messageNode =[[XMPPMessage alloc] init];
+    [messageNode.attributes setObject:contact forKey:@"to"];
+    [messageNode setBody:message];
+
+    [self send:messageNode];
+}
+
+
+#pragma mark set connection attributes
+-(void) setStatusMessageText:(NSString*) message
+{
+    if([message length]>0)
+    self.statusMessage=message;
+    else
+    message=nil;
+    
+    XMPPPresence* node =[[XMPPPresence alloc] init];
+    if(message)[node setStatus:message];
+    
+    if(self.awayState) [node setAway];
+    
+    [self send:node];
+}
+
+-(void) setAway:(BOOL) away
+{
+    self.awayState=away; 
+    XMPPPresence* node =[[XMPPPresence alloc] init];
+    if(away)
+        [node setAway];
+    else
+        [node setAvailable];
+    
+    if(self.statusMessage) [node setStatus:self.statusMessage];
+    [self send:node];
+}
+
+-(void) setVisible:(BOOL) visible
+{
+    self.visibleState=visible;
+     XMPPPresence* node =[[XMPPPresence alloc] init];
+    if(!visible)
+        [node setInvisible];
+    else
+    {
+    if(self.statusMessage) [node setStatus:self.statusMessage];
+    if(self.awayState) [node setAway];
+    }
+    
+    [self send:node];
+}
+
+-(void) updatePriority:(NSInteger) priority
+{
+    self.priority=priority;
+    
+    XMPPPresence* node =[[XMPPPresence alloc] init];
+    [node setPriority:priority];
+    [self send:node];
+
+}
+
+
+
+#pragma mark query info
 
 -(NSString*)getVersionString
 {
@@ -1208,6 +1278,9 @@ dispatch_async(dispatch_get_current_queue(), ^{
     return hashedBase64;
     
 }
+
+
+
 
 #pragma mark XMPP add and remove contact
 -(void) removeFromRoster:(NSString*) contact

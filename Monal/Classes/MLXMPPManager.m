@@ -26,6 +26,8 @@
     BOOL setDefaults =[[NSUserDefaults standardUserDefaults] boolForKey:@"SetDefaults"];
     if(!setDefaults)
     {
+      //  [[NSUserDefaults standardUserDefaults] setObject:@"" forKey:@"StatusMessage"]; // we dont want anything set
+        [[NSUserDefaults standardUserDefaults] setObject:@"5" forKey:@"XMPPPriority"];
         [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"Away"];
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"Visible"];
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"MusicStatus"];
@@ -369,6 +371,7 @@ dispatch_async(dispatch_get_main_queue(), ^{
     for (NSDictionary* row in _connectedXMPP)
     {
         xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
+        [xmppAccount setStatusMessageText:message];
     }
 }
 
@@ -377,6 +380,7 @@ dispatch_async(dispatch_get_main_queue(), ^{
     for (NSDictionary* row in _connectedXMPP)
     {
         xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
+        [xmppAccount setAway:isAway];
     }
 }
 
@@ -385,14 +389,16 @@ dispatch_async(dispatch_get_main_queue(), ^{
     for (NSDictionary* row in _connectedXMPP)
     {
         xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
+        [xmppAccount setVisible:isVisible];
     }
 }
 
--(void) setPriority:(NSInteger*) priority
+-(void) setPriority:(NSInteger) priority
 {
     for (NSDictionary* row in _connectedXMPP)
     {
         xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
+        [xmppAccount updatePriority:priority];
     }
 }
 

@@ -72,7 +72,7 @@
 -(void) setAway:(BOOL) isAway;
 -(void) setVisible:(BOOL) isVisible;
 
--(void) setPriority:(NSInteger*) priority;
+-(void) setPriority:(NSInteger) priority;
 
 @property (nonatomic, weak) ContactsViewController* contactVC;
 

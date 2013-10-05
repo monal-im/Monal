@@ -48,6 +48,11 @@
 -(void) setAway;
 
 /**
+ brings a user back from being away
+ */
+-(void) setAvailable;
+
+/**
  creates and sets the priority child
  */
 -(void) setPriority:(NSInteger)priority;
@@ -57,11 +62,23 @@
  */
 -(void) setShow:(NSString*) showVal;
 
+
+/**
+ creates and sets the status child
+ */
+-(void) setStatus:(NSString*) status;
+
 /**
  unsubscribes from presence notfiction
  */
 -(void) unsubscribeContact:(NSString*) jid;
 
+/**
+ sets type unavilable.  there is no corresponding visibility call since any presence without unavailable will be visible. 
+ */
+-(void) setInvisible;
+
+#pragma mark subscription
 /**
  subscribes from presence notfiction
  */

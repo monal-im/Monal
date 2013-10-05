@@ -48,6 +48,19 @@
     [self setShow:@"away"];
 }
 
+-(void) setAvailable
+{
+    [self setShow:@"chat"];
+}
+
+-(void) setStatus:(NSString*) status
+{
+    XMLNode* statusNode =[[XMLNode alloc] init];
+    statusNode.element=@"status";
+    statusNode.data=status;
+    [self.children addObject:statusNode];
+}
+
 -(void) setPriority:(NSInteger)priority
 {
     _priority=priority; 
@@ -56,6 +69,12 @@
     priorityNode.data=[NSString stringWithFormat:@"%d",_priority];
     [self.children addObject:priorityNode];
 }
+
+-(void) setInvisible
+{
+  [self.attributes setObject:@"unavailable" forKey:@"type"];
+}
+
 
 
 #pragma mark subscription

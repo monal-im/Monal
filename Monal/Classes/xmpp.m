@@ -359,6 +359,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
 	@try
 	{
         [_iStream close];
+         _inputBuffer=[[NSMutableString alloc] init];
 	}
 	@catch(id theException)
 	{
@@ -370,6 +371,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
        	@try
         {
             [_oStream close];
+               _outputQueue=[[NSMutableArray alloc] init];
         }
         @catch(id theException)
         {
@@ -389,8 +391,8 @@ dispatch_async(dispatch_get_current_queue(), ^{
   
     _startTLSComplete=NO;
     _streamHasSpace=NO;
-    _inputBuffer=[[NSMutableString alloc] init];
-    _outputQueue=[[NSMutableArray alloc] init];
+   
+ 
     _loggedIn=NO;
     _disconnected=YES;
     _logInStarted=NO;
@@ -669,9 +671,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
                 
                 XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
                 [discoInfo setiqTo:_domain];
-                XMLNode* info = [[XMLNode alloc] initWithElement:@"query"];
-                [info setXMLNS:@"http://jabber.org/protocol/disco#info"];
-                [discoInfo.children addObject:info];
+                [discoInfo setDiscoInfoNode];
                 [self send:discoInfo];
                 
                 
@@ -692,11 +692,18 @@ dispatch_async(dispatch_get_current_queue(), ^{
             
             if(iqNode.discoInfo)
             {
+                BOOL isUser=NO;
+                if([iqNode.from rangeOfString:@"@"].location!=NSNotFound)
+                    isUser=YES;
+                
+                if([iqNode.from isEqualToString:self.server] || isUser)
+                {
                 XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqResultType];
                 [discoInfo setiqTo:iqNode.from];
-                [discoInfo setDiscoInfo];
+                [discoInfo setDiscoInfoWithFeatures];
                 
                  [self send:discoInfo];
+                }
             }
             
             if(iqNode.vCard)
@@ -731,6 +738,41 @@ dispatch_async(dispatch_get_current_queue(), ^{
                  [pong setiqTo:_domain];
                  [self send:pong];
              }
+            
+            if(iqNode.ping)
+            {
+                XMPPIQ* pong =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqResultType];
+                [pong setiqTo:_domain];
+                [self send:pong];
+            }
+            
+            if ([iqNode.type isEqualToString:kiqResultType])
+            {
+                if(iqNode.discoItems==YES)
+                {
+                    if([iqNode.from isEqualToString:self.server])
+                    {
+                        for (NSDictionary* item in iqNode.items)
+                        {
+                            if(!_discoveredServices) _discoveredServices=[[NSMutableArray alloc] init];
+                            [_discoveredServices addObject:item];
+                            
+                            XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
+                            NSString* jid =[item objectForKey:@"jid"];
+                            if(jid)
+                            {
+                            [discoInfo setiqTo:jid];
+                            [discoInfo setDiscoInfoNode];
+                            [self send:discoInfo];
+                            }
+                        }
+                    }
+                    else
+                    {
+                        
+                    }
+                }
+            }
             
         }
         else  if([[nextStanzaPos objectForKey:@"stanzaType"]  isEqualToString:@"message"])

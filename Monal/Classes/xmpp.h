@@ -69,6 +69,7 @@ typedef struct
     NSOutputStream *_oStream;
     NSMutableString* _inputBuffer;
 	NSMutableArray* _outputQueue;
+
     
     dispatch_queue_t _xmppQueue; 
     dispatch_queue_t _netReadQueue ;
@@ -188,6 +189,7 @@ sets away xmpp call.
 
 // discovered properties
 @property (nonatomic,strong)  NSMutableArray* discoveredServerList;
+@property (nonatomic,strong)  NSMutableArray*  discoveredServices;
 
 //calculated
 @property (nonatomic,strong, readonly) NSString* versionHash;

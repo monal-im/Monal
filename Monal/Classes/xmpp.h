@@ -158,6 +158,11 @@ sets away xmpp call.
 -(void) updatePriority:(NSInteger) priority;
 
 
+/**
+ request futher service detail
+ */
+-(void) getServiceDetails;
+
 #pragma  mark properties
 // connection attributes
 @property (nonatomic,strong) NSString* username;

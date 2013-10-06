@@ -692,18 +692,13 @@ dispatch_async(dispatch_get_current_queue(), ^{
             
             if(iqNode.discoInfo)
             {
-                BOOL isUser=NO;
-                if([iqNode.from rangeOfString:@"@"].location!=NSNotFound)
-                    isUser=YES;
                 
-                if([iqNode.from isEqualToString:self.server] || isUser)
-                {
                 XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqResultType];
                 [discoInfo setiqTo:iqNode.from];
                 [discoInfo setDiscoInfoWithFeatures];
                 
                  [self send:discoInfo];
-                }
+
             }
             
             if(iqNode.vCard)
@@ -756,15 +751,6 @@ dispatch_async(dispatch_get_current_queue(), ^{
                         {
                             if(!_discoveredServices) _discoveredServices=[[NSMutableArray alloc] init];
                             [_discoveredServices addObject:item];
-                            
-                            XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
-                            NSString* jid =[item objectForKey:@"jid"];
-                            if(jid)
-                            {
-                            [discoInfo setiqTo:jid];
-                            [discoInfo setDiscoInfoNode];
-                            [self send:discoInfo];
-                            }
                         }
                     }
                     else
@@ -1322,6 +1308,20 @@ dispatch_async(dispatch_get_current_queue(), ^{
 }
 
 
+-(void) getServiceDetails
+{
+    for (NSDictionary *item in _discoveredServices)
+    {
+    XMPPIQ* discoItem =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
+    NSString* jid =[item objectForKey:@"jid"];
+    if(jid)
+    {
+        [discoItem setiqTo:jid];
+        [discoItem setDiscoItemNode];
+        [self send:discoItem];
+    }
+    }
+}
 
 
 #pragma mark XMPP add and remove contact

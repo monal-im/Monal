@@ -44,6 +44,11 @@
 -(void) setDiscoInfoNode;
 
 /**
+ sets up a disco info query node
+ */
+-(void) setDiscoItemNode;
+
+/**
 gets vcard info 
  */
 -(void) getVcardTo:(NSString*) to;

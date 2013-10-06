@@ -45,6 +45,14 @@
     [self.children addObject:queryNode];
 }
 
+-(void) setDiscoItemNode
+{
+    XMLNode* queryNode =[[XMLNode alloc] init];
+    queryNode.element=@"query";
+    [queryNode setXMLNS:@"http://jabber.org/protocol/disco#item"];
+    [self.children addObject:queryNode];
+}
+
 -(void) setDiscoInfoWithFeatures
 {
     

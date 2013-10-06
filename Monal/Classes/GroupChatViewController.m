@@ -7,6 +7,7 @@
 //
 
 #import "GroupChatViewController.h"
+#import "MLConstants.h"
 
 @interface GroupChatViewController ()
 
@@ -28,8 +29,14 @@
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     self.navigationItem.title=NSLocalizedString(@"Group Chat",@"");
-    [self.view setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"debut_dark"]]];
-  
+    if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0"))
+    {
+        
+    }
+    else
+    {
+        [self.view setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"debut_dark"]]];
+    }
         UIImage *buttonImage = [[UIImage imageNamed:@"blueButton"]
                                  resizableImageWithCapInsets:UIEdgeInsetsMake(18, 18, 18, 18)];
         UIImage *buttonImageHighlight = [[UIImage imageNamed:@"blueButtonHighlight"]

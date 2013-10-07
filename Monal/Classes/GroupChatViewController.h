@@ -14,6 +14,8 @@
     UIView* _accountPickerView;
     IBOutlet UIToolbar* _keyboardToolbar;
     UITextField* _currentTextField;
+    
+    NSDictionary* _selectedAccount;
 }
 
 @property (nonatomic, weak) IBOutlet UITextField* roomName; 

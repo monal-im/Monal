@@ -9,6 +9,8 @@
 #import "GroupChatViewController.h"
 #import "MLConstants.h"
 #import "TPKeyboardAvoidingScrollView.h"
+#import "MLXMPPManager.h"
+#import "xmpp.h"
 
 
 
@@ -74,15 +76,30 @@
     
 }
 
+-(void) viewWillAppear:(BOOL)animated
+{
+    [_accountPicker reloadAllComponents];
+}
+
 #pragma mark picker view delegate
 - (void)pickerView:(UIPickerView *)pickerView didSelectRow:(NSInteger)row inComponent:(NSInteger)component
 {
-    
+    if(row< [[MLXMPPManager sharedInstance].connectedXMPP count])
+    {
+    _selectedAccount=[[MLXMPPManager sharedInstance].connectedXMPP objectAtIndex:row];
+    }
 }
 
 - (NSString *)pickerView:(UIPickerView *)pickerView titleForRow:(NSInteger)row forComponent:(NSInteger)component
 {
-    return @"test";
+    if(row< [[MLXMPPManager sharedInstance].connectedXMPP count])
+    {
+    NSDictionary* datarow= [[MLXMPPManager sharedInstance].connectedXMPP objectAtIndex:row];
+    
+        xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
+        return [NSString stringWithFormat:@"%@@%@",account.username, account.server];
+    }
+    return @"Unnamed";
 }
 
 #pragma mark picker view datasource
@@ -93,7 +110,7 @@
 
 - (NSInteger)pickerView:(UIPickerView *)pickerView numberOfRowsInComponent:(NSInteger)component
 {
-    return 1;
+    return [[MLXMPPManager sharedInstance].connectedXMPP count];
 }
 
 

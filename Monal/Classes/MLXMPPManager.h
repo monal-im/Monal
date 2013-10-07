@@ -19,10 +19,10 @@
  */
 @interface MLXMPPManager : NSObject
 {
-    NSArray* _accountList;
+    
     dispatch_queue_t _netQueue ;
-    NSMutableArray* _connectedXMPP;
     dispatch_source_t _pinger;
+    NSArray* _accountList;
     
 }
 
@@ -75,5 +75,6 @@
 -(void) setPriority:(NSInteger) priority;
 
 @property (nonatomic, weak) ContactsViewController* contactVC;
+@property (nonatomic, strong, readonly) NSMutableArray* connectedXMPP;;
 
 @end

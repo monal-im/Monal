@@ -760,6 +760,11 @@ dispatch_async(dispatch_get_current_queue(), ^{
                 }
             }
             
+            if(iqNode.conferenceServer)
+            {
+                self.conferenceServer=iqNode.conferenceServer; 
+            }
+            
         }
         else  if([[nextStanzaPos objectForKey:@"stanzaType"]  isEqualToString:@"message"])
         {

@@ -195,6 +195,8 @@ sets away xmpp call.
 // discovered properties
 @property (nonatomic,strong)  NSMutableArray* discoveredServerList;
 @property (nonatomic,strong)  NSMutableArray*  discoveredServices;
+@property (nonatomic,strong)  NSString*  conferenceServer;
+
 
 //calculated
 @property (nonatomic,strong, readonly) NSString* versionHash;

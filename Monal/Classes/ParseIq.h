@@ -34,4 +34,8 @@
 @property (nonatomic, strong, readonly) NSString* photoType;
 @property (nonatomic, strong, readonly) NSString* photoBinValue;
 
+
+//discovered services
+@property (nonatomic, strong, readonly) NSString* conferenceServer;
+
 @end

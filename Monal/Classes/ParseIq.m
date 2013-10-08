@@ -69,6 +69,16 @@
         [_items addObject:attributeDict];
     }
     
+    
+    
+    if([elementName isEqualToString:@"identity"])
+	{
+        if([[attributeDict objectForKey:@"category"] isEqualToString:@"conference"])
+        {
+            _conferenceServer=self.from;
+        }
+    }
+    
 }
 
 

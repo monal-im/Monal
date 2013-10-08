@@ -343,6 +343,35 @@ dispatch_async(dispatch_get_main_queue(), ^{
 }
 
 
+#pragma mark getting details
+
+-(void) getServiceDetailsForAccount:(NSInteger) row
+{
+
+    NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
+    dispatch_async(_netQueue,
+                   ^{
+                       xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
+                       if(account)
+                       {
+                           [account getServiceDetails];
+                       }
+                   }
+                   );
+}
+
+-(NSString*) getNameForConnectedRow:(NSInteger) row
+{
+    NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
+    
+    xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
+    return [NSString stringWithFormat:@"%@@%@",account.username, account.server];
+}
+
+
+
+#pragma mark contact
+
 -(void) removeContact:(NSDictionary*) contact
 {
     NSString* accountNo=[NSString stringWithFormat:@"%@", [contact objectForKey:@"account_id"]];

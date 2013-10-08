@@ -10,7 +10,6 @@
 #import "MLConstants.h"
 #import "TPKeyboardAvoidingScrollView.h"
 #import "MLXMPPManager.h"
-#import "xmpp.h"
 
 
 
@@ -79,6 +78,12 @@
 -(void) viewWillAppear:(BOOL)animated
 {
     [_accountPicker reloadAllComponents];
+    
+    if([[MLXMPPManager sharedInstance].connectedXMPP count]==1)
+    {
+        _accountName.text=[[MLXMPPManager sharedInstance] getNameForConnectedRow:0];
+       [[MLXMPPManager sharedInstance] getServiceDetailsForAccount:0 ];
+    }
 }
 
 #pragma mark picker view delegate
@@ -88,16 +93,20 @@
     {
     _selectedAccount=[[MLXMPPManager sharedInstance].connectedXMPP objectAtIndex:row];
     }
+    
+    _accountName.text=[[MLXMPPManager sharedInstance] getNameForConnectedRow:row];
+    
+    [[MLXMPPManager sharedInstance] getServiceDetailsForAccount:row ];
+    
 }
 
 - (NSString *)pickerView:(UIPickerView *)pickerView titleForRow:(NSInteger)row forComponent:(NSInteger)component
 {
     if(row< [[MLXMPPManager sharedInstance].connectedXMPP count])
     {
-    NSDictionary* datarow= [[MLXMPPManager sharedInstance].connectedXMPP objectAtIndex:row];
-    
-        xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
-        return [NSString stringWithFormat:@"%@@%@",account.username, account.server];
+        NSString* name =[[MLXMPPManager sharedInstance] getNameForConnectedRow:row];
+        if(name)
+        return name;
     }
     return @"Unnamed";
 }

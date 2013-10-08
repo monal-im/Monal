@@ -690,7 +690,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
         
             }
             
-            if(iqNode.discoInfo)
+            if((iqNode.discoInfo)  && [iqNode.from isEqualToString:self.server])
             {
                 
                 XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqResultType];
@@ -1310,6 +1310,9 @@ dispatch_async(dispatch_get_current_queue(), ^{
 
 -(void) getServiceDetails
 {
+    if(_hasRequestedServerInfo) return;  // no need to call again on disconnect
+     _hasRequestedServerInfo=YES;
+    
     for (NSDictionary *item in _discoveredServices)
     {
     XMPPIQ* discoItem =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
@@ -1317,10 +1320,12 @@ dispatch_async(dispatch_get_current_queue(), ^{
     if(jid)
     {
         [discoItem setiqTo:jid];
-        [discoItem setDiscoItemNode];
+        [discoItem setDiscoInfoNode];
         [self send:discoItem];
     }
     }
+    
+   
 }
 
 

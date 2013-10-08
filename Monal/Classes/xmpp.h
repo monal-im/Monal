@@ -80,14 +80,15 @@ typedef struct
     
     BOOL _startTLSComplete;
     BOOL _streamHasSpace;
-    
 
     dispatch_source_t _loginCancelOperation;
     
     UIBackgroundTaskIdentifier _backgroundTask ;
     
+    
+    //does not reset at disconnect
     BOOL _loggedInOnce;
-
+    BOOL _hasRequestedServerInfo;
 
 }
 
@@ -156,7 +157,6 @@ sets away xmpp call.
  sets priority. makes xmpp call. this is differnt from setting the property value itself.
  */
 -(void) updatePriority:(NSInteger) priority;
-
 
 /**
  request futher service detail

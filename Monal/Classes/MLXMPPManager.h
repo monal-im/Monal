@@ -61,6 +61,19 @@
 -(void) addContact:(NSDictionary*) contact;
 
 /**
+ Gets service details for account
+ */
+-(void) getServiceDetailsForAccount:(NSInteger) row;
+
+/**
+Returns the name of the conencted account 
+ */
+-(NSString*) getNameForConnectedRow:(NSInteger) row;
+
+
+
+
+/**
  Checks if there are any enabled acconts and connects them if necessary.
  */
 -(void)sendMessage:(NSString*) message toContact:(NSString*)contact fromAccount:(NSString*) accountNo withCompletionHandler:(void (^)(BOOL success)) completion;

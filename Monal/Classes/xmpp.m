@@ -759,11 +759,21 @@ dispatch_async(dispatch_get_current_queue(), ^{
                     }
                 }
             }
+           
             
+//*** MUC related
             if(iqNode.conferenceServer)
             {
-                self.conferenceServer=iqNode.conferenceServer; 
+                _conferenceServer=iqNode.conferenceServer;
             }
+            
+            if([iqNode.from isEqualToString:_conferenceServer] && iqNode.discoItems)
+            {
+                _roomList=iqNode.items;
+                [[NSNotificationCenter defaultCenter]
+                 postNotificationName: kMLHasRoomsNotice object: self];
+            }
+
             
         }
         else  if([[nextStanzaPos objectForKey:@"stanzaType"]  isEqualToString:@"message"])
@@ -1316,21 +1326,57 @@ dispatch_async(dispatch_get_current_queue(), ^{
 -(void) getServiceDetails
 {
     if(_hasRequestedServerInfo) return;  // no need to call again on disconnect
-     _hasRequestedServerInfo=YES;
-    
+
     for (NSDictionary *item in _discoveredServices)
     {
-    XMPPIQ* discoItem =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
+    XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
     NSString* jid =[item objectForKey:@"jid"];
     if(jid)
     {
-        [discoItem setiqTo:jid];
-        [discoItem setDiscoInfoNode];
-        [self send:discoItem];
+        [discoInfo setiqTo:jid];
+        [discoInfo setDiscoInfoNode];
+        [self send:discoInfo];
+        
+       _hasRequestedServerInfo=YES;
+    } else
+    {
+        debug_NSLog(@"no jid on info");
     }
     }
     
    
+}
+
+#pragma mark  MUC
+
+-(void) getConferenceRooms
+{
+    if(_conferenceServer)
+    {
+    XMPPIQ* discoItem =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
+        [discoItem setiqTo:_conferenceServer];
+        [discoItem setDiscoItemNode];
+        [self send:discoItem];
+    }
+    else
+    {
+        debug_NSLog(@"no conference server discovered");
+    }
+}
+
+
+-(void) joinRoom:(NSString*) room withPassword:(NSString *)password
+{
+    XMPPPresence* presence =[[XMPPPresence alloc] init];
+    [presence joinRoom:room withPassword:password onServer:_conferenceServer withName:_username]; //allow nick name in the future
+    [self send:presence];
+}
+
+-(void) leaveRoom:(NSString*) room
+{
+    XMPPPresence* presence =[[XMPPPresence alloc] init];
+    [presence leaveRoom:room onServer:_conferenceServer withName:_username];
+    [self send:presence];
 }
 
 

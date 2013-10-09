@@ -393,6 +393,45 @@ dispatch_async(dispatch_get_main_queue(), ^{
     }
 }
 
+#pragma mark MUC commands
+//makes xmpp call
+-(void) getRoomsForAccountRow:(NSInteger) row
+{
+    NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
+    xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
+    [account getConferenceRooms];
+    
+}
+
+
+//exposes list
+-(NSArray*) getRoomsListForAccountRow:(NSInteger) row
+{
+    NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
+    xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
+    return account.roomList;
+    
+}
+
+
+
+-(void)  joinRoom:(NSString*) roomName  withPassword:(NSString*) password ForAccountRow:(NSInteger) row
+{
+    NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
+    xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
+    [account joinRoom:roomName withPassword:password];
+}
+
+
+-(void)  leaveRoom:(NSString*) roomName ForAccountRow:(NSInteger) row
+{
+    NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
+    xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
+    [account leaveRoom:roomName];
+}
+
+
+
 #pragma mark XMPP settings
 
 -(void) setStatusMessage:(NSString*) message

@@ -11,6 +11,7 @@
                 <outlet property="accountName" destination="46" id="x0V-6V-nYa"/>
                 <outlet property="joinButton" destination="36" id="62"/>
                 <outlet property="password" destination="49" id="61"/>
+                <outlet property="roomButton" destination="I2l-l6-odc" id="AO8-N1-xOr"/>
                 <outlet property="roomName" destination="35" id="59"/>
                 <outlet property="view" destination="29" id="58"/>
             </connections>
@@ -37,7 +38,7 @@
                     </connections>
                 </textField>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="36">
-                    <rect key="frame" x="14" y="304" width="288" height="45"/>
+                    <rect key="frame" x="14" y="246" width="288" height="45"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                     <fontDescription key="fontDescription" name="Helvetica-Bold" family="Helvetica" pointSize="15"/>
                     <state key="normal" title="Join">
@@ -47,6 +48,9 @@
                     <state key="highlighted">
                         <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                     </state>
+                    <connections>
+                        <action selector="joinRoom:" destination="-1" eventType="touchUpInside" id="GVV-xe-vXd"/>
+                    </connections>
                 </button>
                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="Account:" lineBreakMode="tailTruncation" minimumFontSize="10" id="45">
                     <rect key="frame" x="14" y="20" width="135" height="21"/>
@@ -80,6 +84,21 @@
                         <outlet property="delegate" destination="-1" id="qza-zI-mvf"/>
                     </connections>
                 </textField>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="I2l-l6-odc">
+                    <rect key="frame" x="16" y="299" width="288" height="45"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                    <fontDescription key="fontDescription" name="Helvetica-Bold" family="Helvetica" pointSize="15"/>
+                    <state key="normal" title="Get List of Rooms">
+                        <color key="titleColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                        <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                    </state>
+                    <state key="highlighted">
+                        <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </state>
+                    <connections>
+                        <action selector="getRooms:" destination="-1" eventType="touchUpInside" id="51i-eH-mq9"/>
+                    </connections>
+                </button>
             </subviews>
             <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
             <simulatedStatusBarMetrics key="simulatedStatusBarMetrics"/>

@@ -49,7 +49,7 @@
 {
     XMLNode* queryNode =[[XMLNode alloc] init];
     queryNode.element=@"query";
-    [queryNode setXMLNS:@"http://jabber.org/protocol/disco#item"];
+    [queryNode setXMLNS:@"http://jabber.org/protocol/disco#items"];
     [self.children addObject:queryNode];
 }
 
@@ -86,6 +86,7 @@
 
 -(void) setiqTo:(NSString*) to
 {
+    if(to)
     [self.attributes setObject:to forKey:@"to"];
 }
 

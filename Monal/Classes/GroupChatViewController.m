@@ -10,11 +10,12 @@
 #import "MLConstants.h"
 #import "TPKeyboardAvoidingScrollView.h"
 #import "MLXMPPManager.h"
+#import "RoomListViewController.h"
 
 
 
 @interface GroupChatViewController ()
-
+    -(void)showRoomList;
 @end
 
 @implementation GroupChatViewController
@@ -66,11 +67,16 @@
         [_joinButton setBackgroundImage:buttonImage forState:UIControlStateNormal];
         [_joinButton setBackgroundImage:buttonImageHighlight forState:UIControlStateSelected];
     
+    [_roomButton setBackgroundImage:buttonImage forState:UIControlStateNormal];
+    [_roomButton setBackgroundImage:buttonImageHighlight forState:UIControlStateSelected];
+    
+    
     
     self.roomName.inputAccessoryView=_keyboardToolbar;
     self.password.inputAccessoryView=_keyboardToolbar;
     self.accountName.inputAccessoryView=_keyboardToolbar;
     
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showRoomList) name:kMLHasRoomsNotice object:nil];
 
     
 }
@@ -84,16 +90,22 @@
         _accountName.text=[[MLXMPPManager sharedInstance] getNameForConnectedRow:0];
        [[MLXMPPManager sharedInstance] getServiceDetailsForAccount:0 ];
     }
+    
+    _hasRequestedRooms=NO; // reset when modal view goes away. Allows refresh
 }
+
+
+-(void) dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+
 
 #pragma mark picker view delegate
 - (void)pickerView:(UIPickerView *)pickerView didSelectRow:(NSInteger)row inComponent:(NSInteger)component
 {
-    if(row< [[MLXMPPManager sharedInstance].connectedXMPP count])
-    {
-    _selectedAccount=[[MLXMPPManager sharedInstance].connectedXMPP objectAtIndex:row];
-    }
-    
+    _selectedRow=row;
     _accountName.text=[[MLXMPPManager sharedInstance] getNameForConnectedRow:row];
     
     [[MLXMPPManager sharedInstance] getServiceDetailsForAccount:row ];
@@ -158,6 +170,35 @@
      return YES; 
 }
 
+#pragma mark actions
+
+
+-(void)showRoomList
+{
+    dispatch_async(dispatch_get_main_queue(),
+                   ^{
+                       if(_hasRequestedRooms)
+                       {
+                           RoomListViewController* roomlist =[[RoomListViewController alloc] initWithRoomList:   [[MLXMPPManager sharedInstance] getRoomsListForAccountRow:_selectedRow ]];
+                           
+                           [self.navigationController pushViewController:roomlist animated:YES];
+                       }
+                   });
+}
+
+- (IBAction)getRooms:(id)sender
+{
+    [[MLXMPPManager sharedInstance] getRoomsForAccountRow:_selectedRow ];
+    _hasRequestedRooms=YES;
+}
+
+- (IBAction)joinRoom:(id)sender
+{
+    NSString* password =_password.text;
+    if([password length]<1) password=nil;
+    [[MLXMPPManager sharedInstance] joinRoom:_roomName.text withPassword:password
+                               ForAccountRow:_selectedRow ];
+}
 
 
 #pragma mark toolbar actions

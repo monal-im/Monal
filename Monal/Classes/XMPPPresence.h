@@ -94,4 +94,15 @@ allow subscription. Called in response to a remote request.
  */
 -(void) unsubscribedContact:(NSString*) jid;
 
+/**
+ join specified room on server
+ */
+-(void) joinRoom:(NSString*) room withPassword:(NSString*) password onServer:(NSString*) server withName:(NSString*)name;
+
+/**
+ leave specified room
+ */
+-(void) leaveRoom:(NSString*) room onServer:(NSString*) server withName:(NSString*)name;
+
+
 @end

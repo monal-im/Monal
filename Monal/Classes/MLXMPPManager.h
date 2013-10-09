@@ -71,6 +71,28 @@ Returns the name of the conencted account
 -(NSString*) getNameForConnectedRow:(NSInteger) row;
 
 
+#pragma mark MUC commands
+/**
+ Gets a list of rooms on the confernce server
+ */
+-(void) getRoomsForAccountRow:(NSInteger) row;
+
+
+/**
+ returns the list of rooms in confrence server
+ */
+-(NSArray*) getRoomsListForAccountRow:(NSInteger) row;
+
+
+/**
+ Joins the selected Room on the conference server
+ */
+-(void)  joinRoom:(NSString*) roomName  withPassword:(NSString*) password ForAccountRow:(NSInteger) row;
+
+/**
+ leave the specific room for accont
+ */
+-(void)  leaveRoom:(NSString*) roomName ForAccountRow:(NSInteger) row;
 
 
 /**

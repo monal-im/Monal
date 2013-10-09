@@ -163,6 +163,21 @@ sets away xmpp call.
  */
 -(void) getServiceDetails;
 
+/**
+ get list of rooms on conference server
+ */
+-(void) getConferenceRooms;
+
+/**
+ join a room on the conference server
+ */
+-(void) joinRoom:(NSString*) room withPassword:(NSString *)password;
+
+/**
+ leave specific room
+ */
+-(void) leaveRoom:(NSString*) room;
+
 #pragma  mark properties
 // connection attributes
 @property (nonatomic,strong) NSString* username;
@@ -196,7 +211,7 @@ sets away xmpp call.
 @property (nonatomic,strong)  NSMutableArray* discoveredServerList;
 @property (nonatomic,strong)  NSMutableArray*  discoveredServices;
 @property (nonatomic,strong)  NSString*  conferenceServer;
-
+@property (nonatomic,strong)  NSArray*  roomList;
 
 //calculated
 @property (nonatomic,strong, readonly) NSString* versionHash;

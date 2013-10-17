@@ -16,7 +16,7 @@
 - (void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict
 {
     
-    //ignore error message
+   
 	if(([elementName isEqualToString:@"message"])  )
 	{
 		debug_NSLog(@" message error");
@@ -36,8 +36,6 @@
             _type=kMessageChatType;
         }
         
-        
-		return;
 	}
 	
 	

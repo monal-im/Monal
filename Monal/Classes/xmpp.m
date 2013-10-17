@@ -562,29 +562,9 @@ dispatch_async(dispatch_get_current_queue(), ^{
                         //since there is another block of the same stanza, short cuts dont work.check to find beginning of next element
                         if((dupePos.location<maxPos) && (dupePos.location!=NSNotFound))
                         {
+                        //reduce search to within the set of this and at max the next element of the same kind
+                            maxPos=dupePos.location;
                             
-                            
-                            int nextStanzaCounter=0;
-                            NSRange nextPos =NSMakeRange(NSNotFound, 0);
-                            while(nextStanzaCounter < [_stanzaTypes count])
-                            {
-                                
-                                nextPos=[_inputBuffer rangeOfString:[NSString stringWithFormat:@"<%@",[_stanzaTypes objectAtIndex:nextStanzaCounter]]
-                                                            options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location+1, maxPos-pos.location-1)];
-                                
-                                if((nextPos.location<maxPos) && (nextPos.location!=NSNotFound))
-                                {
-                                    
-                                    finalstart=pos.location;
-                                    finalend=nextPos.location; 
-                                    debug_NSLog(@"at  2");
-                                    break;
-                                }
-                                nextStanzaCounter++;
-                               
-                            }
-                             if(finalend>0)
-                                 break;
                         }
                         
                         //  we need to find the end of this stanza

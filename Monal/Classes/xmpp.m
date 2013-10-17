@@ -570,19 +570,21 @@ dispatch_async(dispatch_get_current_queue(), ^{
                             {
                                 
                                 nextPos=[_inputBuffer rangeOfString:[NSString stringWithFormat:@"<%@",[_stanzaTypes objectAtIndex:nextStanzaCounter]]
-                                                            options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, maxPos-pos.location)];
+                                                            options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location+1, maxPos-pos.location-1)];
                                 
                                 if((nextPos.location<maxPos) && (nextPos.location!=NSNotFound))
                                 {
                                     
                                     finalstart=pos.location;
-                                    finalend=nextPos.location-1; //-1 to go back one
+                                    finalend=nextPos.location; 
                                     debug_NSLog(@"at  2");
                                     break;
                                 }
                                 nextStanzaCounter++;
-                                
+                               
                             }
+                             if(finalend>0)
+                                 break;
                         }
                         
                         //  we need to find the end of this stanza

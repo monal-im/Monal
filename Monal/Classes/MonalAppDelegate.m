@@ -98,7 +98,8 @@
         contactsVC.currentNavController=_chatNav;
         _chatNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Contacts",@"") image:[UIImage imageNamed:@"Buddies"] tag:0];
         
-        _tabBarController.viewControllers=[NSArray arrayWithObjects:_chatNav,activeChatNav, settingsNav,  accountsNav, chatLogNav, groupChatNav, searchUsersNav, helpNav, aboutNav, nil];
+        _tabBarController.viewControllers=[NSArray arrayWithObjects:_chatNav,activeChatNav, settingsNav,  accountsNav, chatLogNav, groupChatNav, //searchUsersNav,
+                                           helpNav, aboutNav, nil];
         
         self.window.rootViewController=_tabBarController;
         
@@ -115,7 +116,9 @@
         _splitViewController=[[UISplitViewController alloc] init];
         self.window.rootViewController=_splitViewController;
         
-        _tabBarController.viewControllers=[NSArray arrayWithObjects: activeChatNav,  settingsNav, accountsNav, chatLogNav, groupChatNav, searchUsersNav,  helpNav, aboutNav, nil];
+        _tabBarController.viewControllers=[NSArray arrayWithObjects: activeChatNav,  settingsNav, accountsNav, chatLogNav, groupChatNav,
+                                        //   searchUsersNav,
+                                           helpNav, aboutNav, nil];
         
         _splitViewController.viewControllers=[NSArray arrayWithObjects:navigationControllerContacts, _tabBarController,nil];
         _splitViewController.delegate=self;

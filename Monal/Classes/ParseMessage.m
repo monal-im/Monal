@@ -17,10 +17,26 @@
 {
     
     //ignore error message
-	if(([elementName isEqualToString:@"message"])  && ([[attributeDict objectForKey:@"type"] isEqualToString:kMessageErrorType]))
+	if(([elementName isEqualToString:@"message"])  )
 	{
 		debug_NSLog(@" message error");
-		_type=kMessageErrorType;
+		
+        if ([[attributeDict objectForKey:@"type"] isEqualToString:kMessageErrorType])
+        {
+            _type=kMessageErrorType;
+        }
+        
+        if ([[attributeDict objectForKey:@"type"] isEqualToString:kMessageGroupChatType])
+        {
+            _type=kMessageGroupChatType;
+        }
+        
+        if ([[attributeDict objectForKey:@"type"] isEqualToString:kMessageChatType])
+        {
+            _type=kMessageChatType;
+        }
+        
+        
 		return;
 	}
 	

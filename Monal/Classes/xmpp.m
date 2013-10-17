@@ -555,7 +555,37 @@ dispatch_async(dispatch_get_current_queue(), ^{
                     }
                     else
                     {
-                        //we need to find the end of this stanza
+                        
+                        
+                        NSRange dupePos=[_inputBuffer rangeOfString:[NSString stringWithFormat:@"<%@",[_stanzaTypes objectAtIndex:stanzacounter]]
+                                                            options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location+1, maxPos-pos.location-1)];
+                        //since there is another block of the same stanza, short cuts dont work.check to find beginning of next element
+                        if((dupePos.location<maxPos) && (dupePos.location!=NSNotFound))
+                        {
+                            
+                            
+                            int nextStanzaCounter=0;
+                            NSRange nextPos =NSMakeRange(NSNotFound, 0);
+                            while(nextStanzaCounter < [_stanzaTypes count])
+                            {
+                                
+                                nextPos=[_inputBuffer rangeOfString:[NSString stringWithFormat:@"<%@",[_stanzaTypes objectAtIndex:nextStanzaCounter]]
+                                                            options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, maxPos-pos.location)];
+                                
+                                if((nextPos.location<maxPos) && (nextPos.location!=NSNotFound))
+                                {
+                                    
+                                    finalstart=pos.location;
+                                    finalend=nextPos.location-1; //-1 to go back one
+                                    debug_NSLog(@"at  2");
+                                    break;
+                                }
+                                nextStanzaCounter++;
+                                
+                            }
+                        }
+                        
+                        //  we need to find the end of this stanza
                         NSRange closePos=[_inputBuffer rangeOfString:[NSString stringWithFormat:@"</%@",[_stanzaTypes objectAtIndex:stanzacounter]]
                                                              options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, maxPos-pos.location)];
                         
@@ -568,7 +598,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
                             
                             finalstart=pos.location;
                             finalend=endPos.location+1; //+1 to inclde closing <
-                             debug_NSLog(@"at  2");
+                            debug_NSLog(@"at  3");
                             break;
                         }
                         else
@@ -582,7 +612,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
                                 
                                 finalstart=pos.location;
                                 finalend=endPos.location+2; //+2 to inclde closing />
-                                 debug_NSLog(@"at  3");
+                                 debug_NSLog(@"at  4");
                                 break;
                             }
                             else
@@ -592,10 +622,11 @@ dispatch_async(dispatch_get_current_queue(), ^{
                                     //stream will have no terminal.
                                     finalstart=pos.location;
                                     finalend=maxPos;
-                                     debug_NSLog(@"at  4");
+                                     debug_NSLog(@"at  5");
                                 }
                             
                         }
+                        
                         
                     }
                 }
@@ -784,7 +815,12 @@ dispatch_async(dispatch_get_current_queue(), ^{
                 //TODO: mark message as error
                     return;
             }
-            
+            else
+                if ([messageNode.type isEqualToString:kMessageGroupChatType])
+                {
+                    
+                }
+            else
             if(messageNode.hasBody)
             {
                 [[DataLayer sharedInstance] addMessageFrom:messageNode.from to:_fulluser forAccount:_accountNo withBody:messageNode.messageText actuallyfrom:messageNode.actualFrom];
@@ -1325,8 +1361,15 @@ dispatch_async(dispatch_get_current_queue(), ^{
 
 -(void) getServiceDetails
 {
-    if(_hasRequestedServerInfo) return;  // no need to call again on disconnect
+    if(_hasRequestedServerInfo)
+        return;  // no need to call again on disconnect
 
+    if(!_discoveredServices)
+    {
+        debug_NSLog(@"no discovered services");
+        return;
+    }
+    
     for (NSDictionary *item in _discoveredServices)
     {
     XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];

@@ -69,11 +69,11 @@
     chatLogNav.navigationBar.barStyle=barColor;
     chatLogNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Chat Logs",@"") image:[UIImage imageNamed:@"chatlog"] tag:0];
     
-    SearchUsersViewController* searchUsersVC = [[SearchUsersViewController alloc] init];
-    UINavigationController* searchUsersNav=[[UINavigationController alloc] initWithRootViewController:searchUsersVC];
-    searchUsersNav.navigationBar.barStyle=barColor;
-    searchUsersNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Search Users",@"") image:[UIImage imageNamed:@"Search"] tag:0];
-    
+//    SearchUsersViewController* searchUsersVC = [[SearchUsersViewController alloc] init];
+//    UINavigationController* searchUsersNav=[[UINavigationController alloc] initWithRootViewController:searchUsersVC];
+//    searchUsersNav.navigationBar.barStyle=barColor;
+//    searchUsersNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Search Users",@"") image:[UIImage imageNamed:@"Search"] tag:0];
+//    
     GroupChatViewController* groupChatVC = [[GroupChatViewController alloc] init];
     UINavigationController* groupChatNav=[[UINavigationController alloc] initWithRootViewController:groupChatVC];
     groupChatNav.navigationBar.barStyle=barColor;

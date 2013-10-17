@@ -800,9 +800,9 @@ dispatch_async(dispatch_get_current_queue(), ^{
             else
                 if ([messageNode.type isEqualToString:kMessageGroupChatType])
                 {
-                    
+                
                 }
-            else
+            
             if(messageNode.hasBody)
             {
                 [[DataLayer sharedInstance] addMessageFrom:messageNode.from to:_fulluser forAccount:_accountNo withBody:messageNode.messageText actuallyfrom:messageNode.actualFrom];

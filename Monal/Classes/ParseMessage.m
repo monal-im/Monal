@@ -51,30 +51,24 @@
 		State=@"Message";
 		NSArray*  parts=[[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/"];
 		
-//		if([parts count]>1)
-//		{
-//            debug_NSLog(@"group chat message");
-//            messageUser=[parts objectAtIndex:0];
-//			mucUser=[parts objectAtIndex:1]; //stringByReplacingOccurrencesOfString:[NSString stringWithFormat:@"_%@", domain]
-//            //					   withString:[NSString stringWithFormat:@"@%@", domain]] ;
-//            
-//            
-//			
-//		}
-//        else
-//            
-//        {
-//            debug_NSLog(@"group chat message from room ");
-//            messageUser=[attributeDict objectForKey:@"from"];
-//            mucUser=    [attributeDict objectForKey:@"from"];
-//		}
-//        
-//        
-//		;
-//		return;
+		if([parts count]>1)
+		{
+            debug_NSLog(@"group chat message");
+            _actualFrom=[parts objectAtIndex:0];
+			_from=[parts objectAtIndex:1];
+		}
+        else
+            
+        {
+            debug_NSLog(@"group chat message from a room ");
+            _from=[attributeDict objectForKey:@"from"];
+            _actualFrom= [attributeDict objectForKey:@"from"];
+		}
+
+		return;
 	}
 	else
-        if([elementName isEqualToString:@"message"]) //&& ([[attributeDict objectForKey:@"type"] isEqualToString:@"chat"]))
+        if([elementName isEqualToString:@"message"])
         {
             _from=[[(NSString*)[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
             debug_NSLog(@"message from %@", _from);

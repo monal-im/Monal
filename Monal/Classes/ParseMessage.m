@@ -55,15 +55,14 @@
 		if([parts count]>1)
 		{
             debug_NSLog(@"group chat message");
-            _actualFrom=[parts objectAtIndex:0];
-			_from=[parts objectAtIndex:1];
+            _actualFrom=[parts objectAtIndex:1]; // the user name
+			_from=[parts objectAtIndex:0]; // should be group name
 		}
         else
             
         {
             debug_NSLog(@"group chat message from a room ");
             _from=[attributeDict objectForKey:@"from"];
-            _actualFrom= [attributeDict objectForKey:@"from"];
 		}
 
 		return;

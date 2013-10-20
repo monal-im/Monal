@@ -324,7 +324,8 @@ dispatch_async(dispatch_get_main_queue(), ^{
 
 
 #pragma mark XMPP commands
--(void)sendMessage:(NSString*) message toContact:(NSString*)contact fromAccount:(NSString*) accountNo withCompletionHandler:(void (^)(BOOL success)) completion
+-(void)sendMessage:(NSString*) message toContact:(NSString*)contact fromAccount:(NSString*) accountNo isMUC:(BOOL) isMUC
+withCompletionHandler:(void (^)(BOOL success)) completion
 {
     dispatch_async(_netQueue,
                    ^{
@@ -333,7 +334,7 @@ dispatch_async(dispatch_get_main_queue(), ^{
                        if(account)
                        {
                            success=YES;
-                           [account sendMessage:message toContact:contact];
+                           [account sendMessage:message toContact:contact isMUC:isMUC];
                        }
                        
                        

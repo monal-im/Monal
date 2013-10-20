@@ -797,11 +797,8 @@ dispatch_async(dispatch_get_current_queue(), ^{
                 //TODO: mark message as error
                     return;
             }
-            else
-                if ([messageNode.type isEqualToString:kMessageGroupChatType])
-                {
-                
-                }
+           
+               
             if(messageNode.mucInvite)
             {
                 dispatch_async(dispatch_get_main_queue(), ^{
@@ -823,6 +820,13 @@ dispatch_async(dispatch_get_current_queue(), ^{
             
             if(messageNode.hasBody)
             {
+                if ([messageNode.type isEqualToString:kMessageGroupChatType]
+                    && [messageNode.actualFrom isEqualToString:_username])
+                {
+                    //this is just a muc echo
+                }
+                else
+                {
                 [[DataLayer sharedInstance] addMessageFrom:messageNode.from to:_fulluser
                                                 forAccount:_accountNo withBody:messageNode.messageText
                                               actuallyfrom:messageNode.actualFrom];
@@ -837,6 +841,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
                                             };
                 
                 [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:userDic];
+                }
             }
             
             if(messageNode.avatarData)
@@ -1274,12 +1279,17 @@ dispatch_async(dispatch_get_current_queue(), ^{
 
 #pragma mark messaging
 
--(void) sendMessage:(NSString*) message toContact:(NSString*) contact
+-(void) sendMessage:(NSString*) message toContact:(NSString*) contact isMUC:(BOOL) isMUC
 {
     XMPPMessage* messageNode =[[XMPPMessage alloc] init];
     [messageNode.attributes setObject:contact forKey:@"to"];
     [messageNode setBody:message];
 
+    if(isMUC)
+    {
+        [messageNode.attributes setObject:kMessageGroupChatType forKey:@"type"];
+    }
+    
     [self send:messageNode];
 }
 

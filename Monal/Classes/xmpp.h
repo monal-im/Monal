@@ -99,7 +99,7 @@ typedef struct
 /**
  send a message to a contact
  */
--(void) sendMessage:(NSString*) message toContact:(NSString*) contact;
+-(void) sendMessage:(NSString*) message toContact:(NSString*) contact isMUC:(BOOL) isMUC;
 
 /**
  crafts a whitepace ping and sends it

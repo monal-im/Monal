@@ -1782,7 +1782,7 @@ static DataLayer *sharedInstance=nil;
 }
 
 
-#pragma mark unread messages
+#pragma mark chat properties
 
 
 
@@ -1803,6 +1803,23 @@ static DataLayer *sharedInstance=nil;
 	}
 }
 
+
+
+-(BOOL) isMUC:(NSString*) buddy forAccount:(NSString*) accountNo
+{
+	// count # messages from a specific user in messages table
+	NSString* query=[NSString stringWithFormat:@"select count(message_history_id) from  message_history where message_from!=actual_from and account_id=%@ and message_from='%@'", accountNo, buddy];
+	
+	NSNumber* count=(NSNumber*)[self executeScalar:query];
+	if(count!=nil)
+	{
+		return YES;
+	}
+	else
+	{
+		return NO;
+	}
+}
 
 
 

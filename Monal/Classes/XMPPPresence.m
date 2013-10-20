@@ -79,7 +79,7 @@
 
 -(void) joinRoom:(NSString*) room withPassword:(NSString*) password onServer:(NSString*) server withName:(NSString*)name
 {
-    [self.attributes setObject:[NSString stringWithFormat:@"%@@%@/%@", name,server,room] forKey:@"to"];
+    [self.attributes setObject:[NSString stringWithFormat:@"%@@%@/%@", room,server,name] forKey:@"to"];
     
     XMLNode* xNode =[[XMLNode alloc] init];
     xNode.element=@"x";

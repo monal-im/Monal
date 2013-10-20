@@ -802,6 +802,24 @@ dispatch_async(dispatch_get_current_queue(), ^{
                 {
                 
                 }
+            if(messageNode.mucInvite)
+            {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"You have been invited to a conversation %@?", nil), messageNode.from ];
+                    RIButtonItem* cancelButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Cancel", nil) action:^{
+                        
+                    }];
+                    
+                    RIButtonItem* yesButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Join", nil) action:^{
+
+                        [self joinRoom:messageNode.from withPassword:nil];
+                    }];
+                    
+                    UIAlertView* alert =[[UIAlertView alloc] initWithTitle:@"Chat Invite" message:messageString cancelButtonItem:cancelButton otherButtonItems:yesButton, nil];
+                    [alert show];
+                });
+                
+            }
             
             if(messageNode.hasBody)
             {
@@ -1393,8 +1411,18 @@ dispatch_async(dispatch_get_current_queue(), ^{
 -(void) joinRoom:(NSString*) room withPassword:(NSString *)password
 {
     XMPPPresence* presence =[[XMPPPresence alloc] init];
-    [presence joinRoom:room withPassword:password onServer:_conferenceServer withName:_username]; //allow nick name in the future
-    [self send:presence];
+    NSArray* parts =[room componentsSeparatedByString:@"@"];
+    if([parts count]>1)
+    {
+        [presence joinRoom:[parts objectAtIndex:0] withPassword:password onServer:[parts objectAtIndex:1] withName:_username];
+        //allow nick name in the future
+        
+    }
+    else{
+        [presence joinRoom:room withPassword:password onServer:_conferenceServer withName:_username]; //allow nick name in the future
+       
+    }
+     [self send:presence];
 }
 
 -(void) leaveRoom:(NSString*) room

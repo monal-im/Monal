@@ -36,6 +36,7 @@
             _type=kMessageChatType;
         }
         
+        State=@"Message";
 	}
 	
 	
@@ -48,7 +49,7 @@
     
     if(([elementName isEqualToString:@"message"])  && ([[attributeDict objectForKey:@"type"] isEqualToString:kMessageGroupChatType]))
 	{
-		State=@"Message";
+	
 		NSArray*  parts=[[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/"];
 		
 		if([parts count]>1)
@@ -84,30 +85,11 @@
 	   )
 	{
 		State=@"MucUser";
-		
-        // [self joinMuc:messageUser:@""]; // since we dont have a pw, leave it blank
-        
-//        NSString* askmsg=[NSString stringWithFormat:@"%@: You have been invited to this group chat. Join? ", _from];
-//        //ask for authorization
-//        
-//        dispatch_async(dispatch_get_main_queue(), ^{
-//            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Invite"
-//                                                            message:askmsg
-//                                                           delegate:self cancelButtonTitle:@"Yes"
-//                                                  otherButtonTitles:@"No", nil];
-//            alert.tag=2;
-//            
-//            [alert show];
-//        });
+		_mucInvite=YES;
+
 		return;
 	}
-	
-	if(([State isEqualToString:@"MucUser"]) && (([elementName isEqualToString: @"user:invite"]) || ([elementName isEqualToString: @"invite"])))
-	{
-        //	messageUser=[attributeDict objectForKey:@"from"] ;
-    
-		return; 
-	}
+
 	
 	if((([State isEqualToString:@"MucUser"]) && (([elementName isEqualToString: @"user:reason"]))) || ([elementName isEqualToString: @"reason"]))
 	{
@@ -117,9 +99,7 @@
 		return;
 	}
 	
-    
-    
-  
+
 	if(([elementName isEqualToString:@"data"])  && ([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:avatar:data"]))
 	{
         State=@"AvatarData";

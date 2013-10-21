@@ -32,6 +32,7 @@
  username part of from
  */
 @property (nonatomic, strong, readonly) NSString* user;
+
 /**
  resource part of from
  */

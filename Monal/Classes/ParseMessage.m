@@ -16,12 +16,27 @@
 - (void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict
 {
     
-    //ignore error message
-	if(([elementName isEqualToString:@"message"])  && ([[attributeDict objectForKey:@"type"] isEqualToString:kMessageErrorType]))
+   
+	if(([elementName isEqualToString:@"message"])  )
 	{
 		debug_NSLog(@" message error");
-		_type=kMessageErrorType;
-		return;
+		
+        if ([[attributeDict objectForKey:@"type"] isEqualToString:kMessageErrorType])
+        {
+            _type=kMessageErrorType;
+        }
+        
+        if ([[attributeDict objectForKey:@"type"] isEqualToString:kMessageGroupChatType])
+        {
+            _type=kMessageGroupChatType;
+        }
+        
+        if ([[attributeDict objectForKey:@"type"] isEqualToString:kMessageChatType])
+        {
+            _type=kMessageChatType;
+        }
+        
+        State=@"Message";
 	}
 	
 	
@@ -34,33 +49,26 @@
     
     if(([elementName isEqualToString:@"message"])  && ([[attributeDict objectForKey:@"type"] isEqualToString:kMessageGroupChatType]))
 	{
-		State=@"Message";
+	
 		NSArray*  parts=[[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/"];
 		
-//		if([parts count]>1)
-//		{
-//            debug_NSLog(@"group chat message");
-//            messageUser=[parts objectAtIndex:0];
-//			mucUser=[parts objectAtIndex:1]; //stringByReplacingOccurrencesOfString:[NSString stringWithFormat:@"_%@", domain]
-//            //					   withString:[NSString stringWithFormat:@"@%@", domain]] ;
-//            
-//            
-//			
-//		}
-//        else
-//            
-//        {
-//            debug_NSLog(@"group chat message from room ");
-//            messageUser=[attributeDict objectForKey:@"from"];
-//            mucUser=    [attributeDict objectForKey:@"from"];
-//		}
-//        
-//        
-//		;
-//		return;
+		if([parts count]>1)
+		{
+            debug_NSLog(@"group chat message");
+            _actualFrom=[parts objectAtIndex:1]; // the user name
+			_from=[parts objectAtIndex:0]; // should be group name
+		}
+        else
+            
+        {
+            debug_NSLog(@"group chat message from a room ");
+            _from=[attributeDict objectForKey:@"from"];
+		}
+
+		return;
 	}
 	else
-        if([elementName isEqualToString:@"message"]) //&& ([[attributeDict objectForKey:@"type"] isEqualToString:@"chat"]))
+        if([elementName isEqualToString:@"message"])
         {
             _from=[[(NSString*)[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
             debug_NSLog(@"message from %@", _from);
@@ -76,30 +84,11 @@
 	   )
 	{
 		State=@"MucUser";
-		
-        // [self joinMuc:messageUser:@""]; // since we dont have a pw, leave it blank
-        
-//        NSString* askmsg=[NSString stringWithFormat:@"%@: You have been invited to this group chat. Join? ", _from];
-//        //ask for authorization
-//        
-//        dispatch_async(dispatch_get_main_queue(), ^{
-//            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Invite"
-//                                                            message:askmsg
-//                                                           delegate:self cancelButtonTitle:@"Yes"
-//                                                  otherButtonTitles:@"No", nil];
-//            alert.tag=2;
-//            
-//            [alert show];
-//        });
+		_mucInvite=YES;
+
 		return;
 	}
-	
-	if(([State isEqualToString:@"MucUser"]) && (([elementName isEqualToString: @"user:invite"]) || ([elementName isEqualToString: @"invite"])))
-	{
-        //	messageUser=[attributeDict objectForKey:@"from"] ;
-    
-		return; 
-	}
+
 	
 	if((([State isEqualToString:@"MucUser"]) && (([elementName isEqualToString: @"user:reason"]))) || ([elementName isEqualToString: @"reason"]))
 	{
@@ -109,9 +98,7 @@
 		return;
 	}
 	
-    
-    
-  
+
 	if(([elementName isEqualToString:@"data"])  && ([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:avatar:data"]))
 	{
         State=@"AvatarData";

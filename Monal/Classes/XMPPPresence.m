@@ -48,6 +48,19 @@
     [self setShow:@"away"];
 }
 
+-(void) setAvailable
+{
+    [self setShow:@"chat"];
+}
+
+-(void) setStatus:(NSString*) status
+{
+    XMLNode* statusNode =[[XMLNode alloc] init];
+    statusNode.element=@"status";
+    statusNode.data=status;
+    [self.children addObject:statusNode];
+}
+
 -(void) setPriority:(NSInteger)priority
 {
     _priority=priority; 
@@ -56,6 +69,42 @@
     priorityNode.data=[NSString stringWithFormat:@"%d",_priority];
     [self.children addObject:priorityNode];
 }
+
+-(void) setInvisible
+{
+  [self.attributes setObject:@"unavailable" forKey:@"type"];
+}
+
+#pragma mark MUC 
+
+-(void) joinRoom:(NSString*) room withPassword:(NSString*) password onServer:(NSString*) server withName:(NSString*)name
+{
+    [self.attributes setObject:[NSString stringWithFormat:@"%@@%@/%@", room,server,name] forKey:@"to"];
+    
+    XMLNode* xNode =[[XMLNode alloc] init];
+    xNode.element=@"x";
+    [xNode.attributes setObject:@"http://jabber.org/protocol/muc" forKey:@"xmlns"];
+    
+    if(password)
+    {
+    XMLNode* passwordNode =[[XMLNode alloc] init];
+    passwordNode.element=@"password";
+    passwordNode.data=password;
+    [xNode.children addObject:passwordNode];
+    }
+
+    [self.children addObject:xNode];
+    
+}
+
+
+-(void) leaveRoom:(NSString*) room onServer:(NSString*) server withName:(NSString*)name
+{
+    [self.attributes setObject:[NSString stringWithFormat:@"%@@%@/%@", name,server,room] forKey:@"to"];
+    [self.attributes setObject:@"unavailable" forKey:@"type"];
+    
+}
+
 
 
 #pragma mark subscription

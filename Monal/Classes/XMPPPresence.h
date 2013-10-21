@@ -48,6 +48,11 @@
 -(void) setAway;
 
 /**
+ brings a user back from being away
+ */
+-(void) setAvailable;
+
+/**
  creates and sets the priority child
  */
 -(void) setPriority:(NSInteger)priority;
@@ -57,11 +62,23 @@
  */
 -(void) setShow:(NSString*) showVal;
 
+
+/**
+ creates and sets the status child
+ */
+-(void) setStatus:(NSString*) status;
+
 /**
  unsubscribes from presence notfiction
  */
 -(void) unsubscribeContact:(NSString*) jid;
 
+/**
+ sets type unavilable.  there is no corresponding visibility call since any presence without unavailable will be visible. 
+ */
+-(void) setInvisible;
+
+#pragma mark subscription
 /**
  subscribes from presence notfiction
  */
@@ -76,5 +93,16 @@ allow subscription. Called in response to a remote request.
  do not allow subscription.Called in response to a remote request. 
  */
 -(void) unsubscribedContact:(NSString*) jid;
+
+/**
+ join specified room on server
+ */
+-(void) joinRoom:(NSString*) room withPassword:(NSString*) password onServer:(NSString*) server withName:(NSString*)name;
+
+/**
+ leave specified room
+ */
+-(void) leaveRoom:(NSString*) room onServer:(NSString*) server withName:(NSString*)name;
+
 
 @end

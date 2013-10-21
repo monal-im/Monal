@@ -28,6 +28,9 @@
 #import "MLXMPPManager.h"
 
 @implementation MonalAppDelegate
+{
+    UITabBarItem* _activeTab;
+}
 
 -(void) createRootInterface
 {
@@ -47,6 +50,9 @@
     UINavigationController* activeChatNav=[[UINavigationController alloc] initWithRootViewController:activeChatsVC];
     activeChatNav.navigationBar.barStyle=barColor;
     activeChatNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Active Chats",@"") image:[UIImage imageNamed:@"active"] tag:0];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateUnread) name:UIApplicationWillEnterForegroundNotification object:nil];
+    _activeTab=activeChatNav.tabBarItem;
+    
     
     SettingsViewController* settingsVC = [[SettingsViewController alloc] init];
     UINavigationController* settingsNav=[[UINavigationController alloc] initWithRootViewController:settingsVC];
@@ -63,11 +69,11 @@
     chatLogNav.navigationBar.barStyle=barColor;
     chatLogNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Chat Logs",@"") image:[UIImage imageNamed:@"chatlog"] tag:0];
     
-    SearchUsersViewController* searchUsersVC = [[SearchUsersViewController alloc] init];
-    UINavigationController* searchUsersNav=[[UINavigationController alloc] initWithRootViewController:searchUsersVC];
-    searchUsersNav.navigationBar.barStyle=barColor;
-    searchUsersNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Search Users",@"") image:[UIImage imageNamed:@"Search"] tag:0];
-    
+//    SearchUsersViewController* searchUsersVC = [[SearchUsersViewController alloc] init];
+//    UINavigationController* searchUsersNav=[[UINavigationController alloc] initWithRootViewController:searchUsersVC];
+//    searchUsersNav.navigationBar.barStyle=barColor;
+//    searchUsersNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Search Users",@"") image:[UIImage imageNamed:@"Search"] tag:0];
+//    
     GroupChatViewController* groupChatVC = [[GroupChatViewController alloc] init];
     UINavigationController* groupChatNav=[[UINavigationController alloc] initWithRootViewController:groupChatVC];
     groupChatNav.navigationBar.barStyle=barColor;
@@ -92,7 +98,8 @@
         contactsVC.currentNavController=_chatNav;
         _chatNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Contacts",@"") image:[UIImage imageNamed:@"Buddies"] tag:0];
         
-        _tabBarController.viewControllers=[NSArray arrayWithObjects:_chatNav,activeChatNav, settingsNav,  accountsNav, chatLogNav, groupChatNav, searchUsersNav, helpNav, aboutNav, nil];
+        _tabBarController.viewControllers=[NSArray arrayWithObjects:_chatNav,activeChatNav, settingsNav,  accountsNav, chatLogNav, groupChatNav, //searchUsersNav,
+                                           helpNav, aboutNav, nil];
         
         self.window.rootViewController=_tabBarController;
         
@@ -109,7 +116,9 @@
         _splitViewController=[[UISplitViewController alloc] init];
         self.window.rootViewController=_splitViewController;
         
-        _tabBarController.viewControllers=[NSArray arrayWithObjects: activeChatNav,  settingsNav, accountsNav, chatLogNav, groupChatNav, searchUsersNav,  helpNav, aboutNav, nil];
+        _tabBarController.viewControllers=[NSArray arrayWithObjects: activeChatNav,  settingsNav, accountsNav, chatLogNav, groupChatNav,
+                                        //   searchUsersNav,
+                                           helpNav, aboutNav, nil];
         
         _splitViewController.viewControllers=[NSArray arrayWithObjects:navigationControllerContacts, _tabBarController,nil];
         _splitViewController.delegate=self;
@@ -119,6 +128,16 @@
     _tabBarController.moreNavigationController.navigationBar.barStyle=barColor;
     
     [self.window makeKeyAndVisible];
+}
+
+
+-(void) updateUnread
+{
+//make sure unread badge matches application badge
+    if([UIApplication sharedApplication].applicationIconBadgeNumber>0)
+    _activeTab.badgeValue=[NSString stringWithFormat:@"%d",[UIApplication sharedApplication].applicationIconBadgeNumber];
+    else
+    _activeTab.badgeValue=nil;
 }
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions

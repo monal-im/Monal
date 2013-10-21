@@ -359,6 +359,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
 	@try
 	{
         [_iStream close];
+         _inputBuffer=[[NSMutableString alloc] init];
 	}
 	@catch(id theException)
 	{
@@ -370,6 +371,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
        	@try
         {
             [_oStream close];
+               _outputQueue=[[NSMutableArray alloc] init];
         }
         @catch(id theException)
         {
@@ -389,8 +391,8 @@ dispatch_async(dispatch_get_current_queue(), ^{
   
     _startTLSComplete=NO;
     _streamHasSpace=NO;
-    _inputBuffer=[[NSMutableString alloc] init];
-    _outputQueue=[[NSMutableArray alloc] init];
+   
+ 
     _loggedIn=NO;
     _disconnected=YES;
     _logInStarted=NO;
@@ -553,7 +555,19 @@ dispatch_async(dispatch_get_current_queue(), ^{
                     }
                     else
                     {
-                        //we need to find the end of this stanza
+                        
+                        
+                        NSRange dupePos=[_inputBuffer rangeOfString:[NSString stringWithFormat:@"<%@",[_stanzaTypes objectAtIndex:stanzacounter]]
+                                                            options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location+1, maxPos-pos.location-1)];
+                        //since there is another block of the same stanza, short cuts dont work.check to find beginning of next element
+                        if((dupePos.location<maxPos) && (dupePos.location!=NSNotFound))
+                        {
+                        //reduce search to within the set of this and at max the next element of the same kind
+                            maxPos=dupePos.location;
+                            
+                        }
+                        
+                        //  we need to find the end of this stanza
                         NSRange closePos=[_inputBuffer rangeOfString:[NSString stringWithFormat:@"</%@",[_stanzaTypes objectAtIndex:stanzacounter]]
                                                              options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, maxPos-pos.location)];
                         
@@ -566,7 +580,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
                             
                             finalstart=pos.location;
                             finalend=endPos.location+1; //+1 to inclde closing <
-                             debug_NSLog(@"at  2");
+                            debug_NSLog(@"at  3");
                             break;
                         }
                         else
@@ -580,7 +594,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
                                 
                                 finalstart=pos.location;
                                 finalend=endPos.location+2; //+2 to inclde closing />
-                                 debug_NSLog(@"at  3");
+                                 debug_NSLog(@"at  4");
                                 break;
                             }
                             else
@@ -590,10 +604,11 @@ dispatch_async(dispatch_get_current_queue(), ^{
                                     //stream will have no terminal.
                                     finalstart=pos.location;
                                     finalend=maxPos;
-                                     debug_NSLog(@"at  4");
+                                     debug_NSLog(@"at  5");
                                 }
                             
                         }
+                        
                         
                     }
                 }
@@ -669,26 +684,34 @@ dispatch_async(dispatch_get_current_queue(), ^{
                 
                 XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
                 [discoInfo setiqTo:_domain];
-                XMLNode* info = [[XMLNode alloc] initWithElement:@"query"];
-                [info setXMLNS:@"http://jabber.org/protocol/disco#info"];
-                [discoInfo.children addObject:info];
+                [discoInfo setDiscoInfoNode];
                 [self send:discoInfo];
                 
+                
+                self.priority= [[[NSUserDefaults standardUserDefaults] stringForKey:@"XMPPPriority"] integerValue];
+                self.statusMessage=[[NSUserDefaults standardUserDefaults] stringForKey:@"StatusMessage"];
+                self.awayState=[[NSUserDefaults standardUserDefaults] boolForKey:@"Away"];
+                self.visibleState=[[NSUserDefaults standardUserDefaults] boolForKey:@"Visible"];
+                
                 XMPPPresence* presence =[[XMPPPresence alloc] initWithHash:_versionHash];
-                [presence setPriority:5]; //TODO change later
+                [presence setPriority:self.priority];
+                if(self.statusMessage) [presence setStatus:self.statusMessage];
+                if(self.awayState) [presence setAway];
+                if(!self.visibleState) [presence setInvisible];
                 
                 [self send:presence];
-               
-                
+        
             }
             
-            if(iqNode.discoInfo)
+            if((iqNode.discoInfo)  && [iqNode.from isEqualToString:self.server])
             {
+                
                 XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqResultType];
                 [discoInfo setiqTo:iqNode.from];
-                [discoInfo setDiscoInfo];
+                [discoInfo setDiscoInfoWithFeatures];
                 
                  [self send:discoInfo];
+
             }
             
             if(iqNode.vCard)
@@ -724,6 +747,47 @@ dispatch_async(dispatch_get_current_queue(), ^{
                  [self send:pong];
              }
             
+            if(iqNode.ping)
+            {
+                XMPPIQ* pong =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqResultType];
+                [pong setiqTo:_domain];
+                [self send:pong];
+            }
+            
+            if ([iqNode.type isEqualToString:kiqResultType])
+            {
+                if(iqNode.discoItems==YES)
+                {
+                    if([iqNode.from isEqualToString:self.server])
+                    {
+                        for (NSDictionary* item in iqNode.items)
+                        {
+                            if(!_discoveredServices) _discoveredServices=[[NSMutableArray alloc] init];
+                            [_discoveredServices addObject:item];
+                        }
+                    }
+                    else
+                    {
+                        
+                    }
+                }
+            }
+           
+            
+//*** MUC related
+            if(iqNode.conferenceServer)
+            {
+                _conferenceServer=iqNode.conferenceServer;
+            }
+            
+            if([iqNode.from isEqualToString:_conferenceServer] && iqNode.discoItems)
+            {
+                _roomList=iqNode.items;
+                [[NSNotificationCenter defaultCenter]
+                 postNotificationName: kMLHasRoomsNotice object: self];
+            }
+
+            
         }
         else  if([[nextStanzaPos objectForKey:@"stanzaType"]  isEqualToString:@"message"])
         {
@@ -733,10 +797,40 @@ dispatch_async(dispatch_get_current_queue(), ^{
                 //TODO: mark message as error
                     return;
             }
+           
+               
+            if(messageNode.mucInvite)
+            {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"You have been invited to a conversation %@?", nil), messageNode.from ];
+                    RIButtonItem* cancelButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Cancel", nil) action:^{
+                        
+                    }];
+                    
+                    RIButtonItem* yesButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Join", nil) action:^{
+
+                        [self joinRoom:messageNode.from withPassword:nil];
+                    }];
+                    
+                    UIAlertView* alert =[[UIAlertView alloc] initWithTitle:@"Chat Invite" message:messageString cancelButtonItem:cancelButton otherButtonItems:yesButton, nil];
+                    [alert show];
+                });
+                
+            }
             
             if(messageNode.hasBody)
             {
-                [[DataLayer sharedInstance] addMessageFrom:messageNode.from to:_fulluser forAccount:_accountNo withBody:messageNode.messageText actuallyfrom:messageNode.actualFrom];
+                if ([messageNode.type isEqualToString:kMessageGroupChatType]
+                    && [messageNode.actualFrom isEqualToString:_username])
+                {
+                    //this is just a muc echo
+                }
+                else
+                {
+                [[DataLayer sharedInstance] addMessageFrom:messageNode.from to:_fulluser
+                                                forAccount:_accountNo withBody:messageNode.messageText
+                                              actuallyfrom:messageNode.actualFrom];
+                
                 [[DataLayer sharedInstance] addActiveBuddies:messageNode.from forAccount:_accountNo];
                 
                 NSDictionary* userDic=@{@"from":messageNode.from,
@@ -747,6 +841,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
                                             };
                 
                 [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:userDic];
+                }
             }
             
             if(messageNode.avatarData)
@@ -1154,7 +1249,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
                     _loggedIn=YES;
                     _loggedInOnce=YES;
                     
-                    
+                  
                     NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
                                          kinfoTypeKey:@"connect", kinfoStatusKey:@""};
                     dispatch_async(_xmppQueue, ^{
@@ -1169,14 +1264,6 @@ dispatch_async(dispatch_get_current_queue(), ^{
     }
 }
 
--(void) sendMessage:(NSString*) message toContact:(NSString*) contact
-{
-    XMPPMessage* messageNode =[[XMPPMessage alloc] init];
-    [messageNode.attributes setObject:contact forKey:@"to"];
-    [messageNode setBody:message];
-    
-    [self send:messageNode];
-}
 
 
 -(void) send:(XMLNode*) stanza
@@ -1189,6 +1276,81 @@ dispatch_async(dispatch_get_current_queue(), ^{
     });
 }
 
+
+#pragma mark messaging
+
+-(void) sendMessage:(NSString*) message toContact:(NSString*) contact isMUC:(BOOL) isMUC
+{
+    XMPPMessage* messageNode =[[XMPPMessage alloc] init];
+    [messageNode.attributes setObject:contact forKey:@"to"];
+    [messageNode setBody:message];
+
+    if(isMUC)
+    {
+        [messageNode.attributes setObject:kMessageGroupChatType forKey:@"type"];
+    }
+    
+    [self send:messageNode];
+}
+
+
+#pragma mark set connection attributes
+-(void) setStatusMessageText:(NSString*) message
+{
+    if([message length]>0)
+    self.statusMessage=message;
+    else
+    message=nil;
+    
+    XMPPPresence* node =[[XMPPPresence alloc] init];
+    if(message)[node setStatus:message];
+    
+    if(self.awayState) [node setAway];
+    
+    [self send:node];
+}
+
+-(void) setAway:(BOOL) away
+{
+    self.awayState=away; 
+    XMPPPresence* node =[[XMPPPresence alloc] init];
+    if(away)
+        [node setAway];
+    else
+        [node setAvailable];
+    
+    if(self.statusMessage) [node setStatus:self.statusMessage];
+    [self send:node];
+}
+
+-(void) setVisible:(BOOL) visible
+{
+    self.visibleState=visible;
+     XMPPPresence* node =[[XMPPPresence alloc] init];
+    if(!visible)
+        [node setInvisible];
+    else
+    {
+    if(self.statusMessage) [node setStatus:self.statusMessage];
+    if(self.awayState) [node setAway];
+    }
+    
+    [self send:node];
+}
+
+-(void) updatePriority:(NSInteger) priority
+{
+    self.priority=priority;
+    
+    XMPPPresence* node =[[XMPPPresence alloc] init];
+    [node setPriority:priority];
+    [self send:node];
+
+}
+
+
+
+#pragma mark query info
 
 -(NSString*)getVersionString
 {
@@ -1208,6 +1370,81 @@ dispatch_async(dispatch_get_current_queue(), ^{
     return hashedBase64;
     
 }
+
+
+-(void) getServiceDetails
+{
+    if(_hasRequestedServerInfo)
+        return;  // no need to call again on disconnect
+
+    if(!_discoveredServices)
+    {
+        debug_NSLog(@"no discovered services");
+        return;
+    }
+    
+    for (NSDictionary *item in _discoveredServices)
+    {
+    XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
+    NSString* jid =[item objectForKey:@"jid"];
+    if(jid)
+    {
+        [discoInfo setiqTo:jid];
+        [discoInfo setDiscoInfoNode];
+        [self send:discoInfo];
+        
+       _hasRequestedServerInfo=YES;
+    } else
+    {
+        debug_NSLog(@"no jid on info");
+    }
+    }
+    
+   
+}
+
+#pragma mark  MUC
+
+-(void) getConferenceRooms
+{
+    if(_conferenceServer)
+    {
+    XMPPIQ* discoItem =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
+        [discoItem setiqTo:_conferenceServer];
+        [discoItem setDiscoItemNode];
+        [self send:discoItem];
+    }
+    else
+    {
+        debug_NSLog(@"no conference server discovered");
+    }
+}
+
+
+-(void) joinRoom:(NSString*) room withPassword:(NSString *)password
+{
+    XMPPPresence* presence =[[XMPPPresence alloc] init];
+    NSArray* parts =[room componentsSeparatedByString:@"@"];
+    if([parts count]>1)
+    {
+        [presence joinRoom:[parts objectAtIndex:0] withPassword:password onServer:[parts objectAtIndex:1] withName:_username];
+        //allow nick name in the future
+        
+    }
+    else{
+        [presence joinRoom:room withPassword:password onServer:_conferenceServer withName:_username]; //allow nick name in the future
+       
+    }
+     [self send:presence];
+}
+
+-(void) leaveRoom:(NSString*) room
+{
+    XMPPPresence* presence =[[XMPPPresence alloc] init];
+    [presence leaveRoom:room onServer:_conferenceServer withName:_username];
+    [self send:presence];
+}
+
 
 #pragma mark XMPP add and remove contact
 -(void) removeFromRoster:(NSString*) contact

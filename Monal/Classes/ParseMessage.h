@@ -25,4 +25,7 @@
 
 @property (nonatomic, assign, readonly) NSString* avatarData;
 
+
+@property (nonatomic, assign, readonly) BOOL mucInvite;
+
 @end

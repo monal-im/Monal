@@ -7,6 +7,7 @@
 //
 
 #import "MLSettingCell.h"
+#import "MLXMPPManager.h"
 
 @implementation MLSettingCell
 
@@ -57,6 +58,14 @@
         CGRect frame=CGRectMake(self.frame.size.width-79-padding,
                                 textLabelFrame.origin.y+9,79,
                                 textLabelFrame.size.height*2/3);
+        if([_defaultKey isEqualToString:@"StatusMessage"])
+        {
+            frame=CGRectMake( self.contentView.frame.origin.x+10,
+                             self.contentView.frame.origin.y,
+                              self.contentView.frame.size. width-10,
+                             self.contentView.frame.size.height);
+        }
+        
         _textField.frame=frame;
         _textField.returnKeyType=UIReturnKeyDone;
         _textField.delegate=self;
@@ -70,6 +79,14 @@
 -(void) switchChange
 {
     [[NSUserDefaults standardUserDefaults]  setBool:_toggleSwitch.on forKey: _defaultKey];
+    if([_defaultKey isEqualToString:@"Away"])
+    {
+        [[MLXMPPManager sharedInstance] setAway:_toggleSwitch.on];
+    }
+    else  if([_defaultKey isEqualToString:@"Visible"])
+        {
+            [[MLXMPPManager sharedInstance] setVisible:_toggleSwitch.on];
+        }
 }
 
 #pragma mark uitextfield delegate
@@ -82,6 +99,19 @@
 {
      [[NSUserDefaults standardUserDefaults]  setObject:_textField.text forKey: _defaultKey];
     [textField resignFirstResponder];
+    
+    if([_defaultKey isEqualToString:@"XMPPPriority"])
+    {
+        NSInteger number =[textField.text integerValue];
+        [[MLXMPPManager sharedInstance] setPriority:number];
+    }
+    
+    else
+        if([_defaultKey isEqualToString:@"StatusMessage"])
+        {
+            [[MLXMPPManager sharedInstance] setStatusMessage:textField.text];
+        }
+  
     return YES;
 }
 

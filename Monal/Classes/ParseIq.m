@@ -13,7 +13,7 @@
 -(id) init{
     self=[super init];
     _features=[[NSMutableArray alloc] init];
-
+   
     return self;
 }
 
@@ -47,6 +47,7 @@
     {
         _queryXMLNS=[attributeDict objectForKey:@"xmlns"];
         if([_queryXMLNS isEqualToString:@"http://jabber.org/protocol/disco#info"]) _discoInfo=YES;
+        if([_queryXMLNS isEqualToString:@"http://jabber.org/protocol/disco#items"]) _discoItems=YES;
     }
 
      if([elementName isEqualToString:@"query"])
@@ -59,6 +60,23 @@
     {
         State=@"vCard";
         _vCard=YES;
+    }
+    
+    
+    if([elementName isEqualToString:@"item"])
+    {
+        if(!_items)  _items=[[NSMutableArray alloc] init];
+        [_items addObject:attributeDict];
+    }
+    
+    
+    
+    if([elementName isEqualToString:@"identity"])
+	{
+        if([[attributeDict objectForKey:@"category"] isEqualToString:@"conference"])
+        {
+            _conferenceServer=self.from;
+        }
     }
     
 }

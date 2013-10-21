@@ -26,6 +26,8 @@
     BOOL setDefaults =[[NSUserDefaults standardUserDefaults] boolForKey:@"SetDefaults"];
     if(!setDefaults)
     {
+      //  [[NSUserDefaults standardUserDefaults] setObject:@"" forKey:@"StatusMessage"]; // we dont want anything set
+        [[NSUserDefaults standardUserDefaults] setObject:@"5" forKey:@"XMPPPriority"];
         [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"Away"];
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"Visible"];
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"MusicStatus"];
@@ -322,7 +324,8 @@ dispatch_async(dispatch_get_main_queue(), ^{
 
 
 #pragma mark XMPP commands
--(void)sendMessage:(NSString*) message toContact:(NSString*)contact fromAccount:(NSString*) accountNo withCompletionHandler:(void (^)(BOOL success)) completion
+-(void)sendMessage:(NSString*) message toContact:(NSString*)contact fromAccount:(NSString*) accountNo isMUC:(BOOL) isMUC
+withCompletionHandler:(void (^)(BOOL success)) completion
 {
     dispatch_async(_netQueue,
                    ^{
@@ -331,7 +334,7 @@ dispatch_async(dispatch_get_main_queue(), ^{
                        if(account)
                        {
                            success=YES;
-                           [account sendMessage:message toContact:contact];
+                           [account sendMessage:message toContact:contact isMUC:isMUC];
                        }
                        
                        
@@ -340,6 +343,35 @@ dispatch_async(dispatch_get_main_queue(), ^{
                    });
 }
 
+
+#pragma mark getting details
+
+-(void) getServiceDetailsForAccount:(NSInteger) row
+{
+
+    NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
+    dispatch_async(_netQueue,
+                   ^{
+                       xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
+                       if(account)
+                       {
+                           [account getServiceDetails];
+                       }
+                   }
+                   );
+}
+
+-(NSString*) getNameForConnectedRow:(NSInteger) row
+{
+    NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
+    
+    xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
+    return [NSString stringWithFormat:@"%@@%@",account.username, account.server];
+}
+
+
+
+#pragma mark contact
 
 -(void) removeContact:(NSDictionary*) contact
 {
@@ -362,6 +394,45 @@ dispatch_async(dispatch_get_main_queue(), ^{
     }
 }
 
+#pragma mark MUC commands
+//makes xmpp call
+-(void) getRoomsForAccountRow:(NSInteger) row
+{
+    NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
+    xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
+    [account getConferenceRooms];
+    
+}
+
+
+//exposes list
+-(NSArray*) getRoomsListForAccountRow:(NSInteger) row
+{
+    NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
+    xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
+    return account.roomList;
+    
+}
+
+
+
+-(void)  joinRoom:(NSString*) roomName  withPassword:(NSString*) password ForAccountRow:(NSInteger) row
+{
+    NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
+    xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
+    [account joinRoom:roomName withPassword:password];
+}
+
+
+-(void)  leaveRoom:(NSString*) roomName ForAccountRow:(NSInteger) row
+{
+    NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
+    xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
+    [account leaveRoom:roomName];
+}
+
+
+
 #pragma mark XMPP settings
 
 -(void) setStatusMessage:(NSString*) message
@@ -369,6 +440,7 @@ dispatch_async(dispatch_get_main_queue(), ^{
     for (NSDictionary* row in _connectedXMPP)
     {
         xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
+        [xmppAccount setStatusMessageText:message];
     }
 }
 
@@ -377,6 +449,7 @@ dispatch_async(dispatch_get_main_queue(), ^{
     for (NSDictionary* row in _connectedXMPP)
     {
         xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
+        [xmppAccount setAway:isAway];
     }
 }
 
@@ -385,14 +458,16 @@ dispatch_async(dispatch_get_main_queue(), ^{
     for (NSDictionary* row in _connectedXMPP)
     {
         xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
+        [xmppAccount setVisible:isVisible];
     }
 }
 
--(void) setPriority:(NSInteger*) priority
+-(void) setPriority:(NSInteger) priority
 {
     for (NSDictionary* row in _connectedXMPP)
     {
         xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
+        [xmppAccount updatePriority:priority];
     }
 }
 

@@ -154,7 +154,7 @@
             
         case 1:
         {
-            return 4;
+            return 3; // removed staus ipod for now
             break;
         }
             
@@ -187,8 +187,12 @@
     switch (indexPath.section) {
         case 0:
         {
-            //own image
-            return cell;
+            
+            cell.textField.placeholder=NSLocalizedString(@"Status Message", @"");
+            cell.textField.keyboardType=UIKeyboardTypeNumbersAndPunctuation;
+            cell.defaultKey=@"StatusMessage";
+            cell.textEnabled=YES;
+            return cell; 
             break;
         }
    

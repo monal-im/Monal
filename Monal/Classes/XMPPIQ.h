@@ -36,7 +36,17 @@
 /**
  makes a disco info response
  */
--(void) setDiscoInfo;
+-(void) setDiscoInfoWithFeatures;
+
+/**
+ sets up a disco info query node
+ */
+-(void) setDiscoInfoNode;
+
+/**
+ sets up a disco info query node
+ */
+-(void) setDiscoItemNode;
 
 /**
 gets vcard info 

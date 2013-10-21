@@ -16,6 +16,7 @@
 }
 
 @property (nonatomic, assign, readonly) BOOL discoInfo;
+@property (nonatomic, assign, readonly) BOOL discoItems;
 @property (nonatomic, assign, readonly) BOOL ping;
 
 @property (nonatomic, assign, readonly) BOOL shouldSetBind;
@@ -23,6 +24,7 @@
 
 @property (nonatomic, strong, readonly) NSString* queryXMLNS;
 @property (nonatomic, strong, readonly) NSMutableArray* features;
+@property (nonatomic, strong, readonly) NSMutableArray* items;
 
 // vcard releated
 
@@ -31,5 +33,9 @@
 @property (nonatomic, strong, readonly) NSString* URL;
 @property (nonatomic, strong, readonly) NSString* photoType;
 @property (nonatomic, strong, readonly) NSString* photoBinValue;
+
+
+//discovered services
+@property (nonatomic, strong, readonly) NSString* conferenceServer;
 
 @end

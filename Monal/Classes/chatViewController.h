@@ -42,6 +42,8 @@
     UIView* _topBarView;
     UILabel* _topName;
     UIImageView* _topIcon;
+    
+    BOOL  _isMUC;
 }
 
 @property (nonatomic,strong)  NSString* contactName;

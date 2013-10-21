@@ -217,6 +217,7 @@
     
     _messagelist =[[DataLayer sharedInstance] messageHistory:_contactName forAccount: _accountNo];
     int unread =[[DataLayer sharedInstance] countUserUnreadMessages:_contactName forAccount: _accountNo];
+    _isMUC=[[DataLayer sharedInstance] isMUC:_contactName forAccount: _accountNo];
     
     if([_messagelist count]>0)
     {
@@ -282,7 +283,8 @@
     if(([chatInput text]!=nil) && (![[chatInput text] isEqualToString:@""]) )
     {
         debug_NSLog(@"Sending message");
-        [[MLXMPPManager sharedInstance] sendMessage:[chatInput text] toContact:_contactName fromAccount:_accountNo withCompletionHandler:nil];
+        [[MLXMPPManager sharedInstance] sendMessage:[chatInput text] toContact:_contactName fromAccount:_accountNo isMUC:_isMUC 
+                              withCompletionHandler:nil];
         [self addMessageto:_contactName withMessage:[chatInput text]];
         
     }

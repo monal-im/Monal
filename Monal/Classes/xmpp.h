@@ -69,6 +69,7 @@ typedef struct
     NSOutputStream *_oStream;
     NSMutableString* _inputBuffer;
 	NSMutableArray* _outputQueue;
+
     
     dispatch_queue_t _xmppQueue; 
     dispatch_queue_t _netReadQueue ;
@@ -79,14 +80,15 @@ typedef struct
     
     BOOL _startTLSComplete;
     BOOL _streamHasSpace;
-    
 
     dispatch_source_t _loginCancelOperation;
     
     UIBackgroundTaskIdentifier _backgroundTask ;
     
+    
+    //does not reset at disconnect
     BOOL _loggedInOnce;
-
+    BOOL _hasRequestedServerInfo;
 
 }
 
@@ -97,7 +99,7 @@ typedef struct
 /**
  send a message to a contact
  */
--(void) sendMessage:(NSString*) message toContact:(NSString*) contact;
+-(void) sendMessage:(NSString*) message toContact:(NSString*) contact isMUC:(BOOL) isMUC;
 
 /**
  crafts a whitepace ping and sends it
@@ -132,8 +134,51 @@ typedef struct
 /**
  sets up a background task to reconnect if needed
  */
--(void) reconnect; 
+-(void) reconnect;
 
+
+#pragma mark set connection attributes
+/**
+sets the status message. makes xmpp call
+ */
+-(void) setStatusMessageText:(NSString*) message;
+
+/**
+sets away xmpp call.
+ */
+-(void) setAway:(BOOL) away;
+
+/**
+ sets visibility xmpp call.
+ */
+-(void) setVisible:(BOOL) visible;
+
+/**
+ sets priority. makes xmpp call. this is differnt from setting the property value itself.
+ */
+-(void) updatePriority:(NSInteger) priority;
+
+/**
+ request futher service detail
+ */
+-(void) getServiceDetails;
+
+/**
+ get list of rooms on conference server
+ */
+-(void) getConferenceRooms;
+
+/**
+ join a room on the conference server
+ */
+-(void) joinRoom:(NSString*) room withPassword:(NSString *)password;
+
+/**
+ leave specific room
+ */
+-(void) leaveRoom:(NSString*) room;
+
+#pragma  mark properties
 // connection attributes
 @property (nonatomic,strong) NSString* username;
 @property (nonatomic,strong) NSString* domain;
@@ -145,7 +190,13 @@ typedef struct
 @property (nonatomic,assign) BOOL SSL;
 @property (nonatomic,assign) BOOL oldStyleSSL;
 @property (nonatomic,assign) BOOL selfSigned;
+
+// state attributes
 @property (nonatomic,assign) NSInteger priority;
+@property (nonatomic,strong) NSString* statusMessage;
+@property (nonatomic,assign) BOOL awayState;
+@property (nonatomic,assign) BOOL visibleState;
+
 
 // DB info
 @property (nonatomic,strong) NSString* accountNo;
@@ -158,6 +209,9 @@ typedef struct
 
 // discovered properties
 @property (nonatomic,strong)  NSMutableArray* discoveredServerList;
+@property (nonatomic,strong)  NSMutableArray*  discoveredServices;
+@property (nonatomic,strong)  NSString*  conferenceServer;
+@property (nonatomic,strong)  NSArray*  roomList;
 
 //calculated
 @property (nonatomic,strong, readonly) NSString* versionHash;

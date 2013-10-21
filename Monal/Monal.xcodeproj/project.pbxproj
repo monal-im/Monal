@@ -1654,8 +1654,8 @@
 				LLVM_LTO = NO;
 				OTHER_LDFLAGS = "-lstdc++";
 				PRODUCT_NAME = Monal;
-				PROVISIONING_PROFILE = "";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
+				PROVISIONING_PROFILE = "E44784B1-BF4B-498F-818A-845ACE23C0A1";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "E44784B1-BF4B-498F-818A-845ACE23C0A1";
 			};
 			name = Debug;
 		};
@@ -1712,8 +1712,8 @@
 				LLVM_LTO = NO;
 				OTHER_LDFLAGS = "-lstdc++";
 				PRODUCT_NAME = Monal;
-				PROVISIONING_PROFILE = "";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
+				PROVISIONING_PROFILE = "C87D7BC2-2AC9-4ED4-945E-692EB563956A";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "E44784B1-BF4B-498F-818A-845ACE23C0A1";
 			};
 			name = Distribution;
 		};
@@ -1830,8 +1830,8 @@
 				LLVM_LTO = NO;
 				OTHER_LDFLAGS = "-lstdc++";
 				PRODUCT_NAME = Monal;
-				PROVISIONING_PROFILE = "";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
+				PROVISIONING_PROFILE = "FFA45D52-5BE4-4986-BFE0-5F531D9BE1C6";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "FFA45D52-5BE4-4986-BFE0-5F531D9BE1C6";
 			};
 			name = Adhoc;
 		};

@@ -151,6 +151,8 @@
                 [[MLXMPPManager sharedInstance] connectIfNecessary];
               debug_NSLog(@"XMPP manager completed background task");
             [[UIApplication sharedApplication] endBackgroundTask:_backgroundTask];
+            _backgroundTask=UIBackgroundTaskInvalid;
+
         }
     }
     else

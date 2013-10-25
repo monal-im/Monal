@@ -478,6 +478,9 @@
         cell =[[MLChatCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"ChatCell"];
     }
    
+    
+    if(_isMUC) cell.showName=YES;
+    
     cell.textLabel.text =[row objectForKey:@"message"];
     cell.selectionStyle=UITableViewCellSelectionStyleNone;
     

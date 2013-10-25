@@ -36,10 +36,14 @@
         self.textLabel.lineBreakMode=NSLineBreakByWordWrapping;
         self.textLabel.numberOfLines=0; 
         
+        self.name = [[UILabel alloc] init];
+       
         _bubbleImage=[[UIImageView alloc] init];
-        
-        //this order fro Z index
+        //this order for Z index
         [self.contentView insertSubview:_bubbleImage belowSubview:self.textLabel];
+       
+        [self.contentView addSubview:self.name];
+        
     }
     return self;
 }

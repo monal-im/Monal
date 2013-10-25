@@ -17,5 +17,9 @@
 @property (nonatomic, assign) BOOL outBound;
 
 
+@property (nonatomic, assign) BOOL showName;
+@property (nonatomic, strong) UILabel* name;
+@property (nonatomic, strong) UILabel* date;
+
 +(CGFloat) heightForText:(NSString*) text inWidth:(CGFloat) width;
 @end

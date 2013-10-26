@@ -13,6 +13,8 @@
     UIImageView* _bubbleImage;
 }
 
+#define kNameLabelHeight 10.0
+
 @property (nonatomic, strong) NSString* time;
 @property (nonatomic, assign) BOOL outBound;
 

@@ -479,7 +479,11 @@
     }
    
     
-    if(_isMUC) cell.showName=YES;
+    if(_isMUC)
+    {
+        cell.showName=YES;
+        cell.name.text=[row objectForKey:@"af"];
+    }
     
     cell.textLabel.text =[row objectForKey:@"message"];
     cell.selectionStyle=UITableViewCellSelectionStyleNone;
@@ -496,7 +500,12 @@
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     NSDictionary* row=[_messagelist objectAtIndex:indexPath.row];
-    return [MLChatCell heightForText:[row objectForKey:@"message"] inWidth:tableView.frame.size.width-20];
+    CGFloat height= [MLChatCell heightForText:[row objectForKey:@"message"] inWidth:tableView.frame.size.width-20];
+    if(_isMUC)
+    {
+        height+=kNameLabelHeight;
+    }
+    return height;
     
 }
 

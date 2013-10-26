@@ -11,13 +11,13 @@
 
 
 #define kChatFont 15.0f
-
+#define kNameFont 10.0f
 
 @implementation MLChatCell
 
 
 
-+(CGFloat) heightForText:(NSString*) text inWidth:(CGFloat) width;
++(CGFloat) heightForText:(NSString*) text inWidth:(CGFloat) width 
 {
     //.75 would define the bubble size
     CGSize size = CGSizeMake(width*.75 -10 , MAXFLOAT);
@@ -37,12 +37,16 @@
         self.textLabel.numberOfLines=0; 
         
         self.name = [[UILabel alloc] init];
+        self.name.font=[UIFont systemFontOfSize:kNameFont];
+        self.name .backgroundColor=[UIColor clearColor];
+        self.name. textColor=[UIColor blackColor];
+        self.name .lineBreakMode=NSLineBreakByTruncatingTail;
+        self.name .numberOfLines=1;
        
         _bubbleImage=[[UIImageView alloc] init];
         //this order for Z index
         [self.contentView insertSubview:_bubbleImage belowSubview:self.textLabel];
-       
-        [self.contentView addSubview:self.name];
+        [self.contentView insertSubview:self.name aboveSubview:_bubbleImage];
         
     }
     return self;
@@ -53,6 +57,10 @@
     
     [super layoutSubviews];  //The default implementation of the layoutSubviews
     CGRect textLabelFrame = self.contentView.frame;
+   
+    textLabelFrame.origin.y+=kNameLabelHeight;
+    textLabelFrame.size.height-=kNameLabelHeight;
+    
     textLabelFrame.size.width=(textLabelFrame.size.width*.75);
     UIImage *buttonImage2 ;
     if(_outBound)
@@ -89,8 +97,10 @@
     CGRect finaltextlabelFrame = textLabelFrame;
     finaltextlabelFrame.origin.x+=5;
     finaltextlabelFrame.size.width-=10;
-   
     
+    CGRect nameLabelFrame = CGRectMake(finaltextlabelFrame.origin.x, 0, finaltextlabelFrame.size.width, kNameLabelHeight);
+    
+    self.name.frame=nameLabelFrame; 
     self.textLabel.frame=finaltextlabelFrame;
     _bubbleImage.frame=textLabelFrame;
     

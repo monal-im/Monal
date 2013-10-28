@@ -7,6 +7,7 @@
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="addContact">
             <connections>
+                <outlet property="_addButton" destination="36" id="FvT-01-S6l"/>
                 <outlet property="_buddyName" destination="35" id="kzf-qS-QdV"/>
                 <outlet property="_caption" destination="33" id="z56-ZX-ed1"/>
                 <outlet property="view" destination="29" id="7i2-Uq-ArP"/>
@@ -37,7 +38,7 @@
                     <rect key="frame" x="73" y="155" width="174" height="44"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                     <fontDescription key="fontDescription" name="Helvetica-Bold" family="Helvetica" pointSize="15"/>
-                    <state key="normal" title="Add" backgroundImage="green_button.png">
+                    <state key="normal" title="Add">
                         <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                     </state>
@@ -56,7 +57,4 @@
             </connections>
         </scrollView>
     </objects>
-    <resources>
-        <image name="green_button.png" width="219" height="44"/>
-    </resources>
 </document>

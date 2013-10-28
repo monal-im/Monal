@@ -14,6 +14,7 @@
 	IBOutlet UITextField* _buddyName;
     IBOutlet UILabel* _caption;
      UIBarButtonItem* _closeButton;
+    IBOutlet UIButton* _addButton;
 }
 
 

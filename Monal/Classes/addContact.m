@@ -72,6 +72,15 @@
      }
     
 
+    UIImage *buttonImage = [[UIImage imageNamed:@"blueButton"]
+                            resizableImageWithCapInsets:UIEdgeInsetsMake(18, 18, 18, 18)];
+    UIImage *buttonImageHighlight = [[UIImage imageNamed:@"blueButtonHighlight"]
+                                     resizableImageWithCapInsets:UIEdgeInsetsMake(18, 18, 18, 18)];
+    
+    [_addButton setBackgroundImage:buttonImage forState:UIControlStateNormal];
+    [_addButton setBackgroundImage:buttonImageHighlight forState:UIControlStateSelected];
+    
+    
 }
 
 -(void)viewDidDisappear:(BOOL)animated

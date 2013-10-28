@@ -46,7 +46,7 @@
                         <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                     </state>
                     <connections>
-                        <action selector="addPress" destination="-1" eventType="touchUpInside" id="muY-JW-bio"/>
+                        <action selector="addPress" destination="-1" eventType="touchUpInside" id="hQR-jv-rIy"/>
                     </connections>
                 </button>
                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="Account:" lineBreakMode="tailTruncation" minimumFontSize="10" id="WWN-HW-PkM">

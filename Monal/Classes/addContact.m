@@ -20,17 +20,15 @@
 
 -(IBAction) addPress
 {
-   
-//    
-//	if([jabber addBuddy:[buddyName text]])
-//	{
-//		
-//	}
-//	else
+	if(_buddyName.text.length>0)
+	{
+		
+	}
+	else
 	{
 		UIAlertView *addError = [[UIAlertView alloc] 
-								 initWithTitle:@"Contact Addition Error" 
-								 message:@"Could not add contact."
+								 initWithTitle:@"Error"
+								 message:@"Name can't be empty"
 								 delegate:self cancelButtonTitle:@"Close"
 								 otherButtonTitles: nil] ;
 		[addError show];

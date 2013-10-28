@@ -35,7 +35,6 @@
 	// Do any additional setup after loading the view.
     self.navigationItem.title=NSLocalizedString(@"Group Chat",@"");
     
-    //for time input
     _accountPicker = [[ UIPickerView alloc] init];
     _accountPickerView= [[UIView alloc] initWithFrame: _accountPicker.frame];
     _accountPickerView.autoresizingMask=UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;

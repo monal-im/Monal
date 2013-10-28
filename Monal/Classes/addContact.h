@@ -9,9 +9,15 @@
 #import <Foundation/Foundation.h>
 
 
-@interface addContact : UIViewController<UITextFieldDelegate>{
+@interface addContact : UIViewController<UIPickerViewDataSource, UIPickerViewDelegate, UITextFieldDelegate>
+{
 		
 	IBOutlet UITextField* _buddyName;
+    IBOutlet UITextField* _accountName;
+    UIPickerView* _accountPicker;
+    UIView* _accountPickerView; 
+    NSInteger _selectedRow;
+    
     IBOutlet UILabel* _caption;
      UIBarButtonItem* _closeButton;
     IBOutlet UIButton* _addButton;

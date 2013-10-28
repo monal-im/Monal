@@ -371,6 +371,14 @@ withCompletionHandler:(void (^)(BOOL success)) completion
 
 
 
+-(NSString*) idForConnectedRow:(NSInteger) row
+{
+    NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
+    
+    return [datarow objectForKey:@"account_id"];
+}
+
+
 #pragma mark contact
 
 -(void) removeContact:(NSDictionary*) contact
@@ -386,8 +394,9 @@ withCompletionHandler:(void (^)(BOOL success)) completion
 
 -(void) addContact:(NSDictionary*) contact
 {
-    NSString* accountNo=[NSString stringWithFormat:@"%@", [contact objectForKey:@"account_id"]];
-    xmpp* account =[self getConnectedAccountForID:accountNo];
+    NSNumber* row =[contact objectForKey:@"row"];
+    NSDictionary* datarow= [_connectedXMPP objectAtIndex:[row integerValue]];
+    xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
     if( account)
     {
         [account addToRoster:[contact objectForKey:@"buddy_name"]];

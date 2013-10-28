@@ -22,7 +22,8 @@
 {
 	if(_buddyName.text.length>0)
 	{
-		
+        NSDictionary* contact =@{@"row":[NSNumber numberWithInteger:_selectedRow],@"buddy_name":_buddyName.text};
+		[[MLXMPPManager sharedInstance] addContact:contact];
 	}
 	else
 	{

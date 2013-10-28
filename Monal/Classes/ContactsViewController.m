@@ -87,7 +87,8 @@
 {
     //present modal view
     addContact* addcontactView =[[addContact alloc] init];
-    [self.navigationController presentModalViewController:addcontactView animated:YES];
+    UINavigationController* addContactNav = [[UINavigationController alloc] initWithRootViewController:addcontactView];
+    [self.navigationController presentModalViewController:addContactNav animated:YES];
     
 }
 

@@ -58,9 +58,9 @@
 
 -(void) viewDidLoad
 {
-    self.navigationController.navigationItem.title=@"Add Contact";
-    [_closeButton setAction:@selector(closeView)];
-
+    self.navigationItem.title=@"Add Contact";
+    _closeButton =[[UIBarButtonItem alloc] initWithTitle:@"Close" style:UIBarButtonItemStylePlain target:self action:@selector(closeView)];
+    self.navigationItem.rightBarButtonItem=_closeButton;
 
      if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0"))
      {

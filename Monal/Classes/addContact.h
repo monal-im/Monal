@@ -13,7 +13,7 @@
 		
 	IBOutlet UITextField* _buddyName;
     IBOutlet UILabel* _caption;
-    IBOutlet UIBarButtonItem* _closeButton;
+     UIBarButtonItem* _closeButton;
 }
 
 

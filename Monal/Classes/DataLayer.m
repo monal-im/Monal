@@ -1263,9 +1263,6 @@ static DataLayer *sharedInstance=nil;
 {
 	// seeif it is muc chat name
 	
-	
-	
-	
 	NSString* query=[NSString stringWithFormat:@"SELECT	message_history_id from message_history where account_id=%@ and message_from!=actual_from and message_from='%@'  limit 1", accountNo, buddy];
 	
 	NSNumber* count=(NSNumber*)[self executeScalar:query];
@@ -1273,16 +1270,13 @@ static DataLayer *sharedInstance=nil;
 	{
 		int val=[count integerValue];
 		if(val>0) {
-            ;
 			return YES; } else
 			{
-				;
 				return NO;
 			}
 	}
 	else
 	{
-		;
 		return NO;
 	}
 	
@@ -1802,25 +1796,6 @@ static DataLayer *sharedInstance=nil;
 		return 0;
 	}
 }
-
-
-
--(BOOL) isMUC:(NSString*) buddy forAccount:(NSString*) accountNo
-{
-	// count # messages from a specific user in messages table
-	NSString* query=[NSString stringWithFormat:@"select count(message_history_id) from  message_history where message_from!=actual_from and account_id=%@ and message_from='%@'", accountNo, buddy];
-	
-	NSNumber* count=(NSNumber*)[self executeScalar:query];
-	if(count!=nil)
-	{
-		return YES;
-	}
-	else
-	{
-		return NO;
-	}
-}
-
 
 
 #pragma db Commands

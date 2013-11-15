@@ -217,7 +217,7 @@
     
     _messagelist =[[DataLayer sharedInstance] messageHistory:_contactName forAccount: _accountNo];
     int unread =[[DataLayer sharedInstance] countUserUnreadMessages:_contactName forAccount: _accountNo];
-    _isMUC=[[DataLayer sharedInstance] isMUC:_contactName forAccount: _accountNo];
+    _isMUC=[[DataLayer sharedInstance] isBuddyMuc:_contactName forAccount: _accountNo];
     
     if([_messagelist count]>0)
     {

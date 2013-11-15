@@ -165,7 +165,4 @@
 -(int) countUserUnreadMessages:(NSString*) buddy forAccount:(NSString*) accountNo;
 -(int) countOtherUnreadMessages:(NSString*) buddy forAccount:(NSString*) accountNo;
 
-
--(BOOL) isMUC:(NSString*) buddy forAccount:(NSString*) accountNo;
-
 @end

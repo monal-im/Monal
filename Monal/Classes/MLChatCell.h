@@ -17,11 +17,12 @@
 
 @property (nonatomic, strong) NSString* time;
 @property (nonatomic, assign) BOOL outBound;
-
+@property (nonatomic, assign) BOOL MUC; 
 
 @property (nonatomic, assign) BOOL showName;
 @property (nonatomic, strong) UILabel* name;
 @property (nonatomic, strong) UILabel* date;
 
+- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier andMuc:(BOOL) isMUC;
 +(CGFloat) heightForText:(NSString*) text inWidth:(CGFloat) width;
 @end

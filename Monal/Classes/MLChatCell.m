@@ -25,28 +25,35 @@
     return calcSize.height+5+5;
 }
 
-- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
+- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier andMuc:(BOOL) isMUC
 {
     self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
     if (self) {
         // Initialization code
-       
+        self.MUC=isMUC;
         self.textLabel.font=[UIFont systemFontOfSize:kChatFont];
         self.textLabel.backgroundColor=[UIColor clearColor];
         self.textLabel.lineBreakMode=NSLineBreakByWordWrapping;
         self.textLabel.numberOfLines=0; 
         
+        _bubbleImage=[[UIImageView alloc] init];
+        //this order for Z index
+        [self.contentView insertSubview:_bubbleImage belowSubview:self.textLabel];
+        
+        if(self.MUC)
+        {
         self.name = [[UILabel alloc] init];
         self.name.font=[UIFont systemFontOfSize:kNameFont];
         self.name .backgroundColor=[UIColor clearColor];
         self.name. textColor=[UIColor blackColor];
         self.name .lineBreakMode=NSLineBreakByTruncatingTail;
         self.name .numberOfLines=1;
-       
-        _bubbleImage=[[UIImageView alloc] init];
-        //this order for Z index
-        [self.contentView insertSubview:_bubbleImage belowSubview:self.textLabel];
         [self.contentView insertSubview:self.name aboveSubview:_bubbleImage];
+
+        }
+        
+      
+        
         
     }
     return self;
@@ -58,8 +65,11 @@
     [super layoutSubviews];  //The default implementation of the layoutSubviews
     CGRect textLabelFrame = self.contentView.frame;
    
+    if(self.MUC)
+    {
     textLabelFrame.origin.y+=kNameLabelHeight;
     textLabelFrame.size.height-=kNameLabelHeight;
+    }
     
     textLabelFrame.size.width=(textLabelFrame.size.width*.75);
     UIImage *buttonImage2 ;
@@ -98,9 +108,12 @@
     finaltextlabelFrame.origin.x+=5;
     finaltextlabelFrame.size.width-=10;
     
+    if(self.MUC)
+    {
     CGRect nameLabelFrame = CGRectMake(finaltextlabelFrame.origin.x, 0, finaltextlabelFrame.size.width, kNameLabelHeight);
+    self.name.frame=nameLabelFrame;
+    }
     
-    self.name.frame=nameLabelFrame; 
     self.textLabel.frame=finaltextlabelFrame;
     _bubbleImage.frame=textLabelFrame;
     

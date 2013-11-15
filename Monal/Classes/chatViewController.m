@@ -219,16 +219,6 @@
     int unread =[[DataLayer sharedInstance] countUserUnreadMessages:_contactName forAccount: _accountNo];
     _isMUC=[[DataLayer sharedInstance] isBuddyMuc:_contactName forAccount: _accountNo];
     
-    if([_messagelist count]>0)
-    {
-     NSIndexPath *path1 = [NSIndexPath indexPathForRow:[_messagelist count]-1  inSection:0];
-        if(![_messageTable.indexPathsForVisibleRows containsObject:path1])
-        {
-            
-            [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:NO];
-        }
-    }
-    
     if(unread==0)
         _firstmsg=YES;
     
@@ -240,7 +230,12 @@
         _topName.text=_contactName;
     
     _topIcon.image=[[MLImageManager sharedInstance] getIconForContact:_contactName andAccount:_accountNo];
-    
+ 
+}
+
+-(void) viewDidAppear:(BOOL)animated
+{
+        [self scrollToBottom];
 }
 
 -(void) viewWillDisappear:(BOOL)animated
@@ -393,6 +388,20 @@
 }
 
 
+-(void) scrollToBottom
+{
+    if([_messagelist count]>0)
+    {
+        NSIndexPath *path1 = [NSIndexPath indexPathForRow:[_messagelist count]-1  inSection:0];
+        if(![_messageTable.indexPathsForVisibleRows containsObject:path1])
+        {
+            
+            [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:NO];
+        }
+    }
+    
+}
+
 /*
 #pragma mark gestures
 //handle swipe
@@ -475,7 +484,7 @@
     
     if(!cell)
     {
-        cell =[[MLChatCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"ChatCell"];
+        cell =[[MLChatCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"ChatCell" andMuc:_isMUC];
     }
    
     
@@ -617,15 +626,7 @@
                          
                      } completion:^(BOOL finished) {
                          
-                         if([_messagelist count]>0)
-                         {
-                             NSIndexPath *path1 = [NSIndexPath indexPathForRow:[_messagelist count]-1  inSection:0];
-                             if(![_messageTable.indexPathsForVisibleRows containsObject:path1])
-                             {
-                                 
-                                 [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:NO];
-                             }
-                         }
+                         [self scrollToBottom];
                     }
      ];
 	

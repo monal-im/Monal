@@ -158,7 +158,7 @@
     [_topBarView addSubview:_topName];
     
     self.navigationItem.titleView=_topBarView;
-    
+
 }
 
 -(id) initWithContact:(NSDictionary*) contact
@@ -498,7 +498,66 @@
         cell.name.text=[row objectForKey:@"af"];
     }
     
+    
+    
+    NSString* lowerCase= [[row objectForKey:@"message"] lowercaseString];
+    NSRange pos = [lowerCase rangeOfString:@"http://"];
+    if(pos.location==NSNotFound)
+        pos=[lowerCase rangeOfString:@"https://"];
+    
+    NSRange pos2;
+    if(pos.location!=NSNotFound)
+    {
+        NSString* urlString =[lowerCase substringFromIndex:pos.location];
+        pos2= [urlString rangeOfString:@" "];
+        if(pos2.location!=NSNotFound)
+            urlString=[urlString substringToIndex:pos2.location];
+        
+      cell.link=urlString;
+    }
+    else
+    {
+        cell.link=nil;
+    }
+    
+    if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"6.0"))
+    {
+        if(pos.location!=NSNotFound)
+        {
+        NSDictionary *underlineAttribute = @{NSUnderlineStyleAttributeName: @(NSUnderlineStyleSingle)};
+        NSAttributedString* underlined = [[NSAttributedString alloc] initWithString:cell.link
+                                                             attributes:underlineAttribute];
+     
+            
+            if ([underlined length]==[[row objectForKey:@"message"] length])
+            {
+                cell.textLabel.attributedText=underlined;
+            }
+            else
+            {
+                NSMutableAttributedString* stitchedString  = [[NSMutableAttributedString alloc] init];
+                [stitchedString appendAttributedString:
+                 [[NSAttributedString alloc] initWithString:[[row objectForKey:@"message"] substringToIndex:pos.location] attributes:nil]];
+                [stitchedString appendAttributedString:underlined];
+                if(pos2.location!=NSNotFound)
+                {
+                    NSString* remainder = [[row objectForKey:@"message"] substringFromIndex:pos.location+[underlined length]];
+                    [stitchedString appendAttributedString:[[NSAttributedString alloc] initWithString:remainder attributes:nil]];
+                }
+                cell.textLabel.attributedText=stitchedString;
+            }
+            
+        }
+        else
+        {
+            cell.textLabel.text =[row objectForKey:@"message"];
+        }
+    }
+    else
+    {
     cell.textLabel.text =[row objectForKey:@"message"];
+    }
+    
     cell.selectionStyle=UITableViewCellSelectionStyleNone;
     
     if([[row objectForKey:@"af"] isEqualToString:_jid])
@@ -532,9 +591,14 @@
     return YES;
 }
 
--(void)tableView:(UITableView *)tableView didDeselectRowAtIndexPath:(NSIndexPath *)indexPath
+
+-(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    [chatInput resignFirstResponder];
+    MLChatCell* cell = (MLChatCell*)[tableView cellForRowAtIndexPath:indexPath];
+    if(cell.link)
+    {
+        [cell openlink:self];
+    }
 }
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -572,7 +636,8 @@
     return YES;
 }
 
--(void) open: (id) sender {
+//dummy function needed to remove warnign
+-(void) openlink: (id) sender {
     
 }
 

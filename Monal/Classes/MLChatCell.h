@@ -22,7 +22,11 @@
 @property (nonatomic, assign) BOOL showName;
 @property (nonatomic, strong) UILabel* name;
 @property (nonatomic, strong) UILabel* date;
+@property (nonatomic, strong) NSString* link;
 
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier andMuc:(BOOL) isMUC;
 +(CGFloat) heightForText:(NSString*) text inWidth:(CGFloat) width;
+
+-(void) openlink: (id) sender;
+
 @end

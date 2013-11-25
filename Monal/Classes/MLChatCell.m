@@ -124,9 +124,8 @@
 {
     if(action == @selector(openlink:))
     {
-        NSString* lowerCase= [self.textLabel.text lowercaseString];
-        if( ([lowerCase rangeOfString:@"http://"].location!=NSNotFound || [lowerCase rangeOfString:@"https://"].location !=NSNotFound))
-        return  YES;
+       if(self.link)
+           return  YES;
     }
     
     return (action == @selector(copy:)) ;
@@ -134,23 +133,13 @@
 }
 
 
-/// this methods will be called for the cell menu items
 -(void) openlink: (id) sender {
-    
-    NSString* lowerCase= [self.textLabel.text lowercaseString];
-    NSRange pos = [lowerCase rangeOfString:@"http://"];
-    if(pos.location==NSNotFound)
-        pos=[lowerCase rangeOfString:@"https://"];
 
-    if(pos.location!=NSNotFound)
+    if(self.link)
     {
-        NSString* urlString =[self.textLabel.text substringFromIndex:pos.location];
-        NSRange pos2= [urlString rangeOfString:@" "];
-        if(pos2.location!=NSNotFound)
-            urlString=[urlString substringToIndex:pos2.location];
-        
-        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:urlString]];
+        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:self.link]];
     }
+ 
 }
 
 -(void) copy:(id)sender {

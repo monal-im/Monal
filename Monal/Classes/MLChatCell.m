@@ -120,6 +120,27 @@
     
 }
 
+-(BOOL) canPerformAction:(SEL)action withSender:(id)sender
+{
+    if(action == @selector(open:))
+    {
+        if( ([self.textLabel.text rangeOfString:@"http://"].location!=NSNotFound || [self.textLabel.text rangeOfString:@"https://"].location !=NSNotFound))
+        return  YES;
+    }
+    
+    return (action == @selector(copy:)) ;
+}
+
+
+/// this methods will be called for the cell menu items
+-(void) open: (id) sender {
+    
+}
+
+-(void) copy:(id)sender {
+    
+}
+
 -(void)prepareForReuse
 {
     [super prepareForReuse];

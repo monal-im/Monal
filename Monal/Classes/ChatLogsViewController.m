@@ -7,6 +7,7 @@
 //
 
 #import "ChatLogsViewController.h"
+#import "DataLayer.h"
 
 @interface ChatLogsViewController ()
 
@@ -45,11 +46,15 @@
 }
 
 
+-(void) viewWillAppear:(BOOL)animated
+{
+   // _tableData = [DataLayer sharedInstance];
+}
 
 #pragma mark tableview datasource delegate
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return 0;
+    return [_tableData count];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath

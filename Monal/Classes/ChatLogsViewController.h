@@ -9,7 +9,9 @@
 #import <UIKit/UIKit.h>
 
 @interface ChatLogsViewController : UIViewController <UITableViewDataSource, UITableViewDelegate>
-
+{
+    NSArray* _tableData;
+}
 
 @property (nonatomic, strong) UITableView* chatLogTable;
 

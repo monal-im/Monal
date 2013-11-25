@@ -90,7 +90,7 @@
         [doneBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
         [doneBtn setTitleShadowColor:[UIColor colorWithWhite:0 alpha:0.4] forState:UIControlStateNormal];
         doneBtn.titleLabel.shadowOffset = CGSizeMake (0.0, -1.0);
-        doneBtn.titleLabel.font = [UIFont boldSystemFontOfSize:18.0f];
+        [doneBtn.titleLabel setFont:[UIFont boldSystemFontOfSize:19.0f]];
         [doneBtn setBackgroundImage:sendBtnBackground forState:UIControlStateNormal];
         [doneBtn setBackgroundImage:selectedSendBtnBackground forState:UIControlStateSelected];
         
@@ -206,7 +206,7 @@
     _tap =[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap)];
     [_messageTable addGestureRecognizer:_tap];
     
-    UIMenuItem *openMenuItem = [[UIMenuItem alloc] initWithTitle:@"Open" action:@selector(openlink:)];
+    UIMenuItem *openMenuItem = [[UIMenuItem alloc] initWithTitle:@"Open in Safari" action:@selector(openlink:)];
     [[UIMenuController sharedMenuController] setMenuItems: @[openMenuItem]];
     [[UIMenuController sharedMenuController] update];
     

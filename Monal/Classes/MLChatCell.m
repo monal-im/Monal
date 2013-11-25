@@ -136,7 +136,21 @@
 
 /// this methods will be called for the cell menu items
 -(void) openlink: (id) sender {
-     [[UIApplication sharedApplication] openURL:[NSURL URLWithString:self.textLabel.text]];
+    
+    NSString* lowerCase= [self.textLabel.text lowercaseString];
+    NSRange pos = [lowerCase rangeOfString:@"http://"];
+    if(pos.location==NSNotFound)
+        pos=[lowerCase rangeOfString:@"https://"];
+
+    if(pos.location!=NSNotFound)
+    {
+        NSString* urlString =[self.textLabel.text substringFromIndex:pos.location];
+        NSRange pos2= [urlString rangeOfString:@" "];
+        if(pos2.location!=NSNotFound)
+            urlString=[urlString substringToIndex:pos2.location];
+        
+        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:urlString]];
+    }
 }
 
 -(void) copy:(id)sender {

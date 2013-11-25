@@ -122,23 +122,26 @@
 
 -(BOOL) canPerformAction:(SEL)action withSender:(id)sender
 {
-    if(action == @selector(open:))
+    if(action == @selector(openlink:))
     {
-        if( ([self.textLabel.text rangeOfString:@"http://"].location!=NSNotFound || [self.textLabel.text rangeOfString:@"https://"].location !=NSNotFound))
+        NSString* lowerCase= [self.textLabel.text lowercaseString];
+        if( ([lowerCase rangeOfString:@"http://"].location!=NSNotFound || [lowerCase rangeOfString:@"https://"].location !=NSNotFound))
         return  YES;
     }
     
     return (action == @selector(copy:)) ;
+    
 }
 
 
 /// this methods will be called for the cell menu items
--(void) open: (id) sender {
-    
+-(void) openlink: (id) sender {
+     [[UIApplication sharedApplication] openURL:[NSURL URLWithString:self.textLabel.text]];
 }
 
 -(void) copy:(id)sender {
-    
+    UIPasteboard *pboard = [UIPasteboard generalPasteboard];
+    pboard.string =self.textLabel.text;
 }
 
 -(void)prepareForReuse

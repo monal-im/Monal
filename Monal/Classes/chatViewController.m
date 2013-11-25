@@ -558,6 +558,26 @@
     }
 }
 
+- (BOOL)tableView:(UITableView *)tableView shouldShowMenuForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return YES;
+}
+
+- (BOOL)tableView:(UITableView *)tableView canPerformAction:(SEL)action forRowAtIndexPath:(NSIndexPath *)indexPath withSender:(id)sender
+{
+    return (action == @selector(copy:));
+}
+
+- (void)tableView:(UITableView *)tableView performAction:(SEL)action forRowAtIndexPath:(NSIndexPath *)indexPath withSender:(id)sender
+{
+    MLChatCell* cell = (MLChatCell*)[tableView cellForRowAtIndexPath:indexPath];
+    if (action == @selector(copy:))
+    {
+        UIPasteboard *pboard = [UIPasteboard generalPasteboard];
+        pboard.string =cell.textLabel.text;
+    }
+}
+
 
 # pragma mark Textview delegeate functions
 - (void)textFieldDidBeginEditing:(UITextField *)textField

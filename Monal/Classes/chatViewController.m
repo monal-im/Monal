@@ -206,6 +206,10 @@
     _tap =[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap)];
     [_messageTable addGestureRecognizer:_tap];
     
+    UIMenuItem *openMenuItem = [[UIMenuItem alloc] initWithTitle:@"Open" action:@selector(open:)];
+    [[UIMenuController sharedMenuController] setMenuItems: @[openMenuItem]];
+    [[UIMenuController sharedMenuController] update];
+    
   
 }
 
@@ -565,7 +569,24 @@
 
 - (BOOL)tableView:(UITableView *)tableView canPerformAction:(SEL)action forRowAtIndexPath:(NSIndexPath *)indexPath withSender:(id)sender
 {
-    return (action == @selector(copy:));
+   
+    if(action == @selector(copy:))
+       return YES;
+       
+       if(action == @selector(open:))
+       {
+               MLChatCell* cell = (MLChatCell*)[tableView cellForRowAtIndexPath:indexPath];
+        if([cell.textLabel.text rangeOfString:@"http://"].location!=NSNotFound || [cell.textLabel.text rangeOfString:@"https://"].location !=NSNotFound)
+        {
+           return YES;
+        }
+       }
+          return NO;
+       
+}
+
+-(void) open: (id) sender {
+    
 }
 
 - (void)tableView:(UITableView *)tableView performAction:(SEL)action forRowAtIndexPath:(NSIndexPath *)indexPath withSender:(id)sender
@@ -576,6 +597,11 @@
         UIPasteboard *pboard = [UIPasteboard generalPasteboard];
         pboard.string =cell.textLabel.text;
     }
+    
+    if (action == @selector(copy:))
+     {
+          [[UIApplication sharedApplication] openURL:[NSURL URLWithString:cell.textLabel.text]];
+     }
 }
 
 

@@ -585,13 +585,21 @@
 - (void)tableView:(UITableView *)tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath *)indexPath
 {
     ContactDetails* detailVC = [[ContactDetails alloc]  initWithContact:[_contacts objectAtIndex:indexPath.row] ];
-    [self.currentNavController pushViewController:detailVC animated:YES];
-    
-    //    popOverController = [[UIPopoverController alloc] initWithContentViewController:self];
-    //    popOverController.popoverContentSize = CGSizeMake(320, 480);
-    //    // if(orientation==UIInterfaceOrientationLandscapeRight)
-    //    [popOverController presentPopoverFromRect:cellRect
-    //                                       inView:table permittedArrowDirections:UIPopoverArrowDirectionLeft animated:YES];
+           if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
+           {
+               MLChatCell* cell = (MLChatCell*)[tableView cellForRowAtIndexPath:indexPath];
+               
+               _popOverController = [[UIPopoverController alloc] initWithContentViewController:detailVC];
+                _popOverController.popoverContentSize = CGSizeMake(320, 480);
+                   [_popOverController presentPopoverFromRect:cell.bounds
+                                                      inView:cell
+                                    permittedArrowDirections:UIPopoverArrowDirectionLeft animated:YES];
+           }
+           else
+           {
+               [self.currentNavController pushViewController:detailVC animated:YES];
+           }
+
 }
 
 -(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath

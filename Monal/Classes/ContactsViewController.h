@@ -29,6 +29,7 @@
     NSMutableArray* _contacts;
     NSMutableArray* _offlineContacts;
     NSDictionary* _lastSelectedUser;
+    UIPopoverController* _popOverController;
 }
 
 @property (nonatomic, strong) UITableView* contactsTable;

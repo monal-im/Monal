@@ -188,8 +188,8 @@
         case 0:
         {
             
-            cell.textField.placeholder=NSLocalizedString(@"Status Message", @"");
-            cell.textField.keyboardType=UIKeyboardTypeNumbersAndPunctuation;
+            cell.textInputField.placeholder=NSLocalizedString(@"Status Message", @"");
+            cell.textInputField.keyboardType=UIKeyboardTypeNumbersAndPunctuation;
             cell.defaultKey=@"StatusMessage";
             cell.textEnabled=YES;
             return cell; 
@@ -218,8 +218,8 @@
                 case 2:
                 {
                     cell.textLabel.text=NSLocalizedString(@"XMPP Priority", @"");
-                    cell.textField.placeholder=NSLocalizedString(@"Number", @"");
-                    cell.textField.keyboardType=UIKeyboardTypeNumbersAndPunctuation;
+                    cell.textInputField.placeholder=NSLocalizedString(@"Number", @"");
+                    cell.textInputField.keyboardType=UIKeyboardTypeNumbersAndPunctuation;
                        cell.defaultKey=@"XMPPPriority";
                     cell.textEnabled=YES;
                     break;

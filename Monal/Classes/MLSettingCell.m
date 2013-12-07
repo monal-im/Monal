@@ -16,11 +16,12 @@
     self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
     if (self) {
         // Initialization code
-    }
+  
     self.selectionStyle=UITableViewCellSelectionStyleNone;
     
-    _textField=[[UITextField alloc] initWithFrame:CGRectZero];
+    _textInputField=[[UITextField alloc] initWithFrame:CGRectZero];
     _toggleSwitch=[[UISwitch alloc] initWithFrame:CGRectZero];
+          }
     return self;
 }
 
@@ -66,11 +67,11 @@
                              self.contentView.frame.size.height);
         }
         
-        _textField.frame=frame;
-        _textField.returnKeyType=UIReturnKeyDone;
-        _textField.delegate=self;
-        _textField.text= [[NSUserDefaults standardUserDefaults] stringForKey: _defaultKey];
-        [self.contentView addSubview: _textField ];
+        _textInputField.frame=frame;
+        _textInputField.returnKeyType=UIReturnKeyDone;
+        _textInputField.delegate=self;
+        _textInputField.text= [[NSUserDefaults standardUserDefaults] stringForKey: _defaultKey];
+        [self.contentView addSubview: _textInputField ];
     }
 
 
@@ -97,7 +98,7 @@
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField
 {
-     [[NSUserDefaults standardUserDefaults]  setObject:_textField.text forKey: _defaultKey];
+     [[NSUserDefaults standardUserDefaults]  setObject:_textInputField.text forKey: _defaultKey];
     [textField resignFirstResponder];
     
     if([_defaultKey isEqualToString:@"XMPPPriority"])

@@ -231,7 +231,7 @@
     
 dispatch_async(dispatch_get_main_queue(), ^{
         int index=0;
-        int pos;
+        int pos=0;
         for (NSDictionary* account in _connectedXMPP)
         {
             xmpp* xmppAccount=[account objectForKey:@"xmppAccount"];

@@ -71,10 +71,8 @@
     
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString *documentsDirectory = [paths objectAtIndex:0];
-    NSString *writablePath = [documentsDirectory stringByAppendingPathComponent:@"buddyicons"];
-    writablePath = [documentsDirectory stringByAppendingPathComponent:accountNo];
-    writablePath = [documentsDirectory stringByAppendingPathComponent:filename];
-
+    NSString *writablePath =[NSString stringWithFormat:@"%@%@%@",[documentsDirectory stringByAppendingPathComponent:@"buddyicons"],[documentsDirectory stringByAppendingPathComponent:accountNo], [documentsDirectory stringByAppendingPathComponent:filename]];
+    
     if([fileManager fileExistsAtPath:writablePath])
     {
         [fileManager removeItemAtPath:writablePath error:nil];

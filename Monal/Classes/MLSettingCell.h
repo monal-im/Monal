@@ -26,6 +26,6 @@
 /**
  Textinput field
  */
-@property (nonatomic, strong) UITextField* textField;
+@property (nonatomic, strong) UITextField* textInputField;
 
 @end

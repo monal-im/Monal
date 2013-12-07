@@ -88,6 +88,10 @@
     //present modal view
     addContact* addcontactView =[[addContact alloc] init];
     UINavigationController* addContactNav = [[UINavigationController alloc] initWithRootViewController:addcontactView];
+         if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
+         {
+             addContactNav.modalPresentationStyle=UIModalPresentationFormSheet;
+         }
     [self.navigationController presentModalViewController:addContactNav animated:YES];
     
 }

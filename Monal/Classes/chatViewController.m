@@ -205,6 +205,7 @@
     
     _tap =[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap)];
     [_messageTable addGestureRecognizer:_tap];
+    _tap.delegate=self;
     
     UIMenuItem *openMenuItem = [[UIMenuItem alloc] initWithTitle:@"Open in Safari" action:@selector(openlink:)];
     [[UIMenuController sharedMenuController] setMenuItems: @[openMenuItem]];
@@ -729,6 +730,14 @@
     r.origin.y += diff;
 	containerView.frame = r;
 }
+
+
+#pragma mark gesture recognizer delegate
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
+{
+    return YES; 
+}
+
 
 /*
 #pragma mark HTML generation

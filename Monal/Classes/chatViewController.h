@@ -17,7 +17,7 @@
 #import "MLChatCell.h"
 
 
-@interface chatViewController : UIViewController <HPGrowingTextViewDelegate,UITableViewDelegate, UITableViewDataSource>
+@interface chatViewController : UIViewController <HPGrowingTextViewDelegate,UITableViewDelegate, UITableViewDataSource, UIGestureRecognizerDelegate>
 {
 
     UIView *containerView;

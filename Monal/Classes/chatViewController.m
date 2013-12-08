@@ -186,8 +186,8 @@
 {
     [super viewDidLoad];
     [self makeView];
+    self.navigationController.view.backgroundColor=[UIColor whiteColor];
     
-
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
     [nc addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
     [nc addObserver:self selector:@selector(refreshDisplay) name:UIApplicationWillEnterForegroundNotification object:nil];

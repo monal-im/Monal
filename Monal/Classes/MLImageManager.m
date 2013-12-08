@@ -38,8 +38,8 @@
      return _inboundImage;
  }
  
-    _inboundImage=[[UIImage imageNamed:@"greyButton"]
-                   resizableImageWithCapInsets:UIEdgeInsetsMake(18, 18, 18, 18)];
+    _inboundImage=[[UIImage imageNamed:@"incoming"]
+                   resizableImageWithCapInsets:UIEdgeInsetsMake(20, 30, 20, 30)];
     
     return _inboundImage;
     
@@ -53,8 +53,8 @@
         return _outboundImage;
     }
     
-    _outboundImage=[[UIImage imageNamed:@"blueButton"]
-                   resizableImageWithCapInsets:UIEdgeInsetsMake(18, 18, 18, 18)];
+    _outboundImage=[[UIImage imageNamed:@"outgoing"]
+                   resizableImageWithCapInsets:UIEdgeInsetsMake(20, 30, 20, 30)];
     
     return _outboundImage;
 }

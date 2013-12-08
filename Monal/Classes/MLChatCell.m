@@ -115,7 +115,10 @@
     }
     
     self.textLabel.frame=finaltextlabelFrame;
-    _bubbleImage.frame=textLabelFrame;
+    
+    CGRect bubbleFrame=textLabelFrame;
+    bubbleFrame.size.height+=10;
+    _bubbleImage.frame=bubbleFrame;
     
     
 }

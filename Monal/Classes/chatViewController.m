@@ -90,7 +90,7 @@
         [doneBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
         [doneBtn setTitleShadowColor:[UIColor colorWithWhite:0 alpha:0.4] forState:UIControlStateNormal];
         doneBtn.titleLabel.shadowOffset = CGSizeMake (0.0, -1.0);
-        [doneBtn.titleLabel setFont:[UIFont boldSystemFontOfSize:19.0f]];
+        [doneBtn.titleLabel setFont:[UIFont boldSystemFontOfSize:18.0f]];
         [doneBtn setBackgroundImage:sendBtnBackground forState:UIControlStateNormal];
         [doneBtn setBackgroundImage:selectedSendBtnBackground forState:UIControlStateSelected];
         
@@ -103,19 +103,26 @@
         doneBtn.frame = CGRectMake(containerView.frame.size.width - 69, 8, 63, 27);
         doneBtn.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleLeftMargin;
         [doneBtn setTitle:@"Send" forState:UIControlStateNormal];
-        if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0"))
-        {
-            doneBtn.titleLabel.font=[UIFont boldSystemFontOfSize:[UIFont systemFontSize]];
-        }
-        
+        doneBtn.titleLabel.font=[UIFont boldSystemFontOfSize:19.0f];
+    
         [doneBtn addTarget:self action:@selector(resignTextView) forControlEvents:UIControlEventTouchUpInside];
        [containerView addSubview:doneBtn];
         
-        containerView.backgroundColor=[UIColor colorWithRed:0.921 green:0.921 blue:0.945 alpha:1.0];
+        containerView.backgroundColor=[UIColor colorWithRed:248/255.0f green:248/255.0f blue:248/255.0f alpha:1.0];
         
         chatInput.layer.cornerRadius=5.0f;
         chatInput.layer.borderWidth = 1.0f;
         chatInput.layer.borderColor = [[UIColor lightGrayColor] CGColor];
+        
+        CGRect lineFrame = containerView.frame;
+        lineFrame.size.height=1;
+        lineFrame.origin.x=0;
+        lineFrame.origin.y=0;
+        UIView* lineView=[[UIView alloc] initWithFrame:lineFrame];
+        lineView.backgroundColor=[UIColor colorWithRed:206/255.0f green:206/255.0f blue:206/255.0f alpha:1.0];
+        
+       [containerView addSubview:lineView];
+        lineView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         
     }
     

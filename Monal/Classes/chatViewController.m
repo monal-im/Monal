@@ -210,14 +210,10 @@
     self.view.autoresizesSubviews=true;
     _messageTable.separatorColor=[UIColor whiteColor];
     
-    _tap =[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap)];
-    [_messageTable addGestureRecognizer:_tap];
-    _tap.delegate=self;
-    
-    UIMenuItem *openMenuItem = [[UIMenuItem alloc] initWithTitle:@"Open in Safari" action:@selector(openlink:)];
-    [[UIMenuController sharedMenuController] setMenuItems: @[openMenuItem]];
-    [[UIMenuController sharedMenuController] update];
-    
+//    UIMenuItem *openMenuItem = [[UIMenuItem alloc] initWithTitle:@"Open in Safari" action:@selector(openlink:)];
+//    [[UIMenuController sharedMenuController] setMenuItems: @[openMenuItem]];
+//    [[UIMenuController sharedMenuController] update];
+  
   
 }
 
@@ -602,6 +598,8 @@
 
 -(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    [chatInput resignFirstResponder];
+    
     MLChatCell* cell = (MLChatCell*)[tableView cellForRowAtIndexPath:indexPath];
     if(cell.link)
     {
@@ -736,13 +734,6 @@
     r.size.height -= diff;
     r.origin.y += diff;
 	containerView.frame = r;
-}
-
-
-#pragma mark gesture recognizer delegate
-- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
-{
-    return YES; 
 }
 
 

@@ -20,7 +20,7 @@
 +(CGFloat) heightForText:(NSString*) text inWidth:(CGFloat) width 
 {
     //.75 would define the bubble size
-    CGSize size = CGSizeMake(width*.75 -10 , MAXFLOAT);
+    CGSize size = CGSizeMake(width*.75 -25 , MAXFLOAT);
     CGSize calcSize= [text sizeWithFont:[UIFont systemFontOfSize:kChatFont] constrainedToSize:size lineBreakMode:NSLineBreakByWordWrapping];
     return calcSize.height+5+5+5;
 }
@@ -106,7 +106,7 @@
     
     CGRect finaltextlabelFrame = textLabelFrame;
     finaltextlabelFrame.origin.x+=15;
-    finaltextlabelFrame.size.width-=10;
+    finaltextlabelFrame.size.width-=25;
     
     if(self.MUC)
     {

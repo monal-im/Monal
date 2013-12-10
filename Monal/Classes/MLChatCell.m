@@ -10,7 +10,7 @@
 #import "MLImageManager.h"
 
 
-#define kChatFont 15.0f
+#define kChatFont 17.0f
 #define kNameFont 10.0f
 
 @implementation MLChatCell
@@ -22,7 +22,7 @@
     //.75 would define the bubble size
     CGSize size = CGSizeMake(width*.75 -10 , MAXFLOAT);
     CGSize calcSize= [text sizeWithFont:[UIFont systemFontOfSize:kChatFont] constrainedToSize:size lineBreakMode:NSLineBreakByWordWrapping];
-    return calcSize.height+5+5;
+    return calcSize.height+5+5+5;
 }
 
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier andMuc:(BOOL) isMUC
@@ -105,7 +105,7 @@
     }
     
     CGRect finaltextlabelFrame = textLabelFrame;
-    finaltextlabelFrame.origin.x+=5;
+    finaltextlabelFrame.origin.x+=15;
     finaltextlabelFrame.size.width-=10;
     
     if(self.MUC)
@@ -117,7 +117,7 @@
     self.textLabel.frame=finaltextlabelFrame;
     
     CGRect bubbleFrame=textLabelFrame;
-    bubbleFrame.size.height+=10;
+   // bubbleFrame.size.height+=5;
     _bubbleImage.frame=bubbleFrame;
     
     

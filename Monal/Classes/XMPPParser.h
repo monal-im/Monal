@@ -11,7 +11,7 @@
 @interface XMPPParser : NSObject <NSXMLParserDelegate>
 {
     NSString* State;
-    NSString* _messageBuffer;
+    NSMutableString* _messageBuffer;
     
     NSString* _type;
     NSString* _from;

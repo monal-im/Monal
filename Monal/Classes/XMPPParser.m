@@ -33,10 +33,12 @@
 #pragma mark common parser delegate functions
 - (void)parserDidStartDocument:(NSXMLParser *)parser{
 	debug_NSLog(@"parsing start");
+  
 }
 
 - (void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict
 {
+    _messageBuffer=nil;
     _type=[attributeDict objectForKey:@"type"];
     
     if([attributeDict objectForKey:@"from"])
@@ -52,11 +54,18 @@
     
     //remove any  resource markers and get user
     _user=[_user lowercaseString];
+    
+
 }
 
 - (void)parser:(NSXMLParser *)parser foundCharacters:(NSString *)string
 {
-    _messageBuffer=string;
+    if(!_messageBuffer)
+    {
+           _messageBuffer=[[NSMutableString alloc] init];
+    }
+    
+    [_messageBuffer appendString:string];
 }
 
 

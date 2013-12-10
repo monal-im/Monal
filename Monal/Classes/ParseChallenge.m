@@ -12,6 +12,7 @@
 
 - (void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict
 {
+     _messageBuffer=nil;
     
     if([elementName isEqualToString:@"challenge"])
     {

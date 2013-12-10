@@ -22,7 +22,7 @@
     //.75 would define the bubble size
     CGSize size = CGSizeMake(width*.75 -25 , MAXFLOAT);
     CGSize calcSize= [text sizeWithFont:[UIFont systemFontOfSize:kChatFont] constrainedToSize:size lineBreakMode:NSLineBreakByWordWrapping];
-    return calcSize.height+5+5+5;
+    return calcSize.height+15;
 }
 
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier andMuc:(BOOL) isMUC

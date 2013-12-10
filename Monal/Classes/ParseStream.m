@@ -14,6 +14,7 @@
 
 - (void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict{
     debug_NSLog(@"began this element: %@", elementName);
+     _messageBuffer=nil;
     
     //getting login mechanisms
 	if([elementName isEqualToString:@"stream:features"])

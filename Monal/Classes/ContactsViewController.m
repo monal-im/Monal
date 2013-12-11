@@ -68,7 +68,8 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshDisplay) name:UIApplicationWillEnterForegroundNotification object:nil];
     [self refreshDisplay];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
-
+    
+    [[MLXMPPManager sharedInstance] handleNewMessage:nil];
 }
 
 -(void) viewWillDisappear:(BOOL)animated

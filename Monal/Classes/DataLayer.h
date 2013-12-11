@@ -164,5 +164,6 @@
 -(int) countUnreadMessagesForAccount:(NSString*) accountNo;
 -(int) countUserUnreadMessages:(NSString*) buddy forAccount:(NSString*) accountNo;
 -(int) countOtherUnreadMessages:(NSString*) buddy forAccount:(NSString*) accountNo;
+-(int) countUnreadMessages;
 
 @end

@@ -1686,12 +1686,10 @@ static DataLayer *sharedInstance=nil;
 	if(count!=nil)
 	{
 		int val=[count integerValue];
-		;
 		return val;
 	}
 	else
 	{
-		;
 		return 0;
 	}
 	

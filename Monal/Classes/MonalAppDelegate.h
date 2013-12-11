@@ -25,5 +25,8 @@
 @property (nonatomic, strong) MLTabBarController* tabBarController;
 @property (nonatomic, strong) UISplitViewController* splitViewController;
 
+
+-(void) updateUnread;
+
 @end
 

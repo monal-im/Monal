@@ -110,6 +110,11 @@ Returns the name of the conencted account
 -(void) setPriority:(NSInteger) priority;
 
 @property (nonatomic, weak) ContactsViewController* contactVC;
-@property (nonatomic, strong, readonly) NSMutableArray* connectedXMPP;;
+@property (nonatomic, strong, readonly) NSMutableArray* connectedXMPP;
+
+/**
+ updates unread
+ */
+-(void) handleNewMessage:(NSNotification *)notification;
 
 @end

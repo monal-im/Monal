@@ -50,6 +50,7 @@
 {
     _contacts=[[DataLayer sharedInstance] activeBuddies];
     [_chatListTable reloadData];
+    [[MLXMPPManager sharedInstance] handleNewMessage:nil];
 }
 
 - (void)didReceiveMemoryWarning

@@ -133,11 +133,19 @@
 
 -(void) updateUnread
 {
-//make sure unread badge matches application badge
-    if([UIApplication sharedApplication].applicationIconBadgeNumber>0)
-    _activeTab.badgeValue=[NSString stringWithFormat:@"%d",[UIApplication sharedApplication].applicationIconBadgeNumber];
-    else
-    _activeTab.badgeValue=nil;
+    //make sure unread badge matches application badge
+    
+    int unread= [[DataLayer sharedInstance] countUnreadMessages];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        
+        if(unread>0)
+        {
+            _activeTab.badgeValue=[NSString stringWithFormat:@"%d",unread];
+            [UIApplication sharedApplication].applicationIconBadgeNumber =unread;
+        }
+        else
+            _activeTab.badgeValue=nil;
+    });
 }
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
@@ -191,7 +199,7 @@
 
 -(void) applicationDidBecomeActive:(UIApplication *)application
 {
-    [UIApplication sharedApplication].applicationIconBadgeNumber=0;
+  //  [UIApplication sharedApplication].applicationIconBadgeNumber=0;
 }
 
 #pragma mark notifiction 

@@ -9,7 +9,7 @@
 #import "MLXMPPManager.h"
 #import "DataLayer.h"
 #import "xmpp.h"
-
+#import "MonalAppDelegate.h"
 
 @interface MLXMPPManager()
 /**
@@ -114,6 +114,7 @@
     
     
   
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
     
     return self;
 }
@@ -478,6 +479,13 @@ withCompletionHandler:(void (^)(BOOL success)) completion
         xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
         [xmppAccount updatePriority:priority];
     }
+}
+
+#pragma mark message signals
+-(void) handleNewMessage:(NSNotification *)notification
+{
+    MonalAppDelegate* appDelegate= (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
+    [appDelegate updateUnread];
 }
 
 

@@ -144,7 +144,10 @@
             [UIApplication sharedApplication].applicationIconBadgeNumber =unread;
         }
         else
+        {
             _activeTab.badgeValue=nil;
+             [UIApplication sharedApplication].applicationIconBadgeNumber =0;
+        }
     });
 }
 

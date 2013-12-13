@@ -61,10 +61,10 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    UITableViewCell* cell =[tableView dequeueReusableCellWithIdentifier:@"ChatAccountCell"];
+    UITableViewCell* cell =[tableView dequeueReusableCellWithIdentifier:@"Cell"];
     if(cell==nil)
     {
-        cell=[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"ChatAccountCell"];
+        cell=[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"Cell"];
         cell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
     }
     

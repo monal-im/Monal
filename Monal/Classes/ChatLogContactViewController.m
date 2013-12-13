@@ -40,7 +40,7 @@
 
 - (void)viewWillAppear:(BOOL)animated
 {    
-    _tableData =[[DataLayer sharedInstance] messageHistoryListDates:[_contact objectForKey:@"full_name"] forAccount:_accountId];
+    _tableData =[[DataLayer sharedInstance] messageHistoryListDates:[_contact objectForKey:@"message_from"] forAccount:_accountId];
     [self.tableView reloadData];
 }
 
@@ -59,10 +59,14 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    static NSString *CellIdentifier = @"Cell";
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier forIndexPath:indexPath];
+    UITableViewCell* cell =[tableView dequeueReusableCellWithIdentifier:@"Cell"];
+    if(cell==nil)
+    {
+        cell=[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"ChatAccountCell"];
+        cell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
+    }
     
-    // Configure the cell...
+    cell.textLabel.text=[[_tableData objectAtIndex:indexPath.row] objectForKey:@"the_date"];
     
     return cell;
 }

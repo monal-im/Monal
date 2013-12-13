@@ -58,14 +58,14 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    UITableViewCell* cell =[tableView dequeueReusableCellWithIdentifier:@"ChatAccountCell"];
+    UITableViewCell* cell =[tableView dequeueReusableCellWithIdentifier:@"Cell"];
     if(cell==nil)
     {
         cell=[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"ChatAccountCell"];
         cell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
     }
     
-    cell.textLabel.text=[[_tableData objectAtIndex:indexPath.row] objectForKey:@"message_from"];
+    cell.textLabel.text=[[_tableData objectAtIndex:indexPath.row] objectForKey:@"full_name"];
 
     return cell;
 
@@ -74,9 +74,9 @@
 #pragma mark tableview delegate
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath;
 {
-    NSString* accountId=  [[_tableData objectAtIndex:indexPath.row] objectForKey:@"id"];
+  
     
-    ChatLogContactViewController* vc = [[ChatLogContactViewController alloc] initWithAccountId:accountId andContact: [_tableData objectAtIndex:indexPath.row] ];
+    ChatLogContactViewController* vc = [[ChatLogContactViewController alloc] initWithAccountId:_accountId andContact: [_tableData objectAtIndex:indexPath.row] ];
     [self.navigationController pushViewController:vc animated:YES];
     
 }

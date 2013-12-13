@@ -1451,7 +1451,7 @@ static DataLayer *sharedInstance=nil;
 	if(user!=nil)
 	{
         
-        NSString* query=[NSString stringWithFormat:@"select distinct date(timestamp) from message_history where account_id=%@ and  message_from='%@' or  message_to='%@'   order by timestamp desc", accountNo, buddy, buddy  ];
+        NSString* query=[NSString stringWithFormat:@"select distinct date(timestamp) as the_date from message_history where account_id=%@ and  message_from='%@' or  message_to='%@'   order by timestamp desc", accountNo, buddy, buddy  ];
         //debug_NSLog(query);
         NSArray* toReturn = [self executeReader:query];
         

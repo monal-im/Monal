@@ -8,6 +8,7 @@
 
 #import "ChatLogsViewController.h"
 #import "DataLayer.h"
+#import "ChatLogAccountDetailViewController.h"
 
 @interface ChatLogsViewController ()
 
@@ -28,7 +29,7 @@
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
-    self.navigationItem.title=NSLocalizedString(@"Chat Logs",@"");
+    self.navigationItem.title=NSLocalizedString(@"Accounts With Logs",@"");
     self.view.backgroundColor=[UIColor lightGrayColor];
     self.view.autoresizingMask=UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
     
@@ -48,7 +49,8 @@
 
 -(void) viewWillAppear:(BOOL)animated
 {
-   // _tableData = [DataLayer sharedInstance];
+    _tableData = [[DataLayer sharedInstance] accountList];
+    [_chatLogTable reloadData];
 }
 
 #pragma mark tableview datasource delegate
@@ -59,7 +61,32 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    return nil;
+    UITableViewCell* cell =[tableView dequeueReusableCellWithIdentifier:@"ChatAccountCell"];
+    if(cell==nil)
+    {
+        cell=[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"ChatAccountCell"];
+        cell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
+    }
+    
+    cell.textLabel.text=[NSString stringWithFormat:@"%@@%@", [[_tableData objectAtIndex:indexPath.row] objectForKey:@"username"],
+                         [[_tableData objectAtIndex:indexPath.row] objectForKey:@"domain"]];
+    
+
+ 
+        return cell;
+
+}
+
+#pragma mark tableview delegate
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath;
+{
+    NSString* accountName= [NSString stringWithFormat:@"%@@%@", [[_tableData objectAtIndex:indexPath.row] objectForKey:@"username"],
+                            [[_tableData objectAtIndex:indexPath.row] objectForKey:@"domain"]];;
+    NSString* accountId= [NSString stringWithFormat:@"%@", [[_tableData objectAtIndex:indexPath.row] objectForKey:@"account_id"]];
+    
+    ChatLogAccountDetailViewController* vc = [[ChatLogAccountDetailViewController alloc] initWithAccountId:accountId andName:accountName];
+    [self.navigationController pushViewController:vc animated:YES];
+    
 }
 
 

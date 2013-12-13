@@ -139,7 +139,7 @@
 
 #pragma mark message history
 -(NSMutableArray*) messageHistory:(NSString*) buddy forAccount:(NSString*) accountNo;
--(NSArray*) messageHistoryAll:(NSString*) buddy forAccount:(NSString*) accountNo; //we're going to stop using this.. 
+-(NSArray*) messageHistoryAll:(NSString*) buddy forAccount:(NSString*) accountNo; 
 
 -(NSArray*) messageHistoryListDates:(NSString*) buddy :(NSString*) accountNo; 
 -(NSArray*) messageHistoryDate:(NSString*) buddy forAccount:(NSString*) accountNo forDate:(NSString*) date;

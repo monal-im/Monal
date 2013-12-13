@@ -1500,14 +1500,9 @@ static DataLayer *sharedInstance=nil;
 
 
 
--(NSArray*) messageHistoryAll:(NSString*) buddy :(NSString*) accountNo
+-(NSArray*) messageHistoryAll:(NSString*) buddy forAccount:(NSString*) accountNo
 {
 	//returns a buddy's message history
-	
-	
-	
-	//NSArray* parts=[[[NSDate date] description] componentsSeparatedByString:@" "];
-	
 	
 	NSString* query=[NSString stringWithFormat:@"select message_from, message, thetime from (select message_from, message, timestamp as thetime, message_history_id from message_history where account_id=%@ and (message_from='%@' or message_to='%@') order by message_history_id desc) order by message_history_id asc ", accountNo, buddy, buddy];
 	//debug_NSLog(query);
@@ -1592,7 +1587,7 @@ static DataLayer *sharedInstance=nil;
 	if(user!=nil)
 	{
         
-        NSString* query=[NSString stringWithFormat:@"select x.* from(select distinct message_from,'', ifnull(full_name, message_from) as full_name, filename from message_history as a left outer join buddylist as b on a.message_from=b.buddy_name and a.account_id=b.account_id where a.account_id=%@  union select distinct message_to  ,'', ifnull(full_name, message_to) as full_name, filename from message_history as a left outer join buddylist as b on a.message_to=b.buddy_name and a.account_id=b.account_id where a.account_id=%@  )  as x where message_from!='%@' and message_from!='%@@%@'  order by full_name COLLATE NOCASE ", accountNo, accountNo,[[user objectAtIndex:0] objectAtIndex:0], [[user objectAtIndex:0] objectAtIndex:0],  [[user objectAtIndex:0] objectAtIndex:1]  ];
+        NSString* query=[NSString stringWithFormat:@"select x.* from(select distinct message_from,'', ifnull(full_name, message_from) as full_name, filename from message_history as a left outer join buddylist as b on a.message_from=b.buddy_name and a.account_id=b.account_id where a.account_id=%@  union select distinct message_to  ,'', ifnull(full_name, message_to) as full_name, filename from message_history as a left outer join buddylist as b on a.message_to=b.buddy_name and a.account_id=b.account_id where a.account_id=%@  )  as x where message_from!='%@' and message_from!='%@@%@'  order by full_name COLLATE NOCASE ", accountNo, accountNo,[[user objectAtIndex:0] objectForKey:@"username"], [[user objectAtIndex:0] objectForKey:@"username"],  [[user objectAtIndex:0] objectForKey:@"domain"]  ];
         //debug_NSLog(query);
         NSArray* toReturn = [self executeReader:query];
         

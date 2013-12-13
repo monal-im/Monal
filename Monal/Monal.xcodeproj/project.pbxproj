@@ -142,6 +142,7 @@
 		26761BF61804FBB700D94714 /* RoomListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26761BF41804FBB700D94714 /* RoomListViewController.m */; };
 		26761BF71804FBB700D94714 /* RoomListViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26761BF51804FBB700D94714 /* RoomListViewController.xib */; };
 		2678A98B185A8320003AF53B /* ChatLogAccountDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2678A98A185A8320003AF53B /* ChatLogAccountDetailViewController.m */; };
+		2678A98E185AB739003AF53B /* ChatLogContactViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2678A98D185AB739003AF53B /* ChatLogContactViewController.m */; };
 		2689B6EC1601914E0087CA58 /* DDBadgeViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2689B6EB1601914E0087CA58 /* DDBadgeViewCell.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		268BCF12140B29180025E4D1 /* libjrtplib-static.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */; };
 		268DD58617C4541000C673A9 /* MLChatCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 268DD58517C4541000C673A9 /* MLChatCell.m */; };
@@ -348,6 +349,8 @@
 		26761BF51804FBB700D94714 /* RoomListViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = RoomListViewController.xib; sourceTree = "<group>"; };
 		2678A989185A8320003AF53B /* ChatLogAccountDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChatLogAccountDetailViewController.h; sourceTree = "<group>"; };
 		2678A98A185A8320003AF53B /* ChatLogAccountDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChatLogAccountDetailViewController.m; sourceTree = "<group>"; };
+		2678A98C185AB739003AF53B /* ChatLogContactViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChatLogContactViewController.h; sourceTree = "<group>"; };
+		2678A98D185AB739003AF53B /* ChatLogContactViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChatLogContactViewController.m; sourceTree = "<group>"; };
 		267D96021225E56200B328E3 /* About.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = About.xib; sourceTree = "<group>"; };
 		2689B6EA1601914E0087CA58 /* DDBadgeViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDBadgeViewCell.h; sourceTree = "<group>"; };
 		2689B6EB1601914E0087CA58 /* DDBadgeViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDBadgeViewCell.m; sourceTree = "<group>"; };
@@ -622,6 +625,8 @@
 				261A628D176C15AD00059090 /* ChatLogsViewController.m */,
 				2678A989185A8320003AF53B /* ChatLogAccountDetailViewController.h */,
 				2678A98A185A8320003AF53B /* ChatLogAccountDetailViewController.m */,
+				2678A98C185AB739003AF53B /* ChatLogContactViewController.h */,
+				2678A98D185AB739003AF53B /* ChatLogContactViewController.m */,
 			);
 			name = "Chat Logs";
 			sourceTree = "<group>";
@@ -1151,6 +1156,7 @@
 				261AC91D1788A49C00E05657 /* ParsePresence.m in Sources */,
 				262797AF178A577300B85D94 /* MLContactCell.m in Sources */,
 				26347D861790FFDE006FF64F /* MLInfoCell.m in Sources */,
+				2678A98E185AB739003AF53B /* ChatLogContactViewController.m in Sources */,
 				2696EED21791245A00BC54B8 /* chatViewController.m in Sources */,
 				262D9EA717921169009292B4 /* ParseMessage.m in Sources */,
 				262D9EAA17921E82009292B4 /* XMPPMessage.m in Sources */,

@@ -6,8 +6,9 @@
 //
 //
 
-#import "ChatLogsViewController.h"
+#import <UIKit/UIKit.h>
 #import "DataLayer.h"
+#import "ChatLogContactViewController.h"
 
 @interface ChatLogAccountDetailViewController : UITableViewController
 {

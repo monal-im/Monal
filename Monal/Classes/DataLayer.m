@@ -1440,7 +1440,7 @@ static DataLayer *sharedInstance=nil;
 	}
 }
 
--(NSArray*) messageHistoryListDates:(NSString*) buddy :(NSString*) accountNo
+-(NSArray*) messageHistoryListDates:(NSString*) buddy forAccount: (NSString*) accountNo
 {
     //returns a list of  buddy's with message history
 	

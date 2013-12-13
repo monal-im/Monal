@@ -141,7 +141,7 @@
 -(NSMutableArray*) messageHistory:(NSString*) buddy forAccount:(NSString*) accountNo;
 -(NSArray*) messageHistoryAll:(NSString*) buddy forAccount:(NSString*) accountNo; 
 
--(NSArray*) messageHistoryListDates:(NSString*) buddy :(NSString*) accountNo; 
+-(NSArray*) messageHistoryListDates:(NSString*) buddy forAccount: (NSString*) accountNo;
 -(NSArray*) messageHistoryDate:(NSString*) buddy forAccount:(NSString*) accountNo forDate:(NSString*) date;
 
 -(BOOL) messageHistoryClean:(NSString*) buddy :(NSString*) accountNo;

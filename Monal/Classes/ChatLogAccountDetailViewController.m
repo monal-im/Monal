@@ -8,9 +8,6 @@
 
 #import "ChatLogAccountDetailViewController.h"
 
-@interface ChatLogAccountDetailViewController ()
-
-@end
 
 @implementation ChatLogAccountDetailViewController
 
@@ -23,7 +20,7 @@
     return self;
 }
 
--(id) initWithAccountId:(NSString*) accountId andName: (NSString*) accountName
+-(id) initWithAccountId:(NSString*) accountId andName:(NSString*) accountName
 {
     self = [super init];
     if(self){
@@ -68,7 +65,7 @@
         cell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
     }
     
-    cell.textLabel.text=[[_tableData objectAtIndex:indexPath.row] objectForKey:@"full_name"];
+    cell.textLabel.text=[[_tableData objectAtIndex:indexPath.row] objectForKey:@"message_from"];
 
     return cell;
 
@@ -77,12 +74,10 @@
 #pragma mark tableview delegate
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath;
 {
-//    NSString* accountName= [NSString stringWithFormat:@"%@@%@", [[_tableData objectAtIndex:indexPath.row] objectForKey:@"username"],
-//                            [[_tableData objectAtIndex:indexPath.row] objectForKey:@"domain"]];;
-//    NSString* accountId=  [[_tableData objectAtIndex:indexPath.row] objectForKey:@"id"];
-//    
-//    ChatLogAccountDetailViewController* vc = [[ChatLogAccountDetailViewController alloc] initWithAccountId:accountId andName:accountName];
-//    [self.navigationController pushViewController:vc animated:YES];
+    NSString* accountId=  [[_tableData objectAtIndex:indexPath.row] objectForKey:@"id"];
+    
+    ChatLogContactViewController* vc = [[ChatLogContactViewController alloc] initWithAccountId:accountId andContact: [_tableData objectAtIndex:indexPath.row] ];
+    [self.navigationController pushViewController:vc animated:YES];
     
 }
 

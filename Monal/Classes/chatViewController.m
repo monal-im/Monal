@@ -168,22 +168,46 @@
 
 }
 
--(id) initWithContact:(NSDictionary*) contact
+-(void) setup
 {
-    self=[super init];
-    _contact=contact;
-    // handle messages to view someuser
-    _contactName=[contact objectForKey:@"buddy_name"];
-	_contactFullName=[contact objectForKey:@"full_name"];;
-    self.accountNo=[NSString stringWithFormat:@"%d",[[contact objectForKey:@"account_id"] integerValue]];
+    _contactName=[_contact objectForKey:@"buddy_name"];
+    if(!_contactName)
+    {
+         _contactName=[_contact objectForKey:@"message_from"];
+    }
+	_contactFullName=[_contact objectForKey:@"full_name"];;
+    self.accountNo=[NSString stringWithFormat:@"%d",[[_contact objectForKey:@"account_id"] integerValue]];
     self.hidesBottomBarWhenPushed=YES;
     
 #warning this should be smarter...
     NSArray* accountVals =[[DataLayer sharedInstance] accountVals:self.accountNo];
+    if([accountVals count]>0)
+    {
     self.jid=[NSString stringWithFormat:@"%@@%@",[[accountVals objectAtIndex:0] objectForKey:@"username"], [[accountVals objectAtIndex:0] objectForKey:@"domain"]];
-        
+    }
+}
+
+-(id) initWithContact:(NSDictionary*) contact
+{
+    self=[super init];
+    if(self){
+    _contact=contact;
+    [self setup];
+    }
     return self;
 
+}
+
+-(id) initWithContact:(NSDictionary*) contact  andDay:(NSString* )day;
+{
+    self = [super init];
+    if(self){
+    _contact=contact;
+    _day=day;
+        [self setup];
+    }
+    
+    return self;
 }
 
 
@@ -223,22 +247,41 @@
     [MLNotificationManager sharedInstance].currentAccountNo=self.accountNo;
     [MLNotificationManager sharedInstance].currentContact=self.contactName;
     
-    _messagelist =[[DataLayer sharedInstance] messageHistory:_contactName forAccount: _accountNo];
-    int unread =[[DataLayer sharedInstance] countUserUnreadMessages:_contactName forAccount: _accountNo];
-    _isMUC=[[DataLayer sharedInstance] isBuddyMuc:_contactName forAccount: _accountNo];
+    if(!_day) {
+        _messagelist =[[DataLayer sharedInstance] messageHistory:_contactName forAccount: _accountNo];
+        int unread =[[DataLayer sharedInstance] countUserUnreadMessages:_contactName forAccount: _accountNo];
+        _isMUC=[[DataLayer sharedInstance] isBuddyMuc:_contactName forAccount: _accountNo];
+        
+        if(unread==0)
+            _firstmsg=YES;
+    }
+    else
+    {
+        _messagelist =[[DataLayer sharedInstance] messageHistoryDate:_contactName forAccount: _accountNo forDate:_day];
+        
+    }
     
-    if(unread==0)
-        _firstmsg=YES;
     
     if(![_contactFullName isEqualToString:@"(null)"])
-       {
-           _topName.text=_contactFullName;
-       }
+    {
+        _topName.text=_contactFullName;
+    }
     else
         _topName.text=_contactName;
     
-    _topIcon.image=[[MLImageManager sharedInstance] getIconForContact:_contactName andAccount:_accountNo];
- 
+    
+    if(_day) {
+        _topName.text= [NSString stringWithFormat:@"%@(%@)", _topName.text, _day];
+        [[NSNotificationCenter defaultCenter] removeObserver:self];
+        [containerView removeFromSuperview];
+        [_topIcon removeFromSuperview];
+    }
+    else
+    {
+        _topIcon.image=[[MLImageManager sharedInstance] getIconForContact:_contactName andAccount:_accountNo];
+        
+    }
+    
 }
 
 -(void) viewDidAppear:(BOOL)animated
@@ -251,7 +294,9 @@
     [MLNotificationManager sharedInstance].currentAccountNo=nil;
     [MLNotificationManager sharedInstance].currentContact=nil;
     
+    if(!_day) {
     [[DataLayer sharedInstance] markAsReadBuddy:self.contactName forAccount:self.accountNo];
+    }
 }
 
 -(void) dealloc

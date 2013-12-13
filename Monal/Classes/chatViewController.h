@@ -43,12 +43,19 @@
     UIImageView* _topIcon;
     
     BOOL  _isMUC;
+    
+    NSString* _day; 
 }
 
 @property (nonatomic,strong)  NSString* contactName;
 
 
 -(id) initWithContact:(NSDictionary*) contact  ;
+
+/**
+ if day is specified this is a log
+ */
+-(id) initWithContact:(NSDictionary*) contact  andDay:(NSString* )day;
 
 /**
  Receives the new message notice and will update if it is this user. 

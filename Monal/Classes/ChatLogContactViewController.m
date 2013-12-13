@@ -7,6 +7,7 @@
 //
 
 #import "ChatLogContactViewController.h"
+#import "chatViewController.h"
 
 
 @implementation ChatLogContactViewController
@@ -71,6 +72,17 @@
     return cell;
 }
 
-
+#pragma mark tableview delegate
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath;
+{
+    NSString* theDay = [[_tableData objectAtIndex:indexPath.row] objectForKey:@"the_date"];
+    
+    NSMutableDictionary* contactToPass = [[NSMutableDictionary alloc] initWithDictionary:_contact];
+    [contactToPass setObject:_accountId forKey:@"account_id"];
+    
+    chatViewController* vc = [[chatViewController alloc] initWithContact:contactToPass andDay:theDay];
+    [self.navigationController pushViewController:vc animated:YES];
+    
+}
 
 @end

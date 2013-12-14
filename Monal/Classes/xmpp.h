@@ -212,6 +212,7 @@ sets away xmpp call.
 @property (nonatomic,strong)  NSMutableArray*  discoveredServices;
 @property (nonatomic,strong)  NSString*  conferenceServer;
 @property (nonatomic,strong)  NSArray*  roomList;
+@property (nonatomic, strong) NSArray* rosterList; 
 
 //calculated
 @property (nonatomic,strong, readonly) NSString* versionHash;
@@ -219,6 +220,8 @@ sets away xmpp call.
 
 //UI
 @property (nonatomic,weak) ContactsViewController* contactsVC; 
+
+
 
 
 @end

@@ -688,6 +688,10 @@ dispatch_async(dispatch_get_current_queue(), ^{
                 [self send:discoInfo];
                 
                 
+                XMPPIQ* roster =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
+                [roster setRosterRequest];
+                [self send:roster];
+                
                 self.priority= [[[NSUserDefaults standardUserDefaults] stringForKey:@"XMPPPriority"] integerValue];
                 self.statusMessage=[[NSUserDefaults standardUserDefaults] stringForKey:@"StatusMessage"];
                 self.awayState=[[NSUserDefaults standardUserDefaults] boolForKey:@"Away"];
@@ -770,6 +774,10 @@ dispatch_async(dispatch_get_current_queue(), ^{
                     {
                         
                     }
+                }
+                else if (iqNode.roster==YES)
+                {
+                    self.rosterList=iqNode.items;
                 }
             }
            

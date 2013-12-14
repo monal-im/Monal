@@ -17,6 +17,7 @@
 
 @property (nonatomic, assign, readonly) BOOL discoInfo;
 @property (nonatomic, assign, readonly) BOOL discoItems;
+@property (nonatomic, assign, readonly) BOOL roster;
 @property (nonatomic, assign, readonly) BOOL ping;
 
 @property (nonatomic, assign, readonly) BOOL shouldSetBind;

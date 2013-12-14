@@ -114,6 +114,15 @@
     [self.children addObject:itemNode];
 }
 
+-(void) setRosterRequest
+{       
+    XMLNode* queryNode =[[XMLNode alloc] init];
+    queryNode.element=@"query";
+    [queryNode.attributes setObject:@"jabber:iq:roster" forKey:@"xmlns"];
+    [self.children addObject:queryNode];
+	
+}
+
 #pragma mark iq get
 -(void) getVcardTo:(NSString*) to
 {

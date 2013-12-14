@@ -58,4 +58,9 @@ removes a contact from the roster
  */
 -(void) setRemoveFromRoster:(NSString*) jid;
 
+/**
+ Requests a full roster from the server
+ */
+-(void) setRosterRequest;
+
 @end

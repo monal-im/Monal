@@ -145,7 +145,7 @@
 -(NSArray*) messageHistoryDate:(NSString*) buddy forAccount:(NSString*) accountNo forDate:(NSString*) date;
 
 -(BOOL) messageHistoryClean:(NSString*) buddy :(NSString*) accountNo;
--(BOOL) messageHistoryCleanAll:(NSString*) accountNo;
+-(BOOL) messageHistoryCleanAll;
 
 -(NSArray*) messageHistoryBuddies:(NSString*) accountNo;
 -(BOOL) markAsReadBuddy:(NSString*) buddy forAccount:(NSString*) accountNo;

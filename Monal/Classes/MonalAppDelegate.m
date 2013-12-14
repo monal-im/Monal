@@ -197,6 +197,12 @@
   //  [Crashlytics sharedInstance].debugMode = YES;
   // [[Crashlytics sharedInstance] crash];
     
+    
+    //update logs if needed
+    if(! [[NSUserDefaults standardUserDefaults] boolForKey:@"Logging"])
+    {
+        [[DataLayer sharedInstance] messageHistoryCleanAll];
+    }
     return YES;
 }
 
@@ -233,6 +239,7 @@
 
 -(void)applicationWillTerminate:(UIApplication *)application
 {
+    
        [[NSUserDefaults standardUserDefaults] synchronize];
 }
 

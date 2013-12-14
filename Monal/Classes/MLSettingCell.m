@@ -88,6 +88,7 @@
         {
             [[MLXMPPManager sharedInstance] setVisible:_toggleSwitch.on];
         }
+  
 }
 
 #pragma mark uitextfield delegate

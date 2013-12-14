@@ -8,6 +8,7 @@
 
 #import "SettingsViewController.h"
 #import "MLConstants.h"
+#import "DataLayer.h"
 
 
 @interface SettingsViewController ()
@@ -63,6 +64,13 @@
 -(void) viewWillDisappear:(BOOL)animated
 {
     [[NSUserDefaults standardUserDefaults] synchronize];
+    
+    //update logs if needed
+   if(! [[NSUserDefaults standardUserDefaults] boolForKey:@"Logging"])
+   {
+       [[DataLayer sharedInstance] messageHistoryCleanAll];
+   }
+  
 }
 
 - (void)didReceiveMemoryWarning
@@ -254,14 +262,14 @@
                 case 0:
                 {
                     cell.textLabel.text=NSLocalizedString(@"Message Preview", @"");
-                       cell.defaultKey=@"MessagePreview";
+                    cell.defaultKey=@"MessagePreview";
                     cell.switchEnabled=YES;
                     break; 
                 }
                 case 1:
                 {
                     cell.textLabel.text=NSLocalizedString(@"Log Chats", @"");
-                       cell.defaultKey=@"Logging";
+                    cell.defaultKey=@"Logging";
                     cell.switchEnabled=YES;
                     break;
                 }

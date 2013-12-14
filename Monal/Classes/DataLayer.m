@@ -1552,26 +1552,18 @@ static DataLayer *sharedInstance=nil;
 }
 
 
--(BOOL) messageHistoryCleanAll:(NSString*) accountNo
+-(BOOL) messageHistoryCleanAll
 {
 	//cleans a buddy's message history
-	
-    
-	NSString* query=[NSString stringWithFormat:@"delete from message_history where account_id=%@  ",accountNo];
-	//debug_NSLog(query);
+	NSString* query=[NSString stringWithFormat:@"delete from message_history "];
 	if( [self executeNonQuery:query])
-		
 	{
-		
 		debug_NSLog(@" cleaned messages " );
-		
-		;
 		return YES;
 	}
 	else
 	{
 		debug_NSLog(@"message history failed to clean all");
-		;
 		return NO;
 	}
 	

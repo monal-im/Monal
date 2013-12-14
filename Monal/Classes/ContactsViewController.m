@@ -465,9 +465,10 @@
 -(NSInteger) numberOfSectionsInTableView:(UITableView *)tableView
 {
     
-    if([[NSUserDefaults standardUserDefaults] objectForKey:@"OfflineContact"])
+    if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
         return 3;
-    else return 2;
+    else
+        return 2;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section

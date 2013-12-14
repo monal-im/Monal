@@ -385,8 +385,11 @@
 
 -(void) refreshDisplay
 {
-
-    _contacts=[NSMutableArray arrayWithArray:[[DataLayer sharedInstance] onlineBuddiesSortedBy:@"Name"]];
+    
+     if([[NSUserDefaults standardUserDefaults] objectForKey:@"SortContacts"]) //sort by status
+           _contacts=[NSMutableArray arrayWithArray:[[DataLayer sharedInstance] onlineBuddiesSortedBy:@"Status"]];
+         else
+         _contacts=[NSMutableArray arrayWithArray:[[DataLayer sharedInstance] onlineBuddiesSortedBy:@"Name"]];
     [self.contactsTable reloadData];
 
 }
@@ -461,7 +464,10 @@
 
 -(NSInteger) numberOfSectionsInTableView:(UITableView *)tableView
 {
-    return 3;
+    
+    if([[NSUserDefaults standardUserDefaults] objectForKey:@"OfflineContact"])
+        return 3;
+    else return 2;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section

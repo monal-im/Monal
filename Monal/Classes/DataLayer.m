@@ -636,7 +636,7 @@ static DataLayer *sharedInstance=nil;
                 query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0 as 'count' , ifnull(full_name, buddy_name) as full_name, account_id from buddylist where online=1    order by full_name COLLATE NOCASE asc "];
             }
             
-            if([sort isEqualToString:@"State"])
+            if([sort isEqualToString:@"Status"])
             {
                 query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0 as 'count', ifnull(full_name, buddy_name) as full_name, account_id from buddylist where   online=1   order by state,full_name COLLATE NOCASE  asc "];
             }

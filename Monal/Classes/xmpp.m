@@ -659,7 +659,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
     NSDictionary* nextStanzaPos=[self nextStanza];
     while (nextStanzaPos)
     {
-        //  debug_NSLog(@"got stanza %@", nextStanzaPos);
+        debug_NSLog(@"got stanza %@", nextStanzaPos);
         
         if([[nextStanzaPos objectForKey:@"stanzaType"]  isEqualToString:@"iq"])
         {
@@ -778,6 +778,16 @@ dispatch_async(dispatch_get_current_queue(), ^{
                 else if (iqNode.roster==YES)
                 {
                     self.rosterList=iqNode.items;
+                    
+                    for(NSDictionary* contact in self.rosterList)
+                    {
+                
+                        if(![[DataLayer sharedInstance] isBuddyInList:[contact objectForKey:@"jid"] forAccount:_accountNo])
+                        {
+                        [[DataLayer sharedInstance] addBuddy:[contact objectForKey:@"jid"]?[contact objectForKey:@"jid"]:@"" forAccount:_accountNo fullname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@"" nickname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@""];
+                        }
+                    }
+                    
                 }
             }
            

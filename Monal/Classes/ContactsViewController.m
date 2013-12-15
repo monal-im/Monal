@@ -191,7 +191,7 @@
 }
 
 #pragma mark updating user display
--(void) addUser:(NSDictionary*) user
+-(void) addOnlineUser:(NSDictionary*) user
 {
     
     if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
@@ -209,6 +209,7 @@
                    ^{
                        //check if already there
                        int pos=-1;
+                       int offlinepos=-1;
                        int counter=0;
                        for(NSDictionary* row in _contacts)
                        {
@@ -216,6 +217,19 @@
                               [[row objectForKey:@"account_id"]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
                            {
                                pos=counter;
+                               break;
+                           }
+                           counter++;
+                       }
+                       
+                       
+                       counter=0;
+                       for(NSDictionary* row in _offlineContacts)
+                       {
+                           if([[row objectForKey:@"buddy_name"] caseInsensitiveCompare:[user objectForKey:kusernameKey] ]==NSOrderedSame &&
+                              [[row objectForKey:@"account_id"]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
+                           {
+                               offlinepos=counter;
                                break;
                            }
                            counter++;
@@ -236,6 +250,12 @@
                            }
                            //insert into datasource
                            [_contacts insertObject:[contactRow objectAtIndex:0] atIndex:0];
+                           
+                           if(offlinepos>=0 && offlinepos<[_offlineContacts count])
+                           {
+                               [_offlineContacts removeObjectAtIndex:offlinepos];
+                           }
+                           
                            //sort
                            NSSortDescriptor *descriptor = [[NSSortDescriptor alloc] initWithKey:@"buddy_name"  ascending:YES];
                            NSArray* sortArray =[NSArray arrayWithObjects:descriptor,nil];
@@ -261,6 +281,16 @@
                            NSIndexPath *path1 = [NSIndexPath indexPathForRow:pos inSection:konlineSection];
                            [_contactsTable insertRowsAtIndexPaths:@[path1]
                                                  withRowAnimation:UITableViewRowAnimationAutomatic];
+                           
+                           if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
+                           {
+                               if(offlinepos>=0 && offlinepos<[_offlineContacts count])
+                               {
+                                   NSIndexPath *path2 = [NSIndexPath indexPathForRow:offlinepos inSection:kofflineSection];
+                                   [_contactsTable deleteRowsAtIndexPaths:@[path2]
+                                                         withRowAnimation:UITableViewRowAnimationFade];
+                               }
+                           }
                            [_contactsTable endUpdates];
                            
                            
@@ -285,7 +315,7 @@
     
 }
 
--(void) removeUser:(NSDictionary*) user
+-(void) removeOnlineUser:(NSDictionary*) user
 {
     
     if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
@@ -304,6 +334,7 @@
                        //check if  there
                        int pos=-1;
                        int counter=0;
+                       int offlinepos=-1;
                        for(NSDictionary* row in _contacts)
                        {
                            if([[row objectForKey:@"buddy_name"] caseInsensitiveCompare:[user objectForKey:kusernameKey] ]==NSOrderedSame &&
@@ -315,6 +346,55 @@
                            counter++;
                        }
                        
+                       
+                       NSArray* contactRow=[[DataLayer sharedInstance] contactForUsername:[user objectForKey:kusernameKey] forAccount:[user objectForKey:kaccountNoKey]];
+                       
+                       if(!(contactRow.count>=1))
+                       {
+                           debug_NSLog(@"ERROR:could not find contact row");
+                           return;
+                       }
+                       
+                       counter=0;
+                       for(NSDictionary* row in _offlineContacts)
+                       {
+                           if([[row objectForKey:@"buddy_name"] caseInsensitiveCompare:[user objectForKey:kusernameKey] ]==NSOrderedSame &&
+                              [[row objectForKey:@"account_id"]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
+                           {
+                               offlinepos=counter;
+                               break;
+                           }
+                           counter++;
+                       }
+                       
+                       if(offlinepos==-1)
+                       {
+                           NSMutableDictionary* row= [contactRow objectAtIndex:0] ;
+                           [row setObject:@"offline" forKey:@"state"]; // make sure it is set to offline
+                           [_offlineContacts insertObject:row atIndex:0];
+                           
+                           //sort
+                           NSSortDescriptor *descriptor = [[NSSortDescriptor alloc] initWithKey:@"buddy_name"  ascending:YES];
+                           NSArray* sortArray =[NSArray arrayWithObjects:descriptor,nil];
+                           [_offlineContacts sortUsingDescriptors:sortArray];
+                           
+                           //find where it is
+                           
+                           counter=0;
+                           for(NSDictionary* row in _offlineContacts)
+                           {
+                               if([[row objectForKey:@"buddy_name"] caseInsensitiveCompare:[user objectForKey:kusernameKey] ]==NSOrderedSame &&
+                                  [[row objectForKey:@"account_id"]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
+                               {
+                                   offlinepos=counter;
+                                   break;
+                               }
+                               counter++;
+                           }
+                           debug_NSLog(@"sorted contacts %@", _offlineContacts);
+                       }
+                       
+                       
                        //not there
                        if(pos>=0)
                        {
@@ -324,13 +404,19 @@
                            NSIndexPath *path1 = [NSIndexPath indexPathForRow:pos inSection:konlineSection];
                            [_contactsTable deleteRowsAtIndexPaths:@[path1]
                                                  withRowAnimation:UITableViewRowAnimationAutomatic];
+                           
+                           if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"] && offlinepos>-1)
+                           {
+                               NSIndexPath *path2 = [NSIndexPath indexPathForRow:offlinepos inSection:kofflineSection];
+                               [_contactsTable insertRowsAtIndexPaths:@[path2]
+                                                     withRowAnimation:UITableViewRowAnimationFade];
+                           }
+                           
                            [_contactsTable endUpdates];
                        }
-                       
+
                    });
-    
-    
-    
+ 
 }
 
 -(void) clearContactsForAccount: (NSString*) accountNo
@@ -526,10 +612,10 @@
     }
     
     NSDictionary* row =nil;
-     if(indexPath.section==konlineSection)
-     {
-     row = [_contacts objectAtIndex:indexPath.row];
-     }
+    if(indexPath.section==konlineSection)
+    {
+        row = [_contacts objectAtIndex:indexPath.row];
+    }
     
     if(indexPath.section==kofflineSection)
     {
@@ -608,7 +694,7 @@
 {
     ContactDetails* detailVC =nil;
     if(indexPath.section==konlineSection)
-       detailVC= [[ContactDetails alloc]  initWithContact:[_contacts objectAtIndex:indexPath.row] ];
+        detailVC= [[ContactDetails alloc]  initWithContact:[_contacts objectAtIndex:indexPath.row] ];
     else
         detailVC=[[ContactDetails alloc]  initWithContact:[_offlineContacts objectAtIndex:indexPath.row] ];
     

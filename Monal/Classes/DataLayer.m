@@ -660,7 +660,7 @@ static DataLayer *sharedInstance=nil;
 -(NSArray*) offlineBuddies
 {
 	
-    NSString* query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, ifnull(full_name, buddy_name) as full_name from buddylist where  online=0 order by full_name COLLATE NOCASE "];
+    NSString* query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, ifnull(full_name, buddy_name) as full_name, account_id from buddylist where  online=0 order by full_name COLLATE NOCASE "];
     //debug_NSLog(query);
     NSArray* toReturn = [self executeReader:query];
     

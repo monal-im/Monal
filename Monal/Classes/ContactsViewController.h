@@ -55,12 +55,12 @@
 /**
  add or update an online user
  */
--(void) addUser:(NSDictionary*) user;
+-(void) addOnlineUser:(NSDictionary*) user;
 
 /**
  mark user as offline
  */
--(void) removeUser:(NSDictionary*) user;
+-(void) removeOnlineUser:(NSDictionary*) user;
 
 /**
  if an account disconnects then clear out those contacts in the list

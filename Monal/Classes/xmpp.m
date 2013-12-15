@@ -743,7 +743,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
                                         };
                 
                 dispatch_async(_xmppQueue, ^{
-                    [self.contactsVC addUser:userDic];
+                    [self.contactsVC addOnlineUser:userDic];
                 });
                 
             }
@@ -786,10 +786,10 @@ dispatch_async(dispatch_get_current_queue(), ^{
                     for(NSDictionary* contact in self.rosterList)
                     {
                 
-                        if(![[DataLayer sharedInstance] isBuddyInList:[contact objectForKey:@"jid"] forAccount:_accountNo])
-                        {
-                        [[DataLayer sharedInstance] addBuddy:[contact objectForKey:@"jid"]?[contact objectForKey:@"jid"]:@"" forAccount:_accountNo fullname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@"" nickname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@""];
-                        }
+//                        if(![[DataLayer sharedInstance] isBuddyInList:[contact objectForKey:@"jid"] forAccount:_accountNo])
+//                        {
+//                        [[DataLayer sharedInstance] addBuddy:[contact objectForKey:@"jid"]?[contact objectForKey:@"jid"]:@"" forAccount:_accountNo fullname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@"" nickname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@""];
+//                        }
                     }
                     
                 }
@@ -934,7 +934,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
                                             kstatusKey:status
                                             };
                     dispatch_async(_xmppQueue, ^{
-                    [self.contactsVC addUser:userDic];
+                    [self.contactsVC addOnlineUser:userDic];
                      [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactOnlineNotice object:self userInfo:userDic];
                     });
                     
@@ -974,7 +974,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
                 NSDictionary* userDic=@{kusernameKey: presenceNode.user,
                                         kaccountNoKey:_accountNo};
                 dispatch_async(_xmppQueue, ^{
-                [self.contactsVC removeUser:userDic];
+                [self.contactsVC removeOnlineUser:userDic];
                 [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactOfflineNotice object:self userInfo:userDic];
                 });
                 

@@ -17,6 +17,7 @@
     IBOutlet UITableView* _theTable;
 	IBOutlet UITableViewCell* _topcell;
 	IBOutlet UITableViewCell* _bottomcell;
+    IBOutlet UITableViewCell* _resourceCell;
     IBOutlet UIButton* _callButton;
     
     NSDictionary* _contact; 
@@ -30,6 +31,7 @@
 @property (nonatomic) IBOutlet UILabel* fullName;
 @property (nonatomic) IBOutlet UILabel* buddyStatus;
 @property (nonatomic) IBOutlet UITextView* buddyMessage;
+@property (nonatomic) IBOutlet UITextView* resourcesTextView;
 
 -(id) initWithContact:(NSDictionary*) contact;
 -(IBAction) callPress;

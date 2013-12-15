@@ -595,17 +595,6 @@ static DataLayer *sharedInstance=nil;
 	
 }
 
-
--(NSArray*)getResourcesForUser:(NSString*)user
-{
-    NSString* query1=[NSString stringWithFormat:@" select resource from buddy_resources as A inner join buddylist as B on a.buddy_id=b.buddy_id where  buddy_name='%@'  ", user ];
-	
-    NSArray* resources = [self executeReader:query1];
-    
-    return resources;
-    
-}
-
 -(NSArray*) contactForUsername:(NSString*) username forAccount: (NSString*) accountNo
 {
     NSString* query= query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, ifnull(full_name, buddy_name) as full_name, account_id from buddylist where buddy_name='%@' and account_id=%@", username, accountNo];
@@ -984,6 +973,15 @@ static DataLayer *sharedInstance=nil;
 	{
         return NO;
 	}
+}
+
+
+-(NSArray*)resourcesForContact:(NSString*)contact
+{
+    NSString* query1=[NSString stringWithFormat:@" select resource from buddy_resources as A inner join buddylist as B on a.buddy_id=b.buddy_id where  buddy_name='%@'  ", contact ];
+    NSArray* resources = [self executeReader:query1];
+    return resources;
+    
 }
 
 

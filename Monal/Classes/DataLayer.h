@@ -48,7 +48,7 @@
 -(BOOL) resetContacts;
 
 -(NSArray*) onlineBuddiesSortedBy:(NSString*) sort;
-
+-(NSArray*) resourcesForContact:(NSString*)contact ;
 -(NSArray*) offlineBuddies;
 
 -(NSArray*) newBuddies:(NSString*) accountNo;
@@ -91,9 +91,7 @@
 //-(BOOL) setFileName:(NSString*) fileName forBuddy:(NSString*) buddy andAccount:(NSString*) accountNo;
 
 -(BOOL) setBuddyHash:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
--(NSString*) buddyHash:(NSString*) buddy forAccount:(NSString*) accountNo; 
-
--(NSArray*)getResourcesForUser:(NSString*)user ;
+-(NSString*) buddyHash:(NSString*) buddy forAccount:(NSString*) accountNo;
 
 -(bool) isBuddyOnline:(NSString*) buddy forAccount:(NSString*) accountNo ;
 -(bool) isBuddyMuc:(NSString*) buddy forAccount:(NSString*) accountNo;

@@ -8,6 +8,7 @@
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="ContactDetails">
             <connections>
                 <outlet property="_bottomcell" destination="48" id="71"/>
+                <outlet property="_resourceCell" destination="rdh-ql-sPQ" id="ynW-Wq-BNp"/>
                 <outlet property="_theTable" destination="46" id="69"/>
                 <outlet property="_topcell" destination="47" id="70"/>
                 <outlet property="buddyIconView" destination="36" id="39"/>
@@ -16,6 +17,7 @@
                 <outlet property="buddyStatus" destination="43" id="44"/>
                 <outlet property="fullName" destination="35" id="41"/>
                 <outlet property="protocolImage" destination="37" id="40"/>
+                <outlet property="resourcesTextView" destination="S5G-a9-4uO" id="Sop-dR-Ch1"/>
                 <outlet property="view" destination="46" id="55"/>
             </connections>
         </placeholder>
@@ -85,15 +87,34 @@
             </tableViewCellContentView>
             <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
         </tableViewCell>
-        <tableViewCell contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" id="48" userLabel="bottomcell">
-            <rect key="frame" x="0.0" y="0.0" width="440" height="205"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" rowHeight="126" id="48" userLabel="bottomcell">
+            <rect key="frame" x="0.0" y="0.0" width="440" height="126"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
             <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="48" id="mAa-FN-TAg">
-                <rect key="frame" x="0.0" y="0.0" width="440" height="204"/>
+                <rect key="frame" x="0.0" y="0.0" width="440" height="125"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <textView opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" showsHorizontalScrollIndicator="NO" delaysContentTouches="NO" canCancelContentTouches="NO" bouncesZoom="NO" editable="NO" id="6">
-                        <rect key="frame" x="20" y="7.9999999743635772" width="406" height="186"/>
+                        <rect key="frame" x="20" y="4.9999999474057013" width="406" height="110"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <fontDescription key="fontDescription" type="system" size="system"/>
+                        <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                        <dataDetectorType key="dataDetectorTypes" phoneNumber="YES" link="YES"/>
+                    </textView>
+                </subviews>
+            </tableViewCellContentView>
+            <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+        </tableViewCell>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" id="rdh-ql-sPQ" userLabel="resourceCell">
+            <rect key="frame" x="0.0" y="0.0" width="440" height="205"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="rdh-ql-sPQ" id="Qsg-5r-Cp8">
+                <rect key="frame" x="0.0" y="0.0" width="440" height="204"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <textView opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" showsHorizontalScrollIndicator="NO" delaysContentTouches="NO" canCancelContentTouches="NO" bouncesZoom="NO" editable="NO" id="S5G-a9-4uO">
+                        <rect key="frame" x="20" y="8" width="406" height="185.99999991905824"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <fontDescription key="fontDescription" type="system" size="system"/>

@@ -73,6 +73,16 @@
     
     UIImage* contactImage=[[MLImageManager sharedInstance] getIconForContact:[_contact objectForKey:@"buddy_name"] andAccount:accountNo];
     _buddyIconView.image=contactImage;
+    
+   NSArray* resources= [[DataLayer sharedInstance] resourcesForContact:[_contact objectForKey:@"buddy_name"]];
+     self.resourcesTextView.text=@""; 
+    for(NSDictionary* row in resources)
+    {
+        self.resourcesTextView.text=[NSString stringWithFormat:@"%@\n%@\n",self.resourcesTextView.text, [row objectForKey:@"resource"]];
+        
+    }
+
+    
 }
 
 -(BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -137,11 +147,14 @@
 		thecell=_topcell;
 	}
 	else
-		if(indexPath.section==1) //bottom
+		if(indexPath.section==1) //message
 		{
 			thecell=_bottomcell;
 		}
-    
+    else if(indexPath.section==2) //resources
+    {
+        thecell=_resourceCell;
+    }
     return thecell;
     
 }
@@ -157,6 +170,10 @@
 		{
 			return _bottomcell.frame.size.height;
 		}
+    if(indexPath.section==2) //bottom
+    {
+        return _resourceCell.frame.size.height;
+    }
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section;
@@ -165,9 +182,8 @@
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-	
-	
-	return 2;
+
+	return 3;
 	
 }
 
@@ -176,6 +192,9 @@
     NSString* toreturn=@"";
     if(section==1)
         toreturn= @"Message";
+    
+    if(section==2)
+        toreturn= @"Resources";
 
     return toreturn;
 }

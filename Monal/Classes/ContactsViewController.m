@@ -633,43 +633,51 @@
 {
     [tableView deselectRowAtIndexPath:indexPath animated:NO];
     
-    if((indexPath.section==konlineSection) ||
-       (indexPath.section==kofflineSection) )
+    NSMutableDictionary* row;
+    if((indexPath.section==konlineSection))
+        
     {
         
-        [[_contacts objectAtIndex:indexPath.row] setObject:[NSNumber numberWithInt:0] forKey:@"count"];
+        row=[_contacts objectAtIndex:indexPath.row];
         
-        //make chat view
-        if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
+    }
+    else if (indexPath.section==kofflineSection)
+    {
+        row= [_offlineContacts objectAtIndex:indexPath.row];
+    }
+    
+    [row setObject:[NSNumber numberWithInt:0] forKey:@"count"];
+    
+    //make chat view
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
+    {
+        if([[self.currentNavController topViewController] isKindOfClass:[chatViewController class]])
         {
-            if([[self.currentNavController topViewController] isKindOfClass:[chatViewController class]])
+            chatViewController* currentTop=(chatViewController*)[self.currentNavController topViewController];
+            if([currentTop.contactName isEqualToString:[row objectForKey:@"buddy_name"]] &&
+               [currentTop.accountNo isEqualToString:
+                [NSString stringWithFormat:@"%d",[[row objectForKey:@"account_id"] integerValue]] ]
+               )
             {
-                chatViewController* currentTop=(chatViewController*)[self.currentNavController topViewController];
-                if([currentTop.contactName isEqualToString:[[_contacts objectAtIndex:indexPath.row] objectForKey:@"buddy_name"]] &&
-                   [currentTop.accountNo isEqualToString:
-                    [NSString stringWithFormat:@"%d",[[[_contacts objectAtIndex:indexPath.row] objectForKey:@"account_id"] integerValue]] ]
-                   )
-                {
-                    // do nothing
-                    return; 
-                }
-                else
-                {
-                    [self.currentNavController  popToRootViewControllerAnimated:NO];
-                }
+                // do nothing
+                return;
+            }
+            else
+            {
+                [self.currentNavController  popToRootViewControllerAnimated:NO];
             }
         }
-        
-        chatViewController* chatVC = [[chatViewController alloc] initWithContact:[_contacts objectAtIndex:indexPath.row] ];
-        [self.currentNavController pushViewController:chatVC animated:YES];
-        
-        [tableView beginUpdates];
-        [tableView reloadRowsAtIndexPaths:@[indexPath]
-                         withRowAnimation:UITableViewRowAnimationNone];
-        [tableView endUpdates];
-        
-        _lastSelectedUser=[_contacts objectAtIndex:indexPath.row];
     }
+    
+    chatViewController* chatVC = [[chatViewController alloc] initWithContact:row ];
+    [self.currentNavController pushViewController:chatVC animated:YES];
+    
+    [tableView beginUpdates];
+    [tableView reloadRowsAtIndexPaths:@[indexPath]
+                     withRowAnimation:UITableViewRowAnimationNone];
+    [tableView endUpdates];
+    
+    _lastSelectedUser=row;
     
     
 }

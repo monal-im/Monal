@@ -688,9 +688,13 @@ dispatch_async(dispatch_get_current_queue(), ^{
                 [self send:discoInfo];
                 
                 
+                //no need to pull roster on every call if disconenct
+                if(!_rosterList)
+                {
                 XMPPIQ* roster =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
                 [roster setRosterRequest];
                 [self send:roster];
+                }
                 
                 self.priority= [[[NSUserDefaults standardUserDefaults] stringForKey:@"XMPPPriority"] integerValue];
                 self.statusMessage=[[NSUserDefaults standardUserDefaults] stringForKey:@"StatusMessage"];

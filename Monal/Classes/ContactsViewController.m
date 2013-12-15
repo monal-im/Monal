@@ -606,7 +606,12 @@
 
 - (void)tableView:(UITableView *)tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath *)indexPath
 {
-    ContactDetails* detailVC = [[ContactDetails alloc]  initWithContact:[_contacts objectAtIndex:indexPath.row] ];
+    ContactDetails* detailVC =nil;
+    if(indexPath.section==konlineSection)
+       detailVC= [[ContactDetails alloc]  initWithContact:[_contacts objectAtIndex:indexPath.row] ];
+    else
+        detailVC=[[ContactDetails alloc]  initWithContact:[_offlineContacts objectAtIndex:indexPath.row] ];
+    
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
     {
         MLChatCell* cell = (MLChatCell*)[tableView cellForRowAtIndexPath:indexPath];

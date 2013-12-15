@@ -1024,9 +1024,7 @@ static DataLayer *sharedInstance=nil;
     
     if([resourceCount integerValue]<1)
     {
-        
-        
-        NSString* query=[NSString stringWithFormat:@"update buddylist set online=0, dirty=1  where account_id=%@ and  buddy_name='%@';", accountNo, presenceObj.user];
+        NSString* query=[NSString stringWithFormat:@"update buddylist set online=0, state='offline', dirty=1  where account_id=%@ and  buddy_name='%@';", accountNo, presenceObj.user];
         if([self executeNonQuery:query]!=NO)
         {
             return YES;

@@ -370,7 +370,6 @@
                        if(offlinepos==-1)
                        {
                            NSMutableDictionary* row= [contactRow objectAtIndex:0] ;
-                           [row setObject:@"offline" forKey:@"state"]; // make sure it is set to offline
                            [_offlineContacts insertObject:row atIndex:0];
                            
                            //sort

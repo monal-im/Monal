@@ -251,9 +251,12 @@
                            //insert into datasource
                            [_contacts insertObject:[contactRow objectAtIndex:0] atIndex:0];
                            
+                           if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
+                           {
                            if(offlinepos>=0 && offlinepos<[_offlineContacts count])
                            {
                                [_offlineContacts removeObjectAtIndex:offlinepos];
+                           }
                            }
                            
                            //sort
@@ -355,6 +358,9 @@
                            return;
                        }
                        
+                       if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
+                       {
+                       
                        counter=0;
                        for(NSDictionary* row in _offlineContacts)
                        {
@@ -392,7 +398,7 @@
                            }
                            debug_NSLog(@"sorted contacts %@", _offlineContacts);
                        }
-                       
+                       }
                        
                        //not there
                        if(pos>=0)
@@ -476,7 +482,10 @@
     else
         _contacts=[NSMutableArray arrayWithArray:[[DataLayer sharedInstance] onlineBuddiesSortedBy:@"Name"]];
     
+    if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
+    {
     _offlineContacts=[NSMutableArray arrayWithArray:[[DataLayer sharedInstance] offlineBuddies]];
+    }
     
     [self.contactsTable reloadData];
     

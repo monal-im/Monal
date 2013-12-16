@@ -95,7 +95,7 @@
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <textView opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" showsHorizontalScrollIndicator="NO" delaysContentTouches="NO" canCancelContentTouches="NO" bouncesZoom="NO" editable="NO" id="6">
-                        <rect key="frame" x="20" y="4.9999999474057013" width="406" height="110"/>
+                        <rect key="frame" x="20" y="5" width="406" height="109.9999999474057"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <fontDescription key="fontDescription" type="system" size="system"/>
@@ -114,7 +114,7 @@
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <textView opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" showsHorizontalScrollIndicator="NO" delaysContentTouches="NO" canCancelContentTouches="NO" bouncesZoom="NO" editable="NO" id="S5G-a9-4uO">
-                        <rect key="frame" x="20" y="8" width="406" height="185.99999991905824"/>
+                        <rect key="frame" x="20" y="7.9999999190582383" width="406" height="186"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <fontDescription key="fontDescription" type="system" size="system"/>

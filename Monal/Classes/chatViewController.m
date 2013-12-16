@@ -342,11 +342,6 @@
 
 #pragma mark message signals
 
--(void)refreshDisplay
-{
-}
-
-
 //always messages going out
 -(void) addMessageto:(NSString*)to withMessage:(NSString*) message
 {

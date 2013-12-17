@@ -27,14 +27,14 @@
 	}
 	else
 	{
-		UIAlertView *addError = [[UIAlertView alloc] 
+		UIAlertView *addError = [[UIAlertView alloc]
 								 initWithTitle:@"Error"
 								 message:@"Name can't be empty"
 								 delegate:self cancelButtonTitle:@"Close"
 								 otherButtonTitles: nil] ;
 		[addError show];
 	}
-
+    
 	
 }
 
@@ -43,11 +43,17 @@
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField
 {
-        [textField resignFirstResponder];
-
-	return true;
+    [textField resignFirstResponder];
+    
+	return YES;
 }
 
+
+- (BOOL)textFieldShouldBeginEditing:(UITextField *)textField {
+    
+    _currentTextField=textField;
+    return YES;
+}
 
 -(BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
@@ -61,15 +67,15 @@
     self.navigationItem.title=@"Add Contact";
     _closeButton =[[UIBarButtonItem alloc] initWithTitle:@"Close" style:UIBarButtonItemStylePlain target:self action:@selector(closeView)];
     self.navigationItem.rightBarButtonItem=_closeButton;
-
-     if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0"))
-     {
-         _caption.textColor=[UIColor blackColor];
-         self.view.backgroundColor =[UIColor whiteColor];
-     }
-     else{
-         self.view.backgroundColor = [[UIColor alloc] initWithPatternImage:[UIImage imageNamed:@"debut_dark"]];
-     }
+    
+    if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0"))
+    {
+        _caption.textColor=[UIColor blackColor];
+        self.view.backgroundColor =[UIColor whiteColor];
+    }
+    else{
+        self.view.backgroundColor = [[UIColor alloc] initWithPatternImage:[UIImage imageNamed:@"debut_dark"]];
+    }
     
     
     _accountPicker = [[ UIPickerView alloc] init];
@@ -95,7 +101,10 @@
     }
     
     
-
+    _accountName.inputAccessoryView=_keyboardToolbar;
+    _buddyName.inputAccessoryView=_keyboardToolbar;
+    
+    
     UIImage *buttonImage = [[UIImage imageNamed:@"blueButton"]
                             resizableImageWithCapInsets:UIEdgeInsetsMake(18, 18, 18, 18)];
     UIImage *buttonImageHighlight = [[UIImage imageNamed:@"blueButtonHighlight"]
@@ -150,6 +159,41 @@
     return [[MLXMPPManager sharedInstance].connectedXMPP count];
 }
 
+#pragma mark toolbar actions
+
+-(IBAction)toolbarDone:(id)sender
+{
+    [_currentTextField resignFirstResponder];
+    
+}
+
+- (IBAction)toolbarPrevious:(id)sender
+{
+    NSInteger nextTag = _currentTextField.tag - 1;
+    // Try to find next responder
+    UIResponder* nextResponder = [_currentTextField.superview viewWithTag:nextTag];
+    if (nextResponder) {
+        // Found next responder, so set it.
+        [nextResponder becomeFirstResponder];
+    } else {
+        // Not found, so remove keyboard.
+        [_currentTextField resignFirstResponder];
+    }
+}
+
+- (IBAction)toolbarNext:(id)sender
+{
+    NSInteger nextTag = _currentTextField.tag + 1;
+    // Try to find next responder
+    UIResponder* nextResponder = [_currentTextField.superview viewWithTag:nextTag];
+    if (nextResponder) {
+        // Found next responder, so set it.
+        [nextResponder becomeFirstResponder];
+    } else {
+        // Not found, so remove keyboard.
+        [_currentTextField resignFirstResponder];
+    }
+}
 
 
 

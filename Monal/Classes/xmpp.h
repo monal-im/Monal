@@ -81,8 +81,6 @@ typedef struct
     BOOL _startTLSComplete;
     BOOL _streamHasSpace;
 
-    dispatch_source_t _loginCancelOperation;
-    
     UIBackgroundTaskIdentifier _backgroundTask ;
     
     

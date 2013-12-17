@@ -223,18 +223,20 @@
                        }
                        
                        
-                       counter=0;
-                       for(NSDictionary* row in _offlineContacts)
+                       if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
                        {
-                           if([[row objectForKey:@"buddy_name"] caseInsensitiveCompare:[user objectForKey:kusernameKey] ]==NSOrderedSame &&
-                              [[row objectForKey:@"account_id"]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
+                           counter=0;
+                           for(NSDictionary* row in _offlineContacts)
                            {
-                               offlinepos=counter;
-                               break;
+                               if([[row objectForKey:@"buddy_name"] caseInsensitiveCompare:[user objectForKey:kusernameKey] ]==NSOrderedSame &&
+                                  [[row objectForKey:@"account_id"]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
+                               {
+                                   offlinepos=counter;
+                                   break;
+                               }
+                               counter++;
                            }
-                           counter++;
                        }
-                       
                        
                        //not there
                        if(pos<0)
@@ -253,10 +255,10 @@
                            
                            if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
                            {
-                           if(offlinepos>=0 && offlinepos<[_offlineContacts count])
-                           {
-                               [_offlineContacts removeObjectAtIndex:offlinepos];
-                           }
+                               if(offlinepos>=0 && offlinepos<[_offlineContacts count])
+                               {
+                                   [_offlineContacts removeObjectAtIndex:offlinepos];
+                               }
                            }
                            
                            //sort
@@ -287,7 +289,7 @@
                            
                            if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
                            {
-                               if(offlinepos>=0 && offlinepos<[_offlineContacts count])
+                               if(offlinepos>=0 && offlinepos<=[_offlineContacts count]) // since if last one is delted it is equal to count   
                                {
                                    NSIndexPath *path2 = [NSIndexPath indexPathForRow:offlinepos inSection:kofflineSection];
                                    [_contactsTable deleteRowsAtIndexPaths:@[path2]

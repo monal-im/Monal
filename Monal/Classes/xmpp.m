@@ -281,15 +281,15 @@ dispatch_async(dispatch_get_current_queue(), ^{
             [self connectionTask];
             
             dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-            _loginCancelOperation = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,
+            dispatch_source_t loginCancelOperation = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,
                                              q_background);
             
-            dispatch_source_set_timer(_loginCancelOperation,
+            dispatch_source_set_timer(loginCancelOperation,
                                       dispatch_time(DISPATCH_TIME_NOW, kConnectTimeout* NSEC_PER_SEC),
                                       kConnectTimeout* NSEC_PER_SEC,
                                       1ull * NSEC_PER_SEC);
             
-            dispatch_source_set_event_handler(_loginCancelOperation, ^{
+            dispatch_source_set_event_handler(loginCancelOperation, ^{
                 debug_NSLog(@"login cancel op");
                 
                 
@@ -316,17 +316,17 @@ dispatch_async(dispatch_get_current_queue(), ^{
                     oldBGTask=UIBackgroundTaskInvalid;
                 }
                 
-                dispatch_source_cancel(_loginCancelOperation);
+                dispatch_source_cancel(loginCancelOperation);
  
             });
             
-            dispatch_source_set_cancel_handler(_loginCancelOperation, ^{
+            dispatch_source_set_cancel_handler(loginCancelOperation, ^{
                 debug_NSLog(@"login timer cancelled");
-                dispatch_release(_loginCancelOperation);
+                dispatch_release(loginCancelOperation);
     
             });
             
-            dispatch_resume(_loginCancelOperation);
+            dispatch_resume(loginCancelOperation);
             
         }
 }

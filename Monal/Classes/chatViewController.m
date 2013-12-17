@@ -8,6 +8,7 @@
 
 #import "chatViewController.h"
 #import "MLConstants.h"
+#import "MonalAppDelegate.h"
 #import <QuartzCore/QuartzCore.h>
 
 @implementation chatViewController
@@ -287,6 +288,7 @@
 -(void) viewDidAppear:(BOOL)animated
 {
         [self scrollToBottom];
+        [self refreshCounter];
 }
 
 -(void) viewWillDisappear:(BOOL)animated
@@ -294,9 +296,7 @@
     [MLNotificationManager sharedInstance].currentAccountNo=nil;
     [MLNotificationManager sharedInstance].currentContact=nil;
     
-    if(!_day) {
-    [[DataLayer sharedInstance] markAsReadBuddy:self.contactName forAccount:self.accountNo];
-    }
+    [self refreshCounter];
 }
 
 -(void) dealloc
@@ -321,6 +321,22 @@
 -(void) handleTap
 {
     [chatInput resignFirstResponder];
+}
+
+#pragma mark message signals
+
+
+-(void) refreshCounter
+{
+
+    //coming in  from abckgroun
+    if(!_day) {
+        [[DataLayer sharedInstance] markAsReadBuddy:self.contactName forAccount:self.accountNo];
+        
+        MonalAppDelegate* appDelegate= (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
+        [appDelegate updateUnread];
+    }
+    
 }
 
 

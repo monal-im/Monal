@@ -45,9 +45,6 @@
                       if(([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
                          || ([UIApplication sharedApplication].applicationState==UIApplicationStateInactive ))
                       {
-                          
-                          //increment badge
-                          [UIApplication sharedApplication].applicationIconBadgeNumber++;
                           //present notification
                           
                           NSDate* theDate=[NSDate dateWithTimeIntervalSinceNow:0]; //immediate fire

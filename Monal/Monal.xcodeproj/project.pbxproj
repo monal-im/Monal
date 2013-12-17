@@ -351,7 +351,6 @@
 		2678A98A185A8320003AF53B /* ChatLogAccountDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChatLogAccountDetailViewController.m; sourceTree = "<group>"; };
 		2678A98C185AB739003AF53B /* ChatLogContactViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChatLogContactViewController.h; sourceTree = "<group>"; };
 		2678A98D185AB739003AF53B /* ChatLogContactViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChatLogContactViewController.m; sourceTree = "<group>"; };
-		267D96021225E56200B328E3 /* About.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = About.xib; sourceTree = "<group>"; };
 		2689B6EA1601914E0087CA58 /* DDBadgeViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDBadgeViewCell.h; sourceTree = "<group>"; };
 		2689B6EB1601914E0087CA58 /* DDBadgeViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDBadgeViewCell.m; sourceTree = "<group>"; };
 		268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libjrtplib-static.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -403,7 +402,6 @@
 		26DE9C050FEEFD00000596F6 /* DB definitions */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "DB definitions"; sourceTree = "<group>"; };
 		26E2F7D817C6FD9400C3C8EF /* MLTabBarController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MLTabBarController.h; path = ../MLTabBarController.h; sourceTree = "<group>"; };
 		26E2F7D917C6FD9400C3C8EF /* MLTabBarController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MLTabBarController.m; path = ../MLTabBarController.m; sourceTree = "<group>"; };
-		26EC1DB1122978A100EAF934 /* AboutiPad.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = AboutiPad.xib; sourceTree = "<group>"; };
 		26EC40F817BDD8360031304D /* ContactDetails.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ContactDetails.xib; sourceTree = "<group>"; };
 		26EC40FA17BDD8560031304D /* ContactDetails.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContactDetails.h; sourceTree = "<group>"; };
 		26EC40FB17BDD8560031304D /* ContactDetails.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ContactDetails.m; sourceTree = "<group>"; };
@@ -592,20 +590,10 @@
 				2628E50614049DB50064131E /* askTempPass.xib */,
 				26DC0A8A1339259900E60BFD /* SearchUser.xib */,
 				261ED6C31240257F00C14F6A /* BuddyAdd.xib */,
-				8D1107310486CEB800E47090 /* SworIM-Info.plist */,
 				260447F50FEED62100B3B5A7 /* BuddyDetails.xib */,
 				265F1B2A123040540065C5FE /* web.xib */,
 			);
 			name = "old nibs";
-			sourceTree = "<group>";
-		};
-		26715E5C176506B400684F3D /* unused nibs */ = {
-			isa = PBXGroup;
-			children = (
-				267D96021225E56200B328E3 /* About.xib */,
-				26EC1DB1122978A100EAF934 /* AboutiPad.xib */,
-			);
-			name = "unused nibs";
 			sourceTree = "<group>";
 		};
 		26715E5E17650AF900684F3D /* View Controllers */ = {
@@ -904,9 +892,9 @@
 			isa = PBXGroup;
 			children = (
 				26AAE281179F701A00271345 /* About.html */,
-				26715E5C176506B400684F3D /* unused nibs */,
 				26715E5B176506AD00684F3D /* old nibs */,
 				2601D9CA0FBF25EF004DB939 /* sworim.sqlite */,
+				8D1107310486CEB800E47090 /* SworIM-Info.plist */,
 				26DE9C050FEEFD00000596F6 /* DB definitions */,
 			);
 			name = Resources;

@@ -375,7 +375,8 @@
                            counter++;
                        }
                        
-                       if(offlinepos==-1)
+                           //in contacts but not in offline.. (not in roster this shouldnt happen)
+                       if((offlinepos==-1) &&(pos>=0))
                        {
                            NSMutableDictionary* row= [contactRow objectAtIndex:0] ;
                            [_offlineContacts insertObject:row atIndex:0];
@@ -415,6 +416,7 @@
                            if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"] && offlinepos>-1)
                            {
                                NSIndexPath *path2 = [NSIndexPath indexPathForRow:offlinepos inSection:kofflineSection];
+                               debug_NSLog("inserting offline at %d", offlinepos)
                                [_contactsTable insertRowsAtIndexPaths:@[path2]
                                                      withRowAnimation:UITableViewRowAnimationFade];
                            }

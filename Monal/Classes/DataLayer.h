@@ -49,7 +49,7 @@
 
 -(NSArray*) onlineBuddiesSortedBy:(NSString*) sort;
 -(NSArray*) resourcesForContact:(NSString*)contact ;
--(NSArray*) offlineBuddies;
+-(NSArray*) offlineContacts;
 
 -(NSArray*) newBuddies:(NSString*) accountNo;
 -(NSArray*) removedBuddies:(NSString*) accountNo;

@@ -636,7 +636,7 @@ static DataLayer *sharedInstance=nil;
     if(toReturn!=nil)
     {
         debug_NSLog(@" count: %d",  [toReturn count] );
-        return toReturn; //[toReturn autorelease];
+        return toReturn;
     }
     else
     {
@@ -646,17 +646,17 @@ static DataLayer *sharedInstance=nil;
     
 }
 
--(NSArray*) offlineBuddies
+-(NSArray*) offlineContacts
 {
 	
-    NSString* query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, ifnull(full_name, buddy_name) as full_name, account_id from buddylist where  online=0 order by full_name COLLATE NOCASE "];
+    NSString* query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, ifnull(full_name, buddy_name) as full_name, a.account_id from buddylist  as A inner join account as b  on a.account_id=b.account_id  where  online=0 and enabled=1 order by full_name COLLATE NOCASE "];
     //debug_NSLog(query);
     NSArray* toReturn = [self executeReader:query];
     
     if(toReturn!=nil)
     {
         debug_NSLog(@" count: %d",  [toReturn count] );
-        return toReturn; //[toReturn autorelease];
+        return toReturn;
     }
     else
     {
@@ -670,14 +670,12 @@ static DataLayer *sharedInstance=nil;
 
 -(NSArray*) newBuddies:(NSString*) accountNo;
 {
-	//get domain
-	
-	
 	NSString* query1=[NSString stringWithFormat:@"select username, domain from account where account_id=%@", accountNo];
 	//debug_NSLog(query);
 	NSArray* user = [self executeReader:query1];
 	
 	if(user!=nil)
+    {
 		if([user count]>0)//sanity check
         {
             
@@ -690,17 +688,21 @@ static DataLayer *sharedInstance=nil;
             {
                 
                 debug_NSLog(@" count: %d",  [toReturn count] );
-                ;
-                
-                return toReturn; //[toReturn autorelease];
+               
+            return toReturn;
             }
             else
             {
                 debug_NSLog(@"buddylist is empty or failed to read");
-                ;
                 return nil;
             }
-        } else return nil;
+        }
+        else
+        {
+            return nil;
+        }
+    } else
+        return nil;
 	
 }
 
@@ -727,14 +729,11 @@ static DataLayer *sharedInstance=nil;
             {
                 
                 debug_NSLog(@" count: %d",  [toReturn count] );
-                ;
-                
-                return toReturn; //[toReturn autorelease];
+               return toReturn;
             }
             else
             {
                 debug_NSLog(@"buddylist is empty or failed to read");
-                ;
                 return nil;
             }
         } else return nil;

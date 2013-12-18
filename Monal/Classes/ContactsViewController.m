@@ -486,7 +486,7 @@
     
     if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
     {
-    _offlineContacts=[NSMutableArray arrayWithArray:[[DataLayer sharedInstance] offlineBuddies]];
+    _offlineContacts=[NSMutableArray arrayWithArray:[[DataLayer sharedInstance] offlineContacts]];
     }
     
     [self.contactsTable reloadData];

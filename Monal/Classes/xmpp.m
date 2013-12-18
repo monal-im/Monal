@@ -786,10 +786,10 @@ dispatch_async(dispatch_get_current_queue(), ^{
                     for(NSDictionary* contact in self.rosterList)
                     {
                 
-//                        if(![[DataLayer sharedInstance] isBuddyInList:[contact objectForKey:@"jid"] forAccount:_accountNo])
-//                        {
-//                        [[DataLayer sharedInstance] addBuddy:[contact objectForKey:@"jid"]?[contact objectForKey:@"jid"]:@"" forAccount:_accountNo fullname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@"" nickname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@""];
-//                        }
+                        if(![[DataLayer sharedInstance] isBuddyInList:[contact objectForKey:@"jid"] forAccount:_accountNo])
+                        {
+                        [[DataLayer sharedInstance] addBuddy:[contact objectForKey:@"jid"]?[contact objectForKey:@"jid"]:@"" forAccount:_accountNo fullname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@"" nickname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@""];
+                        }
                     }
                     
                 }

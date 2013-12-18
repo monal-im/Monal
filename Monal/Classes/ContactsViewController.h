@@ -77,11 +77,5 @@
  */
 -(void)addContact;
 
-/**
-Presents a dialog  to confirm removal of an xmpp contact
-*/
--(void)removeContact;
-
-
 
 @end 

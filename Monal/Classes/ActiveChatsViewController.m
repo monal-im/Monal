@@ -10,6 +10,7 @@
 #import "DataLayer.h"
 #import "MLContactCell.h"
 #import "chatViewController.h"
+#import "MonalAppDelegate.h"
 
 @interface ActiveChatsViewController ()
 
@@ -44,12 +45,23 @@
     UIBarButtonItem* rightButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Close All",@"") style:UIBarButtonItemStyleBordered target:self action:@selector(closeAll)];
     self.navigationItem.rightBarButtonItem=rightButton;
     
+    NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+        [nc addObserver:self selector:@selector(refreshDisplay) name:UIApplicationWillEnterForegroundNotification object:nil];
+    
+}
+
+
+-(void) refreshDisplay
+{
+    _contacts=[[DataLayer sharedInstance] activeBuddies];
+    [_chatListTable reloadData];
+    MonalAppDelegate* appDelegate= (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
+    [appDelegate updateUnread];
 }
 
 -(void) viewWillAppear:(BOOL)animated
 {
-    _contacts=[[DataLayer sharedInstance] activeBuddies];
-    [_chatListTable reloadData];
+    [self refreshDisplay];
     [[MLXMPPManager sharedInstance] handleNewMessage:nil];
 }
 
@@ -62,8 +74,7 @@
 -(void) closeAll
 {
     [[DataLayer sharedInstance] removeAllActiveBuddies];
-    _contacts=[[DataLayer sharedInstance] activeBuddies];
-    [_chatListTable reloadData];
+    [self refreshDisplay];
 }
 
 #pragma mark tableview datasource

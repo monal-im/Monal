@@ -1653,7 +1653,7 @@ static DataLayer *sharedInstance=nil;
 -(int) countUnreadMessages
 {
 	// count # of meaages in message table
-    NSString* query=[NSString stringWithFormat:@"select count(message_history_id) from  message_history as A inner join account as b  on a.account_id=b.account_id where   enabled=1 and unread=1"];
+    NSString* query=[NSString stringWithFormat:@"select count(message_history_id) from  message_history where unread=1"];
     
 	NSNumber* count=(NSNumber*)[self executeScalar:query];
 	if(count!=nil)

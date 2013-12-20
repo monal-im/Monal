@@ -7,6 +7,8 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "DDLog.h"
+
 
 #define kMonalNewMessageNotice @"kMLNewMessageNotice"
 #define kMonalContactOnlineNotice @"kMLContactOnlineNotice"
@@ -23,3 +25,4 @@
 #define SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(v)  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedAscending)
 #define SYSTEM_VERSION_LESS_THAN(v)                 ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedAscending)
 #define SYSTEM_VERSION_LESS_THAN_OR_EQUAL_TO(v)     ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedDescending)
+

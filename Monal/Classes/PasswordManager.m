@@ -7,8 +7,9 @@
 //
 
 #import "PasswordManager.h"
+#import "DDLog.h"
 
-
+static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 @implementation PasswordManager
 
@@ -41,7 +42,7 @@
 	NSMutableDictionary* keydata=nil; 
 	NSString* toreturn; 
 	if (keychainErr == noErr) {
-		debug_NSLog(@"getting password "); 
+		DDLogVerbose(@"getting password "); 
         outDictionary=objc_retainedObject(localResult); 
 		 keydata = [self secItemFormatToDictionary:outDictionary];
 		
@@ -49,12 +50,12 @@
 		toreturn=[keydata objectForKey:(__bridge id)kSecValueData];
 	
 		
-		debug_NSLog(@"got %@ ", toreturn) ;
+		DDLogVerbose(@"got %@ ", toreturn) ;
 	}
 	else
 		
 	{
-		debug_NSLog(@"keychain error") ; 
+		DDLogVerbose(@"keychain error") ; 
 		toreturn=@""; 
 		
 	}
@@ -101,14 +102,14 @@
             outDictionary=objc_retainedObject(localResult); 
             // Convert the data dictionary into the format used by the view controller:
             self.keychainData = [self secItemFormatToDictionary:outDictionary];
-				debug_NSLog(@"set keychain data"); 
+				DDLogVerbose(@"set keychain data"); 
         } else if (keychainErr == errSecItemNotFound) {
             // Put default values into the keychain if no matching
             // keychain item is found:
             [self resetKeychainItem];
              [keychainData setObject:@"Monal" forKey:(__bridge id)kSecAttrService];
 			[keychainData setObject:accountno forKey:(__bridge id)kSecAttrAccount ];
-			debug_NSLog(@"reset keychain"); 
+			DDLogVerbose(@"reset keychain"); 
         } else {
             // Any other error is unexpected.
             NSAssert(NO, @"Serious error.\n");

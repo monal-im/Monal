@@ -8,6 +8,9 @@
 
 #import "XMPPParser.h"
 
+
+static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+
 @implementation XMPPParser
 
 - (id) initWithDictionary:(NSDictionary*) dictionary
@@ -32,7 +35,7 @@
 
 #pragma mark common parser delegate functions
 - (void)parserDidStartDocument:(NSXMLParser *)parser{
-	debug_NSLog(@"parsing start");
+	DDLogVerbose(@"parsing start");
   
 }
 
@@ -71,12 +74,12 @@
 
 - (void)parser:(NSXMLParser *)parser foundIgnorableWhitespace:(NSString *)whitespaceString
 {
-	debug_NSLog(@"found ignorable whitespace: %@", whitespaceString);
+	DDLogVerbose(@"found ignorable whitespace: %@", whitespaceString);
 }
 
 - (void)parser:(NSXMLParser *)parser parseErrorOccurred:(NSError *)parseError
 {
-	debug_NSLog(@"Error: line: %d , col: %d desc: %@ ",[parser lineNumber],
+	DDLogVerbose(@"Error: line: %d , col: %d desc: %@ ",[parser lineNumber],
                 [parser columnNumber], [parseError localizedDescription]);
 	
     

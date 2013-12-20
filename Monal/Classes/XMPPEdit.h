@@ -55,11 +55,8 @@
 @property (nonatomic, strong)  NSIndexPath* originIndex;
 
 
--(void) hideKeyboard;
 - (IBAction) delClicked: (id) sender;
 
--(void) keyboardWillHide:(NSNotification *) note;
--(void) keyboardWillShow:(NSNotification *) note;
 -(void) save; 
 
 

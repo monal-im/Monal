@@ -9,6 +9,8 @@
 #import "MLNotificationManager.h"
 
 
+static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+
 @implementation MLNotificationManager
 
 + (MLNotificationManager* )sharedInstance
@@ -32,7 +34,7 @@
 
 -(void) handleNewMessage:(NSNotification *)notification
 {
-    debug_NSLog(@"notificaiton manager got new message notice %@", notification.userInfo);
+    DDLogVerbose(@"notificaiton manager got new message notice %@", notification.userInfo);
 
     dispatch_async(dispatch_get_main_queue(),
                   ^{
@@ -80,7 +82,7 @@
                               [app scheduleLocalNotification:alarm];
                               
                               //	[app presentLocalNotificationNow:alarm];
-                              debug_NSLog(@"Scheduled local message alert "); 
+                              DDLogVerbose(@"Scheduled local message alert "); 
                               
                           }
                           

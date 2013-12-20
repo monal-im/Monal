@@ -8,6 +8,8 @@
 
 #import "ParsePresence.h"
 
+static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+
 @implementation ParsePresence
 
 
@@ -17,8 +19,8 @@
     if([elementName isEqualToString:@"presence"])
     {
          [super parser:parser didStartElement:elementName namespaceURI:namespaceURI qualifiedName:qName attributes:attributeDict];
-        debug_NSLog(@"Presence from %@", _user);
-		debug_NSLog(@"Presence type %@", _type);
+        DDLogVerbose(@"Presence from %@", _user);
+		DDLogVerbose(@"Presence type %@", _type);
         
         if([_type isEqualToString:@"error"])
 		{

@@ -32,6 +32,8 @@
 
 #define kConnectTimeout 20ull //seconds
 
+static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+
 @implementation xmpp
 
 -(id) init
@@ -101,7 +103,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
     CFReadStreamRef readRef= NULL;
     CFWriteStreamRef writeRef= NULL;
 	
-    debug_NSLog(@"stream  creating to  server: %@ port: %d", _server, _port);
+    DDLogVerbose(@"stream  creating to  server: %@ port: %d", _server, _port);
     
 	CFStreamCreatePairWithSocketToHost(NULL, (__bridge CFStringRef)_server, _port, &readRef, &writeRef);
 	
@@ -110,28 +112,28 @@ dispatch_async(dispatch_get_current_queue(), ^{
     
 	if((_iStream==nil) || (_oStream==nil))
 	{
-		debug_NSLog(@"Connection failed");
+		DDLogVerbose(@"Connection failed");
 		return;
 	}
     else
-        debug_NSLog(@"streams created ok");
+        DDLogVerbose(@"streams created ok");
     
     if((CFReadStreamSetProperty((__bridge CFReadStreamRef)_iStream,
                                 kCFStreamNetworkServiceType,  kCFStreamNetworkServiceTypeVoIP)) &&
        (CFWriteStreamSetProperty((__bridge CFWriteStreamRef)_oStream,
                                  kCFStreamNetworkServiceType,  kCFStreamNetworkServiceTypeVoIP)))
     {
-        debug_NSLog(@"Set VOIP properties on streams.")
+        DDLogVerbose(@"Set VOIP properties on streams.");
     }
     else
     {
-        debug_NSLog(@"could not set VOIP properties on streams.");
+        DDLogVerbose(@"could not set VOIP properties on streams.");
     }
     
     if((_SSL==YES)  && (_oldStyleSSL==YES))
 	{
 		// do ssl stuff here
-		debug_NSLog(@"securing connection.. for old style");
+		DDLogVerbose(@"securing connection.. for old style");
         
         NSMutableDictionary *settings = [ [NSMutableDictionary alloc ]
                                          initWithObjectsAndKeys:
@@ -163,7 +165,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
 		CFWriteStreamSetProperty((__bridge CFWriteStreamRef)_oStream,
 								 kCFStreamPropertySSLSettings, (__bridge CFTypeRef)settings);
         
-        debug_NSLog(@"connection secured");
+        DDLogVerbose(@"connection secured");
 	}
 	
     
@@ -182,13 +184,13 @@ dispatch_async(dispatch_get_current_queue(), ^{
                                   , 1ull * NSEC_PER_SEC);
 
         dispatch_source_set_event_handler(streamTimer, ^{
-           debug_NSLog(@"stream connection timed out");
+           DDLogVerbose(@"stream connection timed out");
             dispatch_source_cancel(streamTimer);
             [self disconnect];
         });
 
         dispatch_source_set_cancel_handler(streamTimer, ^{
-            debug_NSLog(@"stream timer cancelled");
+            DDLogVerbose(@"stream timer cancelled");
             dispatch_release(streamTimer);
         });
     
@@ -246,7 +248,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
 {
     if(_loggedIn || _logInStarted)
     {
-        debug_NSLog(@"assymetrical call to login without a teardown");
+        DDLogVerbose(@"assymetrical call to login without a teardown");
         return;
     }
     
@@ -257,7 +259,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
             //notify user
             if(!self.loggedIn)
             {
-                debug_NSLog(@"XMPP connnect bgtask end");
+                DDLogVerbose(@"XMPP connnect bgtask end");
                 
                 NSDictionary* userDic=@{@"from":@"Info",
                                         @"actuallyfrom":@"Info",
@@ -270,14 +272,14 @@ dispatch_async(dispatch_get_current_queue(), ^{
             }
             
             // this should never happen unless we fail for 10 min
-            debug_NSLog(@"XMPP connnect bgtask took too long. closing task");
+            DDLogVerbose(@"XMPP connnect bgtask took too long. closing task");
             [[UIApplication sharedApplication] endBackgroundTask:_backgroundTask];
             _backgroundTask=UIBackgroundTaskInvalid;
             
         }];
         
         if (_backgroundTask != UIBackgroundTaskInvalid) {
-            debug_NSLog(@"XMPP connnect bgtask start"); 
+            DDLogVerbose(@"XMPP connnect bgtask start"); 
             [self connectionTask];
             
             dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
@@ -290,7 +292,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
                                       1ull * NSEC_PER_SEC);
             
             dispatch_source_set_event_handler(loginCancelOperation, ^{
-                debug_NSLog(@"login cancel op");
+                DDLogVerbose(@"login cancel op");
                 
                 
                 UIBackgroundTaskIdentifier oldBGTask=_backgroundTask;
@@ -311,7 +313,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
                 //end background task if it wasnt by disconnenct
                 if (oldBGTask != UIBackgroundTaskInvalid)
                 {
-                    debug_NSLog(@"ending old BG task");
+                    DDLogVerbose(@"ending old BG task");
                     [[UIApplication sharedApplication] endBackgroundTask:oldBGTask];
                     oldBGTask=UIBackgroundTaskInvalid;
                 }
@@ -321,7 +323,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
             });
             
             dispatch_source_set_cancel_handler(loginCancelOperation, ^{
-                debug_NSLog(@"login timer cancelled");
+                DDLogVerbose(@"login timer cancelled");
                 dispatch_release(loginCancelOperation);
     
             });
@@ -342,7 +344,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
     
     _loginError=NO;
  
-    debug_NSLog(@"removing streams");
+    DDLogVerbose(@"removing streams");
     
 	//prevent any new read or write
 	[_iStream setDelegate:nil];
@@ -353,7 +355,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
 	
 	[_iStream removeFromRunLoop:[NSRunLoop currentRunLoop]
                         forMode:NSDefaultRunLoopMode];
-	debug_NSLog(@"removed streams");
+	DDLogVerbose(@"removed streams");
 	
      dispatch_sync(_netReadQueue, ^{
 	@try
@@ -363,7 +365,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
 	}
 	@catch(id theException)
 	{
-		debug_NSLog(@"Exception in istream close");
+		DDLogVerbose(@"Exception in istream close");
 	}
      });
     
@@ -375,7 +377,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
         }
         @catch(id theException)
         {
-            debug_NSLog(@"Exception in ostream close");
+            DDLogVerbose(@"Exception in ostream close");
         }
         
     });
@@ -384,9 +386,9 @@ dispatch_async(dispatch_get_current_queue(), ^{
 	[_contactsVC clearContactsForAccount:_accountNo];
     [[DataLayer sharedInstance] resetContactsForAccount:_accountNo];
     
-	debug_NSLog(@"Connections closed");
+	DDLogVerbose(@"Connections closed");
 	
-	debug_NSLog(@"All closed and cleaned up");
+	DDLogVerbose(@"All closed and cleaned up");
     
   
     _startTLSComplete=NO;
@@ -428,7 +430,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
 {
    __block UIBackgroundTaskIdentifier reconnectBackgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
         
-        debug_NSLog(@"Reconnect bgtask took too long. closing");
+        DDLogVerbose(@"Reconnect bgtask took too long. closing");
         [[UIApplication sharedApplication] endBackgroundTask:reconnectBackgroundTask];
         reconnectBackgroundTask=UIBackgroundTaskInvalid;
         
@@ -447,12 +449,12 @@ dispatch_async(dispatch_get_current_queue(), ^{
 -(void) startStream
 {
     //flush read buffer since its all nont needed
-    debug_NSLog(@"waiting read queue");
+    DDLogVerbose(@"waiting read queue");
     dispatch_sync(_netReadQueue, ^{
         _inputBuffer=[[NSMutableString alloc] init];
     });
     
-    debug_NSLog(@" got read queue");
+    DDLogVerbose(@" got read queue");
     
     XMLNode* stream = [[XMLNode alloc] init];
     stream.element=@"stream:stream";
@@ -502,7 +504,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
     dispatch_sync(_netReadQueue, ^{
         int stanzacounter=0;
         int maxPos=[_inputBuffer length];
-        debug_NSLog(@"maxPos %d", maxPos);
+        DDLogVerbose(@"maxPos %d", maxPos);
         
         if(maxPos<2)
         {
@@ -524,7 +526,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
         
         
         int startpos=startrange.location;
-        debug_NSLog(@"start pos%d", startpos);
+        DDLogVerbose(@"start pos%d", startpos);
         
         if(maxPos>startpos)
             while(stanzacounter<[_stanzaTypes count])
@@ -547,7 +549,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
                             
                             finalstart=pos.location;
                             finalend=endPos.location+1;//+2 to inclde closing />
-                            debug_NSLog(@"at  1");
+                            DDLogVerbose(@"at  1");
                             break;
                         }
                         
@@ -580,7 +582,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
                             
                             finalstart=pos.location;
                             finalend=endPos.location+1; //+1 to inclde closing <
-                            debug_NSLog(@"at  3");
+                            DDLogVerbose(@"at  3");
                             break;
                         }
                         else
@@ -594,7 +596,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
                                 
                                 finalstart=pos.location;
                                 finalend=endPos.location+2; //+2 to inclde closing />
-                                 debug_NSLog(@"at  4");
+                                 DDLogVerbose(@"at  4");
                                 break;
                             }
                             else
@@ -604,7 +606,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
                                     //stream will have no terminal.
                                     finalstart=pos.location;
                                     finalend=maxPos;
-                                     debug_NSLog(@"at  5");
+                                     DDLogVerbose(@"at  5");
                                 }
                             
                         }
@@ -626,17 +628,17 @@ dispatch_async(dispatch_get_current_queue(), ^{
         {
             //this is junk data no stanza start
             _inputBuffer=[[NSMutableString alloc] init];
-            debug_NSLog("wiped input buffer with no start");
+            DDLogVerbose(@"wiped input buffer with no start");
             
         }
         else{
             if((finalend-finalstart<=maxPos) && finalend!=NSNotFound && finalstart!=NSNotFound)
             {
-                debug_NSLog("to del start %d end %d: %@", finalstart, finalend, _inputBuffer)
+                DDLogVerbose(@"to del start %d end %d: %@", finalstart, finalend, _inputBuffer);
                 [_inputBuffer deleteCharactersInRange:NSMakeRange(finalstart, finalend-finalstart) ];
                
                 
-                debug_NSLog("result: %@", _inputBuffer)
+                DDLogVerbose(@"result: %@", _inputBuffer);
             }
         }
     });
@@ -659,7 +661,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
     NSDictionary* nextStanzaPos=[self nextStanza];
     while (nextStanzaPos)
     {
-        debug_NSLog(@"got stanza %@", nextStanzaPos);
+        DDLogVerbose(@"got stanza %@", nextStanzaPos);
         
         if([[nextStanzaPos objectForKey:@"stanzaType"]  isEqualToString:@"iq"])
         {
@@ -667,7 +669,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
             if(iqNode.shouldSetBind)
             {
                 _jid=iqNode.jid;
-                debug_NSLog(@"Set jid %@", _jid);
+                DDLogVerbose(@"Set jid %@", _jid);
                 
                 XMPPIQ* sessionQuery= [[XMPPIQ alloc] initWithId:_sessionKey andType:kiqSetType];
                 XMLNode* session = [[XMLNode alloc] initWithElement:@"stream"];
@@ -910,22 +912,22 @@ dispatch_async(dispatch_get_current_queue(), ^{
             
             if(presenceNode.type ==nil)
             {
-                debug_NSLog(@"presence priority notice from %@", presenceNode.user);
+                DDLogVerbose(@"presence priority notice from %@", presenceNode.user);
                 
                 if((presenceNode.user!=nil) && ([[presenceNode.user stringByTrimmingCharactersInSet:
                                                   [NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0))
                 {
                     if(![[DataLayer sharedInstance] isBuddyInList:presenceNode.user forAccount:_accountNo])
                     {
-                        debug_NSLog(@"Buddy not already in list");
+                        DDLogVerbose(@"Buddy not already in list");
                         [[DataLayer sharedInstance] addBuddy:presenceNode.user forAccount:_accountNo fullname:@"" nickname:@"" ];
                     }
                     else
                     {
-                        debug_NSLog(@"Buddy already in list");
+                        DDLogVerbose(@"Buddy already in list");
                     }
                     
-                    debug_NSLog(@" showing as online now");
+                    DDLogVerbose(@" showing as online now");
                     
                     [[DataLayer sharedInstance] setOnlineBuddy:presenceNode forAccount:_accountNo];
                     [[DataLayer sharedInstance] setBuddyState:presenceNode forAccount:_accountNo];
@@ -951,7 +953,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
                         //check for vcard change
                         if([presenceNode.photoHash isEqualToString:[[DataLayer sharedInstance]  buddyHash:presenceNode.user forAccount:_accountNo]])
                         {
-                            debug_NSLog(@"photo hash is the  same");
+                            DDLogVerbose(@"photo hash is the  same");
                         }
                         else
                         {
@@ -971,7 +973,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
                 }
                 else
                 {
-                    debug_NSLog(@"ERROR: presence priority notice but no user name.");
+                    DDLogVerbose(@"ERROR: presence priority notice but no user name.");
                     
                 }
             }
@@ -1104,14 +1106,14 @@ dispatch_async(dispatch_get_current_queue(), ^{
                                                  kCFStreamPropertySSLSettings, (__bridge CFTypeRef)settings)	 )
                         
                     {
-                        debug_NSLog(@"Set TLS properties on streams.");
+                        DDLogVerbose(@"Set TLS properties on streams.");
                         NSDictionary* info2=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
                                               kinfoTypeKey:@"connect", kinfoStatusKey:@"Securing Connection"};
                         [self.contactsVC updateConnecting:info2];
                     }
                     else
                     {
-                        debug_NSLog(@"not sure.. Could not confirm Set TLS properties on streams.");
+                        DDLogVerbose(@"not sure.. Could not confirm Set TLS properties on streams.");
                        
 //                        NSDictionary* info2=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
 //                                              kinfoTypeKey:@"connect", kinfoStatusKey:@"Could not secure connection"};
@@ -1145,7 +1147,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
                 
                 
                 NSString* decoded=[[NSString alloc]  initWithData: (NSData*)[EncodingTools dataWithBase64EncodedString:challengeNode.challengeText] encoding:NSASCIIStringEncoding];
-                debug_NSLog(@"decoded challenge to %@", decoded);
+                DDLogVerbose(@"decoded challenge to %@", decoded);
                 NSArray* parts =[decoded componentsSeparatedByString:@","];
                 if([parts count]<2)
                 {
@@ -1154,7 +1156,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
                      NSArray* rspparts= [[parts objectAtIndex:0] componentsSeparatedByString:@"="];
                     if([[rspparts objectAtIndex:0] isEqualToString:@"rspauth"])
                     {
-                        debug_NSLog(@"digest-md5 success");
+                        DDLogVerbose(@"digest-md5 success");
                        
                     }
                  
@@ -1192,7 +1194,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
                 
                 // ****** digest stuff going on here...
                 NSString* X= [NSString stringWithFormat:@"%@:%@:%@", self.username, realm, self.password ];
-                debug_NSLog(@"X: %@", X);
+                DDLogVerbose(@"X: %@", X);
                 
                 NSData* Y = [EncodingTools MD5:X];
                 
@@ -1214,7 +1216,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
                 NSMutableData *HA1data = [NSMutableData dataWithCapacity:([Y length] + [A1 length])];
                 [HA1data appendData:Y];
                 [HA1data appendData:A1];
-                debug_NSLog(@" HA1data : %@",HA1data  );
+                DDLogVerbose(@" HA1data : %@",HA1data  );
                 
                 
                 //this hash is wrong..
@@ -1223,7 +1225,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
                 //below is correct
                 
                 NSString* A2=[NSString stringWithFormat:@"AUTHENTICATE:xmpp/%@", realm];
-                debug_NSLog(@"%@", A2);
+                DDLogVerbose(@"%@", A2);
                 NSData* HA2=[EncodingTools MD5:A2];
                 
                 NSString* KD=[NSString stringWithFormat:@"%@:%@:00000001:%@:auth:%@",
@@ -1231,17 +1233,17 @@ dispatch_async(dispatch_get_current_queue(), ^{
                               cnonce,
                               [EncodingTools hexadecimalString:HA2]];
                 
-                // debug_NSLog(@" ha1: %@", [self hexadecimalString:HA1] );
-                //debug_NSLog(@" ha2: %@", [self hexadecimalString:HA2] );
+                // DDLogVerbose(@" ha1: %@", [self hexadecimalString:HA1] );
+                //DDLogVerbose(@" ha2: %@", [self hexadecimalString:HA2] );
                 
-                debug_NSLog(@" KD: %@", KD );
+                DDLogVerbose(@" KD: %@", KD );
                 NSData* responseData=[EncodingTools MD5:KD];
                 // above this is ok
                 NSString* response=[NSString stringWithFormat:@"username=\"%@\",realm=\"%@\",nonce=\"%@\",cnonce=\"%@\",nc=00000001,qop=auth,digest-uri=\"xmpp/%@\",response=%@,charset=utf-8",
                                     self.username,realm, nonce, cnonce, realm, [EncodingTools hexadecimalString:responseData]];
                 //,authzid=\"%@@%@/%@\"  ,account,domain, resource
                 
-                debug_NSLog(@"  response :  %@", response);
+                DDLogVerbose(@"  response :  %@", response);
                 NSString* encoded=[EncodingTools encodeBase64WithString:response];
             
 //                NSString* xmppcmd = [NSString stringWithFormat:@"<response xmlns='urn:ietf:params:xml:ns:xmpp-sasl'>%@</response>", encoded]
@@ -1267,12 +1269,12 @@ dispatch_async(dispatch_get_current_queue(), ^{
             {
                 if(streamNode.SASLSuccess)
                 {
-                    debug_NSLog(@"Got SASL Success");
+                    DDLogVerbose(@"Got SASL Success");
                     
                     srand([[NSDate date] timeIntervalSince1970]);
                     // make up a random session key (id)
                     _sessionKey=[NSString stringWithFormat:@"monal%ld",random()%100000];
-                    debug_NSLog(@"session key: %@", _sessionKey);
+                    DDLogVerbose(@"session key: %@", _sessionKey);
                     
                     [self startStream];
                     _loggedIn=YES;
@@ -1408,7 +1410,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
 
     if(!_discoveredServices)
     {
-        debug_NSLog(@"no discovered services");
+        DDLogVerbose(@"no discovered services");
         return;
     }
     
@@ -1425,7 +1427,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
        _hasRequestedServerInfo=YES;
     } else
     {
-        debug_NSLog(@"no jid on info");
+        DDLogVerbose(@"no jid on info");
     }
     }
     
@@ -1445,7 +1447,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
     }
     else
     {
-        debug_NSLog(@"no conference server discovered");
+        DDLogVerbose(@"no conference server discovered");
     }
 }
 
@@ -1515,7 +1517,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
 
 - (void)stream:(NSStream *)stream handleEvent:(NSStreamEvent)eventCode
 {
-	//debug_NSLog(@"Stream has event");
+	//DDLogVerbose(@"Stream has event");
 	switch(eventCode)
 	{
 			//for writing
@@ -1525,7 +1527,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
                 dispatch_async(_netWriteQueue, ^{
                     _streamHasSpace=YES;
                     
-                    debug_NSLog(@"Stream has space to write");
+                    DDLogVerbose(@"Stream has space to write");
                     [self writeFromQueue];
                 });
             });
@@ -1535,7 +1537,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
 			//for reading
         case  NSStreamEventHasBytesAvailable:
 		{
-			debug_NSLog(@"Stream has bytes to read");
+			DDLogVerbose(@"Stream has bytes to read");
             dispatch_async(_xmppQueue, ^{
                 [self readToBuffer];
             });
@@ -1546,10 +1548,10 @@ dispatch_async(dispatch_get_current_queue(), ^{
 			
 		case NSStreamEventErrorOccurred:
 		{
-			debug_NSLog(@"Stream error");
+			DDLogVerbose(@"Stream error");
             NSError* st_error= [stream streamError];
             
-            debug_NSLog(@"Stream error code=%d domain=%@   local desc:%@ ",st_error.code,st_error.domain,  st_error.localizedDescription);
+            DDLogVerbose(@"Stream error code=%d domain=%@   local desc:%@ ",st_error.code,st_error.domain,  st_error.localizedDescription);
             
            
             if(st_error.code==2)// operation couldnt be completed
@@ -1597,7 +1599,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
 		}
 		case NSStreamEventNone:
 		{
-            //debug_NSLog(@"Stream event none");
+            //DDLogVerbose(@"Stream event none");
 			break;
 			
 		}
@@ -1605,7 +1607,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
 			
 		case NSStreamEventOpenCompleted:
 		{
-			debug_NSLog(@"Stream open completed");
+			DDLogVerbose(@"Stream open completed");
 			
             break;
 		}
@@ -1613,7 +1615,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
 			
 		case NSStreamEventEndEncountered:
 		{
-			debug_NSLog(@"%@ Stream end encoutered", [stream class] );
+			DDLogVerbose(@"%@ Stream end encoutered", [stream class] );
             [self disconnect];
 			break;
 		}
@@ -1627,7 +1629,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
 {
     if(!_streamHasSpace)
     {
-        debug_NSLog(@"no space to write. returning. ");
+        DDLogVerbose(@"no space to write. returning. ");
         return;
     }
     
@@ -1645,18 +1647,18 @@ dispatch_async(dispatch_get_current_queue(), ^{
     _streamHasSpace=NO; // triggers more has space messages
     
     //we probably want to break these into chunks
-    debug_NSLog(@"sending: %@ ", messageOut);
+    DDLogVerbose(@"sending: %@ ", messageOut);
     const uint8_t * rawstring = (const uint8_t *)[messageOut UTF8String];
     int len= strlen((char*)rawstring);
-    debug_NSLog("size : %d",len);
+    DDLogVerbose(@"size : %d",len);
     if([_oStream write:rawstring maxLength:len]!=-1)
     {
-        debug_NSLog(@"done writing ");
+        DDLogVerbose(@"done writing ");
     }
     else
     {
         NSError* error= [_oStream streamError];
-        debug_NSLog(@"sending: failed with error %d domain %@ message %@",error.code, error.domain, error.userInfo);
+        DDLogVerbose(@"sending: failed with error %d domain %@ message %@",error.code, error.domain, error.userInfo);
     }
     
     return;
@@ -1668,7 +1670,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
     
 	if(![_iStream hasBytesAvailable])
 	{
-        debug_NSLog(@"no bytes  to read");
+        DDLogVerbose(@"no bytes  to read");
 		return;
 	}
 	
@@ -1676,15 +1678,15 @@ dispatch_async(dispatch_get_current_queue(), ^{
     int len = 0;
     
 	len = [_iStream read:buf maxLength:kXMPPReadSize];
-    debug_NSLog(@"done reading %d", len);
+    DDLogVerbose(@"done reading %d", len);
 	if(len>0) {
         NSData* data = [NSData dataWithBytes:(const void *)buf length:len];
-        //  debug_NSLog(@" got raw string %s nsdata %@", buf, data);
+        //  DDLogVerbose(@" got raw string %s nsdata %@", buf, data);
         if(data)
         {
-            // debug_NSLog(@"waiting on net read queue");
+            // DDLogVerbose(@"waiting on net read queue");
             dispatch_async(_netReadQueue, ^{
-                // debug_NSLog(@"got net read queue");
+                // DDLogVerbose(@"got net read queue");
                 [_inputBuffer appendString:[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]];
             });
             
@@ -1747,7 +1749,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
         }
         else
         {
-            debug_NSLog(@"dns call timed out");
+            DDLogVerbose(@"dns call timed out");
         }
         
     }
@@ -1828,7 +1830,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
         {
             srv = (srv_rdata *)rdata;
             ConvertDomainNameToCString_withescape(&srv->target, targetstr, 0);
-            debug_NSLog(@"pri=%d, w=%d, port=%d, target=%s\n", ntohs(srv->priority), ntohs(srv->weight), ntohs(srv->port), targetstr);
+          //  DDLogVerbose(@"pri=%d, w=%d, port=%d, target=%s\n", ntohs(srv->priority), ntohs(srv->weight), ntohs(srv->port), targetstr);
 			
 			xmpp* client=(__bridge xmpp*) context;
 			int portval=ntohs(srv->port);
@@ -1837,29 +1839,29 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 			NSNumber* theport=[NSNumber numberWithInt:portval];
 			NSDictionary* row=[NSDictionary dictionaryWithObjectsAndKeys:num,@"priority", theserver, @"server", theport, @"port",nil];
 			[client.discoveredServerList addObject:row];
-			debug_NSLog(@"DISCOVERY: server  %@", theserver);
-			;
+		//	DDLogVerbose(@"DISCOVERY: server  %@", theserver);
+			
             return;
         }
         case T_A:
         {
             assert(len == 4);
             memcpy(&in, rdata, sizeof(in));
-            debug_NSLog(@"%s\n", inet_ntoa(in));
-            ;
+         //   DDLogVerbose(@"%s\n", inet_ntoa(in));
+            
             return;
         }
         case T_PTR:
         {
             ConvertDomainNameToCString_withescape((domainname *)rdata, targetstr, 0);
-            debug_NSLog(@"%s\n", targetstr);
-            ;
+          //  DDLogVerbose(@"%s\n", targetstr);
+            
             return;
         }
         default:
         {
-            debug_NSLog(@"ERROR: I dont know how to print RData of type %d\n", type);
-            ;
+         //   DDLogVerbose(@"ERROR: I dont know how to print RData of type %d\n", type);
+            
             return;
         }
 	}
@@ -1876,10 +1878,10 @@ void query_cb(const DNSServiceRef DNSServiceRef, const DNSServiceFlags flags, co
     
     if (errorCode)
 	{
-        debug_NSLog(@"query callback: error==%d\n", errorCode);
+       // DDLogVerbose(@"query callback: error==%d\n", errorCode);
         return;
 	}
-    debug_NSLog(@"query callback - name = %s, rdata=\n", name);
+   // DDLogVerbose(@"query callback - name = %s, rdata=\n", name);
     print_rdata(rrtype, rdlen, rdata, context);
 }
 
@@ -1890,24 +1892,24 @@ void query_cb(const DNSServiceRef DNSServiceRef, const DNSServiceFlags flags, co
  #pragma mark DNS service discovery
  - (void)netServiceBrowserWillSearch:(NSNetServiceBrowser *)netServiceBrowser
  {
- debug_NSLog(@"began service search of domain %@", domain);
+ DDLogVerbose(@"began service search of domain %@", domain);
  }
  
  
  - (void)netServiceBrowser:(NSNetServiceBrowser *)netServiceBrowser didNotSearch:(NSDictionary *)errorInfo
  {
- debug_NSLog(@"did not  service search");
+ DDLogVerbose(@"did not  service search");
  }
  
  - (void)netServiceBrowser:(NSNetServiceBrowser *)netServiceBrowser didFindService:(NSNetService *)netService moreComing:(BOOL)moreServicesComing
  {
  [netService retain];
- debug_NSLog(@"Add service %@. %@ %@\n", [netService name], [netService type], [netService domain]);
+ DDLogVerbose(@"Add service %@. %@ %@\n", [netService name], [netService type], [netService domain]);
  }
  
  - (void)netServiceBrowserDidStopSearch:(NSNetServiceBrowser *)netServiceBrowser
  {
- debug_NSLog(@"stopped service search"); 
+ DDLogVerbose(@"stopped service search"); 
  }
  */
 

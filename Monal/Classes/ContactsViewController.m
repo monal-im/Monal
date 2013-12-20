@@ -27,6 +27,8 @@
 @implementation ContactsViewController
 
 
+static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+
 #pragma mark view life cycle
 - (void)viewDidLoad
 {
@@ -117,9 +119,9 @@
                        dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
                        if([[info objectForKey:kinfoStatusKey] isEqualToString:@"Disconnected"])
                        {
-                           debug_NSLog(@"hiding disconencted timer started");
+                           DDLogVerbose(@"hiding disconencted timer started");
                            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 3ull * NSEC_PER_SEC), q_background,  ^{
-                               debug_NSLog(@"hiding disconencted");
+                               DDLogVerbose(@"hiding disconencted");
                                [self hideConnecting:info];
                            });
                        }
@@ -247,7 +249,7 @@
                            
                            if(!(contactRow.count>=1))
                            {
-                               debug_NSLog(@"ERROR:could not find contact row");
+                               DDLogVerbose(@"ERROR:could not find contact row");
                                return;
                            }
                            //insert into datasource
@@ -279,9 +281,9 @@
                                }
                                counter++;
                            }
-                           debug_NSLog(@"sorted contacts %@", _contacts);
+                           DDLogVerbose(@"sorted contacts %@", _contacts);
                            
-                           debug_NSLog(@"inserting %@ at pos %d", [_contacts objectAtIndex:pos], pos);
+                           DDLogVerbose(@"inserting %@ at pos %d", [_contacts objectAtIndex:pos], pos);
                            [_contactsTable beginUpdates];
                            NSIndexPath *path1 = [NSIndexPath indexPathForRow:pos inSection:konlineSection];
                            [_contactsTable insertRowsAtIndexPaths:@[path1]
@@ -301,7 +303,7 @@
                            
                        }else
                        {
-                           debug_NSLog(@"user %@ already in list",[user objectForKey:kusernameKey]);
+                           DDLogVerbose(@"user %@ already in list",[user objectForKey:kusernameKey]);
                            if([user objectForKey:kstateKey])
                                [[_contacts objectAtIndex:pos] setObject:[user objectForKey:kstateKey] forKey:kstateKey];
                            if([user objectForKey:kstatusKey])
@@ -356,7 +358,7 @@
                        
                        if(!(contactRow.count>=1))
                        {
-                           debug_NSLog(@"ERROR:could not find contact row");
+                           DDLogVerbose(@"ERROR:could not find contact row");
                            return;
                        }
                        
@@ -399,7 +401,7 @@
                                }
                                counter++;
                            }
-                           debug_NSLog(@"sorted contacts %@", _offlineContacts);
+                           DDLogVerbose(@"sorted contacts %@", _offlineContacts);
                        }
                        }
                        
@@ -407,7 +409,7 @@
                        if(pos>=0)
                        {
                            [_contacts removeObjectAtIndex:pos];
-                           debug_NSLog(@"removing %@ at pos %d", [user objectForKey:kusernameKey], pos);
+                           DDLogVerbose(@"removing %@ at pos %d", [user objectForKey:kusernameKey], pos);
                            [_contactsTable beginUpdates];
                            NSIndexPath *path1 = [NSIndexPath indexPathForRow:pos inSection:konlineSection];
                            [_contactsTable deleteRowsAtIndexPaths:@[path1]
@@ -416,7 +418,7 @@
                            if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"] && offlinepos>-1)
                            {
                                NSIndexPath *path2 = [NSIndexPath indexPathForRow:offlinepos inSection:kofflineSection];
-                               debug_NSLog("inserting offline at %d", offlinepos)
+                               DDLogVerbose(@"inserting offline at %d", offlinepos);
                                [_contactsTable insertRowsAtIndexPaths:@[path2]
                                                      withRowAnimation:UITableViewRowAnimationFade];
                            }
@@ -448,7 +450,7 @@
                            if([[row objectForKey:@"account_id"]  integerValue]==[accountNo integerValue] )
                            {
                                
-                               debug_NSLog(@"removing  pos %d", counter);
+                               DDLogVerbose(@"removing  pos %d", counter);
                                
                                NSIndexPath *path1 = [NSIndexPath indexPathForRow:counter inSection:konlineSection];
                                [indexPaths addObject:path1];
@@ -503,7 +505,7 @@
         return;
     }
     
-    debug_NSLog(@"chat view got new message notice %@", notification.userInfo);
+    DDLogVerbose(@"chat view got new message notice %@", notification.userInfo);
     
     dispatch_async(dispatch_get_main_queue(),
                    ^{

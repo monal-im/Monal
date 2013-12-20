@@ -51,7 +51,7 @@
 
 -(void) endPress
 {
- debug_NSLog(@"end pressed"); 
+ DDLogVerbose(@"end pressed"); 
     
      
    //terminate voip call here too 
@@ -78,7 +78,7 @@
 
 - (void)viewDidLoad
 {
-    debug_NSLog(@"call screen did  load");
+    DDLogVerbose(@"call screen did  load");
     
    // [super viewDidLoad];
     
@@ -117,7 +117,7 @@
 
 - (void)viewDidUnload
 {
- debug_NSLog(@"call screen did  unload");
+ DDLogVerbose(@"call screen did  unload");
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -132,14 +132,14 @@
 
 -(void)proximityStateDidChange
 {
-   debug_NSLog(@"proximity %d", [ [UIDevice currentDevice] proximityState]) ;
+   DDLogVerbose(@"proximity %d", [ [UIDevice currentDevice] proximityState]) ;
 }
 
 -(void) viewWillAppear:(BOOL)animated
 {
     
       
-	debug_NSLog(@"call screen will  appear");
+	DDLogVerbose(@"call screen will  appear");
 	
     if([[tools machine] isEqualToString:@"iPad"])
     {
@@ -165,7 +165,7 @@
 
 -(void)viewDidDisappear:(BOOL)animated
 {
-	debug_NSLog(@"call screen did  disappear");
+	DDLogVerbose(@"call screen did  disappear");
     
     [UIDevice currentDevice].proximityMonitoringEnabled=NO;
     

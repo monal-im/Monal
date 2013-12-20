@@ -10,6 +10,7 @@
 
 @implementation ParseMessage
 
+static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 #pragma mark NSXMLParser delegate
 
@@ -20,7 +21,7 @@
    
 	if(([elementName isEqualToString:@"message"])  )
 	{
-		debug_NSLog(@" message error");
+		DDLogVerbose(@" message error");
 		
         if ([[attributeDict objectForKey:@"type"] isEqualToString:kMessageErrorType])
         {
@@ -55,14 +56,14 @@
 		
 		if([parts count]>1)
 		{
-            debug_NSLog(@"group chat message");
+            DDLogVerbose(@"group chat message");
             _actualFrom=[parts objectAtIndex:1]; // the user name
 			_from=[parts objectAtIndex:0]; // should be group name
 		}
         else
             
         {
-            debug_NSLog(@"group chat message from a room ");
+            DDLogVerbose(@"group chat message from a room ");
             _from=[attributeDict objectForKey:@"from"];
 		}
 
@@ -72,7 +73,7 @@
         if([elementName isEqualToString:@"message"])
         {
             _from=[[(NSString*)[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
-            debug_NSLog(@"message from %@", _from);
+            DDLogVerbose(@"message from %@", _from);
             return;
         }
 
@@ -93,7 +94,7 @@
 	
 	if((([State isEqualToString:@"MucUser"]) && (([elementName isEqualToString: @"user:reason"]))) || ([elementName isEqualToString: @"reason"]))
 	{
-		debug_NSLog(@"user reason set"); 
+		DDLogVerbose(@"user reason set"); 
 		State=@"MucUserReason";
 
 		return;
@@ -116,7 +117,7 @@
     if([elementName isEqualToString:@"body"])
     {
         _messageText=_messageBuffer;
-        debug_NSLog(@"got message %@", _messageText);
+        DDLogVerbose(@"got message %@", _messageText);
     }
     
     if([elementName isEqualToString:@"message"])

@@ -7,13 +7,16 @@
 //
 
 #import "ParseStream.h"
+#import "DDLog.h"
+
+static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 @implementation ParseStream
 
 #pragma mark NSXMLParser delegate
 
 - (void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict{
-    debug_NSLog(@"began this element: %@", elementName);
+    DDLogVerbose(@"began this element: %@", elementName);
      _messageBuffer=nil;
     
     //getting login mechanisms
@@ -26,7 +29,7 @@
 	
     if(([State isEqualToString:@"Features"]) &&([elementName isEqualToString:@"auth"]))
 	{
-        debug_NSLog(@"Supports legacy auth");
+        DDLogVerbose(@"Supports legacy auth");
         _supportsLegacyAuth=true;
         
 		return;
@@ -34,7 +37,7 @@
     
     if(([State isEqualToString:@"Features"]) &&([elementName isEqualToString:@"register"]))
 	{
-        debug_NSLog(@"Supports user registration");
+        DDLogVerbose(@"Supports user registration");
         _supportsUserReg=YES;
         
 		return;
@@ -42,7 +45,7 @@
     
 	if(([State isEqualToString:@"Features"]) &&([elementName isEqualToString:@"starttls"]))
 	{
-        debug_NSLog(@"Using new style SSL");
+        DDLogVerbose(@"Using new style SSL");
         _callStartTLS=YES;
 		[parser abortParsing];
 	}
@@ -50,7 +53,7 @@
     
 	if(([elementName isEqualToString:@"proceed"]) && ([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:ietf:params:xml:ns:xmpp-tls"]) )
 	{
-		debug_NSLog(@"Got SartTLS procced");
+		DDLogVerbose(@"Got SartTLS procced");
 		//trying to switch to TLS
         _startTLSProceed=YES;
 		[parser abortParsing];
@@ -78,10 +81,10 @@
 	if(([State isEqualToString:@"Features"]) && [elementName isEqualToString:@"mechanisms"] )
 	{
 	
-		debug_NSLog(@"mechanisms xmlns:%@ ", [attributeDict objectForKey:@"xmlns"]);
+		DDLogVerbose(@"mechanisms xmlns:%@ ", [attributeDict objectForKey:@"xmlns"]);
 		if([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:ietf:params:xml:ns:xmpp-sasl"])
 		{
-			debug_NSLog(@"SASL supported");
+			DDLogVerbose(@"SASL supported");
 			_supportsSASL=YES;
 		}
 		State=@"Mechanisms";
@@ -90,7 +93,7 @@
 
 	if(([State isEqualToString:@"Mechanisms"]) && [elementName isEqualToString:@"mechanism"])
 	{
-		debug_NSLog(@"Reading mechanism"); 
+		DDLogVerbose(@"Reading mechanism"); 
 		State=@"Mechanism";
 		return;
 	}
@@ -105,22 +108,22 @@
 		
 		State=@"Mechanisms";
 		
-		debug_NSLog(@"got login mechanism: %@", _messageBuffer);
+		DDLogVerbose(@"got login mechanism: %@", _messageBuffer);
 		if([_messageBuffer isEqualToString:@"PLAIN"])
 		{
-			debug_NSLog(@"SASL PLAIN is supported");
+			DDLogVerbose(@"SASL PLAIN is supported");
 			_SASLPlain=YES;
 		}
 		
 		if([_messageBuffer isEqualToString:@"CRAM-MD5"])
 		{
-			debug_NSLog(@"SASL CRAM-MD5 is supported");
+			DDLogVerbose(@"SASL CRAM-MD5 is supported");
 			_SASLCRAM_MD5=YES;
 		}
 		
 		if([_messageBuffer isEqualToString:@"DIGEST-MD5"])
 		{
-			debug_NSLog(@"SASL DIGEST-MD5 is supported");
+			DDLogVerbose(@"SASL DIGEST-MD5 is supported");
 			_SASLDIGEST_MD5=YES;
 		}
         

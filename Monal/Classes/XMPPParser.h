@@ -7,6 +7,9 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "DDLog.h"
+
+
 
 @interface XMPPParser : NSObject <NSXMLParserDelegate>
 {

@@ -102,7 +102,7 @@
 
 -(void) viewDidLoad
 {
-	debug_NSLog(@" ask temp pass did  appear");
+	DDLogVerbose(@" ask temp pass did  appear");
     
    
     
@@ -125,7 +125,7 @@
 
 -(void)viewDidDisappear:(BOOL)animated
 {
-	debug_NSLog(@"ask temp pass did  disappear");
+	DDLogVerbose(@"ask temp pass did  disappear");
 	
 
 	

@@ -10,6 +10,8 @@
 #import "EncodingTools.h"
 #import "DataLayer.h"
 
+static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+
 @implementation MLImageManager
 
 #pragma mark initilization
@@ -82,11 +84,11 @@
     
     if([[EncodingTools dataWithBase64EncodedString:data] writeToFile:writablePath atomically:NO] )
     {
-        debug_NSLog(@"wrote file");
+        DDLogVerbose(@"wrote file");
     }
     else
     {
-        debug_NSLog(@"failed to write");
+        DDLogVerbose(@"failed to write");
     }
     
     //set db entry

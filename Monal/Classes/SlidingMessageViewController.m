@@ -9,6 +9,10 @@
 #import "SlidingMessageViewController.h"
 #import "MLImageManager.h"
 
+#import "DDLog.h"
+
+static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Private interface definitions
@@ -40,7 +44,7 @@
  *------------------------------------------------------------*/
 - (void)hideMsg
 {
-	debug_NSLog(@"hiding message"); 
+	DDLogVerbose(@"hiding message"); 
 	// Slide the view down off screen
 	CGRect frame = self.view.frame;
 	
@@ -113,7 +117,7 @@
     if ([self.view superview])
 		[self.view removeFromSuperview];
     
-    debug_NSLog(@"removed  slider"); 
+    DDLogVerbose(@"removed  slider"); 
 	
 }
  
@@ -519,7 +523,7 @@
 
 -(void) tapped
 {
-    debug_NSLog(@"tapped popup");
+    DDLogVerbose(@"tapped popup");
     // show the user 
     NSArray* vals= [[NSArray alloc] initWithObjects:username, nil]; 
     NSArray* keys= [[NSArray alloc] initWithObjects:@"username", nil]; 

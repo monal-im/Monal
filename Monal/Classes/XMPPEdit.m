@@ -10,6 +10,8 @@
 #import "tools.h"
 
 
+static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+
 @implementation XMPPEdit
 
 
@@ -53,7 +55,7 @@
         _editing=true;
 	} 
 	
-	debug_NSLog(@"got account number %@", _accountno);
+	DDLogVerbose(@"got account number %@", _accountno);
     
 
     UITapGestureRecognizer *gestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(hideKeyboard)]; // hides the kkyeboard when you tap outside the editing area
@@ -64,7 +66,7 @@
 	if(_originIndex.section==0)
 	{
 		//edit
-        debug_NSLog(@"reading account number %@", _accountno);
+        DDLogVerbose(@"reading account number %@", _accountno);
 		NSDictionary* settings=[[_db accountVals:_accountno] objectAtIndex:0]; //only one row
 		
         //allow blank domains.. dont show @ if so
@@ -135,7 +137,7 @@
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-	debug_NSLog(@"xmpp edit view will appear");
+	DDLogVerbose(@"xmpp edit view will appear");
 //    if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"6.0"))
 //    {
 //    [[UILabel appearanceWhenContainedIn:[UITableViewHeaderFooterView class], nil] setColor:[UIColor whiteColor]];
@@ -147,7 +149,7 @@
 - (void)viewWillDisappear:(BOOL)animated
 {
     [super viewWillDisappear:animated];
-	debug_NSLog(@"xmpp edit view will hide");
+	DDLogVerbose(@"xmpp edit view will hide");
 	[self save];
 	
    
@@ -164,7 +166,7 @@
 -(void) save
 {
 	
-	debug_NSLog(@"Saving");
+	DDLogVerbose(@"Saving");
 
 	if([userText.text length]==0)
 	{
@@ -275,7 +277,7 @@
    
         if(enableSwitch.on)
         {
-            debug_NSLog(@"calling connect... ");
+            DDLogVerbose(@"calling connect... ");
             [[MLXMPPManager sharedInstance] connectAccount:_accountno];
         }
         else
@@ -306,7 +308,7 @@
 
 - (IBAction) delClicked: (id) sender
 {
-    debug_NSLog(@"Deleting");
+    DDLogVerbose(@"Deleting");
 	
 	//ask if you want to delete
 	
@@ -335,7 +337,7 @@
 {
     
 
-	debug_NSLog(@"xmpp edit view section %d, row %d", indexPath.section, indexPath.row);
+	DDLogVerbose(@"xmpp edit view section %d, row %d", indexPath.section, indexPath.row);
     
 	UITableViewCell* thecell;
     // load cells from interface builder
@@ -408,7 +410,7 @@
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
 	
-	//debug_NSLog(@"xmpp edit counting # of sections %d",  [sectionArray count]);
+	//DDLogVerbose(@"xmpp edit counting # of sections %d",  [sectionArray count]);
 	return [self.sectionArray count];
 	
 }
@@ -450,7 +452,7 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-	//debug_NSLog(@"xmpp edit counting section %d", section);
+	//DDLogVerbose(@"xmpp edit counting section %d", section);
 	
 	if(section==0)
 		return 3;
@@ -476,7 +478,7 @@
 //required
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)newIndexPath
 {
-	debug_NSLog(@"selected log section %d , row %d", newIndexPath.section, newIndexPath.row);
+	DDLogVerbose(@"selected log section %d , row %d", newIndexPath.section, newIndexPath.row);
 }
 
 - (void)textFieldDidBeginEditing:(UITextField *)textField

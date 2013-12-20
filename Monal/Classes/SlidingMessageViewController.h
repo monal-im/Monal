@@ -15,6 +15,7 @@
 
 
 
+
 @interface SlidingMessageViewController : UIViewController
 {
 	UILabel   *titleLabel;              

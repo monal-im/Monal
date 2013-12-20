@@ -11,6 +11,8 @@
 #import "xmpp.h"
 #import "MonalAppDelegate.h"
 
+static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+
 @interface MLXMPPManager()
 /**
  convenience functin getting account in connected array with account number/id matching
@@ -62,7 +64,7 @@
    
 //    NSTimeInterval timeInterval= 600; // 600 seconds
 //    BOOL keepAlive=[[UIApplication sharedApplication] setKeepAliveTimeout:timeInterval handler:^{
-//        debug_NSLog(@"began background ping");
+//        DDLogVerbose(@"began background ping");
 //        for(NSDictionary* row in _connectedXMPP)
 //        {
 //             xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
@@ -74,11 +76,11 @@
 //    
 //    if(keepAlive)
 //    {
-//        debug_NSLog(@"installed keep alive timer");
+//        DDLogVerbose(@"installed keep alive timer");
 //    }
 //    else
 //    {
-//         debug_NSLog(@"failed to install keep alive timer");
+//         DDLogVerbose(@"failed to install keep alive timer");
 //    }
 //    
     [self defaultSettings];
@@ -174,7 +176,7 @@
         
         return;
     }
-    debug_NSLog(@"connecting account %@",[account objectForKey:@"account_name"] )
+    DDLogVerbose(@"connecting account %@",[account objectForKey:@"account_name"] );
     
     if([[account objectForKey:@"password"] isEqualToString:@""])
     {
@@ -238,11 +240,11 @@ dispatch_async(dispatch_get_main_queue(), ^{
             xmpp* xmppAccount=[account objectForKey:@"xmppAccount"];
             if([xmppAccount.accountNo isEqualToString:accountNo] )
             {
-                debug_NSLog(@"got acct cleaning up.. ");
+                DDLogVerbose(@"got acct cleaning up.. ");
                 Reachability* hostReach=[account objectForKey:@"hostReach"];
                 [hostReach stopNotifier];
                 [ xmppAccount disconnect];
-                debug_NSLog(@"done cleaning up account ");
+                DDLogVerbose(@"done cleaning up account ");
                 pos=index;
                 break;
             }
@@ -296,10 +298,10 @@ dispatch_async(dispatch_get_main_queue(), ^{
     xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
     if([hostReach currentReachabilityStatus]==NotReachable)
     {
-        debug_NSLog(@"not reachable");
+        DDLogVerbose(@"not reachable");
         if(xmppAccount.loggedIn==YES)
         {
-        debug_NSLog(@"logging out");
+        DDLogVerbose(@"logging out");
         dispatch_async(_netQueue,
                        ^{
         [xmppAccount disconnect];
@@ -308,10 +310,10 @@ dispatch_async(dispatch_get_main_queue(), ^{
     }
     else
     {
-        debug_NSLog(@"reachable");
+        DDLogVerbose(@"reachable");
         if((xmppAccount.disconnected==YES) && (!xmppAccount.logInStarted))
         {
-            debug_NSLog(@"logging in");
+            DDLogVerbose(@"logging in");
             dispatch_async(_netQueue,
                            ^{
             [xmppAccount connect];

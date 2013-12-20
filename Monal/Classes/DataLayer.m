@@ -7,9 +7,11 @@
 //
 
 #import "DataLayer.h"
-
+#import "DDLog.h"
 
 @implementation DataLayer
+
+static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 static DataLayer *sharedInstance=nil;
 
@@ -43,7 +45,7 @@ static DataLayer *sharedInstance=nil;
         if (sqlite3_prepare_v2(database, [query  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK) {
             if (sqlite3_step(statement) == SQLITE_ROW)
             {
-                //debug_NSLog(@"got a row");
+                //DDLogVerbose(@"got a row");
                 //get type
                 switch(sqlite3_column_type(statement,0))
                 {
@@ -75,7 +77,7 @@ static DataLayer *sharedInstance=nil;
                     case (SQLITE_TEXT):
                     {
                         NSString* returnString = [NSString stringWithUTF8String:sqlite3_column_text(statement,0)];
-                        //	debug_NSLog(@"got %@", returnString);
+                        //	DDLogVerbose(@"got %@", returnString);
                         while(sqlite3_step(statement)== SQLITE_ROW ){} //clear
                         /*sqlite3_stmt *statement2;
                          if (sqlite3_prepare_v2(database, [@"end"  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement2, NULL) == SQLITE_OK) {
@@ -90,7 +92,7 @@ static DataLayer *sharedInstance=nil;
                     {
                         //trat as string for now
                         NSString* returnString = [NSString stringWithUTF8String:sqlite3_column_text(statement,0)];
-                        //	debug_NSLog(@"got %@", returnString);
+                        //	DDLogVerbose(@"got %@", returnString);
                         while(sqlite3_step(statement)== SQLITE_ROW) {} //clear
                         /*sqlite3_stmt *statement2;
                          if (sqlite3_prepare_v2(database, [@"end"  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement2, NULL) == SQLITE_OK) {
@@ -110,7 +112,7 @@ static DataLayer *sharedInstance=nil;
                         
                     case (SQLITE_NULL):
                     {
-                        debug_NSLog(@"return nil with sql null");
+                        DDLogVerbose(@"return nil with sql null");
                         while(sqlite3_step(statement)== SQLITE_ROW) {} //clear
                         /*sqlite3_stmt *statement2;
                          if (sqlite3_prepare_v2(database, [@"end"  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement2, NULL) == SQLITE_OK) {
@@ -127,7 +129,7 @@ static DataLayer *sharedInstance=nil;
                 
                 
             } else
-            {debug_NSLog(@"return nil with no row");
+            {DDLogVerbose(@"return nil with no row");
                 /*sqlite3_stmt *statement2;
                  if (sqlite3_prepare_v2(database, [@"end"  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement2, NULL) == SQLITE_OK) {
                  sqlite3_step(statement2);
@@ -136,7 +138,7 @@ static DataLayer *sharedInstance=nil;
         }
         else{
             //if noting else
-            debug_NSLog(@"returning nil with out OK %@", query);
+            DDLogVerbose(@"returning nil with out OK %@", query);
             /*sqlite3_stmt *statement2;
              if (sqlite3_prepare_v2(database, [@"end"  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement2, NULL) == SQLITE_OK) {
              sqlite3_step(statement2);
@@ -170,7 +172,7 @@ static DataLayer *sharedInstance=nil;
         
         else
         {
-            debug_NSLog(@"nonquery returning NO with out OK %@", query);
+            DDLogVerbose(@"nonquery returning NO with out OK %@", query);
             toReturn=NO;
         }
         
@@ -203,7 +205,7 @@ static DataLayer *sharedInstance=nil;
             
             while (sqlite3_step(statement) == SQLITE_ROW) {
                 //while there are rows
-				//debug_NSLog(@" has rows");
+				//DDLogVerbose(@" has rows");
                 NSMutableDictionary* row= [[NSMutableDictionary alloc] init];
                 int counter=0;
                 while(counter< sqlite3_column_count(statement) )
@@ -252,7 +254,7 @@ static DataLayer *sharedInstance=nil;
                             
                         case (SQLITE_NULL):
                         {
-                            debug_NSLog(@"return nil with sql null");
+                            DDLogVerbose(@"return nil with sql null");
                             
                             [row setObject:@"" forKey:columnName];
                             break;
@@ -275,7 +277,7 @@ static DataLayer *sharedInstance=nil;
         }
         else
         {
-            debug_NSLog(@"reader nil with sql not ok: %@", query );
+            DDLogVerbose(@"reader nil with sql not ok: %@", query );
             /*sqlite3_stmt *statement2;
              if (sqlite3_prepare_v2(database, [@"end"  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement2, NULL) == SQLITE_OK) {
              sqlite3_step(statement2);
@@ -302,14 +304,14 @@ static DataLayer *sharedInstance=nil;
 	if(toReturn!=nil)
 	{
 		
-		debug_NSLog(@" count: %d",  [toReturn count] );
+		DDLogVerbose(@" count: %d",  [toReturn count] );
 		;
 		
 		return toReturn; //[toReturn autorelease];
 	}
 	else
 	{
-		debug_NSLog(@"protocol list  is empty or failed to read");
+		DDLogVerbose(@"protocol list  is empty or failed to read");
 		;
 		return nil;
 	}
@@ -327,13 +329,13 @@ static DataLayer *sharedInstance=nil;
 	if(toReturn!=nil)
 	{
 		
-		debug_NSLog(@" count: %d",  [toReturn count] );
+		DDLogVerbose(@" count: %d",  [toReturn count] );
         
 		return toReturn; //[toReturn autorelease];
 	}
 	else
 	{
-		debug_NSLog(@"account list  is empty or failed to read");
+		DDLogVerbose(@"account list  is empty or failed to read");
         
 		return nil;
 	}
@@ -352,14 +354,14 @@ static DataLayer *sharedInstance=nil;
 	if(toReturn!=nil)
 	{
 		
-		debug_NSLog(@" count: %d",  [toReturn count] );
+		DDLogVerbose(@" count: %d",  [toReturn count] );
 		;
 		
 		return toReturn; //[toReturn autorelease];
 	}
 	else
 	{
-		debug_NSLog(@"account list  is empty or failed to read");
+		DDLogVerbose(@"account list  is empty or failed to read");
 		;
 		return nil;
 	}
@@ -374,14 +376,14 @@ static DataLayer *sharedInstance=nil;
 	if(toReturn!=nil)
 	{
 		
-		debug_NSLog(@" count: %d",  [toReturn count] );
+		DDLogVerbose(@" count: %d",  [toReturn count] );
 		;
 		
 		return toReturn; //[toReturn autorelease];
 	}
 	else
 	{
-		debug_NSLog(@"account list  is empty or failed to read");
+		DDLogVerbose(@"account list  is empty or failed to read");
 		;
 		return nil;
 	}
@@ -424,7 +426,7 @@ static DataLayer *sharedInstance=nil;
 	NSString* query=
 	[NSString stringWithFormat:@"update account  set account_name='%@', protocol_id=%@, server='%@', other_port='%@', username='%@', password='%@', secure=%d, resource='%@', domain='%@', enabled=%d, selfsigned=%d, oldstyleSSL=%d where account_id=%@",
 	 username, theProtocol,server, otherport, username, password, secure, resource, thedomain,enabled, selfsigned, oldstyle,accountNo];
-    //debug_NSLog(query);
+    //DDLogVerbose(query);
 	
 	
 	if([self executeNonQuery:query]!=NO)
@@ -597,17 +599,17 @@ static DataLayer *sharedInstance=nil;
 {
     NSString* query= query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, ifnull(full_name, buddy_name) as full_name, account_id from buddylist where buddy_name='%@' and account_id=%@", username, accountNo];
     
-    //debug_NSLog(query);
+    //DDLogVerbose(query);
     NSArray* toReturn = [self executeReader:query];
     
     if(toReturn!=nil)
     {
-        debug_NSLog(@" count: %d",  [toReturn count] );
+        DDLogVerbose(@" count: %d",  [toReturn count] );
         return toReturn; //[toReturn autorelease];
     }
     else
     {
-        debug_NSLog(@"buddylist is empty or failed to read");
+        DDLogVerbose(@"buddylist is empty or failed to read");
         return nil;
     }
     
@@ -628,17 +630,17 @@ static DataLayer *sharedInstance=nil;
         query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0 as 'count', ifnull(full_name, buddy_name) as full_name, account_id from buddylist where   online=1   order by state,full_name COLLATE NOCASE  asc "];
     }
     
-    //debug_NSLog(query);
+    //DDLogVerbose(query);
     NSArray* toReturn = [self executeReader:query];
     
     if(toReturn!=nil)
     {
-        debug_NSLog(@" count: %d",  [toReturn count] );
+        DDLogVerbose(@" count: %d",  [toReturn count] );
         return toReturn;
     }
     else
     {
-        debug_NSLog(@"buddylist is empty or failed to read");
+        DDLogVerbose(@"buddylist is empty or failed to read");
         return nil;
     }
     
@@ -648,17 +650,17 @@ static DataLayer *sharedInstance=nil;
 {
 	
     NSString* query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, ifnull(full_name, buddy_name) as full_name, a.account_id from buddylist  as A inner join account as b  on a.account_id=b.account_id  where  online=0 and enabled=1 order by full_name COLLATE NOCASE "];
-    //debug_NSLog(query);
+    //DDLogVerbose(query);
     NSArray* toReturn = [self executeReader:query];
     
     if(toReturn!=nil)
     {
-        debug_NSLog(@" count: %d",  [toReturn count] );
+        DDLogVerbose(@" count: %d",  [toReturn count] );
         return toReturn;
     }
     else
     {
-        debug_NSLog(@"buddylist is empty or failed to read");
+        DDLogVerbose(@"buddylist is empty or failed to read");
         return nil;
     }
     
@@ -669,7 +671,7 @@ static DataLayer *sharedInstance=nil;
 -(NSArray*) newBuddies:(NSString*) accountNo;
 {
 	NSString* query1=[NSString stringWithFormat:@"select username, domain from account where account_id=%@", accountNo];
-	//debug_NSLog(query);
+	//DDLogVerbose(query);
 	NSArray* user = [self executeReader:query1];
 	
 	if(user!=nil)
@@ -679,19 +681,19 @@ static DataLayer *sharedInstance=nil;
             
             NSString* query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, full_name from buddylist where account_id=%@ and online=1  and (buddy_name!='%@'  and buddy_name!='%@@%@'  ) and new=1 order by full_name, buddy_name ", accountNo
                              , [[user objectAtIndex:0] objectAtIndex:0], [[user objectAtIndex:0] objectAtIndex:0],  [[user objectAtIndex:0] objectAtIndex:1]  ];
-            //debug_NSLog(query);
+            //DDLogVerbose(query);
             NSArray* toReturn = [self executeReader:query];
             
             if(toReturn!=nil)
             {
                 
-                debug_NSLog(@" count: %d",  [toReturn count] );
+                DDLogVerbose(@" count: %d",  [toReturn count] );
                
             return toReturn;
             }
             else
             {
-                debug_NSLog(@"buddylist is empty or failed to read");
+                DDLogVerbose(@"buddylist is empty or failed to read");
                 return nil;
             }
         }
@@ -711,7 +713,7 @@ static DataLayer *sharedInstance=nil;
 	
 	
 	NSString* query1=[NSString stringWithFormat:@"select username, domain  from account where account_id=%@", accountNo];
-	//debug_NSLog(query);
+	//DDLogVerbose(query);
 	NSArray* user = [self executeReader:query1];
 	
 	if(user!=nil)
@@ -720,18 +722,18 @@ static DataLayer *sharedInstance=nil;
             
             NSString* query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, full_name from buddylist where account_id=%@ and online=0  and (buddy_name!='%@'  and buddy_name!='%@@%@'  ) and dirty=1  order by full_name, buddy_name ", accountNo
                              , [[user objectAtIndex:0] objectAtIndex:0], [[user objectAtIndex:0] objectAtIndex:0],  [[user objectAtIndex:0] objectAtIndex:1]  ];
-            //debug_NSLog(query);
+            //DDLogVerbose(query);
             NSArray* toReturn = [self executeReader:query];
             
             if(toReturn!=nil)
             {
                 
-                debug_NSLog(@" count: %d",  [toReturn count] );
+                DDLogVerbose(@" count: %d",  [toReturn count] );
                return toReturn;
             }
             else
             {
-                debug_NSLog(@"buddylist is empty or failed to read");
+                DDLogVerbose(@"buddylist is empty or failed to read");
                 return nil;
             }
         } else return nil;
@@ -744,7 +746,7 @@ static DataLayer *sharedInstance=nil;
 	
 	
 	NSString* query1=[NSString stringWithFormat:@"select username, domain  from account where account_id=%@", accountNo];
-	//debug_NSLog(query);
+	//DDLogVerbose(query);
 	NSArray* user = [self executeReader:query1];
 	
 	if(user!=nil)
@@ -753,20 +755,20 @@ static DataLayer *sharedInstance=nil;
             
             NSString* query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, full_name from buddylist where account_id=%@ and online=1  and (buddy_name!='%@'  and buddy_name!='%@@%@'  ) and dirty=1 order by full_name, buddy_name ", accountNo
                              , [[user objectAtIndex:0] objectAtIndex:0], [[user objectAtIndex:0] objectAtIndex:0],  [[user objectAtIndex:0] objectAtIndex:1]  ];
-            //debug_NSLog(query);
+            //DDLogVerbose(query);
             NSArray* toReturn = [self executeReader:query];
             
             if(toReturn!=nil)
             {
                 
-                debug_NSLog(@" count: %d",  [toReturn count] );
+                DDLogVerbose(@" count: %d",  [toReturn count] );
                 ;
                 
                 return toReturn; //[toReturn autorelease];
             }
             else
             {
-                debug_NSLog(@"buddylist is empty or failed to read");
+                DDLogVerbose(@"buddylist is empty or failed to read");
                 ;
                 return nil;
             }
@@ -827,7 +829,7 @@ static DataLayer *sharedInstance=nil;
 {
     NSString* query=[NSString stringWithFormat:@"select count(*) from buddylist as a inner join buddy_resources as b on a.buddy_id=b.buddy_id  inner join ver_info as c  on  b.ver=c.ver where buddy_name='%@' and account_id=%@ and cap='%@'", user, acctNo,cap ];
     
-    //debug_NSLog(@"%@", query);
+    //DDLogVerbose(@"%@", query);
     NSNumber* count = [self executeScalar:query];
     
     if([count integerValue]>0) return YES; else return NO;
@@ -839,7 +841,7 @@ static DataLayer *sharedInstance=nil;
     
     NSString* query=[NSString stringWithFormat:@"select cap from ver_info where ver='%@'", verString];
     
-    //debug_NSLog(query);
+    //DDLogVerbose(query);
     NSArray* toReturn = [self executeReader:query];
     
     if(toReturn!=nil)
@@ -847,14 +849,14 @@ static DataLayer *sharedInstance=nil;
         
         if([toReturn count]==0) return nil;
         
-        debug_NSLog(@" caps  count: %d",  [toReturn count] );
+        DDLogVerbose(@" caps  count: %d",  [toReturn count] );
         ;
         
         return toReturn; //[toReturn autorelease];
     }
     else
     {
-        debug_NSLog(@"caps list is empty");
+        DDLogVerbose(@"caps list is empty");
         ;
         return nil;
     }
@@ -893,7 +895,7 @@ static DataLayer *sharedInstance=nil;
 {
     NSString* query=[NSString stringWithFormat:@"delete from buddy_resources_legacy_caps"];
     
-    //debug_NSLog(@"%@", query);
+    //DDLogVerbose(@"%@", query);
     [self executeNonQuery:query];
     
     return;
@@ -937,7 +939,7 @@ static DataLayer *sharedInstance=nil;
 {
     NSString* query=[NSString stringWithFormat:@"select count(*) from buddylist as a inner join buddy_resources_legacy_caps as b on a.buddy_id=b.buddy_id  inner join legacy_caps as c on c.capid=b.capid where buddy_name='%@' and account_id=%@ and captext='%@'", user, acctNo,cap ];
     
-    //debug_NSLog(@"%@", query);
+    //DDLogVerbose(@"%@", query);
     NSNumber* count = [self executeScalar:query];
     
     if([count integerValue]>0) return YES; else return NO;
@@ -1381,14 +1383,14 @@ static DataLayer *sharedInstance=nil;
     // in the event it is a message from the room
     
     NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, %@, '%@',  '%@', '%@', '%@', '%@',1);", accountNo, from, to, 	dateString, [message stringByReplacingOccurrencesOfString:@"'" withString:@"''"], actualfrom];
-	debug_NSLog(@"%@",query);
+	DDLogVerbose(@"%@",query);
 	if([self executeNonQuery:query]!=NO)
 	{
 		return YES;
 	}
 	else
 	{
-		debug_NSLog(@"failed to insert ");
+		DDLogVerbose(@"failed to insert ");
 		return NO;
 	}
 	
@@ -1430,27 +1432,27 @@ static DataLayer *sharedInstance=nil;
     //returns a list of  buddy's with message history
 	
 	NSString* query1=[NSString stringWithFormat:@"select username, domain from account where account_id=%@", accountNo];
-	//debug_NSLog(query);
+	//DDLogVerbose(query);
 	NSArray* user = [self executeReader:query1];
 	
 	if(user!=nil)
 	{
         
         NSString* query=[NSString stringWithFormat:@"select distinct date(timestamp) as the_date from message_history where account_id=%@ and  message_from='%@' or  message_to='%@'   order by timestamp desc", accountNo, buddy, buddy  ];
-        //debug_NSLog(query);
+        //DDLogVerbose(query);
         NSArray* toReturn = [self executeReader:query];
         
         if(toReturn!=nil)
         {
             
-            debug_NSLog(@" count: %d",  [toReturn count] );
+            DDLogVerbose(@" count: %d",  [toReturn count] );
             ;
             
             return toReturn; //[toReturn autorelease];
         }
         else
         {
-            debug_NSLog(@"message history buddy date list is empty or failed to read");
+            DDLogVerbose(@"message history buddy date list is empty or failed to read");
             ;
             return nil;
         }
@@ -1464,20 +1466,20 @@ static DataLayer *sharedInstance=nil;
     
     NSString* query=[NSString stringWithFormat:@"select af, message, thetime, message_history_id from (select ifnull(actual_from, message_from) as af, message,     timestamp  as thetime, message_history_id from message_history where account_id=%@ and (message_from='%@' or message_to='%@') and date(timestamp)='%@' order by message_history_id desc limit 20) order by message_history_id asc",accountNo, buddy, buddy, date];
     
-	debug_NSLog(@"%@",query);
+	DDLogVerbose(@"%@",query);
 	NSArray* toReturn = [self executeReader:query];
 	
 	if(toReturn!=nil)
 	{
 		
-		debug_NSLog(@" count: %d",  [toReturn count] );
+		DDLogVerbose(@" count: %d",  [toReturn count] );
 		;
 		
 		return toReturn; //[toReturn autorelease];
 	}
 	else
 	{
-		debug_NSLog(@"message history is empty or failed to read");
+		DDLogVerbose(@"message history is empty or failed to read");
 		;
 		return nil;
 	}
@@ -1491,20 +1493,20 @@ static DataLayer *sharedInstance=nil;
 	//returns a buddy's message history
 	
 	NSString* query=[NSString stringWithFormat:@"select message_from, message, thetime from (select message_from, message, timestamp as thetime, message_history_id from message_history where account_id=%@ and (message_from='%@' or message_to='%@') order by message_history_id desc) order by message_history_id asc ", accountNo, buddy, buddy];
-	//debug_NSLog(query);
+	//DDLogVerbose(query);
 	NSArray* toReturn = [self executeReader:query];
 	
 	if(toReturn!=nil)
 	{
 		
-		debug_NSLog(@" count: %d",  [toReturn count] );
+		DDLogVerbose(@" count: %d",  [toReturn count] );
 		;
 		
 		return toReturn; //[toReturn autorelease];
 	}
 	else
 	{
-		debug_NSLog(@"message history is empty or failed to read");
+		DDLogVerbose(@"message history is empty or failed to read");
 		;
 		return nil;
 	}
@@ -1518,18 +1520,18 @@ static DataLayer *sharedInstance=nil;
 	
 	
 	NSString* query=[NSString stringWithFormat:@"delete from message_history where account_id=%@ and (message_from='%@' or message_to='%@') ",accountNo, buddy, buddy];
-	//debug_NSLog(query);
+	//DDLogVerbose(query);
 	if( [self executeNonQuery:query])
         
 	{
-		debug_NSLog(@" cleaned messages for %@",  buddy );
+		DDLogVerbose(@" cleaned messages for %@",  buddy );
 		
 		;
 		return YES;
 	}
 	else
 	{
-		debug_NSLog(@"message history failed to clean");
+		DDLogVerbose(@"message history failed to clean");
 		;
 		return NO;
 	}
@@ -1543,12 +1545,12 @@ static DataLayer *sharedInstance=nil;
 	NSString* query=[NSString stringWithFormat:@"delete from message_history "];
 	if( [self executeNonQuery:query])
 	{
-		debug_NSLog(@" cleaned messages " );
+		DDLogVerbose(@" cleaned messages " );
 		return YES;
 	}
 	else
 	{
-		debug_NSLog(@"message history failed to clean all");
+		DDLogVerbose(@"message history failed to clean all");
 		return NO;
 	}
 	
@@ -1559,27 +1561,27 @@ static DataLayer *sharedInstance=nil;
 	//returns a list of  buddy's with message history
 	
 	NSString* query1=[NSString stringWithFormat:@"select username, domain from account where account_id=%@", accountNo];
-	//debug_NSLog(query);
+	//DDLogVerbose(query);
 	NSArray* user = [self executeReader:query1];
 	
 	if(user!=nil)
 	{
         
         NSString* query=[NSString stringWithFormat:@"select x.* from(select distinct message_from,'', ifnull(full_name, message_from) as full_name, filename from message_history as a left outer join buddylist as b on a.message_from=b.buddy_name and a.account_id=b.account_id where a.account_id=%@  union select distinct message_to  ,'', ifnull(full_name, message_to) as full_name, filename from message_history as a left outer join buddylist as b on a.message_to=b.buddy_name and a.account_id=b.account_id where a.account_id=%@  )  as x where message_from!='%@' and message_from!='%@@%@'  order by full_name COLLATE NOCASE ", accountNo, accountNo,[[user objectAtIndex:0] objectForKey:@"username"], [[user objectAtIndex:0] objectForKey:@"username"],  [[user objectAtIndex:0] objectForKey:@"domain"]  ];
-        //debug_NSLog(query);
+        //DDLogVerbose(query);
         NSArray* toReturn = [self executeReader:query];
         
         if(toReturn!=nil)
         {
             
-            debug_NSLog(@" count: %d",  [toReturn count] );
+            DDLogVerbose(@" count: %d",  [toReturn count] );
             ;
             
             return toReturn; //[toReturn autorelease];
         }
         else
         {
-            debug_NSLog(@"message history buddy list is empty or failed to read");
+            DDLogVerbose(@"message history buddy list is empty or failed to read");
             ;
             return nil;
         }
@@ -1595,18 +1597,18 @@ static DataLayer *sharedInstance=nil;
 	
 	
 	NSString* query=[NSString stringWithFormat:@"select af, message, thetime, message_history_id from (select ifnull(actual_from, message_from) as af, message,     timestamp  as thetime, message_history_id from message_history where account_id=%@ and (message_from='%@' or message_to='%@') order by message_history_id desc limit 20) order by message_history_id asc",accountNo, buddy, buddy];
-	debug_NSLog(@"%@", query);
+	DDLogVerbose(@"%@", query);
 	NSMutableArray* toReturn = [self executeReader:query];
     
 	if(toReturn!=nil)
 	{
 		
-		debug_NSLog(@" message history count: %d",  [toReturn count] );
+		DDLogVerbose(@" message history count: %d",  [toReturn count] );
         return toReturn; //[toReturn autorelease];
 	}
 	else
 	{
-		debug_NSLog(@"message history is empty or failed to read");
+		DDLogVerbose(@"message history is empty or failed to read");
 		return nil;
 	}
 	
@@ -1621,7 +1623,7 @@ static DataLayer *sharedInstance=nil;
     }
 	else
 	{
-		debug_NSLog(@"Message history update failed");
+		DDLogVerbose(@"Message history update failed");
 		return NO;
 	}
 	
@@ -1674,17 +1676,17 @@ static DataLayer *sharedInstance=nil;
 {
     
     NSString* query=[NSString stringWithFormat:@"select distinct b.buddy_name,state,status,filename,0 as 'count' , ifnull(b.full_name, b.buddy_name) as full_name, a.account_id from activechats as a inner join buddylist as b on a.buddy_name=b.buddy_name and a.account_id=b.account_id order by full_name COLLATE NOCASE" ];
-	//	debug_NSLog(query);
+	//	DDLogVerbose(query);
 	NSArray* toReturn = [self executeReader:query];
 	
 	if(toReturn!=nil)
 	{
-		debug_NSLog(@" count: %d",  [toReturn count] );
+		DDLogVerbose(@" count: %d",  [toReturn count] );
 		return toReturn; //[toReturn autorelease];
 	}
 	else
 	{
-		debug_NSLog(@"message history is empty or failed to read");
+		DDLogVerbose(@"message history is empty or failed to read");
 		;
 		return nil;
 	}
@@ -1698,7 +1700,7 @@ static DataLayer *sharedInstance=nil;
 	[self markAsReadBuddy:buddyname forAccount:accountNo];
 	
 	NSString* query=[NSString stringWithFormat:@"delete from activechats where buddy_name='%@' and account_id=%@ ", buddyname, accountNo ];
-	//	debug_NSLog(query);
+	//	DDLogVerbose(query);
     
 	
 	bool result=[self executeNonQuery:query];
@@ -1711,7 +1713,7 @@ static DataLayer *sharedInstance=nil;
 {
     
 	NSString* query=[NSString stringWithFormat:@"delete from activechats " ];
-	//	debug_NSLog(query);
+	//	DDLogVerbose(query);
     
 	
 	bool result=[self executeNonQuery:query];
@@ -1735,7 +1737,7 @@ static DataLayer *sharedInstance=nil;
         {
             //no
             NSString* query2=[NSString stringWithFormat:@"insert into activechats values ( %@,'%@') ",  accountNo,buddyname ];
-            //	debug_NSLog(query);
+            //	DDLogVerbose(query);
             
             bool result=[self executeNonQuery:query2];
             return result;
@@ -1791,17 +1793,17 @@ static DataLayer *sharedInstance=nil;
 	}
 	
 	if (sqlite3_config(SQLITE_CONFIG_SERIALIZED) == SQLITE_OK) {
-		debug_NSLog(@"Database configured ok");
-	} else debug_NSLog(@"Database not configured ok");
+		DDLogVerbose(@"Database configured ok");
+	} else DDLogVerbose(@"Database not configured ok");
 	
 	dbPath = writableDBPath; //[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"sworim.sqlite"];
 	if (sqlite3_open([dbPath UTF8String], &database) == SQLITE_OK) {
-		debug_NSLog(@"Database opened");
+		DDLogVerbose(@"Database opened");
 	}
 	else
 	{
 		//database error message
-		debug_NSLog(@"Error opening database");
+		DDLogVerbose(@"Error opening database");
 	}
     
 	
@@ -1820,13 +1822,13 @@ static DataLayer *sharedInstance=nil;
     [dbversionCheck lock];
     
 	// checking db version and upgrading if necessary
-	debug_NSLog(@"Database version check");
+	DDLogVerbose(@"Database version check");
 	
 	//<1.02 has no db version table but gtalk port is 443 . this is an identifier
 	NSNumber* gtalkport= (NSNumber*)[self executeScalar:@"select default_port from  protocol   where protocol_name='GTalk';"];
 	if([gtalkport intValue]==443)
 	{
-        debug_NSLog(@"Database version <1.02 detected. Performing upgrade");
+        DDLogVerbose(@"Database version <1.02 detected. Performing upgrade");
 		[self executeNonQuery:@"drop table account;"];
 		[self executeNonQuery:@"create table account( account_id integer not null primary key AUTOINCREMENT,account_name varchar(20) not null, protocol_id integer not null, server varchar(50) not null, other_port integer, username varchar(30), password varchar(30), secure bool,resource varchar(30), domain varchar(50), enabled bool);"];
 		[self executeNonQuery:@"update protocol set default_port=5223 where protocol_name='GTalk';"];
@@ -1834,7 +1836,7 @@ static DataLayer *sharedInstance=nil;
 		[self executeNonQuery:@"insert into dbversion values('1.02');"];
 		
 		
-		debug_NSLog(@"Upgrade to 1.02 success importing default account");
+		DDLogVerbose(@"Upgrade to 1.02 success importing default account");
 		NSString* importAcc= [NSString stringWithFormat:@"insert into account values(null, '%@', 0, '%@', %@, '%@', '%@', %@, '%@', '%@', 1); ",
 							  [[NSUserDefaults standardUserDefaults] stringForKey:@"username"] ,
 							  [ [NSUserDefaults standardUserDefaults] stringForKey:@"server"] ,
@@ -1851,7 +1853,7 @@ static DataLayer *sharedInstance=nil;
 		
 		
 		
-		debug_NSLog(@"Done");
+		DDLogVerbose(@"Done");
 		
 		
 	}
@@ -1862,7 +1864,7 @@ static DataLayer *sharedInstance=nil;
 	
 	if( ([gtalkport intValue]==5223) || ([gtalkport intValue]==443))
 	{
-		debug_NSLog(@"Database version <1.04 detected. Performing upgrade");
+		DDLogVerbose(@"Database version <1.04 detected. Performing upgrade");
 		[self executeNonQuery:@"update protocol set default_port=5222 where protocol_name='GTalk';"];
 		[self executeNonQuery:@"insert into protocol values (null,'Facebook',5222); "];
         
@@ -1874,31 +1876,31 @@ static DataLayer *sharedInstance=nil;
 		[self executeNonQuery:@"drop table dbversion;"];
 		[self executeNonQuery:@"create table dbversion(dbversion real);"];
 		[self executeNonQuery:@"insert into dbversion values(1.04);"];
-		debug_NSLog(@"Upgrade to 1.04 success ");
+		DDLogVerbose(@"Upgrade to 1.04 success ");
         
         
 	}
 	
 	
 	NSNumber* dbversion= (NSNumber*)[self executeScalar:@"select dbversion from dbversion"];
-	debug_NSLog(@"Got db version %@", dbversion);
+	DDLogVerbose(@"Got db version %@", dbversion);
 	
 	
 	if([dbversion doubleValue]<1.07)
 	{
-		debug_NSLog(@"Database version <1.07 detected. Performing upgrade");
+		DDLogVerbose(@"Database version <1.07 detected. Performing upgrade");
 		[self executeNonQuery:@"create table buddylistOnline (buddy_id integer not null primary key AUTOINCREMENT,account_id integer not null,buddy_name varchar(50), group_name varchar(100)); "];
 		[self executeNonQuery:@"update dbversion set dbversion='1.07'; "];
 		
 		[[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"IdleAlert"];
 		
-		debug_NSLog(@"Upgrade to 1.07 success ");
+		DDLogVerbose(@"Upgrade to 1.07 success ");
 		
 	}
 	
 	if([dbversion doubleValue]<1.071)
 	{
-		debug_NSLog(@"Database version <1.071 detected. Performing upgrade");
+		DDLogVerbose(@"Database version <1.071 detected. Performing upgrade");
 		[self executeNonQuery:@"drop table buddylistOnline;  "];
 		
 		[self executeNonQuery:@"drop table buddylist;  "];
@@ -1929,22 +1931,22 @@ static DataLayer *sharedInstance=nil;
 		
 		[[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"IdleAlert"];
 		
-		debug_NSLog(@"Upgrade to 1.071 success ");
+		DDLogVerbose(@"Upgrade to 1.071 success ");
 		
 	}
 	
 	if([dbversion doubleValue]<1.072)
 	{
-		debug_NSLog(@"Database version <1.072 detected. Performing upgrade on passwords. ");
+		DDLogVerbose(@"Database version <1.072 detected. Performing upgrade on passwords. ");
 		NSArray* rows = [self executeReader:@"select account_id, password from account"];
 		int counter=0;
 		PasswordManager* pass;
 		while(counter<[rows count])
 		{
-			//debug_NSLog(@" %@ %@",[[rows objectAtIndex:counter] objectAtIndex:0], [[rows objectAtIndex:counter] objectAtIndex:1] );
+			//DDLogVerbose(@" %@ %@",[[rows objectAtIndex:counter] objectAtIndex:0], [[rows objectAtIndex:counter] objectAtIndex:1] );
             pass=[[PasswordManager alloc]  init:[NSString stringWithFormat:@"%@",[[rows objectAtIndex:counter] objectAtIndex:0]]];
 			[pass setPassword:[[rows objectAtIndex:counter] objectAtIndex:1]] ;
-			//debug_NSLog(@"got:%@", [pass getPassword] );
+			//DDLogVerbose(@"got:%@", [pass getPassword] );
 			
 			counter++;
 		}
@@ -1959,7 +1961,7 @@ static DataLayer *sharedInstance=nil;
     
     if([dbversion doubleValue]<1.073)
     {
-        debug_NSLog(@"Database version <1.073 detected. Performing upgrade on passwords. ");
+        DDLogVerbose(@"Database version <1.073 detected. Performing upgrade on passwords. ");
         
         //set defaults on upgrade
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"OfflineContact"];
@@ -1967,7 +1969,7 @@ static DataLayer *sharedInstance=nil;
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"Logging"];
         
         [self executeNonQuery:@"update dbversion set dbversion='1.073'; "];
-        debug_NSLog(@"Upgrade to 1.073 success ");
+        DDLogVerbose(@"Upgrade to 1.073 success ");
         
     }
 	
@@ -1975,7 +1977,7 @@ static DataLayer *sharedInstance=nil;
     
     if([dbversion doubleValue]<1.074)
     {
-        debug_NSLog(@"Database version <1.074 detected. Performing upgrade on protocols. ");
+        DDLogVerbose(@"Database version <1.074 detected. Performing upgrade on protocols. ");
         
         
         [self executeNonQuery:@"delete from protocol where protocol_id=3 "];
@@ -1996,26 +1998,26 @@ static DataLayer *sharedInstance=nil;
         [self executeNonQuery:@"create table buddy_resources_legacy_caps (buddy_id integer,resource varchar(255),capid  integer);"];
         
         [self executeNonQuery:@"update dbversion set dbversion='1.074'; "];
-        debug_NSLog(@"Upgrade to 1.074 success ");
+        DDLogVerbose(@"Upgrade to 1.074 success ");
         
     }
 	
     if([dbversion doubleValue]<1.1)
     {
-        debug_NSLog(@"Database version <1.1 detected. Performing upgrade on accounts. ");
+        DDLogVerbose(@"Database version <1.1 detected. Performing upgrade on accounts. ");
         
         [self executeNonQuery:@"alter table account add column selfsigned bool;"];
         [self executeNonQuery:@"alter table account add column oldstyleSSL bool; "];
         
         [self executeNonQuery:@"update dbversion set dbversion='1.1'; "];
-        debug_NSLog(@"Upgrade to 1.1 success ");
+        DDLogVerbose(@"Upgrade to 1.1 success ");
         
     }
     
     
     if([dbversion doubleValue]<1.2)
     {
-        debug_NSLog(@"Database version <1.2 detected. Performing upgrade on accounts. ");
+        DDLogVerbose(@"Database version <1.2 detected. Performing upgrade on accounts. ");
         
         [self executeNonQuery:@"update  buddylist set iconhash=NULL;"];
         [self executeNonQuery:@"alter table message_history  add column unread bool;"];
@@ -2024,7 +2026,7 @@ static DataLayer *sharedInstance=nil;
         
         
         [self executeNonQuery:@"update dbversion set dbversion='1.2'; "];
-        debug_NSLog(@"Upgrade to 1.2 success ");
+        DDLogVerbose(@"Upgrade to 1.2 success ");
         
     }
     

@@ -24,8 +24,16 @@
 
 #import <Crashlytics/Crashlytics.h>
 
+#import "DDLog.h"
+#import "DDASLLogger.h"
+#import "DDFileLogger.h"
+#import "DDTTYLogger.h"
+
 //xmpp
 #import "MLXMPPManager.h"
+
+
+static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 @implementation MonalAppDelegate
 {
@@ -153,6 +161,17 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+    
+#ifdef  DEBUG
+    [DDLog addLogger:[DDASLLogger sharedInstance]];
+    [DDLog addLogger:[DDTTYLogger sharedInstance]];
+    DDFileLogger *fileLogger = [[DDFileLogger alloc] init];
+    fileLogger.rollingFrequency = 60 * 60 * 24; // 24 hour rolling
+    fileLogger.logFileManager.maximumNumberOfLogFiles = 7;
+    [DDLog addLogger:fileLogger];
+#endif
+    
+    
     [self createRootInterface];
 
     //rating
@@ -170,16 +189,16 @@
     {
        _backgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
             
-            debug_NSLog(@"XMPP manager bgtask took too long. closing");
+            DDLogVerbose(@"XMPP manager bgtask took too long. closing");
             [[UIApplication sharedApplication] endBackgroundTask:_backgroundTask];
             _backgroundTask=UIBackgroundTaskInvalid;
             
         }];
         
         if (_backgroundTask != UIBackgroundTaskInvalid) {
-             debug_NSLog(@"XMPP manager connecting in background");
+             DDLogVerbose(@"XMPP manager connecting in background");
                 [[MLXMPPManager sharedInstance] connectIfNecessary];
-              debug_NSLog(@"XMPP manager completed background task");
+              DDLogVerbose(@"XMPP manager completed background task");
             [[UIApplication sharedApplication] endBackgroundTask:_backgroundTask];
             _backgroundTask=UIBackgroundTaskInvalid;
 
@@ -223,7 +242,7 @@
 - (void)applicationWillEnterForeground:(UIApplication *)application
 {
      if (_backgroundTask != UIBackgroundTaskInvalid) {
-          debug_NSLog(@"entering foreground as connect bg task is running");
+          DDLogVerbose(@"entering foreground as connect bg task is running");
      }
 }
 
@@ -231,9 +250,9 @@
 {
     UIApplicationState state = [application applicationState];
     if (state == UIApplicationStateInactive) {
-        debug_NSLog(@"Screen lock");
+        DDLogVerbose(@"Screen lock");
     } else if (state == UIApplicationStateBackground) {
-        debug_NSLog(@"Entering BG");
+        DDLogVerbose(@"Entering BG");
     }
 }
 

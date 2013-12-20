@@ -169,11 +169,11 @@ static const short _base64DecodingTable[256] = {
      result[8], result[9], result[10], result[11],
      result[12], result[13], result[14], result[15]];
      
-     debug_NSLog(@" hash: %@ => %@",string, toreturn );
+     DDLogVerbose(@" hash: %@ => %@",string, toreturn );
      */
     
     int size=sizeof(unsigned char)*CC_MD5_DIGEST_LENGTH;
-    //  debug_NSLog(@" hash: %s size:%d", result,size);
+    //  DDLogVerbose(@" hash: %s size:%d", result,size);
     
     NSData* data =[[NSData  alloc ] initWithBytes: (const void *)result length:size];
     
@@ -192,7 +192,7 @@ static const short _base64DecodingTable[256] = {
      result[8], result[9], result[10], result[11],
      result[12], result[13], result[14], result[15]];
      */
-    // debug_NSLog(@"data %s hash: %s",cStr, result );
+    // DDLogVerbose(@"data %s hash: %s",cStr, result );
     
     int size=sizeof(unsigned char)*CC_MD5_DIGEST_LENGTH;
     NSData* data =[NSData dataWithBytes:result length:size];

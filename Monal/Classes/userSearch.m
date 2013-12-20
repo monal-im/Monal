@@ -21,7 +21,7 @@
 
 -(void) showUsers:(id)sender
 {
-	debug_NSLog(@"Got user Search results" );
+	DDLogVerbose(@"Got user Search results" );
     //read db and load into table 
 	thelist=jabber.userSearchItems; 
     [currentTable reloadData];
@@ -32,7 +32,7 @@
 -(void)viewDidAppear:(BOOL)animated 
 {
 	
-	debug_NSLog(@"user search did appear");
+	DDLogVerbose(@"user search did appear");
 	
   /*  UITapGestureRecognizer *gestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(hideKeyboard)];
     gestureRecognizer.cancelsTouchesInView=false; //this prevents it from blocking the button
@@ -62,7 +62,7 @@
 
 -(void)viewWillDisappear:(BOOL)animated
 {
-	debug_NSLog(@"user search will disappear");
+	DDLogVerbose(@"user search will disappear");
 
 }
 
@@ -79,7 +79,7 @@
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
 {
 	
-	debug_NSLog(@"clicked button %d", buttonIndex); 
+	DDLogVerbose(@"clicked button %d", buttonIndex); 
     if(buttonIndex==0)
     {
     //add
@@ -95,7 +95,7 @@
 	
     
 	//add buddy
-    debug_NSLog(@"Clicked add contact");
+    DDLogVerbose(@"Clicked add contact");
     
     UIAlertView *addAlert = [[UIAlertView alloc] 
                                 initWithTitle:@"Add Contact" 
@@ -181,7 +181,7 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)newIndexPath
 {
     	
-	debug_NSLog(@"selected log row %d max %d", [newIndexPath indexAtPosition:1], [thelist count]); 
+	DDLogVerbose(@"selected log row %d max %d", [newIndexPath indexAtPosition:1], [thelist count]); 
 		
 // action here
 	
@@ -227,7 +227,7 @@
 
 - (void)searchBarSearchButtonClicked:(UISearchBar *)searchBar
 {
-    debug_NSLog(@"Setting search term"); 
+    DDLogVerbose(@"Setting search term"); 
     [jabber userSearch:searchBar.text]; 
     // clear tables
     thelist=[[NSArray alloc] init];
@@ -238,7 +238,7 @@
 
 - (void)searchBarCancelButtonClicked:(UISearchBar *)searchBar
 {
-     debug_NSLog(@"clicked cancel"); 
+     DDLogVerbose(@"clicked cancel"); 
     //SworIMAppDelegate *app=[[UIApplication sharedApplication] delegate];
     
   //  [app.morenav popViewControllerAnimated:YES];

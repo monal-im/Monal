@@ -56,6 +56,9 @@
 
 #import "Reachability.h"
 
+#import "DDLog.h"
+static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+
 #define kShouldPrintReachabilityFlags 1
 
 static void PrintReachabilityFlags(SCNetworkReachabilityFlags    flags, const char* comment)
@@ -79,19 +82,21 @@ static void PrintReachabilityFlags(SCNetworkReachabilityFlags    flags, const ch
 }
 
 
+
+
 @implementation Reachability
 static void ReachabilityCallback(SCNetworkReachabilityRef target, SCNetworkReachabilityFlags flags, void* info)
 {
 #pragma unused (target, flags)
     if(info == NULL)
     {
-        debug_NSLog(@"info was NULL in ReachabilityCallback");
+      //  DDLogVerbose(@"info was NULL in ReachabilityCallback");
         return;
     }
     
     if(![(NSObject*) info isKindOfClass: [Reachability class]])
     {
-         debug_NSLog(@"info was wrong class in ReachabilityCallback");
+     //    DDLogVerbose(@"info was wrong class in ReachabilityCallback");
     }
     
     //We're on the main RunLoop, so an NSAutoreleasePool is not necessary, but is added defensively

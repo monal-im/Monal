@@ -143,6 +143,15 @@
 		26761BF71804FBB700D94714 /* RoomListViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26761BF51804FBB700D94714 /* RoomListViewController.xib */; };
 		2678A98B185A8320003AF53B /* ChatLogAccountDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2678A98A185A8320003AF53B /* ChatLogAccountDetailViewController.m */; };
 		2678A98E185AB739003AF53B /* ChatLogContactViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2678A98D185AB739003AF53B /* ChatLogContactViewController.m */; };
+		2680B8EB1863C172009599AB /* DDAbstractDatabaseLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 2680B8D91863C172009599AB /* DDAbstractDatabaseLogger.m */; };
+		2680B8EC1863C172009599AB /* DDASLLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 2680B8DB1863C172009599AB /* DDASLLogger.m */; };
+		2680B8ED1863C172009599AB /* DDFileLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 2680B8DD1863C172009599AB /* DDFileLogger.m */; };
+		2680B8EE1863C172009599AB /* DDLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 2680B8E01863C172009599AB /* DDLog.m */; };
+		2680B8EF1863C172009599AB /* DDTTYLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 2680B8E21863C172009599AB /* DDTTYLogger.m */; };
+		2680B8F01863C172009599AB /* DDContextFilterLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 2680B8E51863C172009599AB /* DDContextFilterLogFormatter.m */; };
+		2680B8F11863C172009599AB /* DDDispatchQueueLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 2680B8E71863C172009599AB /* DDDispatchQueueLogFormatter.m */; };
+		2680B8F21863C172009599AB /* DDMultiFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 2680B8E91863C172009599AB /* DDMultiFormatter.m */; };
+		2680B8F31863C172009599AB /* README.txt in Resources */ = {isa = PBXBuildFile; fileRef = 2680B8EA1863C172009599AB /* README.txt */; };
 		2689B6EC1601914E0087CA58 /* DDBadgeViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2689B6EB1601914E0087CA58 /* DDBadgeViewCell.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		268BCF12140B29180025E4D1 /* libjrtplib-static.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */; };
 		268DD58617C4541000C673A9 /* MLChatCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 268DD58517C4541000C673A9 /* MLChatCell.m */; };
@@ -351,6 +360,24 @@
 		2678A98A185A8320003AF53B /* ChatLogAccountDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChatLogAccountDetailViewController.m; sourceTree = "<group>"; };
 		2678A98C185AB739003AF53B /* ChatLogContactViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChatLogContactViewController.h; sourceTree = "<group>"; };
 		2678A98D185AB739003AF53B /* ChatLogContactViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChatLogContactViewController.m; sourceTree = "<group>"; };
+		2680B8D81863C172009599AB /* DDAbstractDatabaseLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDAbstractDatabaseLogger.h; sourceTree = "<group>"; };
+		2680B8D91863C172009599AB /* DDAbstractDatabaseLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDAbstractDatabaseLogger.m; sourceTree = "<group>"; };
+		2680B8DA1863C172009599AB /* DDASLLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDASLLogger.h; sourceTree = "<group>"; };
+		2680B8DB1863C172009599AB /* DDASLLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDASLLogger.m; sourceTree = "<group>"; };
+		2680B8DC1863C172009599AB /* DDFileLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDFileLogger.h; sourceTree = "<group>"; };
+		2680B8DD1863C172009599AB /* DDFileLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDFileLogger.m; sourceTree = "<group>"; };
+		2680B8DE1863C172009599AB /* DDLog+LOGV.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "DDLog+LOGV.h"; sourceTree = "<group>"; };
+		2680B8DF1863C172009599AB /* DDLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDLog.h; sourceTree = "<group>"; };
+		2680B8E01863C172009599AB /* DDLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDLog.m; sourceTree = "<group>"; };
+		2680B8E11863C172009599AB /* DDTTYLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDTTYLogger.h; sourceTree = "<group>"; };
+		2680B8E21863C172009599AB /* DDTTYLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDTTYLogger.m; sourceTree = "<group>"; };
+		2680B8E41863C172009599AB /* DDContextFilterLogFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDContextFilterLogFormatter.h; sourceTree = "<group>"; };
+		2680B8E51863C172009599AB /* DDContextFilterLogFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDContextFilterLogFormatter.m; sourceTree = "<group>"; };
+		2680B8E61863C172009599AB /* DDDispatchQueueLogFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDDispatchQueueLogFormatter.h; sourceTree = "<group>"; };
+		2680B8E71863C172009599AB /* DDDispatchQueueLogFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDDispatchQueueLogFormatter.m; sourceTree = "<group>"; };
+		2680B8E81863C172009599AB /* DDMultiFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDMultiFormatter.h; sourceTree = "<group>"; };
+		2680B8E91863C172009599AB /* DDMultiFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDMultiFormatter.m; sourceTree = "<group>"; };
+		2680B8EA1863C172009599AB /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
 		2689B6EA1601914E0087CA58 /* DDBadgeViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDBadgeViewCell.h; sourceTree = "<group>"; };
 		2689B6EB1601914E0087CA58 /* DDBadgeViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDBadgeViewCell.m; sourceTree = "<group>"; };
 		268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libjrtplib-static.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -619,6 +646,39 @@
 			name = "Chat Logs";
 			sourceTree = "<group>";
 		};
+		2680B8D71863C172009599AB /* Lumberjack */ = {
+			isa = PBXGroup;
+			children = (
+				2680B8D81863C172009599AB /* DDAbstractDatabaseLogger.h */,
+				2680B8D91863C172009599AB /* DDAbstractDatabaseLogger.m */,
+				2680B8DA1863C172009599AB /* DDASLLogger.h */,
+				2680B8DB1863C172009599AB /* DDASLLogger.m */,
+				2680B8DC1863C172009599AB /* DDFileLogger.h */,
+				2680B8DD1863C172009599AB /* DDFileLogger.m */,
+				2680B8DE1863C172009599AB /* DDLog+LOGV.h */,
+				2680B8DF1863C172009599AB /* DDLog.h */,
+				2680B8E01863C172009599AB /* DDLog.m */,
+				2680B8E11863C172009599AB /* DDTTYLogger.h */,
+				2680B8E21863C172009599AB /* DDTTYLogger.m */,
+				2680B8E31863C172009599AB /* Extensions */,
+			);
+			path = Lumberjack;
+			sourceTree = "<group>";
+		};
+		2680B8E31863C172009599AB /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				2680B8E41863C172009599AB /* DDContextFilterLogFormatter.h */,
+				2680B8E51863C172009599AB /* DDContextFilterLogFormatter.m */,
+				2680B8E61863C172009599AB /* DDDispatchQueueLogFormatter.h */,
+				2680B8E71863C172009599AB /* DDDispatchQueueLogFormatter.m */,
+				2680B8E81863C172009599AB /* DDMultiFormatter.h */,
+				2680B8E91863C172009599AB /* DDMultiFormatter.m */,
+				2680B8EA1863C172009599AB /* README.txt */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
 		2689B6E91601914E0087CA58 /* DDBadgeViewCell */ = {
 			isa = PBXGroup;
 			children = (
@@ -836,6 +896,7 @@
 		26DFD4A615666B6C007A1621 /* 3rd Party */ = {
 			isa = PBXGroup;
 			children = (
+				2680B8D71863C172009599AB /* Lumberjack */,
 				2643A129180220890030EFB1 /* TPAvoidingView */,
 				2668B2C217E1E59700C7F7C9 /* Crashlytics.framework */,
 				26DA16D917C302BC00D0065E /* UIAlertView-Blocks */,
@@ -1070,6 +1131,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2601D9CB0FBF25EF004DB939 /* sworim.sqlite in Resources */,
+				2680B8F31863C172009599AB /* README.txt in Resources */,
 				260447F60FEED62100B3B5A7 /* BuddyDetails.xib in Resources */,
 				26D1847310F9972400340C52 /* XMPPEdit.xib in Resources */,
 				265F1B2B123040540065C5FE /* web.xib in Resources */,
@@ -1111,7 +1173,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2680B8EE1863C172009599AB /* DDLog.m in Sources */,
 				1D60589B0D05DD56006BFB54 /* main.m in Sources */,
+				2680B8F11863C172009599AB /* DDDispatchQueueLogFormatter.m in Sources */,
 				1D3623260D0F684500981E51 /* MonalAppDelegate.m in Sources */,
 				2601D9B00FBF255D004DB939 /* DataLayer.m in Sources */,
 				26277888110179D100023C8A /* tools.m in Sources */,
@@ -1119,14 +1183,17 @@
 				26B69A82131C5495002FCBEB /* PasswordManager.m in Sources */,
 				2640AF4014548E7700CB4F60 /* HPGrowingTextView.m in Sources */,
 				2640AF4114548E7700CB4F60 /* HPTextViewInternal.m in Sources */,
+				2680B8EB1863C172009599AB /* DDAbstractDatabaseLogger.m in Sources */,
 				26529F5217FA7B260057F199 /* addContact.m in Sources */,
 				262DE4AF15C4E2C60040A66B /* MBProgressHUD.m in Sources */,
+				2680B8EF1863C172009599AB /* DDTTYLogger.m in Sources */,
 				2658508B15E7D8E40070A2A7 /* TPCircularBuffer+AudioBufferList.c in Sources */,
 				2658508C15E7D8E40070A2A7 /* TPCircularBuffer.c in Sources */,
 				2689B6EC1601914E0087CA58 /* DDBadgeViewCell.m in Sources */,
 				2643A12E180220890030EFB1 /* TPKeyboardAvoidingScrollView.m in Sources */,
 				26BAFC551626537D0073728B /* Appirater.m in Sources */,
 				26761BF61804FBB700D94714 /* RoomListViewController.m in Sources */,
+				2680B8F01863C172009599AB /* DDContextFilterLogFormatter.m in Sources */,
 				261A6281176C055400059090 /* ContactsViewController.m in Sources */,
 				261A6285176C156500059090 /* ActiveChatsViewController.m in Sources */,
 				261A6288176C157D00059090 /* SettingsViewController.m in Sources */,
@@ -1138,6 +1205,7 @@
 				261A629A176C162200059090 /* AboutViewController.m in Sources */,
 				2636C43F177BD58C001CA71F /* XMPPEdit.m in Sources */,
 				26352EA8177D222600E2C8FF /* MLXMPPManager.m in Sources */,
+				2680B8ED1863C172009599AB /* DDFileLogger.m in Sources */,
 				260C51D1177F08F50039634B /* xmpp.m in Sources */,
 				260C51D4177F44AD0039634B /* XMLNode.m in Sources */,
 				263F127A177F867B0025B235 /* ParseStream.m in Sources */,
@@ -1157,11 +1225,13 @@
 				26EE8B1F179B67FA006781F3 /* MLNotificationManager.m in Sources */,
 				26EE8B22179B7B0E006781F3 /* SlidingMessageViewController.m in Sources */,
 				261E672B179E27BE00CB493E /* ParseFailure.m in Sources */,
+				2680B8F21863C172009599AB /* DDMultiFormatter.m in Sources */,
 				26AAE285179F7B0200271345 /* MLSettingCell.m in Sources */,
 				26EC411317BDE39E0031304D /* MLImageManager.m in Sources */,
 				26A8ADD717C031BA0033990D /* ContactDetails.m in Sources */,
 				26DA16E017C302BC00D0065E /* RIButtonItem.m in Sources */,
 				26DA16E117C302BC00D0065E /* UIActionSheet+Blocks.m in Sources */,
+				2680B8EC1863C172009599AB /* DDASLLogger.m in Sources */,
 				2678A98B185A8320003AF53B /* ChatLogAccountDetailViewController.m in Sources */,
 				26DA16E217C302BC00D0065E /* UIAlertView+Blocks.m in Sources */,
 				2643A12F180220890030EFB1 /* TPKeyboardAvoidingTableView.m in Sources */,

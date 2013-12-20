@@ -11,6 +11,9 @@
 #import "MonalAppDelegate.h"
 #import <QuartzCore/QuartzCore.h>
 
+
+static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+
 @implementation chatViewController
 
 - (void)makeView {
@@ -344,7 +347,7 @@
 {
     if(([chatInput text]!=nil) && (![[chatInput text] isEqualToString:@""]) )
     {
-        debug_NSLog(@"Sending message");
+        DDLogVerbose(@"Sending message");
         [[MLXMPPManager sharedInstance] sendMessage:[chatInput text] toContact:_contactName fromAccount:_accountNo isMUC:_isMUC 
                               withCompletionHandler:nil];
         [self addMessageto:_contactName withMessage:[chatInput text]];
@@ -362,7 +365,7 @@
 	
 	if([[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:_accountNo withMessage:message actuallyFrom:self.jid ])
 	{
-		debug_NSLog(@"added message");
+		DDLogVerbose(@"added message");
         
 		if(groupchat!=true) //  message will come back
 		{
@@ -392,7 +395,7 @@
 		
 	}
 	else
-		debug_NSLog(@"failed to add message");
+		DDLogVerbose(@"failed to add message");
 	
 	// make sure its in active
 	if(_firstmsg==YES)
@@ -407,7 +410,7 @@
 
 -(void) handleNewMessage:(NSNotification *)notification
 {
-    debug_NSLog(@"chat view got new message notice %@", notification.userInfo);
+    DDLogVerbose(@"chat view got new message notice %@", notification.userInfo);
     
     if([[notification.userInfo objectForKey:@"accountNo"] isEqualToString:_accountNo]
       && [[notification.userInfo objectForKey:@"from"] isEqualToString:_contactName]
@@ -436,7 +439,7 @@
 #pragma mark MUC display elements
 -(void) popContacts
 {
-    debug_NSLog(@"pop out contacts");
+    DDLogVerbose(@"pop out contacts");
     
     //    UITableViewController* tbv = [UITableViewController alloc];
     //    tbv.tableView=contactList;
@@ -468,11 +471,11 @@
 #pragma mark gestures
 //handle swipe
 - (void)swipeDetected:(UISwipeGestureRecognizer *)recognizer {
-     debug_NSLog(@"pages was   %d", pages.currentPage);
+     DDLogVerbose(@"pages was   %d", pages.currentPage);
     
     if(recognizer.direction==UISwipeGestureRecognizerDirectionRight)
     {
-        debug_NSLog(@"swiped  right in chat"); 
+        DDLogVerbose(@"swiped  right in chat"); 
        
         if(pages.currentPage==0) pages.currentPage=pages.numberOfPages-1; 
         else
@@ -481,7 +484,7 @@
         else
              if(recognizer.direction==UISwipeGestureRecognizerDirectionLeft)
              {
-                 debug_NSLog(@"swiped   left in chat "); 
+                 DDLogVerbose(@"swiped   left in chat "); 
                  
                  if(pages.currentPage==pages.numberOfPages-1) pages.currentPage=0; 
                 else
@@ -490,7 +493,7 @@
              }
             
     
-    debug_NSLog(@"pages now set to %d", pages.currentPage);
+    DDLogVerbose(@"pages now set to %d", pages.currentPage);
     [pages updateCurrentPageDisplay];
     
     //dont keep reloading if only one page
@@ -665,7 +668,7 @@
     if (editingStyle == UITableViewCellEditingStyleDelete) {
         NSDictionary* message= [_messagelist objectAtIndex:indexPath.row];
         
-        debug_NSLog(@"%@", message); 
+        DDLogVerbose(@"%@", message); 
         
         if([message objectForKey:@"message_history_id"])
         {
@@ -714,7 +717,7 @@
 
 -(void) keyboardDidHide: (NSNotification *)notif 
 {
-	debug_NSLog(@"kbd did hide "); 
+	DDLogVerbose(@"kbd did hide "); 
 }
 
 -(void) keyboardWillHide:(NSNotification *) notification
@@ -741,7 +744,7 @@
      ];
 
     
-	debug_NSLog(@"kbd will hide scroll: %f", oldFrame.size.height);
+	DDLogVerbose(@"kbd will hide scroll: %f", oldFrame.size.height);
 }
 
 -(void) keyboardDidShow:(NSNotification *) note
@@ -1049,7 +1052,7 @@
 	NSTimeZone* sourceTimeZone = [NSTimeZone timeZoneWithAbbreviation:@"GMT"];
 	NSTimeZone* destinationTimeZone = [NSTimeZone systemTimeZone];
 		
-	//	debug_NSLog(@"system timezone: %@", [destinationTimeZone  name]); 
+	//	DDLogVerbose(@"system timezone: %@", [destinationTimeZone  name]); 
 	
 	NSInteger sourceGMTOffset = [sourceTimeZone secondsFromGMTForDate:sourceDate];
 	NSInteger destinationGMTOffset = [destinationTimeZone secondsFromGMTForDate:sourceDate];

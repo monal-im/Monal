@@ -11,7 +11,7 @@
 
 @implementation DataLayer
 
-static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+static const int ddLogLevel = LOG_LEVEL_INFO;
 
 static DataLayer *sharedInstance=nil;
 
@@ -32,21 +32,10 @@ static DataLayer *sharedInstance=nil;
 {
     NSObject* __block toReturn;
     dispatch_sync(_dbQueue, ^{
-        
-        
-        /*
-         sqlite3_stmt *statement1;
-         if (sqlite3_prepare_v2(database, [@"begin"  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement1, NULL) == SQLITE_OK) {
-         sqlite3_step(statement1);
-         }
-         */
-        
         sqlite3_stmt *statement;
         if (sqlite3_prepare_v2(database, [query  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK) {
             if (sqlite3_step(statement) == SQLITE_ROW)
             {
-                //DDLogVerbose(@"got a row");
-                //get type
                 switch(sqlite3_column_type(statement,0))
                 {
                         // SQLITE_INTEGER, SQLITE_FLOAT, SQLITE_TEXT, SQLITE_BLOB, or SQLITE_NULL
@@ -54,10 +43,6 @@ static DataLayer *sharedInstance=nil;
                     {
                         NSNumber* returnInt= [NSNumber numberWithInt:sqlite3_column_int(statement,0)];
                         while(sqlite3_step(statement)== SQLITE_ROW) {} //clear
-                        /*sqlite3_stmt *statement2;
-                         if (sqlite3_prepare_v2(database, [@"end"  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement2, NULL) == SQLITE_OK) {
-                         sqlite3_step(statement2);
-                         }*/
                         toReturn= returnInt;
                         break;
                     }
@@ -66,10 +51,6 @@ static DataLayer *sharedInstance=nil;
                     {
                         NSNumber* returnInt= [NSNumber numberWithDouble:sqlite3_column_double(statement,0)];
 						while(sqlite3_step(statement)== SQLITE_ROW) {} //clear
-                        /*	sqlite3_stmt *statement2;
-                         if (sqlite3_prepare_v2(database, [@"end"  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement2, NULL) == SQLITE_OK) {
-                         sqlite3_step(statement2);
-                         }*/
                         toReturn= returnInt;
                         break;
                     }
@@ -79,10 +60,6 @@ static DataLayer *sharedInstance=nil;
                         NSString* returnString = [NSString stringWithUTF8String:sqlite3_column_text(statement,0)];
                         //	DDLogVerbose(@"got %@", returnString);
                         while(sqlite3_step(statement)== SQLITE_ROW ){} //clear
-                        /*sqlite3_stmt *statement2;
-                         if (sqlite3_prepare_v2(database, [@"end"  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement2, NULL) == SQLITE_OK) {
-                         sqlite3_step(statement2);
-                         }*/
                         toReturn= [returnString  stringByReplacingOccurrencesOfString:@"''" withString:@"'"];
                         break;
                         
@@ -92,20 +69,8 @@ static DataLayer *sharedInstance=nil;
                     {
                         //trat as string for now
                         NSString* returnString = [NSString stringWithUTF8String:sqlite3_column_text(statement,0)];
-                        //	DDLogVerbose(@"got %@", returnString);
                         while(sqlite3_step(statement)== SQLITE_ROW) {} //clear
-                        /*sqlite3_stmt *statement2;
-                         if (sqlite3_prepare_v2(database, [@"end"  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement2, NULL) == SQLITE_OK) {
-                         sqlite3_step(statement2);
-                         }*/
                         toReturn= [returnString  stringByReplacingOccurrencesOfString:@"''" withString:@"'"];
-                        
-                        
-                        
-                        //Note: add blob support later
-                        
-                        //char* data= sqlite3_value_text(statement);
-                        ///NSData* returnData =[NSData dataWithBytes:]
                         toReturn= nil;
                         break;
                     }
@@ -114,10 +79,6 @@ static DataLayer *sharedInstance=nil;
                     {
                         DDLogVerbose(@"return nil with sql null");
                         while(sqlite3_step(statement)== SQLITE_ROW) {} //clear
-                        /*sqlite3_stmt *statement2;
-                         if (sqlite3_prepare_v2(database, [@"end"  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement2, NULL) == SQLITE_OK) {
-                         sqlite3_step(statement2);
-                         }*/
                         toReturn= nil;
                         break;
                     }
@@ -130,20 +91,11 @@ static DataLayer *sharedInstance=nil;
                 
             } else
             {DDLogVerbose(@"return nil with no row");
-                /*sqlite3_stmt *statement2;
-                 if (sqlite3_prepare_v2(database, [@"end"  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement2, NULL) == SQLITE_OK) {
-                 sqlite3_step(statement2);
-                 }*/
                 toReturn= nil;};
         }
         else{
             //if noting else
             DDLogVerbose(@"returning nil with out OK %@", query);
-            /*sqlite3_stmt *statement2;
-             if (sqlite3_prepare_v2(database, [@"end"  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement2, NULL) == SQLITE_OK) {
-             sqlite3_step(statement2);
-             }*/
-            
             toReturn= nil;
         }
     });
@@ -156,11 +108,6 @@ static DataLayer *sharedInstance=nil;
 	
     BOOL __block toReturn;
     dispatch_sync(_dbQueue, ^{
-        /*sqlite3_stmt *statement1;
-         if (sqlite3_prepare_v2(database, [@"begin"  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement1, NULL) == SQLITE_OK) {
-         sqlite3_step(statement1);
-         }*/
-        
         sqlite3_stmt *statement;
         if (sqlite3_prepare_v2(database, [query  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK)
         {
@@ -172,16 +119,9 @@ static DataLayer *sharedInstance=nil;
         
         else
         {
-            DDLogVerbose(@"nonquery returning NO with out OK %@", query);
+            DDLogError(@"nonquery returning NO with out OK %@", query);
             toReturn=NO;
         }
-        
-        
-        /*sqlite3_stmt *statement2;
-         if (sqlite3_prepare_v2(database, [@"end"  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement2, NULL) == SQLITE_OK) {
-         sqlite3_step(statement2);
-         }*/
-        
     });
     
     return toReturn;
@@ -193,19 +133,10 @@ static DataLayer *sharedInstance=nil;
     
   	NSMutableArray* __block toReturn =  [[NSMutableArray alloc] init] ;
     dispatch_sync(_dbQueue, ^{
-        /*sqlite3_stmt *statement1;
-         if (sqlite3_prepare_v2(database, [@"begin"  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement1, NULL) == SQLITE_OK) {
-         sqlite3_step(statement1);
-         }
-         */
-        
-        
         sqlite3_stmt *statement;
         if (sqlite3_prepare_v2(database, [query cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK) {
             
             while (sqlite3_step(statement) == SQLITE_ROW) {
-                //while there are rows
-				//DDLogVerbose(@" has rows");
                 NSMutableDictionary* row= [[NSMutableDictionary alloc] init];
                 int counter=0;
                 while(counter< sqlite3_column_count(statement) )
@@ -267,23 +198,10 @@ static DataLayer *sharedInstance=nil;
                 
                 [toReturn addObject:row];
             }
-            
-            /*sqlite3_stmt *statement2;
-             if (sqlite3_prepare_v2(database, [@"end"  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement2, NULL) == SQLITE_OK) {
-             sqlite3_step(statement2);
-             }*/
-            
-            
         }
         else
         {
             DDLogVerbose(@"reader nil with sql not ok: %@", query );
-            /*sqlite3_stmt *statement2;
-             if (sqlite3_prepare_v2(database, [@"end"  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement2, NULL) == SQLITE_OK) {
-             sqlite3_step(statement2);
-             }*/
-            
-            
             toReturn= nil;
         }
     });
@@ -305,14 +223,11 @@ static DataLayer *sharedInstance=nil;
 	{
 		
 		DDLogVerbose(@" count: %d",  [toReturn count] );
-		;
-		
 		return toReturn; //[toReturn autorelease];
 	}
 	else
 	{
-		DDLogVerbose(@"protocol list  is empty or failed to read");
-		;
+		DDLogError(@"protocol list  is empty or failed to read");
 		return nil;
 	}
 }
@@ -335,7 +250,7 @@ static DataLayer *sharedInstance=nil;
 	}
 	else
 	{
-		DDLogVerbose(@"account list  is empty or failed to read");
+		DDLogError(@"account list  is empty or failed to read");
         
 		return nil;
 	}
@@ -345,9 +260,6 @@ static DataLayer *sharedInstance=nil;
 -(NSArray*) enabledAccountList
 {
 	//returns a buddy's message history
-	
-	
-	
 	NSString* query=[NSString stringWithFormat:@"select * from account where enabled=1 order by account_id asc "];
 	NSArray* toReturn = [self executeReader:query];
 	
@@ -355,14 +267,13 @@ static DataLayer *sharedInstance=nil;
 	{
 		
 		DDLogVerbose(@" count: %d",  [toReturn count] );
-		;
 		
-		return toReturn; //[toReturn autorelease];
+		return toReturn;
 	}
 	else
 	{
-		DDLogVerbose(@"account list  is empty or failed to read");
-		;
+		DDLogError(@"account list  is empty or failed to read");
+		
 		return nil;
 	}
 	
@@ -377,14 +288,11 @@ static DataLayer *sharedInstance=nil;
 	{
 		
 		DDLogVerbose(@" count: %d",  [toReturn count] );
-		;
-		
-		return toReturn; //[toReturn autorelease];
+		return toReturn;
 	}
 	else
 	{
-		DDLogVerbose(@"account list  is empty or failed to read");
-		;
+		DDLogError(@"account list  is empty or failed to read");
 		return nil;
 	}
 	
@@ -393,23 +301,15 @@ static DataLayer *sharedInstance=nil;
 -(BOOL) addAccount: (NSString*) name :(NSString*) theProtocol :(NSString*) username: (NSString*) password: (NSString*) server
 				  : (NSString*) otherport: (bool) secure: (NSString*) resource: (NSString*) thedomain:(bool) enabled :(bool) selfsigned: (bool) oldstyle
 {
-    
-	
-	
-	//if(enabled==YES) [self removeEnabledAccount];//reset all
-	
-	NSString* query=
-	[NSString stringWithFormat:@"insert into account values(null, '%@', %@, '%@', '%@', '%@', '%@', %d, '%@', '%@', %d, %d, %d) ",
-	 username, theProtocol,server, otherport, username, password, secure, resource, thedomain, enabled, selfsigned, oldstyle];
+    NSString* query= [NSString stringWithFormat:@"insert into account values(null, '%@', %@, '%@', '%@', '%@', '%@', %d, '%@', '%@', %d, %d, %d) ",
+                      username, theProtocol,server, otherport, username, password, secure, resource, thedomain, enabled, selfsigned, oldstyle];
     
 	if([self executeNonQuery:query]!=NO)
 	{
-		;
 		return YES;
 	}
 	else
 	{
-		;
 		return NO;
 	}
 }
@@ -418,18 +318,11 @@ static DataLayer *sharedInstance=nil;
 					 : (NSString*) otherport: (bool) secure: (NSString*) resource: (NSString*) thedomain:(bool) enabled:(NSString*) accountNo
                      :(bool) selfsigned: (bool) oldstyle
 {
-	
-	
-	
-	//if(enabled==YES) [self removeEnabledAccount];//reset all
-	
+    
 	NSString* query=
 	[NSString stringWithFormat:@"update account  set account_name='%@', protocol_id=%@, server='%@', other_port='%@', username='%@', password='%@', secure=%d, resource='%@', domain='%@', enabled=%d, selfsigned=%d, oldstyleSSL=%d where account_id=%@",
 	 username, theProtocol,server, otherport, username, password, secure, resource, thedomain,enabled, selfsigned, oldstyle,accountNo];
-    //DDLogVerbose(query);
-	
-	
-	if([self executeNonQuery:query]!=NO)
+    if([self executeNonQuery:query]!=NO)
 	{
 		return YES;
 	}
@@ -456,12 +349,10 @@ static DataLayer *sharedInstance=nil;
 	NSString* query=[NSString stringWithFormat:@"delete from account  where account_id=%@ ;", accountNo];
 	if([self executeNonQuery:query]!=NO)
 	{
-		;
 		return YES;
 	}
 	else
 	{
-		;
 		return NO;
 	}
 }
@@ -473,12 +364,10 @@ static DataLayer *sharedInstance=nil;
 	NSString* query=[NSString stringWithFormat:@"update account set enabled=0 where account_id=%@  ", accountNo];
 	if([self executeNonQuery:query]!=NO)
 	{
-		;
 		return YES;
 	}
 	else
 	{
-		;
 		return NO;
 	}
 }
@@ -531,12 +420,10 @@ static DataLayer *sharedInstance=nil;
 	NSString* query=[NSString stringWithFormat:@"delete from buddylist  where account_id=%@ and buddy_name='%@';", accountNo, buddy];
 	if([self executeNonQuery:query]!=NO)
 	{
-		;
 		return YES;
 	}
 	else
 	{
-		;
 		return NO;
 	}
 }
@@ -546,12 +433,10 @@ static DataLayer *sharedInstance=nil;
 	NSString* query=[NSString stringWithFormat:@"delete from buddylist  where account_id=%@ ;", accountNo];
 	if([self executeNonQuery:query]!=NO)
 	{
-		;
 		return YES;
 	}
 	else
 	{
-		;
 		return NO;
 	}
 }
@@ -609,7 +494,7 @@ static DataLayer *sharedInstance=nil;
     }
     else
     {
-        DDLogVerbose(@"buddylist is empty or failed to read");
+        DDLogError(@"buddylist is empty or failed to read");
         return nil;
     }
     
@@ -640,7 +525,7 @@ static DataLayer *sharedInstance=nil;
     }
     else
     {
-        DDLogVerbose(@"buddylist is empty or failed to read");
+        DDLogError(@"buddylist is empty or failed to read");
         return nil;
     }
     
@@ -660,7 +545,7 @@ static DataLayer *sharedInstance=nil;
     }
     else
     {
-        DDLogVerbose(@"buddylist is empty or failed to read");
+        DDLogError(@"buddylist is empty or failed to read");
         return nil;
     }
     
@@ -688,12 +573,12 @@ static DataLayer *sharedInstance=nil;
             {
                 
                 DDLogVerbose(@" count: %d",  [toReturn count] );
-               
-            return toReturn;
+                
+                return toReturn;
             }
             else
             {
-                DDLogVerbose(@"buddylist is empty or failed to read");
+                DDLogError(@"buddylist is empty or failed to read");
                 return nil;
             }
         }
@@ -729,11 +614,11 @@ static DataLayer *sharedInstance=nil;
             {
                 
                 DDLogVerbose(@" count: %d",  [toReturn count] );
-               return toReturn;
+                return toReturn;
             }
             else
             {
-                DDLogVerbose(@"buddylist is empty or failed to read");
+                DDLogError(@"buddylist is empty or failed to read");
                 return nil;
             }
         } else return nil;
@@ -762,14 +647,11 @@ static DataLayer *sharedInstance=nil;
             {
                 
                 DDLogVerbose(@" count: %d",  [toReturn count] );
-                ;
-                
                 return toReturn; //[toReturn autorelease];
             }
             else
             {
-                DDLogVerbose(@"buddylist is empty or failed to read");
-                ;
+                DDLogError(@"buddylist is empty or failed to read");
                 return nil;
             }
         } else return nil;
@@ -784,14 +666,10 @@ static DataLayer *sharedInstance=nil;
 	NSString* query=[NSString stringWithFormat:@"update buddylist set dirty=0, new=0 where account_id=%@ and (new!=0 or dirty!=0)  ;", accountNo];
 	if([self executeNonQuery:query]!=NO)
 	{
-		
-		;
 		return YES;
 	}
 	else
 	{
-		
-		;
 		return NO;
 	}
 }
@@ -830,7 +708,7 @@ static DataLayer *sharedInstance=nil;
     NSString* query=[NSString stringWithFormat:@"select count(*) from buddylist as a inner join buddy_resources as b on a.buddy_id=b.buddy_id  inner join ver_info as c  on  b.ver=c.ver where buddy_name='%@' and account_id=%@ and cap='%@'", user, acctNo,cap ];
     
     //DDLogVerbose(@"%@", query);
-    NSNumber* count = [self executeScalar:query];
+    NSNumber* count = (NSNumber*) [self executeScalar:query];
     
     if([count integerValue]>0) return YES; else return NO;
 }
@@ -850,14 +728,11 @@ static DataLayer *sharedInstance=nil;
         if([toReturn count]==0) return nil;
         
         DDLogVerbose(@" caps  count: %d",  [toReturn count] );
-        ;
-        
         return toReturn; //[toReturn autorelease];
     }
     else
     {
-        DDLogVerbose(@"caps list is empty");
-        ;
+        DDLogError(@"caps list is empty");
         return nil;
     }
     
@@ -867,7 +742,7 @@ static DataLayer *sharedInstance=nil;
 {
     NSString* query1=[NSString stringWithFormat:@" select ver from buddy_resources as A inner join buddylist as B on a.buddy_id=b.buddy_id where resource='%@' and buddy_name='%@'", resource, user ];
 	
-    NSString* ver = [self executeScalar:query1];
+    NSString* ver = (NSString*) [self executeScalar:query1];
     
     return ver;
     
@@ -878,14 +753,11 @@ static DataLayer *sharedInstance=nil;
     NSString* query=[NSString stringWithFormat:@"insert into ver_info values ('%@', '%@')", ver,feature];
 	if([self executeNonQuery:query]!=NO)
 	{
-		
-		;
 		return YES;
 	}
 	else
 	{
-        ;
-		return NO;
+        return NO;
 	}
 }
 
@@ -1135,14 +1007,10 @@ static DataLayer *sharedInstance=nil;
 	NSString* query=[NSString stringWithFormat:@"update buddylist set nick_name='%@',dirty=1 where account_id=%@ and  buddy_name='%@';",[toPass stringByReplacingOccurrencesOfString:@"'" withString:@"''"], accountNo, buddy];
 	if([self executeNonQuery:query]!=NO)
 	{
-		
-		;
 		return YES;
 	}
 	else
 	{
-		
-		;
 		return NO;
 	}
 }
@@ -1200,16 +1068,15 @@ static DataLayer *sharedInstance=nil;
 	{
 		int val=[count integerValue];
 		if(val>0) {
-			;
-			return YES; } else
-			{
-				;
-				return NO;
-			}
+			return YES;
+        }
+        else
+        {
+            return NO;
+        }
 	}
 	else
 	{
-		;
 		return NO;
 	}
 	
@@ -1230,12 +1097,12 @@ static DataLayer *sharedInstance=nil;
 	{
 		int val=[count integerValue];
 		if(val>0) {
-			;
-			return YES; } else
-			{
-				;
-				return NO;
-			}
+			return YES;
+        }
+        else
+        {
+            return NO;
+        }
 	}
 	else
 	{
@@ -1257,10 +1124,12 @@ static DataLayer *sharedInstance=nil;
 	{
 		int val=[count integerValue];
 		if(val>0) {
-			return YES; } else
-			{
-				return NO;
-			}
+			return YES;
+        }
+        else
+        {
+            return NO;
+        }
 	}
 	else
 	{
@@ -1273,27 +1142,21 @@ static DataLayer *sharedInstance=nil;
 -(bool) isBuddyAdded:(NSString*) buddy forAccount:(NSString*) accountNo
 {
 	// count # of meaages in message table
-	
-	
-	
-	
-	NSString* query=[NSString stringWithFormat:@"select count(buddy_id) from buddylist where account_id=%@ and buddy_name='%@' and online=1 and new=1", accountNo, buddy];
-	
+    NSString* query=[NSString stringWithFormat:@"select count(buddy_id) from buddylist where account_id=%@ and buddy_name='%@' and online=1 and new=1", accountNo, buddy];
 	NSNumber* count=(NSNumber*)[self executeScalar:query];
 	if(count!=nil)
 	{
 		int val=[count integerValue];
 		if(val>0) {
-            ;
+            
 			return YES; } else
 			{
-				;
+                
 				return NO;
 			}
 	}
 	else
 	{
-		;
 		return NO;
 	}
 	
@@ -1303,21 +1166,17 @@ static DataLayer *sharedInstance=nil;
 -(bool) isBuddyRemoved:(NSString*) buddy forAccount:(NSString*) accountNo
 {
 	// count # of meaages in message table
-	
-	
-	
-	
-	NSString* query=[NSString stringWithFormat:@"select count(buddy_id) from buddylist where account_id=%@ and buddy_name='%@' and online=0 and dirty=1", accountNo, buddy];
+    NSString* query=[NSString stringWithFormat:@"select count(buddy_id) from buddylist where account_id=%@ and buddy_name='%@' and online=0 and dirty=1", accountNo, buddy];
 	
 	NSNumber* count=(NSNumber*)[self executeScalar:query];
 	if(count!=nil)
 	{
 		int val=[count integerValue];
 		if(val>0) {
-			;
+			
 			return YES; } else
 			{
-				;
+                
 				return NO;
 			}
         
@@ -1390,7 +1249,7 @@ static DataLayer *sharedInstance=nil;
 	}
 	else
 	{
-		DDLogVerbose(@"failed to insert ");
+		DDLogError(@"failed to insert ");
 		return NO;
 	}
 	
@@ -1446,14 +1305,13 @@ static DataLayer *sharedInstance=nil;
         {
             
             DDLogVerbose(@" count: %d",  [toReturn count] );
-            ;
             
             return toReturn; //[toReturn autorelease];
         }
         else
         {
-            DDLogVerbose(@"message history buddy date list is empty or failed to read");
-            ;
+            DDLogError(@"message history buddy date list is empty or failed to read");
+            
             return nil;
         }
         
@@ -1473,14 +1331,12 @@ static DataLayer *sharedInstance=nil;
 	{
 		
 		DDLogVerbose(@" count: %d",  [toReturn count] );
-		;
 		
 		return toReturn; //[toReturn autorelease];
 	}
 	else
 	{
-		DDLogVerbose(@"message history is empty or failed to read");
-		;
+		DDLogError(@"message history is empty or failed to read");
 		return nil;
 	}
 	
@@ -1500,14 +1356,11 @@ static DataLayer *sharedInstance=nil;
 	{
 		
 		DDLogVerbose(@" count: %d",  [toReturn count] );
-		;
-		
 		return toReturn; //[toReturn autorelease];
 	}
 	else
 	{
-		DDLogVerbose(@"message history is empty or failed to read");
-		;
+		DDLogError(@"message history is empty or failed to read");
 		return nil;
 	}
 	
@@ -1525,14 +1378,11 @@ static DataLayer *sharedInstance=nil;
         
 	{
 		DDLogVerbose(@" cleaned messages for %@",  buddy );
-		
-		;
 		return YES;
 	}
 	else
 	{
-		DDLogVerbose(@"message history failed to clean");
-		;
+		DDLogError(@"message history failed to clean");
 		return NO;
 	}
 	
@@ -1550,7 +1400,7 @@ static DataLayer *sharedInstance=nil;
 	}
 	else
 	{
-		DDLogVerbose(@"message history failed to clean all");
+		DDLogError(@"message history failed to clean all");
 		return NO;
 	}
 	
@@ -1575,14 +1425,11 @@ static DataLayer *sharedInstance=nil;
         {
             
             DDLogVerbose(@" count: %d",  [toReturn count] );
-            ;
-            
             return toReturn; //[toReturn autorelease];
         }
         else
         {
-            DDLogVerbose(@"message history buddy list is empty or failed to read");
-            ;
+            DDLogError(@"message history buddy list is empty or failed to read");
             return nil;
         }
         
@@ -1608,7 +1455,7 @@ static DataLayer *sharedInstance=nil;
 	}
 	else
 	{
-		DDLogVerbose(@"message history is empty or failed to read");
+		DDLogError(@"message history is empty or failed to read");
 		return nil;
 	}
 	
@@ -1623,7 +1470,7 @@ static DataLayer *sharedInstance=nil;
     }
 	else
 	{
-		DDLogVerbose(@"Message history update failed");
+		DDLogError(@"Message history update failed");
 		return NO;
 	}
 	
@@ -1639,12 +1486,10 @@ static DataLayer *sharedInstance=nil;
 	
 	if([self executeNonQuery:query]!=NO)
 	{
-		;
 		return YES;
 	}
 	else
 	{
-		;
 		return NO;
 	}
 	
@@ -1686,8 +1531,7 @@ static DataLayer *sharedInstance=nil;
 	}
 	else
 	{
-		DDLogVerbose(@"message history is empty or failed to read");
-		;
+		DDLogError(@"message history is empty or failed to read");
 		return nil;
 	}
 	
@@ -1695,18 +1539,14 @@ static DataLayer *sharedInstance=nil;
 
 -(bool) removeActiveBuddy:(NSString*) buddyname forAccount:(NSString*) accountNo
 {
-	
 	//mark messages as read
 	[self markAsReadBuddy:buddyname forAccount:accountNo];
 	
 	NSString* query=[NSString stringWithFormat:@"delete from activechats where buddy_name='%@' and account_id=%@ ", buddyname, accountNo ];
 	//	DDLogVerbose(query);
+    bool result=[self executeNonQuery:query];
     
-	
-	bool result=[self executeNonQuery:query];
-	;
 	return result;
-	
 }
 
 -(bool) removeAllActiveBuddies
@@ -1714,10 +1554,7 @@ static DataLayer *sharedInstance=nil;
     
 	NSString* query=[NSString stringWithFormat:@"delete from activechats " ];
 	//	DDLogVerbose(query);
-    
-	
-	bool result=[self executeNonQuery:query];
-	;
+    bool result=[self executeNonQuery:query];
 	return result;
 	
 }
@@ -1803,13 +1640,10 @@ static DataLayer *sharedInstance=nil;
 	else
 	{
 		//database error message
-		DDLogVerbose(@"Error opening database");
+		DDLogError(@"Error opening database");
 	}
-    
-	
-	//truncate faster than del
+    //truncate faster than del
 	[self executeNonQuery:@"pragma truncate;"];
-	
     
     dbversionCheck=[NSLock new];
 	[self version];
@@ -2030,15 +1864,10 @@ static DataLayer *sharedInstance=nil;
         
     }
     
-    
     [dbversionCheck unlock];
-    
     [self resetContacts];
-    
 	return;
-	
     
-	
 }
 
 -(void) dealloc

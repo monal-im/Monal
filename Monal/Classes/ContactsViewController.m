@@ -27,7 +27,7 @@
 @implementation ContactsViewController
 
 
-static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+static const int ddLogLevel = LOG_LEVEL_INFO;
 
 #pragma mark view life cycle
 - (void)viewDidLoad
@@ -119,9 +119,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                        dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
                        if([[info objectForKey:kinfoStatusKey] isEqualToString:@"Disconnected"])
                        {
-                           DDLogVerbose(@"hiding disconencted timer started");
+                           DDLogInfo(@"hiding disconencted timer started");
                            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 3ull * NSEC_PER_SEC), q_background,  ^{
-                               DDLogVerbose(@"hiding disconencted");
+                               DDLogInfo(@"hiding disconencted");
                                [self hideConnecting:info];
                            });
                        }
@@ -249,7 +249,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                            
                            if(!(contactRow.count>=1))
                            {
-                               DDLogVerbose(@"ERROR:could not find contact row");
+                               DDLogError(@"ERROR:could not find contact row");
                                return;
                            }
                            //insert into datasource
@@ -358,7 +358,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                        
                        if(!(contactRow.count>=1))
                        {
-                           DDLogVerbose(@"ERROR:could not find contact row");
+                           DDLogError(@"ERROR:could not find contact row");
                            return;
                        }
                        
@@ -505,7 +505,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         return;
     }
     
-    DDLogVerbose(@"chat view got new message notice %@", notification.userInfo);
+    DDLogInfo(@"chat view got new message notice %@", notification.userInfo);
     
     dispatch_async(dispatch_get_main_queue(),
                    ^{

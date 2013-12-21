@@ -18,20 +18,21 @@
 {
     if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0"))
     {
-//        [self.view setBackgroundColor:[UIColor o]];
+        //        [self.view setBackgroundColor:[UIColor o]];
     }
     else
     {
         [self.view setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"debut_dark"]]];
     }
-        UIImage *buttonImage2 = [[UIImage imageNamed:@"greenButton"]
-                                 resizableImageWithCapInsets:UIEdgeInsetsMake(18, 18, 18, 18)];
-        UIImage *buttonImageHighlight2 = [[UIImage imageNamed:@"greenButtonHighlight"]
-                                         resizableImageWithCapInsets:UIEdgeInsetsMake(18, 18, 18, 18)];
     
-        [_callButton setBackgroundImage:buttonImage2 forState:UIControlStateNormal];
-       [_callButton setBackgroundImage:buttonImageHighlight2 forState:UIControlStateSelected];
-
+    UIImage *buttonImage2 = [[UIImage imageNamed:@"greenButton"]
+                             resizableImageWithCapInsets:UIEdgeInsetsMake(18, 18, 18, 18)];
+    UIImage *buttonImageHighlight2 = [[UIImage imageNamed:@"greenButtonHighlight"]
+                                      resizableImageWithCapInsets:UIEdgeInsetsMake(18, 18, 18, 18)];
+    
+    [_callButton setBackgroundImage:buttonImage2 forState:UIControlStateNormal];
+    [_callButton setBackgroundImage:buttonImageHighlight2 forState:UIControlStateSelected];
+    
 }
 
 -(void) viewWillAppear:(BOOL)animated
@@ -39,7 +40,7 @@
     _buddyName.text =[_contact objectForKey:@"buddy_name"];
     
     _buddyMessage.text=[_contact objectForKey:@"status"];
-     if([ _buddyMessage.text isEqualToString:@"(null)"])  _buddyMessage.text=@"";
+    if([ _buddyMessage.text isEqualToString:@"(null)"])  _buddyMessage.text=@"";
     
     _buddyStatus.text=[_contact objectForKey:@"state"];
     if([ _buddyStatus.text isEqualToString:@"(null)"])  _buddyStatus.text=@"";
@@ -50,7 +51,7 @@
     NSArray* parts= [_buddyName.text componentsSeparatedByString:@"@"];
     if([parts count]>1)
     {
-    NSString* domain= [parts objectAtIndex:1];
+        NSString* domain= [parts objectAtIndex:1];
     	if([domain isEqualToString:@"gmail.com"])
     	{
     		//gtalk
@@ -69,19 +70,19 @@
             }
     }
     NSString* accountNo=[NSString stringWithFormat:@"%@", [_contact objectForKey:@"account_id"]];
-
+    
     
     UIImage* contactImage=[[MLImageManager sharedInstance] getIconForContact:[_contact objectForKey:@"buddy_name"] andAccount:accountNo];
     _buddyIconView.image=contactImage;
     
-   NSArray* resources= [[DataLayer sharedInstance] resourcesForContact:[_contact objectForKey:@"buddy_name"]];
-     self.resourcesTextView.text=@""; 
+    NSArray* resources= [[DataLayer sharedInstance] resourcesForContact:[_contact objectForKey:@"buddy_name"]];
+    self.resourcesTextView.text=@"";
     for(NSDictionary* row in resources)
     {
         self.resourcesTextView.text=[NSString stringWithFormat:@"%@\n%@\n",self.resourcesTextView.text, [row objectForKey:@"resource"]];
         
     }
-
+    
     
 }
 
@@ -151,10 +152,10 @@
 		{
 			thecell=_bottomcell;
 		}
-    else if(indexPath.section==2) //resources
-    {
-        thecell=_resourceCell;
-    }
+        else if(indexPath.section==2) //resources
+        {
+            thecell=_resourceCell;
+        }
     return thecell;
     
 }
@@ -182,7 +183,7 @@
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-
+    
 	return 3;
 	
 }
@@ -195,7 +196,7 @@
     
     if(section==2)
         toreturn= @"Resources";
-
+    
     return toreturn;
 }
 
@@ -205,10 +206,10 @@
 	
     self=[super init];
     _contact=contact;
-        
+    
     self.navigationItem.title=NSLocalizedString(@"Details", @"");
     
-
+    
 	
     // see if this user  has  jingle call
     // check caps for audio
@@ -222,15 +223,15 @@
     //    {
     //        // check legacy cap as well
     //        hasAudio=[db checkLegacyCap:@"voice-v1"  forUser:buddy accountNo:jabber.accountNumber];
-    //        
+    //
     //    }
-    //    
+    //
     //    if(!hasAudio)
     //    {
     //        _callButton.hidden=YES;
     //    }
     
-    return self; 
+    return self;
     
 }
 

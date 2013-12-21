@@ -39,7 +39,7 @@
     DDFileLogger *logger=appDelegate.fileLogger;
     
     NSArray *sortedLogFileInfos = [logger.logFileManager sortedLogFileInfos];
-    DDLogFileInfo *logFileInfo = [sortedLogFileInfos objectAtIndex: [sortedLogFileInfos count]-1];
+    DDLogFileInfo *logFileInfo = [sortedLogFileInfos objectAtIndex: 0];
     NSError *error;
     self.logView.text=[NSString stringWithContentsOfFile:logFileInfo.filePath encoding:NSUTF8StringEncoding error:&error];
     

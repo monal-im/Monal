@@ -182,7 +182,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [DDLog addLogger:[DDTTYLogger sharedInstance]];
     self.fileLogger = [[DDFileLogger alloc] init];
     self.fileLogger.rollingFrequency = 60 * 60 * 24; // 24 hour rolling
-    self.fileLogger.logFileManager.maximumNumberOfLogFiles = 5;
+    self.fileLogger.logFileManager.maximumNumberOfLogFiles = 2;
     [DDLog addLogger:self.fileLogger];
 #endif
     

@@ -15,7 +15,7 @@ Notable features:
 
 This is  update that  fixes bugs.
 1. iOS7 UI and compatibiulity
-2. Stability related bug fixes
+2. Numerous Stability related bug fixes
 3. You may login to mutiple accounts
 4. Fixed opening app in landscape mode for ipad
 5. You must explicity set self signed certs if needed

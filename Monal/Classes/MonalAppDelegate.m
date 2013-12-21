@@ -95,11 +95,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     aboutNav.navigationBar.barStyle=barColor;
     aboutNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"About",@"") image:[UIImage imageNamed:@"about"] tag:0];
     
+#ifdef DEBUG
     LogViewController* logVC = [[LogViewController alloc] init];
     UINavigationController* logNav=[[UINavigationController alloc] initWithRootViewController:logVC];
     logNav.navigationBar.barStyle=barColor;
     logNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Log",@"") image:nil tag:0];
-    
+#endif
     
     
     
@@ -111,8 +112,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         contactsVC.currentNavController=_chatNav;
         _chatNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Contacts",@"") image:[UIImage imageNamed:@"Buddies"] tag:0];
         
+    
         _tabBarController.viewControllers=[NSArray arrayWithObjects:_chatNav,activeChatNav, settingsNav,  accountsNav, chatLogNav, groupChatNav, //searchUsersNav,
-                                           helpNav, aboutNav, logNav, nil];
+                                           helpNav, aboutNav,
+#ifdef DEBUG
+                                           logNav,
+#endif
+                                           nil];
         
         self.window.rootViewController=_tabBarController;
         
@@ -130,8 +136,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         self.window.rootViewController=_splitViewController;
         
         _tabBarController.viewControllers=[NSArray arrayWithObjects: activeChatNav,  settingsNav, accountsNav, chatLogNav, groupChatNav,
-                                        //   searchUsersNav,
-                                           helpNav, aboutNav,logNav, nil];
+                                        //   searchU∫sersNav,
+                                           helpNav, aboutNav,
+#ifdef DEBUG
+                                           logNav,
+#endif
+                                           nil];
         
         _splitViewController.viewControllers=[NSArray arrayWithObjects:navigationControllerContacts, _tabBarController,nil];
         _splitViewController.delegate=self;

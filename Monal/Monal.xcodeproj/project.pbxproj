@@ -161,6 +161,8 @@
 		26A8ADD817C031BA0033990D /* ContactDetails.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26EC40F817BDD8360031304D /* ContactDetails.xib */; };
 		26AAE282179F701A00271345 /* About.html in Resources */ = {isa = PBXBuildFile; fileRef = 26AAE281179F701A00271345 /* About.html */; };
 		26AAE285179F7B0200271345 /* MLSettingCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 26AAE284179F7B0200271345 /* MLSettingCell.m */; };
+		26B51C4918654D98002134C3 /* LogViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B51C4718654D98002134C3 /* LogViewController.m */; };
+		26B51C4A18654D98002134C3 /* LogViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26B51C4818654D98002134C3 /* LogViewController.xib */; };
 		26B69A75131C522F002FCBEB /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26B69A74131C522F002FCBEB /* Security.framework */; };
 		26B69A82131C5495002FCBEB /* PasswordManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B69A81131C5495002FCBEB /* PasswordManager.m */; };
 		26BAFC541626537D0073728B /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 26BAFC3E1626537D0073728B /* .gitignore */; };
@@ -388,6 +390,9 @@
 		26AAE281179F701A00271345 /* About.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = About.html; sourceTree = "<group>"; };
 		26AAE283179F7B0200271345 /* MLSettingCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLSettingCell.h; sourceTree = "<group>"; };
 		26AAE284179F7B0200271345 /* MLSettingCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLSettingCell.m; sourceTree = "<group>"; };
+		26B51C4618654D98002134C3 /* LogViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LogViewController.h; sourceTree = "<group>"; };
+		26B51C4718654D98002134C3 /* LogViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LogViewController.m; sourceTree = "<group>"; };
+		26B51C4818654D98002134C3 /* LogViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = LogViewController.xib; sourceTree = "<group>"; };
 		26B69A74131C522F002FCBEB /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		26B69A80131C5495002FCBEB /* PasswordManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PasswordManager.h; sourceTree = "<group>"; };
 		26B69A81131C5495002FCBEB /* PasswordManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PasswordManager.m; sourceTree = "<group>"; };
@@ -880,6 +885,9 @@
 				261A628F176C15D400059090 /* GroupChatViewController.h */,
 				261A6290176C15D400059090 /* GroupChatViewController.m */,
 				26EC410F17BDD98D0031304D /* GroupChatViewController.xib */,
+				26B51C4618654D98002134C3 /* LogViewController.h */,
+				26B51C4718654D98002134C3 /* LogViewController.m */,
+				26B51C4818654D98002134C3 /* LogViewController.xib */,
 				26761BF31804FBB700D94714 /* RoomListViewController.h */,
 				26761BF41804FBB700D94714 /* RoomListViewController.m */,
 				26761BF51804FBB700D94714 /* RoomListViewController.xib */,
@@ -1145,6 +1153,7 @@
 				26BAFC571626537D0073728B /* README.md in Resources */,
 				26529F5317FA7B310057F199 /* addContact.xib in Resources */,
 				26AAE282179F701A00271345 /* About.html in Resources */,
+				26B51C4A18654D98002134C3 /* LogViewController.xib in Resources */,
 				26EC411017BDD98E0031304D /* GroupChatViewController.xib in Resources */,
 				26A8ADD817C031BA0033990D /* ContactDetails.xib in Resources */,
 			);
@@ -1184,6 +1193,7 @@
 				2640AF4014548E7700CB4F60 /* HPGrowingTextView.m in Sources */,
 				2640AF4114548E7700CB4F60 /* HPTextViewInternal.m in Sources */,
 				2680B8EB1863C172009599AB /* DDAbstractDatabaseLogger.m in Sources */,
+				26B51C4918654D98002134C3 /* LogViewController.m in Sources */,
 				26529F5217FA7B260057F199 /* addContact.m in Sources */,
 				262DE4AF15C4E2C60040A66B /* MBProgressHUD.m in Sources */,
 				2680B8EF1863C172009599AB /* DDTTYLogger.m in Sources */,

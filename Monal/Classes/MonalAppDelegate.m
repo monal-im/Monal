@@ -18,16 +18,14 @@
 #import "ChatLogsViewController.h"
 #import "GroupChatViewController.h"
 #import "SearchUsersViewController.h"
+#import "LogViewController.h"
 #import "HelpViewController.h"
 #import "AboutViewController.h"
 #import "MLNotificationManager.h"
 
 #import <Crashlytics/Crashlytics.h>
 
-#import "DDLog.h"
-#import "DDASLLogger.h"
-#import "DDFileLogger.h"
-#import "DDTTYLogger.h"
+
 
 //xmpp
 #import "MLXMPPManager.h"
@@ -97,6 +95,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     aboutNav.navigationBar.barStyle=barColor;
     aboutNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"About",@"") image:[UIImage imageNamed:@"about"] tag:0];
     
+    LogViewController* logVC = [[LogViewController alloc] init];
+    UINavigationController* logNav=[[UINavigationController alloc] initWithRootViewController:logVC];
+    logNav.navigationBar.barStyle=barColor;
+    logNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Log",@"") image:nil tag:0];
+    
+    
+    
     
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone)
     {
@@ -107,7 +112,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         _chatNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Contacts",@"") image:[UIImage imageNamed:@"Buddies"] tag:0];
         
         _tabBarController.viewControllers=[NSArray arrayWithObjects:_chatNav,activeChatNav, settingsNav,  accountsNav, chatLogNav, groupChatNav, //searchUsersNav,
-                                           helpNav, aboutNav, nil];
+                                           helpNav, aboutNav, logNav, nil];
         
         self.window.rootViewController=_tabBarController;
         
@@ -126,7 +131,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         
         _tabBarController.viewControllers=[NSArray arrayWithObjects: activeChatNav,  settingsNav, accountsNav, chatLogNav, groupChatNav,
                                         //   searchUsersNav,
-                                           helpNav, aboutNav, nil];
+                                           helpNav, aboutNav,logNav, nil];
         
         _splitViewController.viewControllers=[NSArray arrayWithObjects:navigationControllerContacts, _tabBarController,nil];
         _splitViewController.delegate=self;
@@ -165,10 +170,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 #ifdef  DEBUG
     [DDLog addLogger:[DDASLLogger sharedInstance]];
     [DDLog addLogger:[DDTTYLogger sharedInstance]];
-    DDFileLogger *fileLogger = [[DDFileLogger alloc] init];
-    fileLogger.rollingFrequency = 60 * 60 * 24; // 24 hour rolling
-    fileLogger.logFileManager.maximumNumberOfLogFiles = 7;
-    [DDLog addLogger:fileLogger];
+    self.fileLogger = [[DDFileLogger alloc] init];
+    self.fileLogger.rollingFrequency = 60 * 60 * 24; // 24 hour rolling
+    self.fileLogger.logFileManager.maximumNumberOfLogFiles = 5;
+    [DDLog addLogger:self.fileLogger];
 #endif
     
     

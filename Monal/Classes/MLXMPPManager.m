@@ -101,8 +101,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         for(NSDictionary* row in _connectedXMPP)
         {
             xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
-            if(xmppAccount.loggedIn)
+            if(xmppAccount.loggedIn) {
                 [xmppAccount sendPing];
+            }
         }
         
     });
@@ -301,16 +302,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             DDLogVerbose(@"not reachable");
             if(xmppAccount.loggedIn==YES)
             {
-                DDLogVerbose(@"Scheduling a ping in 60 sec to test");
+                DDLogVerbose(@"There will be a ping soon to test. ");
                 
                 //dont explicitly disconnect since it might be that there was a network inteepution
                 //ie moving through cells.  schedule a ping for 1 min and see if that results in a TCP or XMPP error
-            
-                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 60ull * NSEC_PER_SEC), _netQueue,  ^{
-                  [xmppAccount sendPing];
-                });
 
-                
                 
 //                dispatch_async(_netQueue,
 //                               ^{

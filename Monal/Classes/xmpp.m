@@ -424,6 +424,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
             [self.contactsVC hideConnecting:info2];
         });
     
+    
     [[DataLayer sharedInstance]  resetContactsForAccount:_accountNo];
     
   

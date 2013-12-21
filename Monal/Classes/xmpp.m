@@ -32,7 +32,7 @@
 
 #define kConnectTimeout 20ull //seconds
 
-static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+static const int ddLogLevel = LOG_LEVEL_INFO;
 
 @implementation xmpp
 
@@ -103,7 +103,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
     CFReadStreamRef readRef= NULL;
     CFWriteStreamRef writeRef= NULL;
 	
-    DDLogVerbose(@"stream  creating to  server: %@ port: %d", _server, _port);
+    DDLogInfo(@"stream  creating to  server: %@ port: %d", _server, _port);
     
 	CFStreamCreatePairWithSocketToHost(NULL, (__bridge CFStringRef)_server, _port, &readRef, &writeRef);
 	
@@ -112,28 +112,28 @@ dispatch_async(dispatch_get_current_queue(), ^{
     
 	if((_iStream==nil) || (_oStream==nil))
 	{
-		DDLogVerbose(@"Connection failed");
+		DDLogError(@"Connection failed");
 		return;
 	}
     else
-        DDLogVerbose(@"streams created ok");
+        DDLogInfo(@"streams created ok");
     
     if((CFReadStreamSetProperty((__bridge CFReadStreamRef)_iStream,
                                 kCFStreamNetworkServiceType,  kCFStreamNetworkServiceTypeVoIP)) &&
        (CFWriteStreamSetProperty((__bridge CFWriteStreamRef)_oStream,
                                  kCFStreamNetworkServiceType,  kCFStreamNetworkServiceTypeVoIP)))
     {
-        DDLogVerbose(@"Set VOIP properties on streams.");
+        DDLogInfo(@"Set VOIP properties on streams.");
     }
     else
     {
-        DDLogVerbose(@"could not set VOIP properties on streams.");
+        DDLogInfo(@"could not set VOIP properties on streams.");
     }
     
     if((_SSL==YES)  && (_oldStyleSSL==YES))
 	{
 		// do ssl stuff here
-		DDLogVerbose(@"securing connection.. for old style");
+		DDLogInfo(@"securing connection.. for old style");
         
         NSMutableDictionary *settings = [ [NSMutableDictionary alloc ]
                                          initWithObjectsAndKeys:
@@ -165,7 +165,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
 		CFWriteStreamSetProperty((__bridge CFWriteStreamRef)_oStream,
 								 kCFStreamPropertySSLSettings, (__bridge CFTypeRef)settings);
         
-        DDLogVerbose(@"connection secured");
+        DDLogInfo(@"connection secured");
 	}
 	
     
@@ -184,13 +184,13 @@ dispatch_async(dispatch_get_current_queue(), ^{
                                   , 1ull * NSEC_PER_SEC);
 
         dispatch_source_set_event_handler(streamTimer, ^{
-           DDLogVerbose(@"stream connection timed out");
+           DDLogError(@"stream connection timed out");
             dispatch_source_cancel(streamTimer);
             [self disconnect];
         });
 
         dispatch_source_set_cancel_handler(streamTimer, ^{
-            DDLogVerbose(@"stream timer cancelled");
+            DDLogError(@"stream timer cancelled");
             dispatch_release(streamTimer);
         });
     
@@ -248,7 +248,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
 {
     if(_loggedIn || _logInStarted)
     {
-        DDLogVerbose(@"assymetrical call to login without a teardown");
+        DDLogError(@"assymetrical call to login without a teardown");
         return;
     }
     
@@ -259,7 +259,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
             //notify user
             if(!self.loggedIn)
             {
-                DDLogVerbose(@"XMPP connnect bgtask end");
+                DDLogInfo(@"XMPP connnect bgtask end");
                 
                 NSDictionary* userDic=@{@"from":@"Info",
                                         @"actuallyfrom":@"Info",
@@ -272,14 +272,14 @@ dispatch_async(dispatch_get_current_queue(), ^{
             }
             
             // this should never happen unless we fail for 10 min
-            DDLogVerbose(@"XMPP connnect bgtask took too long. closing task");
+            DDLogError(@"XMPP connnect bgtask took too long. closing task");
             [[UIApplication sharedApplication] endBackgroundTask:_backgroundTask];
             _backgroundTask=UIBackgroundTaskInvalid;
             
         }];
         
         if (_backgroundTask != UIBackgroundTaskInvalid) {
-            DDLogVerbose(@"XMPP connnect bgtask start"); 
+            DDLogInfo(@"XMPP connnect bgtask start");
             [self connectionTask];
             
             dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
@@ -292,7 +292,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
                                       1ull * NSEC_PER_SEC);
             
             dispatch_source_set_event_handler(loginCancelOperation, ^{
-                DDLogVerbose(@"login cancel op");
+                DDLogInfo(@"login cancel op");
                 
                 
                 UIBackgroundTaskIdentifier oldBGTask=_backgroundTask;
@@ -317,7 +317,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
                 //end background task if it wasnt by disconnenct
                 if (oldBGTask != UIBackgroundTaskInvalid)
                 {
-                    DDLogVerbose(@"ending old BG task");
+                    DDLogInfo(@"ending old BG task");
                     [[UIApplication sharedApplication] endBackgroundTask:oldBGTask];
                     oldBGTask=UIBackgroundTaskInvalid;
                 }
@@ -327,7 +327,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
             });
             
             dispatch_source_set_cancel_handler(loginCancelOperation, ^{
-                DDLogVerbose(@"login timer cancelled");
+                DDLogInfo(@"login timer cancelled");
                 dispatch_release(loginCancelOperation);
     
             });
@@ -348,7 +348,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
     
     _loginError=NO;
  
-    DDLogVerbose(@"removing streams");
+    DDLogInfo(@"removing streams");
     
 	//prevent any new read or write
 	[_iStream setDelegate:nil];
@@ -359,7 +359,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
 	
 	[_iStream removeFromRunLoop:[NSRunLoop currentRunLoop]
                         forMode:NSDefaultRunLoopMode];
-	DDLogVerbose(@"removed streams");
+	DDLogInfo(@"removed streams");
 	
      dispatch_sync(_netReadQueue, ^{
 	@try
@@ -369,7 +369,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
 	}
 	@catch(id theException)
 	{
-		DDLogVerbose(@"Exception in istream close");
+		DDLogError(@"Exception in istream close");
 	}
      });
     
@@ -381,7 +381,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
         }
         @catch(id theException)
         {
-            DDLogVerbose(@"Exception in ostream close");
+            DDLogError(@"Exception in ostream close");
         }
         
     });
@@ -390,9 +390,9 @@ dispatch_async(dispatch_get_current_queue(), ^{
 	[_contactsVC clearContactsForAccount:_accountNo];
     [[DataLayer sharedInstance] resetContactsForAccount:_accountNo];
     
-	DDLogVerbose(@"Connections closed");
+	DDLogInfo(@"Connections closed");
 	
-	DDLogVerbose(@"All closed and cleaned up");
+	DDLogInfo(@"All closed and cleaned up");
     
   
     _startTLSComplete=NO;
@@ -454,12 +454,12 @@ dispatch_async(dispatch_get_current_queue(), ^{
 -(void) startStream
 {
     //flush read buffer since its all nont needed
-    DDLogVerbose(@"waiting read queue");
+    DDLogInfo(@"waiting read queue");
     dispatch_sync(_netReadQueue, ^{
         _inputBuffer=[[NSMutableString alloc] init];
     });
     
-    DDLogVerbose(@" got read queue");
+    DDLogInfo(@" got read queue");
     
     XMLNode* stream = [[XMLNode alloc] init];
     stream.element=@"stream:stream";
@@ -978,7 +978,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
                 }
                 else
                 {
-                    DDLogVerbose(@"ERROR: presence priority notice but no user name.");
+                    DDLogError(@"ERROR: presence priority notice but no user name.");
                     
                 }
             }
@@ -1111,14 +1111,14 @@ dispatch_async(dispatch_get_current_queue(), ^{
                                                  kCFStreamPropertySSLSettings, (__bridge CFTypeRef)settings)	 )
                         
                     {
-                        DDLogVerbose(@"Set TLS properties on streams.");
+                        DDLogInfo(@"Set TLS properties on streams.");
                         NSDictionary* info2=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
                                               kinfoTypeKey:@"connect", kinfoStatusKey:@"Securing Connection"};
                         [self.contactsVC updateConnecting:info2];
                     }
                     else
                     {
-                        DDLogVerbose(@"not sure.. Could not confirm Set TLS properties on streams.");
+                        DDLogError(@"not sure.. Could not confirm Set TLS properties on streams.");
                        
 //                        NSDictionary* info2=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
 //                                              kinfoTypeKey:@"connect", kinfoStatusKey:@"Could not secure connection"};
@@ -1274,7 +1274,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
             {
                 if(streamNode.SASLSuccess)
                 {
-                    DDLogVerbose(@"Got SASL Success");
+                    DDLogInfo(@"Got SASL Success");
                     
                     srand([[NSDate date] timeIntervalSince1970]);
                     // make up a random session key (id)
@@ -1415,7 +1415,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
 
     if(!_discoveredServices)
     {
-        DDLogVerbose(@"no discovered services");
+        DDLogInfo(@"no discovered services");
         return;
     }
     
@@ -1432,7 +1432,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
        _hasRequestedServerInfo=YES;
     } else
     {
-        DDLogVerbose(@"no jid on info");
+        DDLogError(@"no jid on info");
     }
     }
     
@@ -1452,7 +1452,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
     }
     else
     {
-        DDLogVerbose(@"no conference server discovered");
+        DDLogInfo(@"no conference server discovered");
     }
 }
 
@@ -1553,10 +1553,8 @@ dispatch_async(dispatch_get_current_queue(), ^{
 			
 		case NSStreamEventErrorOccurred:
 		{
-			DDLogVerbose(@"Stream error");
-            NSError* st_error= [stream streamError];
-            
-            DDLogVerbose(@"Stream error code=%d domain=%@   local desc:%@ ",st_error.code,st_error.domain,  st_error.localizedDescription);
+			NSError* st_error= [stream streamError];
+            DDLogError(@"Stream error code=%d domain=%@   local desc:%@ ",st_error.code,st_error.domain,  st_error.localizedDescription);
             
            
             if(st_error.code==2)// operation couldnt be completed
@@ -1612,7 +1610,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
 			
 		case NSStreamEventOpenCompleted:
 		{
-			DDLogVerbose(@"Stream open completed");
+			DDLogInfo(@"Stream open completed");
 			
             break;
 		}
@@ -1620,7 +1618,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
 			
 		case NSStreamEventEndEncountered:
 		{
-			DDLogVerbose(@"%@ Stream end encoutered", [stream class] );
+			DDLogInfo(@"%@ Stream end encoutered", [stream class] );
             [self disconnect];
 			break;
 		}

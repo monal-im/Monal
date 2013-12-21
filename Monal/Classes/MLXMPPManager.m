@@ -28,7 +28,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     BOOL setDefaults =[[NSUserDefaults standardUserDefaults] boolForKey:@"SetDefaults"];
     if(!setDefaults)
     {
-      //  [[NSUserDefaults standardUserDefaults] setObject:@"" forKey:@"StatusMessage"]; // we dont want anything set
+        //  [[NSUserDefaults standardUserDefaults] setObject:@"" forKey:@"StatusMessage"]; // we dont want anything set
         [[NSUserDefaults standardUserDefaults] setObject:@"5" forKey:@"XMPPPriority"];
         [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"Away"];
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"Visible"];
@@ -48,7 +48,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 + (MLXMPPManager* )sharedInstance
 {
     static dispatch_once_t once;
-    static MLXMPPManager* sharedInstance; 
+    static MLXMPPManager* sharedInstance;
     dispatch_once(&once, ^{
         sharedInstance = [[MLXMPPManager alloc] init] ;
     });
@@ -61,42 +61,42 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     _connectedXMPP=[[NSMutableArray alloc] init];
     _netQueue = dispatch_queue_create(kMonalNetQueue, DISPATCH_QUEUE_CONCURRENT);
-   
-//    NSTimeInterval timeInterval= 600; // 600 seconds
-//    BOOL keepAlive=[[UIApplication sharedApplication] setKeepAliveTimeout:timeInterval handler:^{
-//        DDLogVerbose(@"began background ping");
-//        for(NSDictionary* row in _connectedXMPP)
-//        {
-//             xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
-//            if(xmppAccount.loggedIn)
-//                [xmppAccount sendWhiteSpacePing];
-//        }
-//        
-//    }];
-//    
-//    if(keepAlive)
-//    {
-//        DDLogVerbose(@"installed keep alive timer");
-//    }
-//    else
-//    {
-//         DDLogVerbose(@"failed to install keep alive timer");
-//    }
-//    
+    
+    //    NSTimeInterval timeInterval= 600; // 600 seconds
+    //    BOOL keepAlive=[[UIApplication sharedApplication] setKeepAliveTimeout:timeInterval handler:^{
+    //        DDLogVerbose(@"began background ping");
+    //        for(NSDictionary* row in _connectedXMPP)
+    //        {
+    //             xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
+    //            if(xmppAccount.loggedIn)
+    //                [xmppAccount sendWhiteSpacePing];
+    //        }
+    //
+    //    }];
+    //
+    //    if(keepAlive)
+    //    {
+    //        DDLogVerbose(@"installed keep alive timer");
+    //    }
+    //    else
+    //    {
+    //         DDLogVerbose(@"failed to install keep alive timer");
+    //    }
+    //
     [self defaultSettings];
-
+    
     //set up regular ping
     dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
     _pinger = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,
                                      q_background);
-     
+    
     dispatch_source_set_timer(_pinger,
                               DISPATCH_TIME_NOW,
                               60ull * NSEC_PER_SEC *5
                               , 1ull * NSEC_PER_SEC);
     
     dispatch_source_set_event_handler(_pinger, ^{
-         
+        
         
         for(NSDictionary* row in _connectedXMPP)
         {
@@ -104,7 +104,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             if(xmppAccount.loggedIn)
                 [xmppAccount sendPing];
         }
-       
+        
     });
     
     dispatch_source_set_cancel_handler(_pinger, ^{
@@ -115,7 +115,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     dispatch_resume(_pinger);
     
     
-  
+    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
     
     return self;
@@ -133,15 +133,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(xmpp*) getConnectedAccountForID:(NSString*) accountNo
 {
     __block xmpp* toReturn=nil;
-        for (NSDictionary* account in _connectedXMPP)
+    for (NSDictionary* account in _connectedXMPP)
+    {
+        xmpp* xmppAccount=[account objectForKey:@"xmppAccount"];
+        
+        if([xmppAccount.accountNo isEqualToString:accountNo] )
         {
-            xmpp* xmppAccount=[account objectForKey:@"xmppAccount"];
-            
-            if([xmppAccount.accountNo isEqualToString:accountNo] )
-            {
-                toReturn= xmppAccount;
-            }
+            toReturn= xmppAccount;
         }
+    }
     return toReturn;
 }
 
@@ -150,17 +150,17 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) connectAccount:(NSString*) accountNo
 {
     dispatch_async(_netQueue, ^{
-
-     _accountList=[[DataLayer sharedInstance] accountList];
-    for (NSDictionary* account in _accountList)
-    {
-        if([[account objectForKey:@"account_id"] integerValue]==[accountNo integerValue])
-        {
-              [self connectAccountWithDictionary:account];
-        }
-    }
         
-       });
+        _accountList=[[DataLayer sharedInstance] accountList];
+        for (NSDictionary* account in _accountList)
+        {
+            if([[account objectForKey:@"account_id"] integerValue]==[accountNo integerValue])
+            {
+                [self connectAccountWithDictionary:account];
+            }
+        }
+        
+    });
 }
 
 -(void) connectAccountWithDictionary:(NSDictionary*)account
@@ -211,19 +211,19 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     Reachability* hostReach = [Reachability reachabilityWithHostName:xmppAccount.server ] ;
     
     
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reachabilityChanged) name:kReachabilityChangedNotification object:nil];
-        [hostReach startNotifier];
-        
-        NSDictionary* accountRow= [[NSDictionary alloc] initWithObjects:@[xmppAccount, hostReach] forKeys:@[@"xmppAccount", @"hostReach"]];
-        [_connectedXMPP addObject:accountRow];
-   
-        
-        dispatch_async(_netQueue,
-                       ^{
-                           [xmppAccount connect];
-                           
-                           
-                       });
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reachabilityChanged) name:kReachabilityChangedNotification object:nil];
+    [hostReach startNotifier];
+    
+    NSDictionary* accountRow= [[NSDictionary alloc] initWithObjects:@[xmppAccount, hostReach] forKeys:@[@"xmppAccount", @"hostReach"]];
+    [_connectedXMPP addObject:accountRow];
+    
+    
+    dispatch_async(_netQueue,
+                   ^{
+                       [xmppAccount connect];
+                       
+                       
+                   });
     
     
 }
@@ -232,7 +232,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) disconnectAccount:(NSString*) accountNo
 {
     
-dispatch_async(dispatch_get_main_queue(), ^{
+    dispatch_async(dispatch_get_main_queue(), ^{
         int index=0;
         int pos=0;
         for (NSDictionary* account in _connectedXMPP)
@@ -278,14 +278,14 @@ dispatch_async(dispatch_get_main_queue(), ^{
 
 -(void)connectIfNecessary
 {
-
+    
     _accountList=[[DataLayer sharedInstance] accountList];
     for (NSDictionary* account in _accountList)
     {
         if([[account objectForKey:@"enabled"] boolValue]==YES)
         {
             [self connectAccountWithDictionary:account];
-        
+            
         }
     }
 }
@@ -294,35 +294,49 @@ dispatch_async(dispatch_get_main_queue(), ^{
 {
     for (NSDictionary* row in _connectedXMPP)
     {
-    Reachability* hostReach=[row objectForKey:@"hostReach"];
-    xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
-    if([hostReach currentReachabilityStatus]==NotReachable)
-    {
-        DDLogVerbose(@"not reachable");
-        if(xmppAccount.loggedIn==YES)
+        Reachability* hostReach=[row objectForKey:@"hostReach"];
+        xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
+        if([hostReach currentReachabilityStatus]==NotReachable)
         {
-        DDLogVerbose(@"logging out");
-        dispatch_async(_netQueue,
-                       ^{
-        [xmppAccount disconnect];
-                       });
+            DDLogVerbose(@"not reachable");
+            if(xmppAccount.loggedIn==YES)
+            {
+                DDLogVerbose(@"Scheduling a ping in 60 sec to test");
+                
+                //dont explicitly disconnect since it might be that there was a network inteepution
+                //ie moving through cells.  schedule a ping for 1 min and see if that results in a TCP or XMPP error
+            
+                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 60ull * NSEC_PER_SEC), _netQueue,  ^{
+                  [xmppAccount sendPing];
+                });
+
+                
+                
+//                dispatch_async(_netQueue,
+//                               ^{
+//                                  [xmppAccount disconnect];
+//                                  
+//                                   
+//                               });
+                
+                
+            }
+        }
+        else
+        {
+            DDLogVerbose(@"reachable");
+            if((xmppAccount.disconnected==YES) && (!xmppAccount.logInStarted))
+            {
+                DDLogVerbose(@"logging in");
+                dispatch_async(_netQueue,
+                               ^{
+                                   [xmppAccount connect];
+                               });
+            }
+            
         }
     }
-    else
-    {
-        DDLogVerbose(@"reachable");
-        if((xmppAccount.disconnected==YES) && (!xmppAccount.logInStarted))
-        {
-            DDLogVerbose(@"logging in");
-            dispatch_async(_netQueue,
-                           ^{
-            [xmppAccount connect];
-                           });
-        }
-        
-    }
-    }
- 
+    
 }
 
 
@@ -351,7 +365,7 @@ withCompletionHandler:(void (^)(BOOL success)) completion
 
 -(void) getServiceDetailsForAccount:(NSInteger) row
 {
-
+    
     NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
     dispatch_async(_netQueue,
                    ^{

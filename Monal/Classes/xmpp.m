@@ -307,6 +307,10 @@ dispatch_async(dispatch_get_current_queue(), ^{
                     {
                         [self reconnect];
                     }
+                    else
+                    {
+                        _backgroundTask=UIBackgroundTaskInvalid;
+                    }
                 });
             
                  

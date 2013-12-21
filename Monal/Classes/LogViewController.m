@@ -43,6 +43,10 @@
     NSError *error;
     self.logView.text=[NSString stringWithContentsOfFile:logFileInfo.filePath encoding:NSUTF8StringEncoding error:&error];
     
+    //scroll to bottom
+    NSRange range = NSMakeRange(self.logView.text.length - 1, 1);
+    [self.logView scrollRangeToVisible:range];
+    
 }
 
 - (void)didReceiveMemoryWarning

@@ -10,7 +10,7 @@
 #import "EncodingTools.h"
 #import "DataLayer.h"
 
-static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 @implementation MLImageManager
 
@@ -88,7 +88,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     else
     {
-        DDLogVerbose(@"failed to write");
+        DDLogError(@"failed to write");
     }
     
     //set db entry

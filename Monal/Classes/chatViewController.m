@@ -12,7 +12,7 @@
 #import <QuartzCore/QuartzCore.h>
 
 
-static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 @implementation chatViewController
 

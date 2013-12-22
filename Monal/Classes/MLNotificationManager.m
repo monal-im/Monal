@@ -97,7 +97,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                           )
                        {
                        
-                      SlidingMessageViewController* slidingView= [[SlidingMessageViewController alloc] correctSliderWithTitle:nameToShow message:[notification.userInfo objectForKey:@"messageText"] userfilename:[notification.userInfo objectForKey:@"from"] user:[notification.userInfo objectForKey:@"from"]];
+                      SlidingMessageViewController* slidingView= [[SlidingMessageViewController alloc] correctSliderWithTitle:nameToShow message:[notification.userInfo objectForKey:@"messageText"] user:[notification.userInfo objectForKey:@"from"] account:[notification.userInfo objectForKey:@"accountNo"] ];
                        
                        [self.window addSubview:slidingView.view];
                        

@@ -135,26 +135,21 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
  *
  *------------------------------------------------------------*/
 
--(id) correctSliderWithTitle:(NSString *)title message:(NSString *)msg userfilename:(NSString*)userfilename user:(NSString*) user
+-(id) correctSliderWithTitle:(NSString *)title message:(NSString *)msg user:(NSString*)user account:(NSString*) account_id
 {
-	
-    username=user; 
+    username=user;
 	//Note: this assumes its in chatwin
-	
 	UIInterfaceOrientation orientation =[[UIApplication sharedApplication] statusBarOrientation];
-	
-	
-    if (([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)&& (! ((orientation==UIInterfaceOrientationPortraitUpsideDown)
+	if (([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)&& (! ((orientation==UIInterfaceOrientationPortraitUpsideDown)
 											 || (orientation==UIInterfaceOrientationPortrait) )))
 	{
-		
-		[self initWithTitle:title message:msg userfilename:userfilename];
+		[self initWithTitle:title message:msg  user:user account:account_id];
 		
 	}
 	else
 	{
 	
-		 [self initTopWithTitle:title message:msg userfilename:userfilename];
+        [self initTopWithTitle:title message:msg user:user account:account_id];
 		
 	}
 	
@@ -162,7 +157,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 	
 }
 
--(id) commonInit:(NSString *)title message:(NSString *)msg userfilename:(NSString*)userfilename
+-(id) commonInit:(NSString *)title message:(NSString *)msg user:(NSString*)user account:(NSString*) account_id
 {
 	// Notice the view y coordinate is offscreen (480)
 	// This hides the view
@@ -172,15 +167,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 	
 	//icon
 	icon =[[UIImageView alloc] initWithFrame:CGRectMake(5, 5, 32, 32)] ;
-	
-
-            //cell.imageView.image=[MLImageManager getIconForContact:[row objectForKey:@"buddy_name"] andAccount:[row objectForKey:@"account_id"]];
-        
-		
-		[self.view addSubview:icon];
-	
-	
-   
+    icon.image=[[MLImageManager sharedInstance] getIconForContact:user andAccount:account_id];
+    [self.view addSubview:icon];
     
 	// Title
 	titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, 5, 280, 30)] ;
@@ -210,15 +198,12 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 	return nil; 
 }
 
--(id)initTopWithTitle:(NSString *)title message:(NSString *)msg userfilename:(NSString*)userfilename
+- (id)initTopWithTitle:(NSString *)title message:(NSString *)msg user:(NSString*) user account:(NSString*) account_id
 {
 	top=true; 
 	if (self = [super init]) 
 	{
-		
-		
-		
-		
+	
 		UIInterfaceOrientation orientation =[[UIApplication sharedApplication] statusBarOrientation];
 		
 		rotate=0;
@@ -245,62 +230,39 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 				width=320; 
 				height=90; 
 				y=0-height+69; 
-			
-			
-		
-			
 		}
 		
 		if(orientation==UIInterfaceOrientationLandscapeLeft) 
 		{
 			
 			rotate= [tools degreesToRadians:-90]; 
-			
-				
-				width=320; 
-				
-				
-			
-			height=90; 
-			
-			y=150; 
-			
-			x=0-height-25; 
-			
-				
-			
+            width=320;
+            height=90;
+			y=150;
+			x=0-height-25;
 		}
 		
 		if(orientation==UIInterfaceOrientationLandscapeRight) 
 		{
 			rotate= [tools degreesToRadians:90]; 
-							
-			
-			width=320; 
+			width=320;
 			height=90;
-			
-			
-			x=300; 
+			x=300;
 			y=480-220;
 		}
 		
-		[self commonInit:title message:msg userfilename:userfilename];
+		[self commonInit:title message:msg user:user account:account_id];
 	}
 	
 	return self;
 }
 
-- (id)initWithTitle:(NSString *)title message:(NSString *)msg userfilename:(NSString*)userfilename
-
+- (id)initWithTitle:(NSString *)title message:(NSString *)msg user:(NSString*) user account:(NSString*) account_id
 {
 	top=false; 
 	if (self = [super init]) 
 	{
-		
-		
-		
-		
-		UIInterfaceOrientation orientation =[[UIApplication sharedApplication] statusBarOrientation];
+        UIInterfaceOrientation orientation =[[UIApplication sharedApplication] statusBarOrientation];
 		
 		 rotate=0; 
 		
@@ -395,9 +357,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         
 		}
 		
-		
-            [self commonInit:title message:msg userfilename:userfilename];
-		
+		[self commonInit:title message:msg user:user account:account_id];
 	}
 	
 	return self;
@@ -414,10 +374,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 - (void)showMsg
 {
 	//  UIView *view = self.view;
-    
-  
-    
-	CGRect frame = self.view.frame;
+    CGRect frame = self.view.frame;
 	[UIView beginAnimations:nil context:NULL];
 	[UIView setAnimationDuration:.75];
 	

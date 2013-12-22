@@ -33,7 +33,7 @@
 
 -(void) releaser; 
 -(id) correctSliderWithTitle:(NSString *)title message:(NSString *)msg user:(NSString*)user account:(NSString*) account_id;
--(id) commonInit:(NSString *)title message:(NSString *)msg user:(NSString*)user account:(NSString*) account_id;
+-(void) commonInit:(NSString *)title message:(NSString *)msg user:(NSString*)user account:(NSString*) account_id;
 - (id)initWithTitle:(NSString *)title message:(NSString *)msg user:(NSString*) user account:(NSString*) account_id;
 - (id)initTopWithTitle:(NSString *)title message:(NSString *)msg user:(NSString*) user account:(NSString*) account_id;
 - (void)showMsg;

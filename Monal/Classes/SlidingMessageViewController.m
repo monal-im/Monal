@@ -51,9 +51,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 	[UIView beginAnimations:nil context:NULL];
 	[UIView setAnimationDuration:.75];
 	
-
-	
-	UIInterfaceOrientation orientation =[[UIApplication sharedApplication] statusBarOrientation];
+    UIInterfaceOrientation orientation =[[UIApplication sharedApplication] statusBarOrientation];
 	
 	if(top==false)
 	{
@@ -73,7 +71,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 			}
 			else
 			{
-			frame.origin.y = y;
+			frame.origin.y = y-height;
 			}
 	}
 	else
@@ -94,7 +92,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 				}
 				else
 				{
-					frame.origin.y = y;
+					frame.origin.y = y-height;
 				}
 		
 	}
@@ -157,7 +155,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 	
 }
 
--(id) commonInit:(NSString *)title message:(NSString *)msg user:(NSString*)user account:(NSString*) account_id
+-(void) commonInit:(NSString *)title message:(NSString *)msg user:(NSString*)user account:(NSString*) account_id
 {
 	// Notice the view y coordinate is offscreen (480)
 	// This hides the view
@@ -195,7 +193,6 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 	}
 	
 	[self.view addSubview:msgLabel];
-	return nil; 
 }
 
 - (id)initTopWithTitle:(NSString *)title message:(NSString *)msg user:(NSString*) user account:(NSString*) account_id
@@ -229,7 +226,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 				
 				width=320; 
 				height=90; 
-				y=0-height+69; 
+				y=0-height;
 		}
 		
 		if(orientation==UIInterfaceOrientationLandscapeLeft) 
@@ -375,8 +372,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 {
 	//  UIView *view = self.view;
     CGRect frame = self.view.frame;
-	[UIView beginAnimations:nil context:NULL];
-	[UIView setAnimationDuration:.75];
+
 	
 	// landscape of  portrait?
 
@@ -387,7 +383,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 	
 	if(orientation==UIInterfaceOrientationPortraitUpsideDown)
 	{
-		frame.origin.y = y+height-10;
+		frame.origin.y = y+height-30;
 	}
 	
 	 if 
@@ -395,7 +391,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 	 {
 	 
 	// portrait
-		frame.origin.y = y-height-44;
+		frame.origin.y = y+height;
 	 
 	 
 	 }
@@ -427,7 +423,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 	{
 		if(orientation==UIInterfaceOrientationPortraitUpsideDown)
 		{
-			frame.origin.y = y-height-10;
+			frame.origin.y = y-height-30;
 		}
 		
 		if 
@@ -435,16 +431,15 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 		{
 			
 			// portrait
-			frame.origin.y = y+height-44;
-			
-			
+			frame.origin.y = y+height;
+
 		}
 		
 		if(orientation==UIInterfaceOrientationLandscapeLeft) 		
 		{
 			
 			//top never called for ipad
-			 frame.origin.x = x+height+44;
+			 frame.origin.x = x+height+64;
 			
 		}
 		
@@ -466,9 +461,11 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     
     [self.view addSubview:tapHandler]; 
     
-	self.view.frame = frame;
 	
-	[UIView commitAnimations];
+	
+	[UIView animateWithDuration:.75f animations:^{
+       self.view.frame = frame;
+    }];
 	
 	
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 2 * NSEC_PER_SEC), dispatch_get_current_queue(),

@@ -749,6 +749,8 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     [row setObject:[NSNumber numberWithInt:0] forKey:@"count"];
     
     //make chat view
+    chatViewController* chatVC = [[chatViewController alloc] initWithContact:row ];
+
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
     {
         if([[self.currentNavController topViewController] isKindOfClass:[chatViewController class]])
@@ -765,12 +767,16 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
             else
             {
                 [self.currentNavController  popToRootViewControllerAnimated:NO];
+             
+
             }
         }
+           [self.currentNavController pushViewController:chatVC animated:NO];
+    }
+    else{
+        [self.currentNavController pushViewController:chatVC animated:YES];
     }
     
-    chatViewController* chatVC = [[chatViewController alloc] initWithContact:row ];
-    [self.currentNavController pushViewController:chatVC animated:YES];
     
     [tableView beginUpdates];
     [tableView reloadRowsAtIndexPaths:@[indexPath]

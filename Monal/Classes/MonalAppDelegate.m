@@ -260,6 +260,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
      if (_backgroundTask != UIBackgroundTaskInvalid) {
           DDLogVerbose(@"entering foreground as connect bg task is running");
      }
+    
+      DDLogVerbose(@"Entering FG");
 }
 
 -(void) applicationDidEnterBackground:(UIApplication *)application

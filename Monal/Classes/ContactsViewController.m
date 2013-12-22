@@ -700,7 +700,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
         }];
         
         UIActionSheet* sheet =[[UIActionSheet alloc] initWithTitle:messageString cancelButtonItem:cancelButton destructiveButtonItem:yesButton otherButtonItems: nil];
-        [sheet showFromTabBar:self.tabBarController.tabBar];
+        [sheet showFromTabBar:self.presentationTabBarController.tabBar];
     }
 }
 

@@ -46,6 +46,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     _tabBarController=[[MLTabBarController alloc] init];
     ContactsViewController* contactsVC = [[ContactsViewController alloc] init];
     [MLXMPPManager sharedInstance].contactVC=contactsVC;
+    contactsVC.presentationTabBarController=_tabBarController; 
     
     UIBarStyle barColor=UIBarStyleBlackOpaque;
     

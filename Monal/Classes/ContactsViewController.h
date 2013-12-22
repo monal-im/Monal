@@ -32,6 +32,11 @@
     UIPopoverController* _popOverController;
 }
 
+/**
+ This may not be the tab bar (ipad) that this VC is in. But alerts should be shown from it.
+ */
+@property (nonatomic, strong) UITabBarController* presentationTabBarController;
+
 @property (nonatomic, strong) UITableView* contactsTable;
 /**
  Nav controller to push using. Ipad will push on another one. 

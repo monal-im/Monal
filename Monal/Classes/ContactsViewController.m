@@ -506,6 +506,14 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     }
     
     DDLogInfo(@"chat view got new message notice %@", notification.userInfo);
+      chatViewController* currentTop=(chatViewController*)[self.currentNavController topViewController];
+    if([currentTop.contactName isEqualToString:[notification.userInfo objectForKey:@"from"]] &&
+       [currentTop.accountNo isEqualToString:
+        [NSString stringWithFormat:@"%d",[[notification.userInfo objectForKey:kaccountNoKey] integerValue] ]]
+       )
+    {
+        return;
+    }
     
     dispatch_async(dispatch_get_main_queue(),
                    ^{
@@ -767,7 +775,6 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
             else
             {
                 [self.currentNavController  popToRootViewControllerAnimated:NO];
-             
 
             }
         }

@@ -9,6 +9,20 @@
 #import <UIKit/UIKit.h>
 
 @interface CallViewController : UIViewController
-@property (nonatomic, weak) IBOutlet UITableView *tableView;
+
+/**
+Icon of the person being called
+ */
+@property (nonatomic, weak) IBOutlet UIImageView* userImage;
+
+/**
+ The name of the person being called.
+ */
+@property (nonatomic, weak) IBOutlet UILabel* userName;
+
+/**
+ cancels the call and dismisses window
+ */
+-(IBAction)cancelCall:(id)sender;
 
 @end

@@ -84,9 +84,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 }
 
 
--(void)proximityStateDidChange
+-(IBAction)cancelCall:(id)sender
 {
-    DDLogVerbose(@"proximity %d", [ [UIDevice currentDevice] proximityState]) ;
+    
 }
 
 @end

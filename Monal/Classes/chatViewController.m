@@ -319,6 +319,11 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     return YES;
 }
 
+-(void) willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
+{
+       	[chatInput resignFirstResponder];
+}
+
 #pragma mark gestures
 -(void) handleTap
 {
@@ -793,6 +798,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     r.origin.y += diff;
 	containerView.frame = r;
 }
+
+
 
 
 /*

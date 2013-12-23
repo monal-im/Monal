@@ -720,11 +720,13 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     else
         detailVC=[[ContactDetails alloc]  initWithContact:[_offlineContacts objectAtIndex:indexPath.row] ];
     
+    detailVC.currentNavController=self.currentNavController; 
+ 
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
     {
         MLChatCell* cell = (MLChatCell*)[tableView cellForRowAtIndexPath:indexPath];
-        
         _popOverController = [[UIPopoverController alloc] initWithContentViewController:detailVC];
+        detailVC.popOverController=_popOverController;
         _popOverController.popoverContentSize = CGSizeMake(320, 480);
         [_popOverController presentPopoverFromRect:cell.bounds
                                             inView:cell

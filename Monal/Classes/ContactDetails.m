@@ -9,7 +9,7 @@
 #import "ContactDetails.h"
 #import "MLImageManager.h"
 #import "MLConstants.h"
-
+#import "CallViewController.h"
 
 @implementation ContactDetails
 
@@ -91,25 +91,19 @@
 	return YES;
 }
 
--(IBAction) callPress
+-(IBAction) callContact:(id)sender;
 {
-    // send jingle stuff
-    //    [jabber startCallUser:buddyName.text];
-    //
-    //    call = [callScreen alloc] ;
-    //
-    //    if([[tools machine] isEqualToString:@"iPad"])
-    //    {
-    //        call.splitViewController=splitViewController;
-    //    }
-    //    else
-    //    {
-    //
-    //    call.navigationController=navigationController;
-    //    }
-    //
-    //    [call show:jabber:buddyName.text];
+    CallViewController *callScreen= [[CallViewController alloc] init];
+    UINavigationController* callNav = [[UINavigationController alloc] initWithRootViewController:callScreen];
+    callNav.navigationBar.hidden=YES;
     
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
+    {
+        callNav.modalPresentationStyle=UIModalPresentationFormSheet;
+        [self.popOverController dismissPopoverAnimated:NO];
+    }
+    
+    [self.currentNavController presentModalViewController:callNav animated:YES];
 }
 
 

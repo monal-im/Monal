@@ -86,7 +86,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(IBAction)cancelCall:(id)sender
 {
-    
+    [self dismissModalViewControllerAnimated:YES];
 }
 
 @end

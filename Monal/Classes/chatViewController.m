@@ -259,7 +259,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     }
     else
     {
-        _messagelist =[[DataLayer sharedInstance] messageHistoryDate:_contactName forAccount: _accountNo forDate:_day];
+        _messagelist =[[[DataLayer sharedInstance] messageHistoryDate:_contactName forAccount: _accountNo forDate:_day] mutableCopy];
         
     }
     
@@ -283,6 +283,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         _topIcon.image=[[MLImageManager sharedInstance] getIconForContact:_contactName andAccount:_accountNo];
         
     }
+       [self refreshCounter];
     
 }
 

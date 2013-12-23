@@ -7,6 +7,7 @@
 //
 
 #import "CallViewController.h"
+#import "MLImageManager.h"
 #import "DDLog.h"
 
 @interface CallViewController ()
@@ -26,17 +27,51 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     return self;
 }
 
+-(id) initWithContact:(NSDictionary*) contact
+{
+    self=[super init];
+    if(self) {
+        _contact=contact;
+    }
+    
+    return self;
+}
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
 }
 
+
+
+-(void) viewWillAppear:(BOOL)animated
+{
+    
+    DDLogVerbose(@"call screen will  appear");
+    [UIDevice currentDevice].proximityMonitoringEnabled=YES;
+    
+    self.userName.text=[_contact objectForKey:@"full_name"];
+    NSString* accountNo=[NSString stringWithFormat:@"%@", [_contact objectForKey:@"account_id"]];
+    
+    self.userImage.image=[[MLImageManager sharedInstance] getIconForContact:[_contact objectForKey:@"buddy_name"] andAccount:accountNo];
+}
+
+-(void)viewDidDisappear:(BOOL)animated
+{
+	DDLogVerbose(@"call screen did  disappear");
+    [UIDevice currentDevice].proximityMonitoringEnabled=NO;
+
+}
+
+
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
+
+
 
 #pragma mark tableview datasource delegate
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
@@ -65,23 +100,6 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         return NO;
 }
 
--(void) viewWillAppear:(BOOL)animated
-{
-    
-    DDLogVerbose(@"call screen will  appear");
-    [UIDevice currentDevice].proximityMonitoringEnabled=YES;
-    
-}
-
--(void)viewDidDisappear:(BOOL)animated
-{
-	DDLogVerbose(@"call screen did  disappear");
-    
-    [UIDevice currentDevice].proximityMonitoringEnabled=NO;
-    
-	
-	
-}
 
 
 -(IBAction)cancelCall:(id)sender

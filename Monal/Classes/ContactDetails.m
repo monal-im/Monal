@@ -70,8 +70,6 @@
             }
     }
     NSString* accountNo=[NSString stringWithFormat:@"%@", [_contact objectForKey:@"account_id"]];
-    
-    
     UIImage* contactImage=[[MLImageManager sharedInstance] getIconForContact:[_contact objectForKey:@"buddy_name"] andAccount:accountNo];
     _buddyIconView.image=contactImage;
     
@@ -93,7 +91,7 @@
 
 -(IBAction) callContact:(id)sender;
 {
-    CallViewController *callScreen= [[CallViewController alloc] init];
+    CallViewController *callScreen= [[CallViewController alloc] initWithContact:_contact];
     UINavigationController* callNav = [[UINavigationController alloc] initWithRootViewController:callScreen];
     callNav.navigationBar.hidden=YES;
     

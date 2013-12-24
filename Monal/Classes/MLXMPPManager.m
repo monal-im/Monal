@@ -453,6 +453,17 @@ withCompletionHandler:(void (^)(BOOL success)) completion
     [account leaveRoom:roomName];
 }
 
+#pragma mark Jingle VOIP
+-(void) callContact:(NSDictionary*) contact
+{
+    
+}
+
+
+-(void) hangupContact:(NSDictionary*) contact
+{
+    
+}
 
 
 #pragma mark XMPP settings

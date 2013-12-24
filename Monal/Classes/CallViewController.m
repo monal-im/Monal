@@ -8,6 +8,7 @@
 
 #import "CallViewController.h"
 #import "MLImageManager.h"
+#import "MLXMPPManager.h"
 #import "DDLog.h"
 
 @interface CallViewController ()
@@ -55,12 +56,16 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     NSString* accountNo=[NSString stringWithFormat:@"%@", [_contact objectForKey:@"account_id"]];
     
     self.userImage.image=[[MLImageManager sharedInstance] getIconForContact:[_contact objectForKey:@"buddy_name"] andAccount:accountNo];
+    
+    [[MLXMPPManager sharedInstance] callContact:_contact];
+    
 }
 
 -(void)viewDidDisappear:(BOOL)animated
 {
 	DDLogVerbose(@"call screen did  disappear");
-    [UIDevice currentDevice].proximityMonitoringEnabled=NO;
+ 
+
 
 }
 
@@ -104,7 +109,11 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(IBAction)cancelCall:(id)sender
 {
+    [UIDevice currentDevice].proximityMonitoringEnabled=NO;
+    [[MLXMPPManager sharedInstance] hangupContact:_contact];
+    
     [self dismissModalViewControllerAnimated:YES];
+  
 }
 
 @end

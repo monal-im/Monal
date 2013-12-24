@@ -95,6 +95,20 @@ Returns the name of the conencted account
 -(void)  leaveRoom:(NSString*) roomName ForAccountRow:(NSInteger) row;
 
 
+#pragma mark Jingle VOIP
+
+
+/**
+ Call a contact from an account
+ */
+-(void) callContact:(NSDictionary*) contact;
+
+/**
+ hangup on a contact from an account
+ */
+-(void) hangupContact:(NSDictionary*) contact;
+
+
 /**
  Checks if there are any enabled acconts and connects them if necessary.
  */

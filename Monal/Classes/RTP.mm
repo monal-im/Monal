@@ -236,9 +236,7 @@ void AudioOutputCallback(
 -(void) sendThread
 {
     debug_NSLog(@"entered RTP send thread");
-    
-    
-    
+
     while(1)
     {
         if(disconnecting) break;
@@ -318,12 +316,7 @@ void AudioInputCallback(
 
 -(int) RTPConnectAddress:(NSString*) IP onRemotePort:(int) destPort withLocalPort:(int) localPort
 {
-    
-    
     TPCircularBufferInit(&packetInCircularBuffer, kBufferLength);
-    
-    
-    
     TPCircularBufferInit(&packetOutCircularBuffer, kBufferLength);
     packCount=0;
     
@@ -333,10 +326,6 @@ void AudioInputCallback(
     [[AVAudioSession sharedInstance] setCategory: AVAudioSessionCategoryPlayAndRecord error: nil];
     
     //********* Audio Queue ********/
-    
-    
-    
-    
     
     recordState.dataFormat.mSampleRate = 8000.0;
     recordState.dataFormat.mFormatID = kAudioFormatALaw;

@@ -33,11 +33,9 @@
     RTP* rtp;
     RTP* rtp2;
     
-    BOOL didReceiveTerminate;
     BOOL didStartCall;
     
     // jingle object elements
-    NSString* action;
 }
 -(NSString*) getGoogleInfo:(NSString*) idval;
 

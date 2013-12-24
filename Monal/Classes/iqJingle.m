@@ -8,30 +8,33 @@
 
 #import "iqJingle.h"
 
+#ifdef DEBUG
+#   define debug_NSLog(fmt, ...) NSLog((@"%s [Line %d] " fmt), __PRETTY_FUNCTION__, __LINE__, ##__VA_ARGS__);
+#else
+#   define debug_NSLog(...)
+#endif
+
 @implementation iqJingle
 
 -(void) resetVals
 {
-    thesid=nil;
-    otherParty=nil;
-    theaddress=nil;
-    destinationPort=nil;
-    destinationPort2=nil;
+    self.thesid=nil;
+    self.otherParty=nil;
+    self.theaddress=nil;
+    self.destinationPort=nil;
+    self.destinationPort2=nil;
     
-    localPort=nil;
-    localPort2=nil;
+    self.localPort=nil;
+    self.localPort2=nil;
     
-    theusername=nil;
-    thepass=nil;
+    self.theusername=nil;
+    self.thepass=nil;
     didReceiveTerminate=NO;
     
     self.activeCall=NO;
     didStartCall=NO;
     self.waitingOnUserAccept=NO; 
-    
-    activeResource=nil;
-    initiator=nil;
-    responder=nil; 
+
 }
 
 -(id) init
@@ -53,7 +56,7 @@
     if (self.activeCall==YES) return @"";
     
     NSMutableString* query=[[NSMutableString alloc] init];
-    [query appendFormat:@"<iq to='%@' from='%@' id='%@' type='result'/>", to, me, iqid]; 
+    [query appendFormat:@"<iq to='%@' from='%@' id='%@' type='result'/>", to, self.me, iqid];
     
  
     return query;
@@ -71,7 +74,7 @@
     
     rtp =[RTP alloc];
     
-    return [rtp RTPConnectAddress:theaddress onRemotePort:[destinationPort intValue] withLocalPort:[localPort intValue]];
+    return [rtp RTPConnectAddress:self.theaddress onRemotePort:[self.destinationPort intValue] withLocalPort:[self.localPort intValue]];
     
 
 }
@@ -113,31 +116,25 @@
 
   
     NSString* ownIP= [self localIPAddress];
-    int localPortInt=[destinationPort intValue]+2;
+    int localPortInt=[self.destinationPort intValue]+2;
     // local port can be the othersides port +2 shoudl be rnadom .. needs to be even for RTP
-   localPort=[NSString stringWithFormat:@"%d",localPortInt];
+   self.localPort=[NSString stringWithFormat:@"%d",localPortInt];
 
-   localPort2=[NSString stringWithFormat:@"%d",localPortInt+10];
+   self.localPort2=[NSString stringWithFormat:@"%d",localPortInt+10];
     
-    
-
-   
+ 
     NSMutableString* query=[[NSMutableString alloc] init];
-    [query appendFormat:@"<iq      to='%@'  id='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-accept'  responder='%@' sid='%@'> <content creator='initiator' name=\"audio-session\" senders=\"both\"><description xmlns=\"urn:xmpp:jingle:apps:rtp:1\" media=\"audio\"> <payload-type id=\"8\" name=\"PCMA\" clockrate=\"8000\"/></description> <transport xmlns='urn:xmpp:jingle:transports:raw-udp:1'><candidate type=\"host\" network=\"0\" component=\"1\" ip=\"%@\" port=\"%@\"   id=\"monal001\" generation=\"0\" protocol=\"udp\" priority=\"1\" /> <candidate type=\"host\" network=\"0\" component=\"2\" ip=\"%@\" port=\"%@\"   id=\"monal002\" generation=\"0\" protocol=\"udp\" priority=\"2\" /> </transport> </content> </jingle> </iq>", otherParty, idval,  me,  thesid, ownIP, localPort, ownIP, localPort2];
+    [query appendFormat:@"<iq      to='%@'  id='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-accept'  responder='%@' sid='%@'> <content creator='initiator' name=\"audio-session\" senders=\"both\"><description xmlns=\"urn:xmpp:jingle:apps:rtp:1\" media=\"audio\"> <payload-type id=\"8\" name=\"PCMA\" clockrate=\"8000\"/></description> <transport xmlns='urn:xmpp:jingle:transports:raw-udp:1'><candidate type=\"host\" network=\"0\" component=\"1\" ip=\"%@\" port=\"%@\"   id=\"monal001\" generation=\"0\" protocol=\"udp\" priority=\"1\" /> <candidate type=\"host\" network=\"0\" component=\"2\" ip=\"%@\" port=\"%@\"   id=\"monal002\" generation=\"0\" protocol=\"udp\" priority=\"2\" /> </transport> </content> </jingle> </iq>", self.otherParty, self.idval,  self.me,  self.thesid, ownIP, self.localPort, ownIP, self.localPort2];
       
     
-    initiator=otherParty;
-    responder=me; 
+    self.initiator=self.otherParty;
+    self.responder=self.me;
     
   /*  NSMutableString* query=[[NSMutableString alloc] init];
     [query appendFormat:@"<iq      to='%@'  id='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-accept'  responder='%@' sid='%@'> <content creator='initiator' name=\"audio-session\" senders=\"both\"><description xmlns=\"urn:xmpp:jingle:apps:rtp:1\" media=\"audio\"> <payload-type name='SPEEX' clockrate='8000' id='98' channels='1'/></description> <transport xmlns='urn:xmpp:jingle:transports:raw-udp:1'><candidate type=\"host\" network=\"0\" component=\"1\" ip=\"%@\" port=\"%@\"   id=\"monal001\" generation=\"0\" protocol=\"udp\" priority=\"1\" /></transport> </content> </jingle> </iq>", to, idval,  me,  thesid, ownIP, localPort];
     */
     
-
-    
- 
   
-    
     return query;
 }
 
@@ -149,18 +146,18 @@
    
     
         NSString* ownIP= [self localIPAddress];
-    localPort=@"7078"; // some random val
-   localPort2=@"7079"; // some random val
-    otherParty=to;
+    self.localPort=@"7078"; // some random val
+   self.localPort2=@"7079"; // some random val
+    self.otherParty=to;
     debug_NSLog(@"resource id %@", resource); 
  
-    thesid=@"Monal3sdfg"; //something random
+    self.thesid=@"Monal3sdfg"; //something random
  NSMutableString* query=[[NSMutableString alloc] init];
-    [query appendFormat:@" <iq to='%@/%@' id='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-initiate' initiator='%@' responder='%@' sid='%@'> <content creator='initiator'  name=\"audio-session\" senders=\"both\" responder='%@'> <description xmlns=\"urn:xmpp:jingle:apps:rtp:1\" media=\"audio\"> <payload-type id=\"8\" name=\"PCMA\" clockrate=\"8000\" channels='0'/></description> <transport xmlns='urn:xmpp:jingle:transports:raw-udp:1'><candidate component=\"1\" ip=\"%@\" port=\"%@\"   id=\"monal001\" generation=\"0\"   /><candidate component=\"2\" ip=\"%@\" port=\"%@\"   id=\"monal002\" generation=\"0\"  /> </transport> </content> </jingle> </iq>", otherParty, resource, iqid, me, to,  thesid, to, ownIP, localPort,ownIP,localPort2];
+    [query appendFormat:@" <iq to='%@/%@' id='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-initiate' initiator='%@' responder='%@' sid='%@'> <content creator='initiator'  name=\"audio-session\" senders=\"both\" responder='%@'> <description xmlns=\"urn:xmpp:jingle:apps:rtp:1\" media=\"audio\"> <payload-type id=\"8\" name=\"PCMA\" clockrate=\"8000\" channels='0'/></description> <transport xmlns='urn:xmpp:jingle:transports:raw-udp:1'><candidate component=\"1\" ip=\"%@\" port=\"%@\"   id=\"monal001\" generation=\"0\"   /><candidate component=\"2\" ip=\"%@\" port=\"%@\"   id=\"monal002\" generation=\"0\"  /> </transport> </content> </jingle> </iq>", self.otherParty, _resource, _iqid, self.me, _to,  self.thesid, _to, _ownIP, self.localPort, _ownIP,self.localPort2];
     
-    initiator=me;
-    responder=otherParty;
-     activeResource=resource;
+    self.initiator=self.me;
+    self.responder=self.otherParty;
+     _activeresource=resource;
     
     return query;
 }
@@ -169,7 +166,7 @@
 {
    
  NSMutableString* query=[[NSMutableString alloc] init];
-    [query appendFormat:@"<iq   id='%@'   to='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-terminate'  initiator='%@' responder='%@' sid='%@'> <reason> <decline/> </reason> </jingle> </iq>", idval, otherParty, otherParty, me,  thesid];
+    [query appendFormat:@"<iq   id='%@'   to='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-terminate'  initiator='%@' responder='%@' sid='%@'> <reason> <decline/> </reason> </jingle> </iq>", self.idval, self.otherParty, self.otherParty, self.me,  self.thesid];
    
    
      [self resetVals];
@@ -184,7 +181,7 @@
     
     NSMutableString* query=[[NSMutableString alloc] init];
      if(!didReceiveTerminate)
-         [query appendFormat:@"<iq   id='%@'   to='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-terminate'  initiator='%@' responder='%@' sid='%@'> <reason> <success/> </reason> </jingle> </iq>", idval, otherParty, initiator, responder,  thesid];
+         [query appendFormat:@"<iq   id='%@'   to='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-terminate'  initiator='%@' responder='%@' sid='%@'> <reason> <success/> </reason> </jingle> </iq>", self.idval, self.otherParty, self.initiator, self.responder,  self.thesid];
     
     else
         query=@"";

@@ -20,7 +20,7 @@
 #include <arpa/inet.h>
 
 #include <stdlib.h>
-#include  <stdio.h>
+#include <stdio.h>
 #include <string>
 #include <string.h>
 
@@ -33,6 +33,7 @@
 #   define debug_NSLog(...)
 #endif
 
+
 jrtplib::RTPSession sess;
 
 
@@ -42,8 +43,6 @@ typedef struct
     AudioQueueRef queue;
     AudioQueueBufferRef buffers[NUM_BUFFERS_REC];
     SInt64 currentPacket;
-    
-    
 } RecordState;
 
 RecordState recordState;
@@ -86,8 +85,6 @@ void checkerror(int rtperr)
 -(void) listenThread
 {
     debug_NSLog(@"entered RTP listen thread");
- 
-    
     while(1)
     {
         if(disconnecting==YES) break;
@@ -103,20 +100,15 @@ void checkerror(int rtperr)
                 while ((pack = sess.GetNextPacket()) != NULL)
                 {
                     
-                  //  debug_NSLog(@"Got packet");
+                    //  debug_NSLog(@"Got packet");
                     
                     TPCircularBufferProduceBytes(&packetInCircularBuffer,pack->GetPayloadData(), pack->GetPayloadLength());
-                    
-                    
+    
                     sess.DeletePacket(pack);
                     
                     packCount++;
-                    
-                    
-                    
+                
                     //start playback after thre are 300 packets
-                    
-                    
                     if((packCount>300 && playState.playing==NO) && (disconnecting==NO))
                     {
                         OSStatus status = AudioQueueStart(playState.queue, NULL);
@@ -155,7 +147,6 @@ void checkerror(int rtperr)
         
         
     }
-    
     debug_NSLog(@"leaving RTP listen thread");
     [NSThread exit];
     
@@ -209,7 +200,7 @@ void AudioOutputCallback(
             packCounter++;
         }
         
-       
+        
         
         //   debug_NSLog(" read %d pcm, %d packets bytes: \n %s", bytesRead,numPackets, outBuffer->mAudioData  )
         
@@ -325,9 +316,7 @@ void AudioInputCallback(
 
 #pragma mark RTP cocoa wrapper
 
-
-
--(int) RTPConnect:(NSString*) IP:(int) destPort:(int) localPort
+-(int) RTPConnectAddress:(NSString*) IP onRemotePort:(int) destPort withLocalPort:(int) localPort
 {
     
     
@@ -536,8 +525,6 @@ void AudioInputCallback(
     return 0;
     
 }
-
-
 
 -(void) RTPDisconnect
 {

@@ -23,37 +23,21 @@
 
 @interface iqJingle : NSObject
 {
-    NSString* me;
-    NSString* otherParty;
-    NSString* thesid;
-    NSString* theaddress;
-    NSString* destinationPort;
-    NSString* destinationPort2;
     
-    NSString* localPort;
-    NSString* localPort2;
-    NSString* theusername;
-    NSString* thepass;
-    
-    NSString* idval;
-    
-    //jingle state objects
-    NSString* activeResource;
-    NSString* initiator;
-    NSString* responder;
-    
+    NSString *_activeresource;
+    NSString *_resource;
+    NSString *_iqid;
+    NSString *_to;
+    NSString *_ownIP;
     
     RTP* rtp;
     RTP* rtp2;
     
-    
     BOOL didReceiveTerminate;
-    
     BOOL didStartCall;
     
     // jingle object elements
     NSString* action;
-    
 }
 -(NSString*) getGoogleInfo:(NSString*) idval;
 
@@ -87,5 +71,8 @@
 
 @property (nonatomic,assign) BOOL activeCall;
 @property (nonatomic,assign) BOOL waitingOnUserAccept;
+
+@property (nonatomic, strong) NSString* initiator;
+@property (nonatomic, strong) NSString* responder;
 
 @end

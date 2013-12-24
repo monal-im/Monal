@@ -18,6 +18,7 @@
 		260C51D1177F08F50039634B /* xmpp.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D0177F08F50039634B /* xmpp.m */; };
 		260C51D4177F44AD0039634B /* XMLNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D3177F44AD0039634B /* XMLNode.m */; };
 		260C6C94178080730004E2E1 /* EncodingTools.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C6C93178080730004E2E1 /* EncodingTools.m */; };
+		261528C51869CE5300BF62D6 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 261528C41869CE5300BF62D6 /* AudioToolbox.framework */; };
 		261A6281176C055400059090 /* ContactsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A627F176C055400059090 /* ContactsViewController.m */; };
 		261A6285176C156500059090 /* ActiveChatsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A6284176C156500059090 /* ActiveChatsViewController.m */; };
 		261A6288176C157D00059090 /* SettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A6287176C157D00059090 /* SettingsViewController.m */; };
@@ -210,6 +211,7 @@
 		260C51D3177F44AD0039634B /* XMLNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMLNode.m; sourceTree = "<group>"; };
 		260C6C92178080730004E2E1 /* EncodingTools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EncodingTools.h; sourceTree = "<group>"; };
 		260C6C93178080730004E2E1 /* EncodingTools.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EncodingTools.m; sourceTree = "<group>"; };
+		261528C41869CE5300BF62D6 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		261A627E176C055400059090 /* ContactsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContactsViewController.h; sourceTree = "<group>"; };
 		261A627F176C055400059090 /* ContactsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ContactsViewController.m; sourceTree = "<group>"; };
 		261A6283176C156500059090 /* ActiveChatsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActiveChatsViewController.h; sourceTree = "<group>"; };
@@ -482,6 +484,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				261528C51869CE5300BF62D6 /* AudioToolbox.framework in Frameworks */,
 				2642EBD01869425D006A6C12 /* CoreAudio.framework in Frameworks */,
 				268E700515D0D979002E63CD /* AVFoundation.framework in Frameworks */,
 				268BCF12140B29180025E4D1 /* libjrtplib-static.a in Frameworks */,
@@ -997,6 +1000,7 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				261528C41869CE5300BF62D6 /* AudioToolbox.framework */,
 				2642EBCF1869425D006A6C12 /* CoreAudio.framework */,
 				264FF3E4158A855D00D97B86 /* AVFoundation.framework */,
 				261AB9371409C2B8006F5155 /* QuartzCore.framework */,

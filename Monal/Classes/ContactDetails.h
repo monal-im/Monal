@@ -11,9 +11,7 @@
 //#import "callScreen.h"
 
 @interface ContactDetails : UIViewController{
-    
-
-    
+  
     IBOutlet UITableView* _theTable;
 	IBOutlet UITableViewCell* _topcell;
 	IBOutlet UITableViewCell* _bottomcell;

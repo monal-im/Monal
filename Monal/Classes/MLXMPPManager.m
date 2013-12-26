@@ -109,7 +109,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     });
     
     dispatch_source_set_cancel_handler(_pinger, ^{
-        NSLog(@"pinger canceled");
+        DDLogInfo(@"pinger canceled");
         dispatch_release(_pinger);
     });
     

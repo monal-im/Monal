@@ -62,27 +62,27 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     _connectedXMPP=[[NSMutableArray alloc] init];
     _netQueue = dispatch_queue_create(kMonalNetQueue, DISPATCH_QUEUE_CONCURRENT);
     
-    //    NSTimeInterval timeInterval= 600; // 600 seconds
-    //    BOOL keepAlive=[[UIApplication sharedApplication] setKeepAliveTimeout:timeInterval handler:^{
-    //        DDLogVerbose(@"began background ping");
-    //        for(NSDictionary* row in _connectedXMPP)
-    //        {
-    //             xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
-    //            if(xmppAccount.loggedIn)
-    //                [xmppAccount sendWhiteSpacePing];
-    //        }
-    //
-    //    }];
-    //
-    //    if(keepAlive)
-    //    {
-    //        DDLogVerbose(@"installed keep alive timer");
-    //    }
-    //    else
-    //    {
-    //         DDLogVerbose(@"failed to install keep alive timer");
-    //    }
-    //
+    NSTimeInterval timeInterval= 600; // 600 seconds
+    BOOL keepAlive=[[UIApplication sharedApplication] setKeepAliveTimeout:timeInterval handler:^{
+        DDLogVerbose(@"began background ping");
+        for(NSDictionary* row in _connectedXMPP)
+        {
+            xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
+            if(xmppAccount.loggedIn)
+                [xmppAccount sendWhiteSpacePing];
+        }
+        
+    }];
+    
+    if(keepAlive)
+    {
+        DDLogVerbose(@"installed keep alive timer");
+    }
+    else
+    {
+        DDLogVerbose(@"failed to install keep alive timer");
+    }
+    
     [self defaultSettings];
     
     //set up regular ping
@@ -102,6 +102,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         {
             xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
             if(xmppAccount.loggedIn) {
+                   DDLogVerbose(@"began my bg  ping");
                 [xmppAccount sendPing];
             }
         }
@@ -306,14 +307,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 
                 //dont explicitly disconnect since it might be that there was a network inteepution
                 //ie moving through cells.  schedule a ping for 1 min and see if that results in a TCP or XMPP error
-
                 
-//                dispatch_async(_netQueue,
-//                               ^{
-//                                  [xmppAccount disconnect];
-//                                  
-//                                   
-//                               });
+                
+                //                dispatch_async(_netQueue,
+                //                               ^{
+                //                                  [xmppAccount disconnect];
+                //
+                //
+                //                               });
                 
                 
             }

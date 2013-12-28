@@ -55,33 +55,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     return sharedInstance;
 }
 
+
 -(id) init
 {
     self=[super init];
     
     _connectedXMPP=[[NSMutableArray alloc] init];
     _netQueue = dispatch_queue_create(kMonalNetQueue, DISPATCH_QUEUE_CONCURRENT);
-    
-    NSTimeInterval timeInterval= 600; // 600 seconds
-    BOOL keepAlive=[[UIApplication sharedApplication] setKeepAliveTimeout:timeInterval handler:^{
-        DDLogVerbose(@"began background ping");
-        for(NSDictionary* row in _connectedXMPP)
-        {
-            xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
-            if(xmppAccount.loggedIn)
-                [xmppAccount sendWhiteSpacePing];
-        }
-        
-    }];
-    
-    if(keepAlive)
-    {
-        DDLogVerbose(@"installed keep alive timer");
-    }
-    else
-    {
-        DDLogVerbose(@"failed to install keep alive timer");
-    }
     
     [self defaultSettings];
     
@@ -130,6 +110,37 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         dispatch_source_cancel(_pinger);
 }
 
+#pragma mark keep alive
+
+
+-(void) setKeepAlivetimer
+{
+    NSTimeInterval timeInterval= 600; // 600 seconds
+    BOOL keepAlive=[[UIApplication sharedApplication] setKeepAliveTimeout:timeInterval handler:^{
+        DDLogVerbose(@"began background ping");
+        for(NSDictionary* row in _connectedXMPP)
+        {
+            xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
+            if(xmppAccount.loggedIn)
+                [xmppAccount sendWhiteSpacePing];
+        }
+        
+    }];
+    
+    if(keepAlive)
+    {
+        DDLogVerbose(@"installed keep alive timer");
+    }
+    else
+    {
+        DDLogVerbose(@"failed to install keep alive timer");
+    }
+}
+
+-(void) clearKeepAlive
+{
+    [[UIApplication sharedApplication] clearKeepAliveTimeout];
+}
 
 
 -(xmpp*) getConnectedAccountForID:(NSString*) accountNo

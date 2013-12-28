@@ -32,7 +32,7 @@
 
 #define kConnectTimeout 20ull //seconds
 
-static const int ddLogLevel = LOG_LEVEL_INFO;
+static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 @implementation xmpp
 
@@ -254,31 +254,32 @@ dispatch_async(dispatch_get_current_queue(), ^{
     
     _logInStarted=YES;
    // always scedule task to conect in bg incase user hits home button
-        _backgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
-            
-            //notify user
-            if(!self.loggedIn)
-            {
-                DDLogInfo(@"XMPP connnect bgtask end");
-                
-                NSDictionary* userDic=@{@"from":@"Info",
-                                        @"actuallyfrom":@"Info",
-                                        @"messageText":@"Connection closed. Could not connect.",
-                                        @"to":_fulluser,
-                                        @"accountNo":_accountNo
-                                        };
-                
-                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:userDic];
-            }
-            
-            // this should never happen unless we fail for 10 min
-            DDLogError(@"XMPP connnect bgtask took too long. closing task");
-            [[UIApplication sharedApplication] endBackgroundTask:_backgroundTask];
-            _backgroundTask=UIBackgroundTaskInvalid;
-            
-        }];
-        
-        if (_backgroundTask != UIBackgroundTaskInvalid) {
+//        _backgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
+//            
+//            //notify user
+//            if(!self.loggedIn)
+//            {
+//                DDLogInfo(@"XMPP connnect bgtask end");
+//                
+//                NSDictionary* userDic=@{@"from":@"Info",
+//                                        @"actuallyfrom":@"Info",
+//                                        @"messageText":@"Connection closed. Could not connect.",
+//                                        @"to":_fulluser,
+//                                        @"accountNo":_accountNo
+//                                        };
+//                
+//                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:userDic];
+//            }
+//            
+//            // this should never happen unless we fail for 10 min
+//            DDLogError(@"XMPP connnect bgtask took too long. closing task");
+//            [[UIApplication sharedApplication] endBackgroundTask:_backgroundTask];
+//            _backgroundTask=UIBackgroundTaskInvalid;
+//            
+//        }];
+    
+//        if (_backgroundTask != UIBackgroundTaskInvalid)
+        {
             DDLogInfo(@"XMPP connnect bgtask start");
             [self connectionTask];
             
@@ -1522,7 +1523,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
 
 - (void)stream:(NSStream *)stream handleEvent:(NSStreamEvent)eventCode
 {
-	//DDLogVerbose(@"Stream has event");
+	DDLogVerbose(@"Stream has event");
 	switch(eventCode)
 	{
 			//for writing

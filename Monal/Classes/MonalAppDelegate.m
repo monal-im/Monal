@@ -263,6 +263,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
      }
     
       DDLogVerbose(@"Entering FG");
+    [[MLXMPPManager sharedInstance] clearKeepAlive];
 }
 
 -(void) applicationDidEnterBackground:(UIApplication *)application
@@ -273,6 +274,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     } else if (state == UIApplicationStateBackground) {
         DDLogVerbose(@"Entering BG");
     }
+    
+    [[MLXMPPManager sharedInstance] setKeepAlivetimer];
 }
 
 -(void)applicationWillTerminate:(UIApplication *)application

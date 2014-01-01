@@ -899,6 +899,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
                     dispatch_async(dispatch_get_main_queue(), ^{
                         NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"Do you wish to allow %@ to add you to their contacts?", nil), presenceNode.from ];
                         RIButtonItem* cancelButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"No", nil) action:^{
+                            [self rejectFromRoster:presenceNode.from];
                             
                         }];
                         
@@ -1499,6 +1500,13 @@ dispatch_async(dispatch_get_current_queue(), ^{
     [presence2 unsubscribedContact:contact];
     [self send:presence2];
     
+}
+
+-(void) rejectFromRoster:(NSString*) contact
+{
+    XMPPPresence* presence2 =[[XMPPPresence alloc] init];
+    [presence2 unsubscribedContact:contact];
+    [self send:presence2];
 }
 
 

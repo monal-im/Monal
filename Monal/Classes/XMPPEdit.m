@@ -92,7 +92,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	
 		if([[settings objectForKey:@"domain"] isEqualToString:@"gmail.com"])
 		{
-			JIDLabel.text=@"Gtalk ID";
+			JIDLabel.text=@"GTalk ID";
 		}
 		
 	}
@@ -101,7 +101,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		
 		if(_originIndex.row==1)
 		{
-			JIDLabel.text=@"Gtalk ID";
+			JIDLabel.text=@"GTalk ID";
 			serverText.text=@"talk.google.com";
 			userText.text=@"@gmail.com";
 		}

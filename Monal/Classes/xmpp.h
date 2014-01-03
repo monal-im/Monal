@@ -81,9 +81,6 @@ typedef struct
     BOOL _startTLSComplete;
     BOOL _streamHasSpace;
 
-    UIBackgroundTaskIdentifier _backgroundTask ;
-    
-    
     //does not reset at disconnect
     BOOL _loggedInOnce;
     BOOL _hasRequestedServerInfo;

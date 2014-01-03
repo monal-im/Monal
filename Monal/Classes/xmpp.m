@@ -253,100 +253,52 @@ dispatch_async(dispatch_get_current_queue(), ^{
     }
     
     _logInStarted=YES;
-   // always scedule task to conect in bg incase user hits home button
-//        _backgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
-//            
-//            //notify user
-//            if(!self.loggedIn)
-//            {
-//                DDLogInfo(@"XMPP connnect bgtask end");
-//                
-//                NSDictionary* userDic=@{@"from":@"Info",
-//                                        @"actuallyfrom":@"Info",
-//                                        @"messageText":@"Connection closed. Could not connect.",
-//                                        @"to":_fulluser,
-//                                        @"accountNo":_accountNo
-//                                        };
-//                
-//                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:userDic];
-//            }
-//            
-//            // this should never happen unless we fail for 10 min
-//            DDLogError(@"XMPP connnect bgtask took too long. closing task");
-//            [[UIApplication sharedApplication] endBackgroundTask:_backgroundTask];
-//            _backgroundTask=UIBackgroundTaskInvalid;
-//            
-//        }];
+    DDLogInfo(@"XMPP connnect  start");
+    [self connectionTask];
     
-//        if (_backgroundTask != UIBackgroundTaskInvalid)
-        {
-            DDLogInfo(@"XMPP connnect bgtask start");
-            [self connectionTask];
-            
-            dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-            dispatch_source_t loginCancelOperation = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,
-                                             q_background);
-            
-            dispatch_source_set_timer(loginCancelOperation,
-                                      dispatch_time(DISPATCH_TIME_NOW, kConnectTimeout* NSEC_PER_SEC),
-                                      kConnectTimeout* NSEC_PER_SEC,
-                                      1ull * NSEC_PER_SEC);
-            
-            dispatch_source_set_event_handler(loginCancelOperation, ^{
-                DDLogInfo(@"login cancel op");
-                
-                
-                UIBackgroundTaskIdentifier oldBGTask=_backgroundTask;
-               
-                dispatch_async(_xmppQueue, ^{
-                    //hide connecting message
-                    NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
-                                         kinfoTypeKey:@"connect", kinfoStatusKey:@""};
-                    [self.contactsVC hideConnecting:info];
-                    // try again
-                    if((!self.loggedIn) && (_loggedInOnce))
-                    {
-                        [self reconnect];
-                    }
-                    else
-                    {
-                        _backgroundTask=UIBackgroundTaskInvalid;
-                    }
-                });
-            
-                 
-                //end background task if it wasnt by disconnenct
-                if (oldBGTask != UIBackgroundTaskInvalid)
-                {
-                    DDLogInfo(@"ending old BG task");
-                    [[UIApplication sharedApplication] endBackgroundTask:oldBGTask];
-                    oldBGTask=UIBackgroundTaskInvalid;
-                }
-                
-                dispatch_source_cancel(loginCancelOperation);
- 
-            });
-            
-            dispatch_source_set_cancel_handler(loginCancelOperation, ^{
-                DDLogInfo(@"login timer cancelled");
-                dispatch_release(loginCancelOperation);
+    dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    dispatch_source_t loginCancelOperation = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,
+                                                                    q_background);
     
-            });
+    dispatch_source_set_timer(loginCancelOperation,
+                              dispatch_time(DISPATCH_TIME_NOW, kConnectTimeout* NSEC_PER_SEC),
+                              kConnectTimeout* NSEC_PER_SEC,
+                              1ull * NSEC_PER_SEC);
+    
+    dispatch_source_set_event_handler(loginCancelOperation, ^{
+        DDLogInfo(@"login cancel op");
+        
+        
+        dispatch_async(_xmppQueue, ^{
+            //hide connecting message
+            NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
+                                 kinfoTypeKey:@"connect", kinfoStatusKey:@""};
+            [self.contactsVC hideConnecting:info];
+            // try again
+            if((!self.loggedIn) && (_loggedInOnce))
+            {
+                [self reconnect];
+            }
             
-            dispatch_resume(loginCancelOperation);
-            
-        }
+        });
+        
+        dispatch_source_cancel(loginCancelOperation);
+        
+    });
+    
+    dispatch_source_set_cancel_handler(loginCancelOperation, ^{
+        DDLogInfo(@"login timer cancelled");
+        dispatch_release(loginCancelOperation);
+        
+    });
+    
+    dispatch_resume(loginCancelOperation);
+    
 }
 
 -(void) disconnect
 {
         
-    if (_backgroundTask != UIBackgroundTaskInvalid)
-    {
-    [[UIApplication sharedApplication] endBackgroundTask:_backgroundTask];
-    _backgroundTask=UIBackgroundTaskInvalid;
-    }
-    
     _loginError=NO;
  
     DDLogInfo(@"removing streams");

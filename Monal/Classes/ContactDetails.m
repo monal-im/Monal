@@ -168,6 +168,9 @@
     {
         return _resourceCell.frame.size.height;
     }
+    
+    //default
+    return 0;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section;

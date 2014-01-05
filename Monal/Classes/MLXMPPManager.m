@@ -82,7 +82,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         {
             xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
             if(xmppAccount.loggedIn) {
-                   DDLogVerbose(@"began my bg  ping");
+                   DDLogInfo(@"began a ping");
                 [xmppAccount sendPing];
             }
         }
@@ -117,7 +117,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     NSTimeInterval timeInterval= 600; // 600 seconds
     BOOL keepAlive=[[UIApplication sharedApplication] setKeepAliveTimeout:timeInterval handler:^{
-        DDLogVerbose(@"began background ping");
+        DDLogInfo(@"began bg keep alive ping");
         for(NSDictionary* row in _connectedXMPP)
         {
             xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];

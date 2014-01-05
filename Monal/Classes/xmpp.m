@@ -32,7 +32,14 @@
 
 #define kConnectTimeout 20ull //seconds
 
-static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+static const int ddLogLevel = LOG_LEVEL_INFO;
+
+@interface xmpp()
+{
+
+}
+@end
+
 
 @implementation xmpp
 
@@ -49,7 +56,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     _resource=@"Monal";
     
     NSString* monalNetReadQueue =[NSString  stringWithFormat:@"im.monal.netReadQueue.%@", _accountNo];
-     NSString* monalNetWriteQueue =[NSString  stringWithFormat:@"im.monal.netWriteQueue.%@", _accountNo];
+    NSString* monalNetWriteQueue =[NSString  stringWithFormat:@"im.monal.netWriteQueue.%@", _accountNo];
     
     _netReadQueue = dispatch_queue_create([monalNetReadQueue UTF8String], DISPATCH_QUEUE_SERIAL);
     _netWriteQueue = dispatch_queue_create([monalNetWriteQueue UTF8String], DISPATCH_QUEUE_SERIAL);
@@ -76,19 +83,19 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void)dealloc
 {
-  
+    
 }
 
 -(void) setRunLoop
 {
     
-dispatch_async(dispatch_get_current_queue(), ^{
-	[_oStream setDelegate:self];
-    [_oStream scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
-	
-	[_iStream setDelegate:self];
-    [_iStream scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
-    
+    dispatch_async(dispatch_get_current_queue(), ^{
+        [_oStream setDelegate:self];
+        [_oStream scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
+        
+        [_iStream setDelegate:self];
+        [_iStream scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
+        
         [[NSRunLoop currentRunLoop]run];
     });
 }
@@ -172,29 +179,29 @@ dispatch_async(dispatch_get_current_queue(), ^{
     [self startStream];
     [self setRunLoop];
     
-
     
-    	dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-        dispatch_source_t streamTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,q_background
-                                         );
     
-        dispatch_source_set_timer(streamTimer,
-                                  dispatch_time(DISPATCH_TIME_NOW, 5ull * NSEC_PER_SEC),
-                                  1ull * NSEC_PER_SEC
-                                  , 1ull * NSEC_PER_SEC);
-
-        dispatch_source_set_event_handler(streamTimer, ^{
-           DDLogError(@"stream connection timed out");
-            dispatch_source_cancel(streamTimer);
-            [self disconnect];
-        });
-
-        dispatch_source_set_cancel_handler(streamTimer, ^{
-            DDLogError(@"stream timer cancelled");
-            dispatch_release(streamTimer);
-        });
+    dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    dispatch_source_t streamTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,q_background
+                                                           );
     
-       dispatch_resume(streamTimer);
+    dispatch_source_set_timer(streamTimer,
+                              dispatch_time(DISPATCH_TIME_NOW, 5ull * NSEC_PER_SEC),
+                              1ull * NSEC_PER_SEC
+                              , 1ull * NSEC_PER_SEC);
+    
+    dispatch_source_set_event_handler(streamTimer, ^{
+        DDLogError(@"stream connection timed out");
+        dispatch_source_cancel(streamTimer);
+        [self disconnect];
+    });
+    
+    dispatch_source_set_cancel_handler(streamTimer, ^{
+        DDLogError(@"stream timer cancelled");
+        dispatch_release(streamTimer);
+    });
+    
+    dispatch_resume(streamTimer);
     
     
     [_iStream open];
@@ -223,7 +230,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
         
         if([_discoveredServerList count]==0)
             [self dnsDiscover];
-  
+        
     }
     
     if([_discoveredServerList count]>0)
@@ -241,7 +248,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
     
     [self createStreams];
     
-
+    
 }
 
 -(void) connect
@@ -277,6 +284,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
             // try again
             if((!self.loggedIn) && (_loggedInOnce))
             {
+                   DDLogInfo(@"trying to login again");
                 [self reconnect];
             }
             
@@ -298,9 +306,9 @@ dispatch_async(dispatch_get_current_queue(), ^{
 
 -(void) disconnect
 {
-        
+    
     _loginError=NO;
- 
+    
     DDLogInfo(@"removing streams");
     
 	//prevent any new read or write
@@ -314,23 +322,23 @@ dispatch_async(dispatch_get_current_queue(), ^{
                         forMode:NSDefaultRunLoopMode];
 	DDLogInfo(@"removed streams");
 	
-     dispatch_sync(_netReadQueue, ^{
-	@try
-	{
-        [_iStream close];
-         _inputBuffer=[[NSMutableString alloc] init];
-	}
-	@catch(id theException)
-	{
-		DDLogError(@"Exception in istream close");
-	}
-     });
+    dispatch_sync(_netReadQueue, ^{
+        @try
+        {
+            [_iStream close];
+            _inputBuffer=[[NSMutableString alloc] init];
+        }
+        @catch(id theException)
+        {
+            DDLogError(@"Exception in istream close");
+        }
+    });
     
     dispatch_sync(_netWriteQueue, ^{
        	@try
         {
             [_oStream close];
-               _outputQueue=[[NSMutableArray alloc] init];
+            _outputQueue=[[NSMutableArray alloc] init];
         }
         @catch(id theException)
         {
@@ -338,7 +346,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
         }
         
     });
-
+    
     
 	[_contactsVC clearContactsForAccount:_accountNo];
     [[DataLayer sharedInstance] resetContactsForAccount:_accountNo];
@@ -347,11 +355,11 @@ dispatch_async(dispatch_get_current_queue(), ^{
 	
 	DDLogInfo(@"All closed and cleaned up");
     
-  
+    
     _startTLSComplete=NO;
     _streamHasSpace=NO;
-   
- 
+    
+    
     _loggedIn=NO;
     _disconnected=YES;
     _logInStarted=NO;
@@ -367,26 +375,27 @@ dispatch_async(dispatch_get_current_queue(), ^{
     
     if(!_loggedInOnce)
     {
-       info2=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
-                              kinfoTypeKey:@"connect", kinfoStatusKey:@"Could not login."};
+        info2=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
+                kinfoTypeKey:@"connect", kinfoStatusKey:@"Could not login."};
     }
     
-     [self.contactsVC showConnecting:info2];
-        dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 3ull * NSEC_PER_SEC), q_background,  ^{
-            [self.contactsVC hideConnecting:info2];
-        });
+    [self.contactsVC showConnecting:info2];
+    dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 3ull * NSEC_PER_SEC), q_background,  ^{
+        [self.contactsVC hideConnecting:info2];
+    });
     
     
     [[DataLayer sharedInstance]  resetContactsForAccount:_accountNo];
     
-  
+    
 }
 
 
 -(void) reconnect
 {
-   __block UIBackgroundTaskIdentifier reconnectBackgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
+    DDLogVerbose(@"reconnecting ");
+    __block UIBackgroundTaskIdentifier reconnectBackgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
         
         DDLogVerbose(@"Reconnect bgtask took too long. closing");
         [[UIApplication sharedApplication] endBackgroundTask:reconnectBackgroundTask];
@@ -396,8 +405,12 @@ dispatch_async(dispatch_get_current_queue(), ^{
     
     if (reconnectBackgroundTask != UIBackgroundTaskInvalid) {
         [self disconnect];
-        [self connect];
-        [[UIApplication sharedApplication] endBackgroundTask:reconnectBackgroundTask];
+        DDLogInfo(@"Trying to connect again in 5 seconds. ");
+        dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 5ull * NSEC_PER_SEC), q_background,  ^{
+            [self connect];
+            [[UIApplication sharedApplication] endBackgroundTask:reconnectBackgroundTask];
+        });
     }
     
 }
@@ -429,6 +442,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
 {
     if(!_loggedIn && !_logInStarted)
     {
+        DDLogInfo(@" ping calling reconnect");
         [self reconnect];
         return;
     }
@@ -443,8 +457,9 @@ dispatch_async(dispatch_get_current_queue(), ^{
 {
     if(!_loggedIn && !_logInStarted)
     {
-       [self reconnect];
-        return; 
+        DDLogInfo(@" whitespace ping calling reconnect");
+        [self reconnect];
+        return;
     }
     
     XMLNode* ping =[[XMLNode alloc] initWithElement:@"whitePing"]; // no such element. Node has logic to  print white space
@@ -522,7 +537,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
                         //since there is another block of the same stanza, short cuts dont work.check to find beginning of next element
                         if((dupePos.location<maxPos) && (dupePos.location!=NSNotFound))
                         {
-                        //reduce search to within the set of this and at max the next element of the same kind
+                            //reduce search to within the set of this and at max the next element of the same kind
                             maxPos=dupePos.location;
                             
                         }
@@ -554,7 +569,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
                                 
                                 finalstart=pos.location;
                                 finalend=endPos.location+2; //+2 to inclde closing />
-                                 DDLogVerbose(@"at  4");
+                                DDLogVerbose(@"at  4");
                                 break;
                             }
                             else
@@ -564,7 +579,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
                                     //stream will have no terminal.
                                     finalstart=pos.location;
                                     finalend=maxPos;
-                                     DDLogVerbose(@"at  5");
+                                    DDLogVerbose(@"at  5");
                                 }
                             
                         }
@@ -578,7 +593,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
         //if this happens its  probably a stream error.sanity check is  preventing crash
         if((finalend-finalstart<=maxPos) && finalend!=NSNotFound && finalstart!=NSNotFound)
         {
-        toReturn=  [_inputBuffer substringWithRange:NSMakeRange(finalstart,finalend-finalstart)];
+            toReturn=  [_inputBuffer substringWithRange:NSMakeRange(finalstart,finalend-finalstart)];
         }
         if([toReturn length]==0) toReturn=nil;
         
@@ -594,7 +609,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
             {
                 DDLogVerbose(@"to del start %d end %d: %@", finalstart, finalend, _inputBuffer);
                 [_inputBuffer deleteCharactersInRange:NSMakeRange(finalstart, finalend-finalstart) ];
-               
+                
                 
                 DDLogVerbose(@"result: %@", _inputBuffer);
             }
@@ -651,9 +666,9 @@ dispatch_async(dispatch_get_current_queue(), ^{
                 //no need to pull roster on every call if disconenct
                 if(!_rosterList)
                 {
-                XMPPIQ* roster =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
-                [roster setRosterRequest];
-                [self send:roster];
+                    XMPPIQ* roster =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
+                    [roster setRosterRequest];
+                    [self send:roster];
                 }
                 
                 self.priority= [[[NSUserDefaults standardUserDefaults] stringForKey:@"XMPPPriority"] integerValue];
@@ -668,7 +683,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
                 if(!self.visibleState) [presence setInvisible];
                 
                 [self send:presence];
-        
+                
             }
             
             if((iqNode.discoInfo)  && [iqNode.from isEqualToString:self.server])
@@ -678,21 +693,21 @@ dispatch_async(dispatch_get_current_queue(), ^{
                 [discoInfo setiqTo:iqNode.from];
                 [discoInfo setDiscoInfoWithFeatures];
                 
-                 [self send:discoInfo];
-
+                [self send:discoInfo];
+                
             }
             
             if(iqNode.vCard)
             {
-                NSString* fullname=iqNode.fullName; 
+                NSString* fullname=iqNode.fullName;
                 if(iqNode.fullName)
                 {
                     [[DataLayer sharedInstance] setFullName:iqNode.fullName forBuddy:iqNode.user andAccount:_accountNo];
                 }
                 
-                 if(iqNode.photoBinValue)
+                if(iqNode.photoBinValue)
                 {
-                     [[MLImageManager sharedInstance] setIconForContact:iqNode.user andAccount:_accountNo WithData:iqNode.photoBinValue ];
+                    [[MLImageManager sharedInstance] setIconForContact:iqNode.user andAccount:_accountNo WithData:iqNode.photoBinValue ];
                 }
                 
                 if(!fullname) fullname=iqNode.user;
@@ -708,12 +723,12 @@ dispatch_async(dispatch_get_current_queue(), ^{
                 
             }
             
-             if(iqNode.ping)
-             {
-                 XMPPIQ* pong =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqResultType];
-                 [pong setiqTo:_domain];
-                 [self send:pong];
-             }
+            if(iqNode.ping)
+            {
+                XMPPIQ* pong =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqResultType];
+                [pong setiqTo:_domain];
+                [self send:pong];
+            }
             
             if(iqNode.ping)
             {
@@ -761,9 +776,9 @@ dispatch_async(dispatch_get_current_queue(), ^{
                     
                 }
             }
-           
             
-//*** MUC related
+            
+            //*** MUC related
             if(iqNode.conferenceServer)
             {
                 _conferenceServer=iqNode.conferenceServer;
@@ -775,19 +790,19 @@ dispatch_async(dispatch_get_current_queue(), ^{
                 [[NSNotificationCenter defaultCenter]
                  postNotificationName: kMLHasRoomsNotice object: self];
             }
-
+            
             
         }
         else  if([[nextStanzaPos objectForKey:@"stanzaType"]  isEqualToString:@"message"])
         {
-             ParseMessage* messageNode= [[ParseMessage alloc]  initWithDictionary:nextStanzaPos];
+            ParseMessage* messageNode= [[ParseMessage alloc]  initWithDictionary:nextStanzaPos];
             if([messageNode.type isEqualToString:kMessageErrorType])
             {
                 //TODO: mark message as error
-                    return;
+                return;
             }
-           
-               
+            
+            
             if(messageNode.mucInvite)
             {
                 dispatch_async(dispatch_get_main_queue(), ^{
@@ -797,7 +812,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
                     }];
                     
                     RIButtonItem* yesButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Join", nil) action:^{
-
+                        
                         [self joinRoom:messageNode.from withPassword:nil];
                     }];
                     
@@ -816,27 +831,27 @@ dispatch_async(dispatch_get_current_queue(), ^{
                 }
                 else
                 {
-                [[DataLayer sharedInstance] addMessageFrom:messageNode.from to:_fulluser
-                                                forAccount:_accountNo withBody:messageNode.messageText
-                                              actuallyfrom:messageNode.actualFrom];
-                
-                [[DataLayer sharedInstance] addActiveBuddies:messageNode.from forAccount:_accountNo];
-                
-                NSDictionary* userDic=@{@"from":messageNode.from,
-                                         @"actuallyfrom":messageNode.actualFrom,
+                    [[DataLayer sharedInstance] addMessageFrom:messageNode.from to:_fulluser
+                                                    forAccount:_accountNo withBody:messageNode.messageText
+                                                  actuallyfrom:messageNode.actualFrom];
+                    
+                    [[DataLayer sharedInstance] addActiveBuddies:messageNode.from forAccount:_accountNo];
+                    
+                    NSDictionary* userDic=@{@"from":messageNode.from,
+                                            @"actuallyfrom":messageNode.actualFrom,
                                             @"messageText":messageNode.messageText,
                                             @"to":_fulluser,
                                             @"accountNo":_accountNo
                                             };
-                
-                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:userDic];
+                    
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:userDic];
                 }
             }
             
             if(messageNode.avatarData)
             {
                 [[MLImageManager sharedInstance] setIconForContact:messageNode.actualFrom andAccount:_accountNo WithData:messageNode.avatarData];
-
+                
             }
             
         }
@@ -845,29 +860,29 @@ dispatch_async(dispatch_get_current_queue(), ^{
             ParsePresence* presenceNode= [[ParsePresence alloc]  initWithDictionary:nextStanzaPos];
             if([presenceNode.user isEqualToString:_fulluser])
                 return; //ignore self
-        
-                if([presenceNode.type isEqualToString:kpresencesSubscribe])
-                {
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"Do you wish to allow %@ to add you to their contacts?", nil), presenceNode.from ];
-                        RIButtonItem* cancelButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"No", nil) action:^{
-                            [self rejectFromRoster:presenceNode.from];
-                            
-                        }];
+            
+            if([presenceNode.type isEqualToString:kpresencesSubscribe])
+            {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"Do you wish to allow %@ to add you to their contacts?", nil), presenceNode.from ];
+                    RIButtonItem* cancelButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"No", nil) action:^{
+                        [self rejectFromRoster:presenceNode.from];
                         
-                        RIButtonItem* yesButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Yes", nil) action:^{
-                            [self approveToRoster:presenceNode.from];
-                            [self addToRoster:presenceNode.from];
-                        
-                        }];
-                        
-                        UIAlertView* alert =[[UIAlertView alloc] initWithTitle:@"Approve Contact" message:messageString cancelButtonItem:cancelButton otherButtonItems:yesButton, nil];
-                        [alert show]; 
-                    });
-                                   
-                  
+                    }];
                     
-                }
+                    RIButtonItem* yesButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Yes", nil) action:^{
+                        [self approveToRoster:presenceNode.from];
+                        [self addToRoster:presenceNode.from];
+                        
+                    }];
+                    
+                    UIAlertView* alert =[[UIAlertView alloc] initWithTitle:@"Approve Contact" message:messageString cancelButtonItem:cancelButton otherButtonItems:yesButton, nil];
+                    [alert show];
+                });
+                
+                
+                
+            }
             
             if(presenceNode.type ==nil)
             {
@@ -902,8 +917,8 @@ dispatch_async(dispatch_get_current_queue(), ^{
                                             kstatusKey:status
                                             };
                     dispatch_async(_xmppQueue, ^{
-                    [self.contactsVC addOnlineUser:userDic];
-                     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactOnlineNotice object:self userInfo:userDic];
+                        [self.contactsVC addOnlineUser:userDic];
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactOnlineNotice object:self userInfo:userDic];
                     });
                     
                     // do not do this in the background
@@ -938,20 +953,21 @@ dispatch_async(dispatch_get_current_queue(), ^{
             }
             else if([presenceNode.type isEqualToString:kpresenceUnavailable])
             {
-                [[DataLayer sharedInstance] setOfflineBuddy:presenceNode forAccount:_accountNo];
+                if ([[DataLayer sharedInstance] setOfflineBuddy:presenceNode forAccount:_accountNo] ) {
                 NSDictionary* userDic=@{kusernameKey: presenceNode.user,
                                         kaccountNoKey:_accountNo};
                 dispatch_async(_xmppQueue, ^{
-                [self.contactsVC removeOnlineUser:userDic];
-                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactOfflineNotice object:self userInfo:userDic];
+                    [self.contactsVC removeOnlineUser:userDic];
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactOfflineNotice object:self userInfo:userDic];
                 });
+                }
                 
             }
             
         }
         else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"stream:stream"])
         {
-          //  ParseStream* streamNode= [[ParseStream alloc]  initWithDictionary:nextStanzaPos];
+            //  ParseStream* streamNode= [[ParseStream alloc]  initWithDictionary:nextStanzaPos];
         }
         else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"stream"])
         {
@@ -1073,10 +1089,10 @@ dispatch_async(dispatch_get_current_queue(), ^{
                     else
                     {
                         DDLogError(@"not sure.. Could not confirm Set TLS properties on streams.");
-                       
-//                        NSDictionary* info2=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
-//                                              kinfoTypeKey:@"connect", kinfoStatusKey:@"Could not secure connection"};
-//                        [self.contactsVC updateConnecting:info2];
+                        
+                        //                        NSDictionary* info2=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
+                        //                                              kinfoTypeKey:@"connect", kinfoStatusKey:@"Could not secure connection"};
+                        //                        [self.contactsVC updateConnecting:info2];
                         
                     }
                     
@@ -1112,105 +1128,105 @@ dispatch_async(dispatch_get_current_queue(), ^{
                 {
                     //this is a success message  form challenge
                     
-                     NSArray* rspparts= [[parts objectAtIndex:0] componentsSeparatedByString:@"="];
+                    NSArray* rspparts= [[parts objectAtIndex:0] componentsSeparatedByString:@"="];
                     if([[rspparts objectAtIndex:0] isEqualToString:@"rspauth"])
                     {
                         DDLogVerbose(@"digest-md5 success");
-                       
+                        
                     }
-                 
+                    
                 }
-            else{
-                
-                NSArray* realmparts= [[parts objectAtIndex:0] componentsSeparatedByString:@"="];
-                NSArray* nonceparts= [[parts objectAtIndex:1] componentsSeparatedByString:@"="];
-                
-                NSString* realm=[[realmparts objectAtIndex:1] substringWithRange:NSMakeRange(1, [[realmparts objectAtIndex:1] length]-2)] ;
-                NSString* nonce=[nonceparts objectAtIndex:1] ;
-                nonce=[nonce substringWithRange:NSMakeRange(1, [nonce length]-2)];
-                
-                //if there is no realm
-                if(![[realmparts objectAtIndex:0]  isEqualToString:@"realm"])
-                {
-                    realm=@"";
-                    nonce=[realmparts objectAtIndex:1];
+                else{
+                    
+                    NSArray* realmparts= [[parts objectAtIndex:0] componentsSeparatedByString:@"="];
+                    NSArray* nonceparts= [[parts objectAtIndex:1] componentsSeparatedByString:@"="];
+                    
+                    NSString* realm=[[realmparts objectAtIndex:1] substringWithRange:NSMakeRange(1, [[realmparts objectAtIndex:1] length]-2)] ;
+                    NSString* nonce=[nonceparts objectAtIndex:1] ;
+                    nonce=[nonce substringWithRange:NSMakeRange(1, [nonce length]-2)];
+                    
+                    //if there is no realm
+                    if(![[realmparts objectAtIndex:0]  isEqualToString:@"realm"])
+                    {
+                        realm=@"";
+                        nonce=[realmparts objectAtIndex:1];
+                    }
+                    
+                    NSData* cnonce_Data=[EncodingTools MD5: [NSString stringWithFormat:@"%d",arc4random()%100000]];
+                    NSString* cnonce =[EncodingTools hexadecimalString:cnonce_Data];
+                    
+                    
+                    //                if([password length]==0)
+                    //                {
+                    //                    if(theTempPass!=NULL)
+                    //                        password=theTempPass;
+                    //
+                    //                }
+                    
+                    //  nonce=@"580F35C1AE408E7DA57DE4DEDC5B9CA7";
+                    //    cnonce=@"B9E01AE3-29E5-4FE5-9AA0-72F99742428A";
+                    
+                    
+                    // ****** digest stuff going on here...
+                    NSString* X= [NSString stringWithFormat:@"%@:%@:%@", self.username, realm, self.password ];
+                    DDLogVerbose(@"X: %@", X);
+                    
+                    NSData* Y = [EncodingTools MD5:X];
+                    
+                    // above is correct
+                    
+                    /*
+                     NSString* A1= [NSString stringWithFormat:@"%@:%@:%@:%@@%@/%@",
+                     Y,[nonce substringWithRange:NSMakeRange(1, [nonce length]-2)],cononce,account,domain,resource];
+                     */
+                    
+                    //  if you have the authzid  here you need it below too but it wont work on som servers
+                    // so best not include it
+                    
+                    NSString* A1Str=[NSString stringWithFormat:@":%@:%@",
+                                     nonce,cnonce];
+                    NSData* A1= [A1Str
+                                 dataUsingEncoding:NSUTF8StringEncoding];
+                    
+                    NSMutableData *HA1data = [NSMutableData dataWithCapacity:([Y length] + [A1 length])];
+                    [HA1data appendData:Y];
+                    [HA1data appendData:A1];
+                    DDLogVerbose(@" HA1data : %@",HA1data  );
+                    
+                    
+                    //this hash is wrong..
+                    NSData* HA1=[EncodingTools DataMD5:HA1data];
+                    
+                    //below is correct
+                    
+                    NSString* A2=[NSString stringWithFormat:@"AUTHENTICATE:xmpp/%@", realm];
+                    DDLogVerbose(@"%@", A2);
+                    NSData* HA2=[EncodingTools MD5:A2];
+                    
+                    NSString* KD=[NSString stringWithFormat:@"%@:%@:00000001:%@:auth:%@",
+                                  [EncodingTools hexadecimalString:HA1], nonce,
+                                  cnonce,
+                                  [EncodingTools hexadecimalString:HA2]];
+                    
+                    // DDLogVerbose(@" ha1: %@", [self hexadecimalString:HA1] );
+                    //DDLogVerbose(@" ha2: %@", [self hexadecimalString:HA2] );
+                    
+                    DDLogVerbose(@" KD: %@", KD );
+                    NSData* responseData=[EncodingTools MD5:KD];
+                    // above this is ok
+                    NSString* response=[NSString stringWithFormat:@"username=\"%@\",realm=\"%@\",nonce=\"%@\",cnonce=\"%@\",nc=00000001,qop=auth,digest-uri=\"xmpp/%@\",response=%@,charset=utf-8",
+                                        self.username,realm, nonce, cnonce, realm, [EncodingTools hexadecimalString:responseData]];
+                    //,authzid=\"%@@%@/%@\"  ,account,domain, resource
+                    
+                    DDLogVerbose(@"  response :  %@", response);
+                    NSString* encoded=[EncodingTools encodeBase64WithString:response];
+                    
+                    //                NSString* xmppcmd = [NSString stringWithFormat:@"<response xmlns='urn:ietf:params:xml:ns:xmpp-sasl'>%@</response>", encoded]
+                    //                [self talk:xmppcmd];
+                    
+                    responseXML.data=encoded;
                 }
-               
-                NSData* cnonce_Data=[EncodingTools MD5: [NSString stringWithFormat:@"%d",arc4random()%100000]];
-                NSString* cnonce =[EncodingTools hexadecimalString:cnonce_Data];
                 
-            
-//                if([password length]==0)
-//                {
-//                    if(theTempPass!=NULL)
-//                        password=theTempPass;
-//                    
-//                }
-                
-                //  nonce=@"580F35C1AE408E7DA57DE4DEDC5B9CA7";
-                //    cnonce=@"B9E01AE3-29E5-4FE5-9AA0-72F99742428A";
-                
-                
-                // ****** digest stuff going on here...
-                NSString* X= [NSString stringWithFormat:@"%@:%@:%@", self.username, realm, self.password ];
-                DDLogVerbose(@"X: %@", X);
-                
-                NSData* Y = [EncodingTools MD5:X];
-                
-                // above is correct
-                
-                /*
-                 NSString* A1= [NSString stringWithFormat:@"%@:%@:%@:%@@%@/%@",
-                 Y,[nonce substringWithRange:NSMakeRange(1, [nonce length]-2)],cononce,account,domain,resource];
-                 */
-                
-                //  if you have the authzid  here you need it below too but it wont work on som servers
-                // so best not include it
-                
-                NSString* A1Str=[NSString stringWithFormat:@":%@:%@",
-                                 nonce,cnonce];
-                NSData* A1= [A1Str
-                             dataUsingEncoding:NSUTF8StringEncoding];
-                
-                NSMutableData *HA1data = [NSMutableData dataWithCapacity:([Y length] + [A1 length])];
-                [HA1data appendData:Y];
-                [HA1data appendData:A1];
-                DDLogVerbose(@" HA1data : %@",HA1data  );
-                
-                
-                //this hash is wrong..
-                NSData* HA1=[EncodingTools DataMD5:HA1data];
-              
-                //below is correct
-                
-                NSString* A2=[NSString stringWithFormat:@"AUTHENTICATE:xmpp/%@", realm];
-                DDLogVerbose(@"%@", A2);
-                NSData* HA2=[EncodingTools MD5:A2];
-                
-                NSString* KD=[NSString stringWithFormat:@"%@:%@:00000001:%@:auth:%@",
-                              [EncodingTools hexadecimalString:HA1], nonce,
-                              cnonce,
-                              [EncodingTools hexadecimalString:HA2]];
-                
-                // DDLogVerbose(@" ha1: %@", [self hexadecimalString:HA1] );
-                //DDLogVerbose(@" ha2: %@", [self hexadecimalString:HA2] );
-                
-                DDLogVerbose(@" KD: %@", KD );
-                NSData* responseData=[EncodingTools MD5:KD];
-                // above this is ok
-                NSString* response=[NSString stringWithFormat:@"username=\"%@\",realm=\"%@\",nonce=\"%@\",cnonce=\"%@\",nc=00000001,qop=auth,digest-uri=\"xmpp/%@\",response=%@,charset=utf-8",
-                                    self.username,realm, nonce, cnonce, realm, [EncodingTools hexadecimalString:responseData]];
-                //,authzid=\"%@@%@/%@\"  ,account,domain, resource
-                
-                DDLogVerbose(@"  response :  %@", response);
-                NSString* encoded=[EncodingTools encodeBase64WithString:response];
-            
-//                NSString* xmppcmd = [NSString stringWithFormat:@"<response xmlns='urn:ietf:params:xml:ns:xmpp-sasl'>%@</response>", encoded]
-//                [self talk:xmppcmd];
-            
-                responseXML.data=encoded;
-            }
-            
                 [self send:responseXML];
                 return;
                 
@@ -1239,17 +1255,17 @@ dispatch_async(dispatch_get_current_queue(), ^{
                     _loggedIn=YES;
                     _loggedInOnce=YES;
                     
-                  
+                    
                     NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
                                          kinfoTypeKey:@"connect", kinfoStatusKey:@""};
                     dispatch_async(_xmppQueue, ^{
-                    [self.contactsVC hideConnecting:info];
+                        [self.contactsVC hideConnecting:info];
                     });
                     
                 }
             }
         }
-       
+        
         nextStanzaPos=[self nextStanza];
     }
 }
@@ -1274,7 +1290,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
     XMPPMessage* messageNode =[[XMPPMessage alloc] init];
     [messageNode.attributes setObject:contact forKey:@"to"];
     [messageNode setBody:message];
-
+    
     if(isMUC)
     {
         [messageNode.attributes setObject:kMessageGroupChatType forKey:@"type"];
@@ -1288,9 +1304,9 @@ dispatch_async(dispatch_get_current_queue(), ^{
 -(void) setStatusMessageText:(NSString*) message
 {
     if([message length]>0)
-    self.statusMessage=message;
+        self.statusMessage=message;
     else
-    message=nil;
+        message=nil;
     
     XMPPPresence* node =[[XMPPPresence alloc] init];
     if(message)[node setStatus:message];
@@ -1302,7 +1318,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
 
 -(void) setAway:(BOOL) away
 {
-    self.awayState=away; 
+    self.awayState=away;
     XMPPPresence* node =[[XMPPPresence alloc] init];
     if(away)
         [node setAway];
@@ -1316,13 +1332,13 @@ dispatch_async(dispatch_get_current_queue(), ^{
 -(void) setVisible:(BOOL) visible
 {
     self.visibleState=visible;
-     XMPPPresence* node =[[XMPPPresence alloc] init];
+    XMPPPresence* node =[[XMPPPresence alloc] init];
     if(!visible)
         [node setInvisible];
     else
     {
-    if(self.statusMessage) [node setStatus:self.statusMessage];
-    if(self.awayState) [node setAway];
+        if(self.statusMessage) [node setStatus:self.statusMessage];
+        if(self.awayState) [node setAway];
     }
     
     [self send:node];
@@ -1335,7 +1351,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
     XMPPPresence* node =[[XMPPPresence alloc] init];
     [node setPriority:priority];
     [self send:node];
-
+    
 }
 
 
@@ -1366,7 +1382,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
 {
     if(_hasRequestedServerInfo)
         return;  // no need to call again on disconnect
-
+    
     if(!_discoveredServices)
     {
         DDLogInfo(@"no discovered services");
@@ -1375,22 +1391,22 @@ dispatch_async(dispatch_get_current_queue(), ^{
     
     for (NSDictionary *item in _discoveredServices)
     {
-    XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
-    NSString* jid =[item objectForKey:@"jid"];
-    if(jid)
-    {
-        [discoInfo setiqTo:jid];
-        [discoInfo setDiscoInfoNode];
-        [self send:discoInfo];
-        
-       _hasRequestedServerInfo=YES;
-    } else
-    {
-        DDLogError(@"no jid on info");
-    }
+        XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
+        NSString* jid =[item objectForKey:@"jid"];
+        if(jid)
+        {
+            [discoInfo setiqTo:jid];
+            [discoInfo setDiscoInfoNode];
+            [self send:discoInfo];
+            
+            _hasRequestedServerInfo=YES;
+        } else
+        {
+            DDLogError(@"no jid on info");
+        }
     }
     
-   
+    
 }
 
 #pragma mark  MUC
@@ -1399,7 +1415,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
 {
     if(_conferenceServer)
     {
-    XMPPIQ* discoItem =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
+        XMPPIQ* discoItem =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
         [discoItem setiqTo:_conferenceServer];
         [discoItem setDiscoItemNode];
         [self send:discoItem];
@@ -1423,9 +1439,9 @@ dispatch_async(dispatch_get_current_queue(), ^{
     }
     else{
         [presence joinRoom:room withPassword:password onServer:_conferenceServer withName:_username]; //allow nick name in the future
-       
+        
     }
-     [self send:presence];
+    [self send:presence];
 }
 
 -(void) leaveRoom:(NSString*) room
@@ -1468,7 +1484,7 @@ dispatch_async(dispatch_get_current_queue(), ^{
     [presence subscribeContact:contact];
     [self send:presence];
     
-  
+    
 }
 
 -(void) approveToRoster:(NSString*) contact
@@ -1517,45 +1533,46 @@ dispatch_async(dispatch_get_current_queue(), ^{
 			NSError* st_error= [stream streamError];
             DDLogError(@"Stream error code=%d domain=%@   local desc:%@ ",st_error.code,st_error.domain,  st_error.localizedDescription);
             
-           
+            
             if(st_error.code==2)// operation couldnt be completed
             {
                 
             }
             
             
-             if(st_error.code==2)// socket not connected
-             {
-                 
-             }
+            if(st_error.code==2)// socket not connected
+            {
+                
+            }
             
             if(st_error.code==61)// Connection refused
             {
-               
+                
             }
             
             
             if(st_error.code==64)// Host is down
             {
-               
+                
             }
             
             if(st_error.code==-9807)// Could not complete operation. SSL probably
             {
-                 [self disconnect];
+                [self disconnect];
                 return;
             }
             
             if(_loggedInOnce)
             {
+                DDLogInfo(@" stream error calling reconnect");
                 [self reconnect];
             }
             
             else
             {
                 // maybe account never worked and should be disabled and reachability should be removed
-//                [[DataLayer sharedInstance] disableEnabledAccount:_accountNo];
-//                [[MLXMPPManager sharedInstance] disconnectAccount:_accountNo];
+                //                [[DataLayer sharedInstance] disableEnabledAccount:_accountNo];
+                //                [[MLXMPPManager sharedInstance] disconnectAccount:_accountNo];
                 
             }
             break;
@@ -1572,7 +1589,6 @@ dispatch_async(dispatch_get_current_queue(), ^{
 		case NSStreamEventOpenCompleted:
 		{
 			DDLogInfo(@"Stream open completed");
-			
             break;
 		}
 			
@@ -1719,8 +1735,8 @@ dispatch_async(dispatch_get_current_queue(), ^{
     }
 }
 
-   
-    
+
+
 
 
 
@@ -1794,7 +1810,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
         {
             srv = (srv_rdata *)rdata;
             ConvertDomainNameToCString_withescape(&srv->target, targetstr, 0);
-          //  DDLogVerbose(@"pri=%d, w=%d, port=%d, target=%s\n", ntohs(srv->priority), ntohs(srv->weight), ntohs(srv->port), targetstr);
+            //  DDLogVerbose(@"pri=%d, w=%d, port=%d, target=%s\n", ntohs(srv->priority), ntohs(srv->weight), ntohs(srv->port), targetstr);
 			
 			xmpp* client=(__bridge xmpp*) context;
 			int portval=ntohs(srv->port);
@@ -1803,7 +1819,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 			NSNumber* theport=[NSNumber numberWithInt:portval];
 			NSDictionary* row=[NSDictionary dictionaryWithObjectsAndKeys:num,@"priority", theserver, @"server", theport, @"port",nil];
 			[client.discoveredServerList addObject:row];
-		//	DDLogVerbose(@"DISCOVERY: server  %@", theserver);
+            //	DDLogVerbose(@"DISCOVERY: server  %@", theserver);
 			
             return;
         }
@@ -1811,20 +1827,20 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
         {
             assert(len == 4);
             memcpy(&in, rdata, sizeof(in));
-         //   DDLogVerbose(@"%s\n", inet_ntoa(in));
+            //   DDLogVerbose(@"%s\n", inet_ntoa(in));
             
             return;
         }
         case T_PTR:
         {
             ConvertDomainNameToCString_withescape((domainname *)rdata, targetstr, 0);
-          //  DDLogVerbose(@"%s\n", targetstr);
+            //  DDLogVerbose(@"%s\n", targetstr);
             
             return;
         }
         default:
         {
-         //   DDLogVerbose(@"ERROR: I dont know how to print RData of type %d\n", type);
+            //   DDLogVerbose(@"ERROR: I dont know how to print RData of type %d\n", type);
             
             return;
         }
@@ -1842,10 +1858,10 @@ void query_cb(const DNSServiceRef DNSServiceRef, const DNSServiceFlags flags, co
     
     if (errorCode)
 	{
-       // DDLogVerbose(@"query callback: error==%d\n", errorCode);
+        // DDLogVerbose(@"query callback: error==%d\n", errorCode);
         return;
 	}
-   // DDLogVerbose(@"query callback - name = %s, rdata=\n", name);
+    // DDLogVerbose(@"query callback - name = %s, rdata=\n", name);
     print_rdata(rrtype, rdlen, rdata, context);
 }
 

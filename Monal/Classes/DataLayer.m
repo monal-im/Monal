@@ -903,7 +903,7 @@ static DataLayer *sharedInstance=nil;
             return NO;
         }
 	}
-    else return YES;
+    else return NO;
     
 }
 
@@ -931,9 +931,8 @@ static DataLayer *sharedInstance=nil;
 {
     
 	NSString* query=[NSString stringWithFormat:@"select state from buddylist where account_id=%@ and buddy_name='%@'", accountNo, buddy];
-	NSString* iconname= (NSString*)[self executeScalar:query];
-    ;
-	return iconname;
+	NSString* state= (NSString*)[self executeScalar:query];
+	return state;
 }
 
 

@@ -32,7 +32,7 @@
 
 #define kConnectTimeout 20ull //seconds
 
-static const int ddLogLevel = LOG_LEVEL_INFO;
+static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 @interface xmpp()
 {

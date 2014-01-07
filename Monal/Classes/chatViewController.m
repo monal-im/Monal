@@ -575,7 +575,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     NSRange pos2;
     if(pos.location!=NSNotFound)
     {
-        NSString* urlString =[lowerCase substringFromIndex:pos.location];
+        NSString* urlString =[[row objectForKey:@"message"] substringFromIndex:pos.location];
         pos2= [urlString rangeOfString:@" "];
         if(pos2.location!=NSNotFound)
             urlString=[urlString substringToIndex:pos2.location];

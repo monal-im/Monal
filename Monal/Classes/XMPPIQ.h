@@ -33,6 +33,7 @@
  */
 -(void) setPing;
 
+#pragma mark disco
 /**
  makes a disco info response
  */
@@ -48,6 +49,7 @@
  */
 -(void) setDiscoItemNode;
 
+#pragma mark roster
 /**
 gets vcard info 
  */
@@ -62,5 +64,13 @@ removes a contact from the roster
  Requests a full roster from the server
  */
 -(void) setRosterRequest;
+
+#pragma mark Jingle
+
+-(void) setJingleInitiateTo:(NSString*) jid andResource:(NSString*) resource;
+-(void) setJingleDeclineTo:(NSString*) jid andResource:(NSString*) resource;
+-(void) setJingleTerminateTo:(NSString*) jid andResource:(NSString*) resource;
+
+
 
 @end

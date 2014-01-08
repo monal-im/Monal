@@ -173,6 +173,17 @@ sets away xmpp call.
  */
 -(void) leaveRoom:(NSString*) room;
 
+#pragma mark Jingle
+/**
+ Calls a contact
+ */
+-(void)call:(NSDictionary*) contact;
+
+/**
+Hangs up current call with contact
+ */
+-(void)hangup:(NSDictionary*) contact;
+
 #pragma  mark properties
 // connection attributes
 @property (nonatomic,strong) NSString* username;

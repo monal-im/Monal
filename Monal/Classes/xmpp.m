@@ -1495,6 +1495,17 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     [self send:presence2];
 }
 
+#pragma Jingle calls
+-(void)call:(NSDictionary*) contact
+{
+    
+}
+
+-(void)hangup:(NSDictionary*) contact
+{
+    
+}
+
 #pragma mark nsstream delegate
 
 - (void)stream:(NSStream *)stream handleEvent:(NSStreamEvent)eventCode

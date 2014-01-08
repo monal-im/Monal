@@ -483,7 +483,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 -(void) refreshDisplay
 {
     
-    if([[NSUserDefaults standardUserDefaults] objectForKey:@"SortContacts"]) //sort by status
+    if([[NSUserDefaults standardUserDefaults] boolForKey:@"SortContacts"]) //sort by status
         _contacts=[NSMutableArray arrayWithArray:[[DataLayer sharedInstance] onlineBuddiesSortedBy:@"Status"]];
     else
         _contacts=[NSMutableArray arrayWithArray:[[DataLayer sharedInstance] onlineBuddiesSortedBy:@"Name"]];

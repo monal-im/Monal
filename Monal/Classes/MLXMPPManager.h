@@ -70,6 +70,10 @@ Returns the name of the conencted account
  */
 -(NSString*) getNameForConnectedRow:(NSInteger) row;
 
+/**
+ Returns YES if account is connected
+ */
+-(BOOL) isAccountForIdConnected:(NSString*) accountNo;
 
 #pragma mark MUC commands
 /**

@@ -207,13 +207,23 @@
             {
                 cell=[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"AccountCell"];
             }
+            else
+            {
+                cell.accessoryView=nil; 
+            }
             cell.textLabel.text=[NSString stringWithFormat:@"%@@%@", [[_accountList objectAtIndex:indexPath.row] objectForKey:@"username"],
                                  [[_accountList objectAtIndex:indexPath.row] objectForKey:@"domain"]];
-            if([[[_accountList objectAtIndex:indexPath.row] objectForKey:@"enabled"] boolValue] ==YES)
+            if([[[_accountList objectAtIndex:indexPath.row] objectForKey:@"enabled"] boolValue] ==YES) {
                    cell.imageView.image=[UIImage imageNamed:@"enabled"];
+                if([[MLXMPPManager sharedInstance] isAccountForIdConnected:[[_accountList objectAtIndex:indexPath.row] objectForKey:@"account_id"]])
+                    cell.accessoryView =[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"available"]];
                 else
+                    cell.accessoryView =[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"away"]];
+            }
+            else {
                     cell.imageView.image=[UIImage imageNamed:@"disabled"];
-            
+            }
+         
             return cell;
             break;
         }

@@ -143,9 +143,17 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 }
 
 
+-(BOOL) isAccountForIdConnected:(NSString*) accountNo;
+{
+    xmpp* account = [self getConnectedAccountForID:[NSString stringWithFormat:@"%@",accountNo]];
+    if(account) return YES;
+    
+    return NO;
+}
+
 -(xmpp*) getConnectedAccountForID:(NSString*) accountNo
 {
-    __block xmpp* toReturn=nil;
+     xmpp* toReturn=nil;
     for (NSDictionary* account in _connectedXMPP)
     {
         xmpp* xmppAccount=[account objectForKey:@"xmppAccount"];

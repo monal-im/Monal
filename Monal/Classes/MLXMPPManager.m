@@ -146,7 +146,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(BOOL) isAccountForIdConnected:(NSString*) accountNo;
 {
     xmpp* account = [self getConnectedAccountForID:[NSString stringWithFormat:@"%@",accountNo]];
-    if(account) return YES;
+    if(account.loggedIn) return YES;
     
     return NO;
 }

@@ -21,6 +21,7 @@ This is  update that  fixes bugs.
 5. You must explicity set self signed certs if needed
 6. You must explicity set old style SSL if it is needed
 7. Fixed roster bugs on iPad
+8. fixed digest-md5 login bugs (works with mavericks server)
 
 
       

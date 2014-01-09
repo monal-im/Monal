@@ -639,6 +639,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         if([[nextStanzaPos objectForKey:@"stanzaType"]  isEqualToString:@"iq"])
         {
             ParseIq* iqNode= [[ParseIq alloc]  initWithDictionary:nextStanzaPos];
+                  if ([iqNode.type isEqualToString:kiqErrorType])
+                  {
+                      return;
+                  }
             if(iqNode.shouldSetBind)
             {
                 _jid=iqNode.jid;

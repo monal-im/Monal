@@ -32,7 +32,7 @@
 
 #define kConnectTimeout 20ull //seconds
 
-static const int ddLogLevel = LOG_LEVEL_INFO;
+static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 @interface xmpp()
 {
@@ -1105,9 +1105,10 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
         else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"failure"])
         {
             ParseFailure* failure = [[ParseFailure alloc] initWithDictionary:nextStanzaPos];
-            if(failure.saslError && failure.notAuthorized)
+            if(failure.saslError || failure.notAuthorized)
             {
                 _loginError=YES;
+                [self disconnect];
             }
             
         }
@@ -1124,9 +1125,10 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                 NSString* decoded=[[NSString alloc]  initWithData: (NSData*)[EncodingTools dataWithBase64EncodedString:challengeNode.challengeText] encoding:NSASCIIStringEncoding];
                 DDLogVerbose(@"decoded challenge to %@", decoded);
                 NSArray* parts =[decoded componentsSeparatedByString:@","];
+                
                 if([parts count]<2)
                 {
-                    //this is a success message  form challenge
+                    //this is a success message  from challenge
                     
                     NSArray* rspparts= [[parts objectAtIndex:0] componentsSeparatedByString:@"="];
                     if([[rspparts objectAtIndex:0] isEqualToString:@"rspauth"])
@@ -1138,19 +1140,26 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                 }
                 else{
                     
-                    NSArray* realmparts= [[parts objectAtIndex:0] componentsSeparatedByString:@"="];
-                    NSArray* nonceparts= [[parts objectAtIndex:1] componentsSeparatedByString:@"="];
+                    NSString* realm;
+                    NSString* nonce;
                     
-                    NSString* realm=[[realmparts objectAtIndex:1] substringWithRange:NSMakeRange(1, [[realmparts objectAtIndex:1] length]-2)] ;
-                    NSString* nonce=[nonceparts objectAtIndex:1] ;
-                    nonce=[nonce substringWithRange:NSMakeRange(1, [nonce length]-2)];
-                    
-                    //if there is no realm
-                    if(![[realmparts objectAtIndex:0]  isEqualToString:@"realm"])
+                    for(NSString* part in parts)
                     {
-                        realm=@"";
-                        nonce=[realmparts objectAtIndex:1];
+                        NSArray* split = [part componentsSeparatedByString:@"="];
+                        if([split count]>1)
+                        {
+                            if([split[0] isEqualToString:@"realm"]) {
+                                realm=[split[1]  substringWithRange:NSMakeRange(1, [split[1]  length]-2)] ;
+                            }
+                            
+                            if([split[0] isEqualToString:@"nonce"]) {
+                                nonce=[split[1]  substringWithRange:NSMakeRange(1, [split[1]  length]-2)] ;
+                            }
+                            
+                        }
                     }
+                    
+                   if(!realm) realm=@"";
                     
                     NSData* cnonce_Data=[EncodingTools MD5: [NSString stringWithFormat:@"%d",arc4random()%100000]];
                     NSString* cnonce =[EncodingTools hexadecimalString:cnonce_Data];

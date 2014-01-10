@@ -734,13 +734,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 [self send:pong];
             }
             
-            if(iqNode.ping)
-            {
-                XMPPIQ* pong =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqResultType];
-                [pong setiqTo:_domain];
-                [self send:pong];
-            }
-            
             if ([iqNode.type isEqualToString:kiqResultType])
             {
                 if(iqNode.discoItems==YES)

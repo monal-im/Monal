@@ -36,7 +36,7 @@
 		return; 
 	}
 	
-     if([elementName isEqualToString:@"query"])
+     if([elementName isEqualToString:@"ping"])
      {
          _queryXMLNS=[attributeDict objectForKey:@"xmlns"];
          if([_queryXMLNS isEqualToString:@"urn:xmpp:ping"])

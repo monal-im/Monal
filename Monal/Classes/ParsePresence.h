@@ -25,4 +25,12 @@ the hash inside the photo tag
  */
 @property (nonatomic, strong, readonly) NSString* photoHash;
 
+/**
+ Status codes that come back e.g. when you join a group chat.
+ */
+@property (nonatomic,strong) NSMutableArray* statusCodes;
+
+@property (nonatomic,assign) BOOL MUC;
+
+
 @end

@@ -881,6 +881,21 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 
             }
             
+            
+            if(presenceNode.MUC)
+            {
+                for (NSString* code in presenceNode.statusCodes) {
+                    if([code isEqualToString:@"201"]) {
+                        //201- created and needs configuration
+                        //make instant room
+                        XMPPIQ *configNode = [[XMPPIQ alloc] initWithId:_sessionKey andType:kiqSetType];
+                        [configNode setiqTo:presenceNode.from];
+                        [configNode setInstantRoom];
+                        [self send:configNode];
+                    }
+                }
+            }
+            
             if(presenceNode.type ==nil)
             {
                 DDLogVerbose(@"presence priority notice from %@", presenceNode.user);

@@ -65,6 +65,12 @@ removes a contact from the roster
  */
 -(void) setRosterRequest;
 
+#pragma mark MUC
+/**
+ create instant room
+ */
+-(void) setInstantRoom;
+
 #pragma mark Jingle
 
 -(void) setJingleInitiateTo:(NSString*) jid andResource:(NSString*) resource;

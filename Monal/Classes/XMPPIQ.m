@@ -136,6 +136,22 @@
     [self.children addObject:vcardNode];
 }
 
+#pragma mark MUC
+-(void) setInstantRoom
+{
+    XMLNode* queryNode =[[XMLNode alloc] init];
+    queryNode.element=@"query";
+    [queryNode.attributes setObject:@"http://jabber.org/protocol/muc#owner" forKey:@"xmlns"];
+    
+    XMLNode* xNode =[[XMLNode alloc] init];
+    xNode.element=@"x";
+    [xNode.attributes setObject:@"jabber:x:data" forKey:@"xmlns"];
+    [xNode.attributes setObject:@"submit" forKey:@"type"];
+    
+    [queryNode.children addObject:xNode];
+    [self.children addObject:queryNode];
+}
+
 #pragma mark Jingle
 
 -(void) setJingleInitiateTo:(NSString*) jid andResource:(NSString*) resource

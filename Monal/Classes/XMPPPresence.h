@@ -37,6 +37,8 @@
 @property (nonatomic,strong) NSString* versionHash;
 @property (nonatomic,assign) NSInteger priority;
 
+
+
 /**
  initialte with a version hash string
  */
@@ -94,6 +96,7 @@ allow subscription. Called in response to a remote request.
  */
 -(void) unsubscribedContact:(NSString*) jid;
 
+#pragma mark MUC
 /**
  join specified room on server
  */

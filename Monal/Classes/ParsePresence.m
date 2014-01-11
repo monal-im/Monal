@@ -15,10 +15,10 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 
 - (void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict
 {
-     _messageBuffer=nil;
+    _messageBuffer=nil;
     if([elementName isEqualToString:@"presence"])
     {
-         [super parser:parser didStartElement:elementName namespaceURI:namespaceURI qualifiedName:qName attributes:attributeDict];
+        [super parser:parser didStartElement:elementName namespaceURI:namespaceURI qualifiedName:qName attributes:attributeDict];
         DDLogVerbose(@"Presence from %@", _user);
 		DDLogVerbose(@"Presence type %@", _type);
         
@@ -35,9 +35,24 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
         _messageBuffer=nil;
     }
     
-    if([elementName isEqualToString:@"status"])
+    if(self.MUC) {
+        if(!self.statusCodes) self.statusCodes=[[NSMutableArray alloc] init];
+        [self.statusCodes addObject:[attributeDict objectForKey:@"code"]];
+    }
+    else {
+        if([elementName isEqualToString:@"status"])
+        {
+            _messageBuffer=nil;
+        }
+    }
+    
+    if([elementName isEqualToString:@"x"])
     {
-        _messageBuffer=nil;
+        if([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"http://jabber.org/protocol/muc#user"])
+        {
+            self.MUC=YES;
+            return;
+        }
     }
     
 }
@@ -54,6 +69,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
             
         }
         
+        
         if([elementName isEqualToString:@"status"])
         {
             _status=_messageBuffer;
@@ -62,6 +78,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
             
             
         }
+        
         
         if([elementName isEqualToString:@"photo"])
         {

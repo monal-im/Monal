@@ -751,6 +751,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
             [_contactsTable deleteRowsAtIndexPaths:@[indexPath]
                                   withRowAnimation:UITableViewRowAnimationAutomatic];
             [_contactsTable endUpdates];
+            
         }];
         
         UIActionSheet* sheet =[[UIActionSheet alloc] initWithTitle:messageString cancelButtonItem:cancelButton destructiveButtonItem:yesButton otherButtonItems: nil];

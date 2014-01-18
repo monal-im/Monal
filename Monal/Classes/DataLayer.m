@@ -411,7 +411,8 @@ static DataLayer *sharedInstance=nil;
     return toReturn;
 	
 }
--(BOOL) removeBuddy:(NSString*) buddy :(NSString*) accountNo
+
+-(BOOL) removeBuddy:(NSString*) buddy forAccount:(NSString*) accountNo
 {
     
 	//clean up logs
@@ -553,126 +554,6 @@ static DataLayer *sharedInstance=nil;
 }
 
 
--(NSArray*) newBuddies:(NSString*) accountNo;
-{
-	NSString* query1=[NSString stringWithFormat:@"select username, domain from account where account_id=%@", accountNo];
-	//DDLogVerbose(query);
-	NSArray* user = [self executeReader:query1];
-	
-	if(user!=nil)
-    {
-		if([user count]>0)//sanity check
-        {
-            
-            NSString* query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, full_name from buddylist where account_id=%@ and online=1  and (buddy_name!='%@'  and buddy_name!='%@@%@'  ) and new=1 order by full_name, buddy_name ", accountNo
-                             , [[user objectAtIndex:0] objectAtIndex:0], [[user objectAtIndex:0] objectAtIndex:0],  [[user objectAtIndex:0] objectAtIndex:1]  ];
-            //DDLogVerbose(query);
-            NSArray* toReturn = [self executeReader:query];
-            
-            if(toReturn!=nil)
-            {
-                
-                DDLogVerbose(@" count: %d",  [toReturn count] );
-                
-                return toReturn;
-            }
-            else
-            {
-                DDLogError(@"buddylist is empty or failed to read");
-                return nil;
-            }
-        }
-        else
-        {
-            return nil;
-        }
-    } else
-        return nil;
-	
-}
-
-
--(NSArray*) removedBuddies:(NSString*) accountNo;
-{
-	//returns a buddy's message history
-	
-	
-	NSString* query1=[NSString stringWithFormat:@"select username, domain  from account where account_id=%@", accountNo];
-	//DDLogVerbose(query);
-	NSArray* user = [self executeReader:query1];
-	
-	if(user!=nil)
-		if([user count]>0)//sanity check
-        {
-            
-            NSString* query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, full_name from buddylist where account_id=%@ and online=0  and (buddy_name!='%@'  and buddy_name!='%@@%@'  ) and dirty=1  order by full_name, buddy_name ", accountNo
-                             , [[user objectAtIndex:0] objectAtIndex:0], [[user objectAtIndex:0] objectAtIndex:0],  [[user objectAtIndex:0] objectAtIndex:1]  ];
-            //DDLogVerbose(query);
-            NSArray* toReturn = [self executeReader:query];
-            
-            if(toReturn!=nil)
-            {
-                
-                DDLogVerbose(@" count: %d",  [toReturn count] );
-                return toReturn;
-            }
-            else
-            {
-                DDLogError(@"buddylist is empty or failed to read");
-                return nil;
-            }
-        } else return nil;
-	
-}
-
--(NSArray*) updatedBuddies:(NSString*) accountNo;
-{
-	//returns a buddy's message history
-	
-	
-	NSString* query1=[NSString stringWithFormat:@"select username, domain  from account where account_id=%@", accountNo];
-	//DDLogVerbose(query);
-	NSArray* user = [self executeReader:query1];
-	
-	if(user!=nil)
-		if([user count]>0)//sanity check
-        {
-            
-            NSString* query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, full_name from buddylist where account_id=%@ and online=1  and (buddy_name!='%@'  and buddy_name!='%@@%@'  ) and dirty=1 order by full_name, buddy_name ", accountNo
-                             , [[user objectAtIndex:0] objectAtIndex:0], [[user objectAtIndex:0] objectAtIndex:0],  [[user objectAtIndex:0] objectAtIndex:1]  ];
-            //DDLogVerbose(query);
-            NSArray* toReturn = [self executeReader:query];
-            
-            if(toReturn!=nil)
-            {
-                
-                DDLogVerbose(@" count: %d",  [toReturn count] );
-                return toReturn; //[toReturn autorelease];
-            }
-            else
-            {
-                DDLogError(@"buddylist is empty or failed to read");
-                return nil;
-            }
-        } else return nil;
-	
-}
-
-
--(BOOL) markBuddiesRead:(NSString*) accountNo
-{
-	
-	
-	NSString* query=[NSString stringWithFormat:@"update buddylist set dirty=0, new=0 where account_id=%@ and (new!=0 or dirty!=0)  ;", accountNo];
-	if([self executeNonQuery:query]!=NO)
-	{
-		return YES;
-	}
-	else
-	{
-		return NO;
-	}
-}
 
 #pragma mark Ver string and Capabilities
 

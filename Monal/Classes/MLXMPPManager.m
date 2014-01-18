@@ -420,7 +420,13 @@ withCompletionHandler:(void (^)(BOOL success)) completion
     xmpp* account =[self getConnectedAccountForID:accountNo];
     if( account)
     {
+        //if not MUC
         [account removeFromRoster:[contact objectForKey:@"buddy_name"]];
+        //if MUC
+        
+        //remove from DB
+        [[DataLayer sharedInstance] removeBuddy:[contact objectForKey:@"buddy_name"] forAccount:[contact objectForKey:@"account_id"]];
+        
     }
     
 }

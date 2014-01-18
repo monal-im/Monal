@@ -37,7 +37,7 @@
 
 // Buddy Commands
 -(BOOL) addBuddy:(NSString*) buddy  forAccount:(NSString*) accountNo fullname:(NSString*)fullName nickname:(NSString*) nickName;
--(BOOL) removeBuddy:(NSString*) buddy :(NSString*) accountNo; 
+-(BOOL) removeBuddy:(NSString*) buddy forAccount:(NSString*) accountNo;
 -(BOOL) clearBuddies:(NSString*) accountNo; 
 -(NSArray*) contactForUsername:(NSString*) username forAccount: (NSString*) accountNo;
 
@@ -50,11 +50,6 @@
 -(NSArray*) onlineBuddiesSortedBy:(NSString*) sort;
 -(NSArray*) resourcesForContact:(NSString*)contact ;
 -(NSArray*) offlineContacts;
-
--(NSArray*) newBuddies:(NSString*) accountNo;
--(NSArray*) removedBuddies:(NSString*) accountNo;
--(NSArray*) updatedBuddies:(NSString*) accountNo;
--(BOOL) markBuddiesRead:(NSString*) accountNo;
 
 #pragma mark Ver string and Capabilities
 -(BOOL) setResourceVer:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;

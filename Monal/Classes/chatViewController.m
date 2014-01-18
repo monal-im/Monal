@@ -437,6 +437,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                            
                             [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:YES];
                            
+                           //mark as read
+                           [[DataLayer sharedInstance] markAsReadBuddy:_contactName forAccount:_accountNo];
                        });
     }
 }

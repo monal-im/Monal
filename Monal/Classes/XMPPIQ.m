@@ -161,9 +161,9 @@
     XMLNode* jingleNode =[[XMLNode alloc] init];
     jingleNode.element=@"jingle";
     [jingleNode setXMLNS:@"urn:xmpp:jingle:1"];
-    [jingleNode.attributes setObject:@"'session-initiate" forKey:@"action"];
-    [jingleNode.attributes setObject:@"initiator" forKey:@""];
-    [jingleNode.attributes setObject:@"responder" forKey:@""];
+    [jingleNode.attributes setObject:@"session-initiate" forKey:@"action"];
+    [jingleNode.attributes setObject:@"" forKey:@"initiator"];
+    [jingleNode.attributes setObject:@"" forKey:@"responder"];
 
  
    XMLNode* contentNode =[[XMLNode alloc] init];
@@ -179,7 +179,6 @@
     [description.attributes setObject:@"urn:xmpp:jingle:apps:rtp:1" forKey:@"xmlns"];
     [description.attributes setObject:@"audio" forKey:@"media"];
 
-    
     
     XMLNode* payload =[[XMLNode alloc] init];
     payload.element=@"payload-type";
@@ -238,9 +237,9 @@
     XMLNode* jingleNode =[[XMLNode alloc] init];
     jingleNode.element=@"jingle";
     [jingleNode setXMLNS:@"urn:xmpp:jingle:1"];
-    [jingleNode.attributes setObject:@"'session-terminate" forKey:@"action"];
-    [jingleNode.attributes setObject:@"initiator" forKey:@""];
-    [jingleNode.attributes setObject:@"responder" forKey:@""];
+    [jingleNode.attributes setObject:@"session-terminate" forKey:@"action"];
+    [jingleNode.attributes setObject:@"" forKey:@"initiator"];
+    [jingleNode.attributes setObject:@"" forKey:@"responder"];
      [jingleNode.attributes setObject:@"" forKey:@"sid"];
     
     XMLNode* reason =[[XMLNode alloc] init];
@@ -267,9 +266,9 @@
     XMLNode* jingleNode =[[XMLNode alloc] init];
     jingleNode.element=@"jingle";
     [jingleNode setXMLNS:@"urn:xmpp:jingle:1"];
-    [jingleNode.attributes setObject:@"'session-terminate" forKey:@"action"];
-    [jingleNode.attributes setObject:@"initiator" forKey:@""];
-    [jingleNode.attributes setObject:@"responder" forKey:@""];
+    [jingleNode.attributes setObject:@"session-terminate" forKey:@"action"];
+    [jingleNode.attributes setObject:@"" forKey:@"initiator"];
+    [jingleNode.attributes setObject:@"" forKey:@"responder"];
     [jingleNode.attributes setObject:@"" forKey:@"sid"];
     
     XMLNode* reason =[[XMLNode alloc] init];

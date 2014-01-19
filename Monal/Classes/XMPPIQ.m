@@ -197,16 +197,16 @@
     XMLNode* candidate1 =[[XMLNode alloc] init];
     candidate1.element=@"candidate";
     [candidate1.attributes setObject:@"1" forKey:@"component"];
-    [candidate1.attributes setObject:@"" forKey:@"ip"];
-    [candidate1.attributes setObject:@"" forKey:@"port"];
+    [candidate1.attributes setObject:[info objectForKey:@"ownip"] forKey:@"ip"];
+    [candidate1.attributes setObject:[info objectForKey:@"localport1"] forKey:@"port"];
     [candidate1.attributes setObject:@"monal001" forKey:@"id"];
     [candidate1.attributes setObject:@"0" forKey:@"generation"];
     
     XMLNode* candidate2 =[[XMLNode alloc] init];
     candidate2.element=@"candidate";
     [candidate2.attributes setObject:@"2" forKey:@"component"];
-    [candidate2.attributes setObject:@"" forKey:@"ip"];
-    [candidate2.attributes setObject:@"" forKey:@"port"];
+    [candidate2.attributes setObject:[info objectForKey:@"ownip"] forKey:@"ip"];
+    [candidate2.attributes setObject:[info objectForKey:@"localport2"] forKey:@"port"];
     [candidate2.attributes setObject:@"monal002" forKey:@"id"];
     [candidate2.attributes setObject:@"0" forKey:@"generation"];
     

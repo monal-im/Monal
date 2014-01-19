@@ -156,19 +156,133 @@
 
 -(void) setJingleInitiateTo:(NSString*) jid andResource:(NSString*) resource
 {
+    [self setiqTo:[NSString stringWithFormat:@"%@/%@",jid,resource]];
+    
+    XMLNode* jingleNode =[[XMLNode alloc] init];
+    jingleNode.element=@"jingle";
+    [jingleNode setXMLNS:@"urn:xmpp:jingle:1"];
+    [jingleNode.attributes setObject:@"'session-initiate" forKey:@"action"];
+    [jingleNode.attributes setObject:@"initiator" forKey:@""];
+    [jingleNode.attributes setObject:@"responder" forKey:@""];
+
+ 
+   XMLNode* contentNode =[[XMLNode alloc] init];
+    contentNode.element=@"content";
+    [contentNode.attributes setObject:@"creator" forKey:@"initiator"];
+    [contentNode.attributes setObject:@"audio-session" forKey:@"name"];
+    [contentNode.attributes setObject:@"both" forKey:@"senders"];
+    [contentNode.attributes setObject:@"" forKey:@"responder"];
     
     
-//        [query appendFormat:@" <iq to='%@/%@' id='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-initiate' initiator='%@' responder='%@' sid='%@'> <content creator='initiator'  name=\"audio-session\" senders=\"both\" responder='%@'> <description xmlns=\"urn:xmpp:jingle:apps:rtp:1\" media=\"audio\"> <payload-type id=\"8\" name=\"PCMA\" clockrate=\"8000\" channels='0'/></description> <transport xmlns='urn:xmpp:jingle:transports:raw-udp:1'><candidate component=\"1\" ip=\"%@\" port=\"%@\"   id=\"monal001\" generation=\"0\"   /><candidate component=\"2\" ip=\"%@\" port=\"%@\"   id=\"monal002\" generation=\"0\"  /> </transport> </content> </jingle> </iq>", self.otherParty, _resource, _iqid, self.me, _to,  self.thesid, _to, _ownIP, self.localPort, _ownIP,self.localPort2];
+    XMLNode* description =[[XMLNode alloc] init];
+    description.element=@"description";
+    [description.attributes setObject:@"urn:xmpp:jingle:apps:rtp:1" forKey:@"xmlns"];
+    [description.attributes setObject:@"audio" forKey:@"media"];
+
+    
+    
+    XMLNode* payload =[[XMLNode alloc] init];
+    payload.element=@"payload-type";
+    [payload.attributes setObject:@"8" forKey:@"id"];
+    [payload.attributes setObject:@"PCMA" forKey:@"name"];
+    [payload.attributes setObject:@"8000" forKey:@"clockrate"];
+    [payload.attributes setObject:@"0" forKey:@"channels"];
+    
+    [description.children addObject:payload];
+    
+    XMLNode* transport =[[XMLNode alloc] init];
+    transport.element=@"transport";
+    [transport.attributes setObject:@"urn:xmpp:jingle:transports:raw-udp:1" forKey:@"xmlns"];
+
+    
+    XMLNode* candidate1 =[[XMLNode alloc] init];
+    candidate1.element=@"candidate";
+    [candidate1.attributes setObject:@"1" forKey:@"component"];
+    [candidate1.attributes setObject:@"" forKey:@"ip"];
+    [candidate1.attributes setObject:@"" forKey:@"port"];
+    [candidate1.attributes setObject:@"monal001" forKey:@"id"];
+    [candidate1.attributes setObject:@"0" forKey:@"generation"];
+    
+    XMLNode* candidate2 =[[XMLNode alloc] init];
+    candidate2.element=@"candidate";
+    [candidate2.attributes setObject:@"2" forKey:@"component"];
+    [candidate2.attributes setObject:@"" forKey:@"ip"];
+    [candidate2.attributes setObject:@"" forKey:@"port"];
+    [candidate2.attributes setObject:@"monal002" forKey:@"id"];
+    [candidate2.attributes setObject:@"0" forKey:@"generation"];
+    
+    [transport.children addObject:candidate1];
+    [transport.children addObject:candidate2];
+    
+    [contentNode.children addObject:description];
+    [contentNode.children addObject:transport];
+    
+    [jingleNode.children addObject:contentNode];
+    [self.children addObject:jingleNode];
+    
+    
+//        [query appendFormat:@" <iq to='%@/%@' id='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-initiate' initiator='%@' responder='%@' sid='%@'>
+//         <content creator='initiator'  name=\"audio-session\" senders=\"both\" responder='%@'>
+//         <description xmlns=\"urn:xmpp:jingle:apps:rtp:1\" media=\"audio\">
+//         <payload-type id=\"8\" name=\"PCMA\" clockrate=\"8000\" channels='0'/></description>
+//         
+//         <transport xmlns='urn:xmpp:jingle:transports:raw-udp:1'>
+//         <candidate component=\"1\" ip=\"%@\" port=\"%@\"   id=\"monal001\" generation=\"0\"   />
+//         <candidate component=\"2\" ip=\"%@\" port=\"%@\"   id=\"monal002\" generation=\"0\"  /> </transport> </content>
+//         
+//         </jingle> </iq>", self.otherParty, _resource, _iqid, self.me, _to,  self.thesid, _to, _ownIP, self.localPort, _ownIP,self.localPort2];
 }
 
 -(void) setJingleDeclineTo:(NSString*) jid andResource:(NSString*) resource
 {
+    XMLNode* jingleNode =[[XMLNode alloc] init];
+    jingleNode.element=@"jingle";
+    [jingleNode setXMLNS:@"urn:xmpp:jingle:1"];
+    [jingleNode.attributes setObject:@"'session-terminate" forKey:@"action"];
+    [jingleNode.attributes setObject:@"initiator" forKey:@""];
+    [jingleNode.attributes setObject:@"responder" forKey:@""];
+     [jingleNode.attributes setObject:@"" forKey:@"sid"];
+    
+    XMLNode* reason =[[XMLNode alloc] init];
+    reason.element=@"reason";
+    
+    XMLNode* decline =[[XMLNode alloc] init];
+    decline.element=@"decline";
+    
+    [reason.children addObject:decline] ;
+    [jingleNode.children addObject:reason];
+    [self.children addObject:jingleNode];
+    
+
+    
 //    [query appendFormat:@"<iq   id='%@'   to='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-terminate'  initiator='%@' responder='%@' sid='%@'> <reason> <decline/> </reason> </jingle> </iq>", self.idval, self.otherParty, self.otherParty, self.me,  self.thesid];
 //    
 }
 
 -(void) setJingleTerminateTo:(NSString*) jid andResource:(NSString*) resource
 {
+    
+    [self setiqTo:[NSString stringWithFormat:@"%@/%@",jid,resource]];
+    
+    XMLNode* jingleNode =[[XMLNode alloc] init];
+    jingleNode.element=@"jingle";
+    [jingleNode setXMLNS:@"urn:xmpp:jingle:1"];
+    [jingleNode.attributes setObject:@"'session-terminate" forKey:@"action"];
+    [jingleNode.attributes setObject:@"initiator" forKey:@""];
+    [jingleNode.attributes setObject:@"responder" forKey:@""];
+    [jingleNode.attributes setObject:@"" forKey:@"sid"];
+    
+    XMLNode* reason =[[XMLNode alloc] init];
+    reason.element=@"reason";
+
+    XMLNode* success =[[XMLNode alloc] init];
+    success.element=@"success";
+
+    [reason.children addObject:success] ;
+    [jingleNode.children addObject:reason];
+    [self.children addObject:jingleNode];
+
+    
 //    [query appendFormat:@"<iq   id='%@'   to='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-terminate'  initiator='%@' responder='%@' sid='%@'> <reason> <success/> </reason> </jingle> </iq>", self.idval, self.otherParty, self.initiator, self.responder,  self.thesid];
 //    
 }

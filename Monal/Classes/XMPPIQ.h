@@ -73,9 +73,13 @@ removes a contact from the roster
 
 #pragma mark Jingle
 
--(void) setJingleInitiateTo:(NSString*) jid andResource:(NSString*) resource;
--(void) setJingleDeclineTo:(NSString*) jid andResource:(NSString*) resource;
--(void) setJingleTerminateTo:(NSString*) jid andResource:(NSString*) resource;
+
+/**
+ Dictionary info has initiator, responder, sid
+ */
+-(void) setJingleInitiateTo:(NSString*) jid andResource:(NSString*) resource withValues:(NSDictionary*) info;
+-(void) setJingleDeclineTo:(NSString*) jid andResource:(NSString*) resource withValues:(NSDictionary*) info;
+-(void) setJingleTerminateTo:(NSString*) jid andResource:(NSString*) resource withValues:(NSDictionary*) info;
 
 
 

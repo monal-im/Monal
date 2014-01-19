@@ -154,7 +154,7 @@
 
 #pragma mark Jingle
 
--(void) setJingleInitiateTo:(NSString*) jid andResource:(NSString*) resource
+-(void) setJingleInitiateTo:(NSString*) jid andResource:(NSString*) resource withValues:(NSDictionary*) info
 {
     [self setiqTo:[NSString stringWithFormat:@"%@/%@",jid,resource]];
     
@@ -162,16 +162,16 @@
     jingleNode.element=@"jingle";
     [jingleNode setXMLNS:@"urn:xmpp:jingle:1"];
     [jingleNode.attributes setObject:@"session-initiate" forKey:@"action"];
-    [jingleNode.attributes setObject:@"" forKey:@"initiator"];
-    [jingleNode.attributes setObject:@"" forKey:@"responder"];
-
+    [jingleNode.attributes setObject:[info objectForKey:@"initiator"] forKey:@"initiator"];
+    [jingleNode.attributes setObject:[info objectForKey:@"responder"] forKey:@"responder"];
+    [jingleNode.attributes setObject:[info objectForKey:@"sid"] forKey:@"sid"];
  
    XMLNode* contentNode =[[XMLNode alloc] init];
     contentNode.element=@"content";
     [contentNode.attributes setObject:@"creator" forKey:@"initiator"];
     [contentNode.attributes setObject:@"audio-session" forKey:@"name"];
     [contentNode.attributes setObject:@"both" forKey:@"senders"];
-    [contentNode.attributes setObject:@"" forKey:@"responder"];
+    [contentNode.attributes setObject:[info objectForKey:@"responder"] forKey:@"responder"];
     
     
     XMLNode* description =[[XMLNode alloc] init];
@@ -232,15 +232,15 @@
 //         </jingle> </iq>", self.otherParty, _resource, _iqid, self.me, _to,  self.thesid, _to, _ownIP, self.localPort, _ownIP,self.localPort2];
 }
 
--(void) setJingleDeclineTo:(NSString*) jid andResource:(NSString*) resource
+-(void) setJingleDeclineTo:(NSString*) jid andResource:(NSString*) resource withValues:(NSDictionary*) info
 {
     XMLNode* jingleNode =[[XMLNode alloc] init];
     jingleNode.element=@"jingle";
     [jingleNode setXMLNS:@"urn:xmpp:jingle:1"];
     [jingleNode.attributes setObject:@"session-terminate" forKey:@"action"];
-    [jingleNode.attributes setObject:@"" forKey:@"initiator"];
-    [jingleNode.attributes setObject:@"" forKey:@"responder"];
-     [jingleNode.attributes setObject:@"" forKey:@"sid"];
+    [jingleNode.attributes setObject:[info objectForKey:@"initiator"] forKey:@"initiator"];
+    [jingleNode.attributes setObject:[info objectForKey:@"responder"] forKey:@"responder"];
+    [jingleNode.attributes setObject:[info objectForKey:@"sid"] forKey:@"sid"];
     
     XMLNode* reason =[[XMLNode alloc] init];
     reason.element=@"reason";
@@ -258,7 +258,7 @@
 //    
 }
 
--(void) setJingleTerminateTo:(NSString*) jid andResource:(NSString*) resource
+-(void) setJingleTerminateTo:(NSString*) jid andResource:(NSString*) resource withValues:(NSDictionary*) info
 {
     
     [self setiqTo:[NSString stringWithFormat:@"%@/%@",jid,resource]];
@@ -267,9 +267,9 @@
     jingleNode.element=@"jingle";
     [jingleNode setXMLNS:@"urn:xmpp:jingle:1"];
     [jingleNode.attributes setObject:@"session-terminate" forKey:@"action"];
-    [jingleNode.attributes setObject:@"" forKey:@"initiator"];
-    [jingleNode.attributes setObject:@"" forKey:@"responder"];
-    [jingleNode.attributes setObject:@"" forKey:@"sid"];
+    [jingleNode.attributes setObject:[info objectForKey:@"initiator"] forKey:@"initiator"];
+    [jingleNode.attributes setObject:[info objectForKey:@"responder"] forKey:@"responder"];
+    [jingleNode.attributes setObject:[info objectForKey:@"sid"] forKey:@"sid"];
     
     XMLNode* reason =[[XMLNode alloc] init];
     reason.element=@"reason";

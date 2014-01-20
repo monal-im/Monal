@@ -20,6 +20,8 @@
 #include <net/if.h>
 #include <ifaddrs.h>
 
+#import "XMPPIQ.h"
+
 
 @interface jingleCall : NSObject
 {
@@ -39,10 +41,10 @@
 }
 -(NSString*) getGoogleInfo:(NSString*) idval;
 
--(NSString*) acceptJingle;
--(NSString*) rejectJingle;
--(NSString*) initiateJingle:(NSString*) to  :(NSString*)iqid:(NSString*) resource;
--(NSString*) terminateJingle;
+-(XMPPIQ*) acceptJingle;
+-(XMPPIQ*) rejectJingle;
+-(XMPPIQ*) initiateJingle:(NSString*) to  withId:(NSString*)iqid andResource:(NSString*) resource;
+-(XMPPIQ*) terminateJingle;
 
 -(int) rtpConnect;
 

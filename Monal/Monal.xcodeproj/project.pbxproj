@@ -131,7 +131,7 @@
 		2640AF4014548E7700CB4F60 /* HPGrowingTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = 2640AF3D14548E7700CB4F60 /* HPGrowingTextView.m */; };
 		2640AF4114548E7700CB4F60 /* HPTextViewInternal.m in Sources */ = {isa = PBXBuildFile; fileRef = 2640AF3F14548E7700CB4F60 /* HPTextViewInternal.m */; };
 		2642EBC718693626006A6C12 /* RTP.mm in Sources */ = {isa = PBXBuildFile; fileRef = 2642EBC618693626006A6C12 /* RTP.mm */; };
-		2642EBCA18693634006A6C12 /* iqJingle.m in Sources */ = {isa = PBXBuildFile; fileRef = 2642EBC918693634006A6C12 /* iqJingle.m */; };
+		2642EBCA18693634006A6C12 /* jingleCall.m in Sources */ = {isa = PBXBuildFile; fileRef = 2642EBC918693634006A6C12 /* jingleCall.m */; };
 		2642EBD01869425D006A6C12 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2642EBCF1869425D006A6C12 /* CoreAudio.framework */; };
 		2643A12E180220890030EFB1 /* TPKeyboardAvoidingScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = 2643A12B180220890030EFB1 /* TPKeyboardAvoidingScrollView.m */; };
 		2643A12F180220890030EFB1 /* TPKeyboardAvoidingTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = 2643A12D180220890030EFB1 /* TPKeyboardAvoidingTableView.m */; };
@@ -349,8 +349,8 @@
 		2640AF3F14548E7700CB4F60 /* HPTextViewInternal.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HPTextViewInternal.m; sourceTree = "<group>"; };
 		2642EBC518693626006A6C12 /* RTP.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = RTP.hh; sourceTree = "<group>"; };
 		2642EBC618693626006A6C12 /* RTP.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = RTP.mm; sourceTree = "<group>"; };
-		2642EBC818693634006A6C12 /* iqJingle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iqJingle.h; sourceTree = "<group>"; };
-		2642EBC918693634006A6C12 /* iqJingle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = iqJingle.m; sourceTree = "<group>"; };
+		2642EBC818693634006A6C12 /* jingleCall.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = jingleCall.h; sourceTree = "<group>"; };
+		2642EBC918693634006A6C12 /* jingleCall.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = jingleCall.m; sourceTree = "<group>"; };
 		2642EBCF1869425D006A6C12 /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
 		2643A12A180220890030EFB1 /* TPKeyboardAvoidingScrollView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TPKeyboardAvoidingScrollView.h; sourceTree = "<group>"; };
 		2643A12B180220890030EFB1 /* TPKeyboardAvoidingScrollView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TPKeyboardAvoidingScrollView.m; sourceTree = "<group>"; };
@@ -613,8 +613,8 @@
 		2642EBC418693615006A6C12 /* Jingle */ = {
 			isa = PBXGroup;
 			children = (
-				2642EBC818693634006A6C12 /* iqJingle.h */,
-				2642EBC918693634006A6C12 /* iqJingle.m */,
+				2642EBC818693634006A6C12 /* jingleCall.h */,
+				2642EBC918693634006A6C12 /* jingleCall.m */,
 				2642EBC518693626006A6C12 /* RTP.hh */,
 				2642EBC618693626006A6C12 /* RTP.mm */,
 			);
@@ -1229,7 +1229,7 @@
 				26529F5217FA7B260057F199 /* addContact.m in Sources */,
 				262DE4AF15C4E2C60040A66B /* MBProgressHUD.m in Sources */,
 				2680B8EF1863C172009599AB /* DDTTYLogger.m in Sources */,
-				2642EBCA18693634006A6C12 /* iqJingle.m in Sources */,
+				2642EBCA18693634006A6C12 /* jingleCall.m in Sources */,
 				2658508B15E7D8E40070A2A7 /* TPCircularBuffer+AudioBufferList.c in Sources */,
 				2658508C15E7D8E40070A2A7 /* TPCircularBuffer.c in Sources */,
 				2689B6EC1601914E0087CA58 /* DDBadgeViewCell.m in Sources */,

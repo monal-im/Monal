@@ -13,6 +13,7 @@
 #import "ContactsViewController.h"
 #import "MLConstants.h"
 
+#import "jingleCall.h"
 
 
 // networking objects
@@ -196,6 +197,8 @@ Hangs up current call with contact
 @property (nonatomic,assign) BOOL SSL;
 @property (nonatomic,assign) BOOL oldStyleSSL;
 @property (nonatomic,assign) BOOL selfSigned;
+
+@property (nonatomic,strong) jingleCall* call;
 
 // state attributes
 @property (nonatomic,assign) NSInteger priority;

@@ -21,7 +21,7 @@
 #include <ifaddrs.h>
 
 
-@interface iqJingle : NSObject
+@interface jingleCall : NSObject
 {
     
     NSString *_activeresource;
@@ -39,16 +39,12 @@
 }
 -(NSString*) getGoogleInfo:(NSString*) idval;
 
--(NSString*) ack:(NSString*) to:(NSString*) iqid;
 -(NSString*) acceptJingle;
 -(NSString*) rejectJingle;
 -(NSString*) initiateJingle:(NSString*) to  :(NSString*)iqid:(NSString*) resource;
 -(NSString*) terminateJingle;
 
--(void) resetVals;
--(id) init;
-
--(int) connect;
+-(int) rtpConnect;
 
 @property (nonatomic, strong) NSString* me;
 @property (nonatomic, strong) NSString* thesid;
@@ -64,9 +60,10 @@
 @property (nonatomic, strong) NSString* thepass;
 
 @property (nonatomic, strong) NSString* idval;
-@property (nonatomic,assign) BOOL didReceiveTerminate;
+
 @property (nonatomic, strong) NSString* action;
 
+@property (nonatomic,assign) BOOL didReceiveTerminate;
 @property (nonatomic,assign) BOOL activeCall;
 @property (nonatomic,assign) BOOL waitingOnUserAccept;
 

@@ -129,12 +129,6 @@
 
 -(XMPPIQ*) terminateJingle:(NSString*) to  withId:(NSString*)iqid andResource:(NSString*) resource
 {
-
-//    if(!_didReceiveTerminate)
-//       
-//        
-//    else
-//        query=@"";
     
     [rtp RTPDisconnect];
     

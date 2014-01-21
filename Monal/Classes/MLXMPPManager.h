@@ -112,6 +112,10 @@ Returns the name of the conencted account
  */
 -(void) hangupContact:(NSDictionary*) contact;
 
+/**
+ declines a call from a contact
+ */
+-(void) declineContact:(NSDictionary*) contact;
 
 /**
  Checks if there are any enabled acconts and connects them if necessary.

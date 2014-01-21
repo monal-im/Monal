@@ -493,6 +493,11 @@ withCompletionHandler:(void (^)(BOOL success)) completion
     //[account hangup:contact];
 }
 
+-(void) declineContact:(NSDictionary*) contact
+{
+    xmpp* account =[self getConnectedAccountForID:[contact objectForKey:@"account_id"]];
+}
+
 
 #pragma mark XMPP settings
 

@@ -41,10 +41,10 @@
 }
 -(NSString*) getGoogleInfo:(NSString*) idval;
 
--(XMPPIQ*) acceptJingle;
--(XMPPIQ*) rejectJingle;
+-(XMPPIQ*) acceptJingle:(NSString*) to  withId:(NSString*)iqid andResource:(NSString*) resource;
+-(XMPPIQ*) rejectJingle:(NSString*) to  withId:(NSString*)iqid andResource:(NSString*) resource;
 -(XMPPIQ*) initiateJingle:(NSString*) to  withId:(NSString*)iqid andResource:(NSString*) resource;
--(XMPPIQ*) terminateJingle;
+-(XMPPIQ*) terminateJingle:(NSString*) to  withId:(NSString*)iqid andResource:(NSString*) resource;
 
 -(int) rtpConnect;
 

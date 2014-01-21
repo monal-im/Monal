@@ -63,7 +63,7 @@
 
 #pragma mark jingle nodes
 
--(XMPPIQ*) acceptJingle
+-(XMPPIQ*) acceptJingle:(NSString*) to  withId:(NSString*)iqid andResource:(NSString*) resource
 {
     if(didStartCall==YES)
     {
@@ -82,7 +82,11 @@
     
    NSDictionary* info =@{self.initiator:@"initiator", self.responder:@"responder", self.thesid:@"sid", _ownIP:@"ownip", self.localPort:@"localport1", self.localPort2:@"localport2"};
     
-    return nil;
+    XMPPIQ* node =[[XMPPIQ alloc] initWithId:iqid andType:kiqSetType];
+    [node setJingleInitiateTo:to andResource:resource withValues:info];
+    
+    
+    return node;
 }
 
 -(XMPPIQ*) initiateJingle:(NSString*) to  withId:(NSString*)iqid andResource:(NSString*) resource
@@ -105,17 +109,25 @@
     
     NSDictionary* info =@{self.initiator:@"initiator", self.responder:@"responder", self.thesid:@"sid", _ownIP:@"ownip", self.localPort:@"localport1", self.localPort2:@"localport2"};
     
-    return nil;
+    XMPPIQ* node =[[XMPPIQ alloc] initWithId:iqid andType:kiqSetType];
+    [node setJingleInitiateTo:to andResource:resource withValues:info];
+    
+    return node;
 }
 
--(XMPPIQ*) rejectJingle
+-(XMPPIQ*) rejectJingle:(NSString*) to  withId:(NSString*)iqid andResource:(NSString*) resource
 {
 
-    return nil;
+       NSDictionary* info =@{self.initiator:@"initiator", self.responder:@"responder", self.thesid:@"sid", _ownIP:@"ownip", self.localPort:@"localport1", self.localPort2:@"localport2"};
+    
+    XMPPIQ* node =[[XMPPIQ alloc] initWithId:iqid andType:kiqSetType];
+    [node setJingleDeclineTo:to andResource:resource withValues:info];
+    
+    return node;
 }
 
 
--(XMPPIQ*) terminateJingle
+-(XMPPIQ*) terminateJingle:(NSString*) to  withId:(NSString*)iqid andResource:(NSString*) resource
 {
 
 //    if(!_didReceiveTerminate)
@@ -126,8 +138,13 @@
     
     [rtp RTPDisconnect];
     
+       NSDictionary* info =@{self.initiator:@"initiator", self.responder:@"responder", self.thesid:@"sid", _ownIP:@"ownip", self.localPort:@"localport1", self.localPort2:@"localport2"};
     
-    return nil;
+    XMPPIQ* node =[[XMPPIQ alloc] initWithId:iqid andType:kiqSetType];
+    [node setJingleTerminateTo:to andResource:resource withValues:info];
+    
+    
+    return node;
 }
 
 

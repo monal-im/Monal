@@ -185,6 +185,11 @@ Hangs up current call with contact
  */
 -(void)hangup:(NSDictionary*) contact;
 
+/**
+Decline a call request
+ */
+-(void)decline:(NSDictionary*) contact;
+
 #pragma  mark properties
 // connection attributes
 @property (nonatomic,strong) NSString* username;
@@ -206,6 +211,7 @@ Hangs up current call with contact
 @property (nonatomic,assign) BOOL awayState;
 @property (nonatomic,assign) BOOL visibleState;
 
+@property (nonatomic, strong) jingleCall *jingle;
 
 // DB info
 @property (nonatomic,strong) NSString* accountNo;

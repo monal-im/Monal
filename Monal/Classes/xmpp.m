@@ -1523,16 +1523,25 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self send:presence2];
 }
 
-#pragma Jingle calls
+#pragma mark Jingle calls
 -(void)call:(NSDictionary*) contact
 {
+    if(!_jingle) _jingle=[[jingleCall alloc] init];
     
+    XMPPIQ* jingleiq =[self.jingle initiateJingle:[contact objectForKey:@"buddy_name" ] withId:_sessionKey andResource:[contact objectForKey:@"resource" ]];
+    [self send:jingleiq];
 }
 
 -(void)hangup:(NSDictionary*) contact
 {
     
 }
+
+-(void)decline:(NSDictionary*) contact
+{
+    
+}
+
 
 #pragma mark nsstream delegate
 

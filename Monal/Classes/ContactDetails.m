@@ -10,6 +10,7 @@
 #import "MLImageManager.h"
 #import "MLConstants.h"
 #import "CallViewController.h"
+#import "MLXMPPManager.h"
 
 
 @implementation ContactDetails
@@ -103,6 +104,7 @@
     }
     
     [self.currentNavController presentModalViewController:callNav animated:YES];
+    [[MLXMPPManager sharedInstance] callContact:_contact];
 }
 
 

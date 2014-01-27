@@ -54,6 +54,11 @@
           
      }
     
+    if([elementName isEqualToString:@"group"] && _roster==YES)
+    {
+        State=@"RosterGroup"; // we can get group name here
+    }
+    
     if([elementName isEqualToString:@"vCard"])
     {
         State=@"vCard";
@@ -117,7 +122,13 @@
         return;
     }
     
-    
+    if(([elementName isEqualToString:@"group"]) && [State isEqualToString:@"RosterGroup"]
+	   )
+    {
+        //we would have a group name here
+       // _photoBinValue=_messageBuffer;
+        return;
+    }
    
 }
 

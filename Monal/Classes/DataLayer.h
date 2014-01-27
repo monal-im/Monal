@@ -100,10 +100,7 @@
 
 -(BOOL) setIconName:(NSString*) icon forBuddy:(NSString*) buddy inAccount:(NSString*) accountNo;
 -(NSString*) iconName:(NSString*) buddy forAccount:(NSString*) accountNo;
- 
-
--(BOOL) setNickName:(NSString*) buddy forAccount:(NSString*) accountNo:(NSString*) nickName;
-
+-(BOOL) setNickName:(NSString*) nickName forBuddy:(NSString*) buddy andAccount:(NSString*) accountNo;
 
 //account commands
 -(NSArray*) protocolList;

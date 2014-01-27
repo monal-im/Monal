@@ -764,6 +764,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             {
                                 [[DataLayer sharedInstance] addBuddy:[contact objectForKey:@"jid"]?[contact objectForKey:@"jid"]:@"" forAccount:_accountNo fullname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@"" nickname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@""];
                             }
+                            else
+                            {
+                             // update info if needed
+                                
+                                [[DataLayer sharedInstance] setFullName:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@"" forBuddy:[contact objectForKey:@"jid"]?[contact objectForKey:@"jid"]:@"" andAccount:_accountNo ] ;
+                                
+                            }
                         }
                         else
                         {

@@ -856,7 +856,7 @@ static DataLayer *sharedInstance=nil;
 	//data length check
 	
 	if([fullName length]>50) toPass=[fullName substringToIndex:49]; else toPass=fullName;
-	// sometimes the buddyname comes from a roster so it might notbe in the lit yet, add first and if that fails (ie already there) then set fullname
+	// sometimes the buddyname comes from a roster so it might not be in the list yet, add first and if that fails (ie already there) then set fullname
 	
 	if(![self addBuddy:buddy forAccount: accountNo fullname:fullName nickname:@""])
 	{
@@ -877,7 +877,7 @@ static DataLayer *sharedInstance=nil;
 	}
 }
 
--(BOOL) setNickName:(NSString*) buddy :(NSString*) accountNo:(NSString*) nickName
+-(BOOL) setNickName:(NSString*) nickName forBuddy:(NSString*) buddy andAccount:(NSString*) accountNo
 {
 	
 	NSString* toPass;

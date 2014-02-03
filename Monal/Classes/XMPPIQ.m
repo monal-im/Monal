@@ -123,6 +123,29 @@
 	
 }
 
+-(void) setVersion
+{
+    [self.attributes setObject:@"jabber:iq:version" forKey:@"xmlns"];
+    
+    XMLNode* name =[[XMLNode alloc] init];
+    name.element=@"name";
+    name.data=@"Monal";
+    
+
+    XMLNode* os =[[XMLNode alloc] init];
+    os.element=@"os";
+    os.data=@"iOS";
+    
+    XMLNode* appVersion =[[XMLNode alloc] init];
+    appVersion.element=@"version";
+    appVersion.data=[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
+    
+    
+    [self.children addObject:name];
+    [self.children addObject:os];
+    [self.children addObject:appVersion];
+}
+
 #pragma mark iq get
 -(void) getVcardTo:(NSString*) to
 {

@@ -65,6 +65,24 @@
         _vCard=YES;
     }
     
+    if([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:time"])
+    {
+        _time=YES;
+        return;
+    }
+    
+    if([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"jabber:iq:version"])
+    {
+        _version=YES;
+        return;
+    }
+    
+    
+    if([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"jabber:iq:last"])
+    {
+        _last=YES;
+        return;
+    }
     
     if([elementName isEqualToString:@"item"])
     {

@@ -65,6 +65,12 @@ removes a contact from the roster
  */
 -(void) setRosterRequest;
 
+/**
+ makes iq  with version element
+ */
+-(void) setVersion;
+
+
 #pragma mark MUC
 /**
  create instant room

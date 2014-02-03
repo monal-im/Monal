@@ -690,7 +690,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 
             }
             
-            if((iqNode.discoInfo)  && [iqNode.from isEqualToString:self.server])
+            if((iqNode.discoInfo)  )
             {
                 
                 XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqResultType];
@@ -733,6 +733,16 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 [pong setiqTo:_domain];
                 [self send:pong];
             }
+            
+            if (iqNode.version)
+            {
+                XMPPIQ* versioniq =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqResultType];
+                [versioniq setiqTo:iqNode.from];
+                [versioniq setVersion];
+                [self send:versioniq];
+            }
+            
+            //TODO add time and last
             
             if ([iqNode.type isEqualToString:kiqResultType])
             {
@@ -1336,7 +1346,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     else
         message=nil;
     
-    XMPPPresence* node =[[XMPPPresence alloc] init];
+    XMPPPresence* node =[[XMPPPresence alloc] initWithHash:self.versionHash];
     if(message)[node setStatus:message];
     
     if(self.awayState) [node setAway];
@@ -1347,7 +1357,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) setAway:(BOOL) away
 {
     self.awayState=away;
-    XMPPPresence* node =[[XMPPPresence alloc] init];
+    XMPPPresence* node =[[XMPPPresence alloc] initWithHash:self.versionHash];
     if(away)
         [node setAway];
     else
@@ -1360,7 +1370,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) setVisible:(BOOL) visible
 {
     self.visibleState=visible;
-    XMPPPresence* node =[[XMPPPresence alloc] init];
+    XMPPPresence* node =[[XMPPPresence alloc] initWithHash:self.versionHash];
     if(!visible)
         [node setInvisible];
     else
@@ -1376,7 +1386,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     self.priority=priority;
     
-    XMPPPresence* node =[[XMPPPresence alloc] init];
+    XMPPPresence* node =[[XMPPPresence alloc] initWithHash:self.versionHash];
     [node setPriority:priority];
     [self send:node];
     

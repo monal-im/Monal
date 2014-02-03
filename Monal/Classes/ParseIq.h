@@ -36,6 +36,11 @@
 @property (nonatomic, strong, readonly) NSString* photoBinValue;
 
 
+//Misc requests
+@property (nonatomic, assign, readonly) BOOL time;
+@property (nonatomic, assign, readonly) BOOL version;
+@property (nonatomic, assign, readonly) BOOL last;
+
 //discovered services
 @property (nonatomic, strong, readonly) NSString* conferenceServer;
 

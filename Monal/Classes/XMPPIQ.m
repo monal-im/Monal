@@ -125,7 +125,9 @@
 
 -(void) setVersion
 {
-    [self.attributes setObject:@"jabber:iq:version" forKey:@"xmlns"];
+    XMLNode* queryNode =[[XMLNode alloc] init];
+    queryNode.element=@"query";
+    [queryNode.attributes setObject:@"jabber:iq:version" forKey:@"xmlns"];
     
     XMLNode* name =[[XMLNode alloc] init];
     name.element=@"name";
@@ -141,9 +143,10 @@
     appVersion.data=[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
     
     
-    [self.children addObject:name];
-    [self.children addObject:os];
-    [self.children addObject:appVersion];
+    [queryNode.children addObject:name];
+    [queryNode.children addObject:os];
+    [queryNode.children addObject:appVersion];
+    [self.children addObject:queryNode];
 }
 
 #pragma mark iq get

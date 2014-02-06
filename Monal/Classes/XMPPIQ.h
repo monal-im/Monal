@@ -70,6 +70,11 @@ removes a contact from the roster
  */
 -(void) setVersion;
 
+/**
+ sends last seconds as 0 since if we are responding we arent away. Migth want to add a timer for away in the future. 
+ */
+-(void) setLast;
+
 
 #pragma mark MUC
 /**

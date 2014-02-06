@@ -742,8 +742,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 [self send:versioniq];
             }
             
-            //TODO add time and last
+            if (iqNode.last)
+            {
+                XMPPIQ* lastiq =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqResultType];
+                [lastiq setiqTo:iqNode.from];
+                [lastiq setLast];
+                [self send:lastiq];
+            }
             
+  
             if ([iqNode.type isEqualToString:kiqResultType])
             {
                 if(iqNode.discoItems==YES)

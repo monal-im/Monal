@@ -149,6 +149,20 @@
     [self.children addObject:queryNode];
 }
 
+
+
+-(void) setLast
+{
+    XMLNode* queryNode =[[XMLNode alloc] init];
+    queryNode.element=@"query";
+    [queryNode.attributes setObject:@"jabber:iq:last" forKey:@"xmlns"];
+     [queryNode.attributes setObject:@"0" forKey:@"seconds"]; // hasnt been away for 0 seconds
+    [self.children addObject:queryNode];
+}
+
+
+
+
 #pragma mark iq get
 -(void) getVcardTo:(NSString*) to
 {

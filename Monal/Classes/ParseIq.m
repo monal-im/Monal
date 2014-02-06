@@ -51,6 +51,9 @@
         if([_queryXMLNS isEqualToString:@"jabber:iq:roster"]) _roster=YES;
         
          [_features addObject:[attributeDict objectForKey:@"val"]];
+        
+        NSString* node =[attributeDict objectForKey:@"node"];
+        if(node) _queryNode=node; 
           
      }
     

@@ -35,9 +35,10 @@
 
 #pragma mark disco
 /**
- makes a disco info response for the server
+ makes a disco info response for the server.
+ @param the param passed is the xmpp node attribute that came in with the iq get
  */
--(void) setDiscoInfoWithFeatures;
+-(void) setDiscoInfoWithFeaturesAndNode:(NSString*) node;
 
 /**
  Disco info response to another client

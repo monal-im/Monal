@@ -53,12 +53,15 @@
     [self.children addObject:queryNode];
 }
 
--(void) setDiscoInfoWithFeatures
+-(void) setDiscoInfoWithFeaturesAndNode:(NSString*) node
 {
     
     XMLNode* queryNode =[[XMLNode alloc] init];
     queryNode.element=@"query";
     [queryNode setXMLNS:@"http://jabber.org/protocol/disco#info"];
+    if(node){
+        [queryNode. attributes setObject:node forKey:@"node"];
+    }
     
    NSArray* features=@[@"http://jabber.org/protocol/disco#info", @"http://jabber.org/protocol/disco#items",@"jabber:iq:version", @"http://jabber.org/protocol/muc#user",@"urn:xmpp:jingle:1",@"urn:xmpp:jingle:transports:raw-udp:0",
                        @"urn:xmpp:jingle:transports:raw-udp:1",@"urn:xmpp:jingle:apps:rtp:1",@"urn:xmpp:jingle:apps:rtp:audio"];

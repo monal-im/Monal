@@ -690,28 +690,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 
             }
             
-            if((iqNode.discoInfo) && [iqNode.from isEqualToString:_server] )
+            if((iqNode.discoInfo))
             {
-                
                 XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqResultType];
                 [discoInfo setiqTo:iqNode.from];
-                [discoInfo setDiscoInfoWithFeatures];
-                
+                [discoInfo setDiscoInfoWithFeaturesAndNode:iqNode.queryNode];
                 [self send:discoInfo];
                 
             }
-            
-            if((iqNode.discoInfo) && ![iqNode.from isEqualToString:_server] )
-            {
-                
-                XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqResultType];
-                [discoInfo setiqTo:iqNode.from];
-                [discoInfo setDiscoItemsWithCommands];
-                
-                [self send:discoInfo];
-                
-            }
-            
             
             if(iqNode.vCard)
             {
@@ -760,6 +746,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 [lastiq setiqTo:iqNode.from];
                 [lastiq setLast];
                 [self send:lastiq];
+            }
+            
+            if (iqNode.time)
+            {
+                XMPPIQ* timeiq =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqResultType];
+                [timeiq setiqTo:iqNode.from];
+                //[lastiq setLast];
+                [self send:timeiq];
             }
             
   

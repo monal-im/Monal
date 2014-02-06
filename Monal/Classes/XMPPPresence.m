@@ -27,7 +27,8 @@
     c.element=@"c";
     [c.attributes setObject:@"http://monal.im/caps" forKey:@"node"];
     [c.attributes setObject:self.versionHash forKey:@"ver"];
-    [c.attributes setObject:[NSString stringWithFormat:@"%@ %@", kextpmuc, kextvoice] forKey:@"ext"];
+    [c.attributes setObject:@"sha-1" forKey:@"hash"];
+    [c.attributes setObject:[NSString stringWithFormat:@"%@ %@", kextpmuc, kextvoice] forKey:@"ext"]; //deprecated .. for legacy
     [c setXMLNS:@"http://jabber.org/protocol/caps"];
     [self.children addObject:c];
     

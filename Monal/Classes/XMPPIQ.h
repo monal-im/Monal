@@ -41,12 +41,6 @@
 -(void) setDiscoInfoWithFeaturesAndNode:(NSString*) node;
 
 /**
- Disco info response to another client
- */
-
--(void) setDiscoItemsWithCommands;
-
-/**
  sets up a disco info query node
  */
 -(void) setDiscoInfoNode;

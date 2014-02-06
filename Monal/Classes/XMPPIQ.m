@@ -63,8 +63,10 @@
         [queryNode. attributes setObject:node forKey:@"node"];
     }
     
-   NSArray* features=@[@"http://jabber.org/protocol/disco#info", @"http://jabber.org/protocol/disco#items",@"jabber:iq:version", @"http://jabber.org/protocol/muc#user",@"urn:xmpp:jingle:1",@"urn:xmpp:jingle:transports:raw-udp:0",
-                       @"urn:xmpp:jingle:transports:raw-udp:1",@"urn:xmpp:jingle:apps:rtp:1",@"urn:xmpp:jingle:apps:rtp:audio"];
+   NSArray* features=@[@"http://jabber.org/protocol/caps",@"http://jabber.org/protocol/disco#info", @"http://jabber.org/protocol/disco#items",@"http://jabber.org/protocol/muc#user"
+                       ];
+//    ,@"jabber:iq:version", ,@"urn:xmpp:jingle:1",@"urn:xmpp:jingle:transports:raw-udp:0",
+//                       @"urn:xmpp:jingle:transports:raw-udp:1",@"urn:xmpp:jingle:apps:rtp:1",@"urn:xmpp:jingle:apps:rtp:audio"];
     
     for(NSString* feature in features)
     {
@@ -80,24 +82,12 @@
     identityNode.element=@"identity";
     [identityNode.attributes setObject:@"client" forKey:@"category"];
      [identityNode.attributes setObject:@"phone" forKey:@"type"];
-     [identityNode.attributes setObject:@"monal" forKey:@"name"];
+     [identityNode.attributes setObject:[NSString stringWithFormat:@"Monal %@", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]] forKey:@"name"];
     [queryNode.children addObject:identityNode];
        
     [self.children addObject:queryNode];
     
 }
-
--(void) setDiscoItemsWithCommands
-{
-    XMLNode* queryNode =[[XMLNode alloc] init];
-    queryNode.element=@"query";
-    [queryNode setXMLNS:@"http://jabber.org/protocol/disco#items"];
-    [queryNode.attributes setObject:@"http://jabber.org/protocol/commands" forKey:@"node"];
-    
-    [self.children addObject:queryNode];
-    
-}
-
 
 -(void) setiqTo:(NSString*) to
 {
@@ -155,10 +145,7 @@
     
     XMLNode* appVersion =[[XMLNode alloc] init];
     appVersion.element=@"version";
-    appVersion.data=[NSString stringWithFormat:@"%@ (%@)",
-                     [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"],
-                     [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"]];
-    
+    appVersion.data=[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
     
     [queryNode.children addObject:name];
     [queryNode.children addObject:os];

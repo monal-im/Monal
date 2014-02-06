@@ -24,13 +24,18 @@
     self.versionHash=version;
     
     XMLNode* c =[[XMLNode alloc] init];
-    c.element=@"c";
+    c.element=@"caps:c ";
     [c.attributes setObject:@"http://monal.im/caps" forKey:@"node"];
     [c.attributes setObject:self.versionHash forKey:@"ver"];
-    [c.attributes setObject:@"sha-1" forKey:@"hash"];
+//    [c.attributes setObject:@"sha-1" forKey:@"hash"];
     [c.attributes setObject:[NSString stringWithFormat:@"%@ %@", kextpmuc, kextvoice] forKey:@"ext"]; //deprecated .. for legacy
-    [c setXMLNS:@"http://jabber.org/protocol/caps"];
+    [c.attributes setObject:@"http://jabber.org/protocol/caps" forKey:@"xmlns:caps"];
     [self.children addObject:c];
+    
+    /*
+     having xmlns:caps seems to make it accept legacy caps? doesnt seem to check hash value
+     */
+     
     
     return self;
 }

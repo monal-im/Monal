@@ -1411,10 +1411,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(NSString*)getVersionString
 {
-    
-    NSString* unhashed=[NSString stringWithFormat:@"client/pc//Monal %@ (%@)<http://jabber.org/protocol/caps<http://jabber.org/protocol/disco#info<http://jabber.org/protocol/disco#items<http://jabber.org/protocol/muc<<http://jabber.org/protocol/offline<", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"], [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"]];
+//    
+//    NSString* unhashed=[NSString stringWithFormat:@"client/pc//Monal %@<http://jabber.org/protocol/disco#info<http://jabber.org/protocol/disco#items<http://jabber.org/protocol/muc#user<jabber:iq:version<urn:xmpp:jingle:1<urn:xmpp:jingle:apps:rtp:1<urn:xmpp:jingle:apps:rtp:audio<urn:xmpp:jingle:transports:raw-udp:0<urn:xmpp:jingle:transports:raw-udp:1<", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]];
+//    
+    NSString* unhashed=[NSString stringWithFormat:@"client/phone//Monal %@<http://jabber.org/protocol/caps<http://jabber.org/protocol/disco#info<http://jabber.org/protocol/disco#items<http://jabber.org/protocol/muc<", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]];
     NSData* hashed;
-    
+    //<http://jabber.org/protocol/offline<
     unsigned char digest[CC_SHA1_DIGEST_LENGTH];
     NSData *stringBytes = [unhashed dataUsingEncoding: NSUTF8StringEncoding]; /* or some other encoding */
     if (CC_SHA1([stringBytes bytes], [stringBytes length], digest)) {

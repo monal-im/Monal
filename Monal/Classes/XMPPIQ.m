@@ -155,7 +155,9 @@
     
     XMLNode* appVersion =[[XMLNode alloc] init];
     appVersion.element=@"version";
-    appVersion.data=[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
+    appVersion.data=[NSString stringWithFormat:@"%@ (%@)",
+                     [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"],
+                     [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"]];
     
     
     [queryNode.children addObject:name];

@@ -690,7 +690,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 
             }
             
-            if((iqNode.discoInfo)  )
+            if((iqNode.discoInfo) && [iqNode.from isEqualToString:_server] )
             {
                 
                 XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqResultType];
@@ -700,6 +700,18 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 [self send:discoInfo];
                 
             }
+            
+            if((iqNode.discoInfo) && ![iqNode.from isEqualToString:_server] )
+            {
+                
+                XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqResultType];
+                [discoInfo setiqTo:iqNode.from];
+                [discoInfo setDiscoItemsWithCommands];
+                
+                [self send:discoInfo];
+                
+            }
+            
             
             if(iqNode.vCard)
             {

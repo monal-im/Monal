@@ -35,9 +35,15 @@
 
 #pragma mark disco
 /**
- makes a disco info response
+ makes a disco info response for the server
  */
 -(void) setDiscoInfoWithFeatures;
+
+/**
+ Disco info response to another client
+ */
+
+-(void) setDiscoItemsWithCommands;
 
 /**
  sets up a disco info query node

@@ -84,6 +84,18 @@
     
 }
 
+-(void) setDiscoItemsWithCommands
+{
+    XMLNode* queryNode =[[XMLNode alloc] init];
+    queryNode.element=@"query";
+    [queryNode setXMLNS:@"http://jabber.org/protocol/disco#items"];
+    [queryNode.attributes setObject:@"http://jabber.org/protocol/commands" forKey:@"node"];
+    
+    [self.children addObject:queryNode];
+    
+}
+
+
 -(void) setiqTo:(NSString*) to
 {
     if(to)

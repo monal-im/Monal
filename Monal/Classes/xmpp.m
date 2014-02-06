@@ -692,7 +692,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             
             if((iqNode.discoInfo))
             {
-                XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqResultType];
+                XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
                 [discoInfo setiqTo:iqNode.from];
                 [discoInfo setDiscoInfoWithFeaturesAndNode:iqNode.queryNode];
                 [self send:discoInfo];
@@ -727,14 +727,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             
             if(iqNode.ping)
             {
-                XMPPIQ* pong =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqResultType];
+                XMPPIQ* pong =[[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
                 [pong setiqTo:_domain];
                 [self send:pong];
             }
             
             if (iqNode.version)
             {
-                XMPPIQ* versioniq =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqResultType];
+                XMPPIQ* versioniq =[[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
                 [versioniq setiqTo:iqNode.from];
                 [versioniq setVersion];
                 [self send:versioniq];
@@ -742,7 +742,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             
             if (iqNode.last)
             {
-                XMPPIQ* lastiq =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqResultType];
+                XMPPIQ* lastiq =[[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
                 [lastiq setiqTo:iqNode.from];
                 [lastiq setLast];
                 [self send:lastiq];
@@ -750,10 +750,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             
             if (iqNode.time)
             {
-                XMPPIQ* timeiq =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqResultType];
-                [timeiq setiqTo:iqNode.from];
-                //[lastiq setLast];
-                [self send:timeiq];
+//                XMPPIQ* timeiq =[[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
+//                [timeiq setiqTo:iqNode.from];
+//                //[lastiq setLast];
+//                [self send:timeiq];
             }
             
   

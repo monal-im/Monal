@@ -750,10 +750,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             
             if (iqNode.time)
             {
-//                XMPPIQ* timeiq =[[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
-//                [timeiq setiqTo:iqNode.from];
-//                //[lastiq setLast];
-//                [self send:timeiq];
+                XMPPIQ* timeiq =[[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
+                [timeiq setiqTo:iqNode.from];
+                //[lastiq setLast];
+                [self send:timeiq];
             }
             
   

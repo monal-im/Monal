@@ -214,7 +214,7 @@
             cell.textLabel.text=[NSString stringWithFormat:@"%@@%@", [[_accountList objectAtIndex:indexPath.row] objectForKey:@"username"],
                                  [[_accountList objectAtIndex:indexPath.row] objectForKey:@"domain"]];
             if([[[_accountList objectAtIndex:indexPath.row] objectForKey:@"enabled"] boolValue] ==YES) {
-                   cell.imageView.image=[UIImage imageNamed:@"enabled"];
+                   cell.imageView.image=[UIImage imageNamed:@"888-checkmark"];
                 if([[MLXMPPManager sharedInstance] isAccountForIdConnected:[[_accountList objectAtIndex:indexPath.row] objectForKey:@"account_id"]])
                     cell.accessoryView =[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"available"]];
                 else

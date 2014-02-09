@@ -43,7 +43,7 @@
     NSURLRequest *urlRequest = [NSURLRequest requestWithURL:websiteUrl];
     [_webView loadRequest:urlRequest];
     
-    UIBarButtonItem* rightButton =[[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"back"] style:UIBarButtonItemStyleBordered target:self action:@selector(goBack)];
+    UIBarButtonItem* rightButton =[[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"765-arrow-left"] style:UIBarButtonItemStyleBordered target:self action:@selector(goBack)];
     self.navigationItem.rightBarButtonItem=rightButton; 
      
 }

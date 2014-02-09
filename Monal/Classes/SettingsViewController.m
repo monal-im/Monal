@@ -197,7 +197,7 @@
         {
             
             cell.textInputField.placeholder=NSLocalizedString(@"Status Message", @"");
-            cell.textInputField.keyboardType=UIKeyboardTypeNumbersAndPunctuation;
+            cell.textInputField.keyboardType=UIKeyboardTypeAlphabet;
             cell.defaultKey=@"StatusMessage";
             cell.textEnabled=YES;
             return cell; 

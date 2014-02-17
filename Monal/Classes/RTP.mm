@@ -116,17 +116,12 @@ void checkerror(int rtperr)
                         {
                             playState.playing=YES;
                             debug_NSLog(@"Started play back ");
-                            
-                            
                             for(int i = 0; i < NUM_BUFFERS; i++)
                             {
-                                
-                                
                                 // needs a proper circular buffer before i use this again..
                                 AudioOutputCallback(&playState, playState.queue, playState.buffers[i]);
                             }
-                            
-                            
+     
                         }
                     }
                     
@@ -139,17 +134,11 @@ void checkerror(int rtperr)
         OSStatus status = sess.Poll();
         checkerror(status);
         if(status!=0) break;
-        
-        
         //wait
         jrtplib::RTPTime::Wait(jrtplib::RTPTime(1,0));
-        
-        
-        
+
     }
     debug_NSLog(@"leaving RTP listen thread");
-    [NSThread exit];
-    
 }
 
 
@@ -249,15 +238,12 @@ void AudioOutputCallback(
             if(availableBytes>=bytesToCopy)
             {
                 void *targetBuffer = malloc(160);
-                
                 memcpy(targetBuffer, buffer, bytesToCopy );
-                
-                
+  
                 int rtpstatus = sess.SendPacket(targetBuffer,bytesToCopy,8,false, bytesToCopy);
                 // pt=8  is PCMA ,  timestamp 2x80 =160 is for 2x 8Khz records at 5 ms
                 checkerror(rtpstatus);
                 if(rtpstatus!=0) break; //  stop sending
-                
                 
                 //clean up
                 TPCircularBufferConsume(&packetOutCircularBuffer, bytesToCopy);
@@ -268,8 +254,6 @@ void AudioOutputCallback(
     }
     
     debug_NSLog(@"leaving RTP send thread");
-    
-    [NSThread exit];
 }
 
 
@@ -474,26 +458,35 @@ void AudioInputCallback(
         debug_NSLog(@"error starting record");
         //return -1;
     }
-    
-    
+
     // ouput
-    
     if(status == 0)
     {
-        
         for(int i = 0; i < NUM_BUFFERS; i++)
         {
             
             AudioQueueAllocateBuffer(playState.queue, 160, &playState.buffers[i]);
-            
         }
         
     }
     
-    [NSThread detachNewThreadSelector:@selector(listenThread) toTarget:self withObject:nil];
-    [NSThread detachNewThreadSelector:@selector(sendThread) toTarget:self withObject:nil];
     
-    [[NSRunLoop currentRunLoop] run]; //needed for callbacks
+    NSString* monalNetReadQueue =@"im.monal.jingleReadQueue.%@";
+    NSString* monalNetWriteQueue =@"im.monal.jingleWriteQueue.%@";
+    
+    dispatch_queue_t _netReadQueue = dispatch_queue_create([monalNetReadQueue UTF8String], DISPATCH_QUEUE_SERIAL);
+    dispatch_queue_t _netWriteQueue = dispatch_queue_create([monalNetWriteQueue UTF8String], DISPATCH_QUEUE_SERIAL);
+    
+    
+    dispatch_async(_netReadQueue, ^{
+        [self listenThread];
+    });
+    
+    dispatch_async(_netWriteQueue, ^{
+        [self sendThread];
+    });
+    
+    [[NSRunLoop currentRunLoop] run]; //needed for audio callbacks
     return 0;
     
 }

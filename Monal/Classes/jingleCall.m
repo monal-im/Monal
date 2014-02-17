@@ -30,9 +30,11 @@
     self.activeCall=YES;
     // rtp2 =[RTP alloc];
     //  [rtp2 RTPConnect:theaddress:[destinationPort2 intValue]:[localPort2 intValue] ];
-    
-    rtp =[RTP alloc];
-    return [rtp RTPConnectAddress:self.recipientIP onRemotePort:[self.destinationPort intValue] withLocalPort:[self.localPort intValue]];
+    dispatch_async(dispatch_get_current_queue(), ^{
+        rtp =[[RTP alloc] init];
+        [rtp RTPConnectAddress:self.recipientIP onRemotePort:[self.destinationPort intValue] withLocalPort:[self.localPort intValue]];
+    });
+   return 0;
 }
 
 -(void) rtpDisconnect

@@ -240,17 +240,12 @@ void AudioOutputCallback(
     while(1)
     {
         if(disconnecting) break;
-        
         //let it bufer a little
         if(packCount>300)
         {
-            
-            
             uint32_t bytesToCopy=160;
             int32_t availableBytes;
             void *buffer = TPCircularBufferTail(&packetOutCircularBuffer, &availableBytes);
-            
-            
             if(availableBytes>=bytesToCopy)
             {
                 void *targetBuffer = malloc(160);
@@ -269,11 +264,7 @@ void AudioOutputCallback(
                 free(targetBuffer);
             }
             
-            
-            
         }
-        
-        
     }
     
     debug_NSLog(@"leaving RTP send thread");
@@ -321,7 +312,6 @@ void AudioInputCallback(
     packCount=0;
     
     disconnecting=NO;
-    
     
     [[AVAudioSession sharedInstance] setCategory: AVAudioSessionCategoryPlayAndRecord error: nil];
     
@@ -407,7 +397,7 @@ void AudioInputCallback(
     uint16_t portbase,destport;
     uint32_t destip;
     std::string ipstr([IP  cStringUsingEncoding:NSUTF8StringEncoding]);
-    int status,i;
+    int status;
     
     destport=destPort;
     portbase=localPort;
@@ -448,11 +438,7 @@ void AudioInputCallback(
     
     if(status!=0) return status;
     
-    
-    
-    
-    
-    
+  
     for(int i = 0; i < NUM_BUFFERS_REC; i++)
     {
         audioStatus= AudioQueueAllocateBuffer(recordState.queue,
@@ -460,7 +446,7 @@ void AudioInputCallback(
         
         if(audioStatus==0)
         {
-            // debug_NSLog("audio buffer allocate ok")
+          //   debug_NSLog("audio buffer allocate ok")
         }
         else {
             debug_NSLog(@"audio in  buffer allocate error %d", audioStatus);
@@ -470,7 +456,7 @@ void AudioInputCallback(
         
         if(audioStatus==0)
         {
-            // debug_NSLog("audio buffer initial enqueue ok")
+           //  debug_NSLog("audio buffer initial enqueue ok")
         }
         else {
             debug_NSLog(@"audio in buffer  initial enqueue error %d", audioStatus);
@@ -502,15 +488,12 @@ void AudioInputCallback(
             
         }
         
-        
-        
     }
     
-    
     [NSThread detachNewThreadSelector:@selector(listenThread) toTarget:self withObject:nil];
-    
     [NSThread detachNewThreadSelector:@selector(sendThread) toTarget:self withObject:nil];
     
+    [[NSRunLoop currentRunLoop] run]; //needed for callbacks
     return 0;
     
 }

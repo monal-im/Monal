@@ -36,7 +36,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 @interface xmpp()
 {
-
+    
 }
 @end
 
@@ -284,7 +284,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             // try again
             if((!self.loggedIn) && (_loggedInOnce))
             {
-                   DDLogInfo(@"trying to login again");
+                DDLogInfo(@"trying to login again");
                 [self reconnect];
             }
             
@@ -639,10 +639,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         if([[nextStanzaPos objectForKey:@"stanzaType"]  isEqualToString:@"iq"])
         {
             ParseIq* iqNode= [[ParseIq alloc]  initWithDictionary:nextStanzaPos];
-                  if ([iqNode.type isEqualToString:kiqErrorType])
-                  {
-                      return;
-                  }
+            if ([iqNode.type isEqualToString:kiqErrorType])
+            {
+                return;
+            }
             if(iqNode.shouldSetBind)
             {
                 _jid=iqNode.jid;
@@ -756,7 +756,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 [self send:timeiq];
             }
             
-  
+            
             if ([iqNode.type isEqualToString:kiqResultType])
             {
                 if(iqNode.discoItems==YES)
@@ -789,7 +789,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             }
                             else
                             {
-                             // update info if needed
+                                // update info if needed
                                 
                                 [[DataLayer sharedInstance] setFullName:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@"" forBuddy:[contact objectForKey:@"jid"]?[contact objectForKey:@"jid"]:@"" andAccount:_accountNo ] ;
                                 
@@ -802,8 +802,72 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     }
                     
                 }
+                
+                if([iqNode.idval isEqualToString:self.jingle.idval])
+                {
+                    //confirmation of set call
+                    [self.jingle rtpConnect];
+                }
             }
             
+            
+            if ([iqNode.type isEqualToString:kiqSetType]) {
+                if(iqNode.jingleSession) {
+                      if([[iqNode.jingleSession objectForKey:@"action"] isEqualToString:@"session-terminate"]) {
+                          XMPPIQ* node = [[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
+                          [node setiqTo:iqNode.from];
+                          [self send:node];
+                          [self.jingle rtpDisconnect];
+                      }
+                    
+                    if([[iqNode.jingleSession objectForKey:@"action"] isEqualToString:@"session-initiate"]) {
+                        NSDictionary* pcmaPayload;
+                        for(NSDictionary* payload in iqNode.jinglePayloadTypes) {
+                            if([[payload objectForKey:@"name"] isEqualToString:@"PCMA"]) {
+                                pcmaPayload=payload;
+                                break;
+                            }
+                        }
+                        
+                        NSDictionary* transport1;
+                        NSDictionary* transport2;
+                        for(NSDictionary* candidate in iqNode.jingleTransportCandidates) {
+                            if([[candidate objectForKey:@"component"] isEqualToString:@"1"]) {
+                                transport1=candidate;
+                            }
+                            if([[candidate objectForKey:@"component"] isEqualToString:@"2"]) {
+                                transport2=candidate;
+                            }
+                        }
+                        
+                        if (pcmaPayload && transport1) {
+                            self.jingle = [[jingleCall alloc] init];
+                            self.jingle.initiator= [iqNode.jingleSession objectForKey:@"initiator"];
+                            self.jingle.responder= [iqNode.jingleSession objectForKey:@"responder"];
+                            self.jingle.thesid= [iqNode.jingleSession objectForKey:@"sid"];
+                            self.jingle.destinationPort= [transport1 objectForKey:@"port"];
+                            self.jingle.idval=iqNode.idval;
+                            if(transport2) {
+                                self.jingle.destinationPort2= [transport2 objectForKey:@"port"];
+                            }
+                            else {
+                                self.jingle.destinationPort2=[transport1 objectForKey:@"port"]; // if nothing is provided just reuse..
+                            }
+                            self.jingle.recipeintIP=[transport1 objectForKey:@"ip"];
+                            
+                            NSArray* nameParts= [iqNode.from componentsSeparatedByString:@"/"];
+                            if([nameParts count]>1) {
+                                XMPPIQ* node =[self.jingle acceptJingleTo:[nameParts objectAtIndex:0] withId:iqNode.idval andResource:[nameParts objectAtIndex:1]];
+                                [self send:node];
+                            }
+                        }
+                        else {
+                            //does not support the same formats
+                        }
+                        
+                    }
+                }
+            }
             
             //*** MUC related
             if(iqNode.conferenceServer)
@@ -996,12 +1060,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             else if([presenceNode.type isEqualToString:kpresenceUnavailable])
             {
                 if ([[DataLayer sharedInstance] setOfflineBuddy:presenceNode forAccount:_accountNo] ) {
-                NSDictionary* userDic=@{kusernameKey: presenceNode.user,
-                                        kaccountNoKey:_accountNo};
-                dispatch_async(_xmppQueue, ^{
-                    [self.contactsVC removeOnlineUser:userDic];
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactOfflineNotice object:self userInfo:userDic];
-                });
+                    NSDictionary* userDic=@{kusernameKey: presenceNode.user,
+                                            kaccountNoKey:_accountNo};
+                    dispatch_async(_xmppQueue, ^{
+                        [self.contactsVC removeOnlineUser:userDic];
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactOfflineNotice object:self userInfo:userDic];
+                    });
                 }
                 
             }
@@ -1201,7 +1265,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         }
                     }
                     
-                   if(!realm) realm=@"";
+                    if(!realm) realm=@"";
                     
                     NSData* cnonce_Data=[EncodingTools MD5: [NSString stringWithFormat:@"%d",arc4random()%100000]];
                     NSString* cnonce =[EncodingTools hexadecimalString:cnonce_Data];
@@ -1411,9 +1475,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(NSString*)getVersionString
 {
-//    
-//    NSString* unhashed=[NSString stringWithFormat:@"client/pc//Monal %@<http://jabber.org/protocol/disco#info<http://jabber.org/protocol/disco#items<http://jabber.org/protocol/muc#user<jabber:iq:version<urn:xmpp:jingle:1<urn:xmpp:jingle:apps:rtp:1<urn:xmpp:jingle:apps:rtp:audio<urn:xmpp:jingle:transports:raw-udp:0<urn:xmpp:jingle:transports:raw-udp:1<", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]];
-//    
+    // We may need this later
+    //    NSString* unhashed=[NSString stringWithFormat:@"client/pc//Monal %@<http://jabber.org/protocol/disco#info<http://jabber.org/protocol/disco#items<http://jabber.org/protocol/muc#user<jabber:iq:version<urn:xmpp:jingle:1<urn:xmpp:jingle:apps:rtp:1<urn:xmpp:jingle:apps:rtp:audio<urn:xmpp:jingle:transports:raw-udp:0<urn:xmpp:jingle:transports:raw-udp:1<", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]];
+    //
     NSString* unhashed=[NSString stringWithFormat:@"client/phone//Monal %@<http://jabber.org/protocol/caps<http://jabber.org/protocol/disco#info<http://jabber.org/protocol/disco#items<http://jabber.org/protocol/muc<", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]];
     NSData* hashed;
     //<http://jabber.org/protocol/offline<
@@ -1553,7 +1617,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     if(!_jingle) _jingle=[[jingleCall alloc] init];
     
-    XMPPIQ* jingleiq =[self.jingle initiateJingle:[contact objectForKey:@"buddy_name" ] withId:_sessionKey andResource:[contact objectForKey:@"resource" ]];
+    XMPPIQ* jingleiq =[self.jingle initiateJingleTo:[contact objectForKey:@"buddy_name" ] withId:_sessionKey andResource:[contact objectForKey:@"resource" ]];
     [self send:jingleiq];
 }
 

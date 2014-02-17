@@ -31,11 +31,15 @@
     //  [rtp2 RTPConnect:theaddress:[destinationPort2 intValue]:[localPort2 intValue] ];
     
     rtp =[RTP alloc];
-    return [rtp RTPConnectAddress:self.theaddress onRemotePort:[self.destinationPort intValue] withLocalPort:[self.localPort intValue]];
+    return [rtp RTPConnectAddress:self.recipeintIP onRemotePort:[self.destinationPort intValue] withLocalPort:[self.localPort intValue]];
 }
 
+-(void) rtpDisconnect
+{
+    [rtp RTPDisconnect];
+}
 
-#pragma mark helper methods 
+#pragma mark helper methods
 
 - (NSString *)hostname
 {
@@ -63,13 +67,9 @@
 
 #pragma mark jingle nodes
 
--(XMPPIQ*) acceptJingle:(NSString*) to  withId:(NSString*)iqid andResource:(NSString*) resource
+-(XMPPIQ*) acceptJingleTo:(NSString*) to  withId:(NSString*)iqid andResource:(NSString*) resource
 {
-    if(didStartCall==YES)
-    {
-        return nil;
-    }
-    
+    if(didStartCall==YES) return nil;
     if (self.activeCall==YES) return nil;
     
     int localPortInt=[self.destinationPort intValue]+2;
@@ -77,19 +77,16 @@
     self.localPort=[NSString stringWithFormat:@"%d",localPortInt];
     
     self.localPort2=[NSString stringWithFormat:@"%d",localPortInt+10];
-    self.initiator=self.otherParty;
-    self.responder=self.me;
     
-   NSDictionary* info =@{self.initiator:@"initiator", self.responder:@"responder", self.thesid:@"sid", _ownIP:@"ownip", self.localPort:@"localport1", self.localPort2:@"localport2"};
+    NSDictionary* info =@{@"initiator":self.initiator, @"responder":self.responder, @"sid":self.thesid, @"ownip":_ownIP, @"localport1":self.localPort,@"localport2":self.localPort2};
     
     XMPPIQ* node =[[XMPPIQ alloc] initWithId:iqid andType:kiqSetType];
-    [node setJingleInitiateTo:to andResource:resource withValues:info];
-    
+    [node setJingleAcceptTo:to andResource:resource withValues:info];
     
     return node;
 }
 
--(XMPPIQ*) initiateJingle:(NSString*) to  withId:(NSString*)iqid andResource:(NSString*) resource
+-(XMPPIQ*) initiateJingleTo:(NSString*) to  withId:(NSString*)iqid andResource:(NSString*) resource
 {
     didStartCall=YES;
     self.activeCall=YES;
@@ -97,7 +94,7 @@
     self.localPort=@"7078"; // some random val
     self.localPort2=@"7079"; // some random val
     self.otherParty=to;
-  
+    
     
     self.thesid=@"Monal3sdfg"; //something random
     
@@ -107,7 +104,7 @@
     
     //initiator, responder, sid, ownip, localport1, localport2
     
-    NSDictionary* info =@{self.initiator:@"initiator", self.responder:@"responder", self.thesid:@"sid", _ownIP:@"ownip", self.localPort:@"localport1", self.localPort2:@"localport2"};
+     NSDictionary* info =@{@"initiator":self.initiator, @"responder":self.responder, @"sid":self.thesid, @"ownip":_ownIP, @"localport1":self.localPort,@"localport2":self.localPort2};
     
     XMPPIQ* node =[[XMPPIQ alloc] initWithId:iqid andType:kiqSetType];
     [node setJingleInitiateTo:to andResource:resource withValues:info];
@@ -115,10 +112,10 @@
     return node;
 }
 
--(XMPPIQ*) rejectJingle:(NSString*) to  withId:(NSString*)iqid andResource:(NSString*) resource
+-(XMPPIQ*) rejectJingleTo:(NSString*) to  withId:(NSString*)iqid andResource:(NSString*) resource
 {
-
-       NSDictionary* info =@{self.initiator:@"initiator", self.responder:@"responder", self.thesid:@"sid", _ownIP:@"ownip", self.localPort:@"localport1", self.localPort2:@"localport2"};
+    
+    NSDictionary* info =@{@"initiator":self.initiator, @"responder":self.responder, @"sid":self.thesid, @"ownip":_ownIP, @"localport1":self.localPort,@"localport2":self.localPort2};
     
     XMPPIQ* node =[[XMPPIQ alloc] initWithId:iqid andType:kiqSetType];
     [node setJingleDeclineTo:to andResource:resource withValues:info];
@@ -127,12 +124,12 @@
 }
 
 
--(XMPPIQ*) terminateJingle:(NSString*) to  withId:(NSString*)iqid andResource:(NSString*) resource
+-(XMPPIQ*) terminateJingleTo:(NSString*) to  withId:(NSString*)iqid andResource:(NSString*) resource
 {
     
     [rtp RTPDisconnect];
     
-       NSDictionary* info =@{self.initiator:@"initiator", self.responder:@"responder", self.thesid:@"sid", _ownIP:@"ownip", self.localPort:@"localport1", self.localPort2:@"localport2"};
+     NSDictionary* info =@{@"initiator":self.initiator, @"responder":self.responder, @"sid":self.thesid, @"ownip":_ownIP, @"localport1":self.localPort,@"localport2":self.localPort2};
     
     XMPPIQ* node =[[XMPPIQ alloc] initWithId:iqid andType:kiqSetType];
     [node setJingleTerminateTo:to andResource:resource withValues:info];

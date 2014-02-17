@@ -45,4 +45,9 @@
 //discovered services
 @property (nonatomic, strong, readonly) NSString* conferenceServer;
 
+//Jingle
+@property (nonatomic, strong, readonly) NSDictionary* jingleSession;
+@property (nonatomic, strong, readonly) NSMutableArray* jinglePayloadTypes;
+@property (nonatomic, strong, readonly) NSMutableArray* jingleTransportCandidates;
+
 @end

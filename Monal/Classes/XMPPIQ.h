@@ -91,6 +91,10 @@ removes a contact from the roster
  */
 -(void) setJingleInitiateTo:(NSString*) jid andResource:(NSString*) resource withValues:(NSDictionary*) info;
 /**
+ Dictionary info has initiator, responder, sid, ownip, localport1, localport2
+ */
+-(void) setJingleAcceptTo:(NSString*) jid andResource:(NSString*) resource withValues:(NSDictionary*) info;
+/**
  Dictionary info has initiator, responder, sid
  */
 -(void) setJingleDeclineTo:(NSString*) jid andResource:(NSString*) resource withValues:(NSDictionary*) info;

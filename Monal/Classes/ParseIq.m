@@ -103,6 +103,43 @@
         }
     }
     
+    //** jingle ** /
+    
+    if([elementName isEqualToString:@"jingle"] &&  [[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:jingle:1"])
+     {
+         _jingleSession=[attributeDict copy];
+         return;
+     }
+    
+    if([elementName isEqualToString:@"description"] &&  [[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:jingle:apps:rtp:1"])
+    {
+        State=@"jingleDescription";
+        return;
+    }
+    
+    if([elementName isEqualToString:@"payload-type"] &&  [State isEqualToString:@"jingleDescription"])
+    {
+        if(!_jinglePayloadTypes) {
+            _jinglePayloadTypes =[[NSMutableArray alloc] init];
+        }
+        [_jinglePayloadTypes addObject:attributeDict];
+        return;
+    }
+    
+    if([elementName isEqualToString:@"transport"] &&  [[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:jingle:transports:raw-udp:1"])
+    {
+        State=@"jingleTransport";
+        return;
+    }
+    
+    if([elementName isEqualToString:@"candidate"] &&  [State isEqualToString:@"jingleTransport"])
+    {
+        if(!_jingleTransportCandidates) {
+            _jingleTransportCandidates =[[NSMutableArray alloc] init];
+        }
+        [_jingleTransportCandidates addObject:attributeDict];
+        return;
+    }
 }
 
 

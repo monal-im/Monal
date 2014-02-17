@@ -41,18 +41,19 @@
 }
 -(NSString*) getGoogleInfo:(NSString*) idval;
 
--(XMPPIQ*) acceptJingle:(NSString*) to  withId:(NSString*)iqid andResource:(NSString*) resource;
--(XMPPIQ*) rejectJingle:(NSString*) to  withId:(NSString*)iqid andResource:(NSString*) resource;
--(XMPPIQ*) initiateJingle:(NSString*) to  withId:(NSString*)iqid andResource:(NSString*) resource;
--(XMPPIQ*) terminateJingle:(NSString*) to  withId:(NSString*)iqid andResource:(NSString*) resource;
+-(XMPPIQ*) acceptJingleTo:(NSString*) to  withId:(NSString*)iqid andResource:(NSString*) resource;
+-(XMPPIQ*) rejectJingleTo:(NSString*) to  withId:(NSString*)iqid andResource:(NSString*) resource;
+-(XMPPIQ*) initiateJingleTo:(NSString*) to  withId:(NSString*)iqid andResource:(NSString*) resource;
+-(XMPPIQ*) terminateJingleTo:(NSString*) to  withId:(NSString*)iqid andResource:(NSString*) resource;
 
 -(int) rtpConnect;
+-(void) rtpDisconnect;
 
 @property (nonatomic, strong) NSString* me;
 @property (nonatomic, strong) NSString* thesid;
 @property (nonatomic, strong) NSString* otherParty;
 
-@property (nonatomic, strong) NSString* theaddress;
+@property (nonatomic, strong) NSString* recipeintIP;
 @property (nonatomic, strong) NSString* destinationPort;
 @property (nonatomic, strong) NSString* destinationPort2;
 

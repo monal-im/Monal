@@ -53,7 +53,7 @@
 @property (nonatomic, strong) NSString* thesid;
 @property (nonatomic, strong) NSString* otherParty;
 
-@property (nonatomic, strong) NSString* recipeintIP;
+@property (nonatomic, strong) NSString* recipientIP;
 @property (nonatomic, strong) NSString* destinationPort;
 @property (nonatomic, strong) NSString* destinationPort2;
 

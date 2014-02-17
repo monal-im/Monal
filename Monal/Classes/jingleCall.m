@@ -31,7 +31,7 @@
     //  [rtp2 RTPConnect:theaddress:[destinationPort2 intValue]:[localPort2 intValue] ];
     
     rtp =[RTP alloc];
-    return [rtp RTPConnectAddress:self.recipeintIP onRemotePort:[self.destinationPort intValue] withLocalPort:[self.localPort intValue]];
+    return [rtp RTPConnectAddress:self.recipientIP onRemotePort:[self.destinationPort intValue] withLocalPort:[self.localPort intValue]];
 }
 
 -(void) rtpDisconnect

@@ -853,7 +853,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             else {
                                 self.jingle.destinationPort2=[transport1 objectForKey:@"port"]; // if nothing is provided just reuse..
                             }
-                            self.jingle.recipeintIP=[transport1 objectForKey:@"ip"];
+                            self.jingle.recipientIP=[transport1 objectForKey:@"ip"];
                             
                             NSArray* nameParts= [iqNode.from componentsSeparatedByString:@"/"];
                             if([nameParts count]>1) {

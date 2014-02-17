@@ -8,20 +8,13 @@
 
 //http://xmpp.org/extensions/xep-0166.html
 
-#include <ifaddrs.h>
-#include <arpa/inet.h>
 
 #import <Foundation/Foundation.h>
 //RTP library (jrtlb obj-c wrapper)
 #import "RTP.hh"
 
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <net/if.h>
-#include <ifaddrs.h>
-
 #import "XMPPIQ.h"
-
+#import "IPAddress.h"
 
 @interface jingleCall : NSObject
 {

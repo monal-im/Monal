@@ -14,7 +14,8 @@
     self=[super init];
     if(self)
     {
-        _ownIP=[self localIPAddress];
+        IPAddress* ip = [[IPAddress alloc] init];
+        _ownIP=[ip getIPAddress:YES];
     }
     return self;
 }
@@ -37,31 +38,6 @@
 -(void) rtpDisconnect
 {
     [rtp RTPDisconnect];
-}
-
-#pragma mark helper methods
-
-- (NSString *)hostname
-{
-    char baseHostName[256];
-    int success = gethostname(baseHostName, 255);
-    if (success != 0) return nil;
-    baseHostName[255] = '\0';
-    
-#if !TARGET_IPHONE_SIMULATOR
-    return [NSString stringWithFormat:@"%s.local", baseHostName];
-#else
-    return [NSString stringWithFormat:@"%s", baseHostName];
-#endif
-}
-
-// return IP Address
-- (NSString *)localIPAddress
-{
-    struct hostent *host = gethostbyname([[self hostname] UTF8String]);
-    if (!host) {herror("resolv"); return nil;}
-    struct in_addr **list = (struct in_addr **)host->h_addr_list;
-    return [NSString stringWithCString:inet_ntoa(*list[0]) encoding:NSUTF8StringEncoding];
 }
 
 

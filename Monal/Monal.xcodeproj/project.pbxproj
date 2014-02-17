@@ -191,6 +191,7 @@
 		26EE8B22179B7B0E006781F3 /* SlidingMessageViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EE8B21179B7B0D006781F3 /* SlidingMessageViewController.m */; };
 		26F7BB431115F8DB00712672 /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F7BB411115F8DB00712672 /* Reachability.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		26F7BB451115F95000712672 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26F7BB441115F95000712672 /* SystemConfiguration.framework */; };
+		26FB468F18B2755A0043094F /* IPAddress.m in Sources */ = {isa = PBXBuildFile; fileRef = 26FB468E18B2755A0043094F /* IPAddress.m */; };
 		288765A50DF7441C002DB57D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 288765A40DF7441C002DB57D /* CoreGraphics.framework */; };
 /* End PBXBuildFile section */
 
@@ -473,6 +474,8 @@
 		26F7BB411115F8DB00712672 /* Reachability.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Reachability.m; sourceTree = "<group>"; };
 		26F7BB421115F8DB00712672 /* Reachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Reachability.h; sourceTree = "<group>"; };
 		26F7BB441115F95000712672 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
+		26FB468D18B2755A0043094F /* IPAddress.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IPAddress.h; sourceTree = "<group>"; };
+		26FB468E18B2755A0043094F /* IPAddress.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IPAddress.m; sourceTree = "<group>"; };
 		288765A40DF7441C002DB57D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		32CA4F630368D1EE00C91783 /* SworIM_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SworIM_Prefix.pch; sourceTree = "<group>"; };
@@ -617,6 +620,8 @@
 				2642EBC918693634006A6C12 /* jingleCall.m */,
 				2642EBC518693626006A6C12 /* RTP.hh */,
 				2642EBC618693626006A6C12 /* RTP.mm */,
+				26FB468D18B2755A0043094F /* IPAddress.h */,
+				26FB468E18B2755A0043094F /* IPAddress.m */,
 			);
 			name = Jingle;
 			sourceTree = "<group>";
@@ -1242,6 +1247,7 @@
 				261A6288176C157D00059090 /* SettingsViewController.m in Sources */,
 				261A628B176C159000059090 /* AccountsViewController.m in Sources */,
 				261A628E176C15AD00059090 /* ChatLogsViewController.m in Sources */,
+				26FB468F18B2755A0043094F /* IPAddress.m in Sources */,
 				261A6291176C15D400059090 /* GroupChatViewController.m in Sources */,
 				261A6294176C15FC00059090 /* SearchUsersViewController.m in Sources */,
 				261A6297176C160900059090 /* HelpViewController.m in Sources */,

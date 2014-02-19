@@ -142,8 +142,6 @@ void checkerror(int rtperr)
 }
 
 
-
-
 void AudioOutputCallback(
                          void* inUserData,
                          AudioQueueRef outAQ,
@@ -157,28 +155,18 @@ void AudioOutputCallback(
     }
     
     // debug_NSLog(@"Queuing buffer %lld for playback\n", playState->currentPacket);
-    
-    
-    
-    
-    
     uint32_t bytesToCopy=160;
     int32_t availableBytes;
     
-    
     void *buffer = TPCircularBufferTail(&packetInCircularBuffer, &availableBytes);
-    
-    
+
     if(availableBytes>=bytesToCopy)
     {
         uint numPackets=bytesToCopy/2;
-        
-        
         //set packet descriptor for each audio packet
         
         AudioStreamPacketDescription packetDescs[numPackets];
-        
-        
+    
         int packCounter=0;
         while(packCounter<numPackets)
         {
@@ -189,11 +177,9 @@ void AudioOutputCallback(
             packCounter++;
         }
         
-        
-        
+
         //   debug_NSLog(" read %d pcm, %d packets bytes: \n %s", bytesRead,numPackets, outBuffer->mAudioData  )
-        
-        
+  
         if(numPackets>0)
         {
             outBuffer->mAudioDataByteSize = bytesToCopy;
@@ -237,7 +223,7 @@ void AudioOutputCallback(
             void *buffer = TPCircularBufferTail(&packetOutCircularBuffer, &availableBytes);
             if(availableBytes>=bytesToCopy)
             {
-                void *targetBuffer = malloc(160);
+                void *targetBuffer = malloc(bytesToCopy);
                 memcpy(targetBuffer, buffer, bytesToCopy );
   
                 int rtpstatus = sess.SendPacket(targetBuffer,bytesToCopy,8,false, bytesToCopy);
@@ -404,7 +390,7 @@ void AudioInputCallback(
     // In this case, we'll be sending 10 samples each second, so we'll
     // put the timestamp unit to (1.0/10.0)
     
-    sessparams.SetOwnTimestampUnit(1.0/8000 );
+    sessparams.SetOwnTimestampUnit(1.0/8000.0 );
     
     sessparams.SetAcceptOwnPackets(true);
     transparams.SetPortbase(portbase);
@@ -412,9 +398,7 @@ void AudioInputCallback(
     checkerror(status);
     
     if(status!=0) return status;
-    
-    
-    
+
     jrtplib::RTPIPv4Address addr(destip,destport);
     
     status = sess.AddDestination(addr);

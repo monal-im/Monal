@@ -673,15 +673,24 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
         row = [_offlineContacts objectAtIndex:indexPath.row];
     }
     
-    cell.textLabel.text=[row objectForKey:@"full_name"];
+    NSString* fullName=[row objectForKey:@"full_name"];
+    if([[fullName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0) {
+        cell.textLabel.text=fullName;
+    }
+    else {
+        cell.textLabel.text=[row objectForKey:@"buddy_name"];
+    }
+    
     if(![[row objectForKey:@"status"] isEqualToString:@"(null)"] && ![[row objectForKey:@"status"] isEqualToString:@""])
         cell.detailTextLabel.text=[row objectForKey:@"status"];
     else
         cell.detailTextLabel.text=nil;
     
-    if(([[row objectForKey:@"state"] isEqualToString:@"away"]) ||
-       ([[row objectForKey:@"state"] isEqualToString:@"dnd"])||
-       ([[row objectForKey:@"state"] isEqualToString:@"xa"])
+    NSString* stateString=[[row objectForKey:@"state"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] ;
+    
+    if(([stateString isEqualToString:@"away"]) ||
+       ([stateString isEqualToString:@"dnd"])||
+       ([stateString isEqualToString:@"xa"])
        )
     {
         cell.status=kStatusAway;

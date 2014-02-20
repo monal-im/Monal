@@ -113,11 +113,6 @@ Returns the name of the conencted account
 -(void) hangupContact:(NSDictionary*) contact;
 
 /**
- declines a call from a contact
- */
--(void) declineContact:(NSDictionary*) contact;
-
-/**
  Checks if there are any enabled acconts and connects them if necessary.
  */
 -(void)sendMessage:(NSString*) message toContact:(NSString*)contact fromAccount:(NSString*) accountNo isMUC:(BOOL) isMUC withCompletionHandler:(void (^)(BOOL success)) completion;

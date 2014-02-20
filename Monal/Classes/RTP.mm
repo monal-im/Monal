@@ -454,7 +454,6 @@ void AudioInputCallback(
         
     }
     
-    
     NSString* monalNetReadQueue =@"im.monal.jingleReadQueue.%@";
     NSString* monalNetWriteQueue =@"im.monal.jingleWriteQueue.%@";
     

@@ -358,12 +358,12 @@
 }
 -(void) setJingleDeclineTo:(NSString*) jid andResource:(NSString*) resource withValues:(NSDictionary*) info
 {
+    [self setiqTo:[NSString stringWithFormat:@"%@/%@",jid,resource]];
+
     XMLNode* jingleNode =[[XMLNode alloc] init];
     jingleNode.element=@"jingle";
     [jingleNode setXMLNS:@"urn:xmpp:jingle:1"];
     [jingleNode.attributes setObject:@"session-terminate" forKey:@"action"];
-    [jingleNode.attributes setObject:[info objectForKey:@"initiator"] forKey:@"initiator"];
-    [jingleNode.attributes setObject:[info objectForKey:@"responder"] forKey:@"responder"];
     [jingleNode.attributes setObject:[info objectForKey:@"sid"] forKey:@"sid"];
     
     XMLNode* reason =[[XMLNode alloc] init];
@@ -376,10 +376,6 @@
     [jingleNode.children addObject:reason];
     [self.children addObject:jingleNode];
     
-
-    
-//    [query appendFormat:@"<iq   id='%@'   to='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-terminate'  initiator='%@' responder='%@' sid='%@'> <reason> <decline/> </reason> </jingle> </iq>", self.idval, self.otherParty, self.otherParty, self.me,  self.thesid];
-//    
 }
 
 -(void) setJingleTerminateTo:(NSString*) jid andResource:(NSString*) resource withValues:(NSDictionary*) info
@@ -405,9 +401,7 @@
     [jingleNode.children addObject:reason];
     [self.children addObject:jingleNode];
 
-    
-//    [query appendFormat:@"<iq   id='%@'   to='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-terminate'  initiator='%@' responder='%@' sid='%@'> <reason> <success/> </reason> </jingle> </iq>", self.idval, self.otherParty, self.initiator, self.responder,  self.thesid];
-//    
+  
 }
 
 

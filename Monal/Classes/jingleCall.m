@@ -92,8 +92,7 @@
 
 -(XMPPIQ*) rejectJingleTo:(NSString*) to  withId:(NSString*)iqid andResource:(NSString*) resource
 {
-    
-    NSDictionary* info =@{@"initiator":self.initiator, @"responder":self.responder, @"sid":self.thesid, @"ownip":_ownIP, @"localport1":self.localPort,@"localport2":self.localPort2};
+    NSDictionary* info =@{@"initiator":self.initiator, @"responder":self.responder, @"sid":self.thesid};
     
     XMPPIQ* node =[[XMPPIQ alloc] initWithId:iqid andType:kiqSetType];
     [node setJingleDeclineTo:to andResource:resource withValues:info];
@@ -104,10 +103,9 @@
 
 -(XMPPIQ*) terminateJingleTo:(NSString*) to  withId:(NSString*)iqid andResource:(NSString*) resource
 {
-    
     [rtp RTPDisconnect];
     
-     NSDictionary* info =@{@"initiator":self.initiator, @"responder":self.responder, @"sid":self.thesid, @"ownip":_ownIP, @"localport1":self.localPort,@"localport2":self.localPort2};
+     NSDictionary* info =@{@"initiator":self.initiator, @"responder":self.responder, @"sid":self.thesid, @"ownip":_ownIP};
     
     XMPPIQ* node =[[XMPPIQ alloc] initWithId:iqid andType:kiqSetType];
     [node setJingleTerminateTo:to andResource:resource withValues:info];

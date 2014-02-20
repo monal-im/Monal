@@ -851,8 +851,26 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             
                             NSArray* nameParts= [iqNode.from componentsSeparatedByString:@"/"];
                             if([nameParts count]>1) {
-                                XMPPIQ* node =[self.jingle acceptJingleTo:[nameParts objectAtIndex:0] withId:iqNode.idval andResource:[nameParts objectAtIndex:1]];
-                                [self send:node];
+                                
+                                dispatch_async(dispatch_get_main_queue(), ^{
+                                    
+                                    NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"Incoming Call From %@?", nil), iqNode.from ];
+                                    RIButtonItem* cancelButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Decline", nil) action:^{
+                                        XMPPIQ* node =[self.jingle rejectJingleTo:[nameParts objectAtIndex:0] withId:iqNode.idval andResource:[nameParts objectAtIndex:1]];
+                                        [self send:node];
+                                    }];
+                                    
+                                    RIButtonItem* yesButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Accept Call", nil) action:^{
+                                        
+                                        XMPPIQ* node =[self.jingle acceptJingleTo:[nameParts objectAtIndex:0] withId:iqNode.idval andResource:[nameParts objectAtIndex:1]];
+                                        [self send:node];
+                                    }];
+                                    
+                                    UIAlertView* alert =[[UIAlertView alloc] initWithTitle:@"Audio Call" message:messageString cancelButtonItem:cancelButton otherButtonItems:yesButton, nil];
+                                    [alert show];
+                                } );
+                                
+                            
                             }
                         }
                         else {

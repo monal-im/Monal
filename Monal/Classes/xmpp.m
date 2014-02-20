@@ -1627,20 +1627,25 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 #pragma mark Jingle calls
 -(void)call:(NSDictionary*) contact
 {
-    if(!_jingle) _jingle=[[jingleCall alloc] init];
+    if(self.jingle) return;
+    self.jingle=[[jingleCall alloc] init];
+    self.jingle.me=self.jid;
     
-    XMPPIQ* jingleiq =[self.jingle initiateJingleTo:[contact objectForKey:@"buddy_name" ] withId:_sessionKey andResource:[contact objectForKey:@"resource" ]];
-    [self send:jingleiq];
+    NSArray* resources= [[DataLayer sharedInstance] resourcesForContact:[contact objectForKey:@"buddy_name"]];
+    if([resources count]>0)
+    {
+        //TODO selct resource action sheet?
+        XMPPIQ* jingleiq =[self.jingle initiateJingleTo:[contact objectForKey:@"buddy_name" ] withId:_sessionKey andResource:[[resources objectAtIndex:0] objectForKey:@"resource"]];
+        [self send:jingleiq];
+    }
 }
 
 -(void)hangup:(NSDictionary*) contact
 {
-    
-}
-
--(void)decline:(NSDictionary*) contact
-{
-    
+    XMPPIQ* jingleiq =[self.jingle terminateJinglewithId:_sessionKey];
+    [self send:jingleiq];
+    [self.jingle rtpDisconnect];
+    self.jingle=nil;
 }
 
 

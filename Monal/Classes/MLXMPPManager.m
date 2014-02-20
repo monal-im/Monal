@@ -484,7 +484,7 @@ withCompletionHandler:(void (^)(BOOL success)) completion
 -(void) hangupContact:(NSDictionary*) contact
 {
     xmpp* account =[self getConnectedAccountForID:[NSString stringWithFormat:@"%@",[contact objectForKey:@"account_id"]]];
-    //[account hangup:contact];
+    [account hangup:contact];
 }
 
 

@@ -50,6 +50,9 @@
     if(didStartCall==YES) return nil;
     if (self.activeCall==YES) return nil;
     
+    didStartCall=YES;
+    self.activeCall=YES;
+    
     int localPortInt=[self.destinationPort intValue]+2;
     // local port can be the othersides port +2 shoudl be rnadom .. needs to be even for RTP
     self.localPort=[NSString stringWithFormat:@"%d",localPortInt];
@@ -61,20 +64,25 @@
     XMPPIQ* node =[[XMPPIQ alloc] initWithId:iqid andType:kiqSetType];
     [node setJingleAcceptTo:to andResource:resource withValues:info];
     
+    
     return node;
 }
 
 -(XMPPIQ*) initiateJingleTo:(NSString*) to  withId:(NSString*)iqid andResource:(NSString*) resource
 {
+
+    if(didStartCall==YES) return nil;
+    if (self.activeCall==YES) return nil;
+    
     didStartCall=YES;
     self.activeCall=YES;
     
     self.localPort=@"7078"; // some random val
     self.localPort2=@"7079"; // some random val
-    self.otherParty=to;
+    self.otherParty=[NSString stringWithFormat:@"%@/%@",to,resource];
     
-    
-    self.thesid=@"Monal3sdfg"; //something random
+    int random = rand() %100;
+    self.thesid=[NSString stringWithFormat:@"Monal%d",random];
     
     self.initiator=self.me;
     self.responder=self.otherParty;
@@ -101,14 +109,14 @@
 }
 
 
--(XMPPIQ*) terminateJingleTo:(NSString*) to  withId:(NSString*)iqid andResource:(NSString*) resource
+-(XMPPIQ*) terminateJinglewithId:(NSString*)iqid
 {
     [rtp RTPDisconnect];
     
      NSDictionary* info =@{@"initiator":self.initiator, @"responder":self.responder, @"sid":self.thesid, @"ownip":_ownIP};
     
     XMPPIQ* node =[[XMPPIQ alloc] initWithId:iqid andType:kiqSetType];
-    [node setJingleTerminateTo:to andResource:resource withValues:info];
+    [node setJingleTerminateTo:self.otherParty andResource:_activeresource withValues:info];
     
     
     return node;

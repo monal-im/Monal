@@ -20,7 +20,6 @@
 {
     
     NSString *_activeresource;
-    NSString *_resource;
     NSString *_iqid;
     NSString *_to;
     NSString *_ownIP;
@@ -37,7 +36,7 @@
 -(XMPPIQ*) acceptJingleTo:(NSString*) to  withId:(NSString*)iqid andResource:(NSString*) resource;
 -(XMPPIQ*) rejectJingleTo:(NSString*) to  withId:(NSString*)iqid andResource:(NSString*) resource;
 -(XMPPIQ*) initiateJingleTo:(NSString*) to  withId:(NSString*)iqid andResource:(NSString*) resource;
--(XMPPIQ*) terminateJingleTo:(NSString*) to  withId:(NSString*)iqid andResource:(NSString*) resource;
+-(XMPPIQ*) terminateJinglewithId:(NSString*)iqid;
 
 -(int) rtpConnect;
 -(void) rtpDisconnect;

@@ -214,7 +214,7 @@
  
    XMLNode* contentNode =[[XMLNode alloc] init];
     contentNode.element=@"content";
-    [contentNode.attributes setObject:@"creator" forKey:@"initiator"];
+    [contentNode.attributes setObject:@"initiator" forKey:@"creator"];
     [contentNode.attributes setObject:@"audio-session" forKey:@"name"];
     [contentNode.attributes setObject:@"both" forKey:@"senders"];
     [contentNode.attributes setObject:[info objectForKey:@"responder"] forKey:@"responder"];

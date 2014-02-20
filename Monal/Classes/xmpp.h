@@ -217,9 +217,9 @@ Decline a call request
 @property (nonatomic,strong) NSString* accountNo;
 
 //we should have an enumerator for this
+@property (nonatomic,assign) BOOL explicitLogout;
 @property (nonatomic,assign,readonly) BOOL logInStarted;
 @property (nonatomic,assign,readonly) BOOL loggedIn;
-@property (nonatomic,assign,readonly) BOOL disconnected; // whether an explicit disconnect had happened
 @property (nonatomic,assign,readonly) BOOL loginError;
 
 // discovered properties

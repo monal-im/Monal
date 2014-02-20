@@ -284,7 +284,7 @@ static DataLayer *sharedInstance=nil;
     NSArray* enabledAccounts = [self enabledAccountList];
     for (NSDictionary* account in enabledAccounts)
     {
-        if([[account objectForKey:@"account_id"] isEqualToString:accountNo])
+        if([[account objectForKey:@"account_id"] integerValue] == [accountNo integerValue])
         {
             return YES;
         }

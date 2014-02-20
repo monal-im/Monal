@@ -218,10 +218,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) connectionTask
 {
-    _disconnected=NO;
-    if(_xmppQueue ==NULL) {
-        _xmppQueue=dispatch_get_current_queue();
-    }
+    if(_xmppQueue==NULL)
+    _xmppQueue=dispatch_get_current_queue();
     _fulluser=[NSString stringWithFormat:@"%@@%@", _username, _domain];
     
     if(_oldStyleSSL==NO) {
@@ -247,6 +245,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) connect
 {
+    if(self.explicitLogout) return;
+    
     if(_loggedIn || _logInStarted)
     {
         DDLogError(@"assymetrical call to login without a teardown");
@@ -280,7 +280,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             {
                 DDLogInfo(@"trying to login again");
                 //make sure we are enabled still.
-                if([[DataLayer sharedInstance] isAccountEnabled:self.accountNo]) {
+                if([[DataLayer sharedInstance] isAccountEnabled:[NSString stringWithFormat:@"%@",self.accountNo]]) {
                     [self reconnect];
                 }
             }
@@ -352,13 +352,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	
 	DDLogInfo(@"All closed and cleaned up");
     
-    
     _startTLSComplete=NO;
     _streamHasSpace=NO;
     
-    
     _loggedIn=NO;
-    _disconnected=YES;
     _logInStarted=NO;
 	
     //for good measure

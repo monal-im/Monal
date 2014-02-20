@@ -215,10 +215,12 @@
                                  [[_accountList objectAtIndex:indexPath.row] objectForKey:@"domain"]];
             if([[[_accountList objectAtIndex:indexPath.row] objectForKey:@"enabled"] boolValue] ==YES) {
                    cell.imageView.image=[UIImage imageNamed:@"888-checkmark"];
-                if([[MLXMPPManager sharedInstance] isAccountForIdConnected:[[_accountList objectAtIndex:indexPath.row] objectForKey:@"account_id"]])
+                if([[MLXMPPManager sharedInstance] isAccountForIdConnected: [NSString stringWithFormat:@"%@",[[_accountList objectAtIndex:indexPath.row] objectForKey:@"account_id"]]]) {
                     cell.accessoryView =[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"available"]];
-                else
+                }
+                else {
                     cell.accessoryView =[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"away"]];
+                }
             }
             else {
                     cell.imageView.image=[UIImage imageNamed:@"disabled"];

@@ -145,7 +145,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(BOOL) isAccountForIdConnected:(NSString*) accountNo;
 {
-    xmpp* account = [self getConnectedAccountForID:[NSString stringWithFormat:@"%@",accountNo]];
+    xmpp* account = [self getConnectedAccountForID:accountNo];
     if(account.loggedIn) return YES;
     
     return NO;
@@ -192,6 +192,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         if(!existing.loggedIn && !existing.logInStarted)
             dispatch_async(_netQueue,
                            ^{
+                                existing.explicitLogout=NO;
                                [existing connect];
                            });
         
@@ -205,6 +206,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     
     xmpp* xmppAccount=[[xmpp alloc] init];
+    xmppAccount.explicitLogout=NO;
     
     xmppAccount.username=[account objectForKey:@"username"];
     xmppAccount.domain=[account objectForKey:@"domain"];
@@ -239,11 +241,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [_connectedXMPP addObject:accountRow];
     
     
-    dispatch_async(_netQueue,
-                   ^{
+    dispatch_async(_netQueue, ^{
                        [xmppAccount connect];
-                       
-                       
                    });
     
     
@@ -264,6 +263,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 DDLogVerbose(@"got acct cleaning up.. ");
                 Reachability* hostReach=[account objectForKey:@"hostReach"];
                 [hostReach stopNotifier];
+                xmppAccount.explicitLogout=YES;
                 [ xmppAccount disconnect];
                 DDLogVerbose(@"done cleaning up account ");
                 pos=index;
@@ -280,12 +280,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 }
 
 
-
-
-
 -(void)logoutAll
 {
-    
     _accountList=[[DataLayer sharedInstance] accountList];
     for (NSDictionary* account in _accountList)
     {
@@ -299,14 +295,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void)connectIfNecessary
 {
-    
     _accountList=[[DataLayer sharedInstance] accountList];
     for (NSDictionary* account in _accountList)
     {
         if([[account objectForKey:@"enabled"] boolValue]==YES)
         {
             [self connectAccountWithDictionary:account];
-            
         }
     }
 }
@@ -341,7 +335,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         else
         {
             DDLogVerbose(@"reachable");
-            if((xmppAccount.disconnected==YES) && (!xmppAccount.logInStarted))
+            if((!xmppAccount.logInStarted))
             {
                 DDLogVerbose(@"logging in");
                 dispatch_async(_netQueue,

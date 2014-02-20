@@ -494,6 +494,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 {
     self.destinationDateFormat = [[NSDateFormatter alloc] init];
     [self.destinationDateFormat setLocale:[NSLocale currentLocale]];
+    [self.destinationDateFormat setDoesRelativeDateFormatting:YES];
     
     self.sourceDateFormat = [[NSDateFormatter alloc] init];
     [self.sourceDateFormat setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
@@ -551,13 +552,18 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         
         if ((self.thisday!=msgday) || (self.thismonth!=msgmonth) || (self.thisyear!=msgyear))
         {
+    
+            //no more need for seconds
+            [self.destinationDateFormat setTimeStyle:NSDateFormatterShortStyle];
+            
             // note: if it isnt the same day we want to show the full  day
             [self.destinationDateFormat setDateStyle:NSDateFormatterMediumStyle];
-            [self.destinationDateFormat setTimeStyle:NSDateFormatterMediumStyle];
+           
         }
         else
         {
-            [self.destinationDateFormat setDateStyle:NSDateFormatterNoStyle];
+            //today just show time
+            [self.destinationDateFormat setDateStyle:NSDateFormatterShortStyle];
             [self.destinationDateFormat setTimeStyle:NSDateFormatterMediumStyle];
         }
         dateString = [ self.destinationDateFormat stringFromDate:destinationDate];

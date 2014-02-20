@@ -112,8 +112,15 @@
         nameLabelFrame=CGRectMake(finaltextlabelFrame.origin.x+5, 3, finaltextlabelFrame.size.width/2, kNameLabelHeight);
         self.name.frame=nameLabelFrame;
     }
+    CGFloat datewidth=150.0f;
+    CGRect dateLabelFrame;
+    if(_outBound) {
+        dateLabelFrame = CGRectMake(finaltextlabelFrame.origin.x+finaltextlabelFrame.size.width-datewidth-10, 3, datewidth, kNameLabelHeight);
+    }
+    else {
+        dateLabelFrame = CGRectMake(finaltextlabelFrame.origin.x+finaltextlabelFrame.size.width-datewidth+35, 3, datewidth, kNameLabelHeight);
+    }
     
-    CGRect dateLabelFrame = CGRectMake(finaltextlabelFrame.origin.x+5+nameLabelFrame.size.width, 3, finaltextlabelFrame.size.width-(15+nameLabelFrame.size.width), kNameLabelHeight);
     self.date.frame=dateLabelFrame;
     
     self.textLabel.frame=finaltextlabelFrame;

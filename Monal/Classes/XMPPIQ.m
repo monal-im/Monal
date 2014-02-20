@@ -14,9 +14,11 @@
 {
     self=[super init];
     self.element=@"iq";
-    [self.attributes setObject:sessionid forKey:@"id"];
-    [self.attributes setObject:iqType forKey:@"type"];
-    return self; 
+    if (sessionid && iqType) {
+        [self.attributes setObject:sessionid forKey:@"id"];
+        [self.attributes setObject:iqType forKey:@"type"];
+    }
+    return self;
 }
 
 #pragma mark iq set

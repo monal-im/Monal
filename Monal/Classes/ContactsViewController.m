@@ -724,12 +724,17 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
     if (editingStyle == UITableViewCellEditingStyleDelete) {
         NSDictionary* contact;
-        if(indexPath.section==1)
+        if ((indexPath.section==1) && (indexPath.row<=[_contacts count]) ) {
             contact=[_contacts objectAtIndex:indexPath.row];
-            
-        if(indexPath.section==2)
+        }
+        else if((indexPath.section==2) && (indexPath.row<=[_offlineContacts count]) ) {
                 contact=[_offlineContacts objectAtIndex:indexPath.row];
-            
+        }
+        else {
+            //we cannot delete here
+            return;
+        }
+        
         NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"Remove %@ from contacts?", nil),[contact objectForKey:@"full_name"] ];
         RIButtonItem* cancelButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Cancel", nil) action:^{
             
@@ -739,12 +744,17 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
             [[MLXMPPManager sharedInstance] removeContact:contact];
             
             [_contactsTable beginUpdates];
-            if(indexPath.section==1) {
+            if ((indexPath.section==1) && (indexPath.row<=[_contacts count]) ) {
                [_contacts removeObjectAtIndex:indexPath.row];
             }
-            
-            if(indexPath.section==2) {
+            else if((indexPath.section==2) && (indexPath.row<=[_offlineContacts count]) ) {
                  [_offlineContacts removeObjectAtIndex:indexPath.row];
+            }
+            else {
+                //nothing to delete just end
+                 [_contactsTable endUpdates];
+                return; 
+                
             }
           
             

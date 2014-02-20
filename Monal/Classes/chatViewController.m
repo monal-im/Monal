@@ -14,16 +14,28 @@
 
 static const int ddLogLevel = LOG_LEVEL_ERROR;
 
+@interface chatViewController()
+
+@property (nonatomic, strong)    NSDateFormatter* destinationDateFormat;
+@property (nonatomic, strong)    NSDateFormatter* sourceDateFormat;
+
+@property (nonatomic, assign) int thisyear;
+@property (nonatomic, assign) int thismonth;
+@property (nonatomic, assign) int thisday;
+
+@end
+
 @implementation chatViewController
+
 
 - (void)makeView {
 	
     self.view.backgroundColor=[UIColor whiteColor];
     _messageTable =[[UITableView alloc] initWithFrame:CGRectMake(0, 2, self.view.frame.size.width, self.view.frame.size.height-42)];
     
-//    pages = [[UIPageControl alloc] init]; 
-//    pages.frame=CGRectMake(0, self.view.frame.size.height - 40-20, self.view.frame.size.width, 20);
-//    
+    //    pages = [[UIPageControl alloc] init];
+    //    pages.frame=CGRectMake(0, self.view.frame.size.height - 40-20, self.view.frame.size.width, 20);
+    //
     containerView = [[UIView alloc] initWithFrame:CGRectMake(0, self.view.frame.size.height - 40, self.view.frame.size.width, 40)];
     
 	chatInput = [[HPGrowingTextView alloc] initWithFrame:CGRectMake(6, 3, self.view.frame.size.width-80, 40)];
@@ -37,16 +49,16 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     chatInput.internalTextView.scrollIndicatorInsets = UIEdgeInsetsMake(5, 0, 5, 0);
     chatInput.backgroundColor = [UIColor whiteColor];
     
-    //page control 
-//    pages.backgroundColor = [UIColor colorWithRed:.4 green:0.435 blue:0.498 alpha:1];
-//    
-//    pages.hidesForSinglePage=false; 
-//    pages.numberOfPages=0; 
-//    pages.currentPage=0; 
-//   
+    //page control
+    //    pages.backgroundColor = [UIColor colorWithRed:.4 green:0.435 blue:0.498 alpha:1];
+    //
+    //    pages.hidesForSinglePage=false;
+    //    pages.numberOfPages=0;
+    //    pages.currentPage=0;
+    //
     
     [self.view addSubview:_messageTable];
-//    [self.view addSubview:pages];
+    //    [self.view addSubview:pages];
     [self.view addSubview:containerView];
     
     if(SYSTEM_VERSION_LESS_THAN(@"7.0"))
@@ -64,16 +76,16 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     
     if(SYSTEM_VERSION_LESS_THAN(@"7.0"))
     {
-    UIImage *rawEntryBackground = [UIImage imageNamed:@"MessageEntryInputField.png"];
-    UIImage *entryBackground = [rawEntryBackground stretchableImageWithLeftCapWidth:13 topCapHeight:22];
-    UIImageView *entryImageView = [[UIImageView alloc] initWithImage:entryBackground];
-    entryImageView.frame = CGRectMake(5, 0, self.view.frame.size.width-72, 40);
-    entryImageView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
-                   [containerView addSubview:entryImageView];
+        UIImage *rawEntryBackground = [UIImage imageNamed:@"MessageEntryInputField.png"];
+        UIImage *entryBackground = [rawEntryBackground stretchableImageWithLeftCapWidth:13 topCapHeight:22];
+        UIImageView *entryImageView = [[UIImageView alloc] initWithImage:entryBackground];
+        entryImageView.frame = CGRectMake(5, 0, self.view.frame.size.width-72, 40);
+        entryImageView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+        [containerView addSubview:entryImageView];
     }
     
     chatInput.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-   
+    
     // view hierachy
     
     if(SYSTEM_VERSION_LESS_THAN(@"7.0"))
@@ -83,14 +95,14 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         UIImage *selectedSendBtnBackground = [[UIImage imageNamed:@"MessageEntrySendButton.png"] stretchableImageWithLeftCapWidth:13 topCapHeight:0];
         
         
-	UIButton *doneBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-	doneBtn.frame = CGRectMake(containerView.frame.size.width - 69, 8, 63, 27);
-    doneBtn.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleLeftMargin;
-	[doneBtn setTitle:@"Send" forState:UIControlStateNormal];
-
-	[doneBtn addTarget:self action:@selector(resignTextView) forControlEvents:UIControlEventTouchUpInside];
-    
-   
+        UIButton *doneBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+        doneBtn.frame = CGRectMake(containerView.frame.size.width - 69, 8, 63, 27);
+        doneBtn.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleLeftMargin;
+        [doneBtn setTitle:@"Send" forState:UIControlStateNormal];
+        
+        [doneBtn addTarget:self action:@selector(resignTextView) forControlEvents:UIControlEventTouchUpInside];
+        
+        
         [doneBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
         [doneBtn setTitleShadowColor:[UIColor colorWithWhite:0 alpha:0.4] forState:UIControlStateNormal];
         doneBtn.titleLabel.shadowOffset = CGSizeMake (0.0, -1.0);
@@ -98,7 +110,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         [doneBtn setBackgroundImage:sendBtnBackground forState:UIControlStateNormal];
         [doneBtn setBackgroundImage:selectedSendBtnBackground forState:UIControlStateSelected];
         
-           [containerView addSubview:doneBtn];
+        [containerView addSubview:doneBtn];
 	}
     else
     {
@@ -108,9 +120,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         doneBtn.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleLeftMargin;
         [doneBtn setTitle:@"Send" forState:UIControlStateNormal];
         doneBtn.titleLabel.font=[UIFont boldSystemFontOfSize:19.0f];
-    
+        
         [doneBtn addTarget:self action:@selector(resignTextView) forControlEvents:UIControlEventTouchUpInside];
-       [containerView addSubview:doneBtn];
+        [containerView addSubview:doneBtn];
         
         containerView.backgroundColor=[UIColor colorWithRed:248/255.0f green:248/255.0f blue:248/255.0f alpha:1.0];
         
@@ -125,25 +137,25 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         UIView* lineView=[[UIView alloc] initWithFrame:lineFrame];
         lineView.backgroundColor=[UIColor colorWithRed:206/255.0f green:206/255.0f blue:206/255.0f alpha:1.0];
         
-       [containerView addSubview:lineView];
+        [containerView addSubview:lineView];
         lineView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         
     }
     
- 
+    
     
     containerView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
     _messageTable.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-//    pages.autoresizingMask= UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
-
-//    UISwipeGestureRecognizer* swipe = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipeDetected:)];
-//    [swipe setDirection:(UISwipeGestureRecognizerDirectionRight )]; 
-//    [self.view addGestureRecognizer:swipe]; 
-//    
-//    UISwipeGestureRecognizer* swipe2 = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipeDetected:)];
-//    [swipe2 setDirection:( UISwipeGestureRecognizerDirectionLeft)]; 
-//    [self.view addGestureRecognizer:swipe2];
- 
+    //    pages.autoresizingMask= UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
+    
+    //    UISwipeGestureRecognizer* swipe = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipeDetected:)];
+    //    [swipe setDirection:(UISwipeGestureRecognizerDirectionRight )];
+    //    [self.view addGestureRecognizer:swipe];
+    //
+    //    UISwipeGestureRecognizer* swipe2 = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipeDetected:)];
+    //    [swipe2 setDirection:( UISwipeGestureRecognizerDirectionLeft)];
+    //    [self.view addGestureRecognizer:swipe2];
+    
     chatInput.delegate=self;
     
     
@@ -161,7 +173,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     
     if(SYSTEM_VERSION_LESS_THAN(@"7.0"))
     {
-    _topName.textColor=[UIColor whiteColor];
+        _topName.textColor=[UIColor whiteColor];
     }
     _topName.backgroundColor=[UIColor clearColor];
     
@@ -169,7 +181,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     [_topBarView addSubview:_topName];
     
     self.navigationItem.titleView=_topBarView;
-
+    
 }
 
 -(void) setup
@@ -177,7 +189,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     _contactName=[_contact objectForKey:@"buddy_name"];
     if(!_contactName)
     {
-         _contactName=[_contact objectForKey:@"message_from"];
+        _contactName=[_contact objectForKey:@"message_from"];
     }
 	_contactFullName=[_contact objectForKey:@"full_name"];;
     self.accountNo=[NSString stringWithFormat:@"%d",[[_contact objectForKey:@"account_id"] integerValue]];
@@ -187,7 +199,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     NSArray* accountVals =[[DataLayer sharedInstance] accountVals:self.accountNo];
     if([accountVals count]>0)
     {
-    self.jid=[NSString stringWithFormat:@"%@@%@",[[accountVals objectAtIndex:0] objectForKey:@"username"], [[accountVals objectAtIndex:0] objectForKey:@"domain"]];
+        self.jid=[NSString stringWithFormat:@"%@@%@",[[accountVals objectAtIndex:0] objectForKey:@"username"], [[accountVals objectAtIndex:0] objectForKey:@"domain"]];
     }
 }
 
@@ -195,19 +207,19 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 {
     self=[super init];
     if(self){
-    _contact=contact;
-    [self setup];
+        _contact=contact;
+        [self setup];
     }
     return self;
-
+    
 }
 
 -(id) initWithContact:(NSDictionary*) contact  andDay:(NSString* )day;
 {
     self = [super init];
     if(self){
-    _contact=contact;
-    _day=day;
+        _contact=contact;
+        _day=day;
         [self setup];
     }
     
@@ -221,6 +233,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 {
     [super viewDidLoad];
     [self makeView];
+    [self setupDateObjects];
     self.navigationController.view.backgroundColor=[UIColor whiteColor];
     
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
@@ -229,18 +242,19 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 	[nc addObserver:self selector:@selector(keyboardWillShow:) name: UIKeyboardWillShowNotification object:nil];
 	[nc addObserver:self selector:@selector(keyboardWillHide:) name: UIKeyboardWillHideNotification object:nil];
 	[nc addObserver:self selector:@selector(keyboardDidShow:) name: UIKeyboardDidShowNotification object:nil];
-
+    
     self.hidesBottomBarWhenPushed=YES;
     _messageTable.delegate=self;
     _messageTable.dataSource=self;
     self.view.autoresizesSubviews=true;
     _messageTable.separatorColor=[UIColor whiteColor];
     
-//    UIMenuItem *openMenuItem = [[UIMenuItem alloc] initWithTitle:@"Open in Safari" action:@selector(openlink:)];
-//    [[UIMenuController sharedMenuController] setMenuItems: @[openMenuItem]];
-//    [[UIMenuController sharedMenuController] update];
-  
-  
+    //    UIMenuItem *openMenuItem = [[UIMenuItem alloc] initWithTitle:@"Open in Safari" action:@selector(openlink:)];
+    //    [[UIMenuController sharedMenuController] setMenuItems: @[openMenuItem]];
+    //    [[UIMenuController sharedMenuController] update];
+    
+    
+    
 }
 
 -(void)viewWillAppear:(BOOL)animated
@@ -283,14 +297,14 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         _topIcon.image=[[MLImageManager sharedInstance] getIconForContact:_contactName andAccount:_accountNo];
         
     }
-       [self refreshCounter];
+    [self refreshCounter];
     
 }
 
 -(void) viewDidAppear:(BOOL)animated
 {
-        [self scrollToBottom];
-        [self refreshCounter];
+    [self scrollToBottom];
+    [self refreshCounter];
 }
 
 -(void) viewWillDisappear:(BOOL)animated
@@ -307,6 +321,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 }
 
 
+#pragma mark rotation
 -(BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
 	[chatInput resignFirstResponder];
@@ -321,7 +336,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void) willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
 {
-       	[chatInput resignFirstResponder];
+    [chatInput resignFirstResponder];
 }
 
 #pragma mark gestures
@@ -335,7 +350,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void) refreshCounter
 {
-
+    
     //coming in  from abckgroun
     if(!_day) {
         [[DataLayer sharedInstance] markAsReadBuddy:self.contactName forAccount:self.accountNo];
@@ -354,7 +369,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     if(([chatInput text]!=nil) && (![[chatInput text] isEqualToString:@""]) )
     {
         DDLogVerbose(@"Sending message");
-        [[MLXMPPManager sharedInstance] sendMessage:[chatInput text] toContact:_contactName fromAccount:_accountNo isMUC:_isMUC 
+        [[MLXMPPManager sharedInstance] sendMessage:[chatInput text] toContact:_contactName fromAccount:_accountNo isMUC:_isMUC
                               withCompletionHandler:nil];
         [self addMessageto:_contactName withMessage:[chatInput text]];
         
@@ -379,7 +394,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                            ^{
                                NSDictionary* userInfo = @{@"af": self.jid,
                                                           @"message": message ,
-                                                          @"thetime": @""  };
+                                                          @"thetime": [self currentGMTTime] };
                                [_messagelist addObject:userInfo];
                                
                                [_messageTable beginUpdates];
@@ -395,7 +410,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                                    [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:NO];
                                }
                            });
-
+            
             
         }
 		
@@ -410,7 +425,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         _firstmsg=NO;
 	}
 	
-
+    
     
 }
 
@@ -419,23 +434,23 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     DDLogVerbose(@"chat view got new message notice %@", notification.userInfo);
     
     if([[notification.userInfo objectForKey:@"accountNo"] isEqualToString:_accountNo]
-      && [[notification.userInfo objectForKey:@"from"] isEqualToString:_contactName]
+       && [[notification.userInfo objectForKey:@"from"] isEqualToString:_contactName]
        )
     {
         dispatch_async(dispatch_get_main_queue(),
                        ^{
                            NSDictionary* userInfo = @{@"af": [notification.userInfo objectForKey:@"actuallyfrom"],
                                                       @"message": [notification.userInfo objectForKey:@"messageText"],
-                                                      @"thetime": @"" };
+                                                      @"thetime": [self currentGMTTime]};
                            [_messagelist addObject:userInfo];
                            
                            [_messageTable beginUpdates];
                            NSIndexPath *path1 = [NSIndexPath indexPathForRow:[_messagelist count]-1  inSection:0];
                            [_messageTable insertRowsAtIndexPaths:@[path1]
-                                                 withRowAnimation:UITableViewRowAnimationTop];
+                                                withRowAnimation:UITableViewRowAnimationTop];
                            [_messageTable endUpdates];
                            
-                            [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:YES];
+                           [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:YES];
                            
                            //mark as read
                            [[DataLayer sharedInstance] markAsReadBuddy:_contactName forAccount:_accountNo];
@@ -455,9 +470,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     //
     //    popOverController.popoverContentSize = CGSizeMake(320, 480);
     //    [popOverController presentPopoverFromBarButtonItem:contactsButton permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
-    // 	
-    //    
-    //  
+    //
+    //
+    //
 }
 
 
@@ -468,53 +483,89 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         NSIndexPath *path1 = [NSIndexPath indexPathForRow:[_messagelist count]-1  inSection:0];
         if(![_messageTable.indexPathsForVisibleRows containsObject:path1])
         {
-            
             [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:NO];
         }
     }
     
 }
+#pragma mark date time
 
-/*
-#pragma mark gestures
-//handle swipe
-- (void)swipeDetected:(UISwipeGestureRecognizer *)recognizer {
-     DDLogVerbose(@"pages was   %d", pages.currentPage);
+-(void) setupDateObjects
+{
+    self.destinationDateFormat = [[NSDateFormatter alloc] init];
+    [self.destinationDateFormat setLocale:[NSLocale currentLocale]];
     
-    if(recognizer.direction==UISwipeGestureRecognizerDirectionRight)
-    {
-        DDLogVerbose(@"swiped  right in chat"); 
-       
-        if(pages.currentPage==0) pages.currentPage=pages.numberOfPages-1; 
-        else
-             pages.currentPage--; 
-    }
-        else
-             if(recognizer.direction==UISwipeGestureRecognizerDirectionLeft)
-             {
-                 DDLogVerbose(@"swiped   left in chat "); 
-                 
-                 if(pages.currentPage==pages.numberOfPages-1) pages.currentPage=0; 
-                else
-                 pages.currentPage++; 
-                
-             }
-            
+    self.sourceDateFormat = [[NSDateFormatter alloc] init];
+    [self.sourceDateFormat setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
     
-    DDLogVerbose(@"pages now set to %d", pages.currentPage);
-    [pages updateCurrentPageDisplay];
+    NSDateFormatter* tmpformatter= [[NSDateFormatter alloc] init];
     
-    //dont keep reloading if only one page
-    if(pages.numberOfPages!=0)
-    {
+    [tmpformatter setDateFormat:@"yyyy"];
+    self.thisyear = [[tmpformatter stringFromDate:[NSDate date]] intValue];
     
-//    [self show:[[activeChats objectAtIndex:pages.currentPage] objectAtIndex:0]
-//              :[[activeChats objectAtIndex:pages.currentPage] objectAtIndex:2] :navController];
-    }
+    [tmpformatter setDateFormat:@"MM"];
+    self.thismonth = [[tmpformatter stringFromDate:[NSDate date]] intValue];
+    
+    [tmpformatter setDateFormat:@"dd"];
+    self.thisday = [[tmpformatter stringFromDate:[NSDate date]] intValue];
     
 }
 
-*/
+-(NSString*) currentGMTTime
+{
+    NSDate* sourceDate =[NSDate date];
+    
+    NSTimeZone* sourceTimeZone = [NSTimeZone systemTimeZone];
+    NSTimeZone* destinationTimeZone = [NSTimeZone timeZoneWithAbbreviation:@"GMT"];
+    NSInteger sourceGMTOffset = [sourceTimeZone secondsFromGMTForDate:sourceDate];
+    NSInteger destinationGMTOffset = [destinationTimeZone secondsFromGMTForDate:sourceDate];
+    NSTimeInterval interval = destinationGMTOffset - sourceGMTOffset;
+    NSDate* destinationDate = [[NSDate alloc] initWithTimeInterval:interval sinceDate:sourceDate];
+    
+    return [self.sourceDateFormat stringFromDate:destinationDate];
+}
+
+-(NSString*) formattedDateWithSource:(NSString*) sourceDateString
+{
+    NSString* dateString;
+    
+    if(sourceDateString!=nil)
+    {
+        
+        NSDate* sourceDate=[self.sourceDateFormat dateFromString:sourceDateString];
+        
+        NSTimeZone* sourceTimeZone = [NSTimeZone timeZoneWithAbbreviation:@"GMT"];
+        NSTimeZone* destinationTimeZone = [NSTimeZone systemTimeZone];
+        NSInteger sourceGMTOffset = [sourceTimeZone secondsFromGMTForDate:sourceDate];
+        NSInteger destinationGMTOffset = [destinationTimeZone secondsFromGMTForDate:sourceDate];
+        NSTimeInterval interval = destinationGMTOffset - sourceGMTOffset;
+        NSDate* destinationDate = [[NSDate alloc] initWithTimeInterval:interval sinceDate:sourceDate];
+        
+        NSDateFormatter* tmpformatter= [[NSDateFormatter alloc] init];
+        [tmpformatter setDateFormat:@"yyyy"];
+        int msgyear = [[tmpformatter stringFromDate:destinationDate] intValue];
+        [tmpformatter setDateFormat:@"MM"];
+        int msgmonth = [[tmpformatter stringFromDate:destinationDate] intValue];
+        [tmpformatter setDateFormat:@"dd"];
+        int msgday = [[tmpformatter stringFromDate:destinationDate] intValue];
+        
+        if ((self.thisday!=msgday) || (self.thismonth!=msgmonth) || (self.thisyear!=msgyear))
+        {
+            // note: if it isnt the same day we want to show the full  day
+            [self.destinationDateFormat setDateStyle:NSDateFormatterMediumStyle];
+            [self.destinationDateFormat setTimeStyle:NSDateFormatterMediumStyle];
+        }
+        else
+        {
+            [self.destinationDateFormat setDateStyle:NSDateFormatterNoStyle];
+            [self.destinationDateFormat setTimeStyle:NSDateFormatterMediumStyle];
+        }
+        dateString = [ self.destinationDateFormat stringFromDate:destinationDate];
+    }
+    
+    return dateString;
+}
+
 
 #pragma mark tableview datasource
 
@@ -545,10 +596,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     MLChatCell* cell;
     NSDictionary* row= [_messagelist objectAtIndex:indexPath.row];
     
-    
     if([[row objectForKey:@"af"] isEqualToString:_jid])
     {
-    cell=[tableView dequeueReusableCellWithIdentifier:@"ChatCellOut"];
+        cell=[tableView dequeueReusableCellWithIdentifier:@"ChatCellOut"];
     }
     else
     {
@@ -559,7 +609,6 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     {
         cell =[[MLChatCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"ChatCell" andMuc:_isMUC];
     }
-   
     
     if(_isMUC)
     {
@@ -568,6 +617,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     }
     
     
+    cell.date.text= [self formattedDateWithSource:[row objectForKey:@"thetime"]];
     
     NSString* lowerCase= [[row objectForKey:@"message"] lowercaseString];
     NSRange pos = [lowerCase rangeOfString:@"http://"];
@@ -582,7 +632,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         if(pos2.location!=NSNotFound)
             urlString=[urlString substringToIndex:pos2.location];
         
-      cell.link=urlString;
+        cell.link=urlString;
     }
     else
     {
@@ -593,10 +643,10 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     {
         if(pos.location!=NSNotFound)
         {
-        NSDictionary *underlineAttribute = @{NSUnderlineStyleAttributeName: @(NSUnderlineStyleSingle)};
-        NSAttributedString* underlined = [[NSAttributedString alloc] initWithString:cell.link
-                                                             attributes:underlineAttribute];
-     
+            NSDictionary *underlineAttribute = @{NSUnderlineStyleAttributeName: @(NSUnderlineStyleSingle)};
+            NSAttributedString* underlined = [[NSAttributedString alloc] initWithString:cell.link
+                                                                             attributes:underlineAttribute];
+            
             
             if ([underlined length]==[[row objectForKey:@"message"] length])
             {
@@ -624,7 +674,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     }
     else
     {
-    cell.textLabel.text =[row objectForKey:@"message"];
+        cell.textLabel.text =[row objectForKey:@"message"];
     }
     
     cell.selectionStyle=UITableViewCellSelectionStyleNone;
@@ -642,10 +692,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 {
     NSDictionary* row=[_messagelist objectAtIndex:indexPath.row];
     CGFloat height= [MLChatCell heightForText:[row objectForKey:@"message"] inWidth:tableView.frame.size.width-20];
-    if(_isMUC)
-    {
-        height+=kNameLabelHeight;
-    }
+    height+=kNameLabelHeight;
+    
     return height;
     
 }
@@ -676,7 +724,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     if (editingStyle == UITableViewCellEditingStyleDelete) {
         NSDictionary* message= [_messagelist objectAtIndex:indexPath.row];
         
-        DDLogVerbose(@"%@", message); 
+        DDLogVerbose(@"%@", message);
         
         if([message objectForKey:@"message_history_id"])
         {
@@ -684,7 +732,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         }
         else if ([message objectForKey:@"message_id"])
         {
-             [[DataLayer sharedInstance] deleteMessage:[NSString stringWithFormat:@"%@",[message objectForKey:@"message_id"]]];
+            [[DataLayer sharedInstance] deleteMessage:[NSString stringWithFormat:@"%@",[message objectForKey:@"message_id"]]];
         }
         else
         {
@@ -723,9 +771,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 {
 }
 
--(void) keyboardDidHide: (NSNotification *)notif 
+-(void) keyboardDidHide: (NSNotification *)notif
 {
-	DDLogVerbose(@"kbd did hide "); 
+	DDLogVerbose(@"kbd did hide ");
 }
 
 -(void) keyboardWillHide:(NSNotification *) notification
@@ -750,7 +798,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                          
                      }
      ];
-
+    
     
 	DDLogVerbose(@"kbd will hide scroll: %f", oldFrame.size.height);
 }
@@ -758,35 +806,35 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 -(void) keyboardDidShow:(NSNotification *) note
 {
     
-
+    
 }
 
 -(void) keyboardWillShow:(NSNotification *) notification
 {
-   
+    
     CGSize keyboardSize = [[[notification userInfo] objectForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue].size;
-
+    
     CGRect r;
 	r=self.view.frame;
     UIInterfaceOrientation orientation = [UIApplication sharedApplication].statusBarOrientation;
-
+    
     if(orientation==UIInterfaceOrientationLandscapeLeft|| orientation==UIInterfaceOrientationLandscapeRight)
     {
         r.size.height -= keyboardSize.width;
     }
     else
-    r.size.height -= keyboardSize.height;
+        r.size.height -= keyboardSize.height;
 	oldFrame=self.view.frame;
     
     NSTimeInterval animationDuration =[[[notification userInfo] objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
     [UIView animateWithDuration:animationDuration
                      animations:^{
-                         	self.view.frame =r;
+                         self.view.frame =r;
                          
                      } completion:^(BOOL finished) {
                          
                          [self scrollToBottom];
-                    }
+                     }
      ];
 	
 }
@@ -805,393 +853,331 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 
 /*
-#pragma mark HTML generation
-
--(NSString*) emoticonsHTML:(NSString*) message
-{
-	NSMutableString* body=[[NSMutableString alloc] initWithString: message]; 
-
-	//fix % issue
-//[body replaceOccurrencesOfString:@"%" withString:@"%%"
-//							  options:NSCaseInsensitiveSearch
-//								range:NSMakeRange(0, [body length])];
-	
-	
-	
-	//only do search if there an emoticon
-	NSRange pos = [message rangeOfString:@":"]; 
-	NSRange pos2 = [message rangeOfString:@";"]; 
-	if((pos.location!=NSNotFound) ||
-	   (pos2.location!=NSNotFound))
-	{
-	
-	[body replaceOccurrencesOfString:@":)"
-							withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Smile.png>"]
-							   options:NSCaseInsensitiveSearch
-								 range:NSMakeRange(0, [body length])];
-	
-	[body replaceOccurrencesOfString:@":-)"
-						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Smile.png>"]
-							 options:NSCaseInsensitiveSearch
-							   range:NSMakeRange(0, [body length])];
-	
-	
-	[body replaceOccurrencesOfString:@":D"
-						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Grin.png>"]
-							 options:NSCaseInsensitiveSearch
-							   range:NSMakeRange(0, [body length])];
-	
-	[body replaceOccurrencesOfString:@":-D"
-						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Grin.png>"]
-							 options:NSCaseInsensitiveSearch
-							   range:NSMakeRange(0, [body length])];
-	
-	
-	[body replaceOccurrencesOfString:@":O"
-						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Surprised.png>"]
-							 options:NSCaseInsensitiveSearch
-							   range:NSMakeRange(0, [body length])];
-	
-	[body replaceOccurrencesOfString:@":-O"
-						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Surprised.png>"]
-							 options:NSCaseInsensitiveSearch
-							   range:NSMakeRange(0, [body length])];
-	
-	
-	
-	
-	[body replaceOccurrencesOfString:@":*"
-						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Kiss.png>"]
-							 options:NSCaseInsensitiveSearch
-							   range:NSMakeRange(0, [body length])];
-	
-	[body replaceOccurrencesOfString:@":-*"
-						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Kiss.png>"]
-							 options:NSCaseInsensitiveSearch
-							   range:NSMakeRange(0, [body length])];
-	
-	
-	
-	
-	
-	[body replaceOccurrencesOfString:@":("
-						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Sad.png>"]
-							 options:NSCaseInsensitiveSearch
-							   range:NSMakeRange(0, [body length])];
-	
-	
-	[body replaceOccurrencesOfString:@":-("
-						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Sad.png>"]
-							 options:NSCaseInsensitiveSearch
-							   range:NSMakeRange(0, [body length])];
-	
-	
-	[body replaceOccurrencesOfString:@":\'("
-						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Crying.png>"]
-							 options:NSCaseInsensitiveSearch
-							   range:NSMakeRange(0, [body length])];
-	
-	
-	[body replaceOccurrencesOfString:@":\'-("
-						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Crying.png>"]
-							 options:NSCaseInsensitiveSearch
-							   range:NSMakeRange(0, [body length])];
-	
-	
-
-	
-	[body replaceOccurrencesOfString:@";-)"
-						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Wink.png>"]
-							 options:NSCaseInsensitiveSearch
-							   range:NSMakeRange(0, [body length])];
-	
-	
-	[body replaceOccurrencesOfString:@";)"
-						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Wink.png>"]
-							 options:NSCaseInsensitiveSearch
-							   range:NSMakeRange(0, [body length])];
-	
-	
-	
-	[body replaceOccurrencesOfString:@":-/"
-						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Sarcastic.png>"]
-							 options:NSCaseInsensitiveSearch
-							   range:NSMakeRange(0, [body length])];
-	
-	
-	[body replaceOccurrencesOfString:@":/"
-						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Sarcastic.png>"]
-							 options:NSCaseInsensitiveSearch
-							   range:NSMakeRange(0, [body length])];
-	
-
-	
-	[body replaceOccurrencesOfString:@":-\\"
-						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Sarcastic.png>"]
-							 options:NSCaseInsensitiveSearch
-							   range:NSMakeRange(0, [body length])];
-	
-	
-	[body replaceOccurrencesOfString:@":\\"
-						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Sarcastic.png>"]
-							 options:NSCaseInsensitiveSearch
-							   range:NSMakeRange(0, [body length])];
-	
-	
-	[body replaceOccurrencesOfString:@":-p"
-						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Tongue.png>"]
-							 options:NSCaseInsensitiveSearch
-							   range:NSMakeRange(0, [body length])];
-	
-	
-	[body replaceOccurrencesOfString:@":p"
-						  withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Tongue.png>"]
-							 options:NSCaseInsensitiveSearch
-							   range:NSMakeRange(0, [body length])];
-	
-	
-	//changes to avoid having :// as in  http:// turned into an emoticon
-	[body replaceOccurrencesOfString:@"<img src=../../Emoticons/AdiumEmoticons/Sarcastic.png>/"
-						  withString:[NSString stringWithFormat:@"://"]
-							 options:NSCaseInsensitiveSearch
-							   range:NSMakeRange(0, [body length])];
-	}
-	
-	//handle carriage return 
-    [body replaceOccurrencesOfString:@"\n"
-                          withString:[NSString stringWithFormat:@"<br>"]
-                             options:NSCaseInsensitiveSearch
-                               range:NSMakeRange(0, [body length])];
-    
-	
-	//this is link handling text
-	
-	int linkstart=0; 
-	int linkend=0; 
-	
-	NSString* linktext; 
-	NSRange urlpos; 
-    NSRange urlpos2; 
-	bool hasHttp=true; 
-    bool hasHttps=true; 
-	
-	//find http
-	urlpos=[body rangeOfString:@"http://" options:NSCaseInsensitiveSearch]; 
-	if(urlpos.location==NSNotFound)
-	{
-		hasHttp=false;
-		//find  www
-			urlpos=[body rangeOfString:@"www." options:NSCaseInsensitiveSearch]; 
-	}
-    
-    //find http
-	urlpos2=[body rangeOfString:@"https://" options:NSCaseInsensitiveSearch]; 
-	if(urlpos2.location==NSNotFound)
-	{
-		hasHttps=false;
-		//find  www
-        //urlpos=[body rangeOfString:@"www." options:NSCaseInsensitiveSearch]; 
-	}
-	
-	if((hasHttp==true) || (hasHttps==true))
-	{
-	// look for <a already there
-		NSRange ahrefPos=[body rangeOfString:@"<a" options:NSCaseInsensitiveSearch]; 
-		if(ahrefPos.location==NSNotFound)
-		{
-	
-	//get length
-            if(urlpos.location!=NSNotFound)
-			linkstart=urlpos.location; 
-            else
-                if(urlpos2.location!=NSNotFound)
-                    linkstart=urlpos2.location; 
-                
-	//find space after that
-			urlpos=[body rangeOfString:@" " options:NSCaseInsensitiveSearch range:NSMakeRange(linkstart, [body length]-linkstart)];
-	if(urlpos.location==NSNotFound)
-	{
-		linkend=[body length]; 
-	} else linkend=urlpos.location; 
-			
-			
-			linktext=[body substringWithRange:NSMakeRange(linkstart, linkend-linkstart)]; 
-			
-	
-	// replace linktext with <a href=linktext> linktext  </a>
-	
-            
-	
-	if((hasHttp==true) || (hasHttps==true))
-	[body replaceOccurrencesOfString:linktext
-						  withString:[NSString stringWithFormat:@"<a href=%@> %@ </a>",linktext, linktext]
-							 options:NSCaseInsensitiveSearch
-							   range:NSMakeRange(0, [body length])];
-	else 
-		[body replaceOccurrencesOfString:linktext
-							  withString:[NSString stringWithFormat:@"<a href=http://%@> %@ </a>",linktext, linktext]
-								 options:NSCaseInsensitiveSearch
-								   range:NSMakeRange(0, [body length])];
-		
-	
-		}
-	}
-	return body; 
-
-}
-
--(NSString*) makeMessageHTMLfrom:(NSString*) from withMessage:(NSString*) themessage andTime:(NSString*) time isLive:(BOOL) liveChat
-{
-
-	NSDateFormatter* dateFormatter = [[NSDateFormatter alloc] init];
-	[dateFormatter setDateFormat:@"HH:mm:ss"];
-	
-	
-	//strip html from message to prevent XSS
-//	NSString* message=[tools flattenHTML:themessage trimWhiteSpace:true];
-//	
-	NSString *dateString;
-	if(time!=nil)
-	{
-		NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
-	[formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
-        
-        
-	NSDate* sourceDate=[formatter dateFromString:time];
-
-	NSTimeZone* sourceTimeZone = [NSTimeZone timeZoneWithAbbreviation:@"GMT"];
-	NSTimeZone* destinationTimeZone = [NSTimeZone systemTimeZone];
-		
-	//	DDLogVerbose(@"system timezone: %@", [destinationTimeZone  name]); 
-	
-	NSInteger sourceGMTOffset = [sourceTimeZone secondsFromGMTForDate:sourceDate];
-	NSInteger destinationGMTOffset = [destinationTimeZone secondsFromGMTForDate:sourceDate];
-	NSTimeInterval interval = destinationGMTOffset - sourceGMTOffset;
-	
-	NSDate* destinationDate = [[NSDate alloc] initWithTimeInterval:interval sinceDate:sourceDate];
-	
-        
-        NSDateFormatter* tmpformatter= [[NSDateFormatter alloc] init];
-        
-        [tmpformatter setDateFormat:@"yyyy"];
-        int thisyear = [[tmpformatter stringFromDate:[NSDate date]] intValue];
-           int msgyear = [[tmpformatter stringFromDate:sourceDate] intValue];
-        
-        [tmpformatter setDateFormat:@"MM"];
-        int thismonth = [[tmpformatter stringFromDate:[NSDate date]] intValue];
-           int msgmonth = [[tmpformatter stringFromDate:sourceDate] intValue];
-        
-        [tmpformatter setDateFormat:@"dd"];
-        int thisday = [[tmpformatter stringFromDate:[NSDate date]] intValue];
-           int msgday = [[tmpformatter stringFromDate:sourceDate] intValue];
-        
-        
-    if ((thisday!=msgday) || (thismonth!=msgmonth) || (thisyear!=msgyear))
-        {
-        
-	// note: if it isnt the same day we want to show the full  day
-	 [formatter setDateStyle: kCFDateFormatterMediumStyle];
-        }
-        
-        [formatter setTimeStyle: kCFDateFormatterMediumStyle];
-        [formatter setLocale:[NSLocale currentLocale] ];
-        
-	dateString = [formatter stringFromDate:destinationDate];
-	}
-	else
-	{
-        [dateFormatter setLocale:[NSLocale currentLocale] ];
-         [dateFormatter setTimeStyle: kCFDateFormatterMediumStyle];
-		dateString =  [dateFormatter stringFromDate:[NSDate date]];
-	}
-	
-	if([from isEqualToString:self.jid])
-	{
-		
-		NSMutableString* tmpout; 
-		
-        // commneted out because of the occasional bug
-//       if([from isEqualToString:lastFrom])
-//			tmpout=[NSMutableString stringWithString:outNextHTML]; 
-//		else
+ #pragma mark HTML generation
  
-        {
-			//new block
-			lastDiv=[NSString stringWithFormat:@"insert%@",dateString];
-			
-			tmpout=[NSMutableString stringWithString:outHTML]; 
-			if(liveChat==true)
-			[tmpout replaceOccurrencesOfString:@"insert"
-								   withString:lastDiv
-									  options:NSCaseInsensitiveSearch
-										range:NSMakeRange(0, [tmpout length])];
-		}
-	
-		
-        
-        
-		[tmpout replaceOccurrencesOfString:@"%message%"
-								withString:[self emoticonsHTML:themessage]
-								   options:NSCaseInsensitiveSearch
-									 range:NSMakeRange(0, [tmpout length])];
-		
-		
-		
-
-		
-		[tmpout replaceOccurrencesOfString:@"%time%"
-								withString:dateString
-								   options:NSCaseInsensitiveSearch
-									 range:NSMakeRange(0, [tmpout length])];
-
-		return tmpout;
-
-	}
-	else
-	{
-		NSMutableString* tmpin; 
-		
-        //commented out because of bugs 
-        //if([from isEqualToString:lastFrom])
-		//	tmpin=[NSMutableString stringWithString:inNextHTML]; 
-		//else
-		{
-			//new block
-			lastDiv=[NSString stringWithFormat:@"insert%@",dateString];
-			
-			tmpin=[NSMutableString stringWithString:inHTML];
-			
-			if(liveChat==true)
-			[tmpin replaceOccurrencesOfString:@"insert"
-								   withString:lastDiv
-									  options:NSCaseInsensitiveSearch
-										range:NSMakeRange(0, [tmpin length])];
-		}
-		
-        if(groupchat==true) //we want individualized names
-        {
-           
-                [tmpin replaceOccurrencesOfString:@"%sender%"
-                                        withString:from
-                                           options:NSCaseInsensitiveSearch
-                                             range:NSMakeRange(0, [tmpin length])];
-        }
-        
-		[tmpin replaceOccurrencesOfString:@"%message%"
-							   withString:[self emoticonsHTML:themessage]
-								  options:NSCaseInsensitiveSearch
-									range:NSMakeRange(0, [tmpin length])];
-        
-		[tmpin replaceOccurrencesOfString:@"%time%"
-							   withString:dateString
-								  options:NSCaseInsensitiveSearch
-									range:NSMakeRange(0, [tmpin length])];
-		
-		;
-		return tmpin;
-		
-	}		
-}
-*/
+ -(NSString*) emoticonsHTML:(NSString*) message
+ {
+ NSMutableString* body=[[NSMutableString alloc] initWithString: message];
+ 
+ //fix % issue
+ //[body replaceOccurrencesOfString:@"%" withString:@"%%"
+ //							  options:NSCaseInsensitiveSearch
+ //								range:NSMakeRange(0, [body length])];
+ 
+ 
+ 
+ //only do search if there an emoticon
+ NSRange pos = [message rangeOfString:@":"];
+ NSRange pos2 = [message rangeOfString:@";"];
+ if((pos.location!=NSNotFound) ||
+ (pos2.location!=NSNotFound))
+ {
+ 
+ [body replaceOccurrencesOfString:@":)"
+ withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Smile.png>"]
+ options:NSCaseInsensitiveSearch
+ range:NSMakeRange(0, [body length])];
+ 
+ [body replaceOccurrencesOfString:@":-)"
+ withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Smile.png>"]
+ options:NSCaseInsensitiveSearch
+ range:NSMakeRange(0, [body length])];
+ 
+ 
+ [body replaceOccurrencesOfString:@":D"
+ withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Grin.png>"]
+ options:NSCaseInsensitiveSearch
+ range:NSMakeRange(0, [body length])];
+ 
+ [body replaceOccurrencesOfString:@":-D"
+ withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Grin.png>"]
+ options:NSCaseInsensitiveSearch
+ range:NSMakeRange(0, [body length])];
+ 
+ 
+ [body replaceOccurrencesOfString:@":O"
+ withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Surprised.png>"]
+ options:NSCaseInsensitiveSearch
+ range:NSMakeRange(0, [body length])];
+ 
+ [body replaceOccurrencesOfString:@":-O"
+ withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Surprised.png>"]
+ options:NSCaseInsensitiveSearch
+ range:NSMakeRange(0, [body length])];
+ 
+ 
+ 
+ 
+ [body replaceOccurrencesOfString:@":*"
+ withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Kiss.png>"]
+ options:NSCaseInsensitiveSearch
+ range:NSMakeRange(0, [body length])];
+ 
+ [body replaceOccurrencesOfString:@":-*"
+ withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Kiss.png>"]
+ options:NSCaseInsensitiveSearch
+ range:NSMakeRange(0, [body length])];
+ 
+ 
+ 
+ 
+ 
+ [body replaceOccurrencesOfString:@":("
+ withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Sad.png>"]
+ options:NSCaseInsensitiveSearch
+ range:NSMakeRange(0, [body length])];
+ 
+ 
+ [body replaceOccurrencesOfString:@":-("
+ withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Sad.png>"]
+ options:NSCaseInsensitiveSearch
+ range:NSMakeRange(0, [body length])];
+ 
+ 
+ [body replaceOccurrencesOfString:@":\'("
+ withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Crying.png>"]
+ options:NSCaseInsensitiveSearch
+ range:NSMakeRange(0, [body length])];
+ 
+ 
+ [body replaceOccurrencesOfString:@":\'-("
+ withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Crying.png>"]
+ options:NSCaseInsensitiveSearch
+ range:NSMakeRange(0, [body length])];
+ 
+ 
+ 
+ 
+ [body replaceOccurrencesOfString:@";-)"
+ withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Wink.png>"]
+ options:NSCaseInsensitiveSearch
+ range:NSMakeRange(0, [body length])];
+ 
+ 
+ [body replaceOccurrencesOfString:@";)"
+ withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Wink.png>"]
+ options:NSCaseInsensitiveSearch
+ range:NSMakeRange(0, [body length])];
+ 
+ 
+ 
+ [body replaceOccurrencesOfString:@":-/"
+ withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Sarcastic.png>"]
+ options:NSCaseInsensitiveSearch
+ range:NSMakeRange(0, [body length])];
+ 
+ 
+ [body replaceOccurrencesOfString:@":/"
+ withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Sarcastic.png>"]
+ options:NSCaseInsensitiveSearch
+ range:NSMakeRange(0, [body length])];
+ 
+ 
+ 
+ [body replaceOccurrencesOfString:@":-\\"
+ withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Sarcastic.png>"]
+ options:NSCaseInsensitiveSearch
+ range:NSMakeRange(0, [body length])];
+ 
+ 
+ [body replaceOccurrencesOfString:@":\\"
+ withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Sarcastic.png>"]
+ options:NSCaseInsensitiveSearch
+ range:NSMakeRange(0, [body length])];
+ 
+ 
+ [body replaceOccurrencesOfString:@":-p"
+ withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Tongue.png>"]
+ options:NSCaseInsensitiveSearch
+ range:NSMakeRange(0, [body length])];
+ 
+ 
+ [body replaceOccurrencesOfString:@":p"
+ withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Tongue.png>"]
+ options:NSCaseInsensitiveSearch
+ range:NSMakeRange(0, [body length])];
+ 
+ 
+ //changes to avoid having :// as in  http:// turned into an emoticon
+ [body replaceOccurrencesOfString:@"<img src=../../Emoticons/AdiumEmoticons/Sarcastic.png>/"
+ withString:[NSString stringWithFormat:@"://"]
+ options:NSCaseInsensitiveSearch
+ range:NSMakeRange(0, [body length])];
+ }
+ 
+ //handle carriage return
+ [body replaceOccurrencesOfString:@"\n"
+ withString:[NSString stringWithFormat:@"<br>"]
+ options:NSCaseInsensitiveSearch
+ range:NSMakeRange(0, [body length])];
+ 
+ 
+ //this is link handling text
+ 
+ int linkstart=0;
+ int linkend=0;
+ 
+ NSString* linktext;
+ NSRange urlpos;
+ NSRange urlpos2;
+ bool hasHttp=true;
+ bool hasHttps=true;
+ 
+ //find http
+ urlpos=[body rangeOfString:@"http://" options:NSCaseInsensitiveSearch];
+ if(urlpos.location==NSNotFound)
+ {
+ hasHttp=false;
+ //find  www
+ urlpos=[body rangeOfString:@"www." options:NSCaseInsensitiveSearch];
+ }
+ 
+ //find http
+ urlpos2=[body rangeOfString:@"https://" options:NSCaseInsensitiveSearch];
+ if(urlpos2.location==NSNotFound)
+ {
+ hasHttps=false;
+ //find  www
+ //urlpos=[body rangeOfString:@"www." options:NSCaseInsensitiveSearch];
+ }
+ 
+ if((hasHttp==true) || (hasHttps==true))
+ {
+ // look for <a already there
+ NSRange ahrefPos=[body rangeOfString:@"<a" options:NSCaseInsensitiveSearch];
+ if(ahrefPos.location==NSNotFound)
+ {
+ 
+ //get length
+ if(urlpos.location!=NSNotFound)
+ linkstart=urlpos.location;
+ else
+ if(urlpos2.location!=NSNotFound)
+ linkstart=urlpos2.location;
+ 
+ //find space after that
+ urlpos=[body rangeOfString:@" " options:NSCaseInsensitiveSearch range:NSMakeRange(linkstart, [body length]-linkstart)];
+ if(urlpos.location==NSNotFound)
+ {
+ linkend=[body length];
+ } else linkend=urlpos.location;
+ 
+ 
+ linktext=[body substringWithRange:NSMakeRange(linkstart, linkend-linkstart)];
+ 
+ 
+ // replace linktext with <a href=linktext> linktext  </a>
+ 
+ 
+ 
+ if((hasHttp==true) || (hasHttps==true))
+ [body replaceOccurrencesOfString:linktext
+ withString:[NSString stringWithFormat:@"<a href=%@> %@ </a>",linktext, linktext]
+ options:NSCaseInsensitiveSearch
+ range:NSMakeRange(0, [body length])];
+ else
+ [body replaceOccurrencesOfString:linktext
+ withString:[NSString stringWithFormat:@"<a href=http://%@> %@ </a>",linktext, linktext]
+ options:NSCaseInsensitiveSearch
+ range:NSMakeRange(0, [body length])];
+ 
+ 
+ }
+ }
+ return body;
+ 
+ }
+ 
+ -(NSString*) makeMessageHTMLfrom:(NSString*) from withMessage:(NSString*) themessage andTime:(NSString*) time isLive:(BOOL) liveChat
+ {
+ 
+ if([from isEqualToString:self.jid])
+ {
+ 
+ NSMutableString* tmpout;
+ 
+ // commneted out because of the occasional bug
+ //       if([from isEqualToString:lastFrom])
+ //			tmpout=[NSMutableString stringWithString:outNextHTML];
+ //		else
+ 
+ {
+ //new block
+ lastDiv=[NSString stringWithFormat:@"insert%@",dateString];
+ 
+ tmpout=[NSMutableString stringWithString:outHTML];
+ if(liveChat==true)
+ [tmpout replaceOccurrencesOfString:@"insert"
+ withString:lastDiv
+ options:NSCaseInsensitiveSearch
+ range:NSMakeRange(0, [tmpout length])];
+ }
+ 
+ 
+ 
+ 
+ [tmpout replaceOccurrencesOfString:@"%message%"
+ withString:[self emoticonsHTML:themessage]
+ options:NSCaseInsensitiveSearch
+ range:NSMakeRange(0, [tmpout length])];
+ 
+ 
+ 
+ 
+ 
+ [tmpout replaceOccurrencesOfString:@"%time%"
+ withString:dateString
+ options:NSCaseInsensitiveSearch
+ range:NSMakeRange(0, [tmpout length])];
+ 
+ return tmpout;
+ 
+ }
+ else
+ {
+ NSMutableString* tmpin;
+ 
+ //commented out because of bugs
+ //if([from isEqualToString:lastFrom])
+ //	tmpin=[NSMutableString stringWithString:inNextHTML];
+ //else
+ {
+ //new block
+ lastDiv=[NSString stringWithFormat:@"insert%@",dateString];
+ 
+ tmpin=[NSMutableString stringWithString:inHTML];
+ 
+ if(liveChat==true)
+ [tmpin replaceOccurrencesOfString:@"insert"
+ withString:lastDiv
+ options:NSCaseInsensitiveSearch
+ range:NSMakeRange(0, [tmpin length])];
+ }
+ 
+ if(groupchat==true) //we want individualized names
+ {
+ 
+ [tmpin replaceOccurrencesOfString:@"%sender%"
+ withString:from
+ options:NSCaseInsensitiveSearch
+ range:NSMakeRange(0, [tmpin length])];
+ }
+ 
+ [tmpin replaceOccurrencesOfString:@"%message%"
+ withString:[self emoticonsHTML:themessage]
+ options:NSCaseInsensitiveSearch
+ range:NSMakeRange(0, [tmpin length])];
+ 
+ [tmpin replaceOccurrencesOfString:@"%time%"
+ withString:dateString
+ options:NSCaseInsensitiveSearch
+ range:NSMakeRange(0, [tmpin length])];
+ 
+ ;
+ return tmpin;
+ 
+ }
+ }
+ */
 
 @end

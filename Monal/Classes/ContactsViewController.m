@@ -136,8 +136,6 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 #pragma mark updating info display
 -(void) showConnecting:(NSDictionary*) info
 {
-    
-    
     dispatch_async(dispatch_get_main_queue(),
                    ^{
                        [ _infoCells insertObject:info atIndex:0];
@@ -146,7 +144,6 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                        [_contactsTable insertRowsAtIndexPaths:@[path1]
                                              withRowAnimation:UITableViewRowAnimationAutomatic];
                        [_contactsTable endUpdates];
-                       
                        
                        dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
                        if([[info objectForKey:kinfoStatusKey] isEqualToString:@"Disconnected"])
@@ -608,7 +605,6 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 
 -(NSInteger) numberOfSectionsInTableView:(UITableView *)tableView
 {
-    
     if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
         return 3;
     else

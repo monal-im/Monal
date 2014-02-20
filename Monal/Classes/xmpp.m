@@ -285,7 +285,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             if((!self.loggedIn) && (_loggedInOnce))
             {
                 DDLogInfo(@"trying to login again");
-                [self reconnect];
+                //make sure we are enabled still.
+                if([[DataLayer sharedInstance] isAccountEnabled:self.accountNo]) {
+                    [self reconnect];
+                }
             }
             
         });

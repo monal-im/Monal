@@ -106,6 +106,7 @@
 -(NSArray*) protocolList;
 -(NSArray*) accountList;
 -(NSArray*) enabledAccountList;
+-(BOOL) isAccountEnabled:(NSString*) accountNo;
 
 -(NSArray*) accountVals:(NSString*) accountNo; 
 -(BOOL) addAccount: (NSString*) name :(NSString*) theProtocol :(NSString*) username: (NSString*) password: (NSString*) server

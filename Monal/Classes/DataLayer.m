@@ -279,6 +279,20 @@ static DataLayer *sharedInstance=nil;
 	
 }
 
+-(BOOL) isAccountEnabled:(NSString*) accountNo
+{
+    NSArray* enabledAccounts = [self enabledAccountList];
+    for (NSDictionary* account in enabledAccounts)
+    {
+        if([[account objectForKey:@"account_id"] isEqualToString:accountNo])
+        {
+            return YES;
+        }
+    }
+    
+    return NO;
+}
+
 -(NSArray*) accountVals:(NSString*) accountNo
 {
 	NSString* query=[NSString stringWithFormat:@"select * from account where  account_id=%@ ", accountNo];

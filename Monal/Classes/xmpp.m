@@ -940,14 +940,23 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     
                     [[DataLayer sharedInstance] addActiveBuddies:messageNode.from forAccount:_accountNo];
                     
+                    
+                    if(messageNode.from) {
+                        NSString* actuallyFrom= messageNode.actualFrom;
+                        if(!actuallyFrom) actuallyFrom=messageNode.from;
+                        
+                        NSString* messageText=messageNode.messageText;
+                        if(!messageText) messageText=@"";
+                        
                     NSDictionary* userDic=@{@"from":messageNode.from,
-                                            @"actuallyfrom":messageNode.actualFrom,
-                                            @"messageText":messageNode.messageText,
+                                            @"actuallyfrom":actuallyFrom,
+                                            @"messageText":messageText,
                                             @"to":_fulluser,
                                             @"accountNo":_accountNo
                                             };
                     
                     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:userDic];
+                    }
                 }
             }
             
@@ -1970,8 +1979,10 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
 			NSString* theserver=[NSString stringWithUTF8String:targetstr];
 			NSNumber* num=[NSNumber numberWithInt:ntohs(srv->priority)];
 			NSNumber* theport=[NSNumber numberWithInt:portval];
-			NSDictionary* row=[NSDictionary dictionaryWithObjectsAndKeys:num,@"priority", theserver, @"server", theport, @"port",nil];
-			[client.discoveredServerList addObject:row];
+            if(theserver && num && theport) {
+                NSDictionary* row=[NSDictionary dictionaryWithObjectsAndKeys:num,@"priority", theserver, @"server", theport, @"port",nil];
+                [client.discoveredServerList addObject:row];
+            }
             //	DDLogVerbose(@"DISCOVERY: server  %@", theserver);
 			
             return;

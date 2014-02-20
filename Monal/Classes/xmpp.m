@@ -218,37 +218,31 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) connectionTask
 {
-    
     _disconnected=NO;
-    _xmppQueue=dispatch_get_current_queue();
-    
+    if(_xmppQueue ==NULL) {
+        _xmppQueue=dispatch_get_current_queue();
+    }
     _fulluser=[NSString stringWithFormat:@"%@@%@", _username, _domain];
     
-    if(_oldStyleSSL==NO)
-    {
+    if(_oldStyleSSL==NO) {
         // do DNS discovery if it hasn't already been set
-        
-        if([_discoveredServerList count]==0)
+        if([_discoveredServerList count]==0) {
             [self dnsDiscover];
-        
+        }
     }
     
-    if([_discoveredServerList count]>0)
-    {
+    if([_discoveredServerList count]>0) {
         //sort by priority
         NSSortDescriptor *descriptor = [[NSSortDescriptor alloc] initWithKey:@"priority"  ascending:YES];
         NSArray* sortArray =[NSArray arrayWithObjects:descriptor,nil];
         [_discoveredServerList sortUsingDescriptors:sortArray];
         
         // take the top one
-        
         _server=[[_discoveredServerList objectAtIndex:0] objectForKey:@"server"];
         _port=[[[_discoveredServerList objectAtIndex:0] objectForKey:@"port"] integerValue];
     }
     
     [self createStreams];
-    
-    
 }
 
 -(void) connect
@@ -1828,7 +1822,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) dnsDiscover
 {
-    
 	DNSServiceRef sdRef;
 	DNSServiceErrorType res;
 	

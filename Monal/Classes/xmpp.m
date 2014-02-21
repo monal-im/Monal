@@ -219,7 +219,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) connectionTask
 {
     if(_xmppQueue==NULL)
-    _xmppQueue=dispatch_get_current_queue();
+        _xmppQueue=dispatch_get_current_queue();
     _fulluser=[NSString stringWithFormat:@"%@@%@", _username, _domain];
     
     if(_oldStyleSSL==NO) {
@@ -797,22 +797,58 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     
                 }
                 
+                
                 if([iqNode.idval isEqualToString:self.jingle.idval])
                 {
-                    //confirmation of set call
+                    //confirmation of set call after we accepted
                     [self.jingle rtpConnect];
+                    return;
                 }
+                
             }
             
             
             if ([iqNode.type isEqualToString:kiqSetType]) {
                 if(iqNode.jingleSession) {
-                      if([[iqNode.jingleSession objectForKey:@"action"] isEqualToString:@"session-terminate"]) {
-                          XMPPIQ* node = [[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
-                          [node setiqTo:iqNode.from];
-                          [self send:node];
-                          [self.jingle rtpDisconnect];
-                      }
+                    
+                    //accpetance of our call
+                    if([[iqNode.jingleSession objectForKey:@"action"] isEqualToString:@"session-accept"] &&
+                       [[iqNode.jingleSession objectForKey:@"sid"] isEqualToString:self.jingle.thesid])
+                    {
+                        
+                        NSDictionary* transport1;
+                        NSDictionary* transport2;
+                        for(NSDictionary* candidate in iqNode.jingleTransportCandidates) {
+                            if([[candidate objectForKey:@"component"] isEqualToString:@"1"]) {
+                                transport1=candidate;
+                            }
+                            if([[candidate objectForKey:@"component"] isEqualToString:@"2"]) {
+                                transport2=candidate;
+                            }
+                        }
+                        
+                        NSDictionary* pcmaPayload;
+                        for(NSDictionary* payload in iqNode.jinglePayloadTypes) {
+                            if([[payload objectForKey:@"name"] isEqualToString:@"PCMA"]) {
+                                pcmaPayload=payload;
+                                break;
+                            }
+                        }
+                        
+                        if (pcmaPayload && transport1) {
+                            self.jingle.recipientIP=[transport1 objectForKey:@"ip"];
+                            self.jingle.destinationPort= [transport1 objectForKey:@"port"];
+                            [self.jingle rtpConnect];
+                        }
+                        return;
+                    }
+                    
+                    if([[iqNode.jingleSession objectForKey:@"action"] isEqualToString:@"session-terminate"] &&  [[iqNode.jingleSession objectForKey:@"sid"] isEqualToString:self.jingle.thesid]) {
+                        XMPPIQ* node = [[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
+                        [node setiqTo:iqNode.from];
+                        [self send:node];
+                        [self.jingle rtpDisconnect];
+                    }
                     
                     if([[iqNode.jingleSession objectForKey:@"action"] isEqualToString:@"session-initiate"]) {
                         NSDictionary* pcmaPayload;
@@ -870,7 +906,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                     [alert show];
                                 } );
                                 
-                            
+                                
                             }
                         }
                         else {
@@ -948,14 +984,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         NSString* messageText=messageNode.messageText;
                         if(!messageText) messageText=@"";
                         
-                    NSDictionary* userDic=@{@"from":messageNode.from,
-                                            @"actuallyfrom":actuallyFrom,
-                                            @"messageText":messageText,
-                                            @"to":_fulluser,
-                                            @"accountNo":_accountNo
-                                            };
-                    
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:userDic];
+                        NSDictionary* userDic=@{@"from":messageNode.from,
+                                                @"actuallyfrom":actuallyFrom,
+                                                @"messageText":messageText,
+                                                @"to":_fulluser,
+                                                @"accountNo":_accountNo
+                                                };
+                        
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:userDic];
                     }
                 }
             }
@@ -2053,7 +2089,7 @@ void query_cb(const DNSServiceRef DNSServiceRef, const DNSServiceFlags flags, co
  
  - (void)netServiceBrowserDidStopSearch:(NSNetServiceBrowser *)netServiceBrowser
  {
- DDLogVerbose(@"stopped service search"); 
+ DDLogVerbose(@"stopped service search");
  }
  */
 

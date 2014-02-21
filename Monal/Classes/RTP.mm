@@ -229,14 +229,11 @@ void AudioOutputCallback(
                 int rtpstatus = sess.SendPacket(targetBuffer,bytesToCopy,8,false, bytesToCopy);
                 // pt=8  is PCMA ,  timestamp 2x80 =160 is for 2x 8Khz records at 5 ms
                 checkerror(rtpstatus);
-                if(rtpstatus!=0)
-                {
+                if(rtpstatus!=0) break; //  stop sending
                 
                 //clean up
                 TPCircularBufferConsume(&packetOutCircularBuffer, bytesToCopy);
                 free(targetBuffer);
-                break; //  stop sending
-                }
             }
             
         }

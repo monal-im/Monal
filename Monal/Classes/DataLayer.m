@@ -1760,6 +1760,19 @@ static DataLayer *sharedInstance=nil;
         
     }
     
+    //going to from 2.1 beta to final
+    if([dbversion doubleValue]<1.3)
+    {
+        DDLogVerbose(@"Database version <1.3 detected. Performing upgrade on accounts. ");
+        
+        [self executeNonQuery:@"update  buddylist set iconhash=NULL;"];
+      
+        [self executeNonQuery:@"update dbversion set dbversion='1.3'; "];
+        DDLogVerbose(@"Upgrade to 1.3 success ");
+        
+    }
+    
+    
     [dbversionCheck unlock];
     [self resetContacts];
 	return;

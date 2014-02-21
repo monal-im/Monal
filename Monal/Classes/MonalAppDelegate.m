@@ -254,6 +254,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 }
 
 
+#pragma mark memory
+-(void) applicationDidReceiveMemoryWarning:(UIApplication *)application
+{
+    [[MLImageManager sharedInstance] purgeCache];
+}
 
 #pragma mark backgrounding
 - (void)applicationWillEnterForeground:(UIApplication *)application

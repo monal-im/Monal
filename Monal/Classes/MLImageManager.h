@@ -10,14 +10,6 @@
 
 
 @interface MLImageManager : NSObject
-{
-    /**
-     Store 20 icons
-     */
-    NSMutableArray* _iconArray;
-
-    
-}
 
 /**
  chatview inbound background image
@@ -42,4 +34,8 @@
  */
 -(UIImage*) getIconForContact:(NSString*) contact andAccount:(NSString*) accountNo;
 
+/**
+ Purge cache in the event of  a memory warning
+ */
+-(void) purgeCache;
 @end

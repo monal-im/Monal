@@ -12,6 +12,12 @@
 
 static const int ddLogLevel = LOG_LEVEL_ERROR;
 
+@interface MLImageManager()
+@property  (nonatomic, strong) NSMutableArray* iconArray;
+@property  (nonatomic, strong) UIImage* noIcon;
+
+@end
+
 @implementation MLImageManager
 
 #pragma mark initilization
@@ -31,6 +37,66 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     self=[super init];
    return self;
 }
+
+#pragma mark cache
+
+-(UIImage*) noIcon{
+    if(!_noIcon) _noIcon=[UIImage imageNamed:@"noicon"];
+    return _noIcon;
+}
+
+-(NSMutableArray*) iconArray
+{
+    if(!_iconArray) _iconArray=[[NSMutableArray alloc] init];
+    return _iconArray;
+}
+
+-(void) purgeCache
+{
+    _iconArray=nil;
+    _noIcon=nil;
+}
+
+-(void) cacheImage:(UIImage*) image withName:(NSString*) contact
+{
+    if([self.iconArray count]==20)
+    {
+        [self.iconArray removeObjectAtIndex:0]; //first in first out
+    }
+    
+    NSDictionary* row = @{@"contact":contact,@"image":image };
+    [self.iconArray addObject:row];
+}
+
+
+-(UIImage*) checkCacheForFile:(NSString*) contact
+{
+    for(NSDictionary* row in self.iconArray)
+    {
+        if([[row objectForKey:@"contact"] isEqualToString:contact]) {
+            return [row objectForKey:@"image"];
+        }
+    }
+    
+    return nil;
+}
+
+
+-(void) unCacheFile:(NSString*) contact
+{
+    int counter=0;
+    for(NSDictionary* row in self.iconArray)
+    {
+        if([[row objectForKey:@"contact"] isEqualToString:contact]) {
+            [self.iconArray removeObjectAtIndex:counter];
+            break;
+        }
+        counter++;
+    }
+
+}
+
+
 
 #pragma mark chat bubbles
 -(UIImage *) inboundImage
@@ -91,6 +157,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         DDLogError(@"failed to write");
     }
     
+    //remove from cache if its there
+    [self unCacheFile:contact];
+    
     //set db entry
     [[DataLayer sharedInstance] setIconName:filename forBuddy:contact inAccount:accountNo];
 }
@@ -101,26 +170,30 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     //get filname from DB
     NSString* filename =  [[DataLayer sharedInstance] iconName:contact forAccount:accountNo];
     
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *documentsDirectory = [paths objectAtIndex:0];
-    NSString *writablePath = [documentsDirectory stringByAppendingPathComponent:@"buddyicons"];
-    writablePath = [documentsDirectory stringByAppendingPathComponent:accountNo];
-    writablePath = [documentsDirectory stringByAppendingPathComponent:filename];
-    
-    
-    UIImage* savedImage =[UIImage imageWithContentsOfFile:writablePath];
- if(savedImage)
-     toreturn=savedImage;
-    
-    
-    //uiimage image named is cached if avaialable
-    
-    if(toreturn==nil)
-    {
-        toreturn=[UIImage imageNamed:@"noicon"];
+    //check cache
+    toreturn= [self checkCacheForFile:contact];
+    if(!toreturn) {
+        
+        NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+        NSString *documentsDirectory = [paths objectAtIndex:0];
+        NSString *writablePath = [documentsDirectory stringByAppendingPathComponent:@"buddyicons"];
+        writablePath = [documentsDirectory stringByAppendingPathComponent:accountNo];
+        writablePath = [documentsDirectory stringByAppendingPathComponent:filename];
+        
+        
+        UIImage* savedImage =[UIImage imageWithContentsOfFile:writablePath];
+        if(savedImage)
+            toreturn=savedImage;
+        
+        if(toreturn==nil)
+        {
+            toreturn=self.noIcon;
+        }
+      
+        //uiimage image named is cached if avaialable
+        [self cacheImage:toreturn withName:contact];
+        
     }
-    
- 
     
     return toreturn;
     

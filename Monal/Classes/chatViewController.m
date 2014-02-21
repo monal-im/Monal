@@ -278,13 +278,13 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     }
     
     
-    if(![_contactFullName isEqualToString:@"(null)"])
+    if(![_contactFullName isEqualToString:@"(null)"] && [[_contactFullName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0)
     {
         _topName.text=_contactFullName;
     }
-    else
+    else {
         _topName.text=_contactName;
-    
+    }
     
     if(_day) {
         _topName.text= [NSString stringWithFormat:@"%@(%@)", _topName.text, _day];

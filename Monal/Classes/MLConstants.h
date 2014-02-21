@@ -14,6 +14,8 @@
 #define kMonalContactOnlineNotice @"kMLContactOnlineNotice"
 #define kMonalContactOfflineNotice @"kMLContactOfflineNotice"
 #define kMLHasRoomsNotice @"kMLHasRoomsNotice"
+#define kMonalCallStartedNotice @"kMonalCallStartedNotice"
+
 
 
 /*

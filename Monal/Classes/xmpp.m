@@ -797,10 +797,28 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     
                 }
                 
-                
+                //confirmation of set call after we accepted
                 if([iqNode.idval isEqualToString:self.jingle.idval])
                 {
-                    //confirmation of set call after we accepted
+                    NSArray* nameParts= [iqNode.from componentsSeparatedByString:@"/"];
+                    NSString* from;
+                    if([nameParts count]>1) {
+                        from=[nameParts objectAtIndex:0];
+                    } else from = iqNode.from;
+                    
+                    NSString* fullName;
+                    fullName=[[DataLayer sharedInstance] fullName:from forAccount:_accountNo];
+                    if(!fullName) fullName=from;
+                    
+                    NSDictionary* userDic=@{@"buddy_name":from,
+                                            @"full_name":fullName,
+                                            @"account_No":_accountNo
+                                            };
+                    
+                    [[NSNotificationCenter defaultCenter]
+                     postNotificationName: kMonalCallStartedNotice object: userDic];
+                    
+                    
                     [self.jingle rtpConnect];
                     return;
                 }
@@ -838,6 +856,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         if (pcmaPayload && transport1) {
                             self.jingle.recipientIP=[transport1 objectForKey:@"ip"];
                             self.jingle.destinationPort= [transport1 objectForKey:@"port"];
+                            
                             [self.jingle rtpConnect];
                         }
                         return;

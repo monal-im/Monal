@@ -8,7 +8,8 @@
 
 #import "MonalAppDelegate.h"
 
-
+#import "MLPortraitNavController.h"
+#import "CallViewController.h"
 
 // tab bar
 #import "ContactsViewController.h"
@@ -27,6 +28,7 @@
 
 
 
+
 //xmpp
 #import "MLXMPPManager.h"
 
@@ -41,6 +43,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) createRootInterface
 {
     self.window=[[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showCallScreen:) name:kMonalCallStartedNotice object:nil];
+    
    // self.window.screen=[UIScreen mainScreen];
     
     _tabBarController=[[MLTabBarController alloc] init];
@@ -155,6 +159,21 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 }
 
 
+#pragma mark notification actions
+-(void) showCallScreen:(NSDictionary*) userInfo
+{
+    CallViewController *callScreen= [[CallViewController alloc] initWithContact:userInfo];
+    MLPortraitNavController* callNav = [[MLPortraitNavController alloc] initWithRootViewController:callScreen];
+    callNav.navigationBar.hidden=YES;
+    
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
+    {
+        callNav.modalPresentationStyle=UIModalPresentationFormSheet;
+    }
+    
+    [self.tabBarController presentModalViewController:callNav animated:YES];
+}
+
 -(void) updateUnread
 {
     //make sure unread badge matches application badge
@@ -174,6 +193,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         }
     });
 }
+
+#pragma mark app life cycle
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {

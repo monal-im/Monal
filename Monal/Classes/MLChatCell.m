@@ -43,9 +43,10 @@
         self.date = [[UILabel alloc] init];
         self.date.font=[UIFont systemFontOfSize:kNameFont];
         self.date.backgroundColor=[UIColor clearColor];
-        self.date.textColor=[UIColor blackColor];
+        self.date.textColor=[UIColor darkGrayColor];
         self.date.lineBreakMode=NSLineBreakByTruncatingTail;
         self.date.numberOfLines=1;
+        self.date.textAlignment=UITextAlignmentRight;
         [self.contentView insertSubview:self.date aboveSubview:_bubbleImage];
         
         if(self.MUC)
@@ -88,13 +89,11 @@
         {
             self.textLabel.textColor=[UIColor whiteColor];
             buttonImage2 = [[MLImageManager sharedInstance] outboundImage];
-            self.date.textAlignment=UITextAlignmentRight;
         }
         else
         {
             self.textLabel.textColor=[UIColor blackColor];
             buttonImage2 = [[MLImageManager sharedInstance] inboundImage];
-            self.date.textAlignment=UITextAlignmentLeft;
         }
         _bubbleImage.image=buttonImage2;
     }
@@ -118,7 +117,7 @@
         dateLabelFrame = CGRectMake(finaltextlabelFrame.origin.x+finaltextlabelFrame.size.width-datewidth-10, 3, datewidth, kNameLabelHeight);
     }
     else {
-        dateLabelFrame = CGRectMake(finaltextlabelFrame.origin.x+finaltextlabelFrame.size.width-datewidth+35, 3, datewidth, kNameLabelHeight);
+        dateLabelFrame = CGRectMake(finaltextlabelFrame.origin.x+finaltextlabelFrame.size.width-datewidth-5, 3, datewidth, kNameLabelHeight);
     }
     
     self.date.frame=dateLabelFrame;

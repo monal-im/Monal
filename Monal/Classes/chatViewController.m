@@ -559,9 +559,10 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         else
         {
             //today just show time
-            [self.destinationDateFormat setDateStyle:NSDateFormatterShortStyle];
+            [self.destinationDateFormat setDateStyle:NSDateFormatterNoStyle];
             [self.destinationDateFormat setTimeStyle:NSDateFormatterMediumStyle];
         }
+      
         dateString = [ self.destinationDateFormat stringFromDate:destinationDate];
     }
     

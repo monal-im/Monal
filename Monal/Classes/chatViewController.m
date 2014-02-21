@@ -16,12 +16,12 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 @interface chatViewController()
 
-@property (nonatomic, strong)    NSDateFormatter* destinationDateFormat;
-@property (nonatomic, strong)    NSDateFormatter* sourceDateFormat;
-
-@property (nonatomic, assign) int thisyear;
-@property (nonatomic, assign) int thismonth;
-@property (nonatomic, assign) int thisday;
+@property (nonatomic, strong)  NSDateFormatter* destinationDateFormat;
+@property (nonatomic, strong)  NSDateFormatter* sourceDateFormat;
+@property (nonatomic, strong)  NSCalendar *gregorian;
+@property (nonatomic, assign) NSInteger thisyear;
+@property (nonatomic, assign) NSInteger thismonth;
+@property (nonatomic, assign) NSInteger thisday;
 
 @end
 
@@ -498,17 +498,15 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     
     self.sourceDateFormat = [[NSDateFormatter alloc] init];
     [self.sourceDateFormat setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+   
+    self.gregorian = [[NSCalendar alloc]
+                             initWithCalendarIdentifier:NSGregorianCalendar];
     
-    NSDateFormatter* tmpformatter= [[NSDateFormatter alloc] init];
-    
-    [tmpformatter setDateFormat:@"yyyy"];
-    self.thisyear = [[tmpformatter stringFromDate:[NSDate date]] intValue];
-    
-    [tmpformatter setDateFormat:@"MM"];
-    self.thismonth = [[tmpformatter stringFromDate:[NSDate date]] intValue];
-    
-    [tmpformatter setDateFormat:@"dd"];
-    self.thisday = [[tmpformatter stringFromDate:[NSDate date]] intValue];
+    NSDate* now =[NSDate date];
+    self.thisday =[self.gregorian components:NSDayCalendarUnit fromDate:now].day;
+    self.thismonth =[self.gregorian components:NSMonthCalendarUnit fromDate:now].month;
+    self.thisyear =[self.gregorian components:NSYearCalendarUnit fromDate:now].year;
+
     
 }
 
@@ -542,13 +540,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         NSTimeInterval interval = destinationGMTOffset - sourceGMTOffset;
         NSDate* destinationDate = [[NSDate alloc] initWithTimeInterval:interval sinceDate:sourceDate];
         
-        NSDateFormatter* tmpformatter= [[NSDateFormatter alloc] init];
-        [tmpformatter setDateFormat:@"yyyy"];
-        int msgyear = [[tmpformatter stringFromDate:destinationDate] intValue];
-        [tmpformatter setDateFormat:@"MM"];
-        int msgmonth = [[tmpformatter stringFromDate:destinationDate] intValue];
-        [tmpformatter setDateFormat:@"dd"];
-        int msgday = [[tmpformatter stringFromDate:destinationDate] intValue];
+        NSInteger msgday =[self.gregorian components:NSDayCalendarUnit fromDate:destinationDate].day;
+        NSInteger msgmonth=[self.gregorian components:NSMonthCalendarUnit fromDate:destinationDate].month;
+        NSInteger msgyear =[self.gregorian components:NSYearCalendarUnit fromDate:destinationDate].year;
         
         if ((self.thisday!=msgday) || (self.thismonth!=msgmonth) || (self.thisyear!=msgyear))
         {
@@ -558,6 +552,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
             
             // note: if it isnt the same day we want to show the full  day
             [self.destinationDateFormat setDateStyle:NSDateFormatterMediumStyle];
+            
+            //cache date
            
         }
         else

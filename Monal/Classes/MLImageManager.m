@@ -101,6 +101,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     NSString *documentsDirectory = [paths objectAtIndex:0];
     NSString *writablePath = [documentsDirectory stringByAppendingPathComponent:@"buddyicons"];
     writablePath = [writablePath stringByAppendingPathComponent:accountNo];
+    NSError* error;
+    [fileManager createDirectoryAtPath:writablePath withIntermediateDirectories:YES attributes:nil error:&error];
     writablePath = [writablePath stringByAppendingPathComponent:filename];
     
     if([fileManager fileExistsAtPath:writablePath])

@@ -11,6 +11,7 @@
 #import "MLConstants.h"
 #import "CallViewController.h"
 #import "MLXMPPManager.h"
+#import "MLPortraitNavController.h"
 
 
 @implementation ContactDetails
@@ -94,7 +95,7 @@
 -(IBAction) callContact:(id)sender;
 {
     CallViewController *callScreen= [[CallViewController alloc] initWithContact:_contact];
-    UINavigationController* callNav = [[UINavigationController alloc] initWithRootViewController:callScreen];
+    MLPortraitNavController* callNav = [[MLPortraitNavController alloc] initWithRootViewController:callScreen];
     callNav.navigationBar.hidden=YES;
     
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)

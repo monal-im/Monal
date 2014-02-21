@@ -100,8 +100,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString *documentsDirectory = [paths objectAtIndex:0];
     NSString *writablePath = [documentsDirectory stringByAppendingPathComponent:@"buddyicons"];
-    writablePath = [documentsDirectory stringByAppendingPathComponent:accountNo];
-    writablePath = [documentsDirectory stringByAppendingPathComponent:filename];
+    writablePath = [writablePath stringByAppendingPathComponent:accountNo];
+    writablePath = [writablePath stringByAppendingPathComponent:filename];
     
     if([fileManager fileExistsAtPath:writablePath])
     {
@@ -118,7 +118,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     }
     
     //remove from cache if its there
-    [self.iconCache removeObjectForKey:contact];
+    [self.iconCache removeObjectForKey:[NSString stringWithFormat:@"%@_%@",accountNo,contact]];
     
     //set db entry
     [[DataLayer sharedInstance] setIconName:filename forBuddy:contact inAccount:accountNo];
@@ -129,16 +129,17 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     UIImage* toreturn=nil; 
     //get filname from DB
     NSString* filename =  [[DataLayer sharedInstance] iconName:contact forAccount:accountNo];
+    NSString* cacheKey=[NSString stringWithFormat:@"%@_%@",accountNo,contact];
     
     //check cache
-    toreturn= [self.iconCache objectForKey:contact];
+    toreturn= [self.iconCache objectForKey:cacheKey];
     if(!toreturn) {
         
         NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
         NSString *documentsDirectory = [paths objectAtIndex:0];
         NSString *writablePath = [documentsDirectory stringByAppendingPathComponent:@"buddyicons"];
-        writablePath = [documentsDirectory stringByAppendingPathComponent:accountNo];
-        writablePath = [documentsDirectory stringByAppendingPathComponent:filename];
+        writablePath = [writablePath stringByAppendingPathComponent:accountNo];
+        writablePath = [writablePath stringByAppendingPathComponent:filename];
         
         
         UIImage* savedImage =[UIImage imageWithContentsOfFile:writablePath];
@@ -151,7 +152,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         }
       
         //uiimage image named is cached if avaialable
-        [self.iconCache setObject:toreturn forKey:contact];
+        [self.iconCache setObject:toreturn forKey:cacheKey];
         
     }
     

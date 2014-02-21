@@ -686,19 +686,23 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     else
         cell.detailTextLabel.text=nil;
     
-    NSString* stateString=[[row objectForKey:@"state"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] ;
-    
-    if(([stateString isEqualToString:@"away"]) ||
-       ([stateString isEqualToString:@"dnd"])||
-       ([stateString isEqualToString:@"xa"])
-       )
+    if(indexPath.section==konlineSection)
     {
-        cell.status=kStatusAway;
+        NSString* stateString=[[row objectForKey:@"state"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] ;
+        
+        if(([stateString isEqualToString:@"away"]) ||
+           ([stateString isEqualToString:@"dnd"])||
+           ([stateString isEqualToString:@"xa"])
+           )
+        {
+            cell.status=kStatusAway;
+        }
+        else if([[row objectForKey:@"state"] isEqualToString:@"(null)"] || [[row objectForKey:@"state"] isEqualToString:@""])
+            cell.status=kStatusOnline;
     }
-    else if([[row objectForKey:@"state"] isEqualToString:@"(null)"] || [[row objectForKey:@"state"] isEqualToString:@""])
-        cell.status=kStatusOnline;
-    else if([[row objectForKey:@"state"] isEqualToString:@"offline"])
+    else  if(indexPath.section==kofflineSection) {
         cell.status=kStatusOffline;
+    }
     
     cell.accessoryType = UITableViewCellAccessoryDetailDisclosureButton;
     

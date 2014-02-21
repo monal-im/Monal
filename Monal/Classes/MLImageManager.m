@@ -13,7 +13,7 @@
 static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 @interface MLImageManager()
-@property  (nonatomic, strong) NSMutableArray* iconArray;
+@property  (nonatomic, strong) NSCache* iconCache;
 @property  (nonatomic, strong) UIImage* noIcon;
 
 @end
@@ -45,57 +45,17 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     return _noIcon;
 }
 
--(NSMutableArray*) iconArray
+-(NSCache*) iconCache
 {
-    if(!_iconArray) _iconArray=[[NSMutableArray alloc] init];
-    return _iconArray;
+    if(!_iconCache) _iconCache=[[NSCache alloc] init];
+    return _iconCache;
 }
 
 -(void) purgeCache
 {
-    _iconArray=nil;
+    _iconCache=nil;
     _noIcon=nil;
 }
-
--(void) cacheImage:(UIImage*) image withName:(NSString*) contact
-{
-    if([self.iconArray count]==20)
-    {
-        [self.iconArray removeObjectAtIndex:0]; //first in first out
-    }
-    
-    NSDictionary* row = @{@"contact":contact,@"image":image };
-    [self.iconArray addObject:row];
-}
-
-
--(UIImage*) checkCacheForFile:(NSString*) contact
-{
-    for(NSDictionary* row in self.iconArray)
-    {
-        if([[row objectForKey:@"contact"] isEqualToString:contact]) {
-            return [row objectForKey:@"image"];
-        }
-    }
-    
-    return nil;
-}
-
-
--(void) unCacheFile:(NSString*) contact
-{
-    int counter=0;
-    for(NSDictionary* row in self.iconArray)
-    {
-        if([[row objectForKey:@"contact"] isEqualToString:contact]) {
-            [self.iconArray removeObjectAtIndex:counter];
-            break;
-        }
-        counter++;
-    }
-
-}
-
 
 
 #pragma mark chat bubbles
@@ -158,7 +118,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     }
     
     //remove from cache if its there
-    [self unCacheFile:contact];
+    [self.iconCache removeObjectForKey:contact];
     
     //set db entry
     [[DataLayer sharedInstance] setIconName:filename forBuddy:contact inAccount:accountNo];
@@ -171,7 +131,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     NSString* filename =  [[DataLayer sharedInstance] iconName:contact forAccount:accountNo];
     
     //check cache
-    toreturn= [self checkCacheForFile:contact];
+    toreturn= [self.iconCache objectForKey:contact];
     if(!toreturn) {
         
         NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
@@ -191,7 +151,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         }
       
         //uiimage image named is cached if avaialable
-        [self cacheImage:toreturn withName:contact];
+        [self.iconCache setObject:toreturn forKey:contact];
         
     }
     

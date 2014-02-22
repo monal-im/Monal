@@ -160,9 +160,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 
 #pragma mark notification actions
--(void) showCallScreen:(NSDictionary*) userInfo
+-(void) showCallScreen:(NSNotification*) userInfo
 {
-    CallViewController *callScreen= [[CallViewController alloc] initWithContact:userInfo];
+    NSDictionary* contact=userInfo.object;
+    CallViewController *callScreen= [[CallViewController alloc] initWithContact:contact];
     MLPortraitNavController* callNav = [[MLPortraitNavController alloc] initWithRootViewController:callScreen];
     callNav.navigationBar.hidden=YES;
     

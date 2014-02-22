@@ -913,6 +913,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                     RIButtonItem* cancelButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Decline", nil) action:^{
                                         XMPPIQ* node =[self.jingle rejectJingleTo:[nameParts objectAtIndex:0] withId:iqNode.idval andResource:[nameParts objectAtIndex:1]];
                                         [self send:node];
+                                        self.jingle=nil;
                                     }];
                                     
                                     RIButtonItem* yesButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Accept Call", nil) action:^{

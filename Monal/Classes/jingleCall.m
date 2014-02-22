@@ -30,7 +30,11 @@
     self.activeCall=YES;
     // rtp2 =[RTP alloc];
     //  [rtp2 RTPConnect:theaddress:[destinationPort2 intValue]:[localPort2 intValue] ];
-    dispatch_async(dispatch_get_current_queue(), ^{
+    NSString* monalNetWriteQueue =@"im.monal.jingleMain.%@";
+    dispatch_queue_t _netReadQueue = dispatch_queue_create([monalNetWriteQueue UTF8String], DISPATCH_QUEUE_SERIAL);
+    
+    
+    dispatch_async(_netReadQueue, ^{
         rtp =[[RTP alloc] init];
         [rtp RTPConnectAddress:self.recipientIP onRemotePort:[self.destinationPort intValue] withLocalPort:[self.localPort intValue]];
     });

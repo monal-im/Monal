@@ -812,7 +812,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     
                     NSDictionary* userDic=@{@"buddy_name":from,
                                             @"full_name":fullName,
-                                            @"account_No":_accountNo
+                                            @"account_id":_accountNo
                                             };
                     
                     [[NSNotificationCenter defaultCenter]

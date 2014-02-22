@@ -54,6 +54,11 @@
     detailLabelFrame.size.width = self.frame.size.width-51-13-35-45;
     self.detailTextLabel.frame = detailLabelFrame;
     
+    CGRect imageFrame =self.imageView.frame;
+    imageFrame.size.height=self.frame.size.height;
+    imageFrame.size.width=self.frame.size.height;
+    self.imageView.frame=imageFrame;
+    
     [self setOrb];
  
 }

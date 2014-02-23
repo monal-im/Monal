@@ -1484,7 +1484,7 @@
 					"$(inherited)",
 					"\"$(SRCROOT)/Debug\"",
 				);
-				ONLY_ACTIVE_ARCH = NO;
+				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;

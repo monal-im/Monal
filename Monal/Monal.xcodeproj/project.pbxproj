@@ -196,6 +196,16 @@
 		288765A50DF7441C002DB57D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 288765A40DF7441C002DB57D /* CoreGraphics.framework */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		2675EF5718B989170059C5C3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 268BCD55140B25CC0025E4D1;
+			remoteInfo = "jrtplib-static";
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1D3623240D0F684500981E51 /* MonalAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MonalAppDelegate.h; sourceTree = "<group>"; };
@@ -1101,6 +1111,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				2675EF5818B989170059C5C3 /* PBXTargetDependency */,
 			);
 			name = Monal;
 			productName = SworIM;
@@ -1214,7 +1225,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "./Crashlytics.framework/run 6e807cf86986312a050437809e762656b44b197c";
+			shellScript = "if [ \"$CONFIGURATION\" != \"Debug\" ]; then\n./Crashlytics.framework/run 6e807cf86986312a050437809e762656b44b197c\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -1339,6 +1350,14 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		2675EF5818B989170059C5C3 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 268BCD55140B25CC0025E4D1 /* jrtplib-static */;
+			targetProxy = 2675EF5718B989170059C5C3 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		26BAFC421626537D0073728B /* AppiraterLocalizable.strings */ = {

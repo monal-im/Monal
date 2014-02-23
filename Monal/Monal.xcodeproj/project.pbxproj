@@ -1178,8 +1178,8 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				1D6058900D05DD3D006BFB54 /* Monal */,
 				268BCD55140B25CC0025E4D1 /* jrtplib-static */,
+				1D6058900D05DD3D006BFB54 /* Monal */,
 			);
 		};
 /* End PBXProject section */
@@ -1508,6 +1508,7 @@
 				PROVISIONING_PROFILE = "DCC3D5D0-2C13-42D0-B613-CD8A14A86A0E";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
+				STRIP_INSTALLED_PRODUCT = NO;
 			};
 			name = AppStore;
 		};
@@ -1539,6 +1540,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
+				STRIP_INSTALLED_PRODUCT = NO;
 			};
 			name = Debug;
 		};
@@ -1600,8 +1602,8 @@
 				LLVM_LTO = NO;
 				OTHER_LDFLAGS = "-lstdc++";
 				PRODUCT_NAME = Monal;
-				PROVISIONING_PROFILE = "AB2E4F87-8F54-4C7B-8F90-AC18BDEF4205";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "AB2E4F87-8F54-4C7B-8F90-AC18BDEF4205";
+				PROVISIONING_PROFILE = "85C76911-58E8-4598-8FDE-6FFEB6E3ACFB";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "85C76911-58E8-4598-8FDE-6FFEB6E3ACFB";
 			};
 			name = Adhoc;
 		};
@@ -1632,6 +1634,7 @@
 				PROVISIONING_PROFILE = "DCC3D5D0-2C13-42D0-B613-CD8A14A86A0E";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
+				STRIP_INSTALLED_PRODUCT = NO;
 			};
 			name = Adhoc;
 		};

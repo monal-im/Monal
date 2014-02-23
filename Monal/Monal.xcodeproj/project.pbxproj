@@ -142,7 +142,6 @@
 		2658508B15E7D8E40070A2A7 /* TPCircularBuffer+AudioBufferList.c in Sources */ = {isa = PBXBuildFile; fileRef = 2658508615E7D8E40070A2A7 /* TPCircularBuffer+AudioBufferList.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		2658508C15E7D8E40070A2A7 /* TPCircularBuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 2658508815E7D8E40070A2A7 /* TPCircularBuffer.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		265F1B2B123040540065C5FE /* web.xib in Resources */ = {isa = PBXBuildFile; fileRef = 265F1B2A123040540065C5FE /* web.xib */; };
-		2668B2C317E1E59700C7F7C9 /* Crashlytics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2668B2C217E1E59700C7F7C9 /* Crashlytics.framework */; };
 		26761BF61804FBB700D94714 /* RoomListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26761BF41804FBB700D94714 /* RoomListViewController.m */; };
 		26761BF71804FBB700D94714 /* RoomListViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26761BF51804FBB700D94714 /* RoomListViewController.xib */; };
 		2678A98B185A8320003AF53B /* ChatLogAccountDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2678A98A185A8320003AF53B /* ChatLogAccountDetailViewController.m */; };
@@ -501,7 +500,6 @@
 				26F7BB451115F95000712672 /* SystemConfiguration.framework in Frameworks */,
 				263F568D121B5E970027D85D /* MediaPlayer.framework in Frameworks */,
 				26292F4F1309CAE100097280 /* CFNetwork.framework in Frameworks */,
-				2668B2C317E1E59700C7F7C9 /* Crashlytics.framework in Frameworks */,
 				26B69A75131C522F002FCBEB /* Security.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

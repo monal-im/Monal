@@ -24,7 +24,7 @@
     self.versionHash=version;
     
     XMLNode* c =[[XMLNode alloc] init];
-    c.element=@"caps:c ";
+    c.element=@"c";
     [c.attributes setObject:@"http://monal.im/caps" forKey:@"node"];
     [c.attributes setObject:self.versionHash forKey:@"ver"];
 //    [c.attributes setObject:@"sha-1" forKey:@"hash"];

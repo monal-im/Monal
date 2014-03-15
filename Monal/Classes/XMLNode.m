@@ -36,14 +36,15 @@
 {
     if(!_element) return nil; // sanity check
  
-    if([_element isEqualToString:@"whitePing"]) return @" ";
+    if([_element isEqualToString:@"whitePing"]) {
+        return @" ";
+    }
+
+    if([_element isEqualToString:@"xml"]) {
+         return [NSString stringWithFormat:@"<?xml version='1.0'?>"];
+    }
     
     NSMutableString* outputString=[[NSMutableString alloc] init];
-    
-    if([_element isEqualToString:@"stream:stream"])
-        [outputString appendString:[NSString stringWithFormat:@"<?xml version='1.0'?>"]];
-    
-    
     [outputString appendString:[NSString stringWithFormat:@"<%@",_element]];
     
     //set attributes

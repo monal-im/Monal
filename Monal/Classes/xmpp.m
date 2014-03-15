@@ -175,7 +175,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         DDLogInfo(@"connection secured");
 	}
 	
-    
+    XMLNode* xmlOpening = [[XMLNode alloc] initWithElement:@"xml"];
+    [self send:xmlOpening];
     [self startStream];
     [self setRunLoop];
     

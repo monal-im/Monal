@@ -53,8 +53,9 @@
         [outputString appendString:[NSString stringWithFormat:@" %@='%@' ",key, [_attributes objectForKey:key]]];
     }
     
-    if ([_element isEqualToString:@"starttls"])
+    if ([_element isEqualToString:@"starttls"]) {
         [outputString appendString:[NSString stringWithFormat:@"/>"]];
+    }
     else
     {
         [outputString appendString:[NSString stringWithFormat:@">"]];
@@ -70,8 +71,9 @@
             [outputString appendString:_data];
         
         //dont close stream
-        if((![_element isEqualToString:@"stream:stream"]) )
+        if((![_element isEqualToString:@"stream:stream"]) ) {
             [outputString appendString:[NSString stringWithFormat:@"</%@>", _element]];
+        }
     }
     
     return (NSString*)outputString ;

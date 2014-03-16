@@ -219,9 +219,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) connectionTask
 {
-    if(_xmppQueue==NULL)
+    if(_xmppQueue==NULL) {
         _xmppQueue=dispatch_get_current_queue();
-    _fulluser=[NSString stringWithFormat:@"%@@%@", _username, _domain];
+    }
+    if([_domain length]>0) {
+        _fulluser=[NSString stringWithFormat:@"%@@%@", _username, _domain];
+    }
+    else {
+        _fulluser=_username;
+    }
     
     if(_oldStyleSSL==NO) {
         // do DNS discovery if it hasn't already been set

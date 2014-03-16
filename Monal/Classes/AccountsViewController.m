@@ -211,8 +211,14 @@
             {
                 cell.accessoryView=nil; 
             }
-            cell.textLabel.text=[NSString stringWithFormat:@"%@@%@", [[_accountList objectAtIndex:indexPath.row] objectForKey:@"username"],
-                                 [[_accountList objectAtIndex:indexPath.row] objectForKey:@"domain"]];
+            if([(NSString*)[[_accountList objectAtIndex:indexPath.row] objectForKey:@"domain"] length]>0) {
+                cell.textLabel.text=[NSString stringWithFormat:@"%@@%@", [[_accountList objectAtIndex:indexPath.row] objectForKey:@"username"],
+                                     [[_accountList objectAtIndex:indexPath.row] objectForKey:@"domain"]];
+            }
+            else {
+                cell.textLabel.text=[[_accountList objectAtIndex:indexPath.row] objectForKey:@"username"];
+            }
+            
             if([[[_accountList objectAtIndex:indexPath.row] objectForKey:@"enabled"] boolValue] ==YES) {
                    cell.imageView.image=[UIImage imageNamed:@"888-checkmark"];
                 if([[MLXMPPManager sharedInstance] isAccountForIdConnected: [NSString stringWithFormat:@"%@",[[_accountList objectAtIndex:indexPath.row] objectForKey:@"account_id"]]]) {

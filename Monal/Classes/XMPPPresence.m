@@ -29,7 +29,7 @@
     [c.attributes setObject:self.versionHash forKey:@"ver"];
 //    [c.attributes setObject:@"sha-1" forKey:@"hash"];
     [c.attributes setObject:[NSString stringWithFormat:@"%@ %@", kextpmuc, kextvoice] forKey:@"ext"]; //deprecated .. for legacy
-    [c.attributes setObject:@"http://jabber.org/protocol/caps" forKey:@"xmlns:caps"];
+    [c.attributes setObject:@"http://jabber.org/protocol/caps" forKey:@"xmlns"];
     [self.children addObject:c];
     
     /*

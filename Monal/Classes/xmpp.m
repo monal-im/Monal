@@ -53,7 +53,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     _port=5552;
     _SSL=YES;
     _oldStyleSSL=NO;
-    _resource=@"Monal";
+    int r =  arc4random();
+    _resource=[NSString stringWithFormat:@"Monal%d",r];
     
     NSString* monalNetReadQueue =[NSString  stringWithFormat:@"im.monal.netReadQueue.%@", _accountNo];
     NSString* monalNetWriteQueue =[NSString  stringWithFormat:@"im.monal.netWriteQueue.%@", _accountNo];

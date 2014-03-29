@@ -1183,7 +1183,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     
                 }
                 
-                if ((_SSL && _startTLSComplete) || (!_SSL && !_startTLSComplete))
+                if ((_SSL && _startTLSComplete) || (!_SSL && !_startTLSComplete) || (_SSL && _oldStyleSSL))
                 {
                     //look at menchanisms presented
                     

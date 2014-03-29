@@ -14,14 +14,9 @@ Notable features:
 2.1.0 changelog
 
 This is  update that  fixes bugs.
-1. iOS7 UI and compatibiulity
-2. Numerous Stability related bug fixes
-3. You may login to mutiple accounts
-4. Fixed opening app in landscape mode for ipad
-5. You must explicity set self signed certs if needed
-6. You must explicity set old style SSL if it is needed
-7. Fixed roster bugs on iPad
-8. fixed digest-md5 login bugs (works with mavericks server)
+1. old style SSL works again
+2. improved server compatibilty
+3. fixed messaging bugs
 
 
       

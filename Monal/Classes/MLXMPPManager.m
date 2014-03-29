@@ -215,7 +215,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     xmppAccount.server=[account objectForKey:@"server"];
     xmppAccount.port=[[account objectForKey:@"other_port"] integerValue];
     xmppAccount.SSL=[[account objectForKey:@"secure"] boolValue];
-    xmppAccount.oldStyleSSL=[[account objectForKey:@"oldStyleSSL"] boolValue];
+    xmppAccount.oldStyleSSL=[[account objectForKey:@"oldstyleSSL"] boolValue];
     xmppAccount.selfSigned=[[account objectForKey:@"selfsigned"] boolValue];
     
     xmppAccount.accountNo=[NSString stringWithFormat:@"%@",[account objectForKey:@"account_id"]];

@@ -86,7 +86,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         sslSwitch.on=[[settings objectForKey:@"secure"] boolValue];
 		enableSwitch.on=[[settings objectForKey:@"enabled"] boolValue];
         
-        oldStyleSSLSwitch.on=[[settings objectForKey:@"oldStyleSSL"] boolValue];
+        oldStyleSSLSwitch.on=[[settings objectForKey:@"oldstyleSSL"] boolValue];
 		checkCertSwitch.on=[[settings objectForKey:@"selfsigned"] boolValue];
 		
 	

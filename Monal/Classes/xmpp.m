@@ -1174,7 +1174,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             if(!_loggedIn)
             {
                 
-                if(streamNode.callStartTLS)
+                if(streamNode.callStartTLS &&  _SSL)
                 {
                     XMLNode* startTLS= [[XMLNode alloc] init];
                     startTLS.element=@"starttls";

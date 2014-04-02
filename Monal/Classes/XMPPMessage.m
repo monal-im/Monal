@@ -17,6 +17,10 @@
     return self;
 }
 
+-(void) setId:(NSString*) idval
+{
+    [self.attributes setObject:idval forKey:@"id"];
+}
 
 -(void) setBody:(NSString*) messageBody
 {

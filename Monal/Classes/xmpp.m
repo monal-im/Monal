@@ -1491,9 +1491,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [messageNode.attributes setObject:contact forKey:@"to"];
     [messageNode setBody:message];
     
+    NSUInteger r = arc4random_uniform(NSIntegerMax);
+    [messageNode setId: [NSString stringWithFormat:@"Monal%d", r]];
+    
     if(isMUC)
     {
         [messageNode.attributes setObject:kMessageGroupChatType forKey:@"type"];
+    } else  {
+         [messageNode.attributes setObject:kMessageChatType forKey:@"type"];
     }
     
     [self send:messageNode];

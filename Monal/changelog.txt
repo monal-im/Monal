@@ -17,6 +17,7 @@ This is  update that  fixes bugs.
 1. Fixed compatibulity with SSL off
 2. Fixed old style SSL issues
 3. Fix for compatibility with telepathy library clients
+4. chinese keyboard input fixed 
 
 
 

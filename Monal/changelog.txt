@@ -11,16 +11,18 @@ Notable features:
 * Tested heavily with google talk, facebook, openfire, prosody   and ejabberd servers. 
 
 
-2.1.0 changelog
+2.1.2 changelog
 
 This is  update that  fixes bugs.
-1. old style SSL works again
-2. improved server compatibilty
-3. fixed messaging bugs
+1. Fixed compatibulity with SSL off
+2. Fixed old style SSL issues
+3. Fix for compatibility with telepathy library clients
+
+
 
 
       
-you can connect to any jabber server or use the settings for google, facebook or  AIM servers
+you can connect to any jabber server or use the settings for google or facebook
 
 to test the  XMPP protocol (used by google, facebook etc) use the credentials below. To test the VOIP features, talk to a client with pidgin on linux or another monal user.  The option to call appears after the tapping on the disclosure indicator on the contacts list. 
 username: sworim

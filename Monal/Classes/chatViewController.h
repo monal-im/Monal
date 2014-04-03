@@ -44,7 +44,8 @@
     
     BOOL  _isMUC;
     
-    NSString* _day; 
+    NSString* _day;
+    BOOL _keyboardVisible; 
 }
 
 @property (nonatomic,strong)  NSString* contactName;

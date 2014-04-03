@@ -802,7 +802,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                      }
      ];
     
-    
+    _keyboardVisible=NO;
 	DDLogVerbose(@"kbd will hide scroll: %f", oldFrame.size.height);
 }
 
@@ -814,20 +814,27 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void) keyboardWillShow:(NSNotification *) notification
 {
-    
-    CGSize keyboardSize = [[[notification userInfo] objectForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue].size;
+    CGSize keyboardSize = [[[notification userInfo] objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue].size;
+   // CGSize keyboardNewPos = [[[notification userInfo] objectForKey:] CGRectValue].size;
     
     CGRect r;
-	r=self.view.frame;
+	
+    //chiense keybaord might call this multiple times ony set for inital
+    if(!_keyboardVisible) {
+        oldFrame=self.view.frame;
+    }
+    _keyboardVisible=YES;
+    r=oldFrame;
+    
     UIInterfaceOrientation orientation = [UIApplication sharedApplication].statusBarOrientation;
     
     if(orientation==UIInterfaceOrientationLandscapeLeft|| orientation==UIInterfaceOrientationLandscapeRight)
     {
         r.size.height -= keyboardSize.width;
     }
-    else
+    else {
         r.size.height -= keyboardSize.height;
-	oldFrame=self.view.frame;
+    }
     
     NSTimeInterval animationDuration =[[[notification userInfo] objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
     [UIView animateWithDuration:animationDuration

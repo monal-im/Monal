@@ -26,7 +26,6 @@
 	NSString* _contactFullName;
     
 	bool _firstmsg;
-	bool groupchat;
 	
 	bool wasaway; 
 	bool wasoffline; 

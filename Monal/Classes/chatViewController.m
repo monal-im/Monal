@@ -388,7 +388,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 	{
 		DDLogVerbose(@"added message");
         
-		if(groupchat!=true) //  message will come back
+		if(_isMUC) //  message will come back
 		{
             dispatch_async(dispatch_get_main_queue(),
                            ^{

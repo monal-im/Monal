@@ -645,6 +645,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             {
                 return;
             }
+            
             if(iqNode.shouldSetBind)
             {
                 _jid=iqNode.jid;
@@ -692,7 +693,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 
             }
             
-            if((iqNode.discoInfo))
+            if((iqNode.discoInfo) && [iqNode.type isEqualToString:kiqGetType])
             {
                 XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
                 [discoInfo setiqTo:iqNode.from];
@@ -763,7 +764,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             {
                 if(iqNode.discoItems==YES)
                 {
-                    if([iqNode.from isEqualToString:self.server])
+                    if([iqNode.from isEqualToString:self.server] || [iqNode.from isEqualToString:self.domain])
                     {
                         for (NSDictionary* item in iqNode.items)
                         {

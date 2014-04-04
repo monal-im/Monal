@@ -1900,7 +1900,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             // DDLogVerbose(@"waiting on net read queue");
             dispatch_async(_netReadQueue, ^{
                 // DDLogVerbose(@"got net read queue");
-                [_inputBuffer appendString:[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]];
+                NSString* inputString=[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+                if(inputString) {
+                    [_inputBuffer appendString:inputString];
+                }
+                else {
+                    DDLogError(@"got data but not string");
+                }
             });
             
         }

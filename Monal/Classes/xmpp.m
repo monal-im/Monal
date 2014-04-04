@@ -1621,7 +1621,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) getConferenceRooms
 {
-    if(_conferenceServer)
+    if(_conferenceServer && !_roomList)
     {
         XMPPIQ* discoItem =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
         [discoItem setiqTo:_conferenceServer];
@@ -1630,7 +1630,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     else
     {
-        DDLogInfo(@"no conference server discovered");
+       if(!_conferenceServer) DDLogInfo(@"no conference server discovered");
+        if(_roomList){
+            [[NSNotificationCenter defaultCenter] postNotificationName: kMLHasRoomsNotice object: self];
+        }
     }
 }
 

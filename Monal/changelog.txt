@@ -18,6 +18,7 @@ This is  update that  fixes bugs.
 2. Fixed old style SSL issues
 3. Fix for compatibility with telepathy library clients
 4. chinese keyboard input fixed 
+5. MUC compatibility improved
 
 
 

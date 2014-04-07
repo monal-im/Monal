@@ -21,7 +21,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
    
 	if(([elementName isEqualToString:@"message"])  )
 	{
-		DDLogVerbose(@" message error");
+		DDLogVerbose(@" message type check");
 		
         if ([[attributeDict objectForKey:@"type"] isEqualToString:kMessageErrorType])
         {

@@ -388,32 +388,28 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 	{
 		DDLogVerbose(@"added message");
         
-		if(!_isMUC) //  message will come back
-		{
-            dispatch_async(dispatch_get_main_queue(),
-                           ^{
-                               NSDictionary* userInfo = @{@"af": self.jid,
-                                                          @"message": message ,
-                                                          @"thetime": [self currentGMTTime] };
-                               [_messagelist addObject:userInfo];
+        
+        dispatch_async(dispatch_get_main_queue(),
+                       ^{
+                           NSDictionary* userInfo = @{@"af": self.jid,
+                                                      @"message": message ,
+                                                      @"thetime": [self currentGMTTime] };
+                           [_messagelist addObject:userInfo];
+                           
+                           [_messageTable beginUpdates];
+                           NSIndexPath *path1 = [NSIndexPath indexPathForRow:[_messagelist count]-1  inSection:0];
+                           [_messageTable insertRowsAtIndexPaths:@[path1]
+                                                withRowAnimation:UITableViewRowAnimationBottom];
+                           [_messageTable endUpdates];
+                           
+                           
+                           if(![_messageTable.indexPathsForVisibleRows containsObject:path1])
+                           {
                                
-                               [_messageTable beginUpdates];
-                               NSIndexPath *path1 = [NSIndexPath indexPathForRow:[_messagelist count]-1  inSection:0];
-                               [_messageTable insertRowsAtIndexPaths:@[path1]
-                                                    withRowAnimation:UITableViewRowAnimationBottom];
-                               [_messageTable endUpdates];
-                               
-                               
-                               if(![_messageTable.indexPathsForVisibleRows containsObject:path1])
-                               {
-                                   
-                                   [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:NO];
-                               }
-                           });
-            
-            
-        }
-		
+                               [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:NO];
+                           }
+                       });
+  
 	}
 	else
 		DDLogVerbose(@"failed to add message");

@@ -24,9 +24,6 @@
 #import "AboutViewController.h"
 #import "MLNotificationManager.h"
 
-#import <Crashlytics/Crashlytics.h>
-
-
 
 
 //xmpp
@@ -251,7 +248,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
 
     
-    [Crashlytics startWithAPIKey:@"6e807cf86986312a050437809e762656b44b197c"];
+ //   [Crashlytics startWithAPIKey:@"6e807cf86986312a050437809e762656b44b197c"];
   //  [Crashlytics sharedInstance].debugMode = YES;
   // [[Crashlytics sharedInstance] crash];
     

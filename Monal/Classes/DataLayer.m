@@ -983,9 +983,6 @@ static DataLayer *sharedInstance=nil;
 {
 	// count # of meaages in message table
 	
-	
-	
-	
 	NSString* query=[NSString stringWithFormat:@"select count(buddy_id) from buddylist where account_id=%@ and buddy_name='%@' and online=1 ", accountNo, buddy];
 	
 	NSNumber* count=(NSNumber*)[self executeScalar:query];

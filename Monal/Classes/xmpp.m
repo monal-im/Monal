@@ -1138,7 +1138,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             [[DataLayer sharedInstance]  setBuddyHash:presenceNode forAccount:_accountNo];
                         }
                     }
-                    
+                    else {
+
+                    }
                     
                 }
                 else

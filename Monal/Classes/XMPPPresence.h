@@ -107,5 +107,4 @@ allow subscription. Called in response to a remote request.
  */
 -(void) leaveRoom:(NSString*) room onServer:(NSString*) server withName:(NSString*)name;
 
-
 @end

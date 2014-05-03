@@ -1011,28 +1011,9 @@ static DataLayer *sharedInstance=nil;
 
 -(bool) isBuddyMuc:(NSString*) buddy forAccount:(NSString*) accountNo
 {
-	// seeif it is muc chat name
-	
-	NSString* query=[NSString stringWithFormat:@"SELECT	message_history_id from message_history where account_id=%@ and message_from!=actual_from and message_from='%@'  limit 1", accountNo, buddy];
-	
-	NSNumber* count=(NSNumber*)[self executeScalar:query];
-	if(count!=nil)
-	{
-		int val=[count integerValue];
-		if(val>0) {
-			return YES;
-        }
-        else
-        {
-            return NO;
-        }
-	}
-	else
-	{
-		return NO;
-	}
-	
-	
+	NSString* query=[NSString stringWithFormat:@"SELECT Muc from buddylist where account_id=%@  and buddy_name='%@' ", accountNo, buddy];
+	NSNumber* status=(NSNumber*)[self executeScalar:query];
+    return [status boolValue];
 }
 
 -(bool) isBuddyAdded:(NSString*) buddy forAccount:(NSString*) accountNo

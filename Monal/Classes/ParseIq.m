@@ -99,7 +99,10 @@
 	{
         if([[attributeDict objectForKey:@"category"] isEqualToString:@"conference"])
         {
+            if([[attributeDict objectForKey:@"type"] isEqualToString:@"text"])
+            {
             _conferenceServer=self.from;
+            }
         }
     }
     

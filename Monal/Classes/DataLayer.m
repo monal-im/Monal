@@ -1773,6 +1773,21 @@ static DataLayer *sharedInstance=nil;
     }
     
     
+    if([dbversion doubleValue]<1.31)
+    {
+        DDLogVerbose(@"Database version <1.31 detected. Performing upgrade on accounts. ");
+        
+        [self executeNonQuery:@"alter table buddylist add column bool Muc;"];
+        
+        [self executeNonQuery:@"update dbversion set dbversion='1.31'; "];
+        DDLogVerbose(@"Upgrade to 1.31 success ");
+        
+    }
+    
+    
+
+    
+    
     [dbversionCheck unlock];
     [self resetContacts];
 	return;

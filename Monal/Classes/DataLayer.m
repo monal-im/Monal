@@ -1777,7 +1777,7 @@ static DataLayer *sharedInstance=nil;
     {
         DDLogVerbose(@"Database version <1.31 detected. Performing upgrade on accounts. ");
         
-        [self executeNonQuery:@"alter table buddylist add column bool Muc;"];
+        [self executeNonQuery:@"alter table buddylist add column  Muc bool;"];
         
         [self executeNonQuery:@"update dbversion set dbversion='1.31'; "];
         DDLogVerbose(@"Upgrade to 1.31 success ");

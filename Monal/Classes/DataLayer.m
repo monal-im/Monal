@@ -412,7 +412,7 @@ static DataLayer *sharedInstance=nil;
                 actualfull=fullName;
             }
             
-            NSString* query=[NSString stringWithFormat:@"insert into buddylist values(null, %@, '%@', '%@','%@','','','','','',0, 0, 1);", accountNo, buddy, actualfull, nickName];
+            NSString* query=[NSString stringWithFormat:@"insert into buddylist values(null, %@, '%@', '%@','%@','','','','','',0, 0, 1,0);", accountNo, buddy, actualfull, nickName];
             if([self executeNonQuery:query]!=NO)
             {
                 toReturn= YES;
@@ -758,7 +758,7 @@ static DataLayer *sharedInstance=nil;
     [self setResourceOnline:presenceObj forAccount:accountNo];
     if([self isBuddyOnline:presenceObj.user forAccount:accountNo]) return NO; // pervent setting something as new
     
-	NSString* query=[NSString stringWithFormat:@"update buddylist set online=1, new=1  where account_id=%@ and  buddy_name='%@';", accountNo, presenceObj.user];
+	NSString* query=[NSString stringWithFormat:@"update buddylist set online=1, new=1, muc=%d where account_id=%@ and  buddy_name='%@';",presenceObj.MUC, accountNo, presenceObj.user ];
 	if([self executeNonQuery:query]!=NO)
 	{
 		return YES;
@@ -1762,10 +1762,7 @@ static DataLayer *sharedInstance=nil;
         
     }
     
-    
-
-    
-    
+ 
     [dbversionCheck unlock];
     [self resetContacts];
 	return;

@@ -1074,6 +1074,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         [self send:configNode];
                     }
                 }
+                
+                //mark buddy as MUC
             }
             
             if(presenceNode.type ==nil)

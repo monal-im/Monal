@@ -49,9 +49,19 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
         }
     }
     
-    if([elementName isEqualToString:@"x"])
+    NSString *namespace = nil;
+    NSArray *parts =[elementName componentsSeparatedByString:@":"];
+    if([parts count]>1) {
+     namespace=[NSString stringWithFormat:@"%@",[parts objectAtIndex:0]];
+    } else
     {
-        if([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"http://jabber.org/protocol/muc#user"])
+        namespace =@"";
+    }
+    
+    if([elementName isEqualToString:[NSString stringWithFormat:@"%@:x",namespace]])
+    {
+        if([[attributeDict objectForKey:[NSString stringWithFormat:@"xmlns:%@",namespace]] isEqualToString:@"http://jabber.org/protocol/muc#user"]
+           || [[attributeDict objectForKey:@"xmlns" ] isEqualToString:@"http://jabber.org/protocol/muc#user"])
         {
             self.MUC=YES;
             return;

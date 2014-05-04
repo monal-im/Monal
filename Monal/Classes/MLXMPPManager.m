@@ -122,7 +122,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         {
             xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
             if(xmppAccount.loggedIn)
-                [xmppAccount sendWhiteSpacePing];
+                [xmppAccount sendPing];  //sendWhiteSpacePing
         }
         
     }];

@@ -199,9 +199,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) endBackgroundLaunch
 {
-    DDLogVerbose(@"XMPP manager completed background task");
-    [[UIApplication sharedApplication] endBackgroundTask:_backgroundTask];
-    _backgroundTask=UIBackgroundTaskInvalid;
+    if(!_backgroundTask==UIBackgroundTaskInvalid) {
+        DDLogVerbose(@"XMPP manager completed background task");
+        [[UIApplication sharedApplication] endBackgroundTask:_backgroundTask];
+        _backgroundTask=UIBackgroundTaskInvalid;
+    }
 }
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions

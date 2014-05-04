@@ -197,6 +197,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 #pragma mark app life cycle
 
+-(void) endBackgroundLaunch
+{
+    DDLogVerbose(@"XMPP manager completed background task");
+    [[UIApplication sharedApplication] endBackgroundTask:_backgroundTask];
+    _backgroundTask=UIBackgroundTaskInvalid;
+}
+
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     
@@ -235,12 +242,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         }];
         
         if (_backgroundTask != UIBackgroundTaskInvalid) {
-             DDLogVerbose(@"XMPP manager connecting in background");
-                [[MLXMPPManager sharedInstance] connectIfNecessary];
-              DDLogVerbose(@"XMPP manager completed background task");
-            [[UIApplication sharedApplication] endBackgroundTask:_backgroundTask];
-            _backgroundTask=UIBackgroundTaskInvalid;
-
+            DDLogVerbose(@"XMPP manager connecting in background");
+            [[MLXMPPManager sharedInstance] connectIfNecessary];
+            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(endBackgroundLaunch) name:kMLHasConnectedNotice object:nil];
         }
     }
     else

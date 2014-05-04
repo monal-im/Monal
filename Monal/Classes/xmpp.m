@@ -291,6 +291,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 if([[DataLayer sharedInstance] isAccountEnabled:[NSString stringWithFormat:@"%@",self.accountNo]]) {
                     [self reconnect];
                 }
+            }else {
+                [[NSNotificationCenter defaultCenter] postNotificationName:kMLHasConnectedNotice object:nil];
             }
             
         });

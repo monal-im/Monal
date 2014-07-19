@@ -923,9 +923,10 @@ static DataLayer *sharedInstance=nil;
 
 -(BOOL) setBuddyHash:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
 {
-	
+    NSString* hash=presenceObj.photoHash;
+    if(!hash) hash=@"";
 	//data length check
-	NSString* query=[NSString stringWithFormat:@"update buddylist set iconhash='%@', dirty=1 where account_id=%@ and  buddy_name='%@';",presenceObj.photoHash,
+	NSString* query=[NSString stringWithFormat:@"update buddylist set iconhash='%@', dirty=1 where account_id=%@ and  buddy_name='%@';",hash,
 					 accountNo, presenceObj.user];
 	if([self executeNonQuery:query]!=NO)
 	{
@@ -939,18 +940,9 @@ static DataLayer *sharedInstance=nil;
 
 -(NSString*) buddyHash:(NSString*) buddy forAccount:(NSString*) accountNo
 {
-    //if there isnt a file name icon wasnt downloaded
-    //	NSString* query2=[NSString stringWithFormat:@"select filename from buddylist where account_id=%@ and buddy_name='%@'", accountNo, buddy];
-    //	NSString* filename= (NSString*)[self executeScalar:query2];
-    //	if([filename isEqualToString:@""])
-    //	{
-    //		return @"";
-    //	}
-	
-	
 	NSString* query=[NSString stringWithFormat:@"select iconhash from buddylist where account_id=%@ and buddy_name='%@'", accountNo, buddy];
-	NSString* iconname= (NSString*)[self executeScalar:query];
-	return iconname;
+	NSString* iconhash= (NSString*)[self executeScalar:query];
+	return iconhash;
 }
 
 

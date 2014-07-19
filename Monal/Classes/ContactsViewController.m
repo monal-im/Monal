@@ -759,7 +759,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
         
         RIButtonItem* yesButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Yes", nil) action:^{
             if(isMUC) {
-                [[MLXMPPManager sharedInstance] leaveRoom:[contact objectForKey:@"buddy_name"] forAccountId: [contact objectForKey:@"account_id"]];
+                [[MLXMPPManager sharedInstance] leaveRoom:[contact objectForKey:@"buddy_name"] forAccountId: [NSString stringWithFormat:@"%@",[contact objectForKey:@"account_id"]]];
             }
             else  {
                 [[MLXMPPManager sharedInstance] removeContact:contact];

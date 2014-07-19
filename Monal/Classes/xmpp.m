@@ -1122,16 +1122,18 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         if([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground)
                         {
                             //check for vcard change
-                            if([presenceNode.photoHash isEqualToString:[[DataLayer sharedInstance]  buddyHash:presenceNode.user forAccount:_accountNo]])
-                            {
-                                DDLogVerbose(@"photo hash is the  same");
-                            }
-                            else
-                            {
-                                [[DataLayer sharedInstance]  setBuddyHash:presenceNode forAccount:_accountNo];
-                                XMPPIQ* iqVCard= [[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
-                                [iqVCard getVcardTo:presenceNode.user];
-                                [self send:iqVCard];
+                            if(presenceNode.photoHash) {
+                                if([presenceNode.photoHash isEqualToString:[[DataLayer sharedInstance]  buddyHash:presenceNode.user forAccount:_accountNo]])
+                                {
+                                    DDLogVerbose(@"photo hash is the  same");
+                                }
+                                else
+                                {
+                                    [[DataLayer sharedInstance]  setBuddyHash:presenceNode forAccount:_accountNo];
+                                    XMPPIQ* iqVCard= [[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
+                                    [iqVCard getVcardTo:presenceNode.user];
+                                    [self send:iqVCard];
+                                }
                             }
                         }
                         else

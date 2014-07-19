@@ -58,7 +58,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
         namespace =@"";
     }
     
-    if([elementName isEqualToString:[NSString stringWithFormat:@"%@:x",namespace]])
+    if([elementName isEqualToString:[NSString stringWithFormat:@"%@:x",namespace]] || [elementName isEqualToString:@"x"] )
     {
         if([[attributeDict objectForKey:[NSString stringWithFormat:@"xmlns:%@",namespace]] isEqualToString:@"http://jabber.org/protocol/muc#user"]
            || [[attributeDict objectForKey:@"xmlns" ] isEqualToString:@"http://jabber.org/protocol/muc#user"])
@@ -96,7 +96,8 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
         if([elementName isEqualToString:@"photo"])
         {
             _photoHash=_messageBuffer;
-            
+            if(!_photoHash)
+                _photoHash=@"";
         }
     }
 }

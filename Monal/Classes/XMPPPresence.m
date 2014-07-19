@@ -26,8 +26,8 @@
     XMLNode* c =[[XMLNode alloc] init];
     c.element=@"c";
     [c.attributes setObject:@"http://monal.im/caps" forKey:@"node"];
-    [c.attributes setObject:self.versionHash forKey:@"ver"];
-//    [c.attributes setObject:@"sha-1" forKey:@"hash"];
+  //  [c.attributes setObject:self.versionHash forKey:@"ver"];
+   [c.attributes setObject:@"sha-1" forKey:@"hash"];
     [c.attributes setObject:[NSString stringWithFormat:@"%@ %@", kextpmuc, kextvoice] forKey:@"ext"]; //deprecated .. for legacy
     [c.attributes setObject:@"http://jabber.org/protocol/caps" forKey:@"xmlns"];
     [self.children addObject:c];
@@ -73,7 +73,7 @@
     XMLNode* priorityNode =[[XMLNode alloc] init];
     priorityNode.element=@"priority";
     priorityNode.data=[NSString stringWithFormat:@"%d",_priority];
-    [self.children addObject:priorityNode];
+   // [self.children addObject:priorityNode];
 }
 
 -(void) setInvisible

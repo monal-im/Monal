@@ -366,6 +366,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void)resignTextView
 {
+    [chatInput resignFirstResponder];//apply autocorrect 
+    [chatInput becomeFirstResponder];
     if(([chatInput text]!=nil) && (![[chatInput text] isEqualToString:@""]) )
     {
         DDLogVerbose(@"Sending message");

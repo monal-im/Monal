@@ -458,7 +458,7 @@ withCompletionHandler:(void (^)(BOOL success)) completion
 
 
 
--(void)  joinRoom:(NSString*) roomName  withPassword:(NSString*) password ForAccountRow:(NSInteger) row
+-(void)  joinRoom:(NSString*) roomName  withPassword:(NSString*) password forAccountRow:(NSInteger) row
 {
     NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
     xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
@@ -466,10 +466,16 @@ withCompletionHandler:(void (^)(BOOL success)) completion
 }
 
 
--(void)  leaveRoom:(NSString*) roomName ForAccountRow:(NSInteger) row
+-(void)  leaveRoom:(NSString*) roomName forAccountRow:(NSInteger) row
 {
     NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
     xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
+    [account leaveRoom:roomName];
+}
+
+-(void)  leaveRoom:(NSString*) roomName forAccountId:(NSString*) accountId
+{
+    xmpp* account= [self getConnectedAccountForID:accountId];
     [account leaveRoom:roomName];
 }
 

@@ -745,12 +745,25 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
         }
         
         NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"Remove %@ from contacts?", nil),[contact objectForKey:@"full_name"] ];
+        
+        BOOL isMUC=[[DataLayer sharedInstance] isBuddyMuc:[contact objectForKey:@"buddy_name"] forAccount:[contact objectForKey:@"account_id"]];
+        if(isMUC)
+        {
+            messageString =@"Leave this converstion?";
+        }
+  
+        
         RIButtonItem* cancelButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Cancel", nil) action:^{
             
         }];
         
         RIButtonItem* yesButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Yes", nil) action:^{
-            [[MLXMPPManager sharedInstance] removeContact:contact];
+            if(isMUC) {
+                [[MLXMPPManager sharedInstance] leaveRoom:[contact objectForKey:@"buddy_name"] forAccountId: [contact objectForKey:@"account_id"]];
+            }
+            else  {
+                [[MLXMPPManager sharedInstance] removeContact:contact];
+            }
             
             [_contactsTable beginUpdates];
             if ((indexPath.section==1) && (indexPath.row<=[_contacts count]) ) {

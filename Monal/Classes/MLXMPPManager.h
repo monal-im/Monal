@@ -91,12 +91,22 @@ Returns the name of the conencted account
 /**
  Joins the selected Room on the conference server
  */
--(void)  joinRoom:(NSString*) roomName  withPassword:(NSString*) password ForAccountRow:(NSInteger) row;
+-(void)  joinRoom:(NSString*) roomName  withPassword:(NSString*) password forAccountRow:(NSInteger) row;
 
 /**
- leave the specific room for accont
+ leave the specific MUC room
+ @param roomName
+ @param row the row of the account in the connected accounts list
  */
--(void)  leaveRoom:(NSString*) roomName ForAccountRow:(NSInteger) row;
+-(void)  leaveRoom:(NSString*) roomName forAccountRow:(NSInteger) row;
+
+/**
+ leaves a specified MUC room. 
+ @param roomName
+ @param accountID the accountid number from the database
+ */
+-(void)  leaveRoom:(NSString*) roomName forAccountId:(NSString*) accountId;
+
 
 
 #pragma mark Jingle VOIP

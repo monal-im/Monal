@@ -385,7 +385,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 //always messages going out
 -(void) addMessageto:(NSString*)to withMessage:(NSString*) message
 {
-	if(!self.jid || &message)  {
+	if(!self.jid || !message)  {
         DDLogError(@" not ready to send messages");
         return;
     }

@@ -257,7 +257,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     if(_loggedIn || _logInStarted)
     {
-        DDLogError(@"assymetrical call to login without a teardown");
+        DDLogError(@"assymetrical call to login without a teardown loggedin %d login started %d", _loggedIn, _logInStarted);
         return;
     }
     
@@ -1823,6 +1823,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             if(_loggedInOnce)
             {
                 DDLogInfo(@" stream error calling reconnect");
+                if(!_logInStarted) _logInStarted=NO;
+                
                 [self reconnect];
             }
             

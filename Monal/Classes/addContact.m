@@ -24,6 +24,13 @@
 	{
         NSDictionary* contact =@{@"row":[NSNumber numberWithInteger:_selectedRow],@"buddy_name":_buddyName.text};
 		[[MLXMPPManager sharedInstance] addContact:contact];
+        
+        UIAlertView *addError = [[UIAlertView alloc]
+								 initWithTitle:@"Permission Requested"
+								 message:@"The new contact will be added to your contacts list when the person you've added has approved your request."
+								 delegate:self cancelButtonTitle:@"Close"
+								 otherButtonTitles: nil] ;
+		[addError show];
 	}
 	else
 	{

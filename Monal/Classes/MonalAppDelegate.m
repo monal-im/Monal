@@ -54,8 +54,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     UIBarStyle barColor=UIBarStyleBlackOpaque;
     
-     if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0"))
+    if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0")) {
          barColor=UIBarStyleDefault;
+    }
     
     ActiveChatsViewController* activeChatsVC = [[ActiveChatsViewController alloc] init];
     UINavigationController* activeChatNav=[[UINavigationController alloc] initWithRootViewController:activeChatsVC];

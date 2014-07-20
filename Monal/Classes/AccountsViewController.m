@@ -41,7 +41,7 @@
     }
     else
     {
-    [self.view setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"debut_dark"]]];
+        [self.view setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"debut_dark"]]];
     }
     _protocolList=[[DataLayer sharedInstance] protocolList];
     

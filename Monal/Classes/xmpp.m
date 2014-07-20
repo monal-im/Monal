@@ -1474,6 +1474,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     [self startStream];
                     _loggedIn=YES;
                     _loggedInOnce=YES;
+                    _logInStarted=NO;
                     
                     
                     NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,

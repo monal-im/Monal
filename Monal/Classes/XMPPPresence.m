@@ -111,7 +111,13 @@
 
 -(void) leaveRoom:(NSString*) room onServer:(NSString*) server withName:(NSString*)name
 {
-    [self.attributes setObject:[NSString stringWithFormat:@"%@@%@/%@", name,server,room] forKey:@"to"];
+    //depeding on how this is called room might have the full server name
+    if(server && ![room hasSuffix:server]) {
+        [self.attributes setObject:[NSString stringWithFormat:@"%@@%@/%@", room,server,name] forKey:@"to"];
+    }
+    else {
+        [self.attributes setObject:[NSString stringWithFormat:@"%@/%@", room,name] forKey:@"to"];
+    }
     [self.attributes setObject:@"unavailable" forKey:@"type"];
     
 }

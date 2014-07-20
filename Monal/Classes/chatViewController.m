@@ -23,6 +23,11 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 @property (nonatomic, assign) NSInteger thismonth;
 @property (nonatomic, assign) NSInteger thisday;
 
+/**
+ if set to yes will prevent scrolling and resizing. useful for resigning first responder just to set auto correct
+ */
+@property (nonatomic, assign) BOOL blockAnimations;
+
 @end
 
 @implementation chatViewController
@@ -366,8 +371,11 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void)resignTextView
 {
-    [chatInput resignFirstResponder];//apply autocorrect 
+    self.blockAnimations=YES;
+    [chatInput resignFirstResponder];//apply autocorrect
     [chatInput becomeFirstResponder];
+    self.blockAnimations=NO;
+    
     if(([chatInput text]!=nil) && (![[chatInput text] isEqualToString:@""]) )
     {
         DDLogVerbose(@"Sending message");
@@ -784,6 +792,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void) keyboardWillHide:(NSNotification *) notification
 {
+    if(self.blockAnimations) return;
     
     NSTimeInterval animationDuration =[[[notification userInfo] objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
 	[UIView animateWithDuration:animationDuration
@@ -817,6 +826,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void) keyboardWillShow:(NSNotification *) notification
 {
+    if(self.blockAnimations) return;
     CGSize keyboardSize = [[[notification userInfo] objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue].size;
    // CGSize keyboardNewPos = [[[notification userInfo] objectForKey:] CGRectValue].size;
     

@@ -117,13 +117,17 @@
 {
     [rtp RTPDisconnect];
     
-     NSDictionary* info =@{@"initiator":self.initiator, @"responder":self.responder, @"sid":self.thesid, @"ownip":_ownIP};
-    
-    XMPPIQ* node =[[XMPPIQ alloc] initWithId:iqid andType:kiqSetType];
-    [node setJingleTerminateTo:self.otherParty andResource:_activeresource withValues:info];
-    
-    
-    return node;
+    if(self.initiator && self.responder && self.thesid && _ownIP) {
+        NSDictionary* info =@{@"initiator":self.initiator, @"responder":self.responder, @"sid":self.thesid, @"ownip":_ownIP};
+        
+        XMPPIQ* node =[[XMPPIQ alloc] initWithId:iqid andType:kiqSetType];
+        [node setJingleTerminateTo:self.otherParty andResource:_activeresource withValues:info];
+        return node;
+    }
+    else
+    {
+        return nil;
+    }
 }
 
 

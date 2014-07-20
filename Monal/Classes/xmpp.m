@@ -1485,6 +1485,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) send:(XMLNode*) stanza
 {
+    if(!stanza) return; 
     dispatch_async(_xmppQueue, ^{
         dispatch_async(_netWriteQueue, ^{
             [_outputQueue addObject:stanza];

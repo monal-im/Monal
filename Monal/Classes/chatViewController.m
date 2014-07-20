@@ -385,7 +385,11 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 //always messages going out
 -(void) addMessageto:(NSString*)to withMessage:(NSString*) message
 {
-	
+	if(!self.jid || &message)  {
+        DDLogError(@" not ready to send messages");
+        return;
+    }
+    
 	if([[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:_accountNo withMessage:message actuallyFrom:self.jid ])
 	{
 		DDLogVerbose(@"added message");
@@ -413,8 +417,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                        });
   
 	}
-	else
+	else {
 		DDLogVerbose(@"failed to add message");
+    }
 	
 	// make sure its in active
 	if(_firstmsg==YES)

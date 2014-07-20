@@ -399,9 +399,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) reconnect
 {
     DDLogVerbose(@"reconnecting ");
+    //can be called multiple times
+    if(self.logInStarted) {
+        DDLogVerbose(@"reconnect called while one already in progress. Stopping.");
+        return;
+    }
     __block UIBackgroundTaskIdentifier reconnectBackgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
         
         DDLogVerbose(@"Reconnect bgtask took too long. closing");
+        _logInStarted=NO;
         [[UIApplication sharedApplication] endBackgroundTask:reconnectBackgroundTask];
         reconnectBackgroundTask=UIBackgroundTaskInvalid;
         
@@ -412,8 +418,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         DDLogInfo(@"Trying to connect again in 5 seconds. ");
         dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 5ull * NSEC_PER_SEC), q_background,  ^{
-            [self connect];
-            [[UIApplication sharedApplication] endBackgroundTask:reconnectBackgroundTask];
+                [self connect];
+                _logInStarted=NO;
+                [[UIApplication sharedApplication] endBackgroundTask:reconnectBackgroundTask];
         });
     }
     

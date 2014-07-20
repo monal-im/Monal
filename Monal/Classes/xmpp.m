@@ -1037,8 +1037,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         else  if([[nextStanzaPos objectForKey:@"stanzaType"]  isEqualToString:@"presence"])
         {
             ParsePresence* presenceNode= [[ParsePresence alloc]  initWithDictionary:nextStanzaPos];
-            if([presenceNode.user isEqualToString:_fulluser])
-                return; //ignore self
+            if([presenceNode.user isEqualToString:_fulluser]) {
+                 nextStanzaPos=[self nextStanza];
+                continue; //ignore self
+            }
             
             if([presenceNode.type isEqualToString:kpresencesSubscribe])
             {
@@ -1479,6 +1481,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         
         nextStanzaPos=[self nextStanza];
     }
+    
 }
 
 

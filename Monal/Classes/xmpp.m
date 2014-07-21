@@ -287,6 +287,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             if((!self.loggedIn) && (_loggedInOnce))
             {
                 DDLogInfo(@"trying to login again");
+                _logInStarted=NO; 
                 //make sure we are enabled still.
                 if([[DataLayer sharedInstance] isAccountEnabled:[NSString stringWithFormat:@"%@",self.accountNo]]) {
                     [self reconnect];

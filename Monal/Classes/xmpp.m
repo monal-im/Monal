@@ -407,6 +407,40 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     __block UIBackgroundTaskIdentifier reconnectBackgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
         
+        
+        if(([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
+           || ([UIApplication sharedApplication].applicationState==UIApplicationStateInactive ))
+        {
+            //present notification
+            
+            NSDate* theDate=[NSDate dateWithTimeIntervalSinceNow:0]; //immediate fire
+            
+            UIApplication* app = [UIApplication sharedApplication];
+            NSArray*    oldNotifications = [app scheduledLocalNotifications];
+            
+            // Clear out the old notification before scheduling a new one.
+            if ([oldNotifications count] > 0)
+                [app cancelAllLocalNotifications];
+            
+            // Create a new notification
+            UILocalNotification* alarm = [[UILocalNotification alloc] init];
+            if (alarm)
+            {
+                //scehdule info
+                alarm.fireDate = theDate;
+                alarm.timeZone = [NSTimeZone defaultTimeZone];
+                alarm.repeatInterval = 0;
+                alarm.alertBody =  @"Lost connection for too long and could not reconnect. Please reopen and reconenct";
+
+                [app scheduleLocalNotification:alarm];
+                
+                //	[app presentLocalNotificationNow:alarm];
+                DDLogVerbose(@"Scheduled local disconnect alert ");
+                
+            }
+        }
+
+        
         DDLogVerbose(@"Reconnect bgtask took too long. closing");
         _logInStarted=NO;
         [[UIApplication sharedApplication] endBackgroundTask:reconnectBackgroundTask];

@@ -1858,9 +1858,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             if(_loggedInOnce)
             {
                 DDLogInfo(@" stream error calling reconnect");
-                if(!_logInStarted) _logInStarted=NO;
-                
-                [self reconnect];
+                // login process has its own reconnect mechanism 
+                if(_loggedIn) {
+                    [self reconnect];
+                }
             }
             
             else

@@ -42,7 +42,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                       NSString* fullName =[[DataLayer sharedInstance] fullName:[notification.userInfo objectForKey:@"from"] forAccount:acctString];
                       
                       NSString* nameToShow=[notification.userInfo objectForKey:@"from"];
-                      if(fullName) nameToShow=fullName;
+                      if([fullName length]>0) nameToShow=fullName;
                       
                       if(([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
                          || ([UIApplication sharedApplication].applicationState==UIApplicationStateInactive ))

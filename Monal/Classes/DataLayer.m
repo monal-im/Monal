@@ -895,7 +895,6 @@ static DataLayer *sharedInstance=nil;
 
 -(BOOL) setNickName:(NSString*) nickName forBuddy:(NSString*) buddy andAccount:(NSString*) accountNo
 {
-	
 	NSString* toPass;
 	//data length check
 	
@@ -913,11 +912,9 @@ static DataLayer *sharedInstance=nil;
 
 -(NSString*) fullName:(NSString*) buddy forAccount:(NSString*) accountNo;
 {
-	
-	
 	NSString* query=[NSString stringWithFormat:@"select full_name from buddylist where account_id=%@ and buddy_name='%@'", accountNo, buddy];
-	NSString* iconname= (NSString*)[self executeScalar:query];
-	return iconname;
+	NSString* fullname= (NSString*)[self executeScalar:query];
+	return fullname;
 }
 
 

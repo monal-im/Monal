@@ -218,7 +218,6 @@ Decline a call request
 
 //we should have an enumerator for this
 @property (nonatomic,assign) BOOL explicitLogout;
-@property (nonatomic,assign,readonly) BOOL logInStarted;
 @property (nonatomic,assign,readonly) BOOL loggedIn;
 @property (nonatomic,assign,readonly) BOOL loginError;
 

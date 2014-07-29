@@ -189,11 +189,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     xmpp* existing=[self getConnectedAccountForID:[NSString stringWithFormat:@"%@",[account objectForKey:@"account_id"]]];
     if(existing)
     {
-        if(!existing.loggedIn && !existing.logInStarted)
+        if(!existing.loggedIn)
             dispatch_async(_netQueue,
                            ^{
                                 existing.explicitLogout=NO;
-                               [existing connect];
+                               [existing reconnect];
                            });
         
         return;
@@ -242,7 +242,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     
     dispatch_async(_netQueue, ^{
-                       [xmppAccount connect];
+                       [xmppAccount reconnect];
                    });
     
     
@@ -335,14 +335,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         else
         {
             DDLogVerbose(@"reachable");
-            if((!xmppAccount.logInStarted))
-            {
-                DDLogVerbose(@"logging in");
-                dispatch_async(_netQueue,
-                               ^{
-                                   [xmppAccount connect];
-                               });
-            }
+            DDLogVerbose(@"logging in");
+            dispatch_async(_netQueue,
+                           ^{
+                               [xmppAccount reconnect];
+                           });
+            
             
         }
     }

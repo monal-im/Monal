@@ -125,9 +125,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         DDLogInfo(@"streams created ok");
     
     if((CFReadStreamSetProperty((__bridge CFReadStreamRef)_iStream,
-                                kCFStreamNetworkServiceType,  kCFStreamNetworkServiceTypeVoIP)) &&
-       (CFWriteStreamSetProperty((__bridge CFWriteStreamRef)_oStream,
-                                 kCFStreamNetworkServiceType,  kCFStreamNetworkServiceTypeVoIP)))
+                                kCFStreamNetworkServiceType,  kCFStreamNetworkServiceTypeVoIP))
+//       &&
+//       (CFWriteStreamSetProperty((__bridge CFWriteStreamRef)_oStream,
+//                                 kCFStreamNetworkServiceType,  kCFStreamNetworkServiceTypeVoIP))
+       )
     {
         DDLogInfo(@"Set VOIP properties on streams.");
     }
@@ -416,19 +418,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     self.reconnectBackgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
         
-        if(([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
-           || ([UIApplication sharedApplication].applicationState==UIApplicationStateInactive ))
+        if((([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
+           || ([UIApplication sharedApplication].applicationState==UIApplicationStateInactive )) && !_loggedIn)
         {
             //present notification
             
             NSDate* theDate=[NSDate dateWithTimeIntervalSinceNow:0]; //immediate fire
             
             UIApplication* app = [UIApplication sharedApplication];
-            NSArray*    oldNotifications = [app scheduledLocalNotifications];
-            
-            // Clear out the old notification before scheduling a new one.
-            if ([oldNotifications count] > 0)
-                [app cancelAllLocalNotifications];
             
             // Create a new notification
             UILocalNotification* alarm = [[UILocalNotification alloc] init];
@@ -442,7 +439,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
                 [app scheduleLocalNotification:alarm];
                 
-                //	[app presentLocalNotificationNow:alarm];
                 DDLogVerbose(@"Scheduled local disconnect alert ");
                 
             }

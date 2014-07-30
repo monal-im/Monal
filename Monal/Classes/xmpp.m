@@ -35,7 +35,9 @@
 static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 @interface xmpp()
- @property (nonatomic, assign) UIBackgroundTaskIdentifier reconnectBackgroundTask;
+{
+    BOOL _loginStarted;
+}
 @end
 
 
@@ -291,9 +293,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         [[UIApplication sharedApplication] endBackgroundTask:tempTask];
                         tempTask=UIBackgroundTaskInvalid;
                     }];
-                    
-                    [[UIApplication sharedApplication] endBackgroundTask:self.reconnectBackgroundTask];
-                    self.reconnectBackgroundTask=UIBackgroundTaskInvalid;
+                    _loginStarted=NO;
                     [self reconnect];
                     
                     [[UIApplication sharedApplication] endBackgroundTask:tempTask];
@@ -377,7 +377,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     _streamHasSpace=NO;
     
     _loggedIn=NO;
-    self.reconnectBackgroundTask=UIBackgroundTaskInvalid;
+    
 	
     //for good measure
     NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
@@ -411,12 +411,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     DDLogVerbose(@"reconnecting ");
     //can be called multiple times
-    if(self.reconnectBackgroundTask!=UIBackgroundTaskInvalid) {
+    if(_loginStarted) {
         DDLogVerbose(@"reconnect called while one already in progress. Stopping.");
         return;
     }
     
-    self.reconnectBackgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
+    _loginStarted=YES;
+    
+    __block UIBackgroundTaskIdentifier reconnectBackgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
         
         if((([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
            || ([UIApplication sharedApplication].applicationState==UIApplicationStateInactive )) && !_loggedIn)
@@ -445,13 +447,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         }
         
         DDLogVerbose(@"Reconnect bgtask took too long. closing");
-        [[UIApplication sharedApplication] endBackgroundTask:self.reconnectBackgroundTask];
-        self.reconnectBackgroundTask=UIBackgroundTaskInvalid;
+        [[UIApplication sharedApplication] endBackgroundTask:reconnectBackgroundTask];
+        reconnectBackgroundTask=UIBackgroundTaskInvalid;
         
     }];
     
-    if (self.reconnectBackgroundTask != UIBackgroundTaskInvalid) {
-        if(_iStream || _oStream) {
+    if (reconnectBackgroundTask != UIBackgroundTaskInvalid) {
+        if(_loggedIn) {
             [self disconnect];
         }
         NSTimeInterval wait=5;
@@ -462,8 +464,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, wait * NSEC_PER_SEC), q_background,  ^{
                 [self connect];
-                [[UIApplication sharedApplication] endBackgroundTask:self.reconnectBackgroundTask];
-                self.reconnectBackgroundTask=UIBackgroundTaskInvalid;
+                [[UIApplication sharedApplication] endBackgroundTask:reconnectBackgroundTask];
+                reconnectBackgroundTask=UIBackgroundTaskInvalid;
         });
     }
     
@@ -1517,6 +1519,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     [self startStream];
                     _loggedIn=YES;
                     _loggedInOnce=YES;
+                    _loginStarted=NO;
                    
                     NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
                                          kinfoTypeKey:@"connect", kinfoStatusKey:@""};

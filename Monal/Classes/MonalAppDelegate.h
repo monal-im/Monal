@@ -19,11 +19,7 @@
 
 
 
-@interface MonalAppDelegate : UIResponder <UIApplicationDelegate, UISplitViewControllerDelegate > {
-    
-    UIBackgroundTaskIdentifier _backgroundTask;
-  
-}
+@interface MonalAppDelegate : UIResponder <UIApplicationDelegate, UISplitViewControllerDelegate >
 
 @property (nonatomic, strong) UIWindow* window;
 @property (nonatomic, strong) UINavigationController* chatNav;

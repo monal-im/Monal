@@ -198,14 +198,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 #pragma mark app life cycle
 
--(void) endBackgroundLaunch
-{
-    if(!_backgroundTask==UIBackgroundTaskInvalid) {
-        DDLogVerbose(@"XMPP manager completed background task");
-        [[UIApplication sharedApplication] endBackgroundTask:_backgroundTask];
-        _backgroundTask=UIBackgroundTaskInvalid;
-    }
-}
+
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
@@ -234,30 +227,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     [MLNotificationManager sharedInstance].window=self.window;
     
-    if([[UIApplication sharedApplication] applicationState]==UIApplicationStateBackground)
-    {
-       _backgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
-            
-            DDLogVerbose(@"XMPP manager bgtask took too long. closing");
-            [[UIApplication sharedApplication] endBackgroundTask:_backgroundTask];
-            _backgroundTask=UIBackgroundTaskInvalid;
-            
-        }];
-        
-        if (_backgroundTask != UIBackgroundTaskInvalid) {
-            DDLogVerbose(@"XMPP manager connecting in background");
-            [[MLXMPPManager sharedInstance] connectIfNecessary];
-            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(endBackgroundLaunch) name:kMLHasConnectedNotice object:nil];
-        }
-    }
-    else
-    {
-    // should any accounts connect?
+     // should any accounts connect?
     [[MLXMPPManager sharedInstance] connectIfNecessary];
-    }
     
 
-    
     [Crashlytics startWithAPIKey:@"6e807cf86986312a050437809e762656b44b197c"];
   //  [Crashlytics sharedInstance].debugMode = YES;
   // [[Crashlytics sharedInstance] crash];
@@ -292,10 +265,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 #pragma mark backgrounding
 - (void)applicationWillEnterForeground:(UIApplication *)application
 {
-     if (_backgroundTask != UIBackgroundTaskInvalid) {
-          DDLogVerbose(@"entering foreground as connect bg task is running");
-     }
-    
       DDLogVerbose(@"Entering FG");
     [[MLXMPPManager sharedInstance] clearKeepAlive];
 }

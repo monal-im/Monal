@@ -265,6 +265,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         return;
     }
     
+    self.pingID=nil;
+    
     DDLogInfo(@"XMPP connnect  start");
     [self connectionTask];
     
@@ -329,7 +331,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) disconnect
 {
     _loginError=NO;
-    
+    self.pingID=nil;
     DDLogInfo(@"removing streams");
     
 	//prevent any new read or write
@@ -505,14 +507,51 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         [self reconnect];
         return;
     }
-    //get random number
     
+    //get random number
     self.pingID=[NSString stringWithFormat:@"Monal%d",arc4random()%100000];
+    
+    dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    dispatch_source_t pingTimeOut = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,
+                                                                    q_background);
+    
+    dispatch_source_set_timer(pingTimeOut,
+                              dispatch_time(DISPATCH_TIME_NOW, kConnectTimeout* NSEC_PER_SEC),
+                              kConnectTimeout* NSEC_PER_SEC,
+                              1ull * NSEC_PER_SEC);
+    
+    dispatch_source_set_event_handler(pingTimeOut, ^{
+    
+        if(self.pingID)
+        {
+            DDLogVerbose(@"ping timed out without a reply to %@",self.pingID);
+            [self reconnect];
+        }
+        else
+        {
+            DDLogVerbose(@"ping reply was seen");
+
+        }
+        
+        dispatch_source_cancel(pingTimeOut);
+        
+    });
+    
+    dispatch_source_set_cancel_handler(pingTimeOut, ^{
+        DDLogInfo(@"ping timer cancelled");
+        dispatch_release(pingTimeOut);
+    });
+    
+    dispatch_resume(pingTimeOut);
+    
     
     XMPPIQ* ping =[[XMPPIQ alloc] initWithId:self.pingID andType:kiqGetType];
     [ping setiqTo:_domain];
     [ping setPing];
     [self send:ping];
+    
+    
+    
 }
 
 -(void) sendWhiteSpacePing
@@ -793,6 +832,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 XMPPIQ* pong =[[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
                 [pong setiqTo:_domain];
                 [self send:pong];
+            }
+            
+            if([iqNode.idval isEqualToString:self.pingID])
+            {
+                //response to my ping
+                self.pingID=nil;
             }
             
             if (iqNode.version)

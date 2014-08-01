@@ -38,6 +38,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     BOOL _loginStarted;
 }
+
+@property (nonatomic, strong) NSString *pingID;
+
 @end
 
 
@@ -502,8 +505,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         [self reconnect];
         return;
     }
+    //get random number
     
-    XMPPIQ* ping =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
+    self.pingID=[NSString stringWithFormat:@"Monal%d",arc4random()%100000];
+    
+    XMPPIQ* ping =[[XMPPIQ alloc] initWithId:self.pingID andType:kiqGetType];
     [ping setiqTo:_domain];
     [ping setPing];
     [self send:ping];
@@ -1520,6 +1526,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     _loggedIn=YES;
                     _loggedInOnce=YES;
                     _loginStarted=NO;
+             
                    
                     NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
                                          kinfoTypeKey:@"connect", kinfoStatusKey:@""};
@@ -1804,6 +1811,21 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	DDLogVerbose(@"Stream has event");
 	switch(eventCode)
 	{
+        case NSStreamEventOpenCompleted:
+        {
+            DDLogVerbose(@"Stream open completed");
+//            if(stream ==_iStream) {
+//                CFDataRef socketData = CFReadStreamCopyProperty((__bridge CFReadStreamRef)(stream), kCFStreamPropertySocketNativeHandle);
+//                CFSocketNativeHandle socket;
+//                CFDataGetBytes(socketData, CFRangeMake(0, sizeof(CFSocketNativeHandle)), (UInt8 *)&socket);
+//                CFRelease(socketData);
+//                
+//                int on = 1;
+//                if (setsockopt(socket, SOL_SOCKET, SO_KEEPALIVE, &on, sizeof(on)) == -1) {
+//                    DDLogVerbose(@"setsockopt failed: %s", strerror(errno));
+//                }
+//            }
+        }
 			//for writing
         case NSStreamEventHasSpaceAvailable:
         {
@@ -1885,16 +1907,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		}
 		case NSStreamEventNone:
 		{
-            //DDLogVerbose(@"Stream event none");
+            DDLogVerbose(@"Stream event none");
 			break;
 			
-		}
-			
-			
-		case NSStreamEventOpenCompleted:
-		{
-			DDLogInfo(@"Stream open completed");
-            break;
 		}
 			
 			

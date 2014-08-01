@@ -102,7 +102,7 @@
     
     XMLNode* pingNode =[[XMLNode alloc] init];
     pingNode.element=@"ping";
-    [pingNode.attributes setObject:@" urn:xmpp:ping" forKey:@"xmlns"];
+    [pingNode.attributes setObject:@"urn:xmpp:ping" forKey:@"xmlns"];
     [self.children addObject:pingNode];
 
 }

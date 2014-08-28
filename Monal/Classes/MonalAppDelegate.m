@@ -212,7 +212,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     self.fileLogger.maximumFileSize=1024 * 500;
     [DDLog addLogger:self.fileLogger];
 #endif
-    
+    //ios8 register for local notifications and badges
+    if([[UIApplication sharedApplication] respondsToSelector:@selector(registerUserNotificationSettings:)])
+    {
+        UIUserNotificationSettings *settings = [UIUserNotificationSettings settingsForTypes:UIUserNotificationTypeAlert|UIUserNotificationTypeSound|UIUserNotificationTypeBadge categories:nil];
+        [[UIApplication sharedApplication] registerUserNotificationSettings:settings];
+    }
     
     [self createRootInterface];
 
@@ -250,6 +255,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 }
 
 #pragma mark notifiction 
+-(void) application:(UIApplication *)application didRegisterUserNotificationSettings:(UIUserNotificationSettings *)notificationSettings
+{
+    DDLogVerbose(@"did register for local notifications");
+}
+
 - (void)application:(UIApplication *)application didReceiveLocalNotification:(UILocalNotification *)notification
 {
 

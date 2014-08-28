@@ -85,7 +85,7 @@
     self.localPort2=@"7079"; // some random val
     self.otherParty=[NSString stringWithFormat:@"%@/%@",to,resource];
     
-    int random = rand() %100;
+    int random =  arc4random_uniform(100);
     self.thesid=[NSString stringWithFormat:@"Monal%d",random];
     
     self.initiator=self.me;

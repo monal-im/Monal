@@ -71,6 +71,7 @@
 
 -(void) viewDidLoad
 {
+    [super viewDidLoad];
     self.navigationItem.title=@"Add Contact";
     _closeButton =[[UIBarButtonItem alloc] initWithTitle:@"Close" style:UIBarButtonItemStylePlain target:self action:@selector(closeView)];
     self.navigationItem.rightBarButtonItem=_closeButton;
@@ -127,6 +128,7 @@
 
 -(void) viewWillAppear:(BOOL)animated
 {
+    [super viewWillAppear:animated];
     [_accountPicker reloadAllComponents];
     
     if([[MLXMPPManager sharedInstance].connectedXMPP count]==1)

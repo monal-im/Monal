@@ -82,6 +82,7 @@
 
 -(void) viewWillAppear:(BOOL)animated
 {
+    [super viewWillAppear:animated];
     [_accountPicker reloadAllComponents];
     
     if([[MLXMPPManager sharedInstance].connectedXMPP count]==1)

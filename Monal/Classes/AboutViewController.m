@@ -38,6 +38,7 @@
 
 -(void) viewWillAppear:(BOOL)animated
 {
+    [super viewWillAppear:animated];
     NSURL *websiteUrl = [NSURL URLWithString:@""];
     NSError* error = nil;
     NSString *path = [[NSBundle mainBundle] pathForResource: @"About" ofType: @"html"];

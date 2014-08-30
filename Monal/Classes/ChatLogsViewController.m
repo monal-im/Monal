@@ -49,6 +49,7 @@
 
 -(void) viewWillAppear:(BOOL)animated
 {
+    [super viewWillAppear:animated];
     _tableData = [[DataLayer sharedInstance] accountList];
     [_chatLogTable reloadData];
 }

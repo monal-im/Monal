@@ -265,6 +265,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 -(void)viewWillAppear:(BOOL)animated
 {
     
+    [super viewWillAppear:animated];
+    
     [MLNotificationManager sharedInstance].currentAccountNo=self.accountNo;
     [MLNotificationManager sharedInstance].currentContact=self.contactName;
     
@@ -303,21 +305,25 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         
     }
     [self refreshCounter];
-    
+
 }
 
 -(void) viewDidAppear:(BOOL)animated
 {
+    [super viewDidAppear:animated];
     [self scrollToBottom];
     [self refreshCounter];
+    
 }
 
 -(void) viewWillDisappear:(BOOL)animated
 {
+    [super viewWillDisappear:animated];
     [MLNotificationManager sharedInstance].currentAccountNo=nil;
     [MLNotificationManager sharedInstance].currentContact=nil;
     
     [self refreshCounter];
+
 }
 
 -(void) dealloc

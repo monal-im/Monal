@@ -63,6 +63,7 @@
 
 -(void) viewWillDisappear:(BOOL)animated
 {
+    [super viewDidDisappear:animated];
     [[NSUserDefaults standardUserDefaults] synchronize];
     
     //update logs if needed

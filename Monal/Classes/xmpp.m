@@ -49,6 +49,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(id) init
 {
     self=[super init];
+    _accountState = kStateLoggedOut;
     
     _discoveredServerList=[[NSMutableArray alloc] init];
     _inputBuffer=[[NSMutableString alloc] init];
@@ -256,12 +257,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self createStreams];
 }
 
+
 -(void) connect
 {
     if(self.explicitLogout) return;
-    if(_loggedIn )
+    if(self.accountState==kStateLoggedIn )
     {
-        DDLogError(@"assymetrical call to login without a teardown loggedin %d ", _loggedIn);
+        DDLogError(@"assymetrical call to login without a teardown loggedin");
         return;
     }
     
@@ -287,7 +289,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                  kinfoTypeKey:@"connect", kinfoStatusKey:@""};
             [self.contactsVC hideConnecting:info];
             // try again
-            if((!self.loggedIn) && (_loggedInOnce))
+            if((self.accountState<kStateHasStream) && (_loggedInOnce))
             {
                 DDLogInfo(@"trying to login again");
                 //make sure we are enabled still.
@@ -306,7 +308,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     
                 }
             }
-            else if (self.loggedIn) {
+            else if (self.accountState==kStateLoggedIn ) {
                 [[NSNotificationCenter defaultCenter] postNotificationName:kMLHasConnectedNotice object:nil];
             }
             else {
@@ -381,7 +383,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     _startTLSComplete=NO;
     _streamHasSpace=NO;
     
-    _loggedIn=NO;
+    _accountState=kStateDisconnected;
     
 	
     //for good measure
@@ -426,7 +428,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     __block UIBackgroundTaskIdentifier reconnectBackgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
         
         if((([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
-           || ([UIApplication sharedApplication].applicationState==UIApplicationStateInactive )) && !_loggedIn)
+           || ([UIApplication sharedApplication].applicationState==UIApplicationStateInactive )) && _accountState<kStateHasStream)
         {
             //present notification
             
@@ -458,7 +460,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }];
     
     if (reconnectBackgroundTask != UIBackgroundTaskInvalid) {
-        if(_loggedIn) {
+        if(_accountState>=kStateReconnecting) {
             [self disconnect];
         }
         NSTimeInterval wait=5;
@@ -501,7 +503,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) sendPing
 {
-    if(!_loggedIn )
+    if(self.accountState!=kStateLoggedIn  )
     {
         DDLogInfo(@" ping calling reconnect");
         [self reconnect];
@@ -556,7 +558,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) sendWhiteSpacePing
 {
-    if(!_loggedIn )
+    if(self.accountState!=kStateLoggedIn  )
     {
         DDLogInfo(@" whitespace ping calling reconnect");
         [self reconnect];
@@ -731,6 +733,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) processInput
 {
+    //prevent reconnect attempt
+    if(_accountState<kStateHasStream) _accountState=kStateHasStream;
     
     NSDictionary* nextStanzaPos=[self nextStanza];
     while (nextStanzaPos)
@@ -1287,7 +1291,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 
             }
             
-            if(!_loggedIn)
+            if(self.accountState!=kStateLoggedIn )
             {
                 
                 if(streamNode.callStartTLS &&  _SSL)
@@ -1568,7 +1572,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     DDLogVerbose(@"session key: %@", _sessionKey);
                     
                     [self startStream];
-                    _loggedIn=YES;
+                    _accountState=kStateLoggedIn;
                     _loggedInOnce=YES;
                     _loginStarted=NO;
              
@@ -1935,7 +1939,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             {
                 DDLogInfo(@" stream error calling reconnect");
                 // login process has its own reconnect mechanism 
-                if(_loggedIn) {
+                if(self.accountState==kStateLoggedIn ) {
                     [self reconnect];
                 }
             }

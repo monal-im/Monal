@@ -81,7 +81,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         for(NSDictionary* row in _connectedXMPP)
         {
             xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
-            if(xmppAccount.loggedIn) {
+            if(xmppAccount.accountState==kStateLoggedIn) {
                    DDLogInfo(@"began a ping");
                 [xmppAccount sendPing];
             }
@@ -121,7 +121,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         for(NSDictionary* row in _connectedXMPP)
         {
             xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
-            if(xmppAccount.loggedIn)
+            if(xmppAccount.accountState==kStateLoggedIn)
                 [xmppAccount sendPing];  //sendWhiteSpacePing
         }
         
@@ -146,7 +146,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(BOOL) isAccountForIdConnected:(NSString*) accountNo;
 {
     xmpp* account = [self getConnectedAccountForID:accountNo];
-    if(account.loggedIn) return YES;
+    if(account.accountState==kStateLoggedIn) return YES;
     
     return NO;
 }
@@ -189,7 +189,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     xmpp* existing=[self getConnectedAccountForID:[NSString stringWithFormat:@"%@",[account objectForKey:@"account_id"]]];
     if(existing)
     {
-        if(!existing.loggedIn)
+        if(!existing.accountState==kStateLoggedIn)
             dispatch_async(_netQueue,
                            ^{
                                 existing.explicitLogout=NO;
@@ -314,7 +314,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         if([hostReach currentReachabilityStatus]==NotReachable)
         {
             DDLogVerbose(@"not reachable");
-            if(xmppAccount.loggedIn==YES)
+            if(xmppAccount.accountState==kStateLoggedIn)
             {
                 DDLogVerbose(@"There will be a ping soon to test. ");
                 

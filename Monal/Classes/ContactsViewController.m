@@ -66,6 +66,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 
 -(void) viewWillAppear:(BOOL)animated
 {
+    [super viewWillAppear:animated];
     _lastSelectedUser=nil;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshDisplay) name:UIApplicationWillEnterForegroundNotification object:nil];
     [self refreshDisplay];
@@ -76,7 +77,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 
 -(void) viewDidAppear:(BOOL)animated
 {
-    
+    [super viewDidAppear:animated];
     if(![[NSUserDefaults standardUserDefaults] boolForKey:@"hasSeenSelfSignedMessage"])
     {
     //if there are enabed accounts and alert hasnt been shown
@@ -108,6 +109,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 
 -(void) viewWillDisappear:(BOOL)animated
 {
+    [super viewWillDisappear:animated];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 

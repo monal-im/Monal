@@ -39,6 +39,7 @@
 
 -(void) viewWillAppear:(BOOL)animated
 {
+    [super viewWillAppear:animated];
     NSURL *websiteUrl = [NSURL URLWithString:kMonalHelpURL];
     NSURLRequest *urlRequest = [NSURLRequest requestWithURL:websiteUrl];
     [_webView loadRequest:urlRequest];

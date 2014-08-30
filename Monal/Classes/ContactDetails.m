@@ -19,6 +19,7 @@
 #pragma mark view lifecycle
 -(void) viewDidLoad
 {
+    [super viewDidLoad];
     if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0"))
     {
         //        [self.view setBackgroundColor:[UIColor o]];
@@ -40,6 +41,7 @@
 
 -(void) viewWillAppear:(BOOL)animated
 {
+    [super viewWillAppear:animated];
     _buddyName.text =[_contact objectForKey:@"buddy_name"];
     
     _buddyMessage.text=[_contact objectForKey:@"status"];

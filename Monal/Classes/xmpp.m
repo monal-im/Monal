@@ -416,6 +416,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) reconnect
 {
+    _accountState=kStateReconnecting;
     DDLogVerbose(@"reconnecting ");
     //can be called multiple times
     if(_loginStarted) {

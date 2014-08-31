@@ -59,13 +59,13 @@ typedef struct
     domainname target;
 } srv_rdata;
 
-typedef enum xmppState : NSInteger {
+typedef NS_ENUM (NSInteger, xmppState) {
     kStateLoggedOut =-1,
-    kStateDisconnected = 0, // has connected once
-    kStateReconnecting = 1,
-    kStateHasStream = 2,
-    kStateLoggedIn = 3
-} xmppState;
+    kStateDisconnected , // has connected once
+    kStateReconnecting ,
+    kStateHasStream ,
+    kStateLoggedIn
+};
 
 @interface xmpp : NSObject <NSStreamDelegate>
 {

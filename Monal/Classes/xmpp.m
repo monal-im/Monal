@@ -416,7 +416,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) reconnect
 {
-    _accountState=kStateReconnecting;
     DDLogVerbose(@"reconnecting ");
     //can be called multiple times
     if(_loginStarted) {
@@ -507,6 +506,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     if(self.accountState!=kStateLoggedIn  )
     {
         DDLogInfo(@" ping calling reconnect");
+          _accountState=kStateReconnecting;
         [self reconnect];
         return;
     }
@@ -528,6 +528,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         if(self.pingID)
         {
             DDLogVerbose(@"ping timed out without a reply to %@",self.pingID);
+              _accountState=kStateReconnecting;
             [self reconnect];
         }
         else
@@ -562,6 +563,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     if(self.accountState!=kStateLoggedIn  )
     {
         DDLogInfo(@" whitespace ping calling reconnect");
+          _accountState=kStateReconnecting;
         [self reconnect];
         return;
     }
@@ -1941,6 +1943,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 DDLogInfo(@" stream error calling reconnect");
                 // login process has its own reconnect mechanism 
                 if(self.accountState==kStateLoggedIn ) {
+                      _accountState=kStateReconnecting;
                     [self reconnect];
                 }
             }

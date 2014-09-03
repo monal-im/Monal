@@ -349,7 +349,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             DDLogVerbose(@"logging in");
             dispatch_async(_netQueue,
                            ^{
-                               [xmppAccount reconnect];
+                               //try to send a ping. if it fails it will reconnect
+                               [xmppAccount sendPing];
                            });
             
             

@@ -332,6 +332,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) disconnect
 {
+    _loginStarted=NO;
     _loginError=NO;
     self.pingID=nil;
     DDLogInfo(@"removing streams");

@@ -18,7 +18,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 /**
  only used when the device is not in the foregreound and unlocked e.g when it doesnt have access to the keychain
  */
-@property (nonatomic, strong) NSMutableArray *passwordDic;
+@property (nonatomic, strong) NSMutableDictionary *passwordDic;
 /**
  convenience functin getting account in connected array with account number/id matching
  */
@@ -66,7 +66,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     self=[super init];
     
     _connectedXMPP=[[NSMutableArray alloc] init];
-    _passwordDic = [[NSMutableArray alloc] init];
+    _passwordDic = [[NSMutableDictionary alloc] init];
     _netQueue = dispatch_queue_create(kMonalNetQueue, DISPATCH_QUEUE_CONCURRENT);
     
     [self defaultSettings];
@@ -206,11 +206,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     DDLogVerbose(@"connecting account %@",[account objectForKey:@"account_name"] );
     
-    if([[account objectForKey:@"password"] isEqualToString:@""])
-    {
-        //need to request a password
-    }
-    
     xmpp* xmppAccount=[[xmpp alloc] init];
     xmppAccount.explicitLogout=NO;
     
@@ -227,19 +222,23 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     xmppAccount.accountNo=[NSString stringWithFormat:@"%@",[account objectForKey:@"account_id"]];
     
     //keychain wont work when device is locked.
-//    if()
-//    {
-//    } else
+    if([self.passwordDic objectForKey:[account objectForKey:@"account_id"]])
     {
-    PasswordManager* passMan= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",[account objectForKey:@"account_id"]]];
-    xmppAccount.password=[passMan getPassword] ;
-  
-    if(([xmppAccount.password length]==0) //&& ([tempPass length]==0)
-       )
+        xmppAccount.password=[account objectForKey:@"account_id"];
+        DDLogVerbose(@"connect got password from dic");
+    }
+    else
+    {
+        PasswordManager* passMan= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",[account objectForKey:@"account_id"]]];
+        xmppAccount.password=[passMan getPassword] ;
+        [self.passwordDic setObject:xmppAccount.password forKey:[account objectForKey:@"account_id"]];
+    }
+    
+    if([xmppAccount.password length]==0) //&& ([tempPass length]==0)
     {
         // no password error
     }
-        }
+    
 
     xmppAccount.contactsVC=self.contactVC;
     //sepcifically look for the server since we might not be online or behind firewall

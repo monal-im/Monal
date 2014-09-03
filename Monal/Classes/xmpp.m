@@ -504,7 +504,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) sendPing
 {
-    if(self.accountState!=kStateLoggedIn  )
+    if(self.accountState<kStateReconnecting )
     {
         DDLogInfo(@" ping calling reconnect");
           _accountState=kStateReconnecting;
@@ -561,7 +561,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) sendWhiteSpacePing
 {
-    if(self.accountState!=kStateLoggedIn  )
+    if(self.accountState<kStateReconnecting  )
     {
         DDLogInfo(@" whitespace ping calling reconnect");
           _accountState=kStateReconnecting;

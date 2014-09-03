@@ -512,6 +512,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         return;
     }
     
+    if(self.accountState==kStateHasStream)
+    {
+        DDLogInfo(@"ping attempt before logged in. returning.");
+        return;
+    }
+    
     //get random number
     self.pingID=[NSString stringWithFormat:@"Monal%d",arc4random()%100000];
     

@@ -722,11 +722,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         else{
             if((finalend-finalstart<=maxPos) && finalend!=NSNotFound && finalstart!=NSNotFound)
             {
-                DDLogVerbose(@"to del start %d end %d: %@", finalstart, finalend, _inputBuffer);
+              //  DDLogVerbose(@"to del start %d end %d: %@", finalstart, finalend, _inputBuffer);
                 [_inputBuffer deleteCharactersInRange:NSMakeRange(finalstart, finalend-finalstart) ];
-                
-                
-                DDLogVerbose(@"result: %@", _inputBuffer);
+              //  DDLogVerbose(@"result: %@", _inputBuffer);
             }
         }
     });

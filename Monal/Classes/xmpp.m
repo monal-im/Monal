@@ -386,7 +386,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     _accountState=kStateDisconnected;
     
-	
     //for good measure
     NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
                          kinfoTypeKey:@"connect", kinfoStatusKey:@""};
@@ -408,10 +407,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         [self.contactsVC hideConnecting:info2];
     });
     
-    
     [[DataLayer sharedInstance]  resetContactsForAccount:_accountNo];
-    
-    
+ 
 }
 
 
@@ -464,6 +461,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         if(_accountState>=kStateReconnecting) {
             [self disconnect];
         }
+        
         NSTimeInterval wait=5;
         if(!_loggedInOnce) {
             wait=0;

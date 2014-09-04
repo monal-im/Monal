@@ -271,7 +271,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             xmpp* xmppAccount=[account objectForKey:@"xmppAccount"];
             if([xmppAccount.accountNo isEqualToString:accountNo] )
             {
-                DDLogVerbose(@"got acct cleaning up.. ");
+                DDLogVerbose(@"got account and cleaning up.. ");
                 Reachability* hostReach=[account objectForKey:@"hostReach"];
                 [hostReach stopNotifier];
                 xmppAccount.explicitLogout=YES;

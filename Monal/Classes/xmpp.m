@@ -514,7 +514,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         return;
     }
     
-    if(self.accountState==kStateHasStream)
+    if(self.accountState<kStateLoggedIn)
     {
         DDLogInfo(@"ping attempt before logged in. returning.");
         return;

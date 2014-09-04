@@ -323,6 +323,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     dispatch_source_set_cancel_handler(loginCancelOperation, ^{
         DDLogInfo(@"login timer cancelled");
+        if(self.accountState<kStateHasStream)
+        {
+             DDLogInfo(@"login client does not have stream");
+        }
         dispatch_release(loginCancelOperation);
     });
     

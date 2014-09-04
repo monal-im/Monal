@@ -224,7 +224,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     //keychain wont work when device is locked.
     if([self.passwordDic objectForKey:[account objectForKey:@"account_id"]])
     {
-        xmppAccount.password=[account objectForKey:@"account_id"];
+        xmppAccount.password=[self.passwordDic objectForKey:[account objectForKey:@"account_id"]];
         DDLogVerbose(@"connect got password from dic");
     }
     else

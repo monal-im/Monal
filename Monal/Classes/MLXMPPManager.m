@@ -345,7 +345,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         else
         {
             DDLogVerbose(@"reachable");
-            DDLogVerbose(@"logging in");
+            DDLogVerbose(@"pinging ");
             dispatch_async(_netQueue,
                            ^{
                                //try to send a ping. if it fails, it will reconnect

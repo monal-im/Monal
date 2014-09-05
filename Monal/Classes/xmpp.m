@@ -475,9 +475,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         DDLogInfo(@"Trying to connect again in %f seconds. ", wait);
         dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, wait * NSEC_PER_SEC), q_background,  ^{
+           //there me another login operation freom reachability or another timer
+            if(self.accountState<kStateReconnecting) {
                 [self connect];
                 [[UIApplication sharedApplication] endBackgroundTask:reconnectBackgroundTask];
                 reconnectBackgroundTask=UIBackgroundTaskInvalid;
+            }
         });
     }
     

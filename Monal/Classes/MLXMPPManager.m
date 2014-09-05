@@ -127,8 +127,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         for(NSDictionary* row in _connectedXMPP)
         {
             xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
-            if(xmppAccount.accountState==kStateLoggedIn)
-                [xmppAccount sendPing];  //sendWhiteSpacePing
+            [xmppAccount sendPing];  //sendWhiteSpacePing
         }
         
     }];

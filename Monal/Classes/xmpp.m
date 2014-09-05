@@ -338,6 +338,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     _loginStarted=NO;
     _loginError=NO;
+    _accountState=kStateDisconnected;
+    
     self.pingID=nil;
     DDLogInfo(@"removing streams");
     
@@ -388,7 +390,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     _startTLSComplete=NO;
     _streamHasSpace=NO;
     
-    _accountState=kStateDisconnected;
+  
     
     //for good measure
     NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
@@ -1976,7 +1978,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		case NSStreamEventEndEncountered:
 		{
 			DDLogInfo(@"%@ Stream end encoutered", [stream class] );
-            [self disconnect];
+            [self reconnect];
 			break;
 		}
 			

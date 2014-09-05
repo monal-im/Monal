@@ -209,7 +209,7 @@ static DataLayer *sharedInstance=nil;
 }
 
 
-//account commands
+#pragma mark account commands
 
 -(NSArray*) protocolList
 {

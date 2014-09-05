@@ -10,6 +10,7 @@
 #import <sqlite3.h>
 #import "PasswordManager.h"
 #import "ParsePresence.h"
+#import "NSString+SqlLite.h"
 
 #define kMonalDBQueue "im.monal.dbQueue"
 #define kMonalContactQueue "im.monal.contactQueue"

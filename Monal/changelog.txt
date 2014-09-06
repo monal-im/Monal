@@ -11,14 +11,13 @@ Notable features:
 * Tested heavily with google talk, facebook, openfire, prosody   and ejabberd servers. 
 
 
-2.1.2 changelog
+2.1.3 changelog
 
 This is  update that  fixes bugs.
-1. Fixed compatibulity with SSL off
-2. Fixed old style SSL issues
-3. Fix for compatibility with telepathy library clients
-4. chinese keyboard input fixed 
-5. MUC compatibility improved
+1. Improved connectivity and server support
+2. improved handling of netowrk outages
+3. tap to enter conversation
+
 
 
 

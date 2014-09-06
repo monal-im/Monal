@@ -1961,6 +1961,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 DDLogInfo(@" stream error calling reconnect");
                 // login process has its own reconnect mechanism 
                 if(self.accountState==kStateLoggedIn ) {
+                     [self disconnect];
                       _accountState=kStateReconnecting;
                     [self reconnect];
                 }
@@ -1987,6 +1988,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		case NSStreamEventEndEncountered:
 		{
 			DDLogInfo(@"%@ Stream end encoutered", [stream class] );
+            [self disconnect];
+            _accountState=kStateReconnecting;
             [self reconnect];
 			break;
 		}

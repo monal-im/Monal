@@ -37,6 +37,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 @interface xmpp()
 {
     BOOL _loginStarted;
+    BOOL _reconnectScheduled;
 }
 
 @property (nonatomic, strong) NSString *pingID;
@@ -414,7 +415,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     });
     
     [[DataLayer sharedInstance]  resetContactsForAccount:_accountNo];
- 
+    _reconnectScheduled =NO;
 }
 
 
@@ -422,13 +423,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     DDLogVerbose(@"reconnecting ");
     //can be called multiple times
-    if(_loginStarted) {
-        DDLogVerbose(@"reconnect called while one already in progress. Stopping.");
-        return;
-    }
-    
-    _loginStarted=YES;
-    
+
+        if(_loginStarted) {
+            DDLogVerbose(@"reconnect called while one already in progress. Stopping.");
+            return;
+        }
+        _loginStarted=YES;
+
     __block UIBackgroundTaskIdentifier reconnectBackgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
         
         if((([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
@@ -472,16 +473,21 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         if(!_loggedInOnce) {
             wait=0;
         }
-        DDLogInfo(@"Trying to connect again in %f seconds. ", wait);
-        dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, wait * NSEC_PER_SEC), q_background,  ^{
-           //there me another login operation freom reachability or another timer
-            if(self.accountState<kStateReconnecting) {
-                [self connect];
-                [[UIApplication sharedApplication] endBackgroundTask:reconnectBackgroundTask];
-                reconnectBackgroundTask=UIBackgroundTaskInvalid;
-            }
-        });
+
+        if(!_reconnectScheduled)
+        {
+            _reconnectScheduled=YES;
+            DDLogInfo(@"Trying to connect again in %f seconds. ", wait);
+            dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, wait * NSEC_PER_SEC), q_background,  ^{
+                //there may be another login operation freom reachability or another timer
+                if(self.accountState<kStateReconnecting) {
+                    [self connect];
+                    [[UIApplication sharedApplication] endBackgroundTask:reconnectBackgroundTask];
+                    reconnectBackgroundTask=UIBackgroundTaskInvalid;
+                }
+            });
+        }
     }
     
 }

@@ -327,6 +327,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         if(self.accountState<kStateHasStream)
         {
              DDLogInfo(@"login client does not have stream");
+            [self disconnect];
+            _accountState=kStateReconnecting;
+            [self reconnect];
         }
         dispatch_release(loginCancelOperation);
     });

@@ -510,7 +510,6 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 
 #pragma mark message signals
 
-
 -(void) refreshDisplay
 {
     
@@ -583,7 +582,45 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     
 }
 
+#pragma mark chat presentation
+-(void) presentChatWithName:(NSString *)buddyname account:(NSNumber *) account 
+{
+    NSDictionary *row =@{@"buddy_name":buddyname, @"account_id": account};
+    [self presentChatWithRow:row];
+    
+}
 
+-(void) presentChatWithRow:(NSDictionary *)row
+{
+    //make chat view
+    chatViewController* chatVC = [[chatViewController alloc] initWithContact:row ];
+    
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
+    {
+        if([[self.currentNavController topViewController] isKindOfClass:[chatViewController class]])
+        {
+            chatViewController* currentTop=(chatViewController*)[self.currentNavController topViewController];
+            if([currentTop.contactName isEqualToString:[row objectForKey:@"buddy_name"]] &&
+               [currentTop.accountNo isEqualToString:
+                [NSString stringWithFormat:@"%d",[[row objectForKey:@"account_id"] integerValue]] ]
+               )
+            {
+                // do nothing
+                return;
+            }
+            else
+            {
+                [self.currentNavController  popToRootViewControllerAnimated:NO];
+                
+            }
+        }
+        [self.currentNavController pushViewController:chatVC animated:NO];
+    }
+    else{
+        [self.currentNavController pushViewController:chatVC animated:YES];
+    }
+    
+}
 
 #pragma mark tableview datasource
 -(NSString*) tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
@@ -826,11 +863,8 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     
     NSMutableDictionary* row;
     if((indexPath.section==konlineSection))
-        
     {
-        
         row=[_contacts objectAtIndex:indexPath.row];
-        
     }
     else if (indexPath.section==kofflineSection)
     {
@@ -839,34 +873,8 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     
     [row setObject:[NSNumber numberWithInt:0] forKey:@"count"];
     
-    //make chat view
-    chatViewController* chatVC = [[chatViewController alloc] initWithContact:row ];
 
-    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
-    {
-        if([[self.currentNavController topViewController] isKindOfClass:[chatViewController class]])
-        {
-            chatViewController* currentTop=(chatViewController*)[self.currentNavController topViewController];
-            if([currentTop.contactName isEqualToString:[row objectForKey:@"buddy_name"]] &&
-               [currentTop.accountNo isEqualToString:
-                [NSString stringWithFormat:@"%d",[[row objectForKey:@"account_id"] integerValue]] ]
-               )
-            {
-                // do nothing
-                return;
-            }
-            else
-            {
-                [self.currentNavController  popToRootViewControllerAnimated:NO];
-
-            }
-        }
-           [self.currentNavController pushViewController:chatVC animated:NO];
-    }
-    else{
-        [self.currentNavController pushViewController:chatVC animated:YES];
-    }
-    
+    [self presentChatWithRow:row];
     
     [tableView beginUpdates];
     [tableView reloadRowsAtIndexPaths:@[indexPath]

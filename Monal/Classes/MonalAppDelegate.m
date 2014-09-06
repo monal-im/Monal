@@ -32,13 +32,15 @@
 //xmpp
 #import "MLXMPPManager.h"
 
+@interface MonalAppDelegate ()
+
+@property (nonatomic, strong)  UITabBarItem* activeTab;
+
+@end
 
 static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 @implementation MonalAppDelegate
-{
-    UITabBarItem* _activeTab;
-}
 
 -(void) createRootInterface
 {
@@ -262,7 +264,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 - (void)application:(UIApplication *)application didReceiveLocalNotification:(UILocalNotification *)notification
 {
-
+  DDLogVerbose(@"entering app with %@", notification);
+    
+    //iphone
+    //make sure tab 0
+    [self.tabBarController setSelectedIndex:0];
+    
+    [[MLXMPPManager sharedInstance].contactVC presentChatWithName:[notification.userInfo objectForKey:@"from"] account:[notification.userInfo objectForKey:@"accountNo"] ];
 }
 
 

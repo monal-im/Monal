@@ -196,7 +196,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     {
         _contactName=[_contact objectForKey:@"message_from"];
     }
-	_contactFullName=[_contact objectForKey:@"full_name"];;
+    _contactFullName=[[DataLayer sharedInstance] fullName:[_contact objectForKey:@"buddy_name"] forAccount:[NSString stringWithFormat:@"%@",[_contact objectForKey:@"account_id"]]];
+    if (!_contactFullName) _contactFullName=_contactName;
+    
     self.accountNo=[NSString stringWithFormat:@"%d",[[_contact objectForKey:@"account_id"] integerValue]];
     self.hidesBottomBarWhenPushed=YES;
     

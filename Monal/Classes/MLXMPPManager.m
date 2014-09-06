@@ -194,7 +194,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     xmpp* existing=[self getConnectedAccountForID:[NSString stringWithFormat:@"%@",[account objectForKey:@"account_id"]]];
     if(existing)
     {
-        if(!existing.accountState==kStateLoggedIn)
             dispatch_async(_netQueue,
                            ^{
                                 existing.explicitLogout=NO;

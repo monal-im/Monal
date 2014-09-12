@@ -326,10 +326,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         DDLogInfo(@"login timer cancelled");
         if(self.accountState<kStateHasStream)
         {
+            if(!_reconnectScheduled)
+            {
+            _reconnectScheduled=YES;
              DDLogInfo(@"login client does not have stream");
             [self disconnect];
             _accountState=kStateReconnecting;
             [self reconnect];
+            }
         }
         dispatch_release(loginCancelOperation);
     });

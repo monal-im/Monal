@@ -456,11 +456,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 alarm.fireDate = theDate;
                 alarm.timeZone = [NSTimeZone defaultTimeZone];
                 alarm.repeatInterval = 0;
-                alarm.alertBody =  @"Lost connection for too long and could not reconnect. Please reopen and reconenct";
+                alarm.alertBody =  @"Lost connection for too long and could not reliably reconnect. Please reopen and make sure you are connected";
 
                 [app scheduleLocalNotification:alarm];
                 
                 DDLogVerbose(@"Scheduled local disconnect alert ");
+                [self disconnect];
                 
             }
         }

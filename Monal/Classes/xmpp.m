@@ -7,6 +7,7 @@
 //
 
 #import <CommonCrypto/CommonCrypto.h>
+#import <CFNetwork/CFSocketStream.h>
 #import "xmpp.h"
 #import "DataLayer.h"
 #import "EncodingTools.h"
@@ -155,8 +156,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                          [NSNull null],kCFStreamSSLPeerName,
                                          kCFStreamSocketSecurityLevelNegotiatedSSL,
                                          kCFStreamSSLLevel,
-                                         
-                                         
                                          nil ];
         
         if(self.selfSigned)
@@ -1396,6 +1395,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     NSMutableDictionary *settings = [ [NSMutableDictionary alloc ]
                                                      initWithObjectsAndKeys:
                                                      [NSNull null],kCFStreamSSLPeerName,
+                                                  //   @"kCFStreamSocketSecurityLevelTLSv1_0SSLv3",
                                                      kCFStreamSocketSecurityLevelNegotiatedSSL,
                                                      kCFStreamSSLLevel,
                                                      nil ];
@@ -1421,7 +1421,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                  kCFStreamPropertySSLSettings, (__bridge CFTypeRef)settings)	 )
                         
                     {
-                        DDLogInfo(@"Set TLS properties on streams.");
+                        DDLogInfo(@"Set TLS properties on streams. Security level %@", [_iStream propertyForKey:NSStreamSocketSecurityLevelKey]);
+                        
                         NSDictionary* info2=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
                                               kinfoTypeKey:@"connect", kinfoStatusKey:@"Securing Connection"};
                         [self.contactsVC updateConnecting:info2];
@@ -1429,6 +1430,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     else
                     {
                         DDLogError(@"not sure.. Could not confirm Set TLS properties on streams.");
+                        DDLogInfo(@"Set TLS properties on streams.security level %@", [_iStream propertyForKey:NSStreamSocketSecurityLevelKey]);
+                        
+                        
                         
                         //                        NSDictionary* info2=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
                         //                                              kinfoTypeKey:@"connect", kinfoStatusKey:@"Could not secure connection"};

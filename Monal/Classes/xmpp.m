@@ -1395,10 +1395,17 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     NSMutableDictionary *settings = [ [NSMutableDictionary alloc ]
                                                      initWithObjectsAndKeys:
                                                      [NSNull null],kCFStreamSSLPeerName,
-                                                  //   @"kCFStreamSocketSecurityLevelTLSv1_0SSLv3",
-                                                     kCFStreamSocketSecurityLevelNegotiatedSSL,
-                                                     kCFStreamSSLLevel,
                                                      nil ];
+                    
+                    if(_brokenServerSSL)
+                    {
+                        DDLogInfo(@"recovering from broken SSL implemtation limit to ss3-tl1");
+                        [settings addEntriesFromDictionary:@{@"kCFStreamSSLLevel":@"kCFStreamSocketSecurityLevelTLSv1_0SSLv3"}];
+                    }
+                    else
+                    {
+                         [settings addEntriesFromDictionary:@{@"kCFStreamSSLLevel":@"kCFStreamSocketSecurityLevelNegotiatedSSL"}];
+                    }
                     
                     if(self.selfSigned)
                     {
@@ -1967,6 +1974,19 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 [self disconnect];
                 return;
             }
+            
+            if(st_error.code==-9820)// Could not complete operation. SSL broken on server
+            {
+                DDLogInfo(@"setting broke ssl. retrying");
+                _brokenServerSSL=YES;
+                
+                [self disconnect];
+                _accountState=kStateReconnecting;
+                [self reconnect];
+                
+                return;
+            }
+            
             
             if(_loggedInOnce)
             {

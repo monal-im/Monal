@@ -90,6 +90,8 @@ typedef NS_ENUM (NSInteger, xmppState) {
     //does not reset at disconnect
     BOOL _loggedInOnce;
     BOOL _hasRequestedServerInfo;
+    
+    BOOL _brokenServerSSL;
 
 }
 

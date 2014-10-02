@@ -218,6 +218,8 @@ Decline a call request
 @property (nonatomic,assign) BOOL awayState;
 @property (nonatomic,assign) BOOL visibleState;
 
+@property (nonatomic,assign) BOOL hasShownAlert;
+
 @property (nonatomic, strong) jingleCall *jingle;
 
 // DB info
@@ -242,8 +244,6 @@ Decline a call request
 
 //UI
 @property (nonatomic,weak) ContactsViewController* contactsVC; 
-
-
 
 
 @end

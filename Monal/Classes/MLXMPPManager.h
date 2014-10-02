@@ -145,6 +145,8 @@ Returns the name of the conencted account
 -(void) handleNewMessage:(NSNotification *)notification;
 
 -(void) setKeepAlivetimer;
--(void) clearKeepAlive; 
+-(void) clearKeepAlive;
+
+-(void) resetForeground;
 
 @end

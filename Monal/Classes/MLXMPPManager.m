@@ -145,8 +145,18 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) clearKeepAlive
 {
     [[UIApplication sharedApplication] clearKeepAliveTimeout];
+    
 }
 
+
+-(void) resetForeground
+{
+    for(NSDictionary* row in _connectedXMPP)
+    {
+        xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
+        xmppAccount.hasShownAlert=NO;
+    }
+}
 
 -(BOOL) isAccountForIdConnected:(NSString*) accountNo;
 {

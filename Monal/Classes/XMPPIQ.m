@@ -22,6 +22,34 @@
 }
 
 #pragma mark iq set
+
+-(void) setAuthTo:(NSString *)to withUserName:(NSString *)username resource:(NSString *) resource andPassword:(NSString *) password
+{
+    [self setiqTo:to];
+    [self.attributes setObject:@"auth1" forKey:@"id"];
+    
+    XMLNode* queryNode =[[XMLNode alloc] init];
+    queryNode.element=@"query";
+    [queryNode setXMLNS:@"jabber:iq:auth"];
+    
+    XMLNode* userNode =[[XMLNode alloc] init];
+    userNode.element=@"username";
+    userNode.data =username;
+    
+    XMLNode* resourceNode =[[XMLNode alloc] init];
+    resourceNode.element=@"resource";
+    resourceNode.data =resource;
+    
+    XMLNode* passNode =[[XMLNode alloc] init];
+    passNode.element=@"password";
+    passNode.data =password;
+    
+    [queryNode.children addObject:userNode];
+     [queryNode.children addObject:resourceNode];
+     [queryNode.children addObject:passNode];
+    [self.children addObject:queryNode];
+}
+
 -(void) setBindWithResource:(NSString*) resource
 {
 
@@ -170,6 +198,23 @@
 
 
 #pragma mark iq get
+-(void) getAuthTo:(NSString*) to withUserName:(NSString *)username
+{
+    [self setiqTo:to];
+    [self.attributes setObject:@"auth1" forKey:@"id"];
+    
+    XMLNode* queryNode =[[XMLNode alloc] init];
+    queryNode.element=@"query";
+    [queryNode setXMLNS:@"jabber:iq:auth"];
+    
+    XMLNode* userNode =[[XMLNode alloc] init];
+    userNode.element=@"username";
+    userNode.data =username;
+    
+    [queryNode.children addObject:userNode];
+    [self.children addObject:queryNode];
+}
+
 -(void) getVcardTo:(NSString*) to
 {
     [self setiqTo:to];

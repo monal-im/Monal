@@ -778,6 +778,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 return;
             }
             
+            if(iqNode.legacyAuth)
+            {
+                XMPPIQ* auth =[[XMPPIQ alloc] initWithId:@"auth2" andType:kiqSetType];
+                [auth setAuthWithUserName:self.username resource:self.resource andPassword:self.password];
+                [self send:auth];
+            }
+            
             if(iqNode.shouldSetBind)
             {
                 _jid=iqNode.jid;
@@ -1196,11 +1203,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     UIAlertView* alert =[[UIAlertView alloc] initWithTitle:@"Approve Contact" message:messageString cancelButtonItem:cancelButton otherButtonItems:yesButton, nil];
                     [alert show];
                 });
-                
-                
-                
+  
             }
-            
             
             if(presenceNode.MUC)
             {

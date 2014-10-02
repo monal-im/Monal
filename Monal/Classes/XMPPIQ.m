@@ -23,10 +23,10 @@
 
 #pragma mark iq set
 
--(void) setAuthTo:(NSString *)to withUserName:(NSString *)username resource:(NSString *) resource andPassword:(NSString *) password
+-(void) setAuthWithUserName:(NSString *)username resource:(NSString *) resource andPassword:(NSString *) password
 {
-    [self setiqTo:to];
     [self.attributes setObject:@"auth1" forKey:@"id"];
+    [self.attributes setObject:kiqSetType forKey:@"type"];
     
     XMLNode* queryNode =[[XMLNode alloc] init];
     queryNode.element=@"query";
@@ -198,10 +198,11 @@
 
 
 #pragma mark iq get
--(void) getAuthTo:(NSString*) to withUserName:(NSString *)username
+-(void) getAuthwithUserName:(NSString *)username
 {
-    [self setiqTo:to];
     [self.attributes setObject:@"auth1" forKey:@"id"];
+    [self.attributes setObject:kiqGetType forKey:@"type"];
+    
     
     XMLNode* queryNode =[[XMLNode alloc] init];
     queryNode.element=@"query";

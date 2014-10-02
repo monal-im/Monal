@@ -74,6 +74,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                   @"message",
                   @"presence",
                   @"stream:stream",
+                  @"stream:error",
                   @"stream",
                   @"features",
                   @"proceed",
@@ -767,7 +768,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     NSDictionary* nextStanzaPos=[self nextStanza];
     while (nextStanzaPos)
     {
-        DDLogVerbose(@"got stanza %@", nextStanzaPos);
+        NSLog(@"got stanza %@", nextStanzaPos);
         
         if([[nextStanzaPos objectForKey:@"stanzaType"]  isEqualToString:@"iq"])
         {
@@ -1304,6 +1305,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             }
             
         }
+        else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"stream:error"])
+        {
+            [self disconnect];
+        }
         else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"stream:stream"])
         {
             //  ParseStream* streamNode= [[ParseStream alloc]  initWithDictionary:nextStanzaPos];
@@ -1364,10 +1369,20 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         }
                         else
                         {
-                            //no supported auth mechanism
-                            [self disconnect];
+                            
+                            //no supported auth mechanism try legacy
+                            //[self disconnect];
+                            DDLogInfo(@"no auth mechanism. will try legacy auth");
+                            XMPPIQ* iqNode =[[XMPPIQ alloc] initWithElement:@"iq"];
+                            [iqNode getAuthwithUserName:self.username ];
+                            
+                            [self send:iqNode];
+                            
+                          
                         }
                 }
+                
+            
             }
             else
             {
@@ -1381,7 +1396,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         }
         else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"features"])
         {
-            
+          
         }
         else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"proceed"])
         {
@@ -2050,6 +2065,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) writeToStream:(NSString*) messageOut
 {
+    if(!messageOut) {
+        DDLogVerbose(@" tried to send empty message. returning"); 
+        return;
+    }
     _streamHasSpace=NO; // triggers more has space messages
     
     //we probably want to break these into chunks

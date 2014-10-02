@@ -20,7 +20,7 @@
 /**
  login with legacy authentication. only as fallback.
  */
--(void) setAuthTo:(NSString *)to withUserName:(NSString *)username resource:(NSString *) resource andPassword:(NSString *) password;
+-(void) setAuthWithUserName:(NSString *)username resource:(NSString *) resource andPassword:(NSString *) password;
 
 /**
  Makes an iq to bind with a resouce. Passing nil will set no resource.
@@ -58,7 +58,7 @@
 /**
  legacy autnetication. only used as a fallback
  */
--(void) getAuthTo:(NSString *) to withUserName:(NSString *)username;
+-(void) getAuthwithUserName:(NSString *)username;
 
 #pragma mark roster
 /**

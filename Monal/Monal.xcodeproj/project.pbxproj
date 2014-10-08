@@ -1610,8 +1610,8 @@
 				LLVM_LTO = NO;
 				OTHER_LDFLAGS = "-lstdc++";
 				PRODUCT_NAME = Monal;
-				PROVISIONING_PROFILE = "5e622588-21cb-4c90-8eae-5a5fb56fa911";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "5e622588-21cb-4c90-8eae-5a5fb56fa911";
+				PROVISIONING_PROFILE = "a259039a-ea09-4154-a3b7-c4fbc4028496";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "a259039a-ea09-4154-a3b7-c4fbc4028496";
 			};
 			name = Adhoc;
 		};

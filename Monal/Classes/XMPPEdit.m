@@ -138,11 +138,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     [super viewWillAppear:animated];
 	DDLogVerbose(@"xmpp edit view will appear");
-//    if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"6.0"))
-//    {
-//    [[UILabel appearanceWhenContainedIn:[UITableViewHeaderFooterView class], nil] setColor:[UIColor whiteColor]];
-//    [[UILabel appearanceWhenContainedIn:[UITableViewHeaderFooterView class], nil] setShadowColor:nil];
-//    }
+
 	
 }
 
@@ -371,7 +367,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     
                     thecell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"DeleteCell"];
                     //thecell.selection=false;
-                    CGRect cellRectangle = CGRectMake(32,3,225,[tableView rowHeight]-6);
+                    CGRect cellRectangle = CGRectMake(32,3,225,40);
                     
                     //Initialize the label with the rectangle.
                     UIButton* theButton= [UIButton buttonWithType:UIButtonTypeRoundedRect];

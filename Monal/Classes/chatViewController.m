@@ -843,8 +843,6 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 {
     if(self.blockAnimations) return;
     CGSize keyboardSize = [[[notification userInfo] objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue].size;
-   // CGSize keyboardNewPos = [[[notification userInfo] objectForKey:] CGRectValue].size;
-    
     CGRect r;
 	
     //chiense keybaord might call this multiple times ony set for inital
@@ -856,14 +854,18 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     
     UIInterfaceOrientation orientation = [UIApplication sharedApplication].statusBarOrientation;
     
-    if(orientation==UIInterfaceOrientationLandscapeLeft|| orientation==UIInterfaceOrientationLandscapeRight)
-    {
-        r.size.height -= keyboardSize.width;
-    }
-    else {
+    if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0")) {
         r.size.height -= keyboardSize.height;
     }
-    
+    else {
+        if(orientation==UIInterfaceOrientationLandscapeLeft|| orientation==UIInterfaceOrientationLandscapeRight)
+        {
+            r.size.height -= keyboardSize.width;
+        }
+        else {
+            r.size.height -= keyboardSize.height;
+        }
+    }
     NSTimeInterval animationDuration =[[[notification userInfo] objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
     [UIView animateWithDuration:animationDuration
                      animations:^{

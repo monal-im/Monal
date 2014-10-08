@@ -771,7 +771,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     NSDictionary* nextStanzaPos=[self nextStanza];
     while (nextStanzaPos)
     {
-        NSLog(@"got stanza %@", nextStanzaPos);
+        DDLogVerbose(@"got stanza %@", nextStanzaPos);
         
         if([[nextStanzaPos objectForKey:@"stanzaType"]  isEqualToString:@"iq"])
         {
@@ -1971,24 +1971,28 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             
             if(st_error.code==2)// operation couldnt be completed
             {
-                
+                [self disconnect];
+                return;
             }
             
             
             if(st_error.code==2)// socket not connected
             {
-                
+                [self disconnect];
+                return;
             }
             
             if(st_error.code==61)// Connection refused
             {
-                
+                [self disconnect];
+                return;
             }
             
             
             if(st_error.code==64)// Host is down
             {
-                
+                [self disconnect];
+                return;
             }
             
             if(st_error.code==-9807)// Could not complete operation. SSL probably

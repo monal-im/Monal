@@ -401,25 +401,27 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
   
     
     //for good measure
-    NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
-                         kinfoTypeKey:@"connect", kinfoStatusKey:@""};
-    [self.contactsVC hideConnecting:info];
-    
-    NSDictionary* info2=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
-                          kinfoTypeKey:@"connect", kinfoStatusKey:@"Disconnected"};
-    
-    
-    if(!_loggedInOnce)
-    {
-        info2=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
-                kinfoTypeKey:@"connect", kinfoStatusKey:@"Could not login."};
+    if(_fulluser) {
+        NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
+                             kinfoTypeKey:@"connect", kinfoStatusKey:@""};
+        [self.contactsVC hideConnecting:info];
+        
+        NSDictionary* info2=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
+                              kinfoTypeKey:@"connect", kinfoStatusKey:@"Disconnected"};
+        
+        
+        if(!_loggedInOnce)
+        {
+            info2=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
+                    kinfoTypeKey:@"connect", kinfoStatusKey:@"Could not login."};
+        }
+        
+        [self.contactsVC showConnecting:info2];
+        dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 3ull * NSEC_PER_SEC), q_background,  ^{
+            [self.contactsVC hideConnecting:info2];
+        });
     }
-    
-    [self.contactsVC showConnecting:info2];
-    dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 3ull * NSEC_PER_SEC), q_background,  ^{
-        [self.contactsVC hideConnecting:info2];
-    });
     
     [[DataLayer sharedInstance]  resetContactsForAccount:_accountNo];
     _reconnectScheduled =NO;

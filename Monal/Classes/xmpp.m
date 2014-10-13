@@ -401,18 +401,21 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
   
     
     //for good measure
-    if(_fulluser) {
-        NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
+    NSString* user=_fulluser;
+    if(!_fulluser) {
+        user=@"";
+    }
+        NSDictionary* info=@{kaccountNameKey:user, kaccountNoKey:_accountNo,
                              kinfoTypeKey:@"connect", kinfoStatusKey:@""};
         [self.contactsVC hideConnecting:info];
         
-        NSDictionary* info2=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
+        NSDictionary* info2=@{kaccountNameKey:user, kaccountNoKey:_accountNo,
                               kinfoTypeKey:@"connect", kinfoStatusKey:@"Disconnected"};
         
         
         if(!_loggedInOnce)
         {
-            info2=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
+            info2=@{kaccountNameKey:user, kaccountNoKey:_accountNo,
                     kinfoTypeKey:@"connect", kinfoStatusKey:@"Could not login."};
         }
         
@@ -421,7 +424,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 3ull * NSEC_PER_SEC), q_background,  ^{
             [self.contactsVC hideConnecting:info2];
         });
-    }
+    
     
     [[DataLayer sharedInstance]  resetContactsForAccount:_accountNo];
     _reconnectScheduled =NO;

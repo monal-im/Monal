@@ -1485,8 +1485,8 @@
 				LLVM_LTO = NO;
 				OTHER_LDFLAGS = "-lstdc++";
 				PRODUCT_NAME = Monal;
-				PROVISIONING_PROFILE = "a259039a-ea09-4154-a3b7-c4fbc4028496";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "a259039a-ea09-4154-a3b7-c4fbc4028496";
+				PROVISIONING_PROFILE = "b5a02c9b-9be4-465e-baf0-226f41994fd5";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "b5a02c9b-9be4-465e-baf0-226f41994fd5";
 			};
 			name = AppStore;
 		};

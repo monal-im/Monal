@@ -268,8 +268,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     //iphone
     //make sure tab 0
-    [self.tabBarController setSelectedIndex:0];
     if([notification.userInfo objectForKey:@"from"]) {
+    [self.tabBarController setSelectedIndex:0];
     [[MLXMPPManager sharedInstance].contactVC presentChatWithName:[notification.userInfo objectForKey:@"from"] account:[notification.userInfo objectForKey:@"accountNo"] ];
     }
 }

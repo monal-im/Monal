@@ -595,29 +595,32 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     //make chat view
     chatViewController* chatVC = [[chatViewController alloc] initWithContact:row ];
     
+
+    if([[self.currentNavController topViewController] isKindOfClass:[chatViewController class]])
+    {
+        chatViewController* currentTop=(chatViewController*)[self.currentNavController topViewController];
+        if([currentTop.contactName isEqualToString:[row objectForKey:@"buddy_name"]] &&
+           [currentTop.accountNo isEqualToString:
+            [NSString stringWithFormat:@"%d",[[row objectForKey:@"account_id"] integerValue]] ]
+           )
+        {
+            // do nothing
+            return;
+        }
+        else
+        {            
+            [self.currentNavController  popToRootViewControllerAnimated:NO];
+
+        }
+    }
+    
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
     {
-        if([[self.currentNavController topViewController] isKindOfClass:[chatViewController class]])
-        {
-            chatViewController* currentTop=(chatViewController*)[self.currentNavController topViewController];
-            if([currentTop.contactName isEqualToString:[row objectForKey:@"buddy_name"]] &&
-               [currentTop.accountNo isEqualToString:
-                [NSString stringWithFormat:@"%d",[[row objectForKey:@"account_id"] integerValue]] ]
-               )
-            {
-                // do nothing
-                return;
-            }
-            else
-            {
-                [self.currentNavController  popToRootViewControllerAnimated:NO];
-                
-            }
-        }
         [self.currentNavController pushViewController:chatVC animated:NO];
     }
-    else{
+    else  {
         [self.currentNavController pushViewController:chatVC animated:YES];
+        
     }
     
 }

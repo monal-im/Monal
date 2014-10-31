@@ -426,8 +426,12 @@
 
 -(void) setJingleTerminateTo:(NSString*) jid andResource:(NSString*) resource withValues:(NSDictionary*) info
 {
-    
+    if([jid rangeOfString:@"/"].location==NSNotFound) {
     [self setiqTo:[NSString stringWithFormat:@"%@/%@",jid,resource]];
+    }
+    else {
+        [self setiqTo:jid];
+    }
     
     XMLNode* jingleNode =[[XMLNode alloc] init];
     jingleNode.element=@"jingle";

@@ -1066,21 +1066,21 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             }
                             self.jingle.recipientIP=[transport1 objectForKey:@"ip"];
                             
-                            NSArray* nameParts= [iqNode.from componentsSeparatedByString:@"/"];
-                            if([nameParts count]>1) {
+                           
+                            if(iqNode.user && iqNode.resource) {
                                 
                                 dispatch_async(dispatch_get_main_queue(), ^{
                                     
                                     NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"Incoming Call From %@?", nil), iqNode.from ];
                                     RIButtonItem* cancelButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Decline", nil) action:^{
-                                        XMPPIQ* node =[self.jingle rejectJingleTo:[nameParts objectAtIndex:0] withId:iqNode.idval andResource:[nameParts objectAtIndex:1]];
+                                        XMPPIQ* node =[self.jingle rejectJingleTo:iqNode.user withId:iqNode.idval andResource:iqNode.resource];
                                         [self send:node];
                                         self.jingle=nil;
                                     }];
                                     
                                     RIButtonItem* yesButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Accept Call", nil) action:^{
                                         
-                                        XMPPIQ* node =[self.jingle acceptJingleTo:[nameParts objectAtIndex:0] withId:iqNode.idval andResource:[nameParts objectAtIndex:1]];
+                                        XMPPIQ* node =[self.jingle acceptJingleTo:iqNode.user withId:iqNode.idval andResource:iqNode.resource];
                                         [self send:node];
                                     }];
                                     

@@ -1019,6 +1019,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             self.jingle.recipientIP=[transport1 objectForKey:@"ip"];
                             self.jingle.destinationPort= [transport1 objectForKey:@"port"];
                             
+                            XMPPIQ* node = [[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
+                            [node setiqTo:[NSString stringWithFormat:@"%@/%@", iqNode.user,iqNode.resource]];
+                            [self send:node];
+                            
                             [self.jingle rtpConnect];
                         }
                         return;
@@ -1026,7 +1030,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     
                     if([[iqNode.jingleSession objectForKey:@"action"] isEqualToString:@"session-terminate"] &&  [[iqNode.jingleSession objectForKey:@"sid"] isEqualToString:self.jingle.thesid]) {
                         XMPPIQ* node = [[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
-                        [node setiqTo:iqNode.from];
+                        [node setiqTo:[NSString stringWithFormat:@"%@/%@", iqNode.user,iqNode.resource]];
                         [self send:node];
                         [self.jingle rtpDisconnect];
                     }

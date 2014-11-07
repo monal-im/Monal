@@ -256,6 +256,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reachabilityChanged) name:kReachabilityChangedNotification object:nil];
     [hostReach startNotifier];
     
+    if(xmppAccount && hostReach) {
     NSDictionary* accountRow= [[NSDictionary alloc] initWithObjects:@[xmppAccount, hostReach] forKeys:@[@"xmppAccount", @"hostReach"]];
     [_connectedXMPP addObject:accountRow];
     
@@ -263,7 +264,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     dispatch_async(_netQueue, ^{
                        [xmppAccount reconnect];
                    });
-    
+    }
     
 }
 

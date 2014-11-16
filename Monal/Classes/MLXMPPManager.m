@@ -256,6 +256,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reachabilityChanged) name:kReachabilityChangedNotification object:nil];
     [hostReach startNotifier];
     
+    if(xmppAccount && hostReach) {
     NSDictionary* accountRow= [[NSDictionary alloc] initWithObjects:@[xmppAccount, hostReach] forKeys:@[@"xmppAccount", @"hostReach"]];
     [_connectedXMPP addObject:accountRow];
     
@@ -263,7 +264,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     dispatch_async(_netQueue, ^{
                        [xmppAccount reconnect];
                    });
-    
+    }
     
 }
 
@@ -446,11 +447,14 @@ withCompletionHandler:(void (^)(BOOL success)) completion
 -(void) addContact:(NSDictionary*) contact
 {
     NSNumber* row =[contact objectForKey:@"row"];
-    NSDictionary* datarow= [_connectedXMPP objectAtIndex:[row integerValue]];
-    xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
-    if( account)
-    {
-        [account addToRoster:[contact objectForKey:@"buddy_name"]];
+    NSInteger pos= [row integerValue];
+    if(pos<[_connectedXMPP count]) {
+        NSDictionary* datarow= [_connectedXMPP objectAtIndex:pos];
+        xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
+        if( account)
+        {
+            [account addToRoster:[contact objectForKey:@"buddy_name"]];
+        }
     }
 }
 

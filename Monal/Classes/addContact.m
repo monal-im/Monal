@@ -20,29 +20,41 @@
 
 -(IBAction) addPress
 {
-	if(_buddyName.text.length>0)
-	{
-        NSDictionary* contact =@{@"row":[NSNumber numberWithInteger:_selectedRow],@"buddy_name":_buddyName.text};
-		[[MLXMPPManager sharedInstance] addContact:contact];
+    if([[MLXMPPManager sharedInstance].connectedXMPP count]==0)
+    {
         
         UIAlertView *addError = [[UIAlertView alloc]
-								 initWithTitle:@"Permission Requested"
-								 message:@"The new contact will be added to your contacts list when the person you've added has approved your request."
-								 delegate:self cancelButtonTitle:@"Close"
-								 otherButtonTitles: nil] ;
-		[addError show];
-	}
-	else
-	{
-		UIAlertView *addError = [[UIAlertView alloc]
-								 initWithTitle:@"Error"
-								 message:@"Name can't be empty"
-								 delegate:self cancelButtonTitle:@"Close"
-								 otherButtonTitles: nil] ;
-		[addError show];
-	}
-    
-	
+                                 initWithTitle:@"No connected accounts"
+                                 message:@"Please make sure at least one account has connected before trying to add a contact. "
+                                 delegate:self cancelButtonTitle:@"Close"
+                                 otherButtonTitles: nil] ;
+        [addError show];
+    }
+    else  {
+        
+        if(_buddyName.text.length>0)
+        {
+            NSDictionary* contact =@{@"row":[NSNumber numberWithInteger:_selectedRow],@"buddy_name":_buddyName.text};
+            [[MLXMPPManager sharedInstance] addContact:contact];
+            
+            UIAlertView *addError = [[UIAlertView alloc]
+                                     initWithTitle:@"Permission Requested"
+                                     message:@"The new contact will be added to your contacts list when the person you've added has approved your request."
+                                     delegate:self cancelButtonTitle:@"Close"
+                                     otherButtonTitles: nil] ;
+            [addError show];
+        }
+        else
+        {
+            UIAlertView *addError = [[UIAlertView alloc]
+                                     initWithTitle:@"Error"
+                                     message:@"Name can't be empty"
+                                     delegate:self cancelButtonTitle:@"Close"
+                                     otherButtonTitles: nil] ;
+            [addError show];
+        }
+        
+    }
 }
 
 

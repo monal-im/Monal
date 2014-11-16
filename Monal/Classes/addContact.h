@@ -11,20 +11,22 @@
 
 @interface addContact : UIViewController<UIPickerViewDataSource, UIPickerViewDelegate, UITextFieldDelegate>
 {
-		
-	IBOutlet UITextField* _buddyName;
-    IBOutlet UITextField* _accountName;
+
     UITextField* _currentTextField;
     UIPickerView* _accountPicker;
     UIView* _accountPickerView; 
     NSInteger _selectedRow;
     
-    IBOutlet UILabel* _caption;
      UIBarButtonItem* _closeButton;
-    IBOutlet UIButton* _addButton;
-    IBOutlet UIToolbar* _keyboardToolbar;
+
 }
 
+@property (nonatomic, weak) IBOutlet UITextField* buddyName;
+@property (nonatomic, weak) IBOutlet UITextField* accountName;
+@property (nonatomic, weak) IBOutlet UIButton* addButton;
+@property (nonatomic, weak) IBOutlet UIToolbar* keyboardToolbar;
+@property (nonatomic, weak) IBOutlet UILabel* contactLabel;
+@property (nonatomic, weak) IBOutlet UILabel* accountLabel;
 
 -(IBAction) addPress;
 -(void) closeView;

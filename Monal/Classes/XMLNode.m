@@ -32,6 +32,24 @@
     [self.attributes setObject:xmlns forKey:@"xmlns"];
 }
 
+
++(NSString *) escapeForXMPPSingleQuote:(NSString *) targetString
+{
+    NSMutableString *mutable=[targetString mutableCopy];
+    [mutable replaceOccurrencesOfString:@"'" withString:@"&apos;" options:NSLiteralSearch range:NSMakeRange(0, mutable.length)];
+    return [mutable copy];
+}
+
++(NSString *) escapeForXMPP:(NSString *) targetString
+{
+    NSMutableString *mutable=[targetString mutableCopy];
+    [mutable replaceOccurrencesOfString:@"&" withString:@"&amp;" options:NSLiteralSearch range:NSMakeRange(0, mutable.length)];
+    [mutable replaceOccurrencesOfString:@"<" withString:@"&lt;" options:NSLiteralSearch range:NSMakeRange(0, mutable.length)];
+    [mutable replaceOccurrencesOfString:@">" withString:@"&gt;" options:NSLiteralSearch range:NSMakeRange(0, mutable.length)];
+    
+    return [mutable copy];
+}
+
 -(NSString*) XMLString
 {
     if(!_element) return nil; // sanity check
@@ -50,7 +68,7 @@
     //set attributes
     for(NSString* key in [_attributes allKeys])
     {
-        [outputString appendString:[NSString stringWithFormat:@" %@='%@' ",key, [_attributes objectForKey:key]]];
+        [outputString appendString:[NSString stringWithFormat:@" %@='%@' ",key, [XMLNode escapeForXMPPSingleQuote:(NSString *)[_attributes objectForKey:key]]]];
     }
     
     if ([_element isEqualToString:@"starttls"]) {
@@ -67,8 +85,9 @@
         }
         
         
-        if(_data)
-            [outputString appendString:_data];
+        if(_data) {
+            [outputString appendString:[XMLNode escapeForXMPP:_data]];
+        }
         
         //dont close stream
         if((![_element isEqualToString:@"stream:stream"]) ) {

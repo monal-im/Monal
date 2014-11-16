@@ -40,7 +40,8 @@
 }
 
 - (void)viewWillAppear:(BOOL)animated
-{    
+{
+    [super viewWillAppear:animated];
     _tableData =[[DataLayer sharedInstance] messageHistoryListDates:[_contact objectForKey:@"message_from"] forAccount:_accountId];
     [self.tableView reloadData];
 }

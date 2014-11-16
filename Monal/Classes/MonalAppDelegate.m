@@ -24,19 +24,23 @@
 #import "AboutViewController.h"
 #import "MLNotificationManager.h"
 
+#import <Crashlytics/Crashlytics.h>
+
 
 
 
 //xmpp
 #import "MLXMPPManager.h"
 
+@interface MonalAppDelegate ()
+
+@property (nonatomic, strong)  UITabBarItem* activeTab;
+
+@end
 
 static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 @implementation MonalAppDelegate
-{
-    UITabBarItem* _activeTab;
-}
 
 -(void) createRootInterface
 {
@@ -52,8 +56,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     UIBarStyle barColor=UIBarStyleBlackOpaque;
     
-     if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0"))
+    if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0")) {
          barColor=UIBarStyleDefault;
+    }
     
     ActiveChatsViewController* activeChatsVC = [[ActiveChatsViewController alloc] init];
     UINavigationController* activeChatNav=[[UINavigationController alloc] initWithRootViewController:activeChatsVC];
@@ -195,6 +200,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 #pragma mark app life cycle
 
+
+
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     
@@ -207,7 +214,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     self.fileLogger.maximumFileSize=1024 * 500;
     [DDLog addLogger:self.fileLogger];
 #endif
-    
+    //ios8 register for local notifications and badges
+    if([[UIApplication sharedApplication] respondsToSelector:@selector(registerUserNotificationSettings:)])
+    {
+        UIUserNotificationSettings *settings = [UIUserNotificationSettings settingsForTypes:UIUserNotificationTypeAlert|UIUserNotificationTypeSound|UIUserNotificationTypeBadge categories:nil];
+        [[UIApplication sharedApplication] registerUserNotificationSettings:settings];
+    }
     
     [self createRootInterface];
 
@@ -222,32 +234,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     [MLNotificationManager sharedInstance].window=self.window;
     
-    if([[UIApplication sharedApplication] applicationState]==UIApplicationStateBackground)
-    {
-       _backgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
-            
-            DDLogVerbose(@"XMPP manager bgtask took too long. closing");
-            [[UIApplication sharedApplication] endBackgroundTask:_backgroundTask];
-            _backgroundTask=UIBackgroundTaskInvalid;
-            
-        }];
-        
-        if (_backgroundTask != UIBackgroundTaskInvalid) {
-             DDLogVerbose(@"XMPP manager connecting in background");
-                [[MLXMPPManager sharedInstance] connectIfNecessary];
-              DDLogVerbose(@"XMPP manager completed background task");
-            [[UIApplication sharedApplication] endBackgroundTask:_backgroundTask];
-            _backgroundTask=UIBackgroundTaskInvalid;
-
-        }
-    }
-    else
-    {
-    // should any accounts connect?
+     // should any accounts connect?
     [[MLXMPPManager sharedInstance] connectIfNecessary];
-    }
+    
 
-
+    [Crashlytics startWithAPIKey:@"6e807cf86986312a050437809e762656b44b197c"];
+  //  [Crashlytics sharedInstance].debugMode = YES;
+  // [[Crashlytics sharedInstance] crash];
+    
     
     //update logs if needed
     if(! [[NSUserDefaults standardUserDefaults] boolForKey:@"Logging"])
@@ -263,9 +257,21 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 }
 
 #pragma mark notifiction 
+-(void) application:(UIApplication *)application didRegisterUserNotificationSettings:(UIUserNotificationSettings *)notificationSettings
+{
+    DDLogVerbose(@"did register for local notifications");
+}
+
 - (void)application:(UIApplication *)application didReceiveLocalNotification:(UILocalNotification *)notification
 {
-
+  DDLogVerbose(@"entering app with %@", notification);
+    
+    //iphone
+    //make sure tab 0
+    if([notification.userInfo objectForKey:@"from"]) {
+    [self.tabBarController setSelectedIndex:0];
+    [[MLXMPPManager sharedInstance].contactVC presentChatWithName:[notification.userInfo objectForKey:@"from"] account:[notification.userInfo objectForKey:@"accountNo"] ];
+    }
 }
 
 
@@ -278,12 +284,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 #pragma mark backgrounding
 - (void)applicationWillEnterForeground:(UIApplication *)application
 {
-     if (_backgroundTask != UIBackgroundTaskInvalid) {
-          DDLogVerbose(@"entering foreground as connect bg task is running");
-     }
-    
       DDLogVerbose(@"Entering FG");
     [[MLXMPPManager sharedInstance] clearKeepAlive];
+    [[MLXMPPManager sharedInstance] resetForeground];
 }
 
 -(void) applicationDidEnterBackground:(UIApplication *)application

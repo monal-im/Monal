@@ -14,6 +14,11 @@
 static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 @interface MLXMPPManager()
+
+/**
+ only used when the device is not in the foregreound and unlocked e.g when it doesnt have access to the keychain
+ */
+@property (nonatomic, strong) NSMutableDictionary *passwordDic;
 /**
  convenience functin getting account in connected array with account number/id matching
  */
@@ -61,6 +66,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     self=[super init];
     
     _connectedXMPP=[[NSMutableArray alloc] init];
+    _passwordDic = [[NSMutableDictionary alloc] init];
     _netQueue = dispatch_queue_create(kMonalNetQueue, DISPATCH_QUEUE_CONCURRENT);
     
     [self defaultSettings];
@@ -81,7 +87,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         for(NSDictionary* row in _connectedXMPP)
         {
             xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
-            if(xmppAccount.loggedIn) {
+            if(xmppAccount.accountState==kStateLoggedIn) {
                    DDLogInfo(@"began a ping");
                 [xmppAccount sendPing];
             }
@@ -121,8 +127,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         for(NSDictionary* row in _connectedXMPP)
         {
             xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
-            if(xmppAccount.loggedIn)
-                [xmppAccount sendWhiteSpacePing];
+            [xmppAccount sendPing];  //sendWhiteSpacePing
         }
         
     }];
@@ -140,13 +145,23 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) clearKeepAlive
 {
     [[UIApplication sharedApplication] clearKeepAliveTimeout];
+    
 }
 
+
+-(void) resetForeground
+{
+    for(NSDictionary* row in _connectedXMPP)
+    {
+        xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
+        xmppAccount.hasShownAlert=NO;
+    }
+}
 
 -(BOOL) isAccountForIdConnected:(NSString*) accountNo;
 {
     xmpp* account = [self getConnectedAccountForID:accountNo];
-    if(account.loggedIn) return YES;
+    if(account.accountState==kStateLoggedIn) return YES;
     
     return NO;
 }
@@ -189,21 +204,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     xmpp* existing=[self getConnectedAccountForID:[NSString stringWithFormat:@"%@",[account objectForKey:@"account_id"]]];
     if(existing)
     {
-        if(!existing.loggedIn && !existing.logInStarted)
             dispatch_async(_netQueue,
                            ^{
                                 existing.explicitLogout=NO;
-                               [existing connect];
+                               [existing reconnect];
                            });
         
         return;
     }
     DDLogVerbose(@"connecting account %@",[account objectForKey:@"account_name"] );
-    
-    if([[account objectForKey:@"password"] isEqualToString:@""])
-    {
-        //need to request a password
-    }
     
     xmpp* xmppAccount=[[xmpp alloc] init];
     xmppAccount.explicitLogout=NO;
@@ -215,20 +224,30 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     xmppAccount.server=[account objectForKey:@"server"];
     xmppAccount.port=[[account objectForKey:@"other_port"] integerValue];
     xmppAccount.SSL=[[account objectForKey:@"secure"] boolValue];
-    xmppAccount.oldStyleSSL=[[account objectForKey:@"oldStyleSSL"] boolValue];
+    xmppAccount.oldStyleSSL=[[account objectForKey:@"oldstyleSSL"] boolValue];
     xmppAccount.selfSigned=[[account objectForKey:@"selfsigned"] boolValue];
     
     xmppAccount.accountNo=[NSString stringWithFormat:@"%@",[account objectForKey:@"account_id"]];
     
-    PasswordManager* passMan= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",[account objectForKey:@"account_id"]]];
-    xmppAccount.password=[passMan getPassword] ;
+    //keychain wont work when device is locked.
+    if([self.passwordDic objectForKey:[account objectForKey:@"account_id"]])
+    {
+        xmppAccount.password=[self.passwordDic objectForKey:[account objectForKey:@"account_id"]];
+        DDLogVerbose(@"connect got password from dic");
+    }
+    else
+    {
+        PasswordManager* passMan= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",[account objectForKey:@"account_id"]]];
+        xmppAccount.password=[passMan getPassword] ;
+        [self.passwordDic setObject:xmppAccount.password forKey:[account objectForKey:@"account_id"]];
+    }
     
-    if(([xmppAccount.password length]==0) //&& ([tempPass length]==0)
-       )
+    if([xmppAccount.password length]==0) //&& ([tempPass length]==0)
     {
         // no password error
     }
     
+
     xmppAccount.contactsVC=self.contactVC;
     //sepcifically look for the server since we might not be online or behind firewall
     Reachability* hostReach = [Reachability reachabilityWithHostName:xmppAccount.server ] ;
@@ -242,7 +261,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     
     dispatch_async(_netQueue, ^{
-                       [xmppAccount connect];
+                       [xmppAccount reconnect];
                    });
     
     
@@ -260,7 +279,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             xmpp* xmppAccount=[account objectForKey:@"xmppAccount"];
             if([xmppAccount.accountNo isEqualToString:accountNo] )
             {
-                DDLogVerbose(@"got acct cleaning up.. ");
+                DDLogVerbose(@"got account and cleaning up.. ");
                 Reachability* hostReach=[account objectForKey:@"hostReach"];
                 [hostReach stopNotifier];
                 xmppAccount.explicitLogout=YES;
@@ -314,7 +333,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         if([hostReach currentReachabilityStatus]==NotReachable)
         {
             DDLogVerbose(@"not reachable");
-            if(xmppAccount.loggedIn==YES)
+            if(xmppAccount.accountState==kStateLoggedIn)
             {
                 DDLogVerbose(@"There will be a ping soon to test. ");
                 
@@ -335,14 +354,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         else
         {
             DDLogVerbose(@"reachable");
-            if((!xmppAccount.logInStarted))
-            {
-                DDLogVerbose(@"logging in");
-                dispatch_async(_netQueue,
-                               ^{
-                                   [xmppAccount connect];
-                               });
-            }
+            DDLogVerbose(@"pinging ");
+            dispatch_async(_netQueue,
+                           ^{
+                               //try to send a ping. if it fails, it will reconnect
+                               [xmppAccount sendPing];
+                           });
+            
             
         }
     }
@@ -458,7 +476,7 @@ withCompletionHandler:(void (^)(BOOL success)) completion
 
 
 
--(void)  joinRoom:(NSString*) roomName  withPassword:(NSString*) password ForAccountRow:(NSInteger) row
+-(void)  joinRoom:(NSString*) roomName  withPassword:(NSString*) password forAccountRow:(NSInteger) row
 {
     NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
     xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
@@ -466,10 +484,16 @@ withCompletionHandler:(void (^)(BOOL success)) completion
 }
 
 
--(void)  leaveRoom:(NSString*) roomName ForAccountRow:(NSInteger) row
+-(void)  leaveRoom:(NSString*) roomName forAccountRow:(NSInteger) row
 {
     NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
     xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
+    [account leaveRoom:roomName];
+}
+
+-(void)  leaveRoom:(NSString*) roomName forAccountId:(NSString*) accountId
+{
+    xmpp* account= [self getConnectedAccountForID:accountId];
     [account leaveRoom:roomName];
 }
 

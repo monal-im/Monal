@@ -10,6 +10,7 @@
 #import <sqlite3.h>
 #import "PasswordManager.h"
 #import "ParsePresence.h"
+#import "NSString+SqlLite.h"
 
 #define kMonalDBQueue "im.monal.dbQueue"
 #define kMonalContactQueue "im.monal.contactQueue"
@@ -65,8 +66,6 @@
 //-(BOOL) setLegacyCap:(NSString*)cap forUser:(presence*)presenceObj accountNo:(NSString*) acctNo;
 -(BOOL) checkLegacyCap:(NSString*)cap forUser:(NSString*) user accountNo:(NSString*) acctNo;
 
-
-
 #pragma mark  presence functions
 -(BOOL) setResourceOnline:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
 -(BOOL) setOnlineBuddy:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
@@ -89,7 +88,9 @@
 -(NSString*) buddyHash:(NSString*) buddy forAccount:(NSString*) accountNo;
 
 -(bool) isBuddyOnline:(NSString*) buddy forAccount:(NSString*) accountNo ;
+
 -(bool) isBuddyMuc:(NSString*) buddy forAccount:(NSString*) accountNo;
+
 
 -(bool) isBuddyAdded:(NSString*) buddy forAccount:(NSString*) accountNo ;
 -(bool) isBuddyRemoved:(NSString*) buddy forAccount:(NSString*) accountNo ;

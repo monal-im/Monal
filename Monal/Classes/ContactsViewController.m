@@ -66,6 +66,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 
 -(void) viewWillAppear:(BOOL)animated
 {
+    [super viewWillAppear:animated];
     _lastSelectedUser=nil;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshDisplay) name:UIApplicationWillEnterForegroundNotification object:nil];
     [self refreshDisplay];
@@ -76,7 +77,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 
 -(void) viewDidAppear:(BOOL)animated
 {
-    
+    [super viewDidAppear:animated];
     if(![[NSUserDefaults standardUserDefaults] boolForKey:@"hasSeenSelfSignedMessage"])
     {
     //if there are enabed accounts and alert hasnt been shown
@@ -108,6 +109,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 
 -(void) viewWillDisappear:(BOOL)animated
 {
+    [super viewWillDisappear:animated];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
@@ -508,7 +510,6 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 
 #pragma mark message signals
 
-
 -(void) refreshDisplay
 {
     
@@ -581,7 +582,48 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     
 }
 
+#pragma mark chat presentation
+-(void) presentChatWithName:(NSString *)buddyname account:(NSNumber *) account 
+{
+    NSDictionary *row =@{@"buddy_name":buddyname, @"account_id": account};
+    [self presentChatWithRow:row];
+    
+}
 
+-(void) presentChatWithRow:(NSDictionary *)row
+{
+    //make chat view
+    chatViewController* chatVC = [[chatViewController alloc] initWithContact:row ];
+    
+
+    if([[self.currentNavController topViewController] isKindOfClass:[chatViewController class]])
+    {
+        chatViewController* currentTop=(chatViewController*)[self.currentNavController topViewController];
+        if([currentTop.contactName isEqualToString:[row objectForKey:@"buddy_name"]] &&
+           [currentTop.accountNo isEqualToString:
+            [NSString stringWithFormat:@"%d",[[row objectForKey:@"account_id"] integerValue]] ]
+           )
+        {
+            // do nothing
+            return;
+        }
+        else
+        {            
+            [self.currentNavController  popToRootViewControllerAnimated:NO];
+
+        }
+    }
+    
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
+    {
+        [self.currentNavController pushViewController:chatVC animated:NO];
+    }
+    else  {
+        [self.currentNavController pushViewController:chatVC animated:YES];
+        
+    }
+    
+}
 
 #pragma mark tableview datasource
 -(NSString*) tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
@@ -745,12 +787,25 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
         }
         
         NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"Remove %@ from contacts?", nil),[contact objectForKey:@"full_name"] ];
+        
+        BOOL isMUC=[[DataLayer sharedInstance] isBuddyMuc:[contact objectForKey:@"buddy_name"] forAccount:[contact objectForKey:@"account_id"]];
+        if(isMUC)
+        {
+            messageString =@"Leave this converstion?";
+        }
+  
+        
         RIButtonItem* cancelButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Cancel", nil) action:^{
             
         }];
         
         RIButtonItem* yesButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Yes", nil) action:^{
-            [[MLXMPPManager sharedInstance] removeContact:contact];
+            if(isMUC) {
+                [[MLXMPPManager sharedInstance] leaveRoom:[contact objectForKey:@"buddy_name"] forAccountId: [NSString stringWithFormat:@"%@",[contact objectForKey:@"account_id"]]];
+            }
+            else  {
+                [[MLXMPPManager sharedInstance] removeContact:contact];
+            }
             
             [_contactsTable beginUpdates];
             if ((indexPath.section==1) && (indexPath.row<=[_contacts count]) ) {
@@ -811,11 +866,8 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     
     NSMutableDictionary* row;
     if((indexPath.section==konlineSection))
-        
     {
-        
         row=[_contacts objectAtIndex:indexPath.row];
-        
     }
     else if (indexPath.section==kofflineSection)
     {
@@ -824,34 +876,8 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     
     [row setObject:[NSNumber numberWithInt:0] forKey:@"count"];
     
-    //make chat view
-    chatViewController* chatVC = [[chatViewController alloc] initWithContact:row ];
 
-    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
-    {
-        if([[self.currentNavController topViewController] isKindOfClass:[chatViewController class]])
-        {
-            chatViewController* currentTop=(chatViewController*)[self.currentNavController topViewController];
-            if([currentTop.contactName isEqualToString:[row objectForKey:@"buddy_name"]] &&
-               [currentTop.accountNo isEqualToString:
-                [NSString stringWithFormat:@"%d",[[row objectForKey:@"account_id"] integerValue]] ]
-               )
-            {
-                // do nothing
-                return;
-            }
-            else
-            {
-                [self.currentNavController  popToRootViewControllerAnimated:NO];
-
-            }
-        }
-           [self.currentNavController pushViewController:chatVC animated:NO];
-    }
-    else{
-        [self.currentNavController pushViewController:chatVC animated:YES];
-    }
-    
+    [self presentChatWithRow:row];
     
     [tableView beginUpdates];
     [tableView reloadRowsAtIndexPaths:@[indexPath]

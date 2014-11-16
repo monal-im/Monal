@@ -39,6 +39,7 @@
 }
 
 - (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
     _tableData =[[DataLayer sharedInstance] messageHistoryBuddies:_accountId];
     [self.tableView reloadData];
 }

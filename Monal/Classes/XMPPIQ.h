@@ -17,6 +17,10 @@
 
 -(id) initWithId:(NSString*) sessionid andType:(NSString*) iqType;
 
+/**
+ login with legacy authentication. only as fallback.
+ */
+-(void) setAuthWithUserName:(NSString *)username resource:(NSString *) resource andPassword:(NSString *) password;
 
 /**
  Makes an iq to bind with a resouce. Passing nil will set no resource.
@@ -49,6 +53,12 @@
  sets up a disco info query node
  */
 -(void) setDiscoItemNode;
+
+#pragma mark legacy authentication
+/**
+ legacy autnetication. only used as a fallback
+ */
+-(void) getAuthwithUserName:(NSString *)username;
 
 #pragma mark roster
 /**

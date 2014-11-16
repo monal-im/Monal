@@ -41,7 +41,7 @@
     }
     else
     {
-    [self.view setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"debut_dark"]]];
+        [self.view setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"debut_dark"]]];
     }
     _protocolList=[[DataLayer sharedInstance] protocolList];
     
@@ -54,6 +54,7 @@
 
 -(void) viewWillAppear:(BOOL)animated
 {
+    [super viewWillAppear:animated];
     _accountList=[[DataLayer sharedInstance] accountList];
     [self.accountsTable reloadData];
 //    if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"6.0"))

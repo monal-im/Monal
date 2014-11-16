@@ -48,9 +48,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		
 		//copy the password so the oject can be released ok
 		toreturn=[keydata objectForKey:(__bridge id)kSecValueData];
-	
-		
-		DDLogVerbose(@"got %@ ", toreturn) ;
+
 	}
 	else
 		

@@ -48,7 +48,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void) viewWillAppear:(BOOL)animated
 {
-    
+    [super viewWillAppear:animated];
     DDLogVerbose(@"call screen will  appear");
     [UIDevice currentDevice].proximityMonitoringEnabled=YES;
     
@@ -63,10 +63,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void)viewDidDisappear:(BOOL)animated
 {
+    [super viewDidDisappear:animated];
 	DDLogVerbose(@"call screen did  disappear");
- 
-
-
 }
 
 

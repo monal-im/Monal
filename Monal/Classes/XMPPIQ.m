@@ -22,6 +22,34 @@
 }
 
 #pragma mark iq set
+
+-(void) setAuthWithUserName:(NSString *)username resource:(NSString *) resource andPassword:(NSString *) password
+{
+    [self.attributes setObject:@"auth1" forKey:@"id"];
+    [self.attributes setObject:kiqSetType forKey:@"type"];
+    
+    XMLNode* queryNode =[[XMLNode alloc] init];
+    queryNode.element=@"query";
+    [queryNode setXMLNS:@"jabber:iq:auth"];
+    
+    XMLNode* userNode =[[XMLNode alloc] init];
+    userNode.element=@"username";
+    userNode.data =username;
+    
+    XMLNode* resourceNode =[[XMLNode alloc] init];
+    resourceNode.element=@"resource";
+    resourceNode.data =resource;
+    
+    XMLNode* passNode =[[XMLNode alloc] init];
+    passNode.element=@"password";
+    passNode.data =password;
+    
+    [queryNode.children addObject:userNode];
+     [queryNode.children addObject:resourceNode];
+     [queryNode.children addObject:passNode];
+    [self.children addObject:queryNode];
+}
+
 -(void) setBindWithResource:(NSString*) resource
 {
 
@@ -102,7 +130,7 @@
     
     XMLNode* pingNode =[[XMLNode alloc] init];
     pingNode.element=@"ping";
-    [pingNode.attributes setObject:@" urn:xmpp:ping" forKey:@"xmlns"];
+    [pingNode.attributes setObject:@"urn:xmpp:ping" forKey:@"xmlns"];
     [self.children addObject:pingNode];
 
 }
@@ -170,6 +198,24 @@
 
 
 #pragma mark iq get
+-(void) getAuthwithUserName:(NSString *)username
+{
+    [self.attributes setObject:@"auth1" forKey:@"id"];
+    [self.attributes setObject:kiqGetType forKey:@"type"];
+    
+    
+    XMLNode* queryNode =[[XMLNode alloc] init];
+    queryNode.element=@"query";
+    [queryNode setXMLNS:@"jabber:iq:auth"];
+    
+    XMLNode* userNode =[[XMLNode alloc] init];
+    userNode.element=@"username";
+    userNode.data =username;
+    
+    [queryNode.children addObject:userNode];
+    [self.children addObject:queryNode];
+}
+
 -(void) getVcardTo:(NSString*) to
 {
     [self setiqTo:to];
@@ -380,8 +426,12 @@
 
 -(void) setJingleTerminateTo:(NSString*) jid andResource:(NSString*) resource withValues:(NSDictionary*) info
 {
-    
+    if([jid rangeOfString:@"/"].location==NSNotFound) {
     [self setiqTo:[NSString stringWithFormat:@"%@/%@",jid,resource]];
+    }
+    else {
+        [self setiqTo:jid];
+    }
     
     XMLNode* jingleNode =[[XMLNode alloc] init];
     jingleNode.element=@"jingle";

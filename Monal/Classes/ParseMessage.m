@@ -21,7 +21,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
    
 	if(([elementName isEqualToString:@"message"])  )
 	{
-		DDLogVerbose(@" message error");
+		DDLogVerbose(@" message type check");
 		
         if ([[attributeDict objectForKey:@"type"] isEqualToString:kMessageErrorType])
         {
@@ -109,6 +109,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	}
 	
     
+    
+	if(([elementName isEqualToString:@"html"]) )
+	{
+        State=@"HTML";
+		
+		return;
+	}
+    
 }
 
 
@@ -116,8 +124,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     if([elementName isEqualToString:@"body"])
     {
-        _messageText=_messageBuffer;
-        DDLogVerbose(@"got message %@", _messageText);
+        if([State isEqualToString:@"HTML"]){
+            _messagHTML=_messageBuffer;
+            DDLogVerbose(@"got message HTML %@", self.messagHTML);
+        } else
+        {
+            _messageText=_messageBuffer;
+            DDLogVerbose(@"got message %@", self.messageText);
+        }
     }
     
     if([elementName isEqualToString:@"message"])
@@ -126,6 +140,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         
         // this is the end of parse
         if(!_actualFrom) _actualFrom=_from;
+        if(!_messageText) _messageText=_messagHTML;
         if(!_messageText) _messageText=_messageBuffer; 
     }
     

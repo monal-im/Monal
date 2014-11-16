@@ -19,6 +19,11 @@
     
 }
 /**
+ Sets the id attribute of the element
+ */
+-(void) setId:(NSString*) idval;
+
+/**
  Sets the body child element
  */
 -(void) setBody:(NSString*) messageBody;

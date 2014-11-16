@@ -26,8 +26,8 @@
     XMLNode* c =[[XMLNode alloc] init];
     c.element=@"c";
     [c.attributes setObject:@"http://monal.im/caps" forKey:@"node"];
-    [c.attributes setObject:self.versionHash forKey:@"ver"];
-//    [c.attributes setObject:@"sha-1" forKey:@"hash"];
+  //  [c.attributes setObject:self.versionHash forKey:@"ver"];
+   [c.attributes setObject:@"sha-1" forKey:@"hash"];
     [c.attributes setObject:[NSString stringWithFormat:@"%@ %@", kextpmuc, kextvoice] forKey:@"ext"]; //deprecated .. for legacy
     [c.attributes setObject:@"http://jabber.org/protocol/caps" forKey:@"xmlns"];
     [self.children addObject:c];
@@ -73,7 +73,7 @@
     XMLNode* priorityNode =[[XMLNode alloc] init];
     priorityNode.element=@"priority";
     priorityNode.data=[NSString stringWithFormat:@"%d",_priority];
-    [self.children addObject:priorityNode];
+   // [self.children addObject:priorityNode];
 }
 
 -(void) setInvisible
@@ -91,6 +91,11 @@
     xNode.element=@"x";
     [xNode.attributes setObject:@"http://jabber.org/protocol/muc" forKey:@"xmlns"];
     
+    XMLNode* historyNode =[[XMLNode alloc] init];
+    historyNode.element=@"history";
+    [historyNode.attributes setObject:@"5" forKey:@"maxstanzas"];
+    [xNode.children addObject:historyNode];
+    
     if(password)
     {
     XMLNode* passwordNode =[[XMLNode alloc] init];
@@ -106,7 +111,13 @@
 
 -(void) leaveRoom:(NSString*) room onServer:(NSString*) server withName:(NSString*)name
 {
-    [self.attributes setObject:[NSString stringWithFormat:@"%@@%@/%@", name,server,room] forKey:@"to"];
+    //depeding on how this is called room might have the full server name
+    if(server && ![room hasSuffix:server]) {
+        [self.attributes setObject:[NSString stringWithFormat:@"%@@%@/%@", room,server,name] forKey:@"to"];
+    }
+    else {
+        [self.attributes setObject:[NSString stringWithFormat:@"%@/%@", room,name] forKey:@"to"];
+    }
     [self.attributes setObject:@"unavailable" forKey:@"type"];
     
 }

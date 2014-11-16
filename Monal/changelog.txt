@@ -11,21 +11,19 @@ Notable features:
 * Tested heavily with google talk, facebook, openfire, prosody   and ejabberd servers. 
 
 
-2.1.0 changelog
+2.1.3 changelog
 
 This is  update that  fixes bugs.
-1. iOS7 UI and compatibiulity
-2. Numerous Stability related bug fixes
-3. You may login to mutiple accounts
-4. Fixed opening app in landscape mode for ipad
-5. You must explicity set self signed certs if needed
-6. You must explicity set old style SSL if it is needed
-7. Fixed roster bugs on iPad
-8. fixed digest-md5 login bugs (works with mavericks server)
+1. Improved connectivity and server support
+2. improved handling of netowrk outages
+3. tap to enter conversation
+
+
+
 
 
       
-you can connect to any jabber server or use the settings for google, facebook or  AIM servers
+you can connect to any jabber server or use the settings for google or facebook
 
 to test the  XMPP protocol (used by google, facebook etc) use the credentials below. To test the VOIP features, talk to a client with pidgin on linux or another monal user.  The option to call appears after the tapping on the disclosure indicator on the contacts list. 
 username: sworim

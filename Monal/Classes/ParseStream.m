@@ -47,7 +47,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	{
         DDLogVerbose(@"Using new style SSL");
         _callStartTLS=YES;
-		[parser abortParsing];
+		return; 
 	}
     
     

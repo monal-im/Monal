@@ -85,7 +85,7 @@
     self.localPort2=@"7079"; // some random val
     self.otherParty=[NSString stringWithFormat:@"%@/%@",to,resource];
     
-    int random = rand() %100;
+    int random =  arc4random_uniform(100);
     self.thesid=[NSString stringWithFormat:@"Monal%d",random];
     
     self.initiator=self.me;
@@ -117,13 +117,17 @@
 {
     [rtp RTPDisconnect];
     
-     NSDictionary* info =@{@"initiator":self.initiator, @"responder":self.responder, @"sid":self.thesid, @"ownip":_ownIP};
-    
-    XMPPIQ* node =[[XMPPIQ alloc] initWithId:iqid andType:kiqSetType];
-    [node setJingleTerminateTo:self.otherParty andResource:_activeresource withValues:info];
-    
-    
-    return node;
+    if(self.initiator && self.responder && self.thesid && _ownIP) {
+        NSDictionary* info =@{@"initiator":self.initiator, @"responder":self.responder, @"sid":self.thesid, @"ownip":_ownIP};
+        
+        XMPPIQ* node =[[XMPPIQ alloc] initWithId:iqid andType:kiqSetType];
+        [node setJingleTerminateTo:self.otherParty andResource:_activeresource withValues:info];
+        return node;
+    }
+    else
+    {
+        return nil;
+    }
 }
 
 

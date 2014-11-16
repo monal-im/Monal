@@ -15,7 +15,6 @@
 
 #import "jingleCall.h"
 
-
 // networking objects
 #import <unistd.h>
 #import <sys/types.h>
@@ -60,7 +59,13 @@ typedef struct
     domainname target;
 } srv_rdata;
 
-
+typedef NS_ENUM (NSInteger, xmppState) {
+    kStateLoggedOut =-1,
+    kStateDisconnected , // has connected once
+    kStateReconnecting ,
+    kStateHasStream ,
+    kStateLoggedIn
+};
 
 @interface xmpp : NSObject <NSStreamDelegate>
 {
@@ -85,6 +90,8 @@ typedef struct
     //does not reset at disconnect
     BOOL _loggedInOnce;
     BOOL _hasRequestedServerInfo;
+    
+    BOOL _brokenServerSSL;
 
 }
 
@@ -211,6 +218,8 @@ Decline a call request
 @property (nonatomic,assign) BOOL awayState;
 @property (nonatomic,assign) BOOL visibleState;
 
+@property (nonatomic,assign) BOOL hasShownAlert;
+
 @property (nonatomic, strong) jingleCall *jingle;
 
 // DB info
@@ -218,9 +227,9 @@ Decline a call request
 
 //we should have an enumerator for this
 @property (nonatomic,assign) BOOL explicitLogout;
-@property (nonatomic,assign,readonly) BOOL logInStarted;
-@property (nonatomic,assign,readonly) BOOL loggedIn;
 @property (nonatomic,assign,readonly) BOOL loginError;
+
+@property (nonatomic, readonly) xmppState accountState;
 
 // discovered properties
 @property (nonatomic,strong)  NSMutableArray* discoveredServerList;
@@ -235,8 +244,6 @@ Decline a call request
 
 //UI
 @property (nonatomic,weak) ContactsViewController* contactsVC; 
-
-
 
 
 @end

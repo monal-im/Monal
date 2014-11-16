@@ -23,6 +23,11 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 @property (nonatomic, assign) NSInteger thismonth;
 @property (nonatomic, assign) NSInteger thisday;
 
+/**
+ if set to yes will prevent scrolling and resizing. useful for resigning first responder just to set auto correct
+ */
+@property (nonatomic, assign) BOOL blockAnimations;
+
 @end
 
 @implementation chatViewController
@@ -191,7 +196,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     {
         _contactName=[_contact objectForKey:@"message_from"];
     }
-	_contactFullName=[_contact objectForKey:@"full_name"];;
+    _contactFullName=[[DataLayer sharedInstance] fullName:[_contact objectForKey:@"buddy_name"] forAccount:[NSString stringWithFormat:@"%@",[_contact objectForKey:@"account_id"]]];
+    if (!_contactFullName) _contactFullName=_contactName;
+    
     self.accountNo=[NSString stringWithFormat:@"%d",[[_contact objectForKey:@"account_id"] integerValue]];
     self.hidesBottomBarWhenPushed=YES;
     
@@ -260,6 +267,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 -(void)viewWillAppear:(BOOL)animated
 {
     
+    [super viewWillAppear:animated];
+    
     [MLNotificationManager sharedInstance].currentAccountNo=self.accountNo;
     [MLNotificationManager sharedInstance].currentContact=self.contactName;
     
@@ -298,21 +307,25 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         
     }
     [self refreshCounter];
-    
+
 }
 
 -(void) viewDidAppear:(BOOL)animated
 {
+    [super viewDidAppear:animated];
     [self scrollToBottom];
     [self refreshCounter];
+    
 }
 
 -(void) viewWillDisappear:(BOOL)animated
 {
+    [super viewWillDisappear:animated];
     [MLNotificationManager sharedInstance].currentAccountNo=nil;
     [MLNotificationManager sharedInstance].currentContact=nil;
     
     [self refreshCounter];
+
 }
 
 -(void) dealloc
@@ -366,6 +379,11 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void)resignTextView
 {
+    self.blockAnimations=YES;
+    [chatInput resignFirstResponder];//apply autocorrect
+    [chatInput becomeFirstResponder];
+    self.blockAnimations=NO;
+    
     if(([chatInput text]!=nil) && (![[chatInput text] isEqualToString:@""]) )
     {
         DDLogVerbose(@"Sending message");
@@ -383,40 +401,41 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 //always messages going out
 -(void) addMessageto:(NSString*)to withMessage:(NSString*) message
 {
-	
+	if(!self.jid || !message)  {
+        DDLogError(@" not ready to send messages");
+        return;
+    }
+    
 	if([[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:_accountNo withMessage:message actuallyFrom:self.jid ])
 	{
 		DDLogVerbose(@"added message");
         
-		if(groupchat!=true) //  message will come back
-		{
-            dispatch_async(dispatch_get_main_queue(),
-                           ^{
-                               NSDictionary* userInfo = @{@"af": self.jid,
-                                                          @"message": message ,
-                                                          @"thetime": [self currentGMTTime] };
-                               [_messagelist addObject:userInfo];
+        
+        dispatch_async(dispatch_get_main_queue(),
+                       ^{
+                           NSDictionary* userInfo = @{@"af": self.jid,
+                                                      @"message": message ,
+                                                      @"thetime": [self currentGMTTime] };
+                           [_messagelist addObject:userInfo];
+                           
+                           [_messageTable beginUpdates];
+                           NSIndexPath *path1 = [NSIndexPath indexPathForRow:[_messagelist count]-1  inSection:0];
+                           [_messageTable insertRowsAtIndexPaths:@[path1]
+                                                withRowAnimation:UITableViewRowAnimationBottom];
+                           [_messageTable endUpdates];
+                           
+                           
+                           if(![_messageTable.indexPathsForVisibleRows containsObject:path1])
+                           {
                                
-                               [_messageTable beginUpdates];
-                               NSIndexPath *path1 = [NSIndexPath indexPathForRow:[_messagelist count]-1  inSection:0];
-                               [_messageTable insertRowsAtIndexPaths:@[path1]
-                                                    withRowAnimation:UITableViewRowAnimationBottom];
-                               [_messageTable endUpdates];
-                               
-                               
-                               if(![_messageTable.indexPathsForVisibleRows containsObject:path1])
-                               {
-                                   
-                                   [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:NO];
-                               }
-                           });
-            
-            
-        }
-		
+                               [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:NO];
+                           }
+                       });
+  
 	}
-	else
+	else {
 		DDLogVerbose(@"failed to add message");
+    }
 	
 	// make sure its in active
 	if(_firstmsg==YES)
@@ -624,16 +643,23 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     
     NSString* lowerCase= [[row objectForKey:@"message"] lowercaseString];
     NSRange pos = [lowerCase rangeOfString:@"http://"];
-    if(pos.location==NSNotFound)
+    if(pos.location==NSNotFound) {
         pos=[lowerCase rangeOfString:@"https://"];
+    }
     
     NSRange pos2;
     if(pos.location!=NSNotFound)
     {
         NSString* urlString =[[row objectForKey:@"message"] substringFromIndex:pos.location];
         pos2= [urlString rangeOfString:@" "];
-        if(pos2.location!=NSNotFound)
+        if(pos2.location==NSNotFound) {
+              pos2= [urlString rangeOfString:@">"];
+        }
+        
+        if(pos2.location!=NSNotFound) {
             urlString=[urlString substringToIndex:pos2.location];
+        }
+       
         
         cell.link=urlString;
     }
@@ -781,6 +807,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void) keyboardWillHide:(NSNotification *) notification
 {
+    if(self.blockAnimations) return;
     
     NSTimeInterval animationDuration =[[[notification userInfo] objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
 	[UIView animateWithDuration:animationDuration
@@ -802,7 +829,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                      }
      ];
     
-    
+    _keyboardVisible=NO;
 	DDLogVerbose(@"kbd will hide scroll: %f", oldFrame.size.height);
 }
 
@@ -814,21 +841,31 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void) keyboardWillShow:(NSNotification *) notification
 {
-    
-    CGSize keyboardSize = [[[notification userInfo] objectForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue].size;
-    
+    if(self.blockAnimations) return;
+    CGSize keyboardSize = [[[notification userInfo] objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue].size;
     CGRect r;
-	r=self.view.frame;
+	
+    //chiense keybaord might call this multiple times ony set for inital
+    if(!_keyboardVisible) {
+        oldFrame=self.view.frame;
+    }
+    _keyboardVisible=YES;
+    r=oldFrame;
+    
     UIInterfaceOrientation orientation = [UIApplication sharedApplication].statusBarOrientation;
     
-    if(orientation==UIInterfaceOrientationLandscapeLeft|| orientation==UIInterfaceOrientationLandscapeRight)
-    {
-        r.size.height -= keyboardSize.width;
-    }
-    else
+    if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0")) {
         r.size.height -= keyboardSize.height;
-	oldFrame=self.view.frame;
-    
+    }
+    else {
+        if(orientation==UIInterfaceOrientationLandscapeLeft|| orientation==UIInterfaceOrientationLandscapeRight)
+        {
+            r.size.height -= keyboardSize.width;
+        }
+        else {
+            r.size.height -= keyboardSize.height;
+        }
+    }
     NSTimeInterval animationDuration =[[[notification userInfo] objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
     [UIView animateWithDuration:animationDuration
                      animations:^{
@@ -852,335 +889,5 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 	containerView.frame = r;
 }
 
-
-
-
-/*
- #pragma mark HTML generation
- 
- -(NSString*) emoticonsHTML:(NSString*) message
- {
- NSMutableString* body=[[NSMutableString alloc] initWithString: message];
- 
- //fix % issue
- //[body replaceOccurrencesOfString:@"%" withString:@"%%"
- //							  options:NSCaseInsensitiveSearch
- //								range:NSMakeRange(0, [body length])];
- 
- 
- 
- //only do search if there an emoticon
- NSRange pos = [message rangeOfString:@":"];
- NSRange pos2 = [message rangeOfString:@";"];
- if((pos.location!=NSNotFound) ||
- (pos2.location!=NSNotFound))
- {
- 
- [body replaceOccurrencesOfString:@":)"
- withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Smile.png>"]
- options:NSCaseInsensitiveSearch
- range:NSMakeRange(0, [body length])];
- 
- [body replaceOccurrencesOfString:@":-)"
- withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Smile.png>"]
- options:NSCaseInsensitiveSearch
- range:NSMakeRange(0, [body length])];
- 
- 
- [body replaceOccurrencesOfString:@":D"
- withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Grin.png>"]
- options:NSCaseInsensitiveSearch
- range:NSMakeRange(0, [body length])];
- 
- [body replaceOccurrencesOfString:@":-D"
- withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Grin.png>"]
- options:NSCaseInsensitiveSearch
- range:NSMakeRange(0, [body length])];
- 
- 
- [body replaceOccurrencesOfString:@":O"
- withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Surprised.png>"]
- options:NSCaseInsensitiveSearch
- range:NSMakeRange(0, [body length])];
- 
- [body replaceOccurrencesOfString:@":-O"
- withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Surprised.png>"]
- options:NSCaseInsensitiveSearch
- range:NSMakeRange(0, [body length])];
- 
- 
- 
- 
- [body replaceOccurrencesOfString:@":*"
- withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Kiss.png>"]
- options:NSCaseInsensitiveSearch
- range:NSMakeRange(0, [body length])];
- 
- [body replaceOccurrencesOfString:@":-*"
- withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Kiss.png>"]
- options:NSCaseInsensitiveSearch
- range:NSMakeRange(0, [body length])];
- 
- 
- 
- 
- 
- [body replaceOccurrencesOfString:@":("
- withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Sad.png>"]
- options:NSCaseInsensitiveSearch
- range:NSMakeRange(0, [body length])];
- 
- 
- [body replaceOccurrencesOfString:@":-("
- withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Sad.png>"]
- options:NSCaseInsensitiveSearch
- range:NSMakeRange(0, [body length])];
- 
- 
- [body replaceOccurrencesOfString:@":\'("
- withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Crying.png>"]
- options:NSCaseInsensitiveSearch
- range:NSMakeRange(0, [body length])];
- 
- 
- [body replaceOccurrencesOfString:@":\'-("
- withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Crying.png>"]
- options:NSCaseInsensitiveSearch
- range:NSMakeRange(0, [body length])];
- 
- 
- 
- 
- [body replaceOccurrencesOfString:@";-)"
- withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Wink.png>"]
- options:NSCaseInsensitiveSearch
- range:NSMakeRange(0, [body length])];
- 
- 
- [body replaceOccurrencesOfString:@";)"
- withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Wink.png>"]
- options:NSCaseInsensitiveSearch
- range:NSMakeRange(0, [body length])];
- 
- 
- 
- [body replaceOccurrencesOfString:@":-/"
- withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Sarcastic.png>"]
- options:NSCaseInsensitiveSearch
- range:NSMakeRange(0, [body length])];
- 
- 
- [body replaceOccurrencesOfString:@":/"
- withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Sarcastic.png>"]
- options:NSCaseInsensitiveSearch
- range:NSMakeRange(0, [body length])];
- 
- 
- 
- [body replaceOccurrencesOfString:@":-\\"
- withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Sarcastic.png>"]
- options:NSCaseInsensitiveSearch
- range:NSMakeRange(0, [body length])];
- 
- 
- [body replaceOccurrencesOfString:@":\\"
- withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Sarcastic.png>"]
- options:NSCaseInsensitiveSearch
- range:NSMakeRange(0, [body length])];
- 
- 
- [body replaceOccurrencesOfString:@":-p"
- withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Tongue.png>"]
- options:NSCaseInsensitiveSearch
- range:NSMakeRange(0, [body length])];
- 
- 
- [body replaceOccurrencesOfString:@":p"
- withString:[NSString stringWithFormat:@"<img src=../../Emoticons/AdiumEmoticons/Tongue.png>"]
- options:NSCaseInsensitiveSearch
- range:NSMakeRange(0, [body length])];
- 
- 
- //changes to avoid having :// as in  http:// turned into an emoticon
- [body replaceOccurrencesOfString:@"<img src=../../Emoticons/AdiumEmoticons/Sarcastic.png>/"
- withString:[NSString stringWithFormat:@"://"]
- options:NSCaseInsensitiveSearch
- range:NSMakeRange(0, [body length])];
- }
- 
- //handle carriage return
- [body replaceOccurrencesOfString:@"\n"
- withString:[NSString stringWithFormat:@"<br>"]
- options:NSCaseInsensitiveSearch
- range:NSMakeRange(0, [body length])];
- 
- 
- //this is link handling text
- 
- int linkstart=0;
- int linkend=0;
- 
- NSString* linktext;
- NSRange urlpos;
- NSRange urlpos2;
- bool hasHttp=true;
- bool hasHttps=true;
- 
- //find http
- urlpos=[body rangeOfString:@"http://" options:NSCaseInsensitiveSearch];
- if(urlpos.location==NSNotFound)
- {
- hasHttp=false;
- //find  www
- urlpos=[body rangeOfString:@"www." options:NSCaseInsensitiveSearch];
- }
- 
- //find http
- urlpos2=[body rangeOfString:@"https://" options:NSCaseInsensitiveSearch];
- if(urlpos2.location==NSNotFound)
- {
- hasHttps=false;
- //find  www
- //urlpos=[body rangeOfString:@"www." options:NSCaseInsensitiveSearch];
- }
- 
- if((hasHttp==true) || (hasHttps==true))
- {
- // look for <a already there
- NSRange ahrefPos=[body rangeOfString:@"<a" options:NSCaseInsensitiveSearch];
- if(ahrefPos.location==NSNotFound)
- {
- 
- //get length
- if(urlpos.location!=NSNotFound)
- linkstart=urlpos.location;
- else
- if(urlpos2.location!=NSNotFound)
- linkstart=urlpos2.location;
- 
- //find space after that
- urlpos=[body rangeOfString:@" " options:NSCaseInsensitiveSearch range:NSMakeRange(linkstart, [body length]-linkstart)];
- if(urlpos.location==NSNotFound)
- {
- linkend=[body length];
- } else linkend=urlpos.location;
- 
- 
- linktext=[body substringWithRange:NSMakeRange(linkstart, linkend-linkstart)];
- 
- 
- // replace linktext with <a href=linktext> linktext  </a>
- 
- 
- 
- if((hasHttp==true) || (hasHttps==true))
- [body replaceOccurrencesOfString:linktext
- withString:[NSString stringWithFormat:@"<a href=%@> %@ </a>",linktext, linktext]
- options:NSCaseInsensitiveSearch
- range:NSMakeRange(0, [body length])];
- else
- [body replaceOccurrencesOfString:linktext
- withString:[NSString stringWithFormat:@"<a href=http://%@> %@ </a>",linktext, linktext]
- options:NSCaseInsensitiveSearch
- range:NSMakeRange(0, [body length])];
- 
- 
- }
- }
- return body;
- 
- }
- 
- -(NSString*) makeMessageHTMLfrom:(NSString*) from withMessage:(NSString*) themessage andTime:(NSString*) time isLive:(BOOL) liveChat
- {
- 
- if([from isEqualToString:self.jid])
- {
- 
- NSMutableString* tmpout;
- 
- // commneted out because of the occasional bug
- //       if([from isEqualToString:lastFrom])
- //			tmpout=[NSMutableString stringWithString:outNextHTML];
- //		else
- 
- {
- //new block
- lastDiv=[NSString stringWithFormat:@"insert%@",dateString];
- 
- tmpout=[NSMutableString stringWithString:outHTML];
- if(liveChat==true)
- [tmpout replaceOccurrencesOfString:@"insert"
- withString:lastDiv
- options:NSCaseInsensitiveSearch
- range:NSMakeRange(0, [tmpout length])];
- }
- 
- 
- 
- 
- [tmpout replaceOccurrencesOfString:@"%message%"
- withString:[self emoticonsHTML:themessage]
- options:NSCaseInsensitiveSearch
- range:NSMakeRange(0, [tmpout length])];
- 
- 
- 
- 
- 
- [tmpout replaceOccurrencesOfString:@"%time%"
- withString:dateString
- options:NSCaseInsensitiveSearch
- range:NSMakeRange(0, [tmpout length])];
- 
- return tmpout;
- 
- }
- else
- {
- NSMutableString* tmpin;
- 
- //commented out because of bugs
- //if([from isEqualToString:lastFrom])
- //	tmpin=[NSMutableString stringWithString:inNextHTML];
- //else
- {
- //new block
- lastDiv=[NSString stringWithFormat:@"insert%@",dateString];
- 
- tmpin=[NSMutableString stringWithString:inHTML];
- 
- if(liveChat==true)
- [tmpin replaceOccurrencesOfString:@"insert"
- withString:lastDiv
- options:NSCaseInsensitiveSearch
- range:NSMakeRange(0, [tmpin length])];
- }
- 
- if(groupchat==true) //we want individualized names
- {
- 
- [tmpin replaceOccurrencesOfString:@"%sender%"
- withString:from
- options:NSCaseInsensitiveSearch
- range:NSMakeRange(0, [tmpin length])];
- }
- 
- [tmpin replaceOccurrencesOfString:@"%message%"
- withString:[self emoticonsHTML:themessage]
- options:NSCaseInsensitiveSearch
- range:NSMakeRange(0, [tmpin length])];
- 
- [tmpin replaceOccurrencesOfString:@"%time%"
- withString:dateString
- options:NSCaseInsensitiveSearch
- range:NSMakeRange(0, [tmpin length])];
- 
- ;
- return tmpin;
- 
- }
- }
- */
 
 @end

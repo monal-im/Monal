@@ -49,6 +49,7 @@
         if([_queryXMLNS isEqualToString:@"http://jabber.org/protocol/disco#info"]) _discoInfo=YES;
         if([_queryXMLNS isEqualToString:@"http://jabber.org/protocol/disco#items"]) _discoItems=YES;
         if([_queryXMLNS isEqualToString:@"jabber:iq:roster"]) _roster=YES;
+        if([_queryXMLNS isEqualToString:@"jabber:iq:auth"]) _legacyAuth=YES;
         
          [_features addObject:[attributeDict objectForKey:@"val"]];
         
@@ -99,7 +100,10 @@
 	{
         if([[attributeDict objectForKey:@"category"] isEqualToString:@"conference"])
         {
+            if([[attributeDict objectForKey:@"type"] isEqualToString:@"text"])
+            {
             _conferenceServer=self.from;
+            }
         }
     }
     

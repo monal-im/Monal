@@ -154,7 +154,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         }
       
         //uiimage image named is cached if avaialable
-        [self.iconCache setObject:toreturn forKey:cacheKey];
+        if(toreturn) {
+            [self.iconCache setObject:toreturn forKey:cacheKey];
+        }
         
     }
     

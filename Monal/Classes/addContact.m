@@ -24,6 +24,13 @@
 	{
         NSDictionary* contact =@{@"row":[NSNumber numberWithInteger:_selectedRow],@"buddy_name":_buddyName.text};
 		[[MLXMPPManager sharedInstance] addContact:contact];
+        
+        UIAlertView *addError = [[UIAlertView alloc]
+								 initWithTitle:@"Permission Requested"
+								 message:@"The new contact will be added to your contacts list when the person you've added has approved your request."
+								 delegate:self cancelButtonTitle:@"Close"
+								 otherButtonTitles: nil] ;
+		[addError show];
 	}
 	else
 	{
@@ -64,17 +71,20 @@
 
 -(void) viewDidLoad
 {
+    [super viewDidLoad];
     self.navigationItem.title=@"Add Contact";
     _closeButton =[[UIBarButtonItem alloc] initWithTitle:@"Close" style:UIBarButtonItemStylePlain target:self action:@selector(closeView)];
     self.navigationItem.rightBarButtonItem=_closeButton;
     
     if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0"))
     {
-        _caption.textColor=[UIColor blackColor];
         self.view.backgroundColor =[UIColor whiteColor];
     }
     else{
         self.view.backgroundColor = [[UIColor alloc] initWithPatternImage:[UIImage imageNamed:@"debut_dark"]];
+        self.contactLabel.textColor=[UIColor whiteColor];
+        self.accountLabel.textColor=[UIColor whiteColor];
+        self.navigationController.navigationBar.tintColor=[UIColor blackColor];
     }
     
     
@@ -118,6 +128,7 @@
 
 -(void) viewWillAppear:(BOOL)animated
 {
+    [super viewWillAppear:animated];
     [_accountPicker reloadAllComponents];
     
     if([[MLXMPPManager sharedInstance].connectedXMPP count]==1)

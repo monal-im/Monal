@@ -155,6 +155,7 @@
 		2680B8F11863C172009599AB /* DDDispatchQueueLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 2680B8E71863C172009599AB /* DDDispatchQueueLogFormatter.m */; };
 		2680B8F21863C172009599AB /* DDMultiFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 2680B8E91863C172009599AB /* DDMultiFormatter.m */; };
 		2680B8F31863C172009599AB /* README.txt in Resources */ = {isa = PBXBuildFile; fileRef = 2680B8EA1863C172009599AB /* README.txt */; };
+		268821FA19B9233B00AEA46E /* NSString+SqlLite.m in Sources */ = {isa = PBXBuildFile; fileRef = 268821F919B9233B00AEA46E /* NSString+SqlLite.m */; };
 		2689B6EC1601914E0087CA58 /* DDBadgeViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2689B6EB1601914E0087CA58 /* DDBadgeViewCell.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		268BCF12140B29180025E4D1 /* libjrtplib-static.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */; };
 		268DD58617C4541000C673A9 /* MLChatCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 268DD58517C4541000C673A9 /* MLChatCell.m */; };
@@ -402,6 +403,8 @@
 		2680B8E81863C172009599AB /* DDMultiFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDMultiFormatter.h; sourceTree = "<group>"; };
 		2680B8E91863C172009599AB /* DDMultiFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDMultiFormatter.m; sourceTree = "<group>"; };
 		2680B8EA1863C172009599AB /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
+		268821F819B9233B00AEA46E /* NSString+SqlLite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+SqlLite.h"; sourceTree = "<group>"; };
+		268821F919B9233B00AEA46E /* NSString+SqlLite.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+SqlLite.m"; sourceTree = "<group>"; };
 		2689B6EA1601914E0087CA58 /* DDBadgeViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDBadgeViewCell.h; sourceTree = "<group>"; };
 		2689B6EB1601914E0087CA58 /* DDBadgeViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDBadgeViewCell.m; sourceTree = "<group>"; };
 		268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libjrtplib-static.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -535,6 +538,8 @@
 				1D3623240D0F684500981E51 /* MonalAppDelegate.h */,
 				1D3623250D0F684500981E51 /* MonalAppDelegate.m */,
 				262D9EAB17924532009292B4 /* MLConstants.h */,
+				268821F819B9233B00AEA46E /* NSString+SqlLite.h */,
+				268821F919B9233B00AEA46E /* NSString+SqlLite.m */,
 			);
 			path = Classes;
 			sourceTree = "<group>";
@@ -1137,7 +1142,9 @@
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0500;
+				CLASSPREFIX = ML;
+				LastUpgradeCheck = 0600;
+				ORGANIZATIONNAME = Monal.im;
 				TargetAttributes = {
 					1D6058900D05DD3D006BFB54 = {
 						DevelopmentTeam = 33XS7DE5NZ;
@@ -1295,6 +1302,7 @@
 				26DA16E017C302BC00D0065E /* RIButtonItem.m in Sources */,
 				26DA16E117C302BC00D0065E /* UIActionSheet+Blocks.m in Sources */,
 				2680B8EC1863C172009599AB /* DDASLLogger.m in Sources */,
+				268821FA19B9233B00AEA46E /* NSString+SqlLite.m in Sources */,
 				2678A98B185A8320003AF53B /* ChatLogAccountDetailViewController.m in Sources */,
 				26DA16E217C302BC00D0065E /* UIAlertView+Blocks.m in Sources */,
 				2643A12F180220890030EFB1 /* TPKeyboardAvoidingTableView.m in Sources */,
@@ -1386,12 +1394,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CLANG_ENABLE_OBJC_ARC = YES;
-				CODE_SIGN_IDENTITY = "iPhone Developer: Anurodh Pokharel (NVHUCKM9V3)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Anurodh Pokharel (NVHUCKM9V3)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = NO;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -1410,24 +1417,25 @@
 				LLVM_LTO = NO;
 				OTHER_LDFLAGS = "-lstdc++";
 				PRODUCT_NAME = Monal;
-				PROVISIONING_PROFILE = "E44784B1-BF4B-498F-818A-845ACE23C0A1";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "E44784B1-BF4B-498F-818A-845ACE23C0A1";
+				PROVISIONING_PROFILE = "5e85f1cf-25d4-4c09-aa40-d9a82e186f7a";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "5e85f1cf-25d4-4c09-aa40-d9a82e186f7a";
 			};
 			name = Debug;
 		};
 		2675EF5918B98C2D0059C5C3 /* AppStore */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "iPhone Distribution: Anurodh Pokharel (33XS7DE5NZ)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Anurodh Pokharel (33XS7DE5NZ)";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
@@ -1441,8 +1449,8 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 5.1.1;
 				LLVM_LTO = YES;
-				PROVISIONING_PROFILE = "DCC3D5D0-2C13-42D0-B613-CD8A14A86A0E";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "DCC3D5D0-2C13-42D0-B613-CD8A14A86A0E";
+				PROVISIONING_PROFILE = "C87D7BC2-2AC9-4ED4-945E-692EB563956A";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "C87D7BC2-2AC9-4ED4-945E-692EB563956A";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -1452,12 +1460,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CLANG_ENABLE_OBJC_ARC = YES;
-				CODE_SIGN_IDENTITY = "iPhone Distribution: Anurodh Pokharel (33XS7DE5NZ)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Anurodh Pokharel (33XS7DE5NZ)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
 				DEAD_CODE_STRIPPING = NO;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -1474,8 +1481,8 @@
 				LLVM_LTO = NO;
 				OTHER_LDFLAGS = "-lstdc++";
 				PRODUCT_NAME = Monal;
-				PROVISIONING_PROFILE = "C87D7BC2-2AC9-4ED4-945E-692EB563956A";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "C87D7BC2-2AC9-4ED4-945E-692EB563956A";
+				PROVISIONING_PROFILE = "b5a02c9b-9be4-465e-baf0-226f41994fd5";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "b5a02c9b-9be4-465e-baf0-226f41994fd5";
 			};
 			name = AppStore;
 		};
@@ -1483,7 +1490,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
 				CODE_SIGN_IDENTITY = "iPhone Distribution: Anurodh Pokharel (33XS7DE5NZ)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -1514,7 +1520,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
 				COPY_PHASE_STRIP = NO;
 				EXECUTABLE_PREFIX = lib;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -1545,16 +1550,17 @@
 		26E74FBD17B06D2200FD91AE /* Adhoc */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "iPhone Distribution: Anurodh Pokharel (33XS7DE5NZ)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Anurodh Pokharel (33XS7DE5NZ)";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
@@ -1568,8 +1574,8 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 5.1.1;
 				LLVM_LTO = YES;
-				PROVISIONING_PROFILE = "DCC3D5D0-2C13-42D0-B613-CD8A14A86A0E";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "DCC3D5D0-2C13-42D0-B613-CD8A14A86A0E";
+				PROVISIONING_PROFILE = "85C76911-58E8-4598-8FDE-6FFEB6E3ACFB";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "85C76911-58E8-4598-8FDE-6FFEB6E3ACFB";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -1579,12 +1585,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CLANG_ENABLE_OBJC_ARC = YES;
-				CODE_SIGN_IDENTITY = "iPhone Distribution: Anurodh Pokharel (33XS7DE5NZ)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Anurodh Pokharel (33XS7DE5NZ)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
 				DEAD_CODE_STRIPPING = NO;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -1601,8 +1606,8 @@
 				LLVM_LTO = NO;
 				OTHER_LDFLAGS = "-lstdc++";
 				PRODUCT_NAME = Monal;
-				PROVISIONING_PROFILE = "85C76911-58E8-4598-8FDE-6FFEB6E3ACFB";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "85C76911-58E8-4598-8FDE-6FFEB6E3ACFB";
+				PROVISIONING_PROFILE = "a259039a-ea09-4154-a3b7-c4fbc4028496";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "a259039a-ea09-4154-a3b7-c4fbc4028496";
 			};
 			name = Adhoc;
 		};
@@ -1610,7 +1615,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
 				CODE_SIGN_IDENTITY = "iPhone Distribution: Anurodh Pokharel (33XS7DE5NZ)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -1640,16 +1644,17 @@
 		C01FCF4F08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Anurodh Pokharel (NVHUCKM9V3)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Anurodh Pokharel (NVHUCKM9V3)";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_INPUT_FILETYPE = automatic;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
@@ -1663,8 +1668,8 @@
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				ONLY_ACTIVE_ARCH = YES;
-				PROVISIONING_PROFILE = "";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
+				PROVISIONING_PROFILE = "3AD01710-97E2-42FE-8BA4-2A639002E1AF";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "3AD01710-97E2-42FE-8BA4-2A639002E1AF";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

@@ -34,7 +34,7 @@
 -(void) viewDidAppear:(BOOL)animated
 {
     
-    
+    [super viewDidAppear:animated];
     MonalAppDelegate* appDelegate= (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
     DDFileLogger *logger=appDelegate.fileLogger;
     

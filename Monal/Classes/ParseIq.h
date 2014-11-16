@@ -19,6 +19,7 @@
 @property (nonatomic, assign, readonly) BOOL discoItems;
 @property (nonatomic, assign, readonly) BOOL roster;
 @property (nonatomic, assign, readonly) BOOL ping;
+@property (nonatomic, assign, readonly) BOOL legacyAuth;
 
 @property (nonatomic, assign, readonly) BOOL shouldSetBind;
 @property (nonatomic, strong, readonly) NSString* jid;

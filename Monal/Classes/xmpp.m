@@ -344,6 +344,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) disconnect
 {
+    if(kStateDisconnected) return;
+    
     _loginStarted=NO;
     _loginError=NO;
     _accountState=kStateDisconnected;

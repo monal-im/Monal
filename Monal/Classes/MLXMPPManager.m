@@ -409,19 +409,25 @@ withCompletionHandler:(void (^)(BOOL success)) completion
 
 -(NSString*) getNameForConnectedRow:(NSInteger) row
 {
-    NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
-    
-    xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
-    return [NSString stringWithFormat:@"%@@%@",account.username, account.server];
+    NSString *toreturn;
+    if(row<[_connectedXMPP count] && row>=0) {
+        NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
+        xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
+        toreturn= [NSString stringWithFormat:@"%@@%@",account.username, account.server];
+    }
+    return toreturn;
 }
 
 
 
 -(NSString*) idForConnectedRow:(NSInteger) row
 {
-    NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
-    
-    return [datarow objectForKey:@"account_id"];
+    NSString *toreturn;
+    if(row<[_connectedXMPP count] && row>=0) {
+        NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
+        toreturn= [datarow objectForKey:@"account_id"];
+    }
+    return toreturn;
 }
 
 
@@ -448,7 +454,7 @@ withCompletionHandler:(void (^)(BOOL success)) completion
 {
     NSNumber* row =[contact objectForKey:@"row"];
     NSInteger pos= [row integerValue];
-    if(pos<[_connectedXMPP count]) {
+    if(pos<[_connectedXMPP count] && pos>=0) {
         NSDictionary* datarow= [_connectedXMPP objectAtIndex:pos];
         xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
         if( account)

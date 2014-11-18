@@ -616,6 +616,12 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     MLChatCell* cell;
+    if(indexPath.row >=0 && indexPath.row<[_messagelist count])
+    {
+        cell =[[MLChatCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"ChatCell" andMuc:_isMUC];
+        return cell;
+    }
+    
     NSDictionary* row= [_messagelist objectAtIndex:indexPath.row];
     
     if([[row objectForKey:@"af"] isEqualToString:_jid])

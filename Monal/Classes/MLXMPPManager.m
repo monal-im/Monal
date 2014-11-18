@@ -88,7 +88,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         {
             xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
             if(xmppAccount.accountState==kStateLoggedIn) {
-                   DDLogInfo(@"began a ping");
+                DDLogInfo(@"began a ping");
                 [xmppAccount sendPing];
             }
         }
@@ -168,7 +168,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(xmpp*) getConnectedAccountForID:(NSString*) accountNo
 {
-     xmpp* toReturn=nil;
+    xmpp* toReturn=nil;
     for (NSDictionary* account in _connectedXMPP)
     {
         xmpp* xmppAccount=[account objectForKey:@"xmppAccount"];
@@ -204,11 +204,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     xmpp* existing=[self getConnectedAccountForID:[NSString stringWithFormat:@"%@",[account objectForKey:@"account_id"]]];
     if(existing)
     {
-            dispatch_async(_netQueue,
-                           ^{
-                                existing.explicitLogout=NO;
-                               [existing reconnect];
-                           });
+        dispatch_async(_netQueue,
+                       ^{
+                           existing.explicitLogout=NO;
+                           [existing reconnect];
+                       });
         
         return;
     }
@@ -247,7 +247,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         // no password error
     }
     
-
+    
     xmppAccount.contactsVC=self.contactVC;
     //sepcifically look for the server since we might not be online or behind firewall
     Reachability* hostReach = [Reachability reachabilityWithHostName:xmppAccount.server ] ;
@@ -257,13 +257,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [hostReach startNotifier];
     
     if(xmppAccount && hostReach) {
-    NSDictionary* accountRow= [[NSDictionary alloc] initWithObjects:@[xmppAccount, hostReach] forKeys:@[@"xmppAccount", @"hostReach"]];
-    [_connectedXMPP addObject:accountRow];
-    
-    
-    dispatch_async(_netQueue, ^{
-                       [xmppAccount reconnect];
-                   });
+        NSDictionary* accountRow= [[NSDictionary alloc] initWithObjects:@[xmppAccount, hostReach] forKeys:@[@"xmppAccount", @"hostReach"]];
+        [_connectedXMPP addObject:accountRow];
+        
+        
+        dispatch_async(_netQueue, ^{
+            [xmppAccount reconnect];
+        });
     }
     
 }
@@ -462,9 +462,11 @@ withCompletionHandler:(void (^)(BOOL success)) completion
 //makes xmpp call
 -(void) getRoomsForAccountRow:(NSInteger) row
 {
-    NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
-    xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
-    [account getConferenceRooms];
+    if(row<[_connectedXMPP count] && row>=0) {
+        NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
+        xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
+        [account getConferenceRooms];
+    }
     
 }
 
@@ -472,9 +474,12 @@ withCompletionHandler:(void (^)(BOOL success)) completion
 //exposes list
 -(NSArray*) getRoomsListForAccountRow:(NSInteger) row
 {
-    NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
-    xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
-    return account.roomList;
+    if(row<[_connectedXMPP count] && row>=0) {
+        NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
+        xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
+        return account.roomList;
+    }
+    else return  nil;
     
 }
 
@@ -482,17 +487,21 @@ withCompletionHandler:(void (^)(BOOL success)) completion
 
 -(void)  joinRoom:(NSString*) roomName  withPassword:(NSString*) password forAccountRow:(NSInteger) row
 {
-    NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
-    xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
-    [account joinRoom:roomName withPassword:password];
+    if(row<[_connectedXMPP count] && row>=0) {
+        NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
+        xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
+        [account joinRoom:roomName withPassword:password];
+    }
 }
 
 
 -(void)  leaveRoom:(NSString*) roomName forAccountRow:(NSInteger) row
 {
-    NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
-    xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
-    [account leaveRoom:roomName];
+    if(row<[_connectedXMPP count] && row>=0) {
+        NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
+        xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
+        [account leaveRoom:roomName];
+    }
 }
 
 -(void)  leaveRoom:(NSString*) roomName forAccountId:(NSString*) accountId

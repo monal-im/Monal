@@ -11,12 +11,11 @@ Notable features:
 * Tested heavily with google talk, facebook, openfire, prosody   and ejabberd servers. 
 
 
-2.1.3 changelog
+2.1.4 changelog
 
 This is  update that  fixes bugs.
-1. Improved connectivity and server support
-2. improved handling of netowrk outages
-3. tap to enter conversation
+1. Improved stability with numerous crash bug fixes.
+
 
 
 

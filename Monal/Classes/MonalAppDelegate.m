@@ -26,9 +26,6 @@
 
 #import <Crashlytics/Crashlytics.h>
 
-
-
-
 //xmpp
 #import "MLXMPPManager.h"
 

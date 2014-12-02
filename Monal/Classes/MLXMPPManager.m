@@ -370,8 +370,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 
 #pragma mark XMPP commands
--(void)sendMessage:(NSString*) message toContact:(NSString*)contact fromAccount:(NSString*) accountNo isMUC:(BOOL) isMUC
-withCompletionHandler:(void (^)(BOOL success)) completion
+-(void)sendMessage:(NSString*) message toContact:(NSString*)contact fromAccount:(NSString*) accountNo isMUC:(BOOL) isMUC messageId:(NSString *) messageId 
+withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 {
     dispatch_async(_netQueue,
                    ^{
@@ -380,12 +380,11 @@ withCompletionHandler:(void (^)(BOOL success)) completion
                        if(account)
                        {
                            success=YES;
-                           [account sendMessage:message toContact:contact isMUC:isMUC];
+                           [account sendMessage:message toContact:contact isMUC:isMUC andMessageId:messageId];
                        }
                        
-                       
                        if(completion)
-                           completion(success);
+                           completion(success, messageId);
                    });
 }
 

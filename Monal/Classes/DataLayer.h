@@ -143,7 +143,7 @@
 
 -(NSArray*) messageHistoryBuddies:(NSString*) accountNo;
 -(BOOL) markAsReadBuddy:(NSString*) buddy forAccount:(NSString*) accountNo;
--(BOOL) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom ;
+-(BOOL) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString *)messageId;
 
 #pragma mark active chats
 -(NSArray*) activeBuddies;

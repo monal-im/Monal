@@ -387,9 +387,11 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     if(([chatInput text]!=nil) && (![[chatInput text] isEqualToString:@""]) )
     {
         DDLogVerbose(@"Sending message");
-        [[MLXMPPManager sharedInstance] sendMessage:[chatInput text] toContact:_contactName fromAccount:_accountNo isMUC:_isMUC
+        NSUInteger r = arc4random_uniform(NSIntegerMax);
+        NSString *messageid =[NSString stringWithFormat:@"Monal%d", r];
+        [[MLXMPPManager sharedInstance] sendMessage:[chatInput text] toContact:_contactName fromAccount:_accountNo isMUC:_isMUC messageId:messageid 
                               withCompletionHandler:nil];
-        [self addMessageto:_contactName withMessage:[chatInput text]];
+        [self addMessageto:_contactName withMessage:[chatInput text] andId:messageid];
         
     }
     [chatInput setText:@""];
@@ -399,17 +401,16 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 #pragma mark message signals
 
 //always messages going out
--(void) addMessageto:(NSString*)to withMessage:(NSString*) message
+-(void) addMessageto:(NSString*)to withMessage:(NSString*) message andId:(NSString *) messageId
 {
 	if(!self.jid || !message)  {
         DDLogError(@" not ready to send messages");
         return;
     }
     
-	if([[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:_accountNo withMessage:message actuallyFrom:self.jid ])
+	if([[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:_accountNo withMessage:message actuallyFrom:self.jid withId:messageId ])
 	{
 		DDLogVerbose(@"added message");
-        
         
         dispatch_async(dispatch_get_main_queue(),
                        ^{
@@ -427,12 +428,11 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                            
                            if(![_messageTable.indexPathsForVisibleRows containsObject:path1])
                            {
-                               
                                [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:NO];
                            }
                        });
-  
-	}
+        
+    }
 	else {
 		DDLogVerbose(@"failed to add message");
     }
@@ -443,9 +443,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         [[DataLayer sharedInstance] addActiveBuddies:to forAccount:_accountNo];
         _firstmsg=NO;
 	}
-	
-    
-    
+
 }
 
 -(void) handleNewMessage:(NSNotification *)notification

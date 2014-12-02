@@ -1683,15 +1683,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 #pragma mark messaging
 
--(void) sendMessage:(NSString*) message toContact:(NSString*) contact isMUC:(BOOL) isMUC
+-(void) sendMessage:(NSString*) message toContact:(NSString*) contact isMUC:(BOOL) isMUC andMessageId:(NSString *) messageId
 {
     XMPPMessage* messageNode =[[XMPPMessage alloc] init];
     [messageNode.attributes setObject:contact forKey:@"to"];
     [messageNode setBody:message];
-    
-    NSUInteger r = arc4random_uniform(NSIntegerMax);
-    [messageNode setId: [NSString stringWithFormat:@"Monal%d", r]];
-    
+    [messageNode setId:messageId ];
+
     if(isMUC)
     {
         [messageNode.attributes setObject:kMessageGroupChatType forKey:@"type"];

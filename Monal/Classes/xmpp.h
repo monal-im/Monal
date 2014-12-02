@@ -92,7 +92,6 @@ typedef NS_ENUM (NSInteger, xmppState) {
     BOOL _hasRequestedServerInfo;
     
     BOOL _brokenServerSSL;
-
 }
 
 -(void) connect;
@@ -100,9 +99,9 @@ typedef NS_ENUM (NSInteger, xmppState) {
 
 
 /**
- send a message to a contact
+ send a message to a contact with xmpp id
  */
--(void) sendMessage:(NSString*) message toContact:(NSString*) contact isMUC:(BOOL) isMUC;
+-(void) sendMessage:(NSString*) message toContact:(NSString*) contact isMUC:(BOOL) isMUC andMessageId:(NSString *) messageId;
 
 /**
  crafts a whitepace ping and sends it

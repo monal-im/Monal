@@ -81,13 +81,9 @@ static DataLayer *sharedInstance=nil;
                         toReturn= nil;
                         break;
                     }
-                        
-                        
-                        
+                            
                 }
-                
-                
-                
+      
             } else
             {DDLogVerbose(@"return nil with no row");
                 toReturn= nil;};

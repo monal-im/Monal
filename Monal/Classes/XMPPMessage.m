@@ -17,7 +17,7 @@
     return self;
 }
 
--(void) setId:(NSString*) idval
+-(void) setXmppId:(NSString*) idval
 {
     [self.attributes setObject:idval forKey:@"id"];
 }

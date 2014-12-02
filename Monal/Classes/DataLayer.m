@@ -1103,7 +1103,7 @@ static DataLayer *sharedInstance=nil;
     // in the event it is a message from the room
     
     //all messages default to unread
-    NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, %@, '%@',  '%@', '%@', '%@', '%@',1,%d);", accountNo, from.escapeForSql, to.escapeForSql, 	dateString, message.escapeForSql, actualfrom.escapeForSql, delivered];
+    NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, %@, '%@',  '%@', '%@', '%@', '%@',1,%d,'');", accountNo, from.escapeForSql, to.escapeForSql, 	dateString, message.escapeForSql, actualfrom.escapeForSql, delivered];
 	DDLogVerbose(@"%@",query);
 	if([self executeNonQuery:query]!=NO)
 	{
@@ -1355,8 +1355,8 @@ static DataLayer *sharedInstance=nil;
 	//MEssaes_history ging out, from is always the local user. always read, never delivered
 	
 	NSArray* parts=[[[NSDate date] description] componentsSeparatedByString:@" "];
-	NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, %@, '%@',  '%@', '%@ %@', '%@', '%@',0,0);", accountNo, from.escapeForSql, to.escapeForSql,
-					 [parts objectAtIndex:0],[parts objectAtIndex:1], message.escapeForSql, actualfrom.escapeForSql];
+	NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, %@, '%@',  '%@', '%@ %@', '%@', '%@',0,0,'%@');", accountNo, from.escapeForSql, to.escapeForSql,
+					 [parts objectAtIndex:0],[parts objectAtIndex:1], message.escapeForSql, actualfrom.escapeForSql, messageId.escapeForSql];
 	
 	if([self executeNonQuery:query]!=NO)
 	{

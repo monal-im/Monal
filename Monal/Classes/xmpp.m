@@ -286,9 +286,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         DDLogInfo(@"login cancel op");
         dispatch_async(_xmppQueue, ^{
             //hide connecting message
-            NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
-                                 kinfoTypeKey:@"connect", kinfoStatusKey:@""};
-            [self.contactsVC hideConnecting:info];
+            if(_fulluser && _accountNo) {
+                NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:self.accountNo,
+                                     kinfoTypeKey:@"connect", kinfoStatusKey:@""};
+                [self.contactsVC hideConnecting:info];
+            }
             // try again
             if((self.accountState<kStateHasStream) && (_loggedInOnce))
             {

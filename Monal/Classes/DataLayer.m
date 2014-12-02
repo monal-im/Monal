@@ -1762,13 +1762,14 @@ static DataLayer *sharedInstance=nil;
         
     }
     
-    if([dbversion doubleValue]<1.4)
+    if([dbversion doubleValue]<1.41)
     {
-        DDLogVerbose(@"Database version <1.4 detected. Performing upgrade on accounts. ");
+        DDLogVerbose(@"Database version <1.41 detected. Performing upgrade on accounts. ");
         
         [self executeNonQuery:@"alter table message_history add column  delivered bool;"];
+        [self executeNonQuery:@"alter table message_history add column  messageid varchar(255);"];
         [self executeNonQuery:@"update message_history set delivered=1;"];
-        [self executeNonQuery:@"update dbversion set dbversion='1.4'; "];
+        [self executeNonQuery:@"update dbversion set dbversion='1.41'; "];
         
         
         DDLogVerbose(@"Upgrade to 1.4 success ");

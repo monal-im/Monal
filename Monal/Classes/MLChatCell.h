@@ -24,6 +24,8 @@
 @property (nonatomic, strong) UILabel* date;
 @property (nonatomic, strong) NSString* link;
 
+@property (nonatomic, assign) BOOL delivered;
+
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier andMuc:(BOOL) isMUC;
 +(CGFloat) heightForText:(NSString*) text inWidth:(CGFloat) width;
 

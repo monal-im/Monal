@@ -1162,7 +1162,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 {
                     [[DataLayer sharedInstance] addMessageFrom:messageNode.from to:_fulluser
                                                     forAccount:_accountNo withBody:messageNode.messageText
-                                                  actuallyfrom:messageNode.actualFrom];
+                                                  actuallyfrom:messageNode.actualFrom delivered:YES];
                     
                     [[DataLayer sharedInstance] addActiveBuddies:messageNode.from forAccount:_accountNo];
                     

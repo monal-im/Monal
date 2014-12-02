@@ -1081,7 +1081,7 @@ static DataLayer *sharedInstance=nil;
 
 
 #pragma mark message Commands
--(BOOL) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom
+-(BOOL) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom delivered:(BOOL) delivered
 {
     //this is always from a contact
 	NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
@@ -1102,7 +1102,8 @@ static DataLayer *sharedInstance=nil;
     NSString* dateString = [formatter stringFromDate:destinationDate];
     // in the event it is a message from the room
     
-    NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, %@, '%@',  '%@', '%@', '%@', '%@',1);", accountNo, from.escapeForSql, to.escapeForSql, 	dateString, message.escapeForSql, actualfrom.escapeForSql];
+    //all messages default to unread
+    NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, %@, '%@',  '%@', '%@', '%@', '%@',1,%d);", accountNo, from.escapeForSql, to.escapeForSql, 	dateString, message.escapeForSql, actualfrom.escapeForSql, delivered];
 	DDLogVerbose(@"%@",query);
 	if([self executeNonQuery:query]!=NO)
 	{
@@ -1116,6 +1117,18 @@ static DataLayer *sharedInstance=nil;
 	
 }
 
+-(BOOL) setMessage:(NSString*) messageNo delivered:(BOOL) delivered
+{
+    NSString* query=[NSString stringWithFormat:@"update message_history set delivered=%d message_history_id=%@",delivered, messageNo];
+    if([self executeNonQuery:query]!=NO)
+    {
+        return YES;
+    }
+    else
+    {
+        return NO;
+    }
+}
 
 
 

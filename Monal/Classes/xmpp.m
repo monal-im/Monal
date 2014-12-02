@@ -1688,7 +1688,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     XMPPMessage* messageNode =[[XMPPMessage alloc] init];
     [messageNode.attributes setObject:contact forKey:@"to"];
     [messageNode setBody:message];
-    [messageNode setId:messageId ];
+    [messageNode setXmppId:messageId ];
 
     if(isMUC)
     {
@@ -2078,18 +2078,26 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     for(XMLNode* node in _outputQueue)
     {
-        [self writeToStream:node.XMLString];
+        BOOL success=[self writeToStream:node.XMLString];
+        if(success) {
+            if([node isKindOfClass:[XMPPMessage class]])
+            {
+                XMPPMessage *messageNode = (XMPPMessage *) node;
+                [[DataLayer sharedInstance] setMessageId:messageNode.xmppId delivered:YES];
+                //probably call back to the UI too 
+            }
+        }
     }
     
     [_outputQueue removeAllObjects];
     
 }
 
--(void) writeToStream:(NSString*) messageOut
+-(BOOL) writeToStream:(NSString*) messageOut
 {
     if(!messageOut) {
         DDLogVerbose(@" tried to send empty message. returning"); 
-        return;
+        return NO;
     }
     _streamHasSpace=NO; // triggers more has space messages
     
@@ -2101,6 +2109,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     if([_oStream write:rawstring maxLength:len]!=-1)
     {
         DDLogVerbose(@"done writing ");
+        return YES;
     }
     else
     {
@@ -2108,8 +2117,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         DDLogVerbose(@"sending: failed with error %d domain %@ message %@",error.code, error.domain, error.userInfo);
     }
     
-    return;
-    
+    return NO;
 }
 
 -(void) readToBuffer

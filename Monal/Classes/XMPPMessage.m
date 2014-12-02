@@ -22,6 +22,11 @@
     [self.attributes setObject:idval forKey:@"id"];
 }
 
+-(NSString *) xmppId
+{
+    return  [self.attributes objectForKey:@"id"];
+}
+
 -(void) setBody:(NSString*) messageBody
 {
     XMLNode* body =[[XMLNode alloc] init];

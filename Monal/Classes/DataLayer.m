@@ -1117,9 +1117,9 @@ static DataLayer *sharedInstance=nil;
 	
 }
 
--(BOOL) setMessage:(NSString*) messageNo delivered:(BOOL) delivered
+-(BOOL) setMessageId:(NSString*) messageid delivered:(BOOL) delivered
 {
-    NSString* query=[NSString stringWithFormat:@"update message_history set delivered=%d message_history_id=%@",delivered, messageNo];
+    NSString* query=[NSString stringWithFormat:@"update message_history set delivered=%d messageid=%@",delivered, messageid];
     if([self executeNonQuery:query]!=NO)
     {
         return YES;

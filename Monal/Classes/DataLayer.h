@@ -125,7 +125,7 @@
 
 #pragma mark message Commands
 -(BOOL) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom delivered:(BOOL) delivered;
--(BOOL) setMessage:(NSString*) messageNo delivered:(BOOL) delivered;
+-(BOOL) setMessageId:(NSString*) messageid delivered:(BOOL) delivered;
 
 -(BOOL) clearMessages:(NSString*) accountNo;
 -(BOOL) deleteMessage:(NSString*) messageNo;

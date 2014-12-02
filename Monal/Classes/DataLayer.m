@@ -1772,7 +1772,7 @@ static DataLayer *sharedInstance=nil;
         [self executeNonQuery:@"update dbversion set dbversion='1.41'; "];
         
         
-        DDLogVerbose(@"Upgrade to 1.4 success ");
+        DDLogVerbose(@"Upgrade to 1.41 success ");
         
     }
     

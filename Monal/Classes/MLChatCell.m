@@ -115,6 +115,15 @@
     CGRect dateLabelFrame;
     if(_outBound) {
         dateLabelFrame = CGRectMake(finaltextlabelFrame.origin.x+finaltextlabelFrame.size.width-datewidth-10, 3, datewidth, kNameLabelHeight);
+        
+        if(self.deliveryFailed) {
+            self.retry = [UIButton buttonWithType:UIButtonTypeInfoLight];
+            CGRect frame =self.retry.frame;
+            frame.origin.x=5;
+            frame.origin.y=(textLabelFrame.size.height- frame.size.height)/2;
+            self.retry.frame=frame;
+            [self.contentView insertSubview:self.retry aboveSubview:_bubbleImage];
+        }
     }
     else {
         dateLabelFrame = CGRectMake(finaltextlabelFrame.origin.x+finaltextlabelFrame.size.width-datewidth-5, 3, datewidth, kNameLabelHeight);

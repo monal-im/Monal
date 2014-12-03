@@ -642,6 +642,10 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         cell.name.text=[row objectForKey:@"af"];
     }
     
+    if([[row objectForKey:@"delivered"] boolValue]!=YES)
+    {
+        cell.deliveryFailed=YES;
+    }
     
     cell.date.text= [self formattedDateWithSource:[row objectForKey:@"thetime"]];
     

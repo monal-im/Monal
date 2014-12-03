@@ -121,7 +121,10 @@
             self.retry = [UIButton buttonWithType:UIButtonTypeSystem];
             [self.retry setImage:[UIImage imageNamed:@"724-info"]  forState:UIControlStateNormal];
             self.retry.tintColor=[UIColor redColor];
-           
+            self.retry.tag= [self.messageHistoryId integerValue];
+            if([self.parent respondsToSelector:@selector(retry:)]) {
+                [self.retry addTarget:self.parent action:@selector(retry:) forControlEvents:UIControlEventTouchUpInside];
+            }
             CGRect frame =self.retry.frame;
             frame.size.height=32;
             frame.size.width=32;

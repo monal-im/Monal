@@ -27,6 +27,8 @@
 
 @property (nonatomic, assign) BOOL deliveryFailed;
 @property (nonatomic, strong) UIButton* retry;
+@property (nonatomic, strong) NSNumber* messageHistoryId;
+@property (nonatomic, weak) UIViewController *parent;
 
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier andMuc:(BOOL) isMUC;
 +(CGFloat) heightForText:(NSString*) text inWidth:(CGFloat) width;

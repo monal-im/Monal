@@ -587,6 +587,25 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 }
 
 
+
+-(void) retry:(id) sender
+{
+    if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0"))
+    {
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Retry sending message?" message:@"It is possible this message may have failed to send." preferredStyle:UIAlertControllerStyleActionSheet];
+        [alert addAction:[UIAlertAction actionWithTitle:@"Retry" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+            
+        }]];
+        [alert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+            [self dismissViewControllerAnimated:YES completion:nil];
+        }]];
+        [self presentViewController:alert animated:YES completion:nil];
+    }
+    else{
+    
+    }
+}
+
 #pragma mark tableview datasource
 
 -(NSInteger) numberOfSectionsInTableView:(UITableView *)tableView
@@ -646,6 +665,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     {
         cell.deliveryFailed=YES;
     }
+    
+    cell.messageHistoryId=[row objectForKey:@"message_history_id"];
+    cell.parent= self;
     
     cell.date.text= [self formattedDateWithSource:[row objectForKey:@"thetime"]];
     

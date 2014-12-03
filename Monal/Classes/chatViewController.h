@@ -74,6 +74,7 @@
 -(void) keyboardWillShow:(NSNotification *) note;
 -(void) keyboardWillHide:(NSNotification *) note;
 
+-(void) retry:(id) sender;
 
 //content generation 
 //-(NSString*) makeMessageHTMLfrom:(NSString*) from withMessage:(NSString*) themessage andTime:(NSString*) time isLive:(BOOL) liveChat;

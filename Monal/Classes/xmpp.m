@@ -2084,6 +2084,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             {
                 XMPPMessage *messageNode = (XMPPMessage *) node;
                 [[DataLayer sharedInstance] setMessageId:messageNode.xmppId delivered:YES];
+                 DDLogVerbose(@"setting message id %@ delivered",messageNode.xmppId );
                 //probably call back to the UI too 
             }
         }

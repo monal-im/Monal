@@ -377,6 +377,16 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 #pragma mark textview
 
+-(void) sendMessage:(NSString *) messageText
+{
+    DDLogVerbose(@"Sending message");
+    NSUInteger r = arc4random_uniform(NSIntegerMax);
+    NSString *messageid =[NSString stringWithFormat:@"Monal%d", r];
+    [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:_contactName fromAccount:_accountNo isMUC:_isMUC messageId:messageid
+                          withCompletionHandler:nil];
+    [self addMessageto:_contactName withMessage:messageText andId:messageid];
+}
+
 -(void)resignTextView
 {
     self.blockAnimations=YES;
@@ -386,12 +396,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     
     if(([chatInput text]!=nil) && (![[chatInput text] isEqualToString:@""]) )
     {
-        DDLogVerbose(@"Sending message");
-        NSUInteger r = arc4random_uniform(NSIntegerMax);
-        NSString *messageid =[NSString stringWithFormat:@"Monal%d", r];
-        [[MLXMPPManager sharedInstance] sendMessage:[chatInput text] toContact:_contactName fromAccount:_accountNo isMUC:_isMUC messageId:messageid 
-                              withCompletionHandler:nil];
-        [self addMessageto:_contactName withMessage:[chatInput text] andId:messageid];
+        [self sendMessage:[chatInput text] ];
         
     }
     [chatInput setText:@""];
@@ -590,11 +595,13 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void) retry:(id) sender
 {
+    NSInteger historyId = ((UIButton*) sender).tag;
     if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0"))
     {
         UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Retry sending message?" message:@"It is possible this message may have failed to send." preferredStyle:UIAlertControllerStyleActionSheet];
         [alert addAction:[UIAlertAction actionWithTitle:@"Retry" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
-            
+            NSString *messageText =[[DataLayer sharedInstance] messageForHistoryID:historyId];
+            [self sendMessage:messageText];
         }]];
         [alert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
             [self dismissViewControllerAnimated:YES completion:nil];

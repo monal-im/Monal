@@ -1077,6 +1077,14 @@ static DataLayer *sharedInstance=nil;
 
 
 #pragma mark message Commands
+
+-(NSString *) messageForHistoryID:(NSInteger) historyID
+{
+    NSString* query=[NSString stringWithFormat:@"select message from message_history  where message_history_id=%ld", (long)historyID];
+    NSString* message= (NSString*)[self executeScalar:query];
+    return message;
+}
+
 -(BOOL) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom delivered:(BOOL) delivered
 {
     //this is always from a contact

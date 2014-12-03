@@ -67,7 +67,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     _connectedXMPP=[[NSMutableArray alloc] init];
     _passwordDic = [[NSMutableDictionary alloc] init];
-    _netQueue = dispatch_queue_create(kMonalNetQueue, DISPATCH_QUEUE_CONCURRENT);
+    _netQueue = dispatch_queue_create(kMonalNetQueue, DISPATCH_QUEUE_SERIAL);
     
     [self defaultSettings];
     

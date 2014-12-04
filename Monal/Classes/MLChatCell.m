@@ -62,6 +62,23 @@
             
         }
         
+        self.retry = [UIButton buttonWithType:UIButtonTypeSystem];
+        [self.retry setImage:[UIImage imageNamed:@"724-info"]  forState:UIControlStateNormal];
+        self.retry.tintColor=[UIColor redColor];
+        self.retry.tag= [self.messageHistoryId integerValue];
+        if([self.parent respondsToSelector:@selector(retry:)]) {
+            [self.retry addTarget:self.parent action:@selector(retry:) forControlEvents:UIControlEventTouchUpInside];
+        }
+        CGRect frame =self.retry.frame;
+        frame.size.height=32;
+        frame.size.width=32;
+        frame.origin.x=8;
+        frame.origin.y=8;
+        
+        self.retry.frame=frame;
+        [self.contentView insertSubview:self.retry aboveSubview:_bubbleImage];
+        self.retry.hidden=YES;
+        
     }
     return self;
 }
@@ -118,21 +135,10 @@
         dateLabelFrame = CGRectMake(finaltextlabelFrame.origin.x+finaltextlabelFrame.size.width-datewidth-10, 3, datewidth, kNameLabelHeight);
         
         if(self.deliveryFailed) {
-            self.retry = [UIButton buttonWithType:UIButtonTypeSystem];
-            [self.retry setImage:[UIImage imageNamed:@"724-info"]  forState:UIControlStateNormal];
-            self.retry.tintColor=[UIColor redColor];
-            self.retry.tag= [self.messageHistoryId integerValue];
-            if([self.parent respondsToSelector:@selector(retry:)]) {
-                [self.retry addTarget:self.parent action:@selector(retry:) forControlEvents:UIControlEventTouchUpInside];
-            }
-            CGRect frame =self.retry.frame;
-            frame.size.height=32;
-            frame.size.width=32;
-            frame.origin.x=5;
-            frame.origin.y=(textLabelFrame.size.height- frame.size.height)/2;
-            
-            self.retry.frame=frame;
-            [self.contentView insertSubview:self.retry aboveSubview:_bubbleImage];
+            self.retry.hidden=NO;
+        }
+        else{
+            self.retry.hidden=YES;
         }
     }
     else {

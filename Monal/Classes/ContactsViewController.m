@@ -855,14 +855,19 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     [tableView deselectRowAtIndexPath:indexPath animated:NO];
     
     NSMutableDictionary* row;
-    if((indexPath.section==konlineSection))
+    if(indexPath.section==kinfoSection)
     {
-        row=[_contacts objectAtIndex:indexPath.row];
+        return;
     }
-    else if (indexPath.section==kofflineSection)
-    {
-        row= [_offlineContacts objectAtIndex:indexPath.row];
-    }
+    else
+        if((indexPath.section==konlineSection))
+        {
+            row=[_contacts objectAtIndex:indexPath.row];
+        }
+        else if (indexPath.section==kofflineSection)
+        {
+            row= [_offlineContacts objectAtIndex:indexPath.row];
+        }
     
     [row setObject:[NSNumber numberWithInt:0] forKey:@"count"];
     

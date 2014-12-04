@@ -348,10 +348,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     if(kStateDisconnected) return;
     
-    _loginStarted=NO;
-    _loginError=NO;
-    _accountState=kStateDisconnected;
-    
     self.pingID=nil;
     DDLogInfo(@"removing streams");
     
@@ -397,12 +393,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
 	DDLogInfo(@"Connections closed");
 	
-	DDLogInfo(@"All closed and cleaned up");
-    
     _startTLSComplete=NO;
     _streamHasSpace=NO;
+    _loginStarted=NO;
+    _loginError=NO;
+    _accountState=kStateDisconnected;
     
-  
+	DDLogInfo(@"All closed and cleaned up");
+    
+
     
     //for good measure
     NSString* user=_fulluser;
@@ -486,6 +485,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     if (reconnectBackgroundTask != UIBackgroundTaskInvalid) {
         if(_accountState>=kStateReconnecting) {
+             DDLogInfo(@" account sate >=reconencting, disconnecting first" );
             [self disconnect];
         }
         
@@ -507,6 +507,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     reconnectBackgroundTask=UIBackgroundTaskInvalid;
                 }
             });
+        } else  {
+            DDLogInfo(@"reconnect scheduled already" );
         }
     }
     

@@ -70,8 +70,8 @@
             [self.retry addTarget:self.parent action:@selector(retry:) forControlEvents:UIControlEventTouchUpInside];
         }
         CGRect frame =self.retry.frame;
-        frame.size.height=32;
-        frame.size.width=32;
+        frame.size.height=28;
+        frame.size.width=28;
         frame.origin.x=8;
         frame.origin.y=8;
         

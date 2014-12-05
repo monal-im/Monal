@@ -39,7 +39,10 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
         if([elementName isEqualToString:@"status"])
         {
             if(!self.statusCodes) self.statusCodes=[[NSMutableArray alloc] init];
-            [self.statusCodes addObject:[attributeDict objectForKey:@"code"]];
+            NSString * code= [attributeDict objectForKey:@"code"];
+            if(code) {
+                [self.statusCodes addObject:[attributeDict objectForKey:@"code"]];
+            }
         }
     }
     else {

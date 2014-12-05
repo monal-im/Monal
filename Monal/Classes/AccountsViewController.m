@@ -10,9 +10,11 @@
 #import "DataLayer.h"
 #import "XMPPEdit.h"
 #import "tools.h"
+#import "MBProgressHUD.h"
 
 
 @interface AccountsViewController ()
+@property (nonatomic , strong) MBProgressHUD *hud;
 
 @end
 
@@ -69,12 +71,25 @@
 
 -(void) connectIfNecessary
 {
+    
+    self.hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+    self.hud.removeFromSuperViewOnHide=YES;
+    self.hud.labelText =@"Reconnecting";
+    self.hud.detailsLabelText =@"Will connect any logged out accounts.";
     [[MLXMPPManager sharedInstance] connectIfNecessary];
+    [self.hud hide:YES afterDelay:3.0f];
+    self.hud=nil;
 }
 
 -(void) logoutAll
 {
+    self.hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+    self.hud.removeFromSuperViewOnHide=YES;
+    self.hud.labelText =@"Logging out all accounts";
+    self.hud.detailsLabelText =@"Tap Reconnect to log everything back in.";
     [[MLXMPPManager sharedInstance] logoutAll];
+    [self.hud hide:YES afterDelay:3.0f];
+    self.hud=nil;
 }
 
 #pragma mark memory management

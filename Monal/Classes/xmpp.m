@@ -330,9 +330,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         {
             if(!_reconnectScheduled)
             {
-            _reconnectScheduled=YES;
+            _loginStarted=NO;
              DDLogInfo(@"login client does not have stream");
-            [self disconnect];
             _accountState=kStateReconnecting;
             [self reconnect];
             }
@@ -493,20 +492,20 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         if(!_loggedInOnce) {
             wait=0;
         }
-
+        
         if(!_reconnectScheduled)
         {
             _reconnectScheduled=YES;
-            DDLogInfo(@"Trying to connect again in %f seconds. ", wait);
+             DDLogInfo(@"Trying to connect again in %f seconds. ", wait);
             dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, wait * NSEC_PER_SEC), q_background,  ^{
-                //there may be another login operation freom reachability or another timer
-                if(self.accountState<kStateReconnecting) {
-                    [self connect];
-                    [[UIApplication sharedApplication] endBackgroundTask:reconnectBackgroundTask];
-                    reconnectBackgroundTask=UIBackgroundTaskInvalid;
-                }
-            });
+            //there may be another login operation freom reachability or another timer
+            if(self.accountState<kStateReconnecting) {
+                [self connect];
+                [[UIApplication sharedApplication] endBackgroundTask:reconnectBackgroundTask];
+                reconnectBackgroundTask=UIBackgroundTaskInvalid;
+            }
+             });
         } else  {
             DDLogInfo(@"reconnect scheduled already" );
         }
@@ -2018,8 +2017,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             {
                 DDLogInfo(@"setting broke ssl. retrying");
                 _brokenServerSSL=YES;
-                
-                [self disconnect];
+                _loginStarted=NO;
                 _accountState=kStateReconnecting;
                 [self reconnect];
                 
@@ -2032,8 +2030,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 DDLogInfo(@" stream error calling reconnect");
                 // login process has its own reconnect mechanism 
                 if(self.accountState==kStateLoggedIn ) {
-                     [self disconnect];
                       _accountState=kStateReconnecting;
+                      _loginStarted=NO;
                     [self reconnect];
                 }
             }
@@ -2059,8 +2057,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		case NSStreamEventEndEncountered:
 		{
 			DDLogInfo(@"%@ Stream end encoutered", [stream class] );
-            [self disconnect];
             _accountState=kStateReconnecting;
+            _loginStarted=NO;
             [self reconnect];
 			break;
 		}

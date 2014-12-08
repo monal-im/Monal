@@ -242,7 +242,11 @@ Decline a call request
 
 
 //UI
-@property (nonatomic,weak) ContactsViewController* contactsVC; 
+@property (nonatomic,weak) ContactsViewController* contactsVC;
+
+
+FOUNDATION_EXPORT NSString *const kMessageId;
+FOUNDATION_EXPORT NSString *const kSendTimer;
 
 
 @end

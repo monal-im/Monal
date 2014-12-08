@@ -395,8 +395,8 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
                            int counter=0;
                            int removalCounter=-1;
                            for(NSDictionary *dic in  self.timerList) {
-                               if([dic objectForKey:@"timer"] == sendTimer) {
-                                   [[DataLayer sharedInstance] setMessageId:[dic objectForKey:@"messageID"] delivered:NO];
+                               if([dic objectForKey:kSendTimer] == sendTimer) {
+                                   [[DataLayer sharedInstance] setMessageId:[dic objectForKey:kMessageId] delivered:NO];
                                    removalCounter=counter;
                                    break;
                                }
@@ -415,7 +415,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
                        });
                        
                        dispatch_resume(sendTimer);
-                       NSDictionary *dic = @{@"timer":sendTimer,@"messageID":messageId};
+                       NSDictionary *dic = @{kSendTimer:sendTimer,kMessageId:messageId};
                        [self.timerList addObject:dic];
                        
                        BOOL success=NO;
@@ -623,16 +623,16 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 {
 
     NSDictionary *info = notification.userInfo;
-    NSString *messageId = [info objectForKey:@"messageID"];
+    NSString *messageId = [info objectForKey:kMessageId];
     DDLogInfo(@"message %@ sent, removing timer",messageId);
     
     int counter=0;
     int removalCounter=-1;
     for (NSDictionary * dic in self.timerList)
     {
-        if([[dic objectForKey:@"messageID"] isEqualToString:messageId])
+        if([[dic objectForKey:kMessageId] isEqualToString:messageId])
         {
-            dispatch_source_t sendTimer = [dic objectForKey:@"timer"];
+            dispatch_source_t sendTimer = [dic objectForKey:kSendTimer];
             dispatch_source_cancel(sendTimer);
             removalCounter=counter;
             break;

@@ -33,6 +33,9 @@
 
 #define kConnectTimeout 20ull //seconds
 
+NSString *const kMessageId=@"MessageID";
+NSString *const kSendTimer=@"SendTimer";
+
 static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 @interface xmpp()
@@ -2080,7 +2083,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             if([node isKindOfClass:[XMPPMessage class]])
             {
                 XMPPMessage *messageNode = (XMPPMessage *) node;
-                NSDictionary *dic =@{@"messageId":messageNode.xmppId};
+                NSDictionary *dic =@{kMessageId:messageNode.xmppId};
                 [[NSNotificationCenter defaultCenter] postNotificationName: kMonalSentMessageNotice object: dic];
                 
             }

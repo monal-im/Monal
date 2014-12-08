@@ -494,7 +494,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         if([[rowDic objectForKey:kMessageId] isEqualToString:[dic objectForKey:kMessageId]]) {
             [rowDic setObject:@NO forKey:@"delivered"];
             NSIndexPath *indexPath =[NSIndexPath indexPathForRow:row inSection:0];
-            [_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+            });
             break;
         }
         row++;

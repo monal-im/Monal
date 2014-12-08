@@ -423,7 +423,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                        ^{
                            NSDictionary* userInfo = @{@"af": self.jid,
                                                       @"message": message ,
-                                                      @"thetime": [self currentGMTTime] };
+                                                      @"thetime": [self currentGMTTime],
+                                                      @"delivered":@YES};
                            [_messagelist addObject:userInfo];
                            
                            [_messageTable beginUpdates];

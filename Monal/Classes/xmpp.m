@@ -2084,7 +2084,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             {
                 XMPPMessage *messageNode = (XMPPMessage *) node;
                 NSDictionary *dic =@{kMessageId:messageNode.xmppId};
-                [[NSNotificationCenter defaultCenter] postNotificationName: kMonalSentMessageNotice object: dic];
+                [[NSNotificationCenter defaultCenter] postNotificationName: kMonalSentMessageNotice object:self userInfo:dic];
                 
             }
         }

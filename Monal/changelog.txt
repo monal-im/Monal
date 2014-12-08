@@ -14,10 +14,10 @@ Notable features:
 2.1.4 changelog
 
 This is  update that  fixes bugs.
-1. Improved stability with numerous crash bug fixes.
-
-
-
+1. Added inidcator if message failed to send and retry buttons
+2. Improved stability with numerous crash bug fixes.
+3. Improved connectivity when moving between cells
+4. Minimim supported version is iOS6
 
 
 

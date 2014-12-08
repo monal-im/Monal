@@ -392,6 +392,21 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
                        
                        dispatch_source_set_event_handler(sendTimer, ^{
                            DDLogError(@"send message  timed out");
+                           int counter=0;
+                           int removalCounter=-1;
+                           for(NSDictionary *dic in  self.timerList) {
+                               if([dic objectForKey:@"timer"] == sendTimer) {
+                                   [[DataLayer sharedInstance] setMessageId:[dic objectForKey:@"messageID"] delivered:NO];
+                                   removalCounter=counter;
+                                   break;
+                               }
+                               counter++;
+                           }
+                           
+                           if(removalCounter>=0) {
+                               [self.timerList removeObjectAtIndex:removalCounter];
+                           }
+                           
                            dispatch_source_cancel(sendTimer);
                        });
                        
@@ -401,6 +416,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
                        
                        dispatch_resume(sendTimer);
                        NSDictionary *dic = @{@"timer":sendTimer,@"messageID":messageId};
+                       [self.timerList addObject:dic];
                        
                        BOOL success=NO;
                        xmpp* account=[self getConnectedAccountForID:accountNo];
@@ -605,18 +621,39 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 
 -(void) handleSentMessage:(NSNotification *)notification
 {
+
     NSDictionary *info = notification.userInfo;
     NSString *messageId = [info objectForKey:@"messageID"];
-
+    DDLogInfo(@"message %@ sent, removing timer",messageId);
+    
+    int counter=0;
+    int removalCounter=-1;
     for (NSDictionary * dic in self.timerList)
     {
         if([[dic objectForKey:@"messageID"] isEqualToString:messageId])
         {
-            //get timer and cancel
-            //[dic objectForKey:@"timer"]
+            dispatch_source_t sendTimer = [dic objectForKey:@"timer"];
+            dispatch_source_cancel(sendTimer);
+            removalCounter=counter;
+            break;
         }
+        counter++;
     }
     
+    if(removalCounter>=0) {
+        [self.timerList removeObjectAtIndex:removalCounter];
+    }
+}
+
+#pragma mark - properties
+
+-(NSMutableArray *)timerList
+{
+    if(!_timerList)
+    {
+        _timerList=[[NSMutableArray alloc] init];
+    }
+    return  _timerList;
 }
 
 

@@ -11,7 +11,7 @@ Notable features:
 * Tested heavily with google talk, facebook, openfire, prosody   and ejabberd servers. 
 
 
-2.1.4 changelog
+2.2 changelog
 
 This is  update that  fixes bugs.
 1. Added inidcator if message failed to send and retry buttons

@@ -487,6 +487,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         if(_accountState>=kStateReconnecting) {
              DDLogInfo(@" account sate >=reconencting, disconnecting first" );
             [self disconnect];
+             _loginStarted=YES;
         }
         
         NSTimeInterval wait=5;

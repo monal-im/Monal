@@ -245,6 +245,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
     [nc addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
+ //   [nc addObserver:self selector:@selector(handleSendFailedMessage:) name:kMonalSendFailedMessageNotice object:nil];
+    
     [nc addObserver:self selector:@selector(handleTap) name:UIApplicationDidEnterBackgroundNotification object:nil];
 	[nc addObserver:self selector:@selector(keyboardWillShow:) name: UIKeyboardWillShowNotification object:nil];
 	[nc addObserver:self selector:@selector(keyboardWillHide:) name: UIKeyboardWillHideNotification object:nil];
@@ -450,6 +452,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 	}
 
 }
+
+#pragma mark -- handling notfications
 
 -(void) handleNewMessage:(NSNotification *)notification
 {

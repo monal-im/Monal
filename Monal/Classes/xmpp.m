@@ -207,7 +207,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     dispatch_source_set_cancel_handler(streamTimer, ^{
         DDLogError(@"stream timer cancelled");
-        dispatch_release(streamTimer);
     });
     
     dispatch_resume(streamTimer);
@@ -336,7 +335,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             [self reconnect];
             }
         }
-        dispatch_release(loginCancelOperation);
     });
     
     dispatch_resume(loginCancelOperation);
@@ -583,8 +581,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     });
     
     dispatch_source_set_cancel_handler(pingTimeOut, ^{
-        DDLogInfo(@"ping timer cancelled");
-        dispatch_release(pingTimeOut);
+        DDLogInfo(@"ping timer cancelled"); 
     });
     
     dispatch_resume(pingTimeOut);
@@ -2083,9 +2080,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             if([node isKindOfClass:[XMPPMessage class]])
             {
                 XMPPMessage *messageNode = (XMPPMessage *) node;
-                [[DataLayer sharedInstance] setMessageId:messageNode.xmppId delivered:YES];
-                 DDLogVerbose(@"setting message id %@ delivered",messageNode.xmppId );
-                //probably call back to the UI too 
+                NSDictionary *dic =@{@"messageId":messageNode.xmppId};
+                [[NSNotificationCenter defaultCenter] postNotificationName: kMonalSentMessageNotice object: dic];
+                
             }
         }
     }

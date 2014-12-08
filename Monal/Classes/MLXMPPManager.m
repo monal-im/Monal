@@ -20,9 +20,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
  */
 @property (nonatomic, strong) NSMutableDictionary *passwordDic;
 /**
- convenience functin getting account in connected array with account number/id matching
+ convenience function getting account in connected array with account number/id matching
  */
 -(xmpp*) getConnectedAccountForID:(NSString*) accountNo;
+
+/**
+An array of Dics what have timers to make sure everything was sent
+ */
+@property (nonatomic, strong) NSMutableArray *timerList;
+
 @end
 
 
@@ -97,7 +103,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     dispatch_source_set_cancel_handler(_pinger, ^{
         DDLogInfo(@"pinger canceled");
-        dispatch_release(_pinger);
     });
     
     dispatch_resume(_pinger);
@@ -105,6 +110,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleSentMessage:) name:kMonalSentMessageNotice object:nil];
     
     return self;
 }
@@ -375,6 +381,27 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 {
     dispatch_async(_netQueue,
                    ^{
+                       dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+                       dispatch_source_t sendTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,q_background
+                                                                              );
+                       
+                       dispatch_source_set_timer(sendTimer,
+                                                 dispatch_time(DISPATCH_TIME_NOW, 5ull * NSEC_PER_SEC),
+                                                 1ull * NSEC_PER_SEC
+                                                 , 1ull * NSEC_PER_SEC);
+                       
+                       dispatch_source_set_event_handler(sendTimer, ^{
+                           DDLogError(@"send message  timed out");
+                           dispatch_source_cancel(sendTimer);
+                       });
+                       
+                       dispatch_source_set_cancel_handler(sendTimer, ^{
+                           DDLogError(@"send message timer cancelled");
+                       });
+                       
+                       dispatch_resume(sendTimer);
+                       NSDictionary *dic = @{@"timer":sendTimer,@"messageID":messageId};
+                       
                        BOOL success=NO;
                        xmpp* account=[self getConnectedAccountForID:accountNo];
                        if(account)
@@ -575,6 +602,22 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
     [appDelegate updateUnread];
 }
 
+
+-(void) handleSentMessage:(NSNotification *)notification
+{
+    NSDictionary *info = notification.userInfo;
+    NSString *messageId = [info objectForKey:@"messageID"];
+
+    for (NSDictionary * dic in self.timerList)
+    {
+        if([[dic objectForKey:@"messageID"] isEqualToString:messageId])
+        {
+            //get timer and cancel
+            //[dic objectForKey:@"timer"]
+        }
+    }
+    
+}
 
 
 @end

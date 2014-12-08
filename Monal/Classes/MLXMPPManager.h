@@ -146,4 +146,10 @@ Returns the name of the conencted account
 
 -(void) resetForeground;
 
+/**
+ updates delivery status after message has been sent
+ */
+-(void) handleSentMessage:(NSNotification *)notification;
+
+
 @end

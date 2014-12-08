@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "ContactsViewController.h"
 #import "Reachability.h"
+#import "xmpp.h"
 
 
 #define kMonalNetQueue "im.monal.netQueue"

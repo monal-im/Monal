@@ -405,7 +405,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 }
 
 
-#pragma mark message signals
+#pragma mark - handling notfications
 
 //always messages going out
 -(void) addMessageto:(NSString*)to withMessage:(NSString*) message andId:(NSString *) messageId
@@ -424,8 +424,10 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                            NSDictionary* userInfo = @{@"af": self.jid,
                                                       @"message": message ,
                                                       @"thetime": [self currentGMTTime],
-                                                      @"delivered":@YES};
-                           [_messagelist addObject:userInfo];
+                                                      @"delivered":@YES,
+                                                             kMessageId: messageId
+                                                             };
+                           [_messagelist addObject:[userInfo mutableCopy]];
                            
                            [_messageTable beginUpdates];
                            NSIndexPath *path1 = [NSIndexPath indexPathForRow:[_messagelist count]-1  inSection:0];
@@ -453,8 +455,6 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 	}
 
 }
-
-#pragma mark -- handling notfications
 
 -(void) handleNewMessage:(NSNotification *)notification
 {
@@ -487,7 +487,18 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void) handleSendFailedMessage:(NSNotification *)notification
 {
-    
+    NSDictionary *dic =notification.userInfo;
+    int row=0;
+    for(NSMutableDictionary *rowDic in _messagelist)
+    {
+        if([[rowDic objectForKey:kMessageId] isEqualToString:[dic objectForKey:kMessageId]]) {
+            [rowDic setObject:@NO forKey:@"delivered"];
+            NSIndexPath *indexPath =[NSIndexPath indexPathForRow:row inSection:0];
+            [_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+            break;
+        }
+        row++;
+    }
 }
 
 #pragma mark MUC display elements

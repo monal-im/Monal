@@ -664,7 +664,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     MLChatCell* cell;
     if(indexPath.row <0 || indexPath.row>=[_messagelist count])
     {
-        cell =[[MLChatCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"ChatCell" andMuc:_isMUC];
+        cell =[[MLChatCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"ChatCell"  Muc:_isMUC andParent:self];
         return cell;
     }
     
@@ -681,7 +681,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     
     if(!cell)
     {
-        cell =[[MLChatCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"ChatCell" andMuc:_isMUC];
+        cell =[[MLChatCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"ChatCell"  Muc:_isMUC andParent:self];
     }
     
     if(_isMUC)

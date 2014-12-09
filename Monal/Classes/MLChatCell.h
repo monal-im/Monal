@@ -30,7 +30,7 @@
 @property (nonatomic, strong) NSNumber* messageHistoryId;
 @property (nonatomic, weak) UIViewController *parent;
 
-- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier andMuc:(BOOL) isMUC;
+- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier Muc:(BOOL) isMUC andParent:(UIViewController*) parent;
 +(CGFloat) heightForText:(NSString*) text inWidth:(CGFloat) width;
 
 -(void) openlink: (id) sender;

@@ -26,9 +26,10 @@
     return calcSize.height+15;
 }
 
-- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier andMuc:(BOOL) isMUC
+- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier Muc:(BOOL) isMUC andParent:(UIViewController*) parent
 {
     self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+    self.parent=parent;
     if (self) {
         // Initialization code
         self.MUC=isMUC;

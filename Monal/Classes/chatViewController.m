@@ -246,6 +246,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
     [nc addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
     [nc addObserver:self selector:@selector(handleSendFailedMessage:) name:kMonalSendFailedMessageNotice object:nil];
+    [nc addObserver:self selector:@selector(handleSentMessage:) name:kMonalSentMessageNotice object:nil];
+    
     
     [nc addObserver:self selector:@selector(handleTap) name:UIApplicationDidEnterBackgroundNotification object:nil];
 	[nc addObserver:self selector:@selector(keyboardWillShow:) name: UIKeyboardWillShowNotification object:nil];
@@ -496,14 +498,13 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     }
 }
 
--(void) handleSendFailedMessage:(NSNotification *)notification
+-(void) setMessageId:(NSString *) messageId delivered:(BOOL) delivered
 {
-    NSDictionary *dic =notification.userInfo;
     int row=0;
     for(NSMutableDictionary *rowDic in _messagelist)
     {
-        if([[rowDic objectForKey:kMessageId] isEqualToString:[dic objectForKey:kMessageId]]) {
-            [rowDic setObject:@NO forKey:@"delivered"];
+        if([[rowDic objectForKey:@"messageid"] isEqualToString:messageId]) {
+            [rowDic setObject:[NSNumber numberWithBool:delivered] forKey:@"delivered"];
             NSIndexPath *indexPath =[NSIndexPath indexPathForRow:row inSection:0];
             dispatch_async(dispatch_get_main_queue(), ^{
                 [_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
@@ -512,6 +513,19 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         }
         row++;
     }
+
+}
+
+-(void) handleSendFailedMessage:(NSNotification *)notification
+{
+    NSDictionary *dic =notification.userInfo;
+    [self setMessageId:[dic objectForKey:kMessageId]  delivered:NO];
+}
+
+-(void) handleSentMessage:(NSNotification *)notification
+{
+    NSDictionary *dic =notification.userInfo;
+    [self setMessageId:[dic objectForKey:kMessageId]  delivered:YES];
 }
 
 #pragma mark MUC display elements

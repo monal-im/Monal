@@ -624,6 +624,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 
     NSDictionary *info = notification.userInfo;
     NSString *messageId = [info objectForKey:kMessageId];
+    [[DataLayer sharedInstance] setMessageId:messageId delivered:YES];
     DDLogInfo(@"message %@ sent, removing timer",messageId);
     
     int counter=0;

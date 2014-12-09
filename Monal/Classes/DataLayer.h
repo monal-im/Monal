@@ -124,7 +124,7 @@
 -(BOOL) disableEnabledAccount:(NSString*) accountNo;
 
 #pragma mark message Commands
--(NSString *) messageForHistoryID:(NSInteger) historyID;
+-(NSArray *) messageForHistoryID:(NSInteger) historyID;
 
 -(BOOL) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom delivered:(BOOL) delivered;
 -(BOOL) setMessageId:(NSString*) messageid delivered:(BOOL) delivered;

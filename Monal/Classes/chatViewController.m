@@ -378,15 +378,26 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 
 #pragma mark textview
-
 -(void) sendMessage:(NSString *) messageText
+{
+    [self sendMessage:messageText andMessageID:nil];
+}
+
+-(void) sendMessage:(NSString *) messageText andMessageID:(NSString *)messageID
 {
     DDLogVerbose(@"Sending message");
     NSUInteger r = arc4random_uniform(NSIntegerMax);
-    NSString *messageid =[NSString stringWithFormat:@"Monal%d", r];
-    [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:_contactName fromAccount:_accountNo isMUC:_isMUC messageId:messageid
+    NSString *newMessageID =messageID;
+    if(!newMessageID) {
+        newMessageID=[NSString stringWithFormat:@"Monal%d", r];
+    }
+    [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:_contactName fromAccount:_accountNo isMUC:_isMUC messageId:newMessageID
                           withCompletionHandler:nil];
-    [self addMessageto:_contactName withMessage:messageText andId:messageid];
+    
+    //dont readd it, use the exisitng
+    if(!messageID) {
+        [self addMessageto:_contactName withMessage:messageText andId:newMessageID];
+    }
 }
 
 -(void)resignTextView
@@ -622,8 +633,11 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     {
         UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Retry sending message?" message:@"It is possible this message may have failed to send." preferredStyle:UIAlertControllerStyleActionSheet];
         [alert addAction:[UIAlertAction actionWithTitle:@"Retry" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
-            NSString *messageText =[[DataLayer sharedInstance] messageForHistoryID:historyId];
-            [self sendMessage:messageText];
+            NSArray *messageArray =[[DataLayer sharedInstance] messageForHistoryID:historyId];
+            if([messageArray count]>0) {
+                NSDictionary *dic= [messageArray objectAtIndex:0];
+                [self sendMessage:[dic objectForKey:@"message"] andMessageID:[dic objectForKey:@"messageid"]];
+            }
         }]];
         [alert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
             [self dismissViewControllerAnimated:YES completion:nil];
@@ -696,8 +710,6 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     }
     
     cell.messageHistoryId=[row objectForKey:@"message_history_id"];
-    cell.parent= self;
-    
     cell.date.text= [self formattedDateWithSource:[row objectForKey:@"thetime"]];
     
     NSString* lowerCase= [[row objectForKey:@"message"] lowercaseString];

@@ -66,7 +66,6 @@
         self.retry = [UIButton buttonWithType:UIButtonTypeSystem];
         [self.retry setImage:[UIImage imageNamed:@"724-info"]  forState:UIControlStateNormal];
         self.retry.tintColor=[UIColor redColor];
-        self.retry.tag= [self.messageHistoryId integerValue];
         if([self.parent respondsToSelector:@selector(retry:)]) {
             [self.retry addTarget:self.parent action:@selector(retry:) forControlEvents:UIControlEventTouchUpInside];
         }
@@ -154,6 +153,7 @@
     // bubbleFrame.size.height+=5;
     _bubbleImage.frame=bubbleFrame;
     
+    self.retry.tag= [self.messageHistoryId integerValue];
     
 }
 

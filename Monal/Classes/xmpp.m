@@ -2030,11 +2030,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             {
                 DDLogInfo(@" stream error calling reconnect");
                 // login process has its own reconnect mechanism 
-                if(self.accountState==kStateLoggedIn ) {
+                if(self.accountState>=kStateHasStream) {
                       _accountState=kStateReconnecting;
                       _loginStarted=NO;
                     [self reconnect];
-                }
+                    }
             }
             
             else

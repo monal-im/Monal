@@ -293,6 +293,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                      kinfoTypeKey:@"connect", kinfoStatusKey:@""};
                 [self.contactsVC hideConnecting:info];
             }
+             _loginStarted=NO;
             // try again
             if((self.accountState<kStateHasStream) && (_loggedInOnce))
             {
@@ -305,7 +306,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         [[UIApplication sharedApplication] endBackgroundTask:tempTask];
                         tempTask=UIBackgroundTaskInvalid;
                     }];
-                    _loginStarted=NO;
                     [self reconnect];
                     
                     [[UIApplication sharedApplication] endBackgroundTask:tempTask];

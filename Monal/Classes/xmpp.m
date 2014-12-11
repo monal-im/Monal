@@ -29,7 +29,7 @@
 #import "MLImageManager.h"
 #import "UIAlertView+Blocks.h"
 
-#define kXMPPReadSize 51200 // bytes
+#define kXMPPReadSize 5120 // bytes
 
 #define kConnectTimeout 20ull //seconds
 

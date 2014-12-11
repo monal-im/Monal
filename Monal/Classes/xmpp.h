@@ -134,9 +134,15 @@ typedef NS_ENUM (NSInteger, xmppState) {
 -(void) approveToRoster:(NSString*) contact;
 
 /**
- sets up a background task to reconnect if needed
+ sets up a background task to reconnect if needed. dEfault wait of 5s
  */
 -(void) reconnect;
+
+/**
+ reconnect called with a specified wait. if never logged in then wait is 0. 
+ */
+-(void) reconnect:(NSInteger) scheduleWait;
+
 
 
 #pragma mark set connection attributes

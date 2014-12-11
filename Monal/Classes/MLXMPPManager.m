@@ -212,7 +212,7 @@ An array of Dics what have timers to make sure everything was sent
         dispatch_async(_netQueue,
                        ^{
                            existing.explicitLogout=NO;
-                           [existing reconnect];
+                           [existing reconnect:0];
                        });
         
         return;
@@ -267,7 +267,7 @@ An array of Dics what have timers to make sure everything was sent
         
         
         dispatch_async(_netQueue, ^{
-            [xmppAccount reconnect];
+            [xmppAccount reconnect:0];
         });
     }
     

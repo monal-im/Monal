@@ -432,9 +432,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [[DataLayer sharedInstance]  resetContactsForAccount:_accountNo];
     _reconnectScheduled =NO;
 }
-
-
 -(void) reconnect
+{
+    [self reconnect:5.0];
+}
+
+-(void) reconnect:(NSInteger) scheduleWait
 {
     DDLogVerbose(@"reconnecting ");
     //can be called multiple times
@@ -490,7 +493,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
              _loginStarted=YES;
         }
         
-        NSTimeInterval wait=5;
+        NSTimeInterval wait=scheduleWait;
         if(!_loggedInOnce) {
             wait=0;
         }
@@ -544,7 +547,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     {
         DDLogInfo(@" ping calling reconnect");
           _accountState=kStateReconnecting;
-        [self reconnect];
+        [self reconnect:0];
         return;
     }
     
@@ -606,7 +609,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     {
         DDLogInfo(@" whitespace ping calling reconnect");
           _accountState=kStateReconnecting;
-        [self reconnect];
+        [self reconnect:0];
         return;
     }
     
@@ -2020,7 +2023,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 _brokenServerSSL=YES;
                 _loginStarted=NO;
                 _accountState=kStateReconnecting;
-                [self reconnect];
+                [self reconnect:0];
                 
                 return;
             }

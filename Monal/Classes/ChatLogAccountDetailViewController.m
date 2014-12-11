@@ -67,7 +67,9 @@
     }
     
     cell.textLabel.text=[[_tableData objectAtIndex:indexPath.row] objectForKey:@"full_name"];
+    if([cell.textLabel.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].length<1) cell.textLabel.text=[[_tableData objectAtIndex:indexPath.row] objectForKey:@"message_from"];
 
+    
     return cell;
 
 }

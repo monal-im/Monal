@@ -1293,7 +1293,7 @@ static DataLayer *sharedInstance=nil;
 	//DDLogVerbose(query);
 	NSArray* user = [self executeReader:query1];
 	
-	if(user!=nil)
+	if([user count]>0)
 	{
         
         NSString* query=[NSString stringWithFormat:@"select x.* from(select distinct message_from,'', ifnull(full_name, message_from) as full_name, filename from message_history as a left outer join buddylist as b on a.message_from=b.buddy_name and a.account_id=b.account_id where a.account_id=%@  union select distinct message_to  ,'', ifnull(full_name, message_to) as full_name, filename from message_history as a left outer join buddylist as b on a.message_to=b.buddy_name and a.account_id=b.account_id where a.account_id=%@  )  as x where message_from!='%@' and message_from!='%@@%@'  order by full_name COLLATE NOCASE ", accountNo, accountNo,((NSString *)[[user objectAtIndex:0] objectForKey:@"username"]).escapeForSql, ((NSString *)[[user objectAtIndex:0] objectForKey:@"username"]).escapeForSql,  ((NSString *)[[user objectAtIndex:0] objectForKey:@"domain"]).escapeForSql  ];

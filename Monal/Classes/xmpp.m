@@ -540,7 +540,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) sendPing
 {
-    if(self.accountState<kStateReconnecting )
+    if(self.accountState<kStateReconnecting  && !_reconnectScheduled)
     {
         DDLogInfo(@" ping calling reconnect");
           _accountState=kStateReconnecting;

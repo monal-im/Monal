@@ -81,13 +81,9 @@ static DataLayer *sharedInstance=nil;
                         toReturn= nil;
                         break;
                     }
-                        
-                        
-                        
+                            
                 }
-                
-                
-                
+      
             } else
             {DDLogVerbose(@"return nil with no row");
                 toReturn= nil;};
@@ -1081,7 +1077,15 @@ static DataLayer *sharedInstance=nil;
 
 
 #pragma mark message Commands
--(BOOL) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom
+
+-(NSArray *) messageForHistoryID:(NSInteger) historyID
+{
+    NSString* query=[NSString stringWithFormat:@"select message, messageid from message_history  where message_history_id=%ld", (long)historyID];
+    NSArray* messageArray= [self executeReader:query];
+    return messageArray;
+}
+
+-(BOOL) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom delivered:(BOOL) delivered
 {
     //this is always from a contact
 	NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
@@ -1102,7 +1106,8 @@ static DataLayer *sharedInstance=nil;
     NSString* dateString = [formatter stringFromDate:destinationDate];
     // in the event it is a message from the room
     
-    NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, %@, '%@',  '%@', '%@', '%@', '%@',1);", accountNo, from.escapeForSql, to.escapeForSql, 	dateString, message.escapeForSql, actualfrom.escapeForSql];
+    //all messages default to unread
+    NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, %@, '%@',  '%@', '%@', '%@', '%@',1,%d,'');", accountNo, from.escapeForSql, to.escapeForSql, 	dateString, message.escapeForSql, actualfrom.escapeForSql, delivered];
 	DDLogVerbose(@"%@",query);
 	if([self executeNonQuery:query]!=NO)
 	{
@@ -1116,6 +1121,19 @@ static DataLayer *sharedInstance=nil;
 	
 }
 
+-(BOOL) setMessageId:(NSString*) messageid delivered:(BOOL) delivered
+{
+    NSString* query=[NSString stringWithFormat:@"update message_history set delivered=%d where messageid='%@';",delivered, messageid];
+    DDLogInfo(@" setting delivered %@",query);
+    if([self executeNonQuery:query]!=NO)
+    {
+        return YES;
+    }
+    else
+    {
+        return NO;
+    }
+}
 
 
 
@@ -1275,7 +1293,7 @@ static DataLayer *sharedInstance=nil;
 	//DDLogVerbose(query);
 	NSArray* user = [self executeReader:query1];
 	
-	if(user!=nil)
+	if([user count]>0)
 	{
         
         NSString* query=[NSString stringWithFormat:@"select x.* from(select distinct message_from,'', ifnull(full_name, message_from) as full_name, filename from message_history as a left outer join buddylist as b on a.message_from=b.buddy_name and a.account_id=b.account_id where a.account_id=%@  union select distinct message_to  ,'', ifnull(full_name, message_to) as full_name, filename from message_history as a left outer join buddylist as b on a.message_to=b.buddy_name and a.account_id=b.account_id where a.account_id=%@  )  as x where message_from!='%@' and message_from!='%@@%@'  order by full_name COLLATE NOCASE ", accountNo, accountNo,((NSString *)[[user objectAtIndex:0] objectForKey:@"username"]).escapeForSql, ((NSString *)[[user objectAtIndex:0] objectForKey:@"username"]).escapeForSql,  ((NSString *)[[user objectAtIndex:0] objectForKey:@"domain"]).escapeForSql  ];
@@ -1301,10 +1319,7 @@ static DataLayer *sharedInstance=nil;
 //message history
 -(NSMutableArray*) messageHistory:(NSString*) buddy forAccount:(NSString*) accountNo
 {
-	//NSArray* parts=[[[NSDate date] description] componentsSeparatedByString:@" "];
-	
-	
-	NSString* query=[NSString stringWithFormat:@"select af, message, thetime, message_history_id from (select ifnull(actual_from, message_from) as af, message,     timestamp  as thetime, message_history_id from message_history where account_id=%@ and (message_from='%@' or message_to='%@') order by message_history_id desc limit 20) order by message_history_id asc",accountNo, buddy.escapeForSql, buddy.escapeForSql];
+	NSString* query=[NSString stringWithFormat:@"select af, message, thetime, message_history_id, delivered, messageid from (select ifnull(actual_from, message_from) as af, message,     timestamp  as thetime, message_history_id, delivered,messageid from message_history where account_id=%@ and (message_from='%@' or message_to='%@') order by message_history_id desc limit 20) order by message_history_id asc",accountNo, buddy.escapeForSql, buddy.escapeForSql];
 	DDLogVerbose(@"%@", query);
 	NSMutableArray* toReturn = [self executeReader:query];
     
@@ -1337,13 +1352,13 @@ static DataLayer *sharedInstance=nil;
 	
 }
 
--(BOOL) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom ;
+-(BOOL) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString *)messageId
 {
-	//MEssaes_history ging out, from is always the local user. always read
+	//MEssaes_history ging out, from is always the local user. always read, default to  delivered (will be reset by timer if needed)
 	
 	NSArray* parts=[[[NSDate date] description] componentsSeparatedByString:@" "];
-	NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, %@, '%@',  '%@', '%@ %@', '%@', '%@',0);", accountNo, from.escapeForSql, to.escapeForSql,
-					 [parts objectAtIndex:0],[parts objectAtIndex:1], message.escapeForSql, actualfrom.escapeForSql];
+	NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, %@, '%@',  '%@', '%@ %@', '%@', '%@',0,1,'%@');", accountNo, from.escapeForSql, to.escapeForSql,
+					 [parts objectAtIndex:0],[parts objectAtIndex:1], message.escapeForSql, actualfrom.escapeForSql, messageId.escapeForSql];
 	
 	if([self executeNonQuery:query]!=NO)
 	{
@@ -1748,6 +1763,21 @@ static DataLayer *sharedInstance=nil;
         DDLogVerbose(@"Upgrade to 1.31 success ");
         
     }
+    
+    if([dbversion doubleValue]<1.41)
+    {
+        DDLogVerbose(@"Database version <1.41 detected. Performing upgrade on accounts. ");
+        
+        [self executeNonQuery:@"alter table message_history add column  delivered bool;"];
+        [self executeNonQuery:@"alter table message_history add column  messageid varchar(255);"];
+        [self executeNonQuery:@"update message_history set delivered=1;"];
+        [self executeNonQuery:@"update dbversion set dbversion='1.41'; "];
+        
+        
+        DDLogVerbose(@"Upgrade to 1.41 success ");
+        
+    }
+    
     
  
     [dbversionCheck unlock];

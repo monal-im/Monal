@@ -29,9 +29,12 @@
 #import "MLImageManager.h"
 #import "UIAlertView+Blocks.h"
 
-#define kXMPPReadSize 51200 // bytes
+#define kXMPPReadSize 5120 // bytes
 
 #define kConnectTimeout 20ull //seconds
+
+NSString *const kMessageId=@"MessageID";
+NSString *const kSendTimer=@"SendTimer";
 
 static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
@@ -207,7 +210,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     dispatch_source_set_cancel_handler(streamTimer, ^{
         DDLogError(@"stream timer cancelled");
-        dispatch_release(streamTimer);
     });
     
     dispatch_resume(streamTimer);
@@ -286,9 +288,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         DDLogInfo(@"login cancel op");
         dispatch_async(_xmppQueue, ^{
             //hide connecting message
-            NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
-                                 kinfoTypeKey:@"connect", kinfoStatusKey:@""};
-            [self.contactsVC hideConnecting:info];
+            if(_fulluser && _accountNo) {
+                NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:self.accountNo,
+                                     kinfoTypeKey:@"connect", kinfoStatusKey:@""};
+                [self.contactsVC hideConnecting:info];
+            }
+             _loginStarted=NO;
             // try again
             if((self.accountState<kStateHasStream) && (_loggedInOnce))
             {
@@ -301,7 +306,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         [[UIApplication sharedApplication] endBackgroundTask:tempTask];
                         tempTask=UIBackgroundTaskInvalid;
                     }];
-                    _loginStarted=NO;
                     [self reconnect];
                     
                     [[UIApplication sharedApplication] endBackgroundTask:tempTask];
@@ -328,14 +332,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         {
             if(!_reconnectScheduled)
             {
-            _reconnectScheduled=YES;
+            _loginStarted=NO;
              DDLogInfo(@"login client does not have stream");
-            [self disconnect];
             _accountState=kStateReconnecting;
             [self reconnect];
             }
         }
-        dispatch_release(loginCancelOperation);
     });
     
     dispatch_resume(loginCancelOperation);
@@ -344,9 +346,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) disconnect
 {
-    _loginStarted=NO;
-    _loginError=NO;
-    _accountState=kStateDisconnected;
+    if(kStateDisconnected) return;
     
     self.pingID=nil;
     DDLogInfo(@"removing streams");
@@ -393,12 +393,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
 	DDLogInfo(@"Connections closed");
 	
-	DDLogInfo(@"All closed and cleaned up");
-    
     _startTLSComplete=NO;
     _streamHasSpace=NO;
+    _loginStarted=NO;
+    _loginError=NO;
+    _accountState=kStateDisconnected;
     
-  
+	DDLogInfo(@"All closed and cleaned up");
+    
+
     
     //for good measure
     NSString* user=_fulluser;
@@ -429,9 +432,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [[DataLayer sharedInstance]  resetContactsForAccount:_accountNo];
     _reconnectScheduled =NO;
 }
-
-
 -(void) reconnect
+{
+    [self reconnect:5.0];
+}
+
+-(void) reconnect:(NSInteger) scheduleWait
 {
     DDLogVerbose(@"reconnecting ");
     //can be called multiple times
@@ -482,27 +488,31 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     if (reconnectBackgroundTask != UIBackgroundTaskInvalid) {
         if(_accountState>=kStateReconnecting) {
+             DDLogInfo(@" account sate >=reconencting, disconnecting first" );
             [self disconnect];
+             _loginStarted=YES;
         }
         
-        NSTimeInterval wait=5;
+        NSTimeInterval wait=scheduleWait;
         if(!_loggedInOnce) {
             wait=0;
         }
-
+        
         if(!_reconnectScheduled)
         {
             _reconnectScheduled=YES;
-            DDLogInfo(@"Trying to connect again in %f seconds. ", wait);
+             DDLogInfo(@"Trying to connect again in %f seconds. ", wait);
             dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, wait * NSEC_PER_SEC), q_background,  ^{
-                //there may be another login operation freom reachability or another timer
-                if(self.accountState<kStateReconnecting) {
-                    [self connect];
-                    [[UIApplication sharedApplication] endBackgroundTask:reconnectBackgroundTask];
-                    reconnectBackgroundTask=UIBackgroundTaskInvalid;
-                }
-            });
+            //there may be another login operation freom reachability or another timer
+            if(self.accountState<kStateReconnecting) {
+                [self connect];
+                [[UIApplication sharedApplication] endBackgroundTask:reconnectBackgroundTask];
+                reconnectBackgroundTask=UIBackgroundTaskInvalid;
+            }
+             });
+        } else  {
+            DDLogInfo(@"reconnect scheduled already" );
         }
     }
     
@@ -533,11 +543,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) sendPing
 {
-    if(self.accountState<kStateReconnecting )
+    if(self.accountState<kStateReconnecting  && !_reconnectScheduled)
     {
         DDLogInfo(@" ping calling reconnect");
           _accountState=kStateReconnecting;
-        [self reconnect];
+        [self reconnect:0];
         return;
     }
     
@@ -578,8 +588,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     });
     
     dispatch_source_set_cancel_handler(pingTimeOut, ^{
-        DDLogInfo(@"ping timer cancelled");
-        dispatch_release(pingTimeOut);
+        DDLogInfo(@"ping timer cancelled"); 
     });
     
     dispatch_resume(pingTimeOut);
@@ -600,7 +609,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     {
         DDLogInfo(@" whitespace ping calling reconnect");
           _accountState=kStateReconnecting;
-        [self reconnect];
+        [self reconnect:0];
         return;
     }
     
@@ -1158,7 +1167,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 {
                     [[DataLayer sharedInstance] addMessageFrom:messageNode.from to:_fulluser
                                                     forAccount:_accountNo withBody:messageNode.messageText
-                                                  actuallyfrom:messageNode.actualFrom];
+                                                  actuallyfrom:messageNode.actualFrom delivered:YES];
                     
                     [[DataLayer sharedInstance] addActiveBuddies:messageNode.from forAccount:_accountNo];
                     
@@ -1679,15 +1688,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 #pragma mark messaging
 
--(void) sendMessage:(NSString*) message toContact:(NSString*) contact isMUC:(BOOL) isMUC
+-(void) sendMessage:(NSString*) message toContact:(NSString*) contact isMUC:(BOOL) isMUC andMessageId:(NSString *) messageId
 {
     XMPPMessage* messageNode =[[XMPPMessage alloc] init];
     [messageNode.attributes setObject:contact forKey:@"to"];
     [messageNode setBody:message];
-    
-    NSUInteger r = arc4random_uniform(NSIntegerMax);
-    [messageNode setId: [NSString stringWithFormat:@"Monal%d", r]];
-    
+    [messageNode setXmppId:messageId ];
+
     if(isMUC)
     {
         [messageNode.attributes setObject:kMessageGroupChatType forKey:@"type"];
@@ -2014,10 +2021,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             {
                 DDLogInfo(@"setting broke ssl. retrying");
                 _brokenServerSSL=YES;
-                
-                [self disconnect];
+                _loginStarted=NO;
                 _accountState=kStateReconnecting;
-                [self reconnect];
+                [self reconnect:0];
                 
                 return;
             }
@@ -2027,11 +2033,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             {
                 DDLogInfo(@" stream error calling reconnect");
                 // login process has its own reconnect mechanism 
-                if(self.accountState==kStateLoggedIn ) {
-                     [self disconnect];
+                if(self.accountState>=kStateHasStream) {
                       _accountState=kStateReconnecting;
+                      _loginStarted=NO;
                     [self reconnect];
-                }
+                    }
             }
             
             else
@@ -2055,8 +2061,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		case NSStreamEventEndEncountered:
 		{
 			DDLogInfo(@"%@ Stream end encoutered", [stream class] );
-            [self disconnect];
             _accountState=kStateReconnecting;
+            _loginStarted=NO;
             [self reconnect];
 			break;
 		}
@@ -2076,18 +2082,27 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     for(XMLNode* node in _outputQueue)
     {
-        [self writeToStream:node.XMLString];
+        BOOL success=[self writeToStream:node.XMLString];
+        if(success) {
+            if([node isKindOfClass:[XMPPMessage class]])
+            {
+                XMPPMessage *messageNode = (XMPPMessage *) node;
+                NSDictionary *dic =@{kMessageId:messageNode.xmppId};
+                [[NSNotificationCenter defaultCenter] postNotificationName: kMonalSentMessageNotice object:self userInfo:dic];
+                
+            }
+        }
     }
     
     [_outputQueue removeAllObjects];
     
 }
 
--(void) writeToStream:(NSString*) messageOut
+-(BOOL) writeToStream:(NSString*) messageOut
 {
     if(!messageOut) {
         DDLogVerbose(@" tried to send empty message. returning"); 
-        return;
+        return NO;
     }
     _streamHasSpace=NO; // triggers more has space messages
     
@@ -2099,6 +2114,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     if([_oStream write:rawstring maxLength:len]!=-1)
     {
         DDLogVerbose(@"done writing ");
+        return YES;
     }
     else
     {
@@ -2106,8 +2122,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         DDLogVerbose(@"sending: failed with error %d domain %@ message %@",error.code, error.domain, error.userInfo);
     }
     
-    return;
-    
+    return NO;
 }
 
 -(void) readToBuffer

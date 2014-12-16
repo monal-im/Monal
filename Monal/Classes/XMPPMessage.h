@@ -21,7 +21,12 @@
 /**
  Sets the id attribute of the element
  */
--(void) setId:(NSString*) idval;
+-(void) setXmppId:(NSString*) idval;
+
+/**
+ returns value of id attribute if set
+ */
+-(NSString *) xmppId;
 
 /**
  Sets the body child element

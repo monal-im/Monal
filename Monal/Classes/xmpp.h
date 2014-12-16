@@ -92,7 +92,6 @@ typedef NS_ENUM (NSInteger, xmppState) {
     BOOL _hasRequestedServerInfo;
     
     BOOL _brokenServerSSL;
-
 }
 
 -(void) connect;
@@ -100,9 +99,9 @@ typedef NS_ENUM (NSInteger, xmppState) {
 
 
 /**
- send a message to a contact
+ send a message to a contact with xmpp id
  */
--(void) sendMessage:(NSString*) message toContact:(NSString*) contact isMUC:(BOOL) isMUC;
+-(void) sendMessage:(NSString*) message toContact:(NSString*) contact isMUC:(BOOL) isMUC andMessageId:(NSString *) messageId;
 
 /**
  crafts a whitepace ping and sends it
@@ -135,9 +134,15 @@ typedef NS_ENUM (NSInteger, xmppState) {
 -(void) approveToRoster:(NSString*) contact;
 
 /**
- sets up a background task to reconnect if needed
+ sets up a background task to reconnect if needed. dEfault wait of 5s
  */
 -(void) reconnect;
+
+/**
+ reconnect called with a specified wait. if never logged in then wait is 0. 
+ */
+-(void) reconnect:(NSInteger) scheduleWait;
+
 
 
 #pragma mark set connection attributes
@@ -243,7 +248,11 @@ Decline a call request
 
 
 //UI
-@property (nonatomic,weak) ContactsViewController* contactsVC; 
+@property (nonatomic,weak) ContactsViewController* contactsVC;
+
+
+FOUNDATION_EXPORT NSString *const kMessageId;
+FOUNDATION_EXPORT NSString *const kSendTimer;
 
 
 @end

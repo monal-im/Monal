@@ -26,9 +26,6 @@
 
 #import <Crashlytics/Crashlytics.h>
 
-
-
-
 //xmpp
 #import "MLXMPPManager.h"
 
@@ -165,17 +162,20 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 #pragma mark notification actions
 -(void) showCallScreen:(NSNotification*) userInfo
 {
-    NSDictionary* contact=userInfo.object;
-    CallViewController *callScreen= [[CallViewController alloc] initWithContact:contact];
-    MLPortraitNavController* callNav = [[MLPortraitNavController alloc] initWithRootViewController:callScreen];
-    callNav.navigationBar.hidden=YES;
-    
-    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
-    {
-        callNav.modalPresentationStyle=UIModalPresentationFormSheet;
-    }
-    
-    [self.tabBarController presentModalViewController:callNav animated:YES];
+    dispatch_async(dispatch_get_main_queue(),
+                   ^{
+                       NSDictionary* contact=userInfo.object;
+                       CallViewController *callScreen= [[CallViewController alloc] initWithContact:contact];
+                       MLPortraitNavController* callNav = [[MLPortraitNavController alloc] initWithRootViewController:callScreen];
+                       callNav.navigationBar.hidden=YES;
+                       
+                       if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
+                       {
+                           callNav.modalPresentationStyle=UIModalPresentationFormSheet;
+                       }
+                       
+                       [self.tabBarController presentModalViewController:callNav animated:YES];
+                   });
 }
 
 -(void) updateUnread

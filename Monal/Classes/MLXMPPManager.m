@@ -8,7 +8,6 @@
 
 #import "MLXMPPManager.h"
 #import "DataLayer.h"
-#import "xmpp.h"
 #import "MonalAppDelegate.h"
 
 static const int ddLogLevel = LOG_LEVEL_VERBOSE;
@@ -20,9 +19,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
  */
 @property (nonatomic, strong) NSMutableDictionary *passwordDic;
 /**
- convenience functin getting account in connected array with account number/id matching
+ convenience function getting account in connected array with account number/id matching
  */
 -(xmpp*) getConnectedAccountForID:(NSString*) accountNo;
+
+/**
+An array of Dics what have timers to make sure everything was sent
+ */
+@property (nonatomic, strong) NSMutableArray *timerList;
+
 @end
 
 
@@ -67,7 +72,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     _connectedXMPP=[[NSMutableArray alloc] init];
     _passwordDic = [[NSMutableDictionary alloc] init];
-    _netQueue = dispatch_queue_create(kMonalNetQueue, DISPATCH_QUEUE_CONCURRENT);
+    _netQueue = dispatch_queue_create(kMonalNetQueue, DISPATCH_QUEUE_SERIAL);
     
     [self defaultSettings];
     
@@ -88,7 +93,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         {
             xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
             if(xmppAccount.accountState==kStateLoggedIn) {
-                   DDLogInfo(@"began a ping");
+                DDLogInfo(@"began a ping");
                 [xmppAccount sendPing];
             }
         }
@@ -97,7 +102,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     dispatch_source_set_cancel_handler(_pinger, ^{
         DDLogInfo(@"pinger canceled");
-        dispatch_release(_pinger);
     });
     
     dispatch_resume(_pinger);
@@ -105,6 +109,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleSentMessage:) name:kMonalSentMessageNotice object:nil];
     
     return self;
 }
@@ -168,7 +173,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(xmpp*) getConnectedAccountForID:(NSString*) accountNo
 {
-     xmpp* toReturn=nil;
+    xmpp* toReturn=nil;
     for (NSDictionary* account in _connectedXMPP)
     {
         xmpp* xmppAccount=[account objectForKey:@"xmppAccount"];
@@ -204,11 +209,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     xmpp* existing=[self getConnectedAccountForID:[NSString stringWithFormat:@"%@",[account objectForKey:@"account_id"]]];
     if(existing)
     {
-            dispatch_async(_netQueue,
-                           ^{
-                                existing.explicitLogout=NO;
-                               [existing reconnect];
-                           });
+        dispatch_async(_netQueue,
+                       ^{
+                           existing.explicitLogout=NO;
+                           [existing reconnect:0];
+                       });
         
         return;
     }
@@ -247,7 +252,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         // no password error
     }
     
-
+    
     xmppAccount.contactsVC=self.contactVC;
     //sepcifically look for the server since we might not be online or behind firewall
     Reachability* hostReach = [Reachability reachabilityWithHostName:xmppAccount.server ] ;
@@ -257,13 +262,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [hostReach startNotifier];
     
     if(xmppAccount && hostReach) {
-    NSDictionary* accountRow= [[NSDictionary alloc] initWithObjects:@[xmppAccount, hostReach] forKeys:@[@"xmppAccount", @"hostReach"]];
-    [_connectedXMPP addObject:accountRow];
-    
-    
-    dispatch_async(_netQueue, ^{
-                       [xmppAccount reconnect];
-                   });
+        NSDictionary* accountRow= [[NSDictionary alloc] initWithObjects:@[xmppAccount, hostReach] forKeys:@[@"xmppAccount", @"hostReach"]];
+        [_connectedXMPP addObject:accountRow];
+        
+        
+        dispatch_async(_netQueue, ^{
+            [xmppAccount reconnect:0];
+        });
     }
     
 }
@@ -370,22 +375,59 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 
 #pragma mark XMPP commands
--(void)sendMessage:(NSString*) message toContact:(NSString*)contact fromAccount:(NSString*) accountNo isMUC:(BOOL) isMUC
-withCompletionHandler:(void (^)(BOOL success)) completion
+-(void)sendMessage:(NSString*) message toContact:(NSString*)contact fromAccount:(NSString*) accountNo isMUC:(BOOL) isMUC messageId:(NSString *) messageId 
+withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 {
     dispatch_async(_netQueue,
                    ^{
+                       dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+                       dispatch_source_t sendTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,q_background
+                                                                              );
+                       
+                       dispatch_source_set_timer(sendTimer,
+                                                 dispatch_time(DISPATCH_TIME_NOW, 5ull * NSEC_PER_SEC),
+                                                 1ull * NSEC_PER_SEC
+                                                 , 1ull * NSEC_PER_SEC);
+                       
+                       dispatch_source_set_event_handler(sendTimer, ^{
+                           DDLogError(@"send message  timed out");
+                           int counter=0;
+                           int removalCounter=-1;
+                           for(NSDictionary *dic in  self.timerList) {
+                               if([dic objectForKey:kSendTimer] == sendTimer) {
+                                   [[DataLayer sharedInstance] setMessageId:[dic objectForKey:kMessageId] delivered:NO];
+                                   [[NSNotificationCenter defaultCenter] postNotificationName:kMonalSendFailedMessageNotice object:self userInfo:dic];
+                                   removalCounter=counter;
+                                   break;
+                               }
+                               counter++;
+                           }
+                           
+                           if(removalCounter>=0) {
+                               [self.timerList removeObjectAtIndex:removalCounter];
+                           }
+                           
+                           dispatch_source_cancel(sendTimer);
+                       });
+                       
+                       dispatch_source_set_cancel_handler(sendTimer, ^{
+                           DDLogError(@"send message timer cancelled");
+                       });
+                       
+                       dispatch_resume(sendTimer);
+                       NSDictionary *dic = @{kSendTimer:sendTimer,kMessageId:messageId};
+                       [self.timerList addObject:dic];
+                       
                        BOOL success=NO;
                        xmpp* account=[self getConnectedAccountForID:accountNo];
                        if(account)
                        {
                            success=YES;
-                           [account sendMessage:message toContact:contact isMUC:isMUC];
+                           [account sendMessage:message toContact:contact isMUC:isMUC andMessageId:messageId];
                        }
                        
-                       
                        if(completion)
-                           completion(success);
+                           completion(success, messageId);
                    });
 }
 
@@ -409,19 +451,25 @@ withCompletionHandler:(void (^)(BOOL success)) completion
 
 -(NSString*) getNameForConnectedRow:(NSInteger) row
 {
-    NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
-    
-    xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
-    return [NSString stringWithFormat:@"%@@%@",account.username, account.server];
+    NSString *toreturn;
+    if(row<[_connectedXMPP count] && row>=0) {
+        NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
+        xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
+        toreturn= [NSString stringWithFormat:@"%@@%@",account.username, account.server];
+    }
+    return toreturn;
 }
 
 
 
 -(NSString*) idForConnectedRow:(NSInteger) row
 {
-    NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
-    
-    return [datarow objectForKey:@"account_id"];
+    NSString *toreturn;
+    if(row<[_connectedXMPP count] && row>=0) {
+        NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
+        toreturn= [datarow objectForKey:@"account_id"];
+    }
+    return toreturn;
 }
 
 
@@ -448,7 +496,7 @@ withCompletionHandler:(void (^)(BOOL success)) completion
 {
     NSNumber* row =[contact objectForKey:@"row"];
     NSInteger pos= [row integerValue];
-    if(pos<[_connectedXMPP count]) {
+    if(pos<[_connectedXMPP count] && pos>=0) {
         NSDictionary* datarow= [_connectedXMPP objectAtIndex:pos];
         xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
         if( account)
@@ -462,9 +510,11 @@ withCompletionHandler:(void (^)(BOOL success)) completion
 //makes xmpp call
 -(void) getRoomsForAccountRow:(NSInteger) row
 {
-    NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
-    xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
-    [account getConferenceRooms];
+    if(row<[_connectedXMPP count] && row>=0) {
+        NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
+        xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
+        [account getConferenceRooms];
+    }
     
 }
 
@@ -472,9 +522,12 @@ withCompletionHandler:(void (^)(BOOL success)) completion
 //exposes list
 -(NSArray*) getRoomsListForAccountRow:(NSInteger) row
 {
-    NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
-    xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
-    return account.roomList;
+    if(row<[_connectedXMPP count] && row>=0) {
+        NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
+        xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
+        return account.roomList;
+    }
+    else return  nil;
     
 }
 
@@ -482,17 +535,21 @@ withCompletionHandler:(void (^)(BOOL success)) completion
 
 -(void)  joinRoom:(NSString*) roomName  withPassword:(NSString*) password forAccountRow:(NSInteger) row
 {
-    NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
-    xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
-    [account joinRoom:roomName withPassword:password];
+    if(row<[_connectedXMPP count] && row>=0) {
+        NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
+        xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
+        [account joinRoom:roomName withPassword:password];
+    }
 }
 
 
 -(void)  leaveRoom:(NSString*) roomName forAccountRow:(NSInteger) row
 {
-    NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
-    xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
-    [account leaveRoom:roomName];
+    if(row<[_connectedXMPP count] && row>=0) {
+        NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
+        xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
+        [account leaveRoom:roomName];
+    }
 }
 
 -(void)  leaveRoom:(NSString*) roomName forAccountId:(NSString*) accountId
@@ -561,6 +618,44 @@ withCompletionHandler:(void (^)(BOOL success)) completion
     [appDelegate updateUnread];
 }
 
+
+-(void) handleSentMessage:(NSNotification *)notification
+{
+
+    NSDictionary *info = notification.userInfo;
+    NSString *messageId = [info objectForKey:kMessageId];
+    [[DataLayer sharedInstance] setMessageId:messageId delivered:YES];
+    DDLogInfo(@"message %@ sent, removing timer",messageId);
+    
+    int counter=0;
+    int removalCounter=-1;
+    for (NSDictionary * dic in self.timerList)
+    {
+        if([[dic objectForKey:kMessageId] isEqualToString:messageId])
+        {
+            dispatch_source_t sendTimer = [dic objectForKey:kSendTimer];
+            dispatch_source_cancel(sendTimer);
+            removalCounter=counter;
+            break;
+        }
+        counter++;
+    }
+    
+    if(removalCounter>=0) {
+        [self.timerList removeObjectAtIndex:removalCounter];
+    }
+}
+
+#pragma mark - properties
+
+-(NSMutableArray *)timerList
+{
+    if(!_timerList)
+    {
+        _timerList=[[NSMutableArray alloc] init];
+    }
+    return  _timerList;
+}
 
 
 @end

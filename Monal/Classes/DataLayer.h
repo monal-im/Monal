@@ -124,8 +124,12 @@
 -(BOOL) disableEnabledAccount:(NSString*) accountNo;
 
 #pragma mark message Commands
--(BOOL) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom ;
--(BOOL) clearMessages:(NSString*) accountNo; 
+-(NSArray *) messageForHistoryID:(NSInteger) historyID;
+
+-(BOOL) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom delivered:(BOOL) delivered;
+-(BOOL) setMessageId:(NSString*) messageid delivered:(BOOL) delivered;
+
+-(BOOL) clearMessages:(NSString*) accountNo;
 -(BOOL) deleteMessage:(NSString*) messageNo;
 -(BOOL) deleteMessageHistory:(NSString*) messageNo;
 
@@ -141,7 +145,7 @@
 
 -(NSArray*) messageHistoryBuddies:(NSString*) accountNo;
 -(BOOL) markAsReadBuddy:(NSString*) buddy forAccount:(NSString*) accountNo;
--(BOOL) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom ;
+-(BOOL) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString *)messageId;
 
 #pragma mark active chats
 -(NSArray*) activeBuddies;

@@ -480,12 +480,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 - (void)textFieldDidBeginEditing:(UITextField *)textField
 {
     if(textField==userText)
-    {    
-    // Construct a new range using the object that adopts the UITextInput, our textfield
-    UITextRange *newRange = [textField textRangeFromPosition:0 toPosition:0];
-    
-    // Set new range
-    [textField setSelectedTextRange:newRange];
+    {
+        if(textField.text.length >0) {
+            // Construct a new range using the object that adopts the UITextInput, our textfield
+            UITextRange *newRange = [textField textRangeFromPosition:0 toPosition:0];
+            
+            // Set new range
+            [textField setSelectedTextRange:newRange];
+        }
     }
 }
 

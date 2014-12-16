@@ -17,9 +17,14 @@
     return self;
 }
 
--(void) setId:(NSString*) idval
+-(void) setXmppId:(NSString*) idval
 {
     [self.attributes setObject:idval forKey:@"id"];
+}
+
+-(NSString *) xmppId
+{
+    return  [self.attributes objectForKey:@"id"];
 }
 
 -(void) setBody:(NSString*) messageBody

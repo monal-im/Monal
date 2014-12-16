@@ -245,6 +245,10 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
     [nc addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
+    [nc addObserver:self selector:@selector(handleSendFailedMessage:) name:kMonalSendFailedMessageNotice object:nil];
+    [nc addObserver:self selector:@selector(handleSentMessage:) name:kMonalSentMessageNotice object:nil];
+    
+    
     [nc addObserver:self selector:@selector(handleTap) name:UIApplicationDidEnterBackgroundNotification object:nil];
 	[nc addObserver:self selector:@selector(keyboardWillShow:) name: UIKeyboardWillShowNotification object:nil];
 	[nc addObserver:self selector:@selector(keyboardWillHide:) name: UIKeyboardWillHideNotification object:nil];
@@ -376,6 +380,27 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 
 #pragma mark textview
+-(void) sendMessage:(NSString *) messageText
+{
+    [self sendMessage:messageText andMessageID:nil];
+}
+
+-(void) sendMessage:(NSString *) messageText andMessageID:(NSString *)messageID
+{
+    DDLogVerbose(@"Sending message");
+    NSUInteger r = arc4random_uniform(NSIntegerMax);
+    NSString *newMessageID =messageID;
+    if(!newMessageID) {
+        newMessageID=[NSString stringWithFormat:@"Monal%d", r];
+    }
+    [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:_contactName fromAccount:_accountNo isMUC:_isMUC messageId:newMessageID
+                          withCompletionHandler:nil];
+    
+    //dont readd it, use the exisitng
+    if(!messageID) {
+        [self addMessageto:_contactName withMessage:messageText andId:newMessageID];
+    }
+}
 
 -(void)resignTextView
 {
@@ -386,37 +411,36 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     
     if(([chatInput text]!=nil) && (![[chatInput text] isEqualToString:@""]) )
     {
-        DDLogVerbose(@"Sending message");
-        [[MLXMPPManager sharedInstance] sendMessage:[chatInput text] toContact:_contactName fromAccount:_accountNo isMUC:_isMUC
-                              withCompletionHandler:nil];
-        [self addMessageto:_contactName withMessage:[chatInput text]];
+        [self sendMessage:[chatInput text] ];
         
     }
     [chatInput setText:@""];
 }
 
 
-#pragma mark message signals
+#pragma mark - handling notfications
 
 //always messages going out
--(void) addMessageto:(NSString*)to withMessage:(NSString*) message
+-(void) addMessageto:(NSString*)to withMessage:(NSString*) message andId:(NSString *) messageId
 {
 	if(!self.jid || !message)  {
         DDLogError(@" not ready to send messages");
         return;
     }
     
-	if([[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:_accountNo withMessage:message actuallyFrom:self.jid ])
+	if([[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:_accountNo withMessage:message actuallyFrom:self.jid withId:messageId ])
 	{
 		DDLogVerbose(@"added message");
-        
         
         dispatch_async(dispatch_get_main_queue(),
                        ^{
                            NSDictionary* userInfo = @{@"af": self.jid,
                                                       @"message": message ,
-                                                      @"thetime": [self currentGMTTime] };
-                           [_messagelist addObject:userInfo];
+                                                      @"thetime": [self currentGMTTime],
+                                                      @"delivered":@YES,
+                                                             kMessageId: messageId
+                                                             };
+                           [_messagelist addObject:[userInfo mutableCopy]];
                            
                            [_messageTable beginUpdates];
                            NSIndexPath *path1 = [NSIndexPath indexPathForRow:[_messagelist count]-1  inSection:0];
@@ -427,12 +451,11 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                            
                            if(![_messageTable.indexPathsForVisibleRows containsObject:path1])
                            {
-                               
                                [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:NO];
                            }
                        });
-  
-	}
+        
+    }
 	else {
 		DDLogVerbose(@"failed to add message");
     }
@@ -443,9 +466,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         [[DataLayer sharedInstance] addActiveBuddies:to forAccount:_accountNo];
         _firstmsg=NO;
 	}
-	
-    
-    
+
 }
 
 -(void) handleNewMessage:(NSNotification *)notification
@@ -477,6 +498,35 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     }
 }
 
+-(void) setMessageId:(NSString *) messageId delivered:(BOOL) delivered
+{
+    int row=0;
+    for(NSMutableDictionary *rowDic in _messagelist)
+    {
+        if([[rowDic objectForKey:@"messageid"] isEqualToString:messageId]) {
+            [rowDic setObject:[NSNumber numberWithBool:delivered] forKey:@"delivered"];
+            NSIndexPath *indexPath =[NSIndexPath indexPathForRow:row inSection:0];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+            });
+            break;
+        }
+        row++;
+    }
+
+}
+
+-(void) handleSendFailedMessage:(NSNotification *)notification
+{
+    NSDictionary *dic =notification.userInfo;
+    [self setMessageId:[dic objectForKey:kMessageId]  delivered:NO];
+}
+
+-(void) handleSentMessage:(NSNotification *)notification
+{
+    NSDictionary *dic =notification.userInfo;
+    [self setMessageId:[dic objectForKey:kMessageId]  delivered:YES];
+}
 
 #pragma mark MUC display elements
 -(void) popContacts
@@ -589,6 +639,30 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 }
 
 
+
+-(void) retry:(id) sender
+{
+    NSInteger historyId = ((UIButton*) sender).tag;
+    if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0"))
+    {
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Retry sending message?" message:@"It is possible this message may have failed to send." preferredStyle:UIAlertControllerStyleActionSheet];
+        [alert addAction:[UIAlertAction actionWithTitle:@"Retry" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+            NSArray *messageArray =[[DataLayer sharedInstance] messageForHistoryID:historyId];
+            if([messageArray count]>0) {
+                NSDictionary *dic= [messageArray objectAtIndex:0];
+                [self sendMessage:[dic objectForKey:@"message"] andMessageID:[dic objectForKey:@"messageid"]];
+            }
+        }]];
+        [alert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+            [self dismissViewControllerAnimated:YES completion:nil];
+        }]];
+        [self presentViewController:alert animated:YES completion:nil];
+    }
+    else{
+    
+    }
+}
+
 #pragma mark tableview datasource
 
 -(NSInteger) numberOfSectionsInTableView:(UITableView *)tableView
@@ -616,6 +690,12 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     MLChatCell* cell;
+    if(indexPath.row <0 || indexPath.row>=[_messagelist count])
+    {
+        cell =[[MLChatCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"ChatCell"  Muc:_isMUC andParent:self];
+        return cell;
+    }
+    
     NSDictionary* row= [_messagelist objectAtIndex:indexPath.row];
     
     if([[row objectForKey:@"af"] isEqualToString:_jid])
@@ -629,7 +709,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     
     if(!cell)
     {
-        cell =[[MLChatCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"ChatCell" andMuc:_isMUC];
+        cell =[[MLChatCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"ChatCell"  Muc:_isMUC andParent:self];
     }
     
     if(_isMUC)
@@ -638,7 +718,12 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         cell.name.text=[row objectForKey:@"af"];
     }
     
+    if([[row objectForKey:@"delivered"] boolValue]!=YES)
+    {
+        cell.deliveryFailed=YES;
+    }
     
+    cell.messageHistoryId=[row objectForKey:@"message_history_id"];
     cell.date.text= [self formattedDateWithSource:[row objectForKey:@"thetime"]];
     
     NSString* lowerCase= [[row objectForKey:@"message"] lowercaseString];

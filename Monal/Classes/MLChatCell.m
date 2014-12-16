@@ -8,6 +8,7 @@
 
 #import "MLChatCell.h"
 #import "MLImageManager.h"
+#import "MLConstants.h"
 
 
 #define kChatFont 17.0f
@@ -25,9 +26,10 @@
     return calcSize.height+15;
 }
 
-- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier andMuc:(BOOL) isMUC
+- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier Muc:(BOOL) isMUC andParent:(UIViewController*) parent
 {
     self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+    self.parent=parent;
     if (self) {
         // Initialization code
         self.MUC=isMUC;
@@ -60,6 +62,22 @@
             [self.contentView insertSubview:self.name aboveSubview:_bubbleImage];
             
         }
+        
+        self.retry = [UIButton buttonWithType:UIButtonTypeSystem];
+        [self.retry setImage:[UIImage imageNamed:@"724-info"]  forState:UIControlStateNormal];
+        self.retry.tintColor=[UIColor redColor];
+        if([self.parent respondsToSelector:@selector(retry:)]) {
+            [self.retry addTarget:self.parent action:@selector(retry:) forControlEvents:UIControlEventTouchUpInside];
+        }
+        CGRect frame =self.retry.frame;
+        frame.size.height=28;
+        frame.size.width=28;
+        frame.origin.x=8;
+        frame.origin.y=8;
+        
+        self.retry.frame=frame;
+        [self.contentView insertSubview:self.retry aboveSubview:_bubbleImage];
+        self.retry.hidden=YES;
         
     }
     return self;
@@ -115,6 +133,13 @@
     CGRect dateLabelFrame;
     if(_outBound) {
         dateLabelFrame = CGRectMake(finaltextlabelFrame.origin.x+finaltextlabelFrame.size.width-datewidth-10, 3, datewidth, kNameLabelHeight);
+        
+        if(self.deliveryFailed) {
+            self.retry.hidden=NO;
+        }
+        else{
+            self.retry.hidden=YES;
+        }
     }
     else {
         dateLabelFrame = CGRectMake(finaltextlabelFrame.origin.x+finaltextlabelFrame.size.width-datewidth-5, 3, datewidth, kNameLabelHeight);
@@ -128,6 +153,7 @@
     // bubbleFrame.size.height+=5;
     _bubbleImage.frame=bubbleFrame;
     
+    self.retry.tag= [self.messageHistoryId integerValue];
     
 }
 

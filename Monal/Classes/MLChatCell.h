@@ -24,7 +24,13 @@
 @property (nonatomic, strong) UILabel* date;
 @property (nonatomic, strong) NSString* link;
 
-- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier andMuc:(BOOL) isMUC;
+
+@property (nonatomic, assign) BOOL deliveryFailed;
+@property (nonatomic, strong) UIButton* retry;
+@property (nonatomic, strong) NSNumber* messageHistoryId;
+@property (nonatomic, weak) UIViewController *parent;
+
+- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier Muc:(BOOL) isMUC andParent:(UIViewController*) parent;
 +(CGFloat) heightForText:(NSString*) text inWidth:(CGFloat) width;
 
 -(void) openlink: (id) sender;

@@ -468,7 +468,6 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
         return;
     }
     
-    
     //mutex to prevent others from modifying contacts at the same time
     dispatch_async(dispatch_get_main_queue(),
                    ^{
@@ -480,31 +479,22 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                        {
                            if([[row objectForKey:@"account_id"]  integerValue]==[accountNo integerValue] )
                            {
-                               
                                DDLogVerbose(@"removing  pos %d", counter);
-                               
                                NSIndexPath *path1 = [NSIndexPath indexPathForRow:counter inSection:konlineSection];
                                [indexPaths addObject:path1];
                                [indexSet addIndex:counter];
-                               
-                               
+
                            }
                            counter++;
                        }
                        
-                       
                        [_contacts removeObjectsAtIndexes:indexSet];
-                       
                        [_contactsTable beginUpdates];
                        [_contactsTable deleteRowsAtIndexPaths:indexPaths
                                              withRowAnimation:UITableViewRowAnimationAutomatic];
                        [_contactsTable endUpdates];
                        
-                       
-                       
                    });
-    
-    
     
 }
 
@@ -865,14 +855,19 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     [tableView deselectRowAtIndexPath:indexPath animated:NO];
     
     NSMutableDictionary* row;
-    if((indexPath.section==konlineSection))
+    if(indexPath.section==kinfoSection)
     {
-        row=[_contacts objectAtIndex:indexPath.row];
+        return;
     }
-    else if (indexPath.section==kofflineSection)
-    {
-        row= [_offlineContacts objectAtIndex:indexPath.row];
-    }
+    else
+        if((indexPath.section==konlineSection))
+        {
+            row=[_contacts objectAtIndex:indexPath.row];
+        }
+        else if (indexPath.section==kofflineSection)
+        {
+            row= [_offlineContacts objectAtIndex:indexPath.row];
+        }
     
     [row setObject:[NSNumber numberWithInt:0] forKey:@"count"];
     

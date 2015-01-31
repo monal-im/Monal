@@ -38,15 +38,20 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     self.view.backgroundColor=[UIColor lightGrayColor];
     self.view.autoresizingMask=UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
     
-    _contactsTable=[[UITableView alloc] init];
+    _contactsTable=(UITableView *)self.view;
     _contactsTable.delegate=self;
     _contactsTable.dataSource=self;
     
     self.view=_contactsTable;
     
     // =nil;
-    [_contactsTable.backgroundView setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"debut_dark"]]];
-    
+    if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0"))
+    {
+        self.view.backgroundColor =[UIColor whiteColor];
+    }
+    else{
+        [_contactsTable.backgroundView setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"debut_dark"]]];
+    }
     
     _contacts=[[NSMutableArray alloc] init] ;
     _offlineContacts=[[NSMutableArray alloc] init] ;

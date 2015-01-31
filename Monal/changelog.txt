@@ -11,14 +11,10 @@ Notable features:
 * Tested heavily with google talk, facebook, openfire, prosody   and ejabberd servers. 
 
 
-2.2 changelog
+2.3 changelog
 
 This is  update that  fixes bugs.
-1. Added inidcator if message failed to send and retry buttons
-2. Improved stability with numerous crash bug fixes.
-3. Improved connectivity when moving between cells
-4. Minimim supported version is iOS6
-
+1.
 
 
       

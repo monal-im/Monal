@@ -14,7 +14,7 @@ Notable features:
 2.3 changelog
 
 This is  update that  fixes bugs.
-1.
+1. turned off all SSL3 support. It is no longer safe
 
 
       

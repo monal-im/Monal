@@ -1152,6 +1152,11 @@
 				TargetAttributes = {
 					1D6058900D05DD3D006BFB54 = {
 						DevelopmentTeam = 33XS7DE5NZ;
+						SystemCapabilities = {
+							com.apple.DataProtection = {
+								enabled = 1;
+							};
+						};
 					};
 				};
 			};
@@ -1421,7 +1426,7 @@
 				LLVM_LTO = NO;
 				OTHER_LDFLAGS = "-lstdc++";
 				PRODUCT_NAME = Monal;
-				PROVISIONING_PROFILE = "5e85f1cf-25d4-4c09-aa40-d9a82e186f7a";
+				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "5e85f1cf-25d4-4c09-aa40-d9a82e186f7a";
 			};
 			name = Debug;
@@ -1485,7 +1490,7 @@
 				LLVM_LTO = NO;
 				OTHER_LDFLAGS = "-lstdc++";
 				PRODUCT_NAME = Monal;
-				PROVISIONING_PROFILE = "b5a02c9b-9be4-465e-baf0-226f41994fd5";
+				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "b5a02c9b-9be4-465e-baf0-226f41994fd5";
 			};
 			name = AppStore;
@@ -1610,7 +1615,7 @@
 				LLVM_LTO = NO;
 				OTHER_LDFLAGS = "-lstdc++";
 				PRODUCT_NAME = Monal;
-				PROVISIONING_PROFILE = "9dd66b28-d4a7-45ff-80bd-f730af69a668";
+				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "9dd66b28-d4a7-45ff-80bd-f730af69a668";
 			};
 			name = Adhoc;

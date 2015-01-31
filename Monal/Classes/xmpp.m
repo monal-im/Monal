@@ -1444,7 +1444,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     }
                     else
                     {
-                         [settings addEntriesFromDictionary:@{@"kCFStreamSSLLevel":@"kCFStreamSocketSecurityLevelNegotiatedSSL"}];
+                         [settings addEntriesFromDictionary:@{@"kCFStreamSSLLevel":@"kCFStreamSocketSecurityLevelTLSv1"}];
                     }
                     
                     if(self.selfSigned)

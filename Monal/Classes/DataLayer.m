@@ -1504,6 +1504,10 @@ static DataLayer *sharedInstance=nil;
 		NSError* error;
 		[fileManager copyItemAtPath:defaultDBPath toPath:writableDBPath error:&error];
 	}
+    
+    NSDictionary *attributes =@{NSFileProtectionKey:NSFileProtectionCompleteUntilFirstUserAuthentication};
+    NSError *error;
+    [fileManager setAttributes:attributes ofItemAtPath:writableDBPath error:&error];
 	
 	if (sqlite3_config(SQLITE_CONFIG_SERIALIZED) == SQLITE_OK) {
 		DDLogVerbose(@"Database configured ok");

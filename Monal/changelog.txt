@@ -15,6 +15,7 @@ Notable features:
 
 This is  update that  fixes bugs.
 1. turned off all SSL3 support. It is no longer safe
+2. added ability to search the contacts list 
 
 
       

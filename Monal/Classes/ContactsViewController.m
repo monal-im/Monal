@@ -889,13 +889,20 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 - (void)tableView:(UITableView *)tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath *)indexPath
 {
     ContactDetails* detailVC =nil;
-    if(indexPath.section==konlineSection)
-        detailVC= [[ContactDetails alloc]  initWithContact:[_contacts objectAtIndex:indexPath.row] ];
-    else
-        detailVC=[[ContactDetails alloc]  initWithContact:[_offlineContacts objectAtIndex:indexPath.row] ];
+    if(tableView ==self.view) {
+        if(indexPath.section==konlineSection)
+            detailVC= [[ContactDetails alloc]  initWithContact:[_contacts objectAtIndex:indexPath.row] ];
+        else
+            detailVC=[[ContactDetails alloc]  initWithContact:[_offlineContacts objectAtIndex:indexPath.row] ];
+    }
     
-    detailVC.currentNavController=self.currentNavController; 
- 
+    else  if(tableView ==self.searchDisplayController.searchResultsTableView)
+    {
+        detailVC=[[ContactDetails alloc]  initWithContact:[self.searchResults objectAtIndex:indexPath.row] ];
+    }
+    
+    detailVC.currentNavController=self.currentNavController;
+    
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
     {
         MLChatCell* cell = (MLChatCell*)[tableView cellForRowAtIndexPath:indexPath];
@@ -918,6 +925,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     [tableView deselectRowAtIndexPath:indexPath animated:NO];
     
     NSMutableDictionary* row;
+    if(tableView ==self.view) {
     if(indexPath.section==kinfoSection)
     {
         return;
@@ -933,7 +941,11 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
         }
     
     [row setObject:[NSNumber numberWithInt:0] forKey:@"count"];
-    
+    }
+    else  if(tableView ==self.searchDisplayController.searchResultsTableView)
+    {
+        row= [self.searchResults objectAtIndex:indexPath.row];
+    }
 
     [self presentChatWithRow:row];
     

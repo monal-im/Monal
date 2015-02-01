@@ -768,7 +768,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
         cell.detailTextLabel.text=[row objectForKey:@"status"];
     else
         cell.detailTextLabel.text=nil;
-    
+        if(tableView ==self.view) {
     if(indexPath.section==konlineSection)
     {
         NSString* stateString=[[row objectForKey:@"state"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] ;
@@ -785,7 +785,18 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     }
     else  if(indexPath.section==kofflineSection) {
         cell.status=kStatusOffline;
-    }
+    }}
+        else {
+            NSNumber *online=[row objectForKey:@"online"];
+            if([online boolValue]==YES)
+            {
+                cell.status=kStatusOnline;
+            }
+            else
+            {
+                cell.status=kStatusOffline;
+            }
+        }
     
     cell.accessoryType = UITableViewCellAccessoryDetailDisclosureButton;
     

@@ -51,6 +51,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 @end
 
 
+
 @implementation xmpp
 
 -(id) init
@@ -70,7 +71,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     self.readQueue =[[NSOperationQueue alloc] init];
     self.writeQueue =[[NSOperationQueue alloc] init];
     self.readQueue.maxConcurrentOperationCount=1;
-    self.writeQueue.maxConcurrentOperationCount=1; 
+    self.writeQueue.maxConcurrentOperationCount=1;
     
     //placing more common at top to reduce iteration
     _stanzaTypes=[NSArray arrayWithObjects:

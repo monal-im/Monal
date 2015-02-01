@@ -48,6 +48,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 @property (nonatomic, strong) NSOperationQueue *readQueue;
 @property (nonatomic, strong) NSOperationQueue *writeQueue;
 
+//stream resumption
+@property (nonatomic, assign) BOOL supportsSM2;
+@property (nonatomic, assign) BOOL supportsSM3;
+
+
 @end
 
 

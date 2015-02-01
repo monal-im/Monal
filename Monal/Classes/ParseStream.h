@@ -14,6 +14,8 @@
 
 @property (nonatomic,readonly, assign) BOOL supportsLegacyAuth;
 @property (nonatomic,readonly, assign) BOOL supportsUserReg;
+@property (nonatomic,readonly, assign) BOOL supportsSM2;
+@property (nonatomic,readonly, assign) BOOL supportsSM3;
 
 //Auth mechanisms
 @property (nonatomic,readonly, assign) BOOL supportsSASL;

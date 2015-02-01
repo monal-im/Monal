@@ -21,6 +21,7 @@
 #define kofflineSection 2
 
 @interface ContactsViewController ()
+@property (nonatomic, strong) NSArray* searchResults ;
 
 @end
 
@@ -509,9 +510,9 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 {
     
     if([[NSUserDefaults standardUserDefaults] boolForKey:@"SortContacts"]) //sort by status
-        _contacts=[NSMutableArray arrayWithArray:[[DataLayer sharedInstance] onlineBuddiesSortedBy:@"Status"]];
+        _contacts=[NSMutableArray arrayWithArray:[[DataLayer sharedInstance] onlineContactsSortedBy:@"Status"]];
     else
-        _contacts=[NSMutableArray arrayWithArray:[[DataLayer sharedInstance] onlineBuddiesSortedBy:@"Name"]];
+        _contacts=[NSMutableArray arrayWithArray:[[DataLayer sharedInstance] onlineContactsSortedBy:@"Name"]];
     
     if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
     {
@@ -620,6 +621,30 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     
 }
 
+#pragma mark search display delegate
+
+- (void)searchDisplayControllerWillBeginSearch:(UISearchDisplayController *)controller {
+    self.searchResults=nil;
+}
+
+- (void)searchDisplayControllerWillEndSearch:(UISearchDisplayController *)controller
+{
+    self.searchResults=nil;
+
+}
+
+-(BOOL) searchDisplayController:(UISearchDisplayController *)controller shouldReloadTableForSearchString:(NSString *)searchString
+{
+    if(searchString.length >0) {
+    
+        self.searchResults = [[DataLayer sharedInstance] searchContactsWithString:searchString];
+        return YES;
+    }
+    
+    self.searchResults=nil;
+    return NO;
+}
+
 #pragma mark tableview datasource
 -(NSString*) tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
@@ -642,28 +667,41 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 
 -(NSInteger) numberOfSectionsInTableView:(UITableView *)tableView
 {
+    NSInteger toreturn=0;
+    if(tableView ==self.view) {
     if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
-        return 3;
+        toreturn =3;
     else
-        return 2;
+        toreturn =2;
+    }
+    else  if(tableView ==self.searchDisplayController.searchResultsTableView) {
+        toreturn =1;
+    }
+    
+    return toreturn;
+    
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    int toReturn=0;
-    
-    switch (section) {
-        case kinfoSection:
-            toReturn=[_infoCells count];
-            break;
-        case konlineSection:
-            toReturn= [_contacts count];
-            break;
-        case kofflineSection:
-            toReturn=[_offlineContacts count];
-            break;
-        default:
-            break;
+    NSInteger toReturn=0;
+    if(tableView ==self.view) {
+        switch (section) {
+            case kinfoSection:
+                toReturn=[_infoCells count];
+                break;
+            case konlineSection:
+                toReturn= [_contacts count];
+                break;
+            case kofflineSection:
+                toReturn=[_offlineContacts count];
+                break;
+            default:
+                break;
+        }
+    }
+    else  if(tableView ==self.searchDisplayController.searchResultsTableView) {
+        toReturn=[self.searchResults count];
     }
     
     return toReturn;
@@ -671,26 +709,28 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    if(indexPath.section==kinfoSection)
-    {
-        MLInfoCell* cell =[tableView dequeueReusableCellWithIdentifier:@"InfoCell"];
-        if(!cell)
+    if(tableView ==self.view) {
+        if(indexPath.section==kinfoSection)
         {
-            cell =[[MLInfoCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"InfoCell"];
+            MLInfoCell* cell =[tableView dequeueReusableCellWithIdentifier:@"InfoCell"];
+            if(!cell)
+            {
+                cell =[[MLInfoCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"InfoCell"];
+            }
+            
+            cell.textLabel.text=[[_infoCells objectAtIndex:indexPath.row] objectForKey:@"accountName"];
+            cell.detailTextLabel.text=[[_infoCells objectAtIndex:indexPath.row] objectForKey:@"status"];
+            cell.type=[[_infoCells objectAtIndex:indexPath.row] objectForKey:@"type"];
+            cell.accountId=[[_infoCells objectAtIndex:indexPath.row] objectForKey:@"acccountId"];
+            
+            
+            if([cell.detailTextLabel.text isEqualToString:@"Connecting"])
+            {
+                [cell.spinner startAnimating];
+            }
+            
+            return cell;
         }
-        
-        cell.textLabel.text=[[_infoCells objectAtIndex:indexPath.row] objectForKey:@"accountName"];
-        cell.detailTextLabel.text=[[_infoCells objectAtIndex:indexPath.row] objectForKey:@"status"];
-        cell.type=[[_infoCells objectAtIndex:indexPath.row] objectForKey:@"type"];
-        cell.accountId=[[_infoCells objectAtIndex:indexPath.row] objectForKey:@"acccountId"];
-        
-        
-        if([cell.detailTextLabel.text isEqualToString:@"Connecting"])
-        {
-            [cell.spinner startAnimating];
-        }
-        
-        return cell;
     }
     
     MLContactCell* cell =[tableView dequeueReusableCellWithIdentifier:@"ContactCell"];
@@ -700,14 +740,20 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     }
     
     NSDictionary* row =nil;
+ 
     if(indexPath.section==konlineSection)
     {
         row = [_contacts objectAtIndex:indexPath.row];
     }
     
-    if(indexPath.section==kofflineSection)
-    {
-        row = [_offlineContacts objectAtIndex:indexPath.row];
+    if(tableView ==self.view) {
+        if(indexPath.section==kofflineSection)
+        {
+            row = [_offlineContacts objectAtIndex:indexPath.row];
+        }
+    }
+    else  if(tableView ==self.searchDisplayController.searchResultsTableView) {
+        row = [self.searchResults objectAtIndex:indexPath.row];
     }
     
     NSString* fullName=[row objectForKey:@"full_name"];
@@ -759,12 +805,24 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    return YES;
+    if(tableView ==self.view) {
+        return YES;
+    }
+    else
+    {
+        return NO;
+    }
 }
 
 - (BOOL)tableView:(UITableView *)tableView shouldIndentWhileEditingRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    return YES;
+    if(tableView ==self.view) {
+        return YES;
+    }
+    else
+    {
+        return NO;
+    }
 }
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {

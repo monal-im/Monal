@@ -48,7 +48,9 @@
 -(BOOL) resetContactsForAccount:(NSString*) accountNo;
 -(BOOL) resetContacts;
 
--(NSArray*) onlineBuddiesSortedBy:(NSString*) sort;
+
+-(NSArray*) searchContactsWithString:(NSString*) search;
+-(NSArray*) onlineContactsSortedBy:(NSString*) sort;
 -(NSArray*) resourcesForContact:(NSString*)contact ;
 -(NSArray*) offlineContacts;
 

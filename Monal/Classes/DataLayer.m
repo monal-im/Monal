@@ -512,7 +512,31 @@ static DataLayer *sharedInstance=nil;
 }
 
 
--(NSArray*) onlineBuddiesSortedBy:(NSString*) sort
+-(NSArray*) searchContactsWithString:(NSString*) search
+{
+    NSString* query=@"";
+    
+
+        query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0 as 'count' , ifnull(full_name, buddy_name) as full_name, account_id from buddylist where buddy_name like '%%%@%%' or full_name like '%%%@%%'  order by full_name COLLATE NOCASE asc ", search, search];
+    
+    
+    //DDLogVerbose(query);
+    NSArray* toReturn = [self executeReader:query];
+    
+    if(toReturn!=nil)
+    {
+        DDLogVerbose(@" count: %d",  [toReturn count] );
+        return toReturn;
+    }
+    else
+    {
+        DDLogError(@"buddylist is empty or failed to read");
+        return nil;
+    }
+    
+}
+
+-(NSArray*) onlineContactsSortedBy:(NSString*) sort
 {
     NSString* query=@"";
     

@@ -517,7 +517,7 @@ static DataLayer *sharedInstance=nil;
     NSString* query=@"";
     
     
-    query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0 as 'count' , ifnull(full_name, buddy_name) as full_name, account_id from buddylist where buddy_name like '%%%@%%' or full_name like '%%%@%%'  order by full_name COLLATE NOCASE asc ", search, search];
+    query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0 as 'count' , ifnull(full_name, buddy_name) as full_name, account_id, online from buddylist where buddy_name like '%%%@%%' or full_name like '%%%@%%'  order by full_name COLLATE NOCASE asc ", search, search];
     
     
     //DDLogVerbose(query);

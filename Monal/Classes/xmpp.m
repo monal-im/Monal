@@ -818,7 +818,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     DDLogVerbose(@"Set jid %@", _jid);
                     
                     XMPPIQ* sessionQuery= [[XMPPIQ alloc] initWithId:_sessionKey andType:kiqSetType];
-                    XMLNode* session = [[XMLNode alloc] initWithElement:@"stream"];
+                    XMLNode* session = [[XMLNode alloc] initWithElement:@"session"];
                     [session setXMLNS:@"urn:ietf:params:xml:ns:xmpp-session"];
                     [sessionQuery.children addObject:session];
                     [self send:sessionQuery];

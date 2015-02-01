@@ -45,6 +45,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 }
 
 @property (nonatomic, strong) NSString *pingID;
+@property (nonatomic, strong) NSOperationQueue *readQueue;
+@property (nonatomic, strong) NSOperationQueue *writeQueue;
 
 @end
 
@@ -65,11 +67,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     int r =  arc4random();
     _resource=[NSString stringWithFormat:@"Monal%d",r];
     
-    NSString* monalNetReadQueue =[NSString  stringWithFormat:@"im.monal.netReadQueue.%@", _accountNo];
-    NSString* monalNetWriteQueue =[NSString  stringWithFormat:@"im.monal.netWriteQueue.%@", _accountNo];
-    
-    _netReadQueue = dispatch_queue_create([monalNetReadQueue UTF8String], DISPATCH_QUEUE_SERIAL);
-    _netWriteQueue = dispatch_queue_create([monalNetWriteQueue UTF8String], DISPATCH_QUEUE_SERIAL);
+    self.readQueue =[[NSOperationQueue alloc] init];
+    self.writeQueue =[[NSOperationQueue alloc] init];
+    self.readQueue.maxConcurrentOperationCount=1;
+    self.writeQueue.maxConcurrentOperationCount=1; 
     
     //placing more common at top to reduce iteration
     _stanzaTypes=[NSArray arrayWithObjects:
@@ -263,6 +264,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) connect
 {
+    [self.readQueue cancelAllOperations];
+    [self.writeQueue cancelAllOperations];
     if(self.explicitLogout) return;
     if(self.accountState==kStateLoggedIn )
     {
@@ -347,6 +350,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) disconnect
 {
     if(kStateDisconnected) return;
+    [self.readQueue cancelAllOperations];
+    [self.writeQueue cancelAllOperations];
     
     self.pingID=nil;
     DDLogInfo(@"removing streams");
@@ -362,7 +367,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         forMode:NSDefaultRunLoopMode];
 	DDLogInfo(@"removed streams");
 	
-    dispatch_sync(_netReadQueue, ^{
+    
+    [self.readQueue addOperation:
+     [NSBlockOperation blockOperationWithBlock:^{
+
         @try
         {
             [_iStream close];
@@ -372,9 +380,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         {
             DDLogError(@"Exception in istream close");
         }
-    });
+    }]];
     
-    dispatch_sync(_netWriteQueue, ^{
+     [self.writeQueue addOperation:
+      [NSBlockOperation blockOperationWithBlock:^{
+
        	@try
         {
             [_oStream close];
@@ -385,7 +395,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             DDLogError(@"Exception in ostream close");
         }
         
-    });
+     }]];
     
     
 	[_contactsVC clearContactsForAccount:_accountNo];
@@ -522,22 +532,22 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) startStream
 {
-    //flush read buffer since its all nont needed
-    DDLogInfo(@"waiting read queue");
-    dispatch_sync(_netReadQueue, ^{
+    [self.readQueue addOperation:
+     [NSBlockOperation blockOperationWithBlock:^{
+        //flush buffer to ignore all prior input
         _inputBuffer=[[NSMutableString alloc] init];
-    });
-    
-    DDLogInfo(@" got read queue");
-    
-    XMLNode* stream = [[XMLNode alloc] init];
-    stream.element=@"stream:stream";
-    [stream.attributes setObject:@"jabber:client" forKey:@"xmlns"];
-    [stream.attributes setObject:@"http://etherx.jabber.org/streams" forKey:@"xmlns:stream"];
-    [stream.attributes setObject:@"1.0" forKey:@"version"];
-    if(_domain)
-        [stream.attributes setObject:_domain forKey:@"to"];
-    [self send:stream];
+        
+        DDLogInfo(@" got read queue");
+        
+        XMLNode* stream = [[XMLNode alloc] init];
+        stream.element=@"stream:stream";
+        [stream.attributes setObject:@"jabber:client" forKey:@"xmlns"];
+        [stream.attributes setObject:@"http://etherx.jabber.org/streams" forKey:@"xmlns:stream"];
+        [stream.attributes setObject:@"1.0" forKey:@"version"];
+        if(_domain)
+            [stream.attributes setObject:_domain forKey:@"to"];
+        [self send:stream];
+    }]];
 }
 
 
@@ -625,15 +635,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     NSString* __block toReturn=nil;
     NSString* __block stanzaType=nil;
     
-    dispatch_sync(_netReadQueue, ^{
         int stanzacounter=0;
         int maxPos=[_inputBuffer length];
         DDLogVerbose(@"maxPos %d", maxPos);
         
         if(maxPos<2)
         {
-            toReturn= nil;
-            return;
+            return nil;
         }
         //accouting for white space
         NSRange startrange=[_inputBuffer rangeOfString:@"<"
@@ -641,7 +649,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         if (startrange.location==NSNotFound)
         {
             toReturn= nil;
-            return;
+            return nil;
         }
         
         
@@ -763,8 +771,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
               //  DDLogVerbose(@"result: %@", _inputBuffer);
             }
         }
-    });
-    
+  
     NSMutableDictionary* returnDic=nil;
     
     if(stanzaType && toReturn)
@@ -781,894 +788,897 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     //prevent reconnect attempt
     if(_accountState<kStateHasStream) _accountState=kStateHasStream;
-    
-    NSDictionary* nextStanzaPos=[self nextStanza];
-    while (nextStanzaPos)
-    {
-        DDLogVerbose(@"got stanza %@", nextStanzaPos);
+    [self.readQueue addOperation:
+     [NSBlockOperation blockOperationWithBlock:^{
         
-        if([[nextStanzaPos objectForKey:@"stanzaType"]  isEqualToString:@"iq"])
+        NSDictionary* nextStanzaPos=[self nextStanza];
+        while (nextStanzaPos)
         {
-            ParseIq* iqNode= [[ParseIq alloc]  initWithDictionary:nextStanzaPos];
-            if ([iqNode.type isEqualToString:kiqErrorType])
-            {
-                return;
-            }
+            DDLogVerbose(@"got stanza %@", nextStanzaPos);
             
-            if(iqNode.legacyAuth)
+            if([[nextStanzaPos objectForKey:@"stanzaType"]  isEqualToString:@"iq"])
             {
-                XMPPIQ* auth =[[XMPPIQ alloc] initWithId:@"auth2" andType:kiqSetType];
-                [auth setAuthWithUserName:self.username resource:self.resource andPassword:self.password];
-                [self send:auth];
-            }
-            
-            if(iqNode.shouldSetBind)
-            {
-                _jid=iqNode.jid;
-                DDLogVerbose(@"Set jid %@", _jid);
-                
-                XMPPIQ* sessionQuery= [[XMPPIQ alloc] initWithId:_sessionKey andType:kiqSetType];
-                XMLNode* session = [[XMLNode alloc] initWithElement:@"stream"];
-                [session setXMLNS:@"urn:ietf:params:xml:ns:xmpp-session"];
-                [sessionQuery.children addObject:session];
-                [self send:sessionQuery];
-                
-                XMPPIQ* discoItems =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
-                [discoItems setiqTo:_domain];
-                XMLNode* items = [[XMLNode alloc] initWithElement:@"query"];
-                [items setXMLNS:@"http://jabber.org/protocol/disco#items"];
-                [discoItems.children addObject:items];
-                [self send:discoItems];
-                
-                XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
-                [discoInfo setiqTo:_domain];
-                [discoInfo setDiscoInfoNode];
-                [self send:discoInfo];
-                
-                
-                //no need to pull roster on every call if disconenct
-                if(!_rosterList)
+                ParseIq* iqNode= [[ParseIq alloc]  initWithDictionary:nextStanzaPos];
+                if ([iqNode.type isEqualToString:kiqErrorType])
                 {
-                    XMPPIQ* roster =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
-                    [roster setRosterRequest];
-                    [self send:roster];
-                }
-                
-                self.priority= [[[NSUserDefaults standardUserDefaults] stringForKey:@"XMPPPriority"] integerValue];
-                self.statusMessage=[[NSUserDefaults standardUserDefaults] stringForKey:@"StatusMessage"];
-                self.awayState=[[NSUserDefaults standardUserDefaults] boolForKey:@"Away"];
-                self.visibleState=[[NSUserDefaults standardUserDefaults] boolForKey:@"Visible"];
-                
-                XMPPPresence* presence =[[XMPPPresence alloc] initWithHash:_versionHash];
-                [presence setPriority:self.priority];
-                if(self.statusMessage) [presence setStatus:self.statusMessage];
-                if(self.awayState) [presence setAway];
-                if(!self.visibleState) [presence setInvisible];
-                
-                [self send:presence];
-                
-            }
-            
-            if((iqNode.discoInfo) && [iqNode.type isEqualToString:kiqGetType])
-            {
-                XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
-                [discoInfo setiqTo:iqNode.from];
-                [discoInfo setDiscoInfoWithFeaturesAndNode:iqNode.queryNode];
-                [self send:discoInfo];
-                
-            }
-            
-            if(iqNode.vCard)
-            {
-                NSString* fullname=iqNode.fullName;
-                if(iqNode.fullName)
-                {
-                    [[DataLayer sharedInstance] setFullName:iqNode.fullName forBuddy:iqNode.user andAccount:_accountNo];
-                }
-                
-                if(iqNode.photoBinValue)
-                {
-                    [[MLImageManager sharedInstance] setIconForContact:iqNode.user andAccount:_accountNo WithData:iqNode.photoBinValue ];
-                }
-                
-                if(!fullname) fullname=iqNode.user;
-                
-                NSDictionary* userDic=@{kusernameKey: iqNode.user,
-                                        kfullNameKey: fullname,
-                                        kaccountNoKey:_accountNo
-                                        };
-                
-                dispatch_async(_xmppQueue, ^{
-                    [self.contactsVC addOnlineUser:userDic];
-                });
-                
-            }
-            
-            if(iqNode.ping)
-            {
-                XMPPIQ* pong =[[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
-                [pong setiqTo:_domain];
-                [self send:pong];
-            }
-            
-            if([iqNode.idval isEqualToString:self.pingID])
-            {
-                //response to my ping
-                self.pingID=nil;
-            }
-            
-            if (iqNode.version)
-            {
-                XMPPIQ* versioniq =[[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
-                [versioniq setiqTo:iqNode.from];
-                [versioniq setVersion];
-                [self send:versioniq];
-            }
-            
-            if (iqNode.last)
-            {
-                XMPPIQ* lastiq =[[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
-                [lastiq setiqTo:iqNode.from];
-                [lastiq setLast];
-                [self send:lastiq];
-            }
-            
-            if (iqNode.time)
-            {
-                XMPPIQ* timeiq =[[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
-                [timeiq setiqTo:iqNode.from];
-                //[lastiq setLast];
-                [self send:timeiq];
-            }
-            
-            
-            if ([iqNode.type isEqualToString:kiqResultType])
-            {
-                if(iqNode.discoItems==YES)
-                {
-                    if([iqNode.from isEqualToString:self.server] || [iqNode.from isEqualToString:self.domain])
-                    {
-                        for (NSDictionary* item in iqNode.items)
-                        {
-                            if(!_discoveredServices) _discoveredServices=[[NSMutableArray alloc] init];
-                            [_discoveredServices addObject:item];
-                        }
-                    }
-                    else
-                    {
-                        
-                    }
-                }
-                else if (iqNode.roster==YES)
-                {
-                    self.rosterList=iqNode.items;
-                    
-                    for(NSDictionary* contact in self.rosterList)
-                    {
-                        
-                        if([[contact objectForKey:@"subscription"] isEqualToString:@"both"])
-                        {
-                            if(![[DataLayer sharedInstance] isBuddyInList:[contact objectForKey:@"jid"] forAccount:_accountNo])
-                            {
-                                [[DataLayer sharedInstance] addBuddy:[contact objectForKey:@"jid"]?[contact objectForKey:@"jid"]:@"" forAccount:_accountNo fullname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@"" nickname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@""];
-                            }
-                            else
-                            {
-                                // update info if needed
-                                
-                                [[DataLayer sharedInstance] setFullName:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@"" forBuddy:[contact objectForKey:@"jid"]?[contact objectForKey:@"jid"]:@"" andAccount:_accountNo ] ;
-                                
-                            }
-                        }
-                        else
-                        {
-                            
-                        }
-                    }
-                    
-                }
-                
-                //confirmation of set call after we accepted
-                if([iqNode.idval isEqualToString:self.jingle.idval])
-                {
-                    NSArray* nameParts= [iqNode.from componentsSeparatedByString:@"/"];
-                    NSString* from;
-                    if([nameParts count]>1) {
-                        from=[nameParts objectAtIndex:0];
-                    } else from = iqNode.from;
-                    
-                    NSString* fullName;
-                    fullName=[[DataLayer sharedInstance] fullName:from forAccount:_accountNo];
-                    if(!fullName) fullName=from;
-                    
-                    NSDictionary* userDic=@{@"buddy_name":from,
-                                            @"full_name":fullName,
-                                            @"account_id":_accountNo
-                                            };
-                    
-                    [[NSNotificationCenter defaultCenter]
-                     postNotificationName: kMonalCallStartedNotice object: userDic];
-                    
-                    
-                    [self.jingle rtpConnect];
                     return;
                 }
                 
-            }
-            
-            
-            if ([iqNode.type isEqualToString:kiqSetType]) {
-                if(iqNode.jingleSession) {
-                    
-                    //accpetance of our call
-                    if([[iqNode.jingleSession objectForKey:@"action"] isEqualToString:@"session-accept"] &&
-                       [[iqNode.jingleSession objectForKey:@"sid"] isEqualToString:self.jingle.thesid])
-                    {
-                        
-                        NSDictionary* transport1;
-                        NSDictionary* transport2;
-                        for(NSDictionary* candidate in iqNode.jingleTransportCandidates) {
-                            if([[candidate objectForKey:@"component"] isEqualToString:@"1"]) {
-                                transport1=candidate;
-                            }
-                            if([[candidate objectForKey:@"component"] isEqualToString:@"2"]) {
-                                transport2=candidate;
-                            }
-                        }
-                        
-                        NSDictionary* pcmaPayload;
-                        for(NSDictionary* payload in iqNode.jinglePayloadTypes) {
-                            if([[payload objectForKey:@"name"] isEqualToString:@"PCMA"]) {
-                                pcmaPayload=payload;
-                                break;
-                            }
-                        }
-                        
-                        if (pcmaPayload && transport1) {
-                            self.jingle.recipientIP=[transport1 objectForKey:@"ip"];
-                            self.jingle.destinationPort= [transport1 objectForKey:@"port"];
-                            
-                            XMPPIQ* node = [[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
-                            [node setiqTo:[NSString stringWithFormat:@"%@/%@", iqNode.user,iqNode.resource]];
-                            [self send:node];
-                            
-                            [self.jingle rtpConnect];
-                        }
-                        return;
-                    }
-                    
-                    if([[iqNode.jingleSession objectForKey:@"action"] isEqualToString:@"session-terminate"] &&  [[iqNode.jingleSession objectForKey:@"sid"] isEqualToString:self.jingle.thesid]) {
-                        XMPPIQ* node = [[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
-                        [node setiqTo:[NSString stringWithFormat:@"%@/%@", iqNode.user,iqNode.resource]];
-                        [self send:node];
-                        [self.jingle rtpDisconnect];
-                    }
-                    
-                    if([[iqNode.jingleSession objectForKey:@"action"] isEqualToString:@"session-initiate"]) {
-                        NSDictionary* pcmaPayload;
-                        for(NSDictionary* payload in iqNode.jinglePayloadTypes) {
-                            if([[payload objectForKey:@"name"] isEqualToString:@"PCMA"]) {
-                                pcmaPayload=payload;
-                                break;
-                            }
-                        }
-                        
-                        NSDictionary* transport1;
-                        NSDictionary* transport2;
-                        for(NSDictionary* candidate in iqNode.jingleTransportCandidates) {
-                            if([[candidate objectForKey:@"component"] isEqualToString:@"1"]) {
-                                transport1=candidate;
-                            }
-                            if([[candidate objectForKey:@"component"] isEqualToString:@"2"]) {
-                                transport2=candidate;
-                            }
-                        }
-                        
-                        if (pcmaPayload && transport1) {
-                            self.jingle = [[jingleCall alloc] init];
-                            self.jingle.initiator= [iqNode.jingleSession objectForKey:@"initiator"];
-                            self.jingle.responder= [iqNode.jingleSession objectForKey:@"responder"];
-                            self.jingle.thesid= [iqNode.jingleSession objectForKey:@"sid"];
-                            self.jingle.destinationPort= [transport1 objectForKey:@"port"];
-                            self.jingle.idval=iqNode.idval;
-                            if(transport2) {
-                                self.jingle.destinationPort2= [transport2 objectForKey:@"port"];
-                            }
-                            else {
-                                self.jingle.destinationPort2=[transport1 objectForKey:@"port"]; // if nothing is provided just reuse..
-                            }
-                            self.jingle.recipientIP=[transport1 objectForKey:@"ip"];
-                            
-                           
-                            if(iqNode.user && iqNode.resource) {
-                                
-                                dispatch_async(dispatch_get_main_queue(), ^{
-                                    
-                                    NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"Incoming Call From %@?", nil), iqNode.from ];
-                                    RIButtonItem* cancelButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Decline", nil) action:^{
-                                        XMPPIQ* node =[self.jingle rejectJingleTo:iqNode.user withId:iqNode.idval andResource:iqNode.resource];
-                                        [self send:node];
-                                        self.jingle=nil;
-                                    }];
-                                    
-                                    RIButtonItem* yesButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Accept Call", nil) action:^{
-                                        
-                                        XMPPIQ* node =[self.jingle acceptJingleTo:iqNode.user withId:iqNode.idval andResource:iqNode.resource];
-                                        [self send:node];
-                                    }];
-                                    
-                                    UIAlertView* alert =[[UIAlertView alloc] initWithTitle:@"Audio Call" message:messageString cancelButtonItem:cancelButton otherButtonItems:yesButton, nil];
-                                    [alert show];
-                                } );
-                                
-                                
-                            }
-                        }
-                        else {
-                            //does not support the same formats
-                        }
-                        
-                    }
-                }
-            }
-            
-            //*** MUC related
-            if(iqNode.conferenceServer)
-            {
-                _conferenceServer=iqNode.conferenceServer;
-            }
-            
-            if([iqNode.from isEqualToString:_conferenceServer] && iqNode.discoItems)
-            {
-                _roomList=iqNode.items;
-                [[NSNotificationCenter defaultCenter]
-                 postNotificationName: kMLHasRoomsNotice object: self];
-            }
-            
-            
-        }
-        else  if([[nextStanzaPos objectForKey:@"stanzaType"]  isEqualToString:@"message"])
-        {
-            ParseMessage* messageNode= [[ParseMessage alloc]  initWithDictionary:nextStanzaPos];
-            if([messageNode.type isEqualToString:kMessageErrorType])
-            {
-                //TODO: mark message as error
-                return;
-            }
-            
-            
-            if(messageNode.mucInvite)
-            {
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"You have been invited to a conversation %@?", nil), messageNode.from ];
-                    RIButtonItem* cancelButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Cancel", nil) action:^{
-                        
-                    }];
-                    
-                    RIButtonItem* yesButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Join", nil) action:^{
-                        
-                        [self joinRoom:messageNode.from withPassword:nil];
-                    }];
-                    
-                    UIAlertView* alert =[[UIAlertView alloc] initWithTitle:@"Chat Invite" message:messageString cancelButtonItem:cancelButton otherButtonItems:yesButton, nil];
-                    [alert show];
-                });
-                
-            }
-            
-            if(messageNode.hasBody)
-            {
-                if ([messageNode.type isEqualToString:kMessageGroupChatType]
-                    && [messageNode.actualFrom isEqualToString:_username])
+                if(iqNode.legacyAuth)
                 {
-                    //this is just a muc echo
+                    XMPPIQ* auth =[[XMPPIQ alloc] initWithId:@"auth2" andType:kiqSetType];
+                    [auth setAuthWithUserName:self.username resource:self.resource andPassword:self.password];
+                    [self send:auth];
                 }
-                else
+                
+                if(iqNode.shouldSetBind)
                 {
-                    [[DataLayer sharedInstance] addMessageFrom:messageNode.from to:_fulluser
-                                                    forAccount:_accountNo withBody:messageNode.messageText
-                                                  actuallyfrom:messageNode.actualFrom delivered:YES];
+                    _jid=iqNode.jid;
+                    DDLogVerbose(@"Set jid %@", _jid);
                     
-                    [[DataLayer sharedInstance] addActiveBuddies:messageNode.from forAccount:_accountNo];
+                    XMPPIQ* sessionQuery= [[XMPPIQ alloc] initWithId:_sessionKey andType:kiqSetType];
+                    XMLNode* session = [[XMLNode alloc] initWithElement:@"stream"];
+                    [session setXMLNS:@"urn:ietf:params:xml:ns:xmpp-session"];
+                    [sessionQuery.children addObject:session];
+                    [self send:sessionQuery];
+                    
+                    XMPPIQ* discoItems =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
+                    [discoItems setiqTo:_domain];
+                    XMLNode* items = [[XMLNode alloc] initWithElement:@"query"];
+                    [items setXMLNS:@"http://jabber.org/protocol/disco#items"];
+                    [discoItems.children addObject:items];
+                    [self send:discoItems];
+                    
+                    XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
+                    [discoInfo setiqTo:_domain];
+                    [discoInfo setDiscoInfoNode];
+                    [self send:discoInfo];
                     
                     
-                    if(messageNode.from) {
-                        NSString* actuallyFrom= messageNode.actualFrom;
-                        if(!actuallyFrom) actuallyFrom=messageNode.from;
-                        
-                        NSString* messageText=messageNode.messageText;
-                        if(!messageText) messageText=@"";
-                        
-                        NSDictionary* userDic=@{@"from":messageNode.from,
-                                                @"actuallyfrom":actuallyFrom,
-                                                @"messageText":messageText,
-                                                @"to":_fulluser,
-                                                @"accountNo":_accountNo
-                                                };
-                        
-                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:userDic];
+                    //no need to pull roster on every call if disconenct
+                    if(!_rosterList)
+                    {
+                        XMPPIQ* roster =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
+                        [roster setRosterRequest];
+                        [self send:roster];
                     }
-                }
-            }
-            
-            if(messageNode.avatarData)
-            {
-                [[MLImageManager sharedInstance] setIconForContact:messageNode.actualFrom andAccount:_accountNo WithData:messageNode.avatarData];
-                
-            }
-            
-        }
-        else  if([[nextStanzaPos objectForKey:@"stanzaType"]  isEqualToString:@"presence"])
-        {
-            ParsePresence* presenceNode= [[ParsePresence alloc]  initWithDictionary:nextStanzaPos];
-            if([presenceNode.user isEqualToString:_fulluser]) {
-                 nextStanzaPos=[self nextStanza];
-                continue; //ignore self
-            }
-            
-            if([presenceNode.type isEqualToString:kpresencesSubscribe])
-            {
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"Do you wish to allow %@ to add you to their contacts?", nil), presenceNode.from ];
-                    RIButtonItem* cancelButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"No", nil) action:^{
-                        [self rejectFromRoster:presenceNode.from];
-                        
-                    }];
                     
-                    RIButtonItem* yesButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Yes", nil) action:^{
-                        [self approveToRoster:presenceNode.from];
-                        [self addToRoster:presenceNode.from];
-                        
-                    }];
+                    self.priority= [[[NSUserDefaults standardUserDefaults] stringForKey:@"XMPPPriority"] integerValue];
+                    self.statusMessage=[[NSUserDefaults standardUserDefaults] stringForKey:@"StatusMessage"];
+                    self.awayState=[[NSUserDefaults standardUserDefaults] boolForKey:@"Away"];
+                    self.visibleState=[[NSUserDefaults standardUserDefaults] boolForKey:@"Visible"];
                     
-                    UIAlertView* alert =[[UIAlertView alloc] initWithTitle:@"Approve Contact" message:messageString cancelButtonItem:cancelButton otherButtonItems:yesButton, nil];
-                    [alert show];
-                });
-  
-            }
-            
-            if(presenceNode.MUC)
-            {
-                for (NSString* code in presenceNode.statusCodes) {
-                    if([code isEqualToString:@"201"]) {
-                        //201- created and needs configuration
-                        //make instant room
-                        XMPPIQ *configNode = [[XMPPIQ alloc] initWithId:_sessionKey andType:kiqSetType];
-                        [configNode setiqTo:presenceNode.from];
-                        [configNode setInstantRoom];
-                        [self send:configNode];
-                    }
+                    XMPPPresence* presence =[[XMPPPresence alloc] initWithHash:_versionHash];
+                    [presence setPriority:self.priority];
+                    if(self.statusMessage) [presence setStatus:self.statusMessage];
+                    if(self.awayState) [presence setAway];
+                    if(!self.visibleState) [presence setInvisible];
+                    
+                    [self send:presence];
+                    
                 }
                 
-                //mark buddy as MUC
-            }
-            
-            if(presenceNode.type ==nil)
-            {
-                DDLogVerbose(@"presence priority notice from %@", presenceNode.user);
-                
-                if((presenceNode.user!=nil) && ([[presenceNode.user stringByTrimmingCharactersInSet:
-                                                  [NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0))
+                if((iqNode.discoInfo) && [iqNode.type isEqualToString:kiqGetType])
                 {
-                    if(![[DataLayer sharedInstance] isBuddyInList:presenceNode.user forAccount:_accountNo])
+                    XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
+                    [discoInfo setiqTo:iqNode.from];
+                    [discoInfo setDiscoInfoWithFeaturesAndNode:iqNode.queryNode];
+                    [self send:discoInfo];
+                    
+                }
+                
+                if(iqNode.vCard)
+                {
+                    NSString* fullname=iqNode.fullName;
+                    if(iqNode.fullName)
                     {
-                        DDLogVerbose(@"Buddy not already in list");
-                        [[DataLayer sharedInstance] addBuddy:presenceNode.user forAccount:_accountNo fullname:@"" nickname:@"" ];
+                        [[DataLayer sharedInstance] setFullName:iqNode.fullName forBuddy:iqNode.user andAccount:_accountNo];
                     }
-                    else
+                    
+                    if(iqNode.photoBinValue)
                     {
-                        DDLogVerbose(@"Buddy already in list");
+                        [[MLImageManager sharedInstance] setIconForContact:iqNode.user andAccount:_accountNo WithData:iqNode.photoBinValue ];
                     }
                     
-                    DDLogVerbose(@" showing as online now");
+                    if(!fullname) fullname=iqNode.user;
                     
-                    [[DataLayer sharedInstance] setOnlineBuddy:presenceNode forAccount:_accountNo];
-                    [[DataLayer sharedInstance] setBuddyState:presenceNode forAccount:_accountNo];
-                    [[DataLayer sharedInstance] setBuddyStatus:presenceNode forAccount:_accountNo];
-                    
-                    NSString* state=presenceNode.show;
-                    if(!state) state=@"";
-                    NSString* status=presenceNode.status;
-                    if(!status) status=@"";
-                    NSDictionary* userDic=@{kusernameKey: presenceNode.user,
-                                            kaccountNoKey:_accountNo,
-                                            kstateKey:state,
-                                            kstatusKey:status
+                    NSDictionary* userDic=@{kusernameKey: iqNode.user,
+                                            kfullNameKey: fullname,
+                                            kaccountNoKey:_accountNo
                                             };
+                    
                     dispatch_async(_xmppQueue, ^{
                         [self.contactsVC addOnlineUser:userDic];
-                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactOnlineNotice object:self userInfo:userDic];
                     });
                     
-                    if(!presenceNode.MUC) {
-                        // do not do this in the background
-                        if([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground)
+                }
+                
+                if(iqNode.ping)
+                {
+                    XMPPIQ* pong =[[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
+                    [pong setiqTo:_domain];
+                    [self send:pong];
+                }
+                
+                if([iqNode.idval isEqualToString:self.pingID])
+                {
+                    //response to my ping
+                    self.pingID=nil;
+                }
+                
+                if (iqNode.version)
+                {
+                    XMPPIQ* versioniq =[[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
+                    [versioniq setiqTo:iqNode.from];
+                    [versioniq setVersion];
+                    [self send:versioniq];
+                }
+                
+                if (iqNode.last)
+                {
+                    XMPPIQ* lastiq =[[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
+                    [lastiq setiqTo:iqNode.from];
+                    [lastiq setLast];
+                    [self send:lastiq];
+                }
+                
+                if (iqNode.time)
+                {
+                    XMPPIQ* timeiq =[[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
+                    [timeiq setiqTo:iqNode.from];
+                    //[lastiq setLast];
+                    [self send:timeiq];
+                }
+                
+                
+                if ([iqNode.type isEqualToString:kiqResultType])
+                {
+                    if(iqNode.discoItems==YES)
+                    {
+                        if([iqNode.from isEqualToString:self.server] || [iqNode.from isEqualToString:self.domain])
                         {
-                            //check for vcard change
-                            if(presenceNode.photoHash) {
-                                if([presenceNode.photoHash isEqualToString:[[DataLayer sharedInstance]  buddyHash:presenceNode.user forAccount:_accountNo]])
+                            for (NSDictionary* item in iqNode.items)
+                            {
+                                if(!_discoveredServices) _discoveredServices=[[NSMutableArray alloc] init];
+                                [_discoveredServices addObject:item];
+                            }
+                        }
+                        else
+                        {
+                            
+                        }
+                    }
+                    else if (iqNode.roster==YES)
+                    {
+                        self.rosterList=iqNode.items;
+                        
+                        for(NSDictionary* contact in self.rosterList)
+                        {
+                            
+                            if([[contact objectForKey:@"subscription"] isEqualToString:@"both"])
+                            {
+                                if(![[DataLayer sharedInstance] isBuddyInList:[contact objectForKey:@"jid"] forAccount:_accountNo])
                                 {
-                                    DDLogVerbose(@"photo hash is the  same");
+                                    [[DataLayer sharedInstance] addBuddy:[contact objectForKey:@"jid"]?[contact objectForKey:@"jid"]:@"" forAccount:_accountNo fullname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@"" nickname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@""];
                                 }
                                 else
                                 {
-                                    [[DataLayer sharedInstance]  setBuddyHash:presenceNode forAccount:_accountNo];
-                                    XMPPIQ* iqVCard= [[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
-                                    [iqVCard getVcardTo:presenceNode.user];
-                                    [self send:iqVCard];
+                                    // update info if needed
+                                    
+                                    [[DataLayer sharedInstance] setFullName:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@"" forBuddy:[contact objectForKey:@"jid"]?[contact objectForKey:@"jid"]:@"" andAccount:_accountNo ] ;
+                                    
                                 }
                             }
+                            else
+                            {
+                                
+                            }
+                        }
+                        
+                    }
+                    
+                    //confirmation of set call after we accepted
+                    if([iqNode.idval isEqualToString:self.jingle.idval])
+                    {
+                        NSArray* nameParts= [iqNode.from componentsSeparatedByString:@"/"];
+                        NSString* from;
+                        if([nameParts count]>1) {
+                            from=[nameParts objectAtIndex:0];
+                        } else from = iqNode.from;
+                        
+                        NSString* fullName;
+                        fullName=[[DataLayer sharedInstance] fullName:from forAccount:_accountNo];
+                        if(!fullName) fullName=from;
+                        
+                        NSDictionary* userDic=@{@"buddy_name":from,
+                                                @"full_name":fullName,
+                                                @"account_id":_accountNo
+                                                };
+                        
+                        [[NSNotificationCenter defaultCenter]
+                         postNotificationName: kMonalCallStartedNotice object: userDic];
+                        
+                        
+                        [self.jingle rtpConnect];
+                        return;
+                    }
+                    
+                }
+                
+                
+                if ([iqNode.type isEqualToString:kiqSetType]) {
+                    if(iqNode.jingleSession) {
+                        
+                        //accpetance of our call
+                        if([[iqNode.jingleSession objectForKey:@"action"] isEqualToString:@"session-accept"] &&
+                           [[iqNode.jingleSession objectForKey:@"sid"] isEqualToString:self.jingle.thesid])
+                        {
+                            
+                            NSDictionary* transport1;
+                            NSDictionary* transport2;
+                            for(NSDictionary* candidate in iqNode.jingleTransportCandidates) {
+                                if([[candidate objectForKey:@"component"] isEqualToString:@"1"]) {
+                                    transport1=candidate;
+                                }
+                                if([[candidate objectForKey:@"component"] isEqualToString:@"2"]) {
+                                    transport2=candidate;
+                                }
+                            }
+                            
+                            NSDictionary* pcmaPayload;
+                            for(NSDictionary* payload in iqNode.jinglePayloadTypes) {
+                                if([[payload objectForKey:@"name"] isEqualToString:@"PCMA"]) {
+                                    pcmaPayload=payload;
+                                    break;
+                                }
+                            }
+                            
+                            if (pcmaPayload && transport1) {
+                                self.jingle.recipientIP=[transport1 objectForKey:@"ip"];
+                                self.jingle.destinationPort= [transport1 objectForKey:@"port"];
+                                
+                                XMPPIQ* node = [[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
+                                [node setiqTo:[NSString stringWithFormat:@"%@/%@", iqNode.user,iqNode.resource]];
+                                [self send:node];
+                                
+                                [self.jingle rtpConnect];
+                            }
+                            return;
+                        }
+                        
+                        if([[iqNode.jingleSession objectForKey:@"action"] isEqualToString:@"session-terminate"] &&  [[iqNode.jingleSession objectForKey:@"sid"] isEqualToString:self.jingle.thesid]) {
+                            XMPPIQ* node = [[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
+                            [node setiqTo:[NSString stringWithFormat:@"%@/%@", iqNode.user,iqNode.resource]];
+                            [self send:node];
+                            [self.jingle rtpDisconnect];
+                        }
+                        
+                        if([[iqNode.jingleSession objectForKey:@"action"] isEqualToString:@"session-initiate"]) {
+                            NSDictionary* pcmaPayload;
+                            for(NSDictionary* payload in iqNode.jinglePayloadTypes) {
+                                if([[payload objectForKey:@"name"] isEqualToString:@"PCMA"]) {
+                                    pcmaPayload=payload;
+                                    break;
+                                }
+                            }
+                            
+                            NSDictionary* transport1;
+                            NSDictionary* transport2;
+                            for(NSDictionary* candidate in iqNode.jingleTransportCandidates) {
+                                if([[candidate objectForKey:@"component"] isEqualToString:@"1"]) {
+                                    transport1=candidate;
+                                }
+                                if([[candidate objectForKey:@"component"] isEqualToString:@"2"]) {
+                                    transport2=candidate;
+                                }
+                            }
+                            
+                            if (pcmaPayload && transport1) {
+                                self.jingle = [[jingleCall alloc] init];
+                                self.jingle.initiator= [iqNode.jingleSession objectForKey:@"initiator"];
+                                self.jingle.responder= [iqNode.jingleSession objectForKey:@"responder"];
+                                self.jingle.thesid= [iqNode.jingleSession objectForKey:@"sid"];
+                                self.jingle.destinationPort= [transport1 objectForKey:@"port"];
+                                self.jingle.idval=iqNode.idval;
+                                if(transport2) {
+                                    self.jingle.destinationPort2= [transport2 objectForKey:@"port"];
+                                }
+                                else {
+                                    self.jingle.destinationPort2=[transport1 objectForKey:@"port"]; // if nothing is provided just reuse..
+                                }
+                                self.jingle.recipientIP=[transport1 objectForKey:@"ip"];
+                                
+                                
+                                if(iqNode.user && iqNode.resource) {
+                                    
+                                    dispatch_async(dispatch_get_main_queue(), ^{
+                                        
+                                        NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"Incoming Call From %@?", nil), iqNode.from ];
+                                        RIButtonItem* cancelButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Decline", nil) action:^{
+                                            XMPPIQ* node =[self.jingle rejectJingleTo:iqNode.user withId:iqNode.idval andResource:iqNode.resource];
+                                            [self send:node];
+                                            self.jingle=nil;
+                                        }];
+                                        
+                                        RIButtonItem* yesButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Accept Call", nil) action:^{
+                                            
+                                            XMPPIQ* node =[self.jingle acceptJingleTo:iqNode.user withId:iqNode.idval andResource:iqNode.resource];
+                                            [self send:node];
+                                        }];
+                                        
+                                        UIAlertView* alert =[[UIAlertView alloc] initWithTitle:@"Audio Call" message:messageString cancelButtonItem:cancelButton otherButtonItems:yesButton, nil];
+                                        [alert show];
+                                    } );
+                                    
+                                    
+                                }
+                            }
+                            else {
+                                //does not support the same formats
+                            }
+                            
+                        }
+                    }
+                }
+                
+                //*** MUC related
+                if(iqNode.conferenceServer)
+                {
+                    _conferenceServer=iqNode.conferenceServer;
+                }
+                
+                if([iqNode.from isEqualToString:_conferenceServer] && iqNode.discoItems)
+                {
+                    _roomList=iqNode.items;
+                    [[NSNotificationCenter defaultCenter]
+                     postNotificationName: kMLHasRoomsNotice object: self];
+                }
+                
+                
+            }
+            else  if([[nextStanzaPos objectForKey:@"stanzaType"]  isEqualToString:@"message"])
+            {
+                ParseMessage* messageNode= [[ParseMessage alloc]  initWithDictionary:nextStanzaPos];
+                if([messageNode.type isEqualToString:kMessageErrorType])
+                {
+                    //TODO: mark message as error
+                    return;
+                }
+                
+                
+                if(messageNode.mucInvite)
+                {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"You have been invited to a conversation %@?", nil), messageNode.from ];
+                        RIButtonItem* cancelButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Cancel", nil) action:^{
+                            
+                        }];
+                        
+                        RIButtonItem* yesButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Join", nil) action:^{
+                            
+                            [self joinRoom:messageNode.from withPassword:nil];
+                        }];
+                        
+                        UIAlertView* alert =[[UIAlertView alloc] initWithTitle:@"Chat Invite" message:messageString cancelButtonItem:cancelButton otherButtonItems:yesButton, nil];
+                        [alert show];
+                    });
+                    
+                }
+                
+                if(messageNode.hasBody)
+                {
+                    if ([messageNode.type isEqualToString:kMessageGroupChatType]
+                        && [messageNode.actualFrom isEqualToString:_username])
+                    {
+                        //this is just a muc echo
+                    }
+                    else
+                    {
+                        [[DataLayer sharedInstance] addMessageFrom:messageNode.from to:_fulluser
+                                                        forAccount:_accountNo withBody:messageNode.messageText
+                                                      actuallyfrom:messageNode.actualFrom delivered:YES];
+                        
+                        [[DataLayer sharedInstance] addActiveBuddies:messageNode.from forAccount:_accountNo];
+                        
+                        
+                        if(messageNode.from) {
+                            NSString* actuallyFrom= messageNode.actualFrom;
+                            if(!actuallyFrom) actuallyFrom=messageNode.from;
+                            
+                            NSString* messageText=messageNode.messageText;
+                            if(!messageText) messageText=@"";
+                            
+                            NSDictionary* userDic=@{@"from":messageNode.from,
+                                                    @"actuallyfrom":actuallyFrom,
+                                                    @"messageText":messageText,
+                                                    @"to":_fulluser,
+                                                    @"accountNo":_accountNo
+                                                    };
+                            
+                            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:userDic];
+                        }
+                    }
+                }
+                
+                if(messageNode.avatarData)
+                {
+                    [[MLImageManager sharedInstance] setIconForContact:messageNode.actualFrom andAccount:_accountNo WithData:messageNode.avatarData];
+                    
+                }
+                
+            }
+            else  if([[nextStanzaPos objectForKey:@"stanzaType"]  isEqualToString:@"presence"])
+            {
+                ParsePresence* presenceNode= [[ParsePresence alloc]  initWithDictionary:nextStanzaPos];
+                if([presenceNode.user isEqualToString:_fulluser]) {
+                    nextStanzaPos=[self nextStanza];
+                    continue; //ignore self
+                }
+                
+                if([presenceNode.type isEqualToString:kpresencesSubscribe])
+                {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"Do you wish to allow %@ to add you to their contacts?", nil), presenceNode.from ];
+                        RIButtonItem* cancelButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"No", nil) action:^{
+                            [self rejectFromRoster:presenceNode.from];
+                            
+                        }];
+                        
+                        RIButtonItem* yesButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Yes", nil) action:^{
+                            [self approveToRoster:presenceNode.from];
+                            [self addToRoster:presenceNode.from];
+                            
+                        }];
+                        
+                        UIAlertView* alert =[[UIAlertView alloc] initWithTitle:@"Approve Contact" message:messageString cancelButtonItem:cancelButton otherButtonItems:yesButton, nil];
+                        [alert show];
+                    });
+                    
+                }
+                
+                if(presenceNode.MUC)
+                {
+                    for (NSString* code in presenceNode.statusCodes) {
+                        if([code isEqualToString:@"201"]) {
+                            //201- created and needs configuration
+                            //make instant room
+                            XMPPIQ *configNode = [[XMPPIQ alloc] initWithId:_sessionKey andType:kiqSetType];
+                            [configNode setiqTo:presenceNode.from];
+                            [configNode setInstantRoom];
+                            [self send:configNode];
+                        }
+                    }
+                    
+                    //mark buddy as MUC
+                }
+                
+                if(presenceNode.type ==nil)
+                {
+                    DDLogVerbose(@"presence priority notice from %@", presenceNode.user);
+                    
+                    if((presenceNode.user!=nil) && ([[presenceNode.user stringByTrimmingCharactersInSet:
+                                                      [NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0))
+                    {
+                        if(![[DataLayer sharedInstance] isBuddyInList:presenceNode.user forAccount:_accountNo])
+                        {
+                            DDLogVerbose(@"Buddy not already in list");
+                            [[DataLayer sharedInstance] addBuddy:presenceNode.user forAccount:_accountNo fullname:@"" nickname:@"" ];
                         }
                         else
                         {
-                            // just set and request when in foreground if needed
-                            [[DataLayer sharedInstance]  setBuddyHash:presenceNode forAccount:_accountNo];
+                            DDLogVerbose(@"Buddy already in list");
                         }
+                        
+                        DDLogVerbose(@" showing as online now");
+                        
+                        [[DataLayer sharedInstance] setOnlineBuddy:presenceNode forAccount:_accountNo];
+                        [[DataLayer sharedInstance] setBuddyState:presenceNode forAccount:_accountNo];
+                        [[DataLayer sharedInstance] setBuddyStatus:presenceNode forAccount:_accountNo];
+                        
+                        NSString* state=presenceNode.show;
+                        if(!state) state=@"";
+                        NSString* status=presenceNode.status;
+                        if(!status) status=@"";
+                        NSDictionary* userDic=@{kusernameKey: presenceNode.user,
+                                                kaccountNoKey:_accountNo,
+                                                kstateKey:state,
+                                                kstatusKey:status
+                                                };
+                        dispatch_async(_xmppQueue, ^{
+                            [self.contactsVC addOnlineUser:userDic];
+                            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactOnlineNotice object:self userInfo:userDic];
+                        });
+                        
+                        if(!presenceNode.MUC) {
+                            // do not do this in the background
+                            if([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground)
+                            {
+                                //check for vcard change
+                                if(presenceNode.photoHash) {
+                                    if([presenceNode.photoHash isEqualToString:[[DataLayer sharedInstance]  buddyHash:presenceNode.user forAccount:_accountNo]])
+                                    {
+                                        DDLogVerbose(@"photo hash is the  same");
+                                    }
+                                    else
+                                    {
+                                        [[DataLayer sharedInstance]  setBuddyHash:presenceNode forAccount:_accountNo];
+                                        XMPPIQ* iqVCard= [[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
+                                        [iqVCard getVcardTo:presenceNode.user];
+                                        [self send:iqVCard];
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                // just set and request when in foreground if needed
+                                [[DataLayer sharedInstance]  setBuddyHash:presenceNode forAccount:_accountNo];
+                            }
+                        }
+                        else {
+                            
+                        }
+                        
                     }
-                    else {
-
+                    else
+                    {
+                        DDLogError(@"ERROR: presence priority notice but no user name.");
+                        
                     }
+                }
+                else if([presenceNode.type isEqualToString:kpresenceUnavailable])
+                {
+                    if ([[DataLayer sharedInstance] setOfflineBuddy:presenceNode forAccount:_accountNo] ) {
+                        NSDictionary* userDic=@{kusernameKey: presenceNode.user,
+                                                kaccountNoKey:_accountNo};
+                        dispatch_async(_xmppQueue, ^{
+                            [self.contactsVC removeOnlineUser:userDic];
+                            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactOfflineNotice object:self userInfo:userDic];
+                        });
+                    }
+                    
+                }
+                
+            }
+            else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"stream:error"])
+            {
+                [self disconnect];
+            }
+            else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"stream:stream"])
+            {
+                //  ParseStream* streamNode= [[ParseStream alloc]  initWithDictionary:nextStanzaPos];
+            }
+            else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"stream"])
+            {
+                ParseStream* streamNode= [[ParseStream alloc]  initWithDictionary:nextStanzaPos];
+                
+                //perform logic to handle stream
+                if(streamNode.error)
+                {
+                    return;
+                    
+                }
+                
+                if(self.accountState!=kStateLoggedIn )
+                {
+                    
+                    if(streamNode.callStartTLS &&  _SSL)
+                    {
+                        XMLNode* startTLS= [[XMLNode alloc] init];
+                        startTLS.element=@"starttls";
+                        [startTLS.attributes setObject:@"urn:ietf:params:xml:ns:xmpp-tls" forKey:@"xmlns"];
+                        [self send:startTLS];
+                        
+                    }
+                    
+                    if ((_SSL && _startTLSComplete) || (!_SSL && !_startTLSComplete) || (_SSL && _oldStyleSSL))
+                    {
+                        //look at menchanisms presented
+                        
+                        if(streamNode.SASLPlain)
+                        {
+                            NSString* saslplain=[EncodingTools encodeBase64WithString: [NSString stringWithFormat:@"\0%@\0%@",  _username, _password ]];
+                            
+                            XMLNode* saslXML= [[XMLNode alloc]init];
+                            saslXML.element=@"auth";
+                            [saslXML.attributes setObject: @"urn:ietf:params:xml:ns:xmpp-sasl"  forKey:@"xmlns"];
+                            [saslXML.attributes setObject: @"PLAIN"forKey: @"mechanism"];
+                            
+                            //google only uses sasl plain
+                            [saslXML.attributes setObject:@"http://www.google.com/talk/protocol/auth" forKey: @"xmlns:ga"];
+                            [saslXML.attributes setObject:@"true" forKey: @"ga:client-uses-full-bind-result"];
+                            
+                            saslXML.data=saslplain;
+                            [self send:saslXML];
+                            
+                        }
+                        else
+                            if(streamNode.SASLDIGEST_MD5)
+                            {
+                                XMLNode* saslXML= [[XMLNode alloc]init];
+                                saslXML.element=@"auth";
+                                [saslXML.attributes setObject: @"urn:ietf:params:xml:ns:xmpp-sasl"  forKey:@"xmlns"];
+                                [saslXML.attributes setObject: @"DIGEST-MD5"forKey: @"mechanism"];
+                                
+                                [self send:saslXML];
+                            }
+                            else
+                            {
+                                
+                                //no supported auth mechanism try legacy
+                                //[self disconnect];
+                                DDLogInfo(@"no auth mechanism. will try legacy auth");
+                                XMPPIQ* iqNode =[[XMPPIQ alloc] initWithElement:@"iq"];
+                                [iqNode getAuthwithUserName:self.username ];
+                                
+                                [self send:iqNode];
+                                
+                                
+                            }
+                    }
+                    
                     
                 }
                 else
                 {
-                    DDLogError(@"ERROR: presence priority notice but no user name.");
+                    XMPPIQ* iqNode =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqSetType];
+                    [iqNode setBindWithResource:_resource];
+                    
+                    [self send:iqNode];
                     
                 }
-            }
-            else if([presenceNode.type isEqualToString:kpresenceUnavailable])
-            {
-                if ([[DataLayer sharedInstance] setOfflineBuddy:presenceNode forAccount:_accountNo] ) {
-                    NSDictionary* userDic=@{kusernameKey: presenceNode.user,
-                                            kaccountNoKey:_accountNo};
-                    dispatch_async(_xmppQueue, ^{
-                        [self.contactsVC removeOnlineUser:userDic];
-                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactOfflineNotice object:self userInfo:userDic];
-                    });
-                }
                 
             }
-            
-        }
-        else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"stream:error"])
-        {
-            [self disconnect];
-        }
-        else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"stream:stream"])
-        {
-            //  ParseStream* streamNode= [[ParseStream alloc]  initWithDictionary:nextStanzaPos];
-        }
-        else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"stream"])
-        {
-            ParseStream* streamNode= [[ParseStream alloc]  initWithDictionary:nextStanzaPos];
-            
-            //perform logic to handle stream
-            if(streamNode.error)
+            else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"features"])
             {
-                return;
                 
             }
-            
-            if(self.accountState!=kStateLoggedIn )
+            else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"proceed"])
             {
                 
-                if(streamNode.callStartTLS &&  _SSL)
+                ParseStream* streamNode= [[ParseStream alloc]  initWithDictionary:nextStanzaPos];
+                //perform logic to handle proceed
+                if(!streamNode.error)
                 {
-                    XMLNode* startTLS= [[XMLNode alloc] init];
-                    startTLS.element=@"starttls";
-                    [startTLS.attributes setObject:@"urn:ietf:params:xml:ns:xmpp-tls" forKey:@"xmlns"];
-                    [self send:startTLS];
-                    
-                }
-                
-                if ((_SSL && _startTLSComplete) || (!_SSL && !_startTLSComplete) || (_SSL && _oldStyleSSL))
-                {
-                    //look at menchanisms presented
-                    
-                    if(streamNode.SASLPlain)
+                    if(streamNode.startTLSProceed)
                     {
-                        NSString* saslplain=[EncodingTools encodeBase64WithString: [NSString stringWithFormat:@"\0%@\0%@",  _username, _password ]];
+                        NSMutableDictionary *settings = [ [NSMutableDictionary alloc ]
+                                                         initWithObjectsAndKeys:
+                                                         [NSNull null],kCFStreamSSLPeerName,
+                                                         nil ];
                         
-                        XMLNode* saslXML= [[XMLNode alloc]init];
-                        saslXML.element=@"auth";
-                        [saslXML.attributes setObject: @"urn:ietf:params:xml:ns:xmpp-sasl"  forKey:@"xmlns"];
-                        [saslXML.attributes setObject: @"PLAIN"forKey: @"mechanism"];
-                        
-                        //google only uses sasl plain
-                        [saslXML.attributes setObject:@"http://www.google.com/talk/protocol/auth" forKey: @"xmlns:ga"];
-                        [saslXML.attributes setObject:@"true" forKey: @"ga:client-uses-full-bind-result"];
-                        
-                        saslXML.data=saslplain;
-                        [self send:saslXML];
-                        
-                    }
-                    else
-                        if(streamNode.SASLDIGEST_MD5)
+                        if(_brokenServerSSL)
                         {
-                            XMLNode* saslXML= [[XMLNode alloc]init];
-                            saslXML.element=@"auth";
-                            [saslXML.attributes setObject: @"urn:ietf:params:xml:ns:xmpp-sasl"  forKey:@"xmlns"];
-                            [saslXML.attributes setObject: @"DIGEST-MD5"forKey: @"mechanism"];
-                            
-                            [self send:saslXML];
+                            DDLogInfo(@"recovering from broken SSL implemtation limit to ss3-tl1");
+                            [settings addEntriesFromDictionary:@{@"kCFStreamSSLLevel":@"kCFStreamSocketSecurityLevelTLSv1_0SSLv3"}];
                         }
                         else
                         {
-                            
-                            //no supported auth mechanism try legacy
-                            //[self disconnect];
-                            DDLogInfo(@"no auth mechanism. will try legacy auth");
-                            XMPPIQ* iqNode =[[XMPPIQ alloc] initWithElement:@"iq"];
-                            [iqNode getAuthwithUserName:self.username ];
-                            
-                            [self send:iqNode];
-                            
-                          
+                            [settings addEntriesFromDictionary:@{@"kCFStreamSSLLevel":@"kCFStreamSocketSecurityLevelTLSv1"}];
                         }
-                }
-                
-            
-            }
-            else
-            {
-                XMPPIQ* iqNode =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqSetType];
-                [iqNode setBindWithResource:_resource];
-                
-                [self send:iqNode];
-                
-            }
-            
-        }
-        else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"features"])
-        {
-          
-        }
-        else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"proceed"])
-        {
-            
-            ParseStream* streamNode= [[ParseStream alloc]  initWithDictionary:nextStanzaPos];
-            //perform logic to handle proceed
-            if(!streamNode.error)
-            {
-                if(streamNode.startTLSProceed)
-                {
-                    NSMutableDictionary *settings = [ [NSMutableDictionary alloc ]
-                                                     initWithObjectsAndKeys:
-                                                     [NSNull null],kCFStreamSSLPeerName,
-                                                     nil ];
-                    
-                    if(_brokenServerSSL)
-                    {
-                        DDLogInfo(@"recovering from broken SSL implemtation limit to ss3-tl1");
-                        [settings addEntriesFromDictionary:@{@"kCFStreamSSLLevel":@"kCFStreamSocketSecurityLevelTLSv1_0SSLv3"}];
-                    }
-                    else
-                    {
-                         [settings addEntriesFromDictionary:@{@"kCFStreamSSLLevel":@"kCFStreamSocketSecurityLevelTLSv1"}];
-                    }
-                    
-                    if(self.selfSigned)
-                    {
-                        NSDictionary* secureOFF= [ [NSDictionary alloc ]
-                                                  initWithObjectsAndKeys:
-                                                  [NSNumber numberWithBool:YES], kCFStreamSSLAllowsExpiredCertificates,
-                                                  [NSNumber numberWithBool:YES], kCFStreamSSLAllowsExpiredRoots,
-                                                  [NSNumber numberWithBool:YES], kCFStreamSSLAllowsAnyRoot,
-                                                  [NSNumber numberWithBool:NO], kCFStreamSSLValidatesCertificateChain, nil];
                         
-                        [settings addEntriesFromDictionary:secureOFF];
-                        
-                        
-                        
-                    }
-                    
-                    if ( 	CFReadStreamSetProperty((__bridge CFReadStreamRef)_iStream,
-                                                    kCFStreamPropertySSLSettings, (__bridge CFTypeRef)settings) &&
-                        CFWriteStreamSetProperty((__bridge CFWriteStreamRef)_oStream,
-                                                 kCFStreamPropertySSLSettings, (__bridge CFTypeRef)settings)	 )
-                        
-                    {
-                        DDLogInfo(@"Set TLS properties on streams. Security level %@", [_iStream propertyForKey:NSStreamSocketSecurityLevelKey]);
-                        
-                        NSDictionary* info2=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
-                                              kinfoTypeKey:@"connect", kinfoStatusKey:@"Securing Connection"};
-                        [self.contactsVC updateConnecting:info2];
-                    }
-                    else
-                    {
-                        DDLogError(@"not sure.. Could not confirm Set TLS properties on streams.");
-                        DDLogInfo(@"Set TLS properties on streams.security level %@", [_iStream propertyForKey:NSStreamSocketSecurityLevelKey]);
-                        
-                        
-                        
-                        //                        NSDictionary* info2=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
-                        //                                              kinfoTypeKey:@"connect", kinfoStatusKey:@"Could not secure connection"};
-                        //                        [self.contactsVC updateConnecting:info2];
-                        
-                    }
-                    
-                    [self startStream];
-                    
-                    _startTLSComplete=YES;
-                }
-            }
-        }
-        else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"failure"])
-        {
-            ParseFailure* failure = [[ParseFailure alloc] initWithDictionary:nextStanzaPos];
-            if(failure.saslError || failure.notAuthorized)
-            {
-                _loginError=YES;
-                [self disconnect];
-            }
-            
-        }
-        else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"challenge"])
-        {
-            ParseChallenge* challengeNode= [[ParseChallenge alloc]  initWithDictionary:nextStanzaPos];
-            if(challengeNode.saslChallenge)
-            {
-                XMLNode* responseXML= [[XMLNode alloc]init];
-                responseXML.element=@"response";
-                [responseXML.attributes setObject: @"urn:ietf:params:xml:ns:xmpp-sasl"  forKey:@"xmlns"];
-                
-                
-                NSString* decoded=[[NSString alloc]  initWithData: (NSData*)[EncodingTools dataWithBase64EncodedString:challengeNode.challengeText] encoding:NSASCIIStringEncoding];
-                DDLogVerbose(@"decoded challenge to %@", decoded);
-                NSArray* parts =[decoded componentsSeparatedByString:@","];
-                
-                if([parts count]<2)
-                {
-                    //this is a success message  from challenge
-                    
-                    NSArray* rspparts= [[parts objectAtIndex:0] componentsSeparatedByString:@"="];
-                    if([[rspparts objectAtIndex:0] isEqualToString:@"rspauth"])
-                    {
-                        DDLogVerbose(@"digest-md5 success");
-                        
-                    }
-                    
-                }
-                else{
-                    
-                    NSString* realm;
-                    NSString* nonce;
-                    
-                    for(NSString* part in parts)
-                    {
-                        NSArray* split = [part componentsSeparatedByString:@"="];
-                        if([split count]>1)
+                        if(self.selfSigned)
                         {
-                            if([split[0] isEqualToString:@"realm"]) {
-                                realm=[split[1]  substringWithRange:NSMakeRange(1, [split[1]  length]-2)] ;
-                            }
+                            NSDictionary* secureOFF= [ [NSDictionary alloc ]
+                                                      initWithObjectsAndKeys:
+                                                      [NSNumber numberWithBool:YES], kCFStreamSSLAllowsExpiredCertificates,
+                                                      [NSNumber numberWithBool:YES], kCFStreamSSLAllowsExpiredRoots,
+                                                      [NSNumber numberWithBool:YES], kCFStreamSSLAllowsAnyRoot,
+                                                      [NSNumber numberWithBool:NO], kCFStreamSSLValidatesCertificateChain, nil];
                             
-                            if([split[0] isEqualToString:@"nonce"]) {
-                                nonce=[split[1]  substringWithRange:NSMakeRange(1, [split[1]  length]-2)] ;
-                            }
+                            [settings addEntriesFromDictionary:secureOFF];
+                            
+                            
                             
                         }
+                        
+                        if ( 	CFReadStreamSetProperty((__bridge CFReadStreamRef)_iStream,
+                                                        kCFStreamPropertySSLSettings, (__bridge CFTypeRef)settings) &&
+                            CFWriteStreamSetProperty((__bridge CFWriteStreamRef)_oStream,
+                                                     kCFStreamPropertySSLSettings, (__bridge CFTypeRef)settings)	 )
+                            
+                        {
+                            DDLogInfo(@"Set TLS properties on streams. Security level %@", [_iStream propertyForKey:NSStreamSocketSecurityLevelKey]);
+                            
+                            NSDictionary* info2=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
+                                                  kinfoTypeKey:@"connect", kinfoStatusKey:@"Securing Connection"};
+                            [self.contactsVC updateConnecting:info2];
+                        }
+                        else
+                        {
+                            DDLogError(@"not sure.. Could not confirm Set TLS properties on streams.");
+                            DDLogInfo(@"Set TLS properties on streams.security level %@", [_iStream propertyForKey:NSStreamSocketSecurityLevelKey]);
+                            
+                            
+                            
+                            //                        NSDictionary* info2=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
+                            //                                              kinfoTypeKey:@"connect", kinfoStatusKey:@"Could not secure connection"};
+                            //                        [self.contactsVC updateConnecting:info2];
+                            
+                        }
+                        
+                        [self startStream];
+                        
+                        _startTLSComplete=YES;
+                    }
+                }
+            }
+            else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"failure"])
+            {
+                ParseFailure* failure = [[ParseFailure alloc] initWithDictionary:nextStanzaPos];
+                if(failure.saslError || failure.notAuthorized)
+                {
+                    _loginError=YES;
+                    [self disconnect];
+                }
+                
+            }
+            else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"challenge"])
+            {
+                ParseChallenge* challengeNode= [[ParseChallenge alloc]  initWithDictionary:nextStanzaPos];
+                if(challengeNode.saslChallenge)
+                {
+                    XMLNode* responseXML= [[XMLNode alloc]init];
+                    responseXML.element=@"response";
+                    [responseXML.attributes setObject: @"urn:ietf:params:xml:ns:xmpp-sasl"  forKey:@"xmlns"];
+                    
+                    
+                    NSString* decoded=[[NSString alloc]  initWithData: (NSData*)[EncodingTools dataWithBase64EncodedString:challengeNode.challengeText] encoding:NSASCIIStringEncoding];
+                    DDLogVerbose(@"decoded challenge to %@", decoded);
+                    NSArray* parts =[decoded componentsSeparatedByString:@","];
+                    
+                    if([parts count]<2)
+                    {
+                        //this is a success message  from challenge
+                        
+                        NSArray* rspparts= [[parts objectAtIndex:0] componentsSeparatedByString:@"="];
+                        if([[rspparts objectAtIndex:0] isEqualToString:@"rspauth"])
+                        {
+                            DDLogVerbose(@"digest-md5 success");
+                            
+                        }
+                        
+                    }
+                    else{
+                        
+                        NSString* realm;
+                        NSString* nonce;
+                        
+                        for(NSString* part in parts)
+                        {
+                            NSArray* split = [part componentsSeparatedByString:@"="];
+                            if([split count]>1)
+                            {
+                                if([split[0] isEqualToString:@"realm"]) {
+                                    realm=[split[1]  substringWithRange:NSMakeRange(1, [split[1]  length]-2)] ;
+                                }
+                                
+                                if([split[0] isEqualToString:@"nonce"]) {
+                                    nonce=[split[1]  substringWithRange:NSMakeRange(1, [split[1]  length]-2)] ;
+                                }
+                                
+                            }
+                        }
+                        
+                        if(!realm) realm=@"";
+                        
+                        NSData* cnonce_Data=[EncodingTools MD5: [NSString stringWithFormat:@"%d",arc4random()%100000]];
+                        NSString* cnonce =[EncodingTools hexadecimalString:cnonce_Data];
+                        
+                        
+                        //                if([password length]==0)
+                        //                {
+                        //                    if(theTempPass!=NULL)
+                        //                        password=theTempPass;
+                        //
+                        //                }
+                        
+                        //  nonce=@"580F35C1AE408E7DA57DE4DEDC5B9CA7";
+                        //    cnonce=@"B9E01AE3-29E5-4FE5-9AA0-72F99742428A";
+                        
+                        
+                        // ****** digest stuff going on here...
+                        NSString* X= [NSString stringWithFormat:@"%@:%@:%@", self.username, realm, self.password ];
+                        DDLogVerbose(@"X: %@", X);
+                        
+                        NSData* Y = [EncodingTools MD5:X];
+                        
+                        // above is correct
+                        
+                        /*
+                         NSString* A1= [NSString stringWithFormat:@"%@:%@:%@:%@@%@/%@",
+                         Y,[nonce substringWithRange:NSMakeRange(1, [nonce length]-2)],cononce,account,domain,resource];
+                         */
+                        
+                        //  if you have the authzid  here you need it below too but it wont work on som servers
+                        // so best not include it
+                        
+                        NSString* A1Str=[NSString stringWithFormat:@":%@:%@",
+                                         nonce,cnonce];
+                        NSData* A1= [A1Str
+                                     dataUsingEncoding:NSUTF8StringEncoding];
+                        
+                        NSMutableData *HA1data = [NSMutableData dataWithCapacity:([Y length] + [A1 length])];
+                        [HA1data appendData:Y];
+                        [HA1data appendData:A1];
+                        DDLogVerbose(@" HA1data : %@",HA1data  );
+                        
+                        
+                        //this hash is wrong..
+                        NSData* HA1=[EncodingTools DataMD5:HA1data];
+                        
+                        //below is correct
+                        
+                        NSString* A2=[NSString stringWithFormat:@"AUTHENTICATE:xmpp/%@", realm];
+                        DDLogVerbose(@"%@", A2);
+                        NSData* HA2=[EncodingTools MD5:A2];
+                        
+                        NSString* KD=[NSString stringWithFormat:@"%@:%@:00000001:%@:auth:%@",
+                                      [EncodingTools hexadecimalString:HA1], nonce,
+                                      cnonce,
+                                      [EncodingTools hexadecimalString:HA2]];
+                        
+                        // DDLogVerbose(@" ha1: %@", [self hexadecimalString:HA1] );
+                        //DDLogVerbose(@" ha2: %@", [self hexadecimalString:HA2] );
+                        
+                        DDLogVerbose(@" KD: %@", KD );
+                        NSData* responseData=[EncodingTools MD5:KD];
+                        // above this is ok
+                        NSString* response=[NSString stringWithFormat:@"username=\"%@\",realm=\"%@\",nonce=\"%@\",cnonce=\"%@\",nc=00000001,qop=auth,digest-uri=\"xmpp/%@\",response=%@,charset=utf-8",
+                                            self.username,realm, nonce, cnonce, realm, [EncodingTools hexadecimalString:responseData]];
+                        //,authzid=\"%@@%@/%@\"  ,account,domain, resource
+                        
+                        DDLogVerbose(@"  response :  %@", response);
+                        NSString* encoded=[EncodingTools encodeBase64WithString:response];
+                        
+                        //                NSString* xmppcmd = [NSString stringWithFormat:@"<response xmlns='urn:ietf:params:xml:ns:xmpp-sasl'>%@</response>", encoded]
+                        //                [self talk:xmppcmd];
+                        
+                        responseXML.data=encoded;
                     }
                     
-                    if(!realm) realm=@"";
+                    [self send:responseXML];
+                    return;
                     
-                    NSData* cnonce_Data=[EncodingTools MD5: [NSString stringWithFormat:@"%d",arc4random()%100000]];
-                    NSString* cnonce =[EncodingTools hexadecimalString:cnonce_Data];
-                    
-                    
-                    //                if([password length]==0)
-                    //                {
-                    //                    if(theTempPass!=NULL)
-                    //                        password=theTempPass;
-                    //
-                    //                }
-                    
-                    //  nonce=@"580F35C1AE408E7DA57DE4DEDC5B9CA7";
-                    //    cnonce=@"B9E01AE3-29E5-4FE5-9AA0-72F99742428A";
-                    
-                    
-                    // ****** digest stuff going on here...
-                    NSString* X= [NSString stringWithFormat:@"%@:%@:%@", self.username, realm, self.password ];
-                    DDLogVerbose(@"X: %@", X);
-                    
-                    NSData* Y = [EncodingTools MD5:X];
-                    
-                    // above is correct
-                    
-                    /*
-                     NSString* A1= [NSString stringWithFormat:@"%@:%@:%@:%@@%@/%@",
-                     Y,[nonce substringWithRange:NSMakeRange(1, [nonce length]-2)],cononce,account,domain,resource];
-                     */
-                    
-                    //  if you have the authzid  here you need it below too but it wont work on som servers
-                    // so best not include it
-                    
-                    NSString* A1Str=[NSString stringWithFormat:@":%@:%@",
-                                     nonce,cnonce];
-                    NSData* A1= [A1Str
-                                 dataUsingEncoding:NSUTF8StringEncoding];
-                    
-                    NSMutableData *HA1data = [NSMutableData dataWithCapacity:([Y length] + [A1 length])];
-                    [HA1data appendData:Y];
-                    [HA1data appendData:A1];
-                    DDLogVerbose(@" HA1data : %@",HA1data  );
-                    
-                    
-                    //this hash is wrong..
-                    NSData* HA1=[EncodingTools DataMD5:HA1data];
-                    
-                    //below is correct
-                    
-                    NSString* A2=[NSString stringWithFormat:@"AUTHENTICATE:xmpp/%@", realm];
-                    DDLogVerbose(@"%@", A2);
-                    NSData* HA2=[EncodingTools MD5:A2];
-                    
-                    NSString* KD=[NSString stringWithFormat:@"%@:%@:00000001:%@:auth:%@",
-                                  [EncodingTools hexadecimalString:HA1], nonce,
-                                  cnonce,
-                                  [EncodingTools hexadecimalString:HA2]];
-                    
-                    // DDLogVerbose(@" ha1: %@", [self hexadecimalString:HA1] );
-                    //DDLogVerbose(@" ha2: %@", [self hexadecimalString:HA2] );
-                    
-                    DDLogVerbose(@" KD: %@", KD );
-                    NSData* responseData=[EncodingTools MD5:KD];
-                    // above this is ok
-                    NSString* response=[NSString stringWithFormat:@"username=\"%@\",realm=\"%@\",nonce=\"%@\",cnonce=\"%@\",nc=00000001,qop=auth,digest-uri=\"xmpp/%@\",response=%@,charset=utf-8",
-                                        self.username,realm, nonce, cnonce, realm, [EncodingTools hexadecimalString:responseData]];
-                    //,authzid=\"%@@%@/%@\"  ,account,domain, resource
-                    
-                    DDLogVerbose(@"  response :  %@", response);
-                    NSString* encoded=[EncodingTools encodeBase64WithString:response];
-                    
-                    //                NSString* xmppcmd = [NSString stringWithFormat:@"<response xmlns='urn:ietf:params:xml:ns:xmpp-sasl'>%@</response>", encoded]
-                    //                [self talk:xmppcmd];
-                    
-                    responseXML.data=encoded;
                 }
-                
-                [self send:responseXML];
-                return;
-                
             }
-        }
-        else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"response"])
-        {
-            
-        }
-        else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"success"])
-        {
-            ParseStream* streamNode= [[ParseStream alloc]  initWithDictionary:nextStanzaPos];
-            //perform logic to handle proceed
-            if(!streamNode.error)
+            else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"response"])
             {
-                if(streamNode.SASLSuccess)
+                
+            }
+            else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"success"])
+            {
+                ParseStream* streamNode= [[ParseStream alloc]  initWithDictionary:nextStanzaPos];
+                //perform logic to handle proceed
+                if(!streamNode.error)
                 {
-                    DDLogInfo(@"Got SASL Success");
-                    
-                    srand([[NSDate date] timeIntervalSince1970]);
-                    // make up a random session key (id)
-                    _sessionKey=[NSString stringWithFormat:@"monal%ld",random()%100000];
-                    DDLogVerbose(@"session key: %@", _sessionKey);
-                    
-                    [self startStream];
-                    _accountState=kStateLoggedIn;
-                    _loggedInOnce=YES;
-                    _loginStarted=NO;
-             
-                   
-                    NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
-                                         kinfoTypeKey:@"connect", kinfoStatusKey:@""};
-                    dispatch_async(_xmppQueue, ^{
-                        [self.contactsVC hideConnecting:info];
-                    });
-                    
+                    if(streamNode.SASLSuccess)
+                    {
+                        DDLogInfo(@"Got SASL Success");
+                        
+                        srand([[NSDate date] timeIntervalSince1970]);
+                        // make up a random session key (id)
+                        _sessionKey=[NSString stringWithFormat:@"monal%ld",random()%100000];
+                        DDLogVerbose(@"session key: %@", _sessionKey);
+                        
+                        [self startStream];
+                        _accountState=kStateLoggedIn;
+                        _loggedInOnce=YES;
+                        _loginStarted=NO;
+                        
+                        
+                        NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
+                                             kinfoTypeKey:@"connect", kinfoStatusKey:@""};
+                        dispatch_async(_xmppQueue, ^{
+                            [self.contactsVC hideConnecting:info];
+                        });
+                        
+                    }
                 }
             }
+            
+            nextStanzaPos=[self nextStanza];
         }
-        
-        nextStanzaPos=[self nextStanza];
-    }
+    }]];
     
 }
 
@@ -1676,13 +1686,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) send:(XMLNode*) stanza
 {
-    if(!stanza) return; 
-    dispatch_async(_xmppQueue, ^{
-        dispatch_async(_netWriteQueue, ^{
-            [_outputQueue addObject:stanza];
-            [self writeFromQueue];  // try to send if there is space
-        });
-    });
+    if(!stanza) return;
+    
+    [self.writeQueue addOperation:
+     [NSBlockOperation blockOperationWithBlock:^{
+        [_outputQueue addObject:stanza];
+        [self writeFromQueue];  // try to send if there is space
+        
+    }]];
 }
 
 
@@ -1956,14 +1967,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 			//for writing
         case NSStreamEventHasSpaceAvailable:
         {
-            dispatch_async(_xmppQueue, ^{
-                dispatch_async(_netWriteQueue, ^{
+            [self.writeQueue addOperation:
+             [NSBlockOperation blockOperationWithBlock:^{
                     _streamHasSpace=YES;
                     
                     DDLogVerbose(@"Stream has space to write");
                     [self writeFromQueue];
-                });
-            });
+            }]];
             break;
         }
 			
@@ -2145,7 +2155,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         if(data)
         {
             // DDLogVerbose(@"waiting on net read queue");
-            dispatch_async(_netReadQueue, ^{
+            [self.readQueue addOperation:
+             [NSBlockOperation blockOperationWithBlock:^{
+
                 // DDLogVerbose(@"got net read queue");
                 NSString* inputString=[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
                 if(inputString) {
@@ -2154,7 +2166,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 else {
                     DDLogError(@"got data but not string");
                 }
-            });
+            }]];
             
         }
         free(buf);

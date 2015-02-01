@@ -17,6 +17,7 @@ This is  update that  fixes bugs.
 1. turned off all SSL3 support. It is no longer safe
 2. added ability to search the contacts list
 3. improved stability
+4. fixed bug that caused facebook contacts to not show
 
 
 

@@ -1489,6 +1489,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 self.streamID=enabledNode.streamID;
                 self.lastHandledInboundStanza=[NSNumber numberWithInteger:0];
                 self.lastHandledOutboundStanza=[NSNumber numberWithInteger:0];
+                self.unAckedStanzas =[[NSMutableArray alloc] init];
                 
             }
             else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"r"])

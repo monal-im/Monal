@@ -25,6 +25,7 @@
 #import "ParseMessage.h"
 #import "ParseChallenge.h"
 #import "ParseFailure.h"
+#import "ParseEnabled.h"
 
 #import "MLImageManager.h"
 #import "UIAlertView+Blocks.h"
@@ -52,6 +53,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 @property (nonatomic, assign) BOOL supportsSM2;
 @property (nonatomic, assign) BOOL supportsSM3;
 
+@property (nonatomic, assign) BOOL supportsResume;
+@property (nonatomic, strong) NSString *streamID;
 
 @end
 
@@ -798,14 +801,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self.readQueue addOperation:
      [NSBlockOperation blockOperationWithBlock:^{
         
-        NSDictionary* nextStanzaPos=[self nextStanza];
-        while (nextStanzaPos)
+        NSDictionary* stanzaToParse=[self nextStanza];
+        while (stanzaToParse)
         {
-            DDLogVerbose(@"got stanza %@", nextStanzaPos);
+            DDLogVerbose(@"got stanza %@", stanzaToParse);
             
-            if([[nextStanzaPos objectForKey:@"stanzaType"]  isEqualToString:@"iq"])
+            if([[stanzaToParse objectForKey:@"stanzaType"]  isEqualToString:@"iq"])
             {
-                ParseIq* iqNode= [[ParseIq alloc]  initWithDictionary:nextStanzaPos];
+                ParseIq* iqNode= [[ParseIq alloc]  initWithDictionary:stanzaToParse];
                 if ([iqNode.type isEqualToString:kiqErrorType])
                 {
                     return;
@@ -1143,9 +1146,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 
                 
             }
-            else  if([[nextStanzaPos objectForKey:@"stanzaType"]  isEqualToString:@"message"])
+            else  if([[stanzaToParse objectForKey:@"stanzaType"]  isEqualToString:@"message"])
             {
-                ParseMessage* messageNode= [[ParseMessage alloc]  initWithDictionary:nextStanzaPos];
+                ParseMessage* messageNode= [[ParseMessage alloc]  initWithDictionary:stanzaToParse];
                 if([messageNode.type isEqualToString:kMessageErrorType])
                 {
                     //TODO: mark message as error
@@ -1214,11 +1217,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 }
                 
             }
-            else  if([[nextStanzaPos objectForKey:@"stanzaType"]  isEqualToString:@"presence"])
+            else  if([[stanzaToParse objectForKey:@"stanzaType"]  isEqualToString:@"presence"])
             {
-                ParsePresence* presenceNode= [[ParsePresence alloc]  initWithDictionary:nextStanzaPos];
+                ParsePresence* presenceNode= [[ParsePresence alloc]  initWithDictionary:stanzaToParse];
                 if([presenceNode.user isEqualToString:_fulluser]) {
-                    nextStanzaPos=[self nextStanza];
+                    stanzaToParse=[self nextStanza];
                     continue; //ignore self
                 }
                 
@@ -1346,17 +1349,17 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 }
                 
             }
-            else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"stream:error"])
+            else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"stream:error"])
             {
                 [self disconnect];
             }
-            else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"stream:stream"])
+            else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"stream:stream"])
             {
                 //  ParseStream* streamNode= [[ParseStream alloc]  initWithDictionary:nextStanzaPos];
             }
-            else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"stream"])
+            else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"stream"])
             {
-                ParseStream* streamNode= [[ParseStream alloc]  initWithDictionary:nextStanzaPos];
+                ParseStream* streamNode= [[ParseStream alloc]  initWithDictionary:stanzaToParse];
                 
                 //perform logic to handle stream
                 if(streamNode.error)
@@ -1444,14 +1447,21 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 }
                 
             }
-            else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"features"])
+            else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"enabled"])
+            {
+                  ParseEnabled* enabledNode= [[ParseEnabled alloc]  initWithDictionary:stanzaToParse];
+                self.supportsResume=enabledNode.resume;
+                self.streamID=enabledNode.streamID;
+                
+            }
+            else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"features"])
             {
                 
             }
-            else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"proceed"])
+            else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"proceed"])
             {
                 
-                ParseStream* streamNode= [[ParseStream alloc]  initWithDictionary:nextStanzaPos];
+                ParseStream* streamNode= [[ParseStream alloc]  initWithDictionary:stanzaToParse];
                 //perform logic to handle proceed
                 if(!streamNode.error)
                 {
@@ -1518,9 +1528,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     }
                 }
             }
-            else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"failure"])
+            else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"failure"])
             {
-                ParseFailure* failure = [[ParseFailure alloc] initWithDictionary:nextStanzaPos];
+                ParseFailure* failure = [[ParseFailure alloc] initWithDictionary:stanzaToParse];
                 if(failure.saslError || failure.notAuthorized)
                 {
                     _loginError=YES;
@@ -1528,9 +1538,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 }
                 
             }
-            else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"challenge"])
+            else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"challenge"])
             {
-                ParseChallenge* challengeNode= [[ParseChallenge alloc]  initWithDictionary:nextStanzaPos];
+                ParseChallenge* challengeNode= [[ParseChallenge alloc]  initWithDictionary:stanzaToParse];
                 if(challengeNode.saslChallenge)
                 {
                     XMLNode* responseXML= [[XMLNode alloc]init];
@@ -1657,13 +1667,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     
                 }
             }
-            else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"response"])
+            else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"response"])
             {
                 
             }
-            else  if([[nextStanzaPos objectForKey:@"stanzaType"] isEqualToString:@"success"])
+            else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"success"])
             {
-                ParseStream* streamNode= [[ParseStream alloc]  initWithDictionary:nextStanzaPos];
+                ParseStream* streamNode= [[ParseStream alloc]  initWithDictionary:stanzaToParse];
                 //perform logic to handle proceed
                 if(!streamNode.error)
                 {
@@ -1692,7 +1702,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 }
             }
             
-            nextStanzaPos=[self nextStanza];
+            stanzaToParse=[self nextStanza];
         }
     }]];
     

@@ -113,10 +113,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                   @"response",
                   @"success",
                   @"enabled",
+                  @"resumed", // should be before r since that will match many things
+                  @"failed",
                   @"r",
                   @"a",
-                  @"resumed",
-                  @"failed",
                   nil];
     
     

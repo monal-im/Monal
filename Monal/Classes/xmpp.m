@@ -115,6 +115,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                   @"enabled",
                   @"r",
                   @"a",
+                  @"resumed",
+                  @"failed",
                   nil];
     
     
@@ -383,6 +385,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         XMLNode* stream = [[XMLNode alloc] init];
         stream.element=@"/stream:stream"; //hack to close stream
         [self send:stream];
+        self.streamID=nil;
     }
     
     if(kStateDisconnected) return;
@@ -1466,18 +1469,29 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 else
                 {
                     
-                    XMPPIQ* iqNode =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqSetType];
-                    [iqNode setBindWithResource:_resource];
-                    
-                    [self send:iqNode];
-                    
-                    if(streamNode.supportsSM3)
-                    {
-                        self.supportsSM3=YES;
-                        XMLNode *enableNode =[[XMLNode alloc] initWithElement:@"enable"];
-                        NSDictionary *dic=@{@"xmlns":@"urn:xmpp:sm:3",@"resume":@"true" };
-                        enableNode.attributes =[dic mutableCopy];
-                        [self send:enableNode];
+                    if(self.streamID) {
+                        XMLNode *resumeNode =[[XMLNode alloc] initWithElement:@"resume"];
+                        NSDictionary *dic=@{@"xmlns":@"urn:xmpp:sm:3",@"h":[NSString stringWithFormat:@"%@",self.lastHandledInboundStanza], @"previd":self.streamID };
+                        resumeNode.attributes =[dic mutableCopy];
+                        [self send:resumeNode];
+                    }
+                    else {
+                        XMPPIQ* iqNode =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqSetType];
+                        [iqNode setBindWithResource:_resource];
+                        
+                        [self send:iqNode];
+                        
+                        if(streamNode.supportsSM3)
+                        {
+                            self.supportsSM3=YES;
+                            
+                            XMLNode *enableNode =[[XMLNode alloc] initWithElement:@"enable"];
+                            NSDictionary *dic=@{@"xmlns":@"urn:xmpp:sm:3",@"resume":@"true" };
+                            enableNode.attributes =[dic mutableCopy];
+                            [self send:enableNode];
+                            
+                            
+                        }
                     }
                     
                 }
@@ -1505,6 +1519,17 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             {
                 ParseA* aNode= [[ParseA alloc]  initWithDictionary:stanzaToParse];
                 self.lastHandledOutboundStanza=aNode.h;
+                
+            }
+            else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"resumed"])
+            {
+               //h would be compared to outbound value
+                //send unacked
+                
+            }
+            else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"failed"])
+            {
+               
                 
             }
             

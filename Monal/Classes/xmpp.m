@@ -1473,6 +1473,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     
                     if(streamNode.supportsSM3)
                     {
+                        self.supportsSM3=YES;
                         XMLNode *enableNode =[[XMLNode alloc] initWithElement:@"enable"];
                         NSDictionary *dic=@{@"xmlns":@"urn:xmpp:sm:3",@"resume":@"true" };
                         enableNode.attributes =[dic mutableCopy];

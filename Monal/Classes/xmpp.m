@@ -1458,6 +1458,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 self.streamID=enabledNode.streamID;
                 
             }
+            else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"r"])
+            {
+                XMLNode *aNode =[[XMLNode alloc] initWithElement:@"a"];
+                NSDictionary *dic=@{@"xmlns":@"urn:xmpp:sm:3",@"h":self.lastHandledStanza };
+                aNode.attributes =[dic mutableCopy];
+                [self send:aNode];
+                
+            }
+            
             else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"features"])
             {
                 

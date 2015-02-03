@@ -18,9 +18,8 @@
     //
     //    }
     
-    _h=[attributeDict objectForKey:@"h"];
+    _h=[NSNumber numberWithInteger:[(NSString*)[attributeDict objectForKey:@"h"] integerValue]];
     
-  
 }
 
 

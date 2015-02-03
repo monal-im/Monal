@@ -92,6 +92,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                   @"challenge",
                   @"response",
                   @"success",
+                  @"enabled",
                   nil];
     
     
@@ -1426,10 +1427,19 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 }
                 else
                 {
+                  
                     XMPPIQ* iqNode =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqSetType];
                     [iqNode setBindWithResource:_resource];
                     
                     [self send:iqNode];
+                    
+                    if(streamNode.supportsSM3)
+                    {
+                        XMLNode *enableNode =[[XMLNode alloc] initWithElement:@"enable"];
+                        NSDictionary *dic=@{@"xmlns":@"urn:xmpp:sm:3",@"resume":@"true" };
+                        enableNode.attributes =[dic mutableCopy];
+                        [self send:enableNode];
+                    }
                     
                 }
                 

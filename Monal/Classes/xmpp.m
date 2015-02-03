@@ -363,6 +363,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) disconnect
 {
+    if(self.explicitLogout)
+    {
+        XMLNode* stream = [[XMLNode alloc] init];
+        stream.element=@"/stream:stream"; //hack to close stream
+        [self send:stream];
+    }
+    
     if(kStateDisconnected) return;
     [self.readQueue cancelAllOperations];
     [self.writeQueue cancelAllOperations];
@@ -1456,12 +1463,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                   ParseEnabled* enabledNode= [[ParseEnabled alloc]  initWithDictionary:stanzaToParse];
                 self.supportsResume=enabledNode.resume;
                 self.streamID=enabledNode.streamID;
+                self.lastHandledStanza=[NSNumber numberWithInteger:0];
                 
             }
             else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"r"])
             {
                 XMLNode *aNode =[[XMLNode alloc] initWithElement:@"a"];
-                NSDictionary *dic=@{@"xmlns":@"urn:xmpp:sm:3",@"h":self.lastHandledStanza };
+                NSDictionary *dic=@{@"xmlns":@"urn:xmpp:sm:3",@"h":[NSString stringWithFormat:@"%@",self.lastHandledStanza] };
                 aNode.attributes =[dic mutableCopy];
                 [self send:aNode];
                 

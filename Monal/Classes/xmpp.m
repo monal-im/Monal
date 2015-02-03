@@ -56,6 +56,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 @property (nonatomic, assign) BOOL supportsResume;
 @property (nonatomic, strong) NSString *streamID;
 
+@property (nonatomic, strong) NSNumber *lastHandledStanza; //h value
+
 @end
 
 
@@ -96,6 +98,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                   @"response",
                   @"success",
                   @"enabled",
+                  @"r",
+                  @"a",
                   nil];
     
     

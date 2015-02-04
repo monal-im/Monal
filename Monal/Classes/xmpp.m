@@ -61,6 +61,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 @property (nonatomic, assign) BOOL supportsResume;
 @property (nonatomic, strong) NSString *streamID;
 
+//carbons
+@property (nonatomic, assign) BOOL supportsCarbons2;
+
+//server details
+@property (nonatomic, strong) NSSet *serverFeatures;
+
 /**
  h to go out in r stanza
  */
@@ -886,6 +892,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 if ([iqNode.type isEqualToString:kiqErrorType])
                 {
                     return;
+                }
+                if(iqNode.features) {
+                    self.serverFeatures=[iqNode.features copy];
                 }
                 
                 if(iqNode.legacyAuth)

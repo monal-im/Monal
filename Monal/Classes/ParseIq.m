@@ -10,14 +10,6 @@
 
 @implementation ParseIq
 
--(id) init{
-    self=[super init];
-    _features=[[NSMutableArray alloc] init];
-   
-    return self;
-}
-
-
 #pragma mark NSXMLParser delegate
 
 - (void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict
@@ -48,15 +40,26 @@
         _queryXMLNS=[attributeDict objectForKey:@"xmlns"];
         if([_queryXMLNS isEqualToString:@"http://jabber.org/protocol/disco#info"]) _discoInfo=YES;
         if([_queryXMLNS isEqualToString:@"http://jabber.org/protocol/disco#items"]) _discoItems=YES;
-        if([_queryXMLNS isEqualToString:@"jabber:iq:roster"]) _roster=YES;
-        if([_queryXMLNS isEqualToString:@"jabber:iq:auth"]) _legacyAuth=YES;
-        
-         [_features addObject:[attributeDict objectForKey:@"val"]];
         
         NSString* node =[attributeDict objectForKey:@"node"];
         if(node) _queryNode=node; 
           
      }
+    
+    
+    if([elementName isEqualToString:@"feature"])
+    {
+        if([_queryXMLNS isEqualToString:@"http://jabber.org/protocol/disco#info"]) {
+            if([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"jabber:iq:roster"]) _roster=YES;
+            else if([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"jabber:iq:auth"]) _legacyAuth=YES;
+            
+            if(!_features)  _features=[[NSMutableSet alloc] init];
+            [_features addObject:[attributeDict objectForKey:@"var"]];
+            
+        }
+        
+    }
+  
     
     if([elementName isEqualToString:@"group"] && _roster==YES)
     {

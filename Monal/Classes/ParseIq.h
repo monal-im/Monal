@@ -26,7 +26,7 @@
 
 @property (nonatomic, strong, readonly) NSString* queryXMLNS;
 @property (nonatomic, strong, readonly) NSString* queryNode;
-@property (nonatomic, strong, readonly) NSMutableArray* features;
+@property (nonatomic, strong, readonly) NSMutableSet* features;
 @property (nonatomic, strong, readonly) NSMutableArray* items;
 
 // vcard releated

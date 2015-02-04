@@ -16,6 +16,9 @@
 @property (nonatomic,readonly, assign) BOOL supportsUserReg;
 @property (nonatomic,readonly, assign) BOOL supportsSM2;
 @property (nonatomic,readonly, assign) BOOL supportsSM3;
+@property (nonatomic,readonly, assign) BOOL supportsCarbons2;
+
+
 
 //Auth mechanisms
 @property (nonatomic,readonly, assign) BOOL supportsSASL;

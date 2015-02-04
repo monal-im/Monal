@@ -616,7 +616,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         return;
     }
     
-    if(self.supportsSM3)
+    if(self.supportsSM3 && self.unAckedStanzas)
     {
         XMLNode* rNode =[[XMLNode alloc] initWithElement:@"r"];
         NSDictionary *dic=@{@"xmlns":@"urn:xmpp:sm:3"};

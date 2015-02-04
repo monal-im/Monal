@@ -62,7 +62,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 @property (nonatomic, strong) NSString *streamID;
 
 //carbons
-@property (nonatomic, assign) BOOL supportsCarbons2;
+@property (nonatomic, assign) BOOL usingCarbons2;
 
 //server details
 @property (nonatomic, strong) NSSet *serverFeatures;
@@ -899,7 +899,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     
                     if([self.serverFeatures containsObject:@"urn:xmpp:carbons:2"])
                     {
-                        self.supportsCarbons2=YES;
                         XMPPIQ* carbons =[[XMPPIQ alloc] initWithId:@"enableCarbons" andType:kiqSetType];
                         XMLNode *enable =[[XMLNode alloc] initWithElement:@"enable"];
                         [enable setXMLNS:@"urn:xmpp:carbons:2"];
@@ -1037,6 +1036,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 
                 if ([iqNode.type isEqualToString:kiqResultType])
                 {
+                    if([iqNode.idval isEqualToString:@"enableCarbons"])
+                    {
+                          self.usingCarbons2=YES;
+                    }
+                    
                     if(iqNode.discoItems==YES)
                     {
                         if([iqNode.from isEqualToString:self.server] || [iqNode.from isEqualToString:self.domain])

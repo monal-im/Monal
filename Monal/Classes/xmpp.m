@@ -27,6 +27,7 @@
 #import "ParseFailure.h"
 #import "ParseEnabled.h"
 #import "ParseA.h"
+#import "ParseResumed.h"
 
 #import "MLImageManager.h"
 #import "UIAlertView+Blocks.h"
@@ -37,6 +38,9 @@
 
 NSString *const kMessageId=@"MessageID";
 NSString *const kSendTimer=@"SendTimer";
+
+NSString *const kStanzaID=@"stanzaID";
+NSString *const kStanza=@"stanza";
 
 static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
@@ -61,17 +65,22 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
  h to go out in r stanza
  */
 @property (nonatomic, strong) NSNumber *lastHandledInboundStanza;
+
 /**
  h from a stanza
  */
 @property (nonatomic, strong) NSNumber *lastHandledOutboundStanza;
 
 /**
+ internal counter that should match lastHandledOutboundStanza
+ */
+@property (nonatomic, strong) NSNumber *lastOutboundStanza;
+
+/**
  Array of NSdic with stanzas that have not been acked.
- NSDic {id, stanza}
+ NSDic {stanzaID, stanza}
  */
 @property (nonatomic, strong) NSMutableArray *unAckedStanzas;
-
 
 @end
 
@@ -386,6 +395,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         stream.element=@"/stream:stream"; //hack to close stream
         [self send:stream];
         self.streamID=nil;
+        self.unAckedStanzas=nil;
     }
     
     if(kStateDisconnected) return;
@@ -831,6 +841,32 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     return  returnDic;
 }
 
+#pragma mark message ACK
+-(void) sendUnAckedMessages
+{
+    for (NSDictionary *dic in self.unAckedStanzas)
+    {
+        [self send:(XMLNode*)[dic objectForKey:kStanza]];
+    }
+}
+
+-(void) removeUnAckedMessagesLessThan:(NSNumber*) hvalue
+{
+    NSMutableArray *discard =[[NSMutableArray alloc] initWithCapacity:[self.unAckedStanzas count]];
+    for (NSDictionary *dic in self.unAckedStanzas)
+    {
+        NSNumber *stanzaNumber = [dic objectForKey:kStanzaID];
+        if([stanzaNumber integerValue]<[hvalue integerValue])
+        {
+            [discard addObject:dic];
+        }
+    }
+    
+    [self.unAckedStanzas removeObjectsInArray:discard];
+}
+
+
+#pragma mark stanza handling
 -(void) processInput
 {
     //prevent reconnect attempt
@@ -1502,8 +1538,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 ParseEnabled* enabledNode= [[ParseEnabled alloc]  initWithDictionary:stanzaToParse];
                 self.supportsResume=enabledNode.resume;
                 self.streamID=enabledNode.streamID;
+                //initilize values
                 self.lastHandledInboundStanza=[NSNumber numberWithInteger:0];
                 self.lastHandledOutboundStanza=[NSNumber numberWithInteger:0];
+                self.lastOutboundStanza=[NSNumber numberWithInteger:0];
                 self.unAckedStanzas =[[NSMutableArray alloc] init];
                 
             }
@@ -1520,16 +1558,32 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 ParseA* aNode= [[ParseA alloc]  initWithDictionary:stanzaToParse];
                 self.lastHandledOutboundStanza=aNode.h;
                 
+                //remove acked messages
+                [self removeUnAckedMessagesLessThan:aNode.h];
+                
             }
             else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"resumed"])
             {
+                ParseResumed* resumeNode= [[ParseResumed alloc]  initWithDictionary:stanzaToParse];
                //h would be compared to outbound value
-                //send unacked
+                if([resumeNode.h integerValue]==[self.lastHandledOutboundStanza integerValue])
+                {
+                    [self.unAckedStanzas removeAllObjects];
+                }
+                else {
+                    [self removeUnAckedMessagesLessThan:resumeNode.h];
+                //send unacked stanzas
+                    [self sendUnAckedMessages];
+                }
                 
             }
             else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"failed"])
             {
-               
+               // if resume failed. bind like normal
+                XMPPIQ* iqNode =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqSetType];
+                [iqNode setBindWithResource:_resource];
+                
+                [self send:iqNode];
                 
             }
             
@@ -1792,6 +1846,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) send:(XMLNode*) stanza
 {
     if(!stanza) return;
+    
+    if(self.supportsSM3 && self.unAckedStanzas)
+    {
+        NSDictionary *dic =@{kStanzaID:[NSNumber numberWithInteger: [self.lastOutboundStanza integerValue]], kStanza:stanza};
+        [self.unAckedStanzas addObject:dic];
+        self.lastOutboundStanza=[NSNumber numberWithInteger:[self.lastOutboundStanza integerValue]+1];
+    }
     
     [self.writeQueue addOperation:
      [NSBlockOperation blockOperationWithBlock:^{

@@ -180,6 +180,7 @@
 		26C3EDEE1A7CA6FA000E6331 /* ContactsViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26C3EDED1A7CA6FA000E6331 /* ContactsViewController.xib */; };
 		26C3EDF71A8072D5000E6331 /* ParseEnabled.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C3EDF61A8072D5000E6331 /* ParseEnabled.m */; };
 		26C3EDFD1A807E76000E6331 /* ParseA.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C3EDFC1A807E76000E6331 /* ParseA.m */; };
+		26C3EE001A819A38000E6331 /* ParseResumed.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C3EDFF1A819A38000E6331 /* ParseResumed.m */; };
 		26CF3EAA1780D6B7002B7085 /* XMPPIQ.m in Sources */ = {isa = PBXBuildFile; fileRef = 26CF3EA91780D6B7002B7085 /* XMPPIQ.m */; };
 		26CF3EAD1780DE5D002B7085 /* ParseIq.m in Sources */ = {isa = PBXBuildFile; fileRef = 26CF3EAC1780DE5C002B7085 /* ParseIq.m */; };
 		26CF3EB21780DFD9002B7085 /* XMPPParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 26CF3EB11780DFD9002B7085 /* XMPPParser.m */; };
@@ -457,6 +458,8 @@
 		26C3EDF61A8072D5000E6331 /* ParseEnabled.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParseEnabled.m; sourceTree = "<group>"; };
 		26C3EDFB1A807E76000E6331 /* ParseA.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParseA.h; sourceTree = "<group>"; };
 		26C3EDFC1A807E76000E6331 /* ParseA.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParseA.m; sourceTree = "<group>"; };
+		26C3EDFE1A819A38000E6331 /* ParseResumed.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParseResumed.h; sourceTree = "<group>"; };
+		26C3EDFF1A819A38000E6331 /* ParseResumed.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParseResumed.m; sourceTree = "<group>"; };
 		26CF3EA81780D6B7002B7085 /* XMPPIQ.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPIQ.h; sourceTree = "<group>"; };
 		26CF3EA91780D6B7002B7085 /* XMPPIQ.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPIQ.m; sourceTree = "<group>"; };
 		26CF3EAB1780DE5C002B7085 /* ParseIq.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParseIq.h; sourceTree = "<group>"; };
@@ -894,6 +897,8 @@
 				26C3EDF61A8072D5000E6331 /* ParseEnabled.m */,
 				26C3EDFB1A807E76000E6331 /* ParseA.h */,
 				26C3EDFC1A807E76000E6331 /* ParseA.m */,
+				26C3EDFE1A819A38000E6331 /* ParseResumed.h */,
+				26C3EDFF1A819A38000E6331 /* ParseResumed.m */,
 			);
 			name = Parsers;
 			sourceTree = "<group>";
@@ -1301,6 +1306,7 @@
 				2680B8ED1863C172009599AB /* DDFileLogger.m in Sources */,
 				260C51D1177F08F50039634B /* xmpp.m in Sources */,
 				260C51D4177F44AD0039634B /* XMLNode.m in Sources */,
+				26C3EE001A819A38000E6331 /* ParseResumed.m in Sources */,
 				263F127A177F867B0025B235 /* ParseStream.m in Sources */,
 				260C6C94178080730004E2E1 /* EncodingTools.m in Sources */,
 				26CF3EAA1780D6B7002B7085 /* XMPPIQ.m in Sources */,

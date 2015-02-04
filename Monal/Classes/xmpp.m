@@ -893,8 +893,19 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 {
                     return;
                 }
-                if(iqNode.features) {
+                
+                if(iqNode.features && iqNode.discoInfo) {
                     self.serverFeatures=[iqNode.features copy];
+                    
+                    if([self.serverFeatures containsObject:@"urn:xmpp:carbons:2"])
+                    {
+                        self.supportsCarbons2=YES;
+                        XMPPIQ* carbons =[[XMPPIQ alloc] initWithId:@"enableCarbons" andType:kiqSetType];
+                        XMLNode *enable =[[XMLNode alloc] initWithElement:@"enable"];
+                        [enable setXMLNS:@"urn:xmpp:carbons:2"];
+                        [carbons.children addObject:enable];
+                        [self send:carbons];
+                    }
                 }
                 
                 if(iqNode.legacyAuth)

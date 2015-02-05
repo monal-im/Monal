@@ -40,7 +40,17 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         
         State=@"Message";
 	}
+    
+    if(([elementName isEqualToString:@"forward"])  )
+    {
+        State=@"Forward";
+    }
 	
+    if(([elementName isEqualToString:@"message"]) && [State isEqualToString:@"Forward"] )
+    {
+       
+    }
+    
 	
     //ignore error message
 	if([elementName isEqualToString:@"body"])

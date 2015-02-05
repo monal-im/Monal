@@ -733,6 +733,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             {
                 stanzaType=[_stanzaTypes objectAtIndex:stanzacounter];
                 
+                
                 if([[_stanzaTypes objectAtIndex:stanzacounter] isEqualToString:@"stream:stream"])
                 {
                     //no children and one line stanza
@@ -756,6 +757,36 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     
                     NSRange dupePos=[_inputBuffer rangeOfString:[NSString stringWithFormat:@"<%@",[_stanzaTypes objectAtIndex:stanzacounter]]
                                                         options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location+1, maxPos-pos.location-1)];
+                 
+                    
+                    if([stanzaType isEqualToString:@"message"] && dupePos.location!=NSNotFound)
+                    {
+                        //check for carbon forwarded
+                        NSRange forwardPos=[_inputBuffer rangeOfString:@"<forwarded"
+                                                               options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, dupePos.location-pos.location-1)];
+                        
+                        if(forwardPos.location!=NSNotFound)
+                        {
+                            
+                            //look for next message close
+                            NSRange forwardClosePos=[_inputBuffer rangeOfString:@"</forwarded"
+                                                         options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, maxPos-pos.location)];
+                            
+                            NSRange messageClose =[_inputBuffer rangeOfString:[NSString stringWithFormat:@"</%@",stanzaType]
+                                                                                options:NSCaseInsensitiveSearch range:NSMakeRange(forwardClosePos.location, maxPos-forwardClosePos.location)];
+                            //ensure it is set to future max
+                         
+                            
+                            finalstart=pos.location;
+                            finalend=messageClose.location+messageClose.length+1; //+1 to inclde closing <
+                            DDLogVerbose(@"at  2.5");
+                            break;
+                        }
+                        
+                        
+                    }
+
+                    
                     //since there is another block of the same stanza, short cuts dont work.check to find beginning of next element
                     if((dupePos.location<maxPos) && (dupePos.location!=NSNotFound))
                     {
@@ -765,8 +796,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     }
                     
                     //  we need to find the end of this stanza
-                    NSRange closePos=[_inputBuffer rangeOfString:[NSString stringWithFormat:@"</%@",[_stanzaTypes objectAtIndex:stanzacounter]]
+                    NSRange closePos=[_inputBuffer rangeOfString:[NSString stringWithFormat:@"</%@",stanzaType]
                                                          options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, maxPos-pos.location)];
+                    
                     
                     if((closePos.location<maxPos) && (closePos.location!=NSNotFound))
                     {

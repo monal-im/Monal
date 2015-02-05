@@ -1328,10 +1328,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             NSString* messageText=messageNode.messageText;
                             if(!messageText) messageText=@"";
                             
+                            NSString *recipient=messageNode.to;
+                            if(!recipient) recipient=self.jid;
                             NSDictionary* userDic=@{@"from":messageNode.from,
                                                     @"actuallyfrom":actuallyFrom,
                                                     @"messageText":messageText,
-                                                    @"to":messageNode.to,
+                                                    @"to":recipient,
                                                     @"accountNo":_accountNo
                                                     };
                             

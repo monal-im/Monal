@@ -38,7 +38,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
     dispatch_async(dispatch_get_main_queue(),
                   ^{
-                     NSString* acctString =[NSString stringWithFormat:@"%d", [[notification.userInfo objectForKey:@"accountNo"] integerValue]];  
+                     NSString* acctString =[NSString stringWithFormat:@"%ld", (long)[[notification.userInfo objectForKey:@"accountNo"] integerValue]];  
                       NSString* fullName =[[DataLayer sharedInstance] fullName:[notification.userInfo objectForKey:@"from"] forAccount:acctString];
                       
                       NSString* nameToShow=[notification.userInfo objectForKey:@"from"];

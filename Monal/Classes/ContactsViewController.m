@@ -534,7 +534,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     DDLogInfo(@"chat view got new message notice %@", notification.userInfo);
     if([[self.currentNavController topViewController] isKindOfClass:[chatViewController class]]) {
         chatViewController* currentTop=(chatViewController*)[self.currentNavController topViewController];
-        if([currentTop.contactName isEqualToString:[notification.userInfo objectForKey:@"from"]] &&
+        if( (([currentTop.contactName isEqualToString:[notification.userInfo objectForKey:@"from"]] )|| ([currentTop.contactName isEqualToString:[notification.userInfo objectForKey:@"to"]] )) &&
            [currentTop.accountNo isEqualToString:
             [NSString stringWithFormat:@"%d",[[notification.userInfo objectForKey:kaccountNoKey] integerValue] ]]
            )

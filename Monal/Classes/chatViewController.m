@@ -420,6 +420,11 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 #pragma mark - handling notfications
 
+-(void) reloadTable
+{
+    [_messageTable reloadData];
+}
+
 //always messages going out
 -(void) addMessageto:(NSString*)to withMessage:(NSString*) message andId:(NSString *) messageId
 {
@@ -474,14 +479,25 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     DDLogVerbose(@"chat view got new message notice %@", notification.userInfo);
     
     if([[notification.userInfo objectForKey:@"accountNo"] isEqualToString:_accountNo]
-       && [[notification.userInfo objectForKey:@"from"] isEqualToString:_contactName]
+       &&( ( [[notification.userInfo objectForKey:@"from"] isEqualToString:_contactName]) || ([[notification.userInfo objectForKey:@"to"] isEqualToString:_contactName] ))
        )
     {
         dispatch_async(dispatch_get_main_queue(),
                        ^{
-                           NSDictionary* userInfo = @{@"af": [notification.userInfo objectForKey:@"actuallyfrom"],
+                           NSDictionary* userInfo;
+                           if([[notification.userInfo objectForKey:@"to"] isEqualToString:_contactName])
+                           {
+                               userInfo = @{@"af": [notification.userInfo objectForKey:@"actuallyfrom"],
+                                                          @"message": [notification.userInfo objectForKey:@"messageText"],
+                                                          @"thetime": [self currentGMTTime],   @"delivered":@YES};
+
+                           } else  {
+                          userInfo = @{@"af": [notification.userInfo objectForKey:@"actuallyfrom"],
                                                       @"message": [notification.userInfo objectForKey:@"messageText"],
-                                                      @"thetime": [self currentGMTTime]};
+                                                      @"thetime": [self currentGMTTime]
+                                     };
+                           }
+                           
                            [_messagelist addObject:userInfo];
                            
                            [_messageTable beginUpdates];
@@ -489,8 +505,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                            [_messageTable insertRowsAtIndexPaths:@[path1]
                                                 withRowAnimation:UITableViewRowAnimationTop];
                            [_messageTable endUpdates];
+                         
+                            [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:YES];
                            
-                           [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:YES];
                            
                            //mark as read
                            [[DataLayer sharedInstance] markAsReadBuddy:_contactName forAccount:_accountNo];

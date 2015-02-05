@@ -1314,14 +1314,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     }
                     else
                     {
-                        [[DataLayer sharedInstance] addMessageFrom:messageNode.from to:_fulluser
+                        [[DataLayer sharedInstance] addMessageFrom:messageNode.from to:messageNode.to
                                                         forAccount:_accountNo withBody:messageNode.messageText
                                                       actuallyfrom:messageNode.actualFrom delivered:YES];
                         
                         [[DataLayer sharedInstance] addActiveBuddies:messageNode.from forAccount:_accountNo];
                         
                         
-                        if(messageNode.from) {
+                        if(messageNode.from && ![messageNode.from isEqualToString:self.jid]) {
                             NSString* actuallyFrom= messageNode.actualFrom;
                             if(!actuallyFrom) actuallyFrom=messageNode.from;
                             
@@ -1331,7 +1331,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             NSDictionary* userDic=@{@"from":messageNode.from,
                                                     @"actuallyfrom":actuallyFrom,
                                                     @"messageText":messageText,
-                                                    @"to":_fulluser,
+                                                    @"to":messageNode.to,
                                                     @"accountNo":_accountNo
                                                     };
                             

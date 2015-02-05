@@ -65,20 +65,13 @@
 
 #pragma mark gesture stuff
 
-//-(void) showSignal:(NSNotification*) note; 
-//-(void)swipeDetected:(UISwipeGestureRecognizer *)recognizer;
-
-
-//-(void) handleInput:(NSString *)text;
 //notification
 -(void) keyboardWillShow:(NSNotification *) note;
 -(void) keyboardWillHide:(NSNotification *) note;
 
 -(void) retry:(id) sender;
 
-//content generation 
-//-(NSString*) makeMessageHTMLfrom:(NSString*) from withMessage:(NSString*) themessage andTime:(NSString*) time isLive:(BOOL) liveChat;
-//-(NSString*) emoticonsHTML:(NSString*) message; 
+-(void) reloadTable; 
 
 /**
  full own username with domain e.g. aa@gmail.com

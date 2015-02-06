@@ -1314,14 +1314,21 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     }
                     else
                     {
+                        NSString *jidWithoutResource = [NSString stringWithFormat:@"%@@%@", self.username, self.domain ];
+                        
+                        BOOL unread=YES;
+                        if( [messageNode.from isEqualToString:jidWithoutResource] ) {
+                            unread=NO;
+                        }
+                        
                         [[DataLayer sharedInstance] addMessageFrom:messageNode.from to:messageNode.to
                                                         forAccount:_accountNo withBody:messageNode.messageText
-                                                      actuallyfrom:messageNode.actualFrom delivered:YES];
+                                                      actuallyfrom:messageNode.actualFrom delivered:YES  unread:unread];
                         
                         [[DataLayer sharedInstance] addActiveBuddies:messageNode.from forAccount:_accountNo];
                         
                         
-                        if(messageNode.from && ![messageNode.from isEqualToString:self.jid]) {
+                        if(messageNode.from ) {
                             NSString* actuallyFrom= messageNode.actualFrom;
                             if(!actuallyFrom) actuallyFrom=messageNode.from;
                             

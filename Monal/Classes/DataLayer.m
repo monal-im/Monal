@@ -1109,7 +1109,7 @@ static DataLayer *sharedInstance=nil;
     return messageArray;
 }
 
--(BOOL) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom delivered:(BOOL) delivered
+-(BOOL) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom delivered:(BOOL) delivered unread:(BOOL) unread
 {
     //this is always from a contact
     NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
@@ -1131,7 +1131,7 @@ static DataLayer *sharedInstance=nil;
     // in the event it is a message from the room
     
     //all messages default to unread
-    NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, %@, '%@',  '%@', '%@', '%@', '%@',1,%d,'');", accountNo, from.escapeForSql, to.escapeForSql, 	dateString, message.escapeForSql, actualfrom.escapeForSql, delivered];
+    NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, %@, '%@',  '%@', '%@', '%@', '%@',%d,%d,'');", accountNo, from.escapeForSql, to.escapeForSql, 	dateString, message.escapeForSql, actualfrom.escapeForSql,unread, delivered];
     DDLogVerbose(@"%@",query);
     if([self executeNonQuery:query]!=NO)
     {

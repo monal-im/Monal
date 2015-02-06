@@ -128,7 +128,7 @@
 #pragma mark message Commands
 -(NSArray *) messageForHistoryID:(NSInteger) historyID;
 
--(BOOL) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom delivered:(BOOL) delivered;
+-(BOOL) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom delivered:(BOOL) delivered unread:(BOOL) unread;
 -(BOOL) setMessageId:(NSString*) messageid delivered:(BOOL) delivered;
 
 -(BOOL) clearMessages:(NSString*) accountNo;

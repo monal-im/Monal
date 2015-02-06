@@ -433,7 +433,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         return;
     }
     
-	if([[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:_accountNo withMessage:message actuallyFrom:self.jid withId:messageId ])
+	if([[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:_accountNo withMessage:message actuallyFrom:self.jid withId:messageId])
 	{
 		DDLogVerbose(@"added message");
         

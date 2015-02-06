@@ -35,7 +35,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) handleNewMessage:(NSNotification *)notification
 {
     DDLogVerbose(@"notificaiton manager got new message notice %@", notification.userInfo);
-
+    if ([[notification.userInfo objectForKey:@"showAlert"] boolValue]) {
     dispatch_async(dispatch_get_main_queue(),
                   ^{
                      NSString* acctString =[NSString stringWithFormat:@"%ld", (long)[[notification.userInfo objectForKey:@"accountNo"] integerValue]];  
@@ -107,6 +107,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                    }
                       
                   });
+    }
 }
 
 -(void) dealloc

@@ -1317,8 +1317,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         NSString *jidWithoutResource = [NSString stringWithFormat:@"%@@%@", self.username, self.domain ];
                         
                         BOOL unread=YES;
+                        BOOL showAlert=YES;
                         if( [messageNode.from isEqualToString:jidWithoutResource] ) {
                             unread=NO;
+                            showAlert=NO;
                         }
                         
                         [[DataLayer sharedInstance] addMessageFrom:messageNode.from to:messageNode.to
@@ -1341,7 +1343,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                     @"actuallyfrom":actuallyFrom,
                                                     @"messageText":messageText,
                                                     @"to":recipient,
-                                                    @"accountNo":_accountNo
+                                                    @"accountNo":_accountNo,
+                                                    @"showAlert":[NSNumber numberWithBool:showAlert]
                                                     };
                             
                             [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:userDic];

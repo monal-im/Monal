@@ -37,7 +37,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 	
     self.view.backgroundColor=[UIColor whiteColor];
     _messageTable =[[UITableView alloc] initWithFrame:CGRectMake(0, 2, self.view.frame.size.width, self.view.frame.size.height-42)];
-    
+    _messageTable.backgroundColor=[UIColor whiteColor];
     //    pages = [[UIPageControl alloc] init];
     //    pages.frame=CGRectMake(0, self.view.frame.size.height - 40-20, self.view.frame.size.width, 20);
     //

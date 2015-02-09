@@ -60,12 +60,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     [super viewDidLoad];
     
-    self.tableView = [[UITableView alloc] initWithFrame:CGRectZero style:UITableViewStyleGrouped];;
-    self.tableView.dataSource=self;
-    self.tableView.delegate=self;
-    self.view=self.tableView;
-    self.view.autoresizingMask=UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
-    
     _db= [DataLayer sharedInstance];
     
     self.sectionArray =  [NSArray arrayWithObjects:@"Account", @"Advanced Settings", nil];
@@ -356,7 +350,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	DDLogVerbose(@"xmpp edit view section %d, row %d", indexPath.section, indexPath.row);
     
 	MLAccountCell* thecell=[[MLAccountCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"AccountCell"];
-  
+
     // load cells from interface builder
 	if(indexPath.section==0)
 	{
@@ -477,14 +471,16 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         
 	}
     
-    
-    thecell.textInputField.delegate=self;
-    thecell.selectionStyle= UITableViewCellSelectionStyleNone;
-
-    if(thecell.switchEnabled==YES)
+    if(indexPath.row!=6)
     {
-        [thecell.toggleSwitch addTarget:self action:@selector(toggleSwitch:) forControlEvents:UIControlEventTouchDown];
+        thecell.textInputField.delegate=self;
+        if(thecell.switchEnabled==YES)
+        {
+            [thecell.toggleSwitch addTarget:self action:@selector(toggleSwitch:) forControlEvents:UIControlEventTouchDown];
+        }
     }
+    
+    thecell.selectionStyle= UITableViewCellSelectionStyleNone;
     
 	return thecell;
 }

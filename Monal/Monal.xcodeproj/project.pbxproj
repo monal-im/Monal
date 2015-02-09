@@ -185,6 +185,7 @@
 		26CF3EAD1780DE5D002B7085 /* ParseIq.m in Sources */ = {isa = PBXBuildFile; fileRef = 26CF3EAC1780DE5C002B7085 /* ParseIq.m */; };
 		26CF3EB21780DFD9002B7085 /* XMPPParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 26CF3EB11780DFD9002B7085 /* XMPPParser.m */; };
 		26D89F061A890672009B147C /* MLAccountCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D89F051A890672009B147C /* MLAccountCell.m */; };
+		26D89F081A8908B6009B147C /* XMPPEdit.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26D89F071A8908B6009B147C /* XMPPEdit.xib */; };
 		26DA16E017C302BC00D0065E /* RIButtonItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 26DA16DB17C302BC00D0065E /* RIButtonItem.m */; };
 		26DA16E117C302BC00D0065E /* UIActionSheet+Blocks.m in Sources */ = {isa = PBXBuildFile; fileRef = 26DA16DD17C302BC00D0065E /* UIActionSheet+Blocks.m */; };
 		26DA16E217C302BC00D0065E /* UIAlertView+Blocks.m in Sources */ = {isa = PBXBuildFile; fileRef = 26DA16DF17C302BC00D0065E /* UIAlertView+Blocks.m */; };
@@ -468,6 +469,7 @@
 		26CF3EB11780DFD9002B7085 /* XMPPParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPParser.m; sourceTree = "<group>"; };
 		26D89F041A890672009B147C /* MLAccountCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLAccountCell.h; sourceTree = "<group>"; };
 		26D89F051A890672009B147C /* MLAccountCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLAccountCell.m; sourceTree = "<group>"; };
+		26D89F071A8908B6009B147C /* XMPPEdit.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = XMPPEdit.xib; sourceTree = "<group>"; };
 		26DA16DA17C302BC00D0065E /* RIButtonItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RIButtonItem.h; sourceTree = "<group>"; };
 		26DA16DB17C302BC00D0065E /* RIButtonItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RIButtonItem.m; sourceTree = "<group>"; };
 		26DA16DC17C302BC00D0065E /* UIActionSheet+Blocks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIActionSheet+Blocks.h"; sourceTree = "<group>"; };
@@ -944,6 +946,7 @@
 				26DB52111777C83100B50353 /* Modal views */,
 				2636C43D177BD58C001CA71F /* XMPPEdit.h */,
 				2636C43E177BD58C001CA71F /* XMPPEdit.m */,
+				26D89F071A8908B6009B147C /* XMPPEdit.xib */,
 				2696EED11791245A00BC54B8 /* chatViewController.m */,
 				2696EED01791245A00BC54B8 /* chatViewController.h */,
 				261A627E176C055400059090 /* ContactsViewController.h */,
@@ -1229,6 +1232,7 @@
 				26470F521835C4080069E3E0 /* Media.xcassets in Resources */,
 				26761BF71804FBB700D94714 /* RoomListViewController.xib in Resources */,
 				26DC0A8B1339259900E60BFD /* SearchUser.xib in Resources */,
+				26D89F081A8908B6009B147C /* XMPPEdit.xib in Resources */,
 				26C3EDEE1A7CA6FA000E6331 /* ContactsViewController.xib in Resources */,
 				2628E50714049DB50064131E /* askTempPass.xib in Resources */,
 				26BAFC541626537D0073728B /* .gitignore in Resources */,

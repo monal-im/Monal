@@ -401,7 +401,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         stream.element=@"/stream:stream"; //hack to close stream
         [self send:stream];
         self.streamID=nil;
-        self.unAckedStanzas=nil;
+        [self.readQueue addOperation:
+         [NSBlockOperation blockOperationWithBlock:^{
+            self.unAckedStanzas=nil;
+        }]];
     }
     
     if(kStateDisconnected) return;
@@ -1917,9 +1920,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     if(self.supportsSM3 && self.unAckedStanzas)
     {
+        [self.readQueue addOperation:
+         [NSBlockOperation blockOperationWithBlock:^{
         NSDictionary *dic =@{kStanzaID:[NSNumber numberWithInteger: [self.lastOutboundStanza integerValue]], kStanza:stanza};
         [self.unAckedStanzas addObject:dic];
         self.lastOutboundStanza=[NSNumber numberWithInteger:[self.lastOutboundStanza integerValue]+1];
+        }]];
     }
     
     [self.writeQueue addOperation:

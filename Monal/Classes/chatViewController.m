@@ -823,7 +823,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 #pragma mark tableview delegate
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    if(indexPath.row<[_messagelist count])  { return 0; }
+    if(indexPath.row>=[_messagelist count])  {
+        return 0;
+    }
     NSDictionary* row=[_messagelist objectAtIndex:indexPath.row];
     CGFloat height= [MLChatCell heightForText:[row objectForKey:@"message"] inWidth:tableView.frame.size.width-20];
     height+=kNameLabelHeight;

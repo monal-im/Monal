@@ -335,10 +335,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     dispatch_source_set_event_handler(loginCancelOperation, ^{
         DDLogInfo(@"login cancel op");
+        NSString *fulluserCopy = [_fulluser copy];
+        NSString *accountNoCopy = [_accountNo copy];
         dispatch_async(_xmppQueue, ^{
             //hide connecting message
-            if(_fulluser && _accountNo) {
-                NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:self.accountNo,
+            if(fulluserCopy && accountNoCopy) {
+                NSDictionary* info=@{kaccountNameKey:fulluserCopy, kaccountNoKey:accountNoCopy,
                                      kinfoTypeKey:@"connect", kinfoStatusKey:@""};
                 [self.contactsVC hideConnecting:info];
             }

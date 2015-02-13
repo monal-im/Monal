@@ -29,6 +29,7 @@ static DataLayer *sharedInstance=nil;
 //lowest level command handlers
 -(NSObject*) executeScalar:(NSString*) query
 {
+    if(!query) return nil;
     NSObject* __block toReturn;
     dispatch_sync(_dbQueue, ^{
         sqlite3_stmt *statement;
@@ -100,7 +101,7 @@ static DataLayer *sharedInstance=nil;
 
 -(BOOL) executeNonQuery:(NSString*) query
 {
-    
+     if(!query) return NO;
     BOOL __block toReturn;
     dispatch_sync(_dbQueue, ^{
         sqlite3_stmt *statement;
@@ -125,7 +126,7 @@ static DataLayer *sharedInstance=nil;
 
 -(NSArray*) executeReader:(NSString*) query
 {
-    
+    if(!query) return nil;
     NSMutableArray* __block toReturn =  [[NSMutableArray alloc] init] ;
     dispatch_sync(_dbQueue, ^{
         sqlite3_stmt *statement;

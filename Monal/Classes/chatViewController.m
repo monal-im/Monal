@@ -517,20 +517,22 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void) setMessageId:(NSString *) messageId delivered:(BOOL) delivered
 {
-    int row=0;
-    for(NSMutableDictionary *rowDic in _messagelist)
-    {
-        if([[rowDic objectForKey:@"messageid"] isEqualToString:messageId]) {
-            [rowDic setObject:[NSNumber numberWithBool:delivered] forKey:@"delivered"];
-            NSIndexPath *indexPath =[NSIndexPath indexPathForRow:row inSection:0];
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
-            });
-            break;
-        }
-        row++;
-    }
-
+    dispatch_async(dispatch_get_main_queue(),
+                   ^{
+                       int row=0;
+                       for(NSMutableDictionary *rowDic in _messagelist)
+                       {
+                           if([[rowDic objectForKey:@"messageid"] isEqualToString:messageId]) {
+                               [rowDic setObject:[NSNumber numberWithBool:delivered] forKey:@"delivered"];
+                               NSIndexPath *indexPath =[NSIndexPath indexPathForRow:row inSection:0];
+                               dispatch_async(dispatch_get_main_queue(), ^{
+                                   [_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+                               });
+                               break;
+                           }
+                           row++;
+                       }
+                   });
 }
 
 -(void) handleSendFailedMessage:(NSNotification *)notification

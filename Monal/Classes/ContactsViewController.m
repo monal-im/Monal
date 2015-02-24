@@ -813,6 +813,9 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 }
 
 #pragma mark tableview delegate
+-(NSString *)tableView:(UITableView *)tableView titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath *)indexPath {
+    return @"Remove Contact";
+}
 
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
 {

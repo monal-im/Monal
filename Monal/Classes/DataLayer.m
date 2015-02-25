@@ -1421,7 +1421,7 @@ static DataLayer *sharedInstance=nil;
 -(NSArray*) activeBuddies
 {
     
-    NSString* query=[NSString stringWithFormat:@"select distinct b.buddy_name,state,status,filename,0 as 'count' , ifnull(b.full_name, b.buddy_name) as full_name, a.account_id from activechats as a inner join buddylist as b on a.buddy_name=b.buddy_name and a.account_id=b.account_id order by full_name COLLATE NOCASE" ];
+    NSString* query=[NSString stringWithFormat:@"select distinct a.buddy_name,state,status,filename,0 as 'count' , ifnull(b.full_name, a.buddy_name) as full_name, a.account_id from activechats as a left outer  join buddylist as b on a.buddy_name=b.buddy_name and a.account_id=b.account_id order by full_name COLLATE NOCASE" ];
     //	DDLogVerbose(query);
     NSArray* toReturn = [self executeReader:query];
     

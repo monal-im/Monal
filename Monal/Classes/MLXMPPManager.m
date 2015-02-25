@@ -437,7 +437,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 -(void) getServiceDetailsForAccount:(NSInteger) row
 {
     
-    if(row < [_connectedXMPP count] && row>0) {
+    if(row < [_connectedXMPP count] && row>=0) {
     NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
     dispatch_async(_netQueue,
                    ^{

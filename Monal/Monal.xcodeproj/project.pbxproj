@@ -1449,7 +1449,7 @@
 				OTHER_LDFLAGS = "-lstdc++";
 				PRODUCT_NAME = Monal;
 				PROVISIONING_PROFILE = "";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "49debedf-4c0c-4a46-9916-47545fb23bbb";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "84bd2c95-d11c-4e96-b785-7d99f930395f";
 			};
 			name = Debug;
 		};
@@ -1638,7 +1638,7 @@
 				OTHER_LDFLAGS = "-lstdc++";
 				PRODUCT_NAME = Monal;
 				PROVISIONING_PROFILE = "";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "78f689e3-f5a2-4c37-8fc2-2c5b4a4661a4";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "8be27b9c-9f20-43ce-b77f-525d04a5998a";
 			};
 			name = Adhoc;
 		};

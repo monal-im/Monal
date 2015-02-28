@@ -163,12 +163,19 @@ An array of Dics what have timers to make sure everything was sent
     }
 }
 
--(BOOL) isAccountForIdConnected:(NSString*) accountNo;
+-(BOOL) isAccountForIdConnected:(NSString*) accountNo
 {
     xmpp* account = [self getConnectedAccountForID:accountNo];
     if(account.accountState==kStateLoggedIn) return YES;
     
     return NO;
+}
+
+
+-(NSDate *) connectedTimeFor:(NSString*) accountNo
+{
+    xmpp* account = [self getConnectedAccountForID:accountNo];
+    return account.connectedTime;
 }
 
 -(xmpp*) getConnectedAccountForID:(NSString*) accountNo

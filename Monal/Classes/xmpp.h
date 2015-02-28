@@ -246,6 +246,9 @@ Decline a call request
 @property (nonatomic,weak) ContactsViewController* contactsVC;
 
 
+@property (nonatomic,strong) NSDate* connectedTime;
+
+
 FOUNDATION_EXPORT NSString *const kMessageId;
 FOUNDATION_EXPORT NSString *const kSendTimer;
 

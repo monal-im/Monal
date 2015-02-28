@@ -76,6 +76,11 @@ Returns the name of the conencted account
  */
 -(BOOL) isAccountForIdConnected:(NSString*) accountNo;
 
+/**
+ When the account estblihsed its current connection. 
+ */
+-(NSDate *) connectedTimeFor:(NSString*) accountNo;
+
 #pragma mark MUC commands
 /**
  Gets a list of rooms on the confernce server

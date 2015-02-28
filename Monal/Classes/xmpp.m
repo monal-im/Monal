@@ -416,6 +416,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
     [self.networkQueue addOperation:
      [NSBlockOperation blockOperationWithBlock:^{
+        self.connectedTime =nil; 
         self.pingID=nil;
         DDLogInfo(@"removing streams");
         
@@ -1890,6 +1891,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         
                         [self startStream];
                         _accountState=kStateLoggedIn;
+                        self.connectedTime=[NSDate date];
                         _loggedInOnce=YES;
                         _loginStarted=NO;
                         

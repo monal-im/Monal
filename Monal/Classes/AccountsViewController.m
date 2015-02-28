@@ -15,6 +15,7 @@
 
 @interface AccountsViewController ()
 @property (nonatomic , strong) MBProgressHUD *hud;
+@property (nonatomic , strong) NSDateFormatter *uptimeFormatter;
 
 @end
 
@@ -52,6 +53,13 @@
     
     UIBarButtonItem* leftButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Log out All",@"") style:UIBarButtonItemStyleBordered target:self action:@selector(logoutAll)];
     self.navigationItem.leftBarButtonItem=leftButton;
+    
+    self.uptimeFormatter =[[NSDateFormatter alloc] init];
+    self.uptimeFormatter.dateStyle =NSDateFormatterShortStyle;
+    self.uptimeFormatter.timeStyle =NSDateFormatterShortStyle;
+    self.uptimeFormatter.doesRelativeDateFormatting=YES;
+    self.uptimeFormatter.locale=[NSLocale currentLocale];
+    self.uptimeFormatter.timeZone=[NSTimeZone systemTimeZone];
 }
 
 -(void) viewWillAppear:(BOOL)animated
@@ -243,6 +251,13 @@
                 else {
                     cell.accessoryView =[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"away"]];
                 }
+                
+                NSDate * connectedTime = [[MLXMPPManager sharedInstance] connectedTimeFor: [NSString stringWithFormat:@"%@",[[_accountList objectAtIndex:indexPath.row] objectForKey:@"account_id"]]];
+                if(connectedTime) {
+                    cell.detailTextLabel.text=[NSString stringWithFormat:@"Connected since: %@",[self.uptimeFormatter stringFromDate:connectedTime]];
+                }
+               
+                
             }
             else {
                     cell.imageView.image=[UIImage imageNamed:@"disabled"];

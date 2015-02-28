@@ -51,7 +51,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 }
 
 @property (nonatomic, strong) NSString *pingID;
-@property (nonatomic, strong) NSOperationQueue *xmppQueue;
+@property (nonatomic, strong) NSOperationQueue *networkQueue;
+@property (nonatomic, strong) NSOperationQueue *processQueue;
 
 
 //stream resumption
@@ -108,8 +109,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     int r =  arc4random();
     _resource=[NSString stringWithFormat:@"Monal%d",r];
     
-    self.xmppQueue =[[NSOperationQueue alloc] init];
-    self.xmppQueue.maxConcurrentOperationCount=1;
+    self.networkQueue =[[NSOperationQueue alloc] init];
+    self.networkQueue.maxConcurrentOperationCount=1;
+    
+    self.processQueue =[[NSOperationQueue alloc] init];
+   // self.networkQueue.maxConcurrentOperationCount=1;
     
     //placing more common at top to reduce iteration
     _stanzaTypes=[NSArray arrayWithObjects:
@@ -144,7 +148,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) setRunLoop
 {
-    
     dispatch_async(dispatch_get_current_queue(), ^{
         [_oStream setDelegate:self];
         [_oStream scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
@@ -306,9 +309,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) connect
 {
-    [self.xmppQueue cancelAllOperations];
+    [self.networkQueue cancelAllOperations];
     
-    [self.xmppQueue addOperationWithBlock:^{
+    [self.networkQueue addOperationWithBlock:^{
         
         if(self.explicitLogout) return;
         if(self.accountState==kStateLoggedIn )
@@ -335,7 +338,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             DDLogInfo(@"login cancel op");
             NSString *fulluserCopy = [_fulluser copy];
             NSString *accountNoCopy = [_accountNo copy];
-            [self.xmppQueue addOperationWithBlock:^{
+            [self.networkQueue addOperationWithBlock:^{
                 //hide connecting message
                 if(fulluserCopy && accountNoCopy) {
                     NSDictionary* info=@{kaccountNameKey:fulluserCopy, kaccountNoKey:accountNoCopy,
@@ -402,33 +405,31 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         stream.element=@"/stream:stream"; //hack to close stream
         [self send:stream];
         self.streamID=nil;
-        [self.xmppQueue addOperation:
+        [self.networkQueue addOperation:
          [NSBlockOperation blockOperationWithBlock:^{
             self.unAckedStanzas=nil;
         }]];
     }
     
     if(kStateDisconnected) return;
-    [self.xmppQueue cancelAllOperations];
+    [self.networkQueue cancelAllOperations];
 
-    
-    self.pingID=nil;
-    DDLogInfo(@"removing streams");
-    
-    //prevent any new read or write
-    [_iStream setDelegate:nil];
-    [_oStream setDelegate:nil];
-    
-    [_oStream removeFromRunLoop:[NSRunLoop currentRunLoop]
-                        forMode:NSDefaultRunLoopMode];
-    
-    [_iStream removeFromRunLoop:[NSRunLoop currentRunLoop]
-                        forMode:NSDefaultRunLoopMode];
-    DDLogInfo(@"removed streams");
-    
-    
-    [self.xmppQueue addOperation:
+    [self.networkQueue addOperation:
      [NSBlockOperation blockOperationWithBlock:^{
+        self.pingID=nil;
+        DDLogInfo(@"removing streams");
+        
+        //prevent any new read or write
+        [_iStream setDelegate:nil];
+        [_oStream setDelegate:nil];
+        
+        [_oStream removeFromRunLoop:[NSRunLoop currentRunLoop]
+                            forMode:NSDefaultRunLoopMode];
+        
+        [_iStream removeFromRunLoop:[NSRunLoop currentRunLoop]
+                            forMode:NSDefaultRunLoopMode];
+        DDLogInfo(@"removed streams");
+        
         
         @try
         {
@@ -588,7 +589,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) startStream
 {
-    [self.xmppQueue addOperation:
+    [self.networkQueue addOperation:
      [NSBlockOperation blockOperationWithBlock:^{
         //flush buffer to ignore all prior input
         _inputBuffer=[[NSMutableString alloc] init];
@@ -910,12 +911,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     //prevent reconnect attempt
     if(_accountState<kStateHasStream) _accountState=kStateHasStream;
-    [self.xmppQueue addOperation:
-     [NSBlockOperation blockOperationWithBlock:^{
-        
+    [self.networkQueue addOperationWithBlock:^{
         NSDictionary* stanzaToParse=[self nextStanza];
         while (stanzaToParse)
         {
+            [self.processQueue addOperationWithBlock:^{
             self.lastHandledInboundStanza=[NSNumber numberWithInteger: [self.lastHandledInboundStanza integerValue]+1];
             DDLogVerbose(@"got stanza %@", stanzaToParse);
             
@@ -1023,7 +1023,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                             kaccountNoKey:_accountNo
                                             };
                     
-                    [self.xmppQueue addOperationWithBlock:^{
+                    [self.networkQueue addOperationWithBlock:^{
                         [self.contactsVC addOnlineUser:userDic];
                     }];
                     
@@ -1364,131 +1364,131 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             {
                 ParsePresence* presenceNode= [[ParsePresence alloc]  initWithDictionary:stanzaToParse];
                 if([presenceNode.user isEqualToString:_fulluser]) {
-                    stanzaToParse=[self nextStanza];
-                    continue; //ignore self
+                        //ignore self
                 }
-                
-                if([presenceNode.type isEqualToString:kpresencesSubscribe])
-                {
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"Do you wish to allow %@ to add you to their contacts?", nil), presenceNode.from ];
-                        RIButtonItem* cancelButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"No", nil) action:^{
-                            [self rejectFromRoster:presenceNode.from];
+                else {
+                    if([presenceNode.type isEqualToString:kpresencesSubscribe])
+                    {
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"Do you wish to allow %@ to add you to their contacts?", nil), presenceNode.from ];
+                            RIButtonItem* cancelButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"No", nil) action:^{
+                                [self rejectFromRoster:presenceNode.from];
+                                
+                            }];
                             
-                        }];
-                        
-                        RIButtonItem* yesButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Yes", nil) action:^{
-                            [self approveToRoster:presenceNode.from];
-                            [self addToRoster:presenceNode.from];
+                            RIButtonItem* yesButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Yes", nil) action:^{
+                                [self approveToRoster:presenceNode.from];
+                                [self addToRoster:presenceNode.from];
+                                
+                            }];
                             
-                        }];
+                            UIAlertView* alert =[[UIAlertView alloc] initWithTitle:@"Approve Contact" message:messageString cancelButtonItem:cancelButton otherButtonItems:yesButton, nil];
+                            [alert show];
+                        });
                         
-                        UIAlertView* alert =[[UIAlertView alloc] initWithTitle:@"Approve Contact" message:messageString cancelButtonItem:cancelButton otherButtonItems:yesButton, nil];
-                        [alert show];
-                    });
-                    
-                }
-                
-                if(presenceNode.MUC)
-                {
-                    for (NSString* code in presenceNode.statusCodes) {
-                        if([code isEqualToString:@"201"]) {
-                            //201- created and needs configuration
-                            //make instant room
-                            XMPPIQ *configNode = [[XMPPIQ alloc] initWithId:_sessionKey andType:kiqSetType];
-                            [configNode setiqTo:presenceNode.from];
-                            [configNode setInstantRoom];
-                            [self send:configNode];
-                        }
                     }
                     
-                    //mark buddy as MUC
-                }
-                
-                if(presenceNode.type ==nil)
-                {
-                    DDLogVerbose(@"presence priority notice from %@", presenceNode.user);
-                    
-                    if((presenceNode.user!=nil) && ([[presenceNode.user stringByTrimmingCharactersInSet:
-                                                      [NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0))
+                    if(presenceNode.MUC)
                     {
-                        if(![[DataLayer sharedInstance] isBuddyInList:presenceNode.user forAccount:_accountNo])
-                        {
-                            DDLogVerbose(@"Buddy not already in list");
-                            [[DataLayer sharedInstance] addBuddy:presenceNode.user forAccount:_accountNo fullname:@"" nickname:@"" ];
+                        for (NSString* code in presenceNode.statusCodes) {
+                            if([code isEqualToString:@"201"]) {
+                                //201- created and needs configuration
+                                //make instant room
+                                XMPPIQ *configNode = [[XMPPIQ alloc] initWithId:_sessionKey andType:kiqSetType];
+                                [configNode setiqTo:presenceNode.from];
+                                [configNode setInstantRoom];
+                                [self send:configNode];
+                            }
                         }
-                        else
+                        
+                        //mark buddy as MUC
+                    }
+                    
+                    if(presenceNode.type ==nil)
+                    {
+                        DDLogVerbose(@"presence priority notice from %@", presenceNode.user);
+                        
+                        if((presenceNode.user!=nil) && ([[presenceNode.user stringByTrimmingCharactersInSet:
+                                                          [NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0))
                         {
-                            DDLogVerbose(@"Buddy already in list");
-                        }
-                        
-                        DDLogVerbose(@" showing as online now");
-                        
-                        [[DataLayer sharedInstance] setOnlineBuddy:presenceNode forAccount:_accountNo];
-                        [[DataLayer sharedInstance] setBuddyState:presenceNode forAccount:_accountNo];
-                        [[DataLayer sharedInstance] setBuddyStatus:presenceNode forAccount:_accountNo];
-                        
-                        NSString* state=presenceNode.show;
-                        if(!state) state=@"";
-                        NSString* status=presenceNode.status;
-                        if(!status) status=@"";
-                        NSDictionary* userDic=@{kusernameKey: presenceNode.user,
-                                                kaccountNoKey:_accountNo,
-                                                kstateKey:state,
-                                                kstatusKey:status
-                                                };
-                        [self.xmppQueue addOperationWithBlock: ^{
-                            [self.contactsVC addOnlineUser:userDic];
-                            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactOnlineNotice object:self userInfo:userDic];
-                        }];
-                        
-                        if(!presenceNode.MUC) {
-                            // do not do this in the background
-                            if([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground)
+                            if(![[DataLayer sharedInstance] isBuddyInList:presenceNode.user forAccount:_accountNo])
                             {
-                                //check for vcard change
-                                if(presenceNode.photoHash) {
-                                    if([presenceNode.photoHash isEqualToString:[[DataLayer sharedInstance]  buddyHash:presenceNode.user forAccount:_accountNo]])
-                                    {
-                                        DDLogVerbose(@"photo hash is the  same");
-                                    }
-                                    else
-                                    {
-                                        [[DataLayer sharedInstance]  setBuddyHash:presenceNode forAccount:_accountNo];
-                                        XMPPIQ* iqVCard= [[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
-                                        [iqVCard getVcardTo:presenceNode.user];
-                                        [self send:iqVCard];
-                                    }
-                                }
+                                DDLogVerbose(@"Buddy not already in list");
+                                [[DataLayer sharedInstance] addBuddy:presenceNode.user forAccount:_accountNo fullname:@"" nickname:@"" ];
                             }
                             else
                             {
-                                // just set and request when in foreground if needed
-                                [[DataLayer sharedInstance]  setBuddyHash:presenceNode forAccount:_accountNo];
+                                DDLogVerbose(@"Buddy already in list");
                             }
-                        }
-                        else {
+                            
+                            DDLogVerbose(@" showing as online now");
+                            
+                            [[DataLayer sharedInstance] setOnlineBuddy:presenceNode forAccount:_accountNo];
+                            [[DataLayer sharedInstance] setBuddyState:presenceNode forAccount:_accountNo];
+                            [[DataLayer sharedInstance] setBuddyStatus:presenceNode forAccount:_accountNo];
+                            
+                            NSString* state=presenceNode.show;
+                            if(!state) state=@"";
+                            NSString* status=presenceNode.status;
+                            if(!status) status=@"";
+                            NSDictionary* userDic=@{kusernameKey: presenceNode.user,
+                                                    kaccountNoKey:_accountNo,
+                                                    kstateKey:state,
+                                                    kstatusKey:status
+                                                    };
+                            [self.networkQueue addOperationWithBlock: ^{
+                                [self.contactsVC addOnlineUser:userDic];
+                                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactOnlineNotice object:self userInfo:userDic];
+                            }];
+                            
+                            if(!presenceNode.MUC) {
+                                // do not do this in the background
+                                if([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground)
+                                {
+                                    //check for vcard change
+                                    if(presenceNode.photoHash) {
+                                        if([presenceNode.photoHash isEqualToString:[[DataLayer sharedInstance]  buddyHash:presenceNode.user forAccount:_accountNo]])
+                                        {
+                                            DDLogVerbose(@"photo hash is the  same");
+                                        }
+                                        else
+                                        {
+                                            [[DataLayer sharedInstance]  setBuddyHash:presenceNode forAccount:_accountNo];
+                                            XMPPIQ* iqVCard= [[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
+                                            [iqVCard getVcardTo:presenceNode.user];
+                                            [self send:iqVCard];
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    // just set and request when in foreground if needed
+                                    [[DataLayer sharedInstance]  setBuddyHash:presenceNode forAccount:_accountNo];
+                                }
+                            }
+                            else {
+                                
+                            }
                             
                         }
-                        
+                        else
+                        {
+                            DDLogError(@"ERROR: presence priority notice but no user name.");
+                            
+                        }
                     }
-                    else
+                    else if([presenceNode.type isEqualToString:kpresenceUnavailable])
                     {
-                        DDLogError(@"ERROR: presence priority notice but no user name.");
+                        if ([[DataLayer sharedInstance] setOfflineBuddy:presenceNode forAccount:_accountNo] ) {
+                            NSDictionary* userDic=@{kusernameKey: presenceNode.user,
+                                                    kaccountNoKey:_accountNo};
+                            [self.networkQueue addOperationWithBlock: ^{
+                                [self.contactsVC removeOnlineUser:userDic];
+                                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactOfflineNotice object:self userInfo:userDic];
+                            }];
+                        }
                         
                     }
-                }
-                else if([presenceNode.type isEqualToString:kpresenceUnavailable])
-                {
-                    if ([[DataLayer sharedInstance] setOfflineBuddy:presenceNode forAccount:_accountNo] ) {
-                        NSDictionary* userDic=@{kusernameKey: presenceNode.user,
-                                                kaccountNoKey:_accountNo};
-                        [self.xmppQueue addOperationWithBlock: ^{
-                            [self.contactsVC removeOnlineUser:userDic];
-                            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactOfflineNotice object:self userInfo:userDic];
-                        }];
-                    }
-                    
                 }
                 
             }
@@ -1896,7 +1896,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         
                         NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
                                              kinfoTypeKey:@"connect", kinfoStatusKey:@""};
-                       [self.xmppQueue addOperationWithBlock: ^{
+                       [self.networkQueue addOperationWithBlock: ^{
                             [self.contactsVC hideConnecting:info];
                         }];
                         
@@ -1904,9 +1904,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 }
             }
             
+            
+        }];
             stanzaToParse=[self nextStanza];
+
         }
-    }]];
+        
+        
+    }];
     
 }
 
@@ -1918,7 +1923,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     if(self.supportsSM3 && self.unAckedStanzas)
     {
-        [self.xmppQueue addOperation:
+        [self.networkQueue addOperation:
          [NSBlockOperation blockOperationWithBlock:^{
         NSDictionary *dic =@{kStanzaID:[NSNumber numberWithInteger: [self.lastOutboundStanza integerValue]], kStanza:stanza};
         [self.unAckedStanzas addObject:dic];
@@ -1926,7 +1931,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         }]];
     }
     
-    [self.xmppQueue addOperation:
+    [self.networkQueue addOperation:
      [NSBlockOperation blockOperationWithBlock:^{
         [_outputQueue addObject:stanza];
         [self writeFromQueue];  // try to send if there is space
@@ -2205,7 +2210,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             //for writing
         case NSStreamEventHasSpaceAvailable:
         {
-            [self.xmppQueue addOperation:
+            [self.networkQueue addOperation:
              [NSBlockOperation blockOperationWithBlock:^{
                 _streamHasSpace=YES;
                 
@@ -2219,7 +2224,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         case  NSStreamEventHasBytesAvailable:
         {
             DDLogVerbose(@"Stream has bytes to read");
-            [self.xmppQueue addOperationWithBlock: ^{
+            [self.networkQueue addOperationWithBlock: ^{
                 [self readToBuffer];
             }];
             
@@ -2392,7 +2397,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         if(data)
         {
             // DDLogVerbose(@"waiting on net read queue");
-            [self.xmppQueue addOperation:
+            [self.networkQueue addOperation:
              [NSBlockOperation blockOperationWithBlock:^{
                 
                 // DDLogVerbose(@"got net read queue");

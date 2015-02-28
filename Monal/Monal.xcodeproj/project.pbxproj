@@ -506,7 +506,7 @@
 		288765A40DF7441C002DB57D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		32CA4F630368D1EE00C91783 /* SworIM_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SworIM_Prefix.pch; sourceTree = "<group>"; };
-		8D1107310486CEB800E47090 /* SworIM-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "SworIM-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
+		8D1107310486CEB800E47090 /* Monal-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "Monal-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1034,7 +1034,7 @@
 				26AAE281179F701A00271345 /* About.html */,
 				26715E5B176506AD00684F3D /* old nibs */,
 				2601D9CA0FBF25EF004DB939 /* sworim.sqlite */,
-				8D1107310486CEB800E47090 /* SworIM-Info.plist */,
+				8D1107310486CEB800E47090 /* Monal-Info.plist */,
 				26DE9C050FEEFD00000596F6 /* DB definitions */,
 			);
 			name = Resources;
@@ -1443,7 +1443,7 @@
 				GCC_PREFIX_HEADER = SworIM_Prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = "DEBUG=1";
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				INFOPLIST_FILE = "SworIM-Info.plist";
+				INFOPLIST_FILE = "Monal-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				LLVM_LTO = NO;
 				OTHER_LDFLAGS = "-lstdc++";
@@ -1507,7 +1507,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = SworIM_Prefix.pch;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				INFOPLIST_FILE = "SworIM-Info.plist";
+				INFOPLIST_FILE = "Monal-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				LLVM_LTO = NO;
 				OTHER_LDFLAGS = "-lstdc++";
@@ -1632,7 +1632,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = SworIM_Prefix.pch;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				INFOPLIST_FILE = "SworIM-Info.plist";
+				INFOPLIST_FILE = "Monal-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				LLVM_LTO = NO;
 				OTHER_LDFLAGS = "-lstdc++";

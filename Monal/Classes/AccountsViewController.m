@@ -247,15 +247,19 @@
                    cell.imageView.image=[UIImage imageNamed:@"888-checkmark"];
                 if([[MLXMPPManager sharedInstance] isAccountForIdConnected: [NSString stringWithFormat:@"%@",[[_accountList objectAtIndex:indexPath.row] objectForKey:@"account_id"]]]) {
                     cell.accessoryView =[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"available"]];
+                    
+                    NSDate * connectedTime = [[MLXMPPManager sharedInstance] connectedTimeFor: [NSString stringWithFormat:@"%@",[[_accountList objectAtIndex:indexPath.row] objectForKey:@"account_id"]]];
+                    if(connectedTime) {
+                        cell.detailTextLabel.text=[NSString stringWithFormat:@"Connected since: %@",[self.uptimeFormatter stringFromDate:connectedTime]];
+                    }
+                    
                 }
                 else {
                     cell.accessoryView =[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"away"]];
+                    cell.detailTextLabel.text=nil;
                 }
                 
-                NSDate * connectedTime = [[MLXMPPManager sharedInstance] connectedTimeFor: [NSString stringWithFormat:@"%@",[[_accountList objectAtIndex:indexPath.row] objectForKey:@"account_id"]]];
-                if(connectedTime) {
-                    cell.detailTextLabel.text=[NSString stringWithFormat:@"Connected since: %@",[self.uptimeFormatter stringFromDate:connectedTime]];
-                }
+              
                
                 
             }

@@ -51,9 +51,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 }
 
 @property (nonatomic, strong) NSString *pingID;
-@property (nonatomic, strong) NSOperationQueue *readQueue;
-@property (nonatomic, strong) NSOperationQueue *writeQueue;
-@property (nonatomic, strong) NSOperationQueue *connectQueue;
+@property (nonatomic, strong) NSOperationQueue *xmppQueue;
+
 
 //stream resumption
 @property (nonatomic, assign) BOOL supportsSM2;
@@ -109,12 +108,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     int r =  arc4random();
     _resource=[NSString stringWithFormat:@"Monal%d",r];
     
-    self.readQueue =[[NSOperationQueue alloc] init];
-    self.writeQueue =[[NSOperationQueue alloc] init];
-    self.connectQueue =[[NSOperationQueue alloc] init];
-    self.readQueue.maxConcurrentOperationCount=1;
-    self.writeQueue.maxConcurrentOperationCount=1;
-    self.connectQueue.maxConcurrentOperationCount=1;
+    self.xmppQueue =[[NSOperationQueue alloc] init];
+    self.xmppQueue.maxConcurrentOperationCount=1;
     
     //placing more common at top to reduce iteration
     _stanzaTypes=[NSArray arrayWithObjects:
@@ -279,9 +274,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) connectionTask
 {
-    if(_xmppQueue==NULL) {
-        _xmppQueue=dispatch_get_current_queue();
-    }
+    
     if([_domain length]>0) {
         _fulluser=[NSString stringWithFormat:@"%@@%@", _username, _domain];
     }
@@ -313,88 +306,91 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) connect
 {
-    [self.readQueue cancelAllOperations];
-    [self.writeQueue cancelAllOperations];
-    if(self.explicitLogout) return;
-    if(self.accountState==kStateLoggedIn )
-    {
-        DDLogError(@"assymetrical call to login without a teardown loggedin");
-        return;
-    }
+    [self.xmppQueue cancelAllOperations];
     
-    self.pingID=nil;
-    
-    DDLogInfo(@"XMPP connnect  start");
-    [self connectionTask];
-    
-    dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-    dispatch_source_t loginCancelOperation = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,
-                                                                    q_background);
-    
-    dispatch_source_set_timer(loginCancelOperation,
-                              dispatch_time(DISPATCH_TIME_NOW, kConnectTimeout* NSEC_PER_SEC),
-                              kConnectTimeout* NSEC_PER_SEC,
-                              1ull * NSEC_PER_SEC);
-    
-    dispatch_source_set_event_handler(loginCancelOperation, ^{
-        DDLogInfo(@"login cancel op");
-        NSString *fulluserCopy = [_fulluser copy];
-        NSString *accountNoCopy = [_accountNo copy];
-        dispatch_async(_xmppQueue, ^{
-            //hide connecting message
-            if(fulluserCopy && accountNoCopy) {
-                NSDictionary* info=@{kaccountNameKey:fulluserCopy, kaccountNoKey:accountNoCopy,
-                                     kinfoTypeKey:@"connect", kinfoStatusKey:@""};
-                [self.contactsVC hideConnecting:info];
-            }
-            _loginStarted=NO;
-            // try again
-            if((self.accountState<kStateHasStream) && (_loggedInOnce))
-            {
-                DDLogInfo(@"trying to login again");
-                //make sure we are enabled still.
-                if([[DataLayer sharedInstance] isAccountEnabled:[NSString stringWithFormat:@"%@",self.accountNo]]) {
-                    
-                    //temp background task while a new one is created
-                    __block UIBackgroundTaskIdentifier tempTask= [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
+    [self.xmppQueue addOperationWithBlock:^{
+        
+        if(self.explicitLogout) return;
+        if(self.accountState==kStateLoggedIn )
+        {
+            DDLogError(@"assymetrical call to login without a teardown loggedin");
+            return;
+        }
+        
+        self.pingID=nil;
+        
+        DDLogInfo(@"XMPP connnect  start");
+        [self connectionTask];
+        
+        dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+        dispatch_source_t loginCancelOperation = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,
+                                                                        q_background);
+        
+        dispatch_source_set_timer(loginCancelOperation,
+                                  dispatch_time(DISPATCH_TIME_NOW, kConnectTimeout* NSEC_PER_SEC),
+                                  kConnectTimeout* NSEC_PER_SEC,
+                                  1ull * NSEC_PER_SEC);
+        
+        dispatch_source_set_event_handler(loginCancelOperation, ^{
+            DDLogInfo(@"login cancel op");
+            NSString *fulluserCopy = [_fulluser copy];
+            NSString *accountNoCopy = [_accountNo copy];
+            [self.xmppQueue addOperationWithBlock:^{
+                //hide connecting message
+                if(fulluserCopy && accountNoCopy) {
+                    NSDictionary* info=@{kaccountNameKey:fulluserCopy, kaccountNoKey:accountNoCopy,
+                                         kinfoTypeKey:@"connect", kinfoStatusKey:@""};
+                    [self.contactsVC hideConnecting:info];
+                }
+            }];
+                _loginStarted=NO;
+                // try again
+                if((self.accountState<kStateHasStream) && (_loggedInOnce))
+                {
+                    DDLogInfo(@"trying to login again");
+                    //make sure we are enabled still.
+                    if([[DataLayer sharedInstance] isAccountEnabled:[NSString stringWithFormat:@"%@",self.accountNo]]) {
+                        
+                        //temp background task while a new one is created
+                        __block UIBackgroundTaskIdentifier tempTask= [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
+                            [[UIApplication sharedApplication] endBackgroundTask:tempTask];
+                            tempTask=UIBackgroundTaskInvalid;
+                        }];
+                        [self reconnect];
+                        
                         [[UIApplication sharedApplication] endBackgroundTask:tempTask];
                         tempTask=UIBackgroundTaskInvalid;
-                    }];
+                        
+                    }
+                }
+                else if (self.accountState==kStateLoggedIn ) {
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kMLHasConnectedNotice object:nil];
+                }
+                else {
+                    DDLogInfo(@"failed to login and not retrying");
+                }
+                
+            });
+            
+            dispatch_source_cancel(loginCancelOperation);
+            
+    
+        dispatch_source_set_cancel_handler(loginCancelOperation, ^{
+            DDLogInfo(@"login timer cancelled");
+            if(self.accountState<kStateHasStream)
+            {
+                if(!_reconnectScheduled)
+                {
+                    _loginStarted=NO;
+                    DDLogInfo(@"login client does not have stream");
+                    _accountState=kStateReconnecting;
                     [self reconnect];
-                    
-                    [[UIApplication sharedApplication] endBackgroundTask:tempTask];
-                    tempTask=UIBackgroundTaskInvalid;
-                    
                 }
             }
-            else if (self.accountState==kStateLoggedIn ) {
-                [[NSNotificationCenter defaultCenter] postNotificationName:kMLHasConnectedNotice object:nil];
-            }
-            else {
-                DDLogInfo(@"failed to login and not retrying");
-            }
-            
         });
         
-        dispatch_source_cancel(loginCancelOperation);
-        
-    });
-    
-    dispatch_source_set_cancel_handler(loginCancelOperation, ^{
-        DDLogInfo(@"login timer cancelled");
-        if(self.accountState<kStateHasStream)
-        {
-            if(!_reconnectScheduled)
-            {
-                _loginStarted=NO;
-                DDLogInfo(@"login client does not have stream");
-                _accountState=kStateReconnecting;
-                [self reconnect];
-            }
-        }
-    });
-    
-    dispatch_resume(loginCancelOperation);
+        dispatch_resume(loginCancelOperation);
+    }];
     
 }
 
@@ -406,15 +402,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         stream.element=@"/stream:stream"; //hack to close stream
         [self send:stream];
         self.streamID=nil;
-        [self.readQueue addOperation:
+        [self.xmppQueue addOperation:
          [NSBlockOperation blockOperationWithBlock:^{
             self.unAckedStanzas=nil;
         }]];
     }
     
     if(kStateDisconnected) return;
-    [self.readQueue cancelAllOperations];
-    [self.writeQueue cancelAllOperations];
+    [self.xmppQueue cancelAllOperations];
+
     
     self.pingID=nil;
     DDLogInfo(@"removing streams");
@@ -431,7 +427,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     DDLogInfo(@"removed streams");
     
     
-    [self.readQueue addOperation:
+    [self.xmppQueue addOperation:
      [NSBlockOperation blockOperationWithBlock:^{
         
         @try
@@ -443,12 +439,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         {
             DDLogError(@"Exception in istream close");
         }
-    }]];
-    
-    [self.writeQueue addOperation:
-     [NSBlockOperation blockOperationWithBlock:^{
         
-       	@try
+        @try
         {
             [_oStream close];
             _outputQueue=[[NSMutableArray alloc] init];
@@ -457,6 +449,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         {
             DDLogError(@"Exception in ostream close");
         }
+        
         
     }]];
     
@@ -595,7 +588,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) startStream
 {
-    [self.readQueue addOperation:
+    [self.xmppQueue addOperation:
      [NSBlockOperation blockOperationWithBlock:^{
         //flush buffer to ignore all prior input
         _inputBuffer=[[NSMutableString alloc] init];
@@ -917,7 +910,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     //prevent reconnect attempt
     if(_accountState<kStateHasStream) _accountState=kStateHasStream;
-    [self.readQueue addOperation:
+    [self.xmppQueue addOperation:
      [NSBlockOperation blockOperationWithBlock:^{
         
         NSDictionary* stanzaToParse=[self nextStanza];
@@ -1030,9 +1023,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                             kaccountNoKey:_accountNo
                                             };
                     
-                    dispatch_async(_xmppQueue, ^{
+                    [self.xmppQueue addOperationWithBlock:^{
                         [self.contactsVC addOnlineUser:userDic];
-                    });
+                    }];
                     
                 }
                 
@@ -1444,10 +1437,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                 kstateKey:state,
                                                 kstatusKey:status
                                                 };
-                        dispatch_async(_xmppQueue, ^{
+                        [self.xmppQueue addOperationWithBlock: ^{
                             [self.contactsVC addOnlineUser:userDic];
                             [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactOnlineNotice object:self userInfo:userDic];
-                        });
+                        }];
                         
                         if(!presenceNode.MUC) {
                             // do not do this in the background
@@ -1490,10 +1483,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     if ([[DataLayer sharedInstance] setOfflineBuddy:presenceNode forAccount:_accountNo] ) {
                         NSDictionary* userDic=@{kusernameKey: presenceNode.user,
                                                 kaccountNoKey:_accountNo};
-                        dispatch_async(_xmppQueue, ^{
+                        [self.xmppQueue addOperationWithBlock: ^{
                             [self.contactsVC removeOnlineUser:userDic];
                             [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactOfflineNotice object:self userInfo:userDic];
-                        });
+                        }];
                     }
                     
                 }
@@ -1903,9 +1896,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         
                         NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
                                              kinfoTypeKey:@"connect", kinfoStatusKey:@""};
-                        dispatch_async(_xmppQueue, ^{
+                       [self.xmppQueue addOperationWithBlock: ^{
                             [self.contactsVC hideConnecting:info];
-                        });
+                        }];
                         
                     }
                 }
@@ -1925,7 +1918,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     if(self.supportsSM3 && self.unAckedStanzas)
     {
-        [self.readQueue addOperation:
+        [self.xmppQueue addOperation:
          [NSBlockOperation blockOperationWithBlock:^{
         NSDictionary *dic =@{kStanzaID:[NSNumber numberWithInteger: [self.lastOutboundStanza integerValue]], kStanza:stanza};
         [self.unAckedStanzas addObject:dic];
@@ -1933,7 +1926,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         }]];
     }
     
-    [self.writeQueue addOperation:
+    [self.xmppQueue addOperation:
      [NSBlockOperation blockOperationWithBlock:^{
         [_outputQueue addObject:stanza];
         [self writeFromQueue];  // try to send if there is space
@@ -2212,7 +2205,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             //for writing
         case NSStreamEventHasSpaceAvailable:
         {
-            [self.writeQueue addOperation:
+            [self.xmppQueue addOperation:
              [NSBlockOperation blockOperationWithBlock:^{
                 _streamHasSpace=YES;
                 
@@ -2226,10 +2219,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         case  NSStreamEventHasBytesAvailable:
         {
             DDLogVerbose(@"Stream has bytes to read");
-            dispatch_async(_xmppQueue, ^{
+            [self.xmppQueue addOperationWithBlock: ^{
                 [self readToBuffer];
-            });
-            
+            }];
             
             break;
         }
@@ -2400,7 +2392,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         if(data)
         {
             // DDLogVerbose(@"waiting on net read queue");
-            [self.readQueue addOperation:
+            [self.xmppQueue addOperation:
              [NSBlockOperation blockOperationWithBlock:^{
                 
                 // DDLogVerbose(@"got net read queue");

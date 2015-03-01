@@ -636,6 +636,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         //get random number
         self.pingID=[NSString stringWithFormat:@"Monal%d",arc4random()%100000];
         
+        XMPPIQ* ping =[[XMPPIQ alloc] initWithId:self.pingID andType:kiqGetType];
+        [ping setiqTo:_domain];
+        [ping setPing];
+        [self send:ping];
+        
         dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
         dispatch_source_t pingTimeOut = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,
                                                                q_background);
@@ -670,10 +675,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         dispatch_resume(pingTimeOut);
         
         
-        XMPPIQ* ping =[[XMPPIQ alloc] initWithId:self.pingID andType:kiqGetType];
-        [ping setiqTo:_domain];
-        [ping setPing];
-        [self send:ping];
+   
     }
     
     

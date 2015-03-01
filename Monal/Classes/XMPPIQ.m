@@ -127,7 +127,6 @@
 
 -(void) setPing
 {
-    
     XMLNode* pingNode =[[XMLNode alloc] init];
     pingNode.element=@"ping";
     [pingNode.attributes setObject:@"urn:xmpp:ping" forKey:@"xmlns"];

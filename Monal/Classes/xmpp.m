@@ -609,6 +609,44 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 }
 
 
+-(void)setPingTimerForID:(NSString *)pingID
+{
+    DDLogInfo(@"setting timer for ping %@", pingID);
+    self.pingID=pingID;
+    dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    dispatch_source_t pingTimeOut = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,
+                                                           q_background);
+    
+    dispatch_source_set_timer(pingTimeOut,
+                              dispatch_time(DISPATCH_TIME_NOW, kConnectTimeout* NSEC_PER_SEC),
+                              DISPATCH_TIME_FOREVER,
+                              1ull * NSEC_PER_SEC);
+    
+    dispatch_source_set_event_handler(pingTimeOut, ^{
+        
+        if(self.pingID)
+        {
+            DDLogVerbose(@"ping timed out without a reply to %@",self.pingID);
+            _accountState=kStateReconnecting;
+            [self reconnect];
+        }
+        else
+        {
+            DDLogVerbose(@"ping reply was seen");
+            
+        }
+        
+        dispatch_source_cancel(pingTimeOut);
+        
+    });
+    
+    dispatch_source_set_cancel_handler(pingTimeOut, ^{
+        DDLogInfo(@"ping timer cancelled");
+    });
+    
+    dispatch_resume(pingTimeOut);
+}
+
 -(void) sendPing
 {
     if(self.accountState<kStateReconnecting  && !_reconnectScheduled)
@@ -634,50 +672,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     else  {
         //get random number
-        self.pingID=[NSString stringWithFormat:@"Monal%d",arc4random()%100000];
-        
-        XMPPIQ* ping =[[XMPPIQ alloc] initWithId:self.pingID andType:kiqGetType];
+        XMPPIQ* ping =[[XMPPIQ alloc] initWithId:[NSString stringWithFormat:@"Monal%d",arc4random()%100000]andType:kiqGetType];
         [ping setiqTo:_domain];
         [ping setPing];
         [self send:ping];
-        
-        dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-        dispatch_source_t pingTimeOut = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,
-                                                               q_background);
-        
-        dispatch_source_set_timer(pingTimeOut,
-                                  dispatch_time(DISPATCH_TIME_NOW, kConnectTimeout* NSEC_PER_SEC),
-                                  DISPATCH_TIME_FOREVER,
-                                  1ull * NSEC_PER_SEC);
-        
-        dispatch_source_set_event_handler(pingTimeOut, ^{
-            
-            if(self.pingID)
-            {
-                DDLogVerbose(@"ping timed out without a reply to %@",self.pingID);
-                _accountState=kStateReconnecting;
-                [self reconnect];
-            }
-            else
-            {
-                DDLogVerbose(@"ping reply was seen");
-                
-            }
-            
-            dispatch_source_cancel(pingTimeOut);
-            
-        });
-        
-        dispatch_source_set_cancel_handler(pingTimeOut, ^{
-            DDLogInfo(@"ping timer cancelled");
-        });
-        
-        dispatch_resume(pingTimeOut);
-        
-
     }
-    
-    
 }
 
 -(void) sendWhiteSpacePing
@@ -2345,6 +2344,18 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 NSDictionary *dic =@{kMessageId:messageNode.xmppId};
                 [[NSNotificationCenter defaultCenter] postNotificationName: kMonalSentMessageNotice object:self userInfo:dic];
                 
+            }
+            else if([node isKindOfClass:[XMPPIQ class]])
+            {
+                XMPPIQ *iq = (XMPPIQ *)node;
+                if([iq.children count]>0)
+                {
+                    XMLNode *child =[iq.children objectAtIndex:0];
+                    if ([[child element] isEqualToString:@"ping"])
+                    {
+                        [self setPingTimerForID:[iq.attributes objectForKey:@"id"]];
+                    }
+                }
             }
         }
     }

@@ -247,7 +247,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     dispatch_source_set_timer(streamTimer,
                               dispatch_time(DISPATCH_TIME_NOW, 5ull * NSEC_PER_SEC),
-                              1ull * NSEC_PER_SEC
+                             DISPATCH_TIME_FOREVER
                               , 1ull * NSEC_PER_SEC);
     
     dispatch_source_set_event_handler(streamTimer, ^{
@@ -331,7 +331,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         
         dispatch_source_set_timer(loginCancelOperation,
                                   dispatch_time(DISPATCH_TIME_NOW, kConnectTimeout* NSEC_PER_SEC),
-                                  kConnectTimeout* NSEC_PER_SEC,
+                                  DISPATCH_TIME_FOREVER,
                                   1ull * NSEC_PER_SEC);
         
         dispatch_source_set_event_handler(loginCancelOperation, ^{
@@ -647,7 +647,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         
         dispatch_source_set_timer(pingTimeOut,
                                   dispatch_time(DISPATCH_TIME_NOW, kConnectTimeout* NSEC_PER_SEC),
-                                  kConnectTimeout* NSEC_PER_SEC,
+                                  DISPATCH_TIME_FOREVER,
                                   1ull * NSEC_PER_SEC);
         
         dispatch_source_set_event_handler(pingTimeOut, ^{
@@ -674,8 +674,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         
         dispatch_resume(pingTimeOut);
         
-        
-   
+
     }
     
     

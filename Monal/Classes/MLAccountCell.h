@@ -10,17 +10,19 @@
 
 @interface MLAccountCell : UITableViewCell
 
-@property (nonatomic, assign) BOOL switchEnabled;
-@property (nonatomic, assign) BOOL textEnabled;
+/**
+ Label to the right
+ */
+@property  (nonatomic, weak) IBOutlet UILabel* cellLabel;
 
 /**
  UIswitch
  */
-@property (nonatomic, strong) UISwitch* toggleSwitch;
+@property  (nonatomic, weak) IBOutlet  UISwitch* toggleSwitch;
 
 /**
  Textinput field
  */
-@property (nonatomic, strong) UITextField* textInputField;
+@property  (nonatomic, weak) IBOutlet UITextField* textInputField;
 
 @end

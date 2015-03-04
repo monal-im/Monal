@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="6254" systemVersion="14C109" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6247"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="AccountCell" id="l5E-LT-0kT" customClass="MLAccountCell">
+            <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="l5E-LT-0kT" id="DMi-LI-zqm">
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="r8c-Jr-MKH">
+                        <rect key="frame" x="8" y="11" width="131" height="21"/>
+                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                        <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="ZDH-II-Cc8">
+                        <rect key="frame" x="147" y="11" width="165" height="21"/>
+                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                        <textInputTraits key="textInputTraits"/>
+                    </textField>
+                    <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="4FD-Uj-Ib9">
+                        <rect key="frame" x="205" y="6" width="51" height="31"/>
+                    </switch>
+                </subviews>
+                <constraints>
+                    <constraint firstItem="ZDH-II-Cc8" firstAttribute="trailing" secondItem="DMi-LI-zqm" secondAttribute="trailingMargin" id="LTg-m3-oEl"/>
+                    <constraint firstItem="ZDH-II-Cc8" firstAttribute="leading" secondItem="r8c-Jr-MKH" secondAttribute="trailing" constant="8" id="WTa-SO-XVZ"/>
+                    <constraint firstItem="4FD-Uj-Ib9" firstAttribute="trailing" secondItem="DMi-LI-zqm" secondAttribute="trailingMargin" constant="-58" id="ai5-3X-WHK"/>
+                    <constraint firstItem="r8c-Jr-MKH" firstAttribute="top" secondItem="DMi-LI-zqm" secondAttribute="topMargin" constant="3" id="dkM-Bb-bcG"/>
+                    <constraint firstItem="r8c-Jr-MKH" firstAttribute="leading" secondItem="DMi-LI-zqm" secondAttribute="leadingMargin" id="eLK-Ws-Cos"/>
+                    <constraint firstItem="ZDH-II-Cc8" firstAttribute="top" secondItem="DMi-LI-zqm" secondAttribute="topMargin" constant="3" id="gL0-U4-7jo"/>
+                    <constraint firstItem="4FD-Uj-Ib9" firstAttribute="top" secondItem="DMi-LI-zqm" secondAttribute="topMargin" constant="-2" id="qN3-vA-V8h"/>
+                </constraints>
+            </tableViewCellContentView>
+            <connections>
+                <outlet property="cellLabel" destination="r8c-Jr-MKH" id="EYp-Bu-pMd"/>
+                <outlet property="textInputField" destination="ZDH-II-Cc8" id="XuF-cf-PQ0"/>
+                <outlet property="toggleSwitch" destination="4FD-Uj-Ib9" id="01q-Cf-jRH"/>
+            </connections>
+            <point key="canvasLocation" x="225" y="50"/>
+        </tableViewCell>
+    </objects>
+</document>

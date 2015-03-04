@@ -60,6 +60,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     [super viewDidLoad];
     
+    [self.tableView registerNib:[UINib nibWithNibName:@"MLAccountCell"
+                                               bundle:[NSBundle mainBundle]]
+         forCellReuseIdentifier:@"AccountCell"];
+    
     _db= [DataLayer sharedInstance];
     
     self.sectionArray =  [NSArray arrayWithObjects:@"Account", @"Advanced Settings", nil];
@@ -141,7 +145,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0"))
     {
-        
+       
     }
     else {
         [self.tableView setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"debut_dark"]]];
@@ -349,8 +353,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 	DDLogVerbose(@"xmpp edit view section %d, row %d", indexPath.section, indexPath.row);
     
-	MLAccountCell* thecell=[[MLAccountCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"AccountCell"];
-
+	MLAccountCell* thecell=(MLAccountCell *)[tableView dequeueReusableCellWithIdentifier:@"AccountCell"];
+    
     // load cells from interface builder
 	if(indexPath.section==0)
 	{
@@ -358,23 +362,23 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		switch (indexPath.row)
 		{
             case 0: {
-                thecell.textLabel.text=@"Jabber Id";
-                thecell.textEnabled=YES;
+                thecell.cellLabel.text=@"Jabber Id";
+                thecell.toggleSwitch.hidden=YES;
                 thecell.textInputField.tag=1;
                 thecell.textInputField.text=self.jid;
                 break;
             }
             case 1: {
-                thecell.textLabel.text=@"Password";
-                thecell.textEnabled=YES;
+                thecell.cellLabel.text=@"Password";
+                thecell.toggleSwitch.hidden=YES;
                 thecell.textInputField.secureTextEntry=YES;
                 thecell.textInputField.tag=2;
-                 thecell.textInputField.text=self.password;
+                thecell.textInputField.text=self.password;
                 break;
             }
             case 2: {
-                thecell.textLabel.text=@"Enabled";
-                thecell.switchEnabled=YES;
+                thecell.cellLabel.text=@"Enabled";
+                thecell.textInputField.hidden=YES;
                 thecell.toggleSwitch.tag=1;
                 thecell.toggleSwitch.on=self.enabled;
                 break;
@@ -388,48 +392,48 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		{
                 //advanced
             case 0:  {
-                thecell.textLabel.text=@"Server";
-                thecell.textEnabled=YES;
-                  thecell.textInputField.tag=3;
+                thecell.cellLabel.text=@"Server";
+                thecell.toggleSwitch.hidden=YES;
+                thecell.textInputField.tag=3;
                  thecell.textInputField.text=self.server;
                 break;
             }
 
             case 1:  {
-                thecell.textLabel.text=@"Port";
-                thecell.textEnabled=YES;
-                  thecell.textInputField.tag=4;
+                thecell.cellLabel.text=@"Port";
+                thecell.toggleSwitch.hidden=YES;
+                thecell.textInputField.tag=4;
                  thecell.textInputField.text=self.port;
                 break;
             }
 
                 
             case 2:  {
-                thecell.textLabel.text=@"Resource";
-                thecell.textEnabled=YES;
-                  thecell.textInputField.tag=5;
+                thecell.cellLabel.text=@"Resource";
+                thecell.toggleSwitch.hidden=YES;
+                thecell.textInputField.tag=5;
                  thecell.textInputField.text=self.resource;
                 break;
             }
 
             case 3: {
-                thecell.textLabel.text=@"SSL";
-                thecell.switchEnabled=YES;
-                 thecell.toggleSwitch.tag=2;
+                thecell.cellLabel.text=@"SSL";
+               thecell.textInputField.hidden=YES;
+                thecell.toggleSwitch.tag=2;
                thecell.toggleSwitch.on=self.useSSL;
                 break;
             }
             case 4: {
-                thecell.textLabel.text=@"Old Style SSL";
-                thecell.switchEnabled=YES;
-                 thecell.toggleSwitch.tag=3;
+                thecell.cellLabel.text=@"Old Style SSL";
+               thecell.textInputField.hidden=YES;
+                thecell.toggleSwitch.tag=3;
                 thecell.toggleSwitch.on=self.oldStyleSSL;
                 break;
             }
             case 5: {
-                thecell.textLabel.text=@"Self Signed";
-                thecell.switchEnabled=YES;
-                 thecell.toggleSwitch.tag=4;
+                thecell.cellLabel.text=@"Self Signed";
+               thecell.textInputField.hidden=YES;
+                thecell.toggleSwitch.tag=4;
                 thecell.toggleSwitch.on=self.selfSignedSSL;
                 break;
             }
@@ -474,7 +478,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     if(indexPath.row!=6)
     {
         thecell.textInputField.delegate=self;
-        if(thecell.switchEnabled==YES)
+        if(thecell.textInputField.hidden==YES)
         {
             [thecell.toggleSwitch addTarget:self action:@selector(toggleSwitch:) forControlEvents:UIControlEventTouchDown];
         }

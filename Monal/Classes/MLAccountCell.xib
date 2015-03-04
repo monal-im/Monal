@@ -26,13 +26,13 @@
                         <textInputTraits key="textInputTraits"/>
                     </textField>
                     <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="4FD-Uj-Ib9">
-                        <rect key="frame" x="205" y="6" width="51" height="31"/>
+                        <rect key="frame" x="247" y="6" width="51" height="31"/>
                     </switch>
                 </subviews>
                 <constraints>
                     <constraint firstItem="ZDH-II-Cc8" firstAttribute="trailing" secondItem="DMi-LI-zqm" secondAttribute="trailingMargin" id="LTg-m3-oEl"/>
                     <constraint firstItem="ZDH-II-Cc8" firstAttribute="leading" secondItem="r8c-Jr-MKH" secondAttribute="trailing" constant="8" id="WTa-SO-XVZ"/>
-                    <constraint firstItem="4FD-Uj-Ib9" firstAttribute="trailing" secondItem="DMi-LI-zqm" secondAttribute="trailingMargin" constant="-58" id="ai5-3X-WHK"/>
+                    <constraint firstItem="4FD-Uj-Ib9" firstAttribute="trailing" secondItem="DMi-LI-zqm" secondAttribute="trailingMargin" constant="-16" id="ai5-3X-WHK"/>
                     <constraint firstItem="r8c-Jr-MKH" firstAttribute="top" secondItem="DMi-LI-zqm" secondAttribute="topMargin" constant="3" id="dkM-Bb-bcG"/>
                     <constraint firstItem="r8c-Jr-MKH" firstAttribute="leading" secondItem="DMi-LI-zqm" secondAttribute="leadingMargin" id="eLK-Ws-Cos"/>
                     <constraint firstItem="ZDH-II-Cc8" firstAttribute="top" secondItem="DMi-LI-zqm" secondAttribute="topMargin" constant="3" id="gL0-U4-7jo"/>

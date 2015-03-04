@@ -480,7 +480,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         thecell.textInputField.delegate=self;
         if(thecell.textInputField.hidden==YES)
         {
-            [thecell.toggleSwitch addTarget:self action:@selector(toggleSwitch:) forControlEvents:UIControlEventTouchDown];
+            [thecell.toggleSwitch addTarget:self action:@selector(toggleSwitch:) forControlEvents:UIControlEventValueChanged];
         }
     }
     

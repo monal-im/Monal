@@ -73,7 +73,7 @@
     XMLNode* priorityNode =[[XMLNode alloc] init];
     priorityNode.element=@"priority";
     priorityNode.data=[NSString stringWithFormat:@"%d",_priority];
-   // [self.children addObject:priorityNode];
+    [self.children addObject:priorityNode];
 }
 
 -(void) setInvisible

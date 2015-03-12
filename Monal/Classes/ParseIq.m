@@ -54,7 +54,9 @@
             else if([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"jabber:iq:auth"]) _legacyAuth=YES;
             
             if(!_features)  _features=[[NSMutableSet alloc] init];
-            [_features addObject:[attributeDict objectForKey:@"var"]];
+            if([attributeDict objectForKey:@"var"]) {
+                [_features addObject:[attributeDict objectForKey:@"var"]];
+            }
             
         }
         

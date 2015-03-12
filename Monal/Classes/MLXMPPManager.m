@@ -241,11 +241,14 @@ An array of Dics what have timers to make sure everything was sent
     
     xmppAccount.accountNo=[NSString stringWithFormat:@"%@",[account objectForKey:@"account_id"]];
     
-    //keychain wont work when device is locked.
-    if([self.passwordDic objectForKey:[account objectForKey:@"account_id"]])
+    if([UIApplication sharedApplication].applicationState!=UIApplicationStateActive)
     {
-        xmppAccount.password=[self.passwordDic objectForKey:[account objectForKey:@"account_id"]];
-        DDLogVerbose(@"connect got password from dic");
+        //keychain wont work when device is locked.
+        if([self.passwordDic objectForKey:[account objectForKey:@"account_id"]])
+        {
+            xmppAccount.password=[self.passwordDic objectForKey:[account objectForKey:@"account_id"]];
+            DDLogVerbose(@"connect got password from dic");
+        }
     }
     else
     {

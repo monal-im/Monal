@@ -35,10 +35,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) handleNewMessage:(NSNotification *)notification
 {
     DDLogVerbose(@"notificaiton manager got new message notice %@", notification.userInfo);
-
+    if ([[notification.userInfo objectForKey:@"showAlert"] boolValue]) {
     dispatch_async(dispatch_get_main_queue(),
                   ^{
-                     NSString* acctString =[NSString stringWithFormat:@"%d", [[notification.userInfo objectForKey:@"accountNo"] integerValue]];  
+                     NSString* acctString =[NSString stringWithFormat:@"%ld", (long)[[notification.userInfo objectForKey:@"accountNo"] integerValue]];  
                       NSString* fullName =[[DataLayer sharedInstance] fullName:[notification.userInfo objectForKey:@"from"] forAccount:acctString];
                       
                       NSString* nameToShow=[notification.userInfo objectForKey:@"from"];
@@ -91,10 +91,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                       else
                    {
                       
-                       if(!([[notification.userInfo objectForKey:@"from"] isEqualToString:self.currentContact] &&
-                          [acctString isEqualToString:self.currentAccountNo])
+                       if(!([[notification.userInfo objectForKey:@"from"] isEqualToString:self.currentContact]) &&
+                          !([[notification.userInfo objectForKey:@"to"] isEqualToString:self.currentContact] ) )
                         //  &&![[notification.userInfo objectForKey:@"from"] isEqualToString:@"Info"]
-                          )
+                          
                        {
                        
                       SlidingMessageViewController* slidingView= [[SlidingMessageViewController alloc] correctSliderWithTitle:nameToShow message:[notification.userInfo objectForKey:@"messageText"] user:[notification.userInfo objectForKey:@"from"] account:[notification.userInfo objectForKey:@"accountNo"] ];
@@ -107,6 +107,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                    }
                       
                   });
+    }
 }
 
 -(void) dealloc

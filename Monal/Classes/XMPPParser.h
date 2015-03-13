@@ -18,6 +18,7 @@
     
     NSString* _type;
     NSString* _from;
+    NSString* _to;
     NSString* _user;
     NSString* _resource;
     NSString* _idval;
@@ -30,6 +31,11 @@
  full name as sent from server
  */
 @property (nonatomic, strong, readonly) NSString* from;
+
+/**
+ full name as sent from server
+ */
+@property (nonatomic, strong, readonly) NSString* to;
 
 /**
  username part of from

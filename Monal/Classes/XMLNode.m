@@ -90,7 +90,7 @@
         }
         
         //dont close stream
-        if((![_element isEqualToString:@"stream:stream"]) ) {
+        if(![_element isEqualToString:@"stream:stream"] && ![_element isEqualToString:@"/stream:stream"]) {
             [outputString appendString:[NSString stringWithFormat:@"</%@>", _element]];
         }
     }

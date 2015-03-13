@@ -18,6 +18,21 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     
      _messageBuffer=nil;
+    
+    if(([elementName isEqualToString:@"forwarded"])  )
+    {
+        State=@"Forwarded";
+        return;
+    }
+    //comes first to not change state t message below immediatley
+    if(([elementName isEqualToString:@"message"]) && [State isEqualToString:@"Forwarded"] )
+    {
+        if([attributeDict objectForKey:@"to"])
+        {
+            _to =[[(NSString*)[attributeDict objectForKey:@"to"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
+            _to=[_to lowercaseString];
+        }
+    }
    
 	if(([elementName isEqualToString:@"message"])  )
 	{
@@ -40,8 +55,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         
         State=@"Message";
 	}
-	
-	
+    
+
     //ignore error message
 	if([elementName isEqualToString:@"body"])
 	{

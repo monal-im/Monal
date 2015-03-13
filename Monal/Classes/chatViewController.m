@@ -37,7 +37,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 	
     self.view.backgroundColor=[UIColor whiteColor];
     _messageTable =[[UITableView alloc] initWithFrame:CGRectMake(0, 2, self.view.frame.size.width, self.view.frame.size.height-42)];
-    
+    _messageTable.backgroundColor=[UIColor whiteColor];
     //    pages = [[UIPageControl alloc] init];
     //    pages.frame=CGRectMake(0, self.view.frame.size.height - 40-20, self.view.frame.size.width, 20);
     //
@@ -420,6 +420,11 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 #pragma mark - handling notfications
 
+-(void) reloadTable
+{
+    [_messageTable reloadData];
+}
+
 //always messages going out
 -(void) addMessageto:(NSString*)to withMessage:(NSString*) message andId:(NSString *) messageId
 {
@@ -428,7 +433,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         return;
     }
     
-	if([[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:_accountNo withMessage:message actuallyFrom:self.jid withId:messageId ])
+	if([[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:_accountNo withMessage:message actuallyFrom:self.jid withId:messageId])
 	{
 		DDLogVerbose(@"added message");
         
@@ -474,14 +479,25 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     DDLogVerbose(@"chat view got new message notice %@", notification.userInfo);
     
     if([[notification.userInfo objectForKey:@"accountNo"] isEqualToString:_accountNo]
-       && [[notification.userInfo objectForKey:@"from"] isEqualToString:_contactName]
+       &&( ( [[notification.userInfo objectForKey:@"from"] isEqualToString:_contactName]) || ([[notification.userInfo objectForKey:@"to"] isEqualToString:_contactName] ))
        )
     {
         dispatch_async(dispatch_get_main_queue(),
                        ^{
-                           NSDictionary* userInfo = @{@"af": [notification.userInfo objectForKey:@"actuallyfrom"],
+                           NSDictionary* userInfo;
+                           if([[notification.userInfo objectForKey:@"to"] isEqualToString:_contactName])
+                           {
+                               userInfo = @{@"af": [notification.userInfo objectForKey:@"actuallyfrom"],
+                                                          @"message": [notification.userInfo objectForKey:@"messageText"],
+                                                          @"thetime": [self currentGMTTime],   @"delivered":@YES};
+
+                           } else  {
+                          userInfo = @{@"af": [notification.userInfo objectForKey:@"actuallyfrom"],
                                                       @"message": [notification.userInfo objectForKey:@"messageText"],
-                                                      @"thetime": [self currentGMTTime]};
+                                                      @"thetime": [self currentGMTTime]
+                                     };
+                           }
+                           
                            [_messagelist addObject:userInfo];
                            
                            [_messageTable beginUpdates];
@@ -489,8 +505,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                            [_messageTable insertRowsAtIndexPaths:@[path1]
                                                 withRowAnimation:UITableViewRowAnimationTop];
                            [_messageTable endUpdates];
+                         
+                            [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:YES];
                            
-                           [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:YES];
                            
                            //mark as read
                            [[DataLayer sharedInstance] markAsReadBuddy:_contactName forAccount:_accountNo];
@@ -500,20 +517,22 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void) setMessageId:(NSString *) messageId delivered:(BOOL) delivered
 {
-    int row=0;
-    for(NSMutableDictionary *rowDic in _messagelist)
-    {
-        if([[rowDic objectForKey:@"messageid"] isEqualToString:messageId]) {
-            [rowDic setObject:[NSNumber numberWithBool:delivered] forKey:@"delivered"];
-            NSIndexPath *indexPath =[NSIndexPath indexPathForRow:row inSection:0];
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
-            });
-            break;
-        }
-        row++;
-    }
-
+    dispatch_async(dispatch_get_main_queue(),
+                   ^{
+                       int row=0;
+                       for(NSMutableDictionary *rowDic in _messagelist)
+                       {
+                           if([[rowDic objectForKey:@"messageid"] isEqualToString:messageId]) {
+                               [rowDic setObject:[NSNumber numberWithBool:delivered] forKey:@"delivered"];
+                               NSIndexPath *indexPath =[NSIndexPath indexPathForRow:row inSection:0];
+                               dispatch_async(dispatch_get_main_queue(), ^{
+                                   [_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+                               });
+                               break;
+                           }
+                           row++;
+                       }
+                   });
 }
 
 -(void) handleSendFailedMessage:(NSNotification *)notification
@@ -804,6 +823,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 #pragma mark tableview delegate
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    if(indexPath.row>=[_messagelist count])  {
+        return 0;
+    }
     NSDictionary* row=[_messagelist objectAtIndex:indexPath.row];
     CGFloat height= [MLChatCell heightForText:[row objectForKey:@"message"] inWidth:tableView.frame.size.width-20];
     height+=kNameLabelHeight;

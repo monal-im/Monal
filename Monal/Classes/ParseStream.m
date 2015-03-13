@@ -67,7 +67,21 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		return;
     }
 	
-	
+    /** stream management **/
+    if(([State isEqualToString:@"Features"]) && ([elementName isEqualToString:@"sm"]))
+    {
+        if([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:sm:2"])
+        {
+        _supportsSM2=YES;
+        }
+        if([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:sm:3"])
+        {
+        _supportsSM3=YES;
+        }
+        return;
+    }
+    
+
     //***** sasl success...
 	if(([elementName isEqualToString:@"success"]) &&  ([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:ietf:params:xml:ns:xmpp-sasl"])
 	   )

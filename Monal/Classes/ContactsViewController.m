@@ -21,6 +21,7 @@
 #define kofflineSection 2
 
 @interface ContactsViewController ()
+@property (nonatomic, strong) NSArray* searchResults ;
 
 @end
 
@@ -38,15 +39,20 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     self.view.backgroundColor=[UIColor lightGrayColor];
     self.view.autoresizingMask=UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
     
-    _contactsTable=[[UITableView alloc] init];
+    _contactsTable=(UITableView *)self.view;
     _contactsTable.delegate=self;
     _contactsTable.dataSource=self;
     
     self.view=_contactsTable;
     
     // =nil;
-    [_contactsTable.backgroundView setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"debut_dark"]]];
-    
+    if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0"))
+    {
+        self.view.backgroundColor =[UIColor whiteColor];
+    }
+    else{
+        [_contactsTable.backgroundView setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"debut_dark"]]];
+    }
     
     _contacts=[[NSMutableArray alloc] init] ;
     _offlineContacts=[[NSMutableArray alloc] init] ;
@@ -504,9 +510,9 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 {
     
     if([[NSUserDefaults standardUserDefaults] boolForKey:@"SortContacts"]) //sort by status
-        _contacts=[NSMutableArray arrayWithArray:[[DataLayer sharedInstance] onlineBuddiesSortedBy:@"Status"]];
+        _contacts=[NSMutableArray arrayWithArray:[[DataLayer sharedInstance] onlineContactsSortedBy:@"Status"]];
     else
-        _contacts=[NSMutableArray arrayWithArray:[[DataLayer sharedInstance] onlineBuddiesSortedBy:@"Name"]];
+        _contacts=[NSMutableArray arrayWithArray:[[DataLayer sharedInstance] onlineContactsSortedBy:@"Name"]];
     
     if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
     {
@@ -528,7 +534,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     DDLogInfo(@"chat view got new message notice %@", notification.userInfo);
     if([[self.currentNavController topViewController] isKindOfClass:[chatViewController class]]) {
         chatViewController* currentTop=(chatViewController*)[self.currentNavController topViewController];
-        if([currentTop.contactName isEqualToString:[notification.userInfo objectForKey:@"from"]] &&
+        if( (([currentTop.contactName isEqualToString:[notification.userInfo objectForKey:@"from"]] )|| ([currentTop.contactName isEqualToString:[notification.userInfo objectForKey:@"to"]] )) &&
            [currentTop.accountNo isEqualToString:
             [NSString stringWithFormat:@"%d",[[notification.userInfo objectForKey:kaccountNoKey] integerValue] ]]
            )
@@ -615,6 +621,30 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     
 }
 
+#pragma mark search display delegate
+
+- (void)searchDisplayControllerWillBeginSearch:(UISearchDisplayController *)controller {
+    self.searchResults=nil;
+}
+
+- (void)searchDisplayControllerWillEndSearch:(UISearchDisplayController *)controller
+{
+    self.searchResults=nil;
+
+}
+
+-(BOOL) searchDisplayController:(UISearchDisplayController *)controller shouldReloadTableForSearchString:(NSString *)searchString
+{
+    if(searchString.length >0) {
+    
+        self.searchResults = [[DataLayer sharedInstance] searchContactsWithString:searchString];
+        return YES;
+    }
+    
+    self.searchResults=nil;
+    return NO;
+}
+
 #pragma mark tableview datasource
 -(NSString*) tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
@@ -637,28 +667,41 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 
 -(NSInteger) numberOfSectionsInTableView:(UITableView *)tableView
 {
+    NSInteger toreturn=0;
+    if(tableView ==self.view) {
     if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
-        return 3;
+        toreturn =3;
     else
-        return 2;
+        toreturn =2;
+    }
+    else  if(tableView ==self.searchDisplayController.searchResultsTableView) {
+        toreturn =1;
+    }
+    
+    return toreturn;
+    
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    int toReturn=0;
-    
-    switch (section) {
-        case kinfoSection:
-            toReturn=[_infoCells count];
-            break;
-        case konlineSection:
-            toReturn= [_contacts count];
-            break;
-        case kofflineSection:
-            toReturn=[_offlineContacts count];
-            break;
-        default:
-            break;
+    NSInteger toReturn=0;
+    if(tableView ==self.view) {
+        switch (section) {
+            case kinfoSection:
+                toReturn=[_infoCells count];
+                break;
+            case konlineSection:
+                toReturn= [_contacts count];
+                break;
+            case kofflineSection:
+                toReturn=[_offlineContacts count];
+                break;
+            default:
+                break;
+        }
+    }
+    else  if(tableView ==self.searchDisplayController.searchResultsTableView) {
+        toReturn=[self.searchResults count];
     }
     
     return toReturn;
@@ -666,26 +709,28 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    if(indexPath.section==kinfoSection)
-    {
-        MLInfoCell* cell =[tableView dequeueReusableCellWithIdentifier:@"InfoCell"];
-        if(!cell)
+    if(tableView ==self.view) {
+        if(indexPath.section==kinfoSection)
         {
-            cell =[[MLInfoCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"InfoCell"];
+            MLInfoCell* cell =[tableView dequeueReusableCellWithIdentifier:@"InfoCell"];
+            if(!cell)
+            {
+                cell =[[MLInfoCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"InfoCell"];
+            }
+            
+            cell.textLabel.text=[[_infoCells objectAtIndex:indexPath.row] objectForKey:@"accountName"];
+            cell.detailTextLabel.text=[[_infoCells objectAtIndex:indexPath.row] objectForKey:@"status"];
+            cell.type=[[_infoCells objectAtIndex:indexPath.row] objectForKey:@"type"];
+            cell.accountId=[[_infoCells objectAtIndex:indexPath.row] objectForKey:@"acccountId"];
+            
+            
+            if([cell.detailTextLabel.text isEqualToString:@"Connecting"])
+            {
+                [cell.spinner startAnimating];
+            }
+            
+            return cell;
         }
-        
-        cell.textLabel.text=[[_infoCells objectAtIndex:indexPath.row] objectForKey:@"accountName"];
-        cell.detailTextLabel.text=[[_infoCells objectAtIndex:indexPath.row] objectForKey:@"status"];
-        cell.type=[[_infoCells objectAtIndex:indexPath.row] objectForKey:@"type"];
-        cell.accountId=[[_infoCells objectAtIndex:indexPath.row] objectForKey:@"acccountId"];
-        
-        
-        if([cell.detailTextLabel.text isEqualToString:@"Connecting"])
-        {
-            [cell.spinner startAnimating];
-        }
-        
-        return cell;
     }
     
     MLContactCell* cell =[tableView dequeueReusableCellWithIdentifier:@"ContactCell"];
@@ -695,14 +740,20 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     }
     
     NSDictionary* row =nil;
+ 
     if(indexPath.section==konlineSection)
     {
         row = [_contacts objectAtIndex:indexPath.row];
     }
     
-    if(indexPath.section==kofflineSection)
-    {
-        row = [_offlineContacts objectAtIndex:indexPath.row];
+    if(tableView ==self.view) {
+        if(indexPath.section==kofflineSection)
+        {
+            row = [_offlineContacts objectAtIndex:indexPath.row];
+        }
+    }
+    else  if(tableView ==self.searchDisplayController.searchResultsTableView) {
+        row = [self.searchResults objectAtIndex:indexPath.row];
     }
     
     NSString* fullName=[row objectForKey:@"full_name"];
@@ -717,7 +768,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
         cell.detailTextLabel.text=[row objectForKey:@"status"];
     else
         cell.detailTextLabel.text=nil;
-    
+        if(tableView ==self.view) {
     if(indexPath.section==konlineSection)
     {
         NSString* stateString=[[row objectForKey:@"state"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] ;
@@ -734,7 +785,18 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     }
     else  if(indexPath.section==kofflineSection) {
         cell.status=kStatusOffline;
-    }
+    }}
+        else {
+            NSNumber *online=[row objectForKey:@"online"];
+            if([online boolValue]==YES)
+            {
+                cell.status=kStatusOnline;
+            }
+            else
+            {
+                cell.status=kStatusOffline;
+            }
+        }
     
     cell.accessoryType = UITableViewCellAccessoryDetailDisclosureButton;
     
@@ -751,15 +813,30 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 }
 
 #pragma mark tableview delegate
+-(NSString *)tableView:(UITableView *)tableView titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath *)indexPath {
+    return @"Remove Contact";
+}
 
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    return YES;
+    if(tableView ==self.view) {
+        return YES;
+    }
+    else
+    {
+        return NO;
+    }
 }
 
 - (BOOL)tableView:(UITableView *)tableView shouldIndentWhileEditingRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    return YES;
+    if(tableView ==self.view) {
+        return YES;
+    }
+    else
+    {
+        return NO;
+    }
 }
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -826,13 +903,20 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 - (void)tableView:(UITableView *)tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath *)indexPath
 {
     ContactDetails* detailVC =nil;
-    if(indexPath.section==konlineSection)
-        detailVC= [[ContactDetails alloc]  initWithContact:[_contacts objectAtIndex:indexPath.row] ];
-    else
-        detailVC=[[ContactDetails alloc]  initWithContact:[_offlineContacts objectAtIndex:indexPath.row] ];
+    if(tableView ==self.view) {
+        if(indexPath.section==konlineSection)
+            detailVC= [[ContactDetails alloc]  initWithContact:[_contacts objectAtIndex:indexPath.row] ];
+        else
+            detailVC=[[ContactDetails alloc]  initWithContact:[_offlineContacts objectAtIndex:indexPath.row] ];
+    }
     
-    detailVC.currentNavController=self.currentNavController; 
- 
+    else  if(tableView ==self.searchDisplayController.searchResultsTableView)
+    {
+        detailVC=[[ContactDetails alloc]  initWithContact:[self.searchResults objectAtIndex:indexPath.row] ];
+    }
+    
+    detailVC.currentNavController=self.currentNavController;
+    
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
     {
         MLChatCell* cell = (MLChatCell*)[tableView cellForRowAtIndexPath:indexPath];
@@ -855,6 +939,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     [tableView deselectRowAtIndexPath:indexPath animated:NO];
     
     NSMutableDictionary* row;
+    if(tableView ==self.view) {
     if(indexPath.section==kinfoSection)
     {
         return;
@@ -870,7 +955,11 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
         }
     
     [row setObject:[NSNumber numberWithInt:0] forKey:@"count"];
-    
+    }
+    else  if(tableView ==self.searchDisplayController.searchResultsTableView)
+    {
+        row= [self.searchResults objectAtIndex:indexPath.row];
+    }
 
     [self presentChatWithRow:row];
     

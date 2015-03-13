@@ -54,6 +54,12 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     }
     
     _idval =[attributeDict objectForKey:@"id"] ;
+   
+    if([attributeDict objectForKey:@"to"])
+    {
+        _to =[[(NSString*)[attributeDict objectForKey:@"to"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
+        _to=[_to lowercaseString];
+    }
     
     //remove any  resource markers and get user
     _user=[_user lowercaseString];

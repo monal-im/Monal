@@ -179,7 +179,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) save
 {
-	
+    [self.currentTextField resignFirstResponder];
+    
 	DDLogVerbose(@"Saving");
 
 	if([self.jid length]==0)

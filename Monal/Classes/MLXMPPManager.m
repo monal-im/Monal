@@ -240,7 +240,7 @@ An array of Dics what have timers to make sure everything was sent
     xmppAccount.selfSigned=[[account objectForKey:@"selfsigned"] boolValue];
     
     xmppAccount.accountNo=[NSString stringWithFormat:@"%@",[account objectForKey:@"account_id"]];
-    
+    NSLog(@"state %ld", [UIApplication sharedApplication].applicationState);
     if([UIApplication sharedApplication].applicationState!=UIApplicationStateActive)
     {
         //keychain wont work when device is locked.
@@ -248,6 +248,11 @@ An array of Dics what have timers to make sure everything was sent
         {
             xmppAccount.password=[self.passwordDic objectForKey:[account objectForKey:@"account_id"]];
             DDLogVerbose(@"connect got password from dic");
+        }
+        else {
+            PasswordManager* passMan= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",[account objectForKey:@"account_id"]]];
+            xmppAccount.password=[passMan getPassword] ;
+            [self.passwordDic setObject:xmppAccount.password forKey:[account objectForKey:@"account_id"]];
         }
     }
     else

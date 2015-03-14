@@ -15,10 +15,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 @interface MLXMPPManager()
 
 /**
- only used when the device is not in the foregreound and unlocked e.g when it doesnt have access to the keychain
- */
-@property (nonatomic, strong) NSMutableDictionary *passwordDic;
-/**
  convenience function getting account in connected array with account number/id matching
  */
 -(xmpp*) getConnectedAccountForID:(NSString*) accountNo;

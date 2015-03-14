@@ -27,7 +27,6 @@
 @property (nonatomic, strong)  NSString* accountno;
 @property (nonatomic, strong)  NSIndexPath* originIndex;
 
-
 - (IBAction) delClicked: (id) sender;
 
 -(void) save; 

@@ -157,5 +157,10 @@ Returns the name of the conencted account
  */
 -(void) handleSentMessage:(NSNotification *)notification;
 
+/**
+ only used when the device is not in the foregreound and unlocked e.g when it doesnt have access to the keychain
+ */
+@property (nonatomic, strong) NSMutableDictionary *passwordDic;
+
 
 @end

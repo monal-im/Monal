@@ -50,6 +50,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     BOOL _reconnectScheduled;
 }
 
+@property (nonatomic ,strong) NSDate *loginStartTimeStamp;
+
 @property (nonatomic, strong) NSString *pingID;
 @property (nonatomic, strong) NSOperationQueue *networkQueue;
 @property (nonatomic, strong) NSOperationQueue *processQueue;
@@ -320,6 +322,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             return;
         }
         
+        self.loginStartTimeStamp=[NSDate date];
         self.pingID=nil;
         
         DDLogInfo(@"XMPP connnect  start");
@@ -510,10 +513,16 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     DDLogVerbose(@"reconnecting ");
     //can be called multiple times
     
-    if(_loginStarted) {
+    if(_loginStarted && [[NSDate date] timeIntervalSinceDate:self.loginStartTimeStamp]<=10) {
         DDLogVerbose(@"reconnect called while one already in progress. Stopping.");
         return;
     }
+    else if (_loginStarted && [[NSDate date] timeIntervalSinceDate:self.loginStartTimeStamp]>10)
+    {
+        DDLogVerbose(@"reconnect called while one already in progress that took more than 10 seconds. disconnect before reconnect.");
+        [self disconnect];
+    }
+    
     _loginStarted=YES;
     
     __block UIBackgroundTaskIdentifier reconnectBackgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
@@ -659,8 +668,16 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     if(self.accountState<kStateLoggedIn)
     {
-        DDLogInfo(@"ping attempt before logged in. returning.");
-        return;
+        if(_loginStarted && [[NSDate date] timeIntervalSinceDate:self.loginStartTimeStamp]<=10) {
+            DDLogInfo(@"ping attempt before logged in. returning.");
+            return;
+        }
+        else if (_loginStarted && [[NSDate date] timeIntervalSinceDate:self.loginStartTimeStamp]>10)
+        {
+            DDLogVerbose(@"ping called while one already in progress that took more than 10 seconds. disconnect before reconnect.");
+            [self reconnect:0];
+        }
+    
     }
     
     if(self.supportsSM3 && self.unAckedStanzas)
@@ -1894,6 +1911,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         self.connectedTime=[NSDate date];
                         _loggedInOnce=YES;
                         _loginStarted=NO;
+                        self.loginStartTimeStamp=nil;
                         
                         
                         NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,

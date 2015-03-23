@@ -1615,7 +1615,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 self.unAckedStanzas =[[NSMutableArray alloc] init];
                 
             }
-            else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"r"])
+            else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"r"] && self.supportsSM3)
             {
                 XMLNode *aNode =[[XMLNode alloc] initWithElement:@"a"];
                 NSDictionary *dic=@{@"xmlns":@"urn:xmpp:sm:3",@"h":[NSString stringWithFormat:@"%@",self.lastHandledInboundStanza] };
@@ -1623,7 +1623,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 [self send:aNode];
                 
             }
-            else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"a"])
+            else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"a"] && self.supportsSM3)
             {
                 ParseA* aNode= [[ParseA alloc]  initWithDictionary:stanzaToParse];
                 self.lastHandledOutboundStanza=aNode.h;

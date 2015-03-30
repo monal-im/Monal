@@ -165,9 +165,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [super viewWillDisappear:animated];
 	DDLogVerbose(@"xmpp edit view will hide");
 	[self save];
-	
+    if(self.password) {
     [ [MLXMPPManager sharedInstance].passwordDic setObject:self.password forKey:self.accountno];
-    
+    }
 }
 
 -(void) dealloc

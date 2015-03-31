@@ -16,19 +16,19 @@
     switch (_status) {
         case kStatusAway:
         {
-            _statusOrb.image=[UIImage imageNamed:@"away"];
+            self.statusOrb.image=[UIImage imageNamed:@"away"];
             self.imageView.alpha=1.0f;
             break;
         }
         case kStatusOnline:
         {
-            _statusOrb.image=[UIImage imageNamed:@"available"];
+            self.statusOrb.image=[UIImage imageNamed:@"available"];
             self.imageView.alpha=1.0f;
             break;
         }
         case kStatusOffline:
         {
-            _statusOrb.image=[UIImage imageNamed:@"offline"];
+            self.statusOrb.image=[UIImage imageNamed:@"offline"];
             self.imageView.alpha=0.5f;
             break;
         }

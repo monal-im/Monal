@@ -741,13 +741,15 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     {
         cell =[[MLContactCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"ContactCell"];
     }
-    
+
     NSDictionary* row =nil;
  
     if(indexPath.section==konlineSection)
     {
         row = [_contacts objectAtIndex:indexPath.row];
     }
+    
+    cell.statusText.text=@"";
     
     if(tableView ==self.view) {
         if(indexPath.section==kofflineSection)
@@ -810,6 +812,8 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     NSString* accountNo=[NSString stringWithFormat:@"%d", cell.accountNo];
     cell.count=  [[DataLayer sharedInstance] countUserUnreadMessages:cell.username forAccount:accountNo];
     cell.userImage.image=[[MLImageManager sharedInstance] getIconForContact:[row objectForKey:@"buddy_name"] andAccount:accountNo];
+    
+    [cell setOrb];
     
     return cell;
 }

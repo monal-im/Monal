@@ -15,71 +15,52 @@
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Awx-9U-LWt" userLabel="statusOrb">
-                        <rect key="frame" x="53" y="17" width="15" height="15"/>
+                        <rect key="frame" x="51" y="17" width="15" height="15"/>
                         <constraints>
-                            <constraint firstAttribute="width" constant="15" id="20N-gB-bxB"/>
+                            <constraint firstAttribute="height" constant="15" id="W9O-5a-SsY"/>
+                            <constraint firstAttribute="width" constant="15" id="c2D-y5-Xhd"/>
                         </constraints>
                     </imageView>
-                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="OhQ-Fk-Czf" userLabel="name">
-                        <rect key="frame" x="76" y="4" width="177" height="21"/>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="OhQ-Fk-Czf" userLabel="name">
+                        <rect key="frame" x="74" y="3" width="177" height="20"/>
                         <fontDescription key="fontDescription" type="system" pointSize="16"/>
                         <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                         <nil key="highlightedColor"/>
                     </label>
-                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="WBM-UR-4hu" userLabel="status">
-                        <rect key="frame" x="76" y="26" width="177" height="21"/>
-                        <constraints>
-                            <constraint firstAttribute="height" constant="21" id="RY3-7K-La5"/>
-                        </constraints>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="WBM-UR-4hu" userLabel="status">
+                        <rect key="frame" x="74" y="26" width="179" height="18"/>
                         <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="15"/>
                         <color key="textColor" red="0.49019607843137253" green="0.49019607843137253" blue="0.50980392156862742" alpha="1" colorSpace="calibratedRGB"/>
                         <nil key="highlightedColor"/>
                     </label>
-                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="pGK-Ar-iBm" userLabel="usericon">
-                        <rect key="frame" x="8" y="7" width="37" height="35"/>
+                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="pGK-Ar-iBm" userLabel="usericon">
+                        <rect key="frame" x="8" y="7" width="35" height="35"/>
                         <constraints>
-                            <constraint firstAttribute="height" constant="37" id="Adm-jd-8Pc"/>
-                            <constraint firstAttribute="width" constant="37" id="eI1-Al-mLn"/>
+                            <constraint firstAttribute="height" constant="35" id="0m8-YI-N9A"/>
+                            <constraint firstAttribute="width" constant="35" id="788-Js-K50"/>
                         </constraints>
                     </imageView>
                 </subviews>
                 <constraints>
-                    <constraint firstItem="pGK-Ar-iBm" firstAttribute="leading" secondItem="Qx8-80-HZA" secondAttribute="leadingMargin" id="0mH-qE-scy"/>
-                    <constraint firstItem="pGK-Ar-iBm" firstAttribute="centerY" secondItem="Awx-9U-LWt" secondAttribute="centerY" id="4dj-CQ-gVC"/>
-                    <constraint firstAttribute="trailingMargin" secondItem="OhQ-Fk-Czf" secondAttribute="trailing" constant="-8" id="9Fk-hp-zg4"/>
-                    <constraint firstAttribute="bottomMargin" secondItem="WBM-UR-4hu" secondAttribute="bottom" constant="-6" id="A8d-Wa-3jH"/>
-                    <constraint firstItem="pGK-Ar-iBm" firstAttribute="centerY" secondItem="Qx8-80-HZA" secondAttribute="centerY" id="F5I-Gt-u1g"/>
-                    <constraint firstItem="OhQ-Fk-Czf" firstAttribute="leading" secondItem="Awx-9U-LWt" secondAttribute="trailing" constant="8" symbolic="YES" id="I2s-x7-3az"/>
-                    <constraint firstAttribute="trailingMargin" secondItem="WBM-UR-4hu" secondAttribute="trailing" constant="-8" id="O93-Hu-dla"/>
-                    <constraint firstItem="pGK-Ar-iBm" firstAttribute="bottom" secondItem="Qx8-80-HZA" secondAttribute="bottomMargin" id="Uhh-xV-Gta"/>
-                    <constraint firstAttribute="trailing" secondItem="WBM-UR-4hu" secondAttribute="trailing" id="XPW-ZS-OIA"/>
-                    <constraint firstItem="Awx-9U-LWt" firstAttribute="top" secondItem="Qx8-80-HZA" secondAttribute="topMargin" constant="9" id="YjA-Rd-d4p"/>
-                    <constraint firstItem="WBM-UR-4hu" firstAttribute="trailing" secondItem="OhQ-Fk-Czf" secondAttribute="trailing" id="ZWa-bk-LHh"/>
-                    <constraint firstItem="pGK-Ar-iBm" firstAttribute="top" secondItem="Qx8-80-HZA" secondAttribute="topMargin" constant="-1" id="b8p-7p-6hO"/>
-                    <constraint firstItem="Awx-9U-LWt" firstAttribute="leading" secondItem="pGK-Ar-iBm" secondAttribute="trailing" constant="8" symbolic="YES" id="gih-yi-jhA"/>
-                    <constraint firstAttribute="bottomMargin" secondItem="WBM-UR-4hu" secondAttribute="bottom" constant="-5" id="jhJ-OH-gj5"/>
-                    <constraint firstItem="WBM-UR-4hu" firstAttribute="leading" secondItem="Awx-9U-LWt" secondAttribute="trailing" constant="8" symbolic="YES" id="nko-rO-ZV0"/>
-                    <constraint firstItem="WBM-UR-4hu" firstAttribute="leading" secondItem="Awx-9U-LWt" secondAttribute="trailing" constant="8" id="sDn-Pg-ZTy"/>
-                    <constraint firstItem="WBM-UR-4hu" firstAttribute="top" secondItem="OhQ-Fk-Czf" secondAttribute="bottom" constant="1" id="sqL-j7-lhK"/>
-                    <constraint firstItem="WBM-UR-4hu" firstAttribute="top" secondItem="OhQ-Fk-Czf" secondAttribute="bottom" constant="1" id="u8N-9E-fwi"/>
-                    <constraint firstItem="OhQ-Fk-Czf" firstAttribute="top" secondItem="Qx8-80-HZA" secondAttribute="topMargin" constant="-4" id="wiz-Ed-Spe"/>
-                    <constraint firstItem="OhQ-Fk-Czf" firstAttribute="leading" secondItem="Awx-9U-LWt" secondAttribute="trailing" constant="8" id="y8O-TL-mEA"/>
+                    <constraint firstItem="pGK-Ar-iBm" firstAttribute="centerY" secondItem="Qx8-80-HZA" secondAttribute="centerY" id="23g-RQ-xlV"/>
+                    <constraint firstItem="OhQ-Fk-Czf" firstAttribute="top" secondItem="Qx8-80-HZA" secondAttribute="topMargin" constant="-5" id="3IJ-Rx-MvT"/>
+                    <constraint firstItem="OhQ-Fk-Czf" firstAttribute="leading" secondItem="Awx-9U-LWt" secondAttribute="trailing" constant="8" id="A34-Th-lrX"/>
+                    <constraint firstItem="WBM-UR-4hu" firstAttribute="leading" secondItem="Awx-9U-LWt" secondAttribute="trailing" constant="8" id="NLB-2x-gIU"/>
+                    <constraint firstAttribute="trailingMargin" secondItem="WBM-UR-4hu" secondAttribute="trailing" constant="-8" id="bdd-iy-yff"/>
+                    <constraint firstItem="pGK-Ar-iBm" firstAttribute="centerY" secondItem="Awx-9U-LWt" secondAttribute="centerY" id="eJf-y1-bxH"/>
+                    <constraint firstItem="WBM-UR-4hu" firstAttribute="top" secondItem="OhQ-Fk-Czf" secondAttribute="bottom" constant="3" id="evP-N4-lG7"/>
+                    <constraint firstItem="Awx-9U-LWt" firstAttribute="leading" secondItem="pGK-Ar-iBm" secondAttribute="trailing" constant="8" symbolic="YES" id="hLz-ze-trA"/>
+                    <constraint firstItem="pGK-Ar-iBm" firstAttribute="leading" secondItem="Qx8-80-HZA" secondAttribute="leadingMargin" id="xPK-Tu-4TS"/>
+                    <constraint firstAttribute="trailingMargin" secondItem="OhQ-Fk-Czf" secondAttribute="trailing" constant="-6" id="xaW-nX-mQG"/>
                 </constraints>
-                <variation key="default">
-                    <mask key="constraints">
-                        <exclude reference="Uhh-xV-Gta"/>
-                        <exclude reference="b8p-7p-6hO"/>
-                        <exclude reference="A8d-Wa-3jH"/>
-                    </mask>
-                </variation>
             </tableViewCellContentView>
             <connections>
+                <outlet property="displayName" destination="OhQ-Fk-Czf" id="a5j-X5-Tvp"/>
                 <outlet property="statusOrb" destination="Awx-9U-LWt" id="ae5-pP-a8p"/>
                 <outlet property="statusText" destination="WBM-UR-4hu" id="cWb-pt-41n"/>
                 <outlet property="userImage" destination="pGK-Ar-iBm" id="ysI-Fi-czO"/>
-                <outlet property="username" destination="OhQ-Fk-Czf" id="adM-ck-om6"/>
             </connections>
-            <point key="canvasLocation" x="566" y="402"/>
+            <point key="canvasLocation" x="566" y="400"/>
         </tableViewCell>
     </objects>
 </document>

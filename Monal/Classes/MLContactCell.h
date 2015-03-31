@@ -27,4 +27,6 @@ typedef enum {
 @property (nonatomic, weak) IBOutlet UIImageView *userImage;
 
 
+-(void) setOrb;
+
 @end

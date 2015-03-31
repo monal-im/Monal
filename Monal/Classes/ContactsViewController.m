@@ -61,6 +61,10 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     
     UIBarButtonItem* rightButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Add Contact",@"") style:UIBarButtonItemStyleBordered target:self action:@selector(addContact)];
     self.navigationItem.rightBarButtonItem=rightButton;
+    
+    [_contactsTable registerNib:[UINib nibWithNibName:@"MLContactCell"
+                                               bundle:[NSBundle mainBundle]]
+         forCellReuseIdentifier:@"ContactCell"];
 }
 
 -(void) dealloc
@@ -757,14 +761,14 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     
     NSString* fullName=[row objectForKey:@"full_name"];
     if([[fullName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0) {
-        cell.textLabel.text=fullName;
+        cell.displayName.text=fullName;
     }
     else {
-        cell.textLabel.text=[row objectForKey:@"buddy_name"];
+        cell.displayName.text=[row objectForKey:@"buddy_name"];
     }
     
     if(![[row objectForKey:@"status"] isEqualToString:@"(null)"] && ![[row objectForKey:@"status"] isEqualToString:@""])
-        cell.detailTextLabel.text=[row objectForKey:@"status"];
+        cell.statusText.text=[row objectForKey:@"status"];
     else
         cell.detailTextLabel.text=nil;
         if(tableView ==self.view) {
@@ -805,13 +809,18 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     //cell.count=[[row objectForKey:@"count"] integerValue];
     NSString* accountNo=[NSString stringWithFormat:@"%d", cell.accountNo];
     cell.count=  [[DataLayer sharedInstance] countUserUnreadMessages:cell.username forAccount:accountNo];
-    cell.imageView.image=[[MLImageManager sharedInstance] getIconForContact:[row objectForKey:@"buddy_name"] andAccount:accountNo];
-    
+    cell.userImage.image=[[MLImageManager sharedInstance] getIconForContact:[row objectForKey:@"buddy_name"] andAccount:accountNo];
     
     return cell;
 }
 
 #pragma mark tableview delegate
+
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return 45.0f;
+}
+
 -(NSString *)tableView:(UITableView *)tableView titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath *)indexPath {
     return @"Remove Contact";
 }

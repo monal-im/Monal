@@ -11,58 +11,6 @@
 
 @implementation MLContactCell
 
-- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
-{
-    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
-    if (self) {
-        // Initialization code
-        self.detailTextLabel.text=nil;
-        self.accessoryType = UITableViewCellAccessoryNone;
-        self.imageView.alpha=1.0;
-        
-        self.badgeColor= [UIColor clearColor];
-        self.badgeHighlightedColor=[UIColor clearColor];
-        self.badgeText =nil;
-        self.textLabel.textColor = [UIColor blackColor];
-    }
-    return self;
-}
-
-- (void)layoutSubviews
-{
-    
-    [super layoutSubviews];  //The default implementation of the layoutSubviews
-    
-    CGRect orbRectangle = CGRectMake(51-13+8,(self.frame.size.height/2) -7,15,15);
-    
-
-    if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0"))
-       {
-           orbRectangle = CGRectMake(3,(self.frame.size.height/2) -7,10,10);
-       }
-	_statusOrb = [[UIImageView alloc] initWithFrame:orbRectangle];
-    [self.contentView addSubview: _statusOrb ];
-
-    
-    CGRect textLabelFrame = self.textLabel.frame;
-    textLabelFrame.origin.x=51+13;
-    textLabelFrame.size.width = self.frame.size.width-51-13-35-45;
-    self.textLabel.frame = textLabelFrame;
-    
-    CGRect detailLabelFrame = self.detailTextLabel.frame;
-    detailLabelFrame.origin.x=51+13;
-    detailLabelFrame.size.width = self.frame.size.width-51-13-35-45;
-    self.detailTextLabel.frame = detailLabelFrame;
-    
-    CGRect imageFrame =self.imageView.frame;
-    imageFrame.size.height=self.frame.size.height;
-    imageFrame.size.width=self.frame.size.height;
-    self.imageView.frame=imageFrame;
-    
-    [self setOrb];
- 
-}
-
 -(void) setOrb
 {
     switch (_status) {
@@ -88,7 +36,6 @@
         default:
             break;
     }
-
 }
 
 -(void) setCount:(NSInteger)count
@@ -109,25 +56,6 @@
     }
     
     
-}
-
--(void) setStatus:(NSInteger)status
-{
-    _status=status;
-
-    if(_statusOrb) [self setOrb];
-}
-
--(void)prepareForReuse
-{
-    [super prepareForReuse];
-//    self.textLabel.text=nil;
-//    self.detailTextLabel.text=nil;
-//    self.imageView.image=nil; 
-//    self.badgeColor= [UIColor clearColor];
-//    self.badgeHighlightedColor=[UIColor clearColor];
-//    self.badgeText=nil;
-//    self.imageView.image=[UIImage imageNamed:@"noicon"];
 }
 
 

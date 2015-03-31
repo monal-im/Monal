@@ -199,6 +199,7 @@
 		26EE8B22179B7B0E006781F3 /* SlidingMessageViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EE8B21179B7B0D006781F3 /* SlidingMessageViewController.m */; };
 		26F7BB431115F8DB00712672 /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F7BB411115F8DB00712672 /* Reachability.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		26F7BB451115F95000712672 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26F7BB441115F95000712672 /* SystemConfiguration.framework */; };
+		26F9794D1ACAC73A0008E005 /* MLContactCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26F9794C1ACAC73A0008E005 /* MLContactCell.xib */; };
 		26FB468F18B2755A0043094F /* IPAddress.m in Sources */ = {isa = PBXBuildFile; fileRef = 26FB468E18B2755A0043094F /* IPAddress.m */; };
 		288765A50DF7441C002DB57D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 288765A40DF7441C002DB57D /* CoreGraphics.framework */; };
 /* End PBXBuildFile section */
@@ -506,6 +507,7 @@
 		26F7BB411115F8DB00712672 /* Reachability.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Reachability.m; sourceTree = "<group>"; };
 		26F7BB421115F8DB00712672 /* Reachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Reachability.h; sourceTree = "<group>"; };
 		26F7BB441115F95000712672 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
+		26F9794C1ACAC73A0008E005 /* MLContactCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MLContactCell.xib; sourceTree = "<group>"; };
 		26FB468D18B2755A0043094F /* IPAddress.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IPAddress.h; sourceTree = "<group>"; };
 		26FB468E18B2755A0043094F /* IPAddress.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IPAddress.m; sourceTree = "<group>"; };
 		288765A40DF7441C002DB57D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -592,6 +594,7 @@
 				26D89F051A890672009B147C /* MLAccountCell.m */,
 				262797AD178A577300B85D94 /* MLContactCell.h */,
 				262797AE178A577300B85D94 /* MLContactCell.m */,
+				26F9794C1ACAC73A0008E005 /* MLContactCell.xib */,
 				26347D841790FFDE006FF64F /* MLInfoCell.h */,
 				26347D851790FFDE006FF64F /* MLInfoCell.m */,
 				26AAE283179F7B0200271345 /* MLSettingCell.h */,
@@ -1238,6 +1241,7 @@
 				26DC0A8B1339259900E60BFD /* SearchUser.xib in Resources */,
 				26D89F081A8908B6009B147C /* XMPPEdit.xib in Resources */,
 				26C3EDEE1A7CA6FA000E6331 /* ContactsViewController.xib in Resources */,
+				26F9794D1ACAC73A0008E005 /* MLContactCell.xib in Resources */,
 				2628E50714049DB50064131E /* askTempPass.xib in Resources */,
 				26BAFC541626537D0073728B /* .gitignore in Resources */,
 				26BAFC561626537D0073728B /* AppiraterLocalizable.strings in Resources */,

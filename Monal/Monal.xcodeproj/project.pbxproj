@@ -158,7 +158,6 @@
 		2680B8F21863C172009599AB /* DDMultiFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 2680B8E91863C172009599AB /* DDMultiFormatter.m */; };
 		2680B8F31863C172009599AB /* README.txt in Resources */ = {isa = PBXBuildFile; fileRef = 2680B8EA1863C172009599AB /* README.txt */; };
 		268821FA19B9233B00AEA46E /* NSString+SqlLite.m in Sources */ = {isa = PBXBuildFile; fileRef = 268821F919B9233B00AEA46E /* NSString+SqlLite.m */; };
-		2689B6EC1601914E0087CA58 /* DDBadgeViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2689B6EB1601914E0087CA58 /* DDBadgeViewCell.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		268BCF12140B29180025E4D1 /* libjrtplib-static.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */; };
 		268DD58617C4541000C673A9 /* MLChatCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 268DD58517C4541000C673A9 /* MLChatCell.m */; };
 		268E700515D0D979002E63CD /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 264FF3E4158A855D00D97B86 /* AVFoundation.framework */; };
@@ -415,8 +414,6 @@
 		2680B8EA1863C172009599AB /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
 		268821F819B9233B00AEA46E /* NSString+SqlLite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+SqlLite.h"; sourceTree = "<group>"; };
 		268821F919B9233B00AEA46E /* NSString+SqlLite.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+SqlLite.m"; sourceTree = "<group>"; };
-		2689B6EA1601914E0087CA58 /* DDBadgeViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDBadgeViewCell.h; sourceTree = "<group>"; };
-		2689B6EB1601914E0087CA58 /* DDBadgeViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDBadgeViewCell.m; sourceTree = "<group>"; };
 		268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libjrtplib-static.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		268DD58417C4541000C673A9 /* MLChatCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLChatCell.h; sourceTree = "<group>"; };
 		268DD58517C4541000C673A9 /* MLChatCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLChatCell.m; sourceTree = "<group>"; };
@@ -755,15 +752,6 @@
 			path = Extensions;
 			sourceTree = "<group>";
 		};
-		2689B6E91601914E0087CA58 /* DDBadgeViewCell */ = {
-			isa = PBXGroup;
-			children = (
-				2689B6EA1601914E0087CA58 /* DDBadgeViewCell.h */,
-				2689B6EB1601914E0087CA58 /* DDBadgeViewCell.m */,
-			);
-			path = DDBadgeViewCell;
-			sourceTree = "<group>";
-		};
 		268BCCFD140B23E10025E4D1 /* jrtplib-static */ = {
 			isa = PBXGroup;
 			children = (
@@ -991,7 +979,6 @@
 				2668B2C217E1E59700C7F7C9 /* Crashlytics.framework */,
 				26DA16D917C302BC00D0065E /* UIAlertView-Blocks */,
 				26BAFC3D1626537D0073728B /* appirator */,
-				2689B6E91601914E0087CA58 /* DDBadgeViewCell */,
 				2658508415E7D8E40070A2A7 /* TPCircularBuffer */,
 				262DE4AC15C4E2C60040A66B /* MBProgressHUd */,
 				2640AF3B14548E7600CB4F60 /* GrowingTextView */,
@@ -1300,7 +1287,6 @@
 				2642EBCA18693634006A6C12 /* jingleCall.m in Sources */,
 				2658508B15E7D8E40070A2A7 /* TPCircularBuffer+AudioBufferList.c in Sources */,
 				2658508C15E7D8E40070A2A7 /* TPCircularBuffer.c in Sources */,
-				2689B6EC1601914E0087CA58 /* DDBadgeViewCell.m in Sources */,
 				2643A12E180220890030EFB1 /* TPKeyboardAvoidingScrollView.m in Sources */,
 				26BAFC551626537D0073728B /* Appirater.m in Sources */,
 				26761BF61804FBB700D94714 /* RoomListViewController.m in Sources */,

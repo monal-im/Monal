@@ -9,6 +9,11 @@
 #import "MLContactCell.h"
 #import "MLConstants.h"
 
+@interface MLContactCell()
+@property (nonatomic, strong) UIImage *badge;
+
+@end
+
 @implementation MLContactCell
 
 -(void) setOrb
@@ -44,15 +49,17 @@
     
     if(_count>0)
     {
-    self.badgeColor=[UIColor darkGrayColor];
-    self.badgeHighlightedColor=[UIColor whiteColor];
-    self.badgeText=[NSString stringWithFormat:@"%d", _count];
+        if(!self.badge)
+        {
+            self.badge =[UIImage imageNamed:@"NotificationBubble"];
+            self.badge =[self.badge resizableImageWithCapInsets:UIEdgeInsetsMake(2, 5, 5, 2) resizingMode:UIImageResizingModeStretch];
+            self.badgeImage.image= self.badge;
+        }
+        self.badgeImage.hidden=NO;
     }
     else
     {
-        self.badgeColor= [UIColor clearColor];
-        self.badgeHighlightedColor=[UIColor clearColor];
-        self.badgeText=nil; 
+        self.badgeImage.hidden=YES;
     }
     
     

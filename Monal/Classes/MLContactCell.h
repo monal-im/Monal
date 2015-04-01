@@ -6,15 +6,13 @@
 //
 //
 
-#import "DDBadgeViewCell.h"
-
 typedef enum {
     kStatusOnline=1,
     kStatusOffline,
     kStatusAway
 } statusType;
 
-@interface MLContactCell : DDBadgeViewCell
+@interface MLContactCell : UITableViewCell
 
 @property (nonatomic, assign) NSInteger status;
 @property (nonatomic, assign) NSInteger count;
@@ -25,7 +23,7 @@ typedef enum {
 @property (nonatomic, weak) IBOutlet UILabel *statusText;
 @property (nonatomic, weak) IBOutlet UIImageView *statusOrb;
 @property (nonatomic, weak) IBOutlet UIImageView *userImage;
-
+@property (nonatomic, weak) IBOutlet UIImageView *badgeImage;
 
 -(void) setOrb;
 

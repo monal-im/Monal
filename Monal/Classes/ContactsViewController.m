@@ -65,6 +65,10 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     [_contactsTable registerNib:[UINib nibWithNibName:@"MLContactCell"
                                                bundle:[NSBundle mainBundle]]
          forCellReuseIdentifier:@"ContactCell"];
+    
+    [self.searchDisplayController.searchResultsTableView registerNib:[UINib nibWithNibName:@"MLContactCell"
+                                                                                     bundle:[NSBundle mainBundle]]
+                                               forCellReuseIdentifier:@"ContactCell"];
 }
 
 -(void) dealloc
@@ -672,10 +676,10 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 {
     NSInteger toreturn=0;
     if(tableView ==self.view) {
-    if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
-        toreturn =3;
-    else
-        toreturn =2;
+        if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
+            toreturn =3;
+        else
+            toreturn =2;
     }
     else  if(tableView ==self.searchDisplayController.searchResultsTableView) {
         toreturn =1;

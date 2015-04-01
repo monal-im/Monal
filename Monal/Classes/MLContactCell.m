@@ -42,6 +42,28 @@
     }
 }
 
+-(void) showStatusText:(NSString *) text
+{
+    self.statusText.text=text;
+    if(text)
+    {
+        self.centeredDisplayName.hidden=YES;
+        self.displayName.hidden=NO;
+        self.statusText.hidden=NO;
+    }
+    else {
+        self.centeredDisplayName.hidden=NO;
+        self.displayName.hidden=YES;
+        self.statusText.hidden=YES;
+    }
+}
+
+-(void) showDisplayName:(NSString *) name
+{
+    self.centeredDisplayName.text=name;
+    self.displayName.text=name;
+}
+
 -(void) setCount:(NSInteger)count
 {
     _count=count;

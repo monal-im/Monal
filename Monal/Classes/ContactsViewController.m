@@ -767,16 +767,18 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     
     NSString* fullName=[row objectForKey:@"full_name"];
     if([[fullName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0) {
-        cell.displayName.text=fullName;
+        [cell showDisplayName:fullName];
     }
     else {
-        cell.displayName.text=[row objectForKey:@"buddy_name"];
+        [cell showDisplayName:[row objectForKey:@"buddy_name"]];
     }
     
-    if(![[row objectForKey:@"status"] isEqualToString:@"(null)"] && ![[row objectForKey:@"status"] isEqualToString:@""])
-        cell.statusText.text=[row objectForKey:@"status"];
-    else
-        cell.detailTextLabel.text=nil;
+    if(![[row objectForKey:@"status"] isEqualToString:@"(null)"] && ![[row objectForKey:@"status"] isEqualToString:@""]) {
+        [cell showStatusText:[row objectForKey:@"status"]];
+    }
+    else {
+       [cell showStatusText:nil];
+    }
         if(tableView ==self.view) {
     if(indexPath.section==konlineSection)
     {

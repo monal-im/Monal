@@ -10,7 +10,6 @@
 #import "MLConstants.h"
 
 @interface MLContactCell()
-@property (nonatomic, strong) UIImage *badge;
 
 @end
 
@@ -49,17 +48,13 @@
     
     if(_count>0)
     {
-        if(!self.badge)
-        {
-            self.badge =[UIImage imageNamed:@"NotificationBubble"];
-            self.badge =[self.badge resizableImageWithCapInsets:UIEdgeInsetsMake(2, 5, 5, 2) resizingMode:UIImageResizingModeStretch];
-            self.badgeImage.image= self.badge;
-        }
-        self.badgeImage.hidden=NO;
+        self.badge.hidden=NO;
+        [self.badge setTitle:[NSString stringWithFormat:@"%d", _count] forState:UIControlStateNormal];
     }
     else
     {
-        self.badgeImage.hidden=YES;
+        self.badge.hidden=YES;
+         [self.badge setTitle:@"" forState:UIControlStateNormal];
     }
     
     

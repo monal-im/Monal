@@ -1808,6 +1808,19 @@ static DataLayer *sharedInstance=nil;
     }
     
     
+    if([dbversion doubleValue]<1.42)
+    {
+        DDLogVerbose(@"Database version <1.42 detected. Performing upgrade on accounts. ");
+        
+        [self executeNonQuery:@"delete from protocol where protocol_id=5;"];
+        [self executeNonQuery:@"update dbversion set dbversion='1.42'; "];
+        
+        
+        DDLogVerbose(@"Upgrade to 1.41 success ");
+        
+    }
+    
+    
     
     [dbversionCheck unlock];
     [self resetContacts];

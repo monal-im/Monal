@@ -129,13 +129,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		self.useSSL=true;
 		
         
-		if(_originIndex.row==2)
-		{
-			self.server=@"chat.facebook.com";
-			self.jid=@"@chat.facebook.com";
-			self.useSSL=true;
-		}
-		
 		self.oldStyleSSL=NO;
         self.selfSignedSSL=NO;
 		

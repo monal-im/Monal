@@ -249,7 +249,7 @@
             if([[[_accountList objectAtIndex:indexPath.row] objectForKey:@"enabled"] boolValue] ==YES) {
                    cell.imageView.image=[UIImage imageNamed:@"888-checkmark"];
                 if([[MLXMPPManager sharedInstance] isAccountForIdConnected: [NSString stringWithFormat:@"%@",[[_accountList objectAtIndex:indexPath.row] objectForKey:@"account_id"]]]) {
-                    accessory.image=[UIImage imageNamed:@"available"];
+                    accessory.image=[UIImage imageNamed:@"Connected"];
                     cell.accessoryView =accessory;
                     
                     NSDate * connectedTime = [[MLXMPPManager sharedInstance] connectedTimeFor: [NSString stringWithFormat:@"%@",[[_accountList objectAtIndex:indexPath.row] objectForKey:@"account_id"]]];
@@ -259,7 +259,7 @@
                     
                 }
                 else {
-                    accessory.image =[UIImage imageNamed:@"away"];
+                    accessory.image =[UIImage imageNamed:@"Disconnected"];
                  
                     cell.accessoryView =accessory;
                     cell.detailTextLabel.text=nil;

@@ -902,15 +902,17 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 #pragma mark message ACK
 -(void) sendUnAckedMessages
 {
+    [self.networkQueue addOperation:
     [NSBlockOperation blockOperationWithBlock:^{
         for (NSDictionary *dic in self.unAckedStanzas)
         {
             [self send:(XMLNode*)[dic objectForKey:kStanza]];
-        }}];
+        }}]];
 }
 
 -(void) removeUnAckedMessagesLessThan:(NSNumber*) hvalue
 {
+    [self.networkQueue addOperation:
     [NSBlockOperation blockOperationWithBlock:^{
         NSMutableArray *discard =[[NSMutableArray alloc] initWithCapacity:[self.unAckedStanzas count]];
         for (NSDictionary *dic in self.unAckedStanzas)
@@ -923,7 +925,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         }
         
         [self.unAckedStanzas removeObjectsInArray:discard];
-    }];
+    }]];
 }
 
 
@@ -1658,9 +1660,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                //h would be compared to outbound value
                 if([resumeNode.h integerValue]==[self.lastHandledOutboundStanza integerValue])
                 {
+                    [self.networkQueue addOperation:
                          [NSBlockOperation blockOperationWithBlock:^{
                              [self.unAckedStanzas removeAllObjects];
-                         }];
+                    }]];
                 }
                 else {
                     [self removeUnAckedMessagesLessThan:resumeNode.h];

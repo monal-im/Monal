@@ -679,20 +679,21 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         }
     
     }
-    
-    if(self.supportsSM3 && self.unAckedStanzas)
-    {
-        XMLNode* rNode =[[XMLNode alloc] initWithElement:@"r"];
-        NSDictionary *dic=@{@"xmlns":@"urn:xmpp:sm:3"};
-        rNode.attributes =[dic mutableCopy];
-        [self send:rNode];
-    }
     else  {
-        //get random number
-        XMPPIQ* ping =[[XMPPIQ alloc] initWithId:[NSString stringWithFormat:@"Monal%d",arc4random()%100000]andType:kiqGetType];
-        [ping setiqTo:_domain];
-        [ping setPing];
-        [self send:ping];
+        if(self.supportsSM3 && self.unAckedStanzas)
+        {
+            XMLNode* rNode =[[XMLNode alloc] initWithElement:@"r"];
+            NSDictionary *dic=@{@"xmlns":@"urn:xmpp:sm:3"};
+            rNode.attributes =[dic mutableCopy];
+            [self send:rNode];
+        }
+        else  {
+            //get random number
+            XMPPIQ* ping =[[XMPPIQ alloc] initWithId:[NSString stringWithFormat:@"Monal%d",arc4random()%100000]andType:kiqGetType];
+            [ping setiqTo:_domain];
+            [ping setPing];
+            [self send:ping];
+        }
     }
 }
 

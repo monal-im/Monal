@@ -902,25 +902,28 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 #pragma mark message ACK
 -(void) sendUnAckedMessages
 {
-    for (NSDictionary *dic in self.unAckedStanzas)
-    {
-        [self send:(XMLNode*)[dic objectForKey:kStanza]];
-    }
+    [NSBlockOperation blockOperationWithBlock:^{
+        for (NSDictionary *dic in self.unAckedStanzas)
+        {
+            [self send:(XMLNode*)[dic objectForKey:kStanza]];
+        }}];
 }
 
 -(void) removeUnAckedMessagesLessThan:(NSNumber*) hvalue
 {
-    NSMutableArray *discard =[[NSMutableArray alloc] initWithCapacity:[self.unAckedStanzas count]];
-    for (NSDictionary *dic in self.unAckedStanzas)
-    {
-        NSNumber *stanzaNumber = [dic objectForKey:kStanzaID];
-        if([stanzaNumber integerValue]<[hvalue integerValue])
+    [NSBlockOperation blockOperationWithBlock:^{
+        NSMutableArray *discard =[[NSMutableArray alloc] initWithCapacity:[self.unAckedStanzas count]];
+        for (NSDictionary *dic in self.unAckedStanzas)
         {
-            [discard addObject:dic];
+            NSNumber *stanzaNumber = [dic objectForKey:kStanzaID];
+            if([stanzaNumber integerValue]<[hvalue integerValue])
+            {
+                [discard addObject:dic];
+            }
         }
-    }
-    
-    [self.unAckedStanzas removeObjectsInArray:discard];
+        
+        [self.unAckedStanzas removeObjectsInArray:discard];
+    }];
 }
 
 
@@ -1655,7 +1658,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                //h would be compared to outbound value
                 if([resumeNode.h integerValue]==[self.lastHandledOutboundStanza integerValue])
                 {
-                    [self.unAckedStanzas removeAllObjects];
+                         [NSBlockOperation blockOperationWithBlock:^{
+                             [self.unAckedStanzas removeAllObjects];
+                         }];
                 }
                 else {
                     [self removeUnAckedMessagesLessThan:resumeNode.h];

@@ -115,8 +115,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     self.networkQueue.maxConcurrentOperationCount=1;
     
     self.processQueue =[[NSOperationQueue alloc] init];
-   // self.networkQueue.maxConcurrentOperationCount=1;
-    
+ 
     //placing more common at top to reduce iteration
     _stanzaTypes=[NSArray arrayWithObjects:
                   @"iq",
@@ -326,6 +325,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         self.pingID=nil;
         
         DDLogInfo(@"XMPP connnect  start");
+        _outputQueue=[[NSMutableArray alloc] init];
+    
         [self connectionTask];
         
         dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
@@ -434,11 +435,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             forMode:NSDefaultRunLoopMode];
         DDLogInfo(@"removed streams");
         
+         _inputBuffer=[[NSMutableString alloc] init];
+        _outputQueue=[[NSMutableArray alloc] init];
         
         @try
         {
             [_iStream close];
-            _inputBuffer=[[NSMutableString alloc] init];
         }
         @catch(id theException)
         {
@@ -448,7 +450,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         @try
         {
             [_oStream close];
-            _outputQueue=[[NSMutableArray alloc] init];
         }
         @catch(id theException)
         {
@@ -593,6 +594,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         }
     }
     
+    DDLogInfo(@"reconnect exits");
 }
 
 #pragma mark XMPP
@@ -1962,6 +1964,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     [self.networkQueue addOperation:
      [NSBlockOperation blockOperationWithBlock:^{
+        DDLogVerbose(@"adding to send %@", stanza.XMLString);
         [_outputQueue addObject:stanza];
         [self writeFromQueue];  // try to send if there is space
         
@@ -2363,6 +2366,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     for(XMLNode* node in _outputQueue)
     {
+        DDLogVerbose(@"iterating output ");
         BOOL success=[self writeToStream:node.XMLString];
         if(success) {
             if([node isKindOfClass:[XMPPMessage class]])
@@ -2387,6 +2391,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         }
     }
     
+    DDLogVerbose(@"removing all objs from output ");
     [_outputQueue removeAllObjects];
     
 }

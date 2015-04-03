@@ -34,7 +34,7 @@
                         <nil key="highlightedColor"/>
                     </label>
                     <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="pGK-Ar-iBm" userLabel="usericon">
-                        <rect key="frame" x="0.0" y="2" width="48" height="48"/>
+                        <rect key="frame" x="0.0" y="1" width="48" height="48"/>
                         <constraints>
                             <constraint firstAttribute="height" constant="48" id="0m8-YI-N9A"/>
                             <constraint firstAttribute="width" constant="48" id="788-Js-K50"/>
@@ -57,12 +57,12 @@
                     </label>
                 </subviews>
                 <constraints>
-                    <constraint firstItem="pGK-Ar-iBm" firstAttribute="centerY" secondItem="Qx8-80-HZA" secondAttribute="centerY" constant="1.5" id="23g-RQ-xlV"/>
+                    <constraint firstItem="pGK-Ar-iBm" firstAttribute="centerY" secondItem="Qx8-80-HZA" secondAttribute="centerY" constant="0.5" id="23g-RQ-xlV"/>
                     <constraint firstItem="OhQ-Fk-Czf" firstAttribute="top" secondItem="Qx8-80-HZA" secondAttribute="topMargin" constant="-5" id="3IJ-Rx-MvT"/>
                     <constraint firstItem="OhQ-Fk-Czf" firstAttribute="leading" secondItem="Awx-9U-LWt" secondAttribute="trailing" constant="8" id="A34-Th-lrX"/>
                     <constraint firstItem="WBM-UR-4hu" firstAttribute="leading" secondItem="Awx-9U-LWt" secondAttribute="trailing" constant="8" id="NLB-2x-gIU"/>
                     <constraint firstAttribute="trailingMargin" secondItem="WBM-UR-4hu" secondAttribute="trailing" constant="-8" id="bdd-iy-yff"/>
-                    <constraint firstItem="pGK-Ar-iBm" firstAttribute="centerY" secondItem="Awx-9U-LWt" secondAttribute="centerY" constant="0.5" id="eJf-y1-bxH"/>
+                    <constraint firstItem="pGK-Ar-iBm" firstAttribute="centerY" secondItem="Awx-9U-LWt" secondAttribute="centerY" constant="-0.5" id="eJf-y1-bxH"/>
                     <constraint firstItem="WBM-UR-4hu" firstAttribute="top" secondItem="OhQ-Fk-Czf" secondAttribute="bottom" constant="2" id="evP-N4-lG7"/>
                     <constraint firstItem="Awx-9U-LWt" firstAttribute="leading" secondItem="pGK-Ar-iBm" secondAttribute="trailing" constant="8" id="hLz-ze-trA"/>
                     <constraint firstItem="pGK-Ar-iBm" firstAttribute="leading" secondItem="Qx8-80-HZA" secondAttribute="leadingMargin" constant="-8" id="xPK-Tu-4TS"/>

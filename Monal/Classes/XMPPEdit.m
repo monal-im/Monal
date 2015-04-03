@@ -341,6 +341,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 #pragma mark table view datasource methods
 
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath;
+{
+    return 40;
+    
+}
+
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     

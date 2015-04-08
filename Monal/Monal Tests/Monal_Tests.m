@@ -25,10 +25,21 @@
     [super tearDown];
 }
 
-- (void)testExample {
+- (void)testLogin {
     // This is an example of a functional test case.
     XCTAssert(YES, @"Pass");
 }
+
+- (void)testSendMessage {
+    // This is an example of a functional test case.
+    XCTAssert(YES, @"Pass");
+}
+
+- (void)testJoinMUC {
+    // This is an example of a functional test case.
+    XCTAssert(YES, @"Pass");
+}
+
 
 - (void)testPerformanceExample {
     // This is an example of a performance test case.

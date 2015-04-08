@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import <XCTest/XCTest.h>
+#import "MLXMPPManager.h"
 
 @interface Monal_Tests : XCTestCase
 
@@ -25,27 +26,59 @@
     [super tearDown];
 }
 
-- (void)testLogin {
-    // This is an example of a functional test case.
-    XCTAssert(YES, @"Pass");
-}
-
-- (void)testSendMessage {
-    // This is an example of a functional test case.
-    XCTAssert(YES, @"Pass");
-}
-
-- (void)testJoinMUC {
+- (void)test1_Login {
     // This is an example of a functional test case.
     XCTAssert(YES, @"Pass");
 }
 
 
-- (void)testPerformanceExample {
-    // This is an example of a performance test case.
-    [self measureBlock:^{
-        // Put the code you want to measure the time of here.
-    }];
+- (void)test2_ServiceDetails {
+    // This is an example of a functional test case.
+    XCTAssert(YES, @"Pass");
 }
+
+
+- (void)test3_Status {
+    // This is an example of a functional test case.
+    XCTAssert(YES, @"Pass");
+}
+
+
+- (void)test4_Away {
+    // This is an example of a functional test case.
+    XCTAssert(YES, @"Pass");
+}
+
+
+- (void)test5_Visible {
+    // This is an example of a functional test case.
+    XCTAssert(YES, @"Pass");
+}
+
+- (void)test6_Priority {
+    // This is an example of a functional test case.
+    XCTAssert(YES, @"Pass");
+}
+
+- (void)test7_SendMessage {
+    // This is an example of a functional test case.
+    XCTAssert(YES, @"Pass");
+}
+
+- (void)test8_JoinMUC {
+    // This is an example of a functional test case.
+    XCTAssert(YES, @"Pass");
+}
+
+- (void)test9_MessageMUC {
+    // This is an example of a functional test case.
+    XCTAssert(YES, @"Pass");
+}
+
+- (void)test10_LeaveMUC {
+    // This is an example of a functional test case.
+    XCTAssert(YES, @"Pass");
+}
+
 
 @end

@@ -170,8 +170,11 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     CGRect nameFrame=CGRectMake(37, 5, _topBarView.frame.size.width-37, imageFrame.size.height);
     
     _topIcon =[[UIImageView alloc] initWithFrame:imageFrame];
-    _topIcon.layer.cornerRadius=7.0f;
+    _topIcon.layer.cornerRadius=_topIcon.frame.size.height/2;
+    _topIcon.layer.borderColor = (__bridge CGColorRef)([UIColor lightGrayColor]);
+    _topIcon.layer.borderWidth=3.0f;
     _topIcon.clipsToBounds=YES;
+    
     
     _topName=[[UILabel alloc] initWithFrame:nameFrame];
     _topName.font=[UIFont boldSystemFontOfSize:15.0f];

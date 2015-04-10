@@ -156,6 +156,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     _tabBarController.moreNavigationController.navigationBar.barStyle=barColor;
     
     [self.window makeKeyAndVisible];
+    
+    UIColor *monalGreen =[UIColor colorWithRed:128.0/255 green:203.0/255 blue:182.0/255 alpha:1.0f];
+
+    [[UINavigationBar appearance] setBarTintColor:monalGreen];
+    [[UINavigationBar appearance] setTintColor:[UIColor whiteColor]];
+    [[UITabBar appearance] setTintColor:monalGreen];
+    
 }
 
 

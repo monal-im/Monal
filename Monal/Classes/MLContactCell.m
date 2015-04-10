@@ -16,6 +16,11 @@
 
 @implementation MLContactCell
 
+-(void) awakeFromNib
+{
+    
+}
+
 -(void) setOrb
 {
     switch (_status) {

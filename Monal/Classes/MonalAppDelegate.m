@@ -164,6 +164,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     [[UINavigationBar appearance] setBarTintColor:monalGreen];
     [[UINavigationBar appearance] setTintColor:[UIColor whiteColor]];
+    [[UINavigationBar appearance] setTitleTextAttributes:@{
+                                                           UITextAttributeTextColor: [UIColor darkGrayColor]
+                                                           }];
     [[UITabBar appearance] setTintColor:monaldarkGreen];
     
 }

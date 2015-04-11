@@ -62,6 +62,10 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     UIBarButtonItem* rightButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(addContact)];
     self.navigationItem.rightBarButtonItem=rightButton;
     
+    UIBarButtonItem* leftButton = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"menu"] style:UIBarButtonItemStylePlain target:self action:@selector(showMenu)];
+    self.navigationItem.leftBarButtonItem=leftButton;
+    
+
     [_contactsTable registerNib:[UINib nibWithNibName:@"MLContactCell"
                                                bundle:[NSBundle mainBundle]]
          forCellReuseIdentifier:@"ContactCell"];
@@ -143,11 +147,20 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     {
         addContactNav.modalPresentationStyle=UIModalPresentationFormSheet;
     }
-    [self.navigationController presentModalViewController:addContactNav animated:YES];
-    
+    [self.navigationController presentViewController:addContactNav animated:YES completion:nil];
 }
 
-
+-(void)showMenu
+{
+    //present modal view
+    addContact* addcontactView =[[addContact alloc] init];
+    UINavigationController* addContactNav = [[UINavigationController alloc] initWithRootViewController:addcontactView];
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
+    {
+        addContactNav.modalPresentationStyle=UIModalPresentationFormSheet;
+    }
+    [self.navigationController presentViewController:addContactNav animated:YES completion:nil];
+}
 
 #pragma mark updating info display
 -(void) showConnecting:(NSDictionary*) info

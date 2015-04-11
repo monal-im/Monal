@@ -16,8 +16,7 @@
     UIPickerView* _accountPicker;
     UIView* _accountPickerView; 
     NSInteger _selectedRow;
-    
-     UIBarButtonItem* _closeButton;
+    UIBarButtonItem* _closeButton;
 
 }
 

@@ -33,7 +33,7 @@
                             <constraint firstAttribute="width" constant="48" id="788-Js-K50"/>
                         </constraints>
                     </imageView>
-                    <button opaque="NO" contentMode="scaleToFill" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" adjustsImageWhenDisabled="NO" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="orC-ej-MKC">
+                    <button opaque="NO" contentMode="scaleToFill" misplaced="YES" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" adjustsImageWhenDisabled="NO" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="orC-ej-MKC">
                         <rect key="frame" x="33" y="0.0" width="22" height="22"/>
                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                         <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>

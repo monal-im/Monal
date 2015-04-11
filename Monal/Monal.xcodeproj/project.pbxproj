@@ -38,6 +38,10 @@
 		262D9EA717921169009292B4 /* ParseMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 262D9EA617921169009292B4 /* ParseMessage.m */; };
 		262D9EAA17921E82009292B4 /* XMPPMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 262D9EA917921E82009292B4 /* XMPPMessage.m */; };
 		262DE4AF15C4E2C60040A66B /* MBProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = 262DE4AE15C4E2C60040A66B /* MBProgressHUD.m */; };
+		262E51921AD8CAC600788351 /* MLButtonCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 262E51901AD8CAC600788351 /* MLButtonCell.m */; };
+		262E51931AD8CAC600788351 /* MLButtonCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 262E51911AD8CAC600788351 /* MLButtonCell.xib */; };
+		262E51971AD8CB7200788351 /* MLTextInputCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 262E51951AD8CB7200788351 /* MLTextInputCell.m */; };
+		262E51981AD8CB7200788351 /* MLTextInputCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 262E51961AD8CB7200788351 /* MLTextInputCell.xib */; };
 		2630FE341AD550C00079F5C0 /* Monal_Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = 2630FE331AD550C00079F5C0 /* Monal_Tests.m */; };
 		26347D861790FFDE006FF64F /* MLInfoCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 26347D851790FFDE006FF64F /* MLInfoCell.m */; };
 		26352EA8177D222600E2C8FF /* MLXMPPManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26352EA7177D222600E2C8FF /* MLXMPPManager.m */; };
@@ -276,6 +280,12 @@
 		262D9EAB17924532009292B4 /* MLConstants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLConstants.h; sourceTree = "<group>"; };
 		262DE4AD15C4E2C60040A66B /* MBProgressHUD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MBProgressHUD.h; sourceTree = "<group>"; };
 		262DE4AE15C4E2C60040A66B /* MBProgressHUD.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MBProgressHUD.m; sourceTree = "<group>"; };
+		262E518F1AD8CAC600788351 /* MLButtonCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLButtonCell.h; sourceTree = "<group>"; };
+		262E51901AD8CAC600788351 /* MLButtonCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLButtonCell.m; sourceTree = "<group>"; };
+		262E51911AD8CAC600788351 /* MLButtonCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MLButtonCell.xib; sourceTree = "<group>"; };
+		262E51941AD8CB7200788351 /* MLTextInputCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLTextInputCell.h; sourceTree = "<group>"; };
+		262E51951AD8CB7200788351 /* MLTextInputCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLTextInputCell.m; sourceTree = "<group>"; };
+		262E51961AD8CB7200788351 /* MLTextInputCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MLTextInputCell.xib; sourceTree = "<group>"; };
 		2630FE2F1AD550C00079F5C0 /* Monal Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Monal Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2630FE321AD550C00079F5C0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2630FE331AD550C00079F5C0 /* Monal_Tests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Monal_Tests.m; sourceTree = "<group>"; };
@@ -617,6 +627,12 @@
 				26AAE284179F7B0200271345 /* MLSettingCell.m */,
 				268DD58417C4541000C673A9 /* MLChatCell.h */,
 				268DD58517C4541000C673A9 /* MLChatCell.m */,
+				262E518F1AD8CAC600788351 /* MLButtonCell.h */,
+				262E51901AD8CAC600788351 /* MLButtonCell.m */,
+				262E51911AD8CAC600788351 /* MLButtonCell.xib */,
+				262E51941AD8CB7200788351 /* MLTextInputCell.h */,
+				262E51951AD8CB7200788351 /* MLTextInputCell.m */,
+				262E51961AD8CB7200788351 /* MLTextInputCell.xib */,
 			);
 			name = Tableviewcells;
 			sourceTree = "<group>";
@@ -1277,6 +1293,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				262E51931AD8CAC600788351 /* MLButtonCell.xib in Resources */,
 				2601D9CB0FBF25EF004DB939 /* sworim.sqlite in Resources */,
 				2680B8F31863C172009599AB /* README.txt in Resources */,
 				260447F60FEED62100B3B5A7 /* BuddyDetails.xib in Resources */,
@@ -1286,6 +1303,7 @@
 				26470F521835C4080069E3E0 /* Media.xcassets in Resources */,
 				26761BF71804FBB700D94714 /* RoomListViewController.xib in Resources */,
 				26DC0A8B1339259900E60BFD /* SearchUser.xib in Resources */,
+				262E51981AD8CB7200788351 /* MLTextInputCell.xib in Resources */,
 				26D89F081A8908B6009B147C /* XMPPEdit.xib in Resources */,
 				26C3EDEE1A7CA6FA000E6331 /* ContactsViewController.xib in Resources */,
 				26F9794D1ACAC73A0008E005 /* MLContactCell.xib in Resources */,
@@ -1350,6 +1368,7 @@
 				26529F5217FA7B260057F199 /* addContact.m in Sources */,
 				262DE4AF15C4E2C60040A66B /* MBProgressHUD.m in Sources */,
 				2680B8EF1863C172009599AB /* DDTTYLogger.m in Sources */,
+				262E51971AD8CB7200788351 /* MLTextInputCell.m in Sources */,
 				26C3EDFD1A807E76000E6331 /* ParseA.m in Sources */,
 				2642EBCA18693634006A6C12 /* jingleCall.m in Sources */,
 				2658508B15E7D8E40070A2A7 /* TPCircularBuffer+AudioBufferList.c in Sources */,
@@ -1403,6 +1422,7 @@
 				268821FA19B9233B00AEA46E /* NSString+SqlLite.m in Sources */,
 				2678A98B185A8320003AF53B /* ChatLogAccountDetailViewController.m in Sources */,
 				26DA16E217C302BC00D0065E /* UIAlertView+Blocks.m in Sources */,
+				262E51921AD8CAC600788351 /* MLButtonCell.m in Sources */,
 				2643A12F180220890030EFB1 /* TPKeyboardAvoidingTableView.m in Sources */,
 				268DD58617C4541000C673A9 /* MLChatCell.m in Sources */,
 				26E2F7DA17C6FD9400C3C8EF /* MLTabBarController.m in Sources */,

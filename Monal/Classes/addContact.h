@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 
 
-@interface addContact : UIViewController<UIPickerViewDataSource, UIPickerViewDelegate, UITextFieldDelegate>
+@interface addContact : UITableViewController<UIPickerViewDataSource, UIPickerViewDelegate, UITextFieldDelegate>
 {
 
     UITextField* _currentTextField;

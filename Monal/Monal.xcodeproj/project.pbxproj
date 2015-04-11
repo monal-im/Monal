@@ -30,7 +30,6 @@
 		261A629A176C162200059090 /* AboutViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A6299176C162200059090 /* AboutViewController.m */; };
 		261AC91D1788A49C00E05657 /* ParsePresence.m in Sources */ = {isa = PBXBuildFile; fileRef = 261AC91C1788A49C00E05657 /* ParsePresence.m */; };
 		261E672B179E27BE00CB493E /* ParseFailure.m in Sources */ = {isa = PBXBuildFile; fileRef = 261E672A179E27BE00CB493E /* ParseFailure.m */; };
-		261ED6C41240257F00C14F6A /* BuddyAdd.xib in Resources */ = {isa = PBXBuildFile; fileRef = 261ED6C31240257F00C14F6A /* BuddyAdd.xib */; };
 		26277888110179D100023C8A /* tools.m in Sources */ = {isa = PBXBuildFile; fileRef = 26277887110179D100023C8A /* tools.m */; };
 		262797AF178A577300B85D94 /* MLContactCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 262797AE178A577300B85D94 /* MLContactCell.m */; };
 		2628E50714049DB50064131E /* askTempPass.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2628E50614049DB50064131E /* askTempPass.xib */; };
@@ -266,7 +265,6 @@
 		261AC91C1788A49C00E05657 /* ParsePresence.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParsePresence.m; sourceTree = "<group>"; };
 		261E6729179E27BE00CB493E /* ParseFailure.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParseFailure.h; sourceTree = "<group>"; };
 		261E672A179E27BE00CB493E /* ParseFailure.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParseFailure.m; sourceTree = "<group>"; };
-		261ED6C31240257F00C14F6A /* BuddyAdd.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = BuddyAdd.xib; sourceTree = "<group>"; };
 		26277886110179D100023C8A /* tools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tools.h; sourceTree = "<group>"; };
 		26277887110179D100023C8A /* tools.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = tools.m; sourceTree = "<group>"; };
 		262797AD178A577300B85D94 /* MLContactCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLContactCell.h; sourceTree = "<group>"; };
@@ -739,7 +737,6 @@
 			children = (
 				2628E50614049DB50064131E /* askTempPass.xib */,
 				26DC0A8A1339259900E60BFD /* SearchUser.xib */,
-				261ED6C31240257F00C14F6A /* BuddyAdd.xib */,
 				260447F50FEED62100B3B5A7 /* BuddyDetails.xib */,
 				265F1B2A123040540065C5FE /* web.xib */,
 			);
@@ -1298,7 +1295,6 @@
 				2680B8F31863C172009599AB /* README.txt in Resources */,
 				260447F60FEED62100B3B5A7 /* BuddyDetails.xib in Resources */,
 				265F1B2B123040540065C5FE /* web.xib in Resources */,
-				261ED6C41240257F00C14F6A /* BuddyAdd.xib in Resources */,
 				264A7E751AA7263600E860E3 /* MLAccountCell.xib in Resources */,
 				26470F521835C4080069E3E0 /* Media.xcassets in Resources */,
 				26761BF71804FBB700D94714 /* RoomListViewController.xib in Resources */,

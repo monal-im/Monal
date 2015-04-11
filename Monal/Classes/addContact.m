@@ -9,16 +9,18 @@
 #import "addContact.h"
 #import "MLConstants.h"
 #import "MLXMPPManager.h"
+#import "MLButtonCell.h"
+#import "MLTextInputCell.h"
 
 @implementation addContact
 
 
 -(void) closeView
 {
-    [self dismissModalViewControllerAnimated:YES];
+    [self dismissViewControllerAnimated:YES completion:nil];
 }
 
--(IBAction) addPress
+-(void) addPress
 {
     if([[MLXMPPManager sharedInstance].connectedXMPP count]==0)
     {
@@ -87,19 +89,7 @@
     self.navigationItem.title=@"Add Contact";
     _closeButton =[[UIBarButtonItem alloc] initWithTitle:@"Close" style:UIBarButtonItemStylePlain target:self action:@selector(closeView)];
     self.navigationItem.rightBarButtonItem=_closeButton;
-    
-    if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0"))
-    {
-        self.view.backgroundColor =[UIColor whiteColor];
-    }
-    else{
-        self.view.backgroundColor = [[UIColor alloc] initWithPatternImage:[UIImage imageNamed:@"debut_dark"]];
-        self.contactLabel.textColor=[UIColor whiteColor];
-        self.accountLabel.textColor=[UIColor whiteColor];
-        self.navigationController.navigationBar.tintColor=[UIColor blackColor];
-    }
-    
-    
+        
     _accountPicker = [[ UIPickerView alloc] init];
     _accountPickerView= [[UIView alloc] initWithFrame: _accountPicker.frame];
     _accountPickerView.autoresizingMask=UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
@@ -112,28 +102,17 @@
     
     _accountName.inputView=_accountPickerView;
     
-    if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0"))
-    {
-        
-    }
-    else
-    {
-        _accountPickerView.backgroundColor=[UIColor blackColor];
-        [self.view setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"debut_dark"]]];
-    }
-    
-    
     _accountName.inputAccessoryView=_keyboardToolbar;
     _buddyName.inputAccessoryView=_keyboardToolbar;
     
+    [self.tableView registerNib:[UINib nibWithNibName:@"MLButtonCell"
+                                               bundle:[NSBundle mainBundle]]
+         forCellReuseIdentifier:@"ButtonCell"];
     
-    UIImage *buttonImage = [[UIImage imageNamed:@"blueButton"]
-                            resizableImageWithCapInsets:UIEdgeInsetsMake(18, 18, 18, 18)];
-    UIImage *buttonImageHighlight = [[UIImage imageNamed:@"blueButtonHighlight"]
-                                     resizableImageWithCapInsets:UIEdgeInsetsMake(18, 18, 18, 18)];
     
-    [_addButton setBackgroundImage:buttonImage forState:UIControlStateNormal];
-    [_addButton setBackgroundImage:buttonImageHighlight forState:UIControlStateSelected];
+    [self.tableView registerNib:[UINib nibWithNibName:@"MLTextInputCell"
+                                               bundle:[NSBundle mainBundle]]
+         forCellReuseIdentifier:@"TextCell"];
     
     
 }
@@ -149,6 +128,67 @@
         [[MLXMPPManager sharedInstance] getServiceDetailsForAccount:0 ];
     }
 }
+
+#pragma mark tableview datasource delegate
+
+-(NSInteger) numberOfSectionsInTableView:(UITableView *)tableView
+{
+    return 2;
+}
+
+- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
+{
+    if(section==0)
+    {
+        return @"Contacts are usually in the format: username@domain.something";
+    }
+    else return nil;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    NSInteger toreturn =0;
+    switch (section) {
+        case 0:
+            toreturn =2;
+            break;
+        case 1:
+            toreturn=1;
+            break;
+            
+        default:
+            break;
+    }
+    
+    return toreturn;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    UITableViewCell *cell ;
+
+    switch (indexPath.section) {
+        case 0:
+            cell =[tableView dequeueReusableCellWithIdentifier:@"TextCell"];;
+            break;
+        case 1:
+            cell =[tableView dequeueReusableCellWithIdentifier:@"ButtonCell"];
+            break;
+            
+        default:
+            break;
+    }
+    
+  return cell;
+    
+}
+
+#pragma mark tableview delegate
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath;
+{
+    
+}
+
 
 #pragma mark picker view delegate
 - (void)pickerView:(UIPickerView *)pickerView didSelectRow:(NSInteger)row inComponent:(NSInteger)component

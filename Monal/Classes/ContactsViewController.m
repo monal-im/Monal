@@ -59,7 +59,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     
     [_contactsTable reloadData];
     
-    UIBarButtonItem* rightButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Add Contact",@"") style:UIBarButtonItemStyleBordered target:self action:@selector(addContact)];
+    UIBarButtonItem* rightButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(addContact)];
     self.navigationItem.rightBarButtonItem=rightButton;
     
     [_contactsTable registerNib:[UINib nibWithNibName:@"MLContactCell"

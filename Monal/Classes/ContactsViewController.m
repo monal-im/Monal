@@ -59,12 +59,6 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     
     [_contactsTable reloadData];
     
-    UIBarButtonItem* rightButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(addContact)];
-    self.navigationItem.rightBarButtonItem=rightButton;
-    
-    UIBarButtonItem* leftButton = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"menu"] style:UIBarButtonItemStylePlain target:self action:@selector(showMenu)];
-    self.navigationItem.leftBarButtonItem=leftButton;
-    
 
     [_contactsTable registerNib:[UINib nibWithNibName:@"MLContactCell"
                                                bundle:[NSBundle mainBundle]]
@@ -90,6 +84,16 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
     
     [[MLXMPPManager sharedInstance] handleNewMessage:nil];
+    
+    
+    if([MLXMPPManager sharedInstance].connectedXMPP.count >0 ) {
+        UIBarButtonItem* rightButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(addContact)];
+        self.navigationItem.rightBarButtonItem=rightButton;
+        
+        //    UIBarButtonItem* leftButton = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"menu"] style:UIBarButtonItemStylePlain target:self action:@selector(showMenu)];
+        //    self.navigationItem.leftBarButtonItem=leftButton;
+    }
+    
     
 }
 

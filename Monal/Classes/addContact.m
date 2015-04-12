@@ -173,8 +173,8 @@
             }
             else   if(indexPath.row ==1){
                 self.contactName =textCell.textInput;
-                self.accountName.placeholder = @"Contact Name";
-                self.accountName.delegate=self;
+                self.contactName.placeholder = @"Contact Name";
+                self.contactName.delegate=self;
             }
             textCell.textInput.inputAccessoryView =_keyboardToolbar;
             

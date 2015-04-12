@@ -34,9 +34,9 @@
     }
     else  {
         
-        if(_buddyName.text.length>0)
+        if(self.contactName.text.length>0)
         {
-            NSDictionary* contact =@{@"row":[NSNumber numberWithInteger:_selectedRow],@"buddy_name":_buddyName.text};
+            NSDictionary* contact =@{@"row":[NSNumber numberWithInteger:_selectedRow],@"buddy_name":self.contactName.text};
             [[MLXMPPManager sharedInstance] addContact:contact];
             
             UIAlertView *addError = [[UIAlertView alloc]
@@ -100,10 +100,6 @@
     _accountPicker.dataSource=self;
     _accountPicker.autoresizingMask=UIViewAutoresizingFlexibleLeftMargin|UIViewAutoresizingFlexibleRightMargin;
     
-    _accountName.inputView=_accountPickerView;
-    
-    _accountName.inputAccessoryView=_keyboardToolbar;
-    _buddyName.inputAccessoryView=_keyboardToolbar;
     
     [self.tableView registerNib:[UINib nibWithNibName:@"MLButtonCell"
                                                bundle:[NSBundle mainBundle]]
@@ -166,15 +162,29 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     UITableViewCell *cell ;
-
+  
     switch (indexPath.section) {
-        case 0:
-            cell =[tableView dequeueReusableCellWithIdentifier:@"TextCell"];;
+        case 0: {
+            MLTextInputCell *textCell =[tableView dequeueReusableCellWithIdentifier:@"TextCell"];
+            if(indexPath.row ==0){
+                self.accountName =textCell.textInput;
+                self.accountName.placeholder = @"Account";
+                self.accountName.inputView=_accountPickerView;
+            }
+            else   if(indexPath.row ==1){
+                self.contactName =textCell.textInput;
+                self.accountName.placeholder = @"Contact Name";
+                self.accountName.delegate=self;
+            }
+            textCell.textInput.inputAccessoryView =_keyboardToolbar;
+            
+            cell= textCell;
             break;
-        case 1:
+        }
+        case 1: {
             cell =[tableView dequeueReusableCellWithIdentifier:@"ButtonCell"];
             break;
-            
+        }
         default:
             break;
     }
@@ -186,7 +196,15 @@
 #pragma mark tableview delegate
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath;
 {
-    
+    switch (indexPath.section) {
+        case 0:
+           
+        case 1:
+            [self addPress];
+            
+        default:
+            break;
+    }
 }
 
 

@@ -20,12 +20,9 @@
 
 }
 
-@property (nonatomic, weak) IBOutlet UITextField* buddyName;
-@property (nonatomic, weak) IBOutlet UITextField* accountName;
-@property (nonatomic, weak) IBOutlet UIButton* addButton;
+@property (nonatomic, weak)  UITextField* contactName;
+@property (nonatomic, weak)  UITextField* accountName;
 @property (nonatomic, weak) IBOutlet UIToolbar* keyboardToolbar;
-@property (nonatomic, weak) IBOutlet UILabel* contactLabel;
-@property (nonatomic, weak) IBOutlet UILabel* accountLabel;
 
 -(IBAction) addPress;
 -(void) closeView;

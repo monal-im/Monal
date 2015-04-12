@@ -170,11 +170,14 @@
                 self.accountName =textCell.textInput;
                 self.accountName.placeholder = @"Account";
                 self.accountName.inputView=_accountPickerView;
+                self.contactName.delegate=self;
+                
             }
             else   if(indexPath.row ==1){
                 self.contactName =textCell.textInput;
                 self.contactName.placeholder = @"Contact Name";
                 self.contactName.delegate=self;
+              
             }
             textCell.textInput.inputAccessoryView =_keyboardToolbar;
             
@@ -182,7 +185,12 @@
             break;
         }
         case 1: {
-            cell =[tableView dequeueReusableCellWithIdentifier:@"ButtonCell"];
+            MLButtonCell *buttonCell ;
+            buttonCell =[tableView dequeueReusableCellWithIdentifier:@"ButtonCell"];
+            buttonCell.buttonText.text=@"Add Contact";
+            buttonCell.buttonText.textColor= [UIColor colorWithRed:128.0/255 green:203.0/255 blue:182.0/255 alpha:1.0f];
+            cell=buttonCell;
+            
             break;
         }
         default:
@@ -198,7 +206,7 @@
 {
     switch (indexPath.section) {
         case 0:
-           
+            break;
         case 1:
             [self addPress];
             
@@ -244,35 +252,35 @@
 
 -(IBAction)toolbarDone:(id)sender
 {
-    [_currentTextField resignFirstResponder];
+    if(_currentTextField ==self.contactName)
+    {
+        [self.contactName resignFirstResponder];
+    }
+    else {
+        [self.accountName resignFirstResponder];
+    }
     
 }
 
 - (IBAction)toolbarPrevious:(id)sender
 {
-    NSInteger nextTag = _currentTextField.tag - 1;
-    // Try to find next responder
-    UIResponder* nextResponder = [_currentTextField.superview viewWithTag:nextTag];
-    if (nextResponder) {
-        // Found next responder, so set it.
-        [nextResponder becomeFirstResponder];
-    } else {
-        // Not found, so remove keyboard.
-        [_currentTextField resignFirstResponder];
+    if(_currentTextField ==self.contactName)
+    {
+        [self.accountName becomeFirstResponder];
+    }
+    else {
+        [self.contactName becomeFirstResponder];
     }
 }
 
 - (IBAction)toolbarNext:(id)sender
 {
-    NSInteger nextTag = _currentTextField.tag + 1;
-    // Try to find next responder
-    UIResponder* nextResponder = [_currentTextField.superview viewWithTag:nextTag];
-    if (nextResponder) {
-        // Found next responder, so set it.
-        [nextResponder becomeFirstResponder];
-    } else {
-        // Not found, so remove keyboard.
-        [_currentTextField resignFirstResponder];
+    if(_currentTextField ==self.contactName)
+    {
+        [self.accountName becomeFirstResponder];
+    }
+    else {
+        [self.contactName becomeFirstResponder];
     }
 }
 

@@ -1,5 +1,5 @@
 
-Monal is an XMPP/Jabber IM client.  It can  connect to any standard  XMPP  chat server such as  Google talk or Facebook chat.
+Monal is an XMPP/Jabber IM client.  It can  connect to any standard  XMPP  chat server such as  Google talk .
 Notable features:
 
 ****Free Forever and No Ads Forever****
@@ -8,25 +8,19 @@ Notable features:
 * Standard XMPP Jingle VOIP. Allows voice conversation with any other user with a program that supports it (e.g. Google Talk, pidgin, psi, etc.)
 * Will work with corporate XMPP servers that require VPN
 * MUC multi user chat
-* Tested heavily with google talk, facebook, openfire, prosody   and ejabberd servers. 
+* Tested heavily with google talk, openfire, prosody   and ejabberd servers.
 
 
-2.3 changelog
+2.5 changelog
 
 This is  update that  fixes bugs.
-1. turned off all SSL3 support. It is no longer safe
-2. added ability to search the contacts list
-3. improved stability
-4. fixed bug that caused facebook contacts to not show
-5. broadcast messages are shown in active chats and can be cleared
-6. bug that prevented joinging groups is fixed
-
+1.removed facebook as an option as XMPP has been disabled.
 
 
       
-you can connect to any jabber server or use the settings for google or facebook
+you can connect to any jabber server or use the settings for google
 
-to test the  XMPP protocol (used by google, facebook etc) use the credentials below. To test the VOIP features, talk to a client with pidgin on linux or another monal user.  The option to call appears after the tapping on the disclosure indicator on the contacts list. 
+to test the  XMPP protocol (used by google and private servers ) use the credentials below. To test the VOIP features, talk to a client with pidgin on linux or another monal user.  The option to call appears after the tapping on the disclosure indicator on the contacts list.
 username: sworim
 password: imtest
 

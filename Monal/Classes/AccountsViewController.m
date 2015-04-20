@@ -243,10 +243,14 @@
                 cell.textLabel.text=[[_accountList objectAtIndex:indexPath.row] objectForKey:@"username"];
             }
             
+            
+            UIImageView *accessory =[[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 30, 30)];
+            
             if([[[_accountList objectAtIndex:indexPath.row] objectForKey:@"enabled"] boolValue] ==YES) {
                    cell.imageView.image=[UIImage imageNamed:@"888-checkmark"];
                 if([[MLXMPPManager sharedInstance] isAccountForIdConnected: [NSString stringWithFormat:@"%@",[[_accountList objectAtIndex:indexPath.row] objectForKey:@"account_id"]]]) {
-                    cell.accessoryView =[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"available"]];
+                    accessory.image=[UIImage imageNamed:@"Connected"];
+                    cell.accessoryView =accessory;
                     
                     NSDate * connectedTime = [[MLXMPPManager sharedInstance] connectedTimeFor: [NSString stringWithFormat:@"%@",[[_accountList objectAtIndex:indexPath.row] objectForKey:@"account_id"]]];
                     if(connectedTime) {
@@ -255,7 +259,9 @@
                     
                 }
                 else {
-                    cell.accessoryView =[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"away"]];
+                    accessory.image =[UIImage imageNamed:@"Disconnected"];
+                 
+                    cell.accessoryView =accessory;
                     cell.detailTextLabel.text=nil;
                 }
                 

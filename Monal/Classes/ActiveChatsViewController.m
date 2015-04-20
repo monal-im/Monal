@@ -48,6 +48,10 @@
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
         [nc addObserver:self selector:@selector(refreshDisplay) name:UIApplicationWillEnterForegroundNotification object:nil];
     
+    
+    [_chatListTable registerNib:[UINib nibWithNibName:@"MLContactCell"
+                                               bundle:[NSBundle mainBundle]]
+         forCellReuseIdentifier:@"ContactCell"];
 }
 
 
@@ -103,32 +107,35 @@
     
     NSString* fullName=[row objectForKey:@"full_name"];
     if([[fullName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0) {
-        cell.textLabel.text=fullName;
+        [cell showDisplayName:fullName];
     }
     else {
-        cell.textLabel.text=[row objectForKey:@"buddy_name"];
+        [cell showDisplayName:[row objectForKey:@"buddy_name"]];
     }
     
+    NSString *state= [[row objectForKey:@"state"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     
     if(![[row objectForKey:@"status"] isEqualToString:@"(null)"] && ![[row objectForKey:@"status"] isEqualToString:@""]) {
-        cell.detailTextLabel.text=[row objectForKey:@"status"];
+       [cell showStatusText:[row objectForKey:@"status"]];
     }
     else
     {
-        cell.detailTextLabel.text=nil;
+        [cell showStatusText:nil];
     }
     
-    if(([[row objectForKey:@"state"] isEqualToString:@"away"]) ||
-       ([[row objectForKey:@"state"] isEqualToString:@"dnd"])||
-       ([[row objectForKey:@"state"] isEqualToString:@"xa"])
+    if(([state isEqualToString:@"away"]) ||
+       ([state isEqualToString:@"dnd"])||
+       ([state isEqualToString:@"xa"])
        )
     {
         cell.status=kStatusAway;
     }
-    else if([[row objectForKey:@"state"] isEqualToString:@"(null)"] || [[row objectForKey:@"state"] isEqualToString:@""])
-        cell.status=kStatusOnline;
-    else if([[row objectForKey:@"state"] isEqualToString:@"offline"])
+    else if([state isEqualToString:@"offline"]) {
         cell.status=kStatusOffline;
+    }
+    else if([state isEqualToString:@"(null)"] || [state isEqualToString:@""]) {
+        cell.status=kStatusOnline;
+    }
     
     cell.accessoryType = UITableViewCellAccessoryNone;
     
@@ -139,12 +146,20 @@
     NSString* accountNo=[NSString stringWithFormat:@"%d", cell.accountNo];
     cell.count=  [[DataLayer sharedInstance] countUserUnreadMessages:cell.username forAccount:accountNo];
     
-    cell.imageView.image=[[MLImageManager sharedInstance] getIconForContact:[row objectForKey:@"buddy_name"] andAccount:accountNo];
+    cell.userImage.image=[[MLImageManager sharedInstance] getIconForContact:[row objectForKey:@"buddy_name"] andAccount:accountNo];
+    [cell setOrb];
     return cell;
 }
 
 
 #pragma mark tableview delegate
+
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return 50.0f;
+}
+
+
 -(NSString *)tableView:(UITableView *)tableView titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath *)indexPath {
     return @"Close";
 }

@@ -9,78 +9,30 @@
 #import "MLContactCell.h"
 #import "MLConstants.h"
 
+@interface MLContactCell()
+
+@end
+
 @implementation MLContactCell
-
-- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
-{
-    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
-    if (self) {
-        // Initialization code
-        self.detailTextLabel.text=nil;
-        self.accessoryType = UITableViewCellAccessoryNone;
-        self.imageView.alpha=1.0;
-        
-        self.badgeColor= [UIColor clearColor];
-        self.badgeHighlightedColor=[UIColor clearColor];
-        self.badgeText =nil;
-        self.textLabel.textColor = [UIColor blackColor];
-    }
-    return self;
-}
-
-- (void)layoutSubviews
-{
-    
-    [super layoutSubviews];  //The default implementation of the layoutSubviews
-    
-    CGRect orbRectangle = CGRectMake(51-13+8,(self.frame.size.height/2) -7,15,15);
-    
-
-    if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0"))
-       {
-           orbRectangle = CGRectMake(3,(self.frame.size.height/2) -7,10,10);
-       }
-	_statusOrb = [[UIImageView alloc] initWithFrame:orbRectangle];
-    [self.contentView addSubview: _statusOrb ];
-
-    
-    CGRect textLabelFrame = self.textLabel.frame;
-    textLabelFrame.origin.x=51+13;
-    textLabelFrame.size.width = self.frame.size.width-51-13-35-45;
-    self.textLabel.frame = textLabelFrame;
-    
-    CGRect detailLabelFrame = self.detailTextLabel.frame;
-    detailLabelFrame.origin.x=51+13;
-    detailLabelFrame.size.width = self.frame.size.width-51-13-35-45;
-    self.detailTextLabel.frame = detailLabelFrame;
-    
-    CGRect imageFrame =self.imageView.frame;
-    imageFrame.size.height=self.frame.size.height;
-    imageFrame.size.width=self.frame.size.height;
-    self.imageView.frame=imageFrame;
-    
-    [self setOrb];
- 
-}
 
 -(void) setOrb
 {
     switch (_status) {
         case kStatusAway:
         {
-            _statusOrb.image=[UIImage imageNamed:@"away"];
+            self.statusOrb.image=[UIImage imageNamed:@"away"];
             self.imageView.alpha=1.0f;
             break;
         }
         case kStatusOnline:
         {
-            _statusOrb.image=[UIImage imageNamed:@"available"];
+            self.statusOrb.image=[UIImage imageNamed:@"available"];
             self.imageView.alpha=1.0f;
             break;
         }
         case kStatusOffline:
         {
-            _statusOrb.image=[UIImage imageNamed:@"offline"];
+            self.statusOrb.image=[UIImage imageNamed:@"offline"];
             self.imageView.alpha=0.5f;
             break;
         }
@@ -88,7 +40,28 @@
         default:
             break;
     }
+}
 
+-(void) showStatusText:(NSString *) text
+{
+    self.statusText.text=text;
+    if(text)
+    {
+        self.centeredDisplayName.hidden=YES;
+        self.displayName.hidden=NO;
+        self.statusText.hidden=NO;
+    }
+    else {
+        self.centeredDisplayName.hidden=NO;
+        self.displayName.hidden=YES;
+        self.statusText.hidden=YES;
+    }
+}
+
+-(void) showDisplayName:(NSString *) name
+{
+    self.centeredDisplayName.text=name;
+    self.displayName.text=name;
 }
 
 -(void) setCount:(NSInteger)count
@@ -97,37 +70,16 @@
     
     if(_count>0)
     {
-    self.badgeColor=[UIColor darkGrayColor];
-    self.badgeHighlightedColor=[UIColor whiteColor];
-    self.badgeText=[NSString stringWithFormat:@"%d", _count];
+        self.badge.hidden=NO;
+        [self.badge setTitle:[NSString stringWithFormat:@"%d", _count] forState:UIControlStateNormal];
     }
     else
     {
-        self.badgeColor= [UIColor clearColor];
-        self.badgeHighlightedColor=[UIColor clearColor];
-        self.badgeText=nil; 
+        self.badge.hidden=YES;
+         [self.badge setTitle:@"" forState:UIControlStateNormal];
     }
     
     
-}
-
--(void) setStatus:(NSInteger)status
-{
-    _status=status;
-
-    if(_statusOrb) [self setOrb];
-}
-
--(void)prepareForReuse
-{
-    [super prepareForReuse];
-//    self.textLabel.text=nil;
-//    self.detailTextLabel.text=nil;
-//    self.imageView.image=nil; 
-//    self.badgeColor= [UIColor clearColor];
-//    self.badgeHighlightedColor=[UIColor clearColor];
-//    self.badgeText=nil;
-//    self.imageView.image=[UIImage imageNamed:@"noicon"];
 }
 
 

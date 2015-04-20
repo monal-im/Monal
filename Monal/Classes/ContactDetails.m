@@ -63,16 +63,10 @@
     		_protocolImage.image=[UIImage imageNamed:@"GTalk"];
     	}
     	else
-            if([domain isEqualToString:@"chat.facebook.com"])
-            {
-                //gtalk
-                _protocolImage.image=[UIImage imageNamed:@"Facebook"];
-            }
-            else
-            {
+            
                 //xmpp
                 _protocolImage.image=[UIImage imageNamed:@"XMPP"];
-            }
+          
     }
     NSString* accountNo=[NSString stringWithFormat:@"%@", [_contact objectForKey:@"account_id"]];
     UIImage* contactImage=[[MLImageManager sharedInstance] getIconForContact:[_contact objectForKey:@"buddy_name"] andAccount:accountNo];

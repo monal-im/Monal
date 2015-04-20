@@ -129,13 +129,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		self.useSSL=true;
 		
         
-		if(_originIndex.row==2)
-		{
-			self.server=@"chat.facebook.com";
-			self.jid=@"@chat.facebook.com";
-			self.useSSL=true;
-		}
-		
 		self.oldStyleSSL=NO;
         self.selfSignedSSL=NO;
 		
@@ -165,9 +158,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [super viewWillDisappear:animated];
 	DDLogVerbose(@"xmpp edit view will hide");
 	[self save];
-	
+    if(self.password) {
     [ [MLXMPPManager sharedInstance].passwordDic setObject:self.password forKey:self.accountno];
-    
+    }
 }
 
 -(void) dealloc
@@ -347,6 +340,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 
 #pragma mark table view datasource methods
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath;
+{
+    return 40;
+    
+}
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {

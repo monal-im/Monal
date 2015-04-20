@@ -61,6 +61,14 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     
     UIBarButtonItem* rightButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Add Contact",@"") style:UIBarButtonItemStyleBordered target:self action:@selector(addContact)];
     self.navigationItem.rightBarButtonItem=rightButton;
+    
+    [_contactsTable registerNib:[UINib nibWithNibName:@"MLContactCell"
+                                               bundle:[NSBundle mainBundle]]
+         forCellReuseIdentifier:@"ContactCell"];
+    
+    [self.searchDisplayController.searchResultsTableView registerNib:[UINib nibWithNibName:@"MLContactCell"
+                                                                                     bundle:[NSBundle mainBundle]]
+                                               forCellReuseIdentifier:@"ContactCell"];
 }
 
 -(void) dealloc
@@ -668,10 +676,10 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 {
     NSInteger toreturn=0;
     if(tableView ==self.view) {
-    if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
-        toreturn =3;
-    else
-        toreturn =2;
+        if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
+            toreturn =3;
+        else
+            toreturn =2;
     }
     else  if(tableView ==self.searchDisplayController.searchResultsTableView) {
         toreturn =1;
@@ -737,13 +745,15 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     {
         cell =[[MLContactCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"ContactCell"];
     }
-    
+
     NSDictionary* row =nil;
  
     if(indexPath.section==konlineSection)
     {
         row = [_contacts objectAtIndex:indexPath.row];
     }
+    
+    cell.statusText.text=@"";
     
     if(tableView ==self.view) {
         if(indexPath.section==kofflineSection)
@@ -757,16 +767,18 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     
     NSString* fullName=[row objectForKey:@"full_name"];
     if([[fullName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0) {
-        cell.textLabel.text=fullName;
+        [cell showDisplayName:fullName];
     }
     else {
-        cell.textLabel.text=[row objectForKey:@"buddy_name"];
+        [cell showDisplayName:[row objectForKey:@"buddy_name"]];
     }
     
-    if(![[row objectForKey:@"status"] isEqualToString:@"(null)"] && ![[row objectForKey:@"status"] isEqualToString:@""])
-        cell.detailTextLabel.text=[row objectForKey:@"status"];
-    else
-        cell.detailTextLabel.text=nil;
+    if(![[row objectForKey:@"status"] isEqualToString:@"(null)"] && ![[row objectForKey:@"status"] isEqualToString:@""]) {
+        [cell showStatusText:[row objectForKey:@"status"]];
+    }
+    else {
+       [cell showStatusText:nil];
+    }
         if(tableView ==self.view) {
     if(indexPath.section==konlineSection)
     {
@@ -805,13 +817,20 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     //cell.count=[[row objectForKey:@"count"] integerValue];
     NSString* accountNo=[NSString stringWithFormat:@"%d", cell.accountNo];
     cell.count=  [[DataLayer sharedInstance] countUserUnreadMessages:cell.username forAccount:accountNo];
-    cell.imageView.image=[[MLImageManager sharedInstance] getIconForContact:[row objectForKey:@"buddy_name"] andAccount:accountNo];
+    cell.userImage.image=[[MLImageManager sharedInstance] getIconForContact:[row objectForKey:@"buddy_name"] andAccount:accountNo];
     
+    [cell setOrb];
     
     return cell;
 }
 
 #pragma mark tableview delegate
+
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return 50.0f;
+}
+
 -(NSString *)tableView:(UITableView *)tableView titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath *)indexPath {
     return @"Remove Contact";
 }

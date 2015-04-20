@@ -115,8 +115,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     self.networkQueue.maxConcurrentOperationCount=1;
     
     self.processQueue =[[NSOperationQueue alloc] init];
-   // self.networkQueue.maxConcurrentOperationCount=1;
-    
+ 
     //placing more common at top to reduce iteration
     _stanzaTypes=[NSArray arrayWithObjects:
                   @"iq",
@@ -326,6 +325,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         self.pingID=nil;
         
         DDLogInfo(@"XMPP connnect  start");
+        _outputQueue=[[NSMutableArray alloc] init];
+    
         [self connectionTask];
         
         dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
@@ -434,11 +435,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             forMode:NSDefaultRunLoopMode];
         DDLogInfo(@"removed streams");
         
+         _inputBuffer=[[NSMutableString alloc] init];
+        _outputQueue=[[NSMutableArray alloc] init];
         
         @try
         {
             [_iStream close];
-            _inputBuffer=[[NSMutableString alloc] init];
         }
         @catch(id theException)
         {
@@ -448,7 +450,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         @try
         {
             [_oStream close];
-            _outputQueue=[[NSMutableArray alloc] init];
         }
         @catch(id theException)
         {
@@ -593,6 +594,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         }
     }
     
+    DDLogInfo(@"reconnect exits");
 }
 
 #pragma mark XMPP
@@ -679,20 +681,21 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         }
     
     }
-    
-    if(self.supportsSM3 && self.unAckedStanzas)
-    {
-        XMLNode* rNode =[[XMLNode alloc] initWithElement:@"r"];
-        NSDictionary *dic=@{@"xmlns":@"urn:xmpp:sm:3"};
-        rNode.attributes =[dic mutableCopy];
-        [self send:rNode];
-    }
     else  {
-        //get random number
-        XMPPIQ* ping =[[XMPPIQ alloc] initWithId:[NSString stringWithFormat:@"Monal%d",arc4random()%100000]andType:kiqGetType];
-        [ping setiqTo:_domain];
-        [ping setPing];
-        [self send:ping];
+        if(self.supportsSM3 && self.unAckedStanzas)
+        {
+            XMLNode* rNode =[[XMLNode alloc] initWithElement:@"r"];
+            NSDictionary *dic=@{@"xmlns":@"urn:xmpp:sm:3"};
+            rNode.attributes =[dic mutableCopy];
+            [self send:rNode];
+        }
+        else  {
+            //get random number
+            XMPPIQ* ping =[[XMPPIQ alloc] initWithId:[NSString stringWithFormat:@"Monal%d",arc4random()%100000]andType:kiqGetType];
+            [ping setiqTo:_domain];
+            [ping setPing];
+            [self send:ping];
+        }
     }
 }
 
@@ -902,25 +905,30 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 #pragma mark message ACK
 -(void) sendUnAckedMessages
 {
-    for (NSDictionary *dic in self.unAckedStanzas)
-    {
-        [self send:(XMLNode*)[dic objectForKey:kStanza]];
-    }
+    [self.networkQueue addOperation:
+    [NSBlockOperation blockOperationWithBlock:^{
+        for (NSDictionary *dic in self.unAckedStanzas)
+        {
+            [self send:(XMLNode*)[dic objectForKey:kStanza]];
+        }}]];
 }
 
 -(void) removeUnAckedMessagesLessThan:(NSNumber*) hvalue
 {
-    NSMutableArray *discard =[[NSMutableArray alloc] initWithCapacity:[self.unAckedStanzas count]];
-    for (NSDictionary *dic in self.unAckedStanzas)
-    {
-        NSNumber *stanzaNumber = [dic objectForKey:kStanzaID];
-        if([stanzaNumber integerValue]<[hvalue integerValue])
+    [self.networkQueue addOperation:
+    [NSBlockOperation blockOperationWithBlock:^{
+        NSMutableArray *discard =[[NSMutableArray alloc] initWithCapacity:[self.unAckedStanzas count]];
+        for (NSDictionary *dic in self.unAckedStanzas)
         {
-            [discard addObject:dic];
+            NSNumber *stanzaNumber = [dic objectForKey:kStanzaID];
+            if([stanzaNumber integerValue]<[hvalue integerValue])
+            {
+                [discard addObject:dic];
+            }
         }
-    }
-    
-    [self.unAckedStanzas removeObjectsInArray:discard];
+        
+        [self.unAckedStanzas removeObjectsInArray:discard];
+    }]];
 }
 
 
@@ -1655,7 +1663,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                //h would be compared to outbound value
                 if([resumeNode.h integerValue]==[self.lastHandledOutboundStanza integerValue])
                 {
-                    [self.unAckedStanzas removeAllObjects];
+                    [self.networkQueue addOperation:
+                         [NSBlockOperation blockOperationWithBlock:^{
+                             [self.unAckedStanzas removeAllObjects];
+                    }]];
                 }
                 else {
                     [self removeUnAckedMessagesLessThan:resumeNode.h];
@@ -1953,6 +1964,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     [self.networkQueue addOperation:
      [NSBlockOperation blockOperationWithBlock:^{
+        DDLogVerbose(@"adding to send %@", stanza.XMLString);
         [_outputQueue addObject:stanza];
         [self writeFromQueue];  // try to send if there is space
         
@@ -2354,6 +2366,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     for(XMLNode* node in _outputQueue)
     {
+        DDLogVerbose(@"iterating output ");
         BOOL success=[self writeToStream:node.XMLString];
         if(success) {
             if([node isKindOfClass:[XMPPMessage class]])
@@ -2378,6 +2391,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         }
     }
     
+    DDLogVerbose(@"removing all objs from output ");
     [_outputQueue removeAllObjects];
     
 }

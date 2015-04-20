@@ -3,17 +3,17 @@
     {
       "idiom" : "universal",
       "scale" : "1x",
-      "filename" : "available.png"
+      "filename" : "Disconnected.png"
     },
     {
       "idiom" : "universal",
       "scale" : "2x",
-      "filename" : "availabe@2x.png"
+      "filename" : "Disconnected@2x.png"
     },
     {
       "idiom" : "universal",
       "scale" : "3x",
-      "filename" : "avalable@3x.png"
+      "filename" : "Disconnected@3x.png"
     }
   ],
   "info" : {

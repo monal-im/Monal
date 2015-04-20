@@ -15,10 +15,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 @interface MLXMPPManager()
 
 /**
- only used when the device is not in the foregreound and unlocked e.g when it doesnt have access to the keychain
- */
-@property (nonatomic, strong) NSMutableDictionary *passwordDic;
-/**
  convenience function getting account in connected array with account number/id matching
  */
 -(xmpp*) getConnectedAccountForID:(NSString*) accountNo;
@@ -163,12 +159,19 @@ An array of Dics what have timers to make sure everything was sent
     }
 }
 
--(BOOL) isAccountForIdConnected:(NSString*) accountNo;
+-(BOOL) isAccountForIdConnected:(NSString*) accountNo
 {
     xmpp* account = [self getConnectedAccountForID:accountNo];
     if(account.accountState==kStateLoggedIn) return YES;
     
     return NO;
+}
+
+
+-(NSDate *) connectedTimeFor:(NSString*) accountNo
+{
+    xmpp* account = [self getConnectedAccountForID:accountNo];
+    return account.connectedTime;
 }
 
 -(xmpp*) getConnectedAccountForID:(NSString*) accountNo
@@ -233,12 +236,20 @@ An array of Dics what have timers to make sure everything was sent
     xmppAccount.selfSigned=[[account objectForKey:@"selfsigned"] boolValue];
     
     xmppAccount.accountNo=[NSString stringWithFormat:@"%@",[account objectForKey:@"account_id"]];
-    
-    //keychain wont work when device is locked.
-    if([self.passwordDic objectForKey:[account objectForKey:@"account_id"]])
+    NSLog(@"state %ld", [UIApplication sharedApplication].applicationState);
+    if([UIApplication sharedApplication].applicationState!=UIApplicationStateActive)
     {
-        xmppAccount.password=[self.passwordDic objectForKey:[account objectForKey:@"account_id"]];
-        DDLogVerbose(@"connect got password from dic");
+        //keychain wont work when device is locked.
+        if([self.passwordDic objectForKey:[account objectForKey:@"account_id"]])
+        {
+            xmppAccount.password=[self.passwordDic objectForKey:[account objectForKey:@"account_id"]];
+            DDLogVerbose(@"connect got password from dic");
+        }
+        else {
+            PasswordManager* passMan= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",[account objectForKey:@"account_id"]]];
+            xmppAccount.password=[passMan getPassword] ;
+            [self.passwordDic setObject:xmppAccount.password forKey:[account objectForKey:@"account_id"]];
+        }
     }
     else
     {

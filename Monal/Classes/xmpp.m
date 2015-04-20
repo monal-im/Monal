@@ -50,9 +50,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     BOOL _reconnectScheduled;
 }
 
+@property (nonatomic ,strong) NSDate *loginStartTimeStamp;
+
 @property (nonatomic, strong) NSString *pingID;
-@property (nonatomic, strong) NSOperationQueue *readQueue;
-@property (nonatomic, strong) NSOperationQueue *writeQueue;
+@property (nonatomic, strong) NSOperationQueue *networkQueue;
+@property (nonatomic, strong) NSOperationQueue *processQueue;
+
 
 //stream resumption
 @property (nonatomic, assign) BOOL supportsSM2;
@@ -108,10 +111,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     int r =  arc4random();
     _resource=[NSString stringWithFormat:@"Monal%d",r];
     
-    self.readQueue =[[NSOperationQueue alloc] init];
-    self.writeQueue =[[NSOperationQueue alloc] init];
-    self.readQueue.maxConcurrentOperationCount=1;
-    self.writeQueue.maxConcurrentOperationCount=1;
+    self.networkQueue =[[NSOperationQueue alloc] init];
+    self.networkQueue.maxConcurrentOperationCount=1;
+    
+    self.processQueue =[[NSOperationQueue alloc] init];
+   // self.networkQueue.maxConcurrentOperationCount=1;
     
     //placing more common at top to reduce iteration
     _stanzaTypes=[NSArray arrayWithObjects:
@@ -146,7 +150,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) setRunLoop
 {
-    
     dispatch_async(dispatch_get_current_queue(), ^{
         [_oStream setDelegate:self];
         [_oStream scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
@@ -246,7 +249,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     dispatch_source_set_timer(streamTimer,
                               dispatch_time(DISPATCH_TIME_NOW, 5ull * NSEC_PER_SEC),
-                              1ull * NSEC_PER_SEC
+                             DISPATCH_TIME_FOREVER
                               , 1ull * NSEC_PER_SEC);
     
     dispatch_source_set_event_handler(streamTimer, ^{
@@ -276,9 +279,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) connectionTask
 {
-    if(_xmppQueue==NULL) {
-        _xmppQueue=dispatch_get_current_queue();
-    }
+    
     if([_domain length]>0) {
         _fulluser=[NSString stringWithFormat:@"%@@%@", _username, _domain];
     }
@@ -310,88 +311,92 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) connect
 {
-    [self.readQueue cancelAllOperations];
-    [self.writeQueue cancelAllOperations];
-    if(self.explicitLogout) return;
-    if(self.accountState==kStateLoggedIn )
-    {
-        DDLogError(@"assymetrical call to login without a teardown loggedin");
-        return;
-    }
+    [self.networkQueue cancelAllOperations];
     
-    self.pingID=nil;
-    
-    DDLogInfo(@"XMPP connnect  start");
-    [self connectionTask];
-    
-    dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-    dispatch_source_t loginCancelOperation = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,
-                                                                    q_background);
-    
-    dispatch_source_set_timer(loginCancelOperation,
-                              dispatch_time(DISPATCH_TIME_NOW, kConnectTimeout* NSEC_PER_SEC),
-                              kConnectTimeout* NSEC_PER_SEC,
-                              1ull * NSEC_PER_SEC);
-    
-    dispatch_source_set_event_handler(loginCancelOperation, ^{
-        DDLogInfo(@"login cancel op");
-        NSString *fulluserCopy = [_fulluser copy];
-        NSString *accountNoCopy = [_accountNo copy];
-        dispatch_async(_xmppQueue, ^{
-            //hide connecting message
-            if(fulluserCopy && accountNoCopy) {
-                NSDictionary* info=@{kaccountNameKey:fulluserCopy, kaccountNoKey:accountNoCopy,
-                                     kinfoTypeKey:@"connect", kinfoStatusKey:@""};
-                [self.contactsVC hideConnecting:info];
-            }
-            _loginStarted=NO;
-            // try again
-            if((self.accountState<kStateHasStream) && (_loggedInOnce))
-            {
-                DDLogInfo(@"trying to login again");
-                //make sure we are enabled still.
-                if([[DataLayer sharedInstance] isAccountEnabled:[NSString stringWithFormat:@"%@",self.accountNo]]) {
-                    
-                    //temp background task while a new one is created
-                    __block UIBackgroundTaskIdentifier tempTask= [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
+    [self.networkQueue addOperationWithBlock:^{
+        
+        if(self.explicitLogout) return;
+        if(self.accountState==kStateLoggedIn )
+        {
+            DDLogError(@"assymetrical call to login without a teardown loggedin");
+            return;
+        }
+        
+        self.loginStartTimeStamp=[NSDate date];
+        self.pingID=nil;
+        
+        DDLogInfo(@"XMPP connnect  start");
+        [self connectionTask];
+        
+        dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+        dispatch_source_t loginCancelOperation = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,
+                                                                        q_background);
+        
+        dispatch_source_set_timer(loginCancelOperation,
+                                  dispatch_time(DISPATCH_TIME_NOW, kConnectTimeout* NSEC_PER_SEC),
+                                  DISPATCH_TIME_FOREVER,
+                                  1ull * NSEC_PER_SEC);
+        
+        dispatch_source_set_event_handler(loginCancelOperation, ^{
+            DDLogInfo(@"login cancel op");
+            NSString *fulluserCopy = [_fulluser copy];
+            NSString *accountNoCopy = [_accountNo copy];
+            [self.networkQueue addOperationWithBlock:^{
+                //hide connecting message
+                if(fulluserCopy && accountNoCopy) {
+                    NSDictionary* info=@{kaccountNameKey:fulluserCopy, kaccountNoKey:accountNoCopy,
+                                         kinfoTypeKey:@"connect", kinfoStatusKey:@""};
+                    [self.contactsVC hideConnecting:info];
+                }
+            }];
+                _loginStarted=NO;
+                // try again
+                if((self.accountState<kStateHasStream) && (_loggedInOnce))
+                {
+                    DDLogInfo(@"trying to login again");
+                    //make sure we are enabled still.
+                    if([[DataLayer sharedInstance] isAccountEnabled:[NSString stringWithFormat:@"%@",self.accountNo]]) {
+                        
+                        //temp background task while a new one is created
+                        __block UIBackgroundTaskIdentifier tempTask= [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
+                            [[UIApplication sharedApplication] endBackgroundTask:tempTask];
+                            tempTask=UIBackgroundTaskInvalid;
+                        }];
+                        [self reconnect];
+                        
                         [[UIApplication sharedApplication] endBackgroundTask:tempTask];
                         tempTask=UIBackgroundTaskInvalid;
-                    }];
+                        
+                    }
+                }
+                else if (self.accountState==kStateLoggedIn ) {
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kMLHasConnectedNotice object:nil];
+                }
+                else {
+                    DDLogInfo(@"failed to login and not retrying");
+                }
+                
+            });
+            
+            dispatch_source_cancel(loginCancelOperation);
+            
+    
+        dispatch_source_set_cancel_handler(loginCancelOperation, ^{
+            DDLogInfo(@"login timer cancelled");
+            if(self.accountState<kStateHasStream)
+            {
+                if(!_reconnectScheduled)
+                {
+                    _loginStarted=NO;
+                    DDLogInfo(@"login client does not have stream");
+                    _accountState=kStateReconnecting;
                     [self reconnect];
-                    
-                    [[UIApplication sharedApplication] endBackgroundTask:tempTask];
-                    tempTask=UIBackgroundTaskInvalid;
-                    
                 }
             }
-            else if (self.accountState==kStateLoggedIn ) {
-                [[NSNotificationCenter defaultCenter] postNotificationName:kMLHasConnectedNotice object:nil];
-            }
-            else {
-                DDLogInfo(@"failed to login and not retrying");
-            }
-            
         });
         
-        dispatch_source_cancel(loginCancelOperation);
-        
-    });
-    
-    dispatch_source_set_cancel_handler(loginCancelOperation, ^{
-        DDLogInfo(@"login timer cancelled");
-        if(self.accountState<kStateHasStream)
-        {
-            if(!_reconnectScheduled)
-            {
-                _loginStarted=NO;
-                DDLogInfo(@"login client does not have stream");
-                _accountState=kStateReconnecting;
-                [self reconnect];
-            }
-        }
-    });
-    
-    dispatch_resume(loginCancelOperation);
+        dispatch_resume(loginCancelOperation);
+    }];
     
 }
 
@@ -403,33 +408,32 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         stream.element=@"/stream:stream"; //hack to close stream
         [self send:stream];
         self.streamID=nil;
-        [self.readQueue addOperation:
+        [self.networkQueue addOperation:
          [NSBlockOperation blockOperationWithBlock:^{
             self.unAckedStanzas=nil;
         }]];
     }
     
     if(kStateDisconnected) return;
-    [self.readQueue cancelAllOperations];
-    [self.writeQueue cancelAllOperations];
-    
-    self.pingID=nil;
-    DDLogInfo(@"removing streams");
-    
-    //prevent any new read or write
-    [_iStream setDelegate:nil];
-    [_oStream setDelegate:nil];
-    
-    [_oStream removeFromRunLoop:[NSRunLoop currentRunLoop]
-                        forMode:NSDefaultRunLoopMode];
-    
-    [_iStream removeFromRunLoop:[NSRunLoop currentRunLoop]
-                        forMode:NSDefaultRunLoopMode];
-    DDLogInfo(@"removed streams");
-    
-    
-    [self.readQueue addOperation:
+    [self.networkQueue cancelAllOperations];
+
+    [self.networkQueue addOperation:
      [NSBlockOperation blockOperationWithBlock:^{
+        self.connectedTime =nil; 
+        self.pingID=nil;
+        DDLogInfo(@"removing streams");
+        
+        //prevent any new read or write
+        [_iStream setDelegate:nil];
+        [_oStream setDelegate:nil];
+        
+        [_oStream removeFromRunLoop:[NSRunLoop currentRunLoop]
+                            forMode:NSDefaultRunLoopMode];
+        
+        [_iStream removeFromRunLoop:[NSRunLoop currentRunLoop]
+                            forMode:NSDefaultRunLoopMode];
+        DDLogInfo(@"removed streams");
+        
         
         @try
         {
@@ -440,12 +444,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         {
             DDLogError(@"Exception in istream close");
         }
-    }]];
-    
-    [self.writeQueue addOperation:
-     [NSBlockOperation blockOperationWithBlock:^{
         
-       	@try
+        @try
         {
             [_oStream close];
             _outputQueue=[[NSMutableArray alloc] init];
@@ -454,6 +454,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         {
             DDLogError(@"Exception in ostream close");
         }
+        
         
     }]];
     
@@ -512,10 +513,16 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     DDLogVerbose(@"reconnecting ");
     //can be called multiple times
     
-    if(_loginStarted) {
+    if(_loginStarted && [[NSDate date] timeIntervalSinceDate:self.loginStartTimeStamp]<=10) {
         DDLogVerbose(@"reconnect called while one already in progress. Stopping.");
         return;
     }
+    else if (_loginStarted && [[NSDate date] timeIntervalSinceDate:self.loginStartTimeStamp]>10)
+    {
+        DDLogVerbose(@"reconnect called while one already in progress that took more than 10 seconds. disconnect before reconnect.");
+        [self disconnect];
+    }
+    
     _loginStarted=YES;
     
     __block UIBackgroundTaskIdentifier reconnectBackgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
@@ -592,7 +599,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) startStream
 {
-    [self.readQueue addOperation:
+    [self.networkQueue addOperation:
      [NSBlockOperation blockOperationWithBlock:^{
         //flush buffer to ignore all prior input
         _inputBuffer=[[NSMutableString alloc] init];
@@ -611,6 +618,44 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 }
 
 
+-(void)setPingTimerForID:(NSString *)pingID
+{
+    DDLogInfo(@"setting timer for ping %@", pingID);
+    self.pingID=pingID;
+    dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    dispatch_source_t pingTimeOut = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,
+                                                           q_background);
+    
+    dispatch_source_set_timer(pingTimeOut,
+                              dispatch_time(DISPATCH_TIME_NOW, kConnectTimeout* NSEC_PER_SEC),
+                              DISPATCH_TIME_FOREVER,
+                              1ull * NSEC_PER_SEC);
+    
+    dispatch_source_set_event_handler(pingTimeOut, ^{
+        
+        if(self.pingID)
+        {
+            DDLogVerbose(@"ping timed out without a reply to %@",self.pingID);
+            _accountState=kStateReconnecting;
+            [self reconnect];
+        }
+        else
+        {
+            DDLogVerbose(@"ping reply was seen");
+            
+        }
+        
+        dispatch_source_cancel(pingTimeOut);
+        
+    });
+    
+    dispatch_source_set_cancel_handler(pingTimeOut, ^{
+        DDLogInfo(@"ping timer cancelled");
+    });
+    
+    dispatch_resume(pingTimeOut);
+}
+
 -(void) sendPing
 {
     if(self.accountState<kStateReconnecting  && !_reconnectScheduled)
@@ -623,8 +668,16 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     if(self.accountState<kStateLoggedIn)
     {
-        DDLogInfo(@"ping attempt before logged in. returning.");
-        return;
+        if(_loginStarted && [[NSDate date] timeIntervalSinceDate:self.loginStartTimeStamp]<=10) {
+            DDLogInfo(@"ping attempt before logged in. returning.");
+            return;
+        }
+        else if (_loginStarted && [[NSDate date] timeIntervalSinceDate:self.loginStartTimeStamp]>10)
+        {
+            DDLogVerbose(@"ping called while one already in progress that took more than 10 seconds. disconnect before reconnect.");
+            [self reconnect:0];
+        }
+    
     }
     
     if(self.supportsSM3 && self.unAckedStanzas)
@@ -636,49 +689,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     else  {
         //get random number
-        self.pingID=[NSString stringWithFormat:@"Monal%d",arc4random()%100000];
-        
-        dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-        dispatch_source_t pingTimeOut = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,
-                                                               q_background);
-        
-        dispatch_source_set_timer(pingTimeOut,
-                                  dispatch_time(DISPATCH_TIME_NOW, kConnectTimeout* NSEC_PER_SEC),
-                                  kConnectTimeout* NSEC_PER_SEC,
-                                  1ull * NSEC_PER_SEC);
-        
-        dispatch_source_set_event_handler(pingTimeOut, ^{
-            
-            if(self.pingID)
-            {
-                DDLogVerbose(@"ping timed out without a reply to %@",self.pingID);
-                _accountState=kStateReconnecting;
-                [self reconnect];
-            }
-            else
-            {
-                DDLogVerbose(@"ping reply was seen");
-                
-            }
-            
-            dispatch_source_cancel(pingTimeOut);
-            
-        });
-        
-        dispatch_source_set_cancel_handler(pingTimeOut, ^{
-            DDLogInfo(@"ping timer cancelled");
-        });
-        
-        dispatch_resume(pingTimeOut);
-        
-        
-        XMPPIQ* ping =[[XMPPIQ alloc] initWithId:self.pingID andType:kiqGetType];
+        XMPPIQ* ping =[[XMPPIQ alloc] initWithId:[NSString stringWithFormat:@"Monal%d",arc4random()%100000]andType:kiqGetType];
         [ping setiqTo:_domain];
         [ping setPing];
         [self send:ping];
     }
-    
-    
 }
 
 -(void) sendWhiteSpacePing
@@ -914,12 +929,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     //prevent reconnect attempt
     if(_accountState<kStateHasStream) _accountState=kStateHasStream;
-    [self.readQueue addOperation:
-     [NSBlockOperation blockOperationWithBlock:^{
-        
+    [self.networkQueue addOperationWithBlock:^{
         NSDictionary* stanzaToParse=[self nextStanza];
         while (stanzaToParse)
         {
+            [self.processQueue addOperationWithBlock:^{
             self.lastHandledInboundStanza=[NSNumber numberWithInteger: [self.lastHandledInboundStanza integerValue]+1];
             DDLogVerbose(@"got stanza %@", stanzaToParse);
             
@@ -1027,9 +1041,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                             kaccountNoKey:_accountNo
                                             };
                     
-                    dispatch_async(_xmppQueue, ^{
+                    [self.networkQueue addOperationWithBlock:^{
                         [self.contactsVC addOnlineUser:userDic];
-                    });
+                    }];
                     
                 }
                 
@@ -1368,131 +1382,131 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             {
                 ParsePresence* presenceNode= [[ParsePresence alloc]  initWithDictionary:stanzaToParse];
                 if([presenceNode.user isEqualToString:_fulluser]) {
-                    stanzaToParse=[self nextStanza];
-                    continue; //ignore self
+                        //ignore self
                 }
-                
-                if([presenceNode.type isEqualToString:kpresencesSubscribe])
-                {
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"Do you wish to allow %@ to add you to their contacts?", nil), presenceNode.from ];
-                        RIButtonItem* cancelButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"No", nil) action:^{
-                            [self rejectFromRoster:presenceNode.from];
-                            
-                        }];
-                        
-                        RIButtonItem* yesButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Yes", nil) action:^{
-                            [self approveToRoster:presenceNode.from];
-                            [self addToRoster:presenceNode.from];
-                            
-                        }];
-                        
-                        UIAlertView* alert =[[UIAlertView alloc] initWithTitle:@"Approve Contact" message:messageString cancelButtonItem:cancelButton otherButtonItems:yesButton, nil];
-                        [alert show];
-                    });
-                    
-                }
-                
-                if(presenceNode.MUC)
-                {
-                    for (NSString* code in presenceNode.statusCodes) {
-                        if([code isEqualToString:@"201"]) {
-                            //201- created and needs configuration
-                            //make instant room
-                            XMPPIQ *configNode = [[XMPPIQ alloc] initWithId:_sessionKey andType:kiqSetType];
-                            [configNode setiqTo:presenceNode.from];
-                            [configNode setInstantRoom];
-                            [self send:configNode];
-                        }
-                    }
-                    
-                    //mark buddy as MUC
-                }
-                
-                if(presenceNode.type ==nil)
-                {
-                    DDLogVerbose(@"presence priority notice from %@", presenceNode.user);
-                    
-                    if((presenceNode.user!=nil) && ([[presenceNode.user stringByTrimmingCharactersInSet:
-                                                      [NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0))
+                else {
+                    if([presenceNode.type isEqualToString:kpresencesSubscribe])
                     {
-                        if(![[DataLayer sharedInstance] isBuddyInList:presenceNode.user forAccount:_accountNo])
-                        {
-                            DDLogVerbose(@"Buddy not already in list");
-                            [[DataLayer sharedInstance] addBuddy:presenceNode.user forAccount:_accountNo fullname:@"" nickname:@"" ];
-                        }
-                        else
-                        {
-                            DDLogVerbose(@"Buddy already in list");
-                        }
-                        
-                        DDLogVerbose(@" showing as online now");
-                        
-                        [[DataLayer sharedInstance] setOnlineBuddy:presenceNode forAccount:_accountNo];
-                        [[DataLayer sharedInstance] setBuddyState:presenceNode forAccount:_accountNo];
-                        [[DataLayer sharedInstance] setBuddyStatus:presenceNode forAccount:_accountNo];
-                        
-                        NSString* state=presenceNode.show;
-                        if(!state) state=@"";
-                        NSString* status=presenceNode.status;
-                        if(!status) status=@"";
-                        NSDictionary* userDic=@{kusernameKey: presenceNode.user,
-                                                kaccountNoKey:_accountNo,
-                                                kstateKey:state,
-                                                kstatusKey:status
-                                                };
-                        dispatch_async(_xmppQueue, ^{
-                            [self.contactsVC addOnlineUser:userDic];
-                            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactOnlineNotice object:self userInfo:userDic];
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"Do you wish to allow %@ to add you to their contacts?", nil), presenceNode.from ];
+                            RIButtonItem* cancelButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"No", nil) action:^{
+                                [self rejectFromRoster:presenceNode.from];
+                                
+                            }];
+                            
+                            RIButtonItem* yesButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Yes", nil) action:^{
+                                [self approveToRoster:presenceNode.from];
+                                [self addToRoster:presenceNode.from];
+                                
+                            }];
+                            
+                            UIAlertView* alert =[[UIAlertView alloc] initWithTitle:@"Approve Contact" message:messageString cancelButtonItem:cancelButton otherButtonItems:yesButton, nil];
+                            [alert show];
                         });
                         
-                        if(!presenceNode.MUC) {
-                            // do not do this in the background
-                            if([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground)
+                    }
+                    
+                    if(presenceNode.MUC)
+                    {
+                        for (NSString* code in presenceNode.statusCodes) {
+                            if([code isEqualToString:@"201"]) {
+                                //201- created and needs configuration
+                                //make instant room
+                                XMPPIQ *configNode = [[XMPPIQ alloc] initWithId:_sessionKey andType:kiqSetType];
+                                [configNode setiqTo:presenceNode.from];
+                                [configNode setInstantRoom];
+                                [self send:configNode];
+                            }
+                        }
+                        
+                        //mark buddy as MUC
+                    }
+                    
+                    if(presenceNode.type ==nil)
+                    {
+                        DDLogVerbose(@"presence priority notice from %@", presenceNode.user);
+                        
+                        if((presenceNode.user!=nil) && ([[presenceNode.user stringByTrimmingCharactersInSet:
+                                                          [NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0))
+                        {
+                            if(![[DataLayer sharedInstance] isBuddyInList:presenceNode.user forAccount:_accountNo])
                             {
-                                //check for vcard change
-                                if(presenceNode.photoHash) {
-                                    if([presenceNode.photoHash isEqualToString:[[DataLayer sharedInstance]  buddyHash:presenceNode.user forAccount:_accountNo]])
-                                    {
-                                        DDLogVerbose(@"photo hash is the  same");
-                                    }
-                                    else
-                                    {
-                                        [[DataLayer sharedInstance]  setBuddyHash:presenceNode forAccount:_accountNo];
-                                        XMPPIQ* iqVCard= [[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
-                                        [iqVCard getVcardTo:presenceNode.user];
-                                        [self send:iqVCard];
-                                    }
-                                }
+                                DDLogVerbose(@"Buddy not already in list");
+                                [[DataLayer sharedInstance] addBuddy:presenceNode.user forAccount:_accountNo fullname:@"" nickname:@"" ];
                             }
                             else
                             {
-                                // just set and request when in foreground if needed
-                                [[DataLayer sharedInstance]  setBuddyHash:presenceNode forAccount:_accountNo];
+                                DDLogVerbose(@"Buddy already in list");
                             }
-                        }
-                        else {
+                            
+                            DDLogVerbose(@" showing as online now");
+                            
+                            [[DataLayer sharedInstance] setOnlineBuddy:presenceNode forAccount:_accountNo];
+                            [[DataLayer sharedInstance] setBuddyState:presenceNode forAccount:_accountNo];
+                            [[DataLayer sharedInstance] setBuddyStatus:presenceNode forAccount:_accountNo];
+                            
+                            NSString* state=presenceNode.show;
+                            if(!state) state=@"";
+                            NSString* status=presenceNode.status;
+                            if(!status) status=@"";
+                            NSDictionary* userDic=@{kusernameKey: presenceNode.user,
+                                                    kaccountNoKey:_accountNo,
+                                                    kstateKey:state,
+                                                    kstatusKey:status
+                                                    };
+                            [self.networkQueue addOperationWithBlock: ^{
+                                [self.contactsVC addOnlineUser:userDic];
+                                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactOnlineNotice object:self userInfo:userDic];
+                            }];
+                            
+                            if(!presenceNode.MUC) {
+                                // do not do this in the background
+                                if([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground)
+                                {
+                                    //check for vcard change
+                                    if(presenceNode.photoHash) {
+                                        if([presenceNode.photoHash isEqualToString:[[DataLayer sharedInstance]  buddyHash:presenceNode.user forAccount:_accountNo]])
+                                        {
+                                            DDLogVerbose(@"photo hash is the  same");
+                                        }
+                                        else
+                                        {
+                                            [[DataLayer sharedInstance]  setBuddyHash:presenceNode forAccount:_accountNo];
+                                            XMPPIQ* iqVCard= [[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
+                                            [iqVCard getVcardTo:presenceNode.user];
+                                            [self send:iqVCard];
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    // just set and request when in foreground if needed
+                                    [[DataLayer sharedInstance]  setBuddyHash:presenceNode forAccount:_accountNo];
+                                }
+                            }
+                            else {
+                                
+                            }
                             
                         }
-                        
+                        else
+                        {
+                            DDLogError(@"ERROR: presence priority notice but no user name.");
+                            
+                        }
                     }
-                    else
+                    else if([presenceNode.type isEqualToString:kpresenceUnavailable])
                     {
-                        DDLogError(@"ERROR: presence priority notice but no user name.");
+                        if ([[DataLayer sharedInstance] setOfflineBuddy:presenceNode forAccount:_accountNo] ) {
+                            NSDictionary* userDic=@{kusernameKey: presenceNode.user,
+                                                    kaccountNoKey:_accountNo};
+                            [self.networkQueue addOperationWithBlock: ^{
+                                [self.contactsVC removeOnlineUser:userDic];
+                                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactOfflineNotice object:self userInfo:userDic];
+                            }];
+                        }
                         
                     }
-                }
-                else if([presenceNode.type isEqualToString:kpresenceUnavailable])
-                {
-                    if ([[DataLayer sharedInstance] setOfflineBuddy:presenceNode forAccount:_accountNo] ) {
-                        NSDictionary* userDic=@{kusernameKey: presenceNode.user,
-                                                kaccountNoKey:_accountNo};
-                        dispatch_async(_xmppQueue, ^{
-                            [self.contactsVC removeOnlineUser:userDic];
-                            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactOfflineNotice object:self userInfo:userDic];
-                        });
-                    }
-                    
                 }
                 
             }
@@ -1618,7 +1632,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 self.unAckedStanzas =[[NSMutableArray alloc] init];
                 
             }
-            else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"r"])
+            else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"r"] && self.supportsSM3)
             {
                 XMLNode *aNode =[[XMLNode alloc] initWithElement:@"a"];
                 NSDictionary *dic=@{@"xmlns":@"urn:xmpp:sm:3",@"h":[NSString stringWithFormat:@"%@",self.lastHandledInboundStanza] };
@@ -1626,7 +1640,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 [self send:aNode];
                 
             }
-            else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"a"])
+            else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"a"] && self.supportsSM3)
             {
                 ParseA* aNode= [[ParseA alloc]  initWithDictionary:stanzaToParse];
                 self.lastHandledOutboundStanza=aNode.h;
@@ -1894,23 +1908,30 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         
                         [self startStream];
                         _accountState=kStateLoggedIn;
+                        self.connectedTime=[NSDate date];
                         _loggedInOnce=YES;
                         _loginStarted=NO;
+                        self.loginStartTimeStamp=nil;
                         
                         
                         NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
                                              kinfoTypeKey:@"connect", kinfoStatusKey:@""};
-                        dispatch_async(_xmppQueue, ^{
+                       [self.networkQueue addOperationWithBlock: ^{
                             [self.contactsVC hideConnecting:info];
-                        });
+                        }];
                         
                     }
                 }
             }
             
+            
+        }];
             stanzaToParse=[self nextStanza];
+
         }
-    }]];
+        
+        
+    }];
     
 }
 
@@ -1922,7 +1943,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     if(self.supportsSM3 && self.unAckedStanzas)
     {
-        [self.readQueue addOperation:
+        [self.networkQueue addOperation:
          [NSBlockOperation blockOperationWithBlock:^{
         NSDictionary *dic =@{kStanzaID:[NSNumber numberWithInteger: [self.lastOutboundStanza integerValue]], kStanza:stanza};
         [self.unAckedStanzas addObject:dic];
@@ -1930,7 +1951,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         }]];
     }
     
-    [self.writeQueue addOperation:
+    [self.networkQueue addOperation:
      [NSBlockOperation blockOperationWithBlock:^{
         [_outputQueue addObject:stanza];
         [self writeFromQueue];  // try to send if there is space
@@ -2209,7 +2230,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             //for writing
         case NSStreamEventHasSpaceAvailable:
         {
-            [self.writeQueue addOperation:
+            [self.networkQueue addOperation:
              [NSBlockOperation blockOperationWithBlock:^{
                 _streamHasSpace=YES;
                 
@@ -2223,10 +2244,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         case  NSStreamEventHasBytesAvailable:
         {
             DDLogVerbose(@"Stream has bytes to read");
-            dispatch_async(_xmppQueue, ^{
+            [self.networkQueue addOperationWithBlock: ^{
                 [self readToBuffer];
-            });
-            
+            }];
             
             break;
         }
@@ -2343,6 +2363,18 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 [[NSNotificationCenter defaultCenter] postNotificationName: kMonalSentMessageNotice object:self userInfo:dic];
                 
             }
+            else if([node isKindOfClass:[XMPPIQ class]])
+            {
+                XMPPIQ *iq = (XMPPIQ *)node;
+                if([iq.children count]>0)
+                {
+                    XMLNode *child =[iq.children objectAtIndex:0];
+                    if ([[child element] isEqualToString:@"ping"])
+                    {
+                        [self setPingTimerForID:[iq.attributes objectForKey:@"id"]];
+                    }
+                }
+            }
         }
     }
     
@@ -2397,7 +2429,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         if(data)
         {
             // DDLogVerbose(@"waiting on net read queue");
-            [self.readQueue addOperation:
+            [self.networkQueue addOperation:
              [NSBlockOperation blockOperationWithBlock:^{
                 
                 // DDLogVerbose(@"got net read queue");

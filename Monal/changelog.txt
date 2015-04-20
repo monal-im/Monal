@@ -18,6 +18,8 @@ This is  update that  fixes bugs.
 2. added ability to search the contacts list
 3. improved stability
 4. fixed bug that caused facebook contacts to not show
+5. broadcast messages are shown in active chats and can be cleared
+6. bug that prevented joinging groups is fixed
 
 
 

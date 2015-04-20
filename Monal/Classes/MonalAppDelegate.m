@@ -248,6 +248,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     {
         [[DataLayer sharedInstance] messageHistoryCleanAll];
     }
+    DDLogInfo(@"App started");
     return YES;
 }
 

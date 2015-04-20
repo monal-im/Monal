@@ -7,10 +7,28 @@
 //
 
 #import "XMPPEdit.h"
+#import "MLAccountCell.h"
 #import "tools.h"
 
 
 static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+
+@interface XMPPEdit()
+@property (nonatomic, strong) NSString *jid;
+@property (nonatomic, strong) NSString *password;
+@property (nonatomic, strong) NSString *resource;
+@property (nonatomic, strong) NSString *server;
+@property (nonatomic, strong) NSString *port;
+
+@property (nonatomic, assign) BOOL enabled;
+@property (nonatomic, assign) BOOL useSSL;
+@property (nonatomic, assign) BOOL oldStyleSSL;
+@property (nonatomic, assign) BOOL selfSignedSSL;
+
+@property (nonatomic, weak) UITextField *currentTextField;
+
+@end
+    
 
 @implementation XMPPEdit
 
@@ -33,13 +51,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) hideKeyboard
 {
-	[userText resignFirstResponder];
-    [passText resignFirstResponder];
-    [enableSwitch resignFirstResponder];
-	
-    [serverText resignFirstResponder];
-    [portText resignFirstResponder];
-    [resourceText resignFirstResponder];
+    [self.currentTextField resignFirstResponder];
 }
 
 #pragma mark view lifecylce
@@ -47,12 +59,17 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    
+    [self.tableView registerNib:[UINib nibWithNibName:@"MLAccountCell"
+                                               bundle:[NSBundle mainBundle]]
+         forCellReuseIdentifier:@"AccountCell"];
+    
     _db= [DataLayer sharedInstance];
     
     self.sectionArray =  [NSArray arrayWithObjects:@"Account", @"Advanced Settings", nil];
 	if(![_accountno isEqualToString:@"-1"])
 	{
-        _editing=true;
+        self.editMode=true;
 	} 
 	
 	DDLogVerbose(@"got account number %@", _accountno);
@@ -60,7 +77,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
     UITapGestureRecognizer *gestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(hideKeyboard)]; // hides the kkyeboard when you tap outside the editing area
     gestureRecognizer.cancelsTouchesInView=false; //this prevents it from blocking the button
-    [theTable addGestureRecognizer:gestureRecognizer];
+    [self.tableView addGestureRecognizer:gestureRecognizer];
 
     
 	if(_originIndex.section==0)
@@ -71,23 +88,24 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		
         //allow blank domains.. dont show @ if so
         if([[settings objectForKey:@"domain"] length]>0)
-            userText.text=[NSString stringWithFormat:@"%@@%@",[settings objectForKey:@"username"],[settings objectForKey:@"domain"]];
+            self.jid=[NSString stringWithFormat:@"%@@%@",[settings objectForKey:@"username"],[settings objectForKey:@"domain"]];
 		else
-            userText.text=[NSString stringWithFormat:@"%@",[settings objectForKey:@"username"]];
+           self.jid=[NSString stringWithFormat:@"%@",[settings objectForKey:@"username"]];
         
-		PasswordManager* pass= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",_accountno]];
-		passText.text=[pass getPassword];
-        
-		serverText.text=[settings objectForKey:@"server"];
 		
-		portText.text=[NSString stringWithFormat:@"%@", [settings objectForKey:@"other_port"]];
-		resourceText.text=[settings objectForKey:@"resource"];
-		
-        sslSwitch.on=[[settings objectForKey:@"secure"] boolValue];
-		enableSwitch.on=[[settings objectForKey:@"enabled"] boolValue];
+        PasswordManager* pass= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",_accountno]];
+        self.password=[pass getPassword];
         
-        oldStyleSSLSwitch.on=[[settings objectForKey:@"oldstyleSSL"] boolValue];
-		checkCertSwitch.on=[[settings objectForKey:@"selfsigned"] boolValue];
+		self.server=[settings objectForKey:@"server"];
+		
+		self.port=[NSString stringWithFormat:@"%@", [settings objectForKey:@"other_port"]];
+		self.resource=[settings objectForKey:@"resource"];
+		
+        self.useSSL=[[settings objectForKey:@"secure"] boolValue];
+		self.enabled=[[settings objectForKey:@"enabled"] boolValue];
+        
+        self.oldStyleSSL=[[settings objectForKey:@"oldstyleSSL"] boolValue];
+		self.selfSignedSSL=[[settings objectForKey:@"selfsigned"] boolValue];
 		
 	
 		if([[settings objectForKey:@"domain"] isEqualToString:@"gmail.com"])
@@ -102,36 +120,36 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		if(_originIndex.row==1)
 		{
 			JIDLabel.text=@"GTalk ID";
-			serverText.text=@"talk.google.com";
-			userText.text=@"@gmail.com";
+			self.server=@"talk.google.com";
+			self.jid=@"@gmail.com";
 		}
 		
-		portText.text=@"5222";
-		resourceText.text=@"Monal";
-		sslSwitch.on=true;
+		self.port=@"5222";
+		self.resource=@"Monal";
+		self.useSSL=true;
 		
         
 		if(_originIndex.row==2)
 		{
-			serverText.text=@"chat.facebook.com";
-			userText.text=@"@chat.facebook.com";
-			sslSwitch.on=true;
+			self.server=@"chat.facebook.com";
+			self.jid=@"@chat.facebook.com";
+			self.useSSL=true;
 		}
 		
-		oldStyleSSLSwitch.on=NO;
-        checkCertSwitch.on=NO;
+		self.oldStyleSSL=NO;
+        self.selfSignedSSL=NO;
 		
 	}
     
-    theTable.backgroundView=nil;
+    self.tableView.backgroundView=nil;
     
     if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0"))
     {
-        
+       
     }
-    else
-    [theTable setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"debut_dark"]]];
-    
+    else {
+        [self.tableView setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"debut_dark"]]];
+    }
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -148,7 +166,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	DDLogVerbose(@"xmpp edit view will hide");
 	[self save];
 	
-   
+    [ [MLXMPPManager sharedInstance].passwordDic setObject:self.password forKey:self.accountno];
     
 }
 
@@ -161,10 +179,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) save
 {
-	
+    [self.currentTextField resignFirstResponder];
+    
 	DDLogVerbose(@"Saving");
 
-	if([userText.text length]==0)
+	if([self.jid length]==0)
 	{
 		return ;
 	}
@@ -180,19 +199,19 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	 */
 	
 	
-	if([userText.text characterAtIndex:0]=='@')
+	if([self.jid characterAtIndex:0]=='@')
 	{
 		//first char =@ means no username in jid
 		return;
 	}
     
-	NSArray* elements=[userText.text componentsSeparatedByString:@"@"];
+	NSArray* elements=[self.jid componentsSeparatedByString:@"@"];
 	
     //default just use JID
-	if([serverText.text length]==0)
+	if([self.server length]==0)
 	{
 		if([elements count]>1)
-            serverText.text=[elements objectAtIndex:1];
+            self.server=[elements objectAtIndex:1];
 	}
 	
 	
@@ -204,15 +223,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	}
 	else
 	{
-		user=userText.text;
+		user=self.jid;
 		domain= @"";
 	}
 	
-	if(!_editing)
+	if(!self.editMode)
 	{
         
-		if(([userText.text length]==0) &&
-           ([passText.text length]==0)
+		if(([self.jid length]==0) &&
+           ([self.password length]==0)
            )
 		{
 			//ignoring blank
@@ -221,27 +240,28 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		{
 			
 			[_db addAccount:
-             userText.text  :
+             self.jid  :
              @"1":
                       user:
              @"":
-             serverText.text:
-             portText.text :
-             sslSwitch.on:
-             resourceText.text:
+             self.server:
+             self.port :
+             self.useSSL:
+            self.resource:
                      domain:
-             enableSwitch.on:
-             checkCertSwitch.on:
-             oldStyleSSLSwitch.on
+             self.enabled:
+             self.selfSignedSSL:
+            self.oldStyleSSL
              ];
 			
 			
 			// save password
-			
-		
-			NSString* val = [NSString stringWithFormat:@"%@", [_db executeScalar:@"select max(account_id) from account"]];
+			  NSString* val = [NSString stringWithFormat:@"%@", [_db executeScalar:@"select max(account_id) from account"]];
             PasswordManager* pass= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",val]];
-            [pass setPassword:passText.text] ;
+            [pass setPassword:self.password] ;
+
+		
+	
             
             [[MLXMPPManager sharedInstance]  connectIfNecessary];
 			
@@ -252,26 +272,25 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         
 		
         [_db updateAccount:
-         userText.text  :
+         self.jid  :
          @"1":
                     user :
          @"" :
-         serverText.text:
-         portText.text :
-         sslSwitch.on:
-         resourceText.text:
+         self.server:
+         self.port :
+         self.useSSL:
+        self.resource:
                    domain:
-         enableSwitch.on:
+         self.enabled:
                 _accountno:
-         checkCertSwitch.on:
-         oldStyleSSLSwitch.on];
+         self.selfSignedSSL:
+        self.oldStyleSSL];
         
-        //save password
+
         PasswordManager* pass= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",_accountno]];
-        [pass setPassword: passText.text] ;
-        
-   
-        if(enableSwitch.on)
+        [pass setPassword:self.password] ;
+  
+        if(self.enabled)
         {
             DDLogVerbose(@"calling connect... ");
             [[MLXMPPManager sharedInstance] connectAccount:_accountno];
@@ -335,16 +354,37 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 	DDLogVerbose(@"xmpp edit view section %d, row %d", indexPath.section, indexPath.row);
     
-	UITableViewCell* thecell;
+	MLAccountCell* thecell=(MLAccountCell *)[tableView dequeueReusableCellWithIdentifier:@"AccountCell"];
+    
     // load cells from interface builder
 	if(indexPath.section==0)
 	{
 		//the user
 		switch (indexPath.row)
 		{
-			case 0: thecell=usernameCell; break;
-			case 1: thecell=passwordCell ;break;
-			case 2: thecell=enableCell ;break;
+            case 0: {
+                thecell.cellLabel.text=@"Jabber Id";
+                thecell.toggleSwitch.hidden=YES;
+                thecell.textInputField.tag=1;
+                thecell.textInputField.text=self.jid;
+                break;
+            }
+            case 1: {
+                thecell.cellLabel.text=@"Password";
+                thecell.toggleSwitch.hidden=YES;
+                thecell.textInputField.secureTextEntry=YES;
+                thecell.textInputField.tag=2;
+                thecell.textInputField.text=self.password;
+                break;
+            }
+            case 2: {
+                thecell.cellLabel.text=@"Enabled";
+                thecell.textInputField.hidden=YES;
+                thecell.toggleSwitch.tag=1;
+                thecell.toggleSwitch.on=self.enabled;
+                break;
+            }
+
 		}
 	}
 	else
@@ -352,17 +392,56 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		switch (indexPath.row)
 		{
                 //advanced
-            case 0: thecell=serverCell; break;
-            case 1: thecell=portCell ;break;
+            case 0:  {
+                thecell.cellLabel.text=@"Server";
+                thecell.toggleSwitch.hidden=YES;
+                thecell.textInputField.tag=3;
+                 thecell.textInputField.text=self.server;
+                break;
+            }
+
+            case 1:  {
+                thecell.cellLabel.text=@"Port";
+                thecell.toggleSwitch.hidden=YES;
+                thecell.textInputField.tag=4;
+                 thecell.textInputField.text=self.port;
+                break;
+            }
+
                 
-            case 2: thecell=resourceCell; break;
-            case 3: thecell=SSLCell ;break;
-             case 4: thecell=oldStyleSSLCell ;break;
-                 case 5: thecell=checkCertCell ;break;
+            case 2:  {
+                thecell.cellLabel.text=@"Resource";
+                thecell.toggleSwitch.hidden=YES;
+                thecell.textInputField.tag=5;
+                 thecell.textInputField.text=self.resource;
+                break;
+            }
+
+            case 3: {
+                thecell.cellLabel.text=@"SSL";
+               thecell.textInputField.hidden=YES;
+                thecell.toggleSwitch.tag=2;
+               thecell.toggleSwitch.on=self.useSSL;
+                break;
+            }
+            case 4: {
+                thecell.cellLabel.text=@"Old Style SSL";
+               thecell.textInputField.hidden=YES;
+                thecell.toggleSwitch.tag=3;
+                thecell.toggleSwitch.on=self.oldStyleSSL;
+                break;
+            }
+            case 5: {
+                thecell.cellLabel.text=@"Self Signed";
+               thecell.textInputField.hidden=YES;
+                thecell.toggleSwitch.tag=4;
+                thecell.toggleSwitch.on=self.selfSignedSSL;
+                break;
+            }
 				
 			case 6:
 			{
-				if(_editing==true)
+				if(self.editMode==true)
 				{
                     
                     thecell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"DeleteCell"];
@@ -396,6 +475,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		}
         
 	}
+    
+    if(indexPath.row!=6)
+    {
+        thecell.textInputField.delegate=self;
+        if(thecell.textInputField.hidden==YES)
+        {
+            [thecell.toggleSwitch addTarget:self action:@selector(toggleSwitch:) forControlEvents:UIControlEventValueChanged];
+        }
+    }
     
     thecell.selectionStyle= UITableViewCellSelectionStyleNone;
     
@@ -454,7 +542,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		return 3;
     else
     {
-        if(_editing==false)
+        if(self.editMode==false)
         {
             if(section==1)
                 return 6;
@@ -476,10 +564,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
 	DDLogVerbose(@"selected log section %d , row %d", newIndexPath.section, newIndexPath.row);
 }
+#pragma mark text input  fielddelegate
 
 - (void)textFieldDidBeginEditing:(UITextField *)textField
 {
-    if(textField==userText)
+    self.currentTextField=textField;
+    if(textField.tag==1) //user input field
     {
         if(textField.text.length >0) {
             // Construct a new range using the object that adopts the UITextInput, our textfield
@@ -489,19 +579,101 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             [textField setSelectedTextRange:newRange];
         }
     }
+   
 }
+
+- (void)textFieldDidEndEditing:(UITextField *)textField
+{
+    switch (textField.tag) {
+        case 1: {
+            self.jid=textField.text;
+            break;
+        }
+        case 2: {
+            self.password=textField.text;
+            break;
+        }
+            
+        case 3: {
+            self.server=textField.text;
+            break;
+        }
+            
+        case 4: {
+            self.port=textField.text;
+            break;
+        }
+        case 5: {
+            self.resource=textField.text;
+            break;
+        }
+            
+        default:
+            break;
+    }
+    
+}
+
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField
 {
-	
+
 	[textField resignFirstResponder];
-    
-    
 	return true;
 }
 
 
+-(void) toggleSwitch:(id)sender
+{
+   UISwitch *toggle = (UISwitch *) sender;
+    
+    switch (toggle.tag) {
+        case 1: {
+            if(toggle.on)
+            {
+                self.enabled=YES;
+            }
+            else {
+                self.enabled=NO;
+            }
+            break;
+        }
+        case 2: {
+            if(toggle.on)
+            {
+                self.useSSL=YES;
+            }
+            else {
+                self.useSSL=NO;
+            }
+            break;
+        }
+            
+        case 3: {
+            if(toggle.on)
+            {
+                self.oldStyleSSL=YES;
+            }
+            else {
+                self.oldStyleSSL=NO;
+            }
+            break;
+        }
+        case 4: {
+            if(toggle.on)
+            {
+                self.selfSignedSSL=YES;
+            }
+            else {
+                self.selfSignedSSL=NO;
+            }
+            
+            break;
+        }
+    }
 
+ 
+}
 
 
 @end

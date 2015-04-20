@@ -76,6 +76,11 @@ Returns the name of the conencted account
  */
 -(BOOL) isAccountForIdConnected:(NSString*) accountNo;
 
+/**
+ When the account estblihsed its current connection. 
+ */
+-(NSDate *) connectedTimeFor:(NSString*) accountNo;
+
 #pragma mark MUC commands
 /**
  Gets a list of rooms on the confernce server
@@ -151,6 +156,11 @@ Returns the name of the conencted account
  updates delivery status after message has been sent
  */
 -(void) handleSentMessage:(NSNotification *)notification;
+
+/**
+ only used when the device is not in the foregreound and unlocked e.g when it doesnt have access to the keychain
+ */
+@property (nonatomic, strong) NSMutableDictionary *passwordDic;
 
 
 @end

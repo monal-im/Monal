@@ -98,6 +98,7 @@
         cell =[[MLContactCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"ContactCell"];
     }
     
+
     NSDictionary* row = [_contacts objectAtIndex:indexPath.row];
     
     NSString* fullName=[row objectForKey:@"full_name"];
@@ -109,8 +110,13 @@
     }
     
     
-    if(![[row objectForKey:@"status"] isEqualToString:@"(null)"] && ![[row objectForKey:@"status"] isEqualToString:@""])
+    if(![[row objectForKey:@"status"] isEqualToString:@"(null)"] && ![[row objectForKey:@"status"] isEqualToString:@""]) {
         cell.detailTextLabel.text=[row objectForKey:@"status"];
+    }
+    else
+    {
+        cell.detailTextLabel.text=nil;
+    }
     
     if(([[row objectForKey:@"state"] isEqualToString:@"away"]) ||
        ([[row objectForKey:@"state"] isEqualToString:@"dnd"])||

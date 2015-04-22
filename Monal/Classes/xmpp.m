@@ -883,6 +883,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             //  DDLogVerbose(@"to del start %d end %d: %@", finalstart, finalend, _inputBuffer);
             if(finalend <[_inputBuffer length] ) {
                 [_inputBuffer deleteCharactersInRange:NSMakeRange(finalstart, finalend-finalstart) ];
+            } else {
+                 [_inputBuffer deleteCharactersInRange:NSMakeRange(finalstart, [_inputBuffer length] -finalstart) ];
             }
             //  DDLogVerbose(@"result: %@", _inputBuffer);
         }

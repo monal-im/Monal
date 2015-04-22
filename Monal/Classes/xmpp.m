@@ -149,15 +149,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) setRunLoop
 {
-    dispatch_async(dispatch_get_current_queue(), ^{
         [_oStream setDelegate:self];
-        [_oStream scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
+        [_oStream scheduleInRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
         
         [_iStream setDelegate:self];
-        [_iStream scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
-        
-        [[NSRunLoop currentRunLoop]run];
-    });
+        [_iStream scheduleInRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
 }
 
 -(void) createStreams
@@ -428,10 +424,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         [_iStream setDelegate:nil];
         [_oStream setDelegate:nil];
         
-        [_oStream removeFromRunLoop:[NSRunLoop currentRunLoop]
+        [_oStream removeFromRunLoop:[NSRunLoop mainRunLoop]
                             forMode:NSDefaultRunLoopMode];
         
-        [_iStream removeFromRunLoop:[NSRunLoop currentRunLoop]
+        [_iStream removeFromRunLoop:[NSRunLoop mainRunLoop]
                             forMode:NSDefaultRunLoopMode];
         DDLogInfo(@"removed streams");
         

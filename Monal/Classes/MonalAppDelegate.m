@@ -161,13 +161,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     UIColor *monaldarkGreen =[UIColor colorWithRed:20.0/255 green:138.0/255 blue:103.0/255 alpha:1.0f];
 
     
-    
-    [[UINavigationBar appearance] setBarTintColor:monalGreen];
-    [[UINavigationBar appearance] setTintColor:[UIColor whiteColor]];
-    [[UINavigationBar appearance] setTitleTextAttributes:@{
-                                                           UITextAttributeTextColor: [UIColor darkGrayColor]
-                                                           }];
-    [[UITabBar appearance] setTintColor:monaldarkGreen];
+    if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0")) {
+        [[UINavigationBar appearance] setBarTintColor:monalGreen];
+        [[UINavigationBar appearance] setTintColor:[UIColor whiteColor]];
+        [[UINavigationBar appearance] setTitleTextAttributes:@{
+                                                               UITextAttributeTextColor: [UIColor darkGrayColor]
+                                                               }];
+        [[UITabBar appearance] setTintColor:monaldarkGreen];
+    }
     
 }
 

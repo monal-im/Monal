@@ -168,6 +168,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                                UITextAttributeTextColor: [UIColor darkGrayColor]
                                                                }];
         [[UITabBar appearance] setTintColor:monaldarkGreen];
+        [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent];
     }
     
 }

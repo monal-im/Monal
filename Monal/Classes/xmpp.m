@@ -1614,12 +1614,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         
                         if(streamNode.supportsSM3)
                         {
-                            self.supportsSM3=YES;
-                            
-                            XMLNode *enableNode =[[XMLNode alloc] initWithElement:@"enable"];
-                            NSDictionary *dic=@{@"xmlns":@"urn:xmpp:sm:3",@"resume":@"true" };
-                            enableNode.attributes =[dic mutableCopy];
-                            [self send:enableNode];
+                            [self enableSM3];
                             
                             
                         }
@@ -1677,11 +1672,16 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             }
             else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"failed"])
             {
+                //remove session
+                self.streamID=nil;
+          
+                
                // if resume failed. bind like normal
                 XMPPIQ* iqNode =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqSetType];
                 [iqNode setBindWithResource:_resource];
                 
                 [self send:iqNode];
+                [self enableSM3];
                 
             }
             
@@ -1993,6 +1993,18 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 
 #pragma mark set connection attributes
+
+-(void) enableSM3
+{
+    self.supportsSM3=YES;
+    
+    XMLNode *enableNode =[[XMLNode alloc] initWithElement:@"enable"];
+    NSDictionary *dic=@{@"xmlns":@"urn:xmpp:sm:3",@"resume":@"true" };
+    enableNode.attributes =[dic mutableCopy];
+    [self send:enableNode];
+    
+}
+
 -(void) setStatusMessageText:(NSString*) message
 {
     if([message length]>0)

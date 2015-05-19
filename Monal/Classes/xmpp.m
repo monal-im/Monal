@@ -942,11 +942,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         while (stanzaToParse)
         {
             [self.processQueue addOperationWithBlock:^{
-            self.lastHandledInboundStanza=[NSNumber numberWithInteger: [self.lastHandledInboundStanza integerValue]+1];
+           
             DDLogVerbose(@"got stanza %@", stanzaToParse);
             
             if([[stanzaToParse objectForKey:@"stanzaType"]  isEqualToString:@"iq"])
             {
+                 self.lastHandledInboundStanza=[NSNumber numberWithInteger: [self.lastHandledInboundStanza integerValue]+1];
                 ParseIq* iqNode= [[ParseIq alloc]  initWithDictionary:stanzaToParse];
                 if ([iqNode.type isEqualToString:kiqErrorType])
                 {
@@ -1305,6 +1306,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             }
             else  if([[stanzaToParse objectForKey:@"stanzaType"]  isEqualToString:@"message"])
             {
+                 self.lastHandledInboundStanza=[NSNumber numberWithInteger: [self.lastHandledInboundStanza integerValue]+1];
                 ParseMessage* messageNode= [[ParseMessage alloc]  initWithDictionary:stanzaToParse];
                 if([messageNode.type isEqualToString:kMessageErrorType])
                 {
@@ -1388,6 +1390,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             }
             else  if([[stanzaToParse objectForKey:@"stanzaType"]  isEqualToString:@"presence"])
             {
+                 self.lastHandledInboundStanza=[NSNumber numberWithInteger: [self.lastHandledInboundStanza integerValue]+1];
                 ParsePresence* presenceNode= [[ParsePresence alloc]  initWithDictionary:stanzaToParse];
                 if([presenceNode.user isEqualToString:_fulluser]) {
                         //ignore self

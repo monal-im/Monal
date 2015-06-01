@@ -8,6 +8,7 @@
 
 #import "XMPPEdit.h"
 #import "MLAccountCell.h"
+#import "MLButtonCell.h"
 #import "tools.h"
 
 
@@ -63,6 +64,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self.tableView registerNib:[UINib nibWithNibName:@"MLAccountCell"
                                                bundle:[NSBundle mainBundle]]
          forCellReuseIdentifier:@"AccountCell"];
+    
+    
+    [self.tableView registerNib:[UINib nibWithNibName:@"MLButtonCell"
+                                               bundle:[NSBundle mainBundle]]
+         forCellReuseIdentifier:@"ButtonCell"];
     
     _db= [DataLayer sharedInstance];
     
@@ -252,9 +258,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 			  NSString* val = [NSString stringWithFormat:@"%@", [_db executeScalar:@"select max(account_id) from account"]];
             PasswordManager* pass= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",val]];
             [pass setPassword:self.password] ;
-
-		
-	
             
             [[MLXMPPManager sharedInstance]  connectIfNecessary];
 			
@@ -262,8 +265,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	}
     else
     {
-        
-		
         [_db updateAccount:
          self.jid  :
          @"1":
@@ -294,9 +295,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         }
     }
 	
-	
-   
-	
 }
 
 
@@ -310,8 +308,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		[self.navigationController popViewControllerAnimated:true];
 		
 	}
-	
-	
 }
 
 - (IBAction) delClicked: (id) sender
@@ -443,30 +439,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 				if(self.editMode==true)
 				{
                     
-                    thecell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"DeleteCell"];
-                    //thecell.selection=false;
-                    CGRect cellRectangle = CGRectMake(32,3,225,40);
-                    
-                    //Initialize the label with the rectangle.
-                    UIButton* theButton= [UIButton buttonWithType:UIButtonTypeRoundedRect];
-					[theButton setBackgroundImage:[[UIImage imageNamed:@"orangeButton"]
-                                                   stretchableImageWithLeftCapWidth:5 topCapHeight:5] forState:UIControlStateNormal];
-                    
-                    
-                    theButton.frame=cellRectangle;
-                    
-					[theButton setTitle:@"Delete" forState: UIControlStateNormal ];
-					[theButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-					theButton.titleLabel.font= [UIFont boldSystemFontOfSize:17.0];
-                    [theButton addTarget:self action:@selector(delClicked:) forControlEvents:UIControlEventTouchUpInside];
-					
-                    
-                    
-                    //Add the label as a sub view to the cell.
-                    [thecell.contentView addSubview:theButton];
-                    //[theButton release];
-                    
-                    
+                    MLButtonCell *buttonCell =(MLButtonCell*)[tableView dequeueReusableCellWithIdentifier:@"ButtonCell"];
+                    buttonCell.buttonText.text=@"Delete";
+                    buttonCell.buttonText.textColor= [UIColor redColor];
+                    thecell=buttonCell;
+            
 				}
 				break;
 			}

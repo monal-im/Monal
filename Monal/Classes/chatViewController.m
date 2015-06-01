@@ -178,6 +178,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     
     _topName=[[UILabel alloc] initWithFrame:nameFrame];
     _topName.font=[UIFont boldSystemFontOfSize:15.0f];
+    _topName.textColor = [UIColor darkGrayColor]; 
     
     if(SYSTEM_VERSION_LESS_THAN(@"7.0"))
     {

@@ -544,7 +544,10 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     _offlineContacts=[NSMutableArray arrayWithArray:[[DataLayer sharedInstance] offlineContacts]];
     }
     
-    [self.contactsTable reloadData];
+    if(self.searchResults.count==0)
+    {
+        [self.contactsTable reloadData];
+    }
     
 }
 

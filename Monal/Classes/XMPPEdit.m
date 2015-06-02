@@ -72,7 +72,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     _db= [DataLayer sharedInstance];
     
-    self.sectionArray =  [NSArray arrayWithObjects:@"Account", @"Advanced Settings", nil];
+    self.sectionArray =  [NSArray arrayWithObjects:@"Account", @"Advanced Settings",@"", nil];
 	if(![_accountno isEqualToString:@"-1"])
 	{
         self.editMode=true;
@@ -382,7 +382,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 		}
 	}
-	else
+	else if (indexPath.section==1)
 	{
 		switch (indexPath.row)
 		{
@@ -433,26 +433,33 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 thecell.toggleSwitch.on=self.selfSignedSSL;
                 break;
             }
-				
-			case 6:
-			{
-				if(self.editMode==true)
-				{
+                
+        }
+        
+        
+    }
+    else if (indexPath.section==2)
+    {
+        switch (indexPath.row) {
+            case 0:
+            {
+                if(self.editMode==true)
+                {
                     
                     MLButtonCell *buttonCell =(MLButtonCell*)[tableView dequeueReusableCellWithIdentifier:@"ButtonCell"];
                     buttonCell.buttonText.text=@"Delete";
                     buttonCell.buttonText.textColor= [UIColor redColor];
                     thecell=buttonCell;
-            
-				}
-				break;
-			}
+                    
+                }
+                break;
+            }
                 
-		}
-        
-	}
+                
+        }
+    }
     
-    if(indexPath.row!=6)
+    if(indexPath.section!=2)
     {
         thecell.textInputField.delegate=self;
         if(thecell.textInputField.hidden==YES)
@@ -460,6 +467,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             [thecell.toggleSwitch addTarget:self action:@selector(toggleSwitch:) forControlEvents:UIControlEventValueChanged];
         }
     }
+
     
     thecell.selectionStyle= UITableViewCellSelectionStyleNone;
     
@@ -514,20 +522,20 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
 	//DDLogVerbose(@"xmpp edit counting section %d", section);
 	
-	if(section==0)
-		return 3;
-    else
-    {
-        if(self.editMode==false)
-        {
-            if(section==1)
-                return 6;
-        }else return 7;
-        
+    if(section==0){
+        return 3;
     }
-	
-	return 0; //default
-	
+    else if( section ==1) {
+        return 6;
+    }
+    else  if(section == 2&&  self.editMode==false)
+    {
+        return 0;
+    }
+    else return 1;
+    
+    return 0; //default
+    
 }
 
 
@@ -538,8 +546,16 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 //required
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)newIndexPath
 {
-	DDLogVerbose(@"selected log section %d , row %d", newIndexPath.section, newIndexPath.row);
+    DDLogVerbose(@"selected log section %d , row %d", newIndexPath.section, newIndexPath.row);
+
+    if(newIndexPath.section==2)
+    {
+        [self delClicked:self];
+    }
+    
 }
+
+
 #pragma mark text input  fielddelegate
 
 - (void)textFieldDidBeginEditing:(UITextField *)textField

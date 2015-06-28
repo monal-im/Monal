@@ -8,6 +8,7 @@
 
 #import "XMPPEdit.h"
 #import "MLAccountCell.h"
+#import "MLButtonCell.h"
 #import "tools.h"
 
 
@@ -64,9 +65,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                bundle:[NSBundle mainBundle]]
          forCellReuseIdentifier:@"AccountCell"];
     
+    
+    [self.tableView registerNib:[UINib nibWithNibName:@"MLButtonCell"
+                                               bundle:[NSBundle mainBundle]]
+         forCellReuseIdentifier:@"ButtonCell"];
+    
     _db= [DataLayer sharedInstance];
     
-    self.sectionArray =  [NSArray arrayWithObjects:@"Account", @"Advanced Settings", nil];
+    self.sectionArray =  [NSArray arrayWithObjects:@"Account", @"Advanced Settings",@"", nil];
 	if(![_accountno isEqualToString:@"-1"])
 	{
         self.editMode=true;
@@ -252,9 +258,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 			  NSString* val = [NSString stringWithFormat:@"%@", [_db executeScalar:@"select max(account_id) from account"]];
             PasswordManager* pass= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",val]];
             [pass setPassword:self.password] ;
-
-		
-	
             
             [[MLXMPPManager sharedInstance]  connectIfNecessary];
 			
@@ -262,8 +265,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	}
     else
     {
-        
-		
         [_db updateAccount:
          self.jid  :
          @"1":
@@ -294,9 +295,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         }
     }
 	
-	
-   
-	
 }
 
 
@@ -310,8 +308,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		[self.navigationController popViewControllerAnimated:true];
 		
 	}
-	
-	
 }
 
 - (IBAction) delClicked: (id) sender
@@ -386,7 +382,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 		}
 	}
-	else
+	else if (indexPath.section==1)
 	{
 		switch (indexPath.row)
 		{
@@ -437,45 +433,33 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 thecell.toggleSwitch.on=self.selfSignedSSL;
                 break;
             }
-				
-			case 6:
-			{
-				if(self.editMode==true)
-				{
-                    
-                    thecell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"DeleteCell"];
-                    //thecell.selection=false;
-                    CGRect cellRectangle = CGRectMake(32,3,225,40);
-                    
-                    //Initialize the label with the rectangle.
-                    UIButton* theButton= [UIButton buttonWithType:UIButtonTypeRoundedRect];
-					[theButton setBackgroundImage:[[UIImage imageNamed:@"orangeButton"]
-                                                   stretchableImageWithLeftCapWidth:5 topCapHeight:5] forState:UIControlStateNormal];
-                    
-                    
-                    theButton.frame=cellRectangle;
-                    
-					[theButton setTitle:@"Delete" forState: UIControlStateNormal ];
-					[theButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-					theButton.titleLabel.font= [UIFont boldSystemFontOfSize:17.0];
-                    [theButton addTarget:self action:@selector(delClicked:) forControlEvents:UIControlEventTouchUpInside];
-					
-                    
-                    
-                    //Add the label as a sub view to the cell.
-                    [thecell.contentView addSubview:theButton];
-                    //[theButton release];
-                    
-                    
-				}
-				break;
-			}
                 
-		}
+        }
         
-	}
+        
+    }
+    else if (indexPath.section==2)
+    {
+        switch (indexPath.row) {
+            case 0:
+            {
+                if(self.editMode==true)
+                {
+                    
+                    MLButtonCell *buttonCell =(MLButtonCell*)[tableView dequeueReusableCellWithIdentifier:@"ButtonCell"];
+                    buttonCell.buttonText.text=@"Delete";
+                    buttonCell.buttonText.textColor= [UIColor redColor];
+                    thecell=buttonCell;
+                    
+                }
+                break;
+            }
+                
+                
+        }
+    }
     
-    if(indexPath.row!=6)
+    if(indexPath.section!=2)
     {
         thecell.textInputField.delegate=self;
         if(thecell.textInputField.hidden==YES)
@@ -483,6 +467,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             [thecell.toggleSwitch addTarget:self action:@selector(toggleSwitch:) forControlEvents:UIControlEventValueChanged];
         }
     }
+
     
     thecell.selectionStyle= UITableViewCellSelectionStyleNone;
     
@@ -537,20 +522,20 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
 	//DDLogVerbose(@"xmpp edit counting section %d", section);
 	
-	if(section==0)
-		return 3;
-    else
-    {
-        if(self.editMode==false)
-        {
-            if(section==1)
-                return 6;
-        }else return 7;
-        
+    if(section==0){
+        return 3;
     }
-	
-	return 0; //default
-	
+    else if( section ==1) {
+        return 6;
+    }
+    else  if(section == 2&&  self.editMode==false)
+    {
+        return 0;
+    }
+    else return 1;
+    
+    return 0; //default
+    
 }
 
 
@@ -561,8 +546,16 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 //required
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)newIndexPath
 {
-	DDLogVerbose(@"selected log section %d , row %d", newIndexPath.section, newIndexPath.row);
+    DDLogVerbose(@"selected log section %d , row %d", newIndexPath.section, newIndexPath.row);
+
+    if(newIndexPath.section==2)
+    {
+        [self delClicked:self];
+    }
+    
 }
+
+
 #pragma mark text input  fielddelegate
 
 - (void)textFieldDidBeginEditing:(UITextField *)textField

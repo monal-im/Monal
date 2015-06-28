@@ -149,15 +149,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) setRunLoop
 {
-    dispatch_async(dispatch_get_current_queue(), ^{
         [_oStream setDelegate:self];
-        [_oStream scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
+        [_oStream scheduleInRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
         
         [_iStream setDelegate:self];
-        [_iStream scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
-        
-        [[NSRunLoop currentRunLoop]run];
-    });
+        [_iStream scheduleInRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
 }
 
 -(void) createStreams
@@ -428,10 +424,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         [_iStream setDelegate:nil];
         [_oStream setDelegate:nil];
         
-        [_oStream removeFromRunLoop:[NSRunLoop currentRunLoop]
+        [_oStream removeFromRunLoop:[NSRunLoop mainRunLoop]
                             forMode:NSDefaultRunLoopMode];
         
-        [_iStream removeFromRunLoop:[NSRunLoop currentRunLoop]
+        [_iStream removeFromRunLoop:[NSRunLoop mainRunLoop]
                             forMode:NSDefaultRunLoopMode];
         DDLogInfo(@"removed streams");
         
@@ -885,7 +881,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         if((finalend-finalstart<=maxPos) && finalend!=NSNotFound && finalstart!=NSNotFound)
         {
             //  DDLogVerbose(@"to del start %d end %d: %@", finalstart, finalend, _inputBuffer);
-            [_inputBuffer deleteCharactersInRange:NSMakeRange(finalstart, finalend-finalstart) ];
+            if(finalend <[_inputBuffer length] ) {
+                [_inputBuffer deleteCharactersInRange:NSMakeRange(finalstart, finalend-finalstart) ];
+            } else {
+                 [_inputBuffer deleteCharactersInRange:NSMakeRange(finalstart, [_inputBuffer length] -finalstart) ];
+            }
             //  DDLogVerbose(@"result: %@", _inputBuffer);
         }
     }
@@ -942,11 +942,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         while (stanzaToParse)
         {
             [self.processQueue addOperationWithBlock:^{
-            self.lastHandledInboundStanza=[NSNumber numberWithInteger: [self.lastHandledInboundStanza integerValue]+1];
+           
             DDLogVerbose(@"got stanza %@", stanzaToParse);
             
             if([[stanzaToParse objectForKey:@"stanzaType"]  isEqualToString:@"iq"])
             {
+                 self.lastHandledInboundStanza=[NSNumber numberWithInteger: [self.lastHandledInboundStanza integerValue]+1];
                 ParseIq* iqNode= [[ParseIq alloc]  initWithDictionary:stanzaToParse];
                 if ([iqNode.type isEqualToString:kiqErrorType])
                 {
@@ -1305,6 +1306,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             }
             else  if([[stanzaToParse objectForKey:@"stanzaType"]  isEqualToString:@"message"])
             {
+                 self.lastHandledInboundStanza=[NSNumber numberWithInteger: [self.lastHandledInboundStanza integerValue]+1];
                 ParseMessage* messageNode= [[ParseMessage alloc]  initWithDictionary:stanzaToParse];
                 if([messageNode.type isEqualToString:kMessageErrorType])
                 {
@@ -1388,6 +1390,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             }
             else  if([[stanzaToParse objectForKey:@"stanzaType"]  isEqualToString:@"presence"])
             {
+                 self.lastHandledInboundStanza=[NSNumber numberWithInteger: [self.lastHandledInboundStanza integerValue]+1];
                 ParsePresence* presenceNode= [[ParsePresence alloc]  initWithDictionary:stanzaToParse];
                 if([presenceNode.user isEqualToString:_fulluser]) {
                         //ignore self
@@ -1614,12 +1617,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         
                         if(streamNode.supportsSM3)
                         {
-                            self.supportsSM3=YES;
-                            
-                            XMLNode *enableNode =[[XMLNode alloc] initWithElement:@"enable"];
-                            NSDictionary *dic=@{@"xmlns":@"urn:xmpp:sm:3",@"resume":@"true" };
-                            enableNode.attributes =[dic mutableCopy];
-                            [self send:enableNode];
+                            [self enableSM3];
                             
                             
                         }
@@ -1677,11 +1675,16 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             }
             else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"failed"])
             {
+                //remove session
+                self.streamID=nil;
+          
+                
                // if resume failed. bind like normal
                 XMPPIQ* iqNode =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqSetType];
                 [iqNode setBindWithResource:_resource];
                 
                 [self send:iqNode];
+                [self enableSM3];
                 
             }
             
@@ -1993,6 +1996,18 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 
 #pragma mark set connection attributes
+
+-(void) enableSM3
+{
+    self.supportsSM3=YES;
+    
+    XMLNode *enableNode =[[XMLNode alloc] initWithElement:@"enable"];
+    NSDictionary *dic=@{@"xmlns":@"urn:xmpp:sm:3",@"resume":@"true" };
+    enableNode.attributes =[dic mutableCopy];
+    [self send:enableNode];
+    
+}
+
 -(void) setStatusMessageText:(NSString*) message
 {
     if([message length]>0)

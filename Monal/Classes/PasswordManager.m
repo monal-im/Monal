@@ -110,7 +110,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 			DDLogVerbose(@"reset keychain"); 
         } else {
             // Any other error is unexpected.
-            NSAssert(NO, @"Serious error.\n");
+            DDLogError(@"Serious error.\n");
         }
     }
     return self;

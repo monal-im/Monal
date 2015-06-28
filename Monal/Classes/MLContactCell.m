@@ -8,12 +8,18 @@
 
 #import "MLContactCell.h"
 #import "MLConstants.h"
+#import <QuartzCore/QuartzCore.h>
 
 @interface MLContactCell()
 
 @end
 
 @implementation MLContactCell
+
+-(void) awakeFromNib
+{
+    
+}
 
 -(void) setOrb
 {

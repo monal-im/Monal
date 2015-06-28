@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="6751" systemVersion="14C1514" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="7531" systemVersion="14D131" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6736"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="7520"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <objects>
@@ -14,21 +14,14 @@
             <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="vJJ-6x-WMR" id="Qx8-80-HZA">
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Awx-9U-LWt" userLabel="statusOrb">
-                        <rect key="frame" x="56" y="18" width="15" height="15"/>
-                        <constraints>
-                            <constraint firstAttribute="height" constant="15" id="W9O-5a-SsY"/>
-                            <constraint firstAttribute="width" constant="15" id="c2D-y5-Xhd"/>
-                        </constraints>
-                    </imageView>
                     <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="OhQ-Fk-Czf" userLabel="name">
-                        <rect key="frame" x="79" y="3" width="171" height="20"/>
+                        <rect key="frame" x="63" y="3" width="190" height="20"/>
                         <fontDescription key="fontDescription" type="system" pointSize="16"/>
                         <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                         <nil key="highlightedColor"/>
                     </label>
                     <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="WBM-UR-4hu" userLabel="status">
-                        <rect key="frame" x="79" y="25" width="174" height="18"/>
+                        <rect key="frame" x="63" y="25" width="190" height="18"/>
                         <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="15"/>
                         <color key="textColor" red="0.49019607843137253" green="0.49019607843137253" blue="0.50980392156862742" alpha="1" colorSpace="calibratedRGB"/>
                         <nil key="highlightedColor"/>
@@ -40,7 +33,7 @@
                             <constraint firstAttribute="width" constant="48" id="788-Js-K50"/>
                         </constraints>
                     </imageView>
-                    <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" adjustsImageWhenDisabled="NO" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="orC-ej-MKC">
+                    <button opaque="NO" contentMode="scaleToFill" misplaced="YES" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" adjustsImageWhenDisabled="NO" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="orC-ej-MKC">
                         <rect key="frame" x="33" y="0.0" width="22" height="22"/>
                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                         <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -49,24 +42,37 @@
                             <color key="titleShadowColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                         </state>
                     </button>
-                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="IrL-yc-gYp" userLabel="name">
-                        <rect key="frame" x="79" y="15" width="171" height="20"/>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="IrL-yc-gYp" userLabel="name">
+                        <rect key="frame" x="63" y="15" width="190" height="20"/>
                         <fontDescription key="fontDescription" type="system" pointSize="16"/>
                         <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                         <nil key="highlightedColor"/>
                     </label>
+                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Awx-9U-LWt" userLabel="statusOrb">
+                        <rect key="frame" x="37" y="34" width="15" height="15"/>
+                        <constraints>
+                            <constraint firstAttribute="height" constant="15" id="W9O-5a-SsY"/>
+                            <constraint firstAttribute="width" constant="15" id="c2D-y5-Xhd"/>
+                        </constraints>
+                    </imageView>
                 </subviews>
                 <constraints>
+                    <constraint firstItem="IrL-yc-gYp" firstAttribute="leading" secondItem="WBM-UR-4hu" secondAttribute="leading" id="0PX-kz-iXU"/>
                     <constraint firstItem="pGK-Ar-iBm" firstAttribute="centerY" secondItem="Qx8-80-HZA" secondAttribute="centerY" constant="0.5" id="23g-RQ-xlV"/>
                     <constraint firstItem="OhQ-Fk-Czf" firstAttribute="top" secondItem="Qx8-80-HZA" secondAttribute="topMargin" constant="-5" id="3IJ-Rx-MvT"/>
-                    <constraint firstItem="OhQ-Fk-Czf" firstAttribute="leading" secondItem="Awx-9U-LWt" secondAttribute="trailing" constant="8" id="A34-Th-lrX"/>
-                    <constraint firstItem="WBM-UR-4hu" firstAttribute="leading" secondItem="Awx-9U-LWt" secondAttribute="trailing" constant="8" id="NLB-2x-gIU"/>
+                    <constraint firstItem="OhQ-Fk-Czf" firstAttribute="leading" secondItem="Awx-9U-LWt" secondAttribute="trailing" constant="11" id="A34-Th-lrX"/>
+                    <constraint firstItem="orC-ej-MKC" firstAttribute="leading" secondItem="Qx8-80-HZA" secondAttribute="leadingMargin" constant="25" id="DlZ-Xq-SUj"/>
+                    <constraint firstItem="WBM-UR-4hu" firstAttribute="leading" secondItem="Awx-9U-LWt" secondAttribute="trailing" constant="11" id="NLB-2x-gIU"/>
+                    <constraint firstItem="IrL-yc-gYp" firstAttribute="leading" secondItem="orC-ej-MKC" secondAttribute="trailing" constant="8" symbolic="YES" id="UjI-tr-Iz7"/>
+                    <constraint firstItem="orC-ej-MKC" firstAttribute="top" secondItem="Qx8-80-HZA" secondAttribute="top" id="XS7-Wv-cqt"/>
                     <constraint firstAttribute="trailingMargin" secondItem="WBM-UR-4hu" secondAttribute="trailing" constant="-8" id="bdd-iy-yff"/>
-                    <constraint firstItem="pGK-Ar-iBm" firstAttribute="centerY" secondItem="Awx-9U-LWt" secondAttribute="centerY" constant="-0.5" id="eJf-y1-bxH"/>
+                    <constraint firstItem="IrL-yc-gYp" firstAttribute="trailing" secondItem="WBM-UR-4hu" secondAttribute="trailing" id="c04-ku-krR"/>
+                    <constraint firstItem="pGK-Ar-iBm" firstAttribute="centerY" secondItem="Awx-9U-LWt" secondAttribute="centerY" constant="-16.5" id="eJf-y1-bxH"/>
                     <constraint firstItem="WBM-UR-4hu" firstAttribute="top" secondItem="OhQ-Fk-Czf" secondAttribute="bottom" constant="2" id="evP-N4-lG7"/>
-                    <constraint firstItem="Awx-9U-LWt" firstAttribute="leading" secondItem="pGK-Ar-iBm" secondAttribute="trailing" constant="8" id="hLz-ze-trA"/>
+                    <constraint firstItem="Awx-9U-LWt" firstAttribute="leading" secondItem="pGK-Ar-iBm" secondAttribute="trailing" constant="-11" id="hLz-ze-trA"/>
+                    <constraint firstItem="IrL-yc-gYp" firstAttribute="centerY" secondItem="pGK-Ar-iBm" secondAttribute="centerY" id="jLf-5R-EL2"/>
                     <constraint firstItem="pGK-Ar-iBm" firstAttribute="leading" secondItem="Qx8-80-HZA" secondAttribute="leadingMargin" constant="-8" id="xPK-Tu-4TS"/>
-                    <constraint firstAttribute="trailingMargin" secondItem="OhQ-Fk-Czf" secondAttribute="trailing" constant="-5" id="xaW-nX-mQG"/>
+                    <constraint firstAttribute="trailingMargin" secondItem="OhQ-Fk-Czf" secondAttribute="trailing" constant="-8" id="xaW-nX-mQG"/>
                 </constraints>
             </tableViewCellContentView>
             <connections>
@@ -77,7 +83,7 @@
                 <outlet property="statusText" destination="WBM-UR-4hu" id="cWb-pt-41n"/>
                 <outlet property="userImage" destination="pGK-Ar-iBm" id="ysI-Fi-czO"/>
             </connections>
-            <point key="canvasLocation" x="708" y="440.5"/>
+            <point key="canvasLocation" x="708" y="440"/>
         </tableViewCell>
     </objects>
     <resources>

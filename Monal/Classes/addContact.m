@@ -9,16 +9,18 @@
 #import "addContact.h"
 #import "MLConstants.h"
 #import "MLXMPPManager.h"
+#import "MLButtonCell.h"
+#import "MLTextInputCell.h"
 
 @implementation addContact
 
 
 -(void) closeView
 {
-    [self dismissModalViewControllerAnimated:YES];
+    [self dismissViewControllerAnimated:YES completion:nil];
 }
 
--(IBAction) addPress
+-(void) addPress
 {
     if([[MLXMPPManager sharedInstance].connectedXMPP count]==0)
     {
@@ -32,9 +34,9 @@
     }
     else  {
         
-        if(_buddyName.text.length>0)
+        if(self.contactName.text.length>0)
         {
-            NSDictionary* contact =@{@"row":[NSNumber numberWithInteger:_selectedRow],@"buddy_name":_buddyName.text};
+            NSDictionary* contact =@{@"row":[NSNumber numberWithInteger:_selectedRow],@"buddy_name":self.contactName.text};
             [[MLXMPPManager sharedInstance] addContact:contact];
             
             UIAlertView *addError = [[UIAlertView alloc]
@@ -87,19 +89,7 @@
     self.navigationItem.title=@"Add Contact";
     _closeButton =[[UIBarButtonItem alloc] initWithTitle:@"Close" style:UIBarButtonItemStylePlain target:self action:@selector(closeView)];
     self.navigationItem.rightBarButtonItem=_closeButton;
-    
-    if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0"))
-    {
-        self.view.backgroundColor =[UIColor whiteColor];
-    }
-    else{
-        self.view.backgroundColor = [[UIColor alloc] initWithPatternImage:[UIImage imageNamed:@"debut_dark"]];
-        self.contactLabel.textColor=[UIColor whiteColor];
-        self.accountLabel.textColor=[UIColor whiteColor];
-        self.navigationController.navigationBar.tintColor=[UIColor blackColor];
-    }
-    
-    
+        
     _accountPicker = [[ UIPickerView alloc] init];
     _accountPickerView= [[UIView alloc] initWithFrame: _accountPicker.frame];
     _accountPickerView.autoresizingMask=UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
@@ -110,30 +100,15 @@
     _accountPicker.dataSource=self;
     _accountPicker.autoresizingMask=UIViewAutoresizingFlexibleLeftMargin|UIViewAutoresizingFlexibleRightMargin;
     
-    _accountName.inputView=_accountPickerView;
     
-    if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0"))
-    {
-        
-    }
-    else
-    {
-        _accountPickerView.backgroundColor=[UIColor blackColor];
-        [self.view setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"debut_dark"]]];
-    }
+    [self.tableView registerNib:[UINib nibWithNibName:@"MLButtonCell"
+                                               bundle:[NSBundle mainBundle]]
+         forCellReuseIdentifier:@"ButtonCell"];
     
     
-    _accountName.inputAccessoryView=_keyboardToolbar;
-    _buddyName.inputAccessoryView=_keyboardToolbar;
-    
-    
-    UIImage *buttonImage = [[UIImage imageNamed:@"blueButton"]
-                            resizableImageWithCapInsets:UIEdgeInsetsMake(18, 18, 18, 18)];
-    UIImage *buttonImageHighlight = [[UIImage imageNamed:@"blueButtonHighlight"]
-                                     resizableImageWithCapInsets:UIEdgeInsetsMake(18, 18, 18, 18)];
-    
-    [_addButton setBackgroundImage:buttonImage forState:UIControlStateNormal];
-    [_addButton setBackgroundImage:buttonImageHighlight forState:UIControlStateSelected];
+    [self.tableView registerNib:[UINib nibWithNibName:@"MLTextInputCell"
+                                               bundle:[NSBundle mainBundle]]
+         forCellReuseIdentifier:@"TextCell"];
     
     
 }
@@ -149,6 +124,97 @@
         [[MLXMPPManager sharedInstance] getServiceDetailsForAccount:0 ];
     }
 }
+
+#pragma mark tableview datasource delegate
+
+-(NSInteger) numberOfSectionsInTableView:(UITableView *)tableView
+{
+    return 2;
+}
+
+- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
+{
+    if(section==0)
+    {
+        return @"Contacts are usually in the format: username@domain.something";
+    }
+    else return nil;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    NSInteger toreturn =0;
+    switch (section) {
+        case 0:
+            toreturn =2;
+            break;
+        case 1:
+            toreturn=1;
+            break;
+            
+        default:
+            break;
+    }
+    
+    return toreturn;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    UITableViewCell *cell ;
+  
+    switch (indexPath.section) {
+        case 0: {
+            MLTextInputCell *textCell =[tableView dequeueReusableCellWithIdentifier:@"TextCell"];
+            if(indexPath.row ==0){
+                self.accountName =textCell.textInput;
+                self.accountName.placeholder = @"Account";
+                self.accountName.inputView=_accountPickerView;
+                self.contactName.delegate=self;
+                
+            }
+            else   if(indexPath.row ==1){
+                self.contactName =textCell.textInput;
+                self.contactName.placeholder = @"Contact Name";
+                self.contactName.delegate=self;
+              
+            }
+            textCell.textInput.inputAccessoryView =_keyboardToolbar;
+            
+            cell= textCell;
+            break;
+        }
+        case 1: {
+            MLButtonCell *buttonCell ;
+            buttonCell =[tableView dequeueReusableCellWithIdentifier:@"ButtonCell"];
+            buttonCell.buttonText.text=@"Add Contact";
+            buttonCell.buttonText.textColor= [UIColor colorWithRed:128.0/255 green:203.0/255 blue:182.0/255 alpha:1.0f];
+            cell=buttonCell;
+            
+            break;
+        }
+        default:
+            break;
+    }
+    
+  return cell;
+    
+}
+
+#pragma mark tableview delegate
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath;
+{
+    switch (indexPath.section) {
+        case 0:
+            break;
+        case 1:
+            [self addPress];
+            
+        default:
+            break;
+    }
+}
+
 
 #pragma mark picker view delegate
 - (void)pickerView:(UIPickerView *)pickerView didSelectRow:(NSInteger)row inComponent:(NSInteger)component
@@ -186,35 +252,35 @@
 
 -(IBAction)toolbarDone:(id)sender
 {
-    [_currentTextField resignFirstResponder];
+    if(_currentTextField ==self.contactName)
+    {
+        [self.contactName resignFirstResponder];
+    }
+    else {
+        [self.accountName resignFirstResponder];
+    }
     
 }
 
 - (IBAction)toolbarPrevious:(id)sender
 {
-    NSInteger nextTag = _currentTextField.tag - 1;
-    // Try to find next responder
-    UIResponder* nextResponder = [_currentTextField.superview viewWithTag:nextTag];
-    if (nextResponder) {
-        // Found next responder, so set it.
-        [nextResponder becomeFirstResponder];
-    } else {
-        // Not found, so remove keyboard.
-        [_currentTextField resignFirstResponder];
+    if(_currentTextField ==self.contactName)
+    {
+        [self.accountName becomeFirstResponder];
+    }
+    else {
+        [self.contactName becomeFirstResponder];
     }
 }
 
 - (IBAction)toolbarNext:(id)sender
 {
-    NSInteger nextTag = _currentTextField.tag + 1;
-    // Try to find next responder
-    UIResponder* nextResponder = [_currentTextField.superview viewWithTag:nextTag];
-    if (nextResponder) {
-        // Found next responder, so set it.
-        [nextResponder becomeFirstResponder];
-    } else {
-        // Not found, so remove keyboard.
-        [_currentTextField resignFirstResponder];
+    if(_currentTextField ==self.contactName)
+    {
+        [self.accountName becomeFirstResponder];
+    }
+    else {
+        [self.contactName becomeFirstResponder];
     }
 }
 

@@ -11,10 +11,10 @@ Notable features:
 * Tested heavily with google talk, openfire, prosody   and ejabberd servers.
 
 
-2.5 changelog
+2.6 changelog
 
 This is  update that  fixes bugs.
-1.removed facebook as an option as XMPP has been disabled.
+1.fixes connectivity on ios7
 
 
       

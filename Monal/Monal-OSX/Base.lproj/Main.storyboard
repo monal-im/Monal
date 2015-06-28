@@ -737,6 +737,9 @@
                                     </subviews>
                                     <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </clipView>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="320" id="WqV-ai-dDo"/>
+                                </constraints>
                                 <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="2Q9-PO-6A8">
                                     <rect key="frame" x="1" y="119" width="223" height="15"/>
                                     <autoresizingMask key="autoresizingMask"/>
@@ -757,7 +760,7 @@
                 </viewController>
                 <customObject id="N6A-8E-AoF" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="101" y="1153"/>
+            <point key="canvasLocation" x="-19" y="1053"/>
         </scene>
         <!--Split View Controller-->
         <scene sceneID="2ls-iF-dj5">
@@ -772,14 +775,14 @@
                         <autoresizingMask key="autoresizingMask"/>
                     </splitView>
                     <connections>
-                        <outlet property="view" destination="em5-AA-GrC" id="EIY-0u-GGi"/>
+                        <outlet property="view" destination="em5-AA-GrC" id="h1h-qC-JWf"/>
                         <segue destination="0BB-CK-cBw" kind="relationship" relationship="splitItems" id="Um2-MI-hoH"/>
                         <segue destination="qLp-oS-WKI" kind="relationship" relationship="splitItems" id="3lx-Th-aNt"/>
                     </connections>
                 </splitViewController>
                 <customObject id="Bif-v0-38w" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="176" y="658"/>
+            <point key="canvasLocation" x="118" y="592"/>
         </scene>
         <!--View Controller-->
         <scene sceneID="CGi-CN-lI2">

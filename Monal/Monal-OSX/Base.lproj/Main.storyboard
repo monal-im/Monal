@@ -723,6 +723,14 @@
                                                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                     </textFieldCell>
                                                                 </textField>
+                                                                <imageView verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="5SW-8j-tAt">
+                                                                    <rect key="frame" x="3" y="9" width="47" height="44"/>
+                                                                    <constraints>
+                                                                        <constraint firstAttribute="height" relation="lessThanOrEqual" constant="50" id="F4b-YU-k8i"/>
+                                                                        <constraint firstAttribute="width" relation="lessThanOrEqual" constant="47" id="zyd-uN-WGk"/>
+                                                                    </constraints>
+                                                                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="noicon" id="cMe-fd-6Pb"/>
+                                                                </imageView>
                                                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="749" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="0ib-3X-AX9">
                                                                     <rect key="frame" x="60" y="9" width="241" height="16"/>
                                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Status Message" id="fWL-0j-FMf">
@@ -731,14 +739,6 @@
                                                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                     </textFieldCell>
                                                                 </textField>
-                                                                <imageView verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="5SW-8j-tAt">
-                                                                    <rect key="frame" x="3" y="3" width="47" height="50"/>
-                                                                    <constraints>
-                                                                        <constraint firstAttribute="height" constant="50" id="F4b-YU-k8i"/>
-                                                                        <constraint firstAttribute="width" constant="47" id="zyd-uN-WGk"/>
-                                                                    </constraints>
-                                                                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="noicon" id="cMe-fd-6Pb"/>
-                                                                </imageView>
                                                             </subviews>
                                                             <constraints>
                                                                 <constraint firstItem="7ak-TK-LeP" firstAttribute="leading" secondItem="5SW-8j-tAt" secondAttribute="trailing" constant="10" id="JVb-U5-tQD"/>

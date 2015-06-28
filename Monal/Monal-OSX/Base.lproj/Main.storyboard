@@ -677,21 +677,21 @@
             </objects>
             <point key="canvasLocation" x="176" y="235"/>
         </scene>
-        <!--View Controller-->
+        <!--Chat List View Controller-->
         <scene sceneID="lWg-JA-sLc">
             <objects>
-                <viewController id="0BB-CK-cBw" sceneMemberID="viewController">
+                <viewController id="0BB-CK-cBw" customClass="MLChatListViewController" sceneMemberID="viewController">
                     <view key="view" id="DYi-kN-cK7">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="480"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
-                            <scrollView autohidesScrollers="YES" horizontalLineScroll="64" horizontalPageScroll="10" verticalLineScroll="64" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="eLW-rG-h59">
+                            <scrollView autohidesScrollers="YES" horizontalLineScroll="60" horizontalPageScroll="10" verticalLineScroll="60" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="eLW-rG-h59">
                                 <rect key="frame" x="0.0" y="0.0" width="320" height="480"/>
                                 <clipView key="contentView" id="HB1-Pi-3Cp">
                                     <rect key="frame" x="1" y="17" width="238" height="117"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
-                                        <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" columnReordering="NO" columnSelection="YES" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" rowHeight="62" rowSizeStyle="automatic" viewBased="YES" id="mgU-VL-SBt">
+                                        <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" columnReordering="NO" columnSelection="YES" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" rowHeight="58" rowSizeStyle="automatic" viewBased="YES" id="mgU-VL-SBt">
                                             <rect key="frame" x="0.0" y="0.0" width="318" height="0.0"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <size key="intercellSpacing" width="3" height="2"/>
@@ -768,6 +768,10 @@
                                                     </prototypeCellViews>
                                                 </tableColumn>
                                             </tableColumns>
+                                            <connections>
+                                                <outlet property="dataSource" destination="0BB-CK-cBw" id="VYB-mG-o5d"/>
+                                                <outlet property="delegate" destination="0BB-CK-cBw" id="vFR-I3-67C"/>
+                                            </connections>
                                         </tableView>
                                     </subviews>
                                     <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -792,6 +796,9 @@
                             <constraint firstItem="eLW-rG-h59" firstAttribute="leading" secondItem="DYi-kN-cK7" secondAttribute="leading" id="YIm-N1-XYL"/>
                         </constraints>
                     </view>
+                    <connections>
+                        <outlet property="chatListTable" destination="mgU-VL-SBt" id="Tqv-FR-7V8"/>
+                    </connections>
                 </viewController>
                 <customObject id="N6A-8E-AoF" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
@@ -819,10 +826,10 @@
             </objects>
             <point key="canvasLocation" x="118" y="592"/>
         </scene>
-        <!--View Controller-->
+        <!--Chat View Controller-->
         <scene sceneID="CGi-CN-lI2">
             <objects>
-                <viewController id="qLp-oS-WKI" sceneMemberID="viewController">
+                <viewController id="qLp-oS-WKI" customClass="MLChatViewController" sceneMemberID="viewController">
                     <view key="view" id="kDf-fM-OV9">
                         <rect key="frame" x="0.0" y="0.0" width="493" height="497"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -845,6 +852,9 @@
                                                     <color key="insertionPointColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                                     <size key="minSize" width="403" height="106"/>
                                                     <size key="maxSize" width="463" height="10000000"/>
+                                                    <connections>
+                                                        <outlet property="delegate" destination="qLp-oS-WKI" id="1X9-gE-xl5"/>
+                                                    </connections>
                                                 </textView>
                                             </subviews>
                                             <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -864,6 +874,9 @@
                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                             <font key="font" metaFont="system"/>
                                         </buttonCell>
+                                        <connections>
+                                            <action selector="send:" target="qLp-oS-WKI" id="8he-Bu-JXB"/>
+                                        </connections>
                                     </button>
                                 </subviews>
                                 <constraints>
@@ -974,6 +987,10 @@
                                                     </prototypeCellViews>
                                                 </tableColumn>
                                             </tableColumns>
+                                            <connections>
+                                                <outlet property="dataSource" destination="qLp-oS-WKI" id="WeH-V5-Fat"/>
+                                                <outlet property="delegate" destination="qLp-oS-WKI" id="pp9-gN-h1L"/>
+                                            </connections>
                                         </tableView>
                                     </subviews>
                                     <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -1001,6 +1018,10 @@
                             <constraint firstAttribute="trailing" secondItem="bPP-Hy-AXK" secondAttribute="trailing" id="pfK-iz-Zzs"/>
                         </constraints>
                     </view>
+                    <connections>
+                        <outlet property="chatTable" destination="Rsm-HI-GDG" id="liM-O1-9PN"/>
+                        <outlet property="messageBox" destination="mlB-yh-jDA" id="G4W-uS-hld"/>
+                    </connections>
                 </viewController>
                 <customObject id="csG-e3-5EW" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>

@@ -715,7 +715,7 @@
                                                             <rect key="frame" x="1" y="1" width="315" height="56"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
-                                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="7ak-TK-LeP">
+                                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="7ak-TK-LeP">
                                                                     <rect key="frame" x="58" y="33" width="243" height="20"/>
                                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Name" id="NNv-MJ-CbN">
                                                                         <font key="font" size="13" name="HelveticaNeue-Bold"/>
@@ -723,7 +723,7 @@
                                                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                     </textFieldCell>
                                                                 </textField>
-                                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="749" translatesAutoresizingMaskIntoConstraints="NO" id="0ib-3X-AX9">
+                                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="749" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="0ib-3X-AX9">
                                                                     <rect key="frame" x="60" y="9" width="241" height="16"/>
                                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Status Message" id="fWL-0j-FMf">
                                                                         <font key="font" metaFont="cellTitle"/>
@@ -734,15 +734,15 @@
                                                                 <imageView verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="5SW-8j-tAt">
                                                                     <rect key="frame" x="3" y="3" width="47" height="50"/>
                                                                     <constraints>
-                                                                        <constraint firstAttribute="height" constant="50" id="NQ7-Gq-K5K"/>
-                                                                        <constraint firstAttribute="width" constant="47" id="nmz-2Q-qJm"/>
+                                                                        <constraint firstAttribute="height" constant="50" id="F4b-YU-k8i"/>
+                                                                        <constraint firstAttribute="width" constant="47" id="zyd-uN-WGk"/>
                                                                     </constraints>
                                                                     <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="noicon" id="cMe-fd-6Pb"/>
                                                                 </imageView>
                                                             </subviews>
                                                             <constraints>
                                                                 <constraint firstItem="7ak-TK-LeP" firstAttribute="leading" secondItem="5SW-8j-tAt" secondAttribute="trailing" constant="10" id="JVb-U5-tQD"/>
-                                                                <constraint firstItem="7ak-TK-LeP" firstAttribute="top" secondItem="azx-Gr-vGb" secondAttribute="top" constant="3" id="MGC-xQ-EPK"/>
+                                                                <constraint firstItem="7ak-TK-LeP" firstAttribute="top" secondItem="azx-Gr-vGb" secondAttribute="top" priority="750" constant="3" id="MGC-xQ-EPK"/>
                                                                 <constraint firstItem="5SW-8j-tAt" firstAttribute="leading" secondItem="azx-Gr-vGb" secondAttribute="leading" constant="3" id="Od7-Rn-1Wh"/>
                                                                 <constraint firstAttribute="trailing" secondItem="0ib-3X-AX9" secondAttribute="trailing" constant="16" id="gRO-NM-RM7"/>
                                                                 <constraint firstItem="5SW-8j-tAt" firstAttribute="top" secondItem="azx-Gr-vGb" secondAttribute="top" constant="3" id="hQg-5f-PNT"/>

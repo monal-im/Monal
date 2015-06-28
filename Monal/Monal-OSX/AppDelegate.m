@@ -25,7 +25,7 @@
 - (BOOL)applicationShouldHandleReopen:(NSApplication *)theApplication hasVisibleWindows:(BOOL)flag{
     
     if(flag==NO){
-        [[[NSApplication sharedApplication] mainWindow] makeKeyAndOrderFront:self];
+        [self.mainWindowController showWindow:self];
     }
     return YES;	
 }

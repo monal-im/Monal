@@ -19,6 +19,7 @@
 		260C51D4177F44AD0039634B /* XMLNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D3177F44AD0039634B /* XMLNode.m */; };
 		260C6C94178080730004E2E1 /* EncodingTools.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C6C93178080730004E2E1 /* EncodingTools.m */; };
 		261528C51869CE5300BF62D6 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 261528C41869CE5300BF62D6 /* AudioToolbox.framework */; };
+		261894921B40483000C957C3 /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 26470F511835C4080069E3E0 /* Media.xcassets */; };
 		261A6281176C055400059090 /* ContactsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A627F176C055400059090 /* ContactsViewController.m */; };
 		261A6285176C156500059090 /* ActiveChatsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A6284176C156500059090 /* ActiveChatsViewController.m */; };
 		261A6288176C157D00059090 /* SettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A6287176C157D00059090 /* SettingsViewController.m */; };
@@ -150,7 +151,6 @@
 		266272B71B27DB8000C1CD49 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 266272B61B27DB8000C1CD49 /* AppDelegate.m */; };
 		266272B91B27DB8000C1CD49 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 266272B81B27DB8000C1CD49 /* main.m */; };
 		266272BC1B27DB8000C1CD49 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 266272BB1B27DB8000C1CD49 /* ViewController.m */; };
-		266272BE1B27DB8000C1CD49 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 266272BD1B27DB8000C1CD49 /* Images.xcassets */; };
 		266272C11B27DB8000C1CD49 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 266272BF1B27DB8000C1CD49 /* Main.storyboard */; };
 		266272CD1B27DB8100C1CD49 /* Monal_OSXTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 266272CC1B27DB8100C1CD49 /* Monal_OSXTests.m */; };
 		2668B2C317E1E59700C7F7C9 /* Crashlytics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2668B2C217E1E59700C7F7C9 /* Crashlytics.framework */; };
@@ -424,7 +424,6 @@
 		266272B81B27DB8000C1CD49 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		266272BA1B27DB8000C1CD49 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
 		266272BB1B27DB8000C1CD49 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
-		266272BD1B27DB8000C1CD49 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		266272C01B27DB8000C1CD49 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		266272C61B27DB8100C1CD49 /* Monal-OSXTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Monal-OSXTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		266272CB1B27DB8100C1CD49 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -780,7 +779,6 @@
 				266272B61B27DB8000C1CD49 /* AppDelegate.m */,
 				266272BA1B27DB8000C1CD49 /* ViewController.h */,
 				266272BB1B27DB8000C1CD49 /* ViewController.m */,
-				266272BD1B27DB8000C1CD49 /* Images.xcassets */,
 				266272BF1B27DB8000C1CD49 /* Main.storyboard */,
 				266272B31B27DB8000C1CD49 /* Supporting Files */,
 			);
@@ -1455,7 +1453,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				266272BE1B27DB8000C1CD49 /* Images.xcassets in Resources */,
+				261894921B40483000C957C3 /* Media.xcassets in Resources */,
 				266272C11B27DB8000C1CD49 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1851,7 +1849,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon-OSX";
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
@@ -1885,7 +1883,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon-OSX";
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
@@ -1926,7 +1924,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon-OSX";
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;

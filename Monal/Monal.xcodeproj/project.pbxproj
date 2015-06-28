@@ -150,6 +150,8 @@
 		265F1B2B123040540065C5FE /* web.xib in Resources */ = {isa = PBXBuildFile; fileRef = 265F1B2A123040540065C5FE /* web.xib */; };
 		2661D3411B40765A00EC51BA /* MLChatListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661D3401B40765A00EC51BA /* MLChatListViewController.m */; };
 		2661D3441B40766F00EC51BA /* MLChatViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661D3431B40766F00EC51BA /* MLChatViewController.m */; };
+		2661D34D1B407ED400EC51BA /* MLChatListCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661D34C1B407ED400EC51BA /* MLChatListCell.m */; };
+		2661D3501B407EDD00EC51BA /* MLChatViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661D34F1B407EDD00EC51BA /* MLChatViewCell.m */; };
 		266272B71B27DB8000C1CD49 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 266272B61B27DB8000C1CD49 /* AppDelegate.m */; };
 		266272B91B27DB8000C1CD49 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 266272B81B27DB8000C1CD49 /* main.m */; };
 		266272C11B27DB8000C1CD49 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 266272BF1B27DB8000C1CD49 /* Main.storyboard */; };
@@ -422,7 +424,12 @@
 		2661D3401B40765A00EC51BA /* MLChatListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLChatListViewController.m; sourceTree = "<group>"; };
 		2661D3421B40766F00EC51BA /* MLChatViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLChatViewController.h; sourceTree = "<group>"; };
 		2661D3431B40766F00EC51BA /* MLChatViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLChatViewController.m; sourceTree = "<group>"; };
-		266272B11B27DB8000C1CD49 /* Monal-OSX.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Monal-OSX.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		2661D34B1B407ED400EC51BA /* MLChatListCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLChatListCell.h; sourceTree = "<group>"; };
+		2661D34C1B407ED400EC51BA /* MLChatListCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLChatListCell.m; sourceTree = "<group>"; };
+		2661D34E1B407EDD00EC51BA /* MLChatViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLChatViewCell.h; sourceTree = "<group>"; };
+		2661D34F1B407EDD00EC51BA /* MLChatViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLChatViewCell.m; sourceTree = "<group>"; };
+		2661D3511B40823E00EC51BA /* Monal-OSX.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Monal-OSX.entitlements"; sourceTree = "<group>"; };
+		266272B11B27DB8000C1CD49 /* Monal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Monal.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		266272B41B27DB8000C1CD49 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		266272B51B27DB8000C1CD49 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		266272B61B27DB8000C1CD49 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -635,7 +642,7 @@
 				26080210110ABA4E005E194D /* Monal.app */,
 				268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */,
 				2630FE2F1AD550C00079F5C0 /* Monal Tests.xctest */,
-				266272B11B27DB8000C1CD49 /* Monal-OSX.app */,
+				266272B11B27DB8000C1CD49 /* Monal.app */,
 				266272C61B27DB8100C1CD49 /* Monal-OSXTests.xctest */,
 			);
 			name = Products;
@@ -778,6 +785,7 @@
 		266272B21B27DB8000C1CD49 /* Monal-OSX */ = {
 			isa = PBXGroup;
 			children = (
+				2661D3511B40823E00EC51BA /* Monal-OSX.entitlements */,
 				266272B51B27DB8000C1CD49 /* AppDelegate.h */,
 				266272B61B27DB8000C1CD49 /* AppDelegate.m */,
 				266272BF1B27DB8000C1CD49 /* Main.storyboard */,
@@ -786,6 +794,10 @@
 				2661D3401B40765A00EC51BA /* MLChatListViewController.m */,
 				2661D3421B40766F00EC51BA /* MLChatViewController.h */,
 				2661D3431B40766F00EC51BA /* MLChatViewController.m */,
+				2661D34B1B407ED400EC51BA /* MLChatListCell.h */,
+				2661D34C1B407ED400EC51BA /* MLChatListCell.m */,
+				2661D34E1B407EDD00EC51BA /* MLChatViewCell.h */,
+				2661D34F1B407EDD00EC51BA /* MLChatViewCell.m */,
 			);
 			path = "Monal-OSX";
 			sourceTree = "<group>";
@@ -1307,7 +1319,7 @@
 			);
 			name = "Monal-OSX";
 			productName = "Monal-OSX";
-			productReference = 266272B11B27DB8000C1CD49 /* Monal-OSX.app */;
+			productReference = 266272B11B27DB8000C1CD49 /* Monal.app */;
 			productType = "com.apple.product-type.application";
 		};
 		266272C51B27DB8100C1CD49 /* Monal-OSXTests */ = {
@@ -1369,6 +1381,11 @@
 					};
 					266272B01B27DB8000C1CD49 = {
 						CreatedOnToolsVersion = 6.3.1;
+						SystemCapabilities = {
+							com.apple.Sandbox = {
+								enabled = 1;
+							};
+						};
 					};
 					266272C51B27DB8100C1CD49 = {
 						CreatedOnToolsVersion = 6.3.1;
@@ -1584,10 +1601,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2661D34D1B407ED400EC51BA /* MLChatListCell.m in Sources */,
 				266272B91B27DB8000C1CD49 /* main.m in Sources */,
 				2661D3441B40766F00EC51BA /* MLChatViewController.m in Sources */,
 				266272B71B27DB8000C1CD49 /* AppDelegate.m in Sources */,
 				2661D3411B40765A00EC51BA /* MLChatListViewController.m in Sources */,
+				2661D3501B407EDD00EC51BA /* MLChatViewCell.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1861,6 +1880,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CODE_SIGN_ENTITLEMENTS = "Monal-OSX/Monal-OSX.entitlements";
 				CODE_SIGN_IDENTITY = "-";
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
@@ -1880,7 +1900,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MTL_ENABLE_DEBUG_INFO = YES;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = Monal;
 				SDKROOT = macosx;
 			};
 			name = Debug;
@@ -1903,6 +1923,7 @@
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_ENTITLEMENTS = "Monal-OSX/Monal-OSX.entitlements";
 				CODE_SIGN_IDENTITY = "-";
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
@@ -1921,7 +1942,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MTL_ENABLE_DEBUG_INFO = NO;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = Monal;
 				SDKROOT = macosx;
 			};
 			name = Adhoc;
@@ -1944,6 +1965,7 @@
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_ENTITLEMENTS = "Monal-OSX/Monal-OSX.entitlements";
 				CODE_SIGN_IDENTITY = "-";
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
@@ -1962,7 +1984,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MTL_ENABLE_DEBUG_INFO = NO;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = Monal;
 				SDKROOT = macosx;
 			};
 			name = AppStore;

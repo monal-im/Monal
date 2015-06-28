@@ -27,4 +27,20 @@
     
 }
 
+#pragma mark -table view datasource
+- (NSInteger)numberOfRowsInTableView:(NSTableView *)aTableView
+{
+    return 0;
+}
+
+#pragma mark - table view delegate
+
+- (NSView *)tableView:(NSTableView *)tableView viewForTableColumn:(NSTableColumn *)tableColumn  row:(NSInteger)row
+{
+    
+ // MLchatViewCell *cell= [tableView makeViewWithIdentifier:cellIdentifier owner:self];
+    return nil;
+}
+
+
 @end

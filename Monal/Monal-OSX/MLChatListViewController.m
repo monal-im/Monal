@@ -17,7 +17,8 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    // Do view setup here.
+    
+    self.chatListTable.backgroundColor= [NSColor clearColor];
 }
 
 

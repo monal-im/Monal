@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="7702" systemVersion="14D136" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="7702" systemVersion="14E46" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="7702"/>
     </dependencies>
@@ -681,13 +681,13 @@
         <scene sceneID="lWg-JA-sLc">
             <objects>
                 <viewController id="0BB-CK-cBw" customClass="MLChatListViewController" sceneMemberID="viewController">
-                    <view key="view" id="DYi-kN-cK7">
-                        <rect key="frame" x="0.0" y="0.0" width="320" height="480"/>
-                        <autoresizingMask key="autoresizingMask"/>
+                    <visualEffectView key="view" appearanceType="vibrantLight" blendingMode="behindWindow" material="appearanceBased" state="followsWindowActiveState" id="EaE-BO-Cf3">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="479"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <subviews>
                             <scrollView autohidesScrollers="YES" horizontalLineScroll="58" horizontalPageScroll="10" verticalLineScroll="58" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="eLW-rG-h59">
                                 <rect key="frame" x="0.0" y="0.0" width="320" height="480"/>
-                                <clipView key="contentView" id="HB1-Pi-3Cp">
+                                <clipView key="contentView" drawsBackground="NO" copiesOnScroll="NO" id="HB1-Pi-3Cp">
                                     <rect key="frame" x="1" y="17" width="238" height="117"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
@@ -736,7 +736,7 @@
                                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Status Message" id="fWL-0j-FMf">
                                                                         <font key="font" metaFont="cellTitle"/>
                                                                         <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
-                                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                                     </textFieldCell>
                                                                 </textField>
                                                             </subviews>
@@ -765,6 +765,9 @@
                                     </subviews>
                                     <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </clipView>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="320" id="0I3-T2-dUm"/>
+                                </constraints>
                                 <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="2Q9-PO-6A8">
                                     <rect key="frame" x="1" y="119" width="223" height="15"/>
                                     <autoresizingMask key="autoresizingMask"/>
@@ -776,19 +779,19 @@
                             </scrollView>
                         </subviews>
                         <constraints>
-                            <constraint firstItem="eLW-rG-h59" firstAttribute="leading" secondItem="DYi-kN-cK7" secondAttribute="leading" id="EyR-sB-4Bh"/>
-                            <constraint firstAttribute="trailing" secondItem="eLW-rG-h59" secondAttribute="trailing" id="dKo-CC-ze5"/>
-                            <constraint firstAttribute="bottom" secondItem="eLW-rG-h59" secondAttribute="bottom" id="oor-yK-UKT"/>
-                            <constraint firstItem="eLW-rG-h59" firstAttribute="top" secondItem="DYi-kN-cK7" secondAttribute="top" id="rhw-3K-F7a"/>
+                            <constraint firstItem="eLW-rG-h59" firstAttribute="leading" secondItem="EaE-BO-Cf3" secondAttribute="leading" id="4x5-52-rqu"/>
+                            <constraint firstAttribute="bottom" secondItem="eLW-rG-h59" secondAttribute="bottom" id="Hgw-ya-dBW"/>
+                            <constraint firstItem="eLW-rG-h59" firstAttribute="top" secondItem="EaE-BO-Cf3" secondAttribute="top" constant="-1" id="k0c-aW-oPl"/>
+                            <constraint firstAttribute="trailing" secondItem="eLW-rG-h59" secondAttribute="trailing" id="v9z-pL-fo1"/>
                         </constraints>
-                    </view>
+                    </visualEffectView>
                     <connections>
                         <outlet property="chatListTable" destination="mgU-VL-SBt" id="Tqv-FR-7V8"/>
                     </connections>
                 </viewController>
                 <customObject id="N6A-8E-AoF" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-19" y="1053"/>
+            <point key="canvasLocation" x="6" y="1098.5"/>
         </scene>
         <!--Split View Controller-->
         <scene sceneID="2ls-iF-dj5">

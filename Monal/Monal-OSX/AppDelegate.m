@@ -7,9 +7,11 @@
 //
 
 #import "AppDelegate.h"
+#import "MASPreferencesWindowController.h"
 
 @interface AppDelegate ()
 
+@property (nonatomic , strong)   MASPreferencesWindowController *preferencesWindow;
 @end
 
 @implementation AppDelegate
@@ -28,6 +30,18 @@
         [self.mainWindowController showWindow:self];
     }
     return YES;	
+}
+
+
+#pragma mark  - Actions
+-(IBAction)showPreferences:(id)sender
+{
+    if(!self.preferencesWindow) {
+        NSArray *array = @[];
+        self.preferencesWindow = [[MASPreferencesWindowController alloc] initWithViewControllers:array];
+    }
+    [self.preferencesWindow showWindow:self];
+    
 }
 
 @end

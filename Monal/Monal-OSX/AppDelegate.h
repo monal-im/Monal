@@ -12,5 +12,7 @@
 
 @property (nonatomic , weak) NSWindowController* mainWindowController;
 
+-(IBAction)showPreferences:(id)sender;
+
 @end
 

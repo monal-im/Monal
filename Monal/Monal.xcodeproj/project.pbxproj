@@ -18,12 +18,6 @@
 		260C51D1177F08F50039634B /* xmpp.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D0177F08F50039634B /* xmpp.m */; };
 		260C51D4177F44AD0039634B /* XMLNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D3177F44AD0039634B /* XMLNode.m */; };
 		260C6C94178080730004E2E1 /* EncodingTools.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C6C93178080730004E2E1 /* EncodingTools.m */; };
-		261199101B632B17008768C8 /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 261199081B632B17008768C8 /* .gitignore */; };
-		261199111B632B17008768C8 /* LICENSE.md in Sources */ = {isa = PBXBuildFile; fileRef = 261199091B632B17008768C8 /* LICENSE.md */; };
-		261199121B632B17008768C8 /* MASPreferences.podspec in Resources */ = {isa = PBXBuildFile; fileRef = 2611990A1B632B17008768C8 /* MASPreferences.podspec */; };
-		261199131B632B17008768C8 /* MASPreferencesWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2611990C1B632B17008768C8 /* MASPreferencesWindow.xib */; };
-		261199141B632B17008768C8 /* MASPreferencesWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2611990E1B632B17008768C8 /* MASPreferencesWindowController.m */; };
-		261199151B632B17008768C8 /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = 2611990F1B632B17008768C8 /* README.md */; };
 		261528C51869CE5300BF62D6 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 261528C41869CE5300BF62D6 /* AudioToolbox.framework */; };
 		261894921B40483000C957C3 /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 26470F511835C4080069E3E0 /* Media.xcassets */; };
 		261A6281176C055400059090 /* ContactsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A627F176C055400059090 /* ContactsViewController.m */; };
@@ -264,14 +258,6 @@
 		260C51D3177F44AD0039634B /* XMLNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMLNode.m; sourceTree = "<group>"; };
 		260C6C92178080730004E2E1 /* EncodingTools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EncodingTools.h; sourceTree = "<group>"; };
 		260C6C93178080730004E2E1 /* EncodingTools.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EncodingTools.m; sourceTree = "<group>"; };
-		261199081B632B17008768C8 /* .gitignore */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
-		261199091B632B17008768C8 /* LICENSE.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = LICENSE.md; sourceTree = "<group>"; };
-		2611990A1B632B17008768C8 /* MASPreferences.podspec */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = MASPreferences.podspec; sourceTree = "<group>"; };
-		2611990B1B632B17008768C8 /* MASPreferencesViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MASPreferencesViewController.h; sourceTree = "<group>"; };
-		2611990C1B632B17008768C8 /* MASPreferencesWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MASPreferencesWindow.xib; sourceTree = "<group>"; };
-		2611990D1B632B17008768C8 /* MASPreferencesWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MASPreferencesWindowController.h; sourceTree = "<group>"; };
-		2611990E1B632B17008768C8 /* MASPreferencesWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MASPreferencesWindowController.m; sourceTree = "<group>"; };
-		2611990F1B632B17008768C8 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		261528C41869CE5300BF62D6 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		261A627E176C055400059090 /* ContactsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContactsViewController.h; sourceTree = "<group>"; };
 		261A627F176C055400059090 /* ContactsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ContactsViewController.m; sourceTree = "<group>"; };
@@ -680,26 +666,10 @@
 		261199061B632B17008768C8 /* External */ = {
 			isa = PBXGroup;
 			children = (
-				261199071B632B17008768C8 /* MASPreferences */,
 			);
 			name = External;
 			path = MonalOSX/External;
 			sourceTree = SOURCE_ROOT;
-		};
-		261199071B632B17008768C8 /* MASPreferences */ = {
-			isa = PBXGroup;
-			children = (
-				261199081B632B17008768C8 /* .gitignore */,
-				261199091B632B17008768C8 /* LICENSE.md */,
-				2611990A1B632B17008768C8 /* MASPreferences.podspec */,
-				2611990B1B632B17008768C8 /* MASPreferencesViewController.h */,
-				2611990C1B632B17008768C8 /* MASPreferencesWindow.xib */,
-				2611990D1B632B17008768C8 /* MASPreferencesWindowController.h */,
-				2611990E1B632B17008768C8 /* MASPreferencesWindowController.m */,
-				2611990F1B632B17008768C8 /* README.md */,
-			);
-			path = MASPreferences;
-			sourceTree = "<group>";
 		};
 		262797AC178A573F00B85D94 /* Tableviewcells */ = {
 			isa = PBXGroup;
@@ -1520,9 +1490,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				261894921B40483000C957C3 /* Media.xcassets in Resources */,
-				261199121B632B17008768C8 /* MASPreferences.podspec in Resources */,
-				261199131B632B17008768C8 /* MASPreferencesWindow.xib in Resources */,
-				261199101B632B17008768C8 /* .gitignore in Resources */,
 				266272C11B27DB8000C1CD49 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1650,11 +1617,8 @@
 			files = (
 				2661D34D1B407ED400EC51BA /* MLChatListCell.m in Sources */,
 				2651AF551B409906008D025C /* MLMainWindow.m in Sources */,
-				261199151B632B17008768C8 /* README.md in Sources */,
 				266272B91B27DB8000C1CD49 /* main.m in Sources */,
 				2661D3441B40766F00EC51BA /* MLChatViewController.m in Sources */,
-				261199141B632B17008768C8 /* MASPreferencesWindowController.m in Sources */,
-				261199111B632B17008768C8 /* LICENSE.md in Sources */,
 				266272B71B27DB8000C1CD49 /* AppDelegate.m in Sources */,
 				2661D3411B40765A00EC51BA /* MLChatListViewController.m in Sources */,
 				2661D3501B407EDD00EC51BA /* MLChatViewCell.m in Sources */,

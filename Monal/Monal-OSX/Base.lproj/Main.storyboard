@@ -770,7 +770,7 @@
                                     <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </clipView>
                                 <constraints>
-                                    <constraint firstAttribute="width" constant="320" id="0I3-T2-dUm"/>
+                                    <constraint firstAttribute="width" constant="320" id="Ilu-q7-rkb"/>
                                 </constraints>
                                 <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="2Q9-PO-6A8">
                                     <rect key="frame" x="1" y="119" width="223" height="15"/>
@@ -795,15 +795,15 @@
                 </viewController>
                 <customObject id="N6A-8E-AoF" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="6" y="1098.5"/>
+            <point key="canvasLocation" x="33" y="1035.5"/>
         </scene>
         <!--Split View Controller-->
         <scene sceneID="2ls-iF-dj5">
             <objects>
                 <splitViewController id="m98-td-Hed" sceneMemberID="viewController">
                     <splitViewItems>
-                        <splitViewItem id="0Gx-Sl-Moy"/>
-                        <splitViewItem id="g4g-S0-pE7"/>
+                        <splitViewItem holdingPriority="750" id="0Gx-Sl-Moy" userLabel="chatlist"/>
+                        <splitViewItem holdingPriority="1" id="g4g-S0-pE7" userLabel="chatview"/>
                     </splitViewItems>
                     <splitView key="splitView" dividerStyle="thin" vertical="YES" id="em5-AA-GrC">
                         <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>

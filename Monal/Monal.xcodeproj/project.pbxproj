@@ -49,6 +49,9 @@
 		26347D861790FFDE006FF64F /* MLInfoCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 26347D851790FFDE006FF64F /* MLInfoCell.m */; };
 		26352EA8177D222600E2C8FF /* MLXMPPManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26352EA7177D222600E2C8FF /* MLXMPPManager.m */; };
 		2636C43F177BD58C001CA71F /* XMPPEdit.m in Sources */ = {isa = PBXBuildFile; fileRef = 2636C43E177BD58C001CA71F /* XMPPEdit.m */; };
+		2638DAE71B68F3AB00DF05AC /* MLPresenceSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = 2638DAE61B68F3AB00DF05AC /* MLPresenceSettings.m */; };
+		2638DAEB1B68F3D400DF05AC /* MLAccountSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = 2638DAE91B68F3D400DF05AC /* MLAccountSettings.m */; };
+		2638DAEF1B68F3EF00DF05AC /* MLDisplaySettings.m in Sources */ = {isa = PBXBuildFile; fileRef = 2638DAEE1B68F3EF00DF05AC /* MLDisplaySettings.m */; };
 		263F127A177F867B0025B235 /* ParseStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 263F1279177F867B0025B235 /* ParseStream.m */; };
 		263F568D121B5E970027D85D /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 263F568C121B5E970027D85D /* MediaPlayer.framework */; };
 		26400712140B43BB00CF1107 /* rtcpapppacket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006BB140B43BB00CF1107 /* rtcpapppacket.cpp */; };
@@ -318,6 +321,12 @@
 		26352EA7177D222600E2C8FF /* MLXMPPManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLXMPPManager.m; sourceTree = "<group>"; };
 		2636C43D177BD58C001CA71F /* XMPPEdit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPEdit.h; sourceTree = "<group>"; };
 		2636C43E177BD58C001CA71F /* XMPPEdit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPEdit.m; sourceTree = "<group>"; };
+		2638DAE51B68F3AB00DF05AC /* MLPresenceSettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLPresenceSettings.h; sourceTree = "<group>"; };
+		2638DAE61B68F3AB00DF05AC /* MLPresenceSettings.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLPresenceSettings.m; sourceTree = "<group>"; };
+		2638DAE81B68F3D400DF05AC /* MLAccountSettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLAccountSettings.h; sourceTree = "<group>"; };
+		2638DAE91B68F3D400DF05AC /* MLAccountSettings.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLAccountSettings.m; sourceTree = "<group>"; };
+		2638DAED1B68F3EF00DF05AC /* MLDisplaySettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLDisplaySettings.h; sourceTree = "<group>"; };
+		2638DAEE1B68F3EF00DF05AC /* MLDisplaySettings.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLDisplaySettings.m; sourceTree = "<group>"; };
 		263F1278177F867B0025B235 /* ParseStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParseStream.h; sourceTree = "<group>"; };
 		263F1279177F867B0025B235 /* ParseStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParseStream.m; sourceTree = "<group>"; };
 		263F568C121B5E970027D85D /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
@@ -768,6 +777,19 @@
 			name = "Older UI code";
 			sourceTree = "<group>";
 		};
+		2638DAE11B68F2EE00DF05AC /* Preferences */ = {
+			isa = PBXGroup;
+			children = (
+				2638DAE51B68F3AB00DF05AC /* MLPresenceSettings.h */,
+				2638DAE61B68F3AB00DF05AC /* MLPresenceSettings.m */,
+				2638DAE81B68F3D400DF05AC /* MLAccountSettings.h */,
+				2638DAE91B68F3D400DF05AC /* MLAccountSettings.m */,
+				2638DAED1B68F3EF00DF05AC /* MLDisplaySettings.h */,
+				2638DAEE1B68F3EF00DF05AC /* MLDisplaySettings.m */,
+			);
+			name = Preferences;
+			sourceTree = "<group>";
+		};
 		2640AF3B14548E7600CB4F60 /* GrowingTextView */ = {
 			isa = PBXGroup;
 			children = (
@@ -817,6 +839,7 @@
 		266272B21B27DB8000C1CD49 /* Monal-OSX */ = {
 			isa = PBXGroup;
 			children = (
+				2638DAE11B68F2EE00DF05AC /* Preferences */,
 				261199061B632B17008768C8 /* External */,
 				2661D3511B40823E00EC51BA /* Monal-OSX.entitlements */,
 				266272B51B27DB8000C1CD49 /* AppDelegate.h */,
@@ -1637,13 +1660,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2638DAEB1B68F3D400DF05AC /* MLAccountSettings.m in Sources */,
 				2661D34D1B407ED400EC51BA /* MLChatListCell.m in Sources */,
+				2638DAEF1B68F3EF00DF05AC /* MLDisplaySettings.m in Sources */,
 				2651AF551B409906008D025C /* MLMainWindow.m in Sources */,
 				266272B91B27DB8000C1CD49 /* main.m in Sources */,
 				2661D3441B40766F00EC51BA /* MLChatViewController.m in Sources */,
 				261199261B632C42008768C8 /* MASPreferencesWindowController.m in Sources */,
 				266272B71B27DB8000C1CD49 /* AppDelegate.m in Sources */,
 				261199271B632C42008768C8 /* README.md in Sources */,
+				2638DAE71B68F3AB00DF05AC /* MLPresenceSettings.m in Sources */,
 				2661D3411B40765A00EC51BA /* MLChatListViewController.m in Sources */,
 				2661D3501B407EDD00EC51BA /* MLChatViewCell.m in Sources */,
 			);

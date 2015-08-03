@@ -15,6 +15,7 @@
 		2601D9CB0FBF25EF004DB939 /* sworim.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 2601D9CA0FBF25EF004DB939 /* sworim.sqlite */; };
 		2601D9D40FBF262E004DB939 /* libsqlite3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2601D9D30FBF262E004DB939 /* libsqlite3.dylib */; };
 		260447F60FEED62100B3B5A7 /* BuddyDetails.xib in Resources */ = {isa = PBXBuildFile; fileRef = 260447F50FEED62100B3B5A7 /* BuddyDetails.xib */; };
+		260870D81B7034460036539B /* MLAccountEdit.m in Sources */ = {isa = PBXBuildFile; fileRef = 260870D71B7034460036539B /* MLAccountEdit.m */; };
 		260C51D1177F08F50039634B /* xmpp.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D0177F08F50039634B /* xmpp.m */; };
 		260C51D4177F44AD0039634B /* XMLNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D3177F44AD0039634B /* XMLNode.m */; };
 		260C6C94178080730004E2E1 /* EncodingTools.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C6C93178080730004E2E1 /* EncodingTools.m */; };
@@ -258,6 +259,8 @@
 		2601D9D30FBF262E004DB939 /* libsqlite3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.dylib; path = usr/lib/libsqlite3.dylib; sourceTree = SDKROOT; };
 		260447F50FEED62100B3B5A7 /* BuddyDetails.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = BuddyDetails.xib; sourceTree = "<group>"; };
 		26080210110ABA4E005E194D /* Monal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Monal.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		260870D61B7034460036539B /* MLAccountEdit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLAccountEdit.h; sourceTree = "<group>"; };
+		260870D71B7034460036539B /* MLAccountEdit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLAccountEdit.m; sourceTree = "<group>"; };
 		260C51CF177F08F50039634B /* xmpp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = xmpp.h; sourceTree = "<group>"; };
 		260C51D0177F08F50039634B /* xmpp.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = xmpp.m; sourceTree = "<group>"; };
 		260C51D2177F44AD0039634B /* XMLNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMLNode.h; sourceTree = "<group>"; };
@@ -786,6 +789,8 @@
 				2638DAE91B68F3D400DF05AC /* MLAccountSettings.m */,
 				2638DAED1B68F3EF00DF05AC /* MLDisplaySettings.h */,
 				2638DAEE1B68F3EF00DF05AC /* MLDisplaySettings.m */,
+				260870D61B7034460036539B /* MLAccountEdit.h */,
+				260870D71B7034460036539B /* MLAccountEdit.m */,
 			);
 			name = Preferences;
 			sourceTree = "<group>";
@@ -1665,6 +1670,7 @@
 				2638DAEF1B68F3EF00DF05AC /* MLDisplaySettings.m in Sources */,
 				2651AF551B409906008D025C /* MLMainWindow.m in Sources */,
 				266272B91B27DB8000C1CD49 /* main.m in Sources */,
+				260870D81B7034460036539B /* MLAccountEdit.m in Sources */,
 				2661D3441B40766F00EC51BA /* MLChatViewController.m in Sources */,
 				261199261B632C42008768C8 /* MASPreferencesWindowController.m in Sources */,
 				266272B71B27DB8000C1CD49 /* AppDelegate.m in Sources */,

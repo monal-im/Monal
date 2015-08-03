@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="7702" systemVersion="14E46" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="7706" systemVersion="14E46" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="7702"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="7706"/>
     </dependencies>
     <scenes>
         <!--Application-->
@@ -648,7 +648,7 @@
                 <customObject id="Voe-Tx-rLC" customClass="AppDelegate"/>
                 <customObject id="Ady-hI-5gd" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="48" y="-143"/>
+            <point key="canvasLocation" x="146" y="-144"/>
         </scene>
         <!--Window Controller-->
         <scene sceneID="R2V-B0-nI4">
@@ -840,10 +840,10 @@
                                                     <rect key="frame" x="0.0" y="0.0" width="223" height="133"/>
                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                     <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                                    <size key="minSize" width="403" height="106"/>
+                                                    <size key="minSize" width="388" height="106"/>
                                                     <size key="maxSize" width="463" height="10000000"/>
                                                     <color key="insertionPointColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                                    <size key="minSize" width="403" height="106"/>
+                                                    <size key="minSize" width="388" height="106"/>
                                                     <size key="maxSize" width="463" height="10000000"/>
                                                     <connections>
                                                         <outlet property="delegate" destination="qLp-oS-WKI" id="1X9-gE-xl5"/>
@@ -923,10 +923,10 @@
                                                                                 <rect key="frame" x="0.0" y="0.0" width="238" height="133"/>
                                                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                                                                <size key="minSize" width="280" height="35"/>
+                                                                                <size key="minSize" width="265" height="35"/>
                                                                                 <size key="maxSize" width="493" height="10000000"/>
                                                                                 <color key="insertionPointColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                                                                <size key="minSize" width="280" height="35"/>
+                                                                                <size key="minSize" width="265" height="35"/>
                                                                                 <size key="maxSize" width="493" height="10000000"/>
                                                                             </textView>
                                                                         </subviews>
@@ -957,10 +957,10 @@
                                                                                 <rect key="frame" x="0.0" y="0.0" width="238" height="133"/>
                                                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                                                                <size key="minSize" width="280" height="35"/>
+                                                                                <size key="minSize" width="265" height="35"/>
                                                                                 <size key="maxSize" width="493" height="10000000"/>
                                                                                 <color key="insertionPointColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                                                                <size key="minSize" width="280" height="35"/>
+                                                                                <size key="minSize" width="265" height="35"/>
                                                                                 <size key="maxSize" width="493" height="10000000"/>
                                                                             </textView>
                                                                         </subviews>
@@ -1019,6 +1019,44 @@
                 <customObject id="csG-e3-5EW" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="778.5" y="670.5"/>
+        </scene>
+        <!--Preferences-Accounts-->
+        <scene sceneID="kbX-E6-xLf">
+            <objects>
+                <viewController title="Accounts" id="iTE-lZ-FwX" userLabel="Preferences-Accounts" sceneMemberID="viewController">
+                    <view key="view" id="vQL-mx-jAG">
+                        <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </view>
+                </viewController>
+                <customObject id="Hfi-Dv-W3k" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="136" y="-421"/>
+        </scene>
+        <!--Preferences-Display-->
+        <scene sceneID="3M3-cJ-azZ">
+            <objects>
+                <viewController id="0nn-qO-NFw" userLabel="Preferences-Display" sceneMemberID="viewController">
+                    <view key="view" id="Dg5-H2-oTG">
+                        <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </view>
+                </viewController>
+                <customObject id="Bl9-uv-2FH" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-365" y="-421"/>
+        </scene>
+        <!--Preferences-Presence-->
+        <scene sceneID="744-64-dVT">
+            <objects>
+                <viewController title="Presence" id="Fsj-KR-oZF" userLabel="Preferences-Presence" sceneMemberID="viewController">
+                    <view key="view" id="I2p-fx-HiD">
+                        <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </view>
+                </viewController>
+                <customObject id="blJ-dl-OT7" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
         </scene>
     </scenes>
     <resources>

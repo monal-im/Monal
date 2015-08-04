@@ -11,4 +11,5 @@
 
 @interface MLPresenceSettings : NSViewController <MASPreferencesViewController>
 
+
 @end

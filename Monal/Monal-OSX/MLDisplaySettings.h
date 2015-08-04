@@ -11,4 +11,5 @@
 
 @interface MLDisplaySettings : NSViewController <MASPreferencesViewController>
 
+
 @end

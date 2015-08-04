@@ -9,6 +9,7 @@
 #import <Cocoa/Cocoa.h>
 #import "MASPreferencesViewController.h"
 
-@interface MLAccountSettings : NSViewController <MASPreferencesViewController>
+@interface MLAccountSettings : NSViewController <MASPreferencesViewController, NSTableViewDataSource, NSTableViewDelegate>
+
 
 @end

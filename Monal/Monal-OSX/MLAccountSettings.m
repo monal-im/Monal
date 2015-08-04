@@ -17,6 +17,26 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do view setup here.
+    
 }
+
+
+#pragma mark - preferences delegate
+
+- (NSString *)identifier
+{
+    return self.title;
+}
+
+- (NSImage *)toolbarItemImage
+{
+    return [NSImage imageNamed:NSImageNameAdvanced];
+}
+
+- (NSString *)toolbarItemLabel
+{
+    return @"";
+}
+
 
 @end

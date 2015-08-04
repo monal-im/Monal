@@ -1023,7 +1023,7 @@
         <!--Preferences-Accounts-->
         <scene sceneID="kbX-E6-xLf">
             <objects>
-                <viewController title="Accounts" id="iTE-lZ-FwX" userLabel="Preferences-Accounts" sceneMemberID="viewController">
+                <viewController title="Accounts" storyboardIdentifier="accounts" id="iTE-lZ-FwX" userLabel="Preferences-Accounts" customClass="MLAccountSettings" sceneMemberID="viewController">
                     <view key="view" id="vQL-mx-jAG">
                         <rect key="frame" x="0.0" y="0.0" width="450" height="327"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -1055,7 +1055,7 @@
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" columnSelection="YES" multipleSelection="NO" autosaveColumns="NO" rowSizeStyle="automatic" viewBased="YES" id="XnT-Hv-eDh">
-                                            <rect key="frame" x="0.0" y="0.0" width="238" height="117"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="408" height="0.0"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <size key="intercellSpacing" width="3" height="2"/>
                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -1133,7 +1133,7 @@
         <!--Preferences-Presence-->
         <scene sceneID="3M3-cJ-azZ">
             <objects>
-                <viewController title="Presence" id="0nn-qO-NFw" userLabel="Preferences-Presence" sceneMemberID="viewController">
+                <viewController title="Presence" storyboardIdentifier="presence" id="0nn-qO-NFw" userLabel="Preferences-Presence" customClass="MLPresenceSettings" sceneMemberID="viewController">
                     <view key="view" id="Dg5-H2-oTG">
                         <rect key="frame" x="0.0" y="0.0" width="450" height="244"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -1194,7 +1194,7 @@
         <!--Preferences-Display-->
         <scene sceneID="744-64-dVT">
             <objects>
-                <viewController title="Display" id="Fsj-KR-oZF" userLabel="Preferences-Display" sceneMemberID="viewController">
+                <viewController title="Display" storyboardIdentifier="display" id="Fsj-KR-oZF" userLabel="Preferences-Display" customClass="MLDisplaySettings" sceneMemberID="viewController">
                     <view key="view" id="I2p-fx-HiD">
                         <rect key="frame" x="0.0" y="0.0" width="357" height="278"/>
                         <autoresizingMask key="autoresizingMask"/>

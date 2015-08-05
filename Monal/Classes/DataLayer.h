@@ -45,7 +45,7 @@
 -(BOOL) addBuddy:(NSString*) buddy  forAccount:(NSString*) accountNo fullname:(NSString*)fullName nickname:(NSString*) nickName;
 -(BOOL) removeBuddy:(NSString*) buddy forAccount:(NSString*) accountNo;
 -(BOOL) clearBuddies:(NSString*) accountNo; 
--(NSArray*) contactForUsername:(NSString*) username forAccount: (NSString*) accountNo;
+-(void) contactForUsername:(NSString*) username forAccount: (NSString*) accountNo withCompletion: (void (^)(NSArray *))completion;
 
 /**
  called when an account goes offline. removes all of its contacts state info

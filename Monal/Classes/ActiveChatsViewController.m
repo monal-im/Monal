@@ -181,12 +181,11 @@
         
        [ [DataLayer sharedInstance] removeActiveBuddy:[contact objectForKey:@"buddy_name"] forAccount:[contact objectForKey:@"account_id"]];
         
-        [_chatListTable beginUpdates];
+   
            _contacts=[[DataLayer sharedInstance] activeBuddies];
         [_chatListTable deleteRowsAtIndexPaths:@[indexPath]
                               withRowAnimation:UITableViewRowAnimationAutomatic];
-        [_chatListTable endUpdates];
-        
+     
         
     }
 }
@@ -221,10 +220,10 @@
         chatViewController* chatVC = [[chatViewController alloc] initWithContact:[_contacts objectAtIndex:indexPath.row] ];
         [self.navigationController pushViewController:chatVC animated:YES];
         
-        [tableView beginUpdates];
+   
         [tableView reloadRowsAtIndexPaths:@[indexPath]
                          withRowAnimation:UITableViewRowAnimationNone];
-        [tableView endUpdates];
+        
         
         _lastSelectedUser=[_contacts objectAtIndex:indexPath.row];
 //    }

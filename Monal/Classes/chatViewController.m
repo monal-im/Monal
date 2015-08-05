@@ -455,17 +455,14 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                            [_messageTable beginUpdates];
                            NSInteger bottom = [_messageTable numberOfRowsInSection:0];
                            if(bottom>0) {
-                                path1 = [NSIndexPath indexPathForRow:bottom-1  inSection:0];
+                                path1 = [NSIndexPath indexPathForRow:bottom  inSection:0];
                                [_messageTable insertRowsAtIndexPaths:@[path1]
                                                     withRowAnimation:UITableViewRowAnimationBottom];
                            }
                            [_messageTable endUpdates];
                            
+                           [self scrollToBottom];
                            
-                           if(![_messageTable.indexPathsForVisibleRows containsObject:path1])
-                           {
-                               [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:NO];
-                           }
                        });
         
     }
@@ -519,8 +516,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                            
                            [_messageTable endUpdates];
                            
-                           [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:YES];
-                           
+                           [self scrollToBottom];
                            
                            //mark as read
                            [[DataLayer sharedInstance] markAsReadBuddy:_contactName forAccount:_accountNo];
@@ -937,11 +933,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                          if([_messagelist count]>0)
                          {
                              NSIndexPath *path1 = [NSIndexPath indexPathForRow:[_messagelist count]-1  inSection:0];
-                             if(![_messageTable.indexPathsForVisibleRows containsObject:path1])
-                             {
-                                 
-                                 [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:NO];
-                             }
+                             [self scrollToBottom];
                          }
                          
                      } completion:^(BOOL finished) {

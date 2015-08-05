@@ -451,10 +451,14 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                                                              };
                            [_messagelist addObject:[userInfo mutableCopy]];
                            
+                           NSIndexPath *path1;
                            [_messageTable beginUpdates];
-                           NSIndexPath *path1 = [NSIndexPath indexPathForRow:[_messagelist count]-1  inSection:0];
-                           [_messageTable insertRowsAtIndexPaths:@[path1]
-                                                withRowAnimation:UITableViewRowAnimationBottom];
+                           NSInteger bottom = [_messageTable numberOfRowsInSection:0];
+                           if(bottom>0) {
+                                path1 = [NSIndexPath indexPathForRow:bottom-1  inSection:0];
+                               [_messageTable insertRowsAtIndexPaths:@[path1]
+                                                    withRowAnimation:UITableViewRowAnimationBottom];
+                           }
                            [_messageTable endUpdates];
                            
                            
@@ -505,9 +509,14 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                            [_messagelist addObject:userInfo];
                            
                            [_messageTable beginUpdates];
-                           NSIndexPath *path1 = [NSIndexPath indexPathForRow:[_messagelist count]-1  inSection:0];
-                           [_messageTable insertRowsAtIndexPaths:@[path1]
-                                                withRowAnimation:UITableViewRowAnimationTop];
+                           NSIndexPath *path1;
+                           NSInteger bottom = [_messageTable numberOfRowsInSection:0];
+                           if(bottom>0) {
+                               path1 = [NSIndexPath indexPathForRow:bottom-1  inSection:0];
+                               [_messageTable insertRowsAtIndexPaths:@[path1]
+                                                    withRowAnimation:UITableViewRowAnimationBottom];
+                           }
+                           
                            [_messageTable endUpdates];
                            
                            [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:YES];

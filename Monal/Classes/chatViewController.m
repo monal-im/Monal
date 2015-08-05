@@ -492,14 +492,14 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                            if([[notification.userInfo objectForKey:@"to"] isEqualToString:_contactName])
                            {
                                userInfo = @{@"af": [notification.userInfo objectForKey:@"actuallyfrom"],
-                                                          @"message": [notification.userInfo objectForKey:@"messageText"],
-                                                          @"thetime": [self currentGMTTime],   @"delivered":@YES};
-
+                                            @"message": [notification.userInfo objectForKey:@"messageText"],
+                                            @"thetime": [self currentGMTTime],   @"delivered":@YES};
+                               
                            } else  {
-                          userInfo = @{@"af": [notification.userInfo objectForKey:@"actuallyfrom"],
-                                                      @"message": [notification.userInfo objectForKey:@"messageText"],
-                                                      @"thetime": [self currentGMTTime]
-                                     };
+                               userInfo = @{@"af": [notification.userInfo objectForKey:@"actuallyfrom"],
+                                            @"message": [notification.userInfo objectForKey:@"messageText"],
+                                            @"thetime": [self currentGMTTime]
+                                            };
                            }
                            
                            [_messagelist addObject:userInfo];
@@ -509,8 +509,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                            [_messageTable insertRowsAtIndexPaths:@[path1]
                                                 withRowAnimation:UITableViewRowAnimationTop];
                            [_messageTable endUpdates];
-                         
-                            [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:YES];
+                           
+                           [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:YES];
                            
                            
                            //mark as read

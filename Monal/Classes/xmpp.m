@@ -166,9 +166,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     CFReadStreamRef readRef= NULL;
     CFWriteStreamRef writeRef= NULL;
     
-    DDLogInfo(@"stream  creating to  server: %@ port: %d", _server, _port);
+    DDLogInfo(@"stream  creating to  server: %@ port: %d", _server, (UInt32)_port);
     
-    CFStreamCreatePairWithSocketToHost(NULL, (__bridge CFStringRef)_server, _port, &readRef, &writeRef);
+    CFStreamCreatePairWithSocketToHost(NULL, (__bridge CFStringRef)_server, (UInt32)_port , &readRef, &writeRef);
     
     _iStream= (__bridge NSInputStream*)readRef;
     _oStream= (__bridge NSOutputStream*) writeRef;
@@ -719,7 +719,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     NSInteger stanzacounter=0;
     NSInteger maxPos=[_inputBuffer length];
-    DDLogVerbose(@"maxPos %d", maxPos);
+    DDLogVerbose(@"maxPos %ld", (long)maxPos);
     
     if(maxPos<2)
     {
@@ -2075,7 +2075,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     //<http://jabber.org/protocol/offline<
     unsigned char digest[CC_SHA1_DIGEST_LENGTH];
     NSData *stringBytes = [unhashed dataUsingEncoding: NSUTF8StringEncoding]; /* or some other encoding */
-    if (CC_SHA1([stringBytes bytes], [stringBytes length], digest)) {
+    if (CC_SHA1([stringBytes bytes], (UInt32)[stringBytes length], digest)) {
         hashed =[NSData dataWithBytes:digest length:CC_SHA1_DIGEST_LENGTH];
     }
     
@@ -2281,7 +2281,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         case NSStreamEventErrorOccurred:
         {
             NSError* st_error= [stream streamError];
-            DDLogError(@"Stream error code=%d domain=%@   local desc:%@ ",st_error.code,st_error.domain,  st_error.localizedDescription);
+            DDLogError(@"Stream error code=%ld domain=%@   local desc:%@ ",(long)st_error.code,st_error.domain,  st_error.localizedDescription);
             
             
             if(st_error.code==2)// operation couldnt be completed
@@ -2422,8 +2422,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     //we probably want to break these into chunks
     DDLogVerbose(@"sending: %@ ", messageOut);
     const uint8_t * rawstring = (const uint8_t *)[messageOut UTF8String];
-    int len= strlen((char*)rawstring);
-    DDLogVerbose(@"size : %d",len);
+    NSInteger len= strlen((char*)rawstring);
+    DDLogVerbose(@"size : %ld",(long)len);
     if([_oStream write:rawstring maxLength:len]!=-1)
     {
         DDLogVerbose(@"done writing ");
@@ -2432,7 +2432,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     else
     {
         NSError* error= [_oStream streamError];
-        DDLogVerbose(@"sending: failed with error %d domain %@ message %@",error.code, error.domain, error.userInfo);
+        DDLogVerbose(@"sending: failed with error %ld domain %@ message %@",(long)error.code, error.domain, error.userInfo);
     }
     
     return NO;
@@ -2451,7 +2451,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     NSInteger len = 0;
     
     len = [_iStream read:buf maxLength:kXMPPReadSize];
-    DDLogVerbose(@"done reading %d", len);
+    DDLogVerbose(@"done reading %ld", (long)len);
     if(len>0) {
         NSData* data = [NSData dataWithBytes:(const void *)buf length:len];
       //    DDLogVerbose(@" got raw string %s nsdata %@", buf, data);

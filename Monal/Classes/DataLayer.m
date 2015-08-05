@@ -217,7 +217,7 @@ static DataLayer *sharedInstance=nil;
     if(toReturn!=nil)
     {
         
-        DDLogVerbose(@" count: %d",  [toReturn count] );
+        DDLogVerbose(@" count: %lu",  (unsigned long)[toReturn count] );
         return toReturn; //[toReturn autorelease];
     }
     else
@@ -239,7 +239,7 @@ static DataLayer *sharedInstance=nil;
     if(toReturn!=nil)
     {
         
-        DDLogVerbose(@" count: %d",  [toReturn count] );
+        DDLogVerbose(@" count: %lu",  (unsigned long)[toReturn count] );
         
         return toReturn; //[toReturn autorelease];
     }
@@ -261,7 +261,7 @@ static DataLayer *sharedInstance=nil;
     if(toReturn!=nil)
     {
         
-        DDLogVerbose(@" count: %d",  [toReturn count] );
+        DDLogVerbose(@" count: %lu",  (unsigned long)[toReturn count] );
         
         return toReturn;
     }
@@ -296,7 +296,7 @@ static DataLayer *sharedInstance=nil;
     if(toReturn!=nil)
     {
         
-        DDLogVerbose(@" count: %d",  [toReturn count] );
+        DDLogVerbose(@" count: %lu",  (unsigned long)[toReturn count] );
         return toReturn;
     }
     else

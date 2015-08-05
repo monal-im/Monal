@@ -298,7 +298,7 @@ static DataLayer *sharedInstance=nil;
         }
     }
    
-    dispatch_sync(_dbQueue, ^{
+    dispatch_async(_dbQueue, ^{
         
         NSMutableArray*  toReturn =  [[NSMutableArray alloc] init] ;
         

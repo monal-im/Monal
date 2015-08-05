@@ -878,7 +878,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         
     }
     else{
-        if((finalend-finalstart<=maxPos) && finalend!=NSNotFound && finalstart!=NSNotFound && finalend<=finalstart)
+        if((finalend-finalstart<=maxPos) && finalend!=NSNotFound && finalstart!=NSNotFound && finalend>=finalstart)
         {
             //  DDLogVerbose(@"to del start %d end %d: %@", finalstart, finalend, _inputBuffer);
             if(finalend <[_inputBuffer length] ) {

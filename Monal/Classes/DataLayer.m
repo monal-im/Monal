@@ -950,25 +950,21 @@ static DataLayer *sharedInstance=nil;
 
 -(void) setResourceOnline:(ParsePresence *)presenceObj forAccount:(NSString *)accountNo
 {
-    
-    //get buddyid for name and accoun
+    //get buddyid for name and account
     NSString* query1=[NSString stringWithFormat:@" select buddy_id from buddylist where account_id=%@ and  buddy_name='%@';", accountNo, presenceObj.user.escapeForSql ];
-    NSString* buddyid = (NSString*)[self executeScalar:query1];
-    if(buddyid==nil) return ;
+    [self executeScalar:query1 withCompletion:^(NSObject *buddyid) {
+        if(buddyid)  {
+            NSString* query3=[NSString stringWithFormat:@" select count(buddy_id) from buddy_resources where buddy_id=%@ and resource='%@';", buddyid, presenceObj.resource.escapeForSql ];
+                [self executeScalar:query3 withCompletion:^(NSObject * resourceCount) {
+                //do not duplicate resource
+                 if([(NSNumber *)resourceCount integerValue] ==0) {
+                     NSString* query=[NSString stringWithFormat:@"insert into buddy_resources values (%@, '%@', '')", buddyid, presenceObj.resource.escapeForSql ];
+                     [self executeNonQuery:query withCompletion:nil];
+                 }
+            }];
     
-    //make sure not already there
-    
-    //see how many left
-    NSString* query3=[NSString stringWithFormat:@" select count(buddy_id) from buddy_resources where buddy_id=%@ and resource='%@';", buddyid, presenceObj.resource.escapeForSql ];
-    NSString* resourceCount =(NSString*) [self executeScalar:query3];
-   	
-    if([resourceCount integerValue]  >0) return ;
-    
-    
-    //do not duplicate resource
-    NSString* query=[NSString stringWithFormat:@"insert into buddy_resources values (%@, '%@', '')", buddyid, presenceObj.resource.escapeForSql ];
-    [self executeNonQuery:query withCompletion:nil];
-
+        }
+    }];
 }
 
 

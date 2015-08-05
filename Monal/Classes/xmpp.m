@@ -717,8 +717,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     NSString* __block toReturn=nil;
     NSString* __block stanzaType=nil;
     
-    int stanzacounter=0;
-    int maxPos=[_inputBuffer length];
+    NSInteger stanzacounter=0;
+    NSInteger maxPos=[_inputBuffer length];
     DDLogVerbose(@"maxPos %d", maxPos);
     
     if(maxPos<2)
@@ -735,12 +735,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     
     
-    int finalstart=0;
-    int finalend=0;
+    NSInteger finalstart=0;
+    NSInteger finalend=0;
     
     
-    int startpos=startrange.location;
-    DDLogVerbose(@"start pos%d", startpos);
+    NSInteger startpos=startrange.location;
+    DDLogVerbose(@"start pos%ld", (long)startpos);
     
     if(maxPos>startpos)
         while(stanzacounter<[_stanzaTypes count])
@@ -864,7 +864,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         }
     
     //if this happens its  probably a stream error.sanity check is  preventing crash
-    if((finalend-finalstart<=maxPos) && finalend!=NSNotFound && finalstart!=NSNotFound)
+    if((finalend-finalstart<=maxPos) && finalend!=NSNotFound && finalstart!=NSNotFound && finalend<=finalstart)
     {
         toReturn=  [_inputBuffer substringWithRange:NSMakeRange(finalstart,finalend-finalstart)];
     }
@@ -878,7 +878,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         
     }
     else{
-        if((finalend-finalstart<=maxPos) && finalend!=NSNotFound && finalstart!=NSNotFound)
+        if((finalend-finalstart<=maxPos) && finalend!=NSNotFound && finalstart!=NSNotFound && finalend<=finalstart)
         {
             //  DDLogVerbose(@"to del start %d end %d: %@", finalstart, finalend, _inputBuffer);
             if(finalend <[_inputBuffer length] ) {

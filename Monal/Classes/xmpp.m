@@ -864,7 +864,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         }
     
     //if this happens its  probably a stream error.sanity check is  preventing crash
-    if((finalend-finalstart<=maxPos) && finalend!=NSNotFound && finalstart!=NSNotFound && finalend<=finalstart)
+    if((finalend-finalstart<=maxPos) && finalend!=NSNotFound && finalstart!=NSNotFound && finalend>=finalstart)
     {
         toReturn=  [_inputBuffer substringWithRange:NSMakeRange(finalstart,finalend-finalstart)];
     }
@@ -2448,13 +2448,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     
     uint8_t* buf=malloc(kXMPPReadSize);
-    int len = 0;
+    NSInteger len = 0;
     
     len = [_iStream read:buf maxLength:kXMPPReadSize];
     DDLogVerbose(@"done reading %d", len);
     if(len>0) {
         NSData* data = [NSData dataWithBytes:(const void *)buf length:len];
-        //  DDLogVerbose(@" got raw string %s nsdata %@", buf, data);
+      //    DDLogVerbose(@" got raw string %s nsdata %@", buf, data);
         if(data)
         {
             // DDLogVerbose(@"waiting on net read queue");

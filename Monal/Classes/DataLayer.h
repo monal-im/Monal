@@ -32,9 +32,14 @@
 -(void) version; 
 
 //lowest level command handlers
--(NSObject*) executeScalar:(NSString*) query; 
--(NSArray*) executeReader:(NSString*) query; 
--(BOOL) executeNonQuery:(NSString*) query; 
+-(NSObject*) executeScalar:(NSString*) query  __deprecated;
+-(NSArray*) executeReader:(NSString*) query __deprecated;
+-(BOOL) executeNonQuery:(NSString*) query __deprecated;
+
+// V2 low level
+-(void) executeScalar:(NSString*) query withCompletion: (void (^)(NSObject *))completion;
+-(void) executeReader:(NSString*) query withCompletion: (void (^)(NSArray *))completion;
+-(void) executeNonQuery:(NSString*) query withCompletion: (void (^)(BOOL))completion;
 
 // Buddy Commands
 -(BOOL) addBuddy:(NSString*) buddy  forAccount:(NSString*) accountNo fullname:(NSString*)fullName nickname:(NSString*) nickName;
@@ -69,8 +74,8 @@
 -(BOOL) checkLegacyCap:(NSString*)cap forUser:(NSString*) user accountNo:(NSString*) acctNo;
 
 #pragma mark  presence functions
--(BOOL) setResourceOnline:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
--(BOOL) setOnlineBuddy:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
+-(void) setResourceOnline:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
+-(void) setOnlineBuddy:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
 -(BOOL) setOfflineBuddy:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
 
 -(BOOL) setBuddyStatus:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;

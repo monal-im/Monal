@@ -42,7 +42,7 @@ NSString *const kSendTimer=@"SendTimer";
 NSString *const kStanzaID=@"stanzaID";
 NSString *const kStanza=@"stanza";
 
-static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+static const int ddLogLevel = LOG_LEVEL_INFO;
 
 @interface xmpp()
 {

@@ -570,9 +570,10 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void) scrollToBottom
 {
-    if([_messagelist count]>0)
+    NSInteger bottom = [_messageTable numberOfRowsInSection:0];
+    if(bottom>0)
     {
-        NSIndexPath *path1 = [NSIndexPath indexPathForRow:[_messagelist count]-1  inSection:0];
+        NSIndexPath *path1 = [NSIndexPath indexPathForRow:bottom-1  inSection:0];
         if(![_messageTable.indexPathsForVisibleRows containsObject:path1])
         {
             [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:NO];

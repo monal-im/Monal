@@ -559,7 +559,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
         return;
     }
     
-    DDLogInfo(@"chat view got new message notice %@", notification.userInfo);
+    DDLogVerbose(@"chat view got new message notice %@", notification.userInfo);
     if([[self.currentNavController topViewController] isKindOfClass:[chatViewController class]]) {
         chatViewController* currentTop=(chatViewController*)[self.currentNavController topViewController];
         if( (([currentTop.contactName isEqualToString:[notification.userInfo objectForKey:@"from"]] )|| ([currentTop.contactName isEqualToString:[notification.userInfo objectForKey:@"to"]] )) &&

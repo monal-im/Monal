@@ -208,6 +208,7 @@
 		26B2A4FD1B73097500272E63 /* DDMultiFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B2A4E81B73097500272E63 /* DDMultiFormatter.m */; };
 		26B2A4FE1B73097500272E63 /* DDMultiFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B2A4E81B73097500272E63 /* DDMultiFormatter.m */; };
 		26B2A5011B730AAC00272E63 /* PasswordManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B69A81131C5495002FCBEB /* PasswordManager.m */; };
+		26B2A5021B730AE100272E63 /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F7BB411115F8DB00712672 /* Reachability.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		26B51C4918654D98002134C3 /* LogViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B51C4718654D98002134C3 /* LogViewController.m */; };
 		26B51C4A18654D98002134C3 /* LogViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26B51C4818654D98002134C3 /* LogViewController.xib */; };
 		26B69A75131C522F002FCBEB /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26B69A74131C522F002FCBEB /* Security.framework */; };
@@ -1797,6 +1798,7 @@
 				26B2A4EE1B73097500272E63 /* DDAbstractDatabaseLogger.m in Sources */,
 				2638DAE71B68F3AB00DF05AC /* MLPresenceSettings.m in Sources */,
 				2661D3411B40765A00EC51BA /* MLChatListViewController.m in Sources */,
+				26B2A5021B730AE100272E63 /* Reachability.m in Sources */,
 				2661D3501B407EDD00EC51BA /* MLChatViewCell.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

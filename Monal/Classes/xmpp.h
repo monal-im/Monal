@@ -10,7 +10,14 @@
 #import "XMLNode.h"
 #import "EncodingTools.h"
 
+
+#if TARGET_OS_IPHONE
 #import "ContactsViewController.h"
+#else
+#import "MLChatListViewController.h"
+#endif
+
+
 #import "MLConstants.h"
 
 #import "jingleCall.h"
@@ -241,9 +248,12 @@ Decline a call request
 //calculated
 @property (nonatomic,strong, readonly) NSString* versionHash;
 
-
-//UI
+#if TARGET_OS_IPHONE
 @property (nonatomic,weak) ContactsViewController* contactsVC;
+#else
+@property (nonatomic,weak) MLChatListViewController* contactsVC;
+#endif
+//UI
 
 
 @property (nonatomic,strong) NSDate* connectedTime;

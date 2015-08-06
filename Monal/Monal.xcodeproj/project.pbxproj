@@ -15,13 +15,17 @@
 		2601D9CB0FBF25EF004DB939 /* sworim.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 2601D9CA0FBF25EF004DB939 /* sworim.sqlite */; };
 		2601D9D40FBF262E004DB939 /* libsqlite3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2601D9D30FBF262E004DB939 /* libsqlite3.dylib */; };
 		260447F60FEED62100B3B5A7 /* BuddyDetails.xib in Resources */ = {isa = PBXBuildFile; fileRef = 260447F50FEED62100B3B5A7 /* BuddyDetails.xib */; };
+		260499E21B730E9000D11866 /* xmpp.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D0177F08F50039634B /* xmpp.m */; };
+		260499E31B730E9500D11866 /* XMLNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D3177F44AD0039634B /* XMLNode.m */; };
+		260499E41B730E9800D11866 /* XMPPIQ.m in Sources */ = {isa = PBXBuildFile; fileRef = 26CF3EA91780D6B7002B7085 /* XMPPIQ.m */; };
+		260499E51B730E9B00D11866 /* XMPPPresence.m in Sources */ = {isa = PBXBuildFile; fileRef = 264E345A1787BAB100BC7BD0 /* XMPPPresence.m */; };
+		260499E61B730E9E00D11866 /* XMPPMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 262D9EA917921E82009292B4 /* XMPPMessage.m */; };
 		260870D81B7034460036539B /* MLAccountEdit.m in Sources */ = {isa = PBXBuildFile; fileRef = 260870D71B7034460036539B /* MLAccountEdit.m */; };
 		260C51D1177F08F50039634B /* xmpp.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D0177F08F50039634B /* xmpp.m */; };
 		260C51D4177F44AD0039634B /* XMLNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D3177F44AD0039634B /* XMLNode.m */; };
 		260C6C94178080730004E2E1 /* EncodingTools.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C6C93178080730004E2E1 /* EncodingTools.m */; };
 		261199251B632C42008768C8 /* MASPreferencesWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 261199211B632C42008768C8 /* MASPreferencesWindow.xib */; };
 		261199261B632C42008768C8 /* MASPreferencesWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261199231B632C42008768C8 /* MASPreferencesWindowController.m */; };
-		261199271B632C42008768C8 /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = 261199241B632C42008768C8 /* README.md */; };
 		261528C51869CE5300BF62D6 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 261528C41869CE5300BF62D6 /* AudioToolbox.framework */; };
 		261894921B40483000C957C3 /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 26470F511835C4080069E3E0 /* Media.xcassets */; };
 		261A6281176C055400059090 /* ContactsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A627F176C055400059090 /* ContactsViewController.m */; };
@@ -1530,7 +1534,7 @@
 			isa = PBXProject;
 			attributes = {
 				CLASSPREFIX = ML;
-				LastUpgradeCheck = 0600;
+				LastUpgradeCheck = 0630;
 				ORGANIZATIONNAME = Monal.im;
 				TargetAttributes = {
 					1D6058900D05DD3D006BFB54 = {
@@ -1775,6 +1779,8 @@
 			files = (
 				26B2A5011B730AAC00272E63 /* PasswordManager.m in Sources */,
 				26B2A4F01B73097500272E63 /* DDASLLogCapture.m in Sources */,
+				260499E21B730E9000D11866 /* xmpp.m in Sources */,
+				260499E51B730E9B00D11866 /* XMPPPresence.m in Sources */,
 				2638DAEB1B68F3D400DF05AC /* MLAccountSettings.m in Sources */,
 				26B2A4BF1B73070F00272E63 /* NSString+SqlLite.m in Sources */,
 				2661D34D1B407ED400EC51BA /* MLChatListCell.m in Sources */,
@@ -1784,14 +1790,16 @@
 				26B2A4F81B73097500272E63 /* DDTTYLogger.m in Sources */,
 				26B2A4FA1B73097500272E63 /* DDContextFilterLogFormatter.m in Sources */,
 				266272B91B27DB8000C1CD49 /* main.m in Sources */,
+				260499E41B730E9800D11866 /* XMPPIQ.m in Sources */,
 				260870D81B7034460036539B /* MLAccountEdit.m in Sources */,
+				260499E31B730E9500D11866 /* XMLNode.m in Sources */,
 				26B2A4FC1B73097500272E63 /* DDDispatchQueueLogFormatter.m in Sources */,
 				26B2A4F41B73097500272E63 /* DDFileLogger.m in Sources */,
+				260499E61B730E9E00D11866 /* XMPPMessage.m in Sources */,
 				2661D3441B40766F00EC51BA /* MLChatViewController.m in Sources */,
 				26B2A4BE1B7306E500272E63 /* DataLayer.m in Sources */,
 				261199261B632C42008768C8 /* MASPreferencesWindowController.m in Sources */,
 				266272B71B27DB8000C1CD49 /* AppDelegate.m in Sources */,
-				261199271B632C42008768C8 /* README.md in Sources */,
 				26B2A4F61B73097500272E63 /* DDLog.m in Sources */,
 				26B2A4FE1B73097500272E63 /* DDMultiFormatter.m in Sources */,
 				26B2A4EA1B73097500272E63 /* CLIColor.m in Sources */,
@@ -2331,6 +2339,7 @@
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_INPUT_FILETYPE = automatic;
+				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
@@ -2456,6 +2465,7 @@
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_INPUT_FILETYPE = automatic;
+				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
@@ -2548,6 +2558,7 @@
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_INPUT_FILETYPE = automatic;
+				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;

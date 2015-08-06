@@ -6,7 +6,7 @@
 //
 //
 
-#import <UIKit/UIKit.h>
+
 #import "XMLNode.h"
 
 #define kMessageChatType @"chat"

@@ -31,6 +31,99 @@
 		260499EF1B7313F300D11866 /* ParseIq.m in Sources */ = {isa = PBXBuildFile; fileRef = 26CF3EAC1780DE5C002B7085 /* ParseIq.m */; };
 		260499F01B7313F600D11866 /* ParseStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 263F1279177F867B0025B235 /* ParseStream.m */; };
 		260499F11B73141500D11866 /* EncodingTools.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C6C93178080730004E2E1 /* EncodingTools.m */; };
+		260499F21B7314D600D11866 /* jingleCall.m in Sources */ = {isa = PBXBuildFile; fileRef = 2642EBC918693634006A6C12 /* jingleCall.m */; };
+		260499F51B7314F400D11866 /* rtcpapppacket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006BB140B43BB00CF1107 /* rtcpapppacket.cpp */; };
+		260499F61B7314F400D11866 /* rtcpbyepacket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006BD140B43BB00CF1107 /* rtcpbyepacket.cpp */; };
+		260499F71B7314F400D11866 /* rtcpcompoundpacket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006BF140B43BB00CF1107 /* rtcpcompoundpacket.cpp */; };
+		260499F81B7314F400D11866 /* rtcpcompoundpacketbuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006C1140B43BB00CF1107 /* rtcpcompoundpacketbuilder.cpp */; };
+		260499F91B7314F400D11866 /* rtcppacket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006C3140B43BB00CF1107 /* rtcppacket.cpp */; };
+		260499FA1B7314F400D11866 /* rtcppacketbuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006C5140B43BB00CF1107 /* rtcppacketbuilder.cpp */; };
+		260499FB1B7314F400D11866 /* rtcprrpacket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006C7140B43BB00CF1107 /* rtcprrpacket.cpp */; };
+		260499FC1B7314F400D11866 /* rtcpscheduler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006C9140B43BB00CF1107 /* rtcpscheduler.cpp */; };
+		260499FD1B7314F400D11866 /* rtcpsdesinfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006CB140B43BB00CF1107 /* rtcpsdesinfo.cpp */; };
+		260499FE1B7314F400D11866 /* rtcpsdespacket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006CD140B43BB00CF1107 /* rtcpsdespacket.cpp */; };
+		260499FF1B7314F400D11866 /* rtcpsrpacket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006CF140B43BB00CF1107 /* rtcpsrpacket.cpp */; };
+		26049A001B7314F400D11866 /* rtpbyteaddress.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006D5140B43BB00CF1107 /* rtpbyteaddress.cpp */; };
+		26049A011B7314F400D11866 /* rtpcollisionlist.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006D7140B43BB00CF1107 /* rtpcollisionlist.cpp */; };
+		26049A021B7314F400D11866 /* rtpdebug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006DA140B43BB00CF1107 /* rtpdebug.cpp */; };
+		26049A031B7314F400D11866 /* rtperrors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006DD140B43BB00CF1107 /* rtperrors.cpp */; };
+		26049A041B7314F400D11866 /* rtpexternaltransmitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006DF140B43BB00CF1107 /* rtpexternaltransmitter.cpp */; };
+		26049A051B7314F400D11866 /* rtpinternalsourcedata.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006E2140B43BB00CF1107 /* rtpinternalsourcedata.cpp */; };
+		26049A061B7314F400D11866 /* rtpipv4address.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006E4140B43BB00CF1107 /* rtpipv4address.cpp */; };
+		26049A071B7314F400D11866 /* rtpipv6address.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006E7140B43BB00CF1107 /* rtpipv6address.cpp */; };
+		26049A081B7314F400D11866 /* rtplibraryversion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006EB140B43BB00CF1107 /* rtplibraryversion.cpp */; };
+		26049A091B7314F400D11866 /* rtppacket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006EF140B43BB00CF1107 /* rtppacket.cpp */; };
+		26049A0A1B7314F400D11866 /* rtppacketbuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006F1140B43BB00CF1107 /* rtppacketbuilder.cpp */; };
+		26049A0B1B7314F400D11866 /* rtppollthread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006F3140B43BB00CF1107 /* rtppollthread.cpp */; };
+		26049A0C1B7314F400D11866 /* rtprandom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006F5140B43BB00CF1107 /* rtprandom.cpp */; };
+		26049A0D1B7314F400D11866 /* rtprandomrand48.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006F7140B43BB00CF1107 /* rtprandomrand48.cpp */; };
+		26049A0E1B7314F400D11866 /* rtprandomrands.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006F9140B43BB00CF1107 /* rtprandomrands.cpp */; };
+		26049A0F1B7314F400D11866 /* rtprandomurandom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006FB140B43BB00CF1107 /* rtprandomurandom.cpp */; };
+		26049A101B7314F400D11866 /* rtpsession.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006FE140B43BB00CF1107 /* rtpsession.cpp */; };
+		26049A111B7314F400D11866 /* rtpsessionparams.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26400700140B43BB00CF1107 /* rtpsessionparams.cpp */; };
+		26049A121B7314F400D11866 /* rtpsessionsources.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26400702140B43BB00CF1107 /* rtpsessionsources.cpp */; };
+		26049A131B7314F400D11866 /* rtpsourcedata.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26400704140B43BB00CF1107 /* rtpsourcedata.cpp */; };
+		26049A141B7314F400D11866 /* rtpsources.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26400706140B43BB00CF1107 /* rtpsources.cpp */; };
+		26049A151B7314F400D11866 /* rtptimeutilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26400709140B43BB00CF1107 /* rtptimeutilities.cpp */; };
+		26049A161B7314F400D11866 /* rtpudpv4transmitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2640070E140B43BB00CF1107 /* rtpudpv4transmitter.cpp */; };
+		26049A171B7314F400D11866 /* rtpudpv6transmitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26400710140B43BB00CF1107 /* rtpudpv6transmitter.cpp */; };
+		26049A1A1B7314F400D11866 /* rtcpapppacket.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006BC140B43BB00CF1107 /* rtcpapppacket.hh */; };
+		26049A1B1B7314F400D11866 /* rtcpbyepacket.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006BE140B43BB00CF1107 /* rtcpbyepacket.hh */; };
+		26049A1C1B7314F400D11866 /* rtcpcompoundpacket.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006C0140B43BB00CF1107 /* rtcpcompoundpacket.hh */; };
+		26049A1D1B7314F400D11866 /* rtcpcompoundpacketbuilder.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006C2140B43BB00CF1107 /* rtcpcompoundpacketbuilder.hh */; };
+		26049A1E1B7314F400D11866 /* rtcppacket.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006C4140B43BB00CF1107 /* rtcppacket.hh */; };
+		26049A1F1B7314F400D11866 /* rtcppacketbuilder.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006C6140B43BB00CF1107 /* rtcppacketbuilder.hh */; };
+		26049A201B7314F400D11866 /* rtcprrpacket.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006C8140B43BB00CF1107 /* rtcprrpacket.hh */; };
+		26049A211B7314F400D11866 /* rtcpscheduler.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006CA140B43BB00CF1107 /* rtcpscheduler.hh */; };
+		26049A221B7314F400D11866 /* rtcpsdesinfo.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006CC140B43BB00CF1107 /* rtcpsdesinfo.hh */; };
+		26049A231B7314F400D11866 /* rtcpsdespacket.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006CE140B43BB00CF1107 /* rtcpsdespacket.hh */; };
+		26049A241B7314F400D11866 /* rtcpsrpacket.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006D0140B43BB00CF1107 /* rtcpsrpacket.hh */; };
+		26049A251B7314F400D11866 /* rtcpunknownpacket.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006D1140B43BB00CF1107 /* rtcpunknownpacket.hh */; };
+		26049A261B7314F400D11866 /* rtpaddress.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006D4140B43BB00CF1107 /* rtpaddress.hh */; };
+		26049A271B7314F400D11866 /* rtpbyteaddress.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006D6140B43BB00CF1107 /* rtpbyteaddress.hh */; };
+		26049A281B7314F400D11866 /* rtpcollisionlist.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006D8140B43BB00CF1107 /* rtpcollisionlist.hh */; };
+		26049A291B7314F400D11866 /* rtpconfig.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006D9140B43BB00CF1107 /* rtpconfig.hh */; };
+		26049A2A1B7314F400D11866 /* rtpdebug.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006DB140B43BB00CF1107 /* rtpdebug.hh */; };
+		26049A2B1B7314F400D11866 /* rtpdefines.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006DC140B43BB00CF1107 /* rtpdefines.hh */; };
+		26049A2C1B7314F400D11866 /* rtperrors.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006DE140B43BB00CF1107 /* rtperrors.hh */; };
+		26049A2D1B7314F400D11866 /* rtpexternaltransmitter.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006E0140B43BB00CF1107 /* rtpexternaltransmitter.hh */; };
+		26049A2E1B7314F400D11866 /* rtphashtable.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006E1140B43BB00CF1107 /* rtphashtable.hh */; };
+		26049A2F1B7314F400D11866 /* rtpinternalsourcedata.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006E3140B43BB00CF1107 /* rtpinternalsourcedata.hh */; };
+		26049A301B7314F400D11866 /* rtpipv4address.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006E5140B43BB00CF1107 /* rtpipv4address.hh */; };
+		26049A311B7314F400D11866 /* rtpipv4destination.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006E6140B43BB00CF1107 /* rtpipv4destination.hh */; };
+		26049A321B7314F400D11866 /* rtpipv6address.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006E8140B43BB00CF1107 /* rtpipv6address.hh */; };
+		26049A331B7314F400D11866 /* rtpipv6destination.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006E9140B43BB00CF1107 /* rtpipv6destination.hh */; };
+		26049A341B7314F400D11866 /* rtpkeyhashtable.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006EA140B43BB00CF1107 /* rtpkeyhashtable.hh */; };
+		26049A351B7314F400D11866 /* rtplibraryversion.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006EC140B43BB00CF1107 /* rtplibraryversion.hh */; };
+		26049A361B7314F400D11866 /* rtpmemorymanager.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006ED140B43BB00CF1107 /* rtpmemorymanager.hh */; };
+		26049A371B7314F400D11866 /* rtpmemoryobject.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006EE140B43BB00CF1107 /* rtpmemoryobject.hh */; };
+		26049A381B7314F400D11866 /* rtppacket.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006F0140B43BB00CF1107 /* rtppacket.hh */; };
+		26049A391B7314F400D11866 /* rtppacketbuilder.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006F2140B43BB00CF1107 /* rtppacketbuilder.hh */; };
+		26049A3A1B7314F400D11866 /* rtppollthread.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006F4140B43BB00CF1107 /* rtppollthread.hh */; };
+		26049A3B1B7314F400D11866 /* rtprandom.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006F6140B43BB00CF1107 /* rtprandom.hh */; };
+		26049A3C1B7314F400D11866 /* rtprandomrand48.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006F8140B43BB00CF1107 /* rtprandomrand48.hh */; };
+		26049A3D1B7314F400D11866 /* rtprandomrands.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006FA140B43BB00CF1107 /* rtprandomrands.hh */; };
+		26049A3E1B7314F400D11866 /* rtprandomurandom.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006FC140B43BB00CF1107 /* rtprandomurandom.hh */; };
+		26049A3F1B7314F400D11866 /* rtprawpacket.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006FD140B43BB00CF1107 /* rtprawpacket.hh */; };
+		26049A401B7314F400D11866 /* rtpsession.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006FF140B43BB00CF1107 /* rtpsession.hh */; };
+		26049A411B7314F400D11866 /* rtpsessionparams.hh in Headers */ = {isa = PBXBuildFile; fileRef = 26400701140B43BB00CF1107 /* rtpsessionparams.hh */; };
+		26049A421B7314F400D11866 /* rtpsessionsources.hh in Headers */ = {isa = PBXBuildFile; fileRef = 26400703140B43BB00CF1107 /* rtpsessionsources.hh */; };
+		26049A431B7314F400D11866 /* rtpsourcedata.hh in Headers */ = {isa = PBXBuildFile; fileRef = 26400705140B43BB00CF1107 /* rtpsourcedata.hh */; };
+		26049A441B7314F400D11866 /* rtpsources.hh in Headers */ = {isa = PBXBuildFile; fileRef = 26400707140B43BB00CF1107 /* rtpsources.hh */; };
+		26049A451B7314F400D11866 /* rtpstructs.hh in Headers */ = {isa = PBXBuildFile; fileRef = 26400708140B43BB00CF1107 /* rtpstructs.hh */; };
+		26049A461B7314F400D11866 /* rtptimeutilities.hh in Headers */ = {isa = PBXBuildFile; fileRef = 2640070A140B43BB00CF1107 /* rtptimeutilities.hh */; };
+		26049A471B7314F400D11866 /* rtptransmitter.hh in Headers */ = {isa = PBXBuildFile; fileRef = 2640070B140B43BB00CF1107 /* rtptransmitter.hh */; };
+		26049A481B7314F400D11866 /* rtptypes_win.hh in Headers */ = {isa = PBXBuildFile; fileRef = 2640070C140B43BB00CF1107 /* rtptypes_win.hh */; };
+		26049A491B7314F400D11866 /* rtptypes.hh in Headers */ = {isa = PBXBuildFile; fileRef = 2640070D140B43BB00CF1107 /* rtptypes.hh */; };
+		26049A4A1B7314F400D11866 /* rtpudpv4transmitter.hh in Headers */ = {isa = PBXBuildFile; fileRef = 2640070F140B43BB00CF1107 /* rtpudpv4transmitter.hh */; };
+		26049A4B1B7314F400D11866 /* rtpudpv6transmitter.hh in Headers */ = {isa = PBXBuildFile; fileRef = 26400711140B43BB00CF1107 /* rtpudpv6transmitter.hh */; };
+		26049A511B73156300D11866 /* libjrtplib-static-OSX.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 26049A501B7314F400D11866 /* libjrtplib-static-OSX.a */; };
+		26049A561B7315A000D11866 /* RTP.mm in Sources */ = {isa = PBXBuildFile; fileRef = 2642EBC618693626006A6C12 /* RTP.mm */; };
+		26049A571B7315C800D11866 /* IPAddress.m in Sources */ = {isa = PBXBuildFile; fileRef = 26FB468E18B2755A0043094F /* IPAddress.m */; };
+		26049A581B7315DC00D11866 /* TPCircularBuffer+AudioBufferList.c in Sources */ = {isa = PBXBuildFile; fileRef = 2658508615E7D8E40070A2A7 /* TPCircularBuffer+AudioBufferList.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		26049A591B7315DF00D11866 /* TPCircularBuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 2658508815E7D8E40070A2A7 /* TPCircularBuffer.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		26049A5B1B73163300D11866 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26049A5A1B73163300D11866 /* AVFoundation.framework */; };
+		26049A5D1B73164500D11866 /* AVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26049A5C1B73164500D11866 /* AVKit.framework */; };
 		260870D81B7034460036539B /* MLAccountEdit.m in Sources */ = {isa = PBXBuildFile; fileRef = 260870D71B7034460036539B /* MLAccountEdit.m */; };
 		260C51D1177F08F50039634B /* xmpp.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D0177F08F50039634B /* xmpp.m */; };
 		260C51D4177F44AD0039634B /* XMLNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D3177F44AD0039634B /* XMLNode.m */; };
@@ -261,6 +354,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		26049A541B73157D00D11866 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 260499F31B7314F400D11866;
+			remoteInfo = "jrtplib-static-OSX";
+		};
 		2630FE351AD550C00079F5C0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
@@ -294,6 +394,9 @@
 		2601D9CA0FBF25EF004DB939 /* sworim.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = sworim.sqlite; sourceTree = "<group>"; };
 		2601D9D30FBF262E004DB939 /* libsqlite3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.dylib; path = usr/lib/libsqlite3.dylib; sourceTree = SDKROOT; };
 		260447F50FEED62100B3B5A7 /* BuddyDetails.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = BuddyDetails.xib; sourceTree = "<group>"; };
+		26049A501B7314F400D11866 /* libjrtplib-static-OSX.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libjrtplib-static-OSX.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		26049A5A1B73163300D11866 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/System/Library/Frameworks/AVFoundation.framework; sourceTree = DEVELOPER_DIR; };
+		26049A5C1B73164500D11866 /* AVKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVKit.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/System/Library/Frameworks/AVKit.framework; sourceTree = DEVELOPER_DIR; };
 		26080210110ABA4E005E194D /* Monal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Monal.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		260870D61B7034460036539B /* MLAccountEdit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLAccountEdit.h; sourceTree = "<group>"; };
 		260870D71B7034460036539B /* MLAccountEdit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLAccountEdit.m; sourceTree = "<group>"; };
@@ -656,6 +759,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		26049A181B7314F400D11866 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		2630FE2C1AD550C00079F5C0 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -667,6 +777,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				26049A5D1B73164500D11866 /* AVKit.framework in Frameworks */,
+				26049A5B1B73163300D11866 /* AVFoundation.framework in Frameworks */,
+				26049A511B73156300D11866 /* libjrtplib-static-OSX.a in Frameworks */,
 				26B2A4CB1B73084800272E63 /* AppKit.framework in Frameworks */,
 				26B2A4C91B73084100272E63 /* libsqlite3.0.dylib in Frameworks */,
 			);
@@ -714,6 +827,7 @@
 				2630FE2F1AD550C00079F5C0 /* Monal Tests.xctest */,
 				266272B11B27DB8000C1CD49 /* Monal.app */,
 				266272C61B27DB8100C1CD49 /* Monal-OSXTests.xctest */,
+				26049A501B7314F400D11866 /* libjrtplib-static-OSX.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1084,6 +1198,7 @@
 		26B2A4B51B73045500272E63 /* External */ = {
 			isa = PBXGroup;
 			children = (
+				268BCCFD140B23E10025E4D1 /* jrtplib-static */,
 				26B2A4CC1B73097500272E63 /* DDLog */,
 			);
 			name = External;
@@ -1323,7 +1438,6 @@
 				2658508415E7D8E40070A2A7 /* TPCircularBuffer */,
 				262DE4AC15C4E2C60040A66B /* MBProgressHUd */,
 				2640AF3B14548E7600CB4F60 /* GrowingTextView */,
-				268BCCFD140B23E10025E4D1 /* jrtplib-static */,
 			);
 			name = External;
 			sourceTree = "<group>";
@@ -1380,6 +1494,8 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				26049A5C1B73164500D11866 /* AVKit.framework */,
+				26049A5A1B73163300D11866 /* AVFoundation.framework */,
 				26B2A5001B730A0D00272E63 /* OSX */,
 				26B2A4FF1B730A0900272E63 /* iOS */,
 			);
@@ -1389,6 +1505,63 @@
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
+		26049A191B7314F400D11866 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				26049A1A1B7314F400D11866 /* rtcpapppacket.hh in Headers */,
+				26049A1B1B7314F400D11866 /* rtcpbyepacket.hh in Headers */,
+				26049A1C1B7314F400D11866 /* rtcpcompoundpacket.hh in Headers */,
+				26049A1D1B7314F400D11866 /* rtcpcompoundpacketbuilder.hh in Headers */,
+				26049A1E1B7314F400D11866 /* rtcppacket.hh in Headers */,
+				26049A1F1B7314F400D11866 /* rtcppacketbuilder.hh in Headers */,
+				26049A201B7314F400D11866 /* rtcprrpacket.hh in Headers */,
+				26049A211B7314F400D11866 /* rtcpscheduler.hh in Headers */,
+				26049A221B7314F400D11866 /* rtcpsdesinfo.hh in Headers */,
+				26049A231B7314F400D11866 /* rtcpsdespacket.hh in Headers */,
+				26049A241B7314F400D11866 /* rtcpsrpacket.hh in Headers */,
+				26049A251B7314F400D11866 /* rtcpunknownpacket.hh in Headers */,
+				26049A261B7314F400D11866 /* rtpaddress.hh in Headers */,
+				26049A271B7314F400D11866 /* rtpbyteaddress.hh in Headers */,
+				26049A281B7314F400D11866 /* rtpcollisionlist.hh in Headers */,
+				26049A291B7314F400D11866 /* rtpconfig.hh in Headers */,
+				26049A2A1B7314F400D11866 /* rtpdebug.hh in Headers */,
+				26049A2B1B7314F400D11866 /* rtpdefines.hh in Headers */,
+				26049A2C1B7314F400D11866 /* rtperrors.hh in Headers */,
+				26049A2D1B7314F400D11866 /* rtpexternaltransmitter.hh in Headers */,
+				26049A2E1B7314F400D11866 /* rtphashtable.hh in Headers */,
+				26049A2F1B7314F400D11866 /* rtpinternalsourcedata.hh in Headers */,
+				26049A301B7314F400D11866 /* rtpipv4address.hh in Headers */,
+				26049A311B7314F400D11866 /* rtpipv4destination.hh in Headers */,
+				26049A321B7314F400D11866 /* rtpipv6address.hh in Headers */,
+				26049A331B7314F400D11866 /* rtpipv6destination.hh in Headers */,
+				26049A341B7314F400D11866 /* rtpkeyhashtable.hh in Headers */,
+				26049A351B7314F400D11866 /* rtplibraryversion.hh in Headers */,
+				26049A361B7314F400D11866 /* rtpmemorymanager.hh in Headers */,
+				26049A371B7314F400D11866 /* rtpmemoryobject.hh in Headers */,
+				26049A381B7314F400D11866 /* rtppacket.hh in Headers */,
+				26049A391B7314F400D11866 /* rtppacketbuilder.hh in Headers */,
+				26049A3A1B7314F400D11866 /* rtppollthread.hh in Headers */,
+				26049A3B1B7314F400D11866 /* rtprandom.hh in Headers */,
+				26049A3C1B7314F400D11866 /* rtprandomrand48.hh in Headers */,
+				26049A3D1B7314F400D11866 /* rtprandomrands.hh in Headers */,
+				26049A3E1B7314F400D11866 /* rtprandomurandom.hh in Headers */,
+				26049A3F1B7314F400D11866 /* rtprawpacket.hh in Headers */,
+				26049A401B7314F400D11866 /* rtpsession.hh in Headers */,
+				26049A411B7314F400D11866 /* rtpsessionparams.hh in Headers */,
+				26049A421B7314F400D11866 /* rtpsessionsources.hh in Headers */,
+				26049A431B7314F400D11866 /* rtpsourcedata.hh in Headers */,
+				26049A441B7314F400D11866 /* rtpsources.hh in Headers */,
+				26049A451B7314F400D11866 /* rtpstructs.hh in Headers */,
+				26049A461B7314F400D11866 /* rtptimeutilities.hh in Headers */,
+				26049A471B7314F400D11866 /* rtptransmitter.hh in Headers */,
+				26049A481B7314F400D11866 /* rtptypes_win.hh in Headers */,
+				26049A491B7314F400D11866 /* rtptypes.hh in Headers */,
+				26049A4A1B7314F400D11866 /* rtpudpv4transmitter.hh in Headers */,
+				26049A4B1B7314F400D11866 /* rtpudpv6transmitter.hh in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		268BCD54140B25CC0025E4D1 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
@@ -1468,6 +1641,23 @@
 			productReference = 26080210110ABA4E005E194D /* Monal.app */;
 			productType = "com.apple.product-type.application";
 		};
+		260499F31B7314F400D11866 /* jrtplib-static-OSX */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 26049A4C1B7314F400D11866 /* Build configuration list for PBXNativeTarget "jrtplib-static-OSX" */;
+			buildPhases = (
+				260499F41B7314F400D11866 /* Sources */,
+				26049A181B7314F400D11866 /* Frameworks */,
+				26049A191B7314F400D11866 /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "jrtplib-static-OSX";
+			productName = "jrtplib-static";
+			productReference = 26049A501B7314F400D11866 /* libjrtplib-static-OSX.a */;
+			productType = "com.apple.product-type.library.static";
+		};
 		2630FE2E1AD550C00079F5C0 /* Monal Tests */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 2630FE3A1AD550C00079F5C0 /* Build configuration list for PBXNativeTarget "Monal Tests" */;
@@ -1497,6 +1687,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				26049A551B73157D00D11866 /* PBXTargetDependency */,
 			);
 			name = "Monal-OSX";
 			productName = "Monal-OSX";
@@ -1610,6 +1801,7 @@
 				2630FE2E1AD550C00079F5C0 /* Monal Tests */,
 				266272B01B27DB8000C1CD49 /* Monal-OSX */,
 				266272C51B27DB8100C1CD49 /* Monal-OSXTests */,
+				260499F31B7314F400D11866 /* jrtplib-static-OSX */,
 			);
 		};
 /* End PBXProject section */
@@ -1776,6 +1968,49 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		260499F41B7314F400D11866 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				260499F51B7314F400D11866 /* rtcpapppacket.cpp in Sources */,
+				260499F61B7314F400D11866 /* rtcpbyepacket.cpp in Sources */,
+				260499F71B7314F400D11866 /* rtcpcompoundpacket.cpp in Sources */,
+				260499F81B7314F400D11866 /* rtcpcompoundpacketbuilder.cpp in Sources */,
+				260499F91B7314F400D11866 /* rtcppacket.cpp in Sources */,
+				260499FA1B7314F400D11866 /* rtcppacketbuilder.cpp in Sources */,
+				260499FB1B7314F400D11866 /* rtcprrpacket.cpp in Sources */,
+				260499FC1B7314F400D11866 /* rtcpscheduler.cpp in Sources */,
+				260499FD1B7314F400D11866 /* rtcpsdesinfo.cpp in Sources */,
+				260499FE1B7314F400D11866 /* rtcpsdespacket.cpp in Sources */,
+				260499FF1B7314F400D11866 /* rtcpsrpacket.cpp in Sources */,
+				26049A001B7314F400D11866 /* rtpbyteaddress.cpp in Sources */,
+				26049A011B7314F400D11866 /* rtpcollisionlist.cpp in Sources */,
+				26049A021B7314F400D11866 /* rtpdebug.cpp in Sources */,
+				26049A031B7314F400D11866 /* rtperrors.cpp in Sources */,
+				26049A041B7314F400D11866 /* rtpexternaltransmitter.cpp in Sources */,
+				26049A051B7314F400D11866 /* rtpinternalsourcedata.cpp in Sources */,
+				26049A061B7314F400D11866 /* rtpipv4address.cpp in Sources */,
+				26049A071B7314F400D11866 /* rtpipv6address.cpp in Sources */,
+				26049A081B7314F400D11866 /* rtplibraryversion.cpp in Sources */,
+				26049A091B7314F400D11866 /* rtppacket.cpp in Sources */,
+				26049A0A1B7314F400D11866 /* rtppacketbuilder.cpp in Sources */,
+				26049A0B1B7314F400D11866 /* rtppollthread.cpp in Sources */,
+				26049A0C1B7314F400D11866 /* rtprandom.cpp in Sources */,
+				26049A0D1B7314F400D11866 /* rtprandomrand48.cpp in Sources */,
+				26049A0E1B7314F400D11866 /* rtprandomrands.cpp in Sources */,
+				26049A0F1B7314F400D11866 /* rtprandomurandom.cpp in Sources */,
+				26049A101B7314F400D11866 /* rtpsession.cpp in Sources */,
+				26049A111B7314F400D11866 /* rtpsessionparams.cpp in Sources */,
+				26049A571B7315C800D11866 /* IPAddress.m in Sources */,
+				26049A121B7314F400D11866 /* rtpsessionsources.cpp in Sources */,
+				26049A131B7314F400D11866 /* rtpsourcedata.cpp in Sources */,
+				26049A141B7314F400D11866 /* rtpsources.cpp in Sources */,
+				26049A151B7314F400D11866 /* rtptimeutilities.cpp in Sources */,
+				26049A161B7314F400D11866 /* rtpudpv4transmitter.cpp in Sources */,
+				26049A171B7314F400D11866 /* rtpudpv6transmitter.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		2630FE2B1AD550C00079F5C0 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1793,8 +2028,10 @@
 				260499E21B730E9000D11866 /* xmpp.m in Sources */,
 				260499E51B730E9B00D11866 /* XMPPPresence.m in Sources */,
 				2638DAEB1B68F3D400DF05AC /* MLAccountSettings.m in Sources */,
+				260499F21B7314D600D11866 /* jingleCall.m in Sources */,
 				26B2A4BF1B73070F00272E63 /* NSString+SqlLite.m in Sources */,
 				2661D34D1B407ED400EC51BA /* MLChatListCell.m in Sources */,
+				26049A581B7315DC00D11866 /* TPCircularBuffer+AudioBufferList.c in Sources */,
 				26B2A4F21B73097500272E63 /* DDASLLogger.m in Sources */,
 				2638DAEF1B68F3EF00DF05AC /* MLDisplaySettings.m in Sources */,
 				260499EE1B7313F000D11866 /* XMPPParser.m in Sources */,
@@ -1803,12 +2040,14 @@
 				26B2A4F81B73097500272E63 /* DDTTYLogger.m in Sources */,
 				26B2A4FA1B73097500272E63 /* DDContextFilterLogFormatter.m in Sources */,
 				266272B91B27DB8000C1CD49 /* main.m in Sources */,
+				26049A561B7315A000D11866 /* RTP.mm in Sources */,
 				260499ED1B7313ED00D11866 /* ParsePresence.m in Sources */,
 				260499E41B730E9800D11866 /* XMPPIQ.m in Sources */,
 				260870D81B7034460036539B /* MLAccountEdit.m in Sources */,
 				260499E31B730E9500D11866 /* XMLNode.m in Sources */,
 				260499F01B7313F600D11866 /* ParseStream.m in Sources */,
 				260499EC1B7313EA00D11866 /* ParseMessage.m in Sources */,
+				26049A591B7315DF00D11866 /* TPCircularBuffer.c in Sources */,
 				26B2A4FC1B73097500272E63 /* DDDispatchQueueLogFormatter.m in Sources */,
 				260499E91B7313E100D11866 /* ParseEnabled.m in Sources */,
 				26B2A4F41B73097500272E63 /* DDFileLogger.m in Sources */,
@@ -1886,6 +2125,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		26049A551B73157D00D11866 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 260499F31B7314F400D11866 /* jrtplib-static-OSX */;
+			targetProxy = 26049A541B73157D00D11866 /* PBXContainerItemProxy */;
+		};
 		2630FE361AD550C00079F5C0 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 1D6058900D05DD3D006BFB54 /* Monal */;
@@ -1969,6 +2213,100 @@
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "84bd2c95-d11c-4e96-b785-7d99f930395f";
 			};
 			name = Debug;
+		};
+		26049A4D1B7314F400D11866 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CODE_SIGN_IDENTITY = "";
+				COPY_PHASE_STRIP = NO;
+				EXECUTABLE_PREFIX = lib;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_INPUT_FILETYPE = sourcecode.cpp.objcpp;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/Debug\"",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "jrtplib-static-OSX";
+				PROVISIONING_PROFILE = "";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				STRIP_INSTALLED_PRODUCT = NO;
+			};
+			name = Debug;
+		};
+		26049A4E1B7314F400D11866 /* Adhoc */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CODE_SIGN_IDENTITY = "";
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				EXECUTABLE_PREFIX = lib;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_INPUT_FILETYPE = sourcecode.cpp.objcpp;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/Debug\"",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				ONLY_ACTIVE_ARCH = NO;
+				PRODUCT_NAME = "jrtplib-static-OSX";
+				PROVISIONING_PROFILE = "";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				STRIP_INSTALLED_PRODUCT = NO;
+			};
+			name = Adhoc;
+		};
+		26049A4F1B7314F400D11866 /* AppStore */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CODE_SIGN_IDENTITY = "";
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				EXECUTABLE_PREFIX = lib;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_INPUT_FILETYPE = sourcecode.cpp.objcpp;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/Debug\"",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				ONLY_ACTIVE_ARCH = NO;
+				PRODUCT_NAME = "jrtplib-static-OSX";
+				PROVISIONING_PROFILE = "";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				STRIP_INSTALLED_PRODUCT = NO;
+			};
+			name = AppStore;
 		};
 		2630FE371AD550C00079F5C0 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -2608,6 +2946,16 @@
 				1D6058940D05DD3E006BFB54 /* Debug */,
 				26E74FBE17B06D2200FD91AE /* Adhoc */,
 				2675EF5A18B98C2D0059C5C3 /* AppStore */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		26049A4C1B7314F400D11866 /* Build configuration list for PBXNativeTarget "jrtplib-static-OSX" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				26049A4D1B7314F400D11866 /* Debug */,
+				26049A4E1B7314F400D11866 /* Adhoc */,
+				26049A4F1B7314F400D11866 /* AppStore */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

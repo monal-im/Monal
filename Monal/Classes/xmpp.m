@@ -13,6 +13,14 @@
 #import "EncodingTools.h"
 #import "MLXMPPManager.h"
 
+
+#if TARGET_OS_IPHONE
+#import "MLImageManager.h"
+#import "UIAlertView+Blocks.h"
+#else
+
+#endif
+
 //objects
 #import "XMPPIQ.h"
 #import "XMPPPresence.h"
@@ -29,8 +37,7 @@
 #import "ParseA.h"
 #import "ParseResumed.h"
 
-#import "MLImageManager.h"
-#import "UIAlertView+Blocks.h"
+
 
 #define kXMPPReadSize 5120 // bytes
 
@@ -348,22 +355,28 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             }];
                 _loginStarted=NO;
                 // try again
-                if((self.accountState<kStateHasStream) && (_loggedInOnce))
-                {
-                    DDLogInfo(@"trying to login again");
-                    //make sure we are enabled still.
-                    if([[DataLayer sharedInstance] isAccountEnabled:[NSString stringWithFormat:@"%@",self.accountNo]]) {
-                        
-                        //temp background task while a new one is created
-                        __block UIBackgroundTaskIdentifier tempTask= [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
-                            [[UIApplication sharedApplication] endBackgroundTask:tempTask];
-                            tempTask=UIBackgroundTaskInvalid;
-                        }];
-                        [self reconnect];
-                        
+            if((self.accountState<kStateHasStream) && (_loggedInOnce))
+            {
+                DDLogInfo(@"trying to login again");
+                //make sure we are enabled still.
+                if([[DataLayer sharedInstance] isAccountEnabled:[NSString stringWithFormat:@"%@",self.accountNo]]) {
+#if TARGET_OS_IPHONE
+                    //temp background task while a new one is created
+                    __block UIBackgroundTaskIdentifier tempTask= [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
                         [[UIApplication sharedApplication] endBackgroundTask:tempTask];
                         tempTask=UIBackgroundTaskInvalid;
-                        
+                    }];
+                    
+#endif
+                    
+                    [self reconnect];
+                    
+                    
+#if TARGET_OS_IPHONE
+                    [[UIApplication sharedApplication] endBackgroundTask:tempTask];
+                    tempTask=UIBackgroundTaskInvalid;
+#endif
+                    
                     }
                 }
                 else if (self.accountState==kStateLoggedIn ) {
@@ -521,6 +534,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     
     _loginStarted=YES;
+    #if TARGET_OS_IPHONE
     
     __block UIBackgroundTaskIdentifier reconnectBackgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
         
@@ -589,6 +603,35 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             DDLogInfo(@"reconnect scheduled already" );
         }
     }
+    
+#else
+    if(_accountState>=kStateReconnecting) {
+        DDLogInfo(@" account sate >=reconencting, disconnecting first" );
+        [self disconnect];
+        _loginStarted=YES;
+    }
+    
+    NSTimeInterval wait=scheduleWait;
+    if(!_loggedInOnce) {
+        wait=0;
+    }
+    
+    if(!_reconnectScheduled)
+    {
+        _reconnectScheduled=YES;
+        DDLogInfo(@"Trying to connect again in %f seconds. ", wait);
+        dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, wait * NSEC_PER_SEC), q_background,  ^{
+            //there may be another login operation freom reachability or another timer
+            if(self.accountState<kStateReconnecting) {
+                [self connect];
+            }
+        });
+    } else  {
+        DDLogInfo(@"reconnect scheduled already" );
+    }
+    
+#endif
     
     DDLogInfo(@"reconnect exits");
 }
@@ -1040,9 +1083,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     
                     if(iqNode.photoBinValue)
                     {
+                        
+#if TARGET_OS_IPHONE
                         [[MLImageManager sharedInstance] setIconForContact:iqNode.user andAccount:_accountNo WithData:iqNode.photoBinValue ];
+#else
+#endif
+
                     }
-                    
+
                     if(!fullname) fullname=iqNode.user;
                     
                     NSDictionary* userDic=@{kusernameKey: iqNode.user,
@@ -1260,7 +1308,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                 if(iqNode.user && iqNode.resource) {
                                     
                                     dispatch_async(dispatch_get_main_queue(), ^{
-                                        
+#if TARGET_OS_IPHONE
                                         NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"Incoming Call From %@?", nil), iqNode.from ];
                                         RIButtonItem* cancelButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Decline", nil) action:^{
                                             XMPPIQ* node =[self.jingle rejectJingleTo:iqNode.user withId:iqNode.idval andResource:iqNode.resource];
@@ -1276,6 +1324,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                         
                                         UIAlertView* alert =[[UIAlertView alloc] initWithTitle:@"Audio Call" message:messageString cancelButtonItem:cancelButton otherButtonItems:yesButton, nil];
                                         [alert show];
+#else
+#endif
                                     } );
                                     
                                     
@@ -1318,6 +1368,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 if(messageNode.mucInvite)
                 {
                     dispatch_async(dispatch_get_main_queue(), ^{
+#if TARGET_OS_IPHONE
                         NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"You have been invited to a conversation %@?", nil), messageNode.from ];
                         RIButtonItem* cancelButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Cancel", nil) action:^{
                             
@@ -1330,6 +1381,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         
                         UIAlertView* alert =[[UIAlertView alloc] initWithTitle:@"Chat Invite" message:messageString cancelButtonItem:cancelButton otherButtonItems:yesButton, nil];
                         [alert show];
+#else
+#endif
                     });
                     
                 }
@@ -1383,8 +1436,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 
                 if(messageNode.avatarData)
                 {
+#if TARGET_OS_IPHONE
                     [[MLImageManager sharedInstance] setIconForContact:messageNode.actualFrom andAccount:_accountNo WithData:messageNode.avatarData];
-                    
+#else
+#endif
                 }
                 
             }
@@ -1398,7 +1453,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 else {
                     if([presenceNode.type isEqualToString:kpresencesSubscribe])
                     {
+
                         dispatch_async(dispatch_get_main_queue(), ^{
+#if TARGET_OS_IPHONE
+
                             NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"Do you wish to allow %@ to add you to their contacts?", nil), presenceNode.from ];
                             RIButtonItem* cancelButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"No", nil) action:^{
                                 [self rejectFromRoster:presenceNode.from];
@@ -1413,6 +1471,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             
                             UIAlertView* alert =[[UIAlertView alloc] initWithTitle:@"Approve Contact" message:messageString cancelButtonItem:cancelButton otherButtonItems:yesButton, nil];
                             [alert show];
+#else
+#endif
                         });
                         
                     }
@@ -1472,7 +1532,19 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             
                             if(!presenceNode.MUC) {
                                 // do not do this in the background
+                                
+                                BOOL checkChange = YES;
+                              
+                                
+#if TARGET_OS_IPHONE
                                 if([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground)
+                                {
+                                    checkChange=NO;
+                                }
+#else
+#endif
+                                
+                               if(checkChange)
                                 {
                                     //check for vcard change
                                     if(presenceNode.photoHash) {

@@ -11,18 +11,6 @@
 #import "MLImageManager.h"
 
 
-//contact cells
-#define kusernameKey @"username"
-#define kfullNameKey @"fullName"
-#define kaccountNoKey @"accountNo"
-#define kstateKey @"state"
-#define kstatusKey @"status"
-
-//info cells
-#define kaccountNameKey @"accountName"
-#define kinfoTypeKey @"type"
-#define kinfoStatusKey @"status"
-
 @interface ContactsViewController : UIViewController <UITableViewDataSource, UITableViewDelegate>
 {
     NSMutableArray* _infoCells;

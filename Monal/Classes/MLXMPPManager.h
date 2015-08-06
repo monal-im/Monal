@@ -7,10 +7,13 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "ContactsViewController.h"
 #import "Reachability.h"
 #import "xmpp.h"
 
+#if TARGET_OS_IPHONE
+#import "ContactsViewController.h"
+#else
+#endif
 
 #define kMonalNetQueue "im.monal.netQueue"
 #define kMonalConnectedListQueue "im.monal.connectedListQueue"
@@ -139,7 +142,11 @@ Returns the name of the conencted account
 
 -(void) setPriority:(NSInteger) priority;
 
+#if TARGET_OS_IPHONE
 @property (nonatomic, weak) ContactsViewController* contactVC;
+#else
+#endif
+
 @property (nonatomic, strong, readonly) NSMutableArray* connectedXMPP;
 
 /**

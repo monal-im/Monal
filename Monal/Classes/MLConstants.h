@@ -22,6 +22,18 @@
 
 
 
+//contact cells
+#define kusernameKey @"username"
+#define kfullNameKey @"fullName"
+#define kaccountNoKey @"accountNo"
+#define kstateKey @"state"
+#define kstatusKey @"status"
+
+//info cells
+#define kaccountNameKey @"accountName"
+#define kinfoTypeKey @"type"
+#define kinfoStatusKey @"status"
+
 #if TARGET_OS_IPHONE
 /*
  *  System Versioning Preprocessor Macros

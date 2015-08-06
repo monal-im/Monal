@@ -20,6 +20,17 @@
 		260499E41B730E9800D11866 /* XMPPIQ.m in Sources */ = {isa = PBXBuildFile; fileRef = 26CF3EA91780D6B7002B7085 /* XMPPIQ.m */; };
 		260499E51B730E9B00D11866 /* XMPPPresence.m in Sources */ = {isa = PBXBuildFile; fileRef = 264E345A1787BAB100BC7BD0 /* XMPPPresence.m */; };
 		260499E61B730E9E00D11866 /* XMPPMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 262D9EA917921E82009292B4 /* XMPPMessage.m */; };
+		260499E71B7313DB00D11866 /* ParseResumed.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C3EDFF1A819A38000E6331 /* ParseResumed.m */; };
+		260499E81B7313DF00D11866 /* ParseA.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C3EDFC1A807E76000E6331 /* ParseA.m */; };
+		260499E91B7313E100D11866 /* ParseEnabled.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C3EDF61A8072D5000E6331 /* ParseEnabled.m */; };
+		260499EA1B7313E500D11866 /* ParseFailure.m in Sources */ = {isa = PBXBuildFile; fileRef = 261E672A179E27BE00CB493E /* ParseFailure.m */; };
+		260499EB1B7313E800D11866 /* ParseChallenge.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EE8B1B179B55D2006781F3 /* ParseChallenge.m */; };
+		260499EC1B7313EA00D11866 /* ParseMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 262D9EA617921169009292B4 /* ParseMessage.m */; };
+		260499ED1B7313ED00D11866 /* ParsePresence.m in Sources */ = {isa = PBXBuildFile; fileRef = 261AC91C1788A49C00E05657 /* ParsePresence.m */; };
+		260499EE1B7313F000D11866 /* XMPPParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 26CF3EB11780DFD9002B7085 /* XMPPParser.m */; };
+		260499EF1B7313F300D11866 /* ParseIq.m in Sources */ = {isa = PBXBuildFile; fileRef = 26CF3EAC1780DE5C002B7085 /* ParseIq.m */; };
+		260499F01B7313F600D11866 /* ParseStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 263F1279177F867B0025B235 /* ParseStream.m */; };
+		260499F11B73141500D11866 /* EncodingTools.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C6C93178080730004E2E1 /* EncodingTools.m */; };
 		260870D81B7034460036539B /* MLAccountEdit.m in Sources */ = {isa = PBXBuildFile; fileRef = 260870D71B7034460036539B /* MLAccountEdit.m */; };
 		260C51D1177F08F50039634B /* xmpp.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D0177F08F50039634B /* xmpp.m */; };
 		260C51D4177F44AD0039634B /* XMLNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D3177F44AD0039634B /* XMLNode.m */; };
@@ -1786,28 +1797,39 @@
 				2661D34D1B407ED400EC51BA /* MLChatListCell.m in Sources */,
 				26B2A4F21B73097500272E63 /* DDASLLogger.m in Sources */,
 				2638DAEF1B68F3EF00DF05AC /* MLDisplaySettings.m in Sources */,
+				260499EE1B7313F000D11866 /* XMPPParser.m in Sources */,
+				260499EB1B7313E800D11866 /* ParseChallenge.m in Sources */,
 				2651AF551B409906008D025C /* MLMainWindow.m in Sources */,
 				26B2A4F81B73097500272E63 /* DDTTYLogger.m in Sources */,
 				26B2A4FA1B73097500272E63 /* DDContextFilterLogFormatter.m in Sources */,
 				266272B91B27DB8000C1CD49 /* main.m in Sources */,
+				260499ED1B7313ED00D11866 /* ParsePresence.m in Sources */,
 				260499E41B730E9800D11866 /* XMPPIQ.m in Sources */,
 				260870D81B7034460036539B /* MLAccountEdit.m in Sources */,
 				260499E31B730E9500D11866 /* XMLNode.m in Sources */,
+				260499F01B7313F600D11866 /* ParseStream.m in Sources */,
+				260499EC1B7313EA00D11866 /* ParseMessage.m in Sources */,
 				26B2A4FC1B73097500272E63 /* DDDispatchQueueLogFormatter.m in Sources */,
+				260499E91B7313E100D11866 /* ParseEnabled.m in Sources */,
 				26B2A4F41B73097500272E63 /* DDFileLogger.m in Sources */,
+				260499F11B73141500D11866 /* EncodingTools.m in Sources */,
 				260499E61B730E9E00D11866 /* XMPPMessage.m in Sources */,
 				2661D3441B40766F00EC51BA /* MLChatViewController.m in Sources */,
 				26B2A4BE1B7306E500272E63 /* DataLayer.m in Sources */,
 				261199261B632C42008768C8 /* MASPreferencesWindowController.m in Sources */,
 				266272B71B27DB8000C1CD49 /* AppDelegate.m in Sources */,
+				260499EA1B7313E500D11866 /* ParseFailure.m in Sources */,
 				26B2A4F61B73097500272E63 /* DDLog.m in Sources */,
 				26B2A4FE1B73097500272E63 /* DDMultiFormatter.m in Sources */,
+				260499E71B7313DB00D11866 /* ParseResumed.m in Sources */,
 				26B2A4EA1B73097500272E63 /* CLIColor.m in Sources */,
+				260499EF1B7313F300D11866 /* ParseIq.m in Sources */,
 				26B2A4EE1B73097500272E63 /* DDAbstractDatabaseLogger.m in Sources */,
 				2638DAE71B68F3AB00DF05AC /* MLPresenceSettings.m in Sources */,
 				2661D3411B40765A00EC51BA /* MLChatListViewController.m in Sources */,
 				26B2A5021B730AE100272E63 /* Reachability.m in Sources */,
 				2661D3501B407EDD00EC51BA /* MLChatViewCell.m in Sources */,
+				260499E81B7313DF00D11866 /* ParseA.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

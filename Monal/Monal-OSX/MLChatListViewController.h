@@ -12,4 +12,14 @@
 
 @property (nonatomic, strong) IBOutlet NSTableView *chatListTable;
 
+
+-(void) showConnecting:(NSDictionary*) info;
+-(void) updateConnecting:(NSDictionary*) info;
+-(void) hideConnecting:(NSDictionary*) info;
+
+-(void) clearContactsForAccount: (NSString*) accountNo;
+
+-(void) addOnlineUser:(NSDictionary*) user;
+-(void) removeOnlineUser:(NSDictionary*) user;
+
 @end

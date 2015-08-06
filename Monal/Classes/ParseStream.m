@@ -145,6 +145,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		return;
 		
 	}
+    
+    if( ([elementName isEqualToString:@"mechanisms"]) && ([State isEqualToString:@"Mechanisms"]))
+    {
+        State =@"Features"; 
+    }
 }
 
 

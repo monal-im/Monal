@@ -1731,10 +1731,11 @@ static DataLayer *sharedInstance=nil;
         NSError* error;
         [fileManager copyItemAtPath:defaultDBPath toPath:writableDBPath error:&error];
     }
-    
+#if TARGET_OS_IPHONE
     NSDictionary *attributes =@{NSFileProtectionKey:NSFileProtectionCompleteUntilFirstUserAuthentication};
     NSError *error;
     [fileManager setAttributes:attributes ofItemAtPath:writableDBPath error:&error];
+#endif 
     
   //  sqlite3_shutdown();
     if (sqlite3_config(SQLITE_CONFIG_SERIALIZED) == SQLITE_OK) {

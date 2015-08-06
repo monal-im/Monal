@@ -250,8 +250,8 @@
 
 /* Begin PBXFileReference section */
 		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
-		1D3623240D0F684500981E51 /* MonalAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MonalAppDelegate.h; sourceTree = "<group>"; };
-		1D3623250D0F684500981E51 /* MonalAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MonalAppDelegate.m; sourceTree = "<group>"; };
+		1D3623240D0F684500981E51 /* MonalAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MonalAppDelegate.h; path = Classes/MonalAppDelegate.h; sourceTree = "<group>"; };
+		1D3623250D0F684500981E51 /* MonalAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MonalAppDelegate.m; path = Classes/MonalAppDelegate.m; sourceTree = "<group>"; };
 		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		2601D9A70FBF255D004DB939 /* DataLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DataLayer.m; sourceTree = "<group>"; };
 		2601D9A80FBF255D004DB939 /* DataLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataLayer.h; sourceTree = "<group>"; };
@@ -296,8 +296,8 @@
 		261AC91C1788A49C00E05657 /* ParsePresence.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParsePresence.m; sourceTree = "<group>"; };
 		261E6729179E27BE00CB493E /* ParseFailure.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParseFailure.h; sourceTree = "<group>"; };
 		261E672A179E27BE00CB493E /* ParseFailure.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParseFailure.m; sourceTree = "<group>"; };
-		26277886110179D100023C8A /* tools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tools.h; sourceTree = "<group>"; };
-		26277887110179D100023C8A /* tools.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = tools.m; sourceTree = "<group>"; };
+		26277886110179D100023C8A /* tools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = tools.h; path = Classes/tools.h; sourceTree = "<group>"; };
+		26277887110179D100023C8A /* tools.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = tools.m; path = Classes/tools.m; sourceTree = "<group>"; };
 		262797AD178A577300B85D94 /* MLContactCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLContactCell.h; sourceTree = "<group>"; };
 		262797AE178A577300B85D94 /* MLContactCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLContactCell.m; sourceTree = "<group>"; };
 		2628E50614049DB50064131E /* askTempPass.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = askTempPass.xib; sourceTree = "<group>"; };
@@ -569,12 +569,12 @@
 		26EC410917BDD9090031304D /* userSearch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = userSearch.h; sourceTree = "<group>"; };
 		26EC410A17BDD9090031304D /* userSearch.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = userSearch.m; sourceTree = "<group>"; };
 		26EC410F17BDD98D0031304D /* GroupChatViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = GroupChatViewController.xib; sourceTree = "<group>"; };
-		26EC411117BDE39E0031304D /* MLImageManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLImageManager.h; sourceTree = "<group>"; };
-		26EC411217BDE39E0031304D /* MLImageManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLImageManager.m; sourceTree = "<group>"; };
+		26EC411117BDE39E0031304D /* MLImageManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MLImageManager.h; path = Classes/MLImageManager.h; sourceTree = "<group>"; };
+		26EC411217BDE39E0031304D /* MLImageManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MLImageManager.m; path = Classes/MLImageManager.m; sourceTree = "<group>"; };
 		26EE8B1A179B55D2006781F3 /* ParseChallenge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParseChallenge.h; sourceTree = "<group>"; };
 		26EE8B1B179B55D2006781F3 /* ParseChallenge.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParseChallenge.m; sourceTree = "<group>"; };
-		26EE8B1D179B67FA006781F3 /* MLNotificationManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLNotificationManager.h; sourceTree = "<group>"; };
-		26EE8B1E179B67FA006781F3 /* MLNotificationManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLNotificationManager.m; sourceTree = "<group>"; };
+		26EE8B1D179B67FA006781F3 /* MLNotificationManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MLNotificationManager.h; path = Classes/MLNotificationManager.h; sourceTree = "<group>"; };
+		26EE8B1E179B67FA006781F3 /* MLNotificationManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MLNotificationManager.m; path = Classes/MLNotificationManager.m; sourceTree = "<group>"; };
 		26EE8B20179B7B0D006781F3 /* SlidingMessageViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SlidingMessageViewController.h; sourceTree = "<group>"; };
 		26EE8B21179B7B0D006781F3 /* SlidingMessageViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SlidingMessageViewController.m; sourceTree = "<group>"; };
 		26F7BB411115F8DB00712672 /* Reachability.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Reachability.m; sourceTree = "<group>"; };
@@ -641,21 +641,20 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		080E96DDFE201D6D7F000001 /* Classes */ = {
+		080E96DDFE201D6D7F000001 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				26B2A4B51B73045500272E63 /* External */,
 				260C51CE177F08CF0039634B /* XMPP */,
 				26352EA5177D21FC00E2C8FF /* Managers */,
-				26715E5E17650AF900684F3D /* View Controllers */,
 				26F7BB3A1115F8A300712672 /* tools */,
 				2601D9A70FBF255D004DB939 /* DataLayer.m */,
 				2601D9A80FBF255D004DB939 /* DataLayer.h */,
-				1D3623240D0F684500981E51 /* MonalAppDelegate.h */,
-				1D3623250D0F684500981E51 /* MonalAppDelegate.m */,
 				262D9EAB17924532009292B4 /* MLConstants.h */,
 				268821F819B9233B00AEA46E /* NSString+SqlLite.h */,
 				268821F919B9233B00AEA46E /* NSString+SqlLite.m */,
 			);
+			name = Shared;
 			path = Classes;
 			sourceTree = "<group>";
 		};
@@ -760,10 +759,6 @@
 			children = (
 				26352EA6177D222600E2C8FF /* MLXMPPManager.h */,
 				26352EA7177D222600E2C8FF /* MLXMPPManager.m */,
-				26EE8B1D179B67FA006781F3 /* MLNotificationManager.h */,
-				26EE8B1E179B67FA006781F3 /* MLNotificationManager.m */,
-				26EC411117BDE39E0031304D /* MLImageManager.h */,
-				26EC411217BDE39E0031304D /* MLImageManager.m */,
 			);
 			name = Managers;
 			sourceTree = "<group>";
@@ -912,6 +907,7 @@
 				269E748D18B707B500BCB2D5 /* MLPortraitNavController.m */,
 			);
 			name = "View Controllers";
+			path = Classes;
 			sourceTree = "<group>";
 		};
 		2678A987185A82BE003AF53B /* Chat Logs */ = {
@@ -1052,6 +1048,51 @@
 			name = "jrtplib-static";
 			sourceTree = "<group>";
 		};
+		26B2A4B41B73040000272E63 /* Monal-iOS */ = {
+			isa = PBXGroup;
+			children = (
+				2675143315C23822006A36A3 /* changelog.txt */,
+				26470F511835C4080069E3E0 /* Media.xcassets */,
+				26B2A4B71B7304DD00272E63 /* Managers */,
+				26B2A4B61B73049B00272E63 /* tools */,
+				1D3623240D0F684500981E51 /* MonalAppDelegate.h */,
+				1D3623250D0F684500981E51 /* MonalAppDelegate.m */,
+				26715E5E17650AF900684F3D /* View Controllers */,
+				26DFD4A615666B6C007A1621 /* External */,
+				8D1107310486CEB800E47090 /* Monal-Info.plist */,
+				26715E5B176506AD00684F3D /* old nibs */,
+			);
+			name = "Monal-iOS";
+			sourceTree = "<group>";
+		};
+		26B2A4B51B73045500272E63 /* External */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = External;
+			path = ..;
+			sourceTree = "<group>";
+		};
+		26B2A4B61B73049B00272E63 /* tools */ = {
+			isa = PBXGroup;
+			children = (
+				26277886110179D100023C8A /* tools.h */,
+				26277887110179D100023C8A /* tools.m */,
+			);
+			name = tools;
+			sourceTree = "<group>";
+		};
+		26B2A4B71B7304DD00272E63 /* Managers */ = {
+			isa = PBXGroup;
+			children = (
+				26EE8B1D179B67FA006781F3 /* MLNotificationManager.h */,
+				26EE8B1E179B67FA006781F3 /* MLNotificationManager.m */,
+				26EC411117BDE39E0031304D /* MLImageManager.h */,
+				26EC411217BDE39E0031304D /* MLImageManager.m */,
+			);
+			name = Managers;
+			sourceTree = "<group>";
+		};
 		26BAFC3D1626537D0073728B /* appirator */ = {
 			isa = PBXGroup;
 			children = (
@@ -1179,7 +1220,7 @@
 			name = "Tab views";
 			sourceTree = "<group>";
 		};
-		26DFD4A615666B6C007A1621 /* 3rd Party */ = {
+		26DFD4A615666B6C007A1621 /* External */ = {
 			isa = PBXGroup;
 			children = (
 				2680B8D71863C172009599AB /* Lumberjack */,
@@ -1192,14 +1233,12 @@
 				2640AF3B14548E7600CB4F60 /* GrowingTextView */,
 				268BCCFD140B23E10025E4D1 /* jrtplib-static */,
 			);
-			name = "3rd Party";
+			name = External;
 			sourceTree = "<group>";
 		};
 		26F7BB3A1115F8A300712672 /* tools */ = {
 			isa = PBXGroup;
 			children = (
-				26277886110179D100023C8A /* tools.h */,
-				26277887110179D100023C8A /* tools.m */,
 				26F7BB411115F8DB00712672 /* Reachability.m */,
 				26F7BB421115F8DB00712672 /* Reachability.h */,
 				26B69A80131C5495002FCBEB /* PasswordManager.h */,
@@ -1213,12 +1252,10 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
-				26470F511835C4080069E3E0 /* Media.xcassets */,
-				2675143315C23822006A36A3 /* changelog.txt */,
-				26DFD4A615666B6C007A1621 /* 3rd Party */,
 				29B97315FDCFA39411CA2CEA /* Root Sources */,
-				080E96DDFE201D6D7F000001 /* Classes */,
+				080E96DDFE201D6D7F000001 /* Shared */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
+				26B2A4B41B73040000272E63 /* Monal-iOS */,
 				2630FE301AD550C00079F5C0 /* Monal Tests */,
 				266272B21B27DB8000C1CD49 /* Monal-OSX */,
 				266272C91B27DB8100C1CD49 /* Monal-OSXTests */,
@@ -1241,9 +1278,7 @@
 			isa = PBXGroup;
 			children = (
 				26AAE281179F701A00271345 /* About.html */,
-				26715E5B176506AD00684F3D /* old nibs */,
 				2601D9CA0FBF25EF004DB939 /* sworim.sqlite */,
-				8D1107310486CEB800E47090 /* Monal-Info.plist */,
 				26DE9C050FEEFD00000596F6 /* DB definitions */,
 			);
 			name = Resources;

@@ -310,7 +310,6 @@
 		261A6296176C160900059090 /* HelpViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HelpViewController.m; sourceTree = "<group>"; };
 		261A6298176C162200059090 /* AboutViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AboutViewController.h; sourceTree = "<group>"; };
 		261A6299176C162200059090 /* AboutViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AboutViewController.m; sourceTree = "<group>"; };
-		261AB9371409C2B8006F5155 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		261AC91B1788A49C00E05657 /* ParsePresence.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParsePresence.h; sourceTree = "<group>"; };
 		261AC91C1788A49C00E05657 /* ParsePresence.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParsePresence.m; sourceTree = "<group>"; };
 		261E6729179E27BE00CB493E /* ParseFailure.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParseFailure.h; sourceTree = "<group>"; };
@@ -1143,6 +1142,33 @@
 			path = Extensions;
 			sourceTree = "<group>";
 		};
+		26B2A4FF1B730A0900272E63 /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				261528C41869CE5300BF62D6 /* AudioToolbox.framework */,
+				2642EBCF1869425D006A6C12 /* CoreAudio.framework */,
+				264FF3E4158A855D00D97B86 /* AVFoundation.framework */,
+				26F7BB441115F95000712672 /* SystemConfiguration.framework */,
+				1DF5F4DF0D08C38300B7A737 /* UIKit.framework */,
+				1D30AB110D05D00D00671497 /* Foundation.framework */,
+				288765A40DF7441C002DB57D /* CoreGraphics.framework */,
+				263F568C121B5E970027D85D /* MediaPlayer.framework */,
+				26292F4E1309CAE100097280 /* CFNetwork.framework */,
+				26B69A74131C522F002FCBEB /* Security.framework */,
+				2601D9D30FBF262E004DB939 /* libsqlite3.dylib */,
+			);
+			name = iOS;
+			sourceTree = "<group>";
+		};
+		26B2A5001B730A0D00272E63 /* OSX */ = {
+			isa = PBXGroup;
+			children = (
+				26B2A4CA1B73084800272E63 /* AppKit.framework */,
+				26B2A4C81B73084100272E63 /* libsqlite3.0.dylib */,
+			);
+			name = OSX;
+			sourceTree = "<group>";
+		};
 		26BAFC3D1626537D0073728B /* appirator */ = {
 			isa = PBXGroup;
 			children = (
@@ -1337,20 +1363,8 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				26B2A4CA1B73084800272E63 /* AppKit.framework */,
-				26B2A4C81B73084100272E63 /* libsqlite3.0.dylib */,
-				261528C41869CE5300BF62D6 /* AudioToolbox.framework */,
-				2642EBCF1869425D006A6C12 /* CoreAudio.framework */,
-				264FF3E4158A855D00D97B86 /* AVFoundation.framework */,
-				261AB9371409C2B8006F5155 /* QuartzCore.framework */,
-				26F7BB441115F95000712672 /* SystemConfiguration.framework */,
-				2601D9D30FBF262E004DB939 /* libsqlite3.dylib */,
-				1DF5F4DF0D08C38300B7A737 /* UIKit.framework */,
-				1D30AB110D05D00D00671497 /* Foundation.framework */,
-				288765A40DF7441C002DB57D /* CoreGraphics.framework */,
-				263F568C121B5E970027D85D /* MediaPlayer.framework */,
-				26292F4E1309CAE100097280 /* CFNetwork.framework */,
-				26B69A74131C522F002FCBEB /* Security.framework */,
+				26B2A5001B730A0D00272E63 /* OSX */,
+				26B2A4FF1B730A0900272E63 /* iOS */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";

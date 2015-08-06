@@ -354,7 +354,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                                                   
                                                   if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
                                                   {
-                                                      if(offlinepos>=0 && offlinepos<=[_offlineContacts count]) // since if last one is delted it is equal to count
+                                                      if(offlinepos>=0 && offlinepos<[_offlineContacts count]) // since if last one is deleted it is equal to count
                                                       {
                                                           NSIndexPath *path2 = [NSIndexPath indexPathForRow:offlinepos inSection:kofflineSection];
                                                           [_contactsTable deleteRowsAtIndexPaths:@[path2]

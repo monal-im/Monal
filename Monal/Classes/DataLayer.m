@@ -26,7 +26,7 @@ static DataLayer *sharedInstance=nil;
     
 }
 
-//lowest level command handlers
+#pragma mark  -- V1 low level
 -(NSObject*) executeScalar:(NSString*) query
 {
     if(!query) return nil;
@@ -98,31 +98,6 @@ static DataLayer *sharedInstance=nil;
     
     return toReturn;
 }
-
--(BOOL) executeNonQuery:(NSString*) query
-{
-     if(!query) return NO;
-    BOOL __block toReturn;
-    dispatch_sync(_dbQueue, ^{
-        sqlite3_stmt *statement;
-        if (sqlite3_prepare_v2(database, [query  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK)
-        {
-            if(sqlite3_step(statement)==SQLITE_DONE)
-                toReturn=YES;
-            else
-                toReturn=NO;
-        }
-        
-        else
-        {
-            DDLogError(@"nonquery returning NO with out OK %@", query);
-            toReturn=NO;
-        }
-    });
-    
-    return toReturn;
-}
-
 
 -(NSArray*) executeReader:(NSString*) query
 {
@@ -205,6 +180,244 @@ static DataLayer *sharedInstance=nil;
     return toReturn;
 }
 
+-(BOOL) executeNonQuery:(NSString*) query
+{
+     if(!query) return NO;
+    BOOL __block toReturn;
+    dispatch_sync(_dbQueue, ^{
+        sqlite3_stmt *statement;
+        if (sqlite3_prepare_v2(database, [query  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK)
+        {
+            if(sqlite3_step(statement)==SQLITE_DONE)
+                toReturn=YES;
+            else
+                toReturn=NO;
+        }
+        
+        else
+        {
+            DDLogError(@"nonquery returning NO with out OK %@", query);
+            toReturn=NO;
+        }
+    });
+    
+    return toReturn;
+}
+
+
+
+
+#pragma mark -- V2 low level
+-(void) executeScalar:(NSString*) query withCompletion: (void (^)(NSObject *))completion
+{
+    if(!query)
+    {
+        if(completion) {
+            completion(nil);
+        }
+    }
+    
+    dispatch_async(_dbQueue, ^{
+        NSObject* toReturn;
+        sqlite3_stmt *statement;
+        if (sqlite3_prepare_v2(database, [query  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK) {
+            if (sqlite3_step(statement) == SQLITE_ROW)
+            {
+                switch(sqlite3_column_type(statement,0))
+                {
+                        // SQLITE_INTEGER, SQLITE_FLOAT, SQLITE_TEXT, SQLITE_BLOB, or SQLITE_NULL
+                    case (SQLITE_INTEGER):
+                    {
+                        NSNumber* returnInt= [NSNumber numberWithInt:sqlite3_column_int(statement,0)];
+                        while(sqlite3_step(statement)== SQLITE_ROW) {} //clear
+                        toReturn= returnInt;
+                        break;
+                    }
+                        
+                    case (SQLITE_FLOAT):
+                    {
+                        NSNumber* returnInt= [NSNumber numberWithDouble:sqlite3_column_double(statement,0)];
+                        while(sqlite3_step(statement)== SQLITE_ROW) {} //clear
+                        toReturn= returnInt;
+                        break;
+                    }
+                        
+                    case (SQLITE_TEXT):
+                    {
+                        NSString* returnString = [NSString stringWithUTF8String:sqlite3_column_text(statement,0)];
+                        //	DDLogVerbose(@"got %@", returnString);
+                        while(sqlite3_step(statement)== SQLITE_ROW ){} //clear
+                        toReturn= [returnString  stringByReplacingOccurrencesOfString:@"''" withString:@"'"];
+                        break;
+                        
+                    }
+                        
+                    case (SQLITE_BLOB):
+                    {
+                        //trat as string for now
+                        NSString* returnString = [NSString stringWithUTF8String:sqlite3_column_text(statement,0)];
+                        while(sqlite3_step(statement)== SQLITE_ROW) {} //clear
+                        toReturn= [returnString  stringByReplacingOccurrencesOfString:@"''" withString:@"'"];
+                        toReturn= nil;
+                        break;
+                    }
+                        
+                    case (SQLITE_NULL):
+                    {
+                        DDLogVerbose(@"return nil with sql null");
+                        while(sqlite3_step(statement)== SQLITE_ROW) {} //clear
+                        toReturn= nil;
+                        break;
+                    }
+                        
+                }
+                
+            } else
+            {DDLogVerbose(@"return nil with no row");
+                toReturn= nil;};
+        }
+        else{
+            //if noting else
+            DDLogVerbose(@"returning nil with out OK %@", query);
+            toReturn= nil;
+        }
+        
+        if(completion) {
+            completion(toReturn);
+        }
+    });
+
+}
+
+-(void) executeReader:(NSString*) query withCompletion: (void (^)(NSArray *))completion;
+{
+    if(!query)
+    {
+        if(completion) {
+            completion(nil);
+        }
+    }
+   
+    dispatch_async(_dbQueue, ^{
+        
+        NSMutableArray*  toReturn =  [[NSMutableArray alloc] init] ;
+        
+        sqlite3_stmt *statement;
+        if (sqlite3_prepare_v2(database, [query cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK) {
+            
+            while (sqlite3_step(statement) == SQLITE_ROW) {
+                NSMutableDictionary* row= [[NSMutableDictionary alloc] init];
+                int counter=0;
+                while(counter< sqlite3_column_count(statement) )
+                {
+                    NSString* columnName=[NSString stringWithUTF8String:sqlite3_column_name(statement,counter)];
+                    
+                    switch(sqlite3_column_type(statement,counter))
+                    {
+                            // SQLITE_INTEGER, SQLITE_FLOAT, SQLITE_TEXT, SQLITE_BLOB, or SQLITE_NULL
+                        case (SQLITE_INTEGER):
+                        {
+                            NSNumber* returnInt= [NSNumber numberWithInt:sqlite3_column_int(statement,counter)];
+                            [row setObject:returnInt forKey:columnName];
+                            break;
+                        }
+                            
+                        case (SQLITE_FLOAT):
+                        {
+                            NSNumber* returnInt= [NSNumber numberWithDouble:sqlite3_column_double(statement,counter)];
+                            [row setObject:returnInt forKey:columnName];
+                            break;
+                        }
+                            
+                        case (SQLITE_TEXT):
+                        {
+                            NSString* returnString = [NSString stringWithUTF8String:sqlite3_column_text(statement,counter)];
+                            [row setObject:[returnString stringByReplacingOccurrencesOfString:@"''" withString:@"'"] forKey:columnName];
+                            break;
+                            
+                        }
+                            
+                        case (SQLITE_BLOB):
+                        {
+                            //trat as string for now
+                            NSString* returnblob = [NSString stringWithUTF8String:sqlite3_column_text(statement,counter)];
+                            [row setObject:[returnblob stringByReplacingOccurrencesOfString:@"''" withString:@"'"] forKey:columnName];
+                            break;
+                            
+                            
+                            //Note: add blob support  as nsdata later
+                            
+                            //char* data= sqlite3_value_text(statement);
+                            ///NSData* returnData =[NSData dataWithBytes:]
+                            
+                        }
+                            
+                        case (SQLITE_NULL):
+                        {
+                            DDLogVerbose(@"return nil with sql null");
+                            
+                            [row setObject:@"" forKey:columnName];
+                            break;
+                        }
+                            
+                    }
+                    
+                    counter++;
+                }
+                
+                [toReturn addObject:row];
+            }
+        }
+        else
+        {
+            DDLogVerbose(@"reader nil with sql not ok: %@", query );
+            toReturn= nil;
+        }
+        
+        if(completion) {
+            completion(toReturn);
+        }
+    });
+    
+}
+
+-(void) executeNonQuery:(NSString*) query withCompletion: (void (^)(BOOL))completion
+{
+    if(!query)
+    {
+        if(completion) {
+            completion(NO);
+        }
+    }
+    
+    BOOL __block toReturn;
+    dispatch_async(_dbQueue, ^{
+        sqlite3_stmt *statement;
+        if (sqlite3_prepare_v2(database, [query  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK)
+        {
+            if(sqlite3_step(statement)==SQLITE_DONE)
+                toReturn=YES;
+            else
+                toReturn=NO;
+        }
+        
+        else
+        {
+            DDLogError(@"nonquery returning NO with out OK %@", query);
+            toReturn=NO;
+        }
+        if (completion)
+        {
+            completion(toReturn);
+        }
+    });
+    
+
+}
+
+
+
+
 
 #pragma mark account commands
 
@@ -217,7 +430,7 @@ static DataLayer *sharedInstance=nil;
     if(toReturn!=nil)
     {
         
-        DDLogVerbose(@" count: %d",  [toReturn count] );
+        DDLogVerbose(@" count: %lu",  (unsigned long)[toReturn count] );
         return toReturn; //[toReturn autorelease];
     }
     else
@@ -239,7 +452,7 @@ static DataLayer *sharedInstance=nil;
     if(toReturn!=nil)
     {
         
-        DDLogVerbose(@" count: %d",  [toReturn count] );
+        DDLogVerbose(@" count: %lu",  (unsigned long)[toReturn count] );
         
         return toReturn; //[toReturn autorelease];
     }
@@ -261,7 +474,7 @@ static DataLayer *sharedInstance=nil;
     if(toReturn!=nil)
     {
         
-        DDLogVerbose(@" count: %d",  [toReturn count] );
+        DDLogVerbose(@" count: %lu",  (unsigned long)[toReturn count] );
         
         return toReturn;
     }
@@ -296,7 +509,7 @@ static DataLayer *sharedInstance=nil;
     if(toReturn!=nil)
     {
         
-        DDLogVerbose(@" count: %d",  [toReturn count] );
+        DDLogVerbose(@" count: %lu",  (unsigned long)[toReturn count] );
         return toReturn;
     }
     else
@@ -492,24 +705,27 @@ static DataLayer *sharedInstance=nil;
     
 }
 
--(NSArray*) contactForUsername:(NSString*) username forAccount: (NSString*) accountNo
+-(void) contactForUsername:(NSString*) username forAccount: (NSString*) accountNo withCompletion: (void (^)(NSArray *))completion
 {
     NSString* query= query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, ifnull(full_name, buddy_name) as full_name, account_id from buddylist where buddy_name='%@' and account_id=%@", username.escapeForSql, accountNo];
     
     //DDLogVerbose(query);
-    NSArray* toReturn = [self executeReader:query];
-    
-    if(toReturn!=nil)
-    {
-        DDLogVerbose(@" count: %lu",  (unsigned long)[toReturn count] );
-        return toReturn; //[toReturn autorelease];
-    }
-    else
-    {
-        DDLogError(@"buddylist is empty or failed to read");
-        return nil;
-    }
-    
+    [self executeReader:query withCompletion:^(NSArray * toReturn) {
+        if(toReturn!=nil)
+        {
+            DDLogVerbose(@" count: %lu",  (unsigned long)[toReturn count] );
+            
+        }
+        else
+        {
+            DDLogError(@"buddylist is empty or failed to read");
+        }
+        
+        if(completion) {
+            completion(toReturn);
+        }
+    }];
+     
 }
 
 
@@ -735,31 +951,23 @@ static DataLayer *sharedInstance=nil;
 
 #pragma mark presence functions
 
--(BOOL) setResourceOnline:(ParsePresence *)presenceObj forAccount:(NSString *)accountNo
+-(void) setResourceOnline:(ParsePresence *)presenceObj forAccount:(NSString *)accountNo
 {
-    
-    //get buddyid for name and accoun
+    //get buddyid for name and account
     NSString* query1=[NSString stringWithFormat:@" select buddy_id from buddylist where account_id=%@ and  buddy_name='%@';", accountNo, presenceObj.user.escapeForSql ];
-    NSString* buddyid = (NSString*)[self executeScalar:query1];
-    if(buddyid==nil) return NO;
+    [self executeScalar:query1 withCompletion:^(NSObject *buddyid) {
+        if(buddyid)  {
+            NSString* query3=[NSString stringWithFormat:@" select count(buddy_id) from buddy_resources where buddy_id=%@ and resource='%@';", buddyid, presenceObj.resource.escapeForSql ];
+                [self executeScalar:query3 withCompletion:^(NSObject * resourceCount) {
+                //do not duplicate resource
+                 if([(NSNumber *)resourceCount integerValue] ==0) {
+                     NSString* query=[NSString stringWithFormat:@"insert into buddy_resources values (%@, '%@', '')", buddyid, presenceObj.resource.escapeForSql ];
+                     [self executeNonQuery:query withCompletion:nil];
+                 }
+            }];
     
-    //make sure not already there
-    
-    //see how many left
-    NSString* query3=[NSString stringWithFormat:@" select count(buddy_id) from buddy_resources where buddy_id=%@ and resource='%@';", buddyid, presenceObj.resource.escapeForSql ];
-    NSString* resourceCount =(NSString*) [self executeScalar:query3];
-   	
-    if([resourceCount integerValue]  >0) return NO;
-    
-    NSString* query=[NSString stringWithFormat:@"insert into buddy_resources values (%@, '%@', '')", buddyid, presenceObj.resource.escapeForSql ];
-    if([self executeNonQuery:query]!=NO)
-    {
-        return YES;
-    }
-    else
-    {
-        return NO;
-    }
+        }
+    }];
 }
 
 
@@ -772,21 +980,17 @@ static DataLayer *sharedInstance=nil;
 }
 
 
--(BOOL) setOnlineBuddy:(ParsePresence *)presenceObj forAccount:(NSString *)accountNo
+-(void) setOnlineBuddy:(ParsePresence *)presenceObj forAccount:(NSString *)accountNo
 {
     [self setResourceOnline:presenceObj forAccount:accountNo];
-    if([self isBuddyOnline:presenceObj.user forAccount:accountNo]) return NO; // pervent setting something as new
+    
+    if([self isBuddyOnline:presenceObj.user forAccount:accountNo]) {
+        return ; // pervent setting something as new and reinserting
+    }
     
     NSString* query=[NSString stringWithFormat:@"update buddylist set online=1, new=1, muc=%d where account_id=%@ and  buddy_name='%@';",presenceObj.MUC, accountNo, presenceObj.user.escapeForSql ];
-    if([self executeNonQuery:query]!=NO)
-    {
-        return YES;
-    }
-    else
-    {
-        return NO;
-    }
-    
+    [self executeNonQuery:query withCompletion:nil];
+ 
 }
 
 -(BOOL) setOfflineBuddy:(ParsePresence *)presenceObj forAccount:(NSString *)accountNo
@@ -989,14 +1193,12 @@ static DataLayer *sharedInstance=nil;
 
 -(bool) isBuddyOnline:(NSString*) buddy forAccount:(NSString*) accountNo
 {
-    // count # of meaages in message table
-    
     NSString* query=[NSString stringWithFormat:@"select count(buddy_id) from buddylist where account_id=%@ and buddy_name='%@' and online=1 ", accountNo, buddy.escapeForSql];
     
     NSNumber* count=(NSNumber*)[self executeScalar:query];
     if(count!=nil)
     {
-        int val=[count integerValue];
+        NSInteger val=[count integerValue];
         if(val>0) {
             return YES;
         }
@@ -1534,9 +1736,12 @@ static DataLayer *sharedInstance=nil;
     NSError *error;
     [fileManager setAttributes:attributes ofItemAtPath:writableDBPath error:&error];
     
+  //  sqlite3_shutdown();
     if (sqlite3_config(SQLITE_CONFIG_SERIALIZED) == SQLITE_OK) {
         DDLogVerbose(@"Database configured ok");
     } else DDLogVerbose(@"Database not configured ok");
+    
+    sqlite3_initialize();
     
     dbPath = writableDBPath; //[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"sworim.sqlite"];
     if (sqlite3_open([dbPath UTF8String], &database) == SQLITE_OK) {

@@ -451,17 +451,18 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                                                              };
                            [_messagelist addObject:[userInfo mutableCopy]];
                            
+                           NSIndexPath *path1;
                            [_messageTable beginUpdates];
-                           NSIndexPath *path1 = [NSIndexPath indexPathForRow:[_messagelist count]-1  inSection:0];
-                           [_messageTable insertRowsAtIndexPaths:@[path1]
-                                                withRowAnimation:UITableViewRowAnimationBottom];
+                           NSInteger bottom = [_messageTable numberOfRowsInSection:0];
+                           if(bottom>0) {
+                                path1 = [NSIndexPath indexPathForRow:bottom  inSection:0];
+                               [_messageTable insertRowsAtIndexPaths:@[path1]
+                                                    withRowAnimation:UITableViewRowAnimationBottom];
+                           }
                            [_messageTable endUpdates];
                            
+                           [self scrollToBottom];
                            
-                           if(![_messageTable.indexPathsForVisibleRows containsObject:path1])
-                           {
-                               [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:NO];
-                           }
                        });
         
     }
@@ -492,26 +493,30 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                            if([[notification.userInfo objectForKey:@"to"] isEqualToString:_contactName])
                            {
                                userInfo = @{@"af": [notification.userInfo objectForKey:@"actuallyfrom"],
-                                                          @"message": [notification.userInfo objectForKey:@"messageText"],
-                                                          @"thetime": [self currentGMTTime],   @"delivered":@YES};
-
+                                            @"message": [notification.userInfo objectForKey:@"messageText"],
+                                            @"thetime": [self currentGMTTime],   @"delivered":@YES};
+                               
                            } else  {
-                          userInfo = @{@"af": [notification.userInfo objectForKey:@"actuallyfrom"],
-                                                      @"message": [notification.userInfo objectForKey:@"messageText"],
-                                                      @"thetime": [self currentGMTTime]
-                                     };
+                               userInfo = @{@"af": [notification.userInfo objectForKey:@"actuallyfrom"],
+                                            @"message": [notification.userInfo objectForKey:@"messageText"],
+                                            @"thetime": [self currentGMTTime]
+                                            };
                            }
                            
                            [_messagelist addObject:userInfo];
                            
                            [_messageTable beginUpdates];
-                           NSIndexPath *path1 = [NSIndexPath indexPathForRow:[_messagelist count]-1  inSection:0];
-                           [_messageTable insertRowsAtIndexPaths:@[path1]
-                                                withRowAnimation:UITableViewRowAnimationTop];
-                           [_messageTable endUpdates];
-                         
-                            [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:YES];
+                           NSIndexPath *path1;
+                           NSInteger bottom = [_messageTable numberOfRowsInSection:0];
+                           if(bottom>0) {
+                               path1 = [NSIndexPath indexPathForRow:bottom-1  inSection:0];
+                               [_messageTable insertRowsAtIndexPaths:@[path1]
+                                                    withRowAnimation:UITableViewRowAnimationBottom];
+                           }
                            
+                           [_messageTable endUpdates];
+                           
+                           [self scrollToBottom];
                            
                            //mark as read
                            [[DataLayer sharedInstance] markAsReadBuddy:_contactName forAccount:_accountNo];
@@ -570,9 +575,10 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void) scrollToBottom
 {
-    if([_messagelist count]>0)
+    NSInteger bottom = [_messageTable numberOfRowsInSection:0];
+    if(bottom>0)
     {
-        NSIndexPath *path1 = [NSIndexPath indexPathForRow:[_messagelist count]-1  inSection:0];
+        NSIndexPath *path1 = [NSIndexPath indexPathForRow:bottom-1  inSection:0];
         if(![_messageTable.indexPathsForVisibleRows containsObject:path1])
         {
             [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:NO];
@@ -927,11 +933,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                          if([_messagelist count]>0)
                          {
                              NSIndexPath *path1 = [NSIndexPath indexPathForRow:[_messagelist count]-1  inSection:0];
-                             if(![_messageTable.indexPathsForVisibleRows containsObject:path1])
-                             {
-                                 
-                                 [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:NO];
-                             }
+                             [self scrollToBottom];
                          }
                          
                      } completion:^(BOOL finished) {

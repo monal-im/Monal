@@ -207,6 +207,7 @@
 		26B2A4FC1B73097500272E63 /* DDDispatchQueueLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B2A4E61B73097500272E63 /* DDDispatchQueueLogFormatter.m */; };
 		26B2A4FD1B73097500272E63 /* DDMultiFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B2A4E81B73097500272E63 /* DDMultiFormatter.m */; };
 		26B2A4FE1B73097500272E63 /* DDMultiFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B2A4E81B73097500272E63 /* DDMultiFormatter.m */; };
+		26B2A5011B730AAC00272E63 /* PasswordManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B69A81131C5495002FCBEB /* PasswordManager.m */; };
 		26B51C4918654D98002134C3 /* LogViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B51C4718654D98002134C3 /* LogViewController.m */; };
 		26B51C4A18654D98002134C3 /* LogViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26B51C4818654D98002134C3 /* LogViewController.xib */; };
 		26B69A75131C522F002FCBEB /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26B69A74131C522F002FCBEB /* Security.framework */; };
@@ -1771,6 +1772,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				26B2A5011B730AAC00272E63 /* PasswordManager.m in Sources */,
 				26B2A4F01B73097500272E63 /* DDASLLogCapture.m in Sources */,
 				2638DAEB1B68F3D400DF05AC /* MLAccountSettings.m in Sources */,
 				26B2A4BF1B73070F00272E63 /* NSString+SqlLite.m in Sources */,

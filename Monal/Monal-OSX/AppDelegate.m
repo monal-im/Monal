@@ -12,6 +12,7 @@
 #import "MLAccountSettings.h"
 #import "MLDisplaySettings.h"
 #import "MLPresenceSettings.h"
+#import "MLXMPPManager.h"
 
 
 @interface AppDelegate ()
@@ -28,6 +29,7 @@
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
     // Insert code here to initialize your application
+    [[MLXMPPManager sharedInstance] connectIfNecessary];
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {

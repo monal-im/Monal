@@ -64,6 +64,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 }
 
 
+
 #pragma mark provided
 - (id)init:(NSString*) accountno
 {
@@ -80,15 +81,21 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         // converted to an NSData object:
         
 		 [keychainData setObject:@"Monal" forKey:(__bridge id)kSecAttrService];
+        
        [genericPasswordQuery setObject:accountno forKey:(__bridge id)kSecAttrAccount ];
-		
+	   [genericPasswordQuery setObject:@"Monal"  forKey:(__bridge id)kSecAttrService ];
+    
+    
 		// Return the attributes of the first match only:
         [genericPasswordQuery setObject:(__bridge id)kSecMatchLimitOne forKey:(__bridge id)kSecMatchLimit];
+     
+        
         // Return the attributes of the keychain item (the password is
         //  acquired in the secItemFormatToDictionary: method):
         [genericPasswordQuery setObject:(id)kCFBooleanTrue
                                  forKey:(__bridge id)kSecReturnAttributes];
-		
+        
+        
         //Initialize the dictionary used to hold return data from the keychain:
         NSMutableDictionary *outDictionary = nil;
           CFTypeRef localResult;
@@ -156,12 +163,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
 	
     // Default generic data for Keychain Item:
-  /*[keychainData setObject:@"Item label" forKey:(id)kSecAttrLabel];
-    [keychainData setObject:@"Item description" forKey:(id)kSecAttrDescription];
-   
-    [keychainData setObject:@"Service" forKey:(id)kSecAttrService];
-    [keychainData setObject:@"Your comment here." forKey:(id)kSecAttrComment];*/
-	
+
     [keychainData setObject:@"Monal" forKey:(__bridge id)kSecAttrService];
 	[keychainData setObject:@"Account" forKey:(__bridge id)kSecAttrAccount];
     [keychainData setObject:@"password" forKey:(__bridge id)kSecValueData];
@@ -182,6 +184,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     // Add the keychain item class and the generic attribute:
 
     [returnDictionary setObject:(__bridge id)kSecClassGenericPassword forKey:(__bridge id)kSecClass];
+    [returnDictionary removeObjectForKey:(__bridge id)kSecReturnAttributes];
 	
     // Convert the password NSString to NSData to fit the API paradigm:
     NSString *passwordString = [dictionaryToConvert objectForKey:(__bridge id)kSecValueData];
@@ -200,7 +203,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	
     // Create a return dictionary populated with the attributes:
     NSMutableDictionary *returnDictionary = [NSMutableDictionary
-											 dictionaryWithDictionary:dictionaryToConvert];
+											 dictionaryWithDictionary:genericPasswordQuery];
 	
     // To acquire the password data from the keychain item,
     // first add the search key and class attribute required to obtain the password:
@@ -215,18 +218,28 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 										&localResult);
     if (keychainError == noErr)
     {
-        passwordData=objc_retainedObject(localResult); 
+    
+#if TARGET_OS_IPHONE
+          passwordData=objc_retainedObject(localResult);
+#else
+        
+        NSDictionary *passDic=objc_retainedObject(localResult);
+        passwordData= [passDic objectForKey:(__bridge id)kSecReturnData];
+#endif
+        
         // Remove the kSecReturnData key; we don't need it anymore:
         [returnDictionary removeObjectForKey:(__bridge id)kSecReturnData];
 		
         // Convert the password to an NSString and add it to the return dictionary:
+  
         NSString *password = [[NSString alloc] initWithBytes:[passwordData bytes]
 													   length:[passwordData length] encoding:NSUTF8StringEncoding];
+        NSLog(@"pass: %@", password);
         [returnDictionary setObject:password forKey:(__bridge id)kSecValueData];
     }
     // Don't do anything if nothing is found.
     else if (keychainError == errSecItemNotFound) {
-		NSAssert(NO, @"Nothing was found in the keychain.\n");
+		NSLog( @"Nothing was found in the keychain.\n");
     }
     // Any other error is unexpected.
     else

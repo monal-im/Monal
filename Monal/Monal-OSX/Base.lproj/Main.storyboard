@@ -1048,13 +1048,13 @@
                                     <segue destination="qIa-ZP-eTF" kind="sheet" id="tH3-rQ-4Ps"/>
                                 </connections>
                             </button>
-                            <scrollView fixedFrame="YES" autohidesScrollers="YES" horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="4H5-ah-4Nn">
+                            <scrollView fixedFrame="YES" autohidesScrollers="YES" horizontalLineScroll="34" horizontalPageScroll="10" verticalLineScroll="34" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="4H5-ah-4Nn">
                                 <rect key="frame" x="20" y="80" width="410" height="227"/>
                                 <clipView key="contentView" misplaced="YES" id="f64-JF-mTW">
                                     <rect key="frame" x="1" y="17" width="238" height="117"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
-                                        <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" columnSelection="YES" multipleSelection="NO" autosaveColumns="NO" rowSizeStyle="automatic" viewBased="YES" id="XnT-Hv-eDh">
+                                        <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" columnSelection="YES" multipleSelection="NO" autosaveColumns="NO" rowHeight="32" rowSizeStyle="automatic" viewBased="YES" id="XnT-Hv-eDh">
                                             <rect key="frame" x="0.0" y="0.0" width="408" height="0.0"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <size key="intercellSpacing" width="3" height="2"/>
@@ -1074,28 +1074,28 @@
                                                     </textFieldCell>
                                                     <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                     <prototypeCellViews>
-                                                        <tableCellView id="GJA-KX-dbK">
-                                                            <rect key="frame" x="1" y="1" width="405" height="17"/>
+                                                        <tableCellView identifier="AccountRow" id="GJA-KX-dbK" customClass="MLAccountRow">
+                                                            <rect key="frame" x="1" y="1" width="405" height="32"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
-                                                                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="jOB-BL-zzi">
-                                                                    <rect key="frame" x="0.0" y="0.0" width="100" height="17"/>
-                                                                    <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="I1D-cr-iDv">
+                                                                <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="TrR-Z7-L5Z">
+                                                                    <rect key="frame" x="1" y="13" width="398" height="18"/>
+                                                                    <buttonCell key="cell" type="check" title="Check" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="1fc-Bl-8fu">
+                                                                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                                         <font key="font" metaFont="system"/>
-                                                                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                                    </textFieldCell>
-                                                                </textField>
+                                                                    </buttonCell>
+                                                                </button>
                                                             </subviews>
                                                             <connections>
-                                                                <outlet property="textField" destination="jOB-BL-zzi" id="B1P-SQ-xHC"/>
+                                                                <outlet property="enabledCheckBox" destination="TrR-Z7-L5Z" id="lTj-l2-Gjt"/>
                                                             </connections>
                                                         </tableCellView>
                                                     </prototypeCellViews>
                                                 </tableColumn>
                                             </tableColumns>
                                             <connections>
-                                                <segue destination="qIa-ZP-eTF" kind="sheet" id="21U-6H-lS2"/>
+                                                <outlet property="dataSource" destination="iTE-lZ-FwX" id="DyL-m8-wM3"/>
+                                                <outlet property="delegate" destination="iTE-lZ-FwX" id="tm1-Bx-k6E"/>
                                             </connections>
                                         </tableView>
                                     </subviews>
@@ -1112,6 +1112,9 @@
                             </scrollView>
                         </subviews>
                     </view>
+                    <connections>
+                        <outlet property="accountTable" destination="XnT-Hv-eDh" id="soB-kU-2CA"/>
+                    </connections>
                 </viewController>
                 <customObject id="Hfi-Dv-W3k" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>

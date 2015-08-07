@@ -29,7 +29,6 @@
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
     // Insert code here to initialize your application
-    [[MLXMPPManager sharedInstance] connectIfNecessary];
 
 #ifdef  DEBUG
     [DDLog addLogger:[DDASLLogger sharedInstance]];
@@ -40,6 +39,8 @@
     self.fileLogger.maximumFileSize=1024 * 500;
     [DDLog addLogger:self.fileLogger];
 #endif
+    
+    //  [[MLXMPPManager sharedInstance] connectIfNecessary];
     
 }
 

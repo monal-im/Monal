@@ -263,6 +263,7 @@
 		26529F5317FA7B310057F199 /* addContact.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26EC410517BDD88B0031304D /* addContact.xib */; };
 		2658508B15E7D8E40070A2A7 /* TPCircularBuffer+AudioBufferList.c in Sources */ = {isa = PBXBuildFile; fileRef = 2658508615E7D8E40070A2A7 /* TPCircularBuffer+AudioBufferList.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		2658508C15E7D8E40070A2A7 /* TPCircularBuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 2658508815E7D8E40070A2A7 /* TPCircularBuffer.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		265F0B631B75719E00A63F20 /* MLAccountRow.m in Sources */ = {isa = PBXBuildFile; fileRef = 265F0B621B75719E00A63F20 /* MLAccountRow.m */; };
 		265F1B2B123040540065C5FE /* web.xib in Resources */ = {isa = PBXBuildFile; fileRef = 265F1B2A123040540065C5FE /* web.xib */; };
 		2661D3411B40765A00EC51BA /* MLChatListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661D3401B40765A00EC51BA /* MLChatListViewController.m */; };
 		2661D3441B40766F00EC51BA /* MLChatViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661D3431B40766F00EC51BA /* MLChatViewController.m */; };
@@ -583,6 +584,8 @@
 		2658508715E7D8E40070A2A7 /* TPCircularBuffer+AudioBufferList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "TPCircularBuffer+AudioBufferList.h"; sourceTree = "<group>"; };
 		2658508815E7D8E40070A2A7 /* TPCircularBuffer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = TPCircularBuffer.c; sourceTree = "<group>"; };
 		2658508915E7D8E40070A2A7 /* TPCircularBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TPCircularBuffer.h; sourceTree = "<group>"; };
+		265F0B611B75719E00A63F20 /* MLAccountRow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLAccountRow.h; sourceTree = "<group>"; };
+		265F0B621B75719E00A63F20 /* MLAccountRow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLAccountRow.m; sourceTree = "<group>"; };
 		265F1B2A123040540065C5FE /* web.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = web.xib; sourceTree = "<group>"; };
 		2661D33F1B40765A00EC51BA /* MLChatListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLChatListViewController.h; sourceTree = "<group>"; };
 		2661D3401B40765A00EC51BA /* MLChatListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLChatListViewController.m; sourceTree = "<group>"; };
@@ -947,14 +950,11 @@
 		2638DAE11B68F2EE00DF05AC /* Preferences */ = {
 			isa = PBXGroup;
 			children = (
+				265F0B641B75733800A63F20 /* Accounts */,
 				2638DAE51B68F3AB00DF05AC /* MLPresenceSettings.h */,
 				2638DAE61B68F3AB00DF05AC /* MLPresenceSettings.m */,
-				2638DAE81B68F3D400DF05AC /* MLAccountSettings.h */,
-				2638DAE91B68F3D400DF05AC /* MLAccountSettings.m */,
 				2638DAED1B68F3EF00DF05AC /* MLDisplaySettings.h */,
 				2638DAEE1B68F3EF00DF05AC /* MLDisplaySettings.m */,
-				260870D61B7034460036539B /* MLAccountEdit.h */,
-				260870D71B7034460036539B /* MLAccountEdit.m */,
 			);
 			name = Preferences;
 			sourceTree = "<group>";
@@ -1003,6 +1003,19 @@
 				2658508915E7D8E40070A2A7 /* TPCircularBuffer.h */,
 			);
 			path = TPCircularBuffer;
+			sourceTree = "<group>";
+		};
+		265F0B641B75733800A63F20 /* Accounts */ = {
+			isa = PBXGroup;
+			children = (
+				265F0B611B75719E00A63F20 /* MLAccountRow.h */,
+				265F0B621B75719E00A63F20 /* MLAccountRow.m */,
+				2638DAE81B68F3D400DF05AC /* MLAccountSettings.h */,
+				2638DAE91B68F3D400DF05AC /* MLAccountSettings.m */,
+				260870D61B7034460036539B /* MLAccountEdit.h */,
+				260870D71B7034460036539B /* MLAccountEdit.m */,
+			);
+			name = Accounts;
 			sourceTree = "<group>";
 		};
 		266272B21B27DB8000C1CD49 /* Monal-OSX */ = {
@@ -2055,6 +2068,7 @@
 				260870D81B7034460036539B /* MLAccountEdit.m in Sources */,
 				260499E31B730E9500D11866 /* XMLNode.m in Sources */,
 				260499F01B7313F600D11866 /* ParseStream.m in Sources */,
+				265F0B631B75719E00A63F20 /* MLAccountRow.m in Sources */,
 				260499EC1B7313EA00D11866 /* ParseMessage.m in Sources */,
 				26049A591B7315DF00D11866 /* TPCircularBuffer.c in Sources */,
 				26B2A4FC1B73097500272E63 /* DDDispatchQueueLogFormatter.m in Sources */,
@@ -2473,6 +2487,7 @@
 				MTL_ENABLE_DEBUG_INFO = YES;
 				PRODUCT_NAME = Monal;
 				SDKROOT = macosx;
+				STRIP_INSTALLED_PRODUCT = NO;
 			};
 			name = Debug;
 		};

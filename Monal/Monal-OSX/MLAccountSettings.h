@@ -11,5 +11,6 @@
 
 @interface MLAccountSettings : NSViewController <MASPreferencesViewController, NSTableViewDataSource, NSTableViewDelegate>
 
+@property (nonatomic, weak) IBOutlet NSTableView *accountTable;
 
 @end

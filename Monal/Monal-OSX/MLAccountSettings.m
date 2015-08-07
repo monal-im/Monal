@@ -7,8 +7,11 @@
 //
 
 #import "MLAccountSettings.h"
+#import "MLAccountRow.h"
+#import "DataLayer.h"
 
 @interface MLAccountSettings ()
+@property (nonatomic, strong) NSArray *accountList;
 
 @end
 
@@ -20,6 +23,36 @@
     
 }
 
+-(void) viewWillAppear
+{
+    self.accountList=[[DataLayer sharedInstance] accountList];
+    [self.accountTable reloadData];
+}
+
+
+#pragma mark  -- tableview datasource
+- (NSInteger)numberOfRowsInTableView:(NSTableView *)tableView;
+{
+    return self.accountList.count;
+}
+
+
+#pragma  mark -- tableview delegate
+- (NSTableRowView *)tableView:(NSTableView *)tableView rowViewForRow:(NSInteger)row;
+{
+    MLAccountRow *tableRow = [tableView makeViewWithIdentifier:@"AccountRow" owner:nil];
+    
+    NSDictionary *account = [self.accountList objectAtIndex:row];
+    tableRow.enabledCheckBox.state= [[account objectForKey:@"enabled"] boolValue];
+    tableRow.enabledCheckBox.title= [NSString stringWithFormat:@"%@@@%@", [account objectForKey:@"account_name"], [account objectForKey:@"domain"]];
+    
+    return tableRow;
+}
+
+- (void)tableViewSelectionDidChange:(NSNotification *)notification;
+{
+    
+}
 
 #pragma mark - preferences delegate
 

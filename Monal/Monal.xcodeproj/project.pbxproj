@@ -277,6 +277,9 @@
 		26761BF71804FBB700D94714 /* RoomListViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26761BF51804FBB700D94714 /* RoomListViewController.xib */; };
 		2678A98B185A8320003AF53B /* ChatLogAccountDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2678A98A185A8320003AF53B /* ChatLogAccountDetailViewController.m */; };
 		2678A98E185AB739003AF53B /* ChatLogContactViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2678A98D185AB739003AF53B /* ChatLogContactViewController.m */; };
+		267ECD691B7467B30025337F /* MLXMPPManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26352EA7177D222600E2C8FF /* MLXMPPManager.m */; };
+		267ECD6B1B746C340025337F /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 267ECD6A1B746C340025337F /* Security.framework */; };
+		267ECD6D1B746C660025337F /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 267ECD6C1B746C660025337F /* CFNetwork.framework */; };
 		268821FA19B9233B00AEA46E /* NSString+SqlLite.m in Sources */ = {isa = PBXBuildFile; fileRef = 268821F919B9233B00AEA46E /* NSString+SqlLite.m */; };
 		268BCF12140B29180025E4D1 /* libjrtplib-static.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */; };
 		268DD58617C4541000C673A9 /* MLChatCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 268DD58517C4541000C673A9 /* MLChatCell.m */; };
@@ -608,6 +611,8 @@
 		2678A98A185A8320003AF53B /* ChatLogAccountDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChatLogAccountDetailViewController.m; sourceTree = "<group>"; };
 		2678A98C185AB739003AF53B /* ChatLogContactViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChatLogContactViewController.h; sourceTree = "<group>"; };
 		2678A98D185AB739003AF53B /* ChatLogContactViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChatLogContactViewController.m; sourceTree = "<group>"; };
+		267ECD6A1B746C340025337F /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
+		267ECD6C1B746C660025337F /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/System/Library/Frameworks/CFNetwork.framework; sourceTree = DEVELOPER_DIR; };
 		268821F819B9233B00AEA46E /* NSString+SqlLite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+SqlLite.h"; sourceTree = "<group>"; };
 		268821F919B9233B00AEA46E /* NSString+SqlLite.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+SqlLite.m"; sourceTree = "<group>"; };
 		268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libjrtplib-static.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -777,6 +782,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				267ECD6D1B746C660025337F /* CFNetwork.framework in Frameworks */,
+				267ECD6B1B746C340025337F /* Security.framework in Frameworks */,
 				26049A5D1B73164500D11866 /* AVKit.framework in Frameworks */,
 				26049A5B1B73163300D11866 /* AVFoundation.framework in Frameworks */,
 				26049A511B73156300D11866 /* libjrtplib-static-OSX.a in Frameworks */,
@@ -1295,6 +1302,10 @@
 		26B2A5001B730A0D00272E63 /* OSX */ = {
 			isa = PBXGroup;
 			children = (
+				267ECD6C1B746C660025337F /* CFNetwork.framework */,
+				26049A5A1B73163300D11866 /* AVFoundation.framework */,
+				26049A5C1B73164500D11866 /* AVKit.framework */,
+				267ECD6A1B746C340025337F /* Security.framework */,
 				26B2A4CA1B73084800272E63 /* AppKit.framework */,
 				26B2A4C81B73084100272E63 /* libsqlite3.0.dylib */,
 			);
@@ -1494,8 +1505,6 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				26049A5C1B73164500D11866 /* AVKit.framework */,
-				26049A5A1B73163300D11866 /* AVFoundation.framework */,
 				26B2A5001B730A0D00272E63 /* OSX */,
 				26B2A4FF1B730A0900272E63 /* iOS */,
 			);
@@ -2060,6 +2069,7 @@
 				260499EA1B7313E500D11866 /* ParseFailure.m in Sources */,
 				26B2A4F61B73097500272E63 /* DDLog.m in Sources */,
 				26B2A4FE1B73097500272E63 /* DDMultiFormatter.m in Sources */,
+				267ECD691B7467B30025337F /* MLXMPPManager.m in Sources */,
 				260499E71B7313DB00D11866 /* ParseResumed.m in Sources */,
 				26B2A4EA1B73097500272E63 /* CLIColor.m in Sources */,
 				260499EF1B7313F300D11866 /* ParseIq.m in Sources */,

@@ -64,11 +64,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 static void PrintReachabilityFlags(SCNetworkReachabilityFlags    flags, const char* comment)
 {
 #if kShouldPrintReachabilityFlags
-    
-    NSLog(@"Reachability Flag Status: %c%c %c%c%c%c%c%c%c %s\n",
+
 #if TARGET_OS_IPHONE
+    NSLog(@"Reachability Flag Status: %c%c %c%c%c%c%c%c%c %s\n",
+
           (flags & kSCNetworkReachabilityFlagsIsWWAN)               ? 'W' : '-',
-#endif
           (flags & kSCNetworkReachabilityFlagsReachable)            ? 'R' : '-',
           
           (flags & kSCNetworkReachabilityFlagsTransientConnection)  ? 't' : '-',
@@ -80,6 +80,7 @@ static void PrintReachabilityFlags(SCNetworkReachabilityFlags    flags, const ch
           (flags & kSCNetworkReachabilityFlagsIsDirect)             ? 'd' : '-',
           comment
           );
+#endif
 #endif
 }
 

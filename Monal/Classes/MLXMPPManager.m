@@ -8,7 +8,12 @@
 
 #import "MLXMPPManager.h"
 #import "DataLayer.h"
+
+
+#if TARGET_OS_IPHONE
 #import "MonalAppDelegate.h"
+#else
+#endif
 
 static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
@@ -122,6 +127,8 @@ An array of Dics what have timers to make sure everything was sent
 
 -(void) setKeepAlivetimer
 {
+    #if TARGET_OS_IPHONE
+
     NSTimeInterval timeInterval= 600; // 600 seconds
     BOOL keepAlive=[[UIApplication sharedApplication] setKeepAliveTimeout:timeInterval handler:^{
         DDLogInfo(@"began bg keep alive ping");
@@ -141,11 +148,16 @@ An array of Dics what have timers to make sure everything was sent
     {
         DDLogVerbose(@"failed to install keep alive timer");
     }
+#else
+#endif
 }
 
 -(void) clearKeepAlive
 {
+#if TARGET_OS_IPHONE
     [[UIApplication sharedApplication] clearKeepAliveTimeout];
+#else
+#endif
     
 }
 
@@ -236,6 +248,7 @@ An array of Dics what have timers to make sure everything was sent
     xmppAccount.selfSigned=[[account objectForKey:@"selfsigned"] boolValue];
     
     xmppAccount.accountNo=[NSString stringWithFormat:@"%@",[account objectForKey:@"account_id"]];
+#if TARGET_OS_IPHONE
     NSLog(@"state %ld", [UIApplication sharedApplication].applicationState);
     if([UIApplication sharedApplication].applicationState!=UIApplicationStateActive)
     {
@@ -252,6 +265,9 @@ An array of Dics what have timers to make sure everything was sent
         }
     }
     else
+#else
+#endif
+
     {
         PasswordManager* passMan= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",[account objectForKey:@"account_id"]]];
         xmppAccount.password=[passMan getPassword] ;
@@ -263,8 +279,12 @@ An array of Dics what have timers to make sure everything was sent
         // no password error
     }
     
+#if TARGET_OS_IPHONE
+     xmppAccount.contactsVC=self.contactVC;
+#else
+#endif
+   
     
-    xmppAccount.contactsVC=self.contactVC;
     //sepcifically look for the server since we might not be online or behind firewall
     Reachability* hostReach = [Reachability reachabilityWithHostName:xmppAccount.server ] ;
     
@@ -627,8 +647,12 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 #pragma mark message signals
 -(void) handleNewMessage:(NSNotification *)notification
 {
+#if TARGET_OS_IPHONE
     MonalAppDelegate* appDelegate= (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
     [appDelegate updateUnread];
+    
+#else
+#endif
 }
 
 

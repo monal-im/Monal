@@ -1173,6 +1173,9 @@
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
+                                <connections>
+                                    <action selector="save:" target="qIa-ZP-eTF" id="HuR-DK-gfb"/>
+                                </connections>
                             </button>
                             <box autoresizesSubviews="NO" fixedFrame="YES" title="Advanced" borderType="line" translatesAutoresizingMaskIntoConstraints="NO" id="S3L-Ys-Pgc">
                                 <rect key="frame" x="17" y="57" width="408" height="205"/>
@@ -1194,14 +1197,6 @@
                                                 <font key="font" metaFont="system"/>
                                                 <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                 <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                            </textFieldCell>
-                                        </textField>
-                                        <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Dhw-7C-0DB">
-                                            <rect key="frame" x="95" y="100" width="293" height="22"/>
-                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="28W-Cb-Y2e">
-                                                <font key="font" metaFont="system"/>
-                                                <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
-                                                <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                             </textFieldCell>
                                         </textField>
                                         <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="cbL-xw-mkr">
@@ -1249,6 +1244,14 @@
                                                 <font key="font" metaFont="system"/>
                                             </buttonCell>
                                         </button>
+                                        <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Dhw-7C-0DB">
+                                            <rect key="frame" x="95" y="100" width="293" height="22"/>
+                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" title="Monal" drawsBackground="YES" id="28W-Cb-Y2e">
+                                                <font key="font" metaFont="system"/>
+                                                <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                                <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                            </textFieldCell>
+                                        </textField>
                                     </subviews>
                                 </view>
                                 <color key="borderColor" white="0.0" alpha="0.41999999999999998" colorSpace="calibratedWhite"/>
@@ -1269,10 +1272,21 @@ Gw
                             </button>
                         </subviews>
                     </view>
+                    <connections>
+                        <outlet property="enabledCheck" destination="iwz-NE-VD4" id="OvK-IS-3gr"/>
+                        <outlet property="jabberID" destination="uB7-sH-eCs" id="4tQ-Da-JML"/>
+                        <outlet property="oldStyleSSL" destination="Yp9-lo-EfY" id="D9n-W0-9ev"/>
+                        <outlet property="password" destination="D9s-Ak-cFT" id="M84-AN-FBa"/>
+                        <outlet property="port" destination="dtm-yw-SY7" id="3UH-k0-mDR"/>
+                        <outlet property="resource" destination="Dhw-7C-0DB" id="Svc-JO-1f2"/>
+                        <outlet property="selfSigned" destination="qZr-m6-nhP" id="2m5-dY-Mmh"/>
+                        <outlet property="server" destination="elL-k2-qHB" id="NeK-Um-qIi"/>
+                        <outlet property="sslCheck" destination="isQ-cw-Hwe" id="h2E-OX-BBf"/>
+                    </connections>
                 </viewController>
                 <customObject id="P05-Te-TLv" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="694" y="-355"/>
+            <point key="canvasLocation" x="744" y="-407"/>
         </scene>
         <!--Preferences-Presence-->
         <scene sceneID="3M3-cJ-azZ">

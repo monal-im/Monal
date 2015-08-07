@@ -184,7 +184,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     // Add the keychain item class and the generic attribute:
 
     [returnDictionary setObject:(__bridge id)kSecClassGenericPassword forKey:(__bridge id)kSecClass];
-    [returnDictionary removeObjectForKey:(__bridge id)kSecReturnAttributes];
+  
 	
     // Convert the password NSString to NSData to fit the API paradigm:
     NSString *passwordString = [dictionaryToConvert objectForKey:(__bridge id)kSecValueData];
@@ -209,23 +209,20 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     // first add the search key and class attribute required to obtain the password:
     [returnDictionary setObject:(id)kCFBooleanTrue forKey:(__bridge id)kSecReturnData];
     [returnDictionary setObject:(__bridge id)kSecClassGenericPassword forKey:(__bridge id)kSecClass];
+    [returnDictionary removeObjectForKey:(__bridge id)kSecReturnAttributes];
     // Then call Keychain Services to get the password:
     NSData *passwordData = NULL;
     OSStatus keychainError = noErr; //
      CFTypeRef localResult;
+    NSLog(@" %@", returnDictionary);
     
     keychainError = SecItemCopyMatching((__bridge CFDictionaryRef)returnDictionary,
 										&localResult);
     if (keychainError == noErr)
     {
     
-#if TARGET_OS_IPHONE
           passwordData=objc_retainedObject(localResult);
-#else
-        
-        NSDictionary *passDic=objc_retainedObject(localResult);
-        passwordData= [passDic objectForKey:(__bridge id)kSecReturnData];
-#endif
+
         
         // Remove the kSecReturnData key; we don't need it anymore:
         [returnDictionary removeObjectForKey:(__bridge id)kSecReturnData];

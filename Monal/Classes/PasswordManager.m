@@ -214,7 +214,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     NSData *passwordData = NULL;
     OSStatus keychainError = noErr; //
      CFTypeRef localResult;
-    NSLog(@" %@", returnDictionary);
     
     keychainError = SecItemCopyMatching((__bridge CFDictionaryRef)returnDictionary,
 										&localResult);
@@ -231,7 +230,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
   
         NSString *password = [[NSString alloc] initWithBytes:[passwordData bytes]
 													   length:[passwordData length] encoding:NSUTF8StringEncoding];
-        NSLog(@"pass: %@", password);
+    
         [returnDictionary setObject:password forKey:(__bridge id)kSecValueData];
     }
     // Don't do anything if nothing is found.

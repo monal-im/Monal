@@ -30,6 +30,17 @@
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
     // Insert code here to initialize your application
     [[MLXMPPManager sharedInstance] connectIfNecessary];
+
+#ifdef  DEBUG
+    [DDLog addLogger:[DDASLLogger sharedInstance]];
+    [DDLog addLogger:[DDTTYLogger sharedInstance]];
+    self.fileLogger = [[DDFileLogger alloc] init];
+    self.fileLogger.rollingFrequency = 60 * 60 * 24; // 24 hour rolling
+    self.fileLogger.logFileManager.maximumNumberOfLogFiles = 5;
+    self.fileLogger.maximumFileSize=1024 * 500;
+    [DDLog addLogger:self.fileLogger];
+#endif
+    
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {

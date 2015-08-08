@@ -547,7 +547,16 @@ static DataLayer *sharedInstance=nil;
 -(void) addAccountWithDictionary:(NSDictionary *) dictionary andCompletion: (void (^)(BOOL))completion
 {
     NSString* query= [NSString stringWithFormat:@"insert into account values(null, '%@', %@, '%@', '%@', '%@', '%@', %d, '%@', '%@', %d, %d, %d) ",
-                      username.escapeForSql, theProtocol,server, otherport, username.escapeForSql, password.escapeForSql, secure, resource.escapeForSql, thedomain.escapeForSql, enabled, selfsigned, oldstyle];
+                      ((NSString *)[dictionary objectForKey:kUsername]).escapeForSql, @"1",[dictionary objectForKey:kServer],
+                      ((NSString *)[dictionary objectForKey:kUsername]).escapeForSql,
+                       ((NSString *)[dictionary objectForKey:kPort]).escapeForSql,
+                      @"", [[dictionary objectForKey:kSSL] boolValue],
+                        ((NSString *)[dictionary objectForKey:kResource]).escapeForSql,
+                       ((NSString *)[dictionary objectForKey:kDomain]).escapeForSql,
+                      [[dictionary objectForKey:kEnabled] boolValue],
+                      [[dictionary objectForKey:kSelfSigned] boolValue],
+                      [[dictionary objectForKey:kOldSSL] boolValue]
+                      ];
     
     [self executeNonQuery:query withCompletion:completion];
    

@@ -259,8 +259,8 @@ Decline a call request
 @property (nonatomic,strong) NSDate* connectedTime;
 
 
-FOUNDATION_EXPORT NSString *const kMessageId;
-FOUNDATION_EXPORT NSString *const kSendTimer;
+extern NSString *const kMessageId;
+extern NSString *const kSendTimer;
 
 
 @end

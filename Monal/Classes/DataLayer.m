@@ -13,6 +13,20 @@
 
 static const int ddLogLevel = LOG_LEVEL_INFO;
 
+ NSString *const kAccountID= @"account_id";
+ NSString *const kAccountName =@"account_name";
+ NSString *const kDomain =@"domain";
+ NSString *const kEnabled =@"enabled";
+
+ NSString *const kServer =@"server";
+ NSString *const kPort =@"other_port";
+ NSString *const kResource =@"resouce";
+ NSString *const kSSL =@"secure";
+ NSString *const kOldSSL =@"oldstyleSSL";
+ NSString *const kSelfSigned =@"selfsigned";
+
+ NSString *const kUsername =@"username";
+
 static DataLayer *sharedInstance=nil;
 
 + (DataLayer* )sharedInstance
@@ -519,6 +533,27 @@ static DataLayer *sharedInstance=nil;
     }
     
 }
+
+
+-(void) updateAccounWithDictionary:(NSDictionary *) dictionary andCompletion:(void (^)(BOOL))completion;
+{
+    NSString* query=
+    [NSString stringWithFormat:@"update account  set account_name='%@', protocol_id=%@, server='%@', other_port='%@', username='%@', password='%@', secure=%d, resource='%@', domain='%@', enabled=%d, selfsigned=%d, oldstyleSSL=%d where account_id=%@",
+     username.escapeForSql, theProtocol,server, otherport, username.escapeForSql, password.escapeForSql, secure, resource.escapeForSql, thedomain.escapeForSql,enabled, selfsigned, oldstyle,accountNo];
+
+     [self executeNonQuery:query withCompletion:completion];
+}
+
+-(void) addAccountWithDictionary:(NSDictionary *) dictionary andCompletion: (void (^)(BOOL))completion
+{
+    NSString* query= [NSString stringWithFormat:@"insert into account values(null, '%@', %@, '%@', '%@', '%@', '%@', %d, '%@', '%@', %d, %d, %d) ",
+                      username.escapeForSql, theProtocol,server, otherport, username.escapeForSql, password.escapeForSql, secure, resource.escapeForSql, thedomain.escapeForSql, enabled, selfsigned, oldstyle];
+    
+    [self executeNonQuery:query withCompletion:completion];
+   
+}
+
+
 
 -(BOOL) addAccount: (NSString*) name :(NSString*) theProtocol :(NSString*) username: (NSString*) password: (NSString*) server
                   : (NSString*) otherport: (bool) secure: (NSString*) resource: (NSString*) thedomain:(bool) enabled :(bool) selfsigned: (bool) oldstyle

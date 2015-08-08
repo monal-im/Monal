@@ -26,10 +26,25 @@
 }
 
 
+extern NSString *const kAccountID;
+extern NSString *const kAccountName;
+extern NSString *const kDomain;
+extern NSString *const kEnabled;
+
+extern NSString *const kServer;
+extern NSString *const kPort;
+extern NSString *const kResource;
+extern NSString *const kSSL;
+extern NSString *const kOldSSL;
+extern NSString *const kSelfSigned;
+
+extern NSString *const kUsername;
+
+
 + (id)sharedInstance;
 
 -(void) initDB;
--(void) version; 
+-(void) version;
 
 //lowest level command handlers
 -(NSObject*) executeScalar:(NSString*) query  __deprecated;
@@ -118,10 +133,15 @@
 
 -(NSArray*) accountVals:(NSString*) accountNo; 
 -(BOOL) addAccount: (NSString*) name :(NSString*) theProtocol :(NSString*) username: (NSString*) password: (NSString*) server
-                  : (NSString*) otherport: (bool) secure: (NSString*) resource: (NSString*) thedomain:(bool) enabled :(bool) selfsigned: (bool) oldstyle;
+                  : (NSString*) otherport: (bool) secure: (NSString*) resource: (NSString*) thedomain:(bool) enabled :(bool) selfsigned: (bool) oldstyle __deprecated;
 
 -(BOOL) updateAccount: (NSString*) name :(NSString*) theProtocol :(NSString*) username: (NSString*) password: (NSString*) server
-					 : (NSString*) otherport: (bool) secure: (NSString*) resource: (NSString*) thedomain: (bool) enabled: (NSString*) accountNo :(bool) selfsigned: (bool) oldstyle;
+                     : (NSString*) otherport: (bool) secure: (NSString*) resource: (NSString*) thedomain: (bool) enabled: (NSString*) accountNo :(bool) selfsigned: (bool) oldstyle __deprecated;
+
+
+-(void) updateAccounWithDictionary:(NSDictionary *) dictionary andCompletion:(void (^)(BOOL))completion;;
+-(void) addAccountWithDictionary:(NSDictionary *) dictionary andCompletion: (void (^)(BOOL))completion;;
+
 
 -(BOOL) removeAccount:(NSString*) accountNo; 
 

@@ -43,8 +43,7 @@
     MLAccountRow *tableRow = [tableView makeViewWithIdentifier:@"AccountRow" owner:nil];
     
     NSDictionary *account = [self.accountList objectAtIndex:row];
-    tableRow.enabledCheckBox.state= [[account objectForKey:@"enabled"] boolValue];
-    tableRow.enabledCheckBox.title= [NSString stringWithFormat:@"%@@@%@", [account objectForKey:@"account_name"], [account objectForKey:@"domain"]];
+    [tableRow updateWithAccountDictionary:account];
     
     return tableRow;
 }

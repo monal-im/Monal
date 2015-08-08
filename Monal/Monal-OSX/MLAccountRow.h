@@ -10,6 +10,11 @@
 
 @interface MLAccountRow : NSTableRowView
 
-@property (nonatomic, weak) IBOutlet NSButton *enabledCheckBox; 
+@property (nonatomic, weak) IBOutlet NSButton *enabledCheckBox;
+@property (nonatomic, strong) NSDictionary *account; 
+
+-(void) updateWithAccountDictionary:(NSDictionary *) account;
+
+-(IBAction)checkBoxAction:(id)sender;
 
 @end

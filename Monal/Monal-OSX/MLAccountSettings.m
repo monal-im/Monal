@@ -8,6 +8,7 @@
 
 #import "MLAccountSettings.h"
 #import "MLAccountRow.h"
+#import "MLAccountEdit.h"
 #import "DataLayer.h"
 
 @interface MLAccountSettings ()
@@ -27,6 +28,29 @@
 {
     self.accountList=[[DataLayer sharedInstance] accountList];
     [self.accountTable reloadData];
+}
+
+
+#pragma mark -- segues
+
+-(IBAction)showXMPP:(id)sender {
+    [self performSegueWithIdentifier:@"showAccountEdit" sender:@"XMPP"];
+}
+
+-(IBAction)showGtalk:(id)sender {
+     [self performSegueWithIdentifier:@"showAccountEdit" sender:@"Gtalk"];
+}
+
+- (void)prepareForSegue:(NSStoryboardSegue *)segue sender:(id)sender
+{
+    MLAccountEdit *sheet = (MLAccountEdit *)[segue destinationController];
+    
+    if([sender isEqualToString:@"Gtalk"])
+    {
+        sheet.server.stringValue= @"talk.google.com";
+        sheet.jabberID.stringValue=@"@gmail.com";
+    }
+    
 }
 
 

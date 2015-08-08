@@ -69,7 +69,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 - (id)init:(NSString*) accountno
 {
     if ((self = [super init])) {
-		
+#if TARGET_OS_IPHONE
+#else
+        OSStatus unlock = SecKeychainUnlock(NULL, 0 , NULL, false);
+#endif
 		        OSStatus keychainErr = noErr;
         // Set up the keychain search dictionary:
         genericPasswordQuery = [[NSMutableDictionary alloc] init];

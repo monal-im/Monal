@@ -1028,29 +1028,19 @@
                         <rect key="frame" x="0.0" y="0.0" width="450" height="327"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
-                            <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="t2A-PB-w4d">
+                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="t2A-PB-w4d">
                                 <rect key="frame" x="14" y="40" width="162" height="32"/>
                                 <buttonCell key="cell" type="push" title="Add XMPP Account" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="RoR-Pd-f4b">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
                                 <connections>
-                                    <segue destination="qIa-ZP-eTF" kind="sheet" id="Orb-1g-XiP"/>
+                                    <action selector="showXMPP:" target="iTE-lZ-FwX" id="FuC-Fg-vqN"/>
                                 </connections>
                             </button>
-                            <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="jUk-1g-L5Z">
-                                <rect key="frame" x="14" y="13" width="157" height="32"/>
-                                <buttonCell key="cell" type="push" title="Add Gtalk Account" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="xWO-Gt-3Y9">
-                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="system"/>
-                                </buttonCell>
-                                <connections>
-                                    <segue destination="qIa-ZP-eTF" kind="sheet" id="tH3-rQ-4Ps"/>
-                                </connections>
-                            </button>
-                            <scrollView fixedFrame="YES" autohidesScrollers="YES" horizontalLineScroll="34" horizontalPageScroll="10" verticalLineScroll="34" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="4H5-ah-4Nn">
+                            <scrollView autohidesScrollers="YES" horizontalLineScroll="34" horizontalPageScroll="10" verticalLineScroll="34" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="4H5-ah-4Nn">
                                 <rect key="frame" x="20" y="80" width="410" height="227"/>
-                                <clipView key="contentView" misplaced="YES" id="f64-JF-mTW">
+                                <clipView key="contentView" id="f64-JF-mTW">
                                     <rect key="frame" x="1" y="17" width="238" height="117"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
@@ -1078,19 +1068,18 @@
                                                             <rect key="frame" x="1" y="1" width="405" height="32"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
-                                                                <button ambiguous="YES" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="TrR-Z7-L5Z">
+                                                                <button translatesAutoresizingMaskIntoConstraints="NO" id="TrR-Z7-L5Z">
                                                                     <rect key="frame" x="1" y="13" width="398" height="18"/>
                                                                     <buttonCell key="cell" type="check" title="Check" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="1fc-Bl-8fu">
                                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                                         <font key="font" metaFont="system"/>
-                                                                        <connections>
-                                                                            <action selector="checkBoxAction:" target="GJA-KX-dbK" id="893-VO-Bxu"/>
-                                                                        </connections>
                                                                     </buttonCell>
                                                                 </button>
                                                             </subviews>
                                                             <constraints>
+                                                                <constraint firstItem="TrR-Z7-L5Z" firstAttribute="top" secondItem="GJA-KX-dbK" secondAttribute="top" constant="3" id="04Z-vx-01J"/>
                                                                 <constraint firstItem="TrR-Z7-L5Z" firstAttribute="leading" secondItem="GJA-KX-dbK" secondAttribute="leading" constant="3" id="0bB-WP-cTb"/>
+                                                                <constraint firstAttribute="trailing" secondItem="TrR-Z7-L5Z" secondAttribute="trailing" constant="8" id="vZf-gY-QhD"/>
                                                             </constraints>
                                                             <connections>
                                                                 <outlet property="enabledCheckBox" destination="TrR-Z7-L5Z" id="lTj-l2-Gjt"/>
@@ -1116,10 +1105,31 @@
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                             </scrollView>
+                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="jUk-1g-L5Z">
+                                <rect key="frame" x="14" y="13" width="157" height="32"/>
+                                <buttonCell key="cell" type="push" title="Add Gtalk Account" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="xWO-Gt-3Y9">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="showGtalk:" target="iTE-lZ-FwX" id="q2l-DH-b04"/>
+                                </connections>
+                            </button>
                         </subviews>
+                        <constraints>
+                            <constraint firstItem="t2A-PB-w4d" firstAttribute="leading" secondItem="4H5-ah-4Nn" secondAttribute="leading" id="5ns-4K-45l"/>
+                            <constraint firstItem="4H5-ah-4Nn" firstAttribute="leading" secondItem="vQL-mx-jAG" secondAttribute="leading" constant="20" id="Dcd-yO-w4d"/>
+                            <constraint firstAttribute="trailing" secondItem="4H5-ah-4Nn" secondAttribute="trailing" constant="20" id="GIp-nS-qNZ"/>
+                            <constraint firstItem="4H5-ah-4Nn" firstAttribute="top" secondItem="vQL-mx-jAG" secondAttribute="top" constant="20" id="IPq-s7-BdJ"/>
+                            <constraint firstItem="t2A-PB-w4d" firstAttribute="top" secondItem="4H5-ah-4Nn" secondAttribute="bottom" constant="12" id="YX8-tA-dXW"/>
+                            <constraint firstItem="t2A-PB-w4d" firstAttribute="leading" secondItem="jUk-1g-L5Z" secondAttribute="leading" id="beu-Fm-FAR"/>
+                            <constraint firstItem="jUk-1g-L5Z" firstAttribute="top" secondItem="t2A-PB-w4d" secondAttribute="bottom" constant="6" id="r6e-nB-qCP"/>
+                            <constraint firstAttribute="bottom" secondItem="t2A-PB-w4d" secondAttribute="bottom" constant="47" id="uqu-tX-rBE"/>
+                        </constraints>
                     </view>
                     <connections>
                         <outlet property="accountTable" destination="XnT-Hv-eDh" id="soB-kU-2CA"/>
+                        <segue destination="qIa-ZP-eTF" kind="sheet" identifier="showAccountEdit" id="Y3W-c5-BwS"/>
                     </connections>
                 </viewController>
                 <customObject id="Hfi-Dv-W3k" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
@@ -1434,7 +1444,4 @@ Gw
     <resources>
         <image name="noicon" width="44" height="44"/>
     </resources>
-    <inferredMetricsTieBreakers>
-        <segue reference="tH3-rQ-4Ps"/>
-    </inferredMetricsTieBreakers>
 </document>

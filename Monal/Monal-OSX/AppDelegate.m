@@ -40,7 +40,7 @@
     [DDLog addLogger:self.fileLogger];
 #endif
     
-    //  [[MLXMPPManager sharedInstance] connectIfNecessary];
+     // [[MLXMPPManager sharedInstance] connectIfNecessary];
     
 }
 

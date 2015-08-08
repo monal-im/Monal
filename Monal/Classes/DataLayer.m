@@ -20,7 +20,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 
  NSString *const kServer =@"server";
  NSString *const kPort =@"other_port";
- NSString *const kResource =@"resouce";
+ NSString *const kResource =@"resource";
  NSString *const kSSL =@"secure";
  NSString *const kOldSSL =@"oldstyleSSL";
  NSString *const kSelfSigned =@"selfsigned";

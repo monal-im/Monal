@@ -539,7 +539,21 @@ static DataLayer *sharedInstance=nil;
 {
     NSString* query=
     [NSString stringWithFormat:@"update account  set account_name='%@', protocol_id=%@, server='%@', other_port='%@', username='%@', password='%@', secure=%d, resource='%@', domain='%@', enabled=%d, selfsigned=%d, oldstyleSSL=%d where account_id=%@",
-     username.escapeForSql, theProtocol,server, otherport, username.escapeForSql, password.escapeForSql, secure, resource.escapeForSql, thedomain.escapeForSql,enabled, selfsigned, oldstyle,accountNo];
+      ((NSString *)[dictionary objectForKey:kUsername]).escapeForSql,
+     @"1",
+       ((NSString *)[dictionary objectForKey:kServer]).escapeForSql,
+       ((NSString *)[dictionary objectForKey:kPort]),
+     ((NSString *)[dictionary objectForKey:kUsername]).escapeForSql,
+   @"",
+        [[dictionary objectForKey:kSSL] boolValue],
+       ((NSString *)[dictionary objectForKey:kResource]).escapeForSql,
+       ((NSString *)[dictionary objectForKey:kDomain]).escapeForSql,
+     [[dictionary objectForKey:kEnabled] boolValue],
+        [[dictionary objectForKey:kSelfSigned] boolValue],
+        [[dictionary objectForKey:kOldSSL] boolValue],
+     
+        [dictionary objectForKey:kAccountID] 
+     ];
 
      [self executeNonQuery:query withCompletion:completion];
 }

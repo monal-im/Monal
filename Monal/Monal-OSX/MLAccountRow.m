@@ -26,20 +26,12 @@
 -(IBAction)checkBoxAction:(id)sender;
 {
 
-    [[DataLayer sharedInstance] updateAccount:
-                                 [NSString stringWithFormat:@"%@@@%@", [self.account objectForKey:@"account_name"], [self.account objectForKey:@"domain"]]
-                                 @"1":
-                                             [self.account objectForKey:@"username"] :
-                                 @"" :
-                                 [self.account objectForKey:@"server"]:
-                                 [self.account objectForKey:@"port"]:
-                                    [self.account objectForKey:@"secure"]:
-                                    [self.account objectForKey:@"resource"]:
-                                               [self.account objectForKey:@"domain"]:
-                                    self.enabledCheckBox.state
-                                        [self.account objectForKey:@"account_is"]:
-                                 self.selfSignedSSL:
-                                 self.oldStyleSSL];
+    NSMutableDictionary *mutableAccount= [self.account mutableCopy];
+    [mutableAccount setObject:[NSNumber numberWithBool:self.enabledCheckBox.state] forKey:kEnabled];
+    
+    [[DataLayer sharedInstance] updateAccounWithDictionary:mutableAccount andCompletion:nil];
+    self.account= [mutableAccount copy];
+     
 }
 
 

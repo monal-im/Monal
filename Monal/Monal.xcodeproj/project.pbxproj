@@ -267,7 +267,7 @@
 		265F1B2B123040540065C5FE /* web.xib in Resources */ = {isa = PBXBuildFile; fileRef = 265F1B2A123040540065C5FE /* web.xib */; };
 		2661D3411B40765A00EC51BA /* MLContactsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661D3401B40765A00EC51BA /* MLContactsViewController.m */; };
 		2661D3441B40766F00EC51BA /* MLChatViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661D3431B40766F00EC51BA /* MLChatViewController.m */; };
-		2661D34D1B407ED400EC51BA /* MLChatListCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661D34C1B407ED400EC51BA /* MLChatListCell.m */; };
+		2661D34D1B407ED400EC51BA /* MLContactCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661D34C1B407ED400EC51BA /* MLContactCell.m */; };
 		2661D3501B407EDD00EC51BA /* MLChatViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661D34F1B407EDD00EC51BA /* MLChatViewCell.m */; };
 		266272B71B27DB8000C1CD49 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 266272B61B27DB8000C1CD49 /* AppDelegate.m */; };
 		266272B91B27DB8000C1CD49 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 266272B81B27DB8000C1CD49 /* main.m */; };
@@ -591,8 +591,8 @@
 		2661D3401B40765A00EC51BA /* MLContactsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLContactsViewController.m; sourceTree = "<group>"; };
 		2661D3421B40766F00EC51BA /* MLChatViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLChatViewController.h; sourceTree = "<group>"; };
 		2661D3431B40766F00EC51BA /* MLChatViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLChatViewController.m; sourceTree = "<group>"; };
-		2661D34B1B407ED400EC51BA /* MLChatListCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLChatListCell.h; sourceTree = "<group>"; };
-		2661D34C1B407ED400EC51BA /* MLChatListCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLChatListCell.m; sourceTree = "<group>"; };
+		2661D34B1B407ED400EC51BA /* MLContactCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLContactCell.h; sourceTree = "<group>"; };
+		2661D34C1B407ED400EC51BA /* MLContactCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLContactCell.m; sourceTree = "<group>"; };
 		2661D34E1B407EDD00EC51BA /* MLChatViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLChatViewCell.h; sourceTree = "<group>"; };
 		2661D34F1B407EDD00EC51BA /* MLChatViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLChatViewCell.m; sourceTree = "<group>"; };
 		2661D3511B40823E00EC51BA /* Monal-OSX.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Monal-OSX.entitlements"; sourceTree = "<group>"; };
@@ -1033,8 +1033,8 @@
 				2661D3401B40765A00EC51BA /* MLContactsViewController.m */,
 				2661D3421B40766F00EC51BA /* MLChatViewController.h */,
 				2661D3431B40766F00EC51BA /* MLChatViewController.m */,
-				2661D34B1B407ED400EC51BA /* MLChatListCell.h */,
-				2661D34C1B407ED400EC51BA /* MLChatListCell.m */,
+				2661D34B1B407ED400EC51BA /* MLContactCell.h */,
+				2661D34C1B407ED400EC51BA /* MLContactCell.m */,
 				2661D34E1B407EDD00EC51BA /* MLChatViewCell.h */,
 				2661D34F1B407EDD00EC51BA /* MLChatViewCell.m */,
 				2651AF531B409906008D025C /* MLMainWindow.h */,
@@ -2052,7 +2052,7 @@
 				2638DAEB1B68F3D400DF05AC /* MLAccountSettings.m in Sources */,
 				260499F21B7314D600D11866 /* jingleCall.m in Sources */,
 				26B2A4BF1B73070F00272E63 /* NSString+SqlLite.m in Sources */,
-				2661D34D1B407ED400EC51BA /* MLChatListCell.m in Sources */,
+				2661D34D1B407ED400EC51BA /* MLContactCell.m in Sources */,
 				26049A581B7315DC00D11866 /* TPCircularBuffer+AudioBufferList.c in Sources */,
 				26B2A4F21B73097500272E63 /* DDASLLogger.m in Sources */,
 				2638DAEF1B68F3EF00DF05AC /* MLDisplaySettings.m in Sources */,

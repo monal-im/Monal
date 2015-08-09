@@ -10,9 +10,11 @@
 
 @interface MLContactsViewController : NSViewController <NSTableViewDataSource, NSTableViewDelegate>
 
-@property (nonatomic, strong) IBOutlet NSTableView *chatListTable;
+@property (nonatomic, strong) IBOutlet NSTableView *contactsTable;
 
 
+
+// methods requied for XMPP accont to call back 
 -(void) showConnecting:(NSDictionary*) info;
 -(void) updateConnecting:(NSDictionary*) info;
 -(void) hideConnecting:(NSDictionary*) info;

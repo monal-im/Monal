@@ -282,11 +282,9 @@ An array of Dics what have timers to make sure everything was sent
         // no password error
     }
     
-#if TARGET_OS_IPHONE
+
      xmppAccount.contactsVC=self.contactVC;
-#else
-#endif
-   
+
     
     //sepcifically look for the server since we might not be online or behind firewall
     Reachability* hostReach = [Reachability reachabilityWithHostName:xmppAccount.server ] ;

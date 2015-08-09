@@ -145,6 +145,7 @@ Returns the name of the conencted account
 #if TARGET_OS_IPHONE
 @property (nonatomic, weak) ContactsViewController* contactVC;
 #else
+@property (nonatomic, weak) MLContactsViewController* contactVC;
 #endif
 
 @property (nonatomic, strong, readonly) NSMutableArray* connectedXMPP;

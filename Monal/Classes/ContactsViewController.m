@@ -254,7 +254,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                    });
 }
 
-#pragma mark updating user display
+#pragma -- mark updating user display
 -(void) addOnlineUser:(NSDictionary*) user
 {
     if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)

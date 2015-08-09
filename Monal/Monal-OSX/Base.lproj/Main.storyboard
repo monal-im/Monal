@@ -790,7 +790,7 @@
                         </constraints>
                     </visualEffectView>
                     <connections>
-                        <outlet property="chatListTable" destination="mgU-VL-SBt" id="Tqv-FR-7V8"/>
+                        <outlet property="contactsTable" destination="mgU-VL-SBt" id="yOx-TM-fj3"/>
                     </connections>
                 </viewController>
                 <customObject id="N6A-8E-AoF" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>

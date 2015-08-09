@@ -1,5 +1,5 @@
 //
-//  MLChatListViewController.h
+//  MLContactsViewController.h
 //  Monal
 //
 //  Created by Anurodh Pokharel on 6/28/15.
@@ -8,7 +8,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-@interface MLChatListViewController : NSViewController <NSTableViewDataSource, NSTableViewDelegate>
+@interface MLContactsViewController : NSViewController <NSTableViewDataSource, NSTableViewDelegate>
 
 @property (nonatomic, strong) IBOutlet NSTableView *chatListTable;
 

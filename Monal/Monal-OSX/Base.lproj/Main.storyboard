@@ -681,10 +681,10 @@
             </objects>
             <point key="canvasLocation" x="113" y="188"/>
         </scene>
-        <!--Chat List View Controller-->
+        <!--Contacts View Controller-->
         <scene sceneID="lWg-JA-sLc">
             <objects>
-                <viewController id="0BB-CK-cBw" customClass="MLChatListViewController" sceneMemberID="viewController">
+                <viewController id="0BB-CK-cBw" customClass="MLContactsViewController" sceneMemberID="viewController">
                     <visualEffectView key="view" appearanceType="vibrantLight" blendingMode="behindWindow" material="appearanceBased" state="followsWindowActiveState" id="EaE-BO-Cf3">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="479"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>

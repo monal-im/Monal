@@ -14,7 +14,7 @@
 #if TARGET_OS_IPHONE
 #import "ContactsViewController.h"
 #else
-#import "MLChatListViewController.h"
+#import "MLContactsViewController.h"
 #endif
 
 
@@ -251,7 +251,7 @@ Decline a call request
 #if TARGET_OS_IPHONE
 @property (nonatomic,weak) ContactsViewController* contactsVC;
 #else
-@property (nonatomic,weak) MLChatListViewController* contactsVC;
+@property (nonatomic,weak) MLContactsViewController* contactsVC;
 #endif
 //UI
 

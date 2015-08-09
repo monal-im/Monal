@@ -1,19 +1,19 @@
 //
-//  MLChatListViewController.m
+//  MLContactsViewController.m
 //  Monal
 //
 //  Created by Anurodh Pokharel on 6/28/15.
 //  Copyright (c) 2015 Monal.im. All rights reserved.
 //
 
-#import "MLChatListViewController.h"
+#import "MLContactsViewController.h"
 #import "MLChatListCell.h"
 
-@interface MLChatListViewController ()
+@interface MLContactsViewController ()
 
 @end
 
-@implementation MLChatListViewController
+@implementation MLContactsViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];

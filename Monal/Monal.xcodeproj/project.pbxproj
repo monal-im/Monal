@@ -265,7 +265,7 @@
 		2658508C15E7D8E40070A2A7 /* TPCircularBuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 2658508815E7D8E40070A2A7 /* TPCircularBuffer.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		265F0B631B75719E00A63F20 /* MLAccountRow.m in Sources */ = {isa = PBXBuildFile; fileRef = 265F0B621B75719E00A63F20 /* MLAccountRow.m */; };
 		265F1B2B123040540065C5FE /* web.xib in Resources */ = {isa = PBXBuildFile; fileRef = 265F1B2A123040540065C5FE /* web.xib */; };
-		2661D3411B40765A00EC51BA /* MLChatListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661D3401B40765A00EC51BA /* MLChatListViewController.m */; };
+		2661D3411B40765A00EC51BA /* MLContactsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661D3401B40765A00EC51BA /* MLContactsViewController.m */; };
 		2661D3441B40766F00EC51BA /* MLChatViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661D3431B40766F00EC51BA /* MLChatViewController.m */; };
 		2661D34D1B407ED400EC51BA /* MLChatListCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661D34C1B407ED400EC51BA /* MLChatListCell.m */; };
 		2661D3501B407EDD00EC51BA /* MLChatViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661D34F1B407EDD00EC51BA /* MLChatViewCell.m */; };
@@ -587,8 +587,8 @@
 		265F0B611B75719E00A63F20 /* MLAccountRow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLAccountRow.h; sourceTree = "<group>"; };
 		265F0B621B75719E00A63F20 /* MLAccountRow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLAccountRow.m; sourceTree = "<group>"; };
 		265F1B2A123040540065C5FE /* web.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = web.xib; sourceTree = "<group>"; };
-		2661D33F1B40765A00EC51BA /* MLChatListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLChatListViewController.h; sourceTree = "<group>"; };
-		2661D3401B40765A00EC51BA /* MLChatListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLChatListViewController.m; sourceTree = "<group>"; };
+		2661D33F1B40765A00EC51BA /* MLContactsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLContactsViewController.h; sourceTree = "<group>"; };
+		2661D3401B40765A00EC51BA /* MLContactsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLContactsViewController.m; sourceTree = "<group>"; };
 		2661D3421B40766F00EC51BA /* MLChatViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLChatViewController.h; sourceTree = "<group>"; };
 		2661D3431B40766F00EC51BA /* MLChatViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLChatViewController.m; sourceTree = "<group>"; };
 		2661D34B1B407ED400EC51BA /* MLChatListCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLChatListCell.h; sourceTree = "<group>"; };
@@ -1029,8 +1029,8 @@
 				266272B61B27DB8000C1CD49 /* AppDelegate.m */,
 				266272BF1B27DB8000C1CD49 /* Main.storyboard */,
 				266272B31B27DB8000C1CD49 /* Supporting Files */,
-				2661D33F1B40765A00EC51BA /* MLChatListViewController.h */,
-				2661D3401B40765A00EC51BA /* MLChatListViewController.m */,
+				2661D33F1B40765A00EC51BA /* MLContactsViewController.h */,
+				2661D3401B40765A00EC51BA /* MLContactsViewController.m */,
 				2661D3421B40766F00EC51BA /* MLChatViewController.h */,
 				2661D3431B40766F00EC51BA /* MLChatViewController.m */,
 				2661D34B1B407ED400EC51BA /* MLChatListCell.h */,
@@ -2089,7 +2089,7 @@
 				260499EF1B7313F300D11866 /* ParseIq.m in Sources */,
 				26B2A4EE1B73097500272E63 /* DDAbstractDatabaseLogger.m in Sources */,
 				2638DAE71B68F3AB00DF05AC /* MLPresenceSettings.m in Sources */,
-				2661D3411B40765A00EC51BA /* MLChatListViewController.m in Sources */,
+				2661D3411B40765A00EC51BA /* MLContactsViewController.m in Sources */,
 				26B2A5021B730AE100272E63 /* Reachability.m in Sources */,
 				2661D3501B407EDD00EC51BA /* MLChatViewCell.m in Sources */,
 				260499E81B7313DF00D11866 /* ParseA.m in Sources */,

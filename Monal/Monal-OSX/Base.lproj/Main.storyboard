@@ -715,7 +715,7 @@
                                                     </textFieldCell>
                                                     <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                     <prototypeCellViews>
-                                                        <tableCellView identifier="OnlineUser" id="azx-Gr-vGb" customClass="MLChatListCell">
+                                                        <tableCellView identifier="OnlineUser" id="azx-Gr-vGb" customClass="MLContactsCell">
                                                             <rect key="frame" x="1" y="1" width="315" height="56"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
@@ -755,7 +755,9 @@
                                                                 <constraint firstItem="0ib-3X-AX9" firstAttribute="top" secondItem="7ak-TK-LeP" secondAttribute="bottom" constant="8" id="qxH-bn-le5"/>
                                                             </constraints>
                                                             <connections>
-                                                                <outlet property="imageView" destination="5SW-8j-tAt" id="fi5-cf-a8L"/>
+                                                                <outlet property="icon" destination="5SW-8j-tAt" id="s76-s3-JxY"/>
+                                                                <outlet property="name" destination="7ak-TK-LeP" id="YVZ-Cl-ezC"/>
+                                                                <outlet property="status" destination="0ib-3X-AX9" id="el9-7z-BZw"/>
                                                             </connections>
                                                         </tableCellView>
                                                     </prototypeCellViews>

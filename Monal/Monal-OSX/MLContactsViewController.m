@@ -7,7 +7,7 @@
 //
 
 #import "MLContactsViewController.h"
-#import "MLContactCell.h"
+#import "MLContactsCell.h"
 #import "MLConstants.h"
 #import "DataLayer.h"
 #import "MLXMPPManager.h"
@@ -163,6 +163,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                            
                            if([user objectForKey:kfullNameKey])
                                [[_contacts objectAtIndex:pos] setObject:[user objectForKey:kfullNameKey] forKey:@"full_name"];
+                           [self.contactsTable reloadData];
                            
 //                               [self.contactsTable beginUpdates];
 //                               
@@ -303,8 +304,17 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 - (NSView *)tableView:(NSTableView *)tableView viewForTableColumn:(NSTableColumn *)tableColumn  row:(NSInteger)row
 {
-
-    MLContactCell *cell = [tableView makeViewWithIdentifier:@"OnlineUser" owner:self];
+    
+    NSDictionary *contactRow = [self.contacts objectAtIndex:row];
+    
+    MLContactsCell *cell = [tableView makeViewWithIdentifier:@"OnlineUser" owner:self];
+    cell.name.stringValue = [contactRow objectForKey:@"buddy_name"];
+    
+    NSString *statusText = [contactRow objectForKey:@"status"];
+    if( [statusText isEqualToString:@"(null)"])  {
+        statusText = @"";
+    }
+    cell.status.stringValue =statusText;
     
     return cell;
 }

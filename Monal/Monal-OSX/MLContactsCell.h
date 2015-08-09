@@ -1,5 +1,5 @@
 //
-//  MLContactCell.h
+//  MLContactsCell.h
 //  Monal
 //
 //  Created by Anurodh Pokharel on 6/28/15.
@@ -8,7 +8,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-@interface MLContactCell : NSTableCellView
+@interface MLContactsCell : NSTableCellView
 
 @property (nonatomic, weak) IBOutlet NSImageView *icon;
 @property (nonatomic, weak) IBOutlet NSTextField *name;

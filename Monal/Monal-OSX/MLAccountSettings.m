@@ -41,11 +41,15 @@
         NSDictionary * row = [self.accountList objectAtIndex:selected];
         
         // pass to database
-        NSString *accountID = [row objectForKey:kAccountID];
-        [[DataLayer sharedInstance] removeAccount:accountID];
+        NSNumber *accountID = [row objectForKey:kAccountID];
+        [[DataLayer sharedInstance] removeAccount:[NSString stringWithFormat:@"%@", accountID]];
+        
+        NSMutableArray *mutableAccounts = [self.accountList mutableCopy];
+        [mutableAccounts removeObjectAtIndex:selected];
+        self.accountList= mutableAccounts;
         
         // update display
-        [self.accountTable noteNumberOfRowsChanged];
+        [self.accountTable reloadData];
     }
 }
 

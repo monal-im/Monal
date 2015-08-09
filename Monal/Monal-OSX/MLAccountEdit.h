@@ -24,6 +24,8 @@
 @property (nonatomic, weak) IBOutlet NSButton *oldStyleSSL;
 @property (nonatomic, weak) IBOutlet NSButton *selfSigned;
 
+@property (nonatomic, strong) NSString *accountType;
+
 -(IBAction)save:(id)sender;
 
 

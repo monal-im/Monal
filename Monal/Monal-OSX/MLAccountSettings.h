@@ -13,6 +13,7 @@
 
 @property (nonatomic, weak) IBOutlet NSTableView *accountTable;
 
+-(void) refreshAccountList; 
 
 -(IBAction)deleteAccount:(id)sender;
 

@@ -20,7 +20,7 @@
 {
     self.account = account;
     self.enabledCheckBox.state= [[self.account objectForKey:@"enabled"] boolValue];
-    self.accountName.stringValue= [NSString stringWithFormat:@"%@@@%@", [self.account objectForKey:@"account_name"], [self.account objectForKey:@"domain"]];
+    self.accountName.stringValue= [NSString stringWithFormat:@"%@@%@", [self.account objectForKey:@"account_name"], [self.account objectForKey:@"domain"]];
 }
 
 -(IBAction)checkBoxAction:(id)sender;

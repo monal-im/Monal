@@ -9,6 +9,7 @@
 #import "MLAccountEdit.h"
 #import "MLXMPPManager.h"
 #import "DataLayer.h"
+#import "MLAccountSettings.h"
 
 @interface MLAccountEdit ()
 
@@ -20,6 +21,15 @@
     [super viewDidLoad];
     // Do view setup here.
 }
+
+-(void) viewWillAppear {
+    [super viewWillAppear];
+    if([self.accountType isEqualToString:@"Gtalk"]) {
+        self.server.stringValue= @"talk.google.com";
+        self.jabberID.stringValue=@"@gmail.com";
+    }
+}
+
 
 -(IBAction)save:(id)sender
 {
@@ -55,13 +65,26 @@
      ];
     
     
-    // save password
-    NSString* val = [NSString stringWithFormat:@"%@", [[DataLayer sharedInstance] executeScalar:@"select max(account_id) from account"]];
-    PasswordManager* pass= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",val]];
-    [pass setPassword:self.password.stringValue] ;
     
-    [[MLXMPPManager sharedInstance]  connectIfNecessary];
-    [self.presentingViewController dismissViewController:self];
+    [[DataLayer sharedInstance] executeScalar:@"select max(account_id) from account" withCompletion:^(NSObject * accountid) {
+        if(accountid) {
+        // save password
+        NSString* val = [NSString stringWithFormat:@"%@", (NSString *) accountid ];
+        PasswordManager* pass= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",val]];
+        [pass setPassword:self.password.stringValue] ;
+    
+        }
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if([self.presentingViewController respondsToSelector:@selector(refreshAccountList)])
+            {
+                MLAccountSettings *presenter = (MLAccountSettings *)self.presentingViewController;
+                [presenter refreshAccountList];
+                [[MLXMPPManager sharedInstance]  connectIfNecessary];
+            }
+            [self.presentingViewController dismissViewController:self];
+        });
+    }];
+   
     
 }
 

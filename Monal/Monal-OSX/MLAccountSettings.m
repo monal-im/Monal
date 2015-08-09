@@ -26,11 +26,14 @@
 
 -(void) viewWillAppear
 {
+    [self refreshAccountList];
+}
+
+-(void) refreshAccountList
+{
     self.accountList=[[DataLayer sharedInstance] accountList];
     [self.accountTable reloadData];
 }
-
-
 
 -(IBAction)deleteAccount:(id)sender
 {
@@ -66,13 +69,7 @@
 - (void)prepareForSegue:(NSStoryboardSegue *)segue sender:(id)sender
 {
     MLAccountEdit *sheet = (MLAccountEdit *)[segue destinationController];
-    
-    if([sender isEqualToString:@"Gtalk"])
-    {
-        sheet.server.stringValue= @"talk.google.com";
-        sheet.jabberID.stringValue=@"@gmail.com";
-    }
-    
+    sheet.accountType= sender;
 }
 
 

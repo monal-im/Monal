@@ -53,6 +53,42 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 
 #pragma --  mark updating user display
+
+-(BOOL) positionOfOnlineContact:(NSDictionary *) user
+{
+    NSInteger pos=0;
+    for(NSDictionary* row in self.contacts)
+    {
+        if([[row objectForKey:@"buddy_name"] caseInsensitiveCompare:[user objectForKey:kusernameKey] ]==NSOrderedSame &&
+           [[row objectForKey:@"account_id"]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
+        {
+            return pos;
+        }
+        pos++;
+    }
+    
+    return -1;
+    
+}
+
+-(BOOL) positionOfOfflineContact:(NSDictionary *) user
+{
+    NSInteger pos=0;
+    for(NSDictionary* row in self.offlineContacts)
+    {
+        if([[row objectForKey:@"buddy_name"] caseInsensitiveCompare:[user objectForKey:kusernameKey] ]==NSOrderedSame &&
+           [[row objectForKey:@"account_id"]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
+        {
+            
+            return pos;
+        }
+        pos++;
+    }
+    
+    return  -1;
+    
+}
+
 -(void) addOnlineUser:(NSDictionary*) user
 {
     //mutex to prevent others from modifying contacts at the same time
@@ -101,6 +137,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                   if(!(contactRow.count>=1))
                                                   {
                                                       DDLogError(@"ERROR:could not find contact row");
+                                                      return;
+                                                  }
+                                                  
+                                                  NSInteger onlinepos= [self positionOfOnlineContact:user];
+                                                  if(onlinepos>=0)
+                                                  {
+                                                      
+                                                      DDLogVerbose(@"user %@ already in list",[user objectForKey:kusernameKey]);
+                                             
                                                       return;
                                                   }
                                                   //insert into datasource

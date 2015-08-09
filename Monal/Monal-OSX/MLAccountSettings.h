@@ -13,6 +13,9 @@
 
 @property (nonatomic, weak) IBOutlet NSTableView *accountTable;
 
+
+-(IBAction)deleteAccount:(id)sender;
+
 -(IBAction)showXMPP:(id)sender;
 -(IBAction)showGtalk:(id)sender;
 

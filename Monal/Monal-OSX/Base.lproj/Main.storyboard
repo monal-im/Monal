@@ -1044,7 +1044,7 @@
                                     <rect key="frame" x="1" y="17" width="238" height="117"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
-                                        <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" columnSelection="YES" multipleSelection="NO" autosaveColumns="NO" rowHeight="32" rowSizeStyle="automatic" viewBased="YES" id="XnT-Hv-eDh">
+                                        <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" multipleSelection="NO" autosaveColumns="NO" rowHeight="32" rowSizeStyle="automatic" viewBased="YES" id="XnT-Hv-eDh">
                                             <rect key="frame" x="0.0" y="0.0" width="408" height="0.0"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <size key="intercellSpacing" width="3" height="2"/>
@@ -1068,13 +1068,21 @@
                                                             <rect key="frame" x="1" y="1" width="405" height="32"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
-                                                                <button translatesAutoresizingMaskIntoConstraints="NO" id="TrR-Z7-L5Z">
-                                                                    <rect key="frame" x="1" y="13" width="398" height="18"/>
-                                                                    <buttonCell key="cell" type="check" title="Check" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="1fc-Bl-8fu">
+                                                                <button misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="TrR-Z7-L5Z">
+                                                                    <rect key="frame" x="1" y="13" width="22" height="18"/>
+                                                                    <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="1fc-Bl-8fu">
                                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                                         <font key="font" metaFont="system"/>
                                                                     </buttonCell>
                                                                 </button>
+                                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Ttp-oM-pX8">
+                                                                    <rect key="frame" x="29" y="15" width="358" height="17"/>
+                                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Account Name" id="Cpe-hs-Iwd">
+                                                                        <font key="font" metaFont="system"/>
+                                                                        <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                                    </textFieldCell>
+                                                                </textField>
                                                             </subviews>
                                                             <constraints>
                                                                 <constraint firstItem="TrR-Z7-L5Z" firstAttribute="top" secondItem="GJA-KX-dbK" secondAttribute="top" constant="3" id="04Z-vx-01J"/>
@@ -1082,6 +1090,7 @@
                                                                 <constraint firstAttribute="trailing" secondItem="TrR-Z7-L5Z" secondAttribute="trailing" constant="8" id="vZf-gY-QhD"/>
                                                             </constraints>
                                                             <connections>
+                                                                <outlet property="accountName" destination="Ttp-oM-pX8" id="BNd-eO-2dO"/>
                                                                 <outlet property="enabledCheckBox" destination="TrR-Z7-L5Z" id="lTj-l2-Gjt"/>
                                                             </connections>
                                                         </tableCellView>
@@ -1113,6 +1122,16 @@
                                 </buttonCell>
                                 <connections>
                                     <action selector="showGtalk:" target="iTE-lZ-FwX" id="q2l-DH-b04"/>
+                                </connections>
+                            </button>
+                            <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="KNm-FH-Arx">
+                                <rect key="frame" x="382" y="20" width="50" height="48"/>
+                                <buttonCell key="cell" type="square" title="Delete" bezelStyle="shadowlessSquare" imagePosition="overlaps" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="eoU-pP-82h">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="deleteAccount:" target="iTE-lZ-FwX" id="uFy-BN-IA7"/>
                                 </connections>
                             </button>
                         </subviews>

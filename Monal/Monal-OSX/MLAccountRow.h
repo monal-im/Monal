@@ -11,6 +11,7 @@
 @interface MLAccountRow : NSTableRowView
 
 @property (nonatomic, weak) IBOutlet NSButton *enabledCheckBox;
+@property (nonatomic, weak) IBOutlet NSTextField *accountName;
 @property (nonatomic, strong) NSDictionary *account; 
 
 -(void) updateWithAccountDictionary:(NSDictionary *) account;

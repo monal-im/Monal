@@ -31,6 +31,24 @@
 }
 
 
+
+-(IBAction)deleteAccount:(id)sender
+{
+    //get selected.
+    
+    NSInteger selected = [self.accountTable selectedRow];
+    if(selected < self.accountList.count) {
+        NSDictionary * row = [self.accountList objectAtIndex:selected];
+        
+        // pass to database
+        NSString *accountID = [row objectForKey:kAccountID];
+        [[DataLayer sharedInstance] removeAccount:accountID];
+        
+        // update display
+        [self.accountTable noteNumberOfRowsChanged];
+    }
+}
+
 #pragma mark -- segues
 
 -(IBAction)showXMPP:(id)sender {

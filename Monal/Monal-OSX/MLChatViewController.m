@@ -269,13 +269,16 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     if([[messageRow objectForKey:@"af"] isEqualToString:self.jid]) {
         cell = [tableView makeViewWithIdentifier:@"OutboundTextCell" owner:self];
         cell.messageText.textColor = [NSColor whiteColor];
+        cell.messageText.linkTextAttributes =@{NSForegroundColorAttributeName:[NSColor whiteColor], NSUnderlineStyleAttributeName: @YES};
     }
     else  {
         cell = [tableView makeViewWithIdentifier:@"InboundTextCell" owner:self];
+        cell.messageText.linkTextAttributes =@{NSForegroundColorAttributeName:[NSColor blackColor], NSUnderlineStyleAttributeName: @YES};
     }
     
     cell.messageText.editable=YES;
     cell.messageText.string =[messageRow objectForKey:@"message"];
+    [cell.messageText checkTextInDocument:nil];
     cell.messageText.editable=NO;
     
     return cell;

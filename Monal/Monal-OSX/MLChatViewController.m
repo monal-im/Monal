@@ -293,7 +293,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         return  25.0f;
     }
     else {
-       return rect.size.height+3+3;
+       return rect.size.height+5+5;
     
     }
 }

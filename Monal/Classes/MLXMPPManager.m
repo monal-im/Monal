@@ -455,6 +455,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
                        if(account)
                        {
                            success=YES;
+                         
                            [account sendMessage:message toContact:contact isMUC:isMUC andMessageId:messageId];
                        }
                        

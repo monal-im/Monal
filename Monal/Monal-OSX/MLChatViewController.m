@@ -17,7 +17,7 @@
 
 @property (nonatomic, strong) NSMutableArray *messageList;
 
-@property (nonatomic, strong) NSString *accountNo;
+@property (nonatomic, strong) NSNumber *accountNo;
 @property (nonatomic, strong) NSString *contactName;
 @property (nonatomic, assign) BOOL isMUC;
 
@@ -25,7 +25,7 @@
 
 @implementation MLChatViewController
 
-static const int ddLogLevel = LOG_LEVEL_ERROR;
+static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -86,13 +86,13 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void) sendMessage:(NSString *) messageText andMessageID:(NSString *)messageID
 {
-    DDLogVerbose(@"Sending message");
+    DDLogVerbose(@"Sending message %@", messageText);
     u_int32_t r = arc4random_uniform(30000000);
     NSString *newMessageID =messageID;
     if(!newMessageID) {
         newMessageID=[NSString stringWithFormat:@"Monal%d", r];
     }
-    [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:self.contactName fromAccount:self.accountNo isMUC:self.isMUC messageId:newMessageID
+    [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:self.contactName fromAccount:[NSString stringWithFormat:@"%@", self.accountNo]  isMUC:self.isMUC messageId:newMessageID
                           withCompletionHandler:nil];
     
     //dont readd it, use the exisitng
@@ -104,7 +104,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(IBAction)send:(id)sender
 {
-    
+    [self sendMessage:[self.messageBox.string copy] andMessageID:nil];
+    self.messageBox.string=@"";
 }
 
 #pragma mark -table view datasource

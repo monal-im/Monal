@@ -274,7 +274,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         cell = [tableView makeViewWithIdentifier:@"InboundTextCell" owner:self];
     }
     
+    cell.messageText.editable=YES;
     cell.messageText.string =[messageRow objectForKey:@"message"];
+    cell.messageText.editable=NO;
     
     return cell;
 }

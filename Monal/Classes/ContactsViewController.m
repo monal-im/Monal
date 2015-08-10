@@ -35,7 +35,7 @@
 @implementation ContactsViewController
 
 
-static const int ddLogLevel = LOG_LEVEL_INFO;
+static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 #pragma mark view life cycle
 - (void)viewDidLoad
@@ -265,7 +265,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 
 
 
--(BOOL) positionOfOnlineContact:(NSDictionary *) user
+-(NSInteger) positionOfOnlineContact:(NSDictionary *) user
 {
     NSInteger pos=0;
     for(NSDictionary* row in self.contacts)
@@ -282,7 +282,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     
 }
 
--(BOOL) positionOfOfflineContact:(NSDictionary *) user
+-(NSInteger) positionOfOfflineContact:(NSDictionary *) user
 {
     NSInteger pos=0;
     for(NSDictionary* row in self.offlineContacts)
@@ -319,9 +319,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                        //check if already there
                        int pos=-1;
                        int offlinepos=-1;
-                       int counter=0;
                        pos=[self positionOfOnlineContact:user];
-                       
                        
                        if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
                        {
@@ -345,6 +343,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                                                   int pos2= [self positionOfOnlineContact:user];
                                                   if(pos2>0)
                                                   {
+                                                      DDLogVerbose(@"already in list when in block"); 
                                                       return ;
                                                   }
                                                   
@@ -402,19 +401,22 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                        }else
                        {
                            DDLogVerbose(@"user %@ already in list",[user objectForKey:kusernameKey]);
-                           if([user objectForKey:kstateKey])
-                               [[_contacts objectAtIndex:pos] setObject:[user objectForKey:kstateKey] forKey:kstateKey];
-                           if([user objectForKey:kstatusKey])
-                               [[_contacts objectAtIndex:pos] setObject:[user objectForKey:kstatusKey] forKey:kstatusKey];
+                           if(pos<self.contacts.count) {
+                               if([user objectForKey:kstateKey])
+                                   [[_contacts objectAtIndex:pos] setObject:[user objectForKey:kstateKey] forKey:kstateKey];
+                               if([user objectForKey:kstatusKey])
+                                   [[_contacts objectAtIndex:pos] setObject:[user objectForKey:kstatusKey] forKey:kstatusKey];
+                               
+                               if([user objectForKey:kfullNameKey])
+                                   [[_contacts objectAtIndex:pos] setObject:[user objectForKey:kfullNameKey] forKey:@"full_name"];
+                               
+                               [_contactsTable beginUpdates];
+                               NSIndexPath *path1 = [NSIndexPath indexPathForRow:pos inSection:konlineSection];
+                               [_contactsTable reloadRowsAtIndexPaths:@[path1]
+                                                     withRowAnimation:UITableViewRowAnimationNone];
+                               [_contactsTable endUpdates];
+                           }
                            
-                           if([user objectForKey:kfullNameKey])
-                               [[_contacts objectAtIndex:pos] setObject:[user objectForKey:kfullNameKey] forKey:@"full_name"];
-                           
-                           [_contactsTable beginUpdates];
-                           NSIndexPath *path1 = [NSIndexPath indexPathForRow:pos inSection:konlineSection];
-                           [_contactsTable reloadRowsAtIndexPaths:@[path1]
-                                                 withRowAnimation:UITableViewRowAnimationNone];
-                           [_contactsTable endUpdates];
                        }
                        
                    });

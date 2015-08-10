@@ -23,6 +23,13 @@
 @interface ContactsViewController ()
 @property (nonatomic, strong) NSArray* searchResults ;
 
+
+@property (nonatomic ,strong) NSMutableArray* infoCells;
+@property (nonatomic ,strong) NSMutableArray* contacts;
+@property (nonatomic ,strong) NSMutableArray* offlineContacts;
+@property (nonatomic ,strong) NSDictionary* lastSelectedUser;
+@property (nonatomic ,strong) UIPopoverController* popOverController;
+
 @end
 
 @implementation ContactsViewController
@@ -255,6 +262,45 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 }
 
 #pragma mark updating user display
+
+
+
+-(BOOL) positionOfOnlineContact:(NSDictionary *) user
+{
+    NSInteger pos=0;
+    for(NSDictionary* row in self.contacts)
+    {
+        if([[row objectForKey:@"buddy_name"] caseInsensitiveCompare:[user objectForKey:kusernameKey] ]==NSOrderedSame &&
+           [[row objectForKey:@"account_id"]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
+        {
+            return pos;
+        }
+        pos++;
+    }
+    
+    return -1;
+    
+}
+
+-(BOOL) positionOfOfflineContact:(NSDictionary *) user
+{
+    NSInteger pos=0;
+    for(NSDictionary* row in self.offlineContacts)
+    {
+        if([[row objectForKey:@"buddy_name"] caseInsensitiveCompare:[user objectForKey:kusernameKey] ]==NSOrderedSame &&
+           [[row objectForKey:@"account_id"]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
+        {
+            
+            return pos;
+        }
+        pos++;
+    }
+    
+    return  -1;
+    
+}
+
+
 -(void) addOnlineUser:(NSDictionary*) user
 {
     if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
@@ -274,31 +320,12 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                        int pos=-1;
                        int offlinepos=-1;
                        int counter=0;
-                       for(NSDictionary* row in _contacts)
-                       {
-                           if([[row objectForKey:@"buddy_name"] caseInsensitiveCompare:[user objectForKey:kusernameKey] ]==NSOrderedSame &&
-                              [[row objectForKey:@"account_id"]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
-                           {
-                               pos=counter;
-                               break;
-                           }
-                           counter++;
-                       }
+                       pos=[self positionOfOnlineContact:user];
                        
                        
                        if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
                        {
-                           counter=0;
-                           for(NSDictionary* row in _offlineContacts)
-                           {
-                               if([[row objectForKey:@"buddy_name"] caseInsensitiveCompare:[user objectForKey:kusernameKey] ]==NSOrderedSame &&
-                                  [[row objectForKey:@"account_id"]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
-                               {
-                                   offlinepos=counter;
-                                   break;
-                               }
-                               counter++;
-                           }
+                           offlinepos =[self positionOfOfflineContact:user];
                        }
                        
                        //not there
@@ -315,6 +342,12 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                                                       DDLogError(@"ERROR:could not find contact row");
                                                       return;
                                                   }
+                                                  int pos2= [self positionOfOnlineContact:user];
+                                                  if(pos2>0)
+                                                  {
+                                                      return ;
+                                                  }
+                                                  
                                                   //insert into datasource
                                                   [_contacts insertObject:[contactRow objectAtIndex:0] atIndex:0];
                                                   
@@ -408,16 +441,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                        int __block pos=-1;
                        int __block counter=0;
                        int __block offlinepos=-1;
-                       for(NSDictionary* row in _contacts)
-                       {
-                           if([[row objectForKey:@"buddy_name"] caseInsensitiveCompare:[user objectForKey:kusernameKey] ]==NSOrderedSame &&
-                              [[row objectForKey:@"account_id"]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
-                           {
-                               pos=counter;
-                               break;
-                           }
-                           counter++;
-                       }
+                       pos=[self positionOfOnlineContact:user];
                        
                        
                        [[DataLayer sharedInstance] contactForUsername:[user objectForKey:kusernameKey] forAccount:[user objectForKey:kaccountNoKey] withCompletion:^(NSArray* contactRow) {
@@ -435,17 +459,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                                               {
                                                   
                                                   counter=0;
-                                                  for(NSDictionary* row in _offlineContacts)
-                                                  {
-                                                      if([[row objectForKey:@"buddy_name"] caseInsensitiveCompare:[user objectForKey:kusernameKey] ]==NSOrderedSame &&
-                                                         [[row objectForKey:@"account_id"]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
-                                                      {
-                                                          offlinepos=counter;
-                                                          break;
-                                                      }
-                                                      counter++;
-                                                  }
-                                                  
+                                                  offlinepos =[self positionOfOfflineContact:user];
                                                   //in contacts but not in offline.. (not in roster this shouldnt happen)
                                                   if((offlinepos==-1) &&(pos>=0))
                                                   {

@@ -40,6 +40,8 @@ extern NSString *const kSelfSigned;
 
 extern NSString *const kUsername;
 
+extern NSString *const kContactName;
+
 
 + (id)sharedInstance;
 

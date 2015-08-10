@@ -70,15 +70,16 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 }
 
 
-#pragma --  mark updating user display
+
+#pragma mark --   updating user display
 
 -(BOOL) positionOfOnlineContact:(NSDictionary *) user
 {
     NSInteger pos=0;
     for(NSDictionary* row in self.contacts)
     {
-        if([[row objectForKey:@"buddy_name"] caseInsensitiveCompare:[user objectForKey:kusernameKey] ]==NSOrderedSame &&
-           [[row objectForKey:@"account_id"]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
+        if([[row objectForKey:kContactName] caseInsensitiveCompare:[user objectForKey:kusernameKey] ]==NSOrderedSame &&
+           [[row objectForKey:kAccountID]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
         {
             return pos;
         }
@@ -94,8 +95,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     NSInteger pos=0;
     for(NSDictionary* row in self.offlineContacts)
     {
-        if([[row objectForKey:@"buddy_name"] caseInsensitiveCompare:[user objectForKey:kusernameKey] ]==NSOrderedSame &&
-           [[row objectForKey:@"account_id"]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
+        if([[row objectForKey:kContactName] caseInsensitiveCompare:[user objectForKey:kusernameKey] ]==NSOrderedSame &&
+           [[row objectForKey:kAccountID]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
         {
             
             return pos;
@@ -118,8 +119,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                        int counter=0;
                        for(NSDictionary* row in _contacts)
                        {
-                           if([[row objectForKey:@"buddy_name"] caseInsensitiveCompare:[user objectForKey:kusernameKey] ]==NSOrderedSame &&
-                              [[row objectForKey:@"account_id"]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
+                           if([[row objectForKey:kContactName] caseInsensitiveCompare:[user objectForKey:kusernameKey] ]==NSOrderedSame &&
+                              [[row objectForKey:kAccountID]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
                            {
                                pos=counter;
                                break;
@@ -133,8 +134,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                            counter=0;
                            for(NSDictionary* row in _offlineContacts)
                            {
-                               if([[row objectForKey:@"buddy_name"] caseInsensitiveCompare:[user objectForKey:kusernameKey] ]==NSOrderedSame &&
-                                  [[row objectForKey:@"account_id"]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
+                               if([[row objectForKey:kContactName] caseInsensitiveCompare:[user objectForKey:kusernameKey] ]==NSOrderedSame &&
+                                  [[row objectForKey:kAccountID]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
                                {
                                    offlinepos=counter;
                                    break;
@@ -178,7 +179,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                   }
                                                   
                                                   //sort
-                                                  NSSortDescriptor *descriptor = [[NSSortDescriptor alloc] initWithKey:@"buddy_name"  ascending:YES];
+                                                  NSSortDescriptor *descriptor = [[NSSortDescriptor alloc] initWithKey:kContactName  ascending:YES];
                                                   NSArray* sortArray =[NSArray arrayWithObjects:descriptor,nil];
                                                   [_contacts sortUsingDescriptors:sortArray];
                                                   
@@ -187,8 +188,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                   int counter=0;
                                                   for(NSDictionary* row in _contacts)
                                                   {
-                                                      if([[row objectForKey:@"buddy_name"] caseInsensitiveCompare:[user objectForKey:kusernameKey] ]==NSOrderedSame &&
-                                                         [[row objectForKey:@"account_id"]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
+                                                      if([[row objectForKey:kContactName] caseInsensitiveCompare:[user objectForKey:kusernameKey] ]==NSOrderedSame &&
+                                                         [[row objectForKey:kAccountID]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
                                                       {
                                                           pos=counter;
                                                           break;
@@ -249,8 +250,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                        int __block offlinepos=-1;
                        for(NSDictionary* row in _contacts)
                        {
-                           if([[row objectForKey:@"buddy_name"] caseInsensitiveCompare:[user objectForKey:kusernameKey] ]==NSOrderedSame &&
-                              [[row objectForKey:@"account_id"]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
+                           if([[row objectForKey:kContactName] caseInsensitiveCompare:[user objectForKey:kusernameKey] ]==NSOrderedSame &&
+                              [[row objectForKey:kAccountID]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
                            {
                                pos=counter;
                                break;
@@ -276,8 +277,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                   counter=0;
                                                   for(NSDictionary* row in _offlineContacts)
                                                   {
-                                                      if([[row objectForKey:@"buddy_name"] caseInsensitiveCompare:[user objectForKey:kusernameKey] ]==NSOrderedSame &&
-                                                         [[row objectForKey:@"account_id"]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
+                                                      if([[row objectForKey:kContactName] caseInsensitiveCompare:[user objectForKey:kusernameKey] ]==NSOrderedSame &&
+                                                         [[row objectForKey:kAccountID]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
                                                       {
                                                           offlinepos=counter;
                                                           break;
@@ -292,7 +293,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                       [_offlineContacts insertObject:row atIndex:0];
                                                       
                                                       //sort
-                                                      NSSortDescriptor *descriptor = [[NSSortDescriptor alloc] initWithKey:@"buddy_name"  ascending:YES];
+                                                      NSSortDescriptor *descriptor = [[NSSortDescriptor alloc] initWithKey:kContactName  ascending:YES];
                                                       NSArray* sortArray =[NSArray arrayWithObjects:descriptor,nil];
                                                       [_offlineContacts sortUsingDescriptors:sortArray];
                                                       
@@ -301,8 +302,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                       counter=0;
                                                       for(NSDictionary* row in _offlineContacts)
                                                       {
-                                                          if([[row objectForKey:@"buddy_name"] caseInsensitiveCompare:[user objectForKey:kusernameKey] ]==NSOrderedSame &&
-                                                             [[row objectForKey:@"account_id"]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
+                                                          if([[row objectForKey:kContactName] caseInsensitiveCompare:[user objectForKey:kusernameKey] ]==NSOrderedSame &&
+                                                             [[row objectForKey:kAccountID]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
                                                           {
                                                               offlinepos=counter;
                                                               break;
@@ -371,7 +372,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     NSDictionary *contactRow = [self.contacts objectAtIndex:row];
     
     MLContactsCell *cell = [tableView makeViewWithIdentifier:@"OnlineUser" owner:self];
-    cell.name.stringValue = [contactRow objectForKey:@"buddy_name"];
+    cell.name.stringValue = [contactRow objectForKey:kContactName];
     
     NSString *statusText = [contactRow objectForKey:@"status"];
     if( [statusText isEqualToString:@"(null)"])  {

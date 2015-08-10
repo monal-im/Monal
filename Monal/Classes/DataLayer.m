@@ -14,6 +14,8 @@
 static const int ddLogLevel = LOG_LEVEL_INFO;
 
  NSString *const kAccountID= @"account_id";
+
+//used for account rows
  NSString *const kAccountName =@"account_name";
  NSString *const kDomain =@"domain";
  NSString *const kEnabled =@"enabled";
@@ -26,6 +28,10 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
  NSString *const kSelfSigned =@"selfsigned";
 
  NSString *const kUsername =@"username";
+
+
+// used for contact rows
+ NSString *const kContactName =@"buddy_name";
 
 static DataLayer *sharedInstance=nil;
 

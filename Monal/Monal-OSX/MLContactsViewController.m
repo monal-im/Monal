@@ -12,6 +12,7 @@
 #import "DataLayer.h"
 #import "MLXMPPManager.h"
 #import "DDLog.h"
+#import "MLChatViewController.h"
 
 #define kinfoSection 0
 #define konlineSection 1
@@ -22,6 +23,8 @@
 @property (nonatomic, strong) NSMutableArray* infoCells;
 @property (nonatomic, strong) NSMutableArray* contacts;
 @property (nonatomic, strong) NSMutableArray* offlineContacts;
+
+@property (nonatomic, weak) MLChatViewController *chatViewController;
 
 @end
 
@@ -44,6 +47,21 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [MLXMPPManager sharedInstance].contactVC=self;
     [self.contactsTable reloadData];
     
+}
+
+-(void) viewDidAppear
+{
+    [super viewDidAppear];
+    
+    if([self.parentViewController isKindOfClass:[NSSplitViewController class]])
+    {
+        NSArray *splitViewItems = ((NSSplitViewController *) self.parentViewController ).splitViewItems;
+        if([splitViewItems count]>1)
+        {
+            NSSplitViewItem *otherItem = [splitViewItems objectAtIndex:1];
+            self.chatViewController = (MLChatViewController *)otherItem.viewController;
+        }
+    }
 }
 
 -(void) dealloc
@@ -372,7 +390,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 - (void)tableViewSelectionDidChange:(NSNotification *)notification;
 {
-    
+     NSDictionary *contactRow = [self.contacts objectAtIndex:self.contactsTable.selectedRow];
+    [self.chatViewController showConversationForContact:contactRow];
 }
 
 @end

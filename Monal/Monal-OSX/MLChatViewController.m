@@ -21,6 +21,12 @@
 
 
 
+-(void) showConversationForContact:(NSDictionary *) contact
+{
+    
+}
+
+
 #pragma mark - actions 
 -(IBAction)send:(id)sender
 {

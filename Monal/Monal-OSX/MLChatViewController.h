@@ -15,4 +15,6 @@
 
 -(IBAction)send:(id)sender;
 
+-(void) showConversationForContact:(NSDictionary *)contact;
+
 @end

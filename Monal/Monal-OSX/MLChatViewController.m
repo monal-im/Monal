@@ -77,6 +77,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     
     [self.chatTable reloadData];
+    [self scrollToBottom];
 }
 
 
@@ -237,7 +238,21 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 - (CGFloat)tableView:(NSTableView *)tableView heightOfRow:(NSInteger)row
 {
-    return 60.0f;
+    NSDictionary *messageRow = [self.messageList objectAtIndex:row];
+    NSString *messageString =[messageRow objectForKey:@"message"];
+
+    NSDictionary *attributes = @{NSFontAttributeName: [NSFont systemFontOfSize:13.0f]};
+    NSSize size = NSMakeSize(272, MAXFLOAT);
+    CGRect rect = [messageString boundingRectWithSize:size options:NSLineBreakByWordWrapping | NSStringDrawingUsesLineFragmentOrigin attributes:attributes];
+
+   
+    if(rect.size.height<25)  {
+        return  25.0f;
+    }
+    else {
+       return rect.size.height+3+3;
+    
+    }
 }
 
 #pragma mark date time

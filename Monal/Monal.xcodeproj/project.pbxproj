@@ -261,6 +261,7 @@
 		2651AF551B409906008D025C /* MLMainWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 2651AF541B409906008D025C /* MLMainWindow.m */; };
 		26529F5217FA7B260057F199 /* addContact.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EC40FE17BDD85F0031304D /* addContact.m */; };
 		26529F5317FA7B310057F199 /* addContact.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26EC410517BDD88B0031304D /* addContact.xib */; };
+		265802851B785B8900C35014 /* MLDisabledScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = 265802841B785B8900C35014 /* MLDisabledScrollView.m */; };
 		2658508B15E7D8E40070A2A7 /* TPCircularBuffer+AudioBufferList.c in Sources */ = {isa = PBXBuildFile; fileRef = 2658508615E7D8E40070A2A7 /* TPCircularBuffer+AudioBufferList.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		2658508C15E7D8E40070A2A7 /* TPCircularBuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 2658508815E7D8E40070A2A7 /* TPCircularBuffer.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		265F0B631B75719E00A63F20 /* MLAccountRow.m in Sources */ = {isa = PBXBuildFile; fileRef = 265F0B621B75719E00A63F20 /* MLAccountRow.m */; };
@@ -580,6 +581,8 @@
 		264FF3E4158A855D00D97B86 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		2651AF531B409906008D025C /* MLMainWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLMainWindow.h; sourceTree = "<group>"; };
 		2651AF541B409906008D025C /* MLMainWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLMainWindow.m; sourceTree = "<group>"; };
+		265802831B785B8900C35014 /* MLDisabledScrollView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLDisabledScrollView.h; sourceTree = "<group>"; };
+		265802841B785B8900C35014 /* MLDisabledScrollView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLDisabledScrollView.m; sourceTree = "<group>"; };
 		2658508615E7D8E40070A2A7 /* TPCircularBuffer+AudioBufferList.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "TPCircularBuffer+AudioBufferList.c"; sourceTree = "<group>"; };
 		2658508715E7D8E40070A2A7 /* TPCircularBuffer+AudioBufferList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "TPCircularBuffer+AudioBufferList.h"; sourceTree = "<group>"; };
 		2658508815E7D8E40070A2A7 /* TPCircularBuffer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = TPCircularBuffer.c; sourceTree = "<group>"; };
@@ -1039,6 +1042,8 @@
 				2661D34F1B407EDD00EC51BA /* MLChatViewCell.m */,
 				2651AF531B409906008D025C /* MLMainWindow.h */,
 				2651AF541B409906008D025C /* MLMainWindow.m */,
+				265802831B785B8900C35014 /* MLDisabledScrollView.h */,
+				265802841B785B8900C35014 /* MLDisabledScrollView.m */,
 			);
 			path = "Monal-OSX";
 			sourceTree = "<group>";
@@ -2065,6 +2070,7 @@
 				26049A561B7315A000D11866 /* RTP.mm in Sources */,
 				260499ED1B7313ED00D11866 /* ParsePresence.m in Sources */,
 				260499E41B730E9800D11866 /* XMPPIQ.m in Sources */,
+				265802851B785B8900C35014 /* MLDisabledScrollView.m in Sources */,
 				260870D81B7034460036539B /* MLAccountEdit.m in Sources */,
 				260499E31B730E9500D11866 /* XMLNode.m in Sources */,
 				260499F01B7313F600D11866 /* ParseStream.m in Sources */,

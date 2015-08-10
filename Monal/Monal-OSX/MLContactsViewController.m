@@ -394,8 +394,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 - (void)tableViewSelectionDidChange:(NSNotification *)notification;
 {
-     NSDictionary *contactRow = [self.contacts objectAtIndex:self.contactsTable.selectedRow];
-    [self.chatViewController showConversationForContact:contactRow];
+    if(self.contactsTable.selectedRow<self.contacts.count) {
+        NSDictionary *contactRow = [self.contacts objectAtIndex:self.contactsTable.selectedRow];
+        [self.chatViewController showConversationForContact:contactRow];
+    } else  {
+        
+    }
 }
 
 @end

@@ -93,6 +93,49 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 #pragma mark -- notificaitons
 -(void) handleNewMessage:(NSNotification *)notification
 {
+    DDLogVerbose(@"chat view got new message notice %@", notification.userInfo);
+    
+    if([[notification.userInfo objectForKey:@"accountNo"] isEqualToString:_accountNo]
+       &&( ( [[notification.userInfo objectForKey:@"from"] isEqualToString:_contactName]) || ([[notification.userInfo objectForKey:@"to"] isEqualToString:_contactName] ))
+       )
+    {
+        dispatch_async(dispatch_get_main_queue(),
+                       ^{
+                           NSDictionary* userInfo;
+                           if([[notification.userInfo objectForKey:@"to"] isEqualToString:_contactName])
+                           {
+                               userInfo = @{@"af": [notification.userInfo objectForKey:@"actuallyfrom"],
+                                            @"message": [notification.userInfo objectForKey:@"messageText"],
+                                            @"thetime": [self currentGMTTime],   @"delivered":@YES};
+                               
+                           } else  {
+                               userInfo = @{@"af": [notification.userInfo objectForKey:@"actuallyfrom"],
+                                            @"message": [notification.userInfo objectForKey:@"messageText"],
+                                            @"thetime": [self currentGMTTime]
+                                            };
+                           }
+                           
+                           [self.messageList addObject:userInfo];
+                           [self.chatTable reloadData];
+                           
+//                           [_messageTable beginUpdates];
+//                           NSIndexPath *path1;
+//                           NSInteger bottom = [_messageTable numberOfRowsInSection:0];
+//                           if(bottom>0) {
+//                               path1 = [NSIndexPath indexPathForRow:bottom-1  inSection:0];
+//                               [_messageTable insertRowsAtIndexPaths:@[path1]
+//                                                    withRowAnimation:UITableViewRowAnimationBottom];
+//                           }
+//                           
+//                           [_messageTable endUpdates];
+                           
+                           [self scrollToBottom];
+                           
+                           //mark as read
+                           [[DataLayer sharedInstance] markAsReadBuddy:_contactName forAccount:_accountNo];
+                       });
+    }
+
     
 }
 

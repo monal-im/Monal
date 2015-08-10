@@ -48,6 +48,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [nc addObserver:self selector:@selector(handleSendFailedMessage:) name:kMonalSendFailedMessageNotice object:nil];
     [nc addObserver:self selector:@selector(handleSentMessage:) name:kMonalSentMessageNotice object:nil];
     
+    [self setupDateObjects];
     
 }
 
@@ -118,16 +119,18 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     if([[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:[NSString stringWithFormat:@"%@",self.accountNo] withMessage:message actuallyFrom:self.jid withId:messageId])
     {
-        DDLogVerbose(@"added message");
+        DDLogVerbose(@"added message %@, %@ %@", message, messageId, [self currentGMTTime]);
+        
+        NSDictionary* userInfo = @{@"af": self.jid,
+                                   @"message": message ,
+                                   @"thetime": [self currentGMTTime],
+                                   kDelivered:@YES,
+                                   kMessageId: messageId
+                                   };
         
         dispatch_async(dispatch_get_main_queue(),
                        ^{
-                           NSDictionary* userInfo = @{@"af": self.jid,
-                                                      @"message": message ,
-                                                      @"thetime": [self currentGMTTime],
-                                                      kDelivered:@YES,
-                                                      kMessageId: messageId
-                                                      };
+                          
                            [self.messageList addObject:[userInfo mutableCopy]];
                            [self.chatTable reloadData];
                            
@@ -221,6 +224,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     if([[messageRow objectForKey:@"af"] isEqualToString:self.jid]) {
         cell = [tableView makeViewWithIdentifier:@"OutboundTextCell" owner:self];
+        cell.messageText.textColor = [NSColor whiteColor];
     }
     else  {
         cell = [tableView makeViewWithIdentifier:@"InboundTextCell" owner:self];

@@ -372,8 +372,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     NSDictionary *contactRow = [self.contacts objectAtIndex:row];
     
     MLContactsCell *cell = [tableView makeViewWithIdentifier:@"OnlineUser" owner:self];
-    cell.name.stringValue = [contactRow objectForKey:kContactName];
+    cell.name.backgroundColor =[NSColor clearColor];
+    cell.status.backgroundColor= [NSColor clearColor];
     
+    cell.name.stringValue = [contactRow objectForKey:kContactName];
+   
     NSString *statusText = [contactRow objectForKey:@"status"];
     if( [statusText isEqualToString:@"(null)"])  {
         statusText = @"";

@@ -73,7 +73,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 #pragma mark --   updating user display
 
--(BOOL) positionOfOnlineContact:(NSDictionary *) user
+-(NSInteger) positionOfOnlineContact:(NSDictionary *) user
 {
     NSInteger pos=0;
     for(NSDictionary* row in self.contacts)
@@ -90,7 +90,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
 }
 
--(BOOL) positionOfOfflineContact:(NSDictionary *) user
+-(NSInteger) positionOfOfflineContact:(NSDictionary *) user
 {
     NSInteger pos=0;
     for(NSDictionary* row in self.offlineContacts)

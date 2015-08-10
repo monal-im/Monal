@@ -9,6 +9,8 @@
 #import "MLChatViewController.h"
 #import "MLConstants.h"
 #import "DataLayer.h"
+#import "DDLog.h"
+#import "MLXMPPManager.h"
 //#import "MLNotificaitonCenter.h"
 
 @interface MLChatViewController ()
@@ -17,12 +19,13 @@
 
 @property (nonatomic, strong) NSString *accountNo;
 @property (nonatomic, strong) NSString *contactName;
-
-
+@property (nonatomic, assign) BOOL isMUC;
 
 @end
 
 @implementation MLChatViewController
+
+static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -80,6 +83,25 @@
 }
 
 #pragma mark - actions 
+
+-(void) sendMessage:(NSString *) messageText andMessageID:(NSString *)messageID
+{
+    DDLogVerbose(@"Sending message");
+    u_int32_t r = arc4random_uniform(30000000);
+    NSString *newMessageID =messageID;
+    if(!newMessageID) {
+        newMessageID=[NSString stringWithFormat:@"Monal%d", r];
+    }
+    [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:self.contactName fromAccount:self.accountNo isMUC:self.isMUC messageId:newMessageID
+                          withCompletionHandler:nil];
+    
+    //dont readd it, use the exisitng
+    if(!messageID) {
+        [self addMessageto:_contactName withMessage:messageText andId:newMessageID];
+    }
+}
+
+
 -(IBAction)send:(id)sender
 {
     

@@ -18,10 +18,20 @@
 
 @property (nonatomic, strong) NSMutableArray *messageList;
 
-@property (nonatomic, strong) NSNumber *accountNo;
+@property (nonatomic, strong)  NSDateFormatter* destinationDateFormat;
+@property (nonatomic, strong)  NSDateFormatter* sourceDateFormat;
+@property (nonatomic, strong)  NSCalendar *gregorian;
+@property (nonatomic, assign) NSInteger thisyear;
+@property (nonatomic, assign) NSInteger thismonth;
+@property (nonatomic, assign) NSInteger thisday;
+
+
+@property (nonatomic, strong) NSString *accountNo;
 @property (nonatomic, strong) NSString *contactName;
 @property (nonatomic, strong) NSString *jid;
 @property (nonatomic, assign) BOOL isMUC;
+
+@property (nonatomic, assign) BOOL firstmsg;
 
 @end
 
@@ -53,13 +63,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 
     
-    self.accountNo = [contact objectForKey:kAccountID];
+    self.accountNo = [NSString stringWithFormat:@"%@",[contact objectForKey:kAccountID]];
     self.contactName = [contact objectForKey:kContactName];
     
-    self.messageList =[[DataLayer sharedInstance] messageHistory:self.contactName forAccount: [NSString stringWithFormat:@"%@", self.accountNo]];
+    self.messageList =[[DataLayer sharedInstance] messageHistory:self.contactName forAccount: self.accountNo];
 
 #warning this should be smarter...
-    NSArray* accountVals =[[DataLayer sharedInstance] accountVals:[NSString stringWithFormat:@"%@", self.accountNo]];
+    NSArray* accountVals =[[DataLayer sharedInstance] accountVals:self.accountNo];
     if([accountVals count]>0)
     {
         self.jid=[NSString stringWithFormat:@"%@@%@",[[accountVals objectAtIndex:0] objectForKey:kUsername], [[accountVals objectAtIndex:0] objectForKey:kDomain]];
@@ -69,40 +79,20 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 }
 
 
+-(void) scrollToBottom
+{
+    NSInteger bottom = [self.chatTable numberOfRows];
+    if(bottom>0)
+    {
+        [self.chatTable scrollRowToVisible:bottom-1];
+    }
+}
+
 #pragma mark -- notificaitons
 -(void) handleNewMessage:(NSNotification *)notification
 {
     
 }
-
--(void) addMessageto:(NSString*)to withMessage:(NSString*) message andId:(NSString *) messageId
-{
-    
-}
-
--(void) setMessageId:(NSString *) messageId delivered:(BOOL) delivered
-{
-    dispatch_async(dispatch_get_main_queue(),
-                   ^{
-                       
-                       [self.chatTable reloadData];
-                       
-//                       int row=0;
-//                       for(NSMutableDictionary *rowDic in self.messageList)
-//                       {
-//                           if([[rowDic objectForKey:kMessageId] isEqualToString:messageId]) {
-//                               [rowDic setObject:[NSNumber numberWithBool:delivered] forKey:kDelivered];
-//                               NSIndexPath *indexPath =[NSIndexPath indexPathForRow:row inSection:0];
-//                               dispatch_async(dispatch_get_main_queue(), ^{
-//                                   [_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
-//                               });
-//                               break;
-//                           }
-//                           row++;
-//                       }
-                   });
-}
-
 
 -(void) handleSendFailedMessage:(NSNotification *)notification
 {
@@ -116,7 +106,81 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self setMessageId:[dic objectForKey:kMessageId]  delivered:YES];
 }
 
-#pragma mark - actions 
+#pragma mark - sending
+
+//always messages going out
+-(void) addMessageto:(NSString*)to withMessage:(NSString*) message andId:(NSString *) messageId
+{
+    if(!self.jid || !message)  {
+        DDLogError(@" not ready to send messages");
+        return;
+    }
+    
+    if([[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:[NSString stringWithFormat:@"%@",self.accountNo] withMessage:message actuallyFrom:self.jid withId:messageId])
+    {
+        DDLogVerbose(@"added message");
+        
+        dispatch_async(dispatch_get_main_queue(),
+                       ^{
+                           NSDictionary* userInfo = @{@"af": self.jid,
+                                                      @"message": message ,
+                                                      @"thetime": [self currentGMTTime],
+                                                      kDelivered:@YES,
+                                                      kMessageId: messageId
+                                                      };
+                           [self.messageList addObject:[userInfo mutableCopy]];
+                           [self.chatTable reloadData];
+                           
+                           //                           NSIndexPath *path1;
+                           //                           [self.chatTable beginUpdates];
+                           //                           NSInteger bottom = [_messageTable numberOfRowsInSection:0];
+                           //                           if(bottom>0) {
+                           //                               path1 = [NSIndexPath indexPathForRow:bottom  inSection:0];
+                           //                               [_messageTable insertRowsAtIndexPaths:@[path1]
+                           //                                                    withRowAnimation:UITableViewRowAnimationBottom];
+                           //                           }
+                           //                           [_messageTable endUpdates];
+                           
+                           [self scrollToBottom];
+                           
+                       });
+        
+    }
+    else {
+        DDLogVerbose(@"failed to add message");
+    }
+    
+    // make sure its in active
+    if(self.firstmsg==YES)
+    {
+        [[DataLayer sharedInstance] addActiveBuddies:to forAccount:_accountNo];
+        self.firstmsg=NO;
+    }
+    
+}
+
+-(void) setMessageId:(NSString *) messageId delivered:(BOOL) delivered
+{
+    dispatch_async(dispatch_get_main_queue(),
+                   ^{
+                       
+                       [self.chatTable reloadData];
+                       
+                       //                       int row=0;
+                       //                       for(NSMutableDictionary *rowDic in self.messageList)
+                       //                       {
+                       //                           if([[rowDic objectForKey:kMessageId] isEqualToString:messageId]) {
+                       //                               [rowDic setObject:[NSNumber numberWithBool:delivered] forKey:kDelivered];
+                       //                               NSIndexPath *indexPath =[NSIndexPath indexPathForRow:row inSection:0];
+                       //                               dispatch_async(dispatch_get_main_queue(), ^{
+                       //                                   [_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+                       //                               });
+                       //                               break;
+                       //                           }
+                       //                           row++;
+                       //                       }
+                   });
+}
 
 -(void) sendMessage:(NSString *) messageText andMessageID:(NSString *)messageID
 {
@@ -126,7 +190,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     if(!newMessageID) {
         newMessageID=[NSString stringWithFormat:@"Monal%d", r];
     }
-    [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:self.contactName fromAccount:[NSString stringWithFormat:@"%@", self.accountNo]  isMUC:self.isMUC messageId:newMessageID
+    [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:self.contactName fromAccount:self.accountNo isMUC:self.isMUC messageId:newMessageID
                           withCompletionHandler:nil];
     
     //dont readd it, use the exisitng
@@ -171,5 +235,87 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     return 60.0f;
 }
+
+#pragma mark date time
+
+-(void) setupDateObjects
+{
+    self.destinationDateFormat = [[NSDateFormatter alloc] init];
+    [self.destinationDateFormat setLocale:[NSLocale currentLocale]];
+    [self.destinationDateFormat setDoesRelativeDateFormatting:YES];
+    
+    self.sourceDateFormat = [[NSDateFormatter alloc] init];
+    [self.sourceDateFormat setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+    
+    self.gregorian = [[NSCalendar alloc]
+                      initWithCalendarIdentifier:NSGregorianCalendar];
+    
+    NSDate* now =[NSDate date];
+    self.thisday =[self.gregorian components:NSDayCalendarUnit fromDate:now].day;
+    self.thismonth =[self.gregorian components:NSMonthCalendarUnit fromDate:now].month;
+    self.thisyear =[self.gregorian components:NSYearCalendarUnit fromDate:now].year;
+    
+    
+}
+
+-(NSString*) currentGMTTime
+{
+    NSDate* sourceDate =[NSDate date];
+    
+    NSTimeZone* sourceTimeZone = [NSTimeZone systemTimeZone];
+    NSTimeZone* destinationTimeZone = [NSTimeZone timeZoneWithAbbreviation:@"GMT"];
+    NSInteger sourceGMTOffset = [sourceTimeZone secondsFromGMTForDate:sourceDate];
+    NSInteger destinationGMTOffset = [destinationTimeZone secondsFromGMTForDate:sourceDate];
+    NSTimeInterval interval = destinationGMTOffset - sourceGMTOffset;
+    NSDate* destinationDate = [[NSDate alloc] initWithTimeInterval:interval sinceDate:sourceDate];
+    
+    return [self.sourceDateFormat stringFromDate:destinationDate];
+}
+
+-(NSString*) formattedDateWithSource:(NSString*) sourceDateString
+{
+    NSString* dateString;
+    
+    if(sourceDateString!=nil)
+    {
+        
+        NSDate* sourceDate=[self.sourceDateFormat dateFromString:sourceDateString];
+        
+        NSTimeZone* sourceTimeZone = [NSTimeZone timeZoneWithAbbreviation:@"GMT"];
+        NSTimeZone* destinationTimeZone = [NSTimeZone systemTimeZone];
+        NSInteger sourceGMTOffset = [sourceTimeZone secondsFromGMTForDate:sourceDate];
+        NSInteger destinationGMTOffset = [destinationTimeZone secondsFromGMTForDate:sourceDate];
+        NSTimeInterval interval = destinationGMTOffset - sourceGMTOffset;
+        NSDate* destinationDate = [[NSDate alloc] initWithTimeInterval:interval sinceDate:sourceDate];
+        
+        NSInteger msgday =[self.gregorian components:NSDayCalendarUnit fromDate:destinationDate].day;
+        NSInteger msgmonth=[self.gregorian components:NSMonthCalendarUnit fromDate:destinationDate].month;
+        NSInteger msgyear =[self.gregorian components:NSYearCalendarUnit fromDate:destinationDate].year;
+        
+        if ((self.thisday!=msgday) || (self.thismonth!=msgmonth) || (self.thisyear!=msgyear))
+        {
+            
+            //no more need for seconds
+            [self.destinationDateFormat setTimeStyle:NSDateFormatterShortStyle];
+            
+            // note: if it isnt the same day we want to show the full  day
+            [self.destinationDateFormat setDateStyle:NSDateFormatterMediumStyle];
+            
+            //cache date
+            
+        }
+        else
+        {
+            //today just show time
+            [self.destinationDateFormat setDateStyle:NSDateFormatterNoStyle];
+            [self.destinationDateFormat setTimeStyle:NSDateFormatterMediumStyle];
+        }
+        
+        dateString = [ self.destinationDateFormat stringFromDate:destinationDate];
+    }
+    
+    return dateString;
+}
+
 
 @end

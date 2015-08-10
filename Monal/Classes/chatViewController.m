@@ -675,7 +675,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0"))
     {
         UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Retry sending message?" message:@"It is possible this message may have failed to send." preferredStyle:UIAlertControllerStyleActionSheet];
-        [alert addAction:[UIAlertAction actionWithTitle:@"Retry" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+        [alert addAction:[UIAlertAction actionWithTitle:@"Retry" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {x
             NSArray *messageArray =[[DataLayer sharedInstance] messageForHistoryID:historyId];
             if([messageArray count]>0) {
                 NSDictionary *dic= [messageArray objectAtIndex:0];

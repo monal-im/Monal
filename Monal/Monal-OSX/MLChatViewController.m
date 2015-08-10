@@ -11,6 +11,7 @@
 #import "DataLayer.h"
 #import "DDLog.h"
 #import "MLXMPPManager.h"
+#import "MLChatViewCell.h"
 //#import "MLNotificaitonCenter.h"
 
 @interface MLChatViewController ()
@@ -19,6 +20,7 @@
 
 @property (nonatomic, strong) NSNumber *accountNo;
 @property (nonatomic, strong) NSString *contactName;
+@property (nonatomic, strong) NSString *jid;
 @property (nonatomic, assign) BOOL isMUC;
 
 @end
@@ -49,13 +51,21 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 //    [MLNotificationManager sharedInstance].currentAccountNo=self.accountNo;
 //    [MLNotificationManager sharedInstance].currentContact=self.contactName;
 
+
+    
     self.accountNo = [contact objectForKey:kAccountID];
     self.contactName = [contact objectForKey:kContactName];
     
-    self.messageList =[[DataLayer sharedInstance] messageHistory:self.contactName forAccount: self.accountNo];
+    self.messageList =[[DataLayer sharedInstance] messageHistory:self.contactName forAccount: [NSString stringWithFormat:@"%@", self.accountNo]];
+
+#warning this should be smarter...
+    NSArray* accountVals =[[DataLayer sharedInstance] accountVals:[NSString stringWithFormat:@"%@", self.accountNo]];
+    if([accountVals count]>0)
+    {
+        self.jid=[NSString stringWithFormat:@"%@@%@",[[accountVals objectAtIndex:0] objectForKey:kUsername], [[accountVals objectAtIndex:0] objectForKey:kDomain]];
+    }
     
     [self.chatTable reloadData];
-    
 }
 
 
@@ -70,16 +80,40 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
 }
 
+-(void) setMessageId:(NSString *) messageId delivered:(BOOL) delivered
+{
+    dispatch_async(dispatch_get_main_queue(),
+                   ^{
+                       
+                       [self.chatTable reloadData];
+                       
+//                       int row=0;
+//                       for(NSMutableDictionary *rowDic in self.messageList)
+//                       {
+//                           if([[rowDic objectForKey:kMessageId] isEqualToString:messageId]) {
+//                               [rowDic setObject:[NSNumber numberWithBool:delivered] forKey:kDelivered];
+//                               NSIndexPath *indexPath =[NSIndexPath indexPathForRow:row inSection:0];
+//                               dispatch_async(dispatch_get_main_queue(), ^{
+//                                   [_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+//                               });
+//                               break;
+//                           }
+//                           row++;
+//                       }
+                   });
+}
+
+
 -(void) handleSendFailedMessage:(NSNotification *)notification
 {
     NSDictionary *dic =notification.userInfo;
-   // [self setMessageId:[dic objectForKey:kMessageId]  delivered:NO];
+    [self setMessageId:[dic objectForKey:kMessageId]  delivered:NO];
 }
 
 -(void) handleSentMessage:(NSNotification *)notification
 {
     NSDictionary *dic =notification.userInfo;
-  //  [self setMessageId:[dic objectForKey:kMessageId]  delivered:YES];
+    [self setMessageId:[dic objectForKey:kMessageId]  delivered:YES];
 }
 
 #pragma mark - actions 
@@ -115,13 +149,27 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 }
 
 #pragma mark - table view delegate
-
 - (NSView *)tableView:(NSTableView *)tableView viewForTableColumn:(NSTableColumn *)tableColumn  row:(NSInteger)row
 {
     
-// MLchatViewCell *cell= [tableView makeViewWithIdentifier:cellIdentifier owner:self];
-    return nil;
+    NSDictionary *messageRow = [self.messageList objectAtIndex:row];
+    MLChatViewCell *cell;
+    
+    if([[messageRow objectForKey:@"af"] isEqualToString:self.jid]) {
+        cell = [tableView makeViewWithIdentifier:@"OutboundTextCell" owner:self];
+    }
+    else  {
+        cell = [tableView makeViewWithIdentifier:@"InboundTextCell" owner:self];
+    }
+    
+    cell.messageText.string =[messageRow objectForKey:@"message"];
+    
+    return cell;
 }
 
+- (CGFloat)tableView:(NSTableView *)tableView heightOfRow:(NSInteger)row
+{
+    return 60.0f;
+}
 
 @end

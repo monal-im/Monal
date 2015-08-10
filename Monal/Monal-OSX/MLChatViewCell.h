@@ -10,4 +10,6 @@
 
 @interface MLChatViewCell : NSTableCellView
 
+@property (nonatomic, strong) IBOutlet NSTextView *messageText;
+
 @end

@@ -21,6 +21,7 @@
 #define kMLHasConnectedNotice @"kMLHasConnectedNotice"
 
 
+#define kDelivered @"delivered"
 
 //contact cells
 #define kusernameKey @"username"

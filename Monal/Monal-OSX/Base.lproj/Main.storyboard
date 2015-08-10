@@ -832,6 +832,16 @@
                             <customView translatesAutoresizingMaskIntoConstraints="NO" id="bPP-Hy-AXK">
                                 <rect key="frame" x="0.0" y="0.0" width="493" height="116"/>
                                 <subviews>
+                                    <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="m4R-R5-Jrl">
+                                        <rect key="frame" x="407" y="68" width="72" height="32"/>
+                                        <buttonCell key="cell" type="push" title="Send" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Rbr-ky-nlC">
+                                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                            <font key="font" metaFont="system"/>
+                                        </buttonCell>
+                                        <connections>
+                                            <action selector="send:" target="qLp-oS-WKI" id="8he-Bu-JXB"/>
+                                        </connections>
+                                    </button>
                                     <scrollView horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Cir-fi-93b">
                                         <rect key="frame" x="0.0" y="4" width="405" height="108"/>
                                         <clipView key="contentView" id="xyg-jq-3Wg">
@@ -863,16 +873,6 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                         </scroller>
                                     </scrollView>
-                                    <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="m4R-R5-Jrl">
-                                        <rect key="frame" x="407" y="68" width="72" height="32"/>
-                                        <buttonCell key="cell" type="push" title="Send" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Rbr-ky-nlC">
-                                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                            <font key="font" metaFont="system"/>
-                                        </buttonCell>
-                                        <connections>
-                                            <action selector="send:" target="qLp-oS-WKI" id="8he-Bu-JXB"/>
-                                        </connections>
-                                    </button>
                                 </subviews>
                                 <constraints>
                                     <constraint firstItem="Cir-fi-93b" firstAttribute="leading" secondItem="bPP-Hy-AXK" secondAttribute="leading" id="7y7-BQ-jL9"/>
@@ -911,7 +911,7 @@
                                                     </textFieldCell>
                                                     <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                     <prototypeCellViews>
-                                                        <tableCellView identifier="InboundTextCell" id="Rho-ef-n6l" customClass="MLChatViewCell">
+                                                        <tableCellView identifier="InboundTextCell" id="Rho-ef-n6l" userLabel="Chat View in Cell" customClass="MLChatViewCell">
                                                             <rect key="frame" x="1" y="1" width="495" height="43"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
@@ -921,10 +921,10 @@
                                                                         <rect key="frame" x="1" y="1" width="238" height="133"/>
                                                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                         <subviews>
-                                                                            <textView importsGraphics="NO" findStyle="panel" continuousSpellChecking="YES" allowsUndo="YES" usesRuler="YES" usesFontPanel="YES" verticallyResizable="YES" allowsNonContiguousLayout="YES" quoteSubstitution="YES" dashSubstitution="YES" spellingCorrection="YES" smartInsertDelete="YES" id="xCt-jX-2Jc">
+                                                                            <textView editable="NO" importsGraphics="NO" findStyle="panel" continuousSpellChecking="YES" allowsUndo="YES" usesRuler="YES" usesFontPanel="YES" verticallyResizable="YES" allowsNonContiguousLayout="YES" quoteSubstitution="YES" dashSubstitution="YES" spellingCorrection="YES" smartInsertDelete="YES" id="xCt-jX-2Jc">
                                                                                 <rect key="frame" x="0.0" y="0.0" width="238" height="133"/>
                                                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                                                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                                                                <color key="backgroundColor" name="tertiaryLabelColor" catalog="System" colorSpace="catalog"/>
                                                                                 <size key="minSize" width="280" height="35"/>
                                                                                 <size key="maxSize" width="493" height="10000000"/>
                                                                                 <color key="insertionPointColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -944,8 +944,11 @@
                                                                     </scroller>
                                                                 </scrollView>
                                                             </subviews>
+                                                            <connections>
+                                                                <outlet property="messageText" destination="xCt-jX-2Jc" id="06d-qo-OHN"/>
+                                                            </connections>
                                                         </tableCellView>
-                                                        <tableCellView identifier="OutboundTextCell" id="zUs-Dd-GH1" customClass="MLChatViewCell">
+                                                        <tableCellView identifier="OutboundTextCell" id="zUs-Dd-GH1" userLabel="Chat View out Cell" customClass="MLChatViewCell">
                                                             <rect key="frame" x="1" y="1" width="495" height="43"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
@@ -955,10 +958,11 @@
                                                                         <rect key="frame" x="1" y="1" width="238" height="133"/>
                                                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                         <subviews>
-                                                                            <textView importsGraphics="NO" findStyle="panel" continuousSpellChecking="YES" allowsUndo="YES" usesRuler="YES" usesFontPanel="YES" verticallyResizable="YES" allowsNonContiguousLayout="YES" quoteSubstitution="YES" dashSubstitution="YES" spellingCorrection="YES" smartInsertDelete="YES" id="gBQ-7e-nXQ">
+                                                                            <textView editable="NO" importsGraphics="NO" findStyle="panel" continuousSpellChecking="YES" allowsUndo="YES" usesRuler="YES" usesFontPanel="YES" verticallyResizable="YES" allowsNonContiguousLayout="YES" quoteSubstitution="YES" dashSubstitution="YES" spellingCorrection="YES" smartInsertDelete="YES" id="gBQ-7e-nXQ">
                                                                                 <rect key="frame" x="0.0" y="0.0" width="238" height="133"/>
                                                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                                                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                                                                <color key="textColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                                                                <color key="backgroundColor" name="alternateSelectedControlColor" catalog="System" colorSpace="catalog"/>
                                                                                 <size key="minSize" width="280" height="35"/>
                                                                                 <size key="maxSize" width="493" height="10000000"/>
                                                                                 <color key="insertionPointColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -978,6 +982,9 @@
                                                                     </scroller>
                                                                 </scrollView>
                                                             </subviews>
+                                                            <connections>
+                                                                <outlet property="messageText" destination="gBQ-7e-nXQ" id="SFc-ts-FwH"/>
+                                                            </connections>
                                                         </tableCellView>
                                                     </prototypeCellViews>
                                                 </tableColumn>

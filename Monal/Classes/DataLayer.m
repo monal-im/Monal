@@ -985,7 +985,7 @@ static DataLayer *sharedInstance=nil;
     [self setResourceOnline:presenceObj forAccount:accountNo];
     
     [self isBuddyOnline:presenceObj.user forAccount:accountNo withCompletion:^(BOOL isOnline) {
-        if(isOnline) {
+        if(!isOnline) {
             NSString* query=[NSString stringWithFormat:@"update buddylist set online=1, new=1, muc=%d where account_id=%@ and  buddy_name='%@';",presenceObj.MUC, accountNo, presenceObj.user.escapeForSql ];
             [self executeNonQuery:query withCompletion:nil];
         }

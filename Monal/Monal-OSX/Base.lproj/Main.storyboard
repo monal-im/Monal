@@ -659,17 +659,45 @@
                         <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
                         <rect key="contentRect" x="196" y="240" width="480" height="270"/>
                         <rect key="screenRect" x="0.0" y="0.0" width="1680" height="1027"/>
-                        <toolbar key="toolbar" implicitIdentifier="EC735BF1-1698-45E1-A353-F99557800F17" autosavesConfiguration="NO" displayMode="iconAndLabel" sizeMode="regular" id="LGE-7m-sfQ">
+                        <toolbar key="toolbar" implicitIdentifier="EC735BF1-1698-45E1-A353-F99557800F17" autosavesConfiguration="NO" displayMode="iconOnly" sizeMode="regular" id="LGE-7m-sfQ">
                             <allowedToolbarItems>
-                                <toolbarItem implicitItemIdentifier="NSToolbarShowColorsItem" id="4fG-3b-KNo"/>
-                                <toolbarItem implicitItemIdentifier="NSToolbarShowFontsItem" id="wKL-cQ-1i4"/>
-                                <toolbarItem implicitItemIdentifier="NSToolbarPrintItem" id="4QQ-j9-o82"/>
                                 <toolbarItem implicitItemIdentifier="NSToolbarSpaceItem" id="ZSw-2Q-VnE"/>
                                 <toolbarItem implicitItemIdentifier="NSToolbarFlexibleSpaceItem" id="7tw-2L-tfc"/>
+                                <toolbarItem implicitItemIdentifier="CABA8109-05DA-427B-AF01-73EF778D46A0" label="Search" paletteLabel="Search" id="FZv-gk-QRd">
+                                    <nil key="toolTip"/>
+                                    <size key="minSize" width="96" height="22"/>
+                                    <size key="maxSize" width="273" height="22"/>
+                                    <searchField key="view" wantsLayer="YES" verticalHuggingPriority="750" id="W9v-xL-dQF">
+                                        <rect key="frame" x="-10" y="14" width="252" height="22"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                        <searchFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" borderStyle="bezel" placeholderString="Search Contacts" usesSingleLineMode="YES" bezelStyle="round" id="xIm-Pi-cYh">
+                                            <font key="font" metaFont="system"/>
+                                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                        </searchFieldCell>
+                                    </searchField>
+                                </toolbarItem>
+                                <toolbarItem implicitItemIdentifier="CA4294CF-0E03-42AE-8369-433A8FD1A408" label="Current Conversation" paletteLabel="Current Conversation" id="82S-Mb-KdJ">
+                                    <nil key="toolTip"/>
+                                    <size key="minSize" width="38" height="17"/>
+                                    <size key="maxSize" width="178" height="17"/>
+                                    <textField key="view" horizontalHuggingPriority="251" verticalHuggingPriority="750" id="FIC-Wz-kIR">
+                                        <rect key="frame" x="38" y="14" width="178" height="17"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="Name" id="0rf-P9-rs9">
+                                            <font key="font" metaFont="system"/>
+                                            <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                        </textFieldCell>
+                                    </textField>
+                                </toolbarItem>
                             </allowedToolbarItems>
                             <defaultToolbarItems>
+                                <toolbarItem reference="ZSw-2Q-VnE"/>
+                                <toolbarItem reference="FZv-gk-QRd"/>
                                 <toolbarItem reference="7tw-2L-tfc"/>
-                                <toolbarItem reference="4QQ-j9-o82"/>
+                                <toolbarItem reference="82S-Mb-KdJ"/>
+                                <toolbarItem reference="7tw-2L-tfc"/>
                             </defaultToolbarItems>
                         </toolbar>
                     </window>

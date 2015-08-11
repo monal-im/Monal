@@ -13,6 +13,7 @@
 #import "MLDisplaySettings.h"
 #import "MLPresenceSettings.h"
 #import "MLXMPPManager.h"
+#import "DataLayer.h"
 
 
 @interface AppDelegate ()
@@ -39,6 +40,9 @@
     self.fileLogger.maximumFileSize=1024 * 500;
     [DDLog addLogger:self.fileLogger];
 #endif
+    
+    NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+    [nc addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
     
       [[MLXMPPManager sharedInstance] connectIfNecessary];
     
@@ -87,6 +91,24 @@
     }
     [self.preferencesWindow showWindow:self];
     
+}
+
+#pragma mark -- notifications
+-(void) handleNewMessage:(NSNotification *)notification;
+{
+    NSUserNotification *alert =[[NSUserNotification alloc] init];
+    NSString* acctString =[NSString stringWithFormat:@"%ld", (long)[[notification.userInfo objectForKey:@"accountNo"] integerValue]];
+    NSString* fullName =[[DataLayer sharedInstance] fullName:[notification.userInfo objectForKey:@"from"] forAccount:acctString];
+    
+    NSString* nameToShow=[notification.userInfo objectForKey:@"from"];
+    if([fullName length]>0) nameToShow=fullName;
+    
+    alert.title= nameToShow;
+    alert.informativeText=[notification.userInfo objectForKey:@"messageText"]; 
+    
+    //alert.contentImage;
+    
+    [[NSUserNotificationCenter defaultUserNotificationCenter] scheduleNotification:alert];
 }
 
 @end

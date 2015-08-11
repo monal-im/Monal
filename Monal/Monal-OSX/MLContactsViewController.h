@@ -11,6 +11,8 @@
 @interface MLContactsViewController : NSViewController <NSTableViewDataSource, NSTableViewDelegate>
 
 @property (nonatomic, strong) IBOutlet NSTableView *contactsTable;
+@property (nonatomic, strong) IBOutlet NSTextField *contactNameField;
+
 
 
 

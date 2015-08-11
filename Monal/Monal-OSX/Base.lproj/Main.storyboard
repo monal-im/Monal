@@ -703,6 +703,9 @@
                                             <font key="font" metaFont="system"/>
                                         </buttonCell>
                                     </button>
+                                    <connections>
+                                        <segue destination="kZp-r1-Nmw" kind="popover" popoverAnchorView="O1F-wJ-6xt" popoverBehavior="t" preferredEdge="maxX" id="AZh-DK-DZF"/>
+                                    </connections>
                                 </toolbarItem>
                             </allowedToolbarItems>
                             <defaultToolbarItems>
@@ -871,6 +874,19 @@
                 <customObject id="Bif-v0-38w" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="118" y="592"/>
+        </scene>
+        <!--View Controller-->
+        <scene sceneID="v2f-nP-h6y">
+            <objects>
+                <viewController id="kZp-r1-Nmw" sceneMemberID="viewController">
+                    <view key="view" id="Icm-RK-2sE">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="400"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </view>
+                </viewController>
+                <customObject id="Y6b-l4-GHd" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="621" y="131"/>
         </scene>
         <!--Chat View Controller-->
         <scene sceneID="CGi-CN-lI2">

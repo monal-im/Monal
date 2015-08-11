@@ -203,7 +203,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                    [self.contactsTable beginUpdates];
                                    
                                    NSIndexSet *indexSet =[[NSIndexSet alloc] initWithIndex:pos] ;
-                                   [self.contactsTable reloadDataForRowIndexes:indexSet columnIndexes:0];
+                                   NSIndexSet *columnIndexSet =[[NSIndexSet alloc] initWithIndex:0] ;
+                                   [self.contactsTable reloadDataForRowIndexes:indexSet columnIndexes:columnIndexSet];
                                    [self.contactsTable endUpdates];
                                }
                            }

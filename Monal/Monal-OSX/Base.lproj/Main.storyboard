@@ -858,7 +858,7 @@
                                                     <size key="minSize" width="403" height="106"/>
                                                     <size key="maxSize" width="463" height="10000000"/>
                                                     <connections>
-                                                        <outlet property="delegate" destination="qLp-oS-WKI" id="1X9-gE-xl5"/>
+                                                        <outlet property="delegate" destination="qLp-oS-WKI" id="exd-Ze-cMr"/>
                                                     </connections>
                                                 </textView>
                                             </subviews>

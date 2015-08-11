@@ -71,7 +71,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 
 
-#pragma mark --   updating user display
+#pragma mark - updating user display
 
 -(NSInteger) positionOfOnlineContact:(NSDictionary *) user
 {
@@ -347,7 +347,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 
 
-#pragma mark -table view datasource
+#pragma mark - table view datasource
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)aTableView
 {
     return [self.contacts count];
@@ -372,6 +372,23 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     cell.status.stringValue =statusText;
     
+    NSString *state= [[contactRow objectForKey:@"state"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    
+    if(([state isEqualToString:@"away"]) ||
+       ([state isEqualToString:@"dnd"])||
+       ([state isEqualToString:@"xa"])
+       )
+    {
+        cell.state=kStatusAway;
+    }
+    else if([state isEqualToString:@"offline"]) {
+        cell.state=kStatusOffline;
+    }
+    else if([state isEqualToString:@"(null)"] || [state isEqualToString:@""]) {
+        cell.state=kStatusOnline;
+    }
+    
+    [cell setOrb];
     return cell;
 }
 

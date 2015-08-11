@@ -114,7 +114,7 @@
     }
     
     NSString *state= [[row objectForKey:@"state"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-    
+
     if(![[row objectForKey:@"status"] isEqualToString:@"(null)"] && ![[row objectForKey:@"status"] isEqualToString:@""]) {
        [cell showStatusText:[row objectForKey:@"status"]];
     }

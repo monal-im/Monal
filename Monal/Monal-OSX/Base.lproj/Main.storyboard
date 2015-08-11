@@ -743,11 +743,19 @@
                                                                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                                     </textFieldCell>
                                                                 </textField>
+                                                                <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="lDT-QO-kIK">
+                                                                    <rect key="frame" x="32" y="3" width="22" height="22"/>
+                                                                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="offline" id="955-HD-aat"/>
+                                                                </imageView>
                                                             </subviews>
                                                             <constraints>
+                                                                <constraint firstItem="lDT-QO-kIK" firstAttribute="leading" secondItem="azx-Gr-vGb" secondAttribute="leading" constant="32" id="I7W-Ot-bQq"/>
                                                                 <constraint firstItem="7ak-TK-LeP" firstAttribute="leading" secondItem="5SW-8j-tAt" secondAttribute="trailing" constant="10" id="JVb-U5-tQD"/>
                                                                 <constraint firstItem="7ak-TK-LeP" firstAttribute="top" secondItem="azx-Gr-vGb" secondAttribute="top" priority="750" constant="3" id="MGC-xQ-EPK"/>
                                                                 <constraint firstItem="5SW-8j-tAt" firstAttribute="leading" secondItem="azx-Gr-vGb" secondAttribute="leading" constant="3" id="Od7-Rn-1Wh"/>
+                                                                <constraint firstAttribute="trailing" secondItem="lDT-QO-kIK" secondAttribute="trailing" constant="261" id="OuA-8X-lXL"/>
+                                                                <constraint firstItem="lDT-QO-kIK" firstAttribute="top" secondItem="0ib-3X-AX9" secondAttribute="top" id="buL-z3-iep"/>
+                                                                <constraint firstAttribute="bottom" secondItem="lDT-QO-kIK" secondAttribute="bottom" constant="3" id="fsW-f9-lGQ"/>
                                                                 <constraint firstAttribute="trailing" secondItem="0ib-3X-AX9" secondAttribute="trailing" constant="16" id="gRO-NM-RM7"/>
                                                                 <constraint firstItem="5SW-8j-tAt" firstAttribute="top" secondItem="azx-Gr-vGb" secondAttribute="top" constant="3" id="hQg-5f-PNT"/>
                                                                 <constraint firstItem="0ib-3X-AX9" firstAttribute="leading" secondItem="5SW-8j-tAt" secondAttribute="trailing" constant="12" id="jrE-SO-HYH"/>
@@ -758,6 +766,7 @@
                                                                 <outlet property="icon" destination="5SW-8j-tAt" id="s76-s3-JxY"/>
                                                                 <outlet property="name" destination="7ak-TK-LeP" id="YVZ-Cl-ezC"/>
                                                                 <outlet property="status" destination="0ib-3X-AX9" id="el9-7z-BZw"/>
+                                                                <outlet property="statusOrb" destination="lDT-QO-kIK" id="lrU-Q4-8rz"/>
                                                             </connections>
                                                         </tableCellView>
                                                     </prototypeCellViews>
@@ -1499,5 +1508,6 @@ Gw
     </scenes>
     <resources>
         <image name="noicon" width="44" height="44"/>
+        <image name="offline" width="15" height="15"/>
     </resources>
 </document>

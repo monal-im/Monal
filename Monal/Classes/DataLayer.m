@@ -1626,7 +1626,7 @@ static DataLayer *sharedInstance=nil;
     
     NSString* query=[NSString stringWithFormat:@"delete from activechats where buddy_name='%@' and account_id=%@ ", buddyname.escapeForSql, accountNo ];
     //	DDLogVerbose(query);
-    bool result=[self executeNonQuery:query];
+    BOOL result=[self executeNonQuery:query];
     
     return result;
 }
@@ -1636,7 +1636,7 @@ static DataLayer *sharedInstance=nil;
     
     NSString* query=[NSString stringWithFormat:@"delete from activechats " ];
     //	DDLogVerbose(query);
-    bool result=[self executeNonQuery:query];
+    BOOL result=[self executeNonQuery:query];
     return result;
     
 }
@@ -1649,7 +1649,7 @@ static DataLayer *sharedInstance=nil;
    [self executeScalar:query withCompletion:^(NSObject * count) {
         if(count!=nil)
         {
-            int val=[((NSNumber *)count) integerValue];
+            NSInteger val=[((NSNumber *)count) integerValue];
             if(val>0) {
                 if (completion) {
                     completion(NO);
@@ -1658,7 +1658,7 @@ static DataLayer *sharedInstance=nil;
             {
                 //no
                 NSString* query2=[NSString stringWithFormat:@"insert into activechats values ( %@,'%@') ",  accountNo,buddyname.escapeForSql ];
-                bool result=[self executeNonQuery:query2];
+                BOOL result=[self executeNonQuery:query2];
                 if (completion) {
                     completion(result);
                 }

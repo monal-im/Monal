@@ -453,7 +453,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                            NSIndexPath *path1;
                            [_messageTable beginUpdates];
                            NSInteger bottom = [_messageTable numberOfRowsInSection:0];
-                           if(bottom>0) {
+                           if(bottom>=0) {
                                 path1 = [NSIndexPath indexPathForRow:bottom  inSection:0];
                                [_messageTable insertRowsAtIndexPaths:@[path1]
                                                     withRowAnimation:UITableViewRowAnimationBottom];
@@ -872,6 +872,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         
         DDLogVerbose(@"%@", message);
         
+#warning will not work if it is a newly sent messge as i m not storing message id in the inserts.  need to do that. 
         if([message objectForKey:@"message_history_id"])
         {
             [[DataLayer sharedInstance] deleteMessageHistory:[NSString stringWithFormat:@"%@",[message objectForKey:@"message_history_id"]]];

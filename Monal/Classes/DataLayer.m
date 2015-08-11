@@ -1625,7 +1625,7 @@ static DataLayer *sharedInstance=nil;
     
 }
 
--(BOOL) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString *)messageId withCompletion:(void (^)(BOOL))completion
+-(void) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString *)messageId withCompletion:(void (^)(BOOL))completion
 {
     //MEssaes_history ging out, from is always the local user. always read, default to  delivered (will be reset by timer if needed)
     
@@ -1633,9 +1633,9 @@ static DataLayer *sharedInstance=nil;
     NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, %@, '%@',  '%@', '%@ %@', '%@', '%@',0,1,'%@');", accountNo, from.escapeForSql, to.escapeForSql,
                      [parts objectAtIndex:0],[parts objectAtIndex:1], message.escapeForSql, actualfrom.escapeForSql, messageId.escapeForSql];
     
-    [self executeNonQuery:query withCompletion:^(BOOL retult) {
+    [self executeNonQuery:query withCompletion:^(BOOL result) {
         if (completion) {
-            completion(retult);
+            completion(result);
         }
         
     }];

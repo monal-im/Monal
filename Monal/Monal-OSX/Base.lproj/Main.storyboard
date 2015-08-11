@@ -1109,6 +1109,9 @@
                                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                                         <font key="font" metaFont="system"/>
                                                                     </buttonCell>
+                                                                    <connections>
+                                                                        <action selector="checkBoxAction:" target="GJA-KX-dbK" id="VIE-rS-ylY"/>
+                                                                    </connections>
                                                                 </button>
                                                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Ttp-oM-pX8">
                                                                     <rect key="frame" x="29" y="15" width="358" height="17"/>
@@ -1126,6 +1129,7 @@
                                                                 <constraint firstItem="TrR-Z7-L5Z" firstAttribute="top" secondItem="GJA-KX-dbK" secondAttribute="top" constant="3" id="04Z-vx-01J"/>
                                                                 <constraint firstItem="TrR-Z7-L5Z" firstAttribute="leading" secondItem="GJA-KX-dbK" secondAttribute="leading" constant="3" id="0bB-WP-cTb"/>
                                                                 <constraint firstItem="TrR-Z7-L5Z" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="GJA-KX-dbK" secondAttribute="leading" constant="3" id="GkS-IY-y0Q"/>
+                                                                <constraint firstItem="TrR-Z7-L5Z" firstAttribute="leading" relation="lessThanOrEqual" secondItem="GJA-KX-dbK" secondAttribute="leading" constant="3" id="OUO-xH-IL1"/>
                                                                 <constraint firstItem="Ttp-oM-pX8" firstAttribute="bottom" secondItem="TrR-Z7-L5Z" secondAttribute="bottom" id="QDZ-8u-MCm"/>
                                                                 <constraint firstItem="Ttp-oM-pX8" firstAttribute="leading" secondItem="TrR-Z7-L5Z" secondAttribute="trailing" constant="10" id="t6A-sC-IaA"/>
                                                             </constraints>
@@ -1317,7 +1321,7 @@
                                         </button>
                                         <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Dhw-7C-0DB">
                                             <rect key="frame" x="95" y="100" width="293" height="22"/>
-                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" title="Monal" drawsBackground="YES" id="28W-Cb-Y2e">
+                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" title="Monal-OSX" drawsBackground="YES" id="28W-Cb-Y2e">
                                                 <font key="font" metaFont="system"/>
                                                 <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
                                                 <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>

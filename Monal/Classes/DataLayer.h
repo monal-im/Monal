@@ -156,7 +156,7 @@ extern NSString *const kContactName;
 -(NSArray *) messageForHistoryID:(NSInteger) historyID;
 
 -(BOOL) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom delivered:(BOOL) delivered unread:(BOOL) unread;
--(BOOL) setMessageId:(NSString*) messageid delivered:(BOOL) delivered;
+-(void) setMessageId:(NSString*) messageid delivered:(BOOL) delivered;
 
 -(BOOL) clearMessages:(NSString*) accountNo;
 -(BOOL) deleteMessage:(NSString*) messageNo;
@@ -173,7 +173,7 @@ extern NSString *const kContactName;
 -(BOOL) messageHistoryCleanAll;
 
 -(NSArray*) messageHistoryBuddies:(NSString*) accountNo;
--(BOOL) markAsReadBuddy:(NSString*) buddy forAccount:(NSString*) accountNo;
+-(void) markAsReadBuddy:(NSString*) buddy forAccount:(NSString*) accountNo;
 -(void) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString *)messageId withCompletion:(void (^)(BOOL))completion;
 
 #pragma mark active chats
@@ -183,9 +183,11 @@ extern NSString *const kContactName;
 -(void) addActiveBuddies:(NSString*) buddyname forAccount:(NSString*) accountNo withCompletion: (void (^)(BOOL))completion;
 
 #pragma mark count unread
--(int) countUnreadMessagesForAccount:(NSString*) accountNo;
+-(void) countUnreadMessagesForAccount:(NSString*) accountNo withCompletion: (void (^)(NSNumber *))completion;
+
 -(int) countUserUnreadMessages:(NSString*) buddy forAccount:(NSString*) accountNo;
 -(int) countOtherUnreadMessages:(NSString*) buddy forAccount:(NSString*) accountNo;
--(int) countUnreadMessages;
+
+-(void) countUnreadMessagesWithCompletion: (void (^)(NSNumber *))completion;
 
 @end

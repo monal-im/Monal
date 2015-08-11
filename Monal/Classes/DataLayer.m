@@ -1394,18 +1394,12 @@ static DataLayer *sharedInstance=nil;
     
 }
 
--(BOOL) setMessageId:(NSString*) messageid delivered:(BOOL) delivered
+-(void) setMessageId:(NSString*) messageid delivered:(BOOL) delivered
 {
     NSString* query=[NSString stringWithFormat:@"update message_history set delivered=%d where messageid='%@';",delivered, messageid];
     DDLogInfo(@" setting delivered %@",query);
-    if([self executeNonQuery:query]!=NO)
-    {
-        return YES;
-    }
-    else
-    {
-        return NO;
-    }
+    [self executeNonQuery:query withCompletion:nil];
+ 
 }
 
 
@@ -1609,19 +1603,13 @@ static DataLayer *sharedInstance=nil;
     }
     
 }
--(BOOL) markAsReadBuddy:(NSString*) buddy forAccount:(NSString*) accountNo
+
+-(void) markAsReadBuddy:(NSString*) buddy forAccount:(NSString*) accountNo
 {
     
     NSString* query2=[NSString stringWithFormat:@"  update message_history set unread=0 where account_id=%@ and message_from='%@';", accountNo, buddy.escapeForSql];
-    if([self executeNonQuery:query2]!=NO)
-    {
-        return YES;
-    }
-    else
-    {
-        DDLogError(@"Message history update failed");
-        return NO;
-    }
+    [self executeNonQuery:query2 withCompletion:nil];
+ 
     
 }
 
@@ -1643,23 +1631,19 @@ static DataLayer *sharedInstance=nil;
 
 
 //count unread
--(int) countUnreadMessages
+-(void) countUnreadMessagesWithCompletion: (void (^)(NSNumber *))completion
 {
     // count # of meaages in message table
     NSString* query=[NSString stringWithFormat:@"select count(message_history_id) from  message_history where unread=1"];
     
-    NSNumber* count=(NSNumber*)[self executeScalar:query];
-    if(count!=nil)
-    {
-        int val=[count integerValue];
-        return val;
-    }
-    else
-    {
-        return 0;
-    }
-    
-    
+    [self executeScalar:query withCompletion:^(NSObject *result) {
+        NSNumber *count= (NSNumber *) result;
+        
+        if(completion)
+        {
+            completion(count);
+        }
+    }];
 }
 
 #pragma mark active chats
@@ -1722,13 +1706,14 @@ static DataLayer *sharedInstance=nil;
             {
                 //no
                 NSString* query2=[NSString stringWithFormat:@"insert into activechats values ( %@,'%@') ",  accountNo,buddyname.escapeForSql ];
-                BOOL result=[self executeNonQuery:query2];
-                if (completion) {
-                    completion(result);
-                }
+                [self executeNonQuery:query2 withCompletion:^(BOOL result) {
+                    if (completion) {
+                        completion(result);
+                    }
+                }];
+                
             }
         }
-        
         
     }];
     

@@ -197,20 +197,28 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     //make sure unread badge matches application badge
     
-    int unread= [[DataLayer sharedInstance] countUnreadMessages];
-    dispatch_async(dispatch_get_main_queue(), ^{
-        
-        if(unread>0)
-        {
-            _activeTab.badgeValue=[NSString stringWithFormat:@"%d",unread];
-            [UIApplication sharedApplication].applicationIconBadgeNumber =unread;
-        }
-        else
-        {
-            _activeTab.badgeValue=nil;
-             [UIApplication sharedApplication].applicationIconBadgeNumber =0;
-        }
-    });
+    [[DataLayer sharedInstance] countUnreadMessagesWithCompletion:^(NSNumber *result) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            
+            NSInteger unread =0;
+            if(result)
+            {
+                unread= [result integerValue];
+            }
+            
+            if(unread>0)
+            {
+                _activeTab.badgeValue=[NSString stringWithFormat:@"%ld",(long)unread];
+                [UIApplication sharedApplication].applicationIconBadgeNumber =unread;
+            }
+            else
+            {
+                _activeTab.badgeValue=nil;
+                [UIApplication sharedApplication].applicationIconBadgeNumber =0;
+            }
+        });
+    }];
+    
 }
 
 #pragma mark app life cycle

@@ -44,6 +44,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     self.offlineContacts=[[NSMutableArray alloc] init] ;
     self.infoCells=[[NSMutableArray alloc] init] ;
     
+    //self.contactsTable.
+    
     [MLXMPPManager sharedInstance].contactVC=self;
     [self.contactsTable reloadData];
     

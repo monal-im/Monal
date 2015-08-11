@@ -123,7 +123,6 @@
 		26049A581B7315DC00D11866 /* TPCircularBuffer+AudioBufferList.c in Sources */ = {isa = PBXBuildFile; fileRef = 2658508615E7D8E40070A2A7 /* TPCircularBuffer+AudioBufferList.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		26049A591B7315DF00D11866 /* TPCircularBuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 2658508815E7D8E40070A2A7 /* TPCircularBuffer.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		26049A5B1B73163300D11866 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26049A5A1B73163300D11866 /* AVFoundation.framework */; };
-		26049A5D1B73164500D11866 /* AVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26049A5C1B73164500D11866 /* AVKit.framework */; };
 		260870D81B7034460036539B /* MLAccountEdit.m in Sources */ = {isa = PBXBuildFile; fileRef = 260870D71B7034460036539B /* MLAccountEdit.m */; };
 		260C51D1177F08F50039634B /* xmpp.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D0177F08F50039634B /* xmpp.m */; };
 		260C51D4177F44AD0039634B /* XMLNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D3177F44AD0039634B /* XMLNode.m */; };
@@ -155,6 +154,7 @@
 		262E51971AD8CB7200788351 /* MLTextInputCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 262E51951AD8CB7200788351 /* MLTextInputCell.m */; };
 		262E51981AD8CB7200788351 /* MLTextInputCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 262E51961AD8CB7200788351 /* MLTextInputCell.xib */; };
 		2630FE341AD550C00079F5C0 /* Monal_Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = 2630FE331AD550C00079F5C0 /* Monal_Tests.m */; };
+		26329D301B797A060061EA36 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 26329D2F1B797A060061EA36 /* Images.xcassets */; };
 		26347D861790FFDE006FF64F /* MLInfoCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 26347D851790FFDE006FF64F /* MLInfoCell.m */; };
 		26352EA8177D222600E2C8FF /* MLXMPPManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26352EA7177D222600E2C8FF /* MLXMPPManager.m */; };
 		2636C43F177BD58C001CA71F /* XMPPEdit.m in Sources */ = {isa = PBXBuildFile; fileRef = 2636C43E177BD58C001CA71F /* XMPPEdit.m */; };
@@ -460,6 +460,7 @@
 		2630FE2F1AD550C00079F5C0 /* Monal Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Monal Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2630FE321AD550C00079F5C0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2630FE331AD550C00079F5C0 /* Monal_Tests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Monal_Tests.m; sourceTree = "<group>"; };
+		26329D2F1B797A060061EA36 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		26347D841790FFDE006FF64F /* MLInfoCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLInfoCell.h; sourceTree = "<group>"; };
 		26347D851790FFDE006FF64F /* MLInfoCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLInfoCell.m; sourceTree = "<group>"; };
 		26352EA6177D222600E2C8FF /* MLXMPPManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLXMPPManager.h; sourceTree = "<group>"; };
@@ -788,7 +789,6 @@
 			files = (
 				267ECD6D1B746C660025337F /* CFNetwork.framework in Frameworks */,
 				267ECD6B1B746C340025337F /* Security.framework in Frameworks */,
-				26049A5D1B73164500D11866 /* AVKit.framework in Frameworks */,
 				26049A5B1B73163300D11866 /* AVFoundation.framework in Frameworks */,
 				26049A511B73156300D11866 /* libjrtplib-static-OSX.a in Frameworks */,
 				26B2A4CB1B73084800272E63 /* AppKit.framework in Frameworks */,
@@ -1041,6 +1041,7 @@
 				2651AF541B409906008D025C /* MLMainWindow.m */,
 				265802831B785B8900C35014 /* MLDisabledScrollView.h */,
 				265802841B785B8900C35014 /* MLDisabledScrollView.m */,
+				26329D2F1B797A060061EA36 /* Images.xcassets */,
 			);
 			path = "Monal-OSX";
 			sourceTree = "<group>";
@@ -1875,6 +1876,7 @@
 				26B2A4BD1B7306C400272E63 /* About.html in Resources */,
 				26B2A4BC1B7306C000272E63 /* sworim.sqlite in Resources */,
 				261894921B40483000C957C3 /* Media.xcassets in Resources */,
+				26329D301B797A060061EA36 /* Images.xcassets in Resources */,
 				266272C11B27DB8000C1CD49 /* Main.storyboard in Resources */,
 				261199251B632C42008768C8 /* MASPreferencesWindow.xib in Resources */,
 			);
@@ -2461,6 +2463,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
@@ -2496,6 +2499,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
@@ -2537,6 +2541,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;

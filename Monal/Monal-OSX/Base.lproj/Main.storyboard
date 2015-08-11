@@ -745,6 +745,7 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <size key="intercellSpacing" width="3" height="2"/>
                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                            <tableViewGridLines key="gridStyleMask" horizontal="YES"/>
                                             <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
                                             <tableColumns>
                                                 <tableColumn width="315" minWidth="40" maxWidth="1000" id="xVS-3C-CZv">
@@ -775,7 +776,9 @@
                                                                 <imageView verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="5SW-8j-tAt">
                                                                     <rect key="frame" x="3" y="9" width="47" height="44"/>
                                                                     <constraints>
+                                                                        <constraint firstAttribute="width" constant="47" id="CaP-qe-f5n"/>
                                                                         <constraint firstAttribute="height" relation="lessThanOrEqual" constant="50" id="F4b-YU-k8i"/>
+                                                                        <constraint firstAttribute="height" constant="44" id="xAo-v2-gcM"/>
                                                                         <constraint firstAttribute="width" relation="lessThanOrEqual" constant="47" id="zyd-uN-WGk"/>
                                                                     </constraints>
                                                                     <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="noicon" id="cMe-fd-6Pb"/>
@@ -790,10 +793,16 @@
                                                                 </textField>
                                                                 <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="lDT-QO-kIK">
                                                                     <rect key="frame" x="32" y="3" width="22" height="22"/>
+                                                                    <constraints>
+                                                                        <constraint firstAttribute="width" constant="22" id="GNB-CR-IL4"/>
+                                                                        <constraint firstAttribute="height" constant="22" id="Wyt-SF-itV"/>
+                                                                    </constraints>
                                                                     <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="offline" id="955-HD-aat"/>
                                                                 </imageView>
                                                             </subviews>
                                                             <constraints>
+                                                                <constraint firstItem="5SW-8j-tAt" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="azx-Gr-vGb" secondAttribute="leading" constant="3" id="5bH-bo-bWg"/>
+                                                                <constraint firstItem="5SW-8j-tAt" firstAttribute="top" relation="greaterThanOrEqual" secondItem="azx-Gr-vGb" secondAttribute="top" constant="3" id="9jG-zR-7Oh"/>
                                                                 <constraint firstItem="lDT-QO-kIK" firstAttribute="leading" secondItem="azx-Gr-vGb" secondAttribute="leading" constant="32" id="I7W-Ot-bQq"/>
                                                                 <constraint firstItem="7ak-TK-LeP" firstAttribute="leading" secondItem="5SW-8j-tAt" secondAttribute="trailing" constant="10" id="JVb-U5-tQD"/>
                                                                 <constraint firstItem="7ak-TK-LeP" firstAttribute="top" secondItem="azx-Gr-vGb" secondAttribute="top" priority="750" constant="3" id="MGC-xQ-EPK"/>

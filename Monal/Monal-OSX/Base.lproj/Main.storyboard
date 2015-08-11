@@ -686,10 +686,23 @@
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="Name" id="0rf-P9-rs9">
                                             <font key="font" metaFont="system"/>
-                                            <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                            <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                         </textFieldCell>
                                     </textField>
+                                </toolbarItem>
+                                <toolbarItem implicitItemIdentifier="6CE04854-34DF-4DA3-9569-48B29F80EA3D" label="Contact Info" paletteLabel="Contact Info" id="O1F-wJ-6xt">
+                                    <nil key="toolTip"/>
+                                    <size key="minSize" width="52" height="28"/>
+                                    <size key="maxSize" width="87" height="55"/>
+                                    <button key="view" verticalHuggingPriority="750" id="J5C-jf-Itd">
+                                        <rect key="frame" x="11" y="14" width="52" height="28"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                        <buttonCell key="cell" type="roundTextured" title="Info" bezelStyle="texturedRounded" alignment="center" borderStyle="border" inset="2" id="JFe-hY-9fy">
+                                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                            <font key="font" metaFont="system"/>
+                                        </buttonCell>
+                                    </button>
                                 </toolbarItem>
                             </allowedToolbarItems>
                             <defaultToolbarItems>
@@ -698,6 +711,7 @@
                                 <toolbarItem reference="7tw-2L-tfc"/>
                                 <toolbarItem reference="82S-Mb-KdJ"/>
                                 <toolbarItem reference="7tw-2L-tfc"/>
+                                <toolbarItem reference="O1F-wJ-6xt"/>
                             </defaultToolbarItems>
                         </toolbar>
                     </window>

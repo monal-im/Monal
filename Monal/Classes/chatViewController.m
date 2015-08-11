@@ -509,7 +509,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                            NSIndexPath *path1;
                            NSInteger bottom = [_messageTable numberOfRowsInSection:0];
                            if(bottom>0) {
-                               path1 = [NSIndexPath indexPathForRow:bottom-1  inSection:0];
+                               path1 = [NSIndexPath indexPathForRow:bottom  inSection:0];
                                [_messageTable insertRowsAtIndexPaths:@[path1]
                                                     withRowAnimation:UITableViewRowAnimationBottom];
                            }
@@ -519,7 +519,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                            [self scrollToBottom];
                            
                            //mark as read
-                           [[DataLayer sharedInstance] markAsReadBuddy:_contactName forAccount:_accountNo];
+                          // [[DataLayer sharedInstance] markAsReadBuddy:_contactName forAccount:_accountNo];
                        });
     }
 }

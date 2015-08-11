@@ -437,10 +437,10 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         return;
     }
     
-	if([[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:_accountNo withMessage:message actuallyFrom:self.jid withId:messageId])
-	{
+	[[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:_accountNo withMessage:message actuallyFrom:self.jid withId:messageId withCompletion:^(BOOL result) {
 		DDLogVerbose(@"added message");
         
+        if(result) {
         dispatch_async(dispatch_get_main_queue(),
                        ^{
                            NSDictionary* userInfo = @{@"af": self.jid,
@@ -469,11 +469,12 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 	else {
 		DDLogVerbose(@"failed to add message");
     }
+    }];
 	
 	// make sure its in active
 	if(_firstmsg==YES)
 	{
-        [[DataLayer sharedInstance] addActiveBuddies:to forAccount:_accountNo];
+        [[DataLayer sharedInstance] addActiveBuddies:to forAccount:_accountNo withCompletion:nil];
         _firstmsg=NO;
 	}
 

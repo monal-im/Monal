@@ -152,13 +152,13 @@
 
 -(NSArray*) messageHistoryBuddies:(NSString*) accountNo;
 -(BOOL) markAsReadBuddy:(NSString*) buddy forAccount:(NSString*) accountNo;
--(BOOL) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString *)messageId;
+-(void) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString *)messageId withCompletion:(void (^)(BOOL))completion;
 
 #pragma mark active chats
 -(NSArray*) activeBuddies;
 -(bool) removeActiveBuddy:(NSString*) buddyname forAccount:(NSString*) accountNo;
 -(bool) removeAllActiveBuddies;
--(bool) addActiveBuddies:(NSString*) buddyname forAccount:(NSString*) accountNo;
+-(void) addActiveBuddies:(NSString*) buddyname forAccount:(NSString*) accountNo withCompletion: (void (^)(BOOL))completion;
 
 #pragma mark count unread
 -(int) countUnreadMessagesForAccount:(NSString*) accountNo;

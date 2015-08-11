@@ -371,8 +371,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void) refreshCounter
 {
-    
-    //coming in  from abckgroun
+    //coming in  from background
     if(!_day) {
         [[DataLayer sharedInstance] markAsReadBuddy:self.contactName forAccount:self.accountNo];
         
@@ -530,18 +529,18 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     dispatch_async(dispatch_get_main_queue(),
                    ^{
                        int row=0;
+                       [_messageTable beginUpdates];
                        for(NSMutableDictionary *rowDic in _messagelist)
                        {
                            if([[rowDic objectForKey:@"messageid"] isEqualToString:messageId]) {
                                [rowDic setObject:[NSNumber numberWithBool:delivered] forKey:@"delivered"];
                                NSIndexPath *indexPath =[NSIndexPath indexPathForRow:row inSection:0];
-                               dispatch_async(dispatch_get_main_queue(), ^{
                                    [_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
-                               });
                                break;
                            }
                            row++;
                        }
+                       [_messageTable endUpdates];
                    });
 }
 

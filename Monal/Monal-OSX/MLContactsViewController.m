@@ -119,8 +119,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                            //check if already there
                            NSInteger pos=-1;
                            NSInteger offlinepos=-1;
-                           NSInteger counter=0;
-                           pos = [self positionOfOfflineContact:user];
+                           pos = [self positionOfOnlineContact:user];
                            
                            
                            //offlinepos= [self positionOfOfflineContact:user];
@@ -128,8 +127,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                            //not there
                            if(pos<0)
                            {
-                               
-                               
+                    
                                if(!(contactRow.count>=1))
                                {
                                    DDLogError(@"ERROR:could not find contact row");
@@ -192,20 +190,22 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                [self.contactsTable endUpdates];
                            }else
                            {
-                               DDLogVerbose(@"user %@ already in list",[user objectForKey:kusernameKey]);
-                               if([user objectForKey:kstateKey])
-                                   [[_contacts objectAtIndex:pos] setObject:[user objectForKey:kstateKey] forKey:kstateKey];
-                               if([user objectForKey:kstatusKey])
-                                   [[_contacts objectAtIndex:pos] setObject:[user objectForKey:kstatusKey] forKey:kstatusKey];
-                               
-                               if([user objectForKey:kfullNameKey])
-                                   [[_contacts objectAtIndex:pos] setObject:[user objectForKey:kfullNameKey] forKey:@"full_name"];
-                               
-                               [self.contactsTable beginUpdates];
-                               
-                               NSIndexSet *indexSet =[[NSIndexSet alloc] initWithIndex:pos] ;
-                               [self.contactsTable reloadDataForRowIndexes:indexSet columnIndexes:0];
-                               [self.contactsTable endUpdates];
+                               DDLogVerbose(@"user %@ already in list %@",[user objectForKey:kusernameKey], self.contacts);
+                               if(pos<self.contacts.count) {
+                                   if([user objectForKey:kstateKey])
+                                       [[_contacts objectAtIndex:pos] setObject:[user objectForKey:kstateKey] forKey:kstateKey];
+                                   if([user objectForKey:kstatusKey])
+                                       [[_contacts objectAtIndex:pos] setObject:[user objectForKey:kstatusKey] forKey:kstatusKey];
+                                   
+                                   if([user objectForKey:kfullNameKey])
+                                       [[_contacts objectAtIndex:pos] setObject:[user objectForKey:kfullNameKey] forKey:@"full_name"];
+                                   
+                                   [self.contactsTable beginUpdates];
+                                   
+                                   NSIndexSet *indexSet =[[NSIndexSet alloc] initWithIndex:pos] ;
+                                   [self.contactsTable reloadDataForRowIndexes:indexSet columnIndexes:0];
+                                   [self.contactsTable endUpdates];
+                               }
                            }
                            
                            
@@ -242,16 +242,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                            {
                                
                                counter=0;
-                               for(NSDictionary* row in _offlineContacts)
-                               {
-                                   if([[row objectForKey:kContactName] caseInsensitiveCompare:[user objectForKey:kusernameKey] ]==NSOrderedSame &&
-                                      [[row objectForKey:kAccountID]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
-                                   {
-                                       offlinepos=counter;
-                                       break;
-                                   }
-                                   counter++;
-                               }
+                               offlinepos= [self positionOfOfflineContact:user];
                                
                                //in contacts but not in offline.. (not in roster this shouldnt happen)
                                if((offlinepos==-1) &&(pos>=0))
@@ -267,16 +258,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                    //find where it is
                                    
                                    counter=0;
-                                   for(NSDictionary* row in _offlineContacts)
-                                   {
-                                       if([[row objectForKey:kContactName] caseInsensitiveCompare:[user objectForKey:kusernameKey] ]==NSOrderedSame &&
-                                          [[row objectForKey:kAccountID]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
-                                       {
-                                           offlinepos=counter;
-                                           break;
-                                       }
-                                       counter++;
-                                   }
+                                   offlinepos= [self positionOfOfflineContact:user];
                                    DDLogVerbose(@"sorted contacts %@", _offlineContacts);
                                }
                            }

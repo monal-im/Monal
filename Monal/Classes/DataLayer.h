@@ -95,10 +95,10 @@ extern NSString *const kContactName;
 -(void) setOnlineBuddy:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
 -(BOOL) setOfflineBuddy:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
 
--(BOOL) setBuddyStatus:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
+-(void) setBuddyStatus:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
 -(NSString*) buddyStatus:(NSString*) buddy forAccount:(NSString*) accountNo;
 
--(BOOL) setBuddyState:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
+-(void) setBuddyState:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
 -(NSString*) buddyState:(NSString*) buddy forAccount:(NSString*) accountNo;
 
 
@@ -111,7 +111,7 @@ extern NSString *const kContactName;
 -(BOOL) setBuddyHash:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
 -(NSString*) buddyHash:(NSString*) buddy forAccount:(NSString*) accountNo;
 
--(bool) isBuddyOnline:(NSString*) buddy forAccount:(NSString*) accountNo ;
+-(void) isBuddyOnline:(NSString*) buddy forAccount:(NSString*) accountNo withCompletion: (void (^)(BOOL))completion;
 
 -(bool) isBuddyMuc:(NSString*) buddy forAccount:(NSString*) accountNo;
 

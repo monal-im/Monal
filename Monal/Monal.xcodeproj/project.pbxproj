@@ -2240,7 +2240,7 @@
 				OTHER_LDFLAGS = "-lstdc++";
 				PRODUCT_NAME = Monal;
 				PROVISIONING_PROFILE = "";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "84bd2c95-d11c-4e96-b785-7d99f930395f";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "1ea706e7-732c-4604-a2b2-64d29262b2a5";
 			};
 			name = Debug;
 		};

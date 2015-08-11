@@ -1048,13 +1048,13 @@ static DataLayer *sharedInstance=nil;
 {
     [self setResourceOnline:presenceObj forAccount:accountNo];
     
-    if([self isBuddyOnline:presenceObj.user forAccount:accountNo]) {
-        return ; // pervent setting something as new and reinserting
-    }
-    
-    NSString* query=[NSString stringWithFormat:@"update buddylist set online=1, new=1, muc=%d where account_id=%@ and  buddy_name='%@';",presenceObj.MUC, accountNo, presenceObj.user.escapeForSql ];
-    [self executeNonQuery:query withCompletion:nil];
- 
+    [self isBuddyOnline:presenceObj.user forAccount:accountNo withCompletion:^(BOOL isOnline) {
+        if(!isOnline) {
+            NSString* query=[NSString stringWithFormat:@"update buddylist set online=1, new=1, muc=%d where account_id=%@ and  buddy_name='%@';",presenceObj.MUC, accountNo, presenceObj.user.escapeForSql ];
+            [self executeNonQuery:query withCompletion:nil];
+        }
+    }];
+
 }
 
 -(BOOL) setOfflineBuddy:(ParsePresence *)presenceObj forAccount:(NSString *)accountNo
@@ -1092,22 +1092,14 @@ static DataLayer *sharedInstance=nil;
 }
 
 
--(BOOL) setBuddyState:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
+-(void) setBuddyState:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
 {
-    
     NSString* toPass;
     //data length check
     
     if([presenceObj.show length]>20) toPass=[presenceObj.show substringToIndex:19]; else toPass=presenceObj.show;
     NSString* query=[NSString stringWithFormat:@"update buddylist set state='%@', dirty=1 where account_id=%@ and  buddy_name='%@';",toPass, accountNo, presenceObj.user.escapeForSql];
-    if([self executeNonQuery:query]!=NO)
-    {
-        return YES;
-    }
-    else
-    {
-        return NO;
-    }
+    [self executeNonQuery:query withCompletion:nil];
     
 }
 
@@ -1120,7 +1112,7 @@ static DataLayer *sharedInstance=nil;
 }
 
 
--(BOOL) setBuddyStatus:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo
+-(void) setBuddyStatus:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo
 {
     NSString* toPass;
     //data length check
@@ -1129,16 +1121,8 @@ static DataLayer *sharedInstance=nil;
     else toPass=[presenceObj.status  stringByReplacingOccurrencesOfString:@"'"
                                                                withString:@"''"];;
     NSString* query=[NSString stringWithFormat:@"update buddylist set status='%@', dirty=1 where account_id=%@ and  buddy_name='%@';",[toPass stringByReplacingOccurrencesOfString:@"'" withString:@"''"], accountNo, presenceObj.user.escapeForSql];
-    if([self executeNonQuery:query]!=NO)
-    {
-        
-        return YES;
-    }
-    else
-    {
-        
-        return NO;
-    }
+    [self executeNonQuery:query withCompletion:nil];
+
 }
 
 -(NSString*) buddyStatus:(NSString*) buddy forAccount:(NSString*) accountNo
@@ -1255,29 +1239,27 @@ static DataLayer *sharedInstance=nil;
     
 }
 
--(bool) isBuddyOnline:(NSString*) buddy forAccount:(NSString*) accountNo
+-(void) isBuddyOnline:(NSString*) buddy forAccount:(NSString*) accountNo withCompletion: (void (^)(BOOL))completion
 {
     NSString* query=[NSString stringWithFormat:@"select count(buddy_id) from buddylist where account_id=%@ and buddy_name='%@' and online=1 ", accountNo, buddy.escapeForSql];
     
-    NSNumber* count=(NSNumber*)[self executeScalar:query];
-    if(count!=nil)
-    {
-        NSInteger val=[count integerValue];
-        if(val>0) {
-            return YES;
-        }
-        else
+    [self executeScalar:query withCompletion:^(NSObject *value) {
+        
+        NSNumber* count=(NSNumber*)value;
+        BOOL toreturn=NO;
+        if(count!=nil)
         {
-            return NO;
+            NSInteger val=[count integerValue];
+            if(val>0) {
+                toreturn= YES;
+            }
+            
         }
-    }
-    else
-    {
-        ;
-        return NO;
-    }
-    
-    
+        if(completion)
+        {
+            completion(toreturn);
+        }
+    }];
 }
 
 -(bool) isBuddyMuc:(NSString*) buddy forAccount:(NSString*) accountNo

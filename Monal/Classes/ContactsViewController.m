@@ -328,9 +328,20 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                            if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
                            {
                                offlinepos =[self positionOfOfflineContact:user];
+                               if(offlinepos>=0 && offlinepos<[_offlineContacts count])
+                               {
+                                   DDLogVerbose(@"removed from offline");
+                                   
+                                   [_offlineContacts removeObjectAtIndex:offlinepos];
+                                   [_contactsTable beginUpdates];
+                                   NSIndexPath *path2 = [NSIndexPath indexPathForRow:offlinepos inSection:kofflineSection];
+                                   [_contactsTable deleteRowsAtIndexPaths:@[path2]
+                                                         withRowAnimation:UITableViewRowAnimationFade];
+                                    [_contactsTable endUpdates];
+                               }
                            }
                            
-                           //not there
+                           //not already in online list
                            if(pos<0)
                            {
                                if(!(contactRow.count>=1))
@@ -339,15 +350,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                    return;
                                }
                                //insert into datasource
+                               DDLogVerbose(@"inserted into contacts");
                                [_contacts insertObject:[contactRow objectAtIndex:0] atIndex:0];
-                               
-                               if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
-                               {
-                                   if(offlinepos>=0 && offlinepos<[_offlineContacts count])
-                                   {
-                                       [_offlineContacts removeObjectAtIndex:offlinepos];
-                                   }
-                               }
                                
                                //sort
                                NSSortDescriptor *descriptor = [[NSSortDescriptor alloc] initWithKey:@"buddy_name"  ascending:YES];
@@ -359,7 +363,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                
                                DDLogVerbose(@"sorted contacts %@", _contacts);
                                
-                               DDLogVerbose(@"inserting %@ at pos %d", [_contacts objectAtIndex:newpos], newpos);
+                               DDLogVerbose(@"inserting %@ st sorted  pos %d", [_contacts objectAtIndex:newpos], newpos);
                                
                                
                                [_contactsTable beginUpdates];
@@ -368,21 +372,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                [_contactsTable insertRowsAtIndexPaths:@[path1]
                                                      withRowAnimation:UITableViewRowAnimationAutomatic];
                                
-                               if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
-                               {
-                                   if(offlinepos>=0 && offlinepos<[_offlineContacts count])
-                                   {
-                                       NSIndexPath *path2 = [NSIndexPath indexPathForRow:offlinepos inSection:kofflineSection];
-                                       [_contactsTable deleteRowsAtIndexPaths:@[path2]
-                                                             withRowAnimation:UITableViewRowAnimationFade];
-                                   }
-                               }
                                [_contactsTable endUpdates];
                                
                                
                            }else
                            {
-                               DDLogVerbose(@"user %@ already in list",[user objectForKey:kusernameKey]);
+                               DDLogVerbose(@"user %@ already in list updating status",[user objectForKey:kusernameKey]);
                                if(pos<self.contacts.count) {
                                    if([user objectForKey:kstateKey])
                                        [[_contacts objectAtIndex:pos] setObject:[user objectForKey:kstateKey] forKey:kstateKey];
@@ -458,21 +453,18 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                    //find where it is
                                    
                                    counter=0;
-                                   for(NSDictionary* row in _offlineContacts)
-                                   {
-                                       if([[row objectForKey:@"buddy_name"] caseInsensitiveCompare:[user objectForKey:kusernameKey] ]==NSOrderedSame &&
-                                          [[row objectForKey:@"account_id"]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
-                                       {
-                                           offlinepos=counter;
-                                           break;
-                                       }
-                                       counter++;
-                                   }
+                                   offlinepos = [self positionOfOfflineContact:user];
                                    DDLogVerbose(@"sorted contacts %@", _offlineContacts);
+                                   [_contactsTable beginUpdates];
+                                   NSIndexPath *path2 = [NSIndexPath indexPathForRow:offlinepos inSection:kofflineSection];
+                                   DDLogVerbose(@"inserting offline at %d", offlinepos);
+                                   [_contactsTable insertRowsAtIndexPaths:@[path2]
+                                                         withRowAnimation:UITableViewRowAnimationFade];
+                                   [_contactsTable endUpdates];
                                }
                            }
                            
-                           //not there
+                           // it exists
                            if(pos>=0)
                            {
                                [_contacts removeObjectAtIndex:pos];
@@ -482,13 +474,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                [_contactsTable deleteRowsAtIndexPaths:@[path1]
                                                      withRowAnimation:UITableViewRowAnimationAutomatic];
                                
-                               if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"] && offlinepos>-1)
-                               {
-                                   NSIndexPath *path2 = [NSIndexPath indexPathForRow:offlinepos inSection:kofflineSection];
-                                   DDLogVerbose(@"inserting offline at %d", offlinepos);
-                                   [_contactsTable insertRowsAtIndexPaths:@[path2]
-                                                         withRowAnimation:UITableViewRowAnimationFade];
-                               }
                                
                                [_contactsTable endUpdates];
                            }

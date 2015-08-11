@@ -1409,7 +1409,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                         forAccount:_accountNo withBody:messageNode.messageText
                                                       actuallyfrom:messageNode.actualFrom delivered:YES  unread:unread];
                         
-                        [[DataLayer sharedInstance] addActiveBuddies:messageNode.from forAccount:_accountNo];
+                        [[DataLayer sharedInstance] addActiveBuddies:messageNode.from forAccount:_accountNo withCompletion:nil];
                         
                         
                         if(messageNode.from ) {

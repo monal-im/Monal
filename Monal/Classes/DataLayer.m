@@ -1625,7 +1625,7 @@ static DataLayer *sharedInstance=nil;
     
 }
 
--(BOOL) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString *)messageId
+-(BOOL) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString *)messageId withCompletion:(void (^)(BOOL))completion
 {
     //MEssaes_history ging out, from is always the local user. always read, default to  delivered (will be reset by timer if needed)
     
@@ -1633,15 +1633,12 @@ static DataLayer *sharedInstance=nil;
     NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, %@, '%@',  '%@', '%@ %@', '%@', '%@',0,1,'%@');", accountNo, from.escapeForSql, to.escapeForSql,
                      [parts objectAtIndex:0],[parts objectAtIndex:1], message.escapeForSql, actualfrom.escapeForSql, messageId.escapeForSql];
     
-    if([self executeNonQuery:query]!=NO)
-    {
-        return YES;
-    }
-    else
-    {
-        return NO;
-    }
-    
+    [self executeNonQuery:query withCompletion:^(BOOL retult) {
+        if (completion) {
+            completion(retult);
+        }
+        
+    }];
 }
 
 
@@ -1693,7 +1690,7 @@ static DataLayer *sharedInstance=nil;
     
     NSString* query=[NSString stringWithFormat:@"delete from activechats where buddy_name='%@' and account_id=%@ ", buddyname.escapeForSql, accountNo ];
     //	DDLogVerbose(query);
-    bool result=[self executeNonQuery:query];
+    BOOL result=[self executeNonQuery:query];
     
     return result;
 }
@@ -1703,34 +1700,37 @@ static DataLayer *sharedInstance=nil;
     
     NSString* query=[NSString stringWithFormat:@"delete from activechats " ];
     //	DDLogVerbose(query);
-    bool result=[self executeNonQuery:query];
+    BOOL result=[self executeNonQuery:query];
     return result;
     
 }
 
 
 
--(bool) addActiveBuddies:(NSString*) buddyname forAccount:(NSString*) accountNo;
+-(void) addActiveBuddies:(NSString*) buddyname forAccount:(NSString*) accountNo withCompletion: (void (^)(BOOL))completion
 {
     NSString* query=[NSString stringWithFormat:@"select count(buddy_name) from activechats where account_id=%@ and buddy_name='%@' ", accountNo, buddyname.escapeForSql];
-    NSNumber* count=(NSNumber*)[self executeScalar:query];
-    if(count!=nil)
-    {
-        int val=[count integerValue];
-        if(val>0) {
-            return NO;
-        } else
+   [self executeScalar:query withCompletion:^(NSObject * count) {
+        if(count!=nil)
         {
-            //no
-            NSString* query2=[NSString stringWithFormat:@"insert into activechats values ( %@,'%@') ",  accountNo,buddyname.escapeForSql ];
-            //	DDLogVerbose(query);
-            
-            bool result=[self executeNonQuery:query2];
-            return result;
+            NSInteger val=[((NSNumber *)count) integerValue];
+            if(val>0) {
+                if (completion) {
+                    completion(NO);
+                }
+            } else
+            {
+                //no
+                NSString* query2=[NSString stringWithFormat:@"insert into activechats values ( %@,'%@') ",  accountNo,buddyname.escapeForSql ];
+                BOOL result=[self executeNonQuery:query2];
+                if (completion) {
+                    completion(result);
+                }
+            }
         }
-    }
-    
-    return NO;
+        
+        
+    }];
     
 }
 

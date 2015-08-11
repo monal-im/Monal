@@ -200,13 +200,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                
                                if([user objectForKey:kfullNameKey])
                                    [[_contacts objectAtIndex:pos] setObject:[user objectForKey:kfullNameKey] forKey:@"full_name"];
-                               [self.contactsTable reloadData];
                                
-                               //                               [self.contactsTable beginUpdates];
-                               //
-                               //                               NSIndexSet *indexSet =[[NSIndexSet alloc] initWithIndex:pos] ;
-                               //                               [self.contactsTable reloadDataForRowIndexes:indexSet columnIndexes:0];
-                               //                               [self.contactsTable endUpdates];
+                               [self.contactsTable beginUpdates];
+                               
+                               NSIndexSet *indexSet =[[NSIndexSet alloc] initWithIndex:pos] ;
+                               [self.contactsTable reloadDataForRowIndexes:indexSet columnIndexes:0];
+                               [self.contactsTable endUpdates];
                            }
                            
                            
@@ -285,13 +284,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                            //not there
                            if(pos>=0)
                            {
-                               //                                                  [_contacts removeObjectAtIndex:pos];
-                               //                                                  DDLogVerbose(@"removing %@ at pos %d", [user objectForKey:kusernameKey], pos);
-                               //                                                  [_contactsTable beginUpdates];
-                               //                                                  NSIndexPath *path1 = [NSIndexPath indexPathForRow:pos inSection:konlineSection];
-                               //                                                  [_contactsTable deleteRowsAtIndexPaths:@[path1]
-                               //                                                                        withRowAnimation:UITableViewRowAnimationAutomatic];
-                               //
+                               [_contacts removeObjectAtIndex:pos];
+                               DDLogVerbose(@"removing %@ at pos %d", [user objectForKey:kusernameKey], pos);
+                               [_contactsTable beginUpdates];
+                               NSIndexSet *indexSet = [NSIndexSet indexSetWithIndex:pos];
+                               [_contactsTable removeRowsAtIndexes:indexSet withAnimation:NSTableViewAnimationEffectFade];
+                               
                                //                                                  if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"] && offlinepos>-1)
                                //                                                  {
                                //                                                      NSIndexPath *path2 = [NSIndexPath indexPathForRow:offlinepos inSection:kofflineSection];
@@ -321,7 +319,30 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) clearContactsForAccount: (NSString*) accountNo
 {
-    
+    //mutex to prevent others from modifying contacts at the same time
+    dispatch_async(dispatch_get_main_queue(),
+                   ^{
+                       NSMutableArray* indexPaths =[[NSMutableArray alloc] init];
+                       NSMutableIndexSet* indexSet = [[NSMutableIndexSet alloc] init];
+                       
+                       NSInteger counter=0;
+                       for(NSDictionary* row in _contacts)
+                       {
+                           if([[row objectForKey:@"account_id"]  integerValue]==[accountNo integerValue] )
+                           {
+                               DDLogVerbose(@"removing  pos %d", counter);
+                               [indexSet addIndex:counter];
+                               
+                           }
+                           counter++;
+                       }
+                       
+                       [_contacts removeObjectsAtIndexes:indexSet];
+                       [_contactsTable beginUpdates];
+                       [_contactsTable removeRowsAtIndexes:indexSet withAnimation:NSTableViewAnimationEffectFade];
+                       [_contactsTable endUpdates];
+                       
+                   });
 }
 
 

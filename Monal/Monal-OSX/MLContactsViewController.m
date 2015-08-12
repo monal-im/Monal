@@ -71,6 +71,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) viewWillAppear
 {
     [self.contactsTable reloadData];
+    [self updateAppBadge];
 }
 
 -(void) dealloc
@@ -472,6 +473,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         [self.chatViewController showConversationForContact:contactRow];
         [self updatWindowForContact:contactRow];
         [[DataLayer sharedInstance] markAsReadBuddy:[contactRow objectForKey:kContactName] forAccount:[contactRow objectForKey:kAccountID]];
+        [self updateAppBadge];
         
         [self.contactsTable beginUpdates];
         NSIndexSet *indexSet =[[NSIndexSet alloc] initWithIndex:self.contactsTable.selectedRow] ;
@@ -483,5 +485,23 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         
     }
 }
+
+
+-(void) updateAppBadge
+{
+    [[DataLayer sharedInstance] countUnreadMessagesWithCompletion:^(NSNumber * result) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if([result integerValue]>0) {
+                [[[NSApplication sharedApplication] dockTile] setBadgeLabel:[NSString stringWithFormat:@"%@", result]];
+            }
+            else
+            {
+                [[[NSApplication sharedApplication] dockTile] setBadgeLabel:nil];
+            }
+        });
+        
+    }];
+}
+
 
 @end

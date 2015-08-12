@@ -52,6 +52,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
 }
 
+-(void) viewWillAppear
+{
+    [[DataLayer sharedInstance] markAsReadBuddy:self.contactName forAccount:self.accountNo];
+}
+
 -(void) dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];

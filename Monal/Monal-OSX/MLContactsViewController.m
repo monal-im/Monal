@@ -48,7 +48,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     //self.contactsTable.
     
     [MLXMPPManager sharedInstance].contactVC=self;
-    [self.contactsTable reloadData];
     
 }
 
@@ -65,6 +64,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             self.chatViewController = (MLChatViewController *)otherItem.viewController;
         }
     }
+}
+
+
+-(void) viewWillAppear
+{
+    [self.contactsTable reloadData];
 }
 
 -(void) dealloc
@@ -360,7 +365,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     cell.name.stringValue = [contactRow objectForKey:kContactName];
     cell.accountNo= [[contactRow objectForKey:kAccountID] integerValue];
-    cell.username =[contactRow objectForKey:kUsername] ;
+    cell.username =[contactRow objectForKey:kContactName] ;
     
     NSString *statusText = [contactRow objectForKey:@"status"];
     if( [statusText isEqualToString:@"(null)"])  {
@@ -388,9 +393,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
     
     NSString* accountNo=[NSString stringWithFormat:@"%ld", (long)cell.accountNo];
-    NSInteger unreadCount=  [[DataLayer sharedInstance] countUserUnreadMessages:cell.username forAccount:accountNo];
-    [cell setUnreadCount:unreadCount];
-    
+    [[DataLayer sharedInstance] countUserUnreadMessages:cell.username forAccount:accountNo withCompletion:^(NSNumber * result) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [cell setUnreadCount:[result integerValue]];
+        });
+    }];
+   
     return cell;
 }
 

@@ -1724,21 +1724,18 @@ static DataLayer *sharedInstance=nil;
 
 
 
--(int) countUserUnreadMessages:(NSString*) buddy forAccount:(NSString*) accountNo
+-(void) countUserUnreadMessages:(NSString*) buddy forAccount:(NSString*) accountNo withCompletion:(void (^)(NSNumber *))completion
 {
     // count # messages from a specific user in messages table
     NSString* query=[NSString stringWithFormat:@"select count(message_history_id) from  message_history where unread=1 and account_id=%@ and message_from='%@'", accountNo, buddy.escapeForSql];
     
-    NSNumber* count=(NSNumber*)[self executeScalar:query];
-    if(count!=nil)
-    {
-        int val=[count integerValue];
-        return val;
-    }
-    else
-    {
-        return 0;
-    }
+    [self executeScalar:query withCompletion:^(NSObject* result) {
+        if(completion)
+        {
+            completion((NSNumber *)result);
+        }
+    }];
+    
 }
 
 

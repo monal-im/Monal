@@ -185,7 +185,7 @@ extern NSString *const kContactName;
 #pragma mark count unread
 -(void) countUnreadMessagesForAccount:(NSString*) accountNo withCompletion: (void (^)(NSNumber *))completion;
 
--(int) countUserUnreadMessages:(NSString*) buddy forAccount:(NSString*) accountNo;
+-(void) countUserUnreadMessages:(NSString*) buddy forAccount:(NSString*) accountNo withCompletion: (void (^)(NSNumber *))completion;
 -(int) countOtherUnreadMessages:(NSString*) buddy forAccount:(NSString*) accountNo;
 
 -(void) countUnreadMessagesWithCompletion: (void (^)(NSNumber *))completion;

@@ -422,9 +422,9 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     cell.name.backgroundColor =[NSColor clearColor];
     cell.status.backgroundColor= [NSColor clearColor];
     
-    cell.name.stringValue = [contactRow objectForKey:kContactName];
+    cell.name.stringValue = [contactRow objectForKey:kFullName];
     cell.accountNo= [[contactRow objectForKey:kAccountID] integerValue];
-    cell.username =[contactRow objectForKey:kFullName] ;
+    cell.username =[contactRow objectForKey:kContactName] ;
     
     NSString *statusText = [contactRow objectForKey:@"status"];
     if( [statusText isEqualToString:@"(null)"])  {

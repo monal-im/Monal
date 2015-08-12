@@ -38,8 +38,9 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    //for some reason i can't set this in the UI editor.
-    self.contactsTable.backgroundColor= [NSColor clearColor];
+//    //for some reason i can't set this in the UI editor.
+//    self.contactsTable.backgroundColor= [NSColor clearColor];
+    self.contactsTable.selectionHighlightStyle =NSTableViewSelectionHighlightStyleSourceList;
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
     
@@ -50,6 +51,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     //self.contactsTable.
     
     [MLXMPPManager sharedInstance].contactVC=self;
+
     
 }
 

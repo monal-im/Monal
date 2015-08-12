@@ -15,11 +15,11 @@
 
 
 #if TARGET_OS_IPHONE
-#import "MLImageManager.h"
 #import "UIAlertView+Blocks.h"
 #else
-
 #endif
+
+#import "MLImageManager.h"
 
 //objects
 #import "XMPPIQ.h"
@@ -1084,11 +1084,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     if(iqNode.photoBinValue)
                     {
                         
-#if TARGET_OS_IPHONE
+                        
                         [[MLImageManager sharedInstance] setIconForContact:iqNode.user andAccount:_accountNo WithData:iqNode.photoBinValue ];
-#else
-#endif
-
+                        
+                        
                     }
 
                     if(!fullname) fullname=iqNode.user;
@@ -1436,10 +1435,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 
                 if(messageNode.avatarData)
                 {
-#if TARGET_OS_IPHONE
+
                     [[MLImageManager sharedInstance] setIconForContact:messageNode.actualFrom andAccount:_accountNo WithData:messageNode.avatarData];
-#else
-#endif
+
                 }
                 
             }

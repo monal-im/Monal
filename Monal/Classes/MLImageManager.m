@@ -10,11 +10,22 @@
 #import "EncodingTools.h"
 #import "DataLayer.h"
 
+#if TARGET_OS_IPHONE
+#else
+#import <Cocoa/Cocoa.h>
+#endif
+
 static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 @interface MLImageManager()
+
 @property  (nonatomic, strong) NSCache* iconCache;
+#if TARGET_OS_IPHONE
 @property  (nonatomic, strong) UIImage* noIcon;
+#else
+@property  (nonatomic, strong) NSImage* noIcon;
+#endif
+
 
 @end
 
@@ -40,10 +51,19 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 #pragma mark cache
 
+#if TARGET_OS_IPHONE
 -(UIImage*) noIcon{
     if(!_noIcon) _noIcon=[UIImage imageNamed:@"noicon"];
     return _noIcon;
 }
+
+#else
+-(NSImage*) noIcon{
+    if(!_noIcon) _noIcon=[NSImage imageNamed:@"noicon"];
+    return _noIcon;
+}
+
+#endif
 
 -(NSCache*) iconCache
 {
@@ -59,6 +79,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 
 #pragma mark chat bubbles
+
+#if TARGET_OS_IPHONE
 -(UIImage *) inboundImage
 {
  if (_inboundImage)
@@ -86,6 +108,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     
     return _outboundImage;
 }
+#endif
+
 #pragma mark user icons
 
 -(void) setIconForContact:(NSString*) contact andAccount:(NSString*) accountNo WithData:(NSString*) data
@@ -126,9 +150,11 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     [[DataLayer sharedInstance] setIconName:filename forBuddy:contact inAccount:accountNo];
 }
 
+
+#if TARGET_OS_IPHONE
 -(UIImage*) getIconForContact:(NSString*) contact andAccount:(NSString*) accountNo
 {
-    UIImage* toreturn=nil; 
+    UIImage* toreturn=nil;
     //get filname from DB
     NSString* filename =  [[DataLayer sharedInstance] iconName:contact forAccount:accountNo];
     NSString* cacheKey=[NSString stringWithFormat:@"%@_%@",accountNo,contact];
@@ -152,7 +178,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         {
             toreturn=self.noIcon;
         }
-      
+        
         //uiimage image named is cached if avaialable
         if(toreturn) {
             [self.iconCache setObject:toreturn forKey:cacheKey];
@@ -163,5 +189,45 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     return toreturn;
     
 }
+#else
+-(NSImage*) getIconForContact:(NSString*) contact andAccount:(NSString*) accountNo
+{
+    NSImage* toreturn=nil;
+    //get filname from DB
+    NSString* filename =  [[DataLayer sharedInstance] iconName:contact forAccount:accountNo];
+    NSString* cacheKey=[NSString stringWithFormat:@"%@_%@",accountNo,contact];
+    
+    //check cache
+    toreturn= [self.iconCache objectForKey:cacheKey];
+    if(!toreturn) {
+        
+        NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+        NSString *documentsDirectory = [paths objectAtIndex:0];
+        NSString *writablePath = [documentsDirectory stringByAppendingPathComponent:@"buddyicons"];
+        writablePath = [writablePath stringByAppendingPathComponent:accountNo];
+        writablePath = [writablePath stringByAppendingPathComponent:filename];
+        
+        
+        NSImage* savedImage =[[NSImage alloc] initWithContentsOfFile:writablePath];
+        if(savedImage)
+            toreturn=savedImage;
+        
+        if(toreturn==nil)
+        {
+            toreturn=self.noIcon;
+        }
+        
+        //uiimage image named is cached if avaialable
+        if(toreturn) {
+            [self.iconCache setObject:toreturn forKey:cacheKey];
+        }
+        
+    }
+    
+    return toreturn;
+    
+}
+#endif
+
 
 @end

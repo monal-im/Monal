@@ -14,6 +14,7 @@
 #import "DDLog.h"
 #import "MLChatViewController.h"
 #import "MLMainWindow.h"
+#import "MLImageManager.h"
 
 #define kinfoSection 0
 #define konlineSection 1
@@ -450,8 +451,10 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     
     [cell setOrb];
 
-    
     NSString* accountNo=[NSString stringWithFormat:@"%ld", (long)cell.accountNo];
+    
+    cell.icon.image= [[MLImageManager sharedInstance] getIconForContact:cell.username andAccount:accountNo];
+    
     [[DataLayer sharedInstance] countUserUnreadMessages:cell.username forAccount:accountNo withCompletion:^(NSNumber * result) {
         dispatch_async(dispatch_get_main_queue(), ^{
             [cell setUnreadCount:[result integerValue]];

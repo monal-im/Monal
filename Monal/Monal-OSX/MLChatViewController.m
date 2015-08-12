@@ -248,7 +248,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 }
 
 
--(IBAction)send:(id)sender
+-(IBAction)sendText:(id)sender
 {
     [self sendMessage:[self.messageBox.string copy] andMessageID:nil];
     self.messageBox.string=@"";
@@ -391,7 +391,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     if([replacementString isEqualToString:@"\n"])
         {
-            [self send:self];
+            [self sendText:self];
         }
     return YES;
 }

@@ -13,7 +13,7 @@
 @property (nonatomic, strong) IBOutlet NSTextView *messageBox;
 @property (nonatomic, strong) IBOutlet NSTableView *chatTable;
 
--(IBAction)send:(id)sender;
+-(IBAction)sendText:(id)sender;
 
 -(void) showConversationForContact:(NSDictionary *)contact;
 

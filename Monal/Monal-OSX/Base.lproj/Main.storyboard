@@ -910,7 +910,7 @@
                                             <font key="font" metaFont="system"/>
                                         </buttonCell>
                                         <connections>
-                                            <action selector="send:" target="qLp-oS-WKI" id="8he-Bu-JXB"/>
+                                            <action selector="sendText:" target="qLp-oS-WKI" id="4tP-lD-TxW"/>
                                         </connections>
                                     </button>
                                     <scrollView horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" hasVerticalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Cir-fi-93b">

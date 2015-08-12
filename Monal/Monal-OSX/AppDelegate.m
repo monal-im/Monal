@@ -14,7 +14,7 @@
 #import "MLPresenceSettings.h"
 #import "MLXMPPManager.h"
 
-
+#import <Crashlytics/Crashlytics.h>
 
 @interface AppDelegate ()
 
@@ -42,6 +42,8 @@
 #endif
     
   [[MLXMPPManager sharedInstance] connectIfNecessary];
+    
+    [Crashlytics startWithAPIKey:@"6e807cf86986312a050437809e762656b44b197c"];
     
 }
 

@@ -54,7 +54,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) viewWillAppear
 {
-    [[DataLayer sharedInstance] markAsReadBuddy:self.contactName forAccount:self.accountNo];
+    if(!(self.view.window.occlusionState & NSWindowOcclusionStateVisible)) {
+        [[DataLayer sharedInstance] markAsReadBuddy:self.contactName forAccount:self.accountNo];
+    }
 }
 
 -(void) dealloc
@@ -95,7 +97,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
 }
 
-#pragma mark -- notificaitons
+#pragma mark - notificaitons
 -(void) handleNewMessage:(NSNotification *)notification
 {
     DDLogVerbose(@"chat view got new message notice %@", notification.userInfo);
@@ -106,6 +108,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     {
         dispatch_async(dispatch_get_main_queue(),
                        ^{
+                           if(!(self.view.window.occlusionState & NSWindowOcclusionStateVisible)) {
+                               return;
+                           }
+                           
                            NSDictionary* userInfo;
                            if([[notification.userInfo objectForKey:@"to"] isEqualToString:_contactName])
                            {

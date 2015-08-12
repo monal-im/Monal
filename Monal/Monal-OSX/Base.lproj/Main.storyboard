@@ -718,6 +718,9 @@
                                 <toolbarItem reference="O1F-wJ-6xt"/>
                             </defaultToolbarItems>
                         </toolbar>
+                        <connections>
+                            <outlet property="delegate" destination="B8D-0N-5wS" id="N8d-KN-pxr"/>
+                        </connections>
                     </window>
                     <connections>
                         <outlet property="contactNameField" destination="FIC-Wz-kIR" id="col-XE-oz0"/>

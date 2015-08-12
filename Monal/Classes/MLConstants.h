@@ -9,6 +9,8 @@
 #import <Foundation/Foundation.h>
 #import "DDLog.h"
 
+//used in OSX only really
+#define kMonalWindowVisible @"kMonalWindowVisible"
 
 #define kMonalNewMessageNotice @"kMLNewMessageNotice"
 #define kMonalSentMessageNotice @"kMLSentMessageNotice"

@@ -47,6 +47,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [nc addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
     [nc addObserver:self selector:@selector(handleSendFailedMessage:) name:kMonalSendFailedMessageNotice object:nil];
     [nc addObserver:self selector:@selector(handleSentMessage:) name:kMonalSentMessageNotice object:nil];
+    [nc addObserver:self selector:@selector(refreshData) name:kMonalWindowVisible object:nil];
+    
     
     [self setupDateObjects];
     
@@ -54,9 +56,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) viewWillAppear
 {
+    if(! self.contactName) return;
+    
     if(!(self.view.window.occlusionState & NSWindowOcclusionStateVisible)) {
         [[DataLayer sharedInstance] markAsReadBuddy:self.contactName forAccount:self.accountNo];
     }
+    
+    [self refreshData];
+    
 }
 
 -(void) dealloc
@@ -64,18 +71,22 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
+-(void) refreshData
+{
+    self.messageList =[[DataLayer sharedInstance] messageHistory:self.contactName forAccount: self.accountNo];
+
+    [self.chatTable reloadData];
+    [self scrollToBottom];
+}
+
 -(void) showConversationForContact:(NSDictionary *) contact
 {
 //    [MLNotificationManager sharedInstance].currentAccountNo=self.accountNo;
 //    [MLNotificationManager sharedInstance].currentContact=self.contactName;
 
-
-    
     self.accountNo = [NSString stringWithFormat:@"%@",[contact objectForKey:kAccountID]];
     self.contactName = [contact objectForKey:kContactName];
     
-    self.messageList =[[DataLayer sharedInstance] messageHistory:self.contactName forAccount: self.accountNo];
-
 #warning this should be smarter...
     NSArray* accountVals =[[DataLayer sharedInstance] accountVals:self.accountNo];
     if([accountVals count]>0)
@@ -83,8 +94,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         self.jid=[NSString stringWithFormat:@"%@@%@",[[accountVals objectAtIndex:0] objectForKey:kUsername], [[accountVals objectAtIndex:0] objectForKey:kDomain]];
     }
     
-    [self.chatTable reloadData];
-    [self scrollToBottom];
+    
+    [self refreshData];
 }
 
 

@@ -75,4 +75,15 @@
 
 }
 
+#pragma mark - Window delegate
+- (void)windowDidChangeOcclusionState:(NSNotification *)notification
+{
+    if ([[notification object] occlusionState]  &  NSWindowOcclusionStateVisible) {
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWindowVisible object:nil];
+        // visible
+    } else {
+        // occluded
+    }
+}
+
 @end

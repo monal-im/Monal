@@ -391,7 +391,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     if([replacementString isEqualToString:@"\n"])
         {
-            [self sendText:self];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self sendText:self];
+            });
+      
         }
     return YES;
 }

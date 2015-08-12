@@ -30,7 +30,7 @@
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
     // Insert code here to initialize your application
-
+    
 #ifdef  DEBUG
     [DDLog addLogger:[DDASLLogger sharedInstance]];
     [DDLog addLogger:[DDTTYLogger sharedInstance]];
@@ -41,7 +41,7 @@
     [DDLog addLogger:self.fileLogger];
 #endif
     
-  [[MLXMPPManager sharedInstance] connectIfNecessary];
+    [[MLXMPPManager sharedInstance] connectIfNecessary];
     
     [Crashlytics startWithAPIKey:@"6e807cf86986312a050437809e762656b44b197c"];
     
@@ -55,6 +55,7 @@
     
     if(flag==NO){
         [self.mainWindowController showWindow:self];
+        [[NSUserNotificationCenter defaultUserNotificationCenter] removeAllDeliveredNotifications];
     }
     return YES;	
 }

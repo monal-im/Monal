@@ -397,7 +397,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 }
 
 
-#pragma  mark -- textview delegate
+#pragma  mark - textview delegate
 - (BOOL)textView:(NSTextView *)view shouldChangeTextInRange:(NSRange)range replacementString:(NSString *)replacementString;
 {
     if([replacementString isEqualToString:@"\n"])
@@ -405,6 +405,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self sendText:self];
             });
+            
+            return NO;
       
         }
     return YES;

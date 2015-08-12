@@ -798,8 +798,18 @@
                                                                     </constraints>
                                                                     <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="offline" id="955-HD-aat"/>
                                                                 </imageView>
+                                                                <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="QZm-KY-HES">
+                                                                    <rect key="frame" x="37" y="35" width="22" height="22"/>
+                                                                    <constraints>
+                                                                        <constraint firstAttribute="width" constant="22" id="Nt5-gD-wNG"/>
+                                                                        <constraint firstAttribute="height" constant="22" id="ooB-1g-Rd8"/>
+                                                                    </constraints>
+                                                                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="NotificationBubble" id="G9r-Nj-XD7"/>
+                                                                </imageView>
                                                             </subviews>
                                                             <constraints>
+                                                                <constraint firstItem="QZm-KY-HES" firstAttribute="leading" secondItem="azx-Gr-vGb" secondAttribute="leading" constant="37" id="AQ4-Pp-V2h"/>
+                                                                <constraint firstItem="QZm-KY-HES" firstAttribute="top" secondItem="azx-Gr-vGb" secondAttribute="top" constant="3" id="Jes-Sg-z6d"/>
                                                                 <constraint firstItem="7ak-TK-LeP" firstAttribute="top" secondItem="azx-Gr-vGb" secondAttribute="top" priority="750" constant="3" id="MGC-xQ-EPK"/>
                                                                 <constraint firstItem="lDT-QO-kIK" firstAttribute="leading" secondItem="azx-Gr-vGb" secondAttribute="leading" constant="37" id="Yxu-fq-myP"/>
                                                                 <constraint firstAttribute="bottom" secondItem="lDT-QO-kIK" secondAttribute="bottom" constant="2" id="bGa-TD-zMV"/>
@@ -1569,6 +1579,7 @@ Gw
         </scene>
     </scenes>
     <resources>
+        <image name="NotificationBubble" width="22" height="22"/>
         <image name="noicon" width="44" height="44"/>
         <image name="offline" width="15" height="15"/>
     </resources>

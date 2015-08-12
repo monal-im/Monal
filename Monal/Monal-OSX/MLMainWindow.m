@@ -10,6 +10,7 @@
 #import "AppDelegate.h"
 #import "DataLayer.h"
 #import "MLConstants.h"
+#import "MLImageManager.h"
 
 
 @interface MLMainWindow ()
@@ -54,7 +55,8 @@
         alert.title= nameToShow;
         alert.informativeText=[notification.userInfo objectForKey:@"messageText"];
         
-        //alert.contentImage;
+        NSImage *alertImage=  [[MLImageManager sharedInstance] getIconForContact:[notification.userInfo objectForKey:@"from"] andAccount:[notification.userInfo objectForKey:@"accountNo"]];
+        alert.contentImage= alertImage;
         
         [[NSUserNotificationCenter defaultUserNotificationCenter] scheduleNotification:alert];
     }

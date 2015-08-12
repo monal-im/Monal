@@ -27,6 +27,7 @@
 
 @property (nonatomic, weak) MLChatViewController *chatViewController;
 
+
 @end
 
 @implementation MLContactsViewController
@@ -39,7 +40,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     //for some reason i can't set this in the UI editor.
     self.contactsTable.backgroundColor= [NSColor clearColor];
     
-  //  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
     
     self.contacts=[[NSMutableArray alloc] init] ;
     self.offlineContacts=[[NSMutableArray alloc] init] ;
@@ -344,6 +345,41 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                    });
 }
 
+
+
+-(void) handleNewMessage:(NSNotification *)notification
+{
+  
+    DDLogVerbose(@"chat view got new message notice %@", notification.userInfo);
+ 
+    dispatch_async(dispatch_get_main_queue(),
+                   ^{
+                       
+                       int pos=-1;
+                       int counter=0;
+                       for(NSDictionary* row in _contacts)
+                       {
+                           if([[row objectForKey:@"buddy_name"] caseInsensitiveCompare:[notification.userInfo objectForKey:@"from"] ]==NSOrderedSame &&
+                              [[row objectForKey:@"account_id"]  integerValue]==[[notification.userInfo objectForKey:kaccountNoKey] integerValue] )
+                           {
+                               pos=counter;
+                               break;
+                           }
+                           counter++;
+                       }
+                       
+                       if(pos>=0)
+                       {
+                           [self.contactsTable beginUpdates];
+                           
+                           NSIndexSet *indexSet =[[NSIndexSet alloc] initWithIndex:pos] ;
+                           NSIndexSet *columnIndexSet =[[NSIndexSet alloc] initWithIndex:0] ;
+                           [self.contactsTable reloadDataForRowIndexes:indexSet columnIndexes:columnIndexSet];
+                           [self.contactsTable endUpdates];
+                       }
+                   });
+    
+}
 
 
 #pragma mark - table view datasource

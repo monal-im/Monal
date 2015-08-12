@@ -57,7 +57,7 @@
         
         NSImage *alertImage=  [[MLImageManager sharedInstance] getIconForContact:[notification.userInfo objectForKey:@"from"] andAccount:[notification.userInfo objectForKey:@"accountNo"]];
         alert.contentImage= alertImage;
-        
+        alert.hasReplyButton=YES;
         [[NSUserNotificationCenter defaultUserNotificationCenter] scheduleNotification:alert];
     }
     

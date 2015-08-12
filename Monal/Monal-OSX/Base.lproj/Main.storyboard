@@ -806,17 +806,29 @@
                                                                     </constraints>
                                                                     <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="NotificationBubble" id="G9r-Nj-XD7"/>
                                                                 </imageView>
+                                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="FDT-Wx-P6f">
+                                                                    <rect key="frame" x="41" y="38" width="16" height="17"/>
+                                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="0" id="sKR-cU-QCL">
+                                                                        <font key="font" metaFont="system"/>
+                                                                        <color key="textColor" name="highlightColor" catalog="System" colorSpace="catalog"/>
+                                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                                    </textFieldCell>
+                                                                </textField>
                                                             </subviews>
                                                             <constraints>
+                                                                <constraint firstItem="7ak-TK-LeP" firstAttribute="leading" secondItem="FDT-Wx-P6f" secondAttribute="trailing" constant="5" id="7L0-mj-uIz"/>
                                                                 <constraint firstItem="QZm-KY-HES" firstAttribute="leading" secondItem="azx-Gr-vGb" secondAttribute="leading" constant="37" id="AQ4-Pp-V2h"/>
+                                                                <constraint firstItem="QZm-KY-HES" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="azx-Gr-vGb" secondAttribute="leading" constant="37" id="IxA-6T-Yut"/>
                                                                 <constraint firstItem="QZm-KY-HES" firstAttribute="top" secondItem="azx-Gr-vGb" secondAttribute="top" constant="3" id="Jes-Sg-z6d"/>
                                                                 <constraint firstItem="7ak-TK-LeP" firstAttribute="top" secondItem="azx-Gr-vGb" secondAttribute="top" priority="750" constant="3" id="MGC-xQ-EPK"/>
                                                                 <constraint firstItem="lDT-QO-kIK" firstAttribute="leading" secondItem="azx-Gr-vGb" secondAttribute="leading" constant="37" id="Yxu-fq-myP"/>
+                                                                <constraint firstItem="QZm-KY-HES" firstAttribute="top" relation="greaterThanOrEqual" secondItem="azx-Gr-vGb" secondAttribute="top" constant="3" id="bAi-6z-pg3"/>
                                                                 <constraint firstAttribute="bottom" secondItem="lDT-QO-kIK" secondAttribute="bottom" constant="2" id="bGa-TD-zMV"/>
                                                                 <constraint firstItem="0ib-3X-AX9" firstAttribute="leading" secondItem="lDT-QO-kIK" secondAttribute="trailing" constant="3" id="cDQ-sd-920"/>
                                                                 <constraint firstAttribute="trailing" secondItem="0ib-3X-AX9" secondAttribute="trailing" constant="16" id="gRO-NM-RM7"/>
                                                                 <constraint firstAttribute="centerY" secondItem="5SW-8j-tAt" secondAttribute="centerY" id="jPk-Ih-taF"/>
                                                                 <constraint firstAttribute="trailing" secondItem="7ak-TK-LeP" secondAttribute="trailing" constant="16" id="mwI-v3-fZG"/>
+                                                                <constraint firstItem="FDT-Wx-P6f" firstAttribute="top" secondItem="azx-Gr-vGb" secondAttribute="top" constant="5" id="nSM-PP-ddl"/>
                                                                 <constraint firstItem="0ib-3X-AX9" firstAttribute="top" secondItem="7ak-TK-LeP" secondAttribute="bottom" constant="8" id="qxH-bn-le5"/>
                                                                 <constraint firstItem="7ak-TK-LeP" firstAttribute="leading" secondItem="5SW-8j-tAt" secondAttribute="trailing" constant="11" id="wGQ-hj-s9b"/>
                                                                 <constraint firstItem="5SW-8j-tAt" firstAttribute="leading" secondItem="azx-Gr-vGb" secondAttribute="leading" constant="5" id="wqL-3q-U13"/>
@@ -826,6 +838,8 @@
                                                                 <outlet property="name" destination="7ak-TK-LeP" id="YVZ-Cl-ezC"/>
                                                                 <outlet property="status" destination="0ib-3X-AX9" id="el9-7z-BZw"/>
                                                                 <outlet property="statusOrb" destination="lDT-QO-kIK" id="lrU-Q4-8rz"/>
+                                                                <outlet property="unreadBadge" destination="QZm-KY-HES" id="tlz-om-vAZ"/>
+                                                                <outlet property="unreadText" destination="FDT-Wx-P6f" id="bia-wY-kQb"/>
                                                             </connections>
                                                         </tableCellView>
                                                     </prototypeCellViews>

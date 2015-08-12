@@ -359,7 +359,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     cell.status.backgroundColor= [NSColor clearColor];
     
     cell.name.stringValue = [contactRow objectForKey:kContactName];
-   
+    cell.accountNo= [[contactRow objectForKey:kAccountID] integerValue];
+    cell.username =[contactRow objectForKey:kUsername] ;
+    
     NSString *statusText = [contactRow objectForKey:@"status"];
     if( [statusText isEqualToString:@"(null)"])  {
         statusText = @"";
@@ -383,6 +385,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     
     [cell setOrb];
+
+    
+    NSString* accountNo=[NSString stringWithFormat:@"%ld", (long)cell.accountNo];
+    NSInteger unreadCount=  [[DataLayer sharedInstance] countUserUnreadMessages:cell.username forAccount:accountNo];
+    [cell setUnreadCount:unreadCount];
+    
     return cell;
 }
 

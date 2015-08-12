@@ -15,6 +15,20 @@
     
     // Drawing code here.
 }
+-(void) setUnreadCount:(NSInteger) count
+{
+    if(count <=0) {
+        self.unreadBadge.hidden=YES;
+        self.unreadText.hidden=YES;
+    }
+    else {
+        self.unreadBadge.hidden=NO;
+        self.unreadText.hidden=NO;
+        
+        self.unreadText.stringValue =[NSString stringWithFormat:@"%ld", count];
+    }
+}
+
 
 -(void) setOrb
 {

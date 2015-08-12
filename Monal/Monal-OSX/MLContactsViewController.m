@@ -414,6 +414,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         NSDictionary *contactRow = [self.contacts objectAtIndex:self.contactsTable.selectedRow];
         [self.chatViewController showConversationForContact:contactRow];
         [self updatWindowForContact:contactRow];
+        [[DataLayer sharedInstance] markAsReadBuddy:[contactRow objectForKey:kContactName] forAccount:[contactRow objectForKey:kAccountID]];
+        
+        [self.contactsTable beginUpdates];
+        NSIndexSet *indexSet =[[NSIndexSet alloc] initWithIndex:self.contactsTable.selectedRow] ;
+        NSIndexSet *columnIndexSet =[[NSIndexSet alloc] initWithIndex:0] ;
+        [self.contactsTable reloadDataForRowIndexes:indexSet columnIndexes:columnIndexSet];
+        [self.contactsTable endUpdates];
+        
     } else  {
         
     }

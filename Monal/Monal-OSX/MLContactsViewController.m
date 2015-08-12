@@ -362,14 +362,11 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                        //if current converstion, mark as read if window is visible
                        NSDictionary *contactRow = nil;
                     
-                       if(!(self.view.window.occlusionState & NSWindowOcclusionStateVisible)) {
-                           return;
-                       }
-                      
-                       if(self.contactsTable.selectedRow <self.contacts.count) {
-                           contactRow=[self.contacts objectAtIndex:self.contactsTable.selectedRow];
-                       }
-                       
+                       if((self.view.window.occlusionState & NSWindowOcclusionStateVisible)) {
+                               if(self.contactsTable.selectedRow <self.contacts.count) {
+                                   contactRow=[self.contacts objectAtIndex:self.contactsTable.selectedRow];
+                               }
+                           }
                        
                        if([[contactRow objectForKey:kContactName] caseInsensitiveCompare:[notification.userInfo objectForKey:@"from"] ]==NSOrderedSame &&
                           [[contactRow objectForKey:kAccountID]  integerValue]==[[notification.userInfo objectForKey:kaccountNoKey] integerValue] ) {

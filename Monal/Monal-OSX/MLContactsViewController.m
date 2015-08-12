@@ -424,7 +424,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     
     cell.name.stringValue = [contactRow objectForKey:kContactName];
     cell.accountNo= [[contactRow objectForKey:kAccountID] integerValue];
-    cell.username =[contactRow objectForKey:kContactName] ;
+    cell.username =[contactRow objectForKey:kFullName] ;
     
     NSString *statusText = [contactRow objectForKey:@"status"];
     if( [statusText isEqualToString:@"(null)"])  {

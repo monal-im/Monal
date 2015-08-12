@@ -39,6 +39,7 @@ extern NSString *const kOldSSL;
 extern NSString *const kSelfSigned;
 
 extern NSString *const kUsername;
+extern NSString *const kFullName;
 
 extern NSString *const kContactName;
 

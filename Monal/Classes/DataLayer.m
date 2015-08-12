@@ -27,11 +27,13 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
  NSString *const kOldSSL =@"oldstyleSSL";
  NSString *const kSelfSigned =@"selfsigned";
 
- NSString *const kUsername =@"username";
+NSString *const kUsername =@"username";
+NSString *const kFullName =@"full_name";
 
 
 // used for contact rows
- NSString *const kContactName =@"buddy_name";
+NSString *const kContactName =@"buddy_name";
+
 
 static DataLayer *sharedInstance=nil;
 

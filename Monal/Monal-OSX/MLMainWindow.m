@@ -33,7 +33,7 @@
 -(void) updateCurrentContact:(NSDictionary *) contact;
 {
     self.contactInfo= contact;
-    self.contactNameField.stringValue= [self.contactInfo objectForKey:@"full_name"];
+    self.contactNameField.stringValue= [self.contactInfo objectForKey:kFullName];
 }
 
 

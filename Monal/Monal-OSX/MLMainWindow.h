@@ -10,4 +10,12 @@
 
 @interface MLMainWindow : NSWindowController
 
+@property (nonatomic, strong) IBOutlet NSTextField *contactNameField;
+
+/**
+ Allows  the window to know what contact is currently selected
+ */
+-(void) updateCurrentContact:(NSDictionary *) contact;
+
+
 @end

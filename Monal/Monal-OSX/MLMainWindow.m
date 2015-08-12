@@ -11,6 +11,8 @@
 
 @interface MLMainWindow ()
 
+@property (nonatomic, strong) NSDictionary *contactInfo;
+
 @end
 
 @implementation MLMainWindow
@@ -21,5 +23,12 @@
     appDelegate.mainWindowController= self; 
 
 }
+
+-(void) updateCurrentContact:(NSDictionary *) contact;
+{
+    self.contactInfo= contact;
+    self.contactNameField.stringValue= [self.contactInfo objectForKey:@"full_name"];
+}
+
 
 @end

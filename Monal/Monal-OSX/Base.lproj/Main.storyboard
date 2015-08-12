@@ -704,7 +704,7 @@
                                         </buttonCell>
                                     </button>
                                     <connections>
-                                        <segue destination="kZp-r1-Nmw" kind="popover" popoverAnchorView="O1F-wJ-6xt" popoverBehavior="t" preferredEdge="maxX" id="AZh-DK-DZF"/>
+                                        <segue destination="kZp-r1-Nmw" kind="popover" identifier="showContactInfo" popoverAnchorView="O1F-wJ-6xt" popoverBehavior="t" preferredEdge="maxX" id="AZh-DK-DZF"/>
                                     </connections>
                                 </toolbarItem>
                             </allowedToolbarItems>
@@ -719,6 +719,7 @@
                         </toolbar>
                     </window>
                     <connections>
+                        <outlet property="contactNameField" destination="FIC-Wz-kIR" id="col-XE-oz0"/>
                         <segue destination="m98-td-Hed" kind="relationship" relationship="window.shadowedContentViewController" id="v2m-Zl-5nK"/>
                     </connections>
                 </windowController>

@@ -13,6 +13,7 @@
 #import "MLXMPPManager.h"
 #import "DDLog.h"
 #import "MLChatViewController.h"
+#import "MLMainWindow.h"
 
 #define kinfoSection 0
 #define konlineSection 1
@@ -73,7 +74,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 
 
-#pragma mark - updating user display
+#pragma mark - update UI
+
+-(void) updatWindowForContact:(NSDictionary *)contact
+{
+    MLMainWindow *window =(MLMainWindow *)self.view.window.windowController;
+    [window updateCurrentContact:contact];
+}
+
+#pragma mark - updating user display in table
 
 -(NSInteger) positionOfOnlineContact:(NSDictionary *) user
 {
@@ -388,6 +397,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     if(self.contactsTable.selectedRow<self.contacts.count) {
         NSDictionary *contactRow = [self.contacts objectAtIndex:self.contactsTable.selectedRow];
         [self.chatViewController showConversationForContact:contactRow];
+        [self updatWindowForContact:contactRow];
     } else  {
         
     }

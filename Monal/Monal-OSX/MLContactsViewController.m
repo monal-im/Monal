@@ -354,18 +354,39 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
  
     dispatch_async(dispatch_get_main_queue(),
                    ^{
+                    NSInteger pos=-1;
                        
-                       int pos=-1;
-                       int counter=0;
-                       for(NSDictionary* row in _contacts)
-                       {
-                           if([[row objectForKey:@"buddy_name"] caseInsensitiveCompare:[notification.userInfo objectForKey:@"from"] ]==NSOrderedSame &&
-                              [[row objectForKey:@"account_id"]  integerValue]==[[notification.userInfo objectForKey:kaccountNoKey] integerValue] )
-                           {
-                               pos=counter;
-                               break;
+                       //if current converstion, mark as read if window is visible
+                       NSDictionary *contactRow = nil;
+                    
+                       if(self.view.window.occlusionState & NSWindowOcclusionStateVisible) {
+                           
+                           if(self.contactsTable.selectedRow <self.contacts.count) {
+                               contactRow=[self.contacts objectAtIndex:self.contactsTable.selectedRow];
                            }
-                           counter++;
+                       }
+                       
+                       if([[contactRow objectForKey:kContactName] caseInsensitiveCompare:[notification.userInfo objectForKey:@"from"] ]==NSOrderedSame &&
+                          [[contactRow objectForKey:kAccountID]  integerValue]==[[notification.userInfo objectForKey:kaccountNoKey] integerValue] ) {
+                           
+                           [[DataLayer sharedInstance] markAsReadBuddy:[contactRow objectForKey:kContactName] forAccount:[contactRow objectForKey:kAccountID]];
+                           pos=self.contactsTable.selectedRow;
+                           
+                       }
+                       else  {
+                           
+                        
+                           int counter=0;
+                           for(NSDictionary* row in _contacts)
+                           {
+                               if([[row objectForKey:kContactName] caseInsensitiveCompare:[notification.userInfo objectForKey:@"from"] ]==NSOrderedSame &&
+                                  [[row objectForKey:kAccountID]  integerValue]==[[notification.userInfo objectForKey:kaccountNoKey] integerValue] )
+                               {
+                                   pos=counter;
+                                   break;
+                               }
+                               counter++;
+                           }
                        }
                        
                        if(pos>=0)

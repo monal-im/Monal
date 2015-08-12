@@ -32,7 +32,7 @@
 
 @implementation MLContactsViewController
 
-static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+static const int ddLogLevel = LOG_LEVEL_INFO;
 
 - (void)viewDidLoad {
     [super viewDidLoad];

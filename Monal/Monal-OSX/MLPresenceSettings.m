@@ -7,6 +7,7 @@
 //
 
 #import "MLPresenceSettings.h"
+#import "MLXMPPManager.h"
 
 @interface MLPresenceSettings ()
 
@@ -20,6 +21,18 @@
     // Do view setup here.
 }
 
+-(void) viewDidAppear
+{
+    self.away.state = [[[NSUserDefaults standardUserDefaults] objectForKey:@"Away"] boolValue];
+    self.visibility.state = [[[NSUserDefaults standardUserDefaults] objectForKey:@"Visible"] boolValue];
+}
+
+
+-(void) viewWillDisappear
+{
+    [[NSUserDefaults standardUserDefaults] setBool:self.away.state  forKey: @"Away"];
+    [[NSUserDefaults standardUserDefaults] setBool:self.visibility.state  forKey: @"Visible"];
+}
 
 #pragma mark - preferences delegate
 

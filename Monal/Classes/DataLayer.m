@@ -9,6 +9,12 @@
 #import "DataLayer.h"
 #import "DDLog.h"
 
+
+#if TARGET_OS_IPHONE
+#else
+#import "PasswordManager.h"
+#endif
+
 @implementation DataLayer
 
 static const int ddLogLevel = LOG_LEVEL_INFO;
@@ -1795,6 +1801,8 @@ static DataLayer *sharedInstance=nil;
 {
     [dbversionCheck lock];
     
+    
+#if TARGET_OS_IPHONE
     // checking db version and upgrading if necessary
     DDLogVerbose(@"Database version check");
     
@@ -1908,6 +1916,7 @@ static DataLayer *sharedInstance=nil;
         DDLogVerbose(@"Upgrade to 1.071 success ");
         
     }
+
     
     if([dbversion doubleValue]<1.072)
     {
@@ -2054,7 +2063,9 @@ static DataLayer *sharedInstance=nil;
         DDLogVerbose(@"Upgrade to 1.41 success ");
         
     }
+#endif
     
+    // this point forward OSX might have legacy issues
     
     
     [dbversionCheck unlock];

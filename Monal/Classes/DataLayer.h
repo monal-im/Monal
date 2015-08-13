@@ -8,7 +8,6 @@
 
 #import <Foundation/Foundation.h>
 #import <sqlite3.h>
-#import "PasswordManager.h"
 #import "ParsePresence.h"
 #import "NSString+SqlLite.h"
 

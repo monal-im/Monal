@@ -18,6 +18,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 
 #pragma mark my abstraction layer
+
 - (void) setPassword:(NSString*) pass 
 {
 	

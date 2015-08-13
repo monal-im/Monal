@@ -12,7 +12,9 @@
 
 #if TARGET_OS_IPHONE
 #import "MonalAppDelegate.h"
+#import "PasswordManager.h"
 #else
+#import "STKeyChain.h"
 #endif
 
 static const int ddLogLevel = LOG_LEVEL_VERBOSE;
@@ -269,8 +271,10 @@ An array of Dics what have timers to make sure everything was sent
 #endif
 
     {
-        PasswordManager* passMan= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",[account objectForKey:@"account_id"]]];
-        xmppAccount.password=[passMan getPassword] ;
+    
+        NSError *error;
+        xmppAccount.password =[STKeychain getPasswordForUsername:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]] andServiceName:@"Monal" error:&error];
+        
         if(!xmppAccount.password)  {
             xmppAccount.password=@"";
         }

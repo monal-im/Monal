@@ -323,7 +323,6 @@
 		26B2A4FC1B73097500272E63 /* DDDispatchQueueLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B2A4E61B73097500272E63 /* DDDispatchQueueLogFormatter.m */; };
 		26B2A4FD1B73097500272E63 /* DDMultiFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B2A4E81B73097500272E63 /* DDMultiFormatter.m */; };
 		26B2A4FE1B73097500272E63 /* DDMultiFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B2A4E81B73097500272E63 /* DDMultiFormatter.m */; };
-		26B2A5011B730AAC00272E63 /* PasswordManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B69A81131C5495002FCBEB /* PasswordManager.m */; };
 		26B2A5021B730AE100272E63 /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F7BB411115F8DB00712672 /* Reachability.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		26B51C4918654D98002134C3 /* LogViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B51C4718654D98002134C3 /* LogViewController.m */; };
 		26B51C4A18654D98002134C3 /* LogViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26B51C4818654D98002134C3 /* LogViewController.xib */; };
@@ -673,8 +672,8 @@
 		26B51C4718654D98002134C3 /* LogViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LogViewController.m; sourceTree = "<group>"; };
 		26B51C4818654D98002134C3 /* LogViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = LogViewController.xib; sourceTree = "<group>"; };
 		26B69A74131C522F002FCBEB /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
-		26B69A80131C5495002FCBEB /* PasswordManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PasswordManager.h; sourceTree = "<group>"; };
-		26B69A81131C5495002FCBEB /* PasswordManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PasswordManager.m; sourceTree = "<group>"; };
+		26B69A80131C5495002FCBEB /* PasswordManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PasswordManager.h; path = Classes/PasswordManager.h; sourceTree = "<group>"; };
+		26B69A81131C5495002FCBEB /* PasswordManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PasswordManager.m; path = Classes/PasswordManager.m; sourceTree = "<group>"; };
 		26BAFC3E1626537D0073728B /* .gitignore */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		26BAFC3F1626537D0073728B /* Appirater.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Appirater.h; sourceTree = "<group>"; };
 		26BAFC401626537D0073728B /* Appirater.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Appirater.m; sourceTree = "<group>"; };
@@ -1274,6 +1273,8 @@
 		26B2A4B71B7304DD00272E63 /* Managers */ = {
 			isa = PBXGroup;
 			children = (
+				26B69A80131C5495002FCBEB /* PasswordManager.h */,
+				26B69A81131C5495002FCBEB /* PasswordManager.m */,
 				26EE8B1D179B67FA006781F3 /* MLNotificationManager.h */,
 				26EE8B1E179B67FA006781F3 /* MLNotificationManager.m */,
 			);
@@ -1507,8 +1508,6 @@
 			children = (
 				26F7BB411115F8DB00712672 /* Reachability.m */,
 				26F7BB421115F8DB00712672 /* Reachability.h */,
-				26B69A80131C5495002FCBEB /* PasswordManager.h */,
-				26B69A81131C5495002FCBEB /* PasswordManager.m */,
 				260C6C92178080730004E2E1 /* EncodingTools.h */,
 				260C6C93178080730004E2E1 /* EncodingTools.m */,
 			);
@@ -2095,7 +2094,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				26B2A5011B730AAC00272E63 /* PasswordManager.m in Sources */,
 				26B2A4F01B73097500272E63 /* DDASLLogCapture.m in Sources */,
 				260499E21B730E9000D11866 /* xmpp.m in Sources */,
 				260499E51B730E9B00D11866 /* XMPPPresence.m in Sources */,

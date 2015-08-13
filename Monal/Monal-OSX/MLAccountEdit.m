@@ -10,6 +10,7 @@
 #import "MLXMPPManager.h"
 #import "DataLayer.h"
 #import "MLAccountSettings.h"
+#import "STKeyChain.h"
 
 @interface MLAccountEdit ()
 
@@ -40,6 +41,12 @@
         self.enabledCheck.state =[[self.accountToEdit objectForKey:kEnabled] boolValue];
         self.selfSigned.state =[[self.accountToEdit objectForKey:kSelfSigned] boolValue];
         self.oldStyleSSL.state =[[self.accountToEdit objectForKey:kOldSSL] boolValue];
+        
+        NSError *error;
+        NSString*pass= [STKeychain getPasswordForUsername:[NSString stringWithFormat:@"%@",[self.accountToEdit objectForKey:kAccountID]] andServiceName:@"Monal" error:&error];
+        if(pass) {
+            self.password.stringValue =pass;
+        }
     }
 }
 
@@ -93,13 +100,10 @@
     
     [[DataLayer sharedInstance] executeScalar:@"select max(account_id) from account" withCompletion:^(NSObject * accountid) {
         if(accountid) {
-        // save password
-        NSString* val = [NSString stringWithFormat:@"%@", (NSString *) accountid ];
-        PasswordManager* pass= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",val]];
-        [pass setPassword:self.password.stringValue] ;
+            NSError *error;
+            [STKeychain storeUsername:[NSString stringWithFormat:@"%@", accountid] andPassword:self.password.stringValue forServiceName:@"Monal" updateExisting:NO error:&error];
             [self refreshPresenter];
         }
-       
     }];
    
     }
@@ -120,11 +124,9 @@
         [[DataLayer sharedInstance] updateAccounWithDictionary:dic andCompletion:^(BOOL result) {
             [self refreshPresenter];
             
-            if(self.password.stringValue.length>0) {
-                PasswordManager* pass= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",[self.accountToEdit objectForKey:kAccountID]]];
-                [pass setPassword:self.password] ;
-            }
-            
+            NSError *error;
+            [STKeychain storeUsername:[NSString stringWithFormat:@"%@",[self.accountToEdit objectForKey:kAccountID]]  andPassword:self.password.stringValue forServiceName:@"Monal"updateExisting:YES error:&error];
+
         }];
         
     }

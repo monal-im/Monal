@@ -30,19 +30,33 @@
             self.jabberID.stringValue=@"@gmail.com";
         }
     } else  {
-        self.jabberID.stringValue =[NSString stringWithFormat:@"%@@%@", [self.accountToEdit objectForKey:@"username"], [self.accountToEdit objectForKey:@"domain"]];
+        self.jabberID.stringValue =[NSString stringWithFormat:@"%@@%@", [self.accountToEdit objectForKey:kUsername], [self.accountToEdit objectForKey:kDomain]];
         
-        self.server.stringValue =[self.accountToEdit objectForKey:@"server"];
-        self.port.stringValue =[self.accountToEdit objectForKey:@"other_port"];
-        self.resource.stringValue =[self.accountToEdit objectForKey:@"resource"];
+        self.server.stringValue =[self.accountToEdit objectForKey:kServer];
+        self.port.stringValue =[NSString stringWithFormat:@"%@", [self.accountToEdit objectForKey:kPort]];
+        self.resource.stringValue =[self.accountToEdit objectForKey:kResource];
         
-        self.enabledCheck.state =[[self.accountToEdit objectForKey:@"enabled"] boolValue];
-        self.selfSigned.state =[[self.accountToEdit objectForKey:@"selfsigned"] boolValue];
-        self.oldStyleSSL.state =[[self.accountToEdit objectForKey:@"oldstyleSSL"] boolValue];
+        self.sslCheck.state =[[self.accountToEdit objectForKey:kSSL] boolValue];
+        self.enabledCheck.state =[[self.accountToEdit objectForKey:kEnabled] boolValue];
+        self.selfSigned.state =[[self.accountToEdit objectForKey:kSelfSigned] boolValue];
+        self.oldStyleSSL.state =[[self.accountToEdit objectForKey:kOldSSL] boolValue];
     }
 }
 
 
+
+-(void) refreshPresenter
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if([self.presentingViewController respondsToSelector:@selector(refreshAccountList)])
+        {
+            MLAccountSettings *presenter = (MLAccountSettings *)self.presentingViewController;
+            [presenter refreshAccountList];
+            [[MLXMPPManager sharedInstance]  connectIfNecessary];
+        }
+        [self.presentingViewController dismissViewController:self];
+    });
+}
 -(IBAction)save:(id)sender
 {
     NSString *user=@"";
@@ -54,13 +68,13 @@
         domain =[parts objectAtIndex:1];
     }
     
-    BOOL enabled =YES;
+    BOOL enabled =self.enabledCheck.state;
     
-    BOOL useSSL =YES;
-    BOOL selfSignedSSL = YES;
-    BOOL oldStyleSSL=NO;
+    BOOL useSSL =self.sslCheck.state;
+    BOOL selfSignedSSL = self.selfSigned.state;
+    BOOL oldStyleSSL=self.oldStyleSSL.state;
     
-    
+    if(!self.accountToEdit) {
     [[DataLayer sharedInstance] addAccount:
      self.jabberID.stringValue  :
      @"1":
@@ -77,26 +91,53 @@
      ];
     
     
-    
     [[DataLayer sharedInstance] executeScalar:@"select max(account_id) from account" withCompletion:^(NSObject * accountid) {
         if(accountid) {
         // save password
         NSString* val = [NSString stringWithFormat:@"%@", (NSString *) accountid ];
         PasswordManager* pass= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",val]];
         [pass setPassword:self.password.stringValue] ;
-    
+            [self refreshPresenter];
         }
-        dispatch_async(dispatch_get_main_queue(), ^{
-            if([self.presentingViewController respondsToSelector:@selector(refreshAccountList)])
-            {
-                MLAccountSettings *presenter = (MLAccountSettings *)self.presentingViewController;
-                [presenter refreshAccountList];
-                [[MLXMPPManager sharedInstance]  connectIfNecessary];
-            }
-            [self.presentingViewController dismissViewController:self];
-        });
+       
     }];
    
+    }
+    else
+    {
+        
+        NSMutableDictionary *dic =[self.accountToEdit mutableCopy];
+        [dic setObject:user forKey:kUsername];
+        [dic setObject:self.server.stringValue  forKey:kServer];
+        [dic setObject:self.port.stringValue forKey:kPort];
+        [dic setObject:self.resource.stringValue  forKey:kResource];
+        
+        [dic setObject:[NSNumber numberWithBool:self.sslCheck.state] forKey:kSSL];
+        [dic setObject:[NSNumber numberWithBool:self.enabledCheck.state] forKey:kEnabled];
+        [dic setObject:[NSNumber numberWithBool:self.selfSigned.state] forKey:kSelfSigned];
+        [dic setObject:[NSNumber numberWithBool:self.oldStyleSSL.state] forKey:kOldSSL];
+        
+        [[DataLayer sharedInstance] updateAccounWithDictionary:dic andCompletion:^(BOOL result) {
+            [self refreshPresenter];
+            
+            if(self.password.stringValue.length>0) {
+                PasswordManager* pass= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",[self.accountToEdit objectForKey:kAccountID]]];
+                [pass setPassword:self.password] ;
+            }
+            
+        }];
+        
+    }
+    
+    if(enabled)
+    {
+        [[MLXMPPManager sharedInstance] connectAccount:[NSString stringWithFormat:@"%@",[self.accountToEdit objectForKey:kAccountID]]];
+    }
+    else
+    {
+        [[MLXMPPManager sharedInstance] disconnectAccount:[NSString stringWithFormat:@"%@",[self.accountToEdit objectForKey:kAccountID]]];
+    }
+    
     
 }
 

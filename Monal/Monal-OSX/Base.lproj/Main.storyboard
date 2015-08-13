@@ -731,21 +731,21 @@
             <objects>
                 <viewController id="0BB-CK-cBw" customClass="MLContactsViewController" sceneMemberID="viewController">
                     <scrollView key="view" autohidesScrollers="YES" horizontalLineScroll="62" horizontalPageScroll="10" verticalLineScroll="62" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" id="eLW-rG-h59">
-                        <rect key="frame" x="0.0" y="0.0" width="274" height="300"/>
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="300"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                        <clipView key="contentView" misplaced="YES" drawsBackground="NO" copiesOnScroll="NO" id="HB1-Pi-3Cp">
+                        <clipView key="contentView" drawsBackground="NO" copiesOnScroll="NO" id="HB1-Pi-3Cp">
                             <rect key="frame" x="1" y="17" width="238" height="117"/>
                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                             <subviews>
                                 <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" columnReordering="NO" columnSelection="YES" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" rowHeight="60" viewBased="YES" id="mgU-VL-SBt">
-                                    <rect key="frame" x="0.0" y="0.0" width="318" height="0.0"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="272" height="0.0"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <size key="intercellSpacing" width="3" height="2"/>
                                     <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                     <tableViewGridLines key="gridStyleMask" horizontal="YES"/>
                                     <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
                                     <tableColumns>
-                                        <tableColumn width="269" minWidth="40" maxWidth="1000" id="xVS-3C-CZv">
+                                        <tableColumn width="315" minWidth="40" maxWidth="1000" id="xVS-3C-CZv">
                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left">
                                                 <font key="font" metaFont="smallSystem"/>
                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -759,10 +759,10 @@
                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                             <prototypeCellViews>
                                                 <tableCellView identifier="OnlineUser" id="azx-Gr-vGb" customClass="MLContactsCell">
-                                                    <rect key="frame" x="1" y="1" width="269" height="60"/>
+                                                    <rect key="frame" x="1" y="1" width="315" height="60"/>
                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                     <subviews>
-                                                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="7ak-TK-LeP">
+                                                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="7ak-TK-LeP">
                                                             <rect key="frame" x="60" y="37" width="239" height="20"/>
                                                             <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Name" drawsBackground="YES" id="NNv-MJ-CbN">
                                                                 <font key="font" size="13" name="HelveticaNeue-Bold"/>
@@ -778,7 +778,7 @@
                                                             </constraints>
                                                             <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="noicon" id="cMe-fd-6Pb"/>
                                                         </imageView>
-                                                        <textField verticalHuggingPriority="749" horizontalCompressionResistancePriority="250" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="0ib-3X-AX9">
+                                                        <textField verticalHuggingPriority="749" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="0ib-3X-AX9">
                                                             <rect key="frame" x="62" y="13" width="237" height="16"/>
                                                             <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Status Message" drawsBackground="YES" id="fWL-0j-FMf">
                                                                 <font key="font" metaFont="cellTitle"/>
@@ -814,6 +814,7 @@
                                                     <constraints>
                                                         <constraint firstItem="7ak-TK-LeP" firstAttribute="leading" secondItem="FDT-Wx-P6f" secondAttribute="trailing" constant="5" id="7L0-mj-uIz"/>
                                                         <constraint firstItem="QZm-KY-HES" firstAttribute="leading" secondItem="azx-Gr-vGb" secondAttribute="leading" constant="37" id="AQ4-Pp-V2h"/>
+                                                        <constraint firstItem="7ak-TK-LeP" firstAttribute="top" relation="lessThanOrEqual" secondItem="azx-Gr-vGb" secondAttribute="top" constant="3" id="ApK-DI-KOg"/>
                                                         <constraint firstItem="QZm-KY-HES" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="azx-Gr-vGb" secondAttribute="leading" constant="37" id="IxA-6T-Yut"/>
                                                         <constraint firstItem="QZm-KY-HES" firstAttribute="top" secondItem="azx-Gr-vGb" secondAttribute="top" constant="3" id="Jes-Sg-z6d"/>
                                                         <constraint firstItem="7ak-TK-LeP" firstAttribute="top" secondItem="azx-Gr-vGb" secondAttribute="top" priority="750" constant="3" id="MGC-xQ-EPK"/>
@@ -826,6 +827,7 @@
                                                         <constraint firstAttribute="trailing" secondItem="7ak-TK-LeP" secondAttribute="trailing" constant="16" id="mwI-v3-fZG"/>
                                                         <constraint firstItem="FDT-Wx-P6f" firstAttribute="top" secondItem="azx-Gr-vGb" secondAttribute="top" constant="5" id="nSM-PP-ddl"/>
                                                         <constraint firstItem="0ib-3X-AX9" firstAttribute="top" secondItem="7ak-TK-LeP" secondAttribute="bottom" constant="8" id="qxH-bn-le5"/>
+                                                        <constraint firstItem="7ak-TK-LeP" firstAttribute="top" relation="greaterThanOrEqual" secondItem="azx-Gr-vGb" secondAttribute="top" constant="3" id="s1C-tm-r9v"/>
                                                         <constraint firstItem="7ak-TK-LeP" firstAttribute="leading" secondItem="5SW-8j-tAt" secondAttribute="trailing" constant="11" id="wGQ-hj-s9b"/>
                                                         <constraint firstItem="5SW-8j-tAt" firstAttribute="leading" secondItem="azx-Gr-vGb" secondAttribute="leading" constant="5" id="wqL-3q-U13"/>
                                                     </constraints>

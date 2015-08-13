@@ -89,9 +89,8 @@
     
     if(notification.activationType==NSUserNotificationActivationTypeReplied)
     {
-  
+        [[MLXMPPManager sharedInstance].contactVC.chatViewController sendMessage:notification.response.string andMessageID:nil];
         
-        //send it
     }
 }
 

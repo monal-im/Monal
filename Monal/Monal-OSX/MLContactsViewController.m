@@ -12,7 +12,6 @@
 #import "DataLayer.h"
 #import "MLXMPPManager.h"
 #import "DDLog.h"
-#import "MLChatViewController.h"
 #import "MLMainWindow.h"
 #import "MLImageManager.h"
 
@@ -26,7 +25,7 @@
 @property (nonatomic, strong) NSMutableArray* contacts;
 @property (nonatomic, strong) NSMutableArray* offlineContacts;
 
-@property (nonatomic, weak) MLChatViewController *chatViewController;
+
 
 
 @end
@@ -86,6 +85,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 {
     NSInteger counter=0;
     NSInteger pos=-1;
+    NSDictionary *selectedRow;
     
     for(NSDictionary* row in self.contacts)
     {
@@ -93,13 +93,18 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
            [[row objectForKey:kAccountID]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
         {
             pos= counter;
+            selectedRow=row;
         }
         counter++;
     }
     
     
+    
     if(pos>=0)
     {
+        //ensures that it isdefintiely set 
+        [self.chatViewController showConversationForContact:selectedRow];
+        
         NSIndexSet *indexSet = [NSIndexSet indexSetWithIndex:pos];
         [self.contactsTable selectRowIndexes:indexSet byExtendingSelection:NO];
     }

@@ -14,6 +14,7 @@
 @property (nonatomic, strong) IBOutlet NSTableView *chatTable;
 
 -(IBAction)sendText:(id)sender;
+-(void) sendMessage:(NSString *) messageText andMessageID:(NSString *)messageID;
 
 -(void) showConversationForContact:(NSDictionary *)contact;
 

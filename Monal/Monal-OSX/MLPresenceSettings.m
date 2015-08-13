@@ -35,7 +35,7 @@
 
 - (NSString *)toolbarItemLabel
 {
-    return @"";
+    return @"Presence";
 }
 
 

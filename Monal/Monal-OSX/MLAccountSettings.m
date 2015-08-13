@@ -105,12 +105,12 @@
 
 - (NSImage *)toolbarItemImage
 {
-    return [NSImage imageNamed:NSImageNameAdvanced];
+    return [NSImage imageNamed:NSImageNameUserAccounts];
 }
 
 - (NSString *)toolbarItemLabel
 {
-    return @"";
+    return @"Accounts";
 }
 
 

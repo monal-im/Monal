@@ -29,12 +29,12 @@
 
 - (NSImage *)toolbarItemImage
 {
-    return [NSImage imageNamed:NSImageNameAdvanced];
+    return [NSImage imageNamed:NSImageNamePreferencesGeneral];
 }
 
 - (NSString *)toolbarItemLabel
 {
-    return @"";
+    return @"Display";
 }
 
 

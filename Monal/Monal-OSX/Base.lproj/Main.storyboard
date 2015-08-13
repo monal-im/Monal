@@ -658,7 +658,7 @@
                         <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES" unifiedTitleAndToolbar="YES"/>
                         <windowCollectionBehavior key="collectionBehavior" fullScreenPrimary="YES"/>
                         <windowPositionMask key="initialPositionMask" topStrut="YES" bottomStrut="YES"/>
-                        <rect key="contentRect" x="196" y="240" width="400" height="300"/>
+                        <rect key="contentRect" x="196" y="240" width="616" height="319"/>
                         <rect key="screenRect" x="0.0" y="0.0" width="1680" height="1027"/>
                         <toolbar key="toolbar" implicitIdentifier="EC735BF1-1698-45E1-A353-F99557800F17" autosavesConfiguration="NO" displayMode="iconOnly" sizeMode="regular" id="LGE-7m-sfQ">
                             <allowedToolbarItems>
@@ -708,6 +708,11 @@
                                         <segue destination="kZp-r1-Nmw" kind="popover" identifier="showContactInfo" popoverAnchorView="O1F-wJ-6xt" popoverBehavior="t" preferredEdge="maxX" id="AZh-DK-DZF"/>
                                     </connections>
                                 </toolbarItem>
+                                <toolbarItem implicitItemIdentifier="380AC09E-9A1F-4EBF-B617-61ED4E0CB273" label="Add Contact" paletteLabel="Add Contact" tag="-1" image="907-plus-rounded-square" id="9TB-3c-nGe">
+                                    <connections>
+                                        <segue destination="YaN-jR-P6F" kind="sheet" id="b5L-QG-mfn"/>
+                                    </connections>
+                                </toolbarItem>
                             </allowedToolbarItems>
                             <defaultToolbarItems>
                                 <toolbarItem reference="ZSw-2Q-VnE"/>
@@ -715,6 +720,7 @@
                                 <toolbarItem reference="7tw-2L-tfc"/>
                                 <toolbarItem reference="82S-Mb-KdJ"/>
                                 <toolbarItem reference="7tw-2L-tfc"/>
+                                <toolbarItem reference="9TB-3c-nGe"/>
                                 <toolbarItem reference="O1F-wJ-6xt"/>
                             </defaultToolbarItems>
                         </toolbar>
@@ -729,14 +735,14 @@
                 </windowController>
                 <customObject id="Oky-zY-oP4" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-192" y="153"/>
+            <point key="canvasLocation" x="-84" y="162.5"/>
         </scene>
         <!--Contacts View Controller-->
         <scene sceneID="lWg-JA-sLc">
             <objects>
                 <viewController id="0BB-CK-cBw" customClass="MLContactsViewController" sceneMemberID="viewController">
                     <scrollView key="view" autohidesScrollers="YES" horizontalLineScroll="62" horizontalPageScroll="10" verticalLineScroll="62" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" id="eLW-rG-h59">
-                        <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
+                        <rect key="frame" x="0.0" y="0.0" width="274" height="300"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <clipView key="contentView" misplaced="YES" drawsBackground="NO" copiesOnScroll="NO" id="HB1-Pi-3Cp">
                             <rect key="frame" x="1" y="17" width="238" height="117"/>
@@ -750,7 +756,7 @@
                                     <tableViewGridLines key="gridStyleMask" horizontal="YES"/>
                                     <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
                                     <tableColumns>
-                                        <tableColumn width="445" minWidth="40" maxWidth="1000" id="xVS-3C-CZv">
+                                        <tableColumn width="269" minWidth="40" maxWidth="1000" id="xVS-3C-CZv">
                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left">
                                                 <font key="font" metaFont="smallSystem"/>
                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -764,7 +770,7 @@
                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                             <prototypeCellViews>
                                                 <tableCellView identifier="OnlineUser" id="azx-Gr-vGb" customClass="MLContactsCell">
-                                                    <rect key="frame" x="1" y="1" width="445" height="60"/>
+                                                    <rect key="frame" x="1" y="1" width="269" height="60"/>
                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                     <subviews>
                                                         <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="7ak-TK-LeP">
@@ -873,7 +879,7 @@
                 </viewController>
                 <customObject id="N6A-8E-AoF" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-359" y="1195.5"/>
+            <point key="canvasLocation" x="-447" y="1195"/>
         </scene>
         <!--Split View Controller-->
         <scene sceneID="2ls-iF-dj5">
@@ -898,6 +904,74 @@
             <point key="canvasLocation" x="11" y="663"/>
         </scene>
         <!--View Controller-->
+        <scene sceneID="HhB-V1-ecH">
+            <objects>
+                <viewController id="YaN-jR-P6F" sceneMemberID="viewController">
+                    <view key="view" id="Y3b-v7-Z5w">
+                        <rect key="frame" x="0.0" y="0.0" width="399" height="253"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <subviews>
+                            <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="JK4-40-sSR">
+                                <rect key="frame" x="20" y="141" width="359" height="22"/>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" placeholderString="Contact Name" bezelStyle="round" id="IkB-3E-c6a">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <comboBox verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="sSp-rL-AUV">
+                                <rect key="frame" x="20" y="173" width="362" height="26"/>
+                                <comboBoxCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" placeholderString="Account" drawsBackground="YES" completes="NO" numberOfVisibleItems="5" id="DTG-JW-xEk">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                    <objectValues>
+                                        <string>Item 1</string>
+                                        <string>Item 2</string>
+                                        <string>Item 3</string>
+                                    </objectValues>
+                                </comboBoxCell>
+                            </comboBox>
+                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="SaO-MG-gNq">
+                                <rect key="frame" x="303" y="13" width="83" height="32"/>
+                                <buttonCell key="cell" type="push" title="Cancel" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Rle-yO-w7W">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                    <string key="keyEquivalent" base64-UTF8="YES">
+Gw
+</string>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="dismissController:" target="YaN-jR-P6F" id="D7O-fb-Yke"/>
+                                </connections>
+                            </button>
+                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="M1U-hP-nYX">
+                                <rect key="frame" x="185" y="13" width="118" height="32"/>
+                                <buttonCell key="cell" type="push" title="Add Contact" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Mdx-vx-CEy">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                            </button>
+                        </subviews>
+                        <constraints>
+                            <constraint firstItem="SaO-MG-gNq" firstAttribute="leading" secondItem="M1U-hP-nYX" secondAttribute="trailing" constant="12" symbolic="YES" id="2MR-I7-1q4"/>
+                            <constraint firstItem="sSp-rL-AUV" firstAttribute="leading" secondItem="JK4-40-sSR" secondAttribute="leading" id="7j2-ca-G2l"/>
+                            <constraint firstItem="JK4-40-sSR" firstAttribute="top" secondItem="sSp-rL-AUV" secondAttribute="bottom" constant="14" id="C6L-NF-rlk"/>
+                            <constraint firstAttribute="trailing" secondItem="SaO-MG-gNq" secondAttribute="trailing" constant="19" id="E4j-cs-0UK"/>
+                            <constraint firstItem="sSp-rL-AUV" firstAttribute="trailing" secondItem="JK4-40-sSR" secondAttribute="trailing" id="SXr-WF-rPe"/>
+                            <constraint firstAttribute="bottom" secondItem="M1U-hP-nYX" secondAttribute="bottom" constant="20" symbolic="YES" id="UdF-ut-2yK"/>
+                            <constraint firstItem="sSp-rL-AUV" firstAttribute="top" secondItem="Y3b-v7-Z5w" secondAttribute="top" constant="56" id="dht-uY-jgu"/>
+                            <constraint firstItem="SaO-MG-gNq" firstAttribute="baseline" secondItem="M1U-hP-nYX" secondAttribute="baseline" id="gBU-4L-rgK"/>
+                            <constraint firstItem="sSp-rL-AUV" firstAttribute="leading" secondItem="Y3b-v7-Z5w" secondAttribute="leading" constant="20" symbolic="YES" id="o0H-K3-LTB"/>
+                            <constraint firstAttribute="trailing" secondItem="sSp-rL-AUV" secondAttribute="trailing" constant="20" symbolic="YES" id="yQb-x2-pdl"/>
+                        </constraints>
+                    </view>
+                </viewController>
+                <customObject id="SAg-Gz-IdD" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="701.5" y="0.5"/>
+        </scene>
+        <!--View Controller-->
         <scene sceneID="v2f-nP-h6y">
             <objects>
                 <viewController id="kZp-r1-Nmw" sceneMemberID="viewController">
@@ -908,7 +982,7 @@
                 </viewController>
                 <customObject id="Y6b-l4-GHd" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="621" y="131"/>
+            <point key="canvasLocation" x="717" y="498"/>
         </scene>
         <!--Chat View Controller-->
         <scene sceneID="CGi-CN-lI2">
@@ -1132,7 +1206,7 @@
                 </viewController>
                 <customObject id="csG-e3-5EW" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="778.5" y="670.5"/>
+            <point key="canvasLocation" x="737.5" y="1019.5"/>
         </scene>
         <!--Preferences-Accounts-->
         <scene sceneID="kbX-E6-xLf">
@@ -1587,6 +1661,7 @@ Gw
         </scene>
     </scenes>
     <resources>
+        <image name="907-plus-rounded-square" width="28" height="28"/>
         <image name="NotificationBubble" width="22" height="22"/>
         <image name="noicon" width="44" height="44"/>
         <image name="offline" width="15" height="15"/>

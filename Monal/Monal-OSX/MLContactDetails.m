@@ -7,6 +7,8 @@
 //
 
 #import "MLContactDetails.h"
+#import "MLImageManager.h"
+#import "DataLayer.h"
 
 @interface MLContactDetails ()
 
@@ -22,43 +24,43 @@
 -(void) viewWillAppear
 {
     [super viewWillAppear];
-//    _buddyName.text =[_contact objectForKey:@"buddy_name"];
-//    
-//    _buddyMessage.text=[_contact objectForKey:@"status"];
-//    if([ _buddyMessage.text isEqualToString:@"(null)"])  _buddyMessage.text=@"";
-//    
-//    _buddyStatus.text=[_contact objectForKey:@"state"];
-//    if([ _buddyStatus.text isEqualToString:@"(null)"])  _buddyStatus.text=@"";
-//    
-//    _fullName.text=[_contact objectForKey:@"full_name"];
-//    if([ _fullName.text isEqualToString:@"(null)"])  _fullName.text=@"";
-//    
-//    NSArray* parts= [_buddyName.text componentsSeparatedByString:@"@"];
-//    if([parts count]>1)
-//    {
-//        NSString* domain= [parts objectAtIndex:1];
-//        if([domain isEqualToString:@"gmail.com"])
-//        {
-//            //gtalk
-//            _protocolImage.image=[UIImage imageNamed:@"GTalk"];
-//        }
-//        else
-//            
-//            //xmpp
-//            _protocolImage.image=[UIImage imageNamed:@"XMPP"];
-//        
-//    }
-//    NSString* accountNo=[NSString stringWithFormat:@"%@", [_contact objectForKey:@"account_id"]];
-//    UIImage* contactImage=[[MLImageManager sharedInstance] getIconForContact:[_contact objectForKey:@"buddy_name"] andAccount:accountNo];
-//    _buddyIconView.image=contactImage;
-//    
-//    NSArray* resources= [[DataLayer sharedInstance] resourcesForContact:[_contact objectForKey:@"buddy_name"]];
-//    self.resourcesTextView.text=@"";
-//    for(NSDictionary* row in resources)
-//    {
-//        self.resourcesTextView.text=[NSString stringWithFormat:@"%@\n%@\n",self.resourcesTextView.text, [row objectForKey:@"resource"]];
-//        
-//    }
+    self.buddyName.stringValue =[_contact objectForKey:@"buddy_name"];
+    
+    self.buddyMessage.stringValue=[_contact objectForKey:@"status"];
+    if([ self.buddyMessage.stringValue isEqualToString:@"(null)"])  self.buddyMessage.stringValue=@"";
+    
+    self.buddyStatus.stringValue=[_contact objectForKey:@"state"];
+    if([ self.buddyStatus.stringValue isEqualToString:@"(null)"])  self.buddyStatus.stringValue=@"";
+    
+    self.fullName.stringValue=[_contact objectForKey:@"full_name"];
+    if([ self.fullName.stringValue isEqualToString:@"(null)"])  self.fullName.stringValue=@"";
+    
+    NSArray* parts= [self.buddyName.stringValue componentsSeparatedByString:@"@"];
+    if([parts count]>1)
+    {
+        NSString* domain= [parts objectAtIndex:1];
+        if([domain isEqualToString:@"gmail.com"])
+        {
+            //gtalk
+            _protocolImage.image=[NSImage imageNamed:@"GTalk"];
+        }
+        else
+            
+            //xmpp
+            _protocolImage.image=[NSImage imageNamed:@"XMPP"];
+        
+    }
+    NSString* accountNo=[NSString stringWithFormat:@"%@", [_contact objectForKey:@"account_id"]];
+    NSImage* contactImage=[[MLImageManager sharedInstance] getIconForContact:[_contact objectForKey:@"buddy_name"] andAccount:accountNo];
+    self.buddyIconView.image=contactImage;
+    
+    NSArray* resources= [[DataLayer sharedInstance] resourcesForContact:[_contact objectForKey:@"buddy_name"]];
+    self.resourcesTextView.string=@"";
+    for(NSDictionary* row in resources)
+    {
+        self.resourcesTextView.string=[NSString stringWithFormat:@"%@\n%@\n",self.resourcesTextView.string, [row objectForKey:@"resource"]];
+
+    }
 
 }
 

@@ -57,6 +57,8 @@
         alert.title= nameToShow;
         if([[[NSUserDefaults standardUserDefaults] objectForKey:@"MessagePreview"] boolValue]) {
             alert.informativeText=[notification.userInfo objectForKey:@"messageText"];
+        } else  {
+             alert.informativeText=@"Open app to see message"; 
         }
         
         if([[[NSUserDefaults standardUserDefaults] objectForKey:@"Sound"] boolValue])

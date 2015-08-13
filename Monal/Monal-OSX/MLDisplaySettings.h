@@ -11,5 +11,12 @@
 
 @interface MLDisplaySettings : NSViewController <MASPreferencesViewController>
 
+@property (nonatomic, weak) IBOutlet NSButton *chatLogs;
+@property (nonatomic, weak) IBOutlet NSButton *playSounds;
+@property (nonatomic, weak) IBOutlet NSButton *showMessagePreview;
+
+
+@property (nonatomic, weak) IBOutlet NSButton *showOffline;
+@property (nonatomic, weak) IBOutlet NSButton *sortByStatus;
 
 @end

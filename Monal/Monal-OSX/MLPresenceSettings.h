@@ -11,5 +11,11 @@
 
 @interface MLPresenceSettings : NSViewController <MASPreferencesViewController>
 
+@property (nonatomic, weak) IBOutlet NSTextField *status;
+@property (nonatomic, weak) IBOutlet NSTextField *priority;
+
+@property (nonatomic, weak) IBOutlet NSButton *away;
+@property (nonatomic, weak) IBOutlet NSButton *visibility;
+
 
 @end

@@ -12,6 +12,7 @@
 #import "MLConstants.h"
 #import "MLImageManager.h"
 #import "MLXMPPManager.h"
+#import "MLContactDetails.h"
 
 
 @interface MLMainWindow ()
@@ -38,6 +39,16 @@
     self.contactInfo= contact;
     self.contactNameField.stringValue= [self.contactInfo objectForKey:kFullName];
 }
+
+#pragma mark -- segue
+- (void)prepareForSegue:(NSStoryboardSegue *)segue sender:(id)sender
+{
+    if([segue.identifier isEqualToString:@"ContatDetails"]) {
+        MLContactDetails *details = (MLContactDetails *)[segue destinationController];
+        details.contact=self.contactInfo;
+    }
+}
+
 
 
 #pragma mark -- notifications

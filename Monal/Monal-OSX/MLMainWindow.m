@@ -43,7 +43,7 @@
 #pragma mark -- segue
 - (void)prepareForSegue:(NSStoryboardSegue *)segue sender:(id)sender
 {
-    if([segue.identifier isEqualToString:@"ContatDetails"]) {
+    if([segue.identifier isEqualToString:@"ContactDetails"]) {
         MLContactDetails *details = (MLContactDetails *)[segue destinationController];
         details.contact=self.contactInfo;
     }

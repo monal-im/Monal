@@ -699,7 +699,7 @@
                                 </toolbarItem>
                                 <toolbarItem implicitItemIdentifier="F04C6D51-26CB-4D2C-B231-77C8E77974C8" label="Contact Info" paletteLabel="Contact Info" tag="-1" image="724-info" id="VQp-eV-N8J">
                                     <connections>
-                                        <segue destination="kZp-r1-Nmw" kind="popover" popoverAnchorView="VQp-eV-N8J" popoverBehavior="t" preferredEdge="maxY" id="1K6-5s-FVT"/>
+                                        <segue destination="kZp-r1-Nmw" kind="popover" identifier="ContactDetails" popoverAnchorView="VQp-eV-N8J" popoverBehavior="t" preferredEdge="maxX" id="1K6-5s-FVT"/>
                                     </connections>
                                 </toolbarItem>
                             </allowedToolbarItems>
@@ -1034,7 +1034,7 @@ Gw
                                     <rect key="frame" x="1" y="1" width="223" height="133"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
-                                        <textView importsGraphics="NO" findStyle="panel" continuousSpellChecking="YES" allowsUndo="YES" usesRuler="YES" usesFontPanel="YES" verticallyResizable="YES" allowsNonContiguousLayout="YES" quoteSubstitution="YES" dashSubstitution="YES" spellingCorrection="YES" smartInsertDelete="YES" id="WE5-f6-27o">
+                                        <textView editable="NO" importsGraphics="NO" richText="NO" findStyle="panel" continuousSpellChecking="YES" allowsUndo="YES" usesRuler="YES" usesFontPanel="YES" verticallyResizable="YES" allowsNonContiguousLayout="YES" quoteSubstitution="YES" dashSubstitution="YES" spellingCorrection="YES" smartInsertDelete="YES" id="WE5-f6-27o">
                                             <rect key="frame" x="0.0" y="0.0" width="223" height="133"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>

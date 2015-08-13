@@ -8,7 +8,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-@interface MLMainWindow : NSWindowController
+@interface MLMainWindow : NSWindowController <NSUserNotificationCenterDelegate>
 
 @property (nonatomic, strong) IBOutlet NSTextField *contactNameField;
 

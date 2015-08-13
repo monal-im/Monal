@@ -28,6 +28,7 @@
     
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
     [nc addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
+    [NSUserNotificationCenter defaultUserNotificationCenter].delegate= self;
     
 }
 
@@ -57,7 +58,7 @@
         
         NSImage *alertImage=  [[MLImageManager sharedInstance] getIconForContact:[notification.userInfo objectForKey:@"from"] andAccount:[notification.userInfo objectForKey:@"accountNo"]];
         alert.contentImage= alertImage;
-        alert.hasReplyButton=YES;
+        alert.hasReplyButton=YES; 
         [[NSUserNotificationCenter defaultUserNotificationCenter] scheduleNotification:alert];
     }
     
@@ -74,6 +75,14 @@
 
 
 }
+
+#pragma mark - notificaiton delegate
+
+- (void)userNotificationCenter:(NSUserNotificationCenter * )center didActivateNotification:(NSUserNotification *  )notification
+{
+    [self showWindow:self];
+}
+
 
 #pragma mark - Window delegate
 - (void)windowDidChangeOcclusionState:(NSNotification *)notification

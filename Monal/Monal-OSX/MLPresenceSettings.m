@@ -21,7 +21,7 @@
     // Do view setup here.
 }
 
--(void) viewDidAppear
+-(void) viewWillAppear
 {
     self.away.state = [[[NSUserDefaults standardUserDefaults] objectForKey:@"Away"] boolValue];
     self.visibility.state = [[[NSUserDefaults standardUserDefaults] objectForKey:@"Visible"] boolValue];
@@ -36,16 +36,30 @@
     
 }
 
-
 -(void) viewWillDisappear
 {
-    [[NSUserDefaults standardUserDefaults] setBool:self.away.state  forKey: @"Away"];
+    if(![self.status.stringValue isEqualToString:[[NSUserDefaults standardUserDefaults] objectForKey:@"StatusMessage"]]) {
+        [[MLXMPPManager sharedInstance] setStatusMessage:self.status.stringValue];
+        [[NSUserDefaults standardUserDefaults] setObject:self.status.stringValue  forKey: @"StatusMessage"];
+    }
+    
+    if(![self.priority.stringValue  isEqualToString:[[NSUserDefaults standardUserDefaults] objectForKey:@"XMPPPriority"]]) {
+        [[NSUserDefaults standardUserDefaults] setObject:self.priority.stringValue  forKey: @"XMPPPriority"];
+        [[MLXMPPManager sharedInstance] setPriority:[self.priority.stringValue  integerValue]];
+    }
+    
+}
+
+-(IBAction)toggleVisble:(id)sender
+{
+    [[MLXMPPManager sharedInstance] setVisible:self.visibility.state];
     [[NSUserDefaults standardUserDefaults] setBool:self.visibility.state  forKey: @"Visible"];
-    
-    [[NSUserDefaults standardUserDefaults] setObject:self.status.stringValue  forKey: @"StatusMessage"];
-    [[NSUserDefaults standardUserDefaults] setObject:self.priority.stringValue  forKey: @"XMPPPriority"];
-    
-    
+}
+
+-(IBAction)toggleAway:(id)sender
+{
+    [[MLXMPPManager sharedInstance] setAway:self.away.state];
+    [[NSUserDefaults standardUserDefaults] setBool:self.away.state  forKey: @"Away"];
 }
 
 #pragma mark - preferences delegate

@@ -1589,6 +1589,9 @@ Gw
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
+                                <connections>
+                                    <action selector="toggleAway:" target="0nn-qO-NFw" id="KkY-Pn-5jB"/>
+                                </connections>
                             </button>
                             <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="29S-sg-rFK">
                                 <rect key="frame" x="18" y="18" width="63" height="18"/>
@@ -1596,6 +1599,9 @@ Gw
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
+                                <connections>
+                                    <action selector="toggleVisble:" target="0nn-qO-NFw" id="jA8-WW-rVk"/>
+                                </connections>
                             </button>
                         </subviews>
                     </view>

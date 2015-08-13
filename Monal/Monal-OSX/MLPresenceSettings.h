@@ -18,4 +18,7 @@
 @property (nonatomic, weak) IBOutlet NSButton *visibility;
 
 
+-(IBAction)toggleVisble:(id)sender;
+-(IBAction)toggleAway:(id)sender;
+
 @end

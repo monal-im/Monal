@@ -21,7 +21,7 @@
 
 
 
--(void) viewDidAppear
+-(void) viewWillAppear
 {
     self.chatLogs.state = [[[NSUserDefaults standardUserDefaults] objectForKey:@"Logging"] boolValue];
     self.playSounds.state = [[[NSUserDefaults standardUserDefaults] objectForKey:@"Sound"] boolValue];
@@ -45,6 +45,7 @@
     [[NSUserDefaults standardUserDefaults] setBool:self.sortByStatus.state  forKey: @"SortContacts"];
    
 }
+
 
 
 #pragma mark - preferences delegate

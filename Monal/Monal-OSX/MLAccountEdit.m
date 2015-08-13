@@ -29,6 +29,16 @@
             self.server.stringValue= @"talk.google.com";
             self.jabberID.stringValue=@"@gmail.com";
         }
+    } else  {
+        self.jabberID.stringValue =[NSString stringWithFormat:@"%@@%@", [self.accountToEdit objectForKey:@"username"], [self.accountToEdit objectForKey:@"domain"]];
+        
+        self.server.stringValue =[self.accountToEdit objectForKey:@"server"];
+        self.port.stringValue =[self.accountToEdit objectForKey:@"other_port"];
+        self.resource.stringValue =[self.accountToEdit objectForKey:@"resource"];
+        
+        self.enabledCheck.state =[[self.accountToEdit objectForKey:@"enabled"] boolValue];
+        self.selfSigned.state =[[self.accountToEdit objectForKey:@"selfsigned"] boolValue];
+        self.oldStyleSSL.state =[[self.accountToEdit objectForKey:@"oldstyleSSL"] boolValue];
     }
 }
 

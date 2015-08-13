@@ -60,7 +60,12 @@
 
 -(void)editAccount
 {
-      [self performSegueWithIdentifier:@"showAccountEdit" sender:@"XMPP"];
+    NSInteger selected = [self.accountTable selectedRow];
+    if(selected < self.accountList.count) {
+        NSDictionary * row = [self.accountList objectAtIndex:selected];
+        
+      [self performSegueWithIdentifier:@"showAccountEdit" sender:row];
+    }
 }
 
 #pragma mark -- segues
@@ -76,7 +81,12 @@
 - (void)prepareForSegue:(NSStoryboardSegue *)segue sender:(id)sender
 {
     MLAccountEdit *sheet = (MLAccountEdit *)[segue destinationController];
-    sheet.accountType= sender;
+    if([sender isKindOfClass:[NSString class]]) {
+        sheet.accountType= sender;
+    }
+    else  {
+        sheet.accountToEdit=sender;
+    }
 }
 
 

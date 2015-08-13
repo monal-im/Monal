@@ -29,7 +29,7 @@
 
 - (NSImage *)toolbarItemImage
 {
-    return [NSImage imageNamed:NSImageNamePreferencesGeneral];
+    return [NSImage imageNamed:@"1008-Desktop"];
 }
 
 - (NSString *)toolbarItemLabel

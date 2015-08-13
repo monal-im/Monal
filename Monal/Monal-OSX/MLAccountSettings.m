@@ -105,7 +105,7 @@
 
 - (NSImage *)toolbarItemImage
 {
-    return [NSImage imageNamed:NSImageNameUserAccounts];
+    return [NSImage imageNamed:@"1049-at-sign"];
 }
 
 - (NSString *)toolbarItemLabel

@@ -30,7 +30,7 @@
 
 - (NSImage *)toolbarItemImage
 {
-    return [NSImage imageNamed:NSImageNameAdvanced];
+    return [NSImage imageNamed:@"740-gear"];
 }
 
 - (NSString *)toolbarItemLabel

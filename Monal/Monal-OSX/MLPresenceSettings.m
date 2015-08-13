@@ -25,6 +25,15 @@
 {
     self.away.state = [[[NSUserDefaults standardUserDefaults] objectForKey:@"Away"] boolValue];
     self.visibility.state = [[[NSUserDefaults standardUserDefaults] objectForKey:@"Visible"] boolValue];
+
+    if([[NSUserDefaults standardUserDefaults] objectForKey:@"StatusMessage"]) {
+        self.status.stringValue = [[NSUserDefaults standardUserDefaults] objectForKey:@"StatusMessage"];
+    }
+    
+    if( [[NSUserDefaults standardUserDefaults] objectForKey:@"XMPPPriority"]) {
+        self.priority.stringValue = [[NSUserDefaults standardUserDefaults] objectForKey:@"XMPPPriority"] ;
+    }
+    
 }
 
 
@@ -32,6 +41,11 @@
 {
     [[NSUserDefaults standardUserDefaults] setBool:self.away.state  forKey: @"Away"];
     [[NSUserDefaults standardUserDefaults] setBool:self.visibility.state  forKey: @"Visible"];
+    
+    [[NSUserDefaults standardUserDefaults] setObject:self.status.stringValue  forKey: @"StatusMessage"];
+    [[NSUserDefaults standardUserDefaults] setObject:self.priority.stringValue  forKey: @"XMPPPriority"];
+    
+    
 }
 
 #pragma mark - preferences delegate

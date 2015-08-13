@@ -55,7 +55,14 @@
         if([fullName length]>0) nameToShow=fullName;
         
         alert.title= nameToShow;
-        alert.informativeText=[notification.userInfo objectForKey:@"messageText"];
+        if([[[NSUserDefaults standardUserDefaults] objectForKey:@"MessagePreview"] boolValue]) {
+            alert.informativeText=[notification.userInfo objectForKey:@"messageText"];
+        }
+        
+        if([[[NSUserDefaults standardUserDefaults] objectForKey:@"Sound"] boolValue])
+        {
+            alert.soundName= NSUserNotificationDefaultSoundName;
+        }
         
         NSImage *alertImage=  [[MLImageManager sharedInstance] getIconForContact:[notification.userInfo objectForKey:@"from"] andAccount:[notification.userInfo objectForKey:@"accountNo"]];
         alert.contentImage= alertImage;

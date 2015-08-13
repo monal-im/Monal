@@ -11,6 +11,7 @@
 #import "DataLayer.h"
 #import "MLConstants.h"
 #import "MLImageManager.h"
+#import "MLXMPPManager.h"
 
 
 @interface MLMainWindow ()
@@ -58,7 +59,8 @@
         
         NSImage *alertImage=  [[MLImageManager sharedInstance] getIconForContact:[notification.userInfo objectForKey:@"from"] andAccount:[notification.userInfo objectForKey:@"accountNo"]];
         alert.contentImage= alertImage;
-        alert.hasReplyButton=YES; 
+        alert.hasReplyButton=YES;
+        alert.userInfo= notification.userInfo;
         [[NSUserNotificationCenter defaultUserNotificationCenter] scheduleNotification:alert];
     }
     
@@ -81,6 +83,16 @@
 - (void)userNotificationCenter:(NSUserNotificationCenter * )center didActivateNotification:(NSUserNotification *  )notification
 {
     [self showWindow:self];
+    
+    NSDictionary *userInfo= notification.userInfo;
+    [[MLXMPPManager sharedInstance].contactVC showConversationForContact:userInfo];
+    
+    if(notification.activationType==NSUserNotificationActivationTypeReplied)
+    {
+  
+        
+        //send it
+    }
 }
 
 

@@ -82,7 +82,30 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 
 #pragma mark - update UI
 
--(void) updatWindowForContact:(NSDictionary *)contact
+-(void) showConversationForContact:(NSDictionary *) user
+{
+    NSInteger counter=0;
+    NSInteger pos=-1;
+    
+    for(NSDictionary* row in self.contacts)
+    {
+        if([[row objectForKey:kContactName] caseInsensitiveCompare:[user objectForKey:@"actuallyfrom"] ]==NSOrderedSame &&
+           [[row objectForKey:kAccountID]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
+        {
+            pos= counter;
+        }
+        counter++;
+    }
+    
+    
+    if(pos>=0)
+    {
+        NSIndexSet *indexSet = [NSIndexSet indexSetWithIndex:pos];
+        [self.contactsTable selectRowIndexes:indexSet byExtendingSelection:NO];
+    }
+}
+
+-(void) updateWindowForContact:(NSDictionary *)contact
 {
     MLMainWindow *window =(MLMainWindow *)self.view.window.windowController;
     [window updateCurrentContact:contact];
@@ -473,7 +496,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     if(self.contactsTable.selectedRow<self.contacts.count) {
         NSDictionary *contactRow = [self.contacts objectAtIndex:self.contactsTable.selectedRow];
         [self.chatViewController showConversationForContact:contactRow];
-        [self updatWindowForContact:contactRow];
+        [self updateWindowForContact:contactRow];
         [[DataLayer sharedInstance] markAsReadBuddy:[contactRow objectForKey:kContactName] forAccount:[contactRow objectForKey:kAccountID]];
         [self updateAppBadge];
         

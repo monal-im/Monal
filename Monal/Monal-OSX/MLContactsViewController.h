@@ -13,6 +13,7 @@
 @property (nonatomic, strong) IBOutlet NSTableView *contactsTable;
 
 
+-(void) showConversationForContact:(NSDictionary *) user;
 
 // methods requied for XMPP accont to call back 
 -(void) showConnecting:(NSDictionary*) info;

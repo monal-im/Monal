@@ -24,9 +24,11 @@
 
 -(void) viewWillAppear {
     [super viewWillAppear];
-    if([self.accountType isEqualToString:@"Gtalk"]) {
-        self.server.stringValue= @"talk.google.com";
-        self.jabberID.stringValue=@"@gmail.com";
+    if(!self.accountToEdit) {
+        if([self.accountType isEqualToString:@"Gtalk"]) {
+            self.server.stringValue= @"talk.google.com";
+            self.jabberID.stringValue=@"@gmail.com";
+        }
     }
 }
 

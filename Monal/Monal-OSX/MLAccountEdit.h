@@ -26,6 +26,8 @@
 
 @property (nonatomic, strong) NSString *accountType;
 
+@property (nonatomic, strong) NSDictionary *accountToEdit;
+
 -(IBAction)save:(id)sender;
 
 

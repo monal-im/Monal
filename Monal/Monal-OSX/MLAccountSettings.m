@@ -27,6 +27,7 @@
 -(void) viewWillAppear
 {
     [self refreshAccountList];
+    [self.accountTable setDoubleAction:@selector(editAccount)];
 }
 
 -(void) refreshAccountList
@@ -54,6 +55,12 @@
         // update display
         [self.accountTable reloadData];
     }
+}
+
+
+-(void)editAccount
+{
+      [self performSegueWithIdentifier:@"showAccountEdit" sender:@"XMPP"];
 }
 
 #pragma mark -- segues

@@ -144,6 +144,7 @@
 		261E672B179E27BE00CB493E /* ParseFailure.m in Sources */ = {isa = PBXBuildFile; fileRef = 261E672A179E27BE00CB493E /* ParseFailure.m */; };
 		26277888110179D100023C8A /* tools.m in Sources */ = {isa = PBXBuildFile; fileRef = 26277887110179D100023C8A /* tools.m */; };
 		26277CE41B7C57670094E4D0 /* MLContactDetails.m in Sources */ = {isa = PBXBuildFile; fileRef = 26277CE31B7C57670094E4D0 /* MLContactDetails.m */; };
+		26277D471B7C5FC60094E4D0 /* STKeychain.m in Sources */ = {isa = PBXBuildFile; fileRef = 26277D331B7C5FC60094E4D0 /* STKeychain.m */; };
 		262797AF178A577300B85D94 /* MLContactCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 262797AE178A577300B85D94 /* MLContactCell.m */; };
 		2628E50714049DB50064131E /* askTempPass.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2628E50614049DB50064131E /* askTempPass.xib */; };
 		26292F4F1309CAE100097280 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26292F4E1309CAE100097280 /* CFNetwork.framework */; };
@@ -445,6 +446,9 @@
 		26277887110179D100023C8A /* tools.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = tools.m; path = Classes/tools.m; sourceTree = "<group>"; };
 		26277CE21B7C57670094E4D0 /* MLContactDetails.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLContactDetails.h; sourceTree = "<group>"; };
 		26277CE31B7C57670094E4D0 /* MLContactDetails.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLContactDetails.m; sourceTree = "<group>"; };
+		26277D321B7C5FC60094E4D0 /* STKeychain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STKeychain.h; sourceTree = "<group>"; };
+		26277D331B7C5FC60094E4D0 /* STKeychain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STKeychain.m; sourceTree = "<group>"; };
+		26277D341B7C5FC60094E4D0 /* STUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STUtils.h; sourceTree = "<group>"; };
 		262797AD178A577300B85D94 /* MLContactCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLContactCell.h; sourceTree = "<group>"; };
 		262797AE178A577300B85D94 /* MLContactCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLContactCell.m; sourceTree = "<group>"; };
 		2628E50614049DB50064131E /* askTempPass.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = askTempPass.xib; sourceTree = "<group>"; };
@@ -867,6 +871,7 @@
 		261199061B632B17008768C8 /* External */ = {
 			isa = PBXGroup;
 			children = (
+				26277D091B7C5FC60094E4D0 /* STUtils */,
 				2611991F1B632C42008768C8 /* MASPreferences */,
 			);
 			name = External;
@@ -883,6 +888,24 @@
 				261199241B632C42008768C8 /* README.md */,
 			);
 			path = MASPreferences;
+			sourceTree = "<group>";
+		};
+		26277D091B7C5FC60094E4D0 /* STUtils */ = {
+			isa = PBXGroup;
+			children = (
+				26277D311B7C5FC60094E4D0 /* Security */,
+				26277D341B7C5FC60094E4D0 /* STUtils.h */,
+			);
+			path = STUtils;
+			sourceTree = "<group>";
+		};
+		26277D311B7C5FC60094E4D0 /* Security */ = {
+			isa = PBXGroup;
+			children = (
+				26277D321B7C5FC60094E4D0 /* STKeychain.h */,
+				26277D331B7C5FC60094E4D0 /* STKeychain.m */,
+			);
+			path = Security;
 			sourceTree = "<group>";
 		};
 		262797AC178A573F00B85D94 /* Tableviewcells */ = {
@@ -2084,6 +2107,7 @@
 				26B2A4F21B73097500272E63 /* DDASLLogger.m in Sources */,
 				2638DAEF1B68F3EF00DF05AC /* MLDisplaySettings.m in Sources */,
 				260499EE1B7313F000D11866 /* XMPPParser.m in Sources */,
+				26277D471B7C5FC60094E4D0 /* STKeychain.m in Sources */,
 				260499EB1B7313E800D11866 /* ParseChallenge.m in Sources */,
 				2651AF551B409906008D025C /* MLMainWindow.m in Sources */,
 				26B2A4F81B73097500272E63 /* DDTTYLogger.m in Sources */,

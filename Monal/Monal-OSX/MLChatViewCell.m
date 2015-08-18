@@ -23,16 +23,18 @@
     NSImage* bottomEdgeFill=[NSImage imageNamed:@"bottomCenter"];
     NSImage* bottomRightCorner=[NSImage imageNamed:@"bottomRight"];
     
+  
+    
     if(self.isInbound)
     {
     
     } else  {
-        
+         // self.messageText.backgroundColor = [NSColor clearColor];
     }
     
     CGRect bubbleFrame = self.frame;
-    bubbleFrame.origin.x= self.frame.size.width -14 - self.messageText.frame.size.width;
-    bubbleFrame.size.width = self.messageText.frame.size.width;
+    bubbleFrame.origin.x= self.frame.size.width -40 - self.messageText.frame.size.width-10;
+    bubbleFrame.size.width = self.messageText.frame.size.width+25;
     
     
     NSDrawNinePartImage(bubbleFrame, topLeftCorner, topEdgeFill, topRightCorner,

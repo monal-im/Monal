@@ -31,7 +31,7 @@
     }
     
     CGRect bubbleFrame = self.frame;
-    bubbleFrame.origin.x= self.messageText.frame.origin.x;
+    bubbleFrame.origin.x= self.frame.size.width -14 - self.messageText.frame.size.width;
     bubbleFrame.size.width = self.messageText.frame.size.width;
     
     

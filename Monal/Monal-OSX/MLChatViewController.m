@@ -306,6 +306,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [cell.messageText checkTextInDocument:nil];
     cell.messageText.editable=NO;
     
+    [cell updateDisplay];   
+    
     return cell;
 }
 
@@ -314,11 +316,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     NSDictionary *messageRow = [self.messageList objectAtIndex:row];
     NSString *messageString =[messageRow objectForKey:@"message"];
 
-    NSDictionary *attributes = @{NSFontAttributeName: [NSFont systemFontOfSize:13.0f]};
-    NSSize size = NSMakeSize(272, MAXFLOAT);
-    CGRect rect = [messageString boundingRectWithSize:size options:NSLineBreakByWordWrapping | NSStringDrawingUsesLineFragmentOrigin attributes:attributes];
-
-   
+    NSRect rect = [MLChatViewCell sizeWithMessage:messageString];
+ 
     if(rect.size.height<37)  {
         return  37.0f;
     }

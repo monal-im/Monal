@@ -14,6 +14,7 @@ typedef enum {
     kStatusAway
 } stateType ;
 
+
 @interface MLContactsCell : NSTableCellView
 
 

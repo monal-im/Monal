@@ -10,6 +10,40 @@
 
 @implementation MLChatViewCell
 
+
++ (NSRect) sizeWithMessage:(NSString *)messageString
+{
+    NSDictionary *attributes = @{NSFontAttributeName: [NSFont systemFontOfSize:13.0f]};
+    NSSize size = NSMakeSize(kCellMax, MAXFLOAT);
+    CGRect rect = [messageString boundingRectWithSize:size options:NSLineBreakByWordWrapping | NSStringDrawingUsesLineFragmentOrigin attributes:attributes];
+
+    return rect;
+    
+}
+
+-(void) updateDisplay
+{
+    NSRect rect = [MLChatViewCell sizeWithMessage:self.messageText.string];
+    if (self.isInbound)
+    {
+        if(rect.size.width<kCellMax)
+        {
+            self.messageText.alignment= kCTTextAlignmentLeft;
+        }
+        else  {
+            self.messageText.alignment= kCTTextAlignmentRight;
+        }
+    } else  {
+        if(rect.size.width<kCellMax)
+        {
+            self.messageText.alignment= kCTTextAlignmentRight;
+        }
+        else  {
+            self.messageText.alignment= kCTTextAlignmentLeft;
+        }
+    }
+}
+
 - (void)drawRect:(NSRect)dirtyRect {
     [super drawRect:dirtyRect];
     

@@ -23,10 +23,10 @@
 
 -(void) updateDisplay
 {
-    NSRect rect = [MLChatViewCell sizeWithMessage:self.messageText.string];
+    self.messageRect = [MLChatViewCell sizeWithMessage:self.messageText.string];
     if (self.isInbound)
     {
-        if(rect.size.width<kCellMax)
+        if( self.messageRect.size.width<kCellMax)
         {
             self.messageText.alignment= kCTTextAlignmentLeft;
         }
@@ -34,7 +34,7 @@
             self.messageText.alignment= kCTTextAlignmentRight;
         }
     } else  {
-        if(rect.size.width<kCellMax)
+        if( self.messageRect.size.width<kCellMax)
         {
             self.messageText.alignment= kCTTextAlignmentRight;
         }
@@ -42,6 +42,8 @@
             self.messageText.alignment= kCTTextAlignmentLeft;
         }
     }
+    
+   
 }
 
 - (void)drawRect:(NSRect)dirtyRect {
@@ -57,20 +59,18 @@
     NSImage* bottomEdgeFill=[NSImage imageNamed:@"bottomCenter"];
     NSImage* bottomRightCorner=[NSImage imageNamed:@"bottomRight"];
     
-  
-    
-    if(self.isInbound)
-    {
-    
-    } else  {
-         // self.messageText.backgroundColor = [NSColor clearColor];
-    }
     
     CGRect bubbleFrame = self.frame;
-    bubbleFrame.origin.x= self.frame.size.width -40 - self.messageText.frame.size.width-10;
-    bubbleFrame.size.width = self.messageText.frame.size.width+25;
+    if (self.messageRect.size.width<kCellMax) {
+        bubbleFrame.size.width = self.messageRect.size.width+40;
+    }
+    else  {
+        bubbleFrame.size.width = self.messageText.frame.size.width;
+    }
     
+    bubbleFrame.origin.x= self.frame.size.width -30-  bubbleFrame.size.width;
     
+   
     NSDrawNinePartImage(bubbleFrame, topLeftCorner, topEdgeFill, topRightCorner,
                         leftEdgeFill, centerFill, rightEdgeFill, bottomLeftCorner, bottomEdgeFill,
                         bottomRightCorner, NSCompositeSourceOver, 1.0f, NO);

@@ -64,15 +64,27 @@
 #pragma mark -- notifications
 -(void) handleNewMessage:(NSNotification *)notification;
 {
+    BOOL showNotification =NO;
+    NSUserNotification *alert =[[NSUserNotification alloc] init];
+    NSString* acctString =[NSString stringWithFormat:@"%ld", (long)[[notification.userInfo objectForKey:@"accountNo"] integerValue]];
+    NSString* nameToShow=[notification.userInfo objectForKey:@"from"];
+
+    
     if(self.window.occlusionState & NSWindowOcclusionStateVisible) {
         
+        if(![nameToShow isEqualToString:[self.contactInfo objectForKey:kContactName]])
+        {
+            showNotification= YES;
+        }
     }
-    else {
-        NSUserNotification *alert =[[NSUserNotification alloc] init];
-        NSString* acctString =[NSString stringWithFormat:@"%ld", (long)[[notification.userInfo objectForKey:@"accountNo"] integerValue]];
+    else  {
+        showNotification= YES;
+    }
+    
+    
+    if (showNotification) {
+   
         NSString* fullName =[[DataLayer sharedInstance] fullName:[notification.userInfo objectForKey:@"from"] forAccount:acctString];
-        
-        NSString* nameToShow=[notification.userInfo objectForKey:@"from"];
         if([fullName length]>0) nameToShow=fullName;
         
         alert.title= nameToShow;

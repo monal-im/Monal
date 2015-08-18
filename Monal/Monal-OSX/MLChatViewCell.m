@@ -61,14 +61,14 @@
     
     
     CGRect bubbleFrame = self.frame;
-    if (self.messageRect.size.width<kCellMax) {
+    if (self.messageRect.size.width<250) {
         bubbleFrame.size.width = self.messageRect.size.width+40;
     }
     else  {
-        bubbleFrame.size.width = self.messageText.frame.size.width;
+        bubbleFrame.size.width = self.messageText.frame.size.width+20;
     }
     
-    bubbleFrame.origin.x= self.frame.size.width -30-  bubbleFrame.size.width;
+    bubbleFrame.origin.x= self.frame.size.width -25-  bubbleFrame.size.width;
     
    
     NSDrawNinePartImage(bubbleFrame, topLeftCorner, topEdgeFill, topRightCorner,

@@ -11,5 +11,6 @@
 @interface MLChatViewCell : NSTableCellView
 
 @property (nonatomic, strong) IBOutlet NSTextView *messageText;
+@property (nonatomic, assign) BOOL isInbound;
 
 @end

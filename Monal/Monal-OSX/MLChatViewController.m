@@ -291,11 +291,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     if([[messageRow objectForKey:@"af"] isEqualToString:self.jid]) {
         cell = [tableView makeViewWithIdentifier:@"OutboundTextCell" owner:self];
+        cell.isInbound= NO;
         cell.messageText.textColor = [NSColor whiteColor];
         cell.messageText.linkTextAttributes =@{NSForegroundColorAttributeName:[NSColor whiteColor], NSUnderlineStyleAttributeName: @YES};
     }
     else  {
         cell = [tableView makeViewWithIdentifier:@"InboundTextCell" owner:self];
+        cell.isInbound=YES;
         cell.messageText.linkTextAttributes =@{NSForegroundColorAttributeName:[NSColor blackColor], NSUnderlineStyleAttributeName: @YES};
     }
     
@@ -317,11 +319,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     CGRect rect = [messageString boundingRectWithSize:size options:NSLineBreakByWordWrapping | NSStringDrawingUsesLineFragmentOrigin attributes:attributes];
 
    
-    if(rect.size.height<25)  {
-        return  25.0f;
+    if(rect.size.height<37)  {
+        return  37.0f;
     }
     else {
-       return rect.size.height+5+5;
+        return rect.size.height+5+5;
     
     }
 }

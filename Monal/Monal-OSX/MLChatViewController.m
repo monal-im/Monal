@@ -318,11 +318,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
     NSRect rect = [MLChatViewCell sizeWithMessage:messageString];
  
-    if(rect.size.height<37)  {
-        return  37.0f;
+    if(rect.size.height<33.0f)  {
+        return  33.0f;
     }
     else {
-        return rect.size.height+5+5;
+        return rect.size.height+5.0+5.0;
     
     }
 }

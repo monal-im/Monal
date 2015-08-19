@@ -16,7 +16,6 @@
     NSDictionary *attributes = @{NSFontAttributeName: [NSFont systemFontOfSize:13.0f]};
     NSSize size = NSMakeSize(kCellMax, MAXFLOAT);
     CGRect rect = [messageString boundingRectWithSize:size options:NSLineBreakByWordWrapping | NSStringDrawingUsesLineFragmentOrigin attributes:attributes];
-
     return rect;
     
 }
@@ -42,6 +41,7 @@
             self.messageText.alignment= kCTTextAlignmentLeft;
         }
     }
+    self.messageText.font =[NSFont systemFontOfSize:13.0f];
     
    
 }

@@ -67,9 +67,13 @@
     else  {
         bubbleFrame.size.width = self.messageText.frame.size.width+20;
     }
-    
-    bubbleFrame.origin.x= self.frame.size.width -25-  bubbleFrame.size.width;
-    
+    if (self.isInbound)
+    {
+        bubbleFrame.origin.x= self.messageText.frame.origin.x+25;
+    }
+    else  {
+        bubbleFrame.origin.x= self.frame.size.width -25-  bubbleFrame.size.width;
+    }
    
     NSDrawNinePartImage(bubbleFrame, topLeftCorner, topEdgeFill, topRightCorner,
                         leftEdgeFill, centerFill, rightEdgeFill, bottomLeftCorner, bottomEdgeFill,

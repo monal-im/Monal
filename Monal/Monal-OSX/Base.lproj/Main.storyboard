@@ -56,8 +56,7 @@
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="kCx-OE-vgT"/>
-                                        <menuItem title="Quit Monal" keyEquivalent="Q" id="4sb-4s-VLi">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                        <menuItem title="Quit Monal" keyEquivalent="q" id="4sb-4s-VLi">
                                             <connections>
                                                 <action selector="terminate:" target="Ady-hI-5gd" id="Te7-pn-YzF"/>
                                             </connections>

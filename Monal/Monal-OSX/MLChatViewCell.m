@@ -49,15 +49,16 @@
 - (void)drawRect:(NSRect)dirtyRect {
     [super drawRect:dirtyRect];
     
-    NSImage* topLeftCorner =[NSImage imageNamed:@"topLeft"];
-    NSImage* topEdgeFill= [NSImage imageNamed:@"topCenter"];
-    NSImage* topRightCorner=[NSImage imageNamed:@"topRight"];
-    NSImage* leftEdgeFill=[NSImage imageNamed:@"centerLeft"];
-    NSImage* centerFill=[NSImage imageNamed:@"center"];
-    NSImage* rightEdgeFill=[NSImage imageNamed:@"centerRight"];
-    NSImage* bottomLeftCorner=[NSImage imageNamed:@"bottomLeft"];
-    NSImage* bottomEdgeFill=[NSImage imageNamed:@"bottomCenter"];
-    NSImage* bottomRightCorner=[NSImage imageNamed:@"bottomRight"];
+    NSImage* topLeftCorner ;
+    NSImage* topEdgeFill;
+    NSImage* topRightCorner;
+    NSImage* leftEdgeFill;
+    NSImage* centerFill;
+    NSImage* rightEdgeFill;
+    NSImage* bottomLeftCorner;
+    NSImage* bottomEdgeFill;
+    NSImage* bottomRightCorner;
+
     
     
     CGRect bubbleFrame = self.frame;
@@ -70,9 +71,29 @@
     if (self.isInbound)
     {
         bubbleFrame.origin.x= self.messageText.frame.origin.x+25;
+        topLeftCorner =[NSImage imageNamed:@"topLeft_in"];
+        topEdgeFill= [NSImage imageNamed:@"topCenter_in"];
+        topRightCorner=[NSImage imageNamed:@"topRight_in"];
+        leftEdgeFill=[NSImage imageNamed:@"centerLeft_in"];
+        centerFill=[NSImage imageNamed:@"center_in"];
+        rightEdgeFill=[NSImage imageNamed:@"centerRight_in"];
+        bottomLeftCorner=[NSImage imageNamed:@"bottomLeft_in"];
+        bottomEdgeFill=[NSImage imageNamed:@"bottomCenter_in"];
+        bottomRightCorner=[NSImage imageNamed:@"bottomRight_in"];
+
     }
     else  {
         bubbleFrame.origin.x= self.frame.size.width -25-  bubbleFrame.size.width;
+        
+        topLeftCorner =[NSImage imageNamed:@"topLeft"];
+        topEdgeFill= [NSImage imageNamed:@"topCenter"];
+        topRightCorner=[NSImage imageNamed:@"topRight"];
+        leftEdgeFill=[NSImage imageNamed:@"centerLeft"];
+        centerFill=[NSImage imageNamed:@"center"];
+        rightEdgeFill=[NSImage imageNamed:@"centerRight"];
+        bottomLeftCorner=[NSImage imageNamed:@"bottomLeft"];
+        bottomEdgeFill=[NSImage imageNamed:@"bottomCenter"];
+        bottomRightCorner=[NSImage imageNamed:@"bottomRight"];
     }
    
     NSDrawNinePartImage(bubbleFrame, topLeftCorner, topEdgeFill, topRightCorner,

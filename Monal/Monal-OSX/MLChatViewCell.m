@@ -8,6 +8,8 @@
 
 #import "MLChatViewCell.h"
 
+#define kBubbleOffset 10
+
 @implementation MLChatViewCell
 
 
@@ -70,7 +72,7 @@
     }
     if (self.isInbound)
     {
-        bubbleFrame.origin.x= self.messageText.frame.origin.x+25;
+        bubbleFrame.origin.x= self.messageText.frame.origin.x+kBubbleOffset;
         topLeftCorner =[NSImage imageNamed:@"topLeft_in"];
         topEdgeFill= [NSImage imageNamed:@"topCenter_in"];
         topRightCorner=[NSImage imageNamed:@"topRight_in"];
@@ -83,7 +85,7 @@
 
     }
     else  {
-        bubbleFrame.origin.x= self.frame.size.width -25-  bubbleFrame.size.width;
+        bubbleFrame.origin.x= self.frame.size.width -kBubbleOffset-  bubbleFrame.size.width;
         
         topLeftCorner =[NSImage imageNamed:@"topLeft"];
         topEdgeFill= [NSImage imageNamed:@"topCenter"];

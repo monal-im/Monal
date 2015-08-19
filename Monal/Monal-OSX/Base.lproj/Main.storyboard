@@ -1166,7 +1166,7 @@ Gw
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
                                                                 <scrollView borderType="none" horizontalLineScroll="0.0" horizontalPageScroll="0.0" verticalLineScroll="0.0" verticalPageScroll="0.0" hasHorizontalScroller="NO" hasVerticalScroller="NO" usesPredominantAxisScrolling="NO" horizontalScrollElasticity="none" verticalScrollElasticity="none" translatesAutoresizingMaskIntoConstraints="NO" id="sQP-OP-6Ue" customClass="MLDisabledScrollView">
-                                                                    <rect key="frame" x="40" y="5" width="282" height="33"/>
+                                                                    <rect key="frame" x="25" y="5" width="282" height="33"/>
                                                                     <clipView key="contentView" drawsBackground="NO" copiesOnScroll="NO" id="8au-jm-j3X">
                                                                         <rect key="frame" x="1" y="1" width="238" height="133"/>
                                                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -1208,7 +1208,7 @@ Gw
                                                             <constraints>
                                                                 <constraint firstItem="sQP-OP-6Ue" firstAttribute="top" secondItem="Rho-ef-n6l" secondAttribute="top" constant="5" id="Kgb-bA-Hoc"/>
                                                                 <constraint firstAttribute="bottom" secondItem="sQP-OP-6Ue" secondAttribute="bottom" constant="5" id="YxQ-bv-KDK"/>
-                                                                <constraint firstItem="sQP-OP-6Ue" firstAttribute="leading" secondItem="Rho-ef-n6l" secondAttribute="leading" constant="40" id="qlB-6A-JoK"/>
+                                                                <constraint firstItem="sQP-OP-6Ue" firstAttribute="leading" secondItem="Rho-ef-n6l" secondAttribute="leading" constant="25" id="qlB-6A-JoK"/>
                                                             </constraints>
                                                             <connections>
                                                                 <outlet property="messageText" destination="xCt-jX-2Jc" id="06d-qo-OHN"/>
@@ -1219,7 +1219,7 @@ Gw
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
                                                                 <scrollView borderType="none" horizontalLineScroll="0.0" horizontalPageScroll="0.0" verticalLineScroll="0.0" verticalPageScroll="0.0" hasHorizontalScroller="NO" hasVerticalScroller="NO" usesPredominantAxisScrolling="NO" horizontalScrollElasticity="none" verticalScrollElasticity="none" translatesAutoresizingMaskIntoConstraints="NO" id="c4f-GC-Hfe" customClass="MLDisabledScrollView">
-                                                                    <rect key="frame" x="173" y="5" width="282" height="33"/>
+                                                                    <rect key="frame" x="188" y="5" width="282" height="33"/>
                                                                     <clipView key="contentView" drawsBackground="NO" copiesOnScroll="NO" id="pih-Cv-hex">
                                                                         <rect key="frame" x="1" y="1" width="238" height="133"/>
                                                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -1260,7 +1260,7 @@ Gw
                                                             </subviews>
                                                             <constraints>
                                                                 <constraint firstAttribute="bottom" secondItem="c4f-GC-Hfe" secondAttribute="bottom" constant="5" id="1rQ-Xm-rtv"/>
-                                                                <constraint firstAttribute="trailing" secondItem="c4f-GC-Hfe" secondAttribute="trailing" constant="40" id="2IQ-hR-giE"/>
+                                                                <constraint firstAttribute="trailing" secondItem="c4f-GC-Hfe" secondAttribute="trailing" constant="25" id="2IQ-hR-giE"/>
                                                                 <constraint firstItem="c4f-GC-Hfe" firstAttribute="top" secondItem="zUs-Dd-GH1" secondAttribute="top" constant="5" id="e6s-HW-xYq"/>
                                                             </constraints>
                                                             <connections>

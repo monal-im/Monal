@@ -44,12 +44,11 @@
 #import <UIKit/UIKit.h>
 #import <CoreTelephony/CTTelephonyNetworkInfo.h>
 #import <CoreTelephony/CTCarrier.h>
-#else
-#import <AppKit/AppKit.h>
-#endif
-
 #if COUNTLY_PREFER_IDFA
 #import <AdSupport/ASIdentifierManager.h>
+#endif
+#else
+#import <AppKit/AppKit.h>
 #endif
 
 #include <sys/types.h>

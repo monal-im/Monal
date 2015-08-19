@@ -352,6 +352,8 @@
 		26E456C51B841E19004BD74C /* Countly_OpenUDID.m in Sources */ = {isa = PBXBuildFile; fileRef = 26E456C31B841E19004BD74C /* Countly_OpenUDID.m */; };
 		26E456CA1B841E49004BD74C /* Countly.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 26E456C61B841E49004BD74C /* Countly.xcdatamodeld */; };
 		26E456CB1B841E49004BD74C /* CountlyDB.m in Sources */ = {isa = PBXBuildFile; fileRef = 26E456C91B841E49004BD74C /* CountlyDB.m */; };
+		26E456CD1B842180004BD74C /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26E456CC1B842180004BD74C /* Sparkle.framework */; };
+		26E456CF1B8421C3004BD74C /* Sparkle.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 26E456CC1B842180004BD74C /* Sparkle.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		26EC411017BDD98E0031304D /* GroupChatViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26EC410F17BDD98D0031304D /* GroupChatViewController.xib */; };
 		26EC411317BDE39E0031304D /* MLImageManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EC411217BDE39E0031304D /* MLImageManager.m */; };
 		26EE8B1C179B55D2006781F3 /* ParseChallenge.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EE8B1B179B55D2006781F3 /* ParseChallenge.m */; };
@@ -394,6 +396,19 @@
 			remoteInfo = "jrtplib-static";
 		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		26E456CE1B8421AF004BD74C /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				26E456CF1B8421C3004BD74C /* Sparkle.framework in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -735,6 +750,7 @@
 		26E456C71B841E49004BD74C /* Countly.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Countly.xcdatamodel; sourceTree = "<group>"; };
 		26E456C81B841E49004BD74C /* CountlyDB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CountlyDB.h; sourceTree = "<group>"; };
 		26E456C91B841E49004BD74C /* CountlyDB.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CountlyDB.m; sourceTree = "<group>"; };
+		26E456CC1B842180004BD74C /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Sparkle.framework; path = MonalOSX/External/Sparkle.framework; sourceTree = "<group>"; };
 		26EC40F817BDD8360031304D /* ContactDetails.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ContactDetails.xib; sourceTree = "<group>"; };
 		26EC40FA17BDD8560031304D /* ContactDetails.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContactDetails.h; sourceTree = "<group>"; };
 		26EC40FB17BDD8560031304D /* ContactDetails.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ContactDetails.m; sourceTree = "<group>"; };
@@ -814,6 +830,7 @@
 				26B2A4CB1B73084800272E63 /* AppKit.framework in Frameworks */,
 				26B2A4C91B73084100272E63 /* libsqlite3.0.dylib in Frameworks */,
 				265F6BA71B7B088A006B8EBA /* Crashlytics.framework in Frameworks */,
+				26E456CD1B842180004BD74C /* Sparkle.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1363,6 +1380,7 @@
 		26B2A5001B730A0D00272E63 /* OSX */ = {
 			isa = PBXGroup;
 			children = (
+				26E456CC1B842180004BD74C /* Sparkle.framework */,
 				265F6BA61B7B088A006B8EBA /* Crashlytics.framework */,
 				267ECD6C1B746C660025337F /* CFNetwork.framework */,
 				26049A5A1B73163300D11866 /* AVFoundation.framework */,
@@ -1767,6 +1785,7 @@
 				266272AE1B27DB8000C1CD49 /* Frameworks */,
 				266272AF1B27DB8000C1CD49 /* Resources */,
 				265F6BA81B7B08AC006B8EBA /* ShellScript */,
+				26E456CE1B8421AF004BD74C /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -2578,6 +2597,7 @@
 				LLVM_LTO = NO;
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MTL_ENABLE_DEBUG_INFO = YES;
+				OTHER_LDFLAGS = "-Wl,-rpath,@loader_path/../Frameworks";
 				PRODUCT_NAME = Monal;
 				PROVISIONING_PROFILE = "";
 				SDKROOT = macosx;
@@ -2628,6 +2648,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MTL_ENABLE_DEBUG_INFO = NO;
+				OTHER_LDFLAGS = "-Wl,-rpath,@loader_path/../Frameworks";
 				PRODUCT_NAME = Monal;
 				PROVISIONING_PROFILE = "";
 				SDKROOT = macosx;
@@ -2677,6 +2698,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MTL_ENABLE_DEBUG_INFO = NO;
+				OTHER_LDFLAGS = "-Wl,-rpath,@loader_path/../Frameworks";
 				PRODUCT_NAME = Monal;
 				PROVISIONING_PROFILE = "";
 				SDKROOT = macosx;

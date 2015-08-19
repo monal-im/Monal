@@ -10,6 +10,8 @@
 	<string>im.Monal.MonalOSX</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
+	<key>SUFeedURL</key>
+	<string>http://monal.im/Monal-OSX/appcast.xml</string>
 	<key>CFBundleName</key>
 	<string>$(PRODUCT_NAME)</string>
 	<key>CFBundlePackageType</key>

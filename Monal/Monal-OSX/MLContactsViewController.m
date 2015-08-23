@@ -374,6 +374,32 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 }
 
 
+-(void) showAuthRequestForContact:(NSDictionary *) dictionary withCompletion: (void (^)(BOOL))completion
+{
+    NSAlert *userAddAlert = [[NSAlert alloc] init];
+    userAddAlert.messageText =@" xyz wants to add you as a conact";
+    userAddAlert.alertStyle=NSInformationalAlertStyle;
+    [userAddAlert addButtonWithTitle:@"Do Not Approve"];
+    [userAddAlert addButtonWithTitle:@"Approve"];
+    [userAddAlert addButtonWithTitle:@"Dismiss"];
+
+    
+    [userAddAlert beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse returnCode) {
+       
+        BOOL allowed=NO;
+        
+        if(returnCode ==NSModalResponseContinue) {
+            allowed=YES;
+        }
+        
+        if(completion)
+        {
+            completion(allowed);
+        }
+    }];
+    
+}
+
 
 #pragma mark - notification handling
 
@@ -430,7 +456,6 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                    });
     
 }
-
 
 #pragma mark - table view datasource
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)aTableView

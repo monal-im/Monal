@@ -1470,6 +1470,16 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             UIAlertView* alert =[[UIAlertView alloc] initWithTitle:@"Approve Contact" message:messageString cancelButtonItem:cancelButton otherButtonItems:yesButton, nil];
                             [alert show];
 #else
+                            [self.contactsVC showAuthRequestForContact:@{} withCompletion:^(BOOL allowed) {
+                                
+                                if(allowed)
+                                {
+                                    [self approveToRoster:presenceNode.from];
+                                    [self addToRoster:presenceNode.from];
+                                }
+                                
+                            }];
+                            
 #endif
                         });
                         

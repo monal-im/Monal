@@ -16,7 +16,7 @@
 
 -(void) showConversationForContact:(NSDictionary *) user;
 
-// methods requied for XMPP accont to call back 
+// methods requied for XMPP accont to call back  should be protocol
 -(void) showConnecting:(NSDictionary*) info;
 -(void) updateConnecting:(NSDictionary*) info;
 -(void) hideConnecting:(NSDictionary*) info;
@@ -25,5 +25,7 @@
 
 -(void) addOnlineUser:(NSDictionary*) user;
 -(void) removeOnlineUser:(NSDictionary*) user;
+
+-(void) showAuthRequestForContact:(NSDictionary *) dictionary withCompletion: (void (^)(BOOL))completion;
 
 @end

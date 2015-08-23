@@ -26,6 +26,6 @@
 -(void) addOnlineUser:(NSDictionary*) user;
 -(void) removeOnlineUser:(NSDictionary*) user;
 
--(void) showAuthRequestForContact:(NSDictionary *) dictionary withCompletion: (void (^)(BOOL))completion;
+-(void) showAuthRequestForContact:(NSString *) contactName withCompletion: (void (^)(BOOL))completion;
 
 @end

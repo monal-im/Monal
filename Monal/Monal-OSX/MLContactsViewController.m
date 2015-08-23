@@ -374,21 +374,21 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 }
 
 
--(void) showAuthRequestForContact:(NSDictionary *) dictionary withCompletion: (void (^)(BOOL))completion
+-(void) showAuthRequestForContact:(NSString *) contactName withCompletion: (void (^)(BOOL))completion
 {
     NSAlert *userAddAlert = [[NSAlert alloc] init];
-    userAddAlert.messageText =@" xyz wants to add you as a conact";
+    userAddAlert.messageText =[NSString stringWithFormat:@"%@ wants to add you as a contact", contactName];
     userAddAlert.alertStyle=NSInformationalAlertStyle;
     [userAddAlert addButtonWithTitle:@"Do Not Approve"];
+    [userAddAlert addButtonWithTitle:@"Ask me later"];
     [userAddAlert addButtonWithTitle:@"Approve"];
-    [userAddAlert addButtonWithTitle:@"Dismiss"];
 
     
     [userAddAlert beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse returnCode) {
        
         BOOL allowed=NO;
         
-        if(returnCode ==NSModalResponseContinue) {
+        if(returnCode ==1002) {
             allowed=YES;
         }
         

@@ -737,17 +737,17 @@
         <scene sceneID="lWg-JA-sLc">
             <objects>
                 <viewController id="0BB-CK-cBw" customClass="MLContactsViewController" sceneMemberID="viewController">
-                    <scrollView key="view" borderType="none" autohidesScrollers="YES" horizontalLineScroll="62" horizontalPageScroll="10" verticalLineScroll="62" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" id="eLW-rG-h59">
-                        <rect key="frame" x="0.0" y="0.0" width="320" height="300"/>
+                    <scrollView key="view" borderType="none" autohidesScrollers="YES" horizontalLineScroll="60" horizontalPageScroll="10" verticalLineScroll="60" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" id="eLW-rG-h59">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="398"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <clipView key="contentView" drawsBackground="NO" copiesOnScroll="NO" id="HB1-Pi-3Cp">
                             <rect key="frame" x="1" y="17" width="238" height="117"/>
                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                             <subviews>
                                 <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" columnReordering="NO" columnSelection="YES" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" rowHeight="60" viewBased="YES" id="mgU-VL-SBt">
-                                    <rect key="frame" x="0.0" y="0.0" width="318" height="0.0"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="320" height="0.0"/>
                                     <autoresizingMask key="autoresizingMask"/>
-                                    <size key="intercellSpacing" width="3" height="2"/>
+                                    <size key="intercellSpacing" width="3" height="0.0"/>
                                     <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                     <tableViewGridLines key="gridStyleMask" horizontal="YES"/>
                                     <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
@@ -876,7 +876,7 @@
                 </viewController>
                 <customObject id="N6A-8E-AoF" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-447" y="1195"/>
+            <point key="canvasLocation" x="-253" y="1305"/>
         </scene>
         <!--Split View Controller-->
         <scene sceneID="2ls-iF-dj5">
@@ -1186,7 +1186,7 @@ Gw
                                                                                 <attributedString key="textStorage">
                                                                                     <fragment content="outbound">
                                                                                         <attributes>
-                                                                                            <font key="NSFont" metaFont="toolTip"/>
+                                                                                            <font key="NSFont" metaFont="smallSystem"/>
                                                                                             <paragraphStyle key="NSParagraphStyle" alignment="natural" lineBreakMode="wordWrapping" baseWritingDirection="natural"/>
                                                                                         </attributes>
                                                                                     </fragment>
@@ -1239,7 +1239,7 @@ Gw
                                                                                 <attributedString key="textStorage">
                                                                                     <fragment content="inbound">
                                                                                         <attributes>
-                                                                                            <font key="NSFont" metaFont="toolTip"/>
+                                                                                            <font key="NSFont" metaFont="smallSystem"/>
                                                                                             <paragraphStyle key="NSParagraphStyle" alignment="natural" lineBreakMode="wordWrapping" baseWritingDirection="natural"/>
                                                                                         </attributes>
                                                                                     </fragment>

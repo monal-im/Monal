@@ -59,7 +59,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     if(! self.contactName) return;
     
     if(!(self.view.window.occlusionState & NSWindowOcclusionStateVisible)) {
-        [[DataLayer sharedInstance] markAsReadBuddy:self.contactName forAccount:self.accountNo];
+        [self markAsRead];
     }
     
     [self refreshData];
@@ -153,8 +153,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                            
                            [self scrollToBottom];
                            
-                           //mark as read
-                           [[DataLayer sharedInstance] markAsReadBuddy:_contactName forAccount:_accountNo];
+                           [self markAsRead];
                        });
     }
 
@@ -171,6 +170,25 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     NSDictionary *dic =notification.userInfo;
     [self setMessageId:[dic objectForKey:kMessageId]  delivered:YES];
+}
+
+-(void) markAsRead
+{
+    //mark as read
+    [[DataLayer sharedInstance] markAsReadBuddy:_contactName forAccount:_accountNo];
+    
+    [[DataLayer sharedInstance] countUnreadMessagesWithCompletion:^(NSNumber * result) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if([result integerValue]>0) {
+                [[[NSApplication sharedApplication] dockTile] setBadgeLabel:[NSString stringWithFormat:@"%@", result]];
+            }
+            else
+            {
+                [[[NSApplication sharedApplication] dockTile] setBadgeLabel:nil];
+            }
+        });
+        
+    }];
 }
 
 #pragma mark - sending
@@ -267,6 +285,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     if(!messageID) {
         [self addMessageto:_contactName withMessage:messageText andId:newMessageID];
     }
+    
+    //mark as read
+    
+    //update badge
 }
 
 

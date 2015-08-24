@@ -75,6 +75,11 @@
         domain =[parts objectAtIndex:1];
     }
     
+    if(self.server.stringValue.length==0)
+    {
+        self.server.stringValue = domain;
+    }
+    
     BOOL enabled =self.enabledCheck.state;
     
     BOOL useSSL =self.sslCheck.state;

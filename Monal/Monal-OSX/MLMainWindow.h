@@ -13,6 +13,8 @@
 
 @property (nonatomic, strong) IBOutlet NSTextField *contactNameField;
 
+@property (nonatomic, strong) IBOutlet NSSearchField *contactSearchField;
+
 /**
  Allows  the window to know what contact is currently selected
  */

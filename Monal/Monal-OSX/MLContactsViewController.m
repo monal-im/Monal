@@ -23,9 +23,8 @@
 
 @property (nonatomic, strong) NSMutableArray* infoCells;
 @property (nonatomic, strong) NSMutableArray* contacts;
+@property (nonatomic, strong) NSMutableArray* searchResults;
 @property (nonatomic, strong) NSMutableArray* offlineContacts;
-
-
 
 
 @end
@@ -63,6 +62,9 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
             self.chatViewController = (MLChatViewController *)otherItem.viewController;
         }
     }
+    
+    MLMainWindow *window =(MLMainWindow *)self.view.window.windowController;
+    window.contactSearchField.delegate=self; 
 }
 
 
@@ -556,6 +558,24 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
         });
         
     }];
+}
+
+
+#pragma mark search field 
+
+- (void)controlTextDidChange:(NSNotification *)aNotification
+{
+    
+}
+
+- (void)controlTextDidBeginEditing:(NSNotification *)aNotification
+{
+    
+}
+
+- (void)controlTextDidEndEditing:(NSNotification *)aNotification
+{
+    
 }
 
 

@@ -462,7 +462,12 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 #pragma mark - table view datasource
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)aTableView
 {
-    return [self.contacts count];
+    if(self.searchResults) {
+        return self.searchResults.count;
+    }
+    else {
+        return [self.contacts count];
+    }
 }
 
 #pragma mark - table view delegate
@@ -470,7 +475,13 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 - (NSView *)tableView:(NSTableView *)tableView viewForTableColumn:(NSTableColumn *)tableColumn  row:(NSInteger)row
 {
     
-    NSDictionary *contactRow = [self.contacts objectAtIndex:row];
+    NSDictionary *contactRow;
+    if(self.searchResults)
+    {
+        contactRow = [self.searchResults objectAtIndex:row];
+    } else  {
+        contactRow=[self.contacts objectAtIndex:row];
+    }
     
     MLContactsCell *cell = [tableView makeViewWithIdentifier:@"OnlineUser" owner:self];
     cell.name.backgroundColor =[NSColor clearColor];
@@ -525,6 +536,21 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 
 - (void)tableViewSelectionDidChange:(NSNotification *)notification;
 {
+    if(self.searchResults && self.contactsTable.selectedRow<self.searchResults.count)
+    {
+        NSDictionary *contactRow = [self.searchResults objectAtIndex:self.contactsTable.selectedRow];
+        [self.chatViewController showConversationForContact:contactRow];
+        [self updateWindowForContact:contactRow];
+        [[DataLayer sharedInstance] markAsReadBuddy:[contactRow objectForKey:kContactName] forAccount:[contactRow objectForKey:kAccountID]];
+        [self updateAppBadge];
+        
+        [self.contactsTable beginUpdates];
+        NSIndexSet *indexSet =[[NSIndexSet alloc] initWithIndex:self.contactsTable.selectedRow] ;
+        NSIndexSet *columnIndexSet =[[NSIndexSet alloc] initWithIndex:0] ;
+        [self.contactsTable reloadDataForRowIndexes:indexSet columnIndexes:columnIndexSet];
+        [self.contactsTable endUpdates];
+    }
+    else
     if(self.contactsTable.selectedRow<self.contacts.count) {
         NSDictionary *contactRow = [self.contacts objectAtIndex:self.contactsTable.selectedRow];
         [self.chatViewController showConversationForContact:contactRow];
@@ -565,7 +591,10 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 
 - (void)controlTextDidChange:(NSNotification *)aNotification
 {
+    NSSearchField *searchField = aNotification.object;
     
+    self.searchResults=[[DataLayer sharedInstance] searchContactsWithString:searchField.stringValue];
+    [self.contactsTable reloadData];
 }
 
 - (void)controlTextDidBeginEditing:(NSNotification *)aNotification
@@ -575,7 +604,8 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 
 - (void)controlTextDidEndEditing:(NSNotification *)aNotification
 {
-    
+    self.searchResults=nil;
+    [self.contactsTable reloadData];
 }
 
 

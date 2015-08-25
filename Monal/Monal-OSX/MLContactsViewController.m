@@ -592,9 +592,14 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 - (void)controlTextDidChange:(NSNotification *)aNotification
 {
     NSSearchField *searchField = aNotification.object;
-    
-    self.searchResults=[[DataLayer sharedInstance] searchContactsWithString:searchField.stringValue];
+
+    if(searchField.stringValue.length>0) {
+        self.searchResults=[[DataLayer sharedInstance] searchContactsWithString:searchField.stringValue];
+    } else  {
+        self.searchResults=nil;
+    }
     [self.contactsTable reloadData];
+
 }
 
 - (void)controlTextDidBeginEditing:(NSNotification *)aNotification
@@ -604,8 +609,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 
 - (void)controlTextDidEndEditing:(NSNotification *)aNotification
 {
-    self.searchResults=nil;
-    [self.contactsTable reloadData];
+  
 }
 
 

@@ -44,9 +44,10 @@
 
 - (void)drawRect:(NSRect)dirtyRect {
     [super drawRect:dirtyRect];
-
+   // NSLog(@"%@ %f", self.messageText.string, self.messageRect.size.width);
+    
     CGRect bubbleFrame = self.frame;
-    if (self.messageRect.size.width<250) {
+    if (self.messageRect.size.width<240) {
         bubbleFrame.size.width = self.messageRect.size.width+40;
     }
     else  {
@@ -60,8 +61,8 @@
            [[NSColor controlHighlightColor] setFill];
     }
     else  {
-        bubbleFrame.origin.x= self.frame.size.width -kBubbleOffset-  bubbleFrame.size.width;
-        bubbleFrame.size.width-=kBubbleOffset; 
+        bubbleFrame.origin.x= self.frame.size.width -kBubbleOffset*2-  bubbleFrame.size.width;
+        
         [[NSColor colorWithCalibratedRed:57.0/255 green:118.0f/255 blue:253.0/255 alpha:1.0] setFill];
     }
     

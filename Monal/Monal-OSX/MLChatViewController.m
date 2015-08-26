@@ -214,14 +214,17 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         
         dispatch_async(dispatch_get_main_queue(),
                        ^{
-                         
-                           NSString *lastMessageId= [[self.messageList objectAtIndex:self.messageList.count-1] objectForKey:@"messageid"];
+                           
+                           NSString *lastMessageId;
+                           if(self.messageList.count>0) {
+                               lastMessageId=[[self.messageList objectAtIndex:self.messageList.count-1] objectForKey:@"messageid"];
+                           }
                            NSString *nextMessageId = [userInfo objectForKey:kMessageId];
                            if(![lastMessageId isEqualToString:nextMessageId]) {
                                [self.messageList addObject:[userInfo mutableCopy]];
                                [self.chatTable reloadData];
                            }
-                     
+                           
                            
                            //                           NSIndexPath *path1;
                            //                           [self.chatTable beginUpdates];

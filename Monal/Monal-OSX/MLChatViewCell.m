@@ -29,7 +29,7 @@
     {
         self.messageText.alignment= kCTTextAlignmentLeft;
     } else  {
-        if( self.messageRect.size.width<kCellMax)
+        if( self.messageRect.size.width<kCellMax && self.messageRect.size.height<=kCellMinHeight)
         {
             self.messageText.alignment= kCTTextAlignmentRight;
         }

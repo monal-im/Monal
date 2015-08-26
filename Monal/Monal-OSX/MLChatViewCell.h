@@ -9,10 +9,12 @@
 #import <Cocoa/Cocoa.h>
 
 #define kCellMax 282
+#define kCellMinHeight 33
 
 @interface MLChatViewCell : NSTableCellView
 
 @property (nonatomic, strong) IBOutlet NSTextView *messageText;
+@property (nonatomic, strong) IBOutlet NSTextField *timeStamp;
 @property (nonatomic, assign) BOOL isInbound;
 @property (nonatomic, assign) NSRect messageRect;
 

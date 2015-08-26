@@ -214,9 +214,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         
         dispatch_async(dispatch_get_main_queue(),
                        ^{
-                          
-                           [self.messageList addObject:[userInfo mutableCopy]];
-                           [self.chatTable reloadData];
+                         
+                           NSString *lastMessageId= [[self.messageList objectAtIndex:self.messageList.count-1] objectForKey:@"messageid"];
+                           NSString *nextMessageId = [userInfo objectForKey:kMessageId];
+                           if(![lastMessageId isEqualToString:nextMessageId]) {
+                               [self.messageList addObject:[userInfo mutableCopy]];
+                               [self.chatTable reloadData];
+                           }
+                     
                            
                            //                           NSIndexPath *path1;
                            //                           [self.chatTable beginUpdates];
@@ -327,6 +332,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     cell.messageText.string =[messageRow objectForKey:@"message"];
     [cell.messageText checkTextInDocument:nil];
     cell.messageText.editable=NO;
+    cell.timeStamp.stringValue =[self formattedDateWithSource:[messageRow objectForKey:@"thetime"]];
     
     [cell updateDisplay];   
     
@@ -340,8 +346,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
     NSRect rect = [MLChatViewCell sizeWithMessage:messageString];
  
-    if(rect.size.height<33.0f)  {
-        return  33.0f;
+    if(rect.size.height<kCellMinHeight)  {
+        return  kCellMinHeight;
     }
     else {
         return rect.size.height+5.0+5.0;

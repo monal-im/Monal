@@ -221,6 +221,9 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                                DDLogVerbose(@"sorted contacts %@", _contacts);
                                
                                DDLogVerbose(@"inserting %@ at pos %d", [_contacts objectAtIndex:pos], pos);
+                               
+                               if(self.searchResults) return;
+                               
                                [_contactsTable beginUpdates];
                                NSIndexSet *indexSet =[[NSIndexSet alloc] initWithIndex:pos] ;
                                [self.contactsTable insertRowsAtIndexes:indexSet withAnimation:NSTableViewAnimationEffectFade];
@@ -246,6 +249,8 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                                    
                                    if([user objectForKey:kfullNameKey])
                                        [[_contacts objectAtIndex:pos] setObject:[user objectForKey:kfullNameKey] forKey:@"full_name"];
+                                   
+                                    if(self.searchResults) return;
                                    
                                    [self.contactsTable beginUpdates];
                                    

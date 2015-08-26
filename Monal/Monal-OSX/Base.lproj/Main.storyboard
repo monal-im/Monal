@@ -1215,6 +1215,7 @@ Gw
                                                                     <rect key="frame" x="313" y="21" width="156" height="17"/>
                                                                     <constraints>
                                                                         <constraint firstAttribute="height" constant="17" id="Tq4-g6-tqq"/>
+                                                                        <constraint firstAttribute="width" relation="lessThanOrEqual" priority="250" constant="152" id="e2b-Lj-ohT"/>
                                                                     </constraints>
                                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="timestamp" id="fF6-2O-OlN">
                                                                         <font key="font" metaFont="label"/>
@@ -1284,6 +1285,7 @@ Gw
                                                                     <rect key="frame" x="23" y="23" width="159" height="17"/>
                                                                     <constraints>
                                                                         <constraint firstAttribute="height" constant="17" id="Gjo-IG-y65"/>
+                                                                        <constraint firstAttribute="width" relation="lessThanOrEqual" priority="250" constant="155" id="t6o-mH-ggS"/>
                                                                     </constraints>
                                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="timestamp" id="Djq-JK-PX9">
                                                                         <font key="font" metaFont="label"/>

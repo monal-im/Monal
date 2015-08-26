@@ -93,6 +93,41 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 -(IBAction)deleteItem:(id)sender
 {
     
+    NSAlert *userDelAlert = [[NSAlert alloc] init];
+    userDelAlert.messageText =[NSString stringWithFormat:@"Are you sure you want to remove this contact?"];
+    userDelAlert.alertStyle=NSInformationalAlertStyle;
+    
+ 
+    
+    
+    if(self.searchResults)
+    {
+        //ask
+        [userDelAlert beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse returnCode) {
+            
+            
+            
+        }];
+    }
+     else if(self.activeChat)
+     {
+         if(self.contactsTable.selectedRow <self.activeChat.count) {
+             NSDictionary *contact =[self.activeChat objectAtIndex:self.contactsTable.selectedRow];
+             
+             [ [DataLayer sharedInstance] removeActiveBuddy:[contact objectForKey:kContactName] forAccount:[contact objectForKey:kAccountID]];
+             self.activeChat=[[DataLayer sharedInstance] activeBuddies];
+             [self.contactsTable reloadData];
+         }
+     }
+     else  {
+         //ask
+         [userDelAlert beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse returnCode) {
+             
+             
+             
+         }];
+     }
+    
 }
 
 -(void) showActiveChat:(BOOL) shouldShow

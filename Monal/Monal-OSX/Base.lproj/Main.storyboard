@@ -742,9 +742,9 @@
                         <rect key="frame" x="0.0" y="0.0" width="320" height="427"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <subviews>
-                            <segmentedControl verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Lzi-ZY-I1a">
-                                <rect key="frame" x="0.0" y="405" width="320" height="23"/>
-                                <segmentedCell key="cell" borderStyle="border" alignment="left" style="smallSquare" trackingMode="selectOne" id="oqh-Du-0wW">
+                            <segmentedControl verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Lzi-ZY-I1a">
+                                <rect key="frame" x="0.0" y="404" width="324" height="24"/>
+                                <segmentedCell key="cell" borderStyle="border" alignment="left" style="rounded" trackingMode="selectOne" id="oqh-Du-0wW">
                                     <font key="font" metaFont="system"/>
                                     <segments>
                                         <segment label="Contacts" width="159" selected="YES"/>

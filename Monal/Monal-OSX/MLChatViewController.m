@@ -108,6 +108,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
 }
 
+-(IBAction)emojiPicker:(id)sender {
+    [[NSApplication sharedApplication] orderFrontCharacterPalette:nil];
+}
+
 #pragma mark - notificaitons
 -(void) handleNewMessage:(NSNotification *)notification
 {

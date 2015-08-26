@@ -1130,14 +1130,27 @@ Gw
                                             <autoresizingMask key="autoresizingMask"/>
                                         </scroller>
                                     </scrollView>
+                                    <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="RB8-DH-Efv">
+                                        <rect key="frame" x="407" y="13" width="72" height="32"/>
+                                        <buttonCell key="cell" type="push" title="😀" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="ccl-s1-dL9">
+                                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                            <font key="font" metaFont="system"/>
+                                        </buttonCell>
+                                        <connections>
+                                            <action selector="emojiPicker:" target="qLp-oS-WKI" id="ooo-mc-es1"/>
+                                        </connections>
+                                    </button>
                                 </subviews>
                                 <constraints>
                                     <constraint firstItem="Cir-fi-93b" firstAttribute="leading" secondItem="bPP-Hy-AXK" secondAttribute="leading" id="7y7-BQ-jL9"/>
                                     <constraint firstItem="m4R-R5-Jrl" firstAttribute="leading" secondItem="Cir-fi-93b" secondAttribute="trailing" constant="8" id="Bj6-8z-B4m"/>
                                     <constraint firstAttribute="bottom" secondItem="Cir-fi-93b" secondAttribute="bottom" constant="4" id="EFY-KI-CqX"/>
+                                    <constraint firstAttribute="trailing" secondItem="RB8-DH-Efv" secondAttribute="trailing" constant="20" id="Fub-RN-XZZ"/>
                                     <constraint firstItem="m4R-R5-Jrl" firstAttribute="leading" secondItem="Cir-fi-93b" secondAttribute="trailing" constant="8" id="H0p-cg-qdT"/>
+                                    <constraint firstItem="RB8-DH-Efv" firstAttribute="leading" secondItem="Cir-fi-93b" secondAttribute="trailing" constant="8" id="THQ-9m-8y9"/>
                                     <constraint firstItem="Cir-fi-93b" firstAttribute="top" secondItem="bPP-Hy-AXK" secondAttribute="top" constant="4" id="XQ6-rk-z5R"/>
                                     <constraint firstAttribute="trailing" secondItem="m4R-R5-Jrl" secondAttribute="trailing" constant="20" id="Z2n-te-bpm"/>
+                                    <constraint firstItem="RB8-DH-Efv" firstAttribute="top" secondItem="m4R-R5-Jrl" secondAttribute="bottom" constant="34" id="bXe-GG-vQs"/>
                                     <constraint firstItem="m4R-R5-Jrl" firstAttribute="top" secondItem="bPP-Hy-AXK" secondAttribute="top" constant="20" id="gty-sZ-NYS"/>
                                     <constraint firstAttribute="bottom" secondItem="m4R-R5-Jrl" secondAttribute="bottom" constant="75" id="h0l-G1-nq5"/>
                                 </constraints>

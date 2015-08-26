@@ -112,6 +112,25 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                     [self.searchResults removeObjectAtIndex:self.contactsTable.selectedRow];
                     
                     [self.contactsTable reloadData];
+                    
+                    NSMutableDictionary *mContact=[contact mutableCopy];
+                    [mContact setObject:[mContact objectForKey:kAccountID] forKey:kaccountNoKey];
+                    [mContact setObject:[mContact objectForKey:kContactName] forKey:kusernameKey];
+                    
+                    //remove from contacts as well
+                    NSInteger pos = [self positionOfOnlineContact:mContact];
+                    if(pos>=0)
+                    {
+                        [self.contacts removeObjectAtIndex:pos];
+                    }
+                    else
+                    {
+                        pos = [self positionOfOfflineContact:mContact];
+                        if(pos>=0)
+                        {
+                            [self.offlineContacts removeObjectAtIndex:pos];
+                        }
+                    }
                 }
                 else
                 {

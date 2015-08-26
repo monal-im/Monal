@@ -19,10 +19,16 @@
 #define konlineSection 1
 #define kofflineSection 2
 
+#define kContactTab 0
+#define kActiveTab 1
+
 @interface MLContactsViewController ()
 
 @property (nonatomic, strong) NSMutableArray* infoCells;
 @property (nonatomic, strong) NSMutableArray* contacts;
+@property (nonatomic, strong) NSMutableArray* activeChat;
+@property (nonatomic, assign) NSInteger currentSegment;
+
 @property (nonatomic, strong) NSMutableArray* searchResults;
 @property (nonatomic, strong) NSMutableArray* offlineContacts;
 
@@ -36,7 +42,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-   // self.contactsTable.selectionHighlightStyle =NSTableViewSelectionHighlightStyleSourceList;
+    self.contactsTable.selectionHighlightStyle =NSTableViewSelectionHighlightStyleSourceList;
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
     
@@ -45,6 +51,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     self.infoCells=[[NSMutableArray alloc] init] ;
         
     [MLXMPPManager sharedInstance].contactVC=self;
+    self.currentSegment= kContactTab;
 
     
 }
@@ -82,6 +89,32 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 
 
 #pragma mark - update UI
+
+-(void) showActiveChat:(BOOL) shouldShow
+{
+    if (shouldShow) {
+        self.activeChat= [[DataLayer sharedInstance] activeBuddies];
+    }
+    else {
+        self.activeChat=nil;
+    }
+    
+    [self.contactsTable reloadData];
+}
+
+-(IBAction)segmentDidChange:(id)sender
+{
+    if(self.segmentedControl.selectedSegment!=self.currentSegment)
+    {
+        self.currentSegment=self.segmentedControl.selectedSegment;
+        if(self.segmentedControl.selectedSegment==kActiveTab) {
+            [self showActiveChat:YES];
+        }
+        else {
+            [self showActiveChat: NO];
+        }
+    }
+}
 
 -(void) showConversationForContact:(NSDictionary *) user
 {
@@ -222,7 +255,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                                
                                DDLogVerbose(@"inserting %@ at pos %d", [_contacts objectAtIndex:pos], pos);
                                
-                               if(self.searchResults) return;
+                               if(self.searchResults || self.activeChat) return;
                                
                                [_contactsTable beginUpdates];
                                NSIndexSet *indexSet =[[NSIndexSet alloc] initWithIndex:pos] ;
@@ -250,7 +283,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                                    if([user objectForKey:kfullNameKey])
                                        [[_contacts objectAtIndex:pos] setObject:[user objectForKey:kfullNameKey] forKey:@"full_name"];
                                    
-                                    if(self.searchResults) return;
+                                    if(self.searchResults || self.activeChat) return;
                                    
                                    [self.contactsTable beginUpdates];
                                    
@@ -320,7 +353,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                            if(pos>=0)
                            {
                                [_contacts removeObjectAtIndex:pos];
-                               if(self.searchResults) return;
+                               if(self.searchResults || self.activeChat) return;
                                
                                DDLogVerbose(@"removing %@ at pos %d", [user objectForKey:kusernameKey], pos);
                                [_contactsTable beginUpdates];
@@ -375,7 +408,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                        }
                        
                        [_contacts removeObjectsAtIndexes:indexSet];
-                        if(self.searchResults) return;
+                        if(self.searchResults || self.activeChat) return;
                        [_contactsTable beginUpdates];
                        [_contactsTable removeRowsAtIndexes:indexSet withAnimation:NSTableViewAnimationEffectFade];
                        [_contactsTable endUpdates];
@@ -456,7 +489,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                        
                        if(pos>=0)
                        {
-                            if(self.searchResults) return;
+                             if(self.searchResults || self.activeChat) return;
                            [self.contactsTable beginUpdates];
                            
                            NSIndexSet *indexSet =[[NSIndexSet alloc] initWithIndex:pos] ;
@@ -475,7 +508,12 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
         return self.searchResults.count;
     }
     else {
-        return [self.contacts count];
+        if(self.currentSegment==kActiveTab)
+        {
+            return [self.activeChat count];
+        } else  {
+            return [self.contacts count];
+        }
     }
 }
 
@@ -489,7 +527,13 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     {
         contactRow = [self.searchResults objectAtIndex:row];
     } else  {
-        contactRow=[self.contacts objectAtIndex:row];
+        if(self.currentSegment==kActiveTab)
+        {
+            contactRow=[self.activeChat objectAtIndex:row];
+        }
+        else  {
+            contactRow=[self.contacts objectAtIndex:row];
+        }
     }
     
     MLContactsCell *cell = [tableView makeViewWithIdentifier:@"OnlineUser" owner:self];
@@ -560,22 +604,38 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
         [self.contactsTable endUpdates];
     }
     else
-    if(self.contactsTable.selectedRow<self.contacts.count) {
-        NSDictionary *contactRow = [self.contacts objectAtIndex:self.contactsTable.selectedRow];
-        [self.chatViewController showConversationForContact:contactRow];
-        [self updateWindowForContact:contactRow];
-        [[DataLayer sharedInstance] markAsReadBuddy:[contactRow objectForKey:kContactName] forAccount:[contactRow objectForKey:kAccountID]];
-        [self updateAppBadge];
-        
-        [self.contactsTable beginUpdates];
-        NSIndexSet *indexSet =[[NSIndexSet alloc] initWithIndex:self.contactsTable.selectedRow] ;
-        NSIndexSet *columnIndexSet =[[NSIndexSet alloc] initWithIndex:0] ;
-        [self.contactsTable reloadDataForRowIndexes:indexSet columnIndexes:columnIndexSet];
-        [self.contactsTable endUpdates];
-        
-    } else  {
-        
-    }
+        if(self.currentSegment==kActiveTab)
+        {
+            if(self.contactsTable.selectedRow<self.activeChat.count) {
+                NSDictionary *contactRow = [self.activeChat objectAtIndex:self.contactsTable.selectedRow];
+                [self.chatViewController showConversationForContact:contactRow];
+                [self updateWindowForContact:contactRow];
+                [[DataLayer sharedInstance] markAsReadBuddy:[contactRow objectForKey:kContactName] forAccount:[contactRow objectForKey:kAccountID]];
+                [self updateAppBadge];
+                
+                [self.contactsTable beginUpdates];
+                NSIndexSet *indexSet =[[NSIndexSet alloc] initWithIndex:self.contactsTable.selectedRow] ;
+                NSIndexSet *columnIndexSet =[[NSIndexSet alloc] initWithIndex:0] ;
+                [self.contactsTable reloadDataForRowIndexes:indexSet columnIndexes:columnIndexSet];
+                [self.contactsTable endUpdates];
+            }
+        }
+        else  {
+            if(self.contactsTable.selectedRow<self.contacts.count) {
+                NSDictionary *contactRow = [self.contacts objectAtIndex:self.contactsTable.selectedRow];
+                [self.chatViewController showConversationForContact:contactRow];
+                [self updateWindowForContact:contactRow];
+                [[DataLayer sharedInstance] markAsReadBuddy:[contactRow objectForKey:kContactName] forAccount:[contactRow objectForKey:kAccountID]];
+                [self updateAppBadge];
+                
+                [self.contactsTable beginUpdates];
+                NSIndexSet *indexSet =[[NSIndexSet alloc] initWithIndex:self.contactsTable.selectedRow] ;
+                NSIndexSet *columnIndexSet =[[NSIndexSet alloc] initWithIndex:0] ;
+                [self.contactsTable reloadDataForRowIndexes:indexSet columnIndexes:columnIndexSet];
+                [self.contactsTable endUpdates];
+                
+            }
+        }
 }
 
 

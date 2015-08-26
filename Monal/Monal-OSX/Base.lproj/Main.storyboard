@@ -750,6 +750,9 @@
                                         <segment label="Contacts" width="159" selected="YES"/>
                                         <segment label="Active Chat" width="158" tag="1"/>
                                     </segments>
+                                    <connections>
+                                        <action selector="segmentDidChange:" target="0BB-CK-cBw" id="lfa-4s-d4I"/>
+                                    </connections>
                                 </segmentedCell>
                             </segmentedControl>
                             <scrollView borderType="none" autohidesScrollers="YES" horizontalLineScroll="60" horizontalPageScroll="10" verticalLineScroll="60" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="eLW-rG-h59">

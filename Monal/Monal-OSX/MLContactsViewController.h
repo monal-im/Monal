@@ -30,4 +30,6 @@
 
 -(void) showAuthRequestForContact:(NSString *) contactName withCompletion: (void (^)(BOOL))completion;
 
+-(IBAction)segmentDidChange:(id)sender;
+
 @end

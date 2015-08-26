@@ -90,6 +90,11 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 
 #pragma mark - update UI
 
+-(IBAction)deleteItem:(id)sender
+{
+    
+}
+
 -(void) showActiveChat:(BOOL) shouldShow
 {
     if (shouldShow) {

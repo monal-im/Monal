@@ -32,4 +32,6 @@
 
 -(IBAction)segmentDidChange:(id)sender;
 
+-(IBAction)deleteItem:(id)sender;
+
 @end

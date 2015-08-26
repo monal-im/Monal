@@ -58,11 +58,11 @@
     if (self.isInbound)
     {
         bubbleFrame.origin.x= self.messageText.frame.origin.x+kBubbleOffset*2;
-        bubbleFrame.size.width-=kBubbleOffset; 
+        bubbleFrame.size.width-=kBubbleOffset*2;
            [[NSColor controlHighlightColor] setFill];
     }
     else  {
-        bubbleFrame.origin.x= self.frame.size.width -kBubbleOffset*2-  bubbleFrame.size.width;
+        bubbleFrame.origin.x= self.frame.size.width -kBubbleOffset-  bubbleFrame.size.width;
         
         [[NSColor colorWithCalibratedRed:57.0/255 green:118.0f/255 blue:253.0/255 alpha:1.0] setFill];
     }

@@ -278,7 +278,6 @@
 		266272B91B27DB8000C1CD49 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 266272B81B27DB8000C1CD49 /* main.m */; };
 		266272C11B27DB8000C1CD49 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 266272BF1B27DB8000C1CD49 /* Main.storyboard */; };
 		266272CD1B27DB8100C1CD49 /* Monal_OSXTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 266272CC1B27DB8100C1CD49 /* Monal_OSXTests.m */; };
-		2668B2C317E1E59700C7F7C9 /* Crashlytics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2668B2C217E1E59700C7F7C9 /* Crashlytics.framework */; };
 		26761BF61804FBB700D94714 /* RoomListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26761BF41804FBB700D94714 /* RoomListViewController.m */; };
 		26761BF71804FBB700D94714 /* RoomListViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26761BF51804FBB700D94714 /* RoomListViewController.xib */; };
 		2678A98B185A8320003AF53B /* ChatLogAccountDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2678A98A185A8320003AF53B /* ChatLogAccountDetailViewController.m */; };
@@ -286,6 +285,7 @@
 		267ECD691B7467B30025337F /* MLXMPPManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26352EA7177D222600E2C8FF /* MLXMPPManager.m */; };
 		267ECD6B1B746C340025337F /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 267ECD6A1B746C340025337F /* Security.framework */; };
 		267ECD6D1B746C660025337F /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 267ECD6C1B746C660025337F /* CFNetwork.framework */; };
+		26817F111B8E01D800A19886 /* Crashlytics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26817F101B8E01D800A19886 /* Crashlytics.framework */; };
 		268821FA19B9233B00AEA46E /* NSString+SqlLite.m in Sources */ = {isa = PBXBuildFile; fileRef = 268821F919B9233B00AEA46E /* NSString+SqlLite.m */; };
 		268BCF12140B29180025E4D1 /* libjrtplib-static.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */; };
 		268DD58617C4541000C673A9 /* MLChatCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 268DD58517C4541000C673A9 /* MLChatCell.m */; };
@@ -636,7 +636,6 @@
 		266272C61B27DB8100C1CD49 /* Monal-OSXTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Monal-OSXTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		266272CB1B27DB8100C1CD49 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		266272CC1B27DB8100C1CD49 /* Monal_OSXTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Monal_OSXTests.m; sourceTree = "<group>"; };
-		2668B2C217E1E59700C7F7C9 /* Crashlytics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Crashlytics.framework; sourceTree = "<group>"; };
 		2675143315C23822006A36A3 /* changelog.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = changelog.txt; sourceTree = "<group>"; };
 		26761BF31804FBB700D94714 /* RoomListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RoomListViewController.h; sourceTree = "<group>"; };
 		26761BF41804FBB700D94714 /* RoomListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RoomListViewController.m; sourceTree = "<group>"; };
@@ -647,6 +646,7 @@
 		2678A98D185AB739003AF53B /* ChatLogContactViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChatLogContactViewController.m; sourceTree = "<group>"; };
 		267ECD6A1B746C340025337F /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
 		267ECD6C1B746C660025337F /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/System/Library/Frameworks/CFNetwork.framework; sourceTree = DEVELOPER_DIR; };
+		26817F101B8E01D800A19886 /* Crashlytics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Crashlytics.framework; path = "Monal-iOS/External/Crashlytics.framework"; sourceTree = "<group>"; };
 		268821F819B9233B00AEA46E /* NSString+SqlLite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+SqlLite.h"; sourceTree = "<group>"; };
 		268821F919B9233B00AEA46E /* NSString+SqlLite.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+SqlLite.m"; sourceTree = "<group>"; };
 		268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libjrtplib-static.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -789,6 +789,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				26817F111B8E01D800A19886 /* Crashlytics.framework in Frameworks */,
 				261528C51869CE5300BF62D6 /* AudioToolbox.framework in Frameworks */,
 				2642EBD01869425D006A6C12 /* CoreAudio.framework in Frameworks */,
 				268E700515D0D979002E63CD /* AVFoundation.framework in Frameworks */,
@@ -800,7 +801,6 @@
 				26F7BB451115F95000712672 /* SystemConfiguration.framework in Frameworks */,
 				263F568D121B5E970027D85D /* MediaPlayer.framework in Frameworks */,
 				26292F4F1309CAE100097280 /* CFNetwork.framework in Frameworks */,
-				2668B2C317E1E59700C7F7C9 /* Crashlytics.framework in Frameworks */,
 				26B69A75131C522F002FCBEB /* Security.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1362,6 +1362,7 @@
 		26B2A4FF1B730A0900272E63 /* iOS */ = {
 			isa = PBXGroup;
 			children = (
+				26817F101B8E01D800A19886 /* Crashlytics.framework */,
 				261528C41869CE5300BF62D6 /* AudioToolbox.framework */,
 				2642EBCF1869425D006A6C12 /* CoreAudio.framework */,
 				264FF3E4158A855D00D97B86 /* AVFoundation.framework */,
@@ -1523,7 +1524,6 @@
 			isa = PBXGroup;
 			children = (
 				2643A129180220890030EFB1 /* TPAvoidingView */,
-				2668B2C217E1E59700C7F7C9 /* Crashlytics.framework */,
 				26DA16D917C302BC00D0065E /* UIAlertView-Blocks */,
 				26BAFC3D1626537D0073728B /* appirator */,
 				2658508415E7D8E40070A2A7 /* TPCircularBuffer */,
@@ -2322,7 +2322,9 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)",
-					"/Users/anurodhp/Development/Monal\\ files/monalxmpp/Monal",
+					/Users/anurodhp/Development/Monal,
+					files/monalxmpp/Monal,
+					"$(PROJECT_DIR)/Monal-iOS/External",
 				);
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -2885,7 +2887,9 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)",
-					"/Users/anurodhp/Development/Monal\\ files/monalxmpp/Monal",
+					/Users/anurodhp/Development/Monal,
+					files/monalxmpp/Monal,
+					"$(PROJECT_DIR)/Monal-iOS/External",
 				);
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -3011,7 +3015,9 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)",
-					"/Users/anurodhp/Development/Monal\\ files/monalxmpp/Monal",
+					/Users/anurodhp/Development/Monal,
+					files/monalxmpp/Monal,
+					"$(PROJECT_DIR)/Monal-iOS/External",
 				);
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;

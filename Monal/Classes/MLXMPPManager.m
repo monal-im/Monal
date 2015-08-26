@@ -268,13 +268,11 @@ An array of Dics what have timers to make sure everything was sent
     }
     else
 #else
-#endif
-
-    {
-    
         NSError *error;
-        xmppAccount.password =[STKeychain getPasswordForUsername:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]] andServiceName:@"Monal" error:&error];
-        
+    xmppAccount.password =[STKeychain getPasswordForUsername:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]] andServiceName:@"Monal" error:&error];
+    
+#endif
+    {
         if(!xmppAccount.password)  {
             xmppAccount.password=@"";
         }

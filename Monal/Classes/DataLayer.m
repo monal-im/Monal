@@ -11,8 +11,9 @@
 
 
 #if TARGET_OS_IPHONE
-#else
 #import "PasswordManager.h"
+#else
+
 #endif
 
 @implementation DataLayer

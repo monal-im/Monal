@@ -188,6 +188,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     else
         DDLogInfo(@"streams created ok");
     
+    #if TARGET_OS_IPHONE
     if((CFReadStreamSetProperty((__bridge CFReadStreamRef)_iStream,
                                 kCFStreamNetworkServiceType,  kCFStreamNetworkServiceTypeVoIP))
        //       &&
@@ -201,6 +202,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     {
         DDLogInfo(@"could not set VOIP properties on streams.");
     }
+#else
+
+#endif
+ 
     
     if((_SSL==YES)  && (_oldStyleSSL==YES))
     {

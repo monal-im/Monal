@@ -108,6 +108,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
 }
 
+-(IBAction)emojiPicker:(id)sender {
+    [[NSApplication sharedApplication] orderFrontCharacterPalette:nil];
+}
+
 #pragma mark - notificaitons
 -(void) handleNewMessage:(NSNotification *)notification
 {
@@ -214,14 +218,17 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         
         dispatch_async(dispatch_get_main_queue(),
                        ^{
-                         
-                           NSString *lastMessageId= [[self.messageList objectAtIndex:self.messageList.count-1] objectForKey:@"messageid"];
+                           
+                           NSString *lastMessageId;
+                           if(self.messageList.count>0) {
+                               lastMessageId=[[self.messageList objectAtIndex:self.messageList.count-1] objectForKey:@"messageid"];
+                           }
                            NSString *nextMessageId = [userInfo objectForKey:kMessageId];
                            if(![lastMessageId isEqualToString:nextMessageId]) {
                                [self.messageList addObject:[userInfo mutableCopy]];
                                [self.chatTable reloadData];
                            }
-                     
+                           
                            
                            //                           NSIndexPath *path1;
                            //                           [self.chatTable beginUpdates];
@@ -327,6 +334,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         cell.isInbound=YES;
         cell.messageText.linkTextAttributes =@{NSForegroundColorAttributeName:[NSColor blackColor], NSUnderlineStyleAttributeName: @YES};
     }
+    
+    //reset to remove any links
+    cell.messageText.string=@"";
     
     cell.messageText.editable=YES;
     cell.messageText.string =[messageRow objectForKey:@"message"];

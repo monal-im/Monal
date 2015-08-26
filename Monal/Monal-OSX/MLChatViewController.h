@@ -14,6 +14,8 @@
 @property (nonatomic, strong) IBOutlet NSTableView *chatTable;
 
 -(IBAction)sendText:(id)sender;
+-(IBAction)emojiPicker:(id)sender;
+
 -(void) sendMessage:(NSString *) messageText andMessageID:(NSString *)messageID;
 
 -(void) showConversationForContact:(NSDictionary *)contact;

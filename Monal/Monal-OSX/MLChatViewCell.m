@@ -9,6 +9,7 @@
 #import "MLChatViewCell.h"
 
 #define kBubbleOffset 10
+#define kdefaultPadding 5
 
 @implementation MLChatViewCell
 
@@ -16,8 +17,9 @@
 + (NSRect) sizeWithMessage:(NSString *)messageString
 {
     NSDictionary *attributes = @{NSFontAttributeName: [NSFont systemFontOfSize:13.0f]};
-    NSSize size = NSMakeSize(kCellMax, MAXFLOAT);
+    NSSize size = NSMakeSize(kCellMax-(kdefaultPadding*2), MAXFLOAT);
     CGRect rect = [messageString boundingRectWithSize:size options:NSLineBreakByWordWrapping | NSStringDrawingUsesLineFragmentOrigin attributes:attributes];
+    rect.size.height+=10; 
     return rect;
     
 }
@@ -43,57 +45,35 @@
 
 - (void)drawRect:(NSRect)dirtyRect {
     [super drawRect:dirtyRect];
-    
-//    NSImage* topLeftCorner ;
-//    NSImage* topEdgeFill;
-//    NSImage* topRightCorner;
-//    NSImage* leftEdgeFill;
-//    NSImage* centerFill;
-//    NSImage* rightEdgeFill;
-//    NSImage* bottomLeftCorner;
-//    NSImage* bottomEdgeFill;
-//    NSImage* bottomRightCorner;
-
-    
+   // NSLog(@"%@ %f", self.messageText.string, self.messageRect.size.width);
     
     CGRect bubbleFrame = self.frame;
-    if (self.messageRect.size.width<250) {
+    if (self.messageRect.size.width<240) {
         bubbleFrame.size.width = self.messageRect.size.width+40;
     }
     else  {
         bubbleFrame.size.width = self.messageText.frame.size.width+20;
     }
+    
     if (self.isInbound)
     {
-//        bubbleFrame.origin.x= self.messageText.frame.origin.x+kBubbleOffset;
-//        topLeftCorner =[NSImage imageNamed:@"topLeft_in"];
-//        topEdgeFill= [NSImage imageNamed:@"topCenter_in"];
-//        topRightCorner=[NSImage imageNamed:@"topRight_in"];
-//        leftEdgeFill=[NSImage imageNamed:@"centerLeft_in"];
-//        centerFill=[NSImage imageNamed:@"center_in"];
-//        rightEdgeFill=[NSImage imageNamed:@"centerRight_in"];
-//        bottomLeftCorner=[NSImage imageNamed:@"bottomLeft_in"];
-//        bottomEdgeFill=[NSImage imageNamed:@"bottomCenter_in"];
-//        bottomRightCorner=[NSImage imageNamed:@"bottomRight_in"];
-
+        bubbleFrame.origin.x= self.messageText.frame.origin.x+kBubbleOffset*2;
+        bubbleFrame.size.width-=kBubbleOffset*2;
+           [[NSColor controlHighlightColor] setFill];
     }
     else  {
         bubbleFrame.origin.x= self.frame.size.width -kBubbleOffset-  bubbleFrame.size.width;
         
-//        topLeftCorner =[NSImage imageNamed:@"topLeft"];
-//        topEdgeFill= [NSImage imageNamed:@"topCenter"];
-//        topRightCorner=[NSImage imageNamed:@"topRight"];
-//        leftEdgeFill=[NSImage imageNamed:@"centerLeft"];
-//        centerFill=[NSImage imageNamed:@"center"];
-//        rightEdgeFill=[NSImage imageNamed:@"centerRight"];
-//        bottomLeftCorner=[NSImage imageNamed:@"bottomLeft"];
-//        bottomEdgeFill=[NSImage imageNamed:@"bottomCenter"];
-//        bottomRightCorner=[NSImage imageNamed:@"bottomRight"];
+        [[NSColor colorWithCalibratedRed:57.0/255 green:118.0f/255 blue:253.0/255 alpha:1.0] setFill];
     }
+    
+    bubbleFrame.origin.y+=5;
+    bubbleFrame.size.height-=10;
    
-//    NSDrawNinePartImage(bubbleFrame, topLeftCorner, topEdgeFill, topRightCorner,
-//                        leftEdgeFill, centerFill, rightEdgeFill, bottomLeftCorner, bottomEdgeFill,
-//                        bottomRightCorner, NSCompositeSourceOver, 1.0f, NO);
+    NSBezierPath *bezierPath= [NSBezierPath bezierPathWithRoundedRect:bubbleFrame xRadius:5.0 yRadius:5.0];
+    
+ 
+    [bezierPath fill];
     
     
 }

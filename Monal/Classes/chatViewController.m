@@ -282,11 +282,12 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     
     if(!_day) {
         _messagelist =[[DataLayer sharedInstance] messageHistory:_contactName forAccount: _accountNo];
-        int unread =[[DataLayer sharedInstance] countUserUnreadMessages:_contactName forAccount: _accountNo];
+       [[DataLayer sharedInstance] countUserUnreadMessages:_contactName forAccount: _accountNo withCompletion:^(NSNumber *unread) {
+           if([unread integerValue]==0) _firstmsg=YES;
+           
+       }];
         _isMUC=[[DataLayer sharedInstance] isBuddyMuc:_contactName forAccount: _accountNo];
         
-        if(unread==0)
-            _firstmsg=YES;
     }
     else
     {
@@ -675,7 +676,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0"))
     {
         UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Retry sending message?" message:@"It is possible this message may have failed to send." preferredStyle:UIAlertControllerStyleActionSheet];
-        [alert addAction:[UIAlertAction actionWithTitle:@"Retry" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {x
+        [alert addAction:[UIAlertAction actionWithTitle:@"Retry" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
             NSArray *messageArray =[[DataLayer sharedInstance] messageForHistoryID:historyId];
             if([messageArray count]>0) {
                 NSDictionary *dic= [messageArray objectAtIndex:0];

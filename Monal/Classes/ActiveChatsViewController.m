@@ -143,8 +143,12 @@
     cell.username=[row objectForKey:@"buddy_name"] ;
     
     //cell.count=[[row objectForKey:@"count"] integerValue];
-    NSString* accountNo=[NSString stringWithFormat:@"%d", cell.accountNo];
-    cell.count=  [[DataLayer sharedInstance] countUserUnreadMessages:cell.username forAccount:accountNo];
+    NSString* accountNo=[NSString stringWithFormat:@"%ld", (long)cell.accountNo];
+    [[DataLayer sharedInstance] countUserUnreadMessages:cell.username forAccount:accountNo withCompletion:^(NSNumber *unread) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            cell.count=[unread integerValue];
+        });
+    }];
     
     cell.userImage.image=[[MLImageManager sharedInstance] getIconForContact:[row objectForKey:@"buddy_name"] andAccount:accountNo];
     [cell setOrb];

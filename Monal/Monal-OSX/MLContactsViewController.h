@@ -12,6 +12,8 @@
 @interface MLContactsViewController : NSViewController <NSTableViewDataSource, NSTableViewDelegate, NSControlTextEditingDelegate>
 
 @property (nonatomic, strong) IBOutlet NSTableView *contactsTable;
+@property (nonatomic, strong) IBOutlet NSSegmentedControl *segmentedControl;
+
 @property (nonatomic, weak) MLChatViewController *chatViewController;
 
 -(void) showConversationForContact:(NSDictionary *) user;
@@ -27,5 +29,9 @@
 -(void) removeOnlineUser:(NSDictionary*) user;
 
 -(void) showAuthRequestForContact:(NSString *) contactName withCompletion: (void (^)(BOOL))completion;
+
+-(IBAction)segmentDidChange:(id)sender;
+
+-(IBAction)deleteItem:(id)sender;
 
 @end

@@ -30,6 +30,8 @@
 	<string>Main</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>SUScheduledCheckInterval</key>
+	<integer>86400</integer>
 	<key>SUFeedURL</key>
 	<string>http://monal.im/Monal-OSX/appcast.xml</string>
 </dict>

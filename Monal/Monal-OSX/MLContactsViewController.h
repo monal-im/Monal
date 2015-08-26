@@ -12,6 +12,8 @@
 @interface MLContactsViewController : NSViewController <NSTableViewDataSource, NSTableViewDelegate, NSControlTextEditingDelegate>
 
 @property (nonatomic, strong) IBOutlet NSTableView *contactsTable;
+@property (nonatomic, strong) IBOutlet NSSegmentedControl *segmentedControl;
+
 @property (nonatomic, weak) MLChatViewController *chatViewController;
 
 -(void) showConversationForContact:(NSDictionary *) user;

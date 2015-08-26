@@ -36,7 +36,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    self.contactsTable.selectionHighlightStyle =NSTableViewSelectionHighlightStyleSourceList;
+   // self.contactsTable.selectionHighlightStyle =NSTableViewSelectionHighlightStyleSourceList;
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
     

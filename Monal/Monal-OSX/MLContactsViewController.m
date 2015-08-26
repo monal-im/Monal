@@ -320,6 +320,8 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                            if(pos>=0)
                            {
                                [_contacts removeObjectAtIndex:pos];
+                               if(self.searchResults) return;
+                               
                                DDLogVerbose(@"removing %@ at pos %d", [user objectForKey:kusernameKey], pos);
                                [_contactsTable beginUpdates];
                                NSIndexSet *indexSet = [NSIndexSet indexSetWithIndex:pos];
@@ -373,6 +375,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                        }
                        
                        [_contacts removeObjectsAtIndexes:indexSet];
+                        if(self.searchResults) return;
                        [_contactsTable beginUpdates];
                        [_contactsTable removeRowsAtIndexes:indexSet withAnimation:NSTableViewAnimationEffectFade];
                        [_contactsTable endUpdates];
@@ -453,6 +456,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                        
                        if(pos>=0)
                        {
+                            if(self.searchResults) return;
                            [self.contactsTable beginUpdates];
                            
                            NSIndexSet *indexSet =[[NSIndexSet alloc] initWithIndex:pos] ;

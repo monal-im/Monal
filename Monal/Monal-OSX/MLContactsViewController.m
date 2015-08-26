@@ -96,37 +96,62 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     NSAlert *userDelAlert = [[NSAlert alloc] init];
     userDelAlert.messageText =[NSString stringWithFormat:@"Are you sure you want to remove this contact?"];
     userDelAlert.alertStyle=NSInformationalAlertStyle;
-    
- 
-    
+    [userDelAlert addButtonWithTitle:@"No"];
+    [userDelAlert addButtonWithTitle:@"Yes"];
     
     if(self.searchResults)
     {
-        //ask
-        [userDelAlert beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse returnCode) {
+        if(self.contactsTable.selectedRow <self.searchResults.count) {
+            NSDictionary *contact =[self.searchResults objectAtIndex:self.contactsTable.selectedRow];
             
-            
-            
-        }];
+            [userDelAlert beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse returnCode) {
+                
+                if(returnCode==1001) //YES
+                {
+                    [[MLXMPPManager sharedInstance] removeContact:contact];
+                    [self.searchResults removeObjectAtIndex:self.contactsTable.selectedRow];
+                    
+                    [self.contactsTable reloadData];
+                }
+                else
+                {
+                    //do nothing
+                }
+                
+            }];
+        }
     }
-     else if(self.activeChat)
-     {
-         if(self.contactsTable.selectedRow <self.activeChat.count) {
-             NSDictionary *contact =[self.activeChat objectAtIndex:self.contactsTable.selectedRow];
-             
-             [ [DataLayer sharedInstance] removeActiveBuddy:[contact objectForKey:kContactName] forAccount:[contact objectForKey:kAccountID]];
-             self.activeChat=[[DataLayer sharedInstance] activeBuddies];
-             [self.contactsTable reloadData];
-         }
-     }
-     else  {
-         //ask
-         [userDelAlert beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse returnCode) {
-             
-             
-             
-         }];
-     }
+    else if(self.activeChat)
+    {
+        if(self.contactsTable.selectedRow <self.activeChat.count) {
+            NSDictionary *contact =[self.activeChat objectAtIndex:self.contactsTable.selectedRow];
+            
+            [ [DataLayer sharedInstance] removeActiveBuddy:[contact objectForKey:kContactName] forAccount:[contact objectForKey:kAccountID]];
+            self.activeChat=[[DataLayer sharedInstance] activeBuddies];
+            [self.contactsTable reloadData];
+        }
+    }
+    else  {
+        if(self.contactsTable.selectedRow <self.contacts.count) {
+            NSDictionary *contact =[self.contacts objectAtIndex:self.contactsTable.selectedRow];
+            [userDelAlert beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse returnCode) {
+               
+                if(returnCode==1001) //YES
+                {
+                    [[MLXMPPManager sharedInstance] removeContact:contact];
+                    [self.contacts removeObjectAtIndex:self.contactsTable.selectedRow];
+                    
+                    [self.contactsTable reloadData];
+                }
+                else
+                {
+                    //do nothing
+                }
+                
+                
+            }];
+        }
+    }
     
 }
 

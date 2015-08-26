@@ -335,6 +335,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         cell.messageText.linkTextAttributes =@{NSForegroundColorAttributeName:[NSColor blackColor], NSUnderlineStyleAttributeName: @YES};
     }
     
+    //reset to remove any links
+    cell.messageText.string=@"";
+    
     cell.messageText.editable=YES;
     cell.messageText.string =[messageRow objectForKey:@"message"];
     [cell.messageText checkTextInDocument:nil];

@@ -181,6 +181,13 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     
 }
 
+-(IBAction)startFind:(id)sender
+{
+    MLMainWindow *window =(MLMainWindow *)self.view.window.windowController;
+    [window.contactSearchField becomeFirstResponder];
+}
+
+
 -(void) showActiveChat:(BOOL) shouldShow
 {
     if (shouldShow) {

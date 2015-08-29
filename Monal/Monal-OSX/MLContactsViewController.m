@@ -77,7 +77,14 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 
 -(void) viewWillAppear
 {
-    [self.contactsTable reloadData];
+    if(self.activeChat)
+    {
+        [self showActiveChat:YES];
+    }
+    else {
+        [self.contactsTable reloadData];
+    }
+    
     [self updateAppBadge];
 }
 

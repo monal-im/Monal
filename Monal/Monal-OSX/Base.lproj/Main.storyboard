@@ -1131,9 +1131,19 @@ Gw
                                             <action selector="sendText:" target="qLp-oS-WKI" id="4tP-lD-TxW"/>
                                         </connections>
                                     </button>
-                                    <scrollView horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" hasVerticalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Cir-fi-93b">
-                                        <rect key="frame" x="0.0" y="-3" width="405" height="108"/>
-                                        <clipView key="contentView" id="xyg-jq-3Wg">
+                                    <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="RB8-DH-Efv">
+                                        <rect key="frame" x="407" y="13" width="72" height="32"/>
+                                        <buttonCell key="cell" type="push" title="😀" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="ccl-s1-dL9">
+                                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                            <font key="font" metaFont="system"/>
+                                        </buttonCell>
+                                        <connections>
+                                            <action selector="emojiPicker:" target="qLp-oS-WKI" id="ooo-mc-es1"/>
+                                        </connections>
+                                    </button>
+                                    <scrollView misplaced="YES" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" hasVerticalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Cir-fi-93b">
+                                        <rect key="frame" x="0.0" y="3" width="405" height="99"/>
+                                        <clipView key="contentView" misplaced="YES" id="xyg-jq-3Wg">
                                             <rect key="frame" x="1" y="1" width="223" height="133"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
@@ -1141,10 +1151,10 @@ Gw
                                                     <rect key="frame" x="0.0" y="0.0" width="223" height="133"/>
                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                     <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                                    <size key="minSize" width="403" height="106"/>
+                                                    <size key="minSize" width="403" height="97"/>
                                                     <size key="maxSize" width="463" height="10000000"/>
                                                     <color key="insertionPointColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                                    <size key="minSize" width="403" height="106"/>
+                                                    <size key="minSize" width="403" height="97"/>
                                                     <size key="maxSize" width="463" height="10000000"/>
                                                     <connections>
                                                         <outlet property="delegate" destination="qLp-oS-WKI" id="exd-Ze-cMr"/>
@@ -1162,16 +1172,6 @@ Gw
                                             <autoresizingMask key="autoresizingMask"/>
                                         </scroller>
                                     </scrollView>
-                                    <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="RB8-DH-Efv">
-                                        <rect key="frame" x="407" y="13" width="72" height="32"/>
-                                        <buttonCell key="cell" type="push" title="😀" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="ccl-s1-dL9">
-                                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                            <font key="font" metaFont="system"/>
-                                        </buttonCell>
-                                        <connections>
-                                            <action selector="emojiPicker:" target="qLp-oS-WKI" id="ooo-mc-es1"/>
-                                        </connections>
-                                    </button>
                                 </subviews>
                                 <constraints>
                                     <constraint firstItem="Cir-fi-93b" firstAttribute="top" secondItem="9FI-ED-NWb" secondAttribute="top" id="26N-jV-WCs"/>

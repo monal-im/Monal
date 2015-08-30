@@ -1141,9 +1141,9 @@ Gw
                                             <action selector="emojiPicker:" target="qLp-oS-WKI" id="ooo-mc-es1"/>
                                         </connections>
                                     </button>
-                                    <scrollView misplaced="YES" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" hasVerticalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Cir-fi-93b">
-                                        <rect key="frame" x="0.0" y="3" width="405" height="99"/>
-                                        <clipView key="contentView" misplaced="YES" id="xyg-jq-3Wg">
+                                    <scrollView horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" hasVerticalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Cir-fi-93b">
+                                        <rect key="frame" x="8" y="9" width="397" height="86"/>
+                                        <clipView key="contentView" id="xyg-jq-3Wg">
                                             <rect key="frame" x="1" y="1" width="223" height="133"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
@@ -1151,10 +1151,10 @@ Gw
                                                     <rect key="frame" x="0.0" y="0.0" width="223" height="133"/>
                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                     <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                                    <size key="minSize" width="403" height="97"/>
+                                                    <size key="minSize" width="395" height="84"/>
                                                     <size key="maxSize" width="463" height="10000000"/>
                                                     <color key="insertionPointColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                                    <size key="minSize" width="403" height="97"/>
+                                                    <size key="minSize" width="395" height="84"/>
                                                     <size key="maxSize" width="463" height="10000000"/>
                                                     <connections>
                                                         <outlet property="delegate" destination="qLp-oS-WKI" id="exd-Ze-cMr"/>
@@ -1174,23 +1174,16 @@ Gw
                                     </scrollView>
                                 </subviews>
                                 <constraints>
-                                    <constraint firstItem="Cir-fi-93b" firstAttribute="top" secondItem="9FI-ED-NWb" secondAttribute="top" id="26N-jV-WCs"/>
-                                    <constraint firstItem="m4R-R5-Jrl" firstAttribute="leading" secondItem="Cir-fi-93b" secondAttribute="trailing" constant="8" id="6wa-wp-pbF"/>
-                                    <constraint firstItem="RB8-DH-Efv" firstAttribute="leading" secondItem="Cir-fi-93b" secondAttribute="trailing" constant="8" id="9iB-ot-WPp"/>
-                                    <constraint firstAttribute="bottom" secondItem="Cir-fi-93b" secondAttribute="bottom" constant="-3" id="GGe-of-ESq"/>
-                                    <constraint firstItem="m4R-R5-Jrl" firstAttribute="top" secondItem="9FI-ED-NWb" secondAttribute="top" constant="20" id="Hrg-tm-pi6"/>
-                                    <constraint firstItem="m4R-R5-Jrl" firstAttribute="leading" secondItem="Cir-fi-93b" secondAttribute="trailing" constant="8" symbolic="YES" id="KTg-j4-gCp"/>
-                                    <constraint firstItem="RB8-DH-Efv" firstAttribute="leading" secondItem="Cir-fi-93b" secondAttribute="trailing" constant="8" id="Kv4-E6-IFe"/>
-                                    <constraint firstItem="Cir-fi-93b" firstAttribute="top" secondItem="9FI-ED-NWb" secondAttribute="top" id="Npz-zN-o6e"/>
-                                    <constraint firstItem="Cir-fi-93b" firstAttribute="top" secondItem="9FI-ED-NWb" secondAttribute="top" id="PGP-na-j9K"/>
-                                    <constraint firstItem="RB8-DH-Efv" firstAttribute="top" secondItem="m4R-R5-Jrl" secondAttribute="bottom" constant="23" id="Qw5-3Z-PsT"/>
-                                    <constraint firstItem="RB8-DH-Efv" firstAttribute="leading" secondItem="Cir-fi-93b" secondAttribute="trailing" constant="8" id="X2f-kG-mr8"/>
-                                    <constraint firstItem="Cir-fi-93b" firstAttribute="leading" secondItem="9FI-ED-NWb" secondAttribute="leading" id="ZoY-jp-o1G"/>
-                                    <constraint firstAttribute="trailing" secondItem="RB8-DH-Efv" secondAttribute="trailing" constant="20" id="hH6-ha-FtC"/>
-                                    <constraint firstAttribute="trailing" secondItem="m4R-R5-Jrl" secondAttribute="trailing" constant="20" id="mGk-q5-f1d"/>
-                                    <constraint firstAttribute="trailing" secondItem="Cir-fi-93b" secondAttribute="trailing" constant="88" id="pkM-IB-55s"/>
-                                    <constraint firstItem="Cir-fi-93b" firstAttribute="top" secondItem="9FI-ED-NWb" secondAttribute="top" id="rnh-5z-Wa6"/>
-                                    <constraint firstItem="RB8-DH-Efv" firstAttribute="leading" secondItem="Cir-fi-93b" secondAttribute="trailing" constant="8" symbolic="YES" id="ssh-JD-TUa"/>
+                                    <constraint firstItem="Cir-fi-93b" firstAttribute="top" secondItem="9FI-ED-NWb" secondAttribute="top" constant="10" id="9f3-oJ-Dr8"/>
+                                    <constraint firstItem="RB8-DH-Efv" firstAttribute="leading" secondItem="Cir-fi-93b" secondAttribute="trailing" constant="8" id="GYU-Ue-mUL"/>
+                                    <constraint firstItem="Cir-fi-93b" firstAttribute="leading" secondItem="9FI-ED-NWb" secondAttribute="leading" constant="8" id="UQb-66-43T"/>
+                                    <constraint firstItem="m4R-R5-Jrl" firstAttribute="top" secondItem="9FI-ED-NWb" secondAttribute="top" constant="20" id="VUa-FB-krO"/>
+                                    <constraint firstItem="RB8-DH-Efv" firstAttribute="top" secondItem="m4R-R5-Jrl" secondAttribute="bottom" constant="23" id="eku-4e-7c3"/>
+                                    <constraint firstAttribute="trailing" secondItem="m4R-R5-Jrl" secondAttribute="trailing" constant="20" id="fjE-vf-2sR"/>
+                                    <constraint firstAttribute="bottom" secondItem="Cir-fi-93b" secondAttribute="bottom" constant="9" id="fvs-qd-Eaz"/>
+                                    <constraint firstAttribute="bottom" secondItem="RB8-DH-Efv" secondAttribute="bottom" constant="20" id="uUv-fF-Dbc"/>
+                                    <constraint firstItem="m4R-R5-Jrl" firstAttribute="leading" secondItem="Cir-fi-93b" secondAttribute="trailing" constant="8" id="yMj-Lj-hTR"/>
+                                    <constraint firstAttribute="trailing" secondItem="RB8-DH-Efv" secondAttribute="trailing" constant="20" id="z2J-vr-0B4"/>
                                 </constraints>
                             </visualEffectView>
                             <scrollView borderType="none" autohidesScrollers="YES" horizontalLineScroll="45" horizontalPageScroll="10" verticalLineScroll="45" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="eNE-em-qs3">
@@ -1380,16 +1373,13 @@ Gw
                             </scrollView>
                         </subviews>
                         <constraints>
-                            <constraint firstAttribute="bottom" secondItem="eNE-em-qs3" secondAttribute="bottom" constant="113" id="1iG-Ci-Txp"/>
-                            <constraint firstItem="eNE-em-qs3" firstAttribute="leading" secondItem="kDf-fM-OV9" secondAttribute="leading" id="DFy-2d-hh8"/>
-                            <constraint firstItem="9FI-ED-NWb" firstAttribute="leading" secondItem="eNE-em-qs3" secondAttribute="leading" id="Hf3-3W-6bt"/>
-                            <constraint firstItem="9FI-ED-NWb" firstAttribute="top" secondItem="eNE-em-qs3" secondAttribute="bottom" constant="8" symbolic="YES" id="WJs-yZ-jie"/>
-                            <constraint firstItem="eNE-em-qs3" firstAttribute="top" secondItem="kDf-fM-OV9" secondAttribute="top" id="ZvO-7U-n1B"/>
-                            <constraint firstAttribute="trailing" secondItem="9FI-ED-NWb" secondAttribute="trailing" id="cGj-Ab-CAe"/>
-                            <constraint firstAttribute="bottom" secondItem="9FI-ED-NWb" secondAttribute="bottom" id="dLQ-2W-ood"/>
-                            <constraint firstAttribute="trailing" secondItem="eNE-em-qs3" secondAttribute="trailing" id="eAB-GO-wZV"/>
-                            <constraint firstItem="9FI-ED-NWb" firstAttribute="top" secondItem="eNE-em-qs3" secondAttribute="bottom" constant="8" id="fRE-P3-Mg7"/>
-                            <constraint firstItem="eNE-em-qs3" firstAttribute="top" secondItem="kDf-fM-OV9" secondAttribute="top" id="n8h-aI-oy1"/>
+                            <constraint firstItem="eNE-em-qs3" firstAttribute="top" secondItem="kDf-fM-OV9" secondAttribute="top" id="2z9-Bx-3Mo"/>
+                            <constraint firstItem="9FI-ED-NWb" firstAttribute="leading" secondItem="kDf-fM-OV9" secondAttribute="leading" id="ElA-sy-yHZ"/>
+                            <constraint firstAttribute="bottom" secondItem="9FI-ED-NWb" secondAttribute="bottom" id="FDu-ZP-7RP"/>
+                            <constraint firstItem="9FI-ED-NWb" firstAttribute="trailing" secondItem="eNE-em-qs3" secondAttribute="trailing" id="MPc-wW-68d"/>
+                            <constraint firstAttribute="trailing" secondItem="9FI-ED-NWb" secondAttribute="trailing" id="Vpq-Hn-6tL"/>
+                            <constraint firstItem="9FI-ED-NWb" firstAttribute="leading" secondItem="eNE-em-qs3" secondAttribute="leading" id="Zrs-mB-sP2"/>
+                            <constraint firstItem="9FI-ED-NWb" firstAttribute="top" secondItem="eNE-em-qs3" secondAttribute="bottom" constant="8" symbolic="YES" id="vY2-MU-nht"/>
                         </constraints>
                     </view>
                     <connections>

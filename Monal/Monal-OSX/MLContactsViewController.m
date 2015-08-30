@@ -243,11 +243,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     }
 }
 
--(void) updateWindowForContact:(NSDictionary *)contact
-{
-    MLMainWindow *window =(MLMainWindow *)self.view.window.windowController;
-    [window updateCurrentContact:contact];
-}
+
 
 #pragma mark - updating user display in table
 
@@ -691,7 +687,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     {
         NSDictionary *contactRow = [self.searchResults objectAtIndex:self.contactsTable.selectedRow];
         [self.chatViewController showConversationForContact:contactRow];
-        [self updateWindowForContact:contactRow];
+     
         [[DataLayer sharedInstance] markAsReadBuddy:[contactRow objectForKey:kContactName] forAccount:[contactRow objectForKey:kAccountID]];
         [self updateAppBadge];
         
@@ -707,7 +703,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
             if(self.contactsTable.selectedRow<self.activeChat.count) {
                 NSDictionary *contactRow = [self.activeChat objectAtIndex:self.contactsTable.selectedRow];
                 [self.chatViewController showConversationForContact:contactRow];
-                [self updateWindowForContact:contactRow];
+       
                 [[DataLayer sharedInstance] markAsReadBuddy:[contactRow objectForKey:kContactName] forAccount:[contactRow objectForKey:kAccountID]];
                 [self updateAppBadge];
                 
@@ -722,7 +718,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
             if(self.contactsTable.selectedRow<self.contacts.count) {
                 NSDictionary *contactRow = [self.contacts objectAtIndex:self.contactsTable.selectedRow];
                 [self.chatViewController showConversationForContact:contactRow];
-                [self updateWindowForContact:contactRow];
+               
                 [[DataLayer sharedInstance] markAsReadBuddy:[contactRow objectForKey:kContactName] forAccount:[contactRow objectForKey:kAccountID]];
                 [self updateAppBadge];
                 

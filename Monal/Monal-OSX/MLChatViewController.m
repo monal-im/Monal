@@ -14,9 +14,12 @@
 #import "MLChatViewCell.h"
 //#import "MLNotificaitonCenter.h"
 
+#import "MLMainWindow.h"
+
 @interface MLChatViewController ()
 
 @property (nonatomic, strong) NSMutableArray *messageList;
+@property (nonatomic, strong) NSDictionary *contactDic;
 
 @property (nonatomic, strong)  NSDateFormatter* destinationDateFormat;
 @property (nonatomic, strong)  NSDateFormatter* sourceDateFormat;
@@ -63,6 +66,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     
     [self refreshData];
+    [self updateWindowForContact:self.contactDic];
     
 }
 
@@ -86,6 +90,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
     self.accountNo = [NSString stringWithFormat:@"%@",[contact objectForKey:kAccountID]];
     self.contactName = [contact objectForKey:kContactName];
+    self.contactDic= contact;
+    [self updateWindowForContact:contact];
     
 #warning this should be smarter...
     NSArray* accountVals =[[DataLayer sharedInstance] accountVals:self.accountNo];
@@ -110,6 +116,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(IBAction)emojiPicker:(id)sender {
     [[NSApplication sharedApplication] orderFrontCharacterPalette:nil];
+}
+
+-(void) updateWindowForContact:(NSDictionary *)contact
+{
+    MLMainWindow *window =(MLMainWindow *)self.view.window.windowController;
+    [window updateCurrentContact:contact];
 }
 
 #pragma mark - notificaitons

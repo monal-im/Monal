@@ -385,7 +385,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     }
                 }
                 else if (self.accountState==kStateLoggedIn ) {
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kMLHasConnectedNotice object:nil];
+                    NSString *accountName =[NSString stringWithFormat:@"%@@%@", self.username, self.domain];
+                    NSDictionary *dic =@{@"AccountNo":self.accountNo, @"AccountName":accountName};
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kMLHasConnectedNotice object:dic];
                 }
                 else {
                     DDLogInfo(@"failed to login and not retrying");
@@ -2018,6 +2020,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                        [self.networkQueue addOperationWithBlock: ^{
                             [self.contactsVC hideConnecting:info];
                         }];
+                        
+                        NSString *accountName =[NSString stringWithFormat:@"%@@%@", self.username, self.domain];
+                        NSDictionary *dic =@{@"AccountNo":self.accountNo, @"AccountName":accountName};
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kMLHasConnectedNotice object:dic];
                         
                     }
                 }

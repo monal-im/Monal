@@ -30,7 +30,9 @@
     
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
     [nc addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
+    [nc addObserver:self selector:@selector(handleConnect:) name:kMLHasConnectedNotice object:nil];
     [NSUserNotificationCenter defaultUserNotificationCenter].delegate= self;
+    
     
 }
 
@@ -61,7 +63,19 @@
 }
 
 
+
+
 #pragma mark -- notifications
+-(void) handleConnect:(NSNotification *)notification
+{
+    NSString* nameToShow=[notification.object objectForKey:@"AccountName"];
+    NSUserNotification *alert =[[NSUserNotification alloc] init];
+    NSString* messageString =[NSString stringWithFormat:@"Account %@ has connected.", nameToShow];
+    alert.informativeText =messageString;
+    [[NSUserNotificationCenter defaultUserNotificationCenter] scheduleNotification:alert];
+    
+}
+
 -(void) handleNewMessage:(NSNotification *)notification;
 {
     BOOL showNotification =NO;

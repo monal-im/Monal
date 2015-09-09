@@ -77,7 +77,14 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 
 -(void) viewWillAppear
 {
-    [self.contactsTable reloadData];
+    if(self.activeChat)
+    {
+        [self showActiveChat:YES];
+    }
+    else {
+        [self.contactsTable reloadData];
+    }
+    
     [self updateAppBadge];
 }
 
@@ -174,6 +181,13 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     
 }
 
+-(IBAction)startFind:(id)sender
+{
+    MLMainWindow *window =(MLMainWindow *)self.view.window.windowController;
+    [window.contactSearchField becomeFirstResponder];
+}
+
+
 -(void) showActiveChat:(BOOL) shouldShow
 {
     if (shouldShow) {
@@ -206,6 +220,10 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     NSInteger pos=-1;
     NSDictionary *selectedRow;
     
+    // swtich to contacts view
+    self.segmentedControl.selectedSegment=0;
+    [self segmentDidChange:self];
+    
     for(NSDictionary* row in self.contacts)
     {
         if([[row objectForKey:kContactName] caseInsensitiveCompare:[user objectForKey:@"actuallyfrom"] ]==NSOrderedSame &&
@@ -213,6 +231,8 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
         {
             pos= counter;
             selectedRow=row;
+            [self.contactsTable scrollRowToVisible:pos];
+            break;
         }
         counter++;
     }
@@ -229,11 +249,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     }
 }
 
--(void) updateWindowForContact:(NSDictionary *)contact
-{
-    MLMainWindow *window =(MLMainWindow *)self.view.window.windowController;
-    [window updateCurrentContact:contact];
-}
+
 
 #pragma mark - updating user display in table
 
@@ -677,7 +693,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     {
         NSDictionary *contactRow = [self.searchResults objectAtIndex:self.contactsTable.selectedRow];
         [self.chatViewController showConversationForContact:contactRow];
-        [self updateWindowForContact:contactRow];
+     
         [[DataLayer sharedInstance] markAsReadBuddy:[contactRow objectForKey:kContactName] forAccount:[contactRow objectForKey:kAccountID]];
         [self updateAppBadge];
         
@@ -693,7 +709,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
             if(self.contactsTable.selectedRow<self.activeChat.count) {
                 NSDictionary *contactRow = [self.activeChat objectAtIndex:self.contactsTable.selectedRow];
                 [self.chatViewController showConversationForContact:contactRow];
-                [self updateWindowForContact:contactRow];
+       
                 [[DataLayer sharedInstance] markAsReadBuddy:[contactRow objectForKey:kContactName] forAccount:[contactRow objectForKey:kAccountID]];
                 [self updateAppBadge];
                 
@@ -708,7 +724,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
             if(self.contactsTable.selectedRow<self.contacts.count) {
                 NSDictionary *contactRow = [self.contacts objectAtIndex:self.contactsTable.selectedRow];
                 [self.chatViewController showConversationForContact:contactRow];
-                [self updateWindowForContact:contactRow];
+               
                 [[DataLayer sharedInstance] markAsReadBuddy:[contactRow objectForKey:kContactName] forAccount:[contactRow objectForKey:kAccountID]];
                 [self updateAppBadge];
                 

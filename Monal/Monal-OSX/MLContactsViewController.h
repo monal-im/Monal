@@ -9,7 +9,7 @@
 #import <Cocoa/Cocoa.h>
 #import "MLChatViewController.h"
 
-@interface MLContactsViewController : NSViewController <NSTableViewDataSource, NSTableViewDelegate, NSControlTextEditingDelegate>
+@interface MLContactsViewController : NSViewController <NSTableViewDataSource, NSTableViewDelegate, NSControlTextEditingDelegate, NSTextFieldDelegate>
 
 @property (nonatomic, strong) IBOutlet NSTableView *contactsTable;
 @property (nonatomic, strong) IBOutlet NSSegmentedControl *segmentedControl;
@@ -33,5 +33,6 @@
 -(IBAction)segmentDidChange:(id)sender;
 
 -(IBAction)deleteItem:(id)sender;
+-(IBAction)startFind:(id)sender;
 
 @end

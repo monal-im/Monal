@@ -141,11 +141,9 @@
     [self showWindow:self];
     
     NSDictionary *userInfo= notification.userInfo;
-    if(notification.activationType==NSUserNotificationActivationTypeContentsClicked)
-    {
+   
     [[MLXMPPManager sharedInstance].contactVC showConversationForContact:userInfo];
-    }
-    else
+   
     if(notification.activationType==NSUserNotificationActivationTypeReplied)
     {
         [[MLXMPPManager sharedInstance].contactVC.chatViewController sendMessage:notification.response.string andMessageID:nil];

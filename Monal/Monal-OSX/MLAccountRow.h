@@ -12,6 +12,7 @@
 
 @property (nonatomic, weak) IBOutlet NSButton *enabledCheckBox;
 @property (nonatomic, weak) IBOutlet NSTextField *accountName;
+@property (nonatomic, weak) IBOutlet NSImageView *accountStatus;
 @property (nonatomic, strong) NSDictionary *account; 
 
 -(void) updateWithAccountDictionary:(NSDictionary *) account;

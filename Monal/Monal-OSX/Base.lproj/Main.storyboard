@@ -1539,18 +1539,27 @@ Gw
                                                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                     </textFieldCell>
                                                                 </textField>
+                                                                <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="AbM-vK-uXf">
+                                                                    <rect key="frame" x="371" y="3" width="31" height="26"/>
+                                                                    <animations/>
+                                                                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="Disconnected" id="zdX-1L-dN6"/>
+                                                                </imageView>
                                                             </subviews>
                                                             <constraints>
+                                                                <constraint firstAttribute="bottom" secondItem="AbM-vK-uXf" secondAttribute="bottom" constant="3" id="00K-PQ-833"/>
                                                                 <constraint firstItem="TrR-Z7-L5Z" firstAttribute="top" secondItem="GJA-KX-dbK" secondAttribute="top" constant="3" id="04Z-vx-01J"/>
                                                                 <constraint firstItem="TrR-Z7-L5Z" firstAttribute="leading" secondItem="GJA-KX-dbK" secondAttribute="leading" constant="3" id="0bB-WP-cTb"/>
                                                                 <constraint firstItem="TrR-Z7-L5Z" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="GJA-KX-dbK" secondAttribute="leading" constant="3" id="GkS-IY-y0Q"/>
                                                                 <constraint firstItem="TrR-Z7-L5Z" firstAttribute="leading" relation="lessThanOrEqual" secondItem="GJA-KX-dbK" secondAttribute="leading" constant="3" id="OUO-xH-IL1"/>
                                                                 <constraint firstItem="Ttp-oM-pX8" firstAttribute="bottom" secondItem="TrR-Z7-L5Z" secondAttribute="bottom" id="QDZ-8u-MCm"/>
+                                                                <constraint firstAttribute="trailing" secondItem="AbM-vK-uXf" secondAttribute="trailing" constant="3" id="Vg4-js-4rY"/>
+                                                                <constraint firstItem="AbM-vK-uXf" firstAttribute="top" secondItem="GJA-KX-dbK" secondAttribute="top" constant="3" id="mOq-pv-qpr"/>
                                                                 <constraint firstItem="Ttp-oM-pX8" firstAttribute="leading" secondItem="TrR-Z7-L5Z" secondAttribute="trailing" constant="10" id="t6A-sC-IaA"/>
                                                             </constraints>
                                                             <animations/>
                                                             <connections>
                                                                 <outlet property="accountName" destination="Ttp-oM-pX8" id="BNd-eO-2dO"/>
+                                                                <outlet property="accountStatus" destination="AbM-vK-uXf" id="D4Z-ES-b2w"/>
                                                                 <outlet property="enabledCheckBox" destination="TrR-Z7-L5Z" id="lTj-l2-Gjt"/>
                                                             </connections>
                                                         </tableCellView>
@@ -1977,6 +1986,7 @@ Gw
     <resources>
         <image name="724-info" width="28" height="28"/>
         <image name="907-plus-rounded-square" width="28" height="28"/>
+        <image name="Disconnected" width="26" height="26"/>
         <image name="NotificationBubble" width="22" height="22"/>
         <image name="XMPP" width="27.840000152587891" height="27.840000152587891"/>
         <image name="noicon" width="44" height="44"/>

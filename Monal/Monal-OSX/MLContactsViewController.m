@@ -557,12 +557,18 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                        
                        //if current converstion, mark as read if window is visible
                        NSDictionary *contactRow = nil;
+                       
+                       NSArray *activeArray=self.contacts;
+                       if(self.currentSegment==kActiveTab)
+                       {
+                           activeArray= self.activeChat;
+                       }
                     
                        if((self.view.window.occlusionState & NSWindowOcclusionStateVisible)) {
-                               if(self.contactsTable.selectedRow <self.contacts.count) {
-                                   contactRow=[self.contacts objectAtIndex:self.contactsTable.selectedRow];
+                               if(self.contactsTable.selectedRow <activeArray.count) {
+                                   contactRow=[activeArray objectAtIndex:self.contactsTable.selectedRow];
                                }
-                           }
+                       }
                        
                        if([[contactRow objectForKey:kContactName] caseInsensitiveCompare:[notification.userInfo objectForKey:@"from"] ]==NSOrderedSame &&
                           [[contactRow objectForKey:kAccountID]  integerValue]==[[notification.userInfo objectForKey:kaccountNoKey] integerValue] ) {
@@ -572,10 +578,9 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                            
                        }
                        else  {
-                           
-                        
+     
                            int counter=0;
-                           for(NSDictionary* row in _contacts)
+                           for(NSDictionary* row in activeArray)
                            {
                                if([[row objectForKey:kContactName] caseInsensitiveCompare:[notification.userInfo objectForKey:@"from"] ]==NSOrderedSame &&
                                   [[row objectForKey:kAccountID]  integerValue]==[[notification.userInfo objectForKey:kaccountNoKey] integerValue] )
@@ -589,7 +594,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                        
                        if(pos>=0)
                        {
-                             if(self.searchResults || self.activeChat) return;
+                            if(self.searchResults) return;
                            [self.contactsTable beginUpdates];
                            
                            NSIndexSet *indexSet =[[NSIndexSet alloc] initWithIndex:pos] ;

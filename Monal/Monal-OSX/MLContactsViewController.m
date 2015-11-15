@@ -595,12 +595,13 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                        if(pos>=0)
                        {
                             if(self.searchResults) return;
-                           [self.contactsTable beginUpdates];
-                           
-                           NSIndexSet *indexSet =[[NSIndexSet alloc] initWithIndex:pos] ;
-                           NSIndexSet *columnIndexSet =[[NSIndexSet alloc] initWithIndex:0] ;
-                           [self.contactsTable reloadDataForRowIndexes:indexSet columnIndexes:columnIndexSet];
-                           [self.contactsTable endUpdates];
+                           if(pos<self.contactsTable.numberOfRows) {
+                               [self.contactsTable beginUpdates];
+                               NSIndexSet *indexSet =[[NSIndexSet alloc] initWithIndex:pos] ;
+                               NSIndexSet *columnIndexSet =[[NSIndexSet alloc] initWithIndex:0] ;
+                               [self.contactsTable reloadDataForRowIndexes:indexSet columnIndexes:columnIndexSet];
+                               [self.contactsTable endUpdates];
+                           }
                        }
                    });
     

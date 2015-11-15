@@ -22,6 +22,7 @@
 #define kMonalCallStartedNotice @"kMonalCallStartedNotice"
 #define kMLHasConnectedNotice @"kMLHasConnectedNotice"
 
+#define kMonalAccountStatusChanged @"kMonalAccountStatusChanged"
 
 #define kDelivered @"delivered"
 

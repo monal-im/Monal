@@ -10,6 +10,7 @@
 #import "MLAccountRow.h"
 #import "MLAccountEdit.h"
 #import "DataLayer.h"
+#import "MLConstants.h"
 
 @interface MLAccountSettings ()
 @property (nonatomic, strong) NSArray *accountList;
@@ -20,8 +21,16 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    // Do view setup here.
     
+     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+     [nc addObserver:self selector:@selector(refreshAccountList) name:kMonalAccountStatusChanged object:nil];
+    
+}
+
+-(void) dealloc
+{
+     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+    [nc removeObserver:self];
 }
 
 -(void) viewWillAppear

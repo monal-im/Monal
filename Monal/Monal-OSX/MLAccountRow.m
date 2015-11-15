@@ -22,6 +22,16 @@
     self.account = account;
     self.enabledCheckBox.state= [[self.account objectForKey:@"enabled"] boolValue];
     self.accountName.stringValue= [NSString stringWithFormat:@"%@@%@", [self.account objectForKey:@"account_name"], [self.account objectForKey:@"domain"]];
+    
+    if(![[MLXMPPManager sharedInstance] isAccountForIdConnected:[NSString stringWithFormat:@"%@", [self.account objectForKey:@"account_id"]]])
+    {
+        self.accountStatus.image =[NSImage imageNamed:@"Disconnected"];
+    }
+    else
+    {
+         self.accountStatus.image =[NSImage imageNamed:@"Connected"];
+    }
+    
 }
 
 -(IBAction)checkBoxAction:(id)sender;

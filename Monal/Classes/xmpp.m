@@ -519,6 +519,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     [[DataLayer sharedInstance]  resetContactsForAccount:_accountNo];
     _reconnectScheduled =NO;
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountStatusChanged object:nil];
 }
 -(void) reconnect
 {
@@ -2024,6 +2026,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         NSString *accountName =[NSString stringWithFormat:@"%@@%@", self.username, self.domain];
                         NSDictionary *dic =@{@"AccountNo":self.accountNo, @"AccountName":accountName};
                         [[NSNotificationCenter defaultCenter] postNotificationName:kMLHasConnectedNotice object:dic];
+                        
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountStatusChanged object:nil];
                         
                     }
                 }

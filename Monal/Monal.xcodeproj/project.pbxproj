@@ -285,6 +285,7 @@
 		267ECD691B7467B30025337F /* MLXMPPManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26352EA7177D222600E2C8FF /* MLXMPPManager.m */; };
 		267ECD6B1B746C340025337F /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 267ECD6A1B746C340025337F /* Security.framework */; };
 		267ECD6D1B746C660025337F /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 267ECD6C1B746C660025337F /* CFNetwork.framework */; };
+		268130181BFD8ECA0074C8EE /* MLAddContact.m in Sources */ = {isa = PBXBuildFile; fileRef = 268130171BFD8ECA0074C8EE /* MLAddContact.m */; };
 		26817F111B8E01D800A19886 /* Crashlytics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26817F101B8E01D800A19886 /* Crashlytics.framework */; };
 		268821FA19B9233B00AEA46E /* NSString+SqlLite.m in Sources */ = {isa = PBXBuildFile; fileRef = 268821F919B9233B00AEA46E /* NSString+SqlLite.m */; };
 		268BCF12140B29180025E4D1 /* libjrtplib-static.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */; };
@@ -647,6 +648,8 @@
 		2678A98D185AB739003AF53B /* ChatLogContactViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChatLogContactViewController.m; sourceTree = "<group>"; };
 		267ECD6A1B746C340025337F /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
 		267ECD6C1B746C660025337F /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/System/Library/Frameworks/CFNetwork.framework; sourceTree = DEVELOPER_DIR; };
+		268130161BFD8ECA0074C8EE /* MLAddContact.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLAddContact.h; sourceTree = "<group>"; };
+		268130171BFD8ECA0074C8EE /* MLAddContact.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLAddContact.m; sourceTree = "<group>"; };
 		26817F101B8E01D800A19886 /* Crashlytics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Crashlytics.framework; path = "Monal-iOS/External/Crashlytics.framework"; sourceTree = "<group>"; };
 		268821F819B9233B00AEA46E /* NSString+SqlLite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+SqlLite.h"; sourceTree = "<group>"; };
 		268821F919B9233B00AEA46E /* NSString+SqlLite.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+SqlLite.m"; sourceTree = "<group>"; };
@@ -1105,6 +1108,8 @@
 				26329D311B7999AD0061EA36 /* Images-OSX.xcassets */,
 				26277CE21B7C57670094E4D0 /* MLContactDetails.h */,
 				26277CE31B7C57670094E4D0 /* MLContactDetails.m */,
+				268130161BFD8ECA0074C8EE /* MLAddContact.h */,
+				268130171BFD8ECA0074C8EE /* MLAddContact.m */,
 			);
 			path = "Monal-OSX";
 			sourceTree = "<group>";
@@ -2165,6 +2170,7 @@
 				260499ED1B7313ED00D11866 /* ParsePresence.m in Sources */,
 				260499E41B730E9800D11866 /* XMPPIQ.m in Sources */,
 				265802851B785B8900C35014 /* MLDisabledScrollView.m in Sources */,
+				268130181BFD8ECA0074C8EE /* MLAddContact.m in Sources */,
 				260870D81B7034460036539B /* MLAccountEdit.m in Sources */,
 				260499E31B730E9500D11866 /* XMLNode.m in Sources */,
 				260499F01B7313F600D11866 /* ParseStream.m in Sources */,

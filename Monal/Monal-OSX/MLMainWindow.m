@@ -53,12 +53,16 @@
 
 - (BOOL)shouldPerformSegueWithIdentifier:(NSString *)identifier sender:(id)sender NS_AVAILABLE_MAC(10_10);
 {
-    if(!self.contactInfo)
-    {
-        return  NO;
-    }
-    else {
-        return YES; 
+    if([identifier isEqualToString:@"ContactDetails"]) {
+        if(!self.contactInfo)
+        {
+            return  NO;
+        }
+        else {
+            return YES;
+        }
+    } else {
+        return YES;
     }
 }
 

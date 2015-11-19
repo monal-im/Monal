@@ -951,10 +951,10 @@ CA
             </objects>
             <point key="canvasLocation" x="-84" y="696"/>
         </scene>
-        <!--View Controller-->
+        <!--Add Contact-->
         <scene sceneID="HhB-V1-ecH">
             <objects>
-                <viewController id="YaN-jR-P6F" sceneMemberID="viewController">
+                <viewController id="YaN-jR-P6F" customClass="MLAddContact" sceneMemberID="viewController">
                     <view key="view" id="Y3b-v7-Z5w">
                         <rect key="frame" x="0.0" y="0.0" width="399" height="253"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -1003,6 +1003,9 @@ Gw
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
+                                <connections>
+                                    <action selector="add:" target="YaN-jR-P6F" id="pak-NS-lA4"/>
+                                </connections>
                             </button>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="t1l-bP-tPA">
                                 <rect key="frame" x="123" y="216" width="153" height="17"/>
@@ -1047,6 +1050,10 @@ Gw
                         </constraints>
                         <animations/>
                     </view>
+                    <connections>
+                        <outlet property="accounts" destination="sSp-rL-AUV" id="5rY-fC-GWd"/>
+                        <outlet property="username" destination="JK4-40-sSR" id="D1V-cz-EDD"/>
+                    </connections>
                 </viewController>
                 <customObject id="SAg-Gz-IdD" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
@@ -1491,18 +1498,18 @@ Gw
                             <scrollView autohidesScrollers="YES" horizontalLineScroll="34" horizontalPageScroll="10" verticalLineScroll="34" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="4H5-ah-4Nn">
                                 <rect key="frame" x="20" y="80" width="410" height="227"/>
                                 <clipView key="contentView" id="f64-JF-mTW">
-                                    <rect key="frame" x="1" y="17" width="238" height="117"/>
+                                    <rect key="frame" x="1" y="1" width="408" height="224"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" multipleSelection="NO" autosaveColumns="NO" rowHeight="32" rowSizeStyle="automatic" viewBased="YES" id="XnT-Hv-eDh">
-                                            <rect key="frame" x="0.0" y="0.0" width="408" height="0.0"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="408" height="224"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <animations/>
                                             <size key="intercellSpacing" width="3" height="2"/>
                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                             <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
                                             <tableColumns>
-                                                <tableColumn width="405.4296875" minWidth="40" maxWidth="1000" id="3p6-nJ-v23">
+                                                <tableColumn width="405.65589753547033" minWidth="40" maxWidth="1000" id="3p6-nJ-v23">
                                                     <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left">
                                                         <font key="font" metaFont="smallSystem"/>
                                                         <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -1580,7 +1587,7 @@ Gw
                                 </clipView>
                                 <animations/>
                                 <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="dNd-63-Z8V">
-                                    <rect key="frame" x="1" y="119" width="223" height="15"/>
+                                    <rect key="frame" x="1" y="211" width="408" height="15"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <animations/>
                                 </scroller>

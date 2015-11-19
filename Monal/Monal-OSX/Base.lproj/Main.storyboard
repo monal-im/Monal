@@ -1405,7 +1405,7 @@ Gw
                                                                 <constraint firstItem="C4A-Sw-T8S" firstAttribute="leading" secondItem="zUs-Dd-GH1" secondAttribute="leading" constant="25" id="4NL-fY-gHW"/>
                                                                 <constraint firstItem="C4A-Sw-T8S" firstAttribute="top" secondItem="zUs-Dd-GH1" secondAttribute="top" constant="3" id="BCG-ty-A8J"/>
                                                                 <constraint firstItem="c4f-GC-Hfe" firstAttribute="top" secondItem="zUs-Dd-GH1" secondAttribute="top" constant="5" id="e6s-HW-xYq"/>
-                                                                <constraint firstItem="c4f-GC-Hfe" firstAttribute="leading" secondItem="C4A-Sw-T8S" secondAttribute="trailing" constant="8" id="leR-lg-RbW"/>
+                                                                <constraint firstItem="c4f-GC-Hfe" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="C4A-Sw-T8S" secondAttribute="trailing" constant="8" id="leR-lg-RbW"/>
                                                             </constraints>
                                                             <animations/>
                                                             <connections>

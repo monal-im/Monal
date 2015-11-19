@@ -31,7 +31,7 @@
     {
         self.messageText.alignment= kCTTextAlignmentLeft;
     } else  {
-        if( self.messageRect.size.width<kCellMax && self.messageRect.size.height<=kCellMinHeight)
+        if( self.messageRect.size.width<240 )//&& self.messageRect.size.height<=kCellMinHeight)
         {
             self.messageText.alignment= kCTTextAlignmentRight;
         }
@@ -63,7 +63,7 @@
     }
     else  {
         bubbleFrame.origin.x= self.frame.size.width -kBubbleOffset-  bubbleFrame.size.width;
-        
+
         [[NSColor colorWithCalibratedRed:57.0/255 green:118.0f/255 blue:253.0/255 alpha:1.0] setFill];
     }
     

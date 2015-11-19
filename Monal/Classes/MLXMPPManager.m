@@ -498,6 +498,17 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 }
 
 
+-(NSString*) getAccountNameForConnectedRow:(NSInteger) row
+{
+    NSString *toreturn;
+    if(row<[_connectedXMPP count] && row>=0) {
+        NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
+        xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
+        toreturn= [NSString stringWithFormat:@"%@@%@",account.username, account.domain];
+    }
+    return toreturn;
+}
+
 
 -(NSString*) idForConnectedRow:(NSInteger) row
 {

@@ -8,10 +8,9 @@
 
 #import "MLAddContact.h"
 #import "MLXMPPManager.h"
-#import "DataLayer.h"
+
 
 @interface MLAddContact ()
-@property (nonatomic, strong) NSMutableArray *displyedAccounts;
 
 @end
 
@@ -25,23 +24,38 @@
 
 -(void) viewWillAppear
 {
-    NSArray *accountsArray = [[DataLayer sharedInstance] accountList];
-    self.displyedAccounts= [[NSMutableArray alloc] init];
-    
-    for (NSDictionary *account in accountsArray)
+    NSInteger pos=0;
+    while (pos<[MLXMPPManager sharedInstance].connectedXMPP.count)
     {
-        if([[MLXMPPManager sharedInstance] isAccountForIdConnected:[NSString stringWithFormat:@"%@", [account objectForKey:@"account_id"]]])
-        {
-            [self.accounts addItemWithObjectValue:[NSString stringWithFormat:@"%@@%@", [account objectForKey:@"account_name"], [account objectForKey:@"domain"]]];
-            [self.displyedAccounts addObject:account];
-        }
+      [self.accounts addItemWithObjectValue:[[MLXMPPManager sharedInstance] getAccountNameForConnectedRow:pos]];
+        pos++;
     }
     
 }
 
 -(IBAction)add:(id)sender
 {
-    
+    if(self.contactName.stringValue.length>0)
+    {
+//        NSDictionary* contact =@{@"row":[NSNumber numberWithInteger:_selectedRow],@"buddy_name":self.contactName.text};
+//        [[MLXMPPManager sharedInstance] addContact:contact];
+        
+//        UIAlertView *addError = [[UIAlertView alloc]
+//                                 initWithTitle:@"Permission Requested"
+//                                 message:@"The new contact will be added to your contacts list when the person you've added has approved your request."
+//                                 delegate:self cancelButtonTitle:@"Close"
+//                                 otherButtonTitles: nil] ;
+//        [addError show];
+    }
+    else
+    {
+//        UIAlertView *addError = [[UIAlertView alloc]
+//                                 initWithTitle:@"Error"
+//                                 message:@"Name can't be empty"
+//                                 delegate:self cancelButtonTitle:@"Close"
+//                                 otherButtonTitles: nil] ;
+//        [addError show];
+    }
 }
 
 @end

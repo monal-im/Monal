@@ -70,9 +70,15 @@
 -(void) getServiceDetailsForAccount:(NSInteger) row;
 
 /**
-Returns the name of the conencted account 
+Returns the server set name of the conencted account 
  */
 -(NSString*) getNameForConnectedRow:(NSInteger) row;
+
+/**
+ Returns the user set name of the conencted account
+ */
+-(NSString*) getAccountNameForConnectedRow:(NSInteger) row;
+
 
 /**
  Returns YES if account is connected

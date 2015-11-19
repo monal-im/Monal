@@ -1047,7 +1047,7 @@ Gw
                     </view>
                     <connections>
                         <outlet property="accounts" destination="sSp-rL-AUV" id="5rY-fC-GWd"/>
-                        <outlet property="username" destination="JK4-40-sSR" id="D1V-cz-EDD"/>
+                        <outlet property="contactName" destination="JK4-40-sSR" id="CVO-jE-10D"/>
                     </connections>
                 </viewController>
                 <customObject id="SAg-Gz-IdD" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>

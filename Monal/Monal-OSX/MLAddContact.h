@@ -11,7 +11,7 @@
 @interface MLAddContact : NSViewController
 
 @property  (nonatomic, weak) IBOutlet NSComboBox *accounts;
-@property  (nonatomic, weak) IBOutlet NSTextField *username;
+@property  (nonatomic, weak) IBOutlet NSTextField *contactName;
 
 -(IBAction)add:(id)sender;
 

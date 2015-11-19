@@ -1157,8 +1157,8 @@ Gw
                             <visualEffectView appearanceType="vibrantLight" blendingMode="behindWindow" state="followsWindowActiveState" translatesAutoresizingMaskIntoConstraints="NO" id="9FI-ED-NWb">
                                 <rect key="frame" x="0.0" y="0.0" width="493" height="105"/>
                                 <subviews>
-                                    <button verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="m4R-R5-Jrl">
-                                        <rect key="frame" x="407" y="57" width="72" height="32"/>
+                                    <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="m4R-R5-Jrl">
+                                        <rect key="frame" x="408" y="57" width="71" height="32"/>
                                         <animations/>
                                         <buttonCell key="cell" type="push" title="Send" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Rbr-ky-nlC">
                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -1168,8 +1168,8 @@ Gw
                                             <action selector="sendText:" target="qLp-oS-WKI" id="4tP-lD-TxW"/>
                                         </connections>
                                     </button>
-                                    <button verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="RB8-DH-Efv">
-                                        <rect key="frame" x="407" y="13" width="72" height="32"/>
+                                    <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="RB8-DH-Efv">
+                                        <rect key="frame" x="408" y="13" width="71" height="32"/>
                                         <animations/>
                                         <buttonCell key="cell" type="push" title="😀" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="ccl-s1-dL9">
                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -1179,21 +1179,21 @@ Gw
                                             <action selector="emojiPicker:" target="qLp-oS-WKI" id="ooo-mc-es1"/>
                                         </connections>
                                     </button>
-                                    <scrollView misplaced="YES" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" hasVerticalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Cir-fi-93b">
-                                        <rect key="frame" x="8" y="9" width="397" height="86"/>
+                                    <scrollView horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" hasVerticalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Cir-fi-93b">
+                                        <rect key="frame" x="8" y="9" width="398" height="86"/>
                                         <clipView key="contentView" id="xyg-jq-3Wg">
-                                            <rect key="frame" x="1" y="1" width="395" height="84"/>
+                                            <rect key="frame" x="1" y="1" width="396" height="84"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
                                                 <textView importsGraphics="NO" richText="NO" findStyle="panel" continuousSpellChecking="YES" allowsUndo="YES" usesRuler="YES" usesFontPanel="YES" verticallyResizable="YES" allowsNonContiguousLayout="YES" quoteSubstitution="YES" linkDetection="YES" dataDetection="YES" dashSubstitution="YES" textReplacement="YES" spellingCorrection="YES" smartInsertDelete="YES" id="mlB-yh-jDA">
-                                                    <rect key="frame" x="0.0" y="0.0" width="395" height="84"/>
+                                                    <rect key="frame" x="0.0" y="0.0" width="396" height="84"/>
                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                     <animations/>
                                                     <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                                    <size key="minSize" width="395" height="84"/>
+                                                    <size key="minSize" width="396" height="84"/>
                                                     <size key="maxSize" width="463" height="10000000"/>
                                                     <color key="insertionPointColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                                    <size key="minSize" width="395" height="84"/>
+                                                    <size key="minSize" width="396" height="84"/>
                                                     <size key="maxSize" width="463" height="10000000"/>
                                                     <connections>
                                                         <outlet property="delegate" destination="qLp-oS-WKI" id="exd-Ze-cMr"/>
@@ -1203,6 +1203,9 @@ Gw
                                             <animations/>
                                             <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                         </clipView>
+                                        <constraints>
+                                            <constraint firstAttribute="width" priority="250" constant="397" id="8py-2d-UJH"/>
+                                        </constraints>
                                         <animations/>
                                         <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="YES" id="8wP-Oc-or5">
                                             <rect key="frame" x="-100" y="-100" width="87" height="18"/>

@@ -2710,7 +2710,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				OTHER_LDFLAGS = "-Wl,-rpath,@loader_path/../Frameworks";
 				PRODUCT_NAME = Monal;
-				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE = "508a5852-6419-429e-9224-ec3a5a24656b";
 				SDKROOT = macosx;
 			};
 			name = AppStore;

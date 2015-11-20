@@ -86,6 +86,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     }
     
     [self updateAppBadge];
+    [self highlightCellForCurrentContact];
 }
 
 -(void) dealloc
@@ -211,6 +212,37 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
         else {
             [self showActiveChat: NO];
         }
+        
+        [self highlightCellForCurrentContact];
+    }
+}
+
+-(void) highlightCellForCurrentContact
+{
+    if(self.chatViewController.contactDic)
+    {
+        NSArray *sourceArray;
+        if(self.currentSegment==kActiveTab)
+        {
+            sourceArray= self.activeChat;
+            
+        } else  {
+            sourceArray= self.contacts;
+        }
+        
+        NSInteger pos=0;
+        for (NSDictionary *row in sourceArray)
+        {
+            if([[row objectForKey:kContactName] caseInsensitiveCompare:[self.chatViewController.contactDic objectForKey:kContactName] ]==NSOrderedSame &&
+               [[row objectForKey:kAccountID]  integerValue]==[[self.chatViewController.contactDic objectForKey:kAccountID] integerValue] )
+            {
+                NSIndexSet *indexSet = [NSIndexSet indexSetWithIndex:pos];
+                [self.contactsTable selectRowIndexes:indexSet byExtendingSelection:NO];
+                break;
+            }
+            pos++;
+        }
+        
     }
 }
 

@@ -19,7 +19,6 @@
 @interface MLChatViewController ()
 
 @property (nonatomic, strong) NSMutableArray *messageList;
-@property (nonatomic, strong) NSDictionary *contactDic;
 
 @property (nonatomic, strong)  NSDateFormatter* destinationDateFormat;
 @property (nonatomic, strong)  NSDateFormatter* sourceDateFormat;

@@ -286,6 +286,7 @@
 		267ECD6B1B746C340025337F /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 267ECD6A1B746C340025337F /* Security.framework */; };
 		267ECD6D1B746C660025337F /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 267ECD6C1B746C660025337F /* CFNetwork.framework */; };
 		268130181BFD8ECA0074C8EE /* MLAddContact.m in Sources */ = {isa = PBXBuildFile; fileRef = 268130171BFD8ECA0074C8EE /* MLAddContact.m */; };
+		2681301A1BFEDCEC0074C8EE /* Fabric.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 268130191BFEDCEC0074C8EE /* Fabric.framework */; };
 		26817F111B8E01D800A19886 /* Crashlytics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26817F101B8E01D800A19886 /* Crashlytics.framework */; };
 		268821FA19B9233B00AEA46E /* NSString+SqlLite.m in Sources */ = {isa = PBXBuildFile; fileRef = 268821F919B9233B00AEA46E /* NSString+SqlLite.m */; };
 		268BCF12140B29180025E4D1 /* libjrtplib-static.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */; };
@@ -650,6 +651,7 @@
 		267ECD6C1B746C660025337F /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/System/Library/Frameworks/CFNetwork.framework; sourceTree = DEVELOPER_DIR; };
 		268130161BFD8ECA0074C8EE /* MLAddContact.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLAddContact.h; sourceTree = "<group>"; };
 		268130171BFD8ECA0074C8EE /* MLAddContact.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLAddContact.m; sourceTree = "<group>"; };
+		268130191BFEDCEC0074C8EE /* Fabric.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Fabric.framework; path = MonalOSX/External/Fabric.framework; sourceTree = "<group>"; };
 		26817F101B8E01D800A19886 /* Crashlytics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Crashlytics.framework; path = "Monal-iOS/External/Crashlytics.framework"; sourceTree = "<group>"; };
 		268821F819B9233B00AEA46E /* NSString+SqlLite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+SqlLite.h"; sourceTree = "<group>"; };
 		268821F919B9233B00AEA46E /* NSString+SqlLite.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+SqlLite.m"; sourceTree = "<group>"; };
@@ -832,6 +834,7 @@
 				26049A5B1B73163300D11866 /* AVFoundation.framework in Frameworks */,
 				26049A511B73156300D11866 /* libjrtplib-static-OSX.a in Frameworks */,
 				26B2A4CB1B73084800272E63 /* AppKit.framework in Frameworks */,
+				2681301A1BFEDCEC0074C8EE /* Fabric.framework in Frameworks */,
 				26B2A4C91B73084100272E63 /* libsqlite3.0.dylib in Frameworks */,
 				265F6BA71B7B088A006B8EBA /* Crashlytics.framework in Frameworks */,
 				26E456CD1B842180004BD74C /* Sparkle.framework in Frameworks */,
@@ -1387,6 +1390,7 @@
 		26B2A5001B730A0D00272E63 /* OSX */ = {
 			isa = PBXGroup;
 			children = (
+				268130191BFEDCEC0074C8EE /* Fabric.framework */,
 				26E456CC1B842180004BD74C /* Sparkle.framework */,
 				265F6BA61B7B088A006B8EBA /* Crashlytics.framework */,
 				267ECD6C1B746C660025337F /* CFNetwork.framework */,

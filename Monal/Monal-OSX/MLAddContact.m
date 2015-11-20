@@ -37,24 +37,33 @@
 {
     if(self.contactName.stringValue.length>0)
     {
-//        NSDictionary* contact =@{@"row":[NSNumber numberWithInteger:_selectedRow],@"buddy_name":self.contactName.text};
-//        [[MLXMPPManager sharedInstance] addContact:contact];
+       NSDictionary* contact =@{@"row":[NSNumber numberWithInteger:self.accounts.indexOfSelectedItem],@"buddy_name":self.contactName.stringValue};
+        [[MLXMPPManager sharedInstance] addContact:contact];
+  
+     
         
-//        UIAlertView *addError = [[UIAlertView alloc]
-//                                 initWithTitle:@"Permission Requested"
-//                                 message:@"The new contact will be added to your contacts list when the person you've added has approved your request."
-//                                 delegate:self cancelButtonTitle:@"Close"
-//                                 otherButtonTitles: nil] ;
-//        [addError show];
+        NSAlert *userAddAlert = [[NSAlert alloc] init];
+          userAddAlert.messageText=@"Permission Requested";
+        userAddAlert.informativeText =[NSString stringWithFormat:@"The new contact will be added to your contacts list when the person you've added has approved your request."];
+        userAddAlert.alertStyle=NSInformationalAlertStyle;
+        [userAddAlert addButtonWithTitle:@"Close"];
+        
+        [userAddAlert beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse returnCode) {
+                  [self dismissController:self];
+        }];
+
     }
     else
     {
-//        UIAlertView *addError = [[UIAlertView alloc]
-//                                 initWithTitle:@"Error"
-//                                 message:@"Name can't be empty"
-//                                 delegate:self cancelButtonTitle:@"Close"
-//                                 otherButtonTitles: nil] ;
-//        [addError show];
+        NSAlert *userAddAlert = [[NSAlert alloc] init];
+        userAddAlert.messageText = @"Error";
+        userAddAlert.informativeText =[NSString stringWithFormat:@"Name can't be empty"];
+        userAddAlert.alertStyle=NSInformationalAlertStyle;
+        [userAddAlert addButtonWithTitle:@"Close"];
+        
+        [userAddAlert beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse returnCode) {
+                  [self dismissController:self];
+        }];
     }
 }
 

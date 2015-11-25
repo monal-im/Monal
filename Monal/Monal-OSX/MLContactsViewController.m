@@ -46,6 +46,8 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
     
+      [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshDisplay) name:kMonalWindowVisible object:nil];
+    
     self.contacts=[[NSMutableArray alloc] init] ;
     self.offlineContacts=[[NSMutableArray alloc] init] ;
     self.infoCells=[[NSMutableArray alloc] init] ;
@@ -95,6 +97,10 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 }
 
 
+-(void) refreshDisplay
+{
+    [self viewWillAppear];
+}
 
 #pragma mark - update UI
 

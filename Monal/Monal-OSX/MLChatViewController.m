@@ -317,8 +317,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(IBAction)sendText:(id)sender
 {
-    [self sendMessage:[self.messageBox.string copy] andMessageID:nil];
-    self.messageBox.string=@"";
+    NSString *message= [self.messageBox.string copy];
+    if(message.length>0) {
+        [self sendMessage:[self.messageBox.string copy] andMessageID:nil];
+        self.messageBox.string=@"";
+    }
 }
 
 #pragma mark -table view datasource

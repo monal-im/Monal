@@ -1485,6 +1485,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                 {
                                     [self approveToRoster:presenceNode.from];
                                     [self addToRoster:presenceNode.from];
+                                } else {
+                                    [self rejectFromRoster:presenceNode.from];
                                 }
                                 
                             }];

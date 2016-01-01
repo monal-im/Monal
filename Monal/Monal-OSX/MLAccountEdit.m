@@ -12,6 +12,8 @@
 #import "MLAccountSettings.h"
 #import "STKeyChain.h"
 
+#import "NXOAuth2.h"
+
 @interface MLAccountEdit ()
 
 @end
@@ -29,6 +31,12 @@
         if([self.accountType isEqualToString:@"Gtalk"]) {
             self.server.stringValue= @"talk.google.com";
             self.jabberID.stringValue=@"@gmail.com";
+            
+            
+            [[NXOAuth2AccountStore sharedStore] requestAccessToAccountWithType:@"GoogleTalk"
+                                           withPreparedAuthorizationURLHandler:^(NSURL *preparedURL){
+                                               // Open a web view or similar
+                                           }];
         }
     } else  {
         self.jabberID.stringValue =[NSString stringWithFormat:@"%@@%@", [self.accountToEdit objectForKey:kUsername], [self.accountToEdit objectForKey:kDomain]];

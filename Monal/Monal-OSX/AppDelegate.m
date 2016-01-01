@@ -45,16 +45,20 @@
 #endif
     
     [[MLXMPPManager sharedInstance] connectIfNecessary];
+   
+    [[NXOAuth2AccountStore sharedStore] setClientID:@"472865344000-q63msgarcfs3ggiabdobkkis31ehtbug.apps.googleusercontent.com"
+                                             secret:@"IGo7ocGYBYXf4znad5Qhumjt"
+                                              scope:[NSSet setWithArray:@[@"https://www.googleapis.com/auth/googletalk"]]
+                                   authorizationURL:[NSURL URLWithString:@"https://accounts.google.com/o/oauth2/v2/auth"]
+                                           tokenURL:[NSURL URLWithString:@"https://"]
+                                        redirectURL:[NSURL URLWithString:@"urn:ietf:wg:oauth:2.0:oob:auto"]
+                                      keyChainGroup:@"MonalGTalk"
+                                     forAccountType:@"GoogleTalk"];
     
-    [[NXOAuth2AccountStore sharedStore] setClientID:@"xXxXxXxXxXxX"
-                                             secret:@"xXxXxXxXxXxX"
-                                   authorizationURL:[NSURL URLWithString:@"https://...your auth URL..."]
-                                           tokenURL:[NSURL URLWithString:@"https://...your token URL..."]
-                                        redirectURL:[NSURL URLWithString:@"https://...your redirect URL..."]
-                                     forAccountType:@"myFancyService"];
     
     [[Countly sharedInstance] startOnCloudWithAppKey:@"2a165fc42c1c5541e49b024a9e75d155cdde999e"];
     [Crashlytics startWithAPIKey:@"6e807cf86986312a050437809e762656b44b197c"];
+
     
 }
 

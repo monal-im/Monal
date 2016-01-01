@@ -13,8 +13,10 @@
 #import "MLDisplaySettings.h"
 #import "MLPresenceSettings.h"
 #import "MLXMPPManager.h"
-#import "Countly.h"
 
+#import "NXOAuth2.h"
+
+#import "Countly.h"
 #import <Crashlytics/Crashlytics.h>
 
 @interface AppDelegate ()
@@ -43,6 +45,13 @@
 #endif
     
     [[MLXMPPManager sharedInstance] connectIfNecessary];
+    
+    [[NXOAuth2AccountStore sharedStore] setClientID:@"xXxXxXxXxXxX"
+                                             secret:@"xXxXxXxXxXxX"
+                                   authorizationURL:[NSURL URLWithString:@"https://...your auth URL..."]
+                                           tokenURL:[NSURL URLWithString:@"https://...your token URL..."]
+                                        redirectURL:[NSURL URLWithString:@"https://...your redirect URL..."]
+                                     forAccountType:@"myFancyService"];
     
     [[Countly sharedInstance] startOnCloudWithAppKey:@"2a165fc42c1c5541e49b024a9e75d155cdde999e"];
     [Crashlytics startWithAPIKey:@"6e807cf86986312a050437809e762656b44b197c"];

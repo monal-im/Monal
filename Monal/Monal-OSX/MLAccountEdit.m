@@ -13,8 +13,10 @@
 #import "STKeyChain.h"
 
 #import "NXOAuth2.h"
+#import "MLOAuthViewController.h"
 
 @interface MLAccountEdit ()
+@property (nonatomic, strong) NSURL *oAuthURL;
 
 @end
 
@@ -35,7 +37,10 @@
             
             [[NXOAuth2AccountStore sharedStore] requestAccessToAccountWithType:@"GoogleTalk"
                                            withPreparedAuthorizationURLHandler:^(NSURL *preparedURL){
-                                               // Open a web view or similar
+                                               
+                                               self.oAuthURL= preparedURL;
+                                               [self performSegueWithIdentifier:@"showOAuth" sender:self];
+                                               
                                            }];
         }
     } else  {
@@ -156,4 +161,14 @@
     
 }
 
+
+- (void)prepareForSegue:(NSStoryboardSegue *)segue sender:(nullable id)sender
+{
+     if([segue.identifier isEqualToString:@"showOAuth"]) {
+         MLOAuthViewController *oauthVC = (MLOAuthViewController *)segue.destinationController;
+       
+         oauthVC.oAuthURL= self.oAuthURL;
+         
+     }
+}
 @end

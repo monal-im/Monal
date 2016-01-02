@@ -321,6 +321,7 @@
 		269574DE1C372FD200544A60 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 269574DD1C372FD200544A60 /* Security.framework */; };
 		269574E01C37301600544A60 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 269574DF1C37301600544A60 /* libz.tbd */; };
 		269574E21C37307300544A60 /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 269574E11C37307300544A60 /* libsqlite3.tbd */; };
+		269574E51C37482A00544A60 /* MLOAuthViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 269574E41C37482A00544A60 /* MLOAuthViewController.m */; };
 		2696EED21791245A00BC54B8 /* chatViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2696EED11791245A00BC54B8 /* chatViewController.m */; };
 		269E748E18B707B500BCB2D5 /* MLPortraitNavController.m in Sources */ = {isa = PBXBuildFile; fileRef = 269E748D18B707B500BCB2D5 /* MLPortraitNavController.m */; };
 		26A8ADD717C031BA0033990D /* ContactDetails.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EC40FB17BDD8560031304D /* ContactDetails.m */; };
@@ -721,6 +722,8 @@
 		269574DD1C372FD200544A60 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
 		269574DF1C37301600544A60 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/usr/lib/libz.tbd; sourceTree = DEVELOPER_DIR; };
 		269574E11C37307300544A60 /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/usr/lib/libsqlite3.tbd; sourceTree = DEVELOPER_DIR; };
+		269574E31C37482A00544A60 /* MLOAuthViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLOAuthViewController.h; sourceTree = "<group>"; };
+		269574E41C37482A00544A60 /* MLOAuthViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLOAuthViewController.m; sourceTree = "<group>"; };
 		2696EED01791245A00BC54B8 /* chatViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chatViewController.h; sourceTree = "<group>"; };
 		2696EED11791245A00BC54B8 /* chatViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = chatViewController.m; sourceTree = "<group>"; };
 		269E748C18B707B500BCB2D5 /* MLPortraitNavController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLPortraitNavController.h; sourceTree = "<group>"; };
@@ -1194,6 +1197,8 @@
 				2638DAE91B68F3D400DF05AC /* MLAccountSettings.m */,
 				260870D61B7034460036539B /* MLAccountEdit.h */,
 				260870D71B7034460036539B /* MLAccountEdit.m */,
+				269574E31C37482A00544A60 /* MLOAuthViewController.h */,
+				269574E41C37482A00544A60 /* MLOAuthViewController.m */,
 			);
 			name = Accounts;
 			sourceTree = "<group>";
@@ -2297,6 +2302,7 @@
 				26277D471B7C5FC60094E4D0 /* STKeychain.m in Sources */,
 				260499EB1B7313E800D11866 /* ParseChallenge.m in Sources */,
 				26E456CB1B841E49004BD74C /* CountlyDB.m in Sources */,
+				269574E51C37482A00544A60 /* MLOAuthViewController.m in Sources */,
 				2651AF551B409906008D025C /* MLMainWindow.m in Sources */,
 				26B2A4F81B73097500272E63 /* DDTTYLogger.m in Sources */,
 				261147E41C35D7860078A72E /* NXOAuth2PostBodyPart.m in Sources */,

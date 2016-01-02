@@ -34,14 +34,9 @@
             self.server.stringValue= @"talk.google.com";
             self.jabberID.stringValue=@"@gmail.com";
             
+            //disable options
+            [self toggleGoogleTalkDisplay];
             
-            [[NXOAuth2AccountStore sharedStore] requestAccessToAccountWithType:@"GoogleTalk"
-                                           withPreparedAuthorizationURLHandler:^(NSURL *preparedURL){
-                                               
-                                               self.oAuthURL= preparedURL;
-                                               [self performSegueWithIdentifier:@"showOAuth" sender:self];
-                                               
-                                           }];
         }
     } else  {
         self.jabberID.stringValue =[NSString stringWithFormat:@"%@@%@", [self.accountToEdit objectForKey:kUsername], [self.accountToEdit objectForKey:kDomain]];
@@ -64,6 +59,12 @@
 }
 
 
+-(void) toggleGoogleTalkDisplay
+{
+    self.advancedBox.hidden =YES;
+    self.password.hidden =YES;
+    self.oAuthTokenButton.hidden =NO; 
+}
 
 -(void) refreshPresenter
 {
@@ -77,6 +78,22 @@
         [self.presentingViewController dismissViewController:self];
     });
 }
+
+#pragma mark Actons
+
+-(IBAction)authenticateWithOAuth:(id)sender;
+{
+    [[NXOAuth2AccountStore sharedStore] requestAccessToAccountWithType:@"GoogleTalk"
+                                   withPreparedAuthorizationURLHandler:^(NSURL *preparedURL){
+                                       // Open a web view or similar
+                                       
+                                       self.oAuthURL= preparedURL;
+                                       [self performSegueWithIdentifier:@"showOAuth" sender:self];
+                                       
+                                   }];
+
+}
+
 -(IBAction)save:(id)sender
 {
     NSString *user=@"";

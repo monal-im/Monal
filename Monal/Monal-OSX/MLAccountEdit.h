@@ -24,12 +24,15 @@
 @property (nonatomic, weak) IBOutlet NSButton *oldStyleSSL;
 @property (nonatomic, weak) IBOutlet NSButton *selfSigned;
 
+@property (nonatomic, weak) IBOutlet NSButton *oAuthTokenButton;
+@property (nonatomic, weak) IBOutlet NSBox *advancedBox;
+
 @property (nonatomic, strong) NSString *accountType;
 
 @property (nonatomic, strong) NSDictionary *accountToEdit;
 
 -(IBAction)save:(id)sender;
-
+-(IBAction)authenticateWithOAuth:(id)sender;
 
 
 @end

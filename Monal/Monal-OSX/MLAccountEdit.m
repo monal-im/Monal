@@ -29,6 +29,12 @@
                                                       object:[NXOAuth2AccountStore sharedStore]
                                                        queue:nil
                                                   usingBlock:^(NSNotification *aNotification){
+                                                    
+                                                      for (NXOAuth2Account *account in [[NXOAuth2AccountStore sharedStore] accountsWithAccountType:@"GoogleTalk"]) {
+                                                       
+                                                          self.password.stringValue= account.accessToken.accessToken;
+                                                          
+                                                      };
                                                       
                                                   }];
     
@@ -103,6 +109,7 @@
 
 -(IBAction)authenticateWithOAuth:(id)sender;
 {
+    
     [[NXOAuth2AccountStore sharedStore] requestAccessToAccountWithType:@"GoogleTalk"
                                    withPreparedAuthorizationURLHandler:^(NSURL *preparedURL){
                                        // Open a web view or similar
@@ -206,7 +213,10 @@
        
          oauthVC.oAuthURL= self.oAuthURL;
          oauthVC.completionHandler=^(NSString *token) {
-             self.password.stringValue = token;
+           //  self.password.stringValue = token;
+             NSURL *url=[NSURL URLWithString:[NSString stringWithFormat:@"urn:ietf:wg:oauth:2.0:oob:auto?code=%@", token]];
+             [[NXOAuth2AccountStore sharedStore] handleRedirectURL:url];
+             
              self.oAuthTokenButton.enabled=NO;
          };
          

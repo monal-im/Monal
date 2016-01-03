@@ -1647,7 +1647,24 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     {
                         //look at menchanisms presented
                         
-                        if(streamNode.SASLPlain)
+                        if(streamNode.SASLX_OAUTH2)
+                        {
+                            NSString* saslplain=[EncodingTools encodeBase64WithString: [NSString stringWithFormat:@"\0%@\0%@",  _username, _password ]];
+                            
+                            XMLNode* saslXML= [[XMLNode alloc]init];
+                            saslXML.element=@"auth";
+                            [saslXML.attributes setObject: @"urn:ietf:params:xml:ns:xmpp-sasl"  forKey:@"xmlns"];
+                            [saslXML.attributes setObject: @"X-OAUTH2"forKey: @"mechanism"];
+                            [saslXML.attributes setObject: @"auth:service"forKey: @"oauth2"];
+                            
+                            //google only uses sasl plain
+                            [saslXML.attributes setObject:@"http://www.google.com/talk/protocol/auth" forKey: @"xmlns:auth"];
+                    
+                            saslXML.data=saslplain;
+                            [self send:saslXML];
+                            
+                        }
+                        else if (streamNode.SASLPlain)
                         {
                             NSString* saslplain=[EncodingTools encodeBase64WithString: [NSString stringWithFormat:@"\0%@\0%@",  _username, _password ]];
                             

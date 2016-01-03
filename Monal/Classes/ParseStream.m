@@ -109,6 +109,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	{
 		DDLogVerbose(@"Reading mechanism"); 
 		State=@"Mechanism";
+        
 		return;
 	}
 	
@@ -140,6 +141,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 			DDLogVerbose(@"SASL DIGEST-MD5 is supported");
 			_SASLDIGEST_MD5=YES;
 		}
+        
+        if([_messageBuffer isEqualToString:@"X-OAUTH2"])
+        {
+            DDLogVerbose(@"SASL X-OAUTH2 is supported");
+            _SASLX_OAUTH2=YES;
+        }
+        
+        
         
         _messageBuffer=nil; 
 		return;

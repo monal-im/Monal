@@ -34,8 +34,37 @@
 {
     
 }
-- (void)webView:(WebView *)senderd didFinishLoadForFrame:(WebFrame *)frame {
+- (void)webView:(WebView *)sender didFinishLoadForFrame:(WebFrame *)frame {
     
 }
 
+- (void)webView:(WebView *)sender willCloseFrame:(WebFrame *)frame
+{
+
+}
+
+- (void)webView:(WebView *)sender didReceiveTitle:(NSString *)title forFrame:(WebFrame *)frame
+{
+   
+    NSArray *components =[title componentsSeparatedByString:@"="];
+    
+    if(components.count>0)
+    {
+        
+        if([[components objectAtIndex:0] isEqualToString:@"Success code"])
+        {
+            if(components.count>1)
+            {
+                NSString *token = [components objectAtIndex:1];
+                if(self.completionHandler)
+                {
+                    self.completionHandler(token);
+                }
+                
+            }
+        }
+    }
+    
+    
+}
 @end

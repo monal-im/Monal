@@ -1134,7 +1134,6 @@
 			isa = PBXGroup;
 			children = (
 				265F0B641B75733800A63F20 /* Accounts */,
-				2638DAE51B68F3AB00DF05AC /* MLPresenceSettings.h */,
 				2638DAE61B68F3AB00DF05AC /* MLPresenceSettings.m */,
 				2638DAED1B68F3EF00DF05AC /* MLDisplaySettings.h */,
 				2638DAEE1B68F3EF00DF05AC /* MLDisplaySettings.m */,
@@ -1199,6 +1198,7 @@
 				260870D71B7034460036539B /* MLAccountEdit.m */,
 				269574E31C37482A00544A60 /* MLOAuthViewController.h */,
 				269574E41C37482A00544A60 /* MLOAuthViewController.m */,
+				2638DAE51B68F3AB00DF05AC /* MLPresenceSettings.h */,
 			);
 			name = Accounts;
 			sourceTree = "<group>";

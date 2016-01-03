@@ -14,5 +14,7 @@
 
 @property (nonatomic, weak) IBOutlet WebView *webView;
 @property (nonatomic, strong)  NSURL *oAuthURL;
+@property (nonatomic, copy)  void (^completionHandler)(NSString *token);
+
 
 @end

@@ -25,18 +25,34 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do view setup here.
+    [[NSNotificationCenter defaultCenter] addObserverForName:NXOAuth2AccountStoreAccountsDidChangeNotification
+                                                      object:[NXOAuth2AccountStore sharedStore]
+                                                       queue:nil
+                                                  usingBlock:^(NSNotification *aNotification){
+                                                      
+                                                  }];
+    
+    [[NSNotificationCenter defaultCenter] addObserverForName:NXOAuth2AccountStoreDidFailToRequestAccessNotification
+                                                      object:[NXOAuth2AccountStore sharedStore]
+                                                       queue:nil
+                                                  usingBlock:^(NSNotification *aNotification){
+                                                      NSError *error = [aNotification.userInfo objectForKey:NXOAuth2AccountStoreErrorKey];
+                                                      // Do something with the error
+                                                  }];
 }
 
 -(void) viewWillAppear {
     [super viewWillAppear];
+    
+     if([self.accountType isEqualToString:@"Gtalk"]) {
+         //disable options
+         [self toggleGoogleTalkDisplay];
+     }
+    
     if(!self.accountToEdit) {
         if([self.accountType isEqualToString:@"Gtalk"]) {
             self.server.stringValue= @"talk.google.com";
             self.jabberID.stringValue=@"@gmail.com";
-            
-            //disable options
-            [self toggleGoogleTalkDisplay];
-            
         }
     } else  {
         self.jabberID.stringValue =[NSString stringWithFormat:@"%@@%@", [self.accountToEdit objectForKey:kUsername], [self.accountToEdit objectForKey:kDomain]];
@@ -58,6 +74,10 @@
     }
 }
 
+-(void) dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
 
 -(void) toggleGoogleTalkDisplay
 {
@@ -185,6 +205,11 @@
          MLOAuthViewController *oauthVC = (MLOAuthViewController *)segue.destinationController;
        
          oauthVC.oAuthURL= self.oAuthURL;
+         oauthVC.completionHandler=^(NSString *token) {
+             self.password.stringValue = token;
+             self.oAuthTokenButton.enabled=NO;
+         };
+         
          
      }
 }

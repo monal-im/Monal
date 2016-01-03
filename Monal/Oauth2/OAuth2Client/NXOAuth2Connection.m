@@ -230,7 +230,7 @@ sendingProgressHandler:(NXOAuth2ConnectionSendingProgressHandler)aSendingProgres
         
         NSString *contentType = [aRequest valueForHTTPHeaderField:@"Content-Type"];
         
-        if (!contentType || [contentType isEqualToString:@"multipart/form-data"]) {
+        if ( [contentType isEqualToString:@"multipart/form-data"]) {
         
             // sends the POST/PUT request as multipart/form-data as default
             
@@ -243,7 +243,7 @@ sendingProgressHandler:(NXOAuth2ConnectionSendingProgressHandler)aSendingProgres
             
             [aRequest setHTTPBodyStream:postBodyStream];
             
-        } else if ([contentType isEqualToString:@"application/x-www-form-urlencoded"]) {
+        } else if (!contentType || [contentType isEqualToString:@"application/x-www-form-urlencoded"]) {
             
             // sends the POST/PUT request as application/x-www-form-urlencoded
             

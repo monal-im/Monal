@@ -16,7 +16,9 @@
 
 #if TARGET_OS_IPHONE
 #import "UIAlertView+Blocks.h"
+#import "PasswordManager.h"
 #else
+#import "STKeyChain.h"
 #endif
 
 #import "MLImageManager.h"
@@ -38,7 +40,7 @@
 #import "ParseResumed.h"
 
 #import "NXOAuth2.h"
-#import "STKeyChain.h"
+
 
 
 
@@ -320,9 +322,16 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                       object:self.oauthAccount queue:nil usingBlock:^(NSNotification *note) {
                                                           
                                                           NSError *error;
-                                                              [STKeychain storeUsername:self.accountNo  andPassword:self.oauthAccount.accessToken.accessToken forServiceName:@"Monal"updateExisting:YES error:&error];
+                                                            self.password= self.oauthAccount.accessToken.accessToken;
+                            
+#if TARGET_OS_IPHONE
+                                                          PasswordManager* pass= [[PasswordManager alloc] init:self.accountNo];
+                                                          [pass setPassword:self.password] ;
+#else
+                                                          [STKeychain storeUsername:self.accountNo  andPassword:self.password forServiceName:@"Monal"updateExisting:YES error:&error];
+#endif
                                                           
-                                                              self.password= self.oauthAccount.accessToken.accessToken;
+                                                          
                                                               [self reconnect];
   
                                                           

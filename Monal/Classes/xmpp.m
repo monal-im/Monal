@@ -37,6 +37,8 @@
 #import "ParseA.h"
 #import "ParseResumed.h"
 
+#import "NXOAuth2.h"
+
 
 
 #define kXMPPReadSize 5120 // bytes
@@ -146,12 +148,33 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     
     _versionHash=[self getVersionString];
+    
+    [[NSNotificationCenter defaultCenter] addObserverForName:NXOAuth2AccountStoreDidFailToRequestAccessNotification
+                                                      object:[NXOAuth2AccountStore sharedStore]
+                                                       queue:nil
+                                                  usingBlock:^(NSNotification *aNotification){
+                                                      NSError *error = [aNotification.userInfo objectForKey:NXOAuth2AccountStoreErrorKey];
+                                                      // Do something with the error
+                                                  }];
+    
+    [[NSNotificationCenter defaultCenter] addObserverForName:NXOAuth2AccountDidChangeAccessTokenNotification
+                                                      object:[NXOAuth2AccountStore sharedStore] queue:nil usingBlock:^(NSNotification *note) {
+                                                          
+                                                          for (NXOAuth2Account *account in [[NXOAuth2AccountStore sharedStore] accountsWithAccountType:_fulluser]) {
+                                                              
+                                                              self.password= account.accessToken.accessToken;
+                                                              [self reconnect];
+                                                              
+                                                          };
+                                                          
+                                                          
+                                                      }];
     return self;
 }
 
 -(void)dealloc
 {
-    
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 -(void) setRunLoop
@@ -1877,6 +1900,29 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 {
                     _loginError=YES;
                     [self disconnect];
+                    //check for oauth
+                    NSArray *accounts= [[NXOAuth2AccountStore sharedStore] accountsWithAccountType:_fulluser];
+                    
+                    if([accounts count]>0)
+                    {
+                        NXOAuth2Account *account= [accounts objectAtIndex:0];
+                        
+                        [[NXOAuth2AccountStore sharedStore] setClientID:@"472865344000-q63msgarcfs3ggiabdobkkis31ehtbug.apps.googleusercontent.com"
+                                                                 secret:@"IGo7ocGYBYXf4znad5Qhumjt"
+                                                                  scope:[NSSet setWithArray:@[@"https://www.googleapis.com/auth/googletalk"]]
+                                                       authorizationURL:[NSURL URLWithString:@"https://accounts.google.com/o/oauth2/auth"]
+                                                               tokenURL:[NSURL URLWithString:@"https://www.googleapis.com/oauth2/v3/token"]
+                                                            redirectURL:[NSURL URLWithString:@"urn:ietf:wg:oauth:2.0:oob:auto"]
+                                                          keyChainGroup:@"MonalGTalk"
+                                                         forAccountType:_fulluser];
+                        
+                        account.oauthClient.desiredScope=[NSSet setWithArray:@[@"https://www.googleapis.com/auth/googletalk"]];
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                             [account.oauthClient refreshAccessToken];
+                        });
+                      
+                    }
+                   
                 }
                 
             }

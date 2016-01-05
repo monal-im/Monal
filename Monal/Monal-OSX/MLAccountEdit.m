@@ -121,7 +121,7 @@
     
     [[NXOAuth2AccountStore sharedStore] requestAccessToAccountWithType:self.jabberID.stringValue
                                    withPreparedAuthorizationURLHandler:^(NSURL *preparedURL){
-                                       // Open a web view or similar
+                                   
                                        
                                        self.oAuthURL= preparedURL;
                                        [self performSegueWithIdentifier:@"showOAuth" sender:self];

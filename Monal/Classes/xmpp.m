@@ -38,6 +38,7 @@
 #import "ParseResumed.h"
 
 #import "NXOAuth2.h"
+#import "STKeyChain.h"
 
 
 
@@ -318,6 +319,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [[NSNotificationCenter defaultCenter] addObserverForName:NXOAuth2AccountDidChangeAccessTokenNotification
                                                       object:self.oauthAccount queue:nil usingBlock:^(NSNotification *note) {
                                                           
+                                                          NSError *error;
+                                                              [STKeychain storeUsername:self.accountNo  andPassword:self.oauthAccount.accessToken.accessToken forServiceName:@"Monal"updateExisting:YES error:&error];
                                                           
                                                               self.password= self.oauthAccount.accessToken.accessToken;
                                                               [self reconnect];

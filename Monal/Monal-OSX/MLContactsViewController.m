@@ -190,8 +190,8 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 
 -(IBAction)startFind:(id)sender
 {
-    MLMainWindow *window =(MLMainWindow *)self.view.window.windowController;
-    [window.contactSearchField becomeFirstResponder];
+    MLMainWindow *windowController =(MLMainWindow *)self.view.window.windowController;
+    [self.view.window makeFirstResponder:windowController.contactSearchField];
 }
 
 

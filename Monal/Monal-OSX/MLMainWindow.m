@@ -81,7 +81,7 @@
 
 -(void) handleNewMessage:(NSNotification *)notification;
 {
-    BOOL showNotification =NO;
+    BOOL showNotification =YES;
     NSUserNotification *alert =[[NSUserNotification alloc] init];
     NSString* acctString =[NSString stringWithFormat:@"%ld", (long)[[notification.userInfo objectForKey:@"accountNo"] integerValue]];
     NSString* nameToShow=[notification.userInfo objectForKey:@"from"];
@@ -89,14 +89,12 @@
     
     if(self.window.occlusionState & NSWindowOcclusionStateVisible) {
         
-        if(![nameToShow isEqualToString:[self.contactInfo objectForKey:kContactName]])
+        if([nameToShow isEqualToString:[self.contactInfo objectForKey:kContactName]])
         {
-            showNotification= YES;
+            showNotification= NO;
         }
     }
-    else  {
-        showNotification= YES;
-    }
+    
     
     
     if (showNotification) {

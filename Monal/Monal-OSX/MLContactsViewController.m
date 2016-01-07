@@ -194,6 +194,18 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     [self.view.window makeFirstResponder:windowController.contactSearchField];
 }
 
+-(IBAction)showContactsTab:(id)sender
+{
+    self.segmentedControl.selectedSegment=kContactTab;
+    [self segmentDidChange:self];
+}
+
+-(IBAction)showActiveChatTab:(id)sender;
+{
+    self.segmentedControl.selectedSegment=kActiveTab;
+    [self segmentDidChange:self];
+}
+
 
 -(void) showActiveChat:(BOOL) shouldShow
 {

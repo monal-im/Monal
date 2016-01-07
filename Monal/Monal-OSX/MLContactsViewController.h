@@ -35,4 +35,8 @@
 -(IBAction)deleteItem:(id)sender;
 -(IBAction)startFind:(id)sender;
 
+-(IBAction)showContactsTab:(id)sender;
+-(IBAction)showActiveChatTab:(id)sender;
+
+
 @end

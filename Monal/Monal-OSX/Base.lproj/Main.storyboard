@@ -634,6 +634,17 @@ CA
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="l2A-Lq-jtU"/>
+                                        <menuItem title="Contacts Tab" keyEquivalent="1" id="eEq-eS-CBI">
+                                            <connections>
+                                                <action selector="showContactsTab:" target="Ady-hI-5gd" id="Z5g-z6-ocH"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Active Chat Tab" keyEquivalent="2" id="FRx-3c-W11">
+                                            <connections>
+                                                <action selector="showActiveChatTab:" target="Ady-hI-5gd" id="71I-34-If3"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="wKO-rV-Mkm"/>
                                         <menuItem title="Bring All to Front" id="LE2-aR-0XJ">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
@@ -665,7 +676,7 @@ CA
                 <customObject id="R3g-9a-MaB" customClass="SUUpdater"/>
                 <customObject id="Ady-hI-5gd" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-286" y="-221"/>
+            <point key="canvasLocation" x="-800" y="-86"/>
         </scene>
         <!--Window Controller-->
         <scene sceneID="R2V-B0-nI4">
@@ -917,7 +928,7 @@ CA
                 </viewController>
                 <customObject id="N6A-8E-AoF" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-352" y="1218.5"/>
+            <point key="canvasLocation" x="-699" y="646.5"/>
         </scene>
         <!--Split View Controller-->
         <scene sceneID="2ls-iF-dj5">
@@ -1435,7 +1446,7 @@ Gw
                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                             <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
                                             <tableColumns>
-                                                <tableColumn width="404.65589753547033" minWidth="40" maxWidth="1000" id="3p6-nJ-v23">
+                                                <tableColumn width="404.95173611782826" minWidth="40" maxWidth="1000" id="3p6-nJ-v23">
                                                     <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left">
                                                         <font key="font" metaFont="smallSystem"/>
                                                         <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -1449,7 +1460,7 @@ Gw
                                                     <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                     <prototypeCellViews>
                                                         <tableCellView identifier="AccountRow" id="GJA-KX-dbK" customClass="MLAccountRow">
-                                                            <rect key="frame" x="1" y="1" width="405" height="32"/>
+                                                            <rect key="frame" x="1" y="1" width="404.74832049350886" height="32"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
                                                                 <button translatesAutoresizingMaskIntoConstraints="NO" id="TrR-Z7-L5Z">
@@ -1506,11 +1517,11 @@ Gw
                                     </subviews>
                                     <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </clipView>
-                                <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="dNd-63-Z8V">
+                                <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="1.2672946504236984e-12" horizontal="YES" id="dNd-63-Z8V">
                                     <rect key="frame" x="1" y="211" width="408" height="15"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
-                                <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="6.0632980118195215e-14" horizontal="NO" id="ioD-in-Aqf">
+                                <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="NO" id="ioD-in-Aqf">
                                     <rect key="frame" x="224" y="17" width="15" height="102"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>

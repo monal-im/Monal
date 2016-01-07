@@ -67,6 +67,11 @@
 }
 
 
+-(IBAction)displayWindow:(id)sender;
+{
+    [self.mainWindowController showWindow:self];
+}
+
 #pragma mark  - Actions
 -(void) linkVCs
 {

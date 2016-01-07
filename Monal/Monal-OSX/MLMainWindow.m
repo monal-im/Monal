@@ -41,7 +41,7 @@
     self.contactNameField.stringValue= [self.contactInfo objectForKey:kFullName];
 }
 
-#pragma mark -- segue
+#pragma mark - segue
 - (void)prepareForSegue:(NSStoryboardSegue *)segue sender:(id)sender
 {
     if([segue.identifier isEqualToString:@"ContactDetails"]) {
@@ -68,7 +68,7 @@
 
 
 
-#pragma mark -- notifications
+#pragma mark - notifications
 -(void) handleConnect:(NSNotification *)notification
 {
     NSString* nameToShow=[notification.object objectForKey:@"AccountName"];
@@ -145,6 +145,9 @@
 {
      [self.contactsViewController toggleActiveChatTab];
 }
+
+
+
 
 #pragma mark - notificaiton delegate
 

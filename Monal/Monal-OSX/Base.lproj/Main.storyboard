@@ -1151,6 +1151,9 @@ Gw
                                 <subviews>
                                     <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="m4R-R5-Jrl">
                                         <rect key="frame" x="408" y="57" width="71" height="32"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="59" id="c7x-BO-B9T"/>
+                                        </constraints>
                                         <buttonCell key="cell" type="push" title="Send" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Rbr-ky-nlC">
                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                             <font key="font" metaFont="system"/>
@@ -1161,6 +1164,9 @@ Gw
                                     </button>
                                     <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="RB8-DH-Efv">
                                         <rect key="frame" x="408" y="13" width="71" height="32"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="59" id="Xxp-MR-yix"/>
+                                        </constraints>
                                         <buttonCell key="cell" type="push" title="😀" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="ccl-s1-dL9">
                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                             <font key="font" metaFont="system"/>

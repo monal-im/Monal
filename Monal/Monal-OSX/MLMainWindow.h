@@ -7,6 +7,7 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "MLContactsViewController.h"
 
 
 @interface MLMainWindow : NSWindowController <NSUserNotificationCenterDelegate>
@@ -15,10 +16,15 @@
 
 @property (nonatomic, strong) IBOutlet NSSearchField *contactSearchField;
 
+@property (nonatomic, weak)  MLContactsViewController *contactsViewController;
+
 /**
  Allows  the window to know what contact is currently selected
  */
 -(void) updateCurrentContact:(NSDictionary *) contact;
+
+-(IBAction)showContactsTab:(id)sender;
+-(IBAction)showActiveChatTab:(id)sender;
 
 
 @end

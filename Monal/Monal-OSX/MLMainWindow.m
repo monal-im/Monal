@@ -14,7 +14,6 @@
 #import "MLXMPPManager.h"
 #import "MLContactDetails.h"
 
-
 @interface MLMainWindow ()
 
 @property (nonatomic, strong) NSDictionary *contactInfo;
@@ -136,6 +135,17 @@
     }];
 
 
+}
+
+#pragma mark - UI Actions
+-(IBAction)showContactsTab:(id)sender
+{
+    [self.contactsViewController toggleContactsTab];
+}
+
+-(IBAction)showActiveChatTab:(id)sender;
+{
+     [self.contactsViewController toggleActiveChatTab];
 }
 
 #pragma mark - notificaiton delegate

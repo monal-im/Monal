@@ -46,7 +46,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
     
-      [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshDisplay) name:kMonalWindowVisible object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshDisplay) name:kMonalWindowVisible object:nil];
     
     self.contacts=[[NSMutableArray alloc] init] ;
     self.offlineContacts=[[NSMutableArray alloc] init] ;
@@ -54,7 +54,6 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
         
     [MLXMPPManager sharedInstance].contactVC=self;
     self.currentSegment= kContactTab;
-
     
 }
 
@@ -73,7 +72,8 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     }
     
     MLMainWindow *window =(MLMainWindow *)self.view.window.windowController;
-    window.contactSearchField.delegate=self; 
+    window.contactSearchField.delegate=self;
+    window.contactsViewController= self;
 }
 
 
@@ -194,13 +194,13 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     [self.view.window makeFirstResponder:windowController.contactSearchField];
 }
 
--(IBAction)showContactsTab:(id)sender
+-(void)toggleContactsTab
 {
     self.segmentedControl.selectedSegment=kContactTab;
     [self segmentDidChange:self];
 }
 
--(IBAction)showActiveChatTab:(id)sender;
+-(void)toggleActiveChatTab
 {
     self.segmentedControl.selectedSegment=kActiveTab;
     [self segmentDidChange:self];

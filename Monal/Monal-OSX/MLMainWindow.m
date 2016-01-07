@@ -152,8 +152,7 @@
 
 - (void)userNotificationCenter:(NSUserNotificationCenter * )center didActivateNotification:(NSUserNotification *  )notification
 {
-    [self showWindow:self];
-    
+   
     NSDictionary *userInfo= notification.userInfo;
    
     [[MLXMPPManager sharedInstance].contactVC showConversationForContact:userInfo];
@@ -164,6 +163,9 @@
             [[MLXMPPManager sharedInstance].contactVC.chatViewController sendMessage:notification.response.string andMessageID:nil];
         }
         
+    }
+    else  {
+        [self showWindow:self];
     }
 }
 

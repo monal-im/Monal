@@ -2064,7 +2064,21 @@ static DataLayer *sharedInstance=nil;
         DDLogVerbose(@"Upgrade to 1.41 success ");
         
     }
+#else 
+    NSNumber* dbversion= (NSNumber*)[self executeScalar:@"select dbversion from dbversion"];
+    DDLogVerbose(@"Got db version %@", dbversion);
 #endif
+    
+    if([dbversion doubleValue]<1.5)
+    {
+        DDLogVerbose(@"Database version <1.5 detected. Performing upgrade on accounts. ");
+        
+        [self executeNonQuery:@"alter table account add column oauth bool;"];
+        [self executeNonQuery:@"update dbversion set dbversion='1.5'; "];
+        
+        DDLogVerbose(@"Upgrade to 1.5 success ");
+        
+    }
     
     // this point forward OSX might have legacy issues
     

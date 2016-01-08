@@ -26,6 +26,8 @@
 -(IBAction)showContactsTab:(id)sender;
 -(IBAction)showActiveChatTab:(id)sender;
 
+-(IBAction)showContactDetails:(id)sender;
+-(IBAction)showAddContactSheet:(id)sender;
 
 
 @end

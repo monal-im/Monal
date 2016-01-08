@@ -146,6 +146,16 @@
      [self.contactsViewController toggleActiveChatTab];
 }
 
+-(IBAction)showContactDetails:(id)sender
+{
+    [self performSegueWithIdentifier:@"ContactDetails" sender:self];
+}
+
+-(IBAction)showAddContactSheet:(id)sender
+{
+    [self performSegueWithIdentifier:@"AddContact" sender:self];
+}
+
 
 
 

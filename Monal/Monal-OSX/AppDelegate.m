@@ -61,7 +61,6 @@
     
     if(flag==NO){
         [self.mainWindowController showWindow:self];
-        [[NSUserNotificationCenter defaultUserNotificationCenter] removeAllDeliveredNotifications];
     }
     return YES;	
 }

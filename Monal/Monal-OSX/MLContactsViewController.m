@@ -74,6 +74,8 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     MLMainWindow *window =(MLMainWindow *)self.view.window.windowController;
     window.contactSearchField.delegate=self;
     window.contactsViewController= self;
+    
+    [[NSUserNotificationCenter defaultUserNotificationCenter] removeAllDeliveredNotifications];
 }
 
 

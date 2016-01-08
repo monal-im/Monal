@@ -32,6 +32,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
  NSString *const kResource =@"resource";
  NSString *const kSSL =@"secure";
  NSString *const kOldSSL =@"oldstyleSSL";
+ NSString *const kOauth =@"oauth";
  NSString *const kSelfSigned =@"selfsigned";
 
 NSString *const kUsername =@"username";
@@ -444,15 +445,10 @@ static DataLayer *sharedInstance=nil;
 
 }
 
-
-
-
-
 #pragma mark account commands
 
 -(NSArray*) protocolList
 {
-    
     NSString* query=[NSString stringWithFormat:@"select * from protocol where protocol_id<=3 or protocol_id=5 order by protocol_id asc"];
     NSArray* toReturn = [self executeReader:query];
     
@@ -460,7 +456,7 @@ static DataLayer *sharedInstance=nil;
     {
         
         DDLogVerbose(@" count: %lu",  (unsigned long)[toReturn count] );
-        return toReturn; //[toReturn autorelease];
+        return toReturn;
     }
     else
     {
@@ -471,10 +467,6 @@ static DataLayer *sharedInstance=nil;
 
 -(NSArray*) accountList
 {
-    //returns a buddy's message history
-    
-    
-    
     NSString* query=[NSString stringWithFormat:@"select * from account order by account_id asc "];
     NSArray* toReturn = [self executeReader:query];
     
@@ -483,7 +475,7 @@ static DataLayer *sharedInstance=nil;
         
         DDLogVerbose(@" count: %lu",  (unsigned long)[toReturn count] );
         
-        return toReturn; //[toReturn autorelease];
+        return toReturn;
     }
     else
     {
@@ -496,7 +488,6 @@ static DataLayer *sharedInstance=nil;
 
 -(NSArray*) enabledAccountList
 {
-    //returns a buddy's message history
     NSString* query=[NSString stringWithFormat:@"select * from account where enabled=1 order by account_id asc "];
     NSArray* toReturn = [self executeReader:query];
     
@@ -553,79 +544,48 @@ static DataLayer *sharedInstance=nil;
 -(void) updateAccounWithDictionary:(NSDictionary *) dictionary andCompletion:(void (^)(BOOL))completion;
 {
     NSString* query=
-    [NSString stringWithFormat:@"update account  set account_name='%@', protocol_id=%@, server='%@', other_port='%@', username='%@', password='%@', secure=%d, resource='%@', domain='%@', enabled=%d, selfsigned=%d, oldstyleSSL=%d where account_id=%@",
-      ((NSString *)[dictionary objectForKey:kUsername]).escapeForSql,
-     @"1",
-       ((NSString *)[dictionary objectForKey:kServer]).escapeForSql,
-       ((NSString *)[dictionary objectForKey:kPort]),
+    [NSString stringWithFormat:@"update account  set account_name='%@', protocol_id=%@, server='%@', other_port='%@', username='%@', password='%@', secure=%d, resource='%@', domain='%@', enabled=%d, selfsigned=%d, oldstyleSSL=%d, oauth=%d  where account_id=%@",
      ((NSString *)[dictionary objectForKey:kUsername]).escapeForSql,
-   @"",
-        [[dictionary objectForKey:kSSL] boolValue],
-       ((NSString *)[dictionary objectForKey:kResource]).escapeForSql,
-       ((NSString *)[dictionary objectForKey:kDomain]).escapeForSql,
+     @"1",
+     ((NSString *)[dictionary objectForKey:kServer]).escapeForSql,
+     ((NSString *)[dictionary objectForKey:kPort]),
+     ((NSString *)[dictionary objectForKey:kUsername]).escapeForSql,
+     @"",
+     [[dictionary objectForKey:kSSL] boolValue],
+     ((NSString *)[dictionary objectForKey:kResource]).escapeForSql,
+     ((NSString *)[dictionary objectForKey:kDomain]).escapeForSql,
      [[dictionary objectForKey:kEnabled] boolValue],
-        [[dictionary objectForKey:kSelfSigned] boolValue],
-        [[dictionary objectForKey:kOldSSL] boolValue],
+     [[dictionary objectForKey:kSelfSigned] boolValue],
+     [[dictionary objectForKey:kOldSSL] boolValue],
+     [[dictionary objectForKey:kOauth] boolValue],
+     [dictionary objectForKey:kAccountID]
      
-        [dictionary objectForKey:kAccountID] 
      ];
-
-     [self executeNonQuery:query withCompletion:completion];
+    
+    [self executeNonQuery:query withCompletion:completion];
 }
 
 -(void) addAccountWithDictionary:(NSDictionary *) dictionary andCompletion: (void (^)(BOOL))completion
 {
-    NSString* query= [NSString stringWithFormat:@"insert into account values(null, '%@', %@, '%@', '%@', '%@', '%@', %d, '%@', '%@', %d, %d, %d) ",
-                      ((NSString *)[dictionary objectForKey:kUsername]).escapeForSql, @"1",[dictionary objectForKey:kServer],
+    NSString* query= [NSString stringWithFormat:@"insert into account values(null, '%@', %@, '%@', '%@', '%@', '%@', %d, '%@', '%@', %d, %d, %d, %d) ",
                       ((NSString *)[dictionary objectForKey:kUsername]).escapeForSql,
-                       ((NSString *)[dictionary objectForKey:kPort]).escapeForSql,
+                      @"1",
+                      ((NSString *) [dictionary objectForKey:kServer]).escapeForSql,
+                      ((NSString *)[dictionary objectForKey:kPort]).escapeForSql,
+                      ((NSString *)[dictionary objectForKey:kUsername]).escapeForSql,
                       @"", [[dictionary objectForKey:kSSL] boolValue],
-                        ((NSString *)[dictionary objectForKey:kResource]).escapeForSql,
-                       ((NSString *)[dictionary objectForKey:kDomain]).escapeForSql,
+                      ((NSString *)[dictionary objectForKey:kResource]).escapeForSql,
+                      ((NSString *)[dictionary objectForKey:kDomain]).escapeForSql,
                       [[dictionary objectForKey:kEnabled] boolValue],
                       [[dictionary objectForKey:kSelfSigned] boolValue],
-                      [[dictionary objectForKey:kOldSSL] boolValue]
+                      [[dictionary objectForKey:kOldSSL] boolValue],
+                      [[dictionary objectForKey:kOauth] boolValue]
                       ];
     
     [self executeNonQuery:query withCompletion:completion];
    
 }
 
-
-
--(BOOL) addAccount: (NSString*) name :(NSString*) theProtocol :(NSString*) username: (NSString*) password: (NSString*) server
-                  : (NSString*) otherport: (bool) secure: (NSString*) resource: (NSString*) thedomain:(bool) enabled :(bool) selfsigned: (bool) oldstyle
-{
-    NSString* query= [NSString stringWithFormat:@"insert into account values(null, '%@', %@, '%@', '%@', '%@', '%@', %d, '%@', '%@', %d, %d, %d) ",
-                      username.escapeForSql, theProtocol,server, otherport, username.escapeForSql, password.escapeForSql, secure, resource.escapeForSql, thedomain.escapeForSql, enabled, selfsigned, oldstyle];
-    
-    if([self executeNonQuery:query]!=NO)
-    {
-        return YES;
-    }
-    else
-    {
-        return NO;
-    }
-}
-
--(BOOL) updateAccount: (NSString*) name :(NSString*) theProtocol :(NSString*) username: (NSString*) password: (NSString*) server
-                     : (NSString*) otherport: (bool) secure: (NSString*) resource: (NSString*) thedomain:(bool) enabled:(NSString*) accountNo
-                     :(bool) selfsigned: (bool) oldstyle
-{
-    
-    NSString* query=
-    [NSString stringWithFormat:@"update account  set account_name='%@', protocol_id=%@, server='%@', other_port='%@', username='%@', password='%@', secure=%d, resource='%@', domain='%@', enabled=%d, selfsigned=%d, oldstyleSSL=%d where account_id=%@",
-     username.escapeForSql, theProtocol,server, otherport, username.escapeForSql, password.escapeForSql, secure, resource.escapeForSql, thedomain.escapeForSql,enabled, selfsigned, oldstyle,accountNo];
-    if([self executeNonQuery:query]!=NO)
-    {
-        return YES;
-    }
-    else
-    {
-        return NO;
-    }
-}
 
 -(BOOL) removeAccount:(NSString*) accountNo
 {

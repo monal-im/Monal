@@ -41,8 +41,10 @@
 
 -(void) refreshAccountList
 {
-    self.accountList=[[DataLayer sharedInstance] accountList];
-    [self.accountTable reloadData];
+    dispatch_async(dispatch_get_main_queue() , ^{
+        self.accountList=[[DataLayer sharedInstance] accountList];
+        [self.accountTable reloadData];
+    });
 }
 
 -(IBAction)deleteAccount:(id)sender

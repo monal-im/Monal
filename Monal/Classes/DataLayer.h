@@ -36,6 +36,7 @@ extern NSString *const kResource;
 extern NSString *const kSSL;
 extern NSString *const kOldSSL;
 extern NSString *const kSelfSigned;
+extern NSString *const kOauth;
 
 extern NSString *const kUsername;
 extern NSString *const kFullName;
@@ -134,12 +135,6 @@ extern NSString *const kContactName;
 -(BOOL) isAccountEnabled:(NSString*) accountNo;
 
 -(NSArray*) accountVals:(NSString*) accountNo; 
--(BOOL) addAccount: (NSString*) name :(NSString*) theProtocol :(NSString*) username: (NSString*) password: (NSString*) server
-                  : (NSString*) otherport: (bool) secure: (NSString*) resource: (NSString*) thedomain:(bool) enabled :(bool) selfsigned: (bool) oldstyle __deprecated;
-
--(BOOL) updateAccount: (NSString*) name :(NSString*) theProtocol :(NSString*) username: (NSString*) password: (NSString*) server
-                     : (NSString*) otherport: (bool) secure: (NSString*) resource: (NSString*) thedomain: (bool) enabled: (NSString*) accountNo :(bool) selfsigned: (bool) oldstyle __deprecated;
-
 
 -(void) updateAccounWithDictionary:(NSDictionary *) dictionary andCompletion:(void (^)(BOOL))completion;;
 -(void) addAccountWithDictionary:(NSDictionary *) dictionary andCompletion: (void (^)(BOOL))completion;;

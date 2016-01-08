@@ -780,7 +780,7 @@ CA
                 <splitViewController id="m98-td-Hed" sceneMemberID="viewController">
                     <splitViewItems>
                         <splitViewItem holdingPriority="750" id="0Gx-Sl-Moy" userLabel="chatlist"/>
-                        <splitViewItem holdingPriority="1" id="g4g-S0-pE7" userLabel="chatview"/>
+                        <splitViewItem id="g4g-S0-pE7" userLabel="chatview"/>
                     </splitViewItems>
                     <splitView key="splitView" dividerStyle="thin" vertical="YES" id="em5-AA-GrC">
                         <rect key="frame" x="0.0" y="0.0" width="750" height="500"/>

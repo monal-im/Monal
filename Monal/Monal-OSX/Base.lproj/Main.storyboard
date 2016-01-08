@@ -1196,9 +1196,6 @@ Gw
                                             </subviews>
                                             <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                         </clipView>
-                                        <constraints>
-                                            <constraint firstAttribute="width" priority="250" constant="397" id="8py-2d-UJH"/>
-                                        </constraints>
                                         <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="YES" id="8wP-Oc-or5">
                                             <rect key="frame" x="-100" y="-100" width="87" height="18"/>
                                             <autoresizingMask key="autoresizingMask"/>
@@ -1410,6 +1407,7 @@ Gw
                         </subviews>
                         <constraints>
                             <constraint firstItem="eNE-em-qs3" firstAttribute="top" secondItem="kDf-fM-OV9" secondAttribute="top" id="2z9-Bx-3Mo"/>
+                            <constraint firstAttribute="trailing" secondItem="9FI-ED-NWb" secondAttribute="trailing" id="Bz2-yL-YW1"/>
                             <constraint firstItem="9FI-ED-NWb" firstAttribute="leading" secondItem="kDf-fM-OV9" secondAttribute="leading" id="ElA-sy-yHZ"/>
                             <constraint firstAttribute="bottom" secondItem="9FI-ED-NWb" secondAttribute="bottom" id="FDu-ZP-7RP"/>
                             <constraint firstItem="9FI-ED-NWb" firstAttribute="trailing" secondItem="eNE-em-qs3" secondAttribute="trailing" id="MPc-wW-68d"/>

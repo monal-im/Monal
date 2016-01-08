@@ -212,7 +212,7 @@ An array of Dics what have timers to make sure everything was sent
         _accountList=[[DataLayer sharedInstance] accountList];
         for (NSDictionary* account in _accountList)
         {
-            if([[account objectForKey:@"account_id"] integerValue]==[accountNo integerValue])
+            if([[account objectForKey:kAccountID] integerValue]==[accountNo integerValue])
             {
                 [self connectAccountWithDictionary:account];
             }
@@ -223,7 +223,7 @@ An array of Dics what have timers to make sure everything was sent
 
 -(void) connectAccountWithDictionary:(NSDictionary*)account
 {
-    xmpp* existing=[self getConnectedAccountForID:[NSString stringWithFormat:@"%@",[account objectForKey:@"account_id"]]];
+    xmpp* existing=[self getConnectedAccountForID:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
     if(existing)
     {
         dispatch_async(_netQueue,
@@ -234,36 +234,37 @@ An array of Dics what have timers to make sure everything was sent
         
         return;
     }
-    DDLogVerbose(@"connecting account %@",[account objectForKey:@"account_name"] );
+    DDLogVerbose(@"connecting account %@",[account objectForKey:kAccountName] );
     
     xmpp* xmppAccount=[[xmpp alloc] init];
     xmppAccount.explicitLogout=NO;
     
-    xmppAccount.username=[account objectForKey:@"username"];
-    xmppAccount.domain=[account objectForKey:@"domain"];
-    xmppAccount.resource=[account objectForKey:@"resource"];
+    xmppAccount.username=[account objectForKey:kUsername];
+    xmppAccount.domain=[account objectForKey:kDomain];
+    xmppAccount.resource=[account objectForKey:kResource];
     
-    xmppAccount.server=[account objectForKey:@"server"];
-    xmppAccount.port=[[account objectForKey:@"other_port"] integerValue];
-    xmppAccount.SSL=[[account objectForKey:@"secure"] boolValue];
-    xmppAccount.oldStyleSSL=[[account objectForKey:@"oldstyleSSL"] boolValue];
-    xmppAccount.selfSigned=[[account objectForKey:@"selfsigned"] boolValue];
+    xmppAccount.server=[account objectForKey:kServer];
+    xmppAccount.port=[[account objectForKey:kPort] integerValue];
+    xmppAccount.SSL=[[account objectForKey:kSSL] boolValue];
+    xmppAccount.oldStyleSSL=[[account objectForKey:kOldSSL] boolValue];
+    xmppAccount.selfSigned=[[account objectForKey:kSelfSigned] boolValue];
+    xmppAccount.oAuth=[[account objectForKey:kOauth] boolValue];
     
-    xmppAccount.accountNo=[NSString stringWithFormat:@"%@",[account objectForKey:@"account_id"]];
+    xmppAccount.accountNo=[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]];
 #if TARGET_OS_IPHONE
     NSLog(@"state %ld", [UIApplication sharedApplication].applicationState);
     if([UIApplication sharedApplication].applicationState!=UIApplicationStateActive)
     {
         //keychain wont work when device is locked.
-        if([self.passwordDic objectForKey:[account objectForKey:@"account_id"]])
+        if([self.passwordDic objectForKey:[account objectForKey:kAccountID]])
         {
-            xmppAccount.password=[self.passwordDic objectForKey:[account objectForKey:@"account_id"]];
+            xmppAccount.password=[self.passwordDic objectForKey:[account objectForKey:kAccountID]];
             DDLogVerbose(@"connect got password from dic");
         }
         else {
-            PasswordManager* passMan= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",[account objectForKey:@"account_id"]]];
+            PasswordManager* passMan= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
             xmppAccount.password=[passMan getPassword] ;
-            [self.passwordDic setObject:xmppAccount.password forKey:[account objectForKey:@"account_id"]];
+            [self.passwordDic setObject:xmppAccount.password forKey:[account objectForKey:kAccountID]];
         }
     }
     else
@@ -276,7 +277,7 @@ An array of Dics what have timers to make sure everything was sent
         if(!xmppAccount.password)  {
             xmppAccount.password=@"";
         }
-        [self.passwordDic setObject:xmppAccount.password forKey:[account objectForKey:@"account_id"]];
+        [self.passwordDic setObject:xmppAccount.password forKey:[account objectForKey:kAccountID]];
     }
     
     if([xmppAccount.password length]==0) //&& ([tempPass length]==0)

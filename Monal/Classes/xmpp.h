@@ -216,6 +216,8 @@ Decline a call request
 @property (nonatomic,assign) BOOL SSL;
 @property (nonatomic,assign) BOOL oldStyleSSL;
 @property (nonatomic,assign) BOOL selfSigned;
+@property (nonatomic,assign) BOOL oAuth;
+
 
 @property (nonatomic,strong) jingleCall* call;
 

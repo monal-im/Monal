@@ -272,10 +272,6 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     NSInteger pos=-1;
     NSDictionary *selectedRow;
     
-    // swtich to contacts view
-    self.segmentedControl.selectedSegment=0;
-    [self segmentDidChange:self];
-    
     for(NSDictionary* row in self.contacts)
     {
         if([[row objectForKey:kContactName] caseInsensitiveCompare:[user objectForKey:@"actuallyfrom"] ]==NSOrderedSame &&

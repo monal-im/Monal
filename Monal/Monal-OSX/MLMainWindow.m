@@ -166,6 +166,7 @@
    
     NSDictionary *userInfo= notification.userInfo;
    
+    [[MLXMPPManager sharedInstance].contactVC toggleActiveChatTab];
     [[MLXMPPManager sharedInstance].contactVC showConversationForContact:userInfo];
    
     if(notification.activationType==NSUserNotificationActivationTypeReplied)

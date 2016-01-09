@@ -176,13 +176,14 @@ extern NSString *const kContactName;
 -(bool) removeActiveBuddy:(NSString*) buddyname forAccount:(NSString*) accountNo;
 -(bool) removeAllActiveBuddies;
 -(void) addActiveBuddies:(NSString*) buddyname forAccount:(NSString*) accountNo withCompletion: (void (^)(BOOL))completion;
+-(void) isActiveBuddy:(NSString*) buddyname forAccount:(NSString*) accountNo withCompletion: (void (^)(BOOL))completion;
+
 
 #pragma mark count unread
--(void) countUnreadMessagesForAccount:(NSString*) accountNo withCompletion: (void (^)(NSNumber *))completion;
-
 -(void) countUserUnreadMessages:(NSString*) buddy forAccount:(NSString*) accountNo withCompletion: (void (^)(NSNumber *))completion;
--(int) countOtherUnreadMessages:(NSString*) buddy forAccount:(NSString*) accountNo;
-
 -(void) countUnreadMessagesWithCompletion: (void (^)(NSNumber *))completion;
+
+-(void) countUserMessages:(NSString*) buddy forAccount:(NSString*) accountNo withCompletion: (void (^)(NSNumber *))completion;
+
 
 @end

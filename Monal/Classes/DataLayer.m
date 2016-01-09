@@ -1688,6 +1688,27 @@ static DataLayer *sharedInstance=nil;
 }
 
 
+-(void) isActiveBuddy:(NSString*) buddyname forAccount:(NSString*) accountNo withCompletion: (void (^)(BOOL))completion
+{
+    NSString* query=[NSString stringWithFormat:@"select count(buddy_name) from activechats where account_id=%@ and buddy_name='%@' ", accountNo, buddyname.escapeForSql];
+    [self executeScalar:query withCompletion:^(NSObject * count) {
+        BOOL toReturn=NO;
+        if(count!=nil)
+        {
+            NSInteger val=[((NSNumber *)count) integerValue];
+            if(val>0) {
+                toReturn=YES;
+            }
+        }
+        
+        if (completion) {
+            completion(toReturn);
+        }
+    }];
+    
+}
+
+
 #pragma mark chat properties
 
 
@@ -1706,6 +1727,20 @@ static DataLayer *sharedInstance=nil;
     
 }
 
+
+-(void) countUserMessages:(NSString*) buddy forAccount:(NSString*) accountNo withCompletion:(void (^)(NSNumber *))completion
+{
+    // count # messages from a specific user in messages table
+    NSString* query=[NSString stringWithFormat:@"select count(message_history_id) from  message_history where account_id=%@ and message_from='%@' or message_to='%@' ", accountNo, buddy.escapeForSql, buddy.escapeForSql];
+    
+    [self executeScalar:query withCompletion:^(NSObject* result) {
+        if(completion)
+        {
+            completion((NSNumber *)result);
+        }
+    }];
+    
+}
 
 #pragma db Commands
 

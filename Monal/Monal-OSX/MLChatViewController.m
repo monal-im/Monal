@@ -33,8 +33,6 @@
 @property (nonatomic, strong) NSString *jid;
 @property (nonatomic, assign) BOOL isMUC;
 
-@property (nonatomic, assign) BOOL firstmsg;
-
 @end
 
 @implementation MLChatViewController
@@ -63,6 +61,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     if(!(self.view.window.occlusionState & NSWindowOcclusionStateVisible)) {
         [self markAsRead];
     }
+    
     
     [self refreshData];
     [self updateWindowForContact:self.contactDic];
@@ -99,7 +98,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         self.jid=[NSString stringWithFormat:@"%@@%@",[[accountVals objectAtIndex:0] objectForKey:kUsername], [[accountVals objectAtIndex:0] objectForKey:kDomain]];
     }
     
-    
+
+    [self markAsRead];
     [self refreshData];
 }
 
@@ -261,13 +261,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     }];
     
-    // make sure its in active
-    if(self.firstmsg==YES)
-    {
-        [[DataLayer sharedInstance] addActiveBuddies:to forAccount:_accountNo withCompletion:nil];
-        self.firstmsg=NO;
-    }
-    
+    [[DataLayer sharedInstance] isActiveBuddy:to forAccount:self.accountNo withCompletion:^(BOOL isActive) {
+        if(!isActive) {
+            [[DataLayer sharedInstance] addActiveBuddies:to forAccount:self.accountNo withCompletion:nil];
+
+        }
+    }];
+
 }
 
 -(void) setMessageId:(NSString *) messageId delivered:(BOOL) delivered

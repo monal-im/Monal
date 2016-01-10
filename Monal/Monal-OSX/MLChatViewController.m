@@ -279,7 +279,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                        int row=0;
                        for(NSMutableDictionary *rowDic in self.messageList)
                        {
-                           if([[rowDic objectForKey:kMessageId] isEqualToString:messageId]) {
+                           if([[rowDic objectForKey:@"messageid"] isEqualToString:messageId]) {
                                [rowDic setObject:[NSNumber numberWithBool:delivered] forKey:kDelivered];
                               
                                [self.chatTable beginUpdates];
@@ -334,10 +334,24 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     userAddAlert.informativeText =[NSString stringWithFormat:@"This message may may have failed to send."];
     userAddAlert.alertStyle=NSWarningAlertStyle;
     [userAddAlert addButtonWithTitle:@"Close"];
+    [userAddAlert addButtonWithTitle:@"Retry"];
+    
+     NSInteger historyId = ((NSButton*) sender).tag;
     
     [userAddAlert beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse returnCode) {
+        if (returnCode ==1001) { //retry
+            
+            NSArray *messageArray =[[DataLayer sharedInstance] messageForHistoryID:historyId];
+            if([messageArray count]>0) {
+                NSDictionary *dic= [messageArray objectAtIndex:0];
+                [self sendMessage:[dic objectForKey:@"message"] andMessageID:[dic objectForKey:@"messageid"]];
+            }
+            
+        }
+        
         [self dismissController:self];
     }];
+    
     
 }
 
@@ -363,8 +377,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         if([[messageRow objectForKey:@"delivered"] boolValue]!=YES)
         {
             cell.deliveryFailed=YES;
+            cell.retry.tag= [[messageRow objectForKey:@"message_history_id"] integerValue];
         }
-        
+        else  {
+            cell.deliveryFailed=NO;
+        }
+    
     }
     else  {
         cell = [tableView makeViewWithIdentifier:@"InboundTextCell" owner:self];

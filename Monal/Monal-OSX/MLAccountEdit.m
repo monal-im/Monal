@@ -231,7 +231,6 @@
              NSURL *url=[NSURL URLWithString:[NSString stringWithFormat:@"urn:ietf:wg:oauth:2.0:oob:auto?code=%@", token]];
              [[NXOAuth2AccountStore sharedStore] handleRedirectURL:url];
              
-             self.oAuthTokenButton.enabled=NO;
          };
          
          

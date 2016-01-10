@@ -326,6 +326,21 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
 }
 
+
+-(IBAction)deliveryFailedMessage:(id)sender
+{
+    NSAlert *userAddAlert = [[NSAlert alloc] init];
+    userAddAlert.messageText=@"Message Failed to Send";
+    userAddAlert.informativeText =[NSString stringWithFormat:@"This message may may have failed to send."];
+    userAddAlert.alertStyle=NSWarningAlertStyle;
+    [userAddAlert addButtonWithTitle:@"Close"];
+    
+    [userAddAlert beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse returnCode) {
+        [self dismissController:self];
+    }];
+    
+}
+
 #pragma mark -table view datasource
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)aTableView
 {

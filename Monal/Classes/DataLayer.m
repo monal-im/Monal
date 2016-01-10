@@ -1618,14 +1618,14 @@ static DataLayer *sharedInstance=nil;
 -(NSArray*) activeBuddies
 {
     
-    NSString* query=[NSString stringWithFormat:@"select X.*, Y.count from (select distinct a.buddy_name,state,status,filename, ifnull(b.full_name, a.buddy_name) as full_name, a.account_id from activechats as a left outer  join buddylist as b on a.buddy_name=b.buddy_name and a.account_id=b.account_id ) as X left outer join (select count(message_history_id) as count, account_id, message_from from  message_history where unread=1) as Y on X.account_id=Y.account_id and X.buddy_name=Y.message_from order by Y.count desc, X.full_name COLLATE NOCASE asc" ];
+    NSString* query=[NSString stringWithFormat:@"select X.*, 0 as 'count' from (select distinct a.buddy_name,state,status,filename, ifnull(b.full_name, a.buddy_name) as full_name, a.account_id from activechats as a left outer  join buddylist as b on a.buddy_name=b.buddy_name and a.account_id=b.account_id ) as X left outer join (select account_id, message_from, max(timestamp) as max_time from  message_history group by account_id, message_from) as Y on X.account_id=Y.account_id and X.buddy_name=Y.message_from order by Y.max_time desc, X.full_name COLLATE NOCASE asc" ];
     //	DDLogVerbose(query);
     NSArray* toReturn = [self executeReader:query];
     
     if(toReturn!=nil)
     {
         DDLogVerbose(@" count: %d",  [toReturn count] );
-        return toReturn; //[toReturn autorelease];
+        return toReturn;
     }
     else
     {

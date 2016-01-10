@@ -609,7 +609,14 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                        NSArray *activeArray=self.contacts;
                        if(self.currentSegment==kActiveTab)
                        {
-                           activeArray= self.activeChat;
+                           //activeArray= self.activeChat;
+                           //add 0.2 delay to allow DB to write since this is called at the same time as db write notification
+                           dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.2 * NSEC_PER_SEC), dispatch_get_main_queue(),  ^{
+                               [self showActiveChat:YES];
+                               [self highlightCellForCurrentContact];
+                           });
+                           
+                           return;
                        }
                     
                        if((self.view.window.occlusionState & NSWindowOcclusionStateVisible)) {
@@ -698,7 +705,6 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     cell.accountNo= [[contactRow objectForKey:kAccountID] integerValue];
     cell.username =[contactRow objectForKey:kContactName] ;
     
-    [cell setUnreadCount:[[contactRow objectForKey:kCount]  integerValue]];
     
     NSString *statusText = [contactRow objectForKey:@"status"];
     if( [statusText isEqualToString:@"(null)"])  {
@@ -728,6 +734,13 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     
     cell.icon.image= [[MLImageManager sharedInstance] getIconForContact:cell.username andAccount:accountNo];
   
+    
+    [[DataLayer sharedInstance] countUserUnreadMessages:cell.username forAccount:accountNo withCompletion:^(NSNumber * result) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [cell setUnreadCount:[result integerValue]];
+        });
+    }];
+
     
     return cell;
 }

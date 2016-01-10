@@ -698,6 +698,8 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     cell.accountNo= [[contactRow objectForKey:kAccountID] integerValue];
     cell.username =[contactRow objectForKey:kContactName] ;
     
+    [cell setUnreadCount:[[contactRow objectForKey:kCount]  integerValue]];
+    
     NSString *statusText = [contactRow objectForKey:@"status"];
     if( [statusText isEqualToString:@"(null)"])  {
         statusText = @"";
@@ -725,13 +727,8 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     NSString* accountNo=[NSString stringWithFormat:@"%ld", (long)cell.accountNo];
     
     cell.icon.image= [[MLImageManager sharedInstance] getIconForContact:cell.username andAccount:accountNo];
+  
     
-    [[DataLayer sharedInstance] countUserUnreadMessages:cell.username forAccount:accountNo withCompletion:^(NSNumber * result) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [cell setUnreadCount:[result integerValue]];
-        });
-    }];
-   
     return cell;
 }
 

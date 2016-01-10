@@ -42,6 +42,7 @@ extern NSString *const kUsername;
 extern NSString *const kFullName;
 
 extern NSString *const kContactName;
+extern NSString *const kCount;
 
 
 + (id)sharedInstance;

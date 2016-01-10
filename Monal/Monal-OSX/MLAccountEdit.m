@@ -72,6 +72,11 @@
         self.selfSigned.state =[[self.accountToEdit objectForKey:kSelfSigned] boolValue];
         self.oldStyleSSL.state =[[self.accountToEdit objectForKey:kOldSSL] boolValue];
         
+        if([[self.accountToEdit objectForKey:kOauth] boolValue] )
+        {
+            [self toggleGoogleTalkDisplay];
+        }
+        
         NSError *error;
         NSString*pass= [STKeychain getPasswordForUsername:[NSString stringWithFormat:@"%@",[self.accountToEdit objectForKey:kAccountID]] andServiceName:@"Monal" error:&error];
         if(pass) {

@@ -56,6 +56,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) viewWillAppear
 {
+    [super viewWillAppear];
     if(! self.contactName) return;
     
     if(!(self.view.window.occlusionState & NSWindowOcclusionStateVisible)) {
@@ -98,8 +99,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         self.jid=[NSString stringWithFormat:@"%@@%@",[[accountVals objectAtIndex:0] objectForKey:kUsername], [[accountVals objectAtIndex:0] objectForKey:kDomain]];
     }
     
-
-    [self markAsRead];
+    if((self.view.window.occlusionState & NSWindowOcclusionStateVisible)) {
+        [self markAsRead];
+    }
     [self refreshData];
 }
 

@@ -1141,7 +1141,7 @@ Gw
                                                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                     </textFieldCell>
                                                                 </textField>
-                                                                <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="EKw-S1-2Aa">
+                                                                <button hidden="YES" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="EKw-S1-2Aa">
                                                                     <rect key="frame" x="315" y="11" width="21" height="21"/>
                                                                     <constraints>
                                                                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="21" id="JHZ-bQ-0tj"/>
@@ -1227,7 +1227,7 @@ Gw
                                                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                     </textFieldCell>
                                                                 </textField>
-                                                                <button verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="lsM-YA-awl">
+                                                                <button hidden="YES" verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="lsM-YA-awl">
                                                                     <rect key="frame" x="159" y="10" width="21" height="21"/>
                                                                     <constraints>
                                                                         <constraint firstAttribute="width" constant="21" id="KDN-nO-9IU"/>

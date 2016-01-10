@@ -276,22 +276,22 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     dispatch_async(dispatch_get_main_queue(),
                    ^{
-                       
-                       [self.chatTable reloadData];
-                       
-                       //                       int row=0;
-                       //                       for(NSMutableDictionary *rowDic in self.messageList)
-                       //                       {
-                       //                           if([[rowDic objectForKey:kMessageId] isEqualToString:messageId]) {
-                       //                               [rowDic setObject:[NSNumber numberWithBool:delivered] forKey:kDelivered];
-                       //                               NSIndexPath *indexPath =[NSIndexPath indexPathForRow:row inSection:0];
-                       //                               dispatch_async(dispatch_get_main_queue(), ^{
-                       //                                   [_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
-                       //                               });
-                       //                               break;
-                       //                           }
-                       //                           row++;
-                       //                       }
+                       int row=0;
+                       for(NSMutableDictionary *rowDic in self.messageList)
+                       {
+                           if([[rowDic objectForKey:kMessageId] isEqualToString:messageId]) {
+                               [rowDic setObject:[NSNumber numberWithBool:delivered] forKey:kDelivered];
+                              
+                               [self.chatTable beginUpdates];
+                               NSIndexSet *indexSet =[[NSIndexSet alloc] initWithIndex:row] ;
+                               NSIndexSet *columnIndexSet =[[NSIndexSet alloc] initWithIndex:0] ;
+                               [self.chatTable reloadDataForRowIndexes:indexSet columnIndexes:columnIndexSet];
+                               [self.chatTable endUpdates];
+                               
+                               break;
+                           }
+                           row++;
+                       }
                    });
 }
 
@@ -344,6 +344,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         cell.isInbound= NO;
         cell.messageText.textColor = [NSColor whiteColor];
         cell.messageText.linkTextAttributes =@{NSForegroundColorAttributeName:[NSColor whiteColor], NSUnderlineStyleAttributeName: @YES};
+        
+        if([[messageRow objectForKey:@"delivered"] boolValue]!=YES)
+        {
+            cell.deliveryFailed=YES;
+        }
+        
     }
     else  {
         cell = [tableView makeViewWithIdentifier:@"InboundTextCell" owner:self];

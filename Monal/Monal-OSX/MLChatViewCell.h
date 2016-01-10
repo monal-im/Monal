@@ -19,6 +19,9 @@
 @property (nonatomic, assign) BOOL isInbound;
 @property (nonatomic, assign) NSRect messageRect;
 
+@property (nonatomic, assign) BOOL deliveryFailed;
+@property (nonatomic, strong) IBOutlet NSButton* retry;
+
 
 + (NSRect) sizeWithMessage:(NSString *)messageString;
 

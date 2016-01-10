@@ -75,6 +75,12 @@
  
     [bezierPath fill];
     
+    if(self.deliveryFailed) {
+        self.retry.hidden=NO;
+    }
+    else{
+        self.retry.hidden=YES;
+    }
     
 }
 

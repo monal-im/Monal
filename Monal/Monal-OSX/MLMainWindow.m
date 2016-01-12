@@ -185,6 +185,11 @@
     if ([[notification object] occlusionState]  &  NSWindowOcclusionStateVisible) {
         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWindowVisible object:nil];
         // visible
+        if(self.window.isKeyWindow)
+        {
+            [[NSUserNotificationCenter defaultUserNotificationCenter] removeAllDeliveredNotifications];
+        }
+        
     } else {
         // occluded
     }

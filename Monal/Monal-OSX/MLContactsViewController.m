@@ -74,7 +74,6 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     window.contactSearchField.delegate=self;
     window.contactsViewController= self;
     
-    [[NSUserNotificationCenter defaultUserNotificationCenter] removeAllDeliveredNotifications];
 }
 
 

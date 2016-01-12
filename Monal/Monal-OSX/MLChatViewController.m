@@ -233,17 +233,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                [self.chatTable reloadData];
                            }
                            
-                           
-                           //                           NSIndexPath *path1;
-                           //                           [self.chatTable beginUpdates];
-                           //                           NSInteger bottom = [_messageTable numberOfRowsInSection:0];
-                           //                           if(bottom>0) {
-                           //                               path1 = [NSIndexPath indexPathForRow:bottom  inSection:0];
-                           //                               [_messageTable insertRowsAtIndexPaths:@[path1]
-                           //                                                    withRowAnimation:UITableViewRowAnimationBottom];
-                           //                           }
-                           //                           [_messageTable endUpdates];
-                           
                            [self scrollToBottom];
                            
                        });

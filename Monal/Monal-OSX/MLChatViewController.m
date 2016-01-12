@@ -59,14 +59,18 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [super viewWillAppear];
     if(! self.contactName) return;
     
-    if(!(self.view.window.occlusionState & NSWindowOcclusionStateVisible)) {
-        [self markAsRead];
-    }
-    
-    
     [self refreshData];
     [self updateWindowForContact:self.contactDic];
     
+}
+
+
+-(void) viewDidAppear
+{
+    [super viewDidAppear];
+    if((self.view.window.occlusionState & NSWindowOcclusionStateVisible)) {
+        [self markAsRead];
+    }
 }
 
 -(void) dealloc
@@ -136,10 +140,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     {
         dispatch_async(dispatch_get_main_queue(),
                        ^{
-                           if(!(self.view.window.occlusionState & NSWindowOcclusionStateVisible)) {
-                               return;
-                           }
-                           
+                          
                            NSDictionary* userInfo;
                            if([[notification.userInfo objectForKey:@"to"] isEqualToString:_contactName])
                            {
@@ -155,22 +156,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                            }
                            
                            [self.messageList addObject:userInfo];
-                           [self.chatTable reloadData];
-                           
-//                           [_messageTable beginUpdates];
-//                           NSIndexPath *path1;
-//                           NSInteger bottom = [_messageTable numberOfRowsInSection:0];
-//                           if(bottom>0) {
-//                               path1 = [NSIndexPath indexPathForRow:bottom-1  inSection:0];
-//                               [_messageTable insertRowsAtIndexPaths:@[path1]
-//                                                    withRowAnimation:UITableViewRowAnimationBottom];
-//                           }
-//                           
-//                           [_messageTable endUpdates];
-                           
-                           [self scrollToBottom];
-                           
-                           [self markAsRead];
+                         
+                           if((self.view.window.occlusionState & NSWindowOcclusionStateVisible)) {
+                               [self.chatTable reloadData];
+                               [self scrollToBottom];
+                               [self markAsRead];
+                           }
                        });
     }
 

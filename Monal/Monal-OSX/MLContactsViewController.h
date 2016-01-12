@@ -38,5 +38,6 @@
 -(void)toggleContactsTab;
 -(void)toggleActiveChatTab;
 
+-(void) highlightCellForCurrentContact;
 
 @end

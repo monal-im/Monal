@@ -88,13 +88,13 @@
 
     
     if(self.window.occlusionState & NSWindowOcclusionStateVisible) {
-        
-        if([nameToShow isEqualToString:[self.contactInfo objectForKey:kContactName]])
-        {
-            showNotification= NO;
+        if(self.window.isKeyWindow) {
+            if([nameToShow isEqualToString:[self.contactInfo objectForKey:kContactName]])
+            {
+                showNotification= NO;
+            }
         }
     }
-    
     
     
     if (showNotification) {
@@ -157,15 +157,11 @@
 }
 
 
-
-
 #pragma mark - notificaiton delegate
 
 - (void)userNotificationCenter:(NSUserNotificationCenter * )center didActivateNotification:(NSUserNotification *  )notification
 {
-   
     NSDictionary *userInfo= notification.userInfo;
-   
     [[MLXMPPManager sharedInstance].contactVC toggleActiveChatTab];
     [[MLXMPPManager sharedInstance].contactVC showConversationForContact:userInfo];
    
@@ -177,6 +173,7 @@
         
     }
     else  {
+        [[MLXMPPManager sharedInstance].contactVC highlightCellForCurrentContact];
         [self showWindow:self];
     }
 }

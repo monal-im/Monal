@@ -502,23 +502,28 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                            //not there
                            if(pos>=0)
                            {
-                               [_contacts removeObjectAtIndex:pos];
-                               if(self.searchResults || self.activeChat) return;
-                               
-                               DDLogVerbose(@"removing %@ at pos %d", [user objectForKey:kusernameKey], pos);
-                               [_contactsTable beginUpdates];
-                               NSIndexSet *indexSet = [NSIndexSet indexSetWithIndex:pos];
-                               [_contactsTable removeRowsAtIndexes:indexSet withAnimation:NSTableViewAnimationEffectFade];
-                               
-                               //                                                  if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"] && offlinepos>-1)
-                               //                                                  {
-                               //                                                      NSIndexPath *path2 = [NSIndexPath indexPathForRow:offlinepos inSection:kofflineSection];
-                               //                                                      DDLogVerbose(@"inserting offline at %d", offlinepos);
-                               //                                                      [_contactsTable insertRowsAtIndexPaths:@[path2]
-                               //                                                                            withRowAnimation:UITableViewRowAnimationFade];
-                               //                                                  }
-                               
-                               [_contactsTable endUpdates];
+                               if(self.searchResults || self.activeChat) {
+                                   return;
+                                   
+                               } else {
+                                   [_contacts removeObjectAtIndex:pos];
+                                   if(self.searchResults || self.activeChat) return;
+                                   
+                                   DDLogVerbose(@"removing %@ at pos %d", [user objectForKey:kusernameKey], pos);
+                                   [_contactsTable beginUpdates];
+                                   NSIndexSet *indexSet = [NSIndexSet indexSetWithIndex:pos];
+                                   [_contactsTable removeRowsAtIndexes:indexSet withAnimation:NSTableViewAnimationEffectFade];
+                                   
+                                   //                                                  if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"] && offlinepos>-1)
+                                   //                                                  {
+                                   //                                                      NSIndexPath *path2 = [NSIndexPath indexPathForRow:offlinepos inSection:kofflineSection];
+                                   //                                                      DDLogVerbose(@"inserting offline at %d", offlinepos);
+                                   //                                                      [_contactsTable insertRowsAtIndexPaths:@[path2]
+                                   //                                                                            withRowAnimation:UITableViewRowAnimationFade];
+                                   //                                                  }
+                                   
+                                   [_contactsTable endUpdates];
+                               }
                            }
                            
                        });
@@ -539,31 +544,37 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 
 -(void) clearContactsForAccount: (NSString*) accountNo
 {
-    //mutex to prevent others from modifying contacts at the same time
-    dispatch_async(dispatch_get_main_queue(),
-                   ^{
-                       NSMutableArray* indexPaths =[[NSMutableArray alloc] init];
-                       NSMutableIndexSet* indexSet = [[NSMutableIndexSet alloc] init];
-                       
-                       NSInteger counter=0;
-                       for(NSDictionary* row in _contacts)
-                       {
-                           if([[row objectForKey:@"account_id"]  integerValue]==[accountNo integerValue] )
+    
+    if(self.searchResults || self.activeChat) {
+        return;
+        
+    } else {
+        //mutex to prevent others from modifying contacts at the same time
+        dispatch_async(dispatch_get_main_queue(),
+                       ^{
+                           NSMutableArray* indexPaths =[[NSMutableArray alloc] init];
+                           NSMutableIndexSet* indexSet = [[NSMutableIndexSet alloc] init];
+                           
+                           NSInteger counter=0;
+                           for(NSDictionary* row in _contacts)
                            {
-                               DDLogVerbose(@"removing  pos %d", counter);
-                               [indexSet addIndex:counter];
-                               
+                               if([[row objectForKey:@"account_id"]  integerValue]==[accountNo integerValue] )
+                               {
+                                   DDLogVerbose(@"removing  pos %d", counter);
+                                   [indexSet addIndex:counter];
+                                   
+                               }
+                               counter++;
                            }
-                           counter++;
-                       }
-                       
-                       [_contacts removeObjectsAtIndexes:indexSet];
-                        if(self.searchResults || self.activeChat) return;
-                       [_contactsTable beginUpdates];
-                       [_contactsTable removeRowsAtIndexes:indexSet withAnimation:NSTableViewAnimationEffectFade];
-                       [_contactsTable endUpdates];
-                       
-                   });
+                           
+                           [_contacts removeObjectsAtIndexes:indexSet];
+                           [_contactsTable beginUpdates];
+                           [_contactsTable removeRowsAtIndexes:indexSet withAnimation:NSTableViewAnimationEffectFade];
+                           [_contactsTable endUpdates];
+                           
+                           
+                       });
+    }
 }
 
 

@@ -33,9 +33,10 @@
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
   
-#ifdef  DEBUG
+
     [DDLog addLogger:[DDASLLogger sharedInstance]];
     [DDLog addLogger:[DDTTYLogger sharedInstance]];
+#ifdef  DEBUG
     self.fileLogger = [[DDFileLogger alloc] init];
     self.fileLogger.rollingFrequency = 60 * 60 * 24; // 24 hour rolling
     self.fileLogger.logFileManager.maximumNumberOfLogFiles = 5;

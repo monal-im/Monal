@@ -314,7 +314,7 @@ An array of Dics what have timers to make sure everything was sent
     
     dispatch_async(dispatch_get_main_queue(), ^{
         int index=0;
-        int pos=0;
+        int pos=-1;
         for (NSDictionary* account in _connectedXMPP)
         {
             xmpp* xmppAccount=[account objectForKey:@"xmppAccount"];
@@ -332,9 +332,10 @@ An array of Dics what have timers to make sure everything was sent
             index++;
         }
         
-        if((pos>=0) && (pos<[_connectedXMPP count]))
+        if((pos>=0) && (pos<[_connectedXMPP count])) {
             [_connectedXMPP removeObjectAtIndex:pos];
-        
+            DDLogVerbose(@"removed account at pos  %d", pos);
+        }
     });
     
 }
@@ -360,7 +361,10 @@ An array of Dics what have timers to make sure everything was sent
     {
         if([[account objectForKey:@"enabled"] boolValue]==YES)
         {
-            [self connectAccountWithDictionary:account];
+            xmpp* existing=[self getConnectedAccountForID:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
+            if(existing.accountState<kStateReconnecting){
+                [self connectAccountWithDictionary:account];
+            }
         }
     }
 }

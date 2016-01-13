@@ -2114,7 +2114,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [ \"$CONFIGURATION\" != \"Debug\" ]; then\nMonalOSX/External/Crashlytics.framework/run 6e807cf86986312a050437809e762656b44b197c d082f9c014f0bce40ebff3a62eb566eb101232f02d7beab5396912a9efcc8caa\nfi\n";
+			shellScript = "if [ \"$CONFIGURATION\" != \"Debug\" ]; then\necho \"running fabric\"\nMonalOSX/External/Crashlytics.framework/run 6e807cf86986312a050437809e762656b44b197c d082f9c014f0bce40ebff3a62eb566eb101232f02d7beab5396912a9efcc8caa\nfi\n";
 		};
 		26B3F1EC17BAED3A0028EA88 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;

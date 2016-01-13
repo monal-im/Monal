@@ -559,36 +559,37 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 -(void) clearContactsForAccount: (NSString*) accountNo
 {
     
-    if(self.searchResults || self.activeChat) {
-        return;
-        
-    } else {
-        //mutex to prevent others from modifying contacts at the same time
-        dispatch_async(dispatch_get_main_queue(),
-                       ^{
-                           NSMutableArray* indexPaths =[[NSMutableArray alloc] init];
-                           NSMutableIndexSet* indexSet = [[NSMutableIndexSet alloc] init];
-                           
-                           NSInteger counter=0;
-                           for(NSDictionary* row in _contacts)
+    //mutex to prevent others from modifying contacts at the same time
+    dispatch_async(dispatch_get_main_queue(),
+                   ^{
+                       NSMutableArray* indexPaths =[[NSMutableArray alloc] init];
+                       NSMutableIndexSet* indexSet = [[NSMutableIndexSet alloc] init];
+                       
+                       NSInteger counter=0;
+                       for(NSDictionary* row in _contacts)
+                       {
+                           if([[row objectForKey:@"account_id"]  integerValue]==[accountNo integerValue] )
                            {
-                               if([[row objectForKey:@"account_id"]  integerValue]==[accountNo integerValue] )
-                               {
-                                   DDLogVerbose(@"removing  pos %d", counter);
-                                   [indexSet addIndex:counter];
-                                   
-                               }
-                               counter++;
+                               DDLogVerbose(@"removing  pos %d", counter);
+                               [indexSet addIndex:counter];
+                               
                            }
+                           counter++;
+                       }
+                       
+                       
+                       if(self.searchResults || self.activeChat) {
+                           return;
                            
+                       } else {
                            [_contacts removeObjectsAtIndexes:indexSet];
                            [_contactsTable beginUpdates];
                            [_contactsTable removeRowsAtIndexes:indexSet withAnimation:NSTableViewAnimationEffectFade];
                            [_contactsTable endUpdates];
-                           
-                           
-                       });
-    }
+                       }
+                       
+                   });
+    
 }
 
 

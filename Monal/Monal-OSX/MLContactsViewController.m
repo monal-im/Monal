@@ -577,12 +577,12 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                            counter++;
                        }
                        
+                       [_contacts removeObjectsAtIndexes:indexSet];
                        
                        if(self.searchResults || self.activeChat) {
                            return;
                            
                        } else {
-                           [_contacts removeObjectsAtIndexes:indexSet];
                            [_contactsTable beginUpdates];
                            [_contactsTable removeRowsAtIndexes:indexSet withAnimation:NSTableViewAnimationEffectFade];
                            [_contactsTable endUpdates];

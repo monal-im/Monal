@@ -46,6 +46,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshDisplay) name:kMonalWindowVisible object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshDisplay) name:kMonalAccountStatusChanged object:nil];
     
     self.contacts=[[NSMutableArray alloc] init] ;
     self.offlineContacts=[[NSMutableArray alloc] init] ;
@@ -103,7 +104,10 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 
 -(void) refreshDisplay
 {
-    [self viewWillAppear];
+    dispatch_async(dispatch_get_main_queue(), ^{
+         [self viewWillAppear];
+    });
+   
 }
 
 #pragma mark - update UI
@@ -405,22 +409,25 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                                
                                DDLogVerbose(@"inserting %@ at pos %d", [_contacts objectAtIndex:pos], pos);
                                
-                               if(self.searchResults || self.activeChat) return;
-                               
-                               [_contactsTable beginUpdates];
-                               NSIndexSet *indexSet =[[NSIndexSet alloc] initWithIndex:pos] ;
-                               [self.contactsTable insertRowsAtIndexes:indexSet withAnimation:NSTableViewAnimationEffectFade];
-                               
-                               //                                                  if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
-                               //                                                  {
-                               //                                                      if(offlinepos>=0 && offlinepos<[_offlineContacts count])
-                               //                                                      {
-                               //                                                          NSIndexPath *path2 = [NSIndexPath indexPathForRow:offlinepos inSection:kofflineSection];
-                               //                                                          [self.contactsTable deleteRowsAtIndexPaths:@[path2]
-                               //                                                                                withRowAnimation:UITableViewRowAnimationFade];
-                               //                                                      }
-                               //                                                  }
-                               [self.contactsTable endUpdates];
+                               if(self.searchResults || self.activeChat) {
+                                   [self refreshDisplay];
+                               }
+                               else {
+                                   [_contactsTable beginUpdates];
+                                   NSIndexSet *indexSet =[[NSIndexSet alloc] initWithIndex:pos] ;
+                                   [self.contactsTable insertRowsAtIndexes:indexSet withAnimation:NSTableViewAnimationEffectFade];
+                                   
+                                   //                                                  if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
+                                   //                                                  {
+                                   //                                                      if(offlinepos>=0 && offlinepos<[_offlineContacts count])
+                                   //                                                      {
+                                   //                                                          NSIndexPath *path2 = [NSIndexPath indexPathForRow:offlinepos inSection:kofflineSection];
+                                   //                                                          [self.contactsTable deleteRowsAtIndexPaths:@[path2]
+                                   //                                                                                withRowAnimation:UITableViewRowAnimationFade];
+                                   //                                                      }
+                                   //                                                  }
+                                   [self.contactsTable endUpdates];
+                               }
                            }else
                            {
                                DDLogVerbose(@"user %@ already in list %@",[user objectForKey:kusernameKey], self.contacts);
@@ -433,14 +440,18 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                                    if([user objectForKey:kfullNameKey])
                                        [[_contacts objectAtIndex:pos] setObject:[user objectForKey:kfullNameKey] forKey:@"full_name"];
                                    
-                                    if(self.searchResults || self.activeChat) return;
-                                   
-                                   [self.contactsTable beginUpdates];
-                                   
-                                   NSIndexSet *indexSet =[[NSIndexSet alloc] initWithIndex:pos] ;
-                                   NSIndexSet *columnIndexSet =[[NSIndexSet alloc] initWithIndex:0] ;
-                                   [self.contactsTable reloadDataForRowIndexes:indexSet columnIndexes:columnIndexSet];
-                                   [self.contactsTable endUpdates];
+                                   if(self.searchResults || self.activeChat){
+                                      [self refreshDisplay];
+                                   }
+                                   else  {
+                                       
+                                       [self.contactsTable beginUpdates];
+                                       
+                                       NSIndexSet *indexSet =[[NSIndexSet alloc] initWithIndex:pos] ;
+                                       NSIndexSet *columnIndexSet =[[NSIndexSet alloc] initWithIndex:0] ;
+                                       [self.contactsTable reloadDataForRowIndexes:indexSet columnIndexes:columnIndexSet];
+                                       [self.contactsTable endUpdates];
+                                   }
                                }
                            }
                            
@@ -504,10 +515,10 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                            {
                                if(self.searchResults || self.activeChat) {
                                    return;
-                                   
+                                
                                } else {
                                    [_contacts removeObjectAtIndex:pos];
-                                   if(self.searchResults || self.activeChat) return;
+                                   
                                    
                                    DDLogVerbose(@"removing %@ at pos %d", [user objectForKey:kusernameKey], pos);
                                    [_contactsTable beginUpdates];

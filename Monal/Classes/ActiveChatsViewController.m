@@ -48,6 +48,7 @@
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
         [nc addObserver:self selector:@selector(refreshDisplay) name:UIApplicationWillEnterForegroundNotification object:nil];
     
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshDisplay) name:kMonalAccountStatusChanged object:nil];
     
     [_chatListTable registerNib:[UINib nibWithNibName:@"MLContactCell"
                                                bundle:[NSBundle mainBundle]]

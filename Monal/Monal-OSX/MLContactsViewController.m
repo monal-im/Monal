@@ -110,7 +110,51 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
    
 }
 
-#pragma mark - update UI
+#pragma mark - update tabs
+
+-(void)toggleContactsTab
+{
+    self.segmentedControl.selectedSegment=kContactTab;
+    [self segmentDidChange:self];
+}
+
+-(void)toggleActiveChatTab
+{
+    self.segmentedControl.selectedSegment=kActiveTab;
+    [self segmentDidChange:self];
+}
+
+
+-(IBAction)segmentDidChange:(id)sender
+{
+    if(self.segmentedControl.selectedSegment!=self.currentSegment)
+    {
+        self.currentSegment=self.segmentedControl.selectedSegment;
+        if(self.segmentedControl.selectedSegment==kActiveTab) {
+            [self showActiveChat:YES];
+        }
+        else {
+            [self showActiveChat: NO];
+        }
+        
+        [self highlightCellForCurrentContact];
+    }
+}
+
+
+#pragma mark - other UI
+
+-(void) showActiveChat:(BOOL) shouldShow
+{
+    if (shouldShow) {
+        self.activeChat= [[DataLayer sharedInstance] activeBuddies];
+    }
+    else {
+        self.activeChat=nil;
+    }
+    
+    [self.contactsTable reloadData];
+}
 
 -(IBAction)deleteItem:(id)sender
 {
@@ -176,7 +220,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
         if(self.contactsTable.selectedRow <self.contacts.count) {
             NSDictionary *contact =[self.contacts objectAtIndex:self.contactsTable.selectedRow];
             [userDelAlert beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse returnCode) {
-               
+                
                 if(returnCode==1001) //YES
                 {
                     [[MLXMPPManager sharedInstance] removeContact:contact];
@@ -200,47 +244,6 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 {
     MLMainWindow *windowController =(MLMainWindow *)self.view.window.windowController;
     [self.view.window makeFirstResponder:windowController.contactSearchField];
-}
-
--(void)toggleContactsTab
-{
-    self.segmentedControl.selectedSegment=kContactTab;
-    [self segmentDidChange:self];
-}
-
--(void)toggleActiveChatTab
-{
-    self.segmentedControl.selectedSegment=kActiveTab;
-    [self segmentDidChange:self];
-}
-
-
--(void) showActiveChat:(BOOL) shouldShow
-{
-    if (shouldShow) {
-        self.activeChat= [[DataLayer sharedInstance] activeBuddies];
-    }
-    else {
-        self.activeChat=nil;
-    }
-    
-    [self.contactsTable reloadData];
-}
-
--(IBAction)segmentDidChange:(id)sender
-{
-    if(self.segmentedControl.selectedSegment!=self.currentSegment)
-    {
-        self.currentSegment=self.segmentedControl.selectedSegment;
-        if(self.segmentedControl.selectedSegment==kActiveTab) {
-            [self showActiveChat:YES];
-        }
-        else {
-            [self showActiveChat: NO];
-        }
-        
-        [self highlightCellForCurrentContact];
-    }
 }
 
 -(void) highlightCellForCurrentContact
@@ -652,7 +655,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                        if([[contactRow objectForKey:kContactName] caseInsensitiveCompare:[notification.userInfo objectForKey:@"from"] ]==NSOrderedSame &&
                           [[contactRow objectForKey:kAccountID]  integerValue]==[[notification.userInfo objectForKey:kaccountNoKey] integerValue] ) {
                            
-                               if(!(self.view.window.occlusionState & NSWindowOcclusionStateVisible)) {
+                           if((self.view.window.occlusionState & NSWindowOcclusionStateVisible)) {
                                [[DataLayer sharedInstance] markAsReadBuddy:[contactRow objectForKey:kContactName] forAccount:[contactRow objectForKey:kAccountID]];
                                [self updateAppBadge];
                            }

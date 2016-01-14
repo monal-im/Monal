@@ -383,8 +383,6 @@
 		26E456C51B841E19004BD74C /* Countly_OpenUDID.m in Sources */ = {isa = PBXBuildFile; fileRef = 26E456C31B841E19004BD74C /* Countly_OpenUDID.m */; };
 		26E456CA1B841E49004BD74C /* Countly.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 26E456C61B841E49004BD74C /* Countly.xcdatamodeld */; };
 		26E456CB1B841E49004BD74C /* CountlyDB.m in Sources */ = {isa = PBXBuildFile; fileRef = 26E456C91B841E49004BD74C /* CountlyDB.m */; };
-		26E456CD1B842180004BD74C /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26E456CC1B842180004BD74C /* Sparkle.framework */; };
-		26E456CF1B8421C3004BD74C /* Sparkle.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 26E456CC1B842180004BD74C /* Sparkle.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		26EC411017BDD98E0031304D /* GroupChatViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26EC410F17BDD98D0031304D /* GroupChatViewController.xib */; };
 		26EC411317BDE39E0031304D /* MLImageManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EC411217BDE39E0031304D /* MLImageManager.m */; };
 		26EE8B1C179B55D2006781F3 /* ParseChallenge.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EE8B1B179B55D2006781F3 /* ParseChallenge.m */; };
@@ -427,19 +425,6 @@
 			remoteInfo = "jrtplib-static";
 		};
 /* End PBXContainerItemProxy section */
-
-/* Begin PBXCopyFilesBuildPhase section */
-		26E456CE1B8421AF004BD74C /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				26E456CF1B8421C3004BD74C /* Sparkle.framework in CopyFiles */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -905,7 +890,6 @@
 				26B2A4CB1B73084800272E63 /* AppKit.framework in Frameworks */,
 				2681301A1BFEDCEC0074C8EE /* Fabric.framework in Frameworks */,
 				265F6BA71B7B088A006B8EBA /* Crashlytics.framework in Frameworks */,
-				26E456CD1B842180004BD74C /* Sparkle.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1917,7 +1901,6 @@
 				266272AE1B27DB8000C1CD49 /* Frameworks */,
 				266272AF1B27DB8000C1CD49 /* Resources */,
 				265F6BA81B7B08AC006B8EBA /* ShellScript */,
-				26E456CE1B8421AF004BD74C /* CopyFiles */,
 			);
 			buildRules = (
 			);

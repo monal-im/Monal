@@ -2632,7 +2632,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     DDLogVerbose(@"done reading %ld", (long)len);
     if(len>0) {
         NSData* data = [NSData dataWithBytes:(const void *)buf length:len];
-      //    DDLogVerbose(@" got raw string %s nsdata %@", buf, data);
+        DDLogVerbose(@" got raw string %s nsdata %@", buf, data);
         if(data)
         {
             // DDLogVerbose(@"waiting on net read queue");

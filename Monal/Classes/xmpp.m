@@ -47,6 +47,8 @@
 #define kXMPPReadSize 5120 // bytes
 
 #define kConnectTimeout 20ull //seconds
+#define kPingTimeout 120ull //seconds
+
 
 NSString *const kMessageId=@"MessageID";
 NSString *const kSendTimer=@"SendTimer";
@@ -721,7 +723,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                            q_background);
     
     dispatch_source_set_timer(pingTimeOut,
-                              dispatch_time(DISPATCH_TIME_NOW, kConnectTimeout* NSEC_PER_SEC),
+                              dispatch_time(DISPATCH_TIME_NOW, kPingTimeout* NSEC_PER_SEC),
                               DISPATCH_TIME_FOREVER,
                               1ull * NSEC_PER_SEC);
     

@@ -281,7 +281,13 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     NSInteger pos=-1;
     NSDictionary *selectedRow;
     
-    for(NSDictionary* row in self.contacts)
+    NSArray *currentTableData= self.contacts;
+    if(self.activeChat)
+    {
+        currentTableData=self.activeChat;
+    }
+    
+    for(NSDictionary* row in currentTableData)
     {
         if([[row objectForKey:kContactName] caseInsensitiveCompare:[user objectForKey:@"actuallyfrom"] ]==NSOrderedSame &&
            [[row objectForKey:kAccountID]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )

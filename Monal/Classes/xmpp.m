@@ -326,14 +326,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                               NSError *error;
                                                               self.password= self.oauthAccount.accessToken.accessToken;
                                                               
-#if TARGET_OS_IPHONE
-                                                              PasswordManager* pass= [[PasswordManager alloc] init:self.accountNo];
-                                                              [pass setPassword:self.password] ;
-#else
-                                                              [STKeychain storeUsername:self.accountNo  andPassword:self.password forServiceName:@"Monal"updateExisting:YES error:&error];
-#endif
-                                                              
-                                                              
                                                               [self reconnect];
                                                               
                                                               
@@ -1695,7 +1687,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         
                         if(streamNode.SASLX_OAUTH2 && self.oAuth)
                         {
-                            NSString* saslplain=[EncodingTools encodeBase64WithString: [NSString stringWithFormat:@"\0%@\0%@",  _username, _password ]];
+                            NSString* saslplain=[EncodingTools encodeBase64WithString: [NSString stringWithFormat:@"\0%@\0%@",  _username, self.oauthAccount.accessToken.accessToken ]];
                             
                             MLXMLNode* saslXML= [[MLXMLNode alloc]init];
                             saslXML.element=@"auth";

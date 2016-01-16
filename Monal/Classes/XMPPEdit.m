@@ -33,6 +33,7 @@ NSString *const kGtalk = @"Gtalk";
 
 @property (nonatomic, weak) UITextField *currentTextField;
 @property (nonatomic, strong) NSURL *oAuthURL;
+@property (nonatomic, assign) BOOL autoSave;
 
 @end
 
@@ -169,13 +170,15 @@ NSString *const kGtalk = @"Gtalk";
                                                       NSError *error = [aNotification.userInfo objectForKey:NXOAuth2AccountStoreErrorKey];
                                                       // Do something with the error
                                                   }];
+    
+    
 }
 
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
     DDLogVerbose(@"xmpp edit view will appear");
-    
+    self.autoSave=YES;
     
 }
 
@@ -183,9 +186,11 @@ NSString *const kGtalk = @"Gtalk";
 {
     [super viewWillDisappear:animated];
     DDLogVerbose(@"xmpp edit view will hide");
-    [self save];
-    if(self.password) {
-        [ [MLXMPPManager sharedInstance].passwordDic setObject:self.password forKey:self.accountno];
+    if(self.autoSave) {
+        [self save];
+        if(self.password) {
+            [ [MLXMPPManager sharedInstance].passwordDic setObject:self.password forKey:self.accountno];
+        }
     }
 }
 
@@ -356,6 +361,7 @@ NSString *const kGtalk = @"Gtalk";
 
 -(void)authenticateWithOAuth
 {
+    self.password=@""; 
     [[NXOAuth2AccountStore sharedStore] setClientID:@"472865344000-q63msgarcfs3ggiabdobkkis31ehtbug.apps.googleusercontent.com"
                                              secret:@"IGo7ocGYBYXf4znad5Qhumjt"
                                               scope:[NSSet setWithArray:@[@"https://www.googleapis.com/auth/googletalk"]]
@@ -380,6 +386,7 @@ NSString *const kGtalk = @"Gtalk";
                                            [[NXOAuth2AccountStore sharedStore] handleRedirectURL:url];
                                            
                                        };
+                                       self.autoSave=NO;
                                        [self.navigationController pushViewController:oauthVC animated:YES];
                                        
                                        

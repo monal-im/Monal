@@ -189,11 +189,11 @@
                         
                         if(self.enabledCheck.state)
                         {
-                            [[MLXMPPManager sharedInstance] connectAccount:[NSString stringWithFormat:@"%@", accountid]]];
+                            [[MLXMPPManager sharedInstance] connectAccount:[NSString stringWithFormat:@"%@", accountid]];
                         }
                         else
                         {
-                            [[MLXMPPManager sharedInstance] disconnectAccount:[NSString stringWithFormat:@"%@", accountid]]];
+                            [[MLXMPPManager sharedInstance] disconnectAccount:[NSString stringWithFormat:@"%@", accountid]];
                         }
                         
                     }

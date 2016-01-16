@@ -1265,6 +1265,21 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
+		2665C1191C4AA22700CC9A04 /* Accounts */ = {
+			isa = PBXGroup;
+			children = (
+				261A6289176C159000059090 /* AccountsViewController.h */,
+				261A628A176C159000059090 /* AccountsViewController.m */,
+				2636C43D177BD58C001CA71F /* XMPPEdit.h */,
+				2636C43E177BD58C001CA71F /* XMPPEdit.m */,
+				26D89F071A8908B6009B147C /* XMPPEdit.xib */,
+				2665C1141C4A6D2100CC9A04 /* MLOAuthViewController.h */,
+				2665C1151C4A6D2100CC9A04 /* MLOAuthViewController.m */,
+				2665C1171C4A6D4500CC9A04 /* MLOAuthViewController.xib */,
+			);
+			name = Accounts;
+			sourceTree = "<group>";
+		};
 		26715E5B176506AD00684F3D /* old nibs */ = {
 			isa = PBXGroup;
 			children = (
@@ -1284,9 +1299,6 @@
 				26DB52121777EA5100B50353 /* Tab views */,
 				269E748C18B707B500BCB2D5 /* MLPortraitNavController.h */,
 				269E748D18B707B500BCB2D5 /* MLPortraitNavController.m */,
-				2665C1141C4A6D2100CC9A04 /* MLOAuthViewController.h */,
-				2665C1151C4A6D2100CC9A04 /* MLOAuthViewController.m */,
-				2665C1171C4A6D4500CC9A04 /* MLOAuthViewController.xib */,
 			);
 			name = "View Controllers";
 			path = Classes;
@@ -1619,13 +1631,11 @@
 		26DB52121777EA5100B50353 /* Tab views */ = {
 			isa = PBXGroup;
 			children = (
+				2665C1191C4AA22700CC9A04 /* Accounts */,
 				2678A987185A82BE003AF53B /* Chat Logs */,
 				262797AC178A573F00B85D94 /* Tableviewcells */,
 				2636C440177BD595001CA71F /* Older UI code */,
 				26DB52111777C83100B50353 /* Modal views */,
-				2636C43D177BD58C001CA71F /* XMPPEdit.h */,
-				2636C43E177BD58C001CA71F /* XMPPEdit.m */,
-				26D89F071A8908B6009B147C /* XMPPEdit.xib */,
 				2696EED11791245A00BC54B8 /* chatViewController.m */,
 				2696EED01791245A00BC54B8 /* chatViewController.h */,
 				261A627E176C055400059090 /* ContactsViewController.h */,
@@ -1635,8 +1645,6 @@
 				261A6284176C156500059090 /* ActiveChatsViewController.m */,
 				261A6286176C157D00059090 /* SettingsViewController.h */,
 				261A6287176C157D00059090 /* SettingsViewController.m */,
-				261A6289176C159000059090 /* AccountsViewController.h */,
-				261A628A176C159000059090 /* AccountsViewController.m */,
 				261A628F176C15D400059090 /* GroupChatViewController.h */,
 				261A6290176C15D400059090 /* GroupChatViewController.m */,
 				26EC410F17BDD98D0031304D /* GroupChatViewController.xib */,
@@ -2484,6 +2492,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -3049,6 +3058,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -3177,6 +3187,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";

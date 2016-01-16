@@ -6,8 +6,15 @@
 //  Copyright © 2016 Monal.im. All rights reserved.
 //
 
-#import <Cocoa/Cocoa.h>
+@import UIKit;
+@import WebKit;
 
-@interface MLOAuthViewController : NSViewController
+
+@interface MLOAuthViewController : UIViewController <UIWebViewDelegate>
+
+@property (nonatomic, weak) IBOutlet UIWebView *webView;
+@property (nonatomic, strong)  NSURL *oAuthURL;
+@property (nonatomic, copy)  void (^completionHandler)(NSString *token);
+
 
 @end

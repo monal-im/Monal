@@ -8,7 +8,7 @@
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
-        <viewController id="1Y9-wn-3Ke">
+        <viewController id="1Y9-wn-3Ke" customClass="MLOAuthViewController">
             <layoutGuides>
                 <viewControllerLayoutGuide type="top" id="mHW-cy-OX0"/>
                 <viewControllerLayoutGuide type="bottom" id="ZOh-UC-bg1"/>
@@ -20,6 +20,9 @@
                     <webView contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="F0l-jI-9hr">
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <color key="backgroundColor" red="0.36078431370000003" green="0.38823529410000002" blue="0.4039215686" alpha="1" colorSpace="deviceRGB"/>
+                        <connections>
+                            <outlet property="delegate" destination="1Y9-wn-3Ke" id="dNi-fC-QCa"/>
+                        </connections>
                     </webView>
                 </subviews>
                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -30,6 +33,10 @@
                     <constraint firstItem="F0l-jI-9hr" firstAttribute="leading" secondItem="hGg-b7-lUi" secondAttribute="leadingMargin" constant="-20" id="xyt-oj-sHI"/>
                 </constraints>
             </view>
+            <connections>
+                <outlet property="view" destination="hGg-b7-lUi" id="mc5-B3-PVa"/>
+                <outlet property="webView" destination="F0l-jI-9hr" id="IVQ-fQ-Xd6"/>
+            </connections>
         </viewController>
     </objects>
 </document>

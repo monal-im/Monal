@@ -1879,8 +1879,8 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 1D6058960D05DD3E006BFB54 /* Build configuration list for PBXNativeTarget "Monal" */;
 			buildPhases = (
-				1D60588D0D05DD3D006BFB54 /* Resources */,
 				2665C11B1C4ABF0B00CC9A04 /* Build number */,
+				1D60588D0D05DD3D006BFB54 /* Resources */,
 				1D60588E0D05DD3D006BFB54 /* Sources */,
 				1D60588F0D05DD3D006BFB54 /* Frameworks */,
 				26B3F1EC17BAED3A0028EA88 /* Crashlytics */,
@@ -2152,7 +2152,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "oldBuildNumber=$(git tag --sort=\"v:refname\" |grep \"Build_\" | tail -n1 | sed 's/Build_//g')\nbuildNumber=$(expr $oldBuildNumber + 1)\n\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $buildNumber\" \"${PROJECT_DIR}/Monal-Info.plist\"";
+			shellScript = "oldBuildNumber=$(git tag --sort=\"v:refname\" |grep \"Build_iOS\" | tail -n1 | sed 's/Build_iOS_//g')\nbuildNumber=$(expr $oldBuildNumber + 1)\n\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $buildNumber\" \"${PROJECT_DIR}/Monal-Info.plist\"";
 		};
 		2665C11C1C4ABF7100CC9A04 /* Remove Build number */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -2180,7 +2180,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [ \"${CONFIGURATION}\" == \"AppStore\" ]; then\noldBuildNumber=$(git tag --sort=\"v:refname\" |grep \"Build_\" | tail -n1 | sed 's/Build_//g')\nbuildNumber=$(expr $oldBuildNumber + 1)\ngit tag Build_$buildNumber\ngit push origin Build_$buildNumber\nfi\n";
+			shellScript = "if [ \"${CONFIGURATION}\" == \"AppStore\" ]; then\noldBuildNumber=$(git tag --sort=\"v:refname\" |grep \"Build_iOS\" | tail -n1 | sed 's/Build_iOS_//g')\nbuildNumber=$(expr $oldBuildNumber + 1)\ngit tag Build_iOS_$buildNumber\ngit push origin Build_iOS_$buildNumber\nfi\n";
 		};
 		26B3F1EC17BAED3A0028EA88 /* Crashlytics */ = {
 			isa = PBXShellScriptBuildPhase;

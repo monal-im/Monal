@@ -11,6 +11,9 @@
 
 @interface MLImageManager : NSObject
 
+
+
+#if TARGET_OS_IPHONE
 /**
  chatview inbound background image
  */
@@ -19,7 +22,11 @@
  chatview outbound background image
  */
 @property (nonatomic, strong) UIImage* outboundImage;
-@property (nonatomic, strong) NSString* something; 
+
+#else
+
+#endif
+
 
 + (MLImageManager* )sharedInstance;
 
@@ -29,10 +36,20 @@
  */
 -(void) setIconForContact:(NSString*) contact andAccount:(NSString*) accountNo WithData:(NSString*) data ;
 
+
+#if TARGET_OS_IPHONE
 /**
- retrieves a uiimage for the icon. returns noicon.png if nothing is found. never returns nil. 
+ retrieves a uiimage for the icon. returns noicon.png if nothing is found. never returns nil.
  */
--(UIImage*) getIconForContact:(NSString*) contact andAccount:(NSString*) accountNo;
+-(UIImage *) getIconForContact:(NSString*) contact andAccount:(NSString *) accountNo;
+
+#else
+/**
+ retrieves a uiimage for the icon. returns noicon.png if nothing is found. never returns nil.
+ */
+-(NSImage *) getIconForContact:(NSString*) contact andAccount:(NSString *) accountNo;
+
+#endif
 
 /**
  Purge cache in the event of  a memory warning

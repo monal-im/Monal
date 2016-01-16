@@ -282,9 +282,12 @@ void AudioInputCallback(
     packCount=0;
     
     disconnecting=NO;
+    #if TARGET_OS_IPHONE
+[[AVAudioSession sharedInstance] setCategory: AVAudioSessionCategoryPlayAndRecord error: nil];
     
-    [[AVAudioSession sharedInstance] setCategory: AVAudioSessionCategoryPlayAndRecord error: nil];
-    
+#else
+#endif
+   
     //********* Audio Queue ********/
     
     recordState.dataFormat.mSampleRate = 8000.0;

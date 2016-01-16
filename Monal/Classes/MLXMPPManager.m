@@ -8,7 +8,14 @@
 
 #import "MLXMPPManager.h"
 #import "DataLayer.h"
+
+
+#if TARGET_OS_IPHONE
 #import "MonalAppDelegate.h"
+#import "PasswordManager.h"
+#else
+#import "STKeyChain.h"
+#endif
 
 static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
@@ -122,6 +129,8 @@ An array of Dics what have timers to make sure everything was sent
 
 -(void) setKeepAlivetimer
 {
+    #if TARGET_OS_IPHONE
+
     NSTimeInterval timeInterval= 600; // 600 seconds
     BOOL keepAlive=[[UIApplication sharedApplication] setKeepAliveTimeout:timeInterval handler:^{
         DDLogInfo(@"began bg keep alive ping");
@@ -141,11 +150,16 @@ An array of Dics what have timers to make sure everything was sent
     {
         DDLogVerbose(@"failed to install keep alive timer");
     }
+#else
+#endif
 }
 
 -(void) clearKeepAlive
 {
+#if TARGET_OS_IPHONE
     [[UIApplication sharedApplication] clearKeepAliveTimeout];
+#else
+#endif
     
 }
 
@@ -198,7 +212,7 @@ An array of Dics what have timers to make sure everything was sent
         _accountList=[[DataLayer sharedInstance] accountList];
         for (NSDictionary* account in _accountList)
         {
-            if([[account objectForKey:@"account_id"] integerValue]==[accountNo integerValue])
+            if([[account objectForKey:kAccountID] integerValue]==[accountNo integerValue])
             {
                 [self connectAccountWithDictionary:account];
             }
@@ -209,7 +223,7 @@ An array of Dics what have timers to make sure everything was sent
 
 -(void) connectAccountWithDictionary:(NSDictionary*)account
 {
-    xmpp* existing=[self getConnectedAccountForID:[NSString stringWithFormat:@"%@",[account objectForKey:@"account_id"]]];
+    xmpp* existing=[self getConnectedAccountForID:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
     if(existing)
     {
         dispatch_async(_netQueue,
@@ -220,42 +234,50 @@ An array of Dics what have timers to make sure everything was sent
         
         return;
     }
-    DDLogVerbose(@"connecting account %@",[account objectForKey:@"account_name"] );
+    DDLogVerbose(@"connecting account %@",[account objectForKey:kAccountName] );
     
     xmpp* xmppAccount=[[xmpp alloc] init];
     xmppAccount.explicitLogout=NO;
     
-    xmppAccount.username=[account objectForKey:@"username"];
-    xmppAccount.domain=[account objectForKey:@"domain"];
-    xmppAccount.resource=[account objectForKey:@"resource"];
+    xmppAccount.username=[account objectForKey:kUsername];
+    xmppAccount.domain=[account objectForKey:kDomain];
+    xmppAccount.resource=[account objectForKey:kResource];
     
-    xmppAccount.server=[account objectForKey:@"server"];
-    xmppAccount.port=[[account objectForKey:@"other_port"] integerValue];
-    xmppAccount.SSL=[[account objectForKey:@"secure"] boolValue];
-    xmppAccount.oldStyleSSL=[[account objectForKey:@"oldstyleSSL"] boolValue];
-    xmppAccount.selfSigned=[[account objectForKey:@"selfsigned"] boolValue];
+    xmppAccount.server=[account objectForKey:kServer];
+    xmppAccount.port=[[account objectForKey:kPort] integerValue];
+    xmppAccount.SSL=[[account objectForKey:kSSL] boolValue];
+    xmppAccount.oldStyleSSL=[[account objectForKey:kOldSSL] boolValue];
+    xmppAccount.selfSigned=[[account objectForKey:kSelfSigned] boolValue];
+    xmppAccount.oAuth=[[account objectForKey:kOauth] boolValue];
     
-    xmppAccount.accountNo=[NSString stringWithFormat:@"%@",[account objectForKey:@"account_id"]];
+    xmppAccount.accountNo=[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]];
+#if TARGET_OS_IPHONE
     NSLog(@"state %ld", [UIApplication sharedApplication].applicationState);
     if([UIApplication sharedApplication].applicationState!=UIApplicationStateActive)
     {
         //keychain wont work when device is locked.
-        if([self.passwordDic objectForKey:[account objectForKey:@"account_id"]])
+        if([self.passwordDic objectForKey:[account objectForKey:kAccountID]])
         {
-            xmppAccount.password=[self.passwordDic objectForKey:[account objectForKey:@"account_id"]];
+            xmppAccount.password=[self.passwordDic objectForKey:[account objectForKey:kAccountID]];
             DDLogVerbose(@"connect got password from dic");
         }
         else {
-            PasswordManager* passMan= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",[account objectForKey:@"account_id"]]];
+            PasswordManager* passMan= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
             xmppAccount.password=[passMan getPassword] ;
-            [self.passwordDic setObject:xmppAccount.password forKey:[account objectForKey:@"account_id"]];
+            [self.passwordDic setObject:xmppAccount.password forKey:[account objectForKey:kAccountID]];
         }
     }
     else
+#else
+        NSError *error;
+    xmppAccount.password =[STKeychain getPasswordForUsername:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]] andServiceName:@"Monal" error:&error];
+    
+#endif
     {
-        PasswordManager* passMan= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",[account objectForKey:@"account_id"]]];
-        xmppAccount.password=[passMan getPassword] ;
-        [self.passwordDic setObject:xmppAccount.password forKey:[account objectForKey:@"account_id"]];
+        if(!xmppAccount.password)  {
+            xmppAccount.password=@"";
+        }
+        [self.passwordDic setObject:xmppAccount.password forKey:[account objectForKey:kAccountID]];
     }
     
     if([xmppAccount.password length]==0) //&& ([tempPass length]==0)
@@ -263,8 +285,10 @@ An array of Dics what have timers to make sure everything was sent
         // no password error
     }
     
+
+     xmppAccount.contactsVC=self.contactVC;
+
     
-    xmppAccount.contactsVC=self.contactVC;
     //sepcifically look for the server since we might not be online or behind firewall
     Reachability* hostReach = [Reachability reachabilityWithHostName:xmppAccount.server ] ;
     
@@ -290,7 +314,7 @@ An array of Dics what have timers to make sure everything was sent
     
     dispatch_async(dispatch_get_main_queue(), ^{
         int index=0;
-        int pos=0;
+        int pos=-1;
         for (NSDictionary* account in _connectedXMPP)
         {
             xmpp* xmppAccount=[account objectForKey:@"xmppAccount"];
@@ -308,9 +332,10 @@ An array of Dics what have timers to make sure everything was sent
             index++;
         }
         
-        if((pos>=0) && (pos<[_connectedXMPP count]))
+        if((pos>=0) && (pos<[_connectedXMPP count])) {
             [_connectedXMPP removeObjectAtIndex:pos];
-        
+            DDLogVerbose(@"removed account at pos  %d", pos);
+        }
     });
     
 }
@@ -336,7 +361,10 @@ An array of Dics what have timers to make sure everything was sent
     {
         if([[account objectForKey:@"enabled"] boolValue]==YES)
         {
-            [self connectAccountWithDictionary:account];
+            xmpp* existing=[self getConnectedAccountForID:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
+            if(existing.accountState<kStateReconnecting){
+                [self connectAccountWithDictionary:account];
+            }
         }
     }
 }
@@ -434,6 +462,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
                        if(account)
                        {
                            success=YES;
+                         
                            [account sendMessage:message toContact:contact isMUC:isMUC andMessageId:messageId];
                        }
                        
@@ -473,6 +502,17 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
     return toreturn;
 }
 
+
+-(NSString*) getAccountNameForConnectedRow:(NSInteger) row
+{
+    NSString *toreturn;
+    if(row<[_connectedXMPP count] && row>=0) {
+        NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
+        xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
+        toreturn= [NSString stringWithFormat:@"%@@%@",account.username, account.domain];
+    }
+    return toreturn;
+}
 
 
 -(NSString*) idForConnectedRow:(NSInteger) row
@@ -627,8 +667,12 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 #pragma mark message signals
 -(void) handleNewMessage:(NSNotification *)notification
 {
+#if TARGET_OS_IPHONE
     MonalAppDelegate* appDelegate= (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
     [appDelegate updateUnread];
+    
+#else
+#endif
 }
 
 

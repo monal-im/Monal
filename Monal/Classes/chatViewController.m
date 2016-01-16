@@ -282,11 +282,12 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     
     if(!_day) {
         _messagelist =[[DataLayer sharedInstance] messageHistory:_contactName forAccount: _accountNo];
-        int unread =[[DataLayer sharedInstance] countUserUnreadMessages:_contactName forAccount: _accountNo];
+       [[DataLayer sharedInstance] countUserUnreadMessages:_contactName forAccount: _accountNo withCompletion:^(NSNumber *unread) {
+           if([unread integerValue]==0) _firstmsg=YES;
+           
+       }];
         _isMUC=[[DataLayer sharedInstance] isBuddyMuc:_contactName forAccount: _accountNo];
         
-        if(unread==0)
-            _firstmsg=YES;
     }
     else
     {
@@ -371,8 +372,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void) refreshCounter
 {
-    
-    //coming in  from abckgroun
+    //coming in  from background
     if(!_day) {
         [[DataLayer sharedInstance] markAsReadBuddy:self.contactName forAccount:self.accountNo];
         
@@ -437,10 +437,10 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         return;
     }
     
-	if([[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:_accountNo withMessage:message actuallyFrom:self.jid withId:messageId])
-	{
+	[[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:_accountNo withMessage:message actuallyFrom:self.jid withId:messageId withCompletion:^(BOOL result) {
 		DDLogVerbose(@"added message");
         
+        if(result) {
         dispatch_async(dispatch_get_main_queue(),
                        ^{
                            NSDictionary* userInfo = @{@"af": self.jid,
@@ -451,28 +451,30 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                                                              };
                            [_messagelist addObject:[userInfo mutableCopy]];
                            
+                           NSIndexPath *path1;
                            [_messageTable beginUpdates];
-                           NSIndexPath *path1 = [NSIndexPath indexPathForRow:[_messagelist count]-1  inSection:0];
-                           [_messageTable insertRowsAtIndexPaths:@[path1]
-                                                withRowAnimation:UITableViewRowAnimationBottom];
+                           NSInteger bottom = [_messageTable numberOfRowsInSection:0];
+                           if(bottom>=0) {
+                                path1 = [NSIndexPath indexPathForRow:bottom  inSection:0];
+                               [_messageTable insertRowsAtIndexPaths:@[path1]
+                                                    withRowAnimation:UITableViewRowAnimationBottom];
+                           }
                            [_messageTable endUpdates];
                            
+                           [self scrollToBottom];
                            
-                           if(![_messageTable.indexPathsForVisibleRows containsObject:path1])
-                           {
-                               [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:NO];
-                           }
                        });
         
     }
 	else {
 		DDLogVerbose(@"failed to add message");
     }
+    }];
 	
 	// make sure its in active
 	if(_firstmsg==YES)
 	{
-        [[DataLayer sharedInstance] addActiveBuddies:to forAccount:_accountNo];
+        [[DataLayer sharedInstance] addActiveBuddies:to forAccount:_accountNo withCompletion:nil];
         _firstmsg=NO;
 	}
 
@@ -492,29 +494,33 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                            if([[notification.userInfo objectForKey:@"to"] isEqualToString:_contactName])
                            {
                                userInfo = @{@"af": [notification.userInfo objectForKey:@"actuallyfrom"],
-                                                          @"message": [notification.userInfo objectForKey:@"messageText"],
-                                                          @"thetime": [self currentGMTTime],   @"delivered":@YES};
-
+                                            @"message": [notification.userInfo objectForKey:@"messageText"],
+                                            @"thetime": [self currentGMTTime],   @"delivered":@YES};
+                               
                            } else  {
-                          userInfo = @{@"af": [notification.userInfo objectForKey:@"actuallyfrom"],
-                                                      @"message": [notification.userInfo objectForKey:@"messageText"],
-                                                      @"thetime": [self currentGMTTime]
-                                     };
+                               userInfo = @{@"af": [notification.userInfo objectForKey:@"actuallyfrom"],
+                                            @"message": [notification.userInfo objectForKey:@"messageText"],
+                                            @"thetime": [self currentGMTTime]
+                                            };
                            }
                            
                            [_messagelist addObject:userInfo];
                            
                            [_messageTable beginUpdates];
-                           NSIndexPath *path1 = [NSIndexPath indexPathForRow:[_messagelist count]-1  inSection:0];
-                           [_messageTable insertRowsAtIndexPaths:@[path1]
-                                                withRowAnimation:UITableViewRowAnimationTop];
-                           [_messageTable endUpdates];
-                         
-                            [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:YES];
+                           NSIndexPath *path1;
+                           NSInteger bottom = [_messageTable numberOfRowsInSection:0];
+                           if(bottom>0) {
+                               path1 = [NSIndexPath indexPathForRow:bottom  inSection:0];
+                               [_messageTable insertRowsAtIndexPaths:@[path1]
+                                                    withRowAnimation:UITableViewRowAnimationBottom];
+                           }
                            
+                           [_messageTable endUpdates];
+                           
+                           [self scrollToBottom];
                            
                            //mark as read
-                           [[DataLayer sharedInstance] markAsReadBuddy:_contactName forAccount:_accountNo];
+                          // [[DataLayer sharedInstance] markAsReadBuddy:_contactName forAccount:_accountNo];
                        });
     }
 }
@@ -524,18 +530,18 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     dispatch_async(dispatch_get_main_queue(),
                    ^{
                        int row=0;
+                       [_messageTable beginUpdates];
                        for(NSMutableDictionary *rowDic in _messagelist)
                        {
                            if([[rowDic objectForKey:@"messageid"] isEqualToString:messageId]) {
                                [rowDic setObject:[NSNumber numberWithBool:delivered] forKey:@"delivered"];
                                NSIndexPath *indexPath =[NSIndexPath indexPathForRow:row inSection:0];
-                               dispatch_async(dispatch_get_main_queue(), ^{
                                    [_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
-                               });
                                break;
                            }
                            row++;
                        }
+                       [_messageTable endUpdates];
                    });
 }
 
@@ -570,9 +576,10 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void) scrollToBottom
 {
-    if([_messagelist count]>0)
+    NSInteger bottom = [_messageTable numberOfRowsInSection:0];
+    if(bottom>0)
     {
-        NSIndexPath *path1 = [NSIndexPath indexPathForRow:[_messagelist count]-1  inSection:0];
+        NSIndexPath *path1 = [NSIndexPath indexPathForRow:bottom-1  inSection:0];
         if(![_messageTable.indexPathsForVisibleRows containsObject:path1])
         {
             [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:NO];
@@ -866,6 +873,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         
         DDLogVerbose(@"%@", message);
         
+#warning will not work if it is a newly sent messge as i m not storing message id in the inserts.  need to do that. 
         if([message objectForKey:@"message_history_id"])
         {
             [[DataLayer sharedInstance] deleteMessageHistory:[NSString stringWithFormat:@"%@",[message objectForKey:@"message_history_id"]]];
@@ -927,11 +935,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                          if([_messagelist count]>0)
                          {
                              NSIndexPath *path1 = [NSIndexPath indexPathForRow:[_messagelist count]-1  inSection:0];
-                             if(![_messageTable.indexPathsForVisibleRows containsObject:path1])
-                             {
-                                 
-                                 [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:NO];
-                             }
+                             [self scrollToBottom];
                          }
                          
                      } completion:^(BOOL finished) {

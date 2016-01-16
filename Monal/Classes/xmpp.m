@@ -13,6 +13,16 @@
 #import "EncodingTools.h"
 #import "MLXMPPManager.h"
 
+
+#if TARGET_OS_IPHONE
+#import "UIAlertView+Blocks.h"
+#import "PasswordManager.h"
+#else
+#import "STKeyChain.h"
+#endif
+
+#import "MLImageManager.h"
+
 //objects
 #import "XMPPIQ.h"
 #import "XMPPPresence.h"
@@ -29,12 +39,16 @@
 #import "ParseA.h"
 #import "ParseResumed.h"
 
-#import "MLImageManager.h"
-#import "UIAlertView+Blocks.h"
+#import "NXOAuth2.h"
+
+
+
 
 #define kXMPPReadSize 5120 // bytes
 
 #define kConnectTimeout 20ull //seconds
+#define kPingTimeout 120ull //seconds
+
 
 NSString *const kMessageId=@"MessageID";
 NSString *const kSendTimer=@"SendTimer";
@@ -91,6 +105,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
  */
 @property (nonatomic, strong) NSMutableArray *unAckedStanzas;
 
+@property (nonatomic, strong) NXOAuth2Account *oauthAccount;
+
 @end
 
 
@@ -139,12 +155,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     
     _versionHash=[self getVersionString];
+
     return self;
 }
 
 -(void)dealloc
 {
-    
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 -(void) setRunLoop
@@ -166,9 +183,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     CFReadStreamRef readRef= NULL;
     CFWriteStreamRef writeRef= NULL;
     
-    DDLogInfo(@"stream  creating to  server: %@ port: %d", _server, _port);
+    DDLogInfo(@"stream  creating to  server: %@ port: %d", _server, (UInt32)_port);
     
-    CFStreamCreatePairWithSocketToHost(NULL, (__bridge CFStringRef)_server, _port, &readRef, &writeRef);
+    CFStreamCreatePairWithSocketToHost(NULL, (__bridge CFStringRef)_server, (UInt32)_port , &readRef, &writeRef);
     
     _iStream= (__bridge NSInputStream*)readRef;
     _oStream= (__bridge NSOutputStream*) writeRef;
@@ -181,6 +198,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     else
         DDLogInfo(@"streams created ok");
     
+    #if TARGET_OS_IPHONE
     if((CFReadStreamSetProperty((__bridge CFReadStreamRef)_iStream,
                                 kCFStreamNetworkServiceType,  kCFStreamNetworkServiceTypeVoIP))
        //       &&
@@ -194,6 +212,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     {
         DDLogInfo(@"could not set VOIP properties on streams.");
     }
+#else
+
+#endif
+ 
     
     if((_SSL==YES)  && (_oldStyleSSL==YES))
     {
@@ -282,6 +304,42 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         _fulluser=_username;
     }
     
+    if(self.oAuth) {
+        [[NSNotificationCenter defaultCenter] addObserverForName:NXOAuth2AccountStoreDidFailToRequestAccessNotification
+                                                          object:[NXOAuth2AccountStore sharedStore]
+                                                           queue:nil
+                                                      usingBlock:^(NSNotification *aNotification){
+                                                          NSError *error = [aNotification.userInfo objectForKey:NXOAuth2AccountStoreErrorKey];
+                                                          // Do something with the error
+                                                      }];
+        
+        NSArray *accounts= [[NXOAuth2AccountStore sharedStore] accountsWithAccountType:_fulluser];
+        
+        if([accounts count]>0)
+        {
+            self.oauthAccount= [accounts objectAtIndex:0];
+        }
+        
+        [[NSNotificationCenter defaultCenter] addObserverForName:NXOAuth2AccountDidChangeAccessTokenNotification
+                                                          object:self.oauthAccount queue:nil usingBlock:^(NSNotification *note) {
+                                                              
+                                                              NSError *error;
+                                                              self.password= self.oauthAccount.accessToken.accessToken;
+                                                              
+#if TARGET_OS_IPHONE
+                                                              PasswordManager* pass= [[PasswordManager alloc] init:self.accountNo];
+                                                              [pass setPassword:self.password] ;
+#else
+                                                              [STKeychain storeUsername:self.accountNo  andPassword:self.password forServiceName:@"Monal"updateExisting:YES error:&error];
+#endif
+                                                              
+                                                              
+                                                              [self reconnect];
+                                                              
+                                                              
+                                                          }];
+    }
+    
     if(_oldStyleSSL==NO) {
         // do DNS discovery if it hasn't already been set
         if([_discoveredServerList count]==0) {
@@ -348,26 +406,34 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             }];
                 _loginStarted=NO;
                 // try again
-                if((self.accountState<kStateHasStream) && (_loggedInOnce))
-                {
-                    DDLogInfo(@"trying to login again");
-                    //make sure we are enabled still.
-                    if([[DataLayer sharedInstance] isAccountEnabled:[NSString stringWithFormat:@"%@",self.accountNo]]) {
-                        
-                        //temp background task while a new one is created
-                        __block UIBackgroundTaskIdentifier tempTask= [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
-                            [[UIApplication sharedApplication] endBackgroundTask:tempTask];
-                            tempTask=UIBackgroundTaskInvalid;
-                        }];
-                        [self reconnect];
-                        
+            if((self.accountState<kStateHasStream) && (_loggedInOnce))
+            {
+                DDLogInfo(@"trying to login again");
+                //make sure we are enabled still.
+                if([[DataLayer sharedInstance] isAccountEnabled:[NSString stringWithFormat:@"%@",self.accountNo]]) {
+#if TARGET_OS_IPHONE
+                    //temp background task while a new one is created
+                    __block UIBackgroundTaskIdentifier tempTask= [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
                         [[UIApplication sharedApplication] endBackgroundTask:tempTask];
                         tempTask=UIBackgroundTaskInvalid;
-                        
+                    }];
+                    
+#endif
+                    
+                    [self reconnect];
+                    
+                    
+#if TARGET_OS_IPHONE
+                    [[UIApplication sharedApplication] endBackgroundTask:tempTask];
+                    tempTask=UIBackgroundTaskInvalid;
+#endif
+                    
                     }
                 }
                 else if (self.accountState==kStateLoggedIn ) {
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kMLHasConnectedNotice object:nil];
+                    NSString *accountName =[NSString stringWithFormat:@"%@@%@", self.username, self.domain];
+                    NSDictionary *dic =@{@"AccountNo":self.accountNo, @"AccountName":accountName};
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kMLHasConnectedNotice object:dic];
                 }
                 else {
                     DDLogInfo(@"failed to login and not retrying");
@@ -499,6 +565,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     [[DataLayer sharedInstance]  resetContactsForAccount:_accountNo];
     _reconnectScheduled =NO;
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountStatusChanged object:nil];
 }
 -(void) reconnect
 {
@@ -521,6 +589,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     
     _loginStarted=YES;
+    #if TARGET_OS_IPHONE
     
     __block UIBackgroundTaskIdentifier reconnectBackgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
         
@@ -590,6 +659,35 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         }
     }
     
+#else
+    if(_accountState>=kStateReconnecting) {
+        DDLogInfo(@" account sate >=reconencting, disconnecting first" );
+        [self disconnect];
+        _loginStarted=YES;
+    }
+    
+    NSTimeInterval wait=scheduleWait;
+    if(!_loggedInOnce) {
+        wait=0;
+    }
+    
+    if(!_reconnectScheduled)
+    {
+        _reconnectScheduled=YES;
+        DDLogInfo(@"Trying to connect again in %f seconds. ", wait);
+        dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, wait * NSEC_PER_SEC), q_background,  ^{
+            //there may be another login operation freom reachability or another timer
+            if(self.accountState<kStateReconnecting) {
+                [self connect];
+            }
+        });
+    } else  {
+        DDLogInfo(@"reconnect scheduled already" );
+    }
+    
+#endif
+    
     DDLogInfo(@"reconnect exits");
 }
 
@@ -625,7 +723,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                            q_background);
     
     dispatch_source_set_timer(pingTimeOut,
-                              dispatch_time(DISPATCH_TIME_NOW, kConnectTimeout* NSEC_PER_SEC),
+                              dispatch_time(DISPATCH_TIME_NOW, kPingTimeout* NSEC_PER_SEC),
                               DISPATCH_TIME_FOREVER,
                               1ull * NSEC_PER_SEC);
     
@@ -717,9 +815,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     NSString* __block toReturn=nil;
     NSString* __block stanzaType=nil;
     
-    int stanzacounter=0;
-    int maxPos=[_inputBuffer length];
-    DDLogVerbose(@"maxPos %d", maxPos);
+    NSInteger stanzacounter=0;
+    NSInteger maxPos=[_inputBuffer length];
+    DDLogVerbose(@"maxPos %ld", (long)maxPos);
     
     if(maxPos<2)
     {
@@ -735,12 +833,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     
     
-    int finalstart=0;
-    int finalend=0;
+    NSInteger finalstart=0;
+    NSInteger finalend=0;
     
     
-    int startpos=startrange.location;
-    DDLogVerbose(@"start pos%d", startpos);
+    NSInteger startpos=startrange.location;
+    DDLogVerbose(@"start pos%ld", (long)startpos);
     
     if(maxPos>startpos)
         while(stanzacounter<[_stanzaTypes count])
@@ -864,7 +962,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         }
     
     //if this happens its  probably a stream error.sanity check is  preventing crash
-    if((finalend-finalstart<=maxPos) && finalend!=NSNotFound && finalstart!=NSNotFound)
+    if((finalend-finalstart<=maxPos) && finalend!=NSNotFound && finalstart!=NSNotFound && finalend>=finalstart)
     {
         toReturn=  [_inputBuffer substringWithRange:NSMakeRange(finalstart,finalend-finalstart)];
     }
@@ -878,7 +976,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         
     }
     else{
-        if((finalend-finalstart<=maxPos) && finalend!=NSNotFound && finalstart!=NSNotFound)
+        if((finalend-finalstart<=maxPos) && finalend!=NSNotFound && finalstart!=NSNotFound && finalend>=finalstart)
         {
             //  DDLogVerbose(@"to del start %d end %d: %@", finalstart, finalend, _inputBuffer);
             if(finalend <[_inputBuffer length] ) {
@@ -1040,9 +1138,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     
                     if(iqNode.photoBinValue)
                     {
+                        
+                        
                         [[MLImageManager sharedInstance] setIconForContact:iqNode.user andAccount:_accountNo WithData:iqNode.photoBinValue ];
+                        
+                        
                     }
-                    
+
                     if(!fullname) fullname=iqNode.user;
                     
                     NSDictionary* userDic=@{kusernameKey: iqNode.user,
@@ -1260,7 +1362,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                 if(iqNode.user && iqNode.resource) {
                                     
                                     dispatch_async(dispatch_get_main_queue(), ^{
-                                        
+#if TARGET_OS_IPHONE
                                         NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"Incoming Call From %@?", nil), iqNode.from ];
                                         RIButtonItem* cancelButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Decline", nil) action:^{
                                             XMPPIQ* node =[self.jingle rejectJingleTo:iqNode.user withId:iqNode.idval andResource:iqNode.resource];
@@ -1276,6 +1378,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                         
                                         UIAlertView* alert =[[UIAlertView alloc] initWithTitle:@"Audio Call" message:messageString cancelButtonItem:cancelButton otherButtonItems:yesButton, nil];
                                         [alert show];
+#else
+#endif
                                     } );
                                     
                                     
@@ -1318,6 +1422,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 if(messageNode.mucInvite)
                 {
                     dispatch_async(dispatch_get_main_queue(), ^{
+#if TARGET_OS_IPHONE
                         NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"You have been invited to a conversation %@?", nil), messageNode.from ];
                         RIButtonItem* cancelButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Cancel", nil) action:^{
                             
@@ -1330,6 +1435,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         
                         UIAlertView* alert =[[UIAlertView alloc] initWithTitle:@"Chat Invite" message:messageString cancelButtonItem:cancelButton otherButtonItems:yesButton, nil];
                         [alert show];
+#else
+#endif
                     });
                     
                 }
@@ -1356,7 +1463,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                         forAccount:_accountNo withBody:messageNode.messageText
                                                       actuallyfrom:messageNode.actualFrom delivered:YES  unread:unread];
                         
-                        [[DataLayer sharedInstance] addActiveBuddies:messageNode.from forAccount:_accountNo];
+                        [[DataLayer sharedInstance] addActiveBuddies:messageNode.from forAccount:_accountNo withCompletion:nil];
                         
                         
                         if(messageNode.from ) {
@@ -1383,8 +1490,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 
                 if(messageNode.avatarData)
                 {
+
                     [[MLImageManager sharedInstance] setIconForContact:messageNode.actualFrom andAccount:_accountNo WithData:messageNode.avatarData];
-                    
+
                 }
                 
             }
@@ -1398,7 +1506,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 else {
                     if([presenceNode.type isEqualToString:kpresencesSubscribe])
                     {
+
                         dispatch_async(dispatch_get_main_queue(), ^{
+#if TARGET_OS_IPHONE
+
                             NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"Do you wish to allow %@ to add you to their contacts?", nil), presenceNode.from ];
                             RIButtonItem* cancelButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"No", nil) action:^{
                                 [self rejectFromRoster:presenceNode.from];
@@ -1413,6 +1524,20 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             
                             UIAlertView* alert =[[UIAlertView alloc] initWithTitle:@"Approve Contact" message:messageString cancelButtonItem:cancelButton otherButtonItems:yesButton, nil];
                             [alert show];
+#else
+                            [self.contactsVC showAuthRequestForContact:presenceNode.from  withCompletion:^(BOOL allowed) {
+                                
+                                if(allowed)
+                                {
+                                    [self approveToRoster:presenceNode.from];
+                                    [self addToRoster:presenceNode.from];
+                                } else {
+                                    [self rejectFromRoster:presenceNode.from];
+                                }
+                                
+                            }];
+                            
+#endif
                         });
                         
                     }
@@ -1472,7 +1597,19 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             
                             if(!presenceNode.MUC) {
                                 // do not do this in the background
+                                
+                                BOOL checkChange = YES;
+                              
+                                
+#if TARGET_OS_IPHONE
                                 if([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground)
+                                {
+                                    checkChange=NO;
+                                }
+#else
+#endif
+                                
+                               if(checkChange)
                                 {
                                     //check for vcard change
                                     if(presenceNode.photoHash) {
@@ -1556,7 +1693,24 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     {
                         //look at menchanisms presented
                         
-                        if(streamNode.SASLPlain)
+                        if(streamNode.SASLX_OAUTH2 && self.oAuth)
+                        {
+                            NSString* saslplain=[EncodingTools encodeBase64WithString: [NSString stringWithFormat:@"\0%@\0%@",  _username, _password ]];
+                            
+                            XMLNode* saslXML= [[XMLNode alloc]init];
+                            saslXML.element=@"auth";
+                            [saslXML.attributes setObject: @"urn:ietf:params:xml:ns:xmpp-sasl"  forKey:@"xmlns"];
+                            [saslXML.attributes setObject: @"X-OAUTH2"forKey: @"mechanism"];
+                            [saslXML.attributes setObject: @"auth:service"forKey: @"oauth2"];
+                            
+                            //google only uses sasl plain
+                            [saslXML.attributes setObject:@"http://www.google.com/talk/protocol/auth" forKey: @"xmlns:auth"];
+                    
+                            saslXML.data=saslplain;
+                            [self send:saslXML];
+                            
+                        }
+                        else if (streamNode.SASLPlain)
                         {
                             NSString* saslplain=[EncodingTools encodeBase64WithString: [NSString stringWithFormat:@"\0%@\0%@",  _username, _password ]];
                             
@@ -1769,8 +1923,26 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 {
                     _loginError=YES;
                     [self disconnect];
+                    //check for oauth
+                    
+                    if(self.oAuth) {
+                        [[NXOAuth2AccountStore sharedStore] setClientID:@"472865344000-q63msgarcfs3ggiabdobkkis31ehtbug.apps.googleusercontent.com"
+                                                                 secret:@"IGo7ocGYBYXf4znad5Qhumjt"
+                                                                  scope:[NSSet setWithArray:@[@"https://www.googleapis.com/auth/googletalk"]]
+                                                       authorizationURL:[NSURL URLWithString:@"https://accounts.google.com/o/oauth2/auth"]
+                                                               tokenURL:[NSURL URLWithString:@"https://www.googleapis.com/oauth2/v3/token"]
+                                                            redirectURL:[NSURL URLWithString:@"urn:ietf:wg:oauth:2.0:oob:auto"]
+                                                          keyChainGroup:@"MonalGTalk"
+                                                         forAccountType:_fulluser];
+                        
+                        self.oauthAccount.oauthClient.desiredScope=[NSSet setWithArray:@[@"https://www.googleapis.com/auth/googletalk"]];
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            [self.oauthAccount.oauthClient refreshAccessToken];
+                        });
+                    }
+                    
                 }
-                
+            
             }
             else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"challenge"])
             {
@@ -1934,6 +2106,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             [self.contactsVC hideConnecting:info];
                         }];
                         
+                        NSString *accountName =[NSString stringWithFormat:@"%@@%@", self.username, self.domain];
+                        NSDictionary *dic =@{@"AccountNo":self.accountNo, @"AccountName":accountName};
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kMLHasConnectedNotice object:dic];
+                        
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountStatusChanged object:nil];
+                        
                     }
                 }
             }
@@ -2075,7 +2253,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     //<http://jabber.org/protocol/offline<
     unsigned char digest[CC_SHA1_DIGEST_LENGTH];
     NSData *stringBytes = [unhashed dataUsingEncoding: NSUTF8StringEncoding]; /* or some other encoding */
-    if (CC_SHA1([stringBytes bytes], [stringBytes length], digest)) {
+    if (CC_SHA1([stringBytes bytes], (UInt32)[stringBytes length], digest)) {
         hashed =[NSData dataWithBytes:digest length:CC_SHA1_DIGEST_LENGTH];
     }
     
@@ -2281,7 +2459,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         case NSStreamEventErrorOccurred:
         {
             NSError* st_error= [stream streamError];
-            DDLogError(@"Stream error code=%d domain=%@   local desc:%@ ",st_error.code,st_error.domain,  st_error.localizedDescription);
+            DDLogError(@"Stream error code=%ld domain=%@   local desc:%@ ",(long)st_error.code,st_error.domain,  st_error.localizedDescription);
             
             
             if(st_error.code==2)// operation couldnt be completed
@@ -2422,8 +2600,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     //we probably want to break these into chunks
     DDLogVerbose(@"sending: %@ ", messageOut);
     const uint8_t * rawstring = (const uint8_t *)[messageOut UTF8String];
-    int len= strlen((char*)rawstring);
-    DDLogVerbose(@"size : %d",len);
+    NSInteger len= strlen((char*)rawstring);
+    DDLogVerbose(@"size : %ld",(long)len);
     if([_oStream write:rawstring maxLength:len]!=-1)
     {
         DDLogVerbose(@"done writing ");
@@ -2432,7 +2610,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     else
     {
         NSError* error= [_oStream streamError];
-        DDLogVerbose(@"sending: failed with error %d domain %@ message %@",error.code, error.domain, error.userInfo);
+        DDLogVerbose(@"sending: failed with error %ld domain %@ message %@",(long)error.code, error.domain, error.userInfo);
     }
     
     return NO;
@@ -2448,13 +2626,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     
     uint8_t* buf=malloc(kXMPPReadSize);
-    int len = 0;
+    NSInteger len = 0;
     
     len = [_iStream read:buf maxLength:kXMPPReadSize];
-    DDLogVerbose(@"done reading %d", len);
+    DDLogVerbose(@"done reading %ld", (long)len);
     if(len>0) {
         NSData* data = [NSData dataWithBytes:(const void *)buf length:len];
-        //  DDLogVerbose(@" got raw string %s nsdata %@", buf, data);
+        DDLogVerbose(@" got raw string %s ", buf);
         if(data)
         {
             // DDLogVerbose(@"waiting on net read queue");

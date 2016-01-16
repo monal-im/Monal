@@ -131,7 +131,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		}
 		
 		self.port=@"5222";
-		self.resource=@"Monal";
+		self.resource=@"Monal-iOS";
 		self.useSSL=true;
 		
         

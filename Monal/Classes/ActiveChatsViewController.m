@@ -48,6 +48,7 @@
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
         [nc addObserver:self selector:@selector(refreshDisplay) name:UIApplicationWillEnterForegroundNotification object:nil];
     
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshDisplay) name:kMonalAccountStatusChanged object:nil];
     
     [_chatListTable registerNib:[UINib nibWithNibName:@"MLContactCell"
                                                bundle:[NSBundle mainBundle]]
@@ -114,7 +115,7 @@
     }
     
     NSString *state= [[row objectForKey:@"state"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-    
+
     if(![[row objectForKey:@"status"] isEqualToString:@"(null)"] && ![[row objectForKey:@"status"] isEqualToString:@""]) {
        [cell showStatusText:[row objectForKey:@"status"]];
     }
@@ -143,8 +144,12 @@
     cell.username=[row objectForKey:@"buddy_name"] ;
     
     //cell.count=[[row objectForKey:@"count"] integerValue];
-    NSString* accountNo=[NSString stringWithFormat:@"%d", cell.accountNo];
-    cell.count=  [[DataLayer sharedInstance] countUserUnreadMessages:cell.username forAccount:accountNo];
+    NSString* accountNo=[NSString stringWithFormat:@"%ld", (long)cell.accountNo];
+    [[DataLayer sharedInstance] countUserUnreadMessages:cell.username forAccount:accountNo withCompletion:^(NSNumber *unread) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            cell.count=[unread integerValue];
+        });
+    }];
     
     cell.userImage.image=[[MLImageManager sharedInstance] getIconForContact:[row objectForKey:@"buddy_name"] andAccount:accountNo];
     [cell setOrb];
@@ -181,12 +186,11 @@
         
        [ [DataLayer sharedInstance] removeActiveBuddy:[contact objectForKey:@"buddy_name"] forAccount:[contact objectForKey:@"account_id"]];
         
-        [_chatListTable beginUpdates];
+   
            _contacts=[[DataLayer sharedInstance] activeBuddies];
         [_chatListTable deleteRowsAtIndexPaths:@[indexPath]
                               withRowAnimation:UITableViewRowAnimationAutomatic];
-        [_chatListTable endUpdates];
-        
+     
         
     }
 }
@@ -221,10 +225,10 @@
         chatViewController* chatVC = [[chatViewController alloc] initWithContact:[_contacts objectAtIndex:indexPath.row] ];
         [self.navigationController pushViewController:chatVC animated:YES];
         
-        [tableView beginUpdates];
+   
         [tableView reloadRowsAtIndexPaths:@[indexPath]
                          withRowAnimation:UITableViewRowAnimationNone];
-        [tableView endUpdates];
+        
         
         _lastSelectedUser=[_contacts objectAtIndex:indexPath.row];
 //    }

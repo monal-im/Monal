@@ -26,6 +26,7 @@
 @property (nonatomic,readonly, assign) BOOL SASLPlain;
 @property (nonatomic,readonly, assign) BOOL SASLCRAM_MD5;
 @property (nonatomic,readonly, assign) BOOL SASLDIGEST_MD5;
+@property (nonatomic,readonly, assign) BOOL SASLX_OAUTH2;
 
 // xmpp state
 @property (nonatomic,readonly, assign) BOOL callStartTLS;

@@ -9,9 +9,39 @@
 #import "DataLayer.h"
 #import "DDLog.h"
 
+
+#if TARGET_OS_IPHONE
+#import "PasswordManager.h"
+#else
+
+#endif
+
 @implementation DataLayer
 
 static const int ddLogLevel = LOG_LEVEL_INFO;
+
+ NSString *const kAccountID= @"account_id";
+
+//used for account rows
+ NSString *const kAccountName =@"account_name";
+ NSString *const kDomain =@"domain";
+ NSString *const kEnabled =@"enabled";
+
+ NSString *const kServer =@"server";
+ NSString *const kPort =@"other_port";
+ NSString *const kResource =@"resource";
+ NSString *const kSSL =@"secure";
+ NSString *const kOldSSL =@"oldstyleSSL";
+ NSString *const kOauth =@"oauth";
+ NSString *const kSelfSigned =@"selfsigned";
+
+NSString *const kUsername =@"username";
+NSString *const kFullName =@"full_name";
+
+
+// used for contact rows
+NSString *const kContactName =@"buddy_name";
+NSString *const kCount =@"count";
 
 static DataLayer *sharedInstance=nil;
 
@@ -26,7 +56,7 @@ static DataLayer *sharedInstance=nil;
     
 }
 
-//lowest level command handlers
+#pragma mark  -- V1 low level
 -(NSObject*) executeScalar:(NSString*) query
 {
     if(!query) return nil;
@@ -98,31 +128,6 @@ static DataLayer *sharedInstance=nil;
     
     return toReturn;
 }
-
--(BOOL) executeNonQuery:(NSString*) query
-{
-     if(!query) return NO;
-    BOOL __block toReturn;
-    dispatch_sync(_dbQueue, ^{
-        sqlite3_stmt *statement;
-        if (sqlite3_prepare_v2(database, [query  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK)
-        {
-            if(sqlite3_step(statement)==SQLITE_DONE)
-                toReturn=YES;
-            else
-                toReturn=NO;
-        }
-        
-        else
-        {
-            DDLogError(@"nonquery returning NO with out OK %@", query);
-            toReturn=NO;
-        }
-    });
-    
-    return toReturn;
-}
-
 
 -(NSArray*) executeReader:(NSString*) query
 {
@@ -205,20 +210,253 @@ static DataLayer *sharedInstance=nil;
     return toReturn;
 }
 
+-(BOOL) executeNonQuery:(NSString*) query
+{
+     if(!query) return NO;
+    BOOL __block toReturn;
+    dispatch_sync(_dbQueue, ^{
+        sqlite3_stmt *statement;
+        if (sqlite3_prepare_v2(database, [query  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK)
+        {
+            if(sqlite3_step(statement)==SQLITE_DONE)
+                toReturn=YES;
+            else
+                toReturn=NO;
+        }
+        
+        else
+        {
+            DDLogError(@"nonquery returning NO with out OK %@", query);
+            toReturn=NO;
+        }
+    });
+    
+    return toReturn;
+}
+
+
+
+
+#pragma mark -- V2 low level
+-(void) executeScalar:(NSString*) query withCompletion: (void (^)(NSObject *))completion
+{
+    if(!query)
+    {
+        if(completion) {
+            completion(nil);
+        }
+    }
+    
+    dispatch_async(_dbQueue, ^{
+        NSObject* toReturn;
+        sqlite3_stmt *statement;
+        if (sqlite3_prepare_v2(database, [query  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK) {
+            if (sqlite3_step(statement) == SQLITE_ROW)
+            {
+                switch(sqlite3_column_type(statement,0))
+                {
+                        // SQLITE_INTEGER, SQLITE_FLOAT, SQLITE_TEXT, SQLITE_BLOB, or SQLITE_NULL
+                    case (SQLITE_INTEGER):
+                    {
+                        NSNumber* returnInt= [NSNumber numberWithInt:sqlite3_column_int(statement,0)];
+                        while(sqlite3_step(statement)== SQLITE_ROW) {} //clear
+                        toReturn= returnInt;
+                        break;
+                    }
+                        
+                    case (SQLITE_FLOAT):
+                    {
+                        NSNumber* returnInt= [NSNumber numberWithDouble:sqlite3_column_double(statement,0)];
+                        while(sqlite3_step(statement)== SQLITE_ROW) {} //clear
+                        toReturn= returnInt;
+                        break;
+                    }
+                        
+                    case (SQLITE_TEXT):
+                    {
+                        NSString* returnString = [NSString stringWithUTF8String:sqlite3_column_text(statement,0)];
+                        //	DDLogVerbose(@"got %@", returnString);
+                        while(sqlite3_step(statement)== SQLITE_ROW ){} //clear
+                        toReturn= [returnString  stringByReplacingOccurrencesOfString:@"''" withString:@"'"];
+                        break;
+                        
+                    }
+                        
+                    case (SQLITE_BLOB):
+                    {
+                        //trat as string for now
+                        NSString* returnString = [NSString stringWithUTF8String:sqlite3_column_text(statement,0)];
+                        while(sqlite3_step(statement)== SQLITE_ROW) {} //clear
+                        toReturn= [returnString  stringByReplacingOccurrencesOfString:@"''" withString:@"'"];
+                        toReturn= nil;
+                        break;
+                    }
+                        
+                    case (SQLITE_NULL):
+                    {
+                        DDLogVerbose(@"return nil with sql null");
+                        while(sqlite3_step(statement)== SQLITE_ROW) {} //clear
+                        toReturn= nil;
+                        break;
+                    }
+                        
+                }
+                
+            } else
+            {DDLogVerbose(@"return nil with no row");
+                toReturn= nil;};
+        }
+        else{
+            //if noting else
+            DDLogVerbose(@"returning nil with out OK %@", query);
+            toReturn= nil;
+        }
+        
+        if(completion) {
+            completion(toReturn);
+        }
+    });
+
+}
+
+-(void) executeReader:(NSString*) query withCompletion: (void (^)(NSArray *))completion;
+{
+    if(!query)
+    {
+        if(completion) {
+            completion(nil);
+        }
+    }
+   
+    dispatch_async(_dbQueue, ^{
+        
+        NSMutableArray*  toReturn =  [[NSMutableArray alloc] init] ;
+        
+        sqlite3_stmt *statement;
+        if (sqlite3_prepare_v2(database, [query cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK) {
+            
+            while (sqlite3_step(statement) == SQLITE_ROW) {
+                NSMutableDictionary* row= [[NSMutableDictionary alloc] init];
+                int counter=0;
+                while(counter< sqlite3_column_count(statement) )
+                {
+                    NSString* columnName=[NSString stringWithUTF8String:sqlite3_column_name(statement,counter)];
+                    
+                    switch(sqlite3_column_type(statement,counter))
+                    {
+                            // SQLITE_INTEGER, SQLITE_FLOAT, SQLITE_TEXT, SQLITE_BLOB, or SQLITE_NULL
+                        case (SQLITE_INTEGER):
+                        {
+                            NSNumber* returnInt= [NSNumber numberWithInt:sqlite3_column_int(statement,counter)];
+                            [row setObject:returnInt forKey:columnName];
+                            break;
+                        }
+                            
+                        case (SQLITE_FLOAT):
+                        {
+                            NSNumber* returnInt= [NSNumber numberWithDouble:sqlite3_column_double(statement,counter)];
+                            [row setObject:returnInt forKey:columnName];
+                            break;
+                        }
+                            
+                        case (SQLITE_TEXT):
+                        {
+                            NSString* returnString = [NSString stringWithUTF8String:sqlite3_column_text(statement,counter)];
+                            [row setObject:[returnString stringByReplacingOccurrencesOfString:@"''" withString:@"'"] forKey:columnName];
+                            break;
+                            
+                        }
+                            
+                        case (SQLITE_BLOB):
+                        {
+                            //trat as string for now
+                            NSString* returnblob = [NSString stringWithUTF8String:sqlite3_column_text(statement,counter)];
+                            [row setObject:[returnblob stringByReplacingOccurrencesOfString:@"''" withString:@"'"] forKey:columnName];
+                            break;
+                            
+                            
+                            //Note: add blob support  as nsdata later
+                            
+                            //char* data= sqlite3_value_text(statement);
+                            ///NSData* returnData =[NSData dataWithBytes:]
+                            
+                        }
+                            
+                        case (SQLITE_NULL):
+                        {
+                            DDLogVerbose(@"return nil with sql null");
+                            
+                            [row setObject:@"" forKey:columnName];
+                            break;
+                        }
+                            
+                    }
+                    
+                    counter++;
+                }
+                
+                [toReturn addObject:row];
+            }
+        }
+        else
+        {
+            DDLogVerbose(@"reader nil with sql not ok: %@", query );
+            toReturn= nil;
+        }
+        
+        if(completion) {
+            completion(toReturn);
+        }
+    });
+    
+}
+
+-(void) executeNonQuery:(NSString*) query withCompletion: (void (^)(BOOL))completion
+{
+    if(!query)
+    {
+        if(completion) {
+            completion(NO);
+        }
+    }
+    
+    BOOL __block toReturn;
+    dispatch_async(_dbQueue, ^{
+        sqlite3_stmt *statement;
+        if (sqlite3_prepare_v2(database, [query  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK)
+        {
+            if(sqlite3_step(statement)==SQLITE_DONE)
+                toReturn=YES;
+            else
+                toReturn=NO;
+        }
+        
+        else
+        {
+            DDLogError(@"nonquery returning NO with out OK %@", query);
+            toReturn=NO;
+        }
+        if (completion)
+        {
+            completion(toReturn);
+        }
+    });
+    
+
+}
 
 #pragma mark account commands
 
 -(NSArray*) protocolList
 {
-    
     NSString* query=[NSString stringWithFormat:@"select * from protocol where protocol_id<=3 or protocol_id=5 order by protocol_id asc"];
     NSArray* toReturn = [self executeReader:query];
     
     if(toReturn!=nil)
     {
         
-        DDLogVerbose(@" count: %d",  [toReturn count] );
-        return toReturn; //[toReturn autorelease];
+        DDLogVerbose(@" count: %lu",  (unsigned long)[toReturn count] );
+        return toReturn;
     }
     else
     {
@@ -229,19 +467,15 @@ static DataLayer *sharedInstance=nil;
 
 -(NSArray*) accountList
 {
-    //returns a buddy's message history
-    
-    
-    
     NSString* query=[NSString stringWithFormat:@"select * from account order by account_id asc "];
     NSArray* toReturn = [self executeReader:query];
     
     if(toReturn!=nil)
     {
         
-        DDLogVerbose(@" count: %d",  [toReturn count] );
+        DDLogVerbose(@" count: %lu",  (unsigned long)[toReturn count] );
         
-        return toReturn; //[toReturn autorelease];
+        return toReturn;
     }
     else
     {
@@ -254,14 +488,13 @@ static DataLayer *sharedInstance=nil;
 
 -(NSArray*) enabledAccountList
 {
-    //returns a buddy's message history
     NSString* query=[NSString stringWithFormat:@"select * from account where enabled=1 order by account_id asc "];
     NSArray* toReturn = [self executeReader:query];
     
     if(toReturn!=nil)
     {
         
-        DDLogVerbose(@" count: %d",  [toReturn count] );
+        DDLogVerbose(@" count: %lu",  (unsigned long)[toReturn count] );
         
         return toReturn;
     }
@@ -296,7 +529,7 @@ static DataLayer *sharedInstance=nil;
     if(toReturn!=nil)
     {
         
-        DDLogVerbose(@" count: %d",  [toReturn count] );
+        DDLogVerbose(@" count: %lu",  (unsigned long)[toReturn count] );
         return toReturn;
     }
     else
@@ -307,39 +540,52 @@ static DataLayer *sharedInstance=nil;
     
 }
 
--(BOOL) addAccount: (NSString*) name :(NSString*) theProtocol :(NSString*) username: (NSString*) password: (NSString*) server
-                  : (NSString*) otherport: (bool) secure: (NSString*) resource: (NSString*) thedomain:(bool) enabled :(bool) selfsigned: (bool) oldstyle
+
+-(void) updateAccounWithDictionary:(NSDictionary *) dictionary andCompletion:(void (^)(BOOL))completion;
 {
-    NSString* query= [NSString stringWithFormat:@"insert into account values(null, '%@', %@, '%@', '%@', '%@', '%@', %d, '%@', '%@', %d, %d, %d) ",
-                      username.escapeForSql, theProtocol,server, otherport, username.escapeForSql, password.escapeForSql, secure, resource.escapeForSql, thedomain.escapeForSql, enabled, selfsigned, oldstyle];
+    NSString* query=
+    [NSString stringWithFormat:@"update account  set account_name='%@', protocol_id=%@, server='%@', other_port='%@', username='%@', password='%@', secure=%d, resource='%@', domain='%@', enabled=%d, selfsigned=%d, oldstyleSSL=%d, oauth=%d  where account_id=%@",
+     ((NSString *)[dictionary objectForKey:kUsername]).escapeForSql,
+     @"1",
+     ((NSString *)[dictionary objectForKey:kServer]).escapeForSql,
+     ((NSString *)[dictionary objectForKey:kPort]),
+     ((NSString *)[dictionary objectForKey:kUsername]).escapeForSql,
+     @"",
+     [[dictionary objectForKey:kSSL] boolValue],
+     ((NSString *)[dictionary objectForKey:kResource]).escapeForSql,
+     ((NSString *)[dictionary objectForKey:kDomain]).escapeForSql,
+     [[dictionary objectForKey:kEnabled] boolValue],
+     [[dictionary objectForKey:kSelfSigned] boolValue],
+     [[dictionary objectForKey:kOldSSL] boolValue],
+     [[dictionary objectForKey:kOauth] boolValue],
+     [dictionary objectForKey:kAccountID]
+     
+     ];
     
-    if([self executeNonQuery:query]!=NO)
-    {
-        return YES;
-    }
-    else
-    {
-        return NO;
-    }
+    [self executeNonQuery:query withCompletion:completion];
 }
 
--(BOOL) updateAccount: (NSString*) name :(NSString*) theProtocol :(NSString*) username: (NSString*) password: (NSString*) server
-                     : (NSString*) otherport: (bool) secure: (NSString*) resource: (NSString*) thedomain:(bool) enabled:(NSString*) accountNo
-                     :(bool) selfsigned: (bool) oldstyle
+-(void) addAccountWithDictionary:(NSDictionary *) dictionary andCompletion: (void (^)(BOOL))completion
 {
+    NSString* query= [NSString stringWithFormat:@"insert into account values(null, '%@', %@, '%@', '%@', '%@', '%@', %d, '%@', '%@', %d, %d, %d, %d) ",
+                      ((NSString *)[dictionary objectForKey:kUsername]).escapeForSql,
+                      @"1",
+                      ((NSString *) [dictionary objectForKey:kServer]).escapeForSql,
+                      ((NSString *)[dictionary objectForKey:kPort]).escapeForSql,
+                      ((NSString *)[dictionary objectForKey:kUsername]).escapeForSql,
+                      @"", [[dictionary objectForKey:kSSL] boolValue],
+                      ((NSString *)[dictionary objectForKey:kResource]).escapeForSql,
+                      ((NSString *)[dictionary objectForKey:kDomain]).escapeForSql,
+                      [[dictionary objectForKey:kEnabled] boolValue],
+                      [[dictionary objectForKey:kSelfSigned] boolValue],
+                      [[dictionary objectForKey:kOldSSL] boolValue],
+                      [[dictionary objectForKey:kOauth] boolValue]
+                      ];
     
-    NSString* query=
-    [NSString stringWithFormat:@"update account  set account_name='%@', protocol_id=%@, server='%@', other_port='%@', username='%@', password='%@', secure=%d, resource='%@', domain='%@', enabled=%d, selfsigned=%d, oldstyleSSL=%d where account_id=%@",
-     username.escapeForSql, theProtocol,server, otherport, username.escapeForSql, password.escapeForSql, secure, resource.escapeForSql, thedomain.escapeForSql,enabled, selfsigned, oldstyle,accountNo];
-    if([self executeNonQuery:query]!=NO)
-    {
-        return YES;
-    }
-    else
-    {
-        return NO;
-    }
+    [self executeNonQuery:query withCompletion:completion];
+   
 }
+
 
 -(BOOL) removeAccount:(NSString*) accountNo
 {
@@ -492,24 +738,27 @@ static DataLayer *sharedInstance=nil;
     
 }
 
--(NSArray*) contactForUsername:(NSString*) username forAccount: (NSString*) accountNo
+-(void) contactForUsername:(NSString*) username forAccount: (NSString*) accountNo withCompletion: (void (^)(NSArray *))completion
 {
     NSString* query= query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, ifnull(full_name, buddy_name) as full_name, account_id from buddylist where buddy_name='%@' and account_id=%@", username.escapeForSql, accountNo];
     
     //DDLogVerbose(query);
-    NSArray* toReturn = [self executeReader:query];
-    
-    if(toReturn!=nil)
-    {
-        DDLogVerbose(@" count: %lu",  (unsigned long)[toReturn count] );
-        return toReturn; //[toReturn autorelease];
-    }
-    else
-    {
-        DDLogError(@"buddylist is empty or failed to read");
-        return nil;
-    }
-    
+    [self executeReader:query withCompletion:^(NSArray * toReturn) {
+        if(toReturn!=nil)
+        {
+            DDLogVerbose(@" count: %lu",  (unsigned long)[toReturn count] );
+            
+        }
+        else
+        {
+            DDLogError(@"buddylist is empty or failed to read");
+        }
+        
+        if(completion) {
+            completion(toReturn);
+        }
+    }];
+     
 }
 
 
@@ -735,31 +984,23 @@ static DataLayer *sharedInstance=nil;
 
 #pragma mark presence functions
 
--(BOOL) setResourceOnline:(ParsePresence *)presenceObj forAccount:(NSString *)accountNo
+-(void) setResourceOnline:(ParsePresence *)presenceObj forAccount:(NSString *)accountNo
 {
-    
-    //get buddyid for name and accoun
+    //get buddyid for name and account
     NSString* query1=[NSString stringWithFormat:@" select buddy_id from buddylist where account_id=%@ and  buddy_name='%@';", accountNo, presenceObj.user.escapeForSql ];
-    NSString* buddyid = (NSString*)[self executeScalar:query1];
-    if(buddyid==nil) return NO;
+    [self executeScalar:query1 withCompletion:^(NSObject *buddyid) {
+        if(buddyid)  {
+            NSString* query3=[NSString stringWithFormat:@" select count(buddy_id) from buddy_resources where buddy_id=%@ and resource='%@';", buddyid, presenceObj.resource.escapeForSql ];
+                [self executeScalar:query3 withCompletion:^(NSObject * resourceCount) {
+                //do not duplicate resource
+                 if([(NSNumber *)resourceCount integerValue] ==0) {
+                     NSString* query=[NSString stringWithFormat:@"insert into buddy_resources values (%@, '%@', '')", buddyid, presenceObj.resource.escapeForSql ];
+                     [self executeNonQuery:query withCompletion:nil];
+                 }
+            }];
     
-    //make sure not already there
-    
-    //see how many left
-    NSString* query3=[NSString stringWithFormat:@" select count(buddy_id) from buddy_resources where buddy_id=%@ and resource='%@';", buddyid, presenceObj.resource.escapeForSql ];
-    NSString* resourceCount =(NSString*) [self executeScalar:query3];
-   	
-    if([resourceCount integerValue]  >0) return NO;
-    
-    NSString* query=[NSString stringWithFormat:@"insert into buddy_resources values (%@, '%@', '')", buddyid, presenceObj.resource.escapeForSql ];
-    if([self executeNonQuery:query]!=NO)
-    {
-        return YES;
-    }
-    else
-    {
-        return NO;
-    }
+        }
+    }];
 }
 
 
@@ -772,21 +1013,17 @@ static DataLayer *sharedInstance=nil;
 }
 
 
--(BOOL) setOnlineBuddy:(ParsePresence *)presenceObj forAccount:(NSString *)accountNo
+-(void) setOnlineBuddy:(ParsePresence *)presenceObj forAccount:(NSString *)accountNo
 {
     [self setResourceOnline:presenceObj forAccount:accountNo];
-    if([self isBuddyOnline:presenceObj.user forAccount:accountNo]) return NO; // pervent setting something as new
     
-    NSString* query=[NSString stringWithFormat:@"update buddylist set online=1, new=1, muc=%d where account_id=%@ and  buddy_name='%@';",presenceObj.MUC, accountNo, presenceObj.user.escapeForSql ];
-    if([self executeNonQuery:query]!=NO)
-    {
-        return YES;
-    }
-    else
-    {
-        return NO;
-    }
-    
+    [self isBuddyOnline:presenceObj.user forAccount:accountNo withCompletion:^(BOOL isOnline) {
+        if(!isOnline) {
+            NSString* query=[NSString stringWithFormat:@"update buddylist set online=1, new=1, muc=%d where account_id=%@ and  buddy_name='%@';",presenceObj.MUC, accountNo, presenceObj.user.escapeForSql ];
+            [self executeNonQuery:query withCompletion:nil];
+        }
+    }];
+
 }
 
 -(BOOL) setOfflineBuddy:(ParsePresence *)presenceObj forAccount:(NSString *)accountNo
@@ -824,22 +1061,14 @@ static DataLayer *sharedInstance=nil;
 }
 
 
--(BOOL) setBuddyState:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
+-(void) setBuddyState:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
 {
-    
     NSString* toPass;
     //data length check
     
     if([presenceObj.show length]>20) toPass=[presenceObj.show substringToIndex:19]; else toPass=presenceObj.show;
     NSString* query=[NSString stringWithFormat:@"update buddylist set state='%@', dirty=1 where account_id=%@ and  buddy_name='%@';",toPass, accountNo, presenceObj.user.escapeForSql];
-    if([self executeNonQuery:query]!=NO)
-    {
-        return YES;
-    }
-    else
-    {
-        return NO;
-    }
+    [self executeNonQuery:query withCompletion:nil];
     
 }
 
@@ -852,7 +1081,7 @@ static DataLayer *sharedInstance=nil;
 }
 
 
--(BOOL) setBuddyStatus:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo
+-(void) setBuddyStatus:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo
 {
     NSString* toPass;
     //data length check
@@ -861,16 +1090,8 @@ static DataLayer *sharedInstance=nil;
     else toPass=[presenceObj.status  stringByReplacingOccurrencesOfString:@"'"
                                                                withString:@"''"];;
     NSString* query=[NSString stringWithFormat:@"update buddylist set status='%@', dirty=1 where account_id=%@ and  buddy_name='%@';",[toPass stringByReplacingOccurrencesOfString:@"'" withString:@"''"], accountNo, presenceObj.user.escapeForSql];
-    if([self executeNonQuery:query]!=NO)
-    {
-        
-        return YES;
-    }
-    else
-    {
-        
-        return NO;
-    }
+    [self executeNonQuery:query withCompletion:nil];
+
 }
 
 -(NSString*) buddyStatus:(NSString*) buddy forAccount:(NSString*) accountNo
@@ -987,31 +1208,27 @@ static DataLayer *sharedInstance=nil;
     
 }
 
--(bool) isBuddyOnline:(NSString*) buddy forAccount:(NSString*) accountNo
+-(void) isBuddyOnline:(NSString*) buddy forAccount:(NSString*) accountNo withCompletion: (void (^)(BOOL))completion
 {
-    // count # of meaages in message table
-    
     NSString* query=[NSString stringWithFormat:@"select count(buddy_id) from buddylist where account_id=%@ and buddy_name='%@' and online=1 ", accountNo, buddy.escapeForSql];
     
-    NSNumber* count=(NSNumber*)[self executeScalar:query];
-    if(count!=nil)
-    {
-        int val=[count integerValue];
-        if(val>0) {
-            return YES;
-        }
-        else
+    [self executeScalar:query withCompletion:^(NSObject *value) {
+        
+        NSNumber* count=(NSNumber*)value;
+        BOOL toreturn=NO;
+        if(count!=nil)
         {
-            return NO;
+            NSInteger val=[count integerValue];
+            if(val>0) {
+                toreturn= YES;
+            }
+            
         }
-    }
-    else
-    {
-        ;
-        return NO;
-    }
-    
-    
+        if(completion)
+        {
+            completion(toreturn);
+        }
+    }];
 }
 
 -(bool) isBuddyMuc:(NSString*) buddy forAccount:(NSString*) accountNo
@@ -1146,18 +1363,12 @@ static DataLayer *sharedInstance=nil;
     
 }
 
--(BOOL) setMessageId:(NSString*) messageid delivered:(BOOL) delivered
+-(void) setMessageId:(NSString*) messageid delivered:(BOOL) delivered
 {
     NSString* query=[NSString stringWithFormat:@"update message_history set delivered=%d where messageid='%@';",delivered, messageid];
     DDLogInfo(@" setting delivered %@",query);
-    if([self executeNonQuery:query]!=NO)
-    {
-        return YES;
-    }
-    else
-    {
-        return NO;
-    }
+    [self executeNonQuery:query withCompletion:nil];
+ 
 }
 
 
@@ -1344,7 +1555,7 @@ static DataLayer *sharedInstance=nil;
 //message history
 -(NSMutableArray*) messageHistory:(NSString*) buddy forAccount:(NSString*) accountNo
 {
-    NSString* query=[NSString stringWithFormat:@"select af, message, thetime, message_history_id, delivered, messageid from (select ifnull(actual_from, message_from) as af, message,     timestamp  as thetime, message_history_id, delivered,messageid from message_history where account_id=%@ and (message_from='%@' or message_to='%@') order by message_history_id desc limit 20) order by message_history_id asc",accountNo, buddy.escapeForSql, buddy.escapeForSql];
+    NSString* query=[NSString stringWithFormat:@"select af, message, thetime, message_history_id, delivered, messageid from (select ifnull(actual_from, message_from) as af, message,     timestamp  as thetime, message_history_id, delivered,messageid from message_history where account_id=%@ and (message_from='%@' or message_to='%@') order by message_history_id desc limit 30) order by message_history_id asc",accountNo, buddy.escapeForSql, buddy.escapeForSql];
     DDLogVerbose(@"%@", query);
     NSMutableArray* toReturn = [self executeReader:query];
     
@@ -1361,23 +1572,16 @@ static DataLayer *sharedInstance=nil;
     }
     
 }
--(BOOL) markAsReadBuddy:(NSString*) buddy forAccount:(NSString*) accountNo
+
+-(void) markAsReadBuddy:(NSString*) buddy forAccount:(NSString*) accountNo
 {
     
     NSString* query2=[NSString stringWithFormat:@"  update message_history set unread=0 where account_id=%@ and message_from='%@';", accountNo, buddy.escapeForSql];
-    if([self executeNonQuery:query2]!=NO)
-    {
-        return YES;
-    }
-    else
-    {
-        DDLogError(@"Message history update failed");
-        return NO;
-    }
-    
+    [self executeNonQuery:query2 withCompletion:nil];
+
 }
 
--(BOOL) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString *)messageId
+-(void) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString *)messageId withCompletion:(void (^)(BOOL))completion
 {
     //MEssaes_history ging out, from is always the local user. always read, default to  delivered (will be reset by timer if needed)
     
@@ -1385,50 +1589,43 @@ static DataLayer *sharedInstance=nil;
     NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, %@, '%@',  '%@', '%@ %@', '%@', '%@',0,1,'%@');", accountNo, from.escapeForSql, to.escapeForSql,
                      [parts objectAtIndex:0],[parts objectAtIndex:1], message.escapeForSql, actualfrom.escapeForSql, messageId.escapeForSql];
     
-    if([self executeNonQuery:query]!=NO)
-    {
-        return YES;
-    }
-    else
-    {
-        return NO;
-    }
-    
+    [self executeNonQuery:query withCompletion:^(BOOL result) {
+        if (completion) {
+            completion(result);
+        }
+        
+    }];
 }
 
 
 //count unread
--(int) countUnreadMessages
+-(void) countUnreadMessagesWithCompletion: (void (^)(NSNumber *))completion
 {
     // count # of meaages in message table
     NSString* query=[NSString stringWithFormat:@"select count(message_history_id) from  message_history where unread=1"];
     
-    NSNumber* count=(NSNumber*)[self executeScalar:query];
-    if(count!=nil)
-    {
-        int val=[count integerValue];
-        return val;
-    }
-    else
-    {
-        return 0;
-    }
-    
-    
+    [self executeScalar:query withCompletion:^(NSObject *result) {
+        NSNumber *count= (NSNumber *) result;
+        
+        if(completion)
+        {
+            completion(count);
+        }
+    }];
 }
 
 #pragma mark active chats
 -(NSArray*) activeBuddies
 {
     
-    NSString* query=[NSString stringWithFormat:@"select distinct a.buddy_name,state,status,filename,0 as 'count' , ifnull(b.full_name, a.buddy_name) as full_name, a.account_id from activechats as a left outer  join buddylist as b on a.buddy_name=b.buddy_name and a.account_id=b.account_id order by full_name COLLATE NOCASE" ];
+    NSString* query=[NSString stringWithFormat:@"select X.*, 0 as 'count' from (select distinct a.buddy_name,state,status,filename, ifnull(b.full_name, a.buddy_name) as full_name, a.account_id from activechats as a left outer  join buddylist as b on a.buddy_name=b.buddy_name and a.account_id=b.account_id ) as X left outer join (select account_id, message_from, max(timestamp) as max_time from  message_history group by account_id, message_from) as Y on X.account_id=Y.account_id and X.buddy_name=Y.message_from order by Y.max_time desc, X.full_name COLLATE NOCASE asc" ];
     //	DDLogVerbose(query);
     NSArray* toReturn = [self executeReader:query];
     
     if(toReturn!=nil)
     {
         DDLogVerbose(@" count: %d",  [toReturn count] );
-        return toReturn; //[toReturn autorelease];
+        return toReturn;
     }
     else
     {
@@ -1445,7 +1642,7 @@ static DataLayer *sharedInstance=nil;
     
     NSString* query=[NSString stringWithFormat:@"delete from activechats where buddy_name='%@' and account_id=%@ ", buddyname.escapeForSql, accountNo ];
     //	DDLogVerbose(query);
-    bool result=[self executeNonQuery:query];
+    BOOL result=[self executeNonQuery:query];
     
     return result;
 }
@@ -1455,34 +1652,59 @@ static DataLayer *sharedInstance=nil;
     
     NSString* query=[NSString stringWithFormat:@"delete from activechats " ];
     //	DDLogVerbose(query);
-    bool result=[self executeNonQuery:query];
+    BOOL result=[self executeNonQuery:query];
     return result;
     
 }
 
 
 
--(bool) addActiveBuddies:(NSString*) buddyname forAccount:(NSString*) accountNo;
+-(void) addActiveBuddies:(NSString*) buddyname forAccount:(NSString*) accountNo withCompletion: (void (^)(BOOL))completion
 {
     NSString* query=[NSString stringWithFormat:@"select count(buddy_name) from activechats where account_id=%@ and buddy_name='%@' ", accountNo, buddyname.escapeForSql];
-    NSNumber* count=(NSNumber*)[self executeScalar:query];
-    if(count!=nil)
-    {
-        int val=[count integerValue];
-        if(val>0) {
-            return NO;
-        } else
+   [self executeScalar:query withCompletion:^(NSObject * count) {
+        if(count!=nil)
         {
-            //no
-            NSString* query2=[NSString stringWithFormat:@"insert into activechats values ( %@,'%@') ",  accountNo,buddyname.escapeForSql ];
-            //	DDLogVerbose(query);
-            
-            bool result=[self executeNonQuery:query2];
-            return result;
+            NSInteger val=[((NSNumber *)count) integerValue];
+            if(val>0) {
+                if (completion) {
+                    completion(NO);
+                }
+            } else
+            {
+                //no
+                NSString* query2=[NSString stringWithFormat:@"insert into activechats values ( %@,'%@') ",  accountNo,buddyname.escapeForSql ];
+                [self executeNonQuery:query2 withCompletion:^(BOOL result) {
+                    if (completion) {
+                        completion(result);
+                    }
+                }];
+                
+            }
         }
-    }
+        
+    }];
     
-    return NO;
+}
+
+
+-(void) isActiveBuddy:(NSString*) buddyname forAccount:(NSString*) accountNo withCompletion: (void (^)(BOOL))completion
+{
+    NSString* query=[NSString stringWithFormat:@"select count(buddy_name) from activechats where account_id=%@ and buddy_name='%@' ", accountNo, buddyname.escapeForSql];
+    [self executeScalar:query withCompletion:^(NSObject * count) {
+        BOOL toReturn=NO;
+        if(count!=nil)
+        {
+            NSInteger val=[((NSNumber *)count) integerValue];
+            if(val>0) {
+                toReturn=YES;
+            }
+        }
+        
+        if (completion) {
+            completion(toReturn);
+        }
+    }];
     
 }
 
@@ -1491,23 +1713,34 @@ static DataLayer *sharedInstance=nil;
 
 
 
--(int) countUserUnreadMessages:(NSString*) buddy forAccount:(NSString*) accountNo
+-(void) countUserUnreadMessages:(NSString*) buddy forAccount:(NSString*) accountNo withCompletion:(void (^)(NSNumber *))completion
 {
     // count # messages from a specific user in messages table
     NSString* query=[NSString stringWithFormat:@"select count(message_history_id) from  message_history where unread=1 and account_id=%@ and message_from='%@'", accountNo, buddy.escapeForSql];
     
-    NSNumber* count=(NSNumber*)[self executeScalar:query];
-    if(count!=nil)
-    {
-        int val=[count integerValue];
-        return val;
-    }
-    else
-    {
-        return 0;
-    }
+    [self executeScalar:query withCompletion:^(NSObject* result) {
+        if(completion)
+        {
+            completion((NSNumber *)result);
+        }
+    }];
+    
 }
 
+
+-(void) countUserMessages:(NSString*) buddy forAccount:(NSString*) accountNo withCompletion:(void (^)(NSNumber *))completion
+{
+    // count # messages from a specific user in messages table
+    NSString* query=[NSString stringWithFormat:@"select count(message_history_id) from  message_history where account_id=%@ and message_from='%@' or message_to='%@' ", accountNo, buddy.escapeForSql, buddy.escapeForSql];
+    
+    [self executeScalar:query withCompletion:^(NSObject* result) {
+        if(completion)
+        {
+            completion((NSNumber *)result);
+        }
+    }];
+    
+}
 
 #pragma db Commands
 
@@ -1529,14 +1762,18 @@ static DataLayer *sharedInstance=nil;
         NSError* error;
         [fileManager copyItemAtPath:defaultDBPath toPath:writableDBPath error:&error];
     }
-    
+#if TARGET_OS_IPHONE
     NSDictionary *attributes =@{NSFileProtectionKey:NSFileProtectionCompleteUntilFirstUserAuthentication};
     NSError *error;
     [fileManager setAttributes:attributes ofItemAtPath:writableDBPath error:&error];
+#endif 
     
+  //  sqlite3_shutdown();
     if (sqlite3_config(SQLITE_CONFIG_SERIALIZED) == SQLITE_OK) {
         DDLogVerbose(@"Database configured ok");
     } else DDLogVerbose(@"Database not configured ok");
+    
+    sqlite3_initialize();
     
     dbPath = writableDBPath; //[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"sworim.sqlite"];
     if (sqlite3_open([dbPath UTF8String], &database) == SQLITE_OK) {
@@ -1560,6 +1797,8 @@ static DataLayer *sharedInstance=nil;
 {
     [dbversionCheck lock];
     
+    
+#if TARGET_OS_IPHONE
     // checking db version and upgrading if necessary
     DDLogVerbose(@"Database version check");
     
@@ -1673,6 +1912,7 @@ static DataLayer *sharedInstance=nil;
         DDLogVerbose(@"Upgrade to 1.071 success ");
         
     }
+
     
     if([dbversion doubleValue]<1.072)
     {
@@ -1819,7 +2059,23 @@ static DataLayer *sharedInstance=nil;
         DDLogVerbose(@"Upgrade to 1.41 success ");
         
     }
+#else 
+    NSNumber* dbversion= (NSNumber*)[self executeScalar:@"select dbversion from dbversion"];
+    DDLogVerbose(@"Got db version %@", dbversion);
+#endif
     
+    if([dbversion doubleValue]<1.5)
+    {
+        DDLogVerbose(@"Database version <1.5 detected. Performing upgrade on accounts. ");
+        
+        [self executeNonQuery:@"alter table account add column oauth bool;"];
+        [self executeNonQuery:@"update dbversion set dbversion='1.5'; "];
+        
+        DDLogVerbose(@"Upgrade to 1.5 success ");
+        
+    }
+    
+    // this point forward OSX might have legacy issues
     
     
     [dbversionCheck unlock];

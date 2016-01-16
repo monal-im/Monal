@@ -4,10 +4,25 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
+		<key>Monal-OSX.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>3</integer>
+		</dict>
 		<key>Monal.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
 			<integer>0</integer>
+		</dict>
+		<key>jrtplib-static copy.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>2</integer>
+		</dict>
+		<key>jrtplib-static-OSX.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>4</integer>
 		</dict>
 		<key>jrtplib-static.xcscheme</key>
 		<dict>
@@ -22,7 +37,22 @@
 			<key>primary</key>
 			<true/>
 		</dict>
+		<key>260499F31B7314F400D11866</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
 		<key>2630FE2E1AD550C00079F5C0</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>266272B01B27DB8000C1CD49</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>266272C51B27DB8100C1CD49</key>
 		<dict>
 			<key>primary</key>
 			<true/>

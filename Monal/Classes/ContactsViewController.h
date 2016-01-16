@@ -11,26 +11,7 @@
 #import "MLImageManager.h"
 
 
-//contact cells
-#define kusernameKey @"username"
-#define kfullNameKey @"fullName"
-#define kaccountNoKey @"accountNo"
-#define kstateKey @"state"
-#define kstatusKey @"status"
-
-//info cells
-#define kaccountNameKey @"accountName"
-#define kinfoTypeKey @"type"
-#define kinfoStatusKey @"status"
-
 @interface ContactsViewController : UIViewController <UITableViewDataSource, UITableViewDelegate>
-{
-    NSMutableArray* _infoCells;
-    NSMutableArray* _contacts;
-    NSMutableArray* _offlineContacts;
-    NSDictionary* _lastSelectedUser;
-    UIPopoverController* _popOverController;
-}
 
 /**
  This may not be the tab bar (ipad) that this VC is in. But alerts should be shown from it.

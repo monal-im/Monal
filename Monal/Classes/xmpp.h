@@ -10,7 +10,14 @@
 #import "XMLNode.h"
 #import "EncodingTools.h"
 
+
+#if TARGET_OS_IPHONE
 #import "ContactsViewController.h"
+#else
+#import "MLContactsViewController.h"
+#endif
+
+
 #import "MLConstants.h"
 
 #import "jingleCall.h"
@@ -209,6 +216,8 @@ Decline a call request
 @property (nonatomic,assign) BOOL SSL;
 @property (nonatomic,assign) BOOL oldStyleSSL;
 @property (nonatomic,assign) BOOL selfSigned;
+@property (nonatomic,assign) BOOL oAuth;
+
 
 @property (nonatomic,strong) jingleCall* call;
 
@@ -241,16 +250,19 @@ Decline a call request
 //calculated
 @property (nonatomic,strong, readonly) NSString* versionHash;
 
-
-//UI
+#if TARGET_OS_IPHONE
 @property (nonatomic,weak) ContactsViewController* contactsVC;
+#else
+@property (nonatomic,weak) MLContactsViewController* contactsVC;
+#endif
+//UI
 
 
 @property (nonatomic,strong) NSDate* connectedTime;
 
 
-FOUNDATION_EXPORT NSString *const kMessageId;
-FOUNDATION_EXPORT NSString *const kSendTimer;
+extern NSString *const kMessageId;
+extern NSString *const kSendTimer;
 
 
 @end

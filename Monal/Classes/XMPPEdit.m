@@ -34,13 +34,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 @implementation XMPPEdit
 
 
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
-	
-	return true;
-}
-
-
-//this call is needed for tableview controller -7/19/13
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:@"XMPPEdit" bundle:nibBundleOrNil];
@@ -117,6 +110,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		if([[settings objectForKey:@"domain"] isEqualToString:@"gmail.com"])
 		{
 			JIDLabel.text=@"GTalk ID";
+            self.accountType=@"Gtalk";
 		}
 		
 	}
@@ -128,6 +122,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 			JIDLabel.text=@"GTalk ID";
 			self.server=@"talk.google.com";
 			self.jid=@"@gmail.com";
+            self.accountType=@"Gtalk";
 		}
 		
 		self.port=@"5222";
@@ -225,6 +220,29 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		user=self.jid;
 		domain= @"";
 	}
+    
+    
+    NSMutableDictionary *dic  = [[NSMutableDictionary alloc] init];
+    [dic setObject:domain forKey:kDomain];
+    
+    
+    [dic setObject:user forKey:kUsername];
+    [dic setObject:self.server  forKey:kServer];
+    [dic setObject:self.port forKey:kPort];
+    [dic setObject:self.resource forKey:kResource];
+    
+    [dic setObject:[NSNumber numberWithBool:self.useSSL] forKey:kSSL];
+    [dic setObject:[NSNumber numberWithBool:self.enabled] forKey:kEnabled];
+    [dic setObject:[NSNumber numberWithBool:self.selfSignedSSL] forKey:kSelfSigned];
+    [dic setObject:[NSNumber numberWithBool:self.oldStyleSSL] forKey:kOldSSL];
+    
+    BOOL isGtalk=NO;
+    if([self.accountType isEqualToString:@"Gtalk"]) {
+        isGtalk=YES;
+    }
+    
+    [dic setObject:[NSNumber numberWithBool:isGtalk] forKey:kOauth];
+    
 	
 	if(!self.editMode)
 	{
@@ -238,61 +256,47 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		else
 		{
 			
-			[_db addAccount:
-             self.jid  :
-             @"1":
-                      user:
-             @"":
-             self.server:
-             self.port :
-             self.useSSL:
-            self.resource:
-                     domain:
-             self.enabled:
-             self.selfSignedSSL:
-            self.oldStyleSSL
-             ];
-			
-			
-			// save password
-			  NSString* val = [NSString stringWithFormat:@"%@", [_db executeScalar:@"select max(account_id) from account"]];
-            PasswordManager* pass= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",val]];
-            [pass setPassword:self.password] ;
-            
-            [[MLXMPPManager sharedInstance]  connectIfNecessary];
-			
+            [[DataLayer sharedInstance] addAccountWithDictionary:dic andCompletion:^(BOOL result) {
+                if(result) {
+                    [[DataLayer sharedInstance] executeScalar:@"select max(account_id) from account" withCompletion:^(NSObject * accountid) {
+                        if(accountid) {
+                            self.accountno=[NSString stringWithFormat:@"%@",accountid];
+                            PasswordManager* pass= [[PasswordManager alloc] init:self.accountno];
+                            [pass setPassword:self.password] ;
+                            
+                            if(self.enabled)
+                            {
+                                DDLogVerbose(@"calling connect... ");
+                                [[MLXMPPManager sharedInstance] connectAccount:self.accountno];
+                            }
+                            else
+                            {
+                                [[MLXMPPManager sharedInstance] disconnectAccount:self.accountno];
+                            }
+                        }
+                    }];
+                }
+            }];
+         
 		}
 	}
     else
     {
-        [_db updateAccount:
-         self.jid  :
-         @"1":
-                    user :
-         @"" :
-         self.server:
-         self.port :
-         self.useSSL:
-        self.resource:
-                   domain:
-         self.enabled:
-                _accountno:
-         self.selfSignedSSL:
-        self.oldStyleSSL];
-        
+        [[DataLayer sharedInstance] updateAccounWithDictionary:dic andCompletion:^(BOOL result) {
 
-        PasswordManager* pass= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",_accountno]];
-        [pass setPassword:self.password] ;
-  
-        if(self.enabled)
-        {
-            DDLogVerbose(@"calling connect... ");
-            [[MLXMPPManager sharedInstance] connectAccount:_accountno];
-        }
-        else
-        {
-            [[MLXMPPManager sharedInstance] disconnectAccount:_accountno];
-        }
+            PasswordManager* pass= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",self.accountno]];
+            
+            [pass setPassword:self.password] ;
+            if(self.enabled)
+            {
+                [[MLXMPPManager sharedInstance] connectAccount:self.accountno];
+            }
+            else
+            {
+                [[MLXMPPManager sharedInstance] disconnectAccount:self.accountno];
+            }
+        }];
+
     }
 	
 }

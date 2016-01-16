@@ -26,6 +26,7 @@
 @property (nonatomic, assign) BOOL editMode;
 @property (nonatomic, strong)  NSString* accountno;
 @property (nonatomic, strong)  NSIndexPath* originIndex;
+@property (nonatomic, strong) NSString *accountType;
 
 - (IBAction) delClicked: (id) sender;
 

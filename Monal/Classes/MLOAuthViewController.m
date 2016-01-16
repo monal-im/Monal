@@ -18,7 +18,6 @@
 -(void) viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    
     NSURLRequest*request=[NSURLRequest requestWithURL:self.oAuthURL];
     [self.webView loadRequest:request];
 }

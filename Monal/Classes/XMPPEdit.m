@@ -9,10 +9,15 @@
 #import "XMPPEdit.h"
 #import "MLAccountCell.h"
 #import "MLButtonCell.h"
+#import "NXOAuth2.h"
+#import "MLOAuthViewController.h"
+
 #import "tools.h"
 
 
 static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+
+NSString *const kGtalk = @"Gtalk";
 
 @interface XMPPEdit()
 @property (nonatomic, strong) NSString *jid;
@@ -27,9 +32,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 @property (nonatomic, assign) BOOL selfSignedSSL;
 
 @property (nonatomic, weak) UITextField *currentTextField;
+@property (nonatomic, strong) NSURL *oAuthURL;
 
 @end
-    
+
 
 @implementation XMPPEdit
 
@@ -65,108 +71,127 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     _db= [DataLayer sharedInstance];
     
-    self.sectionArray =  [NSArray arrayWithObjects:@"Account", @"Advanced Settings",@"", nil];
-	if(![_accountno isEqualToString:@"-1"])
-	{
+    if(![_accountno isEqualToString:@"-1"])
+    {
         self.editMode=true;
-	} 
-	
-	DDLogVerbose(@"got account number %@", _accountno);
+    }
     
-
+    DDLogVerbose(@"got account number %@", _accountno);
+    
+    
     UITapGestureRecognizer *gestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(hideKeyboard)]; // hides the kkyeboard when you tap outside the editing area
     gestureRecognizer.cancelsTouchesInView=false; //this prevents it from blocking the button
     [self.tableView addGestureRecognizer:gestureRecognizer];
-
     
-	if(_originIndex.section==0)
-	{
-		//edit
+    
+    if(_originIndex.section==0)
+    {
+        //edit
         DDLogVerbose(@"reading account number %@", _accountno);
-		NSDictionary* settings=[[_db accountVals:_accountno] objectAtIndex:0]; //only one row
-		
+        NSDictionary* settings=[[_db accountVals:_accountno] objectAtIndex:0]; //only one row
+        
         //allow blank domains.. dont show @ if so
         if([[settings objectForKey:@"domain"] length]>0)
             self.jid=[NSString stringWithFormat:@"%@@%@",[settings objectForKey:@"username"],[settings objectForKey:@"domain"]];
-		else
-           self.jid=[NSString stringWithFormat:@"%@",[settings objectForKey:@"username"]];
+        else
+            self.jid=[NSString stringWithFormat:@"%@",[settings objectForKey:@"username"]];
         
-		
+        
         PasswordManager* pass= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",_accountno]];
         self.password=[pass getPassword];
         
-		self.server=[settings objectForKey:@"server"];
-		
-		self.port=[NSString stringWithFormat:@"%@", [settings objectForKey:@"other_port"]];
-		self.resource=[settings objectForKey:@"resource"];
-		
+        self.server=[settings objectForKey:@"server"];
+        
+        self.port=[NSString stringWithFormat:@"%@", [settings objectForKey:@"other_port"]];
+        self.resource=[settings objectForKey:@"resource"];
+        
         self.useSSL=[[settings objectForKey:@"secure"] boolValue];
-		self.enabled=[[settings objectForKey:@"enabled"] boolValue];
+        self.enabled=[[settings objectForKey:@"enabled"] boolValue];
         
         self.oldStyleSSL=[[settings objectForKey:@"oldstyleSSL"] boolValue];
-		self.selfSignedSSL=[[settings objectForKey:@"selfsigned"] boolValue];
-		
-	
-		if([[settings objectForKey:@"domain"] isEqualToString:@"gmail.com"])
-		{
-			JIDLabel.text=@"GTalk ID";
-            self.accountType=@"Gtalk";
-		}
-		
-	}
-	else
-	{
-		
-		if(_originIndex.row==1)
-		{
-			JIDLabel.text=@"GTalk ID";
-			self.server=@"talk.google.com";
-			self.jid=@"@gmail.com";
-            self.accountType=@"Gtalk";
-		}
-		
-		self.port=@"5222";
-		self.resource=@"Monal-iOS";
-		self.useSSL=true;
-		
+        self.selfSignedSSL=[[settings objectForKey:@"selfsigned"] boolValue];
         
-		self.oldStyleSSL=NO;
+        
+        if([[settings objectForKey:@"domain"] isEqualToString:@"gmail.com"])
+        {
+            JIDLabel.text=@"GTalk ID";
+            self.accountType=kGtalk;
+        }
+        
+    }
+    else
+    {
+        
+        if(_originIndex.row==1)
+        {
+            JIDLabel.text=@"GTalk ID";
+            self.server=@"talk.google.com";
+            self.jid=@"@gmail.com";
+            self.accountType=kGtalk;
+        }
+        
+        self.port=@"5222";
+        self.resource=@"Monal-iOS";
+        self.useSSL=true;
+        
+        
+        self.oldStyleSSL=NO;
         self.selfSignedSSL=NO;
-		
-	}
+        
+    }
+    
+    self.sectionArray = @[@"Account", @"Advanced Settings",@""];
     
     self.tableView.backgroundView=nil;
     
-    if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0"))
-    {
-       
-    }
-    else {
+    if(!SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0")) {
         [self.tableView setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"debut_dark"]]];
     }
+    
+    
+    [[NSNotificationCenter defaultCenter] addObserverForName:NXOAuth2AccountStoreAccountsDidChangeNotification
+                                                      object:[NXOAuth2AccountStore sharedStore]
+                                                       queue:nil
+                                                  usingBlock:^(NSNotification *aNotification){
+                                                      
+                                                      for (NXOAuth2Account *account in [[NXOAuth2AccountStore sharedStore] accountsWithAccountType:self.jid]) {
+                                                          
+                                                          self.password= account.accessToken.accessToken;
+                                                          
+                                                      };
+                                                      
+                                                  }];
+    
+    [[NSNotificationCenter defaultCenter] addObserverForName:NXOAuth2AccountStoreDidFailToRequestAccessNotification
+                                                      object:[NXOAuth2AccountStore sharedStore]
+                                                       queue:nil
+                                                  usingBlock:^(NSNotification *aNotification){
+                                                      NSError *error = [aNotification.userInfo objectForKey:NXOAuth2AccountStoreErrorKey];
+                                                      // Do something with the error
+                                                  }];
 }
 
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-	DDLogVerbose(@"xmpp edit view will appear");
-
-	
+    DDLogVerbose(@"xmpp edit view will appear");
+    
+    
 }
 
 - (void)viewWillDisappear:(BOOL)animated
 {
     [super viewWillDisappear:animated];
-	DDLogVerbose(@"xmpp edit view will hide");
-	[self save];
+    DDLogVerbose(@"xmpp edit view will hide");
+    [self save];
     if(self.password) {
-    [ [MLXMPPManager sharedInstance].passwordDic setObject:self.password forKey:self.accountno];
+        [ [MLXMPPManager sharedInstance].passwordDic setObject:self.password forKey:self.accountno];
     }
 }
 
 -(void) dealloc
 {
-     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 #pragma mark actions
@@ -175,51 +200,43 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     [self.currentTextField resignFirstResponder];
     
-	DDLogVerbose(@"Saving");
-
-	if([self.jid length]==0)
-	{
-		return ;
-	}
-	
-	NSString* domain;
-	NSString* user;
-	
-	/*	 if([elements count]<2)
-	 {
-	 return;
-	 }
-	 if([[elements objectAtIndex:0] length]==0) return;
-	 */
-	
-	
-	if([self.jid characterAtIndex:0]=='@')
-	{
-		//first char =@ means no username in jid
-		return;
-	}
+    DDLogVerbose(@"Saving");
     
-	NSArray* elements=[self.jid componentsSeparatedByString:@"@"];
-	
+    if([self.jid length]==0)
+    {
+        return ;
+    }
+    
+    NSString* domain;
+    NSString* user;
+ 
+    if([self.jid characterAtIndex:0]=='@')
+    {
+        //first char =@ means no username in jid
+        return;
+    }
+    
+    NSArray* elements=[self.jid componentsSeparatedByString:@"@"];
+    
     //default just use JID
-	if([self.server length]==0)
-	{
-		if([elements count]>1)
+    if([self.server length]==0)
+    {
+        if([elements count]>1)
             self.server=[elements objectAtIndex:1];
-	}
-	
-	
-	//if it is a JID
-	if([elements count]>1)
-	{
-		user= [elements objectAtIndex:0];
-		domain = [elements objectAtIndex:1];
-	}
-	else
-	{
-		user=self.jid;
-		domain= @"";
-	}
+    }
+    
+    
+    //if it is a JID
+    if([elements count]>1)
+    {
+        user= [elements objectAtIndex:0];
+        domain = [elements objectAtIndex:1];
+    }
+    else
+    {
+        user=self.jid;
+        domain= @"";
+    }
     
     
     NSMutableDictionary *dic  = [[NSMutableDictionary alloc] init];
@@ -237,25 +254,25 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [dic setObject:[NSNumber numberWithBool:self.oldStyleSSL] forKey:kOldSSL];
     
     BOOL isGtalk=NO;
-    if([self.accountType isEqualToString:@"Gtalk"]) {
+    if([self.accountType isEqualToString:kGtalk]) {
         isGtalk=YES;
     }
     
     [dic setObject:[NSNumber numberWithBool:isGtalk] forKey:kOauth];
     
-	
-	if(!self.editMode)
-	{
+    
+    if(!self.editMode)
+    {
         
-		if(([self.jid length]==0) &&
+        if(([self.jid length]==0) &&
            ([self.password length]==0)
            )
-		{
-			//ignoring blank
-		}
-		else
-		{
-			
+        {
+            //ignoring blank
+        }
+        else
+        {
+            
             [[DataLayer sharedInstance] addAccountWithDictionary:dic andCompletion:^(BOOL result) {
                 if(result) {
                     [[DataLayer sharedInstance] executeScalar:@"select max(account_id) from account" withCompletion:^(NSObject * accountid) {
@@ -277,13 +294,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     }];
                 }
             }];
-         
-		}
-	}
+            
+        }
+    }
     else
     {
         [[DataLayer sharedInstance] updateAccounWithDictionary:dic andCompletion:^(BOOL result) {
-
+            
             PasswordManager* pass= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",self.accountno]];
             
             [pass setPassword:self.password] ;
@@ -296,47 +313,78 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 [[MLXMPPManager sharedInstance] disconnectAccount:self.accountno];
             }
         }];
-
+        
     }
-	
+    
 }
 
 
 
 -(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
 {
-	if(buttonIndex==0)
-	{
-		[_db removeAccount:_accountno];
+    if(buttonIndex==0)
+    {
+        [_db removeAccount:_accountno];
         [[MLXMPPManager sharedInstance] disconnectAccount:_accountno];
-		[self.navigationController popViewControllerAnimated:true];
-		
-	}
+        [self.navigationController popViewControllerAnimated:true];
+        
+    }
 }
 
 - (IBAction) delClicked: (id) sender
 {
     DDLogVerbose(@"Deleting");
-	
-	//ask if you want to delete
-	
     
-
-	UIActionSheet *popupQuery = [[UIActionSheet alloc] initWithTitle:@"Delete this account?" delegate:self
-												   cancelButtonTitle:@"No"
-											  destructiveButtonTitle:@"Yes"
-												   otherButtonTitles:nil, nil];
-	
+    //ask if you want to delete
+    
+    
+    
+    UIActionSheet *popupQuery = [[UIActionSheet alloc] initWithTitle:@"Delete this account?" delegate:self
+                                                   cancelButtonTitle:@"No"
+                                              destructiveButtonTitle:@"Yes"
+                                                   otherButtonTitles:nil, nil];
+    
     popupQuery.actionSheetStyle =  UIActionSheetStyleBlackOpaque;
-	
+    
     // [popupQuery showInView:self.view];
-	
+    
     [popupQuery showFromTabBar:((UITabBarController*)self.navigationController.parentViewController).tabBar];
-	
+    
 }
 
 
 
+-(void)authenticateWithOAuth
+{
+    [[NXOAuth2AccountStore sharedStore] setClientID:@"472865344000-q63msgarcfs3ggiabdobkkis31ehtbug.apps.googleusercontent.com"
+                                             secret:@"IGo7ocGYBYXf4znad5Qhumjt"
+                                              scope:[NSSet setWithArray:@[@"https://www.googleapis.com/auth/googletalk"]]
+                                   authorizationURL:[NSURL URLWithString:@"https://accounts.google.com/o/oauth2/auth"]
+                                           tokenURL:[NSURL URLWithString:@"https://www.googleapis.com/oauth2/v3/token"]
+                                        redirectURL:[NSURL URLWithString:@"urn:ietf:wg:oauth:2.0:oob:auto"]
+                                      keyChainGroup:@"MonalGTalk"
+                                     forAccountType:self.jid];
+    
+    [[NXOAuth2AccountStore sharedStore] requestAccessToAccountWithType:self.jid
+                                   withPreparedAuthorizationURLHandler:^(NSURL *preparedURL){
+                                       
+                                       
+                                       self.oAuthURL= preparedURL;
+                                
+                                       MLOAuthViewController *oauthVC = [[MLOAuthViewController alloc] init];
+                                       
+                                       oauthVC.oAuthURL= self.oAuthURL;
+                                       oauthVC.completionHandler=^(NSString *token) {
+                                           //  self.password.stringValue = token;
+                                           NSURL *url=[NSURL URLWithString:[NSString stringWithFormat:@"urn:ietf:wg:oauth:2.0:oob:auto?code=%@", token]];
+                                           [[NXOAuth2AccountStore sharedStore] handleRedirectURL:url];
+                                           
+                                       };
+                                       [self.navigationController pushViewController:oauthVC animated:YES];
+                                       
+                                       
+                                   }];
+}
 
 
 #pragma mark table view datasource methods
@@ -350,17 +398,17 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     
-
-	DDLogVerbose(@"xmpp edit view section %d, row %d", indexPath.section, indexPath.row);
     
-	MLAccountCell* thecell=(MLAccountCell *)[tableView dequeueReusableCellWithIdentifier:@"AccountCell"];
+    DDLogVerbose(@"xmpp edit view section %d, row %d", indexPath.section, indexPath.row);
+    
+    MLAccountCell* thecell=(MLAccountCell *)[tableView dequeueReusableCellWithIdentifier:@"AccountCell"];
     
     // load cells from interface builder
-	if(indexPath.section==0)
-	{
-		//the user
-		switch (indexPath.row)
-		{
+    if(indexPath.section==0)
+    {
+        //the user
+        switch (indexPath.row)
+        {
             case 0: {
                 thecell.cellLabel.text=@"Jabber Id";
                 thecell.toggleSwitch.hidden=YES;
@@ -369,11 +417,21 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 break;
             }
             case 1: {
-                thecell.cellLabel.text=@"Password";
-                thecell.toggleSwitch.hidden=YES;
-                thecell.textInputField.secureTextEntry=YES;
-                thecell.textInputField.tag=2;
-                thecell.textInputField.text=self.password;
+                if([self.accountType isEqualToString:kGtalk]){
+                    MLButtonCell *buttonCell =(MLButtonCell*)[tableView dequeueReusableCellWithIdentifier:@"ButtonCell"];
+                    UIColor *monalGreen =[UIColor colorWithRed:128.0/255 green:203.0/255 blue:182.0/255 alpha:1.0f];
+                    buttonCell.buttonText.textColor= monalGreen;
+                    buttonCell.buttonText.text=@"Authenticate";
+                    buttonCell.selectionStyle= UITableViewCellSelectionStyleNone;
+                    return buttonCell;
+                    
+                } else  {
+                    thecell.cellLabel.text=@"Password";
+                    thecell.toggleSwitch.hidden=YES;
+                    thecell.textInputField.secureTextEntry=YES;
+                    thecell.textInputField.tag=2;
+                    thecell.textInputField.text=self.password;
+                }
                 break;
             }
             case 2: {
@@ -383,56 +441,56 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 thecell.toggleSwitch.on=self.enabled;
                 break;
             }
-
-		}
-	}
-	else if (indexPath.section==1)
-	{
-		switch (indexPath.row)
-		{
+                
+        }
+    }
+    else if (indexPath.section==1)
+    {
+        switch (indexPath.row)
+        {
                 //advanced
             case 0:  {
                 thecell.cellLabel.text=@"Server";
                 thecell.toggleSwitch.hidden=YES;
                 thecell.textInputField.tag=3;
-                 thecell.textInputField.text=self.server;
+                thecell.textInputField.text=self.server;
                 break;
             }
-
+                
             case 1:  {
                 thecell.cellLabel.text=@"Port";
                 thecell.toggleSwitch.hidden=YES;
                 thecell.textInputField.tag=4;
-                 thecell.textInputField.text=self.port;
+                thecell.textInputField.text=self.port;
                 break;
             }
-
+                
                 
             case 2:  {
                 thecell.cellLabel.text=@"Resource";
                 thecell.toggleSwitch.hidden=YES;
                 thecell.textInputField.tag=5;
-                 thecell.textInputField.text=self.resource;
+                thecell.textInputField.text=self.resource;
                 break;
             }
-
+                
             case 3: {
                 thecell.cellLabel.text=@"SSL";
-               thecell.textInputField.hidden=YES;
+                thecell.textInputField.hidden=YES;
                 thecell.toggleSwitch.tag=2;
-               thecell.toggleSwitch.on=self.useSSL;
+                thecell.toggleSwitch.on=self.useSSL;
                 break;
             }
             case 4: {
                 thecell.cellLabel.text=@"Old Style SSL";
-               thecell.textInputField.hidden=YES;
+                thecell.textInputField.hidden=YES;
                 thecell.toggleSwitch.tag=3;
                 thecell.toggleSwitch.on=self.oldStyleSSL;
                 break;
             }
             case 5: {
                 thecell.cellLabel.text=@"Self Signed";
-               thecell.textInputField.hidden=YES;
+                thecell.textInputField.hidden=YES;
                 thecell.toggleSwitch.tag=4;
                 thecell.toggleSwitch.on=self.selfSignedSSL;
                 break;
@@ -453,8 +511,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     MLButtonCell *buttonCell =(MLButtonCell*)[tableView dequeueReusableCellWithIdentifier:@"ButtonCell"];
                     buttonCell.buttonText.text=@"Delete";
                     buttonCell.buttonText.textColor= [UIColor redColor];
-                    thecell=buttonCell;
-                    
+                    buttonCell.selectionStyle= UITableViewCellSelectionStyleNone;
+                    return buttonCell;
                 }
                 break;
             }
@@ -463,28 +521,22 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         }
     }
     
-    if(indexPath.section!=2)
+    
+    thecell.textInputField.delegate=self;
+    if(thecell.textInputField.hidden==YES)
     {
-        thecell.textInputField.delegate=self;
-        if(thecell.textInputField.hidden==YES)
-        {
-            [thecell.toggleSwitch addTarget:self action:@selector(toggleSwitch:) forControlEvents:UIControlEventValueChanged];
-        }
+        [thecell.toggleSwitch addTarget:self action:@selector(toggleSwitch:) forControlEvents:UIControlEventValueChanged];
     }
-
     
     thecell.selectionStyle= UITableViewCellSelectionStyleNone;
     
-	return thecell;
+    return thecell;
 }
 
 
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-	
-	//DDLogVerbose(@"xmpp edit counting # of sections %d",  [sectionArray count]);
-	return [self.sectionArray count];
-	
+    return [self.sectionArray count];
 }
 
 
@@ -524,8 +576,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-	//DDLogVerbose(@"xmpp edit counting section %d", section);
-	
+    
     if(section==0){
         return 3;
     }
@@ -551,8 +602,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)newIndexPath
 {
     DDLogVerbose(@"selected log section %d , row %d", newIndexPath.section, newIndexPath.row);
-
-    if(newIndexPath.section==2)
+    if(newIndexPath.section==0 && newIndexPath.row==1)
+    {
+        if([self.accountType isEqualToString:kGtalk]){
+            [self authenticateWithOAuth];
+        }
+    }
+    else if(newIndexPath.section==2)
     {
         [self delClicked:self];
     }
@@ -575,7 +631,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             [textField setSelectedTextRange:newRange];
         }
     }
-   
+    
 }
 
 - (void)textFieldDidEndEditing:(UITextField *)textField
@@ -613,15 +669,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField
 {
-
-	[textField resignFirstResponder];
-	return true;
+    
+    [textField resignFirstResponder];
+    return true;
 }
 
 
 -(void) toggleSwitch:(id)sender
 {
-   UISwitch *toggle = (UISwitch *) sender;
+    UISwitch *toggle = (UISwitch *) sender;
     
     switch (toggle.tag) {
         case 1: {
@@ -667,8 +723,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             break;
         }
     }
-
- 
+    
+    
 }
 
 

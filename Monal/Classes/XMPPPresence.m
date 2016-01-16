@@ -23,7 +23,7 @@
     self.element=@"presence";
     self.versionHash=version;
     
-    XMLNode* c =[[XMLNode alloc] init];
+    MLXMLNode* c =[[MLXMLNode alloc] init];
     c.element=@"c";
     [c.attributes setObject:@"http://monal.im/caps" forKey:@"node"];
   //  [c.attributes setObject:self.versionHash forKey:@"ver"];
@@ -43,7 +43,7 @@
 #pragma mark own state
 -(void) setShow:(NSString*) showVal
 {
-    XMLNode* show =[[XMLNode alloc] init];
+    MLXMLNode* show =[[MLXMLNode alloc] init];
     show.element=@"show";
     show.data=showVal;
     [self.children addObject:show];
@@ -61,7 +61,7 @@
 
 -(void) setStatus:(NSString*) status
 {
-    XMLNode* statusNode =[[XMLNode alloc] init];
+    MLXMLNode* statusNode =[[MLXMLNode alloc] init];
     statusNode.element=@"status";
     statusNode.data=status;
     [self.children addObject:statusNode];
@@ -70,7 +70,7 @@
 -(void) setPriority:(NSInteger)priority
 {
     _priority=priority; 
-    XMLNode* priorityNode =[[XMLNode alloc] init];
+    MLXMLNode* priorityNode =[[MLXMLNode alloc] init];
     priorityNode.element=@"priority";
     priorityNode.data=[NSString stringWithFormat:@"%d",_priority];
     [self.children addObject:priorityNode];
@@ -87,18 +87,18 @@
 {
     [self.attributes setObject:[NSString stringWithFormat:@"%@@%@/%@", room,server,name] forKey:@"to"];
     
-    XMLNode* xNode =[[XMLNode alloc] init];
+    MLXMLNode* xNode =[[MLXMLNode alloc] init];
     xNode.element=@"x";
     [xNode.attributes setObject:@"http://jabber.org/protocol/muc" forKey:@"xmlns"];
     
-    XMLNode* historyNode =[[XMLNode alloc] init];
+    MLXMLNode* historyNode =[[MLXMLNode alloc] init];
     historyNode.element=@"history";
     [historyNode.attributes setObject:@"5" forKey:@"maxstanzas"];
     [xNode.children addObject:historyNode];
     
     if(password)
     {
-    XMLNode* passwordNode =[[XMLNode alloc] init];
+    MLXMLNode* passwordNode =[[MLXMLNode alloc] init];
     passwordNode.element=@"password";
     passwordNode.data=password;
     [xNode.children addObject:passwordNode];

@@ -6,9 +6,9 @@
 //
 //
 
-#import "XMLNode.h"
+#import "MLXMLNode.h"
 
-@implementation XMLNode
+@implementation MLXMLNode
 
 -(id) init
 {
@@ -68,7 +68,7 @@
     //set attributes
     for(NSString* key in [_attributes allKeys])
     {
-        [outputString appendString:[NSString stringWithFormat:@" %@='%@' ",key, [XMLNode escapeForXMPPSingleQuote:(NSString *)[_attributes objectForKey:key]]]];
+        [outputString appendString:[NSString stringWithFormat:@" %@='%@' ",key, [MLXMLNode escapeForXMPPSingleQuote:(NSString *)[_attributes objectForKey:key]]]];
     }
     
     if ([_element isEqualToString:@"starttls"]) {
@@ -79,14 +79,14 @@
         [outputString appendString:[NSString stringWithFormat:@">"]];
         
         //set children here
-        for(XMLNode* child in _children)
+        for(MLXMLNode* child in _children)
         {
             [outputString appendString:[child XMLString]];
         }
         
         
         if(_data) {
-            [outputString appendString:[XMLNode escapeForXMPP:_data]];
+            [outputString appendString:[MLXMLNode escapeForXMPP:_data]];
         }
         
         //dont close stream

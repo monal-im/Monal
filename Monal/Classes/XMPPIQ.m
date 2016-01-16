@@ -28,19 +28,19 @@
     [self.attributes setObject:@"auth1" forKey:@"id"];
     [self.attributes setObject:kiqSetType forKey:@"type"];
     
-    XMLNode* queryNode =[[XMLNode alloc] init];
+    MLXMLNode* queryNode =[[MLXMLNode alloc] init];
     queryNode.element=@"query";
     [queryNode setXMLNS:@"jabber:iq:auth"];
     
-    XMLNode* userNode =[[XMLNode alloc] init];
+    MLXMLNode* userNode =[[MLXMLNode alloc] init];
     userNode.element=@"username";
     userNode.data =username;
     
-    XMLNode* resourceNode =[[XMLNode alloc] init];
+    MLXMLNode* resourceNode =[[MLXMLNode alloc] init];
     resourceNode.element=@"resource";
     resourceNode.data =resource;
     
-    XMLNode* passNode =[[XMLNode alloc] init];
+    MLXMLNode* passNode =[[MLXMLNode alloc] init];
     passNode.element=@"password";
     passNode.data =password;
     
@@ -53,11 +53,11 @@
 -(void) setBindWithResource:(NSString*) resource
 {
 
-    XMLNode* bindNode =[[XMLNode alloc] init];
+    MLXMLNode* bindNode =[[MLXMLNode alloc] init];
     bindNode.element=@"bind";
     [bindNode.attributes setObject:@"urn:ietf:params:xml:ns:xmpp-bind" forKey:@"xmlns"];
     
-    XMLNode* resourceNode =[[XMLNode alloc] init];
+    MLXMLNode* resourceNode =[[MLXMLNode alloc] init];
     resourceNode.element=@"resource";
     resourceNode.data=resource;
     [bindNode.children addObject:resourceNode];
@@ -69,7 +69,7 @@
 
 -(void) setDiscoInfoNode
 {
-    XMLNode* queryNode =[[XMLNode alloc] init];
+    MLXMLNode* queryNode =[[MLXMLNode alloc] init];
     queryNode.element=@"query";
     [queryNode setXMLNS:@"http://jabber.org/protocol/disco#info"];
     [self.children addObject:queryNode];
@@ -77,7 +77,7 @@
 
 -(void) setDiscoItemNode
 {
-    XMLNode* queryNode =[[XMLNode alloc] init];
+    MLXMLNode* queryNode =[[MLXMLNode alloc] init];
     queryNode.element=@"query";
     [queryNode setXMLNS:@"http://jabber.org/protocol/disco#items"];
     [self.children addObject:queryNode];
@@ -86,7 +86,7 @@
 -(void) setDiscoInfoWithFeaturesAndNode:(NSString*) node
 {
     
-    XMLNode* queryNode =[[XMLNode alloc] init];
+    MLXMLNode* queryNode =[[MLXMLNode alloc] init];
     queryNode.element=@"query";
     [queryNode setXMLNS:@"http://jabber.org/protocol/disco#info"];
     if(node){
@@ -101,14 +101,14 @@
     for(NSString* feature in features)
     {
     
-    XMLNode* featureNode =[[XMLNode alloc] init];
+    MLXMLNode* featureNode =[[MLXMLNode alloc] init];
     featureNode.element=@"feature";
         [featureNode.attributes setObject:feature forKey:@"var"];
     [queryNode.children addObject:featureNode];
     
    }
     
-    XMLNode* identityNode =[[XMLNode alloc] init];
+    MLXMLNode* identityNode =[[MLXMLNode alloc] init];
     identityNode.element=@"identity";
     [identityNode.attributes setObject:@"client" forKey:@"category"];
      [identityNode.attributes setObject:@"phone" forKey:@"type"];
@@ -127,7 +127,7 @@
 
 -(void) setPing
 {
-    XMLNode* pingNode =[[XMLNode alloc] init];
+    MLXMLNode* pingNode =[[MLXMLNode alloc] init];
     pingNode.element=@"ping";
     [pingNode.attributes setObject:@"urn:xmpp:ping" forKey:@"xmlns"];
     [self.children addObject:pingNode];
@@ -136,12 +136,12 @@
 
 -(void) setRemoveFromRoster:(NSString*) jid
 {
-    XMLNode* queryNode =[[XMLNode alloc] init];
+    MLXMLNode* queryNode =[[MLXMLNode alloc] init];
     queryNode.element=@"query";
     [queryNode.attributes setObject:@"jabber:iq:roster" forKey:@"xmlns"];
     [self.children addObject:queryNode];
     
-    XMLNode* itemNode =[[XMLNode alloc] init];
+    MLXMLNode* itemNode =[[MLXMLNode alloc] init];
     itemNode.element=@"query";
     [itemNode.attributes setObject:jid forKey:@"jid"];
     [itemNode.attributes setObject:@"remove" forKey:@"subscription"];
@@ -150,7 +150,7 @@
 
 -(void) setRosterRequest
 {       
-    XMLNode* queryNode =[[XMLNode alloc] init];
+    MLXMLNode* queryNode =[[MLXMLNode alloc] init];
     queryNode.element=@"query";
     [queryNode.attributes setObject:@"jabber:iq:roster" forKey:@"xmlns"];
     [self.children addObject:queryNode];
@@ -159,20 +159,20 @@
 
 -(void) setVersion
 {
-    XMLNode* queryNode =[[XMLNode alloc] init];
+    MLXMLNode* queryNode =[[MLXMLNode alloc] init];
     queryNode.element=@"query";
     [queryNode.attributes setObject:@"jabber:iq:version" forKey:@"xmlns"];
     
-    XMLNode* name =[[XMLNode alloc] init];
+    MLXMLNode* name =[[MLXMLNode alloc] init];
     name.element=@"name";
     name.data=@"Monal";
     
 
-    XMLNode* os =[[XMLNode alloc] init];
+    MLXMLNode* os =[[MLXMLNode alloc] init];
     os.element=@"os";
     os.data=@"iOS";
     
-    XMLNode* appVersion =[[XMLNode alloc] init];
+    MLXMLNode* appVersion =[[MLXMLNode alloc] init];
     appVersion.element=@"version";
     appVersion.data=[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
     
@@ -186,7 +186,7 @@
 
 -(void) setLast
 {
-    XMLNode* queryNode =[[XMLNode alloc] init];
+    MLXMLNode* queryNode =[[MLXMLNode alloc] init];
     queryNode.element=@"query";
     [queryNode.attributes setObject:@"jabber:iq:last" forKey:@"xmlns"];
      [queryNode.attributes setObject:@"0" forKey:@"seconds"]; // hasnt been away for 0 seconds
@@ -203,11 +203,11 @@
     [self.attributes setObject:kiqGetType forKey:@"type"];
     
     
-    XMLNode* queryNode =[[XMLNode alloc] init];
+    MLXMLNode* queryNode =[[MLXMLNode alloc] init];
     queryNode.element=@"query";
     [queryNode setXMLNS:@"jabber:iq:auth"];
     
-    XMLNode* userNode =[[XMLNode alloc] init];
+    MLXMLNode* userNode =[[MLXMLNode alloc] init];
     userNode.element=@"username";
     userNode.data =username;
     
@@ -220,7 +220,7 @@
     [self setiqTo:to];
     [self.attributes setObject:@"v1" forKey:@"id"];
     
-    XMLNode* vcardNode =[[XMLNode alloc] init];
+    MLXMLNode* vcardNode =[[MLXMLNode alloc] init];
     vcardNode.element=@"vCard";
     [vcardNode setXMLNS:@"vcard-temp"];
     
@@ -230,11 +230,11 @@
 #pragma mark MUC
 -(void) setInstantRoom
 {
-    XMLNode* queryNode =[[XMLNode alloc] init];
+    MLXMLNode* queryNode =[[MLXMLNode alloc] init];
     queryNode.element=@"query";
     [queryNode.attributes setObject:@"http://jabber.org/protocol/muc#owner" forKey:@"xmlns"];
     
-    XMLNode* xNode =[[XMLNode alloc] init];
+    MLXMLNode* xNode =[[MLXMLNode alloc] init];
     xNode.element=@"x";
     [xNode.attributes setObject:@"jabber:x:data" forKey:@"xmlns"];
     [xNode.attributes setObject:@"submit" forKey:@"type"];
@@ -249,7 +249,7 @@
 {
     [self setiqTo:[NSString stringWithFormat:@"%@/%@",jid,resource]];
     
-    XMLNode* jingleNode =[[XMLNode alloc] init];
+    MLXMLNode* jingleNode =[[MLXMLNode alloc] init];
     jingleNode.element=@"jingle";
     [jingleNode setXMLNS:@"urn:xmpp:jingle:1"];
     [jingleNode.attributes setObject:@"session-initiate" forKey:@"action"];
@@ -257,7 +257,7 @@
     [jingleNode.attributes setObject:[info objectForKey:@"responder"] forKey:@"responder"];
     [jingleNode.attributes setObject:[info objectForKey:@"sid"] forKey:@"sid"];
  
-   XMLNode* contentNode =[[XMLNode alloc] init];
+   MLXMLNode* contentNode =[[MLXMLNode alloc] init];
     contentNode.element=@"content";
     [contentNode.attributes setObject:@"initiator" forKey:@"creator"];
     [contentNode.attributes setObject:@"audio-session" forKey:@"name"];
@@ -265,13 +265,13 @@
     [contentNode.attributes setObject:[info objectForKey:@"responder"] forKey:@"responder"];
     
     
-    XMLNode* description =[[XMLNode alloc] init];
+    MLXMLNode* description =[[MLXMLNode alloc] init];
     description.element=@"description";
     [description.attributes setObject:@"urn:xmpp:jingle:apps:rtp:1" forKey:@"xmlns"];
     [description.attributes setObject:@"audio" forKey:@"media"];
 
     
-    XMLNode* payload =[[XMLNode alloc] init];
+    MLXMLNode* payload =[[MLXMLNode alloc] init];
     payload.element=@"payload-type";
     [payload.attributes setObject:@"8" forKey:@"id"];
     [payload.attributes setObject:@"PCMA" forKey:@"name"];
@@ -280,12 +280,12 @@
     
     [description.children addObject:payload];
     
-    XMLNode* transport =[[XMLNode alloc] init];
+    MLXMLNode* transport =[[MLXMLNode alloc] init];
     transport.element=@"transport";
     [transport.attributes setObject:@"urn:xmpp:jingle:transports:raw-udp:1" forKey:@"xmlns"];
 
     
-    XMLNode* candidate1 =[[XMLNode alloc] init];
+    MLXMLNode* candidate1 =[[MLXMLNode alloc] init];
     candidate1.element=@"candidate";
     [candidate1.attributes setObject:@"1" forKey:@"component"];
     [candidate1.attributes setObject:[info objectForKey:@"ownip"] forKey:@"ip"];
@@ -293,7 +293,7 @@
     [candidate1.attributes setObject:@"monal001" forKey:@"id"];
     [candidate1.attributes setObject:@"0" forKey:@"generation"];
     
-    XMLNode* candidate2 =[[XMLNode alloc] init];
+    MLXMLNode* candidate2 =[[MLXMLNode alloc] init];
     candidate2.element=@"candidate";
     [candidate2.attributes setObject:@"2" forKey:@"component"];
     [candidate2.attributes setObject:[info objectForKey:@"ownip"] forKey:@"ip"];
@@ -328,7 +328,7 @@
 {
     [self setiqTo:[NSString stringWithFormat:@"%@/%@",jid,resource]];
     
-    XMLNode* jingleNode =[[XMLNode alloc] init];
+    MLXMLNode* jingleNode =[[MLXMLNode alloc] init];
     jingleNode.element=@"jingle";
     [jingleNode setXMLNS:@"urn:xmpp:jingle:1"];
     [jingleNode.attributes setObject:@"session-accept" forKey:@"action"];
@@ -336,7 +336,7 @@
     [jingleNode.attributes setObject:[info objectForKey:@"responder"] forKey:@"responder"];
     [jingleNode.attributes setObject:[info objectForKey:@"sid"] forKey:@"sid"];
     
-    XMLNode* contentNode =[[XMLNode alloc] init];
+    MLXMLNode* contentNode =[[MLXMLNode alloc] init];
     contentNode.element=@"content";
     [contentNode.attributes setObject:@"creator" forKey:@"initiator"];
     [contentNode.attributes setObject:@"audio-session" forKey:@"name"];
@@ -344,13 +344,13 @@
     [contentNode.attributes setObject:[info objectForKey:@"responder"] forKey:@"responder"];
     
     
-    XMLNode* description =[[XMLNode alloc] init];
+    MLXMLNode* description =[[MLXMLNode alloc] init];
     description.element=@"description";
     [description.attributes setObject:@"urn:xmpp:jingle:apps:rtp:1" forKey:@"xmlns"];
     [description.attributes setObject:@"audio" forKey:@"media"];
     
     
-    XMLNode* payload =[[XMLNode alloc] init];
+    MLXMLNode* payload =[[MLXMLNode alloc] init];
     payload.element=@"payload-type";
     [payload.attributes setObject:@"8" forKey:@"id"];
     [payload.attributes setObject:@"PCMA" forKey:@"name"];
@@ -359,12 +359,12 @@
     
     [description.children addObject:payload];
     
-    XMLNode* transport =[[XMLNode alloc] init];
+    MLXMLNode* transport =[[MLXMLNode alloc] init];
     transport.element=@"transport";
     [transport.attributes setObject:@"urn:xmpp:jingle:transports:raw-udp:1" forKey:@"xmlns"];
     
     
-    XMLNode* candidate1 =[[XMLNode alloc] init];
+    MLXMLNode* candidate1 =[[MLXMLNode alloc] init];
     candidate1.element=@"candidate";
     [candidate1.attributes setObject:@"1" forKey:@"component"];
     [candidate1.attributes setObject:[info objectForKey:@"ownip"] forKey:@"ip"];
@@ -372,7 +372,7 @@
     [candidate1.attributes setObject:@"monal001" forKey:@"id"];
     [candidate1.attributes setObject:@"0" forKey:@"generation"];
     
-    XMLNode* candidate2 =[[XMLNode alloc] init];
+    MLXMLNode* candidate2 =[[MLXMLNode alloc] init];
     candidate2.element=@"candidate";
     [candidate2.attributes setObject:@"2" forKey:@"component"];
     [candidate2.attributes setObject:[info objectForKey:@"ownip"] forKey:@"ip"];
@@ -405,16 +405,16 @@
 {
     [self setiqTo:[NSString stringWithFormat:@"%@/%@",jid,resource]];
 
-    XMLNode* jingleNode =[[XMLNode alloc] init];
+    MLXMLNode* jingleNode =[[MLXMLNode alloc] init];
     jingleNode.element=@"jingle";
     [jingleNode setXMLNS:@"urn:xmpp:jingle:1"];
     [jingleNode.attributes setObject:@"session-terminate" forKey:@"action"];
     [jingleNode.attributes setObject:[info objectForKey:@"sid"] forKey:@"sid"];
     
-    XMLNode* reason =[[XMLNode alloc] init];
+    MLXMLNode* reason =[[MLXMLNode alloc] init];
     reason.element=@"reason";
     
-    XMLNode* decline =[[XMLNode alloc] init];
+    MLXMLNode* decline =[[MLXMLNode alloc] init];
     decline.element=@"decline";
     
     [reason.children addObject:decline] ;
@@ -432,7 +432,7 @@
         [self setiqTo:jid];
     }
     
-    XMLNode* jingleNode =[[XMLNode alloc] init];
+    MLXMLNode* jingleNode =[[MLXMLNode alloc] init];
     jingleNode.element=@"jingle";
     [jingleNode setXMLNS:@"urn:xmpp:jingle:1"];
     [jingleNode.attributes setObject:@"session-terminate" forKey:@"action"];
@@ -440,10 +440,10 @@
     [jingleNode.attributes setObject:[info objectForKey:@"responder"] forKey:@"responder"];
     [jingleNode.attributes setObject:[info objectForKey:@"sid"] forKey:@"sid"];
     
-    XMLNode* reason =[[XMLNode alloc] init];
+    MLXMLNode* reason =[[MLXMLNode alloc] init];
     reason.element=@"reason";
 
-    XMLNode* success =[[XMLNode alloc] init];
+    MLXMLNode* success =[[MLXMLNode alloc] init];
     success.element=@"success";
 
     [reason.children addObject:success] ;

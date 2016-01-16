@@ -29,7 +29,7 @@
 
 -(void) setBody:(NSString*) messageBody
 {
-    XMLNode* body =[[XMLNode alloc] init];
+    MLXMLNode* body =[[MLXMLNode alloc] init];
     body.element=@"body";
     body.data=messageBody;
     [self.children addObject:body];

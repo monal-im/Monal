@@ -6,7 +6,7 @@
 //
 //
 
-#import "XMLNode.h"
+#import "MLXMLNode.h"
 
 /*
  pmuc-v1 = private muc
@@ -29,7 +29,7 @@
 #define kpresenceProbe @"probe"
 #define kpresenceError @"error"
 
-@interface XMPPPresence : XMLNode
+@interface XMPPPresence : MLXMLNode
 {
     
 }

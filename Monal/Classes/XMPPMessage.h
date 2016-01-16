@@ -7,14 +7,14 @@
 //
 
 
-#import "XMLNode.h"
+#import "MLXMLNode.h"
 
 #define kMessageChatType @"chat"
 #define kMessageGroupChatType @"groupchat"
 #define kMessageErrorType @"error"
 #define kMessageNormalType @"normal"
 
-@interface XMPPMessage : XMLNode
+@interface XMPPMessage : MLXMLNode
 {
     
 }

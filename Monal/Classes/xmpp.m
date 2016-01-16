@@ -253,7 +253,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         DDLogInfo(@"connection secured");
     }
     
-    XMLNode* xmlOpening = [[XMLNode alloc] initWithElement:@"xml"];
+    MLXMLNode* xmlOpening = [[MLXMLNode alloc] initWithElement:@"xml"];
     [self send:xmlOpening];
     [self startStream];
     [self setRunLoop];
@@ -467,7 +467,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     if(self.explicitLogout)
     {
-        XMLNode* stream = [[XMLNode alloc] init];
+        MLXMLNode* stream = [[MLXMLNode alloc] init];
         stream.element=@"/stream:stream"; //hack to close stream
         [self send:stream];
         self.streamID=nil;
@@ -702,7 +702,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         
         DDLogInfo(@" got read queue");
         
-        XMLNode* stream = [[XMLNode alloc] init];
+        MLXMLNode* stream = [[MLXMLNode alloc] init];
         stream.element=@"stream:stream";
         [stream.attributes setObject:@"jabber:client" forKey:@"xmlns"];
         [stream.attributes setObject:@"http://etherx.jabber.org/streams" forKey:@"xmlns:stream"];
@@ -778,7 +778,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     else  {
         if(self.supportsSM3 && self.unAckedStanzas)
         {
-            XMLNode* rNode =[[XMLNode alloc] initWithElement:@"r"];
+            MLXMLNode* rNode =[[MLXMLNode alloc] initWithElement:@"r"];
             NSDictionary *dic=@{@"xmlns":@"urn:xmpp:sm:3"};
             rNode.attributes =[dic mutableCopy];
             [self send:rNode];
@@ -803,7 +803,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         return;
     }
     
-    XMLNode* ping =[[XMLNode alloc] initWithElement:@"whitePing"]; // no such element. Node has logic to  print white space
+    MLXMLNode* ping =[[MLXMLNode alloc] initWithElement:@"whitePing"]; // no such element. Node has logic to  print white space
     [self send:ping];
 }
 
@@ -1007,7 +1007,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [NSBlockOperation blockOperationWithBlock:^{
         for (NSDictionary *dic in self.unAckedStanzas)
         {
-            [self send:(XMLNode*)[dic objectForKey:kStanza]];
+            [self send:(MLXMLNode*)[dic objectForKey:kStanza]];
         }}]];
 }
 
@@ -1058,7 +1058,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     if([self.serverFeatures containsObject:@"urn:xmpp:carbons:2"])
                     {
                         XMPPIQ* carbons =[[XMPPIQ alloc] initWithId:@"enableCarbons" andType:kiqSetType];
-                        XMLNode *enable =[[XMLNode alloc] initWithElement:@"enable"];
+                        MLXMLNode *enable =[[MLXMLNode alloc] initWithElement:@"enable"];
                         [enable setXMLNS:@"urn:xmpp:carbons:2"];
                         [carbons.children addObject:enable];
                         [self send:carbons];
@@ -1078,14 +1078,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     DDLogVerbose(@"Set jid %@", _jid);
                     
                     XMPPIQ* sessionQuery= [[XMPPIQ alloc] initWithId:_sessionKey andType:kiqSetType];
-                    XMLNode* session = [[XMLNode alloc] initWithElement:@"session"];
+                    MLXMLNode* session = [[MLXMLNode alloc] initWithElement:@"session"];
                     [session setXMLNS:@"urn:ietf:params:xml:ns:xmpp-session"];
                     [sessionQuery.children addObject:session];
                     [self send:sessionQuery];
                     
                     XMPPIQ* discoItems =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
                     [discoItems setiqTo:_domain];
-                    XMLNode* items = [[XMLNode alloc] initWithElement:@"query"];
+                    MLXMLNode* items = [[MLXMLNode alloc] initWithElement:@"query"];
                     [items setXMLNS:@"http://jabber.org/protocol/disco#items"];
                     [discoItems.children addObject:items];
                     [self send:discoItems];
@@ -1682,7 +1682,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     
                     if(streamNode.callStartTLS &&  _SSL)
                     {
-                        XMLNode* startTLS= [[XMLNode alloc] init];
+                        MLXMLNode* startTLS= [[MLXMLNode alloc] init];
                         startTLS.element=@"starttls";
                         [startTLS.attributes setObject:@"urn:ietf:params:xml:ns:xmpp-tls" forKey:@"xmlns"];
                         [self send:startTLS];
@@ -1697,7 +1697,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         {
                             NSString* saslplain=[EncodingTools encodeBase64WithString: [NSString stringWithFormat:@"\0%@\0%@",  _username, _password ]];
                             
-                            XMLNode* saslXML= [[XMLNode alloc]init];
+                            MLXMLNode* saslXML= [[MLXMLNode alloc]init];
                             saslXML.element=@"auth";
                             [saslXML.attributes setObject: @"urn:ietf:params:xml:ns:xmpp-sasl"  forKey:@"xmlns"];
                             [saslXML.attributes setObject: @"X-OAUTH2"forKey: @"mechanism"];
@@ -1714,7 +1714,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         {
                             NSString* saslplain=[EncodingTools encodeBase64WithString: [NSString stringWithFormat:@"\0%@\0%@",  _username, _password ]];
                             
-                            XMLNode* saslXML= [[XMLNode alloc]init];
+                            MLXMLNode* saslXML= [[MLXMLNode alloc]init];
                             saslXML.element=@"auth";
                             [saslXML.attributes setObject: @"urn:ietf:params:xml:ns:xmpp-sasl"  forKey:@"xmlns"];
                             [saslXML.attributes setObject: @"PLAIN"forKey: @"mechanism"];
@@ -1730,7 +1730,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         else
                             if(streamNode.SASLDIGEST_MD5)
                             {
-                                XMLNode* saslXML= [[XMLNode alloc]init];
+                                MLXMLNode* saslXML= [[MLXMLNode alloc]init];
                                 saslXML.element=@"auth";
                                 [saslXML.attributes setObject: @"urn:ietf:params:xml:ns:xmpp-sasl"  forKey:@"xmlns"];
                                 [saslXML.attributes setObject: @"DIGEST-MD5"forKey: @"mechanism"];
@@ -1758,7 +1758,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 {
                     
                     if(self.streamID) {
-                        XMLNode *resumeNode =[[XMLNode alloc] initWithElement:@"resume"];
+                        MLXMLNode *resumeNode =[[MLXMLNode alloc] initWithElement:@"resume"];
                         NSDictionary *dic=@{@"xmlns":@"urn:xmpp:sm:3",@"h":[NSString stringWithFormat:@"%@",self.lastHandledInboundStanza], @"previd":self.streamID };
                         resumeNode.attributes =[dic mutableCopy];
                         [self send:resumeNode];
@@ -1794,7 +1794,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             }
             else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"r"] && self.supportsSM3)
             {
-                XMLNode *aNode =[[XMLNode alloc] initWithElement:@"a"];
+                MLXMLNode *aNode =[[MLXMLNode alloc] initWithElement:@"a"];
                 NSDictionary *dic=@{@"xmlns":@"urn:xmpp:sm:3",@"h":[NSString stringWithFormat:@"%@",self.lastHandledInboundStanza] };
                 aNode.attributes =[dic mutableCopy];
                 [self send:aNode];
@@ -1949,7 +1949,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 ParseChallenge* challengeNode= [[ParseChallenge alloc]  initWithDictionary:stanzaToParse];
                 if(challengeNode.saslChallenge)
                 {
-                    XMLNode* responseXML= [[XMLNode alloc]init];
+                    MLXMLNode* responseXML= [[MLXMLNode alloc]init];
                     responseXML.element=@"response";
                     [responseXML.attributes setObject: @"urn:ietf:params:xml:ns:xmpp-sasl"  forKey:@"xmlns"];
                     
@@ -2129,7 +2129,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 
 
--(void) send:(XMLNode*) stanza
+-(void) send:(MLXMLNode*) stanza
 {
     if(!stanza) return;
     
@@ -2179,7 +2179,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     self.supportsSM3=YES;
     
-    XMLNode *enableNode =[[XMLNode alloc] initWithElement:@"enable"];
+    MLXMLNode *enableNode =[[MLXMLNode alloc] initWithElement:@"enable"];
     NSDictionary *dic=@{@"xmlns":@"urn:xmpp:sm:3",@"resume":@"true" };
     enableNode.attributes =[dic mutableCopy];
     [self send:enableNode];
@@ -2557,7 +2557,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         return;
     }
     
-    for(XMLNode* node in _outputQueue)
+    for(MLXMLNode* node in _outputQueue)
     {
         DDLogVerbose(@"iterating output ");
         BOOL success=[self writeToStream:node.XMLString];
@@ -2574,7 +2574,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 XMPPIQ *iq = (XMPPIQ *)node;
                 if([iq.children count]>0)
                 {
-                    XMLNode *child =[iq.children objectAtIndex:0];
+                    MLXMLNode *child =[iq.children objectAtIndex:0];
                     if ([[child element] isEqualToString:@"ping"])
                     {
                         [self setPingTimerForID:[iq.attributes objectForKey:@"id"]];

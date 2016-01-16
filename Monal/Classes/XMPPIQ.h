@@ -6,14 +6,14 @@
 //
 //
 
-#import "XMLNode.h"
+#import "MLXMLNode.h"
 
 #define kiqGetType @"get"
 #define kiqSetType @"set"
 #define kiqResultType @"result"
 #define kiqErrorType @"error"
 
-@interface XMPPIQ : XMLNode
+@interface XMPPIQ : MLXMLNode
 
 -(id) initWithId:(NSString*) sessionid andType:(NSString*) iqType;
 

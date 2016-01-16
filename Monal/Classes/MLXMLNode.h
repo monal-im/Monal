@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-@interface XMLNode : NSObject 
+@interface MLXMLNode : NSObject 
 {
     
 }

@@ -16,7 +16,7 @@
 		2601D9D40FBF262E004DB939 /* libsqlite3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2601D9D30FBF262E004DB939 /* libsqlite3.dylib */; };
 		260447F60FEED62100B3B5A7 /* BuddyDetails.xib in Resources */ = {isa = PBXBuildFile; fileRef = 260447F50FEED62100B3B5A7 /* BuddyDetails.xib */; };
 		260499E21B730E9000D11866 /* xmpp.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D0177F08F50039634B /* xmpp.m */; };
-		260499E31B730E9500D11866 /* XMLNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D3177F44AD0039634B /* XMLNode.m */; };
+		260499E31B730E9500D11866 /* MLXMLNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D3177F44AD0039634B /* MLXMLNode.m */; };
 		260499E41B730E9800D11866 /* XMPPIQ.m in Sources */ = {isa = PBXBuildFile; fileRef = 26CF3EA91780D6B7002B7085 /* XMPPIQ.m */; };
 		260499E51B730E9B00D11866 /* XMPPPresence.m in Sources */ = {isa = PBXBuildFile; fileRef = 264E345A1787BAB100BC7BD0 /* XMPPPresence.m */; };
 		260499E61B730E9E00D11866 /* XMPPMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 262D9EA917921E82009292B4 /* XMPPMessage.m */; };
@@ -125,7 +125,7 @@
 		26049A5B1B73163300D11866 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26049A5A1B73163300D11866 /* AVFoundation.framework */; };
 		260870D81B7034460036539B /* MLAccountEdit.m in Sources */ = {isa = PBXBuildFile; fileRef = 260870D71B7034460036539B /* MLAccountEdit.m */; };
 		260C51D1177F08F50039634B /* xmpp.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D0177F08F50039634B /* xmpp.m */; };
-		260C51D4177F44AD0039634B /* XMLNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D3177F44AD0039634B /* XMLNode.m */; };
+		260C51D4177F44AD0039634B /* MLXMLNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D3177F44AD0039634B /* MLXMLNode.m */; };
 		260C6C94178080730004E2E1 /* EncodingTools.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C6C93178080730004E2E1 /* EncodingTools.m */; };
 		261147CF1C35D7860078A72E /* NSData+NXOAuth2.m in Sources */ = {isa = PBXBuildFile; fileRef = 261147B01C35D7860078A72E /* NSData+NXOAuth2.m */; };
 		261147D01C35D7860078A72E /* NSData+NXOAuth2.m in Sources */ = {isa = PBXBuildFile; fileRef = 261147B01C35D7860078A72E /* NSData+NXOAuth2.m */; };
@@ -461,8 +461,8 @@
 		260870D71B7034460036539B /* MLAccountEdit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLAccountEdit.m; sourceTree = "<group>"; };
 		260C51CF177F08F50039634B /* xmpp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = xmpp.h; sourceTree = "<group>"; };
 		260C51D0177F08F50039634B /* xmpp.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = xmpp.m; sourceTree = "<group>"; };
-		260C51D2177F44AD0039634B /* XMLNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMLNode.h; sourceTree = "<group>"; };
-		260C51D3177F44AD0039634B /* XMLNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMLNode.m; sourceTree = "<group>"; };
+		260C51D2177F44AD0039634B /* MLXMLNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLXMLNode.h; sourceTree = "<group>"; };
+		260C51D3177F44AD0039634B /* MLXMLNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLXMLNode.m; sourceTree = "<group>"; };
 		260C6C92178080730004E2E1 /* EncodingTools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EncodingTools.h; sourceTree = "<group>"; };
 		260C6C93178080730004E2E1 /* EncodingTools.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EncodingTools.m; sourceTree = "<group>"; };
 		261147AF1C35D7860078A72E /* NSData+NXOAuth2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+NXOAuth2.h"; sourceTree = "<group>"; };
@@ -1557,8 +1557,8 @@
 		26CF3EAE1780DF86002B7085 /* Nodes */ = {
 			isa = PBXGroup;
 			children = (
-				260C51D2177F44AD0039634B /* XMLNode.h */,
-				260C51D3177F44AD0039634B /* XMLNode.m */,
+				260C51D2177F44AD0039634B /* MLXMLNode.h */,
+				260C51D3177F44AD0039634B /* MLXMLNode.m */,
 				26CF3EA81780D6B7002B7085 /* XMPPIQ.h */,
 				26CF3EA91780D6B7002B7085 /* XMPPIQ.m */,
 				264E34591787BAB100BC7BD0 /* XMPPPresence.h */,
@@ -2195,7 +2195,7 @@
 				2636C43F177BD58C001CA71F /* XMPPEdit.m in Sources */,
 				26352EA8177D222600E2C8FF /* MLXMPPManager.m in Sources */,
 				260C51D1177F08F50039634B /* xmpp.m in Sources */,
-				260C51D4177F44AD0039634B /* XMLNode.m in Sources */,
+				260C51D4177F44AD0039634B /* MLXMLNode.m in Sources */,
 				26C3EE001A819A38000E6331 /* ParseResumed.m in Sources */,
 				263F127A177F867B0025B235 /* ParseStream.m in Sources */,
 				260C6C94178080730004E2E1 /* EncodingTools.m in Sources */,
@@ -2333,7 +2333,7 @@
 				265802851B785B8900C35014 /* MLDisabledScrollView.m in Sources */,
 				268130181BFD8ECA0074C8EE /* MLAddContact.m in Sources */,
 				260870D81B7034460036539B /* MLAccountEdit.m in Sources */,
-				260499E31B730E9500D11866 /* XMLNode.m in Sources */,
+				260499E31B730E9500D11866 /* MLXMLNode.m in Sources */,
 				261147D81C35D7860078A72E /* NXOAuth2Account.m in Sources */,
 				260499F01B7313F600D11866 /* ParseStream.m in Sources */,
 				261147E81C35D7860078A72E /* NXOAuth2Request.m in Sources */,

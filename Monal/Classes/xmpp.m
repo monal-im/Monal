@@ -1594,7 +1594,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                               
                                 
 #if TARGET_OS_IPHONE
-                                if([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground)
+                                if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
                                 {
                                     checkChange=NO;
                                 }

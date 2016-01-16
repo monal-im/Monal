@@ -304,6 +304,8 @@
 		266272B91B27DB8000C1CD49 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 266272B81B27DB8000C1CD49 /* main.m */; };
 		266272C11B27DB8000C1CD49 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 266272BF1B27DB8000C1CD49 /* Main.storyboard */; };
 		266272CD1B27DB8100C1CD49 /* Monal_OSXTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 266272CC1B27DB8100C1CD49 /* Monal_OSXTests.m */; };
+		2665C1161C4A6D2100CC9A04 /* MLOAuthViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2665C1151C4A6D2100CC9A04 /* MLOAuthViewController.m */; };
+		2665C1181C4A6D4500CC9A04 /* MLOAuthViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2665C1171C4A6D4500CC9A04 /* MLOAuthViewController.xib */; };
 		26761BF61804FBB700D94714 /* RoomListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26761BF41804FBB700D94714 /* RoomListViewController.m */; };
 		26761BF71804FBB700D94714 /* RoomListViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26761BF51804FBB700D94714 /* RoomListViewController.xib */; };
 		2678A98B185A8320003AF53B /* ChatLogAccountDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2678A98A185A8320003AF53B /* ChatLogAccountDetailViewController.m */; };
@@ -699,6 +701,9 @@
 		266272C61B27DB8100C1CD49 /* Monal-OSXTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Monal-OSXTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		266272CB1B27DB8100C1CD49 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		266272CC1B27DB8100C1CD49 /* Monal_OSXTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Monal_OSXTests.m; sourceTree = "<group>"; };
+		2665C1141C4A6D2100CC9A04 /* MLOAuthViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLOAuthViewController.h; sourceTree = "<group>"; };
+		2665C1151C4A6D2100CC9A04 /* MLOAuthViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLOAuthViewController.m; sourceTree = "<group>"; };
+		2665C1171C4A6D4500CC9A04 /* MLOAuthViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MLOAuthViewController.xib; sourceTree = "<group>"; };
 		2675143315C23822006A36A3 /* changelog.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = changelog.txt; sourceTree = "<group>"; };
 		26761BF31804FBB700D94714 /* RoomListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RoomListViewController.h; sourceTree = "<group>"; };
 		26761BF41804FBB700D94714 /* RoomListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RoomListViewController.m; sourceTree = "<group>"; };
@@ -1279,6 +1284,9 @@
 				26DB52121777EA5100B50353 /* Tab views */,
 				269E748C18B707B500BCB2D5 /* MLPortraitNavController.h */,
 				269E748D18B707B500BCB2D5 /* MLPortraitNavController.m */,
+				2665C1141C4A6D2100CC9A04 /* MLOAuthViewController.h */,
+				2665C1151C4A6D2100CC9A04 /* MLOAuthViewController.m */,
+				2665C1171C4A6D4500CC9A04 /* MLOAuthViewController.xib */,
 			);
 			name = "View Controllers";
 			path = Classes;
@@ -2058,6 +2066,7 @@
 				26B2A4BB1B73061400272E63 /* Images.xcassets in Resources */,
 				262E51981AD8CB7200788351 /* MLTextInputCell.xib in Resources */,
 				26D89F081A8908B6009B147C /* XMPPEdit.xib in Resources */,
+				2665C1181C4A6D4500CC9A04 /* MLOAuthViewController.xib in Resources */,
 				26C3EDEE1A7CA6FA000E6331 /* ContactsViewController.xib in Resources */,
 				26F9794D1ACAC73A0008E005 /* MLContactCell.xib in Resources */,
 				2628E50714049DB50064131E /* askTempPass.xib in Resources */,
@@ -2191,6 +2200,7 @@
 				261147E31C35D7860078A72E /* NXOAuth2PostBodyPart.m in Sources */,
 				262797AF178A577300B85D94 /* MLContactCell.m in Sources */,
 				26347D861790FFDE006FF64F /* MLInfoCell.m in Sources */,
+				2665C1161C4A6D2100CC9A04 /* MLOAuthViewController.m in Sources */,
 				26B2A4E91B73097500272E63 /* CLIColor.m in Sources */,
 				2678A98E185AB739003AF53B /* ChatLogContactViewController.m in Sources */,
 				261147DF1C35D7860078A72E /* NXOAuth2Constants.m in Sources */,

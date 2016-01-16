@@ -60,6 +60,10 @@
     self.uptimeFormatter.doesRelativeDateFormatting=YES;
     self.uptimeFormatter.locale=[NSLocale currentLocale];
     self.uptimeFormatter.timeZone=[NSTimeZone systemTimeZone];
+    
+    NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+    [nc addObserver:self selector:@selector(refreshAccountList) name:kMonalAccountStatusChanged object:nil];
+    
 }
 
 -(void) viewWillAppear:(BOOL)animated
@@ -74,6 +78,19 @@
 //    }
 }
 
+-(void) dealloc
+{
+    NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+    [nc removeObserver:self];
+}
+
+-(void) refreshAccountList
+{
+    dispatch_async(dispatch_get_main_queue() , ^{
+        _accountList=[[DataLayer sharedInstance] accountList];
+        [self.accountsTable reloadData];
+    });
+}
 
 #pragma mark button actions
 

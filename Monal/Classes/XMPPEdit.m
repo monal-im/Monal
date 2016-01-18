@@ -193,9 +193,6 @@ NSString *const kGtalk = @"Gtalk";
     DDLogVerbose(@"xmpp edit view will hide");
     if(self.autoSave) {
         [self save];
-        if(self.password) {
-            [ [MLXMPPManager sharedInstance].passwordDic setObject:self.password forKey:self.accountno];
-        }
     }
 }
 
@@ -289,8 +286,10 @@ NSString *const kGtalk = @"Gtalk";
                     [[DataLayer sharedInstance] executeScalar:@"select max(account_id) from account" withCompletion:^(NSObject * accountid) {
                         if(accountid) {
                             self.accountno=[NSString stringWithFormat:@"%@",accountid];
-                            PasswordManager* pass= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@-%@",self.accountno,self.jid]];
-                            [pass setPassword:self.password] ;
+                            if(!isGtalk) {
+                                PasswordManager* pass= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@-%@",self.accountno,self.jid]];
+                                [pass setPassword:self.password] ;
+                            }
                             
                             if(self.enabled)
                             {
@@ -311,10 +310,10 @@ NSString *const kGtalk = @"Gtalk";
     else
     {
         [[DataLayer sharedInstance] updateAccounWithDictionary:dic andCompletion:^(BOOL result) {
-            
-            PasswordManager* pass= [[PasswordManager alloc] init:self.accountno];
-            
-            [pass setPassword:self.password] ;
+            if(!isGtalk) {
+                PasswordManager* pass= [[PasswordManager alloc] init:self.accountno];
+                [pass setPassword:self.password] ;
+            }
             if(self.enabled)
             {
                 [[MLXMPPManager sharedInstance] connectAccount:self.accountno];
@@ -345,7 +344,7 @@ NSString *const kGtalk = @"Gtalk";
         }
         
         //TODO remove password
-        
+        self.autoSave=NO;
         [self.db removeAccount:self.accountno];
         [[MLXMPPManager sharedInstance] disconnectAccount:self.accountno];
         [self.navigationController popViewControllerAnimated:true];
@@ -363,7 +362,6 @@ NSString *const kGtalk = @"Gtalk";
                                                    otherButtonTitles:nil, nil];
     
     popupQuery.actionSheetStyle =  UIActionSheetStyleBlackOpaque;
-    self.autoSave=NO;
    [popupQuery showFromTabBar:((UITabBarController*)self.navigationController.parentViewController).tabBar];
     
 }

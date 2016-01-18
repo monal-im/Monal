@@ -74,7 +74,7 @@ An array of Dics what have timers to make sure everything was sent
     self=[super init];
     
     _connectedXMPP=[[NSMutableArray alloc] init];
-    _passwordDic = [[NSMutableDictionary alloc] init];
+   
     _netQueue = dispatch_queue_create(kMonalNetQueue, DISPATCH_QUEUE_SERIAL);
     
     [self defaultSettings];
@@ -255,34 +255,20 @@ An array of Dics what have timers to make sure everything was sent
     NSLog(@"state %ld", [UIApplication sharedApplication].applicationState);
     if([UIApplication sharedApplication].applicationState!=UIApplicationStateActive)
     {
-        //keychain wont work when device is locked.
-        if([self.passwordDic objectForKey:[account objectForKey:kAccountID]])
-        {
-            xmppAccount.password=[self.passwordDic objectForKey:[account objectForKey:kAccountID]];
-            DDLogVerbose(@"connect got password from dic");
-        }
-        else {
-            PasswordManager* passMan= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@-%@",[account objectForKey:kAccountID], [account objectForKey:kAccountName] ]];
+        PasswordManager* passMan= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@-%@",[account objectForKey:kAccountID], [account objectForKey:kAccountName] ]];
+        xmppAccount.password=[passMan getPassword] ;
+        if(!xmppAccount.password.length>0) {
+            passMan= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
             xmppAccount.password=[passMan getPassword] ;
-            if(!xmppAccount.password.length>0) {
-                passMan= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
-                xmppAccount.password=[passMan getPassword] ;
-            }
-            [self.passwordDic setObject:xmppAccount.password forKey:[account objectForKey:kAccountID]];
         }
     }
     else
 #else
-        NSError *error;
+    NSError *error;
     xmppAccount.password =[STKeychain getPasswordForUsername:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]] andServiceName:@"Monal" error:&error];
     
 #endif
-    {
-        if(!xmppAccount.password)  {
-            xmppAccount.password=@"";
-        }
-        [self.passwordDic setObject:xmppAccount.password forKey:[account objectForKey:kAccountID]];
-    }
+ 
     
     if([xmppAccount.password length]==0) //&& ([tempPass length]==0)
     {

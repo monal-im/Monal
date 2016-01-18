@@ -335,8 +335,19 @@ NSString *const kGtalk = @"Gtalk";
 {
     if(buttonIndex==0)
     {
-        [_db removeAccount:_accountno];
-        [[MLXMPPManager sharedInstance] disconnectAccount:_accountno];
+        
+        NSArray *accounts= [[NXOAuth2AccountStore sharedStore] accountsWithAccountType:self.jid];
+        NXOAuth2Account *oauthAccount;
+        if([accounts count]>0)
+        {
+            oauthAccount= [accounts objectAtIndex:0];
+            [[NXOAuth2AccountStore sharedStore] removeAccount:oauthAccount];
+        }
+        
+        //TODO remove password
+        
+        [self.db removeAccount:self.accountno];
+        [[MLXMPPManager sharedInstance] disconnectAccount:self.accountno];
         [self.navigationController popViewControllerAnimated:true];
         
     }
@@ -345,21 +356,15 @@ NSString *const kGtalk = @"Gtalk";
 - (IBAction) delClicked: (id) sender
 {
     DDLogVerbose(@"Deleting");
-    
-    //ask if you want to delete
-    
-    
-    
+  
     UIActionSheet *popupQuery = [[UIActionSheet alloc] initWithTitle:@"Delete this account?" delegate:self
                                                    cancelButtonTitle:@"No"
                                               destructiveButtonTitle:@"Yes"
                                                    otherButtonTitles:nil, nil];
     
     popupQuery.actionSheetStyle =  UIActionSheetStyleBlackOpaque;
-    
-    // [popupQuery showInView:self.view];
-    
-    [popupQuery showFromTabBar:((UITabBarController*)self.navigationController.parentViewController).tabBar];
+    self.autoSave=NO;
+   [popupQuery showFromTabBar:((UITabBarController*)self.navigationController.parentViewController).tabBar];
     
 }
 

@@ -98,8 +98,13 @@ NSString *const kGtalk = @"Gtalk";
             self.jid=[NSString stringWithFormat:@"%@",[settings objectForKey:@"username"]];
         
         
-        PasswordManager* pass= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",_accountno]];
+        PasswordManager* pass= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@-%@",self.accountno,self.jid]];
         self.password=[pass getPassword];
+        if(!self.password.length>0)
+        {
+            pass= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",self.accountno]];
+            self.password=[pass getPassword];
+        }
         
         self.server=[settings objectForKey:@"server"];
         
@@ -284,7 +289,7 @@ NSString *const kGtalk = @"Gtalk";
                     [[DataLayer sharedInstance] executeScalar:@"select max(account_id) from account" withCompletion:^(NSObject * accountid) {
                         if(accountid) {
                             self.accountno=[NSString stringWithFormat:@"%@",accountid];
-                            PasswordManager* pass= [[PasswordManager alloc] init:self.accountno];
+                            PasswordManager* pass= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@-%@",self.accountno,self.jid]];
                             [pass setPassword:self.password] ;
                             
                             if(self.enabled)

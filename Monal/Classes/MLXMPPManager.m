@@ -262,8 +262,12 @@ An array of Dics what have timers to make sure everything was sent
             DDLogVerbose(@"connect got password from dic");
         }
         else {
-            PasswordManager* passMan= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
+            PasswordManager* passMan= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@-%@",[account objectForKey:kAccountID], [account objectForKey:kAccountName] ]];
             xmppAccount.password=[passMan getPassword] ;
+            if(!xmppAccount.password.length>0) {
+                passMan= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
+                xmppAccount.password=[passMan getPassword] ;
+            }
             [self.passwordDic setObject:xmppAccount.password forKey:[account objectForKey:kAccountID]];
         }
     }

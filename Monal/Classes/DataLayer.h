@@ -45,7 +45,7 @@ extern NSString *const kContactName;
 extern NSString *const kCount;
 
 
-+ (id)sharedInstance;
++ (DataLayer* )sharedInstance;
 
 -(void) initDB;
 -(void) version;

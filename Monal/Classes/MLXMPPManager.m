@@ -252,17 +252,13 @@ An array of Dics what have timers to make sure everything was sent
     
     xmppAccount.accountNo=[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]];
 #if TARGET_OS_IPHONE
-    NSLog(@"state %ld", [UIApplication sharedApplication].applicationState);
-    if([UIApplication sharedApplication].applicationState!=UIApplicationStateActive)
-    {
-        PasswordManager* passMan= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@-%@",[account objectForKey:kAccountID], [account objectForKey:kAccountName] ]];
+    PasswordManager* passMan= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@-%@@%@",[account objectForKey:kAccountID], [account objectForKey:kUsername],  [account objectForKey:kDomain] ]];
+    xmppAccount.password=[passMan getPassword] ;
+    if(!xmppAccount.password.length>0) {
+        passMan= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
         xmppAccount.password=[passMan getPassword] ;
-        if(!xmppAccount.password.length>0) {
-            passMan= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
-            xmppAccount.password=[passMan getPassword] ;
-        }
     }
-    else
+    
 #else
     NSError *error;
     xmppAccount.password =[STKeychain getPasswordForUsername:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]] andServiceName:@"Monal" error:&error];
@@ -270,14 +266,12 @@ An array of Dics what have timers to make sure everything was sent
 #endif
  
     
-    if([xmppAccount.password length]==0) //&& ([tempPass length]==0)
+    if([xmppAccount.password length]==0 && !xmppAccount.oAuth) //&& ([tempPass length]==0)
     {
-        // no password error
+        // ask fro temp pass if not oauth
     }
-    
 
      xmppAccount.contactsVC=self.contactVC;
-
     
     //sepcifically look for the server since we might not be online or behind firewall
     Reachability* hostReach = [Reachability reachabilityWithHostName:xmppAccount.server ] ;

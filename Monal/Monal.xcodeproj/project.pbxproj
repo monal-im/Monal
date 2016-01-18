@@ -2552,8 +2552,6 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)",
-					/Users/anurodhp/Development/Monal,
-					files/monalxmpp/Monal,
 					"$(PROJECT_DIR)/Monal-iOS/External",
 				);
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -3119,8 +3117,6 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)",
-					/Users/anurodhp/Development/Monal,
-					files/monalxmpp/Monal,
 					"$(PROJECT_DIR)/Monal-iOS/External",
 				);
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
@@ -3249,8 +3245,6 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)",
-					/Users/anurodhp/Development/Monal,
-					files/monalxmpp/Monal,
 					"$(PROJECT_DIR)/Monal-iOS/External",
 				);
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;

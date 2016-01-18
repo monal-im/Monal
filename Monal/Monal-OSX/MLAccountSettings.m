@@ -55,6 +55,16 @@
     if(selected < self.accountList.count) {
         NSDictionary * row = [self.accountList objectAtIndex:selected];
         
+        NSNumber *jid = [row objectForKey:kAccountName];
+        
+        NSArray *accounts= [[NXOAuth2AccountStore sharedStore] accountsWithAccountType:jid];
+        NXOAuth2Account *oauthAccount;
+        if([accounts count]>0)
+        {
+            oauthAccount= [accounts objectAtIndex:0];
+            [[NXOAuth2AccountStore sharedStore] removeAccount:oauthAccount];
+        }
+        
         // pass to database
         NSNumber *accountID = [row objectForKey:kAccountID];
         [[DataLayer sharedInstance] removeAccount:[NSString stringWithFormat:@"%@", accountID]];

@@ -24,7 +24,9 @@
 #import "AboutViewController.h"
 #import "MLNotificationManager.h"
 
+#import <Fabric/Fabric.h>
 #import <Crashlytics/Crashlytics.h>
+
 
 //xmpp
 #import "MLXMPPManager.h"
@@ -260,11 +262,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
      // should any accounts connect?
     [[MLXMPPManager sharedInstance] connectIfNecessary];
     
-
-    [Crashlytics startWithAPIKey:@"6e807cf86986312a050437809e762656b44b197c"];
-  //  [Crashlytics sharedInstance].debugMode = YES;
-  // [[Crashlytics sharedInstance] crash];
-    
+    [Fabric with:@[[Crashlytics class]]];
     
     //update logs if needed
     if(! [[NSUserDefaults standardUserDefaults] boolForKey:@"Logging"])

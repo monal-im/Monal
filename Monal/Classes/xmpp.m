@@ -179,9 +179,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
                          kinfoTypeKey:@"connect", kinfoStatusKey:@"Opening Connection"};
     [self.contactsVC showConnecting:info];
-    
-
-    
+   
     DDLogInfo(@"stream  creating to  server: %@ port: %d", _server, (UInt32)_port);
     
     if([NSStream respondsToSelector:@selector(getStreamsToHostWithName: port: inputStream: outputStream:)]) {
@@ -503,7 +501,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             forMode:NSDefaultRunLoopMode];
         DDLogInfo(@"removed streams");
         
-         _inputBuffer=[[NSMutableString alloc] init];
+        _inputBuffer=[[NSMutableString alloc] init];
         _outputQueue=[[NSMutableArray alloc] init];
         
         @try
@@ -523,8 +521,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         {
             DDLogError(@"Exception in ostream close");
         }
-        
-        
+     
         _iStream=nil;
         _oStream=nil;
         
@@ -544,9 +541,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     DDLogInfo(@"All closed and cleaned up");
     
-    
-    
-    //for good measure
+   //for good measure
     NSString* user=_fulluser;
     if(!_fulluser) {
         user=@"";

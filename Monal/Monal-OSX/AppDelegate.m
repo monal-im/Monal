@@ -19,7 +19,9 @@
 #import "Countly.h"
 #import <Fabric/Fabric.h>
 #import <Crashlytics/Crashlytics.h>
+#import "DDLog.h"
 
+static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 @interface AppDelegate ()
 
@@ -52,6 +54,14 @@
     
     [[NSUserDefaults standardUserDefaults] registerDefaults:@{ @"NSApplicationCrashOnExceptions": @YES }];
     [Fabric with:@[[Crashlytics class]]];
+    
+    [[[NSWorkspace sharedWorkspace] notificationCenter] addObserver: self
+                                                           selector: @selector(receivedSleepNotification:)
+                                                               name: NSWorkspaceWillSleepNotification object: NULL];
+    
+    [[[NSWorkspace sharedWorkspace] notificationCenter] addObserver: self
+                                                           selector: @selector(receivedWakeNotification:)
+                                                               name: NSWorkspaceDidWakeNotification object: NULL];
 
     
 }
@@ -72,6 +82,19 @@
 -(IBAction)displayWindow:(id)sender;
 {
     [self.mainWindowController showWindow:self];
+}
+
+#pragma mark - device sleep 
+- (void) receivedSleepNotification: (NSNotification*) notificaiton
+{
+    DDLogVerbose(@"Device Sleeping");
+    [[MLXMPPManager sharedInstance] logoutAll];
+}
+
+- (void) receivedWakeNotification: (NSNotification*) notification
+{
+    DDLogVerbose(@"Device Waking");
+    [[MLXMPPManager sharedInstance] connectIfNecessary];
 }
 
 #pragma mark  - Actions

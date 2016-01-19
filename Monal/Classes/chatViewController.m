@@ -390,7 +390,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     NSUInteger r = arc4random_uniform(NSIntegerMax);
     NSString *newMessageID =messageID;
     if(!newMessageID) {
-        newMessageID=[NSString stringWithFormat:@"Monal%d", r];
+        newMessageID=[NSString stringWithFormat:@"Monal%lu", (unsigned long)r];
     }
     [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:_contactName fromAccount:_accountNo isMUC:_isMUC messageId:newMessageID
                           withCompletionHandler:nil];

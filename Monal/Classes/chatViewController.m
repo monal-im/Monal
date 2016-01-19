@@ -508,7 +508,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                            
                            [_messageTable beginUpdates];
                            NSIndexPath *path1;
-                           NSInteger bottom = [_messageTable numberOfRowsInSection:0];
+                           NSInteger bottom =  _messagelist.count-1; //[_messageTable numberOfRowsInSection:0];
                            if(bottom>0) {
                                path1 = [NSIndexPath indexPathForRow:bottom  inSection:0];
                                [_messageTable insertRowsAtIndexPaths:@[path1]

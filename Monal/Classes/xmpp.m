@@ -180,15 +180,30 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                          kinfoTypeKey:@"connect", kinfoStatusKey:@"Opening Connection"};
     [self.contactsVC showConnecting:info];
     
-    CFReadStreamRef readRef= NULL;
-    CFWriteStreamRef writeRef= NULL;
+
     
     DDLogInfo(@"stream  creating to  server: %@ port: %d", _server, (UInt32)_port);
     
-    CFStreamCreatePairWithSocketToHost(NULL, (__bridge CFStringRef)_server, (UInt32)_port , &readRef, &writeRef);
-    
-    _iStream= (__bridge NSInputStream*)readRef;
-    _oStream= (__bridge NSOutputStream*) writeRef;
+    if([NSStream respondsToSelector:@selector(getStreamsToHostWithName: port: inputStream: outputStream:)]) {
+        NSInputStream *localIStream;
+        NSOutputStream *localOStream;
+        
+        [NSStream getStreamsToHostWithName:self.server port:self.port inputStream:&localIStream outputStream:&localOStream];
+        if(localIStream) {
+            _iStream=localIStream;
+        }
+        
+        if(localOStream) {
+            _oStream = localOStream;
+        }
+    }
+    else  {
+        CFReadStreamRef readRef= NULL;
+        CFWriteStreamRef writeRef= NULL;
+        CFStreamCreatePairWithSocketToHost(NULL, (__bridge CFStringRef)_server, (UInt32)_port , &readRef, &writeRef);
+        _iStream= (__bridge NSInputStream*)readRef;
+        _oStream= (__bridge NSOutputStream*) writeRef;
+    }
     
     if((_iStream==nil) || (_oStream==nil))
     {

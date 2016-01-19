@@ -702,7 +702,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    int toReturn=0;
+    NSInteger toReturn=0;
     
     switch (section) {
         case 0:
@@ -934,7 +934,6 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                          self.view.frame =oldFrame;
                          if([_messagelist count]>0)
                          {
-                             NSIndexPath *path1 = [NSIndexPath indexPathForRow:[_messagelist count]-1  inSection:0];
                              [self scrollToBottom];
                          }
                          

@@ -344,11 +344,6 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 
 #pragma mark rotation
--(BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
-{
-	[chatInput resignFirstResponder];
-	return YES;
-}
 
 - (BOOL)shouldAutorotate
 {

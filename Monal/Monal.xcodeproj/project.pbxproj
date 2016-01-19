@@ -1936,11 +1936,14 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 266272D41B27DB8100C1CD49 /* Build configuration list for PBXNativeTarget "Monal-OSX" */;
 			buildPhases = (
+				2649CE4F1C4DE43300CD1E80 /* Build number */,
 				266272AD1B27DB8000C1CD49 /* Sources */,
 				266272AE1B27DB8000C1CD49 /* Frameworks */,
 				266272AF1B27DB8000C1CD49 /* Resources */,
 				265F6BA81B7B08AC006B8EBA /* ShellScript */,
 				26E456CE1B8421AF004BD74C /* CopyFiles */,
+				2649CE501C4DE4A300CD1E80 /* Remove Build Number */,
+				2649CE511C4DE4A500CD1E80 /* Tag Git */,
 			);
 			buildRules = (
 			);
@@ -2127,6 +2130,48 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		2649CE4F1C4DE43300CD1E80 /* Build number */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Build number";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [ \"${CONFIGURATION}\" != \"Debug\" ]; then\noldBuildNumber=$(git tag --sort=\"v:refname\" |grep \"Build_Mac\" | tail -n1 | sed 's/Build_Mac_//g')\nbuildNumber=$(expr $oldBuildNumber + 1)\n\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $buildNumber\" \"${PROJECT_DIR}/Monal-OSX/Info.plist\"\nfi";
+		};
+		2649CE501C4DE4A300CD1E80 /* Remove Build Number */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Remove Build Number";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [ \"${CONFIGURATION}\" != \"Debug\" ]; then\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion 0\" \"${PROJECT_DIR}/Monal-OSX/Info.plist\"\nfi";
+		};
+		2649CE511C4DE4A500CD1E80 /* Tag Git */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Tag Git";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [ \"${CONFIGURATION}\" != \"Debug\" ]; then\noldBuildNumber=$(git tag --sort=\"v:refname\" |grep \"Build_Mac\" | tail -n1 | sed 's/Build_Mac_//g')\nbuildNumber=$(expr $oldBuildNumber + 1)\ngit tag Build_Mac_$buildNumber\ngit push origin Build_Mac_$buildNumber\nfi";
+		};
 		265F6BA81B7B08AC006B8EBA /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;

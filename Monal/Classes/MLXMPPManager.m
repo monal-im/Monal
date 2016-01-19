@@ -18,6 +18,7 @@
 #endif
 
 static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+static const int pingFreqencyMinutes =1;
 
 @interface MLXMPPManager()
 
@@ -86,7 +87,7 @@ An array of Dics what have timers to make sure everything was sent
     
     dispatch_source_set_timer(_pinger,
                               DISPATCH_TIME_NOW,
-                              60ull * NSEC_PER_SEC *5
+                              60ull * NSEC_PER_SEC *pingFreqencyMinutes
                               , 1ull * NSEC_PER_SEC);
     
     dispatch_source_set_event_handler(_pinger, ^{

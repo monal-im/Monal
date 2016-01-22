@@ -71,6 +71,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 @property (nonatomic, strong) NSOperationQueue *processQueue;
 
 
+//ping
+@property (nonatomic, assign) BOOL supportsPing;
+
 //stream resumption
 @property (nonatomic, assign) BOOL supportsSM2;
 @property (nonatomic, assign) BOOL supportsSM3;
@@ -782,17 +785,22 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     else  {
         if(self.supportsSM3 && self.unAckedStanzas.count>0)
         {
+            NSLog(@"%@", self.unAckedStanzas);
             MLXMLNode* rNode =[[MLXMLNode alloc] initWithElement:@"r"];
             NSDictionary *dic=@{@"xmlns":@"urn:xmpp:sm:3"};
             rNode.attributes =[dic mutableCopy];
             [self send:rNode];
         }
         else  {
-            //get random number
-            XMPPIQ* ping =[[XMPPIQ alloc] initWithId:[NSString stringWithFormat:@"Monal%d",arc4random()%100000]andType:kiqGetType];
-            [ping setiqTo:_domain];
-            [ping setPing];
-            [self send:ping];
+            if(self.supportsPing) {
+                //get random number
+                XMPPIQ* ping =[[XMPPIQ alloc] initWithId:[NSString stringWithFormat:@"Monal%d",arc4random()%100000]andType:kiqGetType];
+                [ping setiqTo:_domain];
+                [ping setPing];
+                [self send:ping];
+            } else  {
+                [self sendWhiteSpacePing];
+            }
         }
     }
 }
@@ -1066,6 +1074,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         [enable setXMLNS:@"urn:xmpp:carbons:2"];
                         [carbons.children addObject:enable];
                         [self send:carbons];
+                    }
+                    
+                    if([self.serverFeatures containsObject:@"urn:xmpp:ping"])
+                    {
+                        self.supportsPing=YES;
                     }
                 }
                 

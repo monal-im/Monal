@@ -284,6 +284,7 @@
 		2643A12E180220890030EFB1 /* TPKeyboardAvoidingScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = 2643A12B180220890030EFB1 /* TPKeyboardAvoidingScrollView.m */; };
 		2643A12F180220890030EFB1 /* TPKeyboardAvoidingTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = 2643A12D180220890030EFB1 /* TPKeyboardAvoidingTableView.m */; };
 		26470F521835C4080069E3E0 /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 26470F511835C4080069E3E0 /* Media.xcassets */; };
+		2649CE531C51B84C00CD1E80 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2649CE521C51B84C00CD1E80 /* Launch Screen.storyboard */; };
 		264A7E751AA7263600E860E3 /* MLAccountCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 264A7E741AA7263600E860E3 /* MLAccountCell.xib */; };
 		264E345B1787BAB100BC7BD0 /* XMPPPresence.m in Sources */ = {isa = PBXBuildFile; fileRef = 264E345A1787BAB100BC7BD0 /* XMPPPresence.m */; };
 		2651AF551B409906008D025C /* MLMainWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 2651AF541B409906008D025C /* MLMainWindow.m */; };
@@ -668,6 +669,7 @@
 		2643A12C180220890030EFB1 /* TPKeyboardAvoidingTableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TPKeyboardAvoidingTableView.h; sourceTree = "<group>"; };
 		2643A12D180220890030EFB1 /* TPKeyboardAvoidingTableView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TPKeyboardAvoidingTableView.m; sourceTree = "<group>"; };
 		26470F511835C4080069E3E0 /* Media.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Media.xcassets; sourceTree = "<group>"; };
+		2649CE521C51B84C00CD1E80 /* Launch Screen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = "Launch Screen.storyboard"; path = "Monal-iOS/Launch Screen.storyboard"; sourceTree = "<group>"; };
 		264A7E741AA7263600E860E3 /* MLAccountCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MLAccountCell.xib; sourceTree = "<group>"; };
 		264E34591787BAB100BC7BD0 /* XMPPPresence.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPPresence.h; sourceTree = "<group>"; };
 		264E345A1787BAB100BC7BD0 /* XMPPPresence.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPPresence.m; sourceTree = "<group>"; };
@@ -1709,6 +1711,7 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
+				2649CE521C51B84C00CD1E80 /* Launch Screen.storyboard */,
 				29B97315FDCFA39411CA2CEA /* Root Sources */,
 				080E96DDFE201D6D7F000001 /* Shared */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
@@ -2086,6 +2089,7 @@
 				26D89F081A8908B6009B147C /* XMPPEdit.xib in Resources */,
 				2665C1181C4A6D4500CC9A04 /* MLOAuthViewController.xib in Resources */,
 				26C3EDEE1A7CA6FA000E6331 /* ContactsViewController.xib in Resources */,
+				2649CE531C51B84C00CD1E80 /* Launch Screen.storyboard in Resources */,
 				26F9794D1ACAC73A0008E005 /* MLContactCell.xib in Resources */,
 				2628E50714049DB50064131E /* askTempPass.xib in Resources */,
 				26BAFC541626537D0073728B /* .gitignore in Resources */,

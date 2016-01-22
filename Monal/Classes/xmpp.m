@@ -780,7 +780,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     }
     else  {
-        if(self.supportsSM3 && self.unAckedStanzas)
+        if(self.supportsSM3 && self.unAckedStanzas.count>0)
         {
             MLXMLNode* rNode =[[MLXMLNode alloc] initWithElement:@"r"];
             NSDictionary *dic=@{@"xmlns":@"urn:xmpp:sm:3"};

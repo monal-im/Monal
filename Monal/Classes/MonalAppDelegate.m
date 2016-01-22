@@ -23,6 +23,7 @@
 #import "HelpViewController.h"
 #import "AboutViewController.h"
 #import "MLNotificationManager.h"
+#import "DataLayer.h"
 
 #import <Fabric/Fabric.h>
 #import <Crashlytics/Crashlytics.h>
@@ -242,7 +243,23 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     //ios8 register for local notifications and badges
     if([[UIApplication sharedApplication] respondsToSelector:@selector(registerUserNotificationSettings:)])
     {
-        UIUserNotificationSettings *settings = [UIUserNotificationSettings settingsForTypes:UIUserNotificationTypeAlert|UIUserNotificationTypeSound|UIUserNotificationTypeBadge categories:nil];
+        NSSet *categories;
+        if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"9.0")) {
+            UIMutableUserNotificationAction *replyAction = [[UIMutableUserNotificationAction alloc] init];
+            replyAction.activationMode = UIUserNotificationActivationModeBackground;
+            replyAction.title = @"Reply";
+            replyAction.identifier = @"ReplyButton";
+            replyAction.destructive = NO;
+            replyAction.authenticationRequired = NO;
+            replyAction.behavior = UIUserNotificationActionBehaviorTextInput;
+            
+            UIMutableUserNotificationCategory *actionCategory = [[UIMutableUserNotificationCategory alloc] init];
+            actionCategory.identifier = @"Reply";
+            [actionCategory setActions:@[replyAction] forContext:UIUserNotificationActionContextDefault];
+            categories = [NSSet setWithObject:actionCategory];
+        }
+        
+        UIUserNotificationSettings *settings = [UIUserNotificationSettings settingsForTypes:UIUserNotificationTypeAlert|UIUserNotificationTypeSound|UIUserNotificationTypeBadge categories:categories];
         [[UIApplication sharedApplication] registerUserNotificationSettings:settings];
     }
     
@@ -293,6 +310,40 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     if([notification.userInfo objectForKey:@"from"]) {
     [self.tabBarController setSelectedIndex:0];
     [[MLXMPPManager sharedInstance].contactVC presentChatWithName:[notification.userInfo objectForKey:@"from"] account:[notification.userInfo objectForKey:@"accountNo"] ];
+    }
+}
+
+-(void) application:(UIApplication *)application handleActionWithIdentifier:(nullable NSString *)identifier forLocalNotification:(nonnull UILocalNotification *)notification withResponseInfo:(nonnull NSDictionary *)responseInfo completionHandler:(nonnull void (^)())completionHandler
+{
+    if ([notification.category isEqualToString:@"Reply"]) {
+        NSDictionary *userInfo = notification.userInfo;
+        if ([identifier isEqualToString:@"ReplyButton"]) {
+            NSString *message = responseInfo[UIUserNotificationActionResponseTypedTextKey];
+            if (message.length > 0) {
+                
+                if([notification.userInfo objectForKey:@"from"]) {
+                    
+                    NSArray *toParts= [[notification.userInfo objectForKey:@"to"] componentsSeparatedByString:@"/"];
+                    if(toParts.count>0) {
+                        NSString *replyingAccount = toParts[0];
+                        
+                        NSUInteger r = arc4random_uniform(NSIntegerMax);
+                        NSString *messageID =[NSString stringWithFormat:@"Monal%lu", (unsigned long)r];
+                        
+                        [[DataLayer sharedInstance] addMessageHistoryFrom:replyingAccount to:[notification.userInfo objectForKey:@"from"] forAccount:[notification.userInfo objectForKey:@"accountNo"] withMessage:message actuallyFrom:replyingAccount withId:messageID withCompletion:^(BOOL success) {
+                            
+                        }];
+                        
+                        [[MLXMPPManager sharedInstance] sendMessage:message toContact:[notification.userInfo objectForKey:@"from"] fromAccount:[notification.userInfo objectForKey:@"accountNo"] isMUC:NO messageId:messageID withCompletionHandler:^(BOOL success, NSString *messageId) {
+                            
+                        }];
+                        
+                    }
+                }
+                
+                
+            }
+        }
     }
 }
 

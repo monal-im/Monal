@@ -22,12 +22,6 @@
                                                 <action selector="orderFrontStandardAboutPanel:" target="Ady-hI-5gd" id="Exp-CZ-Vem"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Check for Updates..." id="h3N-PL-P7g">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                            <connections>
-                                                <action selector="checkForUpdates:" target="R3g-9a-MaB" id="rUf-Le-YCQ"/>
-                                            </connections>
-                                        </menuItem>
                                         <menuItem isSeparatorItem="YES" id="VOq-y0-SEH"/>
                                         <menuItem title="Preferences…" keyEquivalent="," id="BOF-NM-1cW">
                                             <connections>
@@ -517,7 +511,6 @@ CA
                     </connections>
                 </application>
                 <customObject id="Voe-Tx-rLC" customClass="AppDelegate"/>
-                <customObject id="R3g-9a-MaB" customClass="SUUpdater"/>
                 <customObject id="Ady-hI-5gd" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-800" y="-86"/>
@@ -935,17 +928,17 @@ Gw
                             <scrollView fixedFrame="YES" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="n6a-mP-jgP">
                                 <rect key="frame" x="20" y="20" width="280" height="135"/>
                                 <clipView key="contentView" ambiguous="YES" id="jpM-ia-7hG">
-                                    <rect key="frame" x="1" y="1" width="263" height="133"/>
+                                    <rect key="frame" x="1" y="1" width="278" height="133"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <textView ambiguous="YES" editable="NO" importsGraphics="NO" richText="NO" findStyle="panel" continuousSpellChecking="YES" allowsUndo="YES" usesRuler="YES" usesFontPanel="YES" verticallyResizable="YES" allowsNonContiguousLayout="YES" quoteSubstitution="YES" dashSubstitution="YES" spellingCorrection="YES" smartInsertDelete="YES" id="WE5-f6-27o">
-                                            <rect key="frame" x="0.0" y="0.0" width="263" height="133"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="278" height="133"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                            <size key="minSize" width="263" height="133"/>
+                                            <size key="minSize" width="278" height="133"/>
                                             <size key="maxSize" width="463" height="10000000"/>
                                             <color key="insertionPointColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                            <size key="minSize" width="263" height="133"/>
+                                            <size key="minSize" width="278" height="133"/>
                                             <size key="maxSize" width="463" height="10000000"/>
                                         </textView>
                                     </subviews>
@@ -956,7 +949,7 @@ Gw
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                                 <scroller key="verticalScroller" verticalHuggingPriority="750" horizontal="NO" id="mNa-zL-YvB">
-                                    <rect key="frame" x="264" y="1" width="15" height="133"/>
+                                    <rect key="frame" x="263" y="1" width="16" height="133"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                             </scrollView>
@@ -1385,8 +1378,8 @@ Gw
                                     </subviews>
                                     <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </clipView>
-                                <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="0.45377428691022675" horizontal="YES" id="dNd-63-Z8V">
-                                    <rect key="frame" x="1" y="211" width="408" height="15"/>
+                                <scroller key="horizontalScroller" verticalHuggingPriority="750" doubleValue="0.45377428691022675" horizontal="YES" id="dNd-63-Z8V">
+                                    <rect key="frame" x="1" y="210" width="408" height="16"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                                 <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="0.065894298109469673" horizontal="NO" id="ioD-in-Aqf">

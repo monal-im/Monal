@@ -254,6 +254,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     
     
     [nc addObserver:self selector:@selector(handleTap) name:UIApplicationDidEnterBackgroundNotification object:nil];
+    [nc addObserver:self selector:@selector(refreshData) name:UIApplicationWillEnterForegroundNotification object:nil];
 	[nc addObserver:self selector:@selector(keyboardWillShow:) name: UIKeyboardWillShowNotification object:nil];
 	[nc addObserver:self selector:@selector(keyboardWillHide:) name: UIKeyboardWillHideNotification object:nil];
 	[nc addObserver:self selector:@selector(keyboardDidShow:) name: UIKeyboardDidShowNotification object:nil];
@@ -264,13 +265,10 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     self.view.autoresizesSubviews=true;
     _messageTable.separatorColor=[UIColor whiteColor];
     
-    //    UIMenuItem *openMenuItem = [[UIMenuItem alloc] initWithTitle:@"Open in Safari" action:@selector(openlink:)];
-    //    [[UIMenuController sharedMenuController] setMenuItems: @[openMenuItem]];
-    //    [[UIMenuController sharedMenuController] update];
-    
-    
-    
+
 }
+
+
 
 -(void)viewWillAppear:(BOOL)animated
 {
@@ -280,21 +278,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     [MLNotificationManager sharedInstance].currentAccountNo=self.accountNo;
     [MLNotificationManager sharedInstance].currentContact=self.contactName;
     
-    if(!_day) {
-        _messagelist =[[DataLayer sharedInstance] messageHistory:_contactName forAccount: _accountNo];
-       [[DataLayer sharedInstance] countUserUnreadMessages:_contactName forAccount: _accountNo withCompletion:^(NSNumber *unread) {
-           if([unread integerValue]==0) _firstmsg=YES;
-           
-       }];
-        _isMUC=[[DataLayer sharedInstance] isBuddyMuc:_contactName forAccount: _accountNo];
-        
-    }
-    else
-    {
-        _messagelist =[[[DataLayer sharedInstance] messageHistoryDate:_contactName forAccount: _accountNo forDate:_day] mutableCopy];
-        
-    }
-    
+ 
+    [self refreshData];
     
     if(![_contactFullName isEqualToString:@"(null)"] && [[_contactFullName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0)
     {
@@ -375,6 +360,25 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         [appDelegate updateUnread];
     }
     
+}
+
+-(void) refreshData
+{
+    if(!_day) {
+        _messagelist =[[DataLayer sharedInstance] messageHistory:_contactName forAccount: _accountNo];
+        [[DataLayer sharedInstance] countUserUnreadMessages:_contactName forAccount: _accountNo withCompletion:^(NSNumber *unread) {
+            if([unread integerValue]==0) _firstmsg=YES;
+            
+        }];
+        _isMUC=[[DataLayer sharedInstance] isBuddyMuc:_contactName forAccount: _accountNo];
+        
+    }
+    else
+    {
+        _messagelist =[[[DataLayer sharedInstance] messageHistoryDate:_contactName forAccount: _accountNo forDate:_day] mutableCopy];
+        
+    }
+    [_messageTable reloadData];
 }
 
 

@@ -38,9 +38,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     self.view.backgroundColor=[UIColor whiteColor];
     _messageTable =[[UITableView alloc] initWithFrame:CGRectMake(0, 2, self.view.frame.size.width, self.view.frame.size.height-42)];
     _messageTable.backgroundColor=[UIColor whiteColor];
-    //    pages = [[UIPageControl alloc] init];
-    //    pages.frame=CGRectMake(0, self.view.frame.size.height - 40-20, self.view.frame.size.width, 20);
-    //
+
     containerView = [[UIView alloc] initWithFrame:CGRectMake(0, self.view.frame.size.height - 40, self.view.frame.size.width, 40)];
     
 	chatInput = [[HPGrowingTextView alloc] initWithFrame:CGRectMake(6, 3, self.view.frame.size.width-80, 40)];
@@ -53,14 +51,6 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 	chatInput.delegate = self;
     chatInput.internalTextView.scrollIndicatorInsets = UIEdgeInsetsMake(5, 0, 5, 0);
     chatInput.backgroundColor = [UIColor whiteColor];
-    
-    //page control
-    //    pages.backgroundColor = [UIColor colorWithRed:.4 green:0.435 blue:0.498 alpha:1];
-    //
-    //    pages.hidesForSinglePage=false;
-    //    pages.numberOfPages=0;
-    //    pages.currentPage=0;
-    //
     
     [self.view addSubview:_messageTable];
     //    [self.view addSubview:pages];
@@ -147,20 +137,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         
     }
     
-    
-    
     containerView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
     _messageTable.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    //    pages.autoresizingMask= UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
-    
-    //    UISwipeGestureRecognizer* swipe = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipeDetected:)];
-    //    [swipe setDirection:(UISwipeGestureRecognizerDirectionRight )];
-    //    [self.view addGestureRecognizer:swipe];
-    //
-    //    UISwipeGestureRecognizer* swipe2 = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipeDetected:)];
-    //    [swipe2 setDirection:( UISwipeGestureRecognizerDirectionLeft)];
-    //    [self.view addGestureRecognizer:swipe2];
-    
     chatInput.delegate=self;
     
     
@@ -254,7 +232,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     
     
     [nc addObserver:self selector:@selector(handleTap) name:UIApplicationDidEnterBackgroundNotification object:nil];
-    [nc addObserver:self selector:@selector(refreshData) name:UIApplicationWillEnterForegroundNotification object:nil];
+    [nc addObserver:self selector:@selector(handleForeGround) name:UIApplicationWillEnterForegroundNotification object:nil];
 	[nc addObserver:self selector:@selector(keyboardWillShow:) name: UIKeyboardWillShowNotification object:nil];
 	[nc addObserver:self selector:@selector(keyboardWillHide:) name: UIKeyboardWillHideNotification object:nil];
 	[nc addObserver:self selector:@selector(keyboardDidShow:) name: UIKeyboardDidShowNotification object:nil];
@@ -268,6 +246,10 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 }
 
+-(void) handleForeGround {
+    [self refreshData];
+    [self refreshCounter];
+}
 
 
 -(void)viewWillAppear:(BOOL)animated
@@ -279,8 +261,6 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     [MLNotificationManager sharedInstance].currentContact=self.contactName;
     
  
-    [self refreshData];
-    
     if(![_contactFullName isEqualToString:@"(null)"] && [[_contactFullName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0)
     {
         _topName.text=_contactFullName;
@@ -300,7 +280,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         _topIcon.image=[[MLImageManager sharedInstance] getIconForContact:_contactName andAccount:_accountNo];
         
     }
-    [self refreshCounter];
+    
+    [self handleForeGround];
 
 }
 

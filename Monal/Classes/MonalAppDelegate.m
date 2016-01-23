@@ -345,6 +345,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             }
         }
     }
+    if(completionHandler) completionHandler();
 }
 
 

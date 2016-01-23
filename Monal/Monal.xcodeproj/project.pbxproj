@@ -155,6 +155,7 @@
 		261147E81C35D7860078A72E /* NXOAuth2Request.m in Sources */ = {isa = PBXBuildFile; fileRef = 261147CC1C35D7860078A72E /* NXOAuth2Request.m */; };
 		261199251B632C42008768C8 /* MASPreferencesWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 261199211B632C42008768C8 /* MASPreferencesWindow.xib */; };
 		261199261B632C42008768C8 /* MASPreferencesWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261199231B632C42008768C8 /* MASPreferencesWindowController.m */; };
+		2614B64F1C54095D004FF2FA /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 2614B64E1C54095D004FF2FA /* libz.tbd */; };
 		261528C51869CE5300BF62D6 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 261528C41869CE5300BF62D6 /* AudioToolbox.framework */; };
 		261894921B40483000C957C3 /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 26470F511835C4080069E3E0 /* Media.xcassets */; };
 		261A6281176C055400059090 /* ContactsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A627F176C055400059090 /* ContactsViewController.m */; };
@@ -503,6 +504,7 @@
 		261199221B632C42008768C8 /* MASPreferencesWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MASPreferencesWindowController.h; sourceTree = "<group>"; };
 		261199231B632C42008768C8 /* MASPreferencesWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MASPreferencesWindowController.m; sourceTree = "<group>"; };
 		261199241B632C42008768C8 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		2614B64E1C54095D004FF2FA /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		261528C41869CE5300BF62D6 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		261A627E176C055400059090 /* ContactsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContactsViewController.h; sourceTree = "<group>"; };
 		261A627F176C055400059090 /* ContactsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ContactsViewController.m; sourceTree = "<group>"; };
@@ -870,6 +872,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2614B64F1C54095D004FF2FA /* libz.tbd in Frameworks */,
 				26817F111B8E01D800A19886 /* Crashlytics.framework in Frameworks */,
 				261528C51869CE5300BF62D6 /* AudioToolbox.framework in Frameworks */,
 				2642EBD01869425D006A6C12 /* CoreAudio.framework in Frameworks */,
@@ -1749,6 +1752,7 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				2614B64E1C54095D004FF2FA /* libz.tbd */,
 				269574E11C37307300544A60 /* libsqlite3.tbd */,
 				269574DF1C37301600544A60 /* libz.tbd */,
 				269574DD1C372FD200544A60 /* Security.framework */,

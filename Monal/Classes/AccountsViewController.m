@@ -60,6 +60,10 @@
     self.uptimeFormatter.doesRelativeDateFormatting=YES;
     self.uptimeFormatter.locale=[NSLocale currentLocale];
     self.uptimeFormatter.timeZone=[NSTimeZone systemTimeZone];
+    
+    NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+    [nc addObserver:self selector:@selector(refreshAccountList) name:kMonalAccountStatusChanged object:nil];
+    
 }
 
 -(void) viewWillAppear:(BOOL)animated
@@ -67,13 +71,22 @@
     [super viewWillAppear:animated];
     _accountList=[[DataLayer sharedInstance] accountList];
     [self.accountsTable reloadData];
-//    if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"6.0"))
-//    {
-//    [[UILabel appearanceWhenContainedIn:[UITableViewHeaderFooterView class], nil] setColor:[UIColor whiteColor]];
-//    [[UILabel appearanceWhenContainedIn:[UITableViewHeaderFooterView class], nil] setShadowColor:nil];
-//    }
+
 }
 
+-(void) dealloc
+{
+    NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+    [nc removeObserver:self];
+}
+
+-(void) refreshAccountList
+{
+    dispatch_async(dispatch_get_main_queue() , ^{
+        _accountList=[[DataLayer sharedInstance] accountList];
+        [self.accountsTable reloadData];
+    });
+}
 
 #pragma mark button actions
 
@@ -245,6 +258,7 @@
             
             
             UIImageView *accessory =[[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 30, 30)];
+            cell.detailTextLabel.text=nil;
             
             if([[[_accountList objectAtIndex:indexPath.row] objectForKey:@"enabled"] boolValue] ==YES) {
                    cell.imageView.image=[UIImage imageNamed:@"888-checkmark"];
@@ -260,14 +274,9 @@
                 }
                 else {
                     accessory.image =[UIImage imageNamed:@"Disconnected"];
-                 
                     cell.accessoryView =accessory;
-                    cell.detailTextLabel.text=nil;
                 }
-                
-              
-               
-                
+       
             }
             else {
                     cell.imageView.image=[UIImage imageNamed:@"disabled"];

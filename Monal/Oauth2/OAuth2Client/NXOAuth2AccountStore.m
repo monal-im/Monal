@@ -722,6 +722,7 @@ NSString * const kNXOAuth2AccountStoreAccountType = @"kNXOAuth2AccountStoreAccou
                                   serviceName, kSecAttrService,
                                   @"OAuth 2 Account Store", kSecAttrLabel,
                                   data, kSecAttrGeneric,
+                                  kSecAttrAccessibleAfterFirstUnlock ,kSecAttrAccessible,
                                   nil];
     
 #ifndef TARGET_IPHONE_SIMULATOR

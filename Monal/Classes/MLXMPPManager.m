@@ -18,6 +18,7 @@
 #endif
 
 static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+static const int pingFreqencyMinutes =1;
 
 @interface MLXMPPManager()
 
@@ -74,7 +75,7 @@ An array of Dics what have timers to make sure everything was sent
     self=[super init];
     
     _connectedXMPP=[[NSMutableArray alloc] init];
-    _passwordDic = [[NSMutableDictionary alloc] init];
+   
     _netQueue = dispatch_queue_create(kMonalNetQueue, DISPATCH_QUEUE_SERIAL);
     
     [self defaultSettings];
@@ -86,7 +87,7 @@ An array of Dics what have timers to make sure everything was sent
     
     dispatch_source_set_timer(_pinger,
                               DISPATCH_TIME_NOW,
-                              60ull * NSEC_PER_SEC *5
+                              60ull * NSEC_PER_SEC *pingFreqencyMinutes
                               , 1ull * NSEC_PER_SEC);
     
     dispatch_source_set_event_handler(_pinger, ^{
@@ -252,42 +253,28 @@ An array of Dics what have timers to make sure everything was sent
     
     xmppAccount.accountNo=[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]];
 #if TARGET_OS_IPHONE
-    NSLog(@"state %ld", [UIApplication sharedApplication].applicationState);
-    if([UIApplication sharedApplication].applicationState!=UIApplicationStateActive)
-    {
-        //keychain wont work when device is locked.
-        if([self.passwordDic objectForKey:[account objectForKey:kAccountID]])
-        {
-            xmppAccount.password=[self.passwordDic objectForKey:[account objectForKey:kAccountID]];
-            DDLogVerbose(@"connect got password from dic");
-        }
-        else {
-            PasswordManager* passMan= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
+    if(!xmppAccount.oAuth) {
+        PasswordManager* passMan= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@-%@@%@",[account objectForKey:kAccountID], [account objectForKey:kUsername],  [account objectForKey:kDomain] ]];
+        xmppAccount.password=[passMan getPassword] ;
+        if(!xmppAccount.password.length>0) {
+            passMan= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
             xmppAccount.password=[passMan getPassword] ;
-            [self.passwordDic setObject:xmppAccount.password forKey:[account objectForKey:kAccountID]];
         }
     }
-    else
+    
 #else
-        NSError *error;
+    NSError *error;
     xmppAccount.password =[STKeychain getPasswordForUsername:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]] andServiceName:@"Monal" error:&error];
     
 #endif
-    {
-        if(!xmppAccount.password)  {
-            xmppAccount.password=@"";
-        }
-        [self.passwordDic setObject:xmppAccount.password forKey:[account objectForKey:kAccountID]];
-    }
+ 
     
-    if([xmppAccount.password length]==0) //&& ([tempPass length]==0)
+    if([xmppAccount.password length]==0 && !xmppAccount.oAuth) //&& ([tempPass length]==0)
     {
-        // no password error
+        // ask fro temp pass if not oauth
     }
-    
 
      xmppAccount.contactsVC=self.contactVC;
-
     
     //sepcifically look for the server since we might not be online or behind firewall
     Reachability* hostReach = [Reachability reachabilityWithHostName:xmppAccount.server ] ;

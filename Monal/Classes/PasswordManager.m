@@ -85,6 +85,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         // converted to an NSData object:
         
 		 [keychainData setObject:@"Monal" forKey:(__bridge id)kSecAttrService];
+        [keychainData setObject:(__bridge id)kSecAttrAccessibleAfterFirstUnlock forKey:(__bridge id)kSecAttrAccessible];
         
        [genericPasswordQuery setObject:accountno forKey:(__bridge id)kSecAttrAccount ];
 	   [genericPasswordQuery setObject:@"Monal"  forKey:(__bridge id)kSecAttrService ];

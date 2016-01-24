@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "XMLNode.h"
+#import "MLXMLNode.h"
 #import "EncodingTools.h"
 
 
@@ -118,7 +118,7 @@ typedef NS_ENUM (NSInteger, xmppState) {
 /**
  Adds the stanza to the output Queue
  */
--(void) send:(XMLNode*) stanza;
+-(void) send:(MLXMLNode*) stanza;
 
 /**
  removes a contact from the roster

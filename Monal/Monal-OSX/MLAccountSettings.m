@@ -11,6 +11,7 @@
 #import "MLAccountEdit.h"
 #import "DataLayer.h"
 #import "MLConstants.h"
+#import "NXOAuth2AccountStore.h"
 
 @interface MLAccountSettings ()
 @property (nonatomic, strong) NSArray *accountList;
@@ -54,6 +55,16 @@
     NSInteger selected = [self.accountTable selectedRow];
     if(selected < self.accountList.count) {
         NSDictionary * row = [self.accountList objectAtIndex:selected];
+        
+        NSString *jid = [row objectForKey:kAccountName];
+        
+        NSArray *accounts= [[NXOAuth2AccountStore sharedStore] accountsWithAccountType:jid];
+        NXOAuth2Account *oauthAccount;
+        if([accounts count]>0)
+        {
+            oauthAccount= [accounts objectAtIndex:0];
+            [[NXOAuth2AccountStore sharedStore] removeAccount:oauthAccount];
+        }
         
         // pass to database
         NSNumber *accountID = [row objectForKey:kAccountID];

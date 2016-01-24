@@ -589,8 +589,6 @@ static DataLayer *sharedInstance=nil;
 
 -(BOOL) removeAccount:(NSString*) accountNo
 {
-    
-    
     // remove all other traces of the account_id
     NSString* query1=[NSString stringWithFormat:@"delete from buddylist  where account_id=%@ ;", accountNo];
     [self executeNonQuery:query1];

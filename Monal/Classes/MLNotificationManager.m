@@ -66,6 +66,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                               alarm.fireDate = theDate;
                               alarm.timeZone = [NSTimeZone defaultTimeZone];
                               alarm.repeatInterval = 0;
+                              if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"9.0")){
+                                  alarm.category=@"Reply";
+                              }
                               
                               if([[NSUserDefaults standardUserDefaults] boolForKey:@"MessagePreview"])
                                   alarm.alertBody = [NSString stringWithFormat: @"%@: %@", nameToShow, [notification.userInfo objectForKey:@"messageText"]];

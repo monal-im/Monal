@@ -2493,6 +2493,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 return;
             }
             
+            if(st_error.code==60)// could not complete operation
+            {
+                [self disconnect];
+                [self reconnect:5];
+                return;
+            }
             
             if(st_error.code==64)// Host is down
             {

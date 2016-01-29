@@ -51,7 +51,7 @@
 
 -(IBAction)sendMessageText:(id)sender;
 
--(id) initWithContact:(NSDictionary*) contact  ;
+-(void) setupWithContact:(NSDictionary*) contact  ;
 
 /**
  if day is specified this is a log

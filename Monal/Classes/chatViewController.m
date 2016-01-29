@@ -55,14 +55,10 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     }
 }
 
--(id) initWithContact:(NSDictionary*) contact
+-(void) setupWithContact:(NSDictionary*) contact
 {
-    self=[super init];
-    if(self){
-        _contact=contact;
-        [self setup];
-    }
-    return self;
+    _contact=contact;
+    [self setup];
     
 }
 

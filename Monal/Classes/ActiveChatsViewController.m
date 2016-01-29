@@ -221,8 +221,11 @@
 //                }
 //            }
     
-        
-        chatViewController* chatVC = [[chatViewController alloc] initWithContact:[_contacts objectAtIndex:indexPath.row] ];
+    
+    UIStoryboard *storyBoard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+    chatViewController* chatVC = [storyBoard instantiateViewControllerWithIdentifier:@"chatViewController"];
+    [chatVC setupWithContact:[_contacts objectAtIndex:indexPath.row] ];
+
         [self.navigationController pushViewController:chatVC animated:YES];
         
    

@@ -609,9 +609,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) presentChatWithRow:(NSDictionary *)row
 {
     //make chat view
-    chatViewController* chatVC = [[chatViewController alloc] initWithContact:row ];
+    UIStoryboard *storyBoard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+    chatViewController* chatVC = [storyBoard instantiateViewControllerWithIdentifier:@"chatViewController"];
+    [chatVC setupWithContact:row];
     
-
     if([[self.currentNavController topViewController] isKindOfClass:[chatViewController class]])
     {
         chatViewController* currentTop=(chatViewController*)[self.currentNavController topViewController];

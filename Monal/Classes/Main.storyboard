@@ -6,10 +6,10 @@
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <scenes>
-        <!--View Controller-->
+        <!--Chat View Controller-->
         <scene sceneID="5Rt-f0-mRM">
             <objects>
-                <viewController id="5nR-Q5-dQD" sceneMemberID="viewController">
+                <viewController id="5nR-Q5-dQD" customClass="chatViewController" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="HiA-3m-fJs"/>
                         <viewControllerLayoutGuide type="bottom" id="si5-od-Uah"/>
@@ -26,10 +26,16 @@
                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                         <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                                        <connections>
+                                            <outlet property="delegate" destination="5nR-Q5-dQD" id="6JC-Ir-6N9"/>
+                                        </connections>
                                     </textView>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="kYa-y4-X5Z">
                                         <rect key="frame" x="548" y="7" width="36" height="30"/>
                                         <state key="normal" title="Send"/>
+                                        <connections>
+                                            <action selector="sendMessageText:" destination="5nR-Q5-dQD" eventType="touchUpInside" id="QRx-TH-CI3"/>
+                                        </connections>
                                     </button>
                                 </subviews>
                                 <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
@@ -47,6 +53,10 @@
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="Kkq-aZ-5fP">
                                 <rect key="frame" x="0.0" y="0.0" width="607" height="557"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <connections>
+                                    <outlet property="dataSource" destination="5nR-Q5-dQD" id="Qvl-NA-FmW"/>
+                                    <outlet property="delegate" destination="5nR-Q5-dQD" id="eK5-I1-Fy5"/>
+                                </connections>
                             </tableView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -61,6 +71,11 @@
                             <constraint firstItem="Kkq-aZ-5fP" firstAttribute="top" secondItem="Riz-2Q-bcU" secondAttribute="topMargin" id="zgT-kA-ROh"/>
                         </constraints>
                     </view>
+                    <connections>
+                        <outlet property="chatInput" destination="spx-KC-CB8" id="EHH-rB-qzw"/>
+                        <outlet property="sendButton" destination="kYa-y4-X5Z" id="efC-cC-umG"/>
+                        <outlet property="view" destination="Riz-2Q-bcU" id="d0E-AR-8aA"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="tvb-fM-fJc" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>

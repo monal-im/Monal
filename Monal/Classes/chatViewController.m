@@ -33,144 +33,6 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 @implementation chatViewController
 
 
-- (void)makeView {
-	
-    self.view.backgroundColor=[UIColor whiteColor];
-    _messageTable =[[UITableView alloc] initWithFrame:CGRectMake(0, 2, self.view.frame.size.width, self.view.frame.size.height-42)];
-    _messageTable.backgroundColor=[UIColor whiteColor];
-
-    containerView = [[UIView alloc] initWithFrame:CGRectMake(0, self.view.frame.size.height - 40, self.view.frame.size.width, 40)];
-    
-	chatInput = [[HPGrowingTextView alloc] initWithFrame:CGRectMake(6, 3, self.view.frame.size.width-80, 40)];
-    chatInput.contentInset = UIEdgeInsetsMake(0, 5, 0, 5);
-    
-	chatInput.minNumberOfLines = 1;
-	chatInput.maxNumberOfLines = 8;
-	
-	chatInput.font = [UIFont systemFontOfSize:15.0f];
-	chatInput.delegate = self;
-    chatInput.internalTextView.delegate=self;
-    chatInput.internalTextView.scrollIndicatorInsets = UIEdgeInsetsMake(5, 0, 5, 0);
-    chatInput.backgroundColor = [UIColor whiteColor];
-    
-    [self.view addSubview:_messageTable];
-    //    [self.view addSubview:pages];
-    [self.view addSubview:containerView];
-    
-    if(SYSTEM_VERSION_LESS_THAN(@"7.0"))
-    {
-        UIImage *rawBackground = [UIImage imageNamed:@"MessageEntryBackground.png"];
-        UIImage *background = [rawBackground stretchableImageWithLeftCapWidth:13 topCapHeight:22];
-        UIImageView *imageView = [[UIImageView alloc] initWithImage:background];
-        imageView.frame = CGRectMake(0, 0, containerView.frame.size.width, containerView.frame.size.height);
-        imageView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
-        [containerView addSubview:imageView];
-        
-    }
-    
-    [containerView addSubview:chatInput];
-    
-    if(SYSTEM_VERSION_LESS_THAN(@"7.0"))
-    {
-        UIImage *rawEntryBackground = [UIImage imageNamed:@"MessageEntryInputField.png"];
-        UIImage *entryBackground = [rawEntryBackground stretchableImageWithLeftCapWidth:13 topCapHeight:22];
-        UIImageView *entryImageView = [[UIImageView alloc] initWithImage:entryBackground];
-        entryImageView.frame = CGRectMake(5, 0, self.view.frame.size.width-72, 40);
-        entryImageView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
-        [containerView addSubview:entryImageView];
-    }
-    
-    chatInput.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-    
-    // view hierachy
-    
-    if(SYSTEM_VERSION_LESS_THAN(@"7.0"))
-    {
-        
-        UIImage *sendBtnBackground = [[UIImage imageNamed:@"MessageEntrySendButton.png"] stretchableImageWithLeftCapWidth:13 topCapHeight:0];
-        UIImage *selectedSendBtnBackground = [[UIImage imageNamed:@"MessageEntrySendButton.png"] stretchableImageWithLeftCapWidth:13 topCapHeight:0];
-        
-        
-        UIButton *doneBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-        doneBtn.frame = CGRectMake(containerView.frame.size.width - 69, 8, 63, 27);
-        doneBtn.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleLeftMargin;
-        [doneBtn setTitle:@"Send" forState:UIControlStateNormal];
-        
-        [doneBtn addTarget:self action:@selector(resignTextView) forControlEvents:UIControlEventTouchUpInside];
-        
-        
-        [doneBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-        [doneBtn setTitleShadowColor:[UIColor colorWithWhite:0 alpha:0.4] forState:UIControlStateNormal];
-        doneBtn.titleLabel.shadowOffset = CGSizeMake (0.0, -1.0);
-        [doneBtn.titleLabel setFont:[UIFont boldSystemFontOfSize:18.0f]];
-        [doneBtn setBackgroundImage:sendBtnBackground forState:UIControlStateNormal];
-        [doneBtn setBackgroundImage:selectedSendBtnBackground forState:UIControlStateSelected];
-        
-        [containerView addSubview:doneBtn];
-	}
-    else
-    {
-        
-        UIButton *doneBtn = [UIButton buttonWithType:UIButtonTypeRoundedRect];
-        doneBtn.frame = CGRectMake(containerView.frame.size.width - 69, 8, 63, 27);
-        doneBtn.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleLeftMargin;
-        [doneBtn setTitle:@"Send" forState:UIControlStateNormal];
-        doneBtn.titleLabel.font=[UIFont boldSystemFontOfSize:19.0f];
-        
-        [doneBtn addTarget:self action:@selector(resignTextView) forControlEvents:UIControlEventTouchUpInside];
-        [containerView addSubview:doneBtn];
-        
-        containerView.backgroundColor=[UIColor colorWithRed:248/255.0f green:248/255.0f blue:248/255.0f alpha:1.0];
-        
-        chatInput.layer.cornerRadius=5.0f;
-        chatInput.layer.borderWidth = 1.0f;
-        chatInput.layer.borderColor = [[UIColor lightGrayColor] CGColor];
-        
-        CGRect lineFrame = containerView.frame;
-        lineFrame.size.height=1;
-        lineFrame.origin.x=0;
-        lineFrame.origin.y=0;
-        UIView* lineView=[[UIView alloc] initWithFrame:lineFrame];
-        lineView.backgroundColor=[UIColor colorWithRed:206/255.0f green:206/255.0f blue:206/255.0f alpha:1.0];
-        
-        [containerView addSubview:lineView];
-        lineView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-        
-    }
-    
-    containerView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
-    _messageTable.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    chatInput.delegate=self;
-    
-    
-    //set up nav bar view
-    _topBarView =[[UIView alloc] initWithFrame:CGRectMake(30, 5, _messageTable.frame.size.width-30, 44)];
-    CGRect imageFrame=CGRectMake(0, 5, 32, 32);
-    CGRect nameFrame=CGRectMake(37, 5, _topBarView.frame.size.width-37, imageFrame.size.height);
-    
-    _topIcon =[[UIImageView alloc] initWithFrame:imageFrame];
-    _topIcon.layer.cornerRadius=_topIcon.frame.size.height/2;
-    _topIcon.layer.borderColor = (__bridge CGColorRef)([UIColor lightGrayColor]);
-    _topIcon.layer.borderWidth=3.0f;
-    _topIcon.clipsToBounds=YES;
-    
-    
-    _topName=[[UILabel alloc] initWithFrame:nameFrame];
-    _topName.font=[UIFont boldSystemFontOfSize:15.0f];
-    _topName.textColor = [UIColor darkGrayColor]; 
-    
-    if(SYSTEM_VERSION_LESS_THAN(@"7.0"))
-    {
-        _topName.textColor=[UIColor whiteColor];
-    }
-    _topName.backgroundColor=[UIColor clearColor];
-    
-    [_topBarView addSubview:_topIcon];
-    [_topBarView addSubview:_topName];
-    
-    self.navigationItem.titleView=_topBarView;
-    
-}
 
 -(void) setup
 {
@@ -222,9 +84,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 -(void) viewDidLoad
 {
     [super viewDidLoad];
-    [self makeView];
     [self setupDateObjects];
     self.navigationController.view.backgroundColor=[UIColor whiteColor];
+    containerView= self.view;
     
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
     [nc addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
@@ -239,8 +101,6 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 	[nc addObserver:self selector:@selector(keyboardDidShow:) name: UIKeyboardDidShowNotification object:nil];
     
     self.hidesBottomBarWhenPushed=YES;
-    _messageTable.delegate=self;
-    _messageTable.dataSource=self;
     self.view.autoresizesSubviews=true;
     _messageTable.separatorColor=[UIColor whiteColor];
     
@@ -314,19 +174,19 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 - (BOOL)shouldAutorotate
 {
-   	[chatInput resignFirstResponder];
+   	[self.chatInput resignFirstResponder];
     return YES;
 }
 
 -(void) willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
 {
-    [chatInput resignFirstResponder];
+    [self.chatInput resignFirstResponder];
 }
 
 #pragma mark gestures
 -(void) handleTap
 {
-    [chatInput resignFirstResponder];
+    [self.chatInput resignFirstResponder];
 }
 
 #pragma mark message signals
@@ -390,16 +250,21 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 -(void)resignTextView
 {
     self.blockAnimations=YES;
-    [chatInput resignFirstResponder];//apply autocorrect
-    [chatInput becomeFirstResponder];
+    [self.chatInput resignFirstResponder];//apply autocorrect
+    [self.chatInput becomeFirstResponder];
     self.blockAnimations=NO;
     
-    if(([chatInput text]!=nil) && (![[chatInput text] isEqualToString:@""]) )
+    if(([self.chatInput text]!=nil) && (![[self.chatInput text] isEqualToString:@""]) )
     {
-        [self sendMessage:[chatInput text] ];
+        [self sendMessage:[self.chatInput text] ];
         
     }
-    [chatInput setText:@""];
+    [self.chatInput setText:@""];
+}
+
+-(IBAction)sendMessageText:(id)sender
+{
+    [self resignTextView];
 }
 
 
@@ -839,7 +704,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    [chatInput resignFirstResponder];
+    [self.chatInput resignFirstResponder];
     
     MLChatCell* cell = (MLChatCell*)[tableView cellForRowAtIndexPath:indexPath];
     if(cell.link)
@@ -999,15 +864,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 	
 }
 
-- (void)growingTextView:(HPGrowingTextView *)growingTextView willChangeHeight:(float)height
-{
-    float diff = (growingTextView.frame.size.height - height);
-    
-	CGRect r = containerView.frame;
-    r.size.height -= diff;
-    r.origin.y += diff;
-	containerView.frame = r;
-}
+
 
 
 @end

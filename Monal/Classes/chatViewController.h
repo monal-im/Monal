@@ -10,18 +10,16 @@
 #import <QuartzCore/QuartzCore.h>
 
 #import "DataLayer.h"
-#import "HPGrowingTextView.h"
 #import "MLConstants.h"
 #import "MLXMPPManager.h"
 #import "MLNotificationManager.h"
 #import "MLChatCell.h"
 
 
-@interface chatViewController : UIViewController <HPGrowingTextViewDelegate,UITableViewDelegate, UITableViewDataSource, UITextViewDelegate>
+@interface chatViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UITextViewDelegate>
 {
-
     UIView *containerView;
-    HPGrowingTextView *chatInput;
+
 	CGRect oldFrame;
 	NSString* _contactFullName;
     
@@ -34,8 +32,6 @@
     NSMutableArray* _messagelist;
     NSDictionary* _contact;
     
-    UITableView* _messageTable;
-    
     UIView* _topBarView;
     UILabel* _topName;
     UIImageView* _topIcon;
@@ -46,8 +42,14 @@
     BOOL _keyboardVisible; 
 }
 
+@property (nonatomic, weak) IBOutlet UITableView* messageTable;
+@property (nonatomic, weak) IBOutlet UITextView* chatInput;
+@property (nonatomic, weak) IBOutlet UIButton* sendButton;
+
 @property (nonatomic,strong)  NSString* contactName;
 
+
+-(IBAction)sendMessageText:(id)sender;
 
 -(id) initWithContact:(NSDictionary*) contact  ;
 

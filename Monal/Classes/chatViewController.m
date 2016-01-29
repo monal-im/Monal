@@ -946,7 +946,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 -(void) keyboardWillShow:(NSNotification *) notification
 {
     if(self.blockAnimations) return;
-    CGSize keyboardSize = [[[notification userInfo] objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue].size;
+    CGRect keyboardframe =[[[notification userInfo] objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
+    CGSize keyboardSize = keyboardframe.size;
     CGRect r;
 	
     //chiense keybaord might call this multiple times ony set for inital
@@ -959,7 +960,22 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     UIInterfaceOrientation orientation = [UIApplication sharedApplication].statusBarOrientation;
     
     if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0")) {
-        r.size.height -= keyboardSize.height;
+        
+        //detect bluetooth or ecternal keybaord
+        if ((keyboardframe.origin.y + keyboardframe.size.height) > oldFrame.size.height) {
+            _keyboardVisible=NO;
+            if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"9.0")) {
+                CGFloat toolbarHeight = oldFrame.size.height - keyboardframe.origin.y;
+                r.size.height -= toolbarHeight;
+            }
+            else {
+                return;
+            }
+           
+        }
+        else  {
+            r.size.height -= keyboardSize.height;
+        }
     }
     else {
         if(orientation==UIInterfaceOrientationLandscapeLeft|| orientation==UIInterfaceOrientationLandscapeRight)

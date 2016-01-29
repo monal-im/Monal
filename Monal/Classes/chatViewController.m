@@ -49,6 +49,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 	
 	chatInput.font = [UIFont systemFontOfSize:15.0f];
 	chatInput.delegate = self;
+    chatInput.internalTextView.delegate=self;
     chatInput.internalTextView.scrollIndicatorInsets = UIEdgeInsetsMake(5, 0, 5, 0);
     chatInput.backgroundColor = [UIColor whiteColor];
     
@@ -894,10 +895,19 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 }
 
 
-# pragma mark Textview delegeate functions
-- (void)textFieldDidBeginEditing:(UITextField *)textField
+# pragma mark Textview delegate functions
+
+- (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text
 {
+    if([text isEqualToString:@"\n"])
+    {
+        [self resignTextView];
+    }
+    
+    return YES;
 }
+
+#pragma mark - Keyboard
 
 -(void) keyboardDidHide: (NSNotification *)notif
 {

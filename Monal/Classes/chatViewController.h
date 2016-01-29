@@ -17,7 +17,7 @@
 #import "MLChatCell.h"
 
 
-@interface chatViewController : UIViewController <HPGrowingTextViewDelegate,UITableViewDelegate, UITableViewDataSource>
+@interface chatViewController : UIViewController <HPGrowingTextViewDelegate,UITableViewDelegate, UITableViewDataSource, UITextViewDelegate>
 {
 
     UIView *containerView;
@@ -29,7 +29,6 @@
 	
 	bool wasaway; 
 	bool wasoffline; 
-//    UIPageControl* pages;
     
     NSArray* activeChats;
     NSMutableArray* _messagelist;

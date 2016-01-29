@@ -291,6 +291,7 @@
 		2651AF551B409906008D025C /* MLMainWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 2651AF541B409906008D025C /* MLMainWindow.m */; };
 		26529F5217FA7B260057F199 /* addContact.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EC40FE17BDD85F0031304D /* addContact.m */; };
 		26529F5317FA7B310057F199 /* addContact.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26EC410517BDD88B0031304D /* addContact.xib */; };
+		2653EAE61C5B243400ED97F7 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2653EAE51C5B243400ED97F7 /* Main.storyboard */; };
 		265802851B785B8900C35014 /* MLDisabledScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = 265802841B785B8900C35014 /* MLDisabledScrollView.m */; };
 		2658508B15E7D8E40070A2A7 /* TPCircularBuffer+AudioBufferList.c in Sources */ = {isa = PBXBuildFile; fileRef = 2658508615E7D8E40070A2A7 /* TPCircularBuffer+AudioBufferList.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		2658508C15E7D8E40070A2A7 /* TPCircularBuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 2658508815E7D8E40070A2A7 /* TPCircularBuffer.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
@@ -678,6 +679,7 @@
 		264FF3E4158A855D00D97B86 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		2651AF531B409906008D025C /* MLMainWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLMainWindow.h; sourceTree = "<group>"; };
 		2651AF541B409906008D025C /* MLMainWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLMainWindow.m; sourceTree = "<group>"; };
+		2653EAE51C5B243400ED97F7 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		265802831B785B8900C35014 /* MLDisabledScrollView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLDisabledScrollView.h; sourceTree = "<group>"; };
 		265802841B785B8900C35014 /* MLDisabledScrollView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLDisabledScrollView.m; sourceTree = "<group>"; };
 		2658508615E7D8E40070A2A7 /* TPCircularBuffer+AudioBufferList.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "TPCircularBuffer+AudioBufferList.c"; sourceTree = "<group>"; };
@@ -1307,6 +1309,7 @@
 				26DB52121777EA5100B50353 /* Tab views */,
 				269E748C18B707B500BCB2D5 /* MLPortraitNavController.h */,
 				269E748D18B707B500BCB2D5 /* MLPortraitNavController.m */,
+				2653EAE51C5B243400ED97F7 /* Main.storyboard */,
 			);
 			name = "View Controllers";
 			path = Classes;
@@ -2089,6 +2092,7 @@
 				26761BF71804FBB700D94714 /* RoomListViewController.xib in Resources */,
 				26DC0A8B1339259900E60BFD /* SearchUser.xib in Resources */,
 				26B2A4BB1B73061400272E63 /* Images.xcassets in Resources */,
+				2653EAE61C5B243400ED97F7 /* Main.storyboard in Resources */,
 				262E51981AD8CB7200788351 /* MLTextInputCell.xib in Resources */,
 				26D89F081A8908B6009B147C /* XMPPEdit.xib in Resources */,
 				2665C1181C4A6D4500CC9A04 /* MLOAuthViewController.xib in Resources */,

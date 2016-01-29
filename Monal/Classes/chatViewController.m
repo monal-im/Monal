@@ -81,7 +81,6 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 {
     [super viewDidLoad];
     [self setupDateObjects];
-    self.navigationController.view.backgroundColor=[UIColor whiteColor];
     containerView= self.view;
     
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
@@ -98,9 +97,6 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     
     self.hidesBottomBarWhenPushed=YES;
     self.view.autoresizesSubviews=true;
-    _messageTable.separatorColor=[UIColor whiteColor];
-    
-
 }
 
 -(void) handleForeGround {
@@ -806,6 +802,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void) keyboardWillShow:(NSNotification *) notification
 {
+    
     if(self.blockAnimations) return;
     CGRect keyboardframe =[[[notification userInfo] objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
     CGSize keyboardSize = keyboardframe.size;

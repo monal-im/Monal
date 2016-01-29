@@ -971,8 +971,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    [tableView deselectRowAtIndexPath:indexPath animated:NO];
-    
     NSMutableDictionary* row;
     if(tableView ==self.view) {
     if(indexPath.section==kinfoSection)
@@ -998,13 +996,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
     [self presentChatWithRow:row];
     
-    [tableView beginUpdates];
-    [tableView reloadRowsAtIndexPaths:@[indexPath]
-                     withRowAnimation:UITableViewRowAnimationNone];
-    [tableView endUpdates];
-    
     _lastSelectedUser=row;
-    
     
 }
 

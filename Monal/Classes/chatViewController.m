@@ -89,7 +89,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     [nc addObserver:self selector:@selector(handleSentMessage:) name:kMonalSentMessageNotice object:nil];
     
     
-    [nc addObserver:self selector:@selector(handleTap) name:UIApplicationDidEnterBackgroundNotification object:nil];
+    [nc addObserver:self selector:@selector(dismissKeyboard:) name:UIApplicationDidEnterBackgroundNotification object:nil];
     [nc addObserver:self selector:@selector(handleForeGround) name:UIApplicationWillEnterForegroundNotification object:nil];
 	[nc addObserver:self selector:@selector(keyboardWillShow:) name: UIKeyboardWillShowNotification object:nil];
 	[nc addObserver:self selector:@selector(keyboardWillHide:) name: UIKeyboardWillHideNotification object:nil];
@@ -176,9 +176,10 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 }
 
 #pragma mark gestures
--(void) handleTap
+
+-(IBAction)dismissKeyboard:(id)sender
 {
-    [self.chatInput resignFirstResponder];
+     [self.chatInput resignFirstResponder];
 }
 
 #pragma mark message signals
@@ -252,6 +253,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         
     }
     [self.chatInput setText:@""];
+    [self scrollToBottom];
 }
 
 -(IBAction)sendMessageText:(id)sender

@@ -43,6 +43,9 @@
                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                         <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                                        <connections>
+                                            <outlet property="delegate" destination="5nR-Q5-dQD" id="s6z-b4-uwm"/>
+                                        </connections>
                                     </textView>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="kYa-y4-X5Z">
                                         <rect key="frame" x="558" y="8" width="36" height="30"/>
@@ -70,6 +73,7 @@
                             </view>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <gestureRecognizers/>
                         <constraints>
                             <constraint firstItem="Kkq-aZ-5fP" firstAttribute="top" secondItem="Riz-2Q-bcU" secondAttribute="topMargin" id="HdK-dF-8fg"/>
                             <constraint firstAttribute="trailingMargin" secondItem="Kkq-aZ-5fP" secondAttribute="trailing" constant="-27" id="L8j-s9-xp2"/>
@@ -80,6 +84,9 @@
                             <constraint firstItem="si5-od-Uah" firstAttribute="top" secondItem="Kkq-aZ-5fP" secondAttribute="bottom" constant="42" id="nYO-I9-AzP"/>
                             <constraint firstAttribute="trailingMargin" secondItem="eXr-Xg-TCZ" secondAttribute="trailing" constant="-27" id="rOV-mz-x8F"/>
                         </constraints>
+                        <connections>
+                            <outletCollection property="gestureRecognizers" destination="TTd-JL-jKd" appends="YES" id="hO4-HA-MSm"/>
+                        </connections>
                     </view>
                     <connections>
                         <outlet property="chatInput" destination="jiV-U5-fDl" id="KSa-Ha-PKG"/>
@@ -88,6 +95,11 @@
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="tvb-fM-fJc" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <tapGestureRecognizer id="TTd-JL-jKd">
+                    <connections>
+                        <action selector="dismissKeyboard:" destination="5nR-Q5-dQD" id="QyX-df-sdW"/>
+                    </connections>
+                </tapGestureRecognizer>
             </objects>
             <point key="canvasLocation" x="403" y="438"/>
         </scene>

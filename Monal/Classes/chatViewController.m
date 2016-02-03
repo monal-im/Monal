@@ -416,13 +416,13 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void) scrollToBottom
 {
-    NSInteger bottom = [_messageTable numberOfRowsInSection:0];
+    NSInteger bottom = [self.messageTable numberOfRowsInSection:0];
     if(bottom>0)
     {
         NSIndexPath *path1 = [NSIndexPath indexPathForRow:bottom-1  inSection:0];
-        if(![_messageTable.indexPathsForVisibleRows containsObject:path1])
+        if(![self.messageTable.indexPathsForVisibleRows containsObject:path1])
         {
-            [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:NO];
+            [self.messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:NO];
         }
     }
     
@@ -766,6 +766,10 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 
 # pragma mark Textview delegate functions
+- (void)textViewDidBeginEditing:(UITextView *)textView
+{
+    [self scrollToBottom];
+}
 
 - (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text
 {

@@ -90,6 +90,7 @@
                     </view>
                     <connections>
                         <outlet property="chatInput" destination="jiV-U5-fDl" id="KSa-Ha-PKG"/>
+                        <outlet property="messageTable" destination="Kkq-aZ-5fP" id="RhH-Dt-heG"/>
                         <outlet property="sendButton" destination="kYa-y4-X5Z" id="efC-cC-umG"/>
                         <outlet property="view" destination="Riz-2Q-bcU" id="d0E-AR-8aA"/>
                     </connections>

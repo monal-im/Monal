@@ -773,6 +773,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void) keyboardWillHide:(NSNotification *) notification
 {
+    return;
     if(self.blockAnimations) return;
     
     NSTimeInterval animationDuration =[[[notification userInfo] objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
@@ -802,6 +803,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void) keyboardWillShow:(NSNotification *) notification
 {
+    return;
     
     if(self.blockAnimations) return;
     CGRect keyboardframe =[[[notification userInfo] objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];

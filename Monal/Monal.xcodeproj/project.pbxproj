@@ -400,6 +400,7 @@
 		26F7BB451115F95000712672 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26F7BB441115F95000712672 /* SystemConfiguration.framework */; };
 		26F9794D1ACAC73A0008E005 /* MLContactCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26F9794C1ACAC73A0008E005 /* MLContactCell.xib */; };
 		26FB468F18B2755A0043094F /* IPAddress.m in Sources */ = {isa = PBXBuildFile; fileRef = 26FB468E18B2755A0043094F /* IPAddress.m */; };
+		26FE3BCB1C61A6C3003CC230 /* MLResizingTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26FE3BCA1C61A6C3003CC230 /* MLResizingTextView.m */; };
 		288765A50DF7441C002DB57D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 288765A40DF7441C002DB57D /* CoreGraphics.framework */; };
 /* End PBXBuildFile section */
 
@@ -863,6 +864,8 @@
 		26F9794C1ACAC73A0008E005 /* MLContactCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MLContactCell.xib; sourceTree = "<group>"; };
 		26FB468D18B2755A0043094F /* IPAddress.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IPAddress.h; sourceTree = "<group>"; };
 		26FB468E18B2755A0043094F /* IPAddress.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IPAddress.m; sourceTree = "<group>"; };
+		26FE3BC91C61A6C3003CC230 /* MLResizingTextView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLResizingTextView.h; sourceTree = "<group>"; };
+		26FE3BCA1C61A6C3003CC230 /* MLResizingTextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLResizingTextView.m; sourceTree = "<group>"; };
 		288765A40DF7441C002DB57D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		32CA4F630368D1EE00C91783 /* SworIM_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SworIM_Prefix.pch; sourceTree = "<group>"; };
@@ -1673,6 +1676,8 @@
 				261A6296176C160900059090 /* HelpViewController.m */,
 				261A6298176C162200059090 /* AboutViewController.h */,
 				261A6299176C162200059090 /* AboutViewController.m */,
+				26FE3BC91C61A6C3003CC230 /* MLResizingTextView.h */,
+				26FE3BCA1C61A6C3003CC230 /* MLResizingTextView.m */,
 			);
 			name = "Tab views";
 			sourceTree = "<group>";
@@ -2294,6 +2299,7 @@
 				261A628B176C159000059090 /* AccountsViewController.m in Sources */,
 				261A628E176C15AD00059090 /* ChatLogsViewController.m in Sources */,
 				26FB468F18B2755A0043094F /* IPAddress.m in Sources */,
+				26FE3BCB1C61A6C3003CC230 /* MLResizingTextView.m in Sources */,
 				26B2A4ED1B73097500272E63 /* DDAbstractDatabaseLogger.m in Sources */,
 				261A6291176C15D400059090 /* GroupChatViewController.m in Sources */,
 				261A6294176C15FC00059090 /* SearchUsersViewController.m in Sources */,

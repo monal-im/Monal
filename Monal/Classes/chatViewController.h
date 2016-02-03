@@ -45,6 +45,7 @@
 @property (nonatomic, weak) IBOutlet UITableView* messageTable;
 @property (nonatomic, weak) IBOutlet UITextView* chatInput;
 @property (nonatomic, weak) IBOutlet UIButton* sendButton;
+@property (nonatomic, weak) IBOutlet UIView* inputContainerView;
 
 @property (nonatomic,strong)  NSString* contactName;
 

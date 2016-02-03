@@ -96,7 +96,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 	[nc addObserver:self selector:@selector(keyboardDidShow:) name: UIKeyboardDidShowNotification object:nil];
     
     self.hidesBottomBarWhenPushed=YES;
-    self.view.autoresizesSubviews=true;
+
 }
 
 -(void) handleForeGround {
@@ -752,6 +752,17 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 }
 
 
+//-(BOOL) canBecomeFirstResponder
+//{
+//    return YES; 
+//}
+//
+//-(UIView *) inputAccessoryView
+//{
+//    return self.inputContainerView;
+//}
+
+
 # pragma mark Textview delegate functions
 
 - (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text
@@ -764,6 +775,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     return YES;
 }
 
+
+
+
 #pragma mark - Keyboard
 
 -(void) keyboardDidHide: (NSNotification *)notif
@@ -773,7 +787,6 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void) keyboardWillHide:(NSNotification *) notification
 {
-    return;
     if(self.blockAnimations) return;
     
     NSTimeInterval animationDuration =[[[notification userInfo] objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
@@ -803,14 +816,12 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void) keyboardWillShow:(NSNotification *) notification
 {
-    return;
-    
     if(self.blockAnimations) return;
     CGRect keyboardframe =[[[notification userInfo] objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
     CGSize keyboardSize = keyboardframe.size;
     CGRect r;
 	
-    //chiense keybaord might call this multiple times ony set for inital
+    //chinese keybaord might call this multiple times ony set for inital
     if(!_keyboardVisible) {
         oldFrame=self.view.frame;
     }

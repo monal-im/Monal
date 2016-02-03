@@ -22,6 +22,7 @@
                                 <rect key="frame" x="0.0" y="0.0" width="607" height="558"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <constraints>
+                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="320" id="k1m-re-kKB"/>
                                     <constraint firstAttribute="height" constant="557" id="xkt-eX-NhJ"/>
                                 </constraints>
                                 <variation key="default">
@@ -37,9 +38,16 @@
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="eXr-Xg-TCZ">
                                 <rect key="frame" x="0.0" y="557" width="607" height="43"/>
                                 <subviews>
+                                    <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="jiV-U5-fDl" customClass="MLResizingTextView">
+                                        <rect key="frame" x="8" y="8" width="542" height="27"/>
+                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                        <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                                    </textView>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="kYa-y4-X5Z">
-                                        <rect key="frame" x="548" y="7" width="36" height="30"/>
+                                        <rect key="frame" x="558" y="8" width="36" height="30"/>
                                         <constraints>
+                                            <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="36" id="7js-Li-YB3"/>
                                             <constraint firstAttribute="width" constant="36" id="NRJ-Qj-1DA"/>
                                         </constraints>
                                         <state key="normal" title="Send"/>
@@ -47,24 +55,16 @@
                                             <action selector="sendMessageText:" destination="5nR-Q5-dQD" eventType="touchUpInside" id="QRx-TH-CI3"/>
                                         </connections>
                                     </button>
-                                    <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="jiV-U5-fDl" customClass="MLResizingTextView">
-                                        <rect key="frame" x="8" y="8" width="532" height="27"/>
-                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                        <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
-                                        <connections>
-                                            <outlet property="delegate" destination="5nR-Q5-dQD" id="zYJ-HN-Xb5"/>
-                                        </connections>
-                                    </textView>
                                 </subviews>
                                 <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
                                 <constraints>
                                     <constraint firstItem="jiV-U5-fDl" firstAttribute="leading" secondItem="eXr-Xg-TCZ" secondAttribute="leading" constant="8" id="07T-zA-Pt2"/>
-                                    <constraint firstAttribute="trailing" secondItem="kYa-y4-X5Z" secondAttribute="trailing" constant="23" id="BW2-vo-vN1"/>
+                                    <constraint firstAttribute="trailing" secondItem="kYa-y4-X5Z" secondAttribute="trailing" constant="13" id="BW2-vo-vN1"/>
+                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="320" id="EWy-UE-gfz"/>
                                     <constraint firstItem="jiV-U5-fDl" firstAttribute="top" secondItem="eXr-Xg-TCZ" secondAttribute="top" constant="8" id="JfN-2V-Vou"/>
                                     <constraint firstItem="kYa-y4-X5Z" firstAttribute="leading" secondItem="jiV-U5-fDl" secondAttribute="trailing" constant="8" id="L32-zc-2Qr"/>
-                                    <constraint firstAttribute="bottom" secondItem="kYa-y4-X5Z" secondAttribute="bottom" constant="6" id="ZIl-mH-C6t"/>
-                                    <constraint firstItem="kYa-y4-X5Z" firstAttribute="top" secondItem="eXr-Xg-TCZ" secondAttribute="top" constant="7" id="fp1-ij-62k"/>
+                                    <constraint firstAttribute="bottom" secondItem="kYa-y4-X5Z" secondAttribute="bottom" constant="5" id="ZIl-mH-C6t"/>
+                                    <constraint firstItem="kYa-y4-X5Z" firstAttribute="top" secondItem="eXr-Xg-TCZ" secondAttribute="top" constant="8" id="fp1-ij-62k"/>
                                     <constraint firstAttribute="bottom" secondItem="jiV-U5-fDl" secondAttribute="bottom" constant="8" id="uH9-O2-NIZ"/>
                                 </constraints>
                             </view>

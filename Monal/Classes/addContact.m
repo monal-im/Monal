@@ -220,7 +220,7 @@
 - (void)pickerView:(UIPickerView *)pickerView didSelectRow:(NSInteger)row inComponent:(NSInteger)component
 {
     _selectedRow=row;
-    _accountName.text=[[MLXMPPManager sharedInstance] getNameForConnectedRow:row];
+    _accountName.text=[[MLXMPPManager sharedInstance] getAccountNameForConnectedRow:row];
     
     [[MLXMPPManager sharedInstance] getServiceDetailsForAccount:row ];
     

@@ -9,7 +9,7 @@
 #import "chatViewController.h"
 #import "MLConstants.h"
 #import "MonalAppDelegate.h"
-#import <QuartzCore/QuartzCore.h>
+@import QuartzCore;
 
 
 static const int ddLogLevel = LOG_LEVEL_ERROR;
@@ -53,6 +53,24 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     {
         self.jid=[NSString stringWithFormat:@"%@@%@",[[accountVals objectAtIndex:0] objectForKey:@"username"], [[accountVals objectAtIndex:0] objectForKey:@"domain"]];
     }
+    
+ 
+    _topIcon.layer.cornerRadius=_topIcon.frame.size.height/2;
+    _topIcon.layer.borderColor = (__bridge CGColorRef)([UIColor lightGrayColor]);
+    _topIcon.layer.borderWidth=3.0f;
+    _topIcon.clipsToBounds=YES;
+    
+    if(SYSTEM_VERSION_LESS_THAN(@"7.0"))
+    {
+        _topName.textColor=[UIColor whiteColor];
+    }
+    
+    [_topBarView addSubview:_topIcon];
+    [_topBarView addSubview:_topName];
+    
+
+    self.navigationItem.titleView=_topBarView;
+    
 }
 
 -(void) setupWithContact:(NSDictionary*) contact
@@ -96,6 +114,13 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 	[nc addObserver:self selector:@selector(keyboardDidShow:) name: UIKeyboardDidShowNotification object:nil];
     
     self.hidesBottomBarWhenPushed=YES;
+    
+    self.chatInput.layer.borderColor=[UIColor lightGrayColor].CGColor;
+    self.chatInput.layer.cornerRadius=5.0f;
+    self.chatInput.layer.borderWidth=1.0f;
+    
+    self.inputContainerView.layer.borderColor=[UIColor lightGrayColor].CGColor;
+    self.inputContainerView.layer.borderWidth=1.0f;
 
 }
 

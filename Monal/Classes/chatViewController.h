@@ -32,9 +32,7 @@
     NSMutableArray* _messagelist;
     NSDictionary* _contact;
     
-    UIView* _topBarView;
-    UILabel* _topName;
-    UIImageView* _topIcon;
+
     
     BOOL  _isMUC;
     
@@ -48,6 +46,10 @@
 @property (nonatomic, weak) IBOutlet UIView* inputContainerView;
 
 @property (nonatomic,strong)  NSString* contactName;
+
+@property (nonatomic, weak) IBOutlet UIView* topBarView;
+@property (nonatomic, weak) IBOutlet UILabel* topName;
+@property (nonatomic, weak) IBOutlet UIImageView* topIcon;
 
 
 -(IBAction)sendMessageText:(id)sender;

@@ -54,7 +54,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         self.jid=[NSString stringWithFormat:@"%@@%@",[[accountVals objectAtIndex:0] objectForKey:@"username"], [[accountVals objectAtIndex:0] objectForKey:@"domain"]];
     }
     
- 
+ /*
     _topIcon.layer.cornerRadius=_topIcon.frame.size.height/2;
     _topIcon.layer.borderColor = (__bridge CGColorRef)([UIColor lightGrayColor]);
     _topIcon.layer.borderWidth=3.0f;
@@ -70,6 +70,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     
 
     self.navigationItem.titleView=_topBarView;
+  */
     
 }
 
@@ -141,14 +142,16 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
  
     if(![_contactFullName isEqualToString:@"(null)"] && [[_contactFullName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0)
     {
-        _topName.text=_contactFullName;
+       // _topName.text=_contactFullName;
+        self.title=_contactFullName;
     }
     else {
-        _topName.text=_contactName;
+      //  _topName.text=_contactName;
+        self.title= _contactName;
     }
     
     if(_day) {
-        _topName.text= [NSString stringWithFormat:@"%@(%@)", _topName.text, _day];
+        self.title=  [NSString stringWithFormat:@"%@(%@)", _topName.text, _day];
         [[NSNotificationCenter defaultCenter] removeObserver:self];
         [containerView removeFromSuperview];
         [_topIcon removeFromSuperview];

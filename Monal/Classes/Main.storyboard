@@ -99,9 +99,6 @@
                         <outlet property="inputContainerView" destination="eXr-Xg-TCZ" id="cve-rB-fhR"/>
                         <outlet property="messageTable" destination="Kkq-aZ-5fP" id="RhH-Dt-heG"/>
                         <outlet property="sendButton" destination="kYa-y4-X5Z" id="efC-cC-umG"/>
-                        <outlet property="topBarView" destination="Q5B-kw-O3x" id="xqr-yM-tSz"/>
-                        <outlet property="topIcon" destination="Uej-Kw-OGQ" id="LYV-ID-ThS"/>
-                        <outlet property="topName" destination="ji5-QX-DfP" id="b4M-Fi-xYR"/>
                         <outlet property="view" destination="Riz-2Q-bcU" id="d0E-AR-8aA"/>
                     </connections>
                 </viewController>

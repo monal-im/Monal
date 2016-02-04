@@ -230,7 +230,7 @@
 {
     if(row< [[MLXMPPManager sharedInstance].connectedXMPP count])
     {
-        NSString* name =[[MLXMPPManager sharedInstance] getNameForConnectedRow:row];
+        NSString* name =[[MLXMPPManager sharedInstance] getAccountNameForConnectedRow:row];
         if(name)
             return name;
     }

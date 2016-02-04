@@ -83,7 +83,13 @@
                             <constraint firstItem="eXr-Xg-TCZ" firstAttribute="leading" secondItem="Riz-2Q-bcU" secondAttribute="leadingMargin" constant="-20" id="jVI-Df-58M"/>
                             <constraint firstItem="si5-od-Uah" firstAttribute="top" secondItem="Kkq-aZ-5fP" secondAttribute="bottom" constant="51" id="nYO-I9-AzP"/>
                             <constraint firstAttribute="trailingMargin" secondItem="eXr-Xg-TCZ" secondAttribute="trailing" constant="-20" id="rOV-mz-x8F"/>
+                            <constraint firstItem="eXr-Xg-TCZ" firstAttribute="top" secondItem="Kkq-aZ-5fP" secondAttribute="bottom" constant="8" id="zpH-ds-x47"/>
                         </constraints>
+                        <variation key="default">
+                            <mask key="constraints">
+                                <exclude reference="fdk-Hh-QpP"/>
+                            </mask>
+                        </variation>
                         <connections>
                             <outletCollection property="gestureRecognizers" destination="TTd-JL-jKd" appends="YES" id="hO4-HA-MSm"/>
                         </connections>

@@ -14,6 +14,7 @@
 #import "MLXMPPManager.h"
 #import "MLNotificationManager.h"
 #import "MLChatCell.h"
+#import "MLResizingTextView.h"
 
 
 @interface chatViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UITextViewDelegate>
@@ -41,9 +42,10 @@
 }
 
 @property (nonatomic, weak) IBOutlet UITableView* messageTable;
-@property (nonatomic, weak) IBOutlet UITextView* chatInput;
+@property (nonatomic, weak) IBOutlet MLResizingTextView* chatInput;
 @property (nonatomic, weak) IBOutlet UIButton* sendButton;
 @property (nonatomic, weak) IBOutlet UIView* inputContainerView;
+@property (nonatomic, weak) IBOutlet NSLayoutConstraint* inputContainerHeight;
 
 @property (nonatomic,strong)  NSString* contactName;
 

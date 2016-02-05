@@ -287,6 +287,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 -(IBAction)sendMessageText:(id)sender
 {
     [self resignTextView];
+    [self updateInputViewSize];
 }
 
 
@@ -794,6 +795,18 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 
 # pragma mark Textview delegate functions
+
+-(void) updateInputViewSize
+{
+    if(self.chatInput.intrinsicContentSize.height>40) {
+        self.inputContainerHeight.constant= self.chatInput.intrinsicContentSize.height+18;
+    } else
+    {
+         self.inputContainerHeight.constant=43.0f;
+    }
+    [self.inputContainerView layoutIfNeeded];
+}
+
 - (void)textViewDidBeginEditing:(UITextView *)textView
 {
     [self scrollToBottom];
@@ -805,6 +818,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     {
         [self resignTextView];
     }
+    
+    [self updateInputViewSize];
     
     return YES;
 }

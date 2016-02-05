@@ -117,11 +117,11 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     self.hidesBottomBarWhenPushed=YES;
     
     self.chatInput.layer.borderColor=[UIColor lightGrayColor].CGColor;
-    self.chatInput.layer.cornerRadius=5.0f;
-    self.chatInput.layer.borderWidth=1.0f;
+    self.chatInput.layer.cornerRadius=3.0f;
+    self.chatInput.layer.borderWidth=0.5f;
     
     self.inputContainerView.layer.borderColor=[UIColor lightGrayColor].CGColor;
-    self.inputContainerView.layer.borderWidth=1.0f;
+    self.inputContainerView.layer.borderWidth=0.5f;
 
 }
 

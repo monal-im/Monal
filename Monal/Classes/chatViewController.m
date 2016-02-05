@@ -806,7 +806,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
          self.inputContainerHeight.constant=43.0f;
     }
     [self.inputContainerView layoutIfNeeded];
-    self.chatInput.contentInset = UIEdgeInsetsMake(2, 2, 2, 2);
+    self.chatInput.contentInset = UIEdgeInsetsMake(5, 0, 0, 0);
  
 }
 

@@ -36,7 +36,7 @@
                                             <constraint firstAttribute="width" constant="36" id="NRJ-Qj-1DA"/>
                                             <constraint firstAttribute="height" constant="30" id="ZPw-Mb-D1d"/>
                                         </constraints>
-                                        <fontDescription key="fontDescription" type="system" weight="light" pointSize="15"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="15"/>
                                         <state key="normal" title="Send"/>
                                         <connections>
                                             <action selector="sendMessageText:" destination="5nR-Q5-dQD" eventType="touchUpInside" id="QRx-TH-CI3"/>

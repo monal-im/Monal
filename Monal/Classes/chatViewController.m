@@ -119,6 +119,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     self.chatInput.layer.borderColor=[UIColor lightGrayColor].CGColor;
     self.chatInput.layer.cornerRadius=3.0f;
     self.chatInput.layer.borderWidth=0.5f;
+    self.chatInput.textContainerInset=UIEdgeInsetsMake(5, 0, 5, 0);
     
     self.inputContainerView.layer.borderColor=[UIColor lightGrayColor].CGColor;
     self.inputContainerView.layer.borderWidth=0.5f;
@@ -805,6 +806,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
          self.inputContainerHeight.constant=43.0f;
     }
     [self.inputContainerView layoutIfNeeded];
+    self.chatInput.contentInset = UIEdgeInsetsMake(2, 2, 2, 2);
+ 
 }
 
 - (void)textViewDidBeginEditing:(UITextView *)textView
@@ -812,19 +815,18 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     [self scrollToBottom];
 }
 
+
 - (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text
 {
     if([text isEqualToString:@"\n"])
     {
         [self resignTextView];
     }
-    
+ 
     [self updateInputViewSize];
-    
+  
     return YES;
 }
-
-
 
 
 #pragma mark - Keyboard

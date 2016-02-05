@@ -25,7 +25,7 @@
 
     if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0")) {
         intrinsicContentSize.width += (self.textContainerInset.left + self.textContainerInset.right ) / 2.0f;
-      //  intrinsicContentSize.height += (self.textContainerInset.top + self.textContainerInset.bottom) / 2.0f;
+        intrinsicContentSize.height += (self.textContainerInset.top + self.textContainerInset.bottom) / 2.0f;
     }
     
     return intrinsicContentSize;

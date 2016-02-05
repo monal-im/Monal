@@ -21,7 +21,7 @@
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="eXr-Xg-TCZ">
                                 <rect key="frame" x="0.0" y="557" width="600" height="43"/>
                                 <subviews>
-                                    <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" bounces="NO" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="jiV-U5-fDl" customClass="MLResizingTextView">
+                                    <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" bounces="NO" showsHorizontalScrollIndicator="NO" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="jiV-U5-fDl" customClass="MLResizingTextView">
                                         <rect key="frame" x="16" y="8" width="532" height="25"/>
                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>

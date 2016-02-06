@@ -71,6 +71,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 @property (nonatomic, strong) NSOperationQueue *processQueue;
 
 
+//HTTP upload
+@property (nonatomic, assign) BOOL supportsHTTPUpload;
+
 //ping
 @property (nonatomic, assign) BOOL supportsPing;
 
@@ -1078,6 +1081,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     if([self.serverFeatures containsObject:@"urn:xmpp:ping"])
                     {
                         self.supportsPing=YES;
+                    }
+                    
+                    if([self.serverFeatures containsObject:@"urn:xmpp:http:upload"])
+                    {
+                        self.supportsHTTPUpload=YES;
                     }
                 }
                 

@@ -131,11 +131,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(IBAction)attach:(id)sender
 {
-    // start http upload XMPP
     
     //selct file
     
-    //upload file over HTTP
+    // start http upload XMPP
+    [[MLXMPPManager sharedInstance] httpUploadFile:@"test" onAccount:self.accountNo withCompletionHandler:^(BOOL success) {
+        
+    }];
+    
 }
 
 #pragma mark - notificaitons

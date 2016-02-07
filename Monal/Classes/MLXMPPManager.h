@@ -135,9 +135,14 @@ Returns the server set name of the conencted account
 -(void) hangupContact:(NSDictionary*) contact;
 
 /**
- Checks if there are any enabled acconts and connects them if necessary.
+Sends a message to a specified contact in account. Calls completion handler on success or failure.
  */
 -(void)sendMessage:(NSString*) message toContact:(NSString*)contact fromAccount:(NSString*) accountNo isMUC:(BOOL) isMUC messageId:(NSString *) messageId withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion;
+
+/**
+Attempts to upload a file to the  HTTP upload service
+ */
+-(void)httpUploadFile:(NSString*) filename onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(BOOL success)) completion;
 
 #pragma mark XMPP settings
 

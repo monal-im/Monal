@@ -50,6 +50,7 @@
 #define kPingTimeout 120ull //seconds
 
 
+NSString *const kId=@"id";
 NSString *const kMessageId=@"MessageID";
 NSString *const kSendTimer=@"SendTimer";
 
@@ -2320,10 +2321,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 #pragma mark HTTP upload
 
--(void) requestSlotWithFile:(NSString *)filename andSize:(NSNumber *) size
+-(void) requestHTTPSlotWithFile:(NSString *)filename andSize:(NSNumber *) size
 {
      XMPPIQ* httpSlotRequest =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
     [httpSlotRequest setiqTo:self.uploadServer];
+    [self send:httpSlotRequest];
 }
 
 #pragma mark  MUC

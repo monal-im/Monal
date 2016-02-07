@@ -458,6 +458,62 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
                    });
 }
 
+-(void)httpUploadFile:(NSString*) filename onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(BOOL success)) completion
+{
+    dispatch_async(_netQueue,
+                   ^{
+                       NSString *uuid = [[NSUUID UUID] UUIDString];
+                       
+                       dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+                       dispatch_source_t sendTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,q_background
+                                                                            );
+                       
+                       dispatch_source_set_timer(sendTimer,
+                                                 dispatch_time(DISPATCH_TIME_NOW, 5ull * NSEC_PER_SEC),
+                                                 1ull * NSEC_PER_SEC
+                                                 , 1ull * NSEC_PER_SEC);
+                       
+                       dispatch_source_set_event_handler(sendTimer, ^{
+                           DDLogError(@"slot request  timed out");
+                           int counter=0;
+                           int removalCounter=-1;
+                           for(NSDictionary *dic in  self.timerList) {
+                               if([dic objectForKey:kSendTimer] == sendTimer) {
+                                  
+                                   removalCounter=counter;
+                                   break;
+                               }
+                               counter++;
+                           }
+                           
+                           if(removalCounter>=0) {
+                               [self.timerList removeObjectAtIndex:removalCounter];
+                           }
+                           
+                           dispatch_source_cancel(sendTimer);
+                       });
+                       
+                       dispatch_source_set_cancel_handler(sendTimer, ^{
+                           DDLogError(@"send message timer cancelled");
+                       });
+                       
+                       dispatch_resume(sendTimer);
+                       NSDictionary *dic = @{kSendTimer:sendTimer,kId:uuid};
+                       [self.timerList addObject:dic];
+                       
+                       BOOL success=NO;
+                       xmpp* account=[self getConnectedAccountForID:accountNo];
+                       if(account)
+                       {
+                           success=YES;
+                           [account requestHTTPSlotWithFile:filename andSize:[NSNumber numberWithInt:5]]; //TODO pass id here
+                       }
+                       
+                       if(completion)
+                           completion(success);
+                   });
+}
+
 
 #pragma mark getting details
 

@@ -204,6 +204,11 @@ Decline a call request
  */
 -(void)decline:(NSDictionary*) contact;
 
+
+#pragma mark HTTP upload 
+-(void) requestHTTPSlotWithFile:(NSString *)filename andSize:(NSNumber *) size;
+
+
 #pragma  mark properties
 // connection attributes
 @property (nonatomic,strong) NSString* username;
@@ -260,7 +265,7 @@ Decline a call request
 
 @property (nonatomic,strong) NSDate* connectedTime;
 
-
+extern NSString *const kId;
 extern NSString *const kMessageId;
 extern NSString *const kSendTimer;
 

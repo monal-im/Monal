@@ -17,6 +17,8 @@
 
 -(IBAction)sendText:(id)sender;
 -(IBAction)emojiPicker:(id)sender;
+-(IBAction)attach:(id)sender;
+
 -(IBAction)deliveryFailedMessage:(id)sender;
 
 -(void) sendMessage:(NSString *) messageText andMessageID:(NSString *)messageID;

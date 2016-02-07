@@ -129,6 +129,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [window updateCurrentContact:contact];
 }
 
+-(IBAction)attach:(id)sender
+{
+    // start http upload XMPP
+    
+    //selct file
+    
+    //upload file over HTTP
+}
+
 #pragma mark - notificaitons
 -(void) handleNewMessage:(NSNotification *)notification
 {

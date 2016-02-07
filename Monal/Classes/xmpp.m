@@ -73,6 +73,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 //HTTP upload
 @property (nonatomic, assign) BOOL supportsHTTPUpload;
+@property (nonatomic, strong) NSString *uploadServer;
 
 //ping
 @property (nonatomic, assign) BOOL supportsPing;
@@ -1086,6 +1087,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     if([self.serverFeatures containsObject:@"urn:xmpp:http:upload"])
                     {
                         self.supportsHTTPUpload=YES;
+                       self.uploadServer = iqNode.from;
                     }
                 }
                 
@@ -2314,6 +2316,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     
     
+}
+
+#pragma mark HTTP upload
+
+-(void) requestSlotWithFile:(NSString *)filename andSize:(NSNumber *) size
+{
+     XMPPIQ* httpSlotRequest =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
+    [httpSlotRequest setiqTo:self.uploadServer];
 }
 
 #pragma mark  MUC

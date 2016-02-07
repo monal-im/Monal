@@ -195,6 +195,28 @@
 
 
 
+-(void) httpUploadforFile:(NSString *) file ofSize:(NSNumber *) filesize andContentType:(NSString *) contentType
+{
+    MLXMLNode* requestNode =[[MLXMLNode alloc] init];
+    requestNode.element=@"request";
+    [requestNode.attributes setObject:@"urn:xmpp:http:upload" forKey:@"xmlns"];
+    
+    MLXMLNode* filename =[[MLXMLNode alloc] init];
+    filename.element=@"filename";
+    filename.data=file;
+    
+    MLXMLNode* size =[[MLXMLNode alloc] init];
+    size.element=@"size";
+    size.data=[NSString stringWithFormat:@"%@", size];
+    
+    MLXMLNode* contentTypeNode =[[MLXMLNode alloc] init];
+    contentTypeNode.element=@"content-type";
+    contentTypeNode.data=contentType;
+    
+    [requestNode.children addObjectsFromArray:@[filename, size, contentTypeNode]];
+    [self.children addObject:requestNode];
+}
+
 
 #pragma mark iq get
 -(void) getAuthwithUserName:(NSString *)username

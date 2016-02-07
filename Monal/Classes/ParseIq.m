@@ -61,6 +61,25 @@
         }
         
     }
+    
+    if([elementName isEqualToString:@"slot"])
+    {
+        _queryXMLNS=[attributeDict objectForKey:@"xmlns"];
+          State=@"slot";
+        return;
+    }
+    
+    if([elementName isEqualToString:@"get"] && [State isEqualToString:@"slot"])
+    {
+        State = @"slotGet";
+        return;
+    }
+    
+    if([elementName isEqualToString:@"put"] && [State isEqualToString:@"slot"])
+    {
+         State = @"slotPut";
+        return;
+    }
   
     
     if([elementName isEqualToString:@"group"] && _roster==YES)
@@ -194,6 +213,20 @@
     {
         //we would have a group name here
        // _photoBinValue=_messageBuffer;
+        return;
+    }
+    
+    if(([elementName isEqualToString:@"get"]) && [State isEqualToString:@"slotGet"]
+       )
+    {
+        _getURL=[_messageBuffer copy];
+        return;
+    }
+    
+    if(([elementName isEqualToString:@"put"]) && [State isEqualToString:@"slotGet"]
+       )
+    {
+        _putURL=[_messageBuffer copy];
         return;
     }
    

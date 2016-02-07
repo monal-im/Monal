@@ -1198,6 +1198,19 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     self.pingID=nil;
                 }
                 
+                if(iqNode.httpUpload)
+                {
+                    //look up id val in upload queue array
+                    
+                    //if matching item found
+                    
+                    //call back with get and put to allow upload.
+                   
+                   //callback responsible for sending message to recipient 
+                    
+                }
+                
+                
                 if (iqNode.version)
                 {
                     XMPPIQ* versioniq =[[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];

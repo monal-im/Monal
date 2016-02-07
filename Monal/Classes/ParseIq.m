@@ -66,6 +66,7 @@
     {
         _queryXMLNS=[attributeDict objectForKey:@"xmlns"];
           State=@"slot";
+        _httpUpload =YES; 
         return;
     }
     

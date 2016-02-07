@@ -20,6 +20,7 @@
 @property (nonatomic, assign, readonly) BOOL roster;
 @property (nonatomic, assign, readonly) BOOL ping;
 @property (nonatomic, assign, readonly) BOOL legacyAuth;
+@property (nonatomic, assign, readonly) BOOL httpUpload;
 
 @property (nonatomic, assign, readonly) BOOL shouldSetBind;
 @property (nonatomic, strong, readonly) NSString* jid;

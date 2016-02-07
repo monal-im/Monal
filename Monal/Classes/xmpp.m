@@ -2325,6 +2325,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
      XMPPIQ* httpSlotRequest =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
     [httpSlotRequest setiqTo:self.uploadServer];
+    [httpSlotRequest httpUploadforFile:filename ofSize:size andContentType:@"image/jpeg"];
     [self send:httpSlotRequest];
 }
 

@@ -87,6 +87,12 @@ removes a contact from the roster
 -(void) setLast;
 
 
+/**
+ sets up an iq that requests a http upload slot
+ */
+-(void) httpUploadforFile:(NSString *) file ofSize:(NSNumber *) filesize andContentType:(NSString *) contentType;
+
+
 #pragma mark MUC
 /**
  create instant room

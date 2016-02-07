@@ -207,7 +207,7 @@
     
     MLXMLNode* size =[[MLXMLNode alloc] init];
     size.element=@"size";
-    size.data=[NSString stringWithFormat:@"%@", size];
+    size.data=[NSString stringWithFormat:@"%@", filesize];
     
     MLXMLNode* contentTypeNode =[[MLXMLNode alloc] init];
     contentTypeNode.element=@"content-type";

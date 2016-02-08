@@ -59,9 +59,11 @@ NSString *const kStanza=@"stanza";
 
 
 NSString *const kFileName=@"fileName";
-NSString *const kContenType=@"contentType";
+NSString *const kContentType=@"contentType";
 NSString *const kData=@"data";
 NSString *const kContact=@"contact";
+
+NSString *const kCompletion=@"completion";
 
 static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
@@ -81,6 +83,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 //HTTP upload
 @property (nonatomic, assign) BOOL supportsHTTPUpload;
 @property (nonatomic, strong) NSString *uploadServer;
+@property (nonatomic, strong) NSMutableArray *httpUploadQueue;
 
 //ping
 @property (nonatomic, assign) BOOL supportsPing;
@@ -552,6 +555,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     _loginStarted=NO;
     _loginError=NO;
     _accountState=kStateDisconnected;
+    
+    self.httpUploadQueue =nil;
     
     DDLogInfo(@"All closed and cleaned up");
     
@@ -1206,14 +1211,30 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 
                 if(iqNode.httpUpload)
                 {
+                    NSDictionary *matchingRow;
                     //look up id val in upload queue array
+                    for(NSDictionary * row in self.httpUploadQueue)
+                    {
+                        if([[row objectForKey:kId] isEqualToString:iqNode.idval])
+                        {
+                            matchingRow= row;
+                            break;
+                        }
+                    }
                     
-                    //if matching item found
+                    if(matchingRow) {
                     
-                    //call back with get and put to allow upload.
-                   
-                   //callback responsible for sending message to recipient 
-                    
+                        //upload to put
+                        
+                        //send get to contact
+                          void (^completion) (NSString *success)  = [matchingRow objectForKey:kCompletion];
+                        if(completion)
+                        {
+                            completion(iqNode.getURL);
+                        }
+                        
+                        
+                    }
                 }
                 
                 
@@ -2340,14 +2361,25 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 #pragma mark HTTP upload
 
--(void) requestHTTPSlotWithParams:(NSDictionary *)params
+-(void) requestHTTPSlotWithParams:(NSDictionary *)params andCompletion:(void(^)(NSString *url)) completion
 {
-     XMPPIQ* httpSlotRequest =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
+    NSString *uuid = [[NSUUID UUID] UUIDString];
+     XMPPIQ* httpSlotRequest =[[XMPPIQ alloc] initWithId:uuid andType:kiqGetType];
     [httpSlotRequest setiqTo:self.uploadServer];
     NSData *data= [params objectForKey:kData];
     NSNumber *size=[NSNumber numberWithInteger: data.length];
     
-    [httpSlotRequest httpUploadforFile:[params objectForKey:kFileName] ofSize:size andContentType:[params objectForKey:kContenType]];
+    NSMutableDictionary *iqParams =[NSMutableDictionary dictionaryWithDictionary:params];
+    [iqParams setObject:uuid forKey:kId];
+    [iqParams setObject:completion forKey:kCompletion];
+    
+    if(!self.httpUploadQueue)
+    {
+        self.httpUploadQueue = [[NSMutableArray alloc] init];
+    }
+    
+    [self.httpUploadQueue addObject:iqParams];
+    [httpSlotRequest httpUploadforFile:[params objectForKey:kFileName] ofSize:size andContentType:[params objectForKey:kContentType]];
     [self send:httpSlotRequest];
 }
 

@@ -460,7 +460,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 
 
 #pragma  mark - HTTP upload
--(void)httpUploadFileURL:(NSURL*) fileURL  toContact:(NSString*)contact onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(BOOL success)) completion{
+-(void)httpUploadFileURL:(NSURL*) fileURL  toContact:(NSString*)contact onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(NSString *url)) completion{
     
     //get file name
     NSString *fileName =  fileURL.pathComponents.lastObject;
@@ -477,67 +477,23 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 }
 
 
--(void)httpUploadData:(NSData *)data withFilename:(NSString*) filename andType:(NSString*)contentType  toContact:(NSString*)contact onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(BOOL success)) completion
+-(void)httpUploadData:(NSData *)data withFilename:(NSString*) filename andType:(NSString*)contentType  toContact:(NSString*)contact onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(NSString *url)) completion
 {
     if(!data || !filename || !contentType || !contact || !accountNo)
     {
-        if(completion) completion(NO);
+        if(completion) completion(nil);
         return;
     }
     
     dispatch_async(_netQueue,
                    ^{
-                       NSString *uuid = [[NSUUID UUID] UUIDString];
-                       
-                       dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-                       dispatch_source_t sendTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,q_background
-                                                                            );
-                       
-                       dispatch_source_set_timer(sendTimer,
-                                                 dispatch_time(DISPATCH_TIME_NOW, 5ull * NSEC_PER_SEC),
-                                                 1ull * NSEC_PER_SEC
-                                                 , 1ull * NSEC_PER_SEC);
-                       
-                       dispatch_source_set_event_handler(sendTimer, ^{
-                           DDLogError(@"slot request  timed out");
-                           int counter=0;
-                           int removalCounter=-1;
-                           for(NSDictionary *dic in  self.timerList) {
-                               if([dic objectForKey:kSendTimer] == sendTimer) {
-                                  
-                                   removalCounter=counter;
-                                   break;
-                               }
-                               counter++;
-                           }
-                           
-                           if(removalCounter>=0) {
-                               [self.timerList removeObjectAtIndex:removalCounter];
-                           }
-                           
-                           dispatch_source_cancel(sendTimer);
-                       });
-                       
-                       dispatch_source_set_cancel_handler(sendTimer, ^{
-                           DDLogError(@"send message timer cancelled");
-                       });
-                       
-                       dispatch_resume(sendTimer);
-                       NSDictionary *dic = @{kSendTimer:sendTimer,kId:uuid};
-                       [self.timerList addObject:dic];
-                       
-                       BOOL success=NO;
                        xmpp* account=[self getConnectedAccountForID:accountNo];
                        if(account)
                        {
-                           
-                           NSDictionary *params =@{kData:data,kFileName:filename, kContenType:contentType, kContact:contact};
-                           success=YES;
-                           [account requestHTTPSlotWithParams:params]; //TODO pass id here
+                           NSDictionary *params =@{kData:data,kFileName:filename, kContentType:contentType, kContact:contact};
+                           [account requestHTTPSlotWithParams:params andCompletion:completion];
                        }
                        
-                       if(completion)
-                           completion(success);
                    });
 }
 

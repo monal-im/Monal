@@ -1228,19 +1228,24 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         //upload to put
                         dispatch_async(dispatch_get_main_queue(), ^{
                             [MLHTTPRequest sendWithVerb:kPut path:iqNode.putURL withArguments:nil data:[matchingRow objectForKey:kData] andCompletionHandler:^(NSError *error, id result) {
+                                 void (^completion) (NSString *success)  = [matchingRow objectForKey:kCompletion];
+                                if(!error)
+                                {
+                                    //send get to contact
+                                    if(completion)
+                                    {
+                                        completion(iqNode.getURL);
+                                    }
+                                } else  {
+                                    if(completion)
+                                    {
+                                        completion(nil);
+                                    }
+                                }
                                 
                             }];
                         });
-                       
-    
-                        //send get to contact
-                          void (^completion) (NSString *success)  = [matchingRow objectForKey:kCompletion];
-                        if(completion)
-                        {
-                            completion(iqNode.getURL);
-                        }
-                        
-                        
+                    
                     }
                 }
                 

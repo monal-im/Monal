@@ -141,8 +141,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 // start http upload XMPP
                 [[MLXMPPManager sharedInstance]  httpUploadFileURL:openPanel.URL toContact:self.contactName onAccount:self.accountNo withCompletionHandler:^(NSString *url) {
                     dispatch_async(dispatch_get_main_queue(), ^{
-                        self.messageBox.string= url;
-                        
+                        if(url) {
+                            self.messageBox.string= url;
+                        }
                     });
                     
                 }];

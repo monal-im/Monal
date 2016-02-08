@@ -57,6 +57,12 @@ NSString *const kSendTimer=@"SendTimer";
 NSString *const kStanzaID=@"stanzaID";
 NSString *const kStanza=@"stanza";
 
+
+NSString *const kFileName=@"fileName";
+NSString *const kContenType=@"contentType";
+NSString *const kData=@"data";
+NSString *const kContact=@"contact";
+
 static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 @interface xmpp()
@@ -2334,11 +2340,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 #pragma mark HTTP upload
 
--(void) requestHTTPSlotWithFile:(NSString *)filename andSize:(NSNumber *) size
+-(void) requestHTTPSlotWithParams:(NSDictionary *)params
 {
      XMPPIQ* httpSlotRequest =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
     [httpSlotRequest setiqTo:self.uploadServer];
-    [httpSlotRequest httpUploadforFile:filename ofSize:size andContentType:@"image/jpeg"];
+    NSData *data= [params objectForKey:kData];
+    NSNumber *size=[NSNumber numberWithInteger: data.length];
+    
+    [httpSlotRequest httpUploadforFile:[params objectForKey:kFileName] ofSize:size andContentType:[params objectForKey:kContenType]];
     [self send:httpSlotRequest];
 }
 

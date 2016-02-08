@@ -530,8 +530,10 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
                        xmpp* account=[self getConnectedAccountForID:accountNo];
                        if(account)
                        {
+                           
+                           NSDictionary *params =@{kData:data,kFileName:filename, kContenType:contentType, kContact:contact};
                            success=YES;
-                           [account requestHTTPSlotWithFile:filename andSize:[NSNumber numberWithInt:5]]; //TODO pass id here
+                           [account requestHTTPSlotWithParams:params]; //TODO pass id here
                        }
                        
                        if(completion)

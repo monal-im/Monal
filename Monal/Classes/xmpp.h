@@ -206,7 +206,12 @@ Decline a call request
 
 
 #pragma mark HTTP upload 
--(void) requestHTTPSlotWithFile:(NSString *)filename andSize:(NSNumber *) size;
+-(void) requestHTTPSlotWithParams:(NSDictionary *)params;
+
+FOUNDATION_EXPORT NSString *const kFileName;
+FOUNDATION_EXPORT NSString *const kContenType;
+FOUNDATION_EXPORT NSString *const kData;
+FOUNDATION_EXPORT NSString *const kContact;
 
 
 #pragma  mark properties

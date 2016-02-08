@@ -46,6 +46,11 @@
 	<string>NSApplication</string>
 	<key>SUFeedURL</key>
 	<string>https://monal.im/Monal-OSX/appcast.xml</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
 	<key>SUScheduledCheckInterval</key>
 	<integer>86400</integer>
 </dict>

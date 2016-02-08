@@ -458,8 +458,33 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
                    });
 }
 
--(void)httpUploadFile:(NSString*) filename onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(BOOL success)) completion
+
+#pragma  mark - HTTP upload
+-(void)httpUploadFileURL:(NSURL*) fileURL  toContact:(NSString*)contact onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(BOOL success)) completion{
+    
+    //get file name
+    NSString *fileName =  fileURL.pathComponents.lastObject;
+
+    //get file type
+    CFStringRef UTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (__bridge CFStringRef)fileURL.pathExtension, NULL);
+    NSString *mimeType = (__bridge NSString *)(UTTypeCopyPreferredTagWithClass (UTI, kUTTagClassMIMEType));
+
+    //get data
+    NSData *fileData = [[NSData alloc] initWithContentsOfURL:fileURL];
+    
+    [self httpUploadData:fileData withFilename:fileName andType:mimeType toContact:contact onAccount:accountNo withCompletionHandler:completion];
+    
+}
+
+
+-(void)httpUploadData:(NSData *)data withFilename:(NSString*) filename andType:(NSString*)contentType  toContact:(NSString*)contact onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(BOOL success)) completion
 {
+    if(!data || !filename || !contentType || !contact || !accountNo)
+    {
+        if(completion) completion(NO);
+        return;
+    }
+    
     dispatch_async(_netQueue,
                    ^{
                        NSString *uuid = [[NSUUID UUID] UUIDString];

@@ -133,12 +133,24 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     
     //selct file
-    
-    // start http upload XMPP
-    [[MLXMPPManager sharedInstance] httpUploadFile:@"test" onAccount:self.accountNo withCompletionHandler:^(BOOL success) {
-        
+    NSOpenPanel *openPanel = [NSOpenPanel openPanel];
+    [openPanel beginWithCompletionHandler:^(NSInteger result) {
+        switch(result){
+            case NSFileHandlingPanelOKButton:
+            {
+                // start http upload XMPP
+                [[MLXMPPManager sharedInstance]  httpUploadFileURL:openPanel.URL toContact:self.contactName onAccount:self.accountNo withCompletionHandler:^(BOOL success) {
+                    
+                }];
+                break;
+            }
+            case NSFileHandlingPanelCancelButton:
+            {
+                break;
+            }
+        }
     }];
-    
+
 }
 
 #pragma mark - notificaitons

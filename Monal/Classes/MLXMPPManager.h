@@ -139,10 +139,17 @@ Sends a message to a specified contact in account. Calls completion handler on s
  */
 -(void)sendMessage:(NSString*) message toContact:(NSString*)contact fromAccount:(NSString*) accountNo isMUC:(BOOL) isMUC messageId:(NSString *) messageId withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion;
 
+
+/**
+ opens file and attempts to upload it
+ */
+-(void)httpUploadFileURL:(NSURL*) fileURL  toContact:(NSString*)contact onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(BOOL success)) completion;
+
 /**
 Attempts to upload a file to the  HTTP upload service
  */
--(void)httpUploadFile:(NSString*) filename onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(BOOL success)) completion;
+-(void)httpUploadData:(NSData *)data withFilename:(NSString*) filename andType:(NSString*)contentType  toContact:(NSString*)contact onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(BOOL success)) completion;
+
 
 #pragma mark XMPP settings
 

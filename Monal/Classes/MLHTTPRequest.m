@@ -54,39 +54,37 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [theRequest setHTTPMethod:verb];
     
     NSData *dataToSubmit=postedData;
- 
+    
     if([verb isEqualToString:kPost]||[verb isEqualToString:kPut]) {
         if(arguments) {
             NSData *jsonData = [NSJSONSerialization dataWithJSONObject:arguments options:0 error:nil];
             // NSString* jsonString = [[NSString alloc] initWithBytes:[jsonData bytes] length:[jsonData length] encoding:NSUTF8StringEncoding];
-            if(!dataToSubmit){
-                if(arguments) {
-                    [theRequest addValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
-                    dataToSubmit=jsonData;
-                }
-            } else  {
-                NSString *boundary =@"------------gsfdwety45ydh4e6435dfsgw7897890709------------";
-                NSMutableData *formData=[[NSMutableData alloc] init];
-                [theRequest addValue:[NSString stringWithFormat:@"multipart/form-data; boundary=%@", boundary] forHTTPHeaderField:@"Content-Type"];
+            [theRequest addValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+            dataToSubmit=jsonData;
+        }
+        else  {
+            NSString *boundary =@"------------gsfdwety45ydh4e6435dfsgw7897890709------------";
+            NSMutableData *formData=[[NSMutableData alloc] init];
+            [theRequest addValue:[NSString stringWithFormat:@"multipart/form-data; boundary=%@", boundary] forHTTPHeaderField:@"Content-Type"];
+            [formData appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+            for (NSString *key in arguments) {
+                
+                [formData appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"%@\"\r\n\r\n", key] dataUsingEncoding:NSUTF8StringEncoding]];
+                NSMutableString *value=[arguments objectForKey:key] ;
+                [formData appendData: [[NSString stringWithFormat:@"%@",value] dataUsingEncoding: NSUTF8StringEncoding]];
                 [formData appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
-                for (NSString *key in arguments) {
-                    
-                    [formData appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"%@\"\r\n\r\n", key] dataUsingEncoding:NSUTF8StringEncoding]];
-                    NSMutableString *value=[arguments objectForKey:key] ;
-                    [formData appendData: [[NSString stringWithFormat:@"%@",value] dataUsingEncoding: NSUTF8StringEncoding]];
-                    [formData appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
-                }
-
-                    [formData appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
-                    [formData appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"image\"; filename=\"filename.jpg\" \r\n"] dataUsingEncoding:NSUTF8StringEncoding]];
-                    [formData appendData:[[NSString stringWithFormat:@"Content-Type: image/jpeg \r\n"] dataUsingEncoding:NSUTF8StringEncoding]];
-                  [formData appendData:[[NSString stringWithFormat:@"Content-Length: %lu \r\n\r\n", (unsigned long)[postedData length]] dataUsingEncoding:NSUTF8StringEncoding]];
-                    [formData appendData:postedData];
-                [formData appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
-                dataToSubmit =formData;
             }
+            
+            [formData appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+            [formData appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"image\"; filename=\"filename.jpg\" \r\n"] dataUsingEncoding:NSUTF8StringEncoding]];
+            [formData appendData:[[NSString stringWithFormat:@"Content-Type: image/jpeg \r\n"] dataUsingEncoding:NSUTF8StringEncoding]];
+            [formData appendData:[[NSString stringWithFormat:@"Content-Length: %lu \r\n\r\n", (unsigned long)[postedData length]] dataUsingEncoding:NSUTF8StringEncoding]];
+            [formData appendData:postedData];
+            [formData appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+            dataToSubmit =formData;
         }
     }
+    
     
     
     DDLogVerbose(@"Calling: %@ %@", verb, path);

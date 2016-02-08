@@ -40,6 +40,7 @@
 #import "ParseResumed.h"
 
 #import "NXOAuth2.h"
+#import "MLHTTPRequest.h"
 
 
 
@@ -1225,7 +1226,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     if(matchingRow) {
                     
                         //upload to put
-                        
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            [MLHTTPRequest sendWithVerb:kPut path:iqNode.putURL withArguments:nil data:[matchingRow objectForKey:kData] andCompletionHandler:^(NSError *error, id result) {
+                                
+                            }];
+                        });
+                       
+    
                         //send get to contact
                           void (^completion) (NSString *success)  = [matchingRow objectForKey:kCompletion];
                         if(completion)

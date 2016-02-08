@@ -371,6 +371,8 @@
 		26BAFC571626537D0073728B /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 26BAFC4F1626537D0073728B /* README.md */; };
 		26BDECDC1867B7790018670D /* CallViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26BDECDA1867B7790018670D /* CallViewController.m */; };
 		26BDECDD1867B7790018670D /* CallViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26BDECDB1867B7790018670D /* CallViewController.xib */; };
+		26C3456E1C68F9F0007F4BEC /* MLHTTPRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C3456D1C68F9F0007F4BEC /* MLHTTPRequest.m */; };
+		26C3456F1C68F9F0007F4BEC /* MLHTTPRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C3456D1C68F9F0007F4BEC /* MLHTTPRequest.m */; };
 		26C3EDEE1A7CA6FA000E6331 /* ContactsViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26C3EDED1A7CA6FA000E6331 /* ContactsViewController.xib */; };
 		26C3EDF71A8072D5000E6331 /* ParseEnabled.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C3EDF61A8072D5000E6331 /* ParseEnabled.m */; };
 		26C3EDFD1A807E76000E6331 /* ParseA.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C3EDFC1A807E76000E6331 /* ParseA.m */; };
@@ -803,6 +805,8 @@
 		26BDECD91867B7790018670D /* CallViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CallViewController.h; sourceTree = "<group>"; };
 		26BDECDA1867B7790018670D /* CallViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CallViewController.m; sourceTree = "<group>"; };
 		26BDECDB1867B7790018670D /* CallViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CallViewController.xib; sourceTree = "<group>"; };
+		26C3456C1C68F9F0007F4BEC /* MLHTTPRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLHTTPRequest.h; sourceTree = "<group>"; };
+		26C3456D1C68F9F0007F4BEC /* MLHTTPRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLHTTPRequest.m; sourceTree = "<group>"; };
 		26C3EDED1A7CA6FA000E6331 /* ContactsViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ContactsViewController.xib; sourceTree = "<group>"; };
 		26C3EDF51A8072D5000E6331 /* ParseEnabled.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParseEnabled.h; sourceTree = "<group>"; };
 		26C3EDF61A8072D5000E6331 /* ParseEnabled.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParseEnabled.m; sourceTree = "<group>"; };
@@ -947,6 +951,7 @@
 		080E96DDFE201D6D7F000001 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				26C3456B1C68F9D9007F4BEC /* HTTP */,
 				26B2A4B51B73045500272E63 /* External */,
 				260C51CE177F08CF0039634B /* XMPP */,
 				26352EA5177D21FC00E2C8FF /* Managers */,
@@ -1568,6 +1573,15 @@
 				26BAFC4F1626537D0073728B /* README.md */,
 			);
 			path = appirator;
+			sourceTree = "<group>";
+		};
+		26C3456B1C68F9D9007F4BEC /* HTTP */ = {
+			isa = PBXGroup;
+			children = (
+				26C3456C1C68F9F0007F4BEC /* MLHTTPRequest.h */,
+				26C3456D1C68F9F0007F4BEC /* MLHTTPRequest.m */,
+			);
+			name = HTTP;
 			sourceTree = "<group>";
 		};
 		26CF3EAE1780DF86002B7085 /* Nodes */ = {
@@ -2325,6 +2339,7 @@
 				26B2A4E91B73097500272E63 /* CLIColor.m in Sources */,
 				2678A98E185AB739003AF53B /* ChatLogContactViewController.m in Sources */,
 				261147DF1C35D7860078A72E /* NXOAuth2Constants.m in Sources */,
+				26C3456E1C68F9F0007F4BEC /* MLHTTPRequest.m in Sources */,
 				2696EED21791245A00BC54B8 /* chatViewController.m in Sources */,
 				26B2A4FB1B73097500272E63 /* DDDispatchQueueLogFormatter.m in Sources */,
 				26B2A4F71B73097500272E63 /* DDTTYLogger.m in Sources */,
@@ -2476,6 +2491,7 @@
 				260499E71B7313DB00D11866 /* ParseResumed.m in Sources */,
 				26B2A4EA1B73097500272E63 /* CLIColor.m in Sources */,
 				260499EF1B7313F300D11866 /* ParseIq.m in Sources */,
+				26C3456F1C68F9F0007F4BEC /* MLHTTPRequest.m in Sources */,
 				261147E21C35D7860078A72E /* NXOAuth2FileStreamWrapper.m in Sources */,
 				26B2A4EE1B73097500272E63 /* DDAbstractDatabaseLogger.m in Sources */,
 				261147DE1C35D7860078A72E /* NXOAuth2Connection.m in Sources */,

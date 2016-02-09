@@ -125,6 +125,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     
     self.inputContainerView.layer.borderColor=[UIColor lightGrayColor].CGColor;
     self.inputContainerView.layer.borderWidth=0.5f;
+    
+    self.topIcon.layer.cornerRadius= self.topIcon.frame.size.height/2;
+    self.topIcon.clipsToBounds=YES;
 
     
 }
@@ -146,12 +149,10 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
  
     if(![_contactFullName isEqualToString:@"(null)"] && [[_contactFullName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0)
     {
-       // _topName.text=_contactFullName;
-        self.title=_contactFullName;
+        _topName.text=_contactFullName;
     }
     else {
-      //  _topName.text=_contactName;
-        self.title= _contactName;
+        _topName.text=_contactName;
     }
     
     if(_day) {
@@ -165,6 +166,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         _topIcon.image=[[MLImageManager sharedInstance] getIconForContact:_contactName andAccount:_accountNo];
         
     }
+    self.navigationItem.titleView=self.topBarView;
     
     [self handleForeGround];
 

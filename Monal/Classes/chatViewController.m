@@ -297,6 +297,11 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 }
 
 
+-(IBAction)attach:(id)sender
+{
+    
+}
+
 #pragma mark - handling notfications
 
 -(void) reloadTable

@@ -56,6 +56,8 @@
 
 
 -(IBAction)sendMessageText:(id)sender;
+-(IBAction)attach:(id)sender;
+
 -(IBAction)dismissKeyboard:(id)sender;
 
 -(void) setupWithContact:(NSDictionary*) contact  ;

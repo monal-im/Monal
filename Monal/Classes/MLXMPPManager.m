@@ -13,6 +13,7 @@
 #if TARGET_OS_IPHONE
 #import "MonalAppDelegate.h"
 #import "PasswordManager.h"
+@import MobileCoreServices;
 #else
 #import "STKeyChain.h"
 #endif

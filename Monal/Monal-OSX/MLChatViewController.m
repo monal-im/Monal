@@ -162,8 +162,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         }
                         else  {
                             NSAlert *userAddAlert = [[NSAlert alloc] init];
-                            userAddAlert.messageText = @"Error";
-                            userAddAlert.informativeText =[NSString stringWithFormat:@"There was an error uploading the file to the server: %@", error.localizedDescription];
+                            userAddAlert.messageText = @"There was an error uploading the file to the server";
+                            userAddAlert.informativeText =[NSString stringWithFormat:@"%@", error.localizedDescription];
                             userAddAlert.alertStyle=NSInformationalAlertStyle;
                             [userAddAlert addButtonWithTitle:@"Close"];
                             

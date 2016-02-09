@@ -46,6 +46,7 @@
 @property (nonatomic, weak) IBOutlet UIButton* sendButton;
 @property (nonatomic, weak) IBOutlet UIView* inputContainerView;
 @property (nonatomic, weak) IBOutlet NSLayoutConstraint* inputContainerHeight;
+@property (nonatomic, weak) IBOutlet NSLayoutConstraint* inputContainerBottom;
 
 @property (nonatomic,strong)  NSString* contactName;
 

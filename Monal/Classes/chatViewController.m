@@ -23,6 +23,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 @property (nonatomic, assign) NSInteger thismonth;
 @property (nonatomic, assign) NSInteger thisday;
 
+
+
 /**
  if set to yes will prevent scrolling and resizing. useful for resigning first responder just to set auto correct
  */
@@ -124,6 +126,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     self.inputContainerView.layer.borderColor=[UIColor lightGrayColor].CGColor;
     self.inputContainerView.layer.borderWidth=0.5f;
 
+    
 }
 
 -(void) handleForeGround {
@@ -843,7 +846,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     NSTimeInterval animationDuration =[[[notification userInfo] objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
 	[UIView animateWithDuration:animationDuration
                      animations:^{
-                         self.view.frame =oldFrame;
+                         self.inputContainerBottom.constant=0; 
                          if([_messagelist count]>0)
                          {
                              [self scrollToBottom];
@@ -870,48 +873,11 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     if(self.blockAnimations) return;
     CGRect keyboardframe =[[[notification userInfo] objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
     CGSize keyboardSize = keyboardframe.size;
-    CGRect r;
-	
-    //chinese keybaord might call this multiple times ony set for inital
-    if(!_keyboardVisible) {
-        oldFrame=self.view.frame;
-    }
-    _keyboardVisible=YES;
-    r=oldFrame;
     
-    UIInterfaceOrientation orientation = [UIApplication sharedApplication].statusBarOrientation;
-    
-    if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0")) {
-        
-        //detect bluetooth or ecternal keybaord
-        if ((keyboardframe.origin.y + keyboardframe.size.height) > oldFrame.size.height) {
-            _keyboardVisible=NO;
-            if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"9.0")) {
-                CGFloat toolbarHeight = oldFrame.size.height - keyboardframe.origin.y;
-                r.size.height -= toolbarHeight;
-            }
-            else {
-                return;
-            }
-           
-        }
-        else  {
-            r.size.height -= keyboardSize.height;
-        }
-    }
-    else {
-        if(orientation==UIInterfaceOrientationLandscapeLeft|| orientation==UIInterfaceOrientationLandscapeRight)
-        {
-            r.size.height -= keyboardSize.width;
-        }
-        else {
-            r.size.height -= keyboardSize.height;
-        }
-    }
     NSTimeInterval animationDuration =[[[notification userInfo] objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
     [UIView animateWithDuration:animationDuration
                      animations:^{
-                         self.view.frame =r;
+                         self.inputContainerBottom.constant= keyboardSize.height;
                          
                      } completion:^(BOOL finished) {
                          

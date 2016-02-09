@@ -74,23 +74,18 @@
                             <constraint firstAttribute="trailingMargin" secondItem="Kkq-aZ-5fP" secondAttribute="trailing" constant="-27" id="L8j-s9-xp2"/>
                             <constraint firstItem="Kkq-aZ-5fP" firstAttribute="leading" secondItem="Riz-2Q-bcU" secondAttribute="leadingMargin" constant="-20" id="aGE-60-OjE"/>
                             <constraint firstItem="Kkq-aZ-5fP" firstAttribute="top" secondItem="Riz-2Q-bcU" secondAttribute="topMargin" id="bMv-kd-rMg"/>
-                            <constraint firstItem="si5-od-Uah" firstAttribute="top" secondItem="eXr-Xg-TCZ" secondAttribute="bottom" id="fdk-Hh-QpP"/>
                             <constraint firstItem="eXr-Xg-TCZ" firstAttribute="leading" secondItem="Riz-2Q-bcU" secondAttribute="leadingMargin" constant="-20" id="jVI-Df-58M"/>
-                            <constraint firstItem="eXr-Xg-TCZ" firstAttribute="bottom" secondItem="si5-od-Uah" secondAttribute="top" id="p3a-xb-CBO"/>
+                            <constraint firstItem="si5-od-Uah" firstAttribute="top" secondItem="eXr-Xg-TCZ" secondAttribute="bottom" id="lAt-Zq-pOz"/>
                             <constraint firstAttribute="trailingMargin" secondItem="eXr-Xg-TCZ" secondAttribute="trailing" constant="-20" id="rOV-mz-x8F"/>
                             <constraint firstItem="eXr-Xg-TCZ" firstAttribute="top" secondItem="Kkq-aZ-5fP" secondAttribute="bottom" constant="8" id="zpH-ds-x47"/>
                         </constraints>
-                        <variation key="default">
-                            <mask key="constraints">
-                                <exclude reference="fdk-Hh-QpP"/>
-                            </mask>
-                        </variation>
                         <connections>
                             <outletCollection property="gestureRecognizers" destination="TTd-JL-jKd" appends="YES" id="hO4-HA-MSm"/>
                         </connections>
                     </view>
                     <connections>
                         <outlet property="chatInput" destination="jiV-U5-fDl" id="gQc-PG-STp"/>
+                        <outlet property="inputContainerBottom" destination="lAt-Zq-pOz" id="SqJ-Rd-9ea"/>
                         <outlet property="inputContainerHeight" destination="lfT-Yz-Z8o" id="H6p-ZZ-ih1"/>
                         <outlet property="inputContainerView" destination="eXr-Xg-TCZ" id="cve-rB-fhR"/>
                         <outlet property="messageTable" destination="Kkq-aZ-5fP" id="RhH-Dt-heG"/>

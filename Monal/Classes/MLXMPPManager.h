@@ -79,6 +79,10 @@ Returns the server set name of the conencted account
  */
 -(NSString*) getAccountNameForConnectedRow:(NSInteger) row;
 
+/*
+ gets the connected account apecified by id. return nil otherwise
+ */
+-(xmpp*) getConnectedAccountForID:(NSString*) accountNo;
 
 /**
  Returns YES if account is connected
@@ -143,12 +147,12 @@ Sends a message to a specified contact in account. Calls completion handler on s
 /**
  opens file and attempts to upload it
  */
--(void)httpUploadFileURL:(NSURL*) fileURL  toContact:(NSString*)contact onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(NSString *url)) completion;
+-(void)httpUploadFileURL:(NSURL*) fileURL  toContact:(NSString*)contact onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(NSString *url,  NSError *error)) completion;
 
 /**
 Attempts to upload a file to the  HTTP upload service
  */
--(void)httpUploadData:(NSData *)data withFilename:(NSString*) filename andType:(NSString*)contentType  toContact:(NSString*)contact onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(NSString *url)) completion;
+-(void)httpUploadData:(NSData *)data withFilename:(NSString*) filename andType:(NSString*)contentType  toContact:(NSString*)contact onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(NSString *url,  NSError *error)) completion;
 
 
 #pragma mark XMPP settings

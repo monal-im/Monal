@@ -1228,18 +1228,18 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         //upload to put
                         dispatch_async(dispatch_get_main_queue(), ^{
                             [MLHTTPRequest sendWithVerb:kPut path:iqNode.putURL withArguments:nil data:[matchingRow objectForKey:kData] andCompletionHandler:^(NSError *error, id result) {
-                                 void (^completion) (NSString *success)  = [matchingRow objectForKey:kCompletion];
+                                 void (^completion) (NSString *url,  NSError *error)  = [matchingRow objectForKey:kCompletion];
                                 if(!error)
                                 {
                                     //send get to contact
                                     if(completion)
                                     {
-                                        completion(iqNode.getURL);
+                                        completion(iqNode.getURL, nil);
                                     }
                                 } else  {
                                     if(completion)
                                     {
-                                        completion(nil);
+                                        completion(nil, error);
                                     }
                                 }
                                 
@@ -2373,7 +2373,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 #pragma mark HTTP upload
 
--(void) requestHTTPSlotWithParams:(NSDictionary *)params andCompletion:(void(^)(NSString *url)) completion
+-(void) requestHTTPSlotWithParams:(NSDictionary *)params andCompletion:(void(^)(NSString *url,  NSError *error)) completion
 {
     NSString *uuid = [[NSUUID UUID] UUIDString];
      XMPPIQ* httpSlotRequest =[[XMPPIQ alloc] initWithId:uuid andType:kiqGetType];

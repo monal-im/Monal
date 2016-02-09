@@ -206,7 +206,7 @@ Decline a call request
 
 
 #pragma mark HTTP upload 
--(void) requestHTTPSlotWithParams:(NSDictionary *)params andCompletion:(void(^)(NSString *url)) completion;
+-(void) requestHTTPSlotWithParams:(NSDictionary *)params andCompletion:(void(^)(NSString *url,  NSError *error)) completion;
 
 FOUNDATION_EXPORT NSString *const kFileName;
 FOUNDATION_EXPORT NSString *const kContentType;
@@ -256,7 +256,9 @@ FOUNDATION_EXPORT NSString *const kCompletion;
 @property (nonatomic,strong)  NSMutableArray*  discoveredServices;
 @property (nonatomic,strong)  NSString*  conferenceServer;
 @property (nonatomic,strong)  NSArray*  roomList;
-@property (nonatomic, strong) NSArray* rosterList; 
+@property (nonatomic, strong) NSArray* rosterList;
+
+@property (nonatomic, readonly) BOOL supportsHTTPUpload;
 
 //calculated
 @property (nonatomic,strong, readonly) NSString* versionHash;

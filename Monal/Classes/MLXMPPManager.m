@@ -460,7 +460,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 
 
 #pragma  mark - HTTP upload
--(void)httpUploadFileURL:(NSURL*) fileURL  toContact:(NSString*)contact onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(NSString *url)) completion{
+-(void)httpUploadFileURL:(NSURL*) fileURL  toContact:(NSString*)contact onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(NSString *url,  NSError *error)) completion{
     
     //get file name
     NSString *fileName =  fileURL.pathComponents.lastObject;
@@ -477,11 +477,12 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 }
 
 
--(void)httpUploadData:(NSData *)data withFilename:(NSString*) filename andType:(NSString*)contentType  toContact:(NSString*)contact onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(NSString *url)) completion
+-(void)httpUploadData:(NSData *)data withFilename:(NSString*) filename andType:(NSString*)contentType  toContact:(NSString*)contact onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(NSString *url,  NSError *error)) completion
 {
     if(!data || !filename || !contentType || !contact || !accountNo)
     {
-        if(completion) completion(nil);
+        NSError *error = [NSError errorWithDomain:@"Empty" code:0 userInfo:@{}];
+        if(completion) completion(nil, error);
         return;
     }
     

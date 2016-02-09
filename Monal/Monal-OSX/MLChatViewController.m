@@ -131,6 +131,22 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(IBAction)attach:(id)sender
 {
+ 
+    xmpp* account=[[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
+    if(!account.supportsHTTPUpload)
+    {
+        NSAlert *userAddAlert = [[NSAlert alloc] init];
+        userAddAlert.messageText = @"Error";
+        userAddAlert.informativeText =[NSString stringWithFormat:@"This server does not appear to support HTTP file uploads (XEP-0363). Please ask the administrator to enable it."];
+        userAddAlert.alertStyle=NSInformationalAlertStyle;
+        [userAddAlert addButtonWithTitle:@"Close"];
+        
+        [userAddAlert beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse returnCode) {
+            [self dismissController:self];
+        }];
+        
+        return;
+    }
     
     //selct file
     NSOpenPanel *openPanel = [NSOpenPanel openPanel];
@@ -139,10 +155,21 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             case NSFileHandlingPanelOKButton:
             {
                 // start http upload XMPP
-                [[MLXMPPManager sharedInstance]  httpUploadFileURL:openPanel.URL toContact:self.contactName onAccount:self.accountNo withCompletionHandler:^(NSString *url) {
+                [[MLXMPPManager sharedInstance]  httpUploadFileURL:openPanel.URL toContact:self.contactName onAccount:self.accountNo withCompletionHandler:^(NSString *url, NSError *error) {
                     dispatch_async(dispatch_get_main_queue(), ^{
                         if(url) {
                             self.messageBox.string= url;
+                        }
+                        else  {
+                            NSAlert *userAddAlert = [[NSAlert alloc] init];
+                            userAddAlert.messageText = @"Error";
+                            userAddAlert.informativeText =[NSString stringWithFormat:@"There was an error uploading the file to the server. %@", error.localizedFailureReason];
+                            userAddAlert.alertStyle=NSInformationalAlertStyle;
+                            [userAddAlert addButtonWithTitle:@"Close"];
+                            
+                            [userAddAlert beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse returnCode) {
+                                [self dismissController:self];
+                            }];
                         }
                     });
                     

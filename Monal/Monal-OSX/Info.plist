@@ -38,6 +38,11 @@
 	<string>public.app-category.social-networking</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright © 2016 Monal.im. All rights reserved.</string>
 	<key>NSMainStoryboardFile</key>
@@ -46,11 +51,6 @@
 	<string>NSApplication</string>
 	<key>SUFeedURL</key>
 	<string>https://monal.im/Monal-OSX/appcast.xml</string>
-	<key>NSAppTransportSecurity</key>
-	<dict>
-		<key>NSAllowsArbitraryLoads</key>
-		<true/>
-	</dict>
 	<key>SUScheduledCheckInterval</key>
 	<integer>86400</integer>
 </dict>

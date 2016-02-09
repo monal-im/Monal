@@ -81,7 +81,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         
         if(connectionError)
         {
-            errorReply=[NSError errorWithDomain:@"HTTP" code:0 userInfo:@{@"result":@"connection error"}];
+            errorReply=connectionError; //[NSError errorWithDomain:@"HTTP" code:0 userInfo:@{@"result":@"connection error"}];
         }
         else {
             NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *) response;

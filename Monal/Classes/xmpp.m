@@ -99,6 +99,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 // client state
 @property (nonatomic, assign) BOOL supportsClientState;
 
+//message archive
+@property (nonatomic, assign) BOOL supportsMam0;
+
 //carbons
 @property (nonatomic, assign) BOOL usingCarbons2;
 
@@ -1106,6 +1109,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         self.supportsHTTPUpload=YES;
                        self.uploadServer = iqNode.from;
                     }
+                    
+                    if([self.serverFeatures containsObject:@"urn:xmpp:mam:0"])
+                    {
+                        self.supportsMam0=YES;
+                    }
+                    
+                   
                 
                 }
                 

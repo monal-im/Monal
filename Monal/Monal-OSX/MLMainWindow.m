@@ -193,11 +193,21 @@
         {
             [[NSUserNotificationCenter defaultUserNotificationCenter] removeAllDeliveredNotifications];
         }
-        
+       
     } else {
         // occluded
+    
     }
 }
 
+- (void)windowWillClose:(NSNotification *)notification
+{
+        [[MLXMPPManager sharedInstance] setClientsInactive];
+}
+
+- (void)windowDidBecomeMain:(NSNotification *)notification
+{
+     [[MLXMPPManager sharedInstance] setClientsActive];
+}
 
 @end

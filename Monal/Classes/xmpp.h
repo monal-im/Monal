@@ -204,6 +204,16 @@ Decline a call request
  */
 -(void)decline:(NSDictionary*) contact;
 
+/*
+ notifies the server client is in foreground
+ */
+-(void) setClientActive;
+
+/*
+ notifies the server client is in foreground
+ */
+-(void) setClientInactive;
+
 
 #pragma mark HTTP upload 
 -(void) requestHTTPSlotWithParams:(NSDictionary *)params andCompletion:(void(^)(NSString *url,  NSError *error)) completion;
@@ -259,6 +269,9 @@ FOUNDATION_EXPORT NSString *const kCompletion;
 @property (nonatomic, strong) NSArray* rosterList;
 
 @property (nonatomic, readonly) BOOL supportsHTTPUpload;
+// client state
+@property (nonatomic, readonly) BOOL supportsClientState;
+
 
 //calculated
 @property (nonatomic,strong, readonly) NSString* versionHash;

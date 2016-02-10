@@ -187,6 +187,16 @@ Attempts to upload a file to the  HTTP upload service
  */
 -(void) handleSentMessage:(NSNotification *)notification;
 
+/**
+ updtes client state on server as inactive
+ */
+-(void) setClientsInactive;
+
+/**
+ sets client state on server as active
+ */
+-(void) setClientsActive;
+
 
 
 @end

@@ -128,10 +128,9 @@ An array of Dics what have timers to make sure everything was sent
 
 #pragma mark keep alive
 
-
 -(void) setKeepAlivetimer
 {
-    #if TARGET_OS_IPHONE
+#if TARGET_OS_IPHONE
 
     NSTimeInterval timeInterval= 600; // 600 seconds
     BOOL keepAlive=[[UIApplication sharedApplication] setKeepAliveTimeout:timeInterval handler:^{
@@ -139,7 +138,7 @@ An array of Dics what have timers to make sure everything was sent
         for(NSDictionary* row in _connectedXMPP)
         {
             xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
-            [xmppAccount sendPing];  //sendWhiteSpacePing
+            [xmppAccount sendPing];
         }
         
     }];
@@ -158,12 +157,44 @@ An array of Dics what have timers to make sure everything was sent
 
 -(void) clearKeepAlive
 {
+    for(NSDictionary* row in _connectedXMPP)
+    {
+        xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
+        if(xmppAccount.supportsClientState) {
+            [xmppAccount setClientActive];
+        }
+    }
+    
 #if TARGET_OS_IPHONE
     [[UIApplication sharedApplication] clearKeepAliveTimeout];
 #else
 #endif
     
 }
+
+
+#pragma mark - client state 
+
+-(void) setClientsInactive {
+    for(NSDictionary* row in _connectedXMPP)
+    {
+        xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
+        if(xmppAccount.supportsClientState) {
+            [xmppAccount setClientInactive];
+        }
+    }
+}
+
+-(void) setClientsActive {
+    for(NSDictionary* row in _connectedXMPP)
+    {
+        xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
+        if(xmppAccount.supportsClientState) {
+            [xmppAccount setClientInactive];
+        }
+    }
+}
+
 
 
 -(void) resetForeground

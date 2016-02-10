@@ -96,6 +96,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 @property (nonatomic, assign) BOOL supportsResume;
 @property (nonatomic, strong) NSString *streamID;
 
+// client state
+@property (nonatomic, assign) BOOL supportsClientState;
+
 //carbons
 @property (nonatomic, assign) BOOL usingCarbons2;
 
@@ -1102,6 +1105,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         self.supportsHTTPUpload=YES;
                        self.uploadServer = iqNode.from;
                     }
+                    
+                    if([self.serverFeatures containsObject:@"urn:xmpp:csi:0"])
+                    {
+                        self.supportsClientState=YES; 
+                    }
+                    
                 }
                 
                 if(iqNode.legacyAuth)

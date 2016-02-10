@@ -134,6 +134,31 @@
 
 }
 
+-(void) setMAMQuerySinceTime:(NSDate *) date
+{
+    MLXMLNode* queryNode =[[MLXMLNode alloc] init];
+    queryNode.element=@"ping";
+    [queryNode.attributes setObject:@"urn:xmpp:mam:0" forKey:@"xmlns"];
+    
+    if(date) {
+    /*
+     <iq type='set' id='juliet1'>
+     <query xmlns='urn:xmpp:mam:1'>
+     <x xmlns='jabber:x:data' type='submit'>
+     <field var='FORM_TYPE' type='hidden'>
+     <value>urn:xmpp:mam:1</value>
+     </field>
+     <field var='start'>
+     <value>2010-08-07T00:00:00Z</value>
+     </field>
+     </x>
+     </query>
+     </iq> */
+    }
+    [self.children addObject:queryNode];
+    
+}
+
 -(void) setRemoveFromRoster:(NSString*) jid
 {
     MLXMLNode* queryNode =[[MLXMLNode alloc] init];

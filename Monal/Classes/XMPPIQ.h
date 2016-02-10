@@ -37,6 +37,11 @@
  */
 -(void) setPing;
 
+/**
+ makes iq for mam query since a date and time. If no date is provided, will query all
+ */
+-(void) setMAMQuerySinceTime:(NSDate *) date;
+
 #pragma mark disco
 /**
  makes a disco info response for the server.

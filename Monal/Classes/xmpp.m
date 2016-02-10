@@ -1114,8 +1114,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     {
                         self.supportsMam0=YES;
                     }
-                    
-                   
                 
                 }
                 
@@ -1872,6 +1870,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         {
                             self.supportsClientState=YES;
                         }
+                        
+                        [self queryMAMArchive];
                     }
                     
                 }
@@ -2427,6 +2427,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     MLXMLNode *activeNode =[[MLXMLNode alloc] initWithElement:@"inactive" ];
     [activeNode setXMLNS:@"urn:xmpp:csi:0"];
     [self send:activeNode];
+}
+
+#pragma mark Message archive
+
+-(void) queryMAMArchive
+{
+    XMPPIQ* query =[[XMPPIQ alloc] initWithId:[NSString stringWithFormat:@"Monal%d",arc4random()%100000]andType:kiqGetType];
+    [query setMAMQuerySinceTime:nil];
+    [self send:query];
 }
 
 #pragma mark  MUC

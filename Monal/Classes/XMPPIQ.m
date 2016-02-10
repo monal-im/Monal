@@ -134,27 +134,48 @@
 
 }
 
--(void) setMAMQuerySinceTime:(NSDate *) date
+-(void) setMAMQuerySinceTime:(NSDate *) date andJid:(NSString *)jid
 {
     MLXMLNode* queryNode =[[MLXMLNode alloc] init];
     queryNode.element=@"query";
     [queryNode.attributes setObject:@"urn:xmpp:mam:0" forKey:@"xmlns"];
     
-    if(date) {
-    /*
-     <iq type='set' id='juliet1'>
-     <query xmlns='urn:xmpp:mam:1'>
-     <x xmlns='jabber:x:data' type='submit'>
-     <field var='FORM_TYPE' type='hidden'>
-     <value>urn:xmpp:mam:1</value>
-     </field>
-     <field var='start'>
-     <value>2010-08-07T00:00:00Z</value>
-     </field>
-     </x>
-     </query>
-     </iq> */
+    
+    MLXMLNode* xnode =[[MLXMLNode alloc] init];
+    xnode.element=@"x";
+    [xnode.attributes setObject:@"jabber:x:data" forKey:@"xmlns"];
+    [xnode.attributes setObject:@"submit" forKey:@"type"];
+
+    MLXMLNode* field1 =[[MLXMLNode alloc] init];
+    field1.element=@"field";
+    [field1.attributes setObject:@"FORM_TYPE" forKey:@"var"];
+    [field1.attributes setObject:@"hidden" forKey:@"type"];
+    field1.data=@"urn:xmpp:mam:1";
+    
+    [xnode.children addObject:field1];
+    
+    if(date || jid) {
+        if(date) {
+            MLXMLNode* field2 =[[MLXMLNode alloc] init];
+            field2.element=@"field";
+            [field2.attributes setObject:@"start" forKey:@"var"];
+            field2.data=@"";
+            
+            [xnode.children addObject:field2];
+            
+        }
+        
+        if(jid) {
+            MLXMLNode* field3 =[[MLXMLNode alloc] init];
+            field3.element=@"field";
+            [field3.attributes setObject:@"with" forKey:@"var"];
+            field3.data=jid;
+            [xnode.children addObject:field3];
+        }
     }
+    
+    [queryNode.children addObject:xnode];
+    
     [self.children addObject:queryNode];
     
 }

@@ -38,9 +38,9 @@
 -(void) setPing;
 
 /**
- makes iq for mam query since a date and time. If no date is provided, will query all
+ makes iq for mam query since a date and time for jid. If no date is provided, will query all. If no jid is provided it will query all
  */
--(void) setMAMQuerySinceTime:(NSDate *) date;
+-(void) setMAMQuerySinceTime:(NSDate *) date andJid:(NSString *)jid;
 
 #pragma mark disco
 /**

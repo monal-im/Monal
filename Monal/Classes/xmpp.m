@@ -1113,7 +1113,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     if([self.serverFeatures containsObject:@"urn:xmpp:mam:0"])
                     {
                         self.supportsMam0=YES;
-                        [self queryMAMArchive];
                     }
                 
                 }
@@ -2431,10 +2430,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 #pragma mark Message archive
 
--(void) queryMAMArchive
+-(void) queryMAMArchiveForJid:(NSString *) jid
 {
     XMPPIQ* query =[[XMPPIQ alloc] initWithId:[NSString stringWithFormat:@"Monal%d",arc4random()%100000]andType:kiqSetType];
-    [query setMAMQuerySinceTime:nil];
+    [query setMAMQuerySinceTime:nil andJid:jid];
     [self send:query];
 }
 

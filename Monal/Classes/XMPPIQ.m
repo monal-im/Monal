@@ -151,7 +151,11 @@
     field1.element=@"field";
     [field1.attributes setObject:@"FORM_TYPE" forKey:@"var"];
     [field1.attributes setObject:@"hidden" forKey:@"type"];
-    field1.data=@"urn:xmpp:mam:0";
+    
+    MLXMLNode* value =[[MLXMLNode alloc] init];
+    value.element=@"value";
+    value.data=@"urn:xmpp:mam:0";
+    [field1.children addObject:value];
     
     [xnode.children addObject:field1];
     
@@ -167,16 +171,34 @@
             MLXMLNode* field2 =[[MLXMLNode alloc] init];
             field2.element=@"field";
             [field2.attributes setObject:@"start" forKey:@"var"];
-            field2.data=[rfc3339DateFormatter stringFromDate:date];
-            [xnode.children addObject:field2];
+            
+            MLXMLNode* value2 =[[MLXMLNode alloc] init];
+            value2.element=@"value";
+            value2.data=[rfc3339DateFormatter stringFromDate:date];
+            [field2.children addObject:value2];
+            
+            MLXMLNode* field3 =[[MLXMLNode alloc] init];
+            field3.element=@"field";
+            [field3.attributes setObject:@"end" forKey:@"var"];
+            
+            MLXMLNode* value3 =[[MLXMLNode alloc] init];
+            value3.element=@"value";
+            value3.data=[rfc3339DateFormatter stringFromDate:[NSDate date]];
+            [field3.children addObject:value2];
+            
+            [xnode.children addObjectsFromArray:@[field2, field3]];
             
         }
-        
         else if(jid) {
             MLXMLNode* field3 =[[MLXMLNode alloc] init];
             field3.element=@"field";
             [field3.attributes setObject:@"with" forKey:@"var"];
-            field3.data=jid;
+            
+            MLXMLNode* value3 =[[MLXMLNode alloc] init];
+            value3.element=@"value";
+            value3.data=jid;
+            [field3.children addObject:value3];
+            
             [xnode.children addObject:field3];
         }
     }

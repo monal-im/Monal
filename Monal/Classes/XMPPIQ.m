@@ -137,7 +137,7 @@
 -(void) setMAMQuerySinceTime:(NSDate *) date
 {
     MLXMLNode* queryNode =[[MLXMLNode alloc] init];
-    queryNode.element=@"ping";
+    queryNode.element=@"query";
     [queryNode.attributes setObject:@"urn:xmpp:mam:0" forKey:@"xmlns"];
     
     if(date) {

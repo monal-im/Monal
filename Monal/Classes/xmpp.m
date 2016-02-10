@@ -1113,6 +1113,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     if([self.serverFeatures containsObject:@"urn:xmpp:mam:0"])
                     {
                         self.supportsMam0=YES;
+                        [self queryMAMArchive];
                     }
                 
                 }
@@ -1871,7 +1872,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             self.supportsClientState=YES;
                         }
                         
-                        [self queryMAMArchive];
                     }
                     
                 }

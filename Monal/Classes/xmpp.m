@@ -2433,7 +2433,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) queryMAMArchive
 {
-    XMPPIQ* query =[[XMPPIQ alloc] initWithId:[NSString stringWithFormat:@"Monal%d",arc4random()%100000]andType:kiqGetType];
+    XMPPIQ* query =[[XMPPIQ alloc] initWithId:[NSString stringWithFormat:@"Monal%d",arc4random()%100000]andType:kiqSetType];
     [query setMAMQuerySinceTime:nil];
     [self send:query];
 }

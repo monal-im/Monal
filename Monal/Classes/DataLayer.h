@@ -165,6 +165,13 @@ extern NSString *const kCount;
 -(NSArray*) messageHistoryListDates:(NSString*) buddy forAccount: (NSString*) accountNo;
 -(NSArray*) messageHistoryDate:(NSString*) buddy forAccount:(NSString*) accountNo forDate:(NSString*) date;
 
+
+/**
+ retrieves the date of the the last message to or from this contact
+ */
+-(void) lastMessageDateForContact:(NSString*) contact andAccount:(NSString*) accountNo withCompletion: (void (^)(NSDate *))completion;;
+
+
 -(BOOL) messageHistoryClean:(NSString*) buddy :(NSString*) accountNo;
 -(BOOL) messageHistoryCleanAll;
 

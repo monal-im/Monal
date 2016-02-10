@@ -107,6 +107,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         [self markAsRead];
     }
     [self refreshData];
+    
+    //get last message date for contact
+    
+    //fetch from archive
+    
 }
 
 

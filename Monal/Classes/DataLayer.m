@@ -1432,6 +1432,7 @@ static DataLayer *sharedInstance=nil;
     
 }
 
+
 -(NSArray*) messageHistoryDate:(NSString*) buddy forAccount:(NSString*) accountNo forDate:(NSString*) date
 {
     
@@ -1608,6 +1609,20 @@ static DataLayer *sharedInstance=nil;
         if(completion)
         {
             completion(count);
+        }
+    }];
+}
+
+
+
+-(void) lastMessageDateForContact:(NSString*) contact andAccount:(NSString*) accountNo withCompletion: (void (^)(NSDate *))completion
+{
+    NSString* query=[NSString stringWithFormat:@"select timestamp from  message_history where account_id=%@ and message_from='%@' order by timestamp desc limit 1", accountNo, contact.escapeForSql];
+    
+    [self executeScalar:query withCompletion:^(NSObject* result) {
+        if(completion)
+        {
+            completion((NSDate *)result);
         }
     }];
 }

@@ -215,8 +215,16 @@ Decline a call request
 -(void) setClientInactive;
 
 
-#pragma mark HTTP upload 
--(void) requestHTTPSlotWithParams:(NSDictionary *)params andCompletion:(void(^)(NSString *url,  NSError *error)) completion;
+/*
+ HTTP upload
+*/
+ -(void) requestHTTPSlotWithParams:(NSDictionary *)params andCompletion:(void(^)(NSString *url,  NSError *error)) completion;
+
+/*
+ query message archive.
+ */
+-(void) queryMAMArchiveSince:(NSDate *) date ForJid:(NSString *) jid;
+
 
 FOUNDATION_EXPORT NSString *const kFileName;
 FOUNDATION_EXPORT NSString *const kContentType;
@@ -271,6 +279,9 @@ FOUNDATION_EXPORT NSString *const kCompletion;
 @property (nonatomic, readonly) BOOL supportsHTTPUpload;
 // client state
 @property (nonatomic, readonly) BOOL supportsClientState;
+
+//message archive
+@property (nonatomic, readonly) BOOL supportsMam0;
 
 
 //calculated

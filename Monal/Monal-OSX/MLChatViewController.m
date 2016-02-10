@@ -108,9 +108,17 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     [self refreshData];
     
-    //get last message date for contact
     
-    //fetch from archive
+    xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
+    if(xmppAccount.supportsMam0) {
+    
+        [[DataLayer sharedInstance] lastMessageDateForContact:self.contactName andAccount:self.accountNo withCompletion:^(NSDate *lastTimeStamp) {
+            
+            [xmppAccount queryMAMArchiveSince:lastTimeStamp ForJid:self.contactName];
+
+        }];
+        
+    }
     
 }
 

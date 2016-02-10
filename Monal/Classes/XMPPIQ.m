@@ -136,6 +136,7 @@
 
 -(void) setMAMQuerySinceTime:(NSDate *) date andJid:(NSString *)jid
 {
+
     MLXMLNode* queryNode =[[MLXMLNode alloc] init];
     queryNode.element=@"query";
     [queryNode.attributes setObject:@"urn:xmpp:mam:0" forKey:@"xmlns"];
@@ -150,22 +151,28 @@
     field1.element=@"field";
     [field1.attributes setObject:@"FORM_TYPE" forKey:@"var"];
     [field1.attributes setObject:@"hidden" forKey:@"type"];
-    field1.data=@"urn:xmpp:mam:1";
+    field1.data=@"urn:xmpp:mam:0";
     
     [xnode.children addObject:field1];
     
     if(date || jid) {
         if(date) {
+            NSDateFormatter *rfc3339DateFormatter = [[NSDateFormatter alloc] init];
+            NSLocale *enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
+            
+            [rfc3339DateFormatter setLocale:enUSPOSIXLocale];
+            [rfc3339DateFormatter setDateFormat:@"yyyy'-'MM'-'dd'T'HH':'mm':'ss'Z'"];
+            [rfc3339DateFormatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+            
             MLXMLNode* field2 =[[MLXMLNode alloc] init];
             field2.element=@"field";
             [field2.attributes setObject:@"start" forKey:@"var"];
-            field2.data=@"";
-            
+            field2.data=[rfc3339DateFormatter stringFromDate:date];
             [xnode.children addObject:field2];
             
         }
         
-        if(jid) {
+        else if(jid) {
             MLXMLNode* field3 =[[MLXMLNode alloc] init];
             field3.element=@"field";
             [field3.attributes setObject:@"with" forKey:@"var"];

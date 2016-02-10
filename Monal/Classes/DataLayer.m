@@ -1622,7 +1622,18 @@ static DataLayer *sharedInstance=nil;
     [self executeScalar:query withCompletion:^(NSObject* result) {
         if(completion)
         {
-            completion((NSDate *)result);
+            
+            
+            NSDateFormatter *dateFromatter = [[NSDateFormatter alloc] init];
+            NSLocale *enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
+            
+            [dateFromatter setLocale:enUSPOSIXLocale];
+            [dateFromatter setDateFormat:@"yyyy'-'MM'-'dd HH':'mm':'ss"];
+            [dateFromatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+            
+            NSDate *datetoReturn =[dateFromatter dateFromString:(NSString *)result];
+            
+            completion(datetoReturn);
         }
     }];
 }

@@ -34,6 +34,7 @@
 
 @property (nonatomic,readonly, assign) BOOL bind;
 
+@property (nonatomic,readonly, assign) BOOL supportsClientState;
 
 @property (nonatomic,readonly, assign) BOOL error;
 

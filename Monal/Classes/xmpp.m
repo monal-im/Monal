@@ -161,6 +161,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                   @"stream:stream",
                   @"stream:error",
                   @"stream",
+                  @"csi",
                   @"features",
                   @"proceed",
                   @"failure",
@@ -1105,12 +1106,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         self.supportsHTTPUpload=YES;
                        self.uploadServer = iqNode.from;
                     }
-                    
-                    if([self.serverFeatures containsObject:@"urn:xmpp:csi:0"])
-                    {
-                        self.supportsClientState=YES; 
-                    }
-                    
+                
                 }
                 
                 if(iqNode.legacyAuth)
@@ -1860,8 +1856,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         if(streamNode.supportsSM3)
                         {
                             [self enableSM3];
-                            
-                            
+                        }
+                        
+                        if(streamNode.supportsClientState)
+                        {
+                            self.supportsClientState=YES;
                         }
                     }
                     
@@ -2402,6 +2401,22 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self.httpUploadQueue addObject:iqParams];
     [httpSlotRequest httpUploadforFile:[params objectForKey:kFileName] ofSize:size andContentType:[params objectForKey:kContentType]];
     [self send:httpSlotRequest];
+}
+
+#pragma mark client state
+-(void) setClientActive
+{
+    MLXMLNode *activeNode =[[MLXMLNode alloc] initWithElement:@"active" ];
+    [activeNode setXMLNS:@"urn:xmpp:csi:0"];
+    [self send:activeNode];
+    
+}
+
+-(void) setClientInactive
+{
+    MLXMLNode *activeNode =[[MLXMLNode alloc] initWithElement:@"inactive" ];
+    [activeNode setXMLNS:@"urn:xmpp:csi:0"];
+    [self send:activeNode];
 }
 
 #pragma mark  MUC

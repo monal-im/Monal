@@ -88,6 +88,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) showConversationForContact:(NSDictionary *) contact
 {
+    if([self.accountNo isEqualToString:[NSString stringWithFormat:@"%@",[contact objectForKey:kAccountID]]] && [self.contactName isEqualToString: [contact objectForKey:kContactName]])
+    {
+        return;
+    }
+    
+    
 //    [MLNotificationManager sharedInstance].currentAccountNo=self.accountNo;
 //    [MLNotificationManager sharedInstance].currentContact=self.contactName;
 

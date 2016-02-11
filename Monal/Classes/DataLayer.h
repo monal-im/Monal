@@ -160,9 +160,9 @@ extern NSString *const kCount;
 -(void) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom delivered:(BOOL) delivered unread:(BOOL) unread serverMessageId:(NSString *) messageid andOverrideDate:(NSString *) messageDate;
 
 /**
-  checks to see if there is a message with the provided messageid
+  checks to see if there is a message with the provided messageid. will return YES if the messageid exists for this account and contact
  */
--(void) hasMessageForId:(NSString*) messageid andCompletion: (void (^)(BOOL))completion;
+-(void) hasMessageForId:(NSString*) messageid toContact:(NSString *) contact onAccount:(NSString *) accountNo andCompletion: (void (^)(BOOL))completion;
 
 /*
  marks a message as delivered

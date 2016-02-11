@@ -1327,46 +1327,61 @@ static DataLayer *sharedInstance=nil;
 
 -(void) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom delivered:(BOOL) delivered unread:(BOOL) unread serverMessageId:(NSString *) messageid andOverrideDate:(NSString *) messageDate
 {
-    //this is always from a contact
-    NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
-    [formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
-    NSDate* sourceDate=[NSDate date];
-    
-    NSTimeZone* sourceTimeZone = [NSTimeZone systemTimeZone];
-    NSTimeZone* destinationTimeZone = [NSTimeZone timeZoneWithAbbreviation:@"GMT"];
-    
-    NSInteger sourceGMTOffset = [sourceTimeZone secondsFromGMTForDate:sourceDate];
-    NSInteger destinationGMTOffset = [destinationTimeZone secondsFromGMTForDate:sourceDate];
-    NSTimeInterval interval = destinationGMTOffset - sourceGMTOffset;
-    
-    NSDate* destinationDate = [[NSDate alloc] initWithTimeInterval:interval sinceDate:sourceDate];
-    
-    // note: if it isnt the same day we want to show the full  day
-    
-    NSString* dateString = [formatter stringFromDate:destinationDate];
-    // in the event it is a message from the room
-    
-    //all messages default to unread
-    NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, %@, '%@',  '%@', '%@', '%@', '%@',%d,%d,'%@');", accountNo, from.escapeForSql, to.escapeForSql, 	dateString, message.escapeForSql, actualfrom.escapeForSql,unread, delivered, message.escapeForSql];
-    DDLogVerbose(@"%@",query);
-    [self executeNonQuery:query withCompletion:^(BOOL success) {
-
-        if(!success)
+    [self hasMessageForId:messageid toContact:actualfrom onAccount:accountNo andCompletion:^(BOOL exists) {
+        if(!exists)
         {
-            DDLogError(@"failed to insert ");
+            //this is always from a contact
+            NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
+            [formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+            NSDate* sourceDate=[NSDate date];
+            
+            NSTimeZone* sourceTimeZone = [NSTimeZone systemTimeZone];
+            NSTimeZone* destinationTimeZone = [NSTimeZone timeZoneWithAbbreviation:@"GMT"];
+            
+            NSInteger sourceGMTOffset = [sourceTimeZone secondsFromGMTForDate:sourceDate];
+            NSInteger destinationGMTOffset = [destinationTimeZone secondsFromGMTForDate:sourceDate];
+            NSTimeInterval interval = destinationGMTOffset - sourceGMTOffset;
+            
+            NSDate* destinationDate = [[NSDate alloc] initWithTimeInterval:interval sinceDate:sourceDate];
+            
+            // note: if it isnt the same day we want to show the full  day
+            
+            NSString* dateString = [formatter stringFromDate:destinationDate];
+            // in the event it is a message from the room
+            
+            //all messages default to unread
+            NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, %@, '%@',  '%@', '%@', '%@', '%@',%d,%d,'%@');", accountNo, from.escapeForSql, to.escapeForSql, 	dateString, message.escapeForSql, actualfrom.escapeForSql,unread, delivered, message.escapeForSql];
+            DDLogVerbose(@"%@",query);
+            [self executeNonQuery:query withCompletion:^(BOOL success) {
+                
+                if(!success)
+                {
+                    DDLogError(@"failed to insert ");
+                }
+            }];
         }
+        
     }];
-  
+    
 }
 
--(void) hasMessageForId:(NSString*) messageid andCompletion: (void (^)(BOOL))completion
+-(void) hasMessageForId:(NSString*) messageid toContact:(NSString *) contact onAccount:(NSString *) accountNo andCompletion: (void (^)(BOOL))completion
 {
-    BOOL exists=NO;
+    NSString* query=[NSString stringWithFormat:@"select messageid from  message_history where account_id=%@ and message_from='%@' and messageid=%@ limit 1", accountNo, contact.escapeForSql, messageid.escapeForSql];
     
-    if(completion)
-    {
-        completion(exists);
-    }
+    [self executeScalar:query withCompletion:^(NSObject* result) {
+        
+        BOOL exists=NO;
+        if(result)
+        {
+            exists=YES;
+        }
+        
+        if(completion)
+        {
+            completion(exists);
+        }
+    }];
     
 }
 
@@ -1637,7 +1652,6 @@ static DataLayer *sharedInstance=nil;
 #pragma mark active chats
 -(NSArray*) activeBuddies
 {
-    
     NSString* query=[NSString stringWithFormat:@"select X.*, 0 as 'count' from (select distinct a.buddy_name,state,status,filename, ifnull(b.full_name, a.buddy_name) as full_name, a.account_id from activechats as a left outer  join buddylist as b on a.buddy_name=b.buddy_name and a.account_id=b.account_id ) as X left outer join (select account_id, message_from, max(timestamp) as max_time from  message_history group by account_id, message_from) as Y on X.account_id=Y.account_id and X.buddy_name=Y.message_from order by Y.max_time desc, X.full_name COLLATE NOCASE asc" ];
     //	DDLogVerbose(query);
     NSArray* toReturn = [self executeReader:query];

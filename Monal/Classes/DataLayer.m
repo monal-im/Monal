@@ -1356,7 +1356,7 @@ static DataLayer *sharedInstance=nil;
             // in the event it is a message from the room
             
             //all messages default to unread
-            NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, %@, '%@',  '%@', '%@', '%@', '%@',%d,%d,'%@');", accountNo, from.escapeForSql, to.escapeForSql, 	dateString, message.escapeForSql, actualfrom.escapeForSql,unread, delivered, message.escapeForSql];
+            NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, %@, '%@',  '%@', '%@', '%@', '%@',%d,%d,'%@');", accountNo, from.escapeForSql, to.escapeForSql, 	dateString, message.escapeForSql, actualfrom.escapeForSql,unread, delivered, messageid.escapeForSql];
             DDLogVerbose(@"%@",query);
             [self executeNonQuery:query withCompletion:^(BOOL success) {
                 

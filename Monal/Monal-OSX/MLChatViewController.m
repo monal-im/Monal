@@ -108,8 +108,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     {
         self.jid=[NSString stringWithFormat:@"%@@%@",[[accountVals objectAtIndex:0] objectForKey:kUsername], [[accountVals objectAtIndex:0] objectForKey:kDomain]];
     }
-    
-    if((self.view.window.occlusionState & NSWindowOcclusionStateVisible)) {
+        if((self.view.window.occlusionState & NSWindowOcclusionStateVisible)) {
         [self markAsRead];
     }
     [self refreshData];

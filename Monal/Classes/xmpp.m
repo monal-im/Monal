@@ -924,15 +924,18 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             NSRange forwardClosePos=[_inputBuffer rangeOfString:@"</forwarded"
                                                          options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, maxPos-pos.location)];
                             
-                            NSRange messageClose =[_inputBuffer rangeOfString:[NSString stringWithFormat:@"</%@",stanzaType]
-                                                                                options:NSCaseInsensitiveSearch range:NSMakeRange(forwardClosePos.location, maxPos-forwardClosePos.location)];
-                            //ensure it is set to future max
-                         
-                            
-                            finalstart=pos.location;
-                            finalend=messageClose.location+messageClose.length+1; //+1 to inclde closing <
-                            DDLogVerbose(@"at  2.5");
-                            break;
+                            if(forwardClosePos.location!=NSNotFound) {
+                                NSRange messageClose =[_inputBuffer rangeOfString:[NSString stringWithFormat:@"</%@",stanzaType]
+                                                                          options:NSCaseInsensitiveSearch range:NSMakeRange(forwardClosePos.location, maxPos-forwardClosePos.location)];
+                                //ensure it is set to future max
+                                
+                                
+                                finalstart=pos.location;
+                                finalend=messageClose.location+messageClose.length+1; //+1 to inclde closing <
+                                DDLogVerbose(@"at  2.5");
+                                break;
+                            }
+                          
                         }
                         
                         

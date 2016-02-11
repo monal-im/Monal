@@ -1325,7 +1325,7 @@ static DataLayer *sharedInstance=nil;
     return messageArray;
 }
 
--(void) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom delivered:(BOOL) delivered unread:(BOOL) unread serverMessageId:(NSString *) messageid andOverrideDate:(NSString *) messageDate
+-(void) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom delivered:(BOOL) delivered unread:(BOOL) unread serverMessageId:(NSString *) messageid andOverrideDate:(NSString *) messageDate withCompletion: (void (^)(BOOL))completion
 {
     [self hasMessageForId:messageid toContact:actualfrom onAccount:accountNo andCompletion:^(BOOL exists) {
         if(!exists)
@@ -1357,6 +1357,11 @@ static DataLayer *sharedInstance=nil;
                 if(!success)
                 {
                     DDLogError(@"failed to insert ");
+                }
+                
+                if(completion)
+                {
+                    completion(success);
                 }
             }];
         }

@@ -1556,36 +1556,43 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         
                         [[DataLayer sharedInstance] addMessageFrom:messageNode.from to:messageNode.to
                                                         forAccount:_accountNo withBody:messageNode.messageText
-                                                      actuallyfrom:messageNode.actualFrom delivered:YES  unread:unread  serverMessageId:messageNode.idval andOverrideDate:nil];
+                                                      actuallyfrom:messageNode.actualFrom delivered:YES  unread:unread  serverMessageId:messageNode.idval andOverrideDate:nil withCompletion:^(BOOL success) {
+                                                          if(success)
+                                                          {
+                                                              [self.networkQueue addOperationWithBlock:^{
+                                                                  [[DataLayer sharedInstance] addActiveBuddies:messageNode.from forAccount:_accountNo withCompletion:nil];
+                                                                  
+                                                                  
+                                                                  if(messageNode.from ) {
+                                                                      NSString* actuallyFrom= messageNode.actualFrom;
+                                                                      if(!actuallyFrom) actuallyFrom=messageNode.from;
+                                                                      
+                                                                      NSString* messageText=messageNode.messageText;
+                                                                      if(!messageText) messageText=@"";
+                                                                      
+                                                                      NSString *recipient=messageNode.to;
+                                                                      if(!recipient) recipient=self.jid;
+                                                                      NSDictionary* userDic=@{@"from":messageNode.from,
+                                                                                              @"actuallyfrom":actuallyFrom,
+                                                                                              @"messageText":messageText,
+                                                                                              @"to":recipient,
+                                                                                              @"accountNo":_accountNo,
+                                                                                              @"showAlert":[NSNumber numberWithBool:showAlert]
+                                                                                              };
+                                                                      
+                                                                      [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:userDic];
+                                                                  }
+                                                              }];
+                                                          }
+                                                          
+                                                      }];
                         
-                        [[DataLayer sharedInstance] addActiveBuddies:messageNode.from forAccount:_accountNo withCompletion:nil];
-                        
-                        
-                        if(messageNode.from ) {
-                            NSString* actuallyFrom= messageNode.actualFrom;
-                            if(!actuallyFrom) actuallyFrom=messageNode.from;
-                            
-                            NSString* messageText=messageNode.messageText;
-                            if(!messageText) messageText=@"";
-                            
-                            NSString *recipient=messageNode.to;
-                            if(!recipient) recipient=self.jid;
-                            NSDictionary* userDic=@{@"from":messageNode.from,
-                                                    @"actuallyfrom":actuallyFrom,
-                                                    @"messageText":messageText,
-                                                    @"to":recipient,
-                                                    @"accountNo":_accountNo,
-                                                    @"showAlert":[NSNumber numberWithBool:showAlert]
-                                                    };
-                            
-                            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:userDic];
-                        }
                     }
                 }
                 
                 if(messageNode.avatarData)
                 {
-
+                    
                     [[MLImageManager sharedInstance] setIconForContact:messageNode.actualFrom andAccount:_accountNo WithData:messageNode.avatarData];
 
                 }

@@ -2556,6 +2556,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 - (void)stream:(NSStream *)stream handleEvent:(NSStreamEvent)eventCode
 {
     DDLogVerbose(@"Stream has event");
+ 
+    if(stream!=_iStream && stream!=_oStream)
+    {
+         DDLogVerbose(@"event from stale stream");
+        return;
+    }
+    
     switch(eventCode)
     {
         case NSStreamEventOpenCompleted:
@@ -2603,24 +2610,40 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             DDLogError(@"Stream error code=%ld domain=%@   local desc:%@ ",(long)st_error.code,st_error.domain,  st_error.localizedDescription);
             
             
-            if(st_error.code==2)// operation couldnt be completed
+            if(_loggedInOnce)
+            {
+                DDLogInfo(@" stream error calling reconnect for account that logged in once before");
+                // login process has its own reconnect mechanism
+                if(self.accountState>=kStateHasStream) {
+                    _accountState=kStateReconnecting;
+                    _loginStarted=NO;
+                    [self reconnect];
+                }
+            }
+            
+            else
+            {
+                // maybe account never worked and should be disabled and reachability should be removed
+                //                [[DataLayer sharedInstance] disableEnabledAccount:_accountNo];
+                //                [[MLXMPPManager sharedInstance] disconnectAccount:_accountNo];
+                
+            }
+
+            
+            if(st_error.code==2)// operation couldnt be completed // socket not connected
             {
                 [self disconnect];
                 return;
             }
             
             
-            if(st_error.code==2)// socket not connected
+            if(st_error.code==2)
             {
                 [self disconnect];
                 return;
             }
             
-            if(st_error.code==61)// Connection refused
-            {
-                [self disconnect];
-                return;
-            }
+         
             
             if(st_error.code==60)// could not complete operation
             {
@@ -2634,6 +2657,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 [self disconnect];
                 return;
             }
+            
+            
             
             if(st_error.code==-9807)// Could not complete operation. SSL probably
             {
@@ -2652,25 +2677,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 return;
             }
             
-            
-            if(_loggedInOnce)
-            {
-                DDLogInfo(@" stream error calling reconnect");
-                // login process has its own reconnect mechanism
-                if(self.accountState>=kStateHasStream) {
-                    _accountState=kStateReconnecting;
-                    _loginStarted=NO;
-                    [self reconnect];
-                }
-            }
-            
-            else
-            {
-                // maybe account never worked and should be disabled and reachability should be removed
-                //                [[DataLayer sharedInstance] disableEnabledAccount:_accountNo];
-                //                [[MLXMPPManager sharedInstance] disconnectAccount:_accountNo];
-                
-            }
             break;
             
         }

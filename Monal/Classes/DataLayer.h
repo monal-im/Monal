@@ -137,8 +137,8 @@ extern NSString *const kCount;
 
 -(NSArray*) accountVals:(NSString*) accountNo; 
 
--(void) updateAccounWithDictionary:(NSDictionary *) dictionary andCompletion:(void (^)(BOOL))completion;;
--(void) addAccountWithDictionary:(NSDictionary *) dictionary andCompletion: (void (^)(BOOL))completion;;
+-(void) updateAccounWithDictionary:(NSDictionary *) dictionary andCompletion:(void (^)(BOOL))completion;
+-(void) addAccountWithDictionary:(NSDictionary *) dictionary andCompletion: (void (^)(BOOL))completion;
 
 
 -(BOOL) removeAccount:(NSString*) accountNo; 
@@ -149,15 +149,28 @@ extern NSString *const kCount;
 -(BOOL) disableEnabledAccount:(NSString*) accountNo;
 
 #pragma mark message Commands
+/**
+ returns messages with the provided local id number 
+ */
 -(NSArray *) messageForHistoryID:(NSInteger) historyID;
 
+/*
+ adds a specified message to the database
+ */
 -(void) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom delivered:(BOOL) delivered unread:(BOOL) unread serverMessageId:(NSString *) messageid andOverrideDate:(NSString *) messageDate;
 
+/**
+  checks to see if there is a message with the provided id
+ */
+-(void) hasMessageForID:(NSString*) messageid andCompletion: (void (^)(BOOL))completion;
+
+/*
+ marks a message as delivered
+ */
 -(void) setMessageId:(NSString*) messageid delivered:(BOOL) delivered;
 
--(BOOL) clearMessages:(NSString*) accountNo;
--(BOOL) deleteMessage:(NSString*) messageNo;
--(BOOL) deleteMessageHistory:(NSString*) messageNo;
+-(void) clearMessages:(NSString*) accountNo;
+-(void) deleteMessageHistory:(NSString*) messageNo;
 
 #pragma mark message history
 -(NSMutableArray*) messageHistory:(NSString*) buddy forAccount:(NSString*) accountNo;

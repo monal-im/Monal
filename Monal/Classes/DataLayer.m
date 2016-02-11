@@ -1350,12 +1350,24 @@ static DataLayer *sharedInstance=nil;
     NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, %@, '%@',  '%@', '%@', '%@', '%@',%d,%d,'%@');", accountNo, from.escapeForSql, to.escapeForSql, 	dateString, message.escapeForSql, actualfrom.escapeForSql,unread, delivered, message.escapeForSql];
     DDLogVerbose(@"%@",query);
     [self executeNonQuery:query withCompletion:^(BOOL success) {
+
         if(!success)
         {
             DDLogError(@"failed to insert ");
         }
     }];
   
+}
+
+-(void) hasMessageForID:(NSString*) messageid andCompletion: (void (^)(BOOL))completion
+{
+    BOOL exists=NO;
+    
+    if(completion)
+    {
+        completion(exists);
+    }
+    
 }
 
 -(void) setMessageId:(NSString*) messageid delivered:(BOOL) delivered
@@ -1368,32 +1380,19 @@ static DataLayer *sharedInstance=nil;
 
 
 
--(BOOL) clearMessages:(NSString*) accountNo
+-(void) clearMessages:(NSString*) accountNo
 {
     NSString* query=[NSString stringWithFormat:@"delete from message_history where account_id=%@", accountNo];
-    if([self executeNonQuery:query]!=NO)
-    {
-        return YES;
-    }
-    else
-    {
-        return NO;
-    }
+    [self executeNonQuery:query withCompletion:nil];
 }
 
 
 
--(BOOL) deleteMessageHistory:(NSString*) messageNo
+-(void) deleteMessageHistory:(NSString*) messageNo
 {
     NSString* query=[NSString stringWithFormat:@"delete from message_history where message_history_id=%@", messageNo];
-    if([self executeNonQuery:query]!=NO)
-    {
-        return YES;
-    }
-    else
-    {
-        return NO;
-    }
+    [self executeNonQuery:query withCompletion:nil];
+
 }
 
 -(NSArray*) messageHistoryListDates:(NSString*) buddy forAccount: (NSString*) accountNo

@@ -224,8 +224,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         CFReadStreamRef readRef= NULL;
         CFWriteStreamRef writeRef= NULL;
         CFStreamCreatePairWithSocketToHost(NULL, (__bridge CFStringRef)_server, (UInt32)_port , &readRef, &writeRef);
-        _iStream= (__bridge NSInputStream*)readRef;
-        _oStream= (__bridge NSOutputStream*) writeRef;
+        _iStream= (__bridge_transfer NSInputStream *)readRef;
+        _oStream= (__bridge_transfer NSOutputStream *) writeRef;
     }
     
     if((_iStream==nil) || (_oStream==nil))

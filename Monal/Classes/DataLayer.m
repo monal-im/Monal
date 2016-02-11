@@ -1335,20 +1335,24 @@ static DataLayer *sharedInstance=nil;
             NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
             [formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
             NSDate* sourceDate=[NSDate date];
+            NSDate* destinationDate;
             if(messageDate) {
-                sourceDate= messageDate;
+                //already GMT no need for conversion
+                
+                destinationDate= messageDate;
+                [formatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
             }
-            
-            
-            NSTimeZone* sourceTimeZone = [NSTimeZone systemTimeZone];
-            NSTimeZone* destinationTimeZone = [NSTimeZone timeZoneWithAbbreviation:@"GMT"];
-            
-            NSInteger sourceGMTOffset = [sourceTimeZone secondsFromGMTForDate:sourceDate];
-            NSInteger destinationGMTOffset = [destinationTimeZone secondsFromGMTForDate:sourceDate];
-            NSTimeInterval interval = destinationGMTOffset - sourceGMTOffset;
-            
-            NSDate* destinationDate = [[NSDate alloc] initWithTimeInterval:interval sinceDate:sourceDate];
-            
+            else {
+                
+                NSTimeZone* sourceTimeZone = [NSTimeZone systemTimeZone];
+                NSTimeZone* destinationTimeZone = [NSTimeZone timeZoneWithAbbreviation:@"GMT"];
+                
+                NSInteger sourceGMTOffset = [sourceTimeZone secondsFromGMTForDate:sourceDate];
+                NSInteger destinationGMTOffset = [destinationTimeZone secondsFromGMTForDate:sourceDate];
+                NSTimeInterval interval = destinationGMTOffset - sourceGMTOffset;
+                
+                destinationDate = [[NSDate alloc] initWithTimeInterval:interval sinceDate:sourceDate];
+            }
             // note: if it isnt the same day we want to show the full  day
             
             NSString* dateString = [formatter stringFromDate:destinationDate];

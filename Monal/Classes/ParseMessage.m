@@ -24,6 +24,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         State=@"Forwarded";
         return;
     }
+    
     //comes first to not change state t message below immediatley
     if(([elementName isEqualToString:@"message"]) && [State isEqualToString:@"Forwarded"] )
     {
@@ -52,6 +53,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         {
             _type=kMessageChatType;
         }
+        
+        _idval =[attributeDict objectForKey:@"id"] ;
         
         State=@"Message";
 	}

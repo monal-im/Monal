@@ -1359,7 +1359,7 @@ static DataLayer *sharedInstance=nil;
   
 }
 
--(void) hasMessageForID:(NSString*) messageid andCompletion: (void (^)(BOOL))completion
+-(void) hasMessageForId:(NSString*) messageid andCompletion: (void (^)(BOOL))completion
 {
     BOOL exists=NO;
     
@@ -1655,26 +1655,23 @@ static DataLayer *sharedInstance=nil;
     
 }
 
--(bool) removeActiveBuddy:(NSString*) buddyname forAccount:(NSString*) accountNo
+-(void) removeActiveBuddy:(NSString*) buddyname forAccount:(NSString*) accountNo
 {
     //mark messages as read
     [self markAsReadBuddy:buddyname forAccount:accountNo];
     
     NSString* query=[NSString stringWithFormat:@"delete from activechats where buddy_name='%@' and account_id=%@ ", buddyname.escapeForSql, accountNo ];
     //	DDLogVerbose(query);
-    BOOL result=[self executeNonQuery:query];
-    
-    return result;
+    [self executeNonQuery:query withCompletion:nil];
 }
 
--(bool) removeAllActiveBuddies
+-(void) removeAllActiveBuddies
 {
     
     NSString* query=[NSString stringWithFormat:@"delete from activechats " ];
     //	DDLogVerbose(query);
-    BOOL result=[self executeNonQuery:query];
-    return result;
-    
+   [self executeNonQuery:query withCompletion:nil];
+
 }
 
 

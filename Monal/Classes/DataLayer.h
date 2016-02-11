@@ -160,9 +160,9 @@ extern NSString *const kCount;
 -(void) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom delivered:(BOOL) delivered unread:(BOOL) unread serverMessageId:(NSString *) messageid andOverrideDate:(NSString *) messageDate;
 
 /**
-  checks to see if there is a message with the provided id
+  checks to see if there is a message with the provided messageid
  */
--(void) hasMessageForID:(NSString*) messageid andCompletion: (void (^)(BOOL))completion;
+-(void) hasMessageForId:(NSString*) messageid andCompletion: (void (^)(BOOL))completion;
 
 /*
  marks a message as delivered
@@ -195,8 +195,8 @@ extern NSString *const kCount;
 
 #pragma mark active chats
 -(NSArray*) activeBuddies;
--(bool) removeActiveBuddy:(NSString*) buddyname forAccount:(NSString*) accountNo;
--(bool) removeAllActiveBuddies;
+-(void) removeActiveBuddy:(NSString*) buddyname forAccount:(NSString*) accountNo;
+-(void) removeAllActiveBuddies;
 -(void) addActiveBuddies:(NSString*) buddyname forAccount:(NSString*) accountNo withCompletion: (void (^)(BOOL))completion;
 -(void) isActiveBuddy:(NSString*) buddyname forAccount:(NSString*) accountNo withCompletion: (void (^)(BOOL))completion;
 

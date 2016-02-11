@@ -33,7 +33,25 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             _to =[[(NSString*)[attributeDict objectForKey:@"to"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
             _to=[_to lowercaseString];
         }
+        
+        //this is the id of the forwarded message and overwrites the main message stanza's id. 
+        _idval =[attributeDict objectForKey:@"id"];
+        
     }
+    
+    if(([elementName isEqualToString:@"delay"]) && [[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:delay"])
+    {
+        NSDateFormatter *rfc3339DateFormatter = [[NSDateFormatter alloc] init];
+        NSLocale *enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
+        
+        [rfc3339DateFormatter setLocale:enUSPOSIXLocale];
+        [rfc3339DateFormatter setDateFormat:@"yyyy'-'MM'-'dd'T'HH':'mm':'ss'Z'"];
+        [rfc3339DateFormatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+        
+        _delayTimeStamp = [rfc3339DateFormatter dateFromString:[attributeDict objectForKey:@"stamp"]];
+        
+    }
+    
    
 	if(([elementName isEqualToString:@"message"])  )
 	{

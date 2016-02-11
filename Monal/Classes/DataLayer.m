@@ -1367,7 +1367,7 @@ static DataLayer *sharedInstance=nil;
 
 -(void) hasMessageForId:(NSString*) messageid toContact:(NSString *) contact onAccount:(NSString *) accountNo andCompletion: (void (^)(BOOL))completion
 {
-    NSString* query=[NSString stringWithFormat:@"select messageid from  message_history where account_id=%@ and message_from='%@' and messageid=%@ limit 1", accountNo, contact.escapeForSql, messageid.escapeForSql];
+    NSString* query=[NSString stringWithFormat:@"select messageid from  message_history where account_id=%@ and message_from='%@' and messageid='%@' limit 1", accountNo, contact.escapeForSql, messageid.escapeForSql];
     
     [self executeScalar:query withCompletion:^(NSObject* result) {
         
@@ -1633,8 +1633,6 @@ static DataLayer *sharedInstance=nil;
     [self executeScalar:query withCompletion:^(NSObject* result) {
         if(completion)
         {
-            
-            
             NSDateFormatter *dateFromatter = [[NSDateFormatter alloc] init];
             NSLocale *enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
             

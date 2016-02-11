@@ -184,7 +184,7 @@
             MLXMLNode* value3 =[[MLXMLNode alloc] init];
             value3.element=@"value";
             value3.data=[rfc3339DateFormatter stringFromDate:[NSDate date]];
-            [field3.children addObject:value2];
+            [field3.children addObject:value3];
             
             [xnode.children addObjectsFromArray:@[field2, field3]];
             

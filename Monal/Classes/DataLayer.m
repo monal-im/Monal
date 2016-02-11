@@ -1330,16 +1330,15 @@ static DataLayer *sharedInstance=nil;
     [self hasMessageForId:messageid toContact:actualfrom onAccount:accountNo andCompletion:^(BOOL exists) {
         if(!exists)
         {
-            
-            NSString* dateString;
-            
+          
             //this is always from a contact
             NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
             [formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
             NSDate* sourceDate=[NSDate date];
-            if(!dateString) {
+            if(messageDate) {
                 sourceDate= messageDate;
             }
+            
             
             NSTimeZone* sourceTimeZone = [NSTimeZone systemTimeZone];
             NSTimeZone* destinationTimeZone = [NSTimeZone timeZoneWithAbbreviation:@"GMT"];
@@ -1352,7 +1351,7 @@ static DataLayer *sharedInstance=nil;
             
             // note: if it isnt the same day we want to show the full  day
             
-                dateString = [formatter stringFromDate:destinationDate];
+            NSString* dateString = [formatter stringFromDate:destinationDate];
             
             // in the event it is a message from the room
             

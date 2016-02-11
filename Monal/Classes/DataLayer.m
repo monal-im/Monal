@@ -1338,7 +1338,7 @@ static DataLayer *sharedInstance=nil;
             [formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
             NSDate* sourceDate=[NSDate date];
             if(!dateString) {
-                sourceDate= dateString;
+                sourceDate= messageDate;
             }
             
             NSTimeZone* sourceTimeZone = [NSTimeZone systemTimeZone];

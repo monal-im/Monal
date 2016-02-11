@@ -1556,7 +1556,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         
                         [[DataLayer sharedInstance] addMessageFrom:messageNode.from to:messageNode.to
                                                         forAccount:_accountNo withBody:messageNode.messageText
-                                                      actuallyfrom:messageNode.actualFrom delivered:YES  unread:unread  serverMessageId:messageNode.idval andOverrideDate:nil withCompletion:^(BOOL success) {
+                                                      actuallyfrom:messageNode.actualFrom delivered:YES  unread:unread  serverMessageId:messageNode.idval andOverrideDate:messageNode.delayTimeStamp withCompletion:^(BOOL success) {
                                                           if(success)
                                                           {
                                                               [self.networkQueue addOperationWithBlock:^{

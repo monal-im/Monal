@@ -208,6 +208,16 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     DDLogVerbose(@"chat view got new message notice %@", notification.userInfo);
     
+    NSNumber *shouldRefresh =[notification.userInfo objectForKey:@"shouldRefresh"];
+    if (shouldRefresh.boolValue) {
+        dispatch_async(dispatch_get_main_queue(),
+                       ^{
+                           [self refreshData];
+                       });
+        return;
+    }
+    
+    
     if([[notification.userInfo objectForKey:@"accountNo"] isEqualToString:_accountNo]
        &&( ( [[notification.userInfo objectForKey:@"from"] isEqualToString:_contactName]) || ([[notification.userInfo objectForKey:@"to"] isEqualToString:_contactName] ))
        )
@@ -232,8 +242,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                            [self.messageList addObject:userInfo];
                          
                            if((self.view.window.occlusionState & NSWindowOcclusionStateVisible)) {
-                               [self.chatTable reloadData];
-                               [self scrollToBottom];
+                               [self refreshData];
                                [self markAsRead];
                            }
                        });

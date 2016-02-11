@@ -1570,6 +1570,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                                       NSString* messageText=messageNode.messageText;
                                                                       if(!messageText) messageText=@"";
                                                                       
+                                                                      BOOL shoulRefresh = NO;
+                                                                      if(messageNode.delayTimeStamp)  shoulRefresh =YES;
+                                                                      
                                                                       NSString *recipient=messageNode.to;
                                                                       if(!recipient) recipient=self.jid;
                                                                       NSDictionary* userDic=@{@"from":messageNode.from,
@@ -1577,7 +1580,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                                                               @"messageText":messageText,
                                                                                               @"to":recipient,
                                                                                               @"accountNo":_accountNo,
-                                                                                              @"showAlert":[NSNumber numberWithBool:showAlert]
+                                                                                              @"showAlert":[NSNumber numberWithBool:showAlert],
+                                                                                              @"shouldRefresh":[NSNumber numberWithBool:shoulRefresh]
                                                                                               };
                                                                       
                                                                       [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:userDic];

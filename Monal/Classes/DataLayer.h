@@ -151,7 +151,7 @@ extern NSString *const kCount;
 #pragma mark message Commands
 -(NSArray *) messageForHistoryID:(NSInteger) historyID;
 
--(BOOL) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom delivered:(BOOL) delivered unread:(BOOL) unread serverMessageId:(NSString *) messageid andOverrideDate:(NSString *) messageDate;
+-(void) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom delivered:(BOOL) delivered unread:(BOOL) unread serverMessageId:(NSString *) messageid andOverrideDate:(NSString *) messageDate;
 
 -(void) setMessageId:(NSString*) messageid delivered:(BOOL) delivered;
 

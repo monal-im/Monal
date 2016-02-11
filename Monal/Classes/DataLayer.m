@@ -1325,7 +1325,7 @@ static DataLayer *sharedInstance=nil;
     return messageArray;
 }
 
--(BOOL) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom delivered:(BOOL) delivered unread:(BOOL) unread serverMessageId:(NSString *) messageid andOverrideDate:(NSString *) messageDate
+-(void) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom delivered:(BOOL) delivered unread:(BOOL) unread serverMessageId:(NSString *) messageid andOverrideDate:(NSString *) messageDate
 {
     //this is always from a contact
     NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
@@ -1349,16 +1349,13 @@ static DataLayer *sharedInstance=nil;
     //all messages default to unread
     NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, %@, '%@',  '%@', '%@', '%@', '%@',%d,%d,'%@');", accountNo, from.escapeForSql, to.escapeForSql, 	dateString, message.escapeForSql, actualfrom.escapeForSql,unread, delivered, message.escapeForSql];
     DDLogVerbose(@"%@",query);
-    if([self executeNonQuery:query]!=NO)
-    {
-        return YES;
-    }
-    else
-    {
-        DDLogError(@"failed to insert ");
-        return NO;
-    }
-    
+    [self executeNonQuery:query withCompletion:^(BOOL success) {
+        if(!success)
+        {
+            DDLogError(@"failed to insert ");
+        }
+    }];
+  
 }
 
 -(void) setMessageId:(NSString*) messageid delivered:(BOOL) delivered

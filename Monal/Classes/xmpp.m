@@ -499,7 +499,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     {
         MLXMLNode* stream = [[MLXMLNode alloc] init];
         stream.element=@"/stream:stream"; //hack to close stream
-        [self send:stream];
+        [self writeToStream:stream.XMLString]; // dont even bother queueing
         self.streamID=nil;
     }
     

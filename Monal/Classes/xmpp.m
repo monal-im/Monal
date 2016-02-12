@@ -501,16 +501,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         stream.element=@"/stream:stream"; //hack to close stream
         [self send:stream];
         self.streamID=nil;
-        [self.networkQueue addOperation:
-         [NSBlockOperation blockOperationWithBlock:^{
-            self.unAckedStanzas=nil;
-        }]];
     }
     
     if(kStateDisconnected) return;
     [self.networkQueue cancelAllOperations];
 
     [self.networkQueue addOperationWithBlock:^{
+        if(self.explicitLogout) {
+            self.unAckedStanzas=nil;
+        }
         self.connectedTime =nil; 
         self.pingID=nil;
         DDLogInfo(@"removing streams");

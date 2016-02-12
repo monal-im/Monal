@@ -546,7 +546,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) handleNewMessage:(NSNotification *)notification
 {
-    if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
+    NSNumber *showAlert =[notification.userInfo objectForKey:@"showAlert"];
+    
+    if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground || !showAlert.boolValue)
     {
         return;
     }

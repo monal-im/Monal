@@ -1562,7 +1562,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                                   [[DataLayer sharedInstance] addActiveBuddies:messageNode.from forAccount:_accountNo withCompletion:nil];
                                                                   
                                                                   
-                                                                  if(messageNode.from ) {
+                                                                  if(messageNode.from  ) {
                                                                       NSString* actuallyFrom= messageNode.actualFrom;
                                                                       if(!actuallyFrom) actuallyFrom=messageNode.from;
                                                                       

@@ -81,7 +81,10 @@
 
 -(void) handleNewMessage:(NSNotification *)notification;
 {
-    BOOL showNotification =YES;
+
+    NSNumber *showAlert =[notification.userInfo objectForKey:@"showAlert"];
+    BOOL showNotification = showAlert.boolValue;
+    
     NSUserNotification *alert =[[NSUserNotification alloc] init];
     NSString* acctString =[NSString stringWithFormat:@"%ld", (long)[[notification.userInfo objectForKey:@"accountNo"] integerValue]];
     NSString* nameToShow=[notification.userInfo objectForKey:@"from"];

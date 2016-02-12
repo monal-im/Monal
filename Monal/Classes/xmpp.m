@@ -1766,6 +1766,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"stream:error"])
             {
                 [self disconnect];
+                [self reconnect:5];
             }
             else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"stream:stream"])
             {

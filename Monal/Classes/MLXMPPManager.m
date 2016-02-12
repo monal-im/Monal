@@ -376,17 +376,20 @@ An array of Dics what have timers to make sure everything was sent
 
 -(void)connectIfNecessary
 {
-    _accountList=[[DataLayer sharedInstance] accountList];
-    for (NSDictionary* account in _accountList)
-    {
-        if([[account objectForKey:@"enabled"] boolValue]==YES)
-        {
-            xmpp* existing=[self getConnectedAccountForID:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
-            if(existing.accountState<kStateReconnecting){
-                [self connectAccountWithDictionary:account];
-            }
-        }
-    }
+    dispatch_async(_netQueue,
+                   ^{
+                       _accountList=[[DataLayer sharedInstance] accountList];
+                       for (NSDictionary* account in _accountList)
+                       {
+                           if([[account objectForKey:@"enabled"] boolValue]==YES)
+                           {
+                               xmpp* existing=[self getConnectedAccountForID:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
+                               if(existing.accountState<kStateReconnecting){
+                                   [self connectAccountWithDictionary:account];
+                               }
+                           }
+                       }
+                   });
 }
 
 -(void) reachabilityChanged

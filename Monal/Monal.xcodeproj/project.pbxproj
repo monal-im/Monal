@@ -277,8 +277,6 @@
 		26400766140B43BB00CF1107 /* rtpudpv4transmitter.hh in Headers */ = {isa = PBXBuildFile; fileRef = 2640070F140B43BB00CF1107 /* rtpudpv4transmitter.hh */; };
 		26400767140B43BB00CF1107 /* rtpudpv6transmitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26400710140B43BB00CF1107 /* rtpudpv6transmitter.cpp */; };
 		26400768140B43BB00CF1107 /* rtpudpv6transmitter.hh in Headers */ = {isa = PBXBuildFile; fileRef = 26400711140B43BB00CF1107 /* rtpudpv6transmitter.hh */; };
-		2640AF4014548E7700CB4F60 /* HPGrowingTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = 2640AF3D14548E7700CB4F60 /* HPGrowingTextView.m */; };
-		2640AF4114548E7700CB4F60 /* HPTextViewInternal.m in Sources */ = {isa = PBXBuildFile; fileRef = 2640AF3F14548E7700CB4F60 /* HPTextViewInternal.m */; };
 		2642EBC718693626006A6C12 /* RTP.mm in Sources */ = {isa = PBXBuildFile; fileRef = 2642EBC618693626006A6C12 /* RTP.mm */; };
 		2642EBCA18693634006A6C12 /* jingleCall.m in Sources */ = {isa = PBXBuildFile; fileRef = 2642EBC918693634006A6C12 /* jingleCall.m */; };
 		2642EBD01869425D006A6C12 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2642EBCF1869425D006A6C12 /* CoreAudio.framework */; };
@@ -661,10 +659,6 @@
 		2640070F140B43BB00CF1107 /* rtpudpv4transmitter.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = rtpudpv4transmitter.hh; path = jrtplib/rtpudpv4transmitter.hh; sourceTree = "<group>"; };
 		26400710140B43BB00CF1107 /* rtpudpv6transmitter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = rtpudpv6transmitter.cpp; path = jrtplib/rtpudpv6transmitter.cpp; sourceTree = "<group>"; };
 		26400711140B43BB00CF1107 /* rtpudpv6transmitter.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = rtpudpv6transmitter.hh; path = jrtplib/rtpudpv6transmitter.hh; sourceTree = "<group>"; };
-		2640AF3C14548E7700CB4F60 /* HPGrowingTextView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HPGrowingTextView.h; sourceTree = "<group>"; };
-		2640AF3D14548E7700CB4F60 /* HPGrowingTextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HPGrowingTextView.m; sourceTree = "<group>"; };
-		2640AF3E14548E7700CB4F60 /* HPTextViewInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HPTextViewInternal.h; sourceTree = "<group>"; };
-		2640AF3F14548E7700CB4F60 /* HPTextViewInternal.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HPTextViewInternal.m; sourceTree = "<group>"; };
 		2642EBC518693626006A6C12 /* RTP.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = RTP.hh; sourceTree = "<group>"; };
 		2642EBC618693626006A6C12 /* RTP.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = RTP.mm; sourceTree = "<group>"; };
 		2642EBC818693634006A6C12 /* jingleCall.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = jingleCall.h; sourceTree = "<group>"; };
@@ -1162,17 +1156,6 @@
 				2638DAEE1B68F3EF00DF05AC /* MLDisplaySettings.m */,
 			);
 			name = Preferences;
-			sourceTree = "<group>";
-		};
-		2640AF3B14548E7600CB4F60 /* GrowingTextView */ = {
-			isa = PBXGroup;
-			children = (
-				2640AF3C14548E7700CB4F60 /* HPGrowingTextView.h */,
-				2640AF3D14548E7700CB4F60 /* HPGrowingTextView.m */,
-				2640AF3E14548E7700CB4F60 /* HPTextViewInternal.h */,
-				2640AF3F14548E7700CB4F60 /* HPTextViewInternal.m */,
-			);
-			path = GrowingTextView;
 			sourceTree = "<group>";
 		};
 		2642EBC418693615006A6C12 /* Jingle */ = {
@@ -1704,7 +1687,6 @@
 				26BAFC3D1626537D0073728B /* appirator */,
 				2658508415E7D8E40070A2A7 /* TPCircularBuffer */,
 				262DE4AC15C4E2C60040A66B /* MBProgressHUd */,
-				2640AF3B14548E7600CB4F60 /* GrowingTextView */,
 			);
 			name = External;
 			sourceTree = "<group>";
@@ -2289,10 +2271,8 @@
 				26277888110179D100023C8A /* tools.m in Sources */,
 				26F7BB431115F8DB00712672 /* Reachability.m in Sources */,
 				26B69A82131C5495002FCBEB /* PasswordManager.m in Sources */,
-				2640AF4014548E7700CB4F60 /* HPGrowingTextView.m in Sources */,
 				261147D11C35D7860078A72E /* NSString+NXOAuth2.m in Sources */,
 				261147E11C35D7860078A72E /* NXOAuth2FileStreamWrapper.m in Sources */,
-				2640AF4114548E7700CB4F60 /* HPTextViewInternal.m in Sources */,
 				26B51C4918654D98002134C3 /* LogViewController.m in Sources */,
 				2642EBC718693626006A6C12 /* RTP.mm in Sources */,
 				26B2A4F11B73097500272E63 /* DDASLLogger.m in Sources */,

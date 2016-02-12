@@ -120,7 +120,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         if(self.messageList.count==0)
         {
             //fetch default
-            [xmppAccount setMAMQueryFromStart:nil toDate:nil andJid:self.contactName];
+            NSDate *yesterday =[NSDate dateWithTimeInterval:86400 sinceDate:[NSDate date]];
+            [xmppAccount setMAMQueryFromStart: yesterday toDate:[NSDate date] andJid:self.contactName];
         }
         
 //        [[DataLayer sharedInstance] lastMessageDateForContact:self.contactName andAccount:self.accountNo withCompletion:^(NSDate *lastTimeStamp) {

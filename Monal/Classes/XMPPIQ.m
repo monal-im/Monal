@@ -134,7 +134,7 @@
 
 }
 
--(void) setMAMQuerySinceTime:(NSDate *) date andJid:(NSString *)jid
+-(void) setMAMQueryFromStart:(NSDate *) startDate toDate:(NSDate *) endDate  andJid:(NSString *)jid
 {
 
     MLXMLNode* queryNode =[[MLXMLNode alloc] init];
@@ -159,8 +159,7 @@
     
     [xnode.children addObject:field1];
     
-    if(date || jid) {
-        if(date) {
+        if(startDate || endDate) {
             NSDateFormatter *rfc3339DateFormatter = [[NSDateFormatter alloc] init];
             NSLocale *enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
             
@@ -174,7 +173,13 @@
             
             MLXMLNode* value2 =[[MLXMLNode alloc] init];
             value2.element=@"value";
-            value2.data=[rfc3339DateFormatter stringFromDate:date];
+            if(startDate) {
+                value2.data=[rfc3339DateFormatter stringFromDate:startDate];
+            }
+            else  {
+                value2.data=[rfc3339DateFormatter stringFromDate:[NSDate dateWithTimeIntervalSinceReferenceDate:0]];
+            }
+            
             [field2.children addObject:value2];
             
             MLXMLNode* field3 =[[MLXMLNode alloc] init];
@@ -183,13 +188,20 @@
             
             MLXMLNode* value3 =[[MLXMLNode alloc] init];
             value3.element=@"value";
-            value3.data=[rfc3339DateFormatter stringFromDate:[NSDate date]];
+            if(endDate) {
+                 value3.data=[rfc3339DateFormatter stringFromDate:endDate];
+            }
+            else  {
+                value3.data=[rfc3339DateFormatter stringFromDate:[NSDate date]];
+            }
             [field3.children addObject:value3];
             
             [xnode.children addObjectsFromArray:@[field2, field3]];
             
         }
-        else if(jid) {
+        
+        
+        if(jid) {
             MLXMLNode* field3 =[[MLXMLNode alloc] init];
             field3.element=@"field";
             [field3.attributes setObject:@"with" forKey:@"var"];
@@ -201,7 +213,7 @@
             
             [xnode.children addObject:field3];
         }
-    }
+    
     
     [queryNode.children addObject:xnode];
     

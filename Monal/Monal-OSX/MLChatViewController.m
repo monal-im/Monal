@@ -117,11 +117,17 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
     if(xmppAccount.supportsMam0) {
     
-        [[DataLayer sharedInstance] lastMessageDateForContact:self.contactName andAccount:self.accountNo withCompletion:^(NSDate *lastTimeStamp) {
-            
-            [xmppAccount queryMAMArchiveSince:lastTimeStamp ForJid:self.contactName];
-
-        }];
+        if(self.messageList.count==0)
+        {
+            //fetch default
+            [xmppAccount setMAMQueryFromStart:nil toDate:nil andJid:self.contactName];
+        }
+        
+//        [[DataLayer sharedInstance] lastMessageDateForContact:self.contactName andAccount:self.accountNo withCompletion:^(NSDate *lastTimeStamp) {
+//            
+//            [xmppAccount queryMAMArchiveSince:lastTimeStamp ForJid:self.contactName];
+//
+//        }];
         
     }
     

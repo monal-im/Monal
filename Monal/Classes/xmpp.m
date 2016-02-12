@@ -2444,10 +2444,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 #pragma mark Message archive
 
--(void) queryMAMArchiveSince:(NSDate *) date ForJid:(NSString *) jid
+-(void) setMAMQueryFromStart:(NSDate *) startDate toDate:(NSDate *) endDate  andJid:(NSString *)jid
 {
     XMPPIQ* query =[[XMPPIQ alloc] initWithId:[NSString stringWithFormat:@"Monal%d",arc4random()%100000]andType:kiqSetType];
-    [query setMAMQuerySinceTime:date andJid:jid];
+    [query setMAMQueryFromStart:startDate toDate:endDate andJid:jid];
     [self send:query];
 }
 

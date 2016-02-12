@@ -223,7 +223,7 @@ Decline a call request
 /*
  query message archive.
  */
--(void) queryMAMArchiveSince:(NSDate *) date ForJid:(NSString *) jid;
+-(void) setMAMQueryFromStart:(NSDate *) startDate toDate:(NSDate *) endDate  andJid:(NSString *)jid;
 
 
 FOUNDATION_EXPORT NSString *const kFileName;

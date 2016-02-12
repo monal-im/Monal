@@ -248,6 +248,7 @@ An array of Dics what have timers to make sure everything was sent
             if([[account objectForKey:kAccountID] integerValue]==[accountNo integerValue])
             {
                 [self connectAccountWithDictionary:account];
+                break;
             }
         }
         

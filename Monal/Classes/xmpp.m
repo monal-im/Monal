@@ -394,102 +394,96 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) connect
 {
-    [self.networkQueue cancelAllOperations];
+    if(self.explicitLogout) return;
+    if(self.accountState==kStateLoggedIn )
+    {
+        DDLogError(@"assymetrical call to login without a teardown loggedin");
+        return;
+    }
     
-    [self.networkQueue addOperationWithBlock:^{
-        
-        if(self.explicitLogout) return;
-        if(self.accountState==kStateLoggedIn )
+    self.loginStartTimeStamp=[NSDate date];
+    self.pingID=nil;
+    
+    DDLogInfo(@"XMPP connnect  start");
+    _outputQueue=[[NSMutableArray alloc] init];
+    
+    [self connectionTask];
+    
+    dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    dispatch_source_t loginCancelOperation = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,
+                                                                    q_background);
+    
+    dispatch_source_set_timer(loginCancelOperation,
+                              dispatch_time(DISPATCH_TIME_NOW, kConnectTimeout* NSEC_PER_SEC),
+                              DISPATCH_TIME_FOREVER,
+                              1ull * NSEC_PER_SEC);
+    
+    dispatch_source_set_event_handler(loginCancelOperation, ^{
+        DDLogInfo(@"login cancel op");
+        NSString *fulluserCopy = [_fulluser copy];
+        NSString *accountNoCopy = [_accountNo copy];
+        [self.networkQueue addOperationWithBlock:^{
+            //hide connecting message
+            if(fulluserCopy && accountNoCopy) {
+                NSDictionary* info=@{kaccountNameKey:fulluserCopy, kaccountNoKey:accountNoCopy,
+                                     kinfoTypeKey:@"connect", kinfoStatusKey:@""};
+                [self.contactsVC hideConnecting:info];
+            }
+        }];
+        _loginStarted=NO;
+        // try again
+        if((self.accountState<kStateHasStream) && (_loggedInOnce))
         {
-            DDLogError(@"assymetrical call to login without a teardown loggedin");
-            return;
-        }
-        
-        self.loginStartTimeStamp=[NSDate date];
-        self.pingID=nil;
-        
-        DDLogInfo(@"XMPP connnect  start");
-        _outputQueue=[[NSMutableArray alloc] init];
-    
-        [self connectionTask];
-        
-        dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-        dispatch_source_t loginCancelOperation = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,
-                                                                        q_background);
-        
-        dispatch_source_set_timer(loginCancelOperation,
-                                  dispatch_time(DISPATCH_TIME_NOW, kConnectTimeout* NSEC_PER_SEC),
-                                  DISPATCH_TIME_FOREVER,
-                                  1ull * NSEC_PER_SEC);
-        
-        dispatch_source_set_event_handler(loginCancelOperation, ^{
-            DDLogInfo(@"login cancel op");
-            NSString *fulluserCopy = [_fulluser copy];
-            NSString *accountNoCopy = [_accountNo copy];
-            [self.networkQueue addOperationWithBlock:^{
-                //hide connecting message
-                if(fulluserCopy && accountNoCopy) {
-                    NSDictionary* info=@{kaccountNameKey:fulluserCopy, kaccountNoKey:accountNoCopy,
-                                         kinfoTypeKey:@"connect", kinfoStatusKey:@""};
-                    [self.contactsVC hideConnecting:info];
-                }
-            }];
-                _loginStarted=NO;
-                // try again
-            if((self.accountState<kStateHasStream) && (_loggedInOnce))
-            {
-                DDLogInfo(@"trying to login again");
-                //make sure we are enabled still.
-                if([[DataLayer sharedInstance] isAccountEnabled:[NSString stringWithFormat:@"%@",self.accountNo]]) {
+            DDLogInfo(@"trying to login again");
+            //make sure we are enabled still.
+            if([[DataLayer sharedInstance] isAccountEnabled:[NSString stringWithFormat:@"%@",self.accountNo]]) {
 #if TARGET_OS_IPHONE
-                    //temp background task while a new one is created
-                    __block UIBackgroundTaskIdentifier tempTask= [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
-                        [[UIApplication sharedApplication] endBackgroundTask:tempTask];
-                        tempTask=UIBackgroundTaskInvalid;
-                    }];
-                    
-#endif
-                    
-                    [self reconnect];
-                    
-                    
-#if TARGET_OS_IPHONE
+                //temp background task while a new one is created
+                __block UIBackgroundTaskIdentifier tempTask= [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
                     [[UIApplication sharedApplication] endBackgroundTask:tempTask];
                     tempTask=UIBackgroundTaskInvalid;
-#endif
-                    
-                    }
-                }
-                else if (self.accountState==kStateLoggedIn ) {
-                    NSString *accountName =[NSString stringWithFormat:@"%@@%@", self.username, self.domain];
-                    NSDictionary *dic =@{@"AccountNo":self.accountNo, @"AccountName":accountName};
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kMLHasConnectedNotice object:dic];
-                }
-                else {
-                    DDLogInfo(@"failed to login and not retrying");
-                }
+                }];
                 
-            });
-            
-            dispatch_source_cancel(loginCancelOperation);
-            
-    
-        dispatch_source_set_cancel_handler(loginCancelOperation, ^{
-            DDLogInfo(@"login timer cancelled");
-            if(self.accountState<kStateHasStream)
-            {
-                if(!_reconnectScheduled)
-                {
-                    _loginStarted=NO;
-                    DDLogInfo(@"login client does not have stream");
-                    _accountState=kStateReconnecting;
-                    [self reconnect];
-                }
+#endif
+                [self reconnect];
+                
+#if TARGET_OS_IPHONE
+                [[UIApplication sharedApplication] endBackgroundTask:tempTask];
+                tempTask=UIBackgroundTaskInvalid;
+#endif
+                
             }
-        });
+        }
+        else if (self.accountState==kStateLoggedIn ) {
+            NSString *accountName =[NSString stringWithFormat:@"%@@%@", self.username, self.domain];
+            NSDictionary *dic =@{@"AccountNo":self.accountNo, @"AccountName":accountName};
+            [[NSNotificationCenter defaultCenter] postNotificationName:kMLHasConnectedNotice object:dic];
+        }
+        else {
+            DDLogInfo(@"failed to login and not retrying");
+        }
         
-        dispatch_resume(loginCancelOperation);
-    }];
+    });
+    
+    dispatch_source_cancel(loginCancelOperation);
+    
+    
+    dispatch_source_set_cancel_handler(loginCancelOperation, ^{
+        DDLogInfo(@"login timer cancelled");
+        if(self.accountState<kStateHasStream)
+        {
+            if(!_reconnectScheduled)
+            {
+                _loginStarted=NO;
+                DDLogInfo(@"login client does not have stream");
+                _accountState=kStateReconnecting;
+                [self reconnect];
+            }
+        }
+    });
+    
+    dispatch_resume(loginCancelOperation);
+    
     
 }
 
@@ -605,6 +599,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) reconnect:(NSInteger) scheduleWait
 {
+    [self.networkQueue cancelAllOperations];
+    
+    [self.networkQueue addOperationWithBlock: ^{
     DDLogVerbose(@"reconnecting ");
     //can be called multiple times
     
@@ -619,7 +616,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     
     _loginStarted=YES;
-    #if TARGET_OS_IPHONE
+#if TARGET_OS_IPHONE
     
     __block UIBackgroundTaskIdentifier reconnectBackgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
         
@@ -719,14 +716,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 #endif
     
     DDLogInfo(@"reconnect exits");
+    }];
 }
 
 #pragma mark XMPP
 
 -(void) startStream
 {
-    [self.networkQueue addOperation:
-     [NSBlockOperation blockOperationWithBlock:^{
+    [self.networkQueue addOperationWithBlock: ^{
         //flush buffer to ignore all prior input
         _inputBuffer=[[NSMutableString alloc] init];
         
@@ -740,7 +737,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         if(_domain)
             [stream.attributes setObject:_domain forKey:@"to"];
         [self send:stream];
-    }]];
+    }];
 }
 
 
@@ -2597,13 +2594,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             //for writing
         case NSStreamEventHasSpaceAvailable:
         {
-            [self.networkQueue addOperation:
-             [NSBlockOperation blockOperationWithBlock:^{
+            [self.networkQueue addOperationWithBlock: ^{
                 _streamHasSpace=YES;
                 
                 DDLogVerbose(@"Stream has space to write");
                 [self writeFromQueue];
-            }]];
+            }];
             break;
         }
             

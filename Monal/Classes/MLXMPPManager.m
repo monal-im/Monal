@@ -260,11 +260,8 @@ An array of Dics what have timers to make sure everything was sent
     xmpp* existing=[self getConnectedAccountForID:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
     if(existing)
     {
-        dispatch_async(_netQueue,
-                       ^{
-                           existing.explicitLogout=NO;
-                           [existing reconnect:0];
-                       });
+        existing.explicitLogout=NO;
+        [existing reconnect:0];
         
         return;
     }
@@ -320,10 +317,7 @@ An array of Dics what have timers to make sure everything was sent
         NSDictionary* accountRow= [[NSDictionary alloc] initWithObjects:@[xmppAccount, hostReach] forKeys:@[@"xmppAccount", @"hostReach"]];
         [_connectedXMPP addObject:accountRow];
         
-        
-        dispatch_async(_netQueue, ^{
-            [xmppAccount reconnect:0];
-        });
+        [xmppAccount reconnect:0];
     }
     
 }
@@ -423,11 +417,10 @@ An array of Dics what have timers to make sure everything was sent
         {
             DDLogVerbose(@"reachable");
             DDLogVerbose(@"pinging ");
-            dispatch_async(_netQueue,
-                           ^{
-                               //try to send a ping. if it fails, it will reconnect
-                               [xmppAccount sendPing];
-                           });
+            
+            //try to send a ping. if it fails, it will reconnect
+            [xmppAccount sendPing];
+            
             
             
         }
@@ -522,16 +515,14 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
         return;
     }
     
-    dispatch_async(_netQueue,
-                   ^{
-                       xmpp* account=[self getConnectedAccountForID:accountNo];
-                       if(account)
-                       {
-                           NSDictionary *params =@{kData:data,kFileName:filename, kContentType:contentType, kContact:contact};
-                           [account requestHTTPSlotWithParams:params andCompletion:completion];
-                       }
-                       
-                   });
+    xmpp* account=[self getConnectedAccountForID:accountNo];
+    if(account)
+    {
+        NSDictionary *params =@{kData:data,kFileName:filename, kContentType:contentType, kContact:contact};
+        [account requestHTTPSlotWithParams:params andCompletion:completion];
+    }
+    
+    
 }
 
 

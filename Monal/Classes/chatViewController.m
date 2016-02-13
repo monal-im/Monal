@@ -291,10 +291,29 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     [self updateInputViewSize];
 }
 
+#pragma mark -image picker
 
 -(IBAction)attach:(id)sender
 {
+    // ask again for camera or photos
+    UIImagePickerController *imagePicker = [[UIImagePickerController alloc] init];
+    imagePicker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;//or camera
+    imagePicker.delegate =self;
+    [self presentViewController:imagePicker animated:YES completion:nil];
     
+}
+
+
+- (void)imagePickerController:(UIImagePickerController *)picker
+didFinishPickingMediaWithInfo:(NSDictionary<NSString *,
+                               id> *)info
+{
+    [self dismissViewControllerAnimated:YES completion:nil];
+}
+
+- (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker
+{
+    [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 #pragma mark - handling notfications

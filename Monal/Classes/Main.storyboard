@@ -49,6 +49,9 @@
                                             <constraint firstAttribute="height" constant="27" id="yNE-7P-Ml5"/>
                                         </constraints>
                                         <state key="normal" image="770-paper-clip"/>
+                                        <connections>
+                                            <action selector="attach:" destination="5nR-Q5-dQD" eventType="touchUpInside" id="7Vw-VD-VgI"/>
+                                        </connections>
                                     </button>
                                 </subviews>
                                 <color key="backgroundColor" red="0.96470588235294119" green="0.96470588235294119" blue="0.96470588235294119" alpha="1" colorSpace="calibratedRGB"/>

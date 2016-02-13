@@ -56,24 +56,6 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         self.jid=[NSString stringWithFormat:@"%@@%@",[[accountVals objectAtIndex:0] objectForKey:@"username"], [[accountVals objectAtIndex:0] objectForKey:@"domain"]];
     }
     
- /*
-    _topIcon.layer.cornerRadius=_topIcon.frame.size.height/2;
-    _topIcon.layer.borderColor = (__bridge CGColorRef)([UIColor lightGrayColor]);
-    _topIcon.layer.borderWidth=3.0f;
-    _topIcon.clipsToBounds=YES;
-    
-    if(SYSTEM_VERSION_LESS_THAN(@"7.0"))
-    {
-        _topName.textColor=[UIColor whiteColor];
-    }
-    
-    [_topBarView addSubview:_topIcon];
-    [_topBarView addSubview:_topName];
-    
-
-    self.navigationItem.titleView=_topBarView;
-  */
-    
 }
 
 -(void) setupWithContact:(NSDictionary*) contact
@@ -174,7 +156,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
     if(xmppAccount.supportsMam0) {
         
-        if(self.messageList.count==0)
+        if(_messagelist.count==0)
         {
             //fetch default
             NSDate *yesterday =[NSDate dateWithTimeInterval:-86400 sinceDate:[NSDate date]];

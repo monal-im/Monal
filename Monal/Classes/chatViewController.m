@@ -169,6 +169,19 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     self.navigationItem.titleView=self.topBarView;
     
     [self handleForeGround];
+    
+    
+    xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
+    if(xmppAccount.supportsMam0) {
+        
+        if(self.messageList.count==0)
+        {
+            //fetch default
+            NSDate *yesterday =[NSDate dateWithTimeInterval:-86400 sinceDate:[NSDate date]];
+            [xmppAccount setMAMQueryFromStart: yesterday toDate:[NSDate date] andJid:self.contactName];
+        }
+        
+    }
 
 }
 

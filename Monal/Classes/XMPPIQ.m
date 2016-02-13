@@ -199,9 +199,7 @@
             [xnode.children addObjectsFromArray:@[field2, field3]];
             
         }
-        
-        
-        if(jid) {
+          if(jid) {
             MLXMLNode* field3 =[[MLXMLNode alloc] init];
             field3.element=@"field";
             [field3.attributes setObject:@"with" forKey:@"var"];

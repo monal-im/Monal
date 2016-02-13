@@ -2643,17 +2643,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             if(st_error.code==2)// operation couldnt be completed // socket not connected
             {
                 [self disconnect];
+                [self reconnect:5];
                 return;
             }
             
-            
-            if(st_error.code==2)
-            {
-                [self disconnect];
-                return;
-            }
-            
-         
             
             if(st_error.code==60)// could not complete operation
             {
@@ -2665,6 +2658,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             if(st_error.code==64)// Host is down
             {
                 [self disconnect];
+                [self reconnect:5];
                 return;
             }
             
@@ -2703,7 +2697,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             DDLogInfo(@"%@ Stream end encoutered", [stream class] );
             _accountState=kStateReconnecting;
             _loginStarted=NO;
-            [self reconnect];
+            [self reconnect:5];
             break;
         }
             

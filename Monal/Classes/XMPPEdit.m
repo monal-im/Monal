@@ -426,7 +426,7 @@ NSString *const kGtalk = @"Gtalk";
         switch (indexPath.row)
         {
             case 0: {
-                thecell.cellLabel.text=@"Jabber Id";
+                thecell.cellLabel.text=@"Jabber ID";
                 thecell.toggleSwitch.hidden=YES;
                 thecell.textInputField.tag=1;
                 thecell.textInputField.text=self.jid;

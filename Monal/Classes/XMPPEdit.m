@@ -491,21 +491,21 @@ NSString *const kGtalk = @"Gtalk";
             }
                 
             case 3: {
-                thecell.cellLabel.text=@"SSL";
+                thecell.cellLabel.text=@"TLS";
                 thecell.textInputField.hidden=YES;
                 thecell.toggleSwitch.tag=2;
                 thecell.toggleSwitch.on=self.useSSL;
                 break;
             }
             case 4: {
-                thecell.cellLabel.text=@"Old Style SSL";
+                thecell.cellLabel.text=@"Old Style TLS";
                 thecell.textInputField.hidden=YES;
                 thecell.toggleSwitch.tag=3;
                 thecell.toggleSwitch.on=self.oldStyleSSL;
                 break;
             }
             case 5: {
-                thecell.cellLabel.text=@"Self Signed";
+                thecell.cellLabel.text=@"Self-Signed Certificate";
                 thecell.textInputField.hidden=YES;
                 thecell.toggleSwitch.tag=4;
                 thecell.toggleSwitch.on=self.selfSignedSSL;

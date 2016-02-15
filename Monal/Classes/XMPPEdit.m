@@ -429,6 +429,7 @@ NSString *const kGtalk = @"Gtalk";
                 thecell.cellLabel.text=@"Jabber Id";
                 thecell.toggleSwitch.hidden=YES;
                 thecell.textInputField.tag=1;
+                thecell.textInputField.keyboardType = UIKeyboardTypeEmailAddress;
                 thecell.textInputField.text=self.jid;
                 break;
             }

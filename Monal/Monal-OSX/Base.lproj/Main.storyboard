@@ -1589,21 +1589,21 @@ Gw
                                         </textField>
                                         <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="isQ-cw-Hwe">
                                             <rect key="frame" x="16" y="70" width="61" height="18"/>
-                                            <buttonCell key="cell" type="check" title="SSL" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="yo1-4o-ZuP">
+                                            <buttonCell key="cell" type="check" title="TLS" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="yo1-4o-ZuP">
                                                 <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                 <font key="font" metaFont="system"/>
                                             </buttonCell>
                                         </button>
                                         <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Yp9-lo-EfY">
                                             <rect key="frame" x="16" y="46" width="108" height="18"/>
-                                            <buttonCell key="cell" type="check" title="Old Style SSL" bezelStyle="regularSquare" imagePosition="left" inset="2" id="RTv-Wu-Idc">
+                                            <buttonCell key="cell" type="check" title="Old Style TLS" bezelStyle="regularSquare" imagePosition="left" inset="2" id="RTv-Wu-Idc">
                                                 <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                 <font key="font" metaFont="system"/>
                                             </buttonCell>
                                         </button>
                                         <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="qZr-m6-nhP">
                                             <rect key="frame" x="16" y="12" width="160" height="32"/>
-                                            <buttonCell key="cell" type="check" title="Self Signed Certificate" bezelStyle="regularSquare" imagePosition="left" inset="2" id="Mr1-fc-WhO">
+                                            <buttonCell key="cell" type="check" title="Self-Signed Certificate" bezelStyle="regularSquare" imagePosition="left" inset="2" id="Mr1-fc-WhO">
                                                 <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                 <font key="font" metaFont="system"/>
                                             </buttonCell>

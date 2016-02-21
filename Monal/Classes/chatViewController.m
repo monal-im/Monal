@@ -10,7 +10,7 @@
 #import "MLConstants.h"
 #import "MonalAppDelegate.h"
 @import QuartzCore;
-
+@import MobileCoreServices;
 
 static const int ddLogLevel = LOG_LEVEL_ERROR;
 
@@ -295,11 +295,26 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(IBAction)attach:(id)sender
 {
+    xmpp* account=[[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
+    if(!account.supportsHTTPUpload)
+    {
+        
+        UIAlertView *addError = [[UIAlertView alloc]
+                                 initWithTitle:@"Error"
+                                 message:@"This server does not appear to support HTTP file uploads (XEP-0363). Please ask the administrator to enable it."
+                                 delegate:self cancelButtonTitle:@"Close"
+                                 otherButtonTitles: nil] ;
+        [addError show];
+        
+        return;
+    }
+    
     // ask again for camera or photos
     UIImagePickerController *imagePicker = [[UIImagePickerController alloc] init];
     imagePicker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;//or camera
     imagePicker.delegate =self;
     [self presentViewController:imagePicker animated:YES completion:nil];
+    
     
 }
 
@@ -309,6 +324,36 @@ didFinishPickingMediaWithInfo:(NSDictionary<NSString *,
                                id> *)info
 {
     [self dismissViewControllerAnimated:YES completion:nil];
+    
+    
+    NSString *mediaType = info[UIImagePickerControllerMediaType];
+    if([mediaType isEqualToString:(NSString *)kUTTypeImage]) {
+        UIImage *selectedImage= info[UIImagePickerControllerEditedImage];
+        NSData *pngData=  UIImagePNGRepresentation (selectedImage);
+        if(pngData)
+        {
+            [[MLXMPPManager sharedInstance]  httpUploadPngData:pngData toContact:self.contactName onAccount:self.accountNo withCompletionHandler:^(NSString *url, NSError *error) {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        if(url) {
+                            self.chatInput.text= url;
+                        }
+                        else  {
+                            UIAlertView *addError = [[UIAlertView alloc]
+                                                     initWithTitle:@"There was an error uploading the file to the server"
+                                                     message:[NSString stringWithFormat:@"%@", error.localizedDescription]
+                                                     delegate:self cancelButtonTitle:@"Close"
+                                                     otherButtonTitles: nil] ;
+                            [addError show];
+                        }
+                    });
+                    
+                }];
+        }
+        
+    }
+    
+
+    
 }
 
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker

@@ -145,6 +145,11 @@ Sends a message to a specified contact in account. Calls completion handler on s
 
 
 /**
+ uploads the selected png image Data as photo.png
+ */
+-(void)httpUploadPngData:(NSData*) fileData   toContact:(NSString*)contact onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(NSString *url,  NSError *error)) completion;
+
+/**
  opens file and attempts to upload it
  */
 -(void)httpUploadFileURL:(NSURL*) fileURL  toContact:(NSString*)contact onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(NSString *url,  NSError *error)) completion;

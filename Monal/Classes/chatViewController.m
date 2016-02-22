@@ -26,6 +26,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 @property (nonatomic, assign) NSInteger thisyear;
 @property (nonatomic, assign) NSInteger thismonth;
 @property (nonatomic, assign) NSInteger thisday;
+@property (nonatomic, strong)  MBProgressHUD *uploadHUD;
 
 
 @property (nonatomic, strong) DBRestClient *restClient;
@@ -308,17 +309,40 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 }
 
-#pragma mark -image picker
+#pragma mark - Dropbox upload and delegate
 
 - (void) uploadImageToDropBox:(NSData *) imageData {
 
-    NSString *fileName = @"photo.png";
+    NSString *fileName = [NSString stringWithFormat:@"%@.png",[NSUUID UUID].UUIDString];
     NSString *tempDir = NSTemporaryDirectory();
     NSString *imagePath = [tempDir stringByAppendingPathComponent:fileName];
     [imageData writeToFile:imagePath atomically:YES];
     
     [self.restClient uploadFile:fileName toPath:@"/" fromPath:imagePath];
 }
+
+- (void)restClient:(DBRestClient *)client uploadedFile:(NSString *)destPath
+              from:(NSString *)srcPath metadata:(DBMetadata *)metadata {
+    DDLogVerbose(@"File uploaded successfully to dropbox path: %@", metadata.path);
+    [self.restClient loadSharableLinkForFile:metadata.path];
+}
+
+- (void)restClient:(DBRestClient *)client uploadFileFailedWithError:(NSError *)error {
+    DDLogVerbose(@"File upload to dropbox failed with error: %@", error);
+}
+
+- (void)restClient:(DBRestClient*)restClient loadedSharableLink:(NSString*)link
+           forFile:(NSString*)path{
+    self.chatInput.text= link;
+    self.uploadHUD.hidden=YES;
+}
+
+- (void)restClient:(DBRestClient*)restClient loadSharableLinkFailedWithError:(NSError*)error{
+    self.uploadHUD.hidden=YES;
+    DDLogVerbose(@"Failed to get Dropbox link with error: %@", error);
+}
+
+#pragma mark - image picker
 
 -(IBAction)attach:(id)sender
 {
@@ -372,10 +396,12 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         if(pngData)
         {
             
-            MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-            hud.removeFromSuperViewOnHide=YES;
-            hud.labelText =@"Uploding";
-            hud.detailsLabelText =@"Upoading file to server";
+            if(!self.uploadHUD) {
+                self.uploadHUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+                self.uploadHUD.removeFromSuperViewOnHide=YES;
+                self.uploadHUD.labelText =@"Uploding";
+                self.uploadHUD.detailsLabelText =@"Upoading file to server";
+            }
            
             //if you have configured it, defer to dropbox
             if(self.restClient)
@@ -385,7 +411,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
             else  {
                 [[MLXMPPManager sharedInstance]  httpUploadPngData:pngData toContact:self.contactName onAccount:self.accountNo withCompletionHandler:^(NSString *url, NSError *error) {
                     dispatch_async(dispatch_get_main_queue(), ^{
-                        hud.hidden=YES;
+                        self.uploadHUD.hidden=YES;
                         
                         if(url) {
                             self.chatInput.text= url;

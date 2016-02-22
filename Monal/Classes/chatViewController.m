@@ -280,8 +280,10 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     if(cleanstring.length>0)
     {
         self.blockAnimations=YES;
-        [self.chatInput resignFirstResponder];//apply autocorrect
-        [self.chatInput becomeFirstResponder];
+        if(self.chatInput.isFirstResponder) {
+            [self.chatInput resignFirstResponder];//apply autocorrect
+            [self.chatInput becomeFirstResponder];
+        }
         self.blockAnimations=NO;
 
         [self sendMessage:cleanstring];

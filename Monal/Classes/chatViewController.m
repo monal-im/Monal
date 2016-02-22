@@ -330,7 +330,7 @@ didFinishPickingMediaWithInfo:(NSDictionary<NSString *,
     if([mediaType isEqualToString:(NSString *)kUTTypeImage]) {
         UIImage *selectedImage= info[UIImagePickerControllerEditedImage];
         if(!selectedImage) selectedImage= info[UIImagePickerControllerOriginalImage];
-        NSData *pngData=  UIImageJPEGRepresentation(selectedImage, 0.8f);
+        NSData *pngData=  UIImageJPEGRepresentation(selectedImage, 0.5f);
         if(pngData)
         {
             [[MLXMPPManager sharedInstance]  httpUploadPngData:pngData toContact:self.contactName onAccount:self.accountNo withCompletionHandler:^(NSString *url, NSError *error) {

@@ -9,6 +9,7 @@
 #import "MLChatCell.h"
 #import "MLImageManager.h"
 #import "MLConstants.h"
+@import SafariServices;
 
 
 #define kChatFont 17.0f
@@ -172,7 +173,13 @@
     
     if(self.link)
     {
-        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:self.link]];
+        if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"9.0")) {
+            SFSafariViewController *safariView = [[ SFSafariViewController alloc] initWithURL:[NSURL URLWithString:self.link]];
+            [self.parent presentViewController:safariView animated:YES completion:nil];
+        }
+        else {
+            [[UIApplication sharedApplication] openURL:[NSURL URLWithString:self.link]];
+        }
     }
 }
 

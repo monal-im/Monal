@@ -331,6 +331,12 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     DDLogVerbose(@"File upload to dropbox failed with error: %@", error);
 }
 
+- (void)restClient:(DBRestClient*)client uploadProgress:(CGFloat)progress
+           forFile:(NSString*)destPath from:(NSString*)srcPat
+{
+    self.uploadHUD.progress=progress;
+}
+
 - (void)restClient:(DBRestClient*)restClient loadedSharableLink:(NSString*)link
            forFile:(NSString*)path{
     self.chatInput.text= link;
@@ -346,6 +352,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(IBAction)attach:(id)sender
 {
+    [self.chatInput resignFirstResponder];
     xmpp* account=[[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
     if(!account.supportsHTTPUpload && !self.restClient)
     {
@@ -401,7 +408,11 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                 self.uploadHUD.removeFromSuperViewOnHide=YES;
                 self.uploadHUD.labelText =@"Uploding";
                 self.uploadHUD.detailsLabelText =@"Upoading file to server";
+                self.uploadHUD.mode=MBProgressHUDModeDeterminate;
             }
+            
+            self.uploadHUD.progress=0;
+            
            
             //if you have configured it, defer to dropbox
             if(self.restClient)

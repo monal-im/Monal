@@ -332,8 +332,7 @@ didFinishPickingMediaWithInfo:(NSDictionary<NSString *,
                                id> *)info
 {
     [self dismissViewControllerAnimated:YES completion:nil];
-    
-    
+
     NSString *mediaType = info[UIImagePickerControllerMediaType];
     if([mediaType isEqualToString:(NSString *)kUTTypeImage]) {
         UIImage *selectedImage= info[UIImagePickerControllerEditedImage];
@@ -341,8 +340,11 @@ didFinishPickingMediaWithInfo:(NSDictionary<NSString *,
         NSData *pngData=  UIImageJPEGRepresentation(selectedImage, 0.5f);
         if(pngData)
         {
+            [UIApplication sharedApplication].networkActivityIndicatorVisible=YES;
+            
             [[MLXMPPManager sharedInstance]  httpUploadPngData:pngData toContact:self.contactName onAccount:self.accountNo withCompletionHandler:^(NSString *url, NSError *error) {
                     dispatch_async(dispatch_get_main_queue(), ^{
+                        [UIApplication sharedApplication].networkActivityIndicatorVisible=NO;
                         if(url) {
                             self.chatInput.text= url;
                         }

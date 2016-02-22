@@ -25,7 +25,7 @@
                                         <rect key="frame" x="62" y="8" width="486" height="25"/>
                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                        <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                                        <textInputTraits key="textInputTraits" autocapitalizationType="sentences" returnKeyType="send"/>
                                         <connections>
                                             <outlet property="delegate" destination="5nR-Q5-dQD" id="s6z-b4-uwm"/>
                                         </connections>

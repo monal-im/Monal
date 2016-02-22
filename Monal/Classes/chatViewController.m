@@ -207,6 +207,13 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     [self.chatInput resignFirstResponder];
 }
 
+#pragma mark gestures
+
+-(IBAction)dismissKeyboard:(id)sender
+{
+     [self.chatInput resignFirstResponder];
+}
+
 #pragma mark message signals
 
 

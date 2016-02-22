@@ -731,43 +731,39 @@ didFinishPickingMediaWithInfo:(NSDictionary<NSString *,
         cell.link=nil;
     }
     
-    if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"6.0"))
+    
+    if(pos.location!=NSNotFound)
     {
-        if(pos.location!=NSNotFound)
+        NSDictionary *underlineAttribute = @{NSUnderlineStyleAttributeName: @(NSUnderlineStyleSingle)};
+        NSAttributedString* underlined = [[NSAttributedString alloc] initWithString:cell.link
+                                                                         attributes:underlineAttribute];
+        
+        
+        if ([underlined length]==[[row objectForKey:@"message"] length])
         {
-            NSDictionary *underlineAttribute = @{NSUnderlineStyleAttributeName: @(NSUnderlineStyleSingle)};
-            NSAttributedString* underlined = [[NSAttributedString alloc] initWithString:cell.link
-                                                                             attributes:underlineAttribute];
-            
-            
-            if ([underlined length]==[[row objectForKey:@"message"] length])
-            {
-                cell.textLabel.attributedText=underlined;
-            }
-            else
-            {
-                NSMutableAttributedString* stitchedString  = [[NSMutableAttributedString alloc] init];
-                [stitchedString appendAttributedString:
-                 [[NSAttributedString alloc] initWithString:[[row objectForKey:@"message"] substringToIndex:pos.location] attributes:nil]];
-                [stitchedString appendAttributedString:underlined];
-                if(pos2.location!=NSNotFound)
-                {
-                    NSString* remainder = [[row objectForKey:@"message"] substringFromIndex:pos.location+[underlined length]];
-                    [stitchedString appendAttributedString:[[NSAttributedString alloc] initWithString:remainder attributes:nil]];
-                }
-                cell.textLabel.attributedText=stitchedString;
-            }
-            
+            cell.textLabel.attributedText=underlined;
         }
         else
         {
-            cell.textLabel.text =[row objectForKey:@"message"];
+            NSMutableAttributedString* stitchedString  = [[NSMutableAttributedString alloc] init];
+            [stitchedString appendAttributedString:
+             [[NSAttributedString alloc] initWithString:[[row objectForKey:@"message"] substringToIndex:pos.location] attributes:nil]];
+            [stitchedString appendAttributedString:underlined];
+            if(pos2.location!=NSNotFound)
+            {
+                NSString* remainder = [[row objectForKey:@"message"] substringFromIndex:pos.location+[underlined length]];
+                [stitchedString appendAttributedString:[[NSAttributedString alloc] initWithString:remainder attributes:nil]];
+            }
+            cell.textLabel.attributedText=stitchedString;
         }
+        
     }
     else
     {
         cell.textLabel.text =[row objectForKey:@"message"];
     }
+    
+    
     
     cell.selectionStyle=UITableViewCellSelectionStyleNone;
     
@@ -779,7 +775,19 @@ didFinishPickingMediaWithInfo:(NSDictionary<NSString *,
     return cell;
 }
 
-#pragma mark tableview delegate
+#pragma mark - tableview delegate
+-(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    [self.chatInput resignFirstResponder];
+    
+    MLChatCell* cell = (MLChatCell*)[tableView cellForRowAtIndexPath:indexPath];
+    if(cell.link)
+    {
+        [cell openlink:self];
+    }
+}
+
+#pragma mark tableview datasource
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     if(indexPath.row>=[_messagelist count])  {
@@ -803,17 +811,6 @@ didFinishPickingMediaWithInfo:(NSDictionary<NSString *,
     return YES;
 }
 
-
--(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    [self.chatInput resignFirstResponder];
-    
-    MLChatCell* cell = (MLChatCell*)[tableView cellForRowAtIndexPath:indexPath];
-    if(cell.link)
-    {
-        [cell openlink:self];
-    }
-}
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
     if (editingStyle == UITableViewCellEditingStyleDelete) {

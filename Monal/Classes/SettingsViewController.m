@@ -40,25 +40,13 @@
     self.view=_settingsTable;
     self.tableView=_settingsTable;
     
-    if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0"))
-    {
-        
-    }
-    else
-    {
-        [self.view setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"debut_dark"]]];
-    }
-    
+
 }
 
 -(void) viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-//    if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"6.0"))
-//    {
-//    [[UILabel appearanceWhenContainedIn:[UITableViewHeaderFooterView class], nil] setColor:[UIColor whiteColor]];
-//    [[UILabel appearanceWhenContainedIn:[UITableViewHeaderFooterView class], nil] setShadowColor:nil];
-//    }
+
 }
 
 -(void) viewWillDisappear:(BOOL)animated
@@ -83,7 +71,7 @@
 #pragma mark tableview datasource delegate
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-    return 4;
+    return 5;
 }
 
 
@@ -102,14 +90,11 @@
     
     [tempView addSubview:tempLabel];
     
-    if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0"))
-    {
-        tempLabel.textColor=[UIColor darkGrayColor];
-        tempLabel.text=  tempLabel.text.uppercaseString;
-        tempLabel.shadowColor =[UIColor clearColor];
-        tempLabel.font=[UIFont systemFontOfSize:[UIFont systemFontSize]];
-        
-    }
+    
+    tempLabel.textColor=[UIColor darkGrayColor];
+    tempLabel.text=  tempLabel.text.uppercaseString;
+    tempLabel.shadowColor =[UIColor clearColor];
+    tempLabel.font=[UIFont systemFontOfSize:[UIFont systemFontSize]];
 
     return tempView;
 }
@@ -141,6 +126,12 @@
             break;
         }
             
+        case 4:
+        {
+            return @"Cloud Storage";
+            break;
+        }
+            
         default:
         {
             return  nil;
@@ -163,7 +154,7 @@
             
         case 1:
         {
-            return 3; // removed staus ipod for now
+            return 3;
             break;
         }
             
@@ -178,7 +169,13 @@
             return 4;
             break;
         }
+          
             
+        case 4:
+        {
+            return 1;
+            break;
+        }
             
         default:
         {
@@ -191,7 +188,8 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     
-      MLSettingCell* cell=[[MLSettingCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"AccountCell"];
+    MLSettingCell* cell=[[MLSettingCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"AccountCell"];
+    cell.parent= self;
    
     switch (indexPath.section) {
         case 0:
@@ -233,13 +231,7 @@
                     cell.textEnabled=YES;
                     break;
                 }
-                case 3:
-                {
-                    cell.textLabel.text=NSLocalizedString(@"Status iPod 🎵", @"");
-                       cell.defaultKey=@"MusicStatus";
-                    cell.switchEnabled=YES;
-                    break;
-                }
+               
                     
                   
             }
@@ -292,7 +284,22 @@
             return cell; 
             break;
         }
-            
+           
+        case 4:
+        {
+            switch(indexPath.row)
+            {
+                case 0:
+                {
+                    cell.textLabel.text=NSLocalizedString(@"Connect DropBox", @"");
+                    cell.defaultKey=@"DropBox";
+                    cell.switchEnabled=YES;
+                    break;
+                }
+            }
+            return cell;
+            break;
+        }
             
         default:
         {

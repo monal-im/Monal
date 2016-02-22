@@ -302,7 +302,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         UIAlertView *addError = [[UIAlertView alloc]
                                  initWithTitle:@"Error"
                                  message:@"This server does not appear to support HTTP file uploads (XEP-0363). Please ask the administrator to enable it."
-                                 delegate:self cancelButtonTitle:@"Close"
+                                 delegate:nil cancelButtonTitle:@"Close"
                                  otherButtonTitles: nil] ;
         [addError show];
         
@@ -329,7 +329,8 @@ didFinishPickingMediaWithInfo:(NSDictionary<NSString *,
     NSString *mediaType = info[UIImagePickerControllerMediaType];
     if([mediaType isEqualToString:(NSString *)kUTTypeImage]) {
         UIImage *selectedImage= info[UIImagePickerControllerEditedImage];
-        NSData *pngData=  UIImagePNGRepresentation (selectedImage);
+        if(!selectedImage) selectedImage= info[UIImagePickerControllerOriginalImage];
+        NSData *pngData=  UIImageJPEGRepresentation(selectedImage, 0.8f);
         if(pngData)
         {
             [[MLXMPPManager sharedInstance]  httpUploadPngData:pngData toContact:self.contactName onAccount:self.accountNo withCompletionHandler:^(NSString *url, NSError *error) {
@@ -341,7 +342,7 @@ didFinishPickingMediaWithInfo:(NSDictionary<NSString *,
                             UIAlertView *addError = [[UIAlertView alloc]
                                                      initWithTitle:@"There was an error uploading the file to the server"
                                                      message:[NSString stringWithFormat:@"%@", error.localizedDescription]
-                                                     delegate:self cancelButtonTitle:@"Close"
+                                                     delegate:nil cancelButtonTitle:@"Close"
                                                      otherButtonTitles: nil] ;
                             [addError show];
                         }

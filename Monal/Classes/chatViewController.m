@@ -274,28 +274,29 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void)resignTextView
 {
-    self.blockAnimations=YES;
-    [self.chatInput resignFirstResponder];//apply autocorrect
-    [self.chatInput becomeFirstResponder];
-    self.blockAnimations=NO;
-    
-    if(([self.chatInput text]!=nil) && (![[self.chatInput text] isEqualToString:@""]) )
+    NSString *cleanstring = [self.chatInput.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    if(cleanstring.length>0)
     {
-        [self sendMessage:[self.chatInput text] ];
+        self.blockAnimations=YES;
+        [self.chatInput resignFirstResponder];//apply autocorrect
+        [self.chatInput becomeFirstResponder];
+        self.blockAnimations=NO;
         
+        if(([self.chatInput text]!=nil) && (![[self.chatInput text] isEqualToString:@""]) )
+        {
+            [self sendMessage:[self.chatInput text] ];
+            
+        }
+        [self.chatInput setText:@""];
+        [self scrollToBottom];
     }
-    [self.chatInput setText:@""];
-    [self scrollToBottom];
 }
 
 -(IBAction)sendMessageText:(id)sender
 {
-    NSString *cleanstring = [self.chatInput.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-    if(cleanstring.length>0)
-    {
-        [self resignTextView];
-        [self updateInputViewSize];
-    }
+    [self resignTextView];
+    [self updateInputViewSize];
+
 }
 
 #pragma mark -image picker
@@ -890,14 +891,16 @@ didFinishPickingMediaWithInfo:(NSDictionary<NSString *,
 
 - (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text
 {
+    BOOL shouldinsert=YES;
+    
     if([text isEqualToString:@"\n"])
     {
         [self resignTextView];
+        shouldinsert=NO;
     }
- 
+    
     [self updateInputViewSize];
-  
-    return YES;
+    return shouldinsert; 
 }
 
 

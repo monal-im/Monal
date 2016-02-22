@@ -408,15 +408,17 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                 self.uploadHUD.removeFromSuperViewOnHide=YES;
                 self.uploadHUD.labelText =@"Uploding";
                 self.uploadHUD.detailsLabelText =@"Upoading file to server";
-                self.uploadHUD.mode=MBProgressHUDModeDeterminate;
+                
             }
             
-            self.uploadHUD.progress=0;
+          
             
            
             //if you have configured it, defer to dropbox
             if(self.restClient)
             {
+                self.uploadHUD.mode=MBProgressHUDModeDeterminate;
+                self.uploadHUD.progress=0;
                 [self uploadImageToDropBox:pngData];
             }
             else  {

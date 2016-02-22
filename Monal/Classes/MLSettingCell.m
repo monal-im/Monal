@@ -94,6 +94,9 @@
         if (![[DBSession sharedSession] isLinked]) {
             [[DBSession sharedSession] linkFromController:self.parent];
         }
+        else {
+            [[DBSession sharedSession] unlinkAll];
+        }
     }
     
 }

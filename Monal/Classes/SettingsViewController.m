@@ -9,6 +9,7 @@
 #import "SettingsViewController.h"
 #import "MLConstants.h"
 #import "DataLayer.h"
+#import <DropboxSDK/DropboxSDK.h>
 
 
 @interface SettingsViewController ()
@@ -46,6 +47,8 @@
 -(void) viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
+    
+    [[NSUserDefaults standardUserDefaults] setBool:[DBSession sharedSession].isLinked forKey:@"DropBox"];
 
 }
 

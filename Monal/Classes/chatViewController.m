@@ -11,13 +11,14 @@
 #import "MonalAppDelegate.h"
 #import "MBProgressHUD.h"
 #import "UIActionSheet+Blocks.h"
+#import <DropBoxSDK/DropBoxSDK.h>
 
 @import QuartzCore;
 @import MobileCoreServices;
 
 static const int ddLogLevel = LOG_LEVEL_ERROR;
 
-@interface chatViewController()
+@interface chatViewController()<DBRestClientDelegate>
 
 @property (nonatomic, strong)  NSDateFormatter* destinationDateFormat;
 @property (nonatomic, strong)  NSDateFormatter* sourceDateFormat;
@@ -26,6 +27,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 @property (nonatomic, assign) NSInteger thismonth;
 @property (nonatomic, assign) NSInteger thisday;
 
+
+@property (nonatomic, strong) DBRestClient *restClient;
 
 
 /**
@@ -113,7 +116,11 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     
     self.topIcon.layer.cornerRadius= self.topIcon.frame.size.height/2;
     self.topIcon.clipsToBounds=YES;
-
+    
+    if ([DBSession sharedSession].isLinked) {
+        self.restClient = [[DBRestClient alloc] initWithSession:[DBSession sharedSession]];
+        self.restClient.delegate = self;
+    }
     
 }
 
@@ -303,15 +310,25 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 #pragma mark -image picker
 
+- (void) uploadImageToDropBox:(NSData *) imageData {
+
+    NSString *fileName = @"photo.png";
+    NSString *tempDir = NSTemporaryDirectory();
+    NSString *imagePath = [tempDir stringByAppendingPathComponent:fileName];
+    [imageData writeToFile:imagePath atomically:YES];
+    
+    [self.restClient uploadFile:fileName toPath:@"/" fromPath:imagePath];
+}
+
 -(IBAction)attach:(id)sender
 {
     xmpp* account=[[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
-    if(!account.supportsHTTPUpload)
+    if(!account.supportsHTTPUpload && !self.restClient)
     {
         
         UIAlertView *addError = [[UIAlertView alloc]
                                  initWithTitle:@"Error"
-                                 message:@"This server does not appear to support HTTP file uploads (XEP-0363). Please ask the administrator to enable it."
+                                 message:@"This server does not appear to support HTTP file uploads (XEP-0363). Please ask the administrator to enable it. You can also link to DropBox in settings and use that to share files."
                                  delegate:nil cancelButtonTitle:@"Close"
                                  otherButtonTitles: nil] ;
         [addError show];
@@ -360,7 +377,13 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
             hud.labelText =@"Uploding";
             hud.detailsLabelText =@"Upoading file to server";
            
-            [[MLXMPPManager sharedInstance]  httpUploadPngData:pngData toContact:self.contactName onAccount:self.accountNo withCompletionHandler:^(NSString *url, NSError *error) {
+            //if you have configured it, defer to dropbox
+            if(self.restClient)
+            {
+                [self uploadImageToDropBox:pngData];
+            }
+            else  {
+                [[MLXMPPManager sharedInstance]  httpUploadPngData:pngData toContact:self.contactName onAccount:self.accountNo withCompletionHandler:^(NSString *url, NSError *error) {
                     dispatch_async(dispatch_get_main_queue(), ^{
                         hud.hidden=YES;
                         
@@ -378,6 +401,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                     });
                     
                 }];
+            }
         }
         
     }

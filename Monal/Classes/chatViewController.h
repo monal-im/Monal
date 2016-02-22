@@ -73,8 +73,6 @@
 -(void) handleNewMessage:(NSNotification *)notification;
 -(void) addMessageto:(NSString*)to withMessage:(NSString*) message andId:(NSString *) messageId;
 
-#pragma mark gesture stuff
-
 //notification
 -(void) keyboardWillShow:(NSNotification *) note;
 -(void) keyboardWillHide:(NSNotification *) note;

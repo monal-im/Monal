@@ -25,8 +25,9 @@
 #import "MLNotificationManager.h"
 #import "DataLayer.h"
 
-#import <Fabric/Fabric.h>
-#import <Crashlytics/Crashlytics.h>
+@import Crashlytics;
+@import Fabric;
+#import <DropboxSDK/DropboxSDK.h>
 
 
 //xmpp
@@ -280,6 +281,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     {
         [[DataLayer sharedInstance] messageHistoryCleanAll];
     }
+    
+    
+    //Dropbox
+    DBSession *dbSession = [[DBSession alloc]
+                            initWithAppKey:@"a134q2ecj1hqa59"
+                            appSecret:@"vqsf5vt6guedlrs"
+                            root:kDBRootAppFolder];
+    [DBSession setSharedSession:dbSession];
+    
     DDLogInfo(@"App started");
     return YES;
 }
@@ -287,6 +297,21 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) applicationDidBecomeActive:(UIApplication *)application
 {
   //  [UIApplication sharedApplication].applicationIconBadgeNumber=0;
+}
+
+#pragma mark handling urls
+
+- (BOOL)application:(UIApplication *)app openURL:(NSURL *)url
+  sourceApplication:(NSString *)source annotation:(id)annotation {
+    if ([[DBSession sharedSession] handleOpenURL:url]) {
+        if ([[DBSession sharedSession] isLinked]) {
+            DDLogVerbose(@"App linked successfully!");
+            // At this point you can start making API calls
+        }
+        return YES;
+    }
+    // Add whatever other url handling code your app requires here
+    return NO;
 }
 
 #pragma mark notifiction 

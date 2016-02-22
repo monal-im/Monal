@@ -165,6 +165,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         
     }
 
+    UIEdgeInsets currentInset = self.messageTable.contentInset;
+    self.messageTable.contentInset =UIEdgeInsetsMake(self.navigationController.navigationBar.frame.size.height+[UIApplication sharedApplication].statusBarFrame.size.height, currentInset.left, currentInset.bottom, currentInset.right);
+    
 }
 
 -(void) viewDidAppear:(BOOL)animated

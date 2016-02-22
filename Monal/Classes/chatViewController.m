@@ -290,8 +290,12 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(IBAction)sendMessageText:(id)sender
 {
-    [self resignTextView];
-    [self updateInputViewSize];
+    NSString *cleanstring = [self.chatInput.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    if(cleanstring.length>0)
+    {
+        [self resignTextView];
+        [self updateInputViewSize];
+    }
 }
 
 #pragma mark -image picker

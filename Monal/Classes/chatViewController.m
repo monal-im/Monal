@@ -10,6 +10,7 @@
 #import "MLConstants.h"
 #import "MonalAppDelegate.h"
 #import "MBProgressHUD.h"
+#import "UIActionSheet+Blocks.h"
 
 @import QuartzCore;
 @import MobileCoreServices;
@@ -318,18 +319,30 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         return;
     }
     
-    //TODO ask again for camera or photos
     UIImagePickerController *imagePicker = [[UIImagePickerController alloc] init];
-    imagePicker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;//or camera
     imagePicker.delegate =self;
-    [self presentViewController:imagePicker animated:YES completion:nil];
     
+    RIButtonItem* cancelButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Cancel", nil) action:^{
+        
+    }];
     
+    RIButtonItem* cameraButton = [RIButtonItem itemWithLabel:@"Camera" action:^{
+        imagePicker.sourceType = UIImagePickerControllerSourceTypeCamera;
+        [self presentViewController:imagePicker animated:YES completion:nil];
+    }];
+    
+    RIButtonItem* photosButton = [RIButtonItem itemWithLabel:@"Photos" action:^{
+          imagePicker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+        [self presentViewController:imagePicker animated:YES completion:nil];
+    }];
+    
+    UIActionSheet* sheet =[[UIActionSheet alloc] initWithTitle:@"Select Image Source" cancelButtonItem:cancelButton destructiveButtonItem:nil otherButtonItems: cameraButton, photosButton,nil];
+    [sheet showFromTabBar:self.tabBarController.tabBar];
+
 }
 
 
-- (void)imagePickerController:(UIImagePickerController *)picker
-didFinishPickingMediaWithInfo:(NSDictionary<NSString *,
+- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<NSString *,
                                id> *)info
 {
     [self dismissViewControllerAnimated:YES completion:nil];
@@ -368,8 +381,6 @@ didFinishPickingMediaWithInfo:(NSDictionary<NSString *,
         }
         
     }
-    
-
     
 }
 

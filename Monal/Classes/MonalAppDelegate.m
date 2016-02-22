@@ -54,11 +54,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [MLXMPPManager sharedInstance].contactVC=contactsVC;
     contactsVC.presentationTabBarController=_tabBarController; 
     
-    UIBarStyle barColor=UIBarStyleBlackOpaque;
-    
-    if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0")) {
-         barColor=UIBarStyleDefault;
-    }
+    UIBarStyle barColor=UIBarStyleBlack;
     
     ActiveChatsViewController* activeChatsVC = [[ActiveChatsViewController alloc] init];
     UINavigationController* activeChatNav=[[UINavigationController alloc] initWithRootViewController:activeChatsVC];
@@ -156,6 +152,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     
     _chatNav.navigationBar.barStyle=barColor;
+    _chatNav.navigationBar.translucent=YES;
     _tabBarController.moreNavigationController.navigationBar.barStyle=barColor;
     
     [self.window makeKeyAndVisible];
@@ -169,8 +166,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                            NSForegroundColorAttributeName: [UIColor darkGrayColor]
                                                            }];
     [[UITabBar appearance] setTintColor:monaldarkGreen];
-    [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent];
-    
+  
+
 }
 
 

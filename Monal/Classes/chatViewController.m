@@ -318,7 +318,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     NSString *imagePath = [tempDir stringByAppendingPathComponent:fileName];
     [imageData writeToFile:imagePath atomically:YES];
     
-    [self.restClient uploadFile:fileName toPath:@"/" fromPath:imagePath];
+    [self.restClient uploadFile:fileName toPath:@"/" withParentRev:nil fromPath:imagePath];
 }
 
 - (void)restClient:(DBRestClient *)client uploadedFile:(NSString *)destPath

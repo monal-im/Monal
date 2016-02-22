@@ -9,6 +9,8 @@
 #import "chatViewController.h"
 #import "MLConstants.h"
 #import "MonalAppDelegate.h"
+#import "MBProgressHUD.h"
+
 @import QuartzCore;
 @import MobileCoreServices;
 
@@ -337,11 +339,16 @@ didFinishPickingMediaWithInfo:(NSDictionary<NSString *,
         NSData *pngData=  UIImageJPEGRepresentation(selectedImage, 0.5f);
         if(pngData)
         {
-            [UIApplication sharedApplication].networkActivityIndicatorVisible=YES;
             
+            MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+            hud.removeFromSuperViewOnHide=YES;
+            hud.labelText =@"Uploding";
+            hud.detailsLabelText =@"Upoading file to server";
+           
             [[MLXMPPManager sharedInstance]  httpUploadPngData:pngData toContact:self.contactName onAccount:self.accountNo withCompletionHandler:^(NSString *url, NSError *error) {
                     dispatch_async(dispatch_get_main_queue(), ^{
-                        [UIApplication sharedApplication].networkActivityIndicatorVisible=NO;
+                        hud.hidden=YES;
+                        
                         if(url) {
                             self.chatInput.text= url;
                         }

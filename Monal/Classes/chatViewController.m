@@ -309,7 +309,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         return;
     }
     
-    // ask again for camera or photos
+    //TODO ask again for camera or photos
     UIImagePickerController *imagePicker = [[UIImagePickerController alloc] init];
     imagePicker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;//or camera
     imagePicker.delegate =self;

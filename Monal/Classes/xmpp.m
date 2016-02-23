@@ -66,7 +66,7 @@ NSString *const kContact=@"contact";
 
 NSString *const kCompletion=@"completion";
 
-static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+static const int ddLogLevel = LOG_LEVEL_DEBUG;
 
 @interface xmpp()
 {

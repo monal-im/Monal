@@ -353,6 +353,33 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 
 -(void) addOnlineUser:(NSDictionary*) user
 {
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSInteger initalPos=-1;
+        initalPos=[self positionOfOnlineContact:user];
+        if(initalPos>=0)
+        {
+            DDLogVerbose(@"user %@ already in list updating status and nothing else",[user objectForKey:kusernameKey]);
+            
+            if([user objectForKey:kstateKey])
+                [[_contacts objectAtIndex:initalPos] setObject:[user objectForKey:kstateKey] forKey:kstateKey];
+            if([user objectForKey:kstatusKey])
+                [[_contacts objectAtIndex:initalPos] setObject:[user objectForKey:kstatusKey] forKey:kstatusKey];
+            
+            if([user objectForKey:kfullNameKey])
+                [[_contacts objectAtIndex:initalPos] setObject:[user objectForKey:kfullNameKey] forKey:@"full_name"];
+            
+            [self.contactsTable beginUpdates];
+            
+            NSIndexSet *indexSet =[[NSIndexSet alloc] initWithIndex:initalPos] ;
+            NSIndexSet *columnIndexSet =[[NSIndexSet alloc] initWithIndex:0] ;
+            [self.contactsTable reloadDataForRowIndexes:indexSet columnIndexes:columnIndexSet];
+            [self.contactsTable endUpdates];
+            
+            
+            
+        }
+        else  {
     //insert into tableview
     // for now just online
     [[DataLayer sharedInstance] contactForUsername:[user objectForKey:kusernameKey] forAccount:[user objectForKey:kaccountNoKey] withCompletion:^(NSArray * contactRow) {
@@ -470,7 +497,8 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
         
     }];
     
-    
+        }
+    });
 }
 
 -(void) removeOnlineUser:(NSDictionary*) user

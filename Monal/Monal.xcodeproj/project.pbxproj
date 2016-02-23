@@ -1532,6 +1532,10 @@
 		26B2A5001B730A0D00272E63 /* OSX */ = {
 			isa = PBXGroup;
 			children = (
+				2614B64E1C54095D004FF2FA /* libz.tbd */,
+				269574E11C37307300544A60 /* libsqlite3.tbd */,
+				269574DF1C37301600544A60 /* libz.tbd */,
+				269574DD1C372FD200544A60 /* Security.framework */,
 				268130191BFEDCEC0074C8EE /* Fabric.framework */,
 				26E456CC1B842180004BD74C /* Sparkle.framework */,
 				265F6BA61B7B088A006B8EBA /* Crashlytics.framework */,
@@ -1756,10 +1760,6 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				2614B64E1C54095D004FF2FA /* libz.tbd */,
-				269574E11C37307300544A60 /* libsqlite3.tbd */,
-				269574DF1C37301600544A60 /* libz.tbd */,
-				269574DD1C372FD200544A60 /* Security.framework */,
 				26B2A5001B730A0D00272E63 /* OSX */,
 				26B2A4FF1B730A0900272E63 /* iOS */,
 			);

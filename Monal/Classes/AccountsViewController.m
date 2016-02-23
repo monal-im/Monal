@@ -38,14 +38,7 @@
     self.view=_accountsTable;
     
     _accountsTable.backgroundView=nil;
-    if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0"))
-    {
-      
-    }
-    else
-    {
-        [self.view setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"debut_dark"]]];
-    }
+ 
     _protocolList=[[DataLayer sharedInstance] protocolList];
     
     UIBarButtonItem* rightButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Reconnect All",@"") style:UIBarButtonItemStyleBordered target:self action:@selector(connectIfNecessary)];

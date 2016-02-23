@@ -47,15 +47,7 @@
     
     self.accountName.inputView=_accountPickerView;
     
-    if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0"))
-    {
-        
-    }
-    else
-    {
-         _accountPickerView.backgroundColor=[UIColor blackColor];
-        [self.view setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"debut_dark"]]];
-    }
+
     
     
         UIImage *buttonImage = [[UIImage imageNamed:@"blueButton"]

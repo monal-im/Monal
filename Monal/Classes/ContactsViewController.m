@@ -50,15 +50,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     _contactsTable.dataSource=self;
     
     self.view=_contactsTable;
-    
-    // =nil;
-    if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0"))
-    {
-        self.view.backgroundColor =[UIColor whiteColor];
-    }
-    else{
-        [_contactsTable.backgroundView setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"debut_dark"]]];
-    }
+    self.view.backgroundColor =[UIColor whiteColor];
+  
     
     _contacts=[[NSMutableArray alloc] init] ;
     _offlineContacts=[[NSMutableArray alloc] init] ;

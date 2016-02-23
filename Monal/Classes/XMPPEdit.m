@@ -149,12 +149,7 @@ NSString *const kGtalk = @"Gtalk";
     self.sectionArray = @[@"Account", @"Advanced Settings",@""];
     
     self.tableView.backgroundView=nil;
-    
-    if(!SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0")) {
-        [self.tableView setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"debut_dark"]]];
-    }
-    
-    
+  
     [[NSNotificationCenter defaultCenter] addObserverForName:NXOAuth2AccountStoreAccountsDidChangeNotification
                                                       object:[NXOAuth2AccountStore sharedStore]
                                                        queue:nil

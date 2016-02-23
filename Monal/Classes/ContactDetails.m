@@ -20,14 +20,7 @@
 -(void) viewDidLoad
 {
     [super viewDidLoad];
-    if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0"))
-    {
-        //        [self.view setBackgroundColor:[UIColor o]];
-    }
-    else
-    {
-        [self.view setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"debut_dark"]]];
-    }
+ 
     
     UIImage *buttonImage2 = [[UIImage imageNamed:@"greenButton"]
                              resizableImageWithCapInsets:UIEdgeInsetsMake(18, 18, 18, 18)];

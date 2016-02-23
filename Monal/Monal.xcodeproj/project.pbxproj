@@ -3189,7 +3189,7 @@
 				OTHER_LDFLAGS = "-lstdc++";
 				PRODUCT_NAME = Monal;
 				PROVISIONING_PROFILE = "";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "63a062e4-c4f7-4754-87c4-9f9658fd22b9";
 			};
 			name = AppStore;
 		};

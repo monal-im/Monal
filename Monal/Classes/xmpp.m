@@ -1074,7 +1074,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         while (stanzaToParse)
         {
             [self.processQueue addOperationWithBlock:^{
-           
             DDLogVerbose(@"got stanza %@", stanzaToParse);
             
             if([[stanzaToParse objectForKey:@"stanzaType"]  isEqualToString:@"iq"])

@@ -625,15 +625,7 @@ static DataLayer *sharedInstance=nil;
     }
 }
 
-
-
-
-
-
-
-
 #pragma mark Buddy Commands
-
 
 -(BOOL) addBuddy:(NSString*) buddy  forAccount:(NSString*) accountNo fullname:(NSString*) fullName nickname:(NSString*) nickName
 {

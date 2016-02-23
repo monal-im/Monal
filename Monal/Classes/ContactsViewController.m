@@ -50,6 +50,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     _contactsTable.dataSource=self;
     
     self.view=_contactsTable;
+    
     self.view.backgroundColor =[UIColor whiteColor];
   
     
@@ -306,92 +307,119 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     {
         return;
     }
-    //insert into tableview
-    // for now just online
-    [[DataLayer sharedInstance] contactForUsername:[user objectForKey:kusernameKey] forAccount:[user objectForKey:kaccountNoKey] withCompletion:^(NSArray * contactRow) {
-        
-        //mutex to prevent others from modifying contacts at the same time
-        dispatch_async(dispatch_get_main_queue(),
-                       ^{
-                           //check if already there
-                           NSInteger pos=-1;
-                           NSInteger offlinepos=-1;
-                           pos=[self positionOfOnlineContact:user];
-                           
-                           if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
-                           {
-                               offlinepos =[self positionOfOfflineContact:user];
-                               if(offlinepos>=0 && offlinepos<[_offlineContacts count])
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSInteger initalPos=-1;
+        initalPos=[self positionOfOnlineContact:user];
+        if(initalPos>=0)
+        {
+            DDLogVerbose(@"user %@ already in list updating status and nothing else",[user objectForKey:kusernameKey]);
+            
+            if([user objectForKey:kstateKey])
+                [[_contacts objectAtIndex:initalPos] setObject:[user objectForKey:kstateKey] forKey:kstateKey];
+            if([user objectForKey:kstatusKey])
+                [[_contacts objectAtIndex:initalPos] setObject:[user objectForKey:kstatusKey] forKey:kstatusKey];
+            
+            if([user objectForKey:kfullNameKey])
+                [[_contacts objectAtIndex:initalPos] setObject:[user objectForKey:kfullNameKey] forKey:@"full_name"];
+            
+            [_contactsTable beginUpdates];
+            NSIndexPath *path1 = [NSIndexPath indexPathForRow:initalPos inSection:konlineSection];
+            [_contactsTable reloadRowsAtIndexPaths:@[path1]
+                                  withRowAnimation:UITableViewRowAnimationNone];
+            [_contactsTable endUpdates];
+            
+            
+            
+        }
+        else  {
+        //insert into tableview
+        // for now just online
+        [[DataLayer sharedInstance] contactForUsername:[user objectForKey:kusernameKey] forAccount:[user objectForKey:kaccountNoKey] withCompletion:^(NSArray * contactRow) {
+            
+            //mutex to prevent others from modifying contacts at the same time
+            dispatch_async(dispatch_get_main_queue(),
+                           ^{
+                               //check if already there
+                               NSInteger pos=-1;
+                               NSInteger offlinepos=-1;
+                               pos=[self positionOfOnlineContact:user];
+                               
+                               if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
                                {
-                                   DDLogVerbose(@"removed from offline");
-                                   
-                                   [_offlineContacts removeObjectAtIndex:offlinepos];
-                                   [_contactsTable beginUpdates];
-                                   NSIndexPath *path2 = [NSIndexPath indexPathForRow:offlinepos inSection:kofflineSection];
-                                   [_contactsTable deleteRowsAtIndexPaths:@[path2]
-                                                         withRowAnimation:UITableViewRowAnimationFade];
-                                    [_contactsTable endUpdates];
+                                   offlinepos =[self positionOfOfflineContact:user];
+                                   if(offlinepos>=0 && offlinepos<[_offlineContacts count])
+                                   {
+                                       DDLogVerbose(@"removed from offline");
+                                       
+                                       [_offlineContacts removeObjectAtIndex:offlinepos];
+                                       [_contactsTable beginUpdates];
+                                       NSIndexPath *path2 = [NSIndexPath indexPathForRow:offlinepos inSection:kofflineSection];
+                                       [_contactsTable deleteRowsAtIndexPaths:@[path2]
+                                                             withRowAnimation:UITableViewRowAnimationFade];
+                                       [_contactsTable endUpdates];
+                                   }
                                }
-                           }
-                           
-                           //not already in online list
-                           if(pos<0)
-                           {
-                               if(!(contactRow.count>=1))
+                               
+                               //not already in online list
+                               if(pos<0)
                                {
-                                   DDLogError(@"ERROR:could not find contact row");
-                                   return;
-                               }
-                               //insert into datasource
-                               DDLogVerbose(@"inserted into contacts");
-                               [_contacts insertObject:[contactRow objectAtIndex:0] atIndex:0];
-                               
-                               //sort
-                               NSSortDescriptor *descriptor = [[NSSortDescriptor alloc] initWithKey:@"buddy_name"  ascending:YES];
-                               NSArray* sortArray =[NSArray arrayWithObjects:descriptor,nil];
-                               [_contacts sortUsingDescriptors:sortArray];
-                               
-                               //find where it is
-                               NSInteger newpos=[self positionOfOnlineContact:user];
-                               
-                               DDLogVerbose(@"sorted contacts %@", _contacts);
-                               
-                               DDLogVerbose(@"inserting %@ st sorted  pos %d", [_contacts objectAtIndex:newpos], newpos);
-                               
-                               
-                               [_contactsTable beginUpdates];
-                               
-                               NSIndexPath *path1 = [NSIndexPath indexPathForRow:newpos inSection:konlineSection];
-                               [_contactsTable insertRowsAtIndexPaths:@[path1]
-                                                     withRowAnimation:UITableViewRowAnimationAutomatic];
-                               
-                               [_contactsTable endUpdates];
-                               
-                               
-                           }else
-                           {
-                               DDLogVerbose(@"user %@ already in list updating status",[user objectForKey:kusernameKey]);
-                               if(pos<self.contacts.count) {
-                                   if([user objectForKey:kstateKey])
-                                       [[_contacts objectAtIndex:pos] setObject:[user objectForKey:kstateKey] forKey:kstateKey];
-                                   if([user objectForKey:kstatusKey])
-                                       [[_contacts objectAtIndex:pos] setObject:[user objectForKey:kstatusKey] forKey:kstatusKey];
+                                   if(!(contactRow.count>=1))
+                                   {
+                                       DDLogError(@"ERROR:could not find contact row");
+                                       return;
+                                   }
+                                   //insert into datasource
+                                   DDLogVerbose(@"inserted into contacts");
+                                   [_contacts insertObject:[contactRow objectAtIndex:0] atIndex:0];
                                    
-                                   if([user objectForKey:kfullNameKey])
-                                       [[_contacts objectAtIndex:pos] setObject:[user objectForKey:kfullNameKey] forKey:@"full_name"];
+                                   //sort
+                                   NSSortDescriptor *descriptor = [[NSSortDescriptor alloc] initWithKey:@"buddy_name"  ascending:YES];
+                                   NSArray* sortArray =[NSArray arrayWithObjects:descriptor,nil];
+                                   [_contacts sortUsingDescriptors:sortArray];
+                                   
+                                   //find where it is
+                                   NSInteger newpos=[self positionOfOnlineContact:user];
+                                   
+                                   DDLogVerbose(@"sorted contacts %@", _contacts);
+                                   
+                                   DDLogVerbose(@"inserting %@ st sorted  pos %d", [_contacts objectAtIndex:newpos], newpos);
+                                   
                                    
                                    [_contactsTable beginUpdates];
-                                   NSIndexPath *path1 = [NSIndexPath indexPathForRow:pos inSection:konlineSection];
-                                   [_contactsTable reloadRowsAtIndexPaths:@[path1]
-                                                         withRowAnimation:UITableViewRowAnimationNone];
+                                   
+                                   NSIndexPath *path1 = [NSIndexPath indexPathForRow:newpos inSection:konlineSection];
+                                   [_contactsTable insertRowsAtIndexPaths:@[path1]
+                                                         withRowAnimation:UITableViewRowAnimationAutomatic];
+                                   
                                    [_contactsTable endUpdates];
                                    
+                                   
+                               }else
+                               {
+                                   DDLogVerbose(@"user %@ already in list updating status",[user objectForKey:kusernameKey]);
+                                   if(pos<self.contacts.count) {
+                                       if([user objectForKey:kstateKey])
+                                           [[_contacts objectAtIndex:pos] setObject:[user objectForKey:kstateKey] forKey:kstateKey];
+                                       if([user objectForKey:kstatusKey])
+                                           [[_contacts objectAtIndex:pos] setObject:[user objectForKey:kstatusKey] forKey:kstatusKey];
+                                       
+                                       if([user objectForKey:kfullNameKey])
+                                           [[_contacts objectAtIndex:pos] setObject:[user objectForKey:kfullNameKey] forKey:@"full_name"];
+                                       
+                                       [_contactsTable beginUpdates];
+                                       NSIndexPath *path1 = [NSIndexPath indexPathForRow:pos inSection:konlineSection];
+                                       [_contactsTable reloadRowsAtIndexPaths:@[path1]
+                                                             withRowAnimation:UITableViewRowAnimationNone];
+                                       [_contactsTable endUpdates];
+                                       
+                                   }
+                                   
                                }
-                               
-                           }
-                       });
-    }];
-    
+                           });
+        }];
+        }
+    });
     
 }
 

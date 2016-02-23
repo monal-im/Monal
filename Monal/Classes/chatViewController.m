@@ -92,6 +92,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     [super viewDidLoad];
     [self setupDateObjects];
     containerView= self.view;
+    self.messageTable.scrollsToTop=YES;
+    self.chatInput.scrollsToTop=NO;
     
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
     [nc addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
@@ -412,8 +414,6 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
             }
             
           
-            
-           
             //if you have configured it, defer to dropbox
             if(self.restClient)
             {

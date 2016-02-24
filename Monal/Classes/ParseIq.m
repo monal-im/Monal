@@ -41,11 +41,16 @@
         if([_queryXMLNS isEqualToString:@"http://jabber.org/protocol/disco#info"]) _discoInfo=YES;
         if([_queryXMLNS isEqualToString:@"http://jabber.org/protocol/disco#items"]) _discoItems=YES;
         
+        if([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"jabber:iq:roster"])  {
+            State=@"RosterQuery";
+            _isRosterResponse=YES;
+        }
+        
         NSString* node =[attributeDict objectForKey:@"node"];
         if(node) _queryNode=node; 
           
      }
-    
+  
     
     if([elementName isEqualToString:@"feature"])
     {
@@ -61,6 +66,8 @@
         }
         
     }
+    
+    //http upload
     
     if([elementName isEqualToString:@"slot"])
     {
@@ -81,9 +88,16 @@
          State = @"slotPut";
         return;
     }
-  
     
-    if([elementName isEqualToString:@"group"] && _roster==YES)
+    //roster
+  
+    if([elementName isEqualToString:@"item"] && [State isEqualToString:@"RosterQuery"])
+    {
+        State=@"RosterItem"; // we can get item info
+    }
+    
+    
+    if([elementName isEqualToString:@"group"] && [State isEqualToString:@"RosterItem"])
     {
         State=@"RosterGroup"; // we can get group name here
     }
@@ -206,6 +220,14 @@
 	   )
     {
         _photoBinValue=_messageBuffer;
+        return;
+    }
+    
+    if(([elementName isEqualToString:@"item"]) && [State isEqualToString:@"RosterItem"]
+       )
+    {
+        //we would have a group name here
+        // _photoBinValue=_messageBuffer;
         return;
     }
     

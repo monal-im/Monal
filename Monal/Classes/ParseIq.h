@@ -22,6 +22,8 @@
 @property (nonatomic, assign, readonly) BOOL legacyAuth;
 @property (nonatomic, assign, readonly) BOOL httpUpload;
 
+@property (nonatomic, assign, readonly) BOOL isRosterResponse;
+
 @property (nonatomic, assign, readonly) BOOL shouldSetBind;
 @property (nonatomic, strong, readonly) NSString* jid;
 

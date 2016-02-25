@@ -110,8 +110,8 @@ extern NSString *const kCount;
 -(NSString*) fullName:(NSString*) buddy forAccount:(NSString*) accountNo; 
 //-(BOOL) setFileName:(NSString*) fileName forBuddy:(NSString*) buddy andAccount:(NSString*) accountNo;
 
--(BOOL) setBuddyHash:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
--(NSString*) buddyHash:(NSString*) buddy forAccount:(NSString*) accountNo;
+-(void) setContactHash:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
+-(void) contactHash:(NSString*) contact forAccount:(NSString*) accountNo withCompeltion: (void (^)(NSString *))completion;
 
 -(void) isBuddyOnline:(NSString*) buddy forAccount:(NSString*) accountNo withCompletion: (void (^)(BOOL))completion;
 

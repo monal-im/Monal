@@ -1718,23 +1718,27 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                                 {
                                     //check for vcard change
                                     if(presenceNode.photoHash) {
-                                        if([presenceNode.photoHash isEqualToString:[[DataLayer sharedInstance]  buddyHash:presenceNode.user forAccount:_accountNo]])
-                                        {
-                                            DDLogVerbose(@"photo hash is the  same");
-                                        }
-                                        else
-                                        {
-                                            [[DataLayer sharedInstance]  setBuddyHash:presenceNode forAccount:_accountNo];
-                                            XMPPIQ* iqVCard= [[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
-                                            [iqVCard getVcardTo:presenceNode.user];
-                                            [self send:iqVCard];
-                                        }
+                                        [[DataLayer sharedInstance]  contactHash:presenceNode.user forAccount:_accountNo withCompeltion:^(NSString *iconHash) {
+                                            if([presenceNode.photoHash isEqualToString:iconHash])
+                                            {
+                                                DDLogVerbose(@"photo hash is the  same");
+                                            }
+                                            else
+                                            {
+                                                [[DataLayer sharedInstance]  setContactHash:presenceNode forAccount:_accountNo];
+                                                XMPPIQ* iqVCard= [[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
+                                                [iqVCard getVcardTo:presenceNode.user];
+                                                [self send:iqVCard];
+                                            }
+                            
+                                        }];
+                                        
                                     }
                                 }
                                 else
                                 {
                                     // just set and request when in foreground if needed
-                                    [[DataLayer sharedInstance]  setBuddyHash:presenceNode forAccount:_accountNo];
+                                    [[DataLayer sharedInstance]  setContactHash:presenceNode forAccount:_accountNo];
                                 }
                             }
                             else {

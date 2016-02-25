@@ -1142,28 +1142,27 @@ static DataLayer *sharedInstance=nil;
 }
 
 
--(BOOL) setBuddyHash:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
+-(void) setContactHash:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo
 {
     NSString* hash=presenceObj.photoHash;
     if(!hash) hash=@"";
     //data length check
     NSString* query=[NSString stringWithFormat:@"update buddylist set iconhash='%@', dirty=1 where account_id=%@ and  buddy_name='%@';",hash,
                      accountNo, presenceObj.user.escapeForSql];
-    if([self executeNonQuery:query]!=NO)
-    {
-        return YES;
-    }
-    else
-    {
-        return NO;
-    }
+    [self executeNonQuery:query withCompletion:nil];
+ 
 }
 
--(NSString*) buddyHash:(NSString*) buddy forAccount:(NSString*) accountNo
+-(void) contactHash:(NSString*) buddy forAccount:(NSString*) accountNo withCompeltion: (void (^)(NSString *))completion;
 {
     NSString* query=[NSString stringWithFormat:@"select iconhash from buddylist where account_id=%@ and buddy_name='%@'", accountNo, buddy.escapeForSql];
-    NSString* iconhash= (NSString*)[self executeScalar:query];
-    return iconhash;
+    [self executeScalar:query withCompletion:^(NSObject *iconHash) {
+        if(completion)
+        {
+            completion((NSString *)iconHash);
+        }
+        
+    }];
 }
 
 

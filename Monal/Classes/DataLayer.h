@@ -61,7 +61,7 @@ extern NSString *const kCount;
 -(void) executeNonQuery:(NSString*) query withCompletion: (void (^)(BOOL))completion;
 
 // Buddy Commands
--(BOOL) addBuddy:(NSString*) buddy  forAccount:(NSString*) accountNo fullname:(NSString*)fullName nickname:(NSString*) nickName;
+-(BOOL) addContact:(NSString*) contact  forAccount:(NSString*) accountNo fullname:(NSString*)fullName nickname:(NSString*) nickName;
 -(BOOL) removeBuddy:(NSString*) buddy forAccount:(NSString*) accountNo;
 -(BOOL) clearBuddies:(NSString*) accountNo; 
 -(void) contactForUsername:(NSString*) username forAccount: (NSString*) accountNo withCompletion: (void (^)(NSArray *))completion;
@@ -106,7 +106,7 @@ extern NSString *const kCount;
 
 #pragma mark Contact info
 
--(BOOL) setFullName:(NSString*) fullName forBuddy:(NSString*) buddy andAccount:(NSString*) accountNo;
+-(void) setFullName:(NSString*) fullName forContact:(NSString*) contact andAccount:(NSString*) accountNo;
 -(NSString*) fullName:(NSString*) buddy forAccount:(NSString*) accountNo; 
 //-(BOOL) setFileName:(NSString*) fileName forBuddy:(NSString*) buddy andAccount:(NSString*) accountNo;
 
@@ -124,7 +124,7 @@ extern NSString *const kCount;
 /**
  Calls with YES if contact  has laredy been added to the database for this account
  */
--(void) isBuddyInList:(NSString*) buddy forAccount:(NSString*) accountNo withCompletion: (void (^)(BOOL))completion;
+-(void) isContactInList:(NSString*) buddy forAccount:(NSString*) accountNo withCompletion: (void (^)(BOOL))completion;
 
 
 //vcard commands

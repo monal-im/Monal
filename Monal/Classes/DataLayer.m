@@ -627,24 +627,24 @@ static DataLayer *sharedInstance=nil;
 
 #pragma mark Buddy Commands
 
--(BOOL) addBuddy:(NSString*) buddy  forAccount:(NSString*) accountNo fullname:(NSString*) fullName nickname:(NSString*) nickName
+-(BOOL) addContact:(NSString*) contact  forAccount:(NSString*) accountNo fullname:(NSString*) fullName nickname:(NSString*) nickName
 {
     __block BOOL toReturn=NO;
     //this needs to be one atomic operation
     dispatch_sync(_contactQueue, ^{
-       [self isBuddyInList:buddy forAccount:accountNo withCompletion:^(BOOL exists) {
+       [self isContactInList:contact forAccount:accountNo withCompletion:^(BOOL exists) {
            if(!exists)
            {
                    // no blank full names
                    NSString* actualfull;
                    if([[fullName  stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]==0) {
-                       actualfull=buddy;
+                       actualfull=contact;
                    }
                    else {
                        actualfull=fullName;
                    }
                    
-                   NSString* query=[NSString stringWithFormat:@"insert into buddylist values(null, %@, '%@', '%@','%@','','','','','',0, 0, 1,0);", accountNo, buddy.escapeForSql, actualfull.escapeForSql, nickName.escapeForSql];
+                   NSString* query=[NSString stringWithFormat:@"insert into buddylist values(null, %@, '%@', '%@','%@','','','','','',0, 0, 1,0);", accountNo, contact.escapeForSql, actualfull.escapeForSql, nickName.escapeForSql];
                    if([self executeNonQuery:query]!=NO)
                    {
                        toReturn= YES;
@@ -1099,7 +1099,7 @@ static DataLayer *sharedInstance=nil;
 
 #pragma mark Contact info
 
--(BOOL) setFullName:(NSString*) fullName forBuddy:(NSString*) buddy andAccount:(NSString*) accountNo
+-(void) setFullName:(NSString*) fullName forContact:(NSString*) contact andAccount:(NSString*) accountNo
 {
     
     NSString* toPass;
@@ -1108,23 +1108,13 @@ static DataLayer *sharedInstance=nil;
     if([fullName length]>50) toPass=[fullName substringToIndex:49]; else toPass=fullName;
     // sometimes the buddyname comes from a roster so it might not be in the list yet, add first and if that fails (ie already there) then set fullname
     
-    if(![self addBuddy:buddy forAccount: accountNo fullname:fullName nickname:@""])
+    if(![self addContact:contact forAccount: accountNo fullname:fullName nickname:@""])
     {
-        NSString* query=[NSString stringWithFormat:@"update buddylist set full_name='%@',dirty=1 where account_id=%@ and  buddy_name='%@';",[toPass stringByReplacingOccurrencesOfString:@"'" withString:@"''"], accountNo, buddy.escapeForSql];
-        if([self executeNonQuery:query]!=NO)
-        {
-            return YES;
-        }
-        else
-        {
-            return NO;
-        }
+        NSString* query=[NSString stringWithFormat:@"update buddylist set full_name='%@',dirty=1 where account_id=%@ and  buddy_name='%@';",[toPass stringByReplacingOccurrencesOfString:@"'" withString:@"''"], accountNo, contact.escapeForSql];
+        [self executeNonQuery:query withCompletion:nil];
         
     }
-    else
-    {
-        return YES;
-    }
+   
 }
 
 -(BOOL) setNickName:(NSString*) nickName forBuddy:(NSString*) buddy andAccount:(NSString*) accountNo
@@ -1179,7 +1169,7 @@ static DataLayer *sharedInstance=nil;
 
 
 
--(void) isBuddyInList:(NSString*) buddy forAccount:(NSString*) accountNo withCompletion: (void (^)(BOOL))completion
+-(void) isContactInList:(NSString*) buddy forAccount:(NSString*) accountNo withCompletion: (void (^)(BOOL))completion
 {
    NSString* query=[NSString stringWithFormat:@"select count(buddy_id) from buddylist where account_id=%@ and buddy_name='%@' ", accountNo, buddy.escapeForSql];
     

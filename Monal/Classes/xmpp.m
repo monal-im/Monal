@@ -1183,7 +1183,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                     NSString* fullname=iqNode.fullName;
                     if(iqNode.fullName)
                     {
-                        [[DataLayer sharedInstance] setFullName:iqNode.fullName forBuddy:iqNode.user andAccount:_accountNo];
+                        [[DataLayer sharedInstance] setFullName:iqNode.fullName forContact:iqNode.user andAccount:_accountNo];
                     }
                     
                     if(iqNode.photoBinValue)
@@ -1317,15 +1317,15 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                             
                             if([[contact objectForKey:@"subscription"] isEqualToString:@"both"])
                             {
-                                [[DataLayer sharedInstance] isBuddyInList:[contact objectForKey:@"jid"] forAccount:_accountNo withCompletion:^(BOOL exists) {
+                                [[DataLayer sharedInstance] isContactInList:[contact objectForKey:@"jid"] forAccount:_accountNo withCompletion:^(BOOL exists) {
                                     if(!exists)
                                     {
-                                               [[DataLayer sharedInstance] addBuddy:[contact objectForKey:@"jid"]?[contact objectForKey:@"jid"]:@"" forAccount:_accountNo fullname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@"" nickname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@""];
+                                               [[DataLayer sharedInstance] addContact:[contact objectForKey:@"jid"]?[contact objectForKey:@"jid"]:@"" forAccount:_accountNo fullname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@"" nickname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@""];
                                     }
                                     else  {
                                         // update info if needed
                                         
-                                        [[DataLayer sharedInstance] setFullName:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@"" forBuddy:[contact objectForKey:@"jid"]?[contact objectForKey:@"jid"]:@"" andAccount:_accountNo ] ;
+                                        [[DataLayer sharedInstance] setFullName:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@"" forContact:[contact objectForKey:@"jid"]?[contact objectForKey:@"jid"]:@"" andAccount:_accountNo ] ;
                                     }
                                 }];
                                    
@@ -1667,11 +1667,11 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                         if((presenceNode.user!=nil) && ([[presenceNode.user stringByTrimmingCharactersInSet:
                                                           [NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0))
                         {
-                            [[DataLayer sharedInstance] isBuddyInList:presenceNode.user forAccount:_accountNo withCompletion:^(BOOL exists) {
+                            [[DataLayer sharedInstance] isContactInList:presenceNode.user forAccount:_accountNo withCompletion:^(BOOL exists) {
                                 if(!exists)
                                 {
                                     DDLogVerbose(@"Buddy not already in list");
-                                    [[DataLayer sharedInstance] addBuddy:presenceNode.user forAccount:_accountNo fullname:@"" nickname:@"" ];
+                                    [[DataLayer sharedInstance] addContact:presenceNode.user forAccount:_accountNo fullname:@"" nickname:@"" ];
                                 }
                                 else
                                 {

@@ -1074,7 +1074,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
         while (stanzaToParse)
         {
             [self.processQueue addOperationWithBlock:^{
-            DDLogDebug(@"got stanza %@", stanzaToParse);
+         //   DDLogDebug(@"got stanza %@", stanzaToParse);
             
             if([[stanzaToParse objectForKey:@"stanzaType"]  isEqualToString:@"iq"])
             {
@@ -1317,17 +1317,18 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                             
                             if([[contact objectForKey:@"subscription"] isEqualToString:@"both"])
                             {
-                                if(![[DataLayer sharedInstance] isBuddyInList:[contact objectForKey:@"jid"] forAccount:_accountNo])
-                                {
-                                    [[DataLayer sharedInstance] addBuddy:[contact objectForKey:@"jid"]?[contact objectForKey:@"jid"]:@"" forAccount:_accountNo fullname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@"" nickname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@""];
-                                }
-                                else
-                                {
-                                    // update info if needed
-                                    
-                                    [[DataLayer sharedInstance] setFullName:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@"" forBuddy:[contact objectForKey:@"jid"]?[contact objectForKey:@"jid"]:@"" andAccount:_accountNo ] ;
-                                    
-                                }
+                                [[DataLayer sharedInstance] isBuddyInList:[contact objectForKey:@"jid"] forAccount:_accountNo withCompletion:^(BOOL exists) {
+                                    if(!exists)
+                                    {
+                                               [[DataLayer sharedInstance] addBuddy:[contact objectForKey:@"jid"]?[contact objectForKey:@"jid"]:@"" forAccount:_accountNo fullname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@"" nickname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@""];
+                                    }
+                                    else  {
+                                        // update info if needed
+                                        
+                                        [[DataLayer sharedInstance] setFullName:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@"" forBuddy:[contact objectForKey:@"jid"]?[contact objectForKey:@"jid"]:@"" andAccount:_accountNo ] ;
+                                    }
+                                }];
+                                   
                             }
                             else
                             {
@@ -1666,15 +1667,18 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                         if((presenceNode.user!=nil) && ([[presenceNode.user stringByTrimmingCharactersInSet:
                                                           [NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0))
                         {
-                            if(![[DataLayer sharedInstance] isBuddyInList:presenceNode.user forAccount:_accountNo])
-                            {
-                                DDLogVerbose(@"Buddy not already in list");
-                                [[DataLayer sharedInstance] addBuddy:presenceNode.user forAccount:_accountNo fullname:@"" nickname:@"" ];
-                            }
-                            else
-                            {
-                                DDLogVerbose(@"Buddy already in list");
-                            }
+                            [[DataLayer sharedInstance] isBuddyInList:presenceNode.user forAccount:_accountNo withCompletion:^(BOOL exists) {
+                                if(!exists)
+                                {
+                                    DDLogVerbose(@"Buddy not already in list");
+                                    [[DataLayer sharedInstance] addBuddy:presenceNode.user forAccount:_accountNo fullname:@"" nickname:@"" ];
+                                }
+                                else
+                                {
+                                    DDLogVerbose(@"Buddy already in list");
+                                }
+                            }];
+                           
                             
                             DDLogVerbose(@" showing as online now");
                             

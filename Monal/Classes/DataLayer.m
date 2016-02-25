@@ -632,27 +632,31 @@ static DataLayer *sharedInstance=nil;
     __block BOOL toReturn=NO;
     //this needs to be one atomic operation
     dispatch_sync(_contactQueue, ^{
-        if(![self isBuddyInList:buddy forAccount:accountNo]) {
-            
-            // no blank full names
-            NSString* actualfull;
-            if([[fullName  stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]==0) {
-                actualfull=buddy;
-            }
-            else {
-                actualfull=fullName;
-            }
-            
-            NSString* query=[NSString stringWithFormat:@"insert into buddylist values(null, %@, '%@', '%@','%@','','','','','',0, 0, 1,0);", accountNo, buddy.escapeForSql, actualfull.escapeForSql, nickName.escapeForSql];
-            if([self executeNonQuery:query]!=NO)
-            {
-                toReturn= YES;
-            }
-            else
-            {
-                
-            }
-        }
+       [self isBuddyInList:buddy forAccount:accountNo withCompletion:^(BOOL exists) {
+           if(!exists)
+           {
+                   // no blank full names
+                   NSString* actualfull;
+                   if([[fullName  stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]==0) {
+                       actualfull=buddy;
+                   }
+                   else {
+                       actualfull=fullName;
+                   }
+                   
+                   NSString* query=[NSString stringWithFormat:@"insert into buddylist values(null, %@, '%@', '%@','%@','','','','','',0, 0, 1,0);", accountNo, buddy.escapeForSql, actualfull.escapeForSql, nickName.escapeForSql];
+                   if([self executeNonQuery:query]!=NO)
+                   {
+                       toReturn= YES;
+                   }
+                   else
+                   {
+                       
+                   }
+
+           }
+       }
+       ];
     });
     
     return toReturn;
@@ -1173,30 +1177,31 @@ static DataLayer *sharedInstance=nil;
 }
 
 
--(bool) isBuddyInList:(NSString*) buddy forAccount:(NSString*) accountNo
+
+
+-(void) isBuddyInList:(NSString*) buddy forAccount:(NSString*) accountNo withCompletion: (void (^)(BOOL))completion
 {
+   NSString* query=[NSString stringWithFormat:@"select count(buddy_id) from buddylist where account_id=%@ and buddy_name='%@' ", accountNo, buddy.escapeForSql];
     
-    NSString* query=[NSString stringWithFormat:@"select count(buddy_id) from buddylist where account_id=%@ and buddy_name='%@' ", accountNo, buddy.escapeForSql];
-    
-    NSNumber* count=(NSNumber*)[self executeScalar:query];
-    if(count!=nil)
-    {
-        int val=[count integerValue];
-        if(val>0) {
-            return YES;
-        }
-        else
+    [self executeScalar:query withCompletion:^(NSObject *value) {
+        
+        NSNumber* count=(NSNumber*)value;
+        BOOL toreturn=NO;
+        if(count!=nil)
         {
-            return NO;
+            NSInteger val=[count integerValue];
+            if(val>0) {
+                toreturn= YES;
+            }
+            
         }
-    }
-    else
-    {
-        return NO;
-    }
-    
-    
+        if(completion)
+        {
+            completion(toreturn);
+        }
+    }];
 }
+
 
 -(void) isBuddyOnline:(NSString*) buddy forAccount:(NSString*) accountNo withCompletion: (void (^)(BOOL))completion
 {

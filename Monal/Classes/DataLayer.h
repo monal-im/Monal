@@ -121,7 +121,11 @@ extern NSString *const kCount;
 -(bool) isBuddyAdded:(NSString*) buddy forAccount:(NSString*) accountNo ;
 -(bool) isBuddyRemoved:(NSString*) buddy forAccount:(NSString*) accountNo ;
 
--(bool) isBuddyInList:(NSString*) buddy forAccount:(NSString*) accountNo ;
+/**
+ Calls with YES if contact  has laredy been added to the database for this account
+ */
+-(void) isBuddyInList:(NSString*) buddy forAccount:(NSString*) accountNo withCompletion: (void (^)(BOOL))completion;
+
 
 //vcard commands
 

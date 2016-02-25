@@ -118,11 +118,12 @@
         }
         
         [[MLImageManager sharedInstance] getIconForContact:[notification.userInfo objectForKey:@"from"] andAccount:[notification.userInfo objectForKey:@"accountNo"] withCompletion:^(NSImage *alertImage) {
-            
+             dispatch_async(dispatch_get_main_queue(), ^{
             alert.contentImage= alertImage;
             alert.hasReplyButton=YES;
             alert.userInfo= notification.userInfo;
             [[NSUserNotificationCenter defaultUserNotificationCenter] scheduleNotification:alert];
+             });
             
             
         }];

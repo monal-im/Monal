@@ -496,12 +496,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self.sourceDateFormat setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
     
     self.gregorian = [[NSCalendar alloc]
-                      initWithCalendarIdentifier:NSGregorianCalendar];
+                      initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
     
     NSDate* now =[NSDate date];
-    self.thisday =[self.gregorian components:NSDayCalendarUnit fromDate:now].day;
-    self.thismonth =[self.gregorian components:NSMonthCalendarUnit fromDate:now].month;
-    self.thisyear =[self.gregorian components:NSYearCalendarUnit fromDate:now].year;
+    self.thisday =[self.gregorian components:NSCalendarUnitDay fromDate:now].day;
+    self.thismonth =[self.gregorian components:NSCalendarUnitMonth fromDate:now].month;
+    self.thisyear =[self.gregorian components:NSCalendarUnitYear fromDate:now].year;
     
     
 }

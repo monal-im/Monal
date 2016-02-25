@@ -627,9 +627,8 @@ static DataLayer *sharedInstance=nil;
 
 #pragma mark Buddy Commands
 
--(void) addContact:(NSString*) contact  forAccount:(NSString*) accountNo fullname:(NSString*) fullName nickname:(NSString*) nickName
+-(void) addContact:(NSString*) contact  forAccount:(NSString*) accountNo fullname:(NSString*)fullName nickname:(NSString*) nickName withCompletion: (void (^)(BOOL))completion
 {
-    
     //this needs to be one atomic operation
     dispatch_sync(_contactQueue, ^{
        [self isContactInList:contact forAccount:accountNo withCompletion:^(BOOL exists) {
@@ -645,11 +644,20 @@ static DataLayer *sharedInstance=nil;
                    }
                    
                    NSString* query=[NSString stringWithFormat:@"insert into buddylist values(null, %@, '%@', '%@','%@','','','','','',0, 0, 1,0);", accountNo, contact.escapeForSql, actualfull.escapeForSql, nickName.escapeForSql];
-               [self executeNonQuery:query withCompletion:nil];
+               [self executeNonQuery:query withCompletion:^(BOOL success) {
+                   if(completion)
+                   {
+                       completion(success);
+                   }
+                   
+               }];
        
            }
-       }
-       ];
+           else
+           {
+               if(completion) completion(NO);
+           }
+       }];
     });
 
 }

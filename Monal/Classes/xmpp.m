@@ -1317,18 +1317,15 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                             
                             if([[contact objectForKey:@"subscription"] isEqualToString:@"both"])
                             {
-                                [[DataLayer sharedInstance] isContactInList:[contact objectForKey:@"jid"] forAccount:_accountNo withCompletion:^(BOOL exists) {
-                                    if(!exists)
+                                [[DataLayer sharedInstance] addContact:[contact objectForKey:@"jid"]?[contact objectForKey:@"jid"]:@"" forAccount:_accountNo fullname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@"" nickname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@"" withCompletion:^(BOOL success) {
+                                    
+                                    if(!success)
                                     {
-                                               [[DataLayer sharedInstance] addContact:[contact objectForKey:@"jid"]?[contact objectForKey:@"jid"]:@"" forAccount:_accountNo fullname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@"" nickname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@""];
-                                    }
-                                    else  {
-                                        // update info if needed
-                                        
                                         [[DataLayer sharedInstance] setFullName:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@"" forContact:[contact objectForKey:@"jid"]?[contact objectForKey:@"jid"]:@"" andAccount:_accountNo ] ;
                                     }
+                                    
                                 }];
-                                   
+ 
                             }
                             else
                             {
@@ -1667,18 +1664,20 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                         if((presenceNode.user!=nil) && ([[presenceNode.user stringByTrimmingCharactersInSet:
                                                           [NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0))
                         {
-                            [[DataLayer sharedInstance] isContactInList:presenceNode.user forAccount:_accountNo withCompletion:^(BOOL exists) {
-                                if(!exists)
+                            
+                            
+                            [[DataLayer sharedInstance] addContact:presenceNode.user forAccount:_accountNo fullname:@"" nickname:@"" withCompletion:^(BOOL success) {
+                                if(!success)
                                 {
                                     DDLogVerbose(@"Buddy not already in list");
-                                    [[DataLayer sharedInstance] addContact:presenceNode.user forAccount:_accountNo fullname:@"" nickname:@"" ];
                                 }
                                 else
                                 {
                                     DDLogVerbose(@"Buddy already in list");
                                 }
+                                
                             }];
-                           
+                            
                             
                             DDLogVerbose(@" showing as online now");
                             

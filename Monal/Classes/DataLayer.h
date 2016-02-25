@@ -61,7 +61,7 @@ extern NSString *const kCount;
 -(void) executeNonQuery:(NSString*) query withCompletion: (void (^)(BOOL))completion;
 
 // Buddy Commands
--(void) addContact:(NSString*) contact  forAccount:(NSString*) accountNo fullname:(NSString*)fullName nickname:(NSString*) nickName;
+-(void) addContact:(NSString*) contact  forAccount:(NSString*) accountNo fullname:(NSString*)fullName nickname:(NSString*) nickName withCompletion: (void (^)(BOOL))completion;
 -(BOOL) removeBuddy:(NSString*) buddy forAccount:(NSString*) accountNo;
 -(BOOL) clearBuddies:(NSString*) accountNo; 
 -(void) contactForUsername:(NSString*) username forAccount: (NSString*) accountNo withCompletion: (void (^)(NSArray *))completion;

@@ -309,7 +309,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         hasChange=YES;
     }
     
-    if([user objectForKey:kfullNameKey] && ![[user objectForKey:kfullNameKey] isEqualToString:[contactrow  objectForKey:kfullNameKey]]  ) {
+    if([user objectForKey:kfullNameKey] && ![[user objectForKey:kfullNameKey] isEqualToString:[contactrow  objectForKey:kfullNameKey]]  &&
+       [[user objectForKey:kfullNameKey] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].length>0) {
         [contactrow setObject:[user objectForKey:kfullNameKey] forKey:@"full_name"];
         hasChange=YES;
     }
@@ -348,7 +349,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         {
             DDLogVerbose(@"user %@ already in list updating status and nothing else",[user objectForKey:kusernameKey]);
             
-            [self updateContactAt:initalPos withInfo:user];
+           [self updateContactAt:initalPos withInfo:user];
 
             
         }

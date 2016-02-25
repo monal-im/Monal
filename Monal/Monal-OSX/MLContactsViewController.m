@@ -351,7 +351,44 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     
 }
 
--(void) addOnlineUser:(NSDictionary*) user
+
+-(void)updateContactAt:(NSInteger) pos withInfo:(NSDictionary *) user
+{
+    NSMutableDictionary *contactrow =[_contacts objectAtIndex:pos];
+    BOOL hasChange=NO;
+    
+    if([user objectForKey:kstateKey] && ![[user objectForKey:kstateKey] isEqualToString:[contactrow  objectForKey:kstateKey]] ) {
+        [contactrow setObject:[user objectForKey:kstateKey] forKey:kstateKey];
+        hasChange=YES;
+    }
+    if([user objectForKey:kstatusKey] && ![[user objectForKey:kstatusKey] isEqualToString:[contactrow  objectForKey:kstatusKey]] ) {
+        [contactrow setObject:[user objectForKey:kstatusKey] forKey:kstatusKey];
+        hasChange=YES;
+    }
+    
+    if([user objectForKey:kfullNameKey] && ![[user objectForKey:kfullNameKey] isEqualToString:[contactrow  objectForKey:kfullNameKey]]  ) {
+        [contactrow setObject:[user objectForKey:kfullNameKey] forKey:@"full_name"];
+        hasChange=YES;
+    }
+    
+    if(hasChange) {
+        if(self.searchResults || self.activeChat){
+            [self refreshDisplay];
+        }
+        else  {
+            [self.contactsTable beginUpdates];
+            
+            NSIndexSet *indexSet =[[NSIndexSet alloc] initWithIndex:pos] ;
+            NSIndexSet *columnIndexSet =[[NSIndexSet alloc] initWithIndex:0] ;
+            [self.contactsTable reloadDataForRowIndexes:indexSet columnIndexes:columnIndexSet];
+            [self.contactsTable endUpdates];
+        }
+    } else  {
+        
+    }
+}
+
+-(void) addOnlineUser:(NSDictionary *) user
 {
     
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -360,39 +397,8 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
         if(initalPos>=0)
         {
             DDLogVerbose(@"user %@ already in list updating status and nothing else",[user objectForKey:kusernameKey]);
-            
-            NSMutableDictionary *contactrow =[_contacts objectAtIndex:initalPos];
-            BOOL hasChange=NO;
-            
-            if([user objectForKey:kstateKey] && ![[user objectForKey:kstateKey] isEqualToString:[contactrow  objectForKey:kstateKey]] ) {
-                [contactrow setObject:[user objectForKey:kstateKey] forKey:kstateKey];
-                hasChange=YES;
-            }
-            if([user objectForKey:kstatusKey] && ![[user objectForKey:kstatusKey] isEqualToString:[contactrow  objectForKey:kstatusKey]] ) {
-                [contactrow setObject:[user objectForKey:kstatusKey] forKey:kstatusKey];
-                hasChange=YES;
-            }
-            
-            if([user objectForKey:kfullNameKey] && ![[user objectForKey:kfullNameKey] isEqualToString:[contactrow  objectForKey:kfullNameKey]]  ) {
-                [contactrow setObject:[user objectForKey:kfullNameKey] forKey:@"full_name"];
-                hasChange=YES;
-            }
-            
-            if(hasChange) {
-                if(self.searchResults || self.activeChat){
-                    [self refreshDisplay];
-                }
-                else  {
-                    [self.contactsTable beginUpdates];
-                    
-                    NSIndexSet *indexSet =[[NSIndexSet alloc] initWithIndex:initalPos] ;
-                    NSIndexSet *columnIndexSet =[[NSIndexSet alloc] initWithIndex:0] ;
-                    [self.contactsTable reloadDataForRowIndexes:indexSet columnIndexes:columnIndexSet];
-                    [self.contactsTable endUpdates];
-                }
-            } else  {
-                
-            }
+            [self updateContactAt:initalPos withInfo:user];
+   
 
         }
         else  {
@@ -483,39 +489,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                            {
                                DDLogVerbose(@"user %@ already in list %@",[user objectForKey:kusernameKey], self.contacts);
                                if(pos<self.contacts.count) {
-                                   
-                                   NSMutableDictionary *contactrow =[_contacts objectAtIndex:pos];
-                                   BOOL hasChange=NO;
-                                   
-                                   if([user objectForKey:kstateKey] && ![[user objectForKey:kstateKey] isEqualToString:[contactrow  objectForKey:kstateKey]] ) {
-                                       [contactrow setObject:[user objectForKey:kstateKey] forKey:kstateKey];
-                                       hasChange=YES;
-                                   }
-                                   if([user objectForKey:kstatusKey] && ![[user objectForKey:kstatusKey] isEqualToString:[contactrow  objectForKey:kstatusKey]] ) {
-                                       [contactrow setObject:[user objectForKey:kstatusKey] forKey:kstatusKey];
-                                       hasChange=YES;
-                                   }
-                                   
-                                   if([user objectForKey:kfullNameKey] && ![[user objectForKey:kfullNameKey] isEqualToString:[contactrow  objectForKey:kfullNameKey]]  ) {
-                                       [contactrow setObject:[user objectForKey:kfullNameKey] forKey:@"full_name"];
-                                       hasChange=YES;
-                                   }
-                                   
-                                   if(hasChange) {
-                                       
-                                       if(self.searchResults || self.activeChat){
-                                           [self refreshDisplay];
-                                       }
-                                       else  {
-                                           
-                                           [self.contactsTable beginUpdates];
-                                           
-                                           NSIndexSet *indexSet =[[NSIndexSet alloc] initWithIndex:pos] ;
-                                           NSIndexSet *columnIndexSet =[[NSIndexSet alloc] initWithIndex:0] ;
-                                           [self.contactsTable reloadDataForRowIndexes:indexSet columnIndexes:columnIndexSet];
-                                           [self.contactsTable endUpdates];
-                                       }
-                                   }
+                                     [self updateContactAt:pos withInfo:user];
                                }
                            }
                            

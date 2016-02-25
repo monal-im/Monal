@@ -771,7 +771,11 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     cell.name.backgroundColor =[NSColor clearColor];
     cell.status.backgroundColor= [NSColor clearColor];
     
-    cell.name.stringValue = [contactRow objectForKey:kFullName];
+    if([[contactRow objectForKey:kFullName]stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].length>0) {
+        cell.name.stringValue = [contactRow objectForKey:kFullName];
+    } else  {
+        cell.name.stringValue=[contactRow objectForKey:kContactName] ;
+    }
     cell.accountNo= [[contactRow objectForKey:kAccountID] integerValue];
     cell.username =[contactRow objectForKey:kContactName] ;
     

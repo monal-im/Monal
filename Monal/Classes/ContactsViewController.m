@@ -313,7 +313,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
        [[user objectForKey:kfullNameKey] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].length>0) {
         [contactrow setObject:[user objectForKey:kfullNameKey] forKey:@"full_name"];
         hasChange=YES;
-    }
+    } 
     
     if(hasChange) {
         

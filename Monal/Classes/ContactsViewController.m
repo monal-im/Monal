@@ -295,6 +295,39 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
 }
 
+-(void)updateContactAt:(NSInteger) pos withInfo:(NSDictionary *) user
+{
+    NSMutableDictionary *contactrow =[_contacts objectAtIndex:pos];
+    BOOL hasChange=NO;
+    
+    if([user objectForKey:kstateKey] && ![[user objectForKey:kstateKey] isEqualToString:[contactrow  objectForKey:kstateKey]] ) {
+        [contactrow setObject:[user objectForKey:kstateKey] forKey:kstateKey];
+        hasChange=YES;
+    }
+    if([user objectForKey:kstatusKey] && ![[user objectForKey:kstatusKey] isEqualToString:[contactrow  objectForKey:kstatusKey]] ) {
+        [contactrow setObject:[user objectForKey:kstatusKey] forKey:kstatusKey];
+        hasChange=YES;
+    }
+    
+    if([user objectForKey:kfullNameKey] && ![[user objectForKey:kfullNameKey] isEqualToString:[contactrow  objectForKey:kfullNameKey]]  ) {
+        [contactrow setObject:[user objectForKey:kfullNameKey] forKey:@"full_name"];
+        hasChange=YES;
+    }
+    
+    if(hasChange) {
+        
+        [self.contactsTable beginUpdates];
+        
+        [_contactsTable beginUpdates];
+        NSIndexPath *path1 = [NSIndexPath indexPathForRow:pos inSection:konlineSection];
+        [_contactsTable reloadRowsAtIndexPaths:@[path1]
+                              withRowAnimation:UITableViewRowAnimationNone];
+        [_contactsTable endUpdates];
+    } else  {
+        
+    }
+}
+
 
 -(void) addOnlineUser:(NSDictionary*) user
 {
@@ -315,21 +348,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         {
             DDLogVerbose(@"user %@ already in list updating status and nothing else",[user objectForKey:kusernameKey]);
             
-            if([user objectForKey:kstateKey])
-                [[_contacts objectAtIndex:initalPos] setObject:[user objectForKey:kstateKey] forKey:kstateKey];
-            if([user objectForKey:kstatusKey])
-                [[_contacts objectAtIndex:initalPos] setObject:[user objectForKey:kstatusKey] forKey:kstatusKey];
-            
-            if([user objectForKey:kfullNameKey])
-                [[_contacts objectAtIndex:initalPos] setObject:[user objectForKey:kfullNameKey] forKey:@"full_name"];
-            
-            [_contactsTable beginUpdates];
-            NSIndexPath *path1 = [NSIndexPath indexPathForRow:initalPos inSection:konlineSection];
-            [_contactsTable reloadRowsAtIndexPaths:@[path1]
-                                  withRowAnimation:UITableViewRowAnimationNone];
-            [_contactsTable endUpdates];
-            
-            
+            [self updateContactAt:initalPos withInfo:user];
+
             
         }
         else  {
@@ -398,23 +418,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                }else
                                {
                                    DDLogVerbose(@"user %@ already in list updating status",[user objectForKey:kusernameKey]);
-                                   if(pos<self.contacts.count) {
-                                       if([user objectForKey:kstateKey])
-                                           [[_contacts objectAtIndex:pos] setObject:[user objectForKey:kstateKey] forKey:kstateKey];
-                                       if([user objectForKey:kstatusKey])
-                                           [[_contacts objectAtIndex:pos] setObject:[user objectForKey:kstatusKey] forKey:kstatusKey];
-                                       
-                                       if([user objectForKey:kfullNameKey])
-                                           [[_contacts objectAtIndex:pos] setObject:[user objectForKey:kfullNameKey] forKey:@"full_name"];
-                                       
-                                       [_contactsTable beginUpdates];
-                                       NSIndexPath *path1 = [NSIndexPath indexPathForRow:pos inSection:konlineSection];
-                                       [_contactsTable reloadRowsAtIndexPaths:@[path1]
-                                                             withRowAnimation:UITableViewRowAnimationNone];
-                                       [_contactsTable endUpdates];
-                                       
-                                   }
-                                   
+                                    [self updateContactAt:initalPos withInfo:user];
                                }
                            });
         }];

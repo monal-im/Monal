@@ -151,7 +151,11 @@
         });
     }];
     
-    cell.userImage.image=[[MLImageManager sharedInstance] getIconForContact:[row objectForKey:@"buddy_name"] andAccount:accountNo];
+    [[MLImageManager sharedInstance] getIconForContact:[row objectForKey:@"buddy_name"] andAccount:accountNo withCompletion:^(UIImage *image) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            cell.userImage.image=image;
+        });
+    }];
     [cell setOrb];
     return cell;
 }

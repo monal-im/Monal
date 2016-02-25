@@ -41,11 +41,11 @@
 /**
  retrieves a uiimage for the icon. returns noicon.png if nothing is found. never returns nil.
  */
--(UIImage *) getIconForContact:(NSString*) contact andAccount:(NSString *) accountNo;
+-(void) getIconForContact:(NSString*) contact andAccount:(NSString *) accountNo withCompletion:(void (^)(UIImage *))completion;
 
 #else
 /**
- retrieves a uiimage for the icon. returns noicon.png if nothing is found. never returns nil.
+ retrieves a nsimage for the icon. returns noicon.png if nothing is found. never returns nil.
  */
 -(void) getIconForContact:(NSString*) contact andAccount:(NSString *) accountNo withCompletion:(void (^)(NSImage *))completion;
 

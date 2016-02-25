@@ -62,8 +62,12 @@
           
     }
     NSString* accountNo=[NSString stringWithFormat:@"%@", [_contact objectForKey:@"account_id"]];
-    UIImage* contactImage=[[MLImageManager sharedInstance] getIconForContact:[_contact objectForKey:@"buddy_name"] andAccount:accountNo];
-    _buddyIconView.image=contactImage;
+    [[MLImageManager sharedInstance] getIconForContact:[_contact objectForKey:@"buddy_name"] andAccount:accountNo withCompletion:^(UIImage *image) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            _buddyIconView.image=image;
+        });
+    }];
+    
     
     NSArray* resources= [[DataLayer sharedInstance] resourcesForContact:[_contact objectForKey:@"buddy_name"]];
     self.resourcesTextView.text=@"";

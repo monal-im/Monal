@@ -43,7 +43,7 @@
         
         if([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"jabber:iq:roster"])  {
             State=@"RosterQuery";
-            _isRosterResponse=YES;
+            _roster=YES;
         }
         
         NSString* node =[attributeDict objectForKey:@"node"];

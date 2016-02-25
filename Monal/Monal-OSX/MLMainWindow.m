@@ -117,11 +117,16 @@
             alert.soundName= NSUserNotificationDefaultSoundName;
         }
         
-        NSImage *alertImage=  [[MLImageManager sharedInstance] getIconForContact:[notification.userInfo objectForKey:@"from"] andAccount:[notification.userInfo objectForKey:@"accountNo"]];
-        alert.contentImage= alertImage;
-        alert.hasReplyButton=YES;
-        alert.userInfo= notification.userInfo;
-        [[NSUserNotificationCenter defaultUserNotificationCenter] scheduleNotification:alert];
+        [[MLImageManager sharedInstance] getIconForContact:[notification.userInfo objectForKey:@"from"] andAccount:[notification.userInfo objectForKey:@"accountNo"] withCompletion:^(NSImage *alertImage) {
+            
+            alert.contentImage= alertImage;
+            alert.hasReplyButton=YES;
+            alert.userInfo= notification.userInfo;
+            [[NSUserNotificationCenter defaultUserNotificationCenter] scheduleNotification:alert];
+            
+            
+        }];
+    
     }
     
 

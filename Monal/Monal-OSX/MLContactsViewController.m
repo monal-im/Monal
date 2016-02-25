@@ -800,7 +800,9 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 
     NSString* accountNo=[NSString stringWithFormat:@"%ld", (long)cell.accountNo];
     
-    cell.icon.image= [[MLImageManager sharedInstance] getIconForContact:cell.username andAccount:accountNo];
+    [[MLImageManager sharedInstance] getIconForContact:cell.username andAccount:accountNo withCompletion:^(NSImage *image) {
+         cell.icon.image=image;
+     }];
   
     
     [[DataLayer sharedInstance] countUserUnreadMessages:cell.username forAccount:accountNo withCompletion:^(NSNumber * result) {

@@ -130,7 +130,7 @@ extern NSString *const kCount;
 //vcard commands
 
 -(BOOL) setIconName:(NSString*) icon forBuddy:(NSString*) buddy inAccount:(NSString*) accountNo;
--(NSString*) iconName:(NSString*) buddy forAccount:(NSString*) accountNo;
+-(void) iconName:(NSString*) contact forAccount:(NSString*) accountNo  withCompeltion: (void (^)(NSString *))completion;
 -(BOOL) setNickName:(NSString*) nickName forBuddy:(NSString*) buddy andAccount:(NSString*) accountNo;
 
 //account commands

@@ -1302,16 +1302,19 @@ static DataLayer *sharedInstance=nil;
     }
 }
 
--(NSString*) iconName:(NSString*) buddy forAccount:(NSString*) accountNo;
+-(void) iconName:(NSString*) contact forAccount:(NSString*) accountNo  withCompeltion: (void (^)(NSString *))completion
 {
-    NSString* query=[NSString stringWithFormat:@"select filename from  buddylist where account_id=%@ and buddy_name='%@'", accountNo, buddy.escapeForSql];
-    NSString* iconname= (NSString*)[self executeScalar:query];
-    return iconname;
+    NSString* query=[NSString stringWithFormat:@"select filename from  buddylist where account_id=%@ and buddy_name='%@'", accountNo, contact.escapeForSql];
+   [self executeScalar:query withCompletion:^(NSObject *iconName) {
+      
+       if(completion)
+       {
+           completion((NSString*)iconName);
+       }
+       
+   }];
+   
 }
-
-
-
-
 
 #pragma mark message Commands
 

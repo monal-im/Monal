@@ -47,7 +47,7 @@
 /**
  retrieves a uiimage for the icon. returns noicon.png if nothing is found. never returns nil.
  */
--(NSImage *) getIconForContact:(NSString*) contact andAccount:(NSString *) accountNo;
+-(void) getIconForContact:(NSString*) contact andAccount:(NSString *) accountNo withCompletion:(void (^)(NSImage *))completion;
 
 #endif
 

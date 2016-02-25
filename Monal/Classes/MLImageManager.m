@@ -147,7 +147,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     [self.iconCache removeObjectForKey:[NSString stringWithFormat:@"%@_%@",accountNo,contact]];
     
     //set db entry
-    [[DataLayer sharedInstance] setIconName:filename forBuddy:contact inAccount:accountNo];
+    [[DataLayer sharedInstance] setIconName:filename forContact:contact inAccount:accountNo];
 }
 
 

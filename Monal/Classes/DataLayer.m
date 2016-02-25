@@ -627,9 +627,9 @@ static DataLayer *sharedInstance=nil;
 
 #pragma mark Buddy Commands
 
--(BOOL) addContact:(NSString*) contact  forAccount:(NSString*) accountNo fullname:(NSString*) fullName nickname:(NSString*) nickName
+-(void) addContact:(NSString*) contact  forAccount:(NSString*) accountNo fullname:(NSString*) fullName nickname:(NSString*) nickName
 {
-    __block BOOL toReturn=NO;
+    
     //this needs to be one atomic operation
     dispatch_sync(_contactQueue, ^{
        [self isContactInList:contact forAccount:accountNo withCompletion:^(BOOL exists) {
@@ -645,22 +645,13 @@ static DataLayer *sharedInstance=nil;
                    }
                    
                    NSString* query=[NSString stringWithFormat:@"insert into buddylist values(null, %@, '%@', '%@','%@','','','','','',0, 0, 1,0);", accountNo, contact.escapeForSql, actualfull.escapeForSql, nickName.escapeForSql];
-                   if([self executeNonQuery:query]!=NO)
-                   {
-                       toReturn= YES;
-                   }
-                   else
-                   {
-                       
-                   }
-
+               [self executeNonQuery:query withCompletion:nil];
+       
            }
        }
        ];
     });
-    
-    return toReturn;
-    
+
 }
 
 -(BOOL) removeBuddy:(NSString*) buddy forAccount:(NSString*) accountNo
@@ -1106,15 +1097,10 @@ static DataLayer *sharedInstance=nil;
     //data length check
     
     if([fullName length]>50) toPass=[fullName substringToIndex:49]; else toPass=fullName;
-    // sometimes the buddyname comes from a roster so it might not be in the list yet, add first and if that fails (ie already there) then set fullname
     
-    if(![self addContact:contact forAccount: accountNo fullname:fullName nickname:@""])
-    {
-        NSString* query=[NSString stringWithFormat:@"update buddylist set full_name='%@',dirty=1 where account_id=%@ and  buddy_name='%@';",[toPass stringByReplacingOccurrencesOfString:@"'" withString:@"''"], accountNo, contact.escapeForSql];
-        [self executeNonQuery:query withCompletion:nil];
-        
-    }
-   
+    NSString* query=[NSString stringWithFormat:@"update buddylist set full_name='%@',dirty=1 where account_id=%@ and  buddy_name='%@';",[toPass stringByReplacingOccurrencesOfString:@"'" withString:@"''"], accountNo, contact.escapeForSql];
+    [self executeNonQuery:query withCompletion:nil];
+    
 }
 
 -(BOOL) setNickName:(NSString*) nickName forBuddy:(NSString*) buddy andAccount:(NSString*) accountNo
@@ -1277,18 +1263,12 @@ static DataLayer *sharedInstance=nil;
 #pragma mark icon Commands
 
 
--(BOOL) setIconName:(NSString*) icon forBuddy:(NSString*) buddy inAccount:(NSString*) accountNo
+-(void) setIconName:(NSString*) icon forContact:(NSString*) contact inAccount:(NSString*) accountNo
 {
     
-    NSString* query=[NSString stringWithFormat:@"update buddylist set filename='%@',dirty=1 where account_id=%@ and  buddy_name='%@';",icon, accountNo, buddy.escapeForSql];
-    if([self executeNonQuery:query]!=NO)
-    {
-        return YES;
-    }
-    else
-    {
-        return NO;
-    }
+    NSString* query=[NSString stringWithFormat:@"update buddylist set filename='%@',dirty=1 where account_id=%@ and  buddy_name='%@';",icon, accountNo, contact.escapeForSql];
+    [self executeNonQuery:query withCompletion:nil];
+  
 }
 
 -(void) iconName:(NSString*) contact forAccount:(NSString*) accountNo  withCompeltion: (void (^)(NSString *))completion

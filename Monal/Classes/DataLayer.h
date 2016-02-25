@@ -61,7 +61,7 @@ extern NSString *const kCount;
 -(void) executeNonQuery:(NSString*) query withCompletion: (void (^)(BOOL))completion;
 
 // Buddy Commands
--(BOOL) addContact:(NSString*) contact  forAccount:(NSString*) accountNo fullname:(NSString*)fullName nickname:(NSString*) nickName;
+-(void) addContact:(NSString*) contact  forAccount:(NSString*) accountNo fullname:(NSString*)fullName nickname:(NSString*) nickName;
 -(BOOL) removeBuddy:(NSString*) buddy forAccount:(NSString*) accountNo;
 -(BOOL) clearBuddies:(NSString*) accountNo; 
 -(void) contactForUsername:(NSString*) username forAccount: (NSString*) accountNo withCompletion: (void (^)(NSArray *))completion;
@@ -129,7 +129,7 @@ extern NSString *const kCount;
 
 //vcard commands
 
--(BOOL) setIconName:(NSString*) icon forBuddy:(NSString*) buddy inAccount:(NSString*) accountNo;
+-(void) setIconName:(NSString*) icon forContact:(NSString*) contact inAccount:(NSString*) accountNo;
 -(void) iconName:(NSString*) contact forAccount:(NSString*) accountNo  withCompeltion: (void (^)(NSString *))completion;
 -(BOOL) setNickName:(NSString*) nickName forBuddy:(NSString*) buddy andAccount:(NSString*) accountNo;
 

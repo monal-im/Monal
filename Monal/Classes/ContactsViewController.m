@@ -316,9 +316,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     } 
     
     if(hasChange) {
-        
-        [self.contactsTable beginUpdates];
-        
+    
         [_contactsTable beginUpdates];
         NSIndexPath *path1 = [NSIndexPath indexPathForRow:pos inSection:konlineSection];
         [_contactsTable reloadRowsAtIndexPaths:@[path1]
@@ -351,9 +349,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             
            [self updateContactAt:initalPos withInfo:user];
 
-            
         }
-        else  {
+        else
+        {
+            
         //insert into tableview
         // for now just online
         [[DataLayer sharedInstance] contactForUsername:[user objectForKey:kusernameKey] forAccount:[user objectForKey:kaccountNoKey] withCompletion:^(NSArray * contactRow) {
@@ -381,6 +380,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                        [_contactsTable endUpdates];
                                    }
                                }
+                             
                                
                                //not already in online list
                                if(pos<0)

@@ -418,7 +418,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                }else
                                {
                                    DDLogVerbose(@"user %@ already in list updating status",[user objectForKey:kusernameKey]);
-                                    [self updateContactAt:initalPos withInfo:user];
+                                    [self updateContactAt:pos withInfo:user];
                                }
                            });
         }];

@@ -55,6 +55,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     [self setupDateObjects];
     
+    self.progressIndicator.bezeled=NO;
+    self.progressIndicator.controlSize=NSMiniControlSize;
+    
 }
 
 -(void) viewWillAppear

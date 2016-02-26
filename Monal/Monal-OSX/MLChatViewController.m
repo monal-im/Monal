@@ -154,6 +154,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [window updateCurrentContact:contact];
 }
 
+
+-(void) endProgressUpdate
+{
+    self.progressIndicator.doubleValue=0;
+    self.progressIndicator.hidden=YES;
+}
+
+
 #pragma mark - Dropbox upload and delegate
 
 - (void) uploadImageToDropBox:(NSData *) imageData {
@@ -185,11 +193,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 - (void)restClient:(DBRestClient*)restClient loadedSharableLink:(NSString*)link
            forFile:(NSString*)path{
     self.messageBox.string=link;
-    self.progressIndicator.doubleValue=0;
+    [self endProgressUpdate];
 }
 
 - (void)restClient:(DBRestClient*)restClient loadSharableLinkFailedWithError:(NSError*)error{
-  self.progressIndicator.doubleValue=0;
+   [self endProgressUpdate];
     DDLogVerbose(@"Failed to get Dropbox link with error: %@", error);
 }
 
@@ -237,7 +245,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 self.progressIndicator.doubleValue=50;
                 [[MLXMPPManager sharedInstance]  httpUploadFileURL:openPanel.URL toContact:self.contactName onAccount:self.accountNo withCompletionHandler:^(NSString *url, NSError *error) {
                     dispatch_async(dispatch_get_main_queue(), ^{
-                        self.progressIndicator.doubleValue=0;
+                        [self endProgressUpdate];
                         if(url) {
                             self.messageBox.string= url;
                         }
@@ -319,7 +327,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     NSDictionary *dic =notification.userInfo;
     [self setMessageId:[dic objectForKey:kMessageId]  delivered:NO];
-     self.progressIndicator.doubleValue=0;
+     [self endProgressUpdate];
 }
 
 -(void) handleSentMessage:(NSNotification *)notification
@@ -331,7 +339,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         self.progressIndicator.doubleValue=100;
         
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.5f * NSEC_PER_SEC), dispatch_get_main_queue(),  ^{
-          self.progressIndicator.doubleValue=0;
+           [self endProgressUpdate];
         });
         
     });

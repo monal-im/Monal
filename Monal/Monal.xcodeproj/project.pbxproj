@@ -297,6 +297,7 @@
 		265F1B2B123040540065C5FE /* web.xib in Resources */ = {isa = PBXBuildFile; fileRef = 265F1B2A123040540065C5FE /* web.xib */; };
 		265F6BA21B7B0040006B8EBA /* MLImageManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EC411217BDE39E0031304D /* MLImageManager.m */; };
 		265F6BA71B7B088A006B8EBA /* Crashlytics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 265F6BA61B7B088A006B8EBA /* Crashlytics.framework */; };
+		265FF0D11C7FD6CF00E2CCE1 /* DropboxOSX.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 265FF0D01C7FD6CF00E2CCE1 /* DropboxOSX.framework */; };
 		2661D3411B40765A00EC51BA /* MLContactsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661D3401B40765A00EC51BA /* MLContactsViewController.m */; };
 		2661D3441B40766F00EC51BA /* MLChatViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661D3431B40766F00EC51BA /* MLChatViewController.m */; };
 		2661D34D1B407ED400EC51BA /* MLContactsCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661D34C1B407ED400EC51BA /* MLContactsCell.m */; };
@@ -687,6 +688,7 @@
 		265F0B621B75719E00A63F20 /* MLAccountRow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLAccountRow.m; sourceTree = "<group>"; };
 		265F1B2A123040540065C5FE /* web.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = web.xib; sourceTree = "<group>"; };
 		265F6BA61B7B088A006B8EBA /* Crashlytics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Crashlytics.framework; path = MonalOSX/External/Crashlytics.framework; sourceTree = "<group>"; };
+		265FF0D01C7FD6CF00E2CCE1 /* DropboxOSX.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DropboxOSX.framework; path = MonalOSX/External/DropboxOSX.framework; sourceTree = "<group>"; };
 		2661D33F1B40765A00EC51BA /* MLContactsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLContactsViewController.h; sourceTree = "<group>"; };
 		2661D3401B40765A00EC51BA /* MLContactsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLContactsViewController.m; sourceTree = "<group>"; };
 		2661D3421B40766F00EC51BA /* MLChatViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLChatViewController.h; sourceTree = "<group>"; };
@@ -920,6 +922,7 @@
 				26049A5B1B73163300D11866 /* AVFoundation.framework in Frameworks */,
 				26049A511B73156300D11866 /* libjrtplib-static-OSX.a in Frameworks */,
 				26B2A4CB1B73084800272E63 /* AppKit.framework in Frameworks */,
+				265FF0D11C7FD6CF00E2CCE1 /* DropboxOSX.framework in Frameworks */,
 				2681301A1BFEDCEC0074C8EE /* Fabric.framework in Frameworks */,
 				265F6BA71B7B088A006B8EBA /* Crashlytics.framework in Frameworks */,
 				26E456CD1B842180004BD74C /* Sparkle.framework in Frameworks */,
@@ -1532,6 +1535,7 @@
 		26B2A5001B730A0D00272E63 /* OSX */ = {
 			isa = PBXGroup;
 			children = (
+				265FF0D01C7FD6CF00E2CCE1 /* DropboxOSX.framework */,
 				2614B64E1C54095D004FF2FA /* libz.tbd */,
 				269574E11C37307300544A60 /* libsqlite3.tbd */,
 				269574DF1C37301600544A60 /* libz.tbd */,

@@ -12,6 +12,7 @@
 
 @property (nonatomic, strong) IBOutlet NSTextView *messageBox;
 @property (nonatomic, strong) IBOutlet NSTableView *chatTable;
+@property (nonatomic, strong) IBOutlet NSProgressIndicator *progressIndicator;
 @property (nonatomic, strong) NSDictionary *contactDic;
 @property (nonatomic, strong, readonly) NSString *contactName;
 

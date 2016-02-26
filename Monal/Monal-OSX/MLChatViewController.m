@@ -176,17 +176,17 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 - (void)restClient:(DBRestClient*)client uploadProgress:(CGFloat)progress
            forFile:(NSString*)destPath from:(NSString*)srcPat
 {
-   // self.uploadHUD.progress=progress;
+    self.progressIndicator.doubleValue=progress*100;
 }
 
 - (void)restClient:(DBRestClient*)restClient loadedSharableLink:(NSString*)link
            forFile:(NSString*)path{
     self.messageBox.string=link;
-   // self.uploadHUD.hidden=YES;
+    self.progressIndicator.doubleValue=0;
 }
 
 - (void)restClient:(DBRestClient*)restClient loadSharableLinkFailedWithError:(NSError*)error{
-  //  self.uploadHUD.hidden=YES;
+  self.progressIndicator.doubleValue=0;
     DDLogVerbose(@"Failed to get Dropbox link with error: %@", error);
 }
 
@@ -224,8 +224,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             {
                 if(self.restClient)
                 {
-//                    self.uploadHUD.mode=MBProgressHUDModeDeterminate;
-//                    self.uploadHUD.progress=0;
+                    self.progressIndicator.doubleValue=0;
                     NSData *fileData= [NSData dataWithContentsOfURL:openPanel.URL];
                     [self uploadImageToDropBox:fileData];
                 }

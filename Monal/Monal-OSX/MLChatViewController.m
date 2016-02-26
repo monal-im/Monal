@@ -222,17 +222,19 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         switch(result){
             case NSFileHandlingPanelOKButton:
             {
+                self.progressIndicator.doubleValue=0;
                 if(self.restClient)
                 {
-                    self.progressIndicator.doubleValue=0;
                     NSData *fileData= [NSData dataWithContentsOfURL:openPanel.URL];
                     [self uploadImageToDropBox:fileData];
                 }
                 else {
                 
                 // start http upload XMPP
+                self.progressIndicator.doubleValue=50;
                 [[MLXMPPManager sharedInstance]  httpUploadFileURL:openPanel.URL toContact:self.contactName onAccount:self.accountNo withCompletionHandler:^(NSString *url, NSError *error) {
                     dispatch_async(dispatch_get_main_queue(), ^{
+                        self.progressIndicator.doubleValue=0;
                         if(url) {
                             self.messageBox.string= url;
                         }
@@ -314,12 +316,22 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     NSDictionary *dic =notification.userInfo;
     [self setMessageId:[dic objectForKey:kMessageId]  delivered:NO];
+     self.progressIndicator.doubleValue=0;
 }
 
 -(void) handleSentMessage:(NSNotification *)notification
 {
     NSDictionary *dic =notification.userInfo;
     [self setMessageId:[dic objectForKey:kMessageId]  delivered:YES];
+    
+    dispatch_async( dispatch_get_main_queue(), ^{
+        self.progressIndicator.doubleValue=100;
+        
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.5f * NSEC_PER_SEC), dispatch_get_main_queue(),  ^{
+          self.progressIndicator.doubleValue=0;
+        });
+        
+    });
 }
 
 -(void) markAsRead
@@ -425,8 +437,16 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     if(!newMessageID) {
         newMessageID=[NSString stringWithFormat:@"Monal%d", r];
     }
+    [self.progressIndicator incrementBy:25];
     [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:self.contactName fromAccount:self.accountNo isMUC:self.isMUC messageId:newMessageID
-                          withCompletionHandler:nil];
+     withCompletionHandler:^(BOOL success, NSString *messageId) {
+         if(success)
+         {
+            dispatch_async( dispatch_get_main_queue(), ^{
+              [self.progressIndicator incrementBy:25];
+            });
+         }
+     }];
     
     //dont readd it, use the exisitng
     if(!messageID) {
@@ -441,6 +461,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(IBAction)sendText:(id)sender
 {
+    self.progressIndicator.doubleValue=0;
     NSString *message= [self.messageBox.string copy];
     if(message.length>0) {
         [self sendMessage:[self.messageBox.string copy] andMessageID:nil];

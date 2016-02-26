@@ -55,11 +55,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     [self setupDateObjects];
     
-    if ([DBSession sharedSession].isLinked) {
-        self.restClient = [[DBRestClient alloc] initWithSession:[DBSession sharedSession]];
-        self.restClient.delegate = self;
-    }
-    
 }
 
 -(void) viewWillAppear
@@ -199,6 +194,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(IBAction)attach:(id)sender
 {
+    
+    if ([DBSession sharedSession].isLinked) {
+        self.restClient = [[DBRestClient alloc] initWithSession:[DBSession sharedSession]];
+        self.restClient.delegate = self;
+    }
  
     xmpp* account=[[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
     if(!account.supportsHTTPUpload && !self.restClient)

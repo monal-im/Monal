@@ -25,6 +25,31 @@
     self.dropBox.state= [DBSession sharedSession].isLinked;
 }
 
+-(void) checkDropBox{
+    if(![DBAuthHelperOSX sharedHelper].isLoading)
+    {
+        self.dropBox.enabled=YES;
+        self.dropBox.state=YES;
+    }
+}
+
+-(IBAction)toggleDropBox:(id)sender
+{
+    if (![[DBSession sharedSession] isLinked]) {
+        self.dropBox.enabled=NO;
+        self.dropBox.state=NO;
+         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(checkDropBox) name:DBAuthHelperOSXStateChangedNotification object:nil];
+        [[DBAuthHelperOSX sharedHelper] authenticate];
+    }
+    else {
+        [[DBSession sharedSession] unlinkAll];
+    }
+}
+
+-(void) dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver: self];
+}
 
 
 #pragma mark - preferences delegate

@@ -16,4 +16,6 @@
 @property (nonatomic, weak) IBOutlet NSButton *ownCloud;
 
 
+-(IBAction)toggleDropBox:(id)sender;
+
 @end

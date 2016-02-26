@@ -1910,6 +1910,9 @@ Gw
                                                 <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                 <font key="font" metaFont="system"/>
                                             </buttonCell>
+                                            <connections>
+                                                <action selector="toggleDropBox:" target="att-OF-UKh" id="9PB-Au-H0X"/>
+                                            </connections>
                                         </button>
                                         <button hidden="YES" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="wdt-KV-OJU">
                                             <rect key="frame" x="16" y="27" width="147" height="18"/>

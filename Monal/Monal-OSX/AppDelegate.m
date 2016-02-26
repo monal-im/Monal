@@ -65,6 +65,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [[[NSWorkspace sharedWorkspace] notificationCenter] addObserver: self
                                                            selector: @selector(receivedWakeNotification:)
                                                                name: NSWorkspaceDidWakeNotification object: NULL];
+   
+    [[NSAppleEventManager sharedAppleEventManager] setEventHandler:self andSelector:@selector(handleURLEvent:withReplyEvent:) forEventClass:kInternetEventClass andEventID:kAEGetURL];
     
     //Dropbox
     DBSession *dbSession = [[DBSession alloc]
@@ -87,6 +89,22 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         [self.mainWindowController showWindow:self];
     }
     return YES;	
+}
+
+
+- (void)handleURLEvent:(NSAppleEventDescriptor*)event
+        withReplyEvent:(NSAppleEventDescriptor*)replyEvent
+{
+//    if ([[DBSession sharedSession] handleOpenURL:[event paramDescriptorForKeyword:keyDirectObject]]) {
+//        if ([[DBSession sharedSession] isLinked]) {
+//            DDLogVerbose(@"App linked successfully!");
+//            // At this point you can start making API calls
+//        }
+    
+ //   }
+    // Add whatever other url handling code your app requires here
+ 
+    
 }
 
 

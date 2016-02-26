@@ -806,6 +806,9 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 
     NSString* accountNo=[NSString stringWithFormat:@"%ld", (long)cell.accountNo];
     
+    cell.icon.image=nil;
+    [cell setUnreadCount:0];
+    
     [[MLImageManager sharedInstance] getIconForContact:cell.username andAccount:accountNo withCompletion:^(NSImage *image) {
        dispatch_async(dispatch_get_main_queue(), ^{
           cell.icon.image=image;

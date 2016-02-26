@@ -787,6 +787,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     {
         cell =[[MLContactCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"ContactCell"];
     }
+    
+    cell.count=0;
+    cell.userImage.image=nil; 
 
     NSDictionary* row =nil;
  

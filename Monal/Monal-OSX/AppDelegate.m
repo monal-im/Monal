@@ -21,6 +21,8 @@
 #import <Crashlytics/Crashlytics.h>
 #import "DDLog.h"
 
+#import <DropboxOSX/DropboxOSX.h>
+
 static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 @interface AppDelegate ()
@@ -62,6 +64,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [[[NSWorkspace sharedWorkspace] notificationCenter] addObserver: self
                                                            selector: @selector(receivedWakeNotification:)
                                                                name: NSWorkspaceDidWakeNotification object: NULL];
+    
+    //Dropbox
+    DBSession *dbSession = [[DBSession alloc]
+                            initWithAppKey:@"a134q2ecj1hqa59"
+                            appSecret:@"vqsf5vt6guedlrs"
+                            root:kDBRootAppFolder];
+    [DBSession setSharedSession:dbSession];
+
 
     
 }

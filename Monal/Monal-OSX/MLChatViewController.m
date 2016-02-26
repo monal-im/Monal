@@ -14,9 +14,11 @@
 #import "MLChatViewCell.h"
 //#import "MLNotificaitonCenter.h"
 
+#import <DropboxOSX/DropboxOSX.h>
+
 #import "MLMainWindow.h"
 
-@interface MLChatViewController ()
+@interface MLChatViewController () <DBRestClientDelegate>
 
 @property (nonatomic, strong) NSMutableArray *messageList;
 
@@ -32,6 +34,8 @@
 @property (nonatomic, strong) NSString *contactName;
 @property (nonatomic, strong) NSString *jid;
 @property (nonatomic, assign) BOOL isMUC;
+
+@property (nonatomic, strong) DBRestClient *restClient;
 
 @end
 
@@ -49,8 +53,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [nc addObserver:self selector:@selector(handleSentMessage:) name:kMonalSentMessageNotice object:nil];
     [nc addObserver:self selector:@selector(refreshData) name:kMonalWindowVisible object:nil];
     
-    
     [self setupDateObjects];
+    
+    if ([DBSession sharedSession].isLinked) {
+        self.restClient = [[DBRestClient alloc] initWithSession:[DBSession sharedSession]];
+        self.restClient.delegate = self;
+    }
     
 }
 
@@ -147,6 +155,47 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     MLMainWindow *window =(MLMainWindow *)self.view.window.windowController;
     [window updateCurrentContact:contact];
 }
+
+#pragma mark - Dropbox upload and delegate
+
+- (void) uploadImageToDropBox:(NSData *) imageData {
+    
+    NSString *fileName = [NSString stringWithFormat:@"%@.png",[NSUUID UUID].UUIDString];
+    NSString *tempDir = NSTemporaryDirectory();
+    NSString *imagePath = [tempDir stringByAppendingPathComponent:fileName];
+    [imageData writeToFile:imagePath atomically:YES];
+    
+    [self.restClient uploadFile:fileName toPath:@"/" withParentRev:nil fromPath:imagePath];
+}
+
+- (void)restClient:(DBRestClient *)client uploadedFile:(NSString *)destPath
+              from:(NSString *)srcPath metadata:(DBMetadata *)metadata {
+    DDLogVerbose(@"File uploaded successfully to dropbox path: %@", metadata.path);
+    [self.restClient loadSharableLinkForFile:metadata.path];
+}
+
+- (void)restClient:(DBRestClient *)client uploadFileFailedWithError:(NSError *)error {
+    DDLogVerbose(@"File upload to dropbox failed with error: %@", error);
+}
+
+- (void)restClient:(DBRestClient*)client uploadProgress:(CGFloat)progress
+           forFile:(NSString*)destPath from:(NSString*)srcPat
+{
+   // self.uploadHUD.progress=progress;
+}
+
+- (void)restClient:(DBRestClient*)restClient loadedSharableLink:(NSString*)link
+           forFile:(NSString*)path{
+    self.messageBox.string=link;
+   // self.uploadHUD.hidden=YES;
+}
+
+- (void)restClient:(DBRestClient*)restClient loadSharableLinkFailedWithError:(NSError*)error{
+  //  self.uploadHUD.hidden=YES;
+    DDLogVerbose(@"Failed to get Dropbox link with error: %@", error);
+}
+
+#pragma mark - attaching
 
 -(IBAction)attach:(id)sender
 {

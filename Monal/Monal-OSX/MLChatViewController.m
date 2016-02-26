@@ -218,7 +218,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     //select file
     NSOpenPanel *openPanel = [NSOpenPanel openPanel];
-    [openPanel beginWithCompletionHandler:^(NSInteger result) {
+    [openPanel beginSheetModalForWindow:self.view.window completionHandler: ^(NSInteger result) {
         switch(result){
             case NSFileHandlingPanelOKButton:
             {

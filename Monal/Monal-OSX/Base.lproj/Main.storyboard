@@ -1325,18 +1325,21 @@ Gw
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                             </scrollView>
-                            <progressIndicator wantsLayer="YES" fixedFrame="YES" maxValue="100" style="bar" translatesAutoresizingMaskIntoConstraints="NO" id="VSu-xb-ucW">
-                                <rect key="frame" x="0.0" y="99" width="493" height="20"/>
+                            <progressIndicator wantsLayer="YES" maxValue="100" displayedWhenStopped="NO" controlSize="small" style="bar" translatesAutoresizingMaskIntoConstraints="NO" id="VSu-xb-ucW">
+                                <rect key="frame" x="0.0" y="101" width="493" height="12"/>
                             </progressIndicator>
                         </subviews>
                         <constraints>
+                            <constraint firstItem="VSu-xb-ucW" firstAttribute="leading" secondItem="kDf-fM-OV9" secondAttribute="leading" id="29j-NI-bhP"/>
                             <constraint firstItem="eNE-em-qs3" firstAttribute="top" secondItem="kDf-fM-OV9" secondAttribute="top" id="2z9-Bx-3Mo"/>
                             <constraint firstAttribute="trailing" secondItem="9FI-ED-NWb" secondAttribute="trailing" id="Bz2-yL-YW1"/>
                             <constraint firstItem="9FI-ED-NWb" firstAttribute="leading" secondItem="kDf-fM-OV9" secondAttribute="leading" id="ElA-sy-yHZ"/>
                             <constraint firstAttribute="bottom" secondItem="9FI-ED-NWb" secondAttribute="bottom" id="FDu-ZP-7RP"/>
                             <constraint firstItem="9FI-ED-NWb" firstAttribute="trailing" secondItem="eNE-em-qs3" secondAttribute="trailing" id="MPc-wW-68d"/>
+                            <constraint firstAttribute="trailing" secondItem="VSu-xb-ucW" secondAttribute="trailing" id="Pev-d0-OMP"/>
                             <constraint firstAttribute="trailing" secondItem="9FI-ED-NWb" secondAttribute="trailing" id="Vpq-Hn-6tL"/>
                             <constraint firstItem="9FI-ED-NWb" firstAttribute="leading" secondItem="eNE-em-qs3" secondAttribute="leading" id="Zrs-mB-sP2"/>
+                            <constraint firstItem="VSu-xb-ucW" firstAttribute="top" secondItem="eNE-em-qs3" secondAttribute="bottom" id="gnH-zc-TZK"/>
                             <constraint firstItem="9FI-ED-NWb" firstAttribute="top" secondItem="eNE-em-qs3" secondAttribute="bottom" constant="8" symbolic="YES" id="vY2-MU-nht"/>
                         </constraints>
                     </view>

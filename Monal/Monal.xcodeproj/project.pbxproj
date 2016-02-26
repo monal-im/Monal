@@ -298,6 +298,7 @@
 		265F6BA21B7B0040006B8EBA /* MLImageManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EC411217BDE39E0031304D /* MLImageManager.m */; };
 		265F6BA71B7B088A006B8EBA /* Crashlytics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 265F6BA61B7B088A006B8EBA /* Crashlytics.framework */; };
 		265FF0D11C7FD6CF00E2CCE1 /* DropboxOSX.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 265FF0D01C7FD6CF00E2CCE1 /* DropboxOSX.framework */; };
+		265FF0D21C7FDA3A00E2CCE1 /* DropboxOSX.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 265FF0D01C7FD6CF00E2CCE1 /* DropboxOSX.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		2661D3411B40765A00EC51BA /* MLContactsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661D3401B40765A00EC51BA /* MLContactsViewController.m */; };
 		2661D3441B40766F00EC51BA /* MLChatViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661D3431B40766F00EC51BA /* MLChatViewController.m */; };
 		2661D34D1B407ED400EC51BA /* MLContactsCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661D34C1B407ED400EC51BA /* MLContactsCell.m */; };
@@ -444,6 +445,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				265FF0D21C7FDA3A00E2CCE1 /* DropboxOSX.framework in CopyFiles */,
 				26E456CF1B8421C3004BD74C /* Sparkle.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

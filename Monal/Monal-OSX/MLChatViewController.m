@@ -57,6 +57,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     self.progressIndicator.bezeled=NO;
     self.progressIndicator.controlSize=NSMiniControlSize;
+    [self endProgressUpdate];
     
 }
 
@@ -234,6 +235,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             case NSFileHandlingPanelOKButton:
             {
                 self.progressIndicator.doubleValue=0;
+                self.progressIndicator.hidden=NO;
                 if(self.restClient)
                 {
                     NSData *fileData= [NSData dataWithContentsOfURL:openPanel.URL];
@@ -473,6 +475,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(IBAction)sendText:(id)sender
 {
     self.progressIndicator.doubleValue=0;
+    self.progressIndicator.hidden=NO;
     NSString *message= [self.messageBox.string copy];
     if(message.length>0) {
         [self sendMessage:[self.messageBox.string copy] andMessageID:nil];

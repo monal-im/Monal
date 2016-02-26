@@ -147,7 +147,11 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 -(void) showActiveChat:(BOOL) shouldShow
 {
     if (shouldShow) {
-        self.activeChat= [[DataLayer sharedInstance] activeBuddies];
+        NSMutableArray *cleanActive=[[DataLayer sharedInstance] activeBuddies];
+        
+        [[MLXMPPManager sharedInstance] cleanArrayOfConnectedAccounts:cleanActive];
+   
+        self.activeChat= cleanActive;
     }
     else {
         self.activeChat=nil;

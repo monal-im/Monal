@@ -76,7 +76,7 @@ typedef NS_ENUM (NSInteger, xmppState) {
 
 @interface xmpp : NSObject <NSStreamDelegate>
 {
-    NSString* _fulluser; // combination of username@domain
+   
     
     NSInputStream *_iStream;
     NSOutputStream *_oStream;
@@ -234,6 +234,9 @@ FOUNDATION_EXPORT NSString *const kCompletion;
 
 
 #pragma  mark properties
+
+@property (nonatomic,readonly) NSString* fulluser; // combination of username@domain
+
 // connection attributes
 @property (nonatomic,strong) NSString* username;
 @property (nonatomic,strong) NSString* domain;

@@ -782,6 +782,28 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
     return  _timerList;
 }
 
+-(void) cleanArrayOfConnectedAccounts:(NSMutableArray *)dirtySet
+{
+    //yes, this is ineffecient but the size shouldnt ever be huge
+    NSMutableIndexSet *indexSet=[[NSMutableIndexSet alloc] init];
+    for(NSDictionary *account in self.connectedXMPP)
+    {
+        xmpp *xmppAccount = [account objectForKey:@"xmppAccount"];
+        NSInteger pos=0;
+        for(NSDictionary *dic in dirtySet)
+        {
+            if([[dic objectForKey:kContactName] isEqualToString:xmppAccount.fulluser] )
+            {
+                [indexSet addIndex:pos];
+            }
+            pos++;
+        }
+        
+    }
+    
+    [dirtySet removeObjectsAtIndexes:indexSet];
+}
+
 
 @end
 

@@ -58,7 +58,10 @@
 
 -(void) refreshDisplay
 {
-    _contacts=[[DataLayer sharedInstance] activeBuddies];
+    NSMutableArray *cleanActive =[[DataLayer sharedInstance] activeBuddies];
+    [[MLXMPPManager sharedInstance] cleanArrayOfConnectedAccounts:cleanActive];
+    
+    _contacts=cleanActive;
     [_chatListTable reloadData];
     MonalAppDelegate* appDelegate= (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
     [appDelegate updateUnread];

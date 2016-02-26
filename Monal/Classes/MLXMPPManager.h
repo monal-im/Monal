@@ -203,5 +203,9 @@ Attempts to upload a file to the  HTTP upload service
 -(void) setClientsActive;
 
 
+/**
+ Iterates through set and compares with connected accounts. Removes them. useful for active chat. 
+ */
+-(void) cleanArrayOfConnectedAccounts:(NSMutableArray *) dirtySet;
 
 @end

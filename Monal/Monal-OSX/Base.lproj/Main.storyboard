@@ -1927,10 +1927,8 @@ Gw
                     </view>
                     <connections>
                         <outlet property="box" destination="O3e-IW-gdb" id="ghF-iN-6dR"/>
-                        <outlet property="chatLogs" destination="kJG-2p-iIB" id="gb6-N3-08h"/>
                         <outlet property="dropBox" destination="kJG-2p-iIB" id="vhj-5S-2mc"/>
                         <outlet property="ownCloud" destination="wdt-KV-OJU" id="kaJ-uh-RTH"/>
-                        <outlet property="playSounds" destination="O3e-IW-gdb" id="0Ny-VA-30i"/>
                         <outlet property="view" destination="G7r-V2-PmX" id="C1a-1T-g6A"/>
                     </connections>
                 </viewController>

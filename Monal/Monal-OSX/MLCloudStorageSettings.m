@@ -7,6 +7,7 @@
 //
 
 #import "MLCloudStorageSettings.h"
+#import <DropBoxOSX/DropBoxOSX.h>
 
 @interface MLCloudStorageSettings ()
 
@@ -17,6 +18,11 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do view setup here.
+}
+
+-(void) viewWillAppear
+{
+    self.dropBox.state= [DBSession sharedSession].isLinked;
 }
 
 

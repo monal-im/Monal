@@ -1074,7 +1074,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
         while (stanzaToParse)
         {
             [self.processQueue addOperationWithBlock:^{
-         //   DDLogDebug(@"got stanza %@", stanzaToParse);
+           DDLogDebug(@"got stanza %@", stanzaToParse);
             
             if([[stanzaToParse objectForKey:@"stanzaType"]  isEqualToString:@"iq"])
             {

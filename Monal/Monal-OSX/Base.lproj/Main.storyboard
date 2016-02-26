@@ -1881,7 +1881,141 @@ Gw
                 </viewController>
                 <customObject id="blJ-dl-OT7" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-158.5" y="-825"/>
+            <point key="canvasLocation" x="-182.5" y="-824"/>
+        </scene>
+        <!--Preferences-Display-->
+        <scene sceneID="Wmh-tx-gcD">
+            <objects>
+                <viewController title="Cloud Storage" storyboardIdentifier="cloudStorage" id="att-OF-UKh" userLabel="Preferences-Display" customClass="MLCloudStorageSettings" sceneMemberID="viewController">
+                    <view key="view" id="G7r-V2-PmX">
+                        <rect key="frame" x="0.0" y="0.0" width="357" height="160"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <subviews>
+                            <box autoresizesSubviews="NO" fixedFrame="YES" title="Select one storage option for attachments" borderType="line" translatesAutoresizingMaskIntoConstraints="NO" id="qE4-2L-v5l">
+                                <rect key="frame" x="17" y="16" width="315" height="124"/>
+                                <view key="contentView" id="xF4-gl-Kjx">
+                                    <rect key="frame" x="1" y="1" width="313" height="108"/>
+                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                    <subviews>
+                                        <button hidden="YES" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="O3e-IW-gdb">
+                                            <rect key="frame" x="16" y="55" width="147" height="18"/>
+                                            <buttonCell key="cell" type="check" title="Box" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="Y4n-dd-fgc">
+                                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                <font key="font" metaFont="system"/>
+                                            </buttonCell>
+                                        </button>
+                                        <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="kJG-2p-iIB">
+                                            <rect key="frame" x="16" y="82" width="86" height="18"/>
+                                            <buttonCell key="cell" type="check" title="DropBox" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="cCj-YY-s1D">
+                                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                <font key="font" metaFont="system"/>
+                                            </buttonCell>
+                                        </button>
+                                        <button hidden="YES" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="wdt-KV-OJU">
+                                            <rect key="frame" x="16" y="27" width="147" height="18"/>
+                                            <buttonCell key="cell" type="check" title="ownCloud" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="i75-Z1-bsY">
+                                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                <font key="font" metaFont="system"/>
+                                            </buttonCell>
+                                        </button>
+                                    </subviews>
+                                </view>
+                                <color key="borderColor" white="0.0" alpha="0.41999999999999998" colorSpace="calibratedWhite"/>
+                                <color key="fillColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                            </box>
+                        </subviews>
+                    </view>
+                    <connections>
+                        <outlet property="box" destination="O3e-IW-gdb" id="ghF-iN-6dR"/>
+                        <outlet property="chatLogs" destination="kJG-2p-iIB" id="gb6-N3-08h"/>
+                        <outlet property="dropBox" destination="kJG-2p-iIB" id="vhj-5S-2mc"/>
+                        <outlet property="ownCloud" destination="wdt-KV-OJU" id="kaJ-uh-RTH"/>
+                        <outlet property="playSounds" destination="O3e-IW-gdb" id="0Ny-VA-30i"/>
+                        <outlet property="view" destination="G7r-V2-PmX" id="C1a-1T-g6A"/>
+                    </connections>
+                </viewController>
+                <customObject id="4As-mx-bUt" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="265.5" y="-883"/>
+        </scene>
+        <!--Preferences-Display-->
+        <scene sceneID="9lU-WJ-X19">
+            <objects>
+                <viewController title="Display" storyboardIdentifier="display" id="t3n-LA-K5d" userLabel="Preferences-Display" customClass="MLDisplaySettings" sceneMemberID="viewController">
+                    <view key="view" id="Otv-yq-PlF">
+                        <rect key="frame" x="0.0" y="0.0" width="357" height="278"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <subviews>
+                            <box autoresizesSubviews="NO" fixedFrame="YES" title="Messages" borderType="line" translatesAutoresizingMaskIntoConstraints="NO" id="TdV-QY-JTC">
+                                <rect key="frame" x="17" y="134" width="315" height="124"/>
+                                <view key="contentView" id="6yd-rA-n1t">
+                                    <rect key="frame" x="1" y="1" width="313" height="108"/>
+                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                    <subviews>
+                                        <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="6Qq-rk-L4J">
+                                            <rect key="frame" x="16" y="55" width="147" height="18"/>
+                                            <buttonCell key="cell" type="check" title="Play Sound in Alerts" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="gI6-eD-anL">
+                                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                <font key="font" metaFont="system"/>
+                                            </buttonCell>
+                                        </button>
+                                        <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="deu-GA-sXN">
+                                            <rect key="frame" x="16" y="82" width="86" height="18"/>
+                                            <buttonCell key="cell" type="check" title="Log Chats" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="U5d-qg-pxo">
+                                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                <font key="font" metaFont="system"/>
+                                            </buttonCell>
+                                        </button>
+                                        <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="VAp-fJ-tj8">
+                                            <rect key="frame" x="16" y="26" width="176" height="18"/>
+                                            <buttonCell key="cell" type="check" title="Show Message Previews" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="I55-yV-lY3">
+                                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                <font key="font" metaFont="system"/>
+                                            </buttonCell>
+                                        </button>
+                                    </subviews>
+                                </view>
+                                <color key="borderColor" white="0.0" alpha="0.41999999999999998" colorSpace="calibratedWhite"/>
+                                <color key="fillColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                            </box>
+                            <box autoresizesSubviews="NO" fixedFrame="YES" title="Contact List" borderType="line" translatesAutoresizingMaskIntoConstraints="NO" id="j7g-ZD-KnW">
+                                <rect key="frame" x="17" y="16" width="323" height="114"/>
+                                <view key="contentView" id="UJj-mx-Vzf">
+                                    <rect key="frame" x="1" y="1" width="321" height="98"/>
+                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                    <subviews>
+                                        <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Dcg-lY-lbf">
+                                            <rect key="frame" x="16" y="65" width="160" height="18"/>
+                                            <buttonCell key="cell" type="check" title="Show Offline Contacts" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="3dN-Na-nN8">
+                                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                <font key="font" metaFont="system"/>
+                                            </buttonCell>
+                                        </button>
+                                        <button hidden="YES" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="HEu-mZ-vU9">
+                                            <rect key="frame" x="16" y="42" width="171" height="18"/>
+                                            <buttonCell key="cell" type="check" title="Sort Contacts By Status" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="ZTq-Lk-hDX">
+                                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                <font key="font" metaFont="system"/>
+                                            </buttonCell>
+                                        </button>
+                                    </subviews>
+                                </view>
+                                <color key="borderColor" white="0.0" alpha="0.41999999999999998" colorSpace="calibratedWhite"/>
+                                <color key="fillColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                            </box>
+                        </subviews>
+                    </view>
+                    <connections>
+                        <outlet property="chatLogs" destination="deu-GA-sXN" id="FiJ-a7-3Bz"/>
+                        <outlet property="playSounds" destination="6Qq-rk-L4J" id="QLq-US-xBX"/>
+                        <outlet property="showMessagePreview" destination="VAp-fJ-tj8" id="klm-Cl-yF7"/>
+                        <outlet property="showOffline" destination="Dcg-lY-lbf" id="YWM-e3-CuR"/>
+                        <outlet property="sortByStatus" destination="HEu-mZ-vU9" id="DKS-au-KcU"/>
+                    </connections>
+                </viewController>
+                <customObject id="0kp-iY-dhW" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-182.5" y="-824"/>
         </scene>
     </scenes>
     <resources>

@@ -299,6 +299,7 @@
 		265F6BA71B7B088A006B8EBA /* Crashlytics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 265F6BA61B7B088A006B8EBA /* Crashlytics.framework */; };
 		265FF0D11C7FD6CF00E2CCE1 /* DropboxOSX.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 265FF0D01C7FD6CF00E2CCE1 /* DropboxOSX.framework */; };
 		265FF0D21C7FDA3A00E2CCE1 /* DropboxOSX.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 265FF0D01C7FD6CF00E2CCE1 /* DropboxOSX.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		265FF0D51C7FDAC100E2CCE1 /* MLCloudStorageSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = 265FF0D41C7FDAC100E2CCE1 /* MLCloudStorageSettings.m */; };
 		2661D3411B40765A00EC51BA /* MLContactsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661D3401B40765A00EC51BA /* MLContactsViewController.m */; };
 		2661D3441B40766F00EC51BA /* MLChatViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661D3431B40766F00EC51BA /* MLChatViewController.m */; };
 		2661D34D1B407ED400EC51BA /* MLContactsCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661D34C1B407ED400EC51BA /* MLContactsCell.m */; };
@@ -691,6 +692,8 @@
 		265F1B2A123040540065C5FE /* web.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = web.xib; sourceTree = "<group>"; };
 		265F6BA61B7B088A006B8EBA /* Crashlytics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Crashlytics.framework; path = MonalOSX/External/Crashlytics.framework; sourceTree = "<group>"; };
 		265FF0D01C7FD6CF00E2CCE1 /* DropboxOSX.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DropboxOSX.framework; path = MonalOSX/External/DropboxOSX.framework; sourceTree = "<group>"; };
+		265FF0D31C7FDAC100E2CCE1 /* MLCloudStorageSettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLCloudStorageSettings.h; sourceTree = "<group>"; };
+		265FF0D41C7FDAC100E2CCE1 /* MLCloudStorageSettings.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLCloudStorageSettings.m; sourceTree = "<group>"; };
 		2661D33F1B40765A00EC51BA /* MLContactsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLContactsViewController.h; sourceTree = "<group>"; };
 		2661D3401B40765A00EC51BA /* MLContactsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLContactsViewController.m; sourceTree = "<group>"; };
 		2661D3421B40766F00EC51BA /* MLChatViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLChatViewController.h; sourceTree = "<group>"; };
@@ -1158,8 +1161,11 @@
 			children = (
 				265F0B641B75733800A63F20 /* Accounts */,
 				2638DAE61B68F3AB00DF05AC /* MLPresenceSettings.m */,
+				2638DAE51B68F3AB00DF05AC /* MLPresenceSettings.h */,
 				2638DAED1B68F3EF00DF05AC /* MLDisplaySettings.h */,
 				2638DAEE1B68F3EF00DF05AC /* MLDisplaySettings.m */,
+				265FF0D31C7FDAC100E2CCE1 /* MLCloudStorageSettings.h */,
+				265FF0D41C7FDAC100E2CCE1 /* MLCloudStorageSettings.m */,
 			);
 			name = Preferences;
 			sourceTree = "<group>";
@@ -1210,7 +1216,6 @@
 				260870D71B7034460036539B /* MLAccountEdit.m */,
 				269574E31C37482A00544A60 /* MLOAuthViewController.h */,
 				269574E41C37482A00544A60 /* MLOAuthViewController.m */,
-				2638DAE51B68F3AB00DF05AC /* MLPresenceSettings.h */,
 			);
 			name = Accounts;
 			sourceTree = "<group>";
@@ -2418,6 +2423,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				26E456CA1B841E49004BD74C /* Countly.xcdatamodeld in Sources */,
+				265FF0D51C7FDAC100E2CCE1 /* MLCloudStorageSettings.m in Sources */,
 				26B2A4F01B73097500272E63 /* DDASLLogCapture.m in Sources */,
 				260499E21B730E9000D11866 /* xmpp.m in Sources */,
 				260499E51B730E9B00D11866 /* XMPPPresence.m in Sources */,

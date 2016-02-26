@@ -544,7 +544,7 @@ static DataLayer *sharedInstance=nil;
 -(void) updateAccounWithDictionary:(NSDictionary *) dictionary andCompletion:(void (^)(BOOL))completion;
 {
     NSString* query=
-    [NSString stringWithFormat:@"update account  set account_name='%@', protocol_id=%@, server='%@', other_port='%@', username='%@', password='%@', secure=%d, resource='%@', domain='%@', enabled=%d, selfsigned=%d, oldstyleSSL=%d, oauth=%d  where account_id=%@",
+    [NSString stringWithFormat:@"update account  set account_name='%@', protocol_id=%@, server='%@', other_port='%@', username='%@', password='%@', secure=%d, resource='%@', domain='%@', enabled=%d, selfsigned=%d, oldstyleSSL=%d where account_id=%@",
      ((NSString *)[dictionary objectForKey:kUsername]).escapeForSql,
      @"1",
      ((NSString *)[dictionary objectForKey:kServer]).escapeForSql,
@@ -557,7 +557,6 @@ static DataLayer *sharedInstance=nil;
      [[dictionary objectForKey:kEnabled] boolValue],
      [[dictionary objectForKey:kSelfSigned] boolValue],
      [[dictionary objectForKey:kOldSSL] boolValue],
-     [[dictionary objectForKey:kOauth] boolValue],
      [dictionary objectForKey:kAccountID]
      
      ];

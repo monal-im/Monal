@@ -201,11 +201,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
  
     xmpp* account=[[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
-    if(!account.supportsHTTPUpload)
+    if(!account.supportsHTTPUpload && !self.restClient)
     {
         NSAlert *userAddAlert = [[NSAlert alloc] init];
         userAddAlert.messageText = @"Error";
-        userAddAlert.informativeText =[NSString stringWithFormat:@"This server does not appear to support HTTP file uploads (XEP-0363). Please ask the administrator to enable it."];
+        userAddAlert.informativeText =[NSString stringWithFormat:@"This server does not appear to support HTTP file uploads (XEP-0363). Please ask the administrator to enable it. You can also link to DropBox in settings and use that to share files."];
         userAddAlert.alertStyle=NSInformationalAlertStyle;
         [userAddAlert addButtonWithTitle:@"Close"];
         
@@ -216,12 +216,21 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         return;
     }
     
-    //selct file
+    //select file
     NSOpenPanel *openPanel = [NSOpenPanel openPanel];
     [openPanel beginWithCompletionHandler:^(NSInteger result) {
         switch(result){
             case NSFileHandlingPanelOKButton:
             {
+                if(self.restClient)
+                {
+//                    self.uploadHUD.mode=MBProgressHUDModeDeterminate;
+//                    self.uploadHUD.progress=0;
+                    NSData *fileData= [NSData dataWithContentsOfURL:openPanel.URL];
+                    [self uploadImageToDropBox:fileData];
+                }
+                else {
+                
                 // start http upload XMPP
                 [[MLXMPPManager sharedInstance]  httpUploadFileURL:openPanel.URL toContact:self.contactName onAccount:self.accountNo withCompletionHandler:^(NSString *url, NSError *error) {
                     dispatch_async(dispatch_get_main_queue(), ^{
@@ -242,6 +251,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     });
                     
                 }];
+                }
                 break;
             }
             case NSFileHandlingPanelCancelButton:

@@ -418,7 +418,6 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                 
             }
             
-          
             //if you have configured it, defer to dropbox
             if(self.restClient)
             {

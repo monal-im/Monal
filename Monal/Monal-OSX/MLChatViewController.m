@@ -488,7 +488,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     NSAlert *userAddAlert = [[NSAlert alloc] init];
     userAddAlert.messageText=@"Message Failed to Send";
-    userAddAlert.informativeText =[NSString stringWithFormat:@"This message may may have failed to send."];
+    userAddAlert.informativeText =[NSString stringWithFormat:@"This message may  have failed to send."];
     userAddAlert.alertStyle=NSWarningAlertStyle;
     [userAddAlert addButtonWithTitle:@"Close"];
     [userAddAlert addButtonWithTitle:@"Retry"];

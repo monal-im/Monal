@@ -844,15 +844,16 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     [cell setOrb];
 
     NSString* accountNo=[NSString stringWithFormat:@"%ld", (long)cell.accountNo];
-    
-    cell.icon.image=nil;
+    NSString *cellUser = [contactRow objectForKey:kContactName];
     [[MLImageManager sharedInstance] getIconForContact:cell.username andAccount:accountNo withCompletion:^(NSImage *image) {
-       dispatch_async(dispatch_get_main_queue(), ^{
-          cell.icon.image=image;
-       });
-       
-     }];
-  
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if([cell.username isEqualToString:cellUser]) {
+                cell.icon.image=image;
+            }
+        });
+        
+    }];
+    
     [cell setUnreadCount:0];
     [[DataLayer sharedInstance] countUserUnreadMessages:cell.username forAccount:accountNo withCompletion:^(NSNumber * result) {
         dispatch_async(dispatch_get_main_queue(), ^{

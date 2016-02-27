@@ -337,6 +337,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     
 }
 
+
 -(NSInteger) positionOfOfflineContact:(NSDictionary *) user
 {
     NSInteger pos=0;
@@ -354,6 +355,25 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     return  -1;
     
 }
+
+
+-(NSInteger) positionOfActiveContact:(NSDictionary *) user
+{
+    NSInteger pos=0;
+    for(NSDictionary* row in self.activeChat)
+    {
+        if([[row objectForKey:kContactName] caseInsensitiveCompare:[user objectForKey:@"from"] ]==NSOrderedSame &&
+           [[row objectForKey:kAccountID]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
+        {
+            return pos;
+        }
+        pos++;
+    }
+    
+    return -1;
+    
+}
+
 
 
 -(void)updateContactAt:(NSInteger) pos withInfo:(NSDictionary *) user
@@ -682,8 +702,23 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                            //activeArray= self.activeChat;
                            //add 0.2 delay to allow DB to write since this is called at the same time as db write notification
                            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.2 * NSEC_PER_SEC), dispatch_get_main_queue(),  ^{
-                               [self showActiveChat:YES];
-                               [self highlightCellForCurrentContact];
+                           
+                               NSInteger activePos =  [self positionOfActiveContact:notification.userInfo];
+                               
+                               if(activePos>=0)
+                               {
+                                   
+                                   if(activePos<self.contactsTable.numberOfRows) {
+                                       [self.contactsTable beginUpdates];
+                                       NSIndexSet *indexSet =[[NSIndexSet alloc] initWithIndex:activePos] ;
+                                       NSIndexSet *columnIndexSet =[[NSIndexSet alloc] initWithIndex:0] ;
+                                       [self.contactsTable reloadDataForRowIndexes:indexSet columnIndexes:columnIndexSet];
+                                       [self.contactsTable endUpdates];
+                                   }
+                               }
+                            
+                               
+                               
                            });
                            
                            return;

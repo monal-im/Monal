@@ -66,7 +66,7 @@ NSString *const kContact=@"contact";
 
 NSString *const kCompletion=@"completion";
 
-static const int ddLogLevel = LOG_LEVEL_DEBUG;
+static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 @interface xmpp()
 {
@@ -1812,7 +1812,6 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                             [saslXML.attributes setObject: @"X-OAUTH2"forKey: @"mechanism"];
                             [saslXML.attributes setObject: @"auth:service"forKey: @"oauth2"];
                             
-                            //google only uses sasl plain
                             [saslXML.attributes setObject:@"http://www.google.com/talk/protocol/auth" forKey: @"xmlns:auth"];
                     
                             saslXML.data=saslplain;
@@ -1828,7 +1827,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                             [saslXML.attributes setObject: @"urn:ietf:params:xml:ns:xmpp-sasl"  forKey:@"xmlns"];
                             [saslXML.attributes setObject: @"PLAIN"forKey: @"mechanism"];
                             
-                            //google only uses sasl plain
+
                             [saslXML.attributes setObject:@"http://www.google.com/talk/protocol/auth" forKey: @"xmlns:ga"];
                             [saslXML.attributes setObject:@"true" forKey: @"ga:client-uses-full-bind-result"];
                             

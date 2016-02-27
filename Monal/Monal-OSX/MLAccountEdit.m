@@ -115,6 +115,16 @@
 -(IBAction)authenticateWithOAuth:(id)sender;
 {
     
+    NSArray *accounts= [[NXOAuth2AccountStore sharedStore] accountsWithAccountType:self.jabberID.stringValue];
+    
+    //clean any exisitng
+    if([accounts count]>0)
+    {
+        NXOAuth2Account *oauthAccount= [accounts objectAtIndex:0];
+        [[NXOAuth2AccountStore sharedStore]  removeAccount:oauthAccount];
+    }
+    
+    
     [[NXOAuth2AccountStore sharedStore] setClientID:@"472865344000-q63msgarcfs3ggiabdobkkis31ehtbug.apps.googleusercontent.com"
                                              secret:@"IGo7ocGYBYXf4znad5Qhumjt"
                                               scope:[NSSet setWithArray:@[@"https://www.googleapis.com/auth/googletalk"]]

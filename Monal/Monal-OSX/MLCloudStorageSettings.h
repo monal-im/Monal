@@ -14,7 +14,7 @@
 @property (nonatomic, weak) IBOutlet NSButton *dropBox;
 @property (nonatomic, weak) IBOutlet NSButton *box;
 @property (nonatomic, weak) IBOutlet NSButton *ownCloud;
-
+@property (nonatomic, weak) IBOutlet NSProgressIndicator *progressIndicator;
 
 -(IBAction)toggleDropBox:(id)sender;
 

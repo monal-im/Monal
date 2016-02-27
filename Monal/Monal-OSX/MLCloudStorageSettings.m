@@ -35,7 +35,7 @@
         if(![DBAuthHelperOSX sharedHelper].isLoading) {
             self.dropBox.state=NO;
             self.dropBox.enabled= YES;
-        
+             [self.progressIndicator stopAnimation:self];
         }
     }
 }
@@ -43,6 +43,7 @@
 -(IBAction)toggleDropBox:(id)sender
 {
     if (![[DBSession sharedSession] isLinked]) {
+        [self.progressIndicator startAnimation:self];
         self.dropBox.enabled=NO;
          [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(checkDropBox) name:DBAuthHelperOSXStateChangedNotification object:nil];
         [[DBAuthHelperOSX sharedHelper] authenticate];

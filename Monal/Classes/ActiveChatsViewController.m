@@ -58,13 +58,19 @@
 
 -(void) refreshDisplay
 {
-    NSMutableArray *cleanActive =[[DataLayer sharedInstance] activeBuddies];
-    [[MLXMPPManager sharedInstance] cleanArrayOfConnectedAccounts:cleanActive];
     
-    _contacts=cleanActive;
-    [_chatListTable reloadData];
-    MonalAppDelegate* appDelegate= (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
-    [appDelegate updateUnread];
+    [[DataLayer sharedInstance] activeContactsWithCompletion:^(NSMutableArray *cleanActive) {
+        [[MLXMPPManager sharedInstance] cleanArrayOfConnectedAccounts:cleanActive];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [[MLXMPPManager sharedInstance] cleanArrayOfConnectedAccounts:cleanActive];
+            
+            _contacts=cleanActive;
+            [_chatListTable reloadData];
+            MonalAppDelegate* appDelegate= (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
+            [appDelegate updateUnread];
+        });
+    }];
+    
 }
 
 -(void) viewWillAppear:(BOOL)animated
@@ -191,13 +197,15 @@
     if (editingStyle == UITableViewCellEditingStyleDelete) {
         NSDictionary* contact= [_contacts objectAtIndex:indexPath.row];
         
-       [ [DataLayer sharedInstance] removeActiveBuddy:[contact objectForKey:@"buddy_name"] forAccount:[contact objectForKey:@"account_id"]];
-        
-   
-           _contacts=[[DataLayer sharedInstance] activeBuddies];
-        [_chatListTable deleteRowsAtIndexPaths:@[indexPath]
-                              withRowAnimation:UITableViewRowAnimationAutomatic];
-     
+        [[DataLayer sharedInstance] removeActiveBuddy:[contact objectForKey:@"buddy_name"] forAccount:[contact objectForKey:@"account_id"]];
+        [[DataLayer sharedInstance] activeContactsWithCompletion:^(NSMutableArray *cleanActive) {
+            [[MLXMPPManager sharedInstance] cleanArrayOfConnectedAccounts:cleanActive];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                _contacts=cleanActive;
+                [_chatListTable deleteRowsAtIndexPaths:@[indexPath]
+                                      withRowAnimation:UITableViewRowAnimationAutomatic];
+            });
+        }];
         
     }
 }

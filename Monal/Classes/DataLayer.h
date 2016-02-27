@@ -57,7 +57,7 @@ extern NSString *const kCount;
 
 // V2 low level
 -(void) executeScalar:(NSString*) query withCompletion: (void (^)(NSObject *))completion;
--(void) executeReader:(NSString*) query withCompletion: (void (^)(NSArray *))completion;
+-(void) executeReader:(NSString*) query withCompletion: (void (^)(NSMutableArray *))completion;
 -(void) executeNonQuery:(NSString*) query withCompletion: (void (^)(BOOL))completion;
 
 // Buddy Commands
@@ -197,8 +197,8 @@ extern NSString *const kCount;
 -(void) markAsReadBuddy:(NSString*) buddy forAccount:(NSString*) accountNo;
 -(void) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString *)messageId withCompletion:(void (^)(BOOL))completion;
 
-#pragma mark active chats
--(NSMutableArray *) activeBuddies;
+#pragma mark active contacts
+-(void) activeContactsWithCompletion: (void (^)(NSMutableArray *))completion;
 -(void) removeActiveBuddy:(NSString*) buddyname forAccount:(NSString*) accountNo;
 -(void) removeAllActiveBuddies;
 -(void) addActiveBuddies:(NSString*) buddyname forAccount:(NSString*) accountNo withCompletion: (void (^)(BOOL))completion;

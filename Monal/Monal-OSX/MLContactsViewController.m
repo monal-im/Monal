@@ -147,17 +147,20 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 -(void) showActiveChat:(BOOL) shouldShow
 {
     if (shouldShow) {
-        NSMutableArray *cleanActive=[[DataLayer sharedInstance] activeBuddies];
-        
-        [[MLXMPPManager sharedInstance] cleanArrayOfConnectedAccounts:cleanActive];
-   
-        self.activeChat= cleanActive;
+        [[DataLayer sharedInstance] activeContactsWithCompletion:^(NSMutableArray *cleanActive) {
+            [[MLXMPPManager sharedInstance] cleanArrayOfConnectedAccounts:cleanActive];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                self.activeChat= cleanActive;
+                [self.contactsTable reloadData];
+            });
+        }];
     }
     else {
         self.activeChat=nil;
+        [self.contactsTable reloadData];
     }
     
-    [self.contactsTable reloadData];
+ 
 }
 
 -(IBAction)deleteItem:(id)sender
@@ -215,9 +218,16 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
         if(self.contactsTable.selectedRow <self.activeChat.count) {
             NSDictionary *contact =[self.activeChat objectAtIndex:self.contactsTable.selectedRow];
             
-            [ [DataLayer sharedInstance] removeActiveBuddy:[contact objectForKey:kContactName] forAccount:[contact objectForKey:kAccountID]];
-            self.activeChat=[[DataLayer sharedInstance] activeBuddies];
-            [self.contactsTable reloadData];
+            [[DataLayer sharedInstance] removeActiveBuddy:[contact objectForKey:kContactName] forAccount:[contact objectForKey:kAccountID]];
+
+            [[DataLayer sharedInstance] activeContactsWithCompletion:^(NSMutableArray *cleanActive) {
+                [[MLXMPPManager sharedInstance] cleanArrayOfConnectedAccounts:cleanActive];
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    self.activeChat= cleanActive;
+                    [self.contactsTable reloadData];
+                });
+            }];
+            
         }
     }
     else  {

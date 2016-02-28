@@ -39,7 +39,14 @@
     
     _accountsTable.backgroundView=nil;
  
-    _protocolList=[[DataLayer sharedInstance] protocolList];
+   [[DataLayer sharedInstance] protocolListWithCompletion:^(NSArray *result) {
+       
+       dispatch_async(dispatch_get_main_queue(), ^{
+           _protocolList=result;
+           [_accountsTable reloadData];
+       });
+       
+   }];
     
     UIBarButtonItem* rightButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Reconnect All",@"") style:UIBarButtonItemStyleBordered target:self action:@selector(connectIfNecessary)];
     self.navigationItem.rightBarButtonItem=rightButton;
@@ -62,9 +69,13 @@
 -(void) viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    _accountList=[[DataLayer sharedInstance] accountList];
-    [self.accountsTable reloadData];
-
+    [[DataLayer sharedInstance] accountListWithCompletion:^(NSArray *result) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            _accountList=result;
+            [self.accountsTable reloadData];
+        });
+        
+    }];
 }
 
 -(void) dealloc
@@ -75,10 +86,13 @@
 
 -(void) refreshAccountList
 {
-    dispatch_async(dispatch_get_main_queue() , ^{
-        _accountList=[[DataLayer sharedInstance] accountList];
-        [self.accountsTable reloadData];
-    });
+    [[DataLayer sharedInstance] accountListWithCompletion:^(NSArray *result) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            _accountList=result;
+            [_accountsTable reloadData];
+        });
+        
+    }];
 }
 
 #pragma mark button actions

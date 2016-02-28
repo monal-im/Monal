@@ -134,8 +134,8 @@ extern NSString *const kCount;
 -(BOOL) setNickName:(NSString*) nickName forBuddy:(NSString*) buddy andAccount:(NSString*) accountNo;
 
 //account commands
--(NSArray*) protocolList;
--(NSArray*) accountList;
+-(void) protocolListWithCompletion: (void (^)(NSArray* result))completion;
+-(void) accountListWithCompletion: (void (^)(NSArray* result))completion;
 -(NSArray*) enabledAccountList;
 -(BOOL) isAccountEnabled:(NSString*) accountNo;
 

@@ -105,28 +105,35 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     if(![[NSUserDefaults standardUserDefaults] boolForKey:@"hasSeenSelfSignedMessage"])
     {
     //if there are enabed accounts and alert hasnt been shown
-    NSArray* accountList=[[DataLayer sharedInstance] accountList];
-    int count=0;
-    for (NSDictionary* account in accountList)
-    {
-        if([[account objectForKey:@"enabled"] boolValue]==YES)
-        {
-            count++;
-        }
-    }
-    
-    if(count>0)
-    {
-        UIAlertView *addError = [[UIAlertView alloc]
-								 initWithTitle:@"Changes to SSL"
-								 message:@"Monal has changed the way it treats self signed SSL certificates. If you already had an account created and your server uses a self signed SSL certificate, please go to accounts and explicity set the account to allow self signed SSL. This is a new option."
-								 delegate:self cancelButtonTitle:@"Close"
-								 otherButtonTitles: nil] ;
-		[addError show];
-
-    }
+  
         
-     [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"hasSeenSelfSignedMessage"];
+        [[DataLayer sharedInstance] accountListWithCompletion:^(NSArray *result) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                 NSArray* accountList=result;
+                int count=0;
+                for (NSDictionary* account in accountList)
+                {
+                    if([[account objectForKey:@"enabled"] boolValue]==YES)
+                    {
+                        count++;
+                    }
+                }
+                
+                if(count>0)
+                {
+                    UIAlertView *addError = [[UIAlertView alloc]
+                                             initWithTitle:@"Changes to SSL"
+                                             message:@"Monal has changed the way it treats self signed SSL certificates. If you already had an account created and your server uses a self signed SSL certificate, please go to accounts and explicity set the account to allow self signed SSL. This is a new option."
+                                             delegate:self cancelButtonTitle:@"Close"
+                                             otherButtonTitles: nil] ;
+                    [addError show];
+                    
+                }
+            });
+            
+        }];
+        
+        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"hasSeenSelfSignedMessage"];
     }
 }
 

@@ -240,19 +240,20 @@ An array of Dics what have timers to make sure everything was sent
 
 -(void) connectAccount:(NSString*) accountNo
 {
-    dispatch_async(_netQueue, ^{
-        
-        _accountList=[[DataLayer sharedInstance] accountList];
-        for (NSDictionary* account in _accountList)
-        {
-            if([[account objectForKey:kAccountID] integerValue]==[accountNo integerValue])
+    [[DataLayer sharedInstance] accountListWithCompletion:^(NSArray *result) {
+        dispatch_async(_netQueue, ^{
+            _accountList=result;
+            for (NSDictionary* account in _accountList)
             {
-                [self connectAccountWithDictionary:account];
-                break;
+                if([[account objectForKey:kAccountID] integerValue]==[accountNo integerValue])
+                {
+                    [self connectAccountWithDictionary:account];
+                    break;
+                }
             }
-        }
+        });
         
-    });
+    }];
 }
 
 -(void) connectAccountWithDictionary:(NSDictionary*)account
@@ -357,33 +358,41 @@ An array of Dics what have timers to make sure everything was sent
 
 -(void)logoutAll
 {
-    _accountList=[[DataLayer sharedInstance] accountList];
-    for (NSDictionary* account in _accountList)
-    {
-        if([[account objectForKey:@"enabled"] boolValue]==YES)
+    
+    [[DataLayer sharedInstance] accountListWithCompletion:^(NSArray *result) {
+        _accountList=result;
+        for (NSDictionary* account in _accountList)
         {
-            [self disconnectAccount:[NSString stringWithFormat:@"%@",[account objectForKey:@ "account_id"]]];
-            
+            if([[account objectForKey:@"enabled"] boolValue]==YES)
+            {
+                [self disconnectAccount:[NSString stringWithFormat:@"%@",[account objectForKey:@ "account_id"]]];
+                
+            }
         }
-    }
+    }];
+ 
 }
 
 -(void)connectIfNecessary
 {
-    dispatch_async(_netQueue,
-                   ^{
-                       _accountList=[[DataLayer sharedInstance] accountList];
-                       for (NSDictionary* account in _accountList)
-                       {
-                           if([[account objectForKey:@"enabled"] boolValue]==YES)
+    
+    [[DataLayer sharedInstance] accountListWithCompletion:^(NSArray *result) {
+        dispatch_async(_netQueue,
+                       ^{
+                           _accountList=result;
+                           for (NSDictionary* account in _accountList)
                            {
-                               xmpp* existing=[self getConnectedAccountForID:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
-                               if(existing.accountState<kStateReconnecting){
-                                   [self connectAccountWithDictionary:account];
+                               if([[account objectForKey:@"enabled"] boolValue]==YES)
+                               {
+                                   xmpp* existing=[self getConnectedAccountForID:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
+                                   if(existing.accountState<kStateReconnecting){
+                                       [self connectAccountWithDictionary:account];
+                                   }
                                }
                            }
-                       }
-                   });
+                       });
+    }];
+    
 }
 
 -(void) reachabilityChanged

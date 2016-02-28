@@ -447,43 +447,22 @@ static DataLayer *sharedInstance=nil;
 
 #pragma mark account commands
 
--(NSArray*) protocolList
+-(void) protocolListWithCompletion: (void (^)(NSArray *result))completion
 {
     NSString* query=[NSString stringWithFormat:@"select * from protocol where protocol_id<=3 or protocol_id=5 order by protocol_id asc"];
-    NSArray* toReturn = [self executeReader:query];
-    
-    if(toReturn!=nil)
-    {
+    [self executeReader:query withCompletion:^(NSMutableArray * result) {
+        if(completion) completion(result);
         
-        DDLogVerbose(@" count: %lu",  (unsigned long)[toReturn count] );
-        return toReturn;
-    }
-    else
-    {
-        DDLogError(@"protocol list  is empty or failed to read");
-        return nil;
-    }
+    }];
 }
 
--(NSArray*) accountList
+-(void) accountListWithCompletion: (void (^)(NSArray* result))completion
 {
     NSString* query=[NSString stringWithFormat:@"select * from account order by account_id asc "];
-    NSArray* toReturn = [self executeReader:query];
-    
-    if(toReturn!=nil)
-    {
-        
-        DDLogVerbose(@" count: %lu",  (unsigned long)[toReturn count] );
-        
-        return toReturn;
-    }
-    else
-    {
-        DDLogError(@"account list  is empty or failed to read");
-        
-        return nil;
-    }
-    
+   [self executeReader:query withCompletion:^(NSMutableArray * result) {
+       if(completion) completion(result);
+       
+   }];
 }
 
 -(NSArray*) enabledAccountList

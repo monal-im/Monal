@@ -331,13 +331,10 @@ NSString *const kGtalk = @"Gtalk";
     {
         
         NSArray *accounts= [[NXOAuth2AccountStore sharedStore] accountsWithAccountType:self.jid];
-        NXOAuth2Account *oauthAccount;
-        if([accounts count]>0)
-        {
-            oauthAccount= [accounts objectAtIndex:0];
+        for(NXOAuth2Account *oauthAccount in accounts ) {
             [[NXOAuth2AccountStore sharedStore] removeAccount:oauthAccount];
         }
-        
+       
         //TODO remove password
         self.autoSave=NO;
         [self.db removeAccount:self.accountno];

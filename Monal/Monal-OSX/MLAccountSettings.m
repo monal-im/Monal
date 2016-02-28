@@ -59,10 +59,9 @@
         NSString *jid = [row objectForKey:kAccountName];
         
         NSArray *accounts= [[NXOAuth2AccountStore sharedStore] accountsWithAccountType:jid];
-        NXOAuth2Account *oauthAccount;
-        if([accounts count]>0)
-        {
-            oauthAccount= [accounts objectAtIndex:0];
+        
+        NSArray *accounts= [[NXOAuth2AccountStore sharedStore] accountsWithAccountType:self.jid];
+        for(NXOAuth2Account *oauthAccount in accounts ) {
             [[NXOAuth2AccountStore sharedStore] removeAccount:oauthAccount];
         }
         

@@ -74,9 +74,11 @@ extern NSString *const kCount;
 
 
 -(NSArray*) searchContactsWithString:(NSString*) search;
--(NSArray*) onlineContactsSortedBy:(NSString*) sort;
+
+-(void) onlineContactsSortedBy:(NSString*) sort withCompeltion: (void (^)(NSMutableArray *))completion;
 -(NSArray*) resourcesForContact:(NSString*)contact ;
--(NSArray*) offlineContacts;
+
+-(void) offlineContactsWithCompeltion: (void (^)(NSMutableArray *))completion;
 
 #pragma mark Ver string and Capabilities
 -(BOOL) setResourceVer:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;

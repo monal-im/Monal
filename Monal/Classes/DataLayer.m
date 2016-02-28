@@ -757,7 +757,7 @@ static DataLayer *sharedInstance=nil;
     
 }
 
--(NSArray*) onlineContactsSortedBy:(NSString*) sort
+-(void) onlineContactsSortedBy:(NSString*) sort withCompeltion: (void (^)(NSMutableArray *))completion
 {
     NSString* query=@"";
     
@@ -771,41 +771,18 @@ static DataLayer *sharedInstance=nil;
         query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0 as 'count', ifnull(full_name, buddy_name) as full_name, account_id from buddylist where   online=1   order by state,full_name COLLATE NOCASE  asc "];
     }
     
-    //DDLogVerbose(query);
-    NSArray* toReturn = [self executeReader:query];
-    
-    if(toReturn!=nil)
-    {
-        DDLogVerbose(@" count: %lu",  (unsigned long)[toReturn count] );
-        return toReturn;
-    }
-    else
-    {
-        DDLogError(@"buddylist is empty or failed to read");
-        return nil;
-    }
-    
+    [self executeReader:query withCompletion:^(NSMutableArray *results) {
+        if(completion) completion(results);
+    }];
+  
 }
 
--(NSArray*) offlineContacts
+-(void) offlineContactsWithCompeltion: (void (^)(NSMutableArray *))completion
 {
-    
     NSString* query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, ifnull(full_name, buddy_name) as full_name, a.account_id from buddylist  as A inner join account as b  on a.account_id=b.account_id  where  online=0 and enabled=1 order by full_name COLLATE NOCASE "];
-    //DDLogVerbose(query);
-    NSArray* toReturn = [self executeReader:query];
-    
-    if(toReturn!=nil)
-    {
-        DDLogVerbose(@" count: %lu",  (unsigned long)[toReturn count] );
-        return toReturn;
-    }
-    else
-    {
-        DDLogError(@"buddylist is empty or failed to read");
-        return nil;
-    }
-    
-    
+    [self executeReader:query withCompletion:^(NSMutableArray *results) {
+        if(completion) completion(results);
+    }];
 }
 
 

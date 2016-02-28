@@ -560,13 +560,33 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     
     if([[NSUserDefaults standardUserDefaults] boolForKey:@"SortContacts"]) //sort by status
-        _contacts=[NSMutableArray arrayWithArray:[[DataLayer sharedInstance] onlineContactsSortedBy:@"Status"]];
-    else
-        _contacts=[NSMutableArray arrayWithArray:[[DataLayer sharedInstance] onlineContactsSortedBy:@"Name"]];
-    
+    {
+        [[DataLayer sharedInstance] onlineContactsSortedBy:@"Status" withCompeltion:^(NSMutableArray *results) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                _contacts= results;
+                [self.contactsTable reloadData];
+            });
+        }];
+    }
+    else {
+        [[DataLayer sharedInstance] onlineContactsSortedBy:@"Name" withCompeltion:^(NSMutableArray *results) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                _contacts= results;
+                [self.contactsTable reloadData];
+            });
+        }];
+    }
+
+
     if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
     {
-    _offlineContacts=[NSMutableArray arrayWithArray:[[DataLayer sharedInstance] offlineContacts]];
+        [[DataLayer sharedInstance] offlineContactsWithCompeltion:^(NSMutableArray *results) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                _offlineContacts= results;
+                [self.contactsTable reloadData];
+            });
+        }];
+
     }
     
     if(self.searchResults.count==0)

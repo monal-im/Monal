@@ -112,12 +112,16 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 #pragma mark user icons
 
+-(NSString *) fileNameforContact:(NSString *) contact {
+    return [NSString stringWithFormat:@"%@.png", [contact lowercaseString]];;
+}
+
 -(void) setIconForContact:(NSString*) contact andAccount:(NSString*) accountNo WithData:(NSString*) data
 {
     if(!data) return; 
 //documents directory/buddyicons/account no/contact
     
-    NSString* filename=[NSString stringWithFormat:@"%@.png", [contact lowercaseString]];
+    NSString* filename= [self fileNameforContact:contact];
     
     NSFileManager* fileManager = [NSFileManager defaultManager];
     
@@ -154,7 +158,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 #if TARGET_OS_IPHONE
 -(void) getIconForContact:(NSString*) contact andAccount:(NSString*) accountNo withCompletion:(void (^)(UIImage *))completion
 {
-        NSString* filename=[NSString stringWithFormat:@"%@.png", [contact lowercaseString]];
+        NSString* filename=[self fileNameforContact:contact];
         
         UIImage* toreturn=nil;
         //get filname from DB
@@ -196,7 +200,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 #else
 -(void) getIconForContact:(NSString*) contact andAccount:(NSString *) accountNo withCompletion:(void (^)(NSImage *))completion
 {
-       NSString* filename=[NSString stringWithFormat:@"%@.png", [contact lowercaseString]];
+       NSString* filename=[self fileNameforContact:contact];
             NSString* cacheKey=[NSString stringWithFormat:@"%@_%@",accountNo,contact];
           //check cache
           NSImage* toreturn= [self.iconCache objectForKey:cacheKey];

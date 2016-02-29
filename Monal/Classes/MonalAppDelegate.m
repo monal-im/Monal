@@ -392,6 +392,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         DDLogVerbose(@"Entering BG");
     }
     
+    [self updateUnread];
+    
     [[MLXMPPManager sharedInstance] setKeepAlivetimer];
     [[MLXMPPManager sharedInstance] setClientsInactive];
 }
@@ -399,7 +401,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void)applicationWillTerminate:(UIApplication *)application
 {
     
-       [[NSUserDefaults standardUserDefaults] synchronize];
+     [self updateUnread];
+    [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 #pragma mark splitview controller delegate

@@ -2713,7 +2713,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 //allow failure to process an oauth to be refreshed
                 dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 5ull * NSEC_PER_SEC), dispatch_get_main_queue(),  ^{
                     DDLogInfo(@"%@ Stream end encoutered.. on oauth acct. Wait for refresh.", [stream class] );
-                    [self reconnect:5];
+                    if(_accountState<kStateHasStream) {
+                        [self reconnect:5];
+                    } else  {
+                        DDLogVerbose(@"already connected/connecting .doing nothimg");
+                    }
                 });
             }
             

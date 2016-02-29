@@ -234,10 +234,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 #pragma mark message signals
 
-
 -(void) refreshCounter
 {
-    //coming in  from background
     if(!_day) {
         [[DataLayer sharedInstance] markAsReadBuddy:self.contactName forAccount:self.accountNo];
         

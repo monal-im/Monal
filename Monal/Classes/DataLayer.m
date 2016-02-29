@@ -1223,30 +1223,7 @@ static DataLayer *sharedInstance=nil;
 }
 
 
-#pragma mark icon Commands
 
-
--(void) setIconName:(NSString*) icon forContact:(NSString*) contact inAccount:(NSString*) accountNo
-{
-    
-    NSString* query=[NSString stringWithFormat:@"update buddylist set filename='%@',dirty=1 where account_id=%@ and  buddy_name='%@';",icon, accountNo, contact.escapeForSql];
-    [self executeNonQuery:query withCompletion:nil];
-  
-}
-
--(void) iconName:(NSString*) contact forAccount:(NSString*) accountNo  withCompeltion: (void (^)(NSString *))completion
-{
-    NSString* query=[NSString stringWithFormat:@"select filename from  buddylist where account_id=%@ and buddy_name='%@'", accountNo, contact.escapeForSql];
-   [self executeScalar:query withCompletion:^(NSObject *iconName) {
-      
-       if(completion)
-       {
-           completion((NSString*)iconName);
-       }
-       
-   }];
-   
-}
 
 #pragma mark message Commands
 

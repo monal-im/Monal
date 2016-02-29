@@ -150,8 +150,6 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     //remove from cache if its there
     [self.iconCache removeObjectForKey:[NSString stringWithFormat:@"%@_%@",accountNo,contact]];
     
-    //set db entry
-    [[DataLayer sharedInstance] setIconName:filename forContact:contact inAccount:accountNo];
 }
 
 

@@ -181,6 +181,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     _versionHash=[self getVersionString];
 
+
     return self;
 }
 
@@ -343,6 +344,17 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     
     if(self.oAuth) {
+        
+        [[NXOAuth2AccountStore sharedStore] setClientID:@"472865344000-q63msgarcfs3ggiabdobkkis31ehtbug.apps.googleusercontent.com"
+                                                     secret:@"IGo7ocGYBYXf4znad5Qhumjt"
+                                                      scope:[NSSet setWithArray:@[@"https://www.googleapis.com/auth/googletalk"]]
+                                           authorizationURL:[NSURL URLWithString:@"https://accounts.google.com/o/oauth2/auth"]
+                                                   tokenURL:[NSURL URLWithString:@"https://www.googleapis.com/oauth2/v3/token"]
+                                                redirectURL:[NSURL URLWithString:@"urn:ietf:wg:oauth:2.0:oob:auto"]
+                                              keyChainGroup:@"MonalGTalk"
+                                             forAccountType:_fulluser];
+        
+        
         [[NSNotificationCenter defaultCenter] addObserverForName:NXOAuth2AccountStoreDidFailToRequestAccessNotification
                                                           object:[NXOAuth2AccountStore sharedStore]
                                                            queue:nil
@@ -489,7 +501,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) disconnect
 {
-    if(self.explicitLogout)
+    if(self.explicitLogout && _accountState>=kStateHasStream)
     {
         MLXMLNode* stream = [[MLXMLNode alloc] init];
         stream.element=@"/stream:stream"; //hack to close stream
@@ -497,7 +509,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         self.streamID=nil;
     }
     
-    if(kStateDisconnected) return;
+    if(_accountState == kStateDisconnected) return;
     [self.networkQueue cancelAllOperations];
 
     [self.networkQueue addOperationWithBlock:^{
@@ -2033,15 +2045,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     //check for oauth
                     
                     if(self.oAuth) {
-                        [[NXOAuth2AccountStore sharedStore] setClientID:@"472865344000-q63msgarcfs3ggiabdobkkis31ehtbug.apps.googleusercontent.com"
-                                                                 secret:@"IGo7ocGYBYXf4znad5Qhumjt"
-                                                                  scope:[NSSet setWithArray:@[@"https://www.googleapis.com/auth/googletalk"]]
-                                                       authorizationURL:[NSURL URLWithString:@"https://accounts.google.com/o/oauth2/auth"]
-                                                               tokenURL:[NSURL URLWithString:@"https://www.googleapis.com/oauth2/v3/token"]
-                                                            redirectURL:[NSURL URLWithString:@"urn:ietf:wg:oauth:2.0:oob:auto"]
-                                                          keyChainGroup:@"MonalGTalk"
-                                                         forAccountType:_fulluser];
-                        
                         self.oauthAccount.oauthClient.desiredScope=[NSSet setWithArray:@[@"https://www.googleapis.com/auth/googletalk"]];
                         dispatch_async(dispatch_get_main_queue(), ^{
                             [self.oauthAccount.oauthClient refreshAccessToken];

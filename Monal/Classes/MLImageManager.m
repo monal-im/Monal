@@ -154,7 +154,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 #if TARGET_OS_IPHONE
 -(void) getIconForContact:(NSString*) contact andAccount:(NSString*) accountNo withCompletion:(void (^)(UIImage *))completion
 {
-    [[DataLayer sharedInstance] iconName:contact forAccount:accountNo withCompeltion:^(NSString *filename) {
+        NSString* filename=[NSString stringWithFormat:@"%@.png", [contact lowercaseString]];
         
         UIImage* toreturn=nil;
         //get filname from DB
@@ -191,13 +191,12 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         {
             completion(toreturn);
         }
-        
-    }];
+  
 }
 #else
 -(void) getIconForContact:(NSString*) contact andAccount:(NSString *) accountNo withCompletion:(void (^)(NSImage *))completion
 {
-      [[DataLayer sharedInstance] iconName:contact forAccount:accountNo withCompeltion:^(NSString *filename) {
+       NSString* filename=[NSString stringWithFormat:@"%@.png", [contact lowercaseString]];
             NSString* cacheKey=[NSString stringWithFormat:@"%@_%@",accountNo,contact];
           //check cache
           NSImage* toreturn= [self.iconCache objectForKey:cacheKey];
@@ -230,11 +229,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
           {
               completion(toreturn);
           }
-          
-        
-      }];
-  
-  
+    
 }
 #endif
 

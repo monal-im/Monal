@@ -893,6 +893,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
            cell.count=[unread integerValue];
        });
    }];
+
     
     [[MLImageManager sharedInstance] getIconForContact:[row objectForKey:@"buddy_name"] andAccount:accountNo withCompletion:^(UIImage *image) {
         dispatch_async(dispatch_get_main_queue(), ^{

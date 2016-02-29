@@ -42,10 +42,13 @@
 
 -(void) refreshAccountList
 {
-    dispatch_async(dispatch_get_main_queue() , ^{
-        self.accountList=[[DataLayer sharedInstance] accountList];
-        [self.accountTable reloadData];
-    });
+    [[DataLayer sharedInstance] accountListWithCompletion:^(NSArray *result) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            self.accountList=result;
+            [self.accountTable reloadData];
+        });
+        
+    }];
 }
 
 -(IBAction)deleteAccount:(id)sender
@@ -59,8 +62,7 @@
         NSString *jid = [row objectForKey:kAccountName];
         
         NSArray *accounts= [[NXOAuth2AccountStore sharedStore] accountsWithAccountType:jid];
-        
-        NSArray *accounts= [[NXOAuth2AccountStore sharedStore] accountsWithAccountType:self.jid];
+    
         for(NXOAuth2Account *oauthAccount in accounts ) {
             [[NXOAuth2AccountStore sharedStore] removeAccount:oauthAccount];
         }

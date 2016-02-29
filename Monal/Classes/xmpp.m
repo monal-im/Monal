@@ -1670,34 +1670,32 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             [[DataLayer sharedInstance] addContact:presenceNode.user forAccount:_accountNo fullname:@"" nickname:@"" withCompletion:^(BOOL success) {
                                 if(!success)
                                 {
-                                    DDLogVerbose(@"Buddy not already in list");
+                                    DDLogVerbose(@"Contact already in list");
                                 }
                                 else
                                 {
-                                    DDLogVerbose(@"Buddy already in list");
+                                    DDLogVerbose(@"Contact not already in list");
                                 }
+                              
+                                DDLogVerbose(@" showing as online from presence");
                                 
-                            }];
-                            
-                            
-                            DDLogVerbose(@" showing as online now");
-                            
-                            [[DataLayer sharedInstance] setOnlineBuddy:presenceNode forAccount:_accountNo];
-                            [[DataLayer sharedInstance] setBuddyState:presenceNode forAccount:_accountNo];
-                            [[DataLayer sharedInstance] setBuddyStatus:presenceNode forAccount:_accountNo];
-                            
-                            NSString* state=presenceNode.show;
-                            if(!state) state=@"";
-                            NSString* status=presenceNode.status;
-                            if(!status) status=@"";
-                            NSDictionary* userDic=@{kusernameKey: presenceNode.user,
-                                                    kaccountNoKey:_accountNo,
-                                                    kstateKey:state,
-                                                    kstatusKey:status
-                                                    };
-                            [self.networkQueue addOperationWithBlock: ^{
-                                [self.contactsVC addOnlineUser:userDic];
-                                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactOnlineNotice object:self userInfo:userDic];
+                                [[DataLayer sharedInstance] setOnlineBuddy:presenceNode forAccount:_accountNo];
+                                [[DataLayer sharedInstance] setBuddyState:presenceNode forAccount:_accountNo];
+                                [[DataLayer sharedInstance] setBuddyStatus:presenceNode forAccount:_accountNo];
+                                
+                                NSString* state=presenceNode.show;
+                                if(!state) state=@"";
+                                NSString* status=presenceNode.status;
+                                if(!status) status=@"";
+                                NSDictionary* userDic=@{kusernameKey: presenceNode.user,
+                                                        kaccountNoKey:_accountNo,
+                                                        kstateKey:state,
+                                                        kstatusKey:status
+                                                        };
+                                [self.networkQueue addOperationWithBlock: ^{
+                                    [self.contactsVC addOnlineUser:userDic];
+                                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactOnlineNotice object:self userInfo:userDic];
+                                }];
                             }];
                             
                             if(!presenceNode.MUC) {

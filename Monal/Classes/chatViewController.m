@@ -803,12 +803,13 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
               pos2= [urlString rangeOfString:@">"];
         }
         
+        
         if(pos2.location!=NSNotFound) {
             urlString=[urlString substringToIndex:pos2.location];
         }
        
         
-        cell.link=urlString;
+        cell.link=[urlString stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     }
     else
     {

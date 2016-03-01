@@ -173,12 +173,15 @@
     
     if(self.link)
     {
+        NSURL *url= [NSURL URLWithString:self.link];
         if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"9.0")) {
-            SFSafariViewController *safariView = [[ SFSafariViewController alloc] initWithURL:[NSURL URLWithString:self.link]];
-            [self.parent presentViewController:safariView animated:YES completion:nil];
+            if ([url.scheme isEqualToString:@"http"] || [url.scheme isEqualToString:@"https"]) {
+                SFSafariViewController *safariView = [[ SFSafariViewController alloc] initWithURL:url];
+                [self.parent presentViewController:safariView animated:YES completion:nil];
+            }
         }
         else {
-            [[UIApplication sharedApplication] openURL:[NSURL URLWithString:self.link]];
+            [[UIApplication sharedApplication] openURL:url];
         }
     }
 }

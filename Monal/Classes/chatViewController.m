@@ -346,10 +346,12 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
            forFile:(NSString*)path{
     self.chatInput.text= link;
     self.uploadHUD.hidden=YES;
+    self.uploadHUD=nil;
 }
 
 - (void)restClient:(DBRestClient*)restClient loadSharableLinkFailedWithError:(NSError*)error{
     self.uploadHUD.hidden=YES;
+    self.uploadHUD=nil;
     DDLogVerbose(@"Failed to get Dropbox link with error: %@", error);
 }
 

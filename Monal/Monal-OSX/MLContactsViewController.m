@@ -827,6 +827,14 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
         cell.name.stringValue=[contactRow objectForKey:kContactName] ;
     }
     cell.accountNo= [[contactRow objectForKey:kAccountID] integerValue];
+    
+    if(cell.username)
+    {
+        //reused
+        cell.icon.image=nil;
+        [cell setUnreadCount:0];
+    }
+    
     cell.username =[contactRow objectForKey:kContactName] ;
     
     

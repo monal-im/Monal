@@ -1126,6 +1126,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     {
                         self.supportsMam0=YES;
                     }
+                    
+                    
+                    if([iqNode.features containsObject:@"http://jabber.org/protocol/muc"])
+                    {
+                        self.conferenceServer=iqNode.from;
+                    }
+                    
+                    
                 
                 }
                 
@@ -1499,12 +1507,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     }
                 }
                 
-                //*** MUC related
-                if(iqNode.conferenceServer)
-                {
-                    _conferenceServer=iqNode.conferenceServer;
-                }
-                
+        
                 if([iqNode.from isEqualToString:_conferenceServer] && iqNode.discoItems)
                 {
                     _roomList=iqNode.items;

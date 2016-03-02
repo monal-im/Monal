@@ -133,19 +133,7 @@
         [_items addObject:attributeDict];
     }
     
-    
-    
-    if([elementName isEqualToString:@"identity"])
-	{
-        if([[attributeDict objectForKey:@"category"] isEqualToString:@"conference"])
-        {
-            if([[attributeDict objectForKey:@"type"] isEqualToString:@"text"])
-            {
-            _conferenceServer=self.from;
-            }
-        }
-    }
-    
+   
     //** jingle ** /
     
     if([elementName isEqualToString:@"jingle"] &&  [[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:jingle:1"])

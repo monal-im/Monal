@@ -48,8 +48,6 @@
 @property (nonatomic, assign, readonly) BOOL version;
 @property (nonatomic, assign, readonly) BOOL last;
 
-//discovered services
-@property (nonatomic, strong, readonly) NSString* conferenceServer;
 
 //Jingle
 @property (nonatomic, strong, readonly) NSDictionary* jingleSession;

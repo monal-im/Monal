@@ -77,13 +77,13 @@
         return;
     }
     
-    if([elementName isEqualToString:@"get"] && [State isEqualToString:@"slot"])
+    if([elementName isEqualToString:@"get"] && _httpUpload)
     {
         State = @"slotGet";
         return;
     }
     
-    if([elementName isEqualToString:@"put"] && [State isEqualToString:@"slot"])
+    if([elementName isEqualToString:@"put"] && _httpUpload)
     {
          State = @"slotPut";
         return;
@@ -227,15 +227,13 @@
         return;
     }
     
-    if(([elementName isEqualToString:@"get"]) && [State isEqualToString:@"slotGet"]
-       )
+    if(([elementName isEqualToString:@"get"]) && _httpUpload )
     {
         _getURL=[_messageBuffer copy];
         return;
     }
     
-    if(([elementName isEqualToString:@"put"]) && [State isEqualToString:@"slotGet"]
-       )
+    if(([elementName isEqualToString:@"put"]) && _httpUpload )
     {
         _putURL=[_messageBuffer copy];
         return;

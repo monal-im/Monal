@@ -83,7 +83,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 //HTTP upload
 @property (nonatomic, assign) BOOL supportsHTTPUpload;
-@property (nonatomic, strong) NSString *uploadServer;
 @property (nonatomic, strong) NSMutableArray *httpUploadQueue;
 
 //ping
@@ -1099,9 +1098,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 }
                 
                 if(iqNode.features && iqNode.discoInfo) {
-                    self.serverFeatures=[iqNode.features copy];
-                    
-                    if([self.serverFeatures containsObject:@"urn:xmpp:carbons:2"])
+                    if([iqNode.from isEqualToString:self.server] || [iqNode.from isEqualToString:self.domain]) {
+                        self.serverFeatures=[iqNode.features copy];
+                    }
+                       
+                    if([iqNode.features containsObject:@"urn:xmpp:carbons:2"])
                     {
                         XMPPIQ* carbons =[[XMPPIQ alloc] initWithId:@"enableCarbons" andType:kiqSetType];
                         MLXMLNode *enable =[[MLXMLNode alloc] initWithElement:@"enable"];
@@ -1110,18 +1111,18 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         [self send:carbons];
                     }
                     
-                    if([self.serverFeatures containsObject:@"urn:xmpp:ping"])
+                    if([iqNode.features containsObject:@"urn:xmpp:ping"])
                     {
                         self.supportsPing=YES;
                     }
                     
-                    if([self.serverFeatures containsObject:@"urn:xmpp:http:upload"])
+                    if([iqNode.features containsObject:@"urn:xmpp:http:upload"])
                     {
                         self.supportsHTTPUpload=YES;
                        self.uploadServer = iqNode.from;
                     }
                     
-                    if([self.serverFeatures containsObject:@"urn:xmpp:mam:0"])
+                    if([iqNode.features containsObject:@"urn:xmpp:mam:0"])
                     {
                         self.supportsMam0=YES;
                     }
@@ -1308,12 +1309,16 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     
                     if(iqNode.discoItems==YES)
                     {
-                        if([iqNode.from isEqualToString:self.server] || [iqNode.from isEqualToString:self.domain])
+                        if(([iqNode.from isEqualToString:self.server] || [iqNode.from isEqualToString:self.domain]) && !_discoveredServices)
                         {
                             for (NSDictionary* item in iqNode.items)
                             {
                                 if(!_discoveredServices) _discoveredServices=[[NSMutableArray alloc] init];
                                 [_discoveredServices addObject:item];
+                                
+                                if((![[item objectForKey:@"jid"] isEqualToString:self.server]  &&  ![[item objectForKey:@"jid"] isEqualToString:self.domain])) {
+                                [self discoverService:[item objectForKey:@"jid"]];
+                                }
                             }
                         }
                         else
@@ -2406,6 +2411,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
 }
 
+-(void) discoverService:(NSString *) node
+{
+    XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
+    [discoInfo setiqTo:node];
+    [discoInfo setDiscoInfoNode];
+    [self send:discoInfo];
+}
+
+
 #pragma mark HTTP upload
 
 -(void) requestHTTPSlotWithParams:(NSDictionary *)params andCompletion:(void(^)(NSString *url,  NSError *error)) completion
@@ -2461,10 +2475,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     if(_conferenceServer && !_roomList)
     {
-        XMPPIQ* discoItem =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
-        [discoItem setiqTo:_conferenceServer];
-        [discoItem setDiscoItemNode];
-        [self send:discoItem];
+        [self discoverService:_conferenceServer];
     }
     else
     {

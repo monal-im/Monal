@@ -279,6 +279,8 @@ FOUNDATION_EXPORT NSString *const kCompletion;
 @property (nonatomic,strong)  NSArray*  roomList;
 @property (nonatomic, strong) NSArray* rosterList;
 
+
+@property (nonatomic,strong)  NSString*  uploadServer;
 @property (nonatomic, readonly) BOOL supportsHTTPUpload;
 // client state
 @property (nonatomic, readonly) BOOL supportsClientState;

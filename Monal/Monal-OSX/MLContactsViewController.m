@@ -136,8 +136,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
         else {
             [self showActiveChat: NO];
         }
-        
-        [self highlightCellForCurrentContact];
+ 
     }
 }
 
@@ -152,15 +151,17 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
             dispatch_async(dispatch_get_main_queue(), ^{
                 self.activeChat= cleanActive;
                 [self.contactsTable reloadData];
+                [self highlightCellForCurrentContact];
             });
         }];
     }
     else {
         self.activeChat=nil;
         [self.contactsTable reloadData];
+        [self highlightCellForCurrentContact];
     }
     
- 
+    
 }
 
 -(IBAction)deleteItem:(id)sender

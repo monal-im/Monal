@@ -411,7 +411,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         DDLogError(@"assymetrical call to login without a teardown loggedin");
         return;
     }
-    
+    _loginStarted=YES;
     self.loginStartTimeStamp=[NSDate date];
     self.pingID=nil;
     
@@ -514,6 +514,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     
     if(_accountState == kStateDisconnected) {
+        
+        _startTLSComplete=NO;
+        _streamHasSpace=NO;
+        _loginStarted=NO;
+        _loginStartTimeStamp=nil;
+        _loginError=NO;
+        _reconnectScheduled =NO;
+        
         if(completion)completion();
         return;
     }
@@ -563,9 +571,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         _iStream=nil;
         _oStream=nil;
         
-        if(completion) completion();
-        
-    }];
+   
     
     
     [_contactsVC clearContactsForAccount:_accountNo];
@@ -576,8 +582,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     _startTLSComplete=NO;
     _streamHasSpace=NO;
     _loginStarted=NO;
+    _loginStartTimeStamp=nil;
     _loginError=NO;
     _accountState=kStateDisconnected;
+    _reconnectScheduled =NO;
     
     self.httpUploadQueue =nil;
     
@@ -610,9 +618,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     
     [[DataLayer sharedInstance]  resetContactsForAccount:_accountNo];
-    _reconnectScheduled =NO;
+ 
     
     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountStatusChanged object:nil];
+        if(completion) completion();
+        
+    }];
 }
 
 -(void) reconnect
@@ -635,7 +646,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     else if (_loginStarted && [[NSDate date] timeIntervalSinceDate:self.loginStartTimeStamp]>10)
     {
         DDLogVerbose(@"reconnect called while one already in progress that took more than 10 seconds. disconnect before reconnect.");
-        [self disconnect];
+        [self disconnectWithCompletion:^{
+            [self reconnect];
+        }];
     }
     
     _loginStarted=YES;
@@ -684,8 +697,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             DDLogInfo(@" account sate >=reconencting, disconnecting first" );
             [self disconnectWithCompletion:^{
                 [self reconnect:0];
-                return;
             }];
+              return;
         }
         
         NSTimeInterval wait=scheduleWait;
@@ -695,7 +708,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         
         if(!_reconnectScheduled)
         {
-            _loginStarted=YES;
             _reconnectScheduled=YES;
             DDLogInfo(@"Trying to connect again in %f seconds. ", wait);
             dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);

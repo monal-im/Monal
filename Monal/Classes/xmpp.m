@@ -500,6 +500,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) disconnect
 {
+    [self disconnectWithCompletion:nil];
+}
+
+-(void) disconnectWithCompletion:(void(^)(void))completion
+{
     if(self.explicitLogout && _accountState>=kStateHasStream)
     {
         MLXMLNode* stream = [[MLXMLNode alloc] init];
@@ -553,6 +558,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
      
         _iStream=nil;
         _oStream=nil;
+        
+        if(completion) completion();
         
     }];
     
@@ -671,8 +678,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     if (reconnectBackgroundTask != UIBackgroundTaskInvalid) {
         if(_accountState>=kStateReconnecting) {
             DDLogInfo(@" account sate >=reconencting, disconnecting first" );
-            [self disconnect];
-            _loginStarted=YES;
+            [self disconnectWithCompletion:^{
+                [self reconnect:0];
+                return;
+            }];
         }
         
         NSTimeInterval wait=scheduleWait;
@@ -682,6 +691,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         
         if(!_reconnectScheduled)
         {
+            _loginStarted=YES;
             _reconnectScheduled=YES;
             DDLogInfo(@"Trying to connect again in %f seconds. ", wait);
             dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
@@ -701,8 +711,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 #else
     if(_accountState>=kStateReconnecting) {
         DDLogInfo(@" account sate >=reconencting, disconnecting first" );
-        [self disconnect];
-        _loginStarted=YES;
+        [self disconnectWithCompletion:^{
+            [self reconnect:0];
+            return;
+        }];
     }
     
     NSTimeInterval wait=scheduleWait;
@@ -712,6 +724,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     if(!_reconnectScheduled)
     {
+         _loginStarted=YES;
         _reconnectScheduled=YES;
         DDLogInfo(@"Trying to connect again in %f seconds. ", wait);
         dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
@@ -2640,46 +2653,42 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             NSError* st_error= [stream streamError];
             DDLogError(@"Stream error code=%ld domain=%@   local desc:%@ ",(long)st_error.code,st_error.domain,  st_error.localizedDescription);
             
+            //everythign comes twice just use the input stream
+            if(stream==_oStream){
+                return;
+            }
             
             if(_loggedInOnce)
             {
                 DDLogInfo(@" stream error calling reconnect for account that logged in once before");
-                // login process has its own reconnect mechanism
-                if(self.accountState>=kStateHasStream) {
-                    _accountState=kStateReconnecting;
-                    _loginStarted=NO;
-                    [self reconnect];
-                }
+                [self disconnectWithCompletion:^{
+                    [self reconnect:5];
+                }];
             }
-            
-            else
-            {
-                // maybe account never worked and should be disabled and reachability should be removed
-                //                [[DataLayer sharedInstance] disableEnabledAccount:_accountNo];
-                //                [[MLXMPPManager sharedInstance] disconnectAccount:_accountNo];
-                
-            }
+         
 
-            
             if(st_error.code==2)// operation couldnt be completed // socket not connected
             {
-                [self disconnect];
-                [self reconnect:5];
+               [self disconnectWithCompletion:^{
+                    [self reconnect:5];
+               }];
                 return;
             }
             
             
             if(st_error.code==60)// could not complete operation
             {
-                [self disconnect];
-                [self reconnect:5];
+                [self disconnectWithCompletion:^{
+                    [self reconnect:5];
+                }];
                 return;
             }
             
             if(st_error.code==64)// Host is down
             {
-                [self disconnect];
-                [self reconnect:5];
+                [self disconnectWithCompletion:^{
+                    [self reconnect:5];
+                }];
                 return;
             }
             
@@ -2693,7 +2702,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             
             if(st_error.code==-9820)// Could not complete operation. SSL broken on server
             {
-                DDLogInfo(@"setting broke ssl. retrying");
+                DDLogInfo(@"setting broken ssl on server. retrying");
                 _brokenServerSSL=YES;
                 _loginStarted=NO;
                 _accountState=kStateReconnecting;
@@ -2717,7 +2726,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         {
             if(_loggedInOnce)
             {
-            DDLogInfo(@"%@ Stream end encoutered.. reconencting.", [stream class] );
+            DDLogInfo(@"%@ Stream end encoutered.. reconnecting.", [stream class] );
             _accountState=kStateReconnecting;
             _loginStarted=NO;
             [self reconnect:5];

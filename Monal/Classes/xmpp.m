@@ -513,7 +513,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         self.streamID=nil;
     }
     
-    if(_accountState == kStateDisconnected) return;
+    if(_accountState == kStateDisconnected) {
+        if(completion)completion();
+        return;
+    }
+    
     [self.networkQueue cancelAllOperations];
 
     [self.networkQueue addOperationWithBlock:^{
@@ -713,8 +717,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         DDLogInfo(@" account sate >=reconencting, disconnecting first" );
         [self disconnectWithCompletion:^{
             [self reconnect:0];
-            return;
         }];
+        return;
     }
     
     NSTimeInterval wait=scheduleWait;

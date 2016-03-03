@@ -830,8 +830,6 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     
     if(cell.username)
     {
-        //reused
-        cell.icon.image=nil;
         [cell setUnreadCount:0];
     }
     
@@ -864,14 +862,13 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 
     NSString* accountNo=[NSString stringWithFormat:@"%ld", (long)cell.accountNo];
     NSString *cellUser = [contactRow objectForKey:kContactName];
+
     [[MLImageManager sharedInstance] getIconForContact:cell.username andAccount:accountNo withCompletion:^(NSImage *image) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            if([cell.username isEqualToString:cellUser]) {
-                cell.icon.image=image;
-            }
-        });
-        
+        if([cell.username isEqualToString:cellUser]) {
+            cell.icon.image=image;
+        }
     }];
+
     
     [cell setUnreadCount:0];
     [[DataLayer sharedInstance] countUserUnreadMessages:cell.username forAccount:accountNo withCompletion:^(NSNumber * result) {

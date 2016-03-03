@@ -198,39 +198,45 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 #else
 -(void) getIconForContact:(NSString*) contact andAccount:(NSString *) accountNo withCompletion:(void (^)(NSImage *))completion
 {
-       NSString* filename=[self fileNameforContact:contact];
-            NSString* cacheKey=[NSString stringWithFormat:@"%@_%@",accountNo,contact];
-          //check cache
-          NSImage* toreturn= [self.iconCache objectForKey:cacheKey];
-          if(!toreturn) {
-              
-              NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-              NSString *documentsDirectory = [paths objectAtIndex:0];
-              NSString *writablePath = [documentsDirectory stringByAppendingPathComponent:@"buddyicons"];
-              writablePath = [writablePath stringByAppendingPathComponent:accountNo];
-              writablePath = [writablePath stringByAppendingPathComponent:filename];
-              
+    NSString* filename=[self fileNameforContact:contact];
+    NSString* cacheKey=[NSString stringWithFormat:@"%@_%@",accountNo,contact];
+    //check cache
+    __block NSImage* toreturn= [self.iconCache objectForKey:cacheKey];
+    if(!toreturn) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+            NSString *documentsDirectory = [paths objectAtIndex:0];
+            NSString *writablePath = [documentsDirectory stringByAppendingPathComponent:@"buddyicons"];
+            writablePath = [writablePath stringByAppendingPathComponent:accountNo];
+            writablePath = [writablePath stringByAppendingPathComponent:filename];
             
-              NSImage* savedImage =[[NSImage alloc] initWithContentsOfFile:writablePath];
-              if(savedImage)
-                  toreturn=savedImage;
-              
-              if(!toreturn)
-              {
-                  toreturn=self.noIcon;
-              }
-              
-              //uiimage image named is cached if avaialable
-              if(toreturn) {
-                  [self.iconCache setObject:toreturn forKey:cacheKey];
-              }
-              
-          }
-          
-          if(completion)
-          {
-              completion(toreturn);
-          }
+            
+            NSImage* savedImage =[[NSImage alloc] initWithContentsOfFile:writablePath];
+            if(savedImage)
+                toreturn=savedImage;
+            
+            if(!toreturn)
+            {
+                toreturn=self.noIcon;
+            }
+            
+            //uiimage image named is cached if avaialable
+            if(toreturn) {
+                [self.iconCache setObject:toreturn forKey:cacheKey];
+            }
+            
+            if(completion)
+            {
+                completion(toreturn);
+            }
+        });
+        
+    }
+    
+    else if(completion)
+    {
+        completion(toreturn);
+    }
     
 }
 #endif

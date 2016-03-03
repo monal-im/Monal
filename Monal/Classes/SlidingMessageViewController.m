@@ -166,11 +166,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 	//icon
     icon =[[UIImageView alloc] initWithFrame:CGRectMake(5, 5, 32, 32)] ;
     [[MLImageManager sharedInstance] getIconForContact:user andAccount:account_id withCompletion:^(UIImage * image) {
-        dispatch_async(dispatch_get_main_queue(), ^{
             icon.image=image;
             [self.view addSubview:icon];
-        });
-        
     }];
     
     // Title

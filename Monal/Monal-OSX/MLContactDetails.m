@@ -52,9 +52,7 @@
     }
     NSString* accountNo=[NSString stringWithFormat:@"%@", [_contact objectForKey:@"account_id"]];
   [[MLImageManager sharedInstance] getIconForContact:[_contact objectForKey:@"buddy_name"] andAccount:accountNo withCompletion:^(NSImage *contactImage) {
-       dispatch_async(dispatch_get_main_queue(), ^{
         self.buddyIconView.image=contactImage;
-       }); 
   }];
   
     

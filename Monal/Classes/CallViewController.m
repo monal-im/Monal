@@ -56,9 +56,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     NSString* accountNo=[NSString stringWithFormat:@"%@", [_contact objectForKey:@"account_id"]];
     
     [[MLImageManager sharedInstance] getIconForContact:[_contact objectForKey:@"buddy_name"] andAccount:accountNo withCompletion:^(UIImage *image) {
-        dispatch_async(dispatch_get_main_queue(), ^{
         self.userImage.image=image;
-        });
     }];
     
     [[MLXMPPManager sharedInstance] callContact:_contact];

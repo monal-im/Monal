@@ -156,16 +156,16 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 #if TARGET_OS_IPHONE
 -(void) getIconForContact:(NSString*) contact andAccount:(NSString*) accountNo withCompletion:(void (^)(UIImage *))completion
 {
-        NSString* filename=[self fileNameforContact:contact];
-        
-        UIImage* toreturn=nil;
-        //get filname from DB
-        NSString* cacheKey=[NSString stringWithFormat:@"%@_%@",accountNo,contact];
-        
-        //check cache
-        toreturn= [self.iconCache objectForKey:cacheKey];
-        if(!toreturn) {
-            
+    NSString* filename=[self fileNameforContact:contact];
+    
+    __block UIImage* toreturn=nil;
+    //get filname from DB
+    NSString* cacheKey=[NSString stringWithFormat:@"%@_%@",accountNo,contact];
+    
+    //check cache
+    toreturn= [self.iconCache objectForKey:cacheKey];
+    if(!toreturn) {
+        dispatch_async(dispatch_get_main_queue(), ^{
             NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
             NSString *documentsDirectory = [paths objectAtIndex:0];
             NSString *writablePath = [documentsDirectory stringByAppendingPathComponent:@"buddyicons"];
@@ -187,13 +187,19 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                 [self.iconCache setObject:toreturn forKey:cacheKey];
             }
             
-        }
-        
-        if(completion)
-        {
-            completion(toreturn);
-        }
-  
+            if(completion)
+            {
+                completion(toreturn);
+            }
+            
+        });
+    }
+    
+    else if(completion)
+    {
+        completion(toreturn);
+    }
+    
 }
 #else
 -(void) getIconForContact:(NSString*) contact andAccount:(NSString *) accountNo withCompletion:(void (^)(NSImage *))completion

@@ -159,10 +159,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     else
     {
         [[MLImageManager sharedInstance] getIconForContact:_contactName andAccount:_accountNo withCompletion:^(UIImage *image) {
-             dispatch_async(dispatch_get_main_queue(), ^{
                  _topIcon.image=image;
-             });
-            
         }];
         
     }

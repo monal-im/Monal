@@ -433,14 +433,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         DDLogInfo(@"login cancel op");
         NSString *fulluserCopy = [_fulluser copy];
         NSString *accountNoCopy = [_accountNo copy];
-        [self.networkQueue addOperationWithBlock:^{
-            //hide connecting message
-            if(fulluserCopy && accountNoCopy) {
-                NSDictionary* info=@{kaccountNameKey:fulluserCopy, kaccountNoKey:accountNoCopy,
-                                     kinfoTypeKey:@"connect", kinfoStatusKey:@""};
-                [self.contactsVC hideConnecting:info];
-            }
-        }];
+       
+        //hide connecting message
+        if(fulluserCopy && accountNoCopy) {
+            NSDictionary* info=@{kaccountNameKey:fulluserCopy, kaccountNoKey:accountNoCopy,
+                                 kinfoTypeKey:@"connect", kinfoStatusKey:@""};
+            [self.contactsVC hideConnecting:info];
+        }
+        
         _loginStarted=NO;
         // try again
         if((self.accountState<kStateHasStream) && (_loggedInOnce))
@@ -2249,9 +2249,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         
                         NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
                                              kinfoTypeKey:@"connect", kinfoStatusKey:@""};
-                       [self.networkQueue addOperationWithBlock: ^{
-                            [self.contactsVC hideConnecting:info];
-                        }];
+                        
+                        [self.contactsVC hideConnecting:info];
+                        
                         
                         NSString *accountName =[NSString stringWithFormat:@"%@@%@", self.username, self.domain];
                         NSDictionary *dic =@{@"AccountNo":self.accountNo, @"AccountName":accountName};

@@ -9,12 +9,16 @@
 #import "chatViewController.h"
 #import "MLConstants.h"
 #import "MonalAppDelegate.h"
-#import <QuartzCore/QuartzCore.h>
+#import "MBProgressHUD.h"
+#import "UIActionSheet+Blocks.h"
+#import <DropBoxSDK/DropBoxSDK.h>
 
+@import QuartzCore;
+@import MobileCoreServices;
 
 static const int ddLogLevel = LOG_LEVEL_ERROR;
 
-@interface chatViewController()
+@interface chatViewController()<DBRestClientDelegate>
 
 @property (nonatomic, strong)  NSDateFormatter* destinationDateFormat;
 @property (nonatomic, strong)  NSDateFormatter* sourceDateFormat;
@@ -22,6 +26,11 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 @property (nonatomic, assign) NSInteger thisyear;
 @property (nonatomic, assign) NSInteger thismonth;
 @property (nonatomic, assign) NSInteger thisday;
+@property (nonatomic, strong)  MBProgressHUD *uploadHUD;
+
+
+@property (nonatomic, strong) DBRestClient *restClient;
+
 
 /**
  if set to yes will prevent scrolling and resizing. useful for resigning first responder just to set auto correct
@@ -33,143 +42,6 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 @implementation chatViewController
 
 
-- (void)makeView {
-	
-    self.view.backgroundColor=[UIColor whiteColor];
-    _messageTable =[[UITableView alloc] initWithFrame:CGRectMake(0, 2, self.view.frame.size.width, self.view.frame.size.height-42)];
-    _messageTable.backgroundColor=[UIColor whiteColor];
-
-    containerView = [[UIView alloc] initWithFrame:CGRectMake(0, self.view.frame.size.height - 40, self.view.frame.size.width, 40)];
-    
-	chatInput = [[HPGrowingTextView alloc] initWithFrame:CGRectMake(6, 3, self.view.frame.size.width-80, 40)];
-    chatInput.contentInset = UIEdgeInsetsMake(0, 5, 0, 5);
-    
-	chatInput.minNumberOfLines = 1;
-	chatInput.maxNumberOfLines = 8;
-	
-	chatInput.font = [UIFont systemFontOfSize:15.0f];
-	chatInput.delegate = self;
-    chatInput.internalTextView.scrollIndicatorInsets = UIEdgeInsetsMake(5, 0, 5, 0);
-    chatInput.backgroundColor = [UIColor whiteColor];
-    
-    [self.view addSubview:_messageTable];
-    //    [self.view addSubview:pages];
-    [self.view addSubview:containerView];
-    
-    if(SYSTEM_VERSION_LESS_THAN(@"7.0"))
-    {
-        UIImage *rawBackground = [UIImage imageNamed:@"MessageEntryBackground.png"];
-        UIImage *background = [rawBackground stretchableImageWithLeftCapWidth:13 topCapHeight:22];
-        UIImageView *imageView = [[UIImageView alloc] initWithImage:background];
-        imageView.frame = CGRectMake(0, 0, containerView.frame.size.width, containerView.frame.size.height);
-        imageView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
-        [containerView addSubview:imageView];
-        
-    }
-    
-    [containerView addSubview:chatInput];
-    
-    if(SYSTEM_VERSION_LESS_THAN(@"7.0"))
-    {
-        UIImage *rawEntryBackground = [UIImage imageNamed:@"MessageEntryInputField.png"];
-        UIImage *entryBackground = [rawEntryBackground stretchableImageWithLeftCapWidth:13 topCapHeight:22];
-        UIImageView *entryImageView = [[UIImageView alloc] initWithImage:entryBackground];
-        entryImageView.frame = CGRectMake(5, 0, self.view.frame.size.width-72, 40);
-        entryImageView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
-        [containerView addSubview:entryImageView];
-    }
-    
-    chatInput.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-    
-    // view hierachy
-    
-    if(SYSTEM_VERSION_LESS_THAN(@"7.0"))
-    {
-        
-        UIImage *sendBtnBackground = [[UIImage imageNamed:@"MessageEntrySendButton.png"] stretchableImageWithLeftCapWidth:13 topCapHeight:0];
-        UIImage *selectedSendBtnBackground = [[UIImage imageNamed:@"MessageEntrySendButton.png"] stretchableImageWithLeftCapWidth:13 topCapHeight:0];
-        
-        
-        UIButton *doneBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-        doneBtn.frame = CGRectMake(containerView.frame.size.width - 69, 8, 63, 27);
-        doneBtn.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleLeftMargin;
-        [doneBtn setTitle:@"Send" forState:UIControlStateNormal];
-        
-        [doneBtn addTarget:self action:@selector(resignTextView) forControlEvents:UIControlEventTouchUpInside];
-        
-        
-        [doneBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-        [doneBtn setTitleShadowColor:[UIColor colorWithWhite:0 alpha:0.4] forState:UIControlStateNormal];
-        doneBtn.titleLabel.shadowOffset = CGSizeMake (0.0, -1.0);
-        [doneBtn.titleLabel setFont:[UIFont boldSystemFontOfSize:18.0f]];
-        [doneBtn setBackgroundImage:sendBtnBackground forState:UIControlStateNormal];
-        [doneBtn setBackgroundImage:selectedSendBtnBackground forState:UIControlStateSelected];
-        
-        [containerView addSubview:doneBtn];
-	}
-    else
-    {
-        
-        UIButton *doneBtn = [UIButton buttonWithType:UIButtonTypeRoundedRect];
-        doneBtn.frame = CGRectMake(containerView.frame.size.width - 69, 8, 63, 27);
-        doneBtn.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleLeftMargin;
-        [doneBtn setTitle:@"Send" forState:UIControlStateNormal];
-        doneBtn.titleLabel.font=[UIFont boldSystemFontOfSize:19.0f];
-        
-        [doneBtn addTarget:self action:@selector(resignTextView) forControlEvents:UIControlEventTouchUpInside];
-        [containerView addSubview:doneBtn];
-        
-        containerView.backgroundColor=[UIColor colorWithRed:248/255.0f green:248/255.0f blue:248/255.0f alpha:1.0];
-        
-        chatInput.layer.cornerRadius=5.0f;
-        chatInput.layer.borderWidth = 1.0f;
-        chatInput.layer.borderColor = [[UIColor lightGrayColor] CGColor];
-        
-        CGRect lineFrame = containerView.frame;
-        lineFrame.size.height=1;
-        lineFrame.origin.x=0;
-        lineFrame.origin.y=0;
-        UIView* lineView=[[UIView alloc] initWithFrame:lineFrame];
-        lineView.backgroundColor=[UIColor colorWithRed:206/255.0f green:206/255.0f blue:206/255.0f alpha:1.0];
-        
-        [containerView addSubview:lineView];
-        lineView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-        
-    }
-    
-    containerView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
-    _messageTable.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    chatInput.delegate=self;
-    
-    
-    //set up nav bar view
-    _topBarView =[[UIView alloc] initWithFrame:CGRectMake(30, 5, _messageTable.frame.size.width-30, 44)];
-    CGRect imageFrame=CGRectMake(0, 5, 32, 32);
-    CGRect nameFrame=CGRectMake(37, 5, _topBarView.frame.size.width-37, imageFrame.size.height);
-    
-    _topIcon =[[UIImageView alloc] initWithFrame:imageFrame];
-    _topIcon.layer.cornerRadius=_topIcon.frame.size.height/2;
-    _topIcon.layer.borderColor = (__bridge CGColorRef)([UIColor lightGrayColor]);
-    _topIcon.layer.borderWidth=3.0f;
-    _topIcon.clipsToBounds=YES;
-    
-    
-    _topName=[[UILabel alloc] initWithFrame:nameFrame];
-    _topName.font=[UIFont boldSystemFontOfSize:15.0f];
-    _topName.textColor = [UIColor darkGrayColor]; 
-    
-    if(SYSTEM_VERSION_LESS_THAN(@"7.0"))
-    {
-        _topName.textColor=[UIColor whiteColor];
-    }
-    _topName.backgroundColor=[UIColor clearColor];
-    
-    [_topBarView addSubview:_topIcon];
-    [_topBarView addSubview:_topName];
-    
-    self.navigationItem.titleView=_topBarView;
-    
-}
 
 -(void) setup
 {
@@ -190,16 +62,13 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     {
         self.jid=[NSString stringWithFormat:@"%@@%@",[[accountVals objectAtIndex:0] objectForKey:@"username"], [[accountVals objectAtIndex:0] objectForKey:@"domain"]];
     }
+    
 }
 
--(id) initWithContact:(NSDictionary*) contact
+-(void) setupWithContact:(NSDictionary*) contact
 {
-    self=[super init];
-    if(self){
-        _contact=contact;
-        [self setup];
-    }
-    return self;
+    _contact=contact;
+    [self setup];
     
 }
 
@@ -221,9 +90,10 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 -(void) viewDidLoad
 {
     [super viewDidLoad];
-    [self makeView];
     [self setupDateObjects];
-    self.navigationController.view.backgroundColor=[UIColor whiteColor];
+    containerView= self.view;
+    self.messageTable.scrollsToTop=YES;
+    self.chatInput.scrollsToTop=NO;
     
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
     [nc addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
@@ -231,19 +101,30 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     [nc addObserver:self selector:@selector(handleSentMessage:) name:kMonalSentMessageNotice object:nil];
     
     
-    [nc addObserver:self selector:@selector(handleTap) name:UIApplicationDidEnterBackgroundNotification object:nil];
+    [nc addObserver:self selector:@selector(dismissKeyboard:) name:UIApplicationDidEnterBackgroundNotification object:nil];
     [nc addObserver:self selector:@selector(handleForeGround) name:UIApplicationWillEnterForegroundNotification object:nil];
 	[nc addObserver:self selector:@selector(keyboardWillShow:) name: UIKeyboardWillShowNotification object:nil];
 	[nc addObserver:self selector:@selector(keyboardWillHide:) name: UIKeyboardWillHideNotification object:nil];
 	[nc addObserver:self selector:@selector(keyboardDidShow:) name: UIKeyboardDidShowNotification object:nil];
     
     self.hidesBottomBarWhenPushed=YES;
-    _messageTable.delegate=self;
-    _messageTable.dataSource=self;
-    self.view.autoresizesSubviews=true;
-    _messageTable.separatorColor=[UIColor whiteColor];
     
-
+    self.chatInput.layer.borderColor=[UIColor lightGrayColor].CGColor;
+    self.chatInput.layer.cornerRadius=3.0f;
+    self.chatInput.layer.borderWidth=0.5f;
+    self.chatInput.textContainerInset=UIEdgeInsetsMake(5, 0, 5, 0);
+    
+    self.inputContainerView.layer.borderColor=[UIColor lightGrayColor].CGColor;
+    self.inputContainerView.layer.borderWidth=0.5f;
+    
+    self.topIcon.layer.cornerRadius= self.topIcon.frame.size.height/2;
+    self.topIcon.clipsToBounds=YES;
+    
+    if ([DBSession sharedSession].isLinked) {
+        self.restClient = [[DBRestClient alloc] initWithSession:[DBSession sharedSession]];
+        self.restClient.delegate = self;
+    }
+    
 }
 
 -(void) handleForeGround {
@@ -270,19 +151,38 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     }
     
     if(_day) {
-        _topName.text= [NSString stringWithFormat:@"%@(%@)", _topName.text, _day];
+        self.title=  [NSString stringWithFormat:@"%@(%@)", _topName.text, _day];
         [[NSNotificationCenter defaultCenter] removeObserver:self];
         [containerView removeFromSuperview];
         [_topIcon removeFromSuperview];
     }
     else
     {
-        _topIcon.image=[[MLImageManager sharedInstance] getIconForContact:_contactName andAccount:_accountNo];
+        [[MLImageManager sharedInstance] getIconForContact:_contactName andAccount:_accountNo withCompletion:^(UIImage *image) {
+                 _topIcon.image=image;
+        }];
         
     }
+    self.navigationItem.titleView=self.topBarView;
     
     [self handleForeGround];
+    
+    
+    xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
+    if(xmppAccount.supportsMam0) {
+        
+        if(_messagelist.count==0)
+        {
+            //fetch default
+            NSDate *yesterday =[NSDate dateWithTimeInterval:-86400 sinceDate:[NSDate date]];
+            [xmppAccount setMAMQueryFromStart: yesterday toDate:[NSDate date] andJid:self.contactName];
+        }
+        
+    }
 
+    UIEdgeInsets currentInset = self.messageTable.contentInset;
+    self.messageTable.contentInset =UIEdgeInsetsMake(self.navigationController.navigationBar.frame.size.height+[UIApplication sharedApplication].statusBarFrame.size.height, currentInset.left, currentInset.bottom, currentInset.right);
+    
 }
 
 -(void) viewDidAppear:(BOOL)animated
@@ -313,27 +213,26 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 - (BOOL)shouldAutorotate
 {
-   	[chatInput resignFirstResponder];
+   	[self.chatInput resignFirstResponder];
     return YES;
 }
 
 -(void) willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
 {
-    [chatInput resignFirstResponder];
+    [self.chatInput resignFirstResponder];
 }
 
 #pragma mark gestures
--(void) handleTap
+
+-(IBAction)dismissKeyboard:(id)sender
 {
-    [chatInput resignFirstResponder];
+     [self.chatInput resignFirstResponder];
 }
 
 #pragma mark message signals
 
-
 -(void) refreshCounter
 {
-    //coming in  from background
     if(!_day) {
         [[DataLayer sharedInstance] markAsReadBuddy:self.contactName forAccount:self.accountNo];
         
@@ -388,19 +287,171 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void)resignTextView
 {
-    self.blockAnimations=YES;
-    [chatInput resignFirstResponder];//apply autocorrect
-    [chatInput becomeFirstResponder];
-    self.blockAnimations=NO;
-    
-    if(([chatInput text]!=nil) && (![[chatInput text] isEqualToString:@""]) )
+    NSString *cleanstring = [self.chatInput.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    if(cleanstring.length>0)
     {
-        [self sendMessage:[chatInput text] ];
-        
+        self.blockAnimations=YES;
+        if(self.chatInput.isFirstResponder) {
+            [self.chatInput resignFirstResponder];//apply autocorrect
+            [self.chatInput becomeFirstResponder];
+        }
+        self.blockAnimations=NO;
+
+        [self sendMessage:cleanstring];
+
+        [self.chatInput setText:@""];
+        [self scrollToBottom];
     }
-    [chatInput setText:@""];
 }
 
+-(IBAction)sendMessageText:(id)sender
+{
+    [self resignTextView];
+    [self updateInputViewSize];
+
+}
+
+#pragma mark - Dropbox upload and delegate
+
+- (void) uploadImageToDropBox:(NSData *) imageData {
+
+    NSString *fileName = [NSString stringWithFormat:@"%@.png",[NSUUID UUID].UUIDString];
+    NSString *tempDir = NSTemporaryDirectory();
+    NSString *imagePath = [tempDir stringByAppendingPathComponent:fileName];
+    [imageData writeToFile:imagePath atomically:YES];
+    
+    [self.restClient uploadFile:fileName toPath:@"/" withParentRev:nil fromPath:imagePath];
+}
+
+- (void)restClient:(DBRestClient *)client uploadedFile:(NSString *)destPath
+              from:(NSString *)srcPath metadata:(DBMetadata *)metadata {
+    DDLogVerbose(@"File uploaded successfully to dropbox path: %@", metadata.path);
+    [self.restClient loadSharableLinkForFile:metadata.path];
+}
+
+- (void)restClient:(DBRestClient *)client uploadFileFailedWithError:(NSError *)error {
+    DDLogVerbose(@"File upload to dropbox failed with error: %@", error);
+}
+
+- (void)restClient:(DBRestClient*)client uploadProgress:(CGFloat)progress
+           forFile:(NSString*)destPath from:(NSString*)srcPat
+{
+    self.uploadHUD.progress=progress;
+}
+
+- (void)restClient:(DBRestClient*)restClient loadedSharableLink:(NSString*)link
+           forFile:(NSString*)path{
+    self.chatInput.text= link;
+    self.uploadHUD.hidden=YES;
+    self.uploadHUD=nil;
+}
+
+- (void)restClient:(DBRestClient*)restClient loadSharableLinkFailedWithError:(NSError*)error{
+    self.uploadHUD.hidden=YES;
+    self.uploadHUD=nil;
+    DDLogVerbose(@"Failed to get Dropbox link with error: %@", error);
+}
+
+#pragma mark - image picker
+
+-(IBAction)attach:(id)sender
+{
+    [self.chatInput resignFirstResponder];
+    xmpp* account=[[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
+    if(!account.supportsHTTPUpload && !self.restClient)
+    {
+        
+        UIAlertView *addError = [[UIAlertView alloc]
+                                 initWithTitle:@"Error"
+                                 message:@"This server does not appear to support HTTP file uploads (XEP-0363). Please ask the administrator to enable it. You can also link to DropBox in settings and use that to share files."
+                                 delegate:nil cancelButtonTitle:@"Close"
+                                 otherButtonTitles: nil] ;
+        [addError show];
+        
+        return;
+    }
+    
+    UIImagePickerController *imagePicker = [[UIImagePickerController alloc] init];
+    imagePicker.delegate =self;
+    
+    RIButtonItem* cancelButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Cancel", nil) action:^{
+        
+    }];
+    
+    RIButtonItem* cameraButton = [RIButtonItem itemWithLabel:@"Camera" action:^{
+        imagePicker.sourceType = UIImagePickerControllerSourceTypeCamera;
+        [self presentViewController:imagePicker animated:YES completion:nil];
+    }];
+    
+    RIButtonItem* photosButton = [RIButtonItem itemWithLabel:@"Photos" action:^{
+          imagePicker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+        [self presentViewController:imagePicker animated:YES completion:nil];
+    }];
+    
+    UIActionSheet* sheet =[[UIActionSheet alloc] initWithTitle:@"Select Image Source" cancelButtonItem:cancelButton destructiveButtonItem:nil otherButtonItems: cameraButton, photosButton,nil];
+    [sheet showFromTabBar:self.tabBarController.tabBar];
+
+}
+
+
+- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<NSString *,
+                               id> *)info
+{
+    [self dismissViewControllerAnimated:YES completion:nil];
+
+    NSString *mediaType = info[UIImagePickerControllerMediaType];
+    if([mediaType isEqualToString:(NSString *)kUTTypeImage]) {
+        UIImage *selectedImage= info[UIImagePickerControllerEditedImage];
+        if(!selectedImage) selectedImage= info[UIImagePickerControllerOriginalImage];
+        NSData *pngData=  UIImageJPEGRepresentation(selectedImage, 0.5f);
+        if(pngData)
+        {
+            
+            if(!self.uploadHUD) {
+                self.uploadHUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+                self.uploadHUD.removeFromSuperViewOnHide=YES;
+                self.uploadHUD.labelText =@"Uploding";
+                self.uploadHUD.detailsLabelText =@"Upoading file to server";
+                
+            }
+            
+            //if you have configured it, defer to dropbox
+            if(self.restClient)
+            {
+                self.uploadHUD.mode=MBProgressHUDModeDeterminate;
+                self.uploadHUD.progress=0;
+                [self uploadImageToDropBox:pngData];
+            }
+            else  {
+                [[MLXMPPManager sharedInstance]  httpUploadPngData:pngData toContact:self.contactName onAccount:self.accountNo withCompletionHandler:^(NSString *url, NSError *error) {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        self.uploadHUD.hidden=YES;
+                        
+                        if(url) {
+                            self.chatInput.text= url;
+                        }
+                        else  {
+                            UIAlertView *addError = [[UIAlertView alloc]
+                                                     initWithTitle:@"There was an error uploading the file to the server"
+                                                     message:[NSString stringWithFormat:@"%@", error.localizedDescription]
+                                                     delegate:nil cancelButtonTitle:@"Close"
+                                                     otherButtonTitles: nil] ;
+                            [addError show];
+                        }
+                    });
+                    
+                }];
+            }
+        }
+        
+    }
+    
+}
+
+- (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker
+{
+    [self dismissViewControllerAnimated:YES completion:nil];
+}
 
 #pragma mark - handling notfications
 
@@ -556,13 +607,13 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void) scrollToBottom
 {
-    NSInteger bottom = [_messageTable numberOfRowsInSection:0];
+    NSInteger bottom = [self.messageTable numberOfRowsInSection:0];
     if(bottom>0)
     {
         NSIndexPath *path1 = [NSIndexPath indexPathForRow:bottom-1  inSection:0];
-        if(![_messageTable.indexPathsForVisibleRows containsObject:path1])
+        if(![self.messageTable.indexPathsForVisibleRows containsObject:path1])
         {
-            [_messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:NO];
+            [self.messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:NO];
         }
     }
     
@@ -751,55 +802,52 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
               pos2= [urlString rangeOfString:@">"];
         }
         
+        
         if(pos2.location!=NSNotFound) {
             urlString=[urlString substringToIndex:pos2.location];
         }
        
         
-        cell.link=urlString;
+        cell.link=[urlString stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     }
     else
     {
         cell.link=nil;
     }
     
-    if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"6.0"))
+    
+    if(pos.location!=NSNotFound)
     {
-        if(pos.location!=NSNotFound)
+        NSDictionary *underlineAttribute = @{NSUnderlineStyleAttributeName: @(NSUnderlineStyleSingle)};
+        NSAttributedString* underlined = [[NSAttributedString alloc] initWithString:cell.link
+                                                                         attributes:underlineAttribute];
+        
+        
+        if ([underlined length]==[[row objectForKey:@"message"] length])
         {
-            NSDictionary *underlineAttribute = @{NSUnderlineStyleAttributeName: @(NSUnderlineStyleSingle)};
-            NSAttributedString* underlined = [[NSAttributedString alloc] initWithString:cell.link
-                                                                             attributes:underlineAttribute];
-            
-            
-            if ([underlined length]==[[row objectForKey:@"message"] length])
-            {
-                cell.textLabel.attributedText=underlined;
-            }
-            else
-            {
-                NSMutableAttributedString* stitchedString  = [[NSMutableAttributedString alloc] init];
-                [stitchedString appendAttributedString:
-                 [[NSAttributedString alloc] initWithString:[[row objectForKey:@"message"] substringToIndex:pos.location] attributes:nil]];
-                [stitchedString appendAttributedString:underlined];
-                if(pos2.location!=NSNotFound)
-                {
-                    NSString* remainder = [[row objectForKey:@"message"] substringFromIndex:pos.location+[underlined length]];
-                    [stitchedString appendAttributedString:[[NSAttributedString alloc] initWithString:remainder attributes:nil]];
-                }
-                cell.textLabel.attributedText=stitchedString;
-            }
-            
+            cell.textLabel.attributedText=underlined;
         }
         else
         {
-            cell.textLabel.text =[row objectForKey:@"message"];
+            NSMutableAttributedString* stitchedString  = [[NSMutableAttributedString alloc] init];
+            [stitchedString appendAttributedString:
+             [[NSAttributedString alloc] initWithString:[[row objectForKey:@"message"] substringToIndex:pos.location] attributes:nil]];
+            [stitchedString appendAttributedString:underlined];
+            if(pos2.location!=NSNotFound)
+            {
+                NSString* remainder = [[row objectForKey:@"message"] substringFromIndex:pos.location+[underlined length]];
+                [stitchedString appendAttributedString:[[NSAttributedString alloc] initWithString:remainder attributes:nil]];
+            }
+            cell.textLabel.attributedText=stitchedString;
         }
+        
     }
     else
     {
         cell.textLabel.text =[row objectForKey:@"message"];
     }
+    
+    
     
     cell.selectionStyle=UITableViewCellSelectionStyleNone;
     
@@ -811,7 +859,19 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     return cell;
 }
 
-#pragma mark tableview delegate
+#pragma mark - tableview delegate
+-(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    [self.chatInput resignFirstResponder];
+    
+    MLChatCell* cell = (MLChatCell*)[tableView cellForRowAtIndexPath:indexPath];
+    if(cell.link)
+    {
+        [cell openlink:self];
+    }
+}
+
+#pragma mark tableview datasource
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     if(indexPath.row>=[_messagelist count])  {
@@ -836,31 +896,15 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 }
 
 
--(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    [chatInput resignFirstResponder];
-    
-    MLChatCell* cell = (MLChatCell*)[tableView cellForRowAtIndexPath:indexPath];
-    if(cell.link)
-    {
-        [cell openlink:self];
-    }
-}
-
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
     if (editingStyle == UITableViewCellEditingStyleDelete) {
         NSDictionary* message= [_messagelist objectAtIndex:indexPath.row];
         
         DDLogVerbose(@"%@", message);
         
-#warning will not work if it is a newly sent messge as i m not storing message id in the inserts.  need to do that. 
         if([message objectForKey:@"message_history_id"])
         {
             [[DataLayer sharedInstance] deleteMessageHistory:[NSString stringWithFormat:@"%@",[message objectForKey:@"message_history_id"]]];
-        }
-        else if ([message objectForKey:@"message_id"])
-        {
-            [[DataLayer sharedInstance] deleteMessage:[NSString stringWithFormat:@"%@",[message objectForKey:@"message_id"]]];
         }
         else
         {
@@ -894,10 +938,54 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 }
 
 
-# pragma mark Textview delegeate functions
-- (void)textFieldDidBeginEditing:(UITextField *)textField
+//-(BOOL) canBecomeFirstResponder
+//{
+//    return YES; 
+//}
+//
+//-(UIView *) inputAccessoryView
+//{
+//    return self.inputContainerView;
+//}
+
+
+# pragma mark Textview delegate functions
+
+-(void) updateInputViewSize
 {
+    if(self.chatInput.intrinsicContentSize.height>40) {
+        self.inputContainerHeight.constant= self.chatInput.intrinsicContentSize.height+18;
+    } else
+    {
+         self.inputContainerHeight.constant=43.0f;
+    }
+    [self.inputContainerView layoutIfNeeded];
+    self.chatInput.contentInset = UIEdgeInsetsMake(5, 0, 0, 0);
+ 
 }
+
+- (void)textViewDidBeginEditing:(UITextView *)textView
+{
+    [self scrollToBottom];
+}
+
+
+- (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text
+{
+    BOOL shouldinsert=YES;
+    
+    if([text isEqualToString:@"\n"])
+    {
+        [self resignTextView];
+        shouldinsert=NO;
+    }
+    
+    [self updateInputViewSize];
+    return shouldinsert; 
+}
+
+
+#pragma mark - Keyboard
 
 -(void) keyboardDidHide: (NSNotification *)notif
 {
@@ -911,7 +999,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     NSTimeInterval animationDuration =[[[notification userInfo] objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
 	[UIView animateWithDuration:animationDuration
                      animations:^{
-                         self.view.frame =oldFrame;
+                         self.inputContainerBottom.constant=0; 
                          if([_messagelist count]>0)
                          {
                              [self scrollToBottom];
@@ -936,34 +1024,13 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 -(void) keyboardWillShow:(NSNotification *) notification
 {
     if(self.blockAnimations) return;
-    CGSize keyboardSize = [[[notification userInfo] objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue].size;
-    CGRect r;
-	
-    //chiense keybaord might call this multiple times ony set for inital
-    if(!_keyboardVisible) {
-        oldFrame=self.view.frame;
-    }
-    _keyboardVisible=YES;
-    r=oldFrame;
+    CGRect keyboardframe =[[[notification userInfo] objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
+    CGSize keyboardSize = keyboardframe.size;
     
-    UIInterfaceOrientation orientation = [UIApplication sharedApplication].statusBarOrientation;
-    
-    if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0")) {
-        r.size.height -= keyboardSize.height;
-    }
-    else {
-        if(orientation==UIInterfaceOrientationLandscapeLeft|| orientation==UIInterfaceOrientationLandscapeRight)
-        {
-            r.size.height -= keyboardSize.width;
-        }
-        else {
-            r.size.height -= keyboardSize.height;
-        }
-    }
     NSTimeInterval animationDuration =[[[notification userInfo] objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
     [UIView animateWithDuration:animationDuration
                      animations:^{
-                         self.view.frame =r;
+                         self.inputContainerBottom.constant= keyboardSize.height;
                          
                      } completion:^(BOOL finished) {
                          
@@ -973,15 +1040,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 	
 }
 
-- (void)growingTextView:(HPGrowingTextView *)growingTextView willChangeHeight:(float)height
-{
-    float diff = (growingTextView.frame.size.height - height);
-    
-	CGRect r = containerView.frame;
-    r.size.height -= diff;
-    r.origin.y += diff;
-	containerView.frame = r;
-}
+
 
 
 @end

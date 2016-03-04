@@ -13,6 +13,7 @@
 #if TARGET_OS_IPHONE
 #import "MonalAppDelegate.h"
 #import "PasswordManager.h"
+@import MobileCoreServices;
 #else
 #import "STKeyChain.h"
 #endif
@@ -127,10 +128,9 @@ An array of Dics what have timers to make sure everything was sent
 
 #pragma mark keep alive
 
-
 -(void) setKeepAlivetimer
 {
-    #if TARGET_OS_IPHONE
+#if TARGET_OS_IPHONE
 
     NSTimeInterval timeInterval= 600; // 600 seconds
     BOOL keepAlive=[[UIApplication sharedApplication] setKeepAliveTimeout:timeInterval handler:^{
@@ -138,7 +138,7 @@ An array of Dics what have timers to make sure everything was sent
         for(NSDictionary* row in _connectedXMPP)
         {
             xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
-            [xmppAccount sendPing];  //sendWhiteSpacePing
+            [xmppAccount sendPing];
         }
         
     }];
@@ -157,12 +157,44 @@ An array of Dics what have timers to make sure everything was sent
 
 -(void) clearKeepAlive
 {
+    for(NSDictionary* row in _connectedXMPP)
+    {
+        xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
+        if(xmppAccount.supportsClientState) {
+            [xmppAccount setClientActive];
+        }
+    }
+    
 #if TARGET_OS_IPHONE
     [[UIApplication sharedApplication] clearKeepAliveTimeout];
 #else
 #endif
     
 }
+
+
+#pragma mark - client state 
+
+-(void) setClientsInactive {
+    for(NSDictionary* row in _connectedXMPP)
+    {
+        xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
+        if(xmppAccount.supportsClientState) {
+            [xmppAccount setClientInactive];
+        }
+    }
+}
+
+-(void) setClientsActive {
+    for(NSDictionary* row in _connectedXMPP)
+    {
+        xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
+        if(xmppAccount.supportsClientState) {
+            [xmppAccount setClientActive];
+        }
+    }
+}
+
 
 
 -(void) resetForeground
@@ -208,18 +240,20 @@ An array of Dics what have timers to make sure everything was sent
 
 -(void) connectAccount:(NSString*) accountNo
 {
-    dispatch_async(_netQueue, ^{
-        
-        _accountList=[[DataLayer sharedInstance] accountList];
-        for (NSDictionary* account in _accountList)
-        {
-            if([[account objectForKey:kAccountID] integerValue]==[accountNo integerValue])
+    [[DataLayer sharedInstance] accountListWithCompletion:^(NSArray *result) {
+        dispatch_async(_netQueue, ^{
+            _accountList=result;
+            for (NSDictionary* account in _accountList)
             {
-                [self connectAccountWithDictionary:account];
+                if([[account objectForKey:kAccountID] integerValue]==[accountNo integerValue])
+                {
+                    [self connectAccountWithDictionary:account];
+                    break;
+                }
             }
-        }
+        });
         
-    });
+    }];
 }
 
 -(void) connectAccountWithDictionary:(NSDictionary*)account
@@ -227,11 +261,8 @@ An array of Dics what have timers to make sure everything was sent
     xmpp* existing=[self getConnectedAccountForID:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
     if(existing)
     {
-        dispatch_async(_netQueue,
-                       ^{
-                           existing.explicitLogout=NO;
-                           [existing reconnect:0];
-                       });
+        existing.explicitLogout=NO;
+        [existing reconnect:0];
         
         return;
     }
@@ -287,10 +318,7 @@ An array of Dics what have timers to make sure everything was sent
         NSDictionary* accountRow= [[NSDictionary alloc] initWithObjects:@[xmppAccount, hostReach] forKeys:@[@"xmppAccount", @"hostReach"]];
         [_connectedXMPP addObject:accountRow];
         
-        
-        dispatch_async(_netQueue, ^{
-            [xmppAccount reconnect:0];
-        });
+        [xmppAccount reconnect:0];
     }
     
 }
@@ -330,30 +358,41 @@ An array of Dics what have timers to make sure everything was sent
 
 -(void)logoutAll
 {
-    _accountList=[[DataLayer sharedInstance] accountList];
-    for (NSDictionary* account in _accountList)
-    {
-        if([[account objectForKey:@"enabled"] boolValue]==YES)
+    
+    [[DataLayer sharedInstance] accountListWithCompletion:^(NSArray *result) {
+        _accountList=result;
+        for (NSDictionary* account in _accountList)
         {
-            [self disconnectAccount:[NSString stringWithFormat:@"%@",[account objectForKey:@ "account_id"]]];
-            
+            if([[account objectForKey:@"enabled"] boolValue]==YES)
+            {
+                [self disconnectAccount:[NSString stringWithFormat:@"%@",[account objectForKey:@ "account_id"]]];
+                
+            }
         }
-    }
+    }];
+ 
 }
 
 -(void)connectIfNecessary
 {
-    _accountList=[[DataLayer sharedInstance] accountList];
-    for (NSDictionary* account in _accountList)
-    {
-        if([[account objectForKey:@"enabled"] boolValue]==YES)
-        {
-            xmpp* existing=[self getConnectedAccountForID:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
-            if(existing.accountState<kStateReconnecting){
-                [self connectAccountWithDictionary:account];
-            }
-        }
-    }
+    
+    [[DataLayer sharedInstance] accountListWithCompletion:^(NSArray *result) {
+        dispatch_async(_netQueue,
+                       ^{
+                           _accountList=result;
+                           for (NSDictionary* account in _accountList)
+                           {
+                               if([[account objectForKey:@"enabled"] boolValue]==YES)
+                               {
+                                   xmpp* existing=[self getConnectedAccountForID:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
+                                   if(existing.accountState<kStateReconnecting){
+                                       [self connectAccountWithDictionary:account];
+                                   }
+                               }
+                           }
+                       });
+    }];
+    
 }
 
 -(void) reachabilityChanged
@@ -387,11 +426,10 @@ An array of Dics what have timers to make sure everything was sent
         {
             DDLogVerbose(@"reachable");
             DDLogVerbose(@"pinging ");
-            dispatch_async(_netQueue,
-                           ^{
-                               //try to send a ping. if it fails, it will reconnect
-                               [xmppAccount sendPing];
-                           });
+            
+            //try to send a ping. if it fails, it will reconnect
+            [xmppAccount sendPing];
+            
             
             
         }
@@ -456,6 +494,58 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
                        if(completion)
                            completion(success, messageId);
                    });
+}
+
+
+#pragma  mark - HTTP upload
+
+-(void)httpUploadPngData:(NSData*) fileData   toContact:(NSString*)contact onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(NSString *url,  NSError *error)) completion{
+    
+    //get file name
+    NSString *fileName =  @"photo.png";
+    
+    //get file type
+    CFStringRef UTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (__bridge CFStringRef)@"png", NULL);
+    NSString *mimeType = (__bridge NSString *)(UTTypeCopyPreferredTagWithClass (UTI, kUTTagClassMIMEType));
+    
+    [self httpUploadData:fileData withFilename:fileName andType:mimeType toContact:contact onAccount:accountNo withCompletionHandler:completion];
+    
+}
+
+-(void)httpUploadFileURL:(NSURL*) fileURL  toContact:(NSString*)contact onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(NSString *url,  NSError *error)) completion{
+    
+    //get file name
+    NSString *fileName =  fileURL.pathComponents.lastObject;
+
+    //get file type
+    CFStringRef UTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (__bridge CFStringRef)fileURL.pathExtension, NULL);
+    NSString *mimeType = (__bridge NSString *)(UTTypeCopyPreferredTagWithClass (UTI, kUTTagClassMIMEType));
+
+    //get data
+    NSData *fileData = [[NSData alloc] initWithContentsOfURL:fileURL];
+    
+    [self httpUploadData:fileData withFilename:fileName andType:mimeType toContact:contact onAccount:accountNo withCompletionHandler:completion];
+    
+}
+
+
+-(void)httpUploadData:(NSData *)data withFilename:(NSString*) filename andType:(NSString*)contentType  toContact:(NSString*)contact onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(NSString *url,  NSError *error)) completion
+{
+    if(!data || !filename || !contentType || !contact || !accountNo)
+    {
+        NSError *error = [NSError errorWithDomain:@"Empty" code:0 userInfo:@{}];
+        if(completion) completion(nil, error);
+        return;
+    }
+    
+    xmpp* account=[self getConnectedAccountForID:accountNo];
+    if(account)
+    {
+        NSDictionary *params =@{kData:data,kFileName:filename, kContentType:contentType, kContact:contact};
+        [account requestHTTPSlotWithParams:params andCompletion:completion];
+    }
+    
+    
 }
 
 
@@ -699,6 +789,28 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
         _timerList=[[NSMutableArray alloc] init];
     }
     return  _timerList;
+}
+
+-(void) cleanArrayOfConnectedAccounts:(NSMutableArray *)dirtySet
+{
+    //yes, this is ineffecient but the size shouldnt ever be huge
+    NSMutableIndexSet *indexSet=[[NSMutableIndexSet alloc] init];
+    for(NSDictionary *account in self.connectedXMPP)
+    {
+        xmpp *xmppAccount = [account objectForKey:@"xmppAccount"];
+        NSInteger pos=0;
+        for(NSDictionary *dic in dirtySet)
+        {
+            if([[dic objectForKey:kContactName] isEqualToString:xmppAccount.fulluser] )
+            {
+                [indexSet addIndex:pos];
+            }
+            pos++;
+        }
+        
+    }
+    
+    [dirtySet removeObjectsAtIndexes:indexSet];
 }
 
 

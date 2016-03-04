@@ -14,9 +14,11 @@
 #import "MLChatViewCell.h"
 //#import "MLNotificaitonCenter.h"
 
+#import <DropboxOSX/DropboxOSX.h>
+
 #import "MLMainWindow.h"
 
-@interface MLChatViewController ()
+@interface MLChatViewController () <DBRestClientDelegate>
 
 @property (nonatomic, strong) NSMutableArray *messageList;
 
@@ -32,6 +34,8 @@
 @property (nonatomic, strong) NSString *contactName;
 @property (nonatomic, strong) NSString *jid;
 @property (nonatomic, assign) BOOL isMUC;
+
+@property (nonatomic, strong) DBRestClient *restClient;
 
 @end
 
@@ -49,8 +53,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [nc addObserver:self selector:@selector(handleSentMessage:) name:kMonalSentMessageNotice object:nil];
     [nc addObserver:self selector:@selector(refreshData) name:kMonalWindowVisible object:nil];
     
-    
     [self setupDateObjects];
+    
+    self.progressIndicator.bezeled=NO;
+    self.progressIndicator.controlSize=NSMiniControlSize;
+    [self endProgressUpdate];
     
 }
 
@@ -88,6 +95,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) showConversationForContact:(NSDictionary *) contact
 {
+    if([self.accountNo isEqualToString:[NSString stringWithFormat:@"%@",[contact objectForKey:kAccountID]]] && [self.contactName isEqualToString: [contact objectForKey:kContactName]])
+    {
+        return;
+    }
+    
+    
 //    [MLNotificationManager sharedInstance].currentAccountNo=self.accountNo;
 //    [MLNotificationManager sharedInstance].currentContact=self.contactName;
 
@@ -102,11 +115,24 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     {
         self.jid=[NSString stringWithFormat:@"%@@%@",[[accountVals objectAtIndex:0] objectForKey:kUsername], [[accountVals objectAtIndex:0] objectForKey:kDomain]];
     }
-    
-    if((self.view.window.occlusionState & NSWindowOcclusionStateVisible)) {
+        if((self.view.window.occlusionState & NSWindowOcclusionStateVisible)) {
         [self markAsRead];
     }
     [self refreshData];
+    
+    
+    xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
+    if(xmppAccount.supportsMam0) {
+    
+      if(self.messageList.count==0)
+        {
+            //fetch default
+            NSDate *yesterday =[NSDate dateWithTimeInterval:-86400 sinceDate:[NSDate date]];
+            [xmppAccount setMAMQueryFromStart: yesterday toDate:[NSDate date] andJid:self.contactName];
+        }
+ 
+    }
+    
 }
 
 
@@ -129,10 +155,142 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [window updateCurrentContact:contact];
 }
 
+
+-(void) endProgressUpdate
+{
+    self.progressIndicator.doubleValue=0;
+    self.progressIndicator.hidden=YES;
+}
+
+
+#pragma mark - Dropbox upload and delegate
+
+- (void) uploadImageToDropBox:(NSData *) imageData {
+    
+    NSString *fileName = [NSString stringWithFormat:@"%@.png",[NSUUID UUID].UUIDString];
+    NSString *tempDir = NSTemporaryDirectory();
+    NSString *imagePath = [tempDir stringByAppendingPathComponent:fileName];
+    [imageData writeToFile:imagePath atomically:YES];
+    
+    [self.restClient uploadFile:fileName toPath:@"/" withParentRev:nil fromPath:imagePath];
+}
+
+- (void)restClient:(DBRestClient *)client uploadedFile:(NSString *)destPath
+              from:(NSString *)srcPath metadata:(DBMetadata *)metadata {
+    DDLogVerbose(@"File uploaded successfully to dropbox path: %@", metadata.path);
+    [self.restClient loadSharableLinkForFile:metadata.path];
+}
+
+- (void)restClient:(DBRestClient *)client uploadFileFailedWithError:(NSError *)error {
+    DDLogVerbose(@"File upload to dropbox failed with error: %@", error);
+}
+
+- (void)restClient:(DBRestClient*)client uploadProgress:(CGFloat)progress
+           forFile:(NSString*)destPath from:(NSString*)srcPat
+{
+    self.progressIndicator.doubleValue=progress*100;
+}
+
+- (void)restClient:(DBRestClient*)restClient loadedSharableLink:(NSString*)link
+           forFile:(NSString*)path{
+    self.messageBox.string=link;
+    [self endProgressUpdate];
+}
+
+- (void)restClient:(DBRestClient*)restClient loadSharableLinkFailedWithError:(NSError*)error{
+   [self endProgressUpdate];
+    DDLogVerbose(@"Failed to get Dropbox link with error: %@", error);
+}
+
+#pragma mark - attaching
+
+-(IBAction)attach:(id)sender
+{
+    
+    if ([DBSession sharedSession].isLinked) {
+        self.restClient = [[DBRestClient alloc] initWithSession:[DBSession sharedSession]];
+        self.restClient.delegate = self;
+    }
+ 
+    xmpp* account=[[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
+    if(!account.supportsHTTPUpload && !self.restClient)
+    {
+        NSAlert *userAddAlert = [[NSAlert alloc] init];
+        userAddAlert.messageText = @"Error";
+        userAddAlert.informativeText =[NSString stringWithFormat:@"This server does not appear to support HTTP file uploads (XEP-0363). Please ask the administrator to enable it. You can also link to DropBox in settings and use that to share files."];
+        userAddAlert.alertStyle=NSInformationalAlertStyle;
+        [userAddAlert addButtonWithTitle:@"Close"];
+        
+        [userAddAlert beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse returnCode) {
+            [self dismissController:self];
+        }];
+        
+        return;
+    }
+    
+    //select file
+    NSOpenPanel *openPanel = [NSOpenPanel openPanel];
+    [openPanel beginSheetModalForWindow:self.view.window completionHandler: ^(NSInteger result) {
+        switch(result){
+            case NSFileHandlingPanelOKButton:
+            {
+                self.progressIndicator.doubleValue=0;
+                self.progressIndicator.hidden=NO;
+                if(self.restClient)
+                {
+                    NSData *fileData= [NSData dataWithContentsOfURL:openPanel.URL];
+                    [self uploadImageToDropBox:fileData];
+                }
+                else {
+                
+                // start http upload XMPP
+                self.progressIndicator.doubleValue=50;
+                [[MLXMPPManager sharedInstance]  httpUploadFileURL:openPanel.URL toContact:self.contactName onAccount:self.accountNo withCompletionHandler:^(NSString *url, NSError *error) {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [self endProgressUpdate];
+                        if(url) {
+                            self.messageBox.string= url;
+                        }
+                        else  {
+                            NSAlert *userAddAlert = [[NSAlert alloc] init];
+                            userAddAlert.messageText = @"There was an error uploading the file to the server";
+                            userAddAlert.informativeText =[NSString stringWithFormat:@"%@", error.localizedDescription];
+                            userAddAlert.alertStyle=NSInformationalAlertStyle;
+                            [userAddAlert addButtonWithTitle:@"Close"];
+                            
+                            [userAddAlert beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse returnCode) {
+                                [self dismissController:self];
+                            }];
+                        }
+                    });
+                    
+                }];
+                }
+                break;
+            }
+            case NSFileHandlingPanelCancelButton:
+            {
+                break;
+            }
+        }
+    }];
+
+}
+
 #pragma mark - notificaitons
 -(void) handleNewMessage:(NSNotification *)notification
 {
     DDLogVerbose(@"chat view got new message notice %@", notification.userInfo);
+    
+    NSNumber *shouldRefresh =[notification.userInfo objectForKey:@"shouldRefresh"];
+    if (shouldRefresh.boolValue) {
+        dispatch_async(dispatch_get_main_queue(),
+                       ^{
+                           [self refreshData];
+                       });
+        return;
+    }
+    
     
     if([[notification.userInfo objectForKey:@"accountNo"] isEqualToString:_accountNo]
        &&( ( [[notification.userInfo objectForKey:@"from"] isEqualToString:_contactName]) || ([[notification.userInfo objectForKey:@"to"] isEqualToString:_contactName] ))
@@ -158,8 +316,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                            [self.messageList addObject:userInfo];
                          
                            if((self.view.window.occlusionState & NSWindowOcclusionStateVisible)) {
-                               [self.chatTable reloadData];
-                               [self scrollToBottom];
+                               [self refreshData];
                                [self markAsRead];
                            }
                        });
@@ -172,12 +329,22 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     NSDictionary *dic =notification.userInfo;
     [self setMessageId:[dic objectForKey:kMessageId]  delivered:NO];
+     [self endProgressUpdate];
 }
 
 -(void) handleSentMessage:(NSNotification *)notification
 {
     NSDictionary *dic =notification.userInfo;
     [self setMessageId:[dic objectForKey:kMessageId]  delivered:YES];
+    
+    dispatch_async( dispatch_get_main_queue(), ^{
+        self.progressIndicator.doubleValue=100;
+        
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.5f * NSEC_PER_SEC), dispatch_get_main_queue(),  ^{
+           [self endProgressUpdate];
+        });
+        
+    });
 }
 
 -(void) markAsRead
@@ -283,8 +450,16 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     if(!newMessageID) {
         newMessageID=[NSString stringWithFormat:@"Monal%d", r];
     }
+    [self.progressIndicator incrementBy:25];
     [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:self.contactName fromAccount:self.accountNo isMUC:self.isMUC messageId:newMessageID
-                          withCompletionHandler:nil];
+     withCompletionHandler:^(BOOL success, NSString *messageId) {
+         if(success)
+         {
+            dispatch_async( dispatch_get_main_queue(), ^{
+              [self.progressIndicator incrementBy:25];
+            });
+         }
+     }];
     
     //dont readd it, use the exisitng
     if(!messageID) {
@@ -299,6 +474,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(IBAction)sendText:(id)sender
 {
+    self.progressIndicator.doubleValue=0;
+    self.progressIndicator.hidden=NO;
     NSString *message= [self.messageBox.string copy];
     if(message.length>0) {
         [self sendMessage:[self.messageBox.string copy] andMessageID:nil];
@@ -311,7 +488,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     NSAlert *userAddAlert = [[NSAlert alloc] init];
     userAddAlert.messageText=@"Message Failed to Send";
-    userAddAlert.informativeText =[NSString stringWithFormat:@"This message may may have failed to send."];
+    userAddAlert.informativeText =[NSString stringWithFormat:@"This message may  have failed to send."];
     userAddAlert.alertStyle=NSWarningAlertStyle;
     [userAddAlert addButtonWithTitle:@"Close"];
     [userAddAlert addButtonWithTitle:@"Retry"];
@@ -412,12 +589,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self.sourceDateFormat setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
     
     self.gregorian = [[NSCalendar alloc]
-                      initWithCalendarIdentifier:NSGregorianCalendar];
+                      initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
     
     NSDate* now =[NSDate date];
-    self.thisday =[self.gregorian components:NSDayCalendarUnit fromDate:now].day;
-    self.thismonth =[self.gregorian components:NSMonthCalendarUnit fromDate:now].month;
-    self.thisyear =[self.gregorian components:NSYearCalendarUnit fromDate:now].year;
+    self.thisday =[self.gregorian components:NSCalendarUnitDay fromDate:now].day;
+    self.thismonth =[self.gregorian components:NSCalendarUnitMonth fromDate:now].month;
+    self.thisyear =[self.gregorian components:NSCalendarUnitYear fromDate:now].year;
     
     
 }

@@ -12,6 +12,7 @@
 #import "MLAccountSettings.h"
 #import "MLDisplaySettings.h"
 #import "MLPresenceSettings.h"
+#import "MLCloudStorageSettings.h"
 #import "MLXMPPManager.h"
 
 #import "NXOAuth2.h"
@@ -21,6 +22,8 @@
 #import <Crashlytics/Crashlytics.h>
 #import "DDLog.h"
 
+#import <DropboxOSX/DropboxOSX.h>
+
 static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 @interface AppDelegate ()
@@ -29,7 +32,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 @property (nonatomic , weak)  MLAccountSettings *accountsVC;
 @property (nonatomic , weak)  MLPresenceSettings *presenceVC;
 @property (nonatomic , weak)  MLDisplaySettings *displayVC;
-
+@property (nonatomic , weak)  MLCloudStorageSettings *cloudVC;
 
 @end
 
@@ -61,6 +64,16 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [[[NSWorkspace sharedWorkspace] notificationCenter] addObserver: self
                                                            selector: @selector(receivedWakeNotification:)
                                                                name: NSWorkspaceDidWakeNotification object: NULL];
+   
+    [[NSAppleEventManager sharedAppleEventManager] setEventHandler:self andSelector:@selector(handleURLEvent:withReplyEvent:) forEventClass:kInternetEventClass andEventID:kAEGetURL];
+    
+    //Dropbox
+    DBSession *dbSession = [[DBSession alloc]
+                            initWithAppKey:@"a134q2ecj1hqa59"
+                            appSecret:@"vqsf5vt6guedlrs"
+                            root:kDBRootAppFolder];
+    [DBSession setSharedSession:dbSession];
+
 
     
 }
@@ -75,6 +88,22 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         [self.mainWindowController showWindow:self];
     }
     return YES;	
+}
+
+
+- (void)handleURLEvent:(NSAppleEventDescriptor*)event
+        withReplyEvent:(NSAppleEventDescriptor*)replyEvent
+{
+//    if ([[DBSession sharedSession] handleOpenURL:[event paramDescriptorForKeyword:keyDirectObject]]) {
+//        if ([[DBSession sharedSession] isLinked]) {
+//            DDLogVerbose(@"App linked successfully!");
+//            // At this point you can start making API calls
+//        }
+    
+ //   }
+    // Add whatever other url handling code your app requires here
+ 
+    
 }
 
 
@@ -115,13 +144,18 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         self.displayVC = [storyboard instantiateControllerWithIdentifier:@"display"];
     }
     
+    if(!self.cloudVC)
+    {
+        self.cloudVC = [storyboard instantiateControllerWithIdentifier:@"cloudStorage"];
+    }
+    
 }
 
 -(IBAction)showPreferences:(id)sender
 {
     [self linkVCs];
     if(!self.preferencesWindow) {
-        NSArray *array = @[self.accountsVC, self.presenceVC, self.displayVC];
+        NSArray *array = @[self.accountsVC, self.presenceVC, self.displayVC, self.cloudVC];
         self.preferencesWindow = [[MASPreferencesWindowController alloc] initWithViewControllers:array];
     }
     [self.preferencesWindow showWindow:self];

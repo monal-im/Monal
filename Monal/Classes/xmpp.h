@@ -76,7 +76,7 @@ typedef NS_ENUM (NSInteger, xmppState) {
 
 @interface xmpp : NSObject <NSStreamDelegate>
 {
-    NSString* _fulluser; // combination of username@domain
+   
     
     NSInputStream *_iStream;
     NSOutputStream *_oStream;
@@ -204,7 +204,39 @@ Decline a call request
  */
 -(void)decline:(NSDictionary*) contact;
 
+/*
+ notifies the server client is in foreground
+ */
+-(void) setClientActive;
+
+/*
+ notifies the server client is in foreground
+ */
+-(void) setClientInactive;
+
+
+/*
+ HTTP upload
+*/
+ -(void) requestHTTPSlotWithParams:(NSDictionary *)params andCompletion:(void(^)(NSString *url,  NSError *error)) completion;
+
+/*
+ query message archive.
+ */
+-(void) setMAMQueryFromStart:(NSDate *) startDate toDate:(NSDate *) endDate  andJid:(NSString *)jid;
+
+
+FOUNDATION_EXPORT NSString *const kFileName;
+FOUNDATION_EXPORT NSString *const kContentType;
+FOUNDATION_EXPORT NSString *const kData;
+FOUNDATION_EXPORT NSString *const kContact;
+FOUNDATION_EXPORT NSString *const kCompletion;
+
+
 #pragma  mark properties
+
+@property (nonatomic,readonly) NSString* fulluser; // combination of username@domain
+
 // connection attributes
 @property (nonatomic,strong) NSString* username;
 @property (nonatomic,strong) NSString* domain;
@@ -245,7 +277,17 @@ Decline a call request
 @property (nonatomic,strong)  NSMutableArray*  discoveredServices;
 @property (nonatomic,strong)  NSString*  conferenceServer;
 @property (nonatomic,strong)  NSArray*  roomList;
-@property (nonatomic, strong) NSArray* rosterList; 
+@property (nonatomic, strong) NSArray* rosterList;
+
+
+@property (nonatomic,strong)  NSString*  uploadServer;
+@property (nonatomic, readonly) BOOL supportsHTTPUpload;
+// client state
+@property (nonatomic, readonly) BOOL supportsClientState;
+
+//message archive
+@property (nonatomic, readonly) BOOL supportsMam0;
+
 
 //calculated
 @property (nonatomic,strong, readonly) NSString* versionHash;
@@ -260,7 +302,7 @@ Decline a call request
 
 @property (nonatomic,strong) NSDate* connectedTime;
 
-
+extern NSString *const kId;
 extern NSString *const kMessageId;
 extern NSString *const kSendTimer;
 

@@ -134,6 +134,91 @@
 
 }
 
+-(void) setMAMQueryFromStart:(NSDate *) startDate toDate:(NSDate *) endDate  andJid:(NSString *)jid
+{
+
+    MLXMLNode* queryNode =[[MLXMLNode alloc] init];
+    queryNode.element=@"query";
+    [queryNode.attributes setObject:@"urn:xmpp:mam:0" forKey:@"xmlns"];
+    
+    
+    MLXMLNode* xnode =[[MLXMLNode alloc] init];
+    xnode.element=@"x";
+    [xnode.attributes setObject:@"jabber:x:data" forKey:@"xmlns"];
+    [xnode.attributes setObject:@"submit" forKey:@"type"];
+
+    MLXMLNode* field1 =[[MLXMLNode alloc] init];
+    field1.element=@"field";
+    [field1.attributes setObject:@"FORM_TYPE" forKey:@"var"];
+    [field1.attributes setObject:@"hidden" forKey:@"type"];
+    
+    MLXMLNode* value =[[MLXMLNode alloc] init];
+    value.element=@"value";
+    value.data=@"urn:xmpp:mam:0";
+    [field1.children addObject:value];
+    
+    [xnode.children addObject:field1];
+    
+        if(startDate || endDate) {
+            NSDateFormatter *rfc3339DateFormatter = [[NSDateFormatter alloc] init];
+            NSLocale *enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
+            
+            [rfc3339DateFormatter setLocale:enUSPOSIXLocale];
+            [rfc3339DateFormatter setDateFormat:@"yyyy'-'MM'-'dd'T'HH':'mm':'ss'Z'"];
+            [rfc3339DateFormatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+            
+            MLXMLNode* field2 =[[MLXMLNode alloc] init];
+            field2.element=@"field";
+            [field2.attributes setObject:@"start" forKey:@"var"];
+            
+            MLXMLNode* value2 =[[MLXMLNode alloc] init];
+            value2.element=@"value";
+            if(startDate) {
+                value2.data=[rfc3339DateFormatter stringFromDate:startDate];
+            }
+            else  {
+                value2.data=[rfc3339DateFormatter stringFromDate:[NSDate dateWithTimeIntervalSinceReferenceDate:0]];
+            }
+            
+            [field2.children addObject:value2];
+            
+            MLXMLNode* field3 =[[MLXMLNode alloc] init];
+            field3.element=@"field";
+            [field3.attributes setObject:@"end" forKey:@"var"];
+            
+            MLXMLNode* value3 =[[MLXMLNode alloc] init];
+            value3.element=@"value";
+            if(endDate) {
+                 value3.data=[rfc3339DateFormatter stringFromDate:endDate];
+            }
+            else  {
+                value3.data=[rfc3339DateFormatter stringFromDate:[NSDate date]];
+            }
+            [field3.children addObject:value3];
+            
+            [xnode.children addObjectsFromArray:@[field2, field3]];
+            
+        }
+          if(jid) {
+            MLXMLNode* field3 =[[MLXMLNode alloc] init];
+            field3.element=@"field";
+            [field3.attributes setObject:@"with" forKey:@"var"];
+            
+            MLXMLNode* value3 =[[MLXMLNode alloc] init];
+            value3.element=@"value";
+            value3.data=jid;
+            [field3.children addObject:value3];
+            
+            [xnode.children addObject:field3];
+        }
+    
+    
+    [queryNode.children addObject:xnode];
+    
+    [self.children addObject:queryNode];
+    
+}
+
 -(void) setRemoveFromRoster:(NSString*) jid
 {
     MLXMLNode* queryNode =[[MLXMLNode alloc] init];
@@ -194,6 +279,28 @@
 }
 
 
+
+-(void) httpUploadforFile:(NSString *) file ofSize:(NSNumber *) filesize andContentType:(NSString *) contentType
+{
+    MLXMLNode* requestNode =[[MLXMLNode alloc] init];
+    requestNode.element=@"request";
+    [requestNode.attributes setObject:@"urn:xmpp:http:upload" forKey:@"xmlns"];
+    
+    MLXMLNode* filename =[[MLXMLNode alloc] init];
+    filename.element=@"filename";
+    filename.data=file;
+    
+    MLXMLNode* size =[[MLXMLNode alloc] init];
+    size.element=@"size";
+    size.data=[NSString stringWithFormat:@"%@", filesize];
+    
+    MLXMLNode* contentTypeNode =[[MLXMLNode alloc] init];
+    contentTypeNode.element=@"content-type";
+    contentTypeNode.data=contentType;
+    
+    [requestNode.children addObjectsFromArray:@[filename, size, contentTypeNode]];
+    [self.children addObject:requestNode];
+}
 
 
 #pragma mark iq get

@@ -12,11 +12,14 @@
 
 @property (nonatomic, strong) IBOutlet NSTextView *messageBox;
 @property (nonatomic, strong) IBOutlet NSTableView *chatTable;
+@property (nonatomic, strong) IBOutlet NSProgressIndicator *progressIndicator;
 @property (nonatomic, strong) NSDictionary *contactDic;
 @property (nonatomic, strong, readonly) NSString *contactName;
 
 -(IBAction)sendText:(id)sender;
 -(IBAction)emojiPicker:(id)sender;
+-(IBAction)attach:(id)sender;
+
 -(IBAction)deliveryFailedMessage:(id)sender;
 
 -(void) sendMessage:(NSString *) messageText andMessageID:(NSString *)messageID;

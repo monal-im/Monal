@@ -50,6 +50,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		return; 
 	}
     
+    if(([State isEqualToString:@"Features"]) &&([elementName isEqualToString:@"csi"]))
+    {
+        DDLogVerbose(@"supports csi");
+        _supportsClientState=YES;
+        return;
+    }
     
 	if(([elementName isEqualToString:@"proceed"]) && ([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:ietf:params:xml:ns:xmpp-tls"]) )
 	{
@@ -81,7 +87,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         return;
     }
     
-
+ 
     //***** sasl success...
 	if(([elementName isEqualToString:@"success"]) &&  ([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:ietf:params:xml:ns:xmpp-sasl"])
 	   )

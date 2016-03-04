@@ -136,8 +136,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
         else {
             [self showActiveChat: NO];
         }
-        
-        [self highlightCellForCurrentContact];
+ 
     }
 }
 
@@ -147,13 +146,22 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 -(void) showActiveChat:(BOOL) shouldShow
 {
     if (shouldShow) {
-        self.activeChat= [[DataLayer sharedInstance] activeBuddies];
+        [[DataLayer sharedInstance] activeContactsWithCompletion:^(NSMutableArray *cleanActive) {
+            [[MLXMPPManager sharedInstance] cleanArrayOfConnectedAccounts:cleanActive];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                self.activeChat= cleanActive;
+                [self.contactsTable reloadData];
+                [self highlightCellForCurrentContact];
+            });
+        }];
     }
     else {
         self.activeChat=nil;
+        [self.contactsTable reloadData];
+        [self highlightCellForCurrentContact];
     }
     
-    [self.contactsTable reloadData];
+    
 }
 
 -(IBAction)deleteItem:(id)sender
@@ -211,9 +219,16 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
         if(self.contactsTable.selectedRow <self.activeChat.count) {
             NSDictionary *contact =[self.activeChat objectAtIndex:self.contactsTable.selectedRow];
             
-            [ [DataLayer sharedInstance] removeActiveBuddy:[contact objectForKey:kContactName] forAccount:[contact objectForKey:kAccountID]];
-            self.activeChat=[[DataLayer sharedInstance] activeBuddies];
-            [self.contactsTable reloadData];
+            [[DataLayer sharedInstance] removeActiveBuddy:[contact objectForKey:kContactName] forAccount:[contact objectForKey:kAccountID]];
+
+            [[DataLayer sharedInstance] activeContactsWithCompletion:^(NSMutableArray *cleanActive) {
+                [[MLXMPPManager sharedInstance] cleanArrayOfConnectedAccounts:cleanActive];
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    self.activeChat= cleanActive;
+                    [self.contactsTable reloadData];
+                });
+            }];
+            
         }
     }
     else  {
@@ -333,6 +348,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     
 }
 
+
 -(NSInteger) positionOfOfflineContact:(NSDictionary *) user
 {
     NSInteger pos=0;
@@ -351,8 +367,78 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     
 }
 
--(void) addOnlineUser:(NSDictionary*) user
+
+-(NSInteger) positionOfActiveContact:(NSDictionary *) user
 {
+    NSInteger pos=0;
+    for(NSDictionary* row in self.activeChat)
+    {
+        if([[row objectForKey:kContactName] caseInsensitiveCompare:[user objectForKey:@"from"] ]==NSOrderedSame &&
+           [[row objectForKey:kAccountID]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
+        {
+            return pos;
+        }
+        pos++;
+    }
+    
+    return -1;
+    
+}
+
+
+
+-(void)updateContactAt:(NSInteger) pos withInfo:(NSDictionary *) user
+{
+    NSMutableDictionary *contactrow =[_contacts objectAtIndex:pos];
+    BOOL hasChange=NO;
+    
+    if([user objectForKey:kstateKey] && ![[user objectForKey:kstateKey] isEqualToString:[contactrow  objectForKey:kstateKey]] ) {
+        [contactrow setObject:[user objectForKey:kstateKey] forKey:kstateKey];
+        hasChange=YES;
+    }
+    if([user objectForKey:kstatusKey] && ![[user objectForKey:kstatusKey] isEqualToString:[contactrow  objectForKey:kstatusKey]] ) {
+        [contactrow setObject:[user objectForKey:kstatusKey] forKey:kstatusKey];
+        hasChange=YES;
+    }
+    
+    if([user objectForKey:kfullNameKey] && ![[user objectForKey:kfullNameKey] isEqualToString:[contactrow  objectForKey:kfullNameKey]] &&
+       [[user objectForKey:kfullNameKey] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].length>0
+       ) {
+        [contactrow setObject:[user objectForKey:kfullNameKey] forKey:@"full_name"];
+        hasChange=YES;
+    }
+    
+    if(hasChange) {
+        if(self.searchResults || self.activeChat){
+            [self refreshDisplay];
+        }
+        else  {
+            [self.contactsTable beginUpdates];
+            
+            NSIndexSet *indexSet =[[NSIndexSet alloc] initWithIndex:pos] ;
+            NSIndexSet *columnIndexSet =[[NSIndexSet alloc] initWithIndex:0] ;
+            [self.contactsTable reloadDataForRowIndexes:indexSet columnIndexes:columnIndexSet];
+            [self.contactsTable endUpdates];
+        }
+    } else  {
+        
+    }
+}
+
+-(void) addOnlineUser:(NSDictionary *) user
+{
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSInteger initalPos=-1;
+        initalPos=[self positionOfOnlineContact:user];
+        if(initalPos>=0)
+        {
+            DDLogVerbose(@"user %@ already in list updating status and nothing else",[user objectForKey:kusernameKey]);
+            [self updateContactAt:initalPos withInfo:user];
+   
+
+        }
+        else  {
     //insert into tableview
     // for now just online
     [[DataLayer sharedInstance] contactForUsername:[user objectForKey:kusernameKey] forAccount:[user objectForKey:kaccountNoKey] withCompletion:^(NSArray * contactRow) {
@@ -363,8 +449,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                            NSInteger pos=-1;
                            NSInteger offlinepos=-1;
                            pos = [self positionOfOnlineContact:user];
-                           
-                           
+               
                            //offlinepos= [self positionOfOfflineContact:user];
                            
                            //not there
@@ -441,26 +526,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                            {
                                DDLogVerbose(@"user %@ already in list %@",[user objectForKey:kusernameKey], self.contacts);
                                if(pos<self.contacts.count) {
-                                   if([user objectForKey:kstateKey])
-                                       [[_contacts objectAtIndex:pos] setObject:[user objectForKey:kstateKey] forKey:kstateKey];
-                                   if([user objectForKey:kstatusKey])
-                                       [[_contacts objectAtIndex:pos] setObject:[user objectForKey:kstatusKey] forKey:kstatusKey];
-                                   
-                                   if([user objectForKey:kfullNameKey])
-                                       [[_contacts objectAtIndex:pos] setObject:[user objectForKey:kfullNameKey] forKey:@"full_name"];
-                                   
-                                   if(self.searchResults || self.activeChat){
-                                      [self refreshDisplay];
-                                   }
-                                   else  {
-                                       
-                                       [self.contactsTable beginUpdates];
-                                       
-                                       NSIndexSet *indexSet =[[NSIndexSet alloc] initWithIndex:pos] ;
-                                       NSIndexSet *columnIndexSet =[[NSIndexSet alloc] initWithIndex:0] ;
-                                       [self.contactsTable reloadDataForRowIndexes:indexSet columnIndexes:columnIndexSet];
-                                       [self.contactsTable endUpdates];
-                                   }
+                                     [self updateContactAt:pos withInfo:user];
                                }
                            }
                            
@@ -470,7 +536,8 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
         
     }];
     
-    
+        }
+    });
 }
 
 -(void) removeOnlineUser:(NSDictionary*) user
@@ -646,8 +713,23 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                            //activeArray= self.activeChat;
                            //add 0.2 delay to allow DB to write since this is called at the same time as db write notification
                            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.2 * NSEC_PER_SEC), dispatch_get_main_queue(),  ^{
-                               [self showActiveChat:YES];
-                               [self highlightCellForCurrentContact];
+                           
+                               NSInteger activePos =  [self positionOfActiveContact:notification.userInfo];
+                               
+                               if(activePos>=0)
+                               {
+                                   
+                                   if(activePos<self.contactsTable.numberOfRows) {
+                                       [self.contactsTable beginUpdates];
+                                       NSIndexSet *indexSet =[[NSIndexSet alloc] initWithIndex:activePos] ;
+                                       NSIndexSet *columnIndexSet =[[NSIndexSet alloc] initWithIndex:0] ;
+                                       [self.contactsTable reloadDataForRowIndexes:indexSet columnIndexes:columnIndexSet];
+                                       [self.contactsTable endUpdates];
+                                   }
+                               }
+                            
+                               
+                               
                            });
                            
                            return;
@@ -739,8 +821,18 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     cell.name.backgroundColor =[NSColor clearColor];
     cell.status.backgroundColor= [NSColor clearColor];
     
-    cell.name.stringValue = [contactRow objectForKey:kFullName];
+    if([[contactRow objectForKey:kFullName]stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].length>0) {
+        cell.name.stringValue = [contactRow objectForKey:kFullName];
+    } else  {
+        cell.name.stringValue=[contactRow objectForKey:kContactName] ;
+    }
     cell.accountNo= [[contactRow objectForKey:kAccountID] integerValue];
+    
+    if(cell.username)
+    {
+        [cell setUnreadCount:0];
+    }
+    
     cell.username =[contactRow objectForKey:kContactName] ;
     
     
@@ -769,10 +861,16 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     [cell setOrb];
 
     NSString* accountNo=[NSString stringWithFormat:@"%ld", (long)cell.accountNo];
+    NSString *cellUser = [contactRow objectForKey:kContactName];
+
+    [[MLImageManager sharedInstance] getIconForContact:cell.username andAccount:accountNo withCompletion:^(NSImage *image) {
+        if([cell.username isEqualToString:cellUser]) {
+            cell.icon.image=image;
+        }
+    }];
+
     
-    cell.icon.image= [[MLImageManager sharedInstance] getIconForContact:cell.username andAccount:accountNo];
-  
-    
+    [cell setUnreadCount:0];
     [[DataLayer sharedInstance] countUserUnreadMessages:cell.username forAccount:accountNo withCompletion:^(NSNumber * result) {
         dispatch_async(dispatch_get_main_queue(), ^{
             [cell setUnreadCount:[result integerValue]];

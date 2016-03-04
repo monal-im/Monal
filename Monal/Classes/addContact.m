@@ -220,7 +220,7 @@
 - (void)pickerView:(UIPickerView *)pickerView didSelectRow:(NSInteger)row inComponent:(NSInteger)component
 {
     _selectedRow=row;
-    _accountName.text=[[MLXMPPManager sharedInstance] getNameForConnectedRow:row];
+    _accountName.text=[[MLXMPPManager sharedInstance] getAccountNameForConnectedRow:row];
     
     [[MLXMPPManager sharedInstance] getServiceDetailsForAccount:row ];
     
@@ -230,7 +230,7 @@
 {
     if(row< [[MLXMPPManager sharedInstance].connectedXMPP count])
     {
-        NSString* name =[[MLXMPPManager sharedInstance] getNameForConnectedRow:row];
+        NSString* name =[[MLXMPPManager sharedInstance] getAccountNameForConnectedRow:row];
         if(name)
             return name;
     }

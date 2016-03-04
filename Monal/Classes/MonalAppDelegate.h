@@ -6,7 +6,7 @@
 //  Copyright __MyCompanyName__ 2008. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
+@import UIKit; 
 #import "Appirater.h"
 #import "DataLayer.h"
 #import "MLTabBarController.h"

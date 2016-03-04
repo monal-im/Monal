@@ -319,7 +319,7 @@ static DataLayer *sharedInstance=nil;
 
 }
 
--(void) executeReader:(NSString*) query withCompletion: (void (^)(NSArray *))completion;
+-(void) executeReader:(NSString*) query withCompletion: (void (^)(NSMutableArray *))completion;
 {
     if(!query)
     {
@@ -447,43 +447,22 @@ static DataLayer *sharedInstance=nil;
 
 #pragma mark account commands
 
--(NSArray*) protocolList
+-(void) protocolListWithCompletion: (void (^)(NSArray *result))completion
 {
     NSString* query=[NSString stringWithFormat:@"select * from protocol where protocol_id<=3 or protocol_id=5 order by protocol_id asc"];
-    NSArray* toReturn = [self executeReader:query];
-    
-    if(toReturn!=nil)
-    {
+    [self executeReader:query withCompletion:^(NSMutableArray * result) {
+        if(completion) completion(result);
         
-        DDLogVerbose(@" count: %lu",  (unsigned long)[toReturn count] );
-        return toReturn;
-    }
-    else
-    {
-        DDLogError(@"protocol list  is empty or failed to read");
-        return nil;
-    }
+    }];
 }
 
--(NSArray*) accountList
+-(void) accountListWithCompletion: (void (^)(NSArray* result))completion
 {
     NSString* query=[NSString stringWithFormat:@"select * from account order by account_id asc "];
-    NSArray* toReturn = [self executeReader:query];
-    
-    if(toReturn!=nil)
-    {
-        
-        DDLogVerbose(@" count: %lu",  (unsigned long)[toReturn count] );
-        
-        return toReturn;
-    }
-    else
-    {
-        DDLogError(@"account list  is empty or failed to read");
-        
-        return nil;
-    }
-    
+   [self executeReader:query withCompletion:^(NSMutableArray * result) {
+       if(completion) completion(result);
+       
+   }];
 }
 
 -(NSArray*) enabledAccountList
@@ -544,7 +523,7 @@ static DataLayer *sharedInstance=nil;
 -(void) updateAccounWithDictionary:(NSDictionary *) dictionary andCompletion:(void (^)(BOOL))completion;
 {
     NSString* query=
-    [NSString stringWithFormat:@"update account  set account_name='%@', protocol_id=%@, server='%@', other_port='%@', username='%@', password='%@', secure=%d, resource='%@', domain='%@', enabled=%d, selfsigned=%d, oldstyleSSL=%d, oauth=%d  where account_id=%@",
+    [NSString stringWithFormat:@"update account  set account_name='%@', protocol_id=%@, server='%@', other_port='%@', username='%@', password='%@', secure=%d, resource='%@', domain='%@', enabled=%d, selfsigned=%d, oldstyleSSL=%d where account_id=%@",
      ((NSString *)[dictionary objectForKey:kUsername]).escapeForSql,
      @"1",
      ((NSString *)[dictionary objectForKey:kServer]).escapeForSql,
@@ -557,7 +536,6 @@ static DataLayer *sharedInstance=nil;
      [[dictionary objectForKey:kEnabled] boolValue],
      [[dictionary objectForKey:kSelfSigned] boolValue],
      [[dictionary objectForKey:kOldSSL] boolValue],
-     [[dictionary objectForKey:kOauth] boolValue],
      [dictionary objectForKey:kAccountID]
      
      ];
@@ -625,46 +603,41 @@ static DataLayer *sharedInstance=nil;
     }
 }
 
-
-
-
-
-
-
-
 #pragma mark Buddy Commands
 
-
--(BOOL) addBuddy:(NSString*) buddy  forAccount:(NSString*) accountNo fullname:(NSString*) fullName nickname:(NSString*) nickName
+-(void) addContact:(NSString*) contact  forAccount:(NSString*) accountNo fullname:(NSString*)fullName nickname:(NSString*) nickName withCompletion: (void (^)(BOOL))completion
 {
-    __block BOOL toReturn=NO;
     //this needs to be one atomic operation
     dispatch_sync(_contactQueue, ^{
-        if(![self isBuddyInList:buddy forAccount:accountNo]) {
-            
-            // no blank full names
-            NSString* actualfull;
-            if([[fullName  stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]==0) {
-                actualfull=buddy;
-            }
-            else {
-                actualfull=fullName;
-            }
-            
-            NSString* query=[NSString stringWithFormat:@"insert into buddylist values(null, %@, '%@', '%@','%@','','','','','',0, 0, 1,0);", accountNo, buddy.escapeForSql, actualfull.escapeForSql, nickName.escapeForSql];
-            if([self executeNonQuery:query]!=NO)
-            {
-                toReturn= YES;
-            }
-            else
-            {
-                
-            }
-        }
+       [self isContactInList:contact forAccount:accountNo withCompletion:^(BOOL exists) {
+           if(!exists)
+           {
+                   // no blank full names
+                   NSString* actualfull;
+                   if([[fullName  stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]==0) {
+                       actualfull=contact;
+                   }
+                   else {
+                       actualfull=fullName;
+                   }
+                   
+                   NSString* query=[NSString stringWithFormat:@"insert into buddylist values(null, %@, '%@', '%@','%@','','','','','',0, 0, 1,0);", accountNo, contact.escapeForSql, actualfull.escapeForSql, nickName.escapeForSql];
+               [self executeNonQuery:query withCompletion:^(BOOL success) {
+                   if(completion)
+                   {
+                       completion(success);
+                   }
+                   
+               }];
+       
+           }
+           else
+           {
+               if(completion) completion(NO);
+           }
+       }];
     });
-    
-    return toReturn;
-    
+
 }
 
 -(BOOL) removeBuddy:(NSString*) buddy forAccount:(NSString*) accountNo
@@ -784,7 +757,7 @@ static DataLayer *sharedInstance=nil;
     
 }
 
--(NSArray*) onlineContactsSortedBy:(NSString*) sort
+-(void) onlineContactsSortedBy:(NSString*) sort withCompeltion: (void (^)(NSMutableArray *))completion
 {
     NSString* query=@"";
     
@@ -798,41 +771,18 @@ static DataLayer *sharedInstance=nil;
         query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0 as 'count', ifnull(full_name, buddy_name) as full_name, account_id from buddylist where   online=1   order by state,full_name COLLATE NOCASE  asc "];
     }
     
-    //DDLogVerbose(query);
-    NSArray* toReturn = [self executeReader:query];
-    
-    if(toReturn!=nil)
-    {
-        DDLogVerbose(@" count: %lu",  (unsigned long)[toReturn count] );
-        return toReturn;
-    }
-    else
-    {
-        DDLogError(@"buddylist is empty or failed to read");
-        return nil;
-    }
-    
+    [self executeReader:query withCompletion:^(NSMutableArray *results) {
+        if(completion) completion(results);
+    }];
+  
 }
 
--(NSArray*) offlineContacts
+-(void) offlineContactsWithCompeltion: (void (^)(NSMutableArray *))completion
 {
-    
     NSString* query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, ifnull(full_name, buddy_name) as full_name, a.account_id from buddylist  as A inner join account as b  on a.account_id=b.account_id  where  online=0 and enabled=1 order by full_name COLLATE NOCASE "];
-    //DDLogVerbose(query);
-    NSArray* toReturn = [self executeReader:query];
-    
-    if(toReturn!=nil)
-    {
-        DDLogVerbose(@" count: %lu",  (unsigned long)[toReturn count] );
-        return toReturn;
-    }
-    else
-    {
-        DDLogError(@"buddylist is empty or failed to read");
-        return nil;
-    }
-    
-    
+    [self executeReader:query withCompletion:^(NSMutableArray *results) {
+        if(completion) completion(results);
+    }];
 }
 
 
@@ -1103,32 +1053,18 @@ static DataLayer *sharedInstance=nil;
 
 #pragma mark Contact info
 
--(BOOL) setFullName:(NSString*) fullName forBuddy:(NSString*) buddy andAccount:(NSString*) accountNo
+-(void) setFullName:(NSString*) fullName forContact:(NSString*) contact andAccount:(NSString*) accountNo
 {
     
     NSString* toPass;
     //data length check
     
-    if([fullName length]>50) toPass=[fullName substringToIndex:49]; else toPass=fullName;
-    // sometimes the buddyname comes from a roster so it might not be in the list yet, add first and if that fails (ie already there) then set fullname
+    NSString *cleanFullName =[fullName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    if([cleanFullName length]>50) toPass=[cleanFullName substringToIndex:49]; else toPass=cleanFullName;
     
-    if(![self addBuddy:buddy forAccount: accountNo fullname:fullName nickname:@""])
-    {
-        NSString* query=[NSString stringWithFormat:@"update buddylist set full_name='%@',dirty=1 where account_id=%@ and  buddy_name='%@';",[toPass stringByReplacingOccurrencesOfString:@"'" withString:@"''"], accountNo, buddy.escapeForSql];
-        if([self executeNonQuery:query]!=NO)
-        {
-            return YES;
-        }
-        else
-        {
-            return NO;
-        }
-        
-    }
-    else
-    {
-        return YES;
-    }
+    NSString* query=[NSString stringWithFormat:@"update buddylist set full_name='%@',dirty=1 where account_id=%@ and  buddy_name='%@';",[toPass stringByReplacingOccurrencesOfString:@"'" withString:@"''"], accountNo, contact.escapeForSql];
+    [self executeNonQuery:query withCompletion:nil];
+    
 }
 
 -(BOOL) setNickName:(NSString*) nickName forBuddy:(NSString*) buddy andAccount:(NSString*) accountNo
@@ -1156,55 +1092,55 @@ static DataLayer *sharedInstance=nil;
 }
 
 
--(BOOL) setBuddyHash:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
+-(void) setContactHash:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo
 {
     NSString* hash=presenceObj.photoHash;
     if(!hash) hash=@"";
     //data length check
     NSString* query=[NSString stringWithFormat:@"update buddylist set iconhash='%@', dirty=1 where account_id=%@ and  buddy_name='%@';",hash,
                      accountNo, presenceObj.user.escapeForSql];
-    if([self executeNonQuery:query]!=NO)
-    {
-        return YES;
-    }
-    else
-    {
-        return NO;
-    }
+    [self executeNonQuery:query withCompletion:nil];
+ 
 }
 
--(NSString*) buddyHash:(NSString*) buddy forAccount:(NSString*) accountNo
+-(void) contactHash:(NSString*) buddy forAccount:(NSString*) accountNo withCompeltion: (void (^)(NSString *))completion;
 {
     NSString* query=[NSString stringWithFormat:@"select iconhash from buddylist where account_id=%@ and buddy_name='%@'", accountNo, buddy.escapeForSql];
-    NSString* iconhash= (NSString*)[self executeScalar:query];
-    return iconhash;
-}
-
-
--(bool) isBuddyInList:(NSString*) buddy forAccount:(NSString*) accountNo
-{
-    
-    NSString* query=[NSString stringWithFormat:@"select count(buddy_id) from buddylist where account_id=%@ and buddy_name='%@' ", accountNo, buddy.escapeForSql];
-    
-    NSNumber* count=(NSNumber*)[self executeScalar:query];
-    if(count!=nil)
-    {
-        int val=[count integerValue];
-        if(val>0) {
-            return YES;
-        }
-        else
+    [self executeScalar:query withCompletion:^(NSObject *iconHash) {
+        if(completion)
         {
-            return NO;
+            completion((NSString *)iconHash);
         }
-    }
-    else
-    {
-        return NO;
-    }
-    
-    
+        
+    }];
 }
+
+
+
+
+-(void) isContactInList:(NSString*) buddy forAccount:(NSString*) accountNo withCompletion: (void (^)(BOOL))completion
+{
+   NSString* query=[NSString stringWithFormat:@"select count(buddy_id) from buddylist where account_id=%@ and buddy_name='%@' ", accountNo, buddy.escapeForSql];
+    
+    [self executeScalar:query withCompletion:^(NSObject *value) {
+        
+        NSNumber* count=(NSNumber*)value;
+        BOOL toreturn=NO;
+        if(count!=nil)
+        {
+            NSInteger val=[count integerValue];
+            if(val>0) {
+                toreturn= YES;
+            }
+            
+        }
+        if(completion)
+        {
+            completion(toreturn);
+        }
+    }];
+}
+
 
 -(void) isBuddyOnline:(NSString*) buddy forAccount:(NSString*) accountNo withCompletion: (void (^)(BOOL))completion
 {
@@ -1288,32 +1224,6 @@ static DataLayer *sharedInstance=nil;
 }
 
 
-#pragma mark icon Commands
-
-
--(BOOL) setIconName:(NSString*) icon forBuddy:(NSString*) buddy inAccount:(NSString*) accountNo
-{
-    
-    NSString* query=[NSString stringWithFormat:@"update buddylist set filename='%@',dirty=1 where account_id=%@ and  buddy_name='%@';",icon, accountNo, buddy.escapeForSql];
-    if([self executeNonQuery:query]!=NO)
-    {
-        return YES;
-    }
-    else
-    {
-        return NO;
-    }
-}
-
--(NSString*) iconName:(NSString*) buddy forAccount:(NSString*) accountNo;
-{
-    NSString* query=[NSString stringWithFormat:@"select filename from  buddylist where account_id=%@ and buddy_name='%@'", accountNo, buddy.escapeForSql];
-    NSString* iconname= (NSString*)[self executeScalar:query];
-    return iconname;
-}
-
-
-
 
 
 #pragma mark message Commands
@@ -1325,39 +1235,78 @@ static DataLayer *sharedInstance=nil;
     return messageArray;
 }
 
--(BOOL) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom delivered:(BOOL) delivered unread:(BOOL) unread
+-(void) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom delivered:(BOOL) delivered unread:(BOOL) unread serverMessageId:(NSString *) messageid andOverrideDate:(NSDate *) messageDate withCompletion: (void (^)(BOOL))completion
 {
-    //this is always from a contact
-    NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
-    [formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
-    NSDate* sourceDate=[NSDate date];
+    [self hasMessageForId:messageid toContact:actualfrom onAccount:accountNo andCompletion:^(BOOL exists) {
+        if(!exists)
+        {
+          
+            //this is always from a contact
+            NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
+            [formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+            NSDate* sourceDate=[NSDate date];
+            NSDate* destinationDate;
+            if(messageDate) {
+                //already GMT no need for conversion
+                
+                destinationDate= messageDate;
+                [formatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+            }
+            else {
+                
+                NSTimeZone* sourceTimeZone = [NSTimeZone systemTimeZone];
+                NSTimeZone* destinationTimeZone = [NSTimeZone timeZoneWithAbbreviation:@"GMT"];
+                
+                NSInteger sourceGMTOffset = [sourceTimeZone secondsFromGMTForDate:sourceDate];
+                NSInteger destinationGMTOffset = [destinationTimeZone secondsFromGMTForDate:sourceDate];
+                NSTimeInterval interval = destinationGMTOffset - sourceGMTOffset;
+                
+                destinationDate = [[NSDate alloc] initWithTimeInterval:interval sinceDate:sourceDate];
+            }
+            // note: if it isnt the same day we want to show the full  day
+            
+            NSString* dateString = [formatter stringFromDate:destinationDate];
+            
+            // in the event it is a message from the room
+            
+            //all messages default to unread
+            NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, %@, '%@',  '%@', '%@', '%@', '%@',%d,%d,'%@');", accountNo, from.escapeForSql, to.escapeForSql, 	dateString, message.escapeForSql, actualfrom.escapeForSql,unread, delivered, messageid.escapeForSql];
+            DDLogVerbose(@"%@",query);
+            [self executeNonQuery:query withCompletion:^(BOOL success) {
+                
+                if(!success)
+                {
+                    DDLogError(@"failed to insert ");
+                }
+                
+                if(completion)
+                {
+                    completion(success);
+                }
+            }];
+        }
+        
+    }];
     
-    NSTimeZone* sourceTimeZone = [NSTimeZone systemTimeZone];
-    NSTimeZone* destinationTimeZone = [NSTimeZone timeZoneWithAbbreviation:@"GMT"];
+}
+
+-(void) hasMessageForId:(NSString*) messageid toContact:(NSString *) contact onAccount:(NSString *) accountNo andCompletion: (void (^)(BOOL))completion
+{
+    NSString* query=[NSString stringWithFormat:@"select messageid from  message_history where account_id=%@ and message_from='%@' and messageid='%@' limit 1", accountNo, contact.escapeForSql, messageid.escapeForSql];
     
-    NSInteger sourceGMTOffset = [sourceTimeZone secondsFromGMTForDate:sourceDate];
-    NSInteger destinationGMTOffset = [destinationTimeZone secondsFromGMTForDate:sourceDate];
-    NSTimeInterval interval = destinationGMTOffset - sourceGMTOffset;
-    
-    NSDate* destinationDate = [[NSDate alloc] initWithTimeInterval:interval sinceDate:sourceDate];
-    
-    // note: if it isnt the same day we want to show the full  day
-    
-    NSString* dateString = [formatter stringFromDate:destinationDate];
-    // in the event it is a message from the room
-    
-    //all messages default to unread
-    NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, %@, '%@',  '%@', '%@', '%@', '%@',%d,%d,'');", accountNo, from.escapeForSql, to.escapeForSql, 	dateString, message.escapeForSql, actualfrom.escapeForSql,unread, delivered];
-    DDLogVerbose(@"%@",query);
-    if([self executeNonQuery:query]!=NO)
-    {
-        return YES;
-    }
-    else
-    {
-        DDLogError(@"failed to insert ");
-        return NO;
-    }
+    [self executeScalar:query withCompletion:^(NSObject* result) {
+        
+        BOOL exists=NO;
+        if(result)
+        {
+            exists=YES;
+        }
+        
+        if(completion)
+        {
+            completion(exists);
+        }
+    }];
     
 }
 
@@ -1371,32 +1320,19 @@ static DataLayer *sharedInstance=nil;
 
 
 
--(BOOL) clearMessages:(NSString*) accountNo
+-(void) clearMessages:(NSString*) accountNo
 {
     NSString* query=[NSString stringWithFormat:@"delete from message_history where account_id=%@", accountNo];
-    if([self executeNonQuery:query]!=NO)
-    {
-        return YES;
-    }
-    else
-    {
-        return NO;
-    }
+    [self executeNonQuery:query withCompletion:nil];
 }
 
 
 
--(BOOL) deleteMessageHistory:(NSString*) messageNo
+-(void) deleteMessageHistory:(NSString*) messageNo
 {
     NSString* query=[NSString stringWithFormat:@"delete from message_history where message_history_id=%@", messageNo];
-    if([self executeNonQuery:query]!=NO)
-    {
-        return YES;
-    }
-    else
-    {
-        return NO;
-    }
+    [self executeNonQuery:query withCompletion:nil];
+
 }
 
 -(NSArray*) messageHistoryListDates:(NSString*) buddy forAccount: (NSString*) accountNo
@@ -1431,6 +1367,7 @@ static DataLayer *sharedInstance=nil;
     } else return nil;
     
 }
+
 
 -(NSArray*) messageHistoryDate:(NSString*) buddy forAccount:(NSString*) accountNo forDate:(NSString*) date
 {
@@ -1553,7 +1490,7 @@ static DataLayer *sharedInstance=nil;
 //message history
 -(NSMutableArray*) messageHistory:(NSString*) buddy forAccount:(NSString*) accountNo
 {
-    NSString* query=[NSString stringWithFormat:@"select af, message, thetime, message_history_id, delivered, messageid from (select ifnull(actual_from, message_from) as af, message,     timestamp  as thetime, message_history_id, delivered,messageid from message_history where account_id=%@ and (message_from='%@' or message_to='%@') order by message_history_id desc limit 30) order by message_history_id asc",accountNo, buddy.escapeForSql, buddy.escapeForSql];
+    NSString* query=[NSString stringWithFormat:@"select af, message, thetime, message_history_id, delivered, messageid from (select ifnull(actual_from, message_from) as af, message,     timestamp  as thetime, message_history_id, delivered,messageid from message_history where account_id=%@ and (message_from='%@' or message_to='%@') order by message_history_id desc limit 30) order by thetime asc",accountNo, buddy.escapeForSql, buddy.escapeForSql];
     DDLogVerbose(@"%@", query);
     NSMutableArray* toReturn = [self executeReader:query];
     
@@ -1612,47 +1549,59 @@ static DataLayer *sharedInstance=nil;
     }];
 }
 
-#pragma mark active chats
--(NSArray*) activeBuddies
+
+
+-(void) lastMessageDateForContact:(NSString*) contact andAccount:(NSString*) accountNo withCompletion: (void (^)(NSDate *))completion
 {
+    NSString* query=[NSString stringWithFormat:@"select timestamp from  message_history where account_id=%@ and message_from='%@' order by timestamp desc limit 1", accountNo, contact.escapeForSql];
     
+    [self executeScalar:query withCompletion:^(NSObject* result) {
+        if(completion)
+        {
+            NSDateFormatter *dateFromatter = [[NSDateFormatter alloc] init];
+            NSLocale *enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
+            
+            [dateFromatter setLocale:enUSPOSIXLocale];
+            [dateFromatter setDateFormat:@"yyyy'-'MM'-'dd HH':'mm':'ss"];
+            [dateFromatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+            
+            NSDate *datetoReturn =[dateFromatter dateFromString:(NSString *)result];
+            
+            completion(datetoReturn);
+        }
+    }];
+}
+
+#pragma mark active chats
+-(void) activeContactsWithCompletion: (void (^)(NSMutableArray *))completion
+{
     NSString* query=[NSString stringWithFormat:@"select X.*, 0 as 'count' from (select distinct a.buddy_name,state,status,filename, ifnull(b.full_name, a.buddy_name) as full_name, a.account_id from activechats as a left outer  join buddylist as b on a.buddy_name=b.buddy_name and a.account_id=b.account_id ) as X left outer join (select account_id, message_from, max(timestamp) as max_time from  message_history group by account_id, message_from) as Y on X.account_id=Y.account_id and X.buddy_name=Y.message_from order by Y.max_time desc, X.full_name COLLATE NOCASE asc" ];
     //	DDLogVerbose(query);
-    NSArray* toReturn = [self executeReader:query];
+     [self executeReader:query withCompletion:^(NSMutableArray *results) {
+         if(completion) completion(results);
+     }];
     
-    if(toReturn!=nil)
-    {
-        DDLogVerbose(@" count: %d",  [toReturn count] );
-        return toReturn;
-    }
-    else
-    {
-        DDLogError(@"message history is empty or failed to read");
-        return nil;
-    }
+ 
     
 }
 
--(bool) removeActiveBuddy:(NSString*) buddyname forAccount:(NSString*) accountNo
+-(void) removeActiveBuddy:(NSString*) buddyname forAccount:(NSString*) accountNo
 {
     //mark messages as read
     [self markAsReadBuddy:buddyname forAccount:accountNo];
     
     NSString* query=[NSString stringWithFormat:@"delete from activechats where buddy_name='%@' and account_id=%@ ", buddyname.escapeForSql, accountNo ];
     //	DDLogVerbose(query);
-    BOOL result=[self executeNonQuery:query];
-    
-    return result;
+    [self executeNonQuery:query withCompletion:nil];
 }
 
--(bool) removeAllActiveBuddies
+-(void) removeAllActiveBuddies
 {
     
     NSString* query=[NSString stringWithFormat:@"delete from activechats " ];
     //	DDLogVerbose(query);
-    BOOL result=[self executeNonQuery:query];
-    return result;
-    
+   [self executeNonQuery:query withCompletion:nil];
+
 }
 
 

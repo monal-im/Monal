@@ -50,8 +50,13 @@
 -(void) viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    _tableData = [[DataLayer sharedInstance] accountList];
-    [_chatLogTable reloadData];
+    [[DataLayer sharedInstance] accountListWithCompletion:^(NSArray *result) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            _tableData=result;
+            [_chatLogTable reloadData];
+        });
+        
+    }];
 }
 
 #pragma mark tableview datasource delegate

@@ -149,12 +149,7 @@ NSString *const kGtalk = @"Gtalk";
     self.sectionArray = @[@"Account", @"Advanced Settings",@""];
     
     self.tableView.backgroundView=nil;
-    
-    if(!SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0")) {
-        [self.tableView setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"debut_dark"]]];
-    }
-    
-    
+  
     [[NSNotificationCenter defaultCenter] addObserverForName:NXOAuth2AccountStoreAccountsDidChangeNotification
                                                       object:[NXOAuth2AccountStore sharedStore]
                                                        queue:nil
@@ -311,7 +306,7 @@ NSString *const kGtalk = @"Gtalk";
     {
         [[DataLayer sharedInstance] updateAccounWithDictionary:dic andCompletion:^(BOOL result) {
             if(!isGtalk) {
-                PasswordManager* pass= [[PasswordManager alloc] init:self.accountno];
+                PasswordManager* pass= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@-%@",self.accountno,self.jid]];
                 [pass setPassword:self.password] ;
             }
             if(self.enabled)
@@ -336,13 +331,10 @@ NSString *const kGtalk = @"Gtalk";
     {
         
         NSArray *accounts= [[NXOAuth2AccountStore sharedStore] accountsWithAccountType:self.jid];
-        NXOAuth2Account *oauthAccount;
-        if([accounts count]>0)
-        {
-            oauthAccount= [accounts objectAtIndex:0];
+        for(NXOAuth2Account *oauthAccount in accounts ) {
             [[NXOAuth2AccountStore sharedStore] removeAccount:oauthAccount];
         }
-        
+       
         //TODO remove password
         self.autoSave=NO;
         [self.db removeAccount:self.accountno];

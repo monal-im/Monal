@@ -58,10 +58,19 @@
 
 -(void) refreshDisplay
 {
-    _contacts=[[DataLayer sharedInstance] activeBuddies];
-    [_chatListTable reloadData];
-    MonalAppDelegate* appDelegate= (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
-    [appDelegate updateUnread];
+    
+    [[DataLayer sharedInstance] activeContactsWithCompletion:^(NSMutableArray *cleanActive) {
+        [[MLXMPPManager sharedInstance] cleanArrayOfConnectedAccounts:cleanActive];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [[MLXMPPManager sharedInstance] cleanArrayOfConnectedAccounts:cleanActive];
+            
+            _contacts=cleanActive;
+            [_chatListTable reloadData];
+            MonalAppDelegate* appDelegate= (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
+            [appDelegate updateUnread];
+        });
+    }];
+    
 }
 
 -(void) viewWillAppear:(BOOL)animated
@@ -151,7 +160,9 @@
         });
     }];
     
-    cell.userImage.image=[[MLImageManager sharedInstance] getIconForContact:[row objectForKey:@"buddy_name"] andAccount:accountNo];
+    [[MLImageManager sharedInstance] getIconForContact:[row objectForKey:@"buddy_name"] andAccount:accountNo withCompletion:^(UIImage *image) {
+            cell.userImage.image=image;
+    }];
     [cell setOrb];
     return cell;
 }
@@ -184,13 +195,15 @@
     if (editingStyle == UITableViewCellEditingStyleDelete) {
         NSDictionary* contact= [_contacts objectAtIndex:indexPath.row];
         
-       [ [DataLayer sharedInstance] removeActiveBuddy:[contact objectForKey:@"buddy_name"] forAccount:[contact objectForKey:@"account_id"]];
-        
-   
-           _contacts=[[DataLayer sharedInstance] activeBuddies];
-        [_chatListTable deleteRowsAtIndexPaths:@[indexPath]
-                              withRowAnimation:UITableViewRowAnimationAutomatic];
-     
+        [[DataLayer sharedInstance] removeActiveBuddy:[contact objectForKey:@"buddy_name"] forAccount:[contact objectForKey:@"account_id"]];
+        [[DataLayer sharedInstance] activeContactsWithCompletion:^(NSMutableArray *cleanActive) {
+            [[MLXMPPManager sharedInstance] cleanArrayOfConnectedAccounts:cleanActive];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                _contacts=cleanActive;
+                [_chatListTable deleteRowsAtIndexPaths:@[indexPath]
+                                      withRowAnimation:UITableViewRowAnimationAutomatic];
+            });
+        }];
         
     }
 }
@@ -221,8 +234,11 @@
 //                }
 //            }
     
-        
-        chatViewController* chatVC = [[chatViewController alloc] initWithContact:[_contacts objectAtIndex:indexPath.row] ];
+    
+    UIStoryboard *storyBoard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+    chatViewController* chatVC = [storyBoard instantiateViewControllerWithIdentifier:@"chatViewController"];
+    [chatVC setupWithContact:[_contacts objectAtIndex:indexPath.row] ];
+
         [self.navigationController pushViewController:chatVC animated:YES];
         
    

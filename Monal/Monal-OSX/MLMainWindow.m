@@ -81,7 +81,10 @@
 
 -(void) handleNewMessage:(NSNotification *)notification;
 {
-    BOOL showNotification =YES;
+
+    NSNumber *showAlert =[notification.userInfo objectForKey:@"showAlert"];
+    BOOL showNotification = showAlert.boolValue;
+    
     NSUserNotification *alert =[[NSUserNotification alloc] init];
     NSString* acctString =[NSString stringWithFormat:@"%ld", (long)[[notification.userInfo objectForKey:@"accountNo"] integerValue]];
     NSString* nameToShow=[notification.userInfo objectForKey:@"from"];
@@ -114,11 +117,17 @@
             alert.soundName= NSUserNotificationDefaultSoundName;
         }
         
-        NSImage *alertImage=  [[MLImageManager sharedInstance] getIconForContact:[notification.userInfo objectForKey:@"from"] andAccount:[notification.userInfo objectForKey:@"accountNo"]];
-        alert.contentImage= alertImage;
-        alert.hasReplyButton=YES;
-        alert.userInfo= notification.userInfo;
-        [[NSUserNotificationCenter defaultUserNotificationCenter] scheduleNotification:alert];
+        [[MLImageManager sharedInstance] getIconForContact:[notification.userInfo objectForKey:@"from"] andAccount:[notification.userInfo objectForKey:@"accountNo"] withCompletion:^(NSImage *alertImage) {
+             dispatch_async(dispatch_get_main_queue(), ^{
+            alert.contentImage= alertImage;
+            alert.hasReplyButton=YES;
+            alert.userInfo= notification.userInfo;
+            [[NSUserNotificationCenter defaultUserNotificationCenter] scheduleNotification:alert];
+             });
+            
+            
+        }];
+    
     }
     
 
@@ -193,11 +202,21 @@
         {
             [[NSUserNotificationCenter defaultUserNotificationCenter] removeAllDeliveredNotifications];
         }
-        
+       
     } else {
         // occluded
+    
     }
 }
 
+- (void)windowWillClose:(NSNotification *)notification
+{
+        [[MLXMPPManager sharedInstance] setClientsInactive];
+}
+
+- (void)windowDidBecomeMain:(NSNotification *)notification
+{
+     [[MLXMPPManager sharedInstance] setClientsActive];
+}
 
 @end

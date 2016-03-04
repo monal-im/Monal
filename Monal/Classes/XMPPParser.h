@@ -46,6 +46,10 @@
  resource part of from
  */
 @property (nonatomic, strong, readonly) NSString* resource;
+
+/**
+ node id
+ */
 @property (nonatomic, strong, readonly) NSString* idval;
 
 

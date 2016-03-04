@@ -8,6 +8,7 @@
 
 #import "MLSettingCell.h"
 #import "MLXMPPManager.h"
+#import <DropboxSDK/DropboxSDK.h>
 
 @implementation MLSettingCell
 
@@ -88,7 +89,16 @@
         {
             [[MLXMPPManager sharedInstance] setVisible:_toggleSwitch.on];
         }
-  
+    else if([_defaultKey isEqualToString:@"DropBox"])
+    {
+        if (![[DBSession sharedSession] isLinked]) {
+            [[DBSession sharedSession] linkFromController:self.parent];
+        }
+        else {
+            [[DBSession sharedSession] unlinkAll];
+        }
+    }
+    
 }
 
 #pragma mark uitextfield delegate

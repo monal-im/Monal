@@ -164,35 +164,37 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 	[self.view setAlpha:.87];
 	
 	//icon
-	icon =[[UIImageView alloc] initWithFrame:CGRectMake(5, 5, 32, 32)] ;
-    icon.image=[[MLImageManager sharedInstance] getIconForContact:user andAccount:account_id];
-    [self.view addSubview:icon];
+    icon =[[UIImageView alloc] initWithFrame:CGRectMake(5, 5, 32, 32)] ;
+    [[MLImageManager sharedInstance] getIconForContact:user andAccount:account_id withCompletion:^(UIImage * image) {
+            icon.image=image;
+            [self.view addSubview:icon];
+    }];
     
-	// Title
-	titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, 5, 280, 30)] ;
-	titleLabel.font = [UIFont boldSystemFontOfSize:17];
-	titleLabel.text = title;
-	titleLabel.textAlignment = UITextAlignmentCenter;
-	titleLabel.textColor = [UIColor whiteColor];
-	titleLabel.backgroundColor = [UIColor clearColor];
-	[self.view addSubview:titleLabel];
-	
-	// Message
-	msgLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, 5, 280, 80)];
-	msgLabel.font = [UIFont systemFontOfSize:15];
-	msgLabel.text = msg;
-	msgLabel.textAlignment = UITextAlignmentCenter;
-	msgLabel.textColor = [UIColor whiteColor];
-	msgLabel.backgroundColor = [UIColor clearColor];
-	
-	if(rotate!=0)
-	{
-		CGAffineTransform transform = [self.view  transform];
-		transform = CGAffineTransformRotate(transform, rotate);
-		self.view.transform=transform;
-	}
-	
-	[self.view addSubview:msgLabel];
+    // Title
+    titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, 5, 280, 30)] ;
+    titleLabel.font = [UIFont boldSystemFontOfSize:17];
+    titleLabel.text = title;
+    titleLabel.textAlignment = UITextAlignmentCenter;
+    titleLabel.textColor = [UIColor whiteColor];
+    titleLabel.backgroundColor = [UIColor clearColor];
+    [self.view addSubview:titleLabel];
+    
+    // Message
+    msgLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, 5, 280, 80)];
+    msgLabel.font = [UIFont systemFontOfSize:15];
+    msgLabel.text = msg;
+    msgLabel.textAlignment = UITextAlignmentCenter;
+    msgLabel.textColor = [UIColor whiteColor];
+    msgLabel.backgroundColor = [UIColor clearColor];
+    
+    if(rotate!=0)
+    {
+        CGAffineTransform transform = [self.view  transform];
+        transform = CGAffineTransformRotate(transform, rotate);
+        self.view.transform=transform;
+    }
+    
+    [self.view addSubview:msgLabel];
 }
 
 - (id)initTopWithTitle:(NSString *)title message:(NSString *)msg user:(NSString*) user account:(NSString*) account_id

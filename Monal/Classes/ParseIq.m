@@ -41,11 +41,16 @@
         if([_queryXMLNS isEqualToString:@"http://jabber.org/protocol/disco#info"]) _discoInfo=YES;
         if([_queryXMLNS isEqualToString:@"http://jabber.org/protocol/disco#items"]) _discoItems=YES;
         
+        if([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"jabber:iq:roster"])  {
+            State=@"RosterQuery";
+            _roster=YES;
+        }
+        
         NSString* node =[attributeDict objectForKey:@"node"];
         if(node) _queryNode=node; 
           
      }
-    
+  
     
     if([elementName isEqualToString:@"feature"])
     {
@@ -61,9 +66,38 @@
         }
         
     }
-  
     
-    if([elementName isEqualToString:@"group"] && _roster==YES)
+    //http upload
+    
+    if([elementName isEqualToString:@"slot"])
+    {
+        _queryXMLNS=[attributeDict objectForKey:@"xmlns"];
+          State=@"slot";
+        _httpUpload =YES; 
+        return;
+    }
+    
+    if([elementName isEqualToString:@"get"] && _httpUpload)
+    {
+        State = @"slotGet";
+        return;
+    }
+    
+    if([elementName isEqualToString:@"put"] && _httpUpload)
+    {
+         State = @"slotPut";
+        return;
+    }
+    
+    //roster
+  
+    if([elementName isEqualToString:@"item"] && [State isEqualToString:@"RosterQuery"])
+    {
+        State=@"RosterItem"; // we can get item info
+    }
+    
+    
+    if([elementName isEqualToString:@"group"] && [State isEqualToString:@"RosterItem"])
     {
         State=@"RosterGroup"; // we can get group name here
     }
@@ -99,19 +133,7 @@
         [_items addObject:attributeDict];
     }
     
-    
-    
-    if([elementName isEqualToString:@"identity"])
-	{
-        if([[attributeDict objectForKey:@"category"] isEqualToString:@"conference"])
-        {
-            if([[attributeDict objectForKey:@"type"] isEqualToString:@"text"])
-            {
-            _conferenceServer=self.from;
-            }
-        }
-    }
-    
+   
     //** jingle ** /
     
     if([elementName isEqualToString:@"jingle"] &&  [[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:jingle:1"])
@@ -189,11 +211,31 @@
         return;
     }
     
+    if(([elementName isEqualToString:@"item"]) && [State isEqualToString:@"RosterItem"]
+       )
+    {
+        //we would have a group name here
+        // _photoBinValue=_messageBuffer;
+        return;
+    }
+    
     if(([elementName isEqualToString:@"group"]) && [State isEqualToString:@"RosterGroup"]
 	   )
     {
         //we would have a group name here
        // _photoBinValue=_messageBuffer;
+        return;
+    }
+    
+    if(([elementName isEqualToString:@"get"]) && _httpUpload )
+    {
+        _getURL=[_messageBuffer copy];
+        return;
+    }
+    
+    if(([elementName isEqualToString:@"put"]) && _httpUpload )
+    {
+        _putURL=[_messageBuffer copy];
         return;
     }
    

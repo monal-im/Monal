@@ -452,7 +452,13 @@ NSString * const NXOAuth2ClientConnectionContextTokenRefresh = @"tokenRefresh";
         [waitingConnections addObject:retryConnection];
     }
     if (!authConnection) {
-        NSAssert((accessToken.refreshToken != nil), @"invalid state");
+        
+       // NSAssert((accessToken.refreshToken != nil), @"invalid state");
+        if(!accessToken.refreshToken) {
+            NSLog(@"missing refresh token");
+            return; 
+        }
+        
         NSMutableURLRequest *tokenRequest = [NSMutableURLRequest requestWithURL:tokenURL];
         [tokenRequest setHTTPMethod:self.tokenRequestHTTPMethod];
         [authConnection cancel]; // not needed, but looks more clean to me :)

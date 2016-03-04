@@ -10,18 +10,17 @@
 #import <QuartzCore/QuartzCore.h>
 
 #import "DataLayer.h"
-#import "HPGrowingTextView.h"
 #import "MLConstants.h"
 #import "MLXMPPManager.h"
 #import "MLNotificationManager.h"
 #import "MLChatCell.h"
+#import "MLResizingTextView.h"
 
 
-@interface chatViewController : UIViewController <HPGrowingTextViewDelegate,UITableViewDelegate, UITableViewDataSource>
+@interface chatViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UITextViewDelegate, UINavigationControllerDelegate, UIImagePickerControllerDelegate>
 {
-
     UIView *containerView;
-    HPGrowingTextView *chatInput;
+
 	CGRect oldFrame;
 	NSString* _contactFullName;
     
@@ -29,17 +28,12 @@
 	
 	bool wasaway; 
 	bool wasoffline; 
-//    UIPageControl* pages;
     
     NSArray* activeChats;
     NSMutableArray* _messagelist;
     NSDictionary* _contact;
     
-    UITableView* _messageTable;
-    
-    UIView* _topBarView;
-    UILabel* _topName;
-    UIImageView* _topIcon;
+
     
     BOOL  _isMUC;
     
@@ -47,10 +41,26 @@
     BOOL _keyboardVisible; 
 }
 
+@property (nonatomic, weak) IBOutlet UITableView* messageTable;
+@property (nonatomic, weak) IBOutlet MLResizingTextView* chatInput;
+@property (nonatomic, weak) IBOutlet UIButton* sendButton;
+@property (nonatomic, weak) IBOutlet UIView* inputContainerView;
+@property (nonatomic, weak) IBOutlet NSLayoutConstraint* inputContainerHeight;
+@property (nonatomic, weak) IBOutlet NSLayoutConstraint* inputContainerBottom;
+
 @property (nonatomic,strong)  NSString* contactName;
 
+@property (nonatomic, weak) IBOutlet UIView* topBarView;
+@property (nonatomic, weak) IBOutlet UILabel* topName;
+@property (nonatomic, weak) IBOutlet UIImageView* topIcon;
 
--(id) initWithContact:(NSDictionary*) contact  ;
+
+-(IBAction)sendMessageText:(id)sender;
+-(IBAction)attach:(id)sender;
+
+-(IBAction)dismissKeyboard:(id)sender;
+
+-(void) setupWithContact:(NSDictionary*) contact  ;
 
 /**
  if day is specified this is a log
@@ -62,8 +72,6 @@
  */
 -(void) handleNewMessage:(NSNotification *)notification;
 -(void) addMessageto:(NSString*)to withMessage:(NSString*) message andId:(NSString *) messageId;
-
-#pragma mark gesture stuff
 
 //notification
 -(void) keyboardWillShow:(NSNotification *) note;

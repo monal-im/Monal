@@ -20,6 +20,7 @@
 @property (nonatomic, assign, readonly) BOOL roster;
 @property (nonatomic, assign, readonly) BOOL ping;
 @property (nonatomic, assign, readonly) BOOL legacyAuth;
+@property (nonatomic, assign, readonly) BOOL httpUpload;
 
 @property (nonatomic, assign, readonly) BOOL shouldSetBind;
 @property (nonatomic, strong, readonly) NSString* jid;
@@ -38,13 +39,15 @@
 @property (nonatomic, strong, readonly) NSString* photoBinValue;
 
 
+//http upload
+@property (nonatomic, strong, readonly) NSString* getURL;
+@property (nonatomic, strong, readonly) NSString* putURL;
+
 //Misc requests
 @property (nonatomic, assign, readonly) BOOL time;
 @property (nonatomic, assign, readonly) BOOL version;
 @property (nonatomic, assign, readonly) BOOL last;
 
-//discovered services
-@property (nonatomic, strong, readonly) NSString* conferenceServer;
 
 //Jingle
 @property (nonatomic, strong, readonly) NSDictionary* jingleSession;

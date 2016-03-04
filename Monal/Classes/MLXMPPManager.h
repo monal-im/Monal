@@ -79,6 +79,10 @@ Returns the server set name of the conencted account
  */
 -(NSString*) getAccountNameForConnectedRow:(NSInteger) row;
 
+/*
+ gets the connected account apecified by id. return nil otherwise
+ */
+-(xmpp*) getConnectedAccountForID:(NSString*) accountNo;
 
 /**
  Returns YES if account is connected
@@ -135,9 +139,26 @@ Returns the server set name of the conencted account
 -(void) hangupContact:(NSDictionary*) contact;
 
 /**
- Checks if there are any enabled acconts and connects them if necessary.
+Sends a message to a specified contact in account. Calls completion handler on success or failure.
  */
 -(void)sendMessage:(NSString*) message toContact:(NSString*)contact fromAccount:(NSString*) accountNo isMUC:(BOOL) isMUC messageId:(NSString *) messageId withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion;
+
+
+/**
+ uploads the selected png image Data as photo.png
+ */
+-(void)httpUploadPngData:(NSData*) fileData   toContact:(NSString*)contact onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(NSString *url,  NSError *error)) completion;
+
+/**
+ opens file and attempts to upload it
+ */
+-(void)httpUploadFileURL:(NSURL*) fileURL  toContact:(NSString*)contact onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(NSString *url,  NSError *error)) completion;
+
+/**
+Attempts to upload a file to the  HTTP upload service
+ */
+-(void)httpUploadData:(NSData *)data withFilename:(NSString*) filename andType:(NSString*)contentType  toContact:(NSString*)contact onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(NSString *url,  NSError *error)) completion;
+
 
 #pragma mark XMPP settings
 
@@ -171,6 +192,20 @@ Returns the server set name of the conencted account
  */
 -(void) handleSentMessage:(NSNotification *)notification;
 
+/**
+ updtes client state on server as inactive
+ */
+-(void) setClientsInactive;
 
+/**
+ sets client state on server as active
+ */
+-(void) setClientsActive;
+
+
+/**
+ Iterates through set and compares with connected accounts. Removes them. useful for active chat. 
+ */
+-(void) cleanArrayOfConnectedAccounts:(NSMutableArray *) dirtySet;
 
 @end

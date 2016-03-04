@@ -37,6 +37,11 @@
  */
 -(void) setPing;
 
+/**
+ makes iq for mam query since a date and time for jid. If no date is provided, will query all. If no jid is provided it will query all
+ */
+-(void) setMAMQueryFromStart:(NSDate *) startDate toDate:(NSDate *) endDate  andJid:(NSString *)jid;
+
 #pragma mark disco
 /**
  makes a disco info response for the server.
@@ -85,6 +90,12 @@ removes a contact from the roster
  sends last seconds as 0 since if we are responding we arent away. Migth want to add a timer for away in the future. 
  */
 -(void) setLast;
+
+
+/**
+ sets up an iq that requests a http upload slot
+ */
+-(void) httpUploadforFile:(NSString *) file ofSize:(NSNumber *) filesize andContentType:(NSString *) contentType;
 
 
 #pragma mark MUC

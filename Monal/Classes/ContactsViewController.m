@@ -51,14 +51,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     self.view=_contactsTable;
     
-    // =nil;
-    if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0"))
-    {
-        self.view.backgroundColor =[UIColor whiteColor];
-    }
-    else{
-        [_contactsTable.backgroundView setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"debut_dark"]]];
-    }
+    self.view.backgroundColor =[UIColor whiteColor];
+  
     
     _contacts=[[NSMutableArray alloc] init] ;
     _offlineContacts=[[NSMutableArray alloc] init] ;
@@ -111,28 +105,35 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     if(![[NSUserDefaults standardUserDefaults] boolForKey:@"hasSeenSelfSignedMessage"])
     {
     //if there are enabed accounts and alert hasnt been shown
-    NSArray* accountList=[[DataLayer sharedInstance] accountList];
-    int count=0;
-    for (NSDictionary* account in accountList)
-    {
-        if([[account objectForKey:@"enabled"] boolValue]==YES)
-        {
-            count++;
-        }
-    }
-    
-    if(count>0)
-    {
-        UIAlertView *addError = [[UIAlertView alloc]
-								 initWithTitle:@"Changes to SSL"
-								 message:@"Monal has changed the way it treats self signed SSL certificates. If you already had an account created and your server uses a self signed SSL certificate, please go to accounts and explicity set the account to allow self signed SSL. This is a new option."
-								 delegate:self cancelButtonTitle:@"Close"
-								 otherButtonTitles: nil] ;
-		[addError show];
-
-    }
+  
         
-     [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"hasSeenSelfSignedMessage"];
+        [[DataLayer sharedInstance] accountListWithCompletion:^(NSArray *result) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                 NSArray* accountList=result;
+                int count=0;
+                for (NSDictionary* account in accountList)
+                {
+                    if([[account objectForKey:@"enabled"] boolValue]==YES)
+                    {
+                        count++;
+                    }
+                }
+                
+                if(count>0)
+                {
+                    UIAlertView *addError = [[UIAlertView alloc]
+                                             initWithTitle:@"Changes to SSL"
+                                             message:@"Monal has changed the way it treats self signed SSL certificates. If you already had an account created and your server uses a self signed SSL certificate, please go to accounts and explicity set the account to allow self signed SSL. This is a new option."
+                                             delegate:self cancelButtonTitle:@"Close"
+                                             otherButtonTitles: nil] ;
+                    [addError show];
+                    
+                }
+            });
+            
+        }];
+        
+        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"hasSeenSelfSignedMessage"];
     }
 }
 
@@ -301,6 +302,38 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
 }
 
+-(void)updateContactAt:(NSInteger) pos withInfo:(NSDictionary *) user
+{
+    NSMutableDictionary *contactrow =[_contacts objectAtIndex:pos];
+    BOOL hasChange=NO;
+    
+    if([user objectForKey:kstateKey] && ![[user objectForKey:kstateKey] isEqualToString:[contactrow  objectForKey:kstateKey]] ) {
+        [contactrow setObject:[user objectForKey:kstateKey] forKey:kstateKey];
+        hasChange=YES;
+    }
+    if([user objectForKey:kstatusKey] && ![[user objectForKey:kstatusKey] isEqualToString:[contactrow  objectForKey:kstatusKey]] ) {
+        [contactrow setObject:[user objectForKey:kstatusKey] forKey:kstatusKey];
+        hasChange=YES;
+    }
+    
+    if([user objectForKey:kfullNameKey] && ![[user objectForKey:kfullNameKey] isEqualToString:[contactrow  objectForKey:kfullNameKey]]  &&
+       [[user objectForKey:kfullNameKey] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].length>0) {
+        [contactrow setObject:[user objectForKey:kfullNameKey] forKey:@"full_name"];
+        hasChange=YES;
+    } 
+    
+    if(hasChange) {
+    
+        [_contactsTable beginUpdates];
+        NSIndexPath *path1 = [NSIndexPath indexPathForRow:pos inSection:konlineSection];
+        [_contactsTable reloadRowsAtIndexPaths:@[path1]
+                              withRowAnimation:UITableViewRowAnimationNone];
+        [_contactsTable endUpdates];
+    } else  {
+        
+    }
+}
+
 
 -(void) addOnlineUser:(NSDictionary*) user
 {
@@ -313,92 +346,92 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     {
         return;
     }
-    //insert into tableview
-    // for now just online
-    [[DataLayer sharedInstance] contactForUsername:[user objectForKey:kusernameKey] forAccount:[user objectForKey:kaccountNoKey] withCompletion:^(NSArray * contactRow) {
-        
-        //mutex to prevent others from modifying contacts at the same time
-        dispatch_async(dispatch_get_main_queue(),
-                       ^{
-                           //check if already there
-                           NSInteger pos=-1;
-                           NSInteger offlinepos=-1;
-                           pos=[self positionOfOnlineContact:user];
-                           
-                           if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
-                           {
-                               offlinepos =[self positionOfOfflineContact:user];
-                               if(offlinepos>=0 && offlinepos<[_offlineContacts count])
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSInteger initalPos=-1;
+        initalPos=[self positionOfOnlineContact:user];
+        if(initalPos>=0)
+        {
+            DDLogVerbose(@"user %@ already in list updating status and nothing else",[user objectForKey:kusernameKey]);
+            
+           [self updateContactAt:initalPos withInfo:user];
+
+        }
+        else
+        {
+            
+        //insert into tableview
+        // for now just online
+        [[DataLayer sharedInstance] contactForUsername:[user objectForKey:kusernameKey] forAccount:[user objectForKey:kaccountNoKey] withCompletion:^(NSArray * contactRow) {
+            
+            //mutex to prevent others from modifying contacts at the same time
+            dispatch_async(dispatch_get_main_queue(),
+                           ^{
+                               //check if already there
+                               NSInteger pos=-1;
+                               NSInteger offlinepos=-1;
+                               pos=[self positionOfOnlineContact:user];
+                               
+                               if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
                                {
-                                   DDLogVerbose(@"removed from offline");
-                                   
-                                   [_offlineContacts removeObjectAtIndex:offlinepos];
-                                   [_contactsTable beginUpdates];
-                                   NSIndexPath *path2 = [NSIndexPath indexPathForRow:offlinepos inSection:kofflineSection];
-                                   [_contactsTable deleteRowsAtIndexPaths:@[path2]
-                                                         withRowAnimation:UITableViewRowAnimationFade];
-                                    [_contactsTable endUpdates];
+                                   offlinepos =[self positionOfOfflineContact:user];
+                                   if(offlinepos>=0 && offlinepos<[_offlineContacts count])
+                                   {
+                                       DDLogVerbose(@"removed from offline");
+                                       
+                                       [_offlineContacts removeObjectAtIndex:offlinepos];
+                                       [_contactsTable beginUpdates];
+                                       NSIndexPath *path2 = [NSIndexPath indexPathForRow:offlinepos inSection:kofflineSection];
+                                       [_contactsTable deleteRowsAtIndexPaths:@[path2]
+                                                             withRowAnimation:UITableViewRowAnimationFade];
+                                       [_contactsTable endUpdates];
+                                   }
                                }
-                           }
-                           
-                           //not already in online list
-                           if(pos<0)
-                           {
-                               if(!(contactRow.count>=1))
+                             
+                               
+                               //not already in online list
+                               if(pos<0)
                                {
-                                   DDLogError(@"ERROR:could not find contact row");
-                                   return;
-                               }
-                               //insert into datasource
-                               DDLogVerbose(@"inserted into contacts");
-                               [_contacts insertObject:[contactRow objectAtIndex:0] atIndex:0];
-                               
-                               //sort
-                               NSSortDescriptor *descriptor = [[NSSortDescriptor alloc] initWithKey:@"buddy_name"  ascending:YES];
-                               NSArray* sortArray =[NSArray arrayWithObjects:descriptor,nil];
-                               [_contacts sortUsingDescriptors:sortArray];
-                               
-                               //find where it is
-                               NSInteger newpos=[self positionOfOnlineContact:user];
-                               
-                               DDLogVerbose(@"sorted contacts %@", _contacts);
-                               
-                               DDLogVerbose(@"inserting %@ st sorted  pos %d", [_contacts objectAtIndex:newpos], newpos);
-                               
-                               
-                               [_contactsTable beginUpdates];
-                               
-                               NSIndexPath *path1 = [NSIndexPath indexPathForRow:newpos inSection:konlineSection];
-                               [_contactsTable insertRowsAtIndexPaths:@[path1]
-                                                     withRowAnimation:UITableViewRowAnimationAutomatic];
-                               
-                               [_contactsTable endUpdates];
-                               
-                               
-                           }else
-                           {
-                               DDLogVerbose(@"user %@ already in list updating status",[user objectForKey:kusernameKey]);
-                               if(pos<self.contacts.count) {
-                                   if([user objectForKey:kstateKey])
-                                       [[_contacts objectAtIndex:pos] setObject:[user objectForKey:kstateKey] forKey:kstateKey];
-                                   if([user objectForKey:kstatusKey])
-                                       [[_contacts objectAtIndex:pos] setObject:[user objectForKey:kstatusKey] forKey:kstatusKey];
+                                   if(!(contactRow.count>=1))
+                                   {
+                                       DDLogError(@"ERROR:could not find contact row");
+                                       return;
+                                   }
+                                   //insert into datasource
+                                   DDLogVerbose(@"inserted into contacts");
+                                   [_contacts insertObject:[contactRow objectAtIndex:0] atIndex:0];
                                    
-                                   if([user objectForKey:kfullNameKey])
-                                       [[_contacts objectAtIndex:pos] setObject:[user objectForKey:kfullNameKey] forKey:@"full_name"];
+                                   //sort
+                                   NSSortDescriptor *descriptor = [[NSSortDescriptor alloc] initWithKey:@"buddy_name"  ascending:YES];
+                                   NSArray* sortArray =[NSArray arrayWithObjects:descriptor,nil];
+                                   [_contacts sortUsingDescriptors:sortArray];
+                                   
+                                   //find where it is
+                                   NSInteger newpos=[self positionOfOnlineContact:user];
+                                   
+                                   DDLogVerbose(@"sorted contacts %@", _contacts);
+                                   
+                                   DDLogVerbose(@"inserting %@ st sorted  pos %d", [_contacts objectAtIndex:newpos], newpos);
+                                   
                                    
                                    [_contactsTable beginUpdates];
-                                   NSIndexPath *path1 = [NSIndexPath indexPathForRow:pos inSection:konlineSection];
-                                   [_contactsTable reloadRowsAtIndexPaths:@[path1]
-                                                         withRowAnimation:UITableViewRowAnimationNone];
+                                   
+                                   NSIndexPath *path1 = [NSIndexPath indexPathForRow:newpos inSection:konlineSection];
+                                   [_contactsTable insertRowsAtIndexPaths:@[path1]
+                                                         withRowAnimation:UITableViewRowAnimationAutomatic];
+                                   
                                    [_contactsTable endUpdates];
                                    
+                                   
+                               }else
+                               {
+                                   DDLogVerbose(@"user %@ already in list updating status",[user objectForKey:kusernameKey]);
+                                    [self updateContactAt:pos withInfo:user];
                                }
-                               
-                           }
-                       });
-    }];
-    
+                           });
+        }];
+        }
+    });
     
 }
 
@@ -527,13 +560,33 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     
     if([[NSUserDefaults standardUserDefaults] boolForKey:@"SortContacts"]) //sort by status
-        _contacts=[NSMutableArray arrayWithArray:[[DataLayer sharedInstance] onlineContactsSortedBy:@"Status"]];
-    else
-        _contacts=[NSMutableArray arrayWithArray:[[DataLayer sharedInstance] onlineContactsSortedBy:@"Name"]];
-    
+    {
+        [[DataLayer sharedInstance] onlineContactsSortedBy:@"Status" withCompeltion:^(NSMutableArray *results) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                _contacts= results;
+                [self.contactsTable reloadData];
+            });
+        }];
+    }
+    else {
+        [[DataLayer sharedInstance] onlineContactsSortedBy:@"Name" withCompeltion:^(NSMutableArray *results) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                _contacts= results;
+                [self.contactsTable reloadData];
+            });
+        }];
+    }
+
+
     if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
     {
-    _offlineContacts=[NSMutableArray arrayWithArray:[[DataLayer sharedInstance] offlineContacts]];
+        [[DataLayer sharedInstance] offlineContactsWithCompeltion:^(NSMutableArray *results) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                _offlineContacts= results;
+                [self.contactsTable reloadData];
+            });
+        }];
+
     }
     
     if(self.searchResults.count==0)
@@ -546,7 +599,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) handleNewMessage:(NSNotification *)notification
 {
-    if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
+    NSNumber *showAlert =[notification.userInfo objectForKey:@"showAlert"];
+    
+    if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground || !showAlert.boolValue)
     {
         return;
     }
@@ -609,9 +664,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) presentChatWithRow:(NSDictionary *)row
 {
     //make chat view
-    chatViewController* chatVC = [[chatViewController alloc] initWithContact:row ];
+    UIStoryboard *storyBoard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+    chatViewController* chatVC = [storyBoard instantiateViewControllerWithIdentifier:@"chatViewController"];
+    [chatVC setupWithContact:row];
     
-
     if([[self.currentNavController topViewController] isKindOfClass:[chatViewController class]])
     {
         chatViewController* currentTop=(chatViewController*)[self.currentNavController topViewController];
@@ -758,6 +814,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     {
         cell =[[MLContactCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"ContactCell"];
     }
+    
+    cell.count=0;
+    cell.userImage.image=nil; 
 
     NSDictionary* row =nil;
  
@@ -834,7 +893,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
            cell.count=[unread integerValue];
        });
    }];
-    cell.userImage.image=[[MLImageManager sharedInstance] getIconForContact:[row objectForKey:@"buddy_name"] andAccount:accountNo];
+
+    
+    [[MLImageManager sharedInstance] getIconForContact:[row objectForKey:@"buddy_name"] andAccount:accountNo withCompletion:^(UIImage *image) {
+            cell.userImage.image=image;
+    }];
     
     [cell setOrb];
     
@@ -971,8 +1034,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    [tableView deselectRowAtIndexPath:indexPath animated:NO];
-    
     NSMutableDictionary* row;
     if(tableView ==self.view) {
     if(indexPath.section==kinfoSection)
@@ -998,13 +1059,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
     [self presentChatWithRow:row];
     
-    [tableView beginUpdates];
-    [tableView reloadRowsAtIndexPaths:@[indexPath]
-                     withRowAnimation:UITableViewRowAnimationNone];
-    [tableView endUpdates];
-    
     _lastSelectedUser=row;
-    
     
 }
 

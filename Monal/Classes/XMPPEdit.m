@@ -306,7 +306,7 @@ NSString *const kGtalk = @"Gtalk";
     {
         [[DataLayer sharedInstance] updateAccounWithDictionary:dic andCompletion:^(BOOL result) {
             if(!isGtalk) {
-                PasswordManager* pass= [[PasswordManager alloc] init:self.accountno];
+                PasswordManager* pass= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@-%@",self.accountno,self.jid]];
                 [pass setPassword:self.password] ;
             }
             if(self.enabled)

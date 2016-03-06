@@ -1125,13 +1125,13 @@ Gw
                             <progressIndicator wantsLayer="YES" maxValue="100" displayedWhenStopped="NO" controlSize="small" style="bar" translatesAutoresizingMaskIntoConstraints="NO" id="VSu-xb-ucW">
                                 <rect key="frame" x="0.0" y="101" width="493" height="12"/>
                             </progressIndicator>
-                            <scrollView borderType="none" autohidesScrollers="YES" horizontalLineScroll="45" horizontalPageScroll="10" verticalLineScroll="45" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="eNE-em-qs3">
+                            <scrollView borderType="none" autohidesScrollers="YES" horizontalLineScroll="58" horizontalPageScroll="10" verticalLineScroll="58" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="eNE-em-qs3">
                                 <rect key="frame" x="0.0" y="113" width="493" height="384"/>
                                 <clipView key="contentView" id="hQs-06-XXl">
                                     <rect key="frame" x="1" y="17" width="238" height="117"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
-                                        <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" selectionHighlightStyle="none" columnReordering="NO" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" typeSelect="NO" rowHeight="43" rowSizeStyle="automatic" viewBased="YES" id="Rsm-HI-GDG">
+                                        <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" selectionHighlightStyle="none" columnReordering="NO" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" typeSelect="NO" rowHeight="56" rowSizeStyle="automatic" viewBased="YES" id="Rsm-HI-GDG">
                                             <rect key="frame" x="0.0" y="0.0" width="493" height="0.0"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <size key="intercellSpacing" width="3" height="2"/>
@@ -1206,20 +1206,20 @@ Gw
                                                             </connections>
                                                         </tableCellView>
                                                         <tableCellView identifier="OutboundTextCell" id="zUs-Dd-GH1" userLabel="Chat View out Cell" customClass="MLChatViewCell">
-                                                            <rect key="frame" x="1" y="46" width="490" height="43"/>
+                                                            <rect key="frame" x="1" y="46" width="490" height="56"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
                                                                 <scrollView borderType="none" horizontalLineScroll="0.0" horizontalPageScroll="0.0" verticalLineScroll="0.0" verticalPageScroll="0.0" hasHorizontalScroller="NO" hasVerticalScroller="NO" usesPredominantAxisScrolling="NO" horizontalScrollElasticity="none" verticalScrollElasticity="none" translatesAutoresizingMaskIntoConstraints="NO" id="c4f-GC-Hfe" customClass="MLDisabledScrollView">
-                                                                    <rect key="frame" x="188" y="5" width="282" height="33"/>
+                                                                    <rect key="frame" x="188" y="5" width="282" height="22"/>
                                                                     <clipView key="contentView" drawsBackground="NO" copiesOnScroll="NO" id="pih-Cv-hex">
-                                                                        <rect key="frame" x="0.0" y="0.0" width="282" height="33"/>
+                                                                        <rect key="frame" x="0.0" y="0.0" width="282" height="22"/>
                                                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                         <subviews>
                                                                             <textView editable="NO" drawsBackground="NO" importsGraphics="NO" findStyle="panel" verticallyResizable="YES" allowsNonContiguousLayout="YES" quoteSubstitution="YES" linkDetection="YES" dataDetection="YES" dashSubstitution="YES" textReplacement="YES" id="gBQ-7e-nXQ">
-                                                                                <rect key="frame" x="0.0" y="0.0" width="282" height="33"/>
+                                                                                <rect key="frame" x="0.0" y="0.0" width="282" height="22"/>
                                                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                                 <color key="backgroundColor" red="0.090196078430000007" green="0.46274509800000002" blue="0.99215686270000003" alpha="1" colorSpace="calibratedRGB"/>
-                                                                                <size key="minSize" width="282" height="33"/>
+                                                                                <size key="minSize" width="282" height="22"/>
                                                                                 <size key="maxSize" width="493" height="10000000"/>
                                                                                 <attributedString key="textStorage">
                                                                                     <fragment content="outbound">
@@ -1230,7 +1230,7 @@ Gw
                                                                                     </fragment>
                                                                                 </attributedString>
                                                                                 <color key="insertionPointColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                                                                <size key="minSize" width="282" height="33"/>
+                                                                                <size key="minSize" width="282" height="22"/>
                                                                                 <size key="maxSize" width="493" height="10000000"/>
                                                                             </textView>
                                                                         </subviews>
@@ -1249,7 +1249,7 @@ Gw
                                                                     </scroller>
                                                                 </scrollView>
                                                                 <button hidden="YES" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="lsM-YA-awl">
-                                                                    <rect key="frame" x="159" y="11" width="21" height="21"/>
+                                                                    <rect key="frame" x="159" y="3" width="21" height="21"/>
                                                                     <constraints>
                                                                         <constraint firstAttribute="width" constant="21" id="KDN-nO-9IU"/>
                                                                         <constraint firstAttribute="height" constant="21" id="XJT-2q-M1Q"/>
@@ -1262,14 +1262,28 @@ Gw
                                                                         <action selector="deliveryFailedMessage:" target="qLp-oS-WKI" id="4tu-cb-k9K"/>
                                                                     </connections>
                                                                 </button>
+                                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Zna-XK-R5x">
+                                                                    <rect key="frame" x="193" y="37" width="104" height="14"/>
+                                                                    <constraints>
+                                                                        <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="0yg-9t-FBZ"/>
+                                                                        <constraint firstAttribute="height" constant="14" id="Qdf-jg-DDP"/>
+                                                                    </constraints>
+                                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Today, 10:00PM" id="rFV-cu-Sps">
+                                                                        <font key="font" metaFont="smallSystem"/>
+                                                                        <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
+                                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                                    </textFieldCell>
+                                                                </textField>
                                                             </subviews>
                                                             <constraints>
                                                                 <constraint firstAttribute="bottom" secondItem="c4f-GC-Hfe" secondAttribute="bottom" constant="5" id="1rQ-Xm-rtv"/>
                                                                 <constraint firstAttribute="trailing" secondItem="c4f-GC-Hfe" secondAttribute="trailing" constant="20" id="2IQ-hR-giE"/>
+                                                                <constraint firstItem="c4f-GC-Hfe" firstAttribute="top" secondItem="Zna-XK-R5x" secondAttribute="bottom" constant="10" id="An4-l7-Hev"/>
+                                                                <constraint firstItem="Zna-XK-R5x" firstAttribute="top" secondItem="zUs-Dd-GH1" secondAttribute="top" constant="5" id="ERE-Fb-PO9"/>
+                                                                <constraint firstItem="Zna-XK-R5x" firstAttribute="centerX" secondItem="zUs-Dd-GH1" secondAttribute="centerX" id="IY1-r5-sgL"/>
                                                                 <constraint firstItem="c4f-GC-Hfe" firstAttribute="leading" secondItem="lsM-YA-awl" secondAttribute="trailing" constant="8" id="Jh5-m5-id3"/>
                                                                 <constraint firstItem="lsM-YA-awl" firstAttribute="leading" secondItem="zUs-Dd-GH1" secondAttribute="leading" constant="159" id="cN9-UB-Ue7"/>
-                                                                <constraint firstItem="c4f-GC-Hfe" firstAttribute="top" secondItem="zUs-Dd-GH1" secondAttribute="top" constant="5" id="e6s-HW-xYq"/>
-                                                                <constraint firstItem="lsM-YA-awl" firstAttribute="centerY" secondItem="zUs-Dd-GH1" secondAttribute="centerY" id="eBg-PO-smh"/>
+                                                                <constraint firstItem="lsM-YA-awl" firstAttribute="centerY" secondItem="zUs-Dd-GH1" secondAttribute="centerY" constant="14.5" id="eBg-PO-smh"/>
                                                             </constraints>
                                                             <connections>
                                                                 <outlet property="messageText" destination="gBQ-7e-nXQ" id="SFc-ts-FwH"/>

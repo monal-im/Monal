@@ -9,7 +9,8 @@
 #import <Cocoa/Cocoa.h>
 
 #define kCellMax 282
-#define kCellMinHeight 33
+#define kCellMinHeight 50
+#define kCellTimeLabelHeightAndOffset 25
 
 @interface MLChatViewCell : NSTableCellView
 

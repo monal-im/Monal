@@ -574,7 +574,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         return  kCellMinHeight;
     }
     else {
-        return rect.size.height+5.0+5.0;
+        return rect.size.height+kCellTimeLabelHeightAndOffset+5;
     
     }
 }

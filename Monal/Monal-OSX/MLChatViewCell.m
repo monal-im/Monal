@@ -19,7 +19,7 @@
     NSDictionary *attributes = @{NSFontAttributeName: [NSFont systemFontOfSize:13.0f]};
     NSSize size = NSMakeSize(kCellMax-(kdefaultPadding*2), MAXFLOAT);
     CGRect rect = [messageString boundingRectWithSize:size options:NSLineBreakByWordWrapping | NSStringDrawingUsesLineFragmentOrigin attributes:attributes];
-    rect.size.height+=10; 
+    rect.size.height+=15;
     return rect;
     
 }
@@ -73,8 +73,8 @@
         }
     }
     
-    bubbleFrame.origin.y+=5;
-    bubbleFrame.size.height-=10;
+    bubbleFrame.origin.y=0;
+    bubbleFrame.size.height-=kCellTimeLabelHeightAndOffset;
     
     NSBezierPath *bezierPath= [NSBezierPath bezierPathWithRoundedRect:bubbleFrame xRadius:5.0 yRadius:5.0];
     

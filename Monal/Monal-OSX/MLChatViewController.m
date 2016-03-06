@@ -554,7 +554,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     cell.messageText.string =[messageRow objectForKey:@"message"];
     [cell.messageText checkTextInDocument:nil];
     cell.messageText.editable=NO;
-    cell.timeStamp.stringValue =[self formattedDateWithSource:[messageRow objectForKey:@"thetime"]];
+  
+    cell.toolTip=[self formattedDateWithSource:[messageRow objectForKey:@"thetime"]];
+    //cell.timeStamp.stringValue =[self formattedDateWithSource:[messageRow objectForKey:@"thetime"]];
     
     [cell updateDisplay];   
     

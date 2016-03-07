@@ -1288,6 +1288,7 @@ Gw
                                                             <connections>
                                                                 <outlet property="messageText" destination="gBQ-7e-nXQ" id="SFc-ts-FwH"/>
                                                                 <outlet property="retry" destination="lsM-YA-awl" id="RE2-Fb-X4p"/>
+                                                                <outlet property="timeStamp" destination="Zna-XK-R5x" id="M1K-wV-qMS"/>
                                                             </connections>
                                                         </tableCellView>
                                                     </prototypeCellViews>

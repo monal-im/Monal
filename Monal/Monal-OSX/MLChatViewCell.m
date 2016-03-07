@@ -19,7 +19,7 @@
     NSDictionary *attributes = @{NSFontAttributeName: [NSFont systemFontOfSize:13.0f]};
     NSSize size = NSMakeSize(kCellMax-(kdefaultPadding*2), MAXFLOAT);
     CGRect rect = [messageString boundingRectWithSize:size options:NSLineBreakByWordWrapping | NSStringDrawingUsesLineFragmentOrigin attributes:attributes];
-    rect.size.height+=15;
+    rect.size.height+=20;
     return rect;
     
 }

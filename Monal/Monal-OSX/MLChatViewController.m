@@ -565,7 +565,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     {
         NSDate *previousTime=[self.sourceDateFormat dateFromString:[previousMessage objectForKey:@"thetime"]];
         NSDate *currenTime=[self.sourceDateFormat dateFromString:[messageRow objectForKey:@"thetime"]];
-        if([currenTime timeIntervalSinceDate:previousTime]>=60){
+        if([currenTime timeIntervalSinceDate:previousTime]>=60*60){
             showTime=YES;
         }
         

@@ -1207,9 +1207,8 @@ Gw
                                                                     </textFieldCell>
                                                                 </textField>
                                                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="1Jj-Uz-3W8">
-                                                                    <rect key="frame" x="193" y="39" width="104" height="14"/>
+                                                                    <rect key="frame" x="193" y="37" width="104" height="14"/>
                                                                     <constraints>
-                                                                        <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="14" id="4Pg-KW-Myx"/>
                                                                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="8k4-Ai-1AJ"/>
                                                                         <constraint firstAttribute="height" constant="14" id="U4S-jL-pcz"/>
                                                                     </constraints>
@@ -1224,10 +1223,10 @@ Gw
                                                                 <constraint firstItem="NpM-vt-K6J" firstAttribute="centerX" secondItem="Rho-ef-n6l" secondAttribute="centerX" id="6K7-sC-p2b"/>
                                                                 <constraint firstAttribute="trailing" secondItem="sQP-OP-6Ue" secondAttribute="trailing" constant="183" id="8H7-8V-QFg"/>
                                                                 <constraint firstItem="1Jj-Uz-3W8" firstAttribute="centerX" secondItem="Rho-ef-n6l" secondAttribute="centerX" id="FbC-pe-jEQ"/>
-                                                                <constraint firstItem="sQP-OP-6Ue" firstAttribute="top" secondItem="1Jj-Uz-3W8" secondAttribute="bottom" constant="3" id="P1b-ik-JgY"/>
+                                                                <constraint firstItem="sQP-OP-6Ue" firstAttribute="top" secondItem="1Jj-Uz-3W8" secondAttribute="bottom" constant="10" id="P1b-ik-JgY"/>
                                                                 <constraint firstItem="NpM-vt-K6J" firstAttribute="top" secondItem="Rho-ef-n6l" secondAttribute="top" constant="-14" id="RjO-wz-MfG"/>
                                                                 <constraint firstAttribute="bottom" secondItem="sQP-OP-6Ue" secondAttribute="bottom" constant="5" id="YxQ-bv-KDK"/>
-                                                                <constraint firstItem="1Jj-Uz-3W8" firstAttribute="top" secondItem="NpM-vt-K6J" secondAttribute="bottom" constant="3" id="Znw-ti-iud"/>
+                                                                <constraint firstItem="1Jj-Uz-3W8" firstAttribute="top" secondItem="NpM-vt-K6J" secondAttribute="bottom" constant="5" id="Znw-ti-iud"/>
                                                                 <constraint firstItem="sQP-OP-6Ue" firstAttribute="leading" secondItem="Rho-ef-n6l" secondAttribute="leading" constant="25" id="qlB-6A-JoK"/>
                                                             </constraints>
                                                             <connections>

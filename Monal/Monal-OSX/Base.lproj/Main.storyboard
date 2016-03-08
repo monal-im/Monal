@@ -1080,7 +1080,7 @@ Gw
                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                         </clipView>
                                         <constraints>
-                                            <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="200" id="O0a-hl-S2t"/>
+                                            <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="285" id="O0a-hl-S2t"/>
                                         </constraints>
                                         <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="YES" id="8wP-Oc-or5">
                                             <rect key="frame" x="-100" y="-100" width="87" height="18"/>

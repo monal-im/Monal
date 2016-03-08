@@ -1232,6 +1232,7 @@ Gw
                                                             <connections>
                                                                 <outlet property="messageText" destination="xCt-jX-2Jc" id="06d-qo-OHN"/>
                                                                 <outlet property="timeStamp" destination="1Jj-Uz-3W8" id="2gV-Ko-Qa7"/>
+                                                                <outlet property="timeStampHeight" destination="U4S-jL-pcz" id="cOn-H9-ign"/>
                                                             </connections>
                                                         </tableCellView>
                                                         <tableCellView identifier="OutboundTextCell" id="zUs-Dd-GH1" userLabel="Chat View out Cell" customClass="MLChatViewCell">
@@ -1318,6 +1319,7 @@ Gw
                                                                 <outlet property="messageText" destination="gBQ-7e-nXQ" id="SFc-ts-FwH"/>
                                                                 <outlet property="retry" destination="lsM-YA-awl" id="RE2-Fb-X4p"/>
                                                                 <outlet property="timeStamp" destination="Zna-XK-R5x" id="M1K-wV-qMS"/>
+                                                                <outlet property="timeStampHeight" destination="Qdf-jg-DDP" id="kDL-ld-ntd"/>
                                                             </connections>
                                                         </tableCellView>
                                                     </prototypeCellViews>

@@ -10,12 +10,14 @@
 
 #define kCellMaxWidth 285
 #define kCellMinHeight 50
-#define kCellTimeLabelHeightAndOffset 25
+#define kCellHeightOffset 11
+#define kCellTimeStampHeight 14
 
 @interface MLChatViewCell : NSTableCellView
 
 @property (nonatomic, strong) IBOutlet NSTextView *messageText;
-@property (nonatomic, strong) IBOutlet NSTextField *timeStamp;
+@property (nonatomic, weak) IBOutlet NSTextField *timeStamp;
+@property (nonatomic, weak) IBOutlet NSLayoutConstraint *timeStampHeight;
 
 @property (nonatomic, assign) BOOL isInbound;
 @property (nonatomic, assign) NSRect messageRect;

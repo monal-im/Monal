@@ -49,7 +49,7 @@
     
     CGRect bubbleFrame = self.frame;
     bubbleFrame.origin.y=0;
-    bubbleFrame.size.height-=kCellTimeLabelHeightAndOffset; 
+    bubbleFrame.size.height-=(kCellTimeStampHeight+kCellHeightOffset);
     bubbleFrame.size.width= self.messageRect.size.width+kdefaultPadding*3;
     if (self.isInbound)
     {

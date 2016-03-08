@@ -576,9 +576,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     if(showTime) {
         cell.timeStamp.hidden=NO;
+        cell.timeStampHeight.constant=14.0f;
         cell.timeStamp.stringValue =[self formattedDateWithSource:[messageRow objectForKey:@"thetime"]];
     } else  {
         cell.timeStamp.hidden=YES;
+        cell.timeStampHeight.constant=0.0f;
     }
     
     [cell updateDisplay];
@@ -598,7 +600,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         return  kCellMinHeight;
     }
     else {
-        return rect.size.height+kCellTimeLabelHeightAndOffset;
+        return rect.size.height+kCellTimeStampHeight+kCellHeightOffset ;
     
     }
 }

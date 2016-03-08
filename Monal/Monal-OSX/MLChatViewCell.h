@@ -8,7 +8,9 @@
 
 #import <Cocoa/Cocoa.h>
 
-#define kCellMax 282
+#define kCellHorizontalFixedPadding 208
+#define kCellMaxWidth 285
+#define kCellMinWidth 100
 #define kCellMinHeight 50
 #define kCellTimeLabelHeightAndOffset 25
 
@@ -24,8 +26,8 @@
 @property (nonatomic, strong) IBOutlet NSButton* retry;
 
 
-+ (NSRect) sizeWithMessage:(NSString *)messageString;
++ (NSRect) sizeWithMessage:(NSString *)messageString forTableWidth:(CGFloat) width;
 
-- (void) updateDisplay; 
+-(void) updateDisplayWithWidth:(CGFloat) width;
 
 @end

@@ -581,7 +581,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         cell.timeStamp.hidden=YES;
     }
     
-    [cell updateDisplay];   
+    [cell updateDisplayWithWidth:self.view.frame.size.width];
     
     return cell;
 }
@@ -591,7 +591,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     NSDictionary *messageRow = [self.messageList objectAtIndex:row];
     NSString *messageString =[messageRow objectForKey:@"message"];
 
-    NSRect rect = [MLChatViewCell sizeWithMessage:messageString];
+    NSRect rect = [MLChatViewCell sizeWithMessage:messageString forTableWidth:self.view.frame.size.width];
  
     if(rect.size.height<kCellMinHeight)  {
         return  kCellMinHeight;

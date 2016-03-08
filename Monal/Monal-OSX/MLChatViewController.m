@@ -592,12 +592,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     NSString *messageString =[messageRow objectForKey:@"message"];
 
     NSRect rect = [MLChatViewCell sizeWithMessage:messageString ];
- 
-    if(rect.size.height<kCellMinHeight)  {
+    NSLog(@"%@ %f", messageString, rect.size.height);
+    
+    if(rect.size.height<44)  { // 44 is doublie line height
         return  kCellMinHeight;
     }
     else {
-        return rect.size.height+kCellTimeLabelHeightAndOffset+10;
+        return rect.size.height+kCellTimeLabelHeightAndOffset;
     
     }
 }

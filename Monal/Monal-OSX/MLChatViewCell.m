@@ -14,28 +14,24 @@
 @implementation MLChatViewCell
 
 
-+ (NSRect) sizeWithMessage:(NSString *)messageString forTableWidth:(CGFloat) width
++ (NSRect) sizeWithMessage:(NSString *)messageString 
 {
-    CGFloat calculatedWidth = width-kCellHorizontalFixedPadding;
-    if(calculatedWidth<kCellMinWidth) calculatedWidth = kCellMinWidth;
-     if(calculatedWidth>kCellMaxWidth) calculatedWidth = kCellMaxWidth;
-    
     NSDictionary *attributes = @{NSFontAttributeName: [NSFont systemFontOfSize:13.0f]};
-    NSSize size = NSMakeSize(calculatedWidth-(kdefaultPadding*2), MAXFLOAT);
+    NSSize size = NSMakeSize(kCellMaxWidth-(kdefaultPadding*2), MAXFLOAT);
     CGRect rect = [messageString boundingRectWithSize:size options:NSLineBreakByWordWrapping | NSStringDrawingUsesLineFragmentOrigin attributes:attributes];
     rect.size.height+=10;
     return rect;
     
 }
 
--(void) updateDisplayWithWidth:(CGFloat) width
+-(void) updateDisplay
 {
-    self.messageRect = [MLChatViewCell sizeWithMessage:self.messageText.string forTableWidth:width];
+    self.messageRect = [MLChatViewCell sizeWithMessage:self.messageText.string];
     if (self.isInbound)
     {
         self.messageText.alignment= kCTTextAlignmentLeft;
     } else  {
-        if( self.messageRect.size.width<240 )//&& self.messageRect.size.height<=kCellMinHeight)
+        if( self.messageRect.size.width<=kCellMaxWidth )//&& self.messageRect.size.height<=kCellMinHeight)
         {
             self.messageText.alignment= kCTTextAlignmentRight;
         }
@@ -61,15 +57,15 @@
         [[NSColor controlHighlightColor] setFill];
     }
     else  {
-//        bubbleFrame.origin.x= self.frame.size.width -kBubbleOffset-  bubbleFrame.size.width;
-//        
-//        [[NSColor colorWithCalibratedRed:57.0/255 green:118.0f/255 blue:253.0/255 alpha:1.0] setFill];
-//        if(self.deliveryFailed) {
-//            self.retry.hidden=NO;
-//        }
-//        else{
-//            self.retry.hidden=YES;
-//        }
+        bubbleFrame.origin.x= self.frame.size.width -bubbleFrame.size.width-20;
+
+        [[NSColor colorWithCalibratedRed:57.0/255 green:118.0f/255 blue:253.0/255 alpha:1.0] setFill];
+        if(self.deliveryFailed) {
+            self.retry.hidden=NO;
+        }
+        else{
+            self.retry.hidden=YES;
+        }
     }
     
     NSBezierPath *bezierPath= [NSBezierPath bezierPathWithRoundedRect:bubbleFrame xRadius:5.0 yRadius:5.0];

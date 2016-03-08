@@ -1156,16 +1156,16 @@ Gw
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
                                                                 <scrollView borderType="none" horizontalLineScroll="0.0" horizontalPageScroll="0.0" verticalLineScroll="0.0" verticalPageScroll="0.0" hasHorizontalScroller="NO" hasVerticalScroller="NO" usesPredominantAxisScrolling="NO" horizontalScrollElasticity="none" verticalScrollElasticity="none" translatesAutoresizingMaskIntoConstraints="NO" id="sQP-OP-6Ue" customClass="MLDisabledScrollView">
-                                                                    <rect key="frame" x="24" y="3" width="282" height="24"/>
+                                                                    <rect key="frame" x="24" y="3" width="285" height="24"/>
                                                                     <clipView key="contentView" drawsBackground="NO" copiesOnScroll="NO" id="8au-jm-j3X">
-                                                                        <rect key="frame" x="0.0" y="0.0" width="282" height="24"/>
+                                                                        <rect key="frame" x="0.0" y="0.0" width="285" height="24"/>
                                                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                         <subviews>
                                                                             <textView editable="NO" drawsBackground="NO" importsGraphics="NO" findStyle="panel" verticallyResizable="YES" allowsNonContiguousLayout="YES" quoteSubstitution="YES" linkDetection="YES" dataDetection="YES" dashSubstitution="YES" textReplacement="YES" id="xCt-jX-2Jc">
-                                                                                <rect key="frame" x="0.0" y="0.0" width="282" height="24"/>
+                                                                                <rect key="frame" x="0.0" y="0.0" width="285" height="24"/>
                                                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                                 <color key="backgroundColor" name="controlHighlightColor" catalog="System" colorSpace="catalog"/>
-                                                                                <size key="minSize" width="282" height="24"/>
+                                                                                <size key="minSize" width="285" height="24"/>
                                                                                 <size key="maxSize" width="493" height="10000000"/>
                                                                                 <attributedString key="textStorage">
                                                                                     <fragment content="inbound">
@@ -1176,12 +1176,15 @@ Gw
                                                                                     </fragment>
                                                                                 </attributedString>
                                                                                 <color key="insertionPointColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                                                                <size key="minSize" width="282" height="24"/>
+                                                                                <size key="minSize" width="285" height="24"/>
                                                                                 <size key="maxSize" width="493" height="10000000"/>
                                                                             </textView>
                                                                         </subviews>
                                                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                                                     </clipView>
+                                                                    <constraints>
+                                                                        <constraint firstAttribute="width" constant="285" id="5it-it-g7R"/>
+                                                                    </constraints>
                                                                     <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="YES" id="2PX-39-GLX">
                                                                         <rect key="frame" x="-100" y="-100" width="87" height="18"/>
                                                                         <autoresizingMask key="autoresizingMask"/>
@@ -1218,7 +1221,7 @@ Gw
                                                             </subviews>
                                                             <constraints>
                                                                 <constraint firstItem="NpM-vt-K6J" firstAttribute="centerX" secondItem="Rho-ef-n6l" secondAttribute="centerX" id="6K7-sC-p2b"/>
-                                                                <constraint firstAttribute="trailing" secondItem="sQP-OP-6Ue" secondAttribute="trailing" constant="184" id="8H7-8V-QFg"/>
+                                                                <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="sQP-OP-6Ue" secondAttribute="trailing" constant="50" id="8H7-8V-QFg"/>
                                                                 <constraint firstItem="1Jj-Uz-3W8" firstAttribute="centerX" secondItem="Rho-ef-n6l" secondAttribute="centerX" id="FbC-pe-jEQ"/>
                                                                 <constraint firstItem="sQP-OP-6Ue" firstAttribute="top" secondItem="1Jj-Uz-3W8" secondAttribute="bottom" constant="10" id="P1b-ik-JgY"/>
                                                                 <constraint firstItem="NpM-vt-K6J" firstAttribute="top" secondItem="Rho-ef-n6l" secondAttribute="top" constant="-14" id="RjO-wz-MfG"/>
@@ -1262,6 +1265,9 @@ Gw
                                                                         </subviews>
                                                                         <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                                     </clipView>
+                                                                    <constraints>
+                                                                        <constraint firstAttribute="width" constant="285" id="8zP-Uy-TiG"/>
+                                                                    </constraints>
                                                                     <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="YES" id="0O7-TL-K9b">
                                                                         <rect key="frame" x="-100" y="-100" width="87" height="18"/>
                                                                         <autoresizingMask key="autoresizingMask"/>
@@ -1305,7 +1311,7 @@ Gw
                                                                 <constraint firstItem="Zna-XK-R5x" firstAttribute="top" secondItem="zUs-Dd-GH1" secondAttribute="top" constant="5" id="ERE-Fb-PO9"/>
                                                                 <constraint firstItem="Zna-XK-R5x" firstAttribute="centerX" secondItem="zUs-Dd-GH1" secondAttribute="centerX" id="IY1-r5-sgL"/>
                                                                 <constraint firstItem="c4f-GC-Hfe" firstAttribute="leading" secondItem="lsM-YA-awl" secondAttribute="trailing" constant="8" id="Jh5-m5-id3"/>
-                                                                <constraint firstItem="lsM-YA-awl" firstAttribute="leading" secondItem="zUs-Dd-GH1" secondAttribute="leading" constant="156" id="cN9-UB-Ue7"/>
+                                                                <constraint firstItem="lsM-YA-awl" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="zUs-Dd-GH1" secondAttribute="leading" constant="50" id="cN9-UB-Ue7"/>
                                                                 <constraint firstItem="lsM-YA-awl" firstAttribute="centerY" secondItem="zUs-Dd-GH1" secondAttribute="centerY" constant="14.5" id="eBg-PO-smh"/>
                                                             </constraints>
                                                             <connections>

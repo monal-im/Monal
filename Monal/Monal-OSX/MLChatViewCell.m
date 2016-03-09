@@ -57,7 +57,7 @@
     bubbleFrame.size.width= self.messageRect.size.width+kCellDefaultPadding*3;
     if (self.isInbound)
     {
-        bubbleFrame.origin.x=+20;
+        bubbleFrame.origin.x=+self.senderIcon.frame.size.width+kCellDefaultPadding*3;
         [[NSColor controlHighlightColor] setFill];
     }
     else  {

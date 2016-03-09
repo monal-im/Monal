@@ -1155,8 +1155,40 @@ Gw
                                                             <rect key="frame" x="1" y="1" width="490" height="56"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
-                                                                <scrollView borderType="none" horizontalLineScroll="0.0" horizontalPageScroll="0.0" verticalLineScroll="0.0" verticalPageScroll="0.0" hasHorizontalScroller="NO" hasVerticalScroller="NO" usesPredominantAxisScrolling="NO" horizontalScrollElasticity="none" verticalScrollElasticity="none" translatesAutoresizingMaskIntoConstraints="NO" id="sQP-OP-6Ue" customClass="MLDisabledScrollView">
-                                                                    <rect key="frame" x="24" y="3" width="285" height="24"/>
+                                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="NpM-vt-K6J">
+                                                                    <rect key="frame" x="193" y="56" width="104" height="14"/>
+                                                                    <constraints>
+                                                                        <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="Bh2-9l-Ef0"/>
+                                                                        <constraint firstAttribute="height" constant="14" id="pES-du-vOO"/>
+                                                                    </constraints>
+                                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Today, 10:00PM" id="zIB-RQ-Qfq">
+                                                                        <font key="font" metaFont="smallSystem"/>
+                                                                        <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
+                                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                                    </textFieldCell>
+                                                                </textField>
+                                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="1Jj-Uz-3W8">
+                                                                    <rect key="frame" x="193" y="37" width="104" height="14"/>
+                                                                    <constraints>
+                                                                        <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="8k4-Ai-1AJ"/>
+                                                                        <constraint firstAttribute="height" constant="14" id="U4S-jL-pcz"/>
+                                                                    </constraints>
+                                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Today, 10:00PM" id="Z2f-uH-fuc">
+                                                                        <font key="font" metaFont="smallSystem"/>
+                                                                        <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
+                                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                                    </textFieldCell>
+                                                                </textField>
+                                                                <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="G0F-Vw-4sf">
+                                                                    <rect key="frame" x="5" y="2" width="25" height="25"/>
+                                                                    <constraints>
+                                                                        <constraint firstAttribute="height" constant="25" id="6QG-q4-VuT"/>
+                                                                        <constraint firstAttribute="width" constant="25" id="YtQ-Ez-SQD"/>
+                                                                    </constraints>
+                                                                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" id="Kl9-z1-zTj"/>
+                                                                </imageView>
+                                                                <scrollView misplaced="YES" borderType="none" horizontalLineScroll="0.0" horizontalPageScroll="0.0" verticalLineScroll="0.0" verticalPageScroll="0.0" hasHorizontalScroller="NO" hasVerticalScroller="NO" usesPredominantAxisScrolling="NO" horizontalScrollElasticity="none" verticalScrollElasticity="none" translatesAutoresizingMaskIntoConstraints="NO" id="sQP-OP-6Ue" customClass="MLDisabledScrollView">
+                                                                    <rect key="frame" x="36" y="3" width="285" height="24"/>
                                                                     <clipView key="contentView" drawsBackground="NO" copiesOnScroll="NO" id="8au-jm-j3X">
                                                                         <rect key="frame" x="0.0" y="0.0" width="285" height="24"/>
                                                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -1194,30 +1226,6 @@ Gw
                                                                         <autoresizingMask key="autoresizingMask"/>
                                                                     </scroller>
                                                                 </scrollView>
-                                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="NpM-vt-K6J">
-                                                                    <rect key="frame" x="193" y="56" width="104" height="14"/>
-                                                                    <constraints>
-                                                                        <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="Bh2-9l-Ef0"/>
-                                                                        <constraint firstAttribute="height" constant="14" id="pES-du-vOO"/>
-                                                                    </constraints>
-                                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Today, 10:00PM" id="zIB-RQ-Qfq">
-                                                                        <font key="font" metaFont="smallSystem"/>
-                                                                        <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
-                                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                                    </textFieldCell>
-                                                                </textField>
-                                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="1Jj-Uz-3W8">
-                                                                    <rect key="frame" x="193" y="37" width="104" height="14"/>
-                                                                    <constraints>
-                                                                        <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="8k4-Ai-1AJ"/>
-                                                                        <constraint firstAttribute="height" constant="14" id="U4S-jL-pcz"/>
-                                                                    </constraints>
-                                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Today, 10:00PM" id="Z2f-uH-fuc">
-                                                                        <font key="font" metaFont="smallSystem"/>
-                                                                        <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
-                                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                                    </textFieldCell>
-                                                                </textField>
                                                             </subviews>
                                                             <constraints>
                                                                 <constraint firstItem="NpM-vt-K6J" firstAttribute="centerX" secondItem="Rho-ef-n6l" secondAttribute="centerX" id="6K7-sC-p2b"/>
@@ -1226,11 +1234,15 @@ Gw
                                                                 <constraint firstItem="sQP-OP-6Ue" firstAttribute="top" secondItem="1Jj-Uz-3W8" secondAttribute="bottom" constant="10" id="P1b-ik-JgY"/>
                                                                 <constraint firstItem="NpM-vt-K6J" firstAttribute="top" secondItem="Rho-ef-n6l" secondAttribute="top" constant="-14" id="RjO-wz-MfG"/>
                                                                 <constraint firstAttribute="bottom" secondItem="sQP-OP-6Ue" secondAttribute="bottom" constant="3" id="YxQ-bv-KDK"/>
+                                                                <constraint firstItem="sQP-OP-6Ue" firstAttribute="leading" secondItem="G0F-Vw-4sf" secondAttribute="trailing" constant="8" id="ZBZ-D5-wFo"/>
                                                                 <constraint firstItem="1Jj-Uz-3W8" firstAttribute="top" secondItem="NpM-vt-K6J" secondAttribute="bottom" constant="5" id="Znw-ti-iud"/>
-                                                                <constraint firstItem="sQP-OP-6Ue" firstAttribute="leading" secondItem="Rho-ef-n6l" secondAttribute="leading" constant="24" id="qlB-6A-JoK"/>
+                                                                <constraint firstAttribute="bottom" secondItem="G0F-Vw-4sf" secondAttribute="bottom" constant="2" id="xWU-cq-cOH"/>
+                                                                <constraint firstItem="G0F-Vw-4sf" firstAttribute="leading" secondItem="Rho-ef-n6l" secondAttribute="leading" constant="5" id="yKg-7J-tgj"/>
                                                             </constraints>
                                                             <connections>
+                                                                <outlet property="imageView" destination="G0F-Vw-4sf" id="WIa-ww-rlW"/>
                                                                 <outlet property="messageText" destination="xCt-jX-2Jc" id="06d-qo-OHN"/>
+                                                                <outlet property="senderIcon" destination="G0F-Vw-4sf" id="xiT-n3-1R7"/>
                                                                 <outlet property="timeStamp" destination="1Jj-Uz-3W8" id="2gV-Ko-Qa7"/>
                                                                 <outlet property="timeStampHeight" destination="U4S-jL-pcz" id="cOn-H9-ign"/>
                                                                 <outlet property="timeStampVeritcalOffset" destination="Znw-ti-iud" id="Pjg-pu-u50"/>

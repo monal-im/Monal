@@ -12,7 +12,7 @@
 #import "DDLog.h"
 #import "MLXMPPManager.h"
 #import "MLChatViewCell.h"
-//#import "MLNotificaitonCenter.h"
+#import "MLImageManager.h"
 
 #import <DropboxOSX/DropboxOSX.h>
 
@@ -596,6 +596,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         cell.timeStampHeight.constant=0.0f;
         cell.timeStampVeritcalOffset.constant=0.0f;
     }
+    
+   [[MLImageManager sharedInstance] getIconForContact:[messageRow objectForKey:@"af"] andAccount:self.accountNo withCompletion:^(NSImage *icon) {
+       cell.senderIcon.image=icon;
+   }];
     
     [cell updateDisplay];
     

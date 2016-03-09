@@ -668,7 +668,7 @@ CA
                                                                     <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="noicon" id="cMe-fd-6Pb"/>
                                                                 </imageView>
                                                                 <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="lDT-QO-kIK">
-                                                                    <rect key="frame" x="37" y="2" width="22" height="22"/>
+                                                                    <rect key="frame" x="35" y="2" width="22" height="22"/>
                                                                     <constraints>
                                                                         <constraint firstAttribute="height" constant="22" id="RPd-oc-ZPE"/>
                                                                         <constraint firstAttribute="width" constant="22" id="fdX-uE-9oB"/>
@@ -708,7 +708,7 @@ CA
                                                                 <constraint firstItem="QZm-KY-HES" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="azx-Gr-vGb" secondAttribute="leading" constant="37" id="IxA-6T-Yut"/>
                                                                 <constraint firstItem="QZm-KY-HES" firstAttribute="top" secondItem="azx-Gr-vGb" secondAttribute="top" constant="3" id="Jes-Sg-z6d"/>
                                                                 <constraint firstItem="7ak-TK-LeP" firstAttribute="top" secondItem="azx-Gr-vGb" secondAttribute="top" priority="750" constant="8" id="MGC-xQ-EPK"/>
-                                                                <constraint firstItem="lDT-QO-kIK" firstAttribute="leading" secondItem="azx-Gr-vGb" secondAttribute="leading" constant="37" id="Yxu-fq-myP"/>
+                                                                <constraint firstItem="lDT-QO-kIK" firstAttribute="leading" secondItem="azx-Gr-vGb" secondAttribute="leading" constant="35" id="Yxu-fq-myP"/>
                                                                 <constraint firstItem="QZm-KY-HES" firstAttribute="top" relation="greaterThanOrEqual" secondItem="azx-Gr-vGb" secondAttribute="top" constant="3" id="bAi-6z-pg3"/>
                                                                 <constraint firstAttribute="bottom" secondItem="lDT-QO-kIK" secondAttribute="bottom" constant="2" id="bGa-TD-zMV"/>
                                                                 <constraint firstItem="0ib-3X-AX9" firstAttribute="leading" secondItem="lDT-QO-kIK" secondAttribute="trailing" constant="3" id="cDQ-sd-920"/>

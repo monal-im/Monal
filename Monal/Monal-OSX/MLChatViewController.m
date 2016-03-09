@@ -608,7 +608,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     NSString *messageString =[messageRow objectForKey:@"message"];
 
     NSRect rect = [MLChatViewCell sizeWithMessage:messageString ];
-    NSLog(@"%@ %f", messageString, rect.size.height);
     
     BOOL showTime=[self shouldShowTimeForRow:row];
     NSInteger timeOffset =0;

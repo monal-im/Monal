@@ -9,7 +9,7 @@
 #import "MLChatViewCell.h"
 
 #define kBubbleOffset 10
-#define kdefaultPadding 5
+
 
 @implementation MLChatViewCell
 
@@ -17,7 +17,7 @@
 + (NSRect) sizeWithMessage:(NSString *)messageString 
 {
     NSDictionary *attributes = @{NSFontAttributeName: [NSFont systemFontOfSize:13.0f]};
-    NSSize size = NSMakeSize(kCellMaxWidth-(kdefaultPadding*2), MAXFLOAT);
+    NSSize size = NSMakeSize(kCellMaxWidth-(kCellDefaultPadding*2), MAXFLOAT);
     CGRect rect = [messageString boundingRectWithSize:size options:NSLineBreakByWordWrapping | NSStringDrawingUsesLineFragmentOrigin attributes:attributes];
     rect.size.height+=10;
     return rect;
@@ -31,7 +31,7 @@
     {
         self.messageText.alignment= kCTTextAlignmentLeft;
     } else  {
-        if( self.messageRect.size.width<=kCellMaxWidth )//&& self.messageRect.size.height<=kCellMinHeight)
+        if( self.messageRect.size.width<kCellMaxWidth )//&& self.messageRect.size.height<=kCellMinHeight)
         {
             self.messageText.alignment= kCTTextAlignmentRight;
         }
@@ -49,8 +49,12 @@
     
     CGRect bubbleFrame = self.frame;
     bubbleFrame.origin.y=0;
-    bubbleFrame.size.height-=(kCellTimeStampHeight+kCellHeightOffset);
-    bubbleFrame.size.width= self.messageRect.size.width+kdefaultPadding*3;
+    bubbleFrame.size.height-=(kCellDefaultPadding);
+    if(!self.timeStamp.hidden)
+    {
+        bubbleFrame.size.height-=(kCellTimeStampHeight+kCellDefaultPadding);
+    }
+    bubbleFrame.size.width= self.messageRect.size.width+kCellDefaultPadding*3;
     if (self.isInbound)
     {
         bubbleFrame.origin.x=+20;

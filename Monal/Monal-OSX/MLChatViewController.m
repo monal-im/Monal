@@ -519,15 +519,37 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 }
 
 #pragma mark - table view delegate
+
+-(BOOL) shouldShowTimeForRow:(NSInteger) row
+{
+     NSDictionary *previousMessage =nil;
+    NSDictionary *messageRow = [self.messageList objectAtIndex:row];
+    if(row>0) {
+        previousMessage=[self.messageList objectAtIndex:row-1];
+    }
+    BOOL showTime=NO;
+    if(previousMessage)
+    {
+        NSDate *previousTime=[self.sourceDateFormat dateFromString:[previousMessage objectForKey:@"thetime"]];
+        NSDate *currenTime=[self.sourceDateFormat dateFromString:[messageRow objectForKey:@"thetime"]];
+        if([currenTime timeIntervalSinceDate:previousTime]>=60*60){
+            showTime=YES;
+        }
+        
+    } else  {
+        showTime=YES;
+    }
+    
+    return showTime;
+    
+}
+
 - (NSView *)tableView:(NSTableView *)tableView viewForTableColumn:(NSTableColumn *)tableColumn  row:(NSInteger)row
 {
     
     NSDictionary *messageRow = [self.messageList objectAtIndex:row];
-    NSDictionary *previousMessage =nil;
-    if(row>0) {
-        previousMessage=[self.messageList objectAtIndex:row-1];
-    }
-    
+   
+  
     MLChatViewCell *cell;
     
     if([[messageRow objectForKey:@"af"] isEqualToString:self.jid]) {
@@ -560,27 +582,19 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [cell.messageText checkTextInDocument:nil];
     cell.messageText.editable=NO;
   
-    BOOL showTime=NO;
-    if(previousMessage)
-    {
-        NSDate *previousTime=[self.sourceDateFormat dateFromString:[previousMessage objectForKey:@"thetime"]];
-        NSDate *currenTime=[self.sourceDateFormat dateFromString:[messageRow objectForKey:@"thetime"]];
-        if([currenTime timeIntervalSinceDate:previousTime]>=60*60){
-            showTime=YES;
-        }
-        
-    } else  {
-        showTime=YES;
-    }
+    BOOL showTime=[self shouldShowTimeForRow:row];
+ 
     cell.toolTip=[self formattedDateWithSource:[messageRow objectForKey:@"thetime"]];
     
     if(showTime) {
         cell.timeStamp.hidden=NO;
-        cell.timeStampHeight.constant=14.0f;
+        cell.timeStampHeight.constant=kCellTimeStampHeight;
+        cell.timeStampVeritcalOffset.constant = kCellDefaultPadding;
         cell.timeStamp.stringValue =[self formattedDateWithSource:[messageRow objectForKey:@"thetime"]];
     } else  {
         cell.timeStamp.hidden=YES;
         cell.timeStampHeight.constant=0.0f;
+        cell.timeStampVeritcalOffset.constant=0.0f;
     }
     
     [cell updateDisplay];
@@ -596,11 +610,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     NSRect rect = [MLChatViewCell sizeWithMessage:messageString ];
     NSLog(@"%@ %f", messageString, rect.size.height);
     
+    BOOL showTime=[self shouldShowTimeForRow:row];
+    NSInteger timeOffset =0;
+    if(!showTime) timeOffset = kCellTimeStampHeight+kCellDefaultPadding;
+    
     if(rect.size.height<44)  { // 44 is doublie line height
-        return  kCellMinHeight;
+        return  kCellMinHeight-timeOffset;
     }
     else {
-        return rect.size.height+kCellTimeStampHeight+kCellHeightOffset ;
+        return rect.size.height+kCellTimeStampHeight+kCellHeightOffset-timeOffset ;
     
     }
 }

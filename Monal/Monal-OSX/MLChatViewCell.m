@@ -41,8 +41,6 @@
     }
     self.messageText.font =[NSFont systemFontOfSize:13.0f];
     
-    self.senderIcon.wantsLayer=YES;
-    self.senderIcon.layer.cornerRadius = self.senderIcon.frame.size.height/2;
 }
 
 - (void)drawRect:(NSRect)dirtyRect {

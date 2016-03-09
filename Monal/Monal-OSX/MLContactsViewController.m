@@ -857,10 +857,6 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     else if([state isEqualToString:@"(null)"] || [state isEqualToString:@""]) {
         cell.state=kStatusOnline;
     }
-    cell.icon.wantsLayer=YES;
-    cell.icon.layer.cornerRadius= cell.icon.frame.size.height/2;
-    cell.statusOrb.wantsLayer=YES;
-    cell.unreadBadge.wantsLayer= YES;
     
     [cell setOrb];
 

@@ -281,7 +281,7 @@ NSString *const kGtalk = @"Gtalk";
                     [[DataLayer sharedInstance] executeScalar:@"select max(account_id) from account" withCompletion:^(NSObject * accountid) {
                         if(accountid) {
                             self.accountno=[NSString stringWithFormat:@"%@",accountid];
-                            if(!isGtalk) {
+                            if(!isGtalk && self.password) {
                                 PasswordManager* pass= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@-%@",self.accountno,self.jid]];
                                 [pass setPassword:self.password] ;
                             }

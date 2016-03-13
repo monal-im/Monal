@@ -730,7 +730,6 @@
 		268130171BFD8ECA0074C8EE /* MLAddContact.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLAddContact.m; sourceTree = "<group>"; };
 		268130191BFEDCEC0074C8EE /* Fabric.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Fabric.framework; path = MonalOSX/External/Fabric.framework; sourceTree = "<group>"; };
 		26817F101B8E01D800A19886 /* Crashlytics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Crashlytics.framework; path = "Monal-iOS/External/Crashlytics.framework"; sourceTree = "<group>"; };
-		26841F4B1C960141004F95E2 /* ReadMe.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ReadMe.md; sourceTree = "<group>"; };
 		268821F819B9233B00AEA46E /* NSString+SqlLite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+SqlLite.h"; sourceTree = "<group>"; };
 		268821F919B9233B00AEA46E /* NSString+SqlLite.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+SqlLite.m"; sourceTree = "<group>"; };
 		268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libjrtplib-static.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1736,7 +1735,6 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
-				26841F4B1C960141004F95E2 /* ReadMe.md */,
 				29B97315FDCFA39411CA2CEA /* Root Sources */,
 				080E96DDFE201D6D7F000001 /* Shared */,
 				29B97317FDCFA39411CA2CEA /* Resources */,

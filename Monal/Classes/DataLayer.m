@@ -1518,7 +1518,7 @@ static DataLayer *sharedInstance=nil;
 
 -(void) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString *)messageId withCompletion:(void (^)(BOOL))completion
 {
-    //MEssaes_history ging out, from is always the local user. always read, default to  delivered (will be reset by timer if needed)
+    //Message_history going out, from is always the local user. always read, default to  delivered (will be reset by timer if needed)
     
     NSArray* parts=[[[NSDate date] description] componentsSeparatedByString:@" "];
     NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, %@, '%@',  '%@', '%@ %@', '%@', '%@',0,1,'%@');", accountNo, from.escapeForSql, to.escapeForSql,

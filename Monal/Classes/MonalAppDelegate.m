@@ -341,22 +341,20 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 
                 if([notification.userInfo objectForKey:@"from"]) {
                     
-                    NSArray *toParts= [[notification.userInfo objectForKey:@"to"] componentsSeparatedByString:@"/"];
-                    if(toParts.count>0) {
-                        NSString *replyingAccount = toParts[0];
+                    NSString *replyingAccount = [notification.userInfo objectForKey:@"to"];
+                    
+                    NSUInteger r = arc4random_uniform(NSIntegerMax);
+                    NSString *messageID =[NSString stringWithFormat:@"Monal%lu", (unsigned long)r];
+                    
+                    [[DataLayer sharedInstance] addMessageHistoryFrom:replyingAccount to:[notification.userInfo objectForKey:@"from"] forAccount:[notification.userInfo objectForKey:@"accountNo"] withMessage:message actuallyFrom:replyingAccount withId:messageID withCompletion:^(BOOL success) {
                         
-                        NSUInteger r = arc4random_uniform(NSIntegerMax);
-                        NSString *messageID =[NSString stringWithFormat:@"Monal%lu", (unsigned long)r];
+                    }];
+                    
+                    [[MLXMPPManager sharedInstance] sendMessage:message toContact:[notification.userInfo objectForKey:@"from"] fromAccount:[notification.userInfo objectForKey:@"accountNo"] isMUC:NO messageId:messageID withCompletionHandler:^(BOOL success, NSString *messageId) {
                         
-                        [[DataLayer sharedInstance] addMessageHistoryFrom:replyingAccount to:[notification.userInfo objectForKey:@"from"] forAccount:[notification.userInfo objectForKey:@"accountNo"] withMessage:message actuallyFrom:replyingAccount withId:messageID withCompletion:^(BOOL success) {
-                            
-                        }];
-                        
-                        [[MLXMPPManager sharedInstance] sendMessage:message toContact:[notification.userInfo objectForKey:@"from"] fromAccount:[notification.userInfo objectForKey:@"accountNo"] isMUC:NO messageId:messageID withCompletionHandler:^(BOOL success, NSString *messageId) {
-                            
-                        }];
-                        
-                    }
+                    }];
+                    
+                    
                 }
                 
                 

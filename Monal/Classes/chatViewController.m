@@ -117,9 +117,6 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     self.inputContainerView.layer.borderColor=[UIColor lightGrayColor].CGColor;
     self.inputContainerView.layer.borderWidth=0.5f;
     
-    self.topIcon.layer.cornerRadius= self.topIcon.frame.size.height/2;
-    self.topIcon.clipsToBounds=YES;
-    
     if ([DBSession sharedSession].isLinked) {
         self.restClient = [[DBRestClient alloc] initWithSession:[DBSession sharedSession]];
         self.restClient.delegate = self;

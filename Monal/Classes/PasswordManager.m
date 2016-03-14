@@ -277,13 +277,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 					   forKey:(__bridge id)kSecClass];
 		
         // Finally, set up the dictionary that contains new values for the attributes:
-        NSMutableDictionary *tempCheck = [self dictionaryToSecItemFormat:keychainData];
+        NSMutableDictionary *newVals = [self dictionaryToSecItemFormat:keychainData];
         //Remove the class--it's not a keychain attribute:
-        [tempCheck removeObjectForKey:(__bridge id)kSecClass];
+        [newVals removeObjectForKey:(__bridge id)kSecClass];
+        [newVals removeObjectForKey:(__bridge id)kSecMatchLimit];
 		
 		// You can update only a single keychain item at a time.
         NSAssert(SecItemUpdate((__bridge CFDictionaryRef)updateItem,
-							   (__bridge CFDictionaryRef)tempCheck) == noErr,
+							   (__bridge CFDictionaryRef)newVals) == noErr,
 				 @"Couldn't update the Keychain Item." );
     }
     else

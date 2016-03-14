@@ -335,7 +335,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) application:(UIApplication *)application handleActionWithIdentifier:(nullable NSString *)identifier forLocalNotification:(nonnull UILocalNotification *)notification withResponseInfo:(nonnull NSDictionary *)responseInfo completionHandler:(nonnull void (^)())completionHandler
 {
     if ([notification.category isEqualToString:@"Reply"]) {
-        NSDictionary *userInfo = notification.userInfo;
         if ([identifier isEqualToString:@"ReplyButton"]) {
             NSString *message = responseInfo[UIUserNotificationActionResponseTypedTextKey];
             if (message.length > 0) {

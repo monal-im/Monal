@@ -823,7 +823,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     
     if([[contactRow objectForKey:kFullName]stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].length>0) {
         cell.name.stringValue = [contactRow objectForKey:kFullName];
-    } else  {
+    } else  if([contactRow objectForKey:kContactName] ){
         cell.name.stringValue=[contactRow objectForKey:kContactName] ;
     }
     cell.accountNo= [[contactRow objectForKey:kAccountID] integerValue];

@@ -49,6 +49,16 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         [rfc3339DateFormatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
         
         _delayTimeStamp = [rfc3339DateFormatter dateFromString:[attributeDict objectForKey:@"stamp"]];
+        if(!_delayTimeStamp)
+        {
+            NSDateFormatter *rfc3339DateFormatter2 = [[NSDateFormatter alloc] init];
+       
+            [rfc3339DateFormatter2 setLocale:enUSPOSIXLocale];
+            [rfc3339DateFormatter2 setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+            [rfc3339DateFormatter2 setDateFormat:@"yyyy'-'MM'-'dd'T'HH':'mm':'ssZ"];
+             _delayTimeStamp = [rfc3339DateFormatter2 dateFromString:[attributeDict objectForKey:@"stamp"]];
+        }
+        
         
     }
     

@@ -157,6 +157,22 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 
 #if TARGET_OS_IPHONE
+
++ (UIImage*)circularImage:(UIImage *)image
+{
+    UIImage *composedImage;
+    UIGraphicsBeginImageContextWithOptions(image.size, NO, 0);
+    UIBezierPath *clipPath = [UIBezierPath bezierPathWithOvalInRect:CGRectMake(0, 0, image.size.width, image.size.height)];
+    [clipPath addClip];
+    // Flip coordinates before drawing image as UIKit and CoreGraphics have inverted coordinate system
+    CGContextTranslateCTM(UIGraphicsGetCurrentContext(), 0, image.size.height);
+    CGContextScaleCTM(UIGraphicsGetCurrentContext(), 1, -1);
+    CGContextDrawImage(UIGraphicsGetCurrentContext(), CGRectMake(0, 0, image.size.width, image.size.height), image.CGImage);
+    composedImage= UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return composedImage;
+}
+
 -(void) getIconForContact:(NSString*) contact andAccount:(NSString*) accountNo withCompletion:(void (^)(UIImage *))completion
 {
     NSString* filename=[self fileNameforContact:contact];
@@ -184,6 +200,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
             {
                 toreturn=self.noIcon;
             }
+            
+            toreturn=[MLImageManager circularImage:toreturn];
             
             //uiimage image named is cached if avaialable
             if(toreturn) {

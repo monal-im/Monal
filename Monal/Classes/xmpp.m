@@ -1597,39 +1597,47 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             showAlert=NO;
                         }
                         
+                         if(messageNode.delayTimeStamp)
+                         {
+                             NSLog(@"delay date: %@" , messageNode.delayTimeStamp);
+                         }
+                        
                         [[DataLayer sharedInstance] addMessageFrom:messageNode.from to:messageNode.to
                                                         forAccount:_accountNo withBody:messageNode.messageText
                                                       actuallyfrom:messageNode.actualFrom delivered:YES  unread:unread  serverMessageId:messageNode.idval andOverrideDate:messageNode.delayTimeStamp withCompletion:^(BOOL success) {
                                                           if(success)
                                                           {
-                                                              [self.networkQueue addOperationWithBlock:^{
-                                                                  [[DataLayer sharedInstance] addActiveBuddies:messageNode.from forAccount:_accountNo withCompletion:nil];
+                                                              
+                                                              [[DataLayer sharedInstance] addActiveBuddies:messageNode.from forAccount:_accountNo withCompletion:nil];
+                                                              
+                                                              
+                                                              if(messageNode.from  ) {
+                                                                  NSString* actuallyFrom= messageNode.actualFrom;
+                                                                  if(!actuallyFrom) actuallyFrom=messageNode.from;
                                                                   
+                                                                  NSString* messageText=messageNode.messageText;
+                                                                  if(!messageText) messageText=@"";
                                                                   
-                                                                  if(messageNode.from  ) {
-                                                                      NSString* actuallyFrom= messageNode.actualFrom;
-                                                                      if(!actuallyFrom) actuallyFrom=messageNode.from;
-                                                                      
-                                                                      NSString* messageText=messageNode.messageText;
-                                                                      if(!messageText) messageText=@"";
-                                                                      
-                                                                      BOOL shouldRefresh = NO;
-                                                                      if(messageNode.delayTimeStamp)  shouldRefresh =YES;
-                                                                      
-                                                                      NSString *recipient=messageNode.to;
-                                                                      if(!recipient) recipient=self.jid;
-                                                                      NSDictionary* userDic=@{@"from":messageNode.from,
-                                                                                              @"actuallyfrom":actuallyFrom,
-                                                                                              @"messageText":messageText,
-                                                                                              @"to":recipient,
-                                                                                              @"accountNo":_accountNo,
-                                                                                              @"showAlert":[NSNumber numberWithBool:showAlert],
-                                                                                              @"shouldRefresh":[NSNumber numberWithBool:shouldRefresh]
-                                                                                              };
-                                                                      
-                                                                      [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:userDic];
+                                                                  BOOL shouldRefresh = NO;
+                                                                  if(messageNode.delayTimeStamp)
+                                                                  {
+                                                                      shouldRefresh =YES;
                                                                   }
-                                                              }];
+                                                                  
+                                                                  NSString *recipient=messageNode.to;
+                                                                  if(!recipient) recipient=self.jid;
+                                                                  NSDictionary* userDic=@{@"from":messageNode.from,
+                                                                                          @"actuallyfrom":actuallyFrom,
+                                                                                          @"messageText":messageText,
+                                                                                          @"to":recipient,
+                                                                                          @"accountNo":_accountNo,
+                                                                                          @"showAlert":[NSNumber numberWithBool:showAlert],
+                                                                                          @"shouldRefresh":[NSNumber numberWithBool:shouldRefresh]
+                                                                                          };
+                                                                  
+                                                                  [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:userDic];
+                                                              }
+                                                              
                                                           }
                                                           
                                                       }];

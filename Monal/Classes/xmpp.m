@@ -1616,8 +1616,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                                       BOOL shouldRefresh = NO;
                                                                       if(messageNode.delayTimeStamp)  shouldRefresh =YES;
                                                                       
-                                                                      NSString *recipient=_fulluser;
-                                                                      if(!recipient) recipient=self.jid;
+                                                                      NSArray *jidParts= [self.jid componentsSeparatedByString:@"/"];
+                                                                      
+                                                                      NSString *recipient;
+                                                                      if([jidParts count]>1) {
+                                                                          recipient= jidParts[0];
+                                                                      }
+                                                                      if(!recipient) recipient= _fulluser;
+                                                                          
+                                                                     
                                                                       NSDictionary* userDic=@{@"from":messageNode.from,
                                                                                               @"actuallyfrom":actuallyFrom,
                                                                                               @"messageText":messageText,

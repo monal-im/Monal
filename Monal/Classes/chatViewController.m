@@ -987,6 +987,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     {
         [self resignTextView];
         shouldinsert=NO;
+        [self updateInputViewSize];
     }
     
     return shouldinsert; 

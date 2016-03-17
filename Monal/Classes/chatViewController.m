@@ -756,13 +756,25 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     
     NSDictionary* row= [_messagelist objectAtIndex:indexPath.row];
     
-    if([[row objectForKey:@"af"] isEqualToString:_jid])
+    if(_isMUC)
     {
-        cell=[tableView dequeueReusableCellWithIdentifier:@"ChatCellOut"];
-    }
-    else
-    {
-        cell=[tableView dequeueReusableCellWithIdentifier:@"ChatCellIn"];
+        if([[row objectForKey:@"af"] isEqualToString:_jid])
+        {
+            cell=[tableView dequeueReusableCellWithIdentifier:@"ChatCellOut"];
+        }
+        else
+        {
+            cell=[tableView dequeueReusableCellWithIdentifier:@"ChatCellIn"];
+        }
+    } else  {
+        if([[row objectForKey:@"af"] isEqualToString:self.contactName])
+        {
+            cell=[tableView dequeueReusableCellWithIdentifier:@"ChatCellIn"];
+        }
+        else
+        {
+            cell=[tableView dequeueReusableCellWithIdentifier:@"ChatCellOut"];
+        }
     }
     
     if(!cell)

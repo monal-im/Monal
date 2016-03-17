@@ -977,10 +977,13 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         shouldinsert=NO;
     }
     
-    [self updateInputViewSize];
     return shouldinsert; 
 }
 
+- (void)textViewDidChange:(UITextView *)textView
+{
+     [self updateInputViewSize];
+}
 
 #pragma mark - Keyboard
 

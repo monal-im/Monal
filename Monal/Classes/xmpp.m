@@ -307,11 +307,16 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                              DISPATCH_TIME_FOREVER
                               , 1ull * NSEC_PER_SEC);
     
+    NSDictionary* info2=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
+                          kinfoTypeKey:@"connect", kinfoStatusKey:@"Logging in"};
+    
     dispatch_source_set_event_handler(streamTimer, ^{
         DDLogError(@"stream connection timed out");
         dispatch_source_cancel(streamTimer);
+        [self.contactsVC hideConnecting:info2];
         [self disconnect];
     });
+    
     
     dispatch_source_set_cancel_handler(streamTimer, ^{
         DDLogError(@"stream timer cancelled");
@@ -323,8 +328,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [_iStream open];
     [_oStream open];
     
-    NSDictionary* info2=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
-                          kinfoTypeKey:@"connect", kinfoStatusKey:@"Logging in"};
+ 
     [self.contactsVC updateConnecting:info2];
     
     dispatch_source_cancel(streamTimer);

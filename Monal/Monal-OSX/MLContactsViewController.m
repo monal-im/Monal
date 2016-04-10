@@ -837,10 +837,13 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     
     
     NSString *statusText = [contactRow objectForKey:@"status"];
-    if( [statusText isEqualToString:@"(null)"])  {
-        statusText = @"";
+    if(statusText) {
+        if( [statusText isEqualToString:@"(null)"])  {
+            statusText = @"";
+        }
+        
+        cell.status.stringValue =statusText;
     }
-    cell.status.stringValue =statusText;
     
     NSString *state= [[contactRow objectForKey:@"state"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     

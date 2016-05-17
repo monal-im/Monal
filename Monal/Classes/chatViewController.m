@@ -187,6 +187,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     [super viewDidAppear:animated];
     [self scrollToBottom];
     [self refreshCounter];
+    self.chatInput.contentInset = UIEdgeInsetsMake(3, 0, 0, 0);
     
 }
 
@@ -964,12 +965,14 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 {
     if(self.chatInput.intrinsicContentSize.height>40) {
         self.inputContainerHeight.constant= self.chatInput.intrinsicContentSize.height+18;
+          self.chatInput.contentInset = UIEdgeInsetsMake(5, 0, 0, 0);
     } else
     {
          self.inputContainerHeight.constant=43.0f;
+          self.chatInput.contentInset = UIEdgeInsetsMake(3, 0, 0, 0);
     }
     [self.inputContainerView layoutIfNeeded];
-    self.chatInput.contentInset = UIEdgeInsetsMake(5, 0, 0, 0);
+  
  
 }
 

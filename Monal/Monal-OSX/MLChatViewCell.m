@@ -9,17 +9,17 @@
 #import "MLChatViewCell.h"
 
 #define kBubbleOffset 10
-#define kdefaultPadding 5
+
 
 @implementation MLChatViewCell
 
 
-+ (NSRect) sizeWithMessage:(NSString *)messageString
++ (NSRect) sizeWithMessage:(NSString *)messageString 
 {
     NSDictionary *attributes = @{NSFontAttributeName: [NSFont systemFontOfSize:13.0f]};
-    NSSize size = NSMakeSize(kCellMax-(kdefaultPadding*2), MAXFLOAT);
+    NSSize size = NSMakeSize(kCellMaxWidth-(kCellDefaultPadding*2), MAXFLOAT);
     CGRect rect = [messageString boundingRectWithSize:size options:NSLineBreakByWordWrapping | NSStringDrawingUsesLineFragmentOrigin attributes:attributes];
-    rect.size.height+=10; 
+    rect.size.height+=10;
     return rect;
     
 }
@@ -31,7 +31,7 @@
     {
         self.messageText.alignment= kCTTextAlignmentLeft;
     } else  {
-        if( self.messageRect.size.width<240 )//&& self.messageRect.size.height<=kCellMinHeight)
+        if( self.messageRect.size.width<kCellMaxWidth )//&& self.messageRect.size.height<=kCellMinHeight)
         {
             self.messageText.alignment= kCTTextAlignmentRight;
         }
@@ -48,22 +48,21 @@
    // NSLog(@"%@ %f", self.messageText.string, self.messageRect.size.width);
     
     CGRect bubbleFrame = self.frame;
-    if (self.messageRect.size.width<240) {
-        bubbleFrame.size.width = self.messageRect.size.width+40;
+    bubbleFrame.origin.y=0;
+    bubbleFrame.size.height-=(kCellDefaultPadding);
+    if(!self.timeStamp.hidden)
+    {
+        bubbleFrame.size.height-=(kCellTimeStampHeight+kCellDefaultPadding);
     }
-    else  {
-        bubbleFrame.size.width = self.messageText.frame.size.width+20;
-    }
-    
+    bubbleFrame.size.width= self.messageRect.size.width+kCellDefaultPadding*3;
     if (self.isInbound)
     {
-        bubbleFrame.origin.x= self.messageText.frame.origin.x+kBubbleOffset*2;
-        bubbleFrame.size.width-=kBubbleOffset*2;
+        bubbleFrame.origin.x=+self.senderIcon.frame.size.width+kCellDefaultPadding*3;
         [[NSColor controlHighlightColor] setFill];
     }
     else  {
-        bubbleFrame.origin.x= self.frame.size.width -kBubbleOffset-  bubbleFrame.size.width;
-        
+        bubbleFrame.origin.x= self.frame.size.width -bubbleFrame.size.width-20;
+
         [[NSColor colorWithCalibratedRed:57.0/255 green:118.0f/255 blue:253.0/255 alpha:1.0] setFill];
         if(self.deliveryFailed) {
             self.retry.hidden=NO;
@@ -72,9 +71,6 @@
             self.retry.hidden=YES;
         }
     }
-    
-    bubbleFrame.origin.y+=5;
-    bubbleFrame.size.height-=10;
     
     NSBezierPath *bezierPath= [NSBezierPath bezierPathWithRoundedRect:bubbleFrame xRadius:5.0 yRadius:5.0];
     

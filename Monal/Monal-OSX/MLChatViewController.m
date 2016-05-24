@@ -12,7 +12,7 @@
 #import "DDLog.h"
 #import "MLXMPPManager.h"
 #import "MLChatViewCell.h"
-//#import "MLNotificaitonCenter.h"
+#import "MLImageManager.h"
 
 #import <DropboxOSX/DropboxOSX.h>
 
@@ -519,10 +519,37 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 }
 
 #pragma mark - table view delegate
+
+-(BOOL) shouldShowTimeForRow:(NSInteger) row
+{
+     NSDictionary *previousMessage =nil;
+    NSDictionary *messageRow = [self.messageList objectAtIndex:row];
+    if(row>0) {
+        previousMessage=[self.messageList objectAtIndex:row-1];
+    }
+    BOOL showTime=NO;
+    if(previousMessage)
+    {
+        NSDate *previousTime=[self.sourceDateFormat dateFromString:[previousMessage objectForKey:@"thetime"]];
+        NSDate *currenTime=[self.sourceDateFormat dateFromString:[messageRow objectForKey:@"thetime"]];
+        if([currenTime timeIntervalSinceDate:previousTime]>=60*60){
+            showTime=YES;
+        }
+        
+    } else  {
+        showTime=YES;
+    }
+    
+    return showTime;
+    
+}
+
 - (NSView *)tableView:(NSTableView *)tableView viewForTableColumn:(NSTableColumn *)tableColumn  row:(NSInteger)row
 {
     
     NSDictionary *messageRow = [self.messageList objectAtIndex:row];
+   
+  
     MLChatViewCell *cell;
     
     if([[messageRow objectForKey:@"af"] isEqualToString:self.jid]) {
@@ -554,9 +581,27 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     cell.messageText.string =[messageRow objectForKey:@"message"];
     [cell.messageText checkTextInDocument:nil];
     cell.messageText.editable=NO;
-    cell.timeStamp.stringValue =[self formattedDateWithSource:[messageRow objectForKey:@"thetime"]];
+  
+    BOOL showTime=[self shouldShowTimeForRow:row];
+ 
+    cell.toolTip=[self formattedDateWithSource:[messageRow objectForKey:@"thetime"]];
     
-    [cell updateDisplay];   
+    if(showTime) {
+        cell.timeStamp.hidden=NO;
+        cell.timeStampHeight.constant=kCellTimeStampHeight;
+        cell.timeStampVeritcalOffset.constant = kCellDefaultPadding;
+        cell.timeStamp.stringValue =[self formattedDateWithSource:[messageRow objectForKey:@"thetime"]];
+    } else  {
+        cell.timeStamp.hidden=YES;
+        cell.timeStampHeight.constant=0.0f;
+        cell.timeStampVeritcalOffset.constant=0.0f;
+    }
+    
+   [[MLImageManager sharedInstance] getIconForContact:[messageRow objectForKey:@"af"] andAccount:self.accountNo withCompletion:^(NSImage *icon) {
+       cell.senderIcon.image=icon;
+   }];
+    
+    [cell updateDisplay];
     
     return cell;
 }
@@ -566,13 +611,17 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     NSDictionary *messageRow = [self.messageList objectAtIndex:row];
     NSString *messageString =[messageRow objectForKey:@"message"];
 
-    NSRect rect = [MLChatViewCell sizeWithMessage:messageString];
- 
-    if(rect.size.height<kCellMinHeight)  {
-        return  kCellMinHeight;
+    NSRect rect = [MLChatViewCell sizeWithMessage:messageString ];
+    
+    BOOL showTime=[self shouldShowTimeForRow:row];
+    NSInteger timeOffset =0;
+    if(!showTime) timeOffset = kCellTimeStampHeight+kCellDefaultPadding;
+    
+    if(rect.size.height<44)  { // 44 is doublie line height
+        return  kCellMinHeight-timeOffset;
     }
     else {
-        return rect.size.height+5.0+5.0;
+        return rect.size.height+kCellTimeStampHeight+kCellHeightOffset-timeOffset ;
     
     }
 }
@@ -628,30 +677,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         NSInteger destinationGMTOffset = [destinationTimeZone secondsFromGMTForDate:sourceDate];
         NSTimeInterval interval = destinationGMTOffset - sourceGMTOffset;
         NSDate* destinationDate = [[NSDate alloc] initWithTimeInterval:interval sinceDate:sourceDate];
-        
-        NSInteger msgday =[self.gregorian components:NSDayCalendarUnit fromDate:destinationDate].day;
-        NSInteger msgmonth=[self.gregorian components:NSMonthCalendarUnit fromDate:destinationDate].month;
-        NSInteger msgyear =[self.gregorian components:NSYearCalendarUnit fromDate:destinationDate].year;
-        
-        if ((self.thisday!=msgday) || (self.thismonth!=msgmonth) || (self.thisyear!=msgyear))
-        {
-            
-            //no more need for seconds
-            [self.destinationDateFormat setTimeStyle:NSDateFormatterShortStyle];
-            
-            // note: if it isnt the same day we want to show the full  day
-            [self.destinationDateFormat setDateStyle:NSDateFormatterMediumStyle];
-            
-            //cache date
-            
-        }
-        else
-        {
-            //today just show time
-            [self.destinationDateFormat setDateStyle:NSDateFormatterNoStyle];
-            [self.destinationDateFormat setTimeStyle:NSDateFormatterMediumStyle];
-        }
-        
+                
+        [self.destinationDateFormat setTimeStyle:NSDateFormatterShortStyle];
+        [self.destinationDateFormat setDateStyle:NSDateFormatterMediumStyle];
         dateString = [ self.destinationDateFormat stringFromDate:destinationDate];
     }
     

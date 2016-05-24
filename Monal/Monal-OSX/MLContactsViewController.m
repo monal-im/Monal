@@ -823,7 +823,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     
     if([[contactRow objectForKey:kFullName]stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].length>0) {
         cell.name.stringValue = [contactRow objectForKey:kFullName];
-    } else  {
+    } else  if([contactRow objectForKey:kContactName] ){
         cell.name.stringValue=[contactRow objectForKey:kContactName] ;
     }
     cell.accountNo= [[contactRow objectForKey:kAccountID] integerValue];
@@ -837,10 +837,13 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     
     
     NSString *statusText = [contactRow objectForKey:@"status"];
-    if( [statusText isEqualToString:@"(null)"])  {
-        statusText = @"";
+    if(statusText) {
+        if( [statusText isEqualToString:@"(null)"])  {
+            statusText = @"";
+        }
+        
+        cell.status.stringValue =statusText;
     }
-    cell.status.stringValue =statusText;
     
     NSString *state= [[contactRow objectForKey:@"state"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     

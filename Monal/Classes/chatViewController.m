@@ -117,9 +117,6 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     self.inputContainerView.layer.borderColor=[UIColor lightGrayColor].CGColor;
     self.inputContainerView.layer.borderWidth=0.5f;
     
-    self.topIcon.layer.cornerRadius= self.topIcon.frame.size.height/2;
-    self.topIcon.clipsToBounds=YES;
-    
     if ([DBSession sharedSession].isLinked) {
         self.restClient = [[DBRestClient alloc] initWithSession:[DBSession sharedSession]];
         self.restClient.delegate = self;
@@ -190,6 +187,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     [super viewDidAppear:animated];
     [self scrollToBottom];
     [self refreshCounter];
+    self.chatInput.contentInset = UIEdgeInsetsMake(3, 0, 0, 0);
     
 }
 
@@ -759,13 +757,25 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     
     NSDictionary* row= [_messagelist objectAtIndex:indexPath.row];
     
-    if([[row objectForKey:@"af"] isEqualToString:_jid])
+    if(_isMUC)
     {
-        cell=[tableView dequeueReusableCellWithIdentifier:@"ChatCellOut"];
-    }
-    else
-    {
-        cell=[tableView dequeueReusableCellWithIdentifier:@"ChatCellIn"];
+        if([[row objectForKey:@"af"] isEqualToString:_jid])
+        {
+            cell=[tableView dequeueReusableCellWithIdentifier:@"ChatCellOut"];
+        }
+        else
+        {
+            cell=[tableView dequeueReusableCellWithIdentifier:@"ChatCellIn"];
+        }
+    } else  {
+        if([[row objectForKey:@"af"] isEqualToString:self.contactName])
+        {
+            cell=[tableView dequeueReusableCellWithIdentifier:@"ChatCellIn"];
+        }
+        else
+        {
+            cell=[tableView dequeueReusableCellWithIdentifier:@"ChatCellOut"];
+        }
     }
     
     if(!cell)
@@ -955,12 +965,14 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 {
     if(self.chatInput.intrinsicContentSize.height>40) {
         self.inputContainerHeight.constant= self.chatInput.intrinsicContentSize.height+18;
+          self.chatInput.contentInset = UIEdgeInsetsMake(5, 0, 0, 0);
     } else
     {
          self.inputContainerHeight.constant=43.0f;
+          self.chatInput.contentInset = UIEdgeInsetsMake(3, 0, 0, 0);
     }
     [self.inputContainerView layoutIfNeeded];
-    self.chatInput.contentInset = UIEdgeInsetsMake(5, 0, 0, 0);
+  
  
 }
 
@@ -978,12 +990,16 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     {
         [self resignTextView];
         shouldinsert=NO;
+        [self updateInputViewSize];
     }
     
-    [self updateInputViewSize];
     return shouldinsert; 
 }
 
+- (void)textViewDidChange:(UITextView *)textView
+{
+     [self updateInputViewSize];
+}
 
 #pragma mark - Keyboard
 

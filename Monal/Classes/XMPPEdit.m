@@ -245,10 +245,10 @@ NSString *const kGtalk = @"Gtalk";
     [dic setObject:domain forKey:kDomain];
     
     
-    [dic setObject:user forKey:kUsername];
-    [dic setObject:self.server  forKey:kServer];
-    [dic setObject:self.port forKey:kPort];
-    [dic setObject:self.resource forKey:kResource];
+    if(user) [dic setObject:user forKey:kUsername];
+    if(self.server) [dic setObject:self.server  forKey:kServer];
+    if(self.port ) [dic setObject:self.port forKey:kPort];
+    if(self.resource) [dic setObject:self.resource forKey:kResource];
     
     [dic setObject:[NSNumber numberWithBool:self.useSSL] forKey:kSSL];
     [dic setObject:[NSNumber numberWithBool:self.enabled] forKey:kEnabled];
@@ -281,7 +281,7 @@ NSString *const kGtalk = @"Gtalk";
                     [[DataLayer sharedInstance] executeScalar:@"select max(account_id) from account" withCompletion:^(NSObject * accountid) {
                         if(accountid) {
                             self.accountno=[NSString stringWithFormat:@"%@",accountid];
-                            if(!isGtalk) {
+                            if(!isGtalk && self.password) {
                                 PasswordManager* pass= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@-%@",self.accountno,self.jid]];
                                 [pass setPassword:self.password] ;
                             }

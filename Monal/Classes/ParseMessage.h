@@ -23,10 +23,8 @@
 @property (nonatomic, strong, readonly) NSString* messageText;
 @property (nonatomic, strong, readonly) NSString* messagHTML;
 @property (nonatomic, assign, readonly) BOOL hasBody; 
-
-@property (nonatomic, assign, readonly) NSDate *delayTimeStamp;
-
-@property (nonatomic, assign, readonly) NSString* avatarData;
+@property (nonatomic, strong, readonly) NSDate *delayTimeStamp;
+@property (nonatomic, strong, readonly) NSString* avatarData;
 
 @property (nonatomic, assign, readonly) BOOL mucInvite;
 

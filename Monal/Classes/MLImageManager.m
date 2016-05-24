@@ -59,7 +59,10 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 #else
 -(NSImage*) noIcon{
-    if(!_noIcon) _noIcon=[NSImage imageNamed:@"noicon"];
+    if(!_noIcon){
+        
+    _noIcon=[NSImage imageNamed:@"noicon"];
+    }
     return _noIcon;
 }
 
@@ -154,6 +157,22 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 
 #if TARGET_OS_IPHONE
+
++ (UIImage*)circularImage:(UIImage *)image
+{
+    UIImage *composedImage;
+    UIGraphicsBeginImageContextWithOptions(image.size, NO, 0);
+    UIBezierPath *clipPath = [UIBezierPath bezierPathWithOvalInRect:CGRectMake(0, 0, image.size.width, image.size.height)];
+    [clipPath addClip];
+    // Flip coordinates before drawing image as UIKit and CoreGraphics have inverted coordinate system
+    CGContextTranslateCTM(UIGraphicsGetCurrentContext(), 0, image.size.height);
+    CGContextScaleCTM(UIGraphicsGetCurrentContext(), 1, -1);
+    CGContextDrawImage(UIGraphicsGetCurrentContext(), CGRectMake(0, 0, image.size.width, image.size.height), image.CGImage);
+    composedImage= UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return composedImage;
+}
+
 -(void) getIconForContact:(NSString*) contact andAccount:(NSString*) accountNo withCompletion:(void (^)(UIImage *))completion
 {
     NSString* filename=[self fileNameforContact:contact];
@@ -182,6 +201,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                 toreturn=self.noIcon;
             }
             
+            toreturn=[MLImageManager circularImage:toreturn];
+            
             //uiimage image named is cached if avaialable
             if(toreturn) {
                 [self.iconCache setObject:toreturn forKey:cacheKey];
@@ -202,6 +223,20 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     
 }
 #else
+
++ (NSImage*)circularImage:(NSImage *)image
+{
+    NSImage *composedImage = [[NSImage alloc] initWithSize:image.size] ;
+    
+    [composedImage lockFocus];
+    NSBezierPath *clipPath = [NSBezierPath bezierPathWithOvalInRect:NSMakeRect(0, 0, image.size.width, image.size.height)];
+    [clipPath addClip];
+    [image drawAtPoint:NSZeroPoint fromRect:NSMakeRect(0, 0, image.size.width, image.size.height) operation:NSCompositeSourceOver fraction:1];
+    [composedImage unlockFocus];
+    
+    return composedImage;
+}
+
 -(void) getIconForContact:(NSString*) contact andAccount:(NSString *) accountNo withCompletion:(void (^)(NSImage *))completion
 {
     NSString* filename=[self fileNameforContact:contact];
@@ -226,7 +261,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                 toreturn=self.noIcon;
             }
             
-            //uiimage image named is cached if avaialable
+            toreturn=[MLImageManager circularImage:toreturn];
+            
+            
             if(toreturn) {
                 [self.iconCache setObject:toreturn forKey:cacheKey];
             }

@@ -288,6 +288,7 @@ An array of Dics what have timers to make sure everything was sent
         PasswordManager* passMan= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@-%@@%@",[account objectForKey:kAccountID], [account objectForKey:kUsername],  [account objectForKey:kDomain] ]];
         xmppAccount.password=[passMan getPassword] ;
         if(!xmppAccount.password.length>0) {
+            //backwards compatibility with old storage
             passMan= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
             xmppAccount.password=[passMan getPassword] ;
         }

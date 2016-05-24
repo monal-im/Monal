@@ -307,11 +307,16 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                              DISPATCH_TIME_FOREVER
                               , 1ull * NSEC_PER_SEC);
     
+    NSDictionary* info2=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
+                          kinfoTypeKey:@"connect", kinfoStatusKey:@"Logging in"};
+    
     dispatch_source_set_event_handler(streamTimer, ^{
         DDLogError(@"stream connection timed out");
         dispatch_source_cancel(streamTimer);
+        [self.contactsVC hideConnecting:info2];
         [self disconnect];
     });
+    
     
     dispatch_source_set_cancel_handler(streamTimer, ^{
         DDLogError(@"stream timer cancelled");
@@ -323,8 +328,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [_iStream open];
     [_oStream open];
     
-    NSDictionary* info2=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
-                          kinfoTypeKey:@"connect", kinfoStatusKey:@"Logging in"};
+ 
     [self.contactsVC updateConnecting:info2];
     
     dispatch_source_cancel(streamTimer);
@@ -1613,18 +1617,25 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                                       NSString* messageText=messageNode.messageText;
                                                                       if(!messageText) messageText=@"";
                                                                       
-                                                                      BOOL shoulRefresh = NO;
-                                                                      if(messageNode.delayTimeStamp)  shoulRefresh =YES;
+                                                                      BOOL shouldRefresh = NO;
+                                                                      if(messageNode.delayTimeStamp)  shouldRefresh =YES;
                                                                       
-                                                                      NSString *recipient=messageNode.to;
-                                                                      if(!recipient) recipient=self.jid;
+                                                                      NSArray *jidParts= [self.jid componentsSeparatedByString:@"/"];
+                                                                      
+                                                                      NSString *recipient;
+                                                                      if([jidParts count]>1) {
+                                                                          recipient= jidParts[0];
+                                                                      }
+                                                                      if(!recipient) recipient= _fulluser;
+                                                                          
+                                                                     
                                                                       NSDictionary* userDic=@{@"from":messageNode.from,
                                                                                               @"actuallyfrom":actuallyFrom,
                                                                                               @"messageText":messageText,
                                                                                               @"to":recipient,
                                                                                               @"accountNo":_accountNo,
                                                                                               @"showAlert":[NSNumber numberWithBool:showAlert],
-                                                                                              @"shouldRefresh":[NSNumber numberWithBool:shoulRefresh]
+                                                                                              @"shouldRefresh":[NSNumber numberWithBool:shouldRefresh]
                                                                                               };
                                                                       
                                                                       [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:userDic];

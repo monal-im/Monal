@@ -8,13 +8,19 @@
 
 #import <Cocoa/Cocoa.h>
 
-#define kCellMax 282
-#define kCellMinHeight 33
+#define kCellMaxWidth 285
+#define kCellMinHeight 50
+#define kCellHeightOffset 11
+#define kCellTimeStampHeight 14
+#define kCellDefaultPadding 5
 
 @interface MLChatViewCell : NSTableCellView
 
 @property (nonatomic, strong) IBOutlet NSTextView *messageText;
-@property (nonatomic, strong) IBOutlet NSTextField *timeStamp;
+@property (nonatomic, weak) IBOutlet NSTextField *timeStamp;
+@property (nonatomic, weak) IBOutlet NSLayoutConstraint *timeStampHeight;
+@property (nonatomic, weak) IBOutlet NSLayoutConstraint *timeStampVeritcalOffset;
+@property (nonatomic, weak) IBOutlet NSImageView *senderIcon;
 
 @property (nonatomic, assign) BOOL isInbound;
 @property (nonatomic, assign) NSRect messageRect;
@@ -25,6 +31,5 @@
 
 + (NSRect) sizeWithMessage:(NSString *)messageString;
 
-- (void) updateDisplay; 
-
+-(void) updateDisplay;
 @end

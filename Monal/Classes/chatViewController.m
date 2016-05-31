@@ -114,6 +114,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     self.chatInput.layer.borderWidth=0.5f;
     self.chatInput.textContainerInset=UIEdgeInsetsMake(5, 0, 5, 0);
     
+    
     self.inputContainerView.layer.borderColor=[UIColor lightGrayColor].CGColor;
     self.inputContainerView.layer.borderWidth=0.5f;
     
@@ -187,8 +188,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     [super viewDidAppear:animated];
     [self scrollToBottom];
     [self refreshCounter];
-    self.chatInput.contentInset = UIEdgeInsetsMake(3, 0, 0, 0);
-    
+ 
 }
 
 -(void) viewWillDisappear:(BOOL)animated
@@ -963,17 +963,19 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void) updateInputViewSize
 {
-    if(self.chatInput.intrinsicContentSize.height>40) {
-        self.inputContainerHeight.constant= self.chatInput.intrinsicContentSize.height+18;
-          self.chatInput.contentInset = UIEdgeInsetsMake(5, 0, 0, 0);
+    
+    if(self.chatInput.intrinsicContentSize.height>43) {
+        self.inputContainerHeight.constant= self.chatInput.intrinsicContentSize.height+16+10;
+          self.chatInput.contentInset = UIEdgeInsetsMake(5, 0, 5, 0);
     } else
     {
-         self.inputContainerHeight.constant=43.0f;
-          self.chatInput.contentInset = UIEdgeInsetsMake(3, 0, 0, 0);
+        self.inputContainerHeight.constant=43.0f;
+        self.chatInput.contentInset = UIEdgeInsetsMake(5, 0, 5, 0);
     }
+    [self.chatInput setScrollEnabled:NO];
     [self.inputContainerView layoutIfNeeded];
-  
- 
+    [self.chatInput setScrollEnabled:YES];
+    [self.chatInput scrollRangeToVisible:NSMakeRange(0, 0)];
 }
 
 - (void)textViewDidBeginEditing:(UITextView *)textView

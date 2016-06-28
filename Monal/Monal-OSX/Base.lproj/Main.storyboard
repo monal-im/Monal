@@ -1330,6 +1330,66 @@ Gw
                                                                 <outlet property="timeStampVeritcalOffset" destination="ERE-Fb-PO9" id="IA5-zx-fb5"/>
                                                             </connections>
                                                         </tableCellView>
+                                                        <tableCellView identifier="InboundTextCell" id="xb3-Ah-EVJ" userLabel="Chat View in Cell" customClass="MLChatViewCell">
+                                                            <rect key="frame" x="1" y="117" width="490" height="150"/>
+                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                            <subviews>
+                                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="48b-sw-1uS">
+                                                                    <rect key="frame" x="193" y="150" width="104" height="14"/>
+                                                                    <constraints>
+                                                                        <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="0Il-2t-AEZ"/>
+                                                                        <constraint firstAttribute="height" constant="14" id="7W1-zz-Vz6"/>
+                                                                    </constraints>
+                                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Today, 10:00PM" id="Nzi-Wg-w5y">
+                                                                        <font key="font" metaFont="smallSystem"/>
+                                                                        <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
+                                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                                    </textFieldCell>
+                                                                </textField>
+                                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="2Nq-18-kr6">
+                                                                    <rect key="frame" x="193" y="131" width="104" height="14"/>
+                                                                    <constraints>
+                                                                        <constraint firstAttribute="height" constant="14" id="fOO-cO-O1n"/>
+                                                                        <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="jQO-lE-nu8"/>
+                                                                    </constraints>
+                                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Today, 10:00PM" id="tAj-Ly-McV">
+                                                                        <font key="font" metaFont="smallSystem"/>
+                                                                        <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
+                                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                                    </textFieldCell>
+                                                                </textField>
+                                                                <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="BS2-cT-hMv">
+                                                                    <rect key="frame" x="5" y="2" width="25" height="25"/>
+                                                                    <constraints>
+                                                                        <constraint firstAttribute="width" constant="25" id="8RA-6K-zMu"/>
+                                                                        <constraint firstAttribute="height" constant="25" id="P1Q-MX-ZJF"/>
+                                                                    </constraints>
+                                                                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" id="BIi-Id-2pU"/>
+                                                                </imageView>
+                                                                <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="pIH-qG-3jP">
+                                                                    <rect key="frame" x="33" y="3" width="285" height="118"/>
+                                                                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" id="K0c-pL-PJh"/>
+                                                                </imageView>
+                                                            </subviews>
+                                                            <constraints>
+                                                                <constraint firstItem="2Nq-18-kr6" firstAttribute="centerX" secondItem="xb3-Ah-EVJ" secondAttribute="centerX" id="0zb-IP-2dQ"/>
+                                                                <constraint firstItem="pIH-qG-3jP" firstAttribute="top" secondItem="2Nq-18-kr6" secondAttribute="bottom" constant="8" id="AcZ-dp-Rr2"/>
+                                                                <constraint firstAttribute="bottom" secondItem="BS2-cT-hMv" secondAttribute="bottom" constant="2" id="G9q-1w-Qhl"/>
+                                                                <constraint firstItem="pIH-qG-3jP" firstAttribute="leading" secondItem="BS2-cT-hMv" secondAttribute="trailing" constant="3" id="GJI-iM-jZ7"/>
+                                                                <constraint firstItem="48b-sw-1uS" firstAttribute="top" secondItem="xb3-Ah-EVJ" secondAttribute="top" constant="-14" id="RHo-Id-yPP"/>
+                                                                <constraint firstItem="2Nq-18-kr6" firstAttribute="top" secondItem="48b-sw-1uS" secondAttribute="bottom" constant="5" id="UDx-Oz-S6R"/>
+                                                                <constraint firstAttribute="bottom" secondItem="pIH-qG-3jP" secondAttribute="bottom" constant="3" id="h4o-d5-Loi"/>
+                                                                <constraint firstItem="48b-sw-1uS" firstAttribute="centerX" secondItem="xb3-Ah-EVJ" secondAttribute="centerX" id="sNV-Ay-dNu"/>
+                                                                <constraint firstItem="BS2-cT-hMv" firstAttribute="leading" secondItem="xb3-Ah-EVJ" secondAttribute="leading" constant="5" id="xsp-pE-h3j"/>
+                                                            </constraints>
+                                                            <connections>
+                                                                <outlet property="imageView" destination="BS2-cT-hMv" id="dva-zL-foQ"/>
+                                                                <outlet property="senderIcon" destination="BS2-cT-hMv" id="7YD-xj-kb7"/>
+                                                                <outlet property="timeStamp" destination="2Nq-18-kr6" id="OYz-es-vdH"/>
+                                                                <outlet property="timeStampHeight" destination="fOO-cO-O1n" id="ckv-22-amp"/>
+                                                                <outlet property="timeStampVeritcalOffset" destination="UDx-Oz-S6R" id="N6w-X9-hY3"/>
+                                                            </connections>
+                                                        </tableCellView>
                                                     </prototypeCellViews>
                                                 </tableColumn>
                                             </tableColumns>

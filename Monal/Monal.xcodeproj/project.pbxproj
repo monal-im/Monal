@@ -182,6 +182,7 @@
 		262E51931AD8CAC600788351 /* MLButtonCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 262E51911AD8CAC600788351 /* MLButtonCell.xib */; };
 		262E51971AD8CB7200788351 /* MLTextInputCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 262E51951AD8CB7200788351 /* MLTextInputCell.m */; };
 		262E51981AD8CB7200788351 /* MLTextInputCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 262E51961AD8CB7200788351 /* MLTextInputCell.xib */; };
+		262FE9361D821CD000A70506 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 262FE9351D821CD000A70506 /* WebKit.framework */; };
 		2630FE341AD550C00079F5C0 /* Monal_Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = 2630FE331AD550C00079F5C0 /* Monal_Tests.m */; };
 		26329D321B7999AD0061EA36 /* Images-OSX.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 26329D311B7999AD0061EA36 /* Images-OSX.xcassets */; };
 		26347D861790FFDE006FF64F /* MLInfoCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 26347D851790FFDE006FF64F /* MLInfoCell.m */; };
@@ -559,6 +560,7 @@
 		262E51941AD8CB7200788351 /* MLTextInputCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLTextInputCell.h; sourceTree = "<group>"; };
 		262E51951AD8CB7200788351 /* MLTextInputCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLTextInputCell.m; sourceTree = "<group>"; };
 		262E51961AD8CB7200788351 /* MLTextInputCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MLTextInputCell.xib; sourceTree = "<group>"; };
+		262FE9351D821CD000A70506 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks/WebKit.framework; sourceTree = DEVELOPER_DIR; };
 		2630FE2F1AD550C00079F5C0 /* Monal Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Monal Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2630FE321AD550C00079F5C0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2630FE331AD550C00079F5C0 /* Monal_Tests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Monal_Tests.m; sourceTree = "<group>"; };
@@ -919,6 +921,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				262FE9361D821CD000A70506 /* WebKit.framework in Frameworks */,
 				269574E21C37307300544A60 /* libsqlite3.tbd in Frameworks */,
 				269574E01C37301600544A60 /* libz.tbd in Frameworks */,
 				269574DE1C372FD200544A60 /* Security.framework in Frameworks */,
@@ -1771,6 +1774,7 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				262FE9351D821CD000A70506 /* WebKit.framework */,
 				26B2A5001B730A0D00272E63 /* OSX */,
 				26B2A4FF1B730A0900272E63 /* iOS */,
 			);

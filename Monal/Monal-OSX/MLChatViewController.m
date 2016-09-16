@@ -616,11 +616,39 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         cell.messageText.linkTextAttributes =@{NSForegroundColorAttributeName:[NSColor blackColor], NSUnderlineStyleAttributeName: @YES};
     }
     
+    NSString *messageString =[messageRow objectForKey:@"message"];
+    if([messageString hasPrefix:@"http://"]||[messageString hasPrefix:@"https://"])
+    {
+        cell = [tableView makeViewWithIdentifier:@"OutboundImageCell" owner:self];
+
+        dispatch_async(dispatch_get_main_queue(), ^{
+            cell.attachmentImage.image = [[NSImage alloc] initWithContentsOfURL:[NSURL URLWithString:messageString]];
+        });
+        
+        
+     /*   NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:messageString]];
+        request.HTTPMethod=@"HEAD";
+        request.cachePolicy= NSURLRequestReturnCacheDataElseLoad;
+        
+        NSURLSession *session = [NSURLSession sharedSession];
+        [[session dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+            NSDictionary *headers= ((NSHTTPURLResponse *)response).allHeaderFields;
+            NSString *contentType = [headers objectForKey:@"Content-Type"];
+            if([contentType hasPrefix:@"image/"])
+            {
+                cell.attachmentImage.image = [[NSImage alloc] initWithContentsOfURL:[NSURL URLWithString:messageString]];
+            }
+            
+        }] resume];
+      */
+    }
+    
+    
     //reset to remove any links
     cell.messageText.string=@"";
     
     cell.messageText.editable=YES;
-    cell.messageText.string =[messageRow objectForKey:@"message"];
+    cell.messageText.string =messageString;
     [cell.messageText checkTextInDocument:nil];
     cell.messageText.editable=NO;
   

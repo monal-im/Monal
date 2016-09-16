@@ -47,6 +47,8 @@
     [super drawRect:dirtyRect];
    // NSLog(@"%@ %f", self.messageText.string, self.messageRect.size.width);
     
+    if(self.attachmentImage) return; 
+    
     CGRect bubbleFrame = self.frame;
     bubbleFrame.origin.y=0;
     bubbleFrame.size.height-=(kCellDefaultPadding);

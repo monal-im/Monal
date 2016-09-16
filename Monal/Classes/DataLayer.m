@@ -2022,6 +2022,18 @@ static DataLayer *sharedInstance=nil;
         
     }
     
+    if([dbversion doubleValue]<1.6)
+    {
+        DDLogVerbose(@"Database version <1.6 detected. Performing upgrade on accounts. ");
+        
+        [self executeNonQuery:@"alter table message_history add column messageType varchar(255);"];
+        [self executeNonQuery:@"update dbversion set dbversion='1.6'; "];
+        
+        DDLogVerbose(@"Upgrade to 1.6 success ");
+        
+    }
+    
+    
     // this point forward OSX might have legacy issues
     
     

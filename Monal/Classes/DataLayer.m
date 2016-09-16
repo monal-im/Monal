@@ -1490,7 +1490,7 @@ static DataLayer *sharedInstance=nil;
 //message history
 -(NSMutableArray*) messageHistory:(NSString*) buddy forAccount:(NSString*) accountNo
 {
-    NSString* query=[NSString stringWithFormat:@"select af, message, thetime, message_history_id, delivered, messageid from (select ifnull(actual_from, message_from) as af, message,     timestamp  as thetime, message_history_id, delivered,messageid from message_history where account_id=%@ and (message_from='%@' or message_to='%@') order by message_history_id desc limit 30) order by thetime asc",accountNo, buddy.escapeForSql, buddy.escapeForSql];
+    NSString* query=[NSString stringWithFormat:@"select af, message, thetime, message_history_id, delivered, messageid from (select ifnull(actual_from, message_from) as af, message,     timestamp  as thetime, message_history_id, delivered,messageid, messageType from message_history where account_id=%@ and (message_from='%@' or message_to='%@') order by message_history_id desc limit 30) order by thetime asc",accountNo, buddy.escapeForSql, buddy.escapeForSql];
     DDLogVerbose(@"%@", query);
     NSMutableArray* toReturn = [self executeReader:query];
     

@@ -392,6 +392,46 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 }
 
 
+-(void) uploadData:(NSData *) data
+{
+    if(!self.uploadHUD) {
+        self.uploadHUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+        self.uploadHUD.removeFromSuperViewOnHide=YES;
+        self.uploadHUD.labelText =@"Uploding";
+        self.uploadHUD.detailsLabelText =@"Upoading file to server";
+        
+    }
+    
+    //if you have configured it, defer to dropbox
+    if(self.restClient)
+    {
+        self.uploadHUD.mode=MBProgressHUDModeDeterminate;
+        self.uploadHUD.progress=0;
+        [self uploadImageToDropBox:data];
+    }
+    else  {
+        [[MLXMPPManager sharedInstance]  httpUploadPngData:data toContact:self.contactName onAccount:self.accountNo withCompletionHandler:^(NSString *url, NSError *error) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                self.uploadHUD.hidden=YES;
+                
+                if(url) {
+                    self.chatInput.text= url;
+                }
+                else  {
+                    UIAlertView *addError = [[UIAlertView alloc]
+                                             initWithTitle:@"There was an error uploading the file to the server"
+                                             message:[NSString stringWithFormat:@"%@", error.localizedDescription]
+                                             delegate:nil cancelButtonTitle:@"Close"
+                                             otherButtonTitles: nil] ;
+                    [addError show];
+                }
+            });
+            
+        }];
+    }
+
+}
+
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<NSString *,
                                id> *)info
 {
@@ -404,42 +444,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         NSData *pngData=  UIImageJPEGRepresentation(selectedImage, 0.5f);
         if(pngData)
         {
-            
-            if(!self.uploadHUD) {
-                self.uploadHUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-                self.uploadHUD.removeFromSuperViewOnHide=YES;
-                self.uploadHUD.labelText =@"Uploding";
-                self.uploadHUD.detailsLabelText =@"Upoading file to server";
-                
-            }
-            
-            //if you have configured it, defer to dropbox
-            if(self.restClient)
-            {
-                self.uploadHUD.mode=MBProgressHUDModeDeterminate;
-                self.uploadHUD.progress=0;
-                [self uploadImageToDropBox:pngData];
-            }
-            else  {
-                [[MLXMPPManager sharedInstance]  httpUploadPngData:pngData toContact:self.contactName onAccount:self.accountNo withCompletionHandler:^(NSString *url, NSError *error) {
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        self.uploadHUD.hidden=YES;
-                        
-                        if(url) {
-                            self.chatInput.text= url;
-                        }
-                        else  {
-                            UIAlertView *addError = [[UIAlertView alloc]
-                                                     initWithTitle:@"There was an error uploading the file to the server"
-                                                     message:[NSString stringWithFormat:@"%@", error.localizedDescription]
-                                                     delegate:nil cancelButtonTitle:@"Close"
-                                                     otherButtonTitles: nil] ;
-                            [addError show];
-                        }
-                    });
-                    
-                }];
-            }
+            [self uploadData:pngData];
         }
         
     }

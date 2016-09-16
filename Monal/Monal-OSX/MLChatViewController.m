@@ -162,7 +162,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     self.progressIndicator.hidden=YES;
 }
 
-
 #pragma mark - Dropbox upload and delegate
 
 - (void) uploadImageToDropBox:(NSData *) imageData {
@@ -202,7 +201,74 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     DDLogVerbose(@"Failed to get Dropbox link with error: %@", error);
 }
 
-#pragma mark - attaching
+#pragma mark uploading attachments
+
+-(void) showNoUploadAlert
+{
+
+    NSAlert *userAddAlert = [[NSAlert alloc] init];
+    userAddAlert.messageText = @"Error";
+    userAddAlert.informativeText =[NSString stringWithFormat:@"This server does not appear to support HTTP file uploads (XEP-0363). Please ask the administrator to enable it. You can also link to DropBox in settings and use that to share files."];
+    userAddAlert.alertStyle=NSInformationalAlertStyle;
+    [userAddAlert addButtonWithTitle:@"Close"];
+    
+    [userAddAlert beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse returnCode) {
+        [self dismissController:self];
+    }];
+    
+}
+
+-(void) uploadData:(NSData *) data
+{
+    
+    xmpp* account=[[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
+    if(!account.supportsHTTPUpload && !self.restClient)
+    {
+        [self showNoUploadAlert];
+        
+        return;
+    }
+    
+    self.progressIndicator.doubleValue=0;
+    self.progressIndicator.hidden=NO;
+    if(self.restClient)
+    {
+        [self uploadImageToDropBox:data];
+    }
+    else {
+        
+        // start http upload XMPP
+        self.progressIndicator.doubleValue=50;
+        [[MLXMPPManager sharedInstance] httpUploadData:data withFilename:@"file" andType:@"file"                                                  toContact:self.contactName onAccount:self.accountNo withCompletionHandler:^(NSString *url, NSError *error) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self endProgressUpdate];
+                if(url) {
+                    self.messageBox.string= url;
+                }
+                else  {
+                    NSAlert *userAddAlert = [[NSAlert alloc] init];
+                    userAddAlert.messageText = @"There was an error uploading the file to the server";
+                    userAddAlert.informativeText =[NSString stringWithFormat:@"%@", error.localizedDescription];
+                    userAddAlert.alertStyle=NSInformationalAlertStyle;
+                    [userAddAlert addButtonWithTitle:@"Close"];
+                    
+                    [userAddAlert beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse returnCode) {
+                        [self dismissController:self];
+                    }];
+                }
+            });
+            
+        }];
+    }
+}
+
+-(void) uploadFile:(NSURL *) fileURL
+{
+    NSData *data =  [NSData dataWithContentsOfURL:fileURL];
+    [self uploadData:data];
+}
+
+
 
 -(IBAction)attach:(id)sender
 {
@@ -215,17 +281,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     xmpp* account=[[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
     if(!account.supportsHTTPUpload && !self.restClient)
     {
-        NSAlert *userAddAlert = [[NSAlert alloc] init];
-        userAddAlert.messageText = @"Error";
-        userAddAlert.informativeText =[NSString stringWithFormat:@"This server does not appear to support HTTP file uploads (XEP-0363). Please ask the administrator to enable it. You can also link to DropBox in settings and use that to share files."];
-        userAddAlert.alertStyle=NSInformationalAlertStyle;
-        [userAddAlert addButtonWithTitle:@"Close"];
-        
-        [userAddAlert beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse returnCode) {
-            [self dismissController:self];
-        }];
-        
-        return;
+        [self showNoUploadAlert];
     }
     
     //select file
@@ -234,38 +290,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         switch(result){
             case NSFileHandlingPanelOKButton:
             {
-                self.progressIndicator.doubleValue=0;
-                self.progressIndicator.hidden=NO;
-                if(self.restClient)
-                {
-                    NSData *fileData= [NSData dataWithContentsOfURL:openPanel.URL];
-                    [self uploadImageToDropBox:fileData];
-                }
-                else {
-                
-                // start http upload XMPP
-                self.progressIndicator.doubleValue=50;
-                [[MLXMPPManager sharedInstance]  httpUploadFileURL:openPanel.URL toContact:self.contactName onAccount:self.accountNo withCompletionHandler:^(NSString *url, NSError *error) {
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        [self endProgressUpdate];
-                        if(url) {
-                            self.messageBox.string= url;
-                        }
-                        else  {
-                            NSAlert *userAddAlert = [[NSAlert alloc] init];
-                            userAddAlert.messageText = @"There was an error uploading the file to the server";
-                            userAddAlert.informativeText =[NSString stringWithFormat:@"%@", error.localizedDescription];
-                            userAddAlert.alertStyle=NSInformationalAlertStyle;
-                            [userAddAlert addButtonWithTitle:@"Close"];
-                            
-                            [userAddAlert beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse returnCode) {
-                                [self dismissController:self];
-                            }];
-                        }
-                    });
-                    
-                }];
-                }
+                [self uploadFile:openPanel.URL];
                 break;
             }
             case NSFileHandlingPanelCancelButton:
@@ -474,13 +499,30 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(IBAction)sendText:(id)sender
 {
+
     self.progressIndicator.doubleValue=0;
     self.progressIndicator.hidden=NO;
+    
+    [self.messageBox.textStorage enumerateAttribute:NSAttachmentAttributeName
+                            inRange:NSMakeRange(0, self.messageBox.textStorage.length)
+                            options:0
+                         usingBlock:^(id value, NSRange range, BOOL *stop)
+     {
+         NSTextAttachment* attachment = (NSTextAttachment*)value;
+         NSData* attachmentData = attachment.fileWrapper.regularFileContents;
+         if(attachmentData)
+         {
+             [self uploadData:attachmentData];
+         }
+        
+     }];
+    
     NSString *message= [self.messageBox.string copy];
+    message = [message stringByReplacingOccurrencesOfString:@"\U0000fffc" withString:@""];
     if(message.length>0) {
         [self sendMessage:[self.messageBox.string copy] andMessageID:nil];
-        self.messageBox.string=@"";
     }
+    self.messageBox.string=@"";
 }
 
 

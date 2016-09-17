@@ -1324,7 +1324,7 @@ Gw
                                                             <rect key="frame" x="1" y="117" width="490" height="200"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
-                                                                <button hidden="YES" verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Xjf-lh-VS8">
+                                                                <button hidden="YES" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Xjf-lh-VS8">
                                                                     <rect key="frame" x="156" y="75" width="21" height="21"/>
                                                                     <constraints>
                                                                         <constraint firstAttribute="height" constant="21" id="bK2-C6-LUE"/>
@@ -1350,23 +1350,31 @@ Gw
                                                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                     </textFieldCell>
                                                                 </textField>
-                                                                <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="QXw-3q-zll">
-                                                                    <rect key="frame" x="195" y="3" width="277" height="170"/>
-                                                                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="NSNetwork" id="CpC-x2-VDZ"/>
-                                                                </imageView>
+                                                                <button translatesAutoresizingMaskIntoConstraints="NO" id="PHn-da-UBI">
+                                                                    <rect key="frame" x="195" y="3" width="292" height="175"/>
+                                                                    <constraints>
+                                                                        <constraint firstAttribute="height" constant="175" id="B2v-bM-xIC"/>
+                                                                        <constraint firstAttribute="height" constant="175" id="JgN-R6-tcd"/>
+                                                                        <constraint firstAttribute="width" constant="292" id="k1B-lz-Gyu"/>
+                                                                    </constraints>
+                                                                    <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" imagePosition="only" alignment="center" imageScaling="proportionallyUpOrDown" inset="2" id="9ym-AJ-Jqw">
+                                                                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                                                        <font key="font" metaFont="system"/>
+                                                                    </buttonCell>
+                                                                </button>
                                                             </subviews>
                                                             <constraints>
                                                                 <constraint firstItem="Xjf-lh-VS8" firstAttribute="centerY" secondItem="AA0-Za-mMq" secondAttribute="centerY" constant="14.5" id="8XI-oK-g67"/>
+                                                                <constraint firstAttribute="trailing" secondItem="PHn-da-UBI" secondAttribute="trailing" constant="3" id="HKH-n7-fKE"/>
                                                                 <constraint firstItem="Xjf-lh-VS8" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="AA0-Za-mMq" secondAttribute="leading" constant="50" id="JgW-La-sN9"/>
-                                                                <constraint firstAttribute="bottom" secondItem="QXw-3q-zll" secondAttribute="bottom" constant="3" id="KhJ-df-BKO"/>
-                                                                <constraint firstAttribute="trailing" secondItem="QXw-3q-zll" secondAttribute="trailing" constant="20" id="LSi-47-oQL"/>
-                                                                <constraint firstItem="QXw-3q-zll" firstAttribute="leading" secondItem="Xjf-lh-VS8" secondAttribute="trailing" constant="18" id="SVk-2B-9Ad"/>
-                                                                <constraint firstItem="QXw-3q-zll" firstAttribute="top" secondItem="Bab-Se-qo9" secondAttribute="bottom" constant="8" id="XdY-12-akJ"/>
+                                                                <constraint firstItem="PHn-da-UBI" firstAttribute="leading" secondItem="Xjf-lh-VS8" secondAttribute="trailing" constant="18" id="N0T-A4-S1L"/>
+                                                                <constraint firstAttribute="bottom" secondItem="PHn-da-UBI" secondAttribute="bottom" constant="3" id="QrU-uu-r2m"/>
                                                                 <constraint firstItem="Bab-Se-qo9" firstAttribute="top" secondItem="AA0-Za-mMq" secondAttribute="top" constant="5" id="oUl-k2-OKu"/>
+                                                                <constraint firstItem="PHn-da-UBI" firstAttribute="top" secondItem="Bab-Se-qo9" secondAttribute="bottom" constant="3" id="tHr-9v-LrG"/>
                                                                 <constraint firstItem="Bab-Se-qo9" firstAttribute="centerX" secondItem="AA0-Za-mMq" secondAttribute="centerX" id="xBT-bV-bIA"/>
                                                             </constraints>
                                                             <connections>
-                                                                <outlet property="attachmentImage" destination="QXw-3q-zll" id="yxT-nC-oPl"/>
+                                                                <outlet property="attachmentImage" destination="PHn-da-UBI" id="Y9B-YB-576"/>
                                                                 <outlet property="retry" destination="Xjf-lh-VS8" id="2jc-Zz-S0i"/>
                                                                 <outlet property="timeStamp" destination="Bab-Se-qo9" id="x9D-y8-ssT"/>
                                                                 <outlet property="timeStampHeight" destination="iR3-Zk-9RU" id="L6y-pt-GkW"/>
@@ -2189,7 +2197,6 @@ Gw
         <image name="770-paper-clip" width="28" height="27"/>
         <image name="907-plus-rounded-square" width="28" height="28"/>
         <image name="Disconnected" width="26" height="26"/>
-        <image name="NSNetwork" width="32" height="32"/>
         <image name="NotificationBubble" width="22" height="22"/>
         <image name="XMPP" width="27.840000152587891" height="27.840000152587891"/>
         <image name="noicon" width="44" height="44"/>

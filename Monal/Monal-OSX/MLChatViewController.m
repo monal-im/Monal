@@ -617,7 +617,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     
     NSString *messageString =[messageRow objectForKey:@"message"];
-    if([messageString hasPrefix:@"http://"]||[messageString hasPrefix:@"https://"])
+    NSString *messageType =[messageRow objectForKey:kMessageType];
+    if([messageType isEqualToString:kMessageTypeImage])
     {
         cell = [tableView makeViewWithIdentifier:@"OutboundImageCell" owner:self];
 
@@ -625,32 +626,17 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             cell.attachmentImage.image = [[NSImage alloc] initWithContentsOfURL:[NSURL URLWithString:messageString]];
         });
         
-        
-     /*   NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:messageString]];
-        request.HTTPMethod=@"HEAD";
-        request.cachePolicy= NSURLRequestReturnCacheDataElseLoad;
-        
-        NSURLSession *session = [NSURLSession sharedSession];
-        [[session dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
-            NSDictionary *headers= ((NSHTTPURLResponse *)response).allHeaderFields;
-            NSString *contentType = [headers objectForKey:@"Content-Type"];
-            if([contentType hasPrefix:@"image/"])
-            {
-                cell.attachmentImage.image = [[NSImage alloc] initWithContentsOfURL:[NSURL URLWithString:messageString]];
-            }
-            
-        }] resume];
-      */
     }
-    
-    
-    //reset to remove any links
-    cell.messageText.string=@"";
-    
-    cell.messageText.editable=YES;
-    cell.messageText.string =messageString;
-    [cell.messageText checkTextInDocument:nil];
-    cell.messageText.editable=NO;
+    else  {
+        
+        //reset to remove any links
+        cell.messageText.string=@"";
+        
+        cell.messageText.editable=YES;
+        cell.messageText.string =messageString;
+        [cell.messageText checkTextInDocument:nil];
+        cell.messageText.editable=NO;
+    }
   
     BOOL showTime=[self shouldShowTimeForRow:row];
  

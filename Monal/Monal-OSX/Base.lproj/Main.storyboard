@@ -1360,6 +1360,9 @@ Gw
                                                                     <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" imagePosition="only" alignment="center" imageScaling="proportionallyUpOrDown" inset="2" id="9ym-AJ-Jqw">
                                                                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                                         <font key="font" metaFont="system"/>
+                                                                        <connections>
+                                                                            <action selector="showImagePreview:" target="qLp-oS-WKI" id="O44-Nm-PRw"/>
+                                                                        </connections>
                                                                     </buttonCell>
                                                                 </button>
                                                             </subviews>

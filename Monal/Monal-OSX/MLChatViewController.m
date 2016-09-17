@@ -35,11 +35,13 @@
 @property (nonatomic, strong) NSString *jid;
 @property (nonatomic, assign) BOOL isMUC;
 
+@property (nonatomic, strong) QLPreviewPanel *QLPreview;
+
 @property (nonatomic, strong) DBRestClient *restClient;
 
 @end
 
-@implementation MLChatViewController
+@implementation MLChatViewController 
 
 static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
@@ -68,7 +70,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     [self refreshData];
     [self updateWindowForContact:self.contactDic];
-    
+        
 }
 
 
@@ -78,6 +80,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     if((self.view.window.occlusionState & NSWindowOcclusionStateVisible)) {
         [self markAsRead];
     }
+    
+    MLMainWindow *window =(MLMainWindow *)self.view.window.windowController;
+    window.chatViewController= self;
 }
 
 -(void) dealloc
@@ -623,7 +628,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         cell = [tableView makeViewWithIdentifier:@"OutboundImageCell" owner:self];
 
         dispatch_async(dispatch_get_main_queue(), ^{
-            cell.attachmentImage.image = [[NSImage alloc] initWithContentsOfURL:[NSURL URLWithString:messageString]];
+            NSMutableURLRequest *imageRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:messageString]];
+            imageRequest.cachePolicy= NSURLRequestReturnCacheDataElseLoad;
+            [[[NSURLSession sharedSession] dataTaskWithRequest:imageRequest completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+                if(data) {
+                    cell.attachmentImage.image = [[NSImage alloc] initWithData:data];
+                }
+            }] resume];
+            
         });
         
     }
@@ -764,5 +776,33 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         }
     return YES;
 }
+
+#pragma mark - quick look
+
+-(IBAction)showImagePreview:(id)sender
+{
+    self.QLPreview = [QLPreviewPanel sharedPreviewPanel];
+    if(self.QLPreview.isVisible)
+    {
+        [self.QLPreview  orderOut:self];
+    }
+    else  {
+        [self.QLPreview makeKeyAndOrderFront:self];
+    }
+}
+
+#pragma mark - quicklook datasource
+- (NSInteger)numberOfPreviewItemsInPreviewPanel:(QLPreviewPanel *)panel
+{
+    return 1; 
+}
+
+- (id<QLPreviewItem>)previewPanel:(QLPreviewPanel *)panel
+               previewItemAtIndex:(NSInteger)index
+{
+    return nil;
+}
+
+
 
 @end

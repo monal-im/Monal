@@ -219,4 +219,23 @@
      [[MLXMPPManager sharedInstance] setClientsActive];
 }
 
+#pragma mark - quick look controller
+
+- (BOOL)acceptsPreviewPanelControl:(QLPreviewPanel *)panel
+{
+    return YES;
+}
+
+- (void)beginPreviewPanelControl:(QLPreviewPanel *)panel
+{
+    panel.delegate = self.chatViewController;
+    panel.dataSource = self.chatViewController;
+}
+
+- (void)endPreviewPanelControl:(QLPreviewPanel *)panel
+{
+    
+}
+
+
 @end

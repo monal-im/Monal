@@ -1982,88 +1982,6 @@ Gw
             <point key="canvasLocation" x="-365" y="-449"/>
         </scene>
         <!--Preferences-Display-->
-        <scene sceneID="744-64-dVT">
-            <objects>
-                <viewController title="Display" storyboardIdentifier="display" id="Fsj-KR-oZF" userLabel="Preferences-Display" customClass="MLDisplaySettings" sceneMemberID="viewController">
-                    <view key="view" id="I2p-fx-HiD">
-                        <rect key="frame" x="0.0" y="0.0" width="357" height="278"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                        <subviews>
-                            <box autoresizesSubviews="NO" fixedFrame="YES" borderType="line" title="Messages" translatesAutoresizingMaskIntoConstraints="NO" id="oX9-oT-hyp">
-                                <rect key="frame" x="17" y="134" width="315" height="124"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <view key="contentView" id="2tK-CS-f21">
-                                    <rect key="frame" x="1" y="1" width="313" height="108"/>
-                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                    <subviews>
-                                        <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="eOr-sf-HH7">
-                                            <rect key="frame" x="16" y="55" width="147" height="18"/>
-                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <buttonCell key="cell" type="check" title="Play Sound in Alerts" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="n3m-Sz-lfP">
-                                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                                                <font key="font" metaFont="system"/>
-                                            </buttonCell>
-                                        </button>
-                                        <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="bU2-9n-Huc">
-                                            <rect key="frame" x="16" y="82" width="86" height="18"/>
-                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <buttonCell key="cell" type="check" title="Log Chats" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="TqY-eW-Hyn">
-                                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                                                <font key="font" metaFont="system"/>
-                                            </buttonCell>
-                                        </button>
-                                        <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="0zM-pL-s0v">
-                                            <rect key="frame" x="16" y="26" width="176" height="18"/>
-                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <buttonCell key="cell" type="check" title="Show Message Previews" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="EiD-OI-e7L">
-                                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                                                <font key="font" metaFont="system"/>
-                                            </buttonCell>
-                                        </button>
-                                    </subviews>
-                                </view>
-                            </box>
-                            <box autoresizesSubviews="NO" fixedFrame="YES" borderType="line" title="Contact List" translatesAutoresizingMaskIntoConstraints="NO" id="HC0-tT-Vrp">
-                                <rect key="frame" x="17" y="16" width="323" height="114"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <view key="contentView" id="gWV-SF-cn9">
-                                    <rect key="frame" x="1" y="1" width="321" height="98"/>
-                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                    <subviews>
-                                        <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Aj2-Ry-UbA">
-                                            <rect key="frame" x="16" y="65" width="160" height="18"/>
-                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <buttonCell key="cell" type="check" title="Show Offline Contacts" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="yVy-qL-e6l">
-                                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                                                <font key="font" metaFont="system"/>
-                                            </buttonCell>
-                                        </button>
-                                        <button hidden="YES" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="wqn-G2-bPL">
-                                            <rect key="frame" x="16" y="42" width="171" height="18"/>
-                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <buttonCell key="cell" type="check" title="Sort Contacts By Status" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="EKW-fs-GGc">
-                                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                                                <font key="font" metaFont="system"/>
-                                            </buttonCell>
-                                        </button>
-                                    </subviews>
-                                </view>
-                            </box>
-                        </subviews>
-                    </view>
-                    <connections>
-                        <outlet property="chatLogs" destination="bU2-9n-Huc" id="CYX-Yp-nbb"/>
-                        <outlet property="playSounds" destination="eOr-sf-HH7" id="szY-zI-LiR"/>
-                        <outlet property="showMessagePreview" destination="0zM-pL-s0v" id="7Xx-tF-0u4"/>
-                        <outlet property="showOffline" destination="Aj2-Ry-UbA" id="CIi-vM-KqL"/>
-                        <outlet property="sortByStatus" destination="wqn-G2-bPL" id="bdg-jh-ige"/>
-                    </connections>
-                </viewController>
-                <customObject id="blJ-dl-OT7" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="-182.5" y="-824"/>
-        </scene>
-        <!--Preferences-Display-->
         <scene sceneID="Wmh-tx-gcD">
             <objects>
                 <viewController title="Cloud Storage" storyboardIdentifier="cloudStorage" id="att-OF-UKh" userLabel="Preferences-Display" customClass="MLCloudStorageSettings" sceneMemberID="viewController">
@@ -2131,18 +2049,18 @@ Gw
             <objects>
                 <viewController title="Display" storyboardIdentifier="display" id="t3n-LA-K5d" userLabel="Preferences-Display" customClass="MLDisplaySettings" sceneMemberID="viewController">
                     <view key="view" id="Otv-yq-PlF">
-                        <rect key="frame" x="0.0" y="0.0" width="357" height="278"/>
+                        <rect key="frame" x="0.0" y="0.0" width="357" height="314"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <box autoresizesSubviews="NO" fixedFrame="YES" borderType="line" title="Messages" translatesAutoresizingMaskIntoConstraints="NO" id="TdV-QY-JTC">
-                                <rect key="frame" x="17" y="134" width="315" height="124"/>
+                                <rect key="frame" x="17" y="134" width="315" height="160"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <view key="contentView" id="6yd-rA-n1t">
-                                    <rect key="frame" x="1" y="1" width="313" height="108"/>
+                                    <rect key="frame" x="1" y="1" width="313" height="144"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="6Qq-rk-L4J">
-                                            <rect key="frame" x="16" y="55" width="147" height="18"/>
+                                            <rect key="frame" x="16" y="91" width="147" height="18"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <buttonCell key="cell" type="check" title="Play Sound in Alerts" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="gI6-eD-anL">
                                                 <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -2150,7 +2068,7 @@ Gw
                                             </buttonCell>
                                         </button>
                                         <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="deu-GA-sXN">
-                                            <rect key="frame" x="16" y="82" width="86" height="18"/>
+                                            <rect key="frame" x="16" y="118" width="86" height="18"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <buttonCell key="cell" type="check" title="Log Chats" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="U5d-qg-pxo">
                                                 <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -2158,13 +2076,30 @@ Gw
                                             </buttonCell>
                                         </button>
                                         <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="VAp-fJ-tj8">
-                                            <rect key="frame" x="16" y="26" width="176" height="18"/>
+                                            <rect key="frame" x="16" y="62" width="176" height="18"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <buttonCell key="cell" type="check" title="Show Message Previews" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="I55-yV-lY3">
                                                 <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                 <font key="font" metaFont="system"/>
                                             </buttonCell>
                                         </button>
+                                        <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="XSW-QE-Y8f">
+                                            <rect key="frame" x="16" y="35" width="176" height="18"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                            <buttonCell key="cell" type="check" title="Show Images Inline" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="i3b-4p-CtR">
+                                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                <font key="font" metaFont="system"/>
+                                            </buttonCell>
+                                        </button>
+                                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="SFL-xo-JTb">
+                                            <rect key="frame" x="36" y="12" width="241" height="17"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Will make a HTTP HEAD call on all links" id="GrL-UF-kau">
+                                                <font key="font" metaFont="system"/>
+                                                <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                            </textFieldCell>
+                                        </textField>
                                     </subviews>
                                 </view>
                             </box>
@@ -2199,6 +2134,7 @@ Gw
                     <connections>
                         <outlet property="chatLogs" destination="deu-GA-sXN" id="FiJ-a7-3Bz"/>
                         <outlet property="playSounds" destination="6Qq-rk-L4J" id="QLq-US-xBX"/>
+                        <outlet property="showImages" destination="XSW-QE-Y8f" id="eUB-y5-31P"/>
                         <outlet property="showMessagePreview" destination="VAp-fJ-tj8" id="klm-Cl-yF7"/>
                         <outlet property="showOffline" destination="Dcg-lY-lbf" id="YWM-e3-CuR"/>
                         <outlet property="sortByStatus" destination="HEu-mZ-vU9" id="DKS-au-KcU"/>
@@ -2206,7 +2142,7 @@ Gw
                 </viewController>
                 <customObject id="0kp-iY-dhW" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-182.5" y="-824"/>
+            <point key="canvasLocation" x="-182.5" y="-806"/>
         </scene>
     </scenes>
     <resources>

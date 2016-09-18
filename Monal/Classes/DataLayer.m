@@ -2066,7 +2066,7 @@ static DataLayer *sharedInstance=nil;
 -(void) messageTypeForMessage:(NSString *) messageString withCompletion:(void(^)(NSString *messageType)) completion
 {
     __block NSString *messageType=kMessageTypeText;
-    if([messageString hasPrefix:@"http://"]||[messageString hasPrefix:@"https://"])
+    if ([[NSUserDefaults standardUserDefaults] boolForKey: @"ShowImages"] &&  ([messageString hasPrefix:@"http://"]||[messageString hasPrefix:@"https://"]))
     {
         
         NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:messageString]];

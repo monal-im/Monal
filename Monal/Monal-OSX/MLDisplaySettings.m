@@ -30,7 +30,7 @@
     self.showOffline.state = [[[NSUserDefaults standardUserDefaults] objectForKey:@"OfflineContact"] boolValue];
     
     self.sortByStatus.state = [[[NSUserDefaults standardUserDefaults] objectForKey:@"SortContacts"] boolValue];
-
+    self.showImages.state = [[NSUserDefaults standardUserDefaults] boolForKey: @"ShowImages"] ;
 }
 
 
@@ -43,7 +43,9 @@
     [[NSUserDefaults standardUserDefaults] setBool:self.showOffline.state  forKey: @"OfflineContact"];
     
     [[NSUserDefaults standardUserDefaults] setBool:self.sortByStatus.state  forKey: @"SortContacts"];
-   
+    [[NSUserDefaults standardUserDefaults] setBool:self.showImages.state  forKey: @"ShowImages"];
+    
+    
 }
 
 

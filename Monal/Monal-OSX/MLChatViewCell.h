@@ -23,6 +23,7 @@
 @property (nonatomic, weak) IBOutlet NSImageView *senderIcon;
 
 @property (nonatomic, weak) IBOutlet NSButton *attachmentImage;
+@property (nonatomic, strong) NSData *imageData; 
 
 @property (nonatomic, assign) BOOL isInbound;
 @property (nonatomic, assign) NSRect messageRect;

@@ -16,6 +16,8 @@
 		2601D9D40FBF262E004DB939 /* libsqlite3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2601D9D30FBF262E004DB939 /* libsqlite3.dylib */; };
 		2602837D1D8DD30E001DD6B8 /* QuickLook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2602837C1D8DD30E001DD6B8 /* QuickLook.framework */; };
 		2602837F1D8DD56B001DD6B8 /* Quartz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2602837E1D8DD56B001DD6B8 /* Quartz.framework */; };
+		260283861D8DEFC1001DD6B8 /* MLPreviewObject.m in Sources */ = {isa = PBXBuildFile; fileRef = 260283851D8DEFC1001DD6B8 /* MLPreviewObject.m */; };
+		260283871D8DEFC1001DD6B8 /* MLPreviewObject.m in Sources */ = {isa = PBXBuildFile; fileRef = 260283851D8DEFC1001DD6B8 /* MLPreviewObject.m */; };
 		260447F60FEED62100B3B5A7 /* BuddyDetails.xib in Resources */ = {isa = PBXBuildFile; fileRef = 260447F50FEED62100B3B5A7 /* BuddyDetails.xib */; };
 		260499E21B730E9000D11866 /* xmpp.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D0177F08F50039634B /* xmpp.m */; };
 		260499E31B730E9500D11866 /* MLXMLNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D3177F44AD0039634B /* MLXMLNode.m */; };
@@ -463,6 +465,8 @@
 		2601D9D30FBF262E004DB939 /* libsqlite3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.dylib; path = usr/lib/libsqlite3.dylib; sourceTree = SDKROOT; };
 		2602837C1D8DD30E001DD6B8 /* QuickLook.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickLook.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk/System/Library/Frameworks/QuickLook.framework; sourceTree = DEVELOPER_DIR; };
 		2602837E1D8DD56B001DD6B8 /* Quartz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quartz.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk/System/Library/Frameworks/Quartz.framework; sourceTree = DEVELOPER_DIR; };
+		260283841D8DEFC1001DD6B8 /* MLPreviewObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLPreviewObject.h; sourceTree = "<group>"; };
+		260283851D8DEFC1001DD6B8 /* MLPreviewObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLPreviewObject.m; sourceTree = "<group>"; };
 		260447F50FEED62100B3B5A7 /* BuddyDetails.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = BuddyDetails.xib; sourceTree = "<group>"; };
 		26049A501B7314F400D11866 /* libjrtplib-static-OSX.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libjrtplib-static-OSX.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		26049A5A1B73163300D11866 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/System/Library/Frameworks/AVFoundation.framework; sourceTree = DEVELOPER_DIR; };
@@ -1220,6 +1224,8 @@
 		266272B21B27DB8000C1CD49 /* Monal-OSX */ = {
 			isa = PBXGroup;
 			children = (
+				260283841D8DEFC1001DD6B8 /* MLPreviewObject.h */,
+				260283851D8DEFC1001DD6B8 /* MLPreviewObject.m */,
 				2638DAE11B68F2EE00DF05AC /* Preferences */,
 				261199061B632B17008768C8 /* External */,
 				2661D3511B40823E00EC51BA /* Monal-OSX.entitlements */,
@@ -2324,6 +2330,7 @@
 				261147D71C35D7860078A72E /* NXOAuth2Account.m in Sources */,
 				262D9EAA17921E82009292B4 /* XMPPMessage.m in Sources */,
 				261147E51C35D7860078A72E /* NXOAuth2PostBodyStream.m in Sources */,
+				260283861D8DEFC1001DD6B8 /* MLPreviewObject.m in Sources */,
 				26EE8B1C179B55D2006781F3 /* ParseChallenge.m in Sources */,
 				261147DB1C35D7860078A72E /* NXOAuth2Client.m in Sources */,
 				26C3EDF71A8072D5000E6331 /* ParseEnabled.m in Sources */,
@@ -2453,6 +2460,7 @@
 				26B2A4F41B73097500272E63 /* DDFileLogger.m in Sources */,
 				260499F11B73141500D11866 /* EncodingTools.m in Sources */,
 				260499E61B730E9E00D11866 /* XMPPMessage.m in Sources */,
+				260283871D8DEFC1001DD6B8 /* MLPreviewObject.m in Sources */,
 				265F6BA21B7B0040006B8EBA /* MLImageManager.m in Sources */,
 				2661D3441B40766F00EC51BA /* MLChatViewController.m in Sources */,
 				26B2A4BE1B7306E500272E63 /* DataLayer.m in Sources */,

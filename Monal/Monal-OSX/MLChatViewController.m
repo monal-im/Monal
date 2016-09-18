@@ -13,6 +13,7 @@
 #import "MLXMPPManager.h"
 #import "MLChatViewCell.h"
 #import "MLImageManager.h"
+#import "MLPreviewObject.h"
 
 #import <DropboxOSX/DropboxOSX.h>
 
@@ -36,6 +37,7 @@
 @property (nonatomic, assign) BOOL isMUC;
 
 @property (nonatomic, strong) QLPreviewPanel *QLPreview;
+@property (nonatomic, strong) NSData *tmpPreviewImageData;
 
 @property (nonatomic, strong) DBRestClient *restClient;
 
@@ -631,6 +633,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             NSMutableURLRequest *imageRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:messageString]];
             imageRequest.cachePolicy= NSURLRequestReturnCacheDataElseLoad;
             [[[NSURLSession sharedSession] dataTaskWithRequest:imageRequest completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+                 cell.imageData= data;
                 if(data) {
                     cell.attachmentImage.image = [[NSImage alloc] initWithData:data];
                 }
@@ -787,6 +790,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         [self.QLPreview  orderOut:self];
     }
     else  {
+        
+        NSButton *button =(NSButton*) sender;
+        MLChatViewCell *cell = (MLChatViewCell *)button.superview;
+        self.tmpPreviewImageData = cell.imageData;
+        
         [self.QLPreview makeKeyAndOrderFront:self];
     }
 }
@@ -800,7 +808,20 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 - (id<QLPreviewItem>)previewPanel:(QLPreviewPanel *)panel
                previewItemAtIndex:(NSInteger)index
 {
-    return nil;
+    
+    MLPreviewObject *preview = [[MLPreviewObject alloc] init];
+    preview.previewItemTitle=@"Image Preview";
+  
+    NSString* tmpFilePath = [NSString stringWithFormat:@"%@tmp.png", NSTemporaryDirectory()];
+    BOOL writeSuccess= [self.tmpPreviewImageData writeToFile:tmpFilePath atomically:YES];
+    
+    if(!writeSuccess)
+    {
+        DDLogError(@"Could not write tmp file %@", tmpFilePath);
+    }
+    
+    preview.previewItemURL =[NSURL URLWithString:[NSString stringWithFormat:@"file://%@",tmpFilePath]];
+    return preview;
 }
 
 

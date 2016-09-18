@@ -148,6 +148,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     NSInteger bottom = [self.chatTable numberOfRows];
     if(bottom>0)
     {
+        
         [self.chatTable scrollRowToVisible:bottom-1];
     }
 }
@@ -645,18 +646,18 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         cell = [tableView makeViewWithIdentifier:cellDirectionID owner:self];
         cell.attachmentImage.image=nil;
         
-        dispatch_async(dispatch_get_main_queue(), ^{
-            NSMutableURLRequest *imageRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:messageString]];
-            imageRequest.cachePolicy= NSURLRequestReturnCacheDataElseLoad;
-            [[[NSURLSession sharedSession] dataTaskWithRequest:imageRequest completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
-                 cell.imageData= data;
+        
+        NSMutableURLRequest *imageRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:messageString]];
+        imageRequest.cachePolicy= NSURLRequestReturnCacheDataElseLoad;
+        [[[NSURLSession sharedSession] dataTaskWithRequest:imageRequest completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+            cell.imageData= data;
+            dispatch_async(dispatch_get_main_queue(), ^{
                 if(data) {
                     cell.attachmentImage.image = [[NSImage alloc] initWithData:data];
                 }
-            }] resume];
-            
-        });
-        
+            });
+        }] resume];
+ 
     }
     else  {
         
@@ -822,7 +823,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         MLChatViewCell *cell = (MLChatViewCell *)button.superview;
         self.tmpPreviewImageData = cell.imageData;
         
-        [self.QLPreview makeKeyAndOrderFront:self];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.QLPreview makeKeyAndOrderFront:self];
+        });
+
     }
 }
 

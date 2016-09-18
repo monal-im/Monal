@@ -808,6 +808,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     return YES;
 }
 
+
+
 #pragma mark - quick look
 
 -(IBAction)showImagePreview:(id)sender
@@ -822,11 +824,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         NSButton *button =(NSButton*) sender;
         MLChatViewCell *cell = (MLChatViewCell *)button.superview;
         self.tmpPreviewImageData = cell.imageData;
+        [self.view.window makeFirstResponder:self.view];
+        [self.QLPreview makeKeyAndOrderFront:self];
         
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self.QLPreview makeKeyAndOrderFront:self];
-        });
-
     }
 }
 
@@ -854,6 +854,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     preview.previewItemURL =[NSURL URLWithString:[NSString stringWithFormat:@"file://%@",tmpFilePath]];
     return preview;
 }
+
 
 
 

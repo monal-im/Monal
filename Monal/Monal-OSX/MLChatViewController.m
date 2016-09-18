@@ -606,15 +606,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         cell.isInbound= NO;
         cell.messageText.textColor = [NSColor whiteColor];
         cell.messageText.linkTextAttributes =@{NSForegroundColorAttributeName:[NSColor whiteColor], NSUnderlineStyleAttributeName: @YES};
-        
-        if([[messageRow objectForKey:@"delivered"] boolValue]!=YES)
-        {
-            cell.deliveryFailed=YES;
-            cell.retry.tag= [[messageRow objectForKey:@"message_history_id"] integerValue];
-        }
-        else  {
-            cell.deliveryFailed=NO;
-        }
     
     }
     else  {
@@ -627,7 +618,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     NSString *messageType =[messageRow objectForKey:kMessageType];
     if([messageType isEqualToString:kMessageTypeImage])
     {
-        cell = [tableView makeViewWithIdentifier:@"OutboundImageCell" owner:self];
+        NSString* cellDirectionID = @"InboundImageCell";
+        if([[messageRow objectForKey:@"af"] isEqualToString:self.jid]) {
+            cellDirectionID=@"OutboundImageCell";
+        }
+        
+        cell = [tableView makeViewWithIdentifier:cellDirectionID owner:self];
 
         dispatch_async(dispatch_get_main_queue(), ^{
             NSMutableURLRequest *imageRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:messageString]];
@@ -651,6 +647,17 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         cell.messageText.string =messageString;
         [cell.messageText checkTextInDocument:nil];
         cell.messageText.editable=NO;
+    }
+    
+    
+    
+    if([[messageRow objectForKey:@"delivered"] boolValue]!=YES)
+    {
+        cell.deliveryFailed=YES;
+        cell.retry.tag= [[messageRow objectForKey:@"message_history_id"] integerValue];
+    }
+    else  {
+        cell.deliveryFailed=NO;
     }
   
     BOOL showTime=[self shouldShowTimeForRow:row];

@@ -1271,21 +1271,23 @@ static DataLayer *sharedInstance=nil;
             NSString* dateString = [formatter stringFromDate:destinationDate];
             
             // in the event it is a message from the room
-            
-            //all messages default to unread
-            NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, %@, '%@',  '%@', '%@', '%@', '%@',%d,%d,'%@');", accountNo, from.escapeForSql, to.escapeForSql, 	dateString, message.escapeForSql, actualfrom.escapeForSql,unread, delivered, messageid.escapeForSql];
-            DDLogVerbose(@"%@",query);
-            [self executeNonQuery:query withCompletion:^(BOOL success) {
+            [self messageTypeForMessage:message withCompletion:^(NSString *messageType) {
                 
-                if(!success)
-                {
-                    DDLogError(@"failed to insert ");
-                }
-                
-                if(completion)
-                {
-                    completion(success);
-                }
+                //all messages default to unread
+                NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, %@, '%@',  '%@', '%@', '%@', '%@',%d,%d,'%@', '%@');", accountNo, from.escapeForSql, to.escapeForSql, 	dateString, message.escapeForSql, actualfrom.escapeForSql,unread, delivered, messageid.escapeForSql,messageType];
+                DDLogVerbose(@"%@",query);
+                [self executeNonQuery:query withCompletion:^(BOOL success) {
+                    
+                    if(!success)
+                    {
+                        DDLogError(@"failed to insert ");
+                    }
+                    
+                    if(completion)
+                    {
+                        completion(success);
+                    }
+                }];
             }];
         }
         

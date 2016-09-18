@@ -1114,13 +1114,13 @@ Gw
                             <progressIndicator wantsLayer="YES" maxValue="100" displayedWhenStopped="NO" controlSize="small" style="bar" translatesAutoresizingMaskIntoConstraints="NO" id="VSu-xb-ucW">
                                 <rect key="frame" x="0.0" y="101" width="493" height="12"/>
                             </progressIndicator>
-                            <scrollView borderType="none" autohidesScrollers="YES" horizontalLineScroll="58" horizontalPageScroll="10" verticalLineScroll="58" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="eNE-em-qs3">
+                            <scrollView borderType="none" autohidesScrollers="YES" horizontalLineScroll="202" horizontalPageScroll="10" verticalLineScroll="202" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="eNE-em-qs3">
                                 <rect key="frame" x="0.0" y="113" width="493" height="384"/>
                                 <clipView key="contentView" id="hQs-06-XXl">
                                     <rect key="frame" x="0.0" y="0.0" width="493" height="384"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
-                                        <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" selectionHighlightStyle="none" columnReordering="NO" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" typeSelect="NO" rowHeight="56" rowSizeStyle="automatic" viewBased="YES" id="Rsm-HI-GDG">
+                                        <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" selectionHighlightStyle="none" columnReordering="NO" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" typeSelect="NO" rowHeight="200" rowSizeStyle="automatic" viewBased="YES" id="Rsm-HI-GDG">
                                             <rect key="frame" x="0.0" y="0.0" width="493" height="384"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <size key="intercellSpacing" width="3" height="2"/>
@@ -1235,8 +1235,82 @@ Gw
                                                                 <outlet property="timeStampVeritcalOffset" destination="Znw-ti-iud" id="Pjg-pu-u50"/>
                                                             </connections>
                                                         </tableCellView>
+                                                        <tableCellView identifier="InboundImageCell" id="cX2-7P-kXI" userLabel="Chat View in Cell" customClass="MLChatViewCell">
+                                                            <rect key="frame" x="1" y="59" width="490" height="200"/>
+                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                            <subviews>
+                                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="eQr-VP-pfh">
+                                                                    <rect key="frame" x="193" y="200" width="104" height="14"/>
+                                                                    <constraints>
+                                                                        <constraint firstAttribute="height" constant="14" id="NQ0-GI-WUl"/>
+                                                                        <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="P6q-rf-6a2"/>
+                                                                    </constraints>
+                                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Today, 10:00PM" id="jB0-Zd-Eie">
+                                                                        <font key="font" metaFont="smallSystem"/>
+                                                                        <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
+                                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                                    </textFieldCell>
+                                                                </textField>
+                                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="sWQ-oj-7zC">
+                                                                    <rect key="frame" x="193" y="181" width="104" height="14"/>
+                                                                    <constraints>
+                                                                        <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="KKD-16-8TH"/>
+                                                                        <constraint firstAttribute="height" constant="14" id="gP3-GQ-xSr"/>
+                                                                    </constraints>
+                                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Today, 10:00PM" id="SDE-fx-uwf">
+                                                                        <font key="font" metaFont="smallSystem"/>
+                                                                        <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
+                                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                                    </textFieldCell>
+                                                                </textField>
+                                                                <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="kUM-jm-fPa">
+                                                                    <rect key="frame" x="5" y="2" width="25" height="25"/>
+                                                                    <constraints>
+                                                                        <constraint firstAttribute="height" constant="25" id="5KF-AO-Ao5"/>
+                                                                        <constraint firstAttribute="width" constant="25" id="ehY-a6-aw9"/>
+                                                                    </constraints>
+                                                                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" id="eF5-mM-AuW"/>
+                                                                </imageView>
+                                                                <button translatesAutoresizingMaskIntoConstraints="NO" id="EGD-cK-zE5">
+                                                                    <rect key="frame" x="48" y="-14" width="292" height="175"/>
+                                                                    <constraints>
+                                                                        <constraint firstAttribute="width" constant="292" id="77E-L1-NJG"/>
+                                                                        <constraint firstAttribute="height" constant="175" id="EBk-0R-rie"/>
+                                                                        <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="292" id="Vj7-Tm-5fd"/>
+                                                                        <constraint firstAttribute="height" constant="175" id="swB-Nw-lgG"/>
+                                                                        <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="175" id="xRw-Qy-eKM"/>
+                                                                    </constraints>
+                                                                    <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" imagePosition="only" alignment="center" imageScaling="proportionallyUpOrDown" inset="2" id="qiM-4U-xJT">
+                                                                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                                                        <font key="font" metaFont="system"/>
+                                                                        <connections>
+                                                                            <action selector="showImagePreview:" target="qLp-oS-WKI" id="Yr2-3Y-Eps"/>
+                                                                        </connections>
+                                                                    </buttonCell>
+                                                                </button>
+                                                            </subviews>
+                                                            <constraints>
+                                                                <constraint firstItem="sWQ-oj-7zC" firstAttribute="centerX" secondItem="cX2-7P-kXI" secondAttribute="centerX" id="2cx-MM-fbk"/>
+                                                                <constraint firstItem="EGD-cK-zE5" firstAttribute="leading" secondItem="kUM-jm-fPa" secondAttribute="trailing" constant="18" id="6G9-5q-f6q"/>
+                                                                <constraint firstItem="sWQ-oj-7zC" firstAttribute="top" secondItem="eQr-VP-pfh" secondAttribute="bottom" constant="5" id="CGY-V2-u17"/>
+                                                                <constraint firstAttribute="bottom" secondItem="kUM-jm-fPa" secondAttribute="bottom" constant="2" id="PF5-yz-wOT"/>
+                                                                <constraint firstItem="EGD-cK-zE5" firstAttribute="top" secondItem="sWQ-oj-7zC" secondAttribute="bottom" constant="20" id="WbQ-Pj-Vdz"/>
+                                                                <constraint firstItem="kUM-jm-fPa" firstAttribute="leading" secondItem="cX2-7P-kXI" secondAttribute="leading" constant="5" id="YqL-yM-EMz"/>
+                                                                <constraint firstAttribute="trailing" secondItem="EGD-cK-zE5" secondAttribute="trailing" constant="150" id="cJE-oh-4ek"/>
+                                                                <constraint firstItem="eQr-VP-pfh" firstAttribute="top" secondItem="cX2-7P-kXI" secondAttribute="top" constant="-14" id="jAV-qF-1Z9"/>
+                                                                <constraint firstItem="eQr-VP-pfh" firstAttribute="centerX" secondItem="cX2-7P-kXI" secondAttribute="centerX" id="w01-et-XwN"/>
+                                                            </constraints>
+                                                            <connections>
+                                                                <outlet property="attachmentImage" destination="EGD-cK-zE5" id="CIK-T6-pWz"/>
+                                                                <outlet property="imageView" destination="kUM-jm-fPa" id="EQV-8j-2QO"/>
+                                                                <outlet property="senderIcon" destination="kUM-jm-fPa" id="KqB-dQ-K5t"/>
+                                                                <outlet property="timeStamp" destination="sWQ-oj-7zC" id="udu-UN-NwP"/>
+                                                                <outlet property="timeStampHeight" destination="gP3-GQ-xSr" id="9AN-2V-RYz"/>
+                                                                <outlet property="timeStampVeritcalOffset" destination="CGY-V2-u17" id="rTW-YA-gF6"/>
+                                                            </connections>
+                                                        </tableCellView>
                                                         <tableCellView identifier="OutboundTextCell" id="zUs-Dd-GH1" userLabel="Chat View out Cell" customClass="MLChatViewCell">
-                                                            <rect key="frame" x="1" y="59" width="490" height="56"/>
+                                                            <rect key="frame" x="1" y="261" width="490" height="56"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
                                                                 <scrollView borderType="none" horizontalLineScroll="0.0" horizontalPageScroll="0.0" verticalLineScroll="0.0" verticalPageScroll="0.0" hasHorizontalScroller="NO" hasVerticalScroller="NO" usesPredominantAxisScrolling="NO" horizontalScrollElasticity="none" verticalScrollElasticity="none" translatesAutoresizingMaskIntoConstraints="NO" id="c4f-GC-Hfe" customClass="MLDisabledScrollView">
@@ -1321,7 +1395,7 @@ Gw
                                                             </connections>
                                                         </tableCellView>
                                                         <tableCellView identifier="OutboundImageCell" id="AA0-Za-mMq" userLabel="Chat View out Cell" customClass="MLChatViewCell">
-                                                            <rect key="frame" x="1" y="117" width="490" height="200"/>
+                                                            <rect key="frame" x="1" y="319" width="490" height="200"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
                                                                 <button hidden="YES" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Xjf-lh-VS8">
@@ -1382,66 +1456,6 @@ Gw
                                                                 <outlet property="timeStamp" destination="Bab-Se-qo9" id="x9D-y8-ssT"/>
                                                                 <outlet property="timeStampHeight" destination="iR3-Zk-9RU" id="L6y-pt-GkW"/>
                                                                 <outlet property="timeStampVeritcalOffset" destination="oUl-k2-OKu" id="WPg-La-kdy"/>
-                                                            </connections>
-                                                        </tableCellView>
-                                                        <tableCellView identifier="InboundTextCell" id="xb3-Ah-EVJ" userLabel="Chat View in Cell" customClass="MLChatViewCell">
-                                                            <rect key="frame" x="1" y="319" width="490" height="150"/>
-                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                                            <subviews>
-                                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="48b-sw-1uS">
-                                                                    <rect key="frame" x="193" y="150" width="104" height="14"/>
-                                                                    <constraints>
-                                                                        <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="0Il-2t-AEZ"/>
-                                                                        <constraint firstAttribute="height" constant="14" id="7W1-zz-Vz6"/>
-                                                                    </constraints>
-                                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Today, 10:00PM" id="Nzi-Wg-w5y">
-                                                                        <font key="font" metaFont="smallSystem"/>
-                                                                        <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
-                                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                                    </textFieldCell>
-                                                                </textField>
-                                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="2Nq-18-kr6">
-                                                                    <rect key="frame" x="193" y="131" width="104" height="14"/>
-                                                                    <constraints>
-                                                                        <constraint firstAttribute="height" constant="14" id="fOO-cO-O1n"/>
-                                                                        <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="jQO-lE-nu8"/>
-                                                                    </constraints>
-                                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Today, 10:00PM" id="tAj-Ly-McV">
-                                                                        <font key="font" metaFont="smallSystem"/>
-                                                                        <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
-                                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                                    </textFieldCell>
-                                                                </textField>
-                                                                <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="BS2-cT-hMv">
-                                                                    <rect key="frame" x="5" y="2" width="25" height="25"/>
-                                                                    <constraints>
-                                                                        <constraint firstAttribute="width" constant="25" id="8RA-6K-zMu"/>
-                                                                        <constraint firstAttribute="height" constant="25" id="P1Q-MX-ZJF"/>
-                                                                    </constraints>
-                                                                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" id="BIi-Id-2pU"/>
-                                                                </imageView>
-                                                                <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="pIH-qG-3jP">
-                                                                    <rect key="frame" x="33" y="3" width="285" height="118"/>
-                                                                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" id="K0c-pL-PJh"/>
-                                                                </imageView>
-                                                            </subviews>
-                                                            <constraints>
-                                                                <constraint firstItem="2Nq-18-kr6" firstAttribute="centerX" secondItem="xb3-Ah-EVJ" secondAttribute="centerX" id="0zb-IP-2dQ"/>
-                                                                <constraint firstItem="pIH-qG-3jP" firstAttribute="top" secondItem="2Nq-18-kr6" secondAttribute="bottom" constant="8" id="AcZ-dp-Rr2"/>
-                                                                <constraint firstAttribute="bottom" secondItem="BS2-cT-hMv" secondAttribute="bottom" constant="2" id="G9q-1w-Qhl"/>
-                                                                <constraint firstItem="pIH-qG-3jP" firstAttribute="leading" secondItem="BS2-cT-hMv" secondAttribute="trailing" constant="3" id="GJI-iM-jZ7"/>
-                                                                <constraint firstItem="48b-sw-1uS" firstAttribute="top" secondItem="xb3-Ah-EVJ" secondAttribute="top" constant="-14" id="RHo-Id-yPP"/>
-                                                                <constraint firstItem="2Nq-18-kr6" firstAttribute="top" secondItem="48b-sw-1uS" secondAttribute="bottom" constant="5" id="UDx-Oz-S6R"/>
-                                                                <constraint firstAttribute="bottom" secondItem="pIH-qG-3jP" secondAttribute="bottom" constant="3" id="h4o-d5-Loi"/>
-                                                                <constraint firstItem="48b-sw-1uS" firstAttribute="centerX" secondItem="xb3-Ah-EVJ" secondAttribute="centerX" id="sNV-Ay-dNu"/>
-                                                                <constraint firstItem="BS2-cT-hMv" firstAttribute="leading" secondItem="xb3-Ah-EVJ" secondAttribute="leading" constant="5" id="xsp-pE-h3j"/>
-                                                            </constraints>
-                                                            <connections>
-                                                                <outlet property="imageView" destination="BS2-cT-hMv" id="dva-zL-foQ"/>
-                                                                <outlet property="senderIcon" destination="BS2-cT-hMv" id="7YD-xj-kb7"/>
-                                                                <outlet property="timeStamp" destination="2Nq-18-kr6" id="OYz-es-vdH"/>
-                                                                <outlet property="timeStampHeight" destination="fOO-cO-O1n" id="ckv-22-amp"/>
-                                                                <outlet property="timeStampVeritcalOffset" destination="UDx-Oz-S6R" id="N6w-X9-hY3"/>
                                                             </connections>
                                                         </tableCellView>
                                                     </prototypeCellViews>

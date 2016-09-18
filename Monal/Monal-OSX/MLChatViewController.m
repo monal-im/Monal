@@ -625,7 +625,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         }
         
         cell = [tableView makeViewWithIdentifier:cellDirectionID owner:self];
-
+        cell.attachmentImage.image=nil;
+        
         dispatch_async(dispatch_get_main_queue(), ^{
             NSMutableURLRequest *imageRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:messageString]];
             imageRequest.cachePolicy= NSURLRequestReturnCacheDataElseLoad;

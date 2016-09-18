@@ -1522,7 +1522,7 @@ static DataLayer *sharedInstance=nil;
 }
 
 
--(void) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString *)messageId withCompletion:(void (^)(BOOL))completion
+-(void) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString *)messageId withCompletion:(void (^)(BOOL, NSString *))completion
 {
     //Message_history going out, from is always the local user. always read, default to  delivered (will be reset by timer if needed)
     
@@ -1534,7 +1534,7 @@ static DataLayer *sharedInstance=nil;
         
         [self executeNonQuery:query withCompletion:^(BOOL result) {
             if (completion) {
-                completion(result);
+                completion(result, messageType);
             }
             
         }];

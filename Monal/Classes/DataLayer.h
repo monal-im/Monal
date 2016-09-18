@@ -198,7 +198,7 @@ extern NSString *const kMessageTypeText;
 
 -(NSArray*) messageHistoryBuddies:(NSString*) accountNo;
 -(void) markAsReadBuddy:(NSString*) buddy forAccount:(NSString*) accountNo;
--(void) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString *)messageId withCompletion:(void (^)(BOOL))completion;
+-(void) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString *)messageId withCompletion:(void (^)(BOOL, NSString *))completion;
 
 #pragma mark active contacts
 -(void) activeContactsWithCompletion: (void (^)(NSMutableArray *))completion;

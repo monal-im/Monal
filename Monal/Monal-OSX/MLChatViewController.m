@@ -408,7 +408,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         return;
     }
     
-    [[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:[NSString stringWithFormat:@"%@",self.accountNo] withMessage:message actuallyFrom:self.jid withId:messageId withCompletion:^(BOOL result) {
+    [[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:[NSString stringWithFormat:@"%@",self.accountNo] withMessage:message actuallyFrom:self.jid withId:messageId withCompletion:^(BOOL result, NSString *messageType) {
     if(result){
         DDLogVerbose(@"added message %@, %@ %@", message, messageId, [self currentGMTTime]);
         
@@ -416,7 +416,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                    @"message": message ,
                                    @"thetime": [self currentGMTTime],
                                    kDelivered:@YES,
-                                   kMessageId: messageId
+                                   kMessageId: messageId,
+                                   kMessageType: messageType
                                    };
         
         dispatch_async(dispatch_get_main_queue(),

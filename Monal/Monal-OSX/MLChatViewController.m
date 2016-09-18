@@ -525,10 +525,28 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         
      }];
     
-    NSString *message= [self.messageBox.string copy];
-    message = [message stringByReplacingOccurrencesOfString:@"\U0000fffc" withString:@""];
+    __block NSMutableString *message= [self.messageBox.string mutableCopy];
+    [message replaceOccurrencesOfString:@"\U0000fffc" withString:@"" options:NSLiteralSearch range:NSMakeRange(0, message.length)];
+    
+    NSAttributedString *messageAttributedString = self.messageBox.attributedString;
+   
+ [messageAttributedString enumerateAttribute:NSLinkAttributeName inRange:NSMakeRange(0, messageAttributedString.length) options:0 usingBlock:^(id  _Nullable value, NSRange range, BOOL * _Nonnull stop) {
+     if(value)
+     {
+         if(range.length == message.length)
+         {
+             message=[NSMutableString stringWithString:@""];
+         } else  {
+             [message appendString:@" "];
+         }
+         
+         [message appendString:(NSString *)value];
+     }
+ }];
+    
+    
     if(message.length>0) {
-        [self sendMessage:[self.messageBox.string copy] andMessageID:nil];
+        [self sendMessage:message andMessageID:nil];
     }
     self.messageBox.string=@"";
 }

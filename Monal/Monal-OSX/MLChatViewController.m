@@ -581,7 +581,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
 }
 
-#pragma mark -table view datasource
+#pragma mark - table view datasource
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)aTableView
 {
     return [self.messageList count];
@@ -645,6 +645,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         
         cell = [tableView makeViewWithIdentifier:cellDirectionID owner:self];
         cell.attachmentImage.image=nil;
+        cell.attachmentImage.canDrawSubviewsIntoLayer=YES;
         
         
         NSMutableURLRequest *imageRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:messageString]];
@@ -821,8 +822,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     else  {
         
-        NSButton *button =(NSButton*) sender;
-        MLChatViewCell *cell = (MLChatViewCell *)button.superview;
+        MLImageView *clickedImage =(MLImageView*) sender;
+        MLChatViewCell *cell = (MLChatViewCell *)clickedImage.superview;
         self.tmpPreviewImageData = cell.imageData;
         [self.view.window makeFirstResponder:self.view];
         [self.QLPreview makeKeyAndOrderFront:self];

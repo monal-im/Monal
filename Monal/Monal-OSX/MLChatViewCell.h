@@ -7,6 +7,7 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "MLImageView.h"
 
 #define kCellMaxWidth 285
 #define kCellMinHeight 50
@@ -22,7 +23,7 @@
 @property (nonatomic, weak) IBOutlet NSLayoutConstraint *timeStampVeritcalOffset;
 @property (nonatomic, weak) IBOutlet NSImageView *senderIcon;
 
-@property (nonatomic, weak) IBOutlet NSButton *attachmentImage;
+@property (nonatomic, weak) IBOutlet MLImageView *attachmentImage;
 @property (nonatomic, strong) NSData *imageData; 
 
 @property (nonatomic, assign) BOOL isInbound;

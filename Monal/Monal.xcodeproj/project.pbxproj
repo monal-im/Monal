@@ -339,6 +339,7 @@
 		269E748E18B707B500BCB2D5 /* MLPortraitNavController.m in Sources */ = {isa = PBXBuildFile; fileRef = 269E748D18B707B500BCB2D5 /* MLPortraitNavController.m */; };
 		26A8ADD717C031BA0033990D /* ContactDetails.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EC40FB17BDD8560031304D /* ContactDetails.m */; };
 		26A8ADD817C031BA0033990D /* ContactDetails.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26EC40F817BDD8360031304D /* ContactDetails.xib */; };
+		26AA41051D9FCBF6005A77ED /* MLImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26AA41041D9FCBF6005A77ED /* MLImageView.m */; };
 		26AAE282179F701A00271345 /* About.html in Resources */ = {isa = PBXBuildFile; fileRef = 26AAE281179F701A00271345 /* About.html */; };
 		26AAE285179F7B0200271345 /* MLSettingCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 26AAE284179F7B0200271345 /* MLSettingCell.m */; };
 		26B2A4BB1B73061400272E63 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 26B2A4BA1B73061400272E63 /* Images.xcassets */; };
@@ -751,6 +752,8 @@
 		2696EED11791245A00BC54B8 /* chatViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = chatViewController.m; sourceTree = "<group>"; };
 		269E748C18B707B500BCB2D5 /* MLPortraitNavController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLPortraitNavController.h; sourceTree = "<group>"; };
 		269E748D18B707B500BCB2D5 /* MLPortraitNavController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLPortraitNavController.m; sourceTree = "<group>"; };
+		26AA41031D9FCBF6005A77ED /* MLImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLImageView.h; sourceTree = "<group>"; };
+		26AA41041D9FCBF6005A77ED /* MLImageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLImageView.m; sourceTree = "<group>"; };
 		26AAE281179F701A00271345 /* About.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = About.html; sourceTree = "<group>"; };
 		26AAE283179F7B0200271345 /* MLSettingCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLSettingCell.h; sourceTree = "<group>"; };
 		26AAE284179F7B0200271345 /* MLSettingCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLSettingCell.m; sourceTree = "<group>"; };
@@ -1224,6 +1227,7 @@
 		266272B21B27DB8000C1CD49 /* Monal-OSX */ = {
 			isa = PBXGroup;
 			children = (
+				26AA41021D9FC61C005A77ED /* Chatview */,
 				260283841D8DEFC1001DD6B8 /* MLPreviewObject.h */,
 				260283851D8DEFC1001DD6B8 /* MLPreviewObject.m */,
 				2638DAE11B68F2EE00DF05AC /* Preferences */,
@@ -1235,12 +1239,8 @@
 				266272B31B27DB8000C1CD49 /* Supporting Files */,
 				2661D33F1B40765A00EC51BA /* MLContactsViewController.h */,
 				2661D3401B40765A00EC51BA /* MLContactsViewController.m */,
-				2661D3421B40766F00EC51BA /* MLChatViewController.h */,
-				2661D3431B40766F00EC51BA /* MLChatViewController.m */,
 				2661D34B1B407ED400EC51BA /* MLContactsCell.h */,
 				2661D34C1B407ED400EC51BA /* MLContactsCell.m */,
-				2661D34E1B407EDD00EC51BA /* MLChatViewCell.h */,
-				2661D34F1B407EDD00EC51BA /* MLChatViewCell.m */,
 				2651AF531B409906008D025C /* MLMainWindow.h */,
 				2651AF541B409906008D025C /* MLMainWindow.m */,
 				265802831B785B8900C35014 /* MLDisabledScrollView.h */,
@@ -1423,6 +1423,19 @@
 				26400711140B43BB00CF1107 /* rtpudpv6transmitter.hh */,
 			);
 			name = "jrtplib-static";
+			sourceTree = "<group>";
+		};
+		26AA41021D9FC61C005A77ED /* Chatview */ = {
+			isa = PBXGroup;
+			children = (
+				2661D3421B40766F00EC51BA /* MLChatViewController.h */,
+				2661D3431B40766F00EC51BA /* MLChatViewController.m */,
+				2661D34E1B407EDD00EC51BA /* MLChatViewCell.h */,
+				2661D34F1B407EDD00EC51BA /* MLChatViewCell.m */,
+				26AA41031D9FCBF6005A77ED /* MLImageView.h */,
+				26AA41041D9FCBF6005A77ED /* MLImageView.m */,
+			);
+			name = Chatview;
 			sourceTree = "<group>";
 		};
 		26B2A4B41B73040000272E63 /* Monal-iOS */ = {
@@ -2450,6 +2463,7 @@
 				261147E81C35D7860078A72E /* NXOAuth2Request.m in Sources */,
 				261147D61C35D7860078A72E /* NXOAuth2AccessToken.m in Sources */,
 				265F0B631B75719E00A63F20 /* MLAccountRow.m in Sources */,
+				26AA41051D9FCBF6005A77ED /* MLImageView.m in Sources */,
 				260499EC1B7313EA00D11866 /* ParseMessage.m in Sources */,
 				261147DC1C35D7860078A72E /* NXOAuth2Client.m in Sources */,
 				261147D21C35D7860078A72E /* NSString+NXOAuth2.m in Sources */,

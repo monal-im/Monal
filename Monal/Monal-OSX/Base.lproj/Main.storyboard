@@ -539,12 +539,12 @@ CA
                                 <toolbarItem implicitItemIdentifier="CABA8109-05DA-427B-AF01-73EF778D46A0" label="Search" paletteLabel="Search" id="FZv-gk-QRd">
                                     <nil key="toolTip"/>
                                     <size key="minSize" width="96" height="22"/>
-                                    <size key="maxSize" width="273" height="22"/>
+                                    <size key="maxSize" width="273" height="32"/>
                                     <searchField key="view" wantsLayer="YES" verticalHuggingPriority="750" id="W9v-xL-dQF">
                                         <rect key="frame" x="0.0" y="14" width="252" height="22"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                        <searchFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" borderStyle="bezel" placeholderString="Search Contacts" usesSingleLineMode="YES" bezelStyle="round" sendsWholeSearchString="YES" id="xIm-Pi-cYh">
-                                            <font key="font" metaFont="system"/>
+                                        <searchFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" borderStyle="bezel" placeholderString="Search Contacts" usesSingleLineMode="YES" bezelStyle="round" sendsWholeSearchString="YES" id="xIm-Pi-cYh">
+                                            <font key="font" metaFont="smallSystem"/>
                                             <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                         </searchFieldCell>

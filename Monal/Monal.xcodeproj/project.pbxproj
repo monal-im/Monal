@@ -2029,6 +2029,7 @@
 				TargetAttributes = {
 					1D6058900D05DD3D006BFB54 = {
 						DevelopmentTeam = 33XS7DE5NZ;
+						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.DataProtection = {
 								enabled = 1;
@@ -2623,6 +2624,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = NO;
+				DEVELOPMENT_TEAM = 33XS7DE5NZ;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -2641,7 +2643,8 @@
 				OTHER_LDFLAGS = "-lstdc++";
 				PRODUCT_NAME = Monal;
 				PROVISIONING_PROFILE = "";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "a820ee95-5645-45e8-aa9b-af28ad58c7ca";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = Debug;
 		};
@@ -3189,6 +3192,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
 				DEAD_CODE_STRIPPING = NO;
+				DEVELOPMENT_TEAM = 33XS7DE5NZ;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -3204,8 +3208,9 @@
 				LLVM_LTO = NO;
 				OTHER_LDFLAGS = "-lstdc++";
 				PRODUCT_NAME = Monal;
-				PROVISIONING_PROFILE = "63a062e4-c4f7-4754-87c4-9f9658fd22b9";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "63a062e4-c4f7-4754-87c4-9f9658fd22b9";
+				PROVISIONING_PROFILE = "";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = AppStore;
 		};
@@ -3318,6 +3323,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
 				DEAD_CODE_STRIPPING = NO;
+				DEVELOPMENT_TEAM = 33XS7DE5NZ;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -3334,7 +3340,8 @@
 				OTHER_LDFLAGS = "-lstdc++";
 				PRODUCT_NAME = Monal;
 				PROVISIONING_PROFILE = "";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "393f09c4-0327-4fde-ab1e-d34d71af7808";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = Adhoc;
 		};

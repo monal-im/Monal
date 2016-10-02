@@ -471,7 +471,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         return;
     }
     
-	[[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:_accountNo withMessage:message actuallyFrom:self.jid withId:messageId withCompletion:^(BOOL result) {
+	[[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:_accountNo withMessage:message actuallyFrom:self.jid withId:messageId withCompletion:^(BOOL result, NSString *messageType) {
 		DDLogVerbose(@"added message");
         
         if(result) {

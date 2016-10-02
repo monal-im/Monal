@@ -44,7 +44,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	NSString* toreturn; 
 	if (keychainErr == noErr) {
 		DDLogVerbose(@"getting password "); 
-        outDictionary=objc_retainedObject(localResult); 
+        outDictionary=CFBridgingRelease(localResult); 
 		 keydata = [self secItemFormatToDictionary:outDictionary];
 		
 		//copy the password so the oject can be released ok
@@ -109,7 +109,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 										  &localResult);
         if (keychainErr == noErr) {
             
-            outDictionary=objc_retainedObject(localResult); 
+            outDictionary=CFBridgingRelease(localResult); 
             // Convert the data dictionary into the format used by the view controller:
             self.keychainData = [self secItemFormatToDictionary:outDictionary];
 				DDLogVerbose(@"set keychain data"); 
@@ -225,7 +225,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     if (keychainError == noErr)
     {
     
-          passwordData=objc_retainedObject(localResult);
+          passwordData=CFBridgingRelease(localResult);
 
         
         // Remove the kSecReturnData key; we don't need it anymore:
@@ -266,7 +266,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 							&localResult) == noErr)
     {
         
-        attributes=objc_retainedObject(localResult); 
+        attributes=CFBridgingRelease(localResult); 
         // First, get the attributes returned from the keychain and add them to the
         // dictionary that controls the update:
         updateItem = [NSMutableDictionary dictionaryWithDictionary:attributes];

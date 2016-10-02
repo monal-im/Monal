@@ -346,7 +346,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     NSUInteger r = arc4random_uniform(NSIntegerMax);
                     NSString *messageID =[NSString stringWithFormat:@"Monal%lu", (unsigned long)r];
                     
-                    [[DataLayer sharedInstance] addMessageHistoryFrom:replyingAccount to:[notification.userInfo objectForKey:@"from"] forAccount:[notification.userInfo objectForKey:@"accountNo"] withMessage:message actuallyFrom:replyingAccount withId:messageID withCompletion:^(BOOL success) {
+                    [[DataLayer sharedInstance] addMessageHistoryFrom:replyingAccount to:[notification.userInfo objectForKey:@"from"] forAccount:[notification.userInfo objectForKey:@"accountNo"] withMessage:message actuallyFrom:replyingAccount withId:messageID withCompletion:^(BOOL success, NSString *messageType) {
                         
                     }];
                     

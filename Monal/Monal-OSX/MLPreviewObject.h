@@ -7,8 +7,12 @@
 //
 
 #import <Foundation/Foundation.h>
-@import QuickLook;
+
+#ifdef __MAC_OS_X_VERSION_MAX_ALLOWED
 @import Quartz;
+#else
+@import QuickLook;
+#endif
 
 @interface MLPreviewObject : NSObject <QLPreviewItem>
 

@@ -1,9 +1,9 @@
 ## Monal : A cross platform, modern XMPP client 
 
 This is the Monal XMPP client as found in the app store.  If you want to  use the lastest stable versions, search for Monal in the iOS or
-<img target="_blank" href="https://itunes.apple.com/us/app/monal-free-xmpp-chat/id317711500/">
+<a target="_blank" href="https://itunes.apple.com/us/app/monal-free-xmpp-chat/id317711500/">
 iOS iTunes</a> or 
-<img target="_blank" href="https://itunes.apple.com/us/app/monal-free-xmpp-chat/id1060957067/">
+<a target="_blank" href="https://itunes.apple.com/us/app/monal-free-xmpp-chat/id1060957067/">
 Mac App Store</a>.
 
 ### Licence

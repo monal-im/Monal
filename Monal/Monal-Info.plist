@@ -55,6 +55,8 @@
 	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Monal uses the microphone to transmit your voice in audio calls.</string>
 	<key>SBUsesNetwork</key>
 	<true/>
 	<key>UIBackgroundModes</key>
@@ -83,7 +85,5 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>Monal uses the microphone to transmit your voice in audio calls.</string>
 </dict>
 </plist>

@@ -269,11 +269,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 -(void) sendMessage:(NSString *) messageText andMessageID:(NSString *)messageID
 {
     DDLogVerbose(@"Sending message");
-    NSUInteger r = arc4random_uniform(NSIntegerMax);
-    NSString *newMessageID =messageID;
-    if(!newMessageID) {
-        newMessageID=[NSString stringWithFormat:@"Monal%lu", (unsigned long)r];
-    }
+    NSString *newMessageID =[[NSUUID UUID] UUIDString];
+ 
     [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:_contactName fromAccount:_accountNo isMUC:_isMUC messageId:newMessageID
                           withCompletionHandler:nil];
     

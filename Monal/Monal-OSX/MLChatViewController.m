@@ -479,11 +479,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) sendMessage:(NSString *) messageText andMessageID:(NSString *)messageID
 {
     DDLogVerbose(@"Sending message %@", messageText);
-    u_int32_t r = arc4random_uniform(30000000);
-    NSString *newMessageID =messageID;
-    if(!newMessageID) {
-        newMessageID=[NSString stringWithFormat:@"Monal%d", r];
-    }
+    NSString *newMessageID =[[NSUUID UUID] UUIDString];
     [self.progressIndicator incrementBy:25];
     [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:self.contactName fromAccount:self.accountNo isMUC:self.isMUC messageId:newMessageID
      withCompletionHandler:^(BOOL success, NSString *messageId) {

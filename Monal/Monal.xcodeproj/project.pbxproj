@@ -3212,9 +3212,9 @@
 				LLVM_LTO = NO;
 				OTHER_LDFLAGS = "-lstdc++";
 				PRODUCT_NAME = Monal;
-				PROVISIONING_PROFILE = "6466a195-4cf8-4167-b747-9037a0f5c568";
+				PROVISIONING_PROFILE = "499c9e3f-44d1-459d-b698-8490f55cabaa";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
-				PROVISIONING_PROFILE_SPECIFIER = "Monal iOS Appstore";
+				PROVISIONING_PROFILE_SPECIFIER = "Monal iOS App Store";
 			};
 			name = AppStore;
 		};

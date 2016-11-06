@@ -1199,7 +1199,7 @@ Gw
                                                                     <rect key="frame" x="193" y="37" width="104" height="14"/>
                                                                     <constraints>
                                                                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="0yg-9t-FBZ"/>
-                                                                        <constraint firstAttribute="height" constant="14" id="Qdf-jg-DDP"/>
+                                                                        <constraint firstAttribute="height" relation="lessThanOrEqual" constant="14" id="Qdf-jg-DDP"/>
                                                                     </constraints>
                                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Today, 10:00PM" id="rFV-cu-Sps">
                                                                         <font key="font" metaFont="smallSystem"/>
@@ -1249,7 +1249,7 @@ Gw
                                                                     <rect key="frame" x="193" y="181" width="104" height="14"/>
                                                                     <constraints>
                                                                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="XwG-Z6-2Eh"/>
-                                                                        <constraint firstAttribute="height" constant="14" id="iR3-Zk-9RU"/>
+                                                                        <constraint firstAttribute="height" relation="lessThanOrEqual" constant="14" id="iR3-Zk-9RU"/>
                                                                     </constraints>
                                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Today, 10:00PM" id="Ffo-XA-3sk">
                                                                         <font key="font" metaFont="smallSystem"/>
@@ -1307,7 +1307,7 @@ Gw
                                                                     <rect key="frame" x="193" y="37" width="104" height="14"/>
                                                                     <constraints>
                                                                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="8k4-Ai-1AJ"/>
-                                                                        <constraint firstAttribute="height" constant="14" id="U4S-jL-pcz"/>
+                                                                        <constraint firstAttribute="height" relation="lessThanOrEqual" constant="14" id="U4S-jL-pcz"/>
                                                                     </constraints>
                                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Today, 10:00PM" id="Z2f-uH-fuc">
                                                                         <font key="font" metaFont="smallSystem"/>
@@ -1402,7 +1402,7 @@ Gw
                                                                     <rect key="frame" x="194" y="181" width="104" height="14"/>
                                                                     <constraints>
                                                                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="KKD-16-8TH"/>
-                                                                        <constraint firstAttribute="height" constant="14" id="gP3-GQ-xSr"/>
+                                                                        <constraint firstAttribute="height" relation="lessThanOrEqual" constant="14" id="gP3-GQ-xSr"/>
                                                                     </constraints>
                                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Today, 10:00PM" id="SDE-fx-uwf">
                                                                         <font key="font" metaFont="smallSystem"/>

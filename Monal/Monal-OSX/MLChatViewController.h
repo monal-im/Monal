@@ -29,4 +29,9 @@
 
 -(void) showConversationForContact:(NSDictionary *)contact;
 
+/**
+ mark as conversation as read and update teh application badge
+ */
+-(void) markAsRead;
+
 @end

@@ -178,6 +178,7 @@
         if(notification.response.string.length>0) {
             if([[MLXMPPManager sharedInstance].contactVC.chatViewController.contactName isEqualToString:[userInfo objectForKey:@"actuallyfrom"]]) {
                 [[MLXMPPManager sharedInstance].contactVC.chatViewController sendMessage:notification.response.string andMessageID:nil];
+                [[MLXMPPManager sharedInstance].contactVC.chatViewController  markAsRead];
             }
             else  {
                 NSLog(@"error cant send to wrong contact");

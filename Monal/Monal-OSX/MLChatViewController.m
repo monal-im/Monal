@@ -496,9 +496,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         [self addMessageto:_contactName withMessage:messageText andId:newMessageID];
     }
     
-    //mark as read
-    
-    //update badge
+
 }
 
 

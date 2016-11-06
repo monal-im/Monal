@@ -537,7 +537,22 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
              [message appendString:@" "];
          }
          
-         [message appendString:(NSString *)value];
+         NSString *valuetoAppend ;
+         if([value isKindOfClass:[NSString class]])
+         {
+             valuetoAppend= value;
+         }
+         else if([value isKindOfClass:[NSURL class]])
+         {
+             valuetoAppend = [value absoluteString];
+         }
+         else  {
+             DDLogWarn(@"non string or url in attributed text");
+         }
+         
+         if(valuetoAppend) {
+         [message appendString:valuetoAppend];
+         }
      }
  }];
     
@@ -546,6 +561,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         [self sendMessage:message andMessageID:nil];
     }
     self.messageBox.string=@"";
+    self.messageBox.backgroundColor=[NSColor whiteColor];
+    self.messageBox.textColor =[NSColor blackColor];
+    self.messageBox.alignment =NSTextAlignmentLeft;
 }
 
 

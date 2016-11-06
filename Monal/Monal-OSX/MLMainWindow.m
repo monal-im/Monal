@@ -26,6 +26,7 @@
     [super windowDidLoad];
     AppDelegate *appDelegate = [NSApplication sharedApplication].delegate;
     appDelegate.mainWindowController= self;
+    self.window.frameAutosaveName =@"MonalMainWindow";
     
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
     [nc addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];

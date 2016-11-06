@@ -564,6 +564,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     self.messageBox.backgroundColor=[NSColor whiteColor];
     self.messageBox.textColor =[NSColor blackColor];
     self.messageBox.alignment =NSTextAlignmentLeft;
+    self.messageBox.font = [NSFont systemFontOfSize:[NSFont systemFontSize]];
 }
 
 

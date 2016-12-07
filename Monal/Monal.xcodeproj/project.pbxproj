@@ -2645,7 +2645,7 @@
 				LLVM_LTO = NO;
 				OTHER_LDFLAGS = "-lstdc++";
 				PRODUCT_NAME = Monal;
-				PROVISIONING_PROFILE = "89322417-5f0a-4843-9f19-e3ebc8908695";
+				PROVISIONING_PROFILE = "45d372f3-59f7-437d-913f-91aeeb1decad";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				PROVISIONING_PROFILE_SPECIFIER = "Monal development";
 			};

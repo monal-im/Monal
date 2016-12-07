@@ -395,8 +395,6 @@
 		26DA16E217C302BC00D0065E /* UIAlertView+Blocks.m in Sources */ = {isa = PBXBuildFile; fileRef = 26DA16DF17C302BC00D0065E /* UIAlertView+Blocks.m */; };
 		26DC0A8B1339259900E60BFD /* SearchUser.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26DC0A8A1339259900E60BFD /* SearchUser.xib */; };
 		26E2F7DA17C6FD9400C3C8EF /* MLTabBarController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26E2F7D917C6FD9400C3C8EF /* MLTabBarController.m */; };
-		26E456CD1B842180004BD74C /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26E456CC1B842180004BD74C /* Sparkle.framework */; };
-		26E456CF1B8421C3004BD74C /* Sparkle.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 26E456CC1B842180004BD74C /* Sparkle.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		26EC411017BDD98E0031304D /* GroupChatViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26EC410F17BDD98D0031304D /* GroupChatViewController.xib */; };
 		26EC411317BDE39E0031304D /* MLImageManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EC411217BDE39E0031304D /* MLImageManager.m */; };
 		26EE8B1C179B55D2006781F3 /* ParseChallenge.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EE8B1B179B55D2006781F3 /* ParseChallenge.m */; };
@@ -449,7 +447,6 @@
 			dstSubfolderSpec = 10;
 			files = (
 				265FF0D21C7FDA3A00E2CCE1 /* DropboxOSX.framework in CopyFiles */,
-				26E456CF1B8421C3004BD74C /* Sparkle.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -843,7 +840,6 @@
 		26DE9C050FEEFD00000596F6 /* DB definitions */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "DB definitions"; sourceTree = "<group>"; };
 		26E2F7D817C6FD9400C3C8EF /* MLTabBarController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MLTabBarController.h; path = ../MLTabBarController.h; sourceTree = "<group>"; };
 		26E2F7D917C6FD9400C3C8EF /* MLTabBarController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MLTabBarController.m; path = ../MLTabBarController.m; sourceTree = "<group>"; };
-		26E456CC1B842180004BD74C /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Sparkle.framework; path = MonalOSX/External/Sparkle.framework; sourceTree = "<group>"; };
 		26EC40F817BDD8360031304D /* ContactDetails.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ContactDetails.xib; sourceTree = "<group>"; };
 		26EC40FA17BDD8560031304D /* ContactDetails.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContactDetails.h; sourceTree = "<group>"; };
 		26EC40FB17BDD8560031304D /* ContactDetails.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ContactDetails.m; sourceTree = "<group>"; };
@@ -936,7 +932,6 @@
 				265FF0D11C7FD6CF00E2CCE1 /* DropboxOSX.framework in Frameworks */,
 				2681301A1BFEDCEC0074C8EE /* Fabric.framework in Frameworks */,
 				265F6BA71B7B088A006B8EBA /* Crashlytics.framework in Frameworks */,
-				26E456CD1B842180004BD74C /* Sparkle.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1565,7 +1560,6 @@
 				269574DF1C37301600544A60 /* libz.tbd */,
 				269574DD1C372FD200544A60 /* Security.framework */,
 				268130191BFEDCEC0074C8EE /* Fabric.framework */,
-				26E456CC1B842180004BD74C /* Sparkle.framework */,
 				265F6BA61B7B088A006B8EBA /* Crashlytics.framework */,
 				267ECD6C1B746C660025337F /* CFNetwork.framework */,
 				26049A5A1B73163300D11866 /* AVFoundation.framework */,

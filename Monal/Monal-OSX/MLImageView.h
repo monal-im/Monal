@@ -10,4 +10,6 @@
 
 @interface MLImageView : NSImageView
 
+@property (nonatomic, weak) IBOutlet id previewTarget;
+
 @end

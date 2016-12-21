@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="11542" systemVersion="16B2555" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="11762" systemVersion="16C67" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="11542"/>
-        <plugIn identifier="com.apple.WebKitIBPlugin" version="11542"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="11762"/>
+        <plugIn identifier="com.apple.WebKitIBPlugin" version="11762"/>
         <capability name="box content view" minToolsVersion="7.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -1009,7 +1009,7 @@ Gw
             </objects>
             <point key="canvasLocation" x="679" y="459"/>
         </scene>
-        <!--Chat View Controller-->
+        <!--Preview Target-->
         <scene sceneID="CGi-CN-lI2">
             <objects>
                 <viewController id="qLp-oS-WKI" customClass="MLChatViewController" sceneMemberID="viewController">
@@ -1257,7 +1257,7 @@ Gw
                                                                     </constraints>
                                                                     <imageCell key="cell" refusesFirstResponder="YES" alignment="left" animates="YES" imageScaling="proportionallyUpOrDown" id="xl6-ZI-PPc"/>
                                                                     <connections>
-                                                                        <action selector="showImagePreview:" target="qLp-oS-WKI" id="fk7-he-Hsv"/>
+                                                                        <outlet property="previewTarget" destination="qLp-oS-WKI" id="wn2-eq-TM6"/>
                                                                     </connections>
                                                                 </imageView>
                                                             </subviews>
@@ -1418,7 +1418,7 @@ Gw
                                                                     </constraints>
                                                                     <imageCell key="cell" refusesFirstResponder="YES" alignment="left" animates="YES" imageScaling="proportionallyUpOrDown" id="SCf-od-Cvx"/>
                                                                     <connections>
-                                                                        <action selector="showImagePreview:" target="qLp-oS-WKI" id="ce4-S8-4jD"/>
+                                                                        <outlet property="previewTarget" destination="qLp-oS-WKI" id="B8h-7B-hQf"/>
                                                                     </connections>
                                                                 </imageView>
                                                             </subviews>

@@ -25,19 +25,11 @@
 
 
 - (void)mouseUp:(NSEvent *)theEvent {
-    [NSApp sendAction:self.action to:self.target from:self];
+    if([self.previewTarget respondsToSelector:@selector(showImagePreview:)]) {
+        [NSApp sendAction:@selector(showImagePreview:) to:self.previewTarget from:self];
+    }
 }
 
-- (SEL)action {return _action; }
 
-- (void)setAction:(SEL)newAction {
-    _action = newAction;
-}
-
-- (id)target { return _target; }
-
-- (void)setTarget:(id)newTarget {
-    _target = newTarget;
-}
 
 @end

@@ -1,0 +1,6 @@
+framework module NXOAuth2Client {
+  umbrella header "NXOAuth2Client-framework-umbrella.h"
+
+  export *
+  module * { export * }
+}

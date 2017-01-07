@@ -1,0 +1,40 @@
+PODS:
+  - Appirater (2.0.5)
+  - Crashlytics (3.8.3):
+    - Fabric (~> 1.6.3)
+  - Dropbox-iOS-SDK (1.3.13)
+  - Dropbox-OSX-SDK (1.3.13)
+  - Fabric (1.6.11)
+  - MASPreferences (1.1.4)
+  - MBProgressHUD (1.0.0)
+  - NXOAuth2Client (1.2.8)
+  - SAMKeychain (1.5.2)
+  - TPCircularBuffer (1.4)
+
+DEPENDENCIES:
+  - Appirater
+  - Crashlytics
+  - Dropbox-iOS-SDK
+  - Dropbox-OSX-SDK
+  - Fabric
+  - MASPreferences
+  - MBProgressHUD
+  - NXOAuth2Client (~> 1.2.8)
+  - SAMKeychain
+  - TPCircularBuffer
+
+SPEC CHECKSUMS:
+  Appirater: e7c0a47fb67ee5041ce8479e6ba960927fb40264
+  Crashlytics: 2b6dbe138a42395577cfa73dfa1aa7248cadf39e
+  Dropbox-iOS-SDK: e0c9b08d1604b39cb78c1d0333251de0f6bdec60
+  Dropbox-OSX-SDK: 7558b741dfb8eac3d2352ad95bd4078debcf0e13
+  Fabric: 5911403591946b8228ab1c51d98f1d7137e863c6
+  MASPreferences: 7bdcfe891d7840453cf48f95fa866c3e152ace7a
+  MBProgressHUD: 4890f671c94e8a0f3cf959aa731e9de2f036d71a
+  NXOAuth2Client: 98c4d4c594edd2b289cfc34a8928653e1dab7adf
+  SAMKeychain: 1865333198217411f35327e8da61b43de79b635b
+  TPCircularBuffer: c0160545b63019adf85231e3de543bbc97cb9041
+
+PODFILE CHECKSUM: 7785e03e84fd1f506fd154cee7a86b241110e853
+
+COCOAPODS: 1.1.1

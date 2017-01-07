@@ -1,0 +1,11 @@
+ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO
+CODE_SIGN_IDENTITY =
+FRAMEWORK_SEARCH_PATHS = $(inherited) "$PODS_CONFIGURATION_BUILD_DIR/Dropbox-OSX-SDK" "$PODS_CONFIGURATION_BUILD_DIR/MASPreferences" "$PODS_CONFIGURATION_BUILD_DIR/NXOAuth2Client-framework" "$PODS_CONFIGURATION_BUILD_DIR/SAMKeychain" "${PODS_ROOT}/Crashlytics/OSX" "${PODS_ROOT}/Fabric/OSX"
+GCC_PREPROCESSOR_DEFINITIONS = $(inherited) COCOAPODS=1
+HEADER_SEARCH_PATHS = $(inherited) "${PODS_ROOT}/Headers/Public" "${PODS_ROOT}/Headers/Public/Crashlytics" "${PODS_ROOT}/Headers/Public/Fabric"
+LD_RUNPATH_SEARCH_PATHS = $(inherited) '@executable_path/../Frameworks' '@loader_path/Frameworks'
+OTHER_CFLAGS = $(inherited) -iquote "$PODS_CONFIGURATION_BUILD_DIR/Dropbox-OSX-SDK/DropboxOSX.framework/Headers" -iquote "$PODS_CONFIGURATION_BUILD_DIR/MASPreferences/MASPreferences.framework/Headers" -iquote "$PODS_CONFIGURATION_BUILD_DIR/NXOAuth2Client-framework/NXOAuth2Client.framework/Headers" -iquote "$PODS_CONFIGURATION_BUILD_DIR/SAMKeychain/SAMKeychain.framework/Headers" -isystem "${PODS_ROOT}/Headers/Public" -isystem "${PODS_ROOT}/Headers/Public/Crashlytics" -isystem "${PODS_ROOT}/Headers/Public/Fabric"
+OTHER_LDFLAGS = $(inherited) -ObjC -l"c++" -l"z" -framework "Crashlytics" -framework "DropboxOSX" -framework "Fabric" -framework "MASPreferences" -framework "NXOAuth2Client" -framework "SAMKeychain" -framework "Security" -framework "SystemConfiguration"
+PODS_BUILD_DIR = $BUILD_DIR
+PODS_CONFIGURATION_BUILD_DIR = $PODS_BUILD_DIR/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)
+PODS_ROOT = ${SRCROOT}/Pods

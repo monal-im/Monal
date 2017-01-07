@@ -11,6 +11,7 @@
 #import "MLButtonCell.h"
 #import "NXOAuth2.h"
 #import "MLOAuthViewController.h"
+#import "NXOAuth2AccountStore.h"
 
 #import "tools.h"
 
@@ -100,7 +101,7 @@ NSString *const kGtalk = @"Gtalk";
         
         PasswordManager* pass= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@-%@",self.accountno,self.jid]];
         self.password=[pass getPassword];
-        if(!self.password.length>0)
+        if(self.password.length==0)
         {
             pass= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",self.accountno]];
             self.password=[pass getPassword];
@@ -331,8 +332,9 @@ NSString *const kGtalk = @"Gtalk";
     {
         
         NSArray *accounts= [[NXOAuth2AccountStore sharedStore] accountsWithAccountType:self.jid];
+        NXOAuth2AccountStore *store = [NXOAuth2AccountStore sharedStore];
         for(NXOAuth2Account *oauthAccount in accounts ) {
-            [[NXOAuth2AccountStore sharedStore] removeAccount:oauthAccount];
+            [store removeAccount:oauthAccount];
         }
        
         //TODO remove password

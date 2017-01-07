@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		135896A7336BA00266B55A98 /* libPods-jrtplib-static.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00CD52DF53F94AC491D7404B /* libPods-jrtplib-static.a */; };
 		1D3623260D0F684500981E51 /* MonalAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D3623250D0F684500981E51 /* MonalAppDelegate.m */; };
 		1D60589B0D05DD56006BFB54 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; };
 		1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
@@ -124,39 +125,11 @@
 		26049A511B73156300D11866 /* libjrtplib-static-OSX.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 26049A501B7314F400D11866 /* libjrtplib-static-OSX.a */; };
 		26049A561B7315A000D11866 /* RTP.mm in Sources */ = {isa = PBXBuildFile; fileRef = 2642EBC618693626006A6C12 /* RTP.mm */; };
 		26049A571B7315C800D11866 /* IPAddress.m in Sources */ = {isa = PBXBuildFile; fileRef = 26FB468E18B2755A0043094F /* IPAddress.m */; };
-		26049A581B7315DC00D11866 /* TPCircularBuffer+AudioBufferList.c in Sources */ = {isa = PBXBuildFile; fileRef = 2658508615E7D8E40070A2A7 /* TPCircularBuffer+AudioBufferList.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		26049A591B7315DF00D11866 /* TPCircularBuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 2658508815E7D8E40070A2A7 /* TPCircularBuffer.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		26049A5B1B73163300D11866 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26049A5A1B73163300D11866 /* AVFoundation.framework */; };
 		260870D81B7034460036539B /* MLAccountEdit.m in Sources */ = {isa = PBXBuildFile; fileRef = 260870D71B7034460036539B /* MLAccountEdit.m */; };
 		260C51D1177F08F50039634B /* xmpp.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D0177F08F50039634B /* xmpp.m */; };
 		260C51D4177F44AD0039634B /* MLXMLNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D3177F44AD0039634B /* MLXMLNode.m */; };
 		260C6C94178080730004E2E1 /* EncodingTools.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C6C93178080730004E2E1 /* EncodingTools.m */; };
-		261147CF1C35D7860078A72E /* NSData+NXOAuth2.m in Sources */ = {isa = PBXBuildFile; fileRef = 261147B01C35D7860078A72E /* NSData+NXOAuth2.m */; };
-		261147D01C35D7860078A72E /* NSData+NXOAuth2.m in Sources */ = {isa = PBXBuildFile; fileRef = 261147B01C35D7860078A72E /* NSData+NXOAuth2.m */; };
-		261147D11C35D7860078A72E /* NSString+NXOAuth2.m in Sources */ = {isa = PBXBuildFile; fileRef = 261147B21C35D7860078A72E /* NSString+NXOAuth2.m */; };
-		261147D21C35D7860078A72E /* NSString+NXOAuth2.m in Sources */ = {isa = PBXBuildFile; fileRef = 261147B21C35D7860078A72E /* NSString+NXOAuth2.m */; };
-		261147D31C35D7860078A72E /* NSURL+NXOAuth2.m in Sources */ = {isa = PBXBuildFile; fileRef = 261147B41C35D7860078A72E /* NSURL+NXOAuth2.m */; };
-		261147D41C35D7860078A72E /* NSURL+NXOAuth2.m in Sources */ = {isa = PBXBuildFile; fileRef = 261147B41C35D7860078A72E /* NSURL+NXOAuth2.m */; };
-		261147D51C35D7860078A72E /* NXOAuth2AccessToken.m in Sources */ = {isa = PBXBuildFile; fileRef = 261147B81C35D7860078A72E /* NXOAuth2AccessToken.m */; };
-		261147D61C35D7860078A72E /* NXOAuth2AccessToken.m in Sources */ = {isa = PBXBuildFile; fileRef = 261147B81C35D7860078A72E /* NXOAuth2AccessToken.m */; };
-		261147D71C35D7860078A72E /* NXOAuth2Account.m in Sources */ = {isa = PBXBuildFile; fileRef = 261147BA1C35D7860078A72E /* NXOAuth2Account.m */; };
-		261147D81C35D7860078A72E /* NXOAuth2Account.m in Sources */ = {isa = PBXBuildFile; fileRef = 261147BA1C35D7860078A72E /* NXOAuth2Account.m */; };
-		261147D91C35D7860078A72E /* NXOAuth2AccountStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 261147BC1C35D7860078A72E /* NXOAuth2AccountStore.m */; };
-		261147DA1C35D7860078A72E /* NXOAuth2AccountStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 261147BC1C35D7860078A72E /* NXOAuth2AccountStore.m */; };
-		261147DB1C35D7860078A72E /* NXOAuth2Client.m in Sources */ = {isa = PBXBuildFile; fileRef = 261147BE1C35D7860078A72E /* NXOAuth2Client.m */; };
-		261147DC1C35D7860078A72E /* NXOAuth2Client.m in Sources */ = {isa = PBXBuildFile; fileRef = 261147BE1C35D7860078A72E /* NXOAuth2Client.m */; };
-		261147DD1C35D7860078A72E /* NXOAuth2Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 261147C11C35D7860078A72E /* NXOAuth2Connection.m */; };
-		261147DE1C35D7860078A72E /* NXOAuth2Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 261147C11C35D7860078A72E /* NXOAuth2Connection.m */; };
-		261147DF1C35D7860078A72E /* NXOAuth2Constants.m in Sources */ = {isa = PBXBuildFile; fileRef = 261147C41C35D7860078A72E /* NXOAuth2Constants.m */; };
-		261147E01C35D7860078A72E /* NXOAuth2Constants.m in Sources */ = {isa = PBXBuildFile; fileRef = 261147C41C35D7860078A72E /* NXOAuth2Constants.m */; };
-		261147E11C35D7860078A72E /* NXOAuth2FileStreamWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 261147C61C35D7860078A72E /* NXOAuth2FileStreamWrapper.m */; };
-		261147E21C35D7860078A72E /* NXOAuth2FileStreamWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 261147C61C35D7860078A72E /* NXOAuth2FileStreamWrapper.m */; };
-		261147E31C35D7860078A72E /* NXOAuth2PostBodyPart.m in Sources */ = {isa = PBXBuildFile; fileRef = 261147C81C35D7860078A72E /* NXOAuth2PostBodyPart.m */; };
-		261147E41C35D7860078A72E /* NXOAuth2PostBodyPart.m in Sources */ = {isa = PBXBuildFile; fileRef = 261147C81C35D7860078A72E /* NXOAuth2PostBodyPart.m */; };
-		261147E51C35D7860078A72E /* NXOAuth2PostBodyStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 261147CA1C35D7860078A72E /* NXOAuth2PostBodyStream.m */; };
-		261147E61C35D7860078A72E /* NXOAuth2PostBodyStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 261147CA1C35D7860078A72E /* NXOAuth2PostBodyStream.m */; };
-		261147E71C35D7860078A72E /* NXOAuth2Request.m in Sources */ = {isa = PBXBuildFile; fileRef = 261147CC1C35D7860078A72E /* NXOAuth2Request.m */; };
-		261147E81C35D7860078A72E /* NXOAuth2Request.m in Sources */ = {isa = PBXBuildFile; fileRef = 261147CC1C35D7860078A72E /* NXOAuth2Request.m */; };
 		261199251B632C42008768C8 /* MASPreferencesWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 261199211B632C42008768C8 /* MASPreferencesWindow.xib */; };
 		261199261B632C42008768C8 /* MASPreferencesWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261199231B632C42008768C8 /* MASPreferencesWindowController.m */; };
 		2614B64F1C54095D004FF2FA /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 2614B64E1C54095D004FF2FA /* libz.tbd */; };
@@ -181,7 +154,6 @@
 		26292F4F1309CAE100097280 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26292F4E1309CAE100097280 /* CFNetwork.framework */; };
 		262D9EA717921169009292B4 /* ParseMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 262D9EA617921169009292B4 /* ParseMessage.m */; };
 		262D9EAA17921E82009292B4 /* XMPPMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 262D9EA917921E82009292B4 /* XMPPMessage.m */; };
-		262DE4AF15C4E2C60040A66B /* MBProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = 262DE4AE15C4E2C60040A66B /* MBProgressHUD.m */; };
 		262E51921AD8CAC600788351 /* MLButtonCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 262E51901AD8CAC600788351 /* MLButtonCell.m */; };
 		262E51931AD8CAC600788351 /* MLButtonCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 262E51911AD8CAC600788351 /* MLButtonCell.xib */; };
 		262E51971AD8CB7200788351 /* MLTextInputCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 262E51951AD8CB7200788351 /* MLTextInputCell.m */; };
@@ -296,14 +268,9 @@
 		26529F5317FA7B310057F199 /* addContact.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26EC410517BDD88B0031304D /* addContact.xib */; };
 		2653EAE61C5B243400ED97F7 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2653EAE51C5B243400ED97F7 /* Main.storyboard */; };
 		265802851B785B8900C35014 /* MLDisabledScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = 265802841B785B8900C35014 /* MLDisabledScrollView.m */; };
-		2658508B15E7D8E40070A2A7 /* TPCircularBuffer+AudioBufferList.c in Sources */ = {isa = PBXBuildFile; fileRef = 2658508615E7D8E40070A2A7 /* TPCircularBuffer+AudioBufferList.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		2658508C15E7D8E40070A2A7 /* TPCircularBuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 2658508815E7D8E40070A2A7 /* TPCircularBuffer.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		265F0B631B75719E00A63F20 /* MLAccountRow.m in Sources */ = {isa = PBXBuildFile; fileRef = 265F0B621B75719E00A63F20 /* MLAccountRow.m */; };
 		265F1B2B123040540065C5FE /* web.xib in Resources */ = {isa = PBXBuildFile; fileRef = 265F1B2A123040540065C5FE /* web.xib */; };
 		265F6BA21B7B0040006B8EBA /* MLImageManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EC411217BDE39E0031304D /* MLImageManager.m */; };
-		265F6BA71B7B088A006B8EBA /* Crashlytics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 265F6BA61B7B088A006B8EBA /* Crashlytics.framework */; };
-		265FF0D11C7FD6CF00E2CCE1 /* DropboxOSX.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 265FF0D01C7FD6CF00E2CCE1 /* DropboxOSX.framework */; };
-		265FF0D21C7FDA3A00E2CCE1 /* DropboxOSX.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 265FF0D01C7FD6CF00E2CCE1 /* DropboxOSX.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		265FF0D51C7FDAC100E2CCE1 /* MLCloudStorageSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = 265FF0D41C7FDAC100E2CCE1 /* MLCloudStorageSettings.m */; };
 		2661D3411B40765A00EC51BA /* MLContactsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661D3401B40765A00EC51BA /* MLContactsViewController.m */; };
 		2661D3441B40766F00EC51BA /* MLChatViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661D3431B40766F00EC51BA /* MLChatViewController.m */; };
@@ -315,18 +282,14 @@
 		266272CD1B27DB8100C1CD49 /* Monal_OSXTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 266272CC1B27DB8100C1CD49 /* Monal_OSXTests.m */; };
 		2665C1161C4A6D2100CC9A04 /* MLOAuthViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2665C1151C4A6D2100CC9A04 /* MLOAuthViewController.m */; };
 		2665C1181C4A6D4500CC9A04 /* MLOAuthViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2665C1171C4A6D4500CC9A04 /* MLOAuthViewController.xib */; };
-		2665C11F1C4AC38200CC9A04 /* Fabric.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2665C11E1C4AC38200CC9A04 /* Fabric.framework */; };
 		26761BF61804FBB700D94714 /* RoomListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26761BF41804FBB700D94714 /* RoomListViewController.m */; };
 		26761BF71804FBB700D94714 /* RoomListViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26761BF51804FBB700D94714 /* RoomListViewController.xib */; };
 		2678A98B185A8320003AF53B /* ChatLogAccountDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2678A98A185A8320003AF53B /* ChatLogAccountDetailViewController.m */; };
 		2678A98E185AB739003AF53B /* ChatLogContactViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2678A98D185AB739003AF53B /* ChatLogContactViewController.m */; };
-		267E906B1C7AD22300A54152 /* DropboxSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 267E906A1C7AD22300A54152 /* DropboxSDK.framework */; };
 		267ECD691B7467B30025337F /* MLXMPPManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26352EA7177D222600E2C8FF /* MLXMPPManager.m */; };
 		267ECD6B1B746C340025337F /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 267ECD6A1B746C340025337F /* Security.framework */; };
 		267ECD6D1B746C660025337F /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 267ECD6C1B746C660025337F /* CFNetwork.framework */; };
 		268130181BFD8ECA0074C8EE /* MLAddContact.m in Sources */ = {isa = PBXBuildFile; fileRef = 268130171BFD8ECA0074C8EE /* MLAddContact.m */; };
-		2681301A1BFEDCEC0074C8EE /* Fabric.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 268130191BFEDCEC0074C8EE /* Fabric.framework */; };
-		26817F111B8E01D800A19886 /* Crashlytics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26817F101B8E01D800A19886 /* Crashlytics.framework */; };
 		268821FA19B9233B00AEA46E /* NSString+SqlLite.m in Sources */ = {isa = PBXBuildFile; fileRef = 268821F919B9233B00AEA46E /* NSString+SqlLite.m */; };
 		268BCF12140B29180025E4D1 /* libjrtplib-static.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */; };
 		268DD58617C4541000C673A9 /* MLChatCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 268DD58517C4541000C673A9 /* MLChatCell.m */; };
@@ -373,10 +336,6 @@
 		26B51C4A18654D98002134C3 /* LogViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26B51C4818654D98002134C3 /* LogViewController.xib */; };
 		26B69A75131C522F002FCBEB /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26B69A74131C522F002FCBEB /* Security.framework */; };
 		26B69A82131C5495002FCBEB /* PasswordManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B69A81131C5495002FCBEB /* PasswordManager.m */; };
-		26BAFC541626537D0073728B /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 26BAFC3E1626537D0073728B /* .gitignore */; };
-		26BAFC551626537D0073728B /* Appirater.m in Sources */ = {isa = PBXBuildFile; fileRef = 26BAFC401626537D0073728B /* Appirater.m */; };
-		26BAFC561626537D0073728B /* AppiraterLocalizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 26BAFC421626537D0073728B /* AppiraterLocalizable.strings */; };
-		26BAFC571626537D0073728B /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 26BAFC4F1626537D0073728B /* README.md */; };
 		26BDECDC1867B7790018670D /* CallViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26BDECDA1867B7790018670D /* CallViewController.m */; };
 		26BDECDD1867B7790018670D /* CallViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26BDECDB1867B7790018670D /* CallViewController.xib */; };
 		26C3456E1C68F9F0007F4BEC /* MLHTTPRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C3456D1C68F9F0007F4BEC /* MLHTTPRequest.m */; };
@@ -408,6 +367,11 @@
 		26FB468F18B2755A0043094F /* IPAddress.m in Sources */ = {isa = PBXBuildFile; fileRef = 26FB468E18B2755A0043094F /* IPAddress.m */; };
 		26FE3BCB1C61A6C3003CC230 /* MLResizingTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26FE3BCA1C61A6C3003CC230 /* MLResizingTextView.m */; };
 		288765A50DF7441C002DB57D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 288765A40DF7441C002DB57D /* CoreGraphics.framework */; };
+		2917CC1192B2D6BFC73B44D2 /* libPods-Monal.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8648C883FD32CF8739A55F1F /* libPods-Monal.a */; };
+		4FFC7B9295126D10C9D663A9 /* Pods_Monal_OSXTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 03E1DFB9E82238E98E106ED8 /* Pods_Monal_OSXTests.framework */; };
+		7506F363B9255CC7EB845450 /* Pods_Monal_OSX.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 353F7FFA13229F6C2CDA3A42 /* Pods_Monal_OSX.framework */; };
+		CAAF78ACC86D0E2D59659974 /* libPods-jrtplib-static-OSX.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0B878F234C6D75087415906A /* libPods-jrtplib-static-OSX.a */; };
+		CE240A984AD1C1E8EAAEA3F3 /* libPods-Monal Tests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73CF915D3257A1EDC011BD07 /* libPods-Monal Tests.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -448,7 +412,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				265FF0D21C7FDA3A00E2CCE1 /* DropboxOSX.framework in CopyFiles */,
 				26E456CF1B8421C3004BD74C /* Sparkle.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -456,6 +419,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		00CD52DF53F94AC491D7404B /* libPods-jrtplib-static.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-jrtplib-static.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		03E1DFB9E82238E98E106ED8 /* Pods_Monal_OSXTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Monal_OSXTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		0B878F234C6D75087415906A /* libPods-jrtplib-static-OSX.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-jrtplib-static-OSX.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		1CB94D0245DE1717B2AA3064 /* Pods-Monal.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal.adhoc.xcconfig"; path = "Pods/Target Support Files/Pods-Monal/Pods-Monal.adhoc.xcconfig"; sourceTree = "<group>"; };
 		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1D3623240D0F684500981E51 /* MonalAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MonalAppDelegate.h; path = Classes/MonalAppDelegate.h; sourceTree = "<group>"; };
 		1D3623250D0F684500981E51 /* MonalAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MonalAppDelegate.m; path = Classes/MonalAppDelegate.m; sourceTree = "<group>"; };
@@ -481,37 +448,6 @@
 		260C51D3177F44AD0039634B /* MLXMLNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLXMLNode.m; sourceTree = "<group>"; };
 		260C6C92178080730004E2E1 /* EncodingTools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EncodingTools.h; sourceTree = "<group>"; };
 		260C6C93178080730004E2E1 /* EncodingTools.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EncodingTools.m; sourceTree = "<group>"; };
-		261147AF1C35D7860078A72E /* NSData+NXOAuth2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+NXOAuth2.h"; sourceTree = "<group>"; };
-		261147B01C35D7860078A72E /* NSData+NXOAuth2.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+NXOAuth2.m"; sourceTree = "<group>"; };
-		261147B11C35D7860078A72E /* NSString+NXOAuth2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+NXOAuth2.h"; sourceTree = "<group>"; };
-		261147B21C35D7860078A72E /* NSString+NXOAuth2.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+NXOAuth2.m"; sourceTree = "<group>"; };
-		261147B31C35D7860078A72E /* NSURL+NXOAuth2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSURL+NXOAuth2.h"; sourceTree = "<group>"; };
-		261147B41C35D7860078A72E /* NSURL+NXOAuth2.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSURL+NXOAuth2.m"; sourceTree = "<group>"; };
-		261147B61C35D7860078A72E /* NXOAuth2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NXOAuth2.h; sourceTree = "<group>"; };
-		261147B71C35D7860078A72E /* NXOAuth2AccessToken.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NXOAuth2AccessToken.h; sourceTree = "<group>"; };
-		261147B81C35D7860078A72E /* NXOAuth2AccessToken.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NXOAuth2AccessToken.m; sourceTree = "<group>"; };
-		261147B91C35D7860078A72E /* NXOAuth2Account.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NXOAuth2Account.h; sourceTree = "<group>"; };
-		261147BA1C35D7860078A72E /* NXOAuth2Account.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NXOAuth2Account.m; sourceTree = "<group>"; };
-		261147BB1C35D7860078A72E /* NXOAuth2AccountStore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NXOAuth2AccountStore.h; sourceTree = "<group>"; };
-		261147BC1C35D7860078A72E /* NXOAuth2AccountStore.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NXOAuth2AccountStore.m; sourceTree = "<group>"; };
-		261147BD1C35D7860078A72E /* NXOAuth2Client.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NXOAuth2Client.h; sourceTree = "<group>"; };
-		261147BE1C35D7860078A72E /* NXOAuth2Client.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NXOAuth2Client.m; sourceTree = "<group>"; };
-		261147BF1C35D7860078A72E /* NXOAuth2ClientDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NXOAuth2ClientDelegate.h; sourceTree = "<group>"; };
-		261147C01C35D7860078A72E /* NXOAuth2Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NXOAuth2Connection.h; sourceTree = "<group>"; };
-		261147C11C35D7860078A72E /* NXOAuth2Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NXOAuth2Connection.m; sourceTree = "<group>"; };
-		261147C21C35D7860078A72E /* NXOAuth2ConnectionDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NXOAuth2ConnectionDelegate.h; sourceTree = "<group>"; };
-		261147C31C35D7860078A72E /* NXOAuth2Constants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NXOAuth2Constants.h; sourceTree = "<group>"; };
-		261147C41C35D7860078A72E /* NXOAuth2Constants.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NXOAuth2Constants.m; sourceTree = "<group>"; };
-		261147C51C35D7860078A72E /* NXOAuth2FileStreamWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NXOAuth2FileStreamWrapper.h; sourceTree = "<group>"; };
-		261147C61C35D7860078A72E /* NXOAuth2FileStreamWrapper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NXOAuth2FileStreamWrapper.m; sourceTree = "<group>"; };
-		261147C71C35D7860078A72E /* NXOAuth2PostBodyPart.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NXOAuth2PostBodyPart.h; sourceTree = "<group>"; };
-		261147C81C35D7860078A72E /* NXOAuth2PostBodyPart.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NXOAuth2PostBodyPart.m; sourceTree = "<group>"; };
-		261147C91C35D7860078A72E /* NXOAuth2PostBodyStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NXOAuth2PostBodyStream.h; sourceTree = "<group>"; };
-		261147CA1C35D7860078A72E /* NXOAuth2PostBodyStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NXOAuth2PostBodyStream.m; sourceTree = "<group>"; };
-		261147CB1C35D7860078A72E /* NXOAuth2Request.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NXOAuth2Request.h; sourceTree = "<group>"; };
-		261147CC1C35D7860078A72E /* NXOAuth2Request.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NXOAuth2Request.m; sourceTree = "<group>"; };
-		261147CD1C35D7860078A72E /* NXOAuth2TrustDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NXOAuth2TrustDelegate.h; sourceTree = "<group>"; };
-		261147CE1C35D7860078A72E /* OAuth2Client_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OAuth2Client_Prefix.pch; sourceTree = "<group>"; };
 		261199201B632C42008768C8 /* MASPreferencesViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MASPreferencesViewController.h; sourceTree = "<group>"; };
 		261199211B632C42008768C8 /* MASPreferencesWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MASPreferencesWindow.xib; sourceTree = "<group>"; };
 		261199221B632C42008768C8 /* MASPreferencesWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MASPreferencesWindowController.h; sourceTree = "<group>"; };
@@ -557,8 +493,6 @@
 		262D9EA817921E82009292B4 /* XMPPMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPMessage.h; sourceTree = "<group>"; };
 		262D9EA917921E82009292B4 /* XMPPMessage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPMessage.m; sourceTree = "<group>"; };
 		262D9EAB17924532009292B4 /* MLConstants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLConstants.h; sourceTree = "<group>"; };
-		262DE4AD15C4E2C60040A66B /* MBProgressHUD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MBProgressHUD.h; sourceTree = "<group>"; };
-		262DE4AE15C4E2C60040A66B /* MBProgressHUD.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MBProgressHUD.m; sourceTree = "<group>"; };
 		262E518F1AD8CAC600788351 /* MLButtonCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLButtonCell.h; sourceTree = "<group>"; };
 		262E51901AD8CAC600788351 /* MLButtonCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLButtonCell.m; sourceTree = "<group>"; };
 		262E51911AD8CAC600788351 /* MLButtonCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MLButtonCell.xib; sourceTree = "<group>"; };
@@ -690,15 +624,9 @@
 		2653EAE51C5B243400ED97F7 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		265802831B785B8900C35014 /* MLDisabledScrollView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLDisabledScrollView.h; sourceTree = "<group>"; };
 		265802841B785B8900C35014 /* MLDisabledScrollView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLDisabledScrollView.m; sourceTree = "<group>"; };
-		2658508615E7D8E40070A2A7 /* TPCircularBuffer+AudioBufferList.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "TPCircularBuffer+AudioBufferList.c"; sourceTree = "<group>"; };
-		2658508715E7D8E40070A2A7 /* TPCircularBuffer+AudioBufferList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "TPCircularBuffer+AudioBufferList.h"; sourceTree = "<group>"; };
-		2658508815E7D8E40070A2A7 /* TPCircularBuffer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = TPCircularBuffer.c; sourceTree = "<group>"; };
-		2658508915E7D8E40070A2A7 /* TPCircularBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TPCircularBuffer.h; sourceTree = "<group>"; };
 		265F0B611B75719E00A63F20 /* MLAccountRow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLAccountRow.h; sourceTree = "<group>"; };
 		265F0B621B75719E00A63F20 /* MLAccountRow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLAccountRow.m; sourceTree = "<group>"; };
 		265F1B2A123040540065C5FE /* web.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = web.xib; sourceTree = "<group>"; };
-		265F6BA61B7B088A006B8EBA /* Crashlytics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Crashlytics.framework; path = MonalOSX/External/Crashlytics.framework; sourceTree = "<group>"; };
-		265FF0D01C7FD6CF00E2CCE1 /* DropboxOSX.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DropboxOSX.framework; path = MonalOSX/External/DropboxOSX.framework; sourceTree = "<group>"; };
 		265FF0D31C7FDAC100E2CCE1 /* MLCloudStorageSettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLCloudStorageSettings.h; sourceTree = "<group>"; };
 		265FF0D41C7FDAC100E2CCE1 /* MLCloudStorageSettings.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLCloudStorageSettings.m; sourceTree = "<group>"; };
 		2661D33F1B40765A00EC51BA /* MLContactsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLContactsViewController.h; sourceTree = "<group>"; };
@@ -722,7 +650,6 @@
 		2665C1141C4A6D2100CC9A04 /* MLOAuthViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLOAuthViewController.h; sourceTree = "<group>"; };
 		2665C1151C4A6D2100CC9A04 /* MLOAuthViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLOAuthViewController.m; sourceTree = "<group>"; };
 		2665C1171C4A6D4500CC9A04 /* MLOAuthViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MLOAuthViewController.xib; sourceTree = "<group>"; };
-		2665C11E1C4AC38200CC9A04 /* Fabric.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Fabric.framework; path = "Monal-iOS/External/Fabric.framework"; sourceTree = "<group>"; };
 		26761BF31804FBB700D94714 /* RoomListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RoomListViewController.h; sourceTree = "<group>"; };
 		26761BF41804FBB700D94714 /* RoomListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RoomListViewController.m; sourceTree = "<group>"; };
 		26761BF51804FBB700D94714 /* RoomListViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = RoomListViewController.xib; sourceTree = "<group>"; };
@@ -730,19 +657,15 @@
 		2678A98A185A8320003AF53B /* ChatLogAccountDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChatLogAccountDetailViewController.m; sourceTree = "<group>"; };
 		2678A98C185AB739003AF53B /* ChatLogContactViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChatLogContactViewController.h; sourceTree = "<group>"; };
 		2678A98D185AB739003AF53B /* ChatLogContactViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChatLogContactViewController.m; sourceTree = "<group>"; };
-		267E906A1C7AD22300A54152 /* DropboxSDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DropboxSDK.framework; path = "Monal-iOS/External/DropboxSDK.framework"; sourceTree = "<group>"; };
 		267ECD6A1B746C340025337F /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
 		267ECD6C1B746C660025337F /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/System/Library/Frameworks/CFNetwork.framework; sourceTree = DEVELOPER_DIR; };
 		268130161BFD8ECA0074C8EE /* MLAddContact.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLAddContact.h; sourceTree = "<group>"; };
 		268130171BFD8ECA0074C8EE /* MLAddContact.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLAddContact.m; sourceTree = "<group>"; };
-		268130191BFEDCEC0074C8EE /* Fabric.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Fabric.framework; path = MonalOSX/External/Fabric.framework; sourceTree = "<group>"; };
-		26817F101B8E01D800A19886 /* Crashlytics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Crashlytics.framework; path = "Monal-iOS/External/Crashlytics.framework"; sourceTree = "<group>"; };
 		268821F819B9233B00AEA46E /* NSString+SqlLite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+SqlLite.h"; sourceTree = "<group>"; };
 		268821F919B9233B00AEA46E /* NSString+SqlLite.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+SqlLite.m"; sourceTree = "<group>"; };
 		268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libjrtplib-static.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		268DD58417C4541000C673A9 /* MLChatCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLChatCell.h; sourceTree = "<group>"; };
 		268DD58517C4541000C673A9 /* MLChatCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLChatCell.m; sourceTree = "<group>"; };
-		269574DC1C372F6B00544A60 /* NXOAuth2Account+Private.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NXOAuth2Account+Private.h"; sourceTree = "<group>"; };
 		269574DD1C372FD200544A60 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
 		269574DF1C37301600544A60 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/usr/lib/libz.tbd; sourceTree = DEVELOPER_DIR; };
 		269574E11C37307300544A60 /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/usr/lib/libsqlite3.tbd; sourceTree = DEVELOPER_DIR; };
@@ -791,27 +714,6 @@
 		26B69A74131C522F002FCBEB /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		26B69A80131C5495002FCBEB /* PasswordManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PasswordManager.h; path = Classes/PasswordManager.h; sourceTree = "<group>"; };
 		26B69A81131C5495002FCBEB /* PasswordManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PasswordManager.m; path = Classes/PasswordManager.m; sourceTree = "<group>"; };
-		26BAFC3E1626537D0073728B /* .gitignore */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
-		26BAFC3F1626537D0073728B /* Appirater.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Appirater.h; sourceTree = "<group>"; };
-		26BAFC401626537D0073728B /* Appirater.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Appirater.m; sourceTree = "<group>"; };
-		26BAFC411626537D0073728B /* AppiraterDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppiraterDelegate.h; sourceTree = "<group>"; };
-		26BAFC431626537D0073728B /* cs */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = cs; path = cs.lproj/AppiraterLocalizable.strings; sourceTree = "<group>"; };
-		26BAFC441626537D0073728B /* da */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = da; path = da.lproj/AppiraterLocalizable.strings; sourceTree = "<group>"; };
-		26BAFC451626537D0073728B /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/AppiraterLocalizable.strings; sourceTree = "<group>"; };
-		26BAFC461626537D0073728B /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/AppiraterLocalizable.strings; sourceTree = "<group>"; };
-		26BAFC471626537D0073728B /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/AppiraterLocalizable.strings; sourceTree = "<group>"; };
-		26BAFC481626537D0073728B /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/AppiraterLocalizable.strings; sourceTree = "<group>"; };
-		26BAFC491626537D0073728B /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/AppiraterLocalizable.strings; sourceTree = "<group>"; };
-		26BAFC4A1626537D0073728B /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/AppiraterLocalizable.strings; sourceTree = "<group>"; };
-		26BAFC4B1626537D0073728B /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/AppiraterLocalizable.strings; sourceTree = "<group>"; };
-		26BAFC4C1626537D0073728B /* nl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nl; path = nl.lproj/AppiraterLocalizable.strings; sourceTree = "<group>"; };
-		26BAFC4D1626537D0073728B /* pl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pl; path = pl.lproj/AppiraterLocalizable.strings; sourceTree = "<group>"; };
-		26BAFC4E1626537D0073728B /* pt */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pt; path = pt.lproj/AppiraterLocalizable.strings; sourceTree = "<group>"; };
-		26BAFC4F1626537D0073728B /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.md; sourceTree = "<group>"; };
-		26BAFC501626537D0073728B /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/AppiraterLocalizable.strings; sourceTree = "<group>"; };
-		26BAFC511626537D0073728B /* sv */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = sv; path = sv.lproj/AppiraterLocalizable.strings; sourceTree = "<group>"; };
-		26BAFC521626537D0073728B /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/AppiraterLocalizable.strings"; sourceTree = "<group>"; };
-		26BAFC531626537D0073728B /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/AppiraterLocalizable.strings"; sourceTree = "<group>"; };
 		26BDECD91867B7790018670D /* CallViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CallViewController.h; sourceTree = "<group>"; };
 		26BDECDA1867B7790018670D /* CallViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CallViewController.m; sourceTree = "<group>"; };
 		26BDECDB1867B7790018670D /* CallViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CallViewController.xib; sourceTree = "<group>"; };
@@ -876,8 +778,28 @@
 		26FE3BCA1C61A6C3003CC230 /* MLResizingTextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLResizingTextView.m; sourceTree = "<group>"; };
 		288765A40DF7441C002DB57D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		31A80863B17A9EB9D4C08364 /* Pods-jrtplib-static.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-jrtplib-static.adhoc.xcconfig"; path = "Pods/Target Support Files/Pods-jrtplib-static/Pods-jrtplib-static.adhoc.xcconfig"; sourceTree = "<group>"; };
 		32CA4F630368D1EE00C91783 /* SworIM_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SworIM_Prefix.pch; sourceTree = "<group>"; };
+		353F7FFA13229F6C2CDA3A42 /* Pods_Monal_OSX.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Monal_OSX.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		3EDC0EB6935929A159956EB5 /* Pods-Monal-OSXTests.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal-OSXTests.adhoc.xcconfig"; path = "Pods/Target Support Files/Pods-Monal-OSXTests/Pods-Monal-OSXTests.adhoc.xcconfig"; sourceTree = "<group>"; };
+		428F57D57919ACB0B97869A6 /* Pods-jrtplib-static-OSX.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-jrtplib-static-OSX.adhoc.xcconfig"; path = "Pods/Target Support Files/Pods-jrtplib-static-OSX/Pods-jrtplib-static-OSX.adhoc.xcconfig"; sourceTree = "<group>"; };
+		4425FD9C1F3AFFA64619FF67 /* Pods-jrtplib-static-OSX.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-jrtplib-static-OSX.appstore.xcconfig"; path = "Pods/Target Support Files/Pods-jrtplib-static-OSX/Pods-jrtplib-static-OSX.appstore.xcconfig"; sourceTree = "<group>"; };
+		6253B2B3FE987619C2714CF5 /* Pods-Monal Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal Tests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Monal Tests/Pods-Monal Tests.debug.xcconfig"; sourceTree = "<group>"; };
+		67334C3FACBBF127DFE076DF /* Pods-jrtplib-static.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-jrtplib-static.debug.xcconfig"; path = "Pods/Target Support Files/Pods-jrtplib-static/Pods-jrtplib-static.debug.xcconfig"; sourceTree = "<group>"; };
+		6D9328A93187B01B20E88F29 /* Pods-Monal.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Monal/Pods-Monal.debug.xcconfig"; sourceTree = "<group>"; };
+		73CF915D3257A1EDC011BD07 /* libPods-Monal Tests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Monal Tests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		861E9C836D3317B11641B333 /* Pods-jrtplib-static.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-jrtplib-static.appstore.xcconfig"; path = "Pods/Target Support Files/Pods-jrtplib-static/Pods-jrtplib-static.appstore.xcconfig"; sourceTree = "<group>"; };
+		8648C883FD32CF8739A55F1F /* libPods-Monal.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Monal.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		8A54C0030602B177997D366B /* Pods-Monal-OSXTests.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal-OSXTests.appstore.xcconfig"; path = "Pods/Target Support Files/Pods-Monal-OSXTests/Pods-Monal-OSXTests.appstore.xcconfig"; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Monal-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "Monal-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
+		9D4B7A0FB4CCDAAA5EEC8690 /* Pods-jrtplib-static-OSX.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-jrtplib-static-OSX.debug.xcconfig"; path = "Pods/Target Support Files/Pods-jrtplib-static-OSX/Pods-jrtplib-static-OSX.debug.xcconfig"; sourceTree = "<group>"; };
+		A1F5E44F27B64591044FB28E /* Pods-Monal-OSX.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal-OSX.adhoc.xcconfig"; path = "Pods/Target Support Files/Pods-Monal-OSX/Pods-Monal-OSX.adhoc.xcconfig"; sourceTree = "<group>"; };
+		ADFC4F2D8AFC07D6C84B0961 /* Pods-Monal.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal.appstore.xcconfig"; path = "Pods/Target Support Files/Pods-Monal/Pods-Monal.appstore.xcconfig"; sourceTree = "<group>"; };
+		AEE82B918E1D2978170F5151 /* Pods-Monal-OSXTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal-OSXTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Monal-OSXTests/Pods-Monal-OSXTests.debug.xcconfig"; sourceTree = "<group>"; };
+		B93583E9A8D07409E6847BCE /* Pods-Monal-OSX.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal-OSX.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Monal-OSX/Pods-Monal-OSX.debug.xcconfig"; sourceTree = "<group>"; };
+		C8C2F3F80367A8A1D3C24092 /* Pods-Monal Tests.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal Tests.adhoc.xcconfig"; path = "Pods/Target Support Files/Pods-Monal Tests/Pods-Monal Tests.adhoc.xcconfig"; sourceTree = "<group>"; };
+		EB7F14851D3C002B88ABBBF2 /* Pods-Monal Tests.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal Tests.appstore.xcconfig"; path = "Pods/Target Support Files/Pods-Monal Tests/Pods-Monal Tests.appstore.xcconfig"; sourceTree = "<group>"; };
+		FEB13B684255D50BCF0CE6C6 /* Pods-Monal-OSX.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal-OSX.appstore.xcconfig"; path = "Pods/Target Support Files/Pods-Monal-OSX/Pods-Monal-OSX.appstore.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -885,22 +807,20 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				267E906B1C7AD22300A54152 /* DropboxSDK.framework in Frameworks */,
 				2614B64F1C54095D004FF2FA /* libz.tbd in Frameworks */,
-				26817F111B8E01D800A19886 /* Crashlytics.framework in Frameworks */,
 				261528C51869CE5300BF62D6 /* AudioToolbox.framework in Frameworks */,
 				2642EBD01869425D006A6C12 /* CoreAudio.framework in Frameworks */,
 				268E700515D0D979002E63CD /* AVFoundation.framework in Frameworks */,
 				268BCF12140B29180025E4D1 /* libjrtplib-static.a in Frameworks */,
 				1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */,
 				1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */,
-				2665C11F1C4AC38200CC9A04 /* Fabric.framework in Frameworks */,
 				288765A50DF7441C002DB57D /* CoreGraphics.framework in Frameworks */,
 				2601D9D40FBF262E004DB939 /* libsqlite3.dylib in Frameworks */,
 				26F7BB451115F95000712672 /* SystemConfiguration.framework in Frameworks */,
 				263F568D121B5E970027D85D /* MediaPlayer.framework in Frameworks */,
 				26292F4F1309CAE100097280 /* CFNetwork.framework in Frameworks */,
 				26B69A75131C522F002FCBEB /* Security.framework in Frameworks */,
+				2917CC1192B2D6BFC73B44D2 /* libPods-Monal.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -908,6 +828,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CAAF78ACC86D0E2D59659974 /* libPods-jrtplib-static-OSX.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -915,6 +836,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CE240A984AD1C1E8EAAEA3F3 /* libPods-Monal Tests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -933,10 +855,8 @@
 				26049A5B1B73163300D11866 /* AVFoundation.framework in Frameworks */,
 				26049A511B73156300D11866 /* libjrtplib-static-OSX.a in Frameworks */,
 				26B2A4CB1B73084800272E63 /* AppKit.framework in Frameworks */,
-				265FF0D11C7FD6CF00E2CCE1 /* DropboxOSX.framework in Frameworks */,
-				2681301A1BFEDCEC0074C8EE /* Fabric.framework in Frameworks */,
-				265F6BA71B7B088A006B8EBA /* Crashlytics.framework in Frameworks */,
 				26E456CD1B842180004BD74C /* Sparkle.framework in Frameworks */,
+				7506F363B9255CC7EB845450 /* Pods_Monal_OSX.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -944,6 +864,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4FFC7B9295126D10C9D663A9 /* Pods_Monal_OSXTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -951,6 +872,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				135896A7336BA00266B55A98 /* libPods-jrtplib-static.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1000,53 +922,6 @@
 				260C51D0177F08F50039634B /* xmpp.m */,
 			);
 			name = XMPP;
-			sourceTree = "<group>";
-		};
-		261147AE1C35D7860078A72E /* Oauth2 */ = {
-			isa = PBXGroup;
-			children = (
-				269574DC1C372F6B00544A60 /* NXOAuth2Account+Private.h */,
-				261147AF1C35D7860078A72E /* NSData+NXOAuth2.h */,
-				261147B01C35D7860078A72E /* NSData+NXOAuth2.m */,
-				261147B11C35D7860078A72E /* NSString+NXOAuth2.h */,
-				261147B21C35D7860078A72E /* NSString+NXOAuth2.m */,
-				261147B31C35D7860078A72E /* NSURL+NXOAuth2.h */,
-				261147B41C35D7860078A72E /* NSURL+NXOAuth2.m */,
-				261147B51C35D7860078A72E /* OAuth2Client */,
-				261147CE1C35D7860078A72E /* OAuth2Client_Prefix.pch */,
-			);
-			path = Oauth2;
-			sourceTree = "<group>";
-		};
-		261147B51C35D7860078A72E /* OAuth2Client */ = {
-			isa = PBXGroup;
-			children = (
-				261147B61C35D7860078A72E /* NXOAuth2.h */,
-				261147B71C35D7860078A72E /* NXOAuth2AccessToken.h */,
-				261147B81C35D7860078A72E /* NXOAuth2AccessToken.m */,
-				261147B91C35D7860078A72E /* NXOAuth2Account.h */,
-				261147BA1C35D7860078A72E /* NXOAuth2Account.m */,
-				261147BB1C35D7860078A72E /* NXOAuth2AccountStore.h */,
-				261147BC1C35D7860078A72E /* NXOAuth2AccountStore.m */,
-				261147BD1C35D7860078A72E /* NXOAuth2Client.h */,
-				261147BE1C35D7860078A72E /* NXOAuth2Client.m */,
-				261147BF1C35D7860078A72E /* NXOAuth2ClientDelegate.h */,
-				261147C01C35D7860078A72E /* NXOAuth2Connection.h */,
-				261147C11C35D7860078A72E /* NXOAuth2Connection.m */,
-				261147C21C35D7860078A72E /* NXOAuth2ConnectionDelegate.h */,
-				261147C31C35D7860078A72E /* NXOAuth2Constants.h */,
-				261147C41C35D7860078A72E /* NXOAuth2Constants.m */,
-				261147C51C35D7860078A72E /* NXOAuth2FileStreamWrapper.h */,
-				261147C61C35D7860078A72E /* NXOAuth2FileStreamWrapper.m */,
-				261147C71C35D7860078A72E /* NXOAuth2PostBodyPart.h */,
-				261147C81C35D7860078A72E /* NXOAuth2PostBodyPart.m */,
-				261147C91C35D7860078A72E /* NXOAuth2PostBodyStream.h */,
-				261147CA1C35D7860078A72E /* NXOAuth2PostBodyStream.m */,
-				261147CB1C35D7860078A72E /* NXOAuth2Request.h */,
-				261147CC1C35D7860078A72E /* NXOAuth2Request.m */,
-				261147CD1C35D7860078A72E /* NXOAuth2TrustDelegate.h */,
-			);
-			path = OAuth2Client;
 			sourceTree = "<group>";
 		};
 		261199061B632B17008768C8 /* External */ = {
@@ -1112,15 +987,6 @@
 				262E51961AD8CB7200788351 /* MLTextInputCell.xib */,
 			);
 			name = Tableviewcells;
-			sourceTree = "<group>";
-		};
-		262DE4AC15C4E2C60040A66B /* MBProgressHUd */ = {
-			isa = PBXGroup;
-			children = (
-				262DE4AD15C4E2C60040A66B /* MBProgressHUD.h */,
-				262DE4AE15C4E2C60040A66B /* MBProgressHUD.m */,
-			);
-			path = MBProgressHUd;
 			sourceTree = "<group>";
 		};
 		2630FE301AD550C00079F5C0 /* Monal Tests */ = {
@@ -1197,17 +1063,6 @@
 				2643A12D180220890030EFB1 /* TPKeyboardAvoidingTableView.m */,
 			);
 			path = TPAvoidingView;
-			sourceTree = "<group>";
-		};
-		2658508415E7D8E40070A2A7 /* TPCircularBuffer */ = {
-			isa = PBXGroup;
-			children = (
-				2658508615E7D8E40070A2A7 /* TPCircularBuffer+AudioBufferList.c */,
-				2658508715E7D8E40070A2A7 /* TPCircularBuffer+AudioBufferList.h */,
-				2658508815E7D8E40070A2A7 /* TPCircularBuffer.c */,
-				2658508915E7D8E40070A2A7 /* TPCircularBuffer.h */,
-			);
-			path = TPCircularBuffer;
 			sourceTree = "<group>";
 		};
 		265F0B641B75733800A63F20 /* Accounts */ = {
@@ -1459,7 +1314,6 @@
 		26B2A4B51B73045500272E63 /* External */ = {
 			isa = PBXGroup;
 			children = (
-				261147AE1C35D7860078A72E /* Oauth2 */,
 				268BCCFD140B23E10025E4D1 /* jrtplib-static */,
 				26B2A4CC1B73097500272E63 /* DDLog */,
 			);
@@ -1539,8 +1393,6 @@
 		26B2A4FF1B730A0900272E63 /* iOS */ = {
 			isa = PBXGroup;
 			children = (
-				2665C11E1C4AC38200CC9A04 /* Fabric.framework */,
-				26817F101B8E01D800A19886 /* Crashlytics.framework */,
 				261528C41869CE5300BF62D6 /* AudioToolbox.framework */,
 				2642EBCF1869425D006A6C12 /* CoreAudio.framework */,
 				264FF3E4158A855D00D97B86 /* AVFoundation.framework */,
@@ -1559,14 +1411,11 @@
 		26B2A5001B730A0D00272E63 /* OSX */ = {
 			isa = PBXGroup;
 			children = (
-				265FF0D01C7FD6CF00E2CCE1 /* DropboxOSX.framework */,
 				2614B64E1C54095D004FF2FA /* libz.tbd */,
 				269574E11C37307300544A60 /* libsqlite3.tbd */,
 				269574DF1C37301600544A60 /* libz.tbd */,
 				269574DD1C372FD200544A60 /* Security.framework */,
-				268130191BFEDCEC0074C8EE /* Fabric.framework */,
 				26E456CC1B842180004BD74C /* Sparkle.framework */,
-				265F6BA61B7B088A006B8EBA /* Crashlytics.framework */,
 				267ECD6C1B746C660025337F /* CFNetwork.framework */,
 				26049A5A1B73163300D11866 /* AVFoundation.framework */,
 				26049A5C1B73164500D11866 /* AVKit.framework */,
@@ -1575,19 +1424,6 @@
 				26B2A4C81B73084100272E63 /* libsqlite3.0.dylib */,
 			);
 			name = OSX;
-			sourceTree = "<group>";
-		};
-		26BAFC3D1626537D0073728B /* appirator */ = {
-			isa = PBXGroup;
-			children = (
-				26BAFC3E1626537D0073728B /* .gitignore */,
-				26BAFC3F1626537D0073728B /* Appirater.h */,
-				26BAFC401626537D0073728B /* Appirater.m */,
-				26BAFC411626537D0073728B /* AppiraterDelegate.h */,
-				26BAFC421626537D0073728B /* AppiraterLocalizable.strings */,
-				26BAFC4F1626537D0073728B /* README.md */,
-			);
-			path = appirator;
 			sourceTree = "<group>";
 		};
 		26C3456B1C68F9D9007F4BEC /* HTTP */ = {
@@ -1714,12 +1550,8 @@
 		26DFD4A615666B6C007A1621 /* External */ = {
 			isa = PBXGroup;
 			children = (
-				267E906A1C7AD22300A54152 /* DropboxSDK.framework */,
 				2643A129180220890030EFB1 /* TPAvoidingView */,
 				26DA16D917C302BC00D0065E /* UIAlertView-Blocks */,
-				26BAFC3D1626537D0073728B /* appirator */,
-				2658508415E7D8E40070A2A7 /* TPCircularBuffer */,
-				262DE4AC15C4E2C60040A66B /* MBProgressHUd */,
 			);
 			name = External;
 			sourceTree = "<group>";
@@ -1748,6 +1580,7 @@
 				266272C91B27DB8100C1CD49 /* Monal-OSXTests */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
+				8E499B2EE45BEF75226B5B32 /* Pods */,
 			);
 			name = CustomTemplate;
 			sourceTree = "<group>";
@@ -1780,8 +1613,39 @@
 				262FE9351D821CD000A70506 /* WebKit.framework */,
 				26B2A5001B730A0D00272E63 /* OSX */,
 				26B2A4FF1B730A0900272E63 /* iOS */,
+				353F7FFA13229F6C2CDA3A42 /* Pods_Monal_OSX.framework */,
+				03E1DFB9E82238E98E106ED8 /* Pods_Monal_OSXTests.framework */,
+				00CD52DF53F94AC491D7404B /* libPods-jrtplib-static.a */,
+				0B878F234C6D75087415906A /* libPods-jrtplib-static-OSX.a */,
+				8648C883FD32CF8739A55F1F /* libPods-Monal.a */,
+				73CF915D3257A1EDC011BD07 /* libPods-Monal Tests.a */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		8E499B2EE45BEF75226B5B32 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				6D9328A93187B01B20E88F29 /* Pods-Monal.debug.xcconfig */,
+				1CB94D0245DE1717B2AA3064 /* Pods-Monal.adhoc.xcconfig */,
+				ADFC4F2D8AFC07D6C84B0961 /* Pods-Monal.appstore.xcconfig */,
+				6253B2B3FE987619C2714CF5 /* Pods-Monal Tests.debug.xcconfig */,
+				C8C2F3F80367A8A1D3C24092 /* Pods-Monal Tests.adhoc.xcconfig */,
+				EB7F14851D3C002B88ABBBF2 /* Pods-Monal Tests.appstore.xcconfig */,
+				B93583E9A8D07409E6847BCE /* Pods-Monal-OSX.debug.xcconfig */,
+				A1F5E44F27B64591044FB28E /* Pods-Monal-OSX.adhoc.xcconfig */,
+				FEB13B684255D50BCF0CE6C6 /* Pods-Monal-OSX.appstore.xcconfig */,
+				AEE82B918E1D2978170F5151 /* Pods-Monal-OSXTests.debug.xcconfig */,
+				3EDC0EB6935929A159956EB5 /* Pods-Monal-OSXTests.adhoc.xcconfig */,
+				8A54C0030602B177997D366B /* Pods-Monal-OSXTests.appstore.xcconfig */,
+				67334C3FACBBF127DFE076DF /* Pods-jrtplib-static.debug.xcconfig */,
+				31A80863B17A9EB9D4C08364 /* Pods-jrtplib-static.adhoc.xcconfig */,
+				861E9C836D3317B11641B333 /* Pods-jrtplib-static.appstore.xcconfig */,
+				9D4B7A0FB4CCDAAA5EEC8690 /* Pods-jrtplib-static-OSX.debug.xcconfig */,
+				428F57D57919ACB0B97869A6 /* Pods-jrtplib-static-OSX.adhoc.xcconfig */,
+				4425FD9C1F3AFFA64619FF67 /* Pods-jrtplib-static-OSX.appstore.xcconfig */,
+			);
+			name = Pods;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -1908,6 +1772,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 1D6058960D05DD3E006BFB54 /* Build configuration list for PBXNativeTarget "Monal" */;
 			buildPhases = (
+				76717EE198DD2D4EE34FBBED /* [CP] Check Pods Manifest.lock */,
 				2665C11B1C4ABF0B00CC9A04 /* Build number */,
 				1D60588D0D05DD3D006BFB54 /* Resources */,
 				1D60588E0D05DD3D006BFB54 /* Sources */,
@@ -1915,6 +1780,8 @@
 				26B3F1EC17BAED3A0028EA88 /* Crashlytics */,
 				2665C11C1C4ABF7100CC9A04 /* Remove Build number */,
 				2665C11D1C4ABFB500CC9A04 /* Tag Git */,
+				54F3D82A80DCDDBD9AEEC4C1 /* [CP] Embed Pods Frameworks */,
+				009C719E4F0BF68E742BA67B /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -1930,9 +1797,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 26049A4C1B7314F400D11866 /* Build configuration list for PBXNativeTarget "jrtplib-static-OSX" */;
 			buildPhases = (
+				025AA15AC879260E0740BB9D /* [CP] Check Pods Manifest.lock */,
 				260499F41B7314F400D11866 /* Sources */,
 				26049A181B7314F400D11866 /* Frameworks */,
 				26049A191B7314F400D11866 /* Headers */,
+				D8443499BC297E05535B677F /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -1947,9 +1816,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 2630FE3A1AD550C00079F5C0 /* Build configuration list for PBXNativeTarget "Monal Tests" */;
 			buildPhases = (
+				C1B7FF5BDDB9A46D5FEEC536 /* [CP] Check Pods Manifest.lock */,
 				2630FE2B1AD550C00079F5C0 /* Sources */,
 				2630FE2C1AD550C00079F5C0 /* Frameworks */,
 				2630FE2D1AD550C00079F5C0 /* Resources */,
+				3C88CB9ED26F4FEF2D3191E4 /* [CP] Embed Pods Frameworks */,
+				A05F1B08E9EBAA59F257040B /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -1965,6 +1837,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 266272D41B27DB8100C1CD49 /* Build configuration list for PBXNativeTarget "Monal-OSX" */;
 			buildPhases = (
+				B1FC64CB20BFE29A46BF0152 /* [CP] Check Pods Manifest.lock */,
 				2649CE4F1C4DE43300CD1E80 /* Build number */,
 				266272AD1B27DB8000C1CD49 /* Sources */,
 				266272AE1B27DB8000C1CD49 /* Frameworks */,
@@ -1973,6 +1846,8 @@
 				26E456CE1B8421AF004BD74C /* CopyFiles */,
 				2649CE501C4DE4A300CD1E80 /* Remove Build Number */,
 				2649CE511C4DE4A500CD1E80 /* Tag Git */,
+				F09A89DA9D14004C997BF0A9 /* [CP] Embed Pods Frameworks */,
+				85961DD6C0DB7B0B37F708BF /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -1988,9 +1863,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 266272D51B27DB8100C1CD49 /* Build configuration list for PBXNativeTarget "Monal-OSXTests" */;
 			buildPhases = (
+				381C9191C5644E8814CECB26 /* [CP] Check Pods Manifest.lock */,
 				266272C21B27DB8100C1CD49 /* Sources */,
 				266272C31B27DB8100C1CD49 /* Frameworks */,
 				266272C41B27DB8100C1CD49 /* Resources */,
+				97B55109CAF0C834A9EC8552 /* [CP] Embed Pods Frameworks */,
+				038D9F574B1C2765BA4C39FA /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -2006,9 +1884,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 268BCD57140B25CC0025E4D1 /* Build configuration list for PBXNativeTarget "jrtplib-static" */;
 			buildPhases = (
+				70921ECBDF172CEC71CF4732 /* [CP] Check Pods Manifest.lock */,
 				268BCD52140B25CC0025E4D1 /* Sources */,
 				268BCD53140B25CC0025E4D1 /* Frameworks */,
 				268BCD54140B25CC0025E4D1 /* Headers */,
+				399049A48234F9369FF1F79F /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -2085,6 +1965,7 @@
 				Base,
 			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* CustomTemplate */;
+			productRefGroup = 19C28FACFE9D520D11CA2CBB /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -2120,9 +2001,6 @@
 				2649CE531C51B84C00CD1E80 /* Launch Screen.storyboard in Resources */,
 				26F9794D1ACAC73A0008E005 /* MLContactCell.xib in Resources */,
 				2628E50714049DB50064131E /* askTempPass.xib in Resources */,
-				26BAFC541626537D0073728B /* .gitignore in Resources */,
-				26BAFC561626537D0073728B /* AppiraterLocalizable.strings in Resources */,
-				26BAFC571626537D0073728B /* README.md in Resources */,
 				26529F5317FA7B310057F199 /* addContact.xib in Resources */,
 				26AAE282179F701A00271345 /* About.html in Resources */,
 				26B51C4A18654D98002134C3 /* LogViewController.xib in Resources */,
@@ -2162,6 +2040,51 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		009C719E4F0BF68E742BA67B /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Monal/Pods-Monal-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		025AA15AC879260E0740BB9D /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		038D9F574B1C2765BA4C39FA /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Monal-OSXTests/Pods-Monal-OSXTests-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 		2649CE4F1C4DE43300CD1E80 /* Build number */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -2273,6 +2196,201 @@
 			shellPath = /bin/sh;
 			shellScript = "if [ \"${CONFIGURATION}\" == \"AppStore\" ]; then\n./Monal-iOS/External/Fabric.framework/run 6e807cf86986312a050437809e762656b44b197c d082f9c014f0bce40ebff3a62eb566eb101232f02d7beab5396912a9efcc8caa\nfi\n";
 		};
+		381C9191C5644E8814CECB26 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		399049A48234F9369FF1F79F /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-jrtplib-static/Pods-jrtplib-static-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		3C88CB9ED26F4FEF2D3191E4 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Monal Tests/Pods-Monal Tests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		54F3D82A80DCDDBD9AEEC4C1 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Monal/Pods-Monal-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		70921ECBDF172CEC71CF4732 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		76717EE198DD2D4EE34FBBED /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		85961DD6C0DB7B0B37F708BF /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Monal-OSX/Pods-Monal-OSX-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		97B55109CAF0C834A9EC8552 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Monal-OSXTests/Pods-Monal-OSXTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		A05F1B08E9EBAA59F257040B /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Monal Tests/Pods-Monal Tests-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		B1FC64CB20BFE29A46BF0152 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		C1B7FF5BDDB9A46D5FEEC536 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		D8443499BC297E05535B677F /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-jrtplib-static-OSX/Pods-jrtplib-static-OSX-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		F09A89DA9D14004C997BF0A9 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Monal-OSX/Pods-Monal-OSX-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -2281,29 +2399,21 @@
 			buildActionMask = 2147483647;
 			files = (
 				26D89F061A890672009B147C /* MLAccountCell.m in Sources */,
-				261147CF1C35D7860078A72E /* NSData+NXOAuth2.m in Sources */,
 				1D60589B0D05DD56006BFB54 /* main.m in Sources */,
 				269E748E18B707B500BCB2D5 /* MLPortraitNavController.m in Sources */,
 				1D3623260D0F684500981E51 /* MonalAppDelegate.m in Sources */,
 				2601D9B00FBF255D004DB939 /* DataLayer.m in Sources */,
-				261147DD1C35D7860078A72E /* NXOAuth2Connection.m in Sources */,
 				26277888110179D100023C8A /* tools.m in Sources */,
 				26F7BB431115F8DB00712672 /* Reachability.m in Sources */,
 				26B69A82131C5495002FCBEB /* PasswordManager.m in Sources */,
-				261147D11C35D7860078A72E /* NSString+NXOAuth2.m in Sources */,
-				261147E11C35D7860078A72E /* NXOAuth2FileStreamWrapper.m in Sources */,
 				26B51C4918654D98002134C3 /* LogViewController.m in Sources */,
 				2642EBC718693626006A6C12 /* RTP.mm in Sources */,
 				26B2A4F11B73097500272E63 /* DDASLLogger.m in Sources */,
 				26529F5217FA7B260057F199 /* addContact.m in Sources */,
-				262DE4AF15C4E2C60040A66B /* MBProgressHUD.m in Sources */,
 				262E51971AD8CB7200788351 /* MLTextInputCell.m in Sources */,
 				26C3EDFD1A807E76000E6331 /* ParseA.m in Sources */,
 				2642EBCA18693634006A6C12 /* jingleCall.m in Sources */,
-				2658508B15E7D8E40070A2A7 /* TPCircularBuffer+AudioBufferList.c in Sources */,
-				2658508C15E7D8E40070A2A7 /* TPCircularBuffer.c in Sources */,
 				2643A12E180220890030EFB1 /* TPKeyboardAvoidingScrollView.m in Sources */,
-				26BAFC551626537D0073728B /* Appirater.m in Sources */,
 				26761BF61804FBB700D94714 /* RoomListViewController.m in Sources */,
 				261A6281176C055400059090 /* ContactsViewController.m in Sources */,
 				261A6285176C156500059090 /* ActiveChatsViewController.m in Sources */,
@@ -2331,28 +2441,22 @@
 				264E345B1787BAB100BC7BD0 /* XMPPPresence.m in Sources */,
 				26BDECDC1867B7790018670D /* CallViewController.m in Sources */,
 				261AC91D1788A49C00E05657 /* ParsePresence.m in Sources */,
-				261147E31C35D7860078A72E /* NXOAuth2PostBodyPart.m in Sources */,
 				262797AF178A577300B85D94 /* MLContactCell.m in Sources */,
 				26347D861790FFDE006FF64F /* MLInfoCell.m in Sources */,
 				2665C1161C4A6D2100CC9A04 /* MLOAuthViewController.m in Sources */,
 				26B2A4E91B73097500272E63 /* CLIColor.m in Sources */,
 				2678A98E185AB739003AF53B /* ChatLogContactViewController.m in Sources */,
-				261147DF1C35D7860078A72E /* NXOAuth2Constants.m in Sources */,
 				26C3456E1C68F9F0007F4BEC /* MLHTTPRequest.m in Sources */,
 				2696EED21791245A00BC54B8 /* chatViewController.m in Sources */,
 				26B2A4FB1B73097500272E63 /* DDDispatchQueueLogFormatter.m in Sources */,
 				26B2A4F71B73097500272E63 /* DDTTYLogger.m in Sources */,
 				262D9EA717921169009292B4 /* ParseMessage.m in Sources */,
-				261147D71C35D7860078A72E /* NXOAuth2Account.m in Sources */,
 				262D9EAA17921E82009292B4 /* XMPPMessage.m in Sources */,
-				261147E51C35D7860078A72E /* NXOAuth2PostBodyStream.m in Sources */,
 				260283861D8DEFC1001DD6B8 /* MLPreviewObject.m in Sources */,
 				26EE8B1C179B55D2006781F3 /* ParseChallenge.m in Sources */,
-				261147DB1C35D7860078A72E /* NXOAuth2Client.m in Sources */,
 				26C3EDF71A8072D5000E6331 /* ParseEnabled.m in Sources */,
 				26B2A4F91B73097500272E63 /* DDContextFilterLogFormatter.m in Sources */,
 				26EE8B1F179B67FA006781F3 /* MLNotificationManager.m in Sources */,
-				261147D91C35D7860078A72E /* NXOAuth2AccountStore.m in Sources */,
 				26EE8B22179B7B0E006781F3 /* SlidingMessageViewController.m in Sources */,
 				261E672B179E27BE00CB493E /* ParseFailure.m in Sources */,
 				26B2A4F51B73097500272E63 /* DDLog.m in Sources */,
@@ -2368,10 +2472,7 @@
 				26B2A4FD1B73097500272E63 /* DDMultiFormatter.m in Sources */,
 				262E51921AD8CAC600788351 /* MLButtonCell.m in Sources */,
 				2643A12F180220890030EFB1 /* TPKeyboardAvoidingTableView.m in Sources */,
-				261147D31C35D7860078A72E /* NSURL+NXOAuth2.m in Sources */,
 				268DD58617C4541000C673A9 /* MLChatCell.m in Sources */,
-				261147D51C35D7860078A72E /* NXOAuth2AccessToken.m in Sources */,
-				261147E71C35D7860078A72E /* NXOAuth2Request.m in Sources */,
 				26E2F7DA17C6FD9400C3C8EF /* MLTabBarController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2435,13 +2536,10 @@
 				26B2A4F01B73097500272E63 /* DDASLLogCapture.m in Sources */,
 				260499E21B730E9000D11866 /* xmpp.m in Sources */,
 				260499E51B730E9B00D11866 /* XMPPPresence.m in Sources */,
-				261147DA1C35D7860078A72E /* NXOAuth2AccountStore.m in Sources */,
 				2638DAEB1B68F3D400DF05AC /* MLAccountSettings.m in Sources */,
 				260499F21B7314D600D11866 /* jingleCall.m in Sources */,
 				26B2A4BF1B73070F00272E63 /* NSString+SqlLite.m in Sources */,
-				261147E61C35D7860078A72E /* NXOAuth2PostBodyStream.m in Sources */,
 				2661D34D1B407ED400EC51BA /* MLContactsCell.m in Sources */,
-				26049A581B7315DC00D11866 /* TPCircularBuffer+AudioBufferList.c in Sources */,
 				26B2A4F21B73097500272E63 /* DDASLLogger.m in Sources */,
 				2638DAEF1B68F3EF00DF05AC /* MLDisplaySettings.m in Sources */,
 				260499EE1B7313F000D11866 /* XMPPParser.m in Sources */,
@@ -2450,8 +2548,6 @@
 				269574E51C37482A00544A60 /* MLOAuthViewController.m in Sources */,
 				2651AF551B409906008D025C /* MLMainWindow.m in Sources */,
 				26B2A4F81B73097500272E63 /* DDTTYLogger.m in Sources */,
-				261147E41C35D7860078A72E /* NXOAuth2PostBodyPart.m in Sources */,
-				261147D01C35D7860078A72E /* NSData+NXOAuth2.m in Sources */,
 				26B2A4FA1B73097500272E63 /* DDContextFilterLogFormatter.m in Sources */,
 				266272B91B27DB8000C1CD49 /* main.m in Sources */,
 				26049A561B7315A000D11866 /* RTP.mm in Sources */,
@@ -2461,19 +2557,12 @@
 				268130181BFD8ECA0074C8EE /* MLAddContact.m in Sources */,
 				260870D81B7034460036539B /* MLAccountEdit.m in Sources */,
 				260499E31B730E9500D11866 /* MLXMLNode.m in Sources */,
-				261147D81C35D7860078A72E /* NXOAuth2Account.m in Sources */,
 				260499F01B7313F600D11866 /* ParseStream.m in Sources */,
-				261147E81C35D7860078A72E /* NXOAuth2Request.m in Sources */,
-				261147D61C35D7860078A72E /* NXOAuth2AccessToken.m in Sources */,
 				265F0B631B75719E00A63F20 /* MLAccountRow.m in Sources */,
 				26AA41051D9FCBF6005A77ED /* MLImageView.m in Sources */,
 				260499EC1B7313EA00D11866 /* ParseMessage.m in Sources */,
-				261147DC1C35D7860078A72E /* NXOAuth2Client.m in Sources */,
-				261147D21C35D7860078A72E /* NSString+NXOAuth2.m in Sources */,
-				26049A591B7315DF00D11866 /* TPCircularBuffer.c in Sources */,
 				26B2A4FC1B73097500272E63 /* DDDispatchQueueLogFormatter.m in Sources */,
 				260499E91B7313E100D11866 /* ParseEnabled.m in Sources */,
-				261147D41C35D7860078A72E /* NSURL+NXOAuth2.m in Sources */,
 				26B2A4F41B73097500272E63 /* DDFileLogger.m in Sources */,
 				260499F11B73141500D11866 /* EncodingTools.m in Sources */,
 				260499E61B730E9E00D11866 /* XMPPMessage.m in Sources */,
@@ -2481,7 +2570,6 @@
 				265F6BA21B7B0040006B8EBA /* MLImageManager.m in Sources */,
 				2661D3441B40766F00EC51BA /* MLChatViewController.m in Sources */,
 				26B2A4BE1B7306E500272E63 /* DataLayer.m in Sources */,
-				261147E01C35D7860078A72E /* NXOAuth2Constants.m in Sources */,
 				261199261B632C42008768C8 /* MASPreferencesWindowController.m in Sources */,
 				266272B71B27DB8000C1CD49 /* AppDelegate.m in Sources */,
 				260499EA1B7313E500D11866 /* ParseFailure.m in Sources */,
@@ -2492,9 +2580,7 @@
 				26B2A4EA1B73097500272E63 /* CLIColor.m in Sources */,
 				260499EF1B7313F300D11866 /* ParseIq.m in Sources */,
 				26C3456F1C68F9F0007F4BEC /* MLHTTPRequest.m in Sources */,
-				261147E21C35D7860078A72E /* NXOAuth2FileStreamWrapper.m in Sources */,
 				26B2A4EE1B73097500272E63 /* DDAbstractDatabaseLogger.m in Sources */,
-				261147DE1C35D7860078A72E /* NXOAuth2Connection.m in Sources */,
 				26277CE41B7C57670094E4D0 /* MLContactDetails.m in Sources */,
 				2638DAE71B68F3AB00DF05AC /* MLPresenceSettings.m in Sources */,
 				2661D3411B40765A00EC51BA /* MLContactsViewController.m in Sources */,
@@ -2588,34 +2674,12 @@
 			name = Main.storyboard;
 			sourceTree = "<group>";
 		};
-		26BAFC421626537D0073728B /* AppiraterLocalizable.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				26BAFC431626537D0073728B /* cs */,
-				26BAFC441626537D0073728B /* da */,
-				26BAFC451626537D0073728B /* de */,
-				26BAFC461626537D0073728B /* en */,
-				26BAFC471626537D0073728B /* es */,
-				26BAFC481626537D0073728B /* fr */,
-				26BAFC491626537D0073728B /* it */,
-				26BAFC4A1626537D0073728B /* ja */,
-				26BAFC4B1626537D0073728B /* ko */,
-				26BAFC4C1626537D0073728B /* nl */,
-				26BAFC4D1626537D0073728B /* pl */,
-				26BAFC4E1626537D0073728B /* pt */,
-				26BAFC501626537D0073728B /* ru */,
-				26BAFC511626537D0073728B /* sv */,
-				26BAFC521626537D0073728B /* zh-Hans */,
-				26BAFC531626537D0073728B /* zh-Hant */,
-			);
-			name = AppiraterLocalizable.strings;
-			sourceTree = "<group>";
-		};
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		1D6058940D05DD3E006BFB54 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 6D9328A93187B01B20E88F29 /* Pods-Monal.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -2638,12 +2702,15 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = SworIM_Prefix.pch;
-				GCC_PREPROCESSOR_DEFINITIONS = "DEBUG=1";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "Monal-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				LLVM_LTO = NO;
-				OTHER_LDFLAGS = "-lstdc++";
+				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_NAME = Monal;
 				PROVISIONING_PROFILE = "45d372f3-59f7-437d-913f-91aeeb1decad";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
@@ -2653,6 +2720,7 @@
 		};
 		26049A4D1B7314F400D11866 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9D4B7A0FB4CCDAAA5EEC8690 /* Pods-jrtplib-static-OSX.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CODE_SIGN_IDENTITY = "";
@@ -2689,6 +2757,7 @@
 		};
 		26049A4E1B7314F400D11866 /* Adhoc */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 428F57D57919ACB0B97869A6 /* Pods-jrtplib-static-OSX.adhoc.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CODE_SIGN_IDENTITY = "";
@@ -2720,6 +2789,7 @@
 		};
 		26049A4F1B7314F400D11866 /* AppStore */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 4425FD9C1F3AFFA64619FF67 /* Pods-jrtplib-static-OSX.appstore.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CODE_SIGN_IDENTITY = "";
@@ -2751,6 +2821,7 @@
 		};
 		2630FE371AD550C00079F5C0 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 6253B2B3FE987619C2714CF5 /* Pods-Monal Tests.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
@@ -2786,6 +2857,7 @@
 		};
 		2630FE381AD550C00079F5C0 /* Adhoc */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = C8C2F3F80367A8A1D3C24092 /* Pods-Monal Tests.adhoc.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
@@ -2830,6 +2902,7 @@
 		};
 		2630FE391AD550C00079F5C0 /* AppStore */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = EB7F14851D3C002B88ABBBF2 /* Pods-Monal Tests.appstore.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
@@ -2874,6 +2947,7 @@
 		};
 		266272CE1B27DB8100C1CD49 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = B93583E9A8D07409E6847BCE /* Pods-Monal-OSX.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -2908,7 +2982,7 @@
 				LLVM_LTO = NO;
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MTL_ENABLE_DEBUG_INFO = YES;
-				OTHER_LDFLAGS = "-Wl,-rpath,@loader_path/../Frameworks";
+				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_NAME = Monal;
 				PROVISIONING_PROFILE = "";
 				SDKROOT = macosx;
@@ -2918,6 +2992,7 @@
 		};
 		266272CF1B27DB8100C1CD49 /* Adhoc */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = A1F5E44F27B64591044FB28E /* Pods-Monal-OSX.adhoc.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -2959,7 +3034,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MTL_ENABLE_DEBUG_INFO = NO;
-				OTHER_LDFLAGS = "-Wl,-rpath,@loader_path/../Frameworks";
+				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_NAME = Monal;
 				PROVISIONING_PROFILE = "";
 				SDKROOT = macosx;
@@ -2968,6 +3043,7 @@
 		};
 		266272D01B27DB8100C1CD49 /* AppStore */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = FEB13B684255D50BCF0CE6C6 /* Pods-Monal-OSX.appstore.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -3009,7 +3085,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MTL_ENABLE_DEBUG_INFO = NO;
-				OTHER_LDFLAGS = "-Wl,-rpath,@loader_path/../Frameworks";
+				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_NAME = Monal;
 				PROVISIONING_PROFILE = "";
 				SDKROOT = macosx;
@@ -3018,6 +3094,7 @@
 		};
 		266272D11B27DB8100C1CD49 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = AEE82B918E1D2978170F5151 /* Pods-Monal-OSXTests.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -3057,6 +3134,7 @@
 		};
 		266272D21B27DB8100C1CD49 /* Adhoc */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 3EDC0EB6935929A159956EB5 /* Pods-Monal-OSXTests.adhoc.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -3103,6 +3181,7 @@
 		};
 		266272D31B27DB8100C1CD49 /* AppStore */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 8A54C0030602B177997D366B /* Pods-Monal-OSXTests.appstore.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -3185,6 +3264,7 @@
 		};
 		2675EF5A18B98C2D0059C5C3 /* AppStore */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = ADFC4F2D8AFC07D6C84B0961 /* Pods-Monal.appstore.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -3210,7 +3290,7 @@
 				INFOPLIST_FILE = "Monal-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				LLVM_LTO = NO;
-				OTHER_LDFLAGS = "-lstdc++";
+				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_NAME = Monal;
 				PROVISIONING_PROFILE = "499c9e3f-44d1-459d-b698-8490f55cabaa";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
@@ -3220,6 +3300,7 @@
 		};
 		2675EF5B18B98C2D0059C5C3 /* AppStore */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 861E9C836D3317B11641B333 /* Pods-jrtplib-static.appstore.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CODE_SIGN_IDENTITY = "iPhone Distribution: Anurodh Pokharel (33XS7DE5NZ)";
@@ -3250,6 +3331,7 @@
 		};
 		268BCD58140B25CC0025E4D1 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 67334C3FACBBF127DFE076DF /* Pods-jrtplib-static.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = NO;
@@ -3317,6 +3399,7 @@
 		};
 		26E74FBE17B06D2200FD91AE /* Adhoc */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1CB94D0245DE1717B2AA3064 /* Pods-Monal.adhoc.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -3342,7 +3425,7 @@
 				INFOPLIST_FILE = "Monal-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				LLVM_LTO = NO;
-				OTHER_LDFLAGS = "-lstdc++";
+				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_NAME = Monal;
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
@@ -3352,6 +3435,7 @@
 		};
 		26E74FBF17B06D2200FD91AE /* Adhoc */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 31A80863B17A9EB9D4C08364 /* Pods-jrtplib-static.adhoc.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CODE_SIGN_IDENTITY = "iPhone Distribution: Anurodh Pokharel (33XS7DE5NZ)";

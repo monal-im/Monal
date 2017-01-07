@@ -1,0 +1,48 @@
+#ifdef __OBJC__
+#import <Cocoa/Cocoa.h>
+#endif
+
+#import "DBAccountInfo.h"
+#import "DBAuthHelperOSX.h"
+#import "DBBase64Transcoder.h"
+#import "DBDeltaEntry.h"
+#import "DBError.h"
+#import "DBJSON.h"
+#import "DBJsonBase.h"
+#import "DBJsonParser.h"
+#import "DBJsonWriter.h"
+#import "DBLog.h"
+#import "DBMetadata.h"
+#import "DBQuota.h"
+#import "DBRequest.h"
+#import "DBRestClient+OSX.h"
+#import "DBRestClient.h"
+#import "DBSession.h"
+#import "DropboxOSX.h"
+#import "JSON.h"
+#import "MPDebug.h"
+#import "MPOAuth.h"
+#import "MPOAuthAPI.h"
+#import "MPOAuthAPIRequestLoader.h"
+#import "MPOAuthAuthenticationMethod.h"
+#import "MPOAuthAuthenticationMethodOAuth.h"
+#import "MPOAuthConnection.h"
+#import "MPOAuthCredentialConcreteStore+KeychainAdditions.h"
+#import "MPOAuthCredentialConcreteStore.h"
+#import "MPOAuthCredentialStore.h"
+#import "MPOAuthParameterFactory.h"
+#import "MPOAuthSignatureParameter.h"
+#import "MPOAuthURLRequest.h"
+#import "MPOAuthURLResponse.h"
+#import "MPURLRequestParameter.h"
+#import "NSDictionary+Dropbox.h"
+#import "NSObject+DBJSON.h"
+#import "NSString+DBJSON.h"
+#import "NSString+Dropbox.h"
+#import "NSString+URLEscapingAdditions.h"
+#import "NSURL+MPURLParameterAdditions.h"
+#import "NSURLResponse+Encoding.h"
+
+FOUNDATION_EXPORT double DropboxOSXVersionNumber;
+FOUNDATION_EXPORT const unsigned char DropboxOSXVersionString[];
+

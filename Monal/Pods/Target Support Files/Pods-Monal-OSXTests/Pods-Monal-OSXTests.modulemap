@@ -1,6 +1,0 @@
-framework module Pods_Monal_OSXTests {
-  umbrella header "Pods-Monal-OSXTests-umbrella.h"
-
-  export *
-  module * { export * }
-}

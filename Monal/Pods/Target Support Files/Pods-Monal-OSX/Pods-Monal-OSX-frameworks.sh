@@ -82,22 +82,3 @@ strip_invalid_archs() {
   fi
 }
 
-
-if [[ "$CONFIGURATION" == "Debug" ]]; then
-  install_framework "$BUILT_PRODUCTS_DIR/NXOAuth2Client-framework/NXOAuth2Client.framework"
-  install_framework "$BUILT_PRODUCTS_DIR/Dropbox-OSX-SDK/DropboxOSX.framework"
-  install_framework "$BUILT_PRODUCTS_DIR/MASPreferences/MASPreferences.framework"
-  install_framework "$BUILT_PRODUCTS_DIR/SAMKeychain/SAMKeychain.framework"
-fi
-if [[ "$CONFIGURATION" == "Adhoc" ]]; then
-  install_framework "$BUILT_PRODUCTS_DIR/NXOAuth2Client-framework/NXOAuth2Client.framework"
-  install_framework "$BUILT_PRODUCTS_DIR/Dropbox-OSX-SDK/DropboxOSX.framework"
-  install_framework "$BUILT_PRODUCTS_DIR/MASPreferences/MASPreferences.framework"
-  install_framework "$BUILT_PRODUCTS_DIR/SAMKeychain/SAMKeychain.framework"
-fi
-if [[ "$CONFIGURATION" == "AppStore" ]]; then
-  install_framework "$BUILT_PRODUCTS_DIR/NXOAuth2Client-framework/NXOAuth2Client.framework"
-  install_framework "$BUILT_PRODUCTS_DIR/Dropbox-OSX-SDK/DropboxOSX.framework"
-  install_framework "$BUILT_PRODUCTS_DIR/MASPreferences/MASPreferences.framework"
-  install_framework "$BUILT_PRODUCTS_DIR/SAMKeychain/SAMKeychain.framework"
-fi

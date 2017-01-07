@@ -1,6 +1,0 @@
-framework module DropboxOSX {
-  umbrella header "Dropbox-OSX-SDK-umbrella.h"
-
-  export *
-  module * { export * }
-}

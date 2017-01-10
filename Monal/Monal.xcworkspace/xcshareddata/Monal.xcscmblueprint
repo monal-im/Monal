@@ -1,0 +1,30 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "F8AF1CF936C5B48522F4A8993B67A7719ADE7A27",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "5F4AF306D94F14DDC53420855DA126B888653148" : 9223372036854775807,
+    "F8AF1CF936C5B48522F4A8993B67A7719ADE7A27" : 9223372036854775807
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "2E5E1CD6-5E39-47C5-BF36-E3F634DB0553",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "5F4AF306D94F14DDC53420855DA126B888653148" : "monalxmpp\/Monal\/MonalOSX\/External\/STUtils\/",
+    "F8AF1CF936C5B48522F4A8993B67A7719ADE7A27" : "monalxmpp\/"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "Monal",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "Monal\/Monal.xcworkspace",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/ldandersen\/STUtils.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "5F4AF306D94F14DDC53420855DA126B888653148"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "github.com:anurodhp\/Monal.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "F8AF1CF936C5B48522F4A8993B67A7719ADE7A27"
+    }
+  ]
+}

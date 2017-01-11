@@ -348,6 +348,32 @@
 		26CF3EAA1780D6B7002B7085 /* XMPPIQ.m in Sources */ = {isa = PBXBuildFile; fileRef = 26CF3EA91780D6B7002B7085 /* XMPPIQ.m */; };
 		26CF3EAD1780DE5D002B7085 /* ParseIq.m in Sources */ = {isa = PBXBuildFile; fileRef = 26CF3EAC1780DE5C002B7085 /* ParseIq.m */; };
 		26CF3EB21780DFD9002B7085 /* XMPPParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 26CF3EB11780DFD9002B7085 /* XMPPParser.m */; };
+		26D51CCA1E2674D700141E04 /* NSData+NXOAuth2.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CAA1E2674D700141E04 /* NSData+NXOAuth2.m */; };
+		26D51CCB1E2674D700141E04 /* NSData+NXOAuth2.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CAA1E2674D700141E04 /* NSData+NXOAuth2.m */; };
+		26D51CCC1E2674D700141E04 /* NSString+NXOAuth2.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CAC1E2674D700141E04 /* NSString+NXOAuth2.m */; };
+		26D51CCD1E2674D700141E04 /* NSString+NXOAuth2.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CAC1E2674D700141E04 /* NSString+NXOAuth2.m */; };
+		26D51CCE1E2674D700141E04 /* NSURL+NXOAuth2.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CAE1E2674D700141E04 /* NSURL+NXOAuth2.m */; };
+		26D51CCF1E2674D700141E04 /* NSURL+NXOAuth2.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CAE1E2674D700141E04 /* NSURL+NXOAuth2.m */; };
+		26D51CD01E2674D700141E04 /* NXOAuth2AccessToken.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CB31E2674D700141E04 /* NXOAuth2AccessToken.m */; };
+		26D51CD11E2674D700141E04 /* NXOAuth2AccessToken.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CB31E2674D700141E04 /* NXOAuth2AccessToken.m */; };
+		26D51CD21E2674D700141E04 /* NXOAuth2Account.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CB51E2674D700141E04 /* NXOAuth2Account.m */; };
+		26D51CD31E2674D700141E04 /* NXOAuth2Account.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CB51E2674D700141E04 /* NXOAuth2Account.m */; };
+		26D51CD41E2674D700141E04 /* NXOAuth2AccountStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CB71E2674D700141E04 /* NXOAuth2AccountStore.m */; };
+		26D51CD51E2674D700141E04 /* NXOAuth2AccountStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CB71E2674D700141E04 /* NXOAuth2AccountStore.m */; };
+		26D51CD61E2674D700141E04 /* NXOAuth2Client.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CB91E2674D700141E04 /* NXOAuth2Client.m */; };
+		26D51CD71E2674D700141E04 /* NXOAuth2Client.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CB91E2674D700141E04 /* NXOAuth2Client.m */; };
+		26D51CD81E2674D700141E04 /* NXOAuth2Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CBC1E2674D700141E04 /* NXOAuth2Connection.m */; };
+		26D51CD91E2674D700141E04 /* NXOAuth2Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CBC1E2674D700141E04 /* NXOAuth2Connection.m */; };
+		26D51CDA1E2674D700141E04 /* NXOAuth2Constants.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CBF1E2674D700141E04 /* NXOAuth2Constants.m */; };
+		26D51CDB1E2674D700141E04 /* NXOAuth2Constants.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CBF1E2674D700141E04 /* NXOAuth2Constants.m */; };
+		26D51CDC1E2674D700141E04 /* NXOAuth2FileStreamWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CC11E2674D700141E04 /* NXOAuth2FileStreamWrapper.m */; };
+		26D51CDD1E2674D700141E04 /* NXOAuth2FileStreamWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CC11E2674D700141E04 /* NXOAuth2FileStreamWrapper.m */; };
+		26D51CDE1E2674D700141E04 /* NXOAuth2PostBodyPart.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CC31E2674D700141E04 /* NXOAuth2PostBodyPart.m */; };
+		26D51CDF1E2674D700141E04 /* NXOAuth2PostBodyPart.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CC31E2674D700141E04 /* NXOAuth2PostBodyPart.m */; };
+		26D51CE01E2674D700141E04 /* NXOAuth2PostBodyStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CC51E2674D700141E04 /* NXOAuth2PostBodyStream.m */; };
+		26D51CE11E2674D700141E04 /* NXOAuth2PostBodyStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CC51E2674D700141E04 /* NXOAuth2PostBodyStream.m */; };
+		26D51CE21E2674D700141E04 /* NXOAuth2Request.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CC71E2674D700141E04 /* NXOAuth2Request.m */; };
+		26D51CE31E2674D700141E04 /* NXOAuth2Request.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CC71E2674D700141E04 /* NXOAuth2Request.m */; };
 		26D89F061A890672009B147C /* MLAccountCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D89F051A890672009B147C /* MLAccountCell.m */; };
 		26D89F081A8908B6009B147C /* XMPPEdit.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26D89F071A8908B6009B147C /* XMPPEdit.xib */; };
 		26DA16E017C302BC00D0065E /* RIButtonItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 26DA16DB17C302BC00D0065E /* RIButtonItem.m */; };
@@ -732,6 +758,38 @@
 		26CF3EAC1780DE5C002B7085 /* ParseIq.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParseIq.m; sourceTree = "<group>"; };
 		26CF3EB01780DFD9002B7085 /* XMPPParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPParser.h; sourceTree = "<group>"; };
 		26CF3EB11780DFD9002B7085 /* XMPPParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPParser.m; sourceTree = "<group>"; };
+		26D51CA91E2674D700141E04 /* NSData+NXOAuth2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+NXOAuth2.h"; sourceTree = "<group>"; };
+		26D51CAA1E2674D700141E04 /* NSData+NXOAuth2.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+NXOAuth2.m"; sourceTree = "<group>"; };
+		26D51CAB1E2674D700141E04 /* NSString+NXOAuth2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+NXOAuth2.h"; sourceTree = "<group>"; };
+		26D51CAC1E2674D700141E04 /* NSString+NXOAuth2.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+NXOAuth2.m"; sourceTree = "<group>"; };
+		26D51CAD1E2674D700141E04 /* NSURL+NXOAuth2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSURL+NXOAuth2.h"; sourceTree = "<group>"; };
+		26D51CAE1E2674D700141E04 /* NSURL+NXOAuth2.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSURL+NXOAuth2.m"; sourceTree = "<group>"; };
+		26D51CAF1E2674D700141E04 /* NXOAuth2Account+Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NXOAuth2Account+Private.h"; sourceTree = "<group>"; };
+		26D51CB11E2674D700141E04 /* NXOAuth2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NXOAuth2.h; sourceTree = "<group>"; };
+		26D51CB21E2674D700141E04 /* NXOAuth2AccessToken.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NXOAuth2AccessToken.h; sourceTree = "<group>"; };
+		26D51CB31E2674D700141E04 /* NXOAuth2AccessToken.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NXOAuth2AccessToken.m; sourceTree = "<group>"; };
+		26D51CB41E2674D700141E04 /* NXOAuth2Account.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NXOAuth2Account.h; sourceTree = "<group>"; };
+		26D51CB51E2674D700141E04 /* NXOAuth2Account.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NXOAuth2Account.m; sourceTree = "<group>"; };
+		26D51CB61E2674D700141E04 /* NXOAuth2AccountStore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NXOAuth2AccountStore.h; sourceTree = "<group>"; };
+		26D51CB71E2674D700141E04 /* NXOAuth2AccountStore.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NXOAuth2AccountStore.m; sourceTree = "<group>"; };
+		26D51CB81E2674D700141E04 /* NXOAuth2Client.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NXOAuth2Client.h; sourceTree = "<group>"; };
+		26D51CB91E2674D700141E04 /* NXOAuth2Client.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NXOAuth2Client.m; sourceTree = "<group>"; };
+		26D51CBA1E2674D700141E04 /* NXOAuth2ClientDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NXOAuth2ClientDelegate.h; sourceTree = "<group>"; };
+		26D51CBB1E2674D700141E04 /* NXOAuth2Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NXOAuth2Connection.h; sourceTree = "<group>"; };
+		26D51CBC1E2674D700141E04 /* NXOAuth2Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NXOAuth2Connection.m; sourceTree = "<group>"; };
+		26D51CBD1E2674D700141E04 /* NXOAuth2ConnectionDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NXOAuth2ConnectionDelegate.h; sourceTree = "<group>"; };
+		26D51CBE1E2674D700141E04 /* NXOAuth2Constants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NXOAuth2Constants.h; sourceTree = "<group>"; };
+		26D51CBF1E2674D700141E04 /* NXOAuth2Constants.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NXOAuth2Constants.m; sourceTree = "<group>"; };
+		26D51CC01E2674D700141E04 /* NXOAuth2FileStreamWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NXOAuth2FileStreamWrapper.h; sourceTree = "<group>"; };
+		26D51CC11E2674D700141E04 /* NXOAuth2FileStreamWrapper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NXOAuth2FileStreamWrapper.m; sourceTree = "<group>"; };
+		26D51CC21E2674D700141E04 /* NXOAuth2PostBodyPart.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NXOAuth2PostBodyPart.h; sourceTree = "<group>"; };
+		26D51CC31E2674D700141E04 /* NXOAuth2PostBodyPart.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NXOAuth2PostBodyPart.m; sourceTree = "<group>"; };
+		26D51CC41E2674D700141E04 /* NXOAuth2PostBodyStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NXOAuth2PostBodyStream.h; sourceTree = "<group>"; };
+		26D51CC51E2674D700141E04 /* NXOAuth2PostBodyStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NXOAuth2PostBodyStream.m; sourceTree = "<group>"; };
+		26D51CC61E2674D700141E04 /* NXOAuth2Request.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NXOAuth2Request.h; sourceTree = "<group>"; };
+		26D51CC71E2674D700141E04 /* NXOAuth2Request.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NXOAuth2Request.m; sourceTree = "<group>"; };
+		26D51CC81E2674D700141E04 /* NXOAuth2TrustDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NXOAuth2TrustDelegate.h; sourceTree = "<group>"; };
+		26D51CC91E2674D700141E04 /* OAuth2Client_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OAuth2Client_Prefix.pch; sourceTree = "<group>"; };
 		26D89F041A890672009B147C /* MLAccountCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLAccountCell.h; sourceTree = "<group>"; };
 		26D89F051A890672009B147C /* MLAccountCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLAccountCell.m; sourceTree = "<group>"; };
 		26D89F071A8908B6009B147C /* XMPPEdit.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = XMPPEdit.xib; sourceTree = "<group>"; };
@@ -1315,6 +1373,7 @@
 		26B2A4B51B73045500272E63 /* External */ = {
 			isa = PBXGroup;
 			children = (
+				26D51CA81E2674D700141E04 /* Oauth2 */,
 				268BCCFD140B23E10025E4D1 /* jrtplib-static */,
 				26B2A4CC1B73097500272E63 /* DDLog */,
 			);
@@ -1476,6 +1535,54 @@
 				26C3EDFF1A819A38000E6331 /* ParseResumed.m */,
 			);
 			name = Parsers;
+			sourceTree = "<group>";
+		};
+		26D51CA81E2674D700141E04 /* Oauth2 */ = {
+			isa = PBXGroup;
+			children = (
+				26D51CA91E2674D700141E04 /* NSData+NXOAuth2.h */,
+				26D51CAA1E2674D700141E04 /* NSData+NXOAuth2.m */,
+				26D51CAB1E2674D700141E04 /* NSString+NXOAuth2.h */,
+				26D51CAC1E2674D700141E04 /* NSString+NXOAuth2.m */,
+				26D51CAD1E2674D700141E04 /* NSURL+NXOAuth2.h */,
+				26D51CAE1E2674D700141E04 /* NSURL+NXOAuth2.m */,
+				26D51CAF1E2674D700141E04 /* NXOAuth2Account+Private.h */,
+				26D51CB01E2674D700141E04 /* OAuth2Client */,
+				26D51CC91E2674D700141E04 /* OAuth2Client_Prefix.pch */,
+			);
+			name = Oauth2;
+			path = "Shared External/Oauth2";
+			sourceTree = "<group>";
+		};
+		26D51CB01E2674D700141E04 /* OAuth2Client */ = {
+			isa = PBXGroup;
+			children = (
+				26D51CB11E2674D700141E04 /* NXOAuth2.h */,
+				26D51CB21E2674D700141E04 /* NXOAuth2AccessToken.h */,
+				26D51CB31E2674D700141E04 /* NXOAuth2AccessToken.m */,
+				26D51CB41E2674D700141E04 /* NXOAuth2Account.h */,
+				26D51CB51E2674D700141E04 /* NXOAuth2Account.m */,
+				26D51CB61E2674D700141E04 /* NXOAuth2AccountStore.h */,
+				26D51CB71E2674D700141E04 /* NXOAuth2AccountStore.m */,
+				26D51CB81E2674D700141E04 /* NXOAuth2Client.h */,
+				26D51CB91E2674D700141E04 /* NXOAuth2Client.m */,
+				26D51CBA1E2674D700141E04 /* NXOAuth2ClientDelegate.h */,
+				26D51CBB1E2674D700141E04 /* NXOAuth2Connection.h */,
+				26D51CBC1E2674D700141E04 /* NXOAuth2Connection.m */,
+				26D51CBD1E2674D700141E04 /* NXOAuth2ConnectionDelegate.h */,
+				26D51CBE1E2674D700141E04 /* NXOAuth2Constants.h */,
+				26D51CBF1E2674D700141E04 /* NXOAuth2Constants.m */,
+				26D51CC01E2674D700141E04 /* NXOAuth2FileStreamWrapper.h */,
+				26D51CC11E2674D700141E04 /* NXOAuth2FileStreamWrapper.m */,
+				26D51CC21E2674D700141E04 /* NXOAuth2PostBodyPart.h */,
+				26D51CC31E2674D700141E04 /* NXOAuth2PostBodyPart.m */,
+				26D51CC41E2674D700141E04 /* NXOAuth2PostBodyStream.h */,
+				26D51CC51E2674D700141E04 /* NXOAuth2PostBodyStream.m */,
+				26D51CC61E2674D700141E04 /* NXOAuth2Request.h */,
+				26D51CC71E2674D700141E04 /* NXOAuth2Request.m */,
+				26D51CC81E2674D700141E04 /* NXOAuth2TrustDelegate.h */,
+			);
+			path = OAuth2Client;
 			sourceTree = "<group>";
 		};
 		26DA16D917C302BC00D0065E /* UIAlertView-Blocks */ = {
@@ -2400,6 +2507,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				26D89F061A890672009B147C /* MLAccountCell.m in Sources */,
+				26D51CDA1E2674D700141E04 /* NXOAuth2Constants.m in Sources */,
 				1D60589B0D05DD56006BFB54 /* main.m in Sources */,
 				269E748E18B707B500BCB2D5 /* MLPortraitNavController.m in Sources */,
 				1D3623260D0F684500981E51 /* MonalAppDelegate.m in Sources */,
@@ -2407,6 +2515,7 @@
 				26277888110179D100023C8A /* tools.m in Sources */,
 				26F7BB431115F8DB00712672 /* Reachability.m in Sources */,
 				26B69A82131C5495002FCBEB /* PasswordManager.m in Sources */,
+				26D51CD61E2674D700141E04 /* NXOAuth2Client.m in Sources */,
 				26B51C4918654D98002134C3 /* LogViewController.m in Sources */,
 				2642EBC718693626006A6C12 /* RTP.mm in Sources */,
 				26B2A4F11B73097500272E63 /* DDASLLogger.m in Sources */,
@@ -2414,10 +2523,12 @@
 				262E51971AD8CB7200788351 /* MLTextInputCell.m in Sources */,
 				26C3EDFD1A807E76000E6331 /* ParseA.m in Sources */,
 				2642EBCA18693634006A6C12 /* jingleCall.m in Sources */,
+				26D51CD81E2674D700141E04 /* NXOAuth2Connection.m in Sources */,
 				2643A12E180220890030EFB1 /* TPKeyboardAvoidingScrollView.m in Sources */,
 				26761BF61804FBB700D94714 /* RoomListViewController.m in Sources */,
 				261A6281176C055400059090 /* ContactsViewController.m in Sources */,
 				261A6285176C156500059090 /* ActiveChatsViewController.m in Sources */,
+				26D51CDC1E2674D700141E04 /* NXOAuth2FileStreamWrapper.m in Sources */,
 				26B2A4F31B73097500272E63 /* DDFileLogger.m in Sources */,
 				261A6288176C157D00059090 /* SettingsViewController.m in Sources */,
 				261A628B176C159000059090 /* AccountsViewController.m in Sources */,
@@ -2427,6 +2538,8 @@
 				26B2A4ED1B73097500272E63 /* DDAbstractDatabaseLogger.m in Sources */,
 				261A6291176C15D400059090 /* GroupChatViewController.m in Sources */,
 				261A6294176C15FC00059090 /* SearchUsersViewController.m in Sources */,
+				26D51CD41E2674D700141E04 /* NXOAuth2AccountStore.m in Sources */,
+				26D51CD01E2674D700141E04 /* NXOAuth2AccessToken.m in Sources */,
 				261A6297176C160900059090 /* HelpViewController.m in Sources */,
 				261A629A176C162200059090 /* AboutViewController.m in Sources */,
 				2636C43F177BD58C001CA71F /* XMPPEdit.m in Sources */,
@@ -2446,6 +2559,7 @@
 				26347D861790FFDE006FF64F /* MLInfoCell.m in Sources */,
 				2665C1161C4A6D2100CC9A04 /* MLOAuthViewController.m in Sources */,
 				26B2A4E91B73097500272E63 /* CLIColor.m in Sources */,
+				26D51CDE1E2674D700141E04 /* NXOAuth2PostBodyPart.m in Sources */,
 				2678A98E185AB739003AF53B /* ChatLogContactViewController.m in Sources */,
 				26C3456E1C68F9F0007F4BEC /* MLHTTPRequest.m in Sources */,
 				2696EED21791245A00BC54B8 /* chatViewController.m in Sources */,
@@ -2454,11 +2568,14 @@
 				262D9EA717921169009292B4 /* ParseMessage.m in Sources */,
 				262D9EAA17921E82009292B4 /* XMPPMessage.m in Sources */,
 				260283861D8DEFC1001DD6B8 /* MLPreviewObject.m in Sources */,
+				26D51CCE1E2674D700141E04 /* NSURL+NXOAuth2.m in Sources */,
 				26EE8B1C179B55D2006781F3 /* ParseChallenge.m in Sources */,
 				26C3EDF71A8072D5000E6331 /* ParseEnabled.m in Sources */,
 				26B2A4F91B73097500272E63 /* DDContextFilterLogFormatter.m in Sources */,
 				26EE8B1F179B67FA006781F3 /* MLNotificationManager.m in Sources */,
+				26D51CE21E2674D700141E04 /* NXOAuth2Request.m in Sources */,
 				26EE8B22179B7B0E006781F3 /* SlidingMessageViewController.m in Sources */,
+				26D51CCA1E2674D700141E04 /* NSData+NXOAuth2.m in Sources */,
 				261E672B179E27BE00CB493E /* ParseFailure.m in Sources */,
 				26B2A4F51B73097500272E63 /* DDLog.m in Sources */,
 				26AAE285179F7B0200271345 /* MLSettingCell.m in Sources */,
@@ -2468,12 +2585,15 @@
 				26DA16E117C302BC00D0065E /* UIActionSheet+Blocks.m in Sources */,
 				268821FA19B9233B00AEA46E /* NSString+SqlLite.m in Sources */,
 				2678A98B185A8320003AF53B /* ChatLogAccountDetailViewController.m in Sources */,
+				26D51CCC1E2674D700141E04 /* NSString+NXOAuth2.m in Sources */,
 				26B2A4EF1B73097500272E63 /* DDASLLogCapture.m in Sources */,
 				26DA16E217C302BC00D0065E /* UIAlertView+Blocks.m in Sources */,
 				26B2A4FD1B73097500272E63 /* DDMultiFormatter.m in Sources */,
 				262E51921AD8CAC600788351 /* MLButtonCell.m in Sources */,
 				2643A12F180220890030EFB1 /* TPKeyboardAvoidingTableView.m in Sources */,
+				26D51CE01E2674D700141E04 /* NXOAuth2PostBodyStream.m in Sources */,
 				268DD58617C4541000C673A9 /* MLChatCell.m in Sources */,
+				26D51CD21E2674D700141E04 /* NXOAuth2Account.m in Sources */,
 				26E2F7DA17C6FD9400C3C8EF /* MLTabBarController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2537,9 +2657,11 @@
 				26B2A4F01B73097500272E63 /* DDASLLogCapture.m in Sources */,
 				260499E21B730E9000D11866 /* xmpp.m in Sources */,
 				260499E51B730E9B00D11866 /* XMPPPresence.m in Sources */,
+				26D51CD51E2674D700141E04 /* NXOAuth2AccountStore.m in Sources */,
 				2638DAEB1B68F3D400DF05AC /* MLAccountSettings.m in Sources */,
 				260499F21B7314D600D11866 /* jingleCall.m in Sources */,
 				26B2A4BF1B73070F00272E63 /* NSString+SqlLite.m in Sources */,
+				26D51CE11E2674D700141E04 /* NXOAuth2PostBodyStream.m in Sources */,
 				2661D34D1B407ED400EC51BA /* MLContactsCell.m in Sources */,
 				26B2A4F21B73097500272E63 /* DDASLLogger.m in Sources */,
 				2638DAEF1B68F3EF00DF05AC /* MLDisplaySettings.m in Sources */,
@@ -2550,6 +2672,8 @@
 				2651AF551B409906008D025C /* MLMainWindow.m in Sources */,
 				26B2A4F81B73097500272E63 /* DDTTYLogger.m in Sources */,
 				26B2A4FA1B73097500272E63 /* DDContextFilterLogFormatter.m in Sources */,
+				26D51CDF1E2674D700141E04 /* NXOAuth2PostBodyPart.m in Sources */,
+				26D51CCB1E2674D700141E04 /* NSData+NXOAuth2.m in Sources */,
 				266272B91B27DB8000C1CD49 /* main.m in Sources */,
 				26049A561B7315A000D11866 /* RTP.mm in Sources */,
 				260499ED1B7313ED00D11866 /* ParsePresence.m in Sources */,
@@ -2559,19 +2683,26 @@
 				260870D81B7034460036539B /* MLAccountEdit.m in Sources */,
 				260499E31B730E9500D11866 /* MLXMLNode.m in Sources */,
 				260499F01B7313F600D11866 /* ParseStream.m in Sources */,
+				26D51CD31E2674D700141E04 /* NXOAuth2Account.m in Sources */,
 				265F0B631B75719E00A63F20 /* MLAccountRow.m in Sources */,
+				26D51CE31E2674D700141E04 /* NXOAuth2Request.m in Sources */,
+				26D51CD11E2674D700141E04 /* NXOAuth2AccessToken.m in Sources */,
 				26AA41051D9FCBF6005A77ED /* MLImageView.m in Sources */,
 				260499EC1B7313EA00D11866 /* ParseMessage.m in Sources */,
+				26D51CD71E2674D700141E04 /* NXOAuth2Client.m in Sources */,
+				26D51CCD1E2674D700141E04 /* NSString+NXOAuth2.m in Sources */,
 				26B2A4FC1B73097500272E63 /* DDDispatchQueueLogFormatter.m in Sources */,
 				260499E91B7313E100D11866 /* ParseEnabled.m in Sources */,
 				26B2A4F41B73097500272E63 /* DDFileLogger.m in Sources */,
 				260499F11B73141500D11866 /* EncodingTools.m in Sources */,
+				26D51CCF1E2674D700141E04 /* NSURL+NXOAuth2.m in Sources */,
 				267710251E21923600464002 /* MASPreferencesWindowController.m in Sources */,
 				260499E61B730E9E00D11866 /* XMPPMessage.m in Sources */,
 				260283871D8DEFC1001DD6B8 /* MLPreviewObject.m in Sources */,
 				265F6BA21B7B0040006B8EBA /* MLImageManager.m in Sources */,
 				2661D3441B40766F00EC51BA /* MLChatViewController.m in Sources */,
 				267710261E21923600464002 /* README.md in Sources */,
+				26D51CDB1E2674D700141E04 /* NXOAuth2Constants.m in Sources */,
 				26B2A4BE1B7306E500272E63 /* DataLayer.m in Sources */,
 				266272B71B27DB8000C1CD49 /* AppDelegate.m in Sources */,
 				260499EA1B7313E500D11866 /* ParseFailure.m in Sources */,
@@ -2581,7 +2712,9 @@
 				260499E71B7313DB00D11866 /* ParseResumed.m in Sources */,
 				26B2A4EA1B73097500272E63 /* CLIColor.m in Sources */,
 				260499EF1B7313F300D11866 /* ParseIq.m in Sources */,
+				26D51CDD1E2674D700141E04 /* NXOAuth2FileStreamWrapper.m in Sources */,
 				26C3456F1C68F9F0007F4BEC /* MLHTTPRequest.m in Sources */,
+				26D51CD91E2674D700141E04 /* NXOAuth2Connection.m in Sources */,
 				26B2A4EE1B73097500272E63 /* DDAbstractDatabaseLogger.m in Sources */,
 				26277CE41B7C57670094E4D0 /* MLContactDetails.m in Sources */,
 				2638DAE71B68F3AB00DF05AC /* MLPresenceSettings.m in Sources */,

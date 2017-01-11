@@ -26,7 +26,7 @@ pod 'Dropbox-iOS-SDK'
 pod 'Appirater'
 pod 'TPCircularBuffer'
 pod 'MBProgressHUD'
-pod 'NXOAuth2Client', '~> 1.2.8'
+#pod 'NXOAuth2Client', '~> 1.2.8'
 
   # Pods for Monal
 
@@ -45,7 +45,7 @@ pod 'Crashlytics'
 pod 'Dropbox-OSX-SDK'
 #pod 'MASPreferences'
 pod 'SAMKeychain'
-pod 'NXOAuth2Client', '~> 1.2.8'
+#pod 'NXOAuth2Client', '~> 1.2.8'
 pod 'TPCircularBuffer'
 
   # Pods for Monal-OSX

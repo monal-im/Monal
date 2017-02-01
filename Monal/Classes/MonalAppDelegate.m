@@ -332,6 +332,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
 }
 
+
+
+
 -(void) application:(UIApplication *)application handleActionWithIdentifier:(nullable NSString *)identifier forLocalNotification:(nonnull UILocalNotification *)notification withResponseInfo:(nonnull NSDictionary *)responseInfo completionHandler:(nonnull void (^)())completionHandler
 {
     if ([notification.category isEqualToString:@"Reply"]) {
@@ -353,6 +356,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         
                     }];
                     
+                    [[DataLayer sharedInstance] markAsReadBuddy:[notification.userInfo objectForKey:@"from"] forAccount:[notification.userInfo objectForKey:@"accountNo"]];
+                    [self updateUnread];
                     
                 }
                 

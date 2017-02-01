@@ -103,6 +103,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     
     [nc addObserver:self selector:@selector(dismissKeyboard:) name:UIApplicationDidEnterBackgroundNotification object:nil];
     [nc addObserver:self selector:@selector(handleForeGround) name:UIApplicationWillEnterForegroundNotification object:nil];
+    [nc addObserver:self selector:@selector(handleBackground) name:UIApplicationWillResignActiveNotification object:nil];
+    
 	[nc addObserver:self selector:@selector(keyboardWillShow:) name: UIKeyboardWillShowNotification object:nil];
 	[nc addObserver:self selector:@selector(keyboardWillHide:) name: UIKeyboardWillHideNotification object:nil];
 	[nc addObserver:self selector:@selector(keyboardDidShow:) name: UIKeyboardDidShowNotification object:nil];
@@ -127,8 +129,13 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void) handleForeGround {
     [self refreshData];
+}
+
+
+-(void) handleBackground {
     [self refreshCounter];
 }
+
 
 
 -(void)viewWillAppear:(BOOL)animated

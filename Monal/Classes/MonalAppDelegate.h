@@ -6,7 +6,8 @@
 //  Copyright __MyCompanyName__ 2008. All rights reserved.
 //
 
-@import UIKit; 
+@import UIKit;
+@import PushKit;
 #import "Appirater.h"
 #import "DataLayer.h"
 #import "MLTabBarController.h"
@@ -19,7 +20,7 @@
 
 
 
-@interface MonalAppDelegate : UIResponder <UIApplicationDelegate, UISplitViewControllerDelegate >
+@interface MonalAppDelegate : UIResponder <UIApplicationDelegate, UISplitViewControllerDelegate, PKPushRegistryDelegate >
 
 @property (nonatomic, strong) UIWindow* window;
 @property (nonatomic, strong) UINavigationController* chatNav;

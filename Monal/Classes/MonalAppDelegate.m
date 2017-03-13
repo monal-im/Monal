@@ -29,7 +29,6 @@
 @import Fabric;
 #import <DropboxSDK/DropboxSDK.h>
 
-
 //xmpp
 #import "MLXMPPManager.h"
 
@@ -171,6 +170,37 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 }
 
+// Register for VoIP notifications
+-(void) voipRegistration
+{
+    DDLogInfo(@"******************************************************************* registering for voip push...");
+    dispatch_queue_t mainQueue = dispatch_get_main_queue();
+    // Create a push registry object
+    PKPushRegistry * voipRegistry = [[PKPushRegistry alloc] initWithQueue: mainQueue];
+    // Set the registry's delegate to self
+    voipRegistry.delegate = self;
+    // Set the push type to VoIP
+    voipRegistry.desiredPushTypes = [NSSet setWithObject:PKPushTypeVoIP];
+}
+
+// Handle updated push credentials
+-(void)pushRegistry:(PKPushRegistry *)registry didUpdatePushCredentials: (PKPushCredentials *)credentials forType:(NSString *)type
+{
+    //tmolitor: Register VoIP push token (a property of PKPushCredentials) with server
+    DDLogInfo(@"******************************************************************* voip push token: %s", [credentials token]);
+}
+
+-(void)pushRegistry:(PKPushRegistry *)registry didInvalidatePushTokenForType:(NSString *)type
+{
+    DDLogInfo(@"******************************************************************* didInvalidatePushTokenForType called...");
+}
+
+// Handle incoming pushes
+-(void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type
+{
+    //tmolitor: Process the received push
+    DDLogInfo(@"******************************************************************* incoming voip notfication: %@", [payload dictionaryPayload]);
+}
 
 #pragma mark notification actions
 -(void) showCallScreen:(NSNotification*) userInfo
@@ -257,6 +287,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         UIUserNotificationSettings *settings = [UIUserNotificationSettings settingsForTypes:UIUserNotificationTypeAlert|UIUserNotificationTypeSound|UIUserNotificationTypeBadge categories:categories];
         [[UIApplication sharedApplication] registerUserNotificationSettings:settings];
     }
+    
+    //voip push
+    [self voipRegistration];
     
     [self createRootInterface];
 

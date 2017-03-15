@@ -89,13 +89,12 @@ static const int ddLogLevel = LOG_LEVEL_WARN;
     self.localPort2=@"7079"; // some random val
     self.otherParty=[NSString stringWithFormat:@"%@/%@",to,resource];
     
-    int random =  arc4random_uniform(100);
-    self.thesid=[NSString stringWithFormat:@"Monal%d",random];
+    self.thesid = [[NSUUID UUID] UUIDString];
     
     self.initiator=self.me;
     self.responder=self.otherParty;
     _activeresource=resource;
-	
+    
     if ([_ownIP isEqualToString:@"0.0.0.0"])
     {
         DDLogWarn( @"initiateJingleTo without valid own IP");

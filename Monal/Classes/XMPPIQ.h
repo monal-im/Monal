@@ -16,6 +16,7 @@
 @interface XMPPIQ : MLXMLNode
 
 -(id) initWithId:(NSString*) sessionid andType:(NSString*) iqType;
+-(id) initWithType:(NSString*) iqType;
 
 /**
  login with legacy authentication. only as fallback.

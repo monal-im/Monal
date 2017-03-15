@@ -147,8 +147,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     _port=5552;
     _SSL=YES;
     _oldStyleSSL=NO;
-    int r =  arc4random();
-    _resource=[NSString stringWithFormat:@"Monal%d",r];
+    _resource = [[NSUUID UUID] UUIDString];
     
     self.networkQueue =[[NSOperationQueue alloc] init];
     self.networkQueue.maxConcurrentOperationCount=1;
@@ -858,7 +857,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         else  {
             if(self.supportsPing) {
                 //get random number
-                XMPPIQ* ping =[[XMPPIQ alloc] initWithId:[NSString stringWithFormat:@"Monal%d",arc4random()%100000]andType:kiqGetType];
+                XMPPIQ* ping =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqGetType];
                 [ping setiqTo:_domain];
                 [ping setPing];
                 [self send:ping];
@@ -1119,7 +1118,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         while (stanzaToParse)
         {
             [self.processQueue addOperationWithBlock:^{
-           DDLogDebug(@"got stanza %@", stanzaToParse);
+            DDLogDebug(@"got stanza %@", stanzaToParse);
             
             if([[stanzaToParse objectForKey:@"stanzaType"]  isEqualToString:@"iq"])
             {
@@ -1182,20 +1181,20 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     _jid=iqNode.jid;
                     DDLogVerbose(@"Set jid %@", _jid);
                     
-                    XMPPIQ* sessionQuery= [[XMPPIQ alloc] initWithId:_sessionKey andType:kiqSetType];
+                    XMPPIQ* sessionQuery= [[XMPPIQ alloc] initWithType:kiqSetType];
                     MLXMLNode* session = [[MLXMLNode alloc] initWithElement:@"session"];
                     [session setXMLNS:@"urn:ietf:params:xml:ns:xmpp-session"];
                     [sessionQuery.children addObject:session];
                     [self send:sessionQuery];
                     
-                    XMPPIQ* discoItems =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
+                    XMPPIQ* discoItems =[[XMPPIQ alloc] initWithType:kiqGetType];
                     [discoItems setiqTo:_domain];
                     MLXMLNode* items = [[MLXMLNode alloc] initWithElement:@"query"];
                     [items setXMLNS:@"http://jabber.org/protocol/disco#items"];
                     [discoItems.children addObject:items];
                     [self send:discoItems];
                     
-                    XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
+                    XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithType:kiqGetType];
                     [discoInfo setiqTo:_domain];
                     [discoInfo setDiscoInfoNode];
                     [self send:discoInfo];
@@ -1204,7 +1203,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     //no need to pull roster on every call if disconenct
                     if(!_rosterList)
                     {
-                        XMPPIQ* roster =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
+                        XMPPIQ* roster =[[XMPPIQ alloc] initWithType:kiqGetType];
                         [roster setRosterRequest];
                         [self send:roster];
                     }
@@ -1708,7 +1707,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             if([code isEqualToString:@"201"]) {
                                 //201- created and needs configuration
                                 //make instant room
-                                XMPPIQ *configNode = [[XMPPIQ alloc] initWithId:_sessionKey andType:kiqSetType];
+                                XMPPIQ *configNode = [[XMPPIQ alloc] initWithType:kiqSetType];
                                 [configNode setiqTo:presenceNode.from];
                                 [configNode setInstantRoom];
                                 [self send:configNode];
@@ -1784,7 +1783,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                             else
                                             {
                                                 [[DataLayer sharedInstance]  setContactHash:presenceNode forAccount:_accountNo];
-                                                XMPPIQ* iqVCard= [[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
+                                                XMPPIQ* iqVCard= [[XMPPIQ alloc] initWithType:kiqGetType];
                                                 [iqVCard getVcardTo:presenceNode.user];
                                                 [self send:iqVCard];
                                             }
@@ -1931,7 +1930,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         [self send:resumeNode];
                     }
                     else {
-                        XMPPIQ* iqNode =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqSetType];
+                        XMPPIQ* iqNode =[[XMPPIQ alloc] initWithType:kiqSetType];
                         [iqNode setBindWithResource:_resource];
                         
                         [self send:iqNode];
@@ -2005,7 +2004,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
           
                 
                // if resume failed. bind like normal
-                XMPPIQ* iqNode =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqSetType];
+                XMPPIQ* iqNode =[[XMPPIQ alloc] initWithType:kiqSetType];
                 [iqNode setBindWithResource:_resource];
                 
                 [self send:iqNode];
@@ -2246,9 +2245,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         DDLogInfo(@"Got SASL Success");
                         
                         srand([[NSDate date] timeIntervalSince1970]);
-                        // make up a random session key (id)
-                        _sessionKey=[NSString stringWithFormat:@"monal%ld",random()%100000];
-                        DDLogVerbose(@"session key: %@", _sessionKey);
                         
                         [self startStream];
                         _accountState=kStateLoggedIn;
@@ -2436,7 +2432,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     for (NSDictionary *item in _discoveredServices)
     {
-        XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
+        XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithType:kiqGetType];
         NSString* jid =[item objectForKey:@"jid"];
         if(jid)
         {
@@ -2456,7 +2452,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) discoverService:(NSString *) node
 {
-    XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithId:_sessionKey andType:kiqGetType];
+    XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithType:kiqGetType];
     [discoInfo setiqTo:node];
     [discoInfo setDiscoInfoNode];
     [self send:discoInfo];
@@ -2507,7 +2503,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) setMAMQueryFromStart:(NSDate *) startDate toDate:(NSDate *) endDate  andJid:(NSString *)jid
 {
-    XMPPIQ* query =[[XMPPIQ alloc] initWithId:[NSString stringWithFormat:@"Monal%d",arc4random()%100000]andType:kiqSetType];
+    XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
     [query setMAMQueryFromStart:startDate toDate:endDate andJid:jid];
     [self send:query];
 }
@@ -2558,7 +2554,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 #pragma mark XMPP add and remove contact
 -(void) removeFromRoster:(NSString*) contact
 {
-    XMPPIQ* iq = [[XMPPIQ alloc] initWithId:_sessionKey andType:kiqSetType];
+    XMPPIQ* iq = [[XMPPIQ alloc] initWithType:kiqSetType];
     [iq setRemoveFromRoster:contact];
     [self send:iq];
     
@@ -2609,14 +2605,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     if([resources count]>0)
     {
         //TODO selct resource action sheet?
-        XMPPIQ* jingleiq =[self.jingle initiateJingleTo:[contact objectForKey:@"buddy_name" ] withId:_sessionKey andResource:[[resources objectAtIndex:0] objectForKey:@"resource"]];
+        XMPPIQ* jingleiq =[self.jingle initiateJingleTo:[contact objectForKey:@"buddy_name" ] withId:[[NSUUID UUID] UUIDString] andResource:[[resources objectAtIndex:0] objectForKey:@"resource"]];
         [self send:jingleiq];
     }
 }
 
 -(void)hangup:(NSDictionary*) contact
 {
-    XMPPIQ* jingleiq =[self.jingle terminateJinglewithId:_sessionKey];
+    XMPPIQ* jingleiq =[self.jingle terminateJinglewithId:[[NSUUID UUID] UUIDString]];
     [self send:jingleiq];
     [self.jingle rtpDisconnect];
     self.jingle=nil;

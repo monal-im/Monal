@@ -10,6 +10,7 @@
 
 @implementation XMPPIQ
 
+
 -(id) initWithId:(NSString*) sessionid andType:(NSString*) iqType
 {
     self=[super init];
@@ -19,6 +20,11 @@
         [self.attributes setObject:iqType forKey:@"type"];
     }
     return self;
+}
+
+-(id) initWithType:(NSString*) iqType
+{
+    return [self initWithId:[[NSUUID UUID] UUIDString] andType:iqType];
 }
 
 #pragma mark iq set
@@ -274,7 +280,7 @@
     MLXMLNode* queryNode =[[MLXMLNode alloc] init];
     queryNode.element=@"query";
     [queryNode.attributes setObject:@"jabber:iq:last" forKey:@"xmlns"];
-     [queryNode.attributes setObject:@"0" forKey:@"seconds"]; // hasnt been away for 0 seconds
+    [queryNode.attributes setObject:@"0" forKey:@"seconds"];  // hasnt been away for 0 seconds
     [self.children addObject:queryNode];
 }
 

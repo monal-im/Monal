@@ -29,6 +29,51 @@
 
 #pragma mark iq set
 
+-(void) setPushEnableWithNode:(NSString *)node andSecret:(NSString *)secret
+{
+    MLXMLNode* enableNode =[[MLXMLNode alloc] init];
+    enableNode.element=@"enable";
+    [enableNode.attributes setObject:@"urn:xmpp:push:0" forKey:@"xmlns"];
+    //this push jid is hardcoded and does not to have the same value as the endpoint below
+    [enableNode.attributes setObject:@"push.eightysoft.de" forKey:@"jid"];
+    [enableNode.attributes setObject:node forKey:@"node"];
+    [self.children addObject:enableNode];
+    
+    MLXMLNode* xNode =[[MLXMLNode alloc] init];
+    xNode.element=@"x";
+    [xNode.attributes setObject:@"jabber:x:data" forKey:@"xmlns"];
+    [xNode.attributes setObject:@"submit" forKey:@"type"];
+    [enableNode.children addObject:xNode];
+    
+    MLXMLNode* formTypeFieldNode =[[MLXMLNode alloc] init];
+    formTypeFieldNode.element=@"field";
+    [formTypeFieldNode.attributes setObject:@"FORM_TYPE" forKey:@"var"];
+    MLXMLNode* formTypeValueNode =[[MLXMLNode alloc] init];
+    formTypeValueNode.element=@"value";
+    formTypeValueNode.data=@"http://jabber.org/protocol/pubsub#publish-options";
+    [formTypeFieldNode.children addObject:formTypeValueNode];
+    [xNode.children addObject:formTypeFieldNode];
+    
+    MLXMLNode* secretFieldNode =[[MLXMLNode alloc] init];
+    secretFieldNode.element=@"field";
+    [secretFieldNode.attributes setObject:@"secret" forKey:@"var"];
+    MLXMLNode* secretValueNode =[[MLXMLNode alloc] init];
+    secretValueNode.element=@"value";
+    secretValueNode.data=secret;
+    [secretFieldNode.children addObject:secretValueNode];
+    [xNode.children addObject:secretFieldNode];
+    
+    MLXMLNode* endpointFieldNode =[[MLXMLNode alloc] init];
+    endpointFieldNode.element=@"field";
+    [endpointFieldNode.attributes setObject:@"endpoint" forKey:@"var"];
+    MLXMLNode* endpointValueNode =[[MLXMLNode alloc] init];
+    endpointValueNode.element=@"value";
+    //this push api endpoint is hardcoded and should match what is set in MonalAppDelegate.m
+    endpointValueNode.data=@"https://push.eightysoft.de/monal/v1/push";
+    [endpointFieldNode.children addObject:endpointValueNode];
+    [xNode.children addObject:endpointFieldNode];
+}
+
 -(void) setAuthWithUserName:(NSString *)username resource:(NSString *) resource andPassword:(NSString *) password
 {
     [self.attributes setObject:@"auth1" forKey:@"id"];
@@ -51,8 +96,8 @@
     passNode.data =password;
     
     [queryNode.children addObject:userNode];
-     [queryNode.children addObject:resourceNode];
-     [queryNode.children addObject:passNode];
+    [queryNode.children addObject:resourceNode];
+    [queryNode.children addObject:passNode];
     [self.children addObject:queryNode];
 }
 

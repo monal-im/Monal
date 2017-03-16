@@ -224,6 +224,7 @@ Decline a call request
  */
 -(void) setMAMQueryFromStart:(NSDate *) startDate toDate:(NSDate *) endDate  andJid:(NSString *)jid;
 
+-(void) enablePush;
 
 FOUNDATION_EXPORT NSString *const kFileName;
 FOUNDATION_EXPORT NSString *const kContentType;
@@ -233,6 +234,9 @@ FOUNDATION_EXPORT NSString *const kCompletion;
 
 
 #pragma  mark properties
+
+@property (nonatomic,assign) NSString* pushNode;
+@property (nonatomic,assign) NSString* pushSecret;
 
 @property (nonatomic,readonly) NSString* fulluser; // combination of username@domain
 

@@ -38,6 +38,9 @@ An array of Dics what have timers to make sure everything was sent
 
 @implementation MLXMPPManager
 
+NSString *pushNode;
+NSString *pushSecret;
+
 -(void) defaultSettings
 {
     BOOL setDefaults =[[NSUserDefaults standardUserDefaults] boolForKey:@"SetDefaults"];
@@ -54,6 +57,8 @@ An array of Dics what have timers to make sure everything was sent
         
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"OfflineContact"];
         [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"SortContacts"];
+        
+        [[NSUserDefaults standardUserDefaults] setObject:[[NSUUID UUID] UUIDString] forKey:@"DeviceUUID"];
         
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"SetDefaults"];
         [[NSUserDefaults standardUserDefaults] synchronize];
@@ -270,6 +275,8 @@ An array of Dics what have timers to make sure everything was sent
     
     xmpp* xmppAccount=[[xmpp alloc] init];
     xmppAccount.explicitLogout=NO;
+    xmppAccount.pushNode=pushNode;
+    xmppAccount.pushSecret=pushSecret;
     
     xmppAccount.username=[account objectForKey:kUsername];
     xmppAccount.domain=[account objectForKey:kDomain];
@@ -814,7 +821,17 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
     [dirtySet removeObjectsAtIndexes:indexSet];
 }
 
-
+-(void) setPushNode:(NSString *)node andSecret:(NSString *)secret
+{
+    pushNode=node;
+    pushSecret=secret;
+    for(NSDictionary* row in _connectedXMPP)
+    {
+        xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
+        xmppAccount.pushNode=node;
+        xmppAccount.pushSecret=secret;
+        [xmppAccount enablePush];
+    }
+}
 
 @end
-

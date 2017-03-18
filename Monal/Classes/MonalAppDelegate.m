@@ -199,10 +199,13 @@ NSMutableData *pushAPIData;
     NSString *response = [[NSString alloc] initWithData: pushAPIData encoding:NSUTF8StringEncoding];
     DDLogInfo(@"************************ push api returned: %@", response);
     NSArray *responseParts=[response componentsSeparatedByString:@"\n"];
-    if([responseParts count]==2)
-        [[MLXMPPManager sharedInstance] setPushNode:responseParts[0] andSecret:responseParts[1]];
+    if([responseParts[0] isEqualToString:@"OK"] && [responseParts count]==3)
+    {
+        DDLogInfo(@"************************ push api: node='%@', secret='%@'", responseParts[1], responseParts[2]);
+        [[MLXMPPManager sharedInstance] setPushNode:responseParts[1] andSecret:responseParts[2]];
+    }
     else
-        DDLogInfo(@"************************ push api returned data count which is not equal to 2: %d", [responseParts count]);
+        DDLogInfo(@"************************ push api returned invalid data: %@", [responseParts componentsJoinedByString: @" | "]);
 }
 
 // Register for VoIP notifications
@@ -218,29 +221,33 @@ NSMutableData *pushAPIData;
     voipRegistry.desiredPushTypes = [NSSet setWithObject:PKPushTypeVoIP];
     
     //tmolitor: dummy call for iOS simulator
-    PKPushCredentials * credentials = [[PKPushCredentials alloc] init];
-    [self pushRegistry:voipRegistry didUpdatePushCredentials:credentials forType:@"voip"];
+    //PKPushCredentials * credentials = [[PKPushCredentials alloc] init];
+    //[self pushRegistry:voipRegistry didUpdatePushCredentials:credentials forType:@"voip"];
 }
 
 // Handle updated push credentials
 -(void)pushRegistry:(PKPushRegistry *)registry didUpdatePushCredentials: (PKPushCredentials *)credentials forType:(NSString *)type
 {
-    //tmolitor: Register VoIP push token (a property of PKPushCredentials) with server
     DDLogInfo(@"************************ voip push token: %@", credentials.token);
     NSString *token = [[NSString alloc] initWithData:credentials.token encoding:NSUTF8StringEncoding];
-    NSString *device = [[NSUserDefaults standardUserDefaults] stringForKey:@"DeviceUUID"];
+    NSString *node = [[NSUserDefaults standardUserDefaults] stringForKey:@"DeviceUUID"];
+    if(![node length])
+    {
+        [[NSUserDefaults standardUserDefaults] setObject:[[NSUUID UUID] UUIDString] forKey:@"DeviceUUID"];
+        [[NSUserDefaults standardUserDefaults] synchronize];
+    }
     
     //send http api request to register this client-token combination and get back a node-secret combination
     //see http://stackoverflow.com/a/15749527 for help on sending out http requests
     
-    NSString *post = [NSString stringWithFormat:@"device=%@&token=%@", [device stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],
+    NSString *post = [NSString stringWithFormat:@"type=apns&node=%@&token=%@", [node stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],
     [token stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
     NSData *postData = [post dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
     NSString *postLength = [NSString stringWithFormat:@"%d",[postData length]];
     
     NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
-    //this is the hardcoded push api endpoint and should match what is set in XMPPIQ.m
-    [request setURL:[NSURL URLWithString:@"https://push.eightysoft.de/monal/v1/register"]];
+    //this is the hardcoded push api endpoint
+    [request setURL:[NSURL URLWithString:@"https://push.eightysoft.de/v1/register"]];
     [request setHTTPMethod:@"POST"];
     [request setValue:postLength forHTTPHeaderField:@"Content-Length"];
     [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
@@ -264,7 +271,6 @@ NSMutableData *pushAPIData;
 // Handle incoming pushes
 -(void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type
 {
-    //tmolitor: Process the received push
     DDLogInfo(@"************************ incoming voip notfication: %@", [payload dictionaryPayload]);
     
     // should any accounts connect?

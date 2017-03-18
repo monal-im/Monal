@@ -34,7 +34,7 @@
     MLXMLNode* enableNode =[[MLXMLNode alloc] init];
     enableNode.element=@"enable";
     [enableNode.attributes setObject:@"urn:xmpp:push:0" forKey:@"xmlns"];
-    //this push jid is hardcoded and does not to have the same value as the endpoint below
+    //this push jid is hardcoded and does not have to be the same hostname as the api endpoint set in MonalAppDelegate.m
     [enableNode.attributes setObject:@"push.eightysoft.de" forKey:@"jid"];
     [enableNode.attributes setObject:node forKey:@"node"];
     [self.children addObject:enableNode];
@@ -62,16 +62,6 @@
     secretValueNode.data=secret;
     [secretFieldNode.children addObject:secretValueNode];
     [xNode.children addObject:secretFieldNode];
-    
-    MLXMLNode* endpointFieldNode =[[MLXMLNode alloc] init];
-    endpointFieldNode.element=@"field";
-    [endpointFieldNode.attributes setObject:@"endpoint" forKey:@"var"];
-    MLXMLNode* endpointValueNode =[[MLXMLNode alloc] init];
-    endpointValueNode.element=@"value";
-    //this push api endpoint is hardcoded and should match what is set in MonalAppDelegate.m
-    endpointValueNode.data=@"https://push.eightysoft.de/monal/v1/push";
-    [endpointFieldNode.children addObject:endpointValueNode];
-    [xNode.children addObject:endpointFieldNode];
 }
 
 -(void) setAuthWithUserName:(NSString *)username resource:(NSString *) resource andPassword:(NSString *) password

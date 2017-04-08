@@ -34,8 +34,9 @@
  * Copyright 2012 Arash Payan. All rights reserved.
  */
 
+#import <SystemConfiguration/SystemConfiguration.h>
+#import <CFNetwork/CFNetwork.h>
 #import "Appirater.h"
-#import <SystemConfiguration/SCNetworkReachability.h>
 #include <netinet/in.h>
 
 #if ! __has_feature(objc_arc)
@@ -76,6 +77,7 @@ static BOOL _alwaysUseMainBundle = NO;
 @property (nonatomic, copy) NSString *alertCancelTitle;
 @property (nonatomic, copy) NSString *alertRateTitle;
 @property (nonatomic, copy) NSString *alertRateLaterTitle;
+@property (nonatomic, strong) NSOperationQueue *eventQueue;
 - (BOOL)connectedToNetwork;
 + (Appirater*)sharedInstance;
 - (void)showPromptWithChecks:(BOOL)withChecks
@@ -246,10 +248,17 @@ static BOOL _alwaysUseMainBundle = NO;
 	BOOL nonWiFi = flags & kSCNetworkReachabilityFlagsTransientConnection;
 	
 	NSURL *testURL = [NSURL URLWithString:@"http://www.apple.com/"];
-	NSURLRequest *testRequest = [NSURLRequest requestWithURL:testURL  cachePolicy:NSURLRequestReloadIgnoringLocalCacheData timeoutInterval:20.0];
-	NSURLConnection *testConnection = [[NSURLConnection alloc] initWithRequest:testRequest delegate:self];
 	
-    return ((isReachable && !needsConnection) || nonWiFi) ? (testConnection ? YES : NO) : NO;
+    NSURLSessionConfiguration* sessionConfiguration = [NSURLSessionConfiguration ephemeralSessionConfiguration];
+    sessionConfiguration.requestCachePolicy = NSURLRequestReloadIgnoringLocalCacheData;
+    sessionConfiguration.timeoutIntervalForRequest = 20.0;
+
+    NSURLSession *session = [NSURLSession sessionWithConfiguration:sessionConfiguration];
+
+    NSURLSessionTask *task = [session dataTaskWithURL:testURL];
+    [task resume];
+    
+    return ((isReachable && !needsConnection) || nonWiFi) ? ( (task.state != NSURLSessionTaskStateSuspended) ? YES : NO ) : NO;
 }
 
 + (Appirater*)sharedInstance {
@@ -260,6 +269,8 @@ static BOOL _alwaysUseMainBundle = NO;
         dispatch_once(&onceToken, ^{
             appirater = [[Appirater alloc] init];
 			appirater.delegate = _delegate;
+            appirater.eventQueue = [[NSOperationQueue alloc] init];
+            appirater.eventQueue.maxConcurrentOperationCount = 1;
             [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appWillResignActive) name:
                 UIApplicationWillResignActiveNotification object:nil];
         });
@@ -270,6 +281,12 @@ static BOOL _alwaysUseMainBundle = NO;
 
 - (void)showRatingAlert:(BOOL)displayRateLaterButton {
   UIAlertView *alertView = nil;
+  id <AppiraterDelegate> delegate = _delegate;
+    
+  if(delegate && [delegate respondsToSelector:@selector(appiraterShouldDisplayAlert:)] && ![delegate appiraterShouldDisplayAlert:self]) {
+      return;
+  }
+  
   if (displayRateLaterButton) {
   	alertView = [[UIAlertView alloc] initWithTitle:self.alertTitle
                                            message:self.alertMessage
@@ -287,7 +304,6 @@ static BOOL _alwaysUseMainBundle = NO;
 	self.ratingAlert = alertView;
     [alertView show];
 
-    id <AppiraterDelegate> delegate = _delegate;
     if (delegate && [delegate respondsToSelector:@selector(appiraterDidDisplayAlert:)]) {
              [delegate appiraterDidDisplayAlert:self];
     }
@@ -503,7 +519,15 @@ static BOOL _alwaysUseMainBundle = NO;
 + (void)appLaunched:(BOOL)canPromptForRating {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0),
                    ^{
-                       [[Appirater sharedInstance] incrementAndRate:canPromptForRating];
+                       Appirater *a = [Appirater sharedInstance];
+                       if (_debug) {
+                           dispatch_async(dispatch_get_main_queue(),
+                                          ^{
+                                              [a showRatingAlert];
+                                          });
+                       } else {
+                           [a incrementAndRate:canPromptForRating]; 
+                       }
                    });
 }
 
@@ -522,17 +546,17 @@ static BOOL _alwaysUseMainBundle = NO;
 }
 
 + (void)appEnteredForeground:(BOOL)canPromptForRating {
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0),
-                   ^{
-                       [[Appirater sharedInstance] incrementAndRate:canPromptForRating];
-                   });
+    Appirater *a = [Appirater sharedInstance];
+    [a.eventQueue addOperationWithBlock:^{
+        [[Appirater sharedInstance] incrementAndRate:canPromptForRating];
+    }];
 }
 
 + (void)userDidSignificantEvent:(BOOL)canPromptForRating {
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0),
-                   ^{
-                       [[Appirater sharedInstance] incrementSignificantEventAndRate:canPromptForRating];
-                   });
+    Appirater *a = [Appirater sharedInstance];
+    [a.eventQueue addOperationWithBlock:^{
+       [[Appirater sharedInstance] incrementSignificantEventAndRate:canPromptForRating];
+    }];
 }
 
 #pragma GCC diagnostic push
@@ -622,11 +646,6 @@ static BOOL _alwaysUseMainBundle = NO;
 		}
 		[[self getRootViewController] presentViewController:storeViewController animated:_usesAnimation completion:^{
 			[self setModalOpen:YES];
-			//Temporarily use a black status bar to match the StoreKit view.
-			[self setStatusBarStyle:[UIApplication sharedApplication].statusBarStyle];
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 70000
-			[[UIApplication sharedApplication]setStatusBarStyle:UIStatusBarStyleLightContent animated:_usesAnimation];
-#endif
 		}];
 	
 	//Use the standard openUrl method if StoreKit is unavailable.
@@ -699,7 +718,6 @@ static BOOL _alwaysUseMainBundle = NO;
 //Close the in-app rating (StoreKit) view and restore the previous status bar style.
 + (void)closeModal {
 	if (_modalOpen) {
-		[[UIApplication sharedApplication]setStatusBarStyle:_statusBarStyle animated:_usesAnimation];
 		BOOL usedAnimation = _usesAnimation;
 		[self setModalOpen:NO];
 		

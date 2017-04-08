@@ -106,7 +106,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     id result = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:&error];
                     if(!result ){
                         DDLogError(@"Error: %@", error);
-                        errorReply=[NSError errorWithDomain:@"JSON" code:0 userInfo:@{@"result":@"JSON parse error"}];
+                      //  errorReply=[NSError errorWithDomain:@"JSON" code:0 userInfo:@{@"result":@"JSON parse error"}];
                     }
                     else {
                         if([result isKindOfClass:[NSDictionary class]])

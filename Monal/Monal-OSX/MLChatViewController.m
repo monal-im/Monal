@@ -13,6 +13,7 @@
 #import "MLXMPPManager.h"
 #import "MLChatViewCell.h"
 #import "MLImageManager.h"
+#import "MLPreviewObject.h"
 
 #import <DropboxOSX/DropboxOSX.h>
 
@@ -35,11 +36,14 @@
 @property (nonatomic, strong) NSString *jid;
 @property (nonatomic, assign) BOOL isMUC;
 
+@property (nonatomic, strong) QLPreviewPanel *QLPreview;
+@property (nonatomic, strong) NSData *tmpPreviewImageData;
+
 @property (nonatomic, strong) DBRestClient *restClient;
 
 @end
 
-@implementation MLChatViewController
+@implementation MLChatViewController 
 
 static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
@@ -68,7 +72,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     [self refreshData];
     [self updateWindowForContact:self.contactDic];
-    
+        
 }
 
 
@@ -78,6 +82,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     if((self.view.window.occlusionState & NSWindowOcclusionStateVisible)) {
         [self markAsRead];
     }
+    
+    MLMainWindow *window =(MLMainWindow *)self.view.window.windowController;
+    window.chatViewController= self;
 }
 
 -(void) dealloc
@@ -141,6 +148,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     NSInteger bottom = [self.chatTable numberOfRows];
     if(bottom>0)
     {
+        
         [self.chatTable scrollRowToVisible:bottom-1];
     }
 }
@@ -161,7 +169,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     self.progressIndicator.doubleValue=0;
     self.progressIndicator.hidden=YES;
 }
-
 
 #pragma mark - Dropbox upload and delegate
 
@@ -202,7 +209,74 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     DDLogVerbose(@"Failed to get Dropbox link with error: %@", error);
 }
 
-#pragma mark - attaching
+#pragma mark uploading attachments
+
+-(void) showNoUploadAlert
+{
+
+    NSAlert *userAddAlert = [[NSAlert alloc] init];
+    userAddAlert.messageText = @"Error";
+    userAddAlert.informativeText =[NSString stringWithFormat:@"This server does not appear to support HTTP file uploads (XEP-0363). Please ask the administrator to enable it. You can also link to DropBox in settings and use that to share files."];
+    userAddAlert.alertStyle=NSInformationalAlertStyle;
+    [userAddAlert addButtonWithTitle:@"Close"];
+    
+    [userAddAlert beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse returnCode) {
+        [self dismissController:self];
+    }];
+    
+}
+
+-(void) uploadData:(NSData *) data
+{
+    
+    xmpp* account=[[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
+    if(!account.supportsHTTPUpload && !self.restClient)
+    {
+        [self showNoUploadAlert];
+        
+        return;
+    }
+    
+    self.progressIndicator.doubleValue=0;
+    self.progressIndicator.hidden=NO;
+    if(self.restClient)
+    {
+        [self uploadImageToDropBox:data];
+    }
+    else {
+        
+        // start http upload XMPP
+        self.progressIndicator.doubleValue=50;
+        [[MLXMPPManager sharedInstance] httpUploadData:data withFilename:@"file" andType:@"file"                                                  toContact:self.contactName onAccount:self.accountNo withCompletionHandler:^(NSString *url, NSError *error) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self endProgressUpdate];
+                if(url) {
+                    self.messageBox.string= url;
+                }
+                else  {
+                    NSAlert *userAddAlert = [[NSAlert alloc] init];
+                    userAddAlert.messageText = @"There was an error uploading the file to the server";
+                    userAddAlert.informativeText =[NSString stringWithFormat:@"%@", error.localizedDescription];
+                    userAddAlert.alertStyle=NSInformationalAlertStyle;
+                    [userAddAlert addButtonWithTitle:@"Close"];
+                    
+                    [userAddAlert beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse returnCode) {
+                        [self dismissController:self];
+                    }];
+                }
+            });
+            
+        }];
+    }
+}
+
+-(void) uploadFile:(NSURL *) fileURL
+{
+    NSData *data =  [NSData dataWithContentsOfURL:fileURL];
+    [self uploadData:data];
+}
+
+
 
 -(IBAction)attach:(id)sender
 {
@@ -215,17 +289,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     xmpp* account=[[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
     if(!account.supportsHTTPUpload && !self.restClient)
     {
-        NSAlert *userAddAlert = [[NSAlert alloc] init];
-        userAddAlert.messageText = @"Error";
-        userAddAlert.informativeText =[NSString stringWithFormat:@"This server does not appear to support HTTP file uploads (XEP-0363). Please ask the administrator to enable it. You can also link to DropBox in settings and use that to share files."];
-        userAddAlert.alertStyle=NSInformationalAlertStyle;
-        [userAddAlert addButtonWithTitle:@"Close"];
-        
-        [userAddAlert beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse returnCode) {
-            [self dismissController:self];
-        }];
-        
-        return;
+        [self showNoUploadAlert];
     }
     
     //select file
@@ -234,38 +298,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         switch(result){
             case NSFileHandlingPanelOKButton:
             {
-                self.progressIndicator.doubleValue=0;
-                self.progressIndicator.hidden=NO;
-                if(self.restClient)
-                {
-                    NSData *fileData= [NSData dataWithContentsOfURL:openPanel.URL];
-                    [self uploadImageToDropBox:fileData];
-                }
-                else {
-                
-                // start http upload XMPP
-                self.progressIndicator.doubleValue=50;
-                [[MLXMPPManager sharedInstance]  httpUploadFileURL:openPanel.URL toContact:self.contactName onAccount:self.accountNo withCompletionHandler:^(NSString *url, NSError *error) {
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        [self endProgressUpdate];
-                        if(url) {
-                            self.messageBox.string= url;
-                        }
-                        else  {
-                            NSAlert *userAddAlert = [[NSAlert alloc] init];
-                            userAddAlert.messageText = @"There was an error uploading the file to the server";
-                            userAddAlert.informativeText =[NSString stringWithFormat:@"%@", error.localizedDescription];
-                            userAddAlert.alertStyle=NSInformationalAlertStyle;
-                            [userAddAlert addButtonWithTitle:@"Close"];
-                            
-                            [userAddAlert beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse returnCode) {
-                                [self dismissController:self];
-                            }];
-                        }
-                    });
-                    
-                }];
-                }
+                [self uploadFile:openPanel.URL];
                 break;
             }
             case NSFileHandlingPanelCancelButton:
@@ -376,7 +409,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         return;
     }
     
-    [[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:[NSString stringWithFormat:@"%@",self.accountNo] withMessage:message actuallyFrom:self.jid withId:messageId withCompletion:^(BOOL result) {
+    [[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:[NSString stringWithFormat:@"%@",self.accountNo] withMessage:message actuallyFrom:self.jid withId:messageId withCompletion:^(BOOL result, NSString *messageType) {
     if(result){
         DDLogVerbose(@"added message %@, %@ %@", message, messageId, [self currentGMTTime]);
         
@@ -384,7 +417,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                    @"message": message ,
                                    @"thetime": [self currentGMTTime],
                                    kDelivered:@YES,
-                                   kMessageId: messageId
+                                   kMessageId: messageId,
+                                   kMessageType: messageType
                                    };
         
         dispatch_async(dispatch_get_main_queue(),
@@ -445,11 +479,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) sendMessage:(NSString *) messageText andMessageID:(NSString *)messageID
 {
     DDLogVerbose(@"Sending message %@", messageText);
-    u_int32_t r = arc4random_uniform(30000000);
-    NSString *newMessageID =messageID;
-    if(!newMessageID) {
-        newMessageID=[NSString stringWithFormat:@"Monal%d", r];
-    }
+    NSString *newMessageID =[[NSUUID UUID] UUIDString];
     [self.progressIndicator incrementBy:25];
     [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:self.contactName fromAccount:self.accountNo isMUC:self.isMUC messageId:newMessageID
      withCompletionHandler:^(BOOL success, NSString *messageId) {
@@ -466,21 +496,73 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         [self addMessageto:_contactName withMessage:messageText andId:newMessageID];
     }
     
-    //mark as read
-    
-    //update badge
+
 }
 
 
 -(IBAction)sendText:(id)sender
 {
+
     self.progressIndicator.doubleValue=0;
     self.progressIndicator.hidden=NO;
-    NSString *message= [self.messageBox.string copy];
+    
+    [self.messageBox.textStorage enumerateAttribute:NSAttachmentAttributeName
+                            inRange:NSMakeRange(0, self.messageBox.textStorage.length)
+                            options:0
+                         usingBlock:^(id value, NSRange range, BOOL *stop)
+     {
+         NSTextAttachment* attachment = (NSTextAttachment*)value;
+         NSData* attachmentData = attachment.fileWrapper.regularFileContents;
+         if(attachmentData)
+         {
+             [self uploadData:attachmentData];
+         }
+        
+     }];
+    
+    __block NSMutableString *message= [self.messageBox.string mutableCopy];
+    [message replaceOccurrencesOfString:@"\U0000fffc" withString:@"" options:NSLiteralSearch range:NSMakeRange(0, message.length)];
+    
+    NSAttributedString *messageAttributedString = self.messageBox.attributedString;
+   
+ [messageAttributedString enumerateAttribute:NSLinkAttributeName inRange:NSMakeRange(0, messageAttributedString.length) options:0 usingBlock:^(id  _Nullable value, NSRange range, BOOL * _Nonnull stop) {
+     if(value)
+     {
+         if(range.length == message.length)
+         {
+             message=[NSMutableString stringWithString:@""];
+         } else  {
+             [message appendString:@" "];
+         }
+         
+         NSString *valuetoAppend ;
+         if([value isKindOfClass:[NSString class]])
+         {
+             valuetoAppend= value;
+         }
+         else if([value isKindOfClass:[NSURL class]])
+         {
+             valuetoAppend = [value absoluteString];
+         }
+         else  {
+             DDLogWarn(@"non string or url in attributed text");
+         }
+         
+         if(valuetoAppend) {
+         [message appendString:valuetoAppend];
+         }
+     }
+ }];
+    
+    
     if(message.length>0) {
-        [self sendMessage:[self.messageBox.string copy] andMessageID:nil];
-        self.messageBox.string=@"";
+        [self sendMessage:message andMessageID:nil];
     }
+    self.messageBox.string=@"";
+    self.messageBox.backgroundColor=[NSColor whiteColor];
+    self.messageBox.textColor =[NSColor blackColor];
+    self.messageBox.alignment =NSTextAlignmentLeft;
+    self.messageBox.font = [NSFont systemFontOfSize:[NSFont systemFontSize]];
 }
 
 
@@ -512,7 +594,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
 }
 
-#pragma mark -table view datasource
+#pragma mark - table view datasource
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)aTableView
 {
     return [self.messageList count];
@@ -557,15 +639,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         cell.isInbound= NO;
         cell.messageText.textColor = [NSColor whiteColor];
         cell.messageText.linkTextAttributes =@{NSForegroundColorAttributeName:[NSColor whiteColor], NSUnderlineStyleAttributeName: @YES};
-        
-        if([[messageRow objectForKey:@"delivered"] boolValue]!=YES)
-        {
-            cell.deliveryFailed=YES;
-            cell.retry.tag= [[messageRow objectForKey:@"message_history_id"] integerValue];
-        }
-        else  {
-            cell.deliveryFailed=NO;
-        }
     
     }
     else  {
@@ -574,13 +647,53 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         cell.messageText.linkTextAttributes =@{NSForegroundColorAttributeName:[NSColor blackColor], NSUnderlineStyleAttributeName: @YES};
     }
     
-    //reset to remove any links
-    cell.messageText.string=@"";
+    NSString *messageString =[messageRow objectForKey:@"message"];
+    NSString *messageType =[messageRow objectForKey:kMessageType];
+    if([messageType isEqualToString:kMessageTypeImage])
+    {
+        NSString* cellDirectionID = @"InboundImageCell";
+        if([[messageRow objectForKey:@"af"] isEqualToString:self.jid]) {
+            cellDirectionID=@"OutboundImageCell";
+        }
+        
+        cell = [tableView makeViewWithIdentifier:cellDirectionID owner:self];
+        cell.attachmentImage.image=nil;
+        cell.attachmentImage.canDrawSubviewsIntoLayer=YES;
+        
+        
+        NSMutableURLRequest *imageRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:messageString]];
+        imageRequest.cachePolicy= NSURLRequestReturnCacheDataElseLoad;
+        [[[NSURLSession sharedSession] dataTaskWithRequest:imageRequest completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+            cell.imageData= data;
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if(data) {
+                    cell.attachmentImage.image = [[NSImage alloc] initWithData:data];
+                }
+            });
+        }] resume];
+ 
+    }
+    else  {
+        
+        //reset to remove any links
+        cell.messageText.string=@"";
+        
+        cell.messageText.editable=YES;
+        cell.messageText.string =messageString;
+        [cell.messageText checkTextInDocument:nil];
+        cell.messageText.editable=NO;
+    }
     
-    cell.messageText.editable=YES;
-    cell.messageText.string =[messageRow objectForKey:@"message"];
-    [cell.messageText checkTextInDocument:nil];
-    cell.messageText.editable=NO;
+    
+    
+    if([[messageRow objectForKey:@"delivered"] boolValue]!=YES)
+    {
+        cell.deliveryFailed=YES;
+        cell.retry.tag= [[messageRow objectForKey:@"message_history_id"] integerValue];
+    }
+    else  {
+        cell.deliveryFailed=NO;
+    }
   
     BOOL showTime=[self shouldShowTimeForRow:row];
  
@@ -610,19 +723,26 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     NSDictionary *messageRow = [self.messageList objectAtIndex:row];
     NSString *messageString =[messageRow objectForKey:@"message"];
-
-    NSRect rect = [MLChatViewCell sizeWithMessage:messageString ];
-    
-    BOOL showTime=[self shouldShowTimeForRow:row];
-    NSInteger timeOffset =0;
-    if(!showTime) timeOffset = kCellTimeStampHeight+kCellDefaultPadding;
-    
-    if(rect.size.height<44)  { // 44 is doublie line height
-        return  kCellMinHeight-timeOffset;
+    NSString *messageType =[messageRow objectForKey:kMessageType];
+    if([messageType isEqualToString:kMessageTypeImage])
+    {
+        return 200;
     }
     else {
-        return rect.size.height+kCellTimeStampHeight+kCellHeightOffset-timeOffset ;
-    
+        
+        NSRect rect = [MLChatViewCell sizeWithMessage:messageString ];
+        
+        BOOL showTime=[self shouldShowTimeForRow:row];
+        NSInteger timeOffset =0;
+        if(!showTime) timeOffset = kCellTimeStampHeight+kCellDefaultPadding;
+        
+        if(rect.size.height<44)  { // 44 is doublie line height
+            return  kCellMinHeight-timeOffset;
+        }
+        else {
+            return rect.size.height+kCellTimeStampHeight+kCellHeightOffset-timeOffset ;
+            
+        }
     }
 }
 
@@ -701,5 +821,55 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         }
     return YES;
 }
+
+
+
+#pragma mark - quick look
+
+-(IBAction)showImagePreview:(id)sender
+{
+    self.QLPreview = [QLPreviewPanel sharedPreviewPanel];
+    if(self.QLPreview.isVisible)
+    {
+        [self.QLPreview  orderOut:self];
+    }
+    else  {
+        
+        MLImageView *clickedImage =(MLImageView*) sender;
+        MLChatViewCell *cell = (MLChatViewCell *)clickedImage.superview;
+        self.tmpPreviewImageData = cell.imageData;
+        [self.view.window makeFirstResponder:self.view];
+        [self.QLPreview makeKeyAndOrderFront:self];
+        
+    }
+}
+
+#pragma mark - quicklook datasource
+- (NSInteger)numberOfPreviewItemsInPreviewPanel:(QLPreviewPanel *)panel
+{
+    return 1; 
+}
+
+- (id<QLPreviewItem>)previewPanel:(QLPreviewPanel *)panel
+               previewItemAtIndex:(NSInteger)index
+{
+    
+    MLPreviewObject *preview = [[MLPreviewObject alloc] init];
+    preview.previewItemTitle=@"Image Preview";
+  
+    NSString* tmpFilePath = [NSString stringWithFormat:@"%@tmp.png", NSTemporaryDirectory()];
+    BOOL writeSuccess= [self.tmpPreviewImageData writeToFile:tmpFilePath atomically:YES];
+    
+    if(!writeSuccess)
+    {
+        DDLogError(@"Could not write tmp file %@", tmpFilePath);
+    }
+    
+    preview.previewItemURL =[NSURL URLWithString:[NSString stringWithFormat:@"file://%@",tmpFilePath]];
+    return preview;
+}
+
+
+
 
 @end

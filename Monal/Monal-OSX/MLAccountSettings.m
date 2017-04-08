@@ -62,9 +62,9 @@
         NSString *jid = [row objectForKey:kAccountName];
         
         NSArray *accounts= [[NXOAuth2AccountStore sharedStore] accountsWithAccountType:jid];
-    
+        NXOAuth2AccountStore *store= [NXOAuth2AccountStore sharedStore] ;
         for(NXOAuth2Account *oauthAccount in accounts ) {
-            [[NXOAuth2AccountStore sharedStore] removeAccount:oauthAccount];
+            [store removeAccount:oauthAccount];
         }
         
         // pass to database

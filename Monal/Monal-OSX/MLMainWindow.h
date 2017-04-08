@@ -17,6 +17,7 @@
 @property (nonatomic, strong) IBOutlet NSSearchField *contactSearchField;
 
 @property (nonatomic, weak)  MLContactsViewController *contactsViewController;
+@property (nonatomic, weak)  MLChatViewController *chatViewController;
 
 /**
  Allows  the window to know what contact is currently selected

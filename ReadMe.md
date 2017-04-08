@@ -7,3 +7,12 @@ Monal is licensed under the BSD license. Any code contributions should be compat
 
 ### Pull Requests
 I take pull requests. Please  use the develop branch to make changes. 
+
+### Current Releases ###
+
+You can get the current releases in the App Store;
+
+* [iOS](https://itunes.apple.com/us/app/monal-free-xmpp-chat/id317711500?mt=8)
+
+* [Mac](https://itunes.apple.com/us/app/monal-free-xmpp-chat/id1060957067?mt=12)
+

@@ -44,6 +44,10 @@ extern NSString *const kFullName;
 extern NSString *const kContactName;
 extern NSString *const kCount;
 
+extern NSString *const kMessageType;
+extern NSString *const kMessageTypeImage;
+extern NSString *const kMessageTypeText;
+
 
 + (DataLayer* )sharedInstance;
 
@@ -194,7 +198,7 @@ extern NSString *const kCount;
 
 -(NSArray*) messageHistoryBuddies:(NSString*) accountNo;
 -(void) markAsReadBuddy:(NSString*) buddy forAccount:(NSString*) accountNo;
--(void) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString *)messageId withCompletion:(void (^)(BOOL))completion;
+-(void) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString *)messageId withCompletion:(void (^)(BOOL, NSString *))completion;
 
 #pragma mark active contacts
 -(void) activeContactsWithCompletion: (void (^)(NSMutableArray *))completion;
@@ -209,6 +213,12 @@ extern NSString *const kCount;
 -(void) countUnreadMessagesWithCompletion: (void (^)(NSNumber *))completion;
 
 -(void) countUserMessages:(NSString*) buddy forAccount:(NSString*) accountNo withCompletion: (void (^)(NSNumber *))completion;
+
+/**
+ checks HTTP  head on URL to determine the message type
+ */
+-(void) messageTypeForMessage:(NSString *) messageString withCompletion:(void(^)(NSString *messageType)) completion;
+
 
 
 @end

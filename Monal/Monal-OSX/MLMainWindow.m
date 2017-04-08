@@ -26,6 +26,8 @@
     [super windowDidLoad];
     AppDelegate *appDelegate = [NSApplication sharedApplication].delegate;
     appDelegate.mainWindowController= self;
+    self.window.frameAutosaveName =@"MonalMainWindow";
+    self.window.titleVisibility=NSWindowTitleHidden;
     
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
     [nc addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
@@ -178,6 +180,7 @@
         if(notification.response.string.length>0) {
             if([[MLXMPPManager sharedInstance].contactVC.chatViewController.contactName isEqualToString:[userInfo objectForKey:@"actuallyfrom"]]) {
                 [[MLXMPPManager sharedInstance].contactVC.chatViewController sendMessage:notification.response.string andMessageID:nil];
+                [[MLXMPPManager sharedInstance].contactVC.chatViewController  markAsRead];
             }
             else  {
                 NSLog(@"error cant send to wrong contact");
@@ -218,5 +221,24 @@
 {
      [[MLXMPPManager sharedInstance] setClientsActive];
 }
+
+#pragma mark - quick look controller
+
+- (BOOL)acceptsPreviewPanelControl:(QLPreviewPanel *)panel
+{
+    return YES;
+}
+
+- (void)beginPreviewPanelControl:(QLPreviewPanel *)panel
+{
+    panel.delegate = self.chatViewController;
+    panel.dataSource = self.chatViewController;
+}
+
+- (void)endPreviewPanelControl:(QLPreviewPanel *)panel
+{
+    
+}
+
 
 @end

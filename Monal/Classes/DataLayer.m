@@ -38,6 +38,9 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 NSString *const kUsername =@"username";
 NSString *const kFullName =@"full_name";
 
+NSString *const kMessageType =@"messageType";
+NSString *const kMessageTypeImage =@"Image";
+NSString *const kMessageTypeText =@"Text";
 
 // used for contact rows
 NSString *const kContactName =@"buddy_name";
@@ -1268,21 +1271,23 @@ static DataLayer *sharedInstance=nil;
             NSString* dateString = [formatter stringFromDate:destinationDate];
             
             // in the event it is a message from the room
-            
-            //all messages default to unread
-            NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, %@, '%@',  '%@', '%@', '%@', '%@',%d,%d,'%@');", accountNo, from.escapeForSql, to.escapeForSql, 	dateString, message.escapeForSql, actualfrom.escapeForSql,unread, delivered, messageid.escapeForSql];
-            DDLogVerbose(@"%@",query);
-            [self executeNonQuery:query withCompletion:^(BOOL success) {
+            [self messageTypeForMessage:message withCompletion:^(NSString *messageType) {
                 
-                if(!success)
-                {
-                    DDLogError(@"failed to insert ");
-                }
-                
-                if(completion)
-                {
-                    completion(success);
-                }
+                //all messages default to unread
+                NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, %@, '%@',  '%@', '%@', '%@', '%@',%d,%d,'%@', '%@');", accountNo, from.escapeForSql, to.escapeForSql, 	dateString, message.escapeForSql, actualfrom.escapeForSql,unread, delivered, messageid.escapeForSql,messageType];
+                DDLogVerbose(@"%@",query);
+                [self executeNonQuery:query withCompletion:^(BOOL success) {
+                    
+                    if(!success)
+                    {
+                        DDLogError(@"failed to insert ");
+                    }
+                    
+                    if(completion)
+                    {
+                        completion(success);
+                    }
+                }];
             }];
         }
         
@@ -1490,7 +1495,7 @@ static DataLayer *sharedInstance=nil;
 //message history
 -(NSMutableArray*) messageHistory:(NSString*) buddy forAccount:(NSString*) accountNo
 {
-    NSString* query=[NSString stringWithFormat:@"select af, message, thetime, message_history_id, delivered, messageid from (select ifnull(actual_from, message_from) as af, message,     timestamp  as thetime, message_history_id, delivered,messageid from message_history where account_id=%@ and (message_from='%@' or message_to='%@') order by message_history_id desc limit 30) order by thetime asc",accountNo, buddy.escapeForSql, buddy.escapeForSql];
+    NSString* query=[NSString stringWithFormat:@"select af, message, thetime, message_history_id, delivered, messageid, messageType from (select ifnull(actual_from, message_from) as af, message,     timestamp  as thetime, message_history_id, delivered,messageid, messageType from message_history where account_id=%@ and (message_from='%@' or message_to='%@') order by message_history_id desc limit 30) order by thetime asc",accountNo, buddy.escapeForSql, buddy.escapeForSql];
     DDLogVerbose(@"%@", query);
     NSMutableArray* toReturn = [self executeReader:query];
     
@@ -1516,20 +1521,26 @@ static DataLayer *sharedInstance=nil;
 
 }
 
--(void) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString *)messageId withCompletion:(void (^)(BOOL))completion
+
+-(void) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString *)messageId withCompletion:(void (^)(BOOL, NSString *))completion
 {
     //Message_history going out, from is always the local user. always read, default to  delivered (will be reset by timer if needed)
     
-    NSArray* parts=[[[NSDate date] description] componentsSeparatedByString:@" "];
-    NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, %@, '%@',  '%@', '%@ %@', '%@', '%@',0,1,'%@');", accountNo, from.escapeForSql, to.escapeForSql,
-                     [parts objectAtIndex:0],[parts objectAtIndex:1], message.escapeForSql, actualfrom.escapeForSql, messageId.escapeForSql];
-    
-    [self executeNonQuery:query withCompletion:^(BOOL result) {
-        if (completion) {
-            completion(result);
-        }
+    [self messageTypeForMessage:message withCompletion:^(NSString *messageType) {
         
+        NSArray* parts=[[[NSDate date] description] componentsSeparatedByString:@" "];
+        NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, %@, '%@',  '%@', '%@ %@', '%@', '%@',0,1,'%@', '%@');", accountNo, from.escapeForSql, to.escapeForSql,
+                         [parts objectAtIndex:0],[parts objectAtIndex:1], message.escapeForSql, actualfrom.escapeForSql, messageId.escapeForSql, messageType];
+        
+        [self executeNonQuery:query withCompletion:^(BOOL result) {
+            if (completion) {
+                completion(result, messageType);
+            }
+            
+        }];
     }];
+    
+
 }
 
 
@@ -2022,6 +2033,18 @@ static DataLayer *sharedInstance=nil;
         
     }
     
+    if([dbversion doubleValue]<1.6)
+    {
+        DDLogVerbose(@"Database version <1.6 detected. Performing upgrade on accounts. ");
+        
+        [self executeNonQuery:@"alter table message_history add column messageType varchar(255);"];
+        [self executeNonQuery:@"update dbversion set dbversion='1.6'; "];
+        
+        DDLogVerbose(@"Upgrade to 1.6 success ");
+        
+    }
+    
+    
     // this point forward OSX might have legacy issues
     
     
@@ -2035,6 +2058,43 @@ static DataLayer *sharedInstance=nil;
 {
     sqlite3_close(database);
 }
+
+
+#pragma mark determine message type
+
+
+-(void) messageTypeForMessage:(NSString *) messageString withCompletion:(void(^)(NSString *messageType)) completion
+{
+    __block NSString *messageType=kMessageTypeText;
+    if ([[NSUserDefaults standardUserDefaults] boolForKey: @"ShowImages"] &&  ([messageString hasPrefix:@"http://"]||[messageString hasPrefix:@"https://"]))
+    {
+        
+        NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:messageString]];
+        request.HTTPMethod=@"HEAD";
+        request.cachePolicy= NSURLRequestReturnCacheDataElseLoad;
+        
+        NSURLSession *session = [NSURLSession sharedSession];
+        [[session dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+            NSDictionary *headers= ((NSHTTPURLResponse *)response).allHeaderFields;
+            NSString *contentType = [headers objectForKey:@"Content-Type"];
+            if([contentType hasPrefix:@"image/"])
+            {
+                messageType=kMessageTypeImage;
+            }
+            
+            if(completion) {
+                completion(messageType);
+            }
+            
+        }] resume];
+        
+    }
+    else
+        if(completion) {
+            completion(messageType);
+        }
+}
+
 
 
 

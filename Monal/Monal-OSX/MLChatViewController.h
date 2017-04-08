@@ -7,8 +7,10 @@
 //
 
 #import <Cocoa/Cocoa.h>
+@import Quartz;
+@import QuickLook;
 
-@interface MLChatViewController : NSViewController <NSTableViewDataSource, NSTableViewDelegate, NSTextViewDelegate>
+@interface MLChatViewController : NSViewController <NSTableViewDataSource, NSTableViewDelegate, NSTextViewDelegate, QLPreviewPanelDataSource, QLPreviewPanelDelegate>
 
 @property (nonatomic, strong) IBOutlet NSTextView *messageBox;
 @property (nonatomic, strong) IBOutlet NSTableView *chatTable;
@@ -19,11 +21,17 @@
 -(IBAction)sendText:(id)sender;
 -(IBAction)emojiPicker:(id)sender;
 -(IBAction)attach:(id)sender;
+-(IBAction)showImagePreview:(id)sender;
 
 -(IBAction)deliveryFailedMessage:(id)sender;
 
 -(void) sendMessage:(NSString *) messageText andMessageID:(NSString *)messageID;
 
 -(void) showConversationForContact:(NSDictionary *)contact;
+
+/**
+ mark as conversation as read and update teh application badge
+ */
+-(void) markAsRead;
 
 @end

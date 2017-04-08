@@ -1,0 +1,1 @@
+../../../NXOAuth2Client/Sources/NSString+NXOAuth2.h

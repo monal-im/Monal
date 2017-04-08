@@ -17,7 +17,6 @@
 
 #import "NXOAuth2.h"
 
-#import "Countly.h"
 #import <Fabric/Fabric.h>
 #import <Crashlytics/Crashlytics.h>
 #import "DDLog.h"
@@ -51,8 +50,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 #endif
     
     [[MLXMPPManager sharedInstance] connectIfNecessary];
-    
-    [[Countly sharedInstance] startOnCloudWithAppKey:@"2a165fc42c1c5541e49b024a9e75d155cdde999e"];
     
     [[NSUserDefaults standardUserDefaults] registerDefaults:@{ @"NSApplicationCrashOnExceptions": @YES }];
     [Fabric with:@[[Crashlytics class]]];

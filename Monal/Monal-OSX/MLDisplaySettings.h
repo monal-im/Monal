@@ -14,7 +14,7 @@
 @property (nonatomic, weak) IBOutlet NSButton *chatLogs;
 @property (nonatomic, weak) IBOutlet NSButton *playSounds;
 @property (nonatomic, weak) IBOutlet NSButton *showMessagePreview;
-
+@property (nonatomic, weak) IBOutlet NSButton *showImages;
 
 @property (nonatomic, weak) IBOutlet NSButton *showOffline;
 @property (nonatomic, weak) IBOutlet NSButton *sortByStatus;

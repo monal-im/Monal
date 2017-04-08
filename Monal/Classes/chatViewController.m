@@ -114,6 +114,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     self.chatInput.layer.borderWidth=0.5f;
     self.chatInput.textContainerInset=UIEdgeInsetsMake(5, 0, 5, 0);
     
+    
     self.inputContainerView.layer.borderColor=[UIColor lightGrayColor].CGColor;
     self.inputContainerView.layer.borderWidth=0.5f;
     
@@ -187,8 +188,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     [super viewDidAppear:animated];
     [self scrollToBottom];
     [self refreshCounter];
-    self.chatInput.contentInset = UIEdgeInsetsMake(3, 0, 0, 0);
-    
+ 
 }
 
 -(void) viewWillDisappear:(BOOL)animated
@@ -269,11 +269,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 -(void) sendMessage:(NSString *) messageText andMessageID:(NSString *)messageID
 {
     DDLogVerbose(@"Sending message");
-    NSUInteger r = arc4random_uniform(NSIntegerMax);
-    NSString *newMessageID =messageID;
-    if(!newMessageID) {
-        newMessageID=[NSString stringWithFormat:@"Monal%lu", (unsigned long)r];
-    }
+    NSString *newMessageID =[[NSUUID UUID] UUIDString];
+ 
     [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:_contactName fromAccount:_accountNo isMUC:_isMUC messageId:newMessageID
                           withCompletionHandler:nil];
     
@@ -392,6 +389,46 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 }
 
 
+-(void) uploadData:(NSData *) data
+{
+    if(!self.uploadHUD) {
+        self.uploadHUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+        self.uploadHUD.removeFromSuperViewOnHide=YES;
+        self.uploadHUD.labelText =@"Uploding";
+        self.uploadHUD.detailsLabelText =@"Upoading file to server";
+        
+    }
+    
+    //if you have configured it, defer to dropbox
+    if(self.restClient)
+    {
+        self.uploadHUD.mode=MBProgressHUDModeDeterminate;
+        self.uploadHUD.progress=0;
+        [self uploadImageToDropBox:data];
+    }
+    else  {
+        [[MLXMPPManager sharedInstance]  httpUploadPngData:data toContact:self.contactName onAccount:self.accountNo withCompletionHandler:^(NSString *url, NSError *error) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                self.uploadHUD.hidden=YES;
+                
+                if(url) {
+                    self.chatInput.text= url;
+                }
+                else  {
+                    UIAlertView *addError = [[UIAlertView alloc]
+                                             initWithTitle:@"There was an error uploading the file to the server"
+                                             message:[NSString stringWithFormat:@"%@", error.localizedDescription]
+                                             delegate:nil cancelButtonTitle:@"Close"
+                                             otherButtonTitles: nil] ;
+                    [addError show];
+                }
+            });
+            
+        }];
+    }
+
+}
+
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<NSString *,
                                id> *)info
 {
@@ -404,42 +441,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         NSData *pngData=  UIImageJPEGRepresentation(selectedImage, 0.5f);
         if(pngData)
         {
-            
-            if(!self.uploadHUD) {
-                self.uploadHUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-                self.uploadHUD.removeFromSuperViewOnHide=YES;
-                self.uploadHUD.labelText =@"Uploding";
-                self.uploadHUD.detailsLabelText =@"Upoading file to server";
-                
-            }
-            
-            //if you have configured it, defer to dropbox
-            if(self.restClient)
-            {
-                self.uploadHUD.mode=MBProgressHUDModeDeterminate;
-                self.uploadHUD.progress=0;
-                [self uploadImageToDropBox:pngData];
-            }
-            else  {
-                [[MLXMPPManager sharedInstance]  httpUploadPngData:pngData toContact:self.contactName onAccount:self.accountNo withCompletionHandler:^(NSString *url, NSError *error) {
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        self.uploadHUD.hidden=YES;
-                        
-                        if(url) {
-                            self.chatInput.text= url;
-                        }
-                        else  {
-                            UIAlertView *addError = [[UIAlertView alloc]
-                                                     initWithTitle:@"There was an error uploading the file to the server"
-                                                     message:[NSString stringWithFormat:@"%@", error.localizedDescription]
-                                                     delegate:nil cancelButtonTitle:@"Close"
-                                                     otherButtonTitles: nil] ;
-                            [addError show];
-                        }
-                    });
-                    
-                }];
-            }
+            [self uploadData:pngData];
         }
         
     }
@@ -466,7 +468,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         return;
     }
     
-	[[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:_accountNo withMessage:message actuallyFrom:self.jid withId:messageId withCompletion:^(BOOL result) {
+	[[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:_accountNo withMessage:message actuallyFrom:self.jid withId:messageId withCompletion:^(BOOL result, NSString *messageType) {
 		DDLogVerbose(@"added message");
         
         if(result) {
@@ -963,17 +965,19 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void) updateInputViewSize
 {
-    if(self.chatInput.intrinsicContentSize.height>40) {
-        self.inputContainerHeight.constant= self.chatInput.intrinsicContentSize.height+18;
-          self.chatInput.contentInset = UIEdgeInsetsMake(5, 0, 0, 0);
+    
+    if(self.chatInput.intrinsicContentSize.height>43) {
+        self.inputContainerHeight.constant= self.chatInput.intrinsicContentSize.height+16+10;
+          self.chatInput.contentInset = UIEdgeInsetsMake(5, 0, 5, 0);
     } else
     {
-         self.inputContainerHeight.constant=43.0f;
-          self.chatInput.contentInset = UIEdgeInsetsMake(3, 0, 0, 0);
+        self.inputContainerHeight.constant=43.0f;
+        self.chatInput.contentInset = UIEdgeInsetsMake(5, 0, 5, 0);
     }
+    [self.chatInput setScrollEnabled:NO];
     [self.inputContainerView layoutIfNeeded];
-  
- 
+    [self.chatInput setScrollEnabled:YES];
+    [self.chatInput scrollRangeToVisible:NSMakeRange(0, 0)];
 }
 
 - (void)textViewDidBeginEditing:(UITextView *)textView

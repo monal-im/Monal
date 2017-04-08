@@ -1,0 +1,10 @@
+ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO
+FRAMEWORK_SEARCH_PATHS = $(inherited) "${PODS_ROOT}/Crashlytics/OSX" "${PODS_ROOT}/Fabric/OSX"
+GCC_PREPROCESSOR_DEFINITIONS = $(inherited) COCOAPODS=1
+HEADER_SEARCH_PATHS = $(inherited) "${PODS_ROOT}/Headers/Public" "${PODS_ROOT}/Headers/Public/Crashlytics" "${PODS_ROOT}/Headers/Public/Dropbox-OSX-SDK" "${PODS_ROOT}/Headers/Public/Fabric" "${PODS_ROOT}/Headers/Public/NXOAuth2Client" "${PODS_ROOT}/Headers/Public/SAMKeychain" "${PODS_ROOT}/Headers/Public/TPCircularBuffer"
+LIBRARY_SEARCH_PATHS = $(inherited) "$PODS_CONFIGURATION_BUILD_DIR/Dropbox-OSX-SDK" "$PODS_CONFIGURATION_BUILD_DIR/NXOAuth2Client-OSX" "$PODS_CONFIGURATION_BUILD_DIR/SAMKeychain" "$PODS_CONFIGURATION_BUILD_DIR/TPCircularBuffer-OSX"
+OTHER_CFLAGS = $(inherited) -isystem "${PODS_ROOT}/Headers/Public" -isystem "${PODS_ROOT}/Headers/Public/Crashlytics" -isystem "${PODS_ROOT}/Headers/Public/Dropbox-OSX-SDK" -isystem "${PODS_ROOT}/Headers/Public/Fabric" -isystem "${PODS_ROOT}/Headers/Public/NXOAuth2Client" -isystem "${PODS_ROOT}/Headers/Public/SAMKeychain" -isystem "${PODS_ROOT}/Headers/Public/TPCircularBuffer"
+OTHER_LDFLAGS = $(inherited) -ObjC -l"Dropbox-OSX-SDK" -l"NXOAuth2Client-OSX" -l"SAMKeychain" -l"TPCircularBuffer-OSX" -l"c++" -l"z" -framework "AudioToolbox" -framework "Crashlytics" -framework "Fabric" -framework "Foundation" -framework "Security" -framework "SystemConfiguration"
+PODS_BUILD_DIR = $BUILD_DIR
+PODS_CONFIGURATION_BUILD_DIR = $PODS_BUILD_DIR/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)
+PODS_ROOT = ${SRCROOT}/Pods

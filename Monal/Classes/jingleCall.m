@@ -8,6 +8,10 @@
 
 #import "jingleCall.h"
 
+#import "DDLog.h"
+
+static const int ddLogLevel = LOG_LEVEL_WARN;
+
 @implementation jingleCall
 
 -(id) init{
@@ -91,7 +95,11 @@
     self.initiator=self.me;
     self.responder=self.otherParty;
     _activeresource=resource;
-    
+	
+    if ([_ownIP isEqualToString:@"0.0.0.0"])
+    {
+        DDLogWarn( @"initiateJingleTo without valid own IP");
+    }
     //initiator, responder, sid, ownip, localport1, localport2
     
      NSDictionary* info =@{@"initiator":self.initiator, @"responder":self.responder, @"sid":self.thesid, @"ownip":_ownIP, @"localport1":self.localPort,@"localport2":self.localPort2};

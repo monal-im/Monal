@@ -116,9 +116,10 @@
 {
     
     NSArray *accounts= [[NXOAuth2AccountStore sharedStore] accountsWithAccountType:self.jabberID.stringValue];
-
+    NXOAuth2AccountStore *store =[NXOAuth2AccountStore sharedStore];
+    
     for(NXOAuth2Account *oauthAccount in accounts ) {
-        [[NXOAuth2AccountStore sharedStore] removeAccount:oauthAccount];
+        [store removeAccount:oauthAccount];
     }
     
     

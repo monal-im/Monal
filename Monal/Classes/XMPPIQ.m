@@ -10,6 +10,7 @@
 
 @implementation XMPPIQ
 
+
 -(id) initWithId:(NSString*) sessionid andType:(NSString*) iqType
 {
     self=[super init];
@@ -21,7 +22,47 @@
     return self;
 }
 
+-(id) initWithType:(NSString*) iqType
+{
+    return [self initWithId:[[NSUUID UUID] UUIDString] andType:iqType];
+}
+
 #pragma mark iq set
+
+-(void) setPushEnableWithNode:(NSString *)node andSecret:(NSString *)secret
+{
+    MLXMLNode* enableNode =[[MLXMLNode alloc] init];
+    enableNode.element=@"enable";
+    [enableNode.attributes setObject:@"urn:xmpp:push:0" forKey:@"xmlns"];
+    //this push jid is hardcoded and does not have to be the same hostname as the api endpoint set in MonalAppDelegate.m
+    [enableNode.attributes setObject:@"push.eightysoft.de" forKey:@"jid"];
+    [enableNode.attributes setObject:node forKey:@"node"];
+    [self.children addObject:enableNode];
+    
+    MLXMLNode* xNode =[[MLXMLNode alloc] init];
+    xNode.element=@"x";
+    [xNode.attributes setObject:@"jabber:x:data" forKey:@"xmlns"];
+    [xNode.attributes setObject:@"submit" forKey:@"type"];
+    [enableNode.children addObject:xNode];
+    
+    MLXMLNode* formTypeFieldNode =[[MLXMLNode alloc] init];
+    formTypeFieldNode.element=@"field";
+    [formTypeFieldNode.attributes setObject:@"FORM_TYPE" forKey:@"var"];
+    MLXMLNode* formTypeValueNode =[[MLXMLNode alloc] init];
+    formTypeValueNode.element=@"value";
+    formTypeValueNode.data=@"http://jabber.org/protocol/pubsub#publish-options";
+    [formTypeFieldNode.children addObject:formTypeValueNode];
+    [xNode.children addObject:formTypeFieldNode];
+    
+    MLXMLNode* secretFieldNode =[[MLXMLNode alloc] init];
+    secretFieldNode.element=@"field";
+    [secretFieldNode.attributes setObject:@"secret" forKey:@"var"];
+    MLXMLNode* secretValueNode =[[MLXMLNode alloc] init];
+    secretValueNode.element=@"value";
+    secretValueNode.data=secret;
+    [secretFieldNode.children addObject:secretValueNode];
+    [xNode.children addObject:secretFieldNode];
+}
 
 -(void) setAuthWithUserName:(NSString *)username resource:(NSString *) resource andPassword:(NSString *) password
 {
@@ -45,8 +86,8 @@
     passNode.data =password;
     
     [queryNode.children addObject:userNode];
-     [queryNode.children addObject:resourceNode];
-     [queryNode.children addObject:passNode];
+    [queryNode.children addObject:resourceNode];
+    [queryNode.children addObject:passNode];
     [self.children addObject:queryNode];
 }
 
@@ -274,7 +315,7 @@
     MLXMLNode* queryNode =[[MLXMLNode alloc] init];
     queryNode.element=@"query";
     [queryNode.attributes setObject:@"jabber:iq:last" forKey:@"xmlns"];
-     [queryNode.attributes setObject:@"0" forKey:@"seconds"]; // hasnt been away for 0 seconds
+    [queryNode.attributes setObject:@"0" forKey:@"seconds"];  // hasnt been away for 0 seconds
     [self.children addObject:queryNode];
 }
 

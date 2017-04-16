@@ -208,5 +208,6 @@ Attempts to upload a file to the  HTTP upload service
  */
 -(void) cleanArrayOfConnectedAccounts:(NSMutableArray *) dirtySet;
 
+-(void) setPushNode:(NSString *)node andSecret:(NSString *)secret;
 
 @end

@@ -29,7 +29,6 @@
 @import Fabric;
 #import <DropboxSDK/DropboxSDK.h>
 
-
 //xmpp
 #import "MLXMPPManager.h"
 
@@ -42,6 +41,8 @@
 static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 @implementation MonalAppDelegate
+
+NSMutableData *pushAPIData;
 
 -(void) createRootInterface
 {
@@ -171,6 +172,111 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 }
 
+#if TARGET_OS_IPHONE
+
+// handle push api incoming response
+-(void) connection:(NSURLConnection *) connection didReceiveResponse:(NSURLResponse *)response
+{
+    [pushAPIData setLength:0];
+}
+
+// handle push api incoming data
+- (void)connection:(NSURLConnection *)connection didReceiveData:(NSData*)data
+{
+    [pushAPIData appendData:data];
+}
+
+// handle push api error
+- (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
+{
+    DDLogInfo(@"************************ push api returned error: %@", error);
+    [pushAPIData setLength:0];
+}
+
+// handle push api response
+- (void)connectionDidFinishLoading:(NSURLConnection *)connection
+{
+    NSString *response = [[NSString alloc] initWithData: pushAPIData encoding:NSUTF8StringEncoding];
+    DDLogInfo(@"************************ push api returned: %@", response);
+    NSArray *responseParts=[response componentsSeparatedByString:@"\n"];
+    if([responseParts[0] isEqualToString:@"OK"] && [responseParts count]==3)
+    {
+        DDLogInfo(@"************************ push api: node='%@', secret='%@'", responseParts[1], responseParts[2]);
+        [[MLXMPPManager sharedInstance] setPushNode:responseParts[1] andSecret:responseParts[2]];
+    }
+    else
+        DDLogInfo(@"************************ push api returned invalid data: %@", [responseParts componentsJoinedByString: @" | "]);
+}
+
+// Register for VoIP notifications
+-(void) voipRegistration
+{
+    DDLogInfo(@"************************ registering for voip push...");
+    dispatch_queue_t mainQueue = dispatch_get_main_queue();
+    // Create a push registry object
+    PKPushRegistry * voipRegistry = [[PKPushRegistry alloc] initWithQueue: mainQueue];
+    // Set the registry's delegate to self
+    voipRegistry.delegate = self;
+    // Set the push type to VoIP
+    voipRegistry.desiredPushTypes = [NSSet setWithObject:PKPushTypeVoIP];
+    
+    //tmolitor: dummy call for iOS simulator
+    //PKPushCredentials * credentials = [[PKPushCredentials alloc] init];
+    //[self pushRegistry:voipRegistry didUpdatePushCredentials:credentials forType:@"voip"];
+}
+
+// Handle updated push credentials
+-(void)pushRegistry:(PKPushRegistry *)registry didUpdatePushCredentials: (PKPushCredentials *)credentials forType:(NSString *)type
+{
+    DDLogInfo(@"************************ voip push token: %@", credentials.token);
+    NSString *token = [[NSString alloc] initWithData:credentials.token encoding:NSUTF8StringEncoding];
+    NSString *node = [[NSUserDefaults standardUserDefaults] stringForKey:@"DeviceUUID"];
+    if(![node length])
+    {
+        [[NSUserDefaults standardUserDefaults] setObject:[[NSUUID UUID] UUIDString] forKey:@"DeviceUUID"];
+        [[NSUserDefaults standardUserDefaults] synchronize];
+    }
+    
+    //send http api request to register this client-token combination and get back a node-secret combination
+    //see http://stackoverflow.com/a/15749527 for help on sending out http requests
+    
+    NSString *post = [NSString stringWithFormat:@"type=apns&node=%@&token=%@", [node stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],
+    [token stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+    NSData *postData = [post dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
+    NSString *postLength = [NSString stringWithFormat:@"%d",[postData length]];
+    
+    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
+    //this is the hardcoded push api endpoint
+    [request setURL:[NSURL URLWithString:@"https://push.eightysoft.de/v1/register"]];
+    [request setHTTPMethod:@"POST"];
+    [request setValue:postLength forHTTPHeaderField:@"Content-Length"];
+    [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
+    [request setHTTPBody:postData];
+    
+    NSURLConnection *conn = [[NSURLConnection alloc] initWithRequest:request delegate:self];
+    if(conn)
+    {
+        DDLogInfo(@"************************ connection to push api successful");
+        pushAPIData = [[NSMutableData alloc] init];
+    }
+    else
+        DDLogInfo(@"************************ connection to push api NOT successful");
+}
+
+-(void)pushRegistry:(PKPushRegistry *)registry didInvalidatePushTokenForType:(NSString *)type
+{
+    DDLogInfo(@"didInvalidatePushTokenForType called (and ignored, TODO: disable push on server?)");
+}
+
+// Handle incoming pushes
+-(void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type
+{
+    DDLogInfo(@"************************ incoming voip notfication: %@", [payload dictionaryPayload]);
+    
+    // should any accounts connect?
+    [[MLXMPPManager sharedInstance] connectIfNecessary];
+}
+#endif
 
 #pragma mark notification actions
 -(void) showCallScreen:(NSNotification*) userInfo
@@ -258,6 +364,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         [[UIApplication sharedApplication] registerUserNotificationSettings:settings];
     }
     
+    //register for voip push uing pushkit
+    [self voipRegistration];
+    
     [self createRootInterface];
 
     //rating
@@ -281,7 +390,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     {
         [[DataLayer sharedInstance] messageHistoryCleanAll];
     }
-    
     
     //Dropbox
     DBSession *dbSession = [[DBSession alloc]
@@ -402,7 +510,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void)applicationWillTerminate:(UIApplication *)application
 {
     
-     [self updateUnread];
+    [self updateUnread];
     [[NSUserDefaults standardUserDefaults] synchronize];
 }
 

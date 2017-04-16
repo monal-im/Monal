@@ -6,7 +6,10 @@
 //  Copyright __MyCompanyName__ 2008. All rights reserved.
 //
 
-@import UIKit; 
+@import UIKit;
+#if TARGET_OS_IPHONE
+@import PushKit;
+#endif
 #import "Appirater.h"
 #import "DataLayer.h"
 #import "MLTabBarController.h"
@@ -18,14 +21,17 @@
 
 
 
-
+#if TARGET_OS_IPHONE
+@interface MonalAppDelegate : UIResponder <UIApplicationDelegate, UISplitViewControllerDelegate, PKPushRegistryDelegate >
+#else
 @interface MonalAppDelegate : UIResponder <UIApplicationDelegate, UISplitViewControllerDelegate >
+#endif
 
 @property (nonatomic, strong) UIWindow* window;
 @property (nonatomic, strong) UINavigationController* chatNav;
 @property (nonatomic, strong) MLTabBarController* tabBarController;
 @property (nonatomic, strong) UISplitViewController* splitViewController;
-@property (nonatomic, strong)  DDFileLogger *fileLogger;
+@property (nonatomic, strong) DDFileLogger *fileLogger;
 
 -(void) updateUnread;
 

@@ -81,10 +81,9 @@ typedef NS_ENUM (NSInteger, xmppState) {
     NSInputStream *_iStream;
     NSOutputStream *_oStream;
     NSMutableString* _inputBuffer;
-	NSMutableArray* _outputQueue;
+    NSMutableArray* _outputQueue;
     
     NSArray* _stanzaTypes;
-    NSString* _sessionKey;
     
     BOOL _startTLSComplete;
     BOOL _streamHasSpace;
@@ -225,6 +224,7 @@ Decline a call request
  */
 -(void) setMAMQueryFromStart:(NSDate *) startDate toDate:(NSDate *) endDate  andJid:(NSString *)jid;
 
+-(void) enablePush;
 
 FOUNDATION_EXPORT NSString *const kFileName;
 FOUNDATION_EXPORT NSString *const kContentType;
@@ -234,6 +234,9 @@ FOUNDATION_EXPORT NSString *const kCompletion;
 
 
 #pragma  mark properties
+
+@property (nonatomic,assign) NSString* pushNode;
+@property (nonatomic,assign) NSString* pushSecret;
 
 @property (nonatomic,readonly) NSString* fulluser; // combination of username@domain
 

@@ -1632,7 +1632,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                                       NSDictionary* userDic=@{@"from":messageNode.from,
                                                                                               @"actuallyfrom":actuallyFrom,
                                                                                               @"messageText":messageText,
-                                                                                              @"to":recipient,
+                                                                                              @"to":messageNode.to,
                                                                                               @"accountNo":_accountNo,
                                                                                               @"showAlert":[NSNumber numberWithBool:showAlert],
                                                                                               @"shouldRefresh":[NSNumber numberWithBool:shouldRefresh]

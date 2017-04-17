@@ -233,7 +233,17 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void)pushRegistry:(PKPushRegistry *)registry didUpdatePushCredentials: (PKPushCredentials *)credentials forType:(NSString *)type
 {
     DDLogInfo(@"************************ voip push token: %@", credentials.token);
-    NSString *token = [[NSString alloc] initWithData:credentials.token encoding:NSUTF8StringEncoding];
+ 
+    unsigned char *tokenBytes = (unsigned char *)[credentials.token bytes];
+    NSMutableString *token = [[NSMutableString alloc] init];
+    
+    NSInteger counter=0;
+    while(counter< credentials.token.length)
+    {
+        [token appendString:[NSString stringWithFormat:@"%02x", (unsigned char) tokenBytes[counter]]];
+        counter++;
+    }
+    
     NSString *node = [[[UIDevice currentDevice] identifierForVendor] UUIDString];
     
     NSString *post = [NSString stringWithFormat:@"type=apns&node=%@&token=%@", [node stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],
@@ -243,7 +253,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
     //this is the hardcoded push api endpoint
-    [request setURL:[NSURL URLWithString:@"https://192.168.2.3:5280/v1/register"]];
+    [request setURL:[NSURL URLWithString:@"http://192.168.2.3:5280/v1/register"]];
     [request setHTTPMethod:@"POST"];
     [request setValue:postLength forHTTPHeaderField:@"Content-Length"];
     [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
@@ -252,7 +262,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     dispatch_async(dispatch_get_main_queue(), ^{
         [[[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
             
-            if(!error)
+            NSHTTPURLResponse *httpresponse= (NSHTTPURLResponse *) response;
+            
+            if(!error && httpresponse.statusCode<400)
             {
                 DDLogInfo(@"************************ connection to push api successful");
                 self.pushAPIData = [[NSMutableData alloc] init];

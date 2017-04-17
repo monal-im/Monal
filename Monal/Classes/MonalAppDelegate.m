@@ -35,6 +35,7 @@
 @interface MonalAppDelegate ()
 
 @property (nonatomic, strong)  UITabBarItem* activeTab;
+@property (nonatomic, strong)  NSMutableData *pushAPIData;
 
 @end
 
@@ -42,7 +43,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 @implementation MonalAppDelegate
 
-NSMutableData *pushAPIData;
+
 
 -(void) createRootInterface
 {
@@ -174,29 +175,33 @@ NSMutableData *pushAPIData;
 
 #if TARGET_OS_IPHONE
 
+
+#pragma mark - VOIP APNS notificaion
+
 // handle push api incoming response
 -(void) connection:(NSURLConnection *) connection didReceiveResponse:(NSURLResponse *)response
 {
-    [pushAPIData setLength:0];
+    [self.pushAPIData setLength:0];
 }
 
 // handle push api incoming data
 - (void)connection:(NSURLConnection *)connection didReceiveData:(NSData*)data
 {
-    [pushAPIData appendData:data];
+    [self.pushAPIData appendData:data];
 }
 
 // handle push api error
 - (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
 {
     DDLogInfo(@"************************ push api returned error: %@", error);
-    [pushAPIData setLength:0];
+    [self.pushAPIData setLength:0];
 }
+
 
 // handle push api response
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection
 {
-    NSString *response = [[NSString alloc] initWithData: pushAPIData encoding:NSUTF8StringEncoding];
+    NSString *response = [[NSString alloc] initWithData: self.pushAPIData encoding:NSUTF8StringEncoding];
     DDLogInfo(@"************************ push api returned: %@", response);
     NSArray *responseParts=[response componentsSeparatedByString:@"\n"];
     if([responseParts[0] isEqualToString:@"OK"] && [responseParts count]==3)
@@ -208,7 +213,6 @@ NSMutableData *pushAPIData;
         DDLogInfo(@"************************ push api returned invalid data: %@", [responseParts componentsJoinedByString: @" | "]);
 }
 
-// Register for VoIP notifications
 -(void) voipRegistration
 {
     DDLogInfo(@"************************ registering for voip push...");
@@ -237,9 +241,7 @@ NSMutableData *pushAPIData;
         [[NSUserDefaults standardUserDefaults] synchronize];
     }
     
-    //send http api request to register this client-token combination and get back a node-secret combination
-    //see http://stackoverflow.com/a/15749527 for help on sending out http requests
-    
+   
     NSString *post = [NSString stringWithFormat:@"type=apns&node=%@&token=%@", [node stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],
     [token stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
     NSData *postData = [post dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
@@ -253,14 +255,19 @@ NSMutableData *pushAPIData;
     [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
     [request setHTTPBody:postData];
     
-    NSURLConnection *conn = [[NSURLConnection alloc] initWithRequest:request delegate:self];
-    if(conn)
-    {
-        DDLogInfo(@"************************ connection to push api successful");
-        pushAPIData = [[NSMutableData alloc] init];
-    }
-    else
-        DDLogInfo(@"************************ connection to push api NOT successful");
+    [[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+        
+        if(!error)
+        {
+            DDLogInfo(@"************************ connection to push api successful");
+            self.pushAPIData = [[NSMutableData alloc] init];
+        } else
+        {
+             DDLogInfo(@"************************ connection to push api NOT successful");
+        }
+        
+    }];
+  
 }
 
 -(void)pushRegistry:(PKPushRegistry *)registry didInvalidatePushTokenForType:(NSString *)type
@@ -407,7 +414,7 @@ NSMutableData *pushAPIData;
   //  [UIApplication sharedApplication].applicationIconBadgeNumber=0;
 }
 
-#pragma mark handling urls
+#pragma mark - handling urls
 
 - (BOOL)application:(UIApplication *)app openURL:(NSURL *)url
   sourceApplication:(NSString *)source annotation:(id)annotation {
@@ -422,7 +429,7 @@ NSMutableData *pushAPIData;
     return NO;
 }
 
-#pragma mark notifiction 
+#pragma mark  - user notifications
 -(void) application:(UIApplication *)application didRegisterUserNotificationSettings:(UIUserNotificationSettings *)notificationSettings
 {
     DDLogVerbose(@"did register for local notifications");
@@ -439,8 +446,6 @@ NSMutableData *pushAPIData;
     [[MLXMPPManager sharedInstance].contactVC presentChatWithName:[notification.userInfo objectForKey:@"from"] account:[notification.userInfo objectForKey:@"accountNo"] ];
     }
 }
-
-
 
 
 -(void) application:(UIApplication *)application handleActionWithIdentifier:(nullable NSString *)identifier forLocalNotification:(nonnull UILocalNotification *)notification withResponseInfo:(nonnull NSDictionary *)responseInfo completionHandler:(nonnull void (^)())completionHandler
@@ -477,13 +482,13 @@ NSMutableData *pushAPIData;
 }
 
 
-#pragma mark memory
+#pragma mark - memory
 -(void) applicationDidReceiveMemoryWarning:(UIApplication *)application
 {
     [[MLImageManager sharedInstance] purgeCache];
 }
 
-#pragma mark backgrounding
+#pragma mark - backgrounding
 - (void)applicationWillEnterForeground:(UIApplication *)application
 {
       DDLogVerbose(@"Entering FG");
@@ -514,7 +519,7 @@ NSMutableData *pushAPIData;
     [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
-#pragma mark splitview controller delegate
+#pragma mark - splitview controller delegate
 - (BOOL)splitViewController:(UISplitViewController *)svc shouldHideViewController:(UIViewController *)vc inOrientation:(UIInterfaceOrientation)orientation
 {
     return NO;

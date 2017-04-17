@@ -224,6 +224,9 @@ Decline a call request
  */
 -(void) setMAMQueryFromStart:(NSDate *) startDate toDate:(NSDate *) endDate  andJid:(NSString *)jid;
 
+/**
+ enable APNS push with provided tokens
+ */
 -(void) enablePush;
 
 FOUNDATION_EXPORT NSString *const kFileName;

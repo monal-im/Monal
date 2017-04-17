@@ -35,7 +35,6 @@
 @interface MonalAppDelegate ()
 
 @property (nonatomic, strong)  UITabBarItem* activeTab;
-@property (nonatomic, strong)  NSMutableData *pushAPIData;
 
 @end
 
@@ -178,41 +177,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 #pragma mark - VOIP APNS notificaion
 
-// handle push api incoming response
--(void) connection:(NSURLConnection *) connection didReceiveResponse:(NSURLResponse *)response
-{
-    [self.pushAPIData setLength:0];
-}
-
-// handle push api incoming data
-- (void)connection:(NSURLConnection *)connection didReceiveData:(NSData*)data
-{
-    [self.pushAPIData appendData:data];
-}
-
-// handle push api error
-- (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
-{
-    DDLogInfo(@"************************ push api returned error: %@", error);
-    [self.pushAPIData setLength:0];
-}
-
-
-// handle push api response
-- (void)connectionDidFinishLoading:(NSURLConnection *)connection
-{
-    NSString *response = [[NSString alloc] initWithData: self.pushAPIData encoding:NSUTF8StringEncoding];
-    DDLogInfo(@"************************ push api returned: %@", response);
-    NSArray *responseParts=[response componentsSeparatedByString:@"\n"];
-    if([responseParts[0] isEqualToString:@"OK"] && [responseParts count]==3)
-    {
-        DDLogInfo(@"************************ push api: node='%@', secret='%@'", responseParts[1], responseParts[2]);
-        [[MLXMPPManager sharedInstance] setPushNode:responseParts[1] andSecret:responseParts[2]];
-    }
-    else
-        DDLogInfo(@"************************ push api returned invalid data: %@", [responseParts componentsJoinedByString: @" | "]);
-}
-
 -(void) voipRegistration
 {
     DDLogInfo(@"************************ registering for voip push...");
@@ -267,10 +231,26 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             if(!error && httpresponse.statusCode<400)
             {
                 DDLogInfo(@"************************ connection to push api successful");
-                self.pushAPIData = [[NSMutableData alloc] init];
+                
+                NSString *responseBody = [[NSString alloc] initWithData:data  encoding:NSUTF8StringEncoding];
+                DDLogInfo(@"************************ push api returned: %@", responseBody);
+                NSArray *responseParts=[responseBody componentsSeparatedByString:@"\n"];
+                if(responseParts.count>0){
+                    if([responseParts[0] isEqualToString:@"OK"] && [responseParts count]==3)
+                    {
+                        DDLogInfo(@"************************ push api: node='%@', secret='%@'", responseParts[1], responseParts[2]);
+                        [[MLXMPPManager sharedInstance] setPushNode:responseParts[1] andSecret:responseParts[2]];
+                    }
+                    else {
+                        DDLogError(@"************************ push api returned invalid data: %@", [responseParts componentsJoinedByString: @" | "]);
+                    }
+                } else {
+                    DDLogError(@"push api could  not be broken into parts");
+                }
+                
             } else
             {
-                DDLogInfo(@"************************ connection to push api NOT successful");
+                DDLogError(@"************************ connection to push api NOT successful");
             }
             
         }] resume];

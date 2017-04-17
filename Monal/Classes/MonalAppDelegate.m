@@ -234,14 +234,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     DDLogInfo(@"************************ voip push token: %@", credentials.token);
     NSString *token = [[NSString alloc] initWithData:credentials.token encoding:NSUTF8StringEncoding];
-    NSString *node = [[NSUserDefaults standardUserDefaults] stringForKey:@"DeviceUUID"];
-    if(![node length])
-    {
-        [[NSUserDefaults standardUserDefaults] setObject:[[NSUUID UUID] UUIDString] forKey:@"DeviceUUID"];
-        [[NSUserDefaults standardUserDefaults] synchronize];
-    }
+    NSString *node = [[[UIDevice currentDevice] identifierForVendor] UUIDString];
     
-   
     NSString *post = [NSString stringWithFormat:@"type=apns&node=%@&token=%@", [node stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],
     [token stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
     NSData *postData = [post dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];

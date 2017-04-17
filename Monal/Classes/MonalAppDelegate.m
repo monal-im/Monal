@@ -239,29 +239,31 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     NSString *post = [NSString stringWithFormat:@"type=apns&node=%@&token=%@", [node stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],
     [token stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
     NSData *postData = [post dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
-    NSString *postLength = [NSString stringWithFormat:@"%ld",[postData length]];
+    NSString *postLength = [NSString stringWithFormat:@"%uld",[postData length]];
     
     NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
     //this is the hardcoded push api endpoint
-    [request setURL:[NSURL URLWithString:@"https://push.eightysoft.de/v1/register"]];
+    [request setURL:[NSURL URLWithString:@"https://192.168.2.3:5280/v1/register"]];
     [request setHTTPMethod:@"POST"];
     [request setValue:postLength forHTTPHeaderField:@"Content-Length"];
     [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
     [request setHTTPBody:postData];
     
-    [[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
-        
-        if(!error)
-        {
-            DDLogInfo(@"************************ connection to push api successful");
-            self.pushAPIData = [[NSMutableData alloc] init];
-        } else
-        {
-             DDLogInfo(@"************************ connection to push api NOT successful");
-        }
-        
-    }];
-  
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [[[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+            
+            if(!error)
+            {
+                DDLogInfo(@"************************ connection to push api successful");
+                self.pushAPIData = [[NSMutableData alloc] init];
+            } else
+            {
+                DDLogInfo(@"************************ connection to push api NOT successful");
+            }
+            
+        }] resume];
+    });
+    
 }
 
 -(void)pushRegistry:(PKPushRegistry *)registry didInvalidatePushTokenForType:(NSString *)type

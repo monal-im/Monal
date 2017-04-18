@@ -268,8 +268,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     DDLogInfo(@"************************ incoming voip notfication: %@", [payload dictionaryPayload]);
     
-    // should any accounts connect?
-    [[MLXMPPManager sharedInstance] connectIfNecessary];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        //reconenct and fetch messages
+        [[MLXMPPManager sharedInstance] connectIfNecessary];
+    });
 }
 #endif
 

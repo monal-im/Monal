@@ -422,6 +422,17 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     DDLogInfo(@"XMPP connnect  start");
     _outputQueue=[[NSMutableArray alloc] init];
     
+    if(!self.streamID)
+    {
+       NSDictionary *dic=[[NSUserDefaults standardUserDefaults] objectForKey:[NSString stringWithFormat:@"stream_%@",self.accountNo]];
+        if(dic && [dic isKindOfClass:[NSDictionary class]])
+        {
+            self.streamID=[dic objectForKey:@"streamID"];
+            self.lastHandledInboundStanza=[dic objectForKey:@"lastInboundStanza"];
+        }
+    }
+    
+    
     [self connectionTask];
     
     dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
@@ -1184,7 +1195,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     {
                         _jid=iqNode.jid;
                         DDLogVerbose(@"Set jid %@", _jid);
-                        
+                    
                         XMPPIQ* sessionQuery= [[XMPPIQ alloc] initWithType:kiqSetType];
                         MLXMLNode* session = [[MLXMLNode alloc] initWithElement:@"session"];
                         [session setXMLNS:@"urn:ietf:params:xml:ns:xmpp-session"];
@@ -1960,11 +1971,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     ParseEnabled* enabledNode= [[ParseEnabled alloc]  initWithDictionary:stanzaToParse];
                     self.supportsResume=enabledNode.resume;
                     self.streamID=enabledNode.streamID;
+                    
                     //initilize values
                     self.lastHandledInboundStanza=[NSNumber numberWithInteger:0];
                     self.lastHandledOutboundStanza=[NSNumber numberWithInteger:0];
                     self.lastOutboundStanza=[NSNumber numberWithInteger:0];
                     self.unAckedStanzas =[[NSMutableArray alloc] init];
+                    
+                    [[NSUserDefaults standardUserDefaults] setObject:@{@"streamID":self.streamID, @"lastInboundStanza":self.lastHandledInboundStanza} forKey:[NSString stringWithFormat:@"stream_%@",self.accountNo]];
+                    
                     
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"r"] && self.supportsSM3)
@@ -2006,6 +2021,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 {
                     //remove session
                     self.streamID=nil;
+                    [[NSUserDefaults standardUserDefaults] removeObjectForKey:[NSString stringWithFormat:@"stream_%@",self.accountNo]];
             
                     
                     // if resume failed. bind like normal

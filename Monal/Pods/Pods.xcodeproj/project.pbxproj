@@ -13,7 +13,7 @@
 		017E142725F296465813832624CAA011 /* DBRestClient.h in Headers */ = {isa = PBXBuildFile; fileRef = 33A8C6E8954DD7D218D9D3C243C61DA9 /* DBRestClient.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		021024BD652CC87C9ADC39F350797D53 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B6F6E84D3F2E81339C4832451EE47DA /* Foundation.framework */; };
 		021F653FF82EEF2E2DD0F650583B0B16 /* NSString+Dropbox.m in Sources */ = {isa = PBXBuildFile; fileRef = FA87B08D2A3C37DD2E66D97FAE3E4CF4 /* NSString+Dropbox.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		04534FA9E25B09B96CE70D5367B74DE5 /* Pods-Monal-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = DE0BED40385DEE6F47237E8A6D368262 /* Pods-Monal-dummy.m */; };
+		04534FA9E25B09B96CE70D5367B74DE5 /* Pods-Monal-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 67AE349200DA3F877949ED61A7E2A9E0 /* Pods-Monal-dummy.m */; };
 		04848B6FEE2AB117FCD0115090D55BC2 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CE7B4F3B19A45E41B95A6606D6227164 /* CoreGraphics.framework */; };
 		04C007F190976B13814AEEB1B207AEF8 /* DBJsonWriter.m in Sources */ = {isa = PBXBuildFile; fileRef = 78A461A9FB000D34D2D16482225C9B06 /* DBJsonWriter.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		05160121F593AA049894B6F42274F437 /* TPCircularBuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = DA53EC96B4322472D7EB5CA006843601 /* TPCircularBuffer.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
@@ -56,7 +56,7 @@
 		31AA180E53E9B22FB4CBEB332B2A2BB3 /* SAMKeychainQuery.h in Headers */ = {isa = PBXBuildFile; fileRef = 190DDCC377CD2ED280D2A6AA03530388 /* SAMKeychainQuery.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		32ACFD623A104B4B81D5895263B9B1AE /* NSObject+DBJSON.m in Sources */ = {isa = PBXBuildFile; fileRef = CC696451060D82718355DA3F49582CC8 /* NSObject+DBJSON.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		33EE61B4B628EA4CFF0C47ED5D32C99A /* TPCircularBuffer+AudioBufferList.h in Headers */ = {isa = PBXBuildFile; fileRef = B2A17152ED5653D9171C1A8B4EA095D2 /* TPCircularBuffer+AudioBufferList.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		39EC0C87A632FACA2A304A0A76DFA334 /* Pods-Monal-OSXTests-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 3992C922A11C8AE106D3A2F34BAB6546 /* Pods-Monal-OSXTests-dummy.m */; };
+		39EC0C87A632FACA2A304A0A76DFA334 /* Pods-Monal-OSXTests-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = F32571D85F71A6EEBFF397B7B1029B03 /* Pods-Monal-OSXTests-dummy.m */; };
 		3A16250CA3DB67B7AB3247B4F07C49BA /* NSObject+DBJSON.h in Headers */ = {isa = PBXBuildFile; fileRef = 7B98E414EC017912836E294F9743F001 /* NSObject+DBJSON.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		3DABD4E9E2AE0E250A842E0AECE14762 /* DropboxOSX.h in Headers */ = {isa = PBXBuildFile; fileRef = CE836353A6F7C4F2E0471B112898A410 /* DropboxOSX.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		3DCFA5BF0A4A7F16020E22BE2736D791 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B5FE30FA9330B14E77B1BB684D6B7E0F /* Cocoa.framework */; };
@@ -70,7 +70,7 @@
 		4B49C6756FE90E9B85483098C8E5B8C9 /* TPCircularBuffer+AudioBufferList.c in Sources */ = {isa = PBXBuildFile; fileRef = 506124F500DF3FB285CE332340E87515 /* TPCircularBuffer+AudioBufferList.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		4BC8FFF972741BE1412FFB9C62AE2BC4 /* id.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 0096E175A7C94C3995E10DB5867512F1 /* id.lproj */; };
 		4C3CB66ABD1D285637973A4B529356A0 /* TPCircularBuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = 31ED3EFCC9A620B9790FA9077537B1CC /* TPCircularBuffer.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		4C766136C7CFAE169BA900F811F2ECC2 /* Pods-jrtplib-static-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = D0847D3495E4582AF261C428FC066B9B /* Pods-jrtplib-static-dummy.m */; };
+		4C766136C7CFAE169BA900F811F2ECC2 /* Pods-jrtplib-static-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = FF5D3F46AD4B8DC6D82795D33BDA7DF2 /* Pods-jrtplib-static-dummy.m */; };
 		4D952DDF048462D6097405F01CC591D7 /* NSString+Dropbox.h in Headers */ = {isa = PBXBuildFile; fileRef = 9F6FF9CD35EF8648148A84E64DADF4A2 /* NSString+Dropbox.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		4E28DF5359DB060A0C24D7F2E53103D2 /* DBJSON.m in Sources */ = {isa = PBXBuildFile; fileRef = 13904BEE869B50AA1169F70248E0E0C6 /* DBJSON.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		4E7C778159D89F1991FDE3F3C6566FF6 /* ru.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 15A6EE180D315F87E93E9177187E6C5C /* ru.lproj */; };
@@ -104,7 +104,7 @@
 		8AF035C696A2C07141269403A8662C98 /* DBMetadata.m in Sources */ = {isa = PBXBuildFile; fileRef = C2AD21019BF4A8B2D6704A08A45AE9DA /* DBMetadata.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		8E39C01FBFBF0AA0385978257A0D3030 /* en.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 60EDD8A89008FE47538CD800F0E96EB8 /* en.lproj */; };
 		906CF59331DBC2AC3647EC577FDB7AF0 /* nb.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 13CEF6D8573778AA806107F403923651 /* nb.lproj */; };
-		9138D547AF0B98C81E0092562FBC67E7 /* Pods-jrtplib-static-OSX-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = ACCA5F9CEF9EFC4A601937A29825E58D /* Pods-jrtplib-static-OSX-dummy.m */; };
+		9138D547AF0B98C81E0092562FBC67E7 /* Pods-jrtplib-static-OSX-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 069654567B5E1E3680C9B263F4682B31 /* Pods-jrtplib-static-OSX-dummy.m */; };
 		91536CFBC0EB9FC28A50FCE67826E887 /* MBProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = E638B1D54448D83F2529CD73329164CF /* MBProgressHUD.m */; };
 		95CB2A7C9A58667B90923F78493634C2 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F818FE60323A691EF210EA44B3EB53E8 /* Security.framework */; };
 		975CDA9BAADFF76951B0780A21DE7408 /* MPOAuthAuthenticationMethod.m in Sources */ = {isa = PBXBuildFile; fileRef = 13CC0223F6160D767D1C084BC60BA164 /* MPOAuthAuthenticationMethod.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
@@ -114,7 +114,7 @@
 		9C86522D1CD52EE609E546FD852D4B71 /* DBJSON.h in Headers */ = {isa = PBXBuildFile; fileRef = 54E1F6C3CEC84755F9426070D2048B8A /* DBJSON.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		9FC40D3B26DFC048A272553E8E811C10 /* MPOAuthURLRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = 3F9049F89F4F03F01C7D93F245C7F3AA /* MPOAuthURLRequest.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A156A19132B6FAEA0035A1852E944E1F /* cs.lproj in Resources */ = {isa = PBXBuildFile; fileRef = E8FB83389BAC86D78FB509CD1031D80A /* cs.lproj */; };
-		A6AA03C1F5B4164691BBC4CAE60ECC6C /* Pods-Monal Tests-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 7A6667824FC96241B0167478130A6245 /* Pods-Monal Tests-dummy.m */; };
+		A6AA03C1F5B4164691BBC4CAE60ECC6C /* Pods-Monal Tests-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 93D7036EA2C5F8376F2F31839FFAE084 /* Pods-Monal Tests-dummy.m */; };
 		A88641136D120F3545838700F87F19DE /* ro.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 6D56D67F86537DADBBB6ED7AA9A256AC /* ro.lproj */; };
 		AA068B2586DAD35A48464965905EE38A /* pl.lproj in Resources */ = {isa = PBXBuildFile; fileRef = D9658BDA070201C69DE3794E9452247A /* pl.lproj */; };
 		AB0CDFAEF1D6F78600162ABD9178A032 /* NSString+URLEscapingAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = EC02EB93399B373C00326FA17C5DAFF4 /* NSString+URLEscapingAdditions.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
@@ -132,7 +132,7 @@
 		C00B4B6D4CCA27F7A0EB5D24BD1AAD4B /* DBRestClient+OSX.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E77137C69E87D40F7D69168A386D2C9 /* DBRestClient+OSX.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		C2ADF17EDDFC9759E2DE843CB97C9A1D /* ms.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 1B8DDF2F35E387D69C0E065AAF60B1E6 /* ms.lproj */; };
 		C5C9A8F837DB991FC7C6161F96C856A1 /* uk.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 5AB257C4B4CE461185B2071CF883C246 /* uk.lproj */; };
-		C8F446709F60CA1BBAB131601413D2FE /* Pods-Monal-OSX-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 5BD9CF2063279DCDC82024BB5532EB1F /* Pods-Monal-OSX-dummy.m */; };
+		C8F446709F60CA1BBAB131601413D2FE /* Pods-Monal-OSX-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 776988447F463362B857D112EFBA429B /* Pods-Monal-OSX-dummy.m */; };
 		CB24FB2E4C5AAE56B50C5E589AAD02BE /* zh-Hans.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 788853B41FF98F3650FE699455CB2611 /* zh-Hans.lproj */; };
 		CC9253404BBC19B821FF8029017847EC /* MPOAuthAPIRequestLoader.h in Headers */ = {isa = PBXBuildFile; fileRef = 265E49EBE70B29EA43949AF56F7F9014 /* MPOAuthAPIRequestLoader.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CCC44F604493B88E9EE1D8DDE9C7AEE8 /* pt-BR.lproj in Resources */ = {isa = PBXBuildFile; fileRef = CC48CFE5379F1984365E34B43CE8A539 /* pt-BR.lproj */; };
@@ -221,11 +221,13 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0006F6094215812B9956E22318FBF558 /* Pods-Monal-OSX-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-Monal-OSX-acknowledgements.markdown"; sourceTree = "<group>"; };
+		0086BFE67776C1F9733FFC081DA44F2B /* Pods-Monal-OSXTests.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal-OSXTests.adhoc.xcconfig"; sourceTree = "<group>"; };
 		0096E175A7C94C3995E10DB5867512F1 /* id.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = id.lproj; sourceTree = "<group>"; };
 		0251ACD8FBCAEC73A831B2B6BC349A76 /* MPOAuthURLResponse.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MPOAuthURLResponse.m; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/MPOAuth/MPOAuthURLResponse.m"; sourceTree = "<group>"; };
 		0473A9E19194783B1357617B57A94EA5 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk/System/Library/Frameworks/AudioToolbox.framework; sourceTree = DEVELOPER_DIR; };
+		069654567B5E1E3680C9B263F4682B31 /* Pods-jrtplib-static-OSX-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-jrtplib-static-OSX-dummy.m"; sourceTree = "<group>"; };
 		07D51DE69034CD01020D3B1BC91B50AB /* MPOAuthCredentialConcreteStore+KeychainAdditions.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "MPOAuthCredentialConcreteStore+KeychainAdditions.h"; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/MPOAuthCredentialConcreteStore+KeychainAdditions.h"; sourceTree = "<group>"; };
-		084CC644E0775684DD15D2ACE5D893BE /* Pods-Monal.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal.release.xcconfig"; sourceTree = "<group>"; };
 		098F23EA63CF6029243BD122A4A2A107 /* DBAccountInfo.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DBAccountInfo.m; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DBAccountInfo.m"; sourceTree = "<group>"; };
 		0AE380B886D0EA14C7F143C8B3727669 /* ko.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = ko.lproj; sourceTree = "<group>"; };
 		0B18508E22939850052DBA78243F78FF /* Appirater.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = Appirater.m; sourceTree = "<group>"; };
@@ -234,10 +236,8 @@
 		0C6488DDC73BEBA82EF66F7D33C06D40 /* th.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = th.lproj; sourceTree = "<group>"; };
 		0D95D476D53C6951A66E6F17A59BFA57 /* DBMetadata.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBMetadata.h; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/DBMetadata.h"; sourceTree = "<group>"; };
 		0EB8C1DA6BD67038CDFDF58B5938E9C3 /* DBMetadata.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBMetadata.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/DBMetadata.h"; sourceTree = "<group>"; };
-		0EDEBCC861EF66E6978FBE998B53578E /* Pods-Monal-OSX.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal-OSX.debug.xcconfig"; sourceTree = "<group>"; };
 		0F38B6CE72B1C72CBDA182E0AE7265CA /* el.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = el.lproj; sourceTree = "<group>"; };
-		0F5A1EFA0BB4484BB5016254290F2F7B /* Pods-Monal-OSXTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal-OSXTests.release.xcconfig"; sourceTree = "<group>"; };
-		117071F7C42DC6E57974F38171ECC606 /* Pods-Monal-OSX-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-Monal-OSX-frameworks.sh"; sourceTree = "<group>"; };
+		1131D492C8D0CEA8D783A8648462E5E2 /* Pods-Monal-OSX.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal-OSX.release.xcconfig"; sourceTree = "<group>"; };
 		13904BEE869B50AA1169F70248E0E0C6 /* DBJSON.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DBJSON.m; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/JSON/DBJSON.m"; sourceTree = "<group>"; };
 		13CC0223F6160D767D1C084BC60BA164 /* MPOAuthAuthenticationMethod.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MPOAuthAuthenticationMethod.m; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/MPOAuth/MPOAuthAuthenticationMethod.m"; sourceTree = "<group>"; };
 		13CEF6D8573778AA806107F403923651 /* nb.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = nb.lproj; sourceTree = "<group>"; };
@@ -245,22 +245,20 @@
 		1464590EED3BA50BB67F54612CCB512E /* DBAuthHelperOSX.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DBAuthHelperOSX.m; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DBAuthHelperOSX.m"; sourceTree = "<group>"; };
 		151E98E67D87D8262BEFD5897D07D5A0 /* DBJsonParser.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBJsonParser.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/DBJsonParser.h"; sourceTree = "<group>"; };
 		15A6EE180D315F87E93E9177187E6C5C /* ru.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = ru.lproj; sourceTree = "<group>"; };
+		15B702ADD260F5D4C5CBE390620860BC /* Pods-jrtplib-static.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-jrtplib-static.release.xcconfig"; sourceTree = "<group>"; };
 		16701CC602DB311A31379829BF4C2EC4 /* Appirater.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = Appirater.h; sourceTree = "<group>"; };
 		172A92F9F23D43098FADC1884FFA7BEE /* fi.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = fi.lproj; sourceTree = "<group>"; };
 		183E84D2D27CC896545228A559272306 /* NSString+URLEscapingAdditions.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "NSString+URLEscapingAdditions.h"; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/NSString+URLEscapingAdditions.h"; sourceTree = "<group>"; };
 		190DDCC377CD2ED280D2A6AA03530388 /* SAMKeychainQuery.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SAMKeychainQuery.h; path = Sources/SAMKeychainQuery.h; sourceTree = "<group>"; };
 		1AF62DAA40019DF10922D43E310A65BD /* Dropbox-OSX-SDK-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Dropbox-OSX-SDK-prefix.pch"; sourceTree = "<group>"; };
 		1B8DDF2F35E387D69C0E065AAF60B1E6 /* ms.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = ms.lproj; sourceTree = "<group>"; };
-		1DAC651306CEF89648628101DDC51DE3 /* Pods-Monal-OSXTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal-OSXTests.debug.xcconfig"; sourceTree = "<group>"; };
-		2088EE397E91BEB1F838822604D0DD16 /* Pods-Monal Tests.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal Tests.appstore.xcconfig"; sourceTree = "<group>"; };
 		209A19548108127D99F207A776D219C1 /* DBSession.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBSession.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/DBSession.h"; sourceTree = "<group>"; };
 		21A622DEF84B65F9693D6D3FAEDA36BA /* sv.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = sv.lproj; sourceTree = "<group>"; };
 		2298CF148EB9D0AB9A7F258D9FAAEC3C /* Appirater-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Appirater-prefix.pch"; sourceTree = "<group>"; };
-		2335277721A720D1F707F7E7B1D5546F /* Pods-Monal.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal.adhoc.xcconfig"; sourceTree = "<group>"; };
 		23C4FE147BFA79246B33B475282659F9 /* DBQuota.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBQuota.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/DBQuota.h"; sourceTree = "<group>"; };
-		23F2123E83FCDC916F637C1B32E2A60C /* Pods-jrtplib-static-OSX-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-jrtplib-static-OSX-acknowledgements.plist"; sourceTree = "<group>"; };
 		2657F455DC2BD25A02949DD987B5FD1A /* DBJsonWriter.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBJsonWriter.h; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/DBJsonWriter.h"; sourceTree = "<group>"; };
 		265E49EBE70B29EA43949AF56F7F9014 /* MPOAuthAPIRequestLoader.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MPOAuthAPIRequestLoader.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/MPOAuthAPIRequestLoader.h"; sourceTree = "<group>"; };
+		2A392CBE348D7080C061327F121FBA69 /* Pods-Monal-OSXTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal-OSXTests.release.xcconfig"; sourceTree = "<group>"; };
 		2B2BC4DA61DFAD248B410EBDF89BD64E /* MPOAuthAuthenticationMethod.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MPOAuthAuthenticationMethod.h; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/MPOAuthAuthenticationMethod.h"; sourceTree = "<group>"; };
 		2B6CABCA4DD8940E7856637BADC68C59 /* CLSLogging.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = CLSLogging.h; path = OSX/Crashlytics.framework/Versions/A/Headers/CLSLogging.h; sourceTree = "<group>"; };
 		2C80F45B9DB299B58E0B138AD473B1BD /* Crashlytics.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = Crashlytics.h; path = OSX/Crashlytics.framework/Versions/A/Headers/Crashlytics.h; sourceTree = "<group>"; };
@@ -268,54 +266,54 @@
 		2D18304B9F54816E74DF06276BFC06B8 /* NSURL+MPURLParameterAdditions.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "NSURL+MPURLParameterAdditions.h"; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/NSURL+MPURLParameterAdditions.h"; sourceTree = "<group>"; };
 		2DD1697370322DC5D483E2E8F05E68CB /* MPDebug.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MPDebug.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/MPDebug.h"; sourceTree = "<group>"; };
 		2DF28B75E298A6C07BD9CBEEDD8AAF86 /* TPCircularBuffer-OSX.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "TPCircularBuffer-OSX.xcconfig"; sourceTree = "<group>"; };
-		2F26D6121F26CA82802141FF4DA3ECED /* Pods-jrtplib-static-OSX.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-jrtplib-static-OSX.adhoc.xcconfig"; sourceTree = "<group>"; };
 		2F54FDACF0DE5815ABCDA058E57828C0 /* ANSCompatibility.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ANSCompatibility.h; path = OSX/Crashlytics.framework/Versions/A/Headers/ANSCompatibility.h; sourceTree = "<group>"; };
 		307EB44EE79BBF68C63756AFC8FDC564 /* libTPCircularBuffer-OSX.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "libTPCircularBuffer-OSX.a"; path = "libTPCircularBuffer-OSX.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		30CBB1847719D11ADF717C88F9E60908 /* DBLog.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBLog.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/DBLog.h"; sourceTree = "<group>"; };
 		30F0C3BD7C746319C8916676998095CA /* libPods-Monal.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "libPods-Monal.a"; path = "libPods-Monal.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		31BCFE9B02634898F3D1FAD83151FDAD /* Pods-Monal.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal.debug.xcconfig"; sourceTree = "<group>"; };
 		31ED3EFCC9A620B9790FA9077537B1CC /* TPCircularBuffer.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = TPCircularBuffer.h; sourceTree = "<group>"; };
 		32298B83CA4BE9158E127A3932587E67 /* libTPCircularBuffer-iOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "libTPCircularBuffer-iOS.a"; path = "libTPCircularBuffer-iOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		33732B57FB4782761D7510DF34B8C774 /* NSURL+MPURLParameterAdditions.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "NSURL+MPURLParameterAdditions.m"; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/MPOAuth/NSURL+MPURLParameterAdditions.m"; sourceTree = "<group>"; };
 		33A8C6E8954DD7D218D9D3C243C61DA9 /* DBRestClient.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBRestClient.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/DBRestClient.h"; sourceTree = "<group>"; };
+		34117D9A22646269DFAF0B6DECEE14E2 /* Pods-jrtplib-static-OSX.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-jrtplib-static-OSX.release.xcconfig"; sourceTree = "<group>"; };
 		351CF300DA36B03E963C558FB651161F /* DBSession+iOS.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "DBSession+iOS.h"; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/DBSession+iOS.h"; sourceTree = "<group>"; };
-		35CF54F6B3B9773A3D9C4FA9B68B820D /* Pods-jrtplib-static-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-jrtplib-static-acknowledgements.plist"; sourceTree = "<group>"; };
 		36EF8D910EE3D997842868685B48D799 /* Crashlytics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Crashlytics.framework; path = OSX/Crashlytics.framework; sourceTree = "<group>"; };
 		37B49685B3C696086A7849CEBD3B55E9 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS10.3.sdk/System/Library/Frameworks/CFNetwork.framework; sourceTree = DEVELOPER_DIR; };
-		3829086714DD8B76D97D77CE0D088B39 /* Pods-Monal-OSXTests.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal-OSXTests.adhoc.xcconfig"; sourceTree = "<group>"; };
 		39699D55F47CBFDFD71D778DE1ACBD6F /* Fabric.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Fabric.framework; path = iOS/Fabric.framework; sourceTree = "<group>"; };
-		3992C922A11C8AE106D3A2F34BAB6546 /* Pods-Monal-OSXTests-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-Monal-OSXTests-dummy.m"; sourceTree = "<group>"; };
 		399BAE03A679BF58317D825524DD74BE /* MPOAuthConnection.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MPOAuthConnection.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/MPOAuthConnection.h"; sourceTree = "<group>"; };
+		3AE0FC648036813B419C3B8CE0219285 /* Pods-jrtplib-static-resources.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-jrtplib-static-resources.sh"; sourceTree = "<group>"; };
 		3BF74202347CA664B51438650BEC86A0 /* MPOAuth.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MPOAuth.h; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/MPOAuth.h"; sourceTree = "<group>"; };
-		3C5D706DC40DDC027FEBAD7C4E87E96E /* Pods-jrtplib-static-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-jrtplib-static-acknowledgements.markdown"; sourceTree = "<group>"; };
 		3D521F2568DDF6DD38B6C3A5D88C69A4 /* MPURLRequestParameter.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MPURLRequestParameter.h; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/MPURLRequestParameter.h"; sourceTree = "<group>"; };
 		3E48170DE6204A6FC39AF35FF979503B /* MPOAuthAPI.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MPOAuthAPI.h; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/MPOAuthAPI.h"; sourceTree = "<group>"; };
 		3E5F76C0621D1D57E7B90190DD97CA0F /* MPOAuthAPIRequestLoader.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MPOAuthAPIRequestLoader.m; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/MPOAuth/MPOAuthAPIRequestLoader.m"; sourceTree = "<group>"; };
+		3EAD87EBCE8C67BDFECD6B818D3EEE24 /* Pods-Monal-OSX.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal-OSX.appstore.xcconfig"; sourceTree = "<group>"; };
 		3F9049F89F4F03F01C7D93F245C7F3AA /* MPOAuthURLRequest.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MPOAuthURLRequest.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/MPOAuthURLRequest.h"; sourceTree = "<group>"; };
 		418F5D1B187676AD837B90770A6FCEE5 /* MPDebug.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MPDebug.h; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/MPDebug.h"; sourceTree = "<group>"; };
 		419F6826D2E69637119EB723119B53FF /* DBQuota.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBQuota.h; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/DBQuota.h"; sourceTree = "<group>"; };
-		41A7706E7313A0E9C06FAFB7DE94E8C4 /* Pods-Monal-OSX-resources.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-Monal-OSX-resources.sh"; sourceTree = "<group>"; };
-		41F43D786CB9FD3D8FA229E7638DE192 /* Pods-Monal.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal.appstore.xcconfig"; sourceTree = "<group>"; };
 		41F50D92EA228D1E0A60A126419112D9 /* MPOAuthCredentiaIConcreteStore+KeychainAdditionsMac.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "MPOAuthCredentiaIConcreteStore+KeychainAdditionsMac.m"; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/MPOAuth/MPOAuthCredentiaIConcreteStore+KeychainAdditionsMac.m"; sourceTree = "<group>"; };
 		42379D4383CB619918F05CAFD9C92957 /* NSURLResponse+Encoding.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "NSURLResponse+Encoding.h"; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/NSURLResponse+Encoding.h"; sourceTree = "<group>"; };
 		424A79F066D53BA3D9FD2AD7E2590CD9 /* ar.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = ar.lproj; sourceTree = "<group>"; };
+		42981B7A455B4CE51EBE91C7454E06D5 /* Pods-jrtplib-static-OSX.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-jrtplib-static-OSX.adhoc.xcconfig"; sourceTree = "<group>"; };
 		42CEFDD59084A4AD620DC610DB1CC636 /* ja.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = ja.lproj; sourceTree = "<group>"; };
 		43842054ECBAC7564FADC434CB6BD5C5 /* MBProgressHUD.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = MBProgressHUD.xcconfig; sourceTree = "<group>"; };
 		43EAE5CF3CB89F5F6B32F7D79E421F44 /* MPOAuthCredentialConcreteStore.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MPOAuthCredentialConcreteStore.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/MPOAuthCredentialConcreteStore.h"; sourceTree = "<group>"; };
 		4439DD634F48103B64D1DA1D693C7050 /* libMBProgressHUD.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = libMBProgressHUD.a; path = libMBProgressHUD.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		45F33FEE86A84C4A09F3ED14C5EE4DCC /* Pods-Monal Tests-resources.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-Monal Tests-resources.sh"; sourceTree = "<group>"; };
+		44EFCB52C89AEEB7D85C2A510858401E /* Pods-Monal.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal.appstore.xcconfig"; sourceTree = "<group>"; };
 		472D439F41BAE9388F9F04FE39249E1C /* NSDictionary+Dropbox.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "NSDictionary+Dropbox.m"; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/NSDictionary+Dropbox.m"; sourceTree = "<group>"; };
+		47A724D3FC67BF45468B61AB3E3D6D8E /* Pods-Monal-resources.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-Monal-resources.sh"; sourceTree = "<group>"; };
 		482AC6B1C44C481CA87F2787F8B76814 /* CLSStackFrame.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = CLSStackFrame.h; path = OSX/Crashlytics.framework/Versions/A/Headers/CLSStackFrame.h; sourceTree = "<group>"; };
 		486D5BA5B6867B38F85D7B59155889EF /* Appirater.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = Appirater.bundle; path = Appirater.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		49142855DC5DDD24BA27B9BACFC58E7C /* JSON.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = JSON.h; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/JSON.h"; sourceTree = "<group>"; };
 		49AA67F7CA80FF0743B9A0FC97D858CD /* DBJsonParser.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DBJsonParser.m; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/JSON/DBJsonParser.m"; sourceTree = "<group>"; };
 		49FD42E1D566673770A4CC7C3A2405D5 /* it.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = it.lproj; sourceTree = "<group>"; };
 		4C841C10D12B0ADDE95F843FB47FA4C3 /* NSObject+DBJSON.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "NSObject+DBJSON.h"; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/NSObject+DBJSON.h"; sourceTree = "<group>"; };
+		4CE5B1927CEDCD246E508CDF13C854AC /* Pods-Monal-OSX-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-Monal-OSX-acknowledgements.plist"; sourceTree = "<group>"; };
 		4D565BDE72C58845F0AC02244EFDAE5F /* Answers.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = Answers.h; path = OSX/Crashlytics.framework/Versions/A/Headers/Answers.h; sourceTree = "<group>"; };
 		4D7AEF1B7D743E6549BEA1BDE27797BB /* MPOAuthURLRequest.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MPOAuthURLRequest.h; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/MPOAuthURLRequest.h"; sourceTree = "<group>"; };
 		4EBB110D8BCE63E20905E958C89AAD55 /* NSString+URLEscapingAdditions.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "NSString+URLEscapingAdditions.h"; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/NSString+URLEscapingAdditions.h"; sourceTree = "<group>"; };
+		4F032F789FC2F91587F81A696F9D6117 /* Pods-Monal-OSX-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-Monal-OSX-frameworks.sh"; sourceTree = "<group>"; };
 		500F3E39E36167333781D5301EB853F7 /* Crashlytics.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = Crashlytics.h; path = iOS/Crashlytics.framework/Headers/Crashlytics.h; sourceTree = "<group>"; };
 		506124F500DF3FB285CE332340E87515 /* TPCircularBuffer+AudioBufferList.c */ = {isa = PBXFileReference; includeInIndex = 1; path = "TPCircularBuffer+AudioBufferList.c"; sourceTree = "<group>"; };
+		507C14741AFBBF9EA6C27A0AB6936CD6 /* Pods-Monal-OSXTests-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-Monal-OSXTests-frameworks.sh"; sourceTree = "<group>"; };
 		508F9DAE68E3717EC3EE241CD97588F4 /* DBLog.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBLog.h; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/DBLog.h"; sourceTree = "<group>"; };
 		512707FE1BF0E4FA07CEEDCBBA3FA0EA /* he.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = he.lproj; sourceTree = "<group>"; };
 		51A4A0B4FDFA8C008CC036D2D3DE980A /* DBSession.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBSession.h; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/DBSession.h"; sourceTree = "<group>"; };
@@ -327,16 +325,14 @@
 		5584C4DF3FCCF2105CE79D942A575E62 /* DBError.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBError.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/DBError.h"; sourceTree = "<group>"; };
 		567D29B116F2EAD31C65BB3F8DCCB5BF /* libDropbox-OSX-SDK.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "libDropbox-OSX-SDK.a"; path = "libDropbox-OSX-SDK.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		56ECA5329AC2BB208CD0100824E70222 /* NSURLResponse+Encoding.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "NSURLResponse+Encoding.m"; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/MPOAuth/NSURLResponse+Encoding.m"; sourceTree = "<group>"; };
-		579429BAE1317552529AC9B474E96169 /* Pods-jrtplib-static.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-jrtplib-static.appstore.xcconfig"; sourceTree = "<group>"; };
 		58551D6B55380B1D3058E2E519AA5FC2 /* DBBase64Transcoder.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBBase64Transcoder.h; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/DBBase64Transcoder.h"; sourceTree = "<group>"; };
 		596112F818B50EBAE2CF5B7CDAF2D408 /* JSON.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = JSON.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/JSON.h"; sourceTree = "<group>"; };
-		59D626D97DAB0311A4BB3F0AFA7DF527 /* Pods-Monal-OSX.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal-OSX.adhoc.xcconfig"; sourceTree = "<group>"; };
 		5A57CCA945F2A32799A25220E6BFC9D3 /* NSString+DBJSON.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "NSString+DBJSON.h"; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/NSString+DBJSON.h"; sourceTree = "<group>"; };
 		5AB257C4B4CE461185B2071CF883C246 /* uk.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = uk.lproj; sourceTree = "<group>"; };
 		5B4824C2CED9B07E47582A5CD01B5691 /* TPCircularBuffer-OSX-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "TPCircularBuffer-OSX-dummy.m"; sourceTree = "<group>"; };
 		5B6F6E84D3F2E81339C4832451EE47DA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS10.3.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		5BD5444C7EBF6C483D4202DA3D0ABA9B /* MPOAuthAuthenticationMethod.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MPOAuthAuthenticationMethod.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/MPOAuthAuthenticationMethod.h"; sourceTree = "<group>"; };
-		5BD9CF2063279DCDC82024BB5532EB1F /* Pods-Monal-OSX-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-Monal-OSX-dummy.m"; sourceTree = "<group>"; };
+		5FBEDD19B0A1CF6FDDD1C8B74ABD826E /* Pods-Monal-OSX-resources.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-Monal-OSX-resources.sh"; sourceTree = "<group>"; };
 		605C5E4B3A747B31689B0B10C92EBF08 /* DBSession.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DBSession.m; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DBSession.m"; sourceTree = "<group>"; };
 		60EDD8A89008FE47538CD800F0E96EB8 /* en.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = en.lproj; sourceTree = "<group>"; };
 		61786E2947E729FFB8FC4434CFA524F7 /* DBRestClient.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBRestClient.h; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/DBRestClient.h"; sourceTree = "<group>"; };
@@ -345,6 +341,9 @@
 		63D9795699278B7BBCFBD70EC94263C0 /* MPURLRequestParameter.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MPURLRequestParameter.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/MPURLRequestParameter.h"; sourceTree = "<group>"; };
 		65BF621B0C3E799DAFC13CD354D9A74B /* DBDeltaEntry.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DBDeltaEntry.m; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DBDeltaEntry.m"; sourceTree = "<group>"; };
 		66F3DAC3C06D70961743A233926196F8 /* MBProgressHUD-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "MBProgressHUD-dummy.m"; sourceTree = "<group>"; };
+		67AE349200DA3F877949ED61A7E2A9E0 /* Pods-Monal-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-Monal-dummy.m"; sourceTree = "<group>"; };
+		6816515220A0BED6CF8DCB2E58103B8D /* Pods-Monal Tests.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal Tests.adhoc.xcconfig"; sourceTree = "<group>"; };
+		6AFCE2E7E7BC8C7F89CACADDE56E4B3D /* Pods-jrtplib-static-OSX-resources.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-jrtplib-static-OSX-resources.sh"; sourceTree = "<group>"; };
 		6B5A59F1BE20913DE15932A69309E473 /* Dropbox-OSX-SDK.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Dropbox-OSX-SDK.xcconfig"; sourceTree = "<group>"; };
 		6BBAABC9B99C7FD6EDC92D48C32A8DBC /* CLSReport.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = CLSReport.h; path = OSX/Crashlytics.framework/Versions/A/Headers/CLSReport.h; sourceTree = "<group>"; };
 		6CBDD5842C0F6981D2CB4551E8BC60FD /* SAMKeychainQuery.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SAMKeychainQuery.m; path = Sources/SAMKeychainQuery.m; sourceTree = "<group>"; };
@@ -354,44 +353,50 @@
 		6EDE73D2D3AA637D73D2AE0219ADD5BA /* TPCircularBuffer-iOS-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "TPCircularBuffer-iOS-dummy.m"; path = "../TPCircularBuffer-iOS/TPCircularBuffer-iOS-dummy.m"; sourceTree = "<group>"; };
 		6FFD02D5D18563BBDD370DC78549DB44 /* DBAuthHelperOSX.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBAuthHelperOSX.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/DBAuthHelperOSX.h"; sourceTree = "<group>"; };
 		7036918DC77A1A82699419B2F77EA6A7 /* Dropbox-OSX-SDK-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Dropbox-OSX-SDK-dummy.m"; sourceTree = "<group>"; };
-		7167008781F2B5F0B7ED913436FA8B88 /* Pods-Monal-OSX.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal-OSX.release.xcconfig"; sourceTree = "<group>"; };
-		72CFC2D317ED71E30DB3025F3567F727 /* Pods-jrtplib-static.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-jrtplib-static.debug.xcconfig"; sourceTree = "<group>"; };
+		715BC968B01B4423CF95EAB0B35EDFF3 /* Pods-jrtplib-static.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-jrtplib-static.adhoc.xcconfig"; sourceTree = "<group>"; };
 		76700872A0BA11AE46063AEA3F229DB1 /* MPOAuthURLResponse.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MPOAuthURLResponse.h; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/MPOAuthURLResponse.h"; sourceTree = "<group>"; };
 		76A890EC91E90AAAB121209A4956F681 /* MPOAuthCredentialConcreteStore+KeychainAdditions.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "MPOAuthCredentialConcreteStore+KeychainAdditions.h"; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/MPOAuthCredentialConcreteStore+KeychainAdditions.h"; sourceTree = "<group>"; };
 		76EC4498A991C6F276DCC3F35C9E92D8 /* tr.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = tr.lproj; sourceTree = "<group>"; };
+		776988447F463362B857D112EFBA429B /* Pods-Monal-OSX-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-Monal-OSX-dummy.m"; sourceTree = "<group>"; };
 		784692913630FF3F5B84DA71F9A5DA84 /* vi.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = vi.lproj; sourceTree = "<group>"; };
 		788853B41FF98F3650FE699455CB2611 /* zh-Hans.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = "zh-Hans.lproj"; sourceTree = "<group>"; };
 		78A461A9FB000D34D2D16482225C9B06 /* DBJsonWriter.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DBJsonWriter.m; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/JSON/DBJsonWriter.m"; sourceTree = "<group>"; };
 		78C8FB488767ED18ED5E98E44F4F7BE6 /* MPOAuthAPI.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MPOAuthAPI.m; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/MPOAuth/MPOAuthAPI.m"; sourceTree = "<group>"; };
+		79A8C6319A8218FEF9724F07AE5D3FCA /* Pods-Monal Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal Tests.debug.xcconfig"; sourceTree = "<group>"; };
 		79CF7725EE17E0FCC536FD141B0A527E /* DBAccountInfo.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBAccountInfo.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/DBAccountInfo.h"; sourceTree = "<group>"; };
-		7A6667824FC96241B0167478130A6245 /* Pods-Monal Tests-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-Monal Tests-dummy.m"; sourceTree = "<group>"; };
+		7A5439D9CE35DE1CE66E510E77B359BC /* Pods-Monal Tests-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-Monal Tests-acknowledgements.plist"; sourceTree = "<group>"; };
+		7A9BD42464983943B961E345D6151300 /* Pods-Monal-OSXTests-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-Monal-OSXTests-acknowledgements.plist"; sourceTree = "<group>"; };
 		7B98E414EC017912836E294F9743F001 /* NSObject+DBJSON.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "NSObject+DBJSON.h"; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/NSObject+DBJSON.h"; sourceTree = "<group>"; };
-		7CBAA4388B7A23357DA5269F00EC5BD8 /* Pods-Monal-OSX-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-Monal-OSX-acknowledgements.markdown"; sourceTree = "<group>"; };
 		7E0F886CB0C364B79B1467CD0EE1B6DE /* SAMKeychain.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SAMKeychain.m; path = Sources/SAMKeychain.m; sourceTree = "<group>"; };
 		7EC9139EADBE6F8838457C1AA364214C /* Answers.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = Answers.h; path = iOS/Crashlytics.framework/Headers/Answers.h; sourceTree = "<group>"; };
+		7F1C4CB9ECECC71B984269A581C8303C /* Pods-Monal Tests-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-Monal Tests-acknowledgements.markdown"; sourceTree = "<group>"; };
 		7F88740EFA4A0BAE8F7F3C155D3852BB /* DBJsonBase.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBJsonBase.h; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/DBJsonBase.h"; sourceTree = "<group>"; };
-		811EC0156F04C0A99E159CA69024AB55 /* Pods-jrtplib-static-OSX-resources.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-jrtplib-static-OSX-resources.sh"; sourceTree = "<group>"; };
+		80C5BA7E818C687E8D45C291E2E6F98A /* Pods-jrtplib-static-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-jrtplib-static-acknowledgements.markdown"; sourceTree = "<group>"; };
 		814D17AAF869984F846D53C6E0410064 /* DBRestClient.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DBRestClient.m; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DBRestClient.m"; sourceTree = "<group>"; };
 		81AF6AD18398813AF9B61CA0750F4E78 /* DBError.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBError.h; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/DBError.h"; sourceTree = "<group>"; };
 		82AAE08D6FAC48F41D502E6E78F49118 /* TPCircularBuffer-OSX-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "TPCircularBuffer-OSX-prefix.pch"; sourceTree = "<group>"; };
+		8305A1B67CBFEBD868909C520E28C7C3 /* Pods-Monal Tests.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal Tests.appstore.xcconfig"; sourceTree = "<group>"; };
 		834DD89E8F2548F532E0C037332FD38C /* MPOAuthAuthenticationMethodOAuth.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MPOAuthAuthenticationMethodOAuth.h; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/MPOAuthAuthenticationMethodOAuth.h"; sourceTree = "<group>"; };
 		851F6A63B0FDAD36399EF12D0C93D837 /* SAMKeychain.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = SAMKeychain.xcconfig; sourceTree = "<group>"; };
 		85C18B73D2D1ED1235997A980F33B95B /* MPOAuthAuthenticationMethodOAuth.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MPOAuthAuthenticationMethodOAuth.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/MPOAuthAuthenticationMethodOAuth.h"; sourceTree = "<group>"; };
 		88E236D93B7864B8040A4572320F14F3 /* MPOAuthParameterFactory.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MPOAuthParameterFactory.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/MPOAuthParameterFactory.h"; sourceTree = "<group>"; };
+		89A539707BB9507622D34E54C2A1F882 /* Pods-jrtplib-static.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-jrtplib-static.appstore.xcconfig"; sourceTree = "<group>"; };
 		8A00AE66388A3B09D21457DECFBE640F /* MPOAuthCredentialStore.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MPOAuthCredentialStore.h; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/MPOAuthCredentialStore.h"; sourceTree = "<group>"; };
 		8A80E3A69648BC3F12CD91057F4EE8FB /* DBRequest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DBRequest.m; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DBRequest.m"; sourceTree = "<group>"; };
+		8B3C2FD11616899BA28AD616B8D1FFBC /* Pods-jrtplib-static-OSX.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-jrtplib-static-OSX.appstore.xcconfig"; sourceTree = "<group>"; };
 		8C944411DD064E402AA6A95F89A683D9 /* AppiraterDelegate.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = AppiraterDelegate.h; sourceTree = "<group>"; };
 		8D296322B004201E7C05AA6F081DD42E /* fr.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = fr.lproj; sourceTree = "<group>"; };
 		8DC70222BD44FB5BCFA25560E8B6FEE6 /* DBKeychain-OSX.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "DBKeychain-OSX.m"; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DBKeychain-OSX.m"; sourceTree = "<group>"; };
 		8E131CD189CF1A9A0A564B01C6C6A688 /* MPOAuthConnection.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MPOAuthConnection.m; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/MPOAuth/MPOAuthConnection.m"; sourceTree = "<group>"; };
+		8F6E09EF8023D2B8B848878656C3B1E2 /* Pods-jrtplib-static-OSX.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-jrtplib-static-OSX.debug.xcconfig"; sourceTree = "<group>"; };
 		900C667A53757BACFAAE5D5A9D050C01 /* es.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = es.lproj; sourceTree = "<group>"; };
-		9057CC80F2E158F5A489C8320C34E59F /* Pods-jrtplib-static.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-jrtplib-static.adhoc.xcconfig"; sourceTree = "<group>"; };
 		93A4A3777CF96A4AAC1D13BA6DCCEA73 /* Podfile */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; lastKnownFileType = text; name = Podfile; path = ../Podfile; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		93D7036EA2C5F8376F2F31839FFAE084 /* Pods-Monal Tests-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-Monal Tests-dummy.m"; sourceTree = "<group>"; };
 		94A5373BD743000F513DDB3B74AEC289 /* MPURLRequestParameter.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MPURLRequestParameter.m; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/MPOAuth/MPURLRequestParameter.m"; sourceTree = "<group>"; };
 		9561553003888BAAE7395F8A405A4F78 /* NSDictionary+Dropbox.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "NSDictionary+Dropbox.h"; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/NSDictionary+Dropbox.h"; sourceTree = "<group>"; };
 		9576D4BA68556E86769B7BF4478142CF /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS10.3.sdk/System/Library/Frameworks/QuartzCore.framework; sourceTree = DEVELOPER_DIR; };
+		96766234A0EE746A84A636D329B08FBF /* Pods-Monal-OSXTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal-OSXTests.debug.xcconfig"; sourceTree = "<group>"; };
 		9801AA16F0274DE606B8913E6677B4B8 /* MPOAuthURLRequest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MPOAuthURLRequest.m; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/MPOAuth/MPOAuthURLRequest.m"; sourceTree = "<group>"; };
-		98A6E0DF94C158A449837192CA058CCB /* Pods-Monal-resources.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-Monal-resources.sh"; sourceTree = "<group>"; };
 		98D5637D28DFE948393279883CAAF90F /* CLSReport.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = CLSReport.h; path = iOS/Crashlytics.framework/Headers/CLSReport.h; sourceTree = "<group>"; };
 		99261FB1540762A011FC4DA27AE85573 /* NSString+DBJSON.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "NSString+DBJSON.m"; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/JSON/NSString+DBJSON.m"; sourceTree = "<group>"; };
 		99EBABB7BC676B21E4E0F2FCF8AF91A1 /* DBJsonParser.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBJsonParser.h; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/DBJsonParser.h"; sourceTree = "<group>"; };
@@ -403,44 +408,37 @@
 		9F4D1FE27C1125121AFAA7000DABCF71 /* libPods-Monal-OSXTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "libPods-Monal-OSXTests.a"; path = "libPods-Monal-OSXTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		9F6FF9CD35EF8648148A84E64DADF4A2 /* NSString+Dropbox.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "NSString+Dropbox.h"; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/NSString+Dropbox.h"; sourceTree = "<group>"; };
 		A1DA51193CA794C846CB326D61D53D25 /* da.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = da.lproj; sourceTree = "<group>"; };
-		A6266F97F3E12FFC7117C5F3677582E5 /* Pods-Monal-OSX-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-Monal-OSX-acknowledgements.plist"; sourceTree = "<group>"; };
-		A73A457C31C77A0CAE257B8BABC9D101 /* Pods-Monal Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal Tests.release.xcconfig"; sourceTree = "<group>"; };
-		AA49ADAF862D73D04C596D2B6F8C3BA9 /* Pods-Monal-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-Monal-frameworks.sh"; sourceTree = "<group>"; };
 		AC5F6C25FF7BC067E842F52EEDD85B3D /* MPOAuthParameterFactory.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MPOAuthParameterFactory.h; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/MPOAuthParameterFactory.h"; sourceTree = "<group>"; };
 		ACB73F3B957DDDC390383FB7DBD29A70 /* SAMKeychain.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SAMKeychain.h; path = Sources/SAMKeychain.h; sourceTree = "<group>"; };
-		ACCA5F9CEF9EFC4A601937A29825E58D /* Pods-jrtplib-static-OSX-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-jrtplib-static-OSX-dummy.m"; sourceTree = "<group>"; };
+		AD4798D2B6C8AFC41135E8FBFBC00C82 /* Pods-jrtplib-static-OSX-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-jrtplib-static-OSX-acknowledgements.markdown"; sourceTree = "<group>"; };
 		AD9099E5E37DE4E9E5C0667D888E376A /* libPods-Monal Tests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "libPods-Monal Tests.a"; path = "libPods-Monal Tests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		AEDD5BC3BAA935C146104682E1AD80F8 /* Pods-Monal-OSX.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal-OSX.appstore.xcconfig"; sourceTree = "<group>"; };
+		AF1F14C879C31569B7A0EC75292CDD16 /* Pods-Monal Tests-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-Monal Tests-frameworks.sh"; sourceTree = "<group>"; };
 		AFC2285F8268B6BDF53A9A14302F9F96 /* libPods-Monal-OSX.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "libPods-Monal-OSX.a"; path = "libPods-Monal-OSX.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		B0594D8EFFD9AB2C20B91B0419E68880 /* Pods-Monal-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-Monal-acknowledgements.plist"; sourceTree = "<group>"; };
 		B0CC8A9AFDF8A704DAA4AD607CC24EA1 /* MPOAuthSignatureParameter.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MPOAuthSignatureParameter.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/MPOAuthSignatureParameter.h"; sourceTree = "<group>"; };
+		B1015D9C4A1F1104B082C23D49B40D92 /* Pods-jrtplib-static-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-jrtplib-static-acknowledgements.plist"; sourceTree = "<group>"; };
 		B2A17152ED5653D9171C1A8B4EA095D2 /* TPCircularBuffer+AudioBufferList.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "TPCircularBuffer+AudioBufferList.h"; sourceTree = "<group>"; };
 		B3007DC0FAE6933F4645532ED1E620F2 /* TPCircularBuffer-iOS-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "TPCircularBuffer-iOS-prefix.pch"; path = "../TPCircularBuffer-iOS/TPCircularBuffer-iOS-prefix.pch"; sourceTree = "<group>"; };
-		B5AF5721B654EEB53999692DDD1124BB /* Pods-Monal-OSXTests-resources.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-Monal-OSXTests-resources.sh"; sourceTree = "<group>"; };
 		B5FE30FA9330B14E77B1BB684D6B7E0F /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk/System/Library/Frameworks/Cocoa.framework; sourceTree = DEVELOPER_DIR; };
 		B61345CE659DA428BB3033C58F4606FF /* DBJsonWriter.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBJsonWriter.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/DBJsonWriter.h"; sourceTree = "<group>"; };
 		B7310F43F13590032ECABC4FA4B0C21F /* NSDictionary+Dropbox.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "NSDictionary+Dropbox.h"; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/NSDictionary+Dropbox.h"; sourceTree = "<group>"; };
+		BA01553431BCC68220BAE8FB39224F82 /* Pods-Monal-OSXTests-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-Monal-OSXTests-acknowledgements.markdown"; sourceTree = "<group>"; };
 		BA18CA47BCBBB83D78D34CF4E6B9A42E /* DBDeltaEntry.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBDeltaEntry.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/DBDeltaEntry.h"; sourceTree = "<group>"; };
 		BA518412F1514A77A1B8CD1D93E25F93 /* zh-Hant.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = "zh-Hant.lproj"; sourceTree = "<group>"; };
-		BAE89D05315D7DA22DF37E40BEE34E62 /* Pods-jrtplib-static-resources.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-jrtplib-static-resources.sh"; sourceTree = "<group>"; };
 		BBD6815BA328E2F3AD14A1F9E535D6CF /* Fabric.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = Fabric.h; path = iOS/Fabric.framework/Headers/Fabric.h; sourceTree = "<group>"; };
 		BD06874F1D1219DE28D7639398DA689D /* CLSStackFrame.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = CLSStackFrame.h; path = iOS/Crashlytics.framework/Headers/CLSStackFrame.h; sourceTree = "<group>"; };
 		BE1941F978A6A1E60EDA9D0E3359E739 /* DBRestClient+OSX.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "DBRestClient+OSX.m"; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DBRestClient+OSX.m"; sourceTree = "<group>"; };
-		BFB258CBD331B491C04CD18DD7400087 /* Pods-jrtplib-static-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-jrtplib-static-frameworks.sh"; sourceTree = "<group>"; };
-		BFDB37FA1AE89F064F008BDE85E6481E /* Pods-jrtplib-static-OSX.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-jrtplib-static-OSX.debug.xcconfig"; sourceTree = "<group>"; };
 		BFFADD03C8B642FE73EE30B4D9EBFF52 /* CLSLogging.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = CLSLogging.h; path = iOS/Crashlytics.framework/Headers/CLSLogging.h; sourceTree = "<group>"; };
 		BFFBC5D16DDD3AA757505D941BA2A6AE /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS10.3.sdk/System/Library/Frameworks/SystemConfiguration.framework; sourceTree = DEVELOPER_DIR; };
 		C00338CC9A69FB2C401D186A568D89A9 /* DBRequest.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBRequest.h; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/DBRequest.h"; sourceTree = "<group>"; };
-		C076DD2AAA209C83647A755FC3F47D73 /* Pods-Monal-OSXTests.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal-OSXTests.appstore.xcconfig"; sourceTree = "<group>"; };
-		C0C25F4C439C6DF556E4E5B47F54A37D /* Pods-Monal-OSXTests-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-Monal-OSXTests-acknowledgements.plist"; sourceTree = "<group>"; };
+		C02C4A912D17D9895D0B7E932E182EEA /* Pods-Monal-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-Monal-acknowledgements.markdown"; sourceTree = "<group>"; };
 		C0F98D6AFCD5221B9A4A1B87C677FF9A /* MPOAuth.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MPOAuth.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/MPOAuth.h"; sourceTree = "<group>"; };
-		C28E218E1A22B2864246FA9F99448570 /* Pods-Monal-OSXTests-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-Monal-OSXTests-frameworks.sh"; sourceTree = "<group>"; };
 		C2AD21019BF4A8B2D6704A08A45AE9DA /* DBMetadata.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DBMetadata.m; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DBMetadata.m"; sourceTree = "<group>"; };
+		C2BF51FF7BA8C06F5AA7677BB8D63985 /* Pods-Monal-OSX.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal-OSX.adhoc.xcconfig"; sourceTree = "<group>"; };
 		C3DD4959137E39D16B773143C337E0EB /* DBQuota.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DBQuota.m; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DBQuota.m"; sourceTree = "<group>"; };
-		C595985580712767AC34480716F969DC /* Pods-jrtplib-static.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-jrtplib-static.release.xcconfig"; sourceTree = "<group>"; };
+		C600C5875AB2C88B16600D717783992C /* Pods-Monal Tests-resources.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-Monal Tests-resources.sh"; sourceTree = "<group>"; };
+		C612EA75E54400EBA6296241C8A8EFD3 /* Pods-Monal-OSXTests.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal-OSXTests.appstore.xcconfig"; sourceTree = "<group>"; };
 		C6FF06D80E4CC2AC091EFE2817EFFAAD /* NSURLResponse+Encoding.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "NSURLResponse+Encoding.h"; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/NSURLResponse+Encoding.h"; sourceTree = "<group>"; };
 		C900FB6635E976DF9FCD3BFEE2CA0CB8 /* libPods-jrtplib-static-OSX.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "libPods-jrtplib-static-OSX.a"; path = "libPods-jrtplib-static-OSX.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		C9FAEA90444DFBA9471F81403E1E1887 /* Pods-jrtplib-static-OSX.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-jrtplib-static-OSX.release.xcconfig"; sourceTree = "<group>"; };
 		CA2EE9F43208E14EFCDDEB13708D6713 /* DBDeltaEntry.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBDeltaEntry.h; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/DBDeltaEntry.h"; sourceTree = "<group>"; };
 		CC48CFE5379F1984365E34B43CE8A539 /* pt-BR.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = "pt-BR.lproj"; sourceTree = "<group>"; };
 		CC696451060D82718355DA3F49582CC8 /* NSObject+DBJSON.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "NSObject+DBJSON.m"; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/JSON/NSObject+DBJSON.m"; sourceTree = "<group>"; };
@@ -448,11 +446,10 @@
 		CE22ED5A10F4A6D3157CBAC98756D043 /* MPOAuthAuthenticationMethodOAuth.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MPOAuthAuthenticationMethodOAuth.m; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/MPOAuth/MPOAuthAuthenticationMethodOAuth.m"; sourceTree = "<group>"; };
 		CE7B4F3B19A45E41B95A6606D6227164 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS10.3.sdk/System/Library/Frameworks/CoreGraphics.framework; sourceTree = DEVELOPER_DIR; };
 		CE836353A6F7C4F2E0471B112898A410 /* DropboxOSX.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DropboxOSX.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/DropboxOSX.h"; sourceTree = "<group>"; };
-		D0847D3495E4582AF261C428FC066B9B /* Pods-jrtplib-static-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-jrtplib-static-dummy.m"; sourceTree = "<group>"; };
+		D006CE970C289718834A0C76B97286A4 /* Pods-Monal Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal Tests.release.xcconfig"; sourceTree = "<group>"; };
 		D126A09A8898FCEBD17C8204891FE8AD /* ca.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = ca.lproj; sourceTree = "<group>"; };
 		D1FBB174CC70EE22D73D645C8FB409D1 /* libSAMKeychain.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = libSAMKeychain.a; path = libSAMKeychain.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		D2BFBF577FB4A5809D7AAFF5B6B52509 /* pt.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = pt.lproj; sourceTree = "<group>"; };
-		D48A1E4266E7E272D4C856CA56225134 /* Pods-jrtplib-static-OSX-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-jrtplib-static-OSX-frameworks.sh"; sourceTree = "<group>"; };
 		D5D60424A063E35386112D9796306BD9 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		D627C84388E35C99753C4900FE71D8DC /* NSString+Dropbox.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "NSString+Dropbox.h"; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/NSString+Dropbox.h"; sourceTree = "<group>"; };
 		D6C06AE3B4F1DB03A8DDA9891E6F54A5 /* MPOAuthSignatureParameter.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MPOAuthSignatureParameter.m; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/MPOAuth/MPOAuthSignatureParameter.m"; sourceTree = "<group>"; };
@@ -460,48 +457,49 @@
 		D8BA118F44B846AF2AFF43F71F2B1CBA /* nl.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = nl.lproj; sourceTree = "<group>"; };
 		D9658BDA070201C69DE3794E9452247A /* pl.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = pl.lproj; sourceTree = "<group>"; };
 		D9666CB93756912F4AAC06D50E7FDC8C /* DBJsonBase.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBJsonBase.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/DBJsonBase.h"; sourceTree = "<group>"; };
+		D96E4252A57CD6C24AEF861E1D76E5AA /* Pods-Monal.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal.release.xcconfig"; sourceTree = "<group>"; };
 		D9B342D956C73A935FAEB1E6C29BCA71 /* MPOAuthSignatureParameter.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MPOAuthSignatureParameter.h; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/MPOAuthSignatureParameter.h"; sourceTree = "<group>"; };
 		DA205DE911B7FF636F91984C63B7AB5F /* hu.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = hu.lproj; sourceTree = "<group>"; };
+		DA455EA3CE9AAE807E3A3E70170389CF /* Pods-Monal-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-Monal-frameworks.sh"; sourceTree = "<group>"; };
 		DA53EC96B4322472D7EB5CA006843601 /* TPCircularBuffer.c */ = {isa = PBXFileReference; includeInIndex = 1; path = TPCircularBuffer.c; sourceTree = "<group>"; };
 		DA6104742ECB4BC0F41A4F466CD7A2EC /* MPOAuthCredentialConcreteStore.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MPOAuthCredentialConcreteStore.m; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/MPOAuth/MPOAuthCredentialConcreteStore.m"; sourceTree = "<group>"; };
-		DB43E4A93C1779DEED079C595C69C842 /* Pods-Monal Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal Tests.debug.xcconfig"; sourceTree = "<group>"; };
 		DB8B2307A3EC9D9293BD8F5F1D71707F /* Crashlytics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Crashlytics.framework; path = iOS/Crashlytics.framework; sourceTree = "<group>"; };
 		DBEA8BB7436F600A617EF339DD341924 /* MPOAuthAPI.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MPOAuthAPI.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/MPOAuthAPI.h"; sourceTree = "<group>"; };
 		DC171C7ADC7ADDA4E7937450B638457F /* Appirater.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = Appirater.xcconfig; sourceTree = "<group>"; };
-		DCA1F1854E5EC88DE0B52BF9278F9740 /* Pods-Monal-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-Monal-acknowledgements.markdown"; sourceTree = "<group>"; };
+		DC69CF7117246C018EC5F410C79BCF4B /* Pods-Monal-OSX.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal-OSX.debug.xcconfig"; sourceTree = "<group>"; };
 		DD4F23C9468C713EFFC7D7F8E58B8299 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS10.3.sdk/System/Library/Frameworks/AudioToolbox.framework; sourceTree = DEVELOPER_DIR; };
 		DDAC0FFAD50ADF3517BE62434DEFA0EF /* MPOAuthCredentialStore.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MPOAuthCredentialStore.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/MPOAuthCredentialStore.h"; sourceTree = "<group>"; };
 		DDFE736675C5670B2B4416D3C50928D6 /* MPOAuthCredentialConcreteStore+KeychainAdditionsiPhone.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "MPOAuthCredentialConcreteStore+KeychainAdditionsiPhone.m"; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/MPOAuth/MPOAuthCredentialConcreteStore+KeychainAdditionsiPhone.m"; sourceTree = "<group>"; };
-		DE0BED40385DEE6F47237E8A6D368262 /* Pods-Monal-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-Monal-dummy.m"; sourceTree = "<group>"; };
 		DE52025E78CDC5A3E5FEB8102D40DED9 /* sk.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = sk.lproj; sourceTree = "<group>"; };
+		DED6B8E4CD095BBE57F5867BC364A431 /* Pods-jrtplib-static-OSX-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-jrtplib-static-OSX-acknowledgements.plist"; sourceTree = "<group>"; };
 		E1327C1E2817C026A8EE68079F1FFD22 /* de.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = de.lproj; sourceTree = "<group>"; };
-		E2119E57DC404CAE2D7B4903B1F10B48 /* Pods-Monal Tests.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal Tests.adhoc.xcconfig"; sourceTree = "<group>"; };
-		E2BE0613761F773F3D8C51A277CEEC32 /* Pods-jrtplib-static-OSX.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-jrtplib-static-OSX.appstore.xcconfig"; sourceTree = "<group>"; };
+		E256CCF5D475F8D6EF4F3BA030910BB0 /* Pods-jrtplib-static.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-jrtplib-static.debug.xcconfig"; sourceTree = "<group>"; };
 		E638B1D54448D83F2529CD73329164CF /* MBProgressHUD.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = MBProgressHUD.m; sourceTree = "<group>"; };
+		E67A98336F53B10AB20D3C24C3F5A7AC /* Pods-Monal.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal.adhoc.xcconfig"; sourceTree = "<group>"; };
 		E6C403541945D47EE57B8BAF2818D2B4 /* DBJSON.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBJSON.h; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/DBJSON.h"; sourceTree = "<group>"; };
 		E764F1CF5F88B4956B1974A9DEC6F2BE /* NSString+DBJSON.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "NSString+DBJSON.h"; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/NSString+DBJSON.h"; sourceTree = "<group>"; };
 		E8FB83389BAC86D78FB509CD1031D80A /* cs.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = cs.lproj; sourceTree = "<group>"; };
 		E96B91717578E9905373B83781AD47ED /* ANSCompatibility.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ANSCompatibility.h; path = iOS/Crashlytics.framework/Headers/ANSCompatibility.h; sourceTree = "<group>"; };
 		EC02EB93399B373C00326FA17C5DAFF4 /* NSString+URLEscapingAdditions.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "NSString+URLEscapingAdditions.m"; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/MPOAuth/NSString+URLEscapingAdditions.m"; sourceTree = "<group>"; };
-		EC63105BA0D079A643DB095334F92528 /* Pods-Monal-OSXTests-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-Monal-OSXTests-acknowledgements.markdown"; sourceTree = "<group>"; };
-		ECFBBB8B0892E78E3B25FC6270C72FA1 /* Pods-Monal Tests-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-Monal Tests-acknowledgements.markdown"; sourceTree = "<group>"; };
-		EEE598F817ABA51178A944215265D9CE /* Pods-jrtplib-static-OSX-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-jrtplib-static-OSX-acknowledgements.markdown"; sourceTree = "<group>"; };
+		EE99F2DEF60E77BC20FCFC1FF24D801B /* Pods-Monal-OSXTests-resources.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-Monal-OSXTests-resources.sh"; sourceTree = "<group>"; };
 		EF3A82553368F2AD2C2F053CF482702D /* DBAccountInfo.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBAccountInfo.h; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/DBAccountInfo.h"; sourceTree = "<group>"; };
 		F04073551A6DDEF238B2B80C379E8381 /* MBProgressHUD-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "MBProgressHUD-prefix.pch"; sourceTree = "<group>"; };
 		F0AABDF9B78BC539AEF757B93728BD72 /* DBRequest.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBRequest.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/DBRequest.h"; sourceTree = "<group>"; };
 		F1CB770B746CD204CB806274E19A5B5A /* libAppirater.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = libAppirater.a; path = libAppirater.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		F27018EC4A646A664707E7EFAB69627D /* MPOAuthURLResponse.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MPOAuthURLResponse.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/MPOAuthURLResponse.h"; sourceTree = "<group>"; };
+		F32571D85F71A6EEBFF397B7B1029B03 /* Pods-Monal-OSXTests-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-Monal-OSXTests-dummy.m"; sourceTree = "<group>"; };
 		F393AF2A29B3A63F9522FF5D6EF1AB63 /* MPOAuthConnection.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MPOAuthConnection.h; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/MPOAuthConnection.h"; sourceTree = "<group>"; };
-		F46AA13E3C547A6DC1D9A109E0784259 /* Pods-Monal Tests-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-Monal Tests-frameworks.sh"; sourceTree = "<group>"; };
+		F3968DFE3EF9C0D7F4CF8E639B4994B8 /* Pods-Monal.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal.debug.xcconfig"; sourceTree = "<group>"; };
+		F4D8C0F5158183AF020D809FC3D8BAB8 /* Pods-Monal-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-Monal-acknowledgements.plist"; sourceTree = "<group>"; };
 		F4FF9A66F74D24C09E89FA2352435E34 /* TPCircularBuffer-iOS.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "TPCircularBuffer-iOS.xcconfig"; path = "../TPCircularBuffer-iOS/TPCircularBuffer-iOS.xcconfig"; sourceTree = "<group>"; };
 		F63548C8FFAC63BFFA976FA309716436 /* DBBase64Transcoder.c */ = {isa = PBXFileReference; includeInIndex = 1; name = DBBase64Transcoder.c; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/MPOAuth/Crypto/DBBase64Transcoder.c"; sourceTree = "<group>"; };
 		F818FE60323A691EF210EA44B3EB53E8 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
 		F86AD35C95FC8F7EDCA75A19A1FEF627 /* SAMKeychain-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "SAMKeychain-dummy.m"; sourceTree = "<group>"; };
-		F99F980CEB684935D2310BFB45062DDE /* Pods-Monal Tests-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-Monal Tests-acknowledgements.plist"; sourceTree = "<group>"; };
 		FA87B08D2A3C37DD2E66D97FAE3E4CF4 /* NSString+Dropbox.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "NSString+Dropbox.m"; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/NSString+Dropbox.m"; sourceTree = "<group>"; };
 		FDD77BBF8B80E9D393985BCF0CCE0590 /* MPOAuthAPIRequestLoader.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MPOAuthAPIRequestLoader.h; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/MPOAuthAPIRequestLoader.h"; sourceTree = "<group>"; };
 		FE42538D18A61F4BA7F2C3C4232DD7EE /* CLSAttributes.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = CLSAttributes.h; path = OSX/Crashlytics.framework/Versions/A/Headers/CLSAttributes.h; sourceTree = "<group>"; };
 		FF13639822BAB0E25DEB3EAEA5EEB5E6 /* FABAttributes.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = FABAttributes.h; path = OSX/Fabric.framework/Versions/A/Headers/FABAttributes.h; sourceTree = "<group>"; };
+		FF5D3F46AD4B8DC6D82795D33BDA7DF2 /* Pods-jrtplib-static-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-jrtplib-static-dummy.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -685,23 +683,6 @@
 			path = Appirater;
 			sourceTree = "<group>";
 		};
-		16AC089EEE705F453D2E43C4C458E40F /* Pods-jrtplib-static-OSX */ = {
-			isa = PBXGroup;
-			children = (
-				EEE598F817ABA51178A944215265D9CE /* Pods-jrtplib-static-OSX-acknowledgements.markdown */,
-				23F2123E83FCDC916F637C1B32E2A60C /* Pods-jrtplib-static-OSX-acknowledgements.plist */,
-				ACCA5F9CEF9EFC4A601937A29825E58D /* Pods-jrtplib-static-OSX-dummy.m */,
-				D48A1E4266E7E272D4C856CA56225134 /* Pods-jrtplib-static-OSX-frameworks.sh */,
-				811EC0156F04C0A99E159CA69024AB55 /* Pods-jrtplib-static-OSX-resources.sh */,
-				2F26D6121F26CA82802141FF4DA3ECED /* Pods-jrtplib-static-OSX.adhoc.xcconfig */,
-				E2BE0613761F773F3D8C51A277CEEC32 /* Pods-jrtplib-static-OSX.appstore.xcconfig */,
-				BFDB37FA1AE89F064F008BDE85E6481E /* Pods-jrtplib-static-OSX.debug.xcconfig */,
-				C9FAEA90444DFBA9471F81403E1E1887 /* Pods-jrtplib-static-OSX.release.xcconfig */,
-			);
-			name = "Pods-jrtplib-static-OSX";
-			path = "Target Support Files/Pods-jrtplib-static-OSX";
-			sourceTree = "<group>";
-		};
 		1A3539A22DBB0F3A2BBF129F5CA5309F /* Support Files */ = {
 			isa = PBXGroup;
 			children = (
@@ -711,23 +692,6 @@
 			);
 			name = "Support Files";
 			path = "../Target Support Files/Dropbox-OSX-SDK";
-			sourceTree = "<group>";
-		};
-		1A667C0C303CCE4012D58DF9DFC53A31 /* Pods-Monal */ = {
-			isa = PBXGroup;
-			children = (
-				DCA1F1854E5EC88DE0B52BF9278F9740 /* Pods-Monal-acknowledgements.markdown */,
-				B0594D8EFFD9AB2C20B91B0419E68880 /* Pods-Monal-acknowledgements.plist */,
-				DE0BED40385DEE6F47237E8A6D368262 /* Pods-Monal-dummy.m */,
-				AA49ADAF862D73D04C596D2B6F8C3BA9 /* Pods-Monal-frameworks.sh */,
-				98A6E0DF94C158A449837192CA058CCB /* Pods-Monal-resources.sh */,
-				2335277721A720D1F707F7E7B1D5546F /* Pods-Monal.adhoc.xcconfig */,
-				41F43D786CB9FD3D8FA229E7638DE192 /* Pods-Monal.appstore.xcconfig */,
-				31BCFE9B02634898F3D1FAD83151FDAD /* Pods-Monal.debug.xcconfig */,
-				084CC644E0775684DD15D2ACE5D893BE /* Pods-Monal.release.xcconfig */,
-			);
-			name = "Pods-Monal";
-			path = "Target Support Files/Pods-Monal";
 			sourceTree = "<group>";
 		};
 		221362AB9631E403BDF8F94B605856D7 /* SAMKeychain */ = {
@@ -755,23 +719,6 @@
 				BFFBC5D16DDD3AA757505D941BA2A6AE /* SystemConfiguration.framework */,
 			);
 			name = iOS;
-			sourceTree = "<group>";
-		};
-		24411B10448537BBD5504D8C410467A4 /* Pods-Monal-OSX */ = {
-			isa = PBXGroup;
-			children = (
-				7CBAA4388B7A23357DA5269F00EC5BD8 /* Pods-Monal-OSX-acknowledgements.markdown */,
-				A6266F97F3E12FFC7117C5F3677582E5 /* Pods-Monal-OSX-acknowledgements.plist */,
-				5BD9CF2063279DCDC82024BB5532EB1F /* Pods-Monal-OSX-dummy.m */,
-				117071F7C42DC6E57974F38171ECC606 /* Pods-Monal-OSX-frameworks.sh */,
-				41A7706E7313A0E9C06FAFB7DE94E8C4 /* Pods-Monal-OSX-resources.sh */,
-				59D626D97DAB0311A4BB3F0AFA7DF527 /* Pods-Monal-OSX.adhoc.xcconfig */,
-				AEDD5BC3BAA935C146104682E1AD80F8 /* Pods-Monal-OSX.appstore.xcconfig */,
-				0EDEBCC861EF66E6978FBE998B53578E /* Pods-Monal-OSX.debug.xcconfig */,
-				7167008781F2B5F0B7ED913436FA8B88 /* Pods-Monal-OSX.release.xcconfig */,
-			);
-			name = "Pods-Monal-OSX";
-			path = "Target Support Files/Pods-Monal-OSX";
 			sourceTree = "<group>";
 		};
 		2CDAFF427C86A7EBC9BB2BF7BB09BF01 /* Support Files */ = {
@@ -843,34 +790,55 @@
 			name = Pods;
 			sourceTree = "<group>";
 		};
-		4E9F2DFE95F3B5E003426FE881F34A59 /* Targets Support Files */ = {
+		3CCDB16EE59A74D11CE0369E71FCADFD /* Pods-Monal Tests */ = {
 			isa = PBXGroup;
 			children = (
-				65B28B7A6C89695E6DFBAC8DD5D4C1DA /* Pods-jrtplib-static */,
-				16AC089EEE705F453D2E43C4C458E40F /* Pods-jrtplib-static-OSX */,
-				1A667C0C303CCE4012D58DF9DFC53A31 /* Pods-Monal */,
-				A17817650A1E54CE71FD11626A2CD2F9 /* Pods-Monal Tests */,
-				24411B10448537BBD5504D8C410467A4 /* Pods-Monal-OSX */,
-				DCEE52947B31D33A78BE2CFBD91D9206 /* Pods-Monal-OSXTests */,
+				7F1C4CB9ECECC71B984269A581C8303C /* Pods-Monal Tests-acknowledgements.markdown */,
+				7A5439D9CE35DE1CE66E510E77B359BC /* Pods-Monal Tests-acknowledgements.plist */,
+				93D7036EA2C5F8376F2F31839FFAE084 /* Pods-Monal Tests-dummy.m */,
+				AF1F14C879C31569B7A0EC75292CDD16 /* Pods-Monal Tests-frameworks.sh */,
+				C600C5875AB2C88B16600D717783992C /* Pods-Monal Tests-resources.sh */,
+				6816515220A0BED6CF8DCB2E58103B8D /* Pods-Monal Tests.adhoc.xcconfig */,
+				8305A1B67CBFEBD868909C520E28C7C3 /* Pods-Monal Tests.appstore.xcconfig */,
+				79A8C6319A8218FEF9724F07AE5D3FCA /* Pods-Monal Tests.debug.xcconfig */,
+				D006CE970C289718834A0C76B97286A4 /* Pods-Monal Tests.release.xcconfig */,
 			);
-			name = "Targets Support Files";
+			name = "Pods-Monal Tests";
+			path = "Target Support Files/Pods-Monal Tests";
 			sourceTree = "<group>";
 		};
-		65B28B7A6C89695E6DFBAC8DD5D4C1DA /* Pods-jrtplib-static */ = {
+		4F7E23764351E911E13E3E36A4F87E4F /* Pods-Monal-OSX */ = {
 			isa = PBXGroup;
 			children = (
-				3C5D706DC40DDC027FEBAD7C4E87E96E /* Pods-jrtplib-static-acknowledgements.markdown */,
-				35CF54F6B3B9773A3D9C4FA9B68B820D /* Pods-jrtplib-static-acknowledgements.plist */,
-				D0847D3495E4582AF261C428FC066B9B /* Pods-jrtplib-static-dummy.m */,
-				BFB258CBD331B491C04CD18DD7400087 /* Pods-jrtplib-static-frameworks.sh */,
-				BAE89D05315D7DA22DF37E40BEE34E62 /* Pods-jrtplib-static-resources.sh */,
-				9057CC80F2E158F5A489C8320C34E59F /* Pods-jrtplib-static.adhoc.xcconfig */,
-				579429BAE1317552529AC9B474E96169 /* Pods-jrtplib-static.appstore.xcconfig */,
-				72CFC2D317ED71E30DB3025F3567F727 /* Pods-jrtplib-static.debug.xcconfig */,
-				C595985580712767AC34480716F969DC /* Pods-jrtplib-static.release.xcconfig */,
+				0006F6094215812B9956E22318FBF558 /* Pods-Monal-OSX-acknowledgements.markdown */,
+				4CE5B1927CEDCD246E508CDF13C854AC /* Pods-Monal-OSX-acknowledgements.plist */,
+				776988447F463362B857D112EFBA429B /* Pods-Monal-OSX-dummy.m */,
+				4F032F789FC2F91587F81A696F9D6117 /* Pods-Monal-OSX-frameworks.sh */,
+				5FBEDD19B0A1CF6FDDD1C8B74ABD826E /* Pods-Monal-OSX-resources.sh */,
+				C2BF51FF7BA8C06F5AA7677BB8D63985 /* Pods-Monal-OSX.adhoc.xcconfig */,
+				3EAD87EBCE8C67BDFECD6B818D3EEE24 /* Pods-Monal-OSX.appstore.xcconfig */,
+				DC69CF7117246C018EC5F410C79BCF4B /* Pods-Monal-OSX.debug.xcconfig */,
+				1131D492C8D0CEA8D783A8648462E5E2 /* Pods-Monal-OSX.release.xcconfig */,
 			);
-			name = "Pods-jrtplib-static";
-			path = "Target Support Files/Pods-jrtplib-static";
+			name = "Pods-Monal-OSX";
+			path = "Target Support Files/Pods-Monal-OSX";
+			sourceTree = "<group>";
+		};
+		640B5198ADCD4C27D588962B9E797949 /* Pods-Monal-OSXTests */ = {
+			isa = PBXGroup;
+			children = (
+				BA01553431BCC68220BAE8FB39224F82 /* Pods-Monal-OSXTests-acknowledgements.markdown */,
+				7A9BD42464983943B961E345D6151300 /* Pods-Monal-OSXTests-acknowledgements.plist */,
+				F32571D85F71A6EEBFF397B7B1029B03 /* Pods-Monal-OSXTests-dummy.m */,
+				507C14741AFBBF9EA6C27A0AB6936CD6 /* Pods-Monal-OSXTests-frameworks.sh */,
+				EE99F2DEF60E77BC20FCFC1FF24D801B /* Pods-Monal-OSXTests-resources.sh */,
+				0086BFE67776C1F9733FFC081DA44F2B /* Pods-Monal-OSXTests.adhoc.xcconfig */,
+				C612EA75E54400EBA6296241C8A8EFD3 /* Pods-Monal-OSXTests.appstore.xcconfig */,
+				96766234A0EE746A84A636D329B08FBF /* Pods-Monal-OSXTests.debug.xcconfig */,
+				2A392CBE348D7080C061327F121FBA69 /* Pods-Monal-OSXTests.release.xcconfig */,
+			);
+			name = "Pods-Monal-OSXTests";
+			path = "Target Support Files/Pods-Monal-OSXTests";
 			sourceTree = "<group>";
 		};
 		76D3DC1984C96B77763B376E3C50E442 /* Crashlytics */ = {
@@ -903,7 +871,7 @@
 				E682202D5F0A02745C581F9A9F41ECAF /* Frameworks */,
 				32451B5A0A6F753F384AD6AA37DC5411 /* Pods */,
 				2CEBC321C8F1A650C07FE4EE65636998 /* Products */,
-				4E9F2DFE95F3B5E003426FE881F34A59 /* Targets Support Files */,
+				D2390164FFEAFB8FEA6C3250F52EA8E4 /* Targets Support Files */,
 			);
 			sourceTree = "<group>";
 		};
@@ -963,21 +931,53 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		A17817650A1E54CE71FD11626A2CD2F9 /* Pods-Monal Tests */ = {
+		91DD368D6FE55047FDF0F4DB4660B4E7 /* Pods-Monal */ = {
 			isa = PBXGroup;
 			children = (
-				ECFBBB8B0892E78E3B25FC6270C72FA1 /* Pods-Monal Tests-acknowledgements.markdown */,
-				F99F980CEB684935D2310BFB45062DDE /* Pods-Monal Tests-acknowledgements.plist */,
-				7A6667824FC96241B0167478130A6245 /* Pods-Monal Tests-dummy.m */,
-				F46AA13E3C547A6DC1D9A109E0784259 /* Pods-Monal Tests-frameworks.sh */,
-				45F33FEE86A84C4A09F3ED14C5EE4DCC /* Pods-Monal Tests-resources.sh */,
-				E2119E57DC404CAE2D7B4903B1F10B48 /* Pods-Monal Tests.adhoc.xcconfig */,
-				2088EE397E91BEB1F838822604D0DD16 /* Pods-Monal Tests.appstore.xcconfig */,
-				DB43E4A93C1779DEED079C595C69C842 /* Pods-Monal Tests.debug.xcconfig */,
-				A73A457C31C77A0CAE257B8BABC9D101 /* Pods-Monal Tests.release.xcconfig */,
+				C02C4A912D17D9895D0B7E932E182EEA /* Pods-Monal-acknowledgements.markdown */,
+				F4D8C0F5158183AF020D809FC3D8BAB8 /* Pods-Monal-acknowledgements.plist */,
+				67AE349200DA3F877949ED61A7E2A9E0 /* Pods-Monal-dummy.m */,
+				DA455EA3CE9AAE807E3A3E70170389CF /* Pods-Monal-frameworks.sh */,
+				47A724D3FC67BF45468B61AB3E3D6D8E /* Pods-Monal-resources.sh */,
+				E67A98336F53B10AB20D3C24C3F5A7AC /* Pods-Monal.adhoc.xcconfig */,
+				44EFCB52C89AEEB7D85C2A510858401E /* Pods-Monal.appstore.xcconfig */,
+				F3968DFE3EF9C0D7F4CF8E639B4994B8 /* Pods-Monal.debug.xcconfig */,
+				D96E4252A57CD6C24AEF861E1D76E5AA /* Pods-Monal.release.xcconfig */,
 			);
-			name = "Pods-Monal Tests";
-			path = "Target Support Files/Pods-Monal Tests";
+			name = "Pods-Monal";
+			path = "Target Support Files/Pods-Monal";
+			sourceTree = "<group>";
+		};
+		AC1CBFAC895B4A080044C6845B54289B /* Pods-jrtplib-static-OSX */ = {
+			isa = PBXGroup;
+			children = (
+				AD4798D2B6C8AFC41135E8FBFBC00C82 /* Pods-jrtplib-static-OSX-acknowledgements.markdown */,
+				DED6B8E4CD095BBE57F5867BC364A431 /* Pods-jrtplib-static-OSX-acknowledgements.plist */,
+				069654567B5E1E3680C9B263F4682B31 /* Pods-jrtplib-static-OSX-dummy.m */,
+				6AFCE2E7E7BC8C7F89CACADDE56E4B3D /* Pods-jrtplib-static-OSX-resources.sh */,
+				42981B7A455B4CE51EBE91C7454E06D5 /* Pods-jrtplib-static-OSX.adhoc.xcconfig */,
+				8B3C2FD11616899BA28AD616B8D1FFBC /* Pods-jrtplib-static-OSX.appstore.xcconfig */,
+				8F6E09EF8023D2B8B848878656C3B1E2 /* Pods-jrtplib-static-OSX.debug.xcconfig */,
+				34117D9A22646269DFAF0B6DECEE14E2 /* Pods-jrtplib-static-OSX.release.xcconfig */,
+			);
+			name = "Pods-jrtplib-static-OSX";
+			path = "Target Support Files/Pods-jrtplib-static-OSX";
+			sourceTree = "<group>";
+		};
+		B23836778E2DD828F53ED89CF04AABF2 /* Pods-jrtplib-static */ = {
+			isa = PBXGroup;
+			children = (
+				80C5BA7E818C687E8D45C291E2E6F98A /* Pods-jrtplib-static-acknowledgements.markdown */,
+				B1015D9C4A1F1104B082C23D49B40D92 /* Pods-jrtplib-static-acknowledgements.plist */,
+				FF5D3F46AD4B8DC6D82795D33BDA7DF2 /* Pods-jrtplib-static-dummy.m */,
+				3AE0FC648036813B419C3B8CE0219285 /* Pods-jrtplib-static-resources.sh */,
+				715BC968B01B4423CF95EAB0B35EDFF3 /* Pods-jrtplib-static.adhoc.xcconfig */,
+				89A539707BB9507622D34E54C2A1F882 /* Pods-jrtplib-static.appstore.xcconfig */,
+				E256CCF5D475F8D6EF4F3BA030910BB0 /* Pods-jrtplib-static.debug.xcconfig */,
+				15B702ADD260F5D4C5CBE390620860BC /* Pods-jrtplib-static.release.xcconfig */,
+			);
+			name = "Pods-jrtplib-static";
+			path = "Target Support Files/Pods-jrtplib-static";
 			sourceTree = "<group>";
 		};
 		C03202BF88B23781BBA6A658182B5E78 /* Fabric */ = {
@@ -1093,21 +1093,17 @@
 			path = "../Target Support Files/TPCircularBuffer-OSX";
 			sourceTree = "<group>";
 		};
-		DCEE52947B31D33A78BE2CFBD91D9206 /* Pods-Monal-OSXTests */ = {
+		D2390164FFEAFB8FEA6C3250F52EA8E4 /* Targets Support Files */ = {
 			isa = PBXGroup;
 			children = (
-				EC63105BA0D079A643DB095334F92528 /* Pods-Monal-OSXTests-acknowledgements.markdown */,
-				C0C25F4C439C6DF556E4E5B47F54A37D /* Pods-Monal-OSXTests-acknowledgements.plist */,
-				3992C922A11C8AE106D3A2F34BAB6546 /* Pods-Monal-OSXTests-dummy.m */,
-				C28E218E1A22B2864246FA9F99448570 /* Pods-Monal-OSXTests-frameworks.sh */,
-				B5AF5721B654EEB53999692DDD1124BB /* Pods-Monal-OSXTests-resources.sh */,
-				3829086714DD8B76D97D77CE0D088B39 /* Pods-Monal-OSXTests.adhoc.xcconfig */,
-				C076DD2AAA209C83647A755FC3F47D73 /* Pods-Monal-OSXTests.appstore.xcconfig */,
-				1DAC651306CEF89648628101DDC51DE3 /* Pods-Monal-OSXTests.debug.xcconfig */,
-				0F5A1EFA0BB4484BB5016254290F2F7B /* Pods-Monal-OSXTests.release.xcconfig */,
+				B23836778E2DD828F53ED89CF04AABF2 /* Pods-jrtplib-static */,
+				AC1CBFAC895B4A080044C6845B54289B /* Pods-jrtplib-static-OSX */,
+				91DD368D6FE55047FDF0F4DB4660B4E7 /* Pods-Monal */,
+				3CCDB16EE59A74D11CE0369E71FCADFD /* Pods-Monal Tests */,
+				4F7E23764351E911E13E3E36A4F87E4F /* Pods-Monal-OSX */,
+				640B5198ADCD4C27D588962B9E797949 /* Pods-Monal-OSXTests */,
 			);
-			name = "Pods-Monal-OSXTests";
-			path = "Target Support Files/Pods-Monal-OSXTests";
+			name = "Targets Support Files";
 			sourceTree = "<group>";
 		};
 		E3591323A5B6EEB804D251F5CF540C39 /* Frameworks */ = {
@@ -1754,6 +1750,29 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		030970890F4E4EE7E909CA8A140BE424 /* Adhoc */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 6816515220A0BED6CF8DCB2E58103B8D /* Pods-Monal Tests.adhoc.xcconfig */;
+			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				MACH_O_TYPE = staticlib;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PODS_ROOT = "$(SRCROOT)";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+			};
+			name = Adhoc;
+		};
 		07898AB5E8AC16D62F03E5E06972BCE6 /* Release */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = DC171C7ADC7ADDA4E7937450B638457F /* Appirater.xcconfig */;
@@ -1773,7 +1792,7 @@
 		};
 		07BB9A8FBB5B1DBB588C958DACF2F792 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 7167008781F2B5F0B7ED913436FA8B88 /* Pods-Monal-OSX.release.xcconfig */;
+			baseConfigurationReference = 1131D492C8D0CEA8D783A8648462E5E2 /* Pods-Monal-OSX.release.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "-";
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
@@ -1796,32 +1815,9 @@
 			};
 			name = Release;
 		};
-		0A411D6ECBC7501531E89A3F98E67EDD /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 31BCFE9B02634898F3D1FAD83151FDAD /* Pods-Monal.debug.xcconfig */;
-			buildSettings = {
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				DEBUG_INFORMATION_FORMAT = dwarf;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_NO_COMMON_BLOCKS = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
-				MACH_O_TYPE = staticlib;
-				MTL_ENABLE_DEBUG_INFO = YES;
-				OTHER_LDFLAGS = "";
-				OTHER_LIBTOOLFLAGS = "";
-				PODS_ROOT = "$(SRCROOT)";
-				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-			};
-			name = Debug;
-		};
 		192D0490BAC50D8E11D0EE03004B22A9 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = C9FAEA90444DFBA9471F81403E1E1887 /* Pods-jrtplib-static-OSX.release.xcconfig */;
+			baseConfigurationReference = 34117D9A22646269DFAF0B6DECEE14E2 /* Pods-jrtplib-static-OSX.release.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "-";
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
@@ -1894,7 +1890,7 @@
 		};
 		2652DDC2B16E37F22F992E3A1266264B /* AppStore */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = AEDD5BC3BAA935C146104682E1AD80F8 /* Pods-Monal-OSX.appstore.xcconfig */;
+			baseConfigurationReference = 3EAD87EBCE8C67BDFECD6B818D3EEE24 /* Pods-Monal-OSX.appstore.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "-";
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
@@ -1916,6 +1912,29 @@
 				SKIP_INSTALL = YES;
 			};
 			name = AppStore;
+		};
+		2681E3388B0506C6403D5F3C28A6E971 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D006CE970C289718834A0C76B97286A4 /* Pods-Monal Tests.release.xcconfig */;
+			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				MACH_O_TYPE = staticlib;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PODS_ROOT = "$(SRCROOT)";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
 		};
 		35E763B30990F32E3A62ECE458C829B9 /* AppStore */ = {
 			isa = XCBuildConfiguration;
@@ -1936,32 +1955,9 @@
 			};
 			name = AppStore;
 		};
-		3863E9F1619729D9BACC1EC783BCE55F /* AppStore */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 41F43D786CB9FD3D8FA229E7638DE192 /* Pods-Monal.appstore.xcconfig */;
-			buildSettings = {
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_NO_COMMON_BLOCKS = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
-				MACH_O_TYPE = staticlib;
-				MTL_ENABLE_DEBUG_INFO = NO;
-				OTHER_LDFLAGS = "";
-				OTHER_LIBTOOLFLAGS = "";
-				PODS_ROOT = "$(SRCROOT)";
-				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-			};
-			name = AppStore;
-		};
 		463CA31814F8AB7ADDE7B122B8AE9C01 /* AppStore */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = E2BE0613761F773F3D8C51A277CEEC32 /* Pods-jrtplib-static-OSX.appstore.xcconfig */;
+			baseConfigurationReference = 8B3C2FD11616899BA28AD616B8D1FFBC /* Pods-jrtplib-static-OSX.appstore.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "-";
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
@@ -1983,52 +1979,6 @@
 				SKIP_INSTALL = YES;
 			};
 			name = AppStore;
-		};
-		4684ECEF4B535576F2476705950E5C95 /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = A73A457C31C77A0CAE257B8BABC9D101 /* Pods-Monal Tests.release.xcconfig */;
-			buildSettings = {
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_NO_COMMON_BLOCKS = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
-				MACH_O_TYPE = staticlib;
-				MTL_ENABLE_DEBUG_INFO = NO;
-				OTHER_LDFLAGS = "";
-				OTHER_LIBTOOLFLAGS = "";
-				PODS_ROOT = "$(SRCROOT)";
-				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-			};
-			name = Release;
-		};
-		47478FCA7EE42BB79BA81D7B232D59CD /* Adhoc */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 2335277721A720D1F707F7E7B1D5546F /* Pods-Monal.adhoc.xcconfig */;
-			buildSettings = {
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_NO_COMMON_BLOCKS = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
-				MACH_O_TYPE = staticlib;
-				MTL_ENABLE_DEBUG_INFO = NO;
-				OTHER_LDFLAGS = "";
-				OTHER_LIBTOOLFLAGS = "";
-				PODS_ROOT = "$(SRCROOT)";
-				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-			};
-			name = Adhoc;
 		};
 		48571CA2687B8C983F0EFD587BFE4473 /* Release */ = {
 			isa = XCBuildConfiguration;
@@ -2056,7 +2006,7 @@
 		};
 		4A35B3046D069EAFF23571FA094359B4 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = C595985580712767AC34480716F969DC /* Pods-jrtplib-static.release.xcconfig */;
+			baseConfigurationReference = 15B702ADD260F5D4C5CBE390620860BC /* Pods-jrtplib-static.release.xcconfig */;
 			buildSettings = {
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
@@ -2146,29 +2096,6 @@
 			};
 			name = AppStore;
 		};
-		536F075CC33B46DCBEC88F9E2CB413C5 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = DB43E4A93C1779DEED079C595C69C842 /* Pods-Monal Tests.debug.xcconfig */;
-			buildSettings = {
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				DEBUG_INFORMATION_FORMAT = dwarf;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_NO_COMMON_BLOCKS = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
-				MACH_O_TYPE = staticlib;
-				MTL_ENABLE_DEBUG_INFO = YES;
-				OTHER_LDFLAGS = "";
-				OTHER_LIBTOOLFLAGS = "";
-				PODS_ROOT = "$(SRCROOT)";
-				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-			};
-			name = Debug;
-		};
 		54BE5D74B5D3002A9A50DDDF19854C6C /* Adhoc */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 6B5A59F1BE20913DE15932A69309E473 /* Dropbox-OSX-SDK.xcconfig */;
@@ -2193,6 +2120,29 @@
 			};
 			name = Adhoc;
 		};
+		5504EE1444ECEBA5DCB3FCD1B65D3BBD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = F3968DFE3EF9C0D7F4CF8E639B4994B8 /* Pods-Monal.debug.xcconfig */;
+			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				MACH_O_TYPE = staticlib;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PODS_ROOT = "$(SRCROOT)";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
 		564590CC5D1AD36FF46E4E4093E1799E /* Adhoc */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = DC171C7ADC7ADDA4E7937450B638457F /* Appirater.xcconfig */;
@@ -2211,6 +2161,75 @@
 				WRAPPER_EXTENSION = bundle;
 			};
 			name = Adhoc;
+		};
+		56F539EE4E4830762724D2BFA0FCE5C5 /* AppStore */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 8305A1B67CBFEBD868909C520E28C7C3 /* Pods-Monal Tests.appstore.xcconfig */;
+			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				MACH_O_TYPE = staticlib;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PODS_ROOT = "$(SRCROOT)";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+			};
+			name = AppStore;
+		};
+		5B4DA542AD061BF9C437987CD0679878 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 79A8C6319A8218FEF9724F07AE5D3FCA /* Pods-Monal Tests.debug.xcconfig */;
+			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				MACH_O_TYPE = staticlib;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PODS_ROOT = "$(SRCROOT)";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		6152F84150D051C89707B76D138C7CFC /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D96E4252A57CD6C24AEF861E1D76E5AA /* Pods-Monal.release.xcconfig */;
+			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				MACH_O_TYPE = staticlib;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PODS_ROOT = "$(SRCROOT)";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
 		};
 		61ECFC15203821D1AA8A2EC2E5FA2F81 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -2237,7 +2256,7 @@
 		};
 		6464DE9FE2AEB2ED402A10F3305B30FC /* Adhoc */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3829086714DD8B76D97D77CE0D088B39 /* Pods-Monal-OSXTests.adhoc.xcconfig */;
+			baseConfigurationReference = 0086BFE67776C1F9733FFC081DA44F2B /* Pods-Monal-OSXTests.adhoc.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "-";
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
@@ -2328,6 +2347,29 @@
 			};
 			name = Release;
 		};
+		66537605430F79A2B6410B3ED27D8FF8 /* Adhoc */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = E67A98336F53B10AB20D3C24C3F5A7AC /* Pods-Monal.adhoc.xcconfig */;
+			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				MACH_O_TYPE = staticlib;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PODS_ROOT = "$(SRCROOT)";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+			};
+			name = Adhoc;
+		};
 		682B71175FD81BA28B73B5F0C4C4C8FF /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 2DF28B75E298A6C07BD9CBEEDD8AAF86 /* TPCircularBuffer-OSX.xcconfig */;
@@ -2377,7 +2419,7 @@
 		};
 		796148C84E6F2CA909A8F284599C84A0 /* Adhoc */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 59D626D97DAB0311A4BB3F0AFA7DF527 /* Pods-Monal-OSX.adhoc.xcconfig */;
+			baseConfigurationReference = C2BF51FF7BA8C06F5AA7677BB8D63985 /* Pods-Monal-OSX.adhoc.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "-";
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
@@ -2425,7 +2467,7 @@
 		};
 		86FC1B9FEE380EAAC48A98BF44438D3E /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 1DAC651306CEF89648628101DDC51DE3 /* Pods-Monal-OSXTests.debug.xcconfig */;
+			baseConfigurationReference = 96766234A0EE746A84A636D329B08FBF /* Pods-Monal-OSXTests.debug.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "-";
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
@@ -2520,7 +2562,7 @@
 		};
 		96BC857FE8DA5A174FEDBF12F9FD2249 /* AppStore */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = C076DD2AAA209C83647A755FC3F47D73 /* Pods-Monal-OSXTests.appstore.xcconfig */;
+			baseConfigurationReference = C612EA75E54400EBA6296241C8A8EFD3 /* Pods-Monal-OSXTests.appstore.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "-";
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
@@ -2592,7 +2634,7 @@
 		};
 		A59F4B7C8A1198BDB13458C3401740EF /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = BFDB37FA1AE89F064F008BDE85E6481E /* Pods-jrtplib-static-OSX.debug.xcconfig */;
+			baseConfigurationReference = 8F6E09EF8023D2B8B848878656C3B1E2 /* Pods-jrtplib-static-OSX.debug.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "-";
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
@@ -2615,32 +2657,9 @@
 			};
 			name = Debug;
 		};
-		A9F67280B1B2CA4EE4537304D9D1D864 /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 084CC644E0775684DD15D2ACE5D893BE /* Pods-Monal.release.xcconfig */;
-			buildSettings = {
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_NO_COMMON_BLOCKS = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
-				MACH_O_TYPE = staticlib;
-				MTL_ENABLE_DEBUG_INFO = NO;
-				OTHER_LDFLAGS = "";
-				OTHER_LIBTOOLFLAGS = "";
-				PODS_ROOT = "$(SRCROOT)";
-				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-			};
-			name = Release;
-		};
 		ACDCDEA03B15715D25E26FF1A64C9927 /* Adhoc */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 2F26D6121F26CA82802141FF4DA3ECED /* Pods-jrtplib-static-OSX.adhoc.xcconfig */;
+			baseConfigurationReference = 42981B7A455B4CE51EBE91C7454E06D5 /* Pods-jrtplib-static-OSX.adhoc.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "-";
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
@@ -2687,29 +2706,6 @@
 			};
 			name = AppStore;
 		};
-		B48280AD8303AAD653EC2F54319F5E74 /* AppStore */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 2088EE397E91BEB1F838822604D0DD16 /* Pods-Monal Tests.appstore.xcconfig */;
-			buildSettings = {
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_NO_COMMON_BLOCKS = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
-				MACH_O_TYPE = staticlib;
-				MTL_ENABLE_DEBUG_INFO = NO;
-				OTHER_LDFLAGS = "";
-				OTHER_LIBTOOLFLAGS = "";
-				PODS_ROOT = "$(SRCROOT)";
-				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-			};
-			name = AppStore;
-		};
 		B5B5B7B28C2DB0C7A3A988FFF4FEA34F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 851F6A63B0FDAD36399EF12D0C93D837 /* SAMKeychain.xcconfig */;
@@ -2736,7 +2732,7 @@
 		};
 		B929AB1929F5CC793143A8988D45A875 /* AppStore */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 579429BAE1317552529AC9B474E96169 /* Pods-jrtplib-static.appstore.xcconfig */;
+			baseConfigurationReference = 89A539707BB9507622D34E54C2A1F882 /* Pods-jrtplib-static.appstore.xcconfig */;
 			buildSettings = {
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
@@ -2783,7 +2779,7 @@
 		};
 		C08EFC98298EF8A4F9CC994C67840708 /* Adhoc */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 9057CC80F2E158F5A489C8320C34E59F /* Pods-jrtplib-static.adhoc.xcconfig */;
+			baseConfigurationReference = 715BC968B01B4423CF95EAB0B35EDFF3 /* Pods-jrtplib-static.adhoc.xcconfig */;
 			buildSettings = {
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
@@ -2892,9 +2888,32 @@
 			};
 			name = AppStore;
 		};
+		D4B9F27CA254536729D8A4674379415B /* AppStore */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 44EFCB52C89AEEB7D85C2A510858401E /* Pods-Monal.appstore.xcconfig */;
+			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				MACH_O_TYPE = staticlib;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PODS_ROOT = "$(SRCROOT)";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+			};
+			name = AppStore;
+		};
 		D58DEFD833510DF064CC50DC11C6A1D8 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 0EDEBCC861EF66E6978FBE998B53578E /* Pods-Monal-OSX.debug.xcconfig */;
+			baseConfigurationReference = DC69CF7117246C018EC5F410C79BCF4B /* Pods-Monal-OSX.debug.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "-";
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
@@ -2988,29 +3007,6 @@
 			};
 			name = Adhoc;
 		};
-		E6471F1AF0B0B9D49A65FC32512CC763 /* Adhoc */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = E2119E57DC404CAE2D7B4903B1F10B48 /* Pods-Monal Tests.adhoc.xcconfig */;
-			buildSettings = {
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_NO_COMMON_BLOCKS = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
-				MACH_O_TYPE = staticlib;
-				MTL_ENABLE_DEBUG_INFO = NO;
-				OTHER_LDFLAGS = "";
-				OTHER_LIBTOOLFLAGS = "";
-				PODS_ROOT = "$(SRCROOT)";
-				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-			};
-			name = Adhoc;
-		};
 		EA3FCA555BEBD58CE154E30D31717C2E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = DC171C7ADC7ADDA4E7937450B638457F /* Appirater.xcconfig */;
@@ -3030,7 +3026,7 @@
 		};
 		F241323B922EF40087C352A318D578E4 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 0F5A1EFA0BB4484BB5016254290F2F7B /* Pods-Monal-OSXTests.release.xcconfig */;
+			baseConfigurationReference = 2A392CBE348D7080C061327F121FBA69 /* Pods-Monal-OSXTests.release.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "-";
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
@@ -3055,7 +3051,7 @@
 		};
 		FA2AB94A97DB84E12C6098EF87AC00F2 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 72CFC2D317ED71E30DB3025F3567F727 /* Pods-jrtplib-static.debug.xcconfig */;
+			baseConfigurationReference = E256CCF5D475F8D6EF4F3BA030910BB0 /* Pods-jrtplib-static.debug.xcconfig */;
 			buildSettings = {
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
@@ -3165,10 +3161,10 @@
 		1DC3521B38015A09F0F40A61AD6F7461 /* Build configuration list for PBXNativeTarget "Pods-Monal" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				47478FCA7EE42BB79BA81D7B232D59CD /* Adhoc */,
-				3863E9F1619729D9BACC1EC783BCE55F /* AppStore */,
-				0A411D6ECBC7501531E89A3F98E67EDD /* Debug */,
-				A9F67280B1B2CA4EE4537304D9D1D864 /* Release */,
+				66537605430F79A2B6410B3ED27D8FF8 /* Adhoc */,
+				D4B9F27CA254536729D8A4674379415B /* AppStore */,
+				5504EE1444ECEBA5DCB3FCD1B65D3BBD /* Debug */,
+				6152F84150D051C89707B76D138C7CFC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -3297,10 +3293,10 @@
 		FFD3FF52818C62FA5BD3EBC13E9A7381 /* Build configuration list for PBXNativeTarget "Pods-Monal Tests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				E6471F1AF0B0B9D49A65FC32512CC763 /* Adhoc */,
-				B48280AD8303AAD653EC2F54319F5E74 /* AppStore */,
-				536F075CC33B46DCBEC88F9E2CB413C5 /* Debug */,
-				4684ECEF4B535576F2476705950E5C95 /* Release */,
+				030970890F4E4EE7E909CA8A140BE424 /* Adhoc */,
+				56F539EE4E4830762724D2BFA0FCE5C5 /* AppStore */,
+				5B4DA542AD061BF9C437987CD0679878 /* Debug */,
+				2681E3388B0506C6403D5F3C28A6E971 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

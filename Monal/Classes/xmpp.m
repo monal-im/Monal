@@ -38,6 +38,7 @@
 #import "ParseEnabled.h"
 #import "ParseA.h"
 #import "ParseResumed.h"
+#import "ParseFailed.h"
 
 #import "NXOAuth2.h"
 #import "MLHTTPRequest.h"
@@ -90,10 +91,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 @property (nonatomic, assign) BOOL supportsPing;
 
 //stream resumption
-@property (nonatomic, assign) BOOL supportsSM2;
 @property (nonatomic, assign) BOOL supportsSM3;
+@property (nonatomic, assign) BOOL resuming;
 
-@property (nonatomic, assign) BOOL supportsResume;
 @property (nonatomic, strong) NSString *streamID;
 
 // client state
@@ -410,7 +410,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) connect
 {
     if(self.explicitLogout) return;
-    if(self.accountState==kStateLoggedIn )
+    if(self.accountState>=kStateLoggedIn )
     {
         DDLogError(@"assymetrical call to login without a teardown loggedin");
         return;
@@ -422,16 +422,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     DDLogInfo(@"XMPP connnect  start");
     _outputQueue=[[NSMutableArray alloc] init];
     
-    if(!self.streamID)
-    {
-       NSDictionary *dic=[[NSUserDefaults standardUserDefaults] objectForKey:[NSString stringWithFormat:@"stream_%@",self.accountNo]];
-        if(dic && [dic isKindOfClass:[NSDictionary class]])
-        {
-            self.streamID=[dic objectForKey:@"streamID"];
-            self.lastHandledInboundStanza=[dic objectForKey:@"lastInboundStanza"];
-        }
-    }
-    
+    //read persistent state
+    [self readState];
     
     [self connectionTask];
     
@@ -480,7 +472,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 
             }
         }
-        else if (self.accountState==kStateLoggedIn ) {
+        else if (self.accountState>=kStateLoggedIn ) {
             NSString *accountName =[NSString stringWithFormat:@"%@@%@", self.username, self.domain];
             NSDictionary *dic =@{@"AccountNo":self.accountNo, @"AccountName":accountName};
             [[NSNotificationCenter defaultCenter] postNotificationName:kMLHasConnectedNotice object:dic];
@@ -522,10 +514,36 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     if(self.explicitLogout && _accountState>=kStateHasStream)
     {
+        if(_accountState>=kStateBound)
+        {
+            ///TODO: push am server deaktivieren
+            
+            //send last smacks ack as required by smacks revision 1.5.2
+            if(self.supportsSM3)
+            {
+                MLXMLNode *aNode = [[MLXMLNode alloc] initWithElement:@"a"];
+                NSDictionary *dic= @{@"xmlns":@"urn:xmpp:sm:3",@"h":[NSString stringWithFormat:@"%@",self.lastHandledInboundStanza] };
+                aNode.attributes = [dic mutableCopy];
+                [self writeToStream:aNode.XMLString]; // dont even bother queueing
+            }
+        }
+        
+        //preserve unAckedStanzas even on explicitLogout and resend them on next connect
+        //if we don't do this messages could be lost when logging out directly after sending them
+        //and: sending messages twice is less intrusive than silently loosing them
+        NSMutableArray* stanzas = self.unAckedStanzas;
+        
+        //reset smacks state to sane values (this can be done even if smacks is not supported)
+        [self initSM3];
+        self.unAckedStanzas=stanzas;
+        
+        //persist these changes
+        [self persistState];
+        
+        //close stream
         MLXMLNode* stream = [[MLXMLNode alloc] init];
-        stream.element=@"/stream:stream"; //hack to close stream
+        stream.element = @"/stream:stream"; //hack to close stream
         [self writeToStream:stream.XMLString]; // dont even bother queueing
-        self.streamID=nil;
     }
     
     if(_accountState == kStateDisconnected) {
@@ -544,9 +562,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self.networkQueue cancelAllOperations];
 
     [self.networkQueue addOperationWithBlock:^{
-        if(self.explicitLogout) {
-            self.unAckedStanzas=nil;
-        }
         self.connectedTime =nil; 
         self.pingID=nil;
         DDLogInfo(@"removing streams");
@@ -845,10 +860,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         return;
     }
     
-    if(self.accountState<kStateLoggedIn)
+    if(self.accountState<kStateBound)
     {
         if(_loginStarted && [[NSDate date] timeIntervalSinceDate:self.loginStartTimeStamp]<=10) {
-            DDLogInfo(@"ping attempt before logged in. returning.");
+            DDLogInfo(@"ping attempt before logged in and bound. returning.");
             return;
         }
         else if (_loginStarted && [[NSDate date] timeIntervalSinceDate:self.loginStartTimeStamp]>10)
@@ -858,8 +873,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         }
     
     }
-    else  {
-        if(self.supportsSM3 && self.unAckedStanzas.count>0)
+    else {
+        //always use smacks pings if supported (they are shorter and better than whitespace pings)
+        if(self.supportsSM3)
         {
             MLXMLNode* rNode =[[MLXMLNode alloc] initWithElement:@"r"];
             NSDictionary *dic=@{@"xmlns":@"urn:xmpp:sm:3"};
@@ -1093,28 +1109,46 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) sendUnAckedMessages
 {
     [self.networkQueue addOperation:
-    [NSBlockOperation blockOperationWithBlock:^{
-        for (NSDictionary *dic in self.unAckedStanzas)
-        {
-            [self send:(MLXMLNode*)[dic objectForKey:kStanza]];
-        }}]];
+        [NSBlockOperation blockOperationWithBlock:^{
+            if(self.unAckedStanzas)
+            {
+                for (NSDictionary *dic in self.unAckedStanzas)
+                {
+                    [self send:(MLXMLNode*)[dic objectForKey:kStanza]];
+                }
+            }
+    }]];
 }
 
 -(void) removeUnAckedMessagesLessThan:(NSNumber*) hvalue
 {
     [self.networkQueue addOperation:
     [NSBlockOperation blockOperationWithBlock:^{
-        NSMutableArray *discard =[[NSMutableArray alloc] initWithCapacity:[self.unAckedStanzas count]];
-        for (NSDictionary *dic in self.unAckedStanzas)
+        if(self.unAckedStanzas)
         {
-            NSNumber *stanzaNumber = [dic objectForKey:kStanzaID];
-            if([stanzaNumber integerValue]<[hvalue integerValue])
+            if([hvalue integerValue]==[self.lastHandledOutboundStanza integerValue])
             {
-                [discard addObject:dic];
+                [self.unAckedStanzas removeAllObjects];
             }
+            else
+            {
+                NSMutableArray *discard =[[NSMutableArray alloc] initWithCapacity:[self.unAckedStanzas count]];
+                for (NSDictionary *dic in self.unAckedStanzas)
+                {
+                    NSNumber *stanzaNumber = [dic objectForKey:kStanzaID];
+                    if([stanzaNumber integerValue]<[hvalue integerValue])
+                    {
+                        [discard addObject:dic];
+                    }
+                }
+            
+                [self.unAckedStanzas removeObjectsInArray:discard];
+            }
+        
+            //persist these changes
+            [self persistState];
         }
         
-        [self.unAckedStanzas removeObjectsInArray:discard];
     }]];
 }
 
@@ -1168,6 +1202,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         if([iqNode.features containsObject:@"urn:xmpp:mam:0"])
                         {
                             self.supportsMam0=YES;
+                            DDLogInfo(@"++++++++++++++++++++++++ supports mam:0");
                         }
                         
                         
@@ -1860,7 +1895,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         
                     }
                     
-                    if(self.accountState!=kStateLoggedIn )
+                    if(self.accountState<kStateLoggedIn )
                     {
                         
                         if(streamNode.callStartTLS &&  _SSL)
@@ -1938,29 +1973,27 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     }
                     else
                     {
+                        if(streamNode.supportsClientState)
+                        {
+                            self.supportsClientState=YES;
+                        }
                         
-                        if(self.streamID) {
+                        if(streamNode.supportsSM3)
+                        {
+                            self.supportsSM3=YES;
+                        }
+                        
+                        //test if smacks is supported and allows resume
+                        if(self.supportsSM3 && self.streamID) {
+                            ///TODO: testen, ob supportsHTTPUpload nach einem resume noch gesetzt ist
                             MLXMLNode *resumeNode =[[MLXMLNode alloc] initWithElement:@"resume"];
                             NSDictionary *dic=@{@"xmlns":@"urn:xmpp:sm:3",@"h":[NSString stringWithFormat:@"%@",self.lastHandledInboundStanza], @"previd":self.streamID };
                             resumeNode.attributes =[dic mutableCopy];
+                            self.resuming=YES;
                             [self send:resumeNode];
                         }
                         else {
-                            XMPPIQ* iqNode =[[XMPPIQ alloc] initWithType:kiqSetType];
-                            [iqNode setBindWithResource:_resource];
-                            
-                            [self send:iqNode];
-                            
-                            if(streamNode.supportsSM3)
-                            {
-                                [self enableSM3];
-                            }
-                            
-                            if(streamNode.supportsClientState)
-                            {
-                                self.supportsClientState=YES;
-                            }
-                            
+                            [self bindAndEnableSmacks];
                         }
                         
                     }
@@ -1968,19 +2001,33 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"enabled"])
                 {
+                    //save old unAckedStanzas queue before it is cleared
+                    NSMutableArray *stanzas = self.unAckedStanzas;
+                    
+                    //init smacks state (this clears the unAckedStanzas queue)
+                    [self initSM3];
+                    
+                    //save streamID if resume is supported
                     ParseEnabled* enabledNode= [[ParseEnabled alloc]  initWithDictionary:stanzaToParse];
-                    self.supportsResume=enabledNode.resume;
-                    self.streamID=enabledNode.streamID;
+                    if(enabledNode.resume)
+                        self.streamID=enabledNode.streamID;
+                    else
+                        self.streamID=nil;
                     
-                    //initilize values
-                    self.lastHandledInboundStanza=[NSNumber numberWithInteger:0];
-                    self.lastHandledOutboundStanza=[NSNumber numberWithInteger:0];
-                    self.lastOutboundStanza=[NSNumber numberWithInteger:0];
-                    self.unAckedStanzas =[[NSMutableArray alloc] init];
+                    //persist these changes (streamID and initSM3)
+                    [self persistState];
                     
-                    [[NSUserDefaults standardUserDefaults] setObject:@{@"streamID":self.streamID, @"lastInboundStanza":self.lastHandledInboundStanza} forKey:[NSString stringWithFormat:@"stream_%@",self.accountNo]];
-                    
-                    
+                    //resend unacked stanzas saved above (this happens only if the server provides smacks support without resumption support)
+                    [self.networkQueue addOperation:
+                        [NSBlockOperation blockOperationWithBlock:^{
+                            if(stanzas)
+                            {
+                                for (NSDictionary *dic in stanzas)
+                                {
+                                    [self send:(MLXMLNode*)[dic objectForKey:kStanza]];
+                                }
+                            }
+                    }]];
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"r"] && self.supportsSM3)
                 {
@@ -1988,7 +2035,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     NSDictionary *dic=@{@"xmlns":@"urn:xmpp:sm:3",@"h":[NSString stringWithFormat:@"%@",self.lastHandledInboundStanza] };
                     aNode.attributes =[dic mutableCopy];
                     [self send:aNode];
-                    
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"a"] && self.supportsSM3)
                 {
@@ -1997,40 +2043,32 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     
                     //remove acked messages
                     [self removeUnAckedMessagesLessThan:aNode.h];
-                    
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"resumed"])
                 {
-                    ParseResumed* resumeNode= [[ParseResumed alloc]  initWithDictionary:stanzaToParse];
-                    //h would be compared to outbound value
-                    if([resumeNode.h integerValue]==[self.lastHandledOutboundStanza integerValue])
-                    {
-                        [self.networkQueue addOperation:
-                            [NSBlockOperation blockOperationWithBlock:^{
-                                [self.unAckedStanzas removeAllObjects];
-                        }]];
-                    }
-                    else {
-                        [self removeUnAckedMessagesLessThan:resumeNode.h];
-                        //send unacked stanzas
-                        [self sendUnAckedMessages];
-                    }
+                    self.resuming=NO;
                     
+                    //remove already delivered stanzas and resend the (still) unacked ones
+                    ParseResumed* resumeNode= [[ParseResumed alloc]  initWithDictionary:stanzaToParse];
+                    [self removeUnAckedMessagesLessThan:resumeNode.h];
+                    [self sendUnAckedMessages];
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"failed"])
                 {
-                    //remove session
-                    self.streamID=nil;
-                    [[NSUserDefaults standardUserDefaults] removeObjectForKey:[NSString stringWithFormat:@"stream_%@",self.accountNo]];
-            
-                    
-                    // if resume failed. bind like normal
-                    XMPPIQ* iqNode =[[XMPPIQ alloc] initWithType:kiqSetType];
-                    [iqNode setBindWithResource:_resource];
-                    
-                    [self send:iqNode];
-                    [self enableSM3];
-                    
+                    if(self.resuming)
+                    {
+                        self.resuming=NO;
+                        
+                        //get h value, if server supports smacks revision 1.5.2
+                        ParseFailed* failedNode= [[ParseFailed alloc]  initWithDictionary:stanzaToParse];
+                        DDLogInfo(@"++++++++++++++++++++++++ failed resume: h=%d", [failedNode.h integerValue]);
+                        [self removeUnAckedMessagesLessThan:failedNode.h];
+                        
+                        // if resume failed. bind like normal
+                        [self bindAndEnableSmacks];
+                    }
+                    else        //smacks enable failed
+                        self.supportsSM3=NO;
                 }
                 
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"features"])
@@ -2309,19 +2347,19 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     if(self.supportsSM3 && self.unAckedStanzas)
     {
         [self.networkQueue addOperation:
-         [NSBlockOperation blockOperationWithBlock:^{
-        NSDictionary *dic =@{kStanzaID:[NSNumber numberWithInteger: [self.lastOutboundStanza integerValue]], kStanza:stanza};
-        [self.unAckedStanzas addObject:dic];
-        self.lastOutboundStanza=[NSNumber numberWithInteger:[self.lastOutboundStanza integerValue]+1];
+            [NSBlockOperation blockOperationWithBlock:^{
+                NSDictionary *dic =@{kStanzaID:[NSNumber numberWithInteger: [self.lastOutboundStanza integerValue]], kStanza:stanza};
+                [self.unAckedStanzas addObject:dic];
+                self.lastOutboundStanza=[NSNumber numberWithInteger:[self.lastOutboundStanza integerValue]+1];
+                DDLogDebug(@"lastOutboundStanza (outgoing h value) is now at: %@", self.lastOutboundStanza);
         }]];
     }
     
     [self.networkQueue addOperation:
-     [NSBlockOperation blockOperationWithBlock:^{
-        DDLogVerbose(@"adding to send %@", stanza.XMLString);
-        [_outputQueue addObject:stanza];
-        [self writeFromQueue];  // try to send if there is space
-        
+        [NSBlockOperation blockOperationWithBlock:^{
+            DDLogVerbose(@"adding to send %@", stanza.XMLString);
+            [_outputQueue addObject:stanza];
+            [self writeFromQueue];  // try to send if there is space
     }]];
 }
 
@@ -2348,15 +2386,70 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 #pragma mark set connection attributes
 
+-(void) persistState
+{
+    //make values persistent
+    NSMutableDictionary* values = @{};
+    [values setValue:self.streamID forKey:@"streamID"];
+    [values setValue:self.lastHandledInboundStanza forKey:@"lastHandledInboundStanza"];
+    [values setValue:self.lastHandledOutboundStanza forKey:@"lastHandledOutboundStanza"];
+    [values setValue:self.lastOutboundStanza forKey:@"lastOutboundStanza"];
+    [values setValue:self.unAckedStanzas forKey:@"unAckedStanzas"];
+    [[NSUserDefaults standardUserDefaults] setObject:values forKey:[NSString stringWithFormat:@"stream_%@",self.accountNo]];
+}
+
+-(void) readState
+{
+    NSDictionary *dic=[[NSUserDefaults standardUserDefaults] objectForKey:[NSString stringWithFormat:@"stream_%@",self.accountNo]];
+    if(dic && [dic isKindOfClass:[NSDictionary class]])
+    {
+        //read smacks state
+        self.lastHandledInboundStanza=[dic objectForKey:@"lastHandledInboundStanza"];
+        self.lastHandledOutboundStanza=[dic objectForKey:@"lastHandledOutboundStanza"];
+        self.lastOutboundStanza=[dic objectForKey:@"lastOutboundStanza"];
+        self.unAckedStanzas=[dic objectForKey:@"unAckedStanzas"];
+        self.streamID=[dic objectForKey:@"streamID"];
+    }
+}
+
+-(void) initSM3
+{
+    //initialize smacks state
+    self.lastHandledInboundStanza=[NSNumber numberWithInteger:0];
+    self.lastHandledOutboundStanza=[NSNumber numberWithInteger:0];
+    self.lastOutboundStanza=[NSNumber numberWithInteger:0];
+    self.unAckedStanzas=[[NSMutableArray alloc] init];
+    self.streamID=nil;
+}
+
 -(void) enableSM3
 {
-    self.supportsSM3=YES;
-    
     MLXMLNode *enableNode =[[MLXMLNode alloc] initWithElement:@"enable"];
     NSDictionary *dic=@{@"xmlns":@"urn:xmpp:sm:3",@"resume":@"true" };
     enableNode.attributes =[dic mutableCopy];
     [self send:enableNode];
+}
+
+-(void) bindAndEnableSmacks
+{
+    XMPPIQ* iqNode =[[XMPPIQ alloc] initWithType:kiqSetType];
+    [iqNode setBindWithResource:_resource];
     
+    [self send:iqNode];
+    
+    if(self.supportsSM3)
+        [self enableSM3];
+    else
+    {
+        //send out messages still in the queue, even if smacks is not supported this time
+        [self sendUnAckedMessages];
+        
+        //clear queue afterwards (we don't want to repeat this)
+        [self.networkQueue addOperation:
+            [NSBlockOperation blockOperationWithBlock:^{
+                [self.unAckedStanzas removeAllObjects];
+        }]];
+    }
 }
 
 -(void) setStatusMessageText:(NSString*) message
@@ -2804,6 +2897,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         return;
     }
     
+    BOOL requestAck=NO;
     for(MLXMLNode* node in _outputQueue)
     {
         DDLogVerbose(@"iterating output ");
@@ -2829,11 +2923,22 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 }
             }
         }
+        //don't react to smacks nonzas
+        if(success && ![node.element isEqualToString:@"r"] && ![node.element isEqualToString:@"a"])
+            requestAck=YES;
     }
     
     DDLogVerbose(@"removing all objs from output ");
     [_outputQueue removeAllObjects];
     
+    if(self.supportsSM3 && requestAck)
+    {
+        DDLogVerbose(@"requesting smacks ack...");
+        MLXMLNode* rNode =[[MLXMLNode alloc] initWithElement:@"r"];
+        NSDictionary *dic=@{@"xmlns":@"urn:xmpp:sm:3"};
+        rNode.attributes =[dic mutableCopy];
+        [self send:rNode];
+    }
 }
 
 -(BOOL) writeToStream:(NSString*) messageOut
@@ -3120,7 +3225,7 @@ void query_cb(const DNSServiceRef DNSServiceRef, const DNSServiceFlags flags, co
 
 -(void) enablePush
 {
-    if(self.accountState==kStateLoggedIn && [self.pushNode length]>0 && [self.pushSecret length]>0 && self.supportsPush)
+    if(self.accountState>=kStateBound && [self.pushNode length]>0 && [self.pushSecret length]>0 && self.supportsPush)
     {
         DDLogInfo(@"************************ ENABLING PUSH: %@ < %@", self.pushNode, self.pushSecret);
         XMPPIQ* enable =[[XMPPIQ alloc] initWithType:kiqSetType];

@@ -1126,24 +1126,18 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [NSBlockOperation blockOperationWithBlock:^{
         if(self.unAckedStanzas)
         {
-            if([hvalue integerValue]==[self.lastHandledOutboundStanza integerValue])
+            DDLogDebug(@"removeUnAckedMessagesLessThan: hvalue %@, lastOutboundStanza %@", hvalue, self.lastOutboundStanza);
+            NSMutableArray *discard =[[NSMutableArray alloc] initWithCapacity:[self.unAckedStanzas count]];
+            for(NSDictionary *dic in self.unAckedStanzas)
             {
-                [self.unAckedStanzas removeAllObjects];
-            }
-            else
-            {
-                NSMutableArray *discard =[[NSMutableArray alloc] initWithCapacity:[self.unAckedStanzas count]];
-                for (NSDictionary *dic in self.unAckedStanzas)
+                NSNumber *stanzaNumber = [dic objectForKey:kStanzaID];
+                if([stanzaNumber integerValue]<[hvalue integerValue])
                 {
-                    NSNumber *stanzaNumber = [dic objectForKey:kStanzaID];
-                    if([stanzaNumber integerValue]<[hvalue integerValue])
-                    {
-                        [discard addObject:dic];
-                    }
+                    [discard addObject:dic];
                 }
-            
-                [self.unAckedStanzas removeObjectsInArray:discard];
             }
+        
+            [self.unAckedStanzas removeObjectsInArray:discard];
         
             //persist these changes
             [self persistState];
@@ -1167,7 +1161,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 
                 if([[stanzaToParse objectForKey:@"stanzaType"]  isEqualToString:@"iq"])
                 {
-                    self.lastHandledInboundStanza=[NSNumber numberWithInteger: [self.lastHandledInboundStanza integerValue]+1];
+                    if(self.accountState>=kStateBound)
+                        self.lastHandledInboundStanza=[NSNumber numberWithInteger: [self.lastHandledInboundStanza integerValue]+1];
                     ParseIq* iqNode= [[ParseIq alloc]  initWithDictionary:stanzaToParse];
                     if ([iqNode.type isEqualToString:kiqErrorType])
                     {
@@ -1231,46 +1226,18 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         _jid=iqNode.jid;
                         DDLogVerbose(@"Set jid %@", _jid);
                     
-                        XMPPIQ* sessionQuery= [[XMPPIQ alloc] initWithType:kiqSetType];
-                        MLXMLNode* session = [[MLXMLNode alloc] initWithElement:@"session"];
-                        [session setXMLNS:@"urn:ietf:params:xml:ns:xmpp-session"];
-                        [sessionQuery.children addObject:session];
-                        [self send:sessionQuery];
-                        
-                        XMPPIQ* discoItems =[[XMPPIQ alloc] initWithType:kiqGetType];
-                        [discoItems setiqTo:_domain];
-                        MLXMLNode* items = [[MLXMLNode alloc] initWithElement:@"query"];
-                        [items setXMLNS:@"http://jabber.org/protocol/disco#items"];
-                        [discoItems.children addObject:items];
-                        [self send:discoItems];
-                        
-                        XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithType:kiqGetType];
-                        [discoInfo setiqTo:_domain];
-                        [discoInfo setDiscoInfoNode];
-                        [self send:discoInfo];
-                        
-                        
-                        //no need to pull roster on every call if disconenct
-                        if(!_rosterList)
+                        if(self.supportsSM3)
                         {
-                            XMPPIQ* roster =[[XMPPIQ alloc] initWithType:kiqGetType];
-                            [roster setRosterRequest];
-                            [self send:roster];
+                            MLXMLNode *enableNode =[[MLXMLNode alloc] initWithElement:@"enable"];
+                            NSDictionary *dic=@{@"xmlns":@"urn:xmpp:sm:3",@"resume":@"true" };
+                            enableNode.attributes =[dic mutableCopy];
+                            [self send:enableNode];
                         }
-                        
-                        self.priority= [[[NSUserDefaults standardUserDefaults] stringForKey:@"XMPPPriority"] integerValue];
-                        self.statusMessage=[[NSUserDefaults standardUserDefaults] stringForKey:@"StatusMessage"];
-                        self.awayState=[[NSUserDefaults standardUserDefaults] boolForKey:@"Away"];
-                        self.visibleState=[[NSUserDefaults standardUserDefaults] boolForKey:@"Visible"];
-                        
-                        XMPPPresence* presence =[[XMPPPresence alloc] initWithHash:_versionHash];
-                        [presence setPriority:self.priority];
-                        if(self.statusMessage) [presence setStatus:self.statusMessage];
-                        if(self.awayState) [presence setAway];
-                        if(!self.visibleState) [presence setInvisible];
-                        
-                        [self send:presence];
-                        
+                        else
+                        {
+                            //init session and query disco, roster etc.
+                            [self initSession];
+                        }
                     }
                     
                     if((iqNode.discoInfo) && [iqNode.type isEqualToString:kiqGetType])
@@ -1602,7 +1569,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"]  isEqualToString:@"message"])
                 {
-                    self.lastHandledInboundStanza=[NSNumber numberWithInteger: [self.lastHandledInboundStanza integerValue]+1];
+                    if(self.accountState>=kStateBound)
+                        self.lastHandledInboundStanza=[NSNumber numberWithInteger: [self.lastHandledInboundStanza integerValue]+1];
                     ParseMessage* messageNode= [[ParseMessage alloc]  initWithDictionary:stanzaToParse];
                     if([messageNode.type isEqualToString:kMessageErrorType])
                     {
@@ -1708,7 +1676,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"]  isEqualToString:@"presence"])
                 {
-                    self.lastHandledInboundStanza=[NSNumber numberWithInteger: [self.lastHandledInboundStanza integerValue]+1];
+                    if(self.accountState>=kStateBound)
+                        self.lastHandledInboundStanza=[NSNumber numberWithInteger: [self.lastHandledInboundStanza integerValue]+1];
                     ParsePresence* presenceNode= [[ParsePresence alloc]  initWithDictionary:stanzaToParse];
                     if([presenceNode.user isEqualToString:_fulluser]) {
                             //ignore self
@@ -1989,11 +1958,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             MLXMLNode *resumeNode =[[MLXMLNode alloc] initWithElement:@"resume"];
                             NSDictionary *dic=@{@"xmlns":@"urn:xmpp:sm:3",@"h":[NSString stringWithFormat:@"%@",self.lastHandledInboundStanza], @"previd":self.streamID };
                             resumeNode.attributes =[dic mutableCopy];
-                            self.resuming=YES;
+                            self.resuming=YES;      //this is needed to distinguish a failed smacks resume and a failed smacks enable later on
                             [self send:resumeNode];
                         }
                         else {
-                            [self bindAndEnableSmacks];
+                            [self bindResource];
                         }
                         
                     }
@@ -2017,28 +1986,27 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     //persist these changes (streamID and initSM3)
                     [self persistState];
                     
+                    //init session and query disco, roster etc.
+                    [self initSession];
+                    
                     //resend unacked stanzas saved above (this happens only if the server provides smacks support without resumption support)
                     [self.networkQueue addOperation:
                         [NSBlockOperation blockOperationWithBlock:^{
                             if(stanzas)
-                            {
-                                for (NSDictionary *dic in stanzas)
-                                {
+                                for(NSDictionary *dic in stanzas)
                                     [self send:(MLXMLNode*)[dic objectForKey:kStanza]];
-                                }
-                            }
                     }]];
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"r"] && self.supportsSM3)
                 {
-                    MLXMLNode *aNode =[[MLXMLNode alloc] initWithElement:@"a"];
-                    NSDictionary *dic=@{@"xmlns":@"urn:xmpp:sm:3",@"h":[NSString stringWithFormat:@"%@",self.lastHandledInboundStanza] };
-                    aNode.attributes =[dic mutableCopy];
+                    MLXMLNode *aNode=[[MLXMLNode alloc] initWithElement:@"a"];
+                    NSDictionary *dic=@{@"xmlns": @"urn:xmpp:sm:3", @"h": [NSString stringWithFormat:@"%@", self.lastHandledInboundStanza]};
+                    aNode.attributes=[dic mutableCopy];
                     [self send:aNode];
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"a"] && self.supportsSM3)
                 {
-                    ParseA* aNode= [[ParseA alloc]  initWithDictionary:stanzaToParse];
+                    ParseA* aNode=[[ParseA alloc] initWithDictionary:stanzaToParse];
                     self.lastHandledOutboundStanza=aNode.h;
                     
                     //remove acked messages
@@ -2048,6 +2016,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 {
                     self.resuming=NO;
                     
+                    //now we are bound again
+                    _accountState=kStateBound;
+                    
                     //remove already delivered stanzas and resend the (still) unacked ones
                     ParseResumed* resumeNode= [[ParseResumed alloc]  initWithDictionary:stanzaToParse];
                     [self removeUnAckedMessagesLessThan:resumeNode.h];
@@ -2055,20 +2026,47 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"failed"])
                 {
-                    if(self.resuming)
+                    if(self.resuming)   //resume failed
                     {
                         self.resuming=NO;
                         
+                        //invalidate stream id
+                        self.streamID=nil;
+                        [self persistState];
+                        
                         //get h value, if server supports smacks revision 1.5.2
                         ParseFailed* failedNode= [[ParseFailed alloc]  initWithDictionary:stanzaToParse];
-                        DDLogInfo(@"++++++++++++++++++++++++ failed resume: h=%d", [failedNode.h integerValue]);
+                        DDLogInfo(@"++++++++++++++++++++++++ failed resume: h=%@", failedNode.h);
                         [self removeUnAckedMessagesLessThan:failedNode.h];
                         
-                        // if resume failed. bind like normal
-                        [self bindAndEnableSmacks];
+                        //if resume failed. bind like normal
+                        [self bindResource];
                     }
                     else        //smacks enable failed
+                    {
                         self.supportsSM3=NO;
+                        
+                        //init session and query disco, roster etc.
+                        [self initSession];
+                        
+                        //resend stanzas still in the outgoing queue and clear it afterwards
+                        //this happens if the server has internal problems and advertises smacks support but ceases to enable it
+                        //message duplicates are possible in this scenario, but that's better than dropping messages
+                        [self.networkQueue addOperation:
+                            [NSBlockOperation blockOperationWithBlock:^{
+                                if(self.unAckedStanzas)
+                                {
+                                    for(NSDictionary *dic in self.unAckedStanzas)
+                                        [self send:(MLXMLNode*)[dic objectForKey:kStanza]];
+                                    
+                                    //clear queue afterwards (we don't want to repeat this)
+                                    [self.unAckedStanzas removeAllObjects];
+                                    
+                                    //persist these changes
+                                    [self persistState];
+                                }
+                        }]];
+                    }
                 }
                 
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"features"])
@@ -2344,14 +2342,18 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     if(!stanza) return;
     
-    if(self.supportsSM3 && self.unAckedStanzas)
+    if(self.accountState>=kStateBound && self.supportsSM3 && self.unAckedStanzas)
     {
         [self.networkQueue addOperation:
             [NSBlockOperation blockOperationWithBlock:^{
-                NSDictionary *dic =@{kStanzaID:[NSNumber numberWithInteger: [self.lastOutboundStanza integerValue]], kStanza:stanza};
-                [self.unAckedStanzas addObject:dic];
-                self.lastOutboundStanza=[NSNumber numberWithInteger:[self.lastOutboundStanza integerValue]+1];
-                DDLogDebug(@"lastOutboundStanza (outgoing h value) is now at: %@", self.lastOutboundStanza);
+                //don't react to smacks nonzas
+                if(![stanza.element isEqualToString:@"r"] && ![stanza.element isEqualToString:@"a"])
+                {
+                    DDLogVerbose(@"adding to unAckedStanzas %@: %@", self.lastOutboundStanza, stanza.XMLString);
+                    NSDictionary *dic =@{kStanzaID:[NSNumber numberWithInteger: [self.lastOutboundStanza integerValue]], kStanza:stanza};
+                    [self.unAckedStanzas addObject:dic];
+                    self.lastOutboundStanza=[NSNumber numberWithInteger:[self.lastOutboundStanza integerValue]+1];
+                }
         }]];
     }
     
@@ -2388,18 +2390,37 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) persistState
 {
+    ///TODO: return entfernen!
+    return;
+    
     //make values persistent
-    NSMutableDictionary* values = @{};
-    [values setValue:self.streamID forKey:@"streamID"];
+    NSMutableDictionary* values = [[NSMutableDictionary alloc] init];
     [values setValue:self.lastHandledInboundStanza forKey:@"lastHandledInboundStanza"];
     [values setValue:self.lastHandledOutboundStanza forKey:@"lastHandledOutboundStanza"];
     [values setValue:self.lastOutboundStanza forKey:@"lastOutboundStanza"];
     [values setValue:self.unAckedStanzas forKey:@"unAckedStanzas"];
+    [values setValue:self.streamID forKey:@"streamID"];
     [[NSUserDefaults standardUserDefaults] setObject:values forKey:[NSString stringWithFormat:@"stream_%@",self.accountNo]];
+    
+    //debug output
+    DDLogInfo(@"persistState: lastHandledInboundStanza=%@, lastHandledOutboundStanza=%@, lastOutboundStanza=%@, #unAckedStanzas=%d%s, streamID=%@",
+        self.lastHandledInboundStanza,
+        self.lastHandledOutboundStanza,
+        self.lastOutboundStanza,
+        self.unAckedStanzas ? [self.unAckedStanzas count] : 0,
+        self.unAckedStanzas ? "" : " (NIL)",
+        self.streamID
+    );
+    if(self.unAckedStanzas)
+        for(NSDictionary *dic in self.unAckedStanzas)
+            DDLogDebug(@"persistState unAckedStanza %@: %@", [dic objectForKey:kStanzaID], [dic objectForKey:kStanza]);
 }
 
 -(void) readState
 {
+    ///TODO: return entfernen!
+    return;
+    
     NSDictionary *dic=[[NSUserDefaults standardUserDefaults] objectForKey:[NSString stringWithFormat:@"stream_%@",self.accountNo]];
     if(dic && [dic isKindOfClass:[NSDictionary class]])
     {
@@ -2410,6 +2431,19 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         self.unAckedStanzas=[dic objectForKey:@"unAckedStanzas"];
         self.streamID=[dic objectForKey:@"streamID"];
     }
+    
+    //debug output
+    DDLogInfo(@"readState: lastHandledInboundStanza=%@, lastHandledOutboundStanza=%@, lastOutboundStanza=%@, #unAckedStanzas=%d%s, streamID=%@",
+        self.lastHandledInboundStanza,
+        self.lastHandledOutboundStanza,
+        self.lastOutboundStanza,
+        self.unAckedStanzas ? [self.unAckedStanzas count] : 0,
+        self.unAckedStanzas ? "" : " (NIL)",
+        self.streamID
+    );
+    if(self.unAckedStanzas)
+        for(NSDictionary *dic in self.unAckedStanzas)
+            DDLogDebug(@"readState unAckedStanza %@: %@", [dic objectForKey:kStanzaID], [dic objectForKey:kStanza]);
 }
 
 -(void) initSM3
@@ -2420,26 +2454,61 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     self.lastOutboundStanza=[NSNumber numberWithInteger:0];
     self.unAckedStanzas=[[NSMutableArray alloc] init];
     self.streamID=nil;
+    DDLogDebug(@"initSM3 done");
 }
 
--(void) enableSM3
-{
-    MLXMLNode *enableNode =[[MLXMLNode alloc] initWithElement:@"enable"];
-    NSDictionary *dic=@{@"xmlns":@"urn:xmpp:sm:3",@"resume":@"true" };
-    enableNode.attributes =[dic mutableCopy];
-    [self send:enableNode];
-}
-
--(void) bindAndEnableSmacks
+-(void) bindResource
 {
     XMPPIQ* iqNode =[[XMPPIQ alloc] initWithType:kiqSetType];
     [iqNode setBindWithResource:_resource];
-    
     [self send:iqNode];
+}
+
+-(void) initSession
+{
+    //now we are bound
+    _accountState=kStateBound;
+        
+    XMPPIQ* sessionQuery= [[XMPPIQ alloc] initWithType:kiqSetType];
+    MLXMLNode* session = [[MLXMLNode alloc] initWithElement:@"session"];
+    [session setXMLNS:@"urn:ietf:params:xml:ns:xmpp-session"];
+    [sessionQuery.children addObject:session];
+    [self send:sessionQuery];
     
-    if(self.supportsSM3)
-        [self enableSM3];
-    else
+    XMPPIQ* discoItems =[[XMPPIQ alloc] initWithType:kiqGetType];
+    [discoItems setiqTo:_domain];
+    MLXMLNode* items = [[MLXMLNode alloc] initWithElement:@"query"];
+    [items setXMLNS:@"http://jabber.org/protocol/disco#items"];
+    [discoItems.children addObject:items];
+    [self send:discoItems];
+    
+    XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithType:kiqGetType];
+    [discoInfo setiqTo:_domain];
+    [discoInfo setDiscoInfoNode];
+    [self send:discoInfo];
+    
+    //no need to pull roster on every call if disconenct
+    if(!_rosterList)
+    {
+        XMPPIQ* roster =[[XMPPIQ alloc] initWithType:kiqGetType];
+        [roster setRosterRequest];
+        [self send:roster];
+    }
+    
+    self.priority=[[[NSUserDefaults standardUserDefaults] stringForKey:@"XMPPPriority"] integerValue];
+    self.statusMessage=[[NSUserDefaults standardUserDefaults] stringForKey:@"StatusMessage"];
+    self.awayState=[[NSUserDefaults standardUserDefaults] boolForKey:@"Away"];
+    self.visibleState=[[NSUserDefaults standardUserDefaults] boolForKey:@"Visible"];
+    
+    XMPPPresence* presence =[[XMPPPresence alloc] initWithHash:_versionHash];
+    [presence setPriority:self.priority];
+    if(self.statusMessage) [presence setStatus:self.statusMessage];
+    if(self.awayState) [presence setAway];
+    if(!self.visibleState) [presence setInvisible];
+    
+    [self send:presence];
+    
+    if(!self.supportsSM3)
     {
         //send out messages still in the queue, even if smacks is not supported this time
         [self sendUnAckedMessages];
@@ -2447,7 +2516,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         //clear queue afterwards (we don't want to repeat this)
         [self.networkQueue addOperation:
             [NSBlockOperation blockOperationWithBlock:^{
-                [self.unAckedStanzas removeAllObjects];
+                if(self.unAckedStanzas)
+                    [self.unAckedStanzas removeAllObjects];
         }]];
     }
 }
@@ -2931,7 +3001,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     DDLogVerbose(@"removing all objs from output ");
     [_outputQueue removeAllObjects];
     
-    if(self.supportsSM3 && requestAck)
+    if(self.accountState>=kStateBound && self.supportsSM3 && requestAck)
     {
         DDLogVerbose(@"requesting smacks ack...");
         MLXMLNode* rNode =[[MLXMLNode alloc] initWithElement:@"r"];

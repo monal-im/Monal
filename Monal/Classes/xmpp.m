@@ -516,7 +516,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     {
         if(_accountState>=kStateBound)
         {
-            ///TODO: push am server deaktivieren
+            //disable push for this node
+            if(self.pushNode && [self.pushNode length]>0 && self.supportsPush)
+            {
+                XMPPIQ* disable=[[XMPPIQ alloc] initWithType:kiqSetType];
+                [disable setPushDisableWithNode:self.pushNode];
+                [self writeToStream:disable.XMLString]; // dont even bother queueing
+            }
             
             //send last smacks ack as required by smacks revision 1.5.2
             if(self.supportsSM3)

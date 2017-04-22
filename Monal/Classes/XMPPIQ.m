@@ -64,6 +64,17 @@
     [xNode.children addObject:secretFieldNode];
 }
 
+-(void) setPushDisableWithNode:(NSString *)node
+{
+    MLXMLNode* disableNode =[[MLXMLNode alloc] init];
+    disableNode.element=@"disable";
+    [disableNode.attributes setObject:@"urn:xmpp:push:0" forKey:@"xmlns"];
+    //this push jid is hardcoded and does not have to be the same hostname as the api endpoint set in MonalAppDelegate.m
+    [disableNode.attributes setObject:@"192.168.2.3" forKey:@"jid"];
+    [disableNode.attributes setObject:node forKey:@"node"];
+    [self.children addObject:disableNode];
+}
+
 -(void) setAuthWithUserName:(NSString *)username resource:(NSString *) resource andPassword:(NSString *) password
 {
     [self.attributes setObject:@"auth1" forKey:@"id"];

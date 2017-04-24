@@ -93,8 +93,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 //stream resumption
 @property (nonatomic, assign) BOOL supportsSM3;
 @property (nonatomic, assign) BOOL resuming;
-
 @property (nonatomic, strong) NSString *streamID;
+@property (nonatomic, assign) BOOL wasClosedBefore;
 
 // client state
 @property (nonatomic, assign) BOOL supportsClientState;
@@ -141,6 +141,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     self=[super init];
     _accountState = kStateLoggedOut;
+    self.wasClosedBefore=YES;
     
     _discoveredServerList=[[NSMutableArray alloc] init];
     _inputBuffer=[[NSMutableString alloc] init];
@@ -1197,7 +1198,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         if([iqNode.features containsObject:@"urn:xmpp:http:upload"])
                         {
                             self.supportsHTTPUpload=YES;
-                        self.uploadServer = iqNode.from;
+                            self.uploadServer = iqNode.from;
                         }
                         
                         if([iqNode.features containsObject:@"urn:xmpp:mam:0"])
@@ -1960,10 +1961,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         
                         //test if smacks is supported and allows resume
                         if(self.supportsSM3 && self.streamID) {
-                            ///TODO: testen, ob supportsHTTPUpload nach einem resume noch gesetzt ist
-                            MLXMLNode *resumeNode =[[MLXMLNode alloc] initWithElement:@"resume"];
+                            MLXMLNode *resumeNode=[[MLXMLNode alloc] initWithElement:@"resume"];
                             NSDictionary *dic=@{@"xmlns":@"urn:xmpp:sm:3",@"h":[NSString stringWithFormat:@"%@",self.lastHandledInboundStanza], @"previd":self.streamID };
-                            resumeNode.attributes =[dic mutableCopy];
+                            resumeNode.attributes=[dic mutableCopy];
                             self.resuming=YES;      //this is needed to distinguish a failed smacks resume and a failed smacks enable later on
                             [self send:resumeNode];
                         }
@@ -2003,14 +2003,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                     [self send:(MLXMLNode*)[dic objectForKey:kStanza]];
                     }]];
                 }
-                else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"r"] && self.supportsSM3)
+                else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"r"] && self.supportsSM3 && self.accountState>=kStateBound)
                 {
                     MLXMLNode *aNode=[[MLXMLNode alloc] initWithElement:@"a"];
                     NSDictionary *dic=@{@"xmlns": @"urn:xmpp:sm:3", @"h": [NSString stringWithFormat:@"%@", self.lastHandledInboundStanza]};
                     aNode.attributes=[dic mutableCopy];
                     [self send:aNode];
                 }
-                else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"a"] && self.supportsSM3)
+                else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"a"] && self.supportsSM3 && self.accountState>=kStateBound)
                 {
                     ParseA* aNode=[[ParseA alloc] initWithDictionary:stanzaToParse];
                     self.lastHandledOutboundStanza=aNode.h;
@@ -2029,6 +2029,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     ParseResumed* resumeNode= [[ParseResumed alloc]  initWithDictionary:stanzaToParse];
                     [self removeUnAckedMessagesLessThan:resumeNode.h];
                     [self sendUnAckedMessages];
+                    
+                    //query disco and presence state if we resumed after a force close
+                    if(self.wasClosedBefore)
+                    {
+                        [self queryDisco];
+                        [self queryPresence];
+                    }
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"failed"])
                 {
@@ -2352,13 +2359,16 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     {
         [self.networkQueue addOperation:
             [NSBlockOperation blockOperationWithBlock:^{
-                //don't react to smacks nonzas
-                if(![stanza.element isEqualToString:@"r"] && ![stanza.element isEqualToString:@"a"])
+                //only count stanzas, not nonzas
+                if([stanza.element isEqualToString:@"iq"] || [stanza.element isEqualToString:@"message"] || [stanza.element isEqualToString:@"presence"])
                 {
                     DDLogVerbose(@"adding to unAckedStanzas %@: %@", self.lastOutboundStanza, stanza.XMLString);
                     NSDictionary *dic =@{kStanzaID:[NSNumber numberWithInteger: [self.lastOutboundStanza integerValue]], kStanza:stanza};
                     [self.unAckedStanzas addObject:dic];
                     self.lastOutboundStanza=[NSNumber numberWithInteger:[self.lastOutboundStanza integerValue]+1];
+                    
+                    //persist these changes
+                    [self persistState];
                 }
         }]];
     }
@@ -2396,20 +2406,21 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) persistState
 {
-    ///TODO: return entfernen!
-    return;
-    
-    //make values persistent
+    //state dictionary
     NSMutableDictionary* values = [[NSMutableDictionary alloc] init];
+    
+    //collect smacks state
     [values setValue:self.lastHandledInboundStanza forKey:@"lastHandledInboundStanza"];
     [values setValue:self.lastHandledOutboundStanza forKey:@"lastHandledOutboundStanza"];
     [values setValue:self.lastOutboundStanza forKey:@"lastOutboundStanza"];
     [values setValue:self.unAckedStanzas forKey:@"unAckedStanzas"];
     [values setValue:self.streamID forKey:@"streamID"];
-    [[NSUserDefaults standardUserDefaults] setObject:values forKey:[NSString stringWithFormat:@"stream_%@",self.accountNo]];
+    
+    //save state dictionary
+    [[NSUserDefaults standardUserDefaults] setObject:[NSKeyedArchiver archivedDataWithRootObject:values] forKey:[NSString stringWithFormat:@"stream_state_v1_%@",self.accountNo]];
     
     //debug output
-    DDLogInfo(@"persistState: lastHandledInboundStanza=%@, lastHandledOutboundStanza=%@, lastOutboundStanza=%@, #unAckedStanzas=%d%s, streamID=%@",
+    DDLogInfo(@"+++++++++++++++++++ persistState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%d%s,\n\tstreamID=%@",
         self.lastHandledInboundStanza,
         self.lastHandledOutboundStanza,
         self.lastOutboundStanza,
@@ -2419,18 +2430,17 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     );
     if(self.unAckedStanzas)
         for(NSDictionary *dic in self.unAckedStanzas)
-            DDLogDebug(@"persistState unAckedStanza %@: %@", [dic objectForKey:kStanzaID], [dic objectForKey:kStanza]);
+            DDLogDebug(@"+++++++++++++++++++ persistState unAckedStanza %@: %@", [dic objectForKey:kStanzaID], ((MLXMLNode*)[dic objectForKey:kStanza]).XMLString);
 }
 
 -(void) readState
 {
-    ///TODO: return entfernen!
-    return;
-    
-    NSDictionary *dic=[[NSUserDefaults standardUserDefaults] objectForKey:[NSString stringWithFormat:@"stream_%@",self.accountNo]];
-    if(dic && [dic isKindOfClass:[NSDictionary class]])
+    NSData *data=[[NSUserDefaults standardUserDefaults] objectForKey:[NSString stringWithFormat:@"stream_state_v1_%@", self.accountNo]];
+    if(data)
     {
-        //read smacks state
+        NSMutableDictionary* dic=[NSKeyedUnarchiver unarchiveObjectWithData:data];
+
+        //collect smacks state
         self.lastHandledInboundStanza=[dic objectForKey:@"lastHandledInboundStanza"];
         self.lastHandledOutboundStanza=[dic objectForKey:@"lastHandledOutboundStanza"];
         self.lastOutboundStanza=[dic objectForKey:@"lastOutboundStanza"];
@@ -2439,7 +2449,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     
     //debug output
-    DDLogInfo(@"readState: lastHandledInboundStanza=%@, lastHandledOutboundStanza=%@, lastOutboundStanza=%@, #unAckedStanzas=%d%s, streamID=%@",
+    DDLogInfo(@"+++++++++++++++++++ readState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%d%s,\n\tstreamID=%@",
         self.lastHandledInboundStanza,
         self.lastHandledOutboundStanza,
         self.lastOutboundStanza,
@@ -2449,7 +2459,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     );
     if(self.unAckedStanzas)
         for(NSDictionary *dic in self.unAckedStanzas)
-            DDLogDebug(@"readState unAckedStanza %@: %@", [dic objectForKey:kStanzaID], [dic objectForKey:kStanza]);
+            DDLogDebug(@"+++++++++++++++++++ readState unAckedStanza %@: %@", [dic objectForKey:kStanzaID], ((MLXMLNode*)[dic objectForKey:kStanza]).XMLString);
 }
 
 -(void) initSM3
@@ -2468,6 +2478,34 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     XMPPIQ* iqNode =[[XMPPIQ alloc] initWithType:kiqSetType];
     [iqNode setBindWithResource:_resource];
     [self send:iqNode];
+    
+    //now the app is initialized and the next smacks resume will have full disco and presence state information
+    self.wasClosedBefore=NO;
+}
+
+-(void) queryPresence
+{
+    ///TODO: alle roster einträge durchgehen und presence probes senden
+}
+
+-(void) queryDisco
+{
+    XMPPIQ* discoItems =[[XMPPIQ alloc] initWithType:kiqGetType];
+    [discoItems setiqTo:_domain];
+    MLXMLNode* items = [[MLXMLNode alloc] initWithElement:@"query"];
+    [items setXMLNS:@"http://jabber.org/protocol/disco#items"];
+    [discoItems.children addObject:items];
+    [self send:discoItems];
+    
+    XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithType:kiqGetType];
+    [discoInfo setiqTo:_domain];
+    [discoInfo setDiscoInfoNode];
+    [self send:discoInfo];
+    
+    self.priority=[[[NSUserDefaults standardUserDefaults] stringForKey:@"XMPPPriority"] integerValue];
+    self.statusMessage=[[NSUserDefaults standardUserDefaults] stringForKey:@"StatusMessage"];
+    self.awayState=[[NSUserDefaults standardUserDefaults] boolForKey:@"Away"];
+    self.visibleState=[[NSUserDefaults standardUserDefaults] boolForKey:@"Visible"];
 }
 
 -(void) initSession
@@ -2481,32 +2519,17 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [sessionQuery.children addObject:session];
     [self send:sessionQuery];
     
-    XMPPIQ* discoItems =[[XMPPIQ alloc] initWithType:kiqGetType];
-    [discoItems setiqTo:_domain];
-    MLXMLNode* items = [[MLXMLNode alloc] initWithElement:@"query"];
-    [items setXMLNS:@"http://jabber.org/protocol/disco#items"];
-    [discoItems.children addObject:items];
-    [self send:discoItems];
-    
-    XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithType:kiqGetType];
-    [discoInfo setiqTo:_domain];
-    [discoInfo setDiscoInfoNode];
-    [self send:discoInfo];
+    [self queryDisco];
     
     //no need to pull roster on every call if disconenct
     if(!_rosterList)
     {
-        XMPPIQ* roster =[[XMPPIQ alloc] initWithType:kiqGetType];
+        XMPPIQ* roster=[[XMPPIQ alloc] initWithType:kiqGetType];
         [roster setRosterRequest];
         [self send:roster];
     }
     
-    self.priority=[[[NSUserDefaults standardUserDefaults] stringForKey:@"XMPPPriority"] integerValue];
-    self.statusMessage=[[NSUserDefaults standardUserDefaults] stringForKey:@"StatusMessage"];
-    self.awayState=[[NSUserDefaults standardUserDefaults] boolForKey:@"Away"];
-    self.visibleState=[[NSUserDefaults standardUserDefaults] boolForKey:@"Visible"];
-    
-    XMPPPresence* presence =[[XMPPPresence alloc] initWithHash:_versionHash];
+    XMPPPresence* presence=[[XMPPPresence alloc] initWithHash:_versionHash];
     [presence setPriority:self.priority];
     if(self.statusMessage) [presence setStatus:self.statusMessage];
     if(self.awayState) [presence setAway];
@@ -2523,7 +2546,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         [self.networkQueue addOperation:
             [NSBlockOperation blockOperationWithBlock:^{
                 if(self.unAckedStanzas)
+                {
                     [self.unAckedStanzas removeAllObjects];
+                    [self persistState];
+                }
         }]];
     }
 }
@@ -2999,8 +3025,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 }
             }
         }
-        //don't react to smacks nonzas
-        if(success && ![node.element isEqualToString:@"r"] && ![node.element isEqualToString:@"a"])
+        //only react to stanzas, not nonzas
+        if(success && ([node.element isEqualToString:@"iq"] || [node.element isEqualToString:@"message"] || [node.element isEqualToString:@"presence"]))
             requestAck=YES;
     }
     

@@ -2416,17 +2416,21 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [values setValue:self.unAckedStanzas forKey:@"unAckedStanzas"];
     [values setValue:self.streamID forKey:@"streamID"];
     
+    //collect roster state
+    [values setValue:self.rosterList forKey:@"rosterList"];
+    
     //save state dictionary
     [[NSUserDefaults standardUserDefaults] setObject:[NSKeyedArchiver archivedDataWithRootObject:values] forKey:[NSString stringWithFormat:@"stream_state_v1_%@",self.accountNo]];
     
     //debug output
-    DDLogInfo(@"+++++++++++++++++++ persistState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%d%s,\n\tstreamID=%@",
+    DDLogInfo(@"+++++++++++++++++++ persistState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%d%s,\n\tstreamID=%@\n\t#rosterList=%d",
         self.lastHandledInboundStanza,
         self.lastHandledOutboundStanza,
         self.lastOutboundStanza,
         self.unAckedStanzas ? [self.unAckedStanzas count] : 0,
         self.unAckedStanzas ? "" : " (NIL)",
-        self.streamID
+        self.streamID,
+        self.rosterList ? [self.rosterList count] : 0
     );
     if(self.unAckedStanzas)
         for(NSDictionary *dic in self.unAckedStanzas)
@@ -2446,16 +2450,20 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         self.lastOutboundStanza=[dic objectForKey:@"lastOutboundStanza"];
         self.unAckedStanzas=[dic objectForKey:@"unAckedStanzas"];
         self.streamID=[dic objectForKey:@"streamID"];
+        
+        //collect roster state
+        self.rosterList=[dic objectForKey:@"rosterList"];
     }
     
     //debug output
-    DDLogInfo(@"+++++++++++++++++++ readState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%d%s,\n\tstreamID=%@",
+    DDLogInfo(@"+++++++++++++++++++ readState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%d%s,\n\tstreamID=%@\n\t#rosterList=%d",
         self.lastHandledInboundStanza,
         self.lastHandledOutboundStanza,
         self.lastOutboundStanza,
         self.unAckedStanzas ? [self.unAckedStanzas count] : 0,
         self.unAckedStanzas ? "" : " (NIL)",
-        self.streamID
+        self.streamID,
+        self.rosterList ? [self.rosterList count] : 0
     );
     if(self.unAckedStanzas)
         for(NSDictionary *dic in self.unAckedStanzas)
@@ -2485,7 +2493,17 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) queryPresence
 {
-    ///TODO: alle roster einträge durchgehen und presence probes senden
+    //FIXME: maybe this can be done by just storing the presence state in persistState instead of querying it here
+    for(NSDictionary* contact in self.rosterList)
+    {
+        if([[contact objectForKey:@"subscription"] isEqualToString:@"both"])
+        {
+            MLXMLNode* presenceProbe = [[MLXMLNode alloc] initWithElement:@"presence"];
+            NSDictionary *dic=@{@"to": [contact objectForKey:@"jid"], @"type": @"probe"};
+            presenceProbe.attributes = [dic mutableCopy];
+            [self send:presenceProbe];
+        }
+    }
 }
 
 -(void) queryDisco
@@ -2521,13 +2539,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     [self queryDisco];
     
-    //no need to pull roster on every call if disconenct
-    if(!_rosterList)
-    {
-        XMPPIQ* roster=[[XMPPIQ alloc] initWithType:kiqGetType];
-        [roster setRosterRequest];
-        [self send:roster];
-    }
+    XMPPIQ* roster=[[XMPPIQ alloc] initWithType:kiqGetType];
+    [roster setRosterRequest];
+    [self send:roster];
     
     XMPPPresence* presence=[[XMPPPresence alloc] initWithHash:_versionHash];
     [presence setPriority:self.priority];

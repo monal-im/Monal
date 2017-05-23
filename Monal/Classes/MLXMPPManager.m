@@ -12,11 +12,10 @@
 
 #if TARGET_OS_IPHONE
 #import "MonalAppDelegate.h"
-#import "PasswordManager.h"
 @import MobileCoreServices;
-#else
-#import "STKeyChain.h"
 #endif
+
+#import "SAMKeychain.h"
 
 static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 static const int pingFreqencyMinutes =1;
@@ -290,23 +289,9 @@ NSString *pushSecret;
     xmppAccount.oAuth=[[account objectForKey:kOauth] boolValue];
     
     xmppAccount.accountNo=[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]];
-#if TARGET_OS_IPHONE
-    if(!xmppAccount.oAuth) {
-        PasswordManager* passMan= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@-%@@%@",[account objectForKey:kAccountID], [account objectForKey:kUsername],  [account objectForKey:kDomain] ]];
-        xmppAccount.password=[passMan getPassword] ;
-        if(!xmppAccount.password.length>0) {
-            //backwards compatibility with old storage
-            passMan= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
-            xmppAccount.password=[passMan getPassword] ;
-        }
-    }
+
     
-#else
-    NSError *error;
-    xmppAccount.password =[STKeychain getPasswordForUsername:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]] andServiceName:@"Monal" error:&error];
-    
-#endif
- 
+    xmppAccount.password = [SAMKeychain passwordForService:@"Monal" account:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
     
     if([xmppAccount.password length]==0 && !xmppAccount.oAuth) //&& ([tempPass length]==0)
     {

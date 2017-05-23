@@ -10,12 +10,6 @@
 #import "DDLog.h"
 
 
-#if TARGET_OS_IPHONE
-#import "PasswordManager.h"
-#else
-
-#endif
-
 @implementation DataLayer
 
 static const int ddLogLevel = LOG_LEVEL_INFO;
@@ -1877,19 +1871,7 @@ static DataLayer *sharedInstance=nil;
         DDLogVerbose(@"Database version <1.072 detected. Performing upgrade on passwords. ");
         NSArray* rows = [self executeReader:@"select account_id, password from account"];
         int counter=0;
-        PasswordManager* pass;
-        while(counter<[rows count])
-        {
-            //DDLogVerbose(@" %@ %@",[[rows objectAtIndex:counter] objectAtIndex:0], [[rows objectAtIndex:counter] objectAtIndex:1] );
-            pass=[[PasswordManager alloc]  init:[NSString stringWithFormat:@"%@",[[rows objectAtIndex:counter] objectAtIndex:0]]];
-            [pass setPassword:[[rows objectAtIndex:counter] objectAtIndex:1]] ;
-            //DDLogVerbose(@"got:%@", [pass getPassword] );
-            
-            counter++;
-        }
-        
-        
-        //wipe passwords
+    
         
         [self executeNonQuery:@"update account set password=''; "];
         

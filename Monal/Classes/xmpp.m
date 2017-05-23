@@ -16,10 +16,10 @@
 
 #if TARGET_OS_IPHONE
 #import "UIAlertView+Blocks.h"
-#import "PasswordManager.h"
-#else
-#import "STKeyChain.h"
 #endif
+
+#import "SAMKeychain.h"
+
 
 #import "MLImageManager.h"
 

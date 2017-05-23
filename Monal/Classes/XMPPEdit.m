@@ -98,13 +98,10 @@ NSString *const kGtalk = @"Gtalk";
         else
             self.jid=[NSString stringWithFormat:@"%@",[settings objectForKey:@"username"]];
         
+        NSString*pass= [SAMKeychain passwordForService:@"Monal" account:[NSString stringWithFormat:@"%@",self.accountno]];
         
-        PasswordManager* pass= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@-%@",self.accountno,self.jid]];
-        self.password=[pass getPassword];
-        if(self.password.length==0)
-        {
-            pass= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",self.accountno]];
-            self.password=[pass getPassword];
+        if(pass) {
+            self.password =pass;
         }
         
         self.server=[settings objectForKey:@"server"];
@@ -282,10 +279,8 @@ NSString *const kGtalk = @"Gtalk";
                     [[DataLayer sharedInstance] executeScalar:@"select max(account_id) from account" withCompletion:^(NSObject * accountid) {
                         if(accountid) {
                             self.accountno=[NSString stringWithFormat:@"%@",accountid];
-                            if(!isGtalk && self.password) {
-                                PasswordManager* pass= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@-%@",self.accountno,self.jid]];
-                                [pass setPassword:self.password] ;
-                            }
+                          
+                           
                             
                             if(self.enabled)
                             {
@@ -306,10 +301,9 @@ NSString *const kGtalk = @"Gtalk";
     else
     {
         [[DataLayer sharedInstance] updateAccounWithDictionary:dic andCompletion:^(BOOL result) {
-            if(!isGtalk) {
-                PasswordManager* pass= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@-%@",self.accountno,self.jid]];
-                [pass setPassword:self.password] ;
-            }
+            NSError *error;
+           
+             [SAMKeychain setPassword:self.password forService:@"Monal" account:self.accountno];
             if(self.enabled)
             {
                 [[MLXMPPManager sharedInstance] connectAccount:self.accountno];

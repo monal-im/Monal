@@ -81,12 +81,15 @@ EOM
 }
 if [[ "$CONFIGURATION" == "Debug" ]]; then
   install_resource "$PODS_CONFIGURATION_BUILD_DIR/Appirater/Appirater.bundle"
+  install_resource "SAMKeychain/Support/SAMKeychain.bundle"
 fi
 if [[ "$CONFIGURATION" == "Adhoc" ]]; then
   install_resource "$PODS_CONFIGURATION_BUILD_DIR/Appirater/Appirater.bundle"
+  install_resource "SAMKeychain/Support/SAMKeychain.bundle"
 fi
 if [[ "$CONFIGURATION" == "AppStore" ]]; then
   install_resource "$PODS_CONFIGURATION_BUILD_DIR/Appirater/Appirater.bundle"
+  install_resource "SAMKeychain/Support/SAMKeychain.bundle"
 fi
 
 mkdir -p "${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}"

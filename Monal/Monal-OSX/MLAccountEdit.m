@@ -10,7 +10,7 @@
 #import "MLXMPPManager.h"
 #import "DataLayer.h"
 #import "MLAccountSettings.h"
-#import "STKeyChain.h"
+#import "SAMKeychain.h"
 
 #import "NXOAuth2.h"
 #import "MLOAuthViewController.h"
@@ -78,7 +78,7 @@
         }
         
         NSError *error;
-        NSString*pass= [STKeychain getPasswordForUsername:[NSString stringWithFormat:@"%@",[self.accountToEdit objectForKey:kAccountID]] andServiceName:@"Monal" error:&error];
+        NSString*pass= [SAMKeychain getPasswordForUsername:[NSString stringWithFormat:@"%@",[self.accountToEdit objectForKey:kAccountID]] andServiceName:@"Monal" error:&error];
         if(pass) {
             self.password.stringValue =pass;
         }
@@ -192,7 +192,7 @@
                 [[DataLayer sharedInstance] executeScalar:@"select max(account_id) from account" withCompletion:^(NSObject * accountid) {
                     if(accountid) {
                         NSError *error;
-                        [STKeychain storeUsername:[NSString stringWithFormat:@"%@", accountid] andPassword:self.password.stringValue forServiceName:@"Monal" updateExisting:NO error:&error];
+                        [SAMKeychain storeUsername:[NSString stringWithFormat:@"%@", accountid] andPassword:self.password.stringValue forServiceName:@"Monal" updateExisting:NO error:&error];
                         [self refreshPresenter];
                         
                         if(self.enabledCheck.state)
@@ -216,7 +216,7 @@
             [self refreshPresenter];
             
             NSError *error;
-            [STKeychain storeUsername:[NSString stringWithFormat:@"%@",[self.accountToEdit objectForKey:kAccountID]]  andPassword:self.password.stringValue forServiceName:@"Monal"updateExisting:YES error:&error];
+            [SAMKeychain storeUsername:[NSString stringWithFormat:@"%@",[self.accountToEdit objectForKey:kAccountID]]  andPassword:self.password.stringValue forServiceName:@"Monal"updateExisting:YES error:&error];
 
             if(self.enabledCheck.state)
             {

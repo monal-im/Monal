@@ -11,73 +11,72 @@
 		013C5534CE0A8279D2C4E26B2E019D93 /* MPOAuthCredentialConcreteStore.m in Sources */ = {isa = PBXBuildFile; fileRef = DA6104742ECB4BC0F41A4F466CD7A2EC /* MPOAuthCredentialConcreteStore.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		0174628D313395F40F3AC4B156419459 /* AppiraterDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 8C944411DD064E402AA6A95F89A683D9 /* AppiraterDelegate.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		017E142725F296465813832624CAA011 /* DBRestClient.h in Headers */ = {isa = PBXBuildFile; fileRef = 33A8C6E8954DD7D218D9D3C243C61DA9 /* DBRestClient.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		021024BD652CC87C9ADC39F350797D53 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B6F6E84D3F2E81339C4832451EE47DA /* Foundation.framework */; };
 		021F653FF82EEF2E2DD0F650583B0B16 /* NSString+Dropbox.m in Sources */ = {isa = PBXBuildFile; fileRef = FA87B08D2A3C37DD2E66D97FAE3E4CF4 /* NSString+Dropbox.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		04534FA9E25B09B96CE70D5367B74DE5 /* Pods-Monal-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 67AE349200DA3F877949ED61A7E2A9E0 /* Pods-Monal-dummy.m */; };
-		04848B6FEE2AB117FCD0115090D55BC2 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CE7B4F3B19A45E41B95A6606D6227164 /* CoreGraphics.framework */; };
+		0347E035BECCD37752CBE60B62471F24 /* SAMKeychainQuery.m in Sources */ = {isa = PBXBuildFile; fileRef = 061BEA9AECDC647CA8CAADA773F876CE /* SAMKeychainQuery.m */; };
+		04848B6FEE2AB117FCD0115090D55BC2 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 225CA12ADDD15A6660B0F05521045B78 /* CoreGraphics.framework */; };
 		04C007F190976B13814AEEB1B207AEF8 /* DBJsonWriter.m in Sources */ = {isa = PBXBuildFile; fileRef = 78A461A9FB000D34D2D16482225C9B06 /* DBJsonWriter.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		05160121F593AA049894B6F42274F437 /* TPCircularBuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = DA53EC96B4322472D7EB5CA006843601 /* TPCircularBuffer.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		058444451CA4A7919EB38DB8CD11AB7B /* fr.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 8D296322B004201E7C05AA6F081DD42E /* fr.lproj */; };
 		06C8581194A7FE8FA0C972AB6E560E2D /* ja.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 42CEFDD59084A4AD620DC610DB1CC636 /* ja.lproj */; };
 		07EBFC7E58E2DCE369F7EE22ED32EF3A /* th.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 0C6488DDC73BEBA82EF66F7D33C06D40 /* th.lproj */; };
 		09950D56656A680EA1F402EE074EF3DC /* MPOAuthConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 399BAE03A679BF58317D825524DD74BE /* MPOAuthConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0AEF414B2642DB8A447B48A77DED80B2 /* zh-Hant.lproj in Resources */ = {isa = PBXBuildFile; fileRef = BA518412F1514A77A1B8CD1D93E25F93 /* zh-Hant.lproj */; };
+		0E3E3AA6E576F35704D0D5A35175117F /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AEEA0199F2BD46AA403B077BE934B458 /* AudioToolbox.framework */; };
 		0F8BBFFC703A4E81CECB05D7DB96401F /* hu.lproj in Resources */ = {isa = PBXBuildFile; fileRef = DA205DE911B7FF636F91984C63B7AB5F /* hu.lproj */; };
 		11B89AE4FA8F7233685FE2BE50110090 /* Appirater.h in Headers */ = {isa = PBXBuildFile; fileRef = 16701CC602DB311A31379829BF4C2EC4 /* Appirater.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		11D6CC8AA2A7E16B0DCF0DAAA3E0BF0F /* MBProgressHUD.h in Headers */ = {isa = PBXBuildFile; fileRef = 53C509F1E19CCD69C0D03242C1A8AA2E /* MBProgressHUD.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		12E601D1D6A475CFF4B8F34177FD0480 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F818FE60323A691EF210EA44B3EB53E8 /* Security.framework */; };
 		1315DC6A05D48CA5516F55408794C47F /* DBAuthHelperOSX.m in Sources */ = {isa = PBXBuildFile; fileRef = 1464590EED3BA50BB67F54612CCB512E /* DBAuthHelperOSX.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		13BE4E59835C7C165E90C9D95EC38D5C /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DD4F23C9468C713EFFC7D7F8E58B8299 /* AudioToolbox.framework */; };
 		14050CC46B16C7304A8E351114C0B04E /* DBSession.h in Headers */ = {isa = PBXBuildFile; fileRef = 209A19548108127D99F207A776D219C1 /* DBSession.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		1436E88E92BC8DCFC10848AFAC6E5177 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37B49685B3C696086A7849CEBD3B55E9 /* CFNetwork.framework */; };
-		1541EBFA6D6E78C7B73A4BA7A8564519 /* TPCircularBuffer-OSX-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B4824C2CED9B07E47582A5CD01B5691 /* TPCircularBuffer-OSX-dummy.m */; };
-		1569A8A389CCF4E69E9DA5AFEEC3FA0A /* TPCircularBuffer+AudioBufferList.c in Sources */ = {isa = PBXBuildFile; fileRef = 506124F500DF3FB285CE332340E87515 /* TPCircularBuffer+AudioBufferList.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		1416E0CEBED9398C3FC9A508CC84C13C /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7C2193EE1858A36A2DB9B3ED721EAB7C /* AudioToolbox.framework */; };
+		1436E88E92BC8DCFC10848AFAC6E5177 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8F697B4F58D57E06DC3EB4E54B6E3F38 /* CFNetwork.framework */; };
 		15C3106E4606ADA53D431750CD8A7FFA /* NSDictionary+Dropbox.m in Sources */ = {isa = PBXBuildFile; fileRef = 472D439F41BAE9388F9F04FE39249E1C /* NSDictionary+Dropbox.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		1D42954DFE1A7DB5BD391F6971F241A9 /* DBRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 8A80E3A69648BC3F12CD91057F4EE8FB /* DBRequest.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		1EBBFD3AE6C73FDE215B2FDCBA16EE45 /* MPOAuthParameterFactory.h in Headers */ = {isa = PBXBuildFile; fileRef = 88E236D93B7864B8040A4572320F14F3 /* MPOAuthParameterFactory.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		1EDCEB26B9D6200EFA6A483E453FB162 /* DBAccountInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CF7725EE17E0FCC536FD141B0A527E /* DBAccountInfo.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		1F5F761C1BBA0CF02A3C24BAEE18BA50 /* NSString+URLEscapingAdditions.h in Headers */ = {isa = PBXBuildFile; fileRef = 183E84D2D27CC896545228A559272306 /* NSString+URLEscapingAdditions.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		20821E422BF10E35C402B5000D986369 /* SAMKeychainQuery.m in Sources */ = {isa = PBXBuildFile; fileRef = 6CBDD5842C0F6981D2CB4551E8BC60FD /* SAMKeychainQuery.m */; };
-		2094E507A108977EC61ED6EA663A58A3 /* TPCircularBuffer+AudioBufferList.h in Headers */ = {isa = PBXBuildFile; fileRef = B2A17152ED5653D9171C1A8B4EA095D2 /* TPCircularBuffer+AudioBufferList.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		2162F19D7DABB43772CF5EC0EF41D690 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B6F6E84D3F2E81339C4832451EE47DA /* Foundation.framework */; };
-		226F69E48F7B6BC9CB28CBEA5DEBC3CF /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B5FE30FA9330B14E77B1BB684D6B7E0F /* Cocoa.framework */; };
+		2162F19D7DABB43772CF5EC0EF41D690 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AE07DDBEE30F178414CC247E5DBBF952 /* Foundation.framework */; };
 		22DB76D9D2090F695511C798BF5B2B00 /* NSString+DBJSON.m in Sources */ = {isa = PBXBuildFile; fileRef = 99261FB1540762A011FC4DA27AE85573 /* NSString+DBJSON.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		231E594EE9306909EA619C933E34A23C /* Dropbox-OSX-SDK-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 7036918DC77A1A82699419B2F77EA6A7 /* Dropbox-OSX-SDK-dummy.m */; };
-		27F3AEE68B21859B3FF546F683BACF16 /* SAMKeychain.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E0F886CB0C364B79B1467CD0EE1B6DE /* SAMKeychain.m */; };
 		2B698B7EBC21CEF8DFE71177F121C4DB /* MBProgressHUD-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 66F3DAC3C06D70961743A233926196F8 /* MBProgressHUD-dummy.m */; };
 		2BD0AF25AE86428344027151CAE35F5A /* MPOAuthURLResponse.h in Headers */ = {isa = PBXBuildFile; fileRef = F27018EC4A646A664707E7EFAB69627D /* MPOAuthURLResponse.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		2C0B5F462585C3F319DA7FD8F0523B3D /* SAMKeychainQuery.m in Sources */ = {isa = PBXBuildFile; fileRef = 061BEA9AECDC647CA8CAADA773F876CE /* SAMKeychainQuery.m */; settings = {COMPILER_FLAGS = "-DOS_OBJECT_USE_OBJC=0"; }; };
 		2CCEC9B863D713CFD7936C03CAABC644 /* MPOAuthAuthenticationMethod.h in Headers */ = {isa = PBXBuildFile; fileRef = 5BD5444C7EBF6C483D4202DA3D0ABA9B /* MPOAuthAuthenticationMethod.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		2CEC6F4C8BF11FBA078E4ACDBBC8C8B0 /* DBBase64Transcoder.c in Sources */ = {isa = PBXBuildFile; fileRef = F63548C8FFAC63BFFA976FA309716436 /* DBBase64Transcoder.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		2E2502F72CE5B294F1630242A846D351 /* SAMKeychain.m in Sources */ = {isa = PBXBuildFile; fileRef = 4ADA8A84F08C7BE071CB31F2BE0EE0AE /* SAMKeychain.m */; settings = {COMPILER_FLAGS = "-DOS_OBJECT_USE_OBJC=0"; }; };
 		2E3FD688613EA9E912AACF878EE873C0 /* MPOAuthAPI.m in Sources */ = {isa = PBXBuildFile; fileRef = 78C8FB488767ED18ED5E98E44F4F7BE6 /* MPOAuthAPI.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		2EF170135E0B3A4790DF61AAD1E7FF5A /* NSString+DBJSON.h in Headers */ = {isa = PBXBuildFile; fileRef = E764F1CF5F88B4956B1974A9DEC6F2BE /* NSString+DBJSON.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		2F9AA39D6341E69FE67612E6DC71355A /* vi.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 784692913630FF3F5B84DA71F9A5DA84 /* vi.lproj */; };
 		300CB12F2EED104AA273C1A9338D82FC /* DBError.h in Headers */ = {isa = PBXBuildFile; fileRef = 5584C4DF3FCCF2105CE79D942A575E62 /* DBError.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		316FB0695691C6D625C34D1FD5639DCF /* fi.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 172A92F9F23D43098FADC1884FFA7BEE /* fi.lproj */; };
-		31AA180E53E9B22FB4CBEB332B2A2BB3 /* SAMKeychainQuery.h in Headers */ = {isa = PBXBuildFile; fileRef = 190DDCC377CD2ED280D2A6AA03530388 /* SAMKeychainQuery.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		32ACFD623A104B4B81D5895263B9B1AE /* NSObject+DBJSON.m in Sources */ = {isa = PBXBuildFile; fileRef = CC696451060D82718355DA3F49582CC8 /* NSObject+DBJSON.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		33EE61B4B628EA4CFF0C47ED5D32C99A /* TPCircularBuffer+AudioBufferList.h in Headers */ = {isa = PBXBuildFile; fileRef = B2A17152ED5653D9171C1A8B4EA095D2 /* TPCircularBuffer+AudioBufferList.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		35F7FFD7E800B39029E370703975021D /* TPCircularBuffer+AudioBufferList.h in Headers */ = {isa = PBXBuildFile; fileRef = B2A17152ED5653D9171C1A8B4EA095D2 /* TPCircularBuffer+AudioBufferList.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		381630E23CDDA5A374387030ED245025 /* Pods-Monal-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 67AE349200DA3F877949ED61A7E2A9E0 /* Pods-Monal-dummy.m */; };
 		39EC0C87A632FACA2A304A0A76DFA334 /* Pods-Monal-OSXTests-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = F32571D85F71A6EEBFF397B7B1029B03 /* Pods-Monal-OSXTests-dummy.m */; };
 		3A16250CA3DB67B7AB3247B4F07C49BA /* NSObject+DBJSON.h in Headers */ = {isa = PBXBuildFile; fileRef = 7B98E414EC017912836E294F9743F001 /* NSObject+DBJSON.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		3C8A18D6562CE93ACB928DF00BF5A308 /* TPCircularBuffer+AudioBufferList.c in Sources */ = {isa = PBXBuildFile; fileRef = 506124F500DF3FB285CE332340E87515 /* TPCircularBuffer+AudioBufferList.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		3DABD4E9E2AE0E250A842E0AECE14762 /* DropboxOSX.h in Headers */ = {isa = PBXBuildFile; fileRef = CE836353A6F7C4F2E0471B112898A410 /* DropboxOSX.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		3DCFA5BF0A4A7F16020E22BE2736D791 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B5FE30FA9330B14E77B1BB684D6B7E0F /* Cocoa.framework */; };
+		3DCFA5BF0A4A7F16020E22BE2736D791 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 93221C4304958C0738B30077A72DBE7C /* Cocoa.framework */; };
 		3F85DAE63451D720A47847347FF168C0 /* DBKeychain.h in Headers */ = {isa = PBXBuildFile; fileRef = 62318D6294284C3D575716C4531ED580 /* DBKeychain.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		413B4D0696FACFA43C78624242C6E2DB /* TPCircularBuffer-iOS-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 6EDE73D2D3AA637D73D2AE0219ADD5BA /* TPCircularBuffer-iOS-dummy.m */; };
+		43841006B1C81551A392A67B580E7ECE /* SAMKeychain-iOS-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = D3079441ED0C241AFF858802E43701BA /* SAMKeychain-iOS-dummy.m */; };
 		4441F7EB2B07CC5D0782EA74B5935341 /* sv.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 21A622DEF84B65F9693D6D3FAEDA36BA /* sv.lproj */; };
 		456C7E2E32A87B932CBCB264B971A368 /* DBDeltaEntry.h in Headers */ = {isa = PBXBuildFile; fileRef = BA18CA47BCBBB83D78D34CF4E6B9A42E /* DBDeltaEntry.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		4693240A500A3CCEEDDE7583C12F6C21 /* DBError.m in Sources */ = {isa = PBXBuildFile; fileRef = 2CC9E10EE74ED06A6960BA1045182BA5 /* DBError.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		4827B5178C53D33CB0D9D9A83C48EA44 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CF84E3D1C3FCD94ED0C13D04626DE9A7 /* Foundation.framework */; };
 		4928B692F3FDC2ADE2126ED43F4510E7 /* DBJsonWriter.h in Headers */ = {isa = PBXBuildFile; fileRef = B61345CE659DA428BB3033C58F4606FF /* DBJsonWriter.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		4A3B870D598A43E22B0505A8A62CB818 /* DBSession.m in Sources */ = {isa = PBXBuildFile; fileRef = 605C5E4B3A747B31689B0B10C92EBF08 /* DBSession.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		4AB35CE1674533B690B438A83935E1CD /* MPOAuthCredentialConcreteStore+KeychainAdditionsiPhone.m in Sources */ = {isa = PBXBuildFile; fileRef = DDFE736675C5670B2B4416D3C50928D6 /* MPOAuthCredentialConcreteStore+KeychainAdditionsiPhone.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		4B49C6756FE90E9B85483098C8E5B8C9 /* TPCircularBuffer+AudioBufferList.c in Sources */ = {isa = PBXBuildFile; fileRef = 506124F500DF3FB285CE332340E87515 /* TPCircularBuffer+AudioBufferList.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		4BC8FFF972741BE1412FFB9C62AE2BC4 /* id.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 0096E175A7C94C3995E10DB5867512F1 /* id.lproj */; };
-		4C3CB66ABD1D285637973A4B529356A0 /* TPCircularBuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = 31ED3EFCC9A620B9790FA9077537B1CC /* TPCircularBuffer.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		4C766136C7CFAE169BA900F811F2ECC2 /* Pods-jrtplib-static-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = FF5D3F46AD4B8DC6D82795D33BDA7DF2 /* Pods-jrtplib-static-dummy.m */; };
+		4D84D4D34911051FDEB3E337665FF645 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 93221C4304958C0738B30077A72DBE7C /* Cocoa.framework */; };
 		4D952DDF048462D6097405F01CC591D7 /* NSString+Dropbox.h in Headers */ = {isa = PBXBuildFile; fileRef = 9F6FF9CD35EF8648148A84E64DADF4A2 /* NSString+Dropbox.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		4E28DF5359DB060A0C24D7F2E53103D2 /* DBJSON.m in Sources */ = {isa = PBXBuildFile; fileRef = 13904BEE869B50AA1169F70248E0E0C6 /* DBJSON.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		4E7C778159D89F1991FDE3F3C6566FF6 /* ru.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 15A6EE180D315F87E93E9177187E6C5C /* ru.lproj */; };
 		520DF527AADE564F6286BE086C11277B /* JSON.h in Headers */ = {isa = PBXBuildFile; fileRef = 596112F818B50EBAE2CF5B7CDAF2D408 /* JSON.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		52111CCFAE9945D9562AAAEDF5BB399C /* DBRestClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 814D17AAF869984F846D53C6E0410064 /* DBRestClient.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		5310C4F6A0C14DD0C3D9A8CACEABF914 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9576D4BA68556E86769B7BF4478142CF /* QuartzCore.framework */; };
-		5843C8824B80AE42C824358EA9F40ACC /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BFFBC5D16DDD3AA757505D941BA2A6AE /* SystemConfiguration.framework */; };
+		5310C4F6A0C14DD0C3D9A8CACEABF914 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6C8EE616E62435CDAE4EA8980D4C2F9 /* QuartzCore.framework */; };
+		559621BDBA4EA20800E3B796CD69822F /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 93221C4304958C0738B30077A72DBE7C /* Cocoa.framework */; };
+		560D0C2A2E90DD135476DD3744FD6549 /* TPCircularBuffer-OSX-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B4824C2CED9B07E47582A5CD01B5691 /* TPCircularBuffer-OSX-dummy.m */; };
+		5843C8824B80AE42C824358EA9F40ACC /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D50F62C8DC730DEC42AB5FEBB582C74 /* SystemConfiguration.framework */; };
 		5AE5D2BC0B30897D02AAE83CA445B6E8 /* DBJsonParser.h in Headers */ = {isa = PBXBuildFile; fileRef = 151E98E67D87D8262BEFD5897D07D5A0 /* DBJsonParser.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		6059A86034D31A7A5C14557928A81B95 /* DBLog.h in Headers */ = {isa = PBXBuildFile; fileRef = 30CBB1847719D11ADF717C88F9E60908 /* DBLog.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		60A60A55BFEBA41C22516BA5E93985AF /* MPOAuthAPI.h in Headers */ = {isa = PBXBuildFile; fileRef = DBEA8BB7436F600A617EF339DD341924 /* MPOAuthAPI.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -85,54 +84,60 @@
 		65FC2015151CC961ECD5BF6E7379A95B /* DBLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 532EA17D63F10E87F0ADD2BC01F83EF3 /* DBLog.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		67A27F145E052CAAAD3E0A5BDF1C79BE /* DBAccountInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 098F23EA63CF6029243BD122A4A2A107 /* DBAccountInfo.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		68FAD013022036D6FB19D629DEED8BAA /* NSURLResponse+Encoding.h in Headers */ = {isa = PBXBuildFile; fileRef = C6FF06D80E4CC2AC091EFE2817EFFAAD /* NSURLResponse+Encoding.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		6AAA00CEE10FCAADC89A817E4FF26C8F /* SAMKeychain.h in Headers */ = {isa = PBXBuildFile; fileRef = ACB73F3B957DDDC390383FB7DBD29A70 /* SAMKeychain.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		6B684F82F76EFAF7BC2F82D426EC9548 /* SAMKeychainQuery.h in Headers */ = {isa = PBXBuildFile; fileRef = E02AFEFB7A818F1AEB764859F15FFCB0 /* SAMKeychainQuery.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		6ECB33D3E94D2FDC82E53F6AB64D22C8 /* SAMKeychainQuery.h in Headers */ = {isa = PBXBuildFile; fileRef = E02AFEFB7A818F1AEB764859F15FFCB0 /* SAMKeychainQuery.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		6F50AA4F43A57F8F6F80390F8F04D6BB /* MPOAuthAPIRequestLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 3E5F76C0621D1D57E7B90190DD97CA0F /* MPOAuthAPIRequestLoader.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		7338D0EC027513BE3C412F709633FB73 /* SAMKeychain-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = F86AD35C95FC8F7EDCA75A19A1FEF627 /* SAMKeychain-dummy.m */; };
-		73FEBCBBCDFB85ECA8B22B9B146BFE80 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B5FE30FA9330B14E77B1BB684D6B7E0F /* Cocoa.framework */; };
-		7503358F7B03B18A4F01388DF8458885 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B6F6E84D3F2E81339C4832451EE47DA /* Foundation.framework */; };
+		7503358F7B03B18A4F01388DF8458885 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AE07DDBEE30F178414CC247E5DBBF952 /* Foundation.framework */; };
 		77196E29B3255438586A2DF26388EE2C /* MPOAuthCredentialConcreteStore+KeychainAdditions.h in Headers */ = {isa = PBXBuildFile; fileRef = 07D51DE69034CD01020D3B1BC91B50AB /* MPOAuthCredentialConcreteStore+KeychainAdditions.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		77475AE1D5558929238DCE43C88FC9AC /* TPCircularBuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = DA53EC96B4322472D7EB5CA006843601 /* TPCircularBuffer.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		792240CE98E2610D5300C0B7DD6D7DFB /* NSDictionary+Dropbox.h in Headers */ = {isa = PBXBuildFile; fileRef = B7310F43F13590032ECABC4FA4B0C21F /* NSDictionary+Dropbox.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		7C2DAD0AEB9305FF4BB2800D76A9AC9E /* TPCircularBuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = 31ED3EFCC9A620B9790FA9077537B1CC /* TPCircularBuffer.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		7C3AA5FB13D83376D4D7450D33A7CB85 /* TPCircularBuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = DA53EC96B4322472D7EB5CA006843601 /* TPCircularBuffer.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		7CFBD6D76C46D9B619CAAFFD4924717B /* NSURL+MPURLParameterAdditions.h in Headers */ = {isa = PBXBuildFile; fileRef = 9F37F6CB709DFAE24C2E4F10C8737591 /* NSURL+MPURLParameterAdditions.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		7DFD34580E933C492A038DE6D5177980 /* DBJsonParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 49AA67F7CA80FF0743B9A0FC97D858CD /* DBJsonParser.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		7FA8C3B0EB3DB7D552B0692E8BB1CC7A /* MPOAuthCredentiaIConcreteStore+KeychainAdditionsMac.m in Sources */ = {isa = PBXBuildFile; fileRef = 41F50D92EA228D1E0A60A126419112D9 /* MPOAuthCredentiaIConcreteStore+KeychainAdditionsMac.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		8018B90EBA8DA747CDD4743B457BE043 /* es.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 900C667A53757BACFAAE5D5A9D050C01 /* es.lproj */; };
+		81B73DC2DAA35CDCA5406467421355BF /* Pods-Monal-OSX-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 776988447F463362B857D112EFBA429B /* Pods-Monal-OSX-dummy.m */; };
 		825C20D3E3735F4C27B83D9A4703D65E /* MPOAuthCredentialConcreteStore.h in Headers */ = {isa = PBXBuildFile; fileRef = 43EAE5CF3CB89F5F6B32F7D79E421F44 /* MPOAuthCredentialConcreteStore.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		84AC2CABA3E8032031798B08945E9FA9 /* MPURLRequestParameter.m in Sources */ = {isa = PBXBuildFile; fileRef = 94A5373BD743000F513DDB3B74AEC289 /* MPURLRequestParameter.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		898F9C47E500DBB3489C5FFEDAA67150 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D5D60424A063E35386112D9796306BD9 /* Foundation.framework */; };
+		86A9CCB075A038170159BA5817A3AD09 /* SAMKeychain.h in Headers */ = {isa = PBXBuildFile; fileRef = 9D40A77427686238063F92AD5D96E11F /* SAMKeychain.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		8AF035C696A2C07141269403A8662C98 /* DBMetadata.m in Sources */ = {isa = PBXBuildFile; fileRef = C2AD21019BF4A8B2D6704A08A45AE9DA /* DBMetadata.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		8E39C01FBFBF0AA0385978257A0D3030 /* en.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 60EDD8A89008FE47538CD800F0E96EB8 /* en.lproj */; };
 		906CF59331DBC2AC3647EC577FDB7AF0 /* nb.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 13CEF6D8573778AA806107F403923651 /* nb.lproj */; };
 		9138D547AF0B98C81E0092562FBC67E7 /* Pods-jrtplib-static-OSX-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 069654567B5E1E3680C9B263F4682B31 /* Pods-jrtplib-static-OSX-dummy.m */; };
 		91536CFBC0EB9FC28A50FCE67826E887 /* MBProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = E638B1D54448D83F2529CD73329164CF /* MBProgressHUD.m */; };
-		95CB2A7C9A58667B90923F78493634C2 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F818FE60323A691EF210EA44B3EB53E8 /* Security.framework */; };
+		943610102571B2876556EB90489A8480 /* SAMKeychain.m in Sources */ = {isa = PBXBuildFile; fileRef = 4ADA8A84F08C7BE071CB31F2BE0EE0AE /* SAMKeychain.m */; };
+		95CB2A7C9A58667B90923F78493634C2 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1696C9667DDEE27609872760C83DB6AB /* Security.framework */; };
 		975CDA9BAADFF76951B0780A21DE7408 /* MPOAuthAuthenticationMethod.m in Sources */ = {isa = PBXBuildFile; fileRef = 13CC0223F6160D767D1C084BC60BA164 /* MPOAuthAuthenticationMethod.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		9859633BC54149ABB3DD8D649E002543 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 93221C4304958C0738B30077A72DBE7C /* Cocoa.framework */; };
 		98BE332E427ACA139C13F461D5C9607D /* MPOAuthAuthenticationMethodOAuth.m in Sources */ = {isa = PBXBuildFile; fileRef = CE22ED5A10F4A6D3157CBAC98756D043 /* MPOAuthAuthenticationMethodOAuth.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		99A8D3E318015EC78355A8F3E13E9A00 /* MPOAuthConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E131CD189CF1A9A0A564B01C6C6A688 /* MPOAuthConnection.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		9A2C4B07AAB2A34E258E281F3924BC94 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0473A9E19194783B1357617B57A94EA5 /* AudioToolbox.framework */; };
 		9C86522D1CD52EE609E546FD852D4B71 /* DBJSON.h in Headers */ = {isa = PBXBuildFile; fileRef = 54E1F6C3CEC84755F9426070D2048B8A /* DBJSON.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		9FC40D3B26DFC048A272553E8E811C10 /* MPOAuthURLRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = 3F9049F89F4F03F01C7D93F245C7F3AA /* MPOAuthURLRequest.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A156A19132B6FAEA0035A1852E944E1F /* cs.lproj in Resources */ = {isa = PBXBuildFile; fileRef = E8FB83389BAC86D78FB509CD1031D80A /* cs.lproj */; };
+		A1D0E620B0686AFE301AC360F458ED63 /* TPCircularBuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = 31ED3EFCC9A620B9790FA9077537B1CC /* TPCircularBuffer.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		A2EF269B4539AECF6328BA1E19E63AE9 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AE07DDBEE30F178414CC247E5DBBF952 /* Foundation.framework */; };
+		A5F74C0D250B8813CFA5E2D52579C806 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AE07DDBEE30F178414CC247E5DBBF952 /* Foundation.framework */; };
 		A6AA03C1F5B4164691BBC4CAE60ECC6C /* Pods-Monal Tests-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 93D7036EA2C5F8376F2F31839FFAE084 /* Pods-Monal Tests-dummy.m */; };
 		A88641136D120F3545838700F87F19DE /* ro.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 6D56D67F86537DADBBB6ED7AA9A256AC /* ro.lproj */; };
 		AA068B2586DAD35A48464965905EE38A /* pl.lproj in Resources */ = {isa = PBXBuildFile; fileRef = D9658BDA070201C69DE3794E9452247A /* pl.lproj */; };
 		AB0CDFAEF1D6F78600162ABD9178A032 /* NSString+URLEscapingAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = EC02EB93399B373C00326FA17C5DAFF4 /* NSString+URLEscapingAdditions.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		AD6E09DC2B032FEE3C2DF5485F7BB1CF /* ar.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 424A79F066D53BA3D9FD2AD7E2590CD9 /* ar.lproj */; };
-		AD815A7EC2365750171DE1D7CEB7B39D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B6F6E84D3F2E81339C4832451EE47DA /* Foundation.framework */; };
 		AF4B92A39DC49C0FEA19E8F765203F58 /* MPURLRequestParameter.h in Headers */ = {isa = PBXBuildFile; fileRef = 63D9795699278B7BBCFBD70EC94263C0 /* MPURLRequestParameter.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		B01E79790B02851C18AE21216F9D672D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AE07DDBEE30F178414CC247E5DBBF952 /* Foundation.framework */; };
+		B0ED95843A8AD869FA270E2ABD323731 /* TPCircularBuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = DA53EC96B4322472D7EB5CA006843601 /* TPCircularBuffer.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		B1EA18399A0D4227454BB5235DA9EAC1 /* TPCircularBuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = 31ED3EFCC9A620B9790FA9077537B1CC /* TPCircularBuffer.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B223C393D071801694666F770FDFB384 /* MPOAuthAuthenticationMethodOAuth.h in Headers */ = {isa = PBXBuildFile; fileRef = 85C18B73D2D1ED1235997A980F33B95B /* MPOAuthAuthenticationMethodOAuth.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B29E76A09142B7A612B80B2D11178926 /* MPOAuth.h in Headers */ = {isa = PBXBuildFile; fileRef = C0F98D6AFCD5221B9A4A1B87C677FF9A /* MPOAuth.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		B5E1F4BC14740E5B0A8302F9D5A7E36B /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B5FE30FA9330B14E77B1BB684D6B7E0F /* Cocoa.framework */; };
+		B3E00C72E23174B75B979DEC3A0562F6 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 07AD99C91FF7120EF5058DE695332951 /* Security.framework */; };
+		B5E1F4BC14740E5B0A8302F9D5A7E36B /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 93221C4304958C0738B30077A72DBE7C /* Cocoa.framework */; };
 		BAA15BE7DF8681F775FD7840AE8878F1 /* MPOAuthSignatureParameter.m in Sources */ = {isa = PBXBuildFile; fileRef = D6C06AE3B4F1DB03A8DDA9891E6F54A5 /* MPOAuthSignatureParameter.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		BD84030F15848424CBF5141CEC1DF57E /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B5FE30FA9330B14E77B1BB684D6B7E0F /* Cocoa.framework */; };
+		BC71F5F56C555CCC767E45F48C3E56F2 /* TPCircularBuffer+AudioBufferList.c in Sources */ = {isa = PBXBuildFile; fileRef = 506124F500DF3FB285CE332340E87515 /* TPCircularBuffer+AudioBufferList.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		BE30A01CA1BD59B25F247E79067993A5 /* ko.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 0AE380B886D0EA14C7F143C8B3727669 /* ko.lproj */; };
 		BEE5C0A8E28D9780285804D8F2616C8E /* NSURLResponse+Encoding.m in Sources */ = {isa = PBXBuildFile; fileRef = 56ECA5329AC2BB208CD0100824E70222 /* NSURLResponse+Encoding.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		BF94EA9452B4E6C107EAE580FE29B4A7 /* tr.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 76EC4498A991C6F276DCC3F35C9E92D8 /* tr.lproj */; };
 		C00B4B6D4CCA27F7A0EB5D24BD1AAD4B /* DBRestClient+OSX.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E77137C69E87D40F7D69168A386D2C9 /* DBRestClient+OSX.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		C2831108F9AA80D15C3B32CCAF46CA01 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1696C9667DDEE27609872760C83DB6AB /* Security.framework */; };
 		C2ADF17EDDFC9759E2DE843CB97C9A1D /* ms.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 1B8DDF2F35E387D69C0E065AAF60B1E6 /* ms.lproj */; };
 		C5C9A8F837DB991FC7C6161F96C856A1 /* uk.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 5AB257C4B4CE461185B2071CF883C246 /* uk.lproj */; };
-		C8F446709F60CA1BBAB131601413D2FE /* Pods-Monal-OSX-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 776988447F463362B857D112EFBA429B /* Pods-Monal-OSX-dummy.m */; };
 		CB24FB2E4C5AAE56B50C5E589AAD02BE /* zh-Hans.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 788853B41FF98F3650FE699455CB2611 /* zh-Hans.lproj */; };
 		CC9253404BBC19B821FF8029017847EC /* MPOAuthAPIRequestLoader.h in Headers */ = {isa = PBXBuildFile; fileRef = 265E49EBE70B29EA43949AF56F7F9014 /* MPOAuthAPIRequestLoader.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CCC44F604493B88E9EE1D8DDE9C7AEE8 /* pt-BR.lproj in Resources */ = {isa = PBXBuildFile; fileRef = CC48CFE5379F1984365E34B43CE8A539 /* pt-BR.lproj */; };
@@ -141,12 +146,13 @@
 		D3896A1AC19E551DB668663FF52AB539 /* DBDeltaEntry.m in Sources */ = {isa = PBXBuildFile; fileRef = 65BF621B0C3E799DAFC13CD354D9A74B /* DBDeltaEntry.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		D3CD8C675819609C72B4BC3065542532 /* ca.lproj in Resources */ = {isa = PBXBuildFile; fileRef = D126A09A8898FCEBD17C8204891FE8AD /* ca.lproj */; };
 		D6708191A36C120FF05AF412786D705C /* DBRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = F0AABDF9B78BC539AEF757B93728BD72 /* DBRequest.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		D70AC1D61462AFB50474483CC2AEE146 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B6F6E84D3F2E81339C4832451EE47DA /* Foundation.framework */; };
+		D70AC1D61462AFB50474483CC2AEE146 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AE07DDBEE30F178414CC247E5DBBF952 /* Foundation.framework */; };
 		DC48D6AF7D0B81D2045E7936FFAFCECE /* DBMetadata.h in Headers */ = {isa = PBXBuildFile; fileRef = 0EB8C1DA6BD67038CDFDF58B5938E9C3 /* DBMetadata.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		DCEE02D7DD6907C63D68199CDD95DA38 /* SAMKeychain-OSX-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 06AFB79AA9C08FD46D766827E4F6528B /* SAMKeychain-OSX-dummy.m */; };
 		DD8473A06FEA9C8FCA4656540CD09013 /* Appirater.m in Sources */ = {isa = PBXBuildFile; fileRef = 0B18508E22939850052DBA78243F78FF /* Appirater.m */; settings = {COMPILER_FLAGS = "-DOS_OBJECT_USE_OBJC=0"; }; };
 		E0763372587B0854A9C9B23C73E572C2 /* DBAuthHelperOSX.h in Headers */ = {isa = PBXBuildFile; fileRef = 6FFD02D5D18563BBDD370DC78549DB44 /* DBAuthHelperOSX.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E329CF08E5086F60D7509EB58C9F8D13 /* DBBase64Transcoder.h in Headers */ = {isa = PBXBuildFile; fileRef = 6DEB769DF76BAB744CCE900F12DEB35D /* DBBase64Transcoder.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		E5EC77DD98B3B7E360B802907CCA67E3 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B6F6E84D3F2E81339C4832451EE47DA /* Foundation.framework */; };
+		E5EC77DD98B3B7E360B802907CCA67E3 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AE07DDBEE30F178414CC247E5DBBF952 /* Foundation.framework */; };
 		E7CD9BB42C09318C2BDB1EE8B62C49D1 /* nl.lproj in Resources */ = {isa = PBXBuildFile; fileRef = D8BA118F44B846AF2AFF43F71F2B1CBA /* nl.lproj */; };
 		E91A377C07F3489ACF4132F19A415D9C /* DBKeychain-OSX.m in Sources */ = {isa = PBXBuildFile; fileRef = 8DC70222BD44FB5BCFA25560E8B6FEE6 /* DBKeychain-OSX.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		EA19815457245C301F9A7E70E35CF913 /* it.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 49FD42E1D566673770A4CC7C3A2405D5 /* it.lproj */; };
@@ -156,46 +162,54 @@
 		ECD271DEB457386571E90DAD10938256 /* de.lproj in Resources */ = {isa = PBXBuildFile; fileRef = E1327C1E2817C026A8EE68079F1FFD22 /* de.lproj */; };
 		ED64F7C3D373150B4446512E3034A3DF /* he.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 512707FE1BF0E4FA07CEEDCBBA3FA0EA /* he.lproj */; };
 		EE690262702FCC99C33FFBB517FE70A4 /* MPOAuthCredentialStore.h in Headers */ = {isa = PBXBuildFile; fileRef = DDAC0FFAD50ADF3517BE62434DEFA0EF /* MPOAuthCredentialStore.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		F123F9C3E9131A7C00FB6F6E7AD531B2 /* TPCircularBuffer-iOS-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 6EDE73D2D3AA637D73D2AE0219ADD5BA /* TPCircularBuffer-iOS-dummy.m */; };
 		F2B325D1725254000CB234046A04A437 /* MPOAuthURLResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 0251ACD8FBCAEC73A831B2B6BC349A76 /* MPOAuthURLResponse.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		F5BD7FF5B9D6405DC4D7844630796C88 /* MPDebug.h in Headers */ = {isa = PBXBuildFile; fileRef = 2DD1697370322DC5D483E2E8F05E68CB /* MPDebug.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		FB3D89ED1392908BE46CA7E03BFDCC76 /* DBJsonBase.h in Headers */ = {isa = PBXBuildFile; fileRef = D9666CB93756912F4AAC06D50E7FDC8C /* DBJsonBase.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		FBC2097BAF6ED8C972ADFD4B91BF6A59 /* sk.lproj in Resources */ = {isa = PBXBuildFile; fileRef = DE52025E78CDC5A3E5FEB8102D40DED9 /* sk.lproj */; };
-		FCB245A71C509D7F9E36AAB61DF717A4 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B5FE30FA9330B14E77B1BB684D6B7E0F /* Cocoa.framework */; };
+		FCB245A71C509D7F9E36AAB61DF717A4 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 93221C4304958C0738B30077A72DBE7C /* Cocoa.framework */; };
 		FDAF685F24306C53B82B49AE2D2A914F /* Appirater-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 53E4F5688102CF1F9E30479468F0B7DB /* Appirater-dummy.m */; };
 		FDB252B4EA8D511B5B0AE9933BBE66EE /* DBJsonBase.m in Sources */ = {isa = PBXBuildFile; fileRef = 0B624C7F316F30674E4B82F21AACA1D4 /* DBJsonBase.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		FDF834AF89BE3DC51C421AC20546C6E9 /* SAMKeychain.h in Headers */ = {isa = PBXBuildFile; fileRef = 9D40A77427686238063F92AD5D96E11F /* SAMKeychain.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		FE0649091063E2827DADBF83F5D3761B /* DBRestClient+OSX.m in Sources */ = {isa = PBXBuildFile; fileRef = BE1941F978A6A1E60EDA9D0E3359E739 /* DBRestClient+OSX.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		FE0A18E94445BEA2A029D286D123CB40 /* TPCircularBuffer+AudioBufferList.h in Headers */ = {isa = PBXBuildFile; fileRef = B2A17152ED5653D9171C1A8B4EA095D2 /* TPCircularBuffer+AudioBufferList.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		FF2377CB5FCB9ED8E3C984D9CEBAF2BD /* da.lproj in Resources */ = {isa = PBXBuildFile; fileRef = A1DA51193CA794C846CB326D61D53D25 /* da.lproj */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		26626E381468D721B8A1902D428DBF51 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = D41D8CD98F00B204E9800998ECF8427E /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 68B17BB9075F1737B0C44BBDF72EC502;
-			remoteInfo = "TPCircularBuffer-iOS";
-		};
-		38A12A6BE99B12A36DFC77826BFFB5D1 /* PBXContainerItemProxy */ = {
+		3100EAB7E365366C8A380A84C1DEA724 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = D41D8CD98F00B204E9800998ECF8427E /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = D0F279BE51C0593BE592433E3BD60F0F;
 			remoteInfo = "Dropbox-OSX-SDK";
 		};
-		639C6FD3FF46C4F69652BAE00A333293 /* PBXContainerItemProxy */ = {
+		35939A6D618DA7872062B1C9EEDC02F4 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = D41D8CD98F00B204E9800998ECF8427E /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 3126B8918EE8ED9CE574BE113DAD0BC5;
-			remoteInfo = SAMKeychain;
+			remoteGlobalIDString = 1B3E0B63F846F00CFE7495A7AFB66360;
+			remoteInfo = "SAMKeychain-OSX";
 		};
-		78724F568510426992428F31A6473463 /* PBXContainerItemProxy */ = {
+		7E1F0522870BB14240A98F6E4C43B054 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = D41D8CD98F00B204E9800998ECF8427E /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = DC14996653352110FD04E18D312DE16E;
+			remoteGlobalIDString = 8572D780E982848925E157717F12B45F;
 			remoteInfo = "TPCircularBuffer-OSX";
+		};
+		878AF64CD83C05D0575E4ABC415C56BF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D41D8CD98F00B204E9800998ECF8427E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 9A1859D8C1508CCCA49511D06F0B7144;
+			remoteInfo = Appirater;
+		};
+		B61EEF65D6312435D5C03CFBA774E605 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D41D8CD98F00B204E9800998ECF8427E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A568B1CD365582069B03539D4AC48513;
+			remoteInfo = "SAMKeychain-iOS";
 		};
 		C984DE8754336562934BA5F36EA0542C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -204,14 +218,14 @@
 			remoteGlobalIDString = A1F1878EA1E020F8BF30447B63421F6E;
 			remoteInfo = "Appirater-Appirater";
 		};
-		DF931523023B34FAA4E48FC253CFBB74 /* PBXContainerItemProxy */ = {
+		CE1ED268F99F80B39D334F9B756067C5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = D41D8CD98F00B204E9800998ECF8427E /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 9A1859D8C1508CCCA49511D06F0B7144;
-			remoteInfo = Appirater;
+			remoteGlobalIDString = 50A76FA88B68025D06D01E5DF263C06B;
+			remoteInfo = "TPCircularBuffer-iOS";
 		};
-		E6A6E8C3AFE4B38D262BBB4484DFF27C /* PBXContainerItemProxy */ = {
+		D7EA8E46D2FD9E3E4AE673095CEC9CF9 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = D41D8CD98F00B204E9800998ECF8427E /* Project object */;
 			proxyType = 1;
@@ -225,39 +239,48 @@
 		0086BFE67776C1F9733FFC081DA44F2B /* Pods-Monal-OSXTests.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal-OSXTests.adhoc.xcconfig"; sourceTree = "<group>"; };
 		0096E175A7C94C3995E10DB5867512F1 /* id.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = id.lproj; sourceTree = "<group>"; };
 		0251ACD8FBCAEC73A831B2B6BC349A76 /* MPOAuthURLResponse.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MPOAuthURLResponse.m; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/MPOAuth/MPOAuthURLResponse.m"; sourceTree = "<group>"; };
-		0473A9E19194783B1357617B57A94EA5 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk/System/Library/Frameworks/AudioToolbox.framework; sourceTree = DEVELOPER_DIR; };
+		061BEA9AECDC647CA8CAADA773F876CE /* SAMKeychainQuery.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SAMKeychainQuery.m; path = Sources/SAMKeychainQuery.m; sourceTree = "<group>"; };
 		069654567B5E1E3680C9B263F4682B31 /* Pods-jrtplib-static-OSX-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-jrtplib-static-OSX-dummy.m"; sourceTree = "<group>"; };
+		06AFB79AA9C08FD46D766827E4F6528B /* SAMKeychain-OSX-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "SAMKeychain-OSX-dummy.m"; sourceTree = "<group>"; };
+		07AD99C91FF7120EF5058DE695332951 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS10.3.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
 		07D51DE69034CD01020D3B1BC91B50AB /* MPOAuthCredentialConcreteStore+KeychainAdditions.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "MPOAuthCredentialConcreteStore+KeychainAdditions.h"; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/MPOAuthCredentialConcreteStore+KeychainAdditions.h"; sourceTree = "<group>"; };
 		098F23EA63CF6029243BD122A4A2A107 /* DBAccountInfo.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DBAccountInfo.m; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DBAccountInfo.m"; sourceTree = "<group>"; };
 		0AE380B886D0EA14C7F143C8B3727669 /* ko.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = ko.lproj; sourceTree = "<group>"; };
 		0B18508E22939850052DBA78243F78FF /* Appirater.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = Appirater.m; sourceTree = "<group>"; };
-		0B5241489DDF348FEB6945DDC10BC4F9 /* libPods-jrtplib-static.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "libPods-jrtplib-static.a"; path = "libPods-jrtplib-static.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		0B624C7F316F30674E4B82F21AACA1D4 /* DBJsonBase.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DBJsonBase.m; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/JSON/DBJsonBase.m"; sourceTree = "<group>"; };
+		0C56E7E7E4948C6F8E0AD36E61AF5177 /* SAMKeychain-OSX-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "SAMKeychain-OSX-prefix.pch"; sourceTree = "<group>"; };
 		0C6488DDC73BEBA82EF66F7D33C06D40 /* th.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = th.lproj; sourceTree = "<group>"; };
 		0D95D476D53C6951A66E6F17A59BFA57 /* DBMetadata.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBMetadata.h; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/DBMetadata.h"; sourceTree = "<group>"; };
+		0E6465D736BE014370B8C92DB294EBB1 /* libTPCircularBuffer-OSX.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "libTPCircularBuffer-OSX.a"; path = "libTPCircularBuffer-OSX.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		0EB8C1DA6BD67038CDFDF58B5938E9C3 /* DBMetadata.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBMetadata.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/DBMetadata.h"; sourceTree = "<group>"; };
+		0F3402C4DF3ED28F86139B93509F9019 /* libPods-Monal Tests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "libPods-Monal Tests.a"; path = "libPods-Monal Tests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		0F38B6CE72B1C72CBDA182E0AE7265CA /* el.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = el.lproj; sourceTree = "<group>"; };
 		1131D492C8D0CEA8D783A8648462E5E2 /* Pods-Monal-OSX.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal-OSX.release.xcconfig"; sourceTree = "<group>"; };
 		13904BEE869B50AA1169F70248E0E0C6 /* DBJSON.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DBJSON.m; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/JSON/DBJSON.m"; sourceTree = "<group>"; };
+		13A999371BB1E46D251E5ECA052F75BE /* libSAMKeychain-OSX.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "libSAMKeychain-OSX.a"; path = "libSAMKeychain-OSX.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		13CC0223F6160D767D1C084BC60BA164 /* MPOAuthAuthenticationMethod.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MPOAuthAuthenticationMethod.m; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/MPOAuth/MPOAuthAuthenticationMethod.m"; sourceTree = "<group>"; };
 		13CEF6D8573778AA806107F403923651 /* nb.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = nb.lproj; sourceTree = "<group>"; };
-		1414F8E14EBA13AE8E458BB1975446C5 /* SAMKeychain.bundle */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = "wrapper.plug-in"; name = SAMKeychain.bundle; path = Support/SAMKeychain.bundle; sourceTree = "<group>"; };
 		1464590EED3BA50BB67F54612CCB512E /* DBAuthHelperOSX.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DBAuthHelperOSX.m; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DBAuthHelperOSX.m"; sourceTree = "<group>"; };
 		151E98E67D87D8262BEFD5897D07D5A0 /* DBJsonParser.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBJsonParser.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/DBJsonParser.h"; sourceTree = "<group>"; };
 		15A6EE180D315F87E93E9177187E6C5C /* ru.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = ru.lproj; sourceTree = "<group>"; };
 		15B702ADD260F5D4C5CBE390620860BC /* Pods-jrtplib-static.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-jrtplib-static.release.xcconfig"; sourceTree = "<group>"; };
 		16701CC602DB311A31379829BF4C2EC4 /* Appirater.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = Appirater.h; sourceTree = "<group>"; };
+		1696C9667DDEE27609872760C83DB6AB /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
 		172A92F9F23D43098FADC1884FFA7BEE /* fi.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = fi.lproj; sourceTree = "<group>"; };
 		183E84D2D27CC896545228A559272306 /* NSString+URLEscapingAdditions.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "NSString+URLEscapingAdditions.h"; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/NSString+URLEscapingAdditions.h"; sourceTree = "<group>"; };
-		190DDCC377CD2ED280D2A6AA03530388 /* SAMKeychainQuery.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SAMKeychainQuery.h; path = Sources/SAMKeychainQuery.h; sourceTree = "<group>"; };
 		1AF62DAA40019DF10922D43E310A65BD /* Dropbox-OSX-SDK-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Dropbox-OSX-SDK-prefix.pch"; sourceTree = "<group>"; };
 		1B8DDF2F35E387D69C0E065AAF60B1E6 /* ms.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = ms.lproj; sourceTree = "<group>"; };
+		1D50F62C8DC730DEC42AB5FEBB582C74 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS10.3.sdk/System/Library/Frameworks/SystemConfiguration.framework; sourceTree = DEVELOPER_DIR; };
 		209A19548108127D99F207A776D219C1 /* DBSession.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBSession.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/DBSession.h"; sourceTree = "<group>"; };
 		21A622DEF84B65F9693D6D3FAEDA36BA /* sv.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = sv.lproj; sourceTree = "<group>"; };
+		225CA12ADDD15A6660B0F05521045B78 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS10.3.sdk/System/Library/Frameworks/CoreGraphics.framework; sourceTree = DEVELOPER_DIR; };
 		2298CF148EB9D0AB9A7F258D9FAAEC3C /* Appirater-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Appirater-prefix.pch"; sourceTree = "<group>"; };
 		23C4FE147BFA79246B33B475282659F9 /* DBQuota.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBQuota.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/DBQuota.h"; sourceTree = "<group>"; };
+		242582082A8D37C9F178C13BFF6FF41F /* SAMKeychain.bundle */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = "wrapper.plug-in"; name = SAMKeychain.bundle; path = Support/SAMKeychain.bundle; sourceTree = "<group>"; };
 		2657F455DC2BD25A02949DD987B5FD1A /* DBJsonWriter.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBJsonWriter.h; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/DBJsonWriter.h"; sourceTree = "<group>"; };
 		265E49EBE70B29EA43949AF56F7F9014 /* MPOAuthAPIRequestLoader.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MPOAuthAPIRequestLoader.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/MPOAuthAPIRequestLoader.h"; sourceTree = "<group>"; };
+		29C8B8AB27AEBD642416DC25953C5553 /* libPods-Monal-OSX.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "libPods-Monal-OSX.a"; path = "libPods-Monal-OSX.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		2A28AA63164BFD62D747BDA90C91D938 /* libTPCircularBuffer-iOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "libTPCircularBuffer-iOS.a"; path = "libTPCircularBuffer-iOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2A392CBE348D7080C061327F121FBA69 /* Pods-Monal-OSXTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal-OSXTests.release.xcconfig"; sourceTree = "<group>"; };
 		2B2BC4DA61DFAD248B410EBDF89BD64E /* MPOAuthAuthenticationMethod.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MPOAuthAuthenticationMethod.h; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/MPOAuthAuthenticationMethod.h"; sourceTree = "<group>"; };
 		2B6CABCA4DD8940E7856637BADC68C59 /* CLSLogging.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = CLSLogging.h; path = OSX/Crashlytics.framework/Versions/A/Headers/CLSLogging.h; sourceTree = "<group>"; };
@@ -267,17 +290,14 @@
 		2DD1697370322DC5D483E2E8F05E68CB /* MPDebug.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MPDebug.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/MPDebug.h"; sourceTree = "<group>"; };
 		2DF28B75E298A6C07BD9CBEEDD8AAF86 /* TPCircularBuffer-OSX.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "TPCircularBuffer-OSX.xcconfig"; sourceTree = "<group>"; };
 		2F54FDACF0DE5815ABCDA058E57828C0 /* ANSCompatibility.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ANSCompatibility.h; path = OSX/Crashlytics.framework/Versions/A/Headers/ANSCompatibility.h; sourceTree = "<group>"; };
-		307EB44EE79BBF68C63756AFC8FDC564 /* libTPCircularBuffer-OSX.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "libTPCircularBuffer-OSX.a"; path = "libTPCircularBuffer-OSX.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		30CBB1847719D11ADF717C88F9E60908 /* DBLog.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBLog.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/DBLog.h"; sourceTree = "<group>"; };
-		30F0C3BD7C746319C8916676998095CA /* libPods-Monal.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "libPods-Monal.a"; path = "libPods-Monal.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		31ED3EFCC9A620B9790FA9077537B1CC /* TPCircularBuffer.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = TPCircularBuffer.h; sourceTree = "<group>"; };
-		32298B83CA4BE9158E127A3932587E67 /* libTPCircularBuffer-iOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "libTPCircularBuffer-iOS.a"; path = "libTPCircularBuffer-iOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		32AF6512844B3E635383449BD2AF20FF /* libSAMKeychain-iOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "libSAMKeychain-iOS.a"; path = "libSAMKeychain-iOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		33732B57FB4782761D7510DF34B8C774 /* NSURL+MPURLParameterAdditions.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "NSURL+MPURLParameterAdditions.m"; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/MPOAuth/NSURL+MPURLParameterAdditions.m"; sourceTree = "<group>"; };
 		33A8C6E8954DD7D218D9D3C243C61DA9 /* DBRestClient.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBRestClient.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/DBRestClient.h"; sourceTree = "<group>"; };
 		34117D9A22646269DFAF0B6DECEE14E2 /* Pods-jrtplib-static-OSX.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-jrtplib-static-OSX.release.xcconfig"; sourceTree = "<group>"; };
 		351CF300DA36B03E963C558FB651161F /* DBSession+iOS.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "DBSession+iOS.h"; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/DBSession+iOS.h"; sourceTree = "<group>"; };
 		36EF8D910EE3D997842868685B48D799 /* Crashlytics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Crashlytics.framework; path = OSX/Crashlytics.framework; sourceTree = "<group>"; };
-		37B49685B3C696086A7849CEBD3B55E9 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS10.3.sdk/System/Library/Frameworks/CFNetwork.framework; sourceTree = DEVELOPER_DIR; };
 		39699D55F47CBFDFD71D778DE1ACBD6F /* Fabric.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Fabric.framework; path = iOS/Fabric.framework; sourceTree = "<group>"; };
 		399BAE03A679BF58317D825524DD74BE /* MPOAuthConnection.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MPOAuthConnection.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/MPOAuthConnection.h"; sourceTree = "<group>"; };
 		3AE0FC648036813B419C3B8CE0219285 /* Pods-jrtplib-static-resources.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-jrtplib-static-resources.sh"; sourceTree = "<group>"; };
@@ -296,15 +316,14 @@
 		42CEFDD59084A4AD620DC610DB1CC636 /* ja.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = ja.lproj; sourceTree = "<group>"; };
 		43842054ECBAC7564FADC434CB6BD5C5 /* MBProgressHUD.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = MBProgressHUD.xcconfig; sourceTree = "<group>"; };
 		43EAE5CF3CB89F5F6B32F7D79E421F44 /* MPOAuthCredentialConcreteStore.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MPOAuthCredentialConcreteStore.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/MPOAuthCredentialConcreteStore.h"; sourceTree = "<group>"; };
-		4439DD634F48103B64D1DA1D693C7050 /* libMBProgressHUD.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = libMBProgressHUD.a; path = libMBProgressHUD.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		44EFCB52C89AEEB7D85C2A510858401E /* Pods-Monal.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal.appstore.xcconfig"; sourceTree = "<group>"; };
 		472D439F41BAE9388F9F04FE39249E1C /* NSDictionary+Dropbox.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "NSDictionary+Dropbox.m"; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/NSDictionary+Dropbox.m"; sourceTree = "<group>"; };
 		47A724D3FC67BF45468B61AB3E3D6D8E /* Pods-Monal-resources.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-Monal-resources.sh"; sourceTree = "<group>"; };
 		482AC6B1C44C481CA87F2787F8B76814 /* CLSStackFrame.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = CLSStackFrame.h; path = OSX/Crashlytics.framework/Versions/A/Headers/CLSStackFrame.h; sourceTree = "<group>"; };
-		486D5BA5B6867B38F85D7B59155889EF /* Appirater.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = Appirater.bundle; path = Appirater.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		49142855DC5DDD24BA27B9BACFC58E7C /* JSON.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = JSON.h; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/JSON.h"; sourceTree = "<group>"; };
 		49AA67F7CA80FF0743B9A0FC97D858CD /* DBJsonParser.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DBJsonParser.m; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/JSON/DBJsonParser.m"; sourceTree = "<group>"; };
 		49FD42E1D566673770A4CC7C3A2405D5 /* it.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = it.lproj; sourceTree = "<group>"; };
+		4ADA8A84F08C7BE071CB31F2BE0EE0AE /* SAMKeychain.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SAMKeychain.m; path = Sources/SAMKeychain.m; sourceTree = "<group>"; };
 		4C841C10D12B0ADDE95F843FB47FA4C3 /* NSObject+DBJSON.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "NSObject+DBJSON.h"; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/NSObject+DBJSON.h"; sourceTree = "<group>"; };
 		4CE5B1927CEDCD246E508CDF13C854AC /* Pods-Monal-OSX-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-Monal-OSX-acknowledgements.plist"; sourceTree = "<group>"; };
 		4D565BDE72C58845F0AC02244EFDAE5F /* Answers.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = Answers.h; path = OSX/Crashlytics.framework/Versions/A/Headers/Answers.h; sourceTree = "<group>"; };
@@ -323,14 +342,12 @@
 		54E1F6C3CEC84755F9426070D2048B8A /* DBJSON.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBJSON.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/DBJSON.h"; sourceTree = "<group>"; };
 		556F1961C05C8EEDA742FECFE47787EE /* Fabric.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Fabric.framework; path = OSX/Fabric.framework; sourceTree = "<group>"; };
 		5584C4DF3FCCF2105CE79D942A575E62 /* DBError.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBError.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/DBError.h"; sourceTree = "<group>"; };
-		567D29B116F2EAD31C65BB3F8DCCB5BF /* libDropbox-OSX-SDK.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "libDropbox-OSX-SDK.a"; path = "libDropbox-OSX-SDK.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		56ECA5329AC2BB208CD0100824E70222 /* NSURLResponse+Encoding.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "NSURLResponse+Encoding.m"; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/MPOAuth/NSURLResponse+Encoding.m"; sourceTree = "<group>"; };
 		58551D6B55380B1D3058E2E519AA5FC2 /* DBBase64Transcoder.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBBase64Transcoder.h; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/DBBase64Transcoder.h"; sourceTree = "<group>"; };
 		596112F818B50EBAE2CF5B7CDAF2D408 /* JSON.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = JSON.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/JSON.h"; sourceTree = "<group>"; };
 		5A57CCA945F2A32799A25220E6BFC9D3 /* NSString+DBJSON.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "NSString+DBJSON.h"; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/NSString+DBJSON.h"; sourceTree = "<group>"; };
 		5AB257C4B4CE461185B2071CF883C246 /* uk.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = uk.lproj; sourceTree = "<group>"; };
 		5B4824C2CED9B07E47582A5CD01B5691 /* TPCircularBuffer-OSX-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "TPCircularBuffer-OSX-dummy.m"; sourceTree = "<group>"; };
-		5B6F6E84D3F2E81339C4832451EE47DA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS10.3.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		5BD5444C7EBF6C483D4202DA3D0ABA9B /* MPOAuthAuthenticationMethod.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MPOAuthAuthenticationMethod.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/MPOAuthAuthenticationMethod.h"; sourceTree = "<group>"; };
 		5FBEDD19B0A1CF6FDDD1C8B74ABD826E /* Pods-Monal-OSX-resources.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-Monal-OSX-resources.sh"; sourceTree = "<group>"; };
 		605C5E4B3A747B31689B0B10C92EBF08 /* DBSession.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DBSession.m; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DBSession.m"; sourceTree = "<group>"; };
@@ -338,6 +355,7 @@
 		61786E2947E729FFB8FC4434CFA524F7 /* DBRestClient.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBRestClient.h; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/DBRestClient.h"; sourceTree = "<group>"; };
 		62318D6294284C3D575716C4531ED580 /* DBKeychain.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBKeychain.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/DBKeychain.h"; sourceTree = "<group>"; };
 		6291B2817FAB12235F356D52A6A3B62D /* DropboxSDK.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DropboxSDK.h; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/DropboxSDK.h"; sourceTree = "<group>"; };
+		631F783BC726DE552F7C52EDE0AAF533 /* libPods-Monal.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "libPods-Monal.a"; path = "libPods-Monal.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		63D9795699278B7BBCFBD70EC94263C0 /* MPURLRequestParameter.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MPURLRequestParameter.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/MPURLRequestParameter.h"; sourceTree = "<group>"; };
 		65BF621B0C3E799DAFC13CD354D9A74B /* DBDeltaEntry.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DBDeltaEntry.m; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DBDeltaEntry.m"; sourceTree = "<group>"; };
 		66F3DAC3C06D70961743A233926196F8 /* MBProgressHUD-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "MBProgressHUD-dummy.m"; sourceTree = "<group>"; };
@@ -346,7 +364,6 @@
 		6AFCE2E7E7BC8C7F89CACADDE56E4B3D /* Pods-jrtplib-static-OSX-resources.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-jrtplib-static-OSX-resources.sh"; sourceTree = "<group>"; };
 		6B5A59F1BE20913DE15932A69309E473 /* Dropbox-OSX-SDK.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Dropbox-OSX-SDK.xcconfig"; sourceTree = "<group>"; };
 		6BBAABC9B99C7FD6EDC92D48C32A8DBC /* CLSReport.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = CLSReport.h; path = OSX/Crashlytics.framework/Versions/A/Headers/CLSReport.h; sourceTree = "<group>"; };
-		6CBDD5842C0F6981D2CB4551E8BC60FD /* SAMKeychainQuery.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SAMKeychainQuery.m; path = Sources/SAMKeychainQuery.m; sourceTree = "<group>"; };
 		6D56D67F86537DADBBB6ED7AA9A256AC /* ro.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = ro.lproj; sourceTree = "<group>"; };
 		6D6396B72471BD01711FEEA707597DCC /* ResourceBundle-Appirater-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "ResourceBundle-Appirater-Info.plist"; sourceTree = "<group>"; };
 		6DEB769DF76BAB744CCE900F12DEB35D /* DBBase64Transcoder.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBBase64Transcoder.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/DBBase64Transcoder.h"; sourceTree = "<group>"; };
@@ -359,6 +376,7 @@
 		76EC4498A991C6F276DCC3F35C9E92D8 /* tr.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = tr.lproj; sourceTree = "<group>"; };
 		776988447F463362B857D112EFBA429B /* Pods-Monal-OSX-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-Monal-OSX-dummy.m"; sourceTree = "<group>"; };
 		784692913630FF3F5B84DA71F9A5DA84 /* vi.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = vi.lproj; sourceTree = "<group>"; };
+		78633F96A9A2E4508F910503822B257B /* SAMKeychain-iOS-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "SAMKeychain-iOS-prefix.pch"; path = "../SAMKeychain-iOS/SAMKeychain-iOS-prefix.pch"; sourceTree = "<group>"; };
 		788853B41FF98F3650FE699455CB2611 /* zh-Hans.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = "zh-Hans.lproj"; sourceTree = "<group>"; };
 		78A461A9FB000D34D2D16482225C9B06 /* DBJsonWriter.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DBJsonWriter.m; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/JSON/DBJsonWriter.m"; sourceTree = "<group>"; };
 		78C8FB488767ED18ED5E98E44F4F7BE6 /* MPOAuthAPI.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MPOAuthAPI.m; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/MPOAuth/MPOAuthAPI.m"; sourceTree = "<group>"; };
@@ -367,7 +385,7 @@
 		7A5439D9CE35DE1CE66E510E77B359BC /* Pods-Monal Tests-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-Monal Tests-acknowledgements.plist"; sourceTree = "<group>"; };
 		7A9BD42464983943B961E345D6151300 /* Pods-Monal-OSXTests-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-Monal-OSXTests-acknowledgements.plist"; sourceTree = "<group>"; };
 		7B98E414EC017912836E294F9743F001 /* NSObject+DBJSON.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "NSObject+DBJSON.h"; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/NSObject+DBJSON.h"; sourceTree = "<group>"; };
-		7E0F886CB0C364B79B1467CD0EE1B6DE /* SAMKeychain.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SAMKeychain.m; path = Sources/SAMKeychain.m; sourceTree = "<group>"; };
+		7C2193EE1858A36A2DB9B3ED721EAB7C /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk/System/Library/Frameworks/AudioToolbox.framework; sourceTree = DEVELOPER_DIR; };
 		7EC9139EADBE6F8838457C1AA364214C /* Answers.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = Answers.h; path = iOS/Crashlytics.framework/Headers/Answers.h; sourceTree = "<group>"; };
 		7F1C4CB9ECECC71B984269A581C8303C /* Pods-Monal Tests-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-Monal Tests-acknowledgements.markdown"; sourceTree = "<group>"; };
 		7F88740EFA4A0BAE8F7F3C155D3852BB /* DBJsonBase.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBJsonBase.h; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/DBJsonBase.h"; sourceTree = "<group>"; };
@@ -377,7 +395,6 @@
 		82AAE08D6FAC48F41D502E6E78F49118 /* TPCircularBuffer-OSX-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "TPCircularBuffer-OSX-prefix.pch"; sourceTree = "<group>"; };
 		8305A1B67CBFEBD868909C520E28C7C3 /* Pods-Monal Tests.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal Tests.appstore.xcconfig"; sourceTree = "<group>"; };
 		834DD89E8F2548F532E0C037332FD38C /* MPOAuthAuthenticationMethodOAuth.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MPOAuthAuthenticationMethodOAuth.h; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/MPOAuthAuthenticationMethodOAuth.h"; sourceTree = "<group>"; };
-		851F6A63B0FDAD36399EF12D0C93D837 /* SAMKeychain.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = SAMKeychain.xcconfig; sourceTree = "<group>"; };
 		85C18B73D2D1ED1235997A980F33B95B /* MPOAuthAuthenticationMethodOAuth.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MPOAuthAuthenticationMethodOAuth.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/MPOAuthAuthenticationMethodOAuth.h"; sourceTree = "<group>"; };
 		88E236D93B7864B8040A4572320F14F3 /* MPOAuthParameterFactory.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MPOAuthParameterFactory.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/MPOAuthParameterFactory.h"; sourceTree = "<group>"; };
 		89A539707BB9507622D34E54C2A1F882 /* Pods-jrtplib-static.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-jrtplib-static.appstore.xcconfig"; sourceTree = "<group>"; };
@@ -387,72 +404,75 @@
 		8C944411DD064E402AA6A95F89A683D9 /* AppiraterDelegate.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = AppiraterDelegate.h; sourceTree = "<group>"; };
 		8D296322B004201E7C05AA6F081DD42E /* fr.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = fr.lproj; sourceTree = "<group>"; };
 		8DC70222BD44FB5BCFA25560E8B6FEE6 /* DBKeychain-OSX.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "DBKeychain-OSX.m"; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DBKeychain-OSX.m"; sourceTree = "<group>"; };
+		8E06B1573AB6F919A114C75FF4212C3D /* libMBProgressHUD.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = libMBProgressHUD.a; path = libMBProgressHUD.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		8E131CD189CF1A9A0A564B01C6C6A688 /* MPOAuthConnection.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MPOAuthConnection.m; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/MPOAuth/MPOAuthConnection.m"; sourceTree = "<group>"; };
+		8F697B4F58D57E06DC3EB4E54B6E3F38 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS10.3.sdk/System/Library/Frameworks/CFNetwork.framework; sourceTree = DEVELOPER_DIR; };
 		8F6E09EF8023D2B8B848878656C3B1E2 /* Pods-jrtplib-static-OSX.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-jrtplib-static-OSX.debug.xcconfig"; sourceTree = "<group>"; };
 		900C667A53757BACFAAE5D5A9D050C01 /* es.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = es.lproj; sourceTree = "<group>"; };
+		92311B3ADB0D7E3014119B66A4F6E6EF /* SAMKeychain-OSX.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "SAMKeychain-OSX.xcconfig"; sourceTree = "<group>"; };
+		93221C4304958C0738B30077A72DBE7C /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk/System/Library/Frameworks/Cocoa.framework; sourceTree = DEVELOPER_DIR; };
 		93A4A3777CF96A4AAC1D13BA6DCCEA73 /* Podfile */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; lastKnownFileType = text; name = Podfile; path = ../Podfile; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		93D7036EA2C5F8376F2F31839FFAE084 /* Pods-Monal Tests-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-Monal Tests-dummy.m"; sourceTree = "<group>"; };
 		94A5373BD743000F513DDB3B74AEC289 /* MPURLRequestParameter.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MPURLRequestParameter.m; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/MPOAuth/MPURLRequestParameter.m"; sourceTree = "<group>"; };
 		9561553003888BAAE7395F8A405A4F78 /* NSDictionary+Dropbox.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "NSDictionary+Dropbox.h"; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/NSDictionary+Dropbox.h"; sourceTree = "<group>"; };
-		9576D4BA68556E86769B7BF4478142CF /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS10.3.sdk/System/Library/Frameworks/QuartzCore.framework; sourceTree = DEVELOPER_DIR; };
 		96766234A0EE746A84A636D329B08FBF /* Pods-Monal-OSXTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal-OSXTests.debug.xcconfig"; sourceTree = "<group>"; };
 		9801AA16F0274DE606B8913E6677B4B8 /* MPOAuthURLRequest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MPOAuthURLRequest.m; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/MPOAuth/MPOAuthURLRequest.m"; sourceTree = "<group>"; };
 		98D5637D28DFE948393279883CAAF90F /* CLSReport.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = CLSReport.h; path = iOS/Crashlytics.framework/Headers/CLSReport.h; sourceTree = "<group>"; };
 		99261FB1540762A011FC4DA27AE85573 /* NSString+DBJSON.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "NSString+DBJSON.m"; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/JSON/NSString+DBJSON.m"; sourceTree = "<group>"; };
 		99EBABB7BC676B21E4E0F2FCF8AF91A1 /* DBJsonParser.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBJsonParser.h; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/DBJsonParser.h"; sourceTree = "<group>"; };
 		9AFCFACAE85E3042CCF724D17B7B4A08 /* Fabric.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = Fabric.h; path = OSX/Fabric.framework/Versions/A/Headers/Fabric.h; sourceTree = "<group>"; };
-		9B09487EC7A78C55C3F88C98DC7A6EB3 /* SAMKeychain-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "SAMKeychain-prefix.pch"; sourceTree = "<group>"; };
+		9D40A77427686238063F92AD5D96E11F /* SAMKeychain.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SAMKeychain.h; path = Sources/SAMKeychain.h; sourceTree = "<group>"; };
 		9E77137C69E87D40F7D69168A386D2C9 /* DBRestClient+OSX.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "DBRestClient+OSX.h"; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/DBRestClient+OSX.h"; sourceTree = "<group>"; };
 		9EE91F91D54D0F1D1A7BBA9CC8528415 /* MPOAuthCredentialConcreteStore.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MPOAuthCredentialConcreteStore.h; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/MPOAuthCredentialConcreteStore.h"; sourceTree = "<group>"; };
 		9F37F6CB709DFAE24C2E4F10C8737591 /* NSURL+MPURLParameterAdditions.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "NSURL+MPURLParameterAdditions.h"; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/NSURL+MPURLParameterAdditions.h"; sourceTree = "<group>"; };
-		9F4D1FE27C1125121AFAA7000DABCF71 /* libPods-Monal-OSXTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "libPods-Monal-OSXTests.a"; path = "libPods-Monal-OSXTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		9F6FF9CD35EF8648148A84E64DADF4A2 /* NSString+Dropbox.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "NSString+Dropbox.h"; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/NSString+Dropbox.h"; sourceTree = "<group>"; };
 		A1DA51193CA794C846CB326D61D53D25 /* da.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = da.lproj; sourceTree = "<group>"; };
+		A495004616DFD81243A53F0C0426DFBC /* libPods-jrtplib-static.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "libPods-jrtplib-static.a"; path = "libPods-jrtplib-static.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A94F5C0E32CFB6A43EAD99B94B13F02D /* libPods-Monal-OSXTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "libPods-Monal-OSXTests.a"; path = "libPods-Monal-OSXTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		ABD5B13C330C67EC94A0EC0B84A8377D /* libPods-jrtplib-static-OSX.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "libPods-jrtplib-static-OSX.a"; path = "libPods-jrtplib-static-OSX.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AC5F6C25FF7BC067E842F52EEDD85B3D /* MPOAuthParameterFactory.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MPOAuthParameterFactory.h; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/MPOAuthParameterFactory.h"; sourceTree = "<group>"; };
-		ACB73F3B957DDDC390383FB7DBD29A70 /* SAMKeychain.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SAMKeychain.h; path = Sources/SAMKeychain.h; sourceTree = "<group>"; };
 		AD4798D2B6C8AFC41135E8FBFBC00C82 /* Pods-jrtplib-static-OSX-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-jrtplib-static-OSX-acknowledgements.markdown"; sourceTree = "<group>"; };
-		AD9099E5E37DE4E9E5C0667D888E376A /* libPods-Monal Tests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "libPods-Monal Tests.a"; path = "libPods-Monal Tests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		AE07DDBEE30F178414CC247E5DBBF952 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS10.3.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		AEEA0199F2BD46AA403B077BE934B458 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS10.3.sdk/System/Library/Frameworks/AudioToolbox.framework; sourceTree = DEVELOPER_DIR; };
 		AF1F14C879C31569B7A0EC75292CDD16 /* Pods-Monal Tests-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-Monal Tests-frameworks.sh"; sourceTree = "<group>"; };
-		AFC2285F8268B6BDF53A9A14302F9F96 /* libPods-Monal-OSX.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "libPods-Monal-OSX.a"; path = "libPods-Monal-OSX.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B0CC8A9AFDF8A704DAA4AD607CC24EA1 /* MPOAuthSignatureParameter.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MPOAuthSignatureParameter.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/MPOAuthSignatureParameter.h"; sourceTree = "<group>"; };
 		B1015D9C4A1F1104B082C23D49B40D92 /* Pods-jrtplib-static-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-jrtplib-static-acknowledgements.plist"; sourceTree = "<group>"; };
 		B2A17152ED5653D9171C1A8B4EA095D2 /* TPCircularBuffer+AudioBufferList.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "TPCircularBuffer+AudioBufferList.h"; sourceTree = "<group>"; };
 		B3007DC0FAE6933F4645532ED1E620F2 /* TPCircularBuffer-iOS-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "TPCircularBuffer-iOS-prefix.pch"; path = "../TPCircularBuffer-iOS/TPCircularBuffer-iOS-prefix.pch"; sourceTree = "<group>"; };
-		B5FE30FA9330B14E77B1BB684D6B7E0F /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk/System/Library/Frameworks/Cocoa.framework; sourceTree = DEVELOPER_DIR; };
 		B61345CE659DA428BB3033C58F4606FF /* DBJsonWriter.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBJsonWriter.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/DBJsonWriter.h"; sourceTree = "<group>"; };
 		B7310F43F13590032ECABC4FA4B0C21F /* NSDictionary+Dropbox.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "NSDictionary+Dropbox.h"; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/NSDictionary+Dropbox.h"; sourceTree = "<group>"; };
 		BA01553431BCC68220BAE8FB39224F82 /* Pods-Monal-OSXTests-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-Monal-OSXTests-acknowledgements.markdown"; sourceTree = "<group>"; };
 		BA18CA47BCBBB83D78D34CF4E6B9A42E /* DBDeltaEntry.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBDeltaEntry.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/DBDeltaEntry.h"; sourceTree = "<group>"; };
 		BA518412F1514A77A1B8CD1D93E25F93 /* zh-Hant.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = "zh-Hant.lproj"; sourceTree = "<group>"; };
+		BBA0257B1A478FEAA1DED7D57D26E800 /* libAppirater.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = libAppirater.a; path = libAppirater.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		BBD6815BA328E2F3AD14A1F9E535D6CF /* Fabric.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = Fabric.h; path = iOS/Fabric.framework/Headers/Fabric.h; sourceTree = "<group>"; };
 		BD06874F1D1219DE28D7639398DA689D /* CLSStackFrame.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = CLSStackFrame.h; path = iOS/Crashlytics.framework/Headers/CLSStackFrame.h; sourceTree = "<group>"; };
 		BE1941F978A6A1E60EDA9D0E3359E739 /* DBRestClient+OSX.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "DBRestClient+OSX.m"; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DBRestClient+OSX.m"; sourceTree = "<group>"; };
 		BFFADD03C8B642FE73EE30B4D9EBFF52 /* CLSLogging.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = CLSLogging.h; path = iOS/Crashlytics.framework/Headers/CLSLogging.h; sourceTree = "<group>"; };
-		BFFBC5D16DDD3AA757505D941BA2A6AE /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS10.3.sdk/System/Library/Frameworks/SystemConfiguration.framework; sourceTree = DEVELOPER_DIR; };
 		C00338CC9A69FB2C401D186A568D89A9 /* DBRequest.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBRequest.h; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/DBRequest.h"; sourceTree = "<group>"; };
 		C02C4A912D17D9895D0B7E932E182EEA /* Pods-Monal-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-Monal-acknowledgements.markdown"; sourceTree = "<group>"; };
 		C0F98D6AFCD5221B9A4A1B87C677FF9A /* MPOAuth.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MPOAuth.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/MPOAuth.h"; sourceTree = "<group>"; };
+		C23F744FF52D92109BF0D482940818C8 /* Appirater.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = Appirater.bundle; path = Appirater.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		C2AD21019BF4A8B2D6704A08A45AE9DA /* DBMetadata.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DBMetadata.m; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DBMetadata.m"; sourceTree = "<group>"; };
 		C2BF51FF7BA8C06F5AA7677BB8D63985 /* Pods-Monal-OSX.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal-OSX.adhoc.xcconfig"; sourceTree = "<group>"; };
 		C3DD4959137E39D16B773143C337E0EB /* DBQuota.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DBQuota.m; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DBQuota.m"; sourceTree = "<group>"; };
 		C600C5875AB2C88B16600D717783992C /* Pods-Monal Tests-resources.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-Monal Tests-resources.sh"; sourceTree = "<group>"; };
 		C612EA75E54400EBA6296241C8A8EFD3 /* Pods-Monal-OSXTests.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal-OSXTests.appstore.xcconfig"; sourceTree = "<group>"; };
 		C6FF06D80E4CC2AC091EFE2817EFFAAD /* NSURLResponse+Encoding.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "NSURLResponse+Encoding.h"; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/NSURLResponse+Encoding.h"; sourceTree = "<group>"; };
-		C900FB6635E976DF9FCD3BFEE2CA0CB8 /* libPods-jrtplib-static-OSX.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "libPods-jrtplib-static-OSX.a"; path = "libPods-jrtplib-static-OSX.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA2EE9F43208E14EFCDDEB13708D6713 /* DBDeltaEntry.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBDeltaEntry.h; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/DBDeltaEntry.h"; sourceTree = "<group>"; };
 		CC48CFE5379F1984365E34B43CE8A539 /* pt-BR.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = "pt-BR.lproj"; sourceTree = "<group>"; };
 		CC696451060D82718355DA3F49582CC8 /* NSObject+DBJSON.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "NSObject+DBJSON.m"; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/JSON/NSObject+DBJSON.m"; sourceTree = "<group>"; };
 		CCD6AE022A7D2C35F1C007BB51C6F6EB /* FABAttributes.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = FABAttributes.h; path = iOS/Fabric.framework/Headers/FABAttributes.h; sourceTree = "<group>"; };
 		CE22ED5A10F4A6D3157CBAC98756D043 /* MPOAuthAuthenticationMethodOAuth.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MPOAuthAuthenticationMethodOAuth.m; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/MPOAuth/MPOAuthAuthenticationMethodOAuth.m"; sourceTree = "<group>"; };
-		CE7B4F3B19A45E41B95A6606D6227164 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS10.3.sdk/System/Library/Frameworks/CoreGraphics.framework; sourceTree = DEVELOPER_DIR; };
 		CE836353A6F7C4F2E0471B112898A410 /* DropboxOSX.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DropboxOSX.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/DropboxOSX.h"; sourceTree = "<group>"; };
+		CF84E3D1C3FCD94ED0C13D04626DE9A7 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		D006CE970C289718834A0C76B97286A4 /* Pods-Monal Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal Tests.release.xcconfig"; sourceTree = "<group>"; };
 		D126A09A8898FCEBD17C8204891FE8AD /* ca.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = ca.lproj; sourceTree = "<group>"; };
-		D1FBB174CC70EE22D73D645C8FB409D1 /* libSAMKeychain.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = libSAMKeychain.a; path = libSAMKeychain.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		D2BFBF577FB4A5809D7AAFF5B6B52509 /* pt.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = pt.lproj; sourceTree = "<group>"; };
-		D5D60424A063E35386112D9796306BD9 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		D3079441ED0C241AFF858802E43701BA /* SAMKeychain-iOS-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "SAMKeychain-iOS-dummy.m"; path = "../SAMKeychain-iOS/SAMKeychain-iOS-dummy.m"; sourceTree = "<group>"; };
 		D627C84388E35C99753C4900FE71D8DC /* NSString+Dropbox.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "NSString+Dropbox.h"; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/NSString+Dropbox.h"; sourceTree = "<group>"; };
 		D6C06AE3B4F1DB03A8DDA9891E6F54A5 /* MPOAuthSignatureParameter.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MPOAuthSignatureParameter.m; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/MPOAuth/MPOAuthSignatureParameter.m"; sourceTree = "<group>"; };
+		D6C8EE616E62435CDAE4EA8980D4C2F9 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS10.3.sdk/System/Library/Frameworks/QuartzCore.framework; sourceTree = DEVELOPER_DIR; };
 		D70969699EA8FF2C71F5C9837D49CB8F /* CLSAttributes.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = CLSAttributes.h; path = iOS/Crashlytics.framework/Headers/CLSAttributes.h; sourceTree = "<group>"; };
 		D8BA118F44B846AF2AFF43F71F2B1CBA /* nl.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = nl.lproj; sourceTree = "<group>"; };
 		D9658BDA070201C69DE3794E9452247A /* pl.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = pl.lproj; sourceTree = "<group>"; };
@@ -467,11 +487,11 @@
 		DBEA8BB7436F600A617EF339DD341924 /* MPOAuthAPI.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MPOAuthAPI.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/MPOAuthAPI.h"; sourceTree = "<group>"; };
 		DC171C7ADC7ADDA4E7937450B638457F /* Appirater.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = Appirater.xcconfig; sourceTree = "<group>"; };
 		DC69CF7117246C018EC5F410C79BCF4B /* Pods-Monal-OSX.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal-OSX.debug.xcconfig"; sourceTree = "<group>"; };
-		DD4F23C9468C713EFFC7D7F8E58B8299 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS10.3.sdk/System/Library/Frameworks/AudioToolbox.framework; sourceTree = DEVELOPER_DIR; };
 		DDAC0FFAD50ADF3517BE62434DEFA0EF /* MPOAuthCredentialStore.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MPOAuthCredentialStore.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/MPOAuthCredentialStore.h"; sourceTree = "<group>"; };
 		DDFE736675C5670B2B4416D3C50928D6 /* MPOAuthCredentialConcreteStore+KeychainAdditionsiPhone.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "MPOAuthCredentialConcreteStore+KeychainAdditionsiPhone.m"; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/MPOAuth/MPOAuthCredentialConcreteStore+KeychainAdditionsiPhone.m"; sourceTree = "<group>"; };
 		DE52025E78CDC5A3E5FEB8102D40DED9 /* sk.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = sk.lproj; sourceTree = "<group>"; };
 		DED6B8E4CD095BBE57F5867BC364A431 /* Pods-jrtplib-static-OSX-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-jrtplib-static-OSX-acknowledgements.plist"; sourceTree = "<group>"; };
+		E02AFEFB7A818F1AEB764859F15FFCB0 /* SAMKeychainQuery.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SAMKeychainQuery.h; path = Sources/SAMKeychainQuery.h; sourceTree = "<group>"; };
 		E1327C1E2817C026A8EE68079F1FFD22 /* de.lproj */ = {isa = PBXFileReference; includeInIndex = 1; path = de.lproj; sourceTree = "<group>"; };
 		E256CCF5D475F8D6EF4F3BA030910BB0 /* Pods-jrtplib-static.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-jrtplib-static.debug.xcconfig"; sourceTree = "<group>"; };
 		E638B1D54448D83F2529CD73329164CF /* MBProgressHUD.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = MBProgressHUD.m; sourceTree = "<group>"; };
@@ -485,16 +505,15 @@
 		EF3A82553368F2AD2C2F053CF482702D /* DBAccountInfo.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBAccountInfo.h; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/DBAccountInfo.h"; sourceTree = "<group>"; };
 		F04073551A6DDEF238B2B80C379E8381 /* MBProgressHUD-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "MBProgressHUD-prefix.pch"; sourceTree = "<group>"; };
 		F0AABDF9B78BC539AEF757B93728BD72 /* DBRequest.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DBRequest.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/DBRequest.h"; sourceTree = "<group>"; };
-		F1CB770B746CD204CB806274E19A5B5A /* libAppirater.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = libAppirater.a; path = libAppirater.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		F27018EC4A646A664707E7EFAB69627D /* MPOAuthURLResponse.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MPOAuthURLResponse.h; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/DropboxSDK/MPOAuthURLResponse.h"; sourceTree = "<group>"; };
 		F32571D85F71A6EEBFF397B7B1029B03 /* Pods-Monal-OSXTests-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-Monal-OSXTests-dummy.m"; sourceTree = "<group>"; };
 		F393AF2A29B3A63F9522FF5D6EF1AB63 /* MPOAuthConnection.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MPOAuthConnection.h; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/MPOAuthConnection.h"; sourceTree = "<group>"; };
 		F3968DFE3EF9C0D7F4CF8E639B4994B8 /* Pods-Monal.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal.debug.xcconfig"; sourceTree = "<group>"; };
+		F3D8B3B417A88755B824942193288256 /* SAMKeychain-iOS.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "SAMKeychain-iOS.xcconfig"; path = "../SAMKeychain-iOS/SAMKeychain-iOS.xcconfig"; sourceTree = "<group>"; };
 		F4D8C0F5158183AF020D809FC3D8BAB8 /* Pods-Monal-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-Monal-acknowledgements.plist"; sourceTree = "<group>"; };
 		F4FF9A66F74D24C09E89FA2352435E34 /* TPCircularBuffer-iOS.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "TPCircularBuffer-iOS.xcconfig"; path = "../TPCircularBuffer-iOS/TPCircularBuffer-iOS.xcconfig"; sourceTree = "<group>"; };
+		F5A0AB3410514862134DB7BBE68228CD /* libDropbox-OSX-SDK.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "libDropbox-OSX-SDK.a"; path = "libDropbox-OSX-SDK.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F63548C8FFAC63BFFA976FA309716436 /* DBBase64Transcoder.c */ = {isa = PBXFileReference; includeInIndex = 1; name = DBBase64Transcoder.c; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/MPOAuth/Crypto/DBBase64Transcoder.c"; sourceTree = "<group>"; };
-		F818FE60323A691EF210EA44B3EB53E8 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
-		F86AD35C95FC8F7EDCA75A19A1FEF627 /* SAMKeychain-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "SAMKeychain-dummy.m"; sourceTree = "<group>"; };
 		FA87B08D2A3C37DD2E66D97FAE3E4CF4 /* NSString+Dropbox.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "NSString+Dropbox.m"; path = "dropbox-osx-sdk-1.3.13/DropboxSDK/Classes/NSString+Dropbox.m"; sourceTree = "<group>"; };
 		FDD77BBF8B80E9D393985BCF0CCE0590 /* MPOAuthAPIRequestLoader.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MPOAuthAPIRequestLoader.h; path = "dropbox-ios-sdk-1.3.13/DropboxSDK.framework/Headers/MPOAuthAPIRequestLoader.h"; sourceTree = "<group>"; };
 		FE42538D18A61F4BA7F2C3C4232DD7EE /* CLSAttributes.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = CLSAttributes.h; path = OSX/Crashlytics.framework/Versions/A/Headers/CLSAttributes.h; sourceTree = "<group>"; };
@@ -503,20 +522,12 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		049337EE18766A377B1D3C03A231CA00 /* Frameworks */ = {
+		18C38DF93897D79510BED160CCDBB0EF /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				021024BD652CC87C9ADC39F350797D53 /* Foundation.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		15102D255480E5E40CD175D29877E78A /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				9A2C4B07AAB2A34E258E281F3924BC94 /* AudioToolbox.framework in Frameworks */,
-				226F69E48F7B6BC9CB28CBEA5DEBC3CF /* Cocoa.framework in Frameworks */,
+				A2EF269B4539AECF6328BA1E19E63AE9 /* Foundation.framework in Frameworks */,
+				B3E00C72E23174B75B979DEC3A0562F6 /* Security.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -525,14 +536,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				D70AC1D61462AFB50474483CC2AEE146 /* Foundation.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		201A048F0084EEAA7D5A7FCEA9806D6C /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				73FEBCBBCDFB85ECA8B22B9B146BFE80 /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -551,6 +554,16 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		6E4C8B8D7434842D88B78BEA4C9833BF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4D84D4D34911051FDEB3E337665FF645 /* Cocoa.framework in Frameworks */,
+				4827B5178C53D33CB0D9D9A83C48EA44 /* Foundation.framework in Frameworks */,
+				C2831108F9AA80D15C3B32CCAF46CA01 /* Security.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		81B6901CD7524E39C10C647CCD9E56BD /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -561,13 +574,11 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		8C4B7FCD48D22C60839BC656E696E6D8 /* Frameworks */ = {
+		824364016B138FDD64ACAE11427D1601 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BD84030F15848424CBF5141CEC1DF57E /* Cocoa.framework in Frameworks */,
-				898F9C47E500DBB3489C5FFEDAA67150 /* Foundation.framework in Frameworks */,
-				12E601D1D6A475CFF4B8F34177FD0480 /* Security.framework in Frameworks */,
+				9859633BC54149ABB3DD8D649E002543 /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -576,6 +587,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				7503358F7B03B18A4F01388DF8458885 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A1DF393D8FD968E6D21F66E015BF04A3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0E3E3AA6E576F35704D0D5A35175117F /* AudioToolbox.framework in Frameworks */,
+				A5F74C0D250B8813CFA5E2D52579C806 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -596,12 +616,20 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		D1FB1B484D4DDDABE79F8C4BE560BE9F /* Frameworks */ = {
+		B86669CB19F7362C2E40760D06E7912D /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				13BE4E59835C7C165E90C9D95EC38D5C /* AudioToolbox.framework in Frameworks */,
-				AD815A7EC2365750171DE1D7CEB7B39D /* Foundation.framework in Frameworks */,
+				1416E0CEBED9398C3FC9A508CC84C13C /* AudioToolbox.framework in Frameworks */,
+				559621BDBA4EA20800E3B796CD69822F /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D2BE0AB50A71222EA3ABEBC03D48C9AF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B01E79790B02851C18AE21216F9D672D /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -694,31 +722,36 @@
 			path = "../Target Support Files/Dropbox-OSX-SDK";
 			sourceTree = "<group>";
 		};
-		221362AB9631E403BDF8F94B605856D7 /* SAMKeychain */ = {
+		1F1B069FC79892688A0D8D2C3EF8582C /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				ACB73F3B957DDDC390383FB7DBD29A70 /* SAMKeychain.h */,
-				7E0F886CB0C364B79B1467CD0EE1B6DE /* SAMKeychain.m */,
-				190DDCC377CD2ED280D2A6AA03530388 /* SAMKeychainQuery.h */,
-				6CBDD5842C0F6981D2CB4551E8BC60FD /* SAMKeychainQuery.m */,
-				FC22F35EB625779AA80091F99A5E62D4 /* Resources */,
-				F922B9C1A421EB206302FCD128B052E4 /* Support Files */,
+				C23F744FF52D92109BF0D482940818C8 /* Appirater.bundle */,
+				BBA0257B1A478FEAA1DED7D57D26E800 /* libAppirater.a */,
+				F5A0AB3410514862134DB7BBE68228CD /* libDropbox-OSX-SDK.a */,
+				8E06B1573AB6F919A114C75FF4212C3D /* libMBProgressHUD.a */,
+				A495004616DFD81243A53F0C0426DFBC /* libPods-jrtplib-static.a */,
+				ABD5B13C330C67EC94A0EC0B84A8377D /* libPods-jrtplib-static-OSX.a */,
+				631F783BC726DE552F7C52EDE0AAF533 /* libPods-Monal.a */,
+				0F3402C4DF3ED28F86139B93509F9019 /* libPods-Monal Tests.a */,
+				29C8B8AB27AEBD642416DC25953C5553 /* libPods-Monal-OSX.a */,
+				A94F5C0E32CFB6A43EAD99B94B13F02D /* libPods-Monal-OSXTests.a */,
+				32AF6512844B3E635383449BD2AF20FF /* libSAMKeychain-iOS.a */,
+				13A999371BB1E46D251E5ECA052F75BE /* libSAMKeychain-OSX.a */,
+				2A28AA63164BFD62D747BDA90C91D938 /* libTPCircularBuffer-iOS.a */,
+				0E6465D736BE014370B8C92DB294EBB1 /* libTPCircularBuffer-OSX.a */,
 			);
-			name = SAMKeychain;
-			path = SAMKeychain;
+			name = Products;
 			sourceTree = "<group>";
 		};
-		22F36FA0148D675B2C5CB9334A9635CE /* iOS */ = {
+		253C58FCE39CE774C99E0F740D527A08 /* OS X */ = {
 			isa = PBXGroup;
 			children = (
-				DD4F23C9468C713EFFC7D7F8E58B8299 /* AudioToolbox.framework */,
-				37B49685B3C696086A7849CEBD3B55E9 /* CFNetwork.framework */,
-				CE7B4F3B19A45E41B95A6606D6227164 /* CoreGraphics.framework */,
-				5B6F6E84D3F2E81339C4832451EE47DA /* Foundation.framework */,
-				9576D4BA68556E86769B7BF4478142CF /* QuartzCore.framework */,
-				BFFBC5D16DDD3AA757505D941BA2A6AE /* SystemConfiguration.framework */,
+				7C2193EE1858A36A2DB9B3ED721EAB7C /* AudioToolbox.framework */,
+				93221C4304958C0738B30077A72DBE7C /* Cocoa.framework */,
+				CF84E3D1C3FCD94ED0C13D04626DE9A7 /* Foundation.framework */,
+				1696C9667DDEE27609872760C83DB6AB /* Security.framework */,
 			);
-			name = iOS;
+			name = "OS X";
 			sourceTree = "<group>";
 		};
 		2CDAFF427C86A7EBC9BB2BF7BB09BF01 /* Support Files */ = {
@@ -733,26 +766,6 @@
 			path = "../Target Support Files/Appirater";
 			sourceTree = "<group>";
 		};
-		2CEBC321C8F1A650C07FE4EE65636998 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				486D5BA5B6867B38F85D7B59155889EF /* Appirater.bundle */,
-				F1CB770B746CD204CB806274E19A5B5A /* libAppirater.a */,
-				567D29B116F2EAD31C65BB3F8DCCB5BF /* libDropbox-OSX-SDK.a */,
-				4439DD634F48103B64D1DA1D693C7050 /* libMBProgressHUD.a */,
-				0B5241489DDF348FEB6945DDC10BC4F9 /* libPods-jrtplib-static.a */,
-				C900FB6635E976DF9FCD3BFEE2CA0CB8 /* libPods-jrtplib-static-OSX.a */,
-				30F0C3BD7C746319C8916676998095CA /* libPods-Monal.a */,
-				AD9099E5E37DE4E9E5C0667D888E376A /* libPods-Monal Tests.a */,
-				AFC2285F8268B6BDF53A9A14302F9F96 /* libPods-Monal-OSX.a */,
-				9F4D1FE27C1125121AFAA7000DABCF71 /* libPods-Monal-OSXTests.a */,
-				D1FBB174CC70EE22D73D645C8FB409D1 /* libSAMKeychain.a */,
-				32298B83CA4BE9158E127A3932587E67 /* libTPCircularBuffer-iOS.a */,
-				307EB44EE79BBF68C63756AFC8FDC564 /* libTPCircularBuffer-OSX.a */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 		2DCBB2A4BA278BC8320D46CD7742B206 /* MBProgressHUD */ = {
 			isa = PBXGroup;
 			children = (
@@ -764,17 +777,6 @@
 			path = MBProgressHUD;
 			sourceTree = "<group>";
 		};
-		2E958F94B378033264AA389A218321B7 /* OS X */ = {
-			isa = PBXGroup;
-			children = (
-				0473A9E19194783B1357617B57A94EA5 /* AudioToolbox.framework */,
-				B5FE30FA9330B14E77B1BB684D6B7E0F /* Cocoa.framework */,
-				D5D60424A063E35386112D9796306BD9 /* Foundation.framework */,
-				F818FE60323A691EF210EA44B3EB53E8 /* Security.framework */,
-			);
-			name = "OS X";
-			sourceTree = "<group>";
-		};
 		32451B5A0A6F753F384AD6AA37DC5411 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
@@ -784,7 +786,7 @@
 				C755EDF0B78CAEEE1371B9FC239DAF9C /* Dropbox-OSX-SDK */,
 				C03202BF88B23781BBA6A658182B5E78 /* Fabric */,
 				2DCBB2A4BA278BC8320D46CD7742B206 /* MBProgressHUD */,
-				221362AB9631E403BDF8F94B605856D7 /* SAMKeychain */,
+				BC1419417C020050AFE72B3F5CF8886B /* SAMKeychain */,
 				0F2A1C2A1D0C90AD60179BFBFC37A6E0 /* TPCircularBuffer */,
 			);
 			name = Pods;
@@ -824,6 +826,15 @@
 			path = "Target Support Files/Pods-Monal-OSX";
 			sourceTree = "<group>";
 		};
+		50568FCBDDE3E64E552DDD84E0E23374 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				9BD8AB0ED72C8FEC026C72E55DEE9EFB /* iOS */,
+				253C58FCE39CE774C99E0F740D527A08 /* OS X */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		640B5198ADCD4C27D588962B9E797949 /* Pods-Monal-OSXTests */ = {
 			isa = PBXGroup;
 			children = (
@@ -839,6 +850,14 @@
 			);
 			name = "Pods-Monal-OSXTests";
 			path = "Target Support Files/Pods-Monal-OSXTests";
+			sourceTree = "<group>";
+		};
+		6A5D67AA91F3FAB8A53B071061A1E87D /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				242582082A8D37C9F178C13BFF6FF41F /* SAMKeychain.bundle */,
+			);
+			name = Resources;
 			sourceTree = "<group>";
 		};
 		76D3DC1984C96B77763B376E3C50E442 /* Crashlytics */ = {
@@ -868,9 +887,9 @@
 			isa = PBXGroup;
 			children = (
 				93A4A3777CF96A4AAC1D13BA6DCCEA73 /* Podfile */,
-				E682202D5F0A02745C581F9A9F41ECAF /* Frameworks */,
+				50568FCBDDE3E64E552DDD84E0E23374 /* Frameworks */,
 				32451B5A0A6F753F384AD6AA37DC5411 /* Pods */,
-				2CEBC321C8F1A650C07FE4EE65636998 /* Products */,
+				1F1B069FC79892688A0D8D2C3EF8582C /* Products */,
 				D2390164FFEAFB8FEA6C3250F52EA8E4 /* Targets Support Files */,
 			);
 			sourceTree = "<group>";
@@ -948,6 +967,20 @@
 			path = "Target Support Files/Pods-Monal";
 			sourceTree = "<group>";
 		};
+		9BD8AB0ED72C8FEC026C72E55DEE9EFB /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				AEEA0199F2BD46AA403B077BE934B458 /* AudioToolbox.framework */,
+				8F697B4F58D57E06DC3EB4E54B6E3F38 /* CFNetwork.framework */,
+				225CA12ADDD15A6660B0F05521045B78 /* CoreGraphics.framework */,
+				AE07DDBEE30F178414CC247E5DBBF952 /* Foundation.framework */,
+				D6C8EE616E62435CDAE4EA8980D4C2F9 /* QuartzCore.framework */,
+				07AD99C91FF7120EF5058DE695332951 /* Security.framework */,
+				1D50F62C8DC730DEC42AB5FEBB582C74 /* SystemConfiguration.framework */,
+			);
+			name = iOS;
+			sourceTree = "<group>";
+		};
 		AC1CBFAC895B4A080044C6845B54289B /* Pods-jrtplib-static-OSX */ = {
 			isa = PBXGroup;
 			children = (
@@ -978,6 +1011,20 @@
 			);
 			name = "Pods-jrtplib-static";
 			path = "Target Support Files/Pods-jrtplib-static";
+			sourceTree = "<group>";
+		};
+		BC1419417C020050AFE72B3F5CF8886B /* SAMKeychain */ = {
+			isa = PBXGroup;
+			children = (
+				9D40A77427686238063F92AD5D96E11F /* SAMKeychain.h */,
+				4ADA8A84F08C7BE071CB31F2BE0EE0AE /* SAMKeychain.m */,
+				E02AFEFB7A818F1AEB764859F15FFCB0 /* SAMKeychainQuery.h */,
+				061BEA9AECDC647CA8CAADA773F876CE /* SAMKeychainQuery.m */,
+				6A5D67AA91F3FAB8A53B071061A1E87D /* Resources */,
+				F65C5E380D3B306AA206E900A96524BD /* Support Files */,
+			);
+			name = SAMKeychain;
+			path = SAMKeychain;
 			sourceTree = "<group>";
 		};
 		C03202BF88B23781BBA6A658182B5E78 /* Fabric */ = {
@@ -1115,32 +1162,18 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		E682202D5F0A02745C581F9A9F41ECAF /* Frameworks */ = {
+		F65C5E380D3B306AA206E900A96524BD /* Support Files */ = {
 			isa = PBXGroup;
 			children = (
-				22F36FA0148D675B2C5CB9334A9635CE /* iOS */,
-				2E958F94B378033264AA389A218321B7 /* OS X */,
-			);
-			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		F922B9C1A421EB206302FCD128B052E4 /* Support Files */ = {
-			isa = PBXGroup;
-			children = (
-				851F6A63B0FDAD36399EF12D0C93D837 /* SAMKeychain.xcconfig */,
-				F86AD35C95FC8F7EDCA75A19A1FEF627 /* SAMKeychain-dummy.m */,
-				9B09487EC7A78C55C3F88C98DC7A6EB3 /* SAMKeychain-prefix.pch */,
+				F3D8B3B417A88755B824942193288256 /* SAMKeychain-iOS.xcconfig */,
+				D3079441ED0C241AFF858802E43701BA /* SAMKeychain-iOS-dummy.m */,
+				78633F96A9A2E4508F910503822B257B /* SAMKeychain-iOS-prefix.pch */,
+				92311B3ADB0D7E3014119B66A4F6E6EF /* SAMKeychain-OSX.xcconfig */,
+				06AFB79AA9C08FD46D766827E4F6528B /* SAMKeychain-OSX-dummy.m */,
+				0C56E7E7E4948C6F8E0AD36E61AF5177 /* SAMKeychain-OSX-prefix.pch */,
 			);
 			name = "Support Files";
-			path = "../Target Support Files/SAMKeychain";
-			sourceTree = "<group>";
-		};
-		FC22F35EB625779AA80091F99A5E62D4 /* Resources */ = {
-			isa = PBXGroup;
-			children = (
-				1414F8E14EBA13AE8E458BB1975446C5 /* SAMKeychain.bundle */,
-			);
-			name = Resources;
+			path = "../Target Support Files/SAMKeychain-OSX";
 			sourceTree = "<group>";
 		};
 		FF49000EA26F8335381F2B1882EF9FF4 /* Support Files */ = {
@@ -1157,12 +1190,12 @@
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
-		1C7C40C71C758979D47A9BD493D94619 /* Headers */ = {
+		1DA9BA437AAC8016864F98AC46D34948 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6AAA00CEE10FCAADC89A817E4FF26C8F /* SAMKeychain.h in Headers */,
-				31AA180E53E9B22FB4CBEB332B2A2BB3 /* SAMKeychainQuery.h in Headers */,
+				FE0A18E94445BEA2A029D286D123CB40 /* TPCircularBuffer+AudioBufferList.h in Headers */,
+				B1EA18399A0D4227454BB5235DA9EAC1 /* TPCircularBuffer.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1175,12 +1208,21 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		39782FE0326EE603C6BF472DEFD9D0EB /* Headers */ = {
+		65F5E9D523F05C8FB9815FE1A485B642 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				33EE61B4B628EA4CFF0C47ED5D32C99A /* TPCircularBuffer+AudioBufferList.h in Headers */,
-				7C2DAD0AEB9305FF4BB2800D76A9AC9E /* TPCircularBuffer.h in Headers */,
+				FDF834AF89BE3DC51C421AC20546C6E9 /* SAMKeychain.h in Headers */,
+				6B684F82F76EFAF7BC2F82D426EC9548 /* SAMKeychainQuery.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8C8C78BE6715EE1B63D007B130871420 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				35F7FFD7E800B39029E370703975021D /* TPCircularBuffer+AudioBufferList.h in Headers */,
+				A1D0E620B0686AFE301AC360F458ED63 /* TPCircularBuffer.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1232,20 +1274,20 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		AA6EEAA0F24DEEB1FCB17FAAAC259559 /* Headers */ = {
-			isa = PBXHeadersBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				2094E507A108977EC61ED6EA663A58A3 /* TPCircularBuffer+AudioBufferList.h in Headers */,
-				4C3CB66ABD1D285637973A4B529356A0 /* TPCircularBuffer.h in Headers */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		BA649061E3F50D017BC1A2B968A0F645 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				11D6CC8AA2A7E16B0DCF0DAAA3E0BF0F /* MBProgressHUD.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CCA50698187FD1CF8E2DE7E15599383E /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				86A9CCB075A038170159BA5817A3AD09 /* SAMKeychain.h in Headers */,
+				6ECB33D3E94D2FDC82E53F6AB64D22C8 /* SAMKeychainQuery.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1265,43 +1307,61 @@
 			);
 			name = "Pods-Monal-OSXTests";
 			productName = "Pods-Monal-OSXTests";
-			productReference = 9F4D1FE27C1125121AFAA7000DABCF71 /* libPods-Monal-OSXTests.a */;
+			productReference = A94F5C0E32CFB6A43EAD99B94B13F02D /* libPods-Monal-OSXTests.a */;
 			productType = "com.apple.product-type.library.static";
 		};
-		23FDFC4AE64BAA82E8B6CBB1D7F8C712 /* Pods-Monal */ = {
+		1B3E0B63F846F00CFE7495A7AFB66360 /* SAMKeychain-OSX */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1DC3521B38015A09F0F40A61AD6F7461 /* Build configuration list for PBXNativeTarget "Pods-Monal" */;
+			buildConfigurationList = CFDB5365128A50275F1F3321430CF1C8 /* Build configuration list for PBXNativeTarget "SAMKeychain-OSX" */;
 			buildPhases = (
-				B4AAE24E3700F91C55538F571FDF6F28 /* Sources */,
-				049337EE18766A377B1D3C03A231CA00 /* Frameworks */,
+				ED7005841E518BD2228686D1E6C6E261 /* Sources */,
+				6E4C8B8D7434842D88B78BEA4C9833BF /* Frameworks */,
+				65F5E9D523F05C8FB9815FE1A485B642 /* Headers */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				2CE5CDF1C8E99FBD3F7DA59C8D335D2A /* PBXTargetDependency */,
-				5AFD1664BC2AD817E24033BFE439D513 /* PBXTargetDependency */,
-				E1F97810C923C6B9DBF56EEBEF4C94B2 /* PBXTargetDependency */,
+			);
+			name = "SAMKeychain-OSX";
+			productName = "SAMKeychain-OSX";
+			productReference = 13A999371BB1E46D251E5ECA052F75BE /* libSAMKeychain-OSX.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		280CB7533921D095F289C28A4FC7C20A /* Pods-Monal */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4593B0AE433FC8D66FB179BCAFD6E156 /* Build configuration list for PBXNativeTarget "Pods-Monal" */;
+			buildPhases = (
+				C91B5971531C91AE0E9822F724EDCACD /* Sources */,
+				D2BE0AB50A71222EA3ABEBC03D48C9AF /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				78152322EC5C626359F59D0AF50F28D0 /* PBXTargetDependency */,
+				88872677A91E2FD267415B30649EDEBC /* PBXTargetDependency */,
+				1C4910450EA7204CEB5D9FA36193A2A1 /* PBXTargetDependency */,
+				75C01751B873CF59899046483231A3B4 /* PBXTargetDependency */,
 			);
 			name = "Pods-Monal";
 			productName = "Pods-Monal";
-			productReference = 30F0C3BD7C746319C8916676998095CA /* libPods-Monal.a */;
+			productReference = 631F783BC726DE552F7C52EDE0AAF533 /* libPods-Monal.a */;
 			productType = "com.apple.product-type.library.static";
 		};
-		3126B8918EE8ED9CE574BE113DAD0BC5 /* SAMKeychain */ = {
+		50A76FA88B68025D06D01E5DF263C06B /* TPCircularBuffer-iOS */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 07231BD6ED66FD8267E227B5ACA208FB /* Build configuration list for PBXNativeTarget "SAMKeychain" */;
+			buildConfigurationList = 8B47E75394A407CC4454D54CBDBE1D47 /* Build configuration list for PBXNativeTarget "TPCircularBuffer-iOS" */;
 			buildPhases = (
-				6A321F3E090A5649CA34B9D3CC3E39A3 /* Sources */,
-				8C4B7FCD48D22C60839BC656E696E6D8 /* Frameworks */,
-				1C7C40C71C758979D47A9BD493D94619 /* Headers */,
+				1332DDF944D834F99E6424643B22171D /* Sources */,
+				A1DF393D8FD968E6D21F66E015BF04A3 /* Frameworks */,
+				8C8C78BE6715EE1B63D007B130871420 /* Headers */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
-			name = SAMKeychain;
-			productName = SAMKeychain;
-			productReference = D1FBB174CC70EE22D73D645C8FB409D1 /* libSAMKeychain.a */;
+			name = "TPCircularBuffer-iOS";
+			productName = "TPCircularBuffer-iOS";
+			productReference = 2A28AA63164BFD62D747BDA90C91D938 /* libTPCircularBuffer-iOS.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 		5814D3DB7D5EFA00573D14440FFA2AB4 /* Pods-jrtplib-static */ = {
@@ -1317,24 +1377,43 @@
 			);
 			name = "Pods-jrtplib-static";
 			productName = "Pods-jrtplib-static";
-			productReference = 0B5241489DDF348FEB6945DDC10BC4F9 /* libPods-jrtplib-static.a */;
+			productReference = A495004616DFD81243A53F0C0426DFBC /* libPods-jrtplib-static.a */;
 			productType = "com.apple.product-type.library.static";
 		};
-		68B17BB9075F1737B0C44BBDF72EC502 /* TPCircularBuffer-iOS */ = {
+		79EB6BC3AEEE43CC7FECDB2D1AC2EA50 /* Pods-Monal-OSX */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 792CEE0861F98C35BD326BC9E5F8E97E /* Build configuration list for PBXNativeTarget "TPCircularBuffer-iOS" */;
+			buildConfigurationList = 9AD42213D81515C9142854593639073C /* Build configuration list for PBXNativeTarget "Pods-Monal-OSX" */;
 			buildPhases = (
-				DC908B5F4B66EC6A7DA7C0882DDF11FA /* Sources */,
-				D1FB1B484D4DDDABE79F8C4BE560BE9F /* Frameworks */,
-				AA6EEAA0F24DEEB1FCB17FAAAC259559 /* Headers */,
+				A95361057559A4F3805283B16763E079 /* Sources */,
+				824364016B138FDD64ACAE11427D1601 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				373A1C58620105408226647A7175B9C8 /* PBXTargetDependency */,
+				214DC03AF10C508039F4BEE672EE9F2D /* PBXTargetDependency */,
+				9C7069DBF2114A62E4459C5CFD5AD583 /* PBXTargetDependency */,
+			);
+			name = "Pods-Monal-OSX";
+			productName = "Pods-Monal-OSX";
+			productReference = 29C8B8AB27AEBD642416DC25953C5553 /* libPods-Monal-OSX.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		8572D780E982848925E157717F12B45F /* TPCircularBuffer-OSX */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 33CDF101A0B96461218FC254F001C951 /* Build configuration list for PBXNativeTarget "TPCircularBuffer-OSX" */;
+			buildPhases = (
+				CA6CC743178493ED46DEBFD97C0DB766 /* Sources */,
+				B86669CB19F7362C2E40760D06E7912D /* Frameworks */,
+				1DA9BA437AAC8016864F98AC46D34948 /* Headers */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
-			name = "TPCircularBuffer-iOS";
-			productName = "TPCircularBuffer-iOS";
-			productReference = 32298B83CA4BE9158E127A3932587E67 /* libTPCircularBuffer-iOS.a */;
+			name = "TPCircularBuffer-OSX";
+			productName = "TPCircularBuffer-OSX";
+			productReference = 0E6465D736BE014370B8C92DB294EBB1 /* libTPCircularBuffer-OSX.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 		8BB0866348D0EDAEA78EFF49275D22B6 /* Pods-Monal Tests */ = {
@@ -1350,7 +1429,7 @@
 			);
 			name = "Pods-Monal Tests";
 			productName = "Pods-Monal Tests";
-			productReference = AD9099E5E37DE4E9E5C0667D888E376A /* libPods-Monal Tests.a */;
+			productReference = 0F3402C4DF3ED28F86139B93509F9019 /* libPods-Monal Tests.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 		8F6428A433C09BBC65F91C38C9C3A80C /* MBProgressHUD */ = {
@@ -1367,7 +1446,7 @@
 			);
 			name = MBProgressHUD;
 			productName = MBProgressHUD;
-			productReference = 4439DD634F48103B64D1DA1D693C7050 /* libMBProgressHUD.a */;
+			productReference = 8E06B1573AB6F919A114C75FF4212C3D /* libMBProgressHUD.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 		9A1859D8C1508CCCA49511D06F0B7144 /* Appirater */ = {
@@ -1385,7 +1464,7 @@
 			);
 			name = Appirater;
 			productName = Appirater;
-			productReference = F1CB770B746CD204CB806274E19A5B5A /* libAppirater.a */;
+			productReference = BBA0257B1A478FEAA1DED7D57D26E800 /* libAppirater.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 		A1F1878EA1E020F8BF30447B63421F6E /* Appirater-Appirater */ = {
@@ -1402,26 +1481,24 @@
 			);
 			name = "Appirater-Appirater";
 			productName = "Appirater-Appirater";
-			productReference = 486D5BA5B6867B38F85D7B59155889EF /* Appirater.bundle */;
+			productReference = C23F744FF52D92109BF0D482940818C8 /* Appirater.bundle */;
 			productType = "com.apple.product-type.bundle";
 		};
-		B93D8A7F2FD6751533200BD66AA01C16 /* Pods-Monal-OSX */ = {
+		A568B1CD365582069B03539D4AC48513 /* SAMKeychain-iOS */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = EEFDAA23DB1BB14AE0BA108B5DF0E248 /* Build configuration list for PBXNativeTarget "Pods-Monal-OSX" */;
+			buildConfigurationList = 14D2EE20E34F4891B28888FF30D4F749 /* Build configuration list for PBXNativeTarget "SAMKeychain-iOS" */;
 			buildPhases = (
-				E0E8BBB74F2A64D40872979E60B77DC9 /* Sources */,
-				201A048F0084EEAA7D5A7FCEA9806D6C /* Frameworks */,
+				3D8C84C93B8579F40862548FDD4AE46C /* Sources */,
+				18C38DF93897D79510BED160CCDBB0EF /* Frameworks */,
+				CCA50698187FD1CF8E2DE7E15599383E /* Headers */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				BECFD920980CE5B54F3A5B2E9B0A669B /* PBXTargetDependency */,
-				FB35B958FB8463CE28F286DAEA323529 /* PBXTargetDependency */,
-				4995A5CDF0FC32D705CBA0997A18E178 /* PBXTargetDependency */,
 			);
-			name = "Pods-Monal-OSX";
-			productName = "Pods-Monal-OSX";
-			productReference = AFC2285F8268B6BDF53A9A14302F9F96 /* libPods-Monal-OSX.a */;
+			name = "SAMKeychain-iOS";
+			productName = "SAMKeychain-iOS";
+			productReference = 32AF6512844B3E635383449BD2AF20FF /* libSAMKeychain-iOS.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 		D0699215327630AC30891C2D1F91EF20 /* Pods-jrtplib-static-OSX */ = {
@@ -1437,7 +1514,7 @@
 			);
 			name = "Pods-jrtplib-static-OSX";
 			productName = "Pods-jrtplib-static-OSX";
-			productReference = C900FB6635E976DF9FCD3BFEE2CA0CB8 /* libPods-jrtplib-static-OSX.a */;
+			productReference = ABD5B13C330C67EC94A0EC0B84A8377D /* libPods-jrtplib-static-OSX.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 		D0F279BE51C0593BE592433E3BD60F0F /* Dropbox-OSX-SDK */ = {
@@ -1454,24 +1531,7 @@
 			);
 			name = "Dropbox-OSX-SDK";
 			productName = "Dropbox-OSX-SDK";
-			productReference = 567D29B116F2EAD31C65BB3F8DCCB5BF /* libDropbox-OSX-SDK.a */;
-			productType = "com.apple.product-type.library.static";
-		};
-		DC14996653352110FD04E18D312DE16E /* TPCircularBuffer-OSX */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 5C5415EFA414DACFE966701D8FC397CD /* Build configuration list for PBXNativeTarget "TPCircularBuffer-OSX" */;
-			buildPhases = (
-				02EB68D54EF383673476BE24F355C9FE /* Sources */,
-				15102D255480E5E40CD175D29877E78A /* Frameworks */,
-				39782FE0326EE603C6BF472DEFD9D0EB /* Headers */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = "TPCircularBuffer-OSX";
-			productName = "TPCircularBuffer-OSX";
-			productReference = 307EB44EE79BBF68C63756AFC8FDC564 /* libTPCircularBuffer-OSX.a */;
+			productReference = F5A0AB3410514862134DB7BBE68228CD /* libDropbox-OSX-SDK.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
@@ -1491,7 +1551,7 @@
 				en,
 			);
 			mainGroup = 7DB346D0F39D3F0E887471402A8071AB;
-			productRefGroup = 2CEBC321C8F1A650C07FE4EE65636998 /* Products */;
+			productRefGroup = 1F1B069FC79892688A0D8D2C3EF8582C /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -1501,13 +1561,14 @@
 				8F6428A433C09BBC65F91C38C9C3A80C /* MBProgressHUD */,
 				5814D3DB7D5EFA00573D14440FFA2AB4 /* Pods-jrtplib-static */,
 				D0699215327630AC30891C2D1F91EF20 /* Pods-jrtplib-static-OSX */,
-				23FDFC4AE64BAA82E8B6CBB1D7F8C712 /* Pods-Monal */,
+				280CB7533921D095F289C28A4FC7C20A /* Pods-Monal */,
 				8BB0866348D0EDAEA78EFF49275D22B6 /* Pods-Monal Tests */,
-				B93D8A7F2FD6751533200BD66AA01C16 /* Pods-Monal-OSX */,
+				79EB6BC3AEEE43CC7FECDB2D1AC2EA50 /* Pods-Monal-OSX */,
 				15A52E72C422A2CC0169AC9087DBC475 /* Pods-Monal-OSXTests */,
-				3126B8918EE8ED9CE574BE113DAD0BC5 /* SAMKeychain */,
-				68B17BB9075F1737B0C44BBDF72EC502 /* TPCircularBuffer-iOS */,
-				DC14996653352110FD04E18D312DE16E /* TPCircularBuffer-OSX */,
+				A568B1CD365582069B03539D4AC48513 /* SAMKeychain-iOS */,
+				1B3E0B63F846F00CFE7495A7AFB66360 /* SAMKeychain-OSX */,
+				50A76FA88B68025D06D01E5DF263C06B /* TPCircularBuffer-iOS */,
+				8572D780E982848925E157717F12B45F /* TPCircularBuffer-OSX */,
 			);
 		};
 /* End PBXProject section */
@@ -1555,20 +1616,20 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		02EB68D54EF383673476BE24F355C9FE /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				1569A8A389CCF4E69E9DA5AFEEC3FA0A /* TPCircularBuffer+AudioBufferList.c in Sources */,
-				1541EBFA6D6E78C7B73A4BA7A8564519 /* TPCircularBuffer-OSX-dummy.m in Sources */,
-				77475AE1D5558929238DCE43C88FC9AC /* TPCircularBuffer.c in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		10DF625A5C3FA2B539CADF194CD671B9 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1332DDF944D834F99E6424643B22171D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BC71F5F56C555CCC767E45F48C3E56F2 /* TPCircularBuffer+AudioBufferList.c in Sources */,
+				413B4D0696FACFA43C78624242C6E2DB /* TPCircularBuffer-iOS-dummy.m in Sources */,
+				7C3AA5FB13D83376D4D7450D33A7CB85 /* TPCircularBuffer.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1581,13 +1642,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		6A321F3E090A5649CA34B9D3CC3E39A3 /* Sources */ = {
+		3D8C84C93B8579F40862548FDD4AE46C /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7338D0EC027513BE3C412F709633FB73 /* SAMKeychain-dummy.m in Sources */,
-				27F3AEE68B21859B3FF546F683BACF16 /* SAMKeychain.m in Sources */,
-				20821E422BF10E35C402B5000D986369 /* SAMKeychainQuery.m in Sources */,
+				43841006B1C81551A392A67B580E7ECE /* SAMKeychain-iOS-dummy.m in Sources */,
+				2E2502F72CE5B294F1630242A846D351 /* SAMKeychain.m in Sources */,
+				2C0B5F462585C3F319DA7FD8F0523B3D /* SAMKeychainQuery.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1604,6 +1665,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				9138D547AF0B98C81E0092562FBC67E7 /* Pods-jrtplib-static-OSX-dummy.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A95361057559A4F3805283B16763E079 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				81B73DC2DAA35CDCA5406467421355BF /* Pods-Monal-OSX-dummy.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1659,11 +1728,21 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		B4AAE24E3700F91C55538F571FDF6F28 /* Sources */ = {
+		C91B5971531C91AE0E9822F724EDCACD /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				04534FA9E25B09B96CE70D5367B74DE5 /* Pods-Monal-dummy.m in Sources */,
+				381630E23CDDA5A374387030ED245025 /* Pods-Monal-dummy.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CA6CC743178493ED46DEBFD97C0DB766 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3C8A18D6562CE93ACB928DF00BF5A308 /* TPCircularBuffer+AudioBufferList.c in Sources */,
+				560D0C2A2E90DD135476DD3744FD6549 /* TPCircularBuffer-OSX-dummy.m in Sources */,
+				B0ED95843A8AD869FA270E2ABD323731 /* TPCircularBuffer.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1676,24 +1755,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		DC908B5F4B66EC6A7DA7C0882DDF11FA /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				4B49C6756FE90E9B85483098C8E5B8C9 /* TPCircularBuffer+AudioBufferList.c in Sources */,
-				F123F9C3E9131A7C00FB6F6E7AD531B2 /* TPCircularBuffer-iOS-dummy.m in Sources */,
-				05160121F593AA049894B6F42274F437 /* TPCircularBuffer.c in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		E0E8BBB74F2A64D40872979E60B77DC9 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				C8F446709F60CA1BBAB131601413D2FE /* Pods-Monal-OSX-dummy.m in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		E6B2EE12550DD8EFD70B2D259B51FDBB /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1702,26 +1763,48 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		ED7005841E518BD2228686D1E6C6E261 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DCEE02D7DD6907C63D68199CDD95DA38 /* SAMKeychain-OSX-dummy.m in Sources */,
+				943610102571B2876556EB90489A8480 /* SAMKeychain.m in Sources */,
+				0347E035BECCD37752CBE60B62471F24 /* SAMKeychainQuery.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		2CE5CDF1C8E99FBD3F7DA59C8D335D2A /* PBXTargetDependency */ = {
+		1C4910450EA7204CEB5D9FA36193A2A1 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "SAMKeychain-iOS";
+			target = A568B1CD365582069B03539D4AC48513 /* SAMKeychain-iOS */;
+			targetProxy = B61EEF65D6312435D5C03CFBA774E605 /* PBXContainerItemProxy */;
+		};
+		214DC03AF10C508039F4BEE672EE9F2D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "SAMKeychain-OSX";
+			target = 1B3E0B63F846F00CFE7495A7AFB66360 /* SAMKeychain-OSX */;
+			targetProxy = 35939A6D618DA7872062B1C9EEDC02F4 /* PBXContainerItemProxy */;
+		};
+		373A1C58620105408226647A7175B9C8 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "Dropbox-OSX-SDK";
+			target = D0F279BE51C0593BE592433E3BD60F0F /* Dropbox-OSX-SDK */;
+			targetProxy = 3100EAB7E365366C8A380A84C1DEA724 /* PBXContainerItemProxy */;
+		};
+		75C01751B873CF59899046483231A3B4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "TPCircularBuffer-iOS";
+			target = 50A76FA88B68025D06D01E5DF263C06B /* TPCircularBuffer-iOS */;
+			targetProxy = CE1ED268F99F80B39D334F9B756067C5 /* PBXContainerItemProxy */;
+		};
+		78152322EC5C626359F59D0AF50F28D0 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = Appirater;
 			target = 9A1859D8C1508CCCA49511D06F0B7144 /* Appirater */;
-			targetProxy = DF931523023B34FAA4E48FC253CFBB74 /* PBXContainerItemProxy */;
-		};
-		4995A5CDF0FC32D705CBA0997A18E178 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = "TPCircularBuffer-OSX";
-			target = DC14996653352110FD04E18D312DE16E /* TPCircularBuffer-OSX */;
-			targetProxy = 78724F568510426992428F31A6473463 /* PBXContainerItemProxy */;
-		};
-		5AFD1664BC2AD817E24033BFE439D513 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = MBProgressHUD;
-			target = 8F6428A433C09BBC65F91C38C9C3A80C /* MBProgressHUD */;
-			targetProxy = E6A6E8C3AFE4B38D262BBB4484DFF27C /* PBXContainerItemProxy */;
+			targetProxy = 878AF64CD83C05D0575E4ABC415C56BF /* PBXContainerItemProxy */;
 		};
 		87F7C77D4B923C8CD0E39DBBBA6BBD10 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -1729,23 +1812,17 @@
 			target = A1F1878EA1E020F8BF30447B63421F6E /* Appirater-Appirater */;
 			targetProxy = C984DE8754336562934BA5F36EA0542C /* PBXContainerItemProxy */;
 		};
-		BECFD920980CE5B54F3A5B2E9B0A669B /* PBXTargetDependency */ = {
+		88872677A91E2FD267415B30649EDEBC /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			name = "Dropbox-OSX-SDK";
-			target = D0F279BE51C0593BE592433E3BD60F0F /* Dropbox-OSX-SDK */;
-			targetProxy = 38A12A6BE99B12A36DFC77826BFFB5D1 /* PBXContainerItemProxy */;
+			name = MBProgressHUD;
+			target = 8F6428A433C09BBC65F91C38C9C3A80C /* MBProgressHUD */;
+			targetProxy = D7EA8E46D2FD9E3E4AE673095CEC9CF9 /* PBXContainerItemProxy */;
 		};
-		E1F97810C923C6B9DBF56EEBEF4C94B2 /* PBXTargetDependency */ = {
+		9C7069DBF2114A62E4459C5CFD5AD583 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			name = "TPCircularBuffer-iOS";
-			target = 68B17BB9075F1737B0C44BBDF72EC502 /* TPCircularBuffer-iOS */;
-			targetProxy = 26626E381468D721B8A1902D428DBF51 /* PBXContainerItemProxy */;
-		};
-		FB35B958FB8463CE28F286DAEA323529 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = SAMKeychain;
-			target = 3126B8918EE8ED9CE574BE113DAD0BC5 /* SAMKeychain */;
-			targetProxy = 639C6FD3FF46C4F69652BAE00A333293 /* PBXContainerItemProxy */;
+			name = "TPCircularBuffer-OSX";
+			target = 8572D780E982848925E157717F12B45F /* TPCircularBuffer-OSX */;
+			targetProxy = 7E1F0522870BB14240A98F6E4C43B054 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -1773,6 +1850,30 @@
 			};
 			name = Adhoc;
 		};
+		062D75034EFC483378534114C7E5D2DA /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 92311B3ADB0D7E3014119B66A4F6E6EF /* SAMKeychain-OSX.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				EXECUTABLE_PREFIX = lib;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREFIX_HEADER = "Target Support Files/SAMKeychain-OSX/SAMKeychain-OSX-prefix.pch";
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PRIVATE_HEADERS_FOLDER_PATH = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PUBLIC_HEADERS_FOLDER_PATH = "";
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
 		07898AB5E8AC16D62F03E5E06972BCE6 /* Release */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = DC171C7ADC7ADDA4E7937450B638457F /* Appirater.xcconfig */;
@@ -1790,27 +1891,25 @@
 			};
 			name = Release;
 		};
-		07BB9A8FBB5B1DBB588C958DACF2F792 /* Release */ = {
+		18FE1A3E506B7801D891109882EDAFC2 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 1131D492C8D0CEA8D783A8648462E5E2 /* Pods-Monal-OSX.release.xcconfig */;
+			baseConfigurationReference = D96E4252A57CD6C24AEF861E1D76E5AA /* Pods-Monal.release.xcconfig */;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "-";
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				EXECUTABLE_PREFIX = lib;
 				GCC_NO_COMMON_BLOCKS = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MACH_O_TYPE = staticlib;
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				OTHER_LDFLAGS = "";
 				OTHER_LIBTOOLFLAGS = "";
 				PODS_ROOT = "$(SRCROOT)";
 				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx;
+				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 			};
 			name = Release;
@@ -1888,27 +1987,25 @@
 			};
 			name = AppStore;
 		};
-		2652DDC2B16E37F22F992E3A1266264B /* AppStore */ = {
+		2306AD9B382FC53CAE0A26F4E99E06D1 /* AppStore */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3EAD87EBCE8C67BDFECD6B818D3EEE24 /* Pods-Monal-OSX.appstore.xcconfig */;
+			baseConfigurationReference = 44EFCB52C89AEEB7D85C2A510858401E /* Pods-Monal.appstore.xcconfig */;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "-";
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				EXECUTABLE_PREFIX = lib;
 				GCC_NO_COMMON_BLOCKS = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MACH_O_TYPE = staticlib;
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				OTHER_LDFLAGS = "";
 				OTHER_LIBTOOLFLAGS = "";
 				PODS_ROOT = "$(SRCROOT)";
 				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx;
+				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 			};
 			name = AppStore;
@@ -1935,6 +2032,54 @@
 				SKIP_INSTALL = YES;
 			};
 			name = Release;
+		};
+		3327614CF8227455834CAF92B87F0FA0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1131D492C8D0CEA8D783A8648462E5E2 /* Pods-Monal-OSX.release.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				EXECUTABLE_PREFIX = lib;
+				GCC_NO_COMMON_BLOCKS = YES;
+				MACH_O_TYPE = staticlib;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PODS_ROOT = "$(SRCROOT)";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
+		35E137565A370E3BB1552B8A5770EB73 /* Adhoc */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = F4FF9A66F74D24C09E89FA2352435E34 /* TPCircularBuffer-iOS.xcconfig */;
+			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREFIX_HEADER = "Target Support Files/TPCircularBuffer-iOS/TPCircularBuffer-iOS-prefix.pch";
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PRIVATE_HEADERS_FOLDER_PATH = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PUBLIC_HEADERS_FOLDER_PATH = "";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+			};
+			name = Adhoc;
 		};
 		35E763B30990F32E3A62ECE458C829B9 /* AppStore */ = {
 			isa = XCBuildConfiguration;
@@ -1979,30 +2124,6 @@
 				SKIP_INSTALL = YES;
 			};
 			name = AppStore;
-		};
-		48571CA2687B8C983F0EFD587BFE4473 /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 2DF28B75E298A6C07BD9CBEEDD8AAF86 /* TPCircularBuffer-OSX.xcconfig */;
-			buildSettings = {
-				CODE_SIGN_IDENTITY = "-";
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				EXECUTABLE_PREFIX = lib;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_PREFIX_HEADER = "Target Support Files/TPCircularBuffer-OSX/TPCircularBuffer-OSX-prefix.pch";
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
-				MTL_ENABLE_DEBUG_INFO = NO;
-				OTHER_LDFLAGS = "";
-				OTHER_LIBTOOLFLAGS = "";
-				PRIVATE_HEADERS_FOLDER_PATH = "";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PUBLIC_HEADERS_FOLDER_PATH = "";
-				SDKROOT = macosx;
-			};
-			name = Release;
 		};
 		4A35B3046D069EAFF23571FA094359B4 /* Release */ = {
 			isa = XCBuildConfiguration;
@@ -2050,28 +2171,30 @@
 			};
 			name = Adhoc;
 		};
-		51E247DFFDEA72DE6E2D8D723DF5F718 /* Debug */ = {
+		4F1FAF24EB63E22FF26CA4F79108755C /* AppStore */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = F4FF9A66F74D24C09E89FA2352435E34 /* TPCircularBuffer-iOS.xcconfig */;
+			baseConfigurationReference = 3EAD87EBCE8C67BDFECD6B818D3EEE24 /* Pods-Monal-OSX.appstore.xcconfig */;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				EXECUTABLE_PREFIX = lib;
 				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_PREFIX_HEADER = "Target Support Files/TPCircularBuffer-iOS/TPCircularBuffer-iOS-prefix.pch";
-				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
-				MTL_ENABLE_DEBUG_INFO = YES;
+				MACH_O_TYPE = staticlib;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MTL_ENABLE_DEBUG_INFO = NO;
 				OTHER_LDFLAGS = "";
 				OTHER_LIBTOOLFLAGS = "";
-				PRIVATE_HEADERS_FOLDER_PATH = "";
+				PODS_ROOT = "$(SRCROOT)";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PUBLIC_HEADERS_FOLDER_PATH = "";
-				SDKROOT = iphoneos;
+				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
 			};
-			name = Debug;
+			name = AppStore;
 		};
 		528ABF15F5702A563F439F046B6118E1 /* AppStore */ = {
 			isa = XCBuildConfiguration;
@@ -2120,29 +2243,6 @@
 			};
 			name = Adhoc;
 		};
-		5504EE1444ECEBA5DCB3FCD1B65D3BBD /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = F3968DFE3EF9C0D7F4CF8E639B4994B8 /* Pods-Monal.debug.xcconfig */;
-			buildSettings = {
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				DEBUG_INFORMATION_FORMAT = dwarf;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_NO_COMMON_BLOCKS = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				MACH_O_TYPE = staticlib;
-				MTL_ENABLE_DEBUG_INFO = YES;
-				OTHER_LDFLAGS = "";
-				OTHER_LIBTOOLFLAGS = "";
-				PODS_ROOT = "$(SRCROOT)";
-				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-			};
-			name = Debug;
-		};
 		564590CC5D1AD36FF46E4E4093E1799E /* Adhoc */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = DC171C7ADC7ADDA4E7937450B638457F /* Appirater.xcconfig */;
@@ -2185,6 +2285,30 @@
 			};
 			name = AppStore;
 		};
+		5B01DA07AA6CCF053565EE0BBA54D624 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 92311B3ADB0D7E3014119B66A4F6E6EF /* SAMKeychain-OSX.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				EXECUTABLE_PREFIX = lib;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREFIX_HEADER = "Target Support Files/SAMKeychain-OSX/SAMKeychain-OSX-prefix.pch";
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PRIVATE_HEADERS_FOLDER_PATH = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PUBLIC_HEADERS_FOLDER_PATH = "";
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
 		5B4DA542AD061BF9C437987CD0679878 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 79A8C6319A8218FEF9724F07AE5D3FCA /* Pods-Monal Tests.debug.xcconfig */;
@@ -2207,29 +2331,6 @@
 				SKIP_INSTALL = YES;
 			};
 			name = Debug;
-		};
-		6152F84150D051C89707B76D138C7CFC /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = D96E4252A57CD6C24AEF861E1D76E5AA /* Pods-Monal.release.xcconfig */;
-			buildSettings = {
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_NO_COMMON_BLOCKS = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				MACH_O_TYPE = staticlib;
-				MTL_ENABLE_DEBUG_INFO = NO;
-				OTHER_LDFLAGS = "";
-				OTHER_LIBTOOLFLAGS = "";
-				PODS_ROOT = "$(SRCROOT)";
-				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-			};
-			name = Release;
 		};
 		61ECFC15203821D1AA8A2EC2E5FA2F81 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -2279,29 +2380,6 @@
 			};
 			name = Adhoc;
 		};
-		65A99DB4B9A87F244644AAE950A05152 /* Adhoc */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = F4FF9A66F74D24C09E89FA2352435E34 /* TPCircularBuffer-iOS.xcconfig */;
-			buildSettings = {
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_PREFIX_HEADER = "Target Support Files/TPCircularBuffer-iOS/TPCircularBuffer-iOS-prefix.pch";
-				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
-				MTL_ENABLE_DEBUG_INFO = NO;
-				OTHER_LDFLAGS = "";
-				OTHER_LIBTOOLFLAGS = "";
-				PRIVATE_HEADERS_FOLDER_PATH = "";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PUBLIC_HEADERS_FOLDER_PATH = "";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-			};
-			name = Adhoc;
-		};
 		663F5CE2402ECA251549A0CCC5115F45 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -2347,9 +2425,9 @@
 			};
 			name = Release;
 		};
-		66537605430F79A2B6410B3ED27D8FF8 /* Adhoc */ = {
+		672F440EC5FE3C2BC1BAFD697F7678FB /* AppStore */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = E67A98336F53B10AB20D3C24C3F5A7AC /* Pods-Monal.adhoc.xcconfig */;
+			baseConfigurationReference = F4FF9A66F74D24C09E89FA2352435E34 /* TPCircularBuffer-iOS.xcconfig */;
 			buildSettings = {
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
@@ -2357,42 +2435,64 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_NO_COMMON_BLOCKS = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				MACH_O_TYPE = staticlib;
+				GCC_PREFIX_HEADER = "Target Support Files/TPCircularBuffer-iOS/TPCircularBuffer-iOS-prefix.pch";
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
 				MTL_ENABLE_DEBUG_INFO = NO;
-				OTHER_LDFLAGS = "";
-				OTHER_LIBTOOLFLAGS = "";
-				PODS_ROOT = "$(SRCROOT)";
-				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-			};
-			name = Adhoc;
-		};
-		682B71175FD81BA28B73B5F0C4C4C8FF /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 2DF28B75E298A6C07BD9CBEEDD8AAF86 /* TPCircularBuffer-OSX.xcconfig */;
-			buildSettings = {
-				CODE_SIGN_IDENTITY = "-";
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				DEBUG_INFORMATION_FORMAT = dwarf;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				EXECUTABLE_PREFIX = lib;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_PREFIX_HEADER = "Target Support Files/TPCircularBuffer-OSX/TPCircularBuffer-OSX-prefix.pch";
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
-				MTL_ENABLE_DEBUG_INFO = YES;
 				OTHER_LDFLAGS = "";
 				OTHER_LIBTOOLFLAGS = "";
 				PRIVATE_HEADERS_FOLDER_PATH = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PUBLIC_HEADERS_FOLDER_PATH = "";
-				SDKROOT = macosx;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
 			};
-			name = Debug;
+			name = AppStore;
+		};
+		701488C473AA1BC457876B9776CF4003 /* Adhoc */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = F3D8B3B417A88755B824942193288256 /* SAMKeychain-iOS.xcconfig */;
+			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREFIX_HEADER = "Target Support Files/SAMKeychain-iOS/SAMKeychain-iOS-prefix.pch";
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PRIVATE_HEADERS_FOLDER_PATH = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PUBLIC_HEADERS_FOLDER_PATH = "";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+			};
+			name = Adhoc;
+		};
+		71A3B8BABAA42F81C92AE2D5C3E4A598 /* AppStore */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = F3D8B3B417A88755B824942193288256 /* SAMKeychain-iOS.xcconfig */;
+			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREFIX_HEADER = "Target Support Files/SAMKeychain-iOS/SAMKeychain-iOS-prefix.pch";
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PRIVATE_HEADERS_FOLDER_PATH = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PUBLIC_HEADERS_FOLDER_PATH = "";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+			};
+			name = AppStore;
 		};
 		76376A8EB5CF77CF955BCDEEBFB66C91 /* Release */ = {
 			isa = XCBuildConfiguration;
@@ -2416,31 +2516,6 @@
 				SKIP_INSTALL = YES;
 			};
 			name = Release;
-		};
-		796148C84E6F2CA909A8F284599C84A0 /* Adhoc */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = C2BF51FF7BA8C06F5AA7677BB8D63985 /* Pods-Monal-OSX.adhoc.xcconfig */;
-			buildSettings = {
-				CODE_SIGN_IDENTITY = "-";
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				EXECUTABLE_PREFIX = lib;
-				GCC_NO_COMMON_BLOCKS = YES;
-				MACH_O_TYPE = staticlib;
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
-				MTL_ENABLE_DEBUG_INFO = NO;
-				OTHER_LDFLAGS = "";
-				OTHER_LIBTOOLFLAGS = "";
-				PODS_ROOT = "$(SRCROOT)";
-				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx;
-				SKIP_INSTALL = YES;
-			};
-			name = Adhoc;
 		};
 		804026018E7F7F9B999B1C41F95F5282 /* AppStore */ = {
 			isa = XCBuildConfiguration;
@@ -2490,6 +2565,54 @@
 			};
 			name = Debug;
 		};
+		8860932BBE4D7EC689229D4C9ADC1C81 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = DC69CF7117246C018EC5F410C79BCF4B /* Pods-Monal-OSX.debug.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				EXECUTABLE_PREFIX = lib;
+				GCC_NO_COMMON_BLOCKS = YES;
+				MACH_O_TYPE = staticlib;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PODS_ROOT = "$(SRCROOT)";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		88CB83AB5BC59A1953E3A3F638582F35 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = F3D8B3B417A88755B824942193288256 /* SAMKeychain-iOS.xcconfig */;
+			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREFIX_HEADER = "Target Support Files/SAMKeychain-iOS/SAMKeychain-iOS-prefix.pch";
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PRIVATE_HEADERS_FOLDER_PATH = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PUBLIC_HEADERS_FOLDER_PATH = "";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
 		88E0E9430C0F8B75A5BF28EB23DB2766 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 43842054ECBAC7564FADC434CB6BD5C5 /* MBProgressHUD.xcconfig */;
@@ -2536,6 +2659,30 @@
 				SDKROOT = macosx;
 			};
 			name = Release;
+		};
+		8E0E8144A2EC7D28C7981726CE560709 /* AppStore */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 92311B3ADB0D7E3014119B66A4F6E6EF /* SAMKeychain-OSX.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				EXECUTABLE_PREFIX = lib;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREFIX_HEADER = "Target Support Files/SAMKeychain-OSX/SAMKeychain-OSX-prefix.pch";
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PRIVATE_HEADERS_FOLDER_PATH = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PUBLIC_HEADERS_FOLDER_PATH = "";
+				SDKROOT = macosx;
+			};
+			name = AppStore;
 		};
 		93DD6BF89454F9B086D9B0A331AC1736 /* Release */ = {
 			isa = XCBuildConfiguration;
@@ -2585,44 +2732,21 @@
 			};
 			name = AppStore;
 		};
-		9A744A428EFAEA023CC74B8CF22E4AEB /* Release */ = {
+		9CB9CD0353AFD81DE4AB7B6712D25E2C /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = F4FF9A66F74D24C09E89FA2352435E34 /* TPCircularBuffer-iOS.xcconfig */;
-			buildSettings = {
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_PREFIX_HEADER = "Target Support Files/TPCircularBuffer-iOS/TPCircularBuffer-iOS-prefix.pch";
-				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
-				MTL_ENABLE_DEBUG_INFO = NO;
-				OTHER_LDFLAGS = "";
-				OTHER_LIBTOOLFLAGS = "";
-				PRIVATE_HEADERS_FOLDER_PATH = "";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PUBLIC_HEADERS_FOLDER_PATH = "";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-			};
-			name = Release;
-		};
-		9B7D02161DE01F4782179ED07EB9BAF7 /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 851F6A63B0FDAD36399EF12D0C93D837 /* SAMKeychain.xcconfig */;
+			baseConfigurationReference = 2DF28B75E298A6C07BD9CBEEDD8AAF86 /* TPCircularBuffer-OSX.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "-";
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				EXECUTABLE_PREFIX = lib;
 				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_PREFIX_HEADER = "Target Support Files/SAMKeychain/SAMKeychain-prefix.pch";
+				GCC_PREFIX_HEADER = "Target Support Files/TPCircularBuffer-OSX/TPCircularBuffer-OSX-prefix.pch";
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
-				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_ENABLE_DEBUG_INFO = YES;
 				OTHER_LDFLAGS = "";
 				OTHER_LIBTOOLFLAGS = "";
 				PRIVATE_HEADERS_FOLDER_PATH = "";
@@ -2630,7 +2754,30 @@
 				PUBLIC_HEADERS_FOLDER_PATH = "";
 				SDKROOT = macosx;
 			};
-			name = Release;
+			name = Debug;
+		};
+		9F221A97CC56DD80227703A283EBDE83 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = F3968DFE3EF9C0D7F4CF8E639B4994B8 /* Pods-Monal.debug.xcconfig */;
+			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				MACH_O_TYPE = staticlib;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PODS_ROOT = "$(SRCROOT)";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
 		};
 		A59F4B7C8A1198BDB13458C3401740EF /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -2657,6 +2804,30 @@
 			};
 			name = Debug;
 		};
+		A8AB5EDE722E547C2CF468158A7E30A5 /* Adhoc */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 92311B3ADB0D7E3014119B66A4F6E6EF /* SAMKeychain-OSX.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				EXECUTABLE_PREFIX = lib;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREFIX_HEADER = "Target Support Files/SAMKeychain-OSX/SAMKeychain-OSX-prefix.pch";
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PRIVATE_HEADERS_FOLDER_PATH = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PUBLIC_HEADERS_FOLDER_PATH = "";
+				SDKROOT = macosx;
+			};
+			name = Adhoc;
+		};
 		ACDCDEA03B15715D25E26FF1A64C9927 /* Adhoc */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 42981B7A455B4CE51EBE91C7454E06D5 /* Pods-jrtplib-static-OSX.adhoc.xcconfig */;
@@ -2682,7 +2853,78 @@
 			};
 			name = Adhoc;
 		};
-		B1EC2392C1F1945C048B4ACDC01D9DA7 /* AppStore */ = {
+		B250B9E0EE1EF572396AD8D3CF3A5B29 /* Adhoc */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = C2BF51FF7BA8C06F5AA7677BB8D63985 /* Pods-Monal-OSX.adhoc.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				EXECUTABLE_PREFIX = lib;
+				GCC_NO_COMMON_BLOCKS = YES;
+				MACH_O_TYPE = staticlib;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PODS_ROOT = "$(SRCROOT)";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+			};
+			name = Adhoc;
+		};
+		B2EC8755A5487456387E605F7753512C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = F3D8B3B417A88755B824942193288256 /* SAMKeychain-iOS.xcconfig */;
+			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREFIX_HEADER = "Target Support Files/SAMKeychain-iOS/SAMKeychain-iOS-prefix.pch";
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PRIVATE_HEADERS_FOLDER_PATH = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PUBLIC_HEADERS_FOLDER_PATH = "";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		B4E19BDC183761974A37C3BA52F5BA5C /* Adhoc */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = E67A98336F53B10AB20D3C24C3F5A7AC /* Pods-Monal.adhoc.xcconfig */;
+			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				MACH_O_TYPE = staticlib;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PODS_ROOT = "$(SRCROOT)";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+			};
+			name = Adhoc;
+		};
+		B866189C54C4B8B366744366882ED941 /* AppStore */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 2DF28B75E298A6C07BD9CBEEDD8AAF86 /* TPCircularBuffer-OSX.xcconfig */;
 			buildSettings = {
@@ -2706,21 +2948,44 @@
 			};
 			name = AppStore;
 		};
-		B5B5B7B28C2DB0C7A3A988FFF4FEA34F /* Debug */ = {
+		B8FA9A44617F68E141F72678E99D587D /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 851F6A63B0FDAD36399EF12D0C93D837 /* SAMKeychain.xcconfig */;
+			baseConfigurationReference = F4FF9A66F74D24C09E89FA2352435E34 /* TPCircularBuffer-iOS.xcconfig */;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "-";
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREFIX_HEADER = "Target Support Files/TPCircularBuffer-iOS/TPCircularBuffer-iOS-prefix.pch";
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PRIVATE_HEADERS_FOLDER_PATH = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PUBLIC_HEADERS_FOLDER_PATH = "";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		B914B3AA424EAD13B11F0920D4A98AD7 /* Adhoc */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 2DF28B75E298A6C07BD9CBEEDD8AAF86 /* TPCircularBuffer-OSX.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				EXECUTABLE_PREFIX = lib;
 				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_PREFIX_HEADER = "Target Support Files/SAMKeychain/SAMKeychain-prefix.pch";
+				GCC_PREFIX_HEADER = "Target Support Files/TPCircularBuffer-OSX/TPCircularBuffer-OSX-prefix.pch";
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
-				MTL_ENABLE_DEBUG_INFO = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
 				OTHER_LDFLAGS = "";
 				OTHER_LIBTOOLFLAGS = "";
 				PRIVATE_HEADERS_FOLDER_PATH = "";
@@ -2728,7 +2993,7 @@
 				PUBLIC_HEADERS_FOLDER_PATH = "";
 				SDKROOT = macosx;
 			};
-			name = Debug;
+			name = Adhoc;
 		};
 		B929AB1929F5CC793143A8988D45A875 /* AppStore */ = {
 			isa = XCBuildConfiguration;
@@ -2750,30 +3015,6 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
-			};
-			name = AppStore;
-		};
-		BDD99C5693115628E5BFE014D3F922A4 /* AppStore */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 851F6A63B0FDAD36399EF12D0C93D837 /* SAMKeychain.xcconfig */;
-			buildSettings = {
-				CODE_SIGN_IDENTITY = "-";
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				EXECUTABLE_PREFIX = lib;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_PREFIX_HEADER = "Target Support Files/SAMKeychain/SAMKeychain-prefix.pch";
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
-				MTL_ENABLE_DEBUG_INFO = NO;
-				OTHER_LDFLAGS = "";
-				OTHER_LIBTOOLFLAGS = "";
-				PRIVATE_HEADERS_FOLDER_PATH = "";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PUBLIC_HEADERS_FOLDER_PATH = "";
-				SDKROOT = macosx;
 			};
 			name = AppStore;
 		};
@@ -2844,6 +3085,30 @@
 			};
 			name = Adhoc;
 		};
+		CD90B2C79A2EF40212B0B66CA12B3155 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 2DF28B75E298A6C07BD9CBEEDD8AAF86 /* TPCircularBuffer-OSX.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				EXECUTABLE_PREFIX = lib;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREFIX_HEADER = "Target Support Files/TPCircularBuffer-OSX/TPCircularBuffer-OSX-prefix.pch";
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PRIVATE_HEADERS_FOLDER_PATH = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PUBLIC_HEADERS_FOLDER_PATH = "";
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
 		D01867B0B7CDBC8C13673801659C20EF /* AppStore */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -2888,54 +3153,6 @@
 			};
 			name = AppStore;
 		};
-		D4B9F27CA254536729D8A4674379415B /* AppStore */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 44EFCB52C89AEEB7D85C2A510858401E /* Pods-Monal.appstore.xcconfig */;
-			buildSettings = {
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_NO_COMMON_BLOCKS = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				MACH_O_TYPE = staticlib;
-				MTL_ENABLE_DEBUG_INFO = NO;
-				OTHER_LDFLAGS = "";
-				OTHER_LIBTOOLFLAGS = "";
-				PODS_ROOT = "$(SRCROOT)";
-				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-			};
-			name = AppStore;
-		};
-		D58DEFD833510DF064CC50DC11C6A1D8 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = DC69CF7117246C018EC5F410C79BCF4B /* Pods-Monal-OSX.debug.xcconfig */;
-			buildSettings = {
-				CODE_SIGN_IDENTITY = "-";
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				DEBUG_INFORMATION_FORMAT = dwarf;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				EXECUTABLE_PREFIX = lib;
-				GCC_NO_COMMON_BLOCKS = YES;
-				MACH_O_TYPE = staticlib;
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
-				MTL_ENABLE_DEBUG_INFO = YES;
-				OTHER_LDFLAGS = "";
-				OTHER_LIBTOOLFLAGS = "";
-				PODS_ROOT = "$(SRCROOT)";
-				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx;
-				SKIP_INSTALL = YES;
-			};
-			name = Debug;
-		};
 		D7C250B24B5D29069CA43C026F37C5CD /* Adhoc */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 43842054ECBAC7564FADC434CB6BD5C5 /* MBProgressHUD.xcconfig */;
@@ -2956,54 +3173,6 @@
 				PUBLIC_HEADERS_FOLDER_PATH = "";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
-			};
-			name = Adhoc;
-		};
-		D8D2E91430D28F8B314530EF34F67B5B /* Adhoc */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 2DF28B75E298A6C07BD9CBEEDD8AAF86 /* TPCircularBuffer-OSX.xcconfig */;
-			buildSettings = {
-				CODE_SIGN_IDENTITY = "-";
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				EXECUTABLE_PREFIX = lib;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_PREFIX_HEADER = "Target Support Files/TPCircularBuffer-OSX/TPCircularBuffer-OSX-prefix.pch";
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
-				MTL_ENABLE_DEBUG_INFO = NO;
-				OTHER_LDFLAGS = "";
-				OTHER_LIBTOOLFLAGS = "";
-				PRIVATE_HEADERS_FOLDER_PATH = "";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PUBLIC_HEADERS_FOLDER_PATH = "";
-				SDKROOT = macosx;
-			};
-			name = Adhoc;
-		};
-		E20AEBF8D5FAD5517DB41F747A368AA6 /* Adhoc */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 851F6A63B0FDAD36399EF12D0C93D837 /* SAMKeychain.xcconfig */;
-			buildSettings = {
-				CODE_SIGN_IDENTITY = "-";
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				EXECUTABLE_PREFIX = lib;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_PREFIX_HEADER = "Target Support Files/SAMKeychain/SAMKeychain-prefix.pch";
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
-				MTL_ENABLE_DEBUG_INFO = NO;
-				OTHER_LDFLAGS = "";
-				OTHER_LIBTOOLFLAGS = "";
-				PRIVATE_HEADERS_FOLDER_PATH = "";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PUBLIC_HEADERS_FOLDER_PATH = "";
-				SDKROOT = macosx;
 			};
 			name = Adhoc;
 		};
@@ -3072,7 +3241,7 @@
 			};
 			name = Debug;
 		};
-		FC509B9378A6555D996DD1182D0C7C14 /* AppStore */ = {
+		FE4C8FAC48D2E8EFBFE2B6AB8D0FC8A1 /* Release */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = F4FF9A66F74D24C09E89FA2352435E34 /* TPCircularBuffer-iOS.xcconfig */;
 			buildSettings = {
@@ -3093,7 +3262,7 @@
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 			};
-			name = AppStore;
+			name = Release;
 		};
 		FFC8FFBA6555E11068D0708682F7BF1A /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -3147,24 +3316,13 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		07231BD6ED66FD8267E227B5ACA208FB /* Build configuration list for PBXNativeTarget "SAMKeychain" */ = {
+		14D2EE20E34F4891B28888FF30D4F749 /* Build configuration list for PBXNativeTarget "SAMKeychain-iOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				E20AEBF8D5FAD5517DB41F747A368AA6 /* Adhoc */,
-				BDD99C5693115628E5BFE014D3F922A4 /* AppStore */,
-				B5B5B7B28C2DB0C7A3A988FFF4FEA34F /* Debug */,
-				9B7D02161DE01F4782179ED07EB9BAF7 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		1DC3521B38015A09F0F40A61AD6F7461 /* Build configuration list for PBXNativeTarget "Pods-Monal" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				66537605430F79A2B6410B3ED27D8FF8 /* Adhoc */,
-				D4B9F27CA254536729D8A4674379415B /* AppStore */,
-				5504EE1444ECEBA5DCB3FCD1B65D3BBD /* Debug */,
-				6152F84150D051C89707B76D138C7CFC /* Release */,
+				701488C473AA1BC457876B9776CF4003 /* Adhoc */,
+				71A3B8BABAA42F81C92AE2D5C3E4A598 /* AppStore */,
+				B2EC8755A5487456387E605F7753512C /* Debug */,
+				88CB83AB5BC59A1953E3A3F638582F35 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -3191,6 +3349,17 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		33CDF101A0B96461218FC254F001C951 /* Build configuration list for PBXNativeTarget "TPCircularBuffer-OSX" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B914B3AA424EAD13B11F0920D4A98AD7 /* Adhoc */,
+				B866189C54C4B8B366744366882ED941 /* AppStore */,
+				9CB9CD0353AFD81DE4AB7B6712D25E2C /* Debug */,
+				CD90B2C79A2EF40212B0B66CA12B3155 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		33F38DB2F1DDB7D9D5612F9F44178CF0 /* Build configuration list for PBXNativeTarget "Pods-jrtplib-static" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -3213,6 +3382,17 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		4593B0AE433FC8D66FB179BCAFD6E156 /* Build configuration list for PBXNativeTarget "Pods-Monal" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B4E19BDC183761974A37C3BA52F5BA5C /* Adhoc */,
+				2306AD9B382FC53CAE0A26F4E99E06D1 /* AppStore */,
+				9F221A97CC56DD80227703A283EBDE83 /* Debug */,
+				18FE1A3E506B7801D891109882EDAFC2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		544CEEA3AB9762CA6DD83EBC7A188D94 /* Build configuration list for PBXNativeTarget "Appirater" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -3224,24 +3404,24 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		5C5415EFA414DACFE966701D8FC397CD /* Build configuration list for PBXNativeTarget "TPCircularBuffer-OSX" */ = {
+		8B47E75394A407CC4454D54CBDBE1D47 /* Build configuration list for PBXNativeTarget "TPCircularBuffer-iOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				D8D2E91430D28F8B314530EF34F67B5B /* Adhoc */,
-				B1EC2392C1F1945C048B4ACDC01D9DA7 /* AppStore */,
-				682B71175FD81BA28B73B5F0C4C4C8FF /* Debug */,
-				48571CA2687B8C983F0EFD587BFE4473 /* Release */,
+				35E137565A370E3BB1552B8A5770EB73 /* Adhoc */,
+				672F440EC5FE3C2BC1BAFD697F7678FB /* AppStore */,
+				B8FA9A44617F68E141F72678E99D587D /* Debug */,
+				FE4C8FAC48D2E8EFBFE2B6AB8D0FC8A1 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		792CEE0861F98C35BD326BC9E5F8E97E /* Build configuration list for PBXNativeTarget "TPCircularBuffer-iOS" */ = {
+		9AD42213D81515C9142854593639073C /* Build configuration list for PBXNativeTarget "Pods-Monal-OSX" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				65A99DB4B9A87F244644AAE950A05152 /* Adhoc */,
-				FC509B9378A6555D996DD1182D0C7C14 /* AppStore */,
-				51E247DFFDEA72DE6E2D8D723DF5F718 /* Debug */,
-				9A744A428EFAEA023CC74B8CF22E4AEB /* Release */,
+				B250B9E0EE1EF572396AD8D3CF3A5B29 /* Adhoc */,
+				4F1FAF24EB63E22FF26CA4F79108755C /* AppStore */,
+				8860932BBE4D7EC689229D4C9ADC1C81 /* Debug */,
+				3327614CF8227455834CAF92B87F0FA0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -3257,6 +3437,17 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		CFDB5365128A50275F1F3321430CF1C8 /* Build configuration list for PBXNativeTarget "SAMKeychain-OSX" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A8AB5EDE722E547C2CF468158A7E30A5 /* Adhoc */,
+				8E0E8144A2EC7D28C7981726CE560709 /* AppStore */,
+				5B01DA07AA6CCF053565EE0BBA54D624 /* Debug */,
+				062D75034EFC483378534114C7E5D2DA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		EC52B6C0975CF0A1FB043DDCFE889189 /* Build configuration list for PBXNativeTarget "Appirater-Appirater" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -3264,17 +3455,6 @@
 				35E763B30990F32E3A62ECE458C829B9 /* AppStore */,
 				EA3FCA555BEBD58CE154E30D31717C2E /* Debug */,
 				07898AB5E8AC16D62F03E5E06972BCE6 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		EEFDAA23DB1BB14AE0BA108B5DF0E248 /* Build configuration list for PBXNativeTarget "Pods-Monal-OSX" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				796148C84E6F2CA909A8F284599C84A0 /* Adhoc */,
-				2652DDC2B16E37F22F992E3A1266264B /* AppStore */,
-				D58DEFD833510DF064CC50DC11C6A1D8 /* Debug */,
-				07BB9A8FBB5B1DBB588C958DACF2F792 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

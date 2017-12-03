@@ -49,7 +49,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     self.window=[[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showCallScreen:) name:kMonalCallStartedNotice object:nil];
     
-   // self.window.screen=[UIScreen mainScreen];
+    // self.window.screen=[UIScreen mainScreen];
     
     _tabBarController=[[MLTabBarController alloc] init];
     ContactsViewController* contactsVC = [[ContactsViewController alloc] init];
@@ -81,11 +81,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     chatLogNav.navigationBar.barStyle=barColor;
     chatLogNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Chat Logs",@"") image:[UIImage imageNamed:@"1065-rewind-time-1"] tag:0];
     
-//    SearchUsersViewController* searchUsersVC = [[SearchUsersViewController alloc] init];
-//    UINavigationController* searchUsersNav=[[UINavigationController alloc] initWithRootViewController:searchUsersVC];
-//    searchUsersNav.navigationBar.barStyle=barColor;
-//    searchUsersNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Search Users",@"") image:[UIImage imageNamed:@"708-search"] tag:0];
-//    
+    //    SearchUsersViewController* searchUsersVC = [[SearchUsersViewController alloc] init];
+    //    UINavigationController* searchUsersNav=[[UINavigationController alloc] initWithRootViewController:searchUsersVC];
+    //    searchUsersNav.navigationBar.barStyle=barColor;
+    //    searchUsersNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Search Users",@"") image:[UIImage imageNamed:@"708-search"] tag:0];
+    //    
     GroupChatViewController* groupChatVC = [[GroupChatViewController alloc] init];
     UINavigationController* groupChatNav=[[UINavigationController alloc] initWithRootViewController:groupChatVC];
     groupChatNav.navigationBar.barStyle=barColor;
@@ -118,7 +118,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         contactsVC.currentNavController=_chatNav;
         _chatNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Contacts",@"") image:[UIImage imageNamed:@"973-user"] tag:0];
         
-    
+        
         _tabBarController.viewControllers=[NSArray arrayWithObjects:_chatNav,activeChatNav, settingsNav,  accountsNav, chatLogNav, groupChatNav, //searchUsersNav,
                                            helpNav, aboutNav,
 #ifdef DEBUG
@@ -142,7 +142,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         self.window.rootViewController=_splitViewController;
         
         _tabBarController.viewControllers=[NSArray arrayWithObjects: activeChatNav,  settingsNav, accountsNav, chatLogNav, groupChatNav,
-                                        //   searchU∫sersNav,
+                                           //   searchU∫sersNav,
                                            helpNav, aboutNav,
 #ifdef DEBUG
                                            logNav,
@@ -162,7 +162,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     UIColor *monalGreen =[UIColor colorWithRed:128.0/255 green:203.0/255 blue:182.0/255 alpha:1.0f];
     UIColor *monaldarkGreen =[UIColor colorWithRed:20.0/255 green:138.0/255 blue:103.0/255 alpha:1.0f];
     
-   [[UINavigationBar appearance] setBarTintColor:monalGreen];
+    [[UINavigationBar appearance] setBarTintColor:monalGreen];
     [[UINavigationBar appearance] setTintColor:[UIColor whiteColor]];
     [[UINavigationBar appearance] setTitleTextAttributes:@{
                                                            NSForegroundColorAttributeName: [UIColor darkGrayColor]
@@ -174,8 +174,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     
     [[UITabBar appearance] setTintColor:monaldarkGreen];
-  
-
+    
+    
 }
 
 #if TARGET_OS_IPHONE
@@ -203,7 +203,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void)pushRegistry:(PKPushRegistry *)registry didUpdatePushCredentials: (PKPushCredentials *)credentials forType:(NSString *)type
 {
     DDLogInfo(@"************************ voip push token: %@", credentials.token);
- 
+    
     unsigned char *tokenBytes = (unsigned char *)[credentials.token bytes];
     NSMutableString *token = [[NSMutableString alloc] init];
     
@@ -217,7 +217,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     NSString *node = [[[UIDevice currentDevice] identifierForVendor] UUIDString];
     
     NSString *post = [NSString stringWithFormat:@"type=apns&node=%@&token=%@", [node stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],
-    [token stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+                      [token stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
     NSData *postData = [post dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
     NSString *postLength = [NSString stringWithFormat:@"%uld",[postData length]];
     
@@ -374,7 +374,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self voipRegistration];
     
     [self createRootInterface];
-
+    
     //rating
     [Appirater setAppId:@"317711500"];
     [Appirater setDaysUntilPrompt:5];
@@ -386,7 +386,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     [MLNotificationManager sharedInstance].window=self.window;
     
-     // should any accounts connect?
+    // should any accounts connect?
     [[MLXMPPManager sharedInstance] connectIfNecessary];
     
     [Fabric with:@[[Crashlytics class]]];
@@ -410,7 +410,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) applicationDidBecomeActive:(UIApplication *)application
 {
-  //  [UIApplication sharedApplication].applicationIconBadgeNumber=0;
+    //  [UIApplication sharedApplication].applicationIconBadgeNumber=0;
 }
 
 #pragma mark - handling urls
@@ -436,13 +436,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 - (void)application:(UIApplication *)application didReceiveLocalNotification:(UILocalNotification *)notification
 {
-  DDLogVerbose(@"entering app with %@", notification);
+    DDLogVerbose(@"entering app with %@", notification);
     
     //iphone
     //make sure tab 0
     if([notification.userInfo objectForKey:@"from"]) {
-    [self.tabBarController setSelectedIndex:0];
-    [[MLXMPPManager sharedInstance].contactVC presentChatWithName:[notification.userInfo objectForKey:@"from"] account:[notification.userInfo objectForKey:@"accountNo"] ];
+        [self.tabBarController setSelectedIndex:0];
+        [[MLXMPPManager sharedInstance].contactVC presentChatWithName:[notification.userInfo objectForKey:@"from"] account:[notification.userInfo objectForKey:@"accountNo"] ];
     }
 }
 
@@ -490,7 +490,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 #pragma mark - backgrounding
 - (void)applicationWillEnterForeground:(UIApplication *)application
 {
-      DDLogVerbose(@"Entering FG");
+    DDLogVerbose(@"Entering FG");
     [[MLXMPPManager sharedInstance] clearKeepAlive];
     [[MLXMPPManager sharedInstance] resetForeground];
     [[MLXMPPManager sharedInstance] setClientsActive];

@@ -1,3 +1,5 @@
+xcuserdata/
+
 # Xcode
 build/*
 *.pbxuser

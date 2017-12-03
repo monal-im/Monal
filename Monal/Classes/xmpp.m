@@ -14,6 +14,7 @@
 #import "MLXMPPManager.h"
 
 
+
 #if TARGET_OS_IPHONE
 #import "UIAlertView+Blocks.h"
 #endif
@@ -43,7 +44,7 @@
 #import "MLHTTPRequest.h"
 
 
-
+@import Darwin.POSIX.sys.time; 
 
 #define kXMPPReadSize 5120 // bytes
 

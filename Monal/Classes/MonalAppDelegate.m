@@ -44,121 +44,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 
 
--(void) createRootInterface
+-(void) setUISettings
 {
-    self.window=[[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showCallScreen:) name:kMonalCallStartedNotice object:nil];
-    
-    // self.window.screen=[UIScreen mainScreen];
-    
-    _tabBarController=[[MLTabBarController alloc] init];
-    ContactsViewController* contactsVC = [[ContactsViewController alloc] init];
-    [MLXMPPManager sharedInstance].contactVC=contactsVC;
-    contactsVC.presentationTabBarController=_tabBarController; 
-    
-    UIBarStyle barColor=UIBarStyleBlack;
-    
-    ActiveChatsViewController* activeChatsVC = [[ActiveChatsViewController alloc] init];
-    UINavigationController* activeChatNav=[[UINavigationController alloc] initWithRootViewController:activeChatsVC];
-    activeChatNav.navigationBar.barStyle=barColor;
-    activeChatNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Active Chats",@"") image:[UIImage imageNamed:@"906-chat-3"] tag:0];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateUnread) name:UIApplicationWillEnterForegroundNotification object:nil];
-    _activeTab=activeChatNav.tabBarItem;
-    
-    
-    SettingsViewController* settingsVC = [[SettingsViewController alloc] init];
-    UINavigationController* settingsNav=[[UINavigationController alloc] initWithRootViewController:settingsVC];
-    settingsNav.navigationBar.barStyle=barColor;
-    settingsNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Settings",@"") image:[UIImage imageNamed:@"740-gear"] tag:0];
-    
-    AccountsViewController* accountsVC = [[AccountsViewController alloc] init];
-    UINavigationController* accountsNav=[[UINavigationController alloc] initWithRootViewController:accountsVC];
-    accountsNav.navigationBar.barStyle=barColor;
-    accountsNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Accounts",@"") image:[UIImage imageNamed:@"1049-at-sign"] tag:0];
-    
-    ChatLogsViewController* chatLogVC = [[ChatLogsViewController alloc] init];
-    UINavigationController* chatLogNav=[[UINavigationController alloc] initWithRootViewController:chatLogVC];
-    chatLogNav.navigationBar.barStyle=barColor;
-    chatLogNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Chat Logs",@"") image:[UIImage imageNamed:@"1065-rewind-time-1"] tag:0];
-    
-    //    SearchUsersViewController* searchUsersVC = [[SearchUsersViewController alloc] init];
-    //    UINavigationController* searchUsersNav=[[UINavigationController alloc] initWithRootViewController:searchUsersVC];
-    //    searchUsersNav.navigationBar.barStyle=barColor;
-    //    searchUsersNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Search Users",@"") image:[UIImage imageNamed:@"708-search"] tag:0];
-    //    
-    GroupChatViewController* groupChatVC = [[GroupChatViewController alloc] init];
-    UINavigationController* groupChatNav=[[UINavigationController alloc] initWithRootViewController:groupChatVC];
-    groupChatNav.navigationBar.barStyle=barColor;
-    groupChatNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Group Chat",@"") image:[UIImage imageNamed:@"974-users"] tag:0];
-    
-    HelpViewController* helpVC = [[HelpViewController alloc] init];
-    UINavigationController* helpNav=[[UINavigationController alloc] initWithRootViewController:helpVC];
-    helpNav.navigationBar.barStyle=barColor;
-    helpNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Help",@"") image:[UIImage imageNamed:@"739-question"] tag:0];
-    
-    AboutViewController* aboutVC = [[AboutViewController alloc] init];
-    UINavigationController* aboutNav=[[UINavigationController alloc] initWithRootViewController:aboutVC];
-    aboutNav.navigationBar.barStyle=barColor;
-    aboutNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"About",@"") image:[UIImage imageNamed:@"724-info"] tag:0];
-    
-#ifdef DEBUG
-    LogViewController* logVC = [[LogViewController alloc] init];
-    UINavigationController* logNav=[[UINavigationController alloc] initWithRootViewController:logVC];
-    logNav.navigationBar.barStyle=barColor;
-    logNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Log",@"") image:nil tag:0];
-#endif
-    
-    
-    
-    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone)
-    {
-        
-        _chatNav=[[UINavigationController alloc] initWithRootViewController:contactsVC];
-        _chatNav.navigationBar.barStyle=barColor;
-        contactsVC.currentNavController=_chatNav;
-        _chatNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Contacts",@"") image:[UIImage imageNamed:@"973-user"] tag:0];
-        
-        
-        _tabBarController.viewControllers=[NSArray arrayWithObjects:_chatNav,activeChatNav, settingsNav,  accountsNav, chatLogNav, groupChatNav, //searchUsersNav,
-                                           helpNav, aboutNav,
-#ifdef DEBUG
-                                           logNav,
-#endif
-                                           nil];
-        
-        self.window.rootViewController=_tabBarController;
-        
-    }
-    else
-    {
-        
-        //this is a dummy nav controller not really used for anything
-        UINavigationController* navigationControllerContacts=[[UINavigationController alloc] initWithRootViewController:contactsVC];
-        navigationControllerContacts.navigationBar.barStyle=barColor;
-        
-        _chatNav=activeChatNav;
-        contactsVC.currentNavController=_chatNav;
-        _splitViewController=[[UISplitViewController alloc] init];
-        self.window.rootViewController=_splitViewController;
-        
-        _tabBarController.viewControllers=[NSArray arrayWithObjects: activeChatNav,  settingsNav, accountsNav, chatLogNav, groupChatNav,
-                                           //   searchU∫sersNav,
-                                           helpNav, aboutNav,
-#ifdef DEBUG
-                                           logNav,
-#endif
-                                           nil];
-        
-        _splitViewController.viewControllers=[NSArray arrayWithObjects:navigationControllerContacts, _tabBarController,nil];
-        _splitViewController.delegate=self;
-    }
-    
-    _chatNav.navigationBar.barStyle=barColor;
-    _chatNav.navigationBar.translucent=YES;
-    _tabBarController.moreNavigationController.navigationBar.barStyle=barColor;
-    
-    [self.window makeKeyAndVisible];
-    
     UIColor *monalGreen =[UIColor colorWithRed:128.0/255 green:203.0/255 blue:182.0/255 alpha:1.0f];
     UIColor *monaldarkGreen =[UIColor colorWithRed:20.0/255 green:138.0/255 blue:103.0/255 alpha:1.0f];
     
@@ -370,10 +257,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         [[UIApplication sharedApplication] registerUserNotificationSettings:settings];
     }
     
-    //register for voip push uing pushkit
+    //register for voip push using pushkit
     [self voipRegistration];
     
-    [self createRootInterface];
+    [self setUISettings];
     
     //rating
     [Appirater setAppId:@"317711500"];

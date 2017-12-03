@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13529" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13529" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="3mc-gS-lkO">
     <device id="ipad9_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
@@ -74,11 +74,11 @@
             </objects>
             <point key="canvasLocation" x="783" y="-810"/>
         </scene>
-        <!--Item-->
+        <!--Contacts-->
         <scene sceneID="IUh-IV-wXI">
             <objects>
                 <splitViewController id="tu2-MS-nsv" sceneMemberID="viewController">
-                    <tabBarItem key="tabBarItem" title="Item" id="BMR-kX-lR2"/>
+                    <tabBarItem key="tabBarItem" title="Contacts" id="BMR-kX-lR2"/>
                     <connections>
                         <segue destination="hMh-kj-2DY" kind="relationship" relationship="masterViewController" id="XWq-7G-tUz"/>
                         <segue destination="Dhn-Pm-OVk" kind="relationship" relationship="detailViewController" id="x51-ex-qWM"/>
@@ -185,11 +185,11 @@
             </objects>
             <point key="canvasLocation" x="677" y="2385"/>
         </scene>
-        <!--Item-->
+        <!--Accounts-->
         <scene sceneID="bUj-Md-UdK">
             <objects>
                 <splitViewController id="gfR-nH-iaY" sceneMemberID="viewController">
-                    <tabBarItem key="tabBarItem" title="Item" id="ch6-QP-psD"/>
+                    <tabBarItem key="tabBarItem" title="Accounts" id="ch6-QP-psD"/>
                     <connections>
                         <segue destination="c3t-79-ogP" kind="relationship" relationship="masterViewController" id="gNi-1V-1rg"/>
                         <segue destination="tD8-RO-taz" kind="relationship" relationship="detailViewController" id="cOp-IB-QOd"/>
@@ -244,11 +244,11 @@
             </objects>
             <point key="canvasLocation" x="745" y="660"/>
         </scene>
-        <!--Item-->
+        <!--Chats-->
         <scene sceneID="vAl-ec-NFW">
             <objects>
                 <splitViewController id="dqD-Rt-bEF" sceneMemberID="viewController">
-                    <tabBarItem key="tabBarItem" title="Item" id="jh7-be-VPo"/>
+                    <tabBarItem key="tabBarItem" title="Chats" id="jh7-be-VPo"/>
                     <connections>
                         <segue destination="rFS-eK-Dxd" kind="relationship" relationship="masterViewController" id="O9T-Gg-eaS"/>
                         <segue destination="0rc-H6-ja6" kind="relationship" relationship="detailViewController" id="24R-bs-4dx"/>

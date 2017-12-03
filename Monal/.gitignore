@@ -1,5 +1,8 @@
 xcuserdata/
 
+*.xcscmblueprint
+*.xccheckout
+
 # Xcode
 build/*
 *.pbxuser

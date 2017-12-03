@@ -167,6 +167,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [[UINavigationBar appearance] setTitleTextAttributes:@{
                                                            NSForegroundColorAttributeName: [UIColor darkGrayColor]
                                                            }];
+    if (@available(iOS 11.0, *)) {
+        [[UINavigationBar appearance] setPrefersLargeTitles:YES];
+        [[UINavigationBar appearance] setLargeTitleTextAttributes:@{NSForegroundColorAttributeName: [UIColor whiteColor]}];
+        
+    }
+    
     [[UITabBar appearance] setTintColor:monaldarkGreen];
   
 
@@ -338,6 +344,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     self.fileLogger.maximumFileSize=1024 * 500;
     [DDLog addLogger:self.fileLogger];
 #endif
+    
+    
+    
     //ios8 register for local notifications and badges
     if([[UIApplication sharedApplication] respondsToSelector:@selector(registerUserNotificationSettings:)])
     {

@@ -28,9 +28,7 @@
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     self.navigationItem.title=NSLocalizedString(@"Accounts",@"");
-    self.view.backgroundColor=[UIColor lightGrayColor];
-    self.view.autoresizingMask=UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
-    
+   
     _accountsTable=self.tableView;
     _accountsTable.delegate=self;
     _accountsTable.dataSource=self;

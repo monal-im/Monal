@@ -340,7 +340,6 @@
 		26BDECDD1867B7790018670D /* CallViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26BDECDB1867B7790018670D /* CallViewController.xib */; };
 		26C3456E1C68F9F0007F4BEC /* MLHTTPRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C3456D1C68F9F0007F4BEC /* MLHTTPRequest.m */; };
 		26C3456F1C68F9F0007F4BEC /* MLHTTPRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C3456D1C68F9F0007F4BEC /* MLHTTPRequest.m */; };
-		26C3EDEE1A7CA6FA000E6331 /* ContactsViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26C3EDED1A7CA6FA000E6331 /* ContactsViewController.xib */; };
 		26C3EDF71A8072D5000E6331 /* ParseEnabled.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C3EDF61A8072D5000E6331 /* ParseEnabled.m */; };
 		26C3EDFD1A807E76000E6331 /* ParseA.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C3EDFC1A807E76000E6331 /* ParseA.m */; };
 		26C3EE001A819A38000E6331 /* ParseResumed.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C3EDFF1A819A38000E6331 /* ParseResumed.m */; };
@@ -740,7 +739,6 @@
 		26BDECDB1867B7790018670D /* CallViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CallViewController.xib; sourceTree = "<group>"; };
 		26C3456C1C68F9F0007F4BEC /* MLHTTPRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLHTTPRequest.h; sourceTree = "<group>"; };
 		26C3456D1C68F9F0007F4BEC /* MLHTTPRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLHTTPRequest.m; sourceTree = "<group>"; };
-		26C3EDED1A7CA6FA000E6331 /* ContactsViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ContactsViewController.xib; sourceTree = "<group>"; };
 		26C3EDF51A8072D5000E6331 /* ParseEnabled.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParseEnabled.h; sourceTree = "<group>"; };
 		26C3EDF61A8072D5000E6331 /* ParseEnabled.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParseEnabled.m; sourceTree = "<group>"; };
 		26C3EDFB1A807E76000E6331 /* ParseA.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParseA.h; sourceTree = "<group>"; };
@@ -1603,7 +1601,6 @@
 				2696EED11791245A00BC54B8 /* chatViewController.m */,
 				2696EED01791245A00BC54B8 /* chatViewController.h */,
 				261A627E176C055400059090 /* ContactsViewController.h */,
-				26C3EDED1A7CA6FA000E6331 /* ContactsViewController.xib */,
 				261A627F176C055400059090 /* ContactsViewController.m */,
 				261A6283176C156500059090 /* ActiveChatsViewController.h */,
 				261A6284176C156500059090 /* ActiveChatsViewController.m */,
@@ -2084,7 +2081,6 @@
 				262E51981AD8CB7200788351 /* MLTextInputCell.xib in Resources */,
 				26D89F081A8908B6009B147C /* XMPPEdit.xib in Resources */,
 				2665C1181C4A6D4500CC9A04 /* MLOAuthViewController.xib in Resources */,
-				26C3EDEE1A7CA6FA000E6331 /* ContactsViewController.xib in Resources */,
 				2649CE531C51B84C00CD1E80 /* Launch Screen.storyboard in Resources */,
 				26F9794D1ACAC73A0008E005 /* MLContactCell.xib in Resources */,
 				2628E50714049DB50064131E /* askTempPass.xib in Resources */,

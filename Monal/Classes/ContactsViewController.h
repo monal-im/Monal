@@ -11,7 +11,7 @@
 #import "MLImageManager.h"
 
 
-@interface ContactsViewController : UIViewController <UITableViewDataSource, UITableViewDelegate>
+@interface ContactsViewController : UITableViewController
 
 /**
  This may not be the tab bar (ipad) that this VC is in. But alerts should be shown from it.

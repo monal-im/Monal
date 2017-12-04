@@ -31,12 +31,10 @@
     self.view.backgroundColor=[UIColor lightGrayColor];
     self.view.autoresizingMask=UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
     
-    _accountsTable=[[UITableView alloc] initWithFrame:CGRectZero style:UITableViewStyleGrouped];
+    _accountsTable=self.tableView;
     _accountsTable.delegate=self;
     _accountsTable.dataSource=self;
-    
-    self.view=_accountsTable;
-    
+
     _accountsTable.backgroundView=nil;
  
    [[DataLayer sharedInstance] protocolListWithCompletion:^(NSArray *result) {

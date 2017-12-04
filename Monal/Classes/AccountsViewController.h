@@ -9,8 +9,7 @@
 #import <UIKit/UIKit.h>
 
 
-@interface AccountsViewController : UIViewController
-<UITableViewDataSource, UITableViewDelegate>
+@interface AccountsViewController : UITableViewController
 {
     NSArray* _accountList;
     NSArray* _protocolList; 

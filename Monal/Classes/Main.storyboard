@@ -29,10 +29,10 @@
             </objects>
             <point key="canvasLocation" x="-2072" y="555"/>
         </scene>
-        <!--Root View Controller-->
+        <!--Contacts -->
         <scene sceneID="i7L-1h-zmZ">
             <objects>
-                <tableViewController clearsSelectionOnViewWillAppear="NO" id="6Ao-6z-tB7" sceneMemberID="viewController">
+                <tableViewController clearsSelectionOnViewWillAppear="NO" id="6Ao-6z-tB7" userLabel="Contacts " customClass="ContactsViewController" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="4Ri-hX-ob8">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -52,7 +52,10 @@
                             <outlet property="delegate" destination="6Ao-6z-tB7" id="m7e-a4-sdI"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="Root View Controller" id="qsR-dX-TO1"/>
+                    <navigationItem key="navigationItem" title="Contacts" id="qsR-dX-TO1"/>
+                    <connections>
+                        <outlet property="view" destination="4Ri-hX-ob8" id="nLc-h6-Jwi"/>
+                    </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="vxj-qR-bK8" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
@@ -105,24 +108,6 @@
             <point key="canvasLocation" x="783" y="-59"/>
         </scene>
         <!--View Controller-->
-        <scene sceneID="ya8-Qe-yUl">
-            <objects>
-                <viewController id="0rc-H6-ja6" sceneMemberID="viewController">
-                    <layoutGuides>
-                        <viewControllerLayoutGuide type="top" id="z1b-hM-i4T"/>
-                        <viewControllerLayoutGuide type="bottom" id="BUX-VU-tOY"/>
-                    </layoutGuides>
-                    <view key="view" contentMode="scaleToFill" id="zk7-uI-xdr">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                    </view>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="JUo-A4-soW" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="745" y="1302"/>
-        </scene>
-        <!--View Controller-->
         <scene sceneID="9wq-dX-5JV">
             <objects>
                 <viewController id="tD8-RO-taz" sceneMemberID="viewController">
@@ -138,19 +123,19 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Jdf-Li-M2y" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="677" y="3027"/>
+            <point key="canvasLocation" x="677" y="3053"/>
         </scene>
-        <!--Root View Controller-->
+        <!--Accounts-->
         <scene sceneID="4iX-sT-SvS">
             <objects>
-                <tableViewController clearsSelectionOnViewWillAppear="NO" id="iVr-y2-7k9" sceneMemberID="viewController">
-                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="wOG-Ub-7xu">
+                <tableViewController clearsSelectionOnViewWillAppear="NO" id="iVr-y2-7k9" customClass="AccountsViewController" sceneMemberID="viewController">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" id="wOG-Ub-7xu">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
                         <prototypes>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="KWo-66-hCp">
-                                <rect key="frame" x="0.0" y="28" width="414" height="44"/>
+                                <rect key="frame" x="0.0" y="55.333333333333336" width="414" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="KWo-66-hCp" id="FwF-fC-Sv3">
                                     <rect key="frame" x="0.0" y="0.0" width="414" height="43.666666666666664"/>
@@ -163,7 +148,7 @@
                             <outlet property="delegate" destination="iVr-y2-7k9" id="1bx-1g-9eH"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="Root View Controller" id="GM4-e8-f1D"/>
+                    <navigationItem key="navigationItem" title="Accounts" id="GM4-e8-f1D"/>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="LVL-lW-IGD" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
@@ -199,10 +184,10 @@
             </objects>
             <point key="canvasLocation" x="-92" y="2704"/>
         </scene>
-        <!--Root View Controller-->
+        <!--Chats-->
         <scene sceneID="NU1-8b-G5Q">
             <objects>
-                <tableViewController clearsSelectionOnViewWillAppear="NO" id="wDx-jI-G7L" sceneMemberID="viewController">
+                <tableViewController clearsSelectionOnViewWillAppear="NO" id="wDx-jI-G7L" userLabel="Chats" customClass="ActiveChatsViewController" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="oVe-va-MJW">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -222,11 +207,11 @@
                             <outlet property="delegate" destination="wDx-jI-G7L" id="VQl-ok-BfC"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="Root View Controller" id="RRa-hC-xrf"/>
+                    <navigationItem key="navigationItem" title="Chats" id="RRa-hC-xrf"/>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ENC-uh-UXW" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1520" y="660"/>
+            <point key="canvasLocation" x="1451" y="1070"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="Gl7-OF-WGk">
@@ -242,7 +227,7 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="gjp-uF-kE3" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="745" y="660"/>
+            <point key="canvasLocation" x="783" y="1070"/>
         </scene>
         <!--Chats-->
         <scene sceneID="vAl-ec-NFW">
@@ -251,7 +236,7 @@
                     <tabBarItem key="tabBarItem" title="Chats" image="906-chat-3" id="jh7-be-VPo"/>
                     <connections>
                         <segue destination="rFS-eK-Dxd" kind="relationship" relationship="masterViewController" id="O9T-Gg-eaS"/>
-                        <segue destination="0rc-H6-ja6" kind="relationship" relationship="detailViewController" id="24R-bs-4dx"/>
+                        <segue destination="Dhn-Pm-OVk" kind="relationship" relationship="detailViewController" id="QlH-d5-Lhg"/>
                     </connections>
                 </splitViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="sOm-vm-Z12" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -402,4 +387,7 @@
         <image name="906-chat-3" width="28" height="26"/>
         <image name="973-user" width="28" height="24"/>
     </resources>
+    <inferredMetricsTieBreakers>
+        <segue reference="QlH-d5-Lhg"/>
+    </inferredMetricsTieBreakers>
 </document>

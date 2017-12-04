@@ -127,6 +127,7 @@
 		26049A571B7315C800D11866 /* IPAddress.m in Sources */ = {isa = PBXBuildFile; fileRef = 26FB468E18B2755A0043094F /* IPAddress.m */; };
 		26049A5B1B73163300D11866 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26049A5A1B73163300D11866 /* AVFoundation.framework */; };
 		260870D81B7034460036539B /* MLAccountEdit.m in Sources */ = {isa = PBXBuildFile; fileRef = 260870D71B7034460036539B /* MLAccountEdit.m */; };
+		2609B5291FD5B26800F09FA1 /* MLSplitViewDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 2609B5281FD5B26800F09FA1 /* MLSplitViewDelegate.m */; };
 		260C51D1177F08F50039634B /* xmpp.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D0177F08F50039634B /* xmpp.m */; };
 		260C51D4177F44AD0039634B /* MLXMLNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D3177F44AD0039634B /* MLXMLNode.m */; };
 		260C6C94178080730004E2E1 /* EncodingTools.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C6C93178080730004E2E1 /* EncodingTools.m */; };
@@ -466,6 +467,8 @@
 		26080210110ABA4E005E194D /* Monal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Monal.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		260870D61B7034460036539B /* MLAccountEdit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLAccountEdit.h; sourceTree = "<group>"; };
 		260870D71B7034460036539B /* MLAccountEdit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLAccountEdit.m; sourceTree = "<group>"; };
+		2609B5271FD5B26800F09FA1 /* MLSplitViewDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLSplitViewDelegate.h; sourceTree = "<group>"; };
+		2609B5281FD5B26800F09FA1 /* MLSplitViewDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLSplitViewDelegate.m; sourceTree = "<group>"; };
 		260C51CF177F08F50039634B /* xmpp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = xmpp.h; sourceTree = "<group>"; };
 		260C51D0177F08F50039634B /* xmpp.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = xmpp.m; sourceTree = "<group>"; };
 		260C51D2177F44AD0039634B /* MLXMLNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLXMLNode.h; sourceTree = "<group>"; };
@@ -1623,6 +1626,8 @@
 				261A6299176C162200059090 /* AboutViewController.m */,
 				26FE3BC91C61A6C3003CC230 /* MLResizingTextView.h */,
 				26FE3BCA1C61A6C3003CC230 /* MLResizingTextView.m */,
+				2609B5271FD5B26800F09FA1 /* MLSplitViewDelegate.h */,
+				2609B5281FD5B26800F09FA1 /* MLSplitViewDelegate.m */,
 			);
 			name = "Tab views";
 			sourceTree = "<group>";
@@ -2504,6 +2509,7 @@
 				261A6285176C156500059090 /* ActiveChatsViewController.m in Sources */,
 				26D51CDC1E2674D700141E04 /* NXOAuth2FileStreamWrapper.m in Sources */,
 				26B2A4F31B73097500272E63 /* DDFileLogger.m in Sources */,
+				2609B5291FD5B26800F09FA1 /* MLSplitViewDelegate.m in Sources */,
 				261A6288176C157D00059090 /* SettingsViewController.m in Sources */,
 				261A628B176C159000059090 /* AccountsViewController.m in Sources */,
 				261A628E176C15AD00059090 /* ChatLogsViewController.m in Sources */,

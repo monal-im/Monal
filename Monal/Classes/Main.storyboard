@@ -83,11 +83,13 @@
                 <splitViewController id="tu2-MS-nsv" sceneMemberID="viewController">
                     <tabBarItem key="tabBarItem" title="Contacts" image="973-user" id="BMR-kX-lR2"/>
                     <connections>
+                        <outlet property="delegate" destination="qac-2e-fgp" id="GDg-K1-dOE"/>
                         <segue destination="hMh-kj-2DY" kind="relationship" relationship="masterViewController" id="XWq-7G-tUz"/>
                         <segue destination="Dhn-Pm-OVk" kind="relationship" relationship="detailViewController" id="x51-ex-qWM"/>
                     </connections>
                 </splitViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="hSl-QX-t2S" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <customObject id="qac-2e-fgp" customClass="MLSplitViewDelegate"/>
             </objects>
             <point key="canvasLocation" x="11" y="-489"/>
         </scene>
@@ -176,10 +178,12 @@
                 <splitViewController id="gfR-nH-iaY" sceneMemberID="viewController">
                     <tabBarItem key="tabBarItem" title="Accounts" image="1049-at-sign" id="ch6-QP-psD"/>
                     <connections>
+                        <outlet property="delegate" destination="GaS-pa-U5f" id="JtH-uf-peV"/>
                         <segue destination="c3t-79-ogP" kind="relationship" relationship="masterViewController" id="gNi-1V-1rg"/>
                         <segue destination="tD8-RO-taz" kind="relationship" relationship="detailViewController" id="cOp-IB-QOd"/>
                     </connections>
                 </splitViewController>
+                <customObject id="GaS-pa-U5f" customClass="MLSplitViewDelegate"/>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ADh-Ev-d3v" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-92" y="2704"/>
@@ -211,7 +215,7 @@
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ENC-uh-UXW" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1451" y="1070"/>
+            <point key="canvasLocation" x="1619" y="1070"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="Gl7-OF-WGk">
@@ -235,10 +239,12 @@
                 <splitViewController id="dqD-Rt-bEF" sceneMemberID="viewController">
                     <tabBarItem key="tabBarItem" title="Chats" image="906-chat-3" id="jh7-be-VPo"/>
                     <connections>
+                        <outlet property="delegate" destination="ncC-uM-uuw" id="L3K-5f-uMh"/>
                         <segue destination="rFS-eK-Dxd" kind="relationship" relationship="masterViewController" id="O9T-Gg-eaS"/>
                         <segue destination="Dhn-Pm-OVk" kind="relationship" relationship="detailViewController" id="QlH-d5-Lhg"/>
                     </connections>
                 </splitViewController>
+                <customObject id="ncC-uM-uuw" customClass="MLSplitViewDelegate"/>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="sOm-vm-Z12" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-23" y="979"/>

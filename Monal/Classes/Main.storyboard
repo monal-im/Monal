@@ -125,7 +125,7 @@
                     </tableView>
                     <navigationItem key="navigationItem" title="Contacts" id="qsR-dX-TO1">
                         <barButtonItem key="leftBarButtonItem" image="740-gear" id="gwj-Jz-FoO"/>
-                        <barButtonItem key="rightBarButtonItem" image="907-plus-rounded-square" id="2ji-VW-Qvv">
+                        <barButtonItem key="rightBarButtonItem" systemItem="add" id="2ji-VW-Qvv">
                             <connections>
                                 <segue destination="elF-QS-Bpm" kind="presentation" id="lpa-8n-0fe"/>
                             </connections>
@@ -497,7 +497,6 @@
         <image name="740-gear" width="28" height="28"/>
         <image name="770-paper-clip" width="28" height="27"/>
         <image name="906-chat-3" width="28" height="26"/>
-        <image name="907-plus-rounded-square" width="28" height="28"/>
         <image name="973-user" width="28" height="24"/>
     </resources>
     <inferredMetricsTieBreakers>

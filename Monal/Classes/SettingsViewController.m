@@ -33,13 +33,10 @@
 	// Do any additional setup after loading the view.
     self.navigationItem.title=NSLocalizedString(@"Settings",@"");
    
-    _settingsTable=[[UITableView alloc] initWithFrame:CGRectZero style:UITableViewStyleGrouped];
+    _settingsTable=self.tableView;
     _settingsTable.delegate=self;
     _settingsTable.dataSource=self;
     _settingsTable.backgroundView=nil;
-    
-    self.view=_settingsTable;
-    self.tableView=_settingsTable;
     
 
 }

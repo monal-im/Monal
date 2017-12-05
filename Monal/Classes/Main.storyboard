@@ -29,6 +29,77 @@
             </objects>
             <point key="canvasLocation" x="-2072" y="555"/>
         </scene>
+        <!--Add Contact-->
+        <scene sceneID="c6l-mN-YrO">
+            <objects>
+                <tableViewController id="aFU-Vb-8Jd" customClass="addContact" sceneMemberID="viewController">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="sjX-Xq-2kO">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <prototypes>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="qnE-ny-9J4">
+                                <rect key="frame" x="0.0" y="28" width="414" height="44"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="qnE-ny-9J4" id="E9X-xc-b3f">
+                                    <rect key="frame" x="0.0" y="0.0" width="414" height="43.666666666666664"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </tableViewCellContentView>
+                            </tableViewCell>
+                        </prototypes>
+                        <connections>
+                            <outlet property="dataSource" destination="aFU-Vb-8Jd" id="rit-aX-dnM"/>
+                            <outlet property="delegate" destination="aFU-Vb-8Jd" id="yBG-Yo-9U4"/>
+                        </connections>
+                    </tableView>
+                    <navigationItem key="navigationItem" title="Add Contact" id="w0d-HZ-N0s"/>
+                    <connections>
+                        <outlet property="keyboardToolbar" destination="2aB-QX-sOk" id="kV4-Kl-5la"/>
+                        <outlet property="view" destination="sjX-Xq-2kO" id="SSN-Sh-vr3"/>
+                    </connections>
+                </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="tIF-hM-oop" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="2aB-QX-sOk">
+                    <rect key="frame" x="0.0" y="0.0" width="411" height="44"/>
+                    <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                    <items>
+                        <barButtonItem title="Previous" id="OxW-Yc-5ky">
+                            <connections>
+                                <action selector="toolbarPrevious:" destination="aFU-Vb-8Jd" id="tHt-KM-qLe"/>
+                            </connections>
+                        </barButtonItem>
+                        <barButtonItem title="Next" width="69" id="PI2-N1-aLJ">
+                            <connections>
+                                <action selector="toolbarNext:" destination="aFU-Vb-8Jd" id="8Vc-n4-Eqe"/>
+                            </connections>
+                        </barButtonItem>
+                        <barButtonItem style="plain" systemItem="flexibleSpace" id="tP2-59-Hnr"/>
+                        <barButtonItem title="Done" style="done" id="TMS-52-ORP">
+                            <connections>
+                                <action selector="toolbarDone:" destination="aFU-Vb-8Jd" id="2g1-rT-35C"/>
+                            </connections>
+                        </barButtonItem>
+                    </items>
+                </toolbar>
+            </objects>
+            <point key="canvasLocation" x="1749" y="-1459"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="ypm-9L-YMe">
+            <objects>
+                <navigationController id="elF-QS-Bpm" sceneMemberID="viewController">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="p4I-kJ-cgY">
+                        <rect key="frame" x="0.0" y="20" width="414" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="aFU-Vb-8Jd" kind="relationship" relationship="rootViewController" id="eYt-qI-VK6"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="g6z-bl-oue" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="830" y="-1459"/>
+        </scene>
         <!--Contacts -->
         <scene sceneID="i7L-1h-zmZ">
             <objects>
@@ -52,7 +123,14 @@
                             <outlet property="delegate" destination="6Ao-6z-tB7" id="m7e-a4-sdI"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="Contacts" id="qsR-dX-TO1"/>
+                    <navigationItem key="navigationItem" title="Contacts" id="qsR-dX-TO1">
+                        <barButtonItem key="leftBarButtonItem" image="740-gear" id="gwj-Jz-FoO"/>
+                        <barButtonItem key="rightBarButtonItem" image="907-plus-rounded-square" id="2ji-VW-Qvv">
+                            <connections>
+                                <segue destination="elF-QS-Bpm" kind="presentation" id="lpa-8n-0fe"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                     <connections>
                         <outlet property="view" destination="4Ri-hX-ob8" id="nLc-h6-Jwi"/>
                     </connections>
@@ -416,8 +494,10 @@
     </scenes>
     <resources>
         <image name="1049-at-sign" width="28" height="28"/>
+        <image name="740-gear" width="28" height="28"/>
         <image name="770-paper-clip" width="28" height="27"/>
         <image name="906-chat-3" width="28" height="26"/>
+        <image name="907-plus-rounded-square" width="28" height="28"/>
         <image name="973-user" width="28" height="24"/>
     </resources>
     <inferredMetricsTieBreakers>

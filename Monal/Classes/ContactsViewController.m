@@ -43,17 +43,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
     self.navigationItem.title=NSLocalizedString(@"Contacts",@"");
-    self.view.autoresizingMask=UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
-    
-    _contactsTable=(UITableView *)self.view;
+  
+    _contactsTable=self.tableView;
     _contactsTable.delegate=self;
     _contactsTable.dataSource=self;
     
-    self.view=_contactsTable;
-    
-    self.view.backgroundColor =[UIColor whiteColor];
-  
-    
+
     _contacts=[[NSMutableArray alloc] init] ;
     _offlineContacts=[[NSMutableArray alloc] init] ;
     _infoCells=[[NSMutableArray alloc] init] ;
@@ -87,54 +82,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     [[MLXMPPManager sharedInstance] handleNewMessage:nil];
     
-    
-    if([MLXMPPManager sharedInstance].connectedXMPP.count >0 ) {
-        UIBarButtonItem* rightButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(addContact)];
-        self.navigationItem.rightBarButtonItem=rightButton;
-        
-        //    UIBarButtonItem* leftButton = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"menu"] style:UIBarButtonItemStylePlain target:self action:@selector(showMenu)];
-        //    self.navigationItem.leftBarButtonItem=leftButton;
-    }
-    
-    
 }
 
 -(void) viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
-    if(![[NSUserDefaults standardUserDefaults] boolForKey:@"hasSeenSelfSignedMessage"])
-    {
-    //if there are enabed accounts and alert hasnt been shown
-  
-        
-        [[DataLayer sharedInstance] accountListWithCompletion:^(NSArray *result) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                 NSArray* accountList=result;
-                int count=0;
-                for (NSDictionary* account in accountList)
-                {
-                    if([[account objectForKey:@"enabled"] boolValue]==YES)
-                    {
-                        count++;
-                    }
-                }
-                
-                if(count>0)
-                {
-                    UIAlertView *addError = [[UIAlertView alloc]
-                                             initWithTitle:@"Changes to SSL"
-                                             message:@"Monal has changed the way it treats self signed SSL certificates. If you already had an account created and your server uses a self signed SSL certificate, please go to accounts and explicity set the account to allow self signed SSL. This is a new option."
-                                             delegate:self cancelButtonTitle:@"Close"
-                                             otherButtonTitles: nil] ;
-                    [addError show];
-                    
-                }
-            });
-            
-        }];
-        
-        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"hasSeenSelfSignedMessage"];
-    }
+
 }
 
 
@@ -150,30 +103,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     // Dispose of any resources that can be recreated.
 }
 
-#pragma mark Actions
--(void)addContact
-{
-    //present modal view
-    addContact* addcontactView =[[addContact alloc] init];
-    UINavigationController* addContactNav = [[UINavigationController alloc] initWithRootViewController:addcontactView];
-    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
-    {
-        addContactNav.modalPresentationStyle=UIModalPresentationFormSheet;
-    }
-    [self.navigationController presentViewController:addContactNav animated:YES completion:nil];
-}
 
--(void)showMenu
-{
-    //present modal view
-    addContact* addcontactView =[[addContact alloc] init];
-    UINavigationController* addContactNav = [[UINavigationController alloc] initWithRootViewController:addcontactView];
-    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
-    {
-        addContactNav.modalPresentationStyle=UIModalPresentationFormSheet;
-    }
-    [self.navigationController presentViewController:addContactNav animated:YES completion:nil];
-}
 
 #pragma mark updating info display
 -(void) showConnecting:(NSDictionary*) info

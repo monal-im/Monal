@@ -218,7 +218,7 @@
         <!--Contacts-->
         <scene sceneID="IUh-IV-wXI">
             <objects>
-                <splitViewController id="tu2-MS-nsv" sceneMemberID="viewController">
+                <splitViewController presentsWithGesture="NO" id="tu2-MS-nsv" sceneMemberID="viewController">
                     <tabBarItem key="tabBarItem" title="Contacts" image="973-user" id="BMR-kX-lR2"/>
                     <connections>
                         <outlet property="delegate" destination="qac-2e-fgp" id="GDg-K1-dOE"/>
@@ -309,7 +309,7 @@
         <!--Accounts-->
         <scene sceneID="bUj-Md-UdK">
             <objects>
-                <splitViewController id="gfR-nH-iaY" sceneMemberID="viewController">
+                <splitViewController presentsWithGesture="NO" id="gfR-nH-iaY" sceneMemberID="viewController">
                     <tabBarItem key="tabBarItem" title="Accounts" image="1049-at-sign" id="ch6-QP-psD"/>
                     <connections>
                         <outlet property="delegate" destination="GaS-pa-U5f" id="5n6-pl-fRC"/>
@@ -415,7 +415,7 @@
         <!--Chats-->
         <scene sceneID="vAl-ec-NFW">
             <objects>
-                <splitViewController id="dqD-Rt-bEF" sceneMemberID="viewController">
+                <splitViewController presentsWithGesture="NO" id="dqD-Rt-bEF" sceneMemberID="viewController">
                     <tabBarItem key="tabBarItem" title="Chats" image="906-chat-3" id="jh7-be-VPo"/>
                     <connections>
                         <outlet property="delegate" destination="ncC-uM-uuw" id="L3K-5f-uMh"/>
@@ -574,7 +574,7 @@
         <image name="973-user" width="28" height="24"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="8bw-7H-nTe"/>
+        <segue reference="fHR-i8-hPA"/>
         <segue reference="QlH-d5-Lhg"/>
     </inferredMetricsTieBreakers>
 </document>

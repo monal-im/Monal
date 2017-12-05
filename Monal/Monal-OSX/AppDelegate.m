@@ -88,6 +88,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     return YES;	
 }
 
+-(void) application:(NSApplication *)application openURLs:(NSArray<NSURL *> *)urls
+{
+    NSURL *url= [urls firstObject];
+    [[NXOAuth2AccountStore sharedStore] handleRedirectURL: url];
+}
+
+
 
 - (void)handleURLEvent:(NSAppleEventDescriptor*)event
         withReplyEvent:(NSAppleEventDescriptor*)replyEvent

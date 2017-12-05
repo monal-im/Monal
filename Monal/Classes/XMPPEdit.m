@@ -357,26 +357,28 @@ NSString *const kGtalk = @"Gtalk";
                                       keyChainGroup:@"MonalGTalk"
                                      forAccountType:self.jid];
     
-    [[NXOAuth2AccountStore sharedStore] requestAccessToAccountWithType:self.jid
-                                   withPreparedAuthorizationURLHandler:^(NSURL *preparedURL){
-                                       
-                                       
-                                       self.oAuthURL= preparedURL;
-                                
-                                       MLOAuthViewController *oauthVC = [[MLOAuthViewController alloc] init];
-                                       
-                                       oauthVC.oAuthURL= self.oAuthURL;
-                                       oauthVC.completionHandler=^(NSString *token) {
-                                           //  self.password.stringValue = token;
-                                           NSURL *url=[NSURL URLWithString:[NSString stringWithFormat:@"urn:ietf:wg:oauth:2.0:oob:auto?code=%@", token]];
-                                           [[NXOAuth2AccountStore sharedStore] handleRedirectURL:url];
-                                           
-                                       };
-                                       self.autoSave=NO;
-                                       [self.navigationController pushViewController:oauthVC animated:YES];
-                                       
-                                       
-                                   }];
+    [[NXOAuth2AccountStore sharedStore] requestAccessToAccountWithType:self.jid];
+    
+//    {
+//                                   withPreparedAuthorizationURLHandler:^(NSURL *preparedURL){
+//                                       
+//                                       
+//                                       self.oAuthURL= preparedURL;
+//                                
+//                                       MLOAuthViewController *oauthVC = [[MLOAuthViewController alloc] init];
+//                                       
+//                                       oauthVC.oAuthURL= self.oAuthURL;
+//                                       oauthVC.completionHandler=^(NSString *token) {
+//                                           //  self.password.stringValue = token;
+//                                           NSURL *url=[NSURL URLWithString:[NSString stringWithFormat:@"urn:ietf:wg:oauth:2.0:oob:auto?code=%@", token]];
+//                                           [[NXOAuth2AccountStore sharedStore] handleRedirectURL:url];
+//                                           
+//                                       };
+//                                       self.autoSave=NO;
+//                                       [self.navigationController pushViewController:oauthVC animated:YES];
+//                                       
+//                                       
+//                                   }];
 }
 
 

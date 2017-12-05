@@ -154,7 +154,11 @@
 {
     
     if([segue.identifier isEqualToString:@"editXMPP"]) {
-        XMPPEdit * editor = (XMPPEdit *) segue.destinationViewController;
+        
+        UINavigationController *nav=   segue.destinationViewController;
+        
+        XMPPEdit * editor = (XMPPEdit *)nav.topViewController;
+    
         editor.originIndex=self.selected;
         if(self.selected.section==0)
         {

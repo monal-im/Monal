@@ -64,6 +64,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                                                      bundle:[NSBundle mainBundle]]
                                                forCellReuseIdentifier:@"ContactCell"];
     
+    self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
+    
 }
 
 -(void) dealloc

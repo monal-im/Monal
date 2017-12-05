@@ -133,7 +133,7 @@
                         </barButtonItem>
                         <barButtonItem key="rightBarButtonItem" systemItem="add" id="2ji-VW-Qvv">
                             <connections>
-                                <segue destination="elF-QS-Bpm" kind="presentation" id="lpa-8n-0fe"/>
+                                <segue destination="elF-QS-Bpm" kind="presentation" modalPresentationStyle="formSheet" id="lpa-8n-0fe"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
@@ -575,6 +575,6 @@
     </resources>
     <inferredMetricsTieBreakers>
         <segue reference="fHR-i8-hPA"/>
-        <segue reference="QlH-d5-Lhg"/>
+        <segue reference="x51-ex-qWM"/>
     </inferredMetricsTieBreakers>
 </document>

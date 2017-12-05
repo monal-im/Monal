@@ -58,6 +58,9 @@
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
     [nc addObserver:self selector:@selector(refreshAccountList) name:kMonalAccountStatusChanged object:nil];
     
+    self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
+    
+    
 }
 
 -(void) viewWillAppear:(BOOL)animated

@@ -53,6 +53,9 @@
     [_chatListTable registerNib:[UINib nibWithNibName:@"MLContactCell"
                                                bundle:[NSBundle mainBundle]]
          forCellReuseIdentifier:@"ContactCell"];
+    
+    self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
+    
 }
 
 

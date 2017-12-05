@@ -81,6 +81,12 @@ NSString *const kGtalk = @"Gtalk";
     {
         //edit
         DDLogVerbose(@"reading account number %@", _accountno);
+        if([_db accountVals:_accountno].count==0 )
+        {
+            //present another UI here. 
+            return;
+            
+        }
         NSDictionary* settings=[[_db accountVals:_accountno] objectAtIndex:0]; //only one row
         
         //allow blank domains.. dont show @ if so

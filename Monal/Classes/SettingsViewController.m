@@ -312,7 +312,10 @@
 }
 
 
-
+-(IBAction)close:(id)sender
+{
+    [self.presentingViewController dismissViewControllerAnimated:YES completion:nil];
+}
 
 
 

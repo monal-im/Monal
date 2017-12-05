@@ -168,7 +168,13 @@
                             <outlet property="delegate" destination="Vcq-cC-U8C" id="oDr-Ar-LJU"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="Settings" id="bRa-lQ-kQr"/>
+                    <navigationItem key="navigationItem" title="Settings" id="bRa-lQ-kQr">
+                        <barButtonItem key="leftBarButtonItem" title="Close" id="R3T-hy-2aY">
+                            <connections>
+                                <action selector="close:" destination="Vcq-cC-U8C" id="y2L-Xl-sdY"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                     <connections>
                         <outlet property="view" destination="ex5-KK-RUs" id="vLg-Hb-CQK"/>
                     </connections>

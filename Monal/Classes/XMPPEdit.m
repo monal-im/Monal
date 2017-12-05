@@ -348,12 +348,12 @@ NSString *const kGtalk = @"Gtalk";
 -(void)authenticateWithOAuth
 {
     self.password=@""; 
-    [[NXOAuth2AccountStore sharedStore] setClientID:@"472865344000-q63msgarcfs3ggiabdobkkis31ehtbug.apps.googleusercontent.com"
-                                             secret:@"IGo7ocGYBYXf4znad5Qhumjt"
+    [[NXOAuth2AccountStore sharedStore] setClientID:@"472865344000-invcngpma1psmiek5imc1gb8u7mef8l9.apps.googleusercontent.com"
+                                             secret:@""
                                               scope:[NSSet setWithArray:@[@"https://www.googleapis.com/auth/googletalk"]]
                                    authorizationURL:[NSURL URLWithString:@"https://accounts.google.com/o/oauth2/auth"]
                                            tokenURL:[NSURL URLWithString:@"https://www.googleapis.com/oauth2/v3/token"]
-                                        redirectURL:[NSURL URLWithString:@"urn:ietf:wg:oauth:2.0:oob:auto"]
+                                        redirectURL:[NSURL URLWithString:@"com.googleusercontent.apps.472865344000-invcngpma1psmiek5imc1gb8u7mef8l9://"]
                                       keyChainGroup:@"MonalGTalk"
                                      forAccountType:self.jid];
     

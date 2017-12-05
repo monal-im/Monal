@@ -270,7 +270,18 @@
                             <outlet property="delegate" destination="iVr-y2-7k9" id="1bx-1g-9eH"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="Accounts" id="GM4-e8-f1D"/>
+                    <navigationItem key="navigationItem" title="Accounts" id="GM4-e8-f1D">
+                        <barButtonItem key="leftBarButtonItem" title="Log out All" id="cBo-1F-HEA">
+                            <connections>
+                                <action selector="logout:" destination="iVr-y2-7k9" id="9cW-PE-XYt"/>
+                            </connections>
+                        </barButtonItem>
+                        <barButtonItem key="rightBarButtonItem" title="Reconenct All" id="r7s-58-k2m">
+                            <connections>
+                                <action selector="connect:" destination="iVr-y2-7k9" id="jvK-e9-Wnb"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="LVL-lW-IGD" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>

@@ -42,15 +42,6 @@ NSString *const kGtalk = @"Gtalk";
 @implementation XMPPEdit
 
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
-{
-    self = [super initWithNibName:@"XMPPEdit" bundle:nibBundleOrNil];
-    if (self) {
-        // Custom initialization
-    }
-    return self;
-}
-
 -(void) hideKeyboard
 {
     [self.currentTextField resignFirstResponder];
@@ -146,8 +137,7 @@ NSString *const kGtalk = @"Gtalk";
     
     self.sectionArray = @[@"Account", @"Advanced Settings",@""];
     
-    self.tableView.backgroundView=nil;
-  
+
     [[NSNotificationCenter defaultCenter] addObserverForName:NXOAuth2AccountStoreAccountsDidChangeNotification
                                                       object:[NXOAuth2AccountStore sharedStore]
                                                        queue:nil
@@ -165,7 +155,7 @@ NSString *const kGtalk = @"Gtalk";
                                                       object:[NXOAuth2AccountStore sharedStore]
                                                        queue:nil
                                                   usingBlock:^(NSNotification *aNotification){
-                                                      NSError *error = [aNotification.userInfo objectForKey:NXOAuth2AccountStoreErrorKey];
+                                                     //NSError *error = [aNotification.userInfo objectForKey:NXOAuth2AccountStoreErrorKey];
                                                       // Do something with the error
                                                   }];
     
@@ -301,8 +291,7 @@ NSString *const kGtalk = @"Gtalk";
     else
     {
         [[DataLayer sharedInstance] updateAccounWithDictionary:dic andCompletion:^(BOOL result) {
-            NSError *error;
-           
+          
              [SAMKeychain setPassword:self.password forService:@"Monal" account:self.accountno];
             if(self.enabled)
             {

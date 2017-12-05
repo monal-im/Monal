@@ -17,6 +17,8 @@
 @property (nonatomic , strong) MBProgressHUD *hud;
 @property (nonatomic , strong) NSDateFormatter *uptimeFormatter;
 
+@property (nonatomic, strong) NSIndexPath  *selected;
+
 @end
 
 @implementation AccountsViewController
@@ -44,11 +46,7 @@
        
    }];
     
-    UIBarButtonItem* rightButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Reconnect All",@"") style:UIBarButtonItemStyleBordered target:self action:@selector(connectIfNecessary)];
-    self.navigationItem.rightBarButtonItem=rightButton;
-    
-    UIBarButtonItem* leftButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Log out All",@"") style:UIBarButtonItemStyleBordered target:self action:@selector(logoutAll)];
-    self.navigationItem.leftBarButtonItem=leftButton;
+
     
     self.uptimeFormatter =[[NSDateFormatter alloc] init];
     self.uptimeFormatter.dateStyle =NSDateFormatterShortStyle;
@@ -72,6 +70,8 @@
         });
         
     }];
+    
+    self.selected=nil;
 }
 
 -(void) dealloc
@@ -93,15 +93,27 @@
 
 #pragma mark button actions
 
+-(IBAction)connect:(id)sender
+{
+    [self connectIfNecessary];
+    
+}
+
+-(IBAction)logout:(id)sender
+{
+    [self logoutAll];
+    
+}
+
 -(void) connectIfNecessary
 {
     
     self.hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
     self.hud.removeFromSuperViewOnHide=YES;
-    self.hud.labelText =@"Reconnecting";
-    self.hud.detailsLabelText =@"Will connect any logged out accounts.";
+    self.hud.label.text =@"Reconnecting";
+    self.hud.detailsLabel.text =@"Will connect any logged out accounts.";
     [[MLXMPPManager sharedInstance] connectIfNecessary];
-    [self.hud hide:YES afterDelay:3.0f];
+     [self.hud hideAnimated:YES afterDelay:3.0f];
     self.hud=nil;
 }
 
@@ -109,10 +121,10 @@
 {
     self.hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
     self.hud.removeFromSuperViewOnHide=YES;
-    self.hud.labelText =@"Logging out all accounts";
-    self.hud.detailsLabelText =@"Tap Reconnect to log everything back in.";
+    self.hud.label.text =@"Logging out all accounts";
+    self.hud.detailsLabel.text=@"Tap Reconnect to log everything back in.";
     [[MLXMPPManager sharedInstance] logoutAll];
-    [self.hud hide:YES afterDelay:3.0f];
+    [self.hud hideAnimated:YES afterDelay:3.0f];
     self.hud=nil;
 }
 
@@ -127,22 +139,36 @@
 #pragma mark tableview delegate
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath;
 {
-    XMPPEdit* editor =[[XMPPEdit alloc] init];
-    editor.originIndex=indexPath; 
-    if(indexPath.section==0)
-    {
-        //existing
-        editor.accountno=[NSString stringWithFormat:@"%@",[[_accountList objectAtIndex:indexPath.row] objectForKey:@"account_id"]];
-    }
-    else if(indexPath.section==1)
-    {
-        editor.accountno=@"-1";
-    }
     
-    [self.navigationController pushViewController:editor animated:YES];
+       [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    self.selected=indexPath;
     
-    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+
+    [self performSegueWithIdentifier:@"editXMPP" sender:self];
+    
+ 
 }
+
+
+-(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+{
+    
+    if([segue.identifier isEqualToString:@"editXMPP"]) {
+        XMPPEdit * editor = (XMPPEdit *) segue.destinationViewController;
+        editor.originIndex=self.selected;
+        if(self.selected.section==0)
+        {
+            //existing
+            editor.accountno=[NSString stringWithFormat:@"%@",[[_accountList objectAtIndex:self.selected.row] objectForKey:@"account_id"]];
+        }
+        else if(self.selected.section==1)
+        {
+            editor.accountno=@"-1";
+        }
+    }
+    
+}
+
 
 #pragma mark tableview datasource
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView

@@ -169,7 +169,7 @@
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" title="Settings" id="bRa-lQ-kQr">
-                        <barButtonItem key="leftBarButtonItem" title="Close" id="R3T-hy-2aY">
+                        <barButtonItem key="rightBarButtonItem" title="Close" id="R3T-hy-2aY">
                             <connections>
                                 <action selector="close:" destination="Vcq-cC-U8C" id="y2L-Xl-sdY"/>
                             </connections>

@@ -10,7 +10,6 @@
 #import "MLAccountCell.h"
 #import "MLButtonCell.h"
 #import "NXOAuth2.h"
-#import "MLOAuthViewController.h"
 #import "NXOAuth2AccountStore.h"
 
 #import "tools.h"
@@ -83,7 +82,7 @@ NSString *const kGtalk = @"Gtalk";
         DDLogVerbose(@"reading account number %@", _accountno);
         if([_db accountVals:_accountno].count==0 )
         {
-            //present another UI here. 
+            //present another UI here.
             return;
             
         }
@@ -365,26 +364,6 @@ NSString *const kGtalk = @"Gtalk";
     
     [[NXOAuth2AccountStore sharedStore] requestAccessToAccountWithType:self.jid];
     
-//    {
-//                                   withPreparedAuthorizationURLHandler:^(NSURL *preparedURL){
-//                                       
-//                                       
-//                                       self.oAuthURL= preparedURL;
-//                                
-//                                       MLOAuthViewController *oauthVC = [[MLOAuthViewController alloc] init];
-//                                       
-//                                       oauthVC.oAuthURL= self.oAuthURL;
-//                                       oauthVC.completionHandler=^(NSString *token) {
-//                                           //  self.password.stringValue = token;
-//                                           NSURL *url=[NSURL URLWithString:[NSString stringWithFormat:@"urn:ietf:wg:oauth:2.0:oob:auto?code=%@", token]];
-//                                           [[NXOAuth2AccountStore sharedStore] handleRedirectURL:url];
-//                                           
-//                                       };
-//                                       self.autoSave=NO;
-//                                       [self.navigationController pushViewController:oauthVC animated:YES];
-//                                       
-//                                       
-//                                   }];
 }
 
 

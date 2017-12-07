@@ -124,7 +124,7 @@
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" title="Contacts" id="qsR-dX-TO1">
-                        <barButtonItem key="leftBarButtonItem" image="740-gear" id="gwj-Jz-FoO">
+                        <barButtonItem key="leftBarButtonItem" image="menu" id="gwj-Jz-FoO">
                             <connections>
                                 <segue destination="19y-iV-lx9" kind="popoverPresentation" popoverAnchorBarButtonItem="gwj-Jz-FoO" id="fRw-7r-LxC">
                                     <popoverArrowDirection key="popoverArrowDirection" up="YES" down="YES" left="YES" right="YES"/>
@@ -139,6 +139,7 @@
                     </navigationItem>
                     <connections>
                         <outlet property="view" destination="4Ri-hX-ob8" id="nLc-h6-Jwi"/>
+                        <segue destination="Dhn-Pm-OVk" kind="showDetail" identifier="showConversation" id="wmf-tk-2CN"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="vxj-qR-bK8" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -245,7 +246,7 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="msX-wy-yDv" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="783" y="-59"/>
+            <point key="canvasLocation" x="1554" y="210"/>
         </scene>
         <!--Accounts-->
         <scene sceneID="4iX-sT-SvS">
@@ -391,6 +392,9 @@
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" title="Chats" id="RRa-hC-xrf"/>
+                    <connections>
+                        <segue destination="Dhn-Pm-OVk" kind="showDetail" identifier="showConversation" id="RLU-kt-b8r"/>
+                    </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ENC-uh-UXW" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
@@ -563,18 +567,18 @@
                     </constraints>
                 </view>
             </objects>
-            <point key="canvasLocation" x="1517" y="-59"/>
+            <point key="canvasLocation" x="2497" y="210"/>
         </scene>
     </scenes>
     <resources>
         <image name="1049-at-sign" width="28" height="28"/>
-        <image name="740-gear" width="28" height="28"/>
         <image name="770-paper-clip" width="28" height="27"/>
         <image name="906-chat-3" width="28" height="26"/>
         <image name="973-user" width="28" height="24"/>
+        <image name="menu" width="28" height="22"/>
     </resources>
     <inferredMetricsTieBreakers>
         <segue reference="fHR-i8-hPA"/>
-        <segue reference="x51-ex-qWM"/>
+        <segue reference="wmf-tk-2CN"/>
     </inferredMetricsTieBreakers>
 </document>

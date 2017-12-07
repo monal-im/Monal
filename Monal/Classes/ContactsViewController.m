@@ -595,39 +595,20 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) presentChatWithRow:(NSDictionary *)row
 {
-    //make chat view
-    UIStoryboard *storyBoard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
-    chatViewController* chatVC = [storyBoard instantiateViewControllerWithIdentifier:@"chatViewController"];
-    [chatVC setupWithContact:row];
-    
-    if([[self.currentNavController topViewController] isKindOfClass:[chatViewController class]])
-    {
-        chatViewController* currentTop=(chatViewController*)[self.currentNavController topViewController];
-        if([currentTop.contactName isEqualToString:[row objectForKey:@"buddy_name"]] &&
-           [currentTop.accountNo isEqualToString:
-            [NSString stringWithFormat:@"%d",[[row objectForKey:@"account_id"] integerValue]] ]
-           )
-        {
-            // do nothing
-            return;
-        }
-        else
-        {            
-            [self.currentNavController  popToRootViewControllerAnimated:NO];
+    [self  performSegueWithIdentifier:@"showConversation" sender:row];
+}
 
-        }
-    }
-    
-    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
+-(void) prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+{
+    if([segue.identifier isEqualToString:@"showConversation"])
     {
-        [self.currentNavController pushViewController:chatVC animated:NO];
-    }
-    else  {
-        [self.currentNavController pushViewController:chatVC animated:YES];
-        
+        UINavigationController *nav = segue.destinationViewController;
+        chatViewController* chatVC = nav.topViewController;
+        [chatVC setupWithContact:sender];
     }
     
 }
+
 
 #pragma mark search display delegate
 

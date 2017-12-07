@@ -95,6 +95,24 @@
     [self refreshDisplay];
 }
 
+-(void) presentChatWithRow:(NSDictionary *)row
+{
+    [self  performSegueWithIdentifier:@"showConversation" sender:row];
+}
+
+-(void) prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+{
+    if([segue.identifier isEqualToString:@"showConversation"])
+    {
+        UINavigationController *nav = segue.destinationViewController;
+        chatViewController *chatVC = (chatViewController *)nav.topViewController;
+        [chatVC setupWithContact:sender];
+    }
+    
+}
+
+
+
 #pragma mark tableview datasource
 
 -(NSInteger) numberOfSectionsInTableView:(UITableView *)tableView
@@ -215,36 +233,10 @@
 {
     [tableView deselectRowAtIndexPath:indexPath animated:NO];
       
-       // [[_contacts objectAtIndex:indexPath.row] setObject:[NSNumber numberWithInt:0] forKey:@"count"];
-        
-        //make chat view
-//        if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
-//        {
-//            if([[self.navigationController topViewController] isKindOfClass:[chatViewController class]])
-//            {
-//                chatViewController* currentTop=(chatViewController*)[self.navigationController topViewController];
-//                if([currentTop.buddyName isEqualToString:[[_contacts objectAtIndex:indexPath.row] objectForKey:@"buddy_name"]] &&
-//                   [currentTop.accountNo isEqualToString:
-//                    [NSString stringWithFormat:@"%d",[[[_contacts objectAtIndex:indexPath.row] objectForKey:@"account_id"] integerValue]] ]
-//                   )
-//                {
-//                    // do nothing
-//                    return;
-//                }
-//                else
-//                {
-//                    [self.navigationController  popToRootViewControllerAnimated:NO];
-//                }
-//            }
+    // [[_contacts objectAtIndex:indexPath.row] setObject:[NSNumber numberWithInt:0] forKey:@"count"];
+ 
+    [self presentChatWithRow:[_contacts objectAtIndex:indexPath.row] ];
     
-    
-    UIStoryboard *storyBoard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
-    chatViewController* chatVC = [storyBoard instantiateViewControllerWithIdentifier:@"chatViewController"];
-    [chatVC setupWithContact:[_contacts objectAtIndex:indexPath.row] ];
-
-        [self.navigationController pushViewController:chatVC animated:YES];
-        
-   
         [tableView reloadRowsAtIndexPaths:@[indexPath]
                          withRowAnimation:UITableViewRowAnimationNone];
         

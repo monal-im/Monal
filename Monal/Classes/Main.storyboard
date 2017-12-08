@@ -89,16 +89,16 @@
             </objects>
             <point key="canvasLocation" x="2542" y="-1470"/>
         </scene>
-        <!--Table View Controller-->
+        <!--Contact Details-->
         <scene sceneID="4Py-3m-Izt">
             <objects>
-                <tableViewController id="OdB-qj-tVb" sceneMemberID="viewController">
+                <tableViewController id="OdB-qj-tVb" customClass="ContactDetails" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="jpw-Pt-KVP">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <prototypes>
-                            <tableViewCell contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="topCell" rowHeight="276" id="PAo-A8-qeH" userLabel="topcell">
+                            <tableViewCell contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="topCell" rowHeight="276" id="PAo-A8-qeH" userLabel="topcell" customClass="MLDetailsTableViewCell">
                                 <rect key="frame" x="0.0" y="28" width="414" height="276"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="PAo-A8-qeH" id="xBi-io-0jH">
@@ -151,7 +151,7 @@
                                 </tableViewCellContentView>
                                 <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             </tableViewCell>
-                            <tableViewCell contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="bottomCell" rowHeight="126" id="09u-CT-hyn" userLabel="bottomcell">
+                            <tableViewCell contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="bottomCell" rowHeight="126" id="09u-CT-hyn" userLabel="bottomcell" customClass="MLDetailsTableViewCell">
                                 <rect key="frame" x="0.0" y="304" width="414" height="126"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="09u-CT-hyn" id="1GC-lX-tRR">
@@ -178,7 +178,7 @@
                                 </tableViewCellContentView>
                                 <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             </tableViewCell>
-                            <tableViewCell contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="resourceCell" id="ncd-NH-noe" userLabel="resourceCell">
+                            <tableViewCell contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="resourceCell" id="ncd-NH-noe" userLabel="resourceCell" customClass="MLDetailsTableViewCell">
                                 <rect key="frame" x="0.0" y="430" width="414" height="44"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="ncd-NH-noe" id="3IL-A3-sPG">

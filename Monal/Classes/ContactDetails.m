@@ -12,6 +12,7 @@
 #import "CallViewController.h"
 #import "MLXMPPManager.h"
 #import "MLPortraitNavController.h"
+#import "MLDetailsTableViewCell.h"
 
 
 @implementation ContactDetails

@@ -289,6 +289,7 @@
 		268130181BFD8ECA0074C8EE /* MLAddContact.m in Sources */ = {isa = PBXBuildFile; fileRef = 268130171BFD8ECA0074C8EE /* MLAddContact.m */; };
 		268821FA19B9233B00AEA46E /* NSString+SqlLite.m in Sources */ = {isa = PBXBuildFile; fileRef = 268821F919B9233B00AEA46E /* NSString+SqlLite.m */; };
 		268BCF12140B29180025E4D1 /* libjrtplib-static.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */; };
+		268C1E4A1FDAD08700BD6921 /* MLDetailsTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 268C1E491FDAD08700BD6921 /* MLDetailsTableViewCell.m */; };
 		268DD58617C4541000C673A9 /* MLChatCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 268DD58517C4541000C673A9 /* MLChatCell.m */; };
 		268E700515D0D979002E63CD /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 264FF3E4158A855D00D97B86 /* AVFoundation.framework */; };
 		269574DE1C372FD200544A60 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 269574DD1C372FD200544A60 /* Security.framework */; };
@@ -677,6 +678,8 @@
 		268821F819B9233B00AEA46E /* NSString+SqlLite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+SqlLite.h"; sourceTree = "<group>"; };
 		268821F919B9233B00AEA46E /* NSString+SqlLite.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+SqlLite.m"; sourceTree = "<group>"; };
 		268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libjrtplib-static.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		268C1E481FDAD08700BD6921 /* MLDetailsTableViewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLDetailsTableViewCell.h; sourceTree = "<group>"; };
+		268C1E491FDAD08700BD6921 /* MLDetailsTableViewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLDetailsTableViewCell.m; sourceTree = "<group>"; };
 		268DD58417C4541000C673A9 /* MLChatCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLChatCell.h; sourceTree = "<group>"; };
 		268DD58517C4541000C673A9 /* MLChatCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLChatCell.m; sourceTree = "<group>"; };
 		269574DD1C372FD200544A60 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
@@ -1303,6 +1306,8 @@
 			children = (
 				26EC40FA17BDD8560031304D /* ContactDetails.h */,
 				26EC40FB17BDD8560031304D /* ContactDetails.m */,
+				268C1E481FDAD08700BD6921 /* MLDetailsTableViewCell.h */,
+				268C1E491FDAD08700BD6921 /* MLDetailsTableViewCell.m */,
 			);
 			name = "Contact Details";
 			sourceTree = "<group>";
@@ -2526,6 +2531,7 @@
 				26D51CD01E2674D700141E04 /* NXOAuth2AccessToken.m in Sources */,
 				261A6297176C160900059090 /* HelpViewController.m in Sources */,
 				261A629A176C162200059090 /* AboutViewController.m in Sources */,
+				268C1E4A1FDAD08700BD6921 /* MLDetailsTableViewCell.m in Sources */,
 				2636C43F177BD58C001CA71F /* XMPPEdit.m in Sources */,
 				26352EA8177D222600E2C8FF /* MLXMPPManager.m in Sources */,
 				260C51D1177F08F50039634B /* xmpp.m in Sources */,

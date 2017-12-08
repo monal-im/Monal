@@ -401,8 +401,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     if(!self.uploadHUD) {
         self.uploadHUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
         self.uploadHUD.removeFromSuperViewOnHide=YES;
-        self.uploadHUD.labelText =@"Uploding";
-        self.uploadHUD.detailsLabelText =@"Upoading file to server";
+        self.uploadHUD.label.text =@"Uploding";
+        self.uploadHUD.detailsLabel.text =@"Upoading file to server";
         
     }
     
@@ -677,9 +677,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         NSTimeInterval interval = destinationGMTOffset - sourceGMTOffset;
         NSDate* destinationDate = [[NSDate alloc] initWithTimeInterval:interval sinceDate:sourceDate];
         
-        NSInteger msgday =[self.gregorian components:NSDayCalendarUnit fromDate:destinationDate].day;
-        NSInteger msgmonth=[self.gregorian components:NSMonthCalendarUnit fromDate:destinationDate].month;
-        NSInteger msgyear =[self.gregorian components:NSYearCalendarUnit fromDate:destinationDate].year;
+        NSInteger msgday =[self.gregorian components:NSCalendarUnitDay fromDate:destinationDate].day;
+        NSInteger msgmonth=[self.gregorian components:NSCalendarUnitMonth fromDate:destinationDate].month;
+        NSInteger msgyear =[self.gregorian components:NSCalendarUnitYear fromDate:destinationDate].year;
         
         if ((self.thisday!=msgday) || (self.thismonth!=msgmonth) || (self.thisyear!=msgyear))
         {

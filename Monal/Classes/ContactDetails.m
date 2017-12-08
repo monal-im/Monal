@@ -105,16 +105,11 @@
     label.backgroundColor = [UIColor clearColor];
     [headerView addSubview:label];
     
-    // [headerView setBackgroundColor:[UIColor clearColor]];
+    label.textColor=[UIColor darkGrayColor];
+    label.text=  label.text.uppercaseString;
+    label.shadowColor =[UIColor clearColor];
+    label.font=[UIFont systemFontOfSize:[UIFont systemFontSize]];
     
-    if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0"))
-    {
-        label.textColor=[UIColor darkGrayColor];
-        label.text=  label.text.uppercaseString;
-        label.shadowColor =[UIColor clearColor];
-        label.font=[UIFont systemFontOfSize:[UIFont systemFontSize]];
-        
-    }
     
     return headerView;
 }

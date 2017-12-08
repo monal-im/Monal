@@ -23,7 +23,6 @@ target 'Monal' do
 pod 'Fabric'
 pod 'Crashlytics'
 pod 'Dropbox-iOS-SDK'
-pod 'Appirater'
 pod 'TPCircularBuffer'
 pod 'MBProgressHUD'
 pod 'SAMKeychain'

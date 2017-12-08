@@ -84,15 +84,12 @@ EOM
   esac
 }
 if [[ "$CONFIGURATION" == "Debug" ]]; then
-  install_resource "$PODS_CONFIGURATION_BUILD_DIR/Appirater/Appirater.bundle"
   install_resource "${PODS_ROOT}/SAMKeychain/Support/SAMKeychain.bundle"
 fi
 if [[ "$CONFIGURATION" == "Adhoc" ]]; then
-  install_resource "$PODS_CONFIGURATION_BUILD_DIR/Appirater/Appirater.bundle"
   install_resource "${PODS_ROOT}/SAMKeychain/Support/SAMKeychain.bundle"
 fi
 if [[ "$CONFIGURATION" == "AppStore" ]]; then
-  install_resource "$PODS_CONFIGURATION_BUILD_DIR/Appirater/Appirater.bundle"
   install_resource "${PODS_ROOT}/SAMKeychain/Support/SAMKeychain.bundle"
 fi
 

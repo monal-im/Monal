@@ -109,10 +109,6 @@
                                             <rect key="frame" x="272" y="6" width="132" height="130"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
                                         </imageView>
-                                        <imageView userInteractionEnabled="NO" contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="iuV-WT-NR7">
-                                            <rect key="frame" x="10" y="107" width="29" height="29"/>
-                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                        </imageView>
                                         <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" fixedFrame="YES" text="Label" lineBreakMode="tailTruncation" minimumFontSize="10" translatesAutoresizingMaskIntoConstraints="NO" id="llX-Nf-F6I">
                                             <rect key="frame" x="8" y="144" width="390" height="21"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxX="YES" flexibleMaxY="YES"/>
@@ -150,6 +146,12 @@
                                     </subviews>
                                 </tableViewCellContentView>
                                 <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <connections>
+                                    <outlet property="buddyIconView" destination="1rm-kG-KIr" id="lKv-nY-YY0"/>
+                                    <outlet property="buddyName" destination="yIx-La-OpF" id="kRQ-bu-lBo"/>
+                                    <outlet property="buddyStatus" destination="hhb-qK-IPe" id="TcG-90-BeW"/>
+                                    <outlet property="fullName" destination="llX-Nf-F6I" id="1qR-VS-Z4v"/>
+                                </connections>
                             </tableViewCell>
                             <tableViewCell contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="bottomCell" rowHeight="126" id="09u-CT-hyn" userLabel="bottomcell" customClass="MLDetailsTableViewCell">
                                 <rect key="frame" x="0.0" y="304" width="414" height="126"/>
@@ -177,6 +179,9 @@
                                     </constraints>
                                 </tableViewCellContentView>
                                 <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <connections>
+                                    <outlet property="cellDetails" destination="bGJ-RO-FKU" id="8Ol-HM-o2e"/>
+                                </connections>
                             </tableViewCell>
                             <tableViewCell contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="resourceCell" id="ncd-NH-noe" userLabel="resourceCell" customClass="MLDetailsTableViewCell">
                                 <rect key="frame" x="0.0" y="430" width="414" height="44"/>
@@ -204,6 +209,9 @@
                                     </constraints>
                                 </tableViewCellContentView>
                                 <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <connections>
+                                    <outlet property="cellDetails" destination="VWJ-lZ-iER" id="jBr-UH-1yH"/>
+                                </connections>
                             </tableViewCell>
                         </prototypes>
                         <connections>

@@ -912,19 +912,22 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 - (void)tableView:(UITableView *)tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath *)indexPath
 {
-    ContactDetails* detailVC =nil;
+    NSDictionary *contactDic;
     if(tableView ==self.view) {
-        if(indexPath.section==konlineSection)
-            detailVC= [[ContactDetails alloc]  initWithContact:[_contacts objectAtIndex:indexPath.row] ];
-        else
-            detailVC=[[ContactDetails alloc]  initWithContact:[_offlineContacts objectAtIndex:indexPath.row] ];
+        if(indexPath.section==konlineSection) {
+            contactDic=[_contacts objectAtIndex:indexPath.row];
+        }
+        else {
+            contactDic=[_offlineContacts objectAtIndex:indexPath.row];
+        }
     }
     
     else  if(tableView ==self.searchDisplayController.searchResultsTableView)
     {
-        detailVC=[[ContactDetails alloc]  initWithContact:[self.searchResults objectAtIndex:indexPath.row] ];
+        contactDic=  [self.searchResults objectAtIndex:indexPath.row];
     }
     
+    [self performSegueWithIdentifier:@"showDetails" sender:contactDic];
 }
 
 -(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath

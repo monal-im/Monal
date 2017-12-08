@@ -1301,6 +1301,8 @@
 		268C1E471FDACDD300BD6921 /* Contact Details */ = {
 			isa = PBXGroup;
 			children = (
+				26EC40FA17BDD8560031304D /* ContactDetails.h */,
+				26EC40FB17BDD8560031304D /* ContactDetails.m */,
 			);
 			name = "Contact Details";
 			sourceTree = "<group>";
@@ -1564,8 +1566,6 @@
 		26DB52111777C83100B50353 /* Modal views */ = {
 			isa = PBXGroup;
 			children = (
-				26EC40FA17BDD8560031304D /* ContactDetails.h */,
-				26EC40FB17BDD8560031304D /* ContactDetails.m */,
 				26EC410017BDD8800031304D /* askTempPass.h */,
 				26EC410117BDD8800031304D /* askTempPass.m */,
 				26EC410217BDD8800031304D /* askTempPass.xib */,

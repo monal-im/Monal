@@ -28,7 +28,6 @@
 @property (nonatomic ,strong) NSMutableArray* contacts;
 @property (nonatomic ,strong) NSMutableArray* offlineContacts;
 @property (nonatomic ,strong) NSDictionary* lastSelectedUser;
-@property (nonatomic ,strong) UIPopoverController* popOverController;
 
 @end
 
@@ -924,23 +923,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     else  if(tableView ==self.searchDisplayController.searchResultsTableView)
     {
         detailVC=[[ContactDetails alloc]  initWithContact:[self.searchResults objectAtIndex:indexPath.row] ];
-    }
-    
-    detailVC.currentNavController=self.currentNavController;
-    
-    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
-    {
-        MLChatCell* cell = (MLChatCell*)[tableView cellForRowAtIndexPath:indexPath];
-        _popOverController = [[UIPopoverController alloc] initWithContentViewController:detailVC];
-        detailVC.popOverController=_popOverController;
-        _popOverController.popoverContentSize = CGSizeMake(320, 480);
-        [_popOverController presentPopoverFromRect:cell.bounds
-                                            inView:cell
-                          permittedArrowDirections:UIPopoverArrowDirectionLeft animated:YES];
-    }
-    else
-    {
-        [self.currentNavController pushViewController:detailVC animated:YES];
     }
     
 }

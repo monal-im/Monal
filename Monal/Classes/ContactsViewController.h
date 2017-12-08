@@ -59,11 +59,6 @@
 -(void) handleNewMessage:(NSNotification *)notification;
 
 /**
- Presents a dialog to send a message to an xmppp user to add them as a contact. 
- */
--(void)addContact;
-
-/**
  Presents a specific chat
  */
 -(void) presentChatWithName:(NSString *)buddyname account:(NSNumber *) account ;

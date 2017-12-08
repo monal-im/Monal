@@ -88,14 +88,7 @@
     CallViewController *callScreen= [[CallViewController alloc] initWithContact:_contact];
     MLPortraitNavController* callNav = [[MLPortraitNavController alloc] initWithRootViewController:callScreen];
     callNav.navigationBar.hidden=YES;
-    
-    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
-    {
-        callNav.modalPresentationStyle=UIModalPresentationFormSheet;
-        [self.popOverController dismissPopoverAnimated:NO];
-    }
-    
-    [self.currentNavController presentModalViewController:callNav animated:YES];
+
     [[MLXMPPManager sharedInstance] callContact:_contact];
 }
 

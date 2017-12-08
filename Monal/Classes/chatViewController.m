@@ -23,9 +23,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 @property (nonatomic, strong)  NSDateFormatter* destinationDateFormat;
 @property (nonatomic, strong)  NSDateFormatter* sourceDateFormat;
 @property (nonatomic, strong)  NSCalendar *gregorian;
-@property (nonatomic, assign) NSInteger thisyear;
-@property (nonatomic, assign) NSInteger thismonth;
-@property (nonatomic, assign) NSInteger thisday;
+@property (nonatomic, assign)  NSInteger thisyear;
+@property (nonatomic, assign)  NSInteger thismonth;
+@property (nonatomic, assign)  NSInteger thisday;
 @property (nonatomic, strong)  MBProgressHUD *uploadHUD;
 
 
@@ -637,12 +637,12 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     [self.sourceDateFormat setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
    
     self.gregorian = [[NSCalendar alloc]
-                             initWithCalendarIdentifier:NSGregorianCalendar];
+                             initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
     
     NSDate* now =[NSDate date];
-    self.thisday =[self.gregorian components:NSDayCalendarUnit fromDate:now].day;
-    self.thismonth =[self.gregorian components:NSMonthCalendarUnit fromDate:now].month;
-    self.thisyear =[self.gregorian components:NSYearCalendarUnit fromDate:now].year;
+    self.thisday =[self.gregorian components:NSCalendarUnitDay fromDate:now].day;
+    self.thismonth =[self.gregorian components:NSCalendarUnitMonth fromDate:now].month;
+    self.thisyear =[self.gregorian components:NSCalendarUnitYear fromDate:now].year;
 
     
 }

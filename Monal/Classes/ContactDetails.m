@@ -21,15 +21,6 @@
 -(void) viewDidLoad
 {
     [super viewDidLoad];
- 
-    
-    UIImage *buttonImage2 = [[UIImage imageNamed:@"greenButton"]
-                             resizableImageWithCapInsets:UIEdgeInsetsMake(18, 18, 18, 18)];
-    UIImage *buttonImageHighlight2 = [[UIImage imageNamed:@"greenButtonHighlight"]
-                                      resizableImageWithCapInsets:UIEdgeInsetsMake(18, 18, 18, 18)];
-    
- 
-    
 }
 
 -(void) viewWillAppear:(BOOL)animated
@@ -137,7 +128,7 @@
 //    {
 //        return _resourceCell.frame.size.height;
 //    }
-//    
+//
     //default
     return 0;
 }

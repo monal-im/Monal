@@ -148,7 +148,6 @@
 		26277888110179D100023C8A /* tools.m in Sources */ = {isa = PBXBuildFile; fileRef = 26277887110179D100023C8A /* tools.m */; };
 		26277CE41B7C57670094E4D0 /* MLContactDetails.m in Sources */ = {isa = PBXBuildFile; fileRef = 26277CE31B7C57670094E4D0 /* MLContactDetails.m */; };
 		262797AF178A577300B85D94 /* MLContactCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 262797AE178A577300B85D94 /* MLContactCell.m */; };
-		2628E50714049DB50064131E /* askTempPass.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2628E50614049DB50064131E /* askTempPass.xib */; };
 		26292F4F1309CAE100097280 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26292F4E1309CAE100097280 /* CFNetwork.framework */; };
 		262D9EA717921169009292B4 /* ParseMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 262D9EA617921169009292B4 /* ParseMessage.m */; };
 		262D9EAA17921E82009292B4 /* XMPPMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 262D9EA917921E82009292B4 /* XMPPMessage.m */; };
@@ -372,7 +371,6 @@
 		26DA16E017C302BC00D0065E /* RIButtonItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 26DA16DB17C302BC00D0065E /* RIButtonItem.m */; };
 		26DA16E117C302BC00D0065E /* UIActionSheet+Blocks.m in Sources */ = {isa = PBXBuildFile; fileRef = 26DA16DD17C302BC00D0065E /* UIActionSheet+Blocks.m */; };
 		26DA16E217C302BC00D0065E /* UIAlertView+Blocks.m in Sources */ = {isa = PBXBuildFile; fileRef = 26DA16DF17C302BC00D0065E /* UIAlertView+Blocks.m */; };
-		26DC0A8B1339259900E60BFD /* SearchUser.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26DC0A8A1339259900E60BFD /* SearchUser.xib */; };
 		26E2F7DA17C6FD9400C3C8EF /* MLTabBarController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26E2F7D917C6FD9400C3C8EF /* MLTabBarController.m */; };
 		26E456CD1B842180004BD74C /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26E456CC1B842180004BD74C /* Sparkle.framework */; };
 		26E456CF1B8421C3004BD74C /* Sparkle.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 26E456CC1B842180004BD74C /* Sparkle.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -499,7 +497,6 @@
 		26277CE31B7C57670094E4D0 /* MLContactDetails.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLContactDetails.m; sourceTree = "<group>"; };
 		262797AD178A577300B85D94 /* MLContactCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLContactCell.h; sourceTree = "<group>"; };
 		262797AE178A577300B85D94 /* MLContactCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLContactCell.m; sourceTree = "<group>"; };
-		2628E50614049DB50064131E /* askTempPass.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = askTempPass.xib; sourceTree = "<group>"; };
 		26292F4E1309CAE100097280 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		262D9EA517921169009292B4 /* ParseMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParseMessage.h; sourceTree = "<group>"; };
 		262D9EA617921169009292B4 /* ParseMessage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParseMessage.m; sourceTree = "<group>"; };
@@ -785,7 +782,6 @@
 		26DA16DD17C302BC00D0065E /* UIActionSheet+Blocks.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIActionSheet+Blocks.m"; sourceTree = "<group>"; };
 		26DA16DE17C302BC00D0065E /* UIAlertView+Blocks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIAlertView+Blocks.h"; sourceTree = "<group>"; };
 		26DA16DF17C302BC00D0065E /* UIAlertView+Blocks.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIAlertView+Blocks.m"; sourceTree = "<group>"; };
-		26DC0A8A1339259900E60BFD /* SearchUser.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SearchUser.xib; sourceTree = "<group>"; };
 		26DE9C050FEEFD00000596F6 /* DB definitions */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "DB definitions"; sourceTree = "<group>"; };
 		26E2F7D817C6FD9400C3C8EF /* MLTabBarController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MLTabBarController.h; path = ../MLTabBarController.h; sourceTree = "<group>"; };
 		26E2F7D917C6FD9400C3C8EF /* MLTabBarController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MLTabBarController.m; path = ../MLTabBarController.m; sourceTree = "<group>"; };
@@ -1160,15 +1156,6 @@
 			name = Accounts;
 			sourceTree = "<group>";
 		};
-		26715E5B176506AD00684F3D /* old nibs */ = {
-			isa = PBXGroup;
-			children = (
-				2628E50614049DB50064131E /* askTempPass.xib */,
-				26DC0A8A1339259900E60BFD /* SearchUser.xib */,
-			);
-			name = "old nibs";
-			sourceTree = "<group>";
-		};
 		26715E5E17650AF900684F3D /* View Controllers */ = {
 			isa = PBXGroup;
 			children = (
@@ -1337,7 +1324,6 @@
 				26715E5E17650AF900684F3D /* View Controllers */,
 				26DFD4A615666B6C007A1621 /* External */,
 				8D1107310486CEB800E47090 /* Monal-Info.plist */,
-				26715E5B176506AD00684F3D /* old nibs */,
 			);
 			name = "Monal-iOS";
 			sourceTree = "<group>";
@@ -2068,13 +2054,11 @@
 				264A7E751AA7263600E860E3 /* MLAccountCell.xib in Resources */,
 				26470F521835C4080069E3E0 /* Media.xcassets in Resources */,
 				26761BF71804FBB700D94714 /* RoomListViewController.xib in Resources */,
-				26DC0A8B1339259900E60BFD /* SearchUser.xib in Resources */,
 				26B2A4BB1B73061400272E63 /* Images.xcassets in Resources */,
 				2653EAE61C5B243400ED97F7 /* Main.storyboard in Resources */,
 				262E51981AD8CB7200788351 /* MLTextInputCell.xib in Resources */,
 				2649CE531C51B84C00CD1E80 /* Launch Screen.storyboard in Resources */,
 				26F9794D1ACAC73A0008E005 /* MLContactCell.xib in Resources */,
-				2628E50714049DB50064131E /* askTempPass.xib in Resources */,
 				26AAE282179F701A00271345 /* About.html in Resources */,
 				26B51C4A18654D98002134C3 /* LogViewController.xib in Resources */,
 				26BDECDD1867B7790018670D /* CallViewController.xib in Resources */,

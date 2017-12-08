@@ -19,7 +19,6 @@
 		2602837F1D8DD56B001DD6B8 /* Quartz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2602837E1D8DD56B001DD6B8 /* Quartz.framework */; };
 		260283861D8DEFC1001DD6B8 /* MLPreviewObject.m in Sources */ = {isa = PBXBuildFile; fileRef = 260283851D8DEFC1001DD6B8 /* MLPreviewObject.m */; };
 		260283871D8DEFC1001DD6B8 /* MLPreviewObject.m in Sources */ = {isa = PBXBuildFile; fileRef = 260283851D8DEFC1001DD6B8 /* MLPreviewObject.m */; };
-		260447F60FEED62100B3B5A7 /* BuddyDetails.xib in Resources */ = {isa = PBXBuildFile; fileRef = 260447F50FEED62100B3B5A7 /* BuddyDetails.xib */; };
 		260499E21B730E9000D11866 /* xmpp.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D0177F08F50039634B /* xmpp.m */; };
 		260499E31B730E9500D11866 /* MLXMLNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D3177F44AD0039634B /* MLXMLNode.m */; };
 		260499E41B730E9800D11866 /* XMPPIQ.m in Sources */ = {isa = PBXBuildFile; fileRef = 26CF3EA91780D6B7002B7085 /* XMPPIQ.m */; };
@@ -267,7 +266,6 @@
 		2653EAE61C5B243400ED97F7 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2653EAE51C5B243400ED97F7 /* Main.storyboard */; };
 		265802851B785B8900C35014 /* MLDisabledScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = 265802841B785B8900C35014 /* MLDisabledScrollView.m */; };
 		265F0B631B75719E00A63F20 /* MLAccountRow.m in Sources */ = {isa = PBXBuildFile; fileRef = 265F0B621B75719E00A63F20 /* MLAccountRow.m */; };
-		265F1B2B123040540065C5FE /* web.xib in Resources */ = {isa = PBXBuildFile; fileRef = 265F1B2A123040540065C5FE /* web.xib */; };
 		265F6BA21B7B0040006B8EBA /* MLImageManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EC411217BDE39E0031304D /* MLImageManager.m */; };
 		265FF0D51C7FDAC100E2CCE1 /* MLCloudStorageSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = 265FF0D41C7FDAC100E2CCE1 /* MLCloudStorageSettings.m */; };
 		2661D3411B40765A00EC51BA /* MLContactsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661D3401B40765A00EC51BA /* MLContactsViewController.m */; };
@@ -300,7 +298,6 @@
 		2696EED21791245A00BC54B8 /* chatViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2696EED11791245A00BC54B8 /* chatViewController.m */; };
 		269E748E18B707B500BCB2D5 /* MLPortraitNavController.m in Sources */ = {isa = PBXBuildFile; fileRef = 269E748D18B707B500BCB2D5 /* MLPortraitNavController.m */; };
 		26A8ADD717C031BA0033990D /* ContactDetails.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EC40FB17BDD8560031304D /* ContactDetails.m */; };
-		26A8ADD817C031BA0033990D /* ContactDetails.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26EC40F817BDD8360031304D /* ContactDetails.xib */; };
 		26AA41051D9FCBF6005A77ED /* MLImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26AA41041D9FCBF6005A77ED /* MLImageView.m */; };
 		26AAE282179F701A00271345 /* About.html in Resources */ = {isa = PBXBuildFile; fileRef = 26AAE281179F701A00271345 /* About.html */; };
 		26AAE285179F7B0200271345 /* MLSettingCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 26AAE284179F7B0200271345 /* MLSettingCell.m */; };
@@ -456,7 +453,6 @@
 		2602837E1D8DD56B001DD6B8 /* Quartz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quartz.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk/System/Library/Frameworks/Quartz.framework; sourceTree = DEVELOPER_DIR; };
 		260283841D8DEFC1001DD6B8 /* MLPreviewObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLPreviewObject.h; sourceTree = "<group>"; };
 		260283851D8DEFC1001DD6B8 /* MLPreviewObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLPreviewObject.m; sourceTree = "<group>"; };
-		260447F50FEED62100B3B5A7 /* BuddyDetails.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = BuddyDetails.xib; sourceTree = "<group>"; };
 		26049A501B7314F400D11866 /* libjrtplib-static-OSX.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libjrtplib-static-OSX.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		26049A5A1B73163300D11866 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/System/Library/Frameworks/AVFoundation.framework; sourceTree = DEVELOPER_DIR; };
 		26049A5C1B73164500D11866 /* AVKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVKit.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/System/Library/Frameworks/AVKit.framework; sourceTree = DEVELOPER_DIR; };
@@ -642,7 +638,6 @@
 		265802841B785B8900C35014 /* MLDisabledScrollView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLDisabledScrollView.m; sourceTree = "<group>"; };
 		265F0B611B75719E00A63F20 /* MLAccountRow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLAccountRow.h; sourceTree = "<group>"; };
 		265F0B621B75719E00A63F20 /* MLAccountRow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLAccountRow.m; sourceTree = "<group>"; };
-		265F1B2A123040540065C5FE /* web.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = web.xib; sourceTree = "<group>"; };
 		265FF0D31C7FDAC100E2CCE1 /* MLCloudStorageSettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLCloudStorageSettings.h; sourceTree = "<group>"; };
 		265FF0D41C7FDAC100E2CCE1 /* MLCloudStorageSettings.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLCloudStorageSettings.m; sourceTree = "<group>"; };
 		2661D33F1B40765A00EC51BA /* MLContactsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLContactsViewController.h; sourceTree = "<group>"; };
@@ -792,7 +787,6 @@
 		26E2F7D817C6FD9400C3C8EF /* MLTabBarController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MLTabBarController.h; path = ../MLTabBarController.h; sourceTree = "<group>"; };
 		26E2F7D917C6FD9400C3C8EF /* MLTabBarController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MLTabBarController.m; path = ../MLTabBarController.m; sourceTree = "<group>"; };
 		26E456CC1B842180004BD74C /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Sparkle.framework; path = MonalOSX/External/Sparkle.framework; sourceTree = "<group>"; };
-		26EC40F817BDD8360031304D /* ContactDetails.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ContactDetails.xib; sourceTree = "<group>"; };
 		26EC40FA17BDD8560031304D /* ContactDetails.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContactDetails.h; sourceTree = "<group>"; };
 		26EC40FB17BDD8560031304D /* ContactDetails.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ContactDetails.m; sourceTree = "<group>"; };
 		26EC40FD17BDD85F0031304D /* addContact.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = addContact.h; sourceTree = "<group>"; };
@@ -1168,8 +1162,6 @@
 			children = (
 				2628E50614049DB50064131E /* askTempPass.xib */,
 				26DC0A8A1339259900E60BFD /* SearchUser.xib */,
-				260447F50FEED62100B3B5A7 /* BuddyDetails.xib */,
-				265F1B2A123040540065C5FE /* web.xib */,
 			);
 			name = "old nibs";
 			sourceTree = "<group>";
@@ -1179,6 +1171,7 @@
 			children = (
 				26E2F7D817C6FD9400C3C8EF /* MLTabBarController.h */,
 				26E2F7D917C6FD9400C3C8EF /* MLTabBarController.m */,
+				26DB52111777C83100B50353 /* Modal views */,
 				26DB52121777EA5100B50353 /* Tab views */,
 				269E748C18B707B500BCB2D5 /* MLPortraitNavController.h */,
 				269E748D18B707B500BCB2D5 /* MLPortraitNavController.m */,
@@ -1303,6 +1296,13 @@
 				26400711140B43BB00CF1107 /* rtpudpv6transmitter.hh */,
 			);
 			name = "jrtplib-static";
+			sourceTree = "<group>";
+		};
+		268C1E471FDACDD300BD6921 /* Contact Details */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = "Contact Details";
 			sourceTree = "<group>";
 		};
 		26AA41021D9FC61C005A77ED /* Chatview */ = {
@@ -1566,7 +1566,6 @@
 			children = (
 				26EC40FA17BDD8560031304D /* ContactDetails.h */,
 				26EC40FB17BDD8560031304D /* ContactDetails.m */,
-				26EC40F817BDD8360031304D /* ContactDetails.xib */,
 				26EC410017BDD8800031304D /* askTempPass.h */,
 				26EC410117BDD8800031304D /* askTempPass.m */,
 				26EC410217BDD8800031304D /* askTempPass.xib */,
@@ -1582,11 +1581,11 @@
 		26DB52121777EA5100B50353 /* Tab views */ = {
 			isa = PBXGroup;
 			children = (
+				268C1E471FDACDD300BD6921 /* Contact Details */,
 				2665C1191C4AA22700CC9A04 /* Accounts */,
 				2678A987185A82BE003AF53B /* Chat Logs */,
 				262797AC178A573F00B85D94 /* Tableviewcells */,
 				2636C440177BD595001CA71F /* Older UI code */,
-				26DB52111777C83100B50353 /* Modal views */,
 				2696EED11791245A00BC54B8 /* chatViewController.m */,
 				2696EED01791245A00BC54B8 /* chatViewController.h */,
 				261A627E176C055400059090 /* ContactsViewController.h */,
@@ -2061,8 +2060,6 @@
 			files = (
 				262E51931AD8CAC600788351 /* MLButtonCell.xib in Resources */,
 				2601D9CB0FBF25EF004DB939 /* sworim.sqlite in Resources */,
-				260447F60FEED62100B3B5A7 /* BuddyDetails.xib in Resources */,
-				265F1B2B123040540065C5FE /* web.xib in Resources */,
 				264A7E751AA7263600E860E3 /* MLAccountCell.xib in Resources */,
 				26470F521835C4080069E3E0 /* Media.xcassets in Resources */,
 				26761BF71804FBB700D94714 /* RoomListViewController.xib in Resources */,
@@ -2077,7 +2074,6 @@
 				26B51C4A18654D98002134C3 /* LogViewController.xib in Resources */,
 				26BDECDD1867B7790018670D /* CallViewController.xib in Resources */,
 				26EC411017BDD98E0031304D /* GroupChatViewController.xib in Resources */,
-				26A8ADD817C031BA0033990D /* ContactDetails.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

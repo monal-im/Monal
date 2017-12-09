@@ -124,19 +124,19 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             
             if(!error && httpresponse.statusCode<400)
             {
-                DDLogInfo(@"************************ connection to push api successful");
+                DDLogInfo(@"connection to push api successful");
                 
                 NSString *responseBody = [[NSString alloc] initWithData:data  encoding:NSUTF8StringEncoding];
-                DDLogInfo(@"************************ push api returned: %@", responseBody);
+                DDLogInfo(@"push api returned: %@", responseBody);
                 NSArray *responseParts=[responseBody componentsSeparatedByString:@"\n"];
                 if(responseParts.count>0){
                     if([responseParts[0] isEqualToString:@"OK"] && [responseParts count]==3)
                     {
-                        DDLogInfo(@"************************ push api: node='%@', secret='%@'", responseParts[1], responseParts[2]);
+                        DDLogInfo(@"push api: node='%@', secret='%@'", responseParts[1], responseParts[2]);
                         [[MLXMPPManager sharedInstance] setPushNode:responseParts[1] andSecret:responseParts[2]];
                     }
                     else {
-                        DDLogError(@"************************ push api returned invalid data: %@", [responseParts componentsJoinedByString: @" | "]);
+                        DDLogError(@" push api returned invalid data: %@", [responseParts componentsJoinedByString: @" | "]);
                     }
                 } else {
                     DDLogError(@"push api could  not be broken into parts");
@@ -144,7 +144,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 
             } else
             {
-                DDLogError(@"************************ connection to push api NOT successful");
+                DDLogError(@" connection to push api NOT successful");
             }
             
         }] resume];
@@ -160,7 +160,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 // Handle incoming pushes
 -(void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type
 {
-    DDLogInfo(@"************************ incoming voip notfication: %@", [payload dictionaryPayload]);
+    DDLogInfo(@"incoming voip notfication: %@", [payload dictionaryPayload]);
     
     dispatch_async(dispatch_get_main_queue(), ^{
         //reconenct and fetch messages

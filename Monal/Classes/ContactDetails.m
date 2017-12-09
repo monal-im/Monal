@@ -11,7 +11,6 @@
 #import "MLConstants.h"
 #import "CallViewController.h"
 #import "MLXMPPManager.h"
-#import "MLPortraitNavController.h"
 #import "MLDetailsTableViewCell.h"
 
 
@@ -63,11 +62,11 @@
 
 -(IBAction) callContact:(id)sender;
 {
-    CallViewController *callScreen= [[CallViewController alloc] initWithContact:_contact];
-    MLPortraitNavController* callNav = [[MLPortraitNavController alloc] initWithRootViewController:callScreen];
-    callNav.navigationBar.hidden=YES;
-
-    [[MLXMPPManager sharedInstance] callContact:_contact];
+//    CallViewController *callScreen= [[CallViewController alloc] initWithContact:_contact];
+//    MLPortraitNavController* callNav = [[MLPortraitNavController alloc] initWithRootViewController:callScreen];
+//    callNav.navigationBar.hidden=YES;
+//
+//    [[MLXMPPManager sharedInstance] callContact:_contact];
 }
 
 

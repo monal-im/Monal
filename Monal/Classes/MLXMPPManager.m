@@ -738,9 +738,10 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 -(void) handleNewMessage:(NSNotification *)notification
 {
 #if TARGET_OS_IPHONE
+    dispatch_async(dispatch_get_main_queue(), ^{
     MonalAppDelegate* appDelegate= (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
     [appDelegate updateUnread];
-    
+    }); 
 #else
 #endif
 }

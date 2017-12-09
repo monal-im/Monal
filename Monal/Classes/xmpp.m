@@ -1777,14 +1777,18 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                 if(!presenceNode.MUC) {
                                     // do not do this in the background
                                     
-                                    BOOL checkChange = YES;
+                                   __block  BOOL checkChange = YES;
                                 
                                     
     #if TARGET_OS_IPHONE
-                                    if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
-                                    {
-                                        checkChange=NO;
-                                    }
+                                    //TODO maybe not a good idea to do this. but bad to crash as well.  fix later. 
+                                    dispatch_sync(dispatch_get_main_queue(), ^{
+                                        if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
+                                        {
+                                            checkChange=NO;
+                                        }
+                                    });
+                                    
     #else
     #endif
                                     

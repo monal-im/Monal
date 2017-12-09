@@ -66,14 +66,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
 }
 
-#if TARGET_OS_IPHONE
+
 
 
 #pragma mark - VOIP APNS notificaion
 
 -(void) voipRegistration
 {
-    DDLogInfo(@"************************ registering for voip push...");
+    DDLogInfo(@"registering for voip APNS...");
     dispatch_queue_t mainQueue = dispatch_get_main_queue();
     // Create a push registry object
     PKPushRegistry * voipRegistry = [[PKPushRegistry alloc] initWithQueue: mainQueue];
@@ -90,7 +90,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 // Handle updated push credentials
 -(void)pushRegistry:(PKPushRegistry *)registry didUpdatePushCredentials: (PKPushCredentials *)credentials forType:(NSString *)type
 {
-    DDLogInfo(@"************************ voip push token: %@", credentials.token);
+    DDLogInfo(@"voip APNS token: %@", credentials.token);
     
     unsigned char *tokenBytes = (unsigned char *)[credentials.token bytes];
     NSMutableString *token = [[NSMutableString alloc] init];
@@ -167,7 +167,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         [[MLXMPPManager sharedInstance] connectIfNecessary];
     });
 }
-#endif
 
 #pragma mark notification actions
 -(void) showCallScreen:(NSNotification*) userInfo

@@ -11,17 +11,6 @@
 #import "MLPortraitNavController.h"
 #import "CallViewController.h"
 
-// tab bar
-#import "ContactsViewController.h"
-#import "ActiveChatsViewController.h"
-#import "SettingsViewController.h"
-#import "AccountsViewController.h"
-#import "ChatLogsViewController.h"
-#import "GroupChatViewController.h"
-#import "SearchUsersViewController.h"
-#import "LogViewController.h"
-#import "HelpViewController.h"
-#import "AboutViewController.h"
 #import "MLNotificationManager.h"
 #import "DataLayer.h"
 #import "NXOAuth2AccountStore.h"

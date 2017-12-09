@@ -104,14 +104,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     NSString *node = [[[UIDevice currentDevice] identifierForVendor] UUIDString];
     
-    NSString *post = [NSString stringWithFormat:@"type=apns&node=%@&token=%@", [node stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],
-                      [token stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+    NSString *post = [NSString stringWithFormat:@"type=apns&node=%@&token=%@", [node stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]],
+                      [token stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]]];
     NSData *postData = [post dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
-    NSString *postLength = [NSString stringWithFormat:@"%uld",[postData length]];
+    NSString *postLength = [NSString stringWithFormat:@"%luld",[postData length]];
     
     NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
     //this is the hardcoded push api endpoint
-    [request setURL:[NSURL URLWithString:@"http://192.168.2.3:5280/push_appserver/v1/register"]];
+    [request setURL:[NSURL URLWithString:@"http://xmpp.monal.im:5280/push_appserver/v1/register"]];
     [request setHTTPMethod:@"POST"];
     [request setValue:postLength forHTTPHeaderField:@"Content-Length"];
     [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];

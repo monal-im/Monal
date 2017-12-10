@@ -3100,13 +3100,13 @@ void query_cb(const DNSServiceRef DNSServiceRef, const DNSServiceFlags flags, co
 {
     if(self.accountState==kStateLoggedIn && [self.pushNode length]>0 && [self.pushSecret length]>0 && self.supportsPush)
     {
-        DDLogInfo(@"************************ ENABLING PUSH: %@ < %@", self.pushNode, self.pushSecret);
+        DDLogInfo(@"ENABLING PUSH: %@ < %@", self.pushNode, self.pushSecret);
         XMPPIQ* enable =[[XMPPIQ alloc] initWithType:kiqSetType];
         [enable setPushEnableWithNode:self.pushNode andSecret:self.pushSecret];
         [self send:enable];
     }
     else
-        DDLogInfo(@"************************ NOT enabling push: %@ < %@", self.pushNode, self.pushSecret);
+        DDLogInfo(@" NOT enabling push: %@ < %@", self.pushNode, self.pushSecret);
 }
 
 @end

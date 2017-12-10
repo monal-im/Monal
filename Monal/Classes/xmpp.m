@@ -237,25 +237,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     else
         DDLogInfo(@"streams created ok");
     
-    #if TARGET_OS_IPHONE
-    if((CFReadStreamSetProperty((__bridge CFReadStreamRef)_iStream,
-                                kCFStreamNetworkServiceType,  kCFStreamNetworkServiceTypeVoIP))
-       //       &&
-       //       (CFWriteStreamSetProperty((__bridge CFWriteStreamRef)_oStream,
-       //                                 kCFStreamNetworkServiceType,  kCFStreamNetworkServiceTypeVoIP))
-       )
-    {
-        DDLogInfo(@"Set VOIP properties on streams.");
-    }
-    else
-    {
-        DDLogInfo(@"could not set VOIP properties on streams.");
-    }
-#else
-
-#endif
- 
     
+ 
     if((_SSL==YES)  && (_oldStyleSSL==YES))
     {
         // do ssl stuff here
@@ -2660,17 +2643,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         case NSStreamEventOpenCompleted:
         {
             DDLogVerbose(@"Stream open completed");
-            //            if(stream ==_iStream) {
-            //                CFDataRef socketData = CFReadStreamCopyProperty((__bridge CFReadStreamRef)(stream), kCFStreamPropertySocketNativeHandle);
-            //                CFSocketNativeHandle socket;
-            //                CFDataGetBytes(socketData, CFRangeMake(0, sizeof(CFSocketNativeHandle)), (UInt8 *)&socket);
-            //                CFRelease(socketData);
-            //
-            //                int on = 1;
-            //                if (setsockopt(socket, SOL_SOCKET, SO_KEEPALIVE, &on, sizeof(on)) == -1) {
-            //                    DDLogVerbose(@"setsockopt failed: %s", strerror(errno));
-            //                }
-            //            }
+           
         }
             //for writing
         case NSStreamEventHasSpaceAvailable:

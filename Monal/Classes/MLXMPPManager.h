@@ -182,9 +182,6 @@ Attempts to upload a file to the  HTTP upload service
  */
 -(void) handleNewMessage:(NSNotification *)notification;
 
--(void) setKeepAlivetimer;
--(void) clearKeepAlive;
-
 -(void) resetForeground;
 
 /**

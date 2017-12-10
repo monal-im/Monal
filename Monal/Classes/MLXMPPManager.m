@@ -130,51 +130,6 @@ NSString *pushSecret;
         dispatch_source_cancel(_pinger);
 }
 
-#pragma mark keep alive
-
--(void) setKeepAlivetimer
-{
-#if TARGET_OS_IPHONE
-
-    NSTimeInterval timeInterval= 600; // 600 seconds
-    BOOL keepAlive=[[UIApplication sharedApplication] setKeepAliveTimeout:timeInterval handler:^{
-        DDLogInfo(@"began bg keep alive ping");
-        for(NSDictionary* row in _connectedXMPP)
-        {
-            xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
-            [xmppAccount sendPing];
-        }
-        
-    }];
-    
-    if(keepAlive)
-    {
-        DDLogVerbose(@"installed keep alive timer");
-    }
-    else
-    {
-        DDLogVerbose(@"failed to install keep alive timer");
-    }
-#else
-#endif
-}
-
--(void) clearKeepAlive
-{
-    for(NSDictionary* row in _connectedXMPP)
-    {
-        xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
-        if(xmppAccount.supportsClientState) {
-            [xmppAccount setClientActive];
-        }
-    }
-    
-#if TARGET_OS_IPHONE
-    [[UIApplication sharedApplication] clearKeepAliveTimeout];
-#else
-#endif
-    
-}
 
 
 #pragma mark - client state 

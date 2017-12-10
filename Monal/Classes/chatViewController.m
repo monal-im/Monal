@@ -216,16 +216,12 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 #pragma mark rotation
 
-- (BOOL)shouldAutorotate
-{
-   	[self.chatInput resignFirstResponder];
-    return YES;
-}
 
--(void) willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
+-(void) viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
 {
     [self.chatInput resignFirstResponder];
 }
+
 
 #pragma mark gestures
 

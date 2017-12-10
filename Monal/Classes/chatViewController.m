@@ -1057,7 +1057,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     NSTimeInterval animationDuration =[[[notification userInfo] objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
     [UIView animateWithDuration:animationDuration
                      animations:^{
-                         self.inputContainerBottom.constant= keyboardSize.height;
+                         self.inputContainerBottom.constant= keyboardSize.height-self.tabBarController.tabBar.frame.size.height;
                          
                      } completion:^(BOOL finished) {
                          

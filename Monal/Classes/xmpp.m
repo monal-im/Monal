@@ -346,7 +346,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                           object:[NXOAuth2AccountStore sharedStore]
                                                            queue:nil
                                                       usingBlock:^(NSNotification *aNotification){
-                                                          NSError *error = [aNotification.userInfo objectForKey:NXOAuth2AccountStoreErrorKey];
+//                                                          NSError *error = [aNotification.userInfo objectForKey:NXOAuth2AccountStoreErrorKey];
                                                           // Do something with the error
                                                       }];
         
@@ -360,7 +360,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         [[NSNotificationCenter defaultCenter] addObserverForName:NXOAuth2AccountDidChangeAccessTokenNotification
                                                           object:self.oauthAccount queue:nil usingBlock:^(NSNotification *note) {
                                                               
-                                                              NSError *error;
+                                                            
                                                               self.password= self.oauthAccount.accessToken.accessToken;
                                                               
                                                               [self reconnect];

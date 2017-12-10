@@ -294,7 +294,7 @@
                     <connections>
                         <outlet property="view" destination="4Ri-hX-ob8" id="nLc-h6-Jwi"/>
                         <segue destination="Dhn-Pm-OVk" kind="showDetail" identifier="showConversation" id="wmf-tk-2CN"/>
-                        <segue destination="OdB-qj-tVb" kind="modal" identifier="showDetails" modalPresentationStyle="formSheet" id="m2S-1Y-3FB"/>
+                        <segue destination="OdB-qj-tVb" kind="presentation" identifier="showDetails" modalPresentationStyle="formSheet" id="m2S-1Y-3FB"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="vxj-qR-bK8" userLabel="First Responder" sceneMemberID="firstResponder"/>

@@ -32,13 +32,13 @@ An array of Dics what have timers to make sure everything was sent
  */
 @property (nonatomic, strong) NSMutableArray *timerList;
 
+@property (nonatomic, strong) NSString *pushNode;
+@property (nonatomic, strong) NSString *pushSecret;
+
 @end
 
 
 @implementation MLXMPPManager
-
-NSString *pushNode;
-NSString *pushSecret;
 
 -(void) defaultSettings
 {
@@ -229,8 +229,8 @@ NSString *pushSecret;
     
     xmpp* xmppAccount=[[xmpp alloc] init];
     xmppAccount.explicitLogout=NO;
-    xmppAccount.pushNode=pushNode;
-    xmppAccount.pushSecret=pushSecret;
+    xmppAccount.pushNode=self.pushNode;
+    xmppAccount.pushSecret=self.pushSecret;
     
     xmppAccount.username=[account objectForKey:kUsername];
     xmppAccount.domain=[account objectForKey:kDomain];
@@ -764,8 +764,8 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 
 -(void) setPushNode:(NSString *)node andSecret:(NSString *)secret
 {
-    pushNode=node;
-    pushSecret=secret;
+    self.pushNode=node;
+    self.pushSecret=secret;
     for(NSDictionary* row in _connectedXMPP)
     {
         xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];

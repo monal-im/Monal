@@ -294,6 +294,8 @@ FOUNDATION_EXPORT NSString *const kCompletion;
 //message archive
 @property (nonatomic, readonly) BOOL supportsMam0;
 
+@property (nonatomic, readonly) BOOL supportsSM3;
+@property (nonatomic, readonly) BOOL supportsPush;
 
 //calculated
 @property (nonatomic,strong, readonly) NSString* versionHash;
@@ -312,5 +314,9 @@ extern NSString *const kId;
 extern NSString *const kMessageId;
 extern NSString *const kSendTimer;
 
+/**
+ An intentional disconnect to trigger APNS. does not close the stream. 
+ */
+-(void) disconnectToResume;
 
 @end

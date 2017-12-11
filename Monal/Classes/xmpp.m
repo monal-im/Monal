@@ -502,36 +502,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self disconnectWithCompletion:nil];
 }
 
--(void) disconnectWithCompletion:(void(^)(void))completion
+-(void) closeSocket
 {
-    if(self.explicitLogout && _accountState>=kStateHasStream)
-    {
-        MLXMLNode* stream = [[MLXMLNode alloc] init];
-        stream.element=@"/stream:stream"; //hack to close stream
-        [self writeToStream:stream.XMLString]; // dont even bother queueing
-        self.streamID=nil;
-    }
-    
-    if(_accountState == kStateDisconnected) {
-        
-        _startTLSComplete=NO;
-        _streamHasSpace=NO;
-        _loginStarted=NO;
-        _loginStartTimeStamp=nil;
-        _loginError=NO;
-        _reconnectScheduled =NO;
-        
-        if(completion)completion();
-        return;
-    }
-    
     [self.networkQueue cancelAllOperations];
-
+    
     [self.networkQueue addOperationWithBlock:^{
         if(self.explicitLogout) {
             self.unAckedStanzas=nil;
         }
-        self.connectedTime =nil; 
+        self.connectedTime =nil;
         self.pingID=nil;
         DDLogInfo(@"removing streams");
         
@@ -566,12 +545,45 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         {
             DDLogError(@"Exception in ostream close");
         }
-     
+        
         _iStream=nil;
         _oStream=nil;
         
-   
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountStatusChanged object:nil];
+     
+        
+    }];
+}
+
+-(void) disconnectWithCompletion:(void(^)(void))completion
+{
+    if(self.explicitLogout && _accountState>=kStateHasStream)
+    {
+        MLXMLNode* stream = [[MLXMLNode alloc] init];
+        stream.element=@"/stream:stream"; //hack to close stream
+        [self writeToStream:stream.XMLString]; // dont even bother queueing
+        [[NSUserDefaults standardUserDefaults] removeObjectForKey:[NSString stringWithFormat:@"stream_%@",self.accountNo]];
+        
+        self.streamID=nil;
+    }
     
+    if(_accountState == kStateDisconnected) {
+        
+        _startTLSComplete=NO;
+        _streamHasSpace=NO;
+        _loginStarted=NO;
+        _loginStartTimeStamp=nil;
+        _loginError=NO;
+        _reconnectScheduled =NO;
+        
+        if(completion)completion();
+        return;
+    }
+    
+    [self closeSocket];
+    
+   
+    [self.networkQueue addOperationWithBlock:^{
     
     [_contactsVC clearContactsForAccount:_accountNo];
     [[DataLayer sharedInstance] resetContactsForAccount:_accountNo];
@@ -617,12 +629,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     
     [[DataLayer sharedInstance]  resetContactsForAccount:_accountNo];
- 
-    
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountStatusChanged object:nil];
-        if(completion) completion();
-        
+    if(completion) completion();
     }];
+    
+ 
 }
 
 -(void) reconnect
@@ -2336,6 +2346,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 
 #pragma mark set connection attributes
+
+-(void) disconnectToResume
+{
+    [self closeSocket]; // just closing socket to simulate a unintentional disconnect
+}
 
 -(void) enableSM3
 {

@@ -35,7 +35,7 @@
     enableNode.element=@"enable";
     [enableNode.attributes setObject:@"urn:xmpp:push:0" forKey:@"xmlns"];
     //this push jid is hardcoded and does not have to be the same hostname as the api endpoint set in MonalAppDelegate.m
-    [enableNode.attributes setObject:@"xmpp.monal.im" forKey:@"jid"];
+    [enableNode.attributes setObject:@"monal.im" forKey:@"jid"];
     [enableNode.attributes setObject:node forKey:@"node"];
     [self.children addObject:enableNode];
     

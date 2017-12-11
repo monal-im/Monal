@@ -544,7 +544,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         chatViewController* currentTop=(chatViewController*)[self.currentNavController topViewController];
         if( (([currentTop.contactName isEqualToString:[notification.userInfo objectForKey:@"from"]] )|| ([currentTop.contactName isEqualToString:[notification.userInfo objectForKey:@"to"]] )) &&
            [currentTop.accountNo isEqualToString:
-            [NSString stringWithFormat:@"%d",[[notification.userInfo objectForKey:kaccountNoKey] integerValue] ]]
+            [NSString stringWithFormat:@"%ld",[[notification.userInfo objectForKey:kaccountNoKey] integerValue] ]]
            )
         {
             return;

@@ -532,10 +532,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     NSNumber *showAlert =[notification.userInfo objectForKey:@"showAlert"];
     
-    if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground || !showAlert.boolValue)
-    {
-        return;
-    }
+    dispatch_sync(dispatch_get_main_queue(),^{
+        if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground || !showAlert.boolValue)
+        {
+            return;
+        }
+    });
     
     DDLogVerbose(@"chat view got new message notice %@", notification.userInfo);
     if([[self.currentNavController topViewController] isKindOfClass:[chatViewController class]]) {

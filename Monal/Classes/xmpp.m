@@ -1931,6 +1931,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             MLXMLNode *resumeNode =[[MLXMLNode alloc] initWithElement:@"resume"];
                             NSDictionary *dic=@{@"xmlns":@"urn:xmpp:sm:3",@"h":[NSString stringWithFormat:@"%@",self.lastHandledInboundStanza], @"previd":self.streamID };
                             resumeNode.attributes =[dic mutableCopy];
+                             self.supportsSM3=YES;
                             [self send:resumeNode];
                         }
                         else {

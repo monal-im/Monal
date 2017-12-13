@@ -926,24 +926,17 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             if((pos.location<maxPos) && (pos.location!=NSNotFound))
             {
                 stanzaType=[_stanzaTypes objectAtIndex:stanzacounter];
-                
-                
-                if([[_stanzaTypes objectAtIndex:stanzacounter] isEqualToString:@"stream:stream"])
-                {
+                 if([[_stanzaTypes objectAtIndex:stanzacounter] isEqualToString:@"stream:stream"]) {
                     //no children and one line stanza
                     NSRange endPos=[_inputBuffer rangeOfString:@">"
                                                        options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, maxPos-pos.location)];
                     
-                    if((endPos.location<maxPos) && (endPos.location!=NSNotFound))
-                    {
-                        
-                        finalstart=pos.location;
+                    if((endPos.location<maxPos) && (endPos.location!=NSNotFound)) {
+                    finalstart=pos.location;
                         finalend=endPos.location+1;//+2 to inclde closing />
                         DDLogVerbose(@"at  1");
                         break;
                     }
-                    
-                    
                 }
                 else  {
                      NSRange dupePos=[_inputBuffer rangeOfString:[NSString stringWithFormat:@"<%@",[_stanzaTypes objectAtIndex:stanzacounter]]
@@ -965,7 +958,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                 NSRange messageClose =[_inputBuffer rangeOfString:[NSString stringWithFormat:@"</%@",stanzaType]
                                                                           options:NSCaseInsensitiveSearch range:NSMakeRange(forwardClosePos.location, maxPos-forwardClosePos.location)];
                                 //ensure it is set to future max
-                                
                                 
                                 finalstart=pos.location;
                                 finalend=messageClose.location+messageClose.length+1; //+1 to inclde closing <
@@ -1000,7 +992,16 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         break;
                     }
                     else {
-                     //no children and one line stanzas
+                        //are ther children?
+                        
+                        NSRange childPos=[_inputBuffer rangeOfString:[NSString stringWithFormat:@"<"]
+                                                             options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, maxPos-pos.location)];
+                          if((childPos.location<maxPos) && (childPos.location!=NSNotFound)){
+                              DDLogVerbose(@"at  3.5 looks like incomplete stanze. need to get more");
+                              break;
+                          }
+                     //no children check for one line stanzas
+                    
                         NSRange endPos=[_inputBuffer rangeOfString:@"/>"
                                                            options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, maxPos-pos.location)];
                         

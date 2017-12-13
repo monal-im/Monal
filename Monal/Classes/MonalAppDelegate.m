@@ -75,7 +75,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     //[self pushRegistry:voipRegistry didUpdatePushCredentials:credentials forType:@"voip"];
 }
 
-// Handle updated push credentials
+// Handle updated APNS tokens
 -(void)pushRegistry:(PKPushRegistry *)registry didUpdatePushCredentials: (PKPushCredentials *)credentials forType:(NSString *)type
 {
     DDLogInfo(@"voip APNS token: %@", credentials.token);
@@ -99,7 +99,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
     //this is the hardcoded push api endpoint
-    [request setURL:[NSURL URLWithString:@"https://xmpp.monal.im:5281/push_appserver/v1/register"]];
+    [request setURL:[NSURL URLWithString:@"http://192.168.2.3:5280/push_appserver/v1/register"]];
     [request setHTTPMethod:@"POST"];
     [request setValue:postLength forHTTPHeaderField:@"Content-Length"];
     [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
@@ -152,7 +152,18 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     dispatch_async(dispatch_get_main_queue(), ^{
         //reconenct and fetch messages
+        
+       __block UIBackgroundTaskIdentifier tempTask= [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
+           DDLogInfo(@"voip wake expiring");
+           [[UIApplication sharedApplication] endBackgroundTask:tempTask];
+            tempTask=UIBackgroundTaskInvalid;
+        }];
+        
         [[MLXMPPManager sharedInstance] connectIfNecessary];
+         DDLogInfo(@"voip wake compelte");
+        
+//        [[UIApplication sharedApplication] endBackgroundTask:tempTask];
+//        tempTask=UIBackgroundTaskInvalid;
     });
 }
 
@@ -378,8 +389,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     
     [self updateUnread];
-    
-    [[MLXMPPManager sharedInstance] setClientsInactive];
+//    [[MLXMPPManager sharedInstance] setClientsInactive];
+//    
+//    __block UIBackgroundTaskIdentifier tempTask= [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
+//        DDLogInfo(@"background wake expiring");
+//        [[UIApplication sharedApplication] endBackgroundTask:tempTask];
+//        tempTask=UIBackgroundTaskInvalid;
+//    }];
 }
 
 -(void)applicationWillTerminate:(UIApplication *)application

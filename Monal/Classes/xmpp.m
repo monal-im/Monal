@@ -663,7 +663,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     _loginStarted=YES;
 #if TARGET_OS_IPHONE
     
-    __block UIBackgroundTaskIdentifier reconnectBackgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
+    __block  reconnectBackgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
         
         if((([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
             || ([UIApplication sharedApplication].applicationState==UIApplicationStateInactive )) && _accountState<kStateHasStream)
@@ -3085,35 +3085,9 @@ void query_cb(const DNSServiceRef DNSServiceRef, const DNSServiceFlags flags, co
 }
 
 
-/*
- // this is useful later for ichat bonjour
- 
- #pragma mark DNS service discovery
- - (void)netServiceBrowserWillSearch:(NSNetServiceBrowser *)netServiceBrowser
- {
- DDLogVerbose(@"began service search of domain %@", domain);
- }
- 
- 
- - (void)netServiceBrowser:(NSNetServiceBrowser *)netServiceBrowser didNotSearch:(NSDictionary *)errorInfo
- {
- DDLogVerbose(@"did not  service search");
- }
- 
- - (void)netServiceBrowser:(NSNetServiceBrowser *)netServiceBrowser didFindService:(NSNetService *)netService moreComing:(BOOL)moreServicesComing
- {
- [netService retain];
- DDLogVerbose(@"Add service %@. %@ %@\n", [netService name], [netService type], [netService domain]);
- }
- 
- - (void)netServiceBrowserDidStopSearch:(NSNetServiceBrowser *)netServiceBrowser
- {
- DDLogVerbose(@"stopped service search");
- }
- */
-
 -(void) enablePush
 {
+    //TODO there is a race condition on how this is called when fisrt logging in.
     if(self.accountState==kStateLoggedIn && [self.pushNode length]>0 && [self.pushSecret length]>0 && self.supportsPush)
     {
         DDLogInfo(@"ENABLING PUSH: %@ < %@", self.pushNode, self.pushSecret);

@@ -138,11 +138,11 @@ An array of Dics what have timers to make sure everything was sent
     for(NSDictionary* row in _connectedXMPP)
     {
         xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
-        if(xmppAccount.supportsSM3 && xmppAccount.supportsPush) 
-        {
-            [xmppAccount disconnectToResume];
-        }
-        else
+//        if(xmppAccount.supportsSM3 && xmppAccount.supportsPush) 
+//        {
+//            [xmppAccount disconnectToResume];
+//        }
+//        else
         if(xmppAccount.supportsClientState) {
             [xmppAccount setClientInactive];
         }

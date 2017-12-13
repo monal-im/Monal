@@ -911,11 +911,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         toReturn= nil;
         return nil;
     }
-    
-    
     NSInteger finalstart=0;
     NSInteger finalend=0;
-    
     
     NSInteger startpos=startrange.location;
     DDLogVerbose(@"start pos%ld", (long)startpos);
@@ -948,22 +945,17 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     
                     
                 }
-                else
-                {
-                    
-                    
-                    NSRange dupePos=[_inputBuffer rangeOfString:[NSString stringWithFormat:@"<%@",[_stanzaTypes objectAtIndex:stanzacounter]]
+                else  {
+                     NSRange dupePos=[_inputBuffer rangeOfString:[NSString stringWithFormat:@"<%@",[_stanzaTypes objectAtIndex:stanzacounter]]
                                                         options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location+1, maxPos-pos.location-1)];
                  
                     
-                    if([stanzaType isEqualToString:@"message"] && dupePos.location!=NSNotFound)
-                    {
+                    if([stanzaType isEqualToString:@"message"] && dupePos.location!=NSNotFound) {
                         //check for carbon forwarded
                         NSRange forwardPos=[_inputBuffer rangeOfString:@"<forwarded"
                                                                options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, dupePos.location-pos.location-1)];
                         
-                        if(forwardPos.location!=NSNotFound)
-                        {
+                        if(forwardPos.location!=NSNotFound) {
                             
                             //look for next message close
                             NSRange forwardClosePos=[_inputBuffer rangeOfString:@"</forwarded"
@@ -980,13 +972,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                 DDLogVerbose(@"at  2.5");
                                 break;
                             }
-                          
+                            
                         }
-                        
-                        
                     }
-
-                    
+  
                     //since there is another block of the same stanza, short cuts dont work.check to find beginning of next element
                     if((dupePos.location<maxPos) && (dupePos.location!=NSNotFound))
                     {
@@ -999,9 +988,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     NSRange closePos=[_inputBuffer rangeOfString:[NSString stringWithFormat:@"</%@",stanzaType]
                                                          options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, maxPos-pos.location)];
                     
-                    
-                    if((closePos.location<maxPos) && (closePos.location!=NSNotFound))
-                    {
+                    if((closePos.location<maxPos) && (closePos.location!=NSNotFound)){
                         //we have the start of the stanza close
                         
                         NSRange endPos=[_inputBuffer rangeOfString:@">"
@@ -1012,33 +999,27 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         DDLogVerbose(@"at  3");
                         break;
                     }
-                    else
-                    {
-                        //no children and one line stanzas
+                    else {
+                     //no children and one line stanzas
                         NSRange endPos=[_inputBuffer rangeOfString:@"/>"
                                                            options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, maxPos-pos.location)];
                         
-                        if((endPos.location<maxPos) && (endPos.location!=NSNotFound))
-                        {
-                            
+                        if((endPos.location<maxPos) && (endPos.location!=NSNotFound)) {
                             finalstart=pos.location;
                             finalend=endPos.location+2; //+2 to inclde closing />
                             DDLogVerbose(@"at  4");
                             break;
                         }
                         else
-                            if([[_stanzaTypes objectAtIndex:stanzacounter] isEqualToString:@"stream"])
-                            {
-                                
+                            if([[_stanzaTypes objectAtIndex:stanzacounter] isEqualToString:@"stream"]) {
                                 //stream will have no terminal.
                                 finalstart=pos.location;
                                 finalend=maxPos;
                                 DDLogVerbose(@"at  5");
                             }
-                        
+
                     }
-                    
-                    
+
                 }
             }
             stanzacounter++;

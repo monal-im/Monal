@@ -77,8 +77,8 @@
             [self toggleGoogleTalkDisplay];
         }
         
-        NSError *error;
-        NSString*pass= [SAMKeychain getPasswordForUsername:[NSString stringWithFormat:@"%@",[self.accountToEdit objectForKey:kAccountID]] andServiceName:@"Monal" error:&error];
+        NSString *pass= [SAMKeychain passwordForService:@"Monal" account:[NSString stringWithFormat:@"%@",[self.accountToEdit objectForKey:kAccountID]]];
+        
         if(pass) {
             self.password.stringValue =pass;
         }
@@ -191,8 +191,8 @@
             if(result) {
                 [[DataLayer sharedInstance] executeScalar:@"select max(account_id) from account" withCompletion:^(NSObject * accountid) {
                     if(accountid) {
-                        NSError *error;
-                        [SAMKeychain storeUsername:[NSString stringWithFormat:@"%@", accountid] andPassword:self.password.stringValue forServiceName:@"Monal" updateExisting:NO error:&error];
+                        [SAMKeychain setPassword:self.password.stringValue forService:@"Monal" account:[NSString stringWithFormat:@"%@", accountid]];
+                        
                         [self refreshPresenter];
                         
                         if(self.enabledCheck.state)
@@ -214,10 +214,8 @@
     {
         [[DataLayer sharedInstance] updateAccounWithDictionary:dic andCompletion:^(BOOL result) {
             [self refreshPresenter];
+            [SAMKeychain setPassword:self.password.stringValue forService:@"Monal" account:[NSString stringWithFormat:@"%@", [self.accountToEdit objectForKey:kAccountID]]];
             
-            NSError *error;
-            [SAMKeychain storeUsername:[NSString stringWithFormat:@"%@",[self.accountToEdit objectForKey:kAccountID]]  andPassword:self.password.stringValue forServiceName:@"Monal"updateExisting:YES error:&error];
-
             if(self.enabledCheck.state)
             {
                 [[MLXMPPManager sharedInstance] connectAccount:[NSString stringWithFormat:@"%@",[self.accountToEdit objectForKey:kAccountID]]];

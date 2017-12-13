@@ -791,8 +791,6 @@ CA
                         </connections>
                     </splitView>
                     <connections>
-                        <outlet property="splitView" destination="em5-AA-GrC" id="6G1-OL-PEU"/>
-                        <outlet property="view" destination="em5-AA-GrC" id="h1h-qC-JWf"/>
                         <segue destination="0BB-CK-cBw" kind="relationship" relationship="splitItems" id="Um2-MI-hoH"/>
                         <segue destination="qLp-oS-WKI" kind="relationship" relationship="splitItems" id="3lx-Th-aNt"/>
                     </connections>

@@ -191,7 +191,7 @@
             if(result) {
                 [[DataLayer sharedInstance] executeScalar:@"select max(account_id) from account" withCompletion:^(NSObject * accountid) {
                     if(accountid) {
-                        [SAMKeychain setPassword:self.password.stringValue forService:@"Monal" account:[NSString stringWithFormat:@"%@", accountid]];
+                        [SAMKeychain setPassword:[self.password.stringValue copy] forService:@"Monal" account:[NSString stringWithFormat:@"%@", accountid]];
                         
                         [self refreshPresenter];
                         
@@ -214,7 +214,7 @@
     {
         [[DataLayer sharedInstance] updateAccounWithDictionary:dic andCompletion:^(BOOL result) {
             [self refreshPresenter];
-            [SAMKeychain setPassword:self.password.stringValue forService:@"Monal" account:[NSString stringWithFormat:@"%@", [self.accountToEdit objectForKey:kAccountID]]];
+            [SAMKeychain setPassword:[self.password.stringValue copy] forService:@"Monal" account:[NSString stringWithFormat:@"%@", [self.accountToEdit objectForKey:kAccountID]]];
             
             if(self.enabledCheck.state)
             {

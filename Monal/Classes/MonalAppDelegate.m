@@ -216,7 +216,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
        willPresentNotification:(UNNotification *)notification
          withCompletionHandler:(void (^)(UNNotificationPresentationOptions options))completionHandler;
 {
-    
+    completionHandler(UNNotificationPresentationOptionAlert);
 }
 
 

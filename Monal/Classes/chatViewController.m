@@ -313,7 +313,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 - (void) uploadImageToDropBox:(NSData *) imageData {
 
-    NSString *fileName = [NSString stringWithFormat:@"%@.png",[NSUUID UUID].UUIDString];
+    NSString *fileName = [NSString stringWithFormat:@"%@.jpg",[NSUUID UUID].UUIDString];
     NSString *tempDir = NSTemporaryDirectory();
     NSString *imagePath = [tempDir stringByAppendingPathComponent:fileName];
     [imageData writeToFile:imagePath atomically:YES];
@@ -410,7 +410,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         [self uploadImageToDropBox:data];
     }
     else  {
-        [[MLXMPPManager sharedInstance]  httpUploadPngData:data toContact:self.contactName onAccount:self.accountNo withCompletionHandler:^(NSString *url, NSError *error) {
+        [[MLXMPPManager sharedInstance]  httpUploadJpegData:data toContact:self.contactName onAccount:self.accountNo withCompletionHandler:^(NSString *url, NSError *error) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 self.uploadHUD.hidden=YES;
                 
@@ -441,10 +441,10 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     if([mediaType isEqualToString:(NSString *)kUTTypeImage]) {
         UIImage *selectedImage= info[UIImagePickerControllerEditedImage];
         if(!selectedImage) selectedImage= info[UIImagePickerControllerOriginalImage];
-        NSData *pngData=  UIImageJPEGRepresentation(selectedImage, 0.5f);
-        if(pngData)
+        NSData *jpgData=  UIImageJPEGRepresentation(selectedImage, 0.5f);
+        if(jpgData)
         {
-            [self uploadData:pngData];
+            [self uploadData:jpgData];
         }
         
     }

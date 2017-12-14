@@ -233,10 +233,8 @@ NSString *const kGtalk = @"Gtalk";
         domain= @"";
     }
     
-    
     NSMutableDictionary *dic  = [[NSMutableDictionary alloc] init];
     [dic setObject:domain forKey:kDomain];
-    
     
     if(user) [dic setObject:user forKey:kUsername];
     if(self.server) [dic setObject:self.server  forKey:kServer];
@@ -322,7 +320,7 @@ NSString *const kGtalk = @"Gtalk";
             [store removeAccount:oauthAccount];
         }
        
-        //TODO remove password
+        [SAMKeychain deletePasswordForService:@"Monal"  account:[NSString stringWithFormat:@"%@",self.accountno]];
         [self.db removeAccount:self.accountno];
         [[MLXMPPManager sharedInstance] disconnectAccount:self.accountno];
         [self.navigationController popViewControllerAnimated:true];

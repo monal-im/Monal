@@ -226,7 +226,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
 }
 
--(void) uploadData:(NSData *) data
+-(void) uploadFile:(NSString *)filename andType: (NSString*) mimeType withData:(NSData *) data
 {
     if ([DBSession sharedSession].isLinked && !self.restClient) {
         self.restClient = [[DBRestClient alloc] initWithSession:[DBSession sharedSession]];
@@ -251,7 +251,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         
         // start http upload XMPP
         self.progressIndicator.doubleValue=50;
-        [[MLXMPPManager sharedInstance] httpUploadData:data withFilename:@"file" andType:@"file"                                                  toContact:self.contactName onAccount:self.accountNo withCompletionHandler:^(NSString *url, NSError *error) {
+        [[MLXMPPManager sharedInstance] httpUploadData:data withFilename:filename andType:mimeType                                                 toContact:self.contactName onAccount:self.accountNo withCompletionHandler:^(NSString *url, NSError *error) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self endProgressUpdate];
                 if(url) {
@@ -259,7 +259,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 }
                 else  {
                     NSAlert *userAddAlert = [[NSAlert alloc] init];
-                    userAddAlert.messageText = @"There was an error uploading the file to the server";
+                    userAddAlert.messageText = @"There was an error uploading the file to the server.";
                     userAddAlert.informativeText =[NSString stringWithFormat:@"%@", error.localizedDescription];
                     userAddAlert.alertStyle=NSInformationalAlertStyle;
                     [userAddAlert addButtonWithTitle:@"Close"];
@@ -277,7 +277,16 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) uploadFile:(NSURL *) fileURL
 {
     NSData *data =  [NSData dataWithContentsOfURL:fileURL];
-    [self uploadData:data];
+    NSString *filename = [fileURL lastPathComponent];
+    
+    NSString *ext = [filename componentsSeparatedByString:@"."].lastObject;
+
+    CFStringRef UTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (__bridge CFStringRef)ext, NULL);
+    NSString *mimeType = (__bridge NSString *)(UTTypeCopyPreferredTagWithClass (UTI, kUTTagClassMIMEType));
+    if(!mimeType) mimeType=@"application/octet-stream";
+    
+    
+    [self uploadFile:filename andType:mimeType withData:data];
 }
 
 
@@ -517,9 +526,18 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
      {
          NSTextAttachment* attachment = (NSTextAttachment*)value;
          NSData* attachmentData = attachment.fileWrapper.regularFileContents;
+         
+         NSString *filename = attachment.fileWrapper.preferredFilename;
+        
+         NSString *ext = [filename componentsSeparatedByString:@"."].lastObject;
+         
+         CFStringRef UTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (__bridge CFStringRef)ext, NULL);
+         NSString *mimeType = (__bridge NSString *)(UTTypeCopyPreferredTagWithClass (UTI, kUTTagClassMIMEType));
+         if(!mimeType) mimeType=@"application/octet-stream";
+         
          if(attachmentData)
          {
-             [self uploadData:attachmentData];
+             [self uploadFile:filename andType:mimeType withData:attachmentData];
          }
         
      }];

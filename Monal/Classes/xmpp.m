@@ -992,23 +992,27 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         break;
                     }
                     else {
-                        //are ther children?
                         
-                        NSRange childPos=[_inputBuffer rangeOfString:[NSString stringWithFormat:@"<"]
-                                                             options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, maxPos-pos.location)];
-                          if((childPos.location<maxPos) && (childPos.location!=NSNotFound)){
-                              DDLogVerbose(@"at  3.5 looks like incomplete stanze. need to get more");
-                              break;
-                          }
-                     //no children check for one line stanzas
-                    
+                        //check if self closed
                         NSRange endPos=[_inputBuffer rangeOfString:@"/>"
                                                            options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, maxPos-pos.location)];
+                        
+                        //are ther children, then not self closed
+                        if(endPos.location<maxPos && endPos.location!=NSNotFound)
+                        {
+                            NSRange childPos=[_inputBuffer rangeOfString:[NSString stringWithFormat:@"<"]
+                                                                 options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location+1, maxPos-endPos.location)];
+                            if((childPos.location<maxPos) && (childPos.location!=NSNotFound)){
+                                DDLogVerbose(@"at  3.5 looks like incomplete stanza. need to get more");
+                                break;
+                            }
+                        }
+                        
                         
                         if((endPos.location<maxPos) && (endPos.location!=NSNotFound)) {
                             finalstart=pos.location;
                             finalend=endPos.location+2; //+2 to inclde closing />
-                            DDLogVerbose(@"at  4");
+                            DDLogVerbose(@"at  4 self closed");
                             break;
                         }
                         else
@@ -1016,7 +1020,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                 //stream will have no terminal.
                                 finalstart=pos.location;
                                 finalend=maxPos;
-                                DDLogVerbose(@"at  5");
+                                DDLogVerbose(@"at  5 stream");
                             }
 
                     }

@@ -200,7 +200,7 @@ An array of Dics what have timers to make sure everything was sent
     return toReturn;
 }
 
-#pragma mark Connection related
+#pragma mark - Connection related
 
 -(void) connectAccount:(NSString*) accountNo
 {
@@ -391,7 +391,7 @@ An array of Dics what have timers to make sure everything was sent
 }
 
 
-#pragma mark XMPP commands
+#pragma mark -  XMPP commands
 -(void)sendMessage:(NSString*) message toContact:(NSString*)contact fromAccount:(NSString*) accountNo isMUC:(BOOL) isMUC messageId:(NSString *) messageId 
 withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 {
@@ -501,7 +501,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 }
 
 
-#pragma mark getting details
+#pragma mark - getting details
 
 -(void) getServiceDetailsForAccount:(NSInteger) row
 {
@@ -555,7 +555,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 }
 
 
-#pragma mark contact
+#pragma mark - contact
 
 -(void) removeContact:(NSDictionary*) contact
 {
@@ -588,7 +588,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
     }
 }
 
-#pragma mark MUC commands
+#pragma mark - MUC commands
 //makes xmpp call
 -(void) getRoomsForAccountRow:(NSInteger) row
 {
@@ -640,7 +640,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
     [account leaveRoom:roomName];
 }
 
-#pragma mark Jingle VOIP
+#pragma mark - Jingle VOIP
 -(void) callContact:(NSDictionary*) contact
 {
     xmpp* account =[self getConnectedAccountForID:[NSString stringWithFormat:@"%@",[contact objectForKey:@"account_id"]]];
@@ -655,7 +655,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 }
 
 
-#pragma mark XMPP settings
+#pragma mark - XMPP settings
 
 -(void) setStatusMessage:(NSString*) message
 {
@@ -765,6 +765,9 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
     
     [dirtySet removeObjectsAtIndexes:indexSet];
 }
+
+
+#pragma mark - APNS
 
 -(void) setPushNode:(NSString *)node andSecret:(NSString *)secret
 {

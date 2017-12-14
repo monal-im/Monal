@@ -7,6 +7,7 @@
 //
 
 #import "MLNotificationManager.h"
+@import UserNotifications;
 
 
 static const int ddLogLevel = LOG_LEVEL_VERBOSE;
@@ -66,9 +67,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                               alarm.fireDate = theDate;
                               alarm.timeZone = [NSTimeZone defaultTimeZone];
                               alarm.repeatInterval = 0;
-                              if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"9.0")){
-                                  alarm.category=@"Reply";
-                              }
+                              alarm.category=@"Reply";
+                              
                               
                               if([[NSUserDefaults standardUserDefaults] boolForKey:@"MessagePreview"])
                                   alarm.alertBody = [NSString stringWithFormat: @"%@: %@", nameToShow, [notification.userInfo objectForKey:@"messageText"]];
@@ -81,10 +81,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                               }
                               
                               alarm.userInfo=notification.userInfo;
-                              
                               [app scheduleLocalNotification:alarm];
                               
-                              //	[app presentLocalNotificationNow:alarm];
                               DDLogVerbose(@"Scheduled local message alert "); 
                               
                           }
@@ -100,11 +98,27 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                           
                        {
                        
-                      SlidingMessageViewController* slidingView= [[SlidingMessageViewController alloc] correctSliderWithTitle:nameToShow message:[notification.userInfo objectForKey:@"messageText"] user:[notification.userInfo objectForKey:@"from"] account:[notification.userInfo objectForKey:@"accountNo"] ];
-                       
-                       [self.window addSubview:slidingView.view];
-                       
-                       [slidingView showMsg];
+                           
+                     
+                                            
+                           UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
+                           content.title =[notification.userInfo objectForKey:@"from"];
+                           content.body =[notification.userInfo objectForKey:@"messageText"];
+                           content.sound = [UNNotificationSound defaultSound];
+                           content.userInfo= notification.userInfo;
+                           
+                           UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:[NSUUID alloc].UUIDString
+                                                                                                 content:content trigger:nil];
+                           
+                           UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+                          
+                           [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
+                               
+                           }];
+                           
+                           
+                           
+                           
                        }
                        
                    }

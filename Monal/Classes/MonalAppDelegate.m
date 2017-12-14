@@ -212,6 +212,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 #pragma mark app life cycle
 
 
+- (void)userNotificationCenter:(UNUserNotificationCenter *)center
+       willPresentNotification:(UNNotification *)notification
+         withCompletionHandler:(void (^)(UNNotificationPresentationOptions options))completionHandler;
+{
+    
+}
+
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
@@ -226,6 +233,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [DDLog addLogger:self.fileLogger];
 #endif
     
+    [UNUserNotificationCenter currentNotificationCenter].delegate=self;
     
     
     //ios8 register for local notifications and badges

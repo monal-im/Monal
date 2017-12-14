@@ -17,9 +17,7 @@
 #import "MLContactsViewController.h"
 #endif
 
-
 #import "MLConstants.h"
-
 #import "jingleCall.h"
 
 // networking objects
@@ -74,10 +72,18 @@ typedef NS_ENUM (NSInteger, xmppState) {
     kStateLoggedIn
 };
 
+
+typedef NS_ENUM (NSInteger, xmppNotifications) {
+    kXMPPError =0,
+    kXMPPFailure,
+    kXMPPSuccess
+//    kStateReconnecting ,
+//    kStateHasStream ,
+//    kStateLoggedIn
+};
+
 @interface xmpp : NSObject <NSStreamDelegate>
 {
-   
-    
     NSInputStream *_iStream;
     NSOutputStream *_oStream;
     NSMutableString* _inputBuffer;

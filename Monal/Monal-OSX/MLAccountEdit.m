@@ -185,17 +185,19 @@
     
     [dic setObject:[NSNumber numberWithBool:isGtalk] forKey:kOauth];
     
+    BOOL isEnabled =self.enabledCheck.state;
+    NSString *passwordText =[self.password.stringValue copy] ;
     
     if(!self.accountToEdit) {
         [[DataLayer sharedInstance] addAccountWithDictionary:dic andCompletion:^(BOOL result) {
             if(result) {
                 [[DataLayer sharedInstance] executeScalar:@"select max(account_id) from account" withCompletion:^(NSObject * accountid) {
                     if(accountid) {
-                        [SAMKeychain setPassword:[self.password.stringValue copy] forService:@"Monal" account:[NSString stringWithFormat:@"%@", accountid]];
+                        [SAMKeychain setPassword:passwordText forService:@"Monal" account:[NSString stringWithFormat:@"%@", accountid]];
                         
                         [self refreshPresenter];
                         
-                        if(self.enabledCheck.state)
+                        if(isEnabled)
                         {
                             [[MLXMPPManager sharedInstance] connectAccount:[NSString stringWithFormat:@"%@", accountid]];
                         }
@@ -214,9 +216,9 @@
     {
         [[DataLayer sharedInstance] updateAccounWithDictionary:dic andCompletion:^(BOOL result) {
             [self refreshPresenter];
-            [SAMKeychain setPassword:[self.password.stringValue copy] forService:@"Monal" account:[NSString stringWithFormat:@"%@", [self.accountToEdit objectForKey:kAccountID]]];
+            [SAMKeychain setPassword:passwordText forService:@"Monal" account:[NSString stringWithFormat:@"%@", [self.accountToEdit objectForKey:kAccountID]]];
             
-            if(self.enabledCheck.state)
+            if(isEnabled)
             {
                 [[MLXMPPManager sharedInstance] connectAccount:[NSString stringWithFormat:@"%@",[self.accountToEdit objectForKey:kAccountID]]];
             }

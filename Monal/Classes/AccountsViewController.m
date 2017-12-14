@@ -46,8 +46,6 @@
        
    }];
     
-
-    
     self.uptimeFormatter =[[NSDateFormatter alloc] init];
     self.uptimeFormatter.dateStyle =NSDateFormatterShortStyle;
     self.uptimeFormatter.timeStyle =NSDateFormatterShortStyle;
@@ -59,7 +57,6 @@
     [nc addObserver:self selector:@selector(refreshAccountList) name:kMonalAccountStatusChanged object:nil];
     
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
-    
     
 }
 
@@ -142,20 +139,16 @@
 #pragma mark tableview delegate
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath;
 {
-    
-       [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
     self.selected=indexPath;
     
-
     [self performSegueWithIdentifier:@"editXMPP" sender:self];
     
- 
 }
 
 
 -(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
-    
     if([segue.identifier isEqualToString:@"editXMPP"]) {
         
         UINavigationController *nav=   segue.destinationViewController;
@@ -173,7 +166,6 @@
             editor.accountno=@"-1";
         }
     }
-    
 }
 
 
@@ -185,7 +177,6 @@
 
 -(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
 {
-  
     UIView *tempView=[[UIView alloc]initWithFrame:CGRectMake(0,200,300,244)];
     tempView.backgroundColor=[UIColor clearColor];
     
@@ -237,14 +228,6 @@
 
 - (NSString *)tableView:(UITableView *)tableView titleForFooterInSection:(NSInteger)section
 {
-//    switch (section) {
-//        case 0:
-//        {
-//            return @"Only one can be enabled at a time.";
-//            break;
-//        }
-//    }
-    
     return nil;
 }
 
@@ -357,7 +340,5 @@
     
     return nil;
 }
-
-
 
 @end

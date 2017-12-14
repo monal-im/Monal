@@ -33,7 +33,7 @@ NSString *const kGtalk = @"Gtalk";
 
 @property (nonatomic, weak) UITextField *currentTextField;
 @property (nonatomic, strong) NSURL *oAuthURL;
-@property (nonatomic, assign) BOOL autoSave;
+
 
 @end
 
@@ -89,10 +89,12 @@ NSString *const kGtalk = @"Gtalk";
         NSDictionary* settings=[[_db accountVals:_accountno] objectAtIndex:0]; //only one row
         
         //allow blank domains.. dont show @ if so
-        if([[settings objectForKey:@"domain"] length]>0)
+        if([[settings objectForKey:@"domain"] length]>0) {
             self.jid=[NSString stringWithFormat:@"%@@%@",[settings objectForKey:@"username"],[settings objectForKey:@"domain"]];
-        else
+        }
+        else {
             self.jid=[NSString stringWithFormat:@"%@",[settings objectForKey:@"username"]];
+        }
         
         NSString*pass= [SAMKeychain passwordForService:@"Monal" account:[NSString stringWithFormat:@"%@",self.accountno]];
         
@@ -171,7 +173,7 @@ NSString *const kGtalk = @"Gtalk";
 {
     [super viewWillAppear:animated];
     DDLogVerbose(@"xmpp edit view will appear");
-    self.autoSave=YES;
+    
     
 }
 
@@ -179,9 +181,7 @@ NSString *const kGtalk = @"Gtalk";
 {
     [super viewWillDisappear:animated];
     DDLogVerbose(@"xmpp edit view will hide");
-    if(self.autoSave) {
-        [self save];
-    }
+    
 }
 
 -(void) dealloc
@@ -191,7 +191,7 @@ NSString *const kGtalk = @"Gtalk";
 
 #pragma mark actions
 
--(void) save
+-(IBAction) save:(id) sender
 {
     [self.currentTextField resignFirstResponder];
     
@@ -255,8 +255,7 @@ NSString *const kGtalk = @"Gtalk";
     }
     
     [dic setObject:[NSNumber numberWithBool:isGtalk] forKey:kOauth];
-    
-    
+
     if(!self.editMode)
     {
         
@@ -274,9 +273,7 @@ NSString *const kGtalk = @"Gtalk";
                     [[DataLayer sharedInstance] executeScalar:@"select max(account_id) from account" withCompletion:^(NSObject * accountid) {
                         if(accountid) {
                             self.accountno=[NSString stringWithFormat:@"%@",accountid];
-                          
                            
-                            
                             if(self.enabled)
                             {
                                 DDLogVerbose(@"calling connect... ");
@@ -326,7 +323,6 @@ NSString *const kGtalk = @"Gtalk";
         }
        
         //TODO remove password
-        self.autoSave=NO;
         [self.db removeAccount:self.accountno];
         [[MLXMPPManager sharedInstance] disconnectAccount:self.accountno];
         [self.navigationController popViewControllerAnimated:true];
@@ -379,7 +375,7 @@ NSString *const kGtalk = @"Gtalk";
 {
     
     
-    DDLogVerbose(@"xmpp edit view section %d, row %d", indexPath.section, indexPath.row);
+    DDLogVerbose(@"xmpp edit view section %ld, row %d", indexPath.section, indexPath.row);
     
     MLAccountCell* thecell=(MLAccountCell *)[tableView dequeueReusableCellWithIdentifier:@"AccountCell"];
     
@@ -536,15 +532,10 @@ NSString *const kGtalk = @"Gtalk";
     
     [tempView addSubview:tempLabel];
     
-    if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0"))
-    {
-        tempLabel.textColor=[UIColor darkGrayColor];
-        tempLabel.text=  tempLabel.text.uppercaseString;
-        tempLabel.shadowColor =[UIColor clearColor];
-        tempLabel.font=[UIFont systemFontOfSize:[UIFont systemFontSize]];
-        
-    }
-    
+    tempLabel.textColor=[UIColor darkGrayColor];
+    tempLabel.text=  tempLabel.text.uppercaseString;
+    tempLabel.shadowColor =[UIColor clearColor];
+    tempLabel.font=[UIFont systemFontOfSize:[UIFont systemFontSize]];
     
     return tempView;
 }
@@ -574,15 +565,10 @@ NSString *const kGtalk = @"Gtalk";
     
 }
 
-
-
-#pragma mark table view delegate
-
-//table view delegate methods
-//required
+#pragma mark -  table view delegate
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)newIndexPath
 {
-    DDLogVerbose(@"selected log section %d , row %d", newIndexPath.section, newIndexPath.row);
+    DDLogVerbose(@"selected log section %ld , row %d", newIndexPath.section, newIndexPath.row);
     if(newIndexPath.section==0 && newIndexPath.row==1)
     {
         if([self.accountType isEqualToString:kGtalk]){
@@ -597,7 +583,7 @@ NSString *const kGtalk = @"Gtalk";
 }
 
 
-#pragma mark text input  fielddelegate
+#pragma mark -  text input  fielddelegate
 
 - (void)textFieldDidBeginEditing:(UITextField *)textField
 {
@@ -605,8 +591,8 @@ NSString *const kGtalk = @"Gtalk";
     if(textField.tag==1) //user input field
     {
         if(textField.text.length >0) {
-            // Construct a new range using the object that adopts the UITextInput, our textfield
-            UITextRange *newRange = [textField textRangeFromPosition:0 toPosition:0];
+            UITextPosition *startPos=  textField.beginningOfDocument;
+            UITextRange *newRange = [textField textRangeFromPosition:startPos toPosition:startPos];
             
             // Set new range
             [textField setSelectedTextRange:newRange];

@@ -29,7 +29,7 @@ extern NSString *const kGtalk;
 
 -(IBAction) delClicked: (id) sender;
 -(void)authenticateWithOAuth;
--(void) save; 
+-(IBAction) save:(id) sender;
 
 
 @end

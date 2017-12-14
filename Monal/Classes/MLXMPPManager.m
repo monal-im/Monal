@@ -250,14 +250,12 @@ An array of Dics what have timers to make sure everything was sent
     
     xmppAccount.accountNo=[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]];
 
-    
     xmppAccount.password = [SAMKeychain passwordForService:@"Monal" account:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
     
     if([xmppAccount.password length]==0 && !xmppAccount.oAuth) //&& ([tempPass length]==0)
     {
         // ask fro temp pass if not oauth
     }
-
      xmppAccount.contactsVC=self.contactVC;
     
     //sepcifically look for the server since we might not be online or behind firewall
@@ -268,9 +266,8 @@ An array of Dics what have timers to make sure everything was sent
     [hostReach startNotifier];
     
     if(xmppAccount && hostReach) {
-        NSDictionary* accountRow= [[NSDictionary alloc] initWithObjects:@[xmppAccount, hostReach] forKeys:@[@"xmppAccount", @"hostReach"]];
-        [_connectedXMPP addObject:accountRow];
-        
+        NSDictionary* accountDic= [[NSDictionary alloc] initWithObjects:@[xmppAccount, hostReach] forKeys:@[@"xmppAccount", @"hostReach"]];
+        [_connectedXMPP addObject:accountDic];
         [xmppAccount reconnect:0];
     }
     

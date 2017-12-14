@@ -11,6 +11,7 @@
 #import "MLButtonCell.h"
 #import "NXOAuth2.h"
 #import "NXOAuth2AccountStore.h"
+#import "MBProgressHUD.h"
 
 #import "tools.h"
 
@@ -304,6 +305,14 @@ NSString *const kGtalk = @"Gtalk";
         }];
         
     }
+    
+    MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+    hud.removeFromSuperViewOnHide=YES;
+    hud.label.text =@"Success";
+    hud.detailsLabel.text =@"The account has been created";
+
+    [hud hideAnimated:YES afterDelay:3.0f];
+  
     
 }
 

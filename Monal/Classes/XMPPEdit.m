@@ -310,7 +310,7 @@ NSString *const kGtalk = @"Gtalk";
     hud.mode = MBProgressHUDModeCustomView;
     hud.removeFromSuperViewOnHide=YES;
     hud.label.text =@"Success";
-    hud.detailsLabel.text =@"The account has been created";
+    hud.detailsLabel.text =@"The account has been savedu"
     UIImage *image = [[UIImage imageNamed:@"success"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
     hud.customView = [[UIImageView alloc] initWithImage:image];
 

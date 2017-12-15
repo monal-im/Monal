@@ -461,9 +461,7 @@
                             <outlet property="delegate" destination="Tus-3k-aPR" id="qAy-nY-fRk"/>
                         </connections>
                     </tableView>
-                    <toolbarItems>
-                        <barButtonItem title="Item" id="4zV-cn-5Kj"/>
-                    </toolbarItems>
+                    <toolbarItems/>
                     <navigationItem key="navigationItem" title="Account Edit" id="pa7-vQ-Yz3">
                         <barButtonItem key="rightBarButtonItem" title="Save" id="TJt-Kl-UDV">
                             <connections>

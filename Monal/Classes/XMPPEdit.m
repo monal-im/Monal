@@ -314,7 +314,7 @@ NSString *const kGtalk = @"Gtalk";
     UIImage *image = [[UIImage imageNamed:@"success"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
     hud.customView = [[UIImageView alloc] initWithImage:image];
 
-    [hud hideAnimated:YES afterDelay:3.0f];
+    [hud hideAnimated:YES afterDelay:1.0f];
   
     
 }
@@ -339,10 +339,17 @@ NSString *const kGtalk = @"Gtalk";
         [SAMKeychain deletePasswordForService:@"Monal"  account:[NSString stringWithFormat:@"%@",self.accountno]];
         [self.db removeAccount:self.accountno];
         [[MLXMPPManager sharedInstance] disconnectAccount:self.accountno];
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self.navigationController popViewControllerAnimated:YES];
-        });
+      
        
+        MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+        hud.mode = MBProgressHUDModeCustomView;
+        hud.removeFromSuperViewOnHide=YES;
+        hud.label.text =@"Success";
+        hud.detailsLabel.text =@"The account has been deleted";
+        UIImage *image = [[UIImage imageNamed:@"success"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+        hud.customView = [[UIImageView alloc] initWithImage:image];
+        
+        [hud hideAnimated:YES afterDelay:1.0f];
         
     }];
     

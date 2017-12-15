@@ -67,6 +67,13 @@ NSString *const kContact=@"contact";
 
 NSString *const kCompletion=@"completion";
 
+
+NSString *const kXMPPError =@"error";
+NSString *const kXMPPFailure= @"failure";
+NSString *const kXMPPSuccess =@"success";
+NSString *const kXMPPPresence = @"presence";
+
+
 static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 @interface xmpp()
@@ -1826,6 +1833,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"stream:error"])
                 {
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:self];
+                    
                     [self disconnect];
                     [self reconnect:5];
                 }
@@ -2004,6 +2013,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"failed"])
                 {
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPFailure object:self];
+                    
                     //remove session
                     self.streamID=nil;
                     [[NSUserDefaults standardUserDefaults] removeObjectForKey:[NSString stringWithFormat:@"stream_%@",self.accountNo]];
@@ -2090,7 +2101,21 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"failure"])
                 {
+                   
                     ParseFailure* failure = [[ParseFailure alloc] initWithDictionary:stanzaToParse];
+                    
+                    NSString *message=failure.text;
+                    if(failure.notAuthorized)
+                    {
+                        if(!message) message =@"Not Authorized. Please check your credentials.";
+                    }
+                    else  {
+                         if(!message) message =@"There was a SASL error on the server."; 
+                    }
+                    
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPFailure object:@[self, message]];
+                    
+                    
                     if(failure.saslError || failure.notAuthorized)
                     {
                         _loginError=YES;
@@ -2249,7 +2274,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         if(streamNode.SASLSuccess)
                         {
                             DDLogInfo(@"Got SASL Success");
-                            
+                           
                             srand([[NSDate date] timeIntervalSince1970]);
                             
                             [self startStream];

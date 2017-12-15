@@ -73,14 +73,10 @@ typedef NS_ENUM (NSInteger, xmppState) {
 };
 
 
-typedef NS_ENUM (NSInteger, xmppNotifications) {
-    kXMPPError =0,
-    kXMPPFailure,
-    kXMPPSuccess
-//    kStateReconnecting ,
-//    kStateHasStream ,
-//    kStateLoggedIn
-};
+extern NSString *const kXMPPError;
+extern NSString *const kXMPPFailure;
+extern NSString *const kXMPPSuccess;
+extern NSString *const kXMPPPresence;
 
 @interface xmpp : NSObject <NSStreamDelegate>
 {

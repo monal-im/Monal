@@ -319,38 +319,37 @@ NSString *const kGtalk = @"Gtalk";
     
 }
 
-
-
--(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
+- (IBAction) delClicked: (id) sender
 {
-    if(buttonIndex==0)
-    {
+    DDLogVerbose(@"Deleting");
+
+    UIAlertController *questionAlert =[UIAlertController alertControllerWithTitle:@"Delete Account" message:@"This will remove this account and the associated data from this device." preferredStyle:UIAlertControllerStyleActionSheet];
+    UIAlertAction *noAction =[UIAlertAction actionWithTitle:@"No" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
         
+    }];
+    
+    UIAlertAction *yesAction =[UIAlertAction actionWithTitle:@"Yes" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+       
         NSArray *accounts= [[NXOAuth2AccountStore sharedStore] accountsWithAccountType:self.jid];
         NXOAuth2AccountStore *store = [NXOAuth2AccountStore sharedStore];
         for(NXOAuth2Account *oauthAccount in accounts ) {
             [store removeAccount:oauthAccount];
         }
-       
+        
         [SAMKeychain deletePasswordForService:@"Monal"  account:[NSString stringWithFormat:@"%@",self.accountno]];
         [self.db removeAccount:self.accountno];
         [[MLXMPPManager sharedInstance] disconnectAccount:self.accountno];
-        [self.navigationController popViewControllerAnimated:true];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.navigationController popViewControllerAnimated:YES];
+        });
+       
         
-    }
-}
-
-- (IBAction) delClicked: (id) sender
-{
-    DDLogVerbose(@"Deleting");
-  
-    UIActionSheet *popupQuery = [[UIActionSheet alloc] initWithTitle:@"Delete this account?" delegate:self
-                                                   cancelButtonTitle:@"No"
-                                              destructiveButtonTitle:@"Yes"
-                                                   otherButtonTitles:nil, nil];
+    }];
     
-    popupQuery.actionSheetStyle =  UIActionSheetStyleBlackOpaque;
-   [popupQuery showFromTabBar:((UITabBarController*)self.navigationController.parentViewController).tabBar];
+    [questionAlert addAction:noAction];
+    [questionAlert addAction:yesAction];
+    
+    [self presentViewController:questionAlert animated:YES completion:nil];
     
 }
 
@@ -383,9 +382,7 @@ NSString *const kGtalk = @"Gtalk";
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    
-    
-    DDLogVerbose(@"xmpp edit view section %ld, row %d", indexPath.section, indexPath.row);
+    DDLogVerbose(@"xmpp edit view section %ld, row %ld", indexPath.section, indexPath.row);
     
     MLAccountCell* thecell=(MLAccountCell *)[tableView dequeueReusableCellWithIdentifier:@"AccountCell"];
     
@@ -578,7 +575,7 @@ NSString *const kGtalk = @"Gtalk";
 #pragma mark -  table view delegate
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)newIndexPath
 {
-    DDLogVerbose(@"selected log section %ld , row %d", newIndexPath.section, newIndexPath.row);
+    DDLogVerbose(@"selected log section %ld , row %ld", newIndexPath.section, newIndexPath.row);
     if(newIndexPath.section==0 && newIndexPath.row==1)
     {
         if([self.accountType isEqualToString:kGtalk]){

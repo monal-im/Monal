@@ -12,7 +12,7 @@
 #import "MLXMPPManager.h"
 
 
-@interface XMPPEdit: UITableViewController <UITextFieldDelegate,UIActionSheetDelegate> {
+@interface XMPPEdit: UITableViewController <UITextFieldDelegate> {
 	CGRect oldFrame;
 	IBOutlet UILabel *JIDLabel;
 }

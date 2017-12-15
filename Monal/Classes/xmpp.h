@@ -74,7 +74,6 @@ typedef NS_ENUM (NSInteger, xmppState) {
 
 
 extern NSString *const kXMPPError;
-extern NSString *const kXMPPFailure;
 extern NSString *const kXMPPSuccess;
 extern NSString *const kXMPPPresence;
 

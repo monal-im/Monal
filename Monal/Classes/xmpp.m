@@ -69,7 +69,6 @@ NSString *const kCompletion=@"completion";
 
 
 NSString *const kXMPPError =@"error";
-NSString *const kXMPPFailure= @"failure";
 NSString *const kXMPPSuccess =@"success";
 NSString *const kXMPPPresence = @"presence";
 
@@ -239,11 +238,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     if((_iStream==nil) || (_oStream==nil))
     {
         DDLogError(@"Connection failed");
+        [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, @"Unable to connect to server"]];
+        
         return;
     }
-    else
+    else {
         DDLogInfo(@"streams created ok");
-    
+    }
     
  
     if((_SSL==YES)  && (_oldStyleSSL==YES))
@@ -1833,7 +1834,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"stream:error"])
                 {
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:self];
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, @"stream error"]];
                     
                     [self disconnect];
                     [self reconnect:5];
@@ -2011,10 +2012,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     }
                     
                 }
-                else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"failed"])
+                else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"failed"]) // stream resume failed
                 {
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPFailure object:self];
-                    
+            
                     //remove session
                     self.streamID=nil;
                     [[NSUserDefaults standardUserDefaults] removeObjectForKey:[NSString stringWithFormat:@"stream_%@",self.accountNo]];
@@ -2113,7 +2113,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                          if(!message) message =@"There was a SASL error on the server."; 
                     }
                     
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPFailure object:@[self, message]];
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, message]];
                     
                     
                     if(failure.saslError || failure.notAuthorized)
@@ -2699,6 +2699,34 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         {
             NSError* st_error= [stream streamError];
             DDLogError(@"Stream error code=%ld domain=%@   local desc:%@ ",(long)st_error.code,st_error.domain,  st_error.localizedDescription);
+            
+            NSString *message =st_error.localizedDescription;
+            
+            switch(st_error.code)
+            {
+                case errSSLXCertChainInvalid: {
+                    message = @"SSL Error: Certificate chain is invalid";
+                break;
+                }
+                    
+                case errSSLUnknownRootCert: {
+                    message = @"SSL Error: Unknown root certificate";
+                    break;
+                }
+                    
+                case errSSLCertExpired: {
+                    message = @"SSL Error: Certificate expired";
+                    break;
+                }
+                    
+                case errSSLHostNameMismatch: {
+                    message = @"SSL Error: Host name mismatch";
+                    break;
+                }
+                   
+            }
+            
+            [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, message]];
             
             //everythign comes twice just use the input stream
             if(stream==_oStream){

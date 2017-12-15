@@ -1834,7 +1834,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"stream:error"])
                 {
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, @"stream error"]];
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, @"XMPP stream error"]];
                     
                     [self disconnect];
                     [self reconnect:5];

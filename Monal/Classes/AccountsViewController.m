@@ -11,6 +11,8 @@
 #import "XMPPEdit.h"
 #import "tools.h"
 #import "MBProgressHUD.h"
+#import "CWStatusBarNotification.h"
+#import "xmpp.h"
 
 
 @interface AccountsViewController ()
@@ -18,6 +20,7 @@
 @property (nonatomic , strong) NSDateFormatter *uptimeFormatter;
 
 @property (nonatomic, strong) NSIndexPath  *selected;
+@property (nonatomic, strong) CWStatusBarNotification * sliding;
 
 @end
 
@@ -55,8 +58,10 @@
     
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
     [nc addObserver:self selector:@selector(refreshAccountList) name:kMonalAccountStatusChanged object:nil];
+    [nc addObserver:self selector:@selector(showConnectionStatus:) name:kXMPPError object:nil];
     
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
+    self.sliding = [CWStatusBarNotification new];
     
 }
 
@@ -89,6 +94,22 @@
         });
         
     }];
+}
+
+#pragma mark - error feedback
+
+-(void) showConnectionStatus:(NSNotification *) notification
+{
+    self.sliding.notificationLabelBackgroundColor = [UIColor redColor];
+    self.sliding.notificationLabelTextColor = [UIColor whiteColor];
+    
+    NSArray *payload= notification.object;
+    NSString *message = payload.lastObject; // this is just the way i set it up a dic might better
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+    [self.sliding displayNotificationWithMessage:message
+                                forDuration:3.0f];
+    });
 }
 
 #pragma mark button actions
@@ -190,15 +211,11 @@
     
     [tempView addSubview:tempLabel];
     
-    if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0"))
-    {
-        tempLabel.textColor=[UIColor darkGrayColor];
-        tempLabel.text=  tempLabel.text.uppercaseString;
-        tempLabel.shadowColor =[UIColor clearColor];
-        tempLabel.font=[UIFont systemFontOfSize:[UIFont systemFontSize]];
-        
-    }
-    
+    tempLabel.textColor=[UIColor darkGrayColor];
+    tempLabel.text=  tempLabel.text.uppercaseString;
+    tempLabel.shadowColor =[UIColor clearColor];
+    tempLabel.font=[UIFont systemFontOfSize:[UIFont systemFontSize]];
+
     return tempView;
 }
 

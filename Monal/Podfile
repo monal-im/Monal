@@ -27,6 +27,7 @@ pod 'TPCircularBuffer'
 pod 'MBProgressHUD'
 pod 'SAMKeychain'
 #pod 'NXOAuth2Client', '~> 1.2.8'
+pod 'CWStatusBarNotification', '~> 2.3.5'
 
   # Pods for Monal
 

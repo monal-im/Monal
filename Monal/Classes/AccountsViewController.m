@@ -113,7 +113,7 @@
     self.hud.label.text =@"Reconnecting";
     self.hud.detailsLabel.text =@"Will connect any logged out accounts.";
     [[MLXMPPManager sharedInstance] connectIfNecessary];
-     [self.hud hideAnimated:YES afterDelay:1.5f];
+     [self.hud hideAnimated:YES afterDelay:1.0f];
     self.hud=nil;
 }
 

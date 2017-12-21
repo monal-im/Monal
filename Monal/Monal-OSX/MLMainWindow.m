@@ -32,6 +32,8 @@
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
     [nc addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
     [nc addObserver:self selector:@selector(handleConnect:) name:kMLHasConnectedNotice object:nil];
+    [nc addObserver:self selector:@selector(showConnectionStatus:) name:kXMPPError object:nil];
+    
     [NSUserNotificationCenter defaultUserNotificationCenter].delegate= self;
     
     
@@ -78,6 +80,27 @@
     NSString* messageString =[NSString stringWithFormat:@"Account %@ has connected.", nameToShow];
     alert.informativeText =messageString;
     [[NSUserNotificationCenter defaultUserNotificationCenter] scheduleNotification:alert];
+    
+}
+
+-(void) showConnectionStatus:(NSNotification *) notification
+{
+
+    NSArray *payload= notification.object;
+    
+    NSString *message = payload.lastObject; // this is just the way i set it up a dic might better
+    xmpp *xmppAccount= payload.firstObject;
+    
+    NSString *accountName = [NSString stringWithFormat:@"%@@%@", xmppAccount.username, xmppAccount.domain];
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSUserNotification *alert =[[NSUserNotification alloc] init];
+        alert.title= accountName;
+        alert.informativeText =message;
+        [[NSUserNotificationCenter defaultUserNotificationCenter] scheduleNotification:alert];
+    });
+    
+    
     
 }
 

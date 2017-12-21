@@ -452,19 +452,33 @@ CA
                                     </items>
                                 </menu>
                             </menuItem>
-                            <menuItem title="Contact" id="3wF-cD-a4l" userLabel="Contact">
+                            <menuItem title="Account" id="3wF-cD-a4l" userLabel="Account">
                                 <modifierMask key="keyEquivalentModifierMask"/>
-                                <menu key="submenu" title="Contact" id="Efa-Ze-Nqp">
+                                <menu key="submenu" title="Account" id="Efa-Ze-Nqp">
                                     <items>
                                         <menuItem title="Add Contact" keyEquivalent="d" id="cIN-1p-hyY">
                                             <connections>
                                                 <action selector="showAddContactSheet:" target="Ady-hI-5gd" id="STv-D1-WVB"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Get Info" keyEquivalent="i" id="fGa-Y2-ZKt">
+                                        <menuItem title="Get Contact Info" keyEquivalent="i" id="fGa-Y2-ZKt">
                                             <connections>
                                                 <action selector="showContactDetails:" target="Ady-hI-5gd" id="V78-dq-Fw7"/>
                                             </connections>
+                                        </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="wrZ-Tr-eIe"/>
+                                        <menuItem title="Server Details" id="aYv-5E-bCb">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <menu key="submenu" title="Server Details" id="OXb-Ap-1dT">
+                                                <items>
+                                                    <menuItem title="None" id="4sP-ZC-mm4">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                    </menuItem>
+                                                </items>
+                                                <connections>
+                                                    <outlet property="delegate" destination="Voe-Tx-rLC" id="Gy2-OJ-Fm3"/>
+                                                </connections>
+                                            </menu>
                                         </menuItem>
                                     </items>
                                 </menu>
@@ -518,7 +532,11 @@ CA
                         <outlet property="delegate" destination="Voe-Tx-rLC" id="PrD-fu-P6m"/>
                     </connections>
                 </application>
-                <customObject id="Voe-Tx-rLC" customClass="AppDelegate"/>
+                <customObject id="Voe-Tx-rLC" customClass="AppDelegate">
+                    <connections>
+                        <outlet property="serverDetails" destination="aYv-5E-bCb" id="t6f-gO-qMI"/>
+                    </connections>
+                </customObject>
                 <customObject id="R3g-9a-MaB" customClass="SUUpdater"/>
                 <customObject id="Ady-hI-5gd" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>

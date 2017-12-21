@@ -20,6 +20,7 @@
 #import <Fabric/Fabric.h>
 #import <Crashlytics/Crashlytics.h>
 #import "DDLog.h"
+#import "DataLayer.h"
 
 #import <DropboxOSX/DropboxOSX.h>
 
@@ -167,6 +168,39 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
 }
 
+
+-(IBAction)fetchServers:(id)sender
+{
+    
+}
+
+-(IBAction)showServerDetails:(id)sender
+{
+    
+}
+
+#pragma mark - Menu delegate
+
+-(void)menuWillOpen:(NSMenu *)menu
+{
+    
+    [[DataLayer sharedInstance] accountListWithCompletion:^(NSArray *result) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+               [self.serverDetails.submenu removeAllItems ];
+            for(NSDictionary *account in result)
+            {
+                xmpp* xmppAccount= [[MLXMPPManager sharedInstance] getConnectedAccountForID:[NSString stringWithFormat:@"%@", [account objectForKey:@"account_id"]]];
+                if(xmppAccount) {
+                    [self.serverDetails.submenu addItemWithTitle:xmppAccount.server action:nil keyEquivalent:@""];
+                }
+            }
+            
+        });
+        
+    }];
+    
+    
+}
 
 
 @end

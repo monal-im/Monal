@@ -13,10 +13,13 @@
 #import "DDFileLogger.h"
 #import "DDTTYLogger.h"
 
-@interface AppDelegate : NSObject <NSApplicationDelegate>
+@interface AppDelegate : NSObject <NSApplicationDelegate, NSMenuDelegate>
 
 @property (nonatomic , weak) NSWindowController* mainWindowController;
 @property (nonatomic, strong)  DDFileLogger *fileLogger;
+
+@property (nonatomic , weak) IBOutlet NSMenuItem *serverDetails;
+
 
 
 @end

@@ -15,6 +15,8 @@
 #import "MLMainWindow.h"
 #import "MLImageManager.h"
 
+#import "MLServerDetailsVC.h"
+
 #define kinfoSection 0
 #define konlineSection 1
 #define kofflineSection 2
@@ -988,6 +990,29 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 - (void)controlTextDidEndEditing:(NSNotification *)aNotification
 {
   
+}
+
+#pragma mark - server details
+
+-(void)prepareForSegue:(NSStoryboardSegue *)segue sender:(id)sender
+{
+    if([segue.identifier isEqualToString:@"showServerDetails"])
+    {
+        
+        NSMenuItem *item = (NSMenuItem *) sender;
+        NSInteger accountNo = item.tag-1000;
+         xmpp* xmppAccount= [[MLXMPPManager sharedInstance] getConnectedAccountForID:[NSString stringWithFormat:@"%ld", accountNo ]];
+        
+        MLServerDetailsVC *details =  (MLServerDetailsVC *)segue.destinationController;
+        details.xmppAccount=xmppAccount;
+        
+    }
+    
+}
+
+-(IBAction) showServerDetails:(id) sender
+{
+    [self performSegueWithIdentifier:@"showServerDetails" sender:sender];
 }
 
 

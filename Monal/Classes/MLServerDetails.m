@@ -60,10 +60,6 @@
            [self.serverCaps addObject:@{@"Title":@"XEP-0352: Client State Indication", @"Description":@"Indicate when a particular device is active or inactive. Saves battery. "}];
     }
     
-   
-    
-    
-    
 }
 
 - (void)didReceiveMemoryWarning {

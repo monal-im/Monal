@@ -372,6 +372,7 @@
 		26DA16E217C302BC00D0065E /* UIAlertView+Blocks.m in Sources */ = {isa = PBXBuildFile; fileRef = 26DA16DF17C302BC00D0065E /* UIAlertView+Blocks.m */; };
 		26E2F7DA17C6FD9400C3C8EF /* MLTabBarController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26E2F7D917C6FD9400C3C8EF /* MLTabBarController.m */; };
 		26E3ED871FEC0CB7008ABDA5 /* MLServerDetails.m in Sources */ = {isa = PBXBuildFile; fileRef = 26E3ED861FEC0CB7008ABDA5 /* MLServerDetails.m */; };
+		26E3ED8B1FEC395D008ABDA5 /* MLServerDetailsVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 26E3ED8A1FEC395D008ABDA5 /* MLServerDetailsVC.m */; };
 		26E456CD1B842180004BD74C /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26E456CC1B842180004BD74C /* Sparkle.framework */; };
 		26E456CF1B8421C3004BD74C /* Sparkle.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 26E456CC1B842180004BD74C /* Sparkle.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		26EC411017BDD98E0031304D /* GroupChatViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26EC410F17BDD98D0031304D /* GroupChatViewController.xib */; };
@@ -785,6 +786,8 @@
 		26E2F7D917C6FD9400C3C8EF /* MLTabBarController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MLTabBarController.m; path = ../MLTabBarController.m; sourceTree = "<group>"; };
 		26E3ED851FEC0CB7008ABDA5 /* MLServerDetails.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLServerDetails.h; sourceTree = "<group>"; };
 		26E3ED861FEC0CB7008ABDA5 /* MLServerDetails.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLServerDetails.m; sourceTree = "<group>"; };
+		26E3ED891FEC395D008ABDA5 /* MLServerDetailsVC.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLServerDetailsVC.h; sourceTree = "<group>"; };
+		26E3ED8A1FEC395D008ABDA5 /* MLServerDetailsVC.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLServerDetailsVC.m; sourceTree = "<group>"; };
 		26E456CC1B842180004BD74C /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Sparkle.framework; path = MonalOSX/External/Sparkle.framework; sourceTree = "<group>"; };
 		26EC40FA17BDD8560031304D /* ContactDetails.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContactDetails.h; sourceTree = "<group>"; };
 		26EC40FB17BDD8560031304D /* ContactDetails.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ContactDetails.m; sourceTree = "<group>"; };
@@ -1092,6 +1095,7 @@
 		266272B21B27DB8000C1CD49 /* Monal-OSX */ = {
 			isa = PBXGroup;
 			children = (
+				26E3ED881FEC3920008ABDA5 /* Account */,
 				26AA41021D9FC61C005A77ED /* Chatview */,
 				260283841D8DEFC1001DD6B8 /* MLPreviewObject.h */,
 				260283851D8DEFC1001DD6B8 /* MLPreviewObject.m */,
@@ -1615,6 +1619,15 @@
 				26DA16D917C302BC00D0065E /* UIAlertView-Blocks */,
 			);
 			name = External;
+			sourceTree = "<group>";
+		};
+		26E3ED881FEC3920008ABDA5 /* Account */ = {
+			isa = PBXGroup;
+			children = (
+				26E3ED891FEC395D008ABDA5 /* MLServerDetailsVC.h */,
+				26E3ED8A1FEC395D008ABDA5 /* MLServerDetailsVC.m */,
+			);
+			name = Account;
 			sourceTree = "<group>";
 		};
 		26F7BB3A1115F8A300712672 /* tools */ = {
@@ -2644,6 +2657,7 @@
 				260499EB1B7313E800D11866 /* ParseChallenge.m in Sources */,
 				269574E51C37482A00544A60 /* MLOAuthViewController.m in Sources */,
 				2651AF551B409906008D025C /* MLMainWindow.m in Sources */,
+				26E3ED8B1FEC395D008ABDA5 /* MLServerDetailsVC.m in Sources */,
 				26B2A4F81B73097500272E63 /* DDTTYLogger.m in Sources */,
 				26B2A4FA1B73097500272E63 /* DDContextFilterLogFormatter.m in Sources */,
 				26D51CDF1E2674D700141E04 /* NXOAuth2PostBodyPart.m in Sources */,

@@ -78,7 +78,7 @@
                     </items>
                 </toolbar>
             </objects>
-            <point key="canvasLocation" x="2545" y="-1798"/>
+            <point key="canvasLocation" x="2878" y="-1798"/>
         </scene>
         <!--Contact Details-->
         <scene sceneID="4Py-3m-Izt">
@@ -470,10 +470,41 @@
                         </barButtonItem>
                     </navigationItem>
                     <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
+                    <connections>
+                        <segue destination="T2P-jI-4uD" kind="show" identifier="showServerDetails" id="i4b-wV-798"/>
+                    </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="4oy-tB-85I" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1619" y="3113"/>
+        </scene>
+        <!--Server Details-->
+        <scene sceneID="090-1P-S9v">
+            <objects>
+                <tableViewController id="T2P-jI-4uD" customClass="MLServerDetails" sceneMemberID="viewController">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" id="aMP-ho-gR0">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
+                        <prototypes>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="serverCell" id="dnS-eI-Sql">
+                                <rect key="frame" x="0.0" y="55.333333333333336" width="414" height="44"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="dnS-eI-Sql" id="8qO-r0-VQV">
+                                    <rect key="frame" x="0.0" y="0.0" width="414" height="43.666666666666664"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </tableViewCellContentView>
+                            </tableViewCell>
+                        </prototypes>
+                        <connections>
+                            <outlet property="dataSource" destination="T2P-jI-4uD" id="XAW-cA-Sxz"/>
+                            <outlet property="delegate" destination="T2P-jI-4uD" id="hCR-aO-hsn"/>
+                        </connections>
+                    </tableView>
+                </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="HiN-m0-zbc" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2380" y="3124"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="OfI-df-wdu">

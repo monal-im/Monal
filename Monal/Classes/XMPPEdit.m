@@ -12,6 +12,7 @@
 #import "NXOAuth2.h"
 #import "NXOAuth2AccountStore.h"
 #import "MBProgressHUD.h"
+#import "MLServerDetails.h"
 
 #import "tools.h"
 
@@ -445,6 +446,7 @@ NSString *const kGtalk = @"Gtalk";
                 thecell.toggleSwitch.hidden=YES;
                 thecell.textInputField.tag=3;
                 thecell.textInputField.text=self.server;
+                thecell.accessoryType=UITableViewCellAccessoryDetailButton;
                 break;
             }
                 
@@ -596,6 +598,31 @@ NSString *const kGtalk = @"Gtalk";
     
 }
 
+-(void)tableView:(UITableView *)tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath *)indexPath
+{
+    if (indexPath.section==1)
+    {
+        switch (indexPath.row)
+        {
+                
+            case 0:  {
+                [self performSegueWithIdentifier:@"showServerDetails" sender:self];
+            }
+        }
+    }
+}
+
+
+#pragma mark - segeue
+
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+{
+    if ([segue.identifier isEqualToString:@"showServerDetails"])
+    {
+        MLServerDetails *server= (MLServerDetails *)segue.destinationViewController;
+        server.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountno];
+    }
+}
 
 #pragma mark -  text input  fielddelegate
 

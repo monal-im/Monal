@@ -591,7 +591,7 @@ CA
                                                     <menuItem title="None" id="4sP-ZC-mm4">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
                                                         <connections>
-                                                            <segue destination="fLw-fN-usf" kind="modal" id="Ab2-zd-tbT"/>
+                                                            <segue destination="fLw-fN-usf" kind="show" id="Ab2-zd-tbT"/>
                                                         </connections>
                                                     </menuItem>
                                                 </items>

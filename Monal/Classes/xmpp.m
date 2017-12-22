@@ -2031,7 +2031,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     //query disco and presence state if we resumed after a force close
                     if(self.wasClosedBefore)
                     {
-                        //[self queryDisco];
+                        [self queryDisco];
                         [self queryPresence];
                     }
                 }
@@ -2526,7 +2526,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self closeSocket]; // just closing socket to simulate a unintentional disconnect
 }
 
--(void) enableSM3
+-(void) queryDisco
 
 {
     XMPPIQ* discoItems =[[XMPPIQ alloc] initWithType:kiqGetType];
@@ -2558,7 +2558,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [sessionQuery.children addObject:session];
     [self send:sessionQuery];
     
-   // [self queryDisco];
+    [self queryDisco];
     
     XMPPIQ* roster=[[XMPPIQ alloc] initWithType:kiqGetType];
     [roster setRosterRequest];

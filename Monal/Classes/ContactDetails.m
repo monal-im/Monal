@@ -53,6 +53,8 @@
 //    }
     
     
+    self.tableView.rowHeight= UITableViewAutomaticDimension;
+    
 }
 
 -(BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -95,41 +97,23 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     UITableViewCell* thecell= [tableView dequeueReusableCellWithIdentifier:@"topCell"];
-//    if(indexPath.section==0) //top
-//    {
-//        thecell=_topcell;
-//    }
-//    else
-//        if(indexPath.section==1) //message
-//        {
-//            thecell=_bottomcell;
-//        }
-//        else if(indexPath.section==2) //resources
-//        {
-//            thecell=_resourceCell;
-//        }
+    
+    
+    switch(indexPath.section) {
+        case 0:
+            thecell= [tableView dequeueReusableCellWithIdentifier:@"topCell"];
+            break;
+        case 1:
+            thecell= [tableView dequeueReusableCellWithIdentifier:@"bottomCell"];
+            break;
+        case 2:
+             thecell= [tableView dequeueReusableCellWithIdentifier:@"resourceCell"];
+            break;
+            
+    }
+    
     return thecell;
     
-}
-
-- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
-{
-//    if(indexPath.section==0) //top
-//    {
-//        return _topcell.frame.size.height;
-//    }
-//    else
-//        if(indexPath.section==1) //bottom
-//        {
-//            return _bottomcell.frame.size.height;
-//        }
-//    if(indexPath.section==2) //bottom
-//    {
-//        return _resourceCell.frame.size.height;
-//    }
-//
-    //default
-    return 0;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section;

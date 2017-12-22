@@ -965,6 +965,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         //we have the max bounds of he XML tag.
         if(endPos.location==NSNotFound) {
             DDLogVerbose(@"dont have the end. exit at 0 ");
+            return nil; 
         }
         else  {
             //look for a space if there is one
@@ -1054,13 +1055,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     
                     //check if self closed
                     NSRange endPos=[_inputBuffer rangeOfString:@"/>"
-                                                       options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, maxPos-pos.location)];
+                                                       options:NSCaseInsensitiveSearch range:NSMakeRange(startpos, maxPos-startpos)];
                     
                     //are ther children, then not self closed
                     if(endPos.location<maxPos && endPos.location!=NSNotFound)
                     {
                         NSRange childPos=[_inputBuffer rangeOfString:[NSString stringWithFormat:@"<"]
-                                                             options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location+1, maxPos-endPos.location)];
+                                                             options:NSCaseInsensitiveSearch range:NSMakeRange(startpos+1, endPos.location-startpos)];
                         if((childPos.location<maxPos) && (childPos.location!=NSNotFound)){
                             DDLogVerbose(@"at 3.5 looks like incomplete stanza. need to get more. loc %d", childPos.location);
                            // break;

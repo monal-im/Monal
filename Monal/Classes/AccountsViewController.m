@@ -11,11 +11,16 @@
 #import "XMPPEdit.h"
 #import "tools.h"
 #import "MBProgressHUD.h"
+#import "CWStatusBarNotification.h"
+#import "xmpp.h"
 
 
 @interface AccountsViewController ()
 @property (nonatomic , strong) MBProgressHUD *hud;
 @property (nonatomic , strong) NSDateFormatter *uptimeFormatter;
+
+@property (nonatomic, strong) NSIndexPath  *selected;
+@property (nonatomic, strong) CWStatusBarNotification * sliding;
 
 @end
 
@@ -28,15 +33,11 @@
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     self.navigationItem.title=NSLocalizedString(@"Accounts",@"");
-    self.view.backgroundColor=[UIColor lightGrayColor];
-    self.view.autoresizingMask=UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
-    
-    _accountsTable=[[UITableView alloc] initWithFrame:CGRectZero style:UITableViewStyleGrouped];
+   
+    _accountsTable=self.tableView;
     _accountsTable.delegate=self;
     _accountsTable.dataSource=self;
-    
-    self.view=_accountsTable;
-    
+
     _accountsTable.backgroundView=nil;
  
    [[DataLayer sharedInstance] protocolListWithCompletion:^(NSArray *result) {
@@ -48,12 +49,6 @@
        
    }];
     
-    UIBarButtonItem* rightButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Reconnect All",@"") style:UIBarButtonItemStyleBordered target:self action:@selector(connectIfNecessary)];
-    self.navigationItem.rightBarButtonItem=rightButton;
-    
-    UIBarButtonItem* leftButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Log out All",@"") style:UIBarButtonItemStyleBordered target:self action:@selector(logoutAll)];
-    self.navigationItem.leftBarButtonItem=leftButton;
-    
     self.uptimeFormatter =[[NSDateFormatter alloc] init];
     self.uptimeFormatter.dateStyle =NSDateFormatterShortStyle;
     self.uptimeFormatter.timeStyle =NSDateFormatterShortStyle;
@@ -63,6 +58,10 @@
     
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
     [nc addObserver:self selector:@selector(refreshAccountList) name:kMonalAccountStatusChanged object:nil];
+    [nc addObserver:self selector:@selector(showConnectionStatus:) name:kXMPPError object:nil];
+    
+    self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
+    self.sliding = [CWStatusBarNotification new];
     
 }
 
@@ -76,6 +75,8 @@
         });
         
     }];
+    
+    self.selected=nil;
 }
 
 -(void) dealloc
@@ -95,17 +96,49 @@
     }];
 }
 
+#pragma mark - error feedback
+
+-(void) showConnectionStatus:(NSNotification *) notification
+{
+    self.sliding.notificationLabelBackgroundColor = [UIColor redColor];
+    self.sliding.notificationLabelTextColor = [UIColor whiteColor];
+    
+    NSArray *payload= notification.object;
+    
+    NSString *message = payload.lastObject; // this is just the way i set it up a dic might better
+    xmpp *xmppAccount= payload.firstObject;
+    
+    NSString *accountName = [NSString stringWithFormat:@"%@@%@", xmppAccount.username, xmppAccount.domain];
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self.sliding displayNotificationWithMessage:[NSString stringWithFormat:@"%@: %@", accountName, message]
+                                forDuration:3.0f];
+    });
+}
+
 #pragma mark button actions
+
+-(IBAction)connect:(id)sender
+{
+    [self connectIfNecessary];
+    
+}
+
+-(IBAction)logout:(id)sender
+{
+    [self logoutAll];
+    
+}
 
 -(void) connectIfNecessary
 {
     
     self.hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
     self.hud.removeFromSuperViewOnHide=YES;
-    self.hud.labelText =@"Reconnecting";
-    self.hud.detailsLabelText =@"Will connect any logged out accounts.";
+    self.hud.label.text =@"Reconnecting";
+    self.hud.detailsLabel.text =@"Will connect any logged out accounts.";
     [[MLXMPPManager sharedInstance] connectIfNecessary];
-    [self.hud hide:YES afterDelay:3.0f];
+     [self.hud hideAnimated:YES afterDelay:1.0f];
     self.hud=nil;
 }
 
@@ -113,10 +146,10 @@
 {
     self.hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
     self.hud.removeFromSuperViewOnHide=YES;
-    self.hud.labelText =@"Logging out all accounts";
-    self.hud.detailsLabelText =@"Tap Reconnect to log everything back in.";
+    self.hud.label.text =@"Logging out all accounts";
+    self.hud.detailsLabel.text=@"Tap Reconnect to log everything back in.";
     [[MLXMPPManager sharedInstance] logoutAll];
-    [self.hud hide:YES afterDelay:3.0f];
+    [self.hud hideAnimated:YES afterDelay:3.0f];
     self.hud=nil;
 }
 
@@ -131,22 +164,35 @@
 #pragma mark tableview delegate
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath;
 {
-    XMPPEdit* editor =[[XMPPEdit alloc] init];
-    editor.originIndex=indexPath; 
-    if(indexPath.section==0)
-    {
-        //existing
-        editor.accountno=[NSString stringWithFormat:@"%@",[[_accountList objectAtIndex:indexPath.row] objectForKey:@"account_id"]];
-    }
-    else if(indexPath.section==1)
-    {
-        editor.accountno=@"-1";
-    }
-    
-    [self.navigationController pushViewController:editor animated:YES];
-    
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    self.selected=indexPath;
+    
+    [self performSegueWithIdentifier:@"editXMPP" sender:self];
+    
 }
+
+
+-(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+{
+    if([segue.identifier isEqualToString:@"editXMPP"]) {
+        
+        UINavigationController *nav=   segue.destinationViewController;
+        
+        XMPPEdit * editor = (XMPPEdit *)nav.topViewController;
+    
+        editor.originIndex=self.selected;
+        if(self.selected.section==0)
+        {
+            //existing
+            editor.accountno=[NSString stringWithFormat:@"%@",[[_accountList objectAtIndex:self.selected.row] objectForKey:@"account_id"]];
+        }
+        else if(self.selected.section==1)
+        {
+            editor.accountno=@"-1";
+        }
+    }
+}
+
 
 #pragma mark tableview datasource
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
@@ -156,7 +202,6 @@
 
 -(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
 {
-  
     UIView *tempView=[[UIView alloc]initWithFrame:CGRectMake(0,200,300,244)];
     tempView.backgroundColor=[UIColor clearColor];
     
@@ -170,15 +215,11 @@
     
     [tempView addSubview:tempLabel];
     
-    if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0"))
-    {
-        tempLabel.textColor=[UIColor darkGrayColor];
-        tempLabel.text=  tempLabel.text.uppercaseString;
-        tempLabel.shadowColor =[UIColor clearColor];
-        tempLabel.font=[UIFont systemFontOfSize:[UIFont systemFontSize]];
-        
-    }
-    
+    tempLabel.textColor=[UIColor darkGrayColor];
+    tempLabel.text=  tempLabel.text.uppercaseString;
+    tempLabel.shadowColor =[UIColor clearColor];
+    tempLabel.font=[UIFont systemFontOfSize:[UIFont systemFontSize]];
+
     return tempView;
 }
 
@@ -208,14 +249,6 @@
 
 - (NSString *)tableView:(UITableView *)tableView titleForFooterInSection:(NSInteger)section
 {
-//    switch (section) {
-//        case 0:
-//        {
-//            return @"Only one can be enabled at a time.";
-//            break;
-//        }
-//    }
-    
     return nil;
 }
 
@@ -328,7 +361,5 @@
     
     return nil;
 }
-
-
 
 @end

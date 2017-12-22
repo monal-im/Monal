@@ -17,9 +17,7 @@
 #import "MLContactsViewController.h"
 #endif
 
-
 #import "MLConstants.h"
-
 #import "jingleCall.h"
 
 // networking objects
@@ -75,10 +73,13 @@ typedef NS_ENUM (NSInteger, xmppState) {
     kStateBound //is operating normally
 };
 
+
+extern NSString *const kXMPPError;
+extern NSString *const kXMPPSuccess;
+extern NSString *const kXMPPPresence;
+
 @interface xmpp : NSObject <NSStreamDelegate>
 {
-   
-    
     NSInputStream *_iStream;
     NSOutputStream *_oStream;
     NSMutableString* _inputBuffer;
@@ -295,6 +296,9 @@ FOUNDATION_EXPORT NSString *const kCompletion;
 //message archive
 @property (nonatomic, readonly) BOOL supportsMam0;
 
+@property (nonatomic, readonly) BOOL supportsSM3;
+@property (nonatomic, readonly) BOOL supportsPush;
+@property (nonatomic, readonly) BOOL usingCarbons2;
 
 //calculated
 @property (nonatomic,strong, readonly) NSString* versionHash;
@@ -313,5 +317,9 @@ extern NSString *const kId;
 extern NSString *const kMessageId;
 extern NSString *const kSendTimer;
 
+/**
+ An intentional disconnect to trigger APNS. does not close the stream. 
+ */
+-(void) disconnectToResume;
 
 @end

@@ -12,11 +12,10 @@
 
 #if TARGET_OS_IPHONE
 #import "MonalAppDelegate.h"
-#import "PasswordManager.h"
 @import MobileCoreServices;
-#else
-#import "STKeyChain.h"
 #endif
+
+#import "SAMKeychain.h"
 
 static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 static const int pingFreqencyMinutes =1;
@@ -33,13 +32,13 @@ An array of Dics what have timers to make sure everything was sent
  */
 @property (nonatomic, strong) NSMutableArray *timerList;
 
+@property (nonatomic, strong) NSString *pushNode;
+@property (nonatomic, strong) NSString *pushSecret;
+
 @end
 
 
 @implementation MLXMPPManager
-
-NSString *pushNode;
-NSString *pushSecret;
 
 -(void) defaultSettings
 {
@@ -131,51 +130,6 @@ NSString *pushSecret;
         dispatch_source_cancel(_pinger);
 }
 
-#pragma mark keep alive
-
--(void) setKeepAlivetimer
-{
-#if TARGET_OS_IPHONE
-
-    NSTimeInterval timeInterval= 600; // 600 seconds
-    BOOL keepAlive=[[UIApplication sharedApplication] setKeepAliveTimeout:timeInterval handler:^{
-        DDLogInfo(@"began bg keep alive ping");
-        for(NSDictionary* row in _connectedXMPP)
-        {
-            xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
-            [xmppAccount sendPing];
-        }
-        
-    }];
-    
-    if(keepAlive)
-    {
-        DDLogVerbose(@"installed keep alive timer");
-    }
-    else
-    {
-        DDLogVerbose(@"failed to install keep alive timer");
-    }
-#else
-#endif
-}
-
--(void) clearKeepAlive
-{
-    for(NSDictionary* row in _connectedXMPP)
-    {
-        xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
-        if(xmppAccount.supportsClientState) {
-            [xmppAccount setClientActive];
-        }
-    }
-    
-#if TARGET_OS_IPHONE
-    [[UIApplication sharedApplication] clearKeepAliveTimeout];
-#else
-#endif
-    
-}
 
 
 #pragma mark - client state 
@@ -184,6 +138,11 @@ NSString *pushSecret;
     for(NSDictionary* row in _connectedXMPP)
     {
         xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
+//        if(xmppAccount.supportsSM3 && xmppAccount.supportsPush) 
+//        {
+//            [xmppAccount disconnectToResume];
+//        }
+//        else
         if(xmppAccount.supportsClientState) {
             [xmppAccount setClientInactive];
         }
@@ -241,7 +200,7 @@ NSString *pushSecret;
     return toReturn;
 }
 
-#pragma mark Connection related
+#pragma mark - Connection related
 
 -(void) connectAccount:(NSString*) accountNo
 {
@@ -275,8 +234,8 @@ NSString *pushSecret;
     
     xmpp* xmppAccount=[[xmpp alloc] init];
     xmppAccount.explicitLogout=NO;
-    xmppAccount.pushNode=pushNode;
-    xmppAccount.pushSecret=pushSecret;
+    xmppAccount.pushNode=self.pushNode;
+    xmppAccount.pushSecret=self.pushSecret;
     
     xmppAccount.username=[account objectForKey:kUsername];
     xmppAccount.domain=[account objectForKey:kDomain];
@@ -290,29 +249,13 @@ NSString *pushSecret;
     xmppAccount.oAuth=[[account objectForKey:kOauth] boolValue];
     
     xmppAccount.accountNo=[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]];
-#if TARGET_OS_IPHONE
-    if(!xmppAccount.oAuth) {
-        PasswordManager* passMan= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@-%@@%@",[account objectForKey:kAccountID], [account objectForKey:kUsername],  [account objectForKey:kDomain] ]];
-        xmppAccount.password=[passMan getPassword] ;
-        if(!xmppAccount.password.length>0) {
-            //backwards compatibility with old storage
-            passMan= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
-            xmppAccount.password=[passMan getPassword] ;
-        }
-    }
-    
-#else
-    NSError *error;
-    xmppAccount.password =[STKeychain getPasswordForUsername:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]] andServiceName:@"Monal" error:&error];
-    
-#endif
- 
+
+    xmppAccount.password = [SAMKeychain passwordForService:@"Monal" account:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
     
     if([xmppAccount.password length]==0 && !xmppAccount.oAuth) //&& ([tempPass length]==0)
     {
         // ask fro temp pass if not oauth
     }
-
      xmppAccount.contactsVC=self.contactVC;
     
     //sepcifically look for the server since we might not be online or behind firewall
@@ -323,9 +266,8 @@ NSString *pushSecret;
     [hostReach startNotifier];
     
     if(xmppAccount && hostReach) {
-        NSDictionary* accountRow= [[NSDictionary alloc] initWithObjects:@[xmppAccount, hostReach] forKeys:@[@"xmppAccount", @"hostReach"]];
-        [_connectedXMPP addObject:accountRow];
-        
+        NSDictionary* accountDic= [[NSDictionary alloc] initWithObjects:@[xmppAccount, hostReach] forKeys:@[@"xmppAccount", @"hostReach"]];
+        [_connectedXMPP addObject:accountDic];
         [xmppAccount reconnect:0];
     }
     
@@ -446,7 +388,7 @@ NSString *pushSecret;
 }
 
 
-#pragma mark XMPP commands
+#pragma mark -  XMPP commands
 -(void)sendMessage:(NSString*) message toContact:(NSString*)contact fromAccount:(NSString*) accountNo isMUC:(BOOL) isMUC messageId:(NSString *) messageId 
 withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 {
@@ -507,13 +449,12 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 
 #pragma  mark - HTTP upload
 
--(void)httpUploadPngData:(NSData*) fileData   toContact:(NSString*)contact onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(NSString *url,  NSError *error)) completion{
+-(void)httpUploadJpegData:(NSData*) fileData   toContact:(NSString*)contact onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(NSString *url,  NSError *error)) completion{
     
-    //get file name
-    NSString *fileName =  @"photo.png";
+    NSString *fileName = [NSString stringWithFormat:@"%@.jpg",[NSUUID UUID].UUIDString];
     
     //get file type
-    CFStringRef UTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (__bridge CFStringRef)@"png", NULL);
+    CFStringRef UTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (__bridge CFStringRef)@"jpg", NULL);
     NSString *mimeType = (__bridge NSString *)(UTTypeCopyPreferredTagWithClass (UTI, kUTTagClassMIMEType));
     
     [self httpUploadData:fileData withFilename:fileName andType:mimeType toContact:contact onAccount:accountNo withCompletionHandler:completion];
@@ -557,7 +498,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 }
 
 
-#pragma mark getting details
+#pragma mark - getting details
 
 -(void) getServiceDetailsForAccount:(NSInteger) row
 {
@@ -611,7 +552,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 }
 
 
-#pragma mark contact
+#pragma mark - contact
 
 -(void) removeContact:(NSDictionary*) contact
 {
@@ -644,7 +585,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
     }
 }
 
-#pragma mark MUC commands
+#pragma mark - MUC commands
 //makes xmpp call
 -(void) getRoomsForAccountRow:(NSInteger) row
 {
@@ -696,7 +637,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
     [account leaveRoom:roomName];
 }
 
-#pragma mark Jingle VOIP
+#pragma mark - Jingle VOIP
 -(void) callContact:(NSDictionary*) contact
 {
     xmpp* account =[self getConnectedAccountForID:[NSString stringWithFormat:@"%@",[contact objectForKey:@"account_id"]]];
@@ -711,7 +652,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 }
 
 
-#pragma mark XMPP settings
+#pragma mark - XMPP settings
 
 -(void) setStatusMessage:(NSString*) message
 {
@@ -753,9 +694,10 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 -(void) handleNewMessage:(NSNotification *)notification
 {
 #if TARGET_OS_IPHONE
+    dispatch_async(dispatch_get_main_queue(), ^{
     MonalAppDelegate* appDelegate= (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
     [appDelegate updateUnread];
-    
+    }); 
 #else
 #endif
 }
@@ -821,10 +763,13 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
     [dirtySet removeObjectsAtIndexes:indexSet];
 }
 
+
+#pragma mark - APNS
+
 -(void) setPushNode:(NSString *)node andSecret:(NSString *)secret
 {
-    pushNode=node;
-    pushSecret=secret;
+    self.pushNode=node;
+    self.pushSecret=secret;
     for(NSDictionary* row in _connectedXMPP)
     {
         xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];

@@ -20,23 +20,19 @@
 @interface chatViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UITextViewDelegate, UINavigationControllerDelegate, UIImagePickerControllerDelegate>
 {
     UIView *containerView;
-
 	CGRect oldFrame;
 	NSString* _contactFullName;
     
-	bool _firstmsg;
+	BOOL _firstmsg;
 	
-	bool wasaway; 
-	bool wasoffline; 
+	BOOL wasaway;
+	BOOL wasoffline;
     
     NSArray* activeChats;
     NSMutableArray* _messagelist;
     NSDictionary* _contact;
-    
 
-    
     BOOL  _isMUC;
-    
     NSString* _day;
     BOOL _keyboardVisible; 
 }

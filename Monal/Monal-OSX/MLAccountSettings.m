@@ -12,6 +12,7 @@
 #import "DataLayer.h"
 #import "MLConstants.h"
 #import "NXOAuth2AccountStore.h"
+#import "SAMKeychain.h"
 
 @interface MLAccountSettings ()
 @property (nonatomic, strong) NSArray *accountList;
@@ -71,6 +72,8 @@
         NSNumber *accountID = [row objectForKey:kAccountID];
         [[DataLayer sharedInstance] removeAccount:[NSString stringWithFormat:@"%@", accountID]];
         
+        [SAMKeychain deletePasswordForService:@"Monal"  account:[NSString stringWithFormat:@"%@", accountID]];
+
         NSMutableArray *mutableAccounts = [self.accountList mutableCopy];
         [mutableAccounts removeObjectAtIndex:selected];
         self.accountList= mutableAccounts;
@@ -91,7 +94,7 @@
     }
 }
 
-#pragma mark -- segues
+#pragma mark - segues
 
 -(IBAction)showXMPP:(id)sender {
     [self performSegueWithIdentifier:@"showAccountEdit" sender:@"XMPP"];
@@ -113,14 +116,14 @@
 }
 
 
-#pragma mark  -- tableview datasource
+#pragma mark  - tableview datasource
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)tableView;
 {
     return self.accountList.count;
 }
 
 
-#pragma  mark -- tableview delegate
+#pragma  mark - tableview delegate
 - (NSTableRowView *)tableView:(NSTableView *)tableView rowViewForRow:(NSInteger)row;
 {
     MLAccountRow *tableRow = [tableView makeViewWithIdentifier:@"AccountRow" owner:nil];

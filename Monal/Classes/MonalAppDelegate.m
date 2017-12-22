@@ -8,22 +8,12 @@
 
 #import "MonalAppDelegate.h"
 
-#import "MLPortraitNavController.h"
+
 #import "CallViewController.h"
 
-// tab bar
-#import "ContactsViewController.h"
-#import "ActiveChatsViewController.h"
-#import "SettingsViewController.h"
-#import "AccountsViewController.h"
-#import "ChatLogsViewController.h"
-#import "GroupChatViewController.h"
-#import "SearchUsersViewController.h"
-#import "LogViewController.h"
-#import "HelpViewController.h"
-#import "AboutViewController.h"
 #import "MLNotificationManager.h"
 #import "DataLayer.h"
+#import "NXOAuth2AccountStore.h"
 
 @import Crashlytics;
 @import Fabric;
@@ -43,143 +33,35 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 @implementation MonalAppDelegate
 
 
-
--(void) createRootInterface
+-(void) setUISettings
 {
-    self.window=[[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showCallScreen:) name:kMonalCallStartedNotice object:nil];
-    
-   // self.window.screen=[UIScreen mainScreen];
-    
-    _tabBarController=[[MLTabBarController alloc] init];
-    ContactsViewController* contactsVC = [[ContactsViewController alloc] init];
-    [MLXMPPManager sharedInstance].contactVC=contactsVC;
-    contactsVC.presentationTabBarController=_tabBarController; 
-    
-    UIBarStyle barColor=UIBarStyleBlack;
-    
-    ActiveChatsViewController* activeChatsVC = [[ActiveChatsViewController alloc] init];
-    UINavigationController* activeChatNav=[[UINavigationController alloc] initWithRootViewController:activeChatsVC];
-    activeChatNav.navigationBar.barStyle=barColor;
-    activeChatNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Active Chats",@"") image:[UIImage imageNamed:@"906-chat-3"] tag:0];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateUnread) name:UIApplicationWillEnterForegroundNotification object:nil];
-    _activeTab=activeChatNav.tabBarItem;
-    
-    
-    SettingsViewController* settingsVC = [[SettingsViewController alloc] init];
-    UINavigationController* settingsNav=[[UINavigationController alloc] initWithRootViewController:settingsVC];
-    settingsNav.navigationBar.barStyle=barColor;
-    settingsNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Settings",@"") image:[UIImage imageNamed:@"740-gear"] tag:0];
-    
-    AccountsViewController* accountsVC = [[AccountsViewController alloc] init];
-    UINavigationController* accountsNav=[[UINavigationController alloc] initWithRootViewController:accountsVC];
-    accountsNav.navigationBar.barStyle=barColor;
-    accountsNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Accounts",@"") image:[UIImage imageNamed:@"1049-at-sign"] tag:0];
-    
-    ChatLogsViewController* chatLogVC = [[ChatLogsViewController alloc] init];
-    UINavigationController* chatLogNav=[[UINavigationController alloc] initWithRootViewController:chatLogVC];
-    chatLogNav.navigationBar.barStyle=barColor;
-    chatLogNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Chat Logs",@"") image:[UIImage imageNamed:@"1065-rewind-time-1"] tag:0];
-    
-//    SearchUsersViewController* searchUsersVC = [[SearchUsersViewController alloc] init];
-//    UINavigationController* searchUsersNav=[[UINavigationController alloc] initWithRootViewController:searchUsersVC];
-//    searchUsersNav.navigationBar.barStyle=barColor;
-//    searchUsersNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Search Users",@"") image:[UIImage imageNamed:@"708-search"] tag:0];
-//    
-    GroupChatViewController* groupChatVC = [[GroupChatViewController alloc] init];
-    UINavigationController* groupChatNav=[[UINavigationController alloc] initWithRootViewController:groupChatVC];
-    groupChatNav.navigationBar.barStyle=barColor;
-    groupChatNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Group Chat",@"") image:[UIImage imageNamed:@"974-users"] tag:0];
-    
-    HelpViewController* helpVC = [[HelpViewController alloc] init];
-    UINavigationController* helpNav=[[UINavigationController alloc] initWithRootViewController:helpVC];
-    helpNav.navigationBar.barStyle=barColor;
-    helpNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Help",@"") image:[UIImage imageNamed:@"739-question"] tag:0];
-    
-    AboutViewController* aboutVC = [[AboutViewController alloc] init];
-    UINavigationController* aboutNav=[[UINavigationController alloc] initWithRootViewController:aboutVC];
-    aboutNav.navigationBar.barStyle=barColor;
-    aboutNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"About",@"") image:[UIImage imageNamed:@"724-info"] tag:0];
-    
-#ifdef DEBUG
-    LogViewController* logVC = [[LogViewController alloc] init];
-    UINavigationController* logNav=[[UINavigationController alloc] initWithRootViewController:logVC];
-    logNav.navigationBar.barStyle=barColor;
-    logNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Log",@"") image:nil tag:0];
-#endif
-    
-    
-    
-    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone)
-    {
-        
-        _chatNav=[[UINavigationController alloc] initWithRootViewController:contactsVC];
-        _chatNav.navigationBar.barStyle=barColor;
-        contactsVC.currentNavController=_chatNav;
-        _chatNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Contacts",@"") image:[UIImage imageNamed:@"973-user"] tag:0];
-        
-    
-        _tabBarController.viewControllers=[NSArray arrayWithObjects:_chatNav,activeChatNav, settingsNav,  accountsNav, chatLogNav, groupChatNav, //searchUsersNav,
-                                           helpNav, aboutNav,
-#ifdef DEBUG
-                                           logNav,
-#endif
-                                           nil];
-        
-        self.window.rootViewController=_tabBarController;
-        
-    }
-    else
-    {
-        
-        //this is a dummy nav controller not really used for anything
-        UINavigationController* navigationControllerContacts=[[UINavigationController alloc] initWithRootViewController:contactsVC];
-        navigationControllerContacts.navigationBar.barStyle=barColor;
-        
-        _chatNav=activeChatNav;
-        contactsVC.currentNavController=_chatNav;
-        _splitViewController=[[UISplitViewController alloc] init];
-        self.window.rootViewController=_splitViewController;
-        
-        _tabBarController.viewControllers=[NSArray arrayWithObjects: activeChatNav,  settingsNav, accountsNav, chatLogNav, groupChatNav,
-                                        //   searchU∫sersNav,
-                                           helpNav, aboutNav,
-#ifdef DEBUG
-                                           logNav,
-#endif
-                                           nil];
-        
-        _splitViewController.viewControllers=[NSArray arrayWithObjects:navigationControllerContacts, _tabBarController,nil];
-        _splitViewController.delegate=self;
-    }
-    
-    _chatNav.navigationBar.barStyle=barColor;
-    _chatNav.navigationBar.translucent=YES;
-    _tabBarController.moreNavigationController.navigationBar.barStyle=barColor;
-    
-    [self.window makeKeyAndVisible];
-    
     UIColor *monalGreen =[UIColor colorWithRed:128.0/255 green:203.0/255 blue:182.0/255 alpha:1.0f];
     UIColor *monaldarkGreen =[UIColor colorWithRed:20.0/255 green:138.0/255 blue:103.0/255 alpha:1.0f];
     
-   [[UINavigationBar appearance] setBarTintColor:monalGreen];
+    [[UINavigationBar appearance] setBarTintColor:monalGreen];
     [[UINavigationBar appearance] setTintColor:[UIColor whiteColor]];
     [[UINavigationBar appearance] setTitleTextAttributes:@{
                                                            NSForegroundColorAttributeName: [UIColor darkGrayColor]
                                                            }];
+    if (@available(iOS 11.0, *)) {
+        [[UINavigationBar appearance] setPrefersLargeTitles:YES];
+        [[UINavigationBar appearance] setLargeTitleTextAttributes:@{NSForegroundColorAttributeName: [UIColor whiteColor]}];
+        
+    }
+    
     [[UITabBar appearance] setTintColor:monaldarkGreen];
-  
-
+    
+    
 }
 
-#if TARGET_OS_IPHONE
+
 
 
 #pragma mark - VOIP APNS notificaion
 
 -(void) voipRegistration
 {
-    DDLogInfo(@"************************ registering for voip push...");
+    DDLogInfo(@"registering for voip APNS...");
     dispatch_queue_t mainQueue = dispatch_get_main_queue();
     // Create a push registry object
     PKPushRegistry * voipRegistry = [[PKPushRegistry alloc] initWithQueue: mainQueue];
@@ -193,11 +75,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     //[self pushRegistry:voipRegistry didUpdatePushCredentials:credentials forType:@"voip"];
 }
 
-// Handle updated push credentials
+// Handle updated APNS tokens
 -(void)pushRegistry:(PKPushRegistry *)registry didUpdatePushCredentials: (PKPushCredentials *)credentials forType:(NSString *)type
 {
-    DDLogInfo(@"************************ voip push token: %@", credentials.token);
- 
+    DDLogInfo(@"voip APNS token: %@", credentials.token);
+    
     unsigned char *tokenBytes = (unsigned char *)[credentials.token bytes];
     NSMutableString *token = [[NSMutableString alloc] init];
     
@@ -210,14 +92,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     NSString *node = [[[UIDevice currentDevice] identifierForVendor] UUIDString];
     
-    NSString *post = [NSString stringWithFormat:@"type=apns&node=%@&token=%@", [node stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],
-    [token stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+    NSString *post = [NSString stringWithFormat:@"type=apns&node=%@&token=%@", [node stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]],
+                      [token stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]]];
     NSData *postData = [post dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
-    NSString *postLength = [NSString stringWithFormat:@"%uld",[postData length]];
+    NSString *postLength = [NSString stringWithFormat:@"%luld",[postData length]];
     
     NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
     //this is the hardcoded push api endpoint
-    [request setURL:[NSURL URLWithString:@"http://192.168.2.3:5280/push_appserver/v1/register"]];
+    [request setURL:[NSURL URLWithString:@"https://push.monal.im:5281/push_appserver/v1/register"]];
     [request setHTTPMethod:@"POST"];
     [request setValue:postLength forHTTPHeaderField:@"Content-Length"];
     [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
@@ -230,19 +112,19 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             
             if(!error && httpresponse.statusCode<400)
             {
-                DDLogInfo(@"************************ connection to push api successful");
+                DDLogInfo(@"connection to push api successful");
                 
                 NSString *responseBody = [[NSString alloc] initWithData:data  encoding:NSUTF8StringEncoding];
-                DDLogInfo(@"************************ push api returned: %@", responseBody);
+                DDLogInfo(@"push api returned: %@", responseBody);
                 NSArray *responseParts=[responseBody componentsSeparatedByString:@"\n"];
                 if(responseParts.count>0){
                     if([responseParts[0] isEqualToString:@"OK"] && [responseParts count]==3)
                     {
-                        DDLogInfo(@"************************ push api: node='%@', secret='%@'", responseParts[1], responseParts[2]);
+                        DDLogInfo(@"push api: node='%@', secret='%@'", responseParts[1], responseParts[2]);
                         [[MLXMPPManager sharedInstance] setPushNode:responseParts[1] andSecret:responseParts[2]];
                     }
                     else {
-                        DDLogError(@"************************ push api returned invalid data: %@", [responseParts componentsJoinedByString: @" | "]);
+                        DDLogError(@" push api returned invalid data: %@", [responseParts componentsJoinedByString: @" | "]);
                     }
                 } else {
                     DDLogError(@"push api could  not be broken into parts");
@@ -250,7 +132,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 
             } else
             {
-                DDLogError(@"************************ connection to push api NOT successful");
+                DDLogError(@" connection to push api NOT successful");
             }
             
         }] resume];
@@ -266,32 +148,37 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 // Handle incoming pushes
 -(void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type
 {
-    DDLogInfo(@"************************ incoming voip notfication: %@", [payload dictionaryPayload]);
+    DDLogInfo(@"incoming voip notfication: %@", [payload dictionaryPayload]);
     
     dispatch_async(dispatch_get_main_queue(), ^{
         //reconenct and fetch messages
+        
+       __block UIBackgroundTaskIdentifier tempTask= [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
+           DDLogInfo(@"voip wake expiring");
+           [[UIApplication sharedApplication] endBackgroundTask:tempTask];
+            tempTask=UIBackgroundTaskInvalid;
+        }];
+        
         [[MLXMPPManager sharedInstance] connectIfNecessary];
+         DDLogInfo(@"voip wake compelte");
+        
+//        [[UIApplication sharedApplication] endBackgroundTask:tempTask];
+//        tempTask=UIBackgroundTaskInvalid;
     });
 }
-#endif
 
 #pragma mark notification actions
 -(void) showCallScreen:(NSNotification*) userInfo
 {
-    dispatch_async(dispatch_get_main_queue(),
-                   ^{
-                       NSDictionary* contact=userInfo.object;
-                       CallViewController *callScreen= [[CallViewController alloc] initWithContact:contact];
-                       MLPortraitNavController* callNav = [[MLPortraitNavController alloc] initWithRootViewController:callScreen];
-                       callNav.navigationBar.hidden=YES;
-                       
-                       if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
-                       {
-                           callNav.modalPresentationStyle=UIModalPresentationFormSheet;
-                       }
-                       
-                       [self.tabBarController presentModalViewController:callNav animated:YES];
-                   });
+//    dispatch_async(dispatch_get_main_queue(),
+//                   ^{
+//                       NSDictionary* contact=userInfo.object;
+//                       CallViewController *callScreen= [[CallViewController alloc] initWithContact:contact];
+//
+//
+//
+//                       [self.tabBarController presentModalViewController:callNav animated:YES];
+//                   });
 }
 
 -(void) updateUnread
@@ -338,6 +225,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     self.fileLogger.maximumFileSize=1024 * 500;
     [DDLog addLogger:self.fileLogger];
 #endif
+    
+    
+    
     //ios8 register for local notifications and badges
     if([[UIApplication sharedApplication] respondsToSelector:@selector(registerUserNotificationSettings:)])
     {
@@ -361,23 +251,16 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         [[UIApplication sharedApplication] registerUserNotificationSettings:settings];
     }
     
-    //register for voip push uing pushkit
+    //register for voip push using pushkit
     [self voipRegistration];
     
-    [self createRootInterface];
-
-    //rating
-    [Appirater setAppId:@"317711500"];
-    [Appirater setDaysUntilPrompt:5];
-    [Appirater setUsesUntilPrompt:10];
-    [Appirater setSignificantEventsUntilPrompt:5];
-    [Appirater setTimeBeforeReminding:2];
-    //[Appirater setDebug:YES];
-    [Appirater appLaunched:YES];
+    [self setUISettings];
+    
+   
     
     [MLNotificationManager sharedInstance].window=self.window;
     
-     // should any accounts connect?
+    // should any accounts connect?
     [[MLXMPPManager sharedInstance] connectIfNecessary];
     
     [Fabric with:@[[Crashlytics class]]];
@@ -401,13 +284,20 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) applicationDidBecomeActive:(UIApplication *)application
 {
-  //  [UIApplication sharedApplication].applicationIconBadgeNumber=0;
+    //  [UIApplication sharedApplication].applicationIconBadgeNumber=0;
 }
 
 #pragma mark - handling urls
 
-- (BOOL)application:(UIApplication *)app openURL:(NSURL *)url
-  sourceApplication:(NSString *)source annotation:(id)annotation {
+- (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey, id> *)options
+{
+    if([url.scheme isEqualToString:@"com.googleusercontent.apps.472865344000-invcngpma1psmiek5imc1gb8u7mef8l9"])
+    {
+        [[NXOAuth2AccountStore sharedStore] handleRedirectURL:url];
+        return YES;
+    }
+    else  {
+    
     if ([[DBSession sharedSession] handleOpenURL:url]) {
         if ([[DBSession sharedSession] isLinked]) {
             DDLogVerbose(@"App linked successfully!");
@@ -415,9 +305,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         }
         return YES;
     }
+    }
     // Add whatever other url handling code your app requires here
     return NO;
 }
+
 
 #pragma mark  - user notifications
 -(void) application:(UIApplication *)application didRegisterUserNotificationSettings:(UIUserNotificationSettings *)notificationSettings
@@ -427,13 +319,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 - (void)application:(UIApplication *)application didReceiveLocalNotification:(UILocalNotification *)notification
 {
-  DDLogVerbose(@"entering app with %@", notification);
+    DDLogVerbose(@"entering app with %@", notification);
     
     //iphone
     //make sure tab 0
     if([notification.userInfo objectForKey:@"from"]) {
-    [self.tabBarController setSelectedIndex:0];
-    [[MLXMPPManager sharedInstance].contactVC presentChatWithName:[notification.userInfo objectForKey:@"from"] account:[notification.userInfo objectForKey:@"accountNo"] ];
+        [self.tabBarController setSelectedIndex:0];
+        [[MLXMPPManager sharedInstance].contactVC presentChatWithName:[notification.userInfo objectForKey:@"from"] account:[notification.userInfo objectForKey:@"accountNo"] ];
     }
 }
 
@@ -481,8 +373,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 #pragma mark - backgrounding
 - (void)applicationWillEnterForeground:(UIApplication *)application
 {
-      DDLogVerbose(@"Entering FG");
-    [[MLXMPPManager sharedInstance] clearKeepAlive];
+    DDLogVerbose(@"Entering FG");
+ 
     [[MLXMPPManager sharedInstance] resetForeground];
     [[MLXMPPManager sharedInstance] setClientsActive];
 }
@@ -497,9 +389,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     
     [self updateUnread];
-    
-    [[MLXMPPManager sharedInstance] setKeepAlivetimer];
-    [[MLXMPPManager sharedInstance] setClientsInactive];
+//    [[MLXMPPManager sharedInstance] setClientsInactive];
+//    
+//    __block UIBackgroundTaskIdentifier tempTask= [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
+//        DDLogInfo(@"background wake expiring");
+//        [[UIApplication sharedApplication] endBackgroundTask:tempTask];
+//        tempTask=UIBackgroundTaskInvalid;
+//    }];
 }
 
 -(void)applicationWillTerminate:(UIApplication *)application

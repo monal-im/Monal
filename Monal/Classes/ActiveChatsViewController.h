@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface ActiveChatsViewController : UITableViewController <UITableViewDataSource, UITableViewDelegate>
+@interface ActiveChatsViewController : UITableViewController 
 {
     NSArray* _contacts;
     NSDictionary* _lastSelectedUser;

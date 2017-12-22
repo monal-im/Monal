@@ -10,7 +10,7 @@
 #import "MLXMPPManager.h"
 #import "DataLayer.h"
 #import "MLAccountSettings.h"
-#import "STKeyChain.h"
+#import "SAMKeychain.h"
 
 #import "NXOAuth2.h"
 #import "MLOAuthViewController.h"
@@ -77,8 +77,8 @@
             [self toggleGoogleTalkDisplay];
         }
         
-        NSError *error;
-        NSString*pass= [STKeychain getPasswordForUsername:[NSString stringWithFormat:@"%@",[self.accountToEdit objectForKey:kAccountID]] andServiceName:@"Monal" error:&error];
+        NSString *pass= [SAMKeychain passwordForService:@"Monal" account:[NSString stringWithFormat:@"%@",[self.accountToEdit objectForKey:kAccountID]]];
+        
         if(pass) {
             self.password.stringValue =pass;
         }
@@ -185,17 +185,19 @@
     
     [dic setObject:[NSNumber numberWithBool:isGtalk] forKey:kOauth];
     
+    BOOL isEnabled =self.enabledCheck.state;
+    NSString *passwordText =[self.password.stringValue copy] ;
     
     if(!self.accountToEdit) {
         [[DataLayer sharedInstance] addAccountWithDictionary:dic andCompletion:^(BOOL result) {
             if(result) {
                 [[DataLayer sharedInstance] executeScalar:@"select max(account_id) from account" withCompletion:^(NSObject * accountid) {
                     if(accountid) {
-                        NSError *error;
-                        [STKeychain storeUsername:[NSString stringWithFormat:@"%@", accountid] andPassword:self.password.stringValue forServiceName:@"Monal" updateExisting:NO error:&error];
+                        [SAMKeychain setPassword:passwordText forService:@"Monal" account:[NSString stringWithFormat:@"%@", accountid]];
+                        
                         [self refreshPresenter];
                         
-                        if(self.enabledCheck.state)
+                        if(isEnabled)
                         {
                             [[MLXMPPManager sharedInstance] connectAccount:[NSString stringWithFormat:@"%@", accountid]];
                         }
@@ -214,11 +216,9 @@
     {
         [[DataLayer sharedInstance] updateAccounWithDictionary:dic andCompletion:^(BOOL result) {
             [self refreshPresenter];
+            [SAMKeychain setPassword:passwordText forService:@"Monal" account:[NSString stringWithFormat:@"%@", [self.accountToEdit objectForKey:kAccountID]]];
             
-            NSError *error;
-            [STKeychain storeUsername:[NSString stringWithFormat:@"%@",[self.accountToEdit objectForKey:kAccountID]]  andPassword:self.password.stringValue forServiceName:@"Monal"updateExisting:YES error:&error];
-
-            if(self.enabledCheck.state)
+            if(isEnabled)
             {
                 [[MLXMPPManager sharedInstance] connectAccount:[NSString stringWithFormat:@"%@",[self.accountToEdit objectForKey:kAccountID]]];
             }

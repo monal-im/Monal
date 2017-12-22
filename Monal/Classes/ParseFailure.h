@@ -11,5 +11,6 @@
 @interface ParseFailure : XMPPParser
 @property (nonatomic, assign, readonly) BOOL saslError;
 @property (nonatomic, assign, readonly) BOOL notAuthorized;
+@property (nonatomic, strong, readonly) NSString  *text;
 
 @end

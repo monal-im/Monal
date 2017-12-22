@@ -9,8 +9,7 @@
 #import <UIKit/UIKit.h>
 
 
-@interface AccountsViewController : UIViewController
-<UITableViewDataSource, UITableViewDelegate>
+@interface AccountsViewController : UITableViewController
 {
     NSArray* _accountList;
     NSArray* _protocolList; 
@@ -18,5 +17,8 @@
 
 
 @property (nonatomic, strong) UITableView* accountsTable;
+
+-(IBAction)connect:(id)sender;
+-(IBAction)logout:(id)sender;
 
 @end

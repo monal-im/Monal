@@ -16,4 +16,6 @@
 
 @property (nonatomic, strong) UITableView* settingsTable;
 
+-(IBAction)close:(id)sender ;
+
 @end

@@ -145,9 +145,9 @@ Sends a message to a specified contact in account. Calls completion handler on s
 
 
 /**
- uploads the selected png image Data as photo.png
+ uploads the selected png image Data as [uuid].jpg
  */
--(void)httpUploadPngData:(NSData*) fileData   toContact:(NSString*)contact onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(NSString *url,  NSError *error)) completion;
+-(void)httpUploadJpegData:(NSData*) fileData   toContact:(NSString*)contact onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(NSString *url,  NSError *error)) completion;
 
 /**
  opens file and attempts to upload it
@@ -181,9 +181,6 @@ Attempts to upload a file to the  HTTP upload service
  updates unread
  */
 -(void) handleNewMessage:(NSNotification *)notification;
-
--(void) setKeepAlivetimer;
--(void) clearKeepAlive;
 
 -(void) resetForeground;
 

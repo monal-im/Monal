@@ -4,7 +4,9 @@
 <dict>
 	<key>aps-environment</key>
 	<string>development</string>
-	<key>com.apple.developer.default-data-protection</key>
-	<string>NSFileProtectionComplete</string>
+	<key>keychain-access-groups</key>
+	<array>
+		<string>$(AppIdentifierPrefix)G7YU7X7KRJ.SworIM</string>
+	</array>
 </dict>
 </plist>

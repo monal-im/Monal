@@ -14,12 +14,13 @@
 #import "MLXMPPManager.h"
 
 
+
 #if TARGET_OS_IPHONE
 #import "UIAlertView+Blocks.h"
-#import "PasswordManager.h"
-#else
-#import "STKeyChain.h"
 #endif
+
+#import "SAMKeychain.h"
+
 
 #import "MLImageManager.h"
 
@@ -44,7 +45,7 @@
 #import "MLHTTPRequest.h"
 
 
-
+@import Darwin.POSIX.sys.time; 
 
 #define kXMPPReadSize 5120 // bytes
 
@@ -66,6 +67,12 @@ NSString *const kData=@"data";
 NSString *const kContact=@"contact";
 
 NSString *const kCompletion=@"completion";
+
+
+NSString *const kXMPPError =@"error";
+NSString *const kXMPPSuccess =@"success";
+NSString *const kXMPPPresence = @"presence";
+
 
 static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
@@ -232,30 +239,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     if((_iStream==nil) || (_oStream==nil))
     {
         DDLogError(@"Connection failed");
+        [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, @"Unable to connect to server"]];
+        
         return;
     }
-    else
+    else {
         DDLogInfo(@"streams created ok");
+    }
     
-    #if TARGET_OS_IPHONE
-    if((CFReadStreamSetProperty((__bridge CFReadStreamRef)_iStream,
-                                kCFStreamNetworkServiceType,  kCFStreamNetworkServiceTypeVoIP))
-       //       &&
-       //       (CFWriteStreamSetProperty((__bridge CFWriteStreamRef)_oStream,
-       //                                 kCFStreamNetworkServiceType,  kCFStreamNetworkServiceTypeVoIP))
-       )
-    {
-        DDLogInfo(@"Set VOIP properties on streams.");
-    }
-    else
-    {
-        DDLogInfo(@"could not set VOIP properties on streams.");
-    }
-#else
-
-#endif
  
-    
     if((_SSL==YES)  && (_oldStyleSSL==YES))
     {
         // do ssl stuff here
@@ -363,7 +355,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                           object:[NXOAuth2AccountStore sharedStore]
                                                            queue:nil
                                                       usingBlock:^(NSNotification *aNotification){
-                                                          NSError *error = [aNotification.userInfo objectForKey:NXOAuth2AccountStoreErrorKey];
+//                                                          NSError *error = [aNotification.userInfo objectForKey:NXOAuth2AccountStoreErrorKey];
                                                           // Do something with the error
                                                       }];
         
@@ -377,7 +369,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         [[NSNotificationCenter defaultCenter] addObserverForName:NXOAuth2AccountDidChangeAccessTokenNotification
                                                           object:self.oauthAccount queue:nil usingBlock:^(NSNotification *note) {
                                                               
-                                                              NSError *error;
+                                                            
                                                               self.password= self.oauthAccount.accessToken.accessToken;
                                                               
                                                               [self reconnect];
@@ -511,8 +503,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self disconnectWithCompletion:nil];
 }
 
--(void) disconnectWithCompletion:(void(^)(void))completion
+-(void) closeSocket
 {
+
     if(self.explicitLogout && _accountState>=kStateHasStream)
     {
         if(_accountState>=kStateBound)
@@ -566,10 +559,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         return;
     }
     
-    [self.networkQueue cancelAllOperations];
 
+    [self.networkQueue cancelAllOperations];
+    
     [self.networkQueue addOperationWithBlock:^{
+
         self.connectedTime =nil; 
+
         self.pingID=nil;
         DDLogInfo(@"removing streams");
         
@@ -604,12 +600,45 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         {
             DDLogError(@"Exception in ostream close");
         }
-     
+        
         _iStream=nil;
         _oStream=nil;
         
-   
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountStatusChanged object:nil];
+     
+        
+    }];
+}
+
+-(void) disconnectWithCompletion:(void(^)(void))completion
+{
+    if(self.explicitLogout && _accountState>=kStateHasStream)
+    {
+        MLXMLNode* stream = [[MLXMLNode alloc] init];
+        stream.element=@"/stream:stream"; //hack to close stream
+        [self writeToStream:stream.XMLString]; // dont even bother queueing
+        [[NSUserDefaults standardUserDefaults] removeObjectForKey:[NSString stringWithFormat:@"stream_%@",self.accountNo]];
+        
+        self.streamID=nil;
+    }
     
+    if(_accountState == kStateDisconnected) {
+        
+        _startTLSComplete=NO;
+        _streamHasSpace=NO;
+        _loginStarted=NO;
+        _loginStartTimeStamp=nil;
+        _loginError=NO;
+        _reconnectScheduled =NO;
+        
+        if(completion)completion();
+        return;
+    }
+    
+    [self closeSocket];
+    
+   
+    [self.networkQueue addOperationWithBlock:^{
     
     [_contactsVC clearContactsForAccount:_accountNo];
     [[DataLayer sharedInstance] resetContactsForAccount:_accountNo];
@@ -655,12 +684,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     
     [[DataLayer sharedInstance]  resetContactsForAccount:_accountNo];
- 
-    
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountStatusChanged object:nil];
-        if(completion) completion();
-        
+    if(completion) completion();
     }];
+    
+ 
 }
 
 -(void) reconnect
@@ -691,7 +718,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     _loginStarted=YES;
 #if TARGET_OS_IPHONE
     
-    __block UIBackgroundTaskIdentifier reconnectBackgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
+    __block  reconnectBackgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
         
         if((([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
             || ([UIApplication sharedApplication].applicationState==UIApplicationStateInactive )) && _accountState<kStateHasStream)
@@ -940,11 +967,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         toReturn= nil;
         return nil;
     }
-    
-    
     NSInteger finalstart=0;
     NSInteger finalend=0;
-    
     
     NSInteger startpos=startrange.location;
     DDLogVerbose(@"start pos%ld", (long)startpos);
@@ -958,41 +982,29 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             if((pos.location<maxPos) && (pos.location!=NSNotFound))
             {
                 stanzaType=[_stanzaTypes objectAtIndex:stanzacounter];
-                
-                
-                if([[_stanzaTypes objectAtIndex:stanzacounter] isEqualToString:@"stream:stream"])
-                {
+                 if([[_stanzaTypes objectAtIndex:stanzacounter] isEqualToString:@"stream:stream"]) {
                     //no children and one line stanza
                     NSRange endPos=[_inputBuffer rangeOfString:@">"
                                                        options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, maxPos-pos.location)];
                     
-                    if((endPos.location<maxPos) && (endPos.location!=NSNotFound))
-                    {
-                        
-                        finalstart=pos.location;
+                    if((endPos.location<maxPos) && (endPos.location!=NSNotFound)) {
+                    finalstart=pos.location;
                         finalend=endPos.location+1;//+2 to inclde closing />
                         DDLogVerbose(@"at  1");
                         break;
                     }
-                    
-                    
                 }
-                else
-                {
-                    
-                    
-                    NSRange dupePos=[_inputBuffer rangeOfString:[NSString stringWithFormat:@"<%@",[_stanzaTypes objectAtIndex:stanzacounter]]
+                else  {
+                     NSRange dupePos=[_inputBuffer rangeOfString:[NSString stringWithFormat:@"<%@",[_stanzaTypes objectAtIndex:stanzacounter]]
                                                         options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location+1, maxPos-pos.location-1)];
                  
                     
-                    if([stanzaType isEqualToString:@"message"] && dupePos.location!=NSNotFound)
-                    {
+                    if([stanzaType isEqualToString:@"message"] && dupePos.location!=NSNotFound) {
                         //check for carbon forwarded
                         NSRange forwardPos=[_inputBuffer rangeOfString:@"<forwarded"
                                                                options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, dupePos.location-pos.location-1)];
                         
-                        if(forwardPos.location!=NSNotFound)
-                        {
+                        if(forwardPos.location!=NSNotFound) {
                             
                             //look for next message close
                             NSRange forwardClosePos=[_inputBuffer rangeOfString:@"</forwarded"
@@ -1003,19 +1015,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                                           options:NSCaseInsensitiveSearch range:NSMakeRange(forwardClosePos.location, maxPos-forwardClosePos.location)];
                                 //ensure it is set to future max
                                 
-                                
                                 finalstart=pos.location;
                                 finalend=messageClose.location+messageClose.length+1; //+1 to inclde closing <
                                 DDLogVerbose(@"at  2.5");
                                 break;
                             }
-                          
+                            
                         }
-                        
-                        
                     }
-
-                    
+  
                     //since there is another block of the same stanza, short cuts dont work.check to find beginning of next element
                     if((dupePos.location<maxPos) && (dupePos.location!=NSNotFound))
                     {
@@ -1028,9 +1036,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     NSRange closePos=[_inputBuffer rangeOfString:[NSString stringWithFormat:@"</%@",stanzaType]
                                                          options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, maxPos-pos.location)];
                     
-                    
-                    if((closePos.location<maxPos) && (closePos.location!=NSNotFound))
-                    {
+                    if((closePos.location<maxPos) && (closePos.location!=NSNotFound)){
                         //we have the start of the stanza close
                         
                         NSRange endPos=[_inputBuffer rangeOfString:@">"
@@ -1041,33 +1047,40 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         DDLogVerbose(@"at  3");
                         break;
                     }
-                    else
-                    {
-                        //no children and one line stanzas
+                    else {
+                        
+                        //check if self closed
                         NSRange endPos=[_inputBuffer rangeOfString:@"/>"
                                                            options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, maxPos-pos.location)];
                         
-                        if((endPos.location<maxPos) && (endPos.location!=NSNotFound))
+                        //are ther children, then not self closed
+                        if(endPos.location<maxPos && endPos.location!=NSNotFound)
                         {
-                            
+                            NSRange childPos=[_inputBuffer rangeOfString:[NSString stringWithFormat:@"<"]
+                                                                 options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location+1, maxPos-endPos.location)];
+                            if((childPos.location<maxPos) && (childPos.location!=NSNotFound)){
+                                DDLogVerbose(@"at  3.5 looks like incomplete stanza. need to get more");
+                                break;
+                            }
+                        }
+                        
+                        
+                        if((endPos.location<maxPos) && (endPos.location!=NSNotFound)) {
                             finalstart=pos.location;
                             finalend=endPos.location+2; //+2 to inclde closing />
-                            DDLogVerbose(@"at  4");
+                            DDLogVerbose(@"at  4 self closed");
                             break;
                         }
                         else
-                            if([[_stanzaTypes objectAtIndex:stanzacounter] isEqualToString:@"stream"])
-                            {
-                                
+                            if([[_stanzaTypes objectAtIndex:stanzacounter] isEqualToString:@"stream"]) {
                                 //stream will have no terminal.
                                 finalstart=pos.location;
                                 finalend=maxPos;
-                                DDLogVerbose(@"at  5");
+                                DDLogVerbose(@"at  5 stream");
                             }
-                        
+
                     }
-                    
-                    
+
                 }
             }
             stanzacounter++;
@@ -1787,14 +1800,18 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                 if(!presenceNode.MUC) {
                                     // do not do this in the background
                                     
-                                    BOOL checkChange = YES;
+                                   __block  BOOL checkChange = YES;
                                 
                                     
     #if TARGET_OS_IPHONE
-                                    if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
-                                    {
-                                        checkChange=NO;
-                                    }
+                                    //TODO maybe not a good idea to do this. but bad to crash as well.  fix later. 
+                                    dispatch_sync(dispatch_get_main_queue(), ^{
+                                        if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
+                                        {
+                                            checkChange=NO;
+                                        }
+                                    });
+                                    
     #else
     #endif
                                     
@@ -1853,6 +1870,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"stream:error"])
                 {
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, @"XMPP stream error"]];
+                    
                     [self disconnect];
                     [self reconnect:5];
                 }
@@ -1963,8 +1982,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         if(self.supportsSM3 && self.streamID) {
                             MLXMLNode *resumeNode=[[MLXMLNode alloc] initWithElement:@"resume"];
                             NSDictionary *dic=@{@"xmlns":@"urn:xmpp:sm:3",@"h":[NSString stringWithFormat:@"%@",self.lastHandledInboundStanza], @"previd":self.streamID };
+
                             resumeNode.attributes=[dic mutableCopy];
                             self.resuming=YES;      //this is needed to distinguish a failed smacks resume and a failed smacks enable later on
+
                             [self send:resumeNode];
                         }
                         else {
@@ -2037,8 +2058,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         [self queryPresence];
                     }
                 }
-                else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"failed"])
+                else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"failed"]) // stream resume failed
                 {
+
                     if(self.resuming)   //resume failed
                     {
                         self.resuming=NO;
@@ -2080,6 +2102,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                 }
                         }]];
                     }
+
                 }
                 
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"features"])
@@ -2154,7 +2177,21 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"failure"])
                 {
+                   
                     ParseFailure* failure = [[ParseFailure alloc] initWithDictionary:stanzaToParse];
+                    
+                    NSString *message=failure.text;
+                    if(failure.notAuthorized)
+                    {
+                        if(!message) message =@"Not Authorized. Please check your credentials.";
+                    }
+                    else  {
+                         if(!message) message =@"There was a SASL error on the server."; 
+                    }
+                    
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, message]];
+                    
+                    
                     if(failure.saslError || failure.notAuthorized)
                     {
                         _loginError=YES;
@@ -2313,7 +2350,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         if(streamNode.SASLSuccess)
                         {
                             DDLogInfo(@"Got SASL Success");
-                            
+                           
                             srand([[NSDate date] timeIntervalSince1970]);
                             
                             [self startStream];
@@ -2403,6 +2440,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 
 #pragma mark set connection attributes
+
 
 -(void) persistState
 {
@@ -2506,7 +2544,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
 }
 
--(void) queryDisco
+-(void) disconnectToResume
+{
+    [self closeSocket]; // just closing socket to simulate a unintentional disconnect
+}
+
+-(void) enableSM3
+
 {
     XMPPIQ* discoItems =[[XMPPIQ alloc] initWithType:kiqGetType];
     [discoItems setiqTo:_domain];
@@ -2864,17 +2908,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         case NSStreamEventOpenCompleted:
         {
             DDLogVerbose(@"Stream open completed");
-            //            if(stream ==_iStream) {
-            //                CFDataRef socketData = CFReadStreamCopyProperty((__bridge CFReadStreamRef)(stream), kCFStreamPropertySocketNativeHandle);
-            //                CFSocketNativeHandle socket;
-            //                CFDataGetBytes(socketData, CFRangeMake(0, sizeof(CFSocketNativeHandle)), (UInt8 *)&socket);
-            //                CFRelease(socketData);
-            //
-            //                int on = 1;
-            //                if (setsockopt(socket, SOL_SOCKET, SO_KEEPALIVE, &on, sizeof(on)) == -1) {
-            //                    DDLogVerbose(@"setsockopt failed: %s", strerror(errno));
-            //                }
-            //            }
+           
         }
             //for writing
         case NSStreamEventHasSpaceAvailable:
@@ -2903,6 +2937,34 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         {
             NSError* st_error= [stream streamError];
             DDLogError(@"Stream error code=%ld domain=%@   local desc:%@ ",(long)st_error.code,st_error.domain,  st_error.localizedDescription);
+            
+            NSString *message =st_error.localizedDescription;
+            
+            switch(st_error.code)
+            {
+                case errSSLXCertChainInvalid: {
+                    message = @"SSL Error: Certificate chain is invalid";
+                break;
+                }
+                    
+                case errSSLUnknownRootCert: {
+                    message = @"SSL Error: Unknown root certificate";
+                    break;
+                }
+                    
+                case errSSLCertExpired: {
+                    message = @"SSL Error: Certificate expired";
+                    break;
+                }
+                    
+                case errSSLHostNameMismatch: {
+                    message = @"SSL Error: Host name mismatch";
+                    break;
+                }
+                   
+            }
+            
+            [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, message]];
             
             //everythign comes twice just use the input stream
             if(stream==_oStream){
@@ -3312,44 +3374,18 @@ void query_cb(const DNSServiceRef DNSServiceRef, const DNSServiceFlags flags, co
 }
 
 
-/*
- // this is useful later for ichat bonjour
- 
- #pragma mark DNS service discovery
- - (void)netServiceBrowserWillSearch:(NSNetServiceBrowser *)netServiceBrowser
- {
- DDLogVerbose(@"began service search of domain %@", domain);
- }
- 
- 
- - (void)netServiceBrowser:(NSNetServiceBrowser *)netServiceBrowser didNotSearch:(NSDictionary *)errorInfo
- {
- DDLogVerbose(@"did not  service search");
- }
- 
- - (void)netServiceBrowser:(NSNetServiceBrowser *)netServiceBrowser didFindService:(NSNetService *)netService moreComing:(BOOL)moreServicesComing
- {
- [netService retain];
- DDLogVerbose(@"Add service %@. %@ %@\n", [netService name], [netService type], [netService domain]);
- }
- 
- - (void)netServiceBrowserDidStopSearch:(NSNetServiceBrowser *)netServiceBrowser
- {
- DDLogVerbose(@"stopped service search");
- }
- */
-
 -(void) enablePush
 {
     if(self.accountState>=kStateBound && [self.pushNode length]>0 && [self.pushSecret length]>0 && self.supportsPush)
+    //TODO there is a race condition on how this is called when fisrt logging in.
     {
-        DDLogInfo(@"************************ ENABLING PUSH: %@ < %@", self.pushNode, self.pushSecret);
+        DDLogInfo(@"ENABLING PUSH: %@ < %@", self.pushNode, self.pushSecret);
         XMPPIQ* enable =[[XMPPIQ alloc] initWithType:kiqSetType];
         [enable setPushEnableWithNode:self.pushNode andSecret:self.pushSecret];
         [self send:enable];
     }
     else
-        DDLogInfo(@"************************ NOT enabling push: %@ < %@", self.pushNode, self.pushSecret);
+        DDLogInfo(@" NOT enabling push: %@ < %@", self.pushNode, self.pushSecret);
 }
 
 @end

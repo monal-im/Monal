@@ -11,7 +11,7 @@
 #import "MLImageManager.h"
 
 
-@interface ContactsViewController : UIViewController <UITableViewDataSource, UITableViewDelegate>
+@interface ContactsViewController : UITableViewController
 
 /**
  This may not be the tab bar (ipad) that this VC is in. But alerts should be shown from it.
@@ -57,11 +57,6 @@
  Receives the new message notice and will update if it is this user.
  */
 -(void) handleNewMessage:(NSNotification *)notification;
-
-/**
- Presents a dialog to send a message to an xmppp user to add them as a contact. 
- */
--(void)addContact;
 
 /**
  Presents a specific chat

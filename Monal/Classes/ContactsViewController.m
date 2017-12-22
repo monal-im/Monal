@@ -28,7 +28,6 @@
 @property (nonatomic ,strong) NSMutableArray* contacts;
 @property (nonatomic ,strong) NSMutableArray* offlineContacts;
 @property (nonatomic ,strong) NSDictionary* lastSelectedUser;
-@property (nonatomic ,strong) UIPopoverController* popOverController;
 
 @end
 
@@ -43,17 +42,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
     self.navigationItem.title=NSLocalizedString(@"Contacts",@"");
-    self.view.autoresizingMask=UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
-    
-    _contactsTable=(UITableView *)self.view;
+  
+    _contactsTable=self.tableView;
     _contactsTable.delegate=self;
     _contactsTable.dataSource=self;
     
-    self.view=_contactsTable;
-    
-    self.view.backgroundColor =[UIColor whiteColor];
-  
-    
+
     _contacts=[[NSMutableArray alloc] init] ;
     _offlineContacts=[[NSMutableArray alloc] init] ;
     _infoCells=[[NSMutableArray alloc] init] ;
@@ -68,6 +62,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self.searchDisplayController.searchResultsTableView registerNib:[UINib nibWithNibName:@"MLContactCell"
                                                                                      bundle:[NSBundle mainBundle]]
                                                forCellReuseIdentifier:@"ContactCell"];
+    
+    self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
     
 }
 
@@ -87,54 +83,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     [[MLXMPPManager sharedInstance] handleNewMessage:nil];
     
-    
-    if([MLXMPPManager sharedInstance].connectedXMPP.count >0 ) {
-        UIBarButtonItem* rightButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(addContact)];
-        self.navigationItem.rightBarButtonItem=rightButton;
-        
-        //    UIBarButtonItem* leftButton = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"menu"] style:UIBarButtonItemStylePlain target:self action:@selector(showMenu)];
-        //    self.navigationItem.leftBarButtonItem=leftButton;
-    }
-    
-    
 }
 
 -(void) viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
-    if(![[NSUserDefaults standardUserDefaults] boolForKey:@"hasSeenSelfSignedMessage"])
-    {
-    //if there are enabed accounts and alert hasnt been shown
-  
-        
-        [[DataLayer sharedInstance] accountListWithCompletion:^(NSArray *result) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                 NSArray* accountList=result;
-                int count=0;
-                for (NSDictionary* account in accountList)
-                {
-                    if([[account objectForKey:@"enabled"] boolValue]==YES)
-                    {
-                        count++;
-                    }
-                }
-                
-                if(count>0)
-                {
-                    UIAlertView *addError = [[UIAlertView alloc]
-                                             initWithTitle:@"Changes to SSL"
-                                             message:@"Monal has changed the way it treats self signed SSL certificates. If you already had an account created and your server uses a self signed SSL certificate, please go to accounts and explicity set the account to allow self signed SSL. This is a new option."
-                                             delegate:self cancelButtonTitle:@"Close"
-                                             otherButtonTitles: nil] ;
-                    [addError show];
-                    
-                }
-            });
-            
-        }];
-        
-        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"hasSeenSelfSignedMessage"];
-    }
+
 }
 
 
@@ -150,30 +104,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     // Dispose of any resources that can be recreated.
 }
 
-#pragma mark Actions
--(void)addContact
-{
-    //present modal view
-    addContact* addcontactView =[[addContact alloc] init];
-    UINavigationController* addContactNav = [[UINavigationController alloc] initWithRootViewController:addcontactView];
-    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
-    {
-        addContactNav.modalPresentationStyle=UIModalPresentationFormSheet;
-    }
-    [self.navigationController presentViewController:addContactNav animated:YES completion:nil];
-}
 
--(void)showMenu
-{
-    //present modal view
-    addContact* addcontactView =[[addContact alloc] init];
-    UINavigationController* addContactNav = [[UINavigationController alloc] initWithRootViewController:addcontactView];
-    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
-    {
-        addContactNav.modalPresentationStyle=UIModalPresentationFormSheet;
-    }
-    [self.navigationController presentViewController:addContactNav animated:YES completion:nil];
-}
 
 #pragma mark updating info display
 -(void) showConnecting:(NSDictionary*) info
@@ -601,17 +532,19 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     NSNumber *showAlert =[notification.userInfo objectForKey:@"showAlert"];
     
-    if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground || !showAlert.boolValue)
-    {
-        return;
-    }
+    dispatch_sync(dispatch_get_main_queue(),^{
+        if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground || !showAlert.boolValue)
+        {
+            return;
+        }
+    });
     
     DDLogVerbose(@"chat view got new message notice %@", notification.userInfo);
     if([[self.currentNavController topViewController] isKindOfClass:[chatViewController class]]) {
         chatViewController* currentTop=(chatViewController*)[self.currentNavController topViewController];
         if( (([currentTop.contactName isEqualToString:[notification.userInfo objectForKey:@"from"]] )|| ([currentTop.contactName isEqualToString:[notification.userInfo objectForKey:@"to"]] )) &&
            [currentTop.accountNo isEqualToString:
-            [NSString stringWithFormat:@"%d",[[notification.userInfo objectForKey:kaccountNoKey] integerValue] ]]
+            [NSString stringWithFormat:@"%ld",[[notification.userInfo objectForKey:kaccountNoKey] integerValue] ]]
            )
         {
             return;
@@ -663,39 +596,20 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) presentChatWithRow:(NSDictionary *)row
 {
-    //make chat view
-    UIStoryboard *storyBoard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
-    chatViewController* chatVC = [storyBoard instantiateViewControllerWithIdentifier:@"chatViewController"];
-    [chatVC setupWithContact:row];
-    
-    if([[self.currentNavController topViewController] isKindOfClass:[chatViewController class]])
-    {
-        chatViewController* currentTop=(chatViewController*)[self.currentNavController topViewController];
-        if([currentTop.contactName isEqualToString:[row objectForKey:@"buddy_name"]] &&
-           [currentTop.accountNo isEqualToString:
-            [NSString stringWithFormat:@"%d",[[row objectForKey:@"account_id"] integerValue]] ]
-           )
-        {
-            // do nothing
-            return;
-        }
-        else
-        {            
-            [self.currentNavController  popToRootViewControllerAnimated:NO];
+    [self  performSegueWithIdentifier:@"showConversation" sender:row];
+}
 
-        }
-    }
-    
-    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
+-(void) prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+{
+    if([segue.identifier isEqualToString:@"showConversation"])
     {
-        [self.currentNavController pushViewController:chatVC animated:NO];
-    }
-    else  {
-        [self.currentNavController pushViewController:chatVC animated:YES];
-        
+        UINavigationController *nav = segue.destinationViewController;
+        chatViewController* chatVC = (chatViewController *)nav.topViewController;
+        [chatVC setupWithContact:sender];
     }
     
 }
+
 
 #pragma mark search display delegate
 
@@ -1000,36 +914,22 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 - (void)tableView:(UITableView *)tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath *)indexPath
 {
-    ContactDetails* detailVC =nil;
+    NSDictionary *contactDic;
     if(tableView ==self.view) {
-        if(indexPath.section==konlineSection)
-            detailVC= [[ContactDetails alloc]  initWithContact:[_contacts objectAtIndex:indexPath.row] ];
-        else
-            detailVC=[[ContactDetails alloc]  initWithContact:[_offlineContacts objectAtIndex:indexPath.row] ];
+        if(indexPath.section==konlineSection) {
+            contactDic=[_contacts objectAtIndex:indexPath.row];
+        }
+        else {
+            contactDic=[_offlineContacts objectAtIndex:indexPath.row];
+        }
     }
     
     else  if(tableView ==self.searchDisplayController.searchResultsTableView)
     {
-        detailVC=[[ContactDetails alloc]  initWithContact:[self.searchResults objectAtIndex:indexPath.row] ];
+        contactDic=  [self.searchResults objectAtIndex:indexPath.row];
     }
     
-    detailVC.currentNavController=self.currentNavController;
-    
-    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
-    {
-        MLChatCell* cell = (MLChatCell*)[tableView cellForRowAtIndexPath:indexPath];
-        _popOverController = [[UIPopoverController alloc] initWithContentViewController:detailVC];
-        detailVC.popOverController=_popOverController;
-        _popOverController.popoverContentSize = CGSizeMake(320, 480);
-        [_popOverController presentPopoverFromRect:cell.bounds
-                                            inView:cell
-                          permittedArrowDirections:UIPopoverArrowDirectionLeft animated:YES];
-    }
-    else
-    {
-        [self.currentNavController pushViewController:detailVC animated:YES];
-    }
-    
+    [self performSegueWithIdentifier:@"showDetails" sender:contactDic];
 }
 
 -(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath

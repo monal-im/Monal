@@ -23,9 +23,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 @property (nonatomic, strong)  NSDateFormatter* destinationDateFormat;
 @property (nonatomic, strong)  NSDateFormatter* sourceDateFormat;
 @property (nonatomic, strong)  NSCalendar *gregorian;
-@property (nonatomic, assign) NSInteger thisyear;
-@property (nonatomic, assign) NSInteger thismonth;
-@property (nonatomic, assign) NSInteger thisday;
+@property (nonatomic, assign)  NSInteger thisyear;
+@property (nonatomic, assign)  NSInteger thismonth;
+@property (nonatomic, assign)  NSInteger thisday;
 @property (nonatomic, strong)  MBProgressHUD *uploadHUD;
 
 
@@ -216,16 +216,12 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 #pragma mark rotation
 
-- (BOOL)shouldAutorotate
-{
-   	[self.chatInput resignFirstResponder];
-    return YES;
-}
 
--(void) willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
+-(void) viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
 {
     [self.chatInput resignFirstResponder];
 }
+
 
 #pragma mark gestures
 
@@ -317,7 +313,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 - (void) uploadImageToDropBox:(NSData *) imageData {
 
-    NSString *fileName = [NSString stringWithFormat:@"%@.png",[NSUUID UUID].UUIDString];
+    NSString *fileName = [NSString stringWithFormat:@"%@.jpg",[NSUUID UUID].UUIDString];
     NSString *tempDir = NSTemporaryDirectory();
     NSString *imagePath = [tempDir stringByAppendingPathComponent:fileName];
     [imageData writeToFile:imagePath atomically:YES];
@@ -401,8 +397,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     if(!self.uploadHUD) {
         self.uploadHUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
         self.uploadHUD.removeFromSuperViewOnHide=YES;
-        self.uploadHUD.labelText =@"Uploding";
-        self.uploadHUD.detailsLabelText =@"Upoading file to server";
+        self.uploadHUD.label.text =@"Uploding";
+        self.uploadHUD.detailsLabel.text =@"Upoading file to server";
         
     }
     
@@ -414,7 +410,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         [self uploadImageToDropBox:data];
     }
     else  {
-        [[MLXMPPManager sharedInstance]  httpUploadPngData:data toContact:self.contactName onAccount:self.accountNo withCompletionHandler:^(NSString *url, NSError *error) {
+        [[MLXMPPManager sharedInstance]  httpUploadJpegData:data toContact:self.contactName onAccount:self.accountNo withCompletionHandler:^(NSString *url, NSError *error) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 self.uploadHUD.hidden=YES;
                 
@@ -445,10 +441,10 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     if([mediaType isEqualToString:(NSString *)kUTTypeImage]) {
         UIImage *selectedImage= info[UIImagePickerControllerEditedImage];
         if(!selectedImage) selectedImage= info[UIImagePickerControllerOriginalImage];
-        NSData *pngData=  UIImageJPEGRepresentation(selectedImage, 0.5f);
-        if(pngData)
+        NSData *jpgData=  UIImageJPEGRepresentation(selectedImage, 0.5f);
+        if(jpgData)
         {
-            [self uploadData:pngData];
+            [self uploadData:jpgData];
         }
         
     }
@@ -637,12 +633,12 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     [self.sourceDateFormat setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
    
     self.gregorian = [[NSCalendar alloc]
-                             initWithCalendarIdentifier:NSGregorianCalendar];
+                             initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
     
     NSDate* now =[NSDate date];
-    self.thisday =[self.gregorian components:NSDayCalendarUnit fromDate:now].day;
-    self.thismonth =[self.gregorian components:NSMonthCalendarUnit fromDate:now].month;
-    self.thisyear =[self.gregorian components:NSYearCalendarUnit fromDate:now].year;
+    self.thisday =[self.gregorian components:NSCalendarUnitDay fromDate:now].day;
+    self.thismonth =[self.gregorian components:NSCalendarUnitMonth fromDate:now].month;
+    self.thisyear =[self.gregorian components:NSCalendarUnitYear fromDate:now].year;
 
     
 }
@@ -677,9 +673,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         NSTimeInterval interval = destinationGMTOffset - sourceGMTOffset;
         NSDate* destinationDate = [[NSDate alloc] initWithTimeInterval:interval sinceDate:sourceDate];
         
-        NSInteger msgday =[self.gregorian components:NSDayCalendarUnit fromDate:destinationDate].day;
-        NSInteger msgmonth=[self.gregorian components:NSMonthCalendarUnit fromDate:destinationDate].month;
-        NSInteger msgyear =[self.gregorian components:NSYearCalendarUnit fromDate:destinationDate].year;
+        NSInteger msgday =[self.gregorian components:NSCalendarUnitDay fromDate:destinationDate].day;
+        NSInteger msgmonth=[self.gregorian components:NSCalendarUnitMonth fromDate:destinationDate].month;
+        NSInteger msgyear =[self.gregorian components:NSCalendarUnitYear fromDate:destinationDate].year;
         
         if ((self.thisday!=msgday) || (self.thismonth!=msgmonth) || (self.thisyear!=msgyear))
         {
@@ -1057,7 +1053,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     NSTimeInterval animationDuration =[[[notification userInfo] objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
     [UIView animateWithDuration:animationDuration
                      animations:^{
-                         self.inputContainerBottom.constant= keyboardSize.height;
+                         self.inputContainerBottom.constant= keyboardSize.height-self.tabBarController.tabBar.frame.size.height;
                          
                      } completion:^(BOOL finished) {
                          

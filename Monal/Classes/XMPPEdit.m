@@ -10,8 +10,9 @@
 #import "MLAccountCell.h"
 #import "MLButtonCell.h"
 #import "NXOAuth2.h"
-#import "MLOAuthViewController.h"
 #import "NXOAuth2AccountStore.h"
+#import "MBProgressHUD.h"
+#import "MLServerDetails.h"
 
 #import "tools.h"
 
@@ -34,22 +35,13 @@ NSString *const kGtalk = @"Gtalk";
 
 @property (nonatomic, weak) UITextField *currentTextField;
 @property (nonatomic, strong) NSURL *oAuthURL;
-@property (nonatomic, assign) BOOL autoSave;
+
 
 @end
 
 
 @implementation XMPPEdit
 
-
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
-{
-    self = [super initWithNibName:@"XMPPEdit" bundle:nibBundleOrNil];
-    if (self) {
-        // Custom initialization
-    }
-    return self;
-}
 
 -(void) hideKeyboard
 {
@@ -90,21 +82,26 @@ NSString *const kGtalk = @"Gtalk";
     {
         //edit
         DDLogVerbose(@"reading account number %@", _accountno);
+        if([_db accountVals:_accountno].count==0 )
+        {
+            //present another UI here.
+            return;
+            
+        }
         NSDictionary* settings=[[_db accountVals:_accountno] objectAtIndex:0]; //only one row
         
         //allow blank domains.. dont show @ if so
-        if([[settings objectForKey:@"domain"] length]>0)
+        if([[settings objectForKey:@"domain"] length]>0) {
             self.jid=[NSString stringWithFormat:@"%@@%@",[settings objectForKey:@"username"],[settings objectForKey:@"domain"]];
-        else
+        }
+        else {
             self.jid=[NSString stringWithFormat:@"%@",[settings objectForKey:@"username"]];
+        }
         
+        NSString*pass= [SAMKeychain passwordForService:@"Monal" account:[NSString stringWithFormat:@"%@",self.accountno]];
         
-        PasswordManager* pass= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@-%@",self.accountno,self.jid]];
-        self.password=[pass getPassword];
-        if(self.password.length==0)
-        {
-            pass= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@",self.accountno]];
-            self.password=[pass getPassword];
+        if(pass) {
+            self.password =pass;
         }
         
         self.server=[settings objectForKey:@"server"];
@@ -149,8 +146,7 @@ NSString *const kGtalk = @"Gtalk";
     
     self.sectionArray = @[@"Account", @"Advanced Settings",@""];
     
-    self.tableView.backgroundView=nil;
-  
+
     [[NSNotificationCenter defaultCenter] addObserverForName:NXOAuth2AccountStoreAccountsDidChangeNotification
                                                       object:[NXOAuth2AccountStore sharedStore]
                                                        queue:nil
@@ -168,7 +164,7 @@ NSString *const kGtalk = @"Gtalk";
                                                       object:[NXOAuth2AccountStore sharedStore]
                                                        queue:nil
                                                   usingBlock:^(NSNotification *aNotification){
-                                                      NSError *error = [aNotification.userInfo objectForKey:NXOAuth2AccountStoreErrorKey];
+                                                     //NSError *error = [aNotification.userInfo objectForKey:NXOAuth2AccountStoreErrorKey];
                                                       // Do something with the error
                                                   }];
     
@@ -179,7 +175,7 @@ NSString *const kGtalk = @"Gtalk";
 {
     [super viewWillAppear:animated];
     DDLogVerbose(@"xmpp edit view will appear");
-    self.autoSave=YES;
+    
     
 }
 
@@ -187,9 +183,7 @@ NSString *const kGtalk = @"Gtalk";
 {
     [super viewWillDisappear:animated];
     DDLogVerbose(@"xmpp edit view will hide");
-    if(self.autoSave) {
-        [self save];
-    }
+    
 }
 
 -(void) dealloc
@@ -199,7 +193,7 @@ NSString *const kGtalk = @"Gtalk";
 
 #pragma mark actions
 
--(void) save
+-(IBAction) save:(id) sender
 {
     [self.currentTextField resignFirstResponder];
     
@@ -241,10 +235,8 @@ NSString *const kGtalk = @"Gtalk";
         domain= @"";
     }
     
-    
     NSMutableDictionary *dic  = [[NSMutableDictionary alloc] init];
     [dic setObject:domain forKey:kDomain];
-    
     
     if(user) [dic setObject:user forKey:kUsername];
     if(self.server) [dic setObject:self.server  forKey:kServer];
@@ -263,8 +255,7 @@ NSString *const kGtalk = @"Gtalk";
     }
     
     [dic setObject:[NSNumber numberWithBool:isGtalk] forKey:kOauth];
-    
-    
+
     if(!self.editMode)
     {
         
@@ -282,11 +273,7 @@ NSString *const kGtalk = @"Gtalk";
                     [[DataLayer sharedInstance] executeScalar:@"select max(account_id) from account" withCompletion:^(NSObject * accountid) {
                         if(accountid) {
                             self.accountno=[NSString stringWithFormat:@"%@",accountid];
-                            if(!isGtalk && self.password) {
-                                PasswordManager* pass= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@-%@",self.accountno,self.jid]];
-                                [pass setPassword:self.password] ;
-                            }
-                            
+                           
                             if(self.enabled)
                             {
                                 DDLogVerbose(@"calling connect... ");
@@ -306,10 +293,8 @@ NSString *const kGtalk = @"Gtalk";
     else
     {
         [[DataLayer sharedInstance] updateAccounWithDictionary:dic andCompletion:^(BOOL result) {
-            if(!isGtalk) {
-                PasswordManager* pass= [[PasswordManager alloc] init:[NSString stringWithFormat:@"%@-%@",self.accountno,self.jid]];
-                [pass setPassword:self.password] ;
-            }
+          
+             [SAMKeychain setPassword:self.password forService:@"Monal" account:self.accountno];
             if(self.enabled)
             {
                 [[MLXMPPManager sharedInstance] connectAccount:self.accountno];
@@ -322,41 +307,57 @@ NSString *const kGtalk = @"Gtalk";
         
     }
     
-}
+    MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+    hud.mode = MBProgressHUDModeCustomView;
+    hud.removeFromSuperViewOnHide=YES;
+    hud.label.text =@"Success";
+    hud.detailsLabel.text =@"The account has been saved";
+    UIImage *image = [[UIImage imageNamed:@"success"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+    hud.customView = [[UIImageView alloc] initWithImage:image];
 
-
-
--(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
-{
-    if(buttonIndex==0)
-    {
-        
-        NSArray *accounts= [[NXOAuth2AccountStore sharedStore] accountsWithAccountType:self.jid];
-        NXOAuth2AccountStore *store = [NXOAuth2AccountStore sharedStore];
-        for(NXOAuth2Account *oauthAccount in accounts ) {
-            [store removeAccount:oauthAccount];
-        }
-       
-        //TODO remove password
-        self.autoSave=NO;
-        [self.db removeAccount:self.accountno];
-        [[MLXMPPManager sharedInstance] disconnectAccount:self.accountno];
-        [self.navigationController popViewControllerAnimated:true];
-        
-    }
+    [hud hideAnimated:YES afterDelay:1.0f];
+  
+    
 }
 
 - (IBAction) delClicked: (id) sender
 {
     DDLogVerbose(@"Deleting");
-  
-    UIActionSheet *popupQuery = [[UIActionSheet alloc] initWithTitle:@"Delete this account?" delegate:self
-                                                   cancelButtonTitle:@"No"
-                                              destructiveButtonTitle:@"Yes"
-                                                   otherButtonTitles:nil, nil];
+
+    UIAlertController *questionAlert =[UIAlertController alertControllerWithTitle:@"Delete Account" message:@"This will remove this account and the associated data from this device." preferredStyle:UIAlertControllerStyleActionSheet];
+    UIAlertAction *noAction =[UIAlertAction actionWithTitle:@"No" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+        
+    }];
     
-    popupQuery.actionSheetStyle =  UIActionSheetStyleBlackOpaque;
-   [popupQuery showFromTabBar:((UITabBarController*)self.navigationController.parentViewController).tabBar];
+    UIAlertAction *yesAction =[UIAlertAction actionWithTitle:@"Yes" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+       
+        NSArray *accounts= [[NXOAuth2AccountStore sharedStore] accountsWithAccountType:self.jid];
+        NXOAuth2AccountStore *store = [NXOAuth2AccountStore sharedStore];
+        for(NXOAuth2Account *oauthAccount in accounts ) {
+            [store removeAccount:oauthAccount];
+        }
+        
+        [SAMKeychain deletePasswordForService:@"Monal"  account:[NSString stringWithFormat:@"%@",self.accountno]];
+        [self.db removeAccount:self.accountno];
+        [[MLXMPPManager sharedInstance] disconnectAccount:self.accountno];
+      
+       
+        MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+        hud.mode = MBProgressHUDModeCustomView;
+        hud.removeFromSuperViewOnHide=YES;
+        hud.label.text =@"Success";
+        hud.detailsLabel.text =@"The account has been deleted";
+        UIImage *image = [[UIImage imageNamed:@"success"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+        hud.customView = [[UIImageView alloc] initWithImage:image];
+        
+        [hud hideAnimated:YES afterDelay:1.0f];
+        
+    }];
+    
+    [questionAlert addAction:noAction];
+    [questionAlert addAction:yesAction];
+    
+    [self presentViewController:questionAlert animated:YES completion:nil];
     
 }
 
@@ -365,35 +366,17 @@ NSString *const kGtalk = @"Gtalk";
 -(void)authenticateWithOAuth
 {
     self.password=@""; 
-    [[NXOAuth2AccountStore sharedStore] setClientID:@"472865344000-q63msgarcfs3ggiabdobkkis31ehtbug.apps.googleusercontent.com"
-                                             secret:@"IGo7ocGYBYXf4znad5Qhumjt"
+    [[NXOAuth2AccountStore sharedStore] setClientID:@"472865344000-invcngpma1psmiek5imc1gb8u7mef8l9.apps.googleusercontent.com"
+                                             secret:@""
                                               scope:[NSSet setWithArray:@[@"https://www.googleapis.com/auth/googletalk"]]
                                    authorizationURL:[NSURL URLWithString:@"https://accounts.google.com/o/oauth2/auth"]
                                            tokenURL:[NSURL URLWithString:@"https://www.googleapis.com/oauth2/v3/token"]
-                                        redirectURL:[NSURL URLWithString:@"urn:ietf:wg:oauth:2.0:oob:auto"]
+                                        redirectURL:[NSURL URLWithString:@"com.googleusercontent.apps.472865344000-invcngpma1psmiek5imc1gb8u7mef8l9://"]
                                       keyChainGroup:@"MonalGTalk"
                                      forAccountType:self.jid];
     
-    [[NXOAuth2AccountStore sharedStore] requestAccessToAccountWithType:self.jid
-                                   withPreparedAuthorizationURLHandler:^(NSURL *preparedURL){
-                                       
-                                       
-                                       self.oAuthURL= preparedURL;
-                                
-                                       MLOAuthViewController *oauthVC = [[MLOAuthViewController alloc] init];
-                                       
-                                       oauthVC.oAuthURL= self.oAuthURL;
-                                       oauthVC.completionHandler=^(NSString *token) {
-                                           //  self.password.stringValue = token;
-                                           NSURL *url=[NSURL URLWithString:[NSString stringWithFormat:@"urn:ietf:wg:oauth:2.0:oob:auto?code=%@", token]];
-                                           [[NXOAuth2AccountStore sharedStore] handleRedirectURL:url];
-                                           
-                                       };
-                                       self.autoSave=NO;
-                                       [self.navigationController pushViewController:oauthVC animated:YES];
-                                       
-                                       
-                                   }];
+    [[NXOAuth2AccountStore sharedStore] requestAccessToAccountWithType:self.jid];
+    
 }
 
 
@@ -407,9 +390,7 @@ NSString *const kGtalk = @"Gtalk";
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    
-    
-    DDLogVerbose(@"xmpp edit view section %d, row %d", indexPath.section, indexPath.row);
+    DDLogVerbose(@"xmpp edit view section %ld, row %ld", indexPath.section, indexPath.row);
     
     MLAccountCell* thecell=(MLAccountCell *)[tableView dequeueReusableCellWithIdentifier:@"AccountCell"];
     
@@ -465,6 +446,7 @@ NSString *const kGtalk = @"Gtalk";
                 thecell.toggleSwitch.hidden=YES;
                 thecell.textInputField.tag=3;
                 thecell.textInputField.text=self.server;
+                thecell.accessoryType=UITableViewCellAccessoryDetailButton;
                 break;
             }
                 
@@ -566,15 +548,10 @@ NSString *const kGtalk = @"Gtalk";
     
     [tempView addSubview:tempLabel];
     
-    if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0"))
-    {
-        tempLabel.textColor=[UIColor darkGrayColor];
-        tempLabel.text=  tempLabel.text.uppercaseString;
-        tempLabel.shadowColor =[UIColor clearColor];
-        tempLabel.font=[UIFont systemFontOfSize:[UIFont systemFontSize]];
-        
-    }
-    
+    tempLabel.textColor=[UIColor darkGrayColor];
+    tempLabel.text=  tempLabel.text.uppercaseString;
+    tempLabel.shadowColor =[UIColor clearColor];
+    tempLabel.font=[UIFont systemFontOfSize:[UIFont systemFontSize]];
     
     return tempView;
 }
@@ -604,15 +581,10 @@ NSString *const kGtalk = @"Gtalk";
     
 }
 
-
-
-#pragma mark table view delegate
-
-//table view delegate methods
-//required
+#pragma mark -  table view delegate
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)newIndexPath
 {
-    DDLogVerbose(@"selected log section %d , row %d", newIndexPath.section, newIndexPath.row);
+    DDLogVerbose(@"selected log section %ld , row %ld", newIndexPath.section, newIndexPath.row);
     if(newIndexPath.section==0 && newIndexPath.row==1)
     {
         if([self.accountType isEqualToString:kGtalk]){
@@ -626,8 +598,33 @@ NSString *const kGtalk = @"Gtalk";
     
 }
 
+-(void)tableView:(UITableView *)tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath *)indexPath
+{
+    if (indexPath.section==1)
+    {
+        switch (indexPath.row)
+        {
+                
+            case 0:  {
+                [self performSegueWithIdentifier:@"showServerDetails" sender:self];
+            }
+        }
+    }
+}
 
-#pragma mark text input  fielddelegate
+
+#pragma mark - segeue
+
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+{
+    if ([segue.identifier isEqualToString:@"showServerDetails"])
+    {
+        MLServerDetails *server= (MLServerDetails *)segue.destinationViewController;
+        server.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountno];
+    }
+}
+
+#pragma mark -  text input  fielddelegate
 
 - (void)textFieldDidBeginEditing:(UITextField *)textField
 {
@@ -635,8 +632,8 @@ NSString *const kGtalk = @"Gtalk";
     if(textField.tag==1) //user input field
     {
         if(textField.text.length >0) {
-            // Construct a new range using the object that adopts the UITextInput, our textfield
-            UITextRange *newRange = [textField textRangeFromPosition:0 toPosition:0];
+            UITextPosition *startPos=  textField.beginningOfDocument;
+            UITextRange *newRange = [textField textRangeFromPosition:startPos toPosition:startPos];
             
             // Set new range
             [textField setSelectedTextRange:newRange];

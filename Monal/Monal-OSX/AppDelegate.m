@@ -20,6 +20,7 @@
 #import <Fabric/Fabric.h>
 #import <Crashlytics/Crashlytics.h>
 #import "DDLog.h"
+#import "DataLayer.h"
 
 #import <DropboxOSX/DropboxOSX.h>
 
@@ -87,6 +88,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     return YES;	
 }
+
+-(void) application:(NSApplication *)application openURLs:(NSArray<NSURL *> *)urls
+{
+    NSURL *url= [urls firstObject];
+    [[NXOAuth2AccountStore sharedStore] handleRedirectURL: url];
+}
+
 
 
 - (void)handleURLEvent:(NSAppleEventDescriptor*)event
@@ -159,6 +167,41 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self.preferencesWindow showWindow:self];
     
 }
+
+
+
+#pragma mark - Menu delegate
+
+-(void)menuWillOpen:(NSMenu *)menu
+{
+    
+    [[DataLayer sharedInstance] accountListWithCompletion:^(NSArray *result) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+          
+             NSMenuItem *template =[self.serverDetails.submenu.itemArray[0] copy];
+             [self.serverDetails.submenu removeAllItems ];
+            for(NSDictionary *account in result)
+            {
+                
+                NSNumber *accountId =[account objectForKey:@"account_id"];
+                xmpp* xmppAccount= [[MLXMPPManager sharedInstance] getConnectedAccountForID:[NSString stringWithFormat:@"%@", accountId ]];
+                if(xmppAccount) {
+                    NSMenuItem *item =[template copy];
+                    
+                    item.title=xmppAccount.server;
+                    item.tag=1000+accountId.integerValue;
+                    
+                    [self.serverDetails.submenu addItem:item];
+                }
+            }
+            
+        });
+        
+    }];
+    
+    
+}
+
 
 
 

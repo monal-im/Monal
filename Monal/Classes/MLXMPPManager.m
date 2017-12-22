@@ -46,7 +46,7 @@ An array of Dics what have timers to make sure everything was sent
     if(!setDefaults)
     {
         //  [[NSUserDefaults standardUserDefaults] setObject:@"" forKey:@"StatusMessage"]; // we dont want anything set
-        [[NSUserDefaults standardUserDefaults] setObject:@"5" forKey:@"XMPPPriority"];
+        [[NSUserDefaults standardUserDefaults] setObject:@"0" forKey:@"XMPPPriority"];
         [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"Away"];
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"Visible"];
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"MusicStatus"];
@@ -60,6 +60,8 @@ An array of Dics what have timers to make sure everything was sent
         [[NSUserDefaults standardUserDefaults] setObject:[[NSUUID UUID] UUIDString] forKey:@"DeviceUUID"];
         
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"SetDefaults"];
+        
+        [[NSUserDefaults standardUserDefaults] setBool:YES  forKey: @"ShowImages"];
         [[NSUserDefaults standardUserDefaults] synchronize];
     }
 }

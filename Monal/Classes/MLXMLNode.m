@@ -27,6 +27,28 @@
     
 }
 
+-(id) initWithCoder:(NSCoder*)decoder
+{
+    self = [super init];
+    if(!self)
+        return nil;
+
+    _element = [decoder decodeObjectForKey:@"element"];
+    _attributes = [decoder decodeObjectForKey:@"attributes"];
+    _children = [decoder decodeObjectForKey:@"children"];
+    _data = [decoder decodeObjectForKey:@"data"];
+
+    return self;
+}
+
+-(void) encodeWithCoder:(NSCoder*)encoder
+{
+    [encoder encodeObject:_element forKey:@"element"];
+    [encoder encodeObject:_attributes forKey:@"attributes"];
+    [encoder encodeInteger:_children forKey:@"children"];
+    [encoder encodeObject:_data forKey:@"data"];
+}
+
 -(void) setXMLNS:(NSString*) xmlns
 {
     [self.attributes setObject:xmlns forKey:@"xmlns"];

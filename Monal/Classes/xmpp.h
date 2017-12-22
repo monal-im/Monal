@@ -69,7 +69,8 @@ typedef NS_ENUM (NSInteger, xmppState) {
     kStateDisconnected , // has connected once
     kStateReconnecting ,
     kStateHasStream ,
-    kStateLoggedIn
+    kStateLoggedIn ,
+    kStateBound //is operating normally
 };
 
 

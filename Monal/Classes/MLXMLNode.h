@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-@interface MLXMLNode : NSObject 
+@interface MLXMLNode : NSObject <NSCoding>
 {
     
 }

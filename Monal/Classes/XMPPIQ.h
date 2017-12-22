@@ -19,6 +19,7 @@
 -(id) initWithType:(NSString*) iqType;
 
 -(void) setPushEnableWithNode:(NSString *)node andSecret:(NSString *)secret;
+-(void) setPushDisableWithNode:(NSString *)node;
 
 /**
  login with legacy authentication. only as fallback.

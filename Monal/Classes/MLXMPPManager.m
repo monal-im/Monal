@@ -101,7 +101,7 @@ An array of Dics what have timers to make sure everything was sent
         for(NSDictionary* row in _connectedXMPP)
         {
             xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
-            if(xmppAccount.accountState==kStateLoggedIn) {
+            if(xmppAccount.accountState>=kStateBound) {
                 DDLogInfo(@"began a ping");
                 [xmppAccount sendPing];
             }
@@ -173,7 +173,7 @@ An array of Dics what have timers to make sure everything was sent
 -(BOOL) isAccountForIdConnected:(NSString*) accountNo
 {
     xmpp* account = [self getConnectedAccountForID:accountNo];
-    if(account.accountState==kStateLoggedIn) return YES;
+    if(account.accountState>=kStateBound) return YES;
     
     return NO;
 }
@@ -354,7 +354,7 @@ An array of Dics what have timers to make sure everything was sent
         if([hostReach currentReachabilityStatus]==NotReachable)
         {
             DDLogVerbose(@"not reachable");
-            if(xmppAccount.accountState==kStateLoggedIn)
+            if(xmppAccount.accountState>=kStateBound)
             {
                 DDLogVerbose(@"There will be a ping soon to test. ");
                 

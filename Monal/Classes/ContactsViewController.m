@@ -511,7 +511,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
     if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
     {
-        [[DataLayer sharedInstance] offlineContactsWithCompeltion:^(NSMutableArray *results) {
+        [[DataLayer sharedInstance] offlineContactsWithCompletion:^(NSMutableArray *results) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 _offlineContacts= results;
                 [self.contactsTable reloadData];

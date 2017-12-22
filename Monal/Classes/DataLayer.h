@@ -82,7 +82,7 @@ extern NSString *const kMessageTypeText;
 -(void) onlineContactsSortedBy:(NSString*) sort withCompeltion: (void (^)(NSMutableArray *))completion;
 -(NSArray*) resourcesForContact:(NSString*)contact ;
 
--(void) offlineContactsWithCompeltion: (void (^)(NSMutableArray *))completion;
+-(void) offlineContactsWithCompletion: (void (^)(NSMutableArray *))completion;
 
 #pragma mark Ver string and Capabilities
 -(BOOL) setResourceVer:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;

@@ -165,6 +165,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
  
     //placing more common at top to reduce iteration
     _stanzaTypes=[NSArray arrayWithObjects:
+                  @"a", // one of the most frequent
                   @"iq",
                   @"message",
                   @"presence",
@@ -182,7 +183,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                   @"resumed", // should be before r since that will match many things
                   @"failed",
                   @"r",
-                  @"a",
                   nil];
     
     
@@ -949,119 +949,146 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     NSInteger startpos=startrange.location;
     DDLogVerbose(@"start pos%ld", (long)startpos);
+    if(startpos!=0)
+    {
+        //this shoudlnt happen
+        DDLogVerbose(@"start in the middle. there was a glitch");
+    }
+    
     
     if(maxPos>startpos)
-        while(stanzacounter<[_stanzaTypes count])
-        {
-            //look for the beginning of stanza
-            NSRange pos=[_inputBuffer rangeOfString:[NSString stringWithFormat:@"<%@",[_stanzaTypes objectAtIndex:stanzacounter]]
-                                            options:NSCaseInsensitiveSearch range:NSMakeRange(startpos, maxPos-startpos)];
-            if((pos.location<maxPos) && (pos.location!=NSNotFound))
+    {
+        NSString *element;
+        NSRange pos;
+        NSRange endPos=[_inputBuffer rangeOfString:@">"
+                                           options:NSCaseInsensitiveSearch range:NSMakeRange(startpos, maxPos-startpos)];
+        //we have the max bounds of he XML tag.
+        if(endPos.location==NSNotFound) {
+            DDLogVerbose(@"dont have the end. exit at 0 ");
+        }
+        else  {
+            //look for a space if there is one
+            NSRange spacePos=[_inputBuffer rangeOfString:@" "
+                                                 options:NSCaseInsensitiveSearch range:NSMakeRange(startpos, endPos.location-startpos)];
+            pos=endPos;
+            
+            if(spacePos.location!=NSNotFound) {
+                pos=spacePos;
+            }
+            
+            element= [_inputBuffer substringWithRange:NSMakeRange(startpos+1, pos.location-(startpos+1))];
+            DDLogVerbose(@"got element %@", element);
+           
+            if([element isEqualToString:@"?xml"] || [element isEqualToString:@"stream:stream"] || [element isEqualToString:@"stream"])
             {
-                stanzaType=[_stanzaTypes objectAtIndex:stanzacounter];
-                 if([[_stanzaTypes objectAtIndex:stanzacounter] isEqualToString:@"stream:stream"]) {
-                    //no children and one line stanza
+                stanzaType= element;
+                element =nil;
+                NSRange endPos=[_inputBuffer rangeOfString:@">"
+                                                   options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, maxPos-pos.location)];
+                
+                finalstart=startpos;
+                finalend=endPos.location+1;
+                DDLogVerbose(@"exiting at 1 ");
+                
+            }
+        }
+        
+        if(element)
+        {
+            stanzaType= element; // [_stanzaTypes objectAtIndex:stanzacounter];
+            
+            {
+                NSRange dupePos=[_inputBuffer rangeOfString:[NSString stringWithFormat:@"<%@",stanzaType]
+                                                    options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location+1, maxPos-pos.location-1)];
+                
+                
+                if([stanzaType isEqualToString:@"message"] && dupePos.location!=NSNotFound) {
+                    //check for carbon forwarded
+                    NSRange forwardPos=[_inputBuffer rangeOfString:@"<forwarded"
+                                                           options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, dupePos.location-pos.location-1)];
+                    
+                    if(forwardPos.location!=NSNotFound) {
+                        
+                        //look for next message close
+                        NSRange forwardClosePos=[_inputBuffer rangeOfString:@"</forwarded"
+                                                                    options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, maxPos-pos.location)];
+                        
+                        if(forwardClosePos.location!=NSNotFound) {
+                            NSRange messageClose =[_inputBuffer rangeOfString:[NSString stringWithFormat:@"</%@",stanzaType]
+                                                                      options:NSCaseInsensitiveSearch range:NSMakeRange(forwardClosePos.location, maxPos-forwardClosePos.location)];
+                            //ensure it is set to future max
+                            
+                            finalstart=startpos;
+                            finalend=messageClose.location+messageClose.length+1; //+1 to inclde closing <
+                            DDLogVerbose(@"at  2.5");
+                            // break;
+                        }
+                        
+                    }
+                }
+                
+                //since there is another block of the same stanza, short cuts dont work.check to find beginning of next element
+                if((dupePos.location<maxPos) && (dupePos.location!=NSNotFound))
+                {
+                    //reduce search to within the set of this and at max the next element of the same kind
+                    maxPos=dupePos.location;
+                    
+                }
+                
+                //  we need to find the end of this stanza
+                NSRange closePos=[_inputBuffer rangeOfString:[NSString stringWithFormat:@"</%@",stanzaType]
+                                                     options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, maxPos-pos.location)];
+                
+                if((closePos.location<maxPos) && (closePos.location!=NSNotFound)){
+                    //we have the start of the stanza close
+                    
                     NSRange endPos=[_inputBuffer rangeOfString:@">"
+                                                       options:NSCaseInsensitiveSearch range:NSMakeRange(closePos.location, maxPos-closePos.location)];
+                    
+                    finalstart=startpos;
+                    finalend=endPos.location+1; //+1 to inclde closing >
+                    DDLogVerbose(@"at  3");
+                  //  break;
+                }
+                else {
+                    
+                    //check if self closed
+                    NSRange endPos=[_inputBuffer rangeOfString:@"/>"
                                                        options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, maxPos-pos.location)];
                     
-                    if((endPos.location<maxPos) && (endPos.location!=NSNotFound)) {
-                    finalstart=pos.location;
-                        finalend=endPos.location+1;//+2 to inclde closing />
-                        DDLogVerbose(@"at  1");
-                        break;
-                    }
-                }
-                else  {
-                     NSRange dupePos=[_inputBuffer rangeOfString:[NSString stringWithFormat:@"<%@",[_stanzaTypes objectAtIndex:stanzacounter]]
-                                                        options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location+1, maxPos-pos.location-1)];
-                 
-                    
-                    if([stanzaType isEqualToString:@"message"] && dupePos.location!=NSNotFound) {
-                        //check for carbon forwarded
-                        NSRange forwardPos=[_inputBuffer rangeOfString:@"<forwarded"
-                                                               options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, dupePos.location-pos.location-1)];
-                        
-                        if(forwardPos.location!=NSNotFound) {
-                            
-                            //look for next message close
-                            NSRange forwardClosePos=[_inputBuffer rangeOfString:@"</forwarded"
-                                                         options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, maxPos-pos.location)];
-                            
-                            if(forwardClosePos.location!=NSNotFound) {
-                                NSRange messageClose =[_inputBuffer rangeOfString:[NSString stringWithFormat:@"</%@",stanzaType]
-                                                                          options:NSCaseInsensitiveSearch range:NSMakeRange(forwardClosePos.location, maxPos-forwardClosePos.location)];
-                                //ensure it is set to future max
-                                
-                                finalstart=pos.location;
-                                finalend=messageClose.location+messageClose.length+1; //+1 to inclde closing <
-                                DDLogVerbose(@"at  2.5");
-                                break;
-                            }
-                            
-                        }
-                    }
-  
-                    //since there is another block of the same stanza, short cuts dont work.check to find beginning of next element
-                    if((dupePos.location<maxPos) && (dupePos.location!=NSNotFound))
+                    //are ther children, then not self closed
+                    if(endPos.location<maxPos && endPos.location!=NSNotFound)
                     {
-                        //reduce search to within the set of this and at max the next element of the same kind
-                        maxPos=dupePos.location;
-                        
-                    }
-                    
-                    //  we need to find the end of this stanza
-                    NSRange closePos=[_inputBuffer rangeOfString:[NSString stringWithFormat:@"</%@",stanzaType]
-                                                         options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, maxPos-pos.location)];
-                    
-                    if((closePos.location<maxPos) && (closePos.location!=NSNotFound)){
-                        //we have the start of the stanza close
-                        
-                        NSRange endPos=[_inputBuffer rangeOfString:@">"
-                                                           options:NSCaseInsensitiveSearch range:NSMakeRange(closePos.location, maxPos-closePos.location)];
-                        
-                        finalstart=pos.location;
-                        finalend=endPos.location+1; //+1 to inclde closing <
-                        DDLogVerbose(@"at  3");
-                        break;
-                    }
-                    else {
-                        
-                        //check if self closed
-                        NSRange endPos=[_inputBuffer rangeOfString:@"/>"
-                                                           options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, maxPos-pos.location)];
-                        
-                        //are ther children, then not self closed
-                        if(endPos.location<maxPos && endPos.location!=NSNotFound)
-                        {
-                            NSRange childPos=[_inputBuffer rangeOfString:[NSString stringWithFormat:@"<"]
-                                                                 options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location+1, maxPos-endPos.location)];
-                            if((childPos.location<maxPos) && (childPos.location!=NSNotFound)){
-                                DDLogVerbose(@"at  3.5 looks like incomplete stanza. need to get more");
-                                break;
-                            }
+                        NSRange childPos=[_inputBuffer rangeOfString:[NSString stringWithFormat:@"<"]
+                                                             options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location+1, maxPos-endPos.location)];
+                        if((childPos.location<maxPos) && (childPos.location!=NSNotFound)){
+                            DDLogVerbose(@"at 3.5 looks like incomplete stanza. need to get more. loc %d", childPos.location);
+                           // break;
                         }
-                        
-                        
-                        if((endPos.location<maxPos) && (endPos.location!=NSNotFound)) {
+                    }
+                    
+                    
+                    if((endPos.location<maxPos) && (endPos.location!=NSNotFound)) {
+                        finalstart=startpos;
+                        finalend=endPos.location+2; //+2 to inclde closing />
+                        DDLogVerbose(@"at  4 self closed");
+                       // break;
+                    }
+                    else
+                        if([stanzaType isEqualToString:@"stream"]) {
+                            //stream will have no terminal.
                             finalstart=pos.location;
-                            finalend=endPos.location+2; //+2 to inclde closing />
-                            DDLogVerbose(@"at  4 self closed");
-                            break;
+                            finalend=maxPos;
+                            DDLogVerbose(@"at  5 stream");
                         }
-                        else
-                            if([[_stanzaTypes objectAtIndex:stanzacounter] isEqualToString:@"stream"]) {
-                                //stream will have no terminal.
-                                finalstart=pos.location;
-                                finalend=maxPos;
-                                DDLogVerbose(@"at  5 stream");
-                            }
-
-                    }
-
+                    
                 }
+                
             }
-            stanzacounter++;
         }
+    }
+            
+        
     
     //if this happens its  probably a stream error.sanity check is  preventing crash
     if((finalend-finalstart<=maxPos) && finalend!=NSNotFound && finalstart!=NSNotFound && finalend>=finalstart)
@@ -3108,6 +3135,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         NSDictionary *dic=@{@"xmlns":@"urn:xmpp:sm:3"};
         rNode.attributes =[dic mutableCopy];
         [self send:rNode];
+    } else  {
+         DDLogVerbose(@"NOT requesting smacks ack...");
     }
 }
 

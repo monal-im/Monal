@@ -100,13 +100,13 @@
         <scene sceneID="4Py-3m-Izt">
             <objects>
                 <tableViewController id="OdB-qj-tVb" customClass="ContactDetails" sceneMemberID="viewController">
-                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="jpw-Pt-KVP">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" id="jpw-Pt-KVP">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
                         <prototypes>
                             <tableViewCell contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="topCell" rowHeight="276" id="PAo-A8-qeH" userLabel="topcell" customClass="MLDetailsTableViewCell">
-                                <rect key="frame" x="0.0" y="28" width="414" height="276"/>
+                                <rect key="frame" x="0.0" y="55.333333333333336" width="414" height="276"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="PAo-A8-qeH" id="xBi-io-0jH">
                                     <rect key="frame" x="0.0" y="0.0" width="414" height="275.66666666666669"/>
@@ -174,7 +174,7 @@
                                 </connections>
                             </tableViewCell>
                             <tableViewCell contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="bottomCell" rowHeight="126" id="09u-CT-hyn" userLabel="bottomcell" customClass="MLDetailsTableViewCell">
-                                <rect key="frame" x="0.0" y="304" width="414" height="126"/>
+                                <rect key="frame" x="0.0" y="331.33333333333331" width="414" height="126"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="09u-CT-hyn" id="1GC-lX-tRR">
                                     <rect key="frame" x="0.0" y="0.0" width="414" height="125.66666666666667"/>
@@ -204,7 +204,7 @@
                                 </connections>
                             </tableViewCell>
                             <tableViewCell contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="resourceCell" rowHeight="45" id="ncd-NH-noe" userLabel="resourceCell" customClass="MLDetailsTableViewCell">
-                                <rect key="frame" x="0.0" y="430" width="414" height="45"/>
+                                <rect key="frame" x="0.0" y="457.33333333333331" width="414" height="45"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="ncd-NH-noe" id="3IL-A3-sPG">
                                     <rect key="frame" x="0.0" y="0.0" width="414" height="44.666666666666664"/>
@@ -239,7 +239,13 @@
                             <outlet property="delegate" destination="OdB-qj-tVb" id="9oK-8U-xey"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" id="tCE-L6-uyy"/>
+                    <navigationItem key="navigationItem" id="tCE-L6-uyy">
+                        <barButtonItem key="rightBarButtonItem" title="Close" id="8S0-Vz-5yv">
+                            <connections>
+                                <action selector="close:" destination="OdB-qj-tVb" id="AbJ-Kb-5e6"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="469-X2-udq" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>

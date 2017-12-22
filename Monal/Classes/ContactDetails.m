@@ -94,7 +94,7 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    UITableViewCell* thecell;
+    UITableViewCell* thecell= [tableView dequeueReusableCellWithIdentifier:@"topCell"];
 //    if(indexPath.section==0) //top
 //    {
 //        thecell=_topcell;

@@ -506,60 +506,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) closeSocket
 {
 
-    if(self.explicitLogout && _accountState>=kStateHasStream)
-    {
-        if(_accountState>=kStateBound)
-        {
-            //disable push for this node
-            if(self.pushNode && [self.pushNode length]>0 && self.supportsPush)
-            {
-                XMPPIQ* disable=[[XMPPIQ alloc] initWithType:kiqSetType];
-                [disable setPushDisableWithNode:self.pushNode];
-                [self writeToStream:disable.XMLString]; // dont even bother queueing
-            }
-            
-            //send last smacks ack as required by smacks revision 1.5.2
-            if(self.supportsSM3)
-            {
-                MLXMLNode *aNode = [[MLXMLNode alloc] initWithElement:@"a"];
-                NSDictionary *dic= @{@"xmlns":@"urn:xmpp:sm:3",@"h":[NSString stringWithFormat:@"%@",self.lastHandledInboundStanza] };
-                aNode.attributes = [dic mutableCopy];
-                [self writeToStream:aNode.XMLString]; // dont even bother queueing
-            }
-        }
-        
-        //preserve unAckedStanzas even on explicitLogout and resend them on next connect
-        //if we don't do this messages could be lost when logging out directly after sending them
-        //and: sending messages twice is less intrusive than silently loosing them
-        NSMutableArray* stanzas = self.unAckedStanzas;
-        
-        //reset smacks state to sane values (this can be done even if smacks is not supported)
-        [self initSM3];
-        self.unAckedStanzas=stanzas;
-        
-        //persist these changes
-        [self persistState];
-        
-        //close stream
-        MLXMLNode* stream = [[MLXMLNode alloc] init];
-        stream.element = @"/stream:stream"; //hack to close stream
-        [self writeToStream:stream.XMLString]; // dont even bother queueing
-    }
-    
-    if(_accountState == kStateDisconnected) {
-        
-        _startTLSComplete=NO;
-        _streamHasSpace=NO;
-        _loginStarted=NO;
-        _loginStartTimeStamp=nil;
-        _loginError=NO;
-        _reconnectScheduled =NO;
-        
-        if(completion)completion();
-        return;
-    }
-    
-
     [self.networkQueue cancelAllOperations];
     
     [self.networkQueue addOperationWithBlock:^{
@@ -614,13 +560,44 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     if(self.explicitLogout && _accountState>=kStateHasStream)
     {
-        MLXMLNode* stream = [[MLXMLNode alloc] init];
-        stream.element=@"/stream:stream"; //hack to close stream
-        [self writeToStream:stream.XMLString]; // dont even bother queueing
-        [[NSUserDefaults standardUserDefaults] removeObjectForKey:[NSString stringWithFormat:@"stream_%@",self.accountNo]];
+        if(_accountState>=kStateBound)
+        {
+            //disable push for this node
+            if(self.pushNode && [self.pushNode length]>0 && self.supportsPush)
+            {
+                XMPPIQ* disable=[[XMPPIQ alloc] initWithType:kiqSetType];
+                [disable setPushDisableWithNode:self.pushNode];
+                [self writeToStream:disable.XMLString]; // dont even bother queueing
+            }
+            
+            //send last smacks ack as required by smacks revision 1.5.2
+            if(self.supportsSM3)
+            {
+                MLXMLNode *aNode = [[MLXMLNode alloc] initWithElement:@"a"];
+                NSDictionary *dic= @{@"xmlns":@"urn:xmpp:sm:3",@"h":[NSString stringWithFormat:@"%@",self.lastHandledInboundStanza] };
+                aNode.attributes = [dic mutableCopy];
+                [self writeToStream:aNode.XMLString]; // dont even bother queueing
+            }
+        }
         
-        self.streamID=nil;
+        //preserve unAckedStanzas even on explicitLogout and resend them on next connect
+        //if we don't do this messages could be lost when logging out directly after sending them
+        //and: sending messages twice is less intrusive than silently loosing them
+        NSMutableArray* stanzas = self.unAckedStanzas;
+        
+        //reset smacks state to sane values (this can be done even if smacks is not supported)
+        [self initSM3];
+        self.unAckedStanzas=stanzas;
+        
+        //persist these changes
+        [self persistState];
+        
+        //close stream
+        MLXMLNode* stream = [[MLXMLNode alloc] init];
+        stream.element = @"/stream:stream"; //hack to close stream
+        [self writeToStream:stream.XMLString]; // dont even bother queueing
     }
+    
     
     if(_accountState == kStateDisconnected) {
         
@@ -2054,7 +2031,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     //query disco and presence state if we resumed after a force close
                     if(self.wasClosedBefore)
                     {
-                        [self queryDisco];
+                        //[self queryDisco];
                         [self queryPresence];
                     }
                 }
@@ -2581,7 +2558,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [sessionQuery.children addObject:session];
     [self send:sessionQuery];
     
-    [self queryDisco];
+   // [self queryDisco];
     
     XMPPIQ* roster=[[XMPPIQ alloc] initWithType:kiqGetType];
     [roster setRosterRequest];

@@ -582,7 +582,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         
         //preserve unAckedStanzas even on explicitLogout and resend them on next connect
         //if we don't do this messages could be lost when logging out directly after sending them
-        //and: sending messages twice is less intrusive than silently loosing them
+        //and: sending messages twice is less intrusive than silently losing them
         NSMutableArray* stanzas = self.unAckedStanzas;
         
         //reset smacks state to sane values (this can be done even if smacks is not supported)
@@ -1974,6 +1974,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"enabled"])
                 {
+                    [self postConnectNotification];
                     //save old unAckedStanzas queue before it is cleared
                     NSMutableArray *stanzas = self.unAckedStanzas;
                     
@@ -1982,10 +1983,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     
                     //save streamID if resume is supported
                     ParseEnabled* enabledNode= [[ParseEnabled alloc]  initWithDictionary:stanzaToParse];
-                    if(enabledNode.resume)
+                    if(enabledNode.resume) {
                         self.streamID=enabledNode.streamID;
-                    else
+                    }
+                    else {
                         self.streamID=nil;
+                    }
                     
                     //persist these changes (streamID and initSM3)
                     [self persistState];
@@ -1996,9 +1999,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     //resend unacked stanzas saved above (this happens only if the server provides smacks support without resumption support)
                     [self.networkQueue addOperation:
                         [NSBlockOperation blockOperationWithBlock:^{
-                            if(stanzas)
-                                for(NSDictionary *dic in stanzas)
-                                    [self send:(MLXMLNode*)[dic objectForKey:kStanza]];
+                        if(stanzas) {
+                            for(NSDictionary *dic in stanzas) {
+                                [self send:(MLXMLNode*)[dic objectForKey:kStanza]];
+                                
+                            }
+                        }
                     }]];
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"r"] && self.supportsSM3 && self.accountState>=kStateBound)
@@ -2031,8 +2037,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     //query disco and presence state if we resumed after a force close
                     if(self.wasClosedBefore)
                     {
-                        [self queryDisco];
-                        [self queryPresence];
+                        //TODO fetch from db not query again
+                       // [self queryDisco];
+                        
+                        //TODO dont query presence until foreground
+                       // [self queryPresence];
                     }
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"failed"]) // stream resume failed
@@ -2343,13 +2352,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             
                             [self.contactsVC hideConnecting:info];
                             
-                            
-                            NSString *accountName =[NSString stringWithFormat:@"%@@%@", self.username, self.domain];
-                            NSDictionary *dic =@{@"AccountNo":self.accountNo, @"AccountName":accountName};
-                            [[NSNotificationCenter defaultCenter] postNotificationName:kMLHasConnectedNotice object:dic];
-                            
-                            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountStatusChanged object:nil];
-                            
+                            [self postConnectNotification];
                         }
                     }
                 }
@@ -2363,6 +2366,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
 }
 
+-(void) postConnectNotification
+{
+    NSString *accountName =[NSString stringWithFormat:@"%@@%@", self.username, self.domain];
+    NSDictionary *dic =@{@"AccountNo":self.accountNo, @"AccountName":accountName};
+    [[NSNotificationCenter defaultCenter] postNotificationName:kMLHasConnectedNotice object:dic];
+     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountStatusChanged object:nil];
+    
+}
 
 
 -(void) send:(MLXMLNode*) stanza
@@ -2447,9 +2458,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         self.streamID,
         self.rosterList ? [self.rosterList count] : 0
     );
-    if(self.unAckedStanzas)
-        for(NSDictionary *dic in self.unAckedStanzas)
+    
+    if(self.unAckedStanzas) {
+        for(NSDictionary *dic in self.unAckedStanzas) {
             DDLogDebug(@"+++++++++++++++++++ persistState unAckedStanza %@: %@", [dic objectForKey:kStanzaID], ((MLXMLNode*)[dic objectForKey:kStanza]).XMLString);
+        }
+    }
 }
 
 -(void) readState
@@ -3079,8 +3093,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             }
         }
         //only react to stanzas, not nonzas
-        if(success && ([node.element isEqualToString:@"iq"] || [node.element isEqualToString:@"message"] || [node.element isEqualToString:@"presence"]))
+        if(success && ([node.element isEqualToString:@"iq"] || [node.element isEqualToString:@"message"] || [node.element isEqualToString:@"presence"])) {
             requestAck=YES;
+        }
     }
     
     DDLogVerbose(@"removing all objs from output ");

@@ -80,6 +80,22 @@
             </objects>
             <point key="canvasLocation" x="2878" y="-1798"/>
         </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="eO3-5V-5fo">
+            <objects>
+                <navigationController id="JoK-Lh-V0A" sceneMemberID="viewController">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="3x8-ZA-XfQ">
+                        <rect key="frame" x="0.0" y="20" width="414" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="OdB-qj-tVb" kind="relationship" relationship="rootViewController" id="99z-2X-jqE"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="bgD-OJ-fYd" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="71" y="-1905"/>
+        </scene>
         <!--Contact Details-->
         <scene sceneID="4Py-3m-Izt">
             <objects>
@@ -223,6 +239,7 @@
                             <outlet property="delegate" destination="OdB-qj-tVb" id="9oK-8U-xey"/>
                         </connections>
                     </tableView>
+                    <navigationItem key="navigationItem" id="tCE-L6-uyy"/>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="469-X2-udq" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
@@ -274,7 +291,7 @@
                     <connections>
                         <outlet property="view" destination="4Ri-hX-ob8" id="nLc-h6-Jwi"/>
                         <segue destination="Dhn-Pm-OVk" kind="showDetail" identifier="showConversation" id="wmf-tk-2CN"/>
-                        <segue destination="OdB-qj-tVb" kind="presentation" identifier="showDetails" modalPresentationStyle="formSheet" id="m2S-1Y-3FB"/>
+                        <segue destination="JoK-Lh-V0A" kind="presentation" identifier="showDetails" id="HKH-FB-LHe"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="vxj-qR-bK8" userLabel="First Responder" sceneMemberID="firstResponder"/>

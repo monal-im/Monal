@@ -1064,7 +1064,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                              options:NSCaseInsensitiveSearch range:NSMakeRange(startpos+1, endPos.location-startpos)];
                         if((childPos.location<maxPos) && (childPos.location!=NSNotFound)){
                             DDLogVerbose(@"at 3.5 looks like incomplete stanza. need to get more. loc %d", childPos.location);
-                           // break;
+                            return nil; 
+                            // break;
                         }
                     }
                     
@@ -1109,12 +1110,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         if((finalend-finalstart<=maxPos) && finalend!=NSNotFound && finalstart!=NSNotFound && finalend>=finalstart)
         {
             //  DDLogVerbose(@"to del start %d end %d: %@", finalstart, finalend, _inputBuffer);
-            if(finalend <[_inputBuffer length] ) {
+            if(finalend <=[_inputBuffer length] ) {
                 [_inputBuffer deleteCharactersInRange:NSMakeRange(finalstart, finalend-finalstart) ];
             } else {
+                  DDLogVerbose(@"Something wrong with lengths."); //This should not happen
                  [_inputBuffer deleteCharactersInRange:NSMakeRange(finalstart, [_inputBuffer length] -finalstart) ];
             }
-            //  DDLogVerbose(@"result: %@", _inputBuffer);
+          
         }
     }
     

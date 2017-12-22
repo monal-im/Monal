@@ -1883,7 +1883,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 {
                     //  ParseStream* streamNode= [[ParseStream alloc]  initWithDictionary:nextStanzaPos];
                 }
-                else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"stream"])
+                else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"stream"] ||  [[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"stream:features"])
                 {
                     ParseStream* streamNode= [[ParseStream alloc]  initWithDictionary:stanzaToParse];
                     

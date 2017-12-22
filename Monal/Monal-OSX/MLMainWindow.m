@@ -24,7 +24,7 @@
 
 - (void)windowDidLoad {
     [super windowDidLoad];
-    AppDelegate *appDelegate = [NSApplication sharedApplication].delegate;
+    __weak AppDelegate *appDelegate = (AppDelegate *) [NSApplication sharedApplication].delegate;
     appDelegate.mainWindowController= self;
     self.window.frameAutosaveName =@"MonalMainWindow";
     self.window.titleVisibility=NSWindowTitleHidden;

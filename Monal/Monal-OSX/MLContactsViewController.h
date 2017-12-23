@@ -19,9 +19,6 @@
 -(void) showConversationForContact:(NSDictionary *) user;
 
 // methods requied for XMPP accont to call back  should be protocol
--(void) showConnecting:(NSDictionary*) info;
--(void) updateConnecting:(NSDictionary*) info;
--(void) hideConnecting:(NSDictionary*) info;
 
 -(void) clearContactsForAccount: (NSString*) accountNo;
 

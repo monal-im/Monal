@@ -620,16 +620,6 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     
 }
 
--(void) showConnecting:(NSDictionary*) info{
-    
-}
--(void) updateConnecting:(NSDictionary*) info
-{
-    
-}
--(void) hideConnecting:(NSDictionary*) info{
-    
-}
 
 -(void) clearContactsForAccount: (NSString*) accountNo
 {

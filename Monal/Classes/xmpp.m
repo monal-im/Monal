@@ -209,10 +209,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) createStreams
 {
     
-    NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
-                         kinfoTypeKey:@"connect", kinfoStatusKey:@"Opening Connection"};
-    [self.contactsVC showConnecting:info];
-   
     DDLogInfo(@"stream  creating to  server: %@ port: %d", _server, (UInt32)_port);
     
     if([NSStream respondsToSelector:@selector(getStreamsToHostWithName: port: inputStream: outputStream:)]) {
@@ -299,17 +295,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                               dispatch_time(DISPATCH_TIME_NOW, 5ull * NSEC_PER_SEC),
                              DISPATCH_TIME_FOREVER
                               , 1ull * NSEC_PER_SEC);
-    
-    NSDictionary* info2=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
-                          kinfoTypeKey:@"connect", kinfoStatusKey:@"Logging in"};
-    
+
     dispatch_source_set_event_handler(streamTimer, ^{
         DDLogError(@"stream connection timed out");
         dispatch_source_cancel(streamTimer);
-        [self.contactsVC hideConnecting:info2];
+
         [self disconnect];
     });
-    
     
     dispatch_source_set_cancel_handler(streamTimer, ^{
         DDLogError(@"stream timer cancelled");
@@ -317,16 +309,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     dispatch_resume(streamTimer);
     
-    
     [_iStream open];
     [_oStream open];
     
- 
-    [self.contactsVC updateConnecting:info2];
-    
     dispatch_source_cancel(streamTimer);
-    
-    
+
 }
 
 -(void) connectionTask
@@ -431,15 +418,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     dispatch_source_set_event_handler(loginCancelOperation, ^{
         DDLogInfo(@"login cancel op");
-        NSString *fulluserCopy = [_fulluser copy];
-        NSString *accountNoCopy = [_accountNo copy];
-       
-        //hide connecting message
-        if(fulluserCopy && accountNoCopy) {
-            NSDictionary* info=@{kaccountNameKey:fulluserCopy, kaccountNoKey:accountNoCopy,
-                                 kinfoTypeKey:@"connect", kinfoStatusKey:@""};
-            [self.contactsVC hideConnecting:info];
-        }
         
         _loginStarted=NO;
         // try again
@@ -547,8 +525,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         
         _iStream=nil;
         _oStream=nil;
-        
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountStatusChanged object:nil];
+
    
     }];
 }
@@ -631,40 +608,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     _reconnectScheduled =NO;
     
     self.httpUploadQueue =nil;
-    
-    DDLogInfo(@"All closed and cleaned up");
-    
-   //for good measure
-    NSString* user=_fulluser;
-    if(!_fulluser) {
-        user=@"";
-    }
-    NSDictionary* info=@{kaccountNameKey:user, kaccountNoKey:_accountNo,
-                         kinfoTypeKey:@"connect", kinfoStatusKey:@""};
-    [self.contactsVC hideConnecting:info];
-    
-    NSDictionary* info2=@{kaccountNameKey:user, kaccountNoKey:_accountNo,
-                          kinfoTypeKey:@"connect", kinfoStatusKey:@"Disconnected"};
-    
-    
-    if(!_loggedInOnce)
-    {
-        info2=@{kaccountNameKey:user, kaccountNoKey:_accountNo,
-                kinfoTypeKey:@"connect", kinfoStatusKey:@"Could not login."};
-    }
-    
-    [self.contactsVC showConnecting:info2];
-    dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 3ull * NSEC_PER_SEC), q_background,  ^{
-        [self.contactsVC hideConnecting:info2];
-    });
-    
-    
-    [[DataLayer sharedInstance]  resetContactsForAccount:_accountNo];
-    if(completion) completion();
+        
+        DDLogInfo(@"All closed and cleaned up");
+        
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountStatusChanged object:nil];
+        if(completion) completion();
     }];
     
- 
 }
 
 -(void) reconnect
@@ -2171,9 +2121,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             {
                                 DDLogInfo(@"Set TLS properties on streams. Security level %@", [_iStream propertyForKey:NSStreamSocketSecurityLevelKey]);
                                 
-                                NSDictionary* info2=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
-                                                    kinfoTypeKey:@"connect", kinfoStatusKey:@"Securing Connection"};
-                                [self.contactsVC updateConnecting:info2];
                             }
                             else
                             {
@@ -2376,13 +2323,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             _loggedInOnce=YES;
                             _loginStarted=NO;
                             self.loginStartTimeStamp=nil;
-                            
-                            
-                            NSDictionary* info=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
-                                                kinfoTypeKey:@"connect", kinfoStatusKey:@""};
-                            
-                            [self.contactsVC hideConnecting:info];
-                            
+                        
                            
                         }
                     }

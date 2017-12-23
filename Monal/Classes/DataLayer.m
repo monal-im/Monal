@@ -10,6 +10,12 @@
 #import "DDLog.h"
 
 
+@interface DataLayer()
+
+@property (nonatomic, strong) NSMutableSet *contactMemory; // where contacts live before they are persisted
+
+@end
+
 @implementation DataLayer
 
 static const int ddLogLevel = LOG_LEVEL_INFO;
@@ -48,6 +54,7 @@ static DataLayer *sharedInstance=nil;
     dispatch_once(&once, ^{
         sharedInstance = [DataLayer alloc] ;
         [sharedInstance initDB];
+       
     });
     return sharedInstance;
     
@@ -606,6 +613,15 @@ static DataLayer *sharedInstance=nil;
 {
     //this needs to be one atomic operation
     dispatch_sync(_contactQueue, ^{
+        if([self.contactMemory containsObject:contact])
+        {
+            DDLogVerbose(@"contact wiating to persist");
+            return;
+        } else  {
+            [self.contactMemory addObject:contact];
+            
+        }
+        
        [self isContactInList:contact forAccount:accountNo withCompletion:^(BOOL exists) {
            if(!exists)
            {
@@ -620,6 +636,7 @@ static DataLayer *sharedInstance=nil;
                    
                    NSString* query=[NSString stringWithFormat:@"insert into buddylist values(null, %@, '%@', '%@','%@','','','','','',0, 0, 1,0);", accountNo, contact.escapeForSql, actualfull.escapeForSql, nickName.escapeForSql];
                [self executeNonQuery:query withCompletion:^(BOOL success) {
+                   [self.contactMemory removeObject:contact];
                    if(completion)
                    {
                        completion(success);
@@ -630,6 +647,7 @@ static DataLayer *sharedInstance=nil;
            }
            else
            {
+               [self.contactMemory removeObject:contact];
                if(completion) completion(NO);
            }
        }];
@@ -1698,6 +1716,9 @@ static DataLayer *sharedInstance=nil;
 
 -(void) initDB
 {
+    
+     self.contactMemory = [[NSMutableSet alloc] init];
+    
     _dbQueue = dispatch_queue_create(kMonalDBQueue, DISPATCH_QUEUE_SERIAL);
     _contactQueue = dispatch_queue_create(kMonalContactQueue, DISPATCH_QUEUE_SERIAL);
     

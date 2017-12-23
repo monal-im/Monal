@@ -2932,7 +2932,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                    
             }
             
-            [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, message]];
+            [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, message, st_error]];
             
             //everythign comes twice just use the input stream
             if(stream==_oStream){

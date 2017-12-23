@@ -127,8 +127,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 - (void) receivedWakeNotification: (NSNotification*) notification
 {
-    DDLogVerbose(@"Device Waking");
-    [[MLXMPPManager sharedInstance] connectIfNecessary];
+    DDLogVerbose(@"Device Waking. Connecting in 5 sec");
+    dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 5 * NSEC_PER_SEC), q_background,  ^{
+        [[MLXMPPManager sharedInstance] connectIfNecessary];
+    });
 }
 
 #pragma mark  - Actions

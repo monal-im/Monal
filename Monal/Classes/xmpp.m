@@ -505,9 +505,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) closeSocket
 {
-
     [self.networkQueue cancelAllOperations];
-    
     [self.networkQueue addOperationWithBlock:^{
 
         self.connectedTime =nil; 
@@ -551,8 +549,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         _oStream=nil;
         
         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountStatusChanged object:nil];
-     
-        
+   
     }];
 }
 
@@ -617,9 +614,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
    
     [self.networkQueue addOperationWithBlock:^{
     
-    [_contactsVC clearContactsForAccount:_accountNo];
-    [[DataLayer sharedInstance] resetContactsForAccount:_accountNo];
-    
+    if(self.supportsSM3 && !self.explicitLogout)
+    {
+        [_contactsVC clearContactsForAccount:_accountNo];
+        [[DataLayer sharedInstance] resetContactsForAccount:_accountNo];
+    }
+   
     DDLogInfo(@"Connections closed");
     
     _startTLSComplete=NO;
@@ -2004,7 +2004,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"enabled"])
                 {
-                    [self postConnectNotification];
+                   
                     //save old unAckedStanzas queue before it is cleared
                     NSMutableArray *stanzas = self.unAckedStanzas;
                     
@@ -2058,6 +2058,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     
                     //now we are bound again
                     _accountState=kStateBound;
+                       [self postConnectNotification];
                     
                     //remove already delivered stanzas and resend the (still) unacked ones
                     ParseResumed* resumeNode= [[ParseResumed alloc]  initWithDictionary:stanzaToParse];
@@ -2382,7 +2383,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             
                             [self.contactsVC hideConnecting:info];
                             
-                            [self postConnectNotification];
+                           
                         }
                     }
                 }
@@ -2595,6 +2596,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     //now we are bound
     _accountState=kStateBound;
+    [self postConnectNotification];
         
     XMPPIQ* sessionQuery= [[XMPPIQ alloc] initWithType:kiqSetType];
     MLXMLNode* session = [[MLXMLNode alloc] initWithElement:@"session"];

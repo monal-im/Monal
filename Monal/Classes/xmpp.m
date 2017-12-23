@@ -591,7 +591,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
    
     [self.networkQueue addOperationWithBlock:^{
     
-    if(self.supportsSM3 && self.explicitLogout)
+    if(!self.supportsSM3 || self.explicitLogout)
     {
         [_contactsVC clearContactsForAccount:_accountNo];
         [[DataLayer sharedInstance] resetContactsForAccount:_accountNo];

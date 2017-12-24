@@ -259,6 +259,7 @@
 		2643A12E180220890030EFB1 /* TPKeyboardAvoidingScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = 2643A12B180220890030EFB1 /* TPKeyboardAvoidingScrollView.m */; };
 		2643A12F180220890030EFB1 /* TPKeyboardAvoidingTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = 2643A12D180220890030EFB1 /* TPKeyboardAvoidingTableView.m */; };
 		2644D48E1FEFAF2F00F46AB5 /* dsa_pub.pem in Resources */ = {isa = PBXBuildFile; fileRef = 2644D48D1FEFAF2E00F46AB5 /* dsa_pub.pem */; };
+		2644D4921FF0064C00F46AB5 /* MLChatImageCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2644D4911FF0064C00F46AB5 /* MLChatImageCell.m */; };
 		26470F521835C4080069E3E0 /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 26470F511835C4080069E3E0 /* Media.xcassets */; };
 		2649CE531C51B84C00CD1E80 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2649CE521C51B84C00CD1E80 /* Launch Screen.storyboard */; };
 		264A7E751AA7263600E860E3 /* MLAccountCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 264A7E741AA7263600E860E3 /* MLAccountCell.xib */; };
@@ -627,6 +628,8 @@
 		2643A12C180220890030EFB1 /* TPKeyboardAvoidingTableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TPKeyboardAvoidingTableView.h; sourceTree = "<group>"; };
 		2643A12D180220890030EFB1 /* TPKeyboardAvoidingTableView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TPKeyboardAvoidingTableView.m; sourceTree = "<group>"; };
 		2644D48D1FEFAF2E00F46AB5 /* dsa_pub.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = dsa_pub.pem; sourceTree = "<group>"; };
+		2644D4901FF0064C00F46AB5 /* MLChatImageCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLChatImageCell.h; sourceTree = "<group>"; };
+		2644D4911FF0064C00F46AB5 /* MLChatImageCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLChatImageCell.m; sourceTree = "<group>"; };
 		26470F511835C4080069E3E0 /* Media.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Media.xcassets; sourceTree = "<group>"; };
 		2649CE521C51B84C00CD1E80 /* Launch Screen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = "Launch Screen.storyboard"; path = "Monal-iOS/Launch Screen.storyboard"; sourceTree = "<group>"; };
 		264A7E741AA7263600E860E3 /* MLAccountCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MLAccountCell.xib; sourceTree = "<group>"; };
@@ -990,8 +993,6 @@
 				26347D851790FFDE006FF64F /* MLInfoCell.m */,
 				26AAE283179F7B0200271345 /* MLSettingCell.h */,
 				26AAE284179F7B0200271345 /* MLSettingCell.m */,
-				268DD58417C4541000C673A9 /* MLChatCell.h */,
-				268DD58517C4541000C673A9 /* MLChatCell.m */,
 				262E518F1AD8CAC600788351 /* MLButtonCell.h */,
 				262E51901AD8CAC600788351 /* MLButtonCell.m */,
 				262E51911AD8CAC600788351 /* MLButtonCell.xib */,
@@ -1076,6 +1077,21 @@
 				2643A12D180220890030EFB1 /* TPKeyboardAvoidingTableView.m */,
 			);
 			path = TPAvoidingView;
+			sourceTree = "<group>";
+		};
+		2644D48F1FF004B800F46AB5 /* ChatViews */ = {
+			isa = PBXGroup;
+			children = (
+				2696EED11791245A00BC54B8 /* chatViewController.m */,
+				2696EED01791245A00BC54B8 /* chatViewController.h */,
+				26FE3BC91C61A6C3003CC230 /* MLResizingTextView.h */,
+				26FE3BCA1C61A6C3003CC230 /* MLResizingTextView.m */,
+				268DD58417C4541000C673A9 /* MLChatCell.h */,
+				268DD58517C4541000C673A9 /* MLChatCell.m */,
+				2644D4901FF0064C00F46AB5 /* MLChatImageCell.h */,
+				2644D4911FF0064C00F46AB5 /* MLChatImageCell.m */,
+			);
+			name = ChatViews;
 			sourceTree = "<group>";
 		};
 		265F0B641B75733800A63F20 /* Accounts */ = {
@@ -1578,13 +1594,12 @@
 		26DB52121777EA5100B50353 /* Tab views */ = {
 			isa = PBXGroup;
 			children = (
+				2644D48F1FF004B800F46AB5 /* ChatViews */,
 				268C1E471FDACDD300BD6921 /* Contact Details */,
 				2665C1191C4AA22700CC9A04 /* Accounts */,
 				2678A987185A82BE003AF53B /* Chat Logs */,
 				262797AC178A573F00B85D94 /* Tableviewcells */,
 				2636C440177BD595001CA71F /* Older UI code */,
-				2696EED11791245A00BC54B8 /* chatViewController.m */,
-				2696EED01791245A00BC54B8 /* chatViewController.h */,
 				261A627E176C055400059090 /* ContactsViewController.h */,
 				261A627F176C055400059090 /* ContactsViewController.m */,
 				261A6283176C156500059090 /* ActiveChatsViewController.h */,
@@ -1606,8 +1621,6 @@
 				261A6296176C160900059090 /* HelpViewController.m */,
 				261A6298176C162200059090 /* AboutViewController.h */,
 				261A6299176C162200059090 /* AboutViewController.m */,
-				26FE3BC91C61A6C3003CC230 /* MLResizingTextView.h */,
-				26FE3BCA1C61A6C3003CC230 /* MLResizingTextView.m */,
 				2609B5271FD5B26800F09FA1 /* MLSplitViewDelegate.h */,
 				2609B5281FD5B26800F09FA1 /* MLSplitViewDelegate.m */,
 			);
@@ -1643,7 +1656,7 @@
 			name = tools;
 			sourceTree = "<group>";
 		};
-		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
+		29B97314FDCFA39411CA2CEA = {
 			isa = PBXGroup;
 			children = (
 				26FDB4341DC16A9800A129E0 /* Monal.entitlements */,
@@ -2048,7 +2061,7 @@
 				"zh-Hant",
 				Base,
 			);
-			mainGroup = 29B97314FDCFA39411CA2CEA /* CustomTemplate */;
+			mainGroup = 29B97314FDCFA39411CA2CEA;
 			productRefGroup = 19C28FACFE9D520D11CA2CBB /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -2123,6 +2136,7 @@
 			);
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-Monal/Pods-Monal-resources.sh",
+				"${PODS_ROOT}/MWPhotoBrowser/MWPhotoBrowser/MWPhotoBrowser.bundle",
 				"${PODS_ROOT}/SAMKeychain/Support/SAMKeychain.bundle",
 			);
 			name = "[CP] Copy Pods Resources";
@@ -2581,6 +2595,7 @@
 				26A8ADD717C031BA0033990D /* ContactDetails.m in Sources */,
 				26DA16E017C302BC00D0065E /* RIButtonItem.m in Sources */,
 				26DA16E117C302BC00D0065E /* UIActionSheet+Blocks.m in Sources */,
+				2644D4921FF0064C00F46AB5 /* MLChatImageCell.m in Sources */,
 				268821FA19B9233B00AEA46E /* NSString+SqlLite.m in Sources */,
 				2678A98B185A8320003AF53B /* ChatLogAccountDetailViewController.m in Sources */,
 				26D51CCC1E2674D700141E04 /* NSString+NXOAuth2.m in Sources */,

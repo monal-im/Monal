@@ -2,11 +2,21 @@ PODS:
   - Crashlytics (3.8.4):
     - Fabric (~> 1.6.3)
   - CWStatusBarNotification (2.3.5)
+  - DACircularProgress (2.3.1)
   - Dropbox-iOS-SDK (1.3.13)
   - Dropbox-OSX-SDK (1.3.13)
   - Fabric (1.6.11)
   - MBProgressHUD (1.0.0)
+  - MWPhotoBrowser (1.2.1):
+    - DACircularProgress
+    - MBProgressHUD
+    - PSTCollectionView (~> 1.2)
+    - SDWebImage (~> 3.5)
+  - PSTCollectionView (1.2.3)
   - SAMKeychain (1.5.2)
+  - SDWebImage (3.8.2):
+    - SDWebImage/Core (= 3.8.2)
+  - SDWebImage/Core (3.8.2)
   - Sparkle (1.18.1)
   - TPCircularBuffer (1.4)
 
@@ -17,21 +27,27 @@ DEPENDENCIES:
   - Dropbox-OSX-SDK
   - Fabric
   - MBProgressHUD
+  - MWPhotoBrowser
   - SAMKeychain
+  - SDWebImage
   - Sparkle
   - TPCircularBuffer
 
 SPEC CHECKSUMS:
   Crashlytics: 79e236942ca1e7fc641df1feb9a275360a78ab6a
   CWStatusBarNotification: 3d2738b25c3207f60cc50201388d3c96182545ff
+  DACircularProgress: 4dd437c0fc3da5161cb289e07ac449493d41db71
   Dropbox-iOS-SDK: e0c9b08d1604b39cb78c1d0333251de0f6bdec60
   Dropbox-OSX-SDK: 7558b741dfb8eac3d2352ad95bd4078debcf0e13
   Fabric: 5911403591946b8228ab1c51d98f1d7137e863c6
   MBProgressHUD: 4890f671c94e8a0f3cf959aa731e9de2f036d71a
+  MWPhotoBrowser: 7087b4c828297ef34ff2b0892c8e967034a86842
+  PSTCollectionView: 6749df92885353521f55279a7ce2b293762e2be4
   SAMKeychain: 1865333198217411f35327e8da61b43de79b635b
+  SDWebImage: 098e97e6176540799c27e804c96653ee0833d13c
   Sparkle: 06ea33170007c5937ee54da481b4481af98fac79
   TPCircularBuffer: c0160545b63019adf85231e3de543bbc97cb9041
 
-PODFILE CHECKSUM: bd4f8f5454f1aafa45ef06ae2469e693b93a0a9f
+PODFILE CHECKSUM: 4a9623016e8c32c965815d1cb01b0436ef57e2cb
 
 COCOAPODS: 1.3.1

@@ -2070,6 +2070,7 @@ static DataLayer *sharedInstance=nil;
 {
     __block NSString *messageType=kMessageTypeText;
     if ([[NSUserDefaults standardUserDefaults] boolForKey: @"ShowImages"] &&  ([messageString hasPrefix:@"http://"]||[messageString hasPrefix:@"https://"]))
+        // HTTP is only here for testing, debugging with ATS off. Will never work in prod
     {
         
         NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:messageString]];

@@ -650,10 +650,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 - (NSView *)tableView:(NSTableView *)tableView viewForTableColumn:(NSTableColumn *)tableColumn  row:(NSInteger)row
 {
-    
     NSDictionary *messageRow = [self.messageList objectAtIndex:row];
-   
-  
     MLChatViewCell *cell;
     
     if([[messageRow objectForKey:@"af"] isEqualToString:self.jid]) {

@@ -64,6 +64,15 @@ An array of Dics what have timers to make sure everything was sent
         [[NSUserDefaults standardUserDefaults] setBool:YES  forKey: @"ShowImages"];
         [[NSUserDefaults standardUserDefaults] synchronize];
     }
+    
+    //on upgrade this one needs to be set to yes. Can be removed later.
+    NSNumber *imagesTest= [[NSUserDefaults standardUserDefaults] objectForKey: @"ShowImages"];
+   
+    if(!imagesTest)
+    {
+          [[NSUserDefaults standardUserDefaults] setBool:YES  forKey: @"ShowImages"];
+          [[NSUserDefaults standardUserDefaults] synchronize];
+    }
 }
 
 + (MLXMPPManager* )sharedInstance

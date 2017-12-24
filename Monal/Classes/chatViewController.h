@@ -29,7 +29,7 @@
 	BOOL wasoffline;
     
     NSArray* activeChats;
-    NSMutableArray* _messagelist;
+    
     NSDictionary* _contact;
 
     BOOL  _isMUC;

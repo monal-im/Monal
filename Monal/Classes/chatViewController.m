@@ -28,6 +28,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 @property (nonatomic, assign)  NSInteger thisday;
 @property (nonatomic, strong)  MBProgressHUD *uploadHUD;
 
+@property (nonatomic, strong) NSMutableArray* messageList;
 
 @property (nonatomic, strong) DBRestClient *restClient;
 
@@ -176,7 +177,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
     if(xmppAccount.supportsMam0) {
         
-        if(_messagelist.count==0)
+        if(self.messageList.count==0)
         {
             //fetch default
             NSDate *yesterday =[NSDate dateWithTimeInterval:-86400 sinceDate:[NSDate date]];
@@ -246,7 +247,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 -(void) refreshData
 {
     if(!_day) {
-        _messagelist =[[DataLayer sharedInstance] messageHistory:_contactName forAccount: _accountNo];
+        self.messageList =[[DataLayer sharedInstance] messageHistory:_contactName forAccount: _accountNo];
         [[DataLayer sharedInstance] countUserUnreadMessages:_contactName forAccount: _accountNo withCompletion:^(NSNumber *unread) {
             if([unread integerValue]==0) _firstmsg=YES;
             
@@ -256,7 +257,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     }
     else
     {
-        _messagelist =[[[DataLayer sharedInstance] messageHistoryDate:_contactName forAccount: _accountNo forDate:_day] mutableCopy];
+        self.messageList =[[[DataLayer sharedInstance] messageHistoryDate:_contactName forAccount: _accountNo forDate:_day] mutableCopy];
         
     }
     [_messageTable reloadData];
@@ -481,13 +482,14 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                                                       @"message": message ,
                                                       @"thetime": [self currentGMTTime],
                                                       @"delivered":@YES,
-                                                             kMessageId: messageId
+                                                             kMessageId: messageId,
+                                                      kMessageType:messageType
                                                              };
-                           [_messagelist addObject:[userInfo mutableCopy]];
+                           [self.messageList addObject:[userInfo mutableCopy]];
                            
                            NSIndexPath *path1;
                            [_messageTable beginUpdates];
-                           NSInteger bottom = [_messagelist count]-1;
+                           NSInteger bottom = [self.messageList count]-1;
                            if(bottom>=0) {
                                 path1 = [NSIndexPath indexPathForRow:bottom  inSection:0];
                                [_messageTable insertRowsAtIndexPaths:@[path1]
@@ -538,11 +540,11 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                                             };
                            }
                            
-                           [_messagelist addObject:userInfo];
+                           [self.messageList addObject:userInfo];
                            
                            [_messageTable beginUpdates];
                            NSIndexPath *path1;
-                           NSInteger bottom =  _messagelist.count-1; 
+                           NSInteger bottom =  self.messageList.count-1;
                            if(bottom>0) {
                                path1 = [NSIndexPath indexPathForRow:bottom  inSection:0];
                                [_messageTable insertRowsAtIndexPaths:@[path1]
@@ -565,7 +567,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                    ^{
                        int row=0;
                        [_messageTable beginUpdates];
-                       for(NSMutableDictionary *rowDic in _messagelist)
+                       for(NSMutableDictionary *rowDic in self.messageList)
                        {
                            if([[rowDic objectForKey:@"messageid"] isEqualToString:messageId]) {
                                [rowDic setObject:[NSNumber numberWithBool:delivered] forKey:@"delivered"];
@@ -707,24 +709,20 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 -(void) retry:(id) sender
 {
     NSInteger historyId = ((UIButton*) sender).tag;
-    if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0"))
-    {
-        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Retry sending message?" message:@"It is possible this message may have failed to send." preferredStyle:UIAlertControllerStyleActionSheet];
-        [alert addAction:[UIAlertAction actionWithTitle:@"Retry" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
-            NSArray *messageArray =[[DataLayer sharedInstance] messageForHistoryID:historyId];
-            if([messageArray count]>0) {
-                NSDictionary *dic= [messageArray objectAtIndex:0];
-                [self sendMessage:[dic objectForKey:@"message"] andMessageID:[dic objectForKey:@"messageid"]];
-            }
-        }]];
-        [alert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
-            [self dismissViewControllerAnimated:YES completion:nil];
-        }]];
-        [self presentViewController:alert animated:YES completion:nil];
-    }
-    else{
     
-    }
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Retry sending message?" message:@"It is possible this message may have failed to send." preferredStyle:UIAlertControllerStyleActionSheet];
+    [alert addAction:[UIAlertAction actionWithTitle:@"Retry" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+        NSArray *messageArray =[[DataLayer sharedInstance] messageForHistoryID:historyId];
+        if([messageArray count]>0) {
+            NSDictionary *dic= [messageArray objectAtIndex:0];
+            [self sendMessage:[dic objectForKey:@"message"] andMessageID:[dic objectForKey:@"messageid"]];
+        }
+    }]];
+    [alert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+        [self dismissViewControllerAnimated:YES completion:nil];
+    }]];
+    [self presentViewController:alert animated:YES completion:nil];
+    
 }
 
 #pragma mark tableview datasource
@@ -741,7 +739,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     switch (section) {
         case 0:
         {
-            toReturn=[_messagelist count];
+            toReturn=[self.messageList count];
             break;
         }
         default:
@@ -754,13 +752,13 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     MLChatCell* cell;
-    if(indexPath.row <0 || indexPath.row>=[_messagelist count])
+    if(indexPath.row <0 || indexPath.row>=[self.messageList count])
     {
         cell =[[MLChatCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"ChatCell"  Muc:_isMUC andParent:self];
         return cell;
     }
     
-    NSDictionary* row= [_messagelist objectAtIndex:indexPath.row];
+    NSDictionary* row= [self.messageList objectAtIndex:indexPath.row];
     
     if(_isMUC)
     {
@@ -781,6 +779,18 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         {
             cell=[tableView dequeueReusableCellWithIdentifier:@"ChatCellOut"];
         }
+    }
+    
+    NSDictionary *messageRow = [self.messageList objectAtIndex:indexPath.row];
+    
+    NSString *messageString =[messageRow objectForKey:@"message"];
+    NSString *messageType =[messageRow objectForKey:kMessageType];
+    
+    if([messageType isEqualToString:kMessageTypeImage])
+    {
+        
+    } else  {
+        
     }
     
     if(!cell)
@@ -889,10 +899,10 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 #pragma mark tableview datasource
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    if(indexPath.row>=[_messagelist count])  {
+    if(indexPath.row>=[self.messageList count])  {
         return 0;
     }
-    NSDictionary* row=[_messagelist objectAtIndex:indexPath.row];
+    NSDictionary* row=[self.messageList objectAtIndex:indexPath.row];
     CGFloat height= [MLChatCell heightForText:[row objectForKey:@"message"] inWidth:tableView.frame.size.width-20];
     height+=kNameLabelHeight;
     
@@ -913,7 +923,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
     if (editingStyle == UITableViewCellEditingStyleDelete) {
-        NSDictionary* message= [_messagelist objectAtIndex:indexPath.row];
+        NSDictionary* message= [self.messageList objectAtIndex:indexPath.row];
         
         DDLogVerbose(@"%@", message);
         
@@ -925,7 +935,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         {
             return;
         }
-        [_messagelist removeObjectAtIndex:indexPath.row];
+        [self.messageList removeObjectAtIndex:indexPath.row];
         [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationRight];
         
         
@@ -1023,7 +1033,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 	[UIView animateWithDuration:animationDuration
                      animations:^{
                          self.inputContainerBottom.constant=0; 
-                         if([_messagelist count]>0)
+                         if([self.messageList count]>0)
                          {
                              [self scrollToBottom];
                          }

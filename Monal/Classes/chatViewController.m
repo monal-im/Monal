@@ -16,12 +16,14 @@
 #import "UIActionSheet+Blocks.h"
 #import <DropBoxSDK/DropBoxSDK.h>
 
+#import "MWPhotoBrowser.h"
+
 @import QuartzCore;
 @import MobileCoreServices;
 
 static const int ddLogLevel = LOG_LEVEL_ERROR;
 
-@interface chatViewController()<DBRestClientDelegate>
+@interface chatViewController()<DBRestClientDelegate, MWPhotoBrowserDelegate>
 
 @property (nonatomic, strong)  NSDateFormatter* destinationDateFormat;
 @property (nonatomic, strong)  NSDateFormatter* sourceDateFormat;
@@ -32,6 +34,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 @property (nonatomic, strong)  MBProgressHUD *uploadHUD;
 
 @property (nonatomic, strong) NSMutableArray* messageList;
+@property (nonatomic, strong) NSMutableArray* photos;
 
 @property (nonatomic, strong) DBRestClient *restClient;
 
@@ -754,7 +757,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    MLChatCell* cell;
+    MLBaseCell* cell;
     if(indexPath.row <0 || indexPath.row>=[self.messageList count])
     {
         cell =[[MLChatCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"ChatCell"  Muc:_isMUC andParent:self];
@@ -888,11 +891,42 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 -(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     [self.chatInput resignFirstResponder];
-    
-    MLChatCell* cell = (MLChatCell*)[tableView cellForRowAtIndexPath:indexPath];
+    MLBaseCell* cell = [tableView cellForRowAtIndexPath:indexPath];
     if(cell.link)
     {
-        [cell openlink:self];
+        if([cell respondsToSelector:@selector(openlink:)]) {
+            [(MLChatCell *)cell openlink:self];
+        } else  {
+            
+            self.photos =[NSMutableArray array];
+            
+            MLChatImageCell *imageCell = (MLChatImageCell *) cell;
+            
+            MWPhoto* photo=[MWPhoto photoWithImage:imageCell.thumbnailImage.image];
+            // photo.caption=[row objectForKey:@"caption"];
+            [self.photos addObject:photo];
+            
+            }
+            
+            dispatch_async(dispatch_get_main_queue(), ^{
+                
+                MWPhotoBrowser *browser = [[MWPhotoBrowser alloc] initWithDelegate:self];
+                
+                browser.displayActionButton = YES; // Show action button to allow sharing, copying, etc (defaults to YES)
+                browser.displayNavArrows = NO; // Whether to display left and right nav arrows on toolbar (defaults to NO)
+                browser.displaySelectionButtons = NO; // Whether selection buttons are shown on each image (defaults to NO)
+                browser.zoomPhotosToFill = YES; // Images that almost fill the screen will be initially zoomed to fill (defaults to YES)
+                browser.alwaysShowControls = NO; // Allows to control whether the bars and controls are always visible or whether they fade away to show the photo full (defaults to NO)
+                browser.enableGrid = YES; // Whether to allow the viewing of all the photo thumbnails on a grid (defaults to YES)
+                browser.startOnGrid = NO; // Whether to start on the grid of thumbnails instead of the first photo (defaults to NO)
+              
+                UINavigationController *nav =[[UINavigationController alloc] initWithRootViewController:browser];
+                
+                
+                [self presentViewController:nav animated:YES completion:nil];
+                
+            });
+            
     }
 }
 
@@ -1017,6 +1051,20 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 {
      [self updateInputViewSize];
 }
+
+
+#pragma mark - photo browser delegate
+- (NSUInteger)numberOfPhotosInPhotoBrowser:(MWPhotoBrowser *)photoBrowser {
+    return self.photos.count;
+}
+
+- (id <MWPhoto>)photoBrowser:(MWPhotoBrowser *)photoBrowser photoAtIndex:(NSUInteger)index {
+    if (index < self.photos.count) {
+        return [self.photos objectAtIndex:index];
+    }
+    return nil;
+}
+
 
 #pragma mark - Keyboard
 

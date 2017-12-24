@@ -36,4 +36,10 @@
     // Configure the view for the selected state
 }
 
+-(BOOL) canPerformAction:(SEL)action withSender:(id)sender
+{
+    return NO;
+}
+
+
 @end

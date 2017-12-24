@@ -6,13 +6,15 @@
 //  Copyright © 2017 Monal.im. All rights reserved.
 //
 
-#import "MLChatCell.h"
+#import "MLBaseCell.h"
 
 
-@interface MLChatImageCell : MLChatCell
+@interface MLChatImageCell : MLBaseCell
+@property (nonatomic, strong) NSString* link;
 
 @property (nonatomic, weak) IBOutlet UIImageView *thumbnailImage;
 
 -(void) loadImage;
 
 @end
+

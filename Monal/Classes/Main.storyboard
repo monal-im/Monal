@@ -744,8 +744,10 @@
                                                     </constraints>
                                                 </imageView>
                                             </subviews>
+                                            <color key="backgroundColor" red="0.1906735897064209" green="0.55723816156387329" blue="0.9816402792930603" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                             <constraints>
                                                 <constraint firstItem="GlC-dn-bvj" firstAttribute="top" secondItem="GA8-Q5-xRV" secondAttribute="topMargin" id="28N-Dr-Vz6"/>
+                                                <constraint firstItem="GlC-dn-bvj" firstAttribute="leading" secondItem="GA8-Q5-xRV" secondAttribute="leadingMargin" id="OKS-P8-7wv"/>
                                                 <constraint firstItem="GlC-dn-bvj" firstAttribute="bottom" secondItem="GA8-Q5-xRV" secondAttribute="bottomMargin" id="XBa-00-tqZ"/>
                                                 <constraint firstItem="GlC-dn-bvj" firstAttribute="leading" secondItem="GA8-Q5-xRV" secondAttribute="leadingMargin" id="a0T-SA-rGZ"/>
                                                 <constraint firstAttribute="trailingMargin" relation="greaterThanOrEqual" secondItem="GlC-dn-bvj" secondAttribute="trailing" constant="98.670000000000002" id="xXV-tC-Fpn"/>

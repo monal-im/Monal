@@ -17,8 +17,6 @@
 
 @implementation MLChatCell
 
-
-
 +(CGFloat) heightForText:(NSString*) text inWidth:(CGFloat) width
 {
     //.75 would define the bubble size
@@ -92,7 +90,7 @@
     
     textLabelFrame.size.width=(textLabelFrame.size.width*.75);
     UIImage *buttonImage2 ;
-    if(_outBound)
+    if(self.outBound)
     {
         textLabelFrame.origin.x= self.contentView.frame.size.width-textLabelFrame.size.width;
         textLabelFrame.size.width-=10;
@@ -104,7 +102,7 @@
     
     if(!_bubbleImage.image)
     {
-        if(_outBound)
+        if(self.outBound)
         {
             self.textLabel.textColor=[UIColor whiteColor];
             buttonImage2 = [[MLImageManager sharedInstance] outboundImage];
@@ -132,7 +130,7 @@
     }
     CGFloat datewidth=150.0f;
     CGRect dateLabelFrame;
-    if(_outBound) {
+    if(self.outBound) {
         dateLabelFrame = CGRectMake(finaltextlabelFrame.origin.x+finaltextlabelFrame.size.width-datewidth-10, 3, datewidth, kNameLabelHeight);
         
         if(self.deliveryFailed) {
@@ -174,15 +172,12 @@
     if(self.link)
     {
         NSURL *url= [NSURL URLWithString:self.link];
-        if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"9.0")) {
-            if ([url.scheme isEqualToString:@"http"] || [url.scheme isEqualToString:@"https"]) {
-                SFSafariViewController *safariView = [[ SFSafariViewController alloc] initWithURL:url];
-                [self.parent presentViewController:safariView animated:YES completion:nil];
-            }
+        
+        if ([url.scheme isEqualToString:@"http"] || [url.scheme isEqualToString:@"https"]) {
+            SFSafariViewController *safariView = [[ SFSafariViewController alloc] initWithURL:url];
+            [self.parent presentViewController:safariView animated:YES completion:nil];
         }
-        else {
-            [[UIApplication sharedApplication] openURL:url];
-        }
+        
     }
 }
 

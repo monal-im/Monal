@@ -883,10 +883,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     NSString* __block stanzaType=nil;
     
     NSInteger stanzacounter=0;
-    NSInteger maxPos=[_inputBuffer length];
-    DDLogVerbose(@"maxPos %ld", (long)maxPos);
+    DDLogVerbose(@"maxPos %ld", _inputBuffer.length );
     
-    if(maxPos<2)
+    if(_inputBuffer.length<2)
     {
         return nil;
     }
@@ -910,12 +909,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     
     
-    if(maxPos>startpos)
+    if(_inputBuffer.length>startpos)
     {
         NSString *element;
         NSRange pos;
         NSRange endPos=[_inputBuffer rangeOfString:@">"
-                                           options:NSCaseInsensitiveSearch range:NSMakeRange(startpos, maxPos-startpos)];
+                                           options:NSCaseInsensitiveSearch range:NSMakeRange(startpos, _inputBuffer.length-startpos)];
         //we have the max bounds of he XML tag.
         if(endPos.location==NSNotFound) {
             DDLogVerbose(@"dont have the end. exit at 0 ");
@@ -939,7 +938,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 stanzaType= element;
                 element =nil;
                 NSRange endPos=[_inputBuffer rangeOfString:@">"
-                                                   options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, maxPos-pos.location)];
+                                                   options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, _inputBuffer.length-pos.location)];
                 
                 finalstart=startpos;
                 finalend=endPos.location+1;
@@ -954,7 +953,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             
             {
                 NSRange dupePos=[_inputBuffer rangeOfString:[NSString stringWithFormat:@"<%@",stanzaType]
-                                                    options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location+1, maxPos-pos.location-1)];
+                                                    options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location+1, _inputBuffer.length-pos.location-1)];
                 
                 
                 if([stanzaType isEqualToString:@"message"] && dupePos.location!=NSNotFound) {
@@ -966,11 +965,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         
                         //look for next message close
                         NSRange forwardClosePos=[_inputBuffer rangeOfString:@"</forwarded"
-                                                                    options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, maxPos-pos.location)];
+                                                                    options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, _inputBuffer.length-pos.location)];
                         
                         if(forwardClosePos.location!=NSNotFound) {
                             NSRange messageClose =[_inputBuffer rangeOfString:[NSString stringWithFormat:@"</%@",stanzaType]
-                                                                      options:NSCaseInsensitiveSearch range:NSMakeRange(forwardClosePos.location, maxPos-forwardClosePos.location)];
+                                                                      options:NSCaseInsensitiveSearch range:NSMakeRange(forwardClosePos.location, _inputBuffer.length-forwardClosePos.location)];
                             //ensure it is set to future max
                             
                             finalstart=startpos;
@@ -978,12 +977,17 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             DDLogVerbose(@"at  2.5");
                             // break;
                         }
+                        else {
+                             DDLogVerbose(@"Incomplete stanza  missing forward close. at 2.6");
+                            return nil;
+                        }
                         
                     }
                 }
                 
                 //since there is another block of the same stanza, short cuts dont work.check to find beginning of next element
-                if((dupePos.location<maxPos) && (dupePos.location!=NSNotFound))
+                NSInteger maxPos=_inputBuffer.length;
+                if((dupePos.location<_inputBuffer.length) && (dupePos.location!=NSNotFound))
                 {
                     //reduce search to within the set of this and at max the next element of the same kind
                     maxPos=dupePos.location;
@@ -1009,14 +1013,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     
                     //check if self closed
                     NSRange endPos=[_inputBuffer rangeOfString:@"/>"
-                                                       options:NSCaseInsensitiveSearch range:NSMakeRange(startpos, maxPos-startpos)];
+                                                       options:NSCaseInsensitiveSearch range:NSMakeRange(startpos, _inputBuffer.length-startpos)];
                     
                     //are ther children, then not self closed
-                    if(endPos.location<maxPos && endPos.location!=NSNotFound)
+                    if(endPos.location<_inputBuffer.length && endPos.location!=NSNotFound)
                     {
                         NSRange childPos=[_inputBuffer rangeOfString:[NSString stringWithFormat:@"<"]
                                                              options:NSCaseInsensitiveSearch range:NSMakeRange(startpos+1, endPos.location-startpos)];
-                        if((childPos.location<maxPos) && (childPos.location!=NSNotFound)){
+                        if((childPos.location<_inputBuffer.length) && (childPos.location!=NSNotFound)){
                             DDLogVerbose(@"at 3.5 looks like incomplete stanza. need to get more. loc %d", childPos.location);
                             return nil; 
                             // break;
@@ -1024,7 +1028,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     }
                     
                     
-                    if((endPos.location<maxPos) && (endPos.location!=NSNotFound)) {
+                    if((endPos.location<_inputBuffer.length) && (endPos.location!=NSNotFound)) {
                         finalstart=startpos;
                         finalend=endPos.location+2; //+2 to inclde closing />
                         DDLogVerbose(@"at  4 self closed");
@@ -1047,7 +1051,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         
     
     //if this happens its  probably a stream error.sanity check is  preventing crash
-    if((finalend-finalstart<=maxPos) && finalend!=NSNotFound && finalstart!=NSNotFound && finalend>=finalstart)
+   
+    if((finalend-finalstart<=_inputBuffer.length) && finalend!=NSNotFound && finalstart!=NSNotFound && finalend>=finalstart)
     {
         toReturn=  [_inputBuffer substringWithRange:NSMakeRange(finalstart,finalend-finalstart)];
     }
@@ -1061,7 +1066,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         
     }
     else{
-        if((finalend-finalstart<=maxPos) && finalend!=NSNotFound && finalstart!=NSNotFound && finalend>=finalstart)
+        if((finalend-finalstart<=_inputBuffer.length) && finalend!=NSNotFound && finalstart!=NSNotFound && finalend>=finalstart)
         {
             //  DDLogVerbose(@"to del start %d end %d: %@", finalstart, finalend, _inputBuffer);
             if(finalend <=[_inputBuffer length] ) {

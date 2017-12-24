@@ -728,6 +728,34 @@
                                 <constraints>
                                     <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="320" id="k1m-re-kKB"/>
                                 </constraints>
+                                <prototypes>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="none" indentationWidth="10" reuseIdentifier="imageInCell" rowHeight="200" id="lKs-kG-aVS" customClass="MLChatImageCell">
+                                        <rect key="frame" x="0.0" y="28" width="374" height="200"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="lKs-kG-aVS" id="GA8-Q5-xRV">
+                                            <rect key="frame" x="0.0" y="0.0" width="374" height="200"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="GlC-dn-bvj">
+                                                    <rect key="frame" x="15.333333333333343" y="11" width="245.00000000000003" height="178"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="height" constant="178" id="T8s-TI-xbm"/>
+                                                        <constraint firstAttribute="width" constant="245" id="ypT-uw-per"/>
+                                                    </constraints>
+                                                </imageView>
+                                            </subviews>
+                                            <constraints>
+                                                <constraint firstItem="GlC-dn-bvj" firstAttribute="top" secondItem="GA8-Q5-xRV" secondAttribute="topMargin" id="28N-Dr-Vz6"/>
+                                                <constraint firstItem="GlC-dn-bvj" firstAttribute="bottom" secondItem="GA8-Q5-xRV" secondAttribute="bottomMargin" id="XBa-00-tqZ"/>
+                                                <constraint firstItem="GlC-dn-bvj" firstAttribute="leading" secondItem="GA8-Q5-xRV" secondAttribute="leadingMargin" id="a0T-SA-rGZ"/>
+                                                <constraint firstAttribute="trailingMargin" relation="greaterThanOrEqual" secondItem="GlC-dn-bvj" secondAttribute="trailing" constant="98.670000000000002" id="xXV-tC-Fpn"/>
+                                            </constraints>
+                                        </tableViewCellContentView>
+                                        <connections>
+                                            <outlet property="thumbnailImage" destination="GlC-dn-bvj" id="iHP-Iz-z5V"/>
+                                        </connections>
+                                    </tableViewCell>
+                                </prototypes>
                                 <connections>
                                     <outlet property="dataSource" destination="5nR-Q5-dQD" id="Qvl-NA-FmW"/>
                                     <outlet property="delegate" destination="5nR-Q5-dQD" id="77O-IS-w23"/>
@@ -737,10 +765,14 @@
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <gestureRecognizers/>
                         <constraints>
+                            <constraint firstItem="eXr-Xg-TCZ" firstAttribute="top" secondItem="Kkq-aZ-5fP" secondAttribute="bottom" constant="8" id="4Sb-Lk-rJw"/>
                             <constraint firstItem="Kkq-aZ-5fP" firstAttribute="top" secondItem="Riz-2Q-bcU" secondAttribute="topMargin" id="HdK-dF-8fg"/>
+                            <constraint firstItem="Kkq-aZ-5fP" firstAttribute="leading" secondItem="Riz-2Q-bcU" secondAttribute="leadingMargin" id="KKl-T1-PHC"/>
                             <constraint firstAttribute="trailingMargin" secondItem="Kkq-aZ-5fP" secondAttribute="trailing" id="L8j-s9-xp2"/>
+                            <constraint firstItem="Kkq-aZ-5fP" firstAttribute="top" secondItem="HiA-3m-fJs" secondAttribute="bottom" id="Oll-Rz-J0p"/>
                             <constraint firstItem="Kkq-aZ-5fP" firstAttribute="leading" secondItem="Riz-2Q-bcU" secondAttribute="leadingMargin" id="aGE-60-OjE"/>
                             <constraint firstItem="Kkq-aZ-5fP" firstAttribute="top" secondItem="Riz-2Q-bcU" secondAttribute="topMargin" id="bMv-kd-rMg"/>
+                            <constraint firstItem="Kkq-aZ-5fP" firstAttribute="trailing" secondItem="Riz-2Q-bcU" secondAttribute="trailingMargin" id="efD-KA-xEh"/>
                             <constraint firstItem="eXr-Xg-TCZ" firstAttribute="leading" secondItem="Riz-2Q-bcU" secondAttribute="leadingMargin" constant="-20" id="jVI-Df-58M"/>
                             <constraint firstItem="si5-od-Uah" firstAttribute="top" secondItem="eXr-Xg-TCZ" secondAttribute="bottom" id="lAt-Zq-pOz"/>
                             <constraint firstAttribute="trailingMargin" secondItem="eXr-Xg-TCZ" secondAttribute="trailing" constant="-20" id="rOV-mz-x8F"/>
@@ -793,7 +825,7 @@
                     </constraints>
                 </view>
             </objects>
-            <point key="canvasLocation" x="2497" y="210"/>
+            <point key="canvasLocation" x="2495.6521739130435" y="209.5108695652174"/>
         </scene>
     </scenes>
     <resources>

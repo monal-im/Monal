@@ -13,7 +13,6 @@
 #import "MLConstants.h"
 #import "MLXMPPManager.h"
 #import "MLNotificationManager.h"
-#import "MLChatCell.h"
 #import "MLResizingTextView.h"
 
 

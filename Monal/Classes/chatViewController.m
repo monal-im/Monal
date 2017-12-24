@@ -7,6 +7,9 @@
 //
 
 #import "chatViewController.h"
+#import "MLChatCell.h"
+#import "MLChatImageCell.h"
+
 #import "MLConstants.h"
 #import "MonalAppDelegate.h"
 #import "MBProgressHUD.h"
@@ -781,6 +784,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         }
     }
     
+    
+   
+    
     NSDictionary *messageRow = [self.messageList objectAtIndex:indexPath.row];
     
     NSString *messageString =[messageRow objectForKey:@"message"];
@@ -788,14 +794,68 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     
     if([messageType isEqualToString:kMessageTypeImage])
     {
+        MLChatImageCell* imageCell= (MLChatImageCell *) [tableView dequeueReusableCellWithIdentifier:@"imageInCell"];
+        
+        imageCell.link = messageString;
+        [imageCell loadImage];
+        cell=imageCell;
         
     } else  {
+          cell =[[MLChatCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"ChatCell"  Muc:_isMUC andParent:self];
         
-    }
-    
-    if(!cell)
-    {
-        cell =[[MLChatCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"ChatCell"  Muc:_isMUC andParent:self];
+        NSString* lowerCase= [[row objectForKey:@"message"] lowercaseString];
+        NSRange pos = [lowerCase rangeOfString:@"http://"];
+        if(pos.location==NSNotFound) {
+            pos=[lowerCase rangeOfString:@"https://"];
+        }
+        
+        NSRange pos2;
+        if(pos.location!=NSNotFound)
+        {
+            NSString* urlString =[[row objectForKey:@"message"] substringFromIndex:pos.location];
+            pos2= [urlString rangeOfString:@" "];
+            if(pos2.location==NSNotFound) {
+                pos2= [urlString rangeOfString:@">"];
+            }
+            
+            
+            if(pos2.location!=NSNotFound) {
+                urlString=[urlString substringToIndex:pos2.location];
+            }
+            
+            
+            cell.link=[urlString stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        
+            NSDictionary *underlineAttribute = @{NSUnderlineStyleAttributeName: @(NSUnderlineStyleSingle)};
+            NSAttributedString* underlined = [[NSAttributedString alloc] initWithString:cell.link
+                                                                             attributes:underlineAttribute];
+            
+            
+            if ([underlined length]==[[row objectForKey:@"message"] length])
+            {
+                cell.textLabel.attributedText=underlined;
+            }
+            else
+            {
+                NSMutableAttributedString* stitchedString  = [[NSMutableAttributedString alloc] init];
+                [stitchedString appendAttributedString:
+                 [[NSAttributedString alloc] initWithString:[[row objectForKey:@"message"] substringToIndex:pos.location] attributes:nil]];
+                [stitchedString appendAttributedString:underlined];
+                if(pos2.location!=NSNotFound)
+                {
+                    NSString* remainder = [[row objectForKey:@"message"] substringFromIndex:pos.location+[underlined length]];
+                    [stitchedString appendAttributedString:[[NSAttributedString alloc] initWithString:remainder attributes:nil]];
+                }
+                cell.textLabel.attributedText=stitchedString;
+            }
+            
+        }
+        else
+        {
+            cell.textLabel.text =[row objectForKey:@"message"];
+             cell.link=nil;
+        }
+        
     }
     
     if(_isMUC)
@@ -803,6 +863,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         cell.showName=YES;
         cell.name.text=[row objectForKey:@"af"];
     }
+
     
     if([[row objectForKey:@"delivered"] boolValue]!=YES)
     {
@@ -811,67 +872,6 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     
     cell.messageHistoryId=[row objectForKey:@"message_history_id"];
     cell.date.text= [self formattedDateWithSource:[row objectForKey:@"thetime"]];
-    
-    NSString* lowerCase= [[row objectForKey:@"message"] lowercaseString];
-    NSRange pos = [lowerCase rangeOfString:@"http://"];
-    if(pos.location==NSNotFound) {
-        pos=[lowerCase rangeOfString:@"https://"];
-    }
-    
-    NSRange pos2;
-    if(pos.location!=NSNotFound)
-    {
-        NSString* urlString =[[row objectForKey:@"message"] substringFromIndex:pos.location];
-        pos2= [urlString rangeOfString:@" "];
-        if(pos2.location==NSNotFound) {
-              pos2= [urlString rangeOfString:@">"];
-        }
-        
-        
-        if(pos2.location!=NSNotFound) {
-            urlString=[urlString substringToIndex:pos2.location];
-        }
-       
-        
-        cell.link=[urlString stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-    }
-    else
-    {
-        cell.link=nil;
-    }
-    
-    
-    if(pos.location!=NSNotFound)
-    {
-        NSDictionary *underlineAttribute = @{NSUnderlineStyleAttributeName: @(NSUnderlineStyleSingle)};
-        NSAttributedString* underlined = [[NSAttributedString alloc] initWithString:cell.link
-                                                                         attributes:underlineAttribute];
-        
-        
-        if ([underlined length]==[[row objectForKey:@"message"] length])
-        {
-            cell.textLabel.attributedText=underlined;
-        }
-        else
-        {
-            NSMutableAttributedString* stitchedString  = [[NSMutableAttributedString alloc] init];
-            [stitchedString appendAttributedString:
-             [[NSAttributedString alloc] initWithString:[[row objectForKey:@"message"] substringToIndex:pos.location] attributes:nil]];
-            [stitchedString appendAttributedString:underlined];
-            if(pos2.location!=NSNotFound)
-            {
-                NSString* remainder = [[row objectForKey:@"message"] substringFromIndex:pos.location+[underlined length]];
-                [stitchedString appendAttributedString:[[NSAttributedString alloc] initWithString:remainder attributes:nil]];
-            }
-            cell.textLabel.attributedText=stitchedString;
-        }
-        
-    }
-    else
-    {
-        cell.textLabel.text =[row objectForKey:@"message"];
-    }
-    
     
     
     cell.selectionStyle=UITableViewCellSelectionStyleNone;

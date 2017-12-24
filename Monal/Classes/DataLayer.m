@@ -2069,7 +2069,8 @@ static DataLayer *sharedInstance=nil;
 -(void) messageTypeForMessage:(NSString *) messageString withCompletion:(void(^)(NSString *messageType)) completion
 {
     __block NSString *messageType=kMessageTypeText;
-    if ([[NSUserDefaults standardUserDefaults] boolForKey: @"ShowImages"] &&  ([messageString hasPrefix:@"http://"]||[messageString hasPrefix:@"https://"]))
+    if ([[NSUserDefaults standardUserDefaults] boolForKey: @"ShowImages"] &&  [messageString hasPrefix:@"https://"])
+         //  [messageString hasPrefix:@"http://"]||
         // HTTP is only here for testing, debugging with ATS off. Will never work in prod
     {
         

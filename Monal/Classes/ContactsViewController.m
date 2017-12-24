@@ -517,6 +517,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         chatViewController* chatVC = (chatViewController *)nav.topViewController;
         [chatVC setupWithContact:sender];
     }
+    else if([segue.identifier isEqualToString:@"showDetails"])
+    {
+        UINavigationController *nav = segue.destinationViewController;
+        ContactDetails* details = (ContactDetails *)nav.topViewController;
+        details.contact= sender;
+    }
     
 }
 

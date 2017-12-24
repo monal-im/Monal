@@ -25,34 +25,7 @@
 -(void) viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-//    _buddyName.text =[_contact objectForKey:@"buddy_name"];
-//
-//    _buddyMessage.text=[_contact objectForKey:@"status"];
-//    if([ _buddyMessage.text isEqualToString:@"(null)"])  _buddyMessage.text=@"";
-//
-//    _buddyStatus.text=[_contact objectForKey:@"state"];
-//    if([ _buddyStatus.text isEqualToString:@"(null)"])  _buddyStatus.text=@"";
-//
-//    _fullName.text=[_contact objectForKey:@"full_name"];
-//    if([ _fullName.text isEqualToString:@"(null)"])  _fullName.text=@"";
-//
-//    NSArray* parts= [_buddyName.text componentsSeparatedByString:@"@"];
-//
-//    NSString* accountNo=[NSString stringWithFormat:@"%@", [_contact objectForKey:@"account_id"]];
-//    [[MLImageManager sharedInstance] getIconForContact:[_contact objectForKey:@"buddy_name"] andAccount:accountNo withCompletion:^(UIImage *image) {
-//            _buddyIconView.image=image;
-//    }];
-//
-//
-//    NSArray* resources= [[DataLayer sharedInstance] resourcesForContact:[_contact objectForKey:@"buddy_name"]];
-//    self.resourcesTextView.text=@"";
-//    for(NSDictionary* row in resources)
-//    {
-//        self.resourcesTextView.text=[NSString stringWithFormat:@"%@\n%@\n",self.resourcesTextView.text, [row objectForKey:@"resource"]];
-//
-//    }
-    
-    
+
     self.tableView.rowHeight= UITableViewAutomaticDimension;
     
 }
@@ -96,22 +69,43 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    UITableViewCell* thecell= [tableView dequeueReusableCellWithIdentifier:@"topCell"];
-    
-    
+    MLDetailsTableViewCell* thecell;
+  
     switch(indexPath.section) {
-        case 0:
-            thecell= [tableView dequeueReusableCellWithIdentifier:@"topCell"];
-            break;
-        case 1:
-            thecell= [tableView dequeueReusableCellWithIdentifier:@"bottomCell"];
-            break;
-        case 2:
-             thecell= [tableView dequeueReusableCellWithIdentifier:@"resourceCell"];
-            break;
+        case 0: {
+            thecell=  (MLDetailsTableViewCell *)[tableView dequeueReusableCellWithIdentifier:@"topCell"];
             
+            thecell.buddyName.text=[self.contact objectForKey:@"buddy_name"];
+            thecell.fullName.text=[self.contact objectForKey:@"buddy_name"];
+            thecell.buddyStatus.text=[self.contact objectForKey:@"buddy_name"];
+            
+            if([thecell.buddyStatus.text isEqualToString:@"(null)"])  thecell.buddyStatus.text=@"";
+            if([thecell.fullName.text isEqualToString:@"(null)"])  thecell.fullName.text=@"";
+            
+            NSString* accountNo=[NSString stringWithFormat:@"%@", [self.contact objectForKey:@"account_id"]];
+            [[MLImageManager sharedInstance] getIconForContact:[self.contact objectForKey:@"buddy_name"] andAccount:accountNo withCompletion:^(UIImage *image) {
+                thecell.buddyIconView.image=image;
+            }];
+            
+            break;
+        }
+        case 1: {
+            thecell=  (MLDetailsTableViewCell *)[tableView dequeueReusableCellWithIdentifier:@"bottomCell"];
+            thecell.detailTextLabel.text=[_contact objectForKey:@"status"];
+            if([  thecell.detailTextLabel.text isEqualToString:@"(null)"])  thecell.detailTextLabel.text=@"";
+            break;
+        }
+        case 2: {
+            thecell=  (MLDetailsTableViewCell *)[tableView dequeueReusableCellWithIdentifier:@"resourceCell"];
+            NSArray* resources= [[DataLayer sharedInstance] resourcesForContact:[_contact objectForKey:@"buddy_name"]];
+            thecell.detailTextLabel.text=@"";
+            for(NSDictionary* row in resources)
+            {
+                thecell.detailTextLabel.text=[NSString stringWithFormat:@"%@\n%@\n", thecell.detailTextLabel.text, [row objectForKey:@"resource"]];
+            }
+            break;
+        }
     }
-    
     return thecell;
     
 }

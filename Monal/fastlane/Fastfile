@@ -15,6 +15,28 @@ fastlane_version "2.25.0"
 
 default_platform :ios
 
+platform :mac do
+  before_all do
+ENV["FASTLANE_ITC_TEAM_ID"] = "247650"
+    # ENV["SLACK_URL"] = "https://hooks.slack.com/services/..."
+    cocoapods
+    
+  end
+  
+  
+   desc "Deploy a new version to the App Store"
+  lane :release do
+    # match(type: "appstore")
+    # snapshot
+    gym(scheme: "Monal-OSX") # Build your app - more options available
+    deliver(force: true)
+    # frameit
+  end
+  
+
+end
+
+
 platform :ios do
   before_all do
 ENV["FASTLANE_ITC_TEAM_ID"] = "247650"
@@ -30,7 +52,7 @@ ENV["FASTLANE_ITC_TEAM_ID"] = "247650"
 
   desc "Submit a new Beta Build to Apple TestFlight"
   desc "This will also make sure the profile is up to date"
-  lane :betaios do
+  lane :beta do
     # match(type: "appstore") # more information: https://codesigning.guide
     gym(scheme: "Monal") # Build your app - more options available
     pilot(distribute_external:true,skip_waiting_for_build_processing:true, changelog:"Latest build")

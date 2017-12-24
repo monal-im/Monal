@@ -48,6 +48,7 @@ pod 'Dropbox-OSX-SDK'
 pod 'SAMKeychain'
 #pod 'NXOAuth2Client', '~> 1.2.8'
 pod 'TPCircularBuffer'
+pod 'Sparkle'
 
   # Pods for Monal-OSX
 

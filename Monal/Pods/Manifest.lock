@@ -7,6 +7,7 @@ PODS:
   - Fabric (1.6.11)
   - MBProgressHUD (1.0.0)
   - SAMKeychain (1.5.2)
+  - Sparkle (1.18.1)
   - TPCircularBuffer (1.4)
 
 DEPENDENCIES:
@@ -17,6 +18,7 @@ DEPENDENCIES:
   - Fabric
   - MBProgressHUD
   - SAMKeychain
+  - Sparkle
   - TPCircularBuffer
 
 SPEC CHECKSUMS:
@@ -27,8 +29,9 @@ SPEC CHECKSUMS:
   Fabric: 5911403591946b8228ab1c51d98f1d7137e863c6
   MBProgressHUD: 4890f671c94e8a0f3cf959aa731e9de2f036d71a
   SAMKeychain: 1865333198217411f35327e8da61b43de79b635b
+  Sparkle: 06ea33170007c5937ee54da481b4481af98fac79
   TPCircularBuffer: c0160545b63019adf85231e3de543bbc97cb9041
 
-PODFILE CHECKSUM: 295f33d88c1c5a9c4d97dc72df62494047adac4f
+PODFILE CHECKSUM: bd4f8f5454f1aafa45ef06ae2469e693b93a0a9f
 
 COCOAPODS: 1.3.1

@@ -670,7 +670,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     alarm.fireDate = theDate;
                     alarm.timeZone = [NSTimeZone defaultTimeZone];
                     alarm.repeatInterval = 0;
-                    alarm.alertBody =  @"Lost connection for too long and could not reliably reconnect. Please reopen and make sure you are connected";
+                    alarm.alertBody =  @"Could not reconnect and fetch messages. Please reopen and make sure you are connected.";
                     
                     [app scheduleLocalNotification:alarm];
                     

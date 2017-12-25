@@ -960,7 +960,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 {
     return YES;
 }
-re
+
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
     if (editingStyle == UITableViewCellEditingStyleDelete) {

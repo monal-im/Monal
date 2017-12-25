@@ -25,6 +25,11 @@
             {
                 self.thumbnailImage.image=nil;
             }
+            else  {
+                if (image.size.height>image.size.width) {
+                    self.imageHeight.constant = 350;
+                }
+            }
             
         }];
     }
@@ -39,6 +44,11 @@
 -(BOOL) canPerformAction:(SEL)action withSender:(id)sender
 {
     return NO;
+}
+
+-(void)prepareForReuse{
+    [super prepareForReuse];
+    self.imageHeight.constant=178;
 }
 
 

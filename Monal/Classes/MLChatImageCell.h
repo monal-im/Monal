@@ -13,6 +13,8 @@
 @property (nonatomic, strong) NSString* link;
 
 @property (nonatomic, weak) IBOutlet UIImageView *thumbnailImage;
+@property (nonatomic, weak) IBOutlet NSLayoutConstraint *imageHeight;
+
 
 -(void) loadImage;
 

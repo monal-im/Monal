@@ -753,6 +753,7 @@
                                             </constraints>
                                         </tableViewCellContentView>
                                         <connections>
+                                            <outlet property="imageHeight" destination="RiZ-ui-Y0E" id="AGX-f4-SYW"/>
                                             <outlet property="thumbnailImage" destination="W0m-OG-Q8V" id="Ze2-T0-Z5z"/>
                                         </connections>
                                     </tableViewCell>
@@ -780,6 +781,7 @@
                                             </constraints>
                                         </tableViewCellContentView>
                                         <connections>
+                                            <outlet property="imageHeight" destination="T8s-TI-xbm" id="RII-N1-3Cn"/>
                                             <outlet property="thumbnailImage" destination="GlC-dn-bvj" id="iHP-Iz-z5V"/>
                                         </connections>
                                     </tableViewCell>

@@ -133,6 +133,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         self.restClient.delegate = self;
     }
     
+    self.messageTable.rowHeight = UITableViewAutomaticDimension;
+    self.messageTable.estimatedRowHeight=75.0f; 
+    
 }
 
 -(void) handleForeGround {
@@ -947,18 +950,18 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 }
 
 #pragma mark tableview datasource
-- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    if(indexPath.row>=[self.messageList count])  {
-        return 0;
-    }
-    NSDictionary* row=[self.messageList objectAtIndex:indexPath.row];
-    CGFloat height= [MLChatCell heightForText:[row objectForKey:@"message"] inWidth:tableView.frame.size.width-20];
-    height+=kNameLabelHeight;
-    
-    return height;
-    
-}
+//- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+//{
+//    if(indexPath.row>=[self.messageList count])  {
+//        return 0;
+//    }
+//    NSDictionary* row=[self.messageList objectAtIndex:indexPath.row];
+//    CGFloat height= [MLChatCell heightForText:[row objectForKey:@"message"] inWidth:tableView.frame.size.width-20];
+//    height+=kNameLabelHeight;
+//    
+//    return height;
+//    
+//}
 
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
 {

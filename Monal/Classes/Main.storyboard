@@ -722,18 +722,45 @@
                                 </constraints>
                             </view>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" showsHorizontalScrollIndicator="NO" keyboardDismissMode="onDrag" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="Kkq-aZ-5fP">
-                                <rect key="frame" x="20" y="64" width="374" height="572"/>
+                                <rect key="frame" x="0.0" y="0.0" width="414" height="636"/>
                                 <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <gestureRecognizers/>
                                 <constraints>
                                     <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="320" id="k1m-re-kKB"/>
                                 </constraints>
                                 <prototypes>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="none" indentationWidth="10" reuseIdentifier="imageOutCell" rowHeight="200" id="2cR-0H-YA2" customClass="MLChatImageCell">
+                                        <rect key="frame" x="0.0" y="28" width="414" height="200"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="2cR-0H-YA2" id="uMC-3d-1aS">
+                                            <rect key="frame" x="0.0" y="0.0" width="414" height="200"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="W0m-OG-Q8V">
+                                                    <rect key="frame" x="129" y="11" width="245" height="178"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="width" constant="245" id="Ehn-wW-v6T"/>
+                                                        <constraint firstAttribute="height" constant="178" id="RiZ-ui-Y0E"/>
+                                                    </constraints>
+                                                </imageView>
+                                            </subviews>
+                                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                            <constraints>
+                                                <constraint firstItem="W0m-OG-Q8V" firstAttribute="top" secondItem="uMC-3d-1aS" secondAttribute="topMargin" id="S7h-ff-LMb"/>
+                                                <constraint firstAttribute="trailing" secondItem="W0m-OG-Q8V" secondAttribute="trailing" id="Vcl-uQ-VM2"/>
+                                                <constraint firstItem="W0m-OG-Q8V" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="uMC-3d-1aS" secondAttribute="leadingMargin" constant="100" id="sdF-fG-HBP"/>
+                                                <constraint firstItem="W0m-OG-Q8V" firstAttribute="bottom" secondItem="uMC-3d-1aS" secondAttribute="bottomMargin" id="z7i-q9-uax"/>
+                                            </constraints>
+                                        </tableViewCellContentView>
+                                        <connections>
+                                            <outlet property="thumbnailImage" destination="W0m-OG-Q8V" id="Ze2-T0-Z5z"/>
+                                        </connections>
+                                    </tableViewCell>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="none" indentationWidth="10" reuseIdentifier="imageInCell" rowHeight="200" id="lKs-kG-aVS" customClass="MLChatImageCell">
-                                        <rect key="frame" x="0.0" y="28" width="374" height="200"/>
+                                        <rect key="frame" x="0.0" y="228" width="414" height="200"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="lKs-kG-aVS" id="GA8-Q5-xRV">
-                                            <rect key="frame" x="0.0" y="0.0" width="374" height="200"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="414" height="200"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="GlC-dn-bvj">
@@ -744,7 +771,7 @@
                                                     </constraints>
                                                 </imageView>
                                             </subviews>
-                                            <color key="backgroundColor" red="0.1906735897064209" green="0.55723816156387329" blue="0.9816402792930603" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                             <constraints>
                                                 <constraint firstItem="GlC-dn-bvj" firstAttribute="top" secondItem="GA8-Q5-xRV" secondAttribute="topMargin" id="28N-Dr-Vz6"/>
                                                 <constraint firstItem="GlC-dn-bvj" firstAttribute="leading" secondItem="GA8-Q5-xRV" secondAttribute="leadingMargin" id="OKS-P8-7wv"/>
@@ -768,16 +795,12 @@
                         <gestureRecognizers/>
                         <constraints>
                             <constraint firstItem="eXr-Xg-TCZ" firstAttribute="top" secondItem="Kkq-aZ-5fP" secondAttribute="bottom" constant="8" id="4Sb-Lk-rJw"/>
-                            <constraint firstItem="Kkq-aZ-5fP" firstAttribute="top" secondItem="Riz-2Q-bcU" secondAttribute="topMargin" id="HdK-dF-8fg"/>
-                            <constraint firstItem="Kkq-aZ-5fP" firstAttribute="leading" secondItem="Riz-2Q-bcU" secondAttribute="leadingMargin" id="KKl-T1-PHC"/>
-                            <constraint firstAttribute="trailingMargin" secondItem="Kkq-aZ-5fP" secondAttribute="trailing" id="L8j-s9-xp2"/>
-                            <constraint firstItem="Kkq-aZ-5fP" firstAttribute="top" secondItem="HiA-3m-fJs" secondAttribute="bottom" id="Oll-Rz-J0p"/>
-                            <constraint firstItem="Kkq-aZ-5fP" firstAttribute="leading" secondItem="Riz-2Q-bcU" secondAttribute="leadingMargin" id="aGE-60-OjE"/>
-                            <constraint firstItem="Kkq-aZ-5fP" firstAttribute="top" secondItem="Riz-2Q-bcU" secondAttribute="topMargin" id="bMv-kd-rMg"/>
-                            <constraint firstItem="Kkq-aZ-5fP" firstAttribute="trailing" secondItem="Riz-2Q-bcU" secondAttribute="trailingMargin" id="efD-KA-xEh"/>
+                            <constraint firstItem="Kkq-aZ-5fP" firstAttribute="leading" secondItem="Riz-2Q-bcU" secondAttribute="leading" id="SIK-A8-KjT"/>
+                            <constraint firstItem="Kkq-aZ-5fP" firstAttribute="top" secondItem="Riz-2Q-bcU" secondAttribute="top" id="T8K-jc-eWo"/>
                             <constraint firstItem="eXr-Xg-TCZ" firstAttribute="leading" secondItem="Riz-2Q-bcU" secondAttribute="leadingMargin" constant="-20" id="jVI-Df-58M"/>
                             <constraint firstItem="si5-od-Uah" firstAttribute="top" secondItem="eXr-Xg-TCZ" secondAttribute="bottom" id="lAt-Zq-pOz"/>
                             <constraint firstAttribute="trailingMargin" secondItem="eXr-Xg-TCZ" secondAttribute="trailing" constant="-20" id="rOV-mz-x8F"/>
+                            <constraint firstAttribute="trailing" secondItem="Kkq-aZ-5fP" secondAttribute="trailing" id="xwD-cC-ws0"/>
                             <constraint firstItem="eXr-Xg-TCZ" firstAttribute="top" secondItem="Kkq-aZ-5fP" secondAttribute="bottom" constant="8" id="zpH-ds-x47"/>
                         </constraints>
                     </view>
@@ -827,7 +850,7 @@
                     </constraints>
                 </view>
             </objects>
-            <point key="canvasLocation" x="2495.6521739130435" y="209.5108695652174"/>
+            <point key="canvasLocation" x="2494.202898550725" y="209.5108695652174"/>
         </scene>
     </scenes>
     <resources>
@@ -839,6 +862,6 @@
     </resources>
     <inferredMetricsTieBreakers>
         <segue reference="8bw-7H-nTe"/>
-        <segue reference="wmf-tk-2CN"/>
+        <segue reference="RLU-kt-b8r"/>
     </inferredMetricsTieBreakers>
 </document>

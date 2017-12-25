@@ -85,6 +85,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     if(self){
         _contact=contact;
         _day=day;
+        self.photos =[[NSMutableArray alloc] init];
         [self setup];
     }
     
@@ -530,40 +531,48 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
        &&( ( [[notification.userInfo objectForKey:@"from"] isEqualToString:_contactName]) || ([[notification.userInfo objectForKey:@"to"] isEqualToString:_contactName] ))
        )
     {
-        dispatch_async(dispatch_get_main_queue(),
-                       ^{
-                           NSDictionary* userInfo;
-                           if([[notification.userInfo objectForKey:@"to"] isEqualToString:_contactName])
-                           {
-                               userInfo = @{@"af": [notification.userInfo objectForKey:@"actuallyfrom"],
-                                            @"message": [notification.userInfo objectForKey:@"messageText"],
-                                            @"thetime": [self currentGMTTime],   @"delivered":@YES};
+        [[DataLayer sharedInstance] messageTypeForMessage: [notification.userInfo objectForKey:@"messageText"] withCompletion:^(NSString *messageType) {
+            
+            dispatch_async(dispatch_get_main_queue(),
+                           ^{
+                               NSDictionary* userInfo;
+                               if([[notification.userInfo objectForKey:@"to"] isEqualToString:_contactName])
+                               {
+                                   userInfo = @{@"af": [notification.userInfo objectForKey:@"actuallyfrom"],
+                                                @"message": [notification.userInfo objectForKey:@"messageText"],
+                                                @"thetime": [self currentGMTTime],   @"delivered":@YES,
+                                                kMessageType:messageType
+                                                };
+                                   
+                               } else  {
+                                   userInfo = @{@"af": [notification.userInfo objectForKey:@"actuallyfrom"],
+                                                @"message": [notification.userInfo objectForKey:@"messageText"],
+                                                @"thetime": [self currentGMTTime], kMessageType:messageType
+                                                };
+                               }
                                
-                           } else  {
-                               userInfo = @{@"af": [notification.userInfo objectForKey:@"actuallyfrom"],
-                                            @"message": [notification.userInfo objectForKey:@"messageText"],
-                                            @"thetime": [self currentGMTTime]
-                                            };
-                           }
-                           
-                           [self.messageList addObject:userInfo];
-                           
-                           [_messageTable beginUpdates];
-                           NSIndexPath *path1;
-                           NSInteger bottom =  self.messageList.count-1;
-                           if(bottom>0) {
-                               path1 = [NSIndexPath indexPathForRow:bottom  inSection:0];
-                               [_messageTable insertRowsAtIndexPaths:@[path1]
-                                                    withRowAnimation:UITableViewRowAnimationBottom];
-                           }
-                           
-                           [_messageTable endUpdates];
-                           
-                           [self scrollToBottom];
-                           
-                           //mark as read
-                          // [[DataLayer sharedInstance] markAsReadBuddy:_contactName forAccount:_accountNo];
-                       });
+                               
+                               [self.messageList addObject:userInfo];
+                               
+                               [_messageTable beginUpdates];
+                               NSIndexPath *path1;
+                               NSInteger bottom =  self.messageList.count-1;
+                               if(bottom>0) {
+                                   path1 = [NSIndexPath indexPathForRow:bottom  inSection:0];
+                                   [_messageTable insertRowsAtIndexPaths:@[path1]
+                                                        withRowAnimation:UITableViewRowAnimationBottom];
+                               }
+                               
+                               [_messageTable endUpdates];
+                               
+                               [self scrollToBottom];
+                               
+                               //mark as read
+                               // [[DataLayer sharedInstance] markAsReadBuddy:_contactName forAccount:_accountNo];
+                           });
+        
+        }];
+
     }
 }
 
@@ -797,7 +806,14 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     
     if([messageType isEqualToString:kMessageTypeImage])
     {
-        MLChatImageCell* imageCell= (MLChatImageCell *) [tableView dequeueReusableCellWithIdentifier:@"imageInCell"];
+        MLChatImageCell* imageCell;
+        if([[row objectForKey:@"af"] isEqualToString:self.contactName])
+        {
+            imageCell= (MLChatImageCell *) [tableView dequeueReusableCellWithIdentifier:@"imageInCell"];
+        }
+        else  {
+            imageCell= (MLChatImageCell *) [tableView dequeueReusableCellWithIdentifier:@"imageOutCell"];
+        }
         
         imageCell.link = messageString;
         [imageCell loadImage];
@@ -898,7 +914,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
             [(MLChatCell *)cell openlink:self];
         } else  {
             
-            self.photos =[NSMutableArray array];
+            
             
             MLChatImageCell *imageCell = (MLChatImageCell *) cell;
             

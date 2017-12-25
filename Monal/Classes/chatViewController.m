@@ -85,7 +85,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     if(self){
         _contact=contact;
         _day=day;
-        self.photos =[[NSMutableArray alloc] init];
+       
         [self setup];
     }
     
@@ -914,7 +914,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
             [(MLChatCell *)cell openlink:self];
         } else  {
             
-            
+            self.photos =[[NSMutableArray alloc] init];
             
             MLChatImageCell *imageCell = (MLChatImageCell *) cell;
             

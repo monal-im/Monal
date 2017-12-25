@@ -8,12 +8,15 @@
 
 #import "MLChatImageCell.h"
 #import "UIImageView+WebCache.h"
+@import QuartzCore; 
 
 @implementation MLChatImageCell
 
 - (void)awakeFromNib {
     [super awakeFromNib];
     // Initialization code
+    self.thumbnailImage.layer.cornerRadius=15.0f;
+    self.thumbnailImage.layer.masksToBounds=YES;
 }
 
 -(void) loadImage
@@ -26,6 +29,7 @@
                 self.thumbnailImage.image=nil;
             }
             else  {
+                
                 if (image.size.height>image.size.width) {
                     self.imageHeight.constant = 350;
                 }

@@ -810,12 +810,16 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     if([messageType isEqualToString:kMessageTypeImage])
     {
         MLChatImageCell* imageCell;
+      
         if([[row objectForKey:@"af"] isEqualToString:self.contactName])
         {
             imageCell= (MLChatImageCell *) [tableView dequeueReusableCellWithIdentifier:@"imageInCell"];
+            imageCell.outBound=NO;
+           
         }
         else  {
             imageCell= (MLChatImageCell *) [tableView dequeueReusableCellWithIdentifier:@"imageOutCell"];
+            imageCell.outBound=YES;
         }
         
         imageCell.link = messageString;

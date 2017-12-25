@@ -823,7 +823,11 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         }
         
         imageCell.link = messageString;
-        [imageCell loadImage];
+        [imageCell loadImageWithcompletion:^{
+            
+            [self.messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+            
+        }];
         cell=imageCell;
         
     } else  {

@@ -19,7 +19,7 @@
     self.thumbnailImage.layer.masksToBounds=YES;
 }
 
--(void) loadImage
+-(void) loadImageWithcompletion:(void (^)(void))completion
 {
     if(self.link)
     {
@@ -34,6 +34,8 @@
                     self.imageHeight.constant = 350;
                 }
             }
+            
+            if(completion) completion();
             
         }];
     }

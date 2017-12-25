@@ -16,7 +16,7 @@
 @property (nonatomic, weak) IBOutlet NSLayoutConstraint *imageHeight;
 
 
--(void) loadImage;
+-(void) loadImageWithcompletion:(void (^)(void))completion;
 
 @end
 

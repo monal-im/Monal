@@ -24,4 +24,7 @@
 @property (nonatomic, strong) NSNumber* messageHistoryId;
 @property (nonatomic, weak) UIViewController *parent;
 
+
+-(void) updateCell;
+
 @end

@@ -45,10 +45,6 @@
 
 @property (nonatomic,strong)  NSString* contactName;
 
-@property (nonatomic, weak) IBOutlet UIView* topBarView;
-@property (nonatomic, weak) IBOutlet UILabel* topName;
-@property (nonatomic, weak) IBOutlet UIImageView* topIcon;
-
 
 -(IBAction)sendMessageText:(id)sender;
 -(IBAction)attach:(id)sender;

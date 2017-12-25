@@ -21,4 +21,22 @@
     // Configure the view for the selected state
 }
 
+
+-(void) updateCell
+{
+    self.retry.tintColor=[UIColor redColor]; // not needed once everything uses prototype
+    if([self.parent respondsToSelector:@selector(retry:)]) {
+        [self.retry addTarget:self.parent action:@selector(retry:) forControlEvents:UIControlEventTouchUpInside];
+    }
+    
+    self.retry.tag= [self.messageHistoryId integerValue];
+    
+    if(self.deliveryFailed) {
+        self.retry.hidden=NO;
+    }
+    else{
+        self.retry.hidden=YES;
+    }
+}
+
 @end

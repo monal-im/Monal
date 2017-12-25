@@ -160,29 +160,22 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
  
     if(![_contactFullName isEqualToString:@"(null)"] && [[_contactFullName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0)
     {
-        _topName.text=_contactFullName;
+         self.navigationItem.title=_contactFullName;
     }
     else {
-        _topName.text=_contactName;
+         self.navigationItem.title=_contactName;
     }
+    
+   
     
     if(_day) {
-        self.title=  [NSString stringWithFormat:@"%@(%@)", _topName.text, _day];
+        self.navigationItem.title=  [NSString stringWithFormat:@"%@(%@)", self.navigationItem.title, _day];
         [[NSNotificationCenter defaultCenter] removeObserver:self];
         [containerView removeFromSuperview];
-        [_topIcon removeFromSuperview];
+       
     }
-    else
-    {
-        [[MLImageManager sharedInstance] getIconForContact:_contactName andAccount:_accountNo withCompletion:^(UIImage *image) {
-                 _topIcon.image=image;
-        }];
-        
-    }
-    self.navigationItem.titleView=self.topBarView;
-    
+
     [self handleForeGround];
-    
     
     xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
     if(xmppAccount.supportsMam0) {
@@ -902,14 +895,16 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     
     cell.messageHistoryId=[row objectForKey:@"message_history_id"];
     cell.date.text= [self formattedDateWithSource:[row objectForKey:@"thetime"]];
-    
-    
     cell.selectionStyle=UITableViewCellSelectionStyleNone;
     
     if([[row objectForKey:@"af"] isEqualToString:_jid])
     {
         cell.outBound=YES;
     }
+    
+    cell.parent=self; 
+    
+    [cell updateCell];
     
     return cell;
 }

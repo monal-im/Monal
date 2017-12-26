@@ -10,9 +10,7 @@
 #import "MLBaseCell.h"
 
 @interface MLChatCell : MLBaseCell
-{
-    UIImageView* _bubbleImage;
-}
+
 
 #define kNameLabelHeight 10.0
 

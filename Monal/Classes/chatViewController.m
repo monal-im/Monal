@@ -605,21 +605,6 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 }
 
 #pragma mark MUC display elements
--(void) popContacts
-{
-    DDLogVerbose(@"pop out contacts");
-    
-    //    UITableViewController* tbv = [UITableViewController alloc];
-    //    tbv.tableView=contactList;
-    //    popOverController = [[UIPopoverController alloc] initWithContentViewController:tbv];
-    //
-    //    popOverController.popoverContentSize = CGSizeMake(320, 480);
-    //    [popOverController presentPopoverFromBarButtonItem:contactsButton permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
-    //
-    //
-    //
-}
-
 
 -(void) scrollToBottom
 {
@@ -763,37 +748,30 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     MLBaseCell* cell;
-    if(indexPath.row <0 || indexPath.row>=[self.messageList count])
-    {
-        cell =[[MLChatCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"ChatCell"  Muc:_isMUC andParent:self];
-        return cell;
-    }
-    
+
     NSDictionary* row= [self.messageList objectAtIndex:indexPath.row];
     
     if(_isMUC)
     {
         if([[row objectForKey:@"af"] isEqualToString:_jid])
         {
-            cell=[tableView dequeueReusableCellWithIdentifier:@"ChatCellOut"];
+            cell=[tableView dequeueReusableCellWithIdentifier:@"textOutCell"];
         }
         else
         {
-            cell=[tableView dequeueReusableCellWithIdentifier:@"ChatCellIn"];
+            cell=[tableView dequeueReusableCellWithIdentifier:@"textInCell"];
         }
     } else  {
         if([[row objectForKey:@"af"] isEqualToString:self.contactName])
         {
-            cell=[tableView dequeueReusableCellWithIdentifier:@"ChatCellIn"];
+            cell=[tableView dequeueReusableCellWithIdentifier:@"textInCell"];
         }
         else
         {
-            cell=[tableView dequeueReusableCellWithIdentifier:@"ChatCellOut"];
+            cell=[tableView dequeueReusableCellWithIdentifier:@"textOutCell"];
         }
     }
-    
-    
-   
+
     
     NSDictionary *messageRow = [self.messageList objectAtIndex:indexPath.row];
     
@@ -824,12 +802,11 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         cell=imageCell;
         
     } else  {
-          cell =[[MLChatCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"ChatCell"  Muc:_isMUC andParent:self];
-        
+    
         NSString* lowerCase= [[row objectForKey:@"message"] lowercaseString];
-        NSRange pos = [lowerCase rangeOfString:@"http://"];
+        NSRange pos = [lowerCase rangeOfString:@"https://"];
         if(pos.location==NSNotFound) {
-            pos=[lowerCase rangeOfString:@"https://"];
+            pos=[lowerCase rangeOfString:@"http://"];
         }
         
         NSRange pos2;
@@ -856,7 +833,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
             
             if ([underlined length]==[[row objectForKey:@"message"] length])
             {
-                cell.textLabel.attributedText=underlined;
+                cell.messageBody.attributedText=underlined;
             }
             else
             {
@@ -869,14 +846,14 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                     NSString* remainder = [[row objectForKey:@"message"] substringFromIndex:pos.location+[underlined length]];
                     [stitchedString appendAttributedString:[[NSAttributedString alloc] initWithString:remainder attributes:nil]];
                 }
-                cell.textLabel.attributedText=stitchedString;
+                cell.messageBody.attributedText=stitchedString;
             }
             
         }
         else
         {
-            cell.textLabel.text =[row objectForKey:@"message"];
-             cell.link=nil;
+            cell.messageBody.text =[row objectForKey:@"message"];
+            cell.link=nil;
         }
         
     }

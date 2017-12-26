@@ -797,16 +797,19 @@
                                                     <state key="normal" image="724-info"/>
                                                 </button>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Date" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="vWM-SI-3lf">
-                                                    <rect key="frame" x="310.33333333333331" y="11" width="23" height="12"/>
+                                                    <rect key="frame" x="294.33333333333331" y="11" width="23" height="12"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="10"/>
                                                     <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="DZU-Tx-2ba">
-                                                    <rect key="frame" x="341.33333333333331" y="1" width="57.666666666666686" height="99"/>
+                                                    <rect key="frame" x="325.33333333333331" y="1" width="73.666666666666686" height="99"/>
                                                     <subviews>
+                                                        <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="rLX-lr-DcJ">
+                                                            <rect key="frame" x="0.0" y="0.0" width="73.666666666666671" height="99"/>
+                                                        </imageView>
                                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="VFO-tq-wdS">
-                                                            <rect key="frame" x="8" y="8" width="41.666666666666664" height="83"/>
+                                                            <rect key="frame" x="15.999999999999996" y="12" width="41.666666666666657" height="75"/>
                                                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                             <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                             <nil key="highlightedColor"/>
@@ -814,10 +817,14 @@
                                                     </subviews>
                                                     <color key="backgroundColor" red="0.19067358970000001" green="0.55723816159999995" blue="0.98164027929999997" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <constraints>
-                                                        <constraint firstItem="VFO-tq-wdS" firstAttribute="top" secondItem="DZU-Tx-2ba" secondAttribute="top" constant="8" id="3IB-gZ-Aqt"/>
-                                                        <constraint firstAttribute="trailing" secondItem="VFO-tq-wdS" secondAttribute="trailing" constant="8" id="4Cf-dj-2KI"/>
-                                                        <constraint firstItem="VFO-tq-wdS" firstAttribute="leading" secondItem="DZU-Tx-2ba" secondAttribute="leading" constant="8" id="GMG-CZ-vcr"/>
-                                                        <constraint firstAttribute="bottom" secondItem="VFO-tq-wdS" secondAttribute="bottom" constant="8" id="Yfi-fu-FAh"/>
+                                                        <constraint firstItem="VFO-tq-wdS" firstAttribute="top" secondItem="DZU-Tx-2ba" secondAttribute="top" constant="12" id="3IB-gZ-Aqt"/>
+                                                        <constraint firstAttribute="trailing" secondItem="VFO-tq-wdS" secondAttribute="trailing" constant="16" id="4Cf-dj-2KI"/>
+                                                        <constraint firstItem="VFO-tq-wdS" firstAttribute="leading" secondItem="DZU-Tx-2ba" secondAttribute="leading" constant="16" id="GMG-CZ-vcr"/>
+                                                        <constraint firstItem="rLX-lr-DcJ" firstAttribute="leading" secondItem="DZU-Tx-2ba" secondAttribute="leading" id="IFl-SD-mHq"/>
+                                                        <constraint firstItem="rLX-lr-DcJ" firstAttribute="top" secondItem="DZU-Tx-2ba" secondAttribute="top" id="UBs-ho-NbO"/>
+                                                        <constraint firstAttribute="trailing" secondItem="rLX-lr-DcJ" secondAttribute="trailing" id="USx-0B-Vu6"/>
+                                                        <constraint firstAttribute="bottom" secondItem="VFO-tq-wdS" secondAttribute="bottom" constant="12" id="Yfi-fu-FAh"/>
+                                                        <constraint firstAttribute="bottom" secondItem="rLX-lr-DcJ" secondAttribute="bottom" id="tWm-3h-e4h"/>
                                                     </constraints>
                                                 </view>
                                             </subviews>
@@ -834,6 +841,7 @@
                                             </constraints>
                                         </tableViewCellContentView>
                                         <connections>
+                                            <outlet property="bubbleImage" destination="rLX-lr-DcJ" id="YsV-ui-ipQ"/>
                                             <outlet property="date" destination="vWM-SI-3lf" id="JSL-sS-NlZ"/>
                                             <outlet property="messageBody" destination="VFO-tq-wdS" id="Ham-7i-hdn"/>
                                             <outlet property="retry" destination="p0Q-oV-3Pb" id="2sQ-po-CC5"/>
@@ -885,16 +893,19 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Date" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="uDg-Hw-FvA">
-                                                    <rect key="frame" x="81" y="11" width="23" height="12"/>
+                                                    <rect key="frame" x="97" y="11" width="23" height="12"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="10"/>
                                                     <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="96E-WC-l2C">
-                                                    <rect key="frame" x="15" y="1" width="58" height="99"/>
+                                                    <rect key="frame" x="15" y="1" width="74" height="99"/>
                                                     <subviews>
+                                                        <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="j3m-BP-DXG">
+                                                            <rect key="frame" x="0.0" y="0.0" width="74" height="99"/>
+                                                        </imageView>
                                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Ra0-Eo-cAh">
-                                                            <rect key="frame" x="8" y="8" width="42" height="83"/>
+                                                            <rect key="frame" x="16" y="12" width="42" height="75"/>
                                                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                             <nil key="textColor"/>
                                                             <nil key="highlightedColor"/>
@@ -902,10 +913,14 @@
                                                     </subviews>
                                                     <color key="backgroundColor" red="0.66666666669999997" green="0.66666666669999997" blue="0.66666666669999997" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <constraints>
-                                                        <constraint firstAttribute="trailing" secondItem="Ra0-Eo-cAh" secondAttribute="trailing" constant="8" id="KQ4-Zu-CKY"/>
-                                                        <constraint firstAttribute="bottom" secondItem="Ra0-Eo-cAh" secondAttribute="bottom" constant="8" id="QVL-vs-z7Q"/>
-                                                        <constraint firstItem="Ra0-Eo-cAh" firstAttribute="leading" secondItem="96E-WC-l2C" secondAttribute="leading" constant="8" id="i5E-8l-Zur"/>
-                                                        <constraint firstItem="Ra0-Eo-cAh" firstAttribute="top" secondItem="96E-WC-l2C" secondAttribute="top" constant="8" id="lQO-PR-7Aa"/>
+                                                        <constraint firstAttribute="trailing" secondItem="Ra0-Eo-cAh" secondAttribute="trailing" constant="16" id="KQ4-Zu-CKY"/>
+                                                        <constraint firstAttribute="trailing" secondItem="j3m-BP-DXG" secondAttribute="trailing" id="LPT-qt-1jX"/>
+                                                        <constraint firstAttribute="bottom" secondItem="Ra0-Eo-cAh" secondAttribute="bottom" constant="12" id="QVL-vs-z7Q"/>
+                                                        <constraint firstItem="j3m-BP-DXG" firstAttribute="top" secondItem="96E-WC-l2C" secondAttribute="top" id="fGO-dU-srK"/>
+                                                        <constraint firstItem="j3m-BP-DXG" firstAttribute="leading" secondItem="96E-WC-l2C" secondAttribute="leading" id="gVc-wU-tYU"/>
+                                                        <constraint firstAttribute="bottom" secondItem="j3m-BP-DXG" secondAttribute="bottom" id="hQW-67-r25"/>
+                                                        <constraint firstItem="Ra0-Eo-cAh" firstAttribute="leading" secondItem="96E-WC-l2C" secondAttribute="leading" constant="16" id="i5E-8l-Zur"/>
+                                                        <constraint firstItem="Ra0-Eo-cAh" firstAttribute="top" secondItem="96E-WC-l2C" secondAttribute="top" constant="12" id="lQO-PR-7Aa"/>
                                                     </constraints>
                                                 </view>
                                             </subviews>
@@ -924,6 +939,7 @@
                                             </constraints>
                                         </tableViewCellContentView>
                                         <connections>
+                                            <outlet property="bubbleImage" destination="j3m-BP-DXG" id="mW6-sq-epF"/>
                                             <outlet property="date" destination="uDg-Hw-FvA" id="30Z-UY-yYy"/>
                                             <outlet property="messageBody" destination="Ra0-Eo-cAh" id="9QE-i9-4oX"/>
                                         </connections>

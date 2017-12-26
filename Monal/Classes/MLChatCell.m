@@ -12,19 +12,27 @@
 @import SafariServices;
 
 
-#define kChatFont 17.0f
-#define kNameFont 10.0f
-
 @implementation MLChatCell
 
-+(CGFloat) heightForText:(NSString*) text inWidth:(CGFloat) width
+-(void) updateCell
 {
-    //.75 would define the bubble size
-    CGSize size = CGSizeMake(width*.75 -25 , MAXFLOAT);
-    CGSize calcSize= [text sizeWithFont:[UIFont systemFontOfSize:kChatFont] constrainedToSize:size lineBreakMode:NSLineBreakByWordWrapping];
-    return calcSize.height+15;
+    [super updateCell];
+    UIImage * buttonImage2;
+    if(!self.bubbleImage.image)
+    {
+        if(self.outBound)
+        {
+            self.textLabel.textColor=[UIColor whiteColor];
+            buttonImage2 = [[MLImageManager sharedInstance] outboundImage];
+        }
+        else
+        {
+            self.textLabel.textColor=[UIColor blackColor];
+            buttonImage2 = [[MLImageManager sharedInstance] inboundImage];
+        }
+        self.bubbleImage.image=buttonImage2;
+    }
 }
-
 
 
 -(BOOL) canPerformAction:(SEL)action withSender:(id)sender

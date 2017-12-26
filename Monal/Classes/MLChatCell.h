@@ -12,11 +12,6 @@
 @interface MLChatCell : MLBaseCell
 
 
-#define kNameLabelHeight 10.0
-
-- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier Muc:(BOOL) isMUC andParent:(UIViewController*) parent;
-+(CGFloat) heightForText:(NSString*) text inWidth:(CGFloat) width;
-
 -(void) openlink: (id) sender;
 
 @end

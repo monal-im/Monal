@@ -37,6 +37,8 @@ NS_ENUM(NSInteger, kSettingSection)
     self.appRows=@[@"Accounts", @"Notifications", @"Display", @"Cloud Storage"];
     self.supportRows=@[@"Email Support", @"Submit Bug"];
     self.aboutRows=@[@"Rate Monal", @"Open Source", @"About", @"Version"];
+    self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
+    
     
 }
 
@@ -78,15 +80,15 @@ NS_ENUM(NSInteger, kSettingSection)
     switch(indexPath.section)
     {
         case kSettingSectionApp: {
-            cell.textLabel.text= self.appRows[indexPath.row];
+            cell.textLabel.text= @"ok"; //self.appRows[indexPath.row];
             break;
         }
         case kSettingSectionSupport: {
-            cell.textLabel.text= self.supportRows[indexPath.row];
+            cell.textLabel.text= @"ok"; //self.supportRows[indexPath.row];
             break;
         }
         case kSettingSectionAbout: {
-            cell.textLabel.text= self.aboutRows[indexPath.row];
+            cell.textLabel.text= @"hmm"; //self.aboutRows[indexPath.row];
             break;
         }
             

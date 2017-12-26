@@ -948,7 +948,7 @@
                             <constraint firstItem="eXr-Xg-TCZ" firstAttribute="top" secondItem="Kkq-aZ-5fP" secondAttribute="bottom" constant="8" id="zpH-ds-x47"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" id="tgd-HR-Cbd"/>
+                    <navigationItem key="navigationItem" largeTitleDisplayMode="never" id="tgd-HR-Cbd"/>
                     <connections>
                         <outlet property="chatInput" destination="jiV-U5-fDl" id="gQc-PG-STp"/>
                         <outlet property="inputContainerBottom" destination="lAt-Zq-pOz" id="SqJ-Rd-9ea"/>

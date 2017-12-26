@@ -815,7 +815,6 @@
                                                             <nil key="highlightedColor"/>
                                                         </label>
                                                     </subviews>
-                                                    <color key="backgroundColor" red="0.19067358970000001" green="0.55723816159999995" blue="0.98164027929999997" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <constraints>
                                                         <constraint firstItem="VFO-tq-wdS" firstAttribute="top" secondItem="DZU-Tx-2ba" secondAttribute="top" constant="12" id="3IB-gZ-Aqt"/>
                                                         <constraint firstAttribute="trailing" secondItem="VFO-tq-wdS" secondAttribute="trailing" constant="16" id="4Cf-dj-2KI"/>
@@ -911,7 +910,6 @@
                                                             <nil key="highlightedColor"/>
                                                         </label>
                                                     </subviews>
-                                                    <color key="backgroundColor" red="0.66666666669999997" green="0.66666666669999997" blue="0.66666666669999997" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <constraints>
                                                         <constraint firstAttribute="trailing" secondItem="Ra0-Eo-cAh" secondAttribute="trailing" constant="16" id="KQ4-Zu-CKY"/>
                                                         <constraint firstAttribute="trailing" secondItem="j3m-BP-DXG" secondAttribute="trailing" id="LPT-qt-1jX"/>

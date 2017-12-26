@@ -670,57 +670,6 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="eXr-Xg-TCZ">
-                                <rect key="frame" x="0.0" y="644" width="414" height="43"/>
-                                <subviews>
-                                    <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" bounces="NO" showsHorizontalScrollIndicator="NO" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="jiV-U5-fDl" customClass="MLResizingTextView">
-                                        <rect key="frame" x="62" y="8" width="300" height="25"/>
-                                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                        <textInputTraits key="textInputTraits" autocapitalizationType="sentences" returnKeyType="send"/>
-                                        <connections>
-                                            <outlet property="delegate" destination="5nR-Q5-dQD" id="s6z-b4-uwm"/>
-                                        </connections>
-                                    </textView>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="kYa-y4-X5Z">
-                                        <rect key="frame" x="370" y="7" width="36" height="30"/>
-                                        <constraints>
-                                            <constraint firstAttribute="width" constant="36" id="NRJ-Qj-1DA"/>
-                                            <constraint firstAttribute="height" constant="30" id="ZPw-Mb-D1d"/>
-                                        </constraints>
-                                        <fontDescription key="fontDescription" type="system" pointSize="15"/>
-                                        <state key="normal" title="Send"/>
-                                        <connections>
-                                            <action selector="sendMessageText:" destination="5nR-Q5-dQD" eventType="touchUpInside" id="QRx-TH-CI3"/>
-                                        </connections>
-                                    </button>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="c6B-5o-sqL">
-                                        <rect key="frame" x="17" y="7" width="28" height="27"/>
-                                        <constraints>
-                                            <constraint firstAttribute="width" constant="28" id="r5D-N5-kFE"/>
-                                            <constraint firstAttribute="height" constant="27" id="yNE-7P-Ml5"/>
-                                        </constraints>
-                                        <state key="normal" image="770-paper-clip"/>
-                                        <connections>
-                                            <action selector="attach:" destination="5nR-Q5-dQD" eventType="touchUpInside" id="7Vw-VD-VgI"/>
-                                        </connections>
-                                    </button>
-                                </subviews>
-                                <color key="backgroundColor" red="0.96470588235294119" green="0.96470588235294119" blue="0.96470588235294119" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                <gestureRecognizers/>
-                                <constraints>
-                                    <constraint firstItem="jiV-U5-fDl" firstAttribute="leading" secondItem="c6B-5o-sqL" secondAttribute="trailing" constant="17" id="0iI-zp-5bF"/>
-                                    <constraint firstAttribute="bottom" secondItem="jiV-U5-fDl" secondAttribute="bottom" constant="10" id="1Ym-FP-VS3"/>
-                                    <constraint firstAttribute="bottom" secondItem="c6B-5o-sqL" secondAttribute="bottom" constant="9" id="9Nx-w1-7jR"/>
-                                    <constraint firstItem="c6B-5o-sqL" firstAttribute="leading" secondItem="eXr-Xg-TCZ" secondAttribute="leading" constant="17" id="AhS-4k-DS6"/>
-                                    <constraint firstAttribute="bottom" secondItem="kYa-y4-X5Z" secondAttribute="bottom" constant="6" id="B7L-s4-GeB"/>
-                                    <constraint firstAttribute="trailing" secondItem="kYa-y4-X5Z" secondAttribute="trailing" constant="8" id="BW2-vo-vN1"/>
-                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="320" id="EWy-UE-gfz"/>
-                                    <constraint firstItem="jiV-U5-fDl" firstAttribute="top" secondItem="eXr-Xg-TCZ" secondAttribute="top" constant="8" id="JfN-2V-Vou"/>
-                                    <constraint firstItem="kYa-y4-X5Z" firstAttribute="leading" secondItem="jiV-U5-fDl" secondAttribute="trailing" constant="8" id="L32-zc-2Qr"/>
-                                    <constraint firstAttribute="height" constant="43" id="lfT-Yz-Z8o"/>
-                                </constraints>
-                            </view>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" showsHorizontalScrollIndicator="NO" keyboardDismissMode="onDrag" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="Kkq-aZ-5fP">
                                 <rect key="frame" x="0.0" y="0.0" width="414" height="636"/>
                                 <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -948,6 +897,57 @@
                                     <outlet property="delegate" destination="5nR-Q5-dQD" id="77O-IS-w23"/>
                                 </connections>
                             </tableView>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="eXr-Xg-TCZ">
+                                <rect key="frame" x="0.0" y="644" width="414" height="43"/>
+                                <subviews>
+                                    <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" bounces="NO" showsHorizontalScrollIndicator="NO" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="jiV-U5-fDl" customClass="MLResizingTextView">
+                                        <rect key="frame" x="62" y="8" width="300" height="25"/>
+                                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                        <textInputTraits key="textInputTraits" autocapitalizationType="sentences" returnKeyType="send"/>
+                                        <connections>
+                                            <outlet property="delegate" destination="5nR-Q5-dQD" id="s6z-b4-uwm"/>
+                                        </connections>
+                                    </textView>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="kYa-y4-X5Z">
+                                        <rect key="frame" x="370" y="7" width="36" height="30"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="36" id="NRJ-Qj-1DA"/>
+                                            <constraint firstAttribute="height" constant="30" id="ZPw-Mb-D1d"/>
+                                        </constraints>
+                                        <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                                        <state key="normal" title="Send"/>
+                                        <connections>
+                                            <action selector="sendMessageText:" destination="5nR-Q5-dQD" eventType="touchUpInside" id="QRx-TH-CI3"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="c6B-5o-sqL">
+                                        <rect key="frame" x="17" y="7" width="28" height="27"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="28" id="r5D-N5-kFE"/>
+                                            <constraint firstAttribute="height" constant="27" id="yNE-7P-Ml5"/>
+                                        </constraints>
+                                        <state key="normal" image="770-paper-clip"/>
+                                        <connections>
+                                            <action selector="attach:" destination="5nR-Q5-dQD" eventType="touchUpInside" id="7Vw-VD-VgI"/>
+                                        </connections>
+                                    </button>
+                                </subviews>
+                                <color key="backgroundColor" red="0.96470588235294119" green="0.96470588235294119" blue="0.96470588235294119" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <gestureRecognizers/>
+                                <constraints>
+                                    <constraint firstItem="jiV-U5-fDl" firstAttribute="leading" secondItem="c6B-5o-sqL" secondAttribute="trailing" constant="17" id="0iI-zp-5bF"/>
+                                    <constraint firstAttribute="bottom" secondItem="jiV-U5-fDl" secondAttribute="bottom" constant="10" id="1Ym-FP-VS3"/>
+                                    <constraint firstAttribute="bottom" secondItem="c6B-5o-sqL" secondAttribute="bottom" constant="9" id="9Nx-w1-7jR"/>
+                                    <constraint firstItem="c6B-5o-sqL" firstAttribute="leading" secondItem="eXr-Xg-TCZ" secondAttribute="leading" constant="17" id="AhS-4k-DS6"/>
+                                    <constraint firstAttribute="bottom" secondItem="kYa-y4-X5Z" secondAttribute="bottom" constant="6" id="B7L-s4-GeB"/>
+                                    <constraint firstAttribute="trailing" secondItem="kYa-y4-X5Z" secondAttribute="trailing" constant="8" id="BW2-vo-vN1"/>
+                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="320" id="EWy-UE-gfz"/>
+                                    <constraint firstItem="jiV-U5-fDl" firstAttribute="top" secondItem="eXr-Xg-TCZ" secondAttribute="top" constant="8" id="JfN-2V-Vou"/>
+                                    <constraint firstItem="kYa-y4-X5Z" firstAttribute="leading" secondItem="jiV-U5-fDl" secondAttribute="trailing" constant="8" id="L32-zc-2Qr"/>
+                                    <constraint firstAttribute="height" constant="43" id="lfT-Yz-Z8o"/>
+                                </constraints>
+                            </view>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <gestureRecognizers/>
@@ -988,6 +988,6 @@
     </resources>
     <inferredMetricsTieBreakers>
         <segue reference="8bw-7H-nTe"/>
-        <segue reference="QlH-d5-Lhg"/>
+        <segue reference="RLU-kt-b8r"/>
     </inferredMetricsTieBreakers>
 </document>

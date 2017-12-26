@@ -261,6 +261,7 @@
 		2644D48E1FEFAF2F00F46AB5 /* dsa_pub.pem in Resources */ = {isa = PBXBuildFile; fileRef = 2644D48D1FEFAF2E00F46AB5 /* dsa_pub.pem */; };
 		2644D4921FF0064C00F46AB5 /* MLChatImageCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2644D4911FF0064C00F46AB5 /* MLChatImageCell.m */; };
 		2644D4951FF046E800F46AB5 /* MLBaseCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2644D4941FF046E800F46AB5 /* MLBaseCell.m */; };
+		2644D4991FF29E5600F46AB5 /* MLSettingsTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2644D4981FF29E5600F46AB5 /* MLSettingsTableViewController.m */; };
 		26470F521835C4080069E3E0 /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 26470F511835C4080069E3E0 /* Media.xcassets */; };
 		2649CE531C51B84C00CD1E80 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2649CE521C51B84C00CD1E80 /* Launch Screen.storyboard */; };
 		264A7E751AA7263600E860E3 /* MLAccountCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 264A7E741AA7263600E860E3 /* MLAccountCell.xib */; };
@@ -633,6 +634,8 @@
 		2644D4911FF0064C00F46AB5 /* MLChatImageCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLChatImageCell.m; sourceTree = "<group>"; };
 		2644D4931FF046E800F46AB5 /* MLBaseCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLBaseCell.h; sourceTree = "<group>"; };
 		2644D4941FF046E800F46AB5 /* MLBaseCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLBaseCell.m; sourceTree = "<group>"; };
+		2644D4971FF29E5600F46AB5 /* MLSettingsTableViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLSettingsTableViewController.h; sourceTree = "<group>"; };
+		2644D4981FF29E5600F46AB5 /* MLSettingsTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLSettingsTableViewController.m; sourceTree = "<group>"; };
 		26470F511835C4080069E3E0 /* Media.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Media.xcassets; sourceTree = "<group>"; };
 		2649CE521C51B84C00CD1E80 /* Launch Screen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = "Launch Screen.storyboard"; path = "Monal-iOS/Launch Screen.storyboard"; sourceTree = "<group>"; };
 		264A7E741AA7263600E860E3 /* MLAccountCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MLAccountCell.xib; sourceTree = "<group>"; };
@@ -1097,6 +1100,15 @@
 				2644D4941FF046E800F46AB5 /* MLBaseCell.m */,
 			);
 			name = ChatViews;
+			sourceTree = "<group>";
+		};
+		2644D4961FF29E1900F46AB5 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				2644D4971FF29E5600F46AB5 /* MLSettingsTableViewController.h */,
+				2644D4981FF29E5600F46AB5 /* MLSettingsTableViewController.m */,
+			);
+			name = Settings;
 			sourceTree = "<group>";
 		};
 		265F0B641B75733800A63F20 /* Accounts */ = {
@@ -1599,6 +1611,7 @@
 		26DB52121777EA5100B50353 /* Tab views */ = {
 			isa = PBXGroup;
 			children = (
+				2644D4961FF29E1900F46AB5 /* Settings */,
 				2644D48F1FF004B800F46AB5 /* ChatViews */,
 				268C1E471FDACDD300BD6921 /* Contact Details */,
 				2665C1191C4AA22700CC9A04 /* Accounts */,
@@ -2613,6 +2626,7 @@
 				26D51CE01E2674D700141E04 /* NXOAuth2PostBodyStream.m in Sources */,
 				268DD58617C4541000C673A9 /* MLChatCell.m in Sources */,
 				26D51CD21E2674D700141E04 /* NXOAuth2Account.m in Sources */,
+				2644D4991FF29E5600F46AB5 /* MLSettingsTableViewController.m in Sources */,
 				26E2F7DA17C6FD9400C3C8EF /* MLTabBarController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

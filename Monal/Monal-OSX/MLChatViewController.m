@@ -678,7 +678,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         cell = [tableView makeViewWithIdentifier:cellDirectionID owner:self];
         cell.attachmentImage.image=nil;
         cell.attachmentImage.canDrawSubviewsIntoLayer=YES;
-        cell.link=messageString; 
+        cell.link=messageString;
         
         [cell loadImageWithCompletion:^{
             
@@ -738,7 +738,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     NSString *messageType =[messageRow objectForKey:kMessageType];
     if([messageType isEqualToString:kMessageTypeImage])
     {
-        return 200;
+        return 230;
     }
     else {
         

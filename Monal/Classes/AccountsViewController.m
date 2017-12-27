@@ -103,26 +103,28 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) showConnectionStatus:(NSNotification *) notification
 {
-    if(([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
-       || ([UIApplication sharedApplication].applicationState==UIApplicationStateInactive ))
-    {
-        DDLogDebug(@"not surfacing errors in the background because they are super common");
-    } else  {
-        self.sliding.notificationLabelBackgroundColor = [UIColor redColor];
-        self.sliding.notificationLabelTextColor = [UIColor whiteColor];
-        
-        NSArray *payload= notification.object;
-        
-        NSString *message = payload.lastObject; // this is just the way i set it up a dic might better
-        xmpp *xmppAccount= payload.firstObject;
-        
-        NSString *accountName = [NSString stringWithFormat:@"%@@%@", xmppAccount.username, xmppAccount.domain];
-        
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self.sliding displayNotificationWithMessage:[NSString stringWithFormat:@"%@: %@", accountName, message]
-                                             forDuration:3.0f];
-        });
-    }
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if(([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
+           || ([UIApplication sharedApplication].applicationState==UIApplicationStateInactive ))
+        {
+            DDLogDebug(@"not surfacing errors in the background because they are super common");
+        } else  {
+            self.sliding.notificationLabelBackgroundColor = [UIColor redColor];
+            self.sliding.notificationLabelTextColor = [UIColor whiteColor];
+            
+            NSArray *payload= notification.object;
+            
+            NSString *message = payload.lastObject; // this is just the way i set it up a dic might better
+            xmpp *xmppAccount= payload.firstObject;
+            
+            NSString *accountName = [NSString stringWithFormat:@"%@@%@", xmppAccount.username, xmppAccount.domain];
+            
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self.sliding displayNotificationWithMessage:[NSString stringWithFormat:@"%@: %@", accountName, message]
+                                                 forDuration:3.0f];
+            });
+        }
+    });
 }
 
 #pragma mark button actions

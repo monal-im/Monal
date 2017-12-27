@@ -458,7 +458,7 @@
                         </rightBarButtonItems>
                     </navigationItem>
                     <connections>
-                        <segue destination="Tus-3k-aPR" kind="show" id="8dk-IL-cgn"/>
+                        <segue destination="Tus-3k-aPR" kind="show" identifier="editXMPP" id="8dk-IL-cgn"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="LVL-lW-IGD" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -514,7 +514,7 @@
                     </navigationItem>
                     <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
                     <connections>
-                        <segue destination="T2P-jI-4uD" kind="show" identifier="editXMPP" id="i4b-wV-798"/>
+                        <segue destination="T2P-jI-4uD" kind="show" identifier="showServerDetails" id="i4b-wV-798"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="4oy-tB-85I" userLabel="First Responder" sceneMemberID="firstResponder"/>

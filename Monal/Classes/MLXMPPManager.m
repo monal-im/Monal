@@ -236,6 +236,7 @@ An array of Dics what have timers to make sure everything was sent
     xmpp* existing=[self getConnectedAccountForID:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
     if(existing)
     {
+         DDLogVerbose(@"existing account just reconnecitng.");
         existing.explicitLogout=NO;
         [existing reconnect:0];
         

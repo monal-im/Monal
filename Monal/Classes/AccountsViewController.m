@@ -114,7 +114,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             
             NSArray *payload= notification.object;
             
-            NSString *message = payload.lastObject; // this is just the way i set it up a dic might better
+            NSString *message = payload[1]; // this is just the way i set it up a dic might better
             xmpp *xmppAccount= payload.firstObject;
             
             NSString *accountName = [NSString stringWithFormat:@"%@@%@", xmppAccount.username, xmppAccount.domain];

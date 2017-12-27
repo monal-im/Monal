@@ -88,7 +88,8 @@
 
     NSArray *payload= notification.object;
     
-    NSString *message = payload.lastObject; // this is just the way i set it up a dic might better
+    NSString *message = payload[1]; // this is just the way i set it up a dic might better
+   // NSError *error =payload[2];
     xmpp *xmppAccount= payload.firstObject;
     
     NSString *accountName = [NSString stringWithFormat:@"%@@%@", xmppAccount.username, xmppAccount.domain];

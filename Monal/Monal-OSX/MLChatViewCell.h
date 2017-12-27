@@ -32,8 +32,13 @@
 @property (nonatomic, assign) BOOL deliveryFailed;
 @property (nonatomic, strong) IBOutlet NSButton* retry;
 
+@property (nonatomic, weak) IBOutlet NSLayoutConstraint *imageHeight;
+
+@property (nonatomic, strong)  NSString* link;
 
 + (NSRect) sizeWithMessage:(NSString *)messageString;
 
 -(void) updateDisplay;
+-(void) loadImageWithCompletion:(void (^)(void))completion;
+
 @end

@@ -24,6 +24,32 @@
     
 }
 
+-(void) loadImageWithCompletion:(void (^)(void))completion
+{
+    NSMutableURLRequest *imageRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:self.link]];
+    imageRequest.cachePolicy= NSURLRequestReturnCacheDataElseLoad;
+    [[[NSURLSession sharedSession] dataTaskWithRequest:imageRequest completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+        self.imageData= data;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if(data) {
+                self.attachmentImage.image = [[NSImage alloc] initWithData:data];
+                
+                if (  self.attachmentImage.image.size.height>  self.attachmentImage.image.size.width) {
+                    self.imageHeight.constant = 360;
+                    
+                }
+                else
+                {
+                    self.imageHeight.constant= 200;
+                }
+            } else  {
+                self.attachmentImage.image=nil;
+            }
+            if(completion) completion();
+        });
+    }] resume];
+}
+
 -(void) updateDisplay
 {
     self.messageRect = [MLChatViewCell sizeWithMessage:self.messageText.string];

@@ -1396,12 +1396,12 @@ Gw
                                                                 <outlet property="timeStampVeritcalOffset" destination="ERE-Fb-PO9" id="IA5-zx-fb5"/>
                                                             </connections>
                                                         </tableCellView>
-                                                        <tableCellView identifier="OutboundImageCell" id="AA0-Za-mMq" userLabel="Chat View out image Cell" customClass="MLChatViewCell">
+                                                        <tableCellView identifier="OutboundImageCell" misplaced="YES" id="AA0-Za-mMq" userLabel="Chat View out image Cell" customClass="MLChatViewCell">
                                                             <rect key="frame" x="1" y="59" width="490" height="200"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
                                                                 <button hidden="YES" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Xjf-lh-VS8">
-                                                                    <rect key="frame" x="156" y="75" width="21" height="21"/>
+                                                                    <rect key="frame" x="173" y="90" width="21" height="21"/>
                                                                     <constraints>
                                                                         <constraint firstAttribute="height" constant="21" id="bK2-C6-LUE"/>
                                                                         <constraint firstAttribute="width" constant="21" id="dT5-o3-1I9"/>
@@ -1415,7 +1415,7 @@ Gw
                                                                     </connections>
                                                                 </button>
                                                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Bab-Se-qo9">
-                                                                    <rect key="frame" x="193" y="181" width="104" height="14"/>
+                                                                    <rect key="frame" x="193" y="211" width="104" height="14"/>
                                                                     <constraints>
                                                                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="XwG-Z6-2Eh"/>
                                                                         <constraint firstAttribute="height" relation="lessThanOrEqual" constant="14" id="iR3-Zk-9RU"/>
@@ -1427,10 +1427,10 @@ Gw
                                                                     </textFieldCell>
                                                                 </textField>
                                                                 <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="SPf-hi-Vyw" customClass="MLImageView">
-                                                                    <rect key="frame" x="195" y="3" width="292" height="170"/>
+                                                                    <rect key="frame" x="212" y="3" width="275" height="200"/>
                                                                     <constraints>
-                                                                        <constraint firstAttribute="width" constant="292" id="7t7-NK-Kug"/>
-                                                                        <constraint firstAttribute="height" constant="170" id="U3K-oy-syt"/>
+                                                                        <constraint firstAttribute="width" constant="275" id="7t7-NK-Kug"/>
+                                                                        <constraint firstAttribute="height" constant="200" id="U3K-oy-syt"/>
                                                                     </constraints>
                                                                     <imageCell key="cell" refusesFirstResponder="YES" alignment="left" animates="YES" imageScaling="proportionallyUpOrDown" id="xl6-ZI-PPc"/>
                                                                     <connections>
@@ -1556,7 +1556,7 @@ Gw
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
                                                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="eQr-VP-pfh">
-                                                                    <rect key="frame" x="194" y="200" width="104" height="14"/>
+                                                                    <rect key="frame" x="184" y="230" width="104" height="14"/>
                                                                     <constraints>
                                                                         <constraint firstAttribute="height" constant="14" id="NQ0-GI-WUl"/>
                                                                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="P6q-rf-6a2"/>
@@ -1568,7 +1568,7 @@ Gw
                                                                     </textFieldCell>
                                                                 </textField>
                                                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="sWQ-oj-7zC">
-                                                                    <rect key="frame" x="194" y="181" width="104" height="14"/>
+                                                                    <rect key="frame" x="184" y="211" width="104" height="14"/>
                                                                     <constraints>
                                                                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="KKD-16-8TH"/>
                                                                         <constraint firstAttribute="height" relation="lessThanOrEqual" constant="14" id="gP3-GQ-xSr"/>
@@ -1588,10 +1588,10 @@ Gw
                                                                     <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" id="eF5-mM-AuW"/>
                                                                 </imageView>
                                                                 <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="61h-Ow-Utz" customClass="MLImageView">
-                                                                    <rect key="frame" x="47" y="3" width="295" height="170"/>
+                                                                    <rect key="frame" x="47" y="3" width="275" height="200"/>
                                                                     <constraints>
-                                                                        <constraint firstAttribute="width" constant="295" id="5Vb-Dp-hMr"/>
-                                                                        <constraint firstAttribute="height" constant="170" id="PfM-Lo-vfg"/>
+                                                                        <constraint firstAttribute="width" constant="275" id="5Vb-Dp-hMr"/>
+                                                                        <constraint firstAttribute="height" constant="200" id="PfM-Lo-vfg"/>
                                                                     </constraints>
                                                                     <imageCell key="cell" refusesFirstResponder="YES" alignment="left" animates="YES" imageScaling="proportionallyUpOrDown" id="SCf-od-Cvx"/>
                                                                     <connections>

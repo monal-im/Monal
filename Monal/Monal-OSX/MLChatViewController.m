@@ -678,18 +678,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         cell = [tableView makeViewWithIdentifier:cellDirectionID owner:self];
         cell.attachmentImage.image=nil;
         cell.attachmentImage.canDrawSubviewsIntoLayer=YES;
+        cell.link=messageString; 
         
-        
-        NSMutableURLRequest *imageRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:messageString]];
-        imageRequest.cachePolicy= NSURLRequestReturnCacheDataElseLoad;
-        [[[NSURLSession sharedSession] dataTaskWithRequest:imageRequest completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
-            cell.imageData= data;
-            dispatch_async(dispatch_get_main_queue(), ^{
-                if(data) {
-                    cell.attachmentImage.image = [[NSImage alloc] initWithData:data];
-                }
-            });
-        }] resume];
+        [cell loadImageWithCompletion:^{
+            
+        }];
  
     }
     else  {

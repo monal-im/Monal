@@ -38,6 +38,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 @property (nonatomic, strong) DBRestClient *restClient;
 
+@property (nonatomic, assign) BOOL usingExternalKeybaord;
+
 
 /**
  if set to yes will prevent scrolling and resizing. useful for resigning first responder just to set auto correct
@@ -1024,7 +1026,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 {
     BOOL shouldinsert=YES;
     
-    if([text isEqualToString:@"\n"])
+    if(self.usingExternalKeybaord && [text isEqualToString:@"\n"])
     {
         [self resignTextView];
         shouldinsert=NO;
@@ -1090,6 +1092,14 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     CGSize keyboardSize = keyboardframe.size;
     self.inputContainerBottom.constant= keyboardSize.height-self.tabBarController.tabBar.frame.size.height;
     [self scrollToBottom];
+    
+    
+    if(keyboardSize.height<60) { // if just the toolbar or less shows up
+        self.usingExternalKeybaord=YES;
+    }
+    else {
+        self.usingExternalKeybaord=NO;
+    }
 
 }
 

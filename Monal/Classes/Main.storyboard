@@ -8,6 +8,7 @@
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13772"/>
         <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
+        <capability name="Navigation items with more than one left or right bar item" minToolsVersion="7.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <customFonts key="customFonts">
@@ -443,16 +444,18 @@
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" title="Accounts" id="GM4-e8-f1D">
-                        <barButtonItem key="leftBarButtonItem" title="Log out All" id="cBo-1F-HEA">
-                            <connections>
-                                <action selector="logout:" destination="iVr-y2-7k9" id="9cW-PE-XYt"/>
-                            </connections>
-                        </barButtonItem>
-                        <barButtonItem key="rightBarButtonItem" title="Reconnect All" id="r7s-58-k2m">
-                            <connections>
-                                <action selector="connect:" destination="iVr-y2-7k9" id="jvK-e9-Wnb"/>
-                            </connections>
-                        </barButtonItem>
+                        <rightBarButtonItems>
+                            <barButtonItem title="Reconnect All" id="r7s-58-k2m">
+                                <connections>
+                                    <action selector="connect:" destination="iVr-y2-7k9" id="jvK-e9-Wnb"/>
+                                </connections>
+                            </barButtonItem>
+                            <barButtonItem title="Log out All" id="cBo-1F-HEA">
+                                <connections>
+                                    <action selector="logout:" destination="iVr-y2-7k9" id="9cW-PE-XYt"/>
+                                </connections>
+                            </barButtonItem>
+                        </rightBarButtonItems>
                     </navigationItem>
                     <connections>
                         <segue destination="Tus-3k-aPR" kind="show" id="8dk-IL-cgn"/>
@@ -618,6 +621,7 @@
                     <connections>
                         <outlet property="view" destination="6bQ-Oj-ELG" id="bdT-f4-vDY"/>
                         <segue destination="CZH-b5-QK1" kind="showDetail" identifier="showSettingDetail" action="showViewController:sender:" id="ljw-Ff-MNq"/>
+                        <segue destination="c3t-79-ogP" kind="showDetail" identifier="showAccounts" action="showViewController:sender:" id="71v-zj-aVV"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="lLi-28-cfT" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -1065,7 +1069,7 @@
         <image name="menu" width="28" height="22"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="6A3-nG-hz2"/>
+        <segue reference="ljw-Ff-MNq"/>
         <segue reference="QlH-d5-Lhg"/>
     </inferredMetricsTieBreakers>
 </document>

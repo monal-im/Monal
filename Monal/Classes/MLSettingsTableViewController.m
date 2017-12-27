@@ -91,7 +91,16 @@ NS_ENUM(NSInteger, kSettingSection)
             break;
         }
         case kSettingSectionAbout: {
-            cell.textLabel.text= self.aboutRows[indexPath.row];
+            if(indexPath.row==3)
+            {
+                NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
+                NSString* version = [infoDict objectForKey:@"CFBundleShortVersionString"];
+                NSString* build = [infoDict objectForKey:@"CFBundleVersion"];
+               
+                cell.textLabel.text= [NSString stringWithFormat:@"Version  %@ (%@)",version, build];
+            } else {
+                cell.textLabel.text= self.aboutRows[indexPath.row];
+            }
             break;
         }
             
@@ -107,6 +116,35 @@ NS_ENUM(NSInteger, kSettingSection)
     return toreturn;
 }
 
+
+-(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    switch(indexPath.section)
+    {
+        case kSettingSectionApp: {
+           
+            switch ((indexPath.row)) {
+                case 0:
+                    [self performSegueWithIdentifier:@"showAccounts" sender:self];
+                    break;
+                    
+                default:
+                    break;
+            }
+            
+            break;
+        }
+        case kSettingSectionSupport: {
+            
+            break;
+        }
+        case kSettingSectionAbout: {
+           
+            break;
+        }
+            
+    }
+}
 
 /*
 #pragma mark - Navigation

@@ -1083,28 +1083,32 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 	DDLogVerbose(@"kbd will hide scroll: %f", oldFrame.size.height);
 }
 
--(void) keyboardDidShow:(NSNotification *) note
-{
-    
-    
-}
-
--(void) keyboardWillShow:(NSNotification *) notification
+-(void) keyboardDidShow:(NSNotification *) notification
 {
     if(self.blockAnimations) return;
     CGRect keyboardframe =[[[notification userInfo] objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
     CGSize keyboardSize = keyboardframe.size;
-    
-    NSTimeInterval animationDuration =[[[notification userInfo] objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
-    [UIView animateWithDuration:animationDuration
-                     animations:^{
-                         self.inputContainerBottom.constant= keyboardSize.height-self.tabBarController.tabBar.frame.size.height;
-                         
-                     } completion:^(BOOL finished) {
-                         
-                         [self scrollToBottom];
-                     }
-     ];
+    self.inputContainerBottom.constant= keyboardSize.height-self.tabBarController.tabBar.frame.size.height;
+    [self scrollToBottom];
+
+}
+
+-(void) keyboardWillShow:(NSNotification *) notification
+{
+//    if(self.blockAnimations) return;
+//    CGRect keyboardframe =[[[notification userInfo] objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
+//    CGSize keyboardSize = keyboardframe.size;
+//
+//    NSTimeInterval animationDuration =[[[notification userInfo] objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
+//    [UIView animateWithDuration:animationDuration
+//                     animations:^{
+//                         self.inputContainerBottom.constant= keyboardSize.height-self.tabBarController.tabBar.frame.size.height;
+//
+//                     } completion:^(BOOL finished) {
+//
+//                         [self scrollToBottom];
+//                     }
+//     ];
 	
 }
 

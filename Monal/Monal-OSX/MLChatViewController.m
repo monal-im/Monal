@@ -166,8 +166,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) endProgressUpdate
 {
+    dispatch_async(dispatch_get_main_queue(), ^{
     self.progressIndicator.doubleValue=0;
     self.progressIndicator.hidden=YES;
+    });
 }
 
 #pragma mark - Dropbox upload and delegate

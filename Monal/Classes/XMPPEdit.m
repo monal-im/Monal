@@ -273,7 +273,7 @@ NSString *const kGtalk = @"Gtalk";
                     [[DataLayer sharedInstance] executeScalar:@"select max(account_id) from account" withCompletion:^(NSObject * accountid) {
                         if(accountid) {
                             self.accountno=[NSString stringWithFormat:@"%@",accountid];
-                           
+                            self.editing=YES;
                             if(self.enabled)
                             {
                                 DDLogVerbose(@"calling connect... ");

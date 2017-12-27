@@ -185,9 +185,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     if([segue.identifier isEqualToString:@"editXMPP"]) {
         
-        UINavigationController *nav=   segue.destinationViewController;
-        
-        XMPPEdit * editor = (XMPPEdit *)nav.topViewController;
+        XMPPEdit * editor = (XMPPEdit *)segue.destinationViewController;
     
         editor.originIndex=self.selected;
         if(self.selected.section==0)

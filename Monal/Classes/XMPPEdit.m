@@ -274,6 +274,7 @@ NSString *const kGtalk = @"Gtalk";
                         if(accountid) {
                             self.accountno=[NSString stringWithFormat:@"%@",accountid];
                             self.editMode=YES;
+                            [SAMKeychain setPassword:self.password forService:@"Monal" account:self.accountno];
                             if(self.enabled)
                             {
                                 DDLogVerbose(@"calling connect... ");

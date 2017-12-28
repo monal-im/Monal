@@ -55,8 +55,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 }
 
 
-
-
 #pragma mark - VOIP APNS notificaion
 
 -(void) voipRegistration
@@ -70,9 +68,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     // Set the push type to VoIP
     voipRegistry.desiredPushTypes = [NSSet setWithObject:PKPushTypeVoIP];
     
-    //tmolitor: dummy call for iOS simulator
-    //PKPushCredentials * credentials = [[PKPushCredentials alloc] init];
-    //[self pushRegistry:voipRegistry didUpdatePushCredentials:credentials forType:@"voip"];
 }
 
 // Handle updated APNS tokens
@@ -225,38 +220,41 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     self.fileLogger.maximumFileSize=1024 * 500;
     [DDLog addLogger:self.fileLogger];
 #endif
-    
-    
-    
-    //ios8 register for local notifications and badges
+
     if([[UIApplication sharedApplication] respondsToSelector:@selector(registerUserNotificationSettings:)])
     {
         NSSet *categories;
-        if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"9.0")) {
-            UIMutableUserNotificationAction *replyAction = [[UIMutableUserNotificationAction alloc] init];
-            replyAction.activationMode = UIUserNotificationActivationModeBackground;
-            replyAction.title = @"Reply";
-            replyAction.identifier = @"ReplyButton";
-            replyAction.destructive = NO;
-            replyAction.authenticationRequired = NO;
-            replyAction.behavior = UIUserNotificationActionBehaviorTextInput;
-            
-            UIMutableUserNotificationCategory *actionCategory = [[UIMutableUserNotificationCategory alloc] init];
-            actionCategory.identifier = @"Reply";
-            [actionCategory setActions:@[replyAction] forContext:UIUserNotificationActionContextDefault];
-            categories = [NSSet setWithObject:actionCategory];
-        }
+        
+        UIMutableUserNotificationAction *replyAction = [[UIMutableUserNotificationAction alloc] init];
+        replyAction.activationMode = UIUserNotificationActivationModeBackground;
+        replyAction.title = @"Reply";
+        replyAction.identifier = @"ReplyButton";
+        replyAction.destructive = NO;
+        replyAction.authenticationRequired = NO;
+        replyAction.behavior = UIUserNotificationActionBehaviorTextInput;
+        
+        UIMutableUserNotificationCategory *actionCategory = [[UIMutableUserNotificationCategory alloc] init];
+        actionCategory.identifier = @"Reply";
+        [actionCategory setActions:@[replyAction] forContext:UIUserNotificationActionContextDefault];
+        categories = [NSSet setWithObject:actionCategory];
         
         UIUserNotificationSettings *settings = [UIUserNotificationSettings settingsForTypes:UIUserNotificationTypeAlert|UIUserNotificationTypeSound|UIUserNotificationTypeBadge categories:categories];
         [[UIApplication sharedApplication] registerUserNotificationSettings:settings];
     }
     
     //register for voip push using pushkit
-    [self voipRegistration];
+    if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground) {
+       // if we are launched in the background, it was from a push. dont do this again.
+        [self voipRegistration];
+    }
+    else  {
+        [MLXMPPManager sharedInstance].pushNode = [[NSUserDefaults standardUserDefaults] objectForKey:@"pushNode"];
+        [MLXMPPManager sharedInstance].pushSecret=[[NSUserDefaults standardUserDefaults] objectForKey:@"pushSecret"];
+        
+    }
     
     [self setUISettings];
-    
-   
+
     
     [MLNotificationManager sharedInstance].window=self.window;
     

@@ -32,9 +32,6 @@ An array of Dics what have timers to make sure everything was sent
  */
 @property (nonatomic, strong) NSMutableArray *timerList;
 
-@property (nonatomic, strong) NSString *pushNode;
-@property (nonatomic, strong) NSString *pushSecret;
-
 @end
 
 
@@ -89,7 +86,7 @@ An array of Dics what have timers to make sure everything was sent
 -(id) init
 {
     self=[super init];
-    
+
     _connectedXMPP=[[NSMutableArray alloc] init];
    
     _netQueue = dispatch_queue_create(kMonalNetQueue, DISPATCH_QUEUE_SERIAL);
@@ -782,6 +779,10 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 {
     self.pushNode=node;
     self.pushSecret=secret;
+    
+    [[NSUserDefaults standardUserDefaults] setObject:node forKey:@"pushNode"];
+    [[NSUserDefaults standardUserDefaults] setObject:secret forKey:@"pushSecret"];
+    
     for(NSDictionary* row in _connectedXMPP)
     {
         xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];

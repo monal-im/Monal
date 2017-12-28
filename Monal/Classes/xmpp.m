@@ -649,7 +649,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     _loginStarted=YES;
 #if TARGET_OS_IPHONE
     
-    __block  reconnectBackgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
+    __block UIBackgroundTaskIdentifier reconnectBackgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
         
         if((([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
             || ([UIApplication sharedApplication].applicationState==UIApplicationStateInactive )) && _accountState<kStateHasStream)

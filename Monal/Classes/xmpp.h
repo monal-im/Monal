@@ -240,8 +240,8 @@ FOUNDATION_EXPORT NSString *const kCompletion;
 
 #pragma  mark properties
 
-@property (nonatomic,assign) NSString* pushNode;
-@property (nonatomic,assign) NSString* pushSecret;
+@property (nonatomic,strong) NSString* pushNode;
+@property (nonatomic,strong) NSString* pushSecret;
 
 @property (nonatomic,readonly) NSString* fulluser; // combination of username@domain
 

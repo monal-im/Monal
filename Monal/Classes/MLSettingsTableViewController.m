@@ -119,6 +119,7 @@ NS_ENUM(NSInteger, kSettingSection)
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
     switch(indexPath.section)
     {
         case kSettingSectionApp: {
@@ -128,6 +129,18 @@ NS_ENUM(NSInteger, kSettingSection)
                     [self performSegueWithIdentifier:@"showAccounts" sender:self];
                     break;
                     
+                case 1:
+                    [self performSegueWithIdentifier:@"showNotifications" sender:self];
+                    break;
+                    
+                case 2:
+                    [self performSegueWithIdentifier:@"showDisplay" sender:self];
+                    break;
+                    
+                case 3:
+                    [self performSegueWithIdentifier:@"showCloud" sender:self];
+                    break;
+                    
                 default:
                     break;
             }
@@ -135,11 +148,38 @@ NS_ENUM(NSInteger, kSettingSection)
             break;
         }
         case kSettingSectionSupport: {
-            
+            switch ((indexPath.row)) {
+                case 0:
+                   //email
+                    break;
+                    
+                case 1:
+                    //submit bug
+                    break;
+                default:
+                    break;
+            }
             break;
         }
         case kSettingSectionAbout: {
-           
+            switch ((indexPath.row)) {
+                case 0:
+                    //rating
+                    break;
+                    
+                case 1:
+                    [self performSegueWithIdentifier:@"showOpenSource" sender:self];
+                    break;
+                    
+                case 2:
+                    [self performSegueWithIdentifier:@"showAbout" sender:self];
+                    break;
+               
+                default:
+                    break;
+            }
+            
+            
             break;
         }
             

@@ -274,6 +274,7 @@ NSString *const kGtalk = @"Gtalk";
                         if(accountid) {
                             self.accountno=[NSString stringWithFormat:@"%@",accountid];
                             self.editMode=YES;
+                             [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
                             [SAMKeychain setPassword:self.password forService:@"Monal" account:self.accountno];
                             if(self.enabled)
                             {
@@ -295,6 +296,7 @@ NSString *const kGtalk = @"Gtalk";
     {
         [[DataLayer sharedInstance] updateAccounWithDictionary:dic andCompletion:^(BOOL result) {
           
+            [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
              [SAMKeychain setPassword:self.password forService:@"Monal" account:self.accountno];
             if(self.enabled)
             {

@@ -2030,6 +2030,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
                     {
                         queryInfo=NO;
+                        [self enablePush]; // since disco wont happen . This came from a push so no need to check
                     }
                     #endif
                     

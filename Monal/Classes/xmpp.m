@@ -101,7 +101,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 @property (nonatomic, assign) BOOL supportsSM3;
 @property (nonatomic, assign) BOOL resuming;
 @property (nonatomic, strong) NSString *streamID;
-@property (nonatomic, assign) BOOL wasClosedBefore;
+@property (nonatomic, assign) BOOL hasDiscoAndRoster;
 
 // client state
 @property (nonatomic, assign) BOOL supportsClientState;
@@ -148,8 +148,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     self=[super init];
     _accountState = kStateLoggedOut;
-    self.wasClosedBefore=YES;
-    
+   
     _discoveredServerList=[[NSMutableArray alloc] init];
     _inputBuffer=[[NSMutableString alloc] init];
     _outputQueue=[[NSMutableArray alloc] init];
@@ -2023,16 +2022,22 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     ParseResumed* resumeNode= [[ParseResumed alloc]  initWithDictionary:stanzaToParse];
                     [self removeUnAckedMessagesLessThan:resumeNode.h];
                     [self sendUnAckedMessages];
+                 
                     
-                    //query disco and presence state if we resumed after a force close
-                    if(self.wasClosedBefore)
+                    BOOL queryInfo=YES;
+                    
+                    #if TARGET_OS_IPHONE
+                    if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
                     {
-                        //TODO fetch from db not query again
-                       // [self queryDisco];
-                        
-                        //TODO dont query presence until foreground
-                       // [self queryPresence];
+                        queryInfo=NO;
                     }
+                    #endif
+                    
+                    
+                    if(queryInfo) {
+                        [self queryInfo];
+                    }
+                    
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"failed"]) // stream resume failed
                 {
@@ -2498,12 +2503,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self send:iqNode];
     
     //now the app is initialized and the next smacks resume will have full disco and presence state information
-    self.wasClosedBefore=NO;
+    self.hasDiscoAndRoster=YES;
 }
 
 -(void) queryPresence
 {
-    //FIXME: maybe this can be done by just storing the presence state in persistState instead of querying it here
     for(NSDictionary* contact in self.rosterList)
     {
         if([[contact objectForKey:@"subscription"] isEqualToString:@"both"])
@@ -2519,6 +2523,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) disconnectToResume
 {
     [self closeSocket]; // just closing socket to simulate a unintentional disconnect
+}
+
+-(void) queryInfo
+{
+    if(!self.hasDiscoAndRoster) {
+        [self queryDisco]; //TODO  we should cache
+        [self queryPresence]; //No real way to cache this since it changes
+        self.hasDiscoAndRoster=YES;
+    }
 }
 
 -(void) queryDisco
@@ -2734,7 +2747,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     MLXMLNode *activeNode =[[MLXMLNode alloc] initWithElement:@"active" ];
     [activeNode setXMLNS:@"urn:xmpp:csi:0"];
     [self send:activeNode];
-    
+    // will either query, or if it is not connected, the reconnect will be in the forground, doing the same thing
+    [self queryInfo];
 }
 
 -(void) setClientInactive

@@ -25,11 +25,6 @@
 @property (nonatomic, strong) UINavigationController* currentNavController;
 
 
-//manage user display
-/**
- add or update an online user
- */
--(void) addOnlineUser:(NSDictionary*) user;
 
 /**
  mark user as offline

@@ -1257,10 +1257,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                 kfullNameKey: fullname,
                                                 kaccountNoKey:_accountNo
                                                 };
-                        
-                        [self.networkQueue addOperationWithBlock:^{
-                            [self.contactsVC addOnlineUser:userDic];
-                        }];
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactOnlineNotice object:self userInfo:userDic];
                         
                     }
                     
@@ -1756,10 +1753,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                             kstateKey:state,
                                                             kstatusKey:status
                                                             };
-                                    [self.networkQueue addOperationWithBlock: ^{
-                                        [self.contactsVC addOnlineUser:userDic];
+                                   
                                         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactOnlineNotice object:self userInfo:userDic];
-                                    }];
+                                
                                 }];
                                 
                                 if(!presenceNode.MUC) {
@@ -2024,14 +2020,17 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     [self sendUnAckedMessages];
                  
                     
-                    BOOL queryInfo=YES;
+                   __block BOOL queryInfo=YES;
                     
                     #if TARGET_OS_IPHONE
-                    if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
-                    {
-                        queryInfo=NO;
-                        [self enablePush]; // since disco wont happen . This came from a push so no need to check
-                    }
+                    dispatch_sync(dispatch_get_main_queue(), ^{
+                        if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
+                        {
+                            queryInfo=NO;
+                            [self enablePush]; // since disco wont happen . This came from a push so no need to check
+                        }
+                    });
+                  
                     #endif
                     
                     

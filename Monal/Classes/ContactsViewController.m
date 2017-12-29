@@ -65,6 +65,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
     
+
 }
 
 -(void) dealloc
@@ -80,6 +81,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshDisplay) name:UIApplicationWillEnterForegroundNotification object:nil];
     [self refreshDisplay];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(addOnlineUser:) name: kMonalContactOnlineNotice object:nil];
     
     [[MLXMPPManager sharedInstance] handleNewMessage:nil];
     
@@ -176,19 +178,20 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 }
 
 
--(void) addOnlineUser:(NSDictionary*) user
+-(void) addOnlineUser:(NSNotification *) notification
 {
-    if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
-    {
-        return;
-    }
-    
-    if (self.navigationController.topViewController!=self)
-    {
-        return;
-    }
+    NSDictionary* user = notification.userInfo;
     
     dispatch_async(dispatch_get_main_queue(), ^{
+        if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
+        {
+            return;
+        }
+        
+        if (self.navigationController.topViewController!=self)
+        {
+            return;
+        }
         NSInteger initalPos=-1;
         initalPos=[self positionOfOnlineContact:user];
         if(initalPos>=0)

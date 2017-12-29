@@ -25,12 +25,6 @@
 @property (nonatomic, strong) UINavigationController* currentNavController;
 
 
-
-/**
- mark user as offline
- */
--(void) removeOnlineUser:(NSDictionary*) user;
-
 /**
  if an account disconnects then clear out those contacts in the list
  */

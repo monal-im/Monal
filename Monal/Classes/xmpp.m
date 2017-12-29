@@ -1820,7 +1820,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                 NSDictionary* userDic=@{kusernameKey: presenceNode.user,
                                                         kaccountNoKey:_accountNo};
                                 [self.networkQueue addOperationWithBlock: ^{
-                                    [self.contactsVC removeOnlineUser:userDic];
+                                    
                                     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactOfflineNotice object:self userInfo:userDic];
                                 }];
                             }

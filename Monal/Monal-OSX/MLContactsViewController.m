@@ -49,6 +49,8 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshDisplay) name:kMonalWindowVisible object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshDisplay) name:kMonalAccountStatusChanged object:nil];
+     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(addOnlineUser:) name: kMonalContactOnlineNotice object:nil];
+       [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(removeOnlineUser:) name: kMonalContactOfflineNotice object:nil];
     
     self.contacts=[[NSMutableArray alloc] init] ;
     self.offlineContacts=[[NSMutableArray alloc] init] ;
@@ -427,8 +429,9 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     }
 }
 
--(void) addOnlineUser:(NSDictionary *) user
+-(void) addOnlineUser:(NSNotification *) notification
 {
+    NSDictionary* user = notification.userInfo;
     
     dispatch_async(dispatch_get_main_queue(), ^{
         NSInteger initalPos=-1;
@@ -542,8 +545,9 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     });
 }
 
--(void) removeOnlineUser:(NSDictionary*) user
+-(void) removeOnlineUser:(NSNotification *) notification
 {
+    NSDictionary* user = notification.userInfo;
     
     [[DataLayer sharedInstance] contactForUsername:[user objectForKey:kusernameKey] forAccount:[user objectForKey:kaccountNoKey] withCompletion:^(NSArray* contactRow) {
         

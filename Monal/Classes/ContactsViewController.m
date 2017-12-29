@@ -82,6 +82,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self refreshDisplay];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(addOnlineUser:) name: kMonalContactOnlineNotice object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(removeOnlineUser:) name: kMonalContactOfflineNotice object:nil];
     
     [[MLXMPPManager sharedInstance] handleNewMessage:nil];
     
@@ -279,8 +280,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
 }
 
--(void) removeOnlineUser:(NSDictionary*) user
+-(void) removeOnlineUser:(NSNotification *) notification
 {
+    NSDictionary* user = notification.userInfo;
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
     
     if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
     {
@@ -357,7 +361,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                            
                        });
     }];
-    
+    });
     
 }
 

@@ -22,8 +22,6 @@
 
 -(void) clearContactsForAccount: (NSString*) accountNo;
 
--(void) addOnlineUser:(NSDictionary*) user;
--(void) removeOnlineUser:(NSDictionary*) user;
 
 -(void) showAuthRequestForContact:(NSString *) contactName withCompletion: (void (^)(BOOL))completion;
 

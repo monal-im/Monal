@@ -514,7 +514,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                                else {
                                    [_contactsTable beginUpdates];
                                    NSIndexSet *indexSet =[[NSIndexSet alloc] initWithIndex:pos] ;
-                                   [self.contactsTable insertRowsAtIndexes:indexSet withAnimation:NSTableViewAnimationEffectFade];
+//                                   [self.contactsTable insertRowsAtIndexes:indexSet withAnimation:NSTableViewAnimationEffectFade];
                                    
                                    //                                                  if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
                                    //                                                  {
@@ -605,8 +605,8 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                                    DDLogVerbose(@"removing %@ at pos %d", [user objectForKey:kusernameKey], pos);
                                    [_contactsTable beginUpdates];
                                    NSIndexSet *indexSet = [NSIndexSet indexSetWithIndex:pos];
-                                   [_contactsTable removeRowsAtIndexes:indexSet withAnimation:NSTableViewAnimationEffectFade];
-                                   
+//                                   [_contactsTable removeRowsAtIndexes:indexSet withAnimation:NSTableViewAnimationEffectFade];
+//
                                    //                                                  if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"] && offlinepos>-1)
                                    //                                                  {
                                    //                                                      NSIndexPath *path2 = [NSIndexPath indexPathForRow:offlinepos inSection:kofflineSection];
@@ -653,7 +653,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                            
                        } else {
                            [_contactsTable beginUpdates];
-                           [_contactsTable removeRowsAtIndexes:indexSet withAnimation:NSTableViewAnimationEffectFade];
+                          // [_contactsTable removeRowsAtIndexes:indexSet withAnimation:NSTableViewAnimationEffectFade];
                            [_contactsTable endUpdates];
                        }
                        
@@ -778,8 +778,9 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     
 }
 
-#pragma mark - table view datasource
-- (NSInteger)numberOfRowsInTableView:(NSTableView *)aTableView
+#pragma mark - outline view datasource
+
+- (NSInteger)outlineView:(NSOutlineView *)outlineView numberOfChildrenOfItem:(id)item
 {
     if(self.searchResults) {
         return self.searchResults.count;
@@ -789,31 +790,119 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
         {
             return [self.activeChat count];
         } else  {
-            return [self.contacts count];
+            if(!item) {
+                if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"]) {
+                    return 2;
+                }
+                else {
+                    return 1;
+                }
+                
+            }
+            else  {
+                if([item isKindOfClass:[NSString class]])
+                {
+                    NSString *section = (NSString *) item;
+                    if([section isEqualToString:@"Online"])
+                    {
+                         return [self.contacts count];
+                    } else  {
+                        return [self.offlineContacts count];
+                    }
+                }  else  {
+                    return 0;
+                }
+              
+            }
+        }
+    }
+
+    
+    
+}
+
+
+
+- (BOOL)outlineView:(NSOutlineView *)outlineView isItemExpandable:(id)item
+{
+    if([item isKindOfClass:[NSString class]]) {
+        return YES;
+    }
+    else {
+        return NO;
+    }
+}
+
+- (id)outlineView:(NSOutlineView *)outlineView child:(NSInteger)index ofItem:(id)item
+{
+    if(self.searchResults) {
+        return self.searchResults[index];
+    }
+    else {
+        if(self.currentSegment==kActiveTab)
+        {
+            return self.activeChat[index];
+        } else  {
+            if(!item) {
+                if(index==0) return @"Online";
+                else return @"Offline";
+            }
+            else  {
+                if([item isKindOfClass:[NSString class]])
+                {
+                    NSString *section = (NSString *) item;
+                    if([section isEqualToString:@"Online"])
+                    {
+                        return self.contacts[index];
+                    } else  {
+                        return self.offlineContacts[index];
+                    }
+                }  else  {
+                    return 0;
+                }
+                
+            }
         }
     }
 }
 
-#pragma mark - table view delegate
 
-- (NSView *)tableView:(NSTableView *)tableView viewForTableColumn:(NSTableColumn *)tableColumn  row:(NSInteger)row
+- (id)outlineView:(NSOutlineView *)outlineView objectValueForTableColumn:(NSTableColumn *)tableColumn byItem:(id)item
 {
-    
-    NSDictionary *contactRow;
-    if(self.searchResults)
+    return @"test";
+}
+
+
+#pragma mark - outline delegate
+
+-(NSView *)outlineView:(NSOutlineView *)outlineView viewForTableColumn:(NSTableColumn *)tableColumn item:(id)item
+{
+    if([item isKindOfClass:[NSString class]])
     {
-        contactRow = [self.searchResults objectAtIndex:row];
-    } else  {
-        if(self.currentSegment==kActiveTab)
-        {
-            contactRow=[self.activeChat objectAtIndex:row];
-        }
-        else  {
-            contactRow=[self.contacts objectAtIndex:row];
-        }
+        NSString *section = (NSString *) item;
+        NSTableCellView *cell= [outlineView makeViewWithIdentifier:@"headerCell" owner:self];
+        cell.textField.stringValue=section;
+        return cell;
+        
     }
     
-    MLContactsCell *cell = [tableView makeViewWithIdentifier:@"OnlineUser" owner:self];
+    NSDictionary *contactRow ;
+    if(self.contacts.count>0)
+        contactRow=self.contacts[0];
+//    if(self.searchResults)
+//    {
+//        contactRow = [self.searchResults objectAtIndex:row];
+//    } else  {
+//        if(self.currentSegment==kActiveTab)
+//        {
+//            contactRow=[self.activeChat objectAtIndex:row];
+//        }
+//        else  {
+//            contactRow=[self.contacts objectAtIndex:row];
+//        }
+//    }
+    
+    MLContactsCell *cell = [outlineView makeViewWithIdentifier:@"contactCell" owner:self];
     cell.name.backgroundColor =[NSColor clearColor];
     cell.status.backgroundColor= [NSColor clearColor];
     
@@ -878,11 +967,6 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 
     
     return cell;
-}
-
-- (CGFloat)tableView:(NSTableView *)tableView heightOfRow:(NSInteger)row
-{
-    return 60.0f;
 }
 
 

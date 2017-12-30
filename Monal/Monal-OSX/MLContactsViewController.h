@@ -9,9 +9,9 @@
 #import <Cocoa/Cocoa.h>
 #import "MLChatViewController.h"
 
-@interface MLContactsViewController : NSViewController <NSTableViewDataSource, NSTableViewDelegate, NSControlTextEditingDelegate, NSTextFieldDelegate, NSSearchFieldDelegate>
+@interface MLContactsViewController : NSViewController <NSOutlineViewDelegate, NSOutlineViewDataSource, NSControlTextEditingDelegate, NSTextFieldDelegate, NSSearchFieldDelegate>
 
-@property (nonatomic, strong) IBOutlet NSTableView *contactsTable;
+@property (nonatomic, strong) IBOutlet NSOutlineView *contactsTable;
 @property (nonatomic, strong) IBOutlet NSSegmentedControl *segmentedControl;
 
 @property (nonatomic, weak) MLChatViewController *chatViewController;

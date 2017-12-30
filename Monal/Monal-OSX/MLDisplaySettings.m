@@ -7,6 +7,7 @@
 //
 
 #import "MLDisplaySettings.h"
+#import "MLConstants.h"
 
 @interface MLDisplaySettings ()
 
@@ -45,6 +46,7 @@
     [[NSUserDefaults standardUserDefaults] setBool:self.sortByStatus.state  forKey: @"SortContacts"];
     [[NSUserDefaults standardUserDefaults] setBool:self.showImages.state  forKey: @"ShowImages"];
     
+    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalRefreshContacts object:self];
     
 }
 

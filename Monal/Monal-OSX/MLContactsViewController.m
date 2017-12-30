@@ -49,6 +49,8 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshDisplay) name:kMonalWindowVisible object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshDisplay) name:kMonalAccountStatusChanged object:nil];
+     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshDisplay) name:kMonalRefreshContacts object:nil];
+    
      [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(addOnlineUser:) name: kMonalContactOnlineNotice object:nil];
        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(removeOnlineUser:) name: kMonalContactOfflineNotice object:nil];
     
@@ -485,7 +487,6 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                                {
                                    
                                    DDLogVerbose(@"user %@ already in list",[user objectForKey:kusernameKey]);
-                                   
                                    return;
                                }
                                //insert into datasource
@@ -493,6 +494,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                                
                                if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
                                {
+                                   offlinepos = [self positionOfOfflineContact:user];
                                    if(offlinepos>=0 && offlinepos<[_offlineContacts count])
                                    {
                                        [_offlineContacts removeObjectAtIndex:offlinepos];
@@ -530,15 +532,16 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                                  
                                    [self.contactsTable insertItemsAtIndexes:indexSet inParent:@"Online" withAnimation:NSTableViewAnimationEffectFade];
                                    
-                                   //                                                  if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
-                                   //                                                  {
-                                   //                                                      if(offlinepos>=0 && offlinepos<[_offlineContacts count])
-                                   //                                                      {
-                                   //                                                          NSIndexPath *path2 = [NSIndexPath indexPathForRow:offlinepos inSection:kofflineSection];
-                                   //                                                          [self.contactsTable deleteRowsAtIndexPaths:@[path2]
-                                   //                                                                                withRowAnimation:UITableViewRowAnimationFade];
-                                   //                                                      }
-                                   //                                                  }
+                                   
+                                   if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
+                                   {
+                                       if(offlinepos>=0 && offlinepos<[_offlineContacts count])
+                                       {
+                                           NSIndexSet *offlineSet =[[NSIndexSet alloc] initWithIndex:offlinepos] ;
+                                           
+                                           [self.contactsTable removeItemsAtIndexes:offlineSet inParent:@"Offline" withAnimation:NSTableViewAnimationEffectFade];
+                                       }
+                                   }
                                    [self.contactsTable endUpdates];
                                }
                            }else
@@ -616,19 +619,24 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                                    [_contacts removeObjectAtIndex:pos];
                                    
                                    
-                                   DDLogVerbose(@"removing %@ at pos %d", [user objectForKey:kusernameKey], pos);
+                                   DDLogVerbose(@"removing %@ at pos %ld", [user objectForKey:kusernameKey], pos);
                                    [_contactsTable beginUpdates];
                                    NSIndexSet *indexSet = [NSIndexSet indexSetWithIndex:pos];
 
                                    [self.contactsTable removeItemsAtIndexes:indexSet inParent:@"Online" withAnimation:NSTableViewAnimationEffectFade];
                                    
-                                   //                                                  if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"] && offlinepos>-1)
-                                   //                                                  {
-                                   //                                                      NSIndexPath *path2 = [NSIndexPath indexPathForRow:offlinepos inSection:kofflineSection];
-                                   //                                                      DDLogVerbose(@"inserting offline at %d", offlinepos);
-                                   //                                                      [_contactsTable insertRowsAtIndexPaths:@[path2]
-                                   //                                                                            withRowAnimation:UITableViewRowAnimationFade];
-                                   //                                                  }
+                            
+                                   if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
+                                   {
+                                       offlinepos = [self positionOfOfflineContact:user];
+                                       if(offlinepos>=0 && offlinepos<[_offlineContacts count])
+                                       {
+                                           NSIndexSet *offlineSet =[[NSIndexSet alloc] initWithIndex:offlinepos] ;
+                                           
+                                           [self.contactsTable insertItemsAtIndexes:offlineSet inParent:@"Offline" withAnimation:NSTableViewAnimationEffectFade];
+                                       }
+                                   }
+                                   
                                    
                                    [_contactsTable endUpdates];
                                }
@@ -646,7 +654,6 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     //mutex to prevent others from modifying contacts at the same time
     dispatch_async(dispatch_get_main_queue(),
                    ^{
-                       NSMutableArray* indexPaths =[[NSMutableArray alloc] init];
                        NSMutableIndexSet* indexSet = [[NSMutableIndexSet alloc] init];
                        
                        NSInteger counter=0;
@@ -654,7 +661,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                        {
                            if([[row objectForKey:@"account_id"]  integerValue]==[accountNo integerValue] )
                            {
-                               DDLogVerbose(@"removing  pos %d", counter);
+                               DDLogVerbose(@"removing  pos %ld", counter);
                                [indexSet addIndex:counter];
                                
                            }
@@ -663,6 +670,31 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                        
                        [_contacts removeObjectsAtIndexes:indexSet];
                        
+                       NSMutableIndexSet* offlineIndexSet;
+                    
+                       if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
+                       {
+                           offlineIndexSet = [[NSMutableIndexSet alloc] init];
+                           counter=0;
+                           
+                           for(NSDictionary* row in self.offlineContacts)
+                           {
+                               if([[row objectForKey:@"account_id"]  integerValue]==[accountNo integerValue] )
+                               {
+                                   DDLogVerbose(@"removing  offline pos %ld", counter);
+                                   [offlineIndexSet addIndex:counter];
+                                   
+                               }
+                               counter++;
+                           }
+                           
+                           [self.offlineContacts removeObjectsAtIndexes:offlineIndexSet];
+                       
+                       }
+                       
+                       
+                       
+                       
                        if(self.searchResults || self.activeChat) {
                            return;
                            
@@ -670,8 +702,17 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                            [_contactsTable beginUpdates];
                            [self.contactsTable removeItemsAtIndexes:indexSet inParent:@"Online" withAnimation:NSTableViewAnimationEffectFade];
                            
+                           if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
+                           {
+                               [self.contactsTable insertItemsAtIndexes:offlineIndexSet inParent:@"Offline" withAnimation:NSTableViewAnimationEffectFade];
+                           }
+                           
+                           
                            [_contactsTable endUpdates];
                        }
+                       
+                       
+                       
                        
                    });
     
@@ -1064,7 +1105,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     NSSearchField *searchField = aNotification.object;
 
     if(searchField.stringValue.length>0) {
-        self.searchResults=[[DataLayer sharedInstance] searchContactsWithString:searchField.stringValue];
+        self.searchResults=[[[DataLayer sharedInstance] searchContactsWithString:searchField.stringValue] mutableCopy];
     } else  {
         self.searchResults=nil;
     }

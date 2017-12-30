@@ -24,6 +24,8 @@
 
 #define kMonalAccountStatusChanged @"kMonalAccountStatusChanged"
 
+#define kMonalRefreshContacts @"kMonalRefreshContacts"
+
 #define kDelivered @"delivered"
 
 //contact cells

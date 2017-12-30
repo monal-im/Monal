@@ -78,7 +78,9 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     MLMainWindow *window =(MLMainWindow *)self.view.window.windowController;
     window.contactSearchField.delegate=self;
     window.contactsViewController= self;
-    
+
+    [self.contactsTable expandItem:@"Online"];
+
 }
 
 
@@ -880,7 +882,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     if([item isKindOfClass:[NSString class]])
     {
         return 17;
-    } else return 60; 
+    } else return 60;
 }
 
 #pragma mark - outline delegate
@@ -896,21 +898,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
         
     }
     
-    NSDictionary *contactRow ;
-    if(self.contacts.count>0)
-        contactRow=self.contacts[0];
-//    if(self.searchResults)
-//    {
-//        contactRow = [self.searchResults objectAtIndex:row];
-//    } else  {
-//        if(self.currentSegment==kActiveTab)
-//        {
-//            contactRow=[self.activeChat objectAtIndex:row];
-//        }
-//        else  {
-//            contactRow=[self.contacts objectAtIndex:row];
-//        }
-//    }
+    NSDictionary *contactRow =item;
     
     MLContactsCell *cell = [outlineView makeViewWithIdentifier:@"contactCell" owner:self];
     cell.name.backgroundColor =[NSColor clearColor];
@@ -980,7 +968,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 }
 
 
-- (void)tableViewSelectionDidChange:(NSNotification *)notification;
+- (void)outlineViewSelectionDidChange:(NSNotification *)notification
 {
     if(self.searchResults && self.contactsTable.selectedRow<self.searchResults.count)
     {
@@ -1018,8 +1006,11 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
             }
         }
         else  {
-            if(self.contactsTable.selectedRow<self.contacts.count) {
-                NSDictionary *contactRow = [self.contacts objectAtIndex:self.contactsTable.selectedRow];
+           
+            id item =[self.contactsTable itemAtRow:self.contactsTable.selectedRow];
+            
+            if([item isKindOfClass:[NSDictionary class]]) {
+                NSDictionary *contactRow = (NSDictionary *)item;
                 [self.chatViewController showConversationForContact:contactRow];
                 
                 if((self.view.window.occlusionState & NSWindowOcclusionStateVisible)) {
@@ -1032,8 +1023,8 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                 NSIndexSet *columnIndexSet =[[NSIndexSet alloc] initWithIndex:0] ;
                 [self.contactsTable reloadDataForRowIndexes:indexSet columnIndexes:columnIndexSet];
                 [self.contactsTable endUpdates];
-                
             }
+            
         }
 }
 

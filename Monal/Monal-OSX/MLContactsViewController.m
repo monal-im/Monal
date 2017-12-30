@@ -174,6 +174,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     else {
         self.activeChat=nil;
         [self.contactsTable reloadData];
+        [self.contactsTable expandItem:@"Online"];
         [self highlightCellForCurrentContact];
     }
     

@@ -776,7 +776,7 @@ CA
                         <subviews>
                             <scrollView autohidesScrollers="YES" horizontalLineScroll="62" horizontalPageScroll="10" verticalLineScroll="62" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="GDZ-eb-BDN">
                                 <rect key="frame" x="0.0" y="0.0" width="320" height="406"/>
-                                <clipView key="contentView" id="zZu-0n-7IX">
+                                <clipView key="contentView" copiesOnScroll="NO" id="zZu-0n-7IX">
                                     <rect key="frame" x="1" y="1" width="318" height="404"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>

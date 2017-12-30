@@ -96,6 +96,16 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
         [self.contactsTable reloadData];
     }
     
+    if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
+    {
+        [[DataLayer sharedInstance] offlineContactsWithCompletion:^(NSMutableArray *results) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                _offlineContacts= results;
+                [self.contactsTable reloadData];
+            });
+        }];
+        
+    }
     [self updateAppBadge];
     [self highlightCellForCurrentContact];
   

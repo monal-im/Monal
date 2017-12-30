@@ -787,7 +787,7 @@ CA
                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                             <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
                                             <tableColumns>
-                                                <tableColumn identifier="contactCell" editable="NO" width="315" minWidth="40" maxWidth="1000" id="ncF-0W-pT5">
+                                                <tableColumn identifier="" editable="NO" width="315" minWidth="40" maxWidth="1000" id="ncF-0W-pT5">
                                                     <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border">
                                                         <font key="font" metaFont="smallSystem"/>
                                                         <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -817,7 +817,7 @@ CA
                                                                 <outlet property="textField" destination="RPf-H7-uwk" id="cAk-JD-d4E"/>
                                                             </connections>
                                                         </tableCellView>
-                                                        <tableCellView identifier="OnlineUser" id="6kd-1k-jyH" customClass="MLContactsCell">
+                                                        <tableCellView identifier="contactCell" id="6kd-1k-jyH" customClass="MLContactsCell">
                                                             <rect key="frame" x="1" y="20" width="315" height="60"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>

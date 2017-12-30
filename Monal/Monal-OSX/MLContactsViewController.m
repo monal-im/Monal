@@ -514,7 +514,8 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                                else {
                                    [_contactsTable beginUpdates];
                                    NSIndexSet *indexSet =[[NSIndexSet alloc] initWithIndex:pos] ;
-//                                   [self.contactsTable insertRowsAtIndexes:indexSet withAnimation:NSTableViewAnimationEffectFade];
+                                 
+                                   [self.contactsTable insertItemsAtIndexes:indexSet inParent:@"Online" withAnimation:NSTableViewAnimationEffectFade];
                                    
                                    //                                                  if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
                                    //                                                  {
@@ -605,8 +606,9 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                                    DDLogVerbose(@"removing %@ at pos %d", [user objectForKey:kusernameKey], pos);
                                    [_contactsTable beginUpdates];
                                    NSIndexSet *indexSet = [NSIndexSet indexSetWithIndex:pos];
-//                                   [_contactsTable removeRowsAtIndexes:indexSet withAnimation:NSTableViewAnimationEffectFade];
-//
+
+                                   [self.contactsTable removeItemsAtIndexes:indexSet inParent:@"Online" withAnimation:NSTableViewAnimationEffectFade];
+                                   
                                    //                                                  if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"] && offlinepos>-1)
                                    //                                                  {
                                    //                                                      NSIndexPath *path2 = [NSIndexPath indexPathForRow:offlinepos inSection:kofflineSection];
@@ -653,7 +655,8 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
                            
                        } else {
                            [_contactsTable beginUpdates];
-                          // [_contactsTable removeRowsAtIndexes:indexSet withAnimation:NSTableViewAnimationEffectFade];
+                           [self.contactsTable removeItemsAtIndexes:indexSet inParent:@"Online" withAnimation:NSTableViewAnimationEffectFade];
+                           
                            [_contactsTable endUpdates];
                        }
                        
@@ -869,7 +872,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 
 - (id)outlineView:(NSOutlineView *)outlineView objectValueForTableColumn:(NSTableColumn *)tableColumn byItem:(id)item
 {
-    return @"test";
+    return item;
 }
 
 

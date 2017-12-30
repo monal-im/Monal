@@ -875,6 +875,13 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     return item;
 }
 
+- (CGFloat)outlineView:(NSOutlineView *)outlineView heightOfRowByItem:(id)item;
+{
+    if([item isKindOfClass:[NSString class]])
+    {
+        return 17;
+    } else return 60; 
+}
 
 #pragma mark - outline delegate
 

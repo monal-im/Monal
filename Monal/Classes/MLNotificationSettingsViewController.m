@@ -26,7 +26,7 @@ NS_ENUM(NSInteger, kNotificationSettingSection)
 @property (nonatomic, strong) NSArray *apple;
 @property (nonatomic, strong) NSArray *user;
 @property (nonatomic, strong) NSArray *monal;
-@property (nonatomic, strong) NSArray *accounts;
+
 
 @property (nonatomic, assign) BOOL canShowNotifications;
 
@@ -50,7 +50,7 @@ NS_ENUM(NSInteger, kNotificationSettingSection)
     self.apple=@[@"Apple Push Service"];
      self.user=@[@"Can Show Notifications"];
      self.monal=@[@"Monal Push Server"];
-    self.accounts=@[];
+   
     
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
     
@@ -103,7 +103,7 @@ NS_ENUM(NSInteger, kNotificationSettingSection)
         }
             
         case kNotificationSettingSectionAccounts: {
-            toreturn= self.accounts.count;
+            toreturn= [MLXMPPManager sharedInstance].connectedXMPP.count;
             break;
         }
             
@@ -175,7 +175,11 @@ NS_ENUM(NSInteger, kNotificationSettingSection)
         case kNotificationSettingSectionAccounts: {
             MLSwitchCell *cell= [tableView dequeueReusableCellWithIdentifier:@"switchCell"];
             cell.toggleSwitch.enabled=NO;
-           // cell.cellLabel.text = self.user[0];
+            xmpp *row =[MLXMPPManager sharedInstance].connectedXMPP[indexPath.row];
+            cell.cellLabel.text =row.fulluser;
+            
+            cell.toggleSwitch.on = row.pushEnabled; 
+            
             toreturn=cell;
             break;
         }

@@ -111,6 +111,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 //carbons
 @property (nonatomic, assign) BOOL usingCarbons2;
+@property (nonatomic, assign) BOOL pushEnabled;
 
 //server details
 @property (nonatomic, strong) NSSet *serverFeatures;
@@ -2028,6 +2029,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         {
                             queryInfo=NO;
                             [self enablePush]; // since disco wont happen . This came from a push so no need to check
+                        } else  {
+                            self.pushEnabled=YES; // since this opened from a push
                         }
                     });
                   
@@ -3373,6 +3376,7 @@ void query_cb(const DNSServiceRef DNSServiceRef, const DNSServiceFlags flags, co
         XMPPIQ* enable =[[XMPPIQ alloc] initWithType:kiqSetType];
         [enable setPushEnableWithNode:self.pushNode andSecret:self.pushSecret];
         [self send:enable];
+        self.pushEnabled=YES;
     }
     else
         DDLogInfo(@" NOT enabling push: %@ < %@", self.pushNode, self.pushSecret);

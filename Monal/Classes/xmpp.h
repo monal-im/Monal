@@ -298,6 +298,7 @@ FOUNDATION_EXPORT NSString *const kCompletion;
 
 @property (nonatomic, readonly) BOOL supportsSM3;
 @property (nonatomic, readonly) BOOL supportsPush;
+@property (nonatomic, readonly) BOOL pushEnabled;
 @property (nonatomic, readonly) BOOL usingCarbons2;
 
 //calculated

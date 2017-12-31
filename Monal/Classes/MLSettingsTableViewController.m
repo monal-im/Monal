@@ -150,7 +150,7 @@ NS_ENUM(NSInteger, kSettingSection)
         case kSettingSectionSupport: {
             switch ((indexPath.row)) {
                 case 0:
-                   //email
+                    [self composeMail];
                     break;
                     
                 case 1:
@@ -206,6 +206,43 @@ NS_ENUM(NSInteger, kSettingSection)
     
     
 }
+
+-(void)composeMail
+{
+    if([MFMailComposeViewController canSendMail]) {
+        MFMailComposeViewController* composeVC = [[MFMailComposeViewController alloc] init];
+        composeVC.mailComposeDelegate = self;
+        [composeVC setToRecipients:@[@"info@monal.im"]];
+        [self presentViewController:composeVC animated:YES completion:nil];
+    }
+    else  {
+        UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:@"Error" message:@"There is no configured email account. Please email info@monal.im ." preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertAction *closeAction =[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+            
+        }];
+        [messageAlert addAction:closeAction];
+        
+        [self presentViewController:messageAlert animated:YES completion:nil];
+    }
+    
+}
+
+#pragma mark - Message ui delegate
+- (void)mailComposeController:(MFMailComposeViewController *)controller
+          didFinishWithResult:(MFMailComposeResult)result
+                        error:(NSError *)error
+{
+    [controller dismissViewControllerAnimated:YES completion:nil];
+}
+
+
+#pragma mark - SKStoreProductViewControllerDelegate
+
+- (void)productViewControllerDidFinish:(SKStoreProductViewController *)viewController {
+    [viewController dismissViewControllerAnimated:YES completion:nil];
+}
+
+
 
 /*
 #pragma mark - Navigation

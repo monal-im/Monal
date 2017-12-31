@@ -7,7 +7,9 @@
 //
 
 #import <UIKit/UIKit.h>
+@import MessageUI;
+@import StoreKit;
 
-@interface MLSettingsTableViewController : UITableViewController
+@interface MLSettingsTableViewController : UITableViewController <MFMailComposeViewControllerDelegate, SKStoreProductViewControllerDelegate>
 
 @end

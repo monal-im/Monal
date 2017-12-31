@@ -26,7 +26,7 @@ NS_ENUM(NSInteger, kSettingSection)
 
 @end
 
-@implementation MLSettingsTableViewController
+@implementation MLSettingsTableViewController 
 
 
 - (void)viewDidLoad {
@@ -130,7 +130,7 @@ NS_ENUM(NSInteger, kSettingSection)
                     break;
                     
                 case 1:
-                    [self performSegueWithIdentifier:@"showNotifications" sender:self];
+                    [self performSegueWithIdentifier:@"showNotification" sender:self];
                     break;
                     
                 case 2:
@@ -164,7 +164,7 @@ NS_ENUM(NSInteger, kSettingSection)
         case kSettingSectionAbout: {
             switch ((indexPath.row)) {
                 case 0:
-                    //rating
+                    [self openStoreProductViewControllerWithITunesItemIdentifier:317711500];
                     break;
                     
                 case 1:
@@ -184,6 +184,27 @@ NS_ENUM(NSInteger, kSettingSection)
         }
             
     }
+}
+
+- (void)openStoreProductViewControllerWithITunesItemIdentifier:(NSInteger)iTunesItemIdentifier {
+    SKStoreProductViewController *storeViewController = [[SKStoreProductViewController alloc] init];
+    
+    storeViewController.delegate = self;
+    
+    NSNumber *identifier = [NSNumber numberWithInteger:iTunesItemIdentifier];
+    
+    NSDictionary *parameters = @{ SKStoreProductParameterITunesItemIdentifier:identifier, @"action":@"write-review"};
+    
+    [storeViewController loadProductWithParameters:parameters
+                                   completionBlock:^(BOOL result, NSError *error) {
+                                       if (result)
+                                           [self presentViewController:storeViewController
+                                                              animated:YES
+                                                            completion:nil];
+                                       else NSLog(@"SKStoreProductViewController: %@", error);
+                                   }];
+    
+    
 }
 
 /*

@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "MLSettingCell.h"
 
-@interface SettingsViewController : UITableViewController <UITableViewDataSource, UITableViewDelegate, UITextFieldDelegate>
+@interface MLDisplaySettingsViewController : UITableViewController <UITableViewDataSource, UITableViewDelegate, UITextFieldDelegate>
 {
     UITextField* _currentField;
 }

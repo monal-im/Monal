@@ -6,17 +6,17 @@
 //
 //
 
-#import "SettingsViewController.h"
+#import "MLDisplaySettingsViewController.h"
 #import "MLConstants.h"
 #import "DataLayer.h"
 #import <DropboxSDK/DropboxSDK.h>
 
 
-@interface SettingsViewController ()
+@interface MLDisplaySettingsViewController ()
 
 @end
 
-@implementation SettingsViewController
+@implementation MLDisplaySettingsViewController
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {

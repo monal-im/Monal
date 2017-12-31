@@ -136,7 +136,7 @@
 		261894921B40483000C957C3 /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 26470F511835C4080069E3E0 /* Media.xcassets */; };
 		261A6281176C055400059090 /* ContactsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A627F176C055400059090 /* ContactsViewController.m */; };
 		261A6285176C156500059090 /* ActiveChatsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A6284176C156500059090 /* ActiveChatsViewController.m */; };
-		261A6288176C157D00059090 /* SettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A6287176C157D00059090 /* SettingsViewController.m */; };
+		261A6288176C157D00059090 /* MLDisplaySettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A6287176C157D00059090 /* MLDisplaySettingsViewController.m */; };
 		261A628B176C159000059090 /* AccountsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A628A176C159000059090 /* AccountsViewController.m */; };
 		261A628E176C15AD00059090 /* ChatLogsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A628D176C15AD00059090 /* ChatLogsViewController.m */; };
 		261A6291176C15D400059090 /* GroupChatViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A6290176C15D400059090 /* GroupChatViewController.m */; };
@@ -338,6 +338,8 @@
 		26B69A75131C522F002FCBEB /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26B69A74131C522F002FCBEB /* Security.framework */; };
 		26BDECDC1867B7790018670D /* CallViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26BDECDA1867B7790018670D /* CallViewController.m */; };
 		26BDECDD1867B7790018670D /* CallViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26BDECDB1867B7790018670D /* CallViewController.xib */; };
+		26C1EA681FF937040085547A /* MLCloudSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C1EA671FF937040085547A /* MLCloudSettingsViewController.m */; };
+		26C1EA6B1FF937320085547A /* MLNotificationSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C1EA6A1FF937320085547A /* MLNotificationSettingsViewController.m */; };
 		26C3456E1C68F9F0007F4BEC /* MLHTTPRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C3456D1C68F9F0007F4BEC /* MLHTTPRequest.m */; };
 		26C3456F1C68F9F0007F4BEC /* MLHTTPRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C3456D1C68F9F0007F4BEC /* MLHTTPRequest.m */; };
 		26C3EDF71A8072D5000E6331 /* ParseEnabled.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C3EDF61A8072D5000E6331 /* ParseEnabled.m */; };
@@ -477,8 +479,8 @@
 		261A627F176C055400059090 /* ContactsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ContactsViewController.m; sourceTree = "<group>"; };
 		261A6283176C156500059090 /* ActiveChatsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActiveChatsViewController.h; sourceTree = "<group>"; };
 		261A6284176C156500059090 /* ActiveChatsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ActiveChatsViewController.m; sourceTree = "<group>"; };
-		261A6286176C157D00059090 /* SettingsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SettingsViewController.h; sourceTree = "<group>"; };
-		261A6287176C157D00059090 /* SettingsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SettingsViewController.m; sourceTree = "<group>"; };
+		261A6286176C157D00059090 /* MLDisplaySettingsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLDisplaySettingsViewController.h; sourceTree = "<group>"; };
+		261A6287176C157D00059090 /* MLDisplaySettingsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLDisplaySettingsViewController.m; sourceTree = "<group>"; };
 		261A6289176C159000059090 /* AccountsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AccountsViewController.h; sourceTree = "<group>"; };
 		261A628A176C159000059090 /* AccountsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AccountsViewController.m; sourceTree = "<group>"; };
 		261A628C176C15AD00059090 /* ChatLogsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChatLogsViewController.h; sourceTree = "<group>"; };
@@ -739,6 +741,10 @@
 		26BDECD91867B7790018670D /* CallViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CallViewController.h; sourceTree = "<group>"; };
 		26BDECDA1867B7790018670D /* CallViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CallViewController.m; sourceTree = "<group>"; };
 		26BDECDB1867B7790018670D /* CallViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CallViewController.xib; sourceTree = "<group>"; };
+		26C1EA661FF937040085547A /* MLCloudSettingsViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLCloudSettingsViewController.h; sourceTree = "<group>"; };
+		26C1EA671FF937040085547A /* MLCloudSettingsViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLCloudSettingsViewController.m; sourceTree = "<group>"; };
+		26C1EA691FF937320085547A /* MLNotificationSettingsViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLNotificationSettingsViewController.h; sourceTree = "<group>"; };
+		26C1EA6A1FF937320085547A /* MLNotificationSettingsViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLNotificationSettingsViewController.m; sourceTree = "<group>"; };
 		26C3456C1C68F9F0007F4BEC /* MLHTTPRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLHTTPRequest.h; sourceTree = "<group>"; };
 		26C3456D1C68F9F0007F4BEC /* MLHTTPRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLHTTPRequest.m; sourceTree = "<group>"; };
 		26C3EDF51A8072D5000E6331 /* ParseEnabled.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParseEnabled.h; sourceTree = "<group>"; };
@@ -1106,7 +1112,11 @@
 			isa = PBXGroup;
 			children = (
 				2644D4971FF29E5600F46AB5 /* MLSettingsTableViewController.h */,
+				26C1EA661FF937040085547A /* MLCloudSettingsViewController.h */,
+				26C1EA671FF937040085547A /* MLCloudSettingsViewController.m */,
 				2644D4981FF29E5600F46AB5 /* MLSettingsTableViewController.m */,
+				26C1EA691FF937320085547A /* MLNotificationSettingsViewController.h */,
+				26C1EA6A1FF937320085547A /* MLNotificationSettingsViewController.m */,
 			);
 			name = Settings;
 			sourceTree = "<group>";
@@ -1622,8 +1632,8 @@
 				261A627F176C055400059090 /* ContactsViewController.m */,
 				261A6283176C156500059090 /* ActiveChatsViewController.h */,
 				261A6284176C156500059090 /* ActiveChatsViewController.m */,
-				261A6286176C157D00059090 /* SettingsViewController.h */,
-				261A6287176C157D00059090 /* SettingsViewController.m */,
+				261A6286176C157D00059090 /* MLDisplaySettingsViewController.h */,
+				261A6287176C157D00059090 /* MLDisplaySettingsViewController.m */,
 				261A628F176C15D400059090 /* GroupChatViewController.h */,
 				261A6290176C15D400059090 /* GroupChatViewController.m */,
 				26EC410F17BDD98D0031304D /* GroupChatViewController.xib */,
@@ -2558,7 +2568,7 @@
 				26D51CDC1E2674D700141E04 /* NXOAuth2FileStreamWrapper.m in Sources */,
 				26B2A4F31B73097500272E63 /* DDFileLogger.m in Sources */,
 				2609B5291FD5B26800F09FA1 /* MLSplitViewDelegate.m in Sources */,
-				261A6288176C157D00059090 /* SettingsViewController.m in Sources */,
+				261A6288176C157D00059090 /* MLDisplaySettingsViewController.m in Sources */,
 				261A628B176C159000059090 /* AccountsViewController.m in Sources */,
 				261A628E176C15AD00059090 /* ChatLogsViewController.m in Sources */,
 				26FB468F18B2755A0043094F /* IPAddress.m in Sources */,
@@ -2592,6 +2602,7 @@
 				26D51CDE1E2674D700141E04 /* NXOAuth2PostBodyPart.m in Sources */,
 				2678A98E185AB739003AF53B /* ChatLogContactViewController.m in Sources */,
 				26C3456E1C68F9F0007F4BEC /* MLHTTPRequest.m in Sources */,
+				26C1EA681FF937040085547A /* MLCloudSettingsViewController.m in Sources */,
 				2696EED21791245A00BC54B8 /* chatViewController.m in Sources */,
 				26B2A4FB1B73097500272E63 /* DDDispatchQueueLogFormatter.m in Sources */,
 				26B2A4F71B73097500272E63 /* DDTTYLogger.m in Sources */,
@@ -2621,6 +2632,7 @@
 				26DA16E217C302BC00D0065E /* UIAlertView+Blocks.m in Sources */,
 				26B2A4FD1B73097500272E63 /* DDMultiFormatter.m in Sources */,
 				262E51921AD8CAC600788351 /* MLButtonCell.m in Sources */,
+				26C1EA6B1FF937320085547A /* MLNotificationSettingsViewController.m in Sources */,
 				2643A12F180220890030EFB1 /* TPKeyboardAvoidingTableView.m in Sources */,
 				2644D4951FF046E800F46AB5 /* MLBaseCell.m in Sources */,
 				26D51CE01E2674D700141E04 /* NXOAuth2PostBodyStream.m in Sources */,

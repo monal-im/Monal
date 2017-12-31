@@ -58,7 +58,7 @@ NS_ENUM(NSInteger, kNotificationSettingSection)
 
 -(void) viewWillAppear:(BOOL)animated
 {
-    self.navigationItem.title = NSLocalizedString(@"Display Settings",@"");
+    self.navigationItem.title = NSLocalizedString(@"Notification Settings",@"");
 
     //TODO when ios 9 is dropped switch this to new API
     // [UNUserNotificationCenter getNotificationSettingsWithCompletionHandler:]

@@ -84,10 +84,12 @@ NS_ENUM(NSInteger, kSettingSection)
     {
         case kSettingSectionApp: {
             cell.textLabel.text= self.appRows[indexPath.row];
+            cell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
             break;
         }
         case kSettingSectionSupport: {
             cell.textLabel.text= self.supportRows[indexPath.row];
+            cell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
             break;
         }
         case kSettingSectionAbout: {
@@ -96,10 +98,12 @@ NS_ENUM(NSInteger, kSettingSection)
                 NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
                 NSString* version = [infoDict objectForKey:@"CFBundleShortVersionString"];
                 NSString* build = [infoDict objectForKey:@"CFBundleVersion"];
-               
+                
                 cell.textLabel.text= [NSString stringWithFormat:@"Version  %@ (%@)",version, build];
+                cell.accessoryType=UITableViewCellAccessoryNone;
             } else {
                 cell.textLabel.text= self.aboutRows[indexPath.row];
+                cell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
             }
             break;
         }

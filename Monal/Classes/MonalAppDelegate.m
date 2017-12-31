@@ -243,14 +243,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     
     //register for voip push using pushkit
-    if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground) {
+    if([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground) {
        // if we are launched in the background, it was from a push. dont do this again.
         [self voipRegistration];
     }
     else  {
         [MLXMPPManager sharedInstance].pushNode = [[NSUserDefaults standardUserDefaults] objectForKey:@"pushNode"];
         [MLXMPPManager sharedInstance].pushSecret=[[NSUserDefaults standardUserDefaults] objectForKey:@"pushSecret"];
-        
+        [MLXMPPManager sharedInstance].hasAPNSToken=YES;
     }
     
     [self setUISettings];

@@ -24,7 +24,7 @@
 @property (nonatomic, weak)  UITextField* accountName;
 @property (nonatomic, weak) IBOutlet UIToolbar* keyboardToolbar;
 
--(IBAction) addPress;
+-(IBAction) addPress:(id)sender;
 -(void) closeView;
 
 

@@ -38,7 +38,7 @@
 
 @implementation MLContactsViewController
 
-static const int ddLogLevel = LOG_LEVEL_INFO;
+static const int ddLogLevel = LOG_LEVEL_DEBUG;
 
 - (void)viewDidLoad {
     [super viewDidLoad];

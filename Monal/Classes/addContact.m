@@ -20,7 +20,7 @@
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
--(void) addPress
+-(IBAction) addPress:(id)sender
 {
     if([[MLXMPPManager sharedInstance].connectedXMPP count]==0)
     {
@@ -101,11 +101,6 @@
     _accountPicker.autoresizingMask=UIViewAutoresizingFlexibleLeftMargin|UIViewAutoresizingFlexibleRightMargin;
     
     
-    [self.tableView registerNib:[UINib nibWithNibName:@"MLButtonCell"
-                                               bundle:[NSBundle mainBundle]]
-         forCellReuseIdentifier:@"ButtonCell"];
-    
-    
     [self.tableView registerNib:[UINib nibWithNibName:@"MLTextInputCell"
                                                bundle:[NSBundle mainBundle]]
          forCellReuseIdentifier:@"TextCell"];
@@ -120,8 +115,9 @@
     
     if([[MLXMPPManager sharedInstance].connectedXMPP count]==1)
     {
-        _accountName.text=[[MLXMPPManager sharedInstance] getNameForConnectedRow:0];
         [[MLXMPPManager sharedInstance] getServiceDetailsForAccount:0 ];
+        [_accountPicker selectedRowInComponent:0];
+        
     }
 }
 
@@ -170,7 +166,13 @@
                 self.accountName =textCell.textInput;
                 self.accountName.placeholder = @"Account";
                 self.accountName.inputView=_accountPickerView;
-                self.contactName.delegate=self;
+                self.accountName.delegate=self;
+                
+                if([[MLXMPPManager sharedInstance].connectedXMPP count]==1)
+                {
+                    self.accountName.text=[[MLXMPPManager sharedInstance] getAccountNameForConnectedRow:0];
+                }
+                
                 
             }
             else   if(indexPath.row ==1){
@@ -185,11 +187,9 @@
             break;
         }
         case 1: {
-            MLButtonCell *buttonCell ;
-            buttonCell =[tableView dequeueReusableCellWithIdentifier:@"ButtonCell"];
-            buttonCell.buttonText.text=@"Add Contact";
-            buttonCell.buttonText.textColor= [UIColor colorWithRed:128.0/255 green:203.0/255 blue:182.0/255 alpha:1.0f];
-            cell=buttonCell;
+           
+            cell =[tableView dequeueReusableCellWithIdentifier:@"addButton"];
+    
             
             break;
         }
@@ -202,17 +202,9 @@
 }
 
 #pragma mark tableview delegate
-- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath;
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    switch (indexPath.section) {
-        case 0:
-            break;
-        case 1:
-            [self addPress];
-            
-        default:
-            break;
-    }
+  
 }
 
 

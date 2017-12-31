@@ -7,6 +7,9 @@
 //
 
 #import "MLNotificationSettingsViewController.h"
+#import "MLSwitchCell.h"
+#import "MLXMPPManager.h"
+@import UserNotificationsUI;
 
 NS_ENUM(NSInteger, kNotificationSettingSection)
 {
@@ -18,7 +21,15 @@ NS_ENUM(NSInteger, kNotificationSettingSection)
 };
 
 @interface MLNotificationSettingsViewController ()
-@property (nonatomic, strong) NSArray *sections;
+@property (nonatomic, strong) NSArray *sectionsHeaders;
+@property (nonatomic, strong) NSArray *sectionsFooters;
+@property (nonatomic, strong) NSArray *apple;
+@property (nonatomic, strong) NSArray *user;
+@property (nonatomic, strong) NSArray *monal;
+@property (nonatomic, strong) NSArray *accounts;
+
+@property (nonatomic, assign) BOOL canShowNotifications;
+
 @end
 
 @implementation MLNotificationSettingsViewController
@@ -26,10 +37,42 @@ NS_ENUM(NSInteger, kNotificationSettingSection)
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    self.sections =@[@"Apple", @"Alerts", @"Monal Push", @"Accounts"];
+    self.sectionsFooters =@[@"Apple push service should always be on. If it is off, your device can not talk to Apple's server.",
+                     @"If Monal can't show notificaitons, you will not see alerts a message arrives. This happens if you tapped 'Decline' when Monal first asked permission.  Fix it by going to iOS Settings -> Monal -> Notifications and select 'Allow Notifications'. ",
+                     @"If Monal push is off, your device could not talk to push.monal.im. This should also never be off. It requires Apple push service to work first. ",
+                     @""];
+    
+    self.sectionsHeaders =@[@"",
+                            @"",
+                            @"",
+                            @"Accounts"];
+    
+    self.apple=@[@"Apple Push Service"];
+     self.user=@[@"Can Show Notifications"];
+     self.monal=@[@"Monal Push Server"];
+    self.accounts=@[];
+    
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
     
 }
+
+-(void) viewWillAppear:(BOOL)animated
+{
+    self.navigationItem.title = NSLocalizedString(@"Display Settings",@"");
+
+    //TODO when ios 9 is dropped switch this to new API
+    // [UNUserNotificationCenter getNotificationSettingsWithCompletionHandler:]
+    UIUserNotificationSettings *notificationSettings= [[UIApplication sharedApplication] currentUserNotificationSettings];
+    
+    if (notificationSettings.types == UIUserNotificationTypeNone) {
+        self.canShowNotifications=NO;
+    }
+    else if (notificationSettings.types  & UIUserNotificationTypeAlert){
+      self.canShowNotifications=YES;
+    }
+    
+}
+
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
@@ -47,20 +90,20 @@ NS_ENUM(NSInteger, kNotificationSettingSection)
     switch(section)
     {
         case kNotificationSettingSectionUser: {
-            toreturn=0;// self.appRows.count;
+            toreturn=self.user.count;
             break;
         }
         case kNotificationSettingSectionApplePush: {
-            toreturn=0;//  self.supportRows.count;
+            toreturn=self.apple.count;
             break;
         }
         case kNotificationSettingSectionMonalPush: {
-            toreturn= 0 ;//self.aboutRows.count;
+            toreturn= self.monal.count;
             break;
         }
             
         case kNotificationSettingSectionAccounts: {
-            toreturn= 0; //self.aboutRows.count;
+            toreturn= self.accounts.count;
             break;
         }
             
@@ -71,8 +114,76 @@ NS_ENUM(NSInteger, kNotificationSettingSection)
 
 -(NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
-    NSString *toreturn= self.sections[section];
+    NSString *toreturn= self.sectionsHeaders[section];
     return toreturn;
+}
+
+-(NSString *)tableView:(UITableView *)tableView titleForFooterInSection:(NSInteger)section
+{
+    NSString *toreturn= self.sectionsFooters[section];
+    return toreturn;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    UITableViewCell *toreturn=[tableView dequeueReusableCellWithIdentifier:@"descriptionCell"];
+    switch(indexPath.section)
+    {
+        case kNotificationSettingSectionUser: {
+            
+            MLSwitchCell *cell= [tableView dequeueReusableCellWithIdentifier:@"switchCell"];
+            cell.toggleSwitch.enabled=NO;
+            cell.cellLabel.text = self.user[0];
+            if(self.canShowNotifications) {
+                cell.toggleSwitch.on=YES;
+            }
+            else  {
+                cell.toggleSwitch.on=NO;
+            }
+            toreturn=cell;
+            break;
+        }
+        case kNotificationSettingSectionApplePush: {
+            MLSwitchCell *cell= [tableView dequeueReusableCellWithIdentifier:@"switchCell"];
+            cell.toggleSwitch.enabled=NO;
+            cell.cellLabel.text = self.apple[0];
+            
+            if([MLXMPPManager sharedInstance].hasAPNSToken) {
+                cell.toggleSwitch.on=YES;
+            }
+            else  {
+                cell.toggleSwitch.on=NO;
+            }
+            
+            toreturn=cell;
+            break;
+        }
+        case kNotificationSettingSectionMonalPush: {
+            MLSwitchCell *cell= [tableView dequeueReusableCellWithIdentifier:@"switchCell"];
+            cell.toggleSwitch.enabled=NO;
+            if([MLXMPPManager sharedInstance].pushNode) {
+                cell.toggleSwitch.on=YES;
+            }
+            else  {
+                cell.toggleSwitch.on=NO;
+            }
+            cell.cellLabel.text = self.monal[0];
+            toreturn=cell;
+            break;
+        }
+            
+        case kNotificationSettingSectionAccounts: {
+            MLSwitchCell *cell= [tableView dequeueReusableCellWithIdentifier:@"switchCell"];
+            cell.toggleSwitch.enabled=NO;
+           // cell.cellLabel.text = self.user[0];
+            toreturn=cell;
+            break;
+        }
+            
+    }
+    
+    return toreturn;
+    
 }
 
 

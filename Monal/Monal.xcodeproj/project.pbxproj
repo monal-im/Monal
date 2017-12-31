@@ -264,7 +264,7 @@
 		2644D4991FF29E5600F46AB5 /* MLSettingsTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2644D4981FF29E5600F46AB5 /* MLSettingsTableViewController.m */; };
 		26470F521835C4080069E3E0 /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 26470F511835C4080069E3E0 /* Media.xcassets */; };
 		2649CE531C51B84C00CD1E80 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2649CE521C51B84C00CD1E80 /* Launch Screen.storyboard */; };
-		264A7E751AA7263600E860E3 /* MLAccountCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 264A7E741AA7263600E860E3 /* MLAccountCell.xib */; };
+		264A7E751AA7263600E860E3 /* MLSwitchCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 264A7E741AA7263600E860E3 /* MLSwitchCell.xib */; };
 		264E345B1787BAB100BC7BD0 /* XMPPPresence.m in Sources */ = {isa = PBXBuildFile; fileRef = 264E345A1787BAB100BC7BD0 /* XMPPPresence.m */; };
 		2651AF551B409906008D025C /* MLMainWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 2651AF541B409906008D025C /* MLMainWindow.m */; };
 		26529F5217FA7B260057F199 /* addContact.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EC40FE17BDD85F0031304D /* addContact.m */; };
@@ -374,7 +374,7 @@
 		26D51CE11E2674D700141E04 /* NXOAuth2PostBodyStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CC51E2674D700141E04 /* NXOAuth2PostBodyStream.m */; };
 		26D51CE21E2674D700141E04 /* NXOAuth2Request.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CC71E2674D700141E04 /* NXOAuth2Request.m */; };
 		26D51CE31E2674D700141E04 /* NXOAuth2Request.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CC71E2674D700141E04 /* NXOAuth2Request.m */; };
-		26D89F061A890672009B147C /* MLAccountCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D89F051A890672009B147C /* MLAccountCell.m */; };
+		26D89F061A890672009B147C /* MLSwitchCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D89F051A890672009B147C /* MLSwitchCell.m */; };
 		26DA16E017C302BC00D0065E /* RIButtonItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 26DA16DB17C302BC00D0065E /* RIButtonItem.m */; };
 		26DA16E117C302BC00D0065E /* UIActionSheet+Blocks.m in Sources */ = {isa = PBXBuildFile; fileRef = 26DA16DD17C302BC00D0065E /* UIActionSheet+Blocks.m */; };
 		26DA16E217C302BC00D0065E /* UIAlertView+Blocks.m in Sources */ = {isa = PBXBuildFile; fileRef = 26DA16DF17C302BC00D0065E /* UIAlertView+Blocks.m */; };
@@ -640,7 +640,7 @@
 		2644D4981FF29E5600F46AB5 /* MLSettingsTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLSettingsTableViewController.m; sourceTree = "<group>"; };
 		26470F511835C4080069E3E0 /* Media.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Media.xcassets; sourceTree = "<group>"; };
 		2649CE521C51B84C00CD1E80 /* Launch Screen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = "Launch Screen.storyboard"; path = "Monal-iOS/Launch Screen.storyboard"; sourceTree = "<group>"; };
-		264A7E741AA7263600E860E3 /* MLAccountCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MLAccountCell.xib; sourceTree = "<group>"; };
+		264A7E741AA7263600E860E3 /* MLSwitchCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MLSwitchCell.xib; sourceTree = "<group>"; };
 		264E34591787BAB100BC7BD0 /* XMPPPresence.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPPresence.h; sourceTree = "<group>"; };
 		264E345A1787BAB100BC7BD0 /* XMPPPresence.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPPresence.m; sourceTree = "<group>"; };
 		264FF3E4158A855D00D97B86 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
@@ -791,8 +791,8 @@
 		26D51CC71E2674D700141E04 /* NXOAuth2Request.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NXOAuth2Request.m; sourceTree = "<group>"; };
 		26D51CC81E2674D700141E04 /* NXOAuth2TrustDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NXOAuth2TrustDelegate.h; sourceTree = "<group>"; };
 		26D51CC91E2674D700141E04 /* OAuth2Client_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OAuth2Client_Prefix.pch; sourceTree = "<group>"; };
-		26D89F041A890672009B147C /* MLAccountCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLAccountCell.h; sourceTree = "<group>"; };
-		26D89F051A890672009B147C /* MLAccountCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLAccountCell.m; sourceTree = "<group>"; };
+		26D89F041A890672009B147C /* MLSwitchCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLSwitchCell.h; sourceTree = "<group>"; };
+		26D89F051A890672009B147C /* MLSwitchCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLSwitchCell.m; sourceTree = "<group>"; };
 		26DA16DA17C302BC00D0065E /* RIButtonItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RIButtonItem.h; sourceTree = "<group>"; };
 		26DA16DB17C302BC00D0065E /* RIButtonItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RIButtonItem.m; sourceTree = "<group>"; };
 		26DA16DC17C302BC00D0065E /* UIActionSheet+Blocks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIActionSheet+Blocks.h"; sourceTree = "<group>"; };
@@ -995,9 +995,9 @@
 		262797AC178A573F00B85D94 /* Tableviewcells */ = {
 			isa = PBXGroup;
 			children = (
-				26D89F041A890672009B147C /* MLAccountCell.h */,
-				264A7E741AA7263600E860E3 /* MLAccountCell.xib */,
-				26D89F051A890672009B147C /* MLAccountCell.m */,
+				26D89F041A890672009B147C /* MLSwitchCell.h */,
+				264A7E741AA7263600E860E3 /* MLSwitchCell.xib */,
+				26D89F051A890672009B147C /* MLSwitchCell.m */,
 				262797AD178A577300B85D94 /* MLContactCell.h */,
 				262797AE178A577300B85D94 /* MLContactCell.m */,
 				26F9794C1ACAC73A0008E005 /* MLContactCell.xib */,
@@ -2111,7 +2111,7 @@
 			files = (
 				262E51931AD8CAC600788351 /* MLButtonCell.xib in Resources */,
 				2601D9CB0FBF25EF004DB939 /* sworim.sqlite in Resources */,
-				264A7E751AA7263600E860E3 /* MLAccountCell.xib in Resources */,
+				264A7E751AA7263600E860E3 /* MLSwitchCell.xib in Resources */,
 				26470F521835C4080069E3E0 /* Media.xcassets in Resources */,
 				26761BF71804FBB700D94714 /* RoomListViewController.xib in Resources */,
 				26B2A4BB1B73061400272E63 /* Images.xcassets in Resources */,
@@ -2545,7 +2545,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				26D89F061A890672009B147C /* MLAccountCell.m in Sources */,
+				26D89F061A890672009B147C /* MLSwitchCell.m in Sources */,
 				26D51CDA1E2674D700141E04 /* NXOAuth2Constants.m in Sources */,
 				1D60589B0D05DD56006BFB54 /* main.m in Sources */,
 				1D3623260D0F684500981E51 /* MonalAppDelegate.m in Sources */,

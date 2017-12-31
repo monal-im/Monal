@@ -177,6 +177,9 @@ Attempts to upload a file to the  HTTP upload service
 
 @property (nonatomic, strong, readonly) NSMutableArray* connectedXMPP;
 
+
+@property (nonatomic, assign) BOOL hasAPNSToken;
+
 @property (nonatomic, strong) NSString *pushNode;
 @property (nonatomic, strong) NSString *pushSecret;
 

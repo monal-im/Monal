@@ -6,8 +6,8 @@
 //  Copyright (c) 2015 Monal.im. All rights reserved.
 //
 
-#import "MLAccountCell.h"
+#import "MLSwitchCell.h"
 
-@implementation MLAccountCell
+@implementation MLSwitchCell
 
 @end

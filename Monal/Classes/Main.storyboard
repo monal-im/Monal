@@ -424,12 +424,12 @@
         <scene sceneID="KnW-pH-rEH">
             <objects>
                 <tableViewController title="Notificaions" id="nPR-ET-sg3" customClass="MLNotificationSettingsViewController" sceneMemberID="viewController">
-                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" id="9jV-5R-tNK">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" allowsSelection="NO" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" id="9jV-5R-tNK">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
                         <prototypes>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="switchCell" id="gkx-K4-TUP">
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="switchCell" id="gkx-K4-TUP" customClass="MLSwitchCell">
                                 <rect key="frame" x="0.0" y="55.333333333333336" width="414" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="gkx-K4-TUP" id="EEc-Yw-s9H">
@@ -451,14 +451,17 @@
                                     </subviews>
                                     <constraints>
                                         <constraint firstItem="Vjz-DV-ulE" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="Bqn-Y6-U05" secondAttribute="trailing" constant="50" id="4q9-dw-GrF"/>
-                                        <constraint firstItem="Vjz-DV-ulE" firstAttribute="top" secondItem="EEc-Yw-s9H" secondAttribute="top" constant="7" id="ECa-lr-dBH"/>
                                         <constraint firstItem="Bqn-Y6-U05" firstAttribute="bottom" secondItem="EEc-Yw-s9H" secondAttribute="bottomMargin" id="IvQ-Sm-xDz"/>
-                                        <constraint firstAttribute="bottom" secondItem="Vjz-DV-ulE" secondAttribute="bottom" constant="5.6699999999999999" id="M2j-KT-ZcV"/>
+                                        <constraint firstItem="Vjz-DV-ulE" firstAttribute="centerY" secondItem="EEc-Yw-s9H" secondAttribute="centerY" id="Jxp-hF-owM"/>
                                         <constraint firstItem="Bqn-Y6-U05" firstAttribute="top" secondItem="EEc-Yw-s9H" secondAttribute="topMargin" constant="1" id="l9l-db-Ea0"/>
                                         <constraint firstAttribute="trailing" secondItem="Vjz-DV-ulE" secondAttribute="trailing" constant="13" id="qa7-Qw-1b9"/>
                                         <constraint firstItem="Bqn-Y6-U05" firstAttribute="leading" secondItem="EEc-Yw-s9H" secondAttribute="leadingMargin" id="v7U-2k-PaU"/>
                                     </constraints>
                                 </tableViewCellContentView>
+                                <connections>
+                                    <outlet property="cellLabel" destination="Bqn-Y6-U05" id="VYb-r9-v2e"/>
+                                    <outlet property="toggleSwitch" destination="Vjz-DV-ulE" id="vKV-o3-Rz1"/>
+                                </connections>
                             </tableViewCell>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="descriptionCell" id="O7j-Oq-WuW">
                                 <rect key="frame" x="0.0" y="99.333333333333343" width="414" height="44"/>

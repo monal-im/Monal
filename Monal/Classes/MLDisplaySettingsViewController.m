@@ -31,7 +31,7 @@
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
-    self.navigationItem.title=NSLocalizedString(@"Settings",@"");
+    self.navigationItem.title=NSLocalizedString(@"Display Settings",@"");
    
     _settingsTable=self.tableView;
     _settingsTable.delegate=self;

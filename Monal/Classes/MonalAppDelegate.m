@@ -77,7 +77,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     unsigned char *tokenBytes = (unsigned char *)[credentials.token bytes];
     NSMutableString *token = [[NSMutableString alloc] init];
-    
+    [MLXMPPManager sharedInstance].hasAPNSToken=YES;
     NSInteger counter=0;
     while(counter< credentials.token.length)
     {

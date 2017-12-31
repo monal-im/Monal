@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface MLAccountCell : UITableViewCell
+@interface MLSwitchCell : UITableViewCell
 
 /**
  Label to the right

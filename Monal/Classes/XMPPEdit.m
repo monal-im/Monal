@@ -7,7 +7,7 @@
 //
 
 #import "XMPPEdit.h"
-#import "MLAccountCell.h"
+#import "MLSwitchCell.h"
 #import "MLButtonCell.h"
 #import "NXOAuth2.h"
 #import "NXOAuth2AccountStore.h"
@@ -395,7 +395,7 @@ NSString *const kGtalk = @"Gtalk";
 {
     DDLogVerbose(@"xmpp edit view section %ld, row %ld", indexPath.section, indexPath.row);
     
-    MLAccountCell* thecell=(MLAccountCell *)[tableView dequeueReusableCellWithIdentifier:@"AccountCell"];
+    MLSwitchCell* thecell=(MLSwitchCell *)[tableView dequeueReusableCellWithIdentifier:@"AccountCell"];
     
     // load cells from interface builder
     if(indexPath.section==0)

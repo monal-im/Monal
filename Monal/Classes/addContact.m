@@ -24,13 +24,13 @@
 {
     if([[MLXMPPManager sharedInstance].connectedXMPP count]==0)
     {
+        UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:@"No connected accounts" message:@"Please make sure at least one account has connected before trying to add a contact." preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertAction *closeAction =[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+            
+        }];
+        [messageAlert addAction:closeAction];
         
-        UIAlertView *addError = [[UIAlertView alloc]
-                                 initWithTitle:@"No connected accounts"
-                                 message:@"Please make sure at least one account has connected before trying to add a contact. "
-                                 delegate:self cancelButtonTitle:@"Close"
-                                 otherButtonTitles: nil] ;
-        [addError show];
+        [self presentViewController:messageAlert animated:YES completion:nil];
     }
     else  {
         
@@ -39,27 +39,29 @@
             NSDictionary* contact =@{@"row":[NSNumber numberWithInteger:_selectedRow],@"buddy_name":self.contactName.text};
             [[MLXMPPManager sharedInstance] addContact:contact];
             
-            UIAlertView *addError = [[UIAlertView alloc]
-                                     initWithTitle:@"Permission Requested"
-                                     message:@"The new contact will be added to your contacts list when the person you've added has approved your request."
-                                     delegate:self cancelButtonTitle:@"Close"
-                                     otherButtonTitles: nil] ;
-            [addError show];
+            UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:@"Permission Requested" message:@"The new contact will be added to your contacts list when the person you've added has approved your request." preferredStyle:UIAlertControllerStyleAlert];
+            UIAlertAction *closeAction =[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+                
+            }];
+            [messageAlert addAction:closeAction];
+            
+            [self presentViewController:messageAlert animated:YES completion:nil];
+            
         }
         else
         {
-            UIAlertView *addError = [[UIAlertView alloc]
-                                     initWithTitle:@"Error"
-                                     message:@"Name can't be empty"
-                                     delegate:self cancelButtonTitle:@"Close"
-                                     otherButtonTitles: nil] ;
-            [addError show];
+            UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:@"Error" message:@"Name can't be empty" preferredStyle:UIAlertControllerStyleAlert];
+            UIAlertAction *closeAction =[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+                
+            }];
+            [messageAlert addAction:closeAction];
+            
+            [self presentViewController:messageAlert animated:YES completion:nil];
+            
         }
         
     }
 }
-
-
 
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField

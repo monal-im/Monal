@@ -34,7 +34,7 @@ NS_ENUM(NSInteger, kSettingSection)
     
     self.sections =@[@"App", @"Support", @"About"];
     
-    self.appRows=@[@"Accounts", @"Notifications", @"Display", @"Cloud Storage"];
+    self.appRows=@[@"Accounts", @"Notifications", @"Display"];  //@"Cloud Storage"
     self.supportRows=@[@"Email Support", @"Submit A Bug"];
     self.aboutRows=@[@"Rate Monal", @"Open Source", @"About", @"Version"];
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;

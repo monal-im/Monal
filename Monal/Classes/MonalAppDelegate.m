@@ -251,6 +251,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         [MLXMPPManager sharedInstance].pushNode = [[NSUserDefaults standardUserDefaults] objectForKey:@"pushNode"];
         [MLXMPPManager sharedInstance].pushSecret=[[NSUserDefaults standardUserDefaults] objectForKey:@"pushSecret"];
         [MLXMPPManager sharedInstance].hasAPNSToken=YES;
+           NSLog(@"push node %@", [MLXMPPManager sharedInstance].pushNode); 
     }
     
     [self setUISettings];

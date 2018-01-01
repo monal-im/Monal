@@ -38,7 +38,7 @@ NS_ENUM(NSInteger, kNotificationSettingSection)
     [super viewDidLoad];
     
     self.sectionsFooters =@[@"Apple push service should always be on. If it is off, your device can not talk to Apple's server.",
-                     @"If Monal can't show notificaitons, you will not see alerts a message arrives. This happens if you tapped 'Decline' when Monal first asked permission.  Fix it by going to iOS Settings -> Monal -> Notifications and select 'Allow Notifications'. ",
+                     @"If Monal can't show notifications, you will not see alerts a message arrives. This happens if you tapped 'Decline' when Monal first asked permission.  Fix it by going to iOS Settings -> Monal -> Notifications and select 'Allow Notifications'. ",
                      @"If Monal push is off, your device could not talk to push.monal.im. This should also never be off. It requires Apple push service to work first. ",
                      @""];
     
@@ -161,6 +161,7 @@ NS_ENUM(NSInteger, kNotificationSettingSection)
         case kNotificationSettingSectionMonalPush: {
             MLSwitchCell *cell= [tableView dequeueReusableCellWithIdentifier:@"switchCell"];
             cell.toggleSwitch.enabled=NO;
+         
             if([MLXMPPManager sharedInstance].pushNode) {
                 cell.toggleSwitch.on=YES;
             }
@@ -175,10 +176,11 @@ NS_ENUM(NSInteger, kNotificationSettingSection)
         case kNotificationSettingSectionAccounts: {
             MLSwitchCell *cell= [tableView dequeueReusableCellWithIdentifier:@"switchCell"];
             cell.toggleSwitch.enabled=NO;
-            xmpp *row =[MLXMPPManager sharedInstance].connectedXMPP[indexPath.row];
-            cell.cellLabel.text =row.fulluser;
+            NSDictionary  *row = [MLXMPPManager sharedInstance].connectedXMPP[indexPath.row];
+            xmpp *xmppAccount = [row objectForKey:@"xmppAccount"];
+            cell.cellLabel.text =xmppAccount.fulluser;
             
-            cell.toggleSwitch.on = row.pushEnabled; 
+            cell.toggleSwitch.on = xmppAccount.pushEnabled; 
             
             toreturn=cell;
             break;

@@ -84,15 +84,15 @@ EOM
   esac
 }
 if [[ "$CONFIGURATION" == "Debug" ]]; then
-  install_resource "${PODS_ROOT}/MWPhotoBrowser/MWPhotoBrowser/MWPhotoBrowser.bundle"
+  install_resource "$PODS_CONFIGURATION_BUILD_DIR/MWPhotoBrowser/MWPhotoBrowser.bundle"
   install_resource "${PODS_ROOT}/SAMKeychain/Support/SAMKeychain.bundle"
 fi
 if [[ "$CONFIGURATION" == "Adhoc" ]]; then
-  install_resource "${PODS_ROOT}/MWPhotoBrowser/MWPhotoBrowser/MWPhotoBrowser.bundle"
+  install_resource "$PODS_CONFIGURATION_BUILD_DIR/MWPhotoBrowser/MWPhotoBrowser.bundle"
   install_resource "${PODS_ROOT}/SAMKeychain/Support/SAMKeychain.bundle"
 fi
 if [[ "$CONFIGURATION" == "AppStore" ]]; then
-  install_resource "${PODS_ROOT}/MWPhotoBrowser/MWPhotoBrowser/MWPhotoBrowser.bundle"
+  install_resource "$PODS_CONFIGURATION_BUILD_DIR/MWPhotoBrowser/MWPhotoBrowser.bundle"
   install_resource "${PODS_ROOT}/SAMKeychain/Support/SAMKeychain.bundle"
 fi
 

@@ -1,24 +1,22 @@
 PODS:
-  - Crashlytics (3.8.4):
-    - Fabric (~> 1.6.3)
+  - Crashlytics (3.9.3):
+    - Fabric (~> 1.7.2)
   - CWStatusBarNotification (2.3.5)
   - DACircularProgress (2.3.1)
   - Dropbox-iOS-SDK (1.3.13)
   - Dropbox-OSX-SDK (1.3.13)
-  - Fabric (1.6.11)
-  - MBProgressHUD (1.0.0)
-  - MWPhotoBrowser (1.2.1):
-    - DACircularProgress
-    - MBProgressHUD
-    - PSTCollectionView (~> 1.2)
-    - SDWebImage (~> 3.5)
-  - PSTCollectionView (1.2.3)
-  - SAMKeychain (1.5.2)
-  - SDWebImage (3.8.2):
-    - SDWebImage/Core (= 3.8.2)
-  - SDWebImage/Core (3.8.2)
+  - Fabric (1.7.2)
+  - MBProgressHUD (1.1.0)
+  - MWPhotoBrowser (2.1.4):
+    - DACircularProgress (~> 2.3.1)
+    - MBProgressHUD (~> 1.1.0)
+    - SDWebImage (~> 4.2.2)
+  - SAMKeychain (1.5.3)
+  - SDWebImage (4.2.2):
+    - SDWebImage/Core (= 4.2.2)
+  - SDWebImage/Core (4.2.2)
   - Sparkle (1.18.1)
-  - TPCircularBuffer (1.4)
+  - TPCircularBuffer (1.5)
 
 DEPENDENCIES:
   - Crashlytics
@@ -26,28 +24,31 @@ DEPENDENCIES:
   - Dropbox-iOS-SDK
   - Dropbox-OSX-SDK
   - Fabric
-  - MBProgressHUD
-  - MWPhotoBrowser
+  - MBProgressHUD (~> 1.1.0)
+  - MWPhotoBrowser (from `https://raw.githubusercontent.com/moinku07/MWPhotoBrowser/master/MWPhotoBrowser.podspec`)
   - SAMKeychain
-  - SDWebImage
+  - SDWebImage (~> 4.2.2)
   - Sparkle
   - TPCircularBuffer
 
+EXTERNAL SOURCES:
+  MWPhotoBrowser:
+    :podspec: https://raw.githubusercontent.com/moinku07/MWPhotoBrowser/master/MWPhotoBrowser.podspec
+
 SPEC CHECKSUMS:
-  Crashlytics: 79e236942ca1e7fc641df1feb9a275360a78ab6a
+  Crashlytics: dbb07d01876c171c5ccbdf7826410380189e452c
   CWStatusBarNotification: 3d2738b25c3207f60cc50201388d3c96182545ff
   DACircularProgress: 4dd437c0fc3da5161cb289e07ac449493d41db71
   Dropbox-iOS-SDK: e0c9b08d1604b39cb78c1d0333251de0f6bdec60
   Dropbox-OSX-SDK: 7558b741dfb8eac3d2352ad95bd4078debcf0e13
-  Fabric: 5911403591946b8228ab1c51d98f1d7137e863c6
-  MBProgressHUD: 4890f671c94e8a0f3cf959aa731e9de2f036d71a
-  MWPhotoBrowser: 7087b4c828297ef34ff2b0892c8e967034a86842
-  PSTCollectionView: 6749df92885353521f55279a7ce2b293762e2be4
-  SAMKeychain: 1865333198217411f35327e8da61b43de79b635b
-  SDWebImage: 098e97e6176540799c27e804c96653ee0833d13c
+  Fabric: 9cd6a848efcf1b8b07497e0b6a2e7d336353ba15
+  MBProgressHUD: e7baa36a220447d8aeb12769bf0585582f3866d9
+  MWPhotoBrowser: c145b4dc9dffad86f04ab807ff7d7ce078519183
+  SAMKeychain: 483e1c9f32984d50ca961e26818a534283b4cd5c
+  SDWebImage: 89a9d32cd520bbb46eb14e541d5109b3564af198
   Sparkle: 06ea33170007c5937ee54da481b4481af98fac79
-  TPCircularBuffer: c0160545b63019adf85231e3de543bbc97cb9041
+  TPCircularBuffer: 5196b690383e7bc54771e2f26e10c17cd928bd22
 
-PODFILE CHECKSUM: 4a9623016e8c32c965815d1cb01b0436ef57e2cb
+PODFILE CHECKSUM: e3b5fd23ff72732a67974c31330d13315ad47e87
 
 COCOAPODS: 1.3.1

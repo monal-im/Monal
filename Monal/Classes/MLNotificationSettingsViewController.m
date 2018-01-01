@@ -38,7 +38,7 @@ NS_ENUM(NSInteger, kNotificationSettingSection)
     [super viewDidLoad];
     
     self.sectionsFooters =@[@"Apple push service should always be on. If it is off, your device can not talk to Apple's server.",
-                     @"If Monal can't show notifications, you will not see alerts a message arrives. This happens if you tapped 'Decline' when Monal first asked permission.  Fix it by going to iOS Settings -> Monal -> Notifications and select 'Allow Notifications'. ",
+                     @"If Monal can't show notifications, you will not see alerts when a message arrives. This happens if you tapped 'Decline' when Monal first asked permission.  Fix it by going to iOS Settings -> Monal -> Notifications and select 'Allow Notifications'. ",
                      @"If Monal push is off, your device could not talk to push.monal.im. This should also never be off. It requires Apple push service to work first. ",
                      @""];
     

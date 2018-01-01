@@ -200,8 +200,8 @@ NS_ENUM(NSInteger, kSettingSection)
     storeViewController.delegate = self;
     
     NSNumber *identifier = [NSNumber numberWithInteger:iTunesItemIdentifier];
-    
-    NSDictionary *parameters = @{ SKStoreProductParameterITunesItemIdentifier:identifier, @"action":@"write-review"};
+    //, @"action":@"write-review"
+    NSDictionary *parameters = @{ SKStoreProductParameterITunesItemIdentifier:identifier};
     
     [storeViewController loadProductWithParameters:parameters
                                    completionBlock:^(BOOL result, NSError *error) {

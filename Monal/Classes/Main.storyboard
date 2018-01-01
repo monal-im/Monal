@@ -484,6 +484,41 @@
             <point key="canvasLocation" x="162" y="7743"/>
         </scene>
         <!--Navigation Controller-->
+        <scene sceneID="3Wl-U9-M4t">
+            <objects>
+                <navigationController id="zlL-d1-5e0" sceneMemberID="viewController">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="FIw-TB-5op">
+                        <rect key="frame" x="0.0" y="20" width="414" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="VMh-fX-A9o" kind="relationship" relationship="rootViewController" id="pdM-E0-4Bq"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="HjV-AW-e5D" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1080" y="6205"/>
+        </scene>
+        <!--Web View Controller-->
+        <scene sceneID="MYP-ea-aMU">
+            <objects>
+                <viewController id="VMh-fX-A9o" customClass="MLWebViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="4tM-wk-rpv"/>
+                        <viewControllerLayoutGuide type="bottom" id="fJD-9Z-7hH"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="j3K-AL-mmv">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="TgJ-pD-QFd"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="MFP-Bo-fMd" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2151" y="6217"/>
+        </scene>
+        <!--Navigation Controller-->
         <scene sceneID="Xiw-XX-JV9">
             <objects>
                 <navigationController id="0cl-pC-vMK" sceneMemberID="viewController">
@@ -728,6 +763,9 @@
                         <segue destination="19y-iV-lx9" kind="showDetail" identifier="showDisplay" id="YJ5-aM-wEP"/>
                         <segue destination="LqK-MQ-QPf" kind="showDetail" identifier="showCloud" id="WKe-6L-LmV"/>
                         <segue destination="0cl-pC-vMK" kind="showDetail" identifier="showNotification" id="kEu-1H-BUT"/>
+                        <segue destination="zlL-d1-5e0" kind="showDetail" identifier="showBug" id="RUx-Ru-YBK"/>
+                        <segue destination="zlL-d1-5e0" kind="showDetail" identifier="showAbout" id="XYR-kq-hQQ"/>
+                        <segue destination="zlL-d1-5e0" kind="showDetail" identifier="showOpenSource" id="pZO-HH-rUP"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="lLi-28-cfT" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -759,7 +797,7 @@
                         <outlet property="delegate" destination="GaS-pa-U5f" id="jHb-hI-E1M"/>
                         <segue destination="J7g-Ys-82i" kind="relationship" relationship="masterViewController" id="bBL-Ih-zel"/>
                         <segue destination="7Hf-ha-dM2" kind="showDetail" id="BfY-Sx-Y1j"/>
-                        <segue destination="0cl-pC-vMK" kind="relationship" relationship="detailViewController" id="emh-dI-5eJ"/>
+                        <segue destination="zlL-d1-5e0" kind="relationship" relationship="detailViewController" id="ccx-ZQ-rgT"/>
                     </connections>
                 </splitViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="y5b-RO-Lk4" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -1223,6 +1261,6 @@
     <inferredMetricsTieBreakers>
         <segue reference="wmf-tk-2CN"/>
         <segue reference="YJ5-aM-wEP"/>
-        <segue reference="kEu-1H-BUT"/>
+        <segue reference="pZO-HH-rUP"/>
     </inferredMetricsTieBreakers>
 </document>

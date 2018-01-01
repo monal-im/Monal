@@ -133,6 +133,9 @@
 		2613BECF1EA41C8600C9F4C5 /* PushKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2613BECE1EA41C8600C9F4C5 /* PushKit.framework */; };
 		2614B64F1C54095D004FF2FA /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 2614B64E1C54095D004FF2FA /* libz.tbd */; };
 		261528C51869CE5300BF62D6 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 261528C41869CE5300BF62D6 /* AudioToolbox.framework */; };
+		26158AF21FFA6E4500E53BDC /* MLWebViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26158AF11FFA6E4500E53BDC /* MLWebViewController.m */; };
+		26158AF41FFA8A6A00E53BDC /* opensource.html in Resources */ = {isa = PBXBuildFile; fileRef = 26158AF31FFA8A6A00E53BDC /* opensource.html */; };
+		26158AF51FFA8A6A00E53BDC /* opensource.html in Resources */ = {isa = PBXBuildFile; fileRef = 26158AF31FFA8A6A00E53BDC /* opensource.html */; };
 		261894921B40483000C957C3 /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 26470F511835C4080069E3E0 /* Media.xcassets */; };
 		261A6281176C055400059090 /* ContactsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A627F176C055400059090 /* ContactsViewController.m */; };
 		261A6285176C156500059090 /* ActiveChatsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A6284176C156500059090 /* ActiveChatsViewController.m */; };
@@ -304,11 +307,9 @@
 		2696EED21791245A00BC54B8 /* chatViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2696EED11791245A00BC54B8 /* chatViewController.m */; };
 		26A8ADD717C031BA0033990D /* ContactDetails.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EC40FB17BDD8560031304D /* ContactDetails.m */; };
 		26AA41051D9FCBF6005A77ED /* MLImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26AA41041D9FCBF6005A77ED /* MLImageView.m */; };
-		26AAE282179F701A00271345 /* About.html in Resources */ = {isa = PBXBuildFile; fileRef = 26AAE281179F701A00271345 /* About.html */; };
 		26AAE285179F7B0200271345 /* MLSettingCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 26AAE284179F7B0200271345 /* MLSettingCell.m */; };
 		26B2A4BB1B73061400272E63 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 26B2A4BA1B73061400272E63 /* Images.xcassets */; };
 		26B2A4BC1B7306C000272E63 /* sworim.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 2601D9CA0FBF25EF004DB939 /* sworim.sqlite */; };
-		26B2A4BD1B7306C400272E63 /* About.html in Resources */ = {isa = PBXBuildFile; fileRef = 26AAE281179F701A00271345 /* About.html */; };
 		26B2A4BE1B7306E500272E63 /* DataLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 2601D9A70FBF255D004DB939 /* DataLayer.m */; };
 		26B2A4BF1B73070F00272E63 /* NSString+SqlLite.m in Sources */ = {isa = PBXBuildFile; fileRef = 268821F919B9233B00AEA46E /* NSString+SqlLite.m */; };
 		26B2A4CB1B73084800272E63 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26B2A4CA1B73084800272E63 /* AppKit.framework */; };
@@ -475,6 +476,9 @@
 		2613BECE1EA41C8600C9F4C5 /* PushKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PushKit.framework; path = System/Library/Frameworks/PushKit.framework; sourceTree = SDKROOT; };
 		2614B64E1C54095D004FF2FA /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		261528C41869CE5300BF62D6 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
+		26158AF01FFA6E4500E53BDC /* MLWebViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLWebViewController.h; sourceTree = "<group>"; };
+		26158AF11FFA6E4500E53BDC /* MLWebViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLWebViewController.m; sourceTree = "<group>"; };
+		26158AF31FFA8A6A00E53BDC /* opensource.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = opensource.html; sourceTree = "<group>"; };
 		261A627E176C055400059090 /* ContactsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContactsViewController.h; sourceTree = "<group>"; };
 		261A627F176C055400059090 /* ContactsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ContactsViewController.m; sourceTree = "<group>"; };
 		261A6283176C156500059090 /* ActiveChatsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActiveChatsViewController.h; sourceTree = "<group>"; };
@@ -703,7 +707,6 @@
 		2696EED11791245A00BC54B8 /* chatViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = chatViewController.m; sourceTree = "<group>"; };
 		26AA41031D9FCBF6005A77ED /* MLImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLImageView.h; sourceTree = "<group>"; };
 		26AA41041D9FCBF6005A77ED /* MLImageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLImageView.m; sourceTree = "<group>"; };
-		26AAE281179F701A00271345 /* About.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = About.html; sourceTree = "<group>"; };
 		26AAE283179F7B0200271345 /* MLSettingCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLSettingCell.h; sourceTree = "<group>"; };
 		26AAE284179F7B0200271345 /* MLSettingCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLSettingCell.m; sourceTree = "<group>"; };
 		26B2A4BA1B73061400272E63 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
@@ -1214,6 +1217,8 @@
 				26DB52111777C83100B50353 /* Modal views */,
 				26DB52121777EA5100B50353 /* Tab views */,
 				2653EAE51C5B243400ED97F7 /* Main.storyboard */,
+				26158AF01FFA6E4500E53BDC /* MLWebViewController.h */,
+				26158AF11FFA6E4500E53BDC /* MLWebViewController.m */,
 			);
 			name = "View Controllers";
 			path = Classes;
@@ -1714,9 +1719,9 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				26158AF31FFA8A6A00E53BDC /* opensource.html */,
 				2644D48D1FEFAF2E00F46AB5 /* dsa_pub.pem */,
 				26470F511835C4080069E3E0 /* Media.xcassets */,
-				26AAE281179F701A00271345 /* About.html */,
 				2601D9CA0FBF25EF004DB939 /* sworim.sqlite */,
 				26DE9C050FEEFD00000596F6 /* DB definitions */,
 			);
@@ -2116,10 +2121,10 @@
 				26761BF71804FBB700D94714 /* RoomListViewController.xib in Resources */,
 				26B2A4BB1B73061400272E63 /* Images.xcassets in Resources */,
 				2653EAE61C5B243400ED97F7 /* Main.storyboard in Resources */,
+				26158AF41FFA8A6A00E53BDC /* opensource.html in Resources */,
 				262E51981AD8CB7200788351 /* MLTextInputCell.xib in Resources */,
 				2649CE531C51B84C00CD1E80 /* Launch Screen.storyboard in Resources */,
 				26F9794D1ACAC73A0008E005 /* MLContactCell.xib in Resources */,
-				26AAE282179F701A00271345 /* About.html in Resources */,
 				26B51C4A18654D98002134C3 /* LogViewController.xib in Resources */,
 				26BDECDD1867B7790018670D /* CallViewController.xib in Resources */,
 				26EC411017BDD98E0031304D /* GroupChatViewController.xib in Resources */,
@@ -2137,9 +2142,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				26158AF51FFA8A6A00E53BDC /* opensource.html in Resources */,
 				2644D48E1FEFAF2F00F46AB5 /* dsa_pub.pem in Resources */,
 				26329D321B7999AD0061EA36 /* Images-OSX.xcassets in Resources */,
-				26B2A4BD1B7306C400272E63 /* About.html in Resources */,
 				267710241E21923600464002 /* MASPreferencesWindow.xib in Resources */,
 				26B2A4BC1B7306C000272E63 /* sworim.sqlite in Resources */,
 				261894921B40483000C957C3 /* Media.xcassets in Resources */,
@@ -2551,6 +2556,7 @@
 				1D3623260D0F684500981E51 /* MonalAppDelegate.m in Sources */,
 				2601D9B00FBF255D004DB939 /* DataLayer.m in Sources */,
 				26277888110179D100023C8A /* tools.m in Sources */,
+				26158AF21FFA6E4500E53BDC /* MLWebViewController.m in Sources */,
 				26F7BB431115F8DB00712672 /* Reachability.m in Sources */,
 				26D51CD61E2674D700141E04 /* NXOAuth2Client.m in Sources */,
 				26B51C4918654D98002134C3 /* LogViewController.m in Sources */,

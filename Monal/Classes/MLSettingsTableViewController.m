@@ -7,6 +7,7 @@
 //
 
 #import "MLSettingsTableViewController.h"
+#import "MLWebViewController.h"
 
 
 NS_ENUM(NSInteger, kSettingSection)
@@ -158,7 +159,7 @@ NS_ENUM(NSInteger, kSettingSection)
                     break;
                     
                 case 1:
-                    //submit bug
+                    [self performSegueWithIdentifier:@"showBug" sender:self];
                     break;
                 default:
                     break;
@@ -249,6 +250,32 @@ NS_ENUM(NSInteger, kSettingSection)
     [viewController dismissViewControllerAnimated:YES completion:nil];
 }
 
+
+-(void)  prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+{
+    if([segue.identifier isEqualToString:@"showBug"])
+    {
+        UINavigationController *nav = (UINavigationController *)  segue.destinationViewController;
+        MLWebViewController *web = (MLWebViewController *) nav.topViewController;
+        web.urltoLoad=[NSURL URLWithString:@"https://github.com/anurodhp/Monal/issues"];
+    }
+    else if([segue.identifier isEqualToString:@"showOpenSource"])
+    {
+        UINavigationController *nav = (UINavigationController *)  segue.destinationViewController;
+        MLWebViewController *web = (MLWebViewController *) nav.topViewController;
+        
+        NSBundle *mainBundle = [NSBundle mainBundle];
+        NSString *myFile = [mainBundle pathForResource: @"opensource" ofType: @"html"];
+    
+        web.urltoLoad=[NSURL fileURLWithPath:myFile];
+    }
+    else if([segue.identifier isEqualToString:@"showAbout"])
+    {
+        UINavigationController *nav = (UINavigationController *)  segue.destinationViewController;
+        MLWebViewController *web = (MLWebViewController *) nav.topViewController;
+        web.urltoLoad=[NSURL URLWithString:@"https://monal.im/about/"];
+    }
+}
 
 
 @end

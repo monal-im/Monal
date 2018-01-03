@@ -54,7 +54,7 @@ NSString *const kGtalk = @"Gtalk";
 {
     [super viewDidLoad];
     
-    [self.tableView registerNib:[UINib nibWithNibName:@"MLAccountCell"
+    [self.tableView registerNib:[UINib nibWithNibName:@"MLSwitchCell"
                                                bundle:[NSBundle mainBundle]]
          forCellReuseIdentifier:@"AccountCell"];
     

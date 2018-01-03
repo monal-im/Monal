@@ -1508,26 +1508,21 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                     
                                     if(iqNode.user && iqNode.resource) {
                                         
-                                        dispatch_async(dispatch_get_main_queue(), ^{
-    #if TARGET_OS_IPHONE
-                                            NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"Incoming Call From %@?", nil), iqNode.from ];
-                                            RIButtonItem* cancelButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Decline", nil) action:^{
-                                                XMPPIQ* node =[self.jingle rejectJingleTo:iqNode.user withId:iqNode.idval andResource:iqNode.resource];
-                                                [self send:node];
-                                                self.jingle=nil;
-                                            }];
-                                            
-                                            RIButtonItem* yesButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Accept Call", nil) action:^{
-                                                
-                                                XMPPIQ* node =[self.jingle acceptJingleTo:iqNode.user withId:iqNode.idval andResource:iqNode.resource];
-                                                [self send:node];
-                                            }];
-                                            
-                                            UIAlertView* alert =[[UIAlertView alloc] initWithTitle:@"Audio Call" message:messageString cancelButtonItem:cancelButton otherButtonItems:yesButton, nil];
-                                            [alert show];
-    #else
-    #endif
-                                        } );
+                                        NSDictionary *dic= @{@"from":iqNode.from,
+                                                             @"user":iqNode.user,
+                                                             @"resource":iqNode.resource,
+                                                             @"id": iqNode.idval
+                                                             };
+                                        
+                                        [[NSNotificationCenter defaultCenter]
+                                         postNotificationName: kMonalCallRequestNotice object: dic];
+                                     
+                                        //                                            XMPPIQ* node =[self.jingle acceptJingleTo:iqNode.user withId:iqNode.idval andResource:iqNode.resource];
+                                        //                                            [self send:node];
+                                        //
+                                        //                                            XMPPIQ* node =[self.jingle acceptJingleTo:iqNode.user withId:iqNode.idval andResource:iqNode.resource];
+                                        //                                            [self send:node];
+                                        
                                         
                                         
                                     }

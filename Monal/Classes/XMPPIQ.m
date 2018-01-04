@@ -304,10 +304,15 @@
     name.element=@"name";
     name.data=@"Monal";
     
-
+ #if TARGET_OS_IPHONE
     MLXMLNode* os =[[MLXMLNode alloc] init];
     os.element=@"os";
-    os.data=@"iOS";
+    os.data=@"iOS"
+#else
+    MLXMLNode* os =[[MLXMLNode alloc] init];
+    os.element=@"os";
+    os.data=@"macOS";
+#endif
     
     MLXMLNode* appVersion =[[MLXMLNode alloc] init];
     appVersion.element=@"version";

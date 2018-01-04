@@ -52,7 +52,10 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
      [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshDisplay) name:kMonalRefreshContacts object:nil];
     
      [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(addOnlineUser:) name: kMonalContactOnlineNotice object:nil];
-       [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(removeOnlineUser:) name: kMonalContactOfflineNotice object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(removeOnlineUser:) name: kMonalContactOfflineNotice object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showCallRequest:) name:kMonalCallRequestNotice object:nil];
+    
     
     self.contacts=[[NSMutableArray alloc] init] ;
     self.offlineContacts=[[NSMutableArray alloc] init] ;
@@ -744,6 +747,30 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
     }];
     
 }
+
+-(void) showCallRequest:(NSNotification *) notification
+{
+    NSString *contactName=@"test";
+    NSAlert *userAddAlert = [[NSAlert alloc] init];
+    userAddAlert.messageText =[NSString stringWithFormat:@"Incoming call from : %@ ", contactName];
+    userAddAlert.alertStyle=NSInformationalAlertStyle;
+    [userAddAlert addButtonWithTitle:@"Decline"];
+    [userAddAlert addButtonWithTitle:@"Accept"];
+  
+    
+    [userAddAlert beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse returnCode) {
+        
+        BOOL allowed=NO;
+        
+        if(returnCode ==1002) {
+            allowed=YES;
+        }
+        
+      
+    }];
+    
+}
+
 
 
 #pragma mark - notification handling

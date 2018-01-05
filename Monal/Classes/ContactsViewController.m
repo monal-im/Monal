@@ -83,6 +83,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(addOnlineUser:) name: kMonalContactOnlineNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(removeOnlineUser:) name: kMonalContactOfflineNotice object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showCallRequest:) name:kMonalCallRequestNotice object:nil];
     
     [[MLXMPPManager sharedInstance] handleNewMessage:nil];
     
@@ -399,6 +400,35 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                        [_contactsTable endUpdates];
                        
                    });
+    
+}
+
+
+#pragma mark - jingle
+
+-(void) showCallRequest:(NSNotification *) notification
+{
+    NSDictionary *dic = notification.object;
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSString *contactName=[dic objectForKey:@"user"];
+        NSString *userName=[dic objectForKey:kAccountName];
+        
+        
+        UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:@"Incoming Call" message:[NSString stringWithFormat:@"Incoming audio call to %@ from %@ ",userName,  contactName] preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertAction *acceptAction =[UIAlertAction actionWithTitle:@"Accept" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+             [[MLXMPPManager sharedInstance] handleCall:dic withResponse:YES];
+        }];
+        
+        UIAlertAction *closeAction =[UIAlertAction actionWithTitle:@"DEcline" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+             [[MLXMPPManager sharedInstance] handleCall:dic withResponse:NO];
+        }];
+        [messageAlert addAction:closeAction];
+        [messageAlert addAction:acceptAction];
+        
+        [self.tabBarController presentViewController:messageAlert animated:YES completion:nil];
+        
+    });
     
 }
 

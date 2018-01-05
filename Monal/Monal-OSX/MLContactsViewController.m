@@ -750,25 +750,27 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 
 -(void) showCallRequest:(NSNotification *) notification
 {
-    NSString *contactName=@"test";
-    NSAlert *userAddAlert = [[NSAlert alloc] init];
-    userAddAlert.messageText =[NSString stringWithFormat:@"Incoming call from : %@ ", contactName];
-    userAddAlert.alertStyle=NSInformationalAlertStyle;
-    [userAddAlert addButtonWithTitle:@"Decline"];
-    [userAddAlert addButtonWithTitle:@"Accept"];
-  
-    
-    [userAddAlert beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse returnCode) {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSString *contactName=@"test";
+        NSAlert *userAddAlert = [[NSAlert alloc] init];
+        userAddAlert.messageText =[NSString stringWithFormat:@"Incoming call from : %@ ", contactName];
+        userAddAlert.alertStyle=NSInformationalAlertStyle;
+        [userAddAlert addButtonWithTitle:@"Decline"];
+        [userAddAlert addButtonWithTitle:@"Accept"];
         
-        BOOL allowed=NO;
         
-        if(returnCode ==1002) {
-            allowed=YES;
-        }
-        
-      
-    }];
-    
+        [userAddAlert beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse returnCode) {
+            
+            BOOL allowed=NO;
+            
+            if(returnCode ==1002) {
+                allowed=YES;
+            }
+            
+            
+        }];
+    });
+
 }
 
 

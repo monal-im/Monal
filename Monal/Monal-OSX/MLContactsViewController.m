@@ -768,7 +768,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
             
             BOOL allowed=NO;
             
-            if(returnCode ==1002) {
+            if(returnCode ==1001) {
                 allowed=YES;
             }
             

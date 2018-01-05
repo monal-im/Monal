@@ -2891,14 +2891,17 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void)acceptCall:(NSDictionary*) userInfo
 {
-    XMPPIQ* node =[self.jingle acceptJingleTo:[userInfo objectForKey:@"from"] withId:[userInfo objectForKey:@"id"]  andResource:[userInfo objectForKey:@"resource"]];
+    XMPPIQ* node =[self.jingle acceptJingleTo:[userInfo objectForKey:@"user"] withId:[[NSUUID UUID] UUIDString]  andResource:[userInfo objectForKey:@"resource"]];
     [self send:node];
 }
 
 
 -(void)declineCall:(NSDictionary*) userInfo
 {
-    
+    XMPPIQ* jingleiq =[self.jingle rejectJingleTo:[userInfo objectForKey:@"user"] withId:[[NSUUID UUID] UUIDString] andResource:[userInfo objectForKey:@"resource"]];
+    [self send:jingleiq];
+    [self.jingle rtpDisconnect];
+    self.jingle=nil;
 }
 
 

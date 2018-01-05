@@ -883,9 +883,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     NSString* __block stanzaType=nil;
     
     DDLogVerbose(@"maxPos %ld", _inputBuffer.length );
-    
-//    _inputBuffer =@"<message type='chat' to='monal1@jabb3r.org/Monal-OSX' from='monal1@jabb3r.org'>    <received    xmlns='urn:xmpp:carbons:2'>    <forwarded    xmlns='urn:xmpp:forward:0'>    <message type='chat' to='monal1@jabb3r.org' from='monal2@jabb3r.org/85195442-320b-4c04-a7bf-f9d7baf1bcfd' id='purpleaa28fb27'    xmlns='jabber:client'>    <active    xmlns='http://jabber.org/protocol/chatstates'/>    </message>    </forwarded>    </received>    <delay from='monal1@jabb3r.org' stamp='2018-01-04T20:34:42Z'    xmlns='urn:xmpp:delay'/>    <delay from='jabb3r.org' stamp='2018-01-04T20:46:18Z'    xmlns='urn:xmpp:delay'/>    <delay from='jabb3r.org' stamp='2018-01-04T21:09:12Z'    xmlns='urn:xmpp:delay'/>    <delay    xmlns='urn:xmpp:delay' stamp='2018-01-04T21:22:16Z' from='jabb3r.org'/>    </message>";
-    
+     
     if(_inputBuffer.length<2)
     {
         return nil;
@@ -972,7 +970,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         
                         //look for next message close
                         NSRange forwardClosePos=[_inputBuffer rangeOfString:@"</forwarded"
-                                                                    options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, _inputBuffer.length-pos.location)];
+                                                                    options:NSCaseInsensitiveSearch range:NSMakeRange(forwardPos.location, _inputBuffer.length-forwardPos.location)];
                         
                         if(forwardClosePos.location!=NSNotFound) {
                             NSRange messageClose =[_inputBuffer rangeOfString:[NSString stringWithFormat:@"</%@",stanzaType]

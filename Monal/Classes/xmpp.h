@@ -203,7 +203,13 @@ Hangs up current call with contact
 /**
 Decline a call request
  */
--(void)decline:(NSDictionary*) contact;
+-(void)declineCall:(NSDictionary*) contact;
+
+/**
+ accept call request
+ */
+-(void)acceptCall:(NSDictionary*) contact;
+
 
 /*
  notifies the server client is in foreground

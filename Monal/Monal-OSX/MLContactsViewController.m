@@ -748,12 +748,17 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
     
 }
 
+#pragma mark - jingle
+
 -(void) showCallRequest:(NSNotification *) notification
 {
+    NSDictionary *dic = notification.object;
+    
     dispatch_async(dispatch_get_main_queue(), ^{
-        NSString *contactName=@"test";
+        NSString *contactName=[dic objectForKey:@"user"];
+        NSString *userName=[dic objectForKey:kAccountName];
         NSAlert *userAddAlert = [[NSAlert alloc] init];
-        userAddAlert.messageText =[NSString stringWithFormat:@"Incoming call from : %@ ", contactName];
+        userAddAlert.messageText =[NSString stringWithFormat:@"Incoming audio call to %@ from %@ ",userName,  contactName];
         userAddAlert.alertStyle=NSInformationalAlertStyle;
         [userAddAlert addButtonWithTitle:@"Decline"];
         [userAddAlert addButtonWithTitle:@"Accept"];
@@ -766,6 +771,8 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
             if(returnCode ==1002) {
                 allowed=YES;
             }
+            
+            [[MLXMPPManager sharedInstance] handleCall:dic withResponse:allowed];
             
             
         }];

@@ -138,6 +138,12 @@ Returns the server set name of the conencted account
  */
 -(void) hangupContact:(NSDictionary*) contact;
 
+
+/**
+ respond to call with either accept or not. Passes back the notifiaction dictionary
+ */
+-(void) handleCall:(NSDictionary *) userDic withResponse:(BOOL) accept; 
+
 /**
 Sends a message to a specified contact in account. Calls completion handler on success or failure.
  */

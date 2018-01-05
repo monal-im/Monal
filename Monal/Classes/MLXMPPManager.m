@@ -650,15 +650,29 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 #pragma mark - Jingle VOIP
 -(void) callContact:(NSDictionary*) contact
 {
-    xmpp* account =[self getConnectedAccountForID:[NSString stringWithFormat:@"%@",[contact objectForKey:@"account_id"]]];
+    xmpp* account =[self getConnectedAccountForID:[NSString stringWithFormat:@"%@",[contact objectForKey:kAccountID]]];
     [account call:contact];
 }
 
 
 -(void) hangupContact:(NSDictionary*) contact
 {
-    xmpp* account =[self getConnectedAccountForID:[NSString stringWithFormat:@"%@",[contact objectForKey:@"account_id"]]];
+    xmpp* account =[self getConnectedAccountForID:[NSString stringWithFormat:@"%@",[contact objectForKey:kAccountID]]];
     [account hangup:contact];
+}
+
+-(void) handleCall:(NSDictionary *) userDic withResponse:(BOOL) accept
+{
+    //find account
+     xmpp* account =[self getConnectedAccountForID:[NSString stringWithFormat:@"%@",[userDic objectForKey:kAccountID]]];
+    
+    if(accept) {
+        [account acceptCall:userDic];
+    }
+    else  {
+         [account declineCall:userDic];
+    }
+    
 }
 
 

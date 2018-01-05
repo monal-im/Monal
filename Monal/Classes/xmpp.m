@@ -1425,7 +1425,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             
                             NSDictionary* userDic=@{@"buddy_name":from,
                                                     @"full_name":fullName,
-                                                    @"account_id":_accountNo
+                                                    kAccountID:_accountNo
                                                     };
                             
                             [[NSNotificationCenter defaultCenter]
@@ -1522,24 +1522,18 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                     self.jingle.recipientIP=[transport1 objectForKey:@"ip"];
                                     
                                     
-                                    if(iqNode.user && iqNode.resource) {
+                                    if(iqNode.user && iqNode.resource && self.fulluser) {
                                         
                                         NSDictionary *dic= @{@"from":iqNode.from,
                                                              @"user":iqNode.user,
                                                              @"resource":iqNode.resource,
-                                                             @"id": iqNode.idval
+                                                             @"id": iqNode.idval,
+                                                             kAccountID:_accountNo,
+                                                             kAccountName: self.fulluser
                                                              };
                                         
                                         [[NSNotificationCenter defaultCenter]
                                          postNotificationName: kMonalCallRequestNotice object: dic];
-                                        
-                                        //                                            XMPPIQ* node =[self.jingle acceptJingleTo:iqNode.user withId:iqNode.idval andResource:iqNode.resource];
-                                        //                                            [self send:node];
-                                        //
-                                        //                                            XMPPIQ* node =[self.jingle acceptJingleTo:iqNode.user withId:iqNode.idval andResource:iqNode.resource];
-                                        //                                            [self send:node];
-                                        
-                                        
                                         
                                     }
                                 }
@@ -2894,6 +2888,19 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self.jingle rtpDisconnect];
     self.jingle=nil;
 }
+
+-(void)acceptCall:(NSDictionary*) userInfo
+{
+    XMPPIQ* node =[self.jingle acceptJingleTo:[userInfo objectForKey:@"from"] withId:[userInfo objectForKey:@"id"]  andResource:[userInfo objectForKey:@"resource"]];
+    [self send:node];
+}
+
+
+-(void)declineCall:(NSDictionary*) userInfo
+{
+    
+}
+
 
 
 #pragma mark nsstream delegate

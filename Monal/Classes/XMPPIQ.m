@@ -145,10 +145,8 @@
         [queryNode. attributes setObject:node forKey:@"node"];
     }
     
-   NSArray* features=@[@"http://jabber.org/protocol/caps",@"http://jabber.org/protocol/disco#info", @"http://jabber.org/protocol/disco#items",@"http://jabber.org/protocol/muc#user"
+   NSArray* features=@[@"http://jabber.org/protocol/caps",@"http://jabber.org/protocol/disco#info", @"http://jabber.org/protocol/disco#items",@"http://jabber.org/protocol/muc#user", @"urn:xmpp:jingle:1", @"urn:xmpp:jingle:apps:rtp:1", @"urn:xmpp:jingle:apps:rtp:audio",@"urn:xmpp:jingle:transports:raw-udp:0",@"jabber:iq:version",
                        ];
-//    ,@"jabber:iq:version", ,@"urn:xmpp:jingle:1",@"urn:xmpp:jingle:transports:raw-udp:0",
-//                       @"urn:xmpp:jingle:transports:raw-udp:1",@"urn:xmpp:jingle:apps:rtp:1",@"urn:xmpp:jingle:apps:rtp:audio"];
     
     for(NSString* feature in features)
     {

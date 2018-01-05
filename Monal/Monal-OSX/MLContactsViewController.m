@@ -937,9 +937,13 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                     NSString *section = (NSString *) item;
                     if([section isEqualToString:@"Online"])
                     {
-                        return self.contacts[index];
+                        if(index<self.contacts.count) {
+                            return self.contacts[index];
+                        }else return @"";
                     } else  {
-                        return self.offlineContacts[index];
+                        if(index<self.offlineContacts.count) {
+                            return self.offlineContacts[index];
+                        } else return @"";
                     }
                 }  else  {
                     return 0;

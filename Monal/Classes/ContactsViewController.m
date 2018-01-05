@@ -420,7 +420,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
              [[MLXMPPManager sharedInstance] handleCall:dic withResponse:YES];
         }];
         
-        UIAlertAction *closeAction =[UIAlertAction actionWithTitle:@"DEcline" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+        UIAlertAction *closeAction =[UIAlertAction actionWithTitle:@"Decline" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
              [[MLXMPPManager sharedInstance] handleCall:dic withResponse:NO];
         }];
         [messageAlert addAction:closeAction];

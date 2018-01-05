@@ -71,7 +71,7 @@ static const int ddLogLevel = LOG_LEVEL_WARN;
     
     XMPPIQ* node =[[XMPPIQ alloc] initWithId:iqid andType:kiqSetType];
     [node setJingleAcceptTo:to andResource:resource withValues:info];
-    
+    self.idval= iqid; 
     
     return node;
 }

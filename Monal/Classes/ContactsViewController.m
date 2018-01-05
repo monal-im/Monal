@@ -87,12 +87,27 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     [[MLXMPPManager sharedInstance] handleNewMessage:nil];
     
+  
+    
 }
 
 -(void) viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
 
+    [[AVAudioSession sharedInstance] requestRecordPermission:^(BOOL granted) {
+        if(!granted)
+        {
+            UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:@"Please Allow Audio Access" message:@"If you want to use VOIP you will need to allow access in Settings->Privacy->Microphone." preferredStyle:UIAlertControllerStyleAlert];
+          
+            UIAlertAction *closeAction =[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+               
+            }];
+            
+            [messageAlert addAction:closeAction];
+            [self presentViewController:messageAlert animated:YES completion:nil];
+        }
+    }];
 }
 
 

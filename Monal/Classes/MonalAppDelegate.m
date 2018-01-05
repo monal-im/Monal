@@ -246,6 +246,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     if([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground) {
        // if we are launched in the background, it was from a push. dont do this again.
         [self voipRegistration];
+ 
     }
     else  {
         [MLXMPPManager sharedInstance].pushNode = [[NSUserDefaults standardUserDefaults] objectForKey:@"pushNode"];

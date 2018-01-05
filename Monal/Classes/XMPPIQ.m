@@ -27,6 +27,38 @@
     return [self initWithId:[[NSUUID UUID] UUIDString] andType:iqType];
 }
 
++ (NSArray *) features {
+    static NSArray* featuresArray;
+     static dispatch_once_t onceToken;
+     dispatch_once(&onceToken, ^{
+    featuresArray=@[@"http://jabber.org/protocol/caps",
+                        @"http://jabber.org/protocol/disco#info",
+                        @"http://jabber.org/protocol/disco#items",
+                        @"http://jabber.org/protocol/muc",
+                        @"urn:xmpp:jingle:1",
+                        @"urn:xmpp:jingle:apps:rtp:1",
+                        @"urn:xmpp:jingle:apps:rtp:audio",
+                        @"urn:xmpp:jingle:transports:raw-udp:0",
+                        @"urn:xmpp:jingle:transports:raw-udp:1"
+                        ];
+     });
+    
+    return featuresArray;
+}
+
++(NSString *) featuresString
+{
+    NSMutableString *toreturn = [[NSMutableString alloc] init];
+    
+    for(NSString* feature in [XMPPIQ features])
+    {
+        [toreturn appendString:feature];
+        [toreturn appendString:@"<"];
+    }
+    return toreturn;
+}
+
+
 #pragma mark iq set
 
 -(void) setPushEnableWithNode:(NSString *)node andSecret:(NSString *)secret
@@ -145,10 +177,8 @@
         [queryNode. attributes setObject:node forKey:@"node"];
     }
     
-   NSArray* features=@[@"http://jabber.org/protocol/caps",@"http://jabber.org/protocol/disco#info", @"http://jabber.org/protocol/disco#items",@"http://jabber.org/protocol/muc#user", @"urn:xmpp:jingle:1", @"urn:xmpp:jingle:apps:rtp:1", @"urn:xmpp:jingle:apps:rtp:audio",@"urn:xmpp:jingle:transports:raw-udp:0",@"jabber:iq:version",
-                       ];
-    
-    for(NSString* feature in features)
+
+    for(NSString* feature in [XMPPIQ features])
     {
     
     MLXMLNode* featureNode =[[MLXMLNode alloc] init];

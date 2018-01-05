@@ -128,6 +128,9 @@ removes a contact from the roster
  */
 -(void) setJingleTerminateTo:(NSString*) jid andResource:(NSString*) resource withValues:(NSDictionary*) info;
 
-
+/**
+ features string for hashing
+ */
++(NSString *) featuresString;
 
 @end

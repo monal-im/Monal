@@ -883,7 +883,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     NSString* __block stanzaType=nil;
     
     DDLogVerbose(@"maxPos %ld", _inputBuffer.length );
-     
+    
     if(_inputBuffer.length<2)
     {
         return nil;
@@ -1237,12 +1237,17 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         }
                     }
                     
-                    if((iqNode.discoInfo) && [iqNode.type isEqualToString:kiqGetType])
+                    if([iqNode.type isEqualToString:kiqGetType])
                     {
-                        XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
-                        [discoInfo setiqTo:iqNode.from];
-                        [discoInfo setDiscoInfoWithFeaturesAndNode:iqNode.queryNode];
-                        [self send:discoInfo];
+                        if((iqNode.discoInfo))
+                        {
+                            XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
+                            [discoInfo setiqTo:iqNode.from];
+                            [discoInfo setDiscoInfoWithFeaturesAndNode:iqNode.queryNode];
+                            [self send:discoInfo];
+                            
+                        }
+                        
                         
                     }
                     
@@ -2667,9 +2672,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(NSString*)getVersionString
 {
     // We may need this later
-    NSString* unhashed=[NSString stringWithFormat:@"client/pc//Monal %@<http://jabber.org/protocol/disco#info <http://jabber.org/protocol/disco#items<http://jabber.org/protocol/muc#user<jabber:iq:version<urn:xmpp:jingle:1<urn:xmpp:jingle:apps:rtp:1<urn:xmpp:jingle:apps:rtp:audio<urn:xmpp:jingle:transports:raw-udp:0<urn:xmpp:jingle:transports:raw-udp:1<", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]];
+    NSString* unhashed=[NSString stringWithFormat:@"client/phone//Monal %@<%@", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"], [XMPPIQ featuresString]];
     
-    //NSString* unhashed=[NSString stringWithFormat:@"client/phone//Monal %@<http://jabber.org/protocol/caps<http://jabber.org/protocol/disco#info<http://jabber.org/protocol/disco#items<http://jabber.org/protocol/muc<", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]];
+//    unhashed=[NSString stringWithFormat:@"client/pc//Exodus 0.9.2<http://jabber.org/protocol/caps<http://jabber.org/protocol/disco#info<http://jabber.org/protocol/disco#items<http://jabber.org/protocol/muc<"];
+
+    
     NSData* hashed;
     //<http://jabber.org/protocol/offline<
     unsigned char digest[CC_SHA1_DIGEST_LENGTH];

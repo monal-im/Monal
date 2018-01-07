@@ -8,11 +8,11 @@
 
 #import <UIKit/UIKit.h>
 
-@interface ChatLogsViewController : UIViewController <UITableViewDataSource, UITableViewDelegate>
+@interface ChatLogsViewController : UITableViewController
 {
     NSArray* _tableData;
 }
 
-@property (nonatomic, strong) UITableView* chatLogTable;
+@property (nonatomic, weak) UITableView* chatLogTable;
 
 @end

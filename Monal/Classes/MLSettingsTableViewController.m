@@ -35,7 +35,7 @@ NS_ENUM(NSInteger, kSettingSection)
     
     self.sections =@[@"App", @"Support", @"About"];
     
-    self.appRows=@[@"Accounts", @"Notifications", @"Display"];  //@"Cloud Storage"
+    self.appRows=@[@"Accounts", @"Notifications", @"Display", @"Chat Logs"];  //@"Cloud Storage"
     self.supportRows=@[@"Email Support", @"Submit A Bug"];
     self.aboutRows=@[@"Rate Monal", @"Open Source", @"About", @"Version"];
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
@@ -143,8 +143,14 @@ NS_ENUM(NSInteger, kSettingSection)
                     break;
                     
                 case 3:
+                    [self performSegueWithIdentifier:@"showChatLog" sender:self];
+                    break;
+                    
+                case 4:
                     [self performSegueWithIdentifier:@"showCloud" sender:self];
                     break;
+                    
+              
                     
                 default:
                     break;

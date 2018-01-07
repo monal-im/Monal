@@ -30,14 +30,8 @@
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     self.navigationItem.title=NSLocalizedString(@"Accounts With Logs",@"");
-    self.view.backgroundColor=[UIColor lightGrayColor];
-    self.view.autoresizingMask=UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
+    _chatLogTable=self.tableView;
     
-    _chatLogTable=[[UITableView alloc] init];
-    _chatLogTable.delegate=self;
-    _chatLogTable.dataSource=self;
-    
-    self.view=_chatLogTable;
 }
 
 - (void)didReceiveMemoryWarning

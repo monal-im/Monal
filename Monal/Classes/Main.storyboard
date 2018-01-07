@@ -483,10 +483,10 @@
             </objects>
             <point key="canvasLocation" x="162" y="7743"/>
         </scene>
-        <!--Root View Controller-->
+        <!--Chat Log-->
         <scene sceneID="qyy-8k-kaT">
             <objects>
-                <tableViewController id="3gZ-1D-g86" customClass="ChatLogsViewController" sceneMemberID="viewController">
+                <tableViewController title="Chat Log" id="3gZ-1D-g86" customClass="ChatLogsViewController" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="vjI-Ic-XHs">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -506,11 +506,42 @@
                             <outlet property="delegate" destination="3gZ-1D-g86" id="4e9-dr-OIX"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="Root View Controller" id="wlb-8I-yzZ"/>
+                    <navigationItem key="navigationItem" title="Accounts With Logs" id="wlb-8I-yzZ"/>
+                    <connections>
+                        <segue destination="sNd-8G-kdU" kind="show" identifier="showAccountLog" id="62d-tw-yHs"/>
+                    </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="BFx-jH-BRp" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="228" y="8535"/>
+        </scene>
+        <!--Chat Log Account Detail View Controller-->
+        <scene sceneID="4eu-zR-dPg">
+            <objects>
+                <tableViewController id="sNd-8G-kdU" customClass="ChatLogAccountDetailViewController" sceneMemberID="viewController">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="lhd-NJ-1Lk">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <prototypes>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="FV1-qB-0H4">
+                                <rect key="frame" x="0.0" y="28" width="414" height="44"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="FV1-qB-0H4" id="XUD-Dv-yet">
+                                    <rect key="frame" x="0.0" y="0.0" width="414" height="43.666666666666664"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </tableViewCellContentView>
+                            </tableViewCell>
+                        </prototypes>
+                        <connections>
+                            <outlet property="dataSource" destination="sNd-8G-kdU" id="5hV-Tj-uP4"/>
+                            <outlet property="delegate" destination="sNd-8G-kdU" id="iYi-74-9Zj"/>
+                        </connections>
+                    </tableView>
+                </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="iR1-Uo-7Vf" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1142" y="8524"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="urU-pt-wbn">

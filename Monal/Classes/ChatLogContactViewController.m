@@ -9,6 +9,10 @@
 #import "ChatLogContactViewController.h"
 #import "chatViewController.h"
 
+@interface ChatLogContactViewController()
+@property (nonatomic,strong) NSMutableDictionary *contactToPass;
+
+@end
 
 @implementation ChatLogContactViewController
 
@@ -42,6 +46,10 @@
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
+ 
+    self.contactToPass = [[NSMutableDictionary alloc] initWithDictionary:_contact];
+    [self.contactToPass setObject:_accountId forKey:@"account_id"];
+    
     _tableData =[[DataLayer sharedInstance] messageHistoryListDates:[_contact objectForKey:@"message_from"] forAccount:_accountId];
     [self.tableView reloadData];
 }
@@ -77,13 +85,20 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath;
 {
     NSString* theDay = [[_tableData objectAtIndex:indexPath.row] objectForKey:@"the_date"];
+
+    [self performSegueWithIdentifier:@"showDayHistory" sender:theDay];
     
-    NSMutableDictionary* contactToPass = [[NSMutableDictionary alloc] initWithDictionary:_contact];
-    [contactToPass setObject:_accountId forKey:@"account_id"];
-    
-    chatViewController* vc = [[chatViewController alloc] initWithContact:contactToPass andDay:theDay];
-    [self.navigationController pushViewController:vc animated:YES];
-    
+}
+
+
+-(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+{
+    if([segue.identifier isEqualToString:@"showDayHistory"])
+    {
+        chatViewController *chat = segue.destinationViewController;
+        chat.day=(NSString *)sender;
+        [chat setupWithContact:self.contactToPass];
+    }
 }
 
 @end

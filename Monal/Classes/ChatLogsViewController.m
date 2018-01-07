@@ -80,13 +80,25 @@
 #pragma mark tableview delegate
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath;
 {
-    NSString* accountName= [NSString stringWithFormat:@"%@@%@", [[_tableData objectAtIndex:indexPath.row] objectForKey:@"username"],
-                            [[_tableData objectAtIndex:indexPath.row] objectForKey:@"domain"]];;
-    NSString* accountId= [NSString stringWithFormat:@"%@", [[_tableData objectAtIndex:indexPath.row] objectForKey:@"account_id"]];
-    
-    ChatLogAccountDetailViewController* vc = [[ChatLogAccountDetailViewController alloc] initWithAccountId:accountId andName:accountName];
-    [self.navigationController pushViewController:vc animated:YES];
-    
+       [self performSegueWithIdentifier:@"showAccountLog" sender:[_tableData objectAtIndex:indexPath.row] ];
+}
+
+
+-(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+{
+    if([segue.identifier isEqualToString:@"showAccountLog"])
+    {
+        ChatLogAccountDetailViewController *chat = segue.destinationViewController;
+        NSDictionary *dic = (NSDictionary *) sender;
+        
+        NSString* accountName= [NSString stringWithFormat:@"%@@%@", [dic objectForKey:@"username"],
+                                [dic objectForKey:@"domain"]];;
+        NSString* accountId= [NSString stringWithFormat:@"%@", [dic objectForKey:@"account_id"]];
+        
+        chat.accountId=accountId;
+        chat.accountName=accountName;
+        
+    }
 }
 
 

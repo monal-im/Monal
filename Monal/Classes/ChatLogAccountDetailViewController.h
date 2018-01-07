@@ -11,15 +11,11 @@
 #import "ChatLogContactViewController.h"
 
 @interface ChatLogAccountDetailViewController : UITableViewController
-{
-    NSString* _accountId;
-    NSString* _accountName;
-    NSArray* _tableData;
-}
 
-/**
- Initilizes with Account name and id
- */
--(id) initWithAccountId:(NSString*) accountId andName:(NSString*) accountName;
+@property (nonatomic, strong) NSString* accountId;
+@property (nonatomic, strong) NSString* accountName;
+@property (nonatomic, strong) NSArray* tableData;
+
+
 
 @end

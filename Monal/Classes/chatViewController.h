@@ -32,7 +32,7 @@
     NSDictionary* _contact;
 
     BOOL  _isMUC;
-    NSString* _day;
+
     BOOL _keyboardVisible; 
 }
 
@@ -43,6 +43,7 @@
 @property (nonatomic, weak) IBOutlet NSLayoutConstraint* inputContainerHeight;
 @property (nonatomic, weak) IBOutlet NSLayoutConstraint* inputContainerBottom;
 
+@property (nonatomic, strong) NSString* day;
 @property (nonatomic,strong)  NSString* contactName;
 
 
@@ -52,11 +53,6 @@
 -(IBAction)dismissKeyboard:(id)sender;
 
 -(void) setupWithContact:(NSDictionary*) contact  ;
-
-/**
- if day is specified this is a log
- */
--(id) initWithContact:(NSDictionary*) contact  andDay:(NSString* )day;
 
 /**
  Receives the new message notice and will update if it is this user. 

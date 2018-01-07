@@ -81,18 +81,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     
 }
 
--(id) initWithContact:(NSDictionary*) contact  andDay:(NSString* )day;
-{
-    self = [super init];
-    if(self){
-        _contact=contact;
-        _day=day;
-       
-        [self setup];
-    }
-    
-    return self;
-}
+
 
 
 #pragma mark view lifecycle

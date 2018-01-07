@@ -11,37 +11,18 @@
 
 @implementation ChatLogAccountDetailViewController
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
-{
-    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-    if (self) {
-        // Custom initialization
-    }
-    return self;
-}
-
--(id) initWithAccountId:(NSString*) accountId andName:(NSString*) accountName
-{
-    self = [super init];
-    if(self){
-        _accountId=accountId;
-        _accountName=accountName;
-    }
-    
-    return self;
-}
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-	// Do any additional setup after loading the view.
-    self.navigationItem.title=_accountName;
+	
 }
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     _tableData =[[DataLayer sharedInstance] messageHistoryBuddies:_accountId];
     [self.tableView reloadData];
+    self.navigationItem.title=_accountName;
 }
 
 - (void)didReceiveMemoryWarning

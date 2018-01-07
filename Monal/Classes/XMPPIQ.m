@@ -547,7 +547,7 @@
     [payload.attributes setObject:@"8" forKey:@"id"];
     [payload.attributes setObject:@"PCMA" forKey:@"name"];
     [payload.attributes setObject:@"8000" forKey:@"clockrate"];
-    [payload.attributes setObject:@"0" forKey:@"channels"];
+    [payload.attributes setObject:@"1" forKey:@"channels"];
     
     [description.children addObject:payload];
     
@@ -581,17 +581,6 @@
     [jingleNode.children addObject:contentNode];
     [self.children addObject:jingleNode];
     
-    
-    //        [query appendFormat:@" <iq to='%@/%@' id='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-initiate' initiator='%@' responder='%@' sid='%@'>
-    //         <content creator='initiator'  name=\"audio-session\" senders=\"both\" responder='%@'>
-    //         <description xmlns=\"urn:xmpp:jingle:apps:rtp:1\" media=\"audio\">
-    //         <payload-type id=\"8\" name=\"PCMA\" clockrate=\"8000\" channels='0'/></description>
-    //
-    //         <transport xmlns='urn:xmpp:jingle:transports:raw-udp:1'>
-    //         <candidate component=\"1\" ip=\"%@\" port=\"%@\"   id=\"monal001\" generation=\"0\"   />
-    //         <candidate component=\"2\" ip=\"%@\" port=\"%@\"   id=\"monal002\" generation=\"0\"  /> </transport> </content>
-    //
-    //         </jingle> </iq>", self.otherParty, _resource, _iqid, self.me, _to,  self.thesid, _to, _ownIP, self.localPort, _ownIP,self.localPort2];
 }
 -(void) setJingleDeclineTo:(NSString*) jid andResource:(NSString*) resource withValues:(NSDictionary*) info
 {

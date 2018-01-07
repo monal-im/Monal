@@ -64,6 +64,13 @@ TPCircularBuffer packetInCircularBuffer;
 TPCircularBuffer packetOutCircularBuffer;
 int packCount;
 
+
+@interface RTP()
+
+@property (nonatomic, assign ) BOOL marker;
+
+@end
+
 @implementation RTP
 
 
@@ -108,8 +115,8 @@ void checkerror(int rtperr)
                     
                     packCount++;
                 
-                    //start playback after thre are 300 packets
-                    if((packCount>300 && playState.playing==NO) && (disconnecting==NO))
+                    //start playback after thre are 400 packets(samples).. 50ms buffer
+                    if((packCount>=400 && playState.playing==NO) && (disconnecting==NO))
                     {
                         OSStatus status = AudioQueueStart(playState.queue, NULL);
                         if(status == 0)
@@ -215,10 +222,7 @@ void AudioOutputCallback(
     while(1)
     {
         if(disconnecting) break;
-        //let it bufer a little
-        if(packCount>300)
-        {
-            uint32_t bytesToCopy=160;
+            uint32_t bytesToCopy=800;
             int32_t availableBytes;
             void *buffer = TPCircularBufferTail(&packetOutCircularBuffer, &availableBytes);
             if(availableBytes>=bytesToCopy)
@@ -226,8 +230,23 @@ void AudioOutputCallback(
                 void *targetBuffer = malloc(bytesToCopy);
                 memcpy(targetBuffer, buffer, bytesToCopy );
   
-                int rtpstatus = sess.SendPacket(targetBuffer,bytesToCopy,8,false, bytesToCopy);
-                // pt=8  is PCMA ,  timestamp 2x80 =160 is for 2x 8Khz records at 5 ms
+                /*
+                 64kbs audio
+                 8000B -> 1000ms
+                 1B - 1/8 ms
+                 800B - 800/8 ms - 100 ms
+                 
+                 
+                 1/8000 s  - > 1/8 ms
+                
+                 */
+              
+                int timestampIncrement=800;
+                int rtpstatus = sess.SendPacket(targetBuffer,bytesToCopy,8,self.marker, timestampIncrement);
+                
+                if(self.marker) self.marker=NO;
+                
+                // pt=8  is PCMA ,  timestamp 2x80 =160 is for 2x 8Khz records x 5 ms
                 checkerror(rtpstatus);
                 if(rtpstatus!=0) break; //  stop sending
                 
@@ -235,8 +254,6 @@ void AudioOutputCallback(
                 TPCircularBufferConsume(&packetOutCircularBuffer, bytesToCopy);
                 free(targetBuffer);
             }
-            
-        }
     }
     
     debug_NSLog(@"leaving RTP send thread");
@@ -252,6 +269,16 @@ void AudioInputCallback(
                         const AudioStreamPacketDescription *inPacketDescs) // 6
 {
     static int count = 0;
+  //  debug_NSLog(@"audio timestamp %f size %u", inStartTime->mSampleTime, (unsigned int)inBuffer->mAudioDataByteSize);
+    
+//    BOOL marker=NO;
+//    if(packCount==0) marker=YES;
+//
+//    int rtpstatus = sess.SendPacket(inBuffer->mAudioData,inBuffer->mAudioDataByteSize,8,marker, inBuffer->mAudioDataByteSize );
+//    checkerror(rtpstatus);
+//    if(rtpstatus!=0) return;
+    
+    
     RecordState* recordState = (RecordState*)inUserData;
     
     TPCircularBufferProduceBytes(&packetOutCircularBuffer,inBuffer->mAudioData, inBuffer->mAudioDataByteSize);
@@ -280,6 +307,7 @@ void AudioInputCallback(
     TPCircularBufferInit(&packetInCircularBuffer, kBufferLength);
     TPCircularBufferInit(&packetOutCircularBuffer, kBufferLength);
     packCount=0;
+    self.marker=YES;
     
     disconnecting=NO;
     #if TARGET_OS_IPHONE
@@ -299,6 +327,8 @@ void AudioInputCallback(
     recordState.dataFormat.mBitsPerChannel = 16;
     recordState.dataFormat.mReserved = 0;
     
+    
+
     
     
     OSStatus audioStatus = AudioQueueNewInput(
@@ -393,7 +423,7 @@ void AudioInputCallback(
     // In this case, we'll be sending 10 samples each second, so we'll
     // put the timestamp unit to (1.0/10.0)
     
-    sessparams.SetOwnTimestampUnit(1.0/8000.0 );
+    sessparams.SetOwnTimestampUnit(1.0/20.0); // for 5ms samples
     
     sessparams.SetAcceptOwnPackets(true);
     transparams.SetPortbase(portbase);

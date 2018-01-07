@@ -1510,6 +1510,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                     self.jingle = [[jingleCall alloc] init];
                                     self.jingle.initiator= [iqNode.jingleSession objectForKey:@"initiator"];
                                     self.jingle.responder= [iqNode.jingleSession objectForKey:@"responder"];
+                                    if(!self.jingle.responder)
+                                    {
+                                        self.jingle.responder = [NSString stringWithFormat:@"%@/@%", iqNode.to, self.resource];
+                                    }
+                                    
                                     self.jingle.thesid= [iqNode.jingleSession objectForKey:@"sid"];
                                     self.jingle.destinationPort= [transport1 objectForKey:@"port"];
                                     self.jingle.idval=iqNode.idval;

@@ -62,7 +62,7 @@ static const int ddLogLevel = LOG_LEVEL_WARN;
     self.activeCall=YES;
     
     int localPortInt=[self.destinationPort intValue]+2;
-    // local port can be the othersides port +2 shoudl be rnadom .. needs to be even for RTP
+    // local port can be the othersides port +2 shoudl be random .. needs to be even for RTP
     self.localPort=[NSString stringWithFormat:@"%d",localPortInt];
     
     self.localPort2=[NSString stringWithFormat:@"%d",localPortInt+10];

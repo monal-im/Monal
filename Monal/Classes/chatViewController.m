@@ -755,9 +755,17 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
     NSDictionary* row= [self.messageList objectAtIndex:indexPath.row];
     
+    NSString *from =[row objectForKey:@"af"];
+    
+    //intended to correct for bad data. Can be removed later probably.
+    if([from isEqualToString:@"(null)"])
+    {
+        from=[row objectForKey:@"message_from"];;
+    }
+    
     if(_isMUC)
     {
-        if([[row objectForKey:@"af"] isEqualToString:_jid])
+        if([from isEqualToString:_jid])
         {
             cell=[tableView dequeueReusableCellWithIdentifier:@"textOutCell"];
         }
@@ -766,7 +774,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
             cell=[tableView dequeueReusableCellWithIdentifier:@"textInCell"];
         }
     } else  {
-        if([[row objectForKey:@"af"] isEqualToString:self.contactName])
+        if([from isEqualToString:self.contactName])
         {
             cell=[tableView dequeueReusableCellWithIdentifier:@"textInCell"];
         }
@@ -786,7 +794,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     {
         MLChatImageCell* imageCell;
       
-        if([[row objectForKey:@"af"] isEqualToString:self.contactName])
+        if([from isEqualToString:self.contactName])
         {
             imageCell= (MLChatImageCell *) [tableView dequeueReusableCellWithIdentifier:@"imageInCell"];
             imageCell.outBound=NO;

@@ -1484,7 +1484,7 @@ static DataLayer *sharedInstance=nil;
     if([user count]>0)
     {
         
-        NSString* query=[NSString stringWithFormat:@"select x.* from(select distinct message_from,'', ifnull(full_name, message_from) as full_name, filename from message_history as a left outer join buddylist as b on a.message_from=b.buddy_name and a.account_id=b.account_id where a.account_id=%@  union select distinct message_to  ,'', ifnull(full_name, message_to) as full_name, filename from message_history as a left outer join buddylist as b on a.message_to=b.buddy_name and a.account_id=b.account_id where a.account_id=%@  )  as x where message_from!='%@' and message_from!='%@@%@'  order by full_name COLLATE NOCASE ", accountNo, accountNo,((NSString *)[[user objectAtIndex:0] objectForKey:@"username"]).escapeForSql, ((NSString *)[[user objectAtIndex:0] objectForKey:@"username"]).escapeForSql,  ((NSString *)[[user objectAtIndex:0] objectForKey:@"domain"]).escapeForSql  ];
+        NSString* query=[NSString stringWithFormat:@"select x.* from(select distinct message_from,'', ifnull(full_name, message_from) as full_name, filename from message_history as a left outer join buddylist as b on a.message_from=b.buddy_name and a.account_id=b.account_id where a.account_id=%@  union select distinct message_to  ,'', ifnull(full_name, message_to) as full_name, filename from message_history as a left outer join buddylist as b on a.message_to=b.buddy_name and a.account_id=b.account_id where a.account_id=%@  and message_to!=\"(null)\" )  as x where message_from!='%@' and message_from!='%@@%@'  order by full_name COLLATE NOCASE ", accountNo, accountNo,((NSString *)[[user objectAtIndex:0] objectForKey:@"username"]).escapeForSql, ((NSString *)[[user objectAtIndex:0] objectForKey:@"username"]).escapeForSql,  ((NSString *)[[user objectAtIndex:0] objectForKey:@"domain"]).escapeForSql  ];
         //DDLogVerbose(query);
         NSArray* toReturn = [self executeReader:query];
         
@@ -1736,6 +1736,7 @@ static DataLayer *sharedInstance=nil;
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString *documentsDirectory = [paths objectAtIndex:0];
     NSString *writableDBPath = [documentsDirectory stringByAppendingPathComponent:@"sworim.sqlite"];
+    DDLogInfo(@"db path %@", writableDBPath);
     if( ![fileManager fileExistsAtPath:writableDBPath])
     {
         // The writable database does not exist, so copy the default to the appropriate location.

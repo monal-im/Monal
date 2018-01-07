@@ -1060,7 +1060,7 @@ static DataLayer *sharedInstance=nil;
 -(NSString*) buddyStatus:(NSString*) buddy forAccount:(NSString*) accountNo
 {
     NSString* query=[NSString stringWithFormat:@"select status from buddylist where account_id=%@ and buddy_name='%@'", accountNo, buddy.escapeForSql];
-    NSString* iconname= [self executeScalar:query];
+    NSString* iconname=  (NSString *)[self executeScalar:query];
     return iconname;
 }
 
@@ -1194,7 +1194,7 @@ static DataLayer *sharedInstance=nil;
     NSNumber* count=(NSNumber*)[self executeScalar:query];
     if(count!=nil)
     {
-        int val=[count integerValue];
+        NSInteger val=[count integerValue];
         if(val>0) {
             
             return YES; } else
@@ -1219,7 +1219,7 @@ static DataLayer *sharedInstance=nil;
     NSNumber* count=(NSNumber*)[self executeScalar:query];
     if(count!=nil)
     {
-        int val=[count integerValue];
+        NSInteger val=[count integerValue];
         if(val>0) {
             
             return YES; } else
@@ -1370,7 +1370,7 @@ static DataLayer *sharedInstance=nil;
         if(toReturn!=nil)
         {
             
-            DDLogVerbose(@" count: %d",  [toReturn count] );
+            DDLogVerbose(@" count: %lu",  (unsigned long)[toReturn count] );
             
             return toReturn; //[toReturn autorelease];
         }
@@ -1389,7 +1389,7 @@ static DataLayer *sharedInstance=nil;
 -(NSArray*) messageHistoryDate:(NSString*) buddy forAccount:(NSString*) accountNo forDate:(NSString*) date
 {
     
-    NSString* query=[NSString stringWithFormat:@"select af, message, thetime, message_history_id from (select ifnull(actual_from, message_from) as af, message,     timestamp  as thetime, message_history_id from message_history where account_id=%@ and (message_from='%@' or message_to='%@') and date(timestamp)='%@' order by message_history_id desc) order by message_history_id asc",accountNo, buddy.escapeForSql, buddy.escapeForSql, date];
+    NSString* query=[NSString stringWithFormat:@"select af, message, thetime, delivered, message_history_id from (select ifnull(actual_from, message_from) as af, message,     timestamp  as thetime, message_history_id from message_history where account_id=%@ and (message_from='%@' or message_to='%@') and date(timestamp)='%@' order by message_history_id desc) order by message_history_id asc",accountNo, buddy.escapeForSql, buddy.escapeForSql, date];
     
     DDLogVerbose(@"%@",query);
     NSArray* toReturn = [self executeReader:query];
@@ -1397,7 +1397,7 @@ static DataLayer *sharedInstance=nil;
     if(toReturn!=nil)
     {
         
-        DDLogVerbose(@" count: %d",  [toReturn count] );
+        DDLogVerbose(@" count: %lu",  (unsigned long)[toReturn count] );
         
         return toReturn; //[toReturn autorelease];
     }
@@ -1422,7 +1422,7 @@ static DataLayer *sharedInstance=nil;
     if(toReturn!=nil)
     {
         
-        DDLogVerbose(@" count: %d",  [toReturn count] );
+        DDLogVerbose(@" count: %lu",  (unsigned long)[toReturn count] );
         return toReturn; //[toReturn autorelease];
     }
     else

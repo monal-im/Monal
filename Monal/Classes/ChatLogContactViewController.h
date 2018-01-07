@@ -10,12 +10,9 @@
 #import "DataLayer.h"
 
 @interface ChatLogContactViewController : UITableViewController
-{
-    NSString* _accountId;
-    NSDictionary* _contact;
-    NSArray* _tableData;
-}
 
--(id) initWithAccountId:(NSString*) accountId andContact: (NSDictionary*) contact;
+@property (nonatomic, strong) NSString* accountId;
+@property (nonatomic, strong) NSDictionary* contact;
+@property (nonatomic, strong) NSArray* tableData;
 
 @end

@@ -72,6 +72,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         self.jid=[NSString stringWithFormat:@"%@@%@",[[accountVals objectAtIndex:0] objectForKey:@"username"], [[accountVals objectAtIndex:0] objectForKey:@"domain"]];
     }
     
+
 }
 
 -(void) setupWithContact:(NSDictionary*) contact
@@ -80,9 +81,6 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     [self setup];
     
 }
-
-
-
 
 #pragma mark view lifecycle
 
@@ -161,11 +159,13 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     
    
     
-    if(_day) {
+    if(self.day) {
         self.navigationItem.title=  [NSString stringWithFormat:@"%@(%@)", self.navigationItem.title, _day];
         [[NSNotificationCenter defaultCenter] removeObserver:self];
-        [containerView removeFromSuperview];
-       
+        self.inputContainerView.hidden=YES;
+    }
+    else {
+        self.inputContainerView.hidden=NO;
     }
 
     [self handleForeGround];

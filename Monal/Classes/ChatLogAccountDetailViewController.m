@@ -59,10 +59,22 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath;
 {
   
-    
-    ChatLogContactViewController* vc = [[ChatLogContactViewController alloc] initWithAccountId:_accountId andContact: [_tableData objectAtIndex:indexPath.row] ];
-    [self.navigationController pushViewController:vc animated:YES];
-    
+    [self performSegueWithIdentifier:@"showContactLogs" sender: [_tableData objectAtIndex:indexPath.row]];
 }
+
+-(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+{
+    if([segue.identifier isEqualToString:@"showContactLogs"])
+    {
+        ChatLogContactViewController* vc = segue.destinationViewController;
+        NSDictionary *dic = (NSDictionary *) sender;
+        
+        vc.accountId=self.accountId;
+        vc.contact= dic;
+      
+        
+    }
+}
+
 
 @end

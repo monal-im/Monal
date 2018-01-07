@@ -16,31 +16,9 @@
 
 @implementation ChatLogContactViewController
 
-- (id)initWithStyle:(UITableViewStyle)style
-{
-    self = [super initWithStyle:style];
-    if (self) {
-        // Custom initialization
-    }
-    return self;
-}
-
--(id) initWithAccountId:(NSString*) accountId andContact: (NSDictionary*) contact
-{
-    self = [super init];
-    if(self){
-        _accountId=accountId;
-        _contact=contact;
-    }
-    
-    return self;
-}
-
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    self.navigationItem.title=[_contact objectForKey:@"full_name"];
-
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -49,8 +27,10 @@
  
     self.contactToPass = [[NSMutableDictionary alloc] initWithDictionary:_contact];
     [self.contactToPass setObject:_accountId forKey:@"account_id"];
-    
+    self.navigationItem.title=[_contact objectForKey:@"full_name"];
+
     _tableData =[[DataLayer sharedInstance] messageHistoryListDates:[_contact objectForKey:@"message_from"] forAccount:_accountId];
+    self.navigationItem.title= @"Log Date";
     [self.tableView reloadData];
 }
 

@@ -52,9 +52,13 @@
         MLContactDetails *details = (MLContactDetails *)[segue destinationController];
         details.contact=self.contactInfo;
     }
+    if([segue.identifier isEqualToString:@"CallContact"]) {
+      //  MLContactDetails *details = (MLContactDetails *)[segue destinationController];
+        //details.contact=self.contactInfo;
+    }
 }
 
-- (BOOL)shouldPerformSegueWithIdentifier:(NSString *)identifier sender:(id)sender NS_AVAILABLE_MAC(10_10);
+- (BOOL)shouldPerformSegueWithIdentifier:(NSString *)identifier sender:(id)sender
 {
     if([identifier isEqualToString:@"ContactDetails"]) {
         if(!self.contactInfo)

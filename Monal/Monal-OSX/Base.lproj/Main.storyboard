@@ -736,7 +736,11 @@ CA
                                         <segue destination="YaN-jR-P6F" kind="sheet" identifier="AddContact" id="b5L-QG-mfn"/>
                                     </connections>
                                 </toolbarItem>
-                                <toolbarItem implicitItemIdentifier="5782E4B7-BB3D-4E23-9ED8-C320B614BDC2" label="Call" paletteLabel="Call" tag="-1" image="call" id="Dne-ym-5CJ" userLabel="Call"/>
+                                <toolbarItem implicitItemIdentifier="5782E4B7-BB3D-4E23-9ED8-C320B614BDC2" label="Call" paletteLabel="Call" tag="-1" image="call" id="Dne-ym-5CJ" userLabel="Call">
+                                    <connections>
+                                        <segue destination="MZJ-Lc-0ne" kind="show" identifier="CallContact" id="Uwt-4d-Ui7"/>
+                                    </connections>
+                                </toolbarItem>
                                 <toolbarItem implicitItemIdentifier="F04C6D51-26CB-4D2C-B231-77C8E77974C8" label="Contact Info" paletteLabel="Contact Info" tag="-1" image="724-info" id="VQp-eV-N8J">
                                     <connections>
                                         <segue destination="kZp-r1-Nmw" kind="popover" identifier="ContactDetails" popoverAnchorView="VQp-eV-N8J" popoverBehavior="t" preferredEdge="maxX" id="1K6-5s-FVT"/>
@@ -976,6 +980,47 @@ CA
                 <customObject id="Bif-v0-38w" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-84" y="696"/>
+        </scene>
+        <!--View Controller-->
+        <scene sceneID="rmO-rR-8l5">
+            <objects>
+                <viewController id="MZJ-Lc-0ne" sceneMemberID="viewController">
+                    <view key="view" id="k9M-82-MAg">
+                        <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <subviews>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="GxR-bh-3Ef">
+                                <rect key="frame" x="18" y="255" width="49" height="17"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Calling:" id="vGw-JW-zXA">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="fJm-Jl-ZyC">
+                                <rect key="frame" x="73" y="255" width="37" height="17"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Label" id="fqi-Xp-3fo">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="V71-71-S9P">
+                                <rect key="frame" x="21" y="41" width="91" height="32"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <buttonCell key="cell" type="push" title="Hang up" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="PJH-q7-PGe">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                            </button>
+                        </subviews>
+                    </view>
+                </viewController>
+                <customObject id="UV6-qh-Dzg" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1265" y="157"/>
         </scene>
         <!--Add Contact-->
         <scene sceneID="HhB-V1-ecH">

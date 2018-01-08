@@ -736,6 +736,7 @@ CA
                                         <segue destination="YaN-jR-P6F" kind="sheet" identifier="AddContact" id="b5L-QG-mfn"/>
                                     </connections>
                                 </toolbarItem>
+                                <toolbarItem implicitItemIdentifier="5782E4B7-BB3D-4E23-9ED8-C320B614BDC2" label="Call" paletteLabel="Call" tag="-1" image="call" id="Dne-ym-5CJ" userLabel="Call"/>
                                 <toolbarItem implicitItemIdentifier="F04C6D51-26CB-4D2C-B231-77C8E77974C8" label="Contact Info" paletteLabel="Contact Info" tag="-1" image="724-info" id="VQp-eV-N8J">
                                     <connections>
                                         <segue destination="kZp-r1-Nmw" kind="popover" identifier="ContactDetails" popoverAnchorView="VQp-eV-N8J" popoverBehavior="t" preferredEdge="maxX" id="1K6-5s-FVT"/>
@@ -750,6 +751,7 @@ CA
                                 <toolbarItem reference="7tw-2L-tfc"/>
                                 <toolbarItem reference="9TB-3c-nGe"/>
                                 <toolbarItem reference="VQp-eV-N8J"/>
+                                <toolbarItem reference="Dne-ym-5CJ"/>
                             </defaultToolbarItems>
                         </toolbar>
                         <connections>
@@ -2323,6 +2325,7 @@ Gw
         <image name="Disconnected" width="26" height="26"/>
         <image name="NotificationBubble" width="22" height="22"/>
         <image name="XMPP" width="27.840000152587891" height="27.840000152587891"/>
+        <image name="call" width="64" height="59"/>
         <image name="noicon" width="44" height="44"/>
         <image name="offline" width="15" height="15"/>
     </resources>

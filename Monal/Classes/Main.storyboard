@@ -29,7 +29,8 @@
                     <connections>
                         <segue destination="tu2-MS-nsv" kind="relationship" relationship="viewControllers" id="vW2-LX-dW3"/>
                         <segue destination="dqD-Rt-bEF" kind="relationship" relationship="viewControllers" id="DnI-os-KR6"/>
-                        <segue destination="dgM-uB-Aap" kind="relationship" relationship="viewControllers" id="bLM-Xi-N16"/>
+                        <segue destination="cOc-T2-fy0" kind="relationship" relationship="viewControllers" id="CL0-e1-nDz"/>
+                        <segue destination="J7g-Ys-82i" kind="relationship" relationship="viewControllers" id="Q9c-s7-CQg"/>
                     </connections>
                 </tabBarController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="VIf-su-Z49" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -883,10 +884,11 @@
             </objects>
             <point key="canvasLocation" x="-802" y="3829"/>
         </scene>
-        <!--Navigation Controller-->
+        <!--Item-->
         <scene sceneID="1d2-iG-jjX">
             <objects>
                 <navigationController id="J7g-Ys-82i" sceneMemberID="viewController">
+                    <tabBarItem key="tabBarItem" title="Item" id="VJW-A6-Zpp"/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="dMn-CD-oTx">
                         <rect key="frame" x="0.0" y="20" width="414" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -1025,6 +1027,113 @@
             </objects>
             <point key="canvasLocation" x="783" y="1070"/>
         </scene>
+        <!--Room List-->
+        <scene sceneID="rw7-nS-Meg">
+            <objects>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dLH-fp-fBA" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <tableViewController id="Kdm-cJ-uvh" sceneMemberID="viewController">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" id="LT9-ej-fGs">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
+                        <prototypes>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="G0t-Hv-fAI">
+                                <rect key="frame" x="0.0" y="55.333333333333336" width="414" height="44"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="G0t-Hv-fAI" id="Jtr-Ah-dbQ">
+                                    <rect key="frame" x="0.0" y="0.0" width="414" height="43.666666666666664"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </tableViewCellContentView>
+                            </tableViewCell>
+                        </prototypes>
+                        <connections>
+                            <outlet property="dataSource" destination="Kdm-cJ-uvh" id="4YW-M4-6mI"/>
+                            <outlet property="delegate" destination="Kdm-cJ-uvh" id="imG-ab-Hu7"/>
+                        </connections>
+                    </tableView>
+                    <navigationItem key="navigationItem" title="Room List" id="q6X-kD-U5E"/>
+                </tableViewController>
+            </objects>
+            <point key="canvasLocation" x="161" y="2434"/>
+        </scene>
+        <!--Group Chat-->
+        <scene sceneID="4hU-MM-WBZ">
+            <objects>
+                <tableViewController clearsSelectionOnViewWillAppear="NO" id="nW7-fq-iEr" sceneMemberID="viewController">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" id="S3v-FE-7ei">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
+                        <prototypes>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="7HG-lP-zEv">
+                                <rect key="frame" x="0.0" y="55.333333333333336" width="414" height="44"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="7HG-lP-zEv" id="GDN-DL-D7y">
+                                    <rect key="frame" x="0.0" y="0.0" width="414" height="43.666666666666664"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </tableViewCellContentView>
+                            </tableViewCell>
+                        </prototypes>
+                        <connections>
+                            <outlet property="dataSource" destination="nW7-fq-iEr" id="l2S-WV-bfd"/>
+                            <outlet property="delegate" destination="nW7-fq-iEr" id="0rh-uA-Jaa"/>
+                        </connections>
+                    </tableView>
+                    <navigationItem key="navigationItem" title="Group Chat" id="k0T-5X-FQu"/>
+                    <connections>
+                        <segue destination="RjC-T7-BwN" kind="showDetail" id="qaB-BP-OcO"/>
+                    </connections>
+                </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Cbc-HF-LG0" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="137" y="1661"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="9Is-dX-ch3">
+            <objects>
+                <navigationController id="PjQ-9S-4Zq" sceneMemberID="viewController">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="yG5-Vj-gyO">
+                        <rect key="frame" x="0.0" y="20" width="414" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="nW7-fq-iEr" kind="relationship" relationship="rootViewController" id="YaG-Tc-cAr"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Byv-mK-vjd" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-783" y="1661"/>
+        </scene>
+        <!--Group-->
+        <scene sceneID="mxa-kE-ZjN">
+            <objects>
+                <splitViewController id="cOc-T2-fy0" sceneMemberID="viewController">
+                    <tabBarItem key="tabBarItem" title="Group" image="974-users" id="fre-oh-ysK"/>
+                    <connections>
+                        <segue destination="PjQ-9S-4Zq" kind="relationship" relationship="masterViewController" id="01i-T3-g3x"/>
+                        <segue destination="RjC-T7-BwN" kind="relationship" relationship="detailViewController" id="mq9-9z-0ZK"/>
+                    </connections>
+                </splitViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Rmd-7z-NCq" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-1703" y="1990"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="ia2-90-6Fa">
+            <objects>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="EU9-NC-JbV" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <navigationController id="RjC-T7-BwN" sceneMemberID="viewController">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="R8x-RL-5Hu">
+                        <rect key="frame" x="0.0" y="20" width="414" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="Kdm-cJ-uvh" kind="relationship" relationship="rootViewController" id="VAf-Wa-gZl"/>
+                    </connections>
+                </navigationController>
+            </objects>
+            <point key="canvasLocation" x="-688" y="2435"/>
+        </scene>
         <!--Chats-->
         <scene sceneID="vAl-ec-NFW">
             <objects>
@@ -1054,7 +1163,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" showsHorizontalScrollIndicator="NO" keyboardDismissMode="onDrag" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="Kkq-aZ-5fP">
-                                <rect key="frame" x="0.0" y="0.0" width="414" height="636"/>
+                                <rect key="frame" x="0.0" y="0.0" width="414" height="685"/>
                                 <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <gestureRecognizers/>
                                 <constraints>
@@ -1281,7 +1390,7 @@
                                 </connections>
                             </tableView>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="eXr-Xg-TCZ">
-                                <rect key="frame" x="0.0" y="644" width="414" height="43"/>
+                                <rect key="frame" x="0.0" y="693" width="414" height="43"/>
                                 <subviews>
                                     <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" bounces="NO" showsHorizontalScrollIndicator="NO" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="jiV-U5-fDl" customClass="MLResizingTextView">
                                         <rect key="frame" x="62" y="8" width="300" height="25"/>
@@ -1367,12 +1476,15 @@
         <image name="770-paper-clip" width="28" height="27"/>
         <image name="906-chat-3" width="28" height="26"/>
         <image name="973-user" width="28" height="24"/>
+        <image name="974-users" width="28" height="18"/>
         <image name="menu" width="28" height="22"/>
     </resources>
     <inferredMetricsTieBreakers>
         <segue reference="ojB-Rp-nEa"/>
+        <segue reference="qaB-BP-OcO"/>
+        <segue reference="Q9c-s7-CQg"/>
         <segue reference="wmf-tk-2CN"/>
-        <segue reference="YJ5-aM-wEP"/>
+        <segue reference="fRw-7r-LxC"/>
         <segue reference="pZO-HH-rUP"/>
         <segue reference="RMJ-9l-zbF"/>
     </inferredMetricsTieBreakers>

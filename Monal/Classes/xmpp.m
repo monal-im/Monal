@@ -2875,7 +2875,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     if(self.jingle) return;
     self.jingle=[[jingleCall alloc] init];
-    self.jingle.me=self.jid;
+    self.jingle.me=[NSString stringWithFormat:@"%@/%@", self.fulluser, self.resource];
     
     NSArray* resources= [[DataLayer sharedInstance] resourcesForContact:[contact objectForKey:@"buddy_name"]];
     if([resources count]>0)

@@ -613,9 +613,6 @@
         [self setiqTo:jid];
     }
     
-//    [jingleNode.attributes setObject:[info objectForKey:@"initiator"] forKey:@"initiator"];
-//    [jingleNode.attributes setObject:[info objectForKey:@"responder"] forKey:@"responder"];
-//
     MLXMLNode* jingleNode =[[MLXMLNode alloc] init];
     jingleNode.element=@"jingle";
     [jingleNode setXMLNS:@"urn:xmpp:jingle:1"];

@@ -43,7 +43,12 @@
 -(void) updateCurrentContact:(NSDictionary *) contact;
 {
     self.contactInfo= contact;
-    self.contactNameField.stringValue= [self.contactInfo objectForKey:kFullName];
+    NSString *fullName= (NSString *) [self.contactInfo objectForKey:kFullName];
+    if(fullName.length>0){
+        self.contactNameField.stringValue= [self.contactInfo objectForKey:kFullName];
+    } else  {
+        self.contactNameField.stringValue= [self.contactInfo objectForKey:kContactName];
+    }
 }
 
 #pragma mark - segue

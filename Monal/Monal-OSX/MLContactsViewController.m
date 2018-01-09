@@ -772,10 +772,12 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
             if(returnCode ==1001) {
                 allowed=YES;
             }
-            
             [[MLXMPPManager sharedInstance] handleCall:dic withResponse:allowed];
-            [self performSegueWithIdentifier:@"CallScreen" sender:dic];
-            
+           
+            if(allowed)
+            {
+                  [self performSegueWithIdentifier:@"CallScreen" sender:dic];
+            }
         }];
     });
 

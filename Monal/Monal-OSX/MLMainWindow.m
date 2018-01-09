@@ -54,8 +54,10 @@
         details.contact=self.contactInfo;
     }
     if([segue.identifier isEqualToString:@"CallContact"]) {
+        [[MLXMPPManager sharedInstance] callContact:self.contactInfo];
         MLCallScreen *call = (MLCallScreen *)[segue destinationController];
         call.contact=self.contactInfo;
+        
     }
 }
 

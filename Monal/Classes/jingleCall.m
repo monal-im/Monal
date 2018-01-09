@@ -53,6 +53,8 @@ static const int ddLogLevel = LOG_LEVEL_WARN;
 
 -(void) rtpDisconnect
 {
+    if(!self.netReadQueue) return;
+    
     dispatch_async(self.netReadQueue, ^{
         [rtp RTPDisconnect];
     });

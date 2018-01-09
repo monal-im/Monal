@@ -1512,7 +1512,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                     self.jingle.responder= [iqNode.jingleSession objectForKey:@"responder"];
                                     if(!self.jingle.responder)
                                     {
-                                        self.jingle.responder = [NSString stringWithFormat:@"%@/@%", iqNode.to, self.resource];
+                                        self.jingle.responder = [NSString stringWithFormat:@"%@/%@", iqNode.to, self.resource];
                                     }
                                     
                                     self.jingle.thesid= [iqNode.jingleSession objectForKey:@"sid"];

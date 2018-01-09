@@ -607,18 +607,20 @@
 -(void) setJingleTerminateTo:(NSString*) jid andResource:(NSString*) resource withValues:(NSDictionary*) info
 {
     if([jid rangeOfString:@"/"].location==NSNotFound) {
-    [self setiqTo:[NSString stringWithFormat:@"%@/%@",jid,resource]];
+        [self setiqTo:[NSString stringWithFormat:@"%@/%@",jid,resource]];
     }
     else {
         [self setiqTo:jid];
     }
     
+//    [jingleNode.attributes setObject:[info objectForKey:@"initiator"] forKey:@"initiator"];
+//    [jingleNode.attributes setObject:[info objectForKey:@"responder"] forKey:@"responder"];
+//
     MLXMLNode* jingleNode =[[MLXMLNode alloc] init];
     jingleNode.element=@"jingle";
     [jingleNode setXMLNS:@"urn:xmpp:jingle:1"];
     [jingleNode.attributes setObject:@"session-terminate" forKey:@"action"];
-    [jingleNode.attributes setObject:[info objectForKey:@"initiator"] forKey:@"initiator"];
-    [jingleNode.attributes setObject:[info objectForKey:@"responder"] forKey:@"responder"];
+  
     [jingleNode.attributes setObject:[info objectForKey:@"sid"] forKey:@"sid"];
     
     MLXMLNode* reason =[[MLXMLNode alloc] init];

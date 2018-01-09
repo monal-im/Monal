@@ -77,6 +77,9 @@ static const int ddLogLevel = LOG_LEVEL_WARN;
     
     NSDictionary* info =@{@"initiator":self.initiator, @"responder":self.responder, @"sid":self.thesid, @"ownip":_ownIP, @"localport1":self.localPort,@"localport2":self.localPort2};
     
+    self.otherParty=self.initiator;
+    _activeresource=resource;
+    
     XMPPIQ* node =[[XMPPIQ alloc] initWithId:iqid andType:kiqSetType];
     [node setJingleAcceptTo:to andResource:resource withValues:info];
     self.idval= iqid; 

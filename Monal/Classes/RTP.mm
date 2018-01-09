@@ -508,6 +508,7 @@ void AudioInputCallback(
 {
     
     disconnecting=true;
+       sess.BYEDestroy(jrtplib::RTPTime(10,0),0,0);
     //input
     OSStatus  audioStatus = AudioQueueStop(recordState.queue, YES);
     
@@ -529,16 +530,17 @@ void AudioInputCallback(
     
     //output
     playState.playing = false;
+   
     
     for(int i = 0; i < NUM_BUFFERS; i++)
     {
         AudioQueueFreeBuffer(playState.queue, playState.buffers[i]);
     }
     
-    AudioQueueDispose(playState.queue, true);
+    AudioQueueDispose(playState.queue, false);
     
     
-    sess.BYEDestroy(jrtplib::RTPTime(10,0),0,0);
+  
 }
 
 @end

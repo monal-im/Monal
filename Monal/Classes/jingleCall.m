@@ -12,6 +12,12 @@
 
 static const int ddLogLevel = LOG_LEVEL_WARN;
 
+@interface jingleCall()
+
+@property (nonatomic, strong ) dispatch_queue_t netReadQueue;
+
+@end
+
 @implementation jingleCall
 
 -(id) init{
@@ -34,11 +40,11 @@ static const int ddLogLevel = LOG_LEVEL_WARN;
     self.activeCall=YES;
     // rtp2 =[RTP alloc];
     //  [rtp2 RTPConnect:theaddress:[destinationPort2 intValue]:[localPort2 intValue] ];
-    NSString* monalNetWriteQueue =@"im.monal.jingleMain.%@";
-    dispatch_queue_t _netReadQueue = dispatch_queue_create([monalNetWriteQueue UTF8String], DISPATCH_QUEUE_SERIAL);
+    NSString* monalNetWriteQueue =@"im.monal.jingleMain";
+    self.netReadQueue = dispatch_queue_create([monalNetWriteQueue UTF8String], DISPATCH_QUEUE_SERIAL);
     
     
-    dispatch_async(_netReadQueue, ^{
+    dispatch_async(self.netReadQueue, ^{
         rtp =[[RTP alloc] init];
         [rtp RTPConnectAddress:self.recipientIP onRemotePort:[self.destinationPort intValue] withLocalPort:[self.localPort intValue]];
     });
@@ -47,7 +53,9 @@ static const int ddLogLevel = LOG_LEVEL_WARN;
 
 -(void) rtpDisconnect
 {
-    [rtp RTPDisconnect];
+    dispatch_async(self.netReadQueue, ^{
+        [rtp RTPDisconnect];
+    });
 }
 
 

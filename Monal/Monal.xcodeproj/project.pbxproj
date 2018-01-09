@@ -161,6 +161,7 @@
 		262FE9361D821CD000A70506 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 262FE9351D821CD000A70506 /* WebKit.framework */; };
 		2630FE341AD550C00079F5C0 /* Monal_Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = 2630FE331AD550C00079F5C0 /* Monal_Tests.m */; };
 		26329D321B7999AD0061EA36 /* Images-OSX.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 26329D311B7999AD0061EA36 /* Images-OSX.xcassets */; };
+		2632EA4220040D2C00191EEB /* MLCallScreen.m in Sources */ = {isa = PBXBuildFile; fileRef = 2632EA4120040D2C00191EEB /* MLCallScreen.m */; };
 		26347D861790FFDE006FF64F /* MLInfoCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 26347D851790FFDE006FF64F /* MLInfoCell.m */; };
 		26352EA8177D222600E2C8FF /* MLXMPPManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26352EA7177D222600E2C8FF /* MLXMPPManager.m */; };
 		2636C43F177BD58C001CA71F /* XMPPEdit.m in Sources */ = {isa = PBXBuildFile; fileRef = 2636C43E177BD58C001CA71F /* XMPPEdit.m */; };
@@ -520,6 +521,8 @@
 		2630FE321AD550C00079F5C0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2630FE331AD550C00079F5C0 /* Monal_Tests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Monal_Tests.m; sourceTree = "<group>"; };
 		26329D311B7999AD0061EA36 /* Images-OSX.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Images-OSX.xcassets"; sourceTree = "<group>"; };
+		2632EA4020040D2C00191EEB /* MLCallScreen.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLCallScreen.h; sourceTree = "<group>"; };
+		2632EA4120040D2C00191EEB /* MLCallScreen.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLCallScreen.m; sourceTree = "<group>"; };
 		26347D841790FFDE006FF64F /* MLInfoCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLInfoCell.h; sourceTree = "<group>"; };
 		26347D851790FFDE006FF64F /* MLInfoCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLInfoCell.m; sourceTree = "<group>"; };
 		26352EA6177D222600E2C8FF /* MLXMPPManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLXMPPManager.h; sourceTree = "<group>"; };
@@ -1176,6 +1179,8 @@
 				26277CE31B7C57670094E4D0 /* MLContactDetails.m */,
 				268130161BFD8ECA0074C8EE /* MLAddContact.h */,
 				268130171BFD8ECA0074C8EE /* MLAddContact.m */,
+				2632EA4020040D2C00191EEB /* MLCallScreen.h */,
+				2632EA4120040D2C00191EEB /* MLCallScreen.m */,
 			);
 			path = "Monal-OSX";
 			sourceTree = "<group>";
@@ -2752,6 +2757,7 @@
 				26B2A4BE1B7306E500272E63 /* DataLayer.m in Sources */,
 				266272B71B27DB8000C1CD49 /* AppDelegate.m in Sources */,
 				260499EA1B7313E500D11866 /* ParseFailure.m in Sources */,
+				2632EA4220040D2C00191EEB /* MLCallScreen.m in Sources */,
 				26B2A4F61B73097500272E63 /* DDLog.m in Sources */,
 				26B2A4FE1B73097500272E63 /* DDMultiFormatter.m in Sources */,
 				267ECD691B7467B30025337F /* MLXMPPManager.m in Sources */,

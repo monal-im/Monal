@@ -736,7 +736,7 @@ CA
                                         <segue destination="YaN-jR-P6F" kind="sheet" identifier="AddContact" id="b5L-QG-mfn"/>
                                     </connections>
                                 </toolbarItem>
-                                <toolbarItem implicitItemIdentifier="5782E4B7-BB3D-4E23-9ED8-C320B614BDC2" label="Call" paletteLabel="Call" tag="-1" image="call" id="Dne-ym-5CJ" userLabel="Call">
+                                <toolbarItem implicitItemIdentifier="5782E4B7-BB3D-4E23-9ED8-C320B614BDC2" label="Call" paletteLabel="Call" tag="-1" image="735-phone" id="Dne-ym-5CJ" userLabel="Call">
                                     <connections>
                                         <segue destination="MZJ-Lc-0ne" kind="show" identifier="CallContact" id="Uwt-4d-Ui7"/>
                                     </connections>
@@ -951,6 +951,7 @@ CA
                         <outlet property="contactsTable" destination="3KX-fy-a4Q" id="tz0-Xa-S7Y"/>
                         <outlet property="segmentedControl" destination="Lzi-ZY-I1a" id="9T2-gc-Fr2"/>
                         <segue destination="fLw-fN-usf" kind="show" identifier="showServerDetails" id="tKf-Kb-CWA"/>
+                        <segue destination="MZJ-Lc-0ne" kind="show" identifier="CallScreen" id="Jkt-hW-Vlb"/>
                     </connections>
                 </viewController>
                 <customObject id="N6A-8E-AoF" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
@@ -981,46 +982,44 @@ CA
             </objects>
             <point key="canvasLocation" x="-84" y="696"/>
         </scene>
-        <!--View Controller-->
+        <!--Call with-->
         <scene sceneID="rmO-rR-8l5">
             <objects>
-                <viewController id="MZJ-Lc-0ne" sceneMemberID="viewController">
+                <viewController title="Call with" id="MZJ-Lc-0ne" customClass="MLCallScreen" sceneMemberID="viewController">
                     <view key="view" id="k9M-82-MAg">
-                        <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
+                        <rect key="frame" x="0.0" y="0.0" width="272" height="212"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
-                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="GxR-bh-3Ef">
-                                <rect key="frame" x="18" y="255" width="49" height="17"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Calling:" id="vGw-JW-zXA">
-                                    <font key="font" metaFont="system"/>
-                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
-                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                </textFieldCell>
-                            </textField>
-                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="fJm-Jl-ZyC">
-                                <rect key="frame" x="73" y="255" width="37" height="17"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Label" id="fqi-Xp-3fo">
-                                    <font key="font" metaFont="system"/>
-                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
-                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                </textFieldCell>
-                            </textField>
                             <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="V71-71-S9P">
-                                <rect key="frame" x="21" y="41" width="91" height="32"/>
+                                <rect key="frame" x="78" y="13" width="91" height="32"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <buttonCell key="cell" type="push" title="Hang up" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="PJH-q7-PGe">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
+                                <connections>
+                                    <action selector="hangup:" target="MZJ-Lc-0ne" id="Cjh-jm-JUM"/>
+                                </connections>
                             </button>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="fJm-Jl-ZyC">
+                                <rect key="frame" x="18" y="128" width="236" height="31"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Label" id="fqi-Xp-3fo">
+                                    <font key="font" metaFont="systemBold" size="20"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
                         </subviews>
                     </view>
+                    <connections>
+                        <outlet property="callButton" destination="V71-71-S9P" id="nrD-i0-Erm"/>
+                        <outlet property="contactName" destination="fJm-Jl-ZyC" id="pLa-pi-AAc"/>
+                    </connections>
                 </viewController>
                 <customObject id="UV6-qh-Dzg" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1265" y="157"/>
+            <point key="canvasLocation" x="1176" y="113"/>
         </scene>
         <!--Add Contact-->
         <scene sceneID="HhB-V1-ecH">
@@ -2365,13 +2364,16 @@ Gw
     </scenes>
     <resources>
         <image name="724-info" width="28" height="28"/>
+        <image name="735-phone" width="28" height="28"/>
         <image name="770-paper-clip" width="28" height="27"/>
         <image name="907-plus-rounded-square" width="28" height="28"/>
         <image name="Disconnected" width="26" height="26"/>
         <image name="NotificationBubble" width="22" height="22"/>
         <image name="XMPP" width="27.840000152587891" height="27.840000152587891"/>
-        <image name="call" width="64" height="59"/>
         <image name="noicon" width="44" height="44"/>
         <image name="offline" width="15" height="15"/>
     </resources>
+    <inferredMetricsTieBreakers>
+        <segue reference="Jkt-hW-Vlb"/>
+    </inferredMetricsTieBreakers>
 </document>

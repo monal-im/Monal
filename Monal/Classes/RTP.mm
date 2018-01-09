@@ -125,6 +125,7 @@ void checkerror(int rtperr)
                             debug_NSLog(@"Started play back ");
                             for(int i = 0; i < NUM_BUFFERS; i++)
                             {
+                                if(disconnecting) break;
                                 // needs a proper circular buffer before i use this again..
                                 AudioOutputCallback(&playState, playState.queue, playState.buffers[i]);
                             }
@@ -277,8 +278,7 @@ void AudioInputCallback(
 //    int rtpstatus = sess.SendPacket(inBuffer->mAudioData,inBuffer->mAudioDataByteSize,8,marker, inBuffer->mAudioDataByteSize );
 //    checkerror(rtpstatus);
 //    if(rtpstatus!=0) return;
-    
-    
+   
     RecordState* recordState = (RecordState*)inUserData;
     
     TPCircularBufferProduceBytes(&packetOutCircularBuffer,inBuffer->mAudioData, inBuffer->mAudioDataByteSize);
@@ -390,10 +390,7 @@ void AudioInputCallback(
         return -1;
     }
     
-    
-    
-    
-    
+  
     //******* RTP *****/
     
     

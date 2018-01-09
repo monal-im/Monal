@@ -13,6 +13,7 @@
 #import "MLImageManager.h"
 #import "MLXMPPManager.h"
 #import "MLContactDetails.h"
+#import "MLCallScreen.h"
 
 @interface MLMainWindow ()
 
@@ -53,8 +54,8 @@
         details.contact=self.contactInfo;
     }
     if([segue.identifier isEqualToString:@"CallContact"]) {
-      //  MLContactDetails *details = (MLContactDetails *)[segue destinationController];
-        //details.contact=self.contactInfo;
+        MLCallScreen *call = (MLCallScreen *)[segue destinationController];
+        call.contact=self.contactInfo;
     }
 }
 

@@ -16,6 +16,7 @@
 #import "MLImageManager.h"
 
 #import "MLServerDetailsVC.h"
+#import "MLCallScreen.h"
 
 #define kinfoSection 0
 #define konlineSection 1
@@ -773,7 +774,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
             }
             
             [[MLXMPPManager sharedInstance] handleCall:dic withResponse:allowed];
-            
+            [self performSegueWithIdentifier:@"CallScreen" sender:dic];
             
         }];
     });
@@ -1178,7 +1179,12 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
         details.xmppAccount=xmppAccount;
         
     }
-    
+    if([segue.identifier isEqualToString:@"CallScreen"])
+    {
+        NSDictionary *dic= (NSDictionary *) sender;
+        MLCallScreen *call =  (MLCallScreen *)segue.destinationController;
+        call.contact=dic;
+    }
 }
 
 -(IBAction) showServerDetails:(id) sender

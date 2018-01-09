@@ -446,16 +446,12 @@
     [jingleNode setXMLNS:@"urn:xmpp:jingle:1"];
     [jingleNode.attributes setObject:@"session-initiate" forKey:@"action"];
     [jingleNode.attributes setObject:[info objectForKey:@"initiator"] forKey:@"initiator"];
-    [jingleNode.attributes setObject:[info objectForKey:@"responder"] forKey:@"responder"];
-    [jingleNode.attributes setObject:[info objectForKey:@"sid"] forKey:@"sid"];
+   [jingleNode.attributes setObject:[info objectForKey:@"sid"] forKey:@"sid"];
  
    MLXMLNode* contentNode =[[MLXMLNode alloc] init];
     contentNode.element=@"content";
     [contentNode.attributes setObject:@"initiator" forKey:@"creator"];
     [contentNode.attributes setObject:@"audio-session" forKey:@"name"];
-    [contentNode.attributes setObject:@"both" forKey:@"senders"];
-    [contentNode.attributes setObject:[info objectForKey:@"responder"] forKey:@"responder"];
-    
     
     MLXMLNode* description =[[MLXMLNode alloc] init];
     description.element=@"description";
@@ -468,7 +464,7 @@
     [payload.attributes setObject:@"8" forKey:@"id"];
     [payload.attributes setObject:@"PCMA" forKey:@"name"];
     [payload.attributes setObject:@"8000" forKey:@"clockrate"];
-    [payload.attributes setObject:@"0" forKey:@"channels"];
+    [payload.attributes setObject:@"1" forKey:@"channels"];
     
     [description.children addObject:payload];
     

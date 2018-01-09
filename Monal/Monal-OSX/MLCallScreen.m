@@ -26,7 +26,10 @@
     self.callButton.enabled=YES;
     if(self.contact) {
         NSString *contactName =  [self.contact objectForKey:@"user"]; //dic form incoming
-        if(!contactName) contactName =  [self.contact objectForKey:@"buddy_name"]; // dic form outgoing
+        if(!contactName)
+        {
+            contactName =  [self.contact objectForKey:@"buddy_name"]; // dic form outgoing
+        }
         
         if(!contactName) {
             contactName = @"No Contact Selected";

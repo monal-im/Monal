@@ -162,6 +162,7 @@
 		2630FE341AD550C00079F5C0 /* Monal_Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = 2630FE331AD550C00079F5C0 /* Monal_Tests.m */; };
 		26329D321B7999AD0061EA36 /* Images-OSX.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 26329D311B7999AD0061EA36 /* Images-OSX.xcassets */; };
 		2632EA4220040D2C00191EEB /* MLCallScreen.m in Sources */ = {isa = PBXBuildFile; fileRef = 2632EA4120040D2C00191EEB /* MLCallScreen.m */; };
+		2632EA472006ADFE00191EEB /* MLGroupChatViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2632EA452006ADFD00191EEB /* MLGroupChatViewController.m */; };
 		26347D861790FFDE006FF64F /* MLInfoCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 26347D851790FFDE006FF64F /* MLInfoCell.m */; };
 		26352EA8177D222600E2C8FF /* MLXMPPManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26352EA7177D222600E2C8FF /* MLXMPPManager.m */; };
 		2636C43F177BD58C001CA71F /* XMPPEdit.m in Sources */ = {isa = PBXBuildFile; fileRef = 2636C43E177BD58C001CA71F /* XMPPEdit.m */; };
@@ -523,6 +524,8 @@
 		26329D311B7999AD0061EA36 /* Images-OSX.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Images-OSX.xcassets"; sourceTree = "<group>"; };
 		2632EA4020040D2C00191EEB /* MLCallScreen.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLCallScreen.h; sourceTree = "<group>"; };
 		2632EA4120040D2C00191EEB /* MLCallScreen.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLCallScreen.m; sourceTree = "<group>"; };
+		2632EA442006ADFD00191EEB /* MLGroupChatViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLGroupChatViewController.h; sourceTree = "<group>"; };
+		2632EA452006ADFD00191EEB /* MLGroupChatViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLGroupChatViewController.m; sourceTree = "<group>"; };
 		26347D841790FFDE006FF64F /* MLInfoCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLInfoCell.h; sourceTree = "<group>"; };
 		26347D851790FFDE006FF64F /* MLInfoCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLInfoCell.m; sourceTree = "<group>"; };
 		26352EA6177D222600E2C8FF /* MLXMPPManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLXMPPManager.h; sourceTree = "<group>"; };
@@ -1044,6 +1047,15 @@
 			name = Muc;
 			sourceTree = "<group>";
 		};
+		2632EA432006ADD300191EEB /* Group chat */ = {
+			isa = PBXGroup;
+			children = (
+				2632EA442006ADFD00191EEB /* MLGroupChatViewController.h */,
+				2632EA452006ADFD00191EEB /* MLGroupChatViewController.m */,
+			);
+			name = "Group chat";
+			sourceTree = "<group>";
+		};
 		26352EA5177D21FC00E2C8FF /* Managers */ = {
 			isa = PBXGroup;
 			children = (
@@ -1155,6 +1167,7 @@
 		266272B21B27DB8000C1CD49 /* Monal-OSX */ = {
 			isa = PBXGroup;
 			children = (
+				2632EA432006ADD300191EEB /* Group chat */,
 				26E3ED881FEC3920008ABDA5 /* Account */,
 				26AA41021D9FC61C005A77ED /* Chatview */,
 				260283841D8DEFC1001DD6B8 /* MLPreviewObject.h */,
@@ -2714,6 +2727,7 @@
 				26D51CE11E2674D700141E04 /* NXOAuth2PostBodyStream.m in Sources */,
 				2661D34D1B407ED400EC51BA /* MLContactsCell.m in Sources */,
 				26B2A4F21B73097500272E63 /* DDASLLogger.m in Sources */,
+				2632EA472006ADFE00191EEB /* MLGroupChatViewController.m in Sources */,
 				2638DAEF1B68F3EF00DF05AC /* MLDisplaySettings.m in Sources */,
 				260499EE1B7313F000D11866 /* XMPPParser.m in Sources */,
 				260499EB1B7313E800D11866 /* ParseChallenge.m in Sources */,

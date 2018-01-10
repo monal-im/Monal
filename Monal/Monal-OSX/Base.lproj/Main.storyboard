@@ -156,7 +156,7 @@
         <!--Join Group Chat-->
         <scene sceneID="YMg-2U-mp8">
             <objects>
-                <viewController title="Join Group Chat" id="skQ-Mr-QQ0" sceneMemberID="viewController">
+                <viewController title="Join Group Chat" id="skQ-Mr-QQ0" customClass="MLGroupChatViewController" sceneMemberID="viewController">
                     <view key="view" id="KiR-HX-JlQ">
                         <rect key="frame" x="0.0" y="0.0" width="450" height="294"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -170,21 +170,6 @@
                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="aCd-uQ-TLD">
-                                <rect key="frame" x="18" y="225" width="415" height="26"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <popUpButtonCell key="cell" type="push" title="Item 1" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="pCq-0N-MQb" id="XiC-eq-z6m">
-                                    <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="menu"/>
-                                    <menu key="menu" id="GBb-PX-TMP">
-                                        <items>
-                                            <menuItem title="Item 1" state="on" id="pCq-0N-MQb"/>
-                                            <menuItem title="Item 2" id="QW9-H2-tN0"/>
-                                            <menuItem title="Item 3" id="YPI-tE-426"/>
-                                        </items>
-                                    </menu>
-                                </popUpButtonCell>
-                            </popUpButton>
                             <box fixedFrame="YES" title="Group Info" translatesAutoresizingMaskIntoConstraints="NO" id="WkL-a4-dOQ">
                                 <rect key="frame" x="17" y="16" width="416" height="204"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
@@ -262,21 +247,43 @@
                                                 <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                 <font key="font" metaFont="system"/>
                                             </buttonCell>
+                                            <connections>
+                                                <action selector="join:" target="skQ-Mr-QQ0" id="cHB-CP-ZL7"/>
+                                            </connections>
                                         </button>
-                                        <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ItY-5B-KgV">
+                                        <secureTextField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2Ji-fC-car">
                                             <rect key="frame" x="109" y="70" width="293" height="22"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="uKa-Wv-9du">
+                                            <secureTextFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" usesSingleLineMode="YES" id="6Jd-0u-y0T">
                                                 <font key="font" metaFont="system"/>
                                                 <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
                                                 <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                            </textFieldCell>
-                                        </textField>
+                                                <allowedInputSourceLocales>
+                                                    <string>NSAllRomanInputSourcesLocaleIdentifier</string>
+                                                </allowedInputSourceLocales>
+                                            </secureTextFieldCell>
+                                        </secureTextField>
                                     </subviews>
                                 </view>
                             </box>
+                            <comboBox verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="4ph-eG-G9i">
+                                <rect key="frame" x="22" y="222" width="411" height="26"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <comboBoxCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" numberOfVisibleItems="5" id="bj4-5l-Y0c">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </comboBoxCell>
+                            </comboBox>
                         </subviews>
                     </view>
+                    <connections>
+                        <outlet property="accounts" destination="4ph-eG-G9i" id="Ut3-2A-JEK"/>
+                        <outlet property="host" destination="otV-la-iX2" id="UOm-Ii-sxO"/>
+                        <outlet property="nick" destination="VEX-sb-aGB" id="kBZ-wK-kFX"/>
+                        <outlet property="password" destination="2Ji-fC-car" id="CR0-DE-Vjp"/>
+                        <outlet property="room" destination="zYd-LE-k0z" id="uU0-5i-TWQ"/>
+                    </connections>
                 </viewController>
                 <customObject id="7j2-g7-sXy" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>

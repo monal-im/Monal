@@ -8,8 +8,6 @@
 
 #import "XMPPMessage.h"
 
-
-
 @implementation XMPPMessage
 
  NSString* const kMessageChatType=@"chat";

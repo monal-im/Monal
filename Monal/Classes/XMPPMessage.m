@@ -8,7 +8,14 @@
 
 #import "XMPPMessage.h"
 
+
+
 @implementation XMPPMessage
+
+ NSString* const kMessageChatType=@"chat";
+ NSString* const kMessageGroupChatType=@"groupchat";
+ NSString* const kMessageErrorType=@"error";
+ NSString* const kMessageNormalType =@"normal";
 
 -(id) init
 {

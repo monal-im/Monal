@@ -33,7 +33,7 @@
 
 -(IBAction)join:(id)sender
 {
-    
+    [[MLXMPPManager sharedInstance] joinRoom:self.room.stringValue withPassword:self.password.stringValue forAccountRow:self.accounts.indexOfSelectedItem];
 }
 
 @end

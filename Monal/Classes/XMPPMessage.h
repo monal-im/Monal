@@ -9,15 +9,13 @@
 
 #import "MLXMLNode.h"
 
-#define kMessageChatType @"chat"
-#define kMessageGroupChatType @"groupchat"
-#define kMessageErrorType @"error"
-#define kMessageNormalType @"normal"
+extern NSString* const kMessageChatType;
+extern NSString* const kMessageGroupChatType;
+extern NSString* const kMessageErrorType;
+extern NSString* const kMessageNormalType;
 
 @interface XMPPMessage : MLXMLNode
-{
-    
-}
+
 /**
  Sets the id attribute of the element
  */

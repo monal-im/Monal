@@ -1180,12 +1180,7 @@ static DataLayer *sharedInstance=nil;
     }];
 }
 
--(bool) isBuddyMuc:(NSString*) buddy forAccount:(NSString*) accountNo
-{
-    NSString* query=[NSString stringWithFormat:@"SELECT Muc from buddylist where account_id=%@  and buddy_name='%@' ", accountNo, buddy.escapeForSql];
-    NSNumber* status=(NSNumber*)[self executeScalar:query];
-    return [status boolValue];
-}
+
 
 -(bool) isBuddyAdded:(NSString*) buddy forAccount:(NSString*) accountNo
 {
@@ -1238,7 +1233,50 @@ static DataLayer *sharedInstance=nil;
     
 }
 
+#pragma mark MUC
 
+-(bool) isBuddyMuc:(NSString*) buddy forAccount:(NSString*) accountNo
+{
+    NSString* query=[NSString stringWithFormat:@"SELECT Muc from buddylist where account_id=%@  and buddy_name='%@' ", accountNo, buddy.escapeForSql];
+    NSNumber* status=(NSNumber*)[self executeScalar:query];
+    return [status boolValue];
+}
+
+
+-(void) addMucFavoritesForAccount:(NSString*) accountNo withRoom:(NSString *) room nick:(NSString *)nick autoJoin:(BOOL) autoJoin andCompletion:(void (^)(BOOL))completion
+{
+    NSString* query=[NSString stringWithFormat:@"insert into muc_favorites (room, nick,auto_join,  account_id) values(%@,%@,%d, %@)",room, nick, autoJoin, accountNo];
+    DDLogVerbose(@"%@", query);
+    
+    [self executeNonQuery:query withCompletion:^(BOOL success) {
+     
+        if(completion) {
+            completion(success);
+        }
+        
+    }];
+    
+}
+
+-(void) mucFavoritesForAccount:(NSString*) accountNo withCompletion:(void (^)(NSMutableArray *))completion
+{
+    NSString* query=[NSString stringWithFormat:@"select * from muc_favorites where account_id=%@",accountNo];
+    DDLogVerbose(@"%@", query);
+     [self executeReader:query withCompletion:^(NSMutableArray *favorites) {
+      if(favorites!=nil) {
+             DDLogVerbose(@"fetched muc favorites");
+         }
+         else{
+            DDLogVerbose(@"could not fetch  muc favorites");
+           
+         }
+         
+         if(completion) {
+             completion(favorites);
+         }
+    }];
+
+}
 
 
 #pragma mark message Commands
@@ -2064,7 +2102,7 @@ static DataLayer *sharedInstance=nil;
     {
         DDLogVerbose(@"Database version <2.0 detected. Performing upgrade on accounts. ");
         
-        [self executeNonQuery:@"CREATE TABLE IF NOT EXISTS \"muc_favorites\" (\"mucid\" integer NOT NULL primary key autoincrement,\"room\" varchar(255,0),\"nick\" varchar(255,0),\"autojoin\" bool);" withCompletion:nil];
+        [self executeNonQuery:@"CREATE TABLE IF NOT EXISTS \"muc_favorites\" (\"mucid\" integer NOT NULL primary key autoincrement,\"room\" varchar(255,0),\"nick\" varchar(255,0),\"autojoin\" bool, account_id int);" withCompletion:nil];
         [self executeNonQuery:@"update dbversion set dbversion='2.0'; " withCompletion:nil];
         
         DDLogVerbose(@"Upgrade to 2.0 success ");

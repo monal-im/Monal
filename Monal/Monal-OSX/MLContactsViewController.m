@@ -255,14 +255,22 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
         }
     }
     else  {
-        if(self.contactsTable.selectedRow <self.contacts.count) {
-            NSDictionary *contact =[self.contacts objectAtIndex:self.contactsTable.selectedRow];
+        id item =[self.contactsTable itemAtRow:self.contactsTable.selectedRow];
+        
+        if([item isKindOfClass:[NSDictionary class]]) {
+            NSDictionary *contact =(NSDictionary *) item;
             [userDelAlert beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse returnCode) {
                 
                 if(returnCode==1001) //YES
                 {
                     [[MLXMPPManager sharedInstance] removeContact:contact];
-                    [self.contacts removeObjectAtIndex:self.contactsTable.selectedRow];
+                    
+                 
+                    if([self.contacts containsObject:contact]){
+                        [self.contacts removeObject:contact];
+                    } else  {
+                        [self.offlineContacts removeObject:contact];
+                    }
                     
                     [self.contactsTable reloadData];
                 }

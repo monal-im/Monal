@@ -1029,7 +1029,7 @@ CA
                                     <rect key="frame" x="1" y="1" width="318" height="404"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
-                                        <outlineView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" columnReordering="NO" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" rowHeight="60" viewBased="YES" outlineTableColumn="ncF-0W-pT5" id="3KX-fy-a4Q">
+                                        <outlineView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" columnReordering="NO" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" autosaveName="" rowHeight="60" viewBased="YES" outlineTableColumn="ncF-0W-pT5" id="3KX-fy-a4Q">
                                             <rect key="frame" x="0.0" y="0.0" width="318" height="404"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <size key="intercellSpacing" width="3" height="2"/>

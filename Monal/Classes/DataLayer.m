@@ -1243,13 +1243,28 @@ static DataLayer *sharedInstance=nil;
 }
 
 
--(void) addMucFavoritesForAccount:(NSString*) accountNo withRoom:(NSString *) room nick:(NSString *)nick autoJoin:(BOOL) autoJoin andCompletion:(void (^)(BOOL))completion
+-(void) addMucFavoriteForAccount:(NSString*) accountNo withRoom:(NSString *) room nick:(NSString *)nick autoJoin:(BOOL) autoJoin andCompletion:(void (^)(BOOL))completion
 {
     NSString* query=[NSString stringWithFormat:@"insert into muc_favorites (room, nick,auto_join,  account_id) values(%@,%@,%d, %@)",room, nick, autoJoin, accountNo];
     DDLogVerbose(@"%@", query);
     
     [self executeNonQuery:query withCompletion:^(BOOL success) {
      
+        if(completion) {
+            completion(success);
+        }
+        
+    }];
+    
+}
+
+-(void) deleteMucFavorite:(NSString *) room forAccount:(NSString*) accountNo withCompletion:(void (^)(BOOL))completion
+{
+    NSString* query=[NSString stringWithFormat:@"delete from muc_favorites where room=%@ and account_id=%@",room, accountNo];
+    DDLogVerbose(@"%@", query);
+    
+    [self executeNonQuery:query withCompletion:^(BOOL success) {
+        
         if(completion) {
             completion(success);
         }

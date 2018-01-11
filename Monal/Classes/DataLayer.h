@@ -130,7 +130,9 @@ extern NSString *const kMessageTypeText;
 
 #pragma mark MUC
 -(void) mucFavoritesForAccount:(NSString*) accountNo withCompletion:(void (^)(NSMutableArray *))completion;
--(void) addMucFavoritesForAccount:(NSString*) accountNo withRoom:(NSString *) room nick:(NSString *)nick autoJoin:(BOOL) autoJoin andCompletion:(void (^)(BOOL))completion;
+-(void) addMucFavoriteForAccount:(NSString*) accountNo withRoom:(NSString *) room nick:(NSString *)nick autoJoin:(BOOL) autoJoin andCompletion:(void (^)(BOOL))completion;
+-(void) deleteMucFavorite:(NSString *) room forAccount:(NSString*) accountNo withCompletion:(void (^)(BOOL))completion;
+
 
 /**
  Calls with YES if contact  has laredy been added to the database for this account
@@ -138,10 +140,10 @@ extern NSString *const kMessageTypeText;
 -(void) isContactInList:(NSString*) buddy forAccount:(NSString*) accountNo withCompletion: (void (^)(BOOL))completion;
 
 
-//vcard commands
+#pragma mark vcard commands
 -(BOOL) setNickName:(NSString*) nickName forBuddy:(NSString*) buddy andAccount:(NSString*) accountNo;
 
-//account commands
+#pragma mark account commands
 -(void) protocolListWithCompletion: (void (^)(NSArray* result))completion;
 -(void) accountListWithCompletion: (void (^)(NSArray* result))completion;
 -(NSArray*) enabledAccountList;

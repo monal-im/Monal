@@ -2070,8 +2070,7 @@ static DataLayer *sharedInstance=nil;
         DDLogVerbose(@"Upgrade to 2.0 success ");
         
     }
-    
-    
+   
     
     [dbversionCheck unlock];
     [self resetContacts];

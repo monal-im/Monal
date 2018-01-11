@@ -2056,8 +2056,21 @@ static DataLayer *sharedInstance=nil;
         
     }
     
-    
+   
     // this point forward OSX might have legacy issues
+    
+    
+    if([dbversion doubleValue]<2.0)
+    {
+        DDLogVerbose(@"Database version <2.0 detected. Performing upgrade on accounts. ");
+        
+        [self executeNonQuery:@"CREATE TABLE IF NOT EXISTS \"muc_favorites\" (\"mucid\" integer NOT NULL,\"room\" varchar(255,0),\"nick\" varchar(255,0),\"autojoin\" bool);" withCompletion:nil];
+        [self executeNonQuery:@"update dbversion set dbversion='2.0'; " withCompletion:nil];
+        
+        DDLogVerbose(@"Upgrade to 2.0 success ");
+        
+    }
+    
     
     
     [dbversionCheck unlock];

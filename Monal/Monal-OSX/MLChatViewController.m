@@ -140,6 +140,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
  
     }
     
+    self.isMUC = [[DataLayer sharedInstance] isBuddyMuc:self.contactName forAccount:self.accountNo];
+    
 }
 
 

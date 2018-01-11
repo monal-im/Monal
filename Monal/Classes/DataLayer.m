@@ -2038,8 +2038,8 @@ static DataLayer *sharedInstance=nil;
     {
         DDLogVerbose(@"Database version <1.5 detected. Performing upgrade on accounts. ");
         
-        [self executeNonQuery:@"alter table account add column oauth bool;"];
-        [self executeNonQuery:@"update dbversion set dbversion='1.5'; "];
+        [self executeNonQuery:@"alter table account add column oauth bool;" withCompletion:nil];
+        [self executeNonQuery:@"update dbversion set dbversion='1.5'; " withCompletion:nil];
         
         DDLogVerbose(@"Upgrade to 1.5 success ");
         
@@ -2049,8 +2049,8 @@ static DataLayer *sharedInstance=nil;
     {
         DDLogVerbose(@"Database version <1.6 detected. Performing upgrade on accounts. ");
         
-        [self executeNonQuery:@"alter table message_history add column messageType varchar(255);"];
-        [self executeNonQuery:@"update dbversion set dbversion='1.6'; "];
+        [self executeNonQuery:@"alter table message_history add column messageType varchar(255);" withCompletion:nil];
+        [self executeNonQuery:@"update dbversion set dbversion='1.6'; " withCompletion:nil];
         
         DDLogVerbose(@"Upgrade to 1.6 success ");
         
@@ -2064,7 +2064,7 @@ static DataLayer *sharedInstance=nil;
     {
         DDLogVerbose(@"Database version <2.0 detected. Performing upgrade on accounts. ");
         
-        [self executeNonQuery:@"CREATE TABLE IF NOT EXISTS \"muc_favorites\" (\"mucid\" integer NOT NULL,\"room\" varchar(255,0),\"nick\" varchar(255,0),\"autojoin\" bool);" withCompletion:nil];
+        [self executeNonQuery:@"CREATE TABLE IF NOT EXISTS \"muc_favorites\" (\"mucid\" integer NOT NULL primary key autoincrement,\"room\" varchar(255,0),\"nick\" varchar(255,0),\"autojoin\" bool);" withCompletion:nil];
         [self executeNonQuery:@"update dbversion set dbversion='2.0'; " withCompletion:nil];
         
         DDLogVerbose(@"Upgrade to 2.0 success ");

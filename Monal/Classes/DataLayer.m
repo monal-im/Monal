@@ -1245,7 +1245,7 @@ static DataLayer *sharedInstance=nil;
 
 -(void) addMucFavoriteForAccount:(NSString*) accountNo withRoom:(NSString *) room nick:(NSString *)nick autoJoin:(BOOL) autoJoin andCompletion:(void (^)(BOOL))completion
 {
-    NSString* query=[NSString stringWithFormat:@"insert into muc_favorites (room, nick,auto_join,  account_id) values(%@,%@,%d, %@)",room, nick, autoJoin, accountNo];
+    NSString* query=[NSString stringWithFormat:@"insert into muc_favorites (room, nick,autojoin,  account_id) values('%@','%@',%d, %@)",room.escapeForSql, nick.escapeForSql, autoJoin, accountNo];
     DDLogVerbose(@"%@", query);
     
     [self executeNonQuery:query withCompletion:^(BOOL success) {
@@ -1260,7 +1260,7 @@ static DataLayer *sharedInstance=nil;
 
 -(void) deleteMucFavorite:(NSString *) room forAccount:(NSString*) accountNo withCompletion:(void (^)(BOOL))completion
 {
-    NSString* query=[NSString stringWithFormat:@"delete from muc_favorites where room=%@ and account_id=%@",room, accountNo];
+    NSString* query=[NSString stringWithFormat:@"delete from muc_favorites where room=%@ and account_id=%@",room.escapeForSql, accountNo];
     DDLogVerbose(@"%@", query);
     
     [self executeNonQuery:query withCompletion:^(BOOL success) {
@@ -2117,6 +2117,7 @@ static DataLayer *sharedInstance=nil;
     {
         DDLogVerbose(@"Database version <2.0 detected. Performing upgrade on accounts. ");
         
+        [self executeNonQuery:@"drop table muc_favorites" withCompletion:nil];
         [self executeNonQuery:@"CREATE TABLE IF NOT EXISTS \"muc_favorites\" (\"mucid\" integer NOT NULL primary key autoincrement,\"room\" varchar(255,0),\"nick\" varchar(255,0),\"autojoin\" bool, account_id int);" withCompletion:nil];
         [self executeNonQuery:@"update dbversion set dbversion='2.0'; " withCompletion:nil];
         

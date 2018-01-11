@@ -8,6 +8,7 @@
 
 #import "MLGroupChatViewController.h"
 #import "MLXMPPManager.h"
+#import "DataLayer.h"
 
 @interface MLGroupChatViewController ()
 
@@ -33,6 +34,10 @@
 
 -(IBAction)join:(id)sender
 {
+    NSDictionary *accountrow = [MLXMPPManager sharedInstance].connectedXMPP[self.accounts.indexOfSelectedItem];
+    xmpp* account= (xmpp*)[accountrow objectForKey:@"xmppAccount"];
+    
+    [[DataLayer sharedInstance] addMucFavoriteForAccount:account.accountNo withRoom:self.room.stringValue nick:self.nick.stringValue autoJoin:0 andCompletion:nil];
     [[MLXMPPManager sharedInstance] joinRoom:self.room.stringValue withPassword:self.password.stringValue forAccountRow:self.accounts.indexOfSelectedItem];
 }
 

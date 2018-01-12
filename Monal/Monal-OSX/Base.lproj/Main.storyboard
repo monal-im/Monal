@@ -288,10 +288,10 @@
             </objects>
             <point key="canvasLocation" x="-1525" y="-178"/>
         </scene>
-        <!--Group Bookmarks-->
+        <!--Group Favorites-->
         <scene sceneID="lBn-6k-9rO">
             <objects>
-                <viewController title="Group Bookmarks" id="vg7-2F-QD1" customClass="MLGroupChatFavoritesViewController" sceneMemberID="viewController">
+                <viewController title="Group Bookmarks" id="vg7-2F-QD1" userLabel="Group Favorites" customClass="MLGroupChatFavoritesViewController" sceneMemberID="viewController">
                     <view key="view" id="UDT-vi-W8l">
                         <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -846,7 +846,7 @@ CA
                                                 <segue destination="skQ-Mr-QQ0" kind="show" id="iPP-Gl-lWx"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Group Bookmarks" id="t1Q-v6-6MD">
+                                        <menuItem title="Group Bookmarks" id="t1Q-v6-6MD" userLabel="Group Favorites">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
                                                 <segue destination="vg7-2F-QD1" kind="show" id="QJm-sF-GVm"/>

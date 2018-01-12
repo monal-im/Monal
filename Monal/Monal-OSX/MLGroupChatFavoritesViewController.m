@@ -26,6 +26,11 @@
 -(void) viewWillAppear
 {
     self.favorites = [[NSMutableArray alloc] init];
+    [self refresh];
+}
+
+-(void) refresh
+{
     for(NSDictionary *row in [MLXMPPManager sharedInstance].connectedXMPP)
     {
         xmpp *account = [row objectForKey:kXmppAccount];
@@ -38,7 +43,6 @@
         }];
     }
 }
-
 
 #pragma mark - table view datasource
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)aTableView
@@ -72,12 +76,14 @@
 
 -(IBAction)join:(id)sender
 {
-    
+    //  [[MLXMPPManager sharedInstance] joinRoom:self.room.stringValue withPassword:self.password.stringValue forAccountRow:self.accounts.indexOfSelectedItem];
 }
 
 -(IBAction)remove:(id)sender
 {
+    //delte
     
+    [self refresh];
 }
 
 

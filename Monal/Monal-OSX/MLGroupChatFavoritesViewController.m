@@ -57,14 +57,7 @@
 {
     
     NSTableCellView *cell = [tableView makeViewWithIdentifier:@"favoriteCell" owner:self];
-//    cell.name.backgroundColor =[NSColor clearColor];
-//    cell.status.backgroundColor= [NSColor clearColor];
-//
-//    NSDictionary *dic = [self.serverCaps objectAtIndex:row];
-//
-//    cell.name.stringValue= [dic objectForKey:@"Title"];
-//    cell.status.stringValue= [dic objectForKey:@"Description"];
-//
+    
     
     NSDictionary *dic = self.favorites[row];
     
@@ -76,7 +69,14 @@
 
 -(IBAction)join:(id)sender
 {
-    //  [[MLXMPPManager sharedInstance] joinRoom:self.room.stringValue withPassword:self.password.stringValue forAccountRow:self.accounts.indexOfSelectedItem];
+    NSIndexSet *selected = self.favoritesTable.selectedRowIndexes;
+    if(selected.count>0) {
+        NSUInteger row  =selected.firstIndex;
+        
+        NSDictionary *dic = self.favorites[row];
+        NSNumber *account=[dic objectForKey:@"account_id"];
+        [[MLXMPPManager sharedInstance] joinRoom:[dic objectForKey:@"room"] withPassword:@"" forAccounId:account.integerValue ];
+    }
 }
 
 -(IBAction)remove:(id)sender

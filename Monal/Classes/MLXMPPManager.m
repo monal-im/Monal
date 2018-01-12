@@ -623,6 +623,14 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
     
 }
 
+-(void)  joinRoom:(NSString*) roomName  withPassword:(NSString*) password forAccounId:(NSInteger) accountId
+{
+    xmpp* account= [self getConnectedAccountForID:[NSString stringWithFormat:@"%ld",accountId]];
+    [account joinRoom:roomName withPassword:password];
+    
+}
+
+
 
 
 -(void)  joinRoom:(NSString*) roomName  withPassword:(NSString*) password forAccountRow:(NSInteger) row

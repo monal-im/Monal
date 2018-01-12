@@ -114,6 +114,8 @@ Returns the server set name of the conencted account
  */
 -(void)  joinRoom:(NSString*) roomName  withPassword:(NSString*) password forAccountRow:(NSInteger) row;
 
+-(void)  joinRoom:(NSString*) roomName  withPassword:(NSString*) password forAccounId:(NSInteger) accountId;
+
 /**
  leave the specific MUC room
  @param roomName

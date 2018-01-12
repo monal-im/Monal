@@ -44,7 +44,7 @@
         [[DataLayer sharedInstance] addMucFavoriteForAccount:account.accountNo withRoom:self.room.stringValue nick:self.nick.stringValue autoJoin:autoJoinValue andCompletion:nil];
     }
     
-    
+
     [[MLXMPPManager sharedInstance] joinRoom:self.room.stringValue withPassword:self.password.stringValue forAccountRow:self.accounts.indexOfSelectedItem];
 }
 

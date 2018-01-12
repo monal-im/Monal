@@ -1258,9 +1258,9 @@ static DataLayer *sharedInstance=nil;
     
 }
 
--(void) deleteMucFavorite:(NSString *) room forAccount:(NSString*) accountNo withCompletion:(void (^)(BOOL))completion
+-(void) deleteMucFavorite:(NSNumber *) mucid forAccountId:(NSInteger) accountNo withCompletion:(void (^)(BOOL))completion
 {
-    NSString* query=[NSString stringWithFormat:@"delete from muc_favorites where room=%@ and account_id=%@",room.escapeForSql, accountNo];
+    NSString* query=[NSString stringWithFormat:@"delete from muc_favorites where mucid=%ld and account_id=%ld",mucid.integerValue, accountNo];
     DDLogVerbose(@"%@", query);
     
     [self executeNonQuery:query withCompletion:^(BOOL success) {

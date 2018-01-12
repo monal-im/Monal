@@ -131,7 +131,7 @@ extern NSString *const kMessageTypeText;
 #pragma mark MUC
 -(void) mucFavoritesForAccount:(NSString*) accountNo withCompletion:(void (^)(NSMutableArray *))completion;
 -(void) addMucFavoriteForAccount:(NSString*) accountNo withRoom:(NSString *) room nick:(NSString *)nick autoJoin:(BOOL) autoJoin andCompletion:(void (^)(BOOL))completion;
--(void) deleteMucFavorite:(NSString *) room forAccount:(NSString*) accountNo withCompletion:(void (^)(BOOL))completion;
+-(void) deleteMucFavorite:(NSNumber *) mucid forAccountId:(NSInteger) accountNo withCompletion:(void (^)(BOOL))completion;
 
 
 /**

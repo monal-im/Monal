@@ -25,12 +25,12 @@
 
 -(void) viewWillAppear
 {
-    self.favorites = [[NSMutableArray alloc] init];
     [self refresh];
 }
 
 -(void) refresh
 {
+     self.favorites = [[NSMutableArray alloc] init];
     for(NSDictionary *row in [MLXMPPManager sharedInstance].connectedXMPP)
     {
         xmpp *account = [row objectForKey:kXmppAccount];
@@ -81,9 +81,20 @@
 
 -(IBAction)remove:(id)sender
 {
-    //delte
-    
-    [self refresh];
+    NSIndexSet *selected = self.favoritesTable.selectedRowIndexes;
+    if(selected.count>0) {
+        NSUInteger row  =selected.firstIndex;
+        NSDictionary *dic = self.favorites[row];
+        NSNumber *account=[dic objectForKey:@"account_id"];
+        
+        [[DataLayer sharedInstance] deleteMucFavorite:[dic objectForKey:@"mucid"] forAccountId:account.integerValue withCompletion:^(BOOL result) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                 [self refresh];
+            });
+        }];
+        
+  
+    }
 }
 
 

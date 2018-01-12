@@ -163,6 +163,7 @@
 		26329D321B7999AD0061EA36 /* Images-OSX.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 26329D311B7999AD0061EA36 /* Images-OSX.xcassets */; };
 		2632EA4220040D2C00191EEB /* MLCallScreen.m in Sources */ = {isa = PBXBuildFile; fileRef = 2632EA4120040D2C00191EEB /* MLCallScreen.m */; };
 		2632EA472006ADFE00191EEB /* MLGroupChatViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2632EA452006ADFD00191EEB /* MLGroupChatViewController.m */; };
+		2632EA4B20080C2C00191EEB /* MLGroupChatFavoritesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2632EA4A20080C2C00191EEB /* MLGroupChatFavoritesViewController.m */; };
 		26347D861790FFDE006FF64F /* MLInfoCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 26347D851790FFDE006FF64F /* MLInfoCell.m */; };
 		26352EA8177D222600E2C8FF /* MLXMPPManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26352EA7177D222600E2C8FF /* MLXMPPManager.m */; };
 		2636C43F177BD58C001CA71F /* XMPPEdit.m in Sources */ = {isa = PBXBuildFile; fileRef = 2636C43E177BD58C001CA71F /* XMPPEdit.m */; };
@@ -526,6 +527,8 @@
 		2632EA4120040D2C00191EEB /* MLCallScreen.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLCallScreen.m; sourceTree = "<group>"; };
 		2632EA442006ADFD00191EEB /* MLGroupChatViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLGroupChatViewController.h; sourceTree = "<group>"; };
 		2632EA452006ADFD00191EEB /* MLGroupChatViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLGroupChatViewController.m; sourceTree = "<group>"; };
+		2632EA4920080C2C00191EEB /* MLGroupChatFavoritesViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLGroupChatFavoritesViewController.h; sourceTree = "<group>"; };
+		2632EA4A20080C2C00191EEB /* MLGroupChatFavoritesViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLGroupChatFavoritesViewController.m; sourceTree = "<group>"; };
 		26347D841790FFDE006FF64F /* MLInfoCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLInfoCell.h; sourceTree = "<group>"; };
 		26347D851790FFDE006FF64F /* MLInfoCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLInfoCell.m; sourceTree = "<group>"; };
 		26352EA6177D222600E2C8FF /* MLXMPPManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLXMPPManager.h; sourceTree = "<group>"; };
@@ -1052,6 +1055,8 @@
 			children = (
 				2632EA442006ADFD00191EEB /* MLGroupChatViewController.h */,
 				2632EA452006ADFD00191EEB /* MLGroupChatViewController.m */,
+				2632EA4920080C2C00191EEB /* MLGroupChatFavoritesViewController.h */,
+				2632EA4A20080C2C00191EEB /* MLGroupChatFavoritesViewController.m */,
 			);
 			name = "Group chat";
 			sourceTree = "<group>";
@@ -2741,6 +2746,7 @@
 				26D51CCB1E2674D700141E04 /* NSData+NXOAuth2.m in Sources */,
 				266272B91B27DB8000C1CD49 /* main.m in Sources */,
 				26049A561B7315A000D11866 /* RTP.mm in Sources */,
+				2632EA4B20080C2C00191EEB /* MLGroupChatFavoritesViewController.m in Sources */,
 				260499ED1B7313ED00D11866 /* ParsePresence.m in Sources */,
 				260499E41B730E9800D11866 /* XMPPIQ.m in Sources */,
 				265802851B785B8900C35014 /* MLDisabledScrollView.m in Sources */,

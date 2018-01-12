@@ -18,6 +18,8 @@
 #define kMonalNetQueue "im.monal.netQueue"
 #define kMonalConnectedListQueue "im.monal.connectedListQueue"
 
+extern NSString *const kXmppAccount;
+
 /**
  A singleton to control all of the active XMPP connections
  */

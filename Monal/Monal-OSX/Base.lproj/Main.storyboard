@@ -277,6 +277,8 @@
                     </view>
                     <connections>
                         <outlet property="accounts" destination="4ph-eG-G9i" id="Ut3-2A-JEK"/>
+                        <outlet property="autoJoin" destination="Erz-4h-KoR" id="X7q-xn-Z5e"/>
+                        <outlet property="favorite" destination="4LX-Ez-0HV" id="tkE-vP-6VF"/>
                         <outlet property="nick" destination="VEX-sb-aGB" id="kBZ-wK-kFX"/>
                         <outlet property="password" destination="2Ji-fC-car" id="CR0-DE-Vjp"/>
                         <outlet property="room" destination="zYd-LE-k0z" id="uU0-5i-TWQ"/>
@@ -289,7 +291,7 @@
         <!--Group Bookmarks-->
         <scene sceneID="lBn-6k-9rO">
             <objects>
-                <viewController title="Group Bookmarks" id="vg7-2F-QD1" sceneMemberID="viewController">
+                <viewController title="Group Bookmarks" id="vg7-2F-QD1" customClass="MLGroupChatFavoritesViewController" sceneMemberID="viewController">
                     <view key="view" id="UDT-vi-W8l">
                         <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -321,7 +323,7 @@
                                                     </textFieldCell>
                                                     <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                     <prototypeCellViews>
-                                                        <tableCellView id="cHt-c6-nn9">
+                                                        <tableCellView identifier="favoriteCell" id="cHt-c6-nn9">
                                                             <rect key="frame" x="1" y="1" width="445" height="17"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
@@ -342,6 +344,10 @@
                                                     </prototypeCellViews>
                                                 </tableColumn>
                                             </tableColumns>
+                                            <connections>
+                                                <outlet property="dataSource" destination="vg7-2F-QD1" id="86Q-BV-pll"/>
+                                                <outlet property="delegate" destination="vg7-2F-QD1" id="LYI-sD-zwd"/>
+                                            </connections>
                                         </tableView>
                                     </subviews>
                                 </clipView>
@@ -361,6 +367,9 @@
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
+                                <connections>
+                                    <action selector="remove:" target="vg7-2F-QD1" id="0dJ-an-5GF"/>
+                                </connections>
                             </button>
                             <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="FSN-DI-UJJ">
                                 <rect key="frame" x="14" y="13" width="66" height="32"/>
@@ -369,9 +378,15 @@
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
+                                <connections>
+                                    <action selector="join:" target="vg7-2F-QD1" id="gEh-9Y-mVG"/>
+                                </connections>
                             </button>
                         </subviews>
                     </view>
+                    <connections>
+                        <outlet property="favoritesTable" destination="DWO-Cj-r1e" id="n8y-wp-EaF"/>
+                    </connections>
                 </viewController>
                 <customObject id="LGr-2m-fCa" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>

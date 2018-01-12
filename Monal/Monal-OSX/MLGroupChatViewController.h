@@ -17,6 +17,11 @@
 @property  (nonatomic, weak) IBOutlet NSTextField *nick;
 @property  (nonatomic, weak) IBOutlet NSTextField *password;
 
+@property (nonatomic, weak) IBOutlet NSButton *autoJoin;
+@property (nonatomic, weak) IBOutlet NSButton *favorite;
+
+
+
 
 -(IBAction)join:(id)sender;
 

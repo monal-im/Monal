@@ -35,7 +35,7 @@
 -(IBAction)join:(id)sender
 {
     NSDictionary *accountrow = [MLXMPPManager sharedInstance].connectedXMPP[self.accounts.indexOfSelectedItem];
-    xmpp* account= (xmpp*)[accountrow objectForKey:@"xmppAccount"];
+    xmpp* account= (xmpp*)[accountrow objectForKey:kXmppAccount];
     
     [[DataLayer sharedInstance] addMucFavoriteForAccount:account.accountNo withRoom:self.room.stringValue nick:self.nick.stringValue autoJoin:0 andCompletion:nil];
     [[MLXMPPManager sharedInstance] joinRoom:self.room.stringValue withPassword:self.password.stringValue forAccountRow:self.accounts.indexOfSelectedItem];

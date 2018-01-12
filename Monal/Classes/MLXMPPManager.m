@@ -20,7 +20,10 @@
 static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 static const int pingFreqencyMinutes =1;
 
+NSString *const kXmppAccount= @"xmppAccount";
+
 @interface MLXMPPManager()
+
 
 /**
  convenience function getting account in connected array with account number/id matching

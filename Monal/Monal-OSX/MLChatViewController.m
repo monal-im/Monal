@@ -108,12 +108,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     
     
+    
 //    [MLNotificationManager sharedInstance].currentAccountNo=self.accountNo;
 //    [MLNotificationManager sharedInstance].currentContact=self.contactName;
 
     self.accountNo = [NSString stringWithFormat:@"%@",[contact objectForKey:kAccountID]];
     self.contactName = [contact objectForKey:kContactName];
     self.contactDic= contact;
+     self.isMUC = [[DataLayer sharedInstance] isBuddyMuc:self.contactName forAccount:self.accountNo];
     [self updateWindowForContact:contact];
     
 #warning this should be smarter...
@@ -140,7 +142,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
  
     }
     
-    self.isMUC = [[DataLayer sharedInstance] isBuddyMuc:self.contactName forAccount:self.accountNo];
+   
     
 }
 
@@ -728,8 +730,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
    [[MLImageManager sharedInstance] getIconForContact:[messageRow objectForKey:@"af"] andAccount:self.accountNo withCompletion:^(NSImage *icon) {
        cell.senderIcon.image=icon;
    }];
-    
-    if(self.isMUC)
+
+    if(self.isMUC && cell.isInbound)
     {
         cell.senderName.stringValue=[messageRow objectForKey:@"af"];
         cell.senderName.hidden=NO;
@@ -739,8 +741,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     } else  {
         cell.nameHeight.constant=0.0f;
         cell.senderName.hidden=YES;
-      
- 
     }
     
     [cell updateDisplay];

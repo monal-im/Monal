@@ -44,7 +44,7 @@
 {
     self.contactInfo= contact;
     NSString *fullName= (NSString *) [self.contactInfo objectForKey:kFullName];
-    if(fullName.length>0){
+    if(fullName .length>0){
         self.contactNameField.stringValue= [self.contactInfo objectForKey:kFullName];
     } else  {
         self.contactNameField.stringValue= [self.contactInfo objectForKey:kContactName];
@@ -125,9 +125,8 @@
     
     NSUserNotification *alert =[[NSUserNotification alloc] init];
     NSString* acctString =[NSString stringWithFormat:@"%ld", (long)[[notification.userInfo objectForKey:@"accountNo"] integerValue]];
-    NSString* nameToShow=[notification.userInfo objectForKey:@"actuallyfrom"];
+    NSString* nameToShow=[notification.userInfo objectForKey:@"from"];
 
-    if(nameToShow.length==0) nameToShow=[notification.userInfo objectForKey:@"from"];
     
     if(self.window.occlusionState & NSWindowOcclusionStateVisible) {
         if(self.window.isKeyWindow) {
@@ -141,8 +140,13 @@
     
     if (showNotification) {
    
-        NSString* fullName =[[DataLayer sharedInstance] fullName:[notification.userInfo objectForKey:@"from"] forAccount:acctString];
-        if([fullName length]>0) nameToShow=fullName;
+        NSString* fullName = [notification.userInfo objectForKey:@"actuallyfrom"];
+
+        if([[notification.userInfo objectForKey:@"actuallyfrom"] isEqualToString:[notification.userInfo objectForKey:@"from"]]) {
+            fullName=[[DataLayer sharedInstance] fullName:[notification.userInfo objectForKey:@"from"] forAccount:acctString];
+           
+        }
+         if([fullName length]>0) nameToShow=fullName;
         
         alert.title= nameToShow;
         if([[[NSUserDefaults standardUserDefaults] objectForKey:@"MessagePreview"] boolValue]) {

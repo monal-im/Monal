@@ -259,12 +259,24 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
         
         if([item isKindOfClass:[NSDictionary class]]) {
             NSDictionary *contact =(NSDictionary *) item;
+            
+            BOOL isMUC= [[DataLayer sharedInstance] isBuddyMuc:[contact objectForKey:@"buddy_name"]  forAccount:[contact objectForKey:@"account_id"]];
+            
+            
+            if(isMUC){
+                userDelAlert.messageText =[NSString stringWithFormat:@"Are you sure you want to leave this group chat?"];
+            }
+            
             [userDelAlert beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse returnCode) {
                 
                 if(returnCode==1001) //YES
                 {
-                    [[MLXMPPManager sharedInstance] removeContact:contact];
                     
+                    if(isMUC) {
+                        [[MLXMPPManager sharedInstance] leaveRoom:[contact objectForKey:@"buddy_name"] forAccountId: [NSString stringWithFormat:@"%@",[contact objectForKey:@"account_id"]]];
+                    } else {
+                        [[MLXMPPManager sharedInstance] removeContact:contact];
+                    }
                  
                     if([self.contacts containsObject:contact]){
                         [self.contacts removeObject:contact];

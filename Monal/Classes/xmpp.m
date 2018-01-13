@@ -2672,10 +2672,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     // We may need this later
     NSString* unhashed=[NSString stringWithFormat:@"client/phone//Monal %@<%@", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"], [XMPPIQ featuresString]];
-    
-//    unhashed=[NSString stringWithFormat:@"client/pc//Exodus 0.9.2<http://jabber.org/protocol/caps<http://jabber.org/protocol/disco#info<http://jabber.org/protocol/disco#items<http://jabber.org/protocol/muc<"];
-
-    
+        
     NSData* hashed;
     //<http://jabber.org/protocol/offline<
     unsigned char digest[CC_SHA1_DIGEST_LENGTH];
@@ -2822,7 +2819,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) leaveRoom:(NSString*) room
 {
     XMPPPresence* presence =[[XMPPPresence alloc] init];
-    [presence leaveRoom:room onServer:_conferenceServer withName:_username];
+    [presence leaveRoom:room onServer:nil withName:_username];
     [self send:presence];
 }
 

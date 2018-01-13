@@ -21,6 +21,7 @@
 @property (nonatomic, weak) IBOutlet NSTextField *timeStamp;
 @property (nonatomic, weak) IBOutlet NSLayoutConstraint *timeStampHeight;
 @property (nonatomic, weak) IBOutlet NSLayoutConstraint *timeStampVeritcalOffset;
+@property (nonatomic, weak) IBOutlet NSLayoutConstraint *nameHeight;
 @property (nonatomic, weak) IBOutlet NSImageView *senderIcon;
 @property (nonatomic, weak) IBOutlet NSTextField *senderName;
 

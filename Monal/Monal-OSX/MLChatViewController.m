@@ -700,14 +700,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         cell.messageText.editable=NO;
     }
     
-    if(self.isMUC)
-    {
-        cell.senderIcon.hidden=YES;
-        cell.senderName.stringValue=[messageRow objectForKey:@"af"];
-        cell.senderName.hidden=NO;
-    }
-    
-    
+
     if([[messageRow objectForKey:@"delivered"] boolValue]!=YES)
     {
         cell.deliveryFailed=YES;
@@ -735,6 +728,20 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
    [[MLImageManager sharedInstance] getIconForContact:[messageRow objectForKey:@"af"] andAccount:self.accountNo withCompletion:^(NSImage *icon) {
        cell.senderIcon.image=icon;
    }];
+    
+    if(self.isMUC)
+    {
+        cell.senderName.stringValue=[messageRow objectForKey:@"af"];
+        cell.senderName.hidden=NO;
+        cell.nameHeight.constant=kCellTimeStampHeight;
+        cell.timeStampHeight.constant=kCellTimeStampHeight;
+        cell.timeStampVeritcalOffset.constant=kCellDefaultPadding;
+    } else  {
+        cell.nameHeight.constant=0.0f;
+        cell.senderName.hidden=YES;
+      
+ 
+    }
     
     [cell updateDisplay];
     

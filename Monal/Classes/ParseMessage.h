@@ -22,6 +22,7 @@
 @property (nonatomic, strong, readonly) NSString* actualFrom;
 @property (nonatomic, strong, readonly) NSString* messageText;
 @property (nonatomic, strong, readonly) NSString* messagHTML;
+@property (nonatomic, strong, readonly) NSString* subject;
 @property (nonatomic, assign, readonly) BOOL hasBody; 
 @property (nonatomic, strong, readonly) NSDate *delayTimeStamp;
 @property (nonatomic, strong, readonly) NSString* avatarData;

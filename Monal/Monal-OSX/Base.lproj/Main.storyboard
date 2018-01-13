@@ -1717,6 +1717,7 @@ Gw
                                                                 <constraint firstItem="Zna-XK-R5x" firstAttribute="top" secondItem="zUs-Dd-GH1" secondAttribute="top" constant="5" id="ERE-Fb-PO9"/>
                                                                 <constraint firstItem="Zna-XK-R5x" firstAttribute="centerX" secondItem="zUs-Dd-GH1" secondAttribute="centerX" id="IY1-r5-sgL"/>
                                                                 <constraint firstItem="c4f-GC-Hfe" firstAttribute="leading" secondItem="lsM-YA-awl" secondAttribute="trailing" constant="8" id="Jh5-m5-id3"/>
+                                                                <constraint firstItem="Zna-XK-R5x" firstAttribute="centerX" secondItem="zUs-Dd-GH1" secondAttribute="centerX" id="Rwr-yD-Cyl"/>
                                                                 <constraint firstItem="lsM-YA-awl" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="zUs-Dd-GH1" secondAttribute="leading" constant="50" id="cN9-UB-Ue7"/>
                                                                 <constraint firstItem="lsM-YA-awl" firstAttribute="centerY" secondItem="zUs-Dd-GH1" secondAttribute="centerY" constant="14.5" id="eBg-PO-smh"/>
                                                                 <constraint firstAttribute="bottom" secondItem="c4f-GC-Hfe" secondAttribute="bottom" constant="5" id="ydI-e0-0DL"/>
@@ -1774,6 +1775,7 @@ Gw
                                                             <constraints>
                                                                 <constraint firstItem="Xjf-lh-VS8" firstAttribute="centerY" secondItem="AA0-Za-mMq" secondAttribute="centerY" constant="14.5" id="8XI-oK-g67"/>
                                                                 <constraint firstItem="Xjf-lh-VS8" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="AA0-Za-mMq" secondAttribute="leading" constant="50" id="JgW-La-sN9"/>
+                                                                <constraint firstItem="Bab-Se-qo9" firstAttribute="centerX" secondItem="AA0-Za-mMq" secondAttribute="centerX" id="NeD-UY-w3Q"/>
                                                                 <constraint firstItem="SPf-hi-Vyw" firstAttribute="leading" secondItem="Xjf-lh-VS8" secondAttribute="trailing" constant="18" id="egb-77-2Bq"/>
                                                                 <constraint firstAttribute="bottom" secondItem="SPf-hi-Vyw" secondAttribute="bottom" constant="3" id="grb-8V-G0r"/>
                                                                 <constraint firstAttribute="trailing" secondItem="SPf-hi-Vyw" secondAttribute="trailing" constant="3" id="h5u-om-KLH"/>
@@ -1811,7 +1813,7 @@ Gw
                                                                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="8k4-Ai-1AJ"/>
                                                                         <constraint firstAttribute="height" relation="lessThanOrEqual" constant="14" id="U4S-jL-pcz"/>
                                                                     </constraints>
-                                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Today, 10:00PM" id="Z2f-uH-fuc">
+                                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="Today, 10:00PM" id="Z2f-uH-fuc">
                                                                         <font key="font" metaFont="smallSystem"/>
                                                                         <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
@@ -1862,10 +1864,11 @@ Gw
                                                                         <autoresizingMask key="autoresizingMask"/>
                                                                     </scroller>
                                                                 </scrollView>
-                                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="7np-ZR-2J2">
-                                                                    <rect key="frame" x="3" y="5" width="37" height="22"/>
+                                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="7np-ZR-2J2">
+                                                                    <rect key="frame" x="3" y="37" width="112" height="14"/>
                                                                     <constraints>
-                                                                        <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="22" id="OBo-R2-88S"/>
+                                                                        <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="33" id="d5d-ZW-Icu"/>
+                                                                        <constraint firstAttribute="height" constant="14" id="pSG-jq-KpQ"/>
                                                                     </constraints>
                                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Name" id="Hfl-Hc-rak">
                                                                         <font key="font" metaFont="smallSystem"/>
@@ -1875,11 +1878,12 @@ Gw
                                                                 </textField>
                                                             </subviews>
                                                             <constraints>
+                                                                <constraint firstItem="1Jj-Uz-3W8" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="7np-ZR-2J2" secondAttribute="trailing" constant="5" id="1WC-Ek-pDA"/>
                                                                 <constraint firstItem="NpM-vt-K6J" firstAttribute="centerX" secondItem="Rho-ef-n6l" secondAttribute="centerX" id="6K7-sC-p2b"/>
                                                                 <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="sQP-OP-6Ue" secondAttribute="trailing" constant="50" id="8H7-8V-QFg"/>
-                                                                <constraint firstAttribute="bottom" secondItem="7np-ZR-2J2" secondAttribute="bottom" constant="5" id="8ZJ-qX-bd2"/>
+                                                                <constraint firstItem="1Jj-Uz-3W8" firstAttribute="centerX" secondItem="Rho-ef-n6l" secondAttribute="centerX" id="Bua-tl-a8M"/>
+                                                                <constraint firstItem="7np-ZR-2J2" firstAttribute="top" secondItem="Rho-ef-n6l" secondAttribute="top" constant="5" id="DJq-Ne-Mwj"/>
                                                                 <constraint firstItem="1Jj-Uz-3W8" firstAttribute="centerX" secondItem="Rho-ef-n6l" secondAttribute="centerX" id="FbC-pe-jEQ"/>
-                                                                <constraint firstItem="sQP-OP-6Ue" firstAttribute="leading" secondItem="7np-ZR-2J2" secondAttribute="trailing" id="OJ0-Lc-E4P"/>
                                                                 <constraint firstItem="sQP-OP-6Ue" firstAttribute="top" secondItem="1Jj-Uz-3W8" secondAttribute="bottom" constant="10" id="P1b-ik-JgY"/>
                                                                 <constraint firstItem="NpM-vt-K6J" firstAttribute="top" secondItem="Rho-ef-n6l" secondAttribute="top" constant="-14" id="RjO-wz-MfG"/>
                                                                 <constraint firstAttribute="bottom" secondItem="sQP-OP-6Ue" secondAttribute="bottom" constant="3" id="YxQ-bv-KDK"/>
@@ -1892,6 +1896,7 @@ Gw
                                                             <connections>
                                                                 <outlet property="imageView" destination="G0F-Vw-4sf" id="WIa-ww-rlW"/>
                                                                 <outlet property="messageText" destination="xCt-jX-2Jc" id="06d-qo-OHN"/>
+                                                                <outlet property="nameHeight" destination="pSG-jq-KpQ" id="4mA-kz-KI8"/>
                                                                 <outlet property="senderIcon" destination="G0F-Vw-4sf" id="xiT-n3-1R7"/>
                                                                 <outlet property="senderName" destination="7np-ZR-2J2" id="pJf-Lm-QtY"/>
                                                                 <outlet property="timeStamp" destination="1Jj-Uz-3W8" id="2gV-Ko-Qa7"/>
@@ -1910,18 +1915,6 @@ Gw
                                                                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="P6q-rf-6a2"/>
                                                                     </constraints>
                                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Today, 10:00PM" id="jB0-Zd-Eie">
-                                                                        <font key="font" metaFont="smallSystem"/>
-                                                                        <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
-                                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                                    </textFieldCell>
-                                                                </textField>
-                                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="sWQ-oj-7zC">
-                                                                    <rect key="frame" x="184" y="211" width="104" height="14"/>
-                                                                    <constraints>
-                                                                        <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="KKD-16-8TH"/>
-                                                                        <constraint firstAttribute="height" relation="lessThanOrEqual" constant="14" id="gP3-GQ-xSr"/>
-                                                                    </constraints>
-                                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Today, 10:00PM" id="SDE-fx-uwf">
                                                                         <font key="font" metaFont="smallSystem"/>
                                                                         <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
@@ -1946,12 +1939,25 @@ Gw
                                                                         <outlet property="previewTarget" destination="qLp-oS-WKI" id="B8h-7B-hQf"/>
                                                                     </connections>
                                                                 </imageView>
+                                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" misplaced="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="sWQ-oj-7zC">
+                                                                    <rect key="frame" x="193" y="211" width="104" height="14"/>
+                                                                    <constraints>
+                                                                        <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="KKD-16-8TH"/>
+                                                                        <constraint firstAttribute="height" relation="lessThanOrEqual" constant="14" id="gP3-GQ-xSr"/>
+                                                                    </constraints>
+                                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Today, 10:00PM" id="SDE-fx-uwf">
+                                                                        <font key="font" metaFont="smallSystem"/>
+                                                                        <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
+                                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                                    </textFieldCell>
+                                                                </textField>
                                                             </subviews>
                                                             <constraints>
                                                                 <constraint firstItem="sWQ-oj-7zC" firstAttribute="centerX" secondItem="cX2-7P-kXI" secondAttribute="centerX" id="2cx-MM-fbk"/>
                                                                 <constraint firstItem="sWQ-oj-7zC" firstAttribute="top" secondItem="eQr-VP-pfh" secondAttribute="bottom" constant="5" id="CGY-V2-u17"/>
                                                                 <constraint firstAttribute="bottom" secondItem="61h-Ow-Utz" secondAttribute="bottom" constant="3" id="JHJ-ce-k66"/>
                                                                 <constraint firstAttribute="trailing" secondItem="61h-Ow-Utz" secondAttribute="trailing" constant="150" id="MTp-58-oPv"/>
+                                                                <constraint firstItem="sWQ-oj-7zC" firstAttribute="centerX" secondItem="cX2-7P-kXI" secondAttribute="centerX" id="O9z-3U-VSa"/>
                                                                 <constraint firstAttribute="bottom" secondItem="kUM-jm-fPa" secondAttribute="bottom" constant="2" id="PF5-yz-wOT"/>
                                                                 <constraint firstItem="61h-Ow-Utz" firstAttribute="leading" secondItem="kUM-jm-fPa" secondAttribute="trailing" constant="17" id="SFH-wV-cJu"/>
                                                                 <constraint firstItem="kUM-jm-fPa" firstAttribute="leading" secondItem="cX2-7P-kXI" secondAttribute="leading" constant="5" id="YqL-yM-EMz"/>

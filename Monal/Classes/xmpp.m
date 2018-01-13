@@ -1666,6 +1666,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         
                     }
                     
+                    if(messageNode.subject && messageNode.type==kMessageGroupChatType)
+                    {
+                        //TODO set topic for muc "contact"
+                    }
+                    
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"]  isEqualToString:@"presence"])
                 {

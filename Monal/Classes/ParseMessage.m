@@ -87,6 +87,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         State=@"Message";
 	}
     
+    
+    if([elementName isEqualToString:@"subject"])
+    {
+        return;
+    }
+    
 
     //ignore error message
 	if([elementName isEqualToString:@"body"])
@@ -193,6 +199,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     if([State isEqualToString:@"AvatarData"])
     {
         _avatarData=_messageBuffer;
+    }
+    
+   if([elementName isEqualToString:@"subject"])
+    {
+      _subject=_messageBuffer;
     }
     
 }

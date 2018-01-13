@@ -56,6 +56,10 @@
     if (self.isInbound)
     {
         self.messageText.alignment= kCTTextAlignmentLeft;
+        if(self.senderName.stringValue.length>0)
+        {
+            
+        }
     } else  {
         if( self.messageRect.size.width<kCellMaxWidth )//&& self.messageRect.size.height<=kCellMinHeight)
         {
@@ -78,7 +82,7 @@
     CGRect bubbleFrame = self.frame;
     bubbleFrame.origin.y=0;
     bubbleFrame.size.height-=(kCellDefaultPadding);
-    if(!self.timeStamp.hidden)
+    if(!self.timeStamp.hidden || !self.senderName.hidden )
     {
         bubbleFrame.size.height-=(kCellTimeStampHeight+kCellDefaultPadding);
     }

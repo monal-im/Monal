@@ -22,11 +22,14 @@
 @property (nonatomic, weak) IBOutlet NSLayoutConstraint *timeStampHeight;
 @property (nonatomic, weak) IBOutlet NSLayoutConstraint *timeStampVeritcalOffset;
 @property (nonatomic, weak) IBOutlet NSImageView *senderIcon;
+@property (nonatomic, weak) IBOutlet NSTextField *senderName;
 
 @property (nonatomic, weak) IBOutlet MLImageView *attachmentImage;
 @property (nonatomic, strong) NSData *imageData; 
 
 @property (nonatomic, assign) BOOL isInbound;
+
+
 @property (nonatomic, assign) NSRect messageRect;
 
 @property (nonatomic, assign) BOOL deliveryFailed;

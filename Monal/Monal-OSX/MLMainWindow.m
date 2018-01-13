@@ -125,8 +125,9 @@
     
     NSUserNotification *alert =[[NSUserNotification alloc] init];
     NSString* acctString =[NSString stringWithFormat:@"%ld", (long)[[notification.userInfo objectForKey:@"accountNo"] integerValue]];
-    NSString* nameToShow=[notification.userInfo objectForKey:@"from"];
+    NSString* nameToShow=[notification.userInfo objectForKey:@"actuallyfrom"];
 
+    if(nameToShow.length==0) nameToShow=[notification.userInfo objectForKey:@"from"];
     
     if(self.window.occlusionState & NSWindowOcclusionStateVisible) {
         if(self.window.isKeyWindow) {

@@ -1727,7 +1727,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                 }
                             }
                             
-                            //mark buddy as MUC
+                            if([presenceNode.type isEqualToString:kpresenceUnavailable])
+                            {
+                                //handle this differently later
+                                return;
+                            }
+                            
                         }
                         
                         if(presenceNode.type ==nil)

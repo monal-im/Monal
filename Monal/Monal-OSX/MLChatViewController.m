@@ -700,6 +700,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         cell.messageText.editable=NO;
     }
     
+    if(self.isMUC)
+    {
+        cell.senderIcon.hidden=YES;
+        cell.senderName.stringValue=[messageRow objectForKey:@"af"];
+        cell.senderName.hidden=NO;
+    }
     
     
     if([[messageRow objectForKey:@"delivered"] boolValue]!=YES)

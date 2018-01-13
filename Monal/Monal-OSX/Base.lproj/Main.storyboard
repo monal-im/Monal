@@ -352,7 +352,7 @@
                                     </subviews>
                                 </clipView>
                                 <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="XUl-Ks-VaW">
-                                    <rect key="frame" x="1" y="119" width="223" height="15"/>
+                                    <rect key="frame" x="1" y="-15" width="0.0" height="16"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                                 <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="NO" id="vwv-LC-S6g">
@@ -1862,16 +1862,30 @@ Gw
                                                                         <autoresizingMask key="autoresizingMask"/>
                                                                     </scroller>
                                                                 </scrollView>
+                                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="7np-ZR-2J2">
+                                                                    <rect key="frame" x="3" y="5" width="37" height="22"/>
+                                                                    <constraints>
+                                                                        <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="22" id="OBo-R2-88S"/>
+                                                                    </constraints>
+                                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Name" id="Hfl-Hc-rak">
+                                                                        <font key="font" metaFont="smallSystem"/>
+                                                                        <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="calibratedWhite"/>
+                                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                                    </textFieldCell>
+                                                                </textField>
                                                             </subviews>
                                                             <constraints>
                                                                 <constraint firstItem="NpM-vt-K6J" firstAttribute="centerX" secondItem="Rho-ef-n6l" secondAttribute="centerX" id="6K7-sC-p2b"/>
                                                                 <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="sQP-OP-6Ue" secondAttribute="trailing" constant="50" id="8H7-8V-QFg"/>
+                                                                <constraint firstAttribute="bottom" secondItem="7np-ZR-2J2" secondAttribute="bottom" constant="5" id="8ZJ-qX-bd2"/>
                                                                 <constraint firstItem="1Jj-Uz-3W8" firstAttribute="centerX" secondItem="Rho-ef-n6l" secondAttribute="centerX" id="FbC-pe-jEQ"/>
+                                                                <constraint firstItem="sQP-OP-6Ue" firstAttribute="leading" secondItem="7np-ZR-2J2" secondAttribute="trailing" id="OJ0-Lc-E4P"/>
                                                                 <constraint firstItem="sQP-OP-6Ue" firstAttribute="top" secondItem="1Jj-Uz-3W8" secondAttribute="bottom" constant="10" id="P1b-ik-JgY"/>
                                                                 <constraint firstItem="NpM-vt-K6J" firstAttribute="top" secondItem="Rho-ef-n6l" secondAttribute="top" constant="-14" id="RjO-wz-MfG"/>
                                                                 <constraint firstAttribute="bottom" secondItem="sQP-OP-6Ue" secondAttribute="bottom" constant="3" id="YxQ-bv-KDK"/>
                                                                 <constraint firstItem="sQP-OP-6Ue" firstAttribute="leading" secondItem="G0F-Vw-4sf" secondAttribute="trailing" constant="8" id="ZBZ-D5-wFo"/>
                                                                 <constraint firstItem="1Jj-Uz-3W8" firstAttribute="top" secondItem="NpM-vt-K6J" secondAttribute="bottom" constant="5" id="Znw-ti-iud"/>
+                                                                <constraint firstItem="7np-ZR-2J2" firstAttribute="leading" secondItem="Rho-ef-n6l" secondAttribute="leading" constant="5" id="pEl-80-OG0"/>
                                                                 <constraint firstAttribute="bottom" secondItem="G0F-Vw-4sf" secondAttribute="bottom" constant="2" id="xWU-cq-cOH"/>
                                                                 <constraint firstItem="G0F-Vw-4sf" firstAttribute="leading" secondItem="Rho-ef-n6l" secondAttribute="leading" constant="5" id="yKg-7J-tgj"/>
                                                             </constraints>
@@ -1879,6 +1893,7 @@ Gw
                                                                 <outlet property="imageView" destination="G0F-Vw-4sf" id="WIa-ww-rlW"/>
                                                                 <outlet property="messageText" destination="xCt-jX-2Jc" id="06d-qo-OHN"/>
                                                                 <outlet property="senderIcon" destination="G0F-Vw-4sf" id="xiT-n3-1R7"/>
+                                                                <outlet property="senderName" destination="7np-ZR-2J2" id="pJf-Lm-QtY"/>
                                                                 <outlet property="timeStamp" destination="1Jj-Uz-3W8" id="2gV-Ko-Qa7"/>
                                                                 <outlet property="timeStampHeight" destination="U4S-jL-pcz" id="cOn-H9-ign"/>
                                                                 <outlet property="timeStampVeritcalOffset" destination="Znw-ti-iud" id="Pjg-pu-u50"/>

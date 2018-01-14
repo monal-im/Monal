@@ -2127,7 +2127,6 @@ static DataLayer *sharedInstance=nil;
         
     }
    
-    
     [dbversionCheck unlock];
     [self resetContacts];
     return;

@@ -1668,7 +1668,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     
                     if(messageNode.subject && messageNode.type==kMessageGroupChatType)
                     {
-                        //TODO set topic for muc "contact"
+                        [[DataLayer sharedInstance] updateMucSubject:messageNode.subject forAccount:self.accountNo andRoom:messageNode.from withCompletion:nil];
                     }
                     
                 }

@@ -1293,6 +1293,21 @@ static DataLayer *sharedInstance=nil;
 
 }
 
+-(void) updateMucSubject:(NSString *) subject forAccount:(NSString*) accountNo andRoom:(NSString *) room  withCompletion:(void (^)(BOOL))completion
+{
+    NSString* query=[NSString stringWithFormat:@"update buddylist set muc_subject='%@' where account_id=%@ and buddy_name='%@'", subject.escapeForSql, accountNo, room.escapeForSql];
+    DDLogVerbose(@"%@", query);
+    
+    [self executeNonQuery:query withCompletion:^(BOOL success) {
+        
+        if(completion) {
+            completion(success);
+        }
+        
+    }];
+    
+}
+
 
 #pragma mark message Commands
 
@@ -2122,6 +2137,7 @@ static DataLayer *sharedInstance=nil;
         [self executeNonQuery:@"update dbversion set dbversion='2.0'; " withCompletion:nil];
         [self executeNonQuery:@"alter table buddy_resources add column muc_role varchar(255);" withCompletion:nil];
         [self executeNonQuery:@"alter table buddylist add column muc_subject varchar(255);" withCompletion:nil];
+        [self executeNonQuery:@"alter table buddylist add column muc_nick varchar(255);" withCompletion:nil];
         
         DDLogVerbose(@"Upgrade to 2.0 success ");
         

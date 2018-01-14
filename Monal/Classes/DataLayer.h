@@ -128,11 +128,12 @@ extern NSString *const kMessageTypeText;
 -(bool) isBuddyRemoved:(NSString*) buddy forAccount:(NSString*) accountNo ;
 
 
+
 #pragma mark MUC
 -(void) mucFavoritesForAccount:(NSString*) accountNo withCompletion:(void (^)(NSMutableArray *))completion;
 -(void) addMucFavoriteForAccount:(NSString*) accountNo withRoom:(NSString *) room nick:(NSString *)nick autoJoin:(BOOL) autoJoin andCompletion:(void (^)(BOOL))completion;
 -(void) deleteMucFavorite:(NSNumber *) mucid forAccountId:(NSInteger) accountNo withCompletion:(void (^)(BOOL))completion;
-
+-(void) updateMucSubject:(NSString *) subject forAccount:(NSString*) accountNo andRoom:(NSString *) room  withCompletion:(void (^)(BOOL))completion;
 
 /**
  Calls with YES if contact  has laredy been added to the database for this account

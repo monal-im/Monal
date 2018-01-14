@@ -2120,6 +2120,8 @@ static DataLayer *sharedInstance=nil;
         [self executeNonQuery:@"drop table muc_favorites" withCompletion:nil];
         [self executeNonQuery:@"CREATE TABLE IF NOT EXISTS \"muc_favorites\" (\"mucid\" integer NOT NULL primary key autoincrement,\"room\" varchar(255,0),\"nick\" varchar(255,0),\"autojoin\" bool, account_id int);" withCompletion:nil];
         [self executeNonQuery:@"update dbversion set dbversion='2.0'; " withCompletion:nil];
+        [self executeNonQuery:@"alter table buddy_resources add column muc_role varchar(255);" withCompletion:nil];
+        [self executeNonQuery:@"alter table buddylist add column muc_subject varchar(255);" withCompletion:nil];
         
         DDLogVerbose(@"Upgrade to 2.0 success ");
         

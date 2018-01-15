@@ -778,12 +778,12 @@ static DataLayer *sharedInstance=nil;
     
     if([sort isEqualToString:@"Name"])
     {
-        query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0 as 'count' , ifnull(full_name, buddy_name) as full_name, account_id from buddylist where online=1    order by full_name COLLATE NOCASE asc "];
+        query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0 as 'count' , ifnull(full_name, buddy_name) as full_name, MUC, muc_subject, muc_nick, account_id from buddylist where online=1    order by full_name COLLATE NOCASE asc "];
     }
     
     if([sort isEqualToString:@"Status"])
     {
-        query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0 as 'count', ifnull(full_name, buddy_name) as full_name, account_id from buddylist where   online=1   order by state,full_name COLLATE NOCASE  asc "];
+        query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0 as 'count', ifnull(full_name, buddy_name) as full_name, MUC, muc_subject, muc_nick, account_id from buddylist where   online=1   order by state,full_name COLLATE NOCASE  asc "];
     }
     
     [self executeReader:query withCompletion:^(NSMutableArray *results) {
@@ -794,7 +794,7 @@ static DataLayer *sharedInstance=nil;
 
 -(void) offlineContactsWithCompletion: (void (^)(NSMutableArray *))completion
 {
-    NSString* query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, ifnull(full_name, buddy_name) as full_name, a.account_id from buddylist  as A inner join account as b  on a.account_id=b.account_id  where  online=0 and enabled=1 order by full_name COLLATE NOCASE "];
+    NSString* query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, ifnull(full_name, buddy_name) as full_name, a.account_id, MUC, muc_subject, muc_nick from buddylist  as A inner join account as b  on a.account_id=b.account_id  where  online=0 and enabled=1 order by full_name COLLATE NOCASE "];
     [self executeReader:query withCompletion:^(NSMutableArray *results) {
         if(completion) completion(results);
     }];

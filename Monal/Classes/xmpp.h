@@ -182,7 +182,7 @@ sets away xmpp call.
 /**
  join a room on the conference server
  */
--(void) joinRoom:(NSString*) room withPassword:(NSString *)password;
+-(void) joinRoom:(NSString*) room withNick:(NSString*) nick andPassword:(NSString *)password;
 
 /**
  leave specific room

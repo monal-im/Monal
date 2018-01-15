@@ -112,9 +112,9 @@ Returns the server set name of the conencted account
 /**
  Joins the selected Room on the conference server
  */
--(void)  joinRoom:(NSString*) roomName  withPassword:(NSString*) password forAccountRow:(NSInteger) row;
+-(void)  joinRoom:(NSString*) roomName withNick:(NSString *)nick andPassword:(NSString*) password forAccountRow:(NSInteger) row;
 
--(void)  joinRoom:(NSString*) roomName  withPassword:(NSString*) password forAccounId:(NSInteger) accountId;
+-(void)  joinRoom:(NSString*) roomName withNick:(NSString *)nick andPassword:(NSString*) password forAccounId:(NSInteger) accountId;
 
 /**
  leave the specific MUC room

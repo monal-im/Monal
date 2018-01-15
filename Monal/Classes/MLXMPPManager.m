@@ -623,22 +623,22 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
     
 }
 
--(void)  joinRoom:(NSString*) roomName  withPassword:(NSString*) password forAccounId:(NSInteger) accountId
+-(void)  joinRoom:(NSString*) roomName  withNick:(NSString *)nick andPassword:(NSString*) password forAccounId:(NSInteger) accountId
 {
     xmpp* account= [self getConnectedAccountForID:[NSString stringWithFormat:@"%ld",accountId]];
-    [account joinRoom:roomName withPassword:password];
+    [account joinRoom:roomName withNick:nick andPassword:password];
     
 }
 
 
 
 
--(void)  joinRoom:(NSString*) roomName  withPassword:(NSString*) password forAccountRow:(NSInteger) row
+-(void)  joinRoom:(NSString*) roomName  withNick:(NSString *)nick andPassword:(NSString*) password forAccountRow:(NSInteger) row
 {
     if(row<[_connectedXMPP count] && row>=0) {
         NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
         xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
-        [account joinRoom:roomName withPassword:password];
+        [account joinRoom:roomName withNick:nick andPassword:password];
     }
 }
 

@@ -726,7 +726,7 @@ static DataLayer *sharedInstance=nil;
 
 -(void) contactForUsername:(NSString*) username forAccount: (NSString*) accountNo withCompletion: (void (^)(NSArray *))completion
 {
-    NSString* query= query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, ifnull(full_name, buddy_name) as full_name, account_id from buddylist where buddy_name='%@' and account_id=%@", username.escapeForSql, accountNo];
+    NSString* query= query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, ifnull(full_name, buddy_name) as full_name, account_id, MUC, muc_subject, muc_nick  from buddylist where buddy_name='%@' and account_id=%@", username.escapeForSql, accountNo];
     
     //DDLogVerbose(query);
     [self executeReader:query withCompletion:^(NSArray * toReturn) {

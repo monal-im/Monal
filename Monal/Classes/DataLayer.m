@@ -1308,6 +1308,17 @@ static DataLayer *sharedInstance=nil;
     
 }
 
+-(void) mucSubject:(NSString *) subject forAccount:(NSString*) accountNo andRoom:(NSString *) room  withCompletion:(void (^)(NSString* ))completion
+{
+    NSString* query=[NSString stringWithFormat:@"select muc_subject from buddylist where account_id=%@ and buddy_name='%@'", accountNo, room.escapeForSql];
+    DDLogVerbose(@"%@", query);
+    
+    [self executeScalar:query withCompletion:^(NSObject *result) {
+        if(completion) completion(result);
+    }];
+    
+}
+
 
 #pragma mark message Commands
 
@@ -1317,6 +1328,7 @@ static DataLayer *sharedInstance=nil;
     NSArray* messageArray= [self executeReader:query];
     return messageArray;
 }
+
 
 -(void) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom delivered:(BOOL) delivered unread:(BOOL) unread serverMessageId:(NSString *) messageid andOverrideDate:(NSDate *) messageDate withCompletion: (void (^)(BOOL))completion
 {

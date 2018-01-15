@@ -45,7 +45,7 @@
     }
     
 
-    [[MLXMPPManager sharedInstance] joinRoom:self.room.stringValue withPassword:self.password.stringValue forAccountRow:self.accounts.indexOfSelectedItem];
+    [[MLXMPPManager sharedInstance] joinRoom:self.room.stringValue withNick:self.nick.stringValue andPassword:self.password.stringValue forAccountRow:self.accounts.indexOfSelectedItem];
 }
 
 @end

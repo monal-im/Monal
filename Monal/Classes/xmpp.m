@@ -2812,7 +2812,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) joinRoom:(NSString*)room withNick:(NSString*)nick andPassword:(NSString *)password
 {
     XMPPPresence* presence =[[XMPPPresence alloc] init];
-    [presence joinRoom:room withPassword:password onServer:_conferenceServer withName:nick];
+    NSArray* parts =[room componentsSeparatedByString:@"@"];
+    if([parts count]>1)
+    {
+        [presence joinRoom:[parts objectAtIndex:0] withPassword:password onServer:[parts objectAtIndex:1] withName:nick];
+    }
+    else{
+        [presence joinRoom:room withPassword:password onServer:_conferenceServer withName:nick];
+    }
     [self send:presence];
 }
 

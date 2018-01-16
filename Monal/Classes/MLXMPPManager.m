@@ -131,6 +131,10 @@ An array of Dics what have timers to make sure everything was sent
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleSentMessage:) name:kMonalSentMessageNotice object:nil];
     
+     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(autoJoinRoom:) name:kMLHasConnectedNotice object:nil];
+    
+    
+    
     return self;
 }
 
@@ -656,6 +660,20 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 {
     xmpp* account= [self getConnectedAccountForID:accountId];
     [account leaveRoom:roomName];
+}
+
+-(void) autoJoinRoom:(NSNotification *) notification
+{
+    NSDictionary *dic = notification.object;
+
+    [[DataLayer sharedInstance] mucFavoritesForAccount:[dic objectForKey:@"AccountNo"] withCompletion:^(NSMutableArray *results) {
+        
+        for(NSDictionary *row in results)
+        {
+            [self joinRoom:[row objectForKey:@"room"] withNick:[row objectForKey:@"nick"] andPassword:[row objectForKey:@""] forAccounId:[[row objectForKey:@"account_id"] integerValue]];
+        }
+        
+    }];
 }
 
 #pragma mark - Jingle VOIP

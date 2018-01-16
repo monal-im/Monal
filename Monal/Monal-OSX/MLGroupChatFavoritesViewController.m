@@ -61,8 +61,16 @@
     
     NSDictionary *dic = self.favorites[row];
     
+    NSMutableString *cellText = [NSMutableString stringWithFormat:@"%@ on %@", [dic objectForKey:@"nick"], [dic objectForKey:@"room"]];
     
-    cell.textField.stringValue = [dic objectForKey:@"room"];
+    NSNumber *autoJoin = [dic objectForKey:@"autojoin"];
+    
+    if(autoJoin.boolValue)
+    {
+        [cellText appendString:@" (autojoin)"];
+    }
+    
+    cell.textField.stringValue = cellText;
     return cell;
 }
 

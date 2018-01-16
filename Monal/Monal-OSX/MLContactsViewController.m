@@ -356,16 +356,22 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
             if([self outlineView:self.contactsTable isItemExpandable:item])
             {
                 NSInteger rowCounter =0;
-                NSDictionary *row=[self outlineView:self.contactsTable child:rowCounter ofItem:item];
-                
-                if([[row objectForKey:kContactName] caseInsensitiveCompare:[self.chatViewController.contactDic objectForKey:kContactName] ]==NSOrderedSame &&
-                   [[row objectForKey:kAccountID]  integerValue]==[[self.chatViewController.contactDic objectForKey:kAccountID] integerValue] )
-                {
-                    NSIndexSet *indexSet = [NSIndexSet indexSetWithIndex:rowCounter+group+offset];
-                    [self.contactsTable selectRowIndexes:indexSet byExtendingSelection:NO];
-                    break;
+                while(rowCounter<[self.contactsTable numberOfChildrenOfItem:item]) {
+                    id childObject = [self outlineView:self.contactsTable child:rowCounter ofItem:item];
+                    if([childObject isKindOfClass:[NSDictionary class]]) {
+                        NSDictionary *row= (NSDictionary *) childObject;
+                        
+                        if([[row objectForKey:kContactName] caseInsensitiveCompare:[self.chatViewController.contactDic objectForKey:kContactName] ]==NSOrderedSame &&
+                           [[row objectForKey:kAccountID]  integerValue]==[[self.chatViewController.contactDic objectForKey:kAccountID] integerValue] )
+                        {
+                            NSIndexSet *indexSet = [NSIndexSet indexSetWithIndex:rowCounter+group+offset];
+                            [self.contactsTable selectRowIndexes:indexSet byExtendingSelection:NO];
+                            break;
+                        }
+                        
+                    }
+                    rowCounter++;
                 }
-                rowCounter++;
                 
             } else  {
                 NSDictionary *row=item;

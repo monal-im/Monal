@@ -670,7 +670,10 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
         
         for(NSDictionary *row in results)
         {
-            [self joinRoom:[row objectForKey:@"room"] withNick:[row objectForKey:@"nick"] andPassword:[row objectForKey:@""] forAccounId:[[row objectForKey:@"account_id"] integerValue]];
+            NSNumber *autoJoin =[row objectForKey:@"autojoin"] ;
+            if(autoJoin.boolValue) {
+                [self joinRoom:[row objectForKey:@"room"] withNick:[row objectForKey:@"nick"] andPassword:[row objectForKey:@""] forAccounId:[[row objectForKey:@"account_id"] integerValue]];
+            }
         }
         
     }];

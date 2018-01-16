@@ -873,6 +873,13 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                                   [[row objectForKey:kAccountID]  integerValue]==[[notification.userInfo objectForKey:kaccountNoKey] integerValue] )
                                {
                                    pos=counter;
+                                   NSDictionary *dic = self.contacts[pos];
+                                   NSNumber *muc=[dic objectForKey:@"Muc"];
+                                   if(muc.boolValue ==YES)
+                                   {
+                                       [dic setValue:[notification.userInfo objectForKey:@"muc_subject"] forKey:@"muc_subject"];
+                                   }
+                                   
                                    break;
                                }
                                counter++;

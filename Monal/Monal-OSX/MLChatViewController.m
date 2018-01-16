@@ -334,6 +334,18 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     DDLogVerbose(@"chat view got new message notice %@", notification.userInfo);
     
+    if([[notification.userInfo objectForKey:kMessageType] isEqualToString:kMessageTypeStatus])
+    {
+        NSMutableDictionary *mutableContact = [self.contactDic mutableCopy];
+        [mutableContact setObject:[notification.userInfo objectForKey:@"muc_subject"]  forKey:@"muc_subject"];
+        self.contactDic= [mutableContact copy];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self updateWindowForContact:self.contactDic];
+            
+        });
+        
+    }
+    
     NSNumber *shouldRefresh =[notification.userInfo objectForKey:@"shouldRefresh"];
     if (shouldRefresh.boolValue) {
         dispatch_async(dispatch_get_main_queue(),
@@ -374,6 +386,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                        });
     }
 
+  
+    
     
 }
 

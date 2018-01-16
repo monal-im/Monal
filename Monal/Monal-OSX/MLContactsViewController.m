@@ -35,6 +35,8 @@
 @property (nonatomic, strong) NSMutableArray* searchResults;
 @property (nonatomic, strong) NSMutableArray* offlineContacts;
 
+@property (nonatomic, strong) NSMutableIndexSet *expanded;
+
 @end
 
 @implementation MLContactsViewController
@@ -151,14 +153,43 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 {
     if(self.segmentedControl.selectedSegment!=self.currentSegment)
     {
+        if(self.currentSegment==kContactTab) {
+            self.expanded =[[NSMutableIndexSet alloc] init];
+            //get expanded groups
+            NSInteger counter=0;
+            
+            while (counter < [self.contactsTable numberOfChildrenOfItem:nil])
+            {
+                NSString  *child= [self outlineView:self.contactsTable child:counter ofItem:nil];
+                if([self.contactsTable isItemExpanded:child])
+                {
+                    [self.expanded addIndex:counter];
+                }
+                
+                counter++;
+            }
+        }
         self.currentSegment=self.segmentedControl.selectedSegment;
         if(self.segmentedControl.selectedSegment==kActiveTab) {
             [self showActiveChat:YES];
         }
         else {
             [self showActiveChat: NO];
+            NSInteger counter=0;
+            
+            while (counter < [self.contactsTable numberOfChildrenOfItem:nil])
+            {
+                NSString  *child= [self outlineView:self.contactsTable child:counter ofItem:nil];
+                
+                if([self.expanded containsIndex:counter])
+                {
+                    [self.contactsTable expandItem:child];
+                }
+                
+                counter++;
+            }
         }
- 
+        
     }
 }
 
@@ -168,6 +199,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 -(void) showActiveChat:(BOOL) shouldShow
 {
     if (shouldShow) {
+  
         [[DataLayer sharedInstance] activeContactsWithCompletion:^(NSMutableArray *cleanActive) {
             [[MLXMPPManager sharedInstance] cleanArrayOfConnectedAccounts:cleanActive];
             dispatch_async(dispatch_get_main_queue(), ^{
@@ -180,7 +212,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
     else {
         self.activeChat=nil;
         [self.contactsTable reloadData];
-        [self.contactsTable expandItem:@"Online"];
+       
         [self highlightCellForCurrentContact];
     }
     

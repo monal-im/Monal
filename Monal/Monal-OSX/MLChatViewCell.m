@@ -17,6 +17,10 @@
 + (NSRect) sizeWithMessage:(NSString *)messageString 
 {
     NSDictionary *attributes = @{NSFontAttributeName: [NSFont systemFontOfSize:13.0f]};
+    if(messageString.length<4)
+    {
+        attributes = @{NSFontAttributeName: [NSFont systemFontOfSize:38.0f]};
+    }
     NSSize size = NSMakeSize(kCellMaxWidth-(kCellDefaultPadding*2), MAXFLOAT);
     CGRect rect = [messageString boundingRectWithSize:size options:NSLineBreakByWordWrapping | NSStringDrawingUsesLineFragmentOrigin attributes:attributes];
     rect.size.height+=10;
@@ -68,6 +72,10 @@
     }
     self.messageText.font =[NSFont systemFontOfSize:13.0f];
     
+     if(self.messageText.string.length<4)
+     {
+         self.messageText.font =[NSFont systemFontOfSize:38.0f];
+     }
 }
 
 - (void)drawRect:(NSRect)dirtyRect {

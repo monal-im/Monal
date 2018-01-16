@@ -52,6 +52,7 @@ pod 'SAMKeychain'
 pod 'TPCircularBuffer'
 pod 'Sparkle'
 
+
   # Pods for Monal-OSX
 
   target 'Monal-OSXTests' do

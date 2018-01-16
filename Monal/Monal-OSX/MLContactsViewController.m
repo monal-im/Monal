@@ -308,28 +308,46 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 {
     if(self.chatViewController.contactDic)
     {
-        NSArray *sourceArray;
-        if(self.currentSegment==kActiveTab)
+        NSInteger offset=0;
+       
+        if(self.currentSegment!=kActiveTab)
         {
-            sourceArray= self.activeChat;
+            offset=1;//0 was root node and there are groups
+        }
+
+        
+        NSInteger group=0;
+        while(group < [self.contactsTable numberOfChildrenOfItem:0])
+        {
             
-        } else  {
-            sourceArray= self.contacts;
-        }
-        
-        NSInteger pos=0;
-        for (NSDictionary *row in sourceArray)
-        {
-            if([[row objectForKey:kContactName] caseInsensitiveCompare:[self.chatViewController.contactDic objectForKey:kContactName] ]==NSOrderedSame &&
-               [[row objectForKey:kAccountID]  integerValue]==[[self.chatViewController.contactDic objectForKey:kAccountID] integerValue] )
+            NSDictionary *item = [self.contactsTable itemAtRow:group];
+            if([self outlineView:self.contactsTable isItemExpandable:item])
             {
-                NSIndexSet *indexSet = [NSIndexSet indexSetWithIndex:pos];
-                [self.contactsTable selectRowIndexes:indexSet byExtendingSelection:NO];
-                break;
+                NSInteger rowCounter =0;
+                NSDictionary *row=[self outlineView:self.contactsTable child:rowCounter ofItem:item];
+                
+                if([[row objectForKey:kContactName] caseInsensitiveCompare:[self.chatViewController.contactDic objectForKey:kContactName] ]==NSOrderedSame &&
+                   [[row objectForKey:kAccountID]  integerValue]==[[self.chatViewController.contactDic objectForKey:kAccountID] integerValue] )
+                {
+                    NSIndexSet *indexSet = [NSIndexSet indexSetWithIndex:rowCounter+group+offset];
+                    [self.contactsTable selectRowIndexes:indexSet byExtendingSelection:NO];
+                    break;
+                }
+                rowCounter++;
+                
+            } else  {
+                NSDictionary *row=item;
+                if([[row objectForKey:kContactName] caseInsensitiveCompare:[self.chatViewController.contactDic objectForKey:kContactName] ]==NSOrderedSame &&
+                   [[row objectForKey:kAccountID]  integerValue]==[[self.chatViewController.contactDic objectForKey:kAccountID] integerValue] )
+                {
+                    NSIndexSet *indexSet = [NSIndexSet indexSetWithIndex:group+offset];
+                    [self.contactsTable selectRowIndexes:indexSet byExtendingSelection:NO];
+                    break;
+                }
             }
-            pos++;
+            group++;
         }
-        
+  
     }
 }
 
@@ -944,6 +962,16 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
     
 }
 
+
+//- (BOOL)outlineView:(NSOutlineView *)outlineView shouldExpandItem:(id)item
+//{
+//
+//}
+//
+//- (BOOL)outlineView:(NSOutlineView *)outlineView shouldCollapseItem:(id)item
+//{
+//
+//}
 
 
 - (BOOL)outlineView:(NSOutlineView *)outlineView isItemExpandable:(id)item

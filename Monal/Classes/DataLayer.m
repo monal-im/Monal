@@ -958,7 +958,7 @@ static DataLayer *sharedInstance=nil;
                 [self executeScalar:query3 withCompletion:^(NSObject * resourceCount) {
                 //do not duplicate resource
                  if([(NSNumber *)resourceCount integerValue] ==0) {
-                     NSString* query=[NSString stringWithFormat:@"insert into buddy_resources values (%@, '%@', '')", buddyid, presenceObj.resource.escapeForSql ];
+                     NSString* query=[NSString stringWithFormat:@"insert into buddy_resources ('buddy_id', 'resource', 'ver') values (%@, '%@', '')", buddyid, presenceObj.resource.escapeForSql ];
                      [self executeNonQuery:query withCompletion:nil];
                  }
             }];

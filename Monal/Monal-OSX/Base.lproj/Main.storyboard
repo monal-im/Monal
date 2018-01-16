@@ -346,6 +346,7 @@
                                                 </tableColumn>
                                             </tableColumns>
                                             <connections>
+                                                <action trigger="doubleAction" selector="doubleClick:" target="vg7-2F-QD1" id="IOS-GE-wbr"/>
                                                 <outlet property="dataSource" destination="vg7-2F-QD1" id="86Q-BV-pll"/>
                                                 <outlet property="delegate" destination="vg7-2F-QD1" id="LYI-sD-zwd"/>
                                             </connections>

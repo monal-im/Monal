@@ -81,6 +81,11 @@
     }
 }
 
+-(IBAction)doubleClick:(id)sender
+{
+    [self join:self];
+}
+
 -(IBAction)remove:(id)sender
 {
     NSIndexSet *selected = self.favoritesTable.selectedRowIndexes;

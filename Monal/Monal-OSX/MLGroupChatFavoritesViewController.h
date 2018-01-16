@@ -14,6 +14,7 @@
 
 -(IBAction)join:(id)sender;
 -(IBAction)remove:(id)sender;
+-(IBAction)doubleClick:(id)sender;
 
 
 @end

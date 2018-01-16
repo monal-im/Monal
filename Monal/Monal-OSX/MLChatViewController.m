@@ -791,7 +791,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
 }
 
-#pragma mark date time
+#pragma mark - date time
 
 -(void) setupDateObjects
 {

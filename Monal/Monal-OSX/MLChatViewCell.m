@@ -72,6 +72,8 @@
 
 - (void)drawRect:(NSRect)dirtyRect {
     [super drawRect:dirtyRect];
+    if(!self.messageText) return; 
+    
    // NSLog(@"%@ %f", self.messageText.string, self.messageRect.size.width);
     
     if(self.attachmentImage) return; 

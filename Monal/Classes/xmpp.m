@@ -1674,7 +1674,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                                                                   @"accountNo":_accountNo,
                                                                                                   @"showAlert":[NSNumber numberWithBool:showAlert],
                                                                                                   @"shouldRefresh":[NSNumber numberWithBool:shouldRefresh],
-                                                                                                  @"messageType":messageType
+                                                                                                  @"messageType":messageType?messageType:kMessageTypeText
                                                                                                   };
                                                                           
                                                                           [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:userDic];

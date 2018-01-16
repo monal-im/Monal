@@ -47,7 +47,7 @@ extern NSString *const kCount;
 extern NSString *const kMessageType;
 extern NSString *const kMessageTypeImage;
 extern NSString *const kMessageTypeText;
-
+extern NSString *const kMessageTypeStatus;
 
 + (DataLayer* )sharedInstance;
 
@@ -174,7 +174,7 @@ extern NSString *const kMessageTypeText;
 /*
  adds a specified message to the database
  */
--(void) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom delivered:(BOOL) delivered unread:(BOOL) unread serverMessageId:(NSString *) messageid andOverrideDate:(NSDate *) messageDate withCompletion: (void (^)(BOOL))completion;
+-(void) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom delivered:(BOOL) delivered unread:(BOOL) unread serverMessageId:(NSString *) messageid messageType:(NSString *) messageType andOverrideDate:(NSDate *) messageDate withCompletion: (void (^)(BOOL))completion;
 
 /**
   checks to see if there is a message with the provided messageid. will return YES if the messageid exists for this account and contact

@@ -659,22 +659,42 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     NSDictionary *messageRow = [self.messageList objectAtIndex:row];
     MLChatViewCell *cell;
     
-    if([[messageRow objectForKey:@"af"] isEqualToString:self.jid]) {
-        cell = [tableView makeViewWithIdentifier:@"OutboundTextCell" owner:self];
-        cell.isInbound= NO;
-        cell.messageText.textColor = [NSColor whiteColor];
-        cell.messageText.linkTextAttributes =@{NSForegroundColorAttributeName:[NSColor whiteColor], NSUnderlineStyleAttributeName: @YES};
-    
-    }
-    else  {
-        cell = [tableView makeViewWithIdentifier:@"InboundTextCell" owner:self];
-        cell.isInbound=YES;
-        cell.messageText.linkTextAttributes =@{NSForegroundColorAttributeName:[NSColor blackColor], NSUnderlineStyleAttributeName: @YES};
-    }
-    
     NSString *messageString =[messageRow objectForKey:@"message"];
     NSString *messageType =[messageRow objectForKey:kMessageType];
-    if([messageType isEqualToString:kMessageTypeImage])
+    
+    if([messageType isEqualToString:kMessageTypeStatus])
+    {
+        cell = [tableView makeViewWithIdentifier:@"statusCell" owner:self];
+        cell.timeStamp.stringValue=messageString;
+        return cell;
+    }
+    
+    if([messageType isEqualToString:kMessageTypeText]) {
+        if([[messageRow objectForKey:@"af"] isEqualToString:self.jid]) {
+            cell = [tableView makeViewWithIdentifier:@"OutboundTextCell" owner:self];
+            cell.isInbound= NO;
+            cell.messageText.textColor = [NSColor whiteColor];
+            cell.messageText.linkTextAttributes =@{NSForegroundColorAttributeName:[NSColor whiteColor], NSUnderlineStyleAttributeName: @YES};
+            
+        }
+        else  {
+            cell = [tableView makeViewWithIdentifier:@"InboundTextCell" owner:self];
+            cell.isInbound=YES;
+            cell.messageText.linkTextAttributes =@{NSForegroundColorAttributeName:[NSColor blackColor], NSUnderlineStyleAttributeName: @YES};
+        }
+        
+        
+        //reset to remove any links
+        cell.messageText.string=@"";
+        
+        cell.messageText.editable=YES;
+        cell.messageText.string =messageString;
+        [cell.messageText checkTextInDocument:nil];
+        cell.messageText.editable=NO;
+       
+    }
+    
+     if([messageType isEqualToString:kMessageTypeImage])
     {
         NSString* cellDirectionID = @"InboundImageCell";
         if([[messageRow objectForKey:@"af"] isEqualToString:self.jid]) {
@@ -691,16 +711,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         }];
  
     }
-    else  {
-        
-        //reset to remove any links
-        cell.messageText.string=@"";
-        
-        cell.messageText.editable=YES;
-        cell.messageText.string =messageString;
-        [cell.messageText checkTextInDocument:nil];
-        cell.messageText.editable=NO;
-    }
+   
     
 
     if([[messageRow objectForKey:@"delivered"] boolValue]!=YES)
@@ -753,6 +764,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     NSDictionary *messageRow = [self.messageList objectAtIndex:row];
     NSString *messageString =[messageRow objectForKey:@"message"];
     NSString *messageType =[messageRow objectForKey:kMessageType];
+    if([messageType isEqualToString:kMessageTypeStatus])
+    {
+        return 45;
+    }
+    
     if([messageType isEqualToString:kMessageTypeImage])
     {
         return 230;

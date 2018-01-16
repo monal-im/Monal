@@ -41,6 +41,7 @@ NSString *const kFullName =@"full_name";
 NSString *const kMessageType =@"messageType";
 NSString *const kMessageTypeImage =@"Image";
 NSString *const kMessageTypeText =@"Text";
+NSString *const kMessageTypeStatus =@"Status";
 
 // used for contact rows
 NSString *const kContactName =@"buddy_name";
@@ -1330,7 +1331,7 @@ static DataLayer *sharedInstance=nil;
 }
 
 
--(void) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom delivered:(BOOL) delivered unread:(BOOL) unread serverMessageId:(NSString *) messageid andOverrideDate:(NSDate *) messageDate withCompletion: (void (^)(BOOL))completion
+-(void) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom delivered:(BOOL) delivered unread:(BOOL) unread serverMessageId:(NSString *) messageid messageType:(NSString *) messageType andOverrideDate:(NSDate *) messageDate withCompletion: (void (^)(BOOL))completion
 {
     [self hasMessageForId:messageid toContact:actualfrom onAccount:accountNo andCompletion:^(BOOL exists) {
         if(!exists)
@@ -1362,28 +1363,37 @@ static DataLayer *sharedInstance=nil;
             
             NSString* dateString = [formatter stringFromDate:destinationDate];
             
-            // in the event it is a message from the room
-            [self messageTypeForMessage:message withCompletion:^(NSString *messageType) {
-                
-                //all messages default to unread
-                NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, %@, '%@',  '%@', '%@', '%@', '%@',%d,%d,'%@', '%@');", accountNo, from.escapeForSql, to.escapeForSql, 	dateString, message.escapeForSql, actualfrom.escapeForSql,unread, delivered, messageid.escapeForSql,messageType];
+            if(messageType)
+            {
+                NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, %@, '%@',  '%@', '%@', '%@', '%@',%d,%d,'%@', '%@');", accountNo, from.escapeForSql, to.escapeForSql,     dateString, message.escapeForSql, actualfrom.escapeForSql,unread, delivered, messageid.escapeForSql,messageType];
                 DDLogVerbose(@"%@",query);
                 [self executeNonQuery:query withCompletion:^(BOOL success) {
-                    
-                    if(!success)
-                    {
-                        DDLogError(@"failed to insert ");
-                    }
-                    
-                    if(completion)
-                    {
-                        completion(success);
-                    }
                 }];
-            }];
+            }
+            else  {
+                // in the event it is a message from the room
+                [self messageTypeForMessage:message withCompletion:^(NSString *foundMessageType) {
+                    
+                    //all messages default to unread
+                    NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, %@, '%@',  '%@', '%@', '%@', '%@',%d,%d,'%@', '%@');", accountNo, from.escapeForSql, to.escapeForSql, 	dateString, message.escapeForSql, actualfrom.escapeForSql,unread, delivered, messageid.escapeForSql,foundMessageType];
+                    DDLogVerbose(@"%@",query);
+                    [self executeNonQuery:query withCompletion:^(BOOL success) {
+                        
+                        if(!success)
+                        {
+                            DDLogError(@"failed to insert ");
+                        }
+                        
+                        if(completion)
+                        {
+                            completion(success);
+                        }
+                    }];
+                }];
+            }
         }
-        
     }];
+    
     
 }
 

@@ -1594,10 +1594,26 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         
                     }
                     
-                    if(messageNode.hasBody)
+                    if(messageNode.subject && messageNode.type==kMessageGroupChatType)
                     {
+                        [[DataLayer sharedInstance] updateMucSubject:messageNode.subject forAccount:self.accountNo andRoom:messageNode.from withCompletion:nil];
+                     
+                    }
+                    
+                    if(messageNode.hasBody || messageNode.subject)
+                    {
+                        NSString *ownNick;
+                        //TODO if muc find own nick to see if echo
+                        if(messageNode.type==kMessageGroupChatType)
+                        {
+                            
+                        }
+                        
+                    
+                        
+                        
                         if ([messageNode.type isEqualToString:kMessageGroupChatType]
-                            && [messageNode.actualFrom isEqualToString:_username])
+                            && [messageNode.actualFrom isEqualToString:ownNick])
                         {
                             //this is just a muc echo
                         }
@@ -1612,9 +1628,20 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                 showAlert=NO;
                             }
                             
+                            NSString *body=messageNode.messageText;
+                            NSString *messageType=nil;
+                            if(!body  && messageNode.subject)
+                            {
+                                body =[NSString stringWithFormat:@"%@ changed the subject to: %@", messageNode.actualFrom, messageNode.subject];
+                                messageType=kMessageTypeStatus;
+                            }
+                            
+                            
                             [[DataLayer sharedInstance] addMessageFrom:messageNode.from to:messageNode.to
-                                                            forAccount:_accountNo withBody:messageNode.messageText
-                                                          actuallyfrom:messageNode.actualFrom delivered:YES  unread:unread  serverMessageId:messageNode.idval andOverrideDate:messageNode.delayTimeStamp withCompletion:^(BOOL success) {
+                                                            forAccount:_accountNo withBody:body
+                                                          actuallyfrom:messageNode.actualFrom delivered:YES  unread:unread  serverMessageId:messageNode.idval
+                                                           messageType:messageType
+                                                       andOverrideDate:messageNode.delayTimeStamp withCompletion:^(BOOL success) {
                                                               if(success)
                                                               {
                                                                   [self.networkQueue addOperationWithBlock:^{
@@ -1646,7 +1673,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                                                                   @"to":messageNode.to?messageNode.to:recipient,
                                                                                                   @"accountNo":_accountNo,
                                                                                                   @"showAlert":[NSNumber numberWithBool:showAlert],
-                                                                                                  @"shouldRefresh":[NSNumber numberWithBool:shouldRefresh]
+                                                                                                  @"shouldRefresh":[NSNumber numberWithBool:shouldRefresh],
+                                                                                                  @"messageType":messageType
                                                                                                   };
                                                                           
                                                                           [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:userDic];
@@ -1666,10 +1694,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         
                     }
                     
-                    if(messageNode.subject && messageNode.type==kMessageGroupChatType)
-                    {
-                        [[DataLayer sharedInstance] updateMucSubject:messageNode.subject forAccount:self.accountNo andRoom:messageNode.from withCompletion:nil];
-                    }
+                  
                     
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"]  isEqualToString:@"presence"])

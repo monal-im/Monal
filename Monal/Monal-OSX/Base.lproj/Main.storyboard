@@ -6,6 +6,7 @@
         <plugIn identifier="com.apple.WebKitIBPlugin" version="13771"/>
         <capability name="box content view" minToolsVersion="7.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+        <capability name="system font weights other than Regular or Bold" minToolsVersion="7.0"/>
     </dependencies>
     <scenes>
         <!--Server DetailsVC-->
@@ -1624,7 +1625,7 @@ Gw
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" selectionHighlightStyle="none" columnReordering="NO" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" typeSelect="NO" rowHeight="230" rowSizeStyle="automatic" viewBased="YES" id="Rsm-HI-GDG">
-                                            <rect key="frame" x="0.0" y="0.0" width="493" height="580"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="493" height="627"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <size key="intercellSpacing" width="3" height="2"/>
                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -1904,8 +1905,48 @@ Gw
                                                                 <outlet property="timeStampVeritcalOffset" destination="Znw-ti-iud" id="Pjg-pu-u50"/>
                                                             </connections>
                                                         </tableCellView>
+                                                        <tableCellView identifier="statusCell" id="dIe-jK-UFl" userLabel="statusCell" customClass="MLChatViewCell">
+                                                            <rect key="frame" x="1" y="349" width="490" height="45"/>
+                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                            <subviews>
+                                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="WpQ-8W-KBz">
+                                                                    <rect key="frame" x="193" y="45" width="104" height="14"/>
+                                                                    <constraints>
+                                                                        <constraint firstAttribute="height" constant="14" id="9dw-rZ-aGW"/>
+                                                                        <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="trs-o5-CVQ"/>
+                                                                    </constraints>
+                                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Today, 10:00PM" id="Kgz-Qo-Ui6">
+                                                                        <font key="font" metaFont="smallSystem"/>
+                                                                        <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="calibratedWhite"/>
+                                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                                    </textFieldCell>
+                                                                </textField>
+                                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="n4e-88-Xmr">
+                                                                    <rect key="frame" x="193" y="26" width="104" height="14"/>
+                                                                    <constraints>
+                                                                        <constraint firstAttribute="height" relation="lessThanOrEqual" constant="14" id="1pf-32-Qsd"/>
+                                                                        <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="cy1-pN-McG"/>
+                                                                    </constraints>
+                                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="Status Message" id="vic-fi-Itw">
+                                                                        <font key="font" metaFont="systemSemibold" size="11"/>
+                                                                        <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="calibratedWhite"/>
+                                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                                    </textFieldCell>
+                                                                </textField>
+                                                            </subviews>
+                                                            <constraints>
+                                                                <constraint firstItem="n4e-88-Xmr" firstAttribute="centerX" secondItem="dIe-jK-UFl" secondAttribute="centerX" id="0gk-Nt-o3D"/>
+                                                                <constraint firstItem="WpQ-8W-KBz" firstAttribute="centerX" secondItem="dIe-jK-UFl" secondAttribute="centerX" id="UQW-rP-Yq0"/>
+                                                                <constraint firstItem="n4e-88-Xmr" firstAttribute="top" secondItem="WpQ-8W-KBz" secondAttribute="bottom" constant="5" id="aX0-Zm-F2f"/>
+                                                                <constraint firstItem="WpQ-8W-KBz" firstAttribute="top" secondItem="dIe-jK-UFl" secondAttribute="top" constant="-14" id="nak-jJ-bQV"/>
+                                                                <constraint firstItem="n4e-88-Xmr" firstAttribute="centerX" secondItem="dIe-jK-UFl" secondAttribute="centerX" id="qq6-Ho-db9"/>
+                                                            </constraints>
+                                                            <connections>
+                                                                <outlet property="timeStamp" destination="n4e-88-Xmr" id="TBO-dm-zbc"/>
+                                                            </connections>
+                                                        </tableCellView>
                                                         <tableCellView identifier="InboundImageCell" misplaced="YES" id="cX2-7P-kXI" userLabel="Chat View in image Cell" customClass="MLChatViewCell">
-                                                            <rect key="frame" x="1" y="349" width="490" height="230"/>
+                                                            <rect key="frame" x="1" y="396" width="490" height="230"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
                                                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="eQr-VP-pfh">

@@ -204,6 +204,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
    if([elementName isEqualToString:@"subject"])
     {
       _subject=_messageBuffer;
+        _messageBuffer=nil; // specifically so the body doesnt get set 
     }
     
 }

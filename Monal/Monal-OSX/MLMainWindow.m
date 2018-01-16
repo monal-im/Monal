@@ -137,6 +137,11 @@
         }
     }
     
+    if([[notification.userInfo objectForKey:@"messageType"] isEqualToString:kMessageTypeStatus])
+    {
+        showNotification=NO;
+    }
+    
     
     if (showNotification) {
    

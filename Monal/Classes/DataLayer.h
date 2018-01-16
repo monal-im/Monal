@@ -121,15 +121,18 @@ extern NSString *const kMessageTypeStatus;
 
 -(void) isBuddyOnline:(NSString*) buddy forAccount:(NSString*) accountNo withCompletion: (void (^)(BOOL))completion;
 
--(bool) isBuddyMuc:(NSString*) buddy forAccount:(NSString*) accountNo;
-
-
--(bool) isBuddyAdded:(NSString*) buddy forAccount:(NSString*) accountNo ;
--(bool) isBuddyRemoved:(NSString*) buddy forAccount:(NSString*) accountNo ;
-
-
+-(BOOL) isBuddyAdded:(NSString*) buddy forAccount:(NSString*) accountNo ;
+-(BOOL) isBuddyRemoved:(NSString*) buddy forAccount:(NSString*) accountNo ;
 
 #pragma mark MUC
+
+-(NSString *) ownNickNameforMuc:(NSString*) room forAccount:(NSString*) accountNo;
+-(void) updateOwnNickName:(NSString *) nick forMuc:(NSString*) room forAccount:(NSString*) accountNo;
+
+
+-(BOOL) isBuddyMuc:(NSString*) buddy forAccount:(NSString*) accountNo;
+
+
 -(void) mucFavoritesForAccount:(NSString*) accountNo withCompletion:(void (^)(NSMutableArray *))completion;
 -(void) addMucFavoriteForAccount:(NSString*) accountNo withRoom:(NSString *) room nick:(NSString *)nick autoJoin:(BOOL) autoJoin andCompletion:(void (^)(BOOL))completion;
 -(void) deleteMucFavorite:(NSNumber *) mucid forAccountId:(NSInteger) accountNo withCompletion:(void (^)(BOOL))completion;

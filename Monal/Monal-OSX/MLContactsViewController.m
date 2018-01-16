@@ -1031,17 +1031,25 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
         [cell setUnreadCount:0];
     }
     
-    cell.username =[contactRow objectForKey:kContactName] ;
+    NSString *statusText ;
+    NSNumber *muc=[contactRow objectForKey:@"Muc"];
+     cell.username =[contactRow objectForKey:kContactName] ;
     
-    
-    NSString *statusText = [contactRow objectForKey:@"status"];
-    if(statusText) {
-        if( [statusText isEqualToString:@"(null)"])  {
-            statusText = @"";
-        }
-        
-        cell.status.stringValue =statusText;
+    if(muc.boolValue ==YES)
+    {
+         cell.name.stringValue = [contactRow objectForKey:@"muc_subject"] ;
+          statusText = [contactRow objectForKey:@"muc_nick"];
     }
+    else  {
+        
+        statusText = [contactRow objectForKey:@"status"];
+        if(statusText) {
+            if( [statusText isEqualToString:@"(null)"])  {
+                statusText = @"";
+            }
+        }
+    }
+    cell.status.stringValue =statusText;
     
     NSString *state= [[contactRow objectForKey:@"state"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     

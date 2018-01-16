@@ -76,6 +76,8 @@
         NSDictionary *dic = self.favorites[row];
         NSNumber *account=[dic objectForKey:@"account_id"];
         [[MLXMPPManager sharedInstance] joinRoom:[dic objectForKey:@"room"] withNick:[dic objectForKey:@"nick"]  andPassword:@"" forAccounId:account.integerValue ];
+        [[DataLayer sharedInstance] updateOwnNickName:[dic objectForKey:@"nick"] forMuc:[dic objectForKey:@"room"] forAccount:[NSString stringWithFormat:@"%@", account]];
+        
     }
 }
 

@@ -1606,11 +1606,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         //TODO if muc find own nick to see if echo
                         if(messageNode.type==kMessageGroupChatType)
                         {
-                            
+                            ownNick = [[DataLayer sharedInstance] ownNickNameforMuc:messageNode.from forAccount:self.accountNo];
                         }
-                        
-                    
-                        
                         
                         if ([messageNode.type isEqualToString:kMessageGroupChatType]
                             && [messageNode.actualFrom isEqualToString:ownNick])

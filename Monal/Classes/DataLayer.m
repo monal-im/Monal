@@ -1236,11 +1236,29 @@ static DataLayer *sharedInstance=nil;
 
 #pragma mark MUC
 
--(bool) isBuddyMuc:(NSString*) buddy forAccount:(NSString*) accountNo
+-(BOOL) isBuddyMuc:(NSString*) buddy forAccount:(NSString*) accountNo
 {
     NSString* query=[NSString stringWithFormat:@"SELECT Muc from buddylist where account_id=%@  and buddy_name='%@' ", accountNo, buddy.escapeForSql];
     NSNumber* status=(NSNumber*)[self executeScalar:query];
     return [status boolValue];
+}
+
+
+-(NSString *) ownNickNameforMuc:(NSString*) room forAccount:(NSString*) accountNo
+{
+    NSString* query=[NSString stringWithFormat:@"SELECT muc_nick from buddylist where account_id=%@  and buddy_name='%@' ", accountNo, room.escapeForSql];
+    NSString * nick=(NSNumber*)[self executeScalar:query];
+    return nick;
+}
+
+-(void) updateOwnNickName:(NSString *) nick forMuc:(NSString*) room forAccount:(NSString*) accountNo
+{
+    NSString* query=[NSString stringWithFormat:@"update buddylist set muc_nick='%@' where account_id=%@ and buddy_name='%@'", nick.escapeForSql, accountNo, room.escapeForSql];
+    DDLogVerbose(@"%@", query);
+    
+    [self executeNonQuery:query withCompletion:^(BOOL success) {
+  
+    }];
 }
 
 
@@ -1368,6 +1386,10 @@ static DataLayer *sharedInstance=nil;
                 NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, %@, '%@',  '%@', '%@', '%@', '%@',%d,%d,'%@', '%@');", accountNo, from.escapeForSql, to.escapeForSql,     dateString, message.escapeForSql, actualfrom.escapeForSql,unread, delivered, messageid.escapeForSql,messageType];
                 DDLogVerbose(@"%@",query);
                 [self executeNonQuery:query withCompletion:^(BOOL success) {
+                    if(completion)
+                    {
+                        completion(success);
+                    }
                 }];
             }
             else  {

@@ -673,7 +673,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     NSDictionary *messageRow = [self.messageList objectAtIndex:row];
     MLChatViewCell *cell;
     
-    NSString *messageString =[messageRow objectForKey:@"message"];
+    NSString *messageString = [messageRow objectForKey:@"message"];
     NSString *messageType =[messageRow objectForKey:kMessageType];
     
     if([messageType isEqualToString:kMessageTypeStatus])
@@ -793,9 +793,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         
         BOOL showTime=[self shouldShowTimeForRow:row];
         NSInteger timeOffset =0;
-        if(!showTime) timeOffset = kCellTimeStampHeight+kCellDefaultPadding;
+        if(!showTime && !self.isMUC) timeOffset = kCellTimeStampHeight+kCellDefaultPadding;
         
-        if(rect.size.height<44)  { // 44 is doublie line height
+        if(rect.size.height<44 )  { // 44 is doublie line height
             return  kCellMinHeight-timeOffset;
         }
         else {

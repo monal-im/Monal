@@ -1594,6 +1594,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         
                     }
                     
+                    NSString *recipient=messageNode.to;
+                    
+                    if(!recipient)
+                    {
+                        recipient= _fulluser;
+                    }
+                    
                     if(messageNode.subject && messageNode.type==kMessageGroupChatType)
                     {
                         [[DataLayer sharedInstance] updateMucSubject:messageNode.subject forAccount:self.accountNo andRoom:messageNode.from withCompletion:nil];
@@ -1634,7 +1641,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             }
                             
                             
-                            [[DataLayer sharedInstance] addMessageFrom:messageNode.from to:messageNode.to
+                            [[DataLayer sharedInstance] addMessageFrom:messageNode.from to:recipient
                                                             forAccount:_accountNo withBody:body
                                                           actuallyfrom:messageNode.actualFrom delivered:YES  unread:unread  serverMessageId:messageNode.idval
                                                            messageType:messageType
@@ -1700,6 +1707,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     if(self.accountState>=kStateBound)
                         self.lastHandledInboundStanza=[NSNumber numberWithInteger: [self.lastHandledInboundStanza integerValue]+1];
                     ParsePresence* presenceNode= [[ParsePresence alloc]  initWithDictionary:stanzaToParse];
+                    
+                    NSString *recipient=presenceNode.to;
+                    
+                    if(!recipient)
+                    {
+                        recipient= _fulluser;
+                    }
+                    
+                    
                     if([presenceNode.user isEqualToString:_fulluser]) {
                         //ignore self
                     }

@@ -1110,11 +1110,15 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
     
     if(muc.boolValue ==YES)
     {
-         cell.name.stringValue = [contactRow objectForKey:@"muc_subject"] ;
-          statusText = [contactRow objectForKey:@"muc_nick"];
+        NSString * subject =[contactRow objectForKey:@"muc_subject"];
+        if(subject.length>0) {
+            subject=[contactRow objectForKey:kContactName] ;
+        }
+        
+        cell.name.stringValue = subject ;
+        statusText = [contactRow objectForKey:@"muc_nick"];
     }
     else  {
-        
         statusText = [contactRow objectForKey:@"status"];
         if(statusText) {
             if( [statusText isEqualToString:@"(null)"])  {

@@ -52,11 +52,13 @@
     {
         self.contactNameField.stringValue =(NSString *) [self.contactInfo objectForKey:@"muc_subject"];
     }
-
+    
     else if(fullName.length>0){
         self.contactNameField.stringValue= [self.contactInfo objectForKey:kFullName];
     } else  {
-        self.contactNameField.stringValue= [self.contactInfo objectForKey:kContactName];
+        if([self.contactInfo objectForKey:kContactName]){
+            self.contactNameField.stringValue= [self.contactInfo objectForKey:kContactName];
+        }
     }
 }
 

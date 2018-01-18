@@ -980,9 +980,9 @@ CA
                                 <toolbarItem implicitItemIdentifier="CA4294CF-0E03-42AE-8369-433A8FD1A408" label="Current Conversation" paletteLabel="Current Conversation" id="82S-Mb-KdJ">
                                     <nil key="toolTip"/>
                                     <size key="minSize" width="38" height="17"/>
-                                    <size key="maxSize" width="178" height="17"/>
+                                    <size key="maxSize" width="429" height="17"/>
                                     <textField key="view" horizontalHuggingPriority="251" verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="YES" id="FIC-Wz-kIR">
-                                        <rect key="frame" x="0.0" y="14" width="178" height="17"/>
+                                        <rect key="frame" x="0.0" y="14" width="429" height="17"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="Name" id="0rf-P9-rs9">
                                             <font key="font" metaFont="system"/>
@@ -2715,6 +2715,6 @@ Gw
         <image name="offline" width="15" height="15"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="Jkt-hW-Vlb"/>
+        <segue reference="Uwt-4d-Ui7"/>
     </inferredMetricsTieBreakers>
 </document>

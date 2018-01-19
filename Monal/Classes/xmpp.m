@@ -1583,7 +1583,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             
                             RIButtonItem* yesButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Join", nil) action:^{
                                 
-                                [self joinRoom:messageNode.from withPassword:nil];
+                                [self joinRoom:messageNode.from withNick:@"test" andPassword:nil]; //TODO fix this
                             }];
                             
                             UIAlertView* alert =[[UIAlertView alloc] initWithTitle:@"Chat Invite" message:messageString cancelButtonItem:cancelButton otherButtonItems:yesButton, nil];

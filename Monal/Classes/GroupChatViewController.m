@@ -188,8 +188,7 @@
 {
     NSString* password =_password.text;
     if([password length]<1) password=nil;
-    [[MLXMPPManager sharedInstance] joinRoom:_roomName.text withPassword:password
-                               forAccountRow:_selectedRow ];
+    [[MLXMPPManager sharedInstance] joinRoom:_roomName.text withNick:@"Test" andPassword:password forAccountRow:_selectedRow];  // TODO fix this
 }
 
 

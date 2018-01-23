@@ -187,8 +187,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     
     _versionHash=[self getVersionString];
-    
-    
+
     return self;
 }
 
@@ -905,7 +904,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     if(startpos!=0)
     {
         //this shoudlnt happen
-        DDLogVerbose(@"start in the middle. there was a glitch");
+        DDLogVerbose(@"start in the middle. there was a glitch or whitespace");
     }
     
     
@@ -989,8 +988,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         
                     }
                     else if(firstClose.location!=NSNotFound) {
-                         DDLogVerbose(@"Incomplete stanza  missing forward close. at 2.7");
-                        finalend=firstClose.location+1;
+                        DDLogVerbose(@"found close without forward . at 2.7");
+                        finalend=firstClose.location+firstClose.length+1;
                     }
                 }
                 

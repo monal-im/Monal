@@ -17,7 +17,7 @@
 + (NSRect) sizeWithMessage:(NSString *)messageString 
 {
     NSDictionary *attributes = @{NSFontAttributeName: [NSFont systemFontOfSize:13.0f]};
-    if(messageString.length<4)
+    if([messageString lengthOfBytesUsingEncoding:NSUTF32StringEncoding]<4)
     {
         attributes = @{NSFontAttributeName: [NSFont systemFontOfSize:38.0f]};
     }
@@ -72,7 +72,7 @@
     }
     self.messageText.font =[NSFont systemFontOfSize:13.0f];
     
-     if(self.messageText.string.length<4)
+     if([self.messageText.string lengthOfBytesUsingEncoding:NSUTF32StringEncoding]<4)
      {
          self.messageText.font =[NSFont systemFontOfSize:38.0f];
      }

@@ -2078,6 +2078,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     [self removeUnAckedMessagesLessThan:resumeNode.h];
                     [self sendUnAckedMessages];
                     
+                    [self sendInitalPresence];
                     
                     __block BOOL queryInfo=YES;
                     
@@ -2616,6 +2617,18 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     self.visibleState=[[NSUserDefaults standardUserDefaults] boolForKey:@"Visible"];
 }
 
+
+-(void) sendInitalPresence
+{
+    XMPPPresence* presence=[[XMPPPresence alloc] initWithHash:_versionHash];
+    [presence setPriority:self.priority];
+    if(self.statusMessage) [presence setStatus:self.statusMessage];
+    if(self.awayState) [presence setAway];
+    if(!self.visibleState) [presence setInvisible];
+    
+    [self send:presence];
+}
+
 -(void) initSession
 {
     //now we are bound
@@ -2634,13 +2647,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [roster setRosterRequest];
     [self send:roster];
     
-    XMPPPresence* presence=[[XMPPPresence alloc] initWithHash:_versionHash];
-    [presence setPriority:self.priority];
-    if(self.statusMessage) [presence setStatus:self.statusMessage];
-    if(self.awayState) [presence setAway];
-    if(!self.visibleState) [presence setInvisible];
-    
-    [self send:presence];
+    [self sendInitalPresence];
     
     if(!self.supportsSM3)
     {
@@ -2678,10 +2685,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     self.awayState=away;
     XMPPPresence* node =[[XMPPPresence alloc] initWithHash:self.versionHash];
-    if(away)
+    if(away) {
         [node setAway];
-    else
+    }
+    else {
         [node setAvailable];
+    }
     
     if(self.statusMessage) [node setStatus:self.statusMessage];
     [self send:node];

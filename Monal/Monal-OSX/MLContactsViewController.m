@@ -365,7 +365,10 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                            [[row objectForKey:kAccountID]  integerValue]==[[self.chatViewController.contactDic objectForKey:kAccountID] integerValue] )
                         {
                             NSIndexSet *indexSet = [NSIndexSet indexSetWithIndex:rowCounter+group+offset];
-                            [self.contactsTable selectRowIndexes:indexSet byExtendingSelection:NO];
+                            dispatch_async(dispatch_get_main_queue(), ^{
+                                  [self.contactsTable selectRowIndexes:indexSet byExtendingSelection:NO];
+                            });
+                          
                             break;
                         }
                         

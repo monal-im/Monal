@@ -601,16 +601,17 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void) scrollToBottom
 {
-    NSInteger bottom = [self.messageTable numberOfRowsInSection:0];
-    if(bottom>0)
-    {
-        NSIndexPath *path1 = [NSIndexPath indexPathForRow:bottom-1  inSection:0];
-        if(![self.messageTable.indexPathsForVisibleRows containsObject:path1])
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSInteger bottom = [self.messageTable numberOfRowsInSection:0];
+        if(bottom>0)
         {
-            [self.messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:NO];
+            NSIndexPath *path1 = [NSIndexPath indexPathForRow:bottom-1  inSection:0];
+            if(![self.messageTable.indexPathsForVisibleRows containsObject:path1])
+            {
+                [self.messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:NO];
+            }
         }
-    }
-    
+    });
 }
 #pragma mark date time
 

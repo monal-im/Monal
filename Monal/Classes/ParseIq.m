@@ -214,7 +214,7 @@
     if(([elementName isEqualToString:@"item"]) && [State isEqualToString:@"RosterItem"]
        )
     {
-        //we would have a group name here
+        //we would have a user name here
         // _photoBinValue=_messageBuffer;
         return;
     }

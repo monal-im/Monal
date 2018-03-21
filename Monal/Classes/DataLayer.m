@@ -635,7 +635,7 @@ static DataLayer *sharedInstance=nil;
                        actualfull=fullName;
                    }
                    
-                   NSString* query=[NSString stringWithFormat:@"insert into buddylist values(null, %@, '%@', '%@','%@','','','','','',0, 0, 1,0);", accountNo, contact.escapeForSql, actualfull.escapeForSql, nickName.escapeForSql];
+                   NSString* query=[NSString stringWithFormat:@"insert into buddylist ('account_id', 'buddy_name', 'full_name' , 'nick_name', 'new', 'online', 'dirty', 'Muc') values( %@, '%@', '%@','%@',1, 0, 0, 0);", accountNo, contact.escapeForSql, actualfull.escapeForSql, nickName.escapeForSql];
                [self executeNonQuery:query withCompletion:^(BOOL success) {
                    [self.contactMemory removeObject:contact];
                    if(completion)

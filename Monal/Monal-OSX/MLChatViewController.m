@@ -521,6 +521,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             dispatch_async( dispatch_get_main_queue(), ^{
               [self.progressIndicator incrementBy:25];
             });
+         } else {
+             
          }
      }];
     

@@ -166,7 +166,7 @@
             
         case 3:
         {
-            return 4;
+            return 5;
             break;
         }
           
@@ -277,6 +277,14 @@
                 {
                     cell.textLabel.text=NSLocalizedString(@"Sort By Status", @"");
                        cell.defaultKey=@"SortContacts";
+                    cell.switchEnabled=YES;
+                    break;
+                }
+                case 4:
+                {
+                    cell.textLabel.text=NSLocalizedString(@"Show Inline Images", @"");
+                    cell.detailTextLabel.text=@"Will make a HTTP HEAD call on all links";
+                    cell.defaultKey=@"ShowImages";
                     cell.switchEnabled=YES;
                     break;
                 }

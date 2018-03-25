@@ -7,8 +7,13 @@
 //
 
 #import "MLGroupChatTableViewController.h"
+#import "MLXMPPManager.h"
+#import "DataLayer.h"
+#import "xmpp.h"
 
 @interface MLGroupChatTableViewController ()
+
+@property (nonatomic, strong) NSMutableArray *favorites;
 
 @end
 
@@ -24,6 +29,22 @@
     // Dispose of any resources that can be recreated.
 }
 
+-(void) refresh
+{
+    self.favorites = [[NSMutableArray alloc] init];
+    for(NSDictionary *row in [MLXMPPManager sharedInstance].connectedXMPP)
+    {
+        xmpp *account = [row objectForKey:kXmppAccount];
+        [[DataLayer sharedInstance] mucFavoritesForAccount:account.accountNo withCompletion:^(NSMutableArray *results) {
+            [self.favorites addObjectsFromArray:results];
+            dispatch_async(dispatch_get_main_queue(),^(){
+                [self.tableView reloadData];
+            });
+            
+        }];
+    }
+}
+
 #pragma mark - Table view data source
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
@@ -31,41 +52,40 @@
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return 2;
+    return self.favorites.count;
 }
 
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"ListItem" forIndexPath:indexPath];
     
-    switch (indexPath.row) {
-        case 0:
-            cell.textLabel.text=@"Join Group Chat";
-            break;
-            
-        case 1:
-            cell.textLabel.text=@"Group Bookmarks";
-            break;
-            
-        default:
-            break;
+    NSDictionary *dic = self.favorites[indexPath.row];
+    
+    NSMutableString *cellText = [NSMutableString stringWithFormat:@"%@ on %@", [dic objectForKey:@"nick"], [dic objectForKey:@"room"]];
+    
+    NSNumber *autoJoin = [dic objectForKey:@"autojoin"];
+    
+    if(autoJoin.boolValue)
+    {
+        cell.detailsLabel.text= @"(autojoin)";
     }
+    else  {
+        cell.detailsLabel.text= @"";
+    }
+    
+    cell.textLabel.text = cellText;
+    
     
     return cell;
 }
 
 
-
-
-
-/*
 #pragma mark - Navigation
 
 // In a storyboard-based application, you will often want to do a little preparation before navigation
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
+ 
 }
-*/
+
 
 @end

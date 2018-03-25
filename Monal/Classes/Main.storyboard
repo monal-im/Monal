@@ -1030,8 +1030,7 @@
         <!--Room List-->
         <scene sceneID="rw7-nS-Meg">
             <objects>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="dLH-fp-fBA" userLabel="First Responder" sceneMemberID="firstResponder"/>
-                <tableViewController id="Kdm-cJ-uvh" sceneMemberID="viewController">
+                <tableViewController id="Kdm-cJ-uvh" customClass="MLRoomListViewController" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" id="LT9-ej-fGs">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -1053,13 +1052,14 @@
                     </tableView>
                     <navigationItem key="navigationItem" title="Room List" id="q6X-kD-U5E"/>
                 </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dLH-fp-fBA" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="161" y="2434"/>
         </scene>
         <!--Group Chat-->
         <scene sceneID="4hU-MM-WBZ">
             <objects>
-                <tableViewController clearsSelectionOnViewWillAppear="NO" id="nW7-fq-iEr" sceneMemberID="viewController">
+                <tableViewController clearsSelectionOnViewWillAppear="NO" id="nW7-fq-iEr" customClass="MLGroupChatTableViewController" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" id="S3v-FE-7ei">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -1110,10 +1110,12 @@
                 <splitViewController id="cOc-T2-fy0" sceneMemberID="viewController">
                     <tabBarItem key="tabBarItem" title="Group" image="974-users" id="fre-oh-ysK"/>
                     <connections>
+                        <outlet property="delegate" destination="9w2-zK-zQT" id="pIz-To-Mb5"/>
                         <segue destination="PjQ-9S-4Zq" kind="relationship" relationship="masterViewController" id="01i-T3-g3x"/>
                         <segue destination="RjC-T7-BwN" kind="relationship" relationship="detailViewController" id="mq9-9z-0ZK"/>
                     </connections>
                 </splitViewController>
+                <customObject id="9w2-zK-zQT" customClass="MLSplitViewDelegate"/>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Rmd-7z-NCq" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-1703" y="1990"/>
@@ -1121,7 +1123,6 @@
         <!--Navigation Controller-->
         <scene sceneID="ia2-90-6Fa">
             <objects>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="EU9-NC-JbV" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <navigationController id="RjC-T7-BwN" sceneMemberID="viewController">
                     <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="R8x-RL-5Hu">
                         <rect key="frame" x="0.0" y="20" width="414" height="44"/>
@@ -1131,6 +1132,7 @@
                         <segue destination="Kdm-cJ-uvh" kind="relationship" relationship="rootViewController" id="VAf-Wa-gZl"/>
                     </connections>
                 </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="EU9-NC-JbV" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-688" y="2435"/>
         </scene>
@@ -1482,7 +1484,7 @@
     <inferredMetricsTieBreakers>
         <segue reference="ojB-Rp-nEa"/>
         <segue reference="qaB-BP-OcO"/>
-        <segue reference="wmf-tk-2CN"/>
+        <segue reference="QlH-d5-Lhg"/>
         <segue reference="fRw-7r-LxC"/>
         <segue reference="pZO-HH-rUP"/>
         <segue reference="RMJ-9l-zbF"/>

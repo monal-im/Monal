@@ -292,6 +292,8 @@
 		267710261E21923600464002 /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = 267710231E21923600464002 /* README.md */; };
 		2678A98B185A8320003AF53B /* ChatLogAccountDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2678A98A185A8320003AF53B /* ChatLogAccountDetailViewController.m */; };
 		2678A98E185AB739003AF53B /* ChatLogContactViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2678A98D185AB739003AF53B /* ChatLogContactViewController.m */; };
+		267C99082067D7BE00AB876C /* MLGroupChatTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 267C99072067D7BE00AB876C /* MLGroupChatTableViewController.m */; };
+		267C990B2067D7E000AB876C /* MLRoomListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 267C990A2067D7E000AB876C /* MLRoomListViewController.m */; };
 		267ECD691B7467B30025337F /* MLXMPPManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26352EA7177D222600E2C8FF /* MLXMPPManager.m */; };
 		267ECD6B1B746C340025337F /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 267ECD6A1B746C340025337F /* Security.framework */; };
 		267ECD6D1B746C660025337F /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 267ECD6C1B746C660025337F /* CFNetwork.framework */; };
@@ -690,6 +692,10 @@
 		2678A98A185A8320003AF53B /* ChatLogAccountDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChatLogAccountDetailViewController.m; sourceTree = "<group>"; };
 		2678A98C185AB739003AF53B /* ChatLogContactViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChatLogContactViewController.h; sourceTree = "<group>"; };
 		2678A98D185AB739003AF53B /* ChatLogContactViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChatLogContactViewController.m; sourceTree = "<group>"; };
+		267C99062067D7BE00AB876C /* MLGroupChatTableViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLGroupChatTableViewController.h; sourceTree = "<group>"; };
+		267C99072067D7BE00AB876C /* MLGroupChatTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLGroupChatTableViewController.m; sourceTree = "<group>"; };
+		267C99092067D7E000AB876C /* MLRoomListViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLRoomListViewController.h; sourceTree = "<group>"; };
+		267C990A2067D7E000AB876C /* MLRoomListViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLRoomListViewController.m; sourceTree = "<group>"; };
 		267ECD6A1B746C340025337F /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
 		267ECD6C1B746C660025337F /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/System/Library/Frameworks/CFNetwork.framework; sourceTree = DEVELOPER_DIR; };
 		268130161BFD8ECA0074C8EE /* MLAddContact.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLAddContact.h; sourceTree = "<group>"; };
@@ -1282,6 +1288,17 @@
 			name = "Chat Logs";
 			sourceTree = "<group>";
 		};
+		267C99052067D78900AB876C /* Group Chat */ = {
+			isa = PBXGroup;
+			children = (
+				267C99062067D7BE00AB876C /* MLGroupChatTableViewController.h */,
+				267C99072067D7BE00AB876C /* MLGroupChatTableViewController.m */,
+				267C99092067D7E000AB876C /* MLRoomListViewController.h */,
+				267C990A2067D7E000AB876C /* MLRoomListViewController.m */,
+			);
+			name = "Group Chat";
+			sourceTree = "<group>";
+		};
 		268BCCFD140B23E10025E4D1 /* jrtplib-static */ = {
 			isa = PBXGroup;
 			children = (
@@ -1659,6 +1676,7 @@
 		26DB52121777EA5100B50353 /* Tab views */ = {
 			isa = PBXGroup;
 			children = (
+				267C99052067D78900AB876C /* Group Chat */,
 				2632EA3F2003151100191EEB /* Muc */,
 				2644D4961FF29E1900F46AB5 /* Settings */,
 				2644D48F1FF004B800F46AB5 /* ChatViews */,
@@ -2575,6 +2593,7 @@
 				1D3623260D0F684500981E51 /* MonalAppDelegate.m in Sources */,
 				2601D9B00FBF255D004DB939 /* DataLayer.m in Sources */,
 				26277888110179D100023C8A /* tools.m in Sources */,
+				267C990B2067D7E000AB876C /* MLRoomListViewController.m in Sources */,
 				26158AF21FFA6E4500E53BDC /* MLWebViewController.m in Sources */,
 				26F7BB431115F8DB00712672 /* Reachability.m in Sources */,
 				26D51CD61E2674D700141E04 /* NXOAuth2Client.m in Sources */,
@@ -2614,6 +2633,7 @@
 				260C6C94178080730004E2E1 /* EncodingTools.m in Sources */,
 				26CF3EAA1780D6B7002B7085 /* XMPPIQ.m in Sources */,
 				26CF3EAD1780DE5D002B7085 /* ParseIq.m in Sources */,
+				267C99082067D7BE00AB876C /* MLGroupChatTableViewController.m in Sources */,
 				26CF3EB21780DFD9002B7085 /* XMPPParser.m in Sources */,
 				264E345B1787BAB100BC7BD0 /* XMPPPresence.m in Sources */,
 				26BDECDC1867B7790018670D /* CallViewController.m in Sources */,

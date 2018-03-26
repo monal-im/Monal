@@ -67,10 +67,10 @@
     
     if(autoJoin.boolValue)
     {
-        cell.detailsLabel.text= @"(autojoin)";
+        cell.detailTextLabel.text= @"(autojoin)";
     }
     else  {
-        cell.detailsLabel.text= @"";
+        cell.detailTextLabel.text= @"";
     }
     
     cell.textLabel.text = cellText;

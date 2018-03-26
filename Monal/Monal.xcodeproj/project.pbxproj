@@ -286,14 +286,12 @@
 		266272C11B27DB8000C1CD49 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 266272BF1B27DB8000C1CD49 /* Main.storyboard */; };
 		266272CD1B27DB8100C1CD49 /* Monal_OSXTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 266272CC1B27DB8100C1CD49 /* Monal_OSXTests.m */; };
 		26761BF61804FBB700D94714 /* RoomListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26761BF41804FBB700D94714 /* RoomListViewController.m */; };
-		26761BF71804FBB700D94714 /* RoomListViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26761BF51804FBB700D94714 /* RoomListViewController.xib */; };
 		267710241E21923600464002 /* MASPreferencesWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 267710201E21923600464002 /* MASPreferencesWindow.xib */; };
 		267710251E21923600464002 /* MASPreferencesWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 267710221E21923600464002 /* MASPreferencesWindowController.m */; };
 		267710261E21923600464002 /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = 267710231E21923600464002 /* README.md */; };
 		2678A98B185A8320003AF53B /* ChatLogAccountDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2678A98A185A8320003AF53B /* ChatLogAccountDetailViewController.m */; };
 		2678A98E185AB739003AF53B /* ChatLogContactViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2678A98D185AB739003AF53B /* ChatLogContactViewController.m */; };
 		267C99082067D7BE00AB876C /* MLGroupChatTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 267C99072067D7BE00AB876C /* MLGroupChatTableViewController.m */; };
-		267C990B2067D7E000AB876C /* MLRoomListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 267C990A2067D7E000AB876C /* MLRoomListViewController.m */; };
 		267ECD691B7467B30025337F /* MLXMPPManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26352EA7177D222600E2C8FF /* MLXMPPManager.m */; };
 		267ECD6B1B746C340025337F /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 267ECD6A1B746C340025337F /* Security.framework */; };
 		267ECD6D1B746C660025337F /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 267ECD6C1B746C660025337F /* CFNetwork.framework */; };
@@ -385,7 +383,6 @@
 		26E2F7DA17C6FD9400C3C8EF /* MLTabBarController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26E2F7D917C6FD9400C3C8EF /* MLTabBarController.m */; };
 		26E3ED871FEC0CB7008ABDA5 /* MLServerDetails.m in Sources */ = {isa = PBXBuildFile; fileRef = 26E3ED861FEC0CB7008ABDA5 /* MLServerDetails.m */; };
 		26E3ED8B1FEC395D008ABDA5 /* MLServerDetailsVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 26E3ED8A1FEC395D008ABDA5 /* MLServerDetailsVC.m */; };
-		26EC411017BDD98E0031304D /* GroupChatViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26EC410F17BDD98D0031304D /* GroupChatViewController.xib */; };
 		26EC411317BDE39E0031304D /* MLImageManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EC411217BDE39E0031304D /* MLImageManager.m */; };
 		26EE8B1C179B55D2006781F3 /* ParseChallenge.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EE8B1B179B55D2006781F3 /* ParseChallenge.m */; };
 		26EE8B1F179B67FA006781F3 /* MLNotificationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EE8B1E179B67FA006781F3 /* MLNotificationManager.m */; };
@@ -682,7 +679,6 @@
 		266272CC1B27DB8100C1CD49 /* Monal_OSXTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Monal_OSXTests.m; sourceTree = "<group>"; };
 		26761BF31804FBB700D94714 /* RoomListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RoomListViewController.h; sourceTree = "<group>"; };
 		26761BF41804FBB700D94714 /* RoomListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RoomListViewController.m; sourceTree = "<group>"; };
-		26761BF51804FBB700D94714 /* RoomListViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = RoomListViewController.xib; sourceTree = "<group>"; };
 		2677101F1E21923600464002 /* MASPreferencesViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MASPreferencesViewController.h; sourceTree = "<group>"; };
 		267710201E21923600464002 /* MASPreferencesWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MASPreferencesWindow.xib; sourceTree = "<group>"; };
 		267710211E21923600464002 /* MASPreferencesWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MASPreferencesWindowController.h; sourceTree = "<group>"; };
@@ -694,8 +690,6 @@
 		2678A98D185AB739003AF53B /* ChatLogContactViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChatLogContactViewController.m; sourceTree = "<group>"; };
 		267C99062067D7BE00AB876C /* MLGroupChatTableViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLGroupChatTableViewController.h; sourceTree = "<group>"; };
 		267C99072067D7BE00AB876C /* MLGroupChatTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLGroupChatTableViewController.m; sourceTree = "<group>"; };
-		267C99092067D7E000AB876C /* MLRoomListViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLRoomListViewController.h; sourceTree = "<group>"; };
-		267C990A2067D7E000AB876C /* MLRoomListViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLRoomListViewController.m; sourceTree = "<group>"; };
 		267ECD6A1B746C340025337F /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
 		267ECD6C1B746C660025337F /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/System/Library/Frameworks/CFNetwork.framework; sourceTree = DEVELOPER_DIR; };
 		268130161BFD8ECA0074C8EE /* MLAddContact.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLAddContact.h; sourceTree = "<group>"; };
@@ -827,7 +821,6 @@
 		26EC410217BDD8800031304D /* askTempPass.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = askTempPass.xib; sourceTree = "<group>"; };
 		26EC410917BDD9090031304D /* userSearch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = userSearch.h; sourceTree = "<group>"; };
 		26EC410A17BDD9090031304D /* userSearch.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = userSearch.m; sourceTree = "<group>"; };
-		26EC410F17BDD98D0031304D /* GroupChatViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = GroupChatViewController.xib; sourceTree = "<group>"; };
 		26EC411117BDE39E0031304D /* MLImageManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLImageManager.h; sourceTree = "<group>"; };
 		26EC411217BDE39E0031304D /* MLImageManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLImageManager.m; sourceTree = "<group>"; };
 		26EE8B1A179B55D2006781F3 /* ParseChallenge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParseChallenge.h; sourceTree = "<group>"; };
@@ -1048,10 +1041,8 @@
 			children = (
 				261A628F176C15D400059090 /* GroupChatViewController.h */,
 				261A6290176C15D400059090 /* GroupChatViewController.m */,
-				26EC410F17BDD98D0031304D /* GroupChatViewController.xib */,
 				26761BF31804FBB700D94714 /* RoomListViewController.h */,
 				26761BF41804FBB700D94714 /* RoomListViewController.m */,
-				26761BF51804FBB700D94714 /* RoomListViewController.xib */,
 			);
 			name = Muc;
 			sourceTree = "<group>";
@@ -1293,8 +1284,6 @@
 			children = (
 				267C99062067D7BE00AB876C /* MLGroupChatTableViewController.h */,
 				267C99072067D7BE00AB876C /* MLGroupChatTableViewController.m */,
-				267C99092067D7E000AB876C /* MLRoomListViewController.h */,
-				267C990A2067D7E000AB876C /* MLRoomListViewController.m */,
 			);
 			name = "Group Chat";
 			sourceTree = "<group>";
@@ -2155,7 +2144,6 @@
 				2601D9CB0FBF25EF004DB939 /* sworim.sqlite in Resources */,
 				264A7E751AA7263600E860E3 /* MLSwitchCell.xib in Resources */,
 				26470F521835C4080069E3E0 /* Media.xcassets in Resources */,
-				26761BF71804FBB700D94714 /* RoomListViewController.xib in Resources */,
 				26B2A4BB1B73061400272E63 /* Images.xcassets in Resources */,
 				2653EAE61C5B243400ED97F7 /* Main.storyboard in Resources */,
 				26158AF41FFA8A6A00E53BDC /* opensource.html in Resources */,
@@ -2164,7 +2152,6 @@
 				26F9794D1ACAC73A0008E005 /* MLContactCell.xib in Resources */,
 				26B51C4A18654D98002134C3 /* LogViewController.xib in Resources */,
 				26BDECDD1867B7790018670D /* CallViewController.xib in Resources */,
-				26EC411017BDD98E0031304D /* GroupChatViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2593,7 +2580,6 @@
 				1D3623260D0F684500981E51 /* MonalAppDelegate.m in Sources */,
 				2601D9B00FBF255D004DB939 /* DataLayer.m in Sources */,
 				26277888110179D100023C8A /* tools.m in Sources */,
-				267C990B2067D7E000AB876C /* MLRoomListViewController.m in Sources */,
 				26158AF21FFA6E4500E53BDC /* MLWebViewController.m in Sources */,
 				26F7BB431115F8DB00712672 /* Reachability.m in Sources */,
 				26D51CD61E2674D700141E04 /* NXOAuth2Client.m in Sources */,

@@ -207,6 +207,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 #pragma mark app life cycle
 
 
+- (void)userNotificationCenter:(UNUserNotificationCenter *)center
+       willPresentNotification:(UNNotification *)notification
+         withCompletionHandler:(void (^)(UNNotificationPresentationOptions options))completionHandler;
+{
+    completionHandler(UNNotificationPresentationOptionAlert);
+}
+
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
@@ -220,7 +227,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     self.fileLogger.maximumFileSize=1024 * 500;
     [DDLog addLogger:self.fileLogger];
 #endif
-
+    
+    if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"10.0")){
+        [UNUserNotificationCenter currentNotificationCenter].delegate=self;
+    }
+    
+    //ios8 register for local notifications and badges
     if([[UIApplication sharedApplication] respondsToSelector:@selector(registerUserNotificationSettings:)])
     {
         NSSet *categories;

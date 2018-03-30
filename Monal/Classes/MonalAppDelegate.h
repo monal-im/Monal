@@ -16,9 +16,10 @@
 #import "DDASLLogger.h"
 #import "DDFileLogger.h"
 #import "DDTTYLogger.h"
+@import UserNotifications;
 
 
-@interface MonalAppDelegate : UIResponder <UIApplicationDelegate, UISplitViewControllerDelegate, PKPushRegistryDelegate >
+@interface MonalAppDelegate : UIResponder <UIApplicationDelegate, UISplitViewControllerDelegate, PKPushRegistryDelegate, UNUserNotificationCenterDelegate >
 
 
 @property (nonatomic, strong) UIWindow* window;

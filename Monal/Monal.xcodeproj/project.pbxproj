@@ -282,6 +282,7 @@
 		267710261E21923600464002 /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = 267710231E21923600464002 /* README.md */; };
 		2678A98B185A8320003AF53B /* ChatLogAccountDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2678A98A185A8320003AF53B /* ChatLogAccountDetailViewController.m */; };
 		2678A98E185AB739003AF53B /* ChatLogContactViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2678A98D185AB739003AF53B /* ChatLogContactViewController.m */; };
+		267C991F206DE09F00AB876C /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 267C991E206DE09E00AB876C /* UserNotifications.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		267ECD691B7467B30025337F /* MLXMPPManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26352EA7177D222600E2C8FF /* MLXMPPManager.m */; };
 		267ECD6B1B746C340025337F /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 267ECD6A1B746C340025337F /* Security.framework */; };
 		267ECD6D1B746C660025337F /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 267ECD6C1B746C660025337F /* CFNetwork.framework */; };
@@ -667,6 +668,7 @@
 		2678A98A185A8320003AF53B /* ChatLogAccountDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChatLogAccountDetailViewController.m; sourceTree = "<group>"; };
 		2678A98C185AB739003AF53B /* ChatLogContactViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChatLogContactViewController.h; sourceTree = "<group>"; };
 		2678A98D185AB739003AF53B /* ChatLogContactViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChatLogContactViewController.m; sourceTree = "<group>"; };
+		267C991E206DE09E00AB876C /* UserNotifications.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UserNotifications.framework; path = System/Library/Frameworks/UserNotifications.framework; sourceTree = SDKROOT; };
 		267ECD6A1B746C340025337F /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
 		267ECD6C1B746C660025337F /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/System/Library/Frameworks/CFNetwork.framework; sourceTree = DEVELOPER_DIR; };
 		268130161BFD8ECA0074C8EE /* MLAddContact.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLAddContact.h; sourceTree = "<group>"; };
@@ -843,6 +845,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				267C991F206DE09F00AB876C /* UserNotifications.framework in Frameworks */,
 				2613BECF1EA41C8600C9F4C5 /* PushKit.framework in Frameworks */,
 				2614B64F1C54095D004FF2FA /* libz.tbd in Frameworks */,
 				261528C51869CE5300BF62D6 /* AudioToolbox.framework in Frameworks */,
@@ -1664,6 +1667,7 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				267C991E206DE09E00AB876C /* UserNotifications.framework */,
 				2613BECE1EA41C8600C9F4C5 /* PushKit.framework */,
 				2602837E1D8DD56B001DD6B8 /* Quartz.framework */,
 				2602837C1D8DD30E001DD6B8 /* QuickLook.framework */,

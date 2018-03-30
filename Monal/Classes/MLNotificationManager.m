@@ -98,26 +98,34 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                           
                        {
                        
-                           
-                     
-                                            
-                           UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
-                           content.title =[notification.userInfo objectForKey:@"from"];
-                           content.body =[notification.userInfo objectForKey:@"messageText"];
-                           content.sound = [UNNotificationSound defaultSound];
-                           content.userInfo= notification.userInfo;
-                           
-                           UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:[NSUUID alloc].UUIDString
-                                                                                                 content:content trigger:nil];
-                           
-                           UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
                           
-                           [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
+                           if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"10.0")){
                                
-                           }];
-                           
-                           
-                           
+                               UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
+                               content.title =[notification.userInfo objectForKey:@"from"];
+                               content.body =[notification.userInfo objectForKey:@"messageText"];
+                               content.sound = [UNNotificationSound defaultSound];
+                               content.userInfo= notification.userInfo;
+                               
+                               UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:[NSUUID alloc].UUIDString
+                                                                                                     content:content trigger:nil];
+                               
+                               UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+                               
+                               [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
+                                   
+                               }];
+                               
+                               
+                           } else  {
+                               
+                               
+                               SlidingMessageViewController* slidingView= [[SlidingMessageViewController alloc] correctSliderWithTitle:nameToShow message:[notification.userInfo objectForKey:@"messageText"] user:[notification.userInfo objectForKey:@"from"] account:[notification.userInfo objectForKey:@"accountNo"] ];
+                               
+                               [self.window addSubview:slidingView.view];
+                               
+                               [slidingView showMsg];
+                           }
                            
                        }
                        

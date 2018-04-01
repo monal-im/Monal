@@ -34,6 +34,8 @@
 
 -(IBAction)join:(id)sender
 {
+    if([MLXMPPManager sharedInstance].connectedXMPP.count<=self.accounts.indexOfSelectedItem) return;
+    
     NSDictionary *accountrow = [MLXMPPManager sharedInstance].connectedXMPP[self.accounts.indexOfSelectedItem];
     xmpp* account= (xmpp*)[accountrow objectForKey:kXmppAccount];
     

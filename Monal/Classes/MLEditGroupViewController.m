@@ -20,9 +20,14 @@
 @property (nonatomic, weak) IBOutlet UIToolbar* keyboardToolbar;
 
 @property (nonatomic, weak) UITextField* currentTextField;
+
+@property (nonatomic, weak) UITextField* accountsField;
+@property (nonatomic, weak) UITextField* roomField;
+@property (nonatomic, weak) UITextField* nickField;
+@property (nonatomic, weak) UITextField* passField;
+
 @property (nonatomic, strong) UIPickerView* accountPicker;
 @property (nonatomic, strong) UIView* accountPickerView;
-@property (nonatomic, assign) NSInteger selectedRow;
 @property (nonatomic, strong) UIBarButtonItem* closeButton;
 
 -(IBAction) addPress:(id)sender;
@@ -147,13 +152,14 @@
                 self.accountName.placeholder = @"Account";
                 self.accountName.inputView=_accountPickerView;
                 self.accountName.delegate=self;
+                textCell.textInput.tag=10;
                 
                 if([[MLXMPPManager sharedInstance].connectedXMPP count]==1)
                 {
                     self.accountName.text=[[MLXMPPManager sharedInstance] getAccountNameForConnectedRow:0];
                 }
                 textCell.textInput.inputAccessoryView =self.keyboardToolbar;
-            
+                self.accountsField= textCell.textInput;
                 toreturn=textCell;
             
                 break;
@@ -168,30 +174,30 @@
                 case 0:{
                       MLTextInputCell* thecell=(MLTextInputCell *)[tableView dequeueReusableCellWithIdentifier:@"TextCell"];
                     thecell.textInput.placeholder=@"Room";
-                    thecell.textInput.tag=1;
+                    
                     thecell.textInput.keyboardType = UIKeyboardTypeEmailAddress;
                     thecell.textInput.inputAccessoryView =self.keyboardToolbar;
+                    thecell.textInput.delegate=self;
+                    self.roomField= thecell.textInput;
                     toreturn=thecell;
                     break;
                 }
                 case 1:{
                      MLTextInputCell* thecell=(MLTextInputCell *)[tableView dequeueReusableCellWithIdentifier:@"TextCell"];
-              
-                    thecell.textInput.placeholder=@"NickNnme";
-                    thecell.textInput.tag=2;
+                    thecell.textInput.placeholder=@"Nickname";
                     thecell.textInput.inputAccessoryView =self.keyboardToolbar;
-
+                     self.nickField= thecell.textInput;
+                    thecell.textInput.delegate=self;
                     toreturn=thecell;
                     break;
                 }
                 case 2:{
                     MLTextInputCell* thecell=(MLTextInputCell *)[tableView dequeueReusableCellWithIdentifier:@"TextCell"];
-                   // thecell.textInputField.text=self.password;
-                    thecell.textInput.placeholder=@"Password";
-                    thecell.textInput.tag=3;
+                   thecell.textInput.placeholder=@"Password";
                     thecell.textInput.inputAccessoryView =self.keyboardToolbar;
-
                     thecell.textInput.secureTextEntry=YES;
+                    
+                     self.passField= thecell.textInput;
                     toreturn=thecell;
                     break;
                 }
@@ -200,8 +206,6 @@
                     
                     thecell.cellLabel.text=@"Favorite";
                     thecell.textInputField.hidden=YES;
-                    thecell.toggleSwitch.tag=4;
-                  //  thecell.toggleSwitch.on=self.enabled;
                     toreturn=thecell;
                     break;
                 }
@@ -210,8 +214,6 @@
                     
                     thecell.cellLabel.text=@"Auto Join";
                     thecell.textInputField.hidden=YES;
-                    thecell.toggleSwitch.tag=2;
-                   // thecell.toggleSwitch.on=self.enabled;
                     toreturn=thecell;
                     break;
                 }
@@ -225,14 +227,12 @@
         {
             //save button
             UITableViewCell *buttonCell =[tableView dequeueReusableCellWithIdentifier:@"addButton"];
-          
             toreturn= buttonCell;
             break;
         }
             
     }
     
-
     return toreturn;
 }
 
@@ -276,14 +276,12 @@
 - (BOOL)textFieldShouldReturn:(UITextField *)textField
 {
     [textField resignFirstResponder];
-    
     return YES;
 }
 
 
 - (BOOL)textFieldShouldBeginEditing:(UITextField *)textField {
-    
-    _currentTextField=textField;
+    self.currentTextField=textField;
     return YES;
 }
 
@@ -292,36 +290,50 @@
 
 -(IBAction)toolbarDone:(id)sender
 {
-//    if(_currentTextField ==self.contactName)
-//    {
-//        [self.contactName resignFirstResponder];
-//    }
-//    else {
-//        [self.accountName resignFirstResponder];
-//    }
     
+    [self.currentTextField resignFirstResponder];
 }
 
 - (IBAction)toolbarPrevious:(id)sender
 {
-//    if(_currentTextField ==self.contactName)
-//    {
-//        [self.accountName becomeFirstResponder];
-//    }
-//    else {
-//        [self.contactName becomeFirstResponder];
-//    }
+    if(_currentTextField ==self.accountsField)
+    {
+         [self.currentTextField resignFirstResponder];
+    }
+    else  if(_currentTextField ==self.roomField)
+    {
+        [self.accountsField becomeFirstResponder];
+    }
+    else if(_currentTextField ==self.passField)
+    {
+        [self.nickField becomeFirstResponder];
+    }
+    else  if(_currentTextField ==self.nickField)
+    {
+        [self.roomField becomeFirstResponder];
+    }
+   
+    
 }
 
 - (IBAction)toolbarNext:(id)sender
 {
-//    if(_currentTextField ==self.contactName)
-//    {
-//        [self.accountName becomeFirstResponder];
-//    }
-//    else {
-//        [self.contactName becomeFirstResponder];
-//    }
+    if(_currentTextField ==self.accountsField)
+    {
+        [self.roomField becomeFirstResponder];
+    }
+    else  if(_currentTextField ==self.roomField)
+    {
+        [self.nickField becomeFirstResponder];
+    }
+    else  if(_currentTextField ==self.nickField)
+    {
+        [self.passField becomeFirstResponder];
+    }
+    else if(_currentTextField ==self.passField)
+    {
+        [self.currentTextField resignFirstResponder];
+    }
 }
 
 @end

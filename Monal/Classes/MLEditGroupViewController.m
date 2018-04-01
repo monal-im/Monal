@@ -26,6 +26,9 @@
 @property (nonatomic, weak) UITextField* nickField;
 @property (nonatomic, weak) UITextField* passField;
 
+@property (nonatomic, weak) UISwitch* favSwitch;
+@property (nonatomic, weak) UISwitch* autoSwitch;
+
 @property (nonatomic, strong) UIPickerView* accountPicker;
 @property (nonatomic, strong) UIView* accountPickerView;
 @property (nonatomic, strong) UIBarButtonItem* closeButton;
@@ -206,6 +209,7 @@
                     
                     thecell.cellLabel.text=@"Favorite";
                     thecell.textInputField.hidden=YES;
+                     self.favSwitch= thecell.toggleSwitch;
                     toreturn=thecell;
                     break;
                 }
@@ -214,6 +218,7 @@
                     
                     thecell.cellLabel.text=@"Auto Join";
                     thecell.textInputField.hidden=YES;
+                    self.autoSwitch= thecell.toggleSwitch;
                     toreturn=thecell;
                     break;
                 }
@@ -256,6 +261,26 @@
         [self presentViewController:messageAlert animated:YES completion:nil];
     }
     else  {
+       
+        
+        
+        if([MLXMPPManager sharedInstance].connectedXMPP.count<=[self.accountPicker selectedRowInComponent:0]) return;
+        
+        NSDictionary *accountrow = [MLXMPPManager sharedInstance].connectedXMPP[[self.accountPicker selectedRowInComponent:0]];
+        xmpp* account= (xmpp*)[accountrow objectForKey:kXmppAccount];
+        
+        if(self.favSwitch.on){
+            BOOL autoJoinValue=NO;
+            if(self.autoSwitch.on) autoJoinValue=YES;
+
+            [[DataLayer sharedInstance] addMucFavoriteForAccount:account.accountNo withRoom:self.roomField.text nick:self.nickField.text autoJoin:autoJoinValue andCompletion:nil];
+        }
+
+        [[MLXMPPManager sharedInstance] joinRoom:self.roomField.text withNick:self.nickField.text andPassword:self.passField.text forAccountRow:[self.accountPicker selectedRowInComponent:0]];
+
+        [[DataLayer sharedInstance] updateOwnNickName:self.nickField.text forMuc:self.roomField.text forAccount:account.accountNo];
+        
+        
     }
 }
 

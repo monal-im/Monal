@@ -38,10 +38,10 @@
 -(IBAction) callContact:(id)sender;
 {
 //    CallViewController *callScreen= [[CallViewController alloc] initWithContact:_contact];
-//    MLPortraitNavController* callNav = [[MLPortraitNavController alloc] initWithRootViewController:callScreen];
-//    callNav.navigationBar.hidden=YES;
-//
-//    [[MLXMPPManager sharedInstance] callContact:_contact];
+
+    [self performSegueWithIdentifier:@"ShowCall" sender:self];
+    
+    [[MLXMPPManager sharedInstance] callContact:_contact];
 }
 
 

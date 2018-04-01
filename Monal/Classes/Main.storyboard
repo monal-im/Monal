@@ -306,6 +306,9 @@
                             </connections>
                         </barButtonItem>
                     </navigationItem>
+                    <connections>
+                        <segue destination="eWC-It-u2H" kind="presentation" identifier="ShowCall" id="yyS-J0-BDM"/>
+                    </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="469-X2-udq" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
@@ -358,6 +361,7 @@
                         <outlet property="view" destination="4Ri-hX-ob8" id="nLc-h6-Jwi"/>
                         <segue destination="Dhn-Pm-OVk" kind="showDetail" identifier="showConversation" id="wmf-tk-2CN"/>
                         <segue destination="JoK-Lh-V0A" kind="presentation" identifier="showDetails" id="HKH-FB-LHe"/>
+                        <segue destination="eWC-It-u2H" kind="presentation" identifier="showCall" id="pPJ-na-Dl3"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="vxj-qR-bK8" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -765,7 +769,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Pp1-Q6-o8O" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-1638" y="-1857"/>
+            <point key="canvasLocation" x="-804" y="-1276"/>
         </scene>
         <!--Contacts-->
         <scene sceneID="IUh-IV-wXI">
@@ -1660,6 +1664,7 @@
         <segue reference="ojB-Rp-nEa"/>
         <segue reference="qaB-BP-OcO"/>
         <segue reference="wmf-tk-2CN"/>
+        <segue reference="yyS-J0-BDM"/>
         <segue reference="fRw-7r-LxC"/>
         <segue reference="pZO-HH-rUP"/>
         <segue reference="RMJ-9l-zbF"/>

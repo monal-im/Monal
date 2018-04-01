@@ -94,20 +94,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
-
-    [[AVAudioSession sharedInstance] requestRecordPermission:^(BOOL granted) {
-        if(!granted)
-        {
-            UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:@"Please Allow Audio Access" message:@"If you want to use VOIP you will need to allow access in Settings->Privacy->Microphone." preferredStyle:UIAlertControllerStyleAlert];
-          
-            UIAlertAction *closeAction =[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
-               
-            }];
-            
-            [messageAlert addAction:closeAction];
-            [self presentViewController:messageAlert animated:YES completion:nil];
-        }
-    }];
+   
 }
 
 
@@ -432,7 +419,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         
         UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:@"Incoming Call" message:[NSString stringWithFormat:@"Incoming audio call to %@ from %@ ",userName,  contactName] preferredStyle:UIAlertControllerStyleAlert];
         UIAlertAction *acceptAction =[UIAlertAction actionWithTitle:@"Accept" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
-             [[MLXMPPManager sharedInstance] handleCall:dic withResponse:YES];
+            
+            [self performSegueWithIdentifier:@"ShowCall" sender:self];
+            
+            [[MLXMPPManager sharedInstance] handleCall:dic withResponse:YES];
         }];
         
         UIAlertAction *closeAction =[UIAlertAction actionWithTitle:@"Decline" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {

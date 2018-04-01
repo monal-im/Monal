@@ -693,6 +693,80 @@
             </objects>
             <point key="canvasLocation" x="783" y="-810"/>
         </scene>
+        <!--Call View Controller-->
+        <scene sceneID="tOH-EX-IFy">
+            <objects>
+                <viewController storyboardIdentifier="CallScreen" id="eWC-It-u2H" customClass="CallViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="2q4-us-OTY"/>
+                        <viewControllerLayoutGuide type="bottom" id="pOz-eG-qrT"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="KJg-cq-7ae">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="4v0-qe-c51">
+                                <rect key="frame" x="0.0" y="28" width="414" height="708"/>
+                                <subviews>
+                                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Calling" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9zt-5x-vSJ">
+                                        <rect key="frame" x="10" y="41" width="394" height="41"/>
+                                        <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
+                                        <color key="tintColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="27"/>
+                                        <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                        <nil key="highlightedColor"/>
+                                        <color key="shadowColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
+                                    </label>
+                                    <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Tyx-js-FC2">
+                                        <rect key="frame" x="0.0" y="609" width="414" height="47"/>
+                                        <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                                        <subviews>
+                                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="N8Q-dy-jba">
+                                                <rect key="frame" x="0.0" y="9" width="414" height="30"/>
+                                                <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
+                                                <fontDescription key="fontDescription" type="system" pointSize="29"/>
+                                                <state key="normal" title="Cancel">
+                                                    <color key="titleColor" red="0.97037827970000001" green="0.97034931179999995" blue="0.97036576269999997" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    <color key="titleShadowColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
+                                                </state>
+                                                <connections>
+                                                    <action selector="cancelCall:" destination="eWC-It-u2H" eventType="touchUpInside" id="FmJ-Nw-yFH"/>
+                                                </connections>
+                                            </button>
+                                        </subviews>
+                                        <color key="backgroundColor" red="1" green="0.20050071929999999" blue="0.3166300789" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                    </view>
+                                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="eQH-4X-M0S">
+                                        <rect key="frame" x="91" y="100" width="232" height="230"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                    </imageView>
+                                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="name" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="iib-jt-Rte">
+                                        <rect key="frame" x="15" y="345" width="384" height="21"/>
+                                        <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                </subviews>
+                                <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            </view>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="4v0-qe-c51" firstAttribute="leading" secondItem="KJg-cq-7ae" secondAttribute="leading" id="4Tg-qG-fZl"/>
+                            <constraint firstAttribute="trailing" secondItem="4v0-qe-c51" secondAttribute="trailing" id="GUG-3u-cyd"/>
+                            <constraint firstItem="4v0-qe-c51" firstAttribute="top" secondItem="2q4-us-OTY" secondAttribute="bottom" constant="8" id="NS2-EG-vES"/>
+                            <constraint firstItem="pOz-eG-qrT" firstAttribute="top" secondItem="4v0-qe-c51" secondAttribute="bottom" id="yWH-Ya-bua"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="userImage" destination="eQH-4X-M0S" id="XED-Wh-K3r"/>
+                        <outlet property="userName" destination="iib-jt-Rte" id="nPd-BP-HOw"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Pp1-Q6-o8O" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-1638" y="-1857"/>
+        </scene>
         <!--Contacts-->
         <scene sceneID="IUh-IV-wXI">
             <objects>

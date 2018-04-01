@@ -21,6 +21,7 @@
 
 //xmpp
 #import "MLXMPPManager.h"
+#import "UIColor+Theme.h"
 
 @interface MonalAppDelegate ()
 
@@ -35,8 +36,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) setUISettings
 {
-    UIColor *monalGreen =[UIColor colorWithRed:128.0/255 green:203.0/255 blue:182.0/255 alpha:1.0f];
-    UIColor *monaldarkGreen =[UIColor colorWithRed:20.0/255 green:138.0/255 blue:103.0/255 alpha:1.0f];
+    UIColor *monalGreen = [UIColor monalGreen];
+    UIColor *monaldarkGreen =[UIColor monaldarkGreen];
     
     [[UINavigationBar appearance] setBarTintColor:monalGreen];
     [[UINavigationBar appearance] setTintColor:[UIColor whiteColor]];

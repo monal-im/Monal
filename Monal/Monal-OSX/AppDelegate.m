@@ -181,23 +181,24 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [[DataLayer sharedInstance] accountListWithCompletion:^(NSArray *result) {
         dispatch_async(dispatch_get_main_queue(), ^{
           
-             NSMenuItem *template =[self.serverDetails.submenu.itemArray[0] copy];
-             [self.serverDetails.submenu removeAllItems ];
-            for(NSDictionary *account in result)
-            {
-                
-                NSNumber *accountId =[account objectForKey:@"account_id"];
-                xmpp* xmppAccount= [[MLXMPPManager sharedInstance] getConnectedAccountForID:[NSString stringWithFormat:@"%@", accountId ]];
-                if(xmppAccount) {
-                    NSMenuItem *item =[template copy];
+            if(self.serverDetails.submenu.itemArray.count>0) {
+                NSMenuItem *template =[self.serverDetails.submenu.itemArray[0] copy];
+                [self.serverDetails.submenu removeAllItems ];
+                for(NSDictionary *account in result)
+                {
                     
-                    item.title=xmppAccount.server;
-                    item.tag=1000+accountId.integerValue;
-                    
-                    [self.serverDetails.submenu addItem:item];
+                    NSNumber *accountId =[account objectForKey:@"account_id"];
+                    xmpp* xmppAccount= [[MLXMPPManager sharedInstance] getConnectedAccountForID:[NSString stringWithFormat:@"%@", accountId ]];
+                    if(xmppAccount) {
+                        NSMenuItem *item =[template copy];
+                        
+                        item.title=xmppAccount.server;
+                        item.tag=1000+accountId.integerValue;
+                        
+                        [self.serverDetails.submenu addItem:item];
+                    }
                 }
             }
-            
         });
         
     }];

@@ -51,6 +51,11 @@
     return 1;
 }
 
+-(NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
+{
+    return @"Favorite Group Chats (MUC). Tap to join. ";
+}
+
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     return self.favorites.count;
 }
@@ -74,7 +79,7 @@
     }
     
     cell.textLabel.text = cellText;
-    
+    cell.accessoryType=UITableViewCellAccessoryDetailButton;
     
     return cell;
 }

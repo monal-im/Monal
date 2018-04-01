@@ -1182,11 +1182,11 @@
             </objects>
             <point key="canvasLocation" x="137" y="1661"/>
         </scene>
-        <!--Root View Controller-->
+        <!--Edit Group Chat-->
         <scene sceneID="kig-36-J1j">
             <objects>
-                <tableViewController id="GpF-k7-Z6D" customClass="MLGroupChatTableViewController" sceneMemberID="viewController">
-                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" id="9LZ-0p-JU3">
+                <tableViewController id="GpF-k7-Z6D" customClass="MLEditGroupViewController" sceneMemberID="viewController">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" allowsSelection="NO" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" id="9LZ-0p-JU3">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
@@ -1205,11 +1205,11 @@
                             <outlet property="delegate" destination="GpF-k7-Z6D" id="3t6-lJ-64G"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="Root View Controller" id="yIE-Ub-BAk"/>
+                    <navigationItem key="navigationItem" title="Edit Group Chat" id="yIE-Ub-BAk"/>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="zeF-qp-qgY" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1759" y="1785"/>
+            <point key="canvasLocation" x="1780" y="1736"/>
         </scene>
         <!--Root View Controller-->
         <scene sceneID="m9Z-mm-cdn">
@@ -1270,7 +1270,7 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Kbu-Vj-En3" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="970" y="1785"/>
+            <point key="canvasLocation" x="1051" y="1736"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="9Is-dX-ch3">

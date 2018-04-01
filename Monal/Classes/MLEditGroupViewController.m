@@ -152,7 +152,10 @@
                 {
                     self.accountName.text=[[MLXMPPManager sharedInstance] getAccountNameForConnectedRow:0];
                 }
+                textCell.textInput.inputAccessoryView =self.keyboardToolbar;
+            
                 toreturn=textCell;
+            
                 break;
         }
             
@@ -167,6 +170,7 @@
                     thecell.textInput.placeholder=@"Room";
                     thecell.textInput.tag=1;
                     thecell.textInput.keyboardType = UIKeyboardTypeEmailAddress;
+                    thecell.textInput.inputAccessoryView =self.keyboardToolbar;
                     toreturn=thecell;
                     break;
                 }
@@ -175,7 +179,8 @@
               
                     thecell.textInput.placeholder=@"NickNnme";
                     thecell.textInput.tag=2;
-                
+                    thecell.textInput.inputAccessoryView =self.keyboardToolbar;
+
                     toreturn=thecell;
                     break;
                 }
@@ -184,6 +189,8 @@
                    // thecell.textInputField.text=self.password;
                     thecell.textInput.placeholder=@"Password";
                     thecell.textInput.tag=3;
+                    thecell.textInput.inputAccessoryView =self.keyboardToolbar;
+
                     thecell.textInput.secureTextEntry=YES;
                     toreturn=thecell;
                     break;
@@ -217,10 +224,8 @@
         case 2:
         {
             //save button
-            MLButtonCell *buttonCell =(MLButtonCell*)[tableView dequeueReusableCellWithIdentifier:@"ButtonCell"];
-            buttonCell.buttonText.text=@"Save";
-            buttonCell.buttonText.textColor= [UIColor monalGreen];
-            buttonCell.selectionStyle= UITableViewCellSelectionStyleNone;
+            UITableViewCell *buttonCell =[tableView dequeueReusableCellWithIdentifier:@"addButton"];
+          
             toreturn= buttonCell;
             break;
         }
@@ -230,6 +235,8 @@
 
     return toreturn;
 }
+
+#pragma mark actions
 
 -(void) closeView
 {

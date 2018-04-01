@@ -1185,7 +1185,7 @@
         <!--Edit Group Chat-->
         <scene sceneID="kig-36-J1j">
             <objects>
-                <tableViewController id="GpF-k7-Z6D" customClass="MLEditGroupViewController" sceneMemberID="viewController">
+                <tableViewController title="Edit Group Chat" id="GpF-k7-Z6D" customClass="MLEditGroupViewController" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" allowsSelection="NO" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" id="9LZ-0p-JU3">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -1197,6 +1197,30 @@
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="aW3-bk-9lP" id="XkY-vh-b2N">
                                     <rect key="frame" x="0.0" y="0.0" width="414" height="43.666666666666664"/>
                                     <autoresizingMask key="autoresizingMask"/>
+                                </tableViewCellContentView>
+                            </tableViewCell>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="addButton" id="7bv-y5-bYi">
+                                <rect key="frame" x="0.0" y="99.333333333333343" width="414" height="44"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="7bv-y5-bYi" id="iZv-xu-LdO">
+                                    <rect key="frame" x="0.0" y="0.0" width="414" height="43.666666666666664"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <subviews>
+                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Q7I-qj-4zk">
+                                            <rect key="frame" x="164" y="7" width="86" height="30"/>
+                                            <state key="normal" title="Add Contact">
+                                                <color key="titleColor" red="0.4541509151" green="0.72539824249999996" blue="0.68004375699999997" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                            </state>
+                                            <connections>
+                                                <action selector="addPress:" destination="GpF-k7-Z6D" eventType="touchUpInside" id="1Tq-1E-8jt"/>
+                                                <action selector="addPress:" destination="aFU-Vb-8Jd" eventType="touchUpInside" id="qVT-vD-6ty"/>
+                                            </connections>
+                                        </button>
+                                    </subviews>
+                                    <constraints>
+                                        <constraint firstItem="Q7I-qj-4zk" firstAttribute="centerY" secondItem="iZv-xu-LdO" secondAttribute="centerY" id="ajg-1g-Tpx"/>
+                                        <constraint firstItem="Q7I-qj-4zk" firstAttribute="centerX" secondItem="iZv-xu-LdO" secondAttribute="centerX" id="bLP-X5-U7e"/>
+                                    </constraints>
                                 </tableViewCellContentView>
                             </tableViewCell>
                         </prototypes>
@@ -1667,7 +1691,7 @@
     </resources>
     <inferredMetricsTieBreakers>
         <segue reference="ojB-Rp-nEa"/>
-        <segue reference="qaB-BP-OcO"/>
+        <segue reference="mq9-9z-0ZK"/>
         <segue reference="wmf-tk-2CN"/>
         <segue reference="yyS-J0-BDM"/>
         <segue reference="fRw-7r-LxC"/>

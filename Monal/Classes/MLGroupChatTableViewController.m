@@ -45,6 +45,11 @@
     }
 }
 
+-(void) viewWillAppear:(BOOL)animated
+{
+    [self refresh];
+}
+
 #pragma mark - Table view data source
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
@@ -82,6 +87,15 @@
     cell.accessoryType=UITableViewCellAccessoryDetailButton;
     
     return cell;
+}
+
+-(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+       NSDictionary *dic = self.favorites[indexPath.row];
+    
+    NSNumber *account=[dic objectForKey:@"account_id"];
+    [[MLXMPPManager sharedInstance] joinRoom:[dic objectForKey:@"room"] withNick:[dic objectForKey:@"nick"]  andPassword:@"" forAccounId:account.integerValue ];
+    [[DataLayer sharedInstance] updateOwnNickName:[dic objectForKey:@"nick"] forMuc:[dic objectForKey:@"room"] forAccount:[NSString stringWithFormat:@"%@", account]];
 }
 
 

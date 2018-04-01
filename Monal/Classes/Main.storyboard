@@ -1163,11 +1163,6 @@
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" title="Group Chat" id="k0T-5X-FQu">
-                        <barButtonItem key="leftBarButtonItem" systemItem="search" id="0l0-51-F8M">
-                            <connections>
-                                <segue destination="knc-Oa-kKj" kind="presentation" id="lbp-vQ-fdz"/>
-                            </connections>
-                        </barButtonItem>
                         <barButtonItem key="rightBarButtonItem" systemItem="add" id="dQ9-YY-e5J">
                             <connections>
                                 <segue destination="e3Q-T1-etu" kind="presentation" id="1d0-oX-Uzg"/>
@@ -1207,8 +1202,8 @@
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Q7I-qj-4zk">
-                                            <rect key="frame" x="164" y="7" width="86" height="30"/>
-                                            <state key="normal" title="Add Contact">
+                                            <rect key="frame" x="169.66666666666666" y="7" width="75" height="30"/>
+                                            <state key="normal" title="Join Group">
                                                 <color key="titleColor" red="0.4541509151" green="0.72539824249999996" blue="0.68004375699999997" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                             </state>
                                             <connections>
@@ -1716,7 +1711,7 @@
     </resources>
     <inferredMetricsTieBreakers>
         <segue reference="ojB-Rp-nEa"/>
-        <segue reference="mq9-9z-0ZK"/>
+        <segue reference="qaB-BP-OcO"/>
         <segue reference="wmf-tk-2CN"/>
         <segue reference="yyS-J0-BDM"/>
         <segue reference="fRw-7r-LxC"/>

@@ -1230,7 +1230,32 @@
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" title="Edit Group Chat" id="yIE-Ub-BAk"/>
+                    <connections>
+                        <outlet property="keyboardToolbar" destination="l3W-dT-pDe" id="aRi-8B-diS"/>
+                    </connections>
                 </tableViewController>
+                <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="l3W-dT-pDe">
+                    <rect key="frame" x="0.0" y="0.0" width="411" height="44"/>
+                    <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                    <items>
+                        <barButtonItem title="Previous" id="AtF-5m-xfT">
+                            <connections>
+                                <action selector="toolbarPrevious:" destination="GpF-k7-Z6D" id="rJp-6h-Pam"/>
+                            </connections>
+                        </barButtonItem>
+                        <barButtonItem title="Next" width="69" id="HOk-DV-nls">
+                            <connections>
+                                <action selector="toolbarNext:" destination="GpF-k7-Z6D" id="Gf4-S9-Qpt"/>
+                            </connections>
+                        </barButtonItem>
+                        <barButtonItem style="plain" systemItem="flexibleSpace" id="8Z0-fJ-bNo"/>
+                        <barButtonItem title="Done" style="done" id="gy3-P9-g7W">
+                            <connections>
+                                <action selector="toolbarDone:" destination="GpF-k7-Z6D" id="mTY-vA-mrD"/>
+                            </connections>
+                        </barButtonItem>
+                    </items>
+                </toolbar>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="zeF-qp-qgY" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1780" y="1736"/>

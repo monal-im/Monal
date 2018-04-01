@@ -300,6 +300,11 @@
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" id="tCE-L6-uyy">
+                        <barButtonItem key="leftBarButtonItem" title="Call" id="apJ-s8-Bws">
+                            <connections>
+                                <action selector="callContact:" destination="OdB-qj-tVb" id="We8-bG-47p"/>
+                            </connections>
+                        </barButtonItem>
                         <barButtonItem key="rightBarButtonItem" title="Close" id="8S0-Vz-5yv">
                             <connections>
                                 <action selector="close:" destination="OdB-qj-tVb" id="AbJ-Kb-5e6"/>

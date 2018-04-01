@@ -35,7 +35,7 @@
 	return YES;
 }
 
--(IBAction) callContact:(id)sender;
+-(IBAction) callContact:(id)sender
 {
 //    CallViewController *callScreen= [[CallViewController alloc] initWithContact:_contact];
 

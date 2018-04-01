@@ -63,6 +63,7 @@
     }
 }
 
+#pragma mark - textfield delegate
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField
 {
@@ -78,10 +79,6 @@
     return YES;
 }
 
--(BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
-{
-	return YES;
-}
 
 #pragma mark View life cycle
 

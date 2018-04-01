@@ -8,6 +8,6 @@
 
 #import <UIKit/UIKit.h>
 
-@interface MLEditGroupViewController : UITableViewController
+@interface MLEditGroupViewController : UITableViewController <UITextFieldDelegate, UIPickerViewDelegate, UIPickerViewDataSource>
 
 @end

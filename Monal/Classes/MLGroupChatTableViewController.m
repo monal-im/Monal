@@ -10,6 +10,7 @@
 #import "MLXMPPManager.h"
 #import "DataLayer.h"
 #import "xmpp.h"
+#import "MLEditGroupViewController.h"
 
 @interface MLGroupChatTableViewController ()
 
@@ -155,6 +156,14 @@
 // In a storyboard-based application, you will often want to do a little preparation before navigation
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
  
+    if([segue.identifier isEqualToString:@"editGroup"])
+    {
+        UINavigationController *nav=segue.destinationViewController;
+        MLEditGroupViewController *editor = (MLEditGroupViewController *)nav.topViewController;
+        
+        editor.groupData=self.toEdit;
+        
+    }
 }
 
 

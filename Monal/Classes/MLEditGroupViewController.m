@@ -47,10 +47,11 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-
+    if(!self.groupData) {
     self.closeButton =[[UIBarButtonItem alloc] initWithTitle:@"Close" style:UIBarButtonItemStylePlain target:self action:@selector(closeView)];
     self.navigationItem.rightBarButtonItem=_closeButton;
-    
+    }
+
     self.accountPicker = [[ UIPickerView alloc] init];
     self.accountPickerView= [[UIView alloc] initWithFrame: _accountPicker.frame];
     self.accountPickerView.autoresizingMask=UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
@@ -182,6 +183,7 @@
                     thecell.textInput.inputAccessoryView =self.keyboardToolbar;
                     thecell.textInput.delegate=self;
                     self.roomField= thecell.textInput;
+                    self.roomField.text=[_groupData objectForKey:@"room"];
                     toreturn=thecell;
                     break;
                 }
@@ -191,6 +193,7 @@
                     thecell.textInput.inputAccessoryView =self.keyboardToolbar;
                      self.nickField= thecell.textInput;
                     thecell.textInput.delegate=self;
+                      self.nickField.text=[_groupData objectForKey:@"nick"];
                     toreturn=thecell;
                     break;
                 }
@@ -201,6 +204,7 @@
                     thecell.textInput.secureTextEntry=YES;
                     
                      self.passField= thecell.textInput;
+                     // self.roomField.text=[_groupData objectForKey:@"room"];
                     toreturn=thecell;
                     break;
                 }
@@ -210,6 +214,7 @@
                     thecell.cellLabel.text=@"Favorite";
                     thecell.textInputField.hidden=YES;
                      self.favSwitch= thecell.toggleSwitch;
+                    if(self.groupData) self.favSwitch.on=YES;
                     toreturn=thecell;
                     break;
                 }
@@ -219,6 +224,14 @@
                     thecell.cellLabel.text=@"Auto Join";
                     thecell.textInputField.hidden=YES;
                     self.autoSwitch= thecell.toggleSwitch;
+                    
+                    NSNumber *on=[_groupData objectForKey:@"autojoin"];
+                    
+                    if(on.intValue==1)
+                    {
+                        self.autoSwitch.on=YES;
+                    }
+                    
                     toreturn=thecell;
                     break;
                 }
@@ -269,7 +282,7 @@
         NSDictionary *accountrow = [MLXMPPManager sharedInstance].connectedXMPP[[self.accountPicker selectedRowInComponent:0]];
         xmpp* account= (xmpp*)[accountrow objectForKey:kXmppAccount];
         
-        if(self.favSwitch.on){
+        if(self.favSwitch.on && !self.groupData){
             BOOL autoJoinValue=NO;
             if(self.autoSwitch.on) autoJoinValue=YES;
 

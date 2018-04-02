@@ -1157,7 +1157,7 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
-                        <segue destination="RjC-T7-BwN" kind="showDetail" id="qaB-BP-OcO"/>
+                        <segue destination="RjC-T7-BwN" kind="showDetail" identifier="editGroup" id="qaB-BP-OcO"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Cbc-HF-LG0" userLabel="First Responder" sceneMemberID="firstResponder"/>

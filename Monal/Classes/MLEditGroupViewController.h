@@ -10,4 +10,6 @@
 
 @interface MLEditGroupViewController : UITableViewController <UITextFieldDelegate, UIPickerViewDelegate, UIPickerViewDataSource>
 
+@property (nonatomic, strong) NSDictionary *groupData; 
+
 @end

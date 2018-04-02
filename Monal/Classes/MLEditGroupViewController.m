@@ -280,11 +280,14 @@
 
       
         
+        NSString *nick=self.nickField.text;
+        NSString *room =self.roomField.text;
+        
         
         [[DataLayer sharedInstance] addContact:self.roomField.text forAccount:account.accountNo fullname:@"" nickname:self.nickField.text  withCompletion:^(BOOL success) {
             if(!success)
             {
-                [[DataLayer sharedInstance] updateOwnNickName:self.nickField.text forMuc:self.roomField.text forAccount:account.accountNo];
+                [[DataLayer sharedInstance] updateOwnNickName:nick forMuc:room forAccount:account.accountNo];
             }
         }];
         

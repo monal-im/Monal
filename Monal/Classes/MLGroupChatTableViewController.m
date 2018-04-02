@@ -124,10 +124,15 @@
         NSNumber *account=[dic objectForKey:@"account_id"];
   
         [[DataLayer sharedInstance] deleteMucFavorite:[dic objectForKey:@"mucid"] forAccountId:account.integerValue withCompletion:^(BOOL success) {
-            
+
         }];
  
-        [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationRight];
+        [self.favorites removeObjectAtIndex:indexPath.row];
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationRight];
+        });
+        
         
     }
     

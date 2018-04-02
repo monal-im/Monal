@@ -103,6 +103,8 @@
                 [[DataLayer sharedInstance] updateOwnNickName:[dic objectForKey:@"nick"] forMuc:[dic objectForKey:@"room"] forAccount:[NSString stringWithFormat:@"%@", account]];
         }
     }];
+    
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
 
 }
 
@@ -112,6 +114,35 @@
     self.toEdit=dic;
     [self performSegueWithIdentifier:@"editGroup" sender:self];
 }
+
+
+- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
+    if (editingStyle == UITableViewCellEditingStyleDelete) {
+        
+        NSDictionary *dic = self.favorites[indexPath.row];
+        
+        NSNumber *account=[dic objectForKey:@"account_id"];
+  
+        [[DataLayer sharedInstance] deleteMucFavorite:[dic objectForKey:@"mucid"] forAccountId:account.integerValue withCompletion:^(BOOL success) {
+            
+        }];
+ 
+        [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationRight];
+        
+    }
+    
+}
+
+- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return YES;
+}
+
+- (BOOL)tableView:(UITableView *)tableView shouldIndentWhileEditingRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return YES;
+}
+
 
 
 #pragma mark - Navigation

@@ -278,7 +278,15 @@
 
         [[MLXMPPManager sharedInstance] joinRoom:self.roomField.text withNick:self.nickField.text andPassword:self.passField.text forAccountRow:[self.accountPicker selectedRowInComponent:0]];
 
-        [[DataLayer sharedInstance] updateOwnNickName:self.nickField.text forMuc:self.roomField.text forAccount:account.accountNo];
+      
+        
+        
+        [[DataLayer sharedInstance] addContact:self.roomField.text forAccount:account.accountNo fullname:@"" nickname:self.nickField.text  withCompletion:^(BOOL success) {
+            if(!success)
+            {
+                [[DataLayer sharedInstance] updateOwnNickName:self.nickField.text forMuc:self.roomField.text forAccount:account.accountNo];
+            }
+        }];
         
         
     }

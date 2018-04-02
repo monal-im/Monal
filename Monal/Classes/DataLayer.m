@@ -1247,7 +1247,7 @@ static DataLayer *sharedInstance=nil;
 -(NSString *) ownNickNameforMuc:(NSString*) room forAccount:(NSString*) accountNo
 {
     NSString* query=[NSString stringWithFormat:@"SELECT muc_nick from buddylist where account_id=%@  and buddy_name='%@' ", accountNo, room.escapeForSql];
-    NSString * nick=(NSNumber*)[self executeScalar:query];
+    NSString * nick=(NSString*)[self executeScalar:query];
     return nick;
 }
 

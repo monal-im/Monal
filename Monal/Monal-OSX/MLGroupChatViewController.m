@@ -48,7 +48,15 @@
 
     [[MLXMPPManager sharedInstance] joinRoom:self.room.stringValue withNick:self.nick.stringValue andPassword:self.password.stringValue forAccountRow:self.accounts.indexOfSelectedItem];
     
-    [[DataLayer sharedInstance] updateOwnNickName:self.nick.stringValue forMuc:self.room.stringValue forAccount:account.accountNo];
+
+    
+    
+    [[DataLayer sharedInstance] addContact:self.room.stringValue forAccount:account.accountNo] fullname:@"" nickname:self.nick.stringValue withCompletion:^(BOOL success) {
+        if(!success)
+        {
+            [[DataLayer sharedInstance] updateOwnNickName:self.nick.stringValue forMuc:self.room.stringValue forAccount:account.accountNo];
+        }
+    }];
 }
 
 @end

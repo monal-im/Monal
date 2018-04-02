@@ -420,7 +420,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:@"Incoming Call" message:[NSString stringWithFormat:@"Incoming audio call to %@ from %@ ",userName,  contactName] preferredStyle:UIAlertControllerStyleAlert];
         UIAlertAction *acceptAction =[UIAlertAction actionWithTitle:@"Accept" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
             
-            [self performSegueWithIdentifier:@"ShowCall" sender:self];
+            [self performSegueWithIdentifier:@"showCall" sender:self];
             
             [[MLXMPPManager sharedInstance] handleCall:dic withResponse:YES];
         }];

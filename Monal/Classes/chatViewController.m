@@ -524,19 +524,27 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
             
             dispatch_async(dispatch_get_main_queue(),
                            ^{
+                               NSString *finalMessageType=messageType;
                                NSDictionary* userInfo;
+                               if([[notification.userInfo objectForKey:kMessageType] isEqualToString:kMessageTypeStatus])
+                               {
+                                   finalMessageType =kMessageTypeStatus;
+                               }
+                           
+                               
+                               
                                if([[notification.userInfo objectForKey:@"to"] isEqualToString:_contactName])
                                {
                                    userInfo = @{@"af": [notification.userInfo objectForKey:@"actuallyfrom"],
                                                 @"message": [notification.userInfo objectForKey:@"messageText"],
                                                 @"thetime": [self currentGMTTime],   @"delivered":@YES,
-                                                kMessageType:messageType
+                                                kMessageType:finalMessageType
                                                 };
                                    
                                } else  {
                                    userInfo = @{@"af": [notification.userInfo objectForKey:@"actuallyfrom"],
                                                 @"message": [notification.userInfo objectForKey:@"messageText"],
-                                                @"thetime": [self currentGMTTime], kMessageType:messageType
+                                                @"thetime": [self currentGMTTime], kMessageType:finalMessageType
                                                 };
                                }
                                
@@ -752,6 +760,15 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     {
         from=[row objectForKey:@"message_from"];;
     }
+      NSString *messageType =[row objectForKey:kMessageType];
+    
+    if([messageType isEqualToString:kMessageTypeStatus])
+    {
+        cell=[tableView dequeueReusableCellWithIdentifier:@"StatusCell"];
+        cell.messageBody.text =[row objectForKey:@"message"];
+        cell.link=nil;
+        return cell;
+    }
     
     if(_isMUC)
     {
@@ -778,8 +795,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     NSDictionary *messageRow = [self.messageList objectAtIndex:indexPath.row];
     
     NSString *messageString =[messageRow objectForKey:@"message"];
-    NSString *messageType =[messageRow objectForKey:kMessageType];
-    
+   
     if([messageType isEqualToString:kMessageTypeImage])
     {
         MLChatImageCell* imageCell;

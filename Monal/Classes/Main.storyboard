@@ -1497,8 +1497,33 @@
                                             <outlet property="thumbnailImage" destination="GlC-dn-bvj" id="iHP-Iz-z5V"/>
                                         </connections>
                                     </tableViewCell>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="StatusCell" id="M9Q-xT-4Bd" customClass="MLBaseCell">
+                                        <rect key="frame" x="0.0" y="572" width="414" height="44"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="M9Q-xT-4Bd" id="xcN-0Z-bTD">
+                                            <rect key="frame" x="0.0" y="0.0" width="414" height="44"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="A Status message would go here. That is correct, a status message. " textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="15o-hp-DgI">
+                                                    <rect key="frame" x="10" y="5.3333333333333321" width="394" height="33.666666666666671"/>
+                                                    <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="14"/>
+                                                    <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                            </subviews>
+                                            <constraints>
+                                                <constraint firstItem="15o-hp-DgI" firstAttribute="leading" secondItem="xcN-0Z-bTD" secondAttribute="leading" constant="10" id="Lvf-LR-9x2"/>
+                                                <constraint firstAttribute="trailing" secondItem="15o-hp-DgI" secondAttribute="trailing" constant="10" id="eIW-Hp-TXf"/>
+                                                <constraint firstItem="15o-hp-DgI" firstAttribute="centerX" secondItem="xcN-0Z-bTD" secondAttribute="centerX" id="lwr-tC-AhW"/>
+                                                <constraint firstItem="15o-hp-DgI" firstAttribute="centerY" secondItem="xcN-0Z-bTD" secondAttribute="centerY" id="p2O-HD-LZA"/>
+                                            </constraints>
+                                        </tableViewCellContentView>
+                                        <connections>
+                                            <outlet property="messageBody" destination="15o-hp-DgI" id="e4o-US-mPu"/>
+                                        </connections>
+                                    </tableViewCell>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="none" indentationWidth="10" reuseIdentifier="textInCell" rowHeight="100" id="Y4D-eD-S4v" userLabel="textInCell" customClass="MLChatCell">
-                                        <rect key="frame" x="0.0" y="572" width="414" height="100"/>
+                                        <rect key="frame" x="0.0" y="616" width="414" height="100"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="Y4D-eD-S4v" id="t2e-sA-RIo">
                                             <rect key="frame" x="0.0" y="0.0" width="414" height="100"/>
@@ -1639,7 +1664,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="tvb-fM-fJc" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2377" y="210"/>
+            <point key="canvasLocation" x="2376.811594202899" y="209.5108695652174"/>
         </scene>
     </scenes>
     <resources>
@@ -1655,7 +1680,7 @@
         <segue reference="ojB-Rp-nEa"/>
         <segue reference="qaB-BP-OcO"/>
         <segue reference="N41-wN-KNl"/>
-        <segue reference="wmf-tk-2CN"/>
+        <segue reference="RLU-kt-b8r"/>
         <segue reference="pPJ-na-Dl3"/>
         <segue reference="fRw-7r-LxC"/>
         <segue reference="pZO-HH-rUP"/>

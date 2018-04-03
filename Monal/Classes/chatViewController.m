@@ -880,6 +880,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     {
         cell.showName=YES;
         cell.name.text=[row objectForKey:@"af"];
+    } else  {
+        cell.name.text=@"";
     }
 
     

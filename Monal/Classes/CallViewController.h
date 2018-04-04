@@ -9,9 +9,8 @@
 #import <UIKit/UIKit.h>
 
 @interface CallViewController : UIViewController
-{
-    NSDictionary* _contact;
-}
+
+@property (nonatomic, strong)  NSDictionary* contact;
 
 /**
 Icon of the person being called
@@ -22,12 +21,6 @@ Icon of the person being called
  The name of the person being called.
  */
 @property (nonatomic, weak) IBOutlet UILabel* userName;
-
-
-/**
- Initlizes call with contact from account
- */
--(id) initWithContact:(NSDictionary*) contact;
 
 /**
  cancels the call and dismisses window

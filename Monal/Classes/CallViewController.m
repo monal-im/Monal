@@ -19,24 +19,6 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 @implementation CallViewController
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
-{
-    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-    if (self) {
-        // Custom initialization
-    }
-    return self;
-}
-
--(id) initWithContact:(NSDictionary*) contact
-{
-    self=[super init];
-    if(self) {
-        _contact=contact;
-    }
-    
-    return self;
-}
 
 - (void)viewDidLoad
 {
@@ -51,15 +33,29 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     [super viewWillAppear:animated];
     DDLogVerbose(@"call screen will  appear");
     [UIDevice currentDevice].proximityMonitoringEnabled=YES;
+   
+    NSString *contactName ;
+    if(self.contact) {
+       contactName =  [self.contact objectForKey:@"user"]; //dic form incoming
+        if(!contactName)
+        {
+            contactName =  [self.contact objectForKey:@"buddy_name"]; // dic form outgoing
+        }
+        
+        if(!contactName) {
+            contactName = @"No Contact Selected";
+            
+        }
+    } 
     
-    self.userName.text=[_contact objectForKey:@"full_name"];
-    NSString* accountNo=[NSString stringWithFormat:@"%@", [_contact objectForKey:@"account_id"]];
+        self.userName.text=contactName;
+    NSString* accountNo=[NSString stringWithFormat:@"%@", [self.contact objectForKey:@"account_id"]];
     
-    [[MLImageManager sharedInstance] getIconForContact:[_contact objectForKey:@"buddy_name"] andAccount:accountNo withCompletion:^(UIImage *image) {
+    [[MLImageManager sharedInstance] getIconForContact:contactName andAccount:accountNo withCompletion:^(UIImage *image) {
         self.userImage.image=image;
     }];
     
-    [[MLXMPPManager sharedInstance] callContact:_contact];
+    [[MLXMPPManager sharedInstance] callContact:self.contact];
     
 }
 
@@ -127,9 +123,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 -(IBAction)cancelCall:(id)sender
 {
     [UIDevice currentDevice].proximityMonitoringEnabled=NO;
-    [[MLXMPPManager sharedInstance] hangupContact:_contact];
+    [[MLXMPPManager sharedInstance] hangupContact:self.contact];
     
-    [self dismissModalViewControllerAnimated:YES];
+    [self dismissViewControllerAnimated:YES completion:nil];
   
 }
 

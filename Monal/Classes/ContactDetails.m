@@ -37,11 +37,18 @@
 
 -(IBAction) callContact:(id)sender
 {
-//    CallViewController *callScreen= [[CallViewController alloc] initWithContact:_contact];
-
     [self performSegueWithIdentifier:@"ShowCall" sender:self];
-    
     [[MLXMPPManager sharedInstance] callContact:_contact];
+}
+
+
+-(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+{
+    if([segue.identifier isEqualToString:@"ShowCall"])
+    {
+        CallViewController *callScreen = segue.destinationViewController;
+        callScreen.contact=_contact; 
+    }
 }
 
 

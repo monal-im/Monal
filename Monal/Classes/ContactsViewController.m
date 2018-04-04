@@ -14,6 +14,7 @@
 #import "ContactDetails.h"
 #import "UIActionSheet+Blocks.h"
 #import "addContact.h"
+#import "CallViewController.h"
 
 
 #define kinfoSection 0
@@ -420,7 +421,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:@"Incoming Call" message:[NSString stringWithFormat:@"Incoming audio call to %@ from %@ ",userName,  contactName] preferredStyle:UIAlertControllerStyleAlert];
         UIAlertAction *acceptAction =[UIAlertAction actionWithTitle:@"Accept" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
             
-            [self performSegueWithIdentifier:@"showCall" sender:self];
+            [self performSegueWithIdentifier:@"showCall" sender:dic];
             
             [[MLXMPPManager sharedInstance] handleCall:dic withResponse:YES];
         }];
@@ -565,6 +566,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         ContactDetails* details = (ContactDetails *)nav.topViewController;
         details.contact= sender;
     }
+    else  if([segue.identifier isEqualToString:@"showCall"])
+    {
+        
+        CallViewController* details = (CallViewController *)segue.destinationViewController;
+        details.contact= sender;
+    }
+        
+    
+    
     
 }
 

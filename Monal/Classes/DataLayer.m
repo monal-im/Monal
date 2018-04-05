@@ -590,44 +590,45 @@ static DataLayer *sharedInstance=nil;
 -(void) updateAccounWithDictionary:(NSDictionary *) dictionary andCompletion:(void (^)(BOOL))completion;
 {
     NSString* query=
-    [NSString stringWithFormat:@"update account  set account_name='%@', protocol_id=%@, server='%@', other_port='%@', username='%@', password='%@', secure=%d, resource='%@', domain='%@', enabled=%d, selfsigned=%d, oldstyleSSL=%d where account_id=%@",
-     ((NSString *)[dictionary objectForKey:kUsername]).escapeForSql,
+    [NSString stringWithFormat:@"update account  set account_name=?, protocol_id=?, server=?, other_port=?, username=?, password=?, secure=?, resource=?, domain=?, enabled=?, selfsigned=?, oldstyleSSL=? where account_id=?"];
+    
+     NSArray * params=@[((NSString *)[dictionary objectForKey:kUsername]),
      @"1",
-     ((NSString *)[dictionary objectForKey:kServer]).escapeForSql,
+     ((NSString *)[dictionary objectForKey:kServer]),
      ((NSString *)[dictionary objectForKey:kPort]),
-     ((NSString *)[dictionary objectForKey:kUsername]).escapeForSql,
+     ((NSString *)[dictionary objectForKey:kUsername]),
      @"",
-     [[dictionary objectForKey:kSSL] boolValue],
-     ((NSString *)[dictionary objectForKey:kResource]).escapeForSql,
-     ((NSString *)[dictionary objectForKey:kDomain]).escapeForSql,
-     [[dictionary objectForKey:kEnabled] boolValue],
-     [[dictionary objectForKey:kSelfSigned] boolValue],
-     [[dictionary objectForKey:kOldSSL] boolValue],
+     [dictionary objectForKey:kSSL],
+     ((NSString *)[dictionary objectForKey:kResource]),
+     ((NSString *)[dictionary objectForKey:kDomain]),
+     [dictionary objectForKey:kEnabled],
+     [dictionary objectForKey:kSelfSigned],
+     [dictionary objectForKey:kOldSSL],
      [dictionary objectForKey:kAccountID]
-     
      ];
     
-    [self executeNonQuery:query withCompletion:completion];
+    [self executeNonQuery:query andArguments:params withCompletion:completion];
 }
 
 -(void) addAccountWithDictionary:(NSDictionary *) dictionary andCompletion: (void (^)(BOOL))completion
 {
-    NSString* query= [NSString stringWithFormat:@"insert into account values(null, '%@', %@, '%@', '%@', '%@', '%@', %d, '%@', '%@', %d, %d, %d, %d) ",
-                      ((NSString *)[dictionary objectForKey:kUsername]).escapeForSql,
-                      @"1",
-                      ((NSString *) [dictionary objectForKey:kServer]).escapeForSql,
-                      ((NSString *)[dictionary objectForKey:kPort]).escapeForSql,
-                      ((NSString *)[dictionary objectForKey:kUsername]).escapeForSql,
-                      @"", [[dictionary objectForKey:kSSL] boolValue],
-                      ((NSString *)[dictionary objectForKey:kResource]).escapeForSql,
-                      ((NSString *)[dictionary objectForKey:kDomain]).escapeForSql,
-                      [[dictionary objectForKey:kEnabled] boolValue],
-                      [[dictionary objectForKey:kSelfSigned] boolValue],
-                      [[dictionary objectForKey:kOldSSL] boolValue],
-                      [[dictionary objectForKey:kOauth] boolValue]
+    NSString* query= [NSString stringWithFormat:@"insert into account (account_name, protocol_id, server,other_port, username, secure,resource,domain, enabled, selfsigned, oldstyleSSL,oauth  ) values( ?, 1, ?, ?, ?, ?, ?, ?, ?, ?,?, ?) "];
+    
+    NSArray *params= @[((NSString *)[dictionary objectForKey:kUsername]),
+                      
+                      ((NSString *) [dictionary objectForKey:kServer]),
+                      ((NSString *)[dictionary objectForKey:kPort]),
+                      ((NSString *)[dictionary objectForKey:kUsername]),
+                       [dictionary objectForKey:kSSL],
+                      ((NSString *)[dictionary objectForKey:kResource]),
+                      ((NSString *)[dictionary objectForKey:kDomain]),
+                      [dictionary objectForKey:kEnabled] ,
+                      [dictionary objectForKey:kSelfSigned],
+                      [dictionary objectForKey:kOldSSL],
+                      [dictionary objectForKey:kOauth]
                       ];
     
-    [self executeNonQuery:query withCompletion:completion];
+    [self executeNonQuery:query andArguments:params withCompletion:completion];
    
 }
 

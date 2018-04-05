@@ -878,10 +878,12 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     
     if(_isMUC)
     {
-        cell.showName=YES;
+        cell.name.hidden=NO;
         cell.name.text=[row objectForKey:@"af"];
     } else  {
+        
         cell.name.text=@"";
+        cell.name.hidden=YES;
     }
 
     

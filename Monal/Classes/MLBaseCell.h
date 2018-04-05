@@ -14,7 +14,6 @@
 @property (nonatomic, assign) BOOL outBound;
 @property (nonatomic, assign) BOOL MUC;
 
-@property (nonatomic, assign) BOOL showName;
 @property (nonatomic, strong) IBOutlet UILabel* name;
 @property (nonatomic, strong) IBOutlet UILabel* date;
 @property (nonatomic, strong) IBOutlet UILabel* messageBody;

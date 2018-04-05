@@ -64,6 +64,11 @@ extern NSString *const kMessageTypeStatus;
 -(void) executeReader:(NSString*) query withCompletion: (void (^)(NSMutableArray *))completion;
 -(void) executeNonQuery:(NSString*) query withCompletion: (void (^)(BOOL))completion;
 
+-(void) executeScalar:(NSString*) query andArguments:(NSArray *) args withCompletion: (void (^)(NSObject *))completion;
+-(void) executeReader:(NSString*) query andArguments:(NSArray *) args withCompletion: (void (^)(NSMutableArray *))completion;
+-(void) executeNonQuery:(NSString*) query andArguments:(NSArray *) args  withCompletion: (void (^)(BOOL))completion;
+
+
 // Buddy Commands
 -(void) addContact:(NSString*) contact  forAccount:(NSString*) accountNo fullname:(NSString*)fullName nickname:(NSString*) nickName withCompletion: (void (^)(BOOL))completion;
 -(BOOL) removeBuddy:(NSString*) buddy forAccount:(NSString*) accountNo;

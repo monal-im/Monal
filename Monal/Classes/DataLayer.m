@@ -245,6 +245,22 @@ static DataLayer *sharedInstance=nil;
 #pragma mark -- V2 low level
 -(void) executeScalar:(NSString*) query withCompletion: (void (^)(NSObject *))completion
 {
+    [self executeScalar:query andArguments:nil withCompletion:completion];
+}
+
+-(void) executeReader:(NSString*) query withCompletion: (void (^)(NSMutableArray *))completion;
+{
+    [self executeReader:query andArguments:nil withCompletion:completion];
+}
+
+-(void) executeNonQuery:(NSString*) query withCompletion: (void (^)(BOOL))completion
+{
+    [self executeNonQuery:query andArguments:nil withCompletion:completion];
+}
+
+
+-(void) executeScalar:(NSString*) query andArguments:(NSArray *) args withCompletion: (void (^)(NSObject *))completion
+{
     if(!query)
     {
         if(completion) {
@@ -256,6 +272,20 @@ static DataLayer *sharedInstance=nil;
         NSObject* toReturn;
         sqlite3_stmt *statement;
         if (sqlite3_prepare_v2(database, [query  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK) {
+            sqlite3_reset(statement);
+            [args enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                if([obj isKindOfClass:[NSNumber class]])
+                {
+                    NSNumber *number = (NSNumber *) obj;
+                    sqlite3_bind_double(statement, (signed)idx+1, [number doubleValue]);
+                }
+                else if([obj isKindOfClass:[NSNumber class]])
+                {
+                    NSString *text = (NSString *) obj;
+                    sqlite3_bind_text(statement, (signed)idx+1,[text cStringUsingEncoding:NSUTF8StringEncoding], (int) strlen([text cStringUsingEncoding:NSUTF8StringEncoding]),0);
+                }
+            }];
+            
             if (sqlite3_step(statement) == SQLITE_ROW)
             {
                 switch(sqlite3_column_type(statement,0))
@@ -280,7 +310,7 @@ static DataLayer *sharedInstance=nil;
                     case (SQLITE_TEXT):
                     {
                         NSString* returnString = [NSString stringWithUTF8String:sqlite3_column_text(statement,0)];
-                        //	DDLogVerbose(@"got %@", returnString);
+                        //    DDLogVerbose(@"got %@", returnString);
                         while(sqlite3_step(statement)== SQLITE_ROW ){} //clear
                         toReturn= [returnString  stringByReplacingOccurrencesOfString:@"''" withString:@"'"];
                         break;
@@ -317,6 +347,8 @@ static DataLayer *sharedInstance=nil;
             toReturn= nil;
         }
         
+        sqlite3_finalize(statement);
+        
         if(completion) {
             completion(toReturn);
         }
@@ -324,7 +356,7 @@ static DataLayer *sharedInstance=nil;
 
 }
 
--(void) executeReader:(NSString*) query withCompletion: (void (^)(NSMutableArray *))completion;
+-(void) executeReader:(NSString*) query andArguments:(NSArray *) args withCompletion: (void (^)(NSMutableArray *))completion
 {
     if(!query)
     {
@@ -332,13 +364,26 @@ static DataLayer *sharedInstance=nil;
             completion(nil);
         }
     }
-   
+    
     dispatch_async(_dbQueue, ^{
         
         NSMutableArray*  toReturn =  [[NSMutableArray alloc] init] ;
         
         sqlite3_stmt *statement;
         if (sqlite3_prepare_v2(database, [query cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK) {
+            sqlite3_reset(statement);
+            [args enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                if([obj isKindOfClass:[NSNumber class]])
+                {
+                    NSNumber *number = (NSNumber *) obj;
+                    sqlite3_bind_double(statement, (signed)idx+1, [number doubleValue]);
+                }
+                else if([obj isKindOfClass:[NSNumber class]])
+                {
+                    NSString *text = (NSString *) obj;
+                    sqlite3_bind_text(statement, (signed)idx+1,[text cStringUsingEncoding:NSUTF8StringEncoding], (int) strlen([text cStringUsingEncoding:NSUTF8StringEncoding]),0);
+                }
+            }];
             
             while (sqlite3_step(statement) == SQLITE_ROW) {
                 NSMutableDictionary* row= [[NSMutableDictionary alloc] init];
@@ -409,14 +454,15 @@ static DataLayer *sharedInstance=nil;
             toReturn= nil;
         }
         
+          sqlite3_finalize(statement);
+        
         if(completion) {
             completion(toReturn);
         }
     });
-    
 }
 
--(void) executeNonQuery:(NSString*) query withCompletion: (void (^)(BOOL))completion
+-(void) executeNonQuery:(NSString*) query andArguments:(NSArray *) args  withCompletion: (void (^)(BOOL))completion
 {
     if(!query)
     {
@@ -430,6 +476,20 @@ static DataLayer *sharedInstance=nil;
         sqlite3_stmt *statement;
         if (sqlite3_prepare_v2(database, [query  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK)
         {
+            sqlite3_reset(statement);
+            [args enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                if([obj isKindOfClass:[NSNumber class]])
+                {
+                    NSNumber *number = (NSNumber *) obj;
+                    sqlite3_bind_double(statement, (signed)idx+1, [number doubleValue]);
+                }
+                else if([obj isKindOfClass:[NSNumber class]])
+                {
+                    NSString *text = (NSString *) obj;
+                    sqlite3_bind_text(statement, (signed)idx+1,[text cStringUsingEncoding:NSUTF8StringEncoding], (int) strlen([text cStringUsingEncoding:NSUTF8StringEncoding]),0);
+                }
+            }];
+            
             if(sqlite3_step(statement)==SQLITE_DONE)
                 toReturn=YES;
             else
@@ -441,14 +501,16 @@ static DataLayer *sharedInstance=nil;
             DDLogError(@"nonquery returning NO with out OK %@", query);
             toReturn=NO;
         }
+        
+          sqlite3_finalize(statement);
+        
         if (completion)
         {
             completion(toReturn);
         }
     });
-    
-
 }
+
 
 #pragma mark account commands
 
@@ -2201,13 +2263,10 @@ static DataLayer *sharedInstance=nil;
 
 #pragma mark determine message type
 
-
 -(void) messageTypeForMessage:(NSString *) messageString withCompletion:(void(^)(NSString *messageType)) completion
 {
     __block NSString *messageType=kMessageTypeText;
     if ([[NSUserDefaults standardUserDefaults] boolForKey: @"ShowImages"] &&  ([messageString hasPrefix:@"HTTPS://"]||[messageString hasPrefix:@"https://"]))
-        
-        // HTTP is only here for testing, debugging with ATS off. Will never work in prod
     {
         
         NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:messageString]];

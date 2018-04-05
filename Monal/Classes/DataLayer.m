@@ -910,10 +910,11 @@ static DataLayer *sharedInstance=nil;
 
 -(BOOL) checkCap:(NSString*)cap forUser:(NSString*) user accountNo:(NSString*) acctNo
 {
-    NSString* query=[NSString stringWithFormat:@"select count(*) from buddylist as a inner join buddy_resources as b on a.buddy_id=b.buddy_id  inner join ver_info as c  on  b.ver=c.ver where buddy_name='%@' and account_id=%@ and cap='%@'", user.escapeForSql, acctNo,cap.escapeForSql ];
+    NSString* query=[NSString stringWithFormat:@"select count(*) from buddylist as a inner join buddy_resources as b on a.buddy_id=b.buddy_id  inner join ver_info as c  on  b.ver=c.ver where buddy_name=? and account_id=? and cap=?"];
+    NSArray *params =@[user, acctNo,cap];
     
     //DDLogVerbose(@"%@", query);
-    NSNumber* count = (NSNumber*) [self executeScalar:query];
+    NSNumber* count = (NSNumber*) [self executeScalar:query andArguments:params];
     
     if([count integerValue]>0) return YES; else return NO;
 }
@@ -921,10 +922,11 @@ static DataLayer *sharedInstance=nil;
 -(NSArray*) capsforVer:(NSString*) verString
 {
     
-    NSString* query=[NSString stringWithFormat:@"select cap from ver_info where ver='%@'", verString.escapeForSql];
+    NSString* query=[NSString stringWithFormat:@"select cap from ver_info where ver=?"];
+    NSArray * param=@[verString];
     
     //DDLogVerbose(query);
-    NSArray* toReturn = [self executeReader:query];
+    NSArray* toReturn = [self executeReader:query andArguments:params];
     
     if(toReturn!=nil)
     {
@@ -944,9 +946,10 @@ static DataLayer *sharedInstance=nil;
 
 -(NSString*)getVerForUser:(NSString*)user Resource:(NSString*) resource
 {
-    NSString* query1=[NSString stringWithFormat:@" select ver from buddy_resources as A inner join buddylist as B on a.buddy_id=b.buddy_id where resource='%@' and buddy_name='%@'", resource.escapeForSql, user.escapeForSql ];
+    NSString* query1=[NSString stringWithFormat:@" select ver from buddy_resources as A inner join buddylist as B on a.buddy_id=b.buddy_id where resource=? and buddy_name=?"];
+    NSArray * params=@[resource,user];
     
-    NSString* ver = (NSString*) [self executeScalar:query1];
+    NSString* ver = (NSString*) [self executeScalar:query1 andArguments:params];
     
     return ver;
     
@@ -954,8 +957,10 @@ static DataLayer *sharedInstance=nil;
 
 -(BOOL)setFeature:(NSString*)feature  forVer:(NSString*) ver
 {
-    NSString* query=[NSString stringWithFormat:@"insert into ver_info values ('%@', '%@')", ver.escapeForSql,feature.escapeForSql];
-    if([self executeNonQuery:query]!=NO)
+    NSString* query=[NSString stringWithFormat:@"insert into ver_info values (?, ?)"];
+    NSArray *params =@[ver,feature];
+ 
+    if([self executeNonQuery:query andArguments:params]!=NO)
     {
         return YES;
     }
@@ -979,10 +984,11 @@ static DataLayer *sharedInstance=nil;
 
 -(BOOL) checkLegacyCap:(NSString*)cap forUser:(NSString*) user accountNo:(NSString*) acctNo
 {
-    NSString* query=[NSString stringWithFormat:@"select count(*) from buddylist as a inner join buddy_resources_legacy_caps as b on a.buddy_id=b.buddy_id  inner join legacy_caps as c on c.capid=b.capid where buddy_name='%@' and account_id=%@ and captext='%@'", user.escapeForSql, acctNo,cap.escapeForSql ];
+    NSString* query=[NSString stringWithFormat:@"select count(*) from buddylist as a inner join buddy_resources_legacy_caps as b on a.buddy_id=b.buddy_id  inner join legacy_caps as c on c.capid=b.capid where buddy_name=? and account_id=? and captext=?"];
+    NSArray * params= @[ user, acctNo,cap ];
     
     //DDLogVerbose(@"%@", query);
-    NSNumber* count = (NSNumber *) [self executeScalar:query];
+    NSNumber* count = (NSNumber *) [self executeScalar:query andArguments:params];
     
     if([count integerValue]>0) return YES; else return NO;
 }
@@ -1011,8 +1017,9 @@ static DataLayer *sharedInstance=nil;
 
 -(NSArray*)resourcesForContact:(NSString*)contact
 {
-    NSString* query1=[NSString stringWithFormat:@" select resource from buddy_resources as A inner join buddylist as B on a.buddy_id=b.buddy_id where  buddy_name='%@'  ", contact.escapeForSql ];
-    NSArray* resources = [self executeReader:query1];
+    NSString* query1=[NSString stringWithFormat:@" select resource from buddy_resources as A inner join buddylist as B on a.buddy_id=b.buddy_id where  buddy_name=?  "];
+    NSAray *params=@[contact ];
+    NSArray* resources = [self executeReader:query1 andArguments:params];
     return resources;
     
 }

@@ -279,7 +279,7 @@ static DataLayer *sharedInstance=nil;
                     NSNumber *number = (NSNumber *) obj;
                     sqlite3_bind_double(statement, (signed)idx+1, [number doubleValue]);
                 }
-                else if([obj isKindOfClass:[NSNumber class]])
+                else if([obj isKindOfClass:[NSString class]])
                 {
                     NSString *text = (NSString *) obj;
                     sqlite3_bind_text(statement, (signed)idx+1,[text cStringUsingEncoding:NSUTF8StringEncoding], (int) strlen([text cStringUsingEncoding:NSUTF8StringEncoding]),0);
@@ -378,7 +378,7 @@ static DataLayer *sharedInstance=nil;
                     NSNumber *number = (NSNumber *) obj;
                     sqlite3_bind_double(statement, (signed)idx+1, [number doubleValue]);
                 }
-                else if([obj isKindOfClass:[NSNumber class]])
+                else if([obj isKindOfClass:[NSString class]])
                 {
                     NSString *text = (NSString *) obj;
                     sqlite3_bind_text(statement, (signed)idx+1,[text cStringUsingEncoding:NSUTF8StringEncoding], (int) strlen([text cStringUsingEncoding:NSUTF8StringEncoding]),0);

@@ -923,7 +923,7 @@ static DataLayer *sharedInstance=nil;
 {
     
     NSString* query=[NSString stringWithFormat:@"select cap from ver_info where ver=?"];
-    NSArray * param=@[verString];
+    NSArray * params=@[verString];
     
     //DDLogVerbose(query);
     NSArray* toReturn = [self executeReader:query andArguments:params];
@@ -1018,7 +1018,7 @@ static DataLayer *sharedInstance=nil;
 -(NSArray*)resourcesForContact:(NSString*)contact
 {
     NSString* query1=[NSString stringWithFormat:@" select resource from buddy_resources as A inner join buddylist as B on a.buddy_id=b.buddy_id where  buddy_name=?  "];
-    NSAray *params=@[contact ];
+    NSArray *params=@[contact ];
     NSArray* resources = [self executeReader:query1 andArguments:params];
     return resources;
     
@@ -1091,8 +1091,9 @@ static DataLayer *sharedInstance=nil;
 -(NSString*) buddyState:(NSString*) buddy forAccount:(NSString*) accountNo
 {
     
-    NSString* query=[NSString stringWithFormat:@"select state from buddylist where account_id=%@ and buddy_name='%@'", accountNo, buddy.escapeForSql];
-    NSString* state= (NSString*)[self executeScalar:query];
+    NSString* query=[NSString stringWithFormat:@"select state from buddylist where account_id=? and buddy_name=?"];
+    NSArray *params=@[accountNo, buddy];
+    NSString* state= (NSString*)[self executeScalar:query andArguments:params];
     return state;
 }
 
@@ -1113,7 +1114,7 @@ static DataLayer *sharedInstance=nil;
 -(NSString*) buddyStatus:(NSString*) buddy forAccount:(NSString*) accountNo
 {
     NSString* query=[NSString stringWithFormat:@"select status from buddylist where account_id=%@ and buddy_name='%@'", accountNo, buddy.escapeForSql];
-    NSString* iconname=  (NSString *)[self executeScalar:query];
+    NSString* iconname=  (NSString *)[self executeScalar:query andArguments:nil];
     return iconname;
 }
 
@@ -1151,8 +1152,9 @@ static DataLayer *sharedInstance=nil;
 
 -(NSString*) fullName:(NSString*) buddy forAccount:(NSString*) accountNo;
 {
-    NSString* query=[NSString stringWithFormat:@"select full_name from buddylist where account_id=%@ and buddy_name='%@'", accountNo, buddy.escapeForSql];
-    NSString* fullname= (NSString*)[self executeScalar:query];
+    NSString* query=[NSString stringWithFormat:@"select full_name from buddylist where account_id=%@ and buddy_name='%@'"];
+    NSArray * params=@[accountNo, buddy];
+    NSString* fullname= (NSString*)[self executeScalar:query andArguments:params];
     return fullname;
 }
 
@@ -1162,9 +1164,10 @@ static DataLayer *sharedInstance=nil;
     NSString* hash=presenceObj.photoHash;
     if(!hash) hash=@"";
     //data length check
-    NSString* query=[NSString stringWithFormat:@"update buddylist set iconhash='%@', dirty=1 where account_id=%@ and  buddy_name='%@';",hash,
-                     accountNo, presenceObj.user.escapeForSql];
-    [self executeNonQuery:query withCompletion:nil];
+    NSString* query=[NSString stringWithFormat:@"update buddylist set iconhash=?, dirty=1 where account_id=? and  buddy_name=?;"];
+                     NSArray *params=@[hash,
+                     accountNo, presenceObj.user];
+    [self executeNonQuery:query  andArguments:params withCompletion:nil];
  
 }
 
@@ -1237,16 +1240,18 @@ static DataLayer *sharedInstance=nil;
 
 -(BOOL) isBuddyMuc:(NSString*) buddy forAccount:(NSString*) accountNo
 {
-    NSString* query=[NSString stringWithFormat:@"SELECT Muc from buddylist where account_id=%@  and buddy_name='%@' ", accountNo, buddy.escapeForSql];
-    NSNumber* status=(NSNumber*)[self executeScalar:query];
+    NSString* query=[NSString stringWithFormat:@"SELECT Muc from buddylist where account_id=?  and buddy_name=? "];
+    NSArray *params=@[ accountNo, buddy];
+    NSNumber* status=(NSNumber*)[self executeScalar:query andArguments:params];
     return [status boolValue];
 }
 
 
 -(NSString *) ownNickNameforMuc:(NSString*) room forAccount:(NSString*) accountNo
 {
-    NSString* query=[NSString stringWithFormat:@"SELECT muc_nick from buddylist where account_id=%@  and buddy_name='%@' ", accountNo, room.escapeForSql];
-    NSString * nick=(NSString*)[self executeScalar:query];
+    NSString* query=[NSString stringWithFormat:@"SELECT muc_nick from buddylist where account_id=?  and buddy_name=? "];
+    NSArray *params=@[ accountNo, room];
+    NSString * nick=(NSString*)[self executeScalar:query andArguments:params];
     return nick;
 }
 
@@ -1481,9 +1486,10 @@ static DataLayer *sharedInstance=nil;
     if(user!=nil)
     {
         
-        NSString* query=[NSString stringWithFormat:@"select distinct date(timestamp) as the_date from message_history where account_id=%@ and  message_from='%@' or  message_to='%@'   order by timestamp desc", accountNo, buddy.escapeForSql, buddy.escapeForSql  ];
+        NSString* query=[NSString stringWithFormat:@"select distinct date(timestamp) as the_date from message_history where account_id=? and  message_from=? or  message_to=?   order by timestamp desc"];
+        NSArray  *params=@[accountNo, buddy, buddy  ];
         //DDLogVerbose(query);
-        NSArray* toReturn = [self executeReader:query];
+        NSArray* toReturn = [self executeReader:query andArguments:params];
         
         if(toReturn!=nil)
         {
@@ -1507,10 +1513,11 @@ static DataLayer *sharedInstance=nil;
 -(NSArray*) messageHistoryDate:(NSString*) buddy forAccount:(NSString*) accountNo forDate:(NSString*) date
 {
     
-    NSString* query=[NSString stringWithFormat:@"select af, message, thetime, delivered, message_history_id from (select ifnull(actual_from, message_from) as af, message, delivered,    timestamp  as thetime, message_history_id from message_history where account_id=%@ and (message_from='%@' or message_to='%@') and date(timestamp)='%@' order by message_history_id desc) order by message_history_id asc",accountNo, buddy.escapeForSql, buddy.escapeForSql, date];
+    NSString* query=[NSString stringWithFormat:@"select af, message, thetime, delivered, message_history_id from (select ifnull(actual_from, message_from) as af, message, delivered,    timestamp  as thetime, message_history_id from message_history where account_id=? and (message_from=? or message_to=?) and date(timestamp)=? order by message_history_id desc) order by message_history_id asc"];
+    NSArray *params=@[accountNo, buddy, buddy, date];
     
     DDLogVerbose(@"%@",query);
-    NSArray* toReturn = [self executeReader:query];
+    NSArray* toReturn = [self executeReader:query andArguments:params];
     
     if(toReturn!=nil)
     {
@@ -1533,9 +1540,10 @@ static DataLayer *sharedInstance=nil;
 {
     //returns a buddy's message history
     
-    NSString* query=[NSString stringWithFormat:@"select message_from, message, thetime from (select message_from, message, timestamp as thetime, message_history_id from message_history where account_id=%@ and (message_from='%@' or message_to='%@') order by message_history_id desc) order by message_history_id asc ", accountNo, buddy.escapeForSql, buddy.escapeForSql];
+    NSString* query=[NSString stringWithFormat:@"select message_from, message, thetime from (select message_from, message, timestamp as thetime, message_history_id from message_history where account_id=? and (message_from=? or message_to=?) order by message_history_id desc) order by message_history_id asc "];
+    NSArray *params=@[accountNo, buddy, buddy];
     //DDLogVerbose(query);
-    NSArray* toReturn = [self executeReader:query];
+    NSArray* toReturn = [self executeReader:query andArguments:params];
     
     if(toReturn!=nil)
     {
@@ -1557,9 +1565,10 @@ static DataLayer *sharedInstance=nil;
     
     
     
-    NSString* query=[NSString stringWithFormat:@"delete from message_history where account_id=%@ and (message_from='%@' or message_to='%@') ",accountNo, buddy.escapeForSql, buddy.escapeForSql];
+    NSString* query=[NSString stringWithFormat:@"delete from message_history where account_id=? and (message_from=? or message_to=?) "];
+    NSArray *params=@[accountNo, buddy, buddy];
     //DDLogVerbose(query);
-    if( [self executeNonQuery:query])
+    if( [self executeNonQuery:query andArguments:params])
         
     {
         DDLogVerbose(@" cleaned messages for %@",  buddy );
@@ -1578,7 +1587,7 @@ static DataLayer *sharedInstance=nil;
 {
     //cleans a buddy's message history
     NSString* query=[NSString stringWithFormat:@"delete from message_history "];
-    if( [self executeNonQuery:query andArguments:nil andArguments:nil])
+    if( [self executeNonQuery:query andArguments:nil])
     {
         DDLogVerbose(@" cleaned messages " );
         return YES;
@@ -1597,14 +1606,15 @@ static DataLayer *sharedInstance=nil;
     
     NSString* query1=[NSString stringWithFormat:@"select username, domain from account where account_id=%@", accountNo];
     //DDLogVerbose(query);
-    NSArray* user = [self executeReader:query1];
+    NSArray* user = [self executeReader:query1 andArguments:nil];
     
     if([user count]>0)
     {
         
-        NSString* query=[NSString stringWithFormat:@"select x.* from(select distinct message_from,'', ifnull(full_name, message_from) as full_name, filename from message_history as a left outer join buddylist as b on a.message_from=b.buddy_name and a.account_id=b.account_id where a.account_id=%@  union select distinct message_to  ,'', ifnull(full_name, message_to) as full_name, filename from message_history as a left outer join buddylist as b on a.message_to=b.buddy_name and a.account_id=b.account_id where a.account_id=%@  and message_to!=\"(null)\" )  as x where message_from!='%@' and message_from!='%@@%@'  order by full_name COLLATE NOCASE ", accountNo, accountNo,((NSString *)[[user objectAtIndex:0] objectForKey:@"username"]).escapeForSql, ((NSString *)[[user objectAtIndex:0] objectForKey:@"username"]).escapeForSql,  ((NSString *)[[user objectAtIndex:0] objectForKey:@"domain"]).escapeForSql  ];
+        NSString* query=[NSString stringWithFormat:@"select x.* from(select distinct message_from,'', ifnull(full_name, message_from) as full_name, filename from message_history as a left outer join buddylist as b on a.message_from=b.buddy_name and a.account_id=b.account_id where a.account_id=?  union select distinct message_to  ,'', ifnull(full_name, message_to) as full_name, filename from message_history as a left outer join buddylist as b on a.message_to=b.buddy_name and a.account_id=b.account_id where a.account_id=?  and message_to!=\"(null)\" )  as x where message_from!=? and message_from!='%%?%%'  order by full_name COLLATE NOCASE "];
+        NSArray *params=@[accountNo, accountNo,((NSString *)[[user objectAtIndex:0] objectForKey:@"username"]), ((NSString *)[[user objectAtIndex:0] objectForKey:@"username"]),  ((NSString *)[[user objectAtIndex:0] objectForKey:@"domain"])  ];
         //DDLogVerbose(query);
-        NSArray* toReturn = [self executeReader:query];
+        NSArray* toReturn = [self executeReader:query andArguments:params];
         
         if(toReturn!=nil)
         {
@@ -1625,9 +1635,10 @@ static DataLayer *sharedInstance=nil;
 //message history
 -(NSMutableArray*) messageHistory:(NSString*) buddy forAccount:(NSString*) accountNo
 {
-    NSString* query=[NSString stringWithFormat:@"select af,message_from,  message, thetime, message_history_id, delivered, messageid, messageType from (select ifnull(actual_from, message_from) as af, message_from,  message,     timestamp  as thetime, message_history_id, delivered,messageid, messageType from message_history where account_id=%@ and (message_from='%@' or message_to='%@') order by message_history_id desc limit 100) order by thetime asc",accountNo, buddy.escapeForSql, buddy.escapeForSql];
+    NSString* query=[NSString stringWithFormat:@"select af,message_from,  message, thetime, message_history_id, delivered, messageid, messageType from (select ifnull(actual_from, message_from) as af, message_from,  message,     timestamp  as thetime, message_history_id, delivered,messageid, messageType from message_history where account_id=? and (message_from=? or message_to=?) order by message_history_id desc limit 100) order by thetime asc"];
+    NSArray *params=@[accountNo, buddy, buddy];
     DDLogVerbose(@"%@", query);
-    NSMutableArray* toReturn = [self executeReader:query];
+    NSMutableArray* toReturn = [self executeReader:query andArguments:params];
     
     if(toReturn!=nil)
     {
@@ -1885,7 +1896,7 @@ static DataLayer *sharedInstance=nil;
         DDLogError(@"Error opening database");
     }
     //truncate faster than del
-    [self executeNonQuery:@"pragma truncate;"];
+    [self executeNonQuery:@"pragma truncate;" andArguments:nil];
     
     dbversionCheck=[NSLock new];
     [self version];
@@ -1903,15 +1914,15 @@ static DataLayer *sharedInstance=nil;
     DDLogVerbose(@"Database version check");
     
     //<1.02 has no db version table but gtalk port is 443 . this is an identifier
-    NSNumber* gtalkport= (NSNumber*)[self executeScalar:@"select default_port from  protocol   where protocol_name='GTalk';"];
+    NSNumber* gtalkport= (NSNumber*)[self executeScalar:@"select default_port from  protocol   where protocol_name='GTalk';" andArguments:nil];
     if([gtalkport intValue]==443)
     {
         DDLogVerbose(@"Database version <1.02 detected. Performing upgrade");
-        [self executeNonQuery:@"drop table account;"];
-        [self executeNonQuery:@"create table account( account_id integer not null primary key AUTOINCREMENT,account_name varchar(20) not null, protocol_id integer not null, server varchar(50) not null, other_port integer, username varchar(30), password varchar(30), secure bool,resource varchar(30), domain varchar(50), enabled bool);"];
-        [self executeNonQuery:@"update protocol set default_port=5223 where protocol_name='GTalk';"];
-        [self executeNonQuery:@"create table dbversion(dbversion varchar(10) );"];
-        [self executeNonQuery:@"insert into dbversion values('1.02');"];
+        [self executeNonQuery:@"drop table account;" andArguments:nil];
+        [self executeNonQuery:@"create table account( account_id integer not null primary key AUTOINCREMENT,account_name varchar(20) not null, protocol_id integer not null, server varchar(50) not null, other_port integer, username varchar(30), password varchar(30), secure bool,resource varchar(30), domain varchar(50), enabled bool);" andArguments:nil];
+        [self executeNonQuery:@"update protocol set default_port=5223 where protocol_name='GTalk';" andArguments:nil];
+        [self executeNonQuery:@"create table dbversion(dbversion varchar(10) );" andArguments:nil];
+        [self executeNonQuery:@"insert into dbversion values('1.02');" andArguments:nil];
         
         
         DDLogVerbose(@"Upgrade to 1.02 success importing default account");
@@ -1927,7 +1938,7 @@ static DataLayer *sharedInstance=nil;
                               
                               ];
         
-        [self executeNonQuery:importAcc];
+        [self executeNonQuery:importAcc andArguments:nil];
         
         
         
@@ -1943,32 +1954,32 @@ static DataLayer *sharedInstance=nil;
     if( ([gtalkport intValue]==5223) || ([gtalkport intValue]==443))
     {
         DDLogVerbose(@"Database version <1.04 detected. Performing upgrade");
-        [self executeNonQuery:@"update protocol set default_port=5222 where protocol_name='GTalk';"];
-        [self executeNonQuery:@"insert into protocol values (null,'Facebook',5222); "];
+        [self executeNonQuery:@"update protocol set default_port=5222 where protocol_name='GTalk';" andArguments:nil];
+        [self executeNonQuery:@"insert into protocol values (null,'Facebook',5222); " andArguments:nil];
         
-        [self executeNonQuery:@"drop table buddylist; "];
-        [self executeNonQuery:@"drop table buddyicon; "];
-        [self executeNonQuery:@"create table buddylist(buddy_id integer not null primary key AUTOINCREMENT, account_id integer not null, buddy_name varchar(50), full_name varchar(50), nick_name varchar(50)); "];
-        [self executeNonQuery:@"create table buddyicon(buddyicon_id integer null primary key AUTOINCREMENT,buddy_id integer not null,hash varchar(255),  filename varchar(50)); "];
+        [self executeNonQuery:@"drop table buddylist; " andArguments:nil];
+        [self executeNonQuery:@"drop table buddyicon; " andArguments:nil];
+        [self executeNonQuery:@"create table buddylist(buddy_id integer not null primary key AUTOINCREMENT, account_id integer not null, buddy_name varchar(50), full_name varchar(50), nick_name varchar(50)); " andArguments:nil];
+        [self executeNonQuery:@"create table buddyicon(buddyicon_id integer null primary key AUTOINCREMENT,buddy_id integer not null,hash varchar(255),  filename varchar(50)); " andArguments:nil];
         
-        [self executeNonQuery:@"drop table dbversion;"];
-        [self executeNonQuery:@"create table dbversion(dbversion real);"];
-        [self executeNonQuery:@"insert into dbversion values(1.04);"];
+        [self executeNonQuery:@"drop table dbversion;" andArguments:nil];
+        [self executeNonQuery:@"create table dbversion(dbversion real);" andArguments:nil];
+        [self executeNonQuery:@"insert into dbversion values(1.04);" andArguments:nil];
         DDLogVerbose(@"Upgrade to 1.04 success ");
         
         
     }
     
     
-    NSNumber* dbversion= (NSNumber*)[self executeScalar:@"select dbversion from dbversion"];
+    NSNumber* dbversion= (NSNumber*)[self executeScalar:@"select dbversion from dbversion" andArguments:nil];
     DDLogVerbose(@"Got db version %@", dbversion);
     
     
     if([dbversion doubleValue]<1.07)
     {
         DDLogVerbose(@"Database version <1.07 detected. Performing upgrade");
-        [self executeNonQuery:@"create table buddylistOnline (buddy_id integer not null primary key AUTOINCREMENT,account_id integer not null,buddy_name varchar(50), group_name varchar(100)); "];
-        [self executeNonQuery:@"update dbversion set dbversion='1.07'; "];
+        [self executeNonQuery:@"create table buddylistOnline (buddy_id integer not null primary key AUTOINCREMENT,account_id integer not null,buddy_name varchar(50), group_name varchar(100)); " andArguments:nil];
+        [self executeNonQuery:@"update dbversion set dbversion='1.07'; " andArguments:nil];
         
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"IdleAlert"];
         
@@ -1979,33 +1990,33 @@ static DataLayer *sharedInstance=nil;
     if([dbversion doubleValue]<1.071)
     {
         DDLogVerbose(@"Database version <1.071 detected. Performing upgrade");
-        [self executeNonQuery:@"drop table buddylistOnline;  "];
+        [self executeNonQuery:@"drop table buddylistOnline;  " andArguments:nil];
         
-        [self executeNonQuery:@"drop table buddylist;  "];
-        [self executeNonQuery:@"drop table messages;  "];
-        [self executeNonQuery:@"drop table message_history;  "];
-        [self executeNonQuery:@"drop table buddyicon;  "];
-        
-        
-        
-        [self executeNonQuery:@"create table buddylist(buddy_id integer not null primary key AUTOINCREMENT,account_id integer not null, buddy_name varchar(50) collate nocase, full_name varchar(50),nick_name varchar(50), group_name varchar(50),iconhash varchar(200),filename varchar(100),state varchar(20), status varchar(200),online bool, dirty bool, new bool); "];
+        [self executeNonQuery:@"drop table buddylist;  " andArguments:nil];
+        [self executeNonQuery:@"drop table messages;  " andArguments:nil];
+        [self executeNonQuery:@"drop table message_history;  " andArguments:nil];
+        [self executeNonQuery:@"drop table buddyicon;  " andArguments:nil];
         
         
         
-        
-        [self executeNonQuery:@"create table messages(message_id integer not null primary key AUTOINCREMENT,account_id integer, message_from varchar(50) collate nocase,message_to varchar(50) collate nocase, timestamp datetime, message blob,notice integer,actual_from varchar(50) collate nocase);"];
-        
-        
-        
-        [self executeNonQuery:@"create table message_history(message_history_id integer not null primary key AUTOINCREMENT,account_id integer, message_from varchar(50) collate nocase,message_to varchar(50) collate nocase,timestamp datetime , message blob,actual_from varchar(50) collate nocase);"];
+        [self executeNonQuery:@"create table buddylist(buddy_id integer not null primary key AUTOINCREMENT,account_id integer not null, buddy_name varchar(50) collate nocase, full_name varchar(50),nick_name varchar(50), group_name varchar(50),iconhash varchar(200),filename varchar(100),state varchar(20), status varchar(200),online bool, dirty bool, new bool); " andArguments:nil];
         
         
         
         
-        [self executeNonQuery:@"create table activechats(account_id integer not null, buddy_name varchar(50) collate nocase); "];
+        [self executeNonQuery:@"create table messages(message_id integer not null primary key AUTOINCREMENT,account_id integer, message_from varchar(50) collate nocase,message_to varchar(50) collate nocase, timestamp datetime, message blob,notice integer,actual_from varchar(50) collate nocase);" andArguments:nil];
         
         
-        [self executeNonQuery:@"update dbversion set dbversion='1.071'; "];
+        
+        [self executeNonQuery:@"create table message_history(message_history_id integer not null primary key AUTOINCREMENT,account_id integer, message_from varchar(50) collate nocase,message_to varchar(50) collate nocase,timestamp datetime , message blob,actual_from varchar(50) collate nocase);" andArguments:nil];
+        
+        
+        
+        
+        [self executeNonQuery:@"create table activechats(account_id integer not null, buddy_name varchar(50) collate nocase); " andArguments:nil];
+        
+        
+        [self executeNonQuery:@"update dbversion set dbversion='1.071'; " andArguments:nil];
         
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"IdleAlert"];
         
@@ -2017,11 +2028,11 @@ static DataLayer *sharedInstance=nil;
     if([dbversion doubleValue]<1.072)
     {
         DDLogVerbose(@"Database version <1.072 detected. Performing upgrade on passwords. ");
-        NSArray* rows = [self executeReader:@"select account_id, password from account"];
+        NSArray* rows = [self executeReader:@"select account_id, password from account" andArguments:nil];
         int counter=0;
     
         
-        [self executeNonQuery:@"update account set password=''; "];
+        [self executeNonQuery:@"update account set password=''; " andArguments:nil];
         
     }
     
@@ -2035,7 +2046,7 @@ static DataLayer *sharedInstance=nil;
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"MessagePreview"];
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"Logging"];
         
-        [self executeNonQuery:@"update dbversion set dbversion='1.073'; "];
+        [self executeNonQuery:@"update dbversion set dbversion='1.073'; " andArguments:nil];
         DDLogVerbose(@"Upgrade to 1.073 success ");
         
     }
@@ -2047,24 +2058,24 @@ static DataLayer *sharedInstance=nil;
         DDLogVerbose(@"Database version <1.074 detected. Performing upgrade on protocols. ");
         
         
-        [self executeNonQuery:@"delete from protocol where protocol_id=3 "];
-        [self executeNonQuery:@"delete from protocol where protocol_id=4 "];
-        [self executeNonQuery:@" create table legacy_caps(capid integer not null primary key ,captext  varchar(20))"];
+        [self executeNonQuery:@"delete from protocol where protocol_id=3 " andArguments:nil];
+        [self executeNonQuery:@"delete from protocol where protocol_id=4 " andArguments:nil];
+        [self executeNonQuery:@" create table legacy_caps(capid integer not null primary key ,captext  varchar(20))" andArguments:nil];
         
-        [self executeNonQuery:@" insert into legacy_caps values (1,'pmuc-v1');"];
-        [self executeNonQuery:@" insert into legacy_caps values (2,'voice-v1');"];
-        [self executeNonQuery:@" insert into legacy_caps values (3,'camera-v1');"];
-        [self executeNonQuery:@" insert into legacy_caps values (4, 'video-v1');"];
+        [self executeNonQuery:@" insert into legacy_caps values (1,'pmuc-v1');" andArguments:nil];
+        [self executeNonQuery:@" insert into legacy_caps values (2,'voice-v1');" andArguments:nil];
+        [self executeNonQuery:@" insert into legacy_caps values (3,'camera-v1');" andArguments:nil];
+        [self executeNonQuery:@" insert into legacy_caps values (4, 'video-v1');" andArguments:nil];
         
         
         
-        [self executeNonQuery:@"create table buddy_resources(buddy_id integer,resource varchar(255),ver varchar(20))"];
+        [self executeNonQuery:@"create table buddy_resources(buddy_id integer,resource varchar(255),ver varchar(20))" andArguments:nil];
         
-        [self executeNonQuery:@"create table ver_info(ver varchar(20),cap varchar(255), primary key (ver,cap))"];
+        [self executeNonQuery:@"create table ver_info(ver varchar(20),cap varchar(255), primary key (ver,cap))" andArguments:nil];
         
-        [self executeNonQuery:@"create table buddy_resources_legacy_caps (buddy_id integer,resource varchar(255),capid  integer);"];
+        [self executeNonQuery:@"create table buddy_resources_legacy_caps (buddy_id integer,resource varchar(255),capid  integer);" andArguments:nil];
         
-        [self executeNonQuery:@"update dbversion set dbversion='1.074'; "];
+        [self executeNonQuery:@"update dbversion set dbversion='1.074'; " andArguments:nil];
         DDLogVerbose(@"Upgrade to 1.074 success ");
         
     }
@@ -2073,10 +2084,10 @@ static DataLayer *sharedInstance=nil;
     {
         DDLogVerbose(@"Database version <1.1 detected. Performing upgrade on accounts. ");
         
-        [self executeNonQuery:@"alter table account add column selfsigned bool;"];
-        [self executeNonQuery:@"alter table account add column oldstyleSSL bool; "];
+        [self executeNonQuery:@"alter table account add column selfsigned bool;" andArguments:nil];
+        [self executeNonQuery:@"alter table account add column oldstyleSSL bool; " andArguments:nil];
         
-        [self executeNonQuery:@"update dbversion set dbversion='1.1'; "];
+        [self executeNonQuery:@"update dbversion set dbversion='1.1'; " andArguments:nil];
         DDLogVerbose(@"Upgrade to 1.1 success ");
         
     }
@@ -2086,13 +2097,13 @@ static DataLayer *sharedInstance=nil;
     {
         DDLogVerbose(@"Database version <1.2 detected. Performing upgrade on accounts. ");
         
-        [self executeNonQuery:@"update  buddylist set iconhash=NULL;"];
-        [self executeNonQuery:@"alter table message_history  add column unread bool;"];
-        [self executeNonQuery:@" insert into message_history (account_id,message_from, message_to, timestamp, message, actual_from,unread) select account_id,message_from, message_to, timestamp, message, actual_from, 1  from messages ;"];
-        [self executeNonQuery:@""];
+        [self executeNonQuery:@"update  buddylist set iconhash=NULL;" andArguments:nil];
+        [self executeNonQuery:@"alter table message_history  add column unread bool;" andArguments:nil];
+        [self executeNonQuery:@" insert into message_history (account_id,message_from, message_to, timestamp, message, actual_from,unread) select account_id,message_from, message_to, timestamp, message, actual_from, 1  from messages ;" andArguments:nil];
+        [self executeNonQuery:@"" andArguments:nil];
         
         
-        [self executeNonQuery:@"update dbversion set dbversion='1.2'; "];
+        [self executeNonQuery:@"update dbversion set dbversion='1.2'; " andArguments:nil];
         DDLogVerbose(@"Upgrade to 1.2 success ");
         
     }
@@ -2102,9 +2113,9 @@ static DataLayer *sharedInstance=nil;
     {
         DDLogVerbose(@"Database version <1.3 detected. Performing upgrade on accounts. ");
         
-        [self executeNonQuery:@"update  buddylist set iconhash=NULL;"];
+        [self executeNonQuery:@"update  buddylist set iconhash=NULL;" andArguments:nil];
         
-        [self executeNonQuery:@"update dbversion set dbversion='1.3'; "];
+        [self executeNonQuery:@"update dbversion set dbversion='1.3'; " andArguments:nil];
         DDLogVerbose(@"Upgrade to 1.3 success ");
         
     }
@@ -2114,9 +2125,9 @@ static DataLayer *sharedInstance=nil;
     {
         DDLogVerbose(@"Database version <1.31 detected. Performing upgrade on accounts. ");
         
-        [self executeNonQuery:@"alter table buddylist add column  Muc bool;"];
+        [self executeNonQuery:@"alter table buddylist add column  Muc bool;" andArguments:nil];
         
-        [self executeNonQuery:@"update dbversion set dbversion='1.31'; "];
+        [self executeNonQuery:@"update dbversion set dbversion='1.31'; " andArguments:nil];
         DDLogVerbose(@"Upgrade to 1.31 success ");
         
     }
@@ -2125,10 +2136,10 @@ static DataLayer *sharedInstance=nil;
     {
         DDLogVerbose(@"Database version <1.41 detected. Performing upgrade on accounts. ");
         
-        [self executeNonQuery:@"alter table message_history add column  delivered bool;"];
-        [self executeNonQuery:@"alter table message_history add column  messageid varchar(255);"];
-        [self executeNonQuery:@"update message_history set delivered=1;"];
-        [self executeNonQuery:@"update dbversion set dbversion='1.41'; "];
+        [self executeNonQuery:@"alter table message_history add column  delivered bool;" andArguments:nil];
+        [self executeNonQuery:@"alter table message_history add column  messageid varchar(255);" andArguments:nil];
+        [self executeNonQuery:@"update message_history set delivered=1;" andArguments:nil];
+        [self executeNonQuery:@"update dbversion set dbversion='1.41'; " andArguments:nil];
         
         
         DDLogVerbose(@"Upgrade to 1.41 success ");
@@ -2140,15 +2151,15 @@ static DataLayer *sharedInstance=nil;
     {
         DDLogVerbose(@"Database version <1.42 detected. Performing upgrade on accounts. ");
         
-        [self executeNonQuery:@"delete from protocol where protocol_id=5;"];
-        [self executeNonQuery:@"update dbversion set dbversion='1.42'; "];
+        [self executeNonQuery:@"delete from protocol where protocol_id=5;" andArguments:nil];
+        [self executeNonQuery:@"update dbversion set dbversion='1.42'; " andArguments:nil];
         
         
         DDLogVerbose(@"Upgrade to 1.41 success ");
         
     }
 #else 
-    NSNumber* dbversion= (NSNumber*)[self executeScalar:@"select dbversion from dbversion"];
+    NSNumber* dbversion= (NSNumber*)[self executeScalar:@"select dbversion from dbversion" andArguments:nil];
     DDLogVerbose(@"Got db version %@", dbversion);
 #endif
     
@@ -2156,8 +2167,8 @@ static DataLayer *sharedInstance=nil;
     {
         DDLogVerbose(@"Database version <1.5 detected. Performing upgrade on accounts. ");
         
-        [self executeNonQuery:@"alter table account add column oauth bool;" withCompletion:nil];
-        [self executeNonQuery:@"update dbversion set dbversion='1.5'; " withCompletion:nil];
+        [self executeNonQuery:@"alter table account add column oauth bool;" andArguments:nil withCompletion:nil];
+        [self executeNonQuery:@"update dbversion set dbversion='1.5'; " andArguments:nil withCompletion:nil];
         
         DDLogVerbose(@"Upgrade to 1.5 success ");
         
@@ -2167,7 +2178,7 @@ static DataLayer *sharedInstance=nil;
     {
         DDLogVerbose(@"Database version <1.6 detected. Performing upgrade on accounts. ");
         
-        [self executeNonQuery:@"alter table message_history add column messageType varchar(255);" withCompletion:nil];
+        [self executeNonQuery:@"alter table message_history add column messageType varchar(255);"  withCompletion:nil];
         [self executeNonQuery:@"update dbversion set dbversion='1.6'; " withCompletion:nil];
         
         DDLogVerbose(@"Upgrade to 1.6 success ");

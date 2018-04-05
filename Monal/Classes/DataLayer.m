@@ -1048,11 +1048,11 @@ static DataLayer *sharedInstance=nil;
     if(buddyid==nil) return NO;
     
     NSString* query2=[NSString stringWithFormat:@"delete from   buddy_resources where buddy_id=? and resource=?"];
-    NSArray *params2=@[buddyid, presenceObj.resource.escapeForSql ];
+    NSArray *params2=@[buddyid, presenceObj.resource?presenceObj.resource:@""];
     if([self executeNonQuery:query2 andArguments:params2]==NO) return NO;
     
     NSString* query4=[NSString stringWithFormat:@"delete from   buddy_resources_legacy_caps where buddy_id=? and resource=?"];
-                     NSArray *params3=@[buddyid, presenceObj.resource ];
+                     NSArray *params3=@[buddyid, presenceObj.resource?presenceObj.resource:@"" ];
     if([self executeNonQuery:query4 andArguments:params3]==NO) return NO;
     
     //see how many left

@@ -62,13 +62,27 @@ static DataLayer *sharedInstance=nil;
 }
 
 #pragma mark  -- V1 low level
--(NSObject*) executeScalar:(NSString*) query
+-(NSObject*) executeScalar:(NSString*) query andArguments:(NSArray *) args
 {
     if(!query) return nil;
     NSObject* __block toReturn;
     dispatch_sync(_dbQueue, ^{
         sqlite3_stmt *statement;
         if (sqlite3_prepare_v2(database, [query  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK) {
+            sqlite3_reset(statement);
+            [args enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                if([obj isKindOfClass:[NSNumber class]])
+                {
+                    NSNumber *number = (NSNumber *) obj;
+                    sqlite3_bind_double(statement, (signed)idx+1, [number doubleValue]);
+                }
+                else if([obj isKindOfClass:[NSString class]])
+                {
+                    NSString *text = (NSString *) obj;
+                    sqlite3_bind_text(statement, (signed)idx+1,[text cStringUsingEncoding:NSUTF8StringEncoding], (int) strlen([text cStringUsingEncoding:NSUTF8StringEncoding]),0);
+                }
+            }];
+            
             if (sqlite3_step(statement) == SQLITE_ROW)
             {
                 switch(sqlite3_column_type(statement,0))
@@ -134,13 +148,27 @@ static DataLayer *sharedInstance=nil;
     return toReturn;
 }
 
--(NSArray*) executeReader:(NSString*) query
+-(NSArray*) executeReader:(NSString*) query andArguments:(NSArray *) args
 {
     if(!query) return nil;
     NSMutableArray* __block toReturn =  [[NSMutableArray alloc] init] ;
     dispatch_sync(_dbQueue, ^{
         sqlite3_stmt *statement;
         if (sqlite3_prepare_v2(database, [query cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK) {
+            
+            sqlite3_reset(statement);
+            [args enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                if([obj isKindOfClass:[NSNumber class]])
+                {
+                    NSNumber *number = (NSNumber *) obj;
+                    sqlite3_bind_double(statement, (signed)idx+1, [number doubleValue]);
+                }
+                else if([obj isKindOfClass:[NSString class]])
+                {
+                    NSString *text = (NSString *) obj;
+                    sqlite3_bind_text(statement, (signed)idx+1,[text cStringUsingEncoding:NSUTF8StringEncoding], (int) strlen([text cStringUsingEncoding:NSUTF8StringEncoding]),0);
+                }
+            }];
             
             while (sqlite3_step(statement) == SQLITE_ROW) {
                 NSMutableDictionary* row= [[NSMutableDictionary alloc] init];
@@ -215,7 +243,7 @@ static DataLayer *sharedInstance=nil;
     return toReturn;
 }
 
--(BOOL) executeNonQuery:(NSString*) query
+-(BOOL) executeNonQuery:(NSString*) query andArguments:(NSArray *) args
 {
      if(!query) return NO;
     BOOL __block toReturn;
@@ -223,6 +251,21 @@ static DataLayer *sharedInstance=nil;
         sqlite3_stmt *statement;
         if (sqlite3_prepare_v2(database, [query  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK)
         {
+            
+            sqlite3_reset(statement);
+            [args enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                if([obj isKindOfClass:[NSNumber class]])
+                {
+                    NSNumber *number = (NSNumber *) obj;
+                    sqlite3_bind_double(statement, (signed)idx+1, [number doubleValue]);
+                }
+                else if([obj isKindOfClass:[NSString class]])
+                {
+                    NSString *text = (NSString *) obj;
+                    sqlite3_bind_text(statement, (signed)idx+1,[text cStringUsingEncoding:NSUTF8StringEncoding], (int) strlen([text cStringUsingEncoding:NSUTF8StringEncoding]),0);
+                }
+            }];
+            
             if(sqlite3_step(statement)==SQLITE_DONE)
                 toReturn=YES;
             else
@@ -535,7 +578,7 @@ static DataLayer *sharedInstance=nil;
 -(NSArray*) enabledAccountList
 {
     NSString* query=[NSString stringWithFormat:@"select * from account where enabled=1 order by account_id asc "];
-    NSArray* toReturn = [self executeReader:query];
+    NSArray* toReturn = [self executeReader:query andArguments:nil] ;
     
     if(toReturn!=nil)
     {
@@ -569,8 +612,9 @@ static DataLayer *sharedInstance=nil;
 
 -(NSArray*) accountVals:(NSString*) accountNo
 {
-    NSString* query=[NSString stringWithFormat:@"select * from account where  account_id=%@ ", accountNo];
-    NSArray* toReturn = [self executeReader:query];
+    NSString* query=[NSString stringWithFormat:@"select * from account where  account_id=? "];
+    NSArray *params=@[accountNo];
+    NSArray* toReturn = [self executeReader:query andArguments:params];
     
     if(toReturn!=nil)
     {
@@ -637,16 +681,16 @@ static DataLayer *sharedInstance=nil;
 {
     // remove all other traces of the account_id
     NSString* query1=[NSString stringWithFormat:@"delete from buddylist  where account_id=%@ ;", accountNo];
-    [self executeNonQuery:query1];
+    [self executeNonQuery:query1 andArguments:nil];
     
     NSString* query3=[NSString stringWithFormat:@"delete from message_history  where account_id=%@ ;", accountNo];
-    [self executeNonQuery:query3];
+    [self executeNonQuery:query3 andArguments:nil];
     
     NSString* query4=[NSString stringWithFormat:@"delete from activechats  where account_id=%@ ;", accountNo];
-    [self executeNonQuery:query4];
+    [self executeNonQuery:query4 andArguments:nil];
     
     NSString* query=[NSString stringWithFormat:@"delete from account  where account_id=%@ ;", accountNo];
-    if([self executeNonQuery:query]!=NO)
+    if([self executeNonQuery:query andArguments:nil]!=NO)
     {
         return YES;
     }
@@ -661,7 +705,7 @@ static DataLayer *sharedInstance=nil;
 {
     
     NSString* query=[NSString stringWithFormat:@"update account set enabled=0 where account_id=%@  ", accountNo];
-    if([self executeNonQuery:query]!=NO)
+    if([self executeNonQuery:query andArguments:nil]!=NO)
     {
         return YES;
     }
@@ -737,7 +781,7 @@ static DataLayer *sharedInstance=nil;
 {
     
     NSString* query=[NSString stringWithFormat:@"delete from buddylist  where account_id=%@ ;", accountNo];
-    if([self executeNonQuery:query]!=NO)
+    if([self executeNonQuery:query andArguments:nil]!=NO)
     {
         return YES;
     }
@@ -753,11 +797,11 @@ static DataLayer *sharedInstance=nil;
 -(BOOL) resetContacts
 {
     NSString* query2=[NSString stringWithFormat:@"delete from  buddy_resources ;   "];
-    [self executeNonQuery:query2];
+    [self executeNonQuery:query2 andArguments:nil];
     
     
     NSString* query=[NSString stringWithFormat:@"update buddylist set dirty=0, new=0, online=0, state='offline', status='';   "];
-    if([self executeNonQuery:query]!=NO)
+    if([self executeNonQuery:query andArguments:nil]!=NO)
     {
         return YES;
     }
@@ -770,12 +814,14 @@ static DataLayer *sharedInstance=nil;
 
 -(BOOL) resetContactsForAccount:(NSString*) accountNo
 {
-    NSString* query2=[NSString stringWithFormat:@"delete from  buddy_resources  where buddy_id in (select buddy_id from  buddylist where account_id=%@);   ", accountNo];
-    [self executeNonQuery:query2];
+    NSString* query2=[NSString stringWithFormat:@"delete from  buddy_resources  where buddy_id in (select buddy_id from  buddylist where account_id=?)"];
+    NSArray *params=@[accountNo];
+    [self executeNonQuery:query2 andArguments:params];
     
     
-    NSString* query=[NSString stringWithFormat:@"update buddylist set dirty=0, new=0, online=0, state='offline', status='' where account_id=%@;   ", accountNo];
-    if([self executeNonQuery:query]!=NO)
+    NSString* query=[NSString stringWithFormat:@"update buddylist set dirty=0, new=0, online=0, state='offline', status='' where account_id=?"];
+    
+    if([self executeNonQuery:query andArguments:params]!=NO)
     {
         return YES;
     }
@@ -813,13 +859,12 @@ static DataLayer *sharedInstance=nil;
 -(NSArray*) searchContactsWithString:(NSString*) search
 {
     NSString* query=@"";
+    query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0 as 'count' , ifnull(full_name, buddy_name) as full_name, account_id, online from buddylist where buddy_name like '%%?%%' or full_name like '%%?%%'  order by full_name COLLATE NOCASE asc "];
     
-    
-    query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0 as 'count' , ifnull(full_name, buddy_name) as full_name, account_id, online from buddylist where buddy_name like '%%%@%%' or full_name like '%%%@%%'  order by full_name COLLATE NOCASE asc ", search, search];
-    
+    NSArray *params = @[search,search];
     
     //DDLogVerbose(query);
-    NSArray* toReturn = [self executeReader:query];
+    NSArray* toReturn = [self executeReader:query andArguments:params];
     
     if(toReturn!=nil)
     {
@@ -927,7 +972,7 @@ static DataLayer *sharedInstance=nil;
     NSString* query=[NSString stringWithFormat:@"delete from buddy_resources_legacy_caps"];
     
     //DDLogVerbose(@"%@", query);
-    [self executeNonQuery:query];
+    [self executeNonQuery:query andArguments:nil];
     
     return;
 }
@@ -990,25 +1035,28 @@ static DataLayer *sharedInstance=nil;
 -(BOOL) setOfflineBuddy:(ParsePresence *)presenceObj forAccount:(NSString *)accountNo
 {
     
-    NSString* query1=[NSString stringWithFormat:@" select buddy_id from buddylist where account_id=%@ and  buddy_name='%@';", accountNo, presenceObj.user.escapeForSql ];
-    NSString* buddyid = (NSString*)[self executeScalar:query1];
+    NSString* query1=[NSString stringWithFormat:@" select buddy_id from buddylist where account_id=? and  buddy_name=?;"];
+    NSArray *params=@[accountNo, presenceObj.user];
+    NSString* buddyid = (NSString*)[self executeScalar:query1 andArguments:params];
     if(buddyid==nil) return NO;
     
-    NSString* query2=[NSString stringWithFormat:@"delete from   buddy_resources where buddy_id=%@ and resource='%@'", buddyid, presenceObj.resource.escapeForSql ];
-    if([self executeNonQuery:query2]==NO) return NO;
+    NSString* query2=[NSString stringWithFormat:@"delete from   buddy_resources where buddy_id=? and resource=?"];
+    NSArray *params2=@[buddyid, presenceObj.resource.escapeForSql ];
+    if([self executeNonQuery:query2 andArguments:params2]==NO) return NO;
     
-    NSString* query4=[NSString stringWithFormat:@"delete from   buddy_resources_legacy_caps where buddy_id=%@ and resource='%@'",
-                      buddyid, presenceObj.resource.escapeForSql ];
-    if([self executeNonQuery:query4]==NO) return NO;
+    NSString* query4=[NSString stringWithFormat:@"delete from   buddy_resources_legacy_caps where buddy_id=? and resource=?"];
+                     NSArray *params3=@[buddyid, presenceObj.resource ];
+    if([self executeNonQuery:query4 andArguments:params3]==NO) return NO;
     
     //see how many left
     NSString* query3=[NSString stringWithFormat:@" select count(buddy_id) from buddy_resources where buddy_id=%@;", buddyid ];
-    NSString* resourceCount = (NSString*)[self executeScalar:query3];
+    NSString* resourceCount = (NSString*)[self executeScalar:query3 andArguments:nil];
     
     if([resourceCount integerValue]<1)
     {
-        NSString* query=[NSString stringWithFormat:@"update buddylist set online=0, state='offline', dirty=1  where account_id=%@ and  buddy_name='%@';", accountNo, presenceObj.user.escapeForSql];
-        if([self executeNonQuery:query]!=NO)
+        NSString* query=[NSString stringWithFormat:@"update buddylist set online=0, state='offline', dirty=1  where account_id=? and  buddy_name=?;"];
+        NSArray*params4=@[accountNo, presenceObj.user];
+        if([self executeNonQuery:query andArguments:params4]!=NO)
         {
             return YES;
         }
@@ -1292,7 +1340,7 @@ static DataLayer *sharedInstance=nil;
 -(NSArray *) messageForHistoryID:(NSInteger) historyID
 {
     NSString* query=[NSString stringWithFormat:@"select message, messageid from message_history  where message_history_id=%ld", (long)historyID];
-    NSArray* messageArray= [self executeReader:query];
+    NSArray* messageArray= [self executeReader:query andArguments:nil];
     return messageArray;
 }
 
@@ -1421,7 +1469,7 @@ static DataLayer *sharedInstance=nil;
     
     NSString* query1=[NSString stringWithFormat:@"select username, domain from account where account_id=%@", accountNo];
     //DDLogVerbose(query);
-    NSArray* user = [self executeReader:query1];
+    NSArray* user = [self executeReader:query1 andArguments:nil ];
     
     if(user!=nil)
     {
@@ -1523,7 +1571,7 @@ static DataLayer *sharedInstance=nil;
 {
     //cleans a buddy's message history
     NSString* query=[NSString stringWithFormat:@"delete from message_history "];
-    if( [self executeNonQuery:query])
+    if( [self executeNonQuery:query andArguments:nil andArguments:nil])
     {
         DDLogVerbose(@" cleaned messages " );
         return YES;

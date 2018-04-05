@@ -54,12 +54,12 @@ extern NSString *const kMessageTypeStatus;
 -(void) initDB;
 -(void) version;
 
-//lowest level command handlers
--(NSObject*) executeScalar:(NSString*) query  __deprecated;
--(NSArray*) executeReader:(NSString*) query __deprecated;
--(BOOL) executeNonQuery:(NSString*) query __deprecated;
+//lowest level command handlers. These are called in sync
+-(NSObject*) executeScalar:(NSString*) query andArguments:(NSArray *) args ;
+-(NSArray*) executeReader:(NSString*) query andArguments:(NSArray *) args;
+-(BOOL) executeNonQuery:(NSString*) query andArguments:(NSArray *) args;
 
-// V2 low level
+// V2 low level. these are called in async
 -(void) executeScalar:(NSString*) query withCompletion: (void (^)(NSObject *))completion;
 -(void) executeReader:(NSString*) query withCompletion: (void (^)(NSMutableArray *))completion;
 -(void) executeNonQuery:(NSString*) query withCompletion: (void (^)(BOOL))completion;

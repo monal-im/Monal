@@ -1331,9 +1331,10 @@ static DataLayer *sharedInstance=nil;
             
             if(messageType)
             {
-                NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, %@, '%@',  '%@', '%@', '%@', '%@',%d,%d,'%@', '%@');", accountNo, from.escapeForSql, to.escapeForSql,     dateString, message.escapeForSql, actualfrom.escapeForSql,unread, delivered, messageid.escapeForSql,messageType];
+                NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, ?, ?, ?, ?, ?, ?,?,?,?, ?);"];
+                NSArray *params=@[accountNo, from, to, dateString, message, actualfrom, [NSNumber numberWithInteger:unread], [NSNumber numberWithInteger:delivered], messageid,messageType];
                 DDLogVerbose(@"%@",query);
-                [self executeNonQuery:query withCompletion:^(BOOL success) {
+                [self executeNonQuery:query andArguments:params withCompletion:^(BOOL success) {
                     if(completion)
                     {
                         completion(success);
@@ -1345,9 +1346,10 @@ static DataLayer *sharedInstance=nil;
                 [self messageTypeForMessage:message withCompletion:^(NSString *foundMessageType) {
                     
                     //all messages default to unread
-                    NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, %@, '%@',  '%@', '%@', '%@', '%@',%d,%d,'%@', '%@');", accountNo, from.escapeForSql, to.escapeForSql, 	dateString, message.escapeForSql, actualfrom.escapeForSql,unread, delivered, messageid.escapeForSql,foundMessageType];
+                    NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, ?,?,?,?,?,?,?,?,?,?);"];
+                    NSArray *params=@[accountNo, from, to, 	dateString, message, actualfrom,[NSNumber numberWithInteger:unread], [NSNumber numberWithInteger:delivered], messageid,foundMessageType];
                     DDLogVerbose(@"%@",query);
-                    [self executeNonQuery:query withCompletion:^(BOOL success) {
+                    [self executeNonQuery:query andArguments:params  withCompletion:^(BOOL success) {
                         
                         if(!success)
                         {

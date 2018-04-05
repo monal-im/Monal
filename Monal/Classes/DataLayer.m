@@ -1371,9 +1371,10 @@ static DataLayer *sharedInstance=nil;
 
 -(void) hasMessageForId:(NSString*) messageid toContact:(NSString *) contact onAccount:(NSString *) accountNo andCompletion: (void (^)(BOOL))completion
 {
-    NSString* query=[NSString stringWithFormat:@"select messageid from  message_history where account_id=%@ and message_from='%@' and messageid='%@' limit 1", accountNo, contact.escapeForSql, messageid.escapeForSql];
+    NSString* query=[NSString stringWithFormat:@"select messageid from  message_history where account_id=? and message_from=? and messageid=? limit 1"];
+    NSArray *params=@[accountNo, contact, messageid];
     
-    [self executeScalar:query withCompletion:^(NSObject* result) {
+    [self executeScalar:query andArguments:params withCompletion:^(NSObject* result) {
         
         BOOL exists=NO;
         if(result)

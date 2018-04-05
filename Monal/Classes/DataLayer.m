@@ -1152,7 +1152,7 @@ static DataLayer *sharedInstance=nil;
 
 -(NSString*) fullName:(NSString*) buddy forAccount:(NSString*) accountNo;
 {
-    NSString* query=[NSString stringWithFormat:@"select full_name from buddylist where account_id=%@ and buddy_name='%@'"];
+    NSString* query=[NSString stringWithFormat:@"select full_name from buddylist where account_id=? and buddy_name=?"];
     NSArray * params=@[accountNo, buddy];
     NSString* fullname= (NSString*)[self executeScalar:query andArguments:params];
     return fullname;

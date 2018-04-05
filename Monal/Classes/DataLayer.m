@@ -74,12 +74,20 @@ static DataLayer *sharedInstance=nil;
                 if([obj isKindOfClass:[NSNumber class]])
                 {
                     NSNumber *number = (NSNumber *) obj;
-                    sqlite3_bind_double(statement, (signed)idx+1, [number doubleValue]);
+                    if(sqlite3_bind_double(statement, (signed)idx+1, [number doubleValue])!=SQLITE_OK)
+                    {
+                        DDLogError(@"number bind error");
+                        
+                    }
                 }
                 else if([obj isKindOfClass:[NSString class]])
                 {
                     NSString *text = (NSString *) obj;
-                    sqlite3_bind_text(statement, (signed)idx+1,[text cStringUsingEncoding:NSUTF8StringEncoding], (int) strlen([text cStringUsingEncoding:NSUTF8StringEncoding]),0);
+                    
+                    if(sqlite3_bind_text(statement, (signed)idx+1,[text cStringUsingEncoding:NSUTF8StringEncoding], -1,SQLITE_TRANSIENT)!=SQLITE_OK) {
+                        DDLogError(@"string bind error");
+                        
+                    };
                 }
             }];
             
@@ -161,12 +169,20 @@ static DataLayer *sharedInstance=nil;
                 if([obj isKindOfClass:[NSNumber class]])
                 {
                     NSNumber *number = (NSNumber *) obj;
-                    sqlite3_bind_double(statement, (signed)idx+1, [number doubleValue]);
+                    if(sqlite3_bind_double(statement, (signed)idx+1, [number doubleValue])!=SQLITE_OK)
+                    {
+                        DDLogError(@"number bind error");
+                        
+                    }
                 }
                 else if([obj isKindOfClass:[NSString class]])
                 {
                     NSString *text = (NSString *) obj;
-                    sqlite3_bind_text(statement, (signed)idx+1,[text cStringUsingEncoding:NSUTF8StringEncoding], (int) strlen([text cStringUsingEncoding:NSUTF8StringEncoding]),0);
+                    
+                    if(sqlite3_bind_text(statement, (signed)idx+1,[text cStringUsingEncoding:NSUTF8StringEncoding], -1,SQLITE_TRANSIENT)!=SQLITE_OK) {
+                        DDLogError(@"string bind error");
+                        
+                    };
                 }
             }];
             
@@ -252,17 +268,24 @@ static DataLayer *sharedInstance=nil;
         if (sqlite3_prepare_v2(database, [query  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK)
         {
             
-            sqlite3_reset(statement);
             [args enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                 if([obj isKindOfClass:[NSNumber class]])
                 {
                     NSNumber *number = (NSNumber *) obj;
-                    sqlite3_bind_double(statement, (signed)idx+1, [number doubleValue]);
+                    if(sqlite3_bind_double(statement, (signed)idx+1, [number doubleValue])!=SQLITE_OK)
+                    {
+                        DDLogError(@"number bind error");
+                        
+                    }
                 }
                 else if([obj isKindOfClass:[NSString class]])
                 {
                     NSString *text = (NSString *) obj;
-                    sqlite3_bind_text(statement, (signed)idx+1,[text cStringUsingEncoding:NSUTF8StringEncoding], (int) strlen([text cStringUsingEncoding:NSUTF8StringEncoding]),0);
+                    
+                    if(sqlite3_bind_text(statement, (signed)idx+1,[text cStringUsingEncoding:NSUTF8StringEncoding], -1,SQLITE_TRANSIENT)!=SQLITE_OK) {
+                        DDLogError(@"string bind error");
+                        
+                    };
                 }
             }];
             
@@ -320,12 +343,20 @@ static DataLayer *sharedInstance=nil;
                 if([obj isKindOfClass:[NSNumber class]])
                 {
                     NSNumber *number = (NSNumber *) obj;
-                    sqlite3_bind_double(statement, (signed)idx+1, [number doubleValue]);
+                    if(sqlite3_bind_double(statement, (signed)idx+1, [number doubleValue])!=SQLITE_OK)
+                    {
+                        DDLogError(@"number bind error");
+                        
+                    }
                 }
                 else if([obj isKindOfClass:[NSString class]])
                 {
                     NSString *text = (NSString *) obj;
-                    sqlite3_bind_text(statement, (signed)idx+1,[text cStringUsingEncoding:NSUTF8StringEncoding], (int) strlen([text cStringUsingEncoding:NSUTF8StringEncoding]),0);
+                    
+                    if(sqlite3_bind_text(statement, (signed)idx+1,[text cStringUsingEncoding:NSUTF8StringEncoding], -1,SQLITE_TRANSIENT)!=SQLITE_OK) {
+                        DDLogError(@"string bind error");
+                        
+                    };
                 }
             }];
             
@@ -419,12 +450,20 @@ static DataLayer *sharedInstance=nil;
                 if([obj isKindOfClass:[NSNumber class]])
                 {
                     NSNumber *number = (NSNumber *) obj;
-                    sqlite3_bind_double(statement, (signed)idx+1, [number doubleValue]);
+                    if(sqlite3_bind_double(statement, (signed)idx+1, [number doubleValue])!=SQLITE_OK)
+                    {
+                        DDLogError(@"number bind error");
+                        
+                    }
                 }
                 else if([obj isKindOfClass:[NSString class]])
                 {
                     NSString *text = (NSString *) obj;
-                    sqlite3_bind_text(statement, (signed)idx+1,[text cStringUsingEncoding:NSUTF8StringEncoding], (int) strlen([text cStringUsingEncoding:NSUTF8StringEncoding]),0);
+                    
+                    if(sqlite3_bind_text(statement, (signed)idx+1,[text cStringUsingEncoding:NSUTF8StringEncoding], -1,SQLITE_TRANSIENT)!=SQLITE_OK) {
+                        DDLogError(@"string bind error");
+                        
+                    };
                 }
             }];
             
@@ -524,12 +563,20 @@ static DataLayer *sharedInstance=nil;
                 if([obj isKindOfClass:[NSNumber class]])
                 {
                     NSNumber *number = (NSNumber *) obj;
-                    sqlite3_bind_double(statement, (signed)idx+1, [number doubleValue]);
+                    if(sqlite3_bind_double(statement, (signed)idx+1, [number doubleValue])!=SQLITE_OK)
+                    {
+                        DDLogError(@"number bind error");
+                     
+                    }
                 }
                 else if([obj isKindOfClass:[NSString class]])
                 {
                     NSString *text = (NSString *) obj;
-                    sqlite3_bind_text(statement, (signed)idx+1,[text cStringUsingEncoding:NSUTF8StringEncoding], (int) strlen([text cStringUsingEncoding:NSUTF8StringEncoding]),0);
+                   
+                    if(sqlite3_bind_text(statement, (signed)idx+1,[text cStringUsingEncoding:NSUTF8StringEncoding], -1,SQLITE_TRANSIENT)!=SQLITE_OK) {
+                        DDLogError(@"string bind error");
+                       
+                    };
                 }
             }];
             
@@ -656,20 +703,21 @@ static DataLayer *sharedInstance=nil;
 
 -(void) addAccountWithDictionary:(NSDictionary *) dictionary andCompletion: (void (^)(BOOL))completion
 {
-    NSString* query= [NSString stringWithFormat:@"insert into account (account_name, protocol_id, server,other_port, username, secure,resource,domain, enabled, selfsigned, oldstyleSSL,oauth  ) values( ?, 1, ?, ?, ?, ?, ?, ?, ?, ?,?, ?) "];
+    NSString* query= [NSString stringWithFormat:@"insert into account (account_name, protocol_id, server,other_port, secure,resource,domain, enabled, selfsigned, oldstyleSSL,oauth, username  ) values( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?) "];
     
+    NSString *username = [((NSString *)[dictionary objectForKey:kUsername]) copy];
     NSArray *params= @[((NSString *)[dictionary objectForKey:kUsername]),
-                      
+                      @"1",
                       ((NSString *) [dictionary objectForKey:kServer]),
                       ((NSString *)[dictionary objectForKey:kPort]),
-                      ((NSString *)[dictionary objectForKey:kUsername]),
+                     
                        [dictionary objectForKey:kSSL],
                       ((NSString *)[dictionary objectForKey:kResource]),
                       ((NSString *)[dictionary objectForKey:kDomain]),
                       [dictionary objectForKey:kEnabled] ,
                       [dictionary objectForKey:kSelfSigned],
                       [dictionary objectForKey:kOldSSL],
-                      [dictionary objectForKey:kOauth]
+                      [dictionary objectForKey:kOauth], username
                       ];
     
     [self executeNonQuery:query andArguments:params withCompletion:completion];

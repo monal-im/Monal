@@ -634,14 +634,14 @@ static DataLayer *sharedInstance=nil;
 -(void) updateAccounWithDictionary:(NSDictionary *) dictionary andCompletion:(void (^)(BOOL))completion;
 {
     NSString* query=
-    [NSString stringWithFormat:@"update account  set account_name=?, protocol_id=?, server=?, other_port=?, username=?, password=?, secure=?, resource=?, domain=?, enabled=?, selfsigned=?, oldstyleSSL=? where account_id=?"];
+    [NSString stringWithFormat:@"update account  set account_name=?,  server=?, other_port=?, username=?, secure=?, resource=?, domain=?, enabled=?, selfsigned=?, oldstyleSSL=? where account_id=?"];
     
      NSArray * params=@[((NSString *)[dictionary objectForKey:kUsername]),
-     @"1",
+     
      ((NSString *)[dictionary objectForKey:kServer]),
      ((NSString *)[dictionary objectForKey:kPort]),
      ((NSString *)[dictionary objectForKey:kUsername]),
-     @"",
+    
      [dictionary objectForKey:kSSL],
      ((NSString *)[dictionary objectForKey:kResource]),
      ((NSString *)[dictionary objectForKey:kDomain]),

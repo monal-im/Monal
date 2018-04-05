@@ -148,6 +148,9 @@
     NSString *user=@"";
     NSString *domain=@"";
     
+    NSString *resource=@"";
+    NSString *port=@"";
+    
     NSArray *parts = [self.jabberID.stringValue componentsSeparatedByString:@"@"];
     if(parts.count > 1) {
         user =[parts objectAtIndex:0];
@@ -168,10 +171,21 @@
         dic =[self.accountToEdit mutableCopy];
     }
     
+    
+    if(self.port.stringValue.length>0)
+    {
+        port=self.port.stringValue;
+    }
+    
+    if(self.resource.stringValue.length>0)
+    {
+        resource=self.resource.stringValue;
+    }
+    
     [dic setObject:user forKey:kUsername];
     [dic setObject:self.server.stringValue  forKey:kServer];
-    [dic setObject:self.port.stringValue forKey:kPort];
-    [dic setObject:self.resource.stringValue  forKey:kResource];
+    [dic setObject:port forKey:kPort];
+    [dic setObject:resource  forKey:kResource];
     
     [dic setObject:[NSNumber numberWithBool:self.sslCheck.state] forKey:kSSL];
     [dic setObject:[NSNumber numberWithBool:self.enabledCheck.state] forKey:kEnabled];

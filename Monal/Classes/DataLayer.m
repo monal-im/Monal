@@ -483,7 +483,7 @@ static DataLayer *sharedInstance=nil;
                     NSNumber *number = (NSNumber *) obj;
                     sqlite3_bind_double(statement, (signed)idx+1, [number doubleValue]);
                 }
-                else if([obj isKindOfClass:[NSNumber class]])
+                else if([obj isKindOfClass:[NSString class]])
                 {
                     NSString *text = (NSString *) obj;
                     sqlite3_bind_text(statement, (signed)idx+1,[text cStringUsingEncoding:NSUTF8StringEncoding], (int) strlen([text cStringUsingEncoding:NSUTF8StringEncoding]),0);
@@ -689,7 +689,7 @@ static DataLayer *sharedInstance=nil;
            if(!exists)
            {
                    // no blank full names
-                   NSString* actualfull;
+                   NSString *actualfull;
                    if([[fullName  stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]==0) {
                        actualfull=contact;
                    }
@@ -697,8 +697,10 @@ static DataLayer *sharedInstance=nil;
                        actualfull=fullName;
                    }
                    
-                   NSString* query=[NSString stringWithFormat:@"insert into buddylist ('account_id', 'buddy_name', 'full_name' , 'nick_name', 'new', 'online', 'dirty', 'Muc') values( %@, '%@', '%@','%@',1, 0, 0, 0);", accountNo, contact.escapeForSql, actualfull.escapeForSql, nickName.escapeForSql];
-               [self executeNonQuery:query withCompletion:^(BOOL success) {
+               NSString *query=[NSString stringWithFormat:@"insert into buddylist ('account_id', 'buddy_name', 'full_name' , 'nick_name', 'new', 'online', 'dirty', 'Muc') values( ?, ?, ?,?,1, 0, 0, 0);"];
+                                    
+               NSArray *params=@[accountNo, contact, actualfull, nickName];
+               [self executeNonQuery:query  andArguments:params withCompletion:^(BOOL success) {
                    [self.contactMemory removeObject:contact];
                    if(completion)
                    {

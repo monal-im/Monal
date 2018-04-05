@@ -1197,21 +1197,21 @@ static DataLayer *sharedInstance=nil;
 
 -(void) updateOwnNickName:(NSString *) nick forMuc:(NSString*) room forAccount:(NSString*) accountNo
 {
-    NSString* query=[NSString stringWithFormat:@"update buddylist set muc_nick='%@' where account_id=%@ and buddy_name='%@'", nick.escapeForSql, accountNo, room.escapeForSql];
+    NSString* query=[NSString stringWithFormat:@"update buddylist set muc_nick=? where account_id=? and buddy_name=?"];
+    NSArray *params=@[nick, accountNo, room];
     DDLogVerbose(@"%@", query);
     
-    [self executeNonQuery:query withCompletion:^(BOOL success) {
-  
-    }];
+    [self executeNonQuery:query andArguments:params  withCompletion:nil];
 }
 
 
 -(void) addMucFavoriteForAccount:(NSString*) accountNo withRoom:(NSString *) room nick:(NSString *)nick autoJoin:(BOOL) autoJoin andCompletion:(void (^)(BOOL))completion
 {
-    NSString* query=[NSString stringWithFormat:@"insert into muc_favorites (room, nick,autojoin,  account_id) values('%@','%@',%d, %@)",room.escapeForSql, nick.escapeForSql, autoJoin, accountNo];
+    NSString* query=[NSString stringWithFormat:@"insert into muc_favorites (room, nick,autojoin,  account_id) values(?,?,?, ?)"];
+    NSArray *params=@[room, nick, [NSNumber numberWithBool:autoJoin], accountNo];
     DDLogVerbose(@"%@", query);
     
-    [self executeNonQuery:query withCompletion:^(BOOL success) {
+    [self executeNonQuery:query andArguments:params withCompletion:^(BOOL success) {
      
         if(completion) {
             completion(success);
@@ -1223,10 +1223,11 @@ static DataLayer *sharedInstance=nil;
 
 -(void) deleteMucFavorite:(NSNumber *) mucid forAccountId:(NSInteger) accountNo withCompletion:(void (^)(BOOL))completion
 {
-    NSString* query=[NSString stringWithFormat:@"delete from muc_favorites where mucid=%ld and account_id=%ld",mucid.integerValue, accountNo];
+    NSString* query=[NSString stringWithFormat:@"delete from muc_favorites where mucid=? and account_id=?"];
+    NSArray *params=@[mucid, [NSNumber numberWithInteger:accountNo]];
     DDLogVerbose(@"%@", query);
     
-    [self executeNonQuery:query withCompletion:^(BOOL success) {
+    [self executeNonQuery:query andArguments:params withCompletion:^(BOOL success) {
         
         if(completion) {
             completion(success);
@@ -1258,10 +1259,11 @@ static DataLayer *sharedInstance=nil;
 
 -(void) updateMucSubject:(NSString *) subject forAccount:(NSString*) accountNo andRoom:(NSString *) room  withCompletion:(void (^)(BOOL))completion
 {
-    NSString* query=[NSString stringWithFormat:@"update buddylist set muc_subject='%@' where account_id=%@ and buddy_name='%@'", subject.escapeForSql, accountNo, room.escapeForSql];
+    NSString* query=[NSString stringWithFormat:@"update buddylist set muc_subject=? where account_id=? and buddy_name=?"];
+    NSArray *params=@[subject, accountNo, room];
     DDLogVerbose(@"%@", query);
     
-    [self executeNonQuery:query withCompletion:^(BOOL success) {
+    [self executeNonQuery:query andArguments:params withCompletion:^(BOOL success) {
         
         if(completion) {
             completion(success);
@@ -1273,11 +1275,13 @@ static DataLayer *sharedInstance=nil;
 
 -(void) mucSubject:(NSString *) subject forAccount:(NSString*) accountNo andRoom:(NSString *) room  withCompletion:(void (^)(NSString* ))completion
 {
-    NSString* query=[NSString stringWithFormat:@"select muc_subject from buddylist where account_id=%@ and buddy_name='%@'", accountNo, room.escapeForSql];
+    NSString* query=[NSString stringWithFormat:@"select muc_subject from buddylist where account_id=? and buddy_name=?"];
+    
+    NSArray *params=@[accountNo, room];
     DDLogVerbose(@"%@", query);
     
-    [self executeScalar:query withCompletion:^(NSObject *result) {
-        if(completion) completion(result);
+    [self executeScalar:query andArguments:params withCompletion:^(NSObject *result) {
+        if(completion) completion((NSString *)result);
     }];
     
 }

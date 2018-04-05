@@ -71,7 +71,7 @@ extern NSString *const kMessageTypeStatus;
 
 // Buddy Commands
 -(void) addContact:(NSString*) contact  forAccount:(NSString*) accountNo fullname:(NSString*)fullName nickname:(NSString*) nickName withCompletion: (void (^)(BOOL))completion;
--(BOOL) removeBuddy:(NSString*) buddy forAccount:(NSString*) accountNo;
+-(void) removeBuddy:(NSString*) buddy forAccount:(NSString*) accountNo;
 -(BOOL) clearBuddies:(NSString*) accountNo; 
 -(void) contactForUsername:(NSString*) username forAccount: (NSString*) accountNo withCompletion: (void (^)(NSArray *))completion;
 
@@ -126,9 +126,6 @@ extern NSString *const kMessageTypeStatus;
 
 -(void) isBuddyOnline:(NSString*) buddy forAccount:(NSString*) accountNo withCompletion: (void (^)(BOOL))completion;
 
--(BOOL) isBuddyAdded:(NSString*) buddy forAccount:(NSString*) accountNo ;
--(BOOL) isBuddyRemoved:(NSString*) buddy forAccount:(NSString*) accountNo ;
-
 #pragma mark MUC
 
 -(NSString *) ownNickNameforMuc:(NSString*) room forAccount:(NSString*) accountNo;
@@ -152,7 +149,7 @@ extern NSString *const kMessageTypeStatus;
 
 
 #pragma mark vcard commands
--(BOOL) setNickName:(NSString*) nickName forBuddy:(NSString*) buddy andAccount:(NSString*) accountNo;
+-(void) setNickName:(NSString*) nickName forBuddy:(NSString*) buddy andAccount:(NSString*) accountNo;
 
 #pragma mark account commands
 -(void) protocolListWithCompletion: (void (^)(NSArray* result))completion;

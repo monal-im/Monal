@@ -65,7 +65,7 @@
         
         self.server.stringValue =[self.accountToEdit objectForKey:kServer];
         self.port.stringValue =[NSString stringWithFormat:@"%@", [self.accountToEdit objectForKey:kPort]];
-        self.resource.stringValue =[self.accountToEdit objectForKey:kResource];
+       // self.resource.stringValue =[self.accountToEdit objectForKey:kResource];
         
         self.sslCheck.state =[[self.accountToEdit objectForKey:kSSL] boolValue];
         self.enabledCheck.state =[[self.accountToEdit objectForKey:kEnabled] boolValue];
@@ -148,7 +148,7 @@
     NSString *user=@"";
     NSString *domain=@"";
     
-    NSString *resource=@"";
+    NSString *resource=@"Monal-OSX";
     NSString *port=@"";
     
     NSArray *parts = [self.jabberID.stringValue componentsSeparatedByString:@"@"];
@@ -177,10 +177,10 @@
         port=self.port.stringValue;
     }
     
-    if(self.resource.stringValue.length>0)
-    {
-        resource=self.resource.stringValue;
-    }
+//    if(self.resource.stringValue.length>0)
+//    {
+//        resource=self.resource.stringValue;
+//    }
     
     [dic setObject:user forKey:kUsername];
     [dic setObject:self.server.stringValue  forKey:kServer];

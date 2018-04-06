@@ -1440,7 +1440,7 @@ static DataLayer *sharedInstance=nil;
             if(messageType)
             {
                 NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, ?, ?, ?, ?, ?, ?,?,?,?, ?);"];
-                NSArray *params=@[accountNo, from, to, dateString, message, actualfrom, [NSNumber numberWithInteger:unread], [NSNumber numberWithInteger:delivered], messageid,messageType];
+                NSArray *params=@[accountNo, from, to, dateString, message, actualfrom, [NSNumber numberWithInteger:unread], [NSNumber numberWithInteger:delivered], messageid?messageid:@"",messageType];
                 DDLogVerbose(@"%@",query);
                 [self executeNonQuery:query andArguments:params withCompletion:^(BOOL success) {
                     if(completion)
@@ -1480,7 +1480,7 @@ static DataLayer *sharedInstance=nil;
 -(void) hasMessageForId:(NSString*) messageid toContact:(NSString *) contact onAccount:(NSString *) accountNo andCompletion: (void (^)(BOOL))completion
 {
     NSString* query=[NSString stringWithFormat:@"select messageid from  message_history where account_id=? and message_from=? and messageid=? limit 1"];
-    NSArray *params=@[accountNo, contact, messageid];
+    NSArray *params=@[accountNo, contact, messageid?messageid:@""];
     
     [self executeScalar:query andArguments:params withCompletion:^(NSObject* result) {
         

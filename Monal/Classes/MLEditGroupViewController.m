@@ -76,6 +76,19 @@
          forCellReuseIdentifier:@"ButtonCell"];
 }
 
+-(void) viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    [_accountPicker reloadAllComponents];
+    
+    if([[MLXMPPManager sharedInstance].connectedXMPP count]==1)
+    {
+        [[MLXMPPManager sharedInstance] getServiceDetailsForAccount:0 ];
+        [_accountPicker selectedRowInComponent:0];
+        
+    }
+}
+
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
@@ -306,6 +319,28 @@
         
         
     }
+}
+
+
+#pragma mark picker view delegate
+- (void)pickerView:(UIPickerView *)pickerView didSelectRow:(NSInteger)row inComponent:(NSInteger)component
+{
+   // _selectedRow=row;
+    _accountName.text=[[MLXMPPManager sharedInstance] getAccountNameForConnectedRow:row];
+    
+    [[MLXMPPManager sharedInstance] getServiceDetailsForAccount:row ];
+    
+}
+
+- (NSString *)pickerView:(UIPickerView *)pickerView titleForRow:(NSInteger)row forComponent:(NSInteger)component
+{
+    if(row< [[MLXMPPManager sharedInstance].connectedXMPP count])
+    {
+        NSString* name =[[MLXMPPManager sharedInstance] getAccountNameForConnectedRow:row];
+        if(name)
+            return name;
+    }
+    return @"Unnamed";
 }
 
 

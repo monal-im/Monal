@@ -107,7 +107,7 @@ NSString *const kGtalk = @"Gtalk";
         self.server=[settings objectForKey:@"server"];
         
         self.port=[NSString stringWithFormat:@"%@", [settings objectForKey:@"other_port"]];
-        self.resource=[settings objectForKey:@"resource"];
+       // self.resource=[settings objectForKey:@"resource"];
         
         self.useSSL=[[settings objectForKey:@"secure"] boolValue];
         self.enabled=[[settings objectForKey:kEnabled] boolValue];
@@ -462,29 +462,29 @@ NSString *const kGtalk = @"Gtalk";
             }
                 
                 
-            case 2:  {
-                thecell.cellLabel.text=@"Resource";
-                thecell.toggleSwitch.hidden=YES;
-                thecell.textInputField.tag=5;
-                thecell.textInputField.text=self.resource;
-                break;
-            }
+//            case 2:  {
+//                thecell.cellLabel.text=@"Resource";
+//                thecell.toggleSwitch.hidden=YES;
+//                thecell.textInputField.tag=5;
+//                thecell.textInputField.text=self.resource;
+//                break;
+//            }
                 
-            case 3: {
+            case 2: {
                 thecell.cellLabel.text=@"TLS";
                 thecell.textInputField.hidden=YES;
                 thecell.toggleSwitch.tag=2;
                 thecell.toggleSwitch.on=self.useSSL;
                 break;
             }
-            case 4: {
+            case 3: {
                 thecell.cellLabel.text=@"Old Style TLS";
                 thecell.textInputField.hidden=YES;
                 thecell.toggleSwitch.tag=3;
                 thecell.toggleSwitch.on=self.oldStyleSSL;
                 break;
             }
-            case 5: {
+            case 4: {
                 thecell.cellLabel.text=@"Self-Signed Certificate";
                 thecell.textInputField.hidden=YES;
                 thecell.toggleSwitch.tag=4;
@@ -572,7 +572,7 @@ NSString *const kGtalk = @"Gtalk";
         return 3;
     }
     else if( section ==1) {
-        return 6;
+        return 5;
     }
     else  if(section == 2&&  self.editMode==false)
     {

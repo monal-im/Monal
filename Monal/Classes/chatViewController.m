@@ -886,10 +886,11 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         cell.name.hidden=YES;
     }
 
-    
-    if([[row objectForKey:@"delivered"] boolValue]!=YES)
-    {
-        cell.deliveryFailed=YES;
+    if([row objectForKey:@"delivered"]){
+        if([[row objectForKey:@"delivered"] boolValue]!=YES)
+        {
+            cell.deliveryFailed=YES;
+        }
     }
     
     cell.messageHistoryId=[row objectForKey:@"message_history_id"];

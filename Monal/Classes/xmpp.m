@@ -665,7 +665,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 UILocalNotification* alarm = [[UILocalNotification alloc] init];
                 if (alarm)
                 {
-                    if(!_hasShownAlert) {
+                    if(!_hasShownAlert && self.accountState<kStateLoggedIn) {
                         _hasShownAlert=YES;
                         //scehdule info
                         alarm.fireDate = theDate;

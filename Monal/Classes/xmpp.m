@@ -1167,10 +1167,16 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         return;
                     }
                     
+                    if(iqNode.discoInfo) {
+                        [self cleanDisco];
+                    }
+                    
                     if(iqNode.features && iqNode.discoInfo) {
                         if([iqNode.from isEqualToString:self.server] || [iqNode.from isEqualToString:self.domain]) {
                             self.serverFeatures=[iqNode.features copy];
                         }
+                        
+                        
                         
                         if([iqNode.features containsObject:@"urn:xmpp:carbons:2"])
                         {
@@ -2518,6 +2524,26 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
        }
         
       }
+    
+    self.unAckedStanzas= toClean;
+}
+
+-(void) cleanDisco
+{
+    NSMutableArray *toClean = [self.unAckedStanzas mutableCopy];
+    for(NSDictionary *dic in self.unAckedStanzas) {
+        if([[dic objectForKey:kStanza] isKindOfClass:[XMPPIQ class]])
+        {
+            XMPPIQ *iq=[dic objectForKey:kStanza] ;
+            MLXMLNode *query = [iq.children firstObject];
+            
+            if([[query.attributes objectForKey:@"xmlns"] isEqualToString:@"http://jabber.org/protocol/disco#info"])
+            {
+                [toClean removeObject:dic];
+            }
+        }
+        
+    }
     
     self.unAckedStanzas= toClean;
 }

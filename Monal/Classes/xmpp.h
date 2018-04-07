@@ -237,6 +237,11 @@ Decline a call request
  */
 -(void) enablePush;
 
+/**
+ query a user's vcard
+ */
+-(void)getVCard:(NSString *) user;
+
 FOUNDATION_EXPORT NSString *const kFileName;
 FOUNDATION_EXPORT NSString *const kContentType;
 FOUNDATION_EXPORT NSString *const kData;

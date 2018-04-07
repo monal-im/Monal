@@ -25,7 +25,7 @@
 -(void) viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-
+    [[MLXMPPManager sharedInstance] getVCard:_contact];
     self.tableView.rowHeight= UITableViewAutomaticDimension;
     
 }

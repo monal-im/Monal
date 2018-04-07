@@ -215,6 +215,12 @@ Attempts to upload a file to the  HTTP upload service
  */
 -(void) setClientsActive;
 
+/**
+ fetch a contacts vCard
+ */
+-(void) getVCard:(NSDictionary *) contact;
+
+
 
 /**
  Iterates through set and compares with connected accounts. Removes them. useful for active chat. 

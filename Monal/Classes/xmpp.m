@@ -1866,9 +1866,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                 else
                                                 {
                                                     [[DataLayer sharedInstance]  setContactHash:presenceNode forAccount:_accountNo];
-                                                    XMPPIQ* iqVCard= [[XMPPIQ alloc] initWithType:kiqGetType];
-                                                    [iqVCard getVcardTo:presenceNode.user];
-                                                    [self send:iqVCard];
+                                              
+                                                    [self getVCard:presenceNode.user];
                                                 }
                                                 
                                             }];
@@ -2654,6 +2653,19 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self send:presence];
 }
 
+-(void) fetchRoster
+{
+    XMPPIQ* roster=[[XMPPIQ alloc] initWithType:kiqGetType];
+    NSString *rosterVer;
+    if(self.supportsRosterVersion)
+    {
+        rosterVer=@""; //TODO fetch proper ver from db
+    }
+    [roster setRosterRequest:rosterVer];
+    
+    [self send:roster];
+}
+
 -(void) initSession
 {
     //now we are bound
@@ -2667,17 +2679,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self send:sessionQuery];
     
     [self queryDisco];
-    
-    XMPPIQ* roster=[[XMPPIQ alloc] initWithType:kiqGetType];
-    NSString *rosterVer;
-    if(self.supportsRosterVersion)
-    {
-        rosterVer=@""; //TODO fetch proper ver from db
-    }
-    [roster setRosterRequest:rosterVer];
-    
-    [self send:roster];
-    
+    [self fetchRoster];
     [self sendInitalPresence];
     
     if(!self.supportsSM3)
@@ -2755,6 +2757,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 
 #pragma mark query info
+
+-(void)getVCard:(NSString *) user
+{
+    XMPPIQ* iqVCard= [[XMPPIQ alloc] initWithType:kiqGetType];
+    [iqVCard getVcardTo:user];
+    [self send:iqVCard];
+}
 
 -(NSString*)getVersionString
 {

@@ -602,6 +602,12 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
     }
 }
 
+-(void) getVCard:(NSDictionary *) contact
+{
+    xmpp* account =[self getConnectedAccountForID:[NSString stringWithFormat:@"%@",[contact objectForKey:kAccountID]]];
+    [account getVCard:[contact objectForKey:@"buddy_name"]];
+}
+
 #pragma mark - MUC commands
 //makes xmpp call
 -(void) getRoomsForAccountRow:(NSInteger) row

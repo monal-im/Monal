@@ -189,6 +189,15 @@
     if(([elementName isEqualToString:@"FN"]) && [State isEqualToString:@"vCard"]
 	   )
     {
+        if(!_fullName){ //might already be set by nick name. prefer that
+        _fullName=_messageBuffer;
+        }
+        return;
+    }
+    
+    if(([elementName isEqualToString:@"NICKNAME"]) && [State isEqualToString:@"vCard"]
+       )
+    {
         _fullName=_messageBuffer;
         return;
     }

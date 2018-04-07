@@ -1174,11 +1174,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         
                         if([iqNode.features containsObject:@"urn:xmpp:carbons:2"])
                         {
-                            XMPPIQ* carbons =[[XMPPIQ alloc] initWithId:@"enableCarbons" andType:kiqSetType];
-                            MLXMLNode *enable =[[MLXMLNode alloc] initWithElement:@"enable"];
-                            [enable setXMLNS:@"urn:xmpp:carbons:2"];
-                            [carbons.children addObject:enable];
-                            [self send:carbons];
+                            if(!self.usingCarbons2){
+                                XMPPIQ* carbons =[[XMPPIQ alloc] initWithId:@"enableCarbons" andType:kiqSetType];
+                                MLXMLNode *enable =[[MLXMLNode alloc] initWithElement:@"enable"];
+                                [enable setXMLNS:@"urn:xmpp:carbons:2"];
+                                [carbons.children addObject:enable];
+                                [self send:carbons];
+                            }
                         }
                         
                         if([iqNode.features containsObject:@"urn:xmpp:ping"])
@@ -1365,6 +1367,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         if([iqNode.idval isEqualToString:@"enableCarbons"])
                         {
                             self.usingCarbons2=YES;
+                            [self cleanEnableCarbons];
                         }
                         
                         if(iqNode.discoItems==YES)
@@ -2501,6 +2504,24 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 #pragma mark set connection attributes
 
+-(void) cleanEnableCarbons
+{
+    NSMutableArray *toClean = [self.unAckedStanzas mutableCopy];
+    for(NSDictionary *dic in self.unAckedStanzas) {
+       if([[dic objectForKey:kStanza] isKindOfClass:[XMPPIQ class]])
+       {
+           XMPPIQ *iq=[dic objectForKey:kStanza] ;
+           if([[iq.attributes objectForKey:@"id"] isEqualToString:@"enableCarbons"])
+           {
+               [toClean removeObject:dic];
+           }
+       }
+        
+      }
+    
+    self.unAckedStanzas= toClean;
+}
+
 
 -(void) persistState
 {
@@ -2557,7 +2578,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     
     //debug output
-    DDLogInfo(@"+++++++++++++++++++ readState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%d%s,\n\tstreamID=%@\n\t#rosterList=%d",
+    DDLogDebug(@"readState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%d%s,\n\tstreamID=%@\n\t#rosterList=%d",
               self.lastHandledInboundStanza,
               self.lastHandledOutboundStanza,
               self.lastOutboundStanza,
@@ -2568,7 +2589,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
               );
     if(self.unAckedStanzas)
         for(NSDictionary *dic in self.unAckedStanzas)
-            DDLogDebug(@"+++++++++++++++++++ readState unAckedStanza %@: %@", [dic objectForKey:kStanzaID], ((MLXMLNode*)[dic objectForKey:kStanza]).XMLString);
+            DDLogDebug(@"readState unAckedStanza %@: %@", [dic objectForKey:kStanzaID], ((MLXMLNode*)[dic objectForKey:kStanza]).XMLString);
 }
 
 -(void) initSM3

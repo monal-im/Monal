@@ -2669,7 +2669,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self queryDisco];
     
     XMPPIQ* roster=[[XMPPIQ alloc] initWithType:kiqGetType];
-    [roster setRosterRequest:@""];
+    NSString *rosterVer;
+    if(self.supportsRosterVersion)
+    {
+        rosterVer=@""; //TODO fetch proper ver from db
+    }
+    [roster setRosterRequest:rosterVer];
+    
     [self send:roster];
     
     [self sendInitalPresence];

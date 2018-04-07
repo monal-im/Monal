@@ -313,13 +313,16 @@
     [self.children addObject:itemNode];
 }
 
--(void) setRosterRequest
+-(void) setRosterRequest:(NSString *) version
 {       
     MLXMLNode* queryNode =[[MLXMLNode alloc] init];
     queryNode.element=@"query";
     [queryNode.attributes setObject:@"jabber:iq:roster" forKey:@"xmlns"];
+    if(version)
+    {
+        [queryNode.attributes setObject:version forKey:@"ver"];
+    }
     [self.children addObject:queryNode];
-	
 }
 
 -(void) setVersion

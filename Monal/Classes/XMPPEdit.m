@@ -241,7 +241,7 @@ NSString *const kGtalk = @"Gtalk";
     if(user) [dic setObject:user forKey:kUsername];
     if(self.server) [dic setObject:self.server  forKey:kServer];
     if(self.port ) [dic setObject:self.port forKey:kPort];
-    if(self.resource) [dic setObject:self.resource forKey:kResource];
+    [dic setObject:@"Monal-iOS" forKey:kResource];
     
     [dic setObject:[NSNumber numberWithBool:self.useSSL] forKey:kSSL];
     [dic setObject:[NSNumber numberWithBool:self.enabled] forKey:kEnabled];

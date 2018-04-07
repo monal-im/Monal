@@ -158,7 +158,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     _port=5552;
     _SSL=YES;
     _oldStyleSSL=NO;
-    _resource = [[NSUUID UUID] UUIDString];
+   // _resource = [[NSUUID UUID] UUIDString];
     
     self.networkQueue =[[NSOperationQueue alloc] init];
     self.networkQueue.maxConcurrentOperationCount=1;
@@ -2669,7 +2669,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self queryDisco];
     
     XMPPIQ* roster=[[XMPPIQ alloc] initWithType:kiqGetType];
-    [roster setRosterRequest];
+    [roster setRosterRequest:@""];
     [self send:roster];
     
     [self sendInitalPresence];

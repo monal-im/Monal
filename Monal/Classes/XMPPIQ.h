@@ -81,9 +81,9 @@ removes a contact from the roster
 -(void) setRemoveFromRoster:(NSString*) jid;
 
 /**
- Requests a full roster from the server
+ Requests a full roster from the server. A null version will not set the ver attribute
  */
--(void) setRosterRequest;
+-(void) setRosterRequest:(NSString *) version;
 
 /**
  makes iq  with version element

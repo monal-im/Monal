@@ -55,7 +55,10 @@
     if([elementName isEqualToString:@"feature"])
     {
         if([_queryXMLNS isEqualToString:@"http://jabber.org/protocol/disco#info"]) {
-            if([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"jabber:iq:roster"]) _roster=YES;
+            if([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"jabber:iq:roster"])
+            {
+                _roster=YES;
+            }
             else if([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"jabber:iq:auth"]) _legacyAuth=YES;
             
             if(!_features)  _features=[[NSMutableSet alloc] init];

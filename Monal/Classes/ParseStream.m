@@ -87,6 +87,18 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         return;
     }
     
+     if(([State isEqualToString:@"Features"]) && ([elementName isEqualToString:@"ver"]))
+    {
+        if([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:features:rosterver"])
+        {
+            _supportsRosterVer=YES;
+        }
+       
+        return;
+    }
+    
+    
+
  
     //***** sasl success...
 	if(([elementName isEqualToString:@"success"]) &&  ([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:ietf:params:xml:ns:xmpp-sasl"])

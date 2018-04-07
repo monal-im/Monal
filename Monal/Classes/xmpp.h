@@ -306,6 +306,7 @@ FOUNDATION_EXPORT NSString *const kCompletion;
 @property (nonatomic, readonly) BOOL supportsPush;
 @property (nonatomic, readonly) BOOL pushEnabled;
 @property (nonatomic, readonly) BOOL usingCarbons2;
+@property (nonatomic, readonly) BOOL supportsRosterVersion;
 
 //calculated
 @property (nonatomic,strong, readonly) NSString* versionHash;

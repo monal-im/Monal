@@ -89,6 +89,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 @property (nonatomic, strong) NSOperationQueue *processQueue;
 
 @property (nonatomic, assign) BOOL supportsPush;
+@property (nonatomic, assign) BOOL supportsRosterVersion;
+
 
 //HTTP upload
 @property (nonatomic, assign) BOOL supportsHTTPUpload;
@@ -1208,6 +1210,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             [self enablePush];
                         }
                         
+                      
+                        
+                        
                     }
                     
                     if(iqNode.legacyAuth)
@@ -2010,6 +2015,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         if(streamNode.supportsSM3)
                         {
                             self.supportsSM3=YES;
+                        }
+                        
+                        if(streamNode.supportsRosterVer)
+                        {
+                            self.supportsRosterVersion=true;
+                            
                         }
                         
                         //test if smacks is supported and allows resume

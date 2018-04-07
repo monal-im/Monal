@@ -233,6 +233,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         [UNUserNotificationCenter currentNotificationCenter].delegate=self;
     }
     
+       [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateState:) name:kMLHasConnectedNotice object:nil];
+    
     //ios8 register for local notifications and badges
     if([[UIApplication sharedApplication] respondsToSelector:@selector(registerUserNotificationSettings:)])
     {
@@ -384,6 +386,16 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 }
 
 #pragma mark - backgrounding
+
+-(void) updateState:(NSNotification *) notification
+{
+    UIApplicationState state = [[UIApplication sharedApplication] applicationState];
+    if (state == UIApplicationStateInactive || state == UIApplicationStateBackground) {
+        [[MLXMPPManager sharedInstance] setClientsInactive];
+    }
+    
+}
+
 - (void)applicationWillEnterForeground:(UIApplication *)application
 {
     DDLogVerbose(@"Entering FG");
@@ -402,7 +414,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     
     [self updateUnread];
-//    [[MLXMPPManager sharedInstance] setClientsInactive];
+    [[MLXMPPManager sharedInstance] setClientsInactive];
 //    
 //    __block UIBackgroundTaskIdentifier tempTask= [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
 //        DDLogInfo(@"background wake expiring");

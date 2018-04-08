@@ -142,7 +142,6 @@
 		261A6288176C157D00059090 /* MLDisplaySettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A6287176C157D00059090 /* MLDisplaySettingsViewController.m */; };
 		261A628B176C159000059090 /* AccountsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A628A176C159000059090 /* AccountsViewController.m */; };
 		261A628E176C15AD00059090 /* ChatLogsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A628D176C15AD00059090 /* ChatLogsViewController.m */; };
-		261A6291176C15D400059090 /* GroupChatViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A6290176C15D400059090 /* GroupChatViewController.m */; };
 		261A6294176C15FC00059090 /* SearchUsersViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A6293176C15FC00059090 /* SearchUsersViewController.m */; };
 		261AC91D1788A49C00E05657 /* ParsePresence.m in Sources */ = {isa = PBXBuildFile; fileRef = 261AC91C1788A49C00E05657 /* ParsePresence.m */; };
 		261B29341FECBBF1001C5CF4 /* ParseFailed.m in Sources */ = {isa = PBXBuildFile; fileRef = 261B29321FECBBF0001C5CF4 /* ParseFailed.m */; };
@@ -260,8 +259,6 @@
 		2642EBC718693626006A6C12 /* RTP.mm in Sources */ = {isa = PBXBuildFile; fileRef = 2642EBC618693626006A6C12 /* RTP.mm */; };
 		2642EBCA18693634006A6C12 /* jingleCall.m in Sources */ = {isa = PBXBuildFile; fileRef = 2642EBC918693634006A6C12 /* jingleCall.m */; };
 		2642EBD01869425D006A6C12 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2642EBCF1869425D006A6C12 /* CoreAudio.framework */; };
-		2643A12E180220890030EFB1 /* TPKeyboardAvoidingScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = 2643A12B180220890030EFB1 /* TPKeyboardAvoidingScrollView.m */; };
-		2643A12F180220890030EFB1 /* TPKeyboardAvoidingTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = 2643A12D180220890030EFB1 /* TPKeyboardAvoidingTableView.m */; };
 		2644D48E1FEFAF2F00F46AB5 /* dsa_pub.pem in Resources */ = {isa = PBXBuildFile; fileRef = 2644D48D1FEFAF2E00F46AB5 /* dsa_pub.pem */; };
 		2644D4921FF0064C00F46AB5 /* MLChatImageCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2644D4911FF0064C00F46AB5 /* MLChatImageCell.m */; };
 		2644D4951FF046E800F46AB5 /* MLBaseCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2644D4941FF046E800F46AB5 /* MLBaseCell.m */; };
@@ -491,8 +488,6 @@
 		261A628A176C159000059090 /* AccountsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AccountsViewController.m; sourceTree = "<group>"; };
 		261A628C176C15AD00059090 /* ChatLogsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChatLogsViewController.h; sourceTree = "<group>"; };
 		261A628D176C15AD00059090 /* ChatLogsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChatLogsViewController.m; sourceTree = "<group>"; };
-		261A628F176C15D400059090 /* GroupChatViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GroupChatViewController.h; sourceTree = "<group>"; };
-		261A6290176C15D400059090 /* GroupChatViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GroupChatViewController.m; sourceTree = "<group>"; };
 		261A6292176C15FC00059090 /* SearchUsersViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SearchUsersViewController.h; sourceTree = "<group>"; };
 		261A6293176C15FC00059090 /* SearchUsersViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SearchUsersViewController.m; sourceTree = "<group>"; };
 		261AC91B1788A49C00E05657 /* ParsePresence.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParsePresence.h; sourceTree = "<group>"; };
@@ -635,10 +630,6 @@
 		2642EBC818693634006A6C12 /* jingleCall.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = jingleCall.h; sourceTree = "<group>"; };
 		2642EBC918693634006A6C12 /* jingleCall.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = jingleCall.m; sourceTree = "<group>"; };
 		2642EBCF1869425D006A6C12 /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
-		2643A12A180220890030EFB1 /* TPKeyboardAvoidingScrollView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TPKeyboardAvoidingScrollView.h; sourceTree = "<group>"; };
-		2643A12B180220890030EFB1 /* TPKeyboardAvoidingScrollView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TPKeyboardAvoidingScrollView.m; sourceTree = "<group>"; };
-		2643A12C180220890030EFB1 /* TPKeyboardAvoidingTableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TPKeyboardAvoidingTableView.h; sourceTree = "<group>"; };
-		2643A12D180220890030EFB1 /* TPKeyboardAvoidingTableView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TPKeyboardAvoidingTableView.m; sourceTree = "<group>"; };
 		2644D48D1FEFAF2E00F46AB5 /* dsa_pub.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = dsa_pub.pem; sourceTree = "<group>"; };
 		2644D4901FF0064C00F46AB5 /* MLChatImageCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLChatImageCell.h; sourceTree = "<group>"; };
 		2644D4911FF0064C00F46AB5 /* MLChatImageCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLChatImageCell.m; sourceTree = "<group>"; };
@@ -1046,8 +1037,6 @@
 		2632EA3F2003151100191EEB /* Muc */ = {
 			isa = PBXGroup;
 			children = (
-				261A628F176C15D400059090 /* GroupChatViewController.h */,
-				261A6290176C15D400059090 /* GroupChatViewController.m */,
 				26761BF31804FBB700D94714 /* RoomListViewController.h */,
 				26761BF41804FBB700D94714 /* RoomListViewController.m */,
 			);
@@ -1110,17 +1099,6 @@
 				26FB468E18B2755A0043094F /* IPAddress.m */,
 			);
 			name = Jingle;
-			sourceTree = "<group>";
-		};
-		2643A129180220890030EFB1 /* TPAvoidingView */ = {
-			isa = PBXGroup;
-			children = (
-				2643A12A180220890030EFB1 /* TPKeyboardAvoidingScrollView.h */,
-				2643A12B180220890030EFB1 /* TPKeyboardAvoidingScrollView.m */,
-				2643A12C180220890030EFB1 /* TPKeyboardAvoidingTableView.h */,
-				2643A12D180220890030EFB1 /* TPKeyboardAvoidingTableView.m */,
-			);
-			path = TPAvoidingView;
 			sourceTree = "<group>";
 		};
 		2644D48F1FF004B800F46AB5 /* ChatViews */ = {
@@ -1699,7 +1677,6 @@
 		26DFD4A615666B6C007A1621 /* External */ = {
 			isa = PBXGroup;
 			children = (
-				2643A129180220890030EFB1 /* TPAvoidingView */,
 				26DA16D917C302BC00D0065E /* UIAlertView-Blocks */,
 			);
 			name = External;
@@ -2602,7 +2579,6 @@
 				26C3EDFD1A807E76000E6331 /* ParseA.m in Sources */,
 				2642EBCA18693634006A6C12 /* jingleCall.m in Sources */,
 				26D51CD81E2674D700141E04 /* NXOAuth2Connection.m in Sources */,
-				2643A12E180220890030EFB1 /* TPKeyboardAvoidingScrollView.m in Sources */,
 				26761BF61804FBB700D94714 /* RoomListViewController.m in Sources */,
 				261A6281176C055400059090 /* ContactsViewController.m in Sources */,
 				261A6285176C156500059090 /* ActiveChatsViewController.m in Sources */,
@@ -2615,7 +2591,6 @@
 				26FB468F18B2755A0043094F /* IPAddress.m in Sources */,
 				26FE3BCB1C61A6C3003CC230 /* MLResizingTextView.m in Sources */,
 				26B2A4ED1B73097500272E63 /* DDAbstractDatabaseLogger.m in Sources */,
-				261A6291176C15D400059090 /* GroupChatViewController.m in Sources */,
 				261A6294176C15FC00059090 /* SearchUsersViewController.m in Sources */,
 				26D51CD41E2674D700141E04 /* NXOAuth2AccountStore.m in Sources */,
 				26D51CD01E2674D700141E04 /* NXOAuth2AccessToken.m in Sources */,
@@ -2675,7 +2650,6 @@
 				26B2A4FD1B73097500272E63 /* DDMultiFormatter.m in Sources */,
 				262E51921AD8CAC600788351 /* MLButtonCell.m in Sources */,
 				26C1EA6B1FF937320085547A /* MLNotificationSettingsViewController.m in Sources */,
-				2643A12F180220890030EFB1 /* TPKeyboardAvoidingTableView.m in Sources */,
 				2644D4951FF046E800F46AB5 /* MLBaseCell.m in Sources */,
 				26D51CE01E2674D700141E04 /* NXOAuth2PostBodyStream.m in Sources */,
 				268DD58617C4541000C673A9 /* MLChatCell.m in Sources */,

@@ -2558,6 +2558,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [values setValue:self.lastOutboundStanza forKey:@"lastOutboundStanza"];
     [values setValue:self.unAckedStanzas forKey:@"unAckedStanzas"];
     [values setValue:self.streamID forKey:@"streamID"];
+    [values setValue:self.serverFeatures forKey:@"serverFeatures"];
     
     //collect roster state
     [values setValue:self.rosterList forKey:@"rosterList"];
@@ -2596,6 +2597,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         self.lastOutboundStanza=[dic objectForKey:@"lastOutboundStanza"];
         self.unAckedStanzas=[dic objectForKey:@"unAckedStanzas"];
         self.streamID=[dic objectForKey:@"streamID"];
+        self.serverFeatures = [dic objectForKey:@"serverFeatures"];
         
         //collect roster state
         self.rosterList=[dic objectForKey:@"rosterList"];
@@ -2659,7 +2661,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) queryInfo
 {
     if(!self.hasDiscoAndRoster) {
-        [self queryDisco]; //TODO  we should cache
         [self queryPresence]; //No real way to cache this since it changes
         self.hasDiscoAndRoster=YES;
     }

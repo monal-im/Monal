@@ -1402,7 +1402,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                 {
                                     [[DataLayer sharedInstance] addContact:[contact objectForKey:@"jid"]?[contact objectForKey:@"jid"]:@"" forAccount:_accountNo fullname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@"" nickname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@"" withCompletion:^(BOOL success) {
                                         
-                                        if(!success)
+                                        if(!success && ((NSString *)[contact objectForKey:@"name"]).length>0)
                                         {
                                             [[DataLayer sharedInstance] setFullName:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@"" forContact:[contact objectForKey:@"jid"]?[contact objectForKey:@"jid"]:@"" andAccount:_accountNo ] ;
                                         }

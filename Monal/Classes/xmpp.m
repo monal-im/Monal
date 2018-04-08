@@ -1266,17 +1266,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     if(iqNode.vCard)
                     {
                         NSString* fullname=iqNode.fullName;
-                        if(iqNode.fullName)
-                        {
-                            [[DataLayer sharedInstance] setFullName:iqNode.fullName forContact:iqNode.user andAccount:_accountNo];
-                        }
+                        if(!fullname) fullname= iqNode.user;
+                        [[DataLayer sharedInstance] setFullName:fullname forContact:iqNode.user andAccount:_accountNo];
                         
                         if(iqNode.photoBinValue)
                         {
-                            
-                            
                             [[MLImageManager sharedInstance] setIconForContact:iqNode.user andAccount:_accountNo WithData:iqNode.photoBinValue ];
-                            
                             
                         }
                         
@@ -1420,6 +1415,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                     
                                 }
                             }
+                            
+                            // iterate roster and get cards
+                            [self getVcards];
                             
                         }
                         
@@ -2803,7 +2801,24 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 
 
-#pragma mark query info
+#pragma mark vcard
+
+-(void) getVcards
+{
+    for (NSDictionary *dic in self.rosterList)
+    {
+        [[DataLayer sharedInstance] contactForUsername:[dic objectForKey:@"jid"] forAccount:self.accountNo withCompletion:^(NSArray * result) {
+            
+            NSDictionary *row = result.firstObject;
+            if (((NSString *)[row objectForKey:@"raw_full"]).length==0)
+            {
+                [self getVCard:[dic objectForKey:@"jid"]];
+            }
+            
+        }];
+    }
+    
+}
 
 -(void)getVCard:(NSString *) user
 {
@@ -2811,6 +2826,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [iqVCard getVcardTo:user];
     [self send:iqVCard];
 }
+
+#pragma mark query info
 
 -(NSString*)getVersionString
 {

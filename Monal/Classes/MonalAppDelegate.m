@@ -389,11 +389,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) updateState:(NSNotification *) notification
 {
-    UIApplicationState state = [[UIApplication sharedApplication] applicationState];
-    if (state == UIApplicationStateInactive || state == UIApplicationStateBackground) {
-        [[MLXMPPManager sharedInstance] setClientsInactive];
-    }
-    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        UIApplicationState state = [[UIApplication sharedApplication] applicationState];
+        if (state == UIApplicationStateInactive || state == UIApplicationStateBackground) {
+            [[MLXMPPManager sharedInstance] setClientsInactive];
+        }
+    });
 }
 
 - (void)applicationWillEnterForeground:(UIApplication *)application

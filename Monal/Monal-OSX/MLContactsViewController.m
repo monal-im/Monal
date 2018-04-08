@@ -59,6 +59,8 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showCallRequest:) name:kMonalCallRequestNotice object:nil];
     
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshContact:) name: kMonalContactRefresh object:nil];
+    
     
     self.contacts=[[NSMutableArray alloc] init] ;
     self.offlineContacts=[[NSMutableArray alloc] init] ;
@@ -433,6 +435,31 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 
 #pragma mark - updating user display in table
 
+-(void) refreshContact:(NSNotification *) notification
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+
+    NSDictionary* user = notification.userInfo;
+    NSInteger initalPos=-1;
+    initalPos=[self positionOfOnlineContact:user];
+    if(initalPos>=0)
+    {
+        [self updateContactAt:initalPos withInfo:user];
+    }
+    else
+    {
+        //offline?
+        initalPos=[self positionOfOfflineContact:user];
+        
+        if(initalPos>=0)
+        {
+            [self updateOfflineContactAt:initalPos withInfo:user];
+        }
+        
+    }
+    });
+}
+
 -(NSInteger) positionOfOnlineContact:(NSDictionary *) user
 {
     NSInteger pos=0;
@@ -492,6 +519,45 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 -(void)updateContactAt:(NSInteger) pos withInfo:(NSDictionary *) user
 {
     NSMutableDictionary *contactrow =[_contacts objectAtIndex:pos];
+    BOOL hasChange=NO;
+    
+    if([user objectForKey:kstateKey] && ![[user objectForKey:kstateKey] isEqualToString:[contactrow  objectForKey:kstateKey]] ) {
+        [contactrow setObject:[user objectForKey:kstateKey] forKey:kstateKey];
+        hasChange=YES;
+    }
+    if([user objectForKey:kstatusKey] && ![[user objectForKey:kstatusKey] isEqualToString:[contactrow  objectForKey:kstatusKey]] ) {
+        [contactrow setObject:[user objectForKey:kstatusKey] forKey:kstatusKey];
+        hasChange=YES;
+    }
+    
+    if([user objectForKey:kfullNameKey] && ![[user objectForKey:kfullNameKey] isEqualToString:[contactrow  objectForKey:kfullNameKey]] &&
+       [[user objectForKey:kfullNameKey] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].length>0
+       ) {
+        [contactrow setObject:[user objectForKey:kfullNameKey] forKey:@"full_name"];
+        hasChange=YES;
+    }
+    
+    if(hasChange) {
+        if(self.searchResults || self.activeChat){
+            [self refreshDisplay];
+        }
+        else  {
+            [self.contactsTable beginUpdates];
+            
+            NSIndexSet *indexSet =[[NSIndexSet alloc] initWithIndex:pos] ;
+            NSIndexSet *columnIndexSet =[[NSIndexSet alloc] initWithIndex:0] ;
+            [self.contactsTable reloadDataForRowIndexes:indexSet columnIndexes:columnIndexSet];
+            [self.contactsTable endUpdates];
+        }
+    } else  {
+        
+    }
+}
+
+
+-(void)updateOfflineContactAt:(NSInteger) pos withInfo:(NSDictionary *) user
+{
+    NSMutableDictionary *contactrow =[_offlineContacts objectAtIndex:pos];
     BOOL hasChange=NO;
     
     if([user objectForKey:kstateKey] && ![[user objectForKey:kstateKey] isEqualToString:[contactrow  objectForKey:kstateKey]] ) {

@@ -83,6 +83,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self refreshDisplay];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(addOnlineUser:) name: kMonalContactOnlineNotice object:nil];
+    
+     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshContact:) name: kMonalContactRefresh object:nil];
+    
+    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(removeOnlineUser:) name: kMonalContactOfflineNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showCallRequest:) name:kMonalCallRequestNotice object:nil];
     
@@ -180,6 +184,62 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     } else  {
         
     }
+}
+
+-(void)updateOfflineContactAt:(NSInteger) pos withInfo:(NSDictionary *) user
+{
+    NSMutableDictionary *contactrow =[_offlineContacts objectAtIndex:pos];
+    BOOL hasChange=NO;
+    
+    if([user objectForKey:kstateKey] && ![[user objectForKey:kstateKey] isEqualToString:[contactrow  objectForKey:kstateKey]] ) {
+        [contactrow setObject:[user objectForKey:kstateKey] forKey:kstateKey];
+        hasChange=YES;
+    }
+    if([user objectForKey:kstatusKey] && ![[user objectForKey:kstatusKey] isEqualToString:[contactrow  objectForKey:kstatusKey]] ) {
+        [contactrow setObject:[user objectForKey:kstatusKey] forKey:kstatusKey];
+        hasChange=YES;
+    }
+    
+    if([user objectForKey:kfullNameKey] && ![[user objectForKey:kfullNameKey] isEqualToString:[contactrow  objectForKey:kfullNameKey]]  &&
+       [[user objectForKey:kfullNameKey] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].length>0) {
+        [contactrow setObject:[user objectForKey:kfullNameKey] forKey:@"full_name"];
+        hasChange=YES;
+    }
+    
+    if(hasChange) {
+        
+        [_contactsTable beginUpdates];
+        NSIndexPath *path1 = [NSIndexPath indexPathForRow:pos inSection:kofflineSection];
+        [_contactsTable reloadRowsAtIndexPaths:@[path1]
+                              withRowAnimation:UITableViewRowAnimationNone];
+        [_contactsTable endUpdates];
+    } else  {
+        
+    }
+}
+
+-(void) refreshContact:(NSNotification *) notification
+{
+        dispatch_async(dispatch_get_main_queue(), ^{
+     NSDictionary* user = notification.userInfo;
+    NSInteger initalPos=-1;
+    initalPos=[self positionOfOnlineContact:user];
+    if(initalPos>=0)
+    {
+        [self updateContactAt:initalPos withInfo:user];
+    }
+    else
+    {
+        //offline?
+         initalPos=[self positionOfOfflineContact:user];
+        
+        if(initalPos>=0)
+        {
+            [self updateOfflineContactAt:initalPos withInfo:user];
+        }
+        
+    }
+        });
 }
 
 

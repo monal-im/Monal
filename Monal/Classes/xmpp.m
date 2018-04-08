@@ -1281,7 +1281,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                 kfullNameKey: fullname,
                                                 kaccountNoKey:_accountNo
                                                 };
-                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactOnlineNotice object:self userInfo:userDic];
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self userInfo:userDic];
                         
                     }
                     

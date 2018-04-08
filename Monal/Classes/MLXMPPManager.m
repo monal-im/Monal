@@ -256,7 +256,7 @@ An array of Dics what have timers to make sure everything was sent
     
     xmppAccount.username=[account objectForKey:kUsername];
     xmppAccount.domain=[account objectForKey:kDomain];
-    xmppAccount.resource=[NSString stringWithFormat:@"%@.%@",[account objectForKey:kResource],[[NSUUID UUID] UUIDString]];
+    xmppAccount.resource=[NSString stringWithFormat:@"%@.%d",[account objectForKey:kResource],rand()%100 ];
     
     xmppAccount.server=[account objectForKey:kServer];
     xmppAccount.port=[[account objectForKey:kPort] integerValue];

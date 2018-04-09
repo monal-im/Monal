@@ -956,11 +956,47 @@
                         <segue destination="zlL-d1-5e0" kind="showDetail" identifier="showAbout" id="XYR-kq-hQQ"/>
                         <segue destination="zlL-d1-5e0" kind="showDetail" identifier="showOpenSource" id="pZO-HH-rUP"/>
                         <segue destination="eBx-3x-WaS" kind="showDetail" identifier="showChatLog" id="RMJ-9l-zbF"/>
+                        <segue destination="v41-1Z-cuJ" kind="show" identifier="showLogs" id="2Ew-6e-Nd2"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="lLi-28-cfT" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-802" y="3829"/>
+        </scene>
+        <!--Log View Controller-->
+        <scene sceneID="g88-aY-02X">
+            <objects>
+                <viewController id="v41-1Z-cuJ" customClass="LogViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="pE0-Vj-loH"/>
+                        <viewControllerLayoutGuide type="bottom" id="Eub-EA-z0c"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="EB3-va-n1E">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="JYm-gw-Mhc">
+                                <rect key="frame" x="0.0" y="64" width="414" height="623"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                            </textView>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="JYm-gw-Mhc" firstAttribute="leading" secondItem="EB3-va-n1E" secondAttribute="leading" id="7OF-Xo-ZGa"/>
+                            <constraint firstItem="Eub-EA-z0c" firstAttribute="top" secondItem="JYm-gw-Mhc" secondAttribute="bottom" id="MFM-gd-XfO"/>
+                            <constraint firstAttribute="trailing" secondItem="JYm-gw-Mhc" secondAttribute="trailing" id="XJd-3p-CJk"/>
+                            <constraint firstItem="JYm-gw-Mhc" firstAttribute="top" secondItem="pE0-Vj-loH" secondAttribute="bottom" id="ghu-qL-fHv"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="logView" destination="JYm-gw-Mhc" id="IRa-EC-O43"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="hAU-hM-hY4" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="528.98550724637687" y="3598.3695652173915"/>
         </scene>
         <!--Item-->
         <scene sceneID="1d2-iG-jjX">
@@ -1692,7 +1728,7 @@
         <segue reference="N41-wN-KNl"/>
         <segue reference="RLU-kt-b8r"/>
         <segue reference="pPJ-na-Dl3"/>
-        <segue reference="fRw-7r-LxC"/>
+        <segue reference="YJ5-aM-wEP"/>
         <segue reference="pZO-HH-rUP"/>
         <segue reference="RMJ-9l-zbF"/>
     </inferredMetricsTieBreakers>

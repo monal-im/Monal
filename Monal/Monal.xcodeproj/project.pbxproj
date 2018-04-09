@@ -334,7 +334,6 @@
 		26B2A4FE1B73097500272E63 /* DDMultiFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B2A4E81B73097500272E63 /* DDMultiFormatter.m */; };
 		26B2A5021B730AE100272E63 /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F7BB411115F8DB00712672 /* Reachability.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		26B51C4918654D98002134C3 /* LogViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B51C4718654D98002134C3 /* LogViewController.m */; };
-		26B51C4A18654D98002134C3 /* LogViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26B51C4818654D98002134C3 /* LogViewController.xib */; };
 		26B69A75131C522F002FCBEB /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26B69A74131C522F002FCBEB /* Security.framework */; };
 		26BDECDC1867B7790018670D /* CallViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26BDECDA1867B7790018670D /* CallViewController.m */; };
 		26C1EA681FF937040085547A /* MLCloudSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C1EA671FF937040085547A /* MLCloudSettingsViewController.m */; };
@@ -736,7 +735,6 @@
 		26B2A4E81B73097500272E63 /* DDMultiFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDMultiFormatter.m; sourceTree = "<group>"; };
 		26B51C4618654D98002134C3 /* LogViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LogViewController.h; sourceTree = "<group>"; };
 		26B51C4718654D98002134C3 /* LogViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LogViewController.m; sourceTree = "<group>"; };
-		26B51C4818654D98002134C3 /* LogViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = LogViewController.xib; sourceTree = "<group>"; };
 		26B69A74131C522F002FCBEB /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		26BDECD91867B7790018670D /* CallViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CallViewController.h; sourceTree = "<group>"; };
 		26BDECDA1867B7790018670D /* CallViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CallViewController.m; sourceTree = "<group>"; };
@@ -1119,7 +1117,6 @@
 			children = (
 				26B51C4618654D98002134C3 /* LogViewController.h */,
 				26B51C4718654D98002134C3 /* LogViewController.m */,
-				26B51C4818654D98002134C3 /* LogViewController.xib */,
 				2644D4971FF29E5600F46AB5 /* MLSettingsTableViewController.h */,
 				26C1EA661FF937040085547A /* MLCloudSettingsViewController.h */,
 				26C1EA671FF937040085547A /* MLCloudSettingsViewController.m */,
@@ -2134,7 +2131,6 @@
 				262E51981AD8CB7200788351 /* MLTextInputCell.xib in Resources */,
 				2649CE531C51B84C00CD1E80 /* Launch Screen.storyboard in Resources */,
 				26F9794D1ACAC73A0008E005 /* MLContactCell.xib in Resources */,
-				26B51C4A18654D98002134C3 /* LogViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

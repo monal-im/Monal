@@ -645,6 +645,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             [self disconnectWithCompletion:^{
                 [self reconnect];
             }];
+            return; 
         }
         
         _loginStarted=YES;
@@ -3075,7 +3076,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     if(stream!=_iStream && stream!=_oStream)
     {
-        DDLogVerbose(@"event from stale stream");
+        DDLogVerbose(@"event from stale stream. This should not happen. Cleaning up and reconnecting.");
+        [self disconnectWithCompletion:^{
+            [self reconnect];
+        }];
         return;
     }
     

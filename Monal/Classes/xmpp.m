@@ -3157,10 +3157,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 [self disconnectWithCompletion:^{
                     [self reconnect:5];
                 }];
+                return;
             }
             
             
-            if(st_error.code==2)// operation couldnt be completed // socket not connected
+            if(st_error.code==2 || st_error.code==57)// operation couldnt be completed // socket not connected
             {
                 [self disconnectWithCompletion:^{
                     [self reconnect:5];
@@ -3203,6 +3204,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 
                 return;
             }
+               
+               
+               DDLogInfo(@"unhandled stream error");
+              
             
             break;
             

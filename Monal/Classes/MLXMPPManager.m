@@ -280,6 +280,7 @@ An array of Dics what have timers to make sure everything was sent
     if(xmppAccount && hostReach) {
         NSDictionary* accountDic= [[NSDictionary alloc] initWithObjects:@[xmppAccount, hostReach] forKeys:@[@"xmppAccount", @"hostReach"]];
         [_connectedXMPP addObject:accountDic];
+         DDLogVerbose(@"reachability starting reconnect");
         [xmppAccount reconnect:0];
     }
     

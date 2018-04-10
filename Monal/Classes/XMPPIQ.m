@@ -39,7 +39,8 @@
                         @"urn:xmpp:jingle:apps:rtp:1",
                         @"urn:xmpp:jingle:apps:rtp:audio",
                         @"urn:xmpp:jingle:transports:raw-udp:0",
-                        @"urn:xmpp:jingle:transports:raw-udp:1"
+                        @"urn:xmpp:jingle:transports:raw-udp:1",
+                        @"urn:xmpp:receipts"
                         ];
      });
     

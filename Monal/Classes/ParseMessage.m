@@ -169,6 +169,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		return;
 	}
     
+    
+    if([elementName isEqualToString:@"request"]  && [[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:receipts"] )
+    {
+        _requestReceipt=YES;
+        return;
+    }
+    
+    
 }
 
 

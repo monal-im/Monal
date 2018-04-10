@@ -45,7 +45,7 @@
 {
     [encoder encodeObject:_element forKey:@"element"];
     [encoder encodeObject:_attributes forKey:@"attributes"];
-    [encoder encodeInteger:_children forKey:@"children"];
+    [encoder encodeObject:_children forKey:@"children"];
     [encoder encodeObject:_data forKey:@"data"];
 }
 

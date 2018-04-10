@@ -40,5 +40,14 @@
     [self.children addObject:body];
 }
 
+-(void) setReceipt:(NSString*) messageId
+{
+    MLXMLNode* received =[[MLXMLNode alloc] init];
+    received.element=@"received";
+    [received.attributes setValue:@"urn:xmpp:receipts" forKey:@"xmlns"];
+    [received.attributes setValue:messageId forKey:@"id"];
+    [self.children addObject:received];
+}
+
 
 @end

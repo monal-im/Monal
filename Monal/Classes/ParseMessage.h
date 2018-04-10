@@ -26,6 +26,7 @@
 @property (nonatomic, assign, readonly) BOOL hasBody; 
 @property (nonatomic, strong, readonly) NSDate *delayTimeStamp;
 @property (nonatomic, strong, readonly) NSString* avatarData;
+@property (nonatomic, assign, readonly) BOOL requestReceipt; 
 
 @property (nonatomic, assign, readonly) BOOL mucInvite;
 

@@ -31,4 +31,11 @@ extern NSString* const kMessageNormalType;
  */
 -(void) setBody:(NSString*) messageBody;
 
+/**
+ sets the receipt child element
+ */
+-(void) setReceipt:(NSString*) messageId;
+
+
+
 @end

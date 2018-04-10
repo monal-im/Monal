@@ -649,19 +649,43 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         }
         
         _loginStarted=YES;
-#if TARGET_OS_IPHONE
         
+        NSTimeInterval wait=scheduleWait;
+        if(!_loggedInOnce) {
+            wait=0;
+        }
+#if TARGET_OS_IPHONE
+     
+        
+        if(self.pushEnabled)
+        {
+            DDLogInfo(@"Using Push path for reconnct");
+    
+            if(!_reconnectScheduled)
+            {
+                _reconnectScheduled=YES;
+                DDLogInfo(@"Trying to connect again in %d seconds. ", wait);
+                dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, wait * NSEC_PER_SEC), q_background,  ^{
+                    //there may be another login operation freom reachability or another timer
+                    if(self.accountState<kStateReconnecting) {
+                        [self connect];
+                    }
+                });
+            } else  {
+                DDLogInfo(@"reconnect scheduled already" );
+            }
+        }
+        else  {
+             DDLogInfo(@"Using non push path for reconnct");
         __block UIBackgroundTaskIdentifier reconnectBackgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
             
             if((([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
                 || ([UIApplication sharedApplication].applicationState==UIApplicationStateInactive )) && _accountState<kStateHasStream)
             {
                 //present notification
-                
                 NSDate* theDate=[NSDate dateWithTimeIntervalSinceNow:0]; //immediate fire
-                
                 UIApplication* app = [UIApplication sharedApplication];
-                
                 // Create a new notification
                 UILocalNotification* alarm = [[UILocalNotification alloc] init];
                 if (alarm)
@@ -698,11 +722,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 return;
             }
             
-            NSTimeInterval wait=scheduleWait;
-            if(!_loggedInOnce) {
-                wait=0;
-            }
-            
             if(!_reconnectScheduled)
             {
                 _reconnectScheduled=YES;
@@ -720,7 +739,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 DDLogInfo(@"reconnect scheduled already" );
             }
         }
-        
+    }
 #else
         if(_accountState>=kStateReconnecting) {
             DDLogInfo(@" account sate >=reconencting, disconnecting first" );
@@ -729,11 +748,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             }];
             return;
         }
-        
-        NSTimeInterval wait=scheduleWait;
-        if(!_loggedInOnce) {
-            wait=0;
-        }
+    
         
         if(!_reconnectScheduled)
         {
@@ -3161,7 +3176,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             }
             
             
-            if(st_error.code==2 || st_error.code==57)// operation couldnt be completed // socket not connected
+            if(st_error.code==2 )// operation couldnt be completed // socket not connected
             {
                 [self disconnectWithCompletion:^{
                     [self reconnect:5];

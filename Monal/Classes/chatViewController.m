@@ -181,6 +181,14 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         }
         
     }
+    
+    if(xmppAccount.accountState<kStateLoggedIn)
+    {
+        self.sendButton.enabled=NO;
+    }
+    else  {
+        self.sendButton.enabled=YES;
+    }
 
     UIEdgeInsets currentInset = self.messageTable.contentInset;
     self.messageTable.contentInset =UIEdgeInsetsMake(self.navigationController.navigationBar.frame.size.height+[UIApplication sharedApplication].statusBarFrame.size.height, currentInset.left, currentInset.bottom, currentInset.right);

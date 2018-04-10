@@ -166,7 +166,7 @@ An array of Dics what have timers to make sure everything was sent
         if(xmppAccount.supportsClientState && xmppAccount.accountState>=kStateLoggedIn) {
             [xmppAccount setClientActive];
         } else  {
-            [xmppAccount reconnect];re
+            [xmppAccount reconnect];
         }
     }
 }

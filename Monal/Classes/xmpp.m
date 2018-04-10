@@ -1744,7 +1744,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     {
                         XMPPMessage *receiptNode = [[XMPPMessage alloc] init];
                         [receiptNode.attributes setObject:messageNode.from forKey:@"to"];
-                        [receiptNode setXmppId:[NSUUID alloc].UUIDString];
+                        [receiptNode setXmppId:[[NSUUID UUID] UUIDString]];
                         [receiptNode setReceipt:messageNode.idval];
                         [self send:receiptNode];
                     }

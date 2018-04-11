@@ -105,7 +105,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 	[nc addObserver:self selector:@selector(keyboardWillHide:) name: UIKeyboardWillHideNotification object:nil];
 	[nc addObserver:self selector:@selector(keyboardDidShow:) name: UIKeyboardDidShowNotification object:nil];
   
-    
+
+    [nc addObserver:self selector:@selector(refreshButton:) name:kMonalAccountStatusChanged object:nil];
     
     
     self.hidesBottomBarWhenPushed=YES;
@@ -182,13 +183,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         
     }
     
-    if(xmppAccount.accountState<kStateLoggedIn)
-    {
-        self.sendButton.enabled=NO;
-    }
-    else  {
-        self.sendButton.enabled=YES;
-    }
+    [self refreshButton:nil];
 
     UIEdgeInsets currentInset = self.messageTable.contentInset;
     self.messageTable.contentInset =UIEdgeInsetsMake(self.navigationController.navigationBar.frame.size.height+[UIApplication sharedApplication].statusBarFrame.size.height, currentInset.left, currentInset.bottom, currentInset.right);
@@ -517,6 +512,25 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         [[DataLayer sharedInstance] addActiveBuddies:to forAccount:_accountNo withCompletion:nil];
         _firstmsg=NO;
 	}
+
+}
+
+-(void) refreshButton:(NSNotification *) notificaiton
+{
+    xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
+ 
+    dispatch_async(dispatch_get_main_queue(), ^{
+        
+        if(xmppAccount.accountState<kStateLoggedIn)
+        {
+            self.sendButton.enabled=NO;
+            [self.sendButton setTitle:@"Offline" forState:UIControlStateDisabled];
+        }
+        else  {
+            self.sendButton.enabled=YES;
+            [self.sendButton setTitle:@"Send" forState:UIControlStateNormal];
+        }
+    });
 
 }
 

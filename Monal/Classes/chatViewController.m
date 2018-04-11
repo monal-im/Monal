@@ -521,14 +521,22 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
  
     dispatch_async(dispatch_get_main_queue(), ^{
         
+        NSString *title=_contactName;
+        if(![_contactFullName isEqualToString:@"(null)"] && [[_contactFullName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0)
+        {
+            title=_contactFullName;
+        }
+        
+        
         if(xmppAccount.accountState<kStateLoggedIn)
         {
             self.sendButton.enabled=NO;
-            [self.sendButton setTitle:@"Offline" forState:UIControlStateDisabled];
+            self.navigationItem.title=[NSString stringWithFormat:@"%@ [%@]", title, @"Logged Out"];
         }
         else  {
             self.sendButton.enabled=YES;
-            [self.sendButton setTitle:@"Send" forState:UIControlStateNormal];
+            self.navigationItem.title=title;
+            
         }
     });
 

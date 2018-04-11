@@ -236,7 +236,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     
-//#ifdef  DEBUG
+#ifdef  DEBUG
     [DDLog addLogger:[DDASLLogger sharedInstance]];
     [DDLog addLogger:[DDTTYLogger sharedInstance]];
     self.fileLogger = [[DDFileLogger alloc] init];
@@ -244,7 +244,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     self.fileLogger.logFileManager.maximumNumberOfLogFiles = 5;
     self.fileLogger.maximumFileSize=1024 * 500;
     [DDLog addLogger:self.fileLogger];
-//#endif
+#endif
     
     if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"10.0")){
         [UNUserNotificationCenter currentNotificationCenter].delegate=self;

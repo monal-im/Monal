@@ -531,6 +531,30 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }];
 }
 
+-(void) cleanUpState
+{
+    if(self.explicitLogout)
+    {
+        [_contactsVC clearContactsForAccount:_accountNo];
+        [[DataLayer sharedInstance] resetContactsForAccount:_accountNo];
+    }
+    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountStatusChanged object:nil];
+    
+    DDLogInfo(@"Connections closed");
+    _startTLSComplete=NO;
+    _streamHasSpace=NO;
+    _loginStarted=NO;
+    _loginStartTimeStamp=nil;
+    _loginError=NO;
+    _accountState=kStateDisconnected;
+    _reconnectScheduled =NO;
+    
+    self.httpUploadQueue =nil;
+    
+    DDLogInfo(@"All closed and cleaned up");
+    
+}
+
 -(void) disconnectWithCompletion:(void(^)(void))completion
 {
     if(self.explicitLogout && _accountState>=kStateHasStream)
@@ -591,32 +615,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     
     [self.networkQueue addOperationWithBlock:^{
-        
-        if(!self.supportsSM3 || self.explicitLogout)
-        {
-            [_contactsVC clearContactsForAccount:_accountNo];
-            [[DataLayer sharedInstance] resetContactsForAccount:_accountNo];
-            
-        }
-        
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountStatusChanged object:nil];
-        
-        
-        DDLogInfo(@"Connections closed");
-        
-        _startTLSComplete=NO;
-        _streamHasSpace=NO;
-        _loginStarted=NO;
-        _loginStartTimeStamp=nil;
-        _loginError=NO;
-        _accountState=kStateDisconnected;
-        _reconnectScheduled =NO;
-        
-        self.httpUploadQueue =nil;
-        
-        DDLogInfo(@"All closed and cleaned up");
-        
-        
+        [self cleanUpState];
         if(completion) completion();
     }];
     
@@ -635,11 +634,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         DDLogVerbose(@"reconnecting ");
         //can be called multiple times
         
-        if(_loginStarted && [[NSDate date] timeIntervalSinceDate:self.loginStartTimeStamp]<=10) {
-            DDLogVerbose(@"reconnect called while one already in progress. Stopping.");
-            return;
-        }
-        else if (_loginStarted && [[NSDate date] timeIntervalSinceDate:self.loginStartTimeStamp]>10)
+       
+        if (_loginStarted && [[NSDate date] timeIntervalSinceDate:self.loginStartTimeStamp]>10)
         {
             DDLogVerbose(@"reconnect called while one already in progress that took more than 10 seconds. disconnect before reconnect.");
             [self disconnectWithCompletion:^{
@@ -647,6 +643,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             }];
             return; 
         }
+        else if(_loginStarted) {
+            DDLogVerbose(@"reconnect called while one already in progress. Stopping.");
+            return;
+        }
+        
+        DDLogVerbose(@"Login started is %d timestamp diff %d",_loginStarted, [[NSDate date] timeIntervalSinceDate:self.loginStartTimeStamp]);
+      
         
         _loginStarted=YES;
         
@@ -1941,8 +1944,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 {
                     [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, @"XMPP stream error"]];
                     
-                    [self disconnect];
-                    [self reconnect:5];
+                    [self disconnectWithCompletion:^{
+                        [self reconnect:5];
+                    }];
+                   
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"stream:stream"])
                 {
@@ -2680,6 +2685,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) disconnectToResume
 {
     [self closeSocket]; // just closing socket to simulate a unintentional disconnect
+    [self cleanUpState];
 }
 
 -(void) queryInfo
@@ -3248,9 +3254,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             if(_loggedInOnce)
             {
                 DDLogInfo(@"%@ Stream end encoutered.. reconnecting.", [stream class] );
-                _accountState=kStateReconnecting;
-                _loginStarted=NO;
-                [self reconnect:5];
+               _loginStarted=NO;
+                [self disconnectWithCompletion:^{
+                    _accountState=kStateReconnecting;
+                    [self reconnect:5];
+                }];
+                
             }
             else  if(self.oauthAccount)
             {
@@ -3258,7 +3267,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 5ull * NSEC_PER_SEC), dispatch_get_main_queue(),  ^{
                     DDLogInfo(@"%@ Stream end encoutered.. on oauth acct. Wait for refresh.", [stream class] );
                     if(_accountState<kStateHasStream) {
-                        [self reconnect:5];
+                        [self disconnectWithCompletion:^{
+                            [self reconnect:5];
+                        }];
                     } else  {
                         DDLogVerbose(@"already connected/connecting .doing nothimg");
                     }

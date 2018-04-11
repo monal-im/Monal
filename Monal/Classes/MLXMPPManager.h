@@ -220,7 +220,10 @@ Attempts to upload a file to the  HTTP upload service
  */
 -(void) getVCard:(NSDictionary *) contact;
 
-
+/**
+ log out everything but doesnt destroy the stream id
+ */
+-(void)logoutAllKeepStream;
 
 /**
  Iterates through set and compares with connected accounts. Removes them. useful for active chat. 

@@ -339,6 +339,32 @@ An array of Dics what have timers to make sure everything was sent
  
 }
 
+-(void)logoutAllKeepStream
+{
+    [[DataLayer sharedInstance] accountListWithCompletion:^(NSArray *result) {
+        _accountList=result;
+        for (NSDictionary* account in _accountList)
+        {
+            if([[account objectForKey:@"enabled"] boolValue]==YES)
+            {
+             
+                for (NSDictionary* account in _connectedXMPP)
+                {
+                    xmpp* xmppAccount=[account objectForKey:@"xmppAccount"];
+                   
+                        DDLogVerbose(@"got account and cleaning up.. keeping stream ");
+                        [xmppAccount disconnectToResume];
+                        DDLogVerbose(@"done cleaning up account. keeping stream ");
+
+                }
+                
+            }
+        }
+    }];
+    
+}
+
+
 -(void)connectIfNecessary
 {
     

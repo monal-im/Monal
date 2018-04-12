@@ -1692,6 +1692,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                        andOverrideDate:messageNode.delayTimeStamp withCompletion:^(BOOL success) {
                                                               if(success)
                                                               {
+                                                                  if(messageNode.requestReceipt)
+                                                                  {
+                                                                      XMPPMessage *receiptNode = [[XMPPMessage alloc] init];
+                                                                      [receiptNode.attributes setObject:messageNode.from forKey:@"to"];
+                                                                      [receiptNode setXmppId:[[NSUUID UUID] UUIDString]];
+                                                                      [receiptNode setReceipt:messageNode.idval];
+                                                                      [self send:receiptNode];
+                                                                  }
+                                                                  
                                                                   [self.networkQueue addOperationWithBlock:^{
                                                                       [[DataLayer sharedInstance] addActiveBuddies:messageNode.from forAccount:_accountNo withCompletion:nil];
                                                                       
@@ -1744,15 +1753,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         
                         [[MLImageManager sharedInstance] setIconForContact:messageNode.actualFrom andAccount:_accountNo WithData:messageNode.avatarData];
                         
-                    }
-                    
-                    if(messageNode.requestReceipt)
-                    {
-                        XMPPMessage *receiptNode = [[XMPPMessage alloc] init];
-                        [receiptNode.attributes setObject:messageNode.from forKey:@"to"];
-                        [receiptNode setXmppId:[[NSUUID UUID] UUIDString]];
-                        [receiptNode setReceipt:messageNode.idval];
-                        [self send:receiptNode];
                     }
                     
                     if(messageNode.receivedID)

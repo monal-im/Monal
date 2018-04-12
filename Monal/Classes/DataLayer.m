@@ -1439,7 +1439,7 @@ static DataLayer *sharedInstance=nil;
             
             if(messageType)
             {
-                NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, ?, ?, ?, ?, ?, ?,?,?,?, ?, 0);"];
+                NSString* query=[NSString stringWithFormat:@"insert into message_history (account_id, message_from, message_to, timestamp, message, actual_from, unread, delivered, messageid, messageType) values (?, ?, ?, ?, ?, ?,?,?,?, ?);"];
                 NSArray *params=@[accountNo, from, to, dateString, message, actualfrom, [NSNumber numberWithInteger:unread], [NSNumber numberWithInteger:delivered], messageid?messageid:@"",messageType];
                 DDLogVerbose(@"%@",query);
                 [self executeNonQuery:query andArguments:params withCompletion:^(BOOL success) {
@@ -1454,7 +1454,7 @@ static DataLayer *sharedInstance=nil;
                 [self messageTypeForMessage:message withCompletion:^(NSString *foundMessageType) {
                     
                     //all messages default to unread
-                    NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, ?,?,?,?,?,?,?,?,?,?);"];
+                    NSString* query=[NSString stringWithFormat:@"insert into message_history (account_id, message_from, message_to, timestamp, message, actual_from, unread, delivered, messageid, messageType) values (?,?,?,?,?,?,?,?,?,?);"];
                     NSArray *params=@[accountNo, from, to, 	dateString, message, actualfrom,[NSNumber numberWithInteger:unread], [NSNumber numberWithInteger:delivered], messageid?messageid:@"",foundMessageType];
                     DDLogVerbose(@"%@",query);
                     [self executeNonQuery:query andArguments:params  withCompletion:^(BOOL success) {

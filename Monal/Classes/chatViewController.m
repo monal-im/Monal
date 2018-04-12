@@ -814,6 +814,11 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         {
             cell=[tableView dequeueReusableCellWithIdentifier:@"textOutCell"];
         }
+        
+        NSNumber *received = [row objectForKey:@"message"];
+        if(received){
+           
+        }
     }
 
     

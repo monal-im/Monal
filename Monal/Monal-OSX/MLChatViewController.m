@@ -739,6 +739,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         cell.deliveryFailed=NO;
     }
   
+    NSNumber *received = [messageRow objectForKey:@"received"];
+    if(received.boolValue==YES) {
+        cell.messageStatus.hidden=NO;
+    }
+    else  {
+        cell.messageStatus.hidden=YES;
+    }
+    
+    
     BOOL showTime=[self shouldShowTimeForRow:row];
  
     cell.toolTip=[self formattedDateWithSource:[messageRow objectForKey:@"thetime"]];

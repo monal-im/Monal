@@ -1736,7 +1736,7 @@ static DataLayer *sharedInstance=nil;
     [self messageTypeForMessage:message withCompletion:^(NSString *messageType) {
         
         NSArray* parts=[[[NSDate date] description] componentsSeparatedByString:@" "];
-        NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, %@, '%@',  '%@', '%@ %@', '%@', '%@',0,1,'%@', '%@');", accountNo, from.escapeForSql, to.escapeForSql,
+        NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, %@, '%@',  '%@', '%@ %@', '%@', '%@',0,1,'%@', '%@',0);", accountNo, from.escapeForSql, to.escapeForSql,
                          [parts objectAtIndex:0],[parts objectAtIndex:1], message.escapeForSql, cleanedActualFrom.escapeForSql, messageId.escapeForSql, messageType];
         
         [self executeNonQuery:query withCompletion:^(BOOL result) {

@@ -190,6 +190,18 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     _versionHash=[self getVersionString];
 
+    
+    self.priority=[[[NSUserDefaults standardUserDefaults] stringForKey:@"XMPPPriority"] integerValue];
+    self.statusMessage=[[NSUserDefaults standardUserDefaults] stringForKey:@"StatusMessage"];
+    self.awayState=[[NSUserDefaults standardUserDefaults] boolForKey:@"Away"];
+    
+    if([[NSUserDefaults standardUserDefaults] objectForKey:@"Visible"]){
+        self.visibleState=[[NSUserDefaults standardUserDefaults] boolForKey:@"Visible"];
+    }
+    else  {
+        self.visibleState=YES;
+    }
+    
     return self;
 }
 
@@ -2727,11 +2739,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [discoInfo setiqTo:_domain];
     [discoInfo setDiscoInfoNode];
     [self send:discoInfo];
-    
-    self.priority=[[[NSUserDefaults standardUserDefaults] stringForKey:@"XMPPPriority"] integerValue];
-    self.statusMessage=[[NSUserDefaults standardUserDefaults] stringForKey:@"StatusMessage"];
-    self.awayState=[[NSUserDefaults standardUserDefaults] boolForKey:@"Away"];
-    self.visibleState=[[NSUserDefaults standardUserDefaults] boolForKey:@"Visible"];
+
 }
 
 

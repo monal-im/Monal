@@ -773,7 +773,16 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
   
     NSNumber *received = [messageRow objectForKey:kReceived];
     if(received.boolValue==YES) {
-        cell.messageStatus.hidden=NO;
+        NSDictionary *prior =nil;
+        if(row>0)
+        {
+            prior = [self.messageList objectAtIndex:row-1];
+        }
+        if(row==self.messageList.count-1 || ![[prior objectForKey:@"af"] isEqualToString:self.jid]) {
+            cell.messageStatus.hidden=NO;
+        } else  {
+            cell.messageStatus.hidden=YES;
+        }
     }
     else  {
         cell.messageStatus.hidden=YES;

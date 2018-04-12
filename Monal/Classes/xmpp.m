@@ -1177,6 +1177,27 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 
 #pragma mark stanza handling
+
+-(void) parseFeatures
+{
+    if([self.serverFeatures containsObject:@"urn:xmpp:carbons:2"])
+    {
+        if(!self.usingCarbons2){
+            XMPPIQ* carbons =[[XMPPIQ alloc] initWithId:@"enableCarbons" andType:kiqSetType];
+            MLXMLNode *enable =[[MLXMLNode alloc] initWithElement:@"enable"];
+            [enable setXMLNS:@"urn:xmpp:carbons:2"];
+            [carbons.children addObject:enable];
+            [self send:carbons];
+        }
+    }
+    
+    if([self.serverFeatures containsObject:@"urn:xmpp:ping"])
+    {
+        self.supportsPing=YES;
+    }
+    
+}
+
 -(void) processInput
 {
     //prevent reconnect attempt
@@ -1205,24 +1226,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     if(iqNode.features && iqNode.discoInfo) {
                         if([iqNode.from isEqualToString:self.server] || [iqNode.from isEqualToString:self.domain]) {
                             self.serverFeatures=[iqNode.features copy];
-                        }
-                        
-                        
-                        
-                        if([iqNode.features containsObject:@"urn:xmpp:carbons:2"])
-                        {
-                            if(!self.usingCarbons2){
-                                XMPPIQ* carbons =[[XMPPIQ alloc] initWithId:@"enableCarbons" andType:kiqSetType];
-                                MLXMLNode *enable =[[MLXMLNode alloc] initWithElement:@"enable"];
-                                [enable setXMLNS:@"urn:xmpp:carbons:2"];
-                                [carbons.children addObject:enable];
-                                [self send:carbons];
-                            }
-                        }
-                        
-                        if([iqNode.features containsObject:@"urn:xmpp:ping"])
-                        {
-                            self.supportsPing=YES;
+                            [self parseFeatures];
                         }
                         
                         if([iqNode.features containsObject:@"urn:xmpp:http:upload"])
@@ -1231,27 +1235,22 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             self.uploadServer = iqNode.from;
                         }
                         
-                        if([iqNode.features containsObject:@"urn:xmpp:mam:0"])
-                        {
-                            self.supportsMam0=YES;
-                            DDLogInfo(@"++++++++++++++++++++++++ supports mam:0");
-                        }
-                        
-                        
                         if([iqNode.features containsObject:@"http://jabber.org/protocol/muc"])
                         {
                             self.conferenceServer=iqNode.from;
                         }
-                        
-                        if([iqNode.from isEqualToString:self.fulluser] && [iqNode.features containsObject:@"urn:xmpp:push:0"])
+                      
+                        if([iqNode.features containsObject:@"urn:xmpp:push:0"])
                         {
                             self.supportsPush=true;
                             [self enablePush];
                         }
                         
-                      
-                        
-                        
+                        if([iqNode.features containsObject:@"urn:xmpp:mam:0"])
+                        {
+                            self.supportsMam0=YES;
+                            DDLogInfo(@"++++++++++++++++++++++++ supports mam:0");
+                        }
                     }
                     
                     if(iqNode.legacyAuth)
@@ -2162,28 +2161,38 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     ParseResumed* resumeNode= [[ParseResumed alloc]  initWithDictionary:stanzaToParse];
                     [self removeUnAckedMessagesLessThan:resumeNode.h];
                     [self sendUnAckedMessages];
+                   
+                    //parse features
+                    [self parseFeatures];
+                    
+                    #if TARGET_OS_IPHONE
+                    if(self.supportsPush && !self.pushEnabled)
+                    {
+                        [self enablePush];
+                    }
+                    #endif
                     
                     [self sendInitalPresence];
                     
-                    __block BOOL queryInfo=YES;
-                    
-#if TARGET_OS_IPHONE
-                    dispatch_sync(dispatch_get_main_queue(), ^{
-                        if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
-                        {
-                            queryInfo=NO;
-                            [self enablePush]; // since disco wont happen . This came from a push so no need to check
-                        } else  {
-                            self.pushEnabled=YES; // since this opened from a push
-                        }
-                    });
-                    
-#endif
-                    
-                    
-                    if(queryInfo) {
-                        [self queryInfo];
-                    }
+//                    __block BOOL queryInfo=YES;
+//
+//#if TARGET_OS_IPHONE
+//                    dispatch_sync(dispatch_get_main_queue(), ^{
+//                        if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
+//                        {
+//                            queryInfo=NO;
+//                            [self enablePush]; // since disco wont happen . This came from a push so no need to check
+//                        } else  {
+//                            self.pushEnabled=YES; // since this opened from a push
+//                        }
+//                    });
+//
+//#endif
+//
+//
+//                    if(queryInfo) {
+//                        [self queryInfo];
+//                    }
                     
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"failed"]) // stream resume failed
@@ -2616,7 +2625,19 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [values setValue:self.lastOutboundStanza forKey:@"lastOutboundStanza"];
     [values setValue:self.unAckedStanzas forKey:@"unAckedStanzas"];
     [values setValue:self.streamID forKey:@"streamID"];
+    
     [values setValue:self.serverFeatures forKey:@"serverFeatures"];
+    if(self.uploadServer) {
+        [values setObject:self.uploadServer forKey:@"uploadServer"];
+    }
+    if(self.conferenceServer) {
+        [values setObject:self.conferenceServer forKey:@"conferenceServer"];
+    }
+    
+    if(self.supportsPush)
+    {
+        [values setObject:[NSNumber numberWithBool:self.supportsPush] forKey:@"supportsPush"];
+    }
     
     //collect roster state
     [values setValue:self.rosterList forKey:@"rosterList"];
@@ -2656,6 +2677,20 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         self.unAckedStanzas=[dic objectForKey:@"unAckedStanzas"];
         self.streamID=[dic objectForKey:@"streamID"];
         self.serverFeatures = [dic objectForKey:@"serverFeatures"];
+        
+        
+        self.uploadServer= [dic objectForKey:@"uploadServer"];
+        if(self.uploadServer)
+        {
+            self.supportsHTTPUpload=YES;
+        }
+        self.conferenceServer = [dic objectForKey:@"conferenceServer"];
+        
+        if([dic objectForKey:@"supportsPush"])
+        {
+            NSNumber *pushNumber = [dic objectForKey:@"supportsPush"];
+            self.supportsPush = pushNumber.boolValue;
+        }
         
         //collect roster state
         self.rosterList=[dic objectForKey:@"rosterList"];

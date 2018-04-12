@@ -1626,7 +1626,7 @@ Gw
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" selectionHighlightStyle="none" columnReordering="NO" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" typeSelect="NO" rowHeight="230" rowSizeStyle="automatic" viewBased="YES" id="Rsm-HI-GDG">
-                                            <rect key="frame" x="0.0" y="0.0" width="493" height="627"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="493" height="643"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <size key="intercellSpacing" width="3" height="2"/>
                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -1751,6 +1751,18 @@ Gw
                                                             <rect key="frame" x="1" y="59" width="490" height="230"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
+                                                                <textField hidden="YES" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Nco-oq-C1X">
+                                                                    <rect key="frame" x="152" y="0.0" width="54" height="14"/>
+                                                                    <constraints>
+                                                                        <constraint firstAttribute="height" constant="14" id="116-CM-u8k"/>
+                                                                        <constraint firstAttribute="width" constant="50" id="SQB-Em-cNP"/>
+                                                                    </constraints>
+                                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Delivered" id="qvS-8S-bVp">
+                                                                        <font key="font" metaFont="smallSystem"/>
+                                                                        <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="calibratedWhite"/>
+                                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                                    </textFieldCell>
+                                                                </textField>
                                                                 <button hidden="YES" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Xjf-lh-VS8">
                                                                     <rect key="frame" x="173" y="90" width="21" height="21"/>
                                                                     <constraints>
@@ -1790,10 +1802,12 @@ Gw
                                                                 </imageView>
                                                             </subviews>
                                                             <constraints>
+                                                                <constraint firstAttribute="bottom" secondItem="Nco-oq-C1X" secondAttribute="bottom" id="1s2-ts-sa3"/>
                                                                 <constraint firstItem="Xjf-lh-VS8" firstAttribute="centerY" secondItem="AA0-Za-mMq" secondAttribute="centerY" constant="14.5" id="8XI-oK-g67"/>
                                                                 <constraint firstItem="Xjf-lh-VS8" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="AA0-Za-mMq" secondAttribute="leading" constant="50" id="JgW-La-sN9"/>
                                                                 <constraint firstItem="Bab-Se-qo9" firstAttribute="centerX" secondItem="AA0-Za-mMq" secondAttribute="centerX" id="NeD-UY-w3Q"/>
                                                                 <constraint firstItem="SPf-hi-Vyw" firstAttribute="leading" secondItem="Xjf-lh-VS8" secondAttribute="trailing" constant="18" id="egb-77-2Bq"/>
+                                                                <constraint firstItem="SPf-hi-Vyw" firstAttribute="leading" secondItem="Nco-oq-C1X" secondAttribute="trailing" constant="8" id="em0-jh-vWY"/>
                                                                 <constraint firstAttribute="bottom" secondItem="SPf-hi-Vyw" secondAttribute="bottom" constant="3" id="grb-8V-G0r"/>
                                                                 <constraint firstAttribute="trailing" secondItem="SPf-hi-Vyw" secondAttribute="trailing" constant="3" id="h5u-om-KLH"/>
                                                                 <constraint firstItem="SPf-hi-Vyw" firstAttribute="top" secondItem="Bab-Se-qo9" secondAttribute="bottom" constant="8" id="hj5-VD-McD"/>
@@ -1802,6 +1816,7 @@ Gw
                                                             </constraints>
                                                             <connections>
                                                                 <outlet property="attachmentImage" destination="SPf-hi-Vyw" id="QkN-sq-JYI"/>
+                                                                <outlet property="messageStatus" destination="Nco-oq-C1X" id="j6P-4V-ZWt"/>
                                                                 <outlet property="retry" destination="Xjf-lh-VS8" id="2jc-Zz-S0i"/>
                                                                 <outlet property="timeStamp" destination="Bab-Se-qo9" id="x9D-y8-ssT"/>
                                                                 <outlet property="timeStampHeight" destination="iR3-Zk-9RU" id="L6y-pt-GkW"/>

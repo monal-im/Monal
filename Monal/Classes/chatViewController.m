@@ -482,7 +482,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                                                       @"message": message ,
                                                       @"thetime": [self currentGMTTime],
                                                       @"delivered":@YES,
-                                                             kMessageId: messageId,
+                                                             @"messageid": messageId,
                                                       kMessageType:messageType
                                                              };
                            [self.messageList addObject:[userInfo mutableCopy]];

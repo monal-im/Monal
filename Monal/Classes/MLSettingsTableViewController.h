@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 @import MessageUI;
 @import StoreKit;
+#import "MLConstants.h"
 
 @interface MLSettingsTableViewController : UITableViewController <MFMailComposeViewControllerDelegate, SKStoreProductViewControllerDelegate>
 

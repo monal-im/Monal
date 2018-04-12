@@ -32,6 +32,7 @@
 #define kMonalRefreshContacts @"kMonalRefreshContacts"
 
 #define kDelivered @"delivered"
+#define kReceived @"received"
 
 //contact cells
 #define kusernameKey @"username"

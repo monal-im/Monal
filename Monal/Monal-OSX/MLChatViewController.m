@@ -56,6 +56,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [nc addObserver:self selector:@selector(handleSendFailedMessage:) name:kMonalSendFailedMessageNotice object:nil];
     [nc addObserver:self selector:@selector(handleSentMessage:) name:kMonalSentMessageNotice object:nil];
     [nc addObserver:self selector:@selector(refreshData) name:kMonalWindowVisible object:nil];
+    [nc addObserver:self selector:@selector(refreshMessage:) name:kMonalMessageReceivedNotice object:nil];
+    
     
     [self setupDateObjects];
     
@@ -391,6 +393,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
 }
 
+
+-(void) refreshMessage:(NSNotification *)notification
+{
+    NSDictionary *dic =notification.userInfo;
+    [self setMessageId:[dic objectForKey:kMessageId]  received:YES];
+    [self endProgressUpdate];
+}
+
+
 -(void) handleSendFailedMessage:(NSNotification *)notification
 {
     NSDictionary *dic =notification.userInfo;
@@ -450,7 +461,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                    @"message": message ,
                                    @"thetime": [self currentGMTTime],
                                    kDelivered:@YES,
-                                   kMessageId: messageId,
+                                   @"messageid": messageId,
                                    kMessageType: messageType
                                    };
         
@@ -484,6 +495,29 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         }
     }];
 
+}
+
+-(void) setMessageId:(NSString *) messageId received:(BOOL) delivered
+{
+    dispatch_async(dispatch_get_main_queue(),
+                   ^{
+                       int row=0;
+                       for(NSMutableDictionary *rowDic in self.messageList)
+                       {
+                           if([[rowDic objectForKey:@"messageid"] isEqualToString:messageId]) {
+                               
+                               [rowDic setObject:[NSNumber numberWithBool:delivered] forKey:kReceived];
+                               [self.chatTable beginUpdates];
+                               NSIndexSet *indexSet =[[NSIndexSet alloc] initWithIndex:row] ;
+                               NSIndexSet *columnIndexSet =[[NSIndexSet alloc] initWithIndex:0] ;
+                               [self.chatTable reloadDataForRowIndexes:indexSet columnIndexes:columnIndexSet];
+                               [self.chatTable endUpdates];
+                               
+                               break;
+                           }
+                           row++;
+                       }
+                   });
 }
 
 -(void) setMessageId:(NSString *) messageId delivered:(BOOL) delivered
@@ -739,7 +773,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         cell.deliveryFailed=NO;
     }
   
-    NSNumber *received = [messageRow objectForKey:@"received"];
+    NSNumber *received = [messageRow objectForKey:kReceived];
     if(received.boolValue==YES) {
         cell.messageStatus.hidden=NO;
     }

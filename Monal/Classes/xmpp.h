@@ -105,7 +105,6 @@ extern NSString *const kXMPPPresence;
  send a message to a contact with xmpp id
  */
 -(void) sendMessage:(NSString*) message toContact:(NSString*) contact isMUC:(BOOL) isMUC andMessageId:(NSString *) messageId;
-
 /**
  crafts a whitepace ping and sends it
  */

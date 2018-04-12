@@ -1751,6 +1751,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         [receiptNode setReceipt:messageNode.idval];
                         [self send:receiptNode];
                     }
+                    
+                    if(messageNode.receivedID)
+                    {
+                        //save in DB
+                        //Post notice
+                        
+                    }
                   
                     
                 }
@@ -2529,6 +2536,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         [messageNode.attributes setObject:kMessageGroupChatType forKey:@"type"];
     } else  {
         [messageNode.attributes setObject:kMessageChatType forKey:@"type"];
+        
+        MLXMLNode *request =[[MLXMLNode alloc] initWithElement:@"request"];
+        [request.attributes setObject:@"urn:xmpp:receipts" forKey:@"xmlns"];
+        [messageNode.children addObject:request];
     }
     
     [self send:messageNode];

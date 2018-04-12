@@ -176,6 +176,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         return;
     }
     
+    if([elementName isEqualToString:@"received"]  && [[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:receipts"] )
+    {
+        _receivedID =[attributeDict objectForKey:@"id"];
+        return;
+    }
     
 }
 

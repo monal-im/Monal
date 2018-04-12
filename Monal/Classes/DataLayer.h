@@ -187,9 +187,14 @@ extern NSString *const kMessageTypeStatus;
 -(void) hasMessageForId:(NSString*) messageid toContact:(NSString *) contact onAccount:(NSString *) accountNo andCompletion: (void (^)(BOOL))completion;
 
 /*
- marks a message as delivered
+ Marks a message as delivered. When we know its been sent out on the wire
  */
 -(void) setMessageId:(NSString*) messageid delivered:(BOOL) delivered;
+
+/**
+ Marked when the client on the other end replies with a recived message
+ */
+-(void) setMessageId:(NSString*) messageid received:(BOOL) received;
 
 -(void) clearMessages:(NSString*) accountNo;
 -(void) deleteMessageHistory:(NSString*) messageNo;

@@ -1507,6 +1507,15 @@ static DataLayer *sharedInstance=nil;
 }
 
 
+-(void) setMessageId:(NSString*) messageid received:(BOOL) received
+{
+    NSString* query=[NSString stringWithFormat:@"update message_history set received=%d where messageid='%@';",received, messageid];
+    DDLogInfo(@" setting received confrmed %@",query);
+    [self executeNonQuery:query withCompletion:nil];
+    
+}
+
+
 
 -(void) clearMessages:(NSString*) accountNo
 {
@@ -1684,7 +1693,7 @@ static DataLayer *sharedInstance=nil;
 -(NSMutableArray*) messageHistory:(NSString*) buddy forAccount:(NSString*) accountNo
 {
     if(!accountNo ||! buddy) return nil; 
-    NSString* query=[NSString stringWithFormat:@"select af,message_from,  message, thetime, message_history_id, delivered, messageid, messageType from (select ifnull(actual_from, message_from) as af, message_from,  message,     timestamp  as thetime, message_history_id, delivered,messageid, messageType from message_history where account_id=? and (message_from=? or message_to=?) order by message_history_id desc limit 100) order by thetime asc"];
+    NSString* query=[NSString stringWithFormat:@"select af,message_from,  message, thetime, message_history_id, delivered, messageid, messageType, received from (select ifnull(actual_from, message_from) as af, message_from,  message, received,    timestamp  as thetime, message_history_id, delivered,messageid, messageType from message_history where account_id=? and (message_from=? or message_to=?) order by message_history_id desc limit 100) order by thetime asc"];
     NSArray *params=@[accountNo, buddy, buddy];
     DDLogVerbose(@"%@", query);
     NSMutableArray* toReturn = [self executeReader:query andArguments:params];
@@ -2252,6 +2261,20 @@ static DataLayer *sharedInstance=nil;
         DDLogVerbose(@"Upgrade to 2.0 success ");
         
     }
+    
+    if([dbversion doubleValue]<2.1)
+    {
+        DDLogVerbose(@"Database version <2.1 detected. Performing upgrade on accounts. ");
+        
+  
+        [self executeNonQuery:@"alter table message_history add column received bool;" withCompletion:nil];
+        [self executeNonQuery:@"update dbversion set dbversion='2.1'; " withCompletion:nil];
+        
+        DDLogVerbose(@"Upgrade to 2.1 success ");
+        
+    }
+    
+    
    
     [dbversionCheck unlock];
     [self resetContacts];

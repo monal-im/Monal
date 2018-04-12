@@ -65,7 +65,6 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     self.accountNo=[NSString stringWithFormat:@"%d",[[_contact objectForKey:@"account_id"] integerValue]];
     self.hidesBottomBarWhenPushed=YES;
     
-#warning this should be smarter...
     NSArray* accountVals =[[DataLayer sharedInstance] accountVals:self.accountNo];
     if([accountVals count]>0)
     {

@@ -1755,7 +1755,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     if(messageNode.receivedID)
                     {
                         //save in DB
+                        [[DataLayer sharedInstance] setMessageId:messageNode.receivedID received:YES];
+                        
                         //Post notice
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalMessageReceivedNotice object:self userInfo:@{@"messageId":messageNode.receivedID}];
                         
                     }
                   

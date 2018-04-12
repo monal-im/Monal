@@ -16,6 +16,8 @@
 #define kMonalSentMessageNotice @"kMLSentMessageNotice"
 #define kMonalSendFailedMessageNotice @"kMonalSendFailedMessageNotice"
 
+#define kMonalMessageReceivedNotice @"kMonalMessageReceivedNotice"
+
 #define kMonalContactOnlineNotice @"kMLContactOnlineNotice"
 #define kMonalContactOfflineNotice @"kMLContactOfflineNotice"
 #define kMLHasRoomsNotice @"kMLHasRoomsNotice"

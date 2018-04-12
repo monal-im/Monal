@@ -30,7 +30,7 @@
 /** Messages that are requesting a resposne */
 @property (nonatomic, assign, readonly) BOOL requestReceipt;
 /** Messages that are the resposne */
-@property (nonatomic, assign, readonly) NSString* receivedID;
+@property (nonatomic, strong, readonly) NSString* receivedID;
 
 @property (nonatomic, assign, readonly) BOOL mucInvite;
 

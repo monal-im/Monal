@@ -104,6 +104,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 	[nc addObserver:self selector:@selector(keyboardWillHide:) name: UIKeyboardWillHideNotification object:nil];
 	[nc addObserver:self selector:@selector(keyboardDidShow:) name: UIKeyboardDidShowNotification object:nil];
   
+    [nc addObserver:self selector:@selector(refreshMessage:) name:kMonalMessageReceivedNotice object:nil];
+    
 
     [nc addObserver:self selector:@selector(refreshButton:) name:kMonalAccountStatusChanged object:nil];
     
@@ -618,6 +620,27 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                    });
 }
 
+-(void) setMessageId:(NSString *) messageId received:(BOOL) received
+{
+    dispatch_async(dispatch_get_main_queue(),
+                   ^{
+                       int row=0;
+                       [_messageTable beginUpdates];
+                       for(NSMutableDictionary *rowDic in self.messageList)
+                       {
+                           if([[rowDic objectForKey:@"messageid"] isEqualToString:messageId]) {
+                               [rowDic setObject:[NSNumber numberWithBool:received] forKey:@"received"];
+                               NSIndexPath *indexPath =[NSIndexPath indexPathForRow:row inSection:0];
+                               [_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+                               break;
+                           }
+                           row++;
+                       }
+                       [_messageTable endUpdates];
+                   });
+}
+
+
 -(void) handleSendFailedMessage:(NSNotification *)notification
 {
     NSDictionary *dic =notification.userInfo;
@@ -629,6 +652,14 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     NSDictionary *dic =notification.userInfo;
     [self setMessageId:[dic objectForKey:kMessageId]  delivered:YES];
 }
+
+
+-(void) refreshMessage:(NSNotification *)notification
+{
+    NSDictionary *dic =notification.userInfo;
+    [self setMessageId:[dic objectForKey:kMessageId]  received:YES];
+}
+
 
 #pragma mark MUC display elements
 
@@ -922,6 +953,16 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
             cell.deliveryFailed=YES;
         }
     }
+    
+    if([row objectForKey:@"received"]){
+        if([[row objectForKey:@"received"] boolValue]==YES)
+        {
+            cell.messageStatus.hidden=NO;
+        } else {
+             cell.messageStatus.hidden=YES;
+        }
+    }
+    
     
     cell.messageHistoryId=[row objectForKey:@"message_history_id"];
     cell.date.text= [self formattedDateWithSource:[row objectForKey:@"thetime"]];

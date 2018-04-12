@@ -762,8 +762,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
  
     }
    
-    
-
     if([[messageRow objectForKey:@"delivered"] boolValue]!=YES)
     {
         cell.deliveryFailed=YES;

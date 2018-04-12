@@ -1439,7 +1439,7 @@ static DataLayer *sharedInstance=nil;
             
             if(messageType)
             {
-                NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, ?, ?, ?, ?, ?, ?,?,?,?, ?);"];
+                NSString* query=[NSString stringWithFormat:@"insert into message_history values (null, ?, ?, ?, ?, ?, ?,?,?,?, ?, 0);"];
                 NSArray *params=@[accountNo, from, to, dateString, message, actualfrom, [NSNumber numberWithInteger:unread], [NSNumber numberWithInteger:delivered], messageid?messageid:@"",messageType];
                 DDLogVerbose(@"%@",query);
                 [self executeNonQuery:query andArguments:params withCompletion:^(BOOL success) {

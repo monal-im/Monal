@@ -518,15 +518,12 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 -(void) refreshButton:(NSNotification *) notificaiton
 {
     xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
- 
     dispatch_async(dispatch_get_main_queue(), ^{
-        
         NSString *title=_contactName;
         if(![_contactFullName isEqualToString:@"(null)"] && [[_contactFullName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0)
         {
             title=_contactFullName;
         }
-        
         
         if(xmppAccount.accountState<kStateLoggedIn)
         {
@@ -539,7 +536,6 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
             
         }
     });
-
 }
 
 -(void) handleNewMessage:(NSNotification *)notification

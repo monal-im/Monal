@@ -24,6 +24,8 @@
 @property (nonatomic, weak) IBOutlet NSLayoutConstraint *nameHeight;
 @property (nonatomic, weak) IBOutlet NSImageView *senderIcon;
 @property (nonatomic, weak) IBOutlet NSTextField *senderName;
+@property (nonatomic, weak) IBOutlet NSTextField *messageStatus;
+
 
 @property (nonatomic, weak) IBOutlet MLImageView *attachmentImage;
 @property (nonatomic, strong) NSData *imageData; 

@@ -1711,6 +1711,18 @@ Gw
                                                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                     </textFieldCell>
                                                                 </textField>
+                                                                <textField hidden="YES" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="0Kf-Uk-FOQ">
+                                                                    <rect key="frame" x="96" y="0.0" width="54" height="14"/>
+                                                                    <constraints>
+                                                                        <constraint firstAttribute="width" constant="50" id="UcQ-uM-P84"/>
+                                                                        <constraint firstAttribute="height" constant="14" id="nyT-jA-sXG"/>
+                                                                    </constraints>
+                                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Delivered" id="RO4-HO-W6y">
+                                                                        <font key="font" metaFont="smallSystem"/>
+                                                                        <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="calibratedWhite"/>
+                                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                                    </textFieldCell>
+                                                                </textField>
                                                             </subviews>
                                                             <constraints>
                                                                 <constraint firstAttribute="bottom" secondItem="c4f-GC-Hfe" secondAttribute="bottom" constant="5" id="1rQ-Xm-rtv"/>
@@ -1720,11 +1732,14 @@ Gw
                                                                 <constraint firstItem="Zna-XK-R5x" firstAttribute="centerX" secondItem="zUs-Dd-GH1" secondAttribute="centerX" id="IY1-r5-sgL"/>
                                                                 <constraint firstItem="c4f-GC-Hfe" firstAttribute="leading" secondItem="lsM-YA-awl" secondAttribute="trailing" constant="8" id="Jh5-m5-id3"/>
                                                                 <constraint firstItem="Zna-XK-R5x" firstAttribute="centerX" secondItem="zUs-Dd-GH1" secondAttribute="centerX" id="Rwr-yD-Cyl"/>
+                                                                <constraint firstAttribute="bottom" secondItem="0Kf-Uk-FOQ" secondAttribute="bottom" id="S8V-YU-dtc"/>
+                                                                <constraint firstItem="lsM-YA-awl" firstAttribute="leading" secondItem="0Kf-Uk-FOQ" secondAttribute="trailing" constant="8" id="Yd6-aM-2p1"/>
                                                                 <constraint firstItem="lsM-YA-awl" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="zUs-Dd-GH1" secondAttribute="leading" constant="50" id="cN9-UB-Ue7"/>
                                                                 <constraint firstItem="lsM-YA-awl" firstAttribute="centerY" secondItem="zUs-Dd-GH1" secondAttribute="centerY" constant="14.5" id="eBg-PO-smh"/>
                                                                 <constraint firstAttribute="bottom" secondItem="c4f-GC-Hfe" secondAttribute="bottom" constant="5" id="ydI-e0-0DL"/>
                                                             </constraints>
                                                             <connections>
+                                                                <outlet property="messageStatus" destination="0Kf-Uk-FOQ" id="eLI-vM-gyd"/>
                                                                 <outlet property="messageText" destination="gBQ-7e-nXQ" id="SFc-ts-FwH"/>
                                                                 <outlet property="retry" destination="lsM-YA-awl" id="RE2-Fb-X4p"/>
                                                                 <outlet property="timeStamp" destination="Zna-XK-R5x" id="M1K-wV-qMS"/>

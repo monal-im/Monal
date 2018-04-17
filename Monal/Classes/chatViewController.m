@@ -954,14 +954,22 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         }
     }
     
-    if([row objectForKey:@"received"]){
-        if([[row objectForKey:@"received"] boolValue]==YES)
+  
+    
+    NSNumber *received = [row objectForKey:kReceived];
+    if(received.boolValue==YES) {
+        NSDictionary *prior =nil;
+        if(indexPath.row>0)
         {
-            cell.messageStatus.hidden=NO;
-        } else {
-             cell.messageStatus.hidden=YES;
+            prior = [self.messageList objectAtIndex:indexPath.row-1];
         }
-    } else  {
+        if(indexPath.row==self.messageList.count-1 || ![[prior objectForKey:@"af"] isEqualToString:self.jid]) {
+            cell.messageStatus.hidden=NO;
+        } else  {
+            cell.messageStatus.hidden=YES;
+        }
+    }
+    else  {
         cell.messageStatus.hidden=YES;
     }
     

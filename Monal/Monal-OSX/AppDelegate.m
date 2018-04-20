@@ -78,7 +78,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
-    // Insert code here to tear down your application
+     [[MLXMPPManager sharedInstance] logoutAll];
 }
 
 - (BOOL)applicationShouldHandleReopen:(NSApplication *)theApplication hasVisibleWindows:(BOOL)flag{

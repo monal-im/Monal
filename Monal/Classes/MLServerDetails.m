@@ -45,7 +45,7 @@
         [self.serverCaps addObject:@{@"Title":@"XEP-0280: Message Carbons", @"Description":@"Synchronize your messages on all loggedin devices."}];
     }
     
-    if(self.xmppAccount.supportsMam0)
+    if(self.xmppAccount.supportsMam2)
     {
            [self.serverCaps addObject:@{@"Title":@"XEP-0313: Message Archive Management", @"Description":@"Access message archives on the server."}];
     }

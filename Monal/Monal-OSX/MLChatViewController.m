@@ -133,15 +133,17 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     
     xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
-    if(xmppAccount.supportsMam0) {
-    
-      if(self.messageList.count==0)
-        {
-            //fetch default
-            NSDate *yesterday =[NSDate dateWithTimeInterval:-86400 sinceDate:[NSDate date]];
-            [xmppAccount setMAMQueryFromStart: yesterday toDate:[NSDate date] andJid:self.contactName];
-        }
- 
+    if(xmppAccount.supportsMam2) {
+        
+        NSDictionary *lastMessage= [self.messageList lastObject];
+        NSDate *last =[self.sourceDateFormat dateFromString:[lastMessage objectForKey:@"thetime"]];
+     
+        //synch point
+        // if synch point < login time
+        
+        
+        [xmppAccount setMAMQueryFromStart: last toDate:nil andJid:self.contactName];
+
     }
     
    

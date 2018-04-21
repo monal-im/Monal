@@ -304,7 +304,7 @@ FOUNDATION_EXPORT NSString *const kCompletion;
 @property (nonatomic, readonly) BOOL supportsClientState;
 
 //message archive
-@property (nonatomic, readonly) BOOL supportsMam0;
+@property (nonatomic, readonly) BOOL supportsMam2;
 
 @property (nonatomic, readonly) BOOL supportsSM3;
 @property (nonatomic, readonly) BOOL supportsPush;

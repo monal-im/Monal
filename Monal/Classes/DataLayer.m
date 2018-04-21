@@ -2275,6 +2275,18 @@ static DataLayer *sharedInstance=nil;
     }
     
     
+    if([dbversion doubleValue]<2.2)
+    {
+        DDLogVerbose(@"Database version <2.2 detected. Performing upgrade . ");
+        
+        
+        [self executeNonQuery:@"alter table buddylist add column synchPoint datetime;" withCompletion:nil];
+        [self executeNonQuery:@"update dbversion set dbversion='2.2'; " withCompletion:nil];
+        
+        DDLogVerbose(@"Upgrade to 2.2 success ");
+        
+    }
+    
    
     [dbversionCheck unlock];
     [self resetContacts];

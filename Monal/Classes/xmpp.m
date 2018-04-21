@@ -109,7 +109,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 @property (nonatomic, assign) BOOL supportsClientState;
 
 //message archive
-@property (nonatomic, assign) BOOL supportsMam0;
+@property (nonatomic, assign) BOOL supportsMam2;
 
 //carbons
 @property (nonatomic, assign) BOOL usingCarbons2;
@@ -1246,10 +1246,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             [self enablePush];
                         }
                         
-                        if([iqNode.features containsObject:@"urn:xmpp:mam:0"])
+                        if([iqNode.features containsObject:@"urn:xmpp:mam:2"])
                         {
-                            self.supportsMam0=YES;
-                            DDLogInfo(@"++++++++++++++++++++++++ supports mam:0");
+                            self.supportsMam2=YES;
+                            DDLogInfo(@" supports mam:2");
                         }
                     }
                     

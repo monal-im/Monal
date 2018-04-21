@@ -120,7 +120,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
      self.isMUC = [[DataLayer sharedInstance] isBuddyMuc:self.contactName forAccount:self.accountNo];
     [self updateWindowForContact:contact];
     
-#warning this should be smarter...
     NSArray* accountVals =[[DataLayer sharedInstance] accountVals:self.accountNo];
     if([accountVals count]>0)
     {
@@ -133,20 +132,22 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     
     xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
-    if(xmppAccount.supportsMam2) {
+    if(xmppAccount.supportsMam2 & !self.isMUC) {
         
         NSDictionary *lastMessage= [self.messageList lastObject];
         NSDate *last =[self.sourceDateFormat dateFromString:[lastMessage objectForKey:@"thetime"]];
      
         //synch point
         // if synch point < login time
+        NSDate *synch = [[DataLayer sharedInstance] synchPointForContact:self.contactName andAccount:self.accountNo];
+        NSDate * connectedTime = [[MLXMPPManager sharedInstance] connectedTimeFor:self.accountNo];
         
-        
-        [xmppAccount setMAMQueryFromStart: last toDate:nil andJid:self.contactName];
-
+        if([synch timeIntervalSinceReferenceDate]<[connectedTime timeIntervalSinceReferenceDate])
+        {
+            [xmppAccount setMAMQueryFromStart: last toDate:nil andJid:self.contactName];
+            [[DataLayer sharedInstance] setSynchPoint:[NSDate date] ForContact:self.contactName andAccount:self.accountNo];
+        }
     }
-    
-   
     
 }
 

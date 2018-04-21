@@ -206,6 +206,11 @@ extern NSString *const kMessageTypeStatus;
 -(NSArray*) messageHistoryListDates:(NSString*) buddy forAccount: (NSString*) accountNo;
 -(NSArray*) messageHistoryDate:(NSString*) buddy forAccount:(NSString*) accountNo forDate:(NSString*) date;
 
+/**
+ The point where  messasges were last synched for a contact
+ */
+-(NSDate*) synchPointForContact:(NSString*) contact andAccount:(NSString*) accountNo;
+-(void) setSynchPoint:(NSDate *) synchPoint ForContact:(NSString*) contact andAccount:(NSString*) accountNo;
 
 /**
  retrieves the date of the the last message to or from this contact

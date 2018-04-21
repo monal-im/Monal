@@ -354,7 +354,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             
             if([protocol isEqualToString:@"XMPP"])
             {
-                 cell.detailTextLabel.text=@"Jabber,Openfire,Prosody etc.   ";
+                 cell.detailTextLabel.text=@"Jabber, Openfire, Prosody etc.   ";
             }
             
             return cell;

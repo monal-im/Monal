@@ -1682,7 +1682,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             
                             BOOL unread=YES;
                             BOOL showAlert=YES;
-                            if( [messageNode.from isEqualToString:jidWithoutResource] ) {
+                            if( [messageNode.from isEqualToString:jidWithoutResource] || messageNode.mamResult ) {
                                 unread=NO;
                                 showAlert=NO;
                             }
@@ -2639,6 +2639,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         [values setObject:[NSNumber numberWithBool:self.supportsPush] forKey:@"supportsPush"];
     }
     
+    if(self.supportsMam2)
+    {
+        [values setObject:[NSNumber numberWithBool:self.supportsMam2] forKey:@"supportsMAM"];
+    }
+    
     //collect roster state
     [values setValue:self.rosterList forKey:@"rosterList"];
     
@@ -2691,6 +2696,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             NSNumber *pushNumber = [dic objectForKey:@"supportsPush"];
             self.supportsPush = pushNumber.boolValue;
         }
+        
+        if([dic objectForKey:@"supportsMAM"])
+        {
+            NSNumber *mamNumber = [dic objectForKey:@"supportsMAM"];
+            self.supportsMam2 = mamNumber.boolValue;
+        }
+        
         
         //collect roster state
         self.rosterList=[dic objectForKey:@"rosterList"];

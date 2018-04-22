@@ -101,6 +101,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		return;
 	}
     
+    
+    
     if(([elementName isEqualToString:@"message"])  && ([[attributeDict objectForKey:@"type"] isEqualToString:kMessageGroupChatType]))
 	{
 	
@@ -161,6 +163,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	}
 	
     
+    if(([elementName isEqualToString:@"result"])  && ([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:mam:2"]))
+    {
+        _mamResult=YES;
+        return;
+    }
+    
+  
     
 	if(([elementName isEqualToString:@"html"]) )
 	{

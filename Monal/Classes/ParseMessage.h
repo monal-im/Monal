@@ -33,5 +33,7 @@
 @property (nonatomic, strong, readonly) NSString* receivedID;
 
 @property (nonatomic, assign, readonly) BOOL mucInvite;
+@property (nonatomic, assign, readonly) BOOL mamResult;
+
 
 @end

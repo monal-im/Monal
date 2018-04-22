@@ -270,6 +270,20 @@
         [field2.children addObject:value2];
         [xnode.children addObject:field2];
     }
+    else
+    {
+        //if we are fetching "all" limit with RSM to 100 for now
+        MLXMLNode* set =[[MLXMLNode alloc] init];
+        set.element=@"set";
+        [set.attributes setObject:@"http://jabber.org/protocol/rsm" forKey:@"xmlns"];
+        
+        MLXMLNode* max =[[MLXMLNode alloc] init];
+        max.element=@"max";
+        max.data=@"100";
+        [set.children addObject:max];
+        [queryNode.children addObject:set];
+        
+    }
     
     if(endDate) {
         MLXMLNode* field3 =[[MLXMLNode alloc] init];

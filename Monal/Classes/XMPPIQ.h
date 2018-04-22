@@ -42,6 +42,17 @@
 -(void) setPing;
 
 /**
+ gets MAM prefernces
+ */
+-(void) mamArchivePref;
+
+/*
+ updates MAM pref
+ @param pref can only be aways, never or roster
+ */
+-(void) updateMamArchivePrefDefault:(NSString *) pref;
+
+/**
  makes iq for mam query since a date and time for jid. If no date is provided, will query all. If no jid is provided it will query all
  */
 -(void) setMAMQueryFromStart:(NSDate *) startDate toDate:(NSDate *) endDate  andJid:(NSString *)jid;

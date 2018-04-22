@@ -17,6 +17,7 @@
 
 #import "MLServerDetailsVC.h"
 #import "MLCallScreen.h"
+#import "MLMAMPref.h"
 
 #define kinfoSection 0
 #define konlineSection 1
@@ -1355,6 +1356,19 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
         details.xmppAccount=xmppAccount;
         
     }
+    
+    if([segue.identifier isEqualToString:@"showMAMPref"])
+    {
+        
+        NSMenuItem *item = (NSMenuItem *) sender;
+        NSInteger accountNo = item.tag-2000;
+        xmpp* xmppAccount= [[MLXMPPManager sharedInstance] getConnectedAccountForID:[NSString stringWithFormat:@"%ld", accountNo ]];
+        
+        MLMAMPref *details =  (MLMAMPref *)segue.destinationController;
+        details.xmppAccount=xmppAccount;
+        
+    }
+    
     if([segue.identifier isEqualToString:@"CallScreen"])
     {
         NSDictionary *dic= (NSDictionary *) sender;
@@ -1368,5 +1382,10 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
     [self performSegueWithIdentifier:@"showServerDetails" sender:sender];
 }
 
+
+-(IBAction) showMAMPref:(id) sender
+{
+    [self performSegueWithIdentifier:@"showMAMPref" sender:sender];
+}
 
 @end

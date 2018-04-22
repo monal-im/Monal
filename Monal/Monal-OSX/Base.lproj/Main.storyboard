@@ -9,6 +9,54 @@
         <capability name="system font weights other than Regular or Bold" minToolsVersion="7.0"/>
     </dependencies>
     <scenes>
+        <!--MAM Preferences-->
+        <scene sceneID="kw5-gn-H1Y">
+            <objects>
+                <viewController title="MAM Preferences" id="1AF-Qt-d1H" customClass="MLMAMPref" sceneMemberID="viewController">
+                    <view key="view" id="H1w-Nu-nl8">
+                        <rect key="frame" x="0.0" y="0.0" width="381" height="252"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <subviews>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="YlY-ln-ubk">
+                                <rect key="frame" x="18" y="215" width="308" height="17"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Select Message Archive Management Preferences" id="SMz-ZW-xW3">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="3aG-n3-ciu">
+                                <rect key="frame" x="31" y="177" width="248" height="18"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <buttonCell key="cell" type="radio" title="All messages are archived by default." bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="u2e-JN-zJf">
+                                    <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                            </button>
+                            <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="FbD-oS-pBF">
+                                <rect key="frame" x="31" y="145" width="263" height="18"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <buttonCell key="cell" type="radio" title="Messages are never archived by default" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="Jlb-h5-S8m">
+                                    <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                            </button>
+                            <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="71P-bG-iNm">
+                                <rect key="frame" x="31" y="117" width="332" height="18"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <buttonCell key="cell" type="radio" title=" Messages are archived only if the contact in roster" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="pB5-oB-1d7">
+                                    <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                            </button>
+                        </subviews>
+                    </view>
+                </viewController>
+                <customObject id="dyG-Vk-3x6" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-1444.5" y="319"/>
+        </scene>
         <!--Server DetailsVC-->
         <scene sceneID="1NX-JE-Mf4">
             <objects>
@@ -888,6 +936,22 @@ CA
                                                 </connections>
                                             </menu>
                                         </menuItem>
+                                        <menuItem title="MAM Preferences" id="B1k-ls-Svw" userLabel="MAM Preferences">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <menu key="submenu" title="MAM Preferences" id="HvV-of-Kth">
+                                                <items>
+                                                    <menuItem title="None" id="t66-wv-0ho">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="showMAMPref:" target="Ady-hI-5gd" id="JfA-vh-bAi"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                </items>
+                                                <connections>
+                                                    <outlet property="delegate" destination="Voe-Tx-rLC" id="VOv-ip-6nb"/>
+                                                </connections>
+                                            </menu>
+                                        </menuItem>
                                     </items>
                                 </menu>
                             </menuItem>
@@ -942,6 +1006,7 @@ CA
                 </application>
                 <customObject id="Voe-Tx-rLC" customClass="AppDelegate">
                     <connections>
+                        <outlet property="mamPrefs" destination="B1k-ls-Svw" id="QSd-H1-LKG"/>
                         <outlet property="serverDetails" destination="aYv-5E-bCb" id="t6f-gO-qMI"/>
                     </connections>
                 </customObject>
@@ -1212,6 +1277,7 @@ CA
                         <outlet property="segmentedControl" destination="Lzi-ZY-I1a" id="9T2-gc-Fr2"/>
                         <segue destination="fLw-fN-usf" kind="show" identifier="showServerDetails" id="tKf-Kb-CWA"/>
                         <segue destination="MZJ-Lc-0ne" kind="show" identifier="CallScreen" id="Jkt-hW-Vlb"/>
+                        <segue destination="1AF-Qt-d1H" kind="show" identifier="showMAMPref" id="UJz-NC-tez"/>
                     </connections>
                 </viewController>
                 <customObject id="N6A-8E-AoF" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
@@ -2745,6 +2811,6 @@ Gw
         <image name="offline" width="15" height="15"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="Uwt-4d-Ui7"/>
+        <segue reference="Jkt-hW-Vlb"/>
     </inferredMetricsTieBreakers>
 </document>

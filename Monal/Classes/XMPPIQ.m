@@ -215,6 +215,28 @@
 
 }
 
+#pragma mark - MAM
+
+-(void) mamArchivePref
+{
+    MLXMLNode* queryNode =[[MLXMLNode alloc] init];
+    queryNode.element=@"prefs";
+    [queryNode.attributes setObject:@"urn:xmpp:mam:2" forKey:@"xmlns"];
+    [self.children addObject:queryNode];
+}
+
+-(void) updateMamArchivePrefDefault:(NSString *) pref
+{
+    /**
+     pref is aways, never or roster
+     */
+    MLXMLNode* queryNode =[[MLXMLNode alloc] init];
+    queryNode.element=@"prefs";
+    [queryNode.attributes setObject:@"urn:xmpp:mam:2" forKey:@"xmlns"];
+    [queryNode.attributes setObject:pref forKey:@"default"];
+    [self.children addObject:queryNode];
+}
+
 /**
  You can send just start or just jid. End alone doesnt make sense
  */

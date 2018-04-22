@@ -199,6 +199,27 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     }
                 }
             }
+                
+                
+                
+                if(self.mamPrefs.submenu.itemArray.count>0) {
+                    NSMenuItem *template =[self.mamPrefs.submenu.itemArray[0] copy];
+                    [self.mamPrefs.submenu removeAllItems ];
+                    for(NSDictionary *account in result)
+                    {
+                        
+                        NSNumber *accountId =[account objectForKey:@"account_id"];
+                        xmpp* xmppAccount= [[MLXMPPManager sharedInstance] getConnectedAccountForID:[NSString stringWithFormat:@"%@", accountId ]];
+                        if(xmppAccount) {
+                            NSMenuItem *item =[template copy];
+                            
+                            item.title=xmppAccount.server;
+                            item.tag=2000+accountId.integerValue;
+                            
+                            [self.mamPrefs.submenu addItem:item];
+                        }
+                    }
+            }
         });
         
     }];

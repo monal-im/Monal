@@ -304,6 +304,7 @@
 		269574E21C37307300544A60 /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 269574E11C37307300544A60 /* libsqlite3.tbd */; };
 		269574E51C37482A00544A60 /* MLOAuthViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 269574E41C37482A00544A60 /* MLOAuthViewController.m */; };
 		2696EED21791245A00BC54B8 /* chatViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2696EED11791245A00BC54B8 /* chatViewController.m */; };
+		26A6EE73208CC321005992E4 /* MLMAMPref.m in Sources */ = {isa = PBXBuildFile; fileRef = 26A6EE72208CC321005992E4 /* MLMAMPref.m */; };
 		26A8ADD717C031BA0033990D /* ContactDetails.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EC40FB17BDD8560031304D /* ContactDetails.m */; };
 		26AA41051D9FCBF6005A77ED /* MLImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26AA41041D9FCBF6005A77ED /* MLImageView.m */; };
 		26AAE285179F7B0200271345 /* MLSettingCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 26AAE284179F7B0200271345 /* MLSettingCell.m */; };
@@ -701,6 +702,8 @@
 		269574E41C37482A00544A60 /* MLOAuthViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLOAuthViewController.m; sourceTree = "<group>"; };
 		2696EED01791245A00BC54B8 /* chatViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chatViewController.h; sourceTree = "<group>"; };
 		2696EED11791245A00BC54B8 /* chatViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = chatViewController.m; sourceTree = "<group>"; };
+		26A6EE71208CC321005992E4 /* MLMAMPref.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLMAMPref.h; sourceTree = "<group>"; };
+		26A6EE72208CC321005992E4 /* MLMAMPref.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLMAMPref.m; sourceTree = "<group>"; };
 		26AA41031D9FCBF6005A77ED /* MLImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLImageView.h; sourceTree = "<group>"; };
 		26AA41041D9FCBF6005A77ED /* MLImageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLImageView.m; sourceTree = "<group>"; };
 		26AAE283179F7B0200271345 /* MLSettingCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLSettingCell.h; sourceTree = "<group>"; };
@@ -1680,6 +1683,8 @@
 			children = (
 				26E3ED891FEC395D008ABDA5 /* MLServerDetailsVC.h */,
 				26E3ED8A1FEC395D008ABDA5 /* MLServerDetailsVC.m */,
+				26A6EE71208CC321005992E4 /* MLMAMPref.h */,
+				26A6EE72208CC321005992E4 /* MLMAMPref.m */,
 			);
 			name = Account;
 			sourceTree = "<group>";
@@ -2755,6 +2760,7 @@
 				267710251E21923600464002 /* MASPreferencesWindowController.m in Sources */,
 				260499E61B730E9E00D11866 /* XMPPMessage.m in Sources */,
 				260283871D8DEFC1001DD6B8 /* MLPreviewObject.m in Sources */,
+				26A6EE73208CC321005992E4 /* MLMAMPref.m in Sources */,
 				265F6BA21B7B0040006B8EBA /* MLImageManager.m in Sources */,
 				2661D3441B40766F00EC51BA /* MLChatViewController.m in Sources */,
 				267710261E21923600464002 /* README.md in Sources */,

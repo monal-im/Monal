@@ -3038,6 +3038,23 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 #pragma mark Message archive
 
+
+-(void) setMAMPrefs:(NSString *) preference
+{
+    XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
+    [query updateMamArchivePrefDefault:preference];
+    [self send:query];
+}
+
+
+-(void) getMAMPrefs
+{
+    XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqGetType];
+    [query mamArchivePref];
+    [self send:query];
+}
+
+
 -(void) setMAMQueryFromStart:(NSDate *) startDate toDate:(NSDate *) endDate  andJid:(NSString *)jid
 {
     XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];

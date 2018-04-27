@@ -231,6 +231,10 @@ Decline a call request
  */
 -(void) setMAMQueryFromStart:(NSDate *) startDate toDate:(NSDate *) endDate  andJid:(NSString *)jid;
 
+
+-(void) setMAMPrefs:(NSString *) preference;
+-(void) getMAMPrefs;
+
 /**
  enable APNS push with provided tokens
  */

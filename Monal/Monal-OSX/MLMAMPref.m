@@ -10,4 +10,31 @@
 
 @implementation MLMAMPref
 
+-(void) viewWillAppear
+{
+    [self.xmppAccount getMAMPrefs];
+}
+
+-(IBAction)changePref:(id)sender
+{
+    NSButton *radio = (NSButton*) sender;
+    switch(radio.tag)
+    {
+        case 1:{
+            [self.xmppAccount setMAMPrefs:@"always"];
+            break;
+        }
+        case 2:{
+            [self.xmppAccount setMAMPrefs:@"never"];
+            break;
+        }
+        case 3:{
+            [self.xmppAccount setMAMPrefs:@"roster"];
+            break;
+        }
+            
+    }
+}
+
+
 @end

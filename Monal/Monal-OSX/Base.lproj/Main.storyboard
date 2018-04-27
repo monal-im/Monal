@@ -26,29 +26,38 @@
                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="3aG-n3-ciu">
+                            <button verticalHuggingPriority="750" fixedFrame="YES" tag="1" translatesAutoresizingMaskIntoConstraints="NO" id="3aG-n3-ciu">
                                 <rect key="frame" x="31" y="177" width="248" height="18"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <buttonCell key="cell" type="radio" title="All messages are archived by default." bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="u2e-JN-zJf">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
+                                <connections>
+                                    <action selector="changePref:" target="1AF-Qt-d1H" id="GET-6G-2aD"/>
+                                </connections>
                             </button>
-                            <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="FbD-oS-pBF">
+                            <button verticalHuggingPriority="750" fixedFrame="YES" tag="2" translatesAutoresizingMaskIntoConstraints="NO" id="FbD-oS-pBF">
                                 <rect key="frame" x="31" y="145" width="263" height="18"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <buttonCell key="cell" type="radio" title="Messages are never archived by default" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="Jlb-h5-S8m">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
+                                <connections>
+                                    <action selector="changePref:" target="1AF-Qt-d1H" id="GK0-k1-N6a"/>
+                                </connections>
                             </button>
-                            <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="71P-bG-iNm">
+                            <button verticalHuggingPriority="750" fixedFrame="YES" tag="3" translatesAutoresizingMaskIntoConstraints="NO" id="71P-bG-iNm">
                                 <rect key="frame" x="31" y="117" width="332" height="18"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <buttonCell key="cell" type="radio" title=" Messages are archived only if the contact in roster" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="pB5-oB-1d7">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
+                                <connections>
+                                    <action selector="changePref:" target="1AF-Qt-d1H" id="glb-T3-aNX"/>
+                                </connections>
                             </button>
                         </subviews>
                     </view>

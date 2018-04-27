@@ -12,4 +12,7 @@
 @interface MLMAMPref : NSViewController
 
 @property (nonatomic, weak) xmpp *xmppAccount;
+
+-(IBAction)changePref:(id)sender;
+
 @end

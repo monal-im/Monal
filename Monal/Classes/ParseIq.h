@@ -54,4 +54,7 @@
 @property (nonatomic, strong, readonly) NSMutableArray* jinglePayloadTypes;
 @property (nonatomic, strong, readonly) NSMutableArray* jingleTransportCandidates;
 
+//mam2
+@property (nonatomic, strong, readonly) NSString* mam2default;
+
 @end

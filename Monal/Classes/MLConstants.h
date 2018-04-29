@@ -23,6 +23,8 @@
 #define kMLHasRoomsNotice @"kMLHasRoomsNotice"
 #define kMLHasConnectedNotice @"kMLHasConnectedNotice"
 
+#define kMLMAMPref @"kMLMAMPref"
+
 #define kMonalCallStartedNotice @"kMonalCallStartedNotice"
 #define kMonalCallRequestNotice @"kMonalCallRequestNotice"
 

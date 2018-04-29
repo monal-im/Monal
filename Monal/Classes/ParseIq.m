@@ -136,6 +136,13 @@
         [_items addObject:attributeDict];
     }
     
+    
+    if([elementName isEqualToString:@"prefs"] && [[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:mam:2"])
+    {
+        _mam2default =[attributeDict objectForKey:@"default"];
+        return;
+    }
+    
    
     //** jingle ** /
     

@@ -158,7 +158,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     _port=5552;
     _SSL=YES;
     _oldStyleSSL=NO;
-   // _resource = [[NSUUID UUID] UUIDString];
+   
     
     self.networkQueue =[[NSOperationQueue alloc] init];
     self.networkQueue.maxConcurrentOperationCount=1;
@@ -1401,6 +1401,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             [self cleanEnableCarbons];
                         }
                         
+                        if(iqNode.mam2default)
+                        {
+                            [[NSNotificationCenter defaultCenter] postNotificationName:kMLMAMPref object:@{@"mamPref":iqNode.mam2default}];
+                        }
+                        
+                        
                         if(iqNode.discoItems==YES)
                         {
                             if(([iqNode.from isEqualToString:self.server] || [iqNode.from isEqualToString:self.domain]) && !_discoveredServices)
@@ -1445,7 +1451,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                     
                                 }
                             }
-                            
+                        
                             // iterate roster and get cards
                             [self getVcards];
                             

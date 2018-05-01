@@ -144,4 +144,14 @@ removes a contact from the roster
  */
 +(NSString *) featuresString;
 
+
+#pragma mark Signal
+/**
+ publishes a device.
+ TODO: use device array
+ */
+-(void) publishDevice:(NSString*) deviceid;
+
+
+
 @end

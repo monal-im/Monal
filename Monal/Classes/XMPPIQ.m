@@ -679,5 +679,37 @@
   
 }
 
+#pragma mark signal
+
+-(void) publishDevice:(NSString*) deviceid
+{
+    MLXMLNode* pubsubNode =[[MLXMLNode alloc] init];
+    pubsubNode.element=@"pubsub";
+    [pubsubNode.attributes setObject:@"http://jabber.org/protocol/pubsub" forKey:@"xmlns"];
+    
+    MLXMLNode* publish =[[MLXMLNode alloc] init];
+    pubsubNode.element=@"publish";
+    [pubsubNode.attributes setObject:@"eu.siacs.conversations.axolotl.devicelist" forKey:@"node"];
+    
+    MLXMLNode* itemNode =[[MLXMLNode alloc] init];
+    itemNode.element=@"item";
+    
+    MLXMLNode* listNode =[[MLXMLNode alloc] init];
+    listNode.element=@"list";
+    [listNode.attributes setObject:@"eu.siacs.conversations.axolotl" forKey:@"xmlns"];
+    
+    MLXMLNode* device =[[MLXMLNode alloc] init];
+    device.element=@"device";
+    [device.attributes setObject:device forKey:@"id"];
+    
+    [listNode.children addObject:device];
+    
+    [itemNode.children addObject:listNode];
+    [publish.children addObject:itemNode];
+    [pubsubNode.children addObject:publish];
+    [self.children addObject:pubsubNode];
+}
+
+
 
 @end

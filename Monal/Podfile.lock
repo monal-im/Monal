@@ -15,6 +15,9 @@ PODS:
   - SDWebImage (4.2.2):
     - SDWebImage/Core (= 4.2.2)
   - SDWebImage/Core (4.2.2)
+  - SignalProtocolC (2.3.1)
+  - SignalProtocolObjC (1.0.0):
+    - SignalProtocolC (~> 2.3.1)
   - Sparkle (1.18.1)
   - TPCircularBuffer (1.5)
 
@@ -28,6 +31,7 @@ DEPENDENCIES:
   - MWPhotoBrowser (from `https://raw.githubusercontent.com/moinku07/MWPhotoBrowser/master/MWPhotoBrowser.podspec`)
   - SAMKeychain
   - SDWebImage (~> 4.2.2)
+  - SignalProtocolObjC
   - Sparkle
   - TPCircularBuffer
 
@@ -46,9 +50,11 @@ SPEC CHECKSUMS:
   MWPhotoBrowser: c145b4dc9dffad86f04ab807ff7d7ce078519183
   SAMKeychain: 483e1c9f32984d50ca961e26818a534283b4cd5c
   SDWebImage: 89a9d32cd520bbb46eb14e541d5109b3564af198
+  SignalProtocolC: e61c89693515347df8ed97961160a36cbe55c441
+  SignalProtocolObjC: f5f0c7dcbedf21490b7ec190b6dc5103910acb75
   Sparkle: 06ea33170007c5937ee54da481b4481af98fac79
   TPCircularBuffer: 5196b690383e7bc54771e2f26e10c17cd928bd22
 
-PODFILE CHECKSUM: 34d5af406a88c931c717b9c0f9fe4d9029e2e21e
+PODFILE CHECKSUM: f05ac5d40635f68816b88eff19f2d6fac6dfb51b
 
 COCOAPODS: 1.4.0

@@ -2836,6 +2836,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self fetchRoster];
     [self sendInitalPresence];
     
+    NSString *deviceid=@"1701";
+    XMPPIQ *signalDevice = [[XMPPIQ alloc] initWithType:kiqSetType];
+    [signalDevice publishDevice:deviceid];
+    [self send:signalDevice];
+    
     if(!self.supportsSM3)
     {
         //send out messages still in the queue, even if smacks is not supported this time

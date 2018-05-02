@@ -688,8 +688,8 @@
     [pubsubNode.attributes setObject:@"http://jabber.org/protocol/pubsub" forKey:@"xmlns"];
     
     MLXMLNode* publish =[[MLXMLNode alloc] init];
-    pubsubNode.element=@"publish";
-    [pubsubNode.attributes setObject:@"eu.siacs.conversations.axolotl.devicelist" forKey:@"node"];
+    publish.element=@"publish";
+    [publish.attributes setObject:@"eu.siacs.conversations.axolotl.devicelist" forKey:@"node"];
     
     MLXMLNode* itemNode =[[MLXMLNode alloc] init];
     itemNode.element=@"item";
@@ -700,13 +700,14 @@
     
     MLXMLNode* device =[[MLXMLNode alloc] init];
     device.element=@"device";
-    [device.attributes setObject:device forKey:@"id"];
+    [device.attributes setObject:deviceid forKey:@"id"];
     
     [listNode.children addObject:device];
-    
     [itemNode.children addObject:listNode];
+    
     [publish.children addObject:itemNode];
     [pubsubNode.children addObject:publish];
+    
     [self.children addObject:pubsubNode];
 }
 

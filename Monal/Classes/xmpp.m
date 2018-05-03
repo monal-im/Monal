@@ -13,6 +13,7 @@
 #import "EncodingTools.h"
 #import "MLXMPPManager.h"
 
+#import "MLSignalStore.h"
 
 
 #if TARGET_OS_IPHONE
@@ -44,6 +45,7 @@
 #import "NXOAuth2.h"
 #import "MLHTTPRequest.h"
 
+#import "SignalProtocolObjC.h"
 
 @import Darwin.POSIX.sys.time; 
 
@@ -202,6 +204,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         self.visibleState=YES;
     }
     
+
     return self;
 }
 
@@ -2836,10 +2839,25 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self fetchRoster];
     [self sendInitalPresence];
     
-    NSString *deviceid=@"1701";
+    MLSignalStore *monalSignalStore = [[MLSignalStore alloc] init];
+    
+    //signal store
+    SignalStorage *signalStorage = [[SignalStorage alloc] initWithSignalStore:monalSignalStore];
+    //signal context
+    SignalContext *signalContext= [[SignalContext alloc] initWithStorage:signalStorage];
+    //signal helper
+    SignalKeyHelper *signalHelper = [[SignalKeyHelper alloc] initWithContext:signalContext];
+    
+    uint32 reg= [signalHelper generateRegistrationId];
+    
+  //  [signalHelper generateSignedPreKeyWithIdentity:reg];
+    
+    NSString *deviceid=[NSString stringWithFormat:@"%d",reg];
     XMPPIQ *signalDevice = [[XMPPIQ alloc] initWithType:kiqSetType];
     [signalDevice publishDevice:deviceid];
     [self send:signalDevice];
+    
+    
     
     if(!self.supportsSM3)
     {

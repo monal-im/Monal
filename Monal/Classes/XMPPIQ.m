@@ -713,4 +713,63 @@
 
 
 
+-(void) publishKeys:(NSDictionary *) keys andPreKeys:(NSArray *) prekeys
+{
+    MLXMLNode* pubsubNode =[[MLXMLNode alloc] init];
+    pubsubNode.element=@"pubsub";
+    [pubsubNode.attributes setObject:@"http://jabber.org/protocol/pubsub" forKey:@"xmlns"];
+    
+    MLXMLNode* publish =[[MLXMLNode alloc] init];
+    publish.element=@"publish";
+    [publish.attributes setObject:@"eu.siacs.conversations.axolotl.devicelist" forKey:@"node"];
+    
+    MLXMLNode* itemNode =[[MLXMLNode alloc] init];
+    itemNode.element=@"item";
+    
+    MLXMLNode* bundle =[[MLXMLNode alloc] init];
+    bundle.element=@"bundle";
+    [bundle.attributes setObject:@"eu.siacs.conversations.axolotl" forKey:@"xmlns"];
+    
+    MLXMLNode* signedPreKeyPublic =[[MLXMLNode alloc] init];
+    signedPreKeyPublic.element=@"signedPreKeyPublic";
+    [signedPreKeyPublic.attributes setObject:@"1" forKey:@"signedPreKeyId"];
+    signedPreKeyPublic.data = [keys objectForKey:@"signedPreKeyPublic"];
+    [bundle.children addObject:signedPreKeyPublic];
+    
+    
+    MLXMLNode* signedPreKeySignature =[[MLXMLNode alloc] init];
+    signedPreKeySignature.element=@"signedPreKeySignature";
+    signedPreKeySignature.data = [keys objectForKey:@"signedPreKeySignature"];
+    [bundle.children addObject:signedPreKeySignature];
+    
+    MLXMLNode* identityKey =[[MLXMLNode alloc] init];
+    identityKey.element=@"identityKey";
+    identityKey.data = [keys objectForKey:@"identityKey"];
+    [bundle.children addObject:identityKey];
+    
+    MLXMLNode* prekeyNode =[[MLXMLNode alloc] init];
+    prekeyNode.element=@"prekeys";
+
+    [prekeys enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        NSString *prekey=(NSString *) obj;
+        
+        MLXMLNode* preKeyPublic =[[MLXMLNode alloc] init];
+        preKeyPublic.element=@"preKeyPublic";
+        [preKeyPublic.attributes setObject:[NSString stringWithFormat:@"%lu",(unsigned long)idx] forKey:@"preKeyId"];
+        preKeyPublic.data = prekey;
+        [prekeyNode.children addObject:preKeyPublic];
+        
+    }];
+    
+    [bundle.children addObject:prekeyNode];
+    [itemNode.children addObject:bundle];
+    
+    [publish.children addObject:itemNode];
+    [pubsubNode.children addObject:publish];
+    
+    [self.children addObject:pubsubNode];
+}
+
+
+
 @end

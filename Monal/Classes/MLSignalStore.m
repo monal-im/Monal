@@ -17,7 +17,7 @@
  */
 - (nullable NSData*) sessionRecordForAddress:(SignalAddress*)address
 {
-    
+    return nil;
 }
 
 /**
@@ -28,7 +28,7 @@
  */
 - (BOOL) storeSessionRecord:(NSData*)recordData forAddress:(SignalAddress*)address
 {
-    
+    return NO;
 }
 
 /**
@@ -37,7 +37,7 @@
  */
 - (BOOL) sessionRecordExistsForAddress:(SignalAddress*)address;
 {
-    
+     return NO;
 }
 
 /**
@@ -45,7 +45,7 @@
  */
 - (BOOL) deleteSessionRecordForAddress:(SignalAddress*)address
 {
-    
+     return NO;
 }
 
 /**
@@ -53,7 +53,7 @@
  */
 - (NSArray<NSNumber*>*) allDeviceIdsForAddressName:(NSString*)addressName
 {
-    
+     return nil;
 }
 
 /**
@@ -63,7 +63,7 @@
  */
 - (int) deleteAllSessionsForAddressName:(NSString*)addressName
 {
-    
+    return 0;
 }
 
 
@@ -73,7 +73,7 @@
  */
 - (nullable NSData*) loadPreKeyWithId:(uint32_t)preKeyId;
 {
-    
+    return nil;
 }
 
 /**
@@ -82,7 +82,7 @@
  */
 - (BOOL) storePreKey:(NSData*)preKey preKeyId:(uint32_t)preKeyId
 {
-    
+     return NO;
 }
 
 /**
@@ -91,7 +91,7 @@
  */
 - (BOOL) containsPreKeyWithId:(uint32_t)preKeyId;
 {
-    
+     return NO;
 }
 
 /**
@@ -99,7 +99,7 @@
  */
 - (BOOL) deletePreKeyWithId:(uint32_t)preKeyId
 {
-    
+     return NO;
 }
 
 /**
@@ -107,7 +107,7 @@
  */
 - (nullable NSData*) loadSignedPreKeyWithId:(uint32_t)signedPreKeyId
 {
-    
+    return nil;
 }
 
 /**
@@ -115,7 +115,7 @@
  */
 - (BOOL) storeSignedPreKey:(NSData*)signedPreKey signedPreKeyId:(uint32_t)signedPreKeyId
 {
-    
+     return NO;
 }
 
 /**
@@ -124,7 +124,7 @@
  */
 - (BOOL) containsSignedPreKeyWithId:(uint32_t)signedPreKeyId
 {
-    
+     return NO;
 }
 
 /**
@@ -132,7 +132,7 @@
  */
 - (BOOL) removeSignedPreKeyWithId:(uint32_t)signedPreKeyId
 {
-    
+     return NO;
 }
 
 /**
@@ -140,7 +140,7 @@
  */
 - (SignalIdentityKeyPair*) getIdentityKeyPair;
 {
-    
+    return nil;
 }
 
 /**
@@ -153,7 +153,7 @@
  */
 - (uint32_t) getLocalRegistrationId;
 {
-    
+    return 1;
 }
 
 /**
@@ -166,7 +166,7 @@
  */
 - (BOOL) saveIdentity:(SignalAddress*)address identityKey:(nullable NSData*)identityKey;
 {
-    
+     return NO;
 }
 
 /**
@@ -181,7 +181,7 @@
  */
 - (BOOL) isTrustedIdentity:(SignalAddress*)address identityKey:(NSData*)identityKey;
 {
-    
+     return NO;
 }
 
 /**
@@ -190,7 +190,7 @@
  */
 - (BOOL) storeSenderKey:(NSData*)senderKey address:(SignalAddress*)address groupId:(NSString*)groupId;
 {
-    
+     return NO;
 }
 
 /**
@@ -199,7 +199,7 @@
  */
 - (nullable NSData*) loadSenderKeyForAddress:(SignalAddress*)address groupId:(NSString*)groupId;
 {
-    
+    return nil; 
 }
 
 

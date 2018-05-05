@@ -2850,7 +2850,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     uint32 reg= [signalHelper generateRegistrationId];
     
-  //  [signalHelper generateSignedPreKeyWithIdentity:reg];
+    SignalIdentityKeyPair *keyPair= [signalHelper generateIdentityKeyPair];
+    //save this and fetch from store in the future
+    
+    SignalSignedPreKey *signedPreKey= [signalHelper generateSignedPreKeyWithIdentity:keyPair signedPreKeyId:1];
+    NSArray *preKeys= [signalHelper generatePreKeysWithStartingPreKeyId:0 count:20];
+    
+    
     
     NSString *deviceid=[NSString stringWithFormat:@"%d",reg];
     XMPPIQ *signalDevice = [[XMPPIQ alloc] initWithType:kiqSetType];

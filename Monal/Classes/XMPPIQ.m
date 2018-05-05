@@ -7,6 +7,8 @@
 //
 
 #import "XMPPIQ.h"
+#import "EncodingTools.h"
+#import "SignalPreKey.h"
 
 @implementation XMPPIQ
 
@@ -679,7 +681,7 @@
   
 }
 
-#pragma mark signal
+#pragma mark - signal
 
 -(void) publishDevice:(NSString*) deviceid
 {
@@ -733,30 +735,30 @@
     MLXMLNode* signedPreKeyPublic =[[MLXMLNode alloc] init];
     signedPreKeyPublic.element=@"signedPreKeyPublic";
     [signedPreKeyPublic.attributes setObject:@"1" forKey:@"signedPreKeyId"];
-    signedPreKeyPublic.data = [keys objectForKey:@"signedPreKeyPublic"];
+    signedPreKeyPublic.data = [EncodingTools encodeBase64WithData: [keys objectForKey:@"signedPreKeyPublic"]];
     [bundle.children addObject:signedPreKeyPublic];
     
     
     MLXMLNode* signedPreKeySignature =[[MLXMLNode alloc] init];
     signedPreKeySignature.element=@"signedPreKeySignature";
-    signedPreKeySignature.data = [keys objectForKey:@"signedPreKeySignature"];
+    signedPreKeySignature.data = [EncodingTools encodeBase64WithData:[keys objectForKey:@"signedPreKeySignature"]];
     [bundle.children addObject:signedPreKeySignature];
     
     MLXMLNode* identityKey =[[MLXMLNode alloc] init];
     identityKey.element=@"identityKey";
-    identityKey.data = [keys objectForKey:@"identityKey"];
+    identityKey.data = [EncodingTools encodeBase64WithData:[keys objectForKey:@"identityKey"]];
     [bundle.children addObject:identityKey];
     
     MLXMLNode* prekeyNode =[[MLXMLNode alloc] init];
     prekeyNode.element=@"prekeys";
 
     [prekeys enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        NSString *prekey=(NSString *) obj;
+        SignalPreKey *prekey=(SignalPreKey *) obj;
         
         MLXMLNode* preKeyPublic =[[MLXMLNode alloc] init];
         preKeyPublic.element=@"preKeyPublic";
         [preKeyPublic.attributes setObject:[NSString stringWithFormat:@"%lu",(unsigned long)idx] forKey:@"preKeyId"];
-        preKeyPublic.data = prekey;
+        preKeyPublic.data = [EncodingTools encodeBase64WithData:prekey.keyPair.publicKey];
         [prekeyNode.children addObject:preKeyPublic];
         
     }];

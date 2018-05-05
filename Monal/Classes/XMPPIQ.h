@@ -152,6 +152,10 @@ removes a contact from the roster
  */
 -(void) publishDevice:(NSString*) deviceid;
 
+/**
+ publishes signal keys and prekeys
+ */
+-(void) publishKeys:(NSDictionary *) keys andPreKeys:(NSArray *) prekeys;
 
 
 @end

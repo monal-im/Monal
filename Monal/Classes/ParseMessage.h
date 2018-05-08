@@ -37,9 +37,12 @@
 
 /** OMEMO */
 
+@property (nonatomic, strong, readonly) NSString* headerSid; // session id?
 @property (nonatomic, strong, readonly) NSString* encryptedPayload;
-@property (nonatomic, strong, readonly) NSString* keyRid;
+@property (nonatomic, strong, readonly) NSString* keyRid; //recipient device id
 @property (nonatomic, strong, readonly) NSString* keyValue;
-@property (nonatomic, assign, readonly) BOOL isPreKey; 
+@property (nonatomic, strong, readonly) NSString* iv;
+@property (nonatomic, strong, readonly) NSString* preKeyRid; 
+@property (nonatomic, strong, readonly) NSString* preKeyValue;
 
 @end

@@ -201,29 +201,31 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     
     
-    
-    
     if(([elementName isEqualToString:@"encrypted"])  && [[attributeDict objectForKey:@"xmlns"] isEqualToString:@"eu.siacs.conversations.axolotl"]  )
     {
         State=@"OMEMO";
-        
         return;
     }
-   
-    if([State isEqualToString:@"OMEMO"] && [elementName isEqualToString:@"payload"])
+    
+    
+    if([State isEqualToString:@"OMEMO"] && [elementName isEqualToString:@"header"] )
     {
+        _headerSid=[attributeDict objectForKey:@"sid"];
         
     }
+
+   
+    if([State isEqualToString:@"OMEMO"] && [elementName isEqualToString:@"key"] &&
+       [[attributeDict objectForKey:@"xmlns"] isEqualToString:@"true"] )
+    {
+        _preKeyRid=[attributeDict objectForKey:@"rid"];
+    }
     
-    if([State isEqualToString:@"OMEMO"] && [elementName isEqualToString:@"key"])
+    if([State isEqualToString:@"OMEMO"] && [elementName isEqualToString:@"key"] &&
+       ![[attributeDict objectForKey:@"xmlns"] isEqualToString:@"true"] )
     {
         _keyRid=[attributeDict objectForKey:@"rid"];
-        if([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"true"])
-        {
-            _isPreKey=YES;
-        } else  {
-            _isPreKey=NO;
-        }
+       
     }
 }
 
@@ -262,6 +264,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
       _subject=_messageBuffer;
         _messageBuffer=nil; // specifically so the body doesnt get set 
     }
+    if([State isEqualToString:@"OMEMO"] && [elementName isEqualToString:@"iv"])
+    {
+        _iv=_messageBuffer;
+        _messageBuffer=nil;
+    }
     
     if([State isEqualToString:@"OMEMO"] && [elementName isEqualToString:@"payload"])
     {
@@ -272,6 +279,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     if([State isEqualToString:@"OMEMO"] && [elementName isEqualToString:@"key"])
     {
         _keyValue=_messageBuffer;
+        _messageBuffer=nil;
+    }
+    
+    if([State isEqualToString:@"OMEMO"] && [elementName isEqualToString:@"key"] && self.preKeyRid)
+    {
+        _preKeyValue=_messageBuffer;
         _messageBuffer=nil;
     }
     

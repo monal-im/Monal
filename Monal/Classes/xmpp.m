@@ -2841,6 +2841,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     MLSignalStore *monalSignalStore = [[MLSignalStore alloc] init];
     
+#warning test code. DO NOT SHIP
+    
+    NSDate *data= [[NSUserDefaults standardUserDefaults] objectForKey:@"singaltmp"];
+    
+     NSDictionary *signaltmp =[NSKeyedUnarchiver unarchiveObjectWithData:data];
+    
     //signal store
     SignalStorage *signalStorage = [[SignalStorage alloc] initWithSignalStore:monalSignalStore];
     //signal context
@@ -2848,14 +2854,32 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     //signal helper
     SignalKeyHelper *signalHelper = [[SignalKeyHelper alloc] initWithContext:signalContext];
     
-    uint32 reg= [signalHelper generateRegistrationId];
+    uint32 reg;
+    SignalIdentityKeyPair *identityKeyPair;
+    SignalSignedPreKey *signedPreKey;
+    NSArray *preKeys;
     
-    SignalIdentityKeyPair *identityKeyPair= [signalHelper generateIdentityKeyPair];
-    //save this and fetch from store in the future
+    if(signaltmp)
+    {
+        reg=[[signaltmp objectForKey:@"reg"] intValue];
+        identityKeyPair = [signaltmp objectForKey:@"identityKeyPair"];
+        signedPreKey= [signaltmp objectForKey:@"signedPreKey"];
+        preKeys= [signaltmp objectForKey:@"preKeys"];
+        
+    } else {
+        reg= [signalHelper generateRegistrationId];
+        identityKeyPair= [signalHelper generateIdentityKeyPair];
+        signedPreKey= [signalHelper generateSignedPreKeyWithIdentity:identityKeyPair signedPreKeyId:1];
+        preKeys= [signalHelper generatePreKeysWithStartingPreKeyId:0 count:20];
     
-    SignalSignedPreKey *signedPreKey= [signalHelper generateSignedPreKeyWithIdentity:identityKeyPair signedPreKeyId:1];
-    NSArray *preKeys= [signalHelper generatePreKeysWithStartingPreKeyId:0 count:20];
-    
+        signaltmp = @{@"reg": [NSNumber numberWithInt:reg],
+                      @"identityKeyPair":identityKeyPair,
+                      @"signedPreKey":signedPreKey, @"preKeys":preKeys};
+        
+        [[NSUserDefaults standardUserDefaults] setObject:[NSKeyedArchiver archivedDataWithRootObject:signaltmp] forKey:@"singaltmp"];
+        
+    }
+ 
     NSString *deviceid=[NSString stringWithFormat:@"%d",reg];
     XMPPIQ *signalDevice = [[XMPPIQ alloc] initWithType:kiqSetType];
     [signalDevice publishDevice:deviceid];
@@ -2867,10 +2891,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self send:signalKeys];
     
     //if not auto subscibe
-    XMPPIQ *subscribe = [[XMPPIQ alloc] initWithType:kiqGetType];
-    [subscribe setiqTo:@"georg@yax.im"];
-    [subscribe requestNode:@"eu.siacs.conversations.axolotl.devicelist"];
-    [self send:subscribe];
+//    XMPPIQ *subscribe = [[XMPPIQ alloc] initWithType:kiqGetType];
+//    [subscribe setiqTo:@"monaltest@jabb3r.org"];
+//    [subscribe requestNode:@"eu.siacs.conversations.axolotl.devicelist"];
+//    [self send:subscribe];
+
+    
     
 if(!self.supportsSM3)
     {

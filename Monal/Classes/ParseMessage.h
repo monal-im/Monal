@@ -35,5 +35,11 @@
 @property (nonatomic, assign, readonly) BOOL mucInvite;
 @property (nonatomic, assign, readonly) BOOL mamResult;
 
+/** OMEMO */
+
+@property (nonatomic, strong, readonly) NSString* encryptedPayload;
+@property (nonatomic, strong, readonly) NSString* keyRid;
+@property (nonatomic, strong, readonly) NSString* keyValue;
+@property (nonatomic, assign, readonly) BOOL isPreKey; 
 
 @end

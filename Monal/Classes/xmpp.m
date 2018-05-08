@@ -2660,7 +2660,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [[NSUserDefaults standardUserDefaults] setObject:[NSKeyedArchiver archivedDataWithRootObject:values] forKey:[NSString stringWithFormat:@"stream_state_v1_%@",self.accountNo]];
     
     //debug output
-    DDLogInfo(@"+++++++++++++++++++ persistState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%d%s,\n\tstreamID=%@\n\t#rosterList=%d",
+    DDLogVerbose(@"+++++++++++++++++++ persistState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%d%s,\n\tstreamID=%@\n\t#rosterList=%d",
               self.lastHandledInboundStanza,
               self.lastHandledOutboundStanza,
               self.lastOutboundStanza,
@@ -2670,11 +2670,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
               self.rosterList ? [self.rosterList count] : 0
               );
     
-    if(self.unAckedStanzas) {
-        for(NSDictionary *dic in self.unAckedStanzas) {
-            DDLogDebug(@"+++++++++++++++++++ persistState unAckedStanza %@: %@", [dic objectForKey:kStanzaID], ((MLXMLNode*)[dic objectForKey:kStanza]).XMLString);
-        }
-    }
+//    if(self.unAckedStanzas) {
+//        for(NSDictionary *dic in self.unAckedStanzas) {
+//            DDLogVerbose(@"+++++++++++++++++++ persistState unAckedStanza %@: %@", [dic objectForKey:kStanzaID], ((MLXMLNode*)[dic objectForKey:kStanza]).XMLString);
+//        }
+//    }
 }
 
 -(void) readState
@@ -2862,10 +2862,17 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self send:signalDevice];
     
      XMPPIQ *signalKeys = [[XMPPIQ alloc] initWithType:kiqSetType];
-    [signalKeys publishKeys:@{@"signedPreKeyPublic":signedPreKey.keyPair.publicKey, @"signedPreKeySignature":signedPreKey.signature, @"identityKey":identityKeyPair.publicKey} andPreKeys:preKeys];
+    [signalKeys publishKeys:@{@"signedPreKeyPublic":signedPreKey.keyPair.publicKey, @"signedPreKeySignature":signedPreKey.signature, @"identityKey":identityKeyPair.publicKey, @"signedPreKeyId": [NSString stringWithFormat:@"%d",signedPreKey.preKeyId]} andPreKeys:preKeys withDeviceId:deviceid];
+    [signalKeys.attributes setValue:[NSString stringWithFormat:@"%@/%@",_fulluser, _resource ] forKey:@"from"];
     [self send:signalKeys];
     
-    if(!self.supportsSM3)
+    //if not auto subscibe
+    XMPPIQ *subscribe = [[XMPPIQ alloc] initWithType:kiqGetType];
+    [subscribe setiqTo:@"georg@yax.im"];
+    [subscribe requestNode:@"eu.siacs.conversations.axolotl.devicelist"];
+    [self send:subscribe];
+    
+if(!self.supportsSM3)
     {
         //send out messages still in the queue, even if smacks is not supported this time
         [self sendUnAckedMessages];
@@ -2910,6 +2917,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     if(self.statusMessage) [node setStatus:self.statusMessage];
     [self send:node];
+    
+
+    
 }
 
 -(void) setVisible:(BOOL) visible

@@ -155,7 +155,11 @@ removes a contact from the roster
 /**
  publishes signal keys and prekeys
  */
--(void) publishKeys:(NSDictionary *) keys andPreKeys:(NSArray *) prekeys;
+-(void) publishKeys:(NSDictionary *) keys andPreKeys:(NSArray *) prekeys withDeviceId:(NSString*) deviceid;
 
+
+#pragma mark - pubsub
+
+-(void) requestNode:(NSString*) node;
 
 @end

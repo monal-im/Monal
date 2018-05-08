@@ -33,7 +33,9 @@
     static NSArray* featuresArray;
      static dispatch_once_t onceToken;
      dispatch_once(&onceToken, ^{
-    featuresArray=@[@"http://jabber.org/protocol/caps",
+         //This list must be in aphabetical order
+    featuresArray=@[@"eu.siacs.conversations.axolotl.devicelist",
+                    @"http://jabber.org/protocol/caps",
                         @"http://jabber.org/protocol/disco#info",
                         @"http://jabber.org/protocol/disco#items",
                         @"http://jabber.org/protocol/muc",
@@ -42,8 +44,8 @@
                         @"urn:xmpp:jingle:apps:rtp:audio",
                         @"urn:xmpp:jingle:transports:raw-udp:0",
                         @"urn:xmpp:jingle:transports:raw-udp:1",
-                        @"urn:xmpp:receipts",
-                        @"eu.siacs.conversations.axolotl.devicelist"
+                        @"urn:xmpp:receipts"
+                    
                         ];
      });
     
@@ -715,7 +717,7 @@
 
 
 
--(void) publishKeys:(NSDictionary *) keys andPreKeys:(NSArray *) prekeys
+-(void) publishKeys:(NSDictionary *) keys andPreKeys:(NSArray *) prekeys withDeviceId:(NSString*) deviceid
 {
     MLXMLNode* pubsubNode =[[MLXMLNode alloc] init];
     pubsubNode.element=@"pubsub";
@@ -723,7 +725,7 @@
     
     MLXMLNode* publish =[[MLXMLNode alloc] init];
     publish.element=@"publish";
-    [publish.attributes setObject:@"eu.siacs.conversations.axolotl.devicelist" forKey:@"node"];
+    [publish.attributes setObject:[NSString stringWithFormat:@"eu.siacs.conversations.axolotl.bundles:%@", deviceid] forKey:@"node"];
     
     MLXMLNode* itemNode =[[MLXMLNode alloc] init];
     itemNode.element=@"item";
@@ -734,7 +736,7 @@
     
     MLXMLNode* signedPreKeyPublic =[[MLXMLNode alloc] init];
     signedPreKeyPublic.element=@"signedPreKeyPublic";
-    [signedPreKeyPublic.attributes setObject:@"1" forKey:@"signedPreKeyId"];
+    [signedPreKeyPublic.attributes setObject:[keys objectForKey:@"signedPreKeyId"] forKey:@"signedPreKeyId"];
     signedPreKeyPublic.data = [EncodingTools encodeBase64WithData: [keys objectForKey:@"signedPreKeyPublic"]];
     [bundle.children addObject:signedPreKeyPublic];
     
@@ -757,7 +759,7 @@
         
         MLXMLNode* preKeyPublic =[[MLXMLNode alloc] init];
         preKeyPublic.element=@"preKeyPublic";
-        [preKeyPublic.attributes setObject:[NSString stringWithFormat:@"%lu",(unsigned long)idx] forKey:@"preKeyId"];
+        [preKeyPublic.attributes setObject:[NSString stringWithFormat:@"%d", prekey.preKeyId] forKey:@"preKeyId"];
         preKeyPublic.data = [EncodingTools encodeBase64WithData:prekey.keyPair.publicKey];
         [prekeyNode.children addObject:preKeyPublic];
         
@@ -772,6 +774,23 @@
     [self.children addObject:pubsubNode];
 }
 
+
+-(void) requestNode:(NSString*) node
+{
+    MLXMLNode* pubsubNode =[[MLXMLNode alloc] init];
+    pubsubNode.element=@"pubsub";
+    [pubsubNode.attributes setObject:@"http://jabber.org/protocol/pubsub" forKey:@"xmlns"];
+
+    
+    MLXMLNode* subscribe =[[MLXMLNode alloc] init];
+    subscribe.element=@"items";
+    [subscribe.attributes setObject:node forKey:@"node"];
+//[subscribe.attributes setObject:@"1" forKey:@"max_items"];
+    
+    [pubsubNode.children addObject:subscribe];
+    [self.children addObject:pubsubNode];
+    
+}
 
 
 @end

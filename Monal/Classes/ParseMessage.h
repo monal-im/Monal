@@ -37,7 +37,7 @@
 
 /** OMEMO */
 
-@property (nonatomic, strong, readonly) NSString* headerSid; // session id?
+@property (nonatomic, strong, readonly) NSString* sid; // sender device id
 @property (nonatomic, strong, readonly) NSString* encryptedPayload;
 @property (nonatomic, strong, readonly) NSString* keyRid; //recipient device id
 @property (nonatomic, strong, readonly) NSString* keyValue;

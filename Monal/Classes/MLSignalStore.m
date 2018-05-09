@@ -7,8 +7,21 @@
 //
 
 #import "MLSignalStore.h"
+#import "SignalPreKey.h"
+
+@interface MLSignalStore()
+@property (nonatomic, strong) NSDictionary *signaltmp ;
+@end
 
 @implementation MLSignalStore
+
+-(id) init{
+    NSData *data= [[NSUserDefaults standardUserDefaults] objectForKey:@"singaltmp"];
+    
+    self.signaltmp =[NSKeyedUnarchiver unarchiveObjectWithData:data];
+    
+    return self; 
+}
 
 /**
  * Returns a copy of the serialized session record corresponding to the
@@ -73,6 +86,16 @@
  */
 - (nullable NSData*) loadPreKeyWithId:(uint32_t)preKeyId;
 {
+  
+   NSArray *preKeys= [self.signaltmp objectForKey:@"preKeys"];
+  
+    for (SignalPreKey *prekey in preKeys)
+    {
+        if(prekey.preKeyId==preKeyId) return [NSKeyedArchiver archivedDataWithRootObject: prekey.keyPair];
+            
+    }
+    
+    
     return nil;
 }
 
@@ -91,7 +114,7 @@
  */
 - (BOOL) containsPreKeyWithId:(uint32_t)preKeyId;
 {
-     return NO;
+     return YES;
 }
 
 /**
@@ -107,7 +130,7 @@
  */
 - (nullable NSData*) loadSignedPreKeyWithId:(uint32_t)signedPreKeyId
 {
-    return nil;
+     return [self.signaltmp objectForKey:@"signedPreKey"];
 }
 
 /**
@@ -140,7 +163,9 @@
  */
 - (SignalIdentityKeyPair*) getIdentityKeyPair;
 {
-    return nil;
+ 
+    return [self.signaltmp objectForKey:@"identityKeyPair"];
+   
 }
 
 /**
@@ -153,7 +178,12 @@
  */
 - (uint32_t) getLocalRegistrationId;
 {
-    return 1;
+   
+    return [[self.signaltmp objectForKey:@"reg"] intValue];
+    
+
+    
+    
 }
 
 /**

@@ -210,7 +210,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     if([State isEqualToString:@"OMEMO"] && [elementName isEqualToString:@"header"] )
     {
-        _headerSid=[attributeDict objectForKey:@"sid"];
+        _sid=[attributeDict objectForKey:@"sid"];
         
     }
 

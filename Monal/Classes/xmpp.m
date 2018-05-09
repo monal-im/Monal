@@ -143,6 +143,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 @property (nonatomic, strong) NXOAuth2Account *oauthAccount;
 
+
+@property (nonatomic, strong) SignalContext *signalContext;
+@property (nonatomic, strong) NSDictionary *signaltmp;
+
 @end
 
 
@@ -1670,8 +1674,40 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         [[DataLayer sharedInstance] updateMucSubject:messageNode.subject forAccount:self.accountNo andRoom:messageNode.from withCompletion:nil];
                      
                     }
+                    NSString *decrypted;
                     
-                    if(messageNode.hasBody || messageNode.subject)
+                    if(messageNode.encryptedPayload)
+                    {
+                        SignalAddress *address = [[SignalAddress alloc] initWithName:messageNode.from deviceId:messageNode.sid.integerValue];
+                        if(!self.signalContext) return; 
+                        //SignalSessionBuilder *builder = [[SignalSessionBuilder alloc] initWithAddress:address context:self.signalContext];
+                        
+                        SignalSessionCipher *cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self.signalContext];
+                      
+                        SignalCiphertextType messagetype;
+                        if(messageNode.preKeyValue)
+                        {
+                            messagetype=SignalCiphertextTypePreKeyMessage;
+                        } else  {
+                            messagetype= SignalCiphertextTypeMessage;
+                        }
+                        
+                        
+                        
+                        SignalCiphertext *ciphertext = [[SignalCiphertext alloc] initWithData:[EncodingTools dataWithBase64EncodedString:messageNode.preKeyValue?messageNode.preKeyValue:messageNode.keyValue] type:messagetype];
+                        NSError *error;
+                      NSData *messageData=  [cipher decryptCiphertext:ciphertext error:&error];
+                        
+                        if(messageData){
+                        decrypted =[NSString stringWithCString:[messageData bytes] encoding:NSUTF8StringEncoding];
+                        }
+                        
+                    }
+
+                    
+                    
+                    
+                    if(messageNode.hasBody || messageNode.subject||decrypted)
                     {
                         NSString *ownNick;
                         //TODO if muc find own nick to see if echo
@@ -1697,6 +1733,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             }
                             
                             NSString *body=messageNode.messageText;
+                            if(decrypted) body=decrypted;
+                            
                             NSString *messageType=nil;
                             if(!body  && messageNode.subject)
                             {
@@ -1785,6 +1823,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         
                     }
                   
+                    
                     
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"]  isEqualToString:@"presence"])
@@ -2843,28 +2882,28 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
 #warning test code. DO NOT SHIP
     
-    NSDate *data= [[NSUserDefaults standardUserDefaults] objectForKey:@"singaltmp"];
+    NSData *data= [[NSUserDefaults standardUserDefaults] objectForKey:@"singaltmp"];
     
-     NSDictionary *signaltmp =[NSKeyedUnarchiver unarchiveObjectWithData:data];
+    self.signaltmp =[NSKeyedUnarchiver unarchiveObjectWithData:data];
     
     //signal store
     SignalStorage *signalStorage = [[SignalStorage alloc] initWithSignalStore:monalSignalStore];
     //signal context
-    SignalContext *signalContext= [[SignalContext alloc] initWithStorage:signalStorage];
+    self.signalContext= [[SignalContext alloc] initWithStorage:signalStorage];
     //signal helper
-    SignalKeyHelper *signalHelper = [[SignalKeyHelper alloc] initWithContext:signalContext];
+    SignalKeyHelper *signalHelper = [[SignalKeyHelper alloc] initWithContext:self.signalContext];
     
     uint32 reg;
     SignalIdentityKeyPair *identityKeyPair;
     SignalSignedPreKey *signedPreKey;
     NSArray *preKeys;
     
-    if(signaltmp)
+    if(self.signaltmp)
     {
-        reg=[[signaltmp objectForKey:@"reg"] intValue];
-        identityKeyPair = [signaltmp objectForKey:@"identityKeyPair"];
-        signedPreKey= [signaltmp objectForKey:@"signedPreKey"];
-        preKeys= [signaltmp objectForKey:@"preKeys"];
+        reg=[[self.signaltmp objectForKey:@"reg"] intValue];
+        identityKeyPair = [self.signaltmp objectForKey:@"identityKeyPair"];
+        signedPreKey= [self.signaltmp objectForKey:@"signedPreKey"];
+        preKeys= [self.signaltmp objectForKey:@"preKeys"];
         
     } else {
         reg= [signalHelper generateRegistrationId];
@@ -2872,11 +2911,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         signedPreKey= [signalHelper generateSignedPreKeyWithIdentity:identityKeyPair signedPreKeyId:1];
         preKeys= [signalHelper generatePreKeysWithStartingPreKeyId:0 count:20];
     
-        signaltmp = @{@"reg": [NSNumber numberWithInt:reg],
+        self.signaltmp = @{@"reg": [NSNumber numberWithInt:reg],
                       @"identityKeyPair":identityKeyPair,
                       @"signedPreKey":signedPreKey, @"preKeys":preKeys};
         
-        [[NSUserDefaults standardUserDefaults] setObject:[NSKeyedArchiver archivedDataWithRootObject:signaltmp] forKey:@"singaltmp"];
+        [[NSUserDefaults standardUserDefaults] setObject:[NSKeyedArchiver archivedDataWithRootObject:self.signaltmp] forKey:@"singaltmp"];
         
     }
  

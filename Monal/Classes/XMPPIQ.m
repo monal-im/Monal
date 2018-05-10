@@ -792,5 +792,18 @@
     
 }
 
+-(void) requestDevices
+{
+    [self requestNode:@"eu.siacs.conversations.axolotl.devicelist"];
+    
+}
+
+-(void) requestBundles:(NSString*) deviceid
+{
+    [self requestNode:[NSString stringWithFormat:@"eu.siacs.conversations.axolotl.bundles:%@", deviceid]];
+    
+}
+
+
 
 @end

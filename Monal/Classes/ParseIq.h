@@ -57,4 +57,11 @@
 //mam2
 @property (nonatomic, strong, readonly) NSString* mam2default;
 
+//omemo
+@property (nonatomic, strong, readonly) NSMutableArray* preKeys; //Array with signalprekey
+@property (nonatomic, strong, readonly) NSString* signedPreKeyPublic;
+@property (nonatomic, strong, readonly) NSString* signedPreKeySignature;
+@property (nonatomic, strong, readonly) NSString* identityKey;
+
+
 @end

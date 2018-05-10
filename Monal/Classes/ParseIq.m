@@ -7,6 +7,13 @@
 //
 
 #import "ParseIq.h"
+#import "SignalPreKey.h"
+
+@interface ParseIq()
+
+@property (nonatomic, assign) NSInteger prekeyid;
+
+@end
 
 @implementation ParseIq
 
@@ -181,6 +188,14 @@
         [_jingleTransportCandidates addObject:attributeDict];
         return;
     }
+    
+    if([elementName isEqualToString:@"bundle"])
+    {
+        State=@"Bundle";
+    }
+    
+ 
+    
 }
 
 
@@ -257,6 +272,41 @@
         _putURL=[_messageBuffer copy];
         return;
     }
+    
+    
+    if([elementName isEqualToString:@"signedPreKeyPublic"] &&  [State isEqualToString:@"Bundle"])
+    {
+       _signedPreKeyPublic= [_messageBuffer copy];
+        _messageBuffer=nil;
+        return;
+    }
+    
+    if([elementName isEqualToString:@"signedPreKeySignature"] &&  [State isEqualToString:@"Bundle"])
+    {
+        _signedPreKeySignature= [_messageBuffer copy];
+        _messageBuffer=nil;
+        return;
+    }
+    
+    
+    if([elementName isEqualToString:@"identityKey"] &&  [State isEqualToString:@"Bundle"])
+    {
+        _identityKey= [_messageBuffer copy];
+        _messageBuffer=nil;
+        return;
+    }
+    
+    
+    
+    
+    if([elementName isEqualToString:@"preKeyPublic"] &&  [State isEqualToString:@"Bundle"])
+    {
+      
+        return;
+    }
+    
+    
+    
    
 }
 

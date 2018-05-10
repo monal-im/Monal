@@ -1458,6 +1458,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                     
                                 }
                             }
+                            
+                            if(iqNode.signedPreKeyPublic)
+                            {
+                                
+                            }
+                            
                         
                             // iterate roster and get cards
                             [self getVcards];
@@ -1693,8 +1699,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         }
                         
                         
+                        NSData *decoded= [EncodingTools dataWithBase64EncodedString:messageNode.preKeyValue?messageNode.preKeyValue:messageNode.keyValue];
                         
-                        SignalCiphertext *ciphertext = [[SignalCiphertext alloc] initWithData:[EncodingTools dataWithBase64EncodedString:messageNode.preKeyValue?messageNode.preKeyValue:messageNode.keyValue] type:messagetype];
+                        
+                        
+                        SignalCiphertext *ciphertext = [[SignalCiphertext alloc] initWithData:decoded type:messagetype];
                         NSError *error;
                       NSData *messageData=  [cipher decryptCiphertext:ciphertext error:&error];
                         
@@ -2930,10 +2939,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self send:signalKeys];
     
     //if not auto subscibe
-//    XMPPIQ *subscribe = [[XMPPIQ alloc] initWithType:kiqGetType];
-//    [subscribe setiqTo:@"monaltest@jabb3r.org"];
-//    [subscribe requestNode:@"eu.siacs.conversations.axolotl.devicelist"];
-//    [self send:subscribe];
+    XMPPIQ *subscribe = [[XMPPIQ alloc] initWithType:kiqGetType];
+    [subscribe setiqTo:@"monal2@jabb3r.org"];
+    [subscribe requestNode:@"eu.siacs.conversations.axolotl.devicelist"];
+    [self send:subscribe];
 
     
     

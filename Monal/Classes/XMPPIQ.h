@@ -160,6 +160,10 @@ removes a contact from the roster
 
 #pragma mark - pubsub
 
+-(void) requestBundles:(NSString*) deviceid;
+-(void) requestDevices;
+
+
 -(void) requestNode:(NSString*) node;
 
 @end

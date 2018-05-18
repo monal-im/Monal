@@ -143,7 +143,21 @@
         return;
     }
     
-   
+    if([elementName isEqualToString:@"fin"] && [[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:mam:2"])
+    {
+        _mam2fin =YES;
+        return;
+    }
+    
+    if([elementName isEqualToString:@"set"] && [[attributeDict objectForKey:@"xmlns"] isEqualToString:@"http://jabber.org/protocol/rsm"])
+    {
+        State=@"MAMSet";
+        return;
+    }
+    
+ 
+    
+    
     //** jingle ** /
     
     if([elementName isEqualToString:@"jingle"] &&  [[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:jingle:1"])
@@ -255,6 +269,12 @@
     if(([elementName isEqualToString:@"put"]) && _httpUpload )
     {
         _putURL=[_messageBuffer copy];
+        return;
+    }
+    
+    if([elementName isEqualToString:@"last"] && [State isEqualToString:@"MAMSet"])
+    {
+        _mam2Last=[_messageBuffer copy];
         return;
     }
    

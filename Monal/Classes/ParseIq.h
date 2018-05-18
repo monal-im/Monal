@@ -56,5 +56,7 @@
 
 //mam2
 @property (nonatomic, strong, readonly) NSString* mam2default;
+@property (nonatomic, assign, readonly) BOOL mam2fin;
+@property (nonatomic, strong, readonly) NSString* mam2Last;
 
 @end

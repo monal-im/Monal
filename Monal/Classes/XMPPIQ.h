@@ -57,6 +57,9 @@
  */
 -(void) setMAMQueryFromStart:(NSDate *) startDate toDate:(NSDate *) endDate  andJid:(NSString *)jid;
 
+-(void) setMAMQueryFromStart:(NSDate *) startDate after:(NSString *) uid  andJid:(NSString *)jid;
+
+
 #pragma mark disco
 /**
  makes a disco info response for the server.

@@ -345,6 +345,97 @@
     
 }
 
+
+-(void) setMAMQueryFromStart:(NSDate *) startDate after:(NSString *) uid  andJid:(NSString *)jid
+{
+    
+    MLXMLNode* queryNode =[[MLXMLNode alloc] init];
+    queryNode.element=@"query";
+    [queryNode.attributes setObject:@"urn:xmpp:mam:2" forKey:@"xmlns"];
+    
+    
+    MLXMLNode* xnode =[[MLXMLNode alloc] init];
+    xnode.element=@"x";
+    [xnode.attributes setObject:@"jabber:x:data" forKey:@"xmlns"];
+    [xnode.attributes setObject:@"submit" forKey:@"type"];
+    
+    MLXMLNode* field1 =[[MLXMLNode alloc] init];
+    field1.element=@"field";
+    [field1.attributes setObject:@"FORM_TYPE" forKey:@"var"];
+    [field1.attributes setObject:@"hidden" forKey:@"type"];
+    
+    MLXMLNode* value =[[MLXMLNode alloc] init];
+    value.element=@"value";
+    value.data=@"urn:xmpp:mam:2";
+    [field1.children addObject:value];
+    
+    [xnode.children addObject:field1];
+    
+    NSDateFormatter *rfc3339DateFormatter;
+    if(startDate) {
+        rfc3339DateFormatter = [[NSDateFormatter alloc] init];
+        NSLocale *enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
+        
+        [rfc3339DateFormatter setLocale:enUSPOSIXLocale];
+        [rfc3339DateFormatter setDateFormat:@"yyyy'-'MM'-'dd'T'HH':'mm':'ss'Z'"];
+        [rfc3339DateFormatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+    }
+    
+    if(startDate){
+        MLXMLNode* field2 =[[MLXMLNode alloc] init];
+        field2.element=@"field";
+        [field2.attributes setObject:@"start" forKey:@"var"];
+        
+        MLXMLNode* value2 =[[MLXMLNode alloc] init];
+        value2.element=@"value";
+        if(startDate) {
+            value2.data=[rfc3339DateFormatter stringFromDate:startDate];
+        }
+        else  {
+            value2.data=[rfc3339DateFormatter stringFromDate:[NSDate dateWithTimeIntervalSinceReferenceDate:0]];
+        }
+        
+        [field2.children addObject:value2];
+        [xnode.children addObject:field2];
+    }
+
+
+ 
+    
+    if(jid) {
+        MLXMLNode* field3 =[[MLXMLNode alloc] init];
+        field3.element=@"field";
+        [field3.attributes setObject:@"with" forKey:@"var"];
+        
+        MLXMLNode* value3 =[[MLXMLNode alloc] init];
+        value3.element=@"value";
+        value3.data=jid;
+        [field3.children addObject:value3];
+        
+        [xnode.children addObject:field3];
+    }
+    
+    
+    if(uid) {
+        MLXMLNode* field3 =[[MLXMLNode alloc] init];
+        field3.element=@"set";
+        [field3.attributes setObject:@"zmlns" forKey:@"http://jabber.org/protocol/rsm"];
+        
+        MLXMLNode* value3 =[[MLXMLNode alloc] init];
+        value3.element=@"after";
+        value3.data=uid;
+        [field3.children addObject:value3];
+        
+        [queryNode.children addObject:field3];
+    }
+    
+    
+    [queryNode.children addObject:xnode];
+    
+    [self.children addObject:queryNode];
+    
+}
+
 -(void) setRemoveFromRoster:(NSString*) jid
 {
     MLXMLNode* queryNode =[[MLXMLNode alloc] init];

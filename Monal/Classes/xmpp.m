@@ -1395,6 +1395,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     
                     if ([iqNode.type isEqualToString:kiqResultType])
                     {
+                        if(iqNode.mam2Last && !iqNode.mam2fin)
+                        {
+                            //fetch since last
+                            [self setMAMQueryFromStart:]
+                            
+                        }
+                        
+                        
                         if([iqNode.idval isEqualToString:@"enableCarbons"])
                         {
                             self.usingCarbons2=YES;
@@ -3065,6 +3073,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
     [query setMAMQueryFromStart:startDate toDate:endDate andJid:jid];
+    [self send:query];
+}
+
+-(void) setMAMQueryFromStart:(NSDate *) startDate after:(NSString *) after  andJid:(NSString *)jid
+{
+    XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
+    [query setMAMQueryFromStart:startDate after:after andJid:jid];
     [self send:query];
 }
 

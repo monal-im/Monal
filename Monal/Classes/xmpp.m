@@ -1398,7 +1398,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         if(iqNode.mam2Last && !iqNode.mam2fin)
                         {
                             //fetch since last
-                            [self setMAMQueryFromStart:]
+                           // [self setMAMQueryFromStart:]
                             
                         }
                         
@@ -1717,7 +1717,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                        andOverrideDate:messageNode.delayTimeStamp withCompletion:^(BOOL success) {
                                                               if(success)
                                                               {
-                                                                  if(messageNode.requestReceipt)
+                                                                  if(messageNode.requestReceipt && !messageNode.mamResult)
                                                                   {
                                                                       XMPPMessage *receiptNode = [[XMPPMessage alloc] init];
                                                                       [receiptNode.attributes setObject:messageNode.from forKey:@"to"];

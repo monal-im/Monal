@@ -151,6 +151,7 @@
 		26277CE41B7C57670094E4D0 /* MLContactDetails.m in Sources */ = {isa = PBXBuildFile; fileRef = 26277CE31B7C57670094E4D0 /* MLContactDetails.m */; };
 		262797AF178A577300B85D94 /* MLContactCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 262797AE178A577300B85D94 /* MLContactCell.m */; };
 		26292F4F1309CAE100097280 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26292F4E1309CAE100097280 /* CFNetwork.framework */; };
+		262AEFE820AE756800498F82 /* MLMAMPrefTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 262AEFE720AE756800498F82 /* MLMAMPrefTableViewController.m */; };
 		262D9EA717921169009292B4 /* ParseMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 262D9EA617921169009292B4 /* ParseMessage.m */; };
 		262D9EAA17921E82009292B4 /* XMPPMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 262D9EA917921E82009292B4 /* XMPPMessage.m */; };
 		262E51921AD8CAC600788351 /* MLButtonCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 262E51901AD8CAC600788351 /* MLButtonCell.m */; };
@@ -503,6 +504,8 @@
 		262797AD178A577300B85D94 /* MLContactCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLContactCell.h; sourceTree = "<group>"; };
 		262797AE178A577300B85D94 /* MLContactCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLContactCell.m; sourceTree = "<group>"; };
 		26292F4E1309CAE100097280 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
+		262AEFE620AE756800498F82 /* MLMAMPrefTableViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLMAMPrefTableViewController.h; sourceTree = "<group>"; };
+		262AEFE720AE756800498F82 /* MLMAMPrefTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLMAMPrefTableViewController.m; sourceTree = "<group>"; };
 		262D9EA517921169009292B4 /* ParseMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParseMessage.h; sourceTree = "<group>"; };
 		262D9EA617921169009292B4 /* ParseMessage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParseMessage.m; sourceTree = "<group>"; };
 		262D9EA817921E82009292B4 /* XMPPMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPMessage.h; sourceTree = "<group>"; };
@@ -1216,6 +1219,8 @@
 				2636C43E177BD58C001CA71F /* XMPPEdit.m */,
 				26E3ED851FEC0CB7008ABDA5 /* MLServerDetails.h */,
 				26E3ED861FEC0CB7008ABDA5 /* MLServerDetails.m */,
+				262AEFE620AE756800498F82 /* MLMAMPrefTableViewController.h */,
+				262AEFE720AE756800498F82 /* MLMAMPrefTableViewController.m */,
 			);
 			name = Accounts;
 			sourceTree = "<group>";
@@ -2631,6 +2636,7 @@
 				26EE8B22179B7B0E006781F3 /* SlidingMessageViewController.m in Sources */,
 				26D51CCA1E2674D700141E04 /* NSData+NXOAuth2.m in Sources */,
 				26D59D9320714F32006F1DEE /* UIColor+Theme.m in Sources */,
+				262AEFE820AE756800498F82 /* MLMAMPrefTableViewController.m in Sources */,
 				261E672B179E27BE00CB493E /* ParseFailure.m in Sources */,
 				26B2A4F51B73097500272E63 /* DDLog.m in Sources */,
 				26AAE285179F7B0200271345 /* MLSettingCell.m in Sources */,

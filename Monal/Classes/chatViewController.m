@@ -759,9 +759,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         
         NSDate* sourceDate;
         if([sourceDateString isKindOfClass:[NSDate class]]){
-            sourceDate=sourceDateString;
+            sourceDate=(NSDate *)sourceDateString;
         } else  {
-        sourceDate=[self.sourceDateFormat dateFromString:sourceDateString];
+        sourceDate= [self.sourceDateFormat dateFromString: (NSString *)sourceDateString];
         }
         
         NSTimeZone* sourceTimeZone = [NSTimeZone timeZoneWithAbbreviation:@"GMT"];

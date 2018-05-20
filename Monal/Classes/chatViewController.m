@@ -108,6 +108,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     
 
     [nc addObserver:self selector:@selector(refreshButton:) name:kMonalAccountStatusChanged object:nil];
+    [nc addObserver:self selector:@selector(fetchMoreMessages) name:kMLMAMMore object:nil];
     
     
     self.hidesBottomBarWhenPushed=YES;
@@ -142,6 +143,47 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 
 
+-(void) synchChat
+{
+    dispatch_async(dispatch_get_main_queue(),
+                   ^{
+                       xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
+                       if(xmppAccount.supportsMam2 & !_isMUC) {
+                           
+                           NSDictionary *lastMessage= [self.messageList lastObject];
+                           NSDate *last =[self.sourceDateFormat dateFromString:[lastMessage objectForKey:@"thetime"]];
+                           
+                           //synch point
+                           // if synch point < login time
+                           NSDate *synch = [[DataLayer sharedInstance] synchPointForContact:self.contactName andAccount:self.accountNo];
+                           NSDate * connectedTime = [[MLXMPPManager sharedInstance] connectedTimeFor:self.accountNo];
+                           
+                           if([synch timeIntervalSinceReferenceDate]<[connectedTime timeIntervalSinceReferenceDate])
+                           {
+                               [xmppAccount setMAMQueryFromStart: last toDate:nil andJid:self.contactName];
+                               [[DataLayer sharedInstance] setSynchPoint:[NSDate date] ForContact:self.contactName andAccount:self.accountNo];
+                           }
+                       }
+                   });
+}
+
+
+-(void) fetchMoreMessages
+{
+    
+    dispatch_async(dispatch_get_main_queue(),
+                   ^{
+                       //this forces a new fetch if needed
+                       NSDictionary *lastMessage= [self.messageList lastObject];
+                       NSDate *last =[self.sourceDateFormat dateFromString:[lastMessage objectForKey:@"thetime"]];
+                       if(last) {
+                           [[DataLayer sharedInstance] setSynchPoint:last ForContact:self.contactName andAccount:self.accountNo];
+                       }
+                       [self synchChat];
+                   });
+}
+
+
 -(void)viewWillAppear:(BOOL)animated
 {
     
@@ -172,17 +214,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
     [self handleForeGround];
     
-    xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
-    if(xmppAccount.supportsMam2 && !_isMUC) {
-        
-        if(self.messageList.count==0)
-        {
-            //fetch default
-            NSDate *yesterday =[NSDate dateWithTimeInterval:-86400 sinceDate:[NSDate date]];
-            [xmppAccount setMAMQueryFromStart: yesterday toDate:[NSDate date] andJid:self.contactName];
-        }
-        
-    }
+ 
     
     [self refreshButton:nil];
 
@@ -196,6 +228,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     [super viewDidAppear:animated];
     [self scrollToBottom];
     [self refreshCounter];
+    [self synchChat];
  
 }
 
@@ -478,13 +511,15 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         if(result) {
         dispatch_async(dispatch_get_main_queue(),
                        ^{
+                           NSDate *messagetime = [self currentGMTTime];
+                           
                            NSDictionary* userInfo = @{@"af": self.jid,
                                                       @"message": message ,
-                                                      @"thetime": [self currentGMTTime],
+                                                      @"thetime": messagetime,
                                                       @"delivered":@YES,
-                                                             @"messageid": messageId,
+                                                      @"messageid": messageId,
                                                       kMessageType:messageType
-                                                             };
+                                                      };
                            [self.messageList addObject:[userInfo mutableCopy]];
                            
                            NSIndexPath *path1;
@@ -564,14 +599,16 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                                {
                                    userInfo = @{@"af": [notification.userInfo objectForKey:@"actuallyfrom"],
                                                 @"message": [notification.userInfo objectForKey:@"messageText"],
-                                                @"thetime": [self currentGMTTime],   @"delivered":@YES,
+                                                @"thetime": [notification.userInfo objectForKey:@"delayTimeStamp"]?[notification.userInfo objectForKey:@"delayTimeStamp"]:[self currentGMTTime],
+                                                @"delivered":@YES,
                                                 kMessageType:finalMessageType
                                                 };
                                    
                                } else  {
                                    userInfo = @{@"af": [notification.userInfo objectForKey:@"actuallyfrom"],
                                                 @"message": [notification.userInfo objectForKey:@"messageText"],
-                                                @"thetime": [self currentGMTTime], kMessageType:finalMessageType
+                                                @"thetime": [self currentGMTTime],
+                                                kMessageType:finalMessageType
                                                 };
                                }
                                
@@ -581,11 +618,11 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                                [_messageTable beginUpdates];
                                NSIndexPath *path1;
                                NSInteger bottom =  self.messageList.count-1;
-                               if(bottom>0) {
+                            
                                    path1 = [NSIndexPath indexPathForRow:bottom  inSection:0];
                                    [_messageTable insertRowsAtIndexPaths:@[path1]
                                                         withRowAnimation:UITableViewRowAnimationBottom];
-                               }
+                               
                                
                                [_messageTable endUpdates];
                                
@@ -713,14 +750,19 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     return [self.sourceDateFormat stringFromDate:destinationDate];
 }
 
--(NSString*) formattedDateWithSource:(NSString*) sourceDateString
+-(NSString*) formattedDateWithSource:(NSObject *) sourceDateString
 {
     NSString* dateString;
     
     if(sourceDateString!=nil)
     {
         
-        NSDate* sourceDate=[self.sourceDateFormat dateFromString:sourceDateString];
+        NSDate* sourceDate;
+        if([sourceDateString isKindOfClass:[NSDate class]]){
+            sourceDate=sourceDateString;
+        } else  {
+        sourceDate=[self.sourceDateFormat dateFromString:sourceDateString];
+        }
         
         NSTimeZone* sourceTimeZone = [NSTimeZone timeZoneWithAbbreviation:@"GMT"];
         NSTimeZone* destinationTimeZone = [NSTimeZone systemTimeZone];

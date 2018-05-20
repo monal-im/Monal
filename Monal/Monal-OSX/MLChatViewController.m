@@ -57,6 +57,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [nc addObserver:self selector:@selector(handleSentMessage:) name:kMonalSentMessageNotice object:nil];
     [nc addObserver:self selector:@selector(refreshData) name:kMonalWindowVisible object:nil];
     [nc addObserver:self selector:@selector(refreshMessage:) name:kMonalMessageReceivedNotice object:nil];
+    [nc addObserver:self selector:@selector(fetchMoreMessages) name:kMLMAMMore object:nil];
     
     
     [self setupDateObjects];
@@ -130,13 +131,17 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     [self refreshData];
     
-    
+    [self synchChat];
+}
+
+-(void) synchChat
+{
     xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
     if(xmppAccount.supportsMam2 & !self.isMUC) {
         
         NSDictionary *lastMessage= [self.messageList lastObject];
         NSDate *last =[self.sourceDateFormat dateFromString:[lastMessage objectForKey:@"thetime"]];
-     
+        
         //synch point
         // if synch point < login time
         NSDate *synch = [[DataLayer sharedInstance] synchPointForContact:self.contactName andAccount:self.accountNo];
@@ -148,9 +153,19 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             [[DataLayer sharedInstance] setSynchPoint:[NSDate date] ForContact:self.contactName andAccount:self.accountNo];
         }
     }
-    
 }
 
+
+-(void) fetchMoreMessages
+{
+    //this forces a new fetch if needed
+    NSDictionary *lastMessage= [self.messageList lastObject];
+    NSDate *last =[self.sourceDateFormat dateFromString:[lastMessage objectForKey:@"thetime"]];
+    if(last) {
+    [[DataLayer sharedInstance] setSynchPoint:last ForContact:self.contactName andAccount:self.accountNo];
+    }
+    [self synchChat];
+}
 
 -(void) scrollToBottom
 {

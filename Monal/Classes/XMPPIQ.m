@@ -301,7 +301,7 @@
         
         MLXMLNode* max =[[MLXMLNode alloc] init];
         max.element=@"max";
-        max.data=@"100";
+        max.data=@"100"; 
         [set.children addObject:max];
         [queryNode.children addObject:set];
         
@@ -399,8 +399,6 @@
         [xnode.children addObject:field2];
     }
 
-
- 
     
     if(jid) {
         MLXMLNode* field3 =[[MLXMLNode alloc] init];
@@ -415,20 +413,26 @@
         [xnode.children addObject:field3];
     }
     
+    MLXMLNode* field3 =[[MLXMLNode alloc] init];
+    field3.element=@"set";
+    [field3.attributes setObject:@"xmlns" forKey:@"http://jabber.org/protocol/rsm"];
+    
+    
+    MLXMLNode* max =[[MLXMLNode alloc] init];
+    max.element=@"max";
+    max.data=@"20"; // initally set to 100 but things didnt like it
+    [field3.children addObject:max];
     
     if(uid) {
-        MLXMLNode* field3 =[[MLXMLNode alloc] init];
-        field3.element=@"set";
-        [field3.attributes setObject:@"zmlns" forKey:@"http://jabber.org/protocol/rsm"];
-        
+   
         MLXMLNode* value3 =[[MLXMLNode alloc] init];
         value3.element=@"after";
         value3.data=uid;
         [field3.children addObject:value3];
         
-        [queryNode.children addObject:field3];
+       
     }
-    
+     [queryNode.children addObject:field3];
     
     [queryNode.children addObject:xnode];
     

@@ -143,7 +143,7 @@
         return;
     }
     
-    if([elementName isEqualToString:@"fin"] && [[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:mam:2"])
+    if([elementName isEqualToString:@"fin"] && [[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:mam:2"]  &&  [[attributeDict objectForKey:@"complete"] isEqualToString:@"true"])
     {
         _mam2fin =YES;
         return;

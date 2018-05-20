@@ -549,6 +549,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     {
         [_contactsVC clearContactsForAccount:_accountNo];
         [[DataLayer sharedInstance] resetContactsForAccount:_accountNo];
+        _unAckedStanzas=nil;
+        [self persistState];
     }
     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountStatusChanged object:nil];
     
@@ -1398,7 +1400,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         if(iqNode.mam2Last && !iqNode.mam2fin)
                         {
                             //fetch since last
-                           // [self setMAMQueryFromStart:]
+                        //   [self setMAMQueryFromStart:[NSDate date] after:iqNode.mam2Last andJid:@"chris@ballinger.io"];
+                            
+                            //RSM seems broken on servers. Tell UI there is more to fetch
+                            [[NSNotificationCenter defaultCenter] postNotificationName:kMLMAMMore object:nil];
                             
                         }
                         

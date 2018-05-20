@@ -173,7 +173,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     [self handleForeGround];
     
     xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
-    if(xmppAccount.supportsMam2) {
+    if(xmppAccount.supportsMam2 && !_isMUC) {
         
         if(self.messageList.count==0)
         {

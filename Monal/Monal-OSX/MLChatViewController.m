@@ -731,22 +731,19 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     NSString *messageString = [messageRow objectForKey:@"message"];
     NSString *messageType =[messageRow objectForKey:kMessageType];
-    cell.timeStamp.stringValue=@"BAA"; //remove template values to no break voice over
+    cell.timeStamp.stringValue=@""; //remove template values to not break voice over
     
     if([messageType isEqualToString:kMessageTypeStatus])
     {
         cell = [tableView makeViewWithIdentifier:@"statusCell" owner:self];
         cell.timeStamp.stringValue=messageString;
-        cell.timeStamp.accessibilityLabel=@"Time Divider";
-        cell.timeStamp.accessibilityHelp=@"Messages below are more than 15 min later";
+        cell.timeStamp.accessibilityLabel=@"Chat Status";
+       // cell.timeStamp.accessibilityHelp=@"Messages below are more than 15 min later";
         return cell;
     }
     
     NSMutableString *accessibility =[[NSMutableString alloc] init];
-    cell.toolTip=[self formattedDateWithSource:[messageRow objectForKey:@"thetime"]];
-    if(cell.toolTip) {
-    [accessibility appendString:cell.toolTip];
-    }
+   
     [accessibility appendString:@" From "];
     
     if([messageType isEqualToString:kMessageTypeText]) {
@@ -775,8 +772,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         cell.messageText.editable=NO;
         
         [accessibility appendString:messageString];
-        cell.scrollArea.accessibilityLabel=accessibility;
-        
+      
        
     }
     
@@ -830,6 +826,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     
     BOOL showTime=[self shouldShowTimeForRow:row];
+    
+    NSString *dateString=[self formattedDateWithSource:[messageRow objectForKey:@"thetime"]];
+    cell.toolTip=dateString;
    
     if(showTime) {
         cell.timeStamp.hidden=NO;
@@ -840,8 +839,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         cell.timeStamp.hidden=YES;
         cell.timeStampHeight.constant=0.0f;
         cell.timeStampVeritcalOffset.constant=0.0f;
+       
+        if(dateString) {
+            [accessibility insertString:dateString atIndex:0];
+        }
         
     }
+    
+    cell.scrollArea.accessibilityLabel=accessibility;
+    
     
    [[MLImageManager sharedInstance] getIconForContact:[messageRow objectForKey:@"af"] andAccount:self.accountNo withCompletion:^(NSImage *icon) {
        cell.senderIcon.image=icon;

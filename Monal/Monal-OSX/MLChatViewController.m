@@ -75,6 +75,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     [self refreshData];
     [self updateWindowForContact:self.contactDic];
+    
         
 }
 
@@ -88,6 +89,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     MLMainWindow *window =(MLMainWindow *)self.view.window.windowController;
     window.chatViewController= self;
+  
 }
 
 -(void) dealloc
@@ -187,6 +189,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     MLMainWindow *window =(MLMainWindow *)self.view.window.windowController;
     [window updateCurrentContact:contact];
+    
+    NSString *fullName= (NSString *) [contact objectForKey:kFullName];
+    if(!fullName) fullName =(NSString *) [contact objectForKey:kContactName];
+    
+    self.chatTable.accessibilityLabel=[NSString stringWithFormat:@"Chat with %@", fullName];
 }
 
 
@@ -737,8 +744,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     {
         cell = [tableView makeViewWithIdentifier:@"statusCell" owner:self];
         cell.timeStamp.stringValue=messageString;
-        cell.timeStamp.accessibilityLabel=@"Chat Status";
-       // cell.timeStamp.accessibilityHelp=@"Messages below are more than 15 min later";
         return cell;
     }
     
@@ -778,11 +783,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
      if([messageType isEqualToString:kMessageTypeImage])
     {
-        cell.accessibilityLabel=[NSString stringWithFormat:@"%@ Picture Sent",cell.toolTip];
+      
         NSString* cellDirectionID = @"InboundImageCell";
         if([[messageRow objectForKey:@"af"] isEqualToString:self.jid]) {
             cellDirectionID=@"OutboundImageCell";
-            cell.accessibilityLabel=[NSString stringWithFormat:@"%@ Picture Received",cell.toolTip];
         }
         
         cell = [tableView makeViewWithIdentifier:cellDirectionID owner:self];
@@ -847,7 +851,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     
     cell.scrollArea.accessibilityLabel=accessibility;
-    
+   
     
    [[MLImageManager sharedInstance] getIconForContact:[messageRow objectForKey:@"af"] andAccount:self.accountNo withCompletion:^(NSImage *icon) {
        cell.senderIcon.image=icon;

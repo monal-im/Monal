@@ -1878,7 +1878,9 @@ Gw
                                                                         <constraint firstAttribute="width" constant="275" id="7t7-NK-Kug"/>
                                                                         <constraint firstAttribute="height" constant="200" id="U3K-oy-syt"/>
                                                                     </constraints>
-                                                                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" animates="YES" imageScaling="proportionallyUpOrDown" id="xl6-ZI-PPc"/>
+                                                                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" animates="YES" imageScaling="proportionallyUpOrDown" id="xl6-ZI-PPc">
+                                                                        <accessibility description="Picture Sent"/>
+                                                                    </imageCell>
                                                                     <connections>
                                                                         <outlet property="previewTarget" destination="qLp-oS-WKI" id="wn2-eq-TM6"/>
                                                                     </connections>
@@ -1897,6 +1899,7 @@ Gw
                                                                 <constraint firstItem="Bab-Se-qo9" firstAttribute="top" secondItem="AA0-Za-mMq" secondAttribute="top" constant="5" id="oUl-k2-OKu"/>
                                                                 <constraint firstItem="Bab-Se-qo9" firstAttribute="centerX" secondItem="AA0-Za-mMq" secondAttribute="centerX" id="xBT-bV-bIA"/>
                                                             </constraints>
+                                                            <accessibility description="Image Sent"/>
                                                             <connections>
                                                                 <outlet property="attachmentImage" destination="SPf-hi-Vyw" id="QkN-sq-JYI"/>
                                                                 <outlet property="messageStatus" destination="Nco-oq-C1X" id="j6P-4V-ZWt"/>
@@ -1954,6 +1957,7 @@ Gw
                                                                             </textView>
                                                                         </subviews>
                                                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                                                        <accessibility description="Message"/>
                                                                     </clipView>
                                                                     <constraints>
                                                                         <constraint firstAttribute="width" constant="285" id="5it-it-g7R"/>
@@ -2106,6 +2110,7 @@ Gw
                                                                 <constraint firstItem="eQr-VP-pfh" firstAttribute="centerX" secondItem="cX2-7P-kXI" secondAttribute="centerX" id="w01-et-XwN"/>
                                                                 <constraint firstItem="61h-Ow-Utz" firstAttribute="top" secondItem="sWQ-oj-7zC" secondAttribute="bottom" constant="8" id="wU7-Ve-17j"/>
                                                             </constraints>
+                                                            <accessibility description="Image Received"/>
                                                             <connections>
                                                                 <outlet property="attachmentImage" destination="61h-Ow-Utz" id="NT2-aT-CZ3"/>
                                                                 <outlet property="imageView" destination="kUM-jm-fPa" id="EQV-8j-2QO"/>

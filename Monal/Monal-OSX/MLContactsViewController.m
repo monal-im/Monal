@@ -202,7 +202,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 -(void) showActiveChat:(BOOL) shouldShow
 {
     if (shouldShow) {
-  
+        self.contactsTable.accessibilityLabel=@"Active Chats";
         [[DataLayer sharedInstance] activeContactsWithCompletion:^(NSMutableArray *cleanActive) {
             [[MLXMPPManager sharedInstance] cleanArrayOfConnectedAccounts:cleanActive];
             dispatch_async(dispatch_get_main_queue(), ^{
@@ -215,7 +215,8 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
     else {
         self.activeChat=nil;
         [self.contactsTable reloadData];
-       
+        self.contactsTable.accessibilityLabel=@"Contacts";
+        
         [self highlightCellForCurrentContact];
     }
     

@@ -1787,7 +1787,7 @@ Gw
                                                                     </textFieldCell>
                                                                 </textField>
                                                                 <textField hidden="YES" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="0Kf-Uk-FOQ">
-                                                                    <rect key="frame" x="89" y="0.0" width="54" height="14"/>
+                                                                    <rect key="frame" x="82" y="0.0" width="54" height="14"/>
                                                                     <constraints>
                                                                         <constraint firstAttribute="width" constant="50" id="UcQ-uM-P84"/>
                                                                         <constraint firstAttribute="height" constant="14" id="nyT-jA-sXG"/>
@@ -1808,7 +1808,7 @@ Gw
                                                                 <constraint firstItem="c4f-GC-Hfe" firstAttribute="leading" secondItem="lsM-YA-awl" secondAttribute="trailing" constant="8" id="Jh5-m5-id3"/>
                                                                 <constraint firstItem="Zna-XK-R5x" firstAttribute="centerX" secondItem="zUs-Dd-GH1" secondAttribute="centerX" id="Rwr-yD-Cyl"/>
                                                                 <constraint firstAttribute="bottom" secondItem="0Kf-Uk-FOQ" secondAttribute="bottom" id="S8V-YU-dtc"/>
-                                                                <constraint firstItem="lsM-YA-awl" firstAttribute="leading" secondItem="0Kf-Uk-FOQ" secondAttribute="trailing" constant="15" id="Yd6-aM-2p1"/>
+                                                                <constraint firstItem="lsM-YA-awl" firstAttribute="leading" secondItem="0Kf-Uk-FOQ" secondAttribute="trailing" constant="22" id="Yd6-aM-2p1"/>
                                                                 <constraint firstItem="lsM-YA-awl" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="zUs-Dd-GH1" secondAttribute="leading" constant="50" id="cN9-UB-Ue7"/>
                                                                 <constraint firstItem="lsM-YA-awl" firstAttribute="centerY" secondItem="zUs-Dd-GH1" secondAttribute="centerY" constant="14.5" id="eBg-PO-smh"/>
                                                                 <constraint firstAttribute="bottom" secondItem="c4f-GC-Hfe" secondAttribute="bottom" constant="5" id="ydI-e0-0DL"/>

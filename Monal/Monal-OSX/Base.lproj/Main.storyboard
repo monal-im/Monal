@@ -1625,7 +1625,7 @@ Gw
                                             <constraint firstAttribute="height" constant="21" id="0v9-bX-Sxq"/>
                                             <constraint firstAttribute="width" constant="59" id="NI9-GV-Te8"/>
                                         </constraints>
-                                        <buttonCell key="cell" type="push" title="😀" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="ccl-s1-dL9">
+                                        <buttonCell key="cell" type="push" bezelStyle="rounded" image="870-smile" imagePosition="only" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="ccl-s1-dL9">
                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                             <font key="font" metaFont="system"/>
                                         </buttonCell>
@@ -2814,6 +2814,7 @@ Gw
         <image name="724-info" width="28" height="28"/>
         <image name="735-phone" width="28" height="28"/>
         <image name="770-paper-clip" width="28" height="27"/>
+        <image name="870-smile" width="28" height="28"/>
         <image name="907-plus-rounded-square" width="28" height="28"/>
         <image name="Disconnected" width="26" height="26"/>
         <image name="NotificationBubble" width="22" height="22"/>

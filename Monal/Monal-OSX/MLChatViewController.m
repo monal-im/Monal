@@ -291,7 +291,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 [self endProgressUpdate];
                 if(url) {
                     self.messageBox.string= url;
-                    [self sendText:selfd];
+                    [self sendText:self];
                 }
                 else  {
                     NSAlert *userAddAlert = [[NSAlert alloc] init];

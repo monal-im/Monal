@@ -1607,10 +1607,13 @@ Gw
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <customView translatesAutoresizingMaskIntoConstraints="NO" id="mUJ-xh-yCG">
-                                <rect key="frame" x="0.0" y="0.0" width="493" height="105"/>
+                                <rect key="frame" x="0.0" y="0.0" width="493" height="38"/>
                                 <subviews>
                                     <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="m4R-R5-Jrl">
                                         <rect key="frame" x="420" y="2" width="71" height="32"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="59" id="p5e-GZ-wtS"/>
+                                        </constraints>
                                         <buttonCell key="cell" type="push" title="Send" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Rbr-ky-nlC">
                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                             <font key="font" metaFont="system"/>
@@ -1619,26 +1622,10 @@ Gw
                                             <action selector="sendText:" target="qLp-oS-WKI" id="4tP-lD-TxW"/>
                                         </connections>
                                     </button>
-                                    <button toolTip="Select Emoji" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="RB8-DH-Efv">
-                                        <rect key="frame" x="420" y="68" width="71" height="32"/>
-                                        <constraints>
-                                            <constraint firstAttribute="height" constant="21" id="0v9-bX-Sxq"/>
-                                            <constraint firstAttribute="width" constant="59" id="NI9-GV-Te8"/>
-                                        </constraints>
-                                        <buttonCell key="cell" type="push" bezelStyle="rounded" image="870-smile" imagePosition="only" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="ccl-s1-dL9">
-                                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                            <font key="font" metaFont="system"/>
-                                        </buttonCell>
-                                        <accessibility description="Emoji" help="Shows emoji picker"/>
-                                        <connections>
-                                            <action selector="emojiPicker:" target="qLp-oS-WKI" id="ooo-mc-es1"/>
-                                        </connections>
-                                    </button>
                                     <button toolTip="Select Attachment" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="8Vn-dI-GYF">
-                                        <rect key="frame" x="420" y="35" width="71" height="32"/>
+                                        <rect key="frame" x="2" y="2" width="42" height="32"/>
                                         <constraints>
-                                            <constraint firstAttribute="width" constant="59" id="WbV-NN-nKL"/>
-                                            <constraint firstAttribute="height" constant="21" id="lHN-sW-E10"/>
+                                            <constraint firstAttribute="width" constant="30" id="ZzH-ds-9Ip"/>
                                         </constraints>
                                         <buttonCell key="cell" type="push" bezelStyle="rounded" image="770-paper-clip" imagePosition="overlaps" alignment="center" borderStyle="border" toolTip="Attachment" imageScaling="proportionallyDown" inset="2" id="EhU-fh-pZm">
                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -1650,16 +1637,16 @@ Gw
                                         </connections>
                                     </button>
                                     <scrollView horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" hasVerticalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Cir-fi-93b">
-                                        <rect key="frame" x="8" y="8" width="410" height="89"/>
+                                        <rect key="frame" x="85" y="8" width="333" height="22"/>
                                         <clipView key="contentView" id="xyg-jq-3Wg">
-                                            <rect key="frame" x="1" y="1" width="408" height="87"/>
+                                            <rect key="frame" x="1" y="1" width="331" height="20"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
                                                 <textView verticallyResizable="YES" usesFontPanel="YES" findStyle="panel" continuousSpellChecking="YES" allowsUndo="YES" allowsImageEditing="YES" usesRuler="YES" allowsNonContiguousLayout="YES" quoteSubstitution="YES" linkDetection="YES" dataDetection="YES" dashSubstitution="YES" textReplacement="YES" spellingCorrection="YES" smartInsertDelete="YES" id="mlB-yh-jDA">
-                                                    <rect key="frame" x="0.0" y="0.0" width="408" height="87"/>
+                                                    <rect key="frame" x="0.0" y="0.0" width="331" height="20"/>
                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                     <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                                    <size key="minSize" width="408" height="87"/>
+                                                    <size key="minSize" width="331" height="20"/>
                                                     <size key="maxSize" width="463" height="10000000"/>
                                                     <color key="insertionPointColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                                     <connections>
@@ -1668,6 +1655,9 @@ Gw
                                                 </textView>
                                             </subviews>
                                         </clipView>
+                                        <constraints>
+                                            <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="333" id="cj4-tA-m7i"/>
+                                        </constraints>
                                         <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="YES" id="8wP-Oc-or5">
                                             <rect key="frame" x="-100" y="-100" width="87" height="18"/>
                                             <autoresizingMask key="autoresizingMask"/>
@@ -1678,33 +1668,47 @@ Gw
                                         </scroller>
                                         <accessibility description="Message Input"/>
                                     </scrollView>
+                                    <button toolTip="Select Emoji" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="RB8-DH-Efv">
+                                        <rect key="frame" x="40" y="2" width="42" height="32"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="21" id="0v9-bX-Sxq"/>
+                                            <constraint firstAttribute="width" constant="30" id="NI9-GV-Te8"/>
+                                        </constraints>
+                                        <buttonCell key="cell" type="push" bezelStyle="rounded" image="870-smile" imagePosition="only" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="ccl-s1-dL9">
+                                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                            <font key="font" metaFont="system"/>
+                                        </buttonCell>
+                                        <accessibility description="Emoji" help="Shows emoji picker"/>
+                                        <connections>
+                                            <action selector="emojiPicker:" target="qLp-oS-WKI" id="ooo-mc-es1"/>
+                                        </connections>
+                                    </button>
                                 </subviews>
                                 <constraints>
-                                    <constraint firstItem="m4R-R5-Jrl" firstAttribute="leading" secondItem="Cir-fi-93b" secondAttribute="trailing" constant="8" id="19I-wA-bFl"/>
-                                    <constraint firstItem="8Vn-dI-GYF" firstAttribute="top" secondItem="RB8-DH-Efv" secondAttribute="bottom" constant="12" id="1id-tA-c7V"/>
-                                    <constraint firstItem="RB8-DH-Efv" firstAttribute="leading" secondItem="Cir-fi-93b" secondAttribute="trailing" constant="8" id="1qa-Hq-8gv"/>
-                                    <constraint firstItem="8Vn-dI-GYF" firstAttribute="leading" secondItem="Cir-fi-93b" secondAttribute="trailing" constant="8" id="4nx-F7-aqP"/>
+                                    <constraint firstItem="RB8-DH-Efv" firstAttribute="top" secondItem="mUJ-xh-yCG" secondAttribute="top" constant="8" id="009-J6-CO7"/>
+                                    <constraint firstItem="m4R-R5-Jrl" firstAttribute="leading" secondItem="Cir-fi-93b" secondAttribute="trailing" constant="8" id="7se-40-ZUw"/>
+                                    <constraint firstItem="RB8-DH-Efv" firstAttribute="leading" secondItem="8Vn-dI-GYF" secondAttribute="trailing" constant="8" id="E9i-iA-PtK"/>
                                     <constraint firstAttribute="bottom" secondItem="m4R-R5-Jrl" secondAttribute="bottom" constant="9" id="KJ2-Od-F8N"/>
-                                    <constraint firstAttribute="trailing" secondItem="8Vn-dI-GYF" secondAttribute="trailing" constant="8" id="OMn-N8-yJP"/>
                                     <constraint firstAttribute="bottom" secondItem="Cir-fi-93b" secondAttribute="bottom" constant="8" id="OhI-Ux-abI"/>
-                                    <constraint firstItem="RB8-DH-Efv" firstAttribute="top" secondItem="mUJ-xh-yCG" secondAttribute="top" constant="9" id="WGU-sR-kN5"/>
-                                    <constraint firstItem="m4R-R5-Jrl" firstAttribute="top" secondItem="8Vn-dI-GYF" secondAttribute="bottom" constant="12" id="a2s-fo-mdX"/>
-                                    <constraint firstItem="Cir-fi-93b" firstAttribute="leading" secondItem="mUJ-xh-yCG" secondAttribute="leading" constant="8" id="bo6-HM-adx"/>
-                                    <constraint firstAttribute="trailing" secondItem="RB8-DH-Efv" secondAttribute="trailing" constant="8" id="hzO-jB-EdY"/>
+                                    <constraint firstItem="8Vn-dI-GYF" firstAttribute="top" secondItem="mUJ-xh-yCG" secondAttribute="top" constant="8" id="ZFb-o8-UfR"/>
+                                    <constraint firstItem="Cir-fi-93b" firstAttribute="leading" secondItem="RB8-DH-Efv" secondAttribute="trailing" constant="9" id="Zgh-rg-miR"/>
+                                    <constraint firstItem="RB8-DH-Efv" firstAttribute="leading" secondItem="8Vn-dI-GYF" secondAttribute="trailing" constant="8" id="fJf-sz-8Ob"/>
+                                    <constraint firstItem="m4R-R5-Jrl" firstAttribute="top" secondItem="mUJ-xh-yCG" secondAttribute="top" constant="8" id="heX-oC-Jw8"/>
                                     <constraint firstItem="Cir-fi-93b" firstAttribute="top" secondItem="mUJ-xh-yCG" secondAttribute="top" constant="8" id="qAa-g1-YXr"/>
+                                    <constraint firstAttribute="trailing" secondItem="m4R-R5-Jrl" secondAttribute="trailing" constant="8" id="qUm-yC-rOt"/>
+                                    <constraint firstItem="8Vn-dI-GYF" firstAttribute="leading" secondItem="mUJ-xh-yCG" secondAttribute="leading" constant="8" id="qlU-6Z-oQw"/>
                                     <constraint firstAttribute="trailing" secondItem="m4R-R5-Jrl" secondAttribute="trailing" constant="8" id="wOx-Er-GWz"/>
-                                    <constraint firstItem="8Vn-dI-GYF" firstAttribute="leading" secondItem="Cir-fi-93b" secondAttribute="trailing" constant="8" id="xEB-qd-cCD"/>
                                 </constraints>
                                 <accessibility description="Input Bar"/>
                             </customView>
                             <progressIndicator wantsLayer="YES" maxValue="100" displayedWhenStopped="NO" controlSize="small" style="bar" translatesAutoresizingMaskIntoConstraints="NO" id="VSu-xb-ucW">
-                                <rect key="frame" x="0.0" y="101" width="493" height="12"/>
+                                <rect key="frame" x="0.0" y="34" width="493" height="12"/>
                                 <accessibility description="Delivery Progress"/>
                             </progressIndicator>
                             <scrollView borderType="none" autohidesScrollers="YES" horizontalLineScroll="232" horizontalPageScroll="10" verticalLineScroll="232" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="eNE-em-qs3">
-                                <rect key="frame" x="0.0" y="113" width="493" height="384"/>
+                                <rect key="frame" x="0.0" y="46" width="493" height="451"/>
                                 <clipView key="contentView" id="hQs-06-XXl">
-                                    <rect key="frame" x="0.0" y="0.0" width="493" height="384"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="493" height="451"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" selectionHighlightStyle="none" columnReordering="NO" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" typeSelect="NO" rowHeight="230" rowSizeStyle="automatic" viewBased="YES" id="Rsm-HI-GDG">
@@ -2131,6 +2135,9 @@ Gw
                                         </tableView>
                                     </subviews>
                                 </clipView>
+                                <constraints>
+                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="493" id="sqe-9p-zkL"/>
+                                </constraints>
                                 <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="FLe-cV-s8q">
                                     <rect key="frame" x="1" y="119" width="223" height="15"/>
                                     <autoresizingMask key="autoresizingMask"/>

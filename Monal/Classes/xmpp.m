@@ -3464,7 +3464,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         DDLogVerbose(@" tried to send empty message. returning");
         return NO;
     }
-    _streamHasSpace=NO; // triggers more has space messages
+    //_streamHasSpace=NO; // triggers more has space messages
     
     //we probably want to break these into chunks
     DDLogVerbose(@"sending: %@ ", messageOut);

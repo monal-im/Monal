@@ -13,6 +13,7 @@
 #import "NXOAuth2AccountStore.h"
 #import "MBProgressHUD.h"
 #import "MLServerDetails.h"
+#import "MLMAMPrefTableViewController.h"
 
 #import "tools.h"
 
@@ -491,6 +492,14 @@ NSString *const kGtalk = @"Gtalk";
                 thecell.toggleSwitch.on=self.selfSignedSSL;
                 break;
             }
+            case 5: {
+                thecell.cellLabel.text=@"Message Archive Pref";
+                thecell.toggleSwitch.hidden=YES;
+                
+                thecell.textInputField.hidden=YES;
+                thecell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
+                break;
+            }
                 
         }
         
@@ -572,7 +581,7 @@ NSString *const kGtalk = @"Gtalk";
         return 3;
     }
     else if( section ==1) {
-        return 5;
+        return 6;
     }
     else  if(section == 2&&  self.editMode==false)
     {
@@ -594,6 +603,14 @@ NSString *const kGtalk = @"Gtalk";
             [self authenticateWithOAuth];
         }
     }
+    else if (newIndexPath.section==1)
+    {  switch (newIndexPath.row)
+        {
+            case 5:  {
+                [self performSegueWithIdentifier:@"showMAMPref" sender:self];
+            }
+        }
+    }
     else if(newIndexPath.section==2)
     {
         [self delClicked:self];
@@ -611,6 +628,7 @@ NSString *const kGtalk = @"Gtalk";
             case 0:  {
                 [self performSegueWithIdentifier:@"showServerDetails" sender:self];
             }
+           
         }
     }
 }
@@ -624,6 +642,12 @@ NSString *const kGtalk = @"Gtalk";
     {
         MLServerDetails *server= (MLServerDetails *)segue.destinationViewController;
         server.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountno];
+    }
+    
+    else if ([segue.identifier isEqualToString:@"showMAMPref"])
+    {
+        MLMAMPrefTableViewController *mam= (MLMAMPrefTableViewController *)segue.destinationViewController;
+        mam.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountno];
     }
 }
 

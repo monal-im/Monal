@@ -7,7 +7,10 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "xmpp.h"
 
 @interface MLMAMPrefTableViewController : UITableViewController
+
+@property (nonatomic, weak) xmpp *xmppAccount;
 
 @end

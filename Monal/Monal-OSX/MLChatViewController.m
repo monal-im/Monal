@@ -134,6 +134,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self synchChat];
 }
 
+#pragma mark - MAM
+
 -(void) synchChat
 {
     xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
@@ -729,13 +731,23 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     NSString *messageString = [messageRow objectForKey:@"message"];
     NSString *messageType =[messageRow objectForKey:kMessageType];
+    cell.timeStamp.stringValue=@"BAA"; //remove template values to no break voice over
     
     if([messageType isEqualToString:kMessageTypeStatus])
     {
         cell = [tableView makeViewWithIdentifier:@"statusCell" owner:self];
         cell.timeStamp.stringValue=messageString;
+        cell.timeStamp.accessibilityLabel=@"Time Divider";
+        cell.timeStamp.accessibilityHelp=@"Messages below are more than 15 min later";
         return cell;
     }
+    
+    NSMutableString *accessibility =[[NSMutableString alloc] init];
+    cell.toolTip=[self formattedDateWithSource:[messageRow objectForKey:@"thetime"]];
+    if(cell.toolTip) {
+    [accessibility appendString:cell.toolTip];
+    }
+    [accessibility appendString:@" From "];
     
     if([messageType isEqualToString:kMessageTypeText]) {
         if([[messageRow objectForKey:@"af"] isEqualToString:self.jid]) {
@@ -743,12 +755,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             cell.isInbound= NO;
             cell.messageText.textColor = [NSColor whiteColor];
             cell.messageText.linkTextAttributes =@{NSForegroundColorAttributeName:[NSColor whiteColor], NSUnderlineStyleAttributeName: @YES};
+            [accessibility appendString:@"Me :"];
             
         }
         else  {
             cell = [tableView makeViewWithIdentifier:@"InboundTextCell" owner:self];
             cell.isInbound=YES;
             cell.messageText.linkTextAttributes =@{NSForegroundColorAttributeName:[NSColor blackColor], NSUnderlineStyleAttributeName: @YES};
+            [accessibility appendString:@"Contact :"];
         }
         
         
@@ -759,14 +773,20 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         cell.messageText.string =messageString;
         [cell.messageText checkTextInDocument:nil];
         cell.messageText.editable=NO;
+        
+        [accessibility appendString:messageString];
+        cell.scrollArea.accessibilityLabel=accessibility;
+        
        
     }
     
      if([messageType isEqualToString:kMessageTypeImage])
     {
+        cell.accessibilityLabel=[NSString stringWithFormat:@"%@ Picture Sent",cell.toolTip];
         NSString* cellDirectionID = @"InboundImageCell";
         if([[messageRow objectForKey:@"af"] isEqualToString:self.jid]) {
             cellDirectionID=@"OutboundImageCell";
+            cell.accessibilityLabel=[NSString stringWithFormat:@"%@ Picture Received",cell.toolTip];
         }
         
         cell = [tableView makeViewWithIdentifier:cellDirectionID owner:self];
@@ -783,12 +803,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     if([[messageRow objectForKey:@"delivered"] boolValue]!=YES)
     {
         cell.deliveryFailed=YES;
+        cell.retry.accessibilityLabel=@"Retry Sending";
         cell.retry.tag= [[messageRow objectForKey:@"message_history_id"] integerValue];
     }
     else  {
         cell.deliveryFailed=NO;
     }
   
+    cell.messageStatus.accessibilityLabel=@"Delivered";
     NSNumber *received = [messageRow objectForKey:kReceived];
     if(received.boolValue==YES) {
         NSDictionary *prior =nil;
@@ -808,9 +830,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     
     BOOL showTime=[self shouldShowTimeForRow:row];
- 
-    cell.toolTip=[self formattedDateWithSource:[messageRow objectForKey:@"thetime"]];
-    
+   
     if(showTime) {
         cell.timeStamp.hidden=NO;
         cell.timeStampHeight.constant=kCellTimeStampHeight;
@@ -820,6 +840,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         cell.timeStamp.hidden=YES;
         cell.timeStampHeight.constant=0.0f;
         cell.timeStampVeritcalOffset.constant=0.0f;
+        
     }
     
    [[MLImageManager sharedInstance] getIconForContact:[messageRow objectForKey:@"af"] andAccount:self.accountNo withCompletion:^(NSImage *icon) {

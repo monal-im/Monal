@@ -1192,6 +1192,7 @@ CA
                                                                         <constraint firstAttribute="width" constant="22" id="ez3-Al-LZu"/>
                                                                     </constraints>
                                                                     <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="NotificationBubble" id="rpz-fX-96K"/>
+                                                                    <accessibility description="Has Unread"/>
                                                                 </imageView>
                                                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" misplaced="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="OtE-Pn-e94">
                                                                     <rect key="frame" x="41" y="38" width="16" height="17"/>
@@ -1618,7 +1619,7 @@ Gw
                                             <action selector="sendText:" target="qLp-oS-WKI" id="4tP-lD-TxW"/>
                                         </connections>
                                     </button>
-                                    <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="RB8-DH-Efv">
+                                    <button toolTip="Select Emoji" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="RB8-DH-Efv">
                                         <rect key="frame" x="420" y="68" width="71" height="32"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="21" id="0v9-bX-Sxq"/>
@@ -1628,20 +1629,22 @@ Gw
                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                             <font key="font" metaFont="system"/>
                                         </buttonCell>
+                                        <accessibility description="Emoji" help="Shows emoji picker"/>
                                         <connections>
                                             <action selector="emojiPicker:" target="qLp-oS-WKI" id="ooo-mc-es1"/>
                                         </connections>
                                     </button>
-                                    <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="8Vn-dI-GYF">
+                                    <button toolTip="Select Attachment" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="8Vn-dI-GYF">
                                         <rect key="frame" x="420" y="35" width="71" height="32"/>
                                         <constraints>
                                             <constraint firstAttribute="width" constant="59" id="WbV-NN-nKL"/>
                                             <constraint firstAttribute="height" constant="21" id="lHN-sW-E10"/>
                                         </constraints>
-                                        <buttonCell key="cell" type="push" bezelStyle="rounded" image="770-paper-clip" imagePosition="overlaps" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="EhU-fh-pZm">
+                                        <buttonCell key="cell" type="push" bezelStyle="rounded" image="770-paper-clip" imagePosition="overlaps" alignment="center" borderStyle="border" toolTip="Attachment" imageScaling="proportionallyDown" inset="2" id="EhU-fh-pZm">
                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                             <font key="font" metaFont="system"/>
                                         </buttonCell>
+                                        <accessibility description="Attach"/>
                                         <connections>
                                             <action selector="attach:" target="qLp-oS-WKI" id="mz7-cH-GVR"/>
                                         </connections>
@@ -1673,6 +1676,7 @@ Gw
                                             <rect key="frame" x="224" y="1" width="15" height="133"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                         </scroller>
+                                        <accessibility description="Message Input"/>
                                     </scrollView>
                                 </subviews>
                                 <constraints>
@@ -1691,9 +1695,11 @@ Gw
                                     <constraint firstAttribute="trailing" secondItem="m4R-R5-Jrl" secondAttribute="trailing" constant="8" id="wOx-Er-GWz"/>
                                     <constraint firstItem="8Vn-dI-GYF" firstAttribute="leading" secondItem="Cir-fi-93b" secondAttribute="trailing" constant="8" id="xEB-qd-cCD"/>
                                 </constraints>
+                                <accessibility description="Input Bar"/>
                             </customView>
                             <progressIndicator wantsLayer="YES" maxValue="100" displayedWhenStopped="NO" controlSize="small" style="bar" translatesAutoresizingMaskIntoConstraints="NO" id="VSu-xb-ucW">
                                 <rect key="frame" x="0.0" y="101" width="493" height="12"/>
+                                <accessibility description="Delivery Progress"/>
                             </progressIndicator>
                             <scrollView borderType="none" autohidesScrollers="YES" horizontalLineScroll="232" horizontalPageScroll="10" verticalLineScroll="232" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="eNE-em-qs3">
                                 <rect key="frame" x="0.0" y="113" width="493" height="384"/>
@@ -1781,7 +1787,7 @@ Gw
                                                                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="0yg-9t-FBZ"/>
                                                                         <constraint firstAttribute="height" relation="lessThanOrEqual" constant="14" id="Qdf-jg-DDP"/>
                                                                     </constraints>
-                                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Today, 10:00PM" id="rFV-cu-Sps">
+                                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" placeholderString="Divider" id="rFV-cu-Sps">
                                                                         <font key="font" metaFont="smallSystem"/>
                                                                         <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
@@ -1818,6 +1824,7 @@ Gw
                                                                 <outlet property="messageStatus" destination="0Kf-Uk-FOQ" id="eLI-vM-gyd"/>
                                                                 <outlet property="messageText" destination="gBQ-7e-nXQ" id="SFc-ts-FwH"/>
                                                                 <outlet property="retry" destination="lsM-YA-awl" id="RE2-Fb-X4p"/>
+                                                                <outlet property="scrollArea" destination="c4f-GC-Hfe" id="OyL-gX-3r4"/>
                                                                 <outlet property="timeStamp" destination="Zna-XK-R5x" id="M1K-wV-qMS"/>
                                                                 <outlet property="timeStampHeight" destination="Qdf-jg-DDP" id="kDL-ld-ntd"/>
                                                                 <outlet property="timeStampVeritcalOffset" destination="ERE-Fb-PO9" id="IA5-zx-fb5"/>
@@ -1859,7 +1866,7 @@ Gw
                                                                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="XwG-Z6-2Eh"/>
                                                                         <constraint firstAttribute="height" relation="lessThanOrEqual" constant="14" id="iR3-Zk-9RU"/>
                                                                     </constraints>
-                                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Today, 10:00PM" id="Ffo-XA-3sk">
+                                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" placeholderString="Divider" id="Ffo-XA-3sk">
                                                                         <font key="font" metaFont="smallSystem"/>
                                                                         <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
@@ -1903,25 +1910,13 @@ Gw
                                                             <rect key="frame" x="1" y="291" width="490" height="56"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
-                                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="NpM-vt-K6J">
-                                                                    <rect key="frame" x="193" y="56" width="104" height="14"/>
-                                                                    <constraints>
-                                                                        <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="Bh2-9l-Ef0"/>
-                                                                        <constraint firstAttribute="height" constant="14" id="pES-du-vOO"/>
-                                                                    </constraints>
-                                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Today, 10:00PM" id="zIB-RQ-Qfq">
-                                                                        <font key="font" metaFont="smallSystem"/>
-                                                                        <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
-                                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                                    </textFieldCell>
-                                                                </textField>
                                                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="1Jj-Uz-3W8">
                                                                     <rect key="frame" x="193" y="37" width="104" height="14"/>
                                                                     <constraints>
                                                                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="8k4-Ai-1AJ"/>
                                                                         <constraint firstAttribute="height" relation="lessThanOrEqual" constant="14" id="U4S-jL-pcz"/>
                                                                     </constraints>
-                                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="Today, 10:00PM" id="Z2f-uH-fuc">
+                                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" placeholderString="Divider" id="Z2f-uH-fuc">
                                                                         <font key="font" metaFont="smallSystem"/>
                                                                         <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
@@ -1936,16 +1931,16 @@ Gw
                                                                     <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" id="Kl9-z1-zTj"/>
                                                                 </imageView>
                                                                 <scrollView borderType="none" horizontalLineScroll="0.0" horizontalPageScroll="0.0" verticalLineScroll="0.0" verticalPageScroll="0.0" hasHorizontalScroller="NO" hasVerticalScroller="NO" usesPredominantAxisScrolling="NO" horizontalScrollElasticity="none" verticalScrollElasticity="none" translatesAutoresizingMaskIntoConstraints="NO" id="sQP-OP-6Ue" customClass="MLDisabledScrollView">
-                                                                    <rect key="frame" x="38" y="3" width="285" height="24"/>
+                                                                    <rect key="frame" x="38" y="3" width="285" height="29"/>
                                                                     <clipView key="contentView" drawsBackground="NO" copiesOnScroll="NO" id="8au-jm-j3X">
-                                                                        <rect key="frame" x="0.0" y="0.0" width="285" height="24"/>
+                                                                        <rect key="frame" x="0.0" y="0.0" width="285" height="29"/>
                                                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                         <subviews>
                                                                             <textView editable="NO" drawsBackground="NO" importsGraphics="NO" verticallyResizable="YES" findStyle="panel" allowsNonContiguousLayout="YES" quoteSubstitution="YES" linkDetection="YES" dataDetection="YES" dashSubstitution="YES" textReplacement="YES" id="xCt-jX-2Jc">
-                                                                                <rect key="frame" x="0.0" y="0.0" width="285" height="24"/>
+                                                                                <rect key="frame" x="0.0" y="0.0" width="285" height="29"/>
                                                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                                 <color key="backgroundColor" name="controlHighlightColor" catalog="System" colorSpace="catalog"/>
-                                                                                <size key="minSize" width="285" height="24"/>
+                                                                                <size key="minSize" width="285" height="29"/>
                                                                                 <size key="maxSize" width="493" height="10000000"/>
                                                                                 <attributedString key="textStorage">
                                                                                     <fragment content="inbound">
@@ -1987,16 +1982,14 @@ Gw
                                                             </subviews>
                                                             <constraints>
                                                                 <constraint firstItem="1Jj-Uz-3W8" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="7np-ZR-2J2" secondAttribute="trailing" constant="5" id="1WC-Ek-pDA"/>
-                                                                <constraint firstItem="NpM-vt-K6J" firstAttribute="centerX" secondItem="Rho-ef-n6l" secondAttribute="centerX" id="6K7-sC-p2b"/>
                                                                 <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="sQP-OP-6Ue" secondAttribute="trailing" constant="50" id="8H7-8V-QFg"/>
                                                                 <constraint firstItem="1Jj-Uz-3W8" firstAttribute="centerX" secondItem="Rho-ef-n6l" secondAttribute="centerX" id="Bua-tl-a8M"/>
                                                                 <constraint firstItem="7np-ZR-2J2" firstAttribute="top" secondItem="Rho-ef-n6l" secondAttribute="top" constant="5" id="DJq-Ne-Mwj"/>
                                                                 <constraint firstItem="1Jj-Uz-3W8" firstAttribute="centerX" secondItem="Rho-ef-n6l" secondAttribute="centerX" id="FbC-pe-jEQ"/>
-                                                                <constraint firstItem="sQP-OP-6Ue" firstAttribute="top" secondItem="1Jj-Uz-3W8" secondAttribute="bottom" constant="10" id="P1b-ik-JgY"/>
-                                                                <constraint firstItem="NpM-vt-K6J" firstAttribute="top" secondItem="Rho-ef-n6l" secondAttribute="top" constant="-14" id="RjO-wz-MfG"/>
+                                                                <constraint firstItem="sQP-OP-6Ue" firstAttribute="top" secondItem="1Jj-Uz-3W8" secondAttribute="bottom" constant="5" id="P1b-ik-JgY"/>
                                                                 <constraint firstAttribute="bottom" secondItem="sQP-OP-6Ue" secondAttribute="bottom" constant="3" id="YxQ-bv-KDK"/>
                                                                 <constraint firstItem="sQP-OP-6Ue" firstAttribute="leading" secondItem="G0F-Vw-4sf" secondAttribute="trailing" constant="8" id="ZBZ-D5-wFo"/>
-                                                                <constraint firstItem="1Jj-Uz-3W8" firstAttribute="top" secondItem="NpM-vt-K6J" secondAttribute="bottom" constant="5" id="Znw-ti-iud"/>
+                                                                <constraint firstItem="1Jj-Uz-3W8" firstAttribute="top" secondItem="Rho-ef-n6l" secondAttribute="top" constant="5" id="beD-LO-uv3"/>
                                                                 <constraint firstItem="7np-ZR-2J2" firstAttribute="leading" secondItem="Rho-ef-n6l" secondAttribute="leading" constant="5" id="pEl-80-OG0"/>
                                                                 <constraint firstAttribute="bottom" secondItem="G0F-Vw-4sf" secondAttribute="bottom" constant="2" id="xWU-cq-cOH"/>
                                                                 <constraint firstItem="G0F-Vw-4sf" firstAttribute="leading" secondItem="Rho-ef-n6l" secondAttribute="leading" constant="5" id="yKg-7J-tgj"/>
@@ -2005,11 +1998,11 @@ Gw
                                                                 <outlet property="imageView" destination="G0F-Vw-4sf" id="WIa-ww-rlW"/>
                                                                 <outlet property="messageText" destination="xCt-jX-2Jc" id="06d-qo-OHN"/>
                                                                 <outlet property="nameHeight" destination="pSG-jq-KpQ" id="4mA-kz-KI8"/>
+                                                                <outlet property="scrollArea" destination="sQP-OP-6Ue" id="G0B-ZM-9Yf"/>
                                                                 <outlet property="senderIcon" destination="G0F-Vw-4sf" id="xiT-n3-1R7"/>
                                                                 <outlet property="senderName" destination="7np-ZR-2J2" id="pJf-Lm-QtY"/>
                                                                 <outlet property="timeStamp" destination="1Jj-Uz-3W8" id="2gV-Ko-Qa7"/>
                                                                 <outlet property="timeStampHeight" destination="U4S-jL-pcz" id="cOn-H9-ign"/>
-                                                                <outlet property="timeStampVeritcalOffset" destination="Znw-ti-iud" id="Pjg-pu-u50"/>
                                                             </connections>
                                                         </tableCellView>
                                                         <tableCellView identifier="statusCell" id="dIe-jK-UFl" userLabel="statusCell" customClass="MLChatViewCell">
@@ -2022,7 +2015,7 @@ Gw
                                                                         <constraint firstAttribute="height" constant="14" id="9dw-rZ-aGW"/>
                                                                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="trs-o5-CVQ"/>
                                                                     </constraints>
-                                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Today, 10:00PM" id="Kgz-Qo-Ui6">
+                                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" placeholderString="Divider" id="Kgz-Qo-Ui6">
                                                                         <font key="font" metaFont="smallSystem"/>
                                                                         <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="calibratedWhite"/>
                                                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
@@ -2062,7 +2055,7 @@ Gw
                                                                         <constraint firstAttribute="height" constant="14" id="NQ0-GI-WUl"/>
                                                                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="P6q-rf-6a2"/>
                                                                     </constraints>
-                                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Today, 10:00PM" id="jB0-Zd-Eie">
+                                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" placeholderString="Divider" id="jB0-Zd-Eie">
                                                                         <font key="font" metaFont="smallSystem"/>
                                                                         <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
@@ -2093,7 +2086,7 @@ Gw
                                                                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="KKD-16-8TH"/>
                                                                         <constraint firstAttribute="height" relation="lessThanOrEqual" constant="14" id="gP3-GQ-xSr"/>
                                                                     </constraints>
-                                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Today, 10:00PM" id="SDE-fx-uwf">
+                                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" placeholderString="Divider" id="SDE-fx-uwf">
                                                                         <font key="font" metaFont="smallSystem"/>
                                                                         <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
@@ -2123,6 +2116,7 @@ Gw
                                                             </connections>
                                                         </tableCellView>
                                                     </prototypeCellViews>
+                                                    <accessibility description="Messages"/>
                                                 </tableColumn>
                                             </tableColumns>
                                             <connections>
@@ -2140,6 +2134,7 @@ Gw
                                     <rect key="frame" x="224" y="17" width="15" height="102"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
+                                <accessibility description="Conversation"/>
                             </scrollView>
                         </subviews>
                         <constraints>
@@ -2154,6 +2149,7 @@ Gw
                             <constraint firstItem="mUJ-xh-yCG" firstAttribute="trailing" secondItem="VSu-xb-ucW" secondAttribute="trailing" id="d9r-kC-VW8"/>
                             <constraint firstItem="mUJ-xh-yCG" firstAttribute="leading" secondItem="VSu-xb-ucW" secondAttribute="leading" id="mRW-9t-NpA"/>
                         </constraints>
+                        <accessibility description="Conversation"/>
                     </view>
                     <connections>
                         <outlet property="chatTable" destination="Rsm-HI-GDG" id="liM-O1-9PN"/>

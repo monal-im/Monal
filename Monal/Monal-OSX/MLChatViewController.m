@@ -19,6 +19,8 @@
 
 #import "MLMainWindow.h"
 
+@import Quartz;
+
 @interface MLChatViewController () <DBRestClientDelegate>
 
 @property (nonatomic, strong) NSMutableArray *messageList;
@@ -65,6 +67,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     self.progressIndicator.bezeled=NO;
     self.progressIndicator.controlSize=NSMiniControlSize;
     [self endProgressUpdate];
+   
+   
+ 
     
 }
 
@@ -76,7 +81,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self refreshData];
     [self updateWindowForContact:self.contactDic];
     
-        
+ 
 }
 
 
@@ -90,6 +95,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     MLMainWindow *window =(MLMainWindow *)self.view.window.windowController;
     window.chatViewController= self;
   
+
 }
 
 -(void) dealloc

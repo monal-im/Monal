@@ -2170,6 +2170,7 @@ Gw
                         <outlet property="messageBox" destination="mlB-yh-jDA" id="G4W-uS-hld"/>
                         <outlet property="messageScroll" destination="Cir-fi-93b" id="ki3-S4-xpV"/>
                         <outlet property="progressIndicator" destination="VSu-xb-ucW" id="ydI-Ov-A0p"/>
+                        <outlet property="tableScroll" destination="eNE-em-qs3" id="NAI-uj-RJQ"/>
                     </connections>
                 </viewController>
                 <customObject id="csG-e3-5EW" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>

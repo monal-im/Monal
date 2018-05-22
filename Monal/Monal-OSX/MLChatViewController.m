@@ -79,6 +79,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [super viewWillAppear];
     if(!self.contactName) {
         self.inputBar.hidden=YES;
+        self.tableScroll.hidden=YES;
         return;
     }
  
@@ -112,10 +113,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     if(!self.contactName) {
         self.inputBar.hidden=YES;
+        self.tableScroll.hidden=YES;
         return;
     }
     
     self.inputBar.hidden=NO;
+    self.tableScroll.hidden=NO;
     self.messageList =[[DataLayer sharedInstance] messageHistory:self.contactName forAccount: self.accountNo];
     [self.chatTable reloadData];
     [self scrollToBottom];

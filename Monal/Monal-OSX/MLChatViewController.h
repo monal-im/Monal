@@ -16,6 +16,7 @@
 @property (nonatomic, strong) IBOutlet NSScrollView *messageScroll;
 @property (nonatomic, strong) IBOutlet NSView *inputBar;
 
+@property (nonatomic, strong) IBOutlet NSScrollView *tableScroll;
 @property (nonatomic, strong) IBOutlet NSTableView *chatTable;
 @property (nonatomic, strong) IBOutlet NSProgressIndicator *progressIndicator;
 @property (nonatomic, strong) NSDictionary *contactDic;

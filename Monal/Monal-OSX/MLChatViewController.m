@@ -68,7 +68,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     self.progressIndicator.controlSize=NSMiniControlSize;
     [self endProgressUpdate];
    
-   
+    self.messageScroll.wantsLayer=YES;
+    self.messageScroll.layer.cornerRadius=10.0f;
  
     
 }

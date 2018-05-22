@@ -1638,7 +1638,7 @@ Gw
                                     </button>
                                     <scrollView borderType="none" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" hasVerticalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Cir-fi-93b">
                                         <rect key="frame" x="85" y="8" width="333" height="22"/>
-                                        <clipView key="contentView" copiesOnScroll="NO" id="xyg-jq-3Wg">
+                                        <clipView key="contentView" drawsBackground="NO" copiesOnScroll="NO" id="xyg-jq-3Wg">
                                             <rect key="frame" x="0.0" y="0.0" width="333" height="22"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
@@ -1654,6 +1654,7 @@ Gw
                                                     </connections>
                                                 </textView>
                                             </subviews>
+                                            <color key="backgroundColor" red="0.88892871139999996" green="0.90273946520000004" blue="0.92016178370000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                         </clipView>
                                         <constraints>
                                             <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="333" id="cj4-tA-m7i"/>
@@ -2166,6 +2167,7 @@ Gw
                     <connections>
                         <outlet property="chatTable" destination="Rsm-HI-GDG" id="liM-O1-9PN"/>
                         <outlet property="messageBox" destination="mlB-yh-jDA" id="G4W-uS-hld"/>
+                        <outlet property="messageScroll" destination="Cir-fi-93b" id="ki3-S4-xpV"/>
                         <outlet property="progressIndicator" destination="VSu-xb-ucW" id="ydI-Ov-A0p"/>
                     </connections>
                 </viewController>

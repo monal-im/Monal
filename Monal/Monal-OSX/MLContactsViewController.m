@@ -220,8 +220,24 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
         [self highlightCellForCurrentContact];
     }
     
-    
+    [self updateAccessabilityCount];
 }
+
+-(void) updateAccessabilityCount
+{
+    [[DataLayer sharedInstance] countUnreadMessagesWithCompletion:^(NSNumber * result) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NSString *currentLabel =self.contactsTable.accessibilityLabel;
+            
+            NSString *formatted= [NSString stringWithFormat:@"%@ (%@ unread)",currentLabel, result];
+            self.contactsTable.accessibilityLabel=formatted;
+            
+        });
+        
+   
+    }];
+}
+
 
 -(IBAction)deleteItem:(id)sender
 {
@@ -460,6 +476,8 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
         
     }
     });
+    
+    [self updateAccessabilityCount];
 }
 
 -(NSInteger) positionOfOnlineContact:(NSDictionary *) user
@@ -1006,7 +1024,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                                    {
                                        [dic setValue:[notification.userInfo objectForKey:@"muc_subject"] forKey:@"muc_subject"];
                                    }
-                                   
+                                   [self refreshContact:notification];
                                    break;
                                }
                                counter++;
@@ -1246,16 +1264,18 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
         NSDictionary *contactRow = [self.searchResults objectAtIndex:self.contactsTable.selectedRow];
         [self.chatViewController showConversationForContact:contactRow];
      
-           if((self.view.window.occlusionState & NSWindowOcclusionStateVisible)) {
-            [[DataLayer sharedInstance] markAsReadBuddy:[contactRow objectForKey:kContactName] forAccount:[contactRow objectForKey:kAccountID]];
-            [self updateAppBadge];
-        }
-        
-        [self.contactsTable beginUpdates];
-        NSIndexSet *indexSet =[[NSIndexSet alloc] initWithIndex:self.contactsTable.selectedRow] ;
-        NSIndexSet *columnIndexSet =[[NSIndexSet alloc] initWithIndex:0] ;
-        [self.contactsTable reloadDataForRowIndexes:indexSet columnIndexes:columnIndexSet];
-        [self.contactsTable endUpdates];
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 3 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+            if((self.view.window.occlusionState & NSWindowOcclusionStateVisible)) {
+                [[DataLayer sharedInstance] markAsReadBuddy:[contactRow objectForKey:kContactName] forAccount:[contactRow objectForKey:kAccountID]];
+                [self updateAppBadge];
+                [self.contactsTable beginUpdates];
+                NSIndexSet *indexSet =[[NSIndexSet alloc] initWithIndex:self.contactsTable.selectedRow] ;
+                NSIndexSet *columnIndexSet =[[NSIndexSet alloc] initWithIndex:0] ;
+                [self.contactsTable reloadDataForRowIndexes:indexSet columnIndexes:columnIndexSet];
+                [self.contactsTable endUpdates];
+            }
+        });
+       
     }
     else
         if(self.currentSegment==kActiveTab)
@@ -1264,38 +1284,42 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                 NSDictionary *contactRow = [self.activeChat objectAtIndex:self.contactsTable.selectedRow];
                 [self.chatViewController showConversationForContact:contactRow];
                 
-                 if((self.view.window.occlusionState & NSWindowOcclusionStateVisible)) {
-                    [[DataLayer sharedInstance] markAsReadBuddy:[contactRow objectForKey:kContactName] forAccount:[contactRow objectForKey:kAccountID]];
-                    [self updateAppBadge];
-                }
-                
-                [self.contactsTable beginUpdates];
-                NSIndexSet *indexSet =[[NSIndexSet alloc] initWithIndex:self.contactsTable.selectedRow] ;
-                NSIndexSet *columnIndexSet =[[NSIndexSet alloc] initWithIndex:0] ;
-                [self.contactsTable reloadDataForRowIndexes:indexSet columnIndexes:columnIndexSet];
-                [self.contactsTable endUpdates];
+                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 3 * NSEC_PER_SEC), dispatch_get_main_queue(),^{
+                    if((self.view.window.occlusionState & NSWindowOcclusionStateVisible)) {
+                        [[DataLayer sharedInstance] markAsReadBuddy:[contactRow objectForKey:kContactName] forAccount:[contactRow objectForKey:kAccountID]];
+                        [self updateAppBadge];
+                    }
+                    
+                    [self.contactsTable beginUpdates];
+                    NSIndexSet *indexSet =[[NSIndexSet alloc] initWithIndex:self.contactsTable.selectedRow] ;
+                    NSIndexSet *columnIndexSet =[[NSIndexSet alloc] initWithIndex:0] ;
+                    [self.contactsTable reloadDataForRowIndexes:indexSet columnIndexes:columnIndexSet];
+                    [self.contactsTable endUpdates];
+                });
             }
         }
         else  {
-           
+            
             id item =[self.contactsTable itemAtRow:self.contactsTable.selectedRow];
             
             if([item isKindOfClass:[NSDictionary class]]) {
                 NSDictionary *contactRow = (NSDictionary *)item;
                 [self.chatViewController showConversationForContact:contactRow];
-                
-                if((self.view.window.occlusionState & NSWindowOcclusionStateVisible)) {
-                    [[DataLayer sharedInstance] markAsReadBuddy:[contactRow objectForKey:kContactName] forAccount:[contactRow objectForKey:kAccountID]];
-                    [self updateAppBadge];
-                }
-                
-                [self.contactsTable beginUpdates];
-                NSIndexSet *indexSet =[[NSIndexSet alloc] initWithIndex:self.contactsTable.selectedRow] ;
-                NSIndexSet *columnIndexSet =[[NSIndexSet alloc] initWithIndex:0] ;
-                [self.contactsTable reloadDataForRowIndexes:indexSet columnIndexes:columnIndexSet];
-                [self.contactsTable endUpdates];
+                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 3 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+                    if((self.view.window.occlusionState & NSWindowOcclusionStateVisible)) {
+                        if((self.view.window.occlusionState & NSWindowOcclusionStateVisible)) {
+                            [[DataLayer sharedInstance] markAsReadBuddy:[contactRow objectForKey:kContactName] forAccount:[contactRow objectForKey:kAccountID]];
+                            [self updateAppBadge];
+                        }
+                        
+                        [self.contactsTable beginUpdates];
+                        NSIndexSet *indexSet =[[NSIndexSet alloc] initWithIndex:self.contactsTable.selectedRow] ;
+                        NSIndexSet *columnIndexSet =[[NSIndexSet alloc] initWithIndex:0] ;
+                        [self.contactsTable reloadDataForRowIndexes:indexSet columnIndexes:columnIndexSet];
+                        [self.contactsTable endUpdates];
+                    }
+                });
             }
-            
         }
 }
 

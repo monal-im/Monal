@@ -769,7 +769,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     NSMutableString *accessibility =[[NSMutableString alloc] init];
    
-    [accessibility appendString:@" From "];
+    [accessibility appendString:@""];
     
     if([messageType isEqualToString:kMessageTypeText]) {
         if([[messageRow objectForKey:@"af"] isEqualToString:self.jid]) {
@@ -777,14 +777,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             cell.isInbound= NO;
             cell.messageText.textColor = [NSColor whiteColor];
             cell.messageText.linkTextAttributes =@{NSForegroundColorAttributeName:[NSColor whiteColor], NSUnderlineStyleAttributeName: @YES};
-            [accessibility appendString:@"Me :"];
+            [accessibility appendString:@"Your Message "];
             
         }
         else  {
             cell = [tableView makeViewWithIdentifier:@"InboundTextCell" owner:self];
             cell.isInbound=YES;
             cell.messageText.linkTextAttributes =@{NSForegroundColorAttributeName:[NSColor blackColor], NSUnderlineStyleAttributeName: @YES};
-            [accessibility appendString:@"Contact :"];
+            [accessibility appendString:@"Message "];
         }
         
         
@@ -865,7 +865,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         cell.timeStampVeritcalOffset.constant=0.0f;
        
         if(dateString) {
-            [accessibility insertString:dateString atIndex:0];
+            [accessibility appendString:@" "];
+            [accessibility appendString:dateString];
         }
         
     }

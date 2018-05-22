@@ -26,6 +26,7 @@
         self.unreadText.hidden=NO;
         
         self.unreadText.stringValue =[NSString stringWithFormat:@"%ld", count];
+    
     }
 }
 

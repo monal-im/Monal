@@ -279,6 +279,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void) refreshData
 {
+    if(!_contactName) return;
+    
     if(!_day) {
         self.messageList =[[DataLayer sharedInstance] messageHistory:_contactName forAccount: _accountNo];
         [[DataLayer sharedInstance] countUserUnreadMessages:_contactName forAccount: _accountNo withCompletion:^(NSNumber *unread) {

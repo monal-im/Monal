@@ -419,7 +419,13 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     
     RIButtonItem* photosButton = [RIButtonItem itemWithLabel:@"Photos" action:^{
           imagePicker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
-        [self presentViewController:imagePicker animated:YES completion:nil];
+        [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
+            if(granted)
+            {
+                [self presentViewController:imagePicker animated:YES completion:nil];
+            }
+        }];
+
     }];
     
     UIActionSheet* sheet =[[UIActionSheet alloc] initWithTitle:@"Select Image Source" cancelButtonItem:cancelButton destructiveButtonItem:nil otherButtonItems: cameraButton, photosButton,nil];

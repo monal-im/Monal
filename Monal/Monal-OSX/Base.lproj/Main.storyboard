@@ -2166,6 +2166,7 @@ Gw
                     </view>
                     <connections>
                         <outlet property="chatTable" destination="Rsm-HI-GDG" id="liM-O1-9PN"/>
+                        <outlet property="inputBar" destination="mUJ-xh-yCG" id="qVo-Er-u9u"/>
                         <outlet property="messageBox" destination="mlB-yh-jDA" id="G4W-uS-hld"/>
                         <outlet property="messageScroll" destination="Cir-fi-93b" id="ki3-S4-xpV"/>
                         <outlet property="progressIndicator" destination="VSu-xb-ucW" id="ydI-Ov-A0p"/>

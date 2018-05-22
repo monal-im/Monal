@@ -77,7 +77,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) viewWillAppear
 {
     [super viewWillAppear];
-    if(! self.contactName) return;
+    if(!self.contactName) {
+        self.inputBar.hidden=YES;
+        return;
+    }
+ 
     
     [self refreshData];
     [self updateWindowForContact:self.contactDic];
@@ -106,8 +110,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) refreshData
 {
+    if(!self.contactName) {
+        self.inputBar.hidden=YES;
+        return;
+    }
+    
+    self.inputBar.hidden=NO;
     self.messageList =[[DataLayer sharedInstance] messageHistory:self.contactName forAccount: self.accountNo];
-
     [self.chatTable reloadData];
     [self scrollToBottom];
 }

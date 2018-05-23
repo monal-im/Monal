@@ -794,7 +794,9 @@ static DataLayer *sharedInstance=nil;
                                     
                NSArray *params=@[accountNo, contact, actualfull, nickName];
                [self executeNonQuery:query  andArguments:params withCompletion:^(BOOL success) {
-                   [self.contactMemory removeObject:contact];
+                   dispatch_sync(_contactQueue, ^{
+                       [self.contactMemory removeObject:contact];
+                   });
                    if(completion)
                    {
                        completion(success);
@@ -805,7 +807,9 @@ static DataLayer *sharedInstance=nil;
            }
            else
            {
-               [self.contactMemory removeObject:contact];
+               dispatch_sync(_contactQueue, ^{
+                   [self.contactMemory removeObject:contact];
+               });
                if(completion) completion(NO);
            }
        }];

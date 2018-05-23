@@ -86,7 +86,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     [self refreshData];
     [self updateWindowForContact:self.contactDic];
-    
+    [self updateInputViewSize];
  
 }
 
@@ -1014,12 +1014,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     if(self.messageBox.intrinsicContentSize.height>22) {
         self.inputContainerHeight.constant= self.messageBox.intrinsicContentSize.height+16+10;
-        if(self.inputContainerHeight.constant>200) self.inputContainerHeight.constant=200; 
-        //  self.messageBox.contentInset = UIEdgeInsetsMake(5, 0, 5, 0);
+        if(self.inputContainerHeight.constant>200) self.inputContainerHeight.constant=200;
+          self.messageScroll.contentInsets = NSEdgeInsetsMake(5, 0, 5, 0);
     } else
     {
         self.inputContainerHeight.constant=38.0f;
-        //  self.messageBox.contentInset = UIEdgeInsetsMake(5, 0, 5, 0);
+          self.messageScroll.contentInsets = NSEdgeInsetsMake(5, 0, 5, 0);
     }
     //  [self.messageScroll setScrollEnabled:NO];
     [self.inputBar layout];

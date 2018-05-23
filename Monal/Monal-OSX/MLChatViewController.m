@@ -1014,7 +1014,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     if(self.messageBox.intrinsicContentSize.height>22) {
         self.inputContainerHeight.constant= self.messageBox.intrinsicContentSize.height+16+10;
-        if(self.inputContainerHeight.constant>200) self.inputContainerHeight.constant=200;
+        if(self.inputContainerHeight.constant>300) self.inputContainerHeight.constant=300;
           self.messageScroll.contentInsets = NSEdgeInsetsMake(5, 0, 5, 0);
     } else
     {

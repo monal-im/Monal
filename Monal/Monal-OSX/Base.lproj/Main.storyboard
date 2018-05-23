@@ -1642,7 +1642,7 @@ Gw
                                             <rect key="frame" x="0.0" y="0.0" width="333" height="22"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
-                                                <textView verticallyResizable="YES" usesFontPanel="YES" findStyle="panel" continuousSpellChecking="YES" allowsUndo="YES" allowsImageEditing="YES" usesRuler="YES" allowsNonContiguousLayout="YES" quoteSubstitution="YES" linkDetection="YES" dataDetection="YES" dashSubstitution="YES" textReplacement="YES" spellingCorrection="YES" smartInsertDelete="YES" id="mlB-yh-jDA">
+                                                <textView verticallyResizable="YES" usesFontPanel="YES" findStyle="panel" continuousSpellChecking="YES" allowsUndo="YES" allowsImageEditing="YES" usesRuler="YES" allowsNonContiguousLayout="YES" quoteSubstitution="YES" linkDetection="YES" dataDetection="YES" dashSubstitution="YES" textReplacement="YES" spellingCorrection="YES" smartInsertDelete="YES" id="mlB-yh-jDA" customClass="MLTextView">
                                                     <rect key="frame" x="0.0" y="0.0" width="333" height="22"/>
                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                     <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -1686,26 +1686,23 @@ Gw
                                     </button>
                                 </subviews>
                                 <constraints>
-                                    <constraint firstItem="RB8-DH-Efv" firstAttribute="top" secondItem="mUJ-xh-yCG" secondAttribute="top" constant="8" id="009-J6-CO7"/>
                                     <constraint firstItem="m4R-R5-Jrl" firstAttribute="leading" secondItem="Cir-fi-93b" secondAttribute="trailing" constant="8" id="7se-40-ZUw"/>
+                                    <constraint firstAttribute="bottom" secondItem="RB8-DH-Efv" secondAttribute="bottom" constant="9" id="BW1-Xr-VIx"/>
+                                    <constraint firstAttribute="bottom" secondItem="8Vn-dI-GYF" secondAttribute="bottom" constant="9" id="Dbb-EP-OrN"/>
                                     <constraint firstItem="RB8-DH-Efv" firstAttribute="leading" secondItem="8Vn-dI-GYF" secondAttribute="trailing" constant="8" id="E9i-iA-PtK"/>
                                     <constraint firstAttribute="bottom" secondItem="m4R-R5-Jrl" secondAttribute="bottom" constant="9" id="KJ2-Od-F8N"/>
-                                    <constraint firstAttribute="bottom" secondItem="Cir-fi-93b" secondAttribute="bottom" constant="8" id="OhI-Ux-abI"/>
-                                    <constraint firstItem="8Vn-dI-GYF" firstAttribute="top" secondItem="mUJ-xh-yCG" secondAttribute="top" constant="8" id="ZFb-o8-UfR"/>
                                     <constraint firstItem="Cir-fi-93b" firstAttribute="leading" secondItem="RB8-DH-Efv" secondAttribute="trailing" constant="9" id="Zgh-rg-miR"/>
                                     <constraint firstItem="RB8-DH-Efv" firstAttribute="leading" secondItem="8Vn-dI-GYF" secondAttribute="trailing" constant="8" id="fJf-sz-8Ob"/>
-                                    <constraint firstItem="m4R-R5-Jrl" firstAttribute="top" secondItem="mUJ-xh-yCG" secondAttribute="top" constant="8" id="heX-oC-Jw8"/>
+                                    <constraint firstAttribute="height" constant="38" id="kdz-e0-pGd"/>
                                     <constraint firstItem="Cir-fi-93b" firstAttribute="top" secondItem="mUJ-xh-yCG" secondAttribute="top" constant="8" id="qAa-g1-YXr"/>
                                     <constraint firstAttribute="trailing" secondItem="m4R-R5-Jrl" secondAttribute="trailing" constant="8" id="qUm-yC-rOt"/>
                                     <constraint firstItem="8Vn-dI-GYF" firstAttribute="leading" secondItem="mUJ-xh-yCG" secondAttribute="leading" constant="8" id="qlU-6Z-oQw"/>
+                                    <constraint firstAttribute="bottom" secondItem="Cir-fi-93b" secondAttribute="bottom" constant="8" id="wB2-CI-Ise"/>
+                                    <constraint firstAttribute="bottom" secondItem="m4R-R5-Jrl" secondAttribute="bottom" constant="9" id="wCT-9U-0aM"/>
                                     <constraint firstAttribute="trailing" secondItem="m4R-R5-Jrl" secondAttribute="trailing" constant="8" id="wOx-Er-GWz"/>
                                 </constraints>
                                 <accessibility description="Input Bar"/>
                             </customView>
-                            <progressIndicator wantsLayer="YES" maxValue="100" displayedWhenStopped="NO" controlSize="small" style="bar" translatesAutoresizingMaskIntoConstraints="NO" id="VSu-xb-ucW">
-                                <rect key="frame" x="0.0" y="34" width="493" height="12"/>
-                                <accessibility description="Delivery Progress"/>
-                            </progressIndicator>
                             <scrollView borderType="none" autohidesScrollers="YES" horizontalLineScroll="232" horizontalPageScroll="10" verticalLineScroll="232" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="eNE-em-qs3">
                                 <rect key="frame" x="0.0" y="46" width="493" height="451"/>
                                 <clipView key="contentView" id="hQs-06-XXl">
@@ -2137,6 +2134,7 @@ Gw
                                     </subviews>
                                 </clipView>
                                 <constraints>
+                                    <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="250" id="rQW-Ru-WyD"/>
                                     <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="493" id="sqe-9p-zkL"/>
                                 </constraints>
                                 <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="FLe-cV-s8q">
@@ -2152,24 +2150,21 @@ Gw
                         </subviews>
                         <constraints>
                             <constraint firstItem="mUJ-xh-yCG" firstAttribute="leading" secondItem="eNE-em-qs3" secondAttribute="leading" id="49h-Oi-OYs"/>
-                            <constraint firstItem="VSu-xb-ucW" firstAttribute="top" secondItem="eNE-em-qs3" secondAttribute="bottom" id="GDo-2N-dqf"/>
                             <constraint firstItem="eNE-em-qs3" firstAttribute="top" secondItem="kDf-fM-OV9" secondAttribute="top" id="GV6-VI-nFl"/>
                             <constraint firstAttribute="trailing" secondItem="mUJ-xh-yCG" secondAttribute="trailing" id="L6j-hN-VFF"/>
                             <constraint firstAttribute="bottom" secondItem="mUJ-xh-yCG" secondAttribute="bottom" id="QDX-Ul-LRH"/>
                             <constraint firstItem="mUJ-xh-yCG" firstAttribute="leading" secondItem="kDf-fM-OV9" secondAttribute="leading" id="Zg2-gZ-yJc"/>
                             <constraint firstItem="mUJ-xh-yCG" firstAttribute="top" secondItem="eNE-em-qs3" secondAttribute="bottom" constant="8" symbolic="YES" id="bfl-Tn-Lef"/>
                             <constraint firstItem="mUJ-xh-yCG" firstAttribute="trailing" secondItem="eNE-em-qs3" secondAttribute="trailing" id="cJu-hq-vdb"/>
-                            <constraint firstItem="mUJ-xh-yCG" firstAttribute="trailing" secondItem="VSu-xb-ucW" secondAttribute="trailing" id="d9r-kC-VW8"/>
-                            <constraint firstItem="mUJ-xh-yCG" firstAttribute="leading" secondItem="VSu-xb-ucW" secondAttribute="leading" id="mRW-9t-NpA"/>
                         </constraints>
                         <accessibility description="Conversation"/>
                     </view>
                     <connections>
                         <outlet property="chatTable" destination="Rsm-HI-GDG" id="liM-O1-9PN"/>
                         <outlet property="inputBar" destination="mUJ-xh-yCG" id="qVo-Er-u9u"/>
+                        <outlet property="inputContainerHeight" destination="kdz-e0-pGd" id="J2t-UF-peY"/>
                         <outlet property="messageBox" destination="mlB-yh-jDA" id="G4W-uS-hld"/>
                         <outlet property="messageScroll" destination="Cir-fi-93b" id="ki3-S4-xpV"/>
-                        <outlet property="progressIndicator" destination="VSu-xb-ucW" id="ydI-Ov-A0p"/>
                         <outlet property="tableScroll" destination="eNE-em-qs3" id="NAI-uj-RJQ"/>
                     </connections>
                 </viewController>

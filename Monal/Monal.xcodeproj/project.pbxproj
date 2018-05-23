@@ -374,6 +374,7 @@
 		26D51CE11E2674D700141E04 /* NXOAuth2PostBodyStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CC51E2674D700141E04 /* NXOAuth2PostBodyStream.m */; };
 		26D51CE21E2674D700141E04 /* NXOAuth2Request.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CC71E2674D700141E04 /* NXOAuth2Request.m */; };
 		26D51CE31E2674D700141E04 /* NXOAuth2Request.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CC71E2674D700141E04 /* NXOAuth2Request.m */; };
+		26D56EE720B59FB000BF7C97 /* MLTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D56EE620B59FB000BF7C97 /* MLTextView.m */; };
 		26D59D9020711969006F1DEE /* MLEditGroupViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D59D8F20711969006F1DEE /* MLEditGroupViewController.m */; };
 		26D59D9320714F32006F1DEE /* UIColor+Theme.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D59D9220714F32006F1DEE /* UIColor+Theme.m */; };
 		26D89F061A890672009B147C /* MLSwitchCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D89F051A890672009B147C /* MLSwitchCell.m */; };
@@ -794,6 +795,8 @@
 		26D51CC71E2674D700141E04 /* NXOAuth2Request.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NXOAuth2Request.m; sourceTree = "<group>"; };
 		26D51CC81E2674D700141E04 /* NXOAuth2TrustDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NXOAuth2TrustDelegate.h; sourceTree = "<group>"; };
 		26D51CC91E2674D700141E04 /* OAuth2Client_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OAuth2Client_Prefix.pch; sourceTree = "<group>"; };
+		26D56EE520B59FB000BF7C97 /* MLTextView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLTextView.h; sourceTree = "<group>"; };
+		26D56EE620B59FB000BF7C97 /* MLTextView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLTextView.m; sourceTree = "<group>"; };
 		26D59D8E20711969006F1DEE /* MLEditGroupViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLEditGroupViewController.h; sourceTree = "<group>"; };
 		26D59D8F20711969006F1DEE /* MLEditGroupViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLEditGroupViewController.m; sourceTree = "<group>"; };
 		26D59D9120714F32006F1DEE /* UIColor+Theme.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UIColor+Theme.h"; sourceTree = "<group>"; };
@@ -1388,6 +1391,8 @@
 				2661D34F1B407EDD00EC51BA /* MLChatViewCell.m */,
 				26AA41031D9FCBF6005A77ED /* MLImageView.h */,
 				26AA41041D9FCBF6005A77ED /* MLImageView.m */,
+				26D56EE520B59FB000BF7C97 /* MLTextView.h */,
+				26D56EE620B59FB000BF7C97 /* MLTextView.m */,
 			);
 			name = Chatview;
 			sourceTree = "<group>";
@@ -2787,6 +2792,7 @@
 				26B2A4EE1B73097500272E63 /* DDAbstractDatabaseLogger.m in Sources */,
 				26277CE41B7C57670094E4D0 /* MLContactDetails.m in Sources */,
 				2638DAE71B68F3AB00DF05AC /* MLPresenceSettings.m in Sources */,
+				26D56EE720B59FB000BF7C97 /* MLTextView.m in Sources */,
 				2661D3411B40765A00EC51BA /* MLContactsViewController.m in Sources */,
 				26B2A5021B730AE100272E63 /* Reachability.m in Sources */,
 				2661D3501B407EDD00EC51BA /* MLChatViewCell.m in Sources */,

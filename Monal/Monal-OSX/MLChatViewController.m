@@ -987,6 +987,23 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     return dateString;
 }
 
+-(void) updateInputViewSize
+{
+    
+    if(self.messageBox.intrinsicContentSize.height>22) {
+        self.inputContainerHeight.constant= self.messageBox.intrinsicContentSize.height+16+10;
+      //  self.messageBox.contentInset = UIEdgeInsetsMake(5, 0, 5, 0);
+    } else
+    {
+        self.inputContainerHeight.constant=38.0f;
+      //  self.messageBox.contentInset = UIEdgeInsetsMake(5, 0, 5, 0);
+    }
+  //  [self.messageScroll setScrollEnabled:NO];
+    [self.inputBar layout];
+  //  [self.messageBox setScrollEnabled:YES];
+    [self.messageBox scrollRangeToVisible:NSMakeRange(0, 0)];
+}
+
 
 #pragma  mark - textview delegate
 - (BOOL)textView:(NSTextView *)view shouldChangeTextInRange:(NSRange)range replacementString:(NSString *)replacementString;
@@ -995,13 +1012,16 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         {
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self sendText:self];
+                [self updateInputViewSize];
             });
             
             return NO;
       
         }
+     [self updateInputViewSize];
     return YES;
 }
+
 
 
 

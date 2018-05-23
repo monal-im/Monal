@@ -2147,15 +2147,24 @@ Gw
                                 </scroller>
                                 <accessibility description="Conversation"/>
                             </scrollView>
+                            <progressIndicator wantsLayer="YES" maxValue="100" style="bar" translatesAutoresizingMaskIntoConstraints="NO" id="Fki-QH-9js">
+                                <rect key="frame" x="0.0" y="37" width="493" height="20"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="18" id="E3Q-Zw-MoQ"/>
+                                </constraints>
+                            </progressIndicator>
                         </subviews>
                         <constraints>
                             <constraint firstItem="mUJ-xh-yCG" firstAttribute="leading" secondItem="eNE-em-qs3" secondAttribute="leading" id="49h-Oi-OYs"/>
+                            <constraint firstAttribute="trailing" secondItem="Fki-QH-9js" secondAttribute="trailing" id="CJA-VR-C13"/>
                             <constraint firstItem="eNE-em-qs3" firstAttribute="top" secondItem="kDf-fM-OV9" secondAttribute="top" id="GV6-VI-nFl"/>
                             <constraint firstAttribute="trailing" secondItem="mUJ-xh-yCG" secondAttribute="trailing" id="L6j-hN-VFF"/>
                             <constraint firstAttribute="bottom" secondItem="mUJ-xh-yCG" secondAttribute="bottom" id="QDX-Ul-LRH"/>
+                            <constraint firstItem="Fki-QH-9js" firstAttribute="leading" secondItem="kDf-fM-OV9" secondAttribute="leading" id="XsF-YE-HUn"/>
                             <constraint firstItem="mUJ-xh-yCG" firstAttribute="leading" secondItem="kDf-fM-OV9" secondAttribute="leading" id="Zg2-gZ-yJc"/>
                             <constraint firstItem="mUJ-xh-yCG" firstAttribute="top" secondItem="eNE-em-qs3" secondAttribute="bottom" constant="8" symbolic="YES" id="bfl-Tn-Lef"/>
                             <constraint firstItem="mUJ-xh-yCG" firstAttribute="trailing" secondItem="eNE-em-qs3" secondAttribute="trailing" id="cJu-hq-vdb"/>
+                            <constraint firstItem="mUJ-xh-yCG" firstAttribute="top" secondItem="Fki-QH-9js" secondAttribute="bottom" id="dBe-yD-44h"/>
                         </constraints>
                         <accessibility description="Conversation"/>
                     </view>
@@ -2165,6 +2174,7 @@ Gw
                         <outlet property="inputContainerHeight" destination="kdz-e0-pGd" id="J2t-UF-peY"/>
                         <outlet property="messageBox" destination="mlB-yh-jDA" id="G4W-uS-hld"/>
                         <outlet property="messageScroll" destination="Cir-fi-93b" id="ki3-S4-xpV"/>
+                        <outlet property="progressIndicator" destination="Fki-QH-9js" id="1Z0-KI-jpZ"/>
                         <outlet property="tableScroll" destination="eNE-em-qs3" id="NAI-uj-RJQ"/>
                     </connections>
                 </viewController>

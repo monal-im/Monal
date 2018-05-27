@@ -1955,7 +1955,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                     else
                                     {
                                         // just set and request when in foreground if needed
-                                        [[DataLayer sharedInstance]  setContactHash:[presenceNode copy] forAccount:_accountNo];
+                                        [[DataLayer sharedInstance]  setContactHash:presenceNode  forAccount:_accountNo];
                                     }
                                 }
                                 else {
@@ -1971,7 +1971,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         }
                         else if([presenceNode.type isEqualToString:kpresenceUnavailable])
                         {
-                            if ([[DataLayer sharedInstance] setOfflineBuddy:[presenceNode copy] forAccount:_accountNo] ) {
+                            if ([[DataLayer sharedInstance] setOfflineBuddy:presenceNode forAccount:_accountNo] ) {
                                 NSDictionary* userDic=@{kusernameKey: presenceNode.user,
                                                         kaccountNoKey:_accountNo};
                                 [self.networkQueue addOperationWithBlock: ^{

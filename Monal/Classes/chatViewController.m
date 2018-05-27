@@ -572,6 +572,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         if(xmppAccount.accountState<kStateLoggedIn)
         {
             self.sendButton.enabled=NO;
+            if(!title) title=@"";
             self.navigationItem.title=[NSString stringWithFormat:@"%@ [%@]", title, @"Logged Out"];
         }
         else  {
@@ -825,6 +826,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     [alert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
         [self dismissViewControllerAnimated:YES completion:nil];
     }]];
+    alert.popoverPresentationController.sourceView=sender;
+    
     [self presentViewController:alert animated:YES completion:nil];
     
 }

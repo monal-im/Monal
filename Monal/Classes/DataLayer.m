@@ -763,7 +763,7 @@ static DataLayer *sharedInstance=nil;
     }
 }
 
-#pragma mark Buddy Commands
+#pragma mark contact Commands
 
 -(void) addContact:(NSString*) contact  forAccount:(NSString*) accountNo fullname:(NSString*)fullName nickname:(NSString*) nickName withCompletion: (void (^)(BOOL))completion
 {
@@ -771,7 +771,7 @@ static DataLayer *sharedInstance=nil;
     dispatch_sync(_contactQueue, ^{
         if([self.contactMemory containsObject:contact])
         {
-            DDLogVerbose(@"contact wiating to persist");
+            DDLogVerbose(@"contact waiting to persist");
             return;
         } else  {
             [self.contactMemory addObject:contact];

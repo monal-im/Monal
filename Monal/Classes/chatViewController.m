@@ -530,7 +530,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         if(result) {
         dispatch_async(dispatch_get_main_queue(),
                        ^{
-                           NSDate *messagetime = [self currentGMTTime];
+                           NSString *messagetime = [self currentGMTTime];
                            
                            NSDictionary* userInfo = @{@"af": self.jid,
                                                       @"message": message ,

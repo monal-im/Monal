@@ -2613,10 +2613,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     self.unAckedStanzas= toClean;
 }
 
+/**
+ cleans out disco requests from unacked stanzas to prevent a loop
+ */
 -(void) cleanDisco
 {
     NSMutableArray *toClean = [self.unAckedStanzas mutableCopy];
-    for(NSDictionary *dic in self.unAckedStanzas) {
+    NSMutableArray *toIterate = [self.unAckedStanzas copy];
+    for(NSDictionary *dic in toIterate) {
         if([[dic objectForKey:kStanza] isKindOfClass:[XMPPIQ class]])
         {
             XMPPIQ *iq=[dic objectForKey:kStanza] ;

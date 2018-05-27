@@ -62,7 +62,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     _contactFullName=[[DataLayer sharedInstance] fullName:_contactName forAccount:[NSString stringWithFormat:@"%@",[_contact objectForKey:@"account_id"]]];
     if (!_contactFullName) _contactFullName=_contactName;
     
-    self.accountNo=[NSString stringWithFormat:@"%d",[[_contact objectForKey:@"account_id"] integerValue]];
+    self.accountNo=[NSString stringWithFormat:@"%ld",[[_contact objectForKey:@"account_id"] integerValue]];
     self.hidesBottomBarWhenPushed=YES;
     
     NSArray* accountVals =[[DataLayer sharedInstance] accountVals:self.accountNo];
@@ -316,6 +316,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     //dont readd it, use the exisitng
     if(!messageID) {
         [self addMessageto:_contactName withMessage:messageText andId:newMessageID];
+    }
+    else  {
+        
     }
 }
 
@@ -821,6 +824,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         if([messageArray count]>0) {
             NSDictionary *dic= [messageArray objectAtIndex:0];
             [self sendMessage:[dic objectForKey:@"message"] andMessageID:[dic objectForKey:@"messageid"]];
+            [self setMessageId:[dic objectForKey:@"messageid"] delivered:YES];
         }
     }]];
     [alert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {

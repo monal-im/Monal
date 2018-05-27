@@ -385,6 +385,7 @@ NSString *const kGtalk = @"Gtalk";
     
     [questionAlert addAction:noAction];
     [questionAlert addAction:yesAction];
+    questionAlert.popoverPresentationController.sourceView=sender;
     
     [self presentViewController:questionAlert animated:YES completion:nil];
     
@@ -638,7 +639,7 @@ NSString *const kGtalk = @"Gtalk";
     }
     else if(newIndexPath.section==2)
     {
-        [self delClicked:self];
+        [self delClicked:[tableView cellForRowAtIndexPath:newIndexPath]];
     }
     
 }

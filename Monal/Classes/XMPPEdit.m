@@ -219,8 +219,9 @@ NSString *const kGtalk = @"Gtalk";
     //default just use JID
     if([self.server length]==0)
     {
-        if([elements count]>1)
+        if([elements count]>1){
             self.server=[elements objectAtIndex:1];
+        }
     }
     
     
@@ -240,8 +241,32 @@ NSString *const kGtalk = @"Gtalk";
     [dic setObject:domain forKey:kDomain];
     
     if(user) [dic setObject:user forKey:kUsername];
-    if(self.server) [dic setObject:self.server  forKey:kServer];
-    if(self.port ) [dic setObject:self.port forKey:kPort];
+    
+    if(self.server) {
+        [dic setObject:self.server  forKey:kServer];
+    } else
+    {
+        
+       UIAlertController* alert= [UIAlertController alertControllerWithTitle:@"Could not determine server" message:@"Please provide a server or use an id in the format user@server" preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            [alert dismissViewControllerAnimated:YES completion:nil];
+        }]];
+        
+        [self presentViewController:alert animated:YES completion:^{
+            
+        }];
+        return;
+        
+    }
+    
+   
+    
+    if(self.port ) {
+        [dic setObject:self.port forKey:kPort];
+    } else {
+        
+    }
+    
     [dic setObject:@"Monal-iOS" forKey:kResource];
     
     [dic setObject:[NSNumber numberWithBool:self.useSSL] forKey:kSSL];

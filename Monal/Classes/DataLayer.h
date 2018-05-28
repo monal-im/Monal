@@ -90,7 +90,6 @@ extern NSString *const kMessageTypeStatus;
 -(void) offlineContactsWithCompletion: (void (^)(NSMutableArray *))completion;
 
 #pragma mark Ver string and Capabilities
--(BOOL) setResourceVer:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
 -(NSArray*) capsforVer:(NSString*) verString;
 -(NSString*)getVerForUser:(NSString*)user Resource:(NSString*) resource;
 

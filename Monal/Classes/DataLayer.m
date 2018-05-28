@@ -68,7 +68,7 @@ static DataLayer *sharedInstance=nil;
     NSObject* __block toReturn;
     dispatch_sync(_dbQueue, ^{
         sqlite3_stmt *statement;
-        if (sqlite3_prepare_v2(database, [query  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK) {
+        if (sqlite3_prepare_v2(self->database, [query  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK) {
             sqlite3_reset(statement);
             [args enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                 if([obj isKindOfClass:[NSNumber class]])
@@ -114,7 +114,7 @@ static DataLayer *sharedInstance=nil;
                         
                     case (SQLITE_TEXT):
                     {
-                        NSString* returnString = [NSString stringWithUTF8String:sqlite3_column_text(statement,0)];
+                        NSString* returnString = [NSString stringWithUTF8String:(const char* _Nonnull) sqlite3_column_text(statement,0)];
                         //	DDLogVerbose(@"got %@", returnString);
                         while(sqlite3_step(statement)== SQLITE_ROW ){} //clear
                         toReturn= [returnString  stringByReplacingOccurrencesOfString:@"''" withString:@"'"];
@@ -125,7 +125,7 @@ static DataLayer *sharedInstance=nil;
                     case (SQLITE_BLOB):
                     {
                         //trat as string for now
-                        NSString* returnString = [NSString stringWithUTF8String:sqlite3_column_text(statement,0)];
+                        NSString* returnString = [NSString stringWithUTF8String:(const char* _Nonnull)sqlite3_column_text(statement,0)];
                         while(sqlite3_step(statement)== SQLITE_ROW) {} //clear
                         toReturn= [returnString  stringByReplacingOccurrencesOfString:@"''" withString:@"'"];
                         toReturn= nil;
@@ -162,7 +162,7 @@ static DataLayer *sharedInstance=nil;
     NSMutableArray* __block toReturn =  [[NSMutableArray alloc] init] ;
     dispatch_sync(_dbQueue, ^{
         sqlite3_stmt *statement;
-        if (sqlite3_prepare_v2(database, [query cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK) {
+        if (sqlite3_prepare_v2(self->database, [query cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK) {
             
             sqlite3_reset(statement);
             [args enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -212,7 +212,7 @@ static DataLayer *sharedInstance=nil;
                             
                         case (SQLITE_TEXT):
                         {
-                            NSString* returnString = [NSString stringWithUTF8String:sqlite3_column_text(statement,counter)];
+                            NSString* returnString = [NSString stringWithUTF8String:(const char* _Nonnull)sqlite3_column_text(statement,counter)];
                             [row setObject:[returnString stringByReplacingOccurrencesOfString:@"''" withString:@"'"] forKey:columnName];
                             break;
                             
@@ -221,7 +221,7 @@ static DataLayer *sharedInstance=nil;
                         case (SQLITE_BLOB):
                         {
                             //trat as string for now
-                            NSString* returnblob = [NSString stringWithUTF8String:sqlite3_column_text(statement,counter)];
+                            NSString* returnblob = [NSString stringWithUTF8String:(const char* _Nonnull)sqlite3_column_text(statement,counter)];
                             [row setObject:[returnblob stringByReplacingOccurrencesOfString:@"''" withString:@"'"] forKey:columnName];
                             break;
                             
@@ -265,7 +265,7 @@ static DataLayer *sharedInstance=nil;
     BOOL __block toReturn;
     dispatch_sync(_dbQueue, ^{
         sqlite3_stmt *statement;
-        if (sqlite3_prepare_v2(database, [query  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK)
+        if (sqlite3_prepare_v2(self->database, [query  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK)
         {
             
             [args enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -337,7 +337,7 @@ static DataLayer *sharedInstance=nil;
     dispatch_async(_dbQueue, ^{
         NSObject* toReturn;
         sqlite3_stmt *statement;
-        if (sqlite3_prepare_v2(database, [query  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK) {
+        if (sqlite3_prepare_v2(self->database, [query  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK) {
             sqlite3_reset(statement);
             [args enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                 if([obj isKindOfClass:[NSNumber class]])
@@ -383,7 +383,7 @@ static DataLayer *sharedInstance=nil;
                         
                     case (SQLITE_TEXT):
                     {
-                        NSString* returnString = [NSString stringWithUTF8String:sqlite3_column_text(statement,0)];
+                        NSString* returnString = [NSString stringWithUTF8String:(const char* _Nonnull)sqlite3_column_text(statement,0)];
                         //    DDLogVerbose(@"got %@", returnString);
                         while(sqlite3_step(statement)== SQLITE_ROW ){} //clear
                         toReturn= [returnString  stringByReplacingOccurrencesOfString:@"''" withString:@"'"];
@@ -394,7 +394,7 @@ static DataLayer *sharedInstance=nil;
                     case (SQLITE_BLOB):
                     {
                         //trat as string for now
-                        NSString* returnString = [NSString stringWithUTF8String:sqlite3_column_text(statement,0)];
+                        NSString* returnString = [NSString stringWithUTF8String:(const char* _Nonnull)sqlite3_column_text(statement,0)];
                         while(sqlite3_step(statement)== SQLITE_ROW) {} //clear
                         toReturn= [returnString  stringByReplacingOccurrencesOfString:@"''" withString:@"'"];
                         toReturn= nil;
@@ -444,7 +444,7 @@ static DataLayer *sharedInstance=nil;
         NSMutableArray*  toReturn =  [[NSMutableArray alloc] init] ;
         
         sqlite3_stmt *statement;
-        if (sqlite3_prepare_v2(database, [query cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK) {
+        if (sqlite3_prepare_v2(self->database, [query cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK) {
             sqlite3_reset(statement);
             [args enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                 if([obj isKindOfClass:[NSNumber class]])
@@ -493,7 +493,7 @@ static DataLayer *sharedInstance=nil;
                             
                         case (SQLITE_TEXT):
                         {
-                            NSString* returnString = [NSString stringWithUTF8String:sqlite3_column_text(statement,counter)];
+                            NSString* returnString = [NSString stringWithUTF8String:(const char* _Nonnull)sqlite3_column_text(statement,counter)];
                             [row setObject:[returnString stringByReplacingOccurrencesOfString:@"''" withString:@"'"] forKey:columnName];
                             break;
                             
@@ -502,7 +502,7 @@ static DataLayer *sharedInstance=nil;
                         case (SQLITE_BLOB):
                         {
                             //trat as string for now
-                            NSString* returnblob = [NSString stringWithUTF8String:sqlite3_column_text(statement,counter)];
+                            NSString* returnblob = [NSString stringWithUTF8String:(const char* _Nonnull)sqlite3_column_text(statement,counter)];
                             [row setObject:[returnblob stringByReplacingOccurrencesOfString:@"''" withString:@"'"] forKey:columnName];
                             break;
                             
@@ -556,7 +556,7 @@ static DataLayer *sharedInstance=nil;
     BOOL __block toReturn;
     dispatch_async(_dbQueue, ^{
         sqlite3_stmt *statement;
-        if (sqlite3_prepare_v2(database, [query  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK)
+        if (sqlite3_prepare_v2(self->database, [query  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK)
         {
             sqlite3_reset(statement);
             [args enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -794,7 +794,7 @@ static DataLayer *sharedInstance=nil;
                                     
                NSArray *params=@[accountNo, contact, actualfull, nickName];
                [self executeNonQuery:query  andArguments:params withCompletion:^(BOOL success) {
-                   dispatch_sync(_contactQueue, ^{
+                   dispatch_sync(self->_contactQueue, ^{
                        [self.contactMemory removeObject:contact];
                    });
                    if(completion)
@@ -807,7 +807,7 @@ static DataLayer *sharedInstance=nil;
            }
            else
            {
-               dispatch_sync(_contactQueue, ^{
+               dispatch_sync(self->_contactQueue, ^{
                    [self.contactMemory removeObject:contact];
                });
                if(completion) completion(NO);
@@ -1738,12 +1738,12 @@ static DataLayer *sharedInstance=nil;
     NSString* query=[NSString stringWithFormat:@"select af,message_from,  message, thetime, message_history_id, delivered, messageid, messageType, received from (select ifnull(actual_from, message_from) as af, message_from,  message, received,    timestamp  as thetime, message_history_id, delivered,messageid, messageType from message_history where account_id=? and (message_from=? or message_to=?) order by message_history_id desc limit 100) order by thetime asc"];
     NSArray *params=@[accountNo, buddy, buddy];
     DDLogVerbose(@"%@", query);
-    NSMutableArray* toReturn = [self executeReader:query andArguments:params];
+    NSMutableArray* toReturn = [[self executeReader:query andArguments:params] mutableCopy];
     
     if(toReturn!=nil)
     {
         
-        DDLogVerbose(@" message history count: %d",  [toReturn count] );
+        DDLogVerbose(@" message history count: %lu",  (unsigned long)[toReturn count] );
         return toReturn; //[toReturn autorelease];
     }
     else
@@ -2128,10 +2128,9 @@ static DataLayer *sharedInstance=nil;
     if([dbversion doubleValue]<1.072)
     {
         DDLogVerbose(@"Database version <1.072 detected. Performing upgrade on passwords. ");
-        NSArray* rows = [self executeReader:@"select account_id, password from account" andArguments:nil];
-        int counter=0;
+        [self executeReader:@"select account_id, password from account" andArguments:nil];
+      
     
-        
         [self executeNonQuery:@"update account set password=''; " andArguments:nil];
         
     }

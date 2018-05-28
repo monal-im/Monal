@@ -536,8 +536,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             DDLogError(@"Exception in ostream close");
         }
         
-        self->_iStream=nil;
-        self->_oStream=nil;
+//        self->_iStream=nil;
+//        self->_oStream=nil;
         
         
     }];
@@ -795,7 +795,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     [self.networkQueue addOperationWithBlock: ^{
         //flush buffer to ignore all prior input
-        _inputBuffer=[[NSMutableString alloc] init];
+        self->_inputBuffer=[[NSMutableString alloc] init];
         
         DDLogInfo(@" got read queue");
         
@@ -804,8 +804,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         [stream.attributes setObject:@"jabber:client" forKey:@"xmlns"];
         [stream.attributes setObject:@"http://etherx.jabber.org/streams" forKey:@"xmlns:stream"];
         [stream.attributes setObject:@"1.0" forKey:@"version"];
-        if(_domain)
-            [stream.attributes setObject:_domain forKey:@"to"];
+        if(self->_domain)
+            [stream.attributes setObject:self->_domain forKey:@"to"];
         [self send:stream];
     }];
 }

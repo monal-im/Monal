@@ -103,6 +103,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) showConnectionStatus:(NSNotification *) notification
 {
+    NSArray *payload= [notification.object copy];
     dispatch_async(dispatch_get_main_queue(), ^{
         if(([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
            || ([UIApplication sharedApplication].applicationState==UIApplicationStateInactive ))
@@ -111,8 +112,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         } else  {
             self.sliding.notificationLabelBackgroundColor = [UIColor redColor];
             self.sliding.notificationLabelTextColor = [UIColor whiteColor];
-            
-            NSArray *payload= notification.object;
             
             NSString *message = payload[1]; // this is just the way i set it up a dic might better
             xmpp *xmppAccount= payload.firstObject;

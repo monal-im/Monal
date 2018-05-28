@@ -910,10 +910,11 @@ static DataLayer *sharedInstance=nil;
 
 -(NSArray*) searchContactsWithString:(NSString*) search
 {
+    NSString *likeString =[NSString stringWithFormat:@"%%%@%%", search];
     NSString* query=@"";
-    query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0 as 'count' , ifnull(full_name, buddy_name) as full_name, account_id, online from buddylist where buddy_name like '%%?%%' or full_name like '%%?%%'  order by full_name COLLATE NOCASE asc "];
+    query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0 as 'count' , ifnull(full_name, buddy_name) as full_name, account_id, online from buddylist where buddy_name like ? or full_name like ?  order by full_name COLLATE NOCASE asc "];
     
-    NSArray *params = @[search,search];
+    NSArray *params = @[likeString,likeString];
     
     //DDLogVerbose(query);
     NSArray* toReturn = [self executeReader:query andArguments:params];

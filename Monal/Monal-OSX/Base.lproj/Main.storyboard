@@ -2530,7 +2530,7 @@ Gw
                         <outlet property="selfSigned" destination="qZr-m6-nhP" id="2m5-dY-Mmh"/>
                         <outlet property="server" destination="elL-k2-qHB" id="NeK-Um-qIi"/>
                         <outlet property="sslCheck" destination="isQ-cw-Hwe" id="h2E-OX-BBf"/>
-                        <segue destination="qCP-od-UE7" kind="popover" identifier="showOAuth" popoverBehavior="t" preferredEdge="maxY" id="clA-Qj-lfS"/>
+                        <segue destination="qCP-od-UE7" kind="popover" identifier="showOAuth" popoverAnchorView="SH7-tD-HlI" popoverBehavior="t" preferredEdge="maxY" id="clA-Qj-lfS"/>
                     </connections>
                 </viewController>
                 <customObject id="P05-Te-TLv" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>

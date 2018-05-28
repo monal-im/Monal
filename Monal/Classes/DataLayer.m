@@ -1706,16 +1706,19 @@ static DataLayer *sharedInstance=nil;
     
     if([user count]>0)
     {
-        
-        NSString* query=[NSString stringWithFormat:@"select x.* from(select distinct message_from,'', ifnull(full_name, message_from) as full_name, filename from message_history as a left outer join buddylist as b on a.message_from=b.buddy_name and a.account_id=b.account_id where a.account_id=?  union select distinct message_to  ,'', ifnull(full_name, message_to) as full_name, filename from message_history as a left outer join buddylist as b on a.message_to=b.buddy_name and a.account_id=b.account_id where a.account_id=?  and message_to!=\"(null)\" )  as x where message_from!=? and message_from!='%%?%%'  order by full_name COLLATE NOCASE "];
-        NSArray *params=@[accountNo, accountNo,((NSString *)[[user objectAtIndex:0] objectForKey:@"username"]), ((NSString *)[[user objectAtIndex:0] objectForKey:@"username"]),  ((NSString *)[[user objectAtIndex:0] objectForKey:@"domain"])  ];
+      
+        NSString* query=[NSString stringWithFormat:@"select x.* from(select distinct message_from,'', ifnull(full_name, message_from) as full_name, filename from message_history as a left outer join buddylist as b on a.message_from=b.buddy_name and a.account_id=b.account_id where a.account_id=?  union select distinct message_to  ,'', ifnull(full_name, message_to) as full_name, filename from message_history as a left outer join buddylist as b on a.message_to=b.buddy_name and a.account_id=b.account_id where a.account_id=?  and message_to!=\"(null)\" )  as x where message_from!=? and message_from!=?  order by full_name COLLATE NOCASE "];
+        NSArray *params=@[accountNo, accountNo,
+                          ((NSString *)[[user objectAtIndex:0] objectForKey:@"username"]),
+                         // ((NSString *)[[user objectAtIndex:0] objectForKey:@"username"]),
+                          ((NSString *)[[user objectAtIndex:0] objectForKey:@"domain"])  ];
         //DDLogVerbose(query);
         NSArray* toReturn = [self executeReader:query andArguments:params];
         
         if(toReturn!=nil)
         {
             
-            DDLogVerbose(@" count: %d",  [toReturn count] );
+            DDLogVerbose(@" count: %lu",  (unsigned long)[toReturn count] );
             return toReturn; //[toReturn autorelease];
         }
         else

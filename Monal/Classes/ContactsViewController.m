@@ -961,7 +961,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 - (void)tableView:(UITableView *)tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath *)indexPath
 {
     NSDictionary *contactDic;
-    if(tableView ==self.view) {
+    if(self.searchResults.count>0)
+    {
+        contactDic=  [self.searchResults objectAtIndex:indexPath.row];
+    }
+   else  {
         if(indexPath.section==konlineSection) {
             contactDic=[_contacts objectAtIndex:indexPath.row];
         }
@@ -970,10 +974,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         }
     }
     
-    else  if(tableView ==self.searchDisplayController.searchResultsTableView)
-    {
-        contactDic=  [self.searchResults objectAtIndex:indexPath.row];
-    }
+    
     
     [self performSegueWithIdentifier:@"showDetails" sender:contactDic];
 }
@@ -981,27 +982,29 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     NSMutableDictionary* row;
-    if(tableView ==self.view) {
-    if(indexPath.section==kinfoSection)
-    {
-        return;
-    }
-    else
-        if((indexPath.section==konlineSection))
-        {
-            row=[_contacts objectAtIndex:indexPath.row];
-        }
-        else if (indexPath.section==kofflineSection)
-        {
-            row= [_offlineContacts objectAtIndex:indexPath.row];
-        }
     
-    [row setObject:[NSNumber numberWithInt:0] forKey:@"count"];
-    }
-    else  if(tableView ==self.searchDisplayController.searchResultsTableView)
+    if(self.searchResults.count>0)
     {
         row= [self.searchResults objectAtIndex:indexPath.row];
+    } else
+    {
+        if(indexPath.section==kinfoSection)
+        {
+            return;
+        }
+        else
+            if((indexPath.section==konlineSection))
+            {
+                row=[_contacts objectAtIndex:indexPath.row];
+            }
+            else if (indexPath.section==kofflineSection)
+            {
+                row= [_offlineContacts objectAtIndex:indexPath.row];
+            }
+        
+        [row setObject:[NSNumber numberWithInt:0] forKey:@"count"];
     }
+    
 
     [self presentChatWithRow:row];
     

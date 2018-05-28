@@ -46,8 +46,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
    [[DataLayer sharedInstance] protocolListWithCompletion:^(NSArray *result) {
        
        dispatch_async(dispatch_get_main_queue(), ^{
-           _protocolList=result;
-           [_accountsTable reloadData];
+           self->_protocolList=result;
+           [self->_accountsTable reloadData];
        });
        
    }];

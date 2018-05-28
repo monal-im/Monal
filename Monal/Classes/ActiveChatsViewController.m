@@ -67,8 +67,8 @@
         dispatch_async(dispatch_get_main_queue(), ^{
             [[MLXMPPManager sharedInstance] cleanArrayOfConnectedAccounts:cleanActive];
             
-            _contacts=cleanActive;
-            [_chatListTable reloadData];
+            self->_contacts=cleanActive;
+            [self->_chatListTable reloadData];
             MonalAppDelegate* appDelegate= (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
             [appDelegate updateUnread];
         });
@@ -220,8 +220,8 @@
         [[DataLayer sharedInstance] activeContactsWithCompletion:^(NSMutableArray *cleanActive) {
             [[MLXMPPManager sharedInstance] cleanArrayOfConnectedAccounts:cleanActive];
             dispatch_async(dispatch_get_main_queue(), ^{
-                _contacts=cleanActive;
-                [_chatListTable deleteRowsAtIndexPaths:@[indexPath]
+                self->_contacts=cleanActive;
+                [self->_chatListTable deleteRowsAtIndexPaths:@[indexPath]
                                       withRowAnimation:UITableViewRowAnimationAutomatic];
             });
         }];

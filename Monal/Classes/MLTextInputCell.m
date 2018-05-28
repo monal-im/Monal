@@ -11,6 +11,7 @@
 @implementation MLTextInputCell
 
 - (void)awakeFromNib {
+    [super awakeFromNib];
     // Initialization code
 }
 

@@ -112,7 +112,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     BOOL threeOh = [[NSUserDefaults standardUserDefaults] boolForKey:@"threeohNotice"];
     
     if(!threeOh) {
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Monal 3" message:@"Thank you for using Monal! I have made improvements to password storage. If you have upgraded from a 2.x version, you will need to re-enter your password under accounts." preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Monal 3" message:@"Thank you for using Monal! Because I have made improvements to password storage, if you have upgraded from a 2.x version, you will need to re-enter your password under accounts." preferredStyle:UIAlertControllerStyleAlert];
     [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
         [self dismissViewControllerAnimated:YES completion:nil];
         

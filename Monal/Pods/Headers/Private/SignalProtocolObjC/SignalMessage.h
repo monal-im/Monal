@@ -1,0 +1,1 @@
+../../../SignalProtocolObjC/Classes/Models/SignalMessage.h

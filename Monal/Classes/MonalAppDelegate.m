@@ -209,12 +209,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             
             if(unread>0)
             {
-                _activeTab.badgeValue=[NSString stringWithFormat:@"%ld",(long)unread];
+                self->_activeTab.badgeValue=[NSString stringWithFormat:@"%ld",(long)unread];
                 [UIApplication sharedApplication].applicationIconBadgeNumber =unread;
             }
             else
             {
-                _activeTab.badgeValue=nil;
+                self->_activeTab.badgeValue=nil;
                 [UIApplication sharedApplication].applicationIconBadgeNumber =0;
             }
         });

@@ -19,6 +19,8 @@
 
 #import "MLMainWindow.h"
 
+@import Quartz;
+
 @interface MLChatViewController () <DBRestClientDelegate>
 
 @property (nonatomic, strong) NSMutableArray *messageList;
@@ -57,6 +59,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [nc addObserver:self selector:@selector(handleSentMessage:) name:kMonalSentMessageNotice object:nil];
     [nc addObserver:self selector:@selector(refreshData) name:kMonalWindowVisible object:nil];
     [nc addObserver:self selector:@selector(refreshMessage:) name:kMonalMessageReceivedNotice object:nil];
+    [nc addObserver:self selector:@selector(fetchMoreMessages) name:kMLMAMMore object:nil];
     
     
     [self setupDateObjects];
@@ -64,17 +67,27 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     self.progressIndicator.bezeled=NO;
     self.progressIndicator.controlSize=NSMiniControlSize;
     [self endProgressUpdate];
+   
+    self.messageScroll.wantsLayer=YES;
+    self.messageScroll.layer.cornerRadius=10.0f;
+ 
     
 }
 
 -(void) viewWillAppear
 {
     [super viewWillAppear];
-    if(! self.contactName) return;
+    if(!self.contactName) {
+        self.inputBar.hidden=YES;
+        self.tableScroll.hidden=YES;
+        return;
+    }
+ 
     
     [self refreshData];
     [self updateWindowForContact:self.contactDic];
-        
+    [self updateInputViewSize];
+ 
 }
 
 
@@ -87,6 +100,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     MLMainWindow *window =(MLMainWindow *)self.view.window.windowController;
     window.chatViewController= self;
+  
+
 }
 
 -(void) dealloc
@@ -96,8 +111,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) refreshData
 {
+    if(!self.contactName) {
+        self.inputBar.hidden=YES;
+        self.tableScroll.hidden=YES;
+        return;
+    }
+    
+    self.inputBar.hidden=NO;
+    self.tableScroll.hidden=NO;
     self.messageList =[[DataLayer sharedInstance] messageHistory:self.contactName forAccount: self.accountNo];
-
     [self.chatTable reloadData];
     [self scrollToBottom];
 }
@@ -130,13 +152,19 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     [self refreshData];
     
-    
+    [self synchChat];
+}
+
+#pragma mark - MAM
+
+-(void) synchChat
+{
     xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
     if(xmppAccount.supportsMam2 & !self.isMUC) {
         
         NSDictionary *lastMessage= [self.messageList lastObject];
         NSDate *last =[self.sourceDateFormat dateFromString:[lastMessage objectForKey:@"thetime"]];
-     
+        
         //synch point
         // if synch point < login time
         NSDate *synch = [[DataLayer sharedInstance] synchPointForContact:self.contactName andAccount:self.accountNo];
@@ -148,9 +176,19 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             [[DataLayer sharedInstance] setSynchPoint:[NSDate date] ForContact:self.contactName andAccount:self.accountNo];
         }
     }
-    
 }
 
+
+-(void) fetchMoreMessages
+{
+    //this forces a new fetch if needed
+    NSDictionary *lastMessage= [self.messageList lastObject];
+    NSDate *last =[self.sourceDateFormat dateFromString:[lastMessage objectForKey:@"thetime"]];
+    if(last) {
+    [[DataLayer sharedInstance] setSynchPoint:last ForContact:self.contactName andAccount:self.accountNo];
+    }
+    [self synchChat];
+}
 
 -(void) scrollToBottom
 {
@@ -170,6 +208,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     MLMainWindow *window =(MLMainWindow *)self.view.window.windowController;
     [window updateCurrentContact:contact];
+    
+    NSString *fullName= (NSString *) [contact objectForKey:kFullName];
+    if(!fullName) fullName =(NSString *) [contact objectForKey:kContactName];
+    
+    self.chatTable.accessibilityLabel=[NSString stringWithFormat:@"Chat with %@", fullName];
 }
 
 
@@ -267,6 +310,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 [self endProgressUpdate];
                 if(url) {
                     self.messageBox.string= url;
+                    [self sendText:self];
                 }
                 else  {
                     NSAlert *userAddAlert = [[NSAlert alloc] init];
@@ -644,6 +688,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     self.messageBox.textColor =[NSColor blackColor];
     self.messageBox.alignment =NSTextAlignmentLeft;
     self.messageBox.font = [NSFont systemFontOfSize:[NSFont systemFontSize]];
+    [self updateInputViewSize];
 }
 
 
@@ -714,6 +759,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     NSString *messageString = [messageRow objectForKey:@"message"];
     NSString *messageType =[messageRow objectForKey:kMessageType];
+    cell.timeStamp.stringValue=@""; //remove template values to not break voice over
     
     if([messageType isEqualToString:kMessageTypeStatus])
     {
@@ -722,18 +768,24 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         return cell;
     }
     
+    NSMutableString *accessibility =[[NSMutableString alloc] init];
+   
+    [accessibility appendString:@""];
+    
     if([messageType isEqualToString:kMessageTypeText]) {
         if([[messageRow objectForKey:@"af"] isEqualToString:self.jid]) {
             cell = [tableView makeViewWithIdentifier:@"OutboundTextCell" owner:self];
             cell.isInbound= NO;
             cell.messageText.textColor = [NSColor whiteColor];
             cell.messageText.linkTextAttributes =@{NSForegroundColorAttributeName:[NSColor whiteColor], NSUnderlineStyleAttributeName: @YES};
+            [accessibility appendString:@"Your Message "];
             
         }
         else  {
             cell = [tableView makeViewWithIdentifier:@"InboundTextCell" owner:self];
             cell.isInbound=YES;
             cell.messageText.linkTextAttributes =@{NSForegroundColorAttributeName:[NSColor blackColor], NSUnderlineStyleAttributeName: @YES};
+            [accessibility appendString:@"Message "];
         }
         
         
@@ -744,11 +796,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         cell.messageText.string =messageString;
         [cell.messageText checkTextInDocument:nil];
         cell.messageText.editable=NO;
+        
+        [accessibility appendString:messageString];
+      
        
     }
     
      if([messageType isEqualToString:kMessageTypeImage])
     {
+      
         NSString* cellDirectionID = @"InboundImageCell";
         if([[messageRow objectForKey:@"af"] isEqualToString:self.jid]) {
             cellDirectionID=@"OutboundImageCell";
@@ -768,12 +824,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     if([[messageRow objectForKey:@"delivered"] boolValue]!=YES)
     {
         cell.deliveryFailed=YES;
+        cell.retry.accessibilityLabel=@"Retry Sending";
         cell.retry.tag= [[messageRow objectForKey:@"message_history_id"] integerValue];
     }
     else  {
         cell.deliveryFailed=NO;
     }
   
+    cell.messageStatus.accessibilityLabel=@"Delivered";
     NSNumber *received = [messageRow objectForKey:kReceived];
     if(received.boolValue==YES) {
         NSDictionary *prior =nil;
@@ -793,9 +851,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     
     BOOL showTime=[self shouldShowTimeForRow:row];
- 
-    cell.toolTip=[self formattedDateWithSource:[messageRow objectForKey:@"thetime"]];
     
+    NSString *dateString=[self formattedDateWithSource:[messageRow objectForKey:@"thetime"]];
+    cell.toolTip=dateString;
+   
     if(showTime) {
         cell.timeStamp.hidden=NO;
         cell.timeStampHeight.constant=kCellTimeStampHeight;
@@ -805,7 +864,16 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         cell.timeStamp.hidden=YES;
         cell.timeStampHeight.constant=0.0f;
         cell.timeStampVeritcalOffset.constant=0.0f;
+       
+        if(dateString) {
+            [accessibility appendString:@" "];
+            [accessibility appendString:dateString];
+        }
+        
     }
+    
+    cell.scrollArea.accessibilityLabel=accessibility;
+   
     
    [[MLImageManager sharedInstance] getIconForContact:[messageRow objectForKey:@"af"] andAccount:self.accountNo withCompletion:^(NSImage *icon) {
        cell.senderIcon.image=icon;
@@ -921,6 +989,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 }
 
 
+
 #pragma  mark - textview delegate
 - (BOOL)textView:(NSTextView *)view shouldChangeTextInRange:(NSRange)range replacementString:(NSString *)replacementString;
 {
@@ -929,12 +998,36 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self sendText:self];
             });
-            
             return NO;
-      
         }
+    
     return YES;
 }
+
+- (void)textDidChange:(NSNotification *)notification;
+{
+     [self updateInputViewSize];
+}
+
+-(void) updateInputViewSize
+{
+    
+    if(self.messageBox.intrinsicContentSize.height>22) {
+        self.inputContainerHeight.constant= self.messageBox.intrinsicContentSize.height+16+10;
+        if(self.inputContainerHeight.constant>300) self.inputContainerHeight.constant=300;
+          self.messageScroll.contentInsets = NSEdgeInsetsMake(5, 0, 5, 0);
+    } else
+    {
+        self.inputContainerHeight.constant=38.0f;
+          self.messageScroll.contentInsets = NSEdgeInsetsMake(5, 0, 5, 0);
+    }
+    //  [self.messageScroll setScrollEnabled:NO];
+    [self.inputBar layout];
+    //  [self.messageBox setScrollEnabled:YES];
+    [self.messageBox scrollRangeToVisible:NSMakeRange(0, 0)];
+}
+
+
 
 
 

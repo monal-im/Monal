@@ -14,7 +14,7 @@
 #include "rtpsessionparams.hh"
 #include "rtperrors.hh"
 #include "rtppacket.hh"
-
+#import "TPCircularBuffer.h"
 
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -164,7 +164,7 @@ void AudioOutputCallback(
     
     // debug_NSLog(@"Queuing buffer %lld for playback\n", playState->currentPacket);
     uint32_t bytesToCopy=160;
-    int32_t availableBytes;
+    uint32_t availableBytes;
     
     void *buffer = TPCircularBufferTail(&packetInCircularBuffer, &availableBytes);
 
@@ -224,9 +224,10 @@ void AudioOutputCallback(
     {
         if(disconnecting) break;
             uint32_t bytesToCopy=800;
-            int32_t availableBytes;
+            uint32_t availableBytes;
             void *buffer = TPCircularBufferTail(&packetOutCircularBuffer, &availableBytes);
-            if(availableBytes>=bytesToCopy)
+   
+        if(availableBytes>=bytesToCopy)
             {
                 void *targetBuffer = malloc(bytesToCopy);
                 memcpy(targetBuffer, buffer, bytesToCopy );

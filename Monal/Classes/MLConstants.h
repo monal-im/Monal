@@ -24,6 +24,8 @@
 #define kMLHasConnectedNotice @"kMLHasConnectedNotice"
 
 #define kMLMAMPref @"kMLMAMPref"
+#define kMLMAMMore @"kMLMAMMore"
+
 
 #define kMonalCallStartedNotice @"kMonalCallStartedNotice"
 #define kMonalCallRequestNotice @"kMonalCallRequestNotice"
@@ -62,6 +64,6 @@
 #endif
 
 
-#ifndef DEBUG
-#define DEBUG 1
-#endif
+//#ifndef DEBUG
+//#define DEBUG 1
+//#endif

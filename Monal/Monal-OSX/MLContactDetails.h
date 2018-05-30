@@ -16,6 +16,7 @@
 @property (nonatomic,weak) IBOutlet NSTextField* fullName;
 @property (nonatomic,weak) IBOutlet NSTextField* buddyStatus;
 @property (nonatomic,weak) IBOutlet NSTextField* buddyMessage;
+@property (nonatomic,weak) IBOutlet NSTextField* subscription;
 @property (nonatomic,strong) IBOutlet NSTextView* resourcesTextView;
 
 @property (nonatomic,strong) NSDictionary *contact;

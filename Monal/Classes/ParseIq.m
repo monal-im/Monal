@@ -150,7 +150,21 @@
         return;
     }
     
-   
+    if([elementName isEqualToString:@"fin"] && [[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:mam:2"]  &&  [[attributeDict objectForKey:@"complete"] isEqualToString:@"true"])
+    {
+        _mam2fin =YES;
+        return;
+    }
+    
+    if([elementName isEqualToString:@"set"] && [[attributeDict objectForKey:@"xmlns"] isEqualToString:@"http://jabber.org/protocol/rsm"])
+    {
+        State=@"MAMSet";
+        return;
+    }
+    
+ 
+    
+    
     //** jingle ** /
     
     if([elementName isEqualToString:@"jingle"] &&  [[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:jingle:1"])
@@ -273,6 +287,7 @@
         return;
     }
     
+
     
     if([elementName isEqualToString:@"signedPreKeyPublic"] &&  [State isEqualToString:@"Bundle"])
     {
@@ -304,9 +319,14 @@
       
         return;
     }
-    
-    
-    
+ 
+
+    if([elementName isEqualToString:@"last"] && [State isEqualToString:@"MAMSet"])
+    {
+        _mam2Last=[_messageBuffer copy];
+        return;
+    }
+
    
 }
 

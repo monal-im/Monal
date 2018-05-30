@@ -13,6 +13,7 @@
 #import "NXOAuth2AccountStore.h"
 #import "MBProgressHUD.h"
 #import "MLServerDetails.h"
+#import "MLMAMPrefTableViewController.h"
 
 #import "tools.h"
 
@@ -218,8 +219,9 @@ NSString *const kGtalk = @"Gtalk";
     //default just use JID
     if([self.server length]==0)
     {
-        if([elements count]>1)
+        if([elements count]>1){
             self.server=[elements objectAtIndex:1];
+        }
     }
     
     
@@ -239,8 +241,32 @@ NSString *const kGtalk = @"Gtalk";
     [dic setObject:domain forKey:kDomain];
     
     if(user) [dic setObject:user forKey:kUsername];
-    if(self.server) [dic setObject:self.server  forKey:kServer];
-    if(self.port ) [dic setObject:self.port forKey:kPort];
+    
+    if(self.server) {
+        [dic setObject:self.server  forKey:kServer];
+    } else
+    {
+        
+       UIAlertController* alert= [UIAlertController alertControllerWithTitle:@"Could not determine server" message:@"Please provide a server or use an id in the format user@server" preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            [alert dismissViewControllerAnimated:YES completion:nil];
+        }]];
+        
+        [self presentViewController:alert animated:YES completion:^{
+            
+        }];
+        return;
+        
+    }
+    
+   
+    
+    if(self.port ) {
+        [dic setObject:self.port forKey:kPort];
+    } else {
+        
+    }
+    
     [dic setObject:@"Monal-iOS" forKey:kResource];
     
     [dic setObject:[NSNumber numberWithBool:self.useSSL] forKey:kSSL];
@@ -359,6 +385,7 @@ NSString *const kGtalk = @"Gtalk";
     
     [questionAlert addAction:noAction];
     [questionAlert addAction:yesAction];
+    questionAlert.popoverPresentationController.sourceView=sender;
     
     [self presentViewController:questionAlert animated:YES completion:nil];
     
@@ -491,6 +518,14 @@ NSString *const kGtalk = @"Gtalk";
                 thecell.toggleSwitch.on=self.selfSignedSSL;
                 break;
             }
+            case 5: {
+                thecell.cellLabel.text=@"Message Archive Pref";
+                thecell.toggleSwitch.hidden=YES;
+                
+                thecell.textInputField.hidden=YES;
+                thecell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
+                break;
+            }
                 
         }
         
@@ -572,7 +607,7 @@ NSString *const kGtalk = @"Gtalk";
         return 3;
     }
     else if( section ==1) {
-        return 5;
+        return 6;
     }
     else  if(section == 2&&  self.editMode==false)
     {
@@ -594,9 +629,17 @@ NSString *const kGtalk = @"Gtalk";
             [self authenticateWithOAuth];
         }
     }
+    else if (newIndexPath.section==1)
+    {  switch (newIndexPath.row)
+        {
+            case 5:  {
+                [self performSegueWithIdentifier:@"showMAMPref" sender:self];
+            }
+        }
+    }
     else if(newIndexPath.section==2)
     {
-        [self delClicked:self];
+        [self delClicked:[tableView cellForRowAtIndexPath:newIndexPath]];
     }
     
 }
@@ -611,6 +654,7 @@ NSString *const kGtalk = @"Gtalk";
             case 0:  {
                 [self performSegueWithIdentifier:@"showServerDetails" sender:self];
             }
+           
         }
     }
 }
@@ -624,6 +668,12 @@ NSString *const kGtalk = @"Gtalk";
     {
         MLServerDetails *server= (MLServerDetails *)segue.destinationViewController;
         server.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountno];
+    }
+    
+    else if ([segue.identifier isEqualToString:@"showMAMPref"])
+    {
+        MLMAMPrefTableViewController *mam= (MLMAMPrefTableViewController *)segue.destinationViewController;
+        mam.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountno];
     }
 }
 

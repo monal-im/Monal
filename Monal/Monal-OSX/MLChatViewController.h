@@ -7,16 +7,22 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "MLTextView.h"
 @import Quartz;
 @import QuickLook;
 
 @interface MLChatViewController : NSViewController <NSTableViewDataSource, NSTableViewDelegate, NSTextViewDelegate, QLPreviewPanelDataSource, QLPreviewPanelDelegate>
 
-@property (nonatomic, strong) IBOutlet NSTextView *messageBox;
+@property (nonatomic, strong) IBOutlet MLTextView *messageBox;
+@property (nonatomic, strong) IBOutlet NSScrollView *messageScroll;
+@property (nonatomic, weak) IBOutlet NSView *inputBar;
+
+@property (nonatomic, strong) IBOutlet NSScrollView *tableScroll;
 @property (nonatomic, strong) IBOutlet NSTableView *chatTable;
-@property (nonatomic, strong) IBOutlet NSProgressIndicator *progressIndicator;
+@property (nonatomic, weak) IBOutlet NSProgressIndicator *progressIndicator;
 @property (nonatomic, strong) NSDictionary *contactDic;
 @property (nonatomic, strong, readonly) NSString *contactName;
+@property (nonatomic, weak) IBOutlet NSLayoutConstraint *inputContainerHeight;
 
 -(IBAction)sendText:(id)sender;
 -(IBAction)emojiPicker:(id)sender;

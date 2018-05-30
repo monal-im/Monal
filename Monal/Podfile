@@ -29,7 +29,7 @@ pod 'SAMKeychain'
 #pod 'NXOAuth2Client', '~> 1.2.8'
 pod 'CWStatusBarNotification', '~> 2.3.5'
 pod 'MWPhotoBrowser', :podspec =>'https://raw.githubusercontent.com/moinku07/MWPhotoBrowser/master/MWPhotoBrowser.podspec'
-pod 'SDWebImage', '~> 4.2.2'
+pod 'SDWebImage'
 pod 'SignalProtocolObjC'
   # Pods for Monal
 

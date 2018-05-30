@@ -23,6 +23,7 @@
 
 @interface ContactsViewController ()
 @property (nonatomic, strong) NSArray* searchResults ;
+@property (nonatomic, strong) UISearchController *searchController;
 
 
 @property (nonatomic ,strong) NSMutableArray* infoCells;
@@ -60,13 +61,24 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                bundle:[NSBundle mainBundle]]
          forCellReuseIdentifier:@"ContactCell"];
     
-    [self.searchDisplayController.searchResultsTableView registerNib:[UINib nibWithNibName:@"MLContactCell"
-                                                                                     bundle:[NSBundle mainBundle]]
-                                               forCellReuseIdentifier:@"ContactCell"];
-    
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
     
-
+    self.searchController =[[UISearchController alloc] initWithSearchResultsController:nil];
+    
+    self.searchController.searchResultsUpdater = self;
+    self.searchController.delegate=self;
+    self.searchController.dimsBackgroundDuringPresentation = NO;
+    self.definesPresentationContext = YES;
+    
+    if (@available(iOS 11.0, *)) {
+        self.navigationItem.searchController= self.searchController;
+    }
+    else  {
+        // Install the search bar as the table header.
+        UITableView *tableView = (UITableView *)self.view;
+        tableView.tableHeaderView = self.searchController.searchBar;
+    }
+    
 }
 
 -(void) dealloc
@@ -92,13 +104,30 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     [[MLXMPPManager sharedInstance] handleNewMessage:nil];
     
-  
-    
 }
+
+
+-(void) upgradeNotice
+{
+    BOOL threeOh = [[NSUserDefaults standardUserDefaults] boolForKey:@"threeohNotice"];
+    
+    if(!threeOh) {
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Monal 3" message:@"Thank you for using Monal! Because I have made improvements to password storage, if you have upgraded from a 2.x version, you will need to re-enter your password under accounts." preferredStyle:UIAlertControllerStyleAlert];
+    [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+        [self dismissViewControllerAnimated:YES completion:nil];
+        
+    }]];
+    [self presentViewController:alert animated:YES completion:nil];
+    
+        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"threeohNotice"];
+    }
+}
+
 
 -(void) viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
+    [self upgradeNotice];
    
 }
 
@@ -639,29 +668,29 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 }
 
 
-#pragma mark search display delegate
 
-- (void)searchDisplayControllerWillBeginSearch:(UISearchDisplayController *)controller {
-    self.searchResults=nil;
-}
+#pragma mark - Search Controller
 
-- (void)searchDisplayControllerWillEndSearch:(UISearchDisplayController *)controller
+- (void)didDismissSearchController:(UISearchController *)searchController;
 {
     self.searchResults=nil;
-
+    [self.tableView reloadData];
 }
 
--(BOOL) searchDisplayController:(UISearchDisplayController *)controller shouldReloadTableForSearchString:(NSString *)searchString
+
+- (void)updateSearchResultsForSearchController:(UISearchController *)searchController;
 {
-    if(searchString.length >0) {
-    
-        self.searchResults = [[DataLayer sharedInstance] searchContactsWithString:searchString];
-        return YES;
+    if(searchController.searchBar.text.length>0) {
+        
+        NSString *term = [searchController.searchBar.text  copy];
+        self.searchResults = [[DataLayer sharedInstance] searchContactsWithString:term];
+        
+    } else  {
+        self.searchResults=nil;
     }
-    
-    self.searchResults=nil;
-    return NO;
+    [self.tableView reloadData];
 }
+
 
 #pragma mark tableview datasource
 -(NSString*) tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
@@ -686,24 +715,26 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(NSInteger) numberOfSectionsInTableView:(UITableView *)tableView
 {
     NSInteger toreturn=0;
-    if(tableView ==self.view) {
+    if(self.searchResults.count>0) {
+        toreturn =1;
+    }
+    else{
         if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
             toreturn =3;
         else
             toreturn =2;
     }
-    else  if(tableView ==self.searchDisplayController.searchResultsTableView) {
-        toreturn =1;
-    }
-    
     return toreturn;
-    
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     NSInteger toReturn=0;
-    if(tableView ==self.view) {
+    if(self.searchResults.count>0) {
+        toReturn=[self.searchResults count];
+    }
+    //if(tableView ==self.view)
+    else {
         switch (section) {
             case kinfoSection:
                 toReturn=[_infoCells count];
@@ -718,16 +749,20 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 break;
         }
     }
-    else  if(tableView ==self.searchDisplayController.searchResultsTableView) {
-        toReturn=[self.searchResults count];
-    }
+    
     
     return toReturn;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    if(tableView ==self.view) {
+    NSDictionary* row =nil;
+    if(self.searchResults.count>0) {
+        row = [self.searchResults objectAtIndex:indexPath.row];
+    }
+     else
+   // if(tableView ==self.view)
+    {
         if(indexPath.section==kinfoSection)
         {
             MLInfoCell* cell =[tableView dequeueReusableCellWithIdentifier:@"InfoCell"];
@@ -749,6 +784,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             
             return cell;
         }
+        else
+            if(indexPath.section==konlineSection)
+            {
+                row = [_contacts objectAtIndex:indexPath.row];
+            }
+            else if(indexPath.section==kofflineSection)
+            {
+                row = [_offlineContacts objectAtIndex:indexPath.row];
+            }
     }
     
     MLContactCell* cell =[tableView dequeueReusableCellWithIdentifier:@"ContactCell"];
@@ -758,27 +802,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     
     cell.count=0;
-    cell.userImage.image=nil; 
-
-    NSDictionary* row =nil;
- 
-    if(indexPath.section==konlineSection)
-    {
-        row = [_contacts objectAtIndex:indexPath.row];
-    }
-    
+    cell.userImage.image=nil;
     cell.statusText.text=@"";
-    
-    if(tableView ==self.view) {
-        if(indexPath.section==kofflineSection)
-        {
-            row = [_offlineContacts objectAtIndex:indexPath.row];
-        }
-    }
-    else  if(tableView ==self.searchDisplayController.searchResultsTableView) {
-        row = [self.searchResults objectAtIndex:indexPath.row];
-    }
-    
+  
     NSString* fullName=[row objectForKey:@"full_name"];
     if([[fullName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0) {
         [cell showDisplayName:fullName];
@@ -943,7 +969,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 - (void)tableView:(UITableView *)tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath *)indexPath
 {
     NSDictionary *contactDic;
-    if(tableView ==self.view) {
+    if(self.searchResults.count>0)
+    {
+        contactDic=  [self.searchResults objectAtIndex:indexPath.row];
+    }
+   else  {
         if(indexPath.section==konlineSection) {
             contactDic=[_contacts objectAtIndex:indexPath.row];
         }
@@ -952,10 +982,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         }
     }
     
-    else  if(tableView ==self.searchDisplayController.searchResultsTableView)
-    {
-        contactDic=  [self.searchResults objectAtIndex:indexPath.row];
-    }
+    
     
     [self performSegueWithIdentifier:@"showDetails" sender:contactDic];
 }
@@ -963,27 +990,29 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     NSMutableDictionary* row;
-    if(tableView ==self.view) {
-    if(indexPath.section==kinfoSection)
-    {
-        return;
-    }
-    else
-        if((indexPath.section==konlineSection))
-        {
-            row=[_contacts objectAtIndex:indexPath.row];
-        }
-        else if (indexPath.section==kofflineSection)
-        {
-            row= [_offlineContacts objectAtIndex:indexPath.row];
-        }
     
-    [row setObject:[NSNumber numberWithInt:0] forKey:@"count"];
-    }
-    else  if(tableView ==self.searchDisplayController.searchResultsTableView)
+    if(self.searchResults.count>0)
     {
         row= [self.searchResults objectAtIndex:indexPath.row];
+    } else
+    {
+        if(indexPath.section==kinfoSection)
+        {
+            return;
+        }
+        else
+            if((indexPath.section==konlineSection))
+            {
+                row=[_contacts objectAtIndex:indexPath.row];
+            }
+            else if (indexPath.section==kofflineSection)
+            {
+                row= [_offlineContacts objectAtIndex:indexPath.row];
+            }
+        
+        [row setObject:[NSNumber numberWithInt:0] forKey:@"count"];
     }
+    
 
     [self presentChatWithRow:row];
     

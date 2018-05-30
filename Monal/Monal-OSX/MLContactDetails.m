@@ -27,13 +27,23 @@
     self.buddyName.stringValue =[_contact objectForKey:@"buddy_name"];
     
     self.buddyMessage.stringValue=[_contact objectForKey:@"status"];
-    if([ self.buddyMessage.stringValue isEqualToString:@"(null)"])  self.buddyMessage.stringValue=@"";
+    if([self.buddyMessage.stringValue isEqualToString:@"(null)"])  self.buddyMessage.stringValue=@"";
     
     self.buddyStatus.stringValue=[_contact objectForKey:@"state"];
-    if([ self.buddyStatus.stringValue isEqualToString:@"(null)"])  self.buddyStatus.stringValue=@"";
+    if([self.buddyStatus.stringValue isEqualToString:@"(null)"])  self.buddyStatus.stringValue=@"";
     
     self.fullName.stringValue=[_contact objectForKey:@"full_name"];
-    if([ self.fullName.stringValue isEqualToString:@"(null)"])  self.fullName.stringValue=@"";
+    if([self.fullName.stringValue isEqualToString:@"(null)"])  self.fullName.stringValue=@"";
+    
+  
+     NSString* accountNo=[NSString stringWithFormat:@"%@", [_contact objectForKey:@"account_id"]];
+//    [[DataLayer sharedInstance] contactForUsername:[_contact objectForKey:@"buddy_name"] forAccount:accountNo withCompletion:^(NSArray *result) {
+//
+//     self.subscription.stringValue=[_contact objectForKey:@"full_name"];
+//        if([self.subscription.stringValue isEqualToString:@"(null)"])  self.subscription.stringValue=@"";
+//
+//
+//    }];
     
     NSArray* parts= [self.buddyName.stringValue componentsSeparatedByString:@"@"];
     if([parts count]>1)
@@ -50,7 +60,7 @@
             _protocolImage.image=[NSImage imageNamed:@"XMPP"];
         
     }
-    NSString* accountNo=[NSString stringWithFormat:@"%@", [_contact objectForKey:@"account_id"]];
+ ;
   [[MLImageManager sharedInstance] getIconForContact:[_contact objectForKey:@"buddy_name"] andAccount:accountNo withCompletion:^(NSImage *contactImage) {
         self.buddyIconView.image=contactImage;
   }];

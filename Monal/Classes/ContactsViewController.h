@@ -11,7 +11,7 @@
 #import "MLImageManager.h"
 
 
-@interface ContactsViewController : UITableViewController
+@interface ContactsViewController : UITableViewController  <UISearchResultsUpdating, UISearchControllerDelegate>
 
 /**
  This may not be the tab bar (ipad) that this VC is in. But alerts should be shown from it.

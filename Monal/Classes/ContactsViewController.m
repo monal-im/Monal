@@ -203,7 +203,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         hasChange=YES;
     } 
     
-    if(hasChange) {
+    if(hasChange &&  self.searchResults.count==0)
+    {
     
         [_contactsTable beginUpdates];
         NSIndexPath *path1 = [NSIndexPath indexPathForRow:pos inSection:konlineSection];
@@ -235,7 +236,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         hasChange=YES;
     }
     
-    if(hasChange) {
+    if(hasChange &&  self.searchResults.count==0) {
         
         [_contactsTable beginUpdates];
         NSIndexPath *path1 = [NSIndexPath indexPathForRow:pos inSection:kofflineSection];

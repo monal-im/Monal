@@ -276,6 +276,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) addOnlineUser:(NSNotification *) notification
 {
     NSDictionary* user = notification.userInfo;
+    if(self.searchResults.count!=0) return;
     
     dispatch_async(dispatch_get_main_queue(), ^{
         if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
@@ -941,24 +942,24 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 [[MLXMPPManager sharedInstance] removeContact:contact];
             }
             
-            [_contactsTable beginUpdates];
-            if ((indexPath.section==1) && (indexPath.row<=[_contacts count]) ) {
-               [_contacts removeObjectAtIndex:indexPath.row];
-            }
-            else if((indexPath.section==2) && (indexPath.row<=[_offlineContacts count]) ) {
-                 [_offlineContacts removeObjectAtIndex:indexPath.row];
-            }
-            else {
-                //nothing to delete just end
-                 [_contactsTable endUpdates];
-                return; 
+            if(self.searchResults.count!=0) {
+                [_contactsTable beginUpdates];
+                if ((indexPath.section==1) && (indexPath.row<=[_contacts count]) ) {
+                    [_contacts removeObjectAtIndex:indexPath.row];
+                }
+                else if((indexPath.section==2) && (indexPath.row<=[_offlineContacts count]) ) {
+                    [_offlineContacts removeObjectAtIndex:indexPath.row];
+                }
+                else {
+                    //nothing to delete just end
+                    [_contactsTable endUpdates];
+                    return;
+                }
                 
+                [_contactsTable deleteRowsAtIndexPaths:@[indexPath]
+                                      withRowAnimation:UITableViewRowAnimationAutomatic];
+                [_contactsTable endUpdates];
             }
-          
-            
-            [_contactsTable deleteRowsAtIndexPaths:@[indexPath]
-                                  withRowAnimation:UITableViewRowAnimationAutomatic];
-            [_contactsTable endUpdates];
             
         }];
         

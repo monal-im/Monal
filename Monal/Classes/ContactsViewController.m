@@ -276,7 +276,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) addOnlineUser:(NSNotification *) notification
 {
     NSDictionary* user = notification.userInfo;
-    if(self.searchResults.count!=0) return;
+  
     
     dispatch_async(dispatch_get_main_queue(), ^{
         if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
@@ -299,7 +299,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         }
         else
         {
-            
+          
         //insert into tableview
         // for now just online
         [[DataLayer sharedInstance] contactForUsername:[user objectForKey:kusernameKey] forAccount:[user objectForKey:kaccountNoKey] withCompletion:^(NSArray * contactRow) {
@@ -320,11 +320,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                        DDLogVerbose(@"removed from offline");
                                        
                                        [_offlineContacts removeObjectAtIndex:offlinepos];
-                                       [_contactsTable beginUpdates];
-                                       NSIndexPath *path2 = [NSIndexPath indexPathForRow:offlinepos inSection:kofflineSection];
-                                       [_contactsTable deleteRowsAtIndexPaths:@[path2]
-                                                             withRowAnimation:UITableViewRowAnimationFade];
-                                       [_contactsTable endUpdates];
+                                       if(self.searchResults.count!=0) {
+                                           [_contactsTable beginUpdates];
+                                           NSIndexPath *path2 = [NSIndexPath indexPathForRow:offlinepos inSection:kofflineSection];
+                                           [_contactsTable deleteRowsAtIndexPaths:@[path2]
+                                                                 withRowAnimation:UITableViewRowAnimationFade];
+                                           [_contactsTable endUpdates];
+                                       }
                                    }
                                }
                              
@@ -353,14 +355,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                    
                                    DDLogVerbose(@"inserting %@ st sorted  pos %d", [_contacts objectAtIndex:newpos], newpos);
                                    
-                                   
-                                   [_contactsTable beginUpdates];
-                                   
-                                   NSIndexPath *path1 = [NSIndexPath indexPathForRow:newpos inSection:konlineSection];
-                                   [_contactsTable insertRowsAtIndexPaths:@[path1]
-                                                         withRowAnimation:UITableViewRowAnimationAutomatic];
-                                   
-                                   [_contactsTable endUpdates];
+                                   if(self.searchResults.count!=0) {
+                                       [_contactsTable beginUpdates];
+                                       
+                                       NSIndexPath *path1 = [NSIndexPath indexPathForRow:newpos inSection:konlineSection];
+                                       [_contactsTable insertRowsAtIndexPaths:@[path1]
+                                                             withRowAnimation:UITableViewRowAnimationAutomatic];
+                                       
+                                       [_contactsTable endUpdates];
+                                   }
                                    
                                    
                                }else
@@ -416,7 +419,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                counter=0;
                                offlinepos =[self positionOfOfflineContact:user];
                                //in contacts but not in offline.. (not in roster this shouldnt happen)
-                               if((offlinepos==-1) &&(pos>=0))
+                               if((offlinepos==-1) &&(pos>=0)    && self.searchResults.count!=0)
                                {
                                    NSMutableDictionary* row= [contactRow objectAtIndex:0] ;
                                    [_offlineContacts insertObject:row atIndex:0];
@@ -441,7 +444,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                            }
                            
                            // it exists
-                           if(pos>=0)
+                           if(pos>=0  && self.searchResults.count!=0)
                            {
                                [_contacts removeObjectAtIndex:pos];
                                DDLogVerbose(@"removing %@ at pos %d", [user objectForKey:kusernameKey], pos);

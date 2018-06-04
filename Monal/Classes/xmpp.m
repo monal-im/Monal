@@ -1157,7 +1157,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
      [NSBlockOperation blockOperationWithBlock:^{
         if(self.unAckedStanzas)
         {
-            NSMutableArray *iterationArray = self.unAckedStanzas;
+            NSMutableArray *iterationArray = [self.unAckedStanzas mutableCopy];
             DDLogDebug(@"removeUnAckedMessagesLessThan: hvalue %@, lastOutboundStanza %@", hvalue, self.lastOutboundStanza);
             NSMutableArray *discard =[[NSMutableArray alloc] initWithCapacity:[self.unAckedStanzas count]];
             for(NSDictionary *dic in iterationArray)

@@ -1157,9 +1157,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
      [NSBlockOperation blockOperationWithBlock:^{
         if(self.unAckedStanzas)
         {
+            NSMutableArray *iterationArray = self.unAckedStanzas;
             DDLogDebug(@"removeUnAckedMessagesLessThan: hvalue %@, lastOutboundStanza %@", hvalue, self.lastOutboundStanza);
             NSMutableArray *discard =[[NSMutableArray alloc] initWithCapacity:[self.unAckedStanzas count]];
-            for(NSDictionary *dic in self.unAckedStanzas)
+            for(NSDictionary *dic in iterationArray)
             {
                 NSNumber *stanzaNumber = [dic objectForKey:kStanzaID];
                 if([stanzaNumber integerValue]<[hvalue integerValue])
@@ -1168,7 +1169,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 }
             }
             
-            [self.unAckedStanzas removeObjectsInArray:discard];
+            [iterationArray removeObjectsInArray:discard];
+            if(self.unAckedStanzas) self.unAckedStanzas= iterationArray; // if it was set to nil elsewhere, dont restore
             
             //persist these changes
             [self persistState];

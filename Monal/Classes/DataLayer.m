@@ -1178,11 +1178,14 @@ static DataLayer *sharedInstance=nil;
 -(void) setFullName:(NSString*) fullName forContact:(NSString*) contact andAccount:(NSString*) accountNo
 {
     
+    
     NSString* toPass;
     //data length check
     
     NSString *cleanFullName =[fullName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     if([cleanFullName length]>50) toPass=[cleanFullName substringToIndex:49]; else toPass=cleanFullName;
+    
+    if(!toPass) return;
     
     NSString* query=[NSString stringWithFormat:@"update buddylist set full_name=?,dirty=1 where account_id=? and  buddy_name=?"];
     NSArray *params=@[toPass , accountNo, contact];

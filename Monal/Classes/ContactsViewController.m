@@ -320,7 +320,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                        DDLogVerbose(@"removed from offline");
                                        
                                        [_offlineContacts removeObjectAtIndex:offlinepos];
-                                       if(self.searchResults.count!=0) {
+                                       if(self.searchResults.count==0) {
                                            [_contactsTable beginUpdates];
                                            NSIndexPath *path2 = [NSIndexPath indexPathForRow:offlinepos inSection:kofflineSection];
                                            [_contactsTable deleteRowsAtIndexPaths:@[path2]
@@ -355,7 +355,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                    
                                    DDLogVerbose(@"inserting %@ st sorted  pos %d", [_contacts objectAtIndex:newpos], newpos);
                                    
-                                   if(self.searchResults.count!=0) {
+                                   if(self.searchResults.count==0) {
                                        [_contactsTable beginUpdates];
                                        
                                        NSIndexPath *path1 = [NSIndexPath indexPathForRow:newpos inSection:konlineSection];
@@ -419,7 +419,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                counter=0;
                                offlinepos =[self positionOfOfflineContact:user];
                                //in contacts but not in offline.. (not in roster this shouldnt happen)
-                               if((offlinepos==-1) &&(pos>=0)    && self.searchResults.count!=0)
+                               if((offlinepos==-1) &&(pos>=0)    && self.searchResults.count==0)
                                {
                                    NSMutableDictionary* row= [contactRow objectAtIndex:0] ;
                                    [_offlineContacts insertObject:row atIndex:0];
@@ -444,7 +444,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                            }
                            
                            // it exists
-                           if(pos>=0  && self.searchResults.count!=0)
+                           if(pos>=0  && self.searchResults.count==0)
                            {
                                [_contacts removeObjectAtIndex:pos];
                                DDLogVerbose(@"removing %@ at pos %d", [user objectForKey:kusernameKey], pos);
@@ -945,7 +945,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 [[MLXMPPManager sharedInstance] removeContact:contact];
             }
             
-            if(self.searchResults.count!=0) {
+            if(self.searchResults.count==0) {
                 [_contactsTable beginUpdates];
                 if ((indexPath.section==1) && (indexPath.row<=[_contacts count]) ) {
                     [_contacts removeObjectAtIndex:indexPath.row];

@@ -1305,7 +1305,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         
                         if(iqNode.photoBinValue)
                         {
-                            [[MLImageManager sharedInstance] setIconForContact:iqNode.user andAccount:self->_accountNo WithData:iqNode.photoBinValue ];
+                            [[MLImageManager sharedInstance] setIconForContact:iqNode.user andAccount:self->_accountNo WithData:[iqNode.photoBinValue copy]];
                             
                         }
                         

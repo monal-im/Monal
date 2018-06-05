@@ -148,7 +148,9 @@
     NSString *user=@"";
     NSString *domain=@"";
     
-    NSString *resource=@"Monal-OSX";
+    srand([[NSDate date] timeIntervalSince1970]);
+    NSString *resource=[NSString stringWithFormat:@"Monal-OSX.%d",rand()%100];
+
     NSString *port=@"";
     
     NSArray *parts = [self.jabberID.stringValue componentsSeparatedByString:@"@"];

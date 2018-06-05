@@ -136,8 +136,9 @@ NSString *const kGtalk = @"Gtalk";
         }
         
         self.port=@"5222";
-        self.resource=@"Monal-iOS";
         self.useSSL=true;
+        srand([[NSDate date] timeIntervalSince1970]);
+        self.resource=[NSString stringWithFormat:@"Monal-iOS.%d",rand()%100];
         
         
         self.oldStyleSSL=NO;

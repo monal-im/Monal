@@ -591,7 +591,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 aNode.attributes = [dic mutableCopy];
                 [self writeToStream:aNode.XMLString]; // dont even bother queueing
             }
+            
+            
         }
+        
+        //close stream
+        MLXMLNode* stream = [[MLXMLNode alloc] init];
+        stream.element = @"/stream:stream"; //hack to close stream
+        [self writeToStream:stream.XMLString]; // dont even bother queueing
         
         //preserve unAckedStanzas even on explicitLogout and resend them on next connect
         //if we don't do this messages could be lost when logging out directly after sending them
@@ -605,28 +612,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         //persist these changes
         [self persistState];
         
-        //close stream
-        MLXMLNode* stream = [[MLXMLNode alloc] init];
-        stream.element = @"/stream:stream"; //hack to close stream
-        [self writeToStream:stream.XMLString]; // dont even bother queueing
-    }
-    
-    
-    if(_accountState == kStateDisconnected) {
-        
-        _startTLSComplete=NO;
-        _streamHasSpace=NO;
-        _loginStarted=NO;
-        _loginStartTimeStamp=nil;
-        _loginError=NO;
-        _reconnectScheduled =NO;
-        
-        if(completion)completion();
-        return;
     }
     
     [self closeSocket];
-    
     
     [self.networkQueue addOperationWithBlock:^{
         [self cleanUpState];

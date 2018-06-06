@@ -2322,13 +2322,30 @@ static DataLayer *sharedInstance=nil;
     if([dbversion doubleValue]<2.2)
     {
         DDLogVerbose(@"Database version <2.2 detected. Performing upgrade . ");
-        
-        
+
         [self executeNonQuery:@"alter table buddylist add column synchPoint datetime;" withCompletion:nil];
         [self executeNonQuery:@"update dbversion set dbversion='2.2'; " withCompletion:nil];
         
         DDLogVerbose(@"Upgrade to 2.2 success ");
+    }
+    
+    if([dbversion doubleValue]<2.3)
+    {
+        DDLogVerbose(@"Database version <2.3 detected. Performing upgrade . ");
         
+        srand([[NSDate date] timeIntervalSince1970]);
+#if TARGET_OS_IPHONE
+        NSString *resource=[NSString stringWithFormat:@"Monal-iOS.%d",rand()%100];
+#else
+        NSString *resource=[NSString stringWithFormat:@"Monal-OSX.%d",rand()%100];
+#endif
+        
+        NSString *resourceQuery = [NSString stringWithFormat:@"update account set resource='%@';",resource];
+        
+        [self executeNonQuery:resourceQuery withCompletion:nil];
+        [self executeNonQuery:@"update dbversion set dbversion='2.3'; " withCompletion:nil];
+        
+        DDLogVerbose(@"Upgrade to 2.3 success ");
     }
     
    

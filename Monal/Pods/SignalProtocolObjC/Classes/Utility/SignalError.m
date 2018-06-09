@@ -7,7 +7,9 @@
 //
 
 #import "SignalError.h"
-@import SignalProtocolC;
+#import "signal_protocol.h"
+
+NSString * const SignalErrorDomain = @"org.whispersystems.SignalProtocol";
 
 SignalError SignalErrorFromCode(int errorCode) {
     switch (errorCode) {
@@ -87,8 +89,13 @@ NSString *SignalErrorDescription(SignalError signalError) {
     }
 }
 
+NSError *ErrorFromSignalErrorCode(int errorCode) {
+    SignalError code = SignalErrorFromCode(errorCode);
+    return ErrorFromSignalError(code);
+}
+
 NSError *ErrorFromSignalError(SignalError signalError) {
     NSString *errorString = SignalErrorDescription(signalError);
-    NSError *error = [NSError errorWithDomain:@"org.whispersystems.SignalProtocol" code:signalError userInfo:@{NSLocalizedDescriptionKey: errorString}];
+    NSError *error = [NSError errorWithDomain:SignalErrorDomain code:signalError userInfo:@{NSLocalizedDescriptionKey: errorString}];
     return error;
 }

@@ -44,7 +44,7 @@
     
     //always disconenct first
     [[MLXMPPManager sharedInstance] disconnectAccount:accountString];
-    if(!self.enabledCheckBox.state==YES) {
+    if(self.enabledCheckBox.state!=YES) {
         
     }
     else {

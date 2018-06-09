@@ -253,8 +253,8 @@ An array of Dics what have timers to make sure everything was sent
     
     xmppAccount.username=[account objectForKey:kUsername];
     xmppAccount.domain=[account objectForKey:kDomain];
-    srand([[NSDate date] timeIntervalSince1970]);
-    xmppAccount.resource=[NSString stringWithFormat:@"%@.%d",[account objectForKey:kResource],rand()%100 ];
+    
+    xmppAccount.resource=[account objectForKey:kResource];
     
     xmppAccount.server=[account objectForKey:kServer];
     xmppAccount.port=[[account objectForKey:kPort] integerValue];
@@ -296,7 +296,7 @@ An array of Dics what have timers to make sure everything was sent
     dispatch_async(dispatch_get_main_queue(), ^{
         int index=0;
         int pos=-1;
-        for (NSDictionary* account in _connectedXMPP)
+        for (NSDictionary* account in self->_connectedXMPP)
         {
             xmpp* xmppAccount=[account objectForKey:@"xmppAccount"];
             if([xmppAccount.accountNo isEqualToString:accountNo] )
@@ -313,8 +313,8 @@ An array of Dics what have timers to make sure everything was sent
             index++;
         }
         
-        if((pos>=0) && (pos<[_connectedXMPP count])) {
-            [_connectedXMPP removeObjectAtIndex:pos];
+        if((pos>=0) && (pos<[self->_connectedXMPP count])) {
+            [self->_connectedXMPP removeObjectAtIndex:pos];
             DDLogVerbose(@"removed account at pos  %d", pos);
         }
     });
@@ -326,8 +326,8 @@ An array of Dics what have timers to make sure everything was sent
 {
     
     [[DataLayer sharedInstance] accountListWithCompletion:^(NSArray *result) {
-        _accountList=result;
-        for (NSDictionary* account in _accountList)
+        self->_accountList=result;
+        for (NSDictionary* account in self->_accountList)
         {
             if([[account objectForKey:@"enabled"] boolValue]==YES)
             {

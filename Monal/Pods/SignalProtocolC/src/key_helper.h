@@ -22,7 +22,7 @@ int signal_protocol_key_helper_generate_identity_key_pair(ratchet_identity_key_p
  * at install time.
  *
  * @param registration_id set to the generated registration ID
- * @param extendedRange By default (0), the generated registration
+ * @param extended_range By default (0), the generated registration
  *                      ID is sized to require the minimal possible protobuf
  *                      encoding overhead. Specify true (1) if the caller needs
  *                      the full range of MAX_INT at the cost of slightly
@@ -32,10 +32,10 @@ int signal_protocol_key_helper_generate_identity_key_pair(ratchet_identity_key_p
 int signal_protocol_key_helper_generate_registration_id(uint32_t *registration_id, int extended_range, signal_context *global_context);
 
 /**
- * Generate a random number bounded by the provided maximum
+ * Generate a random number between 0 (inclusive) and the provided maximum (exclusive).
  *
  * @param value set to the next random number
- * @param max the maximum value of the random number
+ * @param max the maximum bound on the value of the random number
  * @return 0 on success, or negative on failure
  */
 int signal_protocol_key_helper_get_random_sequence(int *value, int max, signal_context *global_context);
@@ -63,7 +63,7 @@ int signal_protocol_key_helper_generate_pre_keys(signal_protocol_key_helper_pre_
 /**
  * Get the pre key element for the current node in the key list.
  *
- * @param current list node
+ * @param node current list node
  * @return pre key element
  */
 session_pre_key *signal_protocol_key_helper_key_list_element(const signal_protocol_key_helper_pre_key_list_node *node);
@@ -71,7 +71,7 @@ session_pre_key *signal_protocol_key_helper_key_list_element(const signal_protoc
 /**
  * Get the next element in the key list.
  *
- * @param current list node
+ * @param node current list node
  * @return next list node, or 0 if at the end of the list
  */
 signal_protocol_key_helper_pre_key_list_node *signal_protocol_key_helper_key_list_next(const signal_protocol_key_helper_pre_key_list_node *node);
@@ -82,15 +82,6 @@ signal_protocol_key_helper_pre_key_list_node *signal_protocol_key_helper_key_lis
  * @param head pointer to the head of the list to free
  */
 void signal_protocol_key_helper_key_list_free(signal_protocol_key_helper_pre_key_list_node *head);
-
-/**
- * Generate the last resort pre key.  Clients should do this only once, at
- * install time, and durably store it for the length of the install.
- *
- * @param pre_key set to the generated pre key
- * @return 0 on success, or negative on failure
- */
-int signal_protocol_key_helper_generate_last_resort_pre_key(session_pre_key **pre_key, signal_context *global_context);
 
 /**
  * Generate a signed pre key

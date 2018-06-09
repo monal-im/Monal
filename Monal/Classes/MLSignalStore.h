@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "SignalStorage.h"
+#import <SignalProtocolObjC/SignalProtocolObjC.h>
 
 @interface MLSignalStore : NSObject <SignalStore>
 

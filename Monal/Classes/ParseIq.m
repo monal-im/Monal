@@ -218,7 +218,7 @@
     if(([elementName isEqualToString:@"jid"]) && [State isEqualToString:@"Bind"]
 	   )
     {
-        _jid=_messageBuffer;
+        _jid=[_messageBuffer copy];
         return; 
     }
     
@@ -226,7 +226,7 @@
 	   )
     {
         if(!_fullName){ //might already be set by nick name. prefer that
-        _fullName=_messageBuffer;
+        _fullName=[_messageBuffer copy];
         }
         return;
     }
@@ -234,28 +234,28 @@
     if(([elementName isEqualToString:@"NICKNAME"]) && [State isEqualToString:@"vCard"]
        )
     {
-        _fullName=_messageBuffer;
+        _fullName=[_messageBuffer copy];
         return;
     }
     
     if(([elementName isEqualToString:@"URL"]) && [State isEqualToString:@"vCard"]
 	   )
     {
-        _URL=_messageBuffer;
+        _URL=[_messageBuffer copy];
         return;
     }
     
     if(([elementName isEqualToString:@"TYPE"]) && [State isEqualToString:@"vCard"]
 	   )
     {
-        _photoType=_messageBuffer;
+        _photoType=[_messageBuffer copy];
         return;
     }
     
     if(([elementName isEqualToString:@"BINVAL"]) && [State isEqualToString:@"vCard"]
 	   )
     {
-        _photoBinValue=_messageBuffer;
+        _photoBinValue=[_messageBuffer copy];
         return;
     }
     

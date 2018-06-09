@@ -216,13 +216,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
    
     if([State isEqualToString:@"OMEMO"] && [elementName isEqualToString:@"key"] &&
-       [[attributeDict objectForKey:@"xmlns"] isEqualToString:@"true"] )
+       [[attributeDict objectForKey:@"prekey"] isEqualToString:@"1"] )
     {
         _preKeyRid=[attributeDict objectForKey:@"rid"];
     }
     
     if([State isEqualToString:@"OMEMO"] && [elementName isEqualToString:@"key"] &&
-       ![[attributeDict objectForKey:@"xmlns"] isEqualToString:@"true"] )
+       ![[attributeDict objectForKey:@"prekey"] isEqualToString:@"1"] )
     {
         _keyRid=[attributeDict objectForKey:@"rid"];
        

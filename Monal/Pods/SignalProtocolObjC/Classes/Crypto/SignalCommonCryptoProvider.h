@@ -8,7 +8,7 @@
 
 
 @import Foundation;
-@import SignalProtocolC;
+#import "signal_protocol.h"
 
 @interface SignalCommonCryptoProvider : NSObject
 

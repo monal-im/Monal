@@ -7,7 +7,7 @@
 //
 
 #import "SignalStorage.h"
-@import SignalProtocolC;
+#import "signal_protocol.h"
 
 @interface SignalStorage ()
 @property (nonatomic, strong, readonly) id<SignalSessionStore> sessionStore;

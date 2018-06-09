@@ -16,11 +16,13 @@
 
 
 + (NSString *)encodeBase64WithString:(NSString *)strData {
-    
     NSData *data =[strData dataUsingEncoding:NSUTF8StringEncoding];
-    
-    return [data base64EncodedStringWithOptions:NSDataBase64EncodingEndLineWithLineFeed];
-    
+    return [EncodingTools encodeBase64WithData:data];
+}
+
++ (NSString *)encodeBase64WithData:(NSData *)objData
+{
+   return [objData base64EncodedStringWithOptions:NSDataBase64EncodingEndLineWithLineFeed];
 }
 
 + (NSData*) dataWithBase64EncodedString:(NSString *)string

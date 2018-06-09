@@ -598,7 +598,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 aNode.attributes = [dic mutableCopy];
                 [self writeToStream:aNode.XMLString]; // dont even bother queueing
             }
+            
+            
         }
+        
+        //close stream
+        MLXMLNode* stream = [[MLXMLNode alloc] init];
+        stream.element = @"/stream:stream"; //hack to close stream
+        [self writeToStream:stream.XMLString]; // dont even bother queueing
         
         //preserve unAckedStanzas even on explicitLogout and resend them on next connect
         //if we don't do this messages could be lost when logging out directly after sending them
@@ -612,28 +619,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         //persist these changes
         [self persistState];
         
-        //close stream
-        MLXMLNode* stream = [[MLXMLNode alloc] init];
-        stream.element = @"/stream:stream"; //hack to close stream
-        [self writeToStream:stream.XMLString]; // dont even bother queueing
-    }
-    
-    
-    if(_accountState == kStateDisconnected) {
-        
-        _startTLSComplete=NO;
-        _streamHasSpace=NO;
-        _loginStarted=NO;
-        _loginStartTimeStamp=nil;
-        _loginError=NO;
-        _reconnectScheduled =NO;
-        
-        if(completion)completion();
-        return;
     }
     
     [self closeSocket];
-    
     
     [self.networkQueue addOperationWithBlock:^{
         [self cleanUpState];
@@ -1164,9 +1152,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
      [NSBlockOperation blockOperationWithBlock:^{
         if(self.unAckedStanzas)
         {
+            NSMutableArray *iterationArray = [self.unAckedStanzas mutableCopy];
             DDLogDebug(@"removeUnAckedMessagesLessThan: hvalue %@, lastOutboundStanza %@", hvalue, self.lastOutboundStanza);
             NSMutableArray *discard =[[NSMutableArray alloc] initWithCapacity:[self.unAckedStanzas count]];
-            for(NSDictionary *dic in self.unAckedStanzas)
+            for(NSDictionary *dic in iterationArray)
             {
                 NSNumber *stanzaNumber = [dic objectForKey:kStanzaID];
                 if([stanzaNumber integerValue]<[hvalue integerValue])
@@ -1175,7 +1164,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 }
             }
             
-            [self.unAckedStanzas removeObjectsInArray:discard];
+            [iterationArray removeObjectsInArray:discard];
+            if(self.unAckedStanzas) self.unAckedStanzas= iterationArray; // if it was set to nil elsewhere, dont restore
             
             //persist these changes
             [self persistState];
@@ -1310,7 +1300,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         
                         if(iqNode.photoBinValue)
                         {
-                            [[MLImageManager sharedInstance] setIconForContact:iqNode.user andAccount:self->_accountNo WithData:iqNode.photoBinValue ];
+                            [[MLImageManager sharedInstance] setIconForContact:iqNode.user andAccount:self->_accountNo WithData:[iqNode.photoBinValue copy]];
                             
                         }
                         
@@ -1699,12 +1689,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     {
                         SignalAddress *address = [[SignalAddress alloc] initWithName:messageNode.from deviceId:messageNode.sid.integerValue];
                         if(!self.signalContext) return; 
-                        //SignalSessionBuilder *builder = [[SignalSessionBuilder alloc] initWithAddress:address context:self.signalContext];
+                        SignalSessionBuilder *builder = [[SignalSessionBuilder alloc] initWithAddress:address context:self.signalContext];
+                        //builder.
                         
                         SignalSessionCipher *cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self.signalContext];
                       
                         SignalCiphertextType messagetype;
-                        if(messageNode.preKeyValue)
+                        if(messageNode.preKeyRid)
                         {
                             messagetype=SignalCiphertextTypePreKeyMessage;
                         } else  {
@@ -1713,21 +1704,17 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         
                         
                         NSData *decoded= [EncodingTools dataWithBase64EncodedString:messageNode.preKeyValue?messageNode.preKeyValue:messageNode.keyValue];
-                        
-                        
+                        //NSData *decodedText= [EncodingTools dataWithBase64EncodedString:messageNode.encryptedPayload];
                         
                         SignalCiphertext *ciphertext = [[SignalCiphertext alloc] initWithData:decoded type:messagetype];
                         NSError *error;
-                      NSData *messageData=  [cipher decryptCiphertext:ciphertext error:&error];
+                        NSData *messageData=  [cipher decryptCiphertext:ciphertext error:&error];
                         
                         if(messageData){
-                        decrypted =[NSString stringWithCString:[messageData bytes] encoding:NSUTF8StringEncoding];
+                            decrypted =[NSString stringWithCString:[messageData bytes] encoding:NSUTF8StringEncoding];
                         }
                         
                     }
-
-                    
-                    
                     
                     if(messageNode.hasBody || messageNode.subject||decrypted)
                     {

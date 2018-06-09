@@ -7,7 +7,7 @@
 //
 
 #import "SignalPreKeyMessage.h"
-@import SignalProtocolC;
+#import "signal_protocol.h"
 
 @interface SignalPreKeyMessage ()
 @property (nonatomic, readonly) pre_key_signal_message *pre_key_signal_message;

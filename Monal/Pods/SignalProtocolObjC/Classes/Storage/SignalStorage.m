@@ -9,11 +9,11 @@
 #import "SignalStorage.h"
 #import "SignalAddress_Internal.h"
 #import "SignalStorage_Internal.h"
-@import SignalProtocolC;
+#import "signal_protocol.h"
 
 #pragma mark signal_protocol_session_store callbacks
 
-static int load_session_func(signal_buffer **record, const signal_protocol_address *address, void *user_data) {
+static int load_session_func(signal_buffer **record, signal_buffer **user_record, const signal_protocol_address *address, void *user_data) {
     id <SignalSessionStore> sessionStore = (__bridge id<SignalSessionStore>)(user_data);
     SignalAddress *addr = [[SignalAddress alloc] initWithAddress:address];
     NSData *data = nil;
@@ -45,7 +45,7 @@ static int get_sub_device_sessions_func(signal_int_list **sessions, const char *
     return (int)deviceIds.count;
 }
 
-static int store_session_func(const signal_protocol_address *address, uint8_t *record, size_t record_len, void *user_data) {
+static int store_session_func(const signal_protocol_address *address, uint8_t *record, size_t record_len, uint8_t *user_record, size_t user_record_len, void *user_data) {
     id <SignalSessionStore> sessionStore = (__bridge id<SignalSessionStore>)(user_data);
     SignalAddress *addr = [[SignalAddress alloc] initWithAddress:address];
     if (!addr) {
@@ -223,7 +223,7 @@ static int is_trusted_identity(const signal_protocol_address *_address, uint8_t 
 
 #pragma mark signal_protocol_sender_key_store
 
-static int store_sender_key(const signal_protocol_sender_key_name *sender_key_name, uint8_t *record, size_t record_len, void *user_data) {
+static int store_sender_key(const signal_protocol_sender_key_name *sender_key_name, uint8_t *record, size_t record_len, uint8_t *user_record, size_t user_record_len, void *user_data) {
     id <SignalSenderKeyStore> senderKeyStore = (__bridge id<SignalSenderKeyStore>)(user_data);
     SignalAddress *address = [[SignalAddress alloc] initWithAddress:&sender_key_name->sender];
     NSString *groupId = [NSString stringWithUTF8String:sender_key_name->group_id];
@@ -236,7 +236,7 @@ static int store_sender_key(const signal_protocol_sender_key_name *sender_key_na
     }
 }
 
-static int load_sender_key(signal_buffer **record, const signal_protocol_sender_key_name *sender_key_name, void *user_data) {
+static int load_sender_key(signal_buffer **record, signal_buffer **user_record, const signal_protocol_sender_key_name *sender_key_name, void *user_data) {
     id <SignalSenderKeyStore> senderKeyStore = (__bridge id<SignalSenderKeyStore>)(user_data);
     SignalAddress *address = [[SignalAddress alloc] initWithAddress:&sender_key_name->sender];
     NSString *groupId = [NSString stringWithUTF8String:sender_key_name->group_id];

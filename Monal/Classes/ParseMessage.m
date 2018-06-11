@@ -201,7 +201,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     
     
-    if(([elementName isEqualToString:@"encrypted"])  && [[attributeDict objectForKey:@"xmlns"] isEqualToString:@"eu.siacs.conversations.axolotl"]  )
+    if(([elementName isEqualToString:@"encrypted"])
+       && [[attributeDict objectForKey:@"xmlns"] isEqualToString:@"eu.siacs.conversations.axolotl"]  )
     {
         State=@"OMEMO";
         return;
@@ -213,18 +214,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         _sid=[attributeDict objectForKey:@"sid"];
         
     }
-
-   
-    if([State isEqualToString:@"OMEMO"] && [elementName isEqualToString:@"key"] &&
-       [[attributeDict objectForKey:@"prekey"] isEqualToString:@"1"] )
-    {
-        _preKeyRid=[attributeDict objectForKey:@"rid"];
-    }
     
-    if([State isEqualToString:@"OMEMO"] && [elementName isEqualToString:@"key"] &&
-       ![[attributeDict objectForKey:@"prekey"] isEqualToString:@"1"] )
-    {
+    if([State isEqualToString:@"OMEMO"] && [elementName isEqualToString:@"key"]) {
+        if([[attributeDict objectForKey:@"prekey"] isEqualToString:@"1"]
+           || [[attributeDict objectForKey:@"prekey"] isEqualToString:@"true"])
+        {
+          _preKeyRid=[attributeDict objectForKey:@"rid"];
+        } else  {
         _keyRid=[attributeDict objectForKey:@"rid"];
+        }
        
     }
 }

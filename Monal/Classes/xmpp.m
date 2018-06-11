@@ -2893,6 +2893,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self fetchRoster];
     [self sendInitalPresence];
     
+  //  [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"singaltmp"];
     MLSignalStore *monalSignalStore = [[MLSignalStore alloc] init];
     
 #warning test code. DO NOT SHIP

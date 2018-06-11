@@ -30,6 +30,8 @@
  */
 - (nullable NSData*) sessionRecordForAddress:(SignalAddress*)address
 {
+   // fetch return
+    
     return nil;
 }
 
@@ -41,7 +43,15 @@
  */
 - (BOOL) storeSessionRecord:(NSData*)recordData forAddress:(SignalAddress*)address
 {
-    return NO;
+    //save data
+    NSDictionary *sess =@{@"name":address.name,
+                          @"deviceid":[NSNumber numberWithInt:address.deviceId],
+                          @"data":recordData
+                          };
+    
+    [[NSUserDefaults standardUserDefaults] setObject:sess forKey:@"sess"];
+    
+    return YES;
 }
 
 /**
@@ -50,7 +60,7 @@
  */
 - (BOOL) sessionRecordExistsForAddress:(SignalAddress*)address;
 {
-     return NO;
+     return YES;
 }
 
 /**
@@ -66,7 +76,9 @@
  */
 - (NSArray<NSNumber*>*) allDeviceIdsForAddressName:(NSString*)addressName
 {
-     return nil;
+    NSDictionary *dic =  [[NSUserDefaults standardUserDefaults] objectForKey:@"sess"];
+    NSNumber *deviceid= [dic objectForKey:@"deviceid"];
+    return @[deviceid];
 }
 
 /**
@@ -91,7 +103,8 @@
   
     for (SignalPreKey *prekey in preKeys)
     {
-        if(prekey.preKeyId==preKeyId) return [NSKeyedArchiver archivedDataWithRootObject: prekey.keyPair];
+        if(prekey.preKeyId==preKeyId)
+            return  prekey.serializedData; 
             
     }
     
@@ -130,7 +143,9 @@
  */
 - (nullable NSData*) loadSignedPreKeyWithId:(uint32_t)signedPreKeyId
 {
-     return [self.signaltmp objectForKey:@"signedPreKey"];
+     SignalSignedPreKey *key= [self.signaltmp objectForKey:@"signedPreKey"];
+    NSData* toreturn= key.serializedData;
+    return toreturn;
 }
 
 /**
@@ -163,9 +178,7 @@
  */
 - (SignalIdentityKeyPair*) getIdentityKeyPair;
 {
- 
     return [self.signaltmp objectForKey:@"identityKeyPair"];
-   
 }
 
 /**
@@ -178,12 +191,7 @@
  */
 - (uint32_t) getLocalRegistrationId;
 {
-   
-    return [[self.signaltmp objectForKey:@"reg"] intValue];
-    
-
-    
-    
+   return [[self.signaltmp objectForKey:@"reg"] intValue];
 }
 
 /**
@@ -211,7 +219,7 @@
  */
 - (BOOL) isTrustedIdentity:(SignalAddress*)address identityKey:(NSData*)identityKey;
 {
-     return NO;
+     return YES;
 }
 
 /**

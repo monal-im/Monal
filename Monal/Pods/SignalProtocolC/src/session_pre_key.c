@@ -338,7 +338,11 @@ int session_signed_pre_key_deserialize(session_signed_pre_key **pre_key, const u
     ec_private_key *private_key = 0;
     ec_key_pair *key_pair = 0;
     session_signed_pre_key *result_pre_key = 0;
-
+    //printf("anu: %s", data );
+     FILE *fptr= fopen("/Users/anurodhp/Library/Containers/im.Monal.MonalOSX/Data/Documents/proto","wb");
+    fwrite(data, 1, 1, fptr);
+    fclose(fptr);
+    
     record = textsecure__signed_pre_key_record_structure__unpack(0, len, data);
     if(!record) {
         result = SG_ERR_INVALID_PROTO_BUF;

@@ -132,7 +132,7 @@ static int remove_pre_key(uint32_t pre_key_id, void *user_data) {
 
 static int load_signed_pre_key(signal_buffer **record, uint32_t signed_pre_key_id, void *user_data) {
     id <SignalSignedPreKeyStore> signedPreKeyStore = (__bridge id<SignalSignedPreKeyStore>)(user_data);
-    NSData *key = [signedPreKeyStore loadSignedPreKeyWithId:signed_pre_key_id];
+    NSData *key = [[signedPreKeyStore loadSignedPreKeyWithId:signed_pre_key_id] copy];
     if (!key) {
         return SG_ERR_INVALID_KEY_ID;
     }

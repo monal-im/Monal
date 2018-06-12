@@ -53,6 +53,7 @@ pod 'TPCircularBuffer'
 pod 'Sparkle'
 pod 'SignalProtocolObjC'
 pod 'SignalProtocolC'
+pod 'OpenSSL-Universal'
 
   # Pods for Monal-OSX
 

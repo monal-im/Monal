@@ -46,6 +46,8 @@
 #import "MLHTTPRequest.h"
 
 #import "SignalProtocolObjC.h"
+#include <openssl/bio.h>
+#include <openssl/evp.h>
 
 @import Darwin.POSIX.sys.time; 
 
@@ -1708,10 +1710,65 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         
                         SignalCiphertext *ciphertext = [[SignalCiphertext alloc] initWithData:decoded type:messagetype];
                         NSError *error;
-                        NSData *messageData=  [cipher decryptCiphertext:ciphertext error:&error];
+                        NSData *decryptedKey=  [cipher decryptCiphertext:ciphertext error:&error];
                         
-                        if(messageData){
-                            decrypted =[NSString stringWithCString:[messageData bytes] encoding:NSUTF8StringEncoding];
+                        NSData *key;
+                        NSData *auth;
+                        
+                        if(decryptedKey.length==16*2)
+                        {
+                            key=[decryptedKey subdataWithRange:NSMakeRange(0,16)];
+                            auth=[decryptedKey subdataWithRange:NSMakeRange(16,16)];
+                        }
+                        else {
+                            key=decryptedKey;
+                        }
+                        
+                        if(key){
+                            NSData *iv = [EncodingTools dataWithBase64EncodedString:messageNode.iv];
+                            
+                         //   decrypted =[NSString stringWithCString:[messageData bytes] encoding:NSUTF8StringEncoding];
+                            //use key to get message
+                          
+                    
+                            NSData *decodedPayload = [EncodingTools dataWithBase64EncodedString:messageNode.encryptedPayload];
+                         
+                          
+                            EVP_CIPHER_CTX *ctx =EVP_CIPHER_CTX_new();
+                            int outlen, rv;
+                            unsigned char outbuf[1024];
+                     
+                            /* Select cipher */
+                            EVP_DecryptInit_ex(ctx, EVP_aes_128_gcm(), NULL, NULL, NULL);
+                            /* Set IV length, omit for 96 bits */
+                            EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_IVLEN, iv.length, NULL);
+                            /* Specify key and IV */
+                            EVP_DecryptInit_ex(ctx, NULL, NULL, key.bytes, iv.bytes);
+                           
+                    
+                            /* Decrypt plaintext */
+                            EVP_DecryptUpdate(ctx, outbuf, &outlen, decodedPayload.bytes, decodedPayload.length);
+                            /* Output decrypted block */
+                           
+                          if(auth) {
+                            /* Set expected tag value. */
+                            EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_TAG, auth.length, auth.bytes);
+                          }
+                            /* Finalise: note get no output for GCM */
+                            rv = EVP_DecryptFinal_ex(ctx, outbuf, &outlen);
+                            decrypted= [NSString stringWithCString:outbuf encoding:NSUTF8StringEncoding];
+                            
+                            if(rv==0){
+                             //   NSData *decdata = [[NSData alloc] initWithBytes:outbuf length:decodedPayload.length];
+                                
+                                decrypted= [NSString stringWithCString:outbuf encoding:NSUTF8StringEncoding];
+                                
+                            }
+                          
+                            EVP_CIPHER_CTX_free(ctx);
+                            
+                            
+                            
                         }
                         
                     }

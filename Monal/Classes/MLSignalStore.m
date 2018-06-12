@@ -60,7 +60,7 @@
  */
 - (BOOL) sessionRecordExistsForAddress:(SignalAddress*)address;
 {
-     return YES;
+     return NO;
 }
 
 /**
@@ -107,8 +107,7 @@
             return  prekey.serializedData; 
             
     }
-    
-    
+
     return nil;
 }
 
@@ -135,7 +134,7 @@
  */
 - (BOOL) deletePreKeyWithId:(uint32_t)preKeyId
 {
-     return NO;
+     return YES;
 }
 
 /**
@@ -153,7 +152,7 @@
  */
 - (BOOL) storeSignedPreKey:(NSData*)signedPreKey signedPreKeyId:(uint32_t)signedPreKeyId
 {
-     return NO;
+     return YES;
 }
 
 /**
@@ -170,7 +169,7 @@
  */
 - (BOOL) removeSignedPreKeyWithId:(uint32_t)signedPreKeyId
 {
-     return NO;
+    return YES;
 }
 
 /**
@@ -204,7 +203,7 @@
  */
 - (BOOL) saveIdentity:(SignalAddress*)address identityKey:(nullable NSData*)identityKey;
 {
-     return NO;
+     return YES;
 }
 
 /**

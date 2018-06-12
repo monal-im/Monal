@@ -75,7 +75,12 @@
         return nil;
     }
     if (self = [super init]) {
-        int result = session_signed_pre_key_deserialize(&_signed_pre_key, serializedData.bytes, serializedData.length, NULL);
+//        const uint8_t *data = malloc(serializedData.length);
+//        [serializedData getBytes:data range:NSMakeRange(0, serializedData.length)];
+//
+    
+        int result = session_signed_pre_key_deserialize(&_signed_pre_key,serializedData.bytes, serializedData.length, NULL);
+   //     free(data);
         if (result < 0) {
             if (error) {
                 *error = ErrorFromSignalError(SignalErrorFromCode(result));

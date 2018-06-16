@@ -15,7 +15,6 @@ PODS:
   - SDWebImage (4.3.3):
     - SDWebImage/Core (= 4.3.3)
   - SDWebImage/Core (4.3.3)
-  - Sparkle (1.19.0)
   - TPCircularBuffer (1.6.1)
 
 DEPENDENCIES:
@@ -28,7 +27,6 @@ DEPENDENCIES:
   - MWPhotoBrowser (from `https://raw.githubusercontent.com/moinku07/MWPhotoBrowser/master/MWPhotoBrowser.podspec`)
   - SAMKeychain
   - SDWebImage (~> 4.3.3)
-  - Sparkle
   - TPCircularBuffer
 
 EXTERNAL SOURCES:
@@ -46,9 +44,8 @@ SPEC CHECKSUMS:
   MWPhotoBrowser: b275990bc6cfa982ae5c5b8ba835ba6d3a9bc914
   SAMKeychain: 483e1c9f32984d50ca961e26818a534283b4cd5c
   SDWebImage: de4d90b5bff3571eae7bd16202b1f43135409fa5
-  Sparkle: 8486d2493599665e466b5076e72b28849776e32f
   TPCircularBuffer: c13243556527551c4d320709c7b14a6d20cdc30a
 
-PODFILE CHECKSUM: f0cf40af135c99b81d0b82e12a324c42c32865be
+PODFILE CHECKSUM: 7b22de19a40ad0f9d2bead39997fb37be5b59ab3
 
 COCOAPODS: 1.4.0

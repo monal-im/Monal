@@ -2348,6 +2348,25 @@ static DataLayer *sharedInstance=nil;
         DDLogVerbose(@"Upgrade to 2.3 success ");
     }
     
+    //OMEMO begins below
+    if([dbversion doubleValue]<3.0)
+    {
+        DDLogVerbose(@"Database version <3.0 detected. Performing upgrade . ");
+        
+        [self executeNonQuery:@"CREATE TABLE signalIdentity (deviceid int NOT NULL PRIMARY KEY, account_id int NOT NULL,identityPublicKey BLOB,identityPrivateKey BLOB)" withCompletion:nil];
+        [self executeNonQuery:@"CREATE TABLE signalSignedPreKey (account_id int NOT NULL,signedPreKeyId int not null,signedPreKey BLOB);" withCompletion:nil];
+        
+        [self executeNonQuery:@"CREATE TABLE signalSignedPreKey (account_id int NOT NULL,prekeyid int not null,preKey BLOB);" withCompletion:nil];
+        
+        [self executeNonQuery:@"CREATE TABLE signalContactIdentity ( account_id int NOT NULL,contactName text,contactDeviceId int not null,identity BLOB,trusted boolean);" withCompletion:nil];
+        
+        [self executeNonQuery:@"CREATE TABLE signalContactKey (account_id int NOT NULL,contactName text,contactDeviceId int not null, groupId text,senderKey BLOB);" withCompletion:nil];
+        
+        [self executeNonQuery:@"update dbversion set dbversion='3.0'; " withCompletion:nil];
+        
+        DDLogVerbose(@"Upgrade to 3.0 success ");
+    }
+    
    
     [dbversionCheck unlock];
     [self resetContacts];

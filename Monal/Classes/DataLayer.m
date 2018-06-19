@@ -124,11 +124,13 @@ static DataLayer *sharedInstance=nil;
                         
                     case (SQLITE_BLOB):
                     {
-                        //trat as string for now
-                        NSString* returnString = [NSString stringWithUTF8String:(const char* _Nonnull)sqlite3_column_text(statement,0)];
+                        
+                        const char* bytes=(const char* _Nonnull)sqlite3_column_blob(statement,0);
+                        int size = sizeof (bytes);
+                        NSData* returnData = [NSData dataWithBytes:bytes length:size];
                         while(sqlite3_step(statement)== SQLITE_ROW) {} //clear
-                        toReturn= [returnString  stringByReplacingOccurrencesOfString:@"''" withString:@"'"];
-                        toReturn= nil;
+                        toReturn= returnData;
+                        
                         break;
                     }
                         
@@ -220,17 +222,12 @@ static DataLayer *sharedInstance=nil;
                             
                         case (SQLITE_BLOB):
                         {
-                            //trat as string for now
-                            NSString* returnblob = [NSString stringWithUTF8String:(const char* _Nonnull)sqlite3_column_text(statement,counter)];
-                            [row setObject:[returnblob stringByReplacingOccurrencesOfString:@"''" withString:@"'"] forKey:columnName];
+                            const char* bytes=(const char* _Nonnull)sqlite3_column_blob(statement,0);
+                            int size = sizeof (bytes);
+                            NSData* returnData = [NSData dataWithBytes:bytes length:size];
+                            while(sqlite3_step(statement)== SQLITE_ROW) {} //clear
+                            [row setObject:returnData forKey:columnName];
                             break;
-                            
-                            
-                            //Note: add blob support  as nsdata later
-                            
-                            //char* data= sqlite3_value_text(statement);
-                            ///NSData* returnData =[NSData dataWithBytes:]
-                            
                         }
                             
                         case (SQLITE_NULL):
@@ -283,6 +280,16 @@ static DataLayer *sharedInstance=nil;
                     NSString *text = (NSString *) obj;
                     
                     if(sqlite3_bind_text(statement, (signed)idx+1,[text cStringUsingEncoding:NSUTF8StringEncoding], -1,SQLITE_TRANSIENT)!=SQLITE_OK) {
+                        DDLogError(@"string bind error");
+                        
+                    };
+                }
+                
+                else if([obj isKindOfClass:[NSData class]])
+                {
+                    NSData *data = (NSData *) obj;
+                    
+                    if(sqlite3_bind_text(statement, (signed)idx+1,[data bytes], -1,SQLITE_TRANSIENT)!=SQLITE_OK) {
                         DDLogError(@"string bind error");
                         
                     };
@@ -358,6 +365,15 @@ static DataLayer *sharedInstance=nil;
                         
                     };
                 }
+                else if([obj isKindOfClass:[NSData class]])
+                {
+                    NSData *data = (NSData *) obj;
+                    
+                    if(sqlite3_bind_text(statement, (signed)idx+1,[data bytes], -1,SQLITE_TRANSIENT)!=SQLITE_OK) {
+                        DDLogError(@"string bind error");
+                        
+                    };
+                }
             }];
             
             if (sqlite3_step(statement) == SQLITE_ROW)
@@ -393,11 +409,12 @@ static DataLayer *sharedInstance=nil;
                         
                     case (SQLITE_BLOB):
                     {
-                        //trat as string for now
-                        NSString* returnString = [NSString stringWithUTF8String:(const char* _Nonnull)sqlite3_column_text(statement,0)];
+                        const char* bytes=(const char* _Nonnull)sqlite3_column_blob(statement,0);
+                        int size = sizeof (bytes);
+                        NSData* returnData = [NSData dataWithBytes:bytes length:size];
                         while(sqlite3_step(statement)== SQLITE_ROW) {} //clear
-                        toReturn= [returnString  stringByReplacingOccurrencesOfString:@"''" withString:@"'"];
-                        toReturn= nil;
+                        toReturn= returnData;
+                        
                         break;
                     }
                         
@@ -501,17 +518,14 @@ static DataLayer *sharedInstance=nil;
                             
                         case (SQLITE_BLOB):
                         {
-                            //trat as string for now
-                            NSString* returnblob = [NSString stringWithUTF8String:(const char* _Nonnull)sqlite3_column_text(statement,counter)];
-                            [row setObject:[returnblob stringByReplacingOccurrencesOfString:@"''" withString:@"'"] forKey:columnName];
+                
+                            const char* bytes=(const char* _Nonnull)sqlite3_column_blob(statement,0);
+                            int size = sizeof (bytes);
+                            NSData* returnData = [NSData dataWithBytes:bytes length:size];
+                            while(sqlite3_step(statement)== SQLITE_ROW) {} //clear
+                            
+                             [row setObject:returnData forKey:columnName];
                             break;
-                            
-                            
-                            //Note: add blob support  as nsdata later
-                            
-                            //char* data= sqlite3_value_text(statement);
-                            ///NSData* returnData =[NSData dataWithBytes:]
-                            
                         }
                             
                         case (SQLITE_NULL):
@@ -576,6 +590,15 @@ static DataLayer *sharedInstance=nil;
                     if(sqlite3_bind_text(statement, (signed)idx+1,[text cStringUsingEncoding:NSUTF8StringEncoding], -1,SQLITE_TRANSIENT)!=SQLITE_OK) {
                         DDLogError(@"string bind error");
                        
+                    };
+                }
+                else if([obj isKindOfClass:[NSData class]])
+                {
+                    NSData *data = (NSData *) obj;
+                    
+                    if(sqlite3_bind_text(statement, (signed)idx+1,[data bytes], -1,SQLITE_TRANSIENT)!=SQLITE_OK) {
+                        DDLogError(@"string bind error");
+                        
                     };
                 }
             }];

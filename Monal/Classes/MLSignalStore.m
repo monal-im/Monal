@@ -26,8 +26,6 @@
 -(id) initWithAccountId:(NSString *) accountId{
     
     NSArray *data= [[DataLayer sharedInstance] executeReader:@"select * from signalIdentity where account_id=?" andArguments:@[accountId]];
-
-    
     NSDictionary *row = [data firstObject];
     
     if(row)
@@ -58,9 +56,8 @@
  */
 - (nullable NSData*) sessionRecordForAddress:(SignalAddress*)address
 {
-   // fetch return
-    
-    return nil;
+    NSData *record= (NSData *)[[DataLayer sharedInstance] executeScalar:@"select recordData from signalContactSession where account_id=? and contactName=? and contactDeviceId=?" andArguments:@[self.accountId, address.name, [NSNumber numberWithInteger:address.deviceId]]];
+    return record;
 }
 
 /**
@@ -88,7 +85,8 @@
  */
 - (BOOL) sessionRecordExistsForAddress:(SignalAddress*)address;
 {
-     return NO;
+    NSData *preKeyData= [self sessionRecordForAddress:address];
+    return preKeyData?YES:NO;
 }
 
 /**
@@ -96,7 +94,7 @@
  */
 - (BOOL) deleteSessionRecordForAddress:(SignalAddress*)address
 {
-     return NO;
+  return  [[DataLayer sharedInstance] executeNonQuery:@"delete from signalContactSession where account_id=? and contactName=? and contactDeviceId=?" andArguments:@[self.accountId, address.name, [NSNumber numberWithInteger:address.deviceId]]];
 }
 
 /**

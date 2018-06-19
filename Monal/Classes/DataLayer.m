@@ -2362,6 +2362,10 @@ static DataLayer *sharedInstance=nil;
         
         [self executeNonQuery:@"CREATE TABLE signalContactKey (account_id int NOT NULL,contactName text,contactDeviceId int not null, groupId text,senderKey BLOB);" withCompletion:nil];
         
+        
+        [self executeNonQuery:@"  CREATE TABLE signalContactSession (account_id int NOT NULL, contactName text, contactDeviceId int not null, recordData BLOB)" withCompletion:nil];
+      
+        
         [self executeNonQuery:@"update dbversion set dbversion='3.0'; " withCompletion:nil];
         
         DDLogVerbose(@"Upgrade to 3.0 success ");

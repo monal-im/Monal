@@ -7,18 +7,46 @@
 //
 
 #import "MLSignalStore.h"
-#import "SignalPreKey.h"
+#import "SignalProtocolObjC.h"
+#import "DataLayer.h"
 
 @interface MLSignalStore()
 @property (nonatomic, strong) NSDictionary *signaltmp ;
+
+@property (nonatomic, assign) uint32 deviceid;
+@property (nonatomic, assign) NSString *accountId;
+
+@property (nonatomic, strong) SignalIdentityKeyPair *identityKeyPair;
+@property (nonatomic, strong) SignalSignedPreKey *signedPreKey;
+@property (nonatomic, strong) NSArray *preKeys;
 @end
 
 @implementation MLSignalStore
 
--(id) init{
-    NSData *data= [[NSUserDefaults standardUserDefaults] objectForKey:@"singaltmp"];
+-(id) initWithAccountId:(NSString *) accountId{
     
-    self.signaltmp =[NSKeyedUnarchiver unarchiveObjectWithData:data];
+    NSArray *data= [[DataLayer sharedInstance] executeReader:@"select * from signalIdentity where account_id=?" andArguments:@[accountId]];
+
+    
+    NSDictionary *row = [data firstObject];
+    
+    if(row)
+    {
+        NSData *idKeyPub = [row objectForKey:@"identityPublicKey"];
+        NSData *idKeyPrivate = [row objectForKey:@"identityPrivateKey"];
+        
+        NSError *error;
+        self.identityKeyPair= [[SignalIdentityKeyPair alloc] initWithPublicKey:idKeyPub privateKey:idKeyPrivate error:&error];
+        
+        if(error)
+        {
+            NSLog(@"prekey error %@", error);
+        }
+        
+        self.deviceid=[(NSNumber *)[row objectForKey:@"deviceid"] unsignedIntValue];
+    }
+    
+    self.accountId=accountId;
     
     return self; 
 }
@@ -99,16 +127,8 @@
 - (nullable NSData*) loadPreKeyWithId:(uint32_t)preKeyId;
 {
   
-   NSArray *preKeys= [self.signaltmp objectForKey:@"preKeys"];
-  
-    for (SignalPreKey *prekey in preKeys)
-    {
-        if(prekey.preKeyId==preKeyId)
-            return  prekey.serializedData; 
-            
-    }
-
-    return nil;
+    NSData *preKeyData= (NSData *)[[DataLayer sharedInstance] executeScalar:@"select prekey from signalPreKey where account_id=? and prekeyid=?" andArguments:@[self.accountId, [NSNumber numberWithInteger:preKeyId]]];
+    return preKeyData;
 }
 
 /**
@@ -142,8 +162,7 @@
  */
 - (nullable NSData*) loadSignedPreKeyWithId:(uint32_t)signedPreKeyId
 {
-     SignalSignedPreKey *key= [self.signaltmp objectForKey:@"signedPreKey"];
-    NSData* toreturn= key.serializedData;
+    NSData* toreturn= self.signedPreKey.serializedData;
     return toreturn;
 }
 
@@ -177,7 +196,7 @@
  */
 - (SignalIdentityKeyPair*) getIdentityKeyPair;
 {
-    return [self.signaltmp objectForKey:@"identityKeyPair"];
+    return self.identityKeyPair;
 }
 
 /**
@@ -190,7 +209,7 @@
  */
 - (uint32_t) getLocalRegistrationId;
 {
-   return [[self.signaltmp objectForKey:@"reg"] intValue];
+    return self.deviceid;
 }
 
 /**
@@ -236,7 +255,8 @@
  */
 - (nullable NSData*) loadSenderKeyForAddress:(SignalAddress*)address groupId:(NSString*)groupId;
 {
-    return nil; 
+    NSData *keyData= (NSData *)[[DataLayer sharedInstance] executeScalar:@"select senderKey from signalContactKey where account_id=? and groupId=? and contactDeviceId=? and contactName=?" andArguments:@[self.accountId,groupId, [NSNumber numberWithInteger:address.deviceId], address.name]];
+    return keyData;
 }
 
 

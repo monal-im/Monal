@@ -10,5 +10,5 @@
 #import <SignalProtocolObjC/SignalProtocolObjC.h>
 
 @interface MLSignalStore : NSObject <SignalStore>
-
+@property (nonatomic, assign, readonly) uint32 deviceid;
 @end

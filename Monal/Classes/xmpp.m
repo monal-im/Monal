@@ -2966,10 +2966,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     //signal helper
     SignalKeyHelper *signalHelper = [[SignalKeyHelper alloc] initWithContext:self.signalContext];
     
-    uint32 reg;
-    SignalIdentityKeyPair *identityKeyPair;
-    SignalSignedPreKey *signedPreKey;
-    NSArray *preKeys;
+   
     
     if(self.signaltmp)
     {

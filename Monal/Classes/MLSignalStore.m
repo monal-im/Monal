@@ -102,9 +102,17 @@
  */
 - (NSArray<NSNumber*>*) allDeviceIdsForAddressName:(NSString*)addressName
 {
-    NSDictionary *dic =  [[NSUserDefaults standardUserDefaults] objectForKey:@"sess"];
-    NSNumber *deviceid= [dic objectForKey:@"deviceid"];
-    return @[deviceid];
+    NSArray *rows= [[DataLayer sharedInstance] executeReader:@"select contactDeviceId from signalContactSession where account_id=? and contactName=? " andArguments:@[self.accountId, addressName]];
+
+    NSMutableArray *devices = [[NSMutableArray alloc] initWithCapacity:rows.count];
+    
+    for(NSDictionary *row in rows)
+    {
+        NSNumber *number= [row objectForKey:@"contactDeviceId"];
+        [devices addObject:number];
+    }
+    
+    return devices;
 }
 
 /**
@@ -114,7 +122,12 @@
  */
 - (int) deleteAllSessionsForAddressName:(NSString*)addressName
 {
-    return 0;
+    
+    NSNumber *count = (NSNumber *) [[DataLayer sharedInstance] executeScalar:@"count * from  signalContactSession where account_id=? and contactName=? " andArguments:@[self.accountId, addressName]];
+    
+    [[DataLayer sharedInstance] executeNonQuery:@"delete from  signalContactSession where account_id=? and contactName=? " andArguments:@[self.accountId, addressName]];
+    
+    return count.intValue;
 }
 
 
@@ -144,7 +157,8 @@
  */
 - (BOOL) containsPreKeyWithId:(uint32_t)preKeyId;
 {
-     return YES;
+    NSData *prekey= [self loadPreKeyWithId:preKeyId];
+    return prekey?YES:NO;
 }
 
 /**
@@ -152,7 +166,8 @@
  */
 - (BOOL) deletePreKeyWithId:(uint32_t)preKeyId
 {
-     return YES;
+    return [[DataLayer sharedInstance] executeNonQuery:@"delete prekey from signalPreKey where account_id=? and prekeyid=?" andArguments:@[self.accountId, [NSNumber numberWithInteger:preKeyId]]];
+
 }
 
 /**
@@ -178,7 +193,8 @@
  */
 - (BOOL) containsSignedPreKeyWithId:(uint32_t)signedPreKeyId
 {
-     return NO;
+    NSData *key= (NSData *)[[DataLayer sharedInstance] executeScalar:@"select prekey from signalSignedPreKey where account_id=? and prekeyid=?" andArguments:@[self.accountId, [NSNumber numberWithInteger:signedPreKeyId]]];
+    return key?YES:NO;
 }
 
 /**
@@ -186,7 +202,7 @@
  */
 - (BOOL) removeSignedPreKeyWithId:(uint32_t)signedPreKeyId
 {
-    return YES;
+    return [[DataLayer sharedInstance] executeNonQuery:@"delete  from signalSignedPreKey where account_id=? and prekeyid=?" andArguments:@[self.accountId, [NSNumber numberWithInteger:signedPreKeyId]]];
 }
 
 /**
@@ -235,7 +251,7 @@
  */
 - (BOOL) isTrustedIdentity:(SignalAddress*)address identityKey:(NSData*)identityKey;
 {
-     return YES;
+     return YES; //TODO fix logic
 }
 
 /**

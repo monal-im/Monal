@@ -2951,13 +2951,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self sendInitalPresence];
     
   //  [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"singaltmp"];
-    MLSignalStore *monalSignalStore = [[MLSignalStore alloc] init];
-    
-#warning test code. DO NOT SHIP
-    
-    NSData *data= [[NSUserDefaults standardUserDefaults] objectForKey:@"singaltmp"];
-    
-    self.signaltmp =[NSKeyedUnarchiver unarchiveObjectWithData:data];
+    MLSignalStore *monalSignalStore = [[MLSignalStore alloc] initWithAccountId:_accountNo];
     
     //signal store
     SignalStorage *signalStorage = [[SignalStorage alloc] initWithSignalStore:monalSignalStore];
@@ -2965,37 +2959,26 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     self.signalContext= [[SignalContext alloc] initWithStorage:signalStorage];
     //signal helper
     SignalKeyHelper *signalHelper = [[SignalKeyHelper alloc] initWithContext:self.signalContext];
-    
-   
-    
-    if(self.signaltmp)
+
+    if(monalSignalStore.deviceid==0)
     {
-        reg=[[self.signaltmp objectForKey:@"reg"] intValue];
-        identityKeyPair = [self.signaltmp objectForKey:@"identityKeyPair"];
-        signedPreKey= [self.signaltmp objectForKey:@"signedPreKey"];
-        preKeys= [self.signaltmp objectForKey:@"preKeys"];
+        monalSignalStore.deviceid=[signalHelper generateRegistrationId];
         
-    } else {
-        reg= [signalHelper generateRegistrationId];
-        identityKeyPair= [signalHelper generateIdentityKeyPair];
-        signedPreKey= [signalHelper generateSignedPreKeyWithIdentity:identityKeyPair signedPreKeyId:1];
-        preKeys= [signalHelper generatePreKeysWithStartingPreKeyId:0 count:20];
-    
-        self.signaltmp = @{@"reg": [NSNumber numberWithInt:reg],
-                      @"identityKeyPair":identityKeyPair,
-                      @"signedPreKey":signedPreKey, @"preKeys":preKeys};
+        monalSignalStore.identityKeyPair= [signalHelper generateIdentityKeyPair];
+        monalSignalStore.signedPreKey= [signalHelper generateSignedPreKeyWithIdentity:monalSignalStore.identityKeyPair signedPreKeyId:1];
+       // monalSignalStore.preKeys= [signalHelper generatePreKeysWithStartingPreKeyId:0 count:20];
         
-        [[NSUserDefaults standardUserDefaults] setObject:[NSKeyedArchiver archivedDataWithRootObject:self.signaltmp] forKey:@"singaltmp"];
-        
+        [monalSignalStore saveValues];
     }
- 
-    NSString *deviceid=[NSString stringWithFormat:@"%d",reg];
+    
+    
+    NSString *deviceid=[NSString stringWithFormat:@"%d",monalSignalStore.deviceid];
     XMPPIQ *signalDevice = [[XMPPIQ alloc] initWithType:kiqSetType];
     [signalDevice publishDevice:deviceid];
     [self send:signalDevice];
     
      XMPPIQ *signalKeys = [[XMPPIQ alloc] initWithType:kiqSetType];
-    [signalKeys publishKeys:@{@"signedPreKeyPublic":signedPreKey.keyPair.publicKey, @"signedPreKeySignature":signedPreKey.signature, @"identityKey":identityKeyPair.publicKey, @"signedPreKeyId": [NSString stringWithFormat:@"%d",signedPreKey.preKeyId]} andPreKeys:preKeys withDeviceId:deviceid];
+    [signalKeys publishKeys:@{@"signedPreKeyPublic":monalSignalStore.signedPreKey.keyPair.publicKey, @"signedPreKeySignature":monalSignalStore.signedPreKey.signature, @"identityKey":monalSignalStore.identityKeyPair.publicKey, @"signedPreKeyId": [NSString stringWithFormat:@"%d",monalSignalStore.signedPreKey.preKeyId]} andPreKeys:monalSignalStore.preKeys withDeviceId:deviceid];
     [signalKeys.attributes setValue:[NSString stringWithFormat:@"%@/%@",_fulluser, _resource ] forKey:@"from"];
     [self send:signalKeys];
     

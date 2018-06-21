@@ -11,14 +11,7 @@
 #import "DataLayer.h"
 
 @interface MLSignalStore()
-@property (nonatomic, strong) NSDictionary *signaltmp ;
-
-@property (nonatomic, assign) uint32 deviceid;
-@property (nonatomic, assign) NSString *accountId;
-
-@property (nonatomic, strong) SignalIdentityKeyPair *identityKeyPair;
-@property (nonatomic, strong) SignalSignedPreKey *signedPreKey;
-@property (nonatomic, strong) NSArray *preKeys;
+@property (nonatomic, strong) NSString *accountId;
 @end
 
 @implementation MLSignalStore
@@ -30,23 +23,54 @@
     
     if(row)
     {
+        
+        self.deviceid=[(NSNumber *)[row objectForKey:@"deviceid"] unsignedIntValue];
+        
         NSData *idKeyPub = [row objectForKey:@"identityPublicKey"];
         NSData *idKeyPrivate = [row objectForKey:@"identityPrivateKey"];
         
         NSError *error;
         self.identityKeyPair= [[SignalIdentityKeyPair alloc] initWithPublicKey:idKeyPub privateKey:idKeyPrivate error:&error];
-        
+      
         if(error)
         {
             NSLog(@"prekey error %@", error);
         }
         
-        self.deviceid=[(NSNumber *)[row objectForKey:@"deviceid"] unsignedIntValue];
+        
+        self.signedPreKey=[[SignalSignedPreKey alloc] initWithSerializedData:[self loadSignedPreKeyWithId:1] error:&error];
+        
+        if(error)
+        {
+            NSLog(@"signed prekey error %@", error);
+        }
+        
+        NSArray *keys= [[DataLayer sharedInstance] executeReader:@"select prekeyid, preKey from signalPreKey where account_id=?" andArguments:@[accountId]];
+        NSMutableArray *array = [[NSMutableArray alloc] initWithCapacity:keys.count];
+        
+        for (NSDictionary *row in keys)
+        {
+            SignalPreKey *key = [[SignalPreKey alloc] initWithSerializedData:[row objectForKey:@"preKey"] error:nil];
+            [array addObject:key];
+        }
+        
+        self.preKeys=array;
+     
     }
-    
+ 
     self.accountId=accountId;
-    
     return self; 
+}
+
+-(void) saveValues
+{
+    [self storeSignedPreKey:self.signedPreKey.serializedData signedPreKeyId:1];
+    [self storeIdentityPublicKey:self.identityKeyPair.publicKey andPrivateKey:self.identityKeyPair.privateKey];
+    
+    for (SignalPreKey *key in self.preKeys)
+    {
+        [self storePreKey:key.serializedData preKeyId:key.preKeyId];
+    }
 }
 
 /**
@@ -68,15 +92,10 @@
  */
 - (BOOL) storeSessionRecord:(NSData*)recordData forAddress:(SignalAddress*)address
 {
-    //save data
-    NSDictionary *sess =@{@"name":address.name,
-                          @"deviceid":[NSNumber numberWithInt:address.deviceId],
-                          @"data":recordData
-                          };
+ 
+ BOOL success=[[DataLayer sharedInstance] executeNonQuery:@"insert into  signalContactSession (account_id,contactName,contactDeviceId,recordData) values  (?,?,?)" andArguments:@[self.accountId, address.name, [NSNumber numberWithInteger:address.deviceId], recordData]];
     
-    [[NSUserDefaults standardUserDefaults] setObject:sess forKey:@"sess"];
-    
-    return YES;
+    return success;
 }
 
 /**
@@ -137,7 +156,6 @@
  */
 - (nullable NSData*) loadPreKeyWithId:(uint32_t)preKeyId;
 {
-  
     NSData *preKeyData= (NSData *)[[DataLayer sharedInstance] executeScalar:@"select prekey from signalPreKey where account_id=? and prekeyid=?" andArguments:@[self.accountId, [NSNumber numberWithInteger:preKeyId]]];
     return preKeyData;
 }
@@ -148,7 +166,8 @@
  */
 - (BOOL) storePreKey:(NSData*)preKey preKeyId:(uint32_t)preKeyId
 {
-     return NO;
+    BOOL success= [[DataLayer sharedInstance] executeNonQuery:@"insert into  signalPreKey (account_id,prekeyid,preKey) values (?,?,?)" andArguments:@[self.accountId, [NSNumber numberWithInteger:preKeyId], preKey]];
+     return success;
 }
 
 /**
@@ -215,6 +234,14 @@
     return self.identityKeyPair;
 }
 
+- (BOOL) storeIdentityPublicKey:(NSData*)publicKey andPrivateKey:(NSData *) privateKey
+{
+    BOOL success= [[DataLayer sharedInstance] executeNonQuery:@"insert into  signalIdentity (account_id, deviceid,identityPublicKey, identityPrivateKey) values (?,?,?,?)" andArguments:@[self.accountId, [NSNumber numberWithInteger:self.deviceid], publicKey, privateKey]];
+    
+    return success;
+}
+
+
 /**
  * Return the local client's registration ID.
  *
@@ -262,7 +289,9 @@
  */
 - (BOOL) storeSenderKey:(NSData*)senderKey address:(SignalAddress*)address groupId:(NSString*)groupId;
 {
-     return NO;
+    
+    BOOL success= [[DataLayer sharedInstance] executeNonQuery:@"select insert into signalContactKey (account_id,contactName,contactDeviceId,groupId,senderKey) values (?,?,?,?,?)" andArguments:@[self.accountId,address.name, [NSNumber numberWithInteger:address.deviceId], groupId,senderKey]];
+     return success;
 }
 
 /**

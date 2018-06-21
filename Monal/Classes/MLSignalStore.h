@@ -10,5 +10,12 @@
 #import <SignalProtocolObjC/SignalProtocolObjC.h>
 
 @interface MLSignalStore : NSObject <SignalStore>
-@property (nonatomic, assign, readonly) uint32 deviceid;
+@property (nonatomic, assign) uint32 deviceid;
+@property (nonatomic, strong) SignalIdentityKeyPair *identityKeyPair;
+@property (nonatomic, strong) SignalSignedPreKey *signedPreKey;
+@property (nonatomic, strong) NSArray *preKeys;
+
+-(id) initWithAccountId:(NSString *) accountId;
+-(void) saveValues; 
+
 @end

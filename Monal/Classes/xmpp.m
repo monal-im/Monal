@@ -2966,7 +2966,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         
         monalSignalStore.identityKeyPair= [signalHelper generateIdentityKeyPair];
         monalSignalStore.signedPreKey= [signalHelper generateSignedPreKeyWithIdentity:monalSignalStore.identityKeyPair signedPreKeyId:1];
-       // monalSignalStore.preKeys= [signalHelper generatePreKeysWithStartingPreKeyId:0 count:20];
+        monalSignalStore.preKeys= [signalHelper generatePreKeysWithStartingPreKeyId:0 count:1];
         
         [monalSignalStore saveValues];
     }

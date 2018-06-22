@@ -1760,9 +1760,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             decrypted= [NSString stringWithCString:decdata.bytes encoding:NSUTF8StringEncoding];
                             
                             EVP_CIPHER_CTX_free(ctx);
-                            
-                            
-                            
+                                
                         }
                         
                     }

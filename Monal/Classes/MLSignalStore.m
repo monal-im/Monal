@@ -269,7 +269,8 @@
  */
 - (BOOL) saveIdentity:(SignalAddress*)address identityKey:(nullable NSData*)identityKey;
 {
-     return YES;
+    BOOL success= [[DataLayer sharedInstance] executeNonQuery:@"insert into signalContactIdentity (account_id,contactName,contactDeviceId,identity,trusted) values (?,?,?,?,1)" andArguments:@[self.accountId,address.name,[NSNumber numberWithInteger:address.deviceId], identityKey]];
+    return success;
 }
 
 /**
@@ -284,7 +285,22 @@
  */
 - (BOOL) isTrustedIdentity:(SignalAddress*)address identityKey:(NSData*)identityKey;
 {
-     return YES; //TODO fix logic
+    
+    NSData *dbIdentity= (NSData *)[[DataLayer sharedInstance] executeScalar:@"select identity from signalContactIdentity where account_id=? and contactDeviceId=? and contactName=? and trusted=1" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
+    BOOL toreturn=NO;
+    
+    if(!dbIdentity) {
+        toreturn=YES;
+    }
+    else {
+        if([dbIdentity isEqualToData:identityKey])
+        {
+            toreturn=YES;
+        }
+        
+    }
+    
+     return toreturn;
 }
 
 /**
@@ -294,7 +310,7 @@
 - (BOOL) storeSenderKey:(NSData*)senderKey address:(SignalAddress*)address groupId:(NSString*)groupId;
 {
     
-    BOOL success= [[DataLayer sharedInstance] executeNonQuery:@"select insert into signalContactKey (account_id,contactName,contactDeviceId,groupId,senderKey) values (?,?,?,?,?)" andArguments:@[self.accountId,address.name, [NSNumber numberWithInteger:address.deviceId], groupId,senderKey]];
+    BOOL success= [[DataLayer sharedInstance] executeNonQuery:@"insert into signalContactKey (account_id,contactName,contactDeviceId,groupId,senderKey) values (?,?,?,?,?)" andArguments:@[self.accountId,address.name, [NSNumber numberWithInteger:address.deviceId], groupId,senderKey]];
      return success;
 }
 

@@ -8,11 +8,11 @@
 #include "signal_protocol_internal.h"
 #include "utlist.h"
 
-struct signal_protocol_key_helper_pre_key_list_node
-{
-    session_pre_key *element;
-    struct signal_protocol_key_helper_pre_key_list_node *next;
-};
+//struct signal_protocol_key_helper_pre_key_list_node
+//{
+//    session_pre_key *element;
+//    struct signal_protocol_key_helper_pre_key_list_node *next;
+//};
 
 int signal_protocol_key_helper_generate_identity_key_pair(ratchet_identity_key_pair **key_pair, signal_context *global_context)
 {
@@ -185,7 +185,8 @@ session_pre_key *signal_protocol_key_helper_key_list_element(const signal_protoc
 signal_protocol_key_helper_pre_key_list_node *signal_protocol_key_helper_key_list_next(const signal_protocol_key_helper_pre_key_list_node *node)
 {
     assert(node);
-    return node->next;
+    signal_protocol_key_helper_pre_key_list_node* next=  node->next;
+    return next;
 }
 
 void signal_protocol_key_helper_key_list_free(signal_protocol_key_helper_pre_key_list_node *head)

@@ -203,7 +203,7 @@
  */
 - (BOOL) storeSignedPreKey:(NSData*)signedPreKey signedPreKeyId:(uint32_t)signedPreKeyId
 {
-    BOOL success= [[DataLayer sharedInstance] executeNonQuery:@"insert into  signalSignedPreKey (account_id, deviceid,prekeyid, preKey) values (?,?,?,?)" andArguments:@[self.accountId, [NSNumber numberWithInteger:self.deviceid], [NSNumber numberWithInteger:signedPreKeyId], signedPreKey]];
+    BOOL success= [[DataLayer sharedInstance] executeNonQuery:@"insert into  signalSignedPreKey (account_id, deviceid,signedPreKeyId, signedPreKey) values (?,?,?,?)" andArguments:@[self.accountId, [NSNumber numberWithInteger:self.deviceid], [NSNumber numberWithInteger:signedPreKeyId], signedPreKey]];
     
     return success;
 }

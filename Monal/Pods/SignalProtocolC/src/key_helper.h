@@ -8,6 +8,12 @@
 extern "C" {
 #endif
 
+    struct signal_protocol_key_helper_pre_key_list_node
+    {
+        session_pre_key *element;
+        struct signal_protocol_key_helper_pre_key_list_node *next;
+    };
+    
 /**
 * Generate an identity key pair.  Clients should only do this once,
 * at install time.

@@ -289,7 +289,7 @@ static DataLayer *sharedInstance=nil;
                 {
                     NSData *data = (NSData *) obj;
                     
-                    if(sqlite3_bind_blob(statement, (signed)idx+1,[data bytes], -1,SQLITE_TRANSIENT)!=SQLITE_OK) {
+                    if(sqlite3_bind_blob(statement, (signed)idx+1,[data bytes], data.length,SQLITE_TRANSIENT)!=SQLITE_OK) {
                         DDLogError(@"string bind error");
                         
                     };
@@ -369,7 +369,7 @@ static DataLayer *sharedInstance=nil;
                 {
                     NSData *data = (NSData *) obj;
                     
-                    if(sqlite3_bind_blob(statement, (signed)idx+1,[data bytes], -1,SQLITE_TRANSIENT)!=SQLITE_OK) {
+                    if(sqlite3_bind_blob(statement, (signed)idx+1,[data bytes],data.length,SQLITE_TRANSIENT)!=SQLITE_OK) {
                         DDLogError(@"string bind error");
                         
                     };
@@ -596,7 +596,7 @@ static DataLayer *sharedInstance=nil;
                 {
                     NSData *data = (NSData *) obj;
                     
-                    if(sqlite3_bind_blob(statement, (signed)idx+1,[data bytes], -1,SQLITE_TRANSIENT)!=SQLITE_OK) {
+                    if(sqlite3_bind_blob(statement, (signed)idx+1,[data bytes], data.length,SQLITE_TRANSIENT)!=SQLITE_OK) {
                         DDLogError(@"string bind error");
                         
                     };

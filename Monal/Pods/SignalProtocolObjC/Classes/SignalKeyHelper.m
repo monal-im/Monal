@@ -12,7 +12,8 @@
 #import "SignalIdentityKeyPair_Internal.h"
 #import "SignalPreKey_Internal.h"
 #import "SignalSignedPreKey_Internal.h"
-#import "signal_protocol.h"
+#include "signal_protocol.h"
+#include "key_helper.h"
 
 @implementation SignalKeyHelper
 
@@ -52,12 +53,14 @@
     if (!head || result < 0) {
         return @[];
     }
+     signal_protocol_key_helper_pre_key_list_node *iter = head;
     NSMutableArray<SignalPreKey*> *keys = [NSMutableArray array];
-    while (head) {
-        session_pre_key *pre_key = signal_protocol_key_helper_key_list_element(head);
+    while (iter ) {
+        session_pre_key *pre_key = signal_protocol_key_helper_key_list_element(iter);
         SignalPreKey *preKey = [[SignalPreKey alloc] initWithPreKey:pre_key];
         [keys addObject:preKey];
-        head = signal_protocol_key_helper_key_list_next(head);
+       
+        iter = signal_protocol_key_helper_key_list_next(iter);
     }
     return keys;
 }

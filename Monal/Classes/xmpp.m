@@ -1756,10 +1756,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                           }
                             /* Finalise: note get no output for GCM */
                             rv = EVP_DecryptFinal_ex(ctx, outbuf, &outlen);
-                            decrypted= [NSString stringWithCString:outbuf encoding:NSUTF8StringEncoding];
+                            
+                            NSData *decdata = [[NSData alloc] initWithBytes:outbuf length:decodedPayload.length];
+                            decrypted= [NSString stringWithCString:decdata.bytes encoding:NSUTF8StringEncoding];
+                            
                             
                             if(rv==0){
-                             //   NSData *decdata = [[NSData alloc] initWithBytes:outbuf length:decodedPayload.length];
+                             //
                                 
                                 decrypted= [NSString stringWithCString:outbuf encoding:NSUTF8StringEncoding];
                                 

@@ -97,7 +97,7 @@
 - (BOOL) storeSessionRecord:(NSData*)recordData forAddress:(SignalAddress*)address
 {
  
- BOOL success=[[DataLayer sharedInstance] executeNonQuery:@"insert into  signalContactSession (account_id,contactName,contactDeviceId,recordData) values  (?,?,?)" andArguments:@[self.accountId, address.name, [NSNumber numberWithInteger:address.deviceId], recordData]];
+ BOOL success=[[DataLayer sharedInstance] executeNonQuery:@"insert into  signalContactSession (account_id,contactName,contactDeviceId,recordData) values  (?,?,?,?)" andArguments:@[self.accountId, address.name, [NSNumber numberWithInteger:address.deviceId], recordData]];
     
     return success;
 }
@@ -189,7 +189,7 @@
  */
 - (BOOL) deletePreKeyWithId:(uint32_t)preKeyId
 {
-    return [[DataLayer sharedInstance] executeNonQuery:@"delete prekey from signalPreKey where account_id=? and prekeyid=?" andArguments:@[self.accountId, [NSNumber numberWithInteger:preKeyId]]];
+    return [[DataLayer sharedInstance] executeNonQuery:@"delete  from signalPreKey where account_id=? and prekeyid=?" andArguments:@[self.accountId, [NSNumber numberWithInteger:preKeyId]]];
 
 }
 

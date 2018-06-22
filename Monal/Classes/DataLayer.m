@@ -222,8 +222,8 @@ static DataLayer *sharedInstance=nil;
                             
                         case (SQLITE_BLOB):
                         {
-                            const char* bytes=(const char* _Nonnull)sqlite3_column_blob(statement,0);
-                            int size = sqlite3_column_bytes(statement,0);
+                            const char* bytes=(const char* _Nonnull)sqlite3_column_blob(statement,counter);
+                            int size = sqlite3_column_bytes(statement,counter);
                             NSData* returnData = [NSData dataWithBytes:bytes length:size];
                             
                             [row setObject:returnData forKey:columnName];
@@ -519,8 +519,8 @@ static DataLayer *sharedInstance=nil;
                         case (SQLITE_BLOB):
                         {
                 
-                            const char* bytes=(const char* _Nonnull)sqlite3_column_blob(statement,0);
-                            int size = sqlite3_column_bytes(statement,0);
+                            const char* bytes=(const char* _Nonnull)sqlite3_column_blob(statement,counter);
+                            int size = sqlite3_column_bytes(statement,counter);
                             NSData* returnData = [NSData dataWithBytes:bytes length:size];
                            
                             

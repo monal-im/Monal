@@ -18,7 +18,7 @@
 
 -(id) initWithAccountId:(NSString *) accountId{
     
-    NSArray *data= [[DataLayer sharedInstance] executeReader:@"select * from signalIdentity where account_id=?" andArguments:@[accountId]];
+    NSArray *data= [[DataLayer sharedInstance] executeReader:@"select identityPrivateKey, deviceid,identityPublicKey from signalIdentity where account_id=?" andArguments:@[accountId]];
     NSDictionary *row = [data firstObject];
     
     if(row)
@@ -35,6 +35,7 @@
         if(error)
         {
             NSLog(@"prekey error %@", error);
+            return self;
         }
         
         
@@ -43,6 +44,7 @@
         if(error)
         {
             NSLog(@"signed prekey error %@", error);
+            return self;
         }
         
         NSArray *keys= [[DataLayer sharedInstance] executeReader:@"select prekeyid, preKey from signalPreKey where account_id=?" andArguments:@[accountId]];

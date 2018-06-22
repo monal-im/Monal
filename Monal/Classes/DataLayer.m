@@ -225,7 +225,7 @@ static DataLayer *sharedInstance=nil;
                             const char* bytes=(const char* _Nonnull)sqlite3_column_blob(statement,0);
                             int size = sizeof (bytes);
                             NSData* returnData = [NSData dataWithBytes:bytes length:size];
-                            while(sqlite3_step(statement)== SQLITE_ROW) {} //clear
+                            
                             [row setObject:returnData forKey:columnName];
                             break;
                         }
@@ -522,7 +522,7 @@ static DataLayer *sharedInstance=nil;
                             const char* bytes=(const char* _Nonnull)sqlite3_column_blob(statement,0);
                             int size = sizeof (bytes);
                             NSData* returnData = [NSData dataWithBytes:bytes length:size];
-                            while(sqlite3_step(statement)== SQLITE_ROW) {} //clear
+                           
                             
                              [row setObject:returnData forKey:columnName];
                             break;

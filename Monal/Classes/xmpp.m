@@ -1736,7 +1736,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                           
                             EVP_CIPHER_CTX *ctx =EVP_CIPHER_CTX_new();
                             int outlen, rv;
-                            unsigned char outbuf[1024];
+                            unsigned char outbuf[decodedPayload.length];
                      
                             /* Select cipher */
                             EVP_DecryptInit_ex(ctx, EVP_aes_128_gcm(), NULL, NULL, NULL);
@@ -1744,8 +1744,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_IVLEN, iv.length, NULL);
                             /* Specify key and IV */
                             EVP_DecryptInit_ex(ctx, NULL, NULL, key.bytes, iv.bytes);
-                           
-                    
+                            EVP_CIPHER_CTX_set_padding(ctx,1);
                             /* Decrypt plaintext */
                             EVP_DecryptUpdate(ctx, outbuf, &outlen, decodedPayload.bytes, decodedPayload.length);
                             /* Output decrypted block */
@@ -1760,14 +1759,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             NSData *decdata = [[NSData alloc] initWithBytes:outbuf length:decodedPayload.length];
                             decrypted= [NSString stringWithCString:decdata.bytes encoding:NSUTF8StringEncoding];
                             
-                            
-                            if(rv==0){
-                             //
-                                
-                                decrypted= [NSString stringWithCString:outbuf encoding:NSUTF8StringEncoding];
-                                
-                            }
-                          
                             EVP_CIPHER_CTX_free(ctx);
                             
                             

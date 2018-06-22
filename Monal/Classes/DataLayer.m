@@ -126,7 +126,7 @@ static DataLayer *sharedInstance=nil;
                     {
                         
                         const char* bytes=(const char* _Nonnull)sqlite3_column_blob(statement,0);
-                        int size = sizeof (bytes);
+                        int size = sqlite3_column_bytes(statement,0);
                         NSData* returnData = [NSData dataWithBytes:bytes length:size];
                         while(sqlite3_step(statement)== SQLITE_ROW) {} //clear
                         toReturn= returnData;
@@ -223,7 +223,7 @@ static DataLayer *sharedInstance=nil;
                         case (SQLITE_BLOB):
                         {
                             const char* bytes=(const char* _Nonnull)sqlite3_column_blob(statement,0);
-                            int size = sizeof (bytes);
+                            int size = sqlite3_column_bytes(statement,0);
                             NSData* returnData = [NSData dataWithBytes:bytes length:size];
                             
                             [row setObject:returnData forKey:columnName];
@@ -289,7 +289,7 @@ static DataLayer *sharedInstance=nil;
                 {
                     NSData *data = (NSData *) obj;
                     
-                    if(sqlite3_bind_blob(statement, (signed)idx+1,[data bytes], data.length,SQLITE_TRANSIENT)!=SQLITE_OK) {
+                    if(sqlite3_bind_blob(statement, (signed)idx+1,[data bytes], (int)data.length,SQLITE_TRANSIENT)!=SQLITE_OK) {
                         DDLogError(@"string bind error");
                         
                     };
@@ -410,7 +410,7 @@ static DataLayer *sharedInstance=nil;
                     case (SQLITE_BLOB):
                     {
                         const char* bytes=(const char* _Nonnull)sqlite3_column_blob(statement,0);
-                        int size = sizeof (bytes);
+                        int size = sqlite3_column_bytes(statement,0);
                         NSData* returnData = [NSData dataWithBytes:bytes length:size];
                         while(sqlite3_step(statement)== SQLITE_ROW) {} //clear
                         toReturn= returnData;
@@ -520,7 +520,7 @@ static DataLayer *sharedInstance=nil;
                         {
                 
                             const char* bytes=(const char* _Nonnull)sqlite3_column_blob(statement,0);
-                            int size = sizeof (bytes);
+                            int size = sqlite3_column_bytes(statement,0);
                             NSData* returnData = [NSData dataWithBytes:bytes length:size];
                            
                             

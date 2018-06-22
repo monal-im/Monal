@@ -2376,7 +2376,7 @@ static DataLayer *sharedInstance=nil;
     {
         DDLogVerbose(@"Database version <3.0 detected. Performing upgrade . ");
         
-        [self executeNonQuery:@"CREATE TABLE signalIdentity (deviceid int NOT NULL PRIMARY KEY, account_id int NOT NULL,identityPublicKey BLOB,identityPrivateKey BLOB)" withCompletion:nil];
+        [self executeNonQuery:@"CREATE TABLE signalIdentity (deviceid int NOT NULL PRIMARY KEY, account_id int NOT NULL unique,identityPublicKey BLOB,identityPrivateKey BLOB)" withCompletion:nil];
         [self executeNonQuery:@"CREATE TABLE signalSignedPreKey (account_id int NOT NULL,signedPreKeyId int not null,signedPreKey BLOB);" withCompletion:nil];
         
         [self executeNonQuery:@"CREATE TABLE signalPreKey (account_id int NOT NULL,prekeyid int not null,preKey BLOB);" withCompletion:nil];

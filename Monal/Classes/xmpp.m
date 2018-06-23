@@ -46,8 +46,9 @@
 #import "MLHTTPRequest.h"
 
 #import "SignalProtocolObjC.h"
-#include <openssl/bio.h>
+
 #include <openssl/evp.h>
+#include <openssl/rand.h>
 
 @import Darwin.POSIX.sys.time; 
 
@@ -145,9 +146,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 @property (nonatomic, strong) NXOAuth2Account *oauthAccount;
 
-
 @property (nonatomic, strong) SignalContext *signalContext;
-@property (nonatomic, strong) NSDictionary *signaltmp;
+@property (nonatomic, strong) MLSignalStore *monalSignalStore;
+
 
 @end
 
@@ -1691,7 +1692,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     {
                         SignalAddress *address = [[SignalAddress alloc] initWithName:messageNode.from deviceId:messageNode.sid.integerValue];
                         if(!self.signalContext) return; 
-                        SignalSessionBuilder *builder = [[SignalSessionBuilder alloc] initWithAddress:address context:self.signalContext];
+                    
                         //builder.
                         
                         SignalSessionCipher *cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self.signalContext];
@@ -2660,10 +2661,112 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) sendMessage:(NSString*) message toContact:(NSString*) contact isMUC:(BOOL) isMUC andMessageId:(NSString *) messageId
 {
+    
     XMPPMessage* messageNode =[[XMPPMessage alloc] init];
     [messageNode.attributes setObject:contact forKey:@"to"];
-    [messageNode setBody:message];
     [messageNode setXmppId:messageId ];
+    
+    if(self.signalContext && !isMUC) {
+        
+        NSArray *devices = [self.monalSignalStore allDeviceIdsForAddressName:contact];
+        if(devices.count>0 ){
+        
+            NSData *messageBytes=[[NSData alloc] initWithBytes:[message cStringUsingEncoding:NSUTF8StringEncoding]
+                                                        length: sizeof([message cStringUsingEncoding:NSUTF8StringEncoding])];
+            //aes encrypt message
+            
+            EVP_CIPHER_CTX *ctx =EVP_CIPHER_CTX_new();
+            int outlen;
+            unsigned char outbuf[messageBytes.length];
+            unsigned char tag[16];
+            
+            //genreate key and iv
+            
+            unsigned char key[16];
+            RAND_bytes(key, sizeof(key));
+            
+            unsigned char iv[16];
+            RAND_bytes(iv, sizeof(iv));
+            
+            NSData *gcmKey = [[NSData alloc] initWithBytes:key length:16];
+            
+            NSData *gcmiv= [[NSData alloc] initWithBytes:iv length:16];
+        ;
+            
+            NSMutableData *encryptedMessage;
+            
+           
+            ctx = EVP_CIPHER_CTX_new();
+            /* Set cipher type and mode */
+            EVP_EncryptInit_ex(ctx, EVP_aes_128_gcm(), NULL, NULL, NULL);
+            /* Set IV length if default 96 bits is not approp riate */
+            EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_IVLEN, gcmiv.length, NULL);
+            /* Initialise key and IV */
+            EVP_EncryptInit_ex(ctx, NULL, NULL, gcmKey.bytes, gcmiv.bytes);
+          
+            /* Encrypt plaintext */
+            EVP_EncryptUpdate(ctx, outbuf, &outlen,messageBytes.bytes,messageBytes.length);
+           
+            encryptedMessage = [NSMutableData dataWithBytes:outbuf length:outlen];
+            
+            /* Finalise: note get no output for GCM */
+            EVP_EncryptFinal_ex(ctx, outbuf, &outlen);
+            
+           
+            /* Get tag */
+            EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_GET_TAG, 16, tag);
+            
+            EVP_CIPHER_CTX_free(ctx);
+           
+            
+            MLXMLNode *encrypted =[[MLXMLNode alloc] initWithElement:@"encrypted"];
+            [encrypted.attributes setObject:@"eu.siacs.conversations.axolotl" forKey:@"xmlns"];
+            [messageNode.children addObject:encrypted];
+            
+            MLXMLNode *payload =[[MLXMLNode alloc] initWithElement:@"payload"];
+            [payload setData:[EncodingTools encodeBase64WithData:encryptedMessage]];
+            [encrypted.children addObject:payload];
+            
+            
+            NSString *deviceid=[NSString stringWithFormat:@"%d",self.monalSignalStore.deviceid];
+            MLXMLNode *header =[[MLXMLNode alloc] initWithElement:@"header"];
+            [header.attributes setObject:deviceid forKey:@"sid"];
+            [encrypted.children addObject:header];
+            
+            MLXMLNode *ivNode =[[MLXMLNode alloc] initWithElement:@"iv"];
+            [ivNode setData:[EncodingTools encodeBase64WithData:gcmiv]];
+            [header.children addObject:ivNode];
+            
+            
+            [devices enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                 NSNumber *device = (NSNumber *)obj;
+                SignalAddress *address = [[SignalAddress alloc] initWithName:contact deviceId:device.integerValue];
+             //   SignalSessionBuilder *builder = [[SignalSessionBuilder alloc] initWithAddress:address context:self.signalContext];
+                //builder.
+                
+                SignalSessionCipher *cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self.signalContext];
+                NSError *error;
+                SignalCiphertext* deviceEncryptedKey=[cipher encryptData:gcmKey error:&error];
+                
+                
+                MLXMLNode *keyNode =[[MLXMLNode alloc] initWithElement:@"key"];
+                 [keyNode.attributes setObject:[NSString stringWithFormat:@"%@",device] forKey:@"rid"];
+                if(deviceEncryptedKey.type==SignalCiphertextTypePreKeyMessage)
+                {
+                     [keyNode.attributes setObject:@"1" forKey:@"prekey"];
+                }
+                
+                [keyNode setData:[EncodingTools encodeBase64WithData:deviceEncryptedKey.data]];
+                [header.children addObject:keyNode];
+                
+            }];
+            
+            
+        }
+    }
+    else  {
+        [messageNode setBody:message];
+    }
     
     if(isMUC)
     {
@@ -2943,34 +3046,34 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self sendInitalPresence];
     
   //  [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"singaltmp"];
-    MLSignalStore *monalSignalStore = [[MLSignalStore alloc] initWithAccountId:_accountNo];
+    self.monalSignalStore = [[MLSignalStore alloc] initWithAccountId:_accountNo];
     
     //signal store
-    SignalStorage *signalStorage = [[SignalStorage alloc] initWithSignalStore:monalSignalStore];
+    SignalStorage *signalStorage = [[SignalStorage alloc] initWithSignalStore:self.monalSignalStore];
     //signal context
     self.signalContext= [[SignalContext alloc] initWithStorage:signalStorage];
     //signal helper
     SignalKeyHelper *signalHelper = [[SignalKeyHelper alloc] initWithContext:self.signalContext];
 
-    if(monalSignalStore.deviceid==0)
+    if(self.monalSignalStore.deviceid==0)
     {
-        monalSignalStore.deviceid=[signalHelper generateRegistrationId];
+        self.monalSignalStore.deviceid=[signalHelper generateRegistrationId];
         
-        monalSignalStore.identityKeyPair= [signalHelper generateIdentityKeyPair];
-        monalSignalStore.signedPreKey= [signalHelper generateSignedPreKeyWithIdentity:monalSignalStore.identityKeyPair signedPreKeyId:1];
-        monalSignalStore.preKeys= [signalHelper generatePreKeysWithStartingPreKeyId:0 count:20];
+        self.monalSignalStore.identityKeyPair= [signalHelper generateIdentityKeyPair];
+        self.monalSignalStore.signedPreKey= [signalHelper generateSignedPreKeyWithIdentity:self.monalSignalStore.identityKeyPair signedPreKeyId:1];
+        self.monalSignalStore.preKeys= [signalHelper generatePreKeysWithStartingPreKeyId:0 count:20];
         
-        [monalSignalStore saveValues];
+        [self.monalSignalStore saveValues];
     }
     
     
-    NSString *deviceid=[NSString stringWithFormat:@"%d",monalSignalStore.deviceid];
+    NSString *deviceid=[NSString stringWithFormat:@"%d",self.monalSignalStore.deviceid];
     XMPPIQ *signalDevice = [[XMPPIQ alloc] initWithType:kiqSetType];
     [signalDevice publishDevice:deviceid];
     [self send:signalDevice];
     
      XMPPIQ *signalKeys = [[XMPPIQ alloc] initWithType:kiqSetType];
-    [signalKeys publishKeys:@{@"signedPreKeyPublic":monalSignalStore.signedPreKey.keyPair.publicKey, @"signedPreKeySignature":monalSignalStore.signedPreKey.signature, @"identityKey":monalSignalStore.identityKeyPair.publicKey, @"signedPreKeyId": [NSString stringWithFormat:@"%d",monalSignalStore.signedPreKey.preKeyId]} andPreKeys:monalSignalStore.preKeys withDeviceId:deviceid];
+    [signalKeys publishKeys:@{@"signedPreKeyPublic":self.monalSignalStore.signedPreKey.keyPair.publicKey, @"signedPreKeySignature":self.monalSignalStore.signedPreKey.signature, @"identityKey":self.monalSignalStore.identityKeyPair.publicKey, @"signedPreKeyId": [NSString stringWithFormat:@"%d",self.monalSignalStore.signedPreKey.preKeyId]} andPreKeys:self.monalSignalStore.preKeys withDeviceId:deviceid];
     [signalKeys.attributes setValue:[NSString stringWithFormat:@"%@/%@",_fulluser, _resource ] forKey:@"from"];
     [self send:signalKeys];
     

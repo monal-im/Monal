@@ -2715,6 +2715,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
            
             /* Get tag */
             EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_GET_TAG, 16, tag);
+            [encryptedMessage appendBytes:tag length:16];
             
             EVP_CIPHER_CTX_free(ctx);
            

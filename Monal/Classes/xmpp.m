@@ -3164,9 +3164,26 @@ if(!self.supportsSM3)
 
 -(void) queryOMEMOBundleFrom:(NSString *) jid
 {
+     NSArray *devices = [self.monalSignalStore allDeviceIdsForAddressName:jid];
+    
+    [devices enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        NSNumber *devicenum = (NSNumber*) obj;
+        
+        XMPPIQ* query2 =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
+        [query2 requestBundles:[NSString stringWithFormat:@"%@", devicenum]];
+        [self send:query2];
+    }];
+}
+
+
+
+-(void) queryOMEMODevicesFrom:(NSString *) jid
+{
     XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
+    [query requestDevices];
    // [query updateMamArchivePrefDefault:preference];
     [self send:query];
+
 }
 
 

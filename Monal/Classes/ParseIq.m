@@ -203,6 +203,8 @@
         return;
     }
     
+    //OMEMO
+    
     if([elementName isEqualToString:@"bundle"])
     {
         State=@"Bundle";

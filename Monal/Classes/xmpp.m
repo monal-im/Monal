@@ -2703,7 +2703,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_IVLEN, gcmiv.length, NULL);
             /* Initialise key and IV */
             EVP_EncryptInit_ex(ctx, NULL, NULL, gcmKey.bytes, gcmiv.bytes);
-          
+            EVP_CIPHER_CTX_set_padding(ctx,1);
             /* Encrypt plaintext */
             EVP_EncryptUpdate(ctx, outbuf, &outlen,messageBytes.bytes,messageBytes.length);
            
@@ -3046,7 +3046,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self fetchRoster];
     [self sendInitalPresence];
     
-  //  [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"singaltmp"];
     self.monalSignalStore = [[MLSignalStore alloc] initWithAccountId:_accountNo];
     
     //signal store
@@ -3067,24 +3066,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         [self.monalSignalStore saveValues];
     }
     
-    
-    NSString *deviceid=[NSString stringWithFormat:@"%d",self.monalSignalStore.deviceid];
-    XMPPIQ *signalDevice = [[XMPPIQ alloc] initWithType:kiqSetType];
-    [signalDevice publishDevice:deviceid];
-    [self send:signalDevice];
-    
-     XMPPIQ *signalKeys = [[XMPPIQ alloc] initWithType:kiqSetType];
-    [signalKeys publishKeys:@{@"signedPreKeyPublic":self.monalSignalStore.signedPreKey.keyPair.publicKey, @"signedPreKeySignature":self.monalSignalStore.signedPreKey.signature, @"identityKey":self.monalSignalStore.identityKeyPair.publicKey, @"signedPreKeyId": [NSString stringWithFormat:@"%d",self.monalSignalStore.signedPreKey.preKeyId]} andPreKeys:self.monalSignalStore.preKeys withDeviceId:deviceid];
-    [signalKeys.attributes setValue:[NSString stringWithFormat:@"%@/%@",_fulluser, _resource ] forKey:@"from"];
-    [self send:signalKeys];
-    
-    //if not auto subscibe
-    XMPPIQ *subscribe = [[XMPPIQ alloc] initWithType:kiqGetType];
-    [subscribe setiqTo:@"monal2@jabb3r.org"];
-    [subscribe requestNode:@"eu.siacs.conversations.axolotl.devicelist"];
-    [self send:subscribe];
-
-    
+    [self sendOMEMODevice];
     
 if(!self.supportsSM3)
     {
@@ -3161,6 +3143,31 @@ if(!self.supportsSM3)
     
 }
 
+
+#pragma mark OMEMO
+
+-(void) sendOMEMODevice {
+    NSString *deviceid=[NSString stringWithFormat:@"%d",self.monalSignalStore.deviceid];
+    XMPPIQ *signalDevice = [[XMPPIQ alloc] initWithType:kiqSetType];
+    [signalDevice publishDevice:deviceid];
+    [self send:signalDevice];
+}
+
+-(void) sendOMEMOBundle
+{
+    NSString *deviceid=[NSString stringWithFormat:@"%d",self.monalSignalStore.deviceid];
+    XMPPIQ *signalKeys = [[XMPPIQ alloc] initWithType:kiqSetType];
+    [signalKeys publishKeys:@{@"signedPreKeyPublic":self.monalSignalStore.signedPreKey.keyPair.publicKey, @"signedPreKeySignature":self.monalSignalStore.signedPreKey.signature, @"identityKey":self.monalSignalStore.identityKeyPair.publicKey, @"signedPreKeyId": [NSString stringWithFormat:@"%d",self.monalSignalStore.signedPreKey.preKeyId]} andPreKeys:self.monalSignalStore.preKeys withDeviceId:deviceid];
+    [signalKeys.attributes setValue:[NSString stringWithFormat:@"%@/%@",_fulluser, _resource ] forKey:@"from"];
+    [self send:signalKeys];
+}
+
+-(void) queryOMEMOBundleFrom:(NSString *) jid
+{
+    XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
+   // [query updateMamArchivePrefDefault:preference];
+    [self send:query];
+}
 
 
 #pragma mark vcard

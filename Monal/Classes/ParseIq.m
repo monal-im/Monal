@@ -12,6 +12,7 @@
 @interface ParseIq()
 
 @property (nonatomic, assign) NSInteger prekeyid;
+@property (nonatomic, strong) NSMutableArray* omemoDevices;
 
 @end
 
@@ -204,13 +205,25 @@
     }
     
     //OMEMO
-    
-    if([elementName isEqualToString:@"bundle"])
-    {
-        State=@"Bundle";
+    if([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"eu.siacs.conversations.axolotl"]) {
+        if([elementName isEqualToString:@"bundle"])
+        {
+            State=@"Bundle";
+            return;
+        }
+        
+        if([elementName isEqualToString:@"list"] )
+        {
+            State=@"DeviceList";
+            self.omemoDevices = [[NSMutableArray alloc] init];
+            return;
+        }
     }
     
- 
+    if([State isEqualToString:@"DeviceList"] && [elementName isEqualToString:@"device"] )
+    {
+        [self.omemoDevices addObject:[attributeDict objectForKey:@"id"]];
+    }
     
 }
 

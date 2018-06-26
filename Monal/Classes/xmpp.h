@@ -243,7 +243,11 @@ Decline a call request
 /**
  query a user's vcard
  */
--(void)getVCard:(NSString *) user;
+-(void) getVCard:(NSString *) user;
+
+
+/** OMEMO */
+-(void) queryOMEMODevicesFrom:(NSString *) jid;
 
 FOUNDATION_EXPORT NSString *const kFileName;
 FOUNDATION_EXPORT NSString *const kContentType;

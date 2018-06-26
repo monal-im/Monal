@@ -1407,6 +1407,22 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             
                         }
                         
+                        //OMEMO
+                        
+                        if(iqNode.omemoDevices)
+                        {
+                            [iqNode.omemoDevices enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                                NSString *device  =(NSString *)obj;
+                                [self queryOMEMOBundleFrom:iqNode.from andDevice:device];
+                            }];
+                            
+                        }
+                        
+                        if(iqNode.signedPreKeyPublic)
+                        {
+                            
+                        }
+                        
                         
                         if([iqNode.idval isEqualToString:@"enableCarbons"])
                         {
@@ -1464,16 +1480,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                     
                                 }
                             }
-                            
-                            if(iqNode.signedPreKeyPublic)
-                            {
-                                
-                            }
-                            
-                        
+                         
                             // iterate roster and get cards
                             [self getVcards];
-                            
                         }
                         
                         //confirmation of set call after we accepted
@@ -3067,6 +3076,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     
     [self sendOMEMODevice];
+    [self sendOMEMOBundle];
     
 if(!self.supportsSM3)
     {
@@ -3162,26 +3172,19 @@ if(!self.supportsSM3)
     [self send:signalKeys];
 }
 
--(void) queryOMEMOBundleFrom:(NSString *) jid
+-(void) queryOMEMOBundleFrom:(NSString *) jid andDevice:(NSString *) deviceid
 {
-     NSArray *devices = [self.monalSignalStore allDeviceIdsForAddressName:jid];
-    
-    [devices enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        NSNumber *devicenum = (NSNumber*) obj;
-        
-        XMPPIQ* query2 =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
-        [query2 requestBundles:[NSString stringWithFormat:@"%@", devicenum]];
-        [self send:query2];
-    }];
+    XMPPIQ* query2 =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqGetType];
+    [query2 setiqTo:jid];
+    [query2 requestBundles:deviceid]; //[NSString stringWithFormat:@"%@", devicenum]
+    [self send:query2];
 }
-
-
 
 -(void) queryOMEMODevicesFrom:(NSString *) jid
 {
-    XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
+    XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqGetType];
+    [query setiqTo:jid];
     [query requestDevices];
-   // [query updateMamArchivePrefDefault:preference];
     [self send:query];
 
 }

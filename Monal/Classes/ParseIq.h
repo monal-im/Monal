@@ -65,5 +65,6 @@
 @property (nonatomic, strong, readonly) NSString* signedPreKeySignature;
 @property (nonatomic, strong, readonly) NSString* identityKey;
 
+@property (nonatomic, strong, readonly) NSMutableArray* omemoDevices;
 
 @end

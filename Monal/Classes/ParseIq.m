@@ -249,6 +249,11 @@
     }
     
     
+    if([elementName isEqualToString:@"signedPreKeyPublic"] &&  [State isEqualToString:@"Bundle"])
+    {
+        _signedPreKeyId = [attributeDict objectForKey:@"signedPreKeyId"];
+    }
+    
     
 }
 
@@ -356,7 +361,7 @@
     
     if([elementName isEqualToString:@"preKeyPublic"] &&  [State isEqualToString:@"Bundle"])
     {
-        [self.currentPreKey setObject:_messageBuffer forKey:@"preKey"];
+        [self.currentPreKey setObject:[_messageBuffer copy]  forKey:@"preKey"];
         [self.preKeys addObject:self.currentPreKey];
         _messageBuffer=nil;
         return;

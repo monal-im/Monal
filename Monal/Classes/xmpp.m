@@ -1722,7 +1722,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         SignalAddress *address = [[SignalAddress alloc] initWithName:messageNode.from deviceId:messageNode.sid.integerValue];
                         if(!self.signalContext) return; 
                     
-                        //builder.
                         
                         SignalSessionCipher *cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self.signalContext];
                       
@@ -2774,7 +2773,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 SignalSessionCipher *cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self.signalContext];
                 NSError *error;
                 SignalCiphertext* deviceEncryptedKey=[cipher encryptData:gcmKey error:&error];
-                
                 
                 MLXMLNode *keyNode =[[MLXMLNode alloc] initWithElement:@"key"];
                  [keyNode.attributes setObject:[NSString stringWithFormat:@"%@",device] forKey:@"rid"];

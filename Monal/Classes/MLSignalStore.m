@@ -261,6 +261,11 @@
  */
 - (BOOL) saveIdentity:(SignalAddress*)address identityKey:(nullable NSData*)identityKey;
 {
+    NSData *dbIdentity= (NSData *)[[DataLayer sharedInstance] executeScalar:@"select identity from signalContactIdentity where account_id=? and contactDeviceId=? and contactName=?" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
+    if(dbIdentity)
+    {
+        return YES;
+    }
     BOOL success= [[DataLayer sharedInstance] executeNonQuery:@"insert into signalContactIdentity (account_id,contactName,contactDeviceId,identity,trusted) values (?,?,?,?,1)" andArguments:@[self.accountId,address.name,[NSNumber numberWithInteger:address.deviceId], identityKey]];
     return success;
 }
@@ -287,7 +292,7 @@
         if([dbIdentity isEqualToData:identityKey])
         {
             toreturn=YES;
-        }
+        } 
         
     }
     

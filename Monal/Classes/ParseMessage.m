@@ -7,6 +7,12 @@
 //
 
 #import "ParseMessage.h"
+#import "MLSignalStore.h"
+
+@interface ParseMessage()
+@property (nonatomic, strong) NSMutableDictionary *currentKey; 
+
+@end
 
 @implementation ParseMessage
 
@@ -212,16 +218,24 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     if([State isEqualToString:@"OMEMO"] && [elementName isEqualToString:@"header"] )
     {
         _sid=[attributeDict objectForKey:@"sid"];
+        _signalKeys =[[NSMutableArray alloc] init];
         
     }
     
+    
+    //store in array
     if([State isEqualToString:@"OMEMO"] && [elementName isEqualToString:@"key"]) {
+        
+        self.currentKey =[[NSMutableDictionary alloc] init];
+        [self.currentKey setObject:[attributeDict objectForKey:@"rid"] forKey:@"rid"];
+        
         if([[attributeDict objectForKey:@"prekey"] isEqualToString:@"1"]
            || [[attributeDict objectForKey:@"prekey"] isEqualToString:@"true"])
         {
-          _preKeyRid=[attributeDict objectForKey:@"rid"];
+            [self.currentKey setObject:@"1" forKey:@"prekey"];
         } else  {
-        _keyRid=[attributeDict objectForKey:@"rid"];
+       [self.currentKey setObject:@"0" forKey:@"prekey"];
+            
         }
        
     }
@@ -273,19 +287,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         _encryptedPayload=_messageBuffer;
         _messageBuffer=nil;
     }
-    
+
     if([State isEqualToString:@"OMEMO"] && [elementName isEqualToString:@"key"])
     {
-        _keyValue=_messageBuffer;
+        [self.currentKey setObject:[_messageBuffer copy] forKey:@"key"];
+        [self.signalKeys addObject:self.currentKey];
         _messageBuffer=nil;
     }
-    
-    if([State isEqualToString:@"OMEMO"] && [elementName isEqualToString:@"key"] && self.preKeyRid)
-    {
-        _preKeyValue=_messageBuffer;
-        _messageBuffer=nil;
-    }
-    
 }
 
 @end

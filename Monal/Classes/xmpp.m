@@ -1723,10 +1723,27 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         if(!self.signalContext) return; 
                     
                         
+                        __block NSDictionary *messageKey;
+                        [messageNode.signalKeys enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                            NSDictionary *currentKey = (NSDictionary *) obj;
+                            NSString* rid=[currentKey objectForKey:@"rid"];
+                            if(rid.integerValue==self.monalSignalStore.deviceid)
+                            {
+                                messageKey=currentKey;
+                                *stop=YES;
+                            }
+                            
+                        }];
+                        
+                        if(!messageKey) return;
+                        
                         SignalSessionCipher *cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self.signalContext];
                       
                         SignalCiphertextType messagetype;
-                        if(messageNode.preKeyRid)
+                        
+                    
+                        
+                        if([[messageKey objectForKey:@"prekey"] isEqualToString:@"1"])
                         {
                             messagetype=SignalCiphertextTypePreKeyMessage;
                         } else  {
@@ -1734,7 +1751,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         }
                         
                         
-                        NSData *decoded= [EncodingTools dataWithBase64EncodedString:messageNode.preKeyValue?messageNode.preKeyValue:messageNode.keyValue];
+                        NSData *decoded= [EncodingTools dataWithBase64EncodedString:[messageKey objectForKey:@"key"]];
                         //NSData *decodedText= [EncodingTools dataWithBase64EncodedString:messageNode.encryptedPayload];
                         
                         SignalCiphertext *ciphertext = [[SignalCiphertext alloc] initWithData:decoded type:messagetype];

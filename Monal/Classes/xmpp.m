@@ -1418,8 +1418,28 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             
                         }
                         
-                        if(iqNode.signedPreKeyPublic)
+                        if(iqNode.signedPreKeyPublic && self.signalContext)
                         {
+                            SignalAddress *address = [[SignalAddress alloc] initWithName:iqNode.from deviceId:0];
+                            SignalSessionBuilder *builder = [[SignalSessionBuilder alloc] initWithAddress:address context:self.signalContext];
+                            NSError *error;
+                            
+                            [iqNode.preKeys enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                                
+                                NSDictionary *row = (NSDictionary *) obj;
+                                NSString *keyid = (NSString *)[row objectForKey:@"preKeyId"];
+                                
+                                SignalPreKeyBundle *bundle = [[SignalPreKeyBundle alloc] initWithRegistrationId:0
+                                                                                                       deviceId:(uint32_t)[iqNode.deviceid intValue]
+                                                                                                       preKeyId:[keyid integerValue]
+                                                                                                   preKeyPublic:[EncodingTools dataWithBase64EncodedString:[row objectForKey:@"preKey"]]
+                                                                                                 signedPreKeyId:iqNode.signedPreKeyId.integerValue
+                                                                                             signedPreKeyPublic:[EncodingTools dataWithBase64EncodedString:iqNode.signedPreKeyPublic]
+                                                                                                      signature:[EncodingTools dataWithBase64EncodedString:iqNode.signedPreKeySignature]
+                                                                                                    identityKey:[EncodingTools dataWithBase64EncodedString:iqNode.identityKey]
+                                                                                                          error:nil];
+                                [builder processPreKeyBundle:bundle error:nil];
+                            }];
                             
                         }
                         
@@ -2751,9 +2771,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             [devices enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                  NSNumber *device = (NSNumber *)obj;
                 SignalAddress *address = [[SignalAddress alloc] initWithName:contact deviceId:device.integerValue];
-             //   SignalSessionBuilder *builder = [[SignalSessionBuilder alloc] initWithAddress:address context:self.signalContext];
-                //builder.
-                
                 SignalSessionCipher *cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self.signalContext];
                 NSError *error;
                 SignalCiphertext* deviceEncryptedKey=[cipher encryptData:gcmKey error:&error];

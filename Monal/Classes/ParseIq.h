@@ -60,11 +60,12 @@
 @property (nonatomic, strong, readonly) NSString* mam2Last;
 
 //omemo
-@property (nonatomic, strong, readonly) NSMutableArray* preKeys; //Array with signalprekey
+@property (nonatomic, strong, readonly) NSMutableArray* preKeys; //Array with dic of signalprekey, key id
 @property (nonatomic, strong, readonly) NSString* signedPreKeyPublic;
+@property (nonatomic, strong, readonly) NSNumber* signedPreKeyId;
 @property (nonatomic, strong, readonly) NSString* signedPreKeySignature;
 @property (nonatomic, strong, readonly) NSString* identityKey;
-
-@property (nonatomic, strong, readonly) NSMutableArray* omemoDevices;
+@property (nonatomic, strong, readonly) NSString* deviceid;
+@property (nonatomic, strong, readonly) NSMutableArray* omemoDevices; //array of device ids
 
 @end

@@ -25,7 +25,6 @@
     
     if(row)
     {
-        
         self.deviceid=[(NSNumber *)[row objectForKey:@"deviceid"] unsignedIntValue];
         
         NSData *idKeyPub = [row objectForKey:@"identityPublicKey"];
@@ -39,7 +38,6 @@
             NSLog(@"prekey error %@", error);
             return self;
         }
-        
         
         self.signedPreKey=[[SignalSignedPreKey alloc] initWithSerializedData:[self loadSignedPreKeyWithId:1] error:&error];
         
@@ -57,12 +55,9 @@
             SignalPreKey *key = [[SignalPreKey alloc] initWithSerializedData:[row objectForKey:@"preKey"] error:nil];
             [array addObject:key];
         }
-        
         self.preKeys=array;
-     
     }
- 
-  
+
     return self; 
 }
 
@@ -96,9 +91,7 @@
  */
 - (BOOL) storeSessionRecord:(NSData*)recordData forAddress:(SignalAddress*)address
 {
- 
  BOOL success=[[DataLayer sharedInstance] executeNonQuery:@"insert into  signalContactSession (account_id,contactName,contactDeviceId,recordData) values  (?,?,?,?)" andArguments:@[self.accountId, address.name, [NSNumber numberWithInteger:address.deviceId], recordData]];
-    
     return success;
 }
 
@@ -241,7 +234,6 @@
 - (BOOL) storeIdentityPublicKey:(NSData*)publicKey andPrivateKey:(NSData *) privateKey
 {
     BOOL success= [[DataLayer sharedInstance] executeNonQuery:@"insert into  signalIdentity (account_id, deviceid,identityPublicKey, identityPrivateKey) values (?,?,?,?)" andArguments:@[self.accountId, [NSNumber numberWithInteger:self.deviceid], publicKey, privateKey]];
-    
     return success;
 }
 
@@ -285,7 +277,6 @@
  */
 - (BOOL) isTrustedIdentity:(SignalAddress*)address identityKey:(NSData*)identityKey;
 {
-    
     NSData *dbIdentity= (NSData *)[[DataLayer sharedInstance] executeScalar:@"select identity from signalContactIdentity where account_id=? and contactDeviceId=? and contactName=? and trusted=1" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
     BOOL toreturn=NO;
     
@@ -309,7 +300,6 @@
  */
 - (BOOL) storeSenderKey:(NSData*)senderKey address:(SignalAddress*)address groupId:(NSString*)groupId;
 {
-    
     BOOL success= [[DataLayer sharedInstance] executeNonQuery:@"insert into signalContactKey (account_id,contactName,contactDeviceId,groupId,senderKey) values (?,?,?,?,?)" andArguments:@[self.accountId,address.name, [NSNumber numberWithInteger:address.deviceId], groupId,senderKey]];
      return success;
 }

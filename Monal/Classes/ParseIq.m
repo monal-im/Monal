@@ -11,8 +11,8 @@
 
 @interface ParseIq()
 
-@property (nonatomic, assign) NSInteger prekeyid;
 @property (nonatomic, strong) NSMutableArray* omemoDevices;
+@property (nonatomic, strong) NSMutableDictionary *currentPreKey;
 
 @end
 
@@ -205,10 +205,26 @@
     }
     
     //OMEMO
+    
+    if( [elementName isEqualToString:@"item"] )
+    {
+        NSString *node = (NSString *) [attributeDict objectForKey:@"node"];
+        if([node hasPrefix:@"eu.siacs.conversations.axolotl.bundles:"])
+        {
+            NSArray *parts = [node componentsSeparatedByString:@":"];
+            if(parts.count>1)
+            {
+                _deviceid= parts[0];
+            }
+        }
+        
+    }
+    
     if([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"eu.siacs.conversations.axolotl"]) {
         if([elementName isEqualToString:@"bundle"])
         {
             State=@"Bundle";
+            _preKeys =[[NSMutableArray alloc] init];
             return;
         }
         
@@ -224,6 +240,15 @@
     {
         [self.omemoDevices addObject:[attributeDict objectForKey:@"id"]];
     }
+    
+    
+    if([State isEqualToString:@"Bundle"] && [elementName isEqualToString:@"preKeyPublic"] )
+    {
+        self.currentPreKey =[[NSMutableDictionary alloc] init];
+        [self.currentPreKey setObject:[attributeDict objectForKey:@"preKeyId"] forKey:@"preKeyId"];
+    }
+    
+    
     
 }
 
@@ -331,7 +356,9 @@
     
     if([elementName isEqualToString:@"preKeyPublic"] &&  [State isEqualToString:@"Bundle"])
     {
-      
+        [self.currentPreKey setObject:_messageBuffer forKey:@"preKey"];
+        [self.preKeys addObject:self.currentPreKey];
+        _messageBuffer=nil;
         return;
     }
  

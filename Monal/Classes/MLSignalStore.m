@@ -91,8 +91,15 @@
  */
 - (BOOL) storeSessionRecord:(NSData*)recordData forAddress:(SignalAddress*)address
 {
- BOOL success=[[DataLayer sharedInstance] executeNonQuery:@"insert into  signalContactSession (account_id,contactName,contactDeviceId,recordData) values  (?,?,?,?)" andArguments:@[self.accountId, address.name, [NSNumber numberWithInteger:address.deviceId], recordData]];
-    return success;
+    if([self sessionRecordForAddress:address])
+    {
+        BOOL success=[[DataLayer sharedInstance] executeNonQuery:@"update  signalContactSession set recordData =? where account_id=? and contactName =? and contactDeviceId=?" andArguments:@[recordData, self.accountId, address.name, [NSNumber numberWithInteger:address.deviceId]]];
+        return success;
+    }
+    else {
+        BOOL success=[[DataLayer sharedInstance] executeNonQuery:@"insert into  signalContactSession (account_id,contactName,contactDeviceId,recordData) values  (?,?,?,?)" andArguments:@[self.accountId, address.name, [NSNumber numberWithInteger:address.deviceId], recordData]];
+        return success;
+    }
 }
 
 /**

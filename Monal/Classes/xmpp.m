@@ -1738,10 +1738,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         if(!messageKey) return;
                         
                         SignalSessionCipher *cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self.signalContext];
-                      
                         SignalCiphertextType messagetype;
-                        
-                    
                         
                         if([[messageKey objectForKey:@"prekey"] isEqualToString:@"1"])
                         {
@@ -1750,9 +1747,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             messagetype= SignalCiphertextTypeMessage;
                         }
                         
-                        
                         NSData *decoded= [EncodingTools dataWithBase64EncodedString:[messageKey objectForKey:@"key"]];
-                        //NSData *decodedText= [EncodingTools dataWithBase64EncodedString:messageNode.encryptedPayload];
                         
                         SignalCiphertext *ciphertext = [[SignalCiphertext alloc] initWithData:decoded type:messagetype];
                         NSError *error;
@@ -1772,14 +1767,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         
                         if(key){
                             NSData *iv = [EncodingTools dataWithBase64EncodedString:messageNode.iv];
-                            
-                         //   decrypted =[NSString stringWithCString:[messageData bytes] encoding:NSUTF8StringEncoding];
-                            //use key to get message
-                          
-                    
                             NSData *decodedPayload = [EncodingTools dataWithBase64EncodedString:messageNode.encryptedPayload];
                          
-                          
                             EVP_CIPHER_CTX *ctx =EVP_CIPHER_CTX_new();
                             int outlen, rv;
                             unsigned char outbuf[decodedPayload.length];

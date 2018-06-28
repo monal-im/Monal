@@ -2705,8 +2705,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         NSArray *devices = [self.monalSignalStore allDeviceIdsForAddressName:contact];
         if(devices.count>0 ){
         
-            NSData *messageBytes=[[NSData alloc] initWithBytes:[message cStringUsingEncoding:NSUTF8StringEncoding]
-                                                        length: sizeof([message cStringUsingEncoding:NSUTF8StringEncoding])];
+            NSData *messageBytes=[message dataUsingEncoding:NSUTF8StringEncoding];
             //aes encrypt message
             
             EVP_CIPHER_CTX *ctx =EVP_CIPHER_CTX_new();

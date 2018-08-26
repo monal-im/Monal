@@ -42,6 +42,8 @@
 @property (nonatomic, strong) NSData *tmpPreviewImageData;
 
 @property (nonatomic, strong) DBRestClient *restClient;
+@property (nonatomic, assign) BOOL encryptChat;
+
 
 @end
 
@@ -488,6 +490,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         });
         
     }];
+}
+
+#pragma mark - encryption
+-(IBAction)toggleEncryption:(id)sender
+{
+    self.encryptChat=YES;
 }
 
 #pragma mark - sending

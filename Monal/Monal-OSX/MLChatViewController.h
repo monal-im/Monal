@@ -24,10 +24,13 @@
 @property (nonatomic, strong, readonly) NSString *contactName;
 @property (nonatomic, weak) IBOutlet NSLayoutConstraint *inputContainerHeight;
 
+@property (nonatomic, assign, readonly) BOOL encryptChat;
+
 -(IBAction)sendText:(id)sender;
 -(IBAction)emojiPicker:(id)sender;
 -(IBAction)attach:(id)sender;
 -(IBAction)showImagePreview:(id)sender;
+-(IBAction)toggleEncryption:(id)sender;
 
 -(IBAction)deliveryFailedMessage:(id)sender;
 

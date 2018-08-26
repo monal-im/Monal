@@ -374,7 +374,15 @@
         return;
     }
 
-   
+    if([elementName isEqualToString:@"count"] && [State isEqualToString:@"MAMSet"])
+    {
+        NSString* count=[_messageBuffer copy];
+        if([count integerValue]<1)
+        {
+            _mam2fin=YES;
+        }
+        return;
+    }
 }
 
 

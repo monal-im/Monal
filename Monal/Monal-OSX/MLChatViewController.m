@@ -606,7 +606,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     DDLogVerbose(@"Sending message %@", messageText);
     NSString *newMessageID =[[NSUUID UUID] UUIDString];
     [self.progressIndicator incrementBy:25];
-    [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:self.contactName fromAccount:self.accountNo isMUC:self.isMUC messageId:newMessageID
+    [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:self.contactName fromAccount:self.accountNo isEncrypted:self.encryptChat isMUC:self.isMUC messageId:newMessageID
      withCompletionHandler:^(BOOL success, NSString *messageId) {
          if(success)
          {

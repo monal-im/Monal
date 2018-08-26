@@ -431,7 +431,7 @@ An array of Dics what have timers to make sure everything was sent
 
 
 #pragma mark -  XMPP commands
--(void)sendMessage:(NSString*) message toContact:(NSString*)contact fromAccount:(NSString*) accountNo isMUC:(BOOL) isMUC messageId:(NSString *) messageId 
+-(void)sendMessage:(NSString*) message toContact:(NSString*)contact fromAccount:(NSString*) accountNo isEncrypted:(BOOL) encrypted isMUC:(BOOL) isMUC messageId:(NSString *) messageId
 withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 {
     dispatch_async(_netQueue,
@@ -480,7 +480,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
                        {
                            success=YES;
                          
-                           [account sendMessage:message toContact:contact isMUC:isMUC andMessageId:messageId];
+                           [account sendMessage:message toContact:contact isMUC:isMUC isEncrypted:encrypted andMessageId:messageId];
                        }
                        
                        if(completion)

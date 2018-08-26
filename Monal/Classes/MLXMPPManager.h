@@ -151,7 +151,8 @@ Returns the server set name of the conencted account
 /**
 Sends a message to a specified contact in account. Calls completion handler on success or failure.
  */
--(void)sendMessage:(NSString*) message toContact:(NSString*)contact fromAccount:(NSString*) accountNo isMUC:(BOOL) isMUC messageId:(NSString *) messageId withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion;
+-(void)sendMessage:(NSString*) message toContact:(NSString*)contact fromAccount:(NSString*) accountNo isEncrypted:(BOOL) encrypted isMUC:(BOOL) isMUC messageId:(NSString *) messageId
+withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion;
 
 
 /**

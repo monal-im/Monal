@@ -2694,14 +2694,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 #pragma mark messaging
 
--(void) sendMessage:(NSString*) message toContact:(NSString*) contact isMUC:(BOOL) isMUC andMessageId:(NSString *) messageId
+-(void) sendMessage:(NSString*) message toContact:(NSString*) contact isMUC:(BOOL) isMUC isEncrypted:(BOOL) encrypt andMessageId:(NSString *) messageId
 {
     
     XMPPMessage* messageNode =[[XMPPMessage alloc] init];
     [messageNode.attributes setObject:contact forKey:@"to"];
     [messageNode setXmppId:messageId ];
     
-    if(self.signalContext && !isMUC) {
+    if(self.signalContext && !isMUC && encrypt) {
         
         NSArray *devices = [self.monalSignalStore allDeviceIdsForAddressName:contact];
         if(devices.count>0 ){

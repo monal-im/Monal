@@ -8,7 +8,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import <XCTest/XCTest.h>
-#import "signal_protocol.h"
+#include "signal_protocol.h"
 
 @interface Monal_OSXTests : XCTestCase
 

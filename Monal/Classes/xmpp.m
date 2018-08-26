@@ -1437,7 +1437,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                                                              signedPreKeyPublic:[EncodingTools dataWithBase64EncodedString:iqNode.signedPreKeyPublic]
                                                                                                       signature:[EncodingTools dataWithBase64EncodedString:iqNode.signedPreKeySignature]
                                                                                                     identityKey:[EncodingTools dataWithBase64EncodedString:iqNode.identityKey]
-                                                                                                          error:nil];
+                                                                                                          ];
+                             
                                 [builder processPreKeyBundle:bundle error:nil];
                             }];
                             

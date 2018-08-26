@@ -16,9 +16,9 @@ PODS:
   - SDWebImage (4.3.3):
     - SDWebImage/Core (= 4.3.3)
   - SDWebImage/Core (4.3.3)
-  - SignalProtocolC (2.3.2)
-  - SignalProtocolObjC (1.1.0):
-    - SignalProtocolC (~> 2.3.2)
+  - SignalProtocolC (2.3.1)
+  - SignalProtocolObjC (1.0.0):
+    - SignalProtocolC (~> 2.3.1)
   - Sparkle (1.19.0)
   - TPCircularBuffer (1.6.1)
 
@@ -54,8 +54,8 @@ SPEC CHECKSUMS:
   OpenSSL-Universal: 401888162f11c33ebbd46f782d9229da35c61327
   SAMKeychain: 483e1c9f32984d50ca961e26818a534283b4cd5c
   SDWebImage: de4d90b5bff3571eae7bd16202b1f43135409fa5
-  SignalProtocolC: 051512e9f3abfeb4120c5e9673af9ae0ee370070
-  SignalProtocolObjC: b992ed29c3b7b453510ff0102ed16ef143f7efd2
+  SignalProtocolC: e61c89693515347df8ed97961160a36cbe55c441
+  SignalProtocolObjC: f5f0c7dcbedf21490b7ec190b6dc5103910acb75
   Sparkle: 8486d2493599665e466b5076e72b28849776e32f
   TPCircularBuffer: c13243556527551c4d320709c7b14a6d20cdc30a
 

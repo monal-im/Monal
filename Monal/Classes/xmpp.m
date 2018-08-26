@@ -2316,6 +2316,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     #endif
                     
                     [self sendInitalPresence];
+                    [self setupSignal];
                     
 //                    __block BOOL queryInfo=YES;
 //
@@ -3060,6 +3061,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self send:roster];
 }
 
+
 -(void) initSession
 {
     //now we are bound
@@ -3076,28 +3078,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self fetchRoster];
     [self sendInitalPresence];
     
-    self.monalSignalStore = [[MLSignalStore alloc] initWithAccountId:_accountNo];
-    
-    //signal store
-    SignalStorage *signalStorage = [[SignalStorage alloc] initWithSignalStore:self.monalSignalStore];
-    //signal context
-    self.signalContext= [[SignalContext alloc] initWithStorage:signalStorage];
-    //signal helper
-    SignalKeyHelper *signalHelper = [[SignalKeyHelper alloc] initWithContext:self.signalContext];
-
-    if(self.monalSignalStore.deviceid==0)
-    {
-        self.monalSignalStore.deviceid=[signalHelper generateRegistrationId];
-        
-        self.monalSignalStore.identityKeyPair= [signalHelper generateIdentityKeyPair];
-        self.monalSignalStore.signedPreKey= [signalHelper generateSignedPreKeyWithIdentity:self.monalSignalStore.identityKeyPair signedPreKeyId:1];
-        self.monalSignalStore.preKeys= [signalHelper generatePreKeysWithStartingPreKeyId:0 count:20];
-        
-        [self.monalSignalStore saveValues];
-    }
-    
-    [self sendOMEMODevice];
-    [self sendOMEMOBundle];
+    [self setupSignal];
     
 if(!self.supportsSM3)
     {
@@ -3176,6 +3157,32 @@ if(!self.supportsSM3)
 
 
 #pragma mark OMEMO
+
+-(void) setupSignal
+{
+    self.monalSignalStore = [[MLSignalStore alloc] initWithAccountId:_accountNo];
+    
+    //signal store
+    SignalStorage *signalStorage = [[SignalStorage alloc] initWithSignalStore:self.monalSignalStore];
+    //signal context
+    self.signalContext= [[SignalContext alloc] initWithStorage:signalStorage];
+    //signal helper
+    SignalKeyHelper *signalHelper = [[SignalKeyHelper alloc] initWithContext:self.signalContext];
+    
+    if(self.monalSignalStore.deviceid==0)
+    {
+        self.monalSignalStore.deviceid=[signalHelper generateRegistrationId];
+        
+        self.monalSignalStore.identityKeyPair= [signalHelper generateIdentityKeyPair];
+        self.monalSignalStore.signedPreKey= [signalHelper generateSignedPreKeyWithIdentity:self.monalSignalStore.identityKeyPair signedPreKeyId:1];
+        self.monalSignalStore.preKeys= [signalHelper generatePreKeysWithStartingPreKeyId:0 count:20];
+        
+        [self.monalSignalStore saveValues];
+    }
+    
+    [self sendOMEMODevice];
+    [self sendOMEMOBundle];
+}
 
 -(void) sendOMEMODevice {
     NSString *deviceid=[NSString stringWithFormat:@"%d",self.monalSignalStore.deviceid];

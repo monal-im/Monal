@@ -170,6 +170,8 @@
 		2638DAE71B68F3AB00DF05AC /* MLPresenceSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = 2638DAE61B68F3AB00DF05AC /* MLPresenceSettings.m */; };
 		2638DAEB1B68F3D400DF05AC /* MLAccountSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = 2638DAE91B68F3D400DF05AC /* MLAccountSettings.m */; };
 		2638DAEF1B68F3EF00DF05AC /* MLDisplaySettings.m in Sources */ = {isa = PBXBuildFile; fileRef = 2638DAEE1B68F3EF00DF05AC /* MLDisplaySettings.m */; };
+		263AFDFC209B3B35007F9CEE /* MLSignalStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 263AFDFB209B3B35007F9CEE /* MLSignalStore.m */; };
+		263AFDFD209B3B35007F9CEE /* MLSignalStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 263AFDFB209B3B35007F9CEE /* MLSignalStore.m */; };
 		263F127A177F867B0025B235 /* ParseStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 263F1279177F867B0025B235 /* ParseStream.m */; };
 		263F568D121B5E970027D85D /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 263F568C121B5E970027D85D /* MediaPlayer.framework */; };
 		26400712140B43BB00CF1107 /* rtcpapppacket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006BB140B43BB00CF1107 /* rtcpapppacket.cpp */; };
@@ -541,6 +543,8 @@
 		2638DAE91B68F3D400DF05AC /* MLAccountSettings.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLAccountSettings.m; sourceTree = "<group>"; };
 		2638DAED1B68F3EF00DF05AC /* MLDisplaySettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLDisplaySettings.h; sourceTree = "<group>"; };
 		2638DAEE1B68F3EF00DF05AC /* MLDisplaySettings.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLDisplaySettings.m; sourceTree = "<group>"; };
+		263AFDFA209B3B35007F9CEE /* MLSignalStore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLSignalStore.h; sourceTree = "<group>"; };
+		263AFDFB209B3B35007F9CEE /* MLSignalStore.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLSignalStore.m; sourceTree = "<group>"; };
 		263F1278177F867B0025B235 /* ParseStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParseStream.h; sourceTree = "<group>"; };
 		263F1279177F867B0025B235 /* ParseStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParseStream.m; sourceTree = "<group>"; };
 		263F568C121B5E970027D85D /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
@@ -960,6 +964,8 @@
 				268821F919B9233B00AEA46E /* NSString+SqlLite.m */,
 				26EC411117BDE39E0031304D /* MLImageManager.h */,
 				26EC411217BDE39E0031304D /* MLImageManager.m */,
+				263AFDFA209B3B35007F9CEE /* MLSignalStore.h */,
+				263AFDFB209B3B35007F9CEE /* MLSignalStore.m */,
 			);
 			name = Shared;
 			path = Classes;
@@ -2085,7 +2091,8 @@
 					};
 					266272C51B27DB8100C1CD49 = {
 						CreatedOnToolsVersion = 6.3.1;
-						TestTargetID = 266272B01B27DB8000C1CD49;
+						DevelopmentTeam = 33XS7DE5NZ;
+						ProvisioningStyle = Automatic;
 					};
 				};
 			};
@@ -2606,6 +2613,7 @@
 				26352EA8177D222600E2C8FF /* MLXMPPManager.m in Sources */,
 				26E3ED871FEC0CB7008ABDA5 /* MLServerDetails.m in Sources */,
 				260C51D1177F08F50039634B /* xmpp.m in Sources */,
+				263AFDFC209B3B35007F9CEE /* MLSignalStore.m in Sources */,
 				260C51D4177F44AD0039634B /* MLXMLNode.m in Sources */,
 				26C3EE001A819A38000E6331 /* ParseResumed.m in Sources */,
 				263F127A177F867B0025B235 /* ParseStream.m in Sources */,
@@ -2769,6 +2777,7 @@
 				260499F11B73141500D11866 /* EncodingTools.m in Sources */,
 				26D51CCF1E2674D700141E04 /* NSURL+NXOAuth2.m in Sources */,
 				267710251E21923600464002 /* MASPreferencesWindowController.m in Sources */,
+				263AFDFD209B3B35007F9CEE /* MLSignalStore.m in Sources */,
 				260499E61B730E9E00D11866 /* XMPPMessage.m in Sources */,
 				260283871D8DEFC1001DD6B8 /* MLPreviewObject.m in Sources */,
 				26A6EE73208CC321005992E4 /* MLMAMPref.m in Sources */,
@@ -3310,15 +3319,17 @@
 			baseConfigurationReference = AEE82B918E1D2978170F5151 /* Pods-Monal-OSXTests.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 33XS7DE5NZ;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(DEVELOPER_FRAMEWORKS_DIR)",
 					"$(inherited)",
@@ -3340,8 +3351,8 @@
 				MTL_ENABLE_DEBUG_INFO = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Monal-OSX.app/Contents/MacOS/Monal-OSX";
 			};
 			name = Debug;
 		};
@@ -3350,7 +3361,6 @@
 			baseConfigurationReference = 3EDC0EB6935929A159956EB5 /* Pods-Monal-OSXTests.adhoc.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
@@ -3364,9 +3374,12 @@
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 33XS7DE5NZ;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -3387,8 +3400,8 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Monal-OSX.app/Contents/MacOS/Monal-OSX";
 			};
 			name = Adhoc;
 		};
@@ -3397,7 +3410,6 @@
 			baseConfigurationReference = 8A54C0030602B177997D366B /* Pods-Monal-OSXTests.appstore.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
@@ -3411,9 +3423,12 @@
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 33XS7DE5NZ;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -3434,8 +3449,8 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Monal-OSX.app/Contents/MacOS/Monal-OSX";
 			};
 			name = AppStore;
 		};

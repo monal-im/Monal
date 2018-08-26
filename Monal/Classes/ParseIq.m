@@ -7,6 +7,14 @@
 //
 
 #import "ParseIq.h"
+#import "SignalPreKey.h"
+
+@interface ParseIq()
+
+@property (nonatomic, strong) NSMutableArray* omemoDevices;
+@property (nonatomic, strong) NSMutableDictionary *currentPreKey;
+
+@end
 
 @implementation ParseIq
 
@@ -195,6 +203,58 @@
         [_jingleTransportCandidates addObject:attributeDict];
         return;
     }
+    
+    //OMEMO
+    
+    if( [elementName isEqualToString:@"item"] )
+    {
+        NSString *node = (NSString *) [attributeDict objectForKey:@"node"];
+        if([node hasPrefix:@"eu.siacs.conversations.axolotl.bundles:"])
+        {
+            NSArray *parts = [node componentsSeparatedByString:@":"];
+            if(parts.count>1)
+            {
+                _deviceid= parts[0];
+            }
+        }
+        
+    }
+    
+    if([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"eu.siacs.conversations.axolotl"]) {
+        if([elementName isEqualToString:@"bundle"])
+        {
+            State=@"Bundle";
+            _preKeys =[[NSMutableArray alloc] init];
+            return;
+        }
+        
+        if([elementName isEqualToString:@"list"] )
+        {
+            State=@"DeviceList";
+            self.omemoDevices = [[NSMutableArray alloc] init];
+            return;
+        }
+    }
+    
+    if([State isEqualToString:@"DeviceList"] && [elementName isEqualToString:@"device"] )
+    {
+        [self.omemoDevices addObject:[attributeDict objectForKey:@"id"]];
+    }
+    
+    
+    if([State isEqualToString:@"Bundle"] && [elementName isEqualToString:@"preKeyPublic"] )
+    {
+        self.currentPreKey =[[NSMutableDictionary alloc] init];
+        [self.currentPreKey setObject:[attributeDict objectForKey:@"preKeyId"] forKey:@"preKeyId"];
+    }
+    
+    
+    if([elementName isEqualToString:@"signedPreKeyPublic"] &&  [State isEqualToString:@"Bundle"])
+    {
+        _signedPreKeyId = [attributeDict objectForKey:@"signedPreKeyId"];
+    }
+    
+    
 }
 
 
@@ -272,11 +332,48 @@
         return;
     }
     
+
+    
+    if([elementName isEqualToString:@"signedPreKeyPublic"] &&  [State isEqualToString:@"Bundle"])
+    {
+       _signedPreKeyPublic= [_messageBuffer copy];
+        _messageBuffer=nil;
+        return;
+    }
+    
+    if([elementName isEqualToString:@"signedPreKeySignature"] &&  [State isEqualToString:@"Bundle"])
+    {
+        _signedPreKeySignature= [_messageBuffer copy];
+        _messageBuffer=nil;
+        return;
+    }
+    
+    
+    if([elementName isEqualToString:@"identityKey"] &&  [State isEqualToString:@"Bundle"])
+    {
+        _identityKey= [_messageBuffer copy];
+        _messageBuffer=nil;
+        return;
+    }
+    
+    
+    
+    
+    if([elementName isEqualToString:@"preKeyPublic"] &&  [State isEqualToString:@"Bundle"])
+    {
+        [self.currentPreKey setObject:[_messageBuffer copy]  forKey:@"preKey"];
+        [self.preKeys addObject:self.currentPreKey];
+        _messageBuffer=nil;
+        return;
+    }
+ 
+
     if([elementName isEqualToString:@"last"] && [State isEqualToString:@"MAMSet"])
     {
         _mam2Last=[_messageBuffer copy];
         return;
     }
+
    
 }
 

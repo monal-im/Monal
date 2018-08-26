@@ -7,6 +7,12 @@
 //
 
 #import "ParseMessage.h"
+#import "MLSignalStore.h"
+
+@interface ParseMessage()
+@property (nonatomic, strong) NSMutableDictionary *currentKey; 
+
+@end
 
 @implementation ParseMessage
 
@@ -177,7 +183,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		
 		return;
 	}
-    
+
     
     if([elementName isEqualToString:@"request"]  && [[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:receipts"] )
     {
@@ -191,6 +197,48 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         return;
     }
     
+    
+    
+    if(([elementName isEqualToString:@"encryption"]) )
+    {
+        State=@"Encryption"; //TODO figure out the poing of this
+        
+        return;
+    }
+    
+    
+    if(([elementName isEqualToString:@"encrypted"])
+       && [[attributeDict objectForKey:@"xmlns"] isEqualToString:@"eu.siacs.conversations.axolotl"]  )
+    {
+        State=@"OMEMO";
+        return;
+    }
+    
+    
+    if([State isEqualToString:@"OMEMO"] && [elementName isEqualToString:@"header"] )
+    {
+        _sid=[attributeDict objectForKey:@"sid"];
+        _signalKeys =[[NSMutableArray alloc] init];
+        
+    }
+    
+    
+    //store in array
+    if([State isEqualToString:@"OMEMO"] && [elementName isEqualToString:@"key"]) {
+        
+        self.currentKey =[[NSMutableDictionary alloc] init];
+        [self.currentKey setObject:[attributeDict objectForKey:@"rid"] forKey:@"rid"];
+        
+        if([[attributeDict objectForKey:@"prekey"] isEqualToString:@"1"]
+           || [[attributeDict objectForKey:@"prekey"] isEqualToString:@"true"])
+        {
+            [self.currentKey setObject:@"1" forKey:@"prekey"];
+        } else  {
+       [self.currentKey setObject:@"0" forKey:@"prekey"];
+            
+        }
+       
+    }
 }
 
 
@@ -228,7 +276,24 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
       _subject=_messageBuffer;
         _messageBuffer=nil; // specifically so the body doesnt get set 
     }
+    if([State isEqualToString:@"OMEMO"] && [elementName isEqualToString:@"iv"])
+    {
+        _iv=_messageBuffer;
+        _messageBuffer=nil;
+    }
     
+    if([State isEqualToString:@"OMEMO"] && [elementName isEqualToString:@"payload"])
+    {
+        _encryptedPayload=_messageBuffer;
+        _messageBuffer=nil;
+    }
+
+    if([State isEqualToString:@"OMEMO"] && [elementName isEqualToString:@"key"])
+    {
+        [self.currentKey setObject:[_messageBuffer copy] forKey:@"key"];
+        [self.signalKeys addObject:self.currentKey];
+        _messageBuffer=nil;
+    }
 }
 
 @end

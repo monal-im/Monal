@@ -1,0 +1,1 @@
+../../../SignalProtocolC/src/device_consistency.h

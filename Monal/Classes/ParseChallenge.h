@@ -11,5 +11,6 @@
 @interface ParseChallenge : XMPPParser
 
 @property (nonatomic, assign) BOOL saslChallenge;
-@property (nonatomic, strong,readonly) NSString* challengeText;
+@property (nonatomic, strong, readonly) NSString* challengeText;
+
 @end 

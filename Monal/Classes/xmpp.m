@@ -13,6 +13,7 @@
 #import "EncodingTools.h"
 #import "MLXMPPManager.h"
 
+#import "MLSignalStore.h"
 
 
 #if TARGET_OS_IPHONE
@@ -44,6 +45,10 @@
 #import "NXOAuth2.h"
 #import "MLHTTPRequest.h"
 
+#import "SignalProtocolObjC.h"
+
+#include <openssl/evp.h>
+#include <openssl/rand.h>
 
 @import Darwin.POSIX.sys.time; 
 
@@ -141,6 +146,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 @property (nonatomic, strong) NXOAuth2Account *oauthAccount;
 
+@property (nonatomic, strong) SignalContext *signalContext;
+@property (nonatomic, strong) MLSignalStore *monalSignalStore;
+
+
 @end
 
 
@@ -202,6 +211,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         self.visibleState=YES;
     }
     
+
     return self;
 }
 
@@ -1397,6 +1407,42 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             
                         }
                         
+                        //OMEMO
+                        
+                        if(iqNode.omemoDevices)
+                        {
+                            [iqNode.omemoDevices enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                                NSString *device  =(NSString *)obj;
+                                [self queryOMEMOBundleFrom:iqNode.from andDevice:device];
+                            }];
+                            
+                        }
+                        
+                        if(iqNode.signedPreKeyPublic && self.signalContext)
+                        {
+                            SignalAddress *address = [[SignalAddress alloc] initWithName:iqNode.from deviceId:0];
+                            SignalSessionBuilder *builder = [[SignalSessionBuilder alloc] initWithAddress:address context:self.signalContext];
+                            NSError *error;
+                            
+                            [iqNode.preKeys enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                                
+                                NSDictionary *row = (NSDictionary *) obj;
+                                NSString *keyid = (NSString *)[row objectForKey:@"preKeyId"];
+                                
+                                SignalPreKeyBundle *bundle = [[SignalPreKeyBundle alloc] initWithRegistrationId:0
+                                                                                                       deviceId:(uint32_t)[iqNode.deviceid intValue]
+                                                                                                       preKeyId:[keyid integerValue]
+                                                                                                   preKeyPublic:[EncodingTools dataWithBase64EncodedString:[row objectForKey:@"preKey"]]
+                                                                                                 signedPreKeyId:iqNode.signedPreKeyId.integerValue
+                                                                                             signedPreKeyPublic:[EncodingTools dataWithBase64EncodedString:iqNode.signedPreKeyPublic]
+                                                                                                      signature:[EncodingTools dataWithBase64EncodedString:iqNode.signedPreKeySignature]
+                                                                                                    identityKey:[EncodingTools dataWithBase64EncodedString:iqNode.identityKey]
+                                                                                                          error:nil];
+                                [builder processPreKeyBundle:bundle error:nil];
+                            }];
+                            
+                        }
+                        
                         
                         if([iqNode.idval isEqualToString:@"enableCarbons"])
                         {
@@ -1454,10 +1500,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                     
                                 }
                             }
-                        
+                         
                             // iterate roster and get cards
                             [self getVcards];
-                            
                         }
                         
                         //confirmation of set call after we accepted
@@ -1670,8 +1715,92 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         [[DataLayer sharedInstance] updateMucSubject:messageNode.subject forAccount:self.accountNo andRoom:messageNode.from withCompletion:nil];
                      
                     }
+                    NSString *decrypted;
                     
-                    if(messageNode.hasBody || messageNode.subject)
+                    if(messageNode.encryptedPayload)
+                    {
+                        SignalAddress *address = [[SignalAddress alloc] initWithName:messageNode.from deviceId:messageNode.sid.integerValue];
+                        if(!self.signalContext) return; 
+                    
+                        
+                        __block NSDictionary *messageKey;
+                        [messageNode.signalKeys enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                            NSDictionary *currentKey = (NSDictionary *) obj;
+                            NSString* rid=[currentKey objectForKey:@"rid"];
+                            if(rid.integerValue==self.monalSignalStore.deviceid)
+                            {
+                                messageKey=currentKey;
+                                *stop=YES;
+                            }
+                            
+                        }];
+                        
+                        if(!messageKey) return;
+                        
+                        SignalSessionCipher *cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self.signalContext];
+                        SignalCiphertextType messagetype;
+                        
+                        if([[messageKey objectForKey:@"prekey"] isEqualToString:@"1"])
+                        {
+                            messagetype=SignalCiphertextTypePreKeyMessage;
+                        } else  {
+                            messagetype= SignalCiphertextTypeMessage;
+                        }
+                        
+                        NSData *decoded= [EncodingTools dataWithBase64EncodedString:[messageKey objectForKey:@"key"]];
+                        
+                        SignalCiphertext *ciphertext = [[SignalCiphertext alloc] initWithData:decoded type:messagetype];
+                        NSError *error;
+                        NSData *decryptedKey=  [cipher decryptCiphertext:ciphertext error:&error];
+                        
+                        NSData *key;
+                        NSData *auth;
+                        
+                        if(decryptedKey.length==16*2)
+                        {
+                            key=[decryptedKey subdataWithRange:NSMakeRange(0,16)];
+                            auth=[decryptedKey subdataWithRange:NSMakeRange(16,16)];
+                        }
+                        else {
+                            key=decryptedKey;
+                        }
+                        
+                        if(key){
+                            NSData *iv = [EncodingTools dataWithBase64EncodedString:messageNode.iv];
+                            NSData *decodedPayload = [EncodingTools dataWithBase64EncodedString:messageNode.encryptedPayload];
+                         
+                            EVP_CIPHER_CTX *ctx =EVP_CIPHER_CTX_new();
+                            int outlen, rv;
+                            unsigned char outbuf[decodedPayload.length];
+                     
+                            /* Select cipher */
+                            EVP_DecryptInit_ex(ctx, EVP_aes_128_gcm(), NULL, NULL, NULL);
+                            /* Set IV length, omit for 96 bits */
+                            EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_IVLEN, iv.length, NULL);
+                            /* Specify key and IV */
+                            EVP_DecryptInit_ex(ctx, NULL, NULL, key.bytes, iv.bytes);
+                            EVP_CIPHER_CTX_set_padding(ctx,1);
+                            /* Decrypt plaintext */
+                            EVP_DecryptUpdate(ctx, outbuf, &outlen, decodedPayload.bytes, decodedPayload.length);
+                            /* Output decrypted block */
+                           
+                          if(auth) {
+                            /* Set expected tag value. */
+                            EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_TAG, auth.length, auth.bytes);
+                          }
+                            /* Finalise: note get no output for GCM */
+                            rv = EVP_DecryptFinal_ex(ctx, outbuf, &outlen);
+                            
+                            NSData *decdata = [[NSData alloc] initWithBytes:outbuf length:decodedPayload.length];
+                            decrypted= [NSString stringWithCString:decdata.bytes encoding:NSUTF8StringEncoding];
+                            
+                            EVP_CIPHER_CTX_free(ctx);
+                                
+                        }
+                        
+                    }
+                    
+                    if(messageNode.hasBody || messageNode.subject||decrypted)
                     {
                         NSString *ownNick;
                         //TODO if muc find own nick to see if echo
@@ -1697,6 +1826,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             }
                             
                             NSString *body=messageNode.messageText;
+                            if(decrypted) body=decrypted;
+                            
                             NSString *messageType=nil;
                             if(!body  && messageNode.subject)
                             {
@@ -1786,6 +1917,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         
                     }
                   
+                    
                     
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"]  isEqualToString:@"presence"])
@@ -2563,10 +2695,108 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) sendMessage:(NSString*) message toContact:(NSString*) contact isMUC:(BOOL) isMUC andMessageId:(NSString *) messageId
 {
+    
     XMPPMessage* messageNode =[[XMPPMessage alloc] init];
     [messageNode.attributes setObject:contact forKey:@"to"];
-    [messageNode setBody:message];
     [messageNode setXmppId:messageId ];
+    
+    if(self.signalContext && !isMUC) {
+        
+        NSArray *devices = [self.monalSignalStore allDeviceIdsForAddressName:contact];
+        if(devices.count>0 ){
+        
+            NSData *messageBytes=[message dataUsingEncoding:NSUTF8StringEncoding];
+            //aes encrypt message
+            
+            EVP_CIPHER_CTX *ctx =EVP_CIPHER_CTX_new();
+            int outlen;
+            unsigned char outbuf[messageBytes.length];
+            unsigned char tag[16];
+            
+            //genreate key and iv
+            
+            unsigned char key[16];
+            RAND_bytes(key, sizeof(key));
+            
+            unsigned char iv[16];
+            RAND_bytes(iv, sizeof(iv));
+            
+            NSData *gcmKey = [[NSData alloc] initWithBytes:key length:16];
+            
+            NSData *gcmiv= [[NSData alloc] initWithBytes:iv length:16];
+        ;
+            
+            NSMutableData *encryptedMessage;
+            
+           
+            ctx = EVP_CIPHER_CTX_new();
+            /* Set cipher type and mode */
+            EVP_EncryptInit_ex(ctx, EVP_aes_128_gcm(), NULL, NULL, NULL);
+            /* Set IV length if default 96 bits is not approp riate */
+            EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_IVLEN, gcmiv.length, NULL);
+            /* Initialise key and IV */
+            EVP_EncryptInit_ex(ctx, NULL, NULL, gcmKey.bytes, gcmiv.bytes);
+            EVP_CIPHER_CTX_set_padding(ctx,1);
+            /* Encrypt plaintext */
+            EVP_EncryptUpdate(ctx, outbuf, &outlen,messageBytes.bytes,messageBytes.length);
+           
+            encryptedMessage = [NSMutableData dataWithBytes:outbuf length:outlen];
+            
+            /* Finalise: note get no output for GCM */
+            EVP_EncryptFinal_ex(ctx, outbuf, &outlen);
+            
+           
+            /* Get tag */
+            EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_GET_TAG, 16, tag);
+            [encryptedMessage appendBytes:tag length:16];
+            
+            EVP_CIPHER_CTX_free(ctx);
+           
+            
+            MLXMLNode *encrypted =[[MLXMLNode alloc] initWithElement:@"encrypted"];
+            [encrypted.attributes setObject:@"eu.siacs.conversations.axolotl" forKey:@"xmlns"];
+            [messageNode.children addObject:encrypted];
+            
+            MLXMLNode *payload =[[MLXMLNode alloc] initWithElement:@"payload"];
+            [payload setData:[EncodingTools encodeBase64WithData:encryptedMessage]];
+            [encrypted.children addObject:payload];
+            
+            
+            NSString *deviceid=[NSString stringWithFormat:@"%d",self.monalSignalStore.deviceid];
+            MLXMLNode *header =[[MLXMLNode alloc] initWithElement:@"header"];
+            [header.attributes setObject:deviceid forKey:@"sid"];
+            [encrypted.children addObject:header];
+            
+            MLXMLNode *ivNode =[[MLXMLNode alloc] initWithElement:@"iv"];
+            [ivNode setData:[EncodingTools encodeBase64WithData:gcmiv]];
+            [header.children addObject:ivNode];
+            
+            
+            [devices enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                 NSNumber *device = (NSNumber *)obj;
+                SignalAddress *address = [[SignalAddress alloc] initWithName:contact deviceId:device.integerValue];
+                SignalSessionCipher *cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self.signalContext];
+                NSError *error;
+                SignalCiphertext* deviceEncryptedKey=[cipher encryptData:gcmKey error:&error];
+                
+                MLXMLNode *keyNode =[[MLXMLNode alloc] initWithElement:@"key"];
+                 [keyNode.attributes setObject:[NSString stringWithFormat:@"%@",device] forKey:@"rid"];
+                if(deviceEncryptedKey.type==SignalCiphertextTypePreKeyMessage)
+                {
+                     [keyNode.attributes setObject:@"1" forKey:@"prekey"];
+                }
+                
+                [keyNode setData:[EncodingTools encodeBase64WithData:deviceEncryptedKey.data]];
+                [header.children addObject:keyNode];
+                
+            }];
+            
+            
+        }
+    }
+    else  {
+        [messageNode setBody:message];
+    }
     
     if(isMUC)
     {
@@ -2666,7 +2896,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [[NSUserDefaults standardUserDefaults] setObject:[NSKeyedArchiver archivedDataWithRootObject:values] forKey:[NSString stringWithFormat:@"stream_state_v1_%@",self.accountNo]];
     
     //debug output
-    DDLogInfo(@"+++++++++++++++++++ persistState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%d%s,\n\tstreamID=%@\n\t#rosterList=%d",
+    DDLogVerbose(@"+++++++++++++++++++ persistState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%d%s,\n\tstreamID=%@\n\t#rosterList=%d",
               self.lastHandledInboundStanza,
               self.lastHandledOutboundStanza,
               self.lastOutboundStanza,
@@ -2676,11 +2906,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
               self.rosterList ? [self.rosterList count] : 0
               );
     
-    if(self.unAckedStanzas) {
-        for(NSDictionary *dic in self.unAckedStanzas) {
-            DDLogDebug(@"+++++++++++++++++++ persistState unAckedStanza %@: %@", [dic objectForKey:kStanzaID], ((MLXMLNode*)[dic objectForKey:kStanza]).XMLString);
-        }
-    }
+//    if(self.unAckedStanzas) {
+//        for(NSDictionary *dic in self.unAckedStanzas) {
+//            DDLogVerbose(@"+++++++++++++++++++ persistState unAckedStanza %@: %@", [dic objectForKey:kStanzaID], ((MLXMLNode*)[dic objectForKey:kStanza]).XMLString);
+//        }
+//    }
 }
 
 -(void) readState
@@ -2845,7 +3075,30 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self fetchRoster];
     [self sendInitalPresence];
     
-    if(!self.supportsSM3)
+    self.monalSignalStore = [[MLSignalStore alloc] initWithAccountId:_accountNo];
+    
+    //signal store
+    SignalStorage *signalStorage = [[SignalStorage alloc] initWithSignalStore:self.monalSignalStore];
+    //signal context
+    self.signalContext= [[SignalContext alloc] initWithStorage:signalStorage];
+    //signal helper
+    SignalKeyHelper *signalHelper = [[SignalKeyHelper alloc] initWithContext:self.signalContext];
+
+    if(self.monalSignalStore.deviceid==0)
+    {
+        self.monalSignalStore.deviceid=[signalHelper generateRegistrationId];
+        
+        self.monalSignalStore.identityKeyPair= [signalHelper generateIdentityKeyPair];
+        self.monalSignalStore.signedPreKey= [signalHelper generateSignedPreKeyWithIdentity:self.monalSignalStore.identityKeyPair signedPreKeyId:1];
+        self.monalSignalStore.preKeys= [signalHelper generatePreKeysWithStartingPreKeyId:0 count:20];
+        
+        [self.monalSignalStore saveValues];
+    }
+    
+    [self sendOMEMODevice];
+    [self sendOMEMOBundle];
+    
+if(!self.supportsSM3)
     {
         //send out messages still in the queue, even if smacks is not supported this time
         [self sendUnAckedMessages];
@@ -2890,6 +3143,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     if(self.statusMessage) [node setStatus:self.statusMessage];
     [self send:node];
+    
+
+    
 }
 
 -(void) setVisible:(BOOL) visible
@@ -2917,6 +3173,41 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
 }
 
+
+#pragma mark OMEMO
+
+-(void) sendOMEMODevice {
+    NSString *deviceid=[NSString stringWithFormat:@"%d",self.monalSignalStore.deviceid];
+    XMPPIQ *signalDevice = [[XMPPIQ alloc] initWithType:kiqSetType];
+    [signalDevice publishDevice:deviceid];
+    [self send:signalDevice];
+}
+
+-(void) sendOMEMOBundle
+{
+    NSString *deviceid=[NSString stringWithFormat:@"%d",self.monalSignalStore.deviceid];
+    XMPPIQ *signalKeys = [[XMPPIQ alloc] initWithType:kiqSetType];
+    [signalKeys publishKeys:@{@"signedPreKeyPublic":self.monalSignalStore.signedPreKey.keyPair.publicKey, @"signedPreKeySignature":self.monalSignalStore.signedPreKey.signature, @"identityKey":self.monalSignalStore.identityKeyPair.publicKey, @"signedPreKeyId": [NSString stringWithFormat:@"%d",self.monalSignalStore.signedPreKey.preKeyId]} andPreKeys:self.monalSignalStore.preKeys withDeviceId:deviceid];
+    [signalKeys.attributes setValue:[NSString stringWithFormat:@"%@/%@",_fulluser, _resource ] forKey:@"from"];
+    [self send:signalKeys];
+}
+
+-(void) queryOMEMOBundleFrom:(NSString *) jid andDevice:(NSString *) deviceid
+{
+    XMPPIQ* query2 =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqGetType];
+    [query2 setiqTo:jid];
+    [query2 requestBundles:deviceid]; //[NSString stringWithFormat:@"%@", devicenum]
+    [self send:query2];
+}
+
+-(void) queryOMEMODevicesFrom:(NSString *) jid
+{
+    XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqGetType];
+    [query setiqTo:jid];
+    [query requestDevices];
+    [self send:query];
+
+}
 
 
 #pragma mark vcard

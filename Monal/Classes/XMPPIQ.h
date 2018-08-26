@@ -147,4 +147,26 @@ removes a contact from the roster
  */
 +(NSString *) featuresString;
 
+
+#pragma mark Signal
+/**
+ publishes a device.
+ TODO: use device array
+ */
+-(void) publishDevice:(NSString*) deviceid;
+
+/**
+ publishes signal keys and prekeys
+ */
+-(void) publishKeys:(NSDictionary *) keys andPreKeys:(NSArray *) prekeys withDeviceId:(NSString*) deviceid;
+
+
+#pragma mark - pubsub
+
+-(void) requestBundles:(NSString*) deviceid;
+-(void) requestDevices;
+
+
+-(void) requestNode:(NSString*) node;
+
 @end

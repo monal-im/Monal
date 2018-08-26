@@ -35,5 +35,11 @@
 @property (nonatomic, assign, readonly) BOOL mucInvite;
 @property (nonatomic, assign, readonly) BOOL mamResult;
 
+/** OMEMO */
+
+@property (nonatomic, strong, readonly) NSString* sid; // sender device id
+@property (nonatomic, strong, readonly) NSString* encryptedPayload;
+@property (nonatomic, strong, readonly) NSString* iv;
+@property (nonatomic, strong, readonly) NSMutableArray *signalKeys; 
 
 @end

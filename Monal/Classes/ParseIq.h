@@ -59,4 +59,13 @@
 @property (nonatomic, assign, readonly) BOOL mam2fin;
 @property (nonatomic, strong, readonly) NSString* mam2Last;
 
+//omemo
+@property (nonatomic, strong, readonly) NSMutableArray* preKeys; //Array with dic of signalprekey, key id
+@property (nonatomic, strong, readonly) NSString* signedPreKeyPublic;
+@property (nonatomic, strong, readonly) NSString* signedPreKeyId;
+@property (nonatomic, strong, readonly) NSString* signedPreKeySignature;
+@property (nonatomic, strong, readonly) NSString* identityKey;
+@property (nonatomic, strong, readonly) NSString* deviceid;
+@property (nonatomic, strong, readonly) NSMutableArray* omemoDevices; //array of device ids
+
 @end

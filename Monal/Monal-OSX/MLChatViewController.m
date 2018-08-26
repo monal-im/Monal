@@ -155,6 +155,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self refreshData];
     
     [self synchChat];
+    
+    xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
+    [xmppAccount queryOMEMODevicesFrom:self.contactName];
 }
 
 #pragma mark - MAM

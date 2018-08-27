@@ -23,6 +23,7 @@
 @property (nonatomic, weak) IBOutlet NSLayoutConstraint *timeStampVeritcalOffset;
 @property (nonatomic, weak) IBOutlet NSLayoutConstraint *nameHeight;
 @property (nonatomic, weak) IBOutlet NSImageView *senderIcon;
+@property (nonatomic, weak) IBOutlet NSImageView *lockImage;
 @property (nonatomic, weak) IBOutlet NSTextField *senderName;
 @property (nonatomic, weak) IBOutlet NSTextField *messageStatus;
 @property (nonatomic, weak) IBOutlet NSScrollView *scrollArea;

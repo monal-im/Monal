@@ -841,7 +841,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     else  {
         cell.deliveryFailed=NO;
     }
-  
+ 
     cell.messageStatus.accessibilityLabel=@"Delivered";
     NSNumber *received = [messageRow objectForKey:kReceived];
     if(received.boolValue==YES) {
@@ -858,6 +858,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     else  {
         cell.messageStatus.hidden=YES;
+    }
+    
+    if([[messageRow objectForKey:@"encrypted"] boolValue]!=YES)
+    {
+        cell.lockImage.hidden=NO;
+        cell.lockImage.accessibilityLabel=@"encrypted";
+    }
+    else  {
+        cell.lockImage.hidden=YES;
     }
     
     

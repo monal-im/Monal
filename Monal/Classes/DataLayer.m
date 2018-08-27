@@ -1761,7 +1761,7 @@ static DataLayer *sharedInstance=nil;
 -(NSMutableArray*) messageHistory:(NSString*) buddy forAccount:(NSString*) accountNo
 {
     if(!accountNo ||! buddy) return nil; 
-    NSString* query=[NSString stringWithFormat:@"select af,message_from,  message, thetime, message_history_id, delivered, messageid, messageType, received from (select ifnull(actual_from, message_from) as af, message_from,  message, received,    timestamp  as thetime, message_history_id, delivered,messageid, messageType from message_history where account_id=? and (message_from=? or message_to=?) order by message_history_id desc limit 100) order by thetime asc"];
+    NSString* query=[NSString stringWithFormat:@"select af,message_from,  message, thetime, message_history_id, delivered, messageid, messageType, received,encrypted from (select ifnull(actual_from, message_from) as af, message_from,  message, received, encrypted,   timestamp  as thetime, message_history_id, delivered,messageid, messageType from message_history where account_id=? and (message_from=? or message_to=?) order by message_history_id desc limit 100) order by thetime asc"];
     NSArray *params=@[accountNo, buddy, buddy];
     DDLogVerbose(@"%@", query);
     NSMutableArray* toReturn = [[self executeReader:query andArguments:params] mutableCopy];
@@ -2384,11 +2384,9 @@ static DataLayer *sharedInstance=nil;
         [self executeNonQuery:@"CREATE TABLE signalContactIdentity ( account_id int NOT NULL,contactName text,contactDeviceId int not null,identity BLOB,trusted boolean);" withCompletion:nil];
         
         [self executeNonQuery:@"CREATE TABLE signalContactKey (account_id int NOT NULL,contactName text,contactDeviceId int not null, groupId text,senderKey BLOB);" withCompletion:nil];
-        
-        
+       
         [self executeNonQuery:@"  CREATE TABLE signalContactSession (account_id int NOT NULL, contactName text, contactDeviceId int not null, recordData BLOB)" withCompletion:nil];
-      
-        
+        [self executeNonQuery:@"alter table message_history add column encrypted bool;" withCompletion:nil];
         [self executeNonQuery:@"update dbversion set dbversion='3.0'; " withCompletion:nil];
         
         DDLogVerbose(@"Upgrade to 3.0 success ");

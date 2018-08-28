@@ -511,7 +511,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         return;
     }
     
-    [[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:[NSString stringWithFormat:@"%@",self.accountNo] withMessage:message actuallyFrom:self.jid withId:messageId withCompletion:^(BOOL result, NSString *messageType) {
+    [[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:[NSString stringWithFormat:@"%@",self.accountNo] withMessage:message actuallyFrom:self.jid withId:messageId encrypted:self.encryptChat withCompletion:^(BOOL result, NSString *messageType) {
     if(result){
         DDLogVerbose(@"added message %@, %@ %@", message, messageId, [self currentGMTTime]);
         
@@ -520,7 +520,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                    @"thetime": [self currentGMTTime],
                                    kDelivered:@YES,
                                    @"messageid": messageId,
-                                   kMessageType: messageType
+                                   kMessageType: messageType,
+                                   @"encrypted":[NSNumber numberWithBool:self.encryptChat]
                                    };
         
         dispatch_async(dispatch_get_main_queue(),
@@ -860,7 +861,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         cell.messageStatus.hidden=YES;
     }
     
-    if([[messageRow objectForKey:@"encrypted"] boolValue]!=YES)
+    if([[messageRow objectForKey:@"encrypted"] boolValue]==YES)
     {
         cell.lockImage.hidden=NO;
         cell.lockImage.accessibilityLabel=@"encrypted";

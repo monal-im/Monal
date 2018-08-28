@@ -1835,13 +1835,16 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                 body =[NSString stringWithFormat:@"%@ changed the subject to: %@", messageNode.actualFrom, messageNode.subject];
                                 messageType=kMessageTypeStatus;
                             }
-                            
+                            BOOL encrypted=NO;
+                            if(decrypted) encrypted=YES;
                             
                             [[DataLayer sharedInstance] addMessageFrom:messageNode.from to:recipient
                                                             forAccount:_accountNo withBody:body
                                                           actuallyfrom:messageNode.actualFrom delivered:YES  unread:unread  serverMessageId:messageNode.idval
                                                            messageType:messageType
-                                                       andOverrideDate:messageNode.delayTimeStamp withCompletion:^(BOOL success) {
+                                                       andOverrideDate:messageNode.delayTimeStamp
+                                                             encrypted:encrypted
+                                                        withCompletion:^(BOOL success) {
                                                               if(success)
                                                               {
                                                                   if(messageNode.requestReceipt && !messageNode.mamResult)

@@ -178,7 +178,7 @@ extern NSString *const kMessageTypeStatus;
 /*
  adds a specified message to the database
  */
--(void) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom delivered:(BOOL) delivered unread:(BOOL) unread serverMessageId:(NSString *) messageid messageType:(NSString *) messageType andOverrideDate:(NSDate *) messageDate withCompletion: (void (^)(BOOL))completion;
+-(void) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom delivered:(BOOL) delivered unread:(BOOL) unread serverMessageId:(NSString *) messageid messageType:(NSString *) messageType andOverrideDate:(NSDate *) messageDate encrypted:(BOOL) encrypted  withCompletion: (void (^)(BOOL))completion;
 
 /**
   checks to see if there is a message with the provided messageid. will return YES if the messageid exists for this account and contact
@@ -222,7 +222,7 @@ extern NSString *const kMessageTypeStatus;
 
 -(NSArray*) messageHistoryBuddies:(NSString*) accountNo;
 -(void) markAsReadBuddy:(NSString*) buddy forAccount:(NSString*) accountNo;
--(void) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString *)messageId withCompletion:(void (^)(BOOL, NSString *))completion;
+-(void) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString *)messageId encrypted:(BOOL) encrypted withCompletion:(void (^)(BOOL, NSString *))completion;
 
 #pragma mark active contacts
 -(void) activeContactsWithCompletion: (void (^)(NSMutableArray *))completion;

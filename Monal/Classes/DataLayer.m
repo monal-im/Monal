@@ -1805,8 +1805,10 @@ static DataLayer *sharedInstance=nil;
         
         NSArray* parts=[[[NSDate date] description] componentsSeparatedByString:@" "];
         
+        NSString *dateTime =[NSString stringWithFormat:@"%@ %@", [parts objectAtIndex:0],[parts objectAtIndex:1]];
+        
         NSString* query=[NSString stringWithFormat:@"insert into message_history (account_id, message_from, message_to, timestamp, message, actual_from, unread, delivered, messageid, messageType, encrypted) values (?,?,?,?,?,?,?,?,?,?,?);"];
-        NSArray *params=@[accountNo, from, to, [parts objectAtIndex:0], message, cleanedActualFrom,[NSNumber numberWithInteger:0], [NSNumber numberWithInteger:1], messageId,messageType, [NSNumber numberWithInteger:encrypted]];
+        NSArray *params=@[accountNo, from, to, dateTime, message, cleanedActualFrom,[NSNumber numberWithInteger:0], [NSNumber numberWithInteger:1], messageId,messageType, [NSNumber numberWithInteger:encrypted]];
         DDLogVerbose(@"%@",query);
         [self executeNonQuery:query andArguments:params  withCompletion:^(BOOL result) {
             if (completion) {

@@ -43,6 +43,7 @@
 
 @property (nonatomic, strong) DBRestClient *restClient;
 @property (nonatomic, assign) BOOL encryptChat;
+@property (nonatomic, weak) NSToolbarItem *encryptButton;
 
 
 @end
@@ -132,7 +133,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     {
         return;
     }
-    
+    self.encryptChat=NO;
+      self.encryptButton .image = [NSImage imageNamed:@"745-unlocked"];
     
     
 //    [MLNotificationManager sharedInstance].currentAccountNo=self.accountNo;
@@ -498,6 +500,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 #pragma mark - encryption
 -(IBAction)toggleEncryption:(id)sender
 {
+    self.encryptButton =(NSToolbarItem *)sender;
+    self.encryptButton .image = [NSImage imageNamed:@"744-locked-selected"];
+    
     self.encryptChat=YES;
 }
 

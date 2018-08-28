@@ -1080,7 +1080,7 @@ CA
                                         <segue destination="kZp-r1-Nmw" kind="popover" identifier="ContactDetails" popoverAnchorView="VQp-eV-N8J" popoverBehavior="t" preferredEdge="maxX" id="1K6-5s-FVT"/>
                                     </connections>
                                 </toolbarItem>
-                                <toolbarItem implicitItemIdentifier="E1B1CE0B-423B-4596-9E09-E008ACF64276" label="Encrypt" paletteLabel="Encrypt" tag="-1" image="744-locked-selected" id="eQS-Gt-mIg">
+                                <toolbarItem implicitItemIdentifier="E1B1CE0B-423B-4596-9E09-E008ACF64276" label="Encrypt" paletteLabel="Encrypt" tag="-1" image="745-unlocked" id="eQS-Gt-mIg">
                                     <connections>
                                         <action selector="toggleEncryption:" target="Oky-zY-oP4" id="LLk-Mv-BaM"/>
                                     </connections>
@@ -2883,6 +2883,7 @@ Gw
         <image name="724-info" width="28" height="28"/>
         <image name="735-phone" width="28" height="28"/>
         <image name="744-locked-selected" width="21" height="28"/>
+        <image name="745-unlocked" width="21" height="28"/>
         <image name="770-paper-clip" width="28" height="27"/>
         <image name="870-smile" width="28" height="28"/>
         <image name="907-plus-rounded-square" width="28" height="28"/>

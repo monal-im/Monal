@@ -147,7 +147,6 @@
 		261B29341FECBBF1001C5CF4 /* ParseFailed.m in Sources */ = {isa = PBXBuildFile; fileRef = 261B29321FECBBF0001C5CF4 /* ParseFailed.m */; };
 		261B29351FECBBF1001C5CF4 /* ParseFailed.m in Sources */ = {isa = PBXBuildFile; fileRef = 261B29321FECBBF0001C5CF4 /* ParseFailed.m */; };
 		261E672B179E27BE00CB493E /* ParseFailure.m in Sources */ = {isa = PBXBuildFile; fileRef = 261E672A179E27BE00CB493E /* ParseFailure.m */; };
-		262265D22144156A00B18F83 /* libcrypto.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 262265D12144156A00B18F83 /* libcrypto.a */; };
 		26277888110179D100023C8A /* tools.m in Sources */ = {isa = PBXBuildFile; fileRef = 26277887110179D100023C8A /* tools.m */; };
 		26277CE41B7C57670094E4D0 /* MLContactDetails.m in Sources */ = {isa = PBXBuildFile; fileRef = 26277CE31B7C57670094E4D0 /* MLContactDetails.m */; };
 		262797AF178A577300B85D94 /* MLContactCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 262797AE178A577300B85D94 /* MLContactCell.m */; };
@@ -503,6 +502,7 @@
 		261E672A179E27BE00CB493E /* ParseFailure.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParseFailure.m; sourceTree = "<group>"; };
 		262265CF2144148A00B18F83 /* libapple_crypto.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libapple_crypto.tbd; path = usr/lib/libapple_crypto.tbd; sourceTree = SDKROOT; };
 		262265D12144156A00B18F83 /* libcrypto.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcrypto.a; path = "Pods/OpenSSL-Universal/lib-macos/libcrypto.a"; sourceTree = "<group>"; };
+		262265D521441FA300B18F83 /* libssl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libssl.a; path = "Pods/OpenSSL-Universal/lib-macos/libssl.a"; sourceTree = "<group>"; };
 		26277886110179D100023C8A /* tools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = tools.h; path = Classes/tools.h; sourceTree = "<group>"; };
 		26277887110179D100023C8A /* tools.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = tools.m; path = Classes/tools.m; sourceTree = "<group>"; };
 		26277CE21B7C57670094E4D0 /* MLContactDetails.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLContactDetails.h; sourceTree = "<group>"; };
@@ -879,7 +879,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				262265D22144156A00B18F83 /* libcrypto.a in Frameworks */,
 				267C9921206DE23100AB876C /* UserNotifications.framework in Frameworks */,
 				2613BECF1EA41C8600C9F4C5 /* PushKit.framework in Frameworks */,
 				2614B64F1C54095D004FF2FA /* libz.tbd in Frameworks */,
@@ -1762,6 +1761,7 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				262265D521441FA300B18F83 /* libssl.a */,
 				262265D12144156A00B18F83 /* libcrypto.a */,
 				262265CF2144148A00B18F83 /* libapple_crypto.tbd */,
 				267C9920206DE23100AB876C /* UserNotifications.framework */,

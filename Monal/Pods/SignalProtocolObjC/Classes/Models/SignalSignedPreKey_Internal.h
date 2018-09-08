@@ -7,7 +7,7 @@
 //
 
 #import "SignalSignedPreKey.h"
-#import "signal_protocol.h"
+#include "signal_protocol.h"
 
 NS_ASSUME_NONNULL_BEGIN
 @interface SignalSignedPreKey ()

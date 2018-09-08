@@ -375,11 +375,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     
                     NSString *messageID =[[NSUUID UUID] UUIDString];
                     
-                    [[DataLayer sharedInstance] addMessageHistoryFrom:replyingAccount to:[notification.userInfo objectForKey:@"from"] forAccount:[notification.userInfo objectForKey:@"accountNo"] withMessage:message actuallyFrom:replyingAccount withId:messageID withCompletion:^(BOOL success, NSString *messageType) {
+                    //TODO the encrypted value needs to be pulled from the DB for the chat
+                    [[DataLayer sharedInstance] addMessageHistoryFrom:replyingAccount to:[notification.userInfo objectForKey:@"from"] forAccount:[notification.userInfo objectForKey:@"accountNo"] withMessage:message actuallyFrom:replyingAccount withId:messageID encrypted:NO withCompletion:^(BOOL success, NSString *messageType) {
                         
                     }];
                     
-                    [[MLXMPPManager sharedInstance] sendMessage:message toContact:[notification.userInfo objectForKey:@"from"] fromAccount:[notification.userInfo objectForKey:@"accountNo"] isMUC:NO messageId:messageID withCompletionHandler:^(BOOL success, NSString *messageId) {
+                    [[MLXMPPManager sharedInstance] sendMessage:message toContact:[notification.userInfo objectForKey:@"from"] fromAccount:[notification.userInfo objectForKey:@"accountNo"] isEncrypted:NO isMUC:NO messageId:messageID  withCompletionHandler:^(BOOL success, NSString *messageId) {
                         
                     }];
                     

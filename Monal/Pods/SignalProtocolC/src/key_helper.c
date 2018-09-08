@@ -8,11 +8,11 @@
 #include "signal_protocol_internal.h"
 #include "utlist.h"
 
-//struct signal_protocol_key_helper_pre_key_list_node
-//{
-//    session_pre_key *element;
-//    struct signal_protocol_key_helper_pre_key_list_node *next;
-//};
+struct signal_protocol_key_helper_pre_key_list_node
+{
+    session_pre_key *element;
+    struct signal_protocol_key_helper_pre_key_list_node *next;
+};
 
 int signal_protocol_key_helper_generate_identity_key_pair(ratchet_identity_key_pair **key_pair, signal_context *global_context)
 {
@@ -185,8 +185,7 @@ session_pre_key *signal_protocol_key_helper_key_list_element(const signal_protoc
 signal_protocol_key_helper_pre_key_list_node *signal_protocol_key_helper_key_list_next(const signal_protocol_key_helper_pre_key_list_node *node)
 {
     assert(node);
-    signal_protocol_key_helper_pre_key_list_node* next=  node->next;
-    return next;
+    return node->next;
 }
 
 void signal_protocol_key_helper_key_list_free(signal_protocol_key_helper_pre_key_list_node *head)
@@ -200,6 +199,29 @@ void signal_protocol_key_helper_key_list_free(signal_protocol_key_helper_pre_key
             free(cur_node);
         }
     }
+}
+
+int signal_protocol_key_helper_generate_last_resort_pre_key(session_pre_key **pre_key, signal_context *global_context)
+{
+    int result = 0;
+    session_pre_key *result_pre_key = 0;
+    ec_key_pair *ec_pair = 0;
+
+    assert(global_context);
+
+    result = curve_generate_key_pair(global_context, &ec_pair);
+    if(result < 0) {
+        goto complete;
+    }
+
+    result = session_pre_key_create(&result_pre_key, PRE_KEY_MEDIUM_MAX_VALUE, ec_pair);
+
+complete:
+    SIGNAL_UNREF(ec_pair);
+    if(result >= 0) {
+        *pre_key = result_pre_key;
+    }
+    return result;
 }
 
 int signal_protocol_key_helper_generate_signed_pre_key(session_signed_pre_key **signed_pre_key,

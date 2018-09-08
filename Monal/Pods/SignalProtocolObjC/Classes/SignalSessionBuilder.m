@@ -11,6 +11,7 @@
 #import "SignalContext_Internal.h"
 #import "SignalAddress_Internal.h"
 #import "SignalPreKeyBundle_Internal.h"
+#import "session_builder.h"
 
 @interface SignalSessionBuilder()
 @property (nonatomic, readonly) session_builder *builder;

@@ -15,6 +15,7 @@
 #include "signal_protocol.h"
 #include "key_helper.h"
 
+
 @implementation SignalKeyHelper
 
 - (instancetype) initWithContext:(SignalContext*)context {
@@ -53,16 +54,24 @@
     if (!head || result < 0) {
         return @[];
     }
-     signal_protocol_key_helper_pre_key_list_node *iter = head;
     NSMutableArray<SignalPreKey*> *keys = [NSMutableArray array];
-    while (iter ) {
-        session_pre_key *pre_key = signal_protocol_key_helper_key_list_element(iter);
+    while (head) {
+        session_pre_key *pre_key = signal_protocol_key_helper_key_list_element(head);
         SignalPreKey *preKey = [[SignalPreKey alloc] initWithPreKey:pre_key];
         [keys addObject:preKey];
-       
-        iter = signal_protocol_key_helper_key_list_next(iter);
+        head = signal_protocol_key_helper_key_list_next(head);
     }
     return keys;
+}
+
+- (nullable SignalPreKey*)generateLastResortPreKey {
+    session_pre_key *pre_key = NULL;
+    int result = signal_protocol_key_helper_generate_last_resort_pre_key(&pre_key, _context.context);
+    if (result < 0) {
+        return nil;
+    }
+    SignalPreKey *key = [[SignalPreKey alloc] initWithPreKey:pre_key];
+    return key;
 }
 
 - (SignalSignedPreKey*)generateSignedPreKeyWithIdentity:(SignalIdentityKeyPair*)identityKeyPair

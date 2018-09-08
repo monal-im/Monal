@@ -7,7 +7,7 @@
 //
 
 #import "SignalPreKeyBundle.h"
-#import "signal_protocol.h"
+#include "signal_protocol.h"
 
 @interface SignalPreKeyBundle ()
 

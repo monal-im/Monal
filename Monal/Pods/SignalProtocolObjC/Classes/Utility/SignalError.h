@@ -8,12 +8,11 @@
 
 #import <Foundation/Foundation.h>
 
-NS_ASSUME_NONNULL_BEGIN
 
 typedef NS_ENUM(NSInteger, SignalError) {
-    SignalErrorUnknown = 0,
     SignalErrorNoMemory,
     SignalErrorInvalidArgument,
+    SignalErrorUnknown,
     SignalErrorDuplicateMessage,
     SignalErrorInvalidKey,
     SignalErrorInvalidKeyId,
@@ -30,12 +29,6 @@ typedef NS_ENUM(NSInteger, SignalError) {
 };
 
 /** Translate from libsignal-protocol-c internal errors to SignalError enum */
-FOUNDATION_EXPORT SignalError SignalErrorFromCode(int errorCode);
-FOUNDATION_EXPORT NSString *SignalErrorDescription(SignalError signalError);
-/** Internal signal error codes */
-FOUNDATION_EXPORT NSError *ErrorFromSignalErrorCode(int errorCode);
-FOUNDATION_EXPORT NSError *ErrorFromSignalError(SignalError signalError);
-/** "org.whispersystems.SignalProtocol" */
-FOUNDATION_EXPORT NSString * const SignalErrorDomain;
-
-NS_ASSUME_NONNULL_END
+SignalError SignalErrorFromCode(int errorCode);
+NSString *SignalErrorDescription(SignalError signalError);
+NSError *ErrorFromSignalError(SignalError signalError);

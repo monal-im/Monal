@@ -14,9 +14,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong, readonly) NSData *publicKey;
 @property (nonatomic, strong, readonly) NSData *privateKey;
 
-- (nullable instancetype) initWithPublicKey:(NSData*)publicKey
-                                 privateKey:(NSData*)privateKey
-                                      error:(NSError**)error;
+- (instancetype) initWithPublicKey:(NSData*)publicKey
+                        privateKey:(NSData*)privateKey;
 
 @end
 NS_ASSUME_NONNULL_END

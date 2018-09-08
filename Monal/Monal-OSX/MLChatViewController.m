@@ -500,10 +500,18 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 #pragma mark - encryption
 -(IBAction)toggleEncryption:(id)sender
 {
-    self.encryptButton =(NSToolbarItem *)sender;
-    self.encryptButton .image = [NSImage imageNamed:@"744-locked-selected"];
+    // check for trusted keys
     
-    self.encryptChat=YES;
+    // ask if disabling encryption
+    if(self.encryptChat==YES) {
+        
+    }
+    else {
+        self.encryptButton =(NSToolbarItem *)sender;
+        self.encryptButton.image = [NSImage imageNamed:@"744-locked-selected"];
+        self.encryptChat=YES;
+    }
+    
 }
 
 #pragma mark - sending

@@ -323,8 +323,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     DDLogVerbose(@"Sending message");
     NSString *newMessageID =[[NSUUID UUID] UUIDString];
  
-    [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:_contactName fromAccount:_accountNo isMUC:_isMUC messageId:newMessageID
-                          withCompletionHandler:nil];
+    [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:_contactName fromAccount:_accountNo isEncrypted:NO isMUC:_isMUC messageId:newMessageID
+                                       withCompletionHandler:nil];
     
     //dont readd it, use the exisitng
     if(!messageID) {
@@ -529,7 +529,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         return;
     }
     
-	[[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:_accountNo withMessage:message actuallyFrom:self.jid withId:messageId withCompletion:^(BOOL result, NSString *messageType) {
+    [[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:_accountNo withMessage:message actuallyFrom:self.jid withId:messageId encrypted:NO withCompletion:^(BOOL result, NSString *messageType) {
 		DDLogVerbose(@"added message");
         
         if(result) {

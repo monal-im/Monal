@@ -14,8 +14,9 @@
 #import "SignalPreKeyMessage_Internal.h"
 #import "SignalError.h"
 
-#import "signal_protocol.h"
 #import "protocol.h"
+#include "signal_protocol.h"
+#include "session_cipher.h"
 
 @interface SignalSessionCipher ()
 @property (nonatomic, readonly) session_cipher *cipher;

@@ -20,15 +20,14 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic ,strong, readonly) NSData *signature;
 @property (nonatomic ,strong, readonly) NSData *identityKey;
 
-- (nullable instancetype) initWithRegistrationId:(uint32_t)registrationId
+- (instancetype) initWithRegistrationId:(uint32_t)registrationId
                                deviceId:(uint32_t)deviceId
                                preKeyId:(uint32_t)preKeyId
                            preKeyPublic:(NSData*)preKeyPublic
                          signedPreKeyId:(uint32_t)signedPreKeyId
                      signedPreKeyPublic:(NSData*)signedPreKeyPublic
                               signature:(NSData*)signature
-                            identityKey:(NSData*)identityKey
-                                  error:(NSError* __autoreleasing *)error;
+                            identityKey:(NSData*)identityKey;
 
 @end
 NS_ASSUME_NONNULL_END

@@ -10,7 +10,8 @@
 #import "SignalContext_Internal.h"
 #import "SignalCommonCryptoProvider.h"
 #import "SignalStorage_Internal.h"
-#import "signal_protocol.h"
+//#include "signal_protocol.h"
+#include "signal_protocol.h"
 
 static void signal_lock(void *user_data);
 static void signal_unlock(void *user_data);

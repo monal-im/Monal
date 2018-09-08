@@ -8,7 +8,6 @@
 
 #import "SignalKeyPair.h"
 #import "SignalKeyPair_Internal.h"
-#import "SignalError.h"
 
 @implementation SignalKeyPair
 @synthesize publicKey = _publicKey;
@@ -86,45 +85,31 @@
     return self;
 }
 
-+ (nullable ec_public_key*)publicKeyFromData:(NSData*)data error:(NSError**)error {
++ (ec_public_key*)publicKeyFromData:(NSData*)data {
     NSParameterAssert(data);
     if (!data) { return nil; }
     ec_public_key *public = NULL;
     int result = curve_decode_point(&public, data.bytes, data.length, NULL);
+    NSAssert(result >= 0, @"couldn't decode public key");
     if (result < 0 || !public) {
-        if (error) {
-            *error = ErrorFromSignalErrorCode(result);
-        }
         return nil;
     }
     return public;
 }
 
-- (nullable instancetype) initWithPublicKey:(NSData*)publicKey
-                        privateKey:(NSData*)privateKey
-                             error:(NSError**)error {
+- (instancetype) initWithPublicKey:(NSData*)publicKey
+                        privateKey:(NSData*)privateKey {
     NSParameterAssert(publicKey);
     NSParameterAssert(privateKey);
-    if (!publicKey || !privateKey) {
-        if (error) {
-            *error = ErrorFromSignalError(SignalErrorInvalidArgument);
-        }
-        return nil;
-    }
-    ec_public_key *public = [[self class] publicKeyFromData:publicKey error:error];
-    if (!public) {
-        return nil;
-    }
+    ec_public_key *public = [[self class] publicKeyFromData:publicKey];
     _ec_public_key = public;
     int result = curve_decode_private_point(&_ec_private_key, privateKey.bytes, privateKey.length, NULL);
     NSAssert(result >= 0, @"couldnt decode private key");
     if (result < 0 || !_ec_private_key) {
-        if (error) {
-            *error = ErrorFromSignalErrorCode(result);
-        }
         return nil;
     }
     
+    if (!publicKey || !privateKey) { return nil; }
     if (self = [super init]) {
         _publicKey = publicKey;
         _privateKey = privateKey;
@@ -132,7 +117,7 @@
     return self;
 }
 
-- (nullable instancetype) initWithECKeyPair:(ec_key_pair*)ec_key_pair {
+- (instancetype) initWithECKeyPair:(ec_key_pair*)ec_key_pair {
     NSParameterAssert(ec_key_pair);
     if (!ec_key_pair) { return nil; }
     ec_private_key *private = ec_key_pair_get_private(ec_key_pair);
@@ -153,7 +138,7 @@
 - (instancetype)initWithCoder:(NSCoder *)aDecoder {
     NSData *publicKey = [aDecoder decodeObjectOfClass:[NSData class] forKey:@"public"];
     NSData *privateKey = [aDecoder decodeObjectOfClass:[NSData class] forKey:@"private"];
-    return [self initWithPublicKey:publicKey privateKey:privateKey error:nil];
+    return [self initWithPublicKey:publicKey privateKey:privateKey];
 }
 
 - (void)encodeWithCoder:(NSCoder *)aCoder{

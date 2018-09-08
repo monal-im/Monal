@@ -19,7 +19,6 @@ struct sender_key_record
 {
     signal_type_base base;
     sender_key_state_node *sender_key_states_head;
-    signal_buffer *user_record;
     signal_context *global_context;
 };
 
@@ -175,7 +174,6 @@ complete:
 int sender_key_record_copy(sender_key_record **record, sender_key_record *other_record, signal_context *global_context)
 {
     int result = 0;
-    sender_key_record *result_record = 0;
     signal_buffer *buffer = 0;
     uint8_t *data;
     size_t len;
@@ -191,27 +189,14 @@ int sender_key_record_copy(sender_key_record **record, sender_key_record *other_
     data = signal_buffer_data(buffer);
     len = signal_buffer_len(buffer);
 
-    result = sender_key_record_deserialize(&result_record, data, len, global_context);
+    result = sender_key_record_deserialize(record, data, len, global_context);
     if(result < 0) {
         goto complete;
-    }
-    if(other_record->user_record) {
-        result_record->user_record = signal_buffer_copy(other_record->user_record);
-        if(!result_record->user_record) {
-            result = SG_ERR_NOMEM;
-            goto complete;
-        }
     }
 
 complete:
     if(buffer) {
         signal_buffer_free(buffer);
-    }
-    if(result >= 0) {
-        *record = result_record;
-    }
-    else {
-        SIGNAL_UNREF(result_record);
     }
     return result;
 }
@@ -339,21 +324,6 @@ int sender_key_record_set_sender_key_state(sender_key_record *record,
     return result;
 }
 
-signal_buffer *sender_key_record_get_user_record(const sender_key_record *record)
-{
-    assert(record);
-    return record->user_record;
-}
-
-void sender_key_record_set_user_record(sender_key_record *record, signal_buffer *user_record)
-{
-    assert(record);
-    if(record->user_record) {
-        signal_buffer_free(record->user_record);
-    }
-    record->user_record = user_record;
-}
-
 void sender_key_record_destroy(signal_type_base *type)
 {
     sender_key_record *record = (sender_key_record *)type;
@@ -368,10 +338,6 @@ void sender_key_record_destroy(signal_type_base *type)
         free(cur_node);
     }
     record->sender_key_states_head = 0;
-
-    if(record->user_record) {
-        signal_buffer_free(record->user_record);
-    }
 
     free(record);
 }

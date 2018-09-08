@@ -10,6 +10,7 @@
 #import "SignalPreKeyMessage_Internal.h"
 #import "SignalContext_Internal.h"
 #import "SignalError.h"
+#import "protocol.h"
 
 @implementation SignalPreKeyMessage
 

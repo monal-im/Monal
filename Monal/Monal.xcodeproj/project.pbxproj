@@ -2220,6 +2220,9 @@
 							com.apple.Push = {
 								enabled = 1;
 							};
+							com.apple.SafariKeychain = {
+								enabled = 1;
+							};
 						};
 					};
 					2630FE2E1AD550C00079F5C0 = {

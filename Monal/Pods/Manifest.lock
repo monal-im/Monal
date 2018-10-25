@@ -38,6 +38,23 @@ DEPENDENCIES:
   - Sparkle
   - TPCircularBuffer
 
+SPEC REPOS:
+  https://github.com/cocoapods/specs.git:
+    - Crashlytics
+    - CWStatusBarNotification
+    - DACircularProgress
+    - Dropbox-iOS-SDK
+    - Dropbox-OSX-SDK
+    - Fabric
+    - MBProgressHUD
+    - OpenSSL-Universal
+    - SAMKeychain
+    - SDWebImage
+    - SignalProtocolC
+    - SignalProtocolObjC
+    - Sparkle
+    - TPCircularBuffer
+
 EXTERNAL SOURCES:
   MWPhotoBrowser:
     :podspec: https://raw.githubusercontent.com/moinku07/MWPhotoBrowser/master/MWPhotoBrowser.podspec
@@ -59,6 +76,6 @@ SPEC CHECKSUMS:
   Sparkle: 8486d2493599665e466b5076e72b28849776e32f
   TPCircularBuffer: c13243556527551c4d320709c7b14a6d20cdc30a
 
-PODFILE CHECKSUM: 16f01530c9c37cb77a56e8b5b673cde3e36a8f65
+PODFILE CHECKSUM: d2cacb7f1f1970a581fed85cd096132265735bc9
 
-COCOAPODS: 1.4.0
+COCOAPODS: 1.5.3

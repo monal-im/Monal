@@ -230,19 +230,24 @@
 
 - (void)userNotificationCenter:(NSUserNotificationCenter * )center didActivateNotification:(NSUserNotification *  )notification
 {
-    NSDictionary *userInfo= notification.userInfo;
-    [[MLXMPPManager sharedInstance].contactVC showConversationForContact:userInfo];
-   
     if(notification.activationType==NSUserNotificationActivationTypeReplied)
     {
         if(notification.response.string.length>0) {
-            if([[MLXMPPManager sharedInstance].contactVC.chatViewController.contactName isEqualToString:[userInfo objectForKey:@"actuallyfrom"]]) {
-                [[MLXMPPManager sharedInstance].contactVC.chatViewController sendMessage:notification.response.string andMessageID:nil];
-                [[MLXMPPManager sharedInstance].contactVC.chatViewController  markAsRead];
-            }
-            else  {
-                NSLog(@"error cant send to wrong contact");
-            }
+            
+            NSString *replyingAccount = [notification.userInfo objectForKey:@"to"];
+            
+            NSString *messageID =[[NSUUID UUID] UUIDString];
+            
+            //TODO the encrypted value needs to be pulled from the DB for the chat
+            [[DataLayer sharedInstance] addMessageHistoryFrom:replyingAccount to:[notification.userInfo objectForKey:@"from"] forAccount:[notification.userInfo objectForKey:@"accountNo"] withMessage:notification.response.string actuallyFrom:replyingAccount withId:messageID encrypted:NO withCompletion:^(BOOL success, NSString *messageType) {
+                
+            }];
+            
+            [[MLXMPPManager sharedInstance] sendMessage:notification.response.string toContact:[notification.userInfo objectForKey:@"from"] fromAccount:[notification.userInfo objectForKey:@"accountNo"] isEncrypted:NO isMUC:NO messageId:messageID  withCompletionHandler:^(BOOL success, NSString *messageId) {
+                
+            }];
+            
+            [[DataLayer sharedInstance] markAsReadBuddy:[notification.userInfo objectForKey:@"from"] forAccount:[notification.userInfo objectForKey:@"accountNo"]];
         }
         
     }

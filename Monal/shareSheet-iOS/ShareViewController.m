@@ -7,6 +7,7 @@
 //
 
 #import "ShareViewController.h"
+#import "MLSelectionController.h"
 @import Crashlytics;
 @import Fabric;
 
@@ -14,6 +15,9 @@
 
 @property (nonatomic, strong) NSString *account;
 @property (nonatomic, strong) NSString *recipient;
+
+@property (nonatomic, strong) NSArray *accounts;
+@property (nonatomic, strong) NSArray *recipients;
 
 
 @end
@@ -25,19 +29,17 @@
 }
 
 - (BOOL)isContentValid {
-    // Do validation of contentText and/or NSExtensionContext attachments here
+
+    if(self.recipient.length>0 && self.account.length>0)
     return YES;
+    else return NO;
 }
 
 - (void)didSelectPost {
-    // This is called after the user selects Post. Do the upload of contentText and/or NSExtensionContext attachments.
-    
-    //get text
     NSMutableDictionary *payload = [[NSMutableDictionary alloc] init];
     
     NSExtensionItem *item = self.extensionContext.inputItems.firstObject;
     NSLog(@"Attachments = %@", item.attachments);
-    
     
     for (NSItemProvider *provider in item.attachments)
     {
@@ -45,7 +47,7 @@
        {
            [provider loadItemForTypeIdentifier:@"public.url" options:NULL completionHandler:^(NSURL<NSSecureCoding>*  _Nullable item, NSError * _Null_unspecified error) {
                [payload setObject:item.absoluteString forKey:@"url"];
-               [payload setObject:self.contentText forKey:@"comment"];
+               if(self.contentText) input [payload setObject:self.contentText forKey:@"comment"];
                [payload setObject:self.account forKey:@"account"];
                [payload setObject:self.recipient forKey:@"recipient"];
                
@@ -56,7 +58,6 @@
                [outbox addObject:payload];
                [groupDefaults setObject:outbox forKey:@"outbox"];
                [groupDefaults synchronize];
-               
            }];
        }
     }
@@ -66,33 +67,55 @@
 //
 //
 //    }] resume];
-    
-    
-    
-    // Inform the host that we're done, so it un-blocks its UI. Note: Alternatively you could call super's -didSelectPost, which will similarly complete the extension context.
+
      [self.extensionContext completeRequestReturningItems:@[] completionHandler:nil];
 }
 
 - (NSArray *)configurationItems {
-    // To add configuration options via table cells at the bottom of the sheet, return an array of SLComposeSheetConfigurationItem here.
-    SLComposeSheetConfigurationItem *account = [[SLComposeSheetConfigurationItem alloc] init];
-    account.title=@"Account";
-    account.value=@"anurodhp@jabb3r.org"; // last used
-    account.tapHandler = ^{
-        UITableViewController *controller = (UITableViewController *)[self.storyboard instantiateViewControllerWithIdentifier:@"accounts"];
-         [self pushConfigurationViewController:controller];
-    };
+    NSMutableArray *toreturn = [[NSMutableArray alloc] init];
+    if(self.accounts.count>1) {
+        SLComposeSheetConfigurationItem *account = [[SLComposeSheetConfigurationItem alloc] init];
+        account.title=@"Account";
+        account.value=self.account;
+        account.tapHandler = ^{
+            MLSelectionController *controller = (MLSelectionController *)[self.storyboard instantiateViewControllerWithIdentifier:@"accounts"];
+            controller.completion = ^(NSString *selectedAccount)
+            {
+                if(selectedAccount) {
+                    self.account=selectedAccount;
+                }
+                else {
+                    self.account=@"";
+                }
+                [self reloadInputViews];
+            };
+            
+            [self pushConfigurationViewController:controller];
+        };
+        [toreturn addObject:account];
+    }
     
     SLComposeSheetConfigurationItem *recipient = [[SLComposeSheetConfigurationItem alloc] init];
     recipient.title=@"Recipient";
-    recipient.value=@"monal2@jabb3r.org"; //last used
+    recipient.value=self.recipient;
     recipient.tapHandler = ^{
-        UITableViewController *controller = (UITableViewController *)[self.storyboard instantiateViewControllerWithIdentifier:@"contacts"];
+        MLSelectionController *controller = (MLSelectionController *)[self.storyboard instantiateViewControllerWithIdentifier:@"contacts"];
+        controller.completion = ^(NSString *selectedRecipient)
+        {
+            if(selectedRecipient) {
+                self.recipient=selectedRecipient;
+            }
+            else {
+                self.recipient=@"";
+            }
+            [self reloadInputViews];
+        };
         
         [self pushConfigurationViewController:controller];
     };
+    [toreturn addObject:recipient];
     
-    return @[account, recipient];
+    return toreturn;
 }
 
 @end

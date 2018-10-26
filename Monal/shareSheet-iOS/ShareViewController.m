@@ -47,7 +47,7 @@
        {
            [provider loadItemForTypeIdentifier:@"public.url" options:NULL completionHandler:^(NSURL<NSSecureCoding>*  _Nullable item, NSError * _Null_unspecified error) {
                [payload setObject:item.absoluteString forKey:@"url"];
-               if(self.contentText) input [payload setObject:self.contentText forKey:@"comment"];
+               if(self.contentText) [payload setObject:self.contentText forKey:@"comment"];
                [payload setObject:self.account forKey:@"account"];
                [payload setObject:self.recipient forKey:@"recipient"];
                

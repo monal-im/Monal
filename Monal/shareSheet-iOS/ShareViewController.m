@@ -12,6 +12,10 @@
 
 @interface ShareViewController ()
 
+@property (nonatomic, strong) NSString *account;
+@property (nonatomic, strong) NSString *recipient;
+
+
 @end
 
 @implementation ShareViewController
@@ -40,8 +44,10 @@
        if([provider hasItemConformingToTypeIdentifier:@"public.url"])
        {
            [provider loadItemForTypeIdentifier:@"public.url" options:NULL completionHandler:^(NSURL<NSSecureCoding>*  _Nullable item, NSError * _Null_unspecified error) {
-                [payload setObject:item.absoluteString forKey:@"url"];
-                [payload setObject:self.contentText forKey:@"comment"];
+               [payload setObject:item.absoluteString forKey:@"url"];
+               [payload setObject:self.contentText forKey:@"comment"];
+               [payload setObject:self.account forKey:@"account"];
+               [payload setObject:self.recipient forKey:@"recipient"];
                
                NSUserDefaults *groupDefaults= [[NSUserDefaults alloc] initWithSuiteName:@"group.monal"];
                NSMutableArray *outbox=[[groupDefaults objectForKey:@"outbox"] mutableCopy];
@@ -54,9 +60,6 @@
            }];
        }
     }
-    
-   
-
     
     
 //    [[[NSURLSession sharedSession] dataTaskWithURL:[NSURL URLWithString:@"https://monal.im/wakeios"] completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
@@ -75,9 +78,19 @@
     SLComposeSheetConfigurationItem *account = [[SLComposeSheetConfigurationItem alloc] init];
     account.title=@"Account";
     account.value=@"anurodhp@jabb3r.org"; // last used
+    account.tapHandler = ^{
+        UITableViewController *controller = (UITableViewController *)[self.storyboard instantiateViewControllerWithIdentifier:@"accounts"];
+         [self pushConfigurationViewController:controller];
+    };
+    
     SLComposeSheetConfigurationItem *recipient = [[SLComposeSheetConfigurationItem alloc] init];
     recipient.title=@"Recipient";
     recipient.value=@"monal2@jabb3r.org"; //last used
+    recipient.tapHandler = ^{
+        UITableViewController *controller = (UITableViewController *)[self.storyboard instantiateViewControllerWithIdentifier:@"contacts"];
+        
+        [self pushConfigurationViewController:controller];
+    };
     
     return @[account, recipient];
 }

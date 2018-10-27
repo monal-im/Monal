@@ -9,13 +9,13 @@
 #import <UIKit/UIKit.h>
 
 NS_ASSUME_NONNULL_BEGIN
-typedef void(^selectionResult)(NSString *);
+typedef void(^selectionResult)(NSDictionary *);
 
 @interface MLSelectionController : UITableViewController
 
-@property (nonatomic, assign) selectionResult completion;
+@property (nonatomic, copy) selectionResult completion;
 @property (nonatomic, strong) NSArray *options; // an Array of stirngs
-@property (nonatomic, strong) NSString *selection;
+@property (nonatomic, strong) NSDictionary *selection;
 @end
 
 NS_ASSUME_NONNULL_END

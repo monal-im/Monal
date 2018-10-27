@@ -16,18 +16,6 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
-    // Uncomment the following line to preserve selection between presentations.
-    // self.clearsSelectionOnViewWillAppear = NO;
-    
-    // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-    // self.navigationItem.rightBarButtonItem = self.editButtonItem;
-}
-
--(void) viewWillDisappear:(BOOL)animated {
-    if(self.completion) {
-        self.completion(self.selection);
-    }
 }
 
 #pragma mark - Table view data source
@@ -43,8 +31,9 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"option" forIndexPath:indexPath];
-    cell.textLabel.text = self.options[indexPath.row];
-    if([self.selection isEqualToString: cell.textLabel.text]) {
+   NSDictionary *row = self.options[indexPath.row];
+    cell.textLabel.text = [row objectForKey:@"full_name"];
+    if([[self.selection objectForKey:@"buddy_name"] isEqualToString: [row objectForKey:@"buddy_name"]]) {
         cell.accessoryType=UITableViewCellAccessoryCheckmark;
     } else {
         cell.accessoryType= UITableViewCellAccessoryNone;
@@ -56,6 +45,9 @@
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     self.selection= self.options[indexPath.row];
     [tableView reloadData];
+    if(self.completion) {
+        self.completion(self.selection);
+    }
 }
 
 

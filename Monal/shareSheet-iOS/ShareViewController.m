@@ -80,19 +80,19 @@
     if(self.accounts.count>1) {
         SLComposeSheetConfigurationItem *account = [[SLComposeSheetConfigurationItem alloc] init];
         account.title=@"Account";
-        account.value=self.account;
+        account.value=[NSString stringWithFormat:@"%@@@%@",[self.account objectForKey:@"username"],[self.account objectForKey:@"domain"]];
         account.tapHandler = ^{
             MLSelectionController *controller = (MLSelectionController *)[self.storyboard instantiateViewControllerWithIdentifier:@"accounts"];
             controller.options= self.accounts;
-            controller.completion = ^(NSString *selectedAccount)
+            controller.completion = ^(NSDictionary *selectedAccount)
             {
                 if(selectedAccount) {
                     self.account=selectedAccount;
                 }
                 else {
-                    self.account=@"";
+                    self.account=nil;
                 }
-                [self reloadInputViews];
+                [self reloadConfigurationItems];
             };
             
             [self pushConfigurationViewController:controller];
@@ -120,21 +120,21 @@
         }
         
         controller.options = recipientsToShow;
-        controller.completion = ^(NSString *selectedRecipient)
+        controller.completion = ^(NSDictionary *selectedRecipient)
         {
             if(selectedRecipient) {
-                self.recipient=selectedRecipient;
+                self.recipient=[selectedRecipient objectForKey:@"buddy_name"];;
             }
             else {
                 self.recipient=@"";
             }
-            [self reloadInputViews];
+            [self reloadConfigurationItems];
         };
         
         [self pushConfigurationViewController:controller];
     };
     [toreturn addObject:recipient];
-    
+    [self validateContent];
     return toreturn;
 }
 

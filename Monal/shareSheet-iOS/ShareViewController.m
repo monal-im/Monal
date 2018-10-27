@@ -47,7 +47,7 @@
     NSMutableDictionary *payload = [[NSMutableDictionary alloc] init];
     
     NSExtensionItem *item = self.extensionContext.inputItems.firstObject;
-    NSLog(@"Attachments = %@", item.attachments);
+   // NSLog(@"Attachments = %@", item.attachments);
     
     for (NSItemProvider *provider in item.attachments)
     {

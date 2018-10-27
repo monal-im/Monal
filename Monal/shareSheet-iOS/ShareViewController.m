@@ -88,7 +88,7 @@
     if(self.accounts.count>1) {
         SLComposeSheetConfigurationItem *account = [[SLComposeSheetConfigurationItem alloc] init];
         account.title=@"Account";
-        account.value=[NSString stringWithFormat:@"%@@@%@",[self.account objectForKey:@"username"],[self.account objectForKey:@"domain"]];
+        account.value=[NSString stringWithFormat:@"%@@%@",[self.account objectForKey:@"username"],[self.account objectForKey:@"domain"]];
         account.tapHandler = ^{
             MLSelectionController *controller = (MLSelectionController *)[self.storyboard instantiateViewControllerWithIdentifier:@"accounts"];
             controller.options= self.accounts;
@@ -100,6 +100,7 @@
                 else {
                     self.account=nil;
                 }
+                self.recipient=@"";
                 [self reloadConfigurationItems];
             };
             

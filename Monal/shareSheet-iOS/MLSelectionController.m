@@ -32,11 +32,21 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"option" forIndexPath:indexPath];
    NSDictionary *row = self.options[indexPath.row];
-    cell.textLabel.text = [row objectForKey:@"full_name"];
-    if([[self.selection objectForKey:@"buddy_name"] isEqualToString: [row objectForKey:@"buddy_name"]]) {
-        cell.accessoryType=UITableViewCellAccessoryCheckmark;
+    
+    if([row objectForKey:@"buddy_name"]) {
+        cell.textLabel.text = [row objectForKey:@"full_name"];
+        if([[self.selection objectForKey:@"buddy_name"] isEqualToString: [row objectForKey:@"buddy_name"]]) {
+            cell.accessoryType=UITableViewCellAccessoryCheckmark;
+        } else {
+            cell.accessoryType= UITableViewCellAccessoryNone;
+        }
     } else {
-        cell.accessoryType= UITableViewCellAccessoryNone;
+        cell.textLabel.text = [NSString stringWithFormat:@"%@@%@",[row objectForKey:@"username"],[row objectForKey:@"domain"]];
+        if([[self.selection objectForKey:@"account_id"] integerValue]==[[row objectForKey:@"account_id"] integerValue]) {
+            cell.accessoryType=UITableViewCellAccessoryCheckmark;
+        } else {
+            cell.accessoryType= UITableViewCellAccessoryNone;
+        }
     }
     return cell;
 }

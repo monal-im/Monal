@@ -50,8 +50,6 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 @implementation chatViewController
 
-
-
 -(void) setup
 {
     _contactName=[_contact objectForKey:@"buddy_name"];

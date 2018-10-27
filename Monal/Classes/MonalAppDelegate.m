@@ -47,14 +47,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     if (@available(iOS 11.0, *)) {
         [[UINavigationBar appearance] setPrefersLargeTitles:YES];
         [[UINavigationBar appearance] setLargeTitleTextAttributes:@{NSForegroundColorAttributeName: [UIColor whiteColor]}];
-        
     }
     
     [[UITabBar appearance] setTintColor:monaldarkGreen];
-    
-    
 }
-
 
 #pragma mark - VOIP APNS notificaion
 
@@ -68,7 +64,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     voipRegistry.delegate = self;
     // Set the push type to VoIP
     voipRegistry.desiredPushTypes = [NSSet setWithObject:PKPushTypeVoIP];
-    
 }
 
 // Handle updated APNS tokens
@@ -421,6 +416,18 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
  
     [[MLXMPPManager sharedInstance] resetForeground];
     [[MLXMPPManager sharedInstance] setClientsActive];
+}
+
+-(void)applicationWillResignActive:(UIApplication *)application
+{
+     NSUserDefaults *groupDefaults= [[NSUserDefaults alloc] initWithSuiteName:@"group.monal"];
+    [[DataLayer sharedInstance] activeContactsWithCompletion:^(NSMutableArray *cleanActive) {
+        [groupDefaults setObject:cleanActive forKey:@"recipients"];
+        [groupDefaults synchronize];
+    }];
+    
+    [groupDefaults setObject:[[DataLayer sharedInstance] enabledAccountList] forKey:@"accounts"];
+    [groupDefaults synchronize];
 }
 
 -(void) applicationDidEnterBackground:(UIApplication *)application

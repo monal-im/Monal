@@ -25,7 +25,6 @@
 @property (nonatomic, strong) NSArray* searchResults ;
 @property (nonatomic, strong) UISearchController *searchController;
 
-
 @property (nonatomic ,strong) NSMutableArray* infoCells;
 @property (nonatomic ,strong) NSMutableArray* contacts;
 @property (nonatomic ,strong) NSMutableArray* offlineContacts;
@@ -34,7 +33,6 @@
 @end
 
 @implementation ContactsViewController
-
 
 static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
@@ -276,7 +274,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) addOnlineUser:(NSNotification *) notification
 {
     NSDictionary* user = notification.userInfo;
-  
     
     dispatch_async(dispatch_get_main_queue(), ^{
         if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
@@ -536,7 +533,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) refreshDisplay
 {
-    
     if([[NSUserDefaults standardUserDefaults] boolForKey:@"SortContacts"]) //sort by status
     {
         [[DataLayer sharedInstance] onlineContactsSortedBy:@"Status" withCompeltion:^(NSMutableArray *results) {
@@ -555,7 +551,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         }];
     }
 
-
     if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
     {
         [[DataLayer sharedInstance] offlineContactsWithCompletion:^(NSMutableArray *results) {
@@ -564,7 +559,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 [self.contactsTable reloadData];
             });
         }];
-
     }
     
     if(self.searchResults.count==0)

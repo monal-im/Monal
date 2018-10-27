@@ -13,7 +13,7 @@
 
 @interface ShareViewController ()
 
-@property (nonatomic, strong) NSString *account;
+@property (nonatomic, strong) NSDictionary *account;
 @property (nonatomic, strong) NSString *recipient;
 
 @property (nonatomic, strong) NSArray *accounts;
@@ -26,11 +26,15 @@
 
 - (void)presentationAnimationDidFinish {
       [Fabric with:@[[Crashlytics class]]];
+    NSUserDefaults *groupDefaults= [[NSUserDefaults alloc] initWithSuiteName:@"group.monal"];
+    self.accounts= [groupDefaults objectForKey:@"accounts"];
+    self.recipients = [groupDefaults objectForKey:@"recipients"];
+    [self reloadConfigurationItems];
 }
 
 - (BOOL)isContentValid {
 
-    if(self.recipient.length>0 && self.account.length>0)
+    if(self.recipient.length>0 && self.account!=nil)
     return YES;
     else return NO;
 }
@@ -79,6 +83,7 @@
         account.value=self.account;
         account.tapHandler = ^{
             MLSelectionController *controller = (MLSelectionController *)[self.storyboard instantiateViewControllerWithIdentifier:@"accounts"];
+            controller.options= self.accounts;
             controller.completion = ^(NSString *selectedAccount)
             {
                 if(selectedAccount) {
@@ -93,6 +98,10 @@
             [self pushConfigurationViewController:controller];
         };
         [toreturn addObject:account];
+    } else  {
+        if(self.accounts.count>0) {
+            self.account = [self.accounts objectAtIndex:0];
+        }
     }
     
     SLComposeSheetConfigurationItem *recipient = [[SLComposeSheetConfigurationItem alloc] init];
@@ -100,6 +109,17 @@
     recipient.value=self.recipient;
     recipient.tapHandler = ^{
         MLSelectionController *controller = (MLSelectionController *)[self.storyboard instantiateViewControllerWithIdentifier:@"contacts"];
+        
+        NSMutableArray *recipientsToShow = [[NSMutableArray alloc] init];
+        
+        for (NSDictionary * dic in self.recipients) {
+            if([[dic objectForKey:@"account_id"] integerValue]==[[self.account objectForKey:@"account_id"] integerValue])
+            {
+                [recipientsToShow addObject:dic];
+            }
+        }
+        
+        controller.options = recipientsToShow;
         controller.completion = ^(NSString *selectedRecipient)
         {
             if(selectedRecipient) {

@@ -877,6 +877,11 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
     NSDictionary *dic = notification.object;
     NSString *account= [dic objectForKey:@"AccountNo"];
     
+    [self sendOutboxForAccount:account];
+}
+
+
+- (void) sendOutboxForAccount:(NSString *) account{
     NSUserDefaults *groupDefaults= [[NSUserDefaults alloc] initWithSuiteName:@"group.monal"];
     NSMutableArray *outbox=[[groupDefaults objectForKey:@"outbox"] mutableCopy];
     NSMutableArray *outboxClean=[[groupDefaults objectForKey:@"outbox"] mutableCopy];
@@ -890,7 +895,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
             [xmpp sendMessage:[row objectForKey:@"url"] toContact:[row objectForKey:@"recipient"] isMUC:NO isEncrypted:NO andMessageId:[[NSUUID UUID] UUIDString]];
             
             if([row objectForKey:@"comment"]) {
-              [xmpp sendMessage:[row objectForKey:@"comment"] toContact:[row objectForKey:@"recipient"] isMUC:NO isEncrypted:NO andMessageId:[[NSUUID UUID] UUIDString]];
+                [xmpp sendMessage:[row objectForKey:@"comment"] toContact:[row objectForKey:@"recipient"] isMUC:NO isEncrypted:NO andMessageId:[[NSUUID UUID] UUIDString]];
             }
             
             [outboxClean removeObject:row];
@@ -898,6 +903,15 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
     }
     
     [groupDefaults setObject:outboxClean forKey:@"outbox"];
+}
+
+-(void) sendMessageForConnectedAccounts
+{
+    for (NSDictionary* account in _connectedXMPP)
+    {
+         xmpp* xmppAccount=[account objectForKey:@"xmppAccount"];
+        [self sendOutboxForAccount:xmppAccount.accountNo];
+    }
 }
 
 @end

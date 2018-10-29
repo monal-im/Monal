@@ -416,6 +416,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
  
     [[MLXMPPManager sharedInstance] resetForeground];
     [[MLXMPPManager sharedInstance] setClientsActive];
+    [[MLXMPPManager sharedInstance] sendMessageForConnectedAccounts];
 }
 
 -(void)applicationWillResignActive:(UIApplication *)application

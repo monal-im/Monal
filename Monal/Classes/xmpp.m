@@ -2795,8 +2795,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 [header.children addObject:keyNode];
                 
             }];
-            
-            
         }
     }
     else  {

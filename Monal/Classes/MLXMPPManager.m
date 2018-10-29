@@ -133,6 +133,7 @@ An array of Dics what have timers to make sure everything was sent
     
      [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(autoJoinRoom:) name:kMLHasConnectedNotice object:nil];
     
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sendOutbox:) name:kMLHasConnectedNotice object:nil];
     
     
     return self;
@@ -861,13 +862,42 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
     [[NSUserDefaults standardUserDefaults] setObject:node forKey:@"pushNode"];
     [[NSUserDefaults standardUserDefaults] setObject:secret forKey:@"pushSecret"];
     
-    for(NSDictionary* row in _connectedXMPP)
+    for(NSDictionary  *row in _connectedXMPP)
     {
         xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
         xmppAccount.pushNode=node;
         xmppAccount.pushSecret=secret;
         [xmppAccount enablePush];
     }
+}
+
+#pragma mark - share sheet added
+
+-(void) sendOutbox: (NSNotification *) notification {
+    NSDictionary *dic = notification.object;
+    NSString *account= [dic objectForKey:@"AccountNo"];
+    
+    NSUserDefaults *groupDefaults= [[NSUserDefaults alloc] initWithSuiteName:@"group.monal"];
+    NSMutableArray *outbox=[[groupDefaults objectForKey:@"outbox"] mutableCopy];
+    NSMutableArray *outboxClean=[[groupDefaults objectForKey:@"outbox"] mutableCopy];
+    
+    for (NSDictionary *row in outbox)
+    {
+        NSDictionary *accountDic = [row objectForKey:@"account"] ;
+        if([[accountDic objectForKey:@"account_id"] integerValue] == [account integerValue])
+        {
+            xmpp* xmpp =[self getConnectedAccountForID:account];
+            [xmpp sendMessage:[row objectForKey:@"url"] toContact:[row objectForKey:@"recipient"] isMUC:NO isEncrypted:NO andMessageId:[[NSUUID UUID] UUIDString]];
+            
+            if([row objectForKey:@"comment"]) {
+              [xmpp sendMessage:[row objectForKey:@"comment"] toContact:[row objectForKey:@"recipient"] isMUC:NO isEncrypted:NO andMessageId:[[NSUUID UUID] UUIDString]];
+            }
+            
+            [outboxClean removeObject:row];
+        }
+    }
+    
+    [groupDefaults setObject:outboxClean forKey:@"outbox"];
 }
 
 @end

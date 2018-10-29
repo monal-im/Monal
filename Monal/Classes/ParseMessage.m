@@ -136,6 +136,22 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             DDLogVerbose(@"message from %@", _from);
             return;
         }
+    
+    
+    if(([elementName isEqualToString:@"x"])  && ([[attributeDict objectForKey:@"xmlns"] isEqualToString:@""]))
+    {
+        State=@"OOB";
+        return;
+    }
+    
+    if([State isEqualToString:@"OOB"] && [elementName isEqualToString: @"url"])
+    {
+        DDLogVerbose(@"OOB Url seen");
+        State=@"OOBUrl";
+        
+        return;
+    }
+    
 
 	//multi user chat
 	//message->user:X
@@ -151,7 +167,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		return;
 	}
 
-	
+
+    
 	if((([State isEqualToString:@"MucUser"]) && (([elementName isEqualToString: @"user:reason"]))) || ([elementName isEqualToString: @"reason"]))
 	{
 		DDLogVerbose(@"user reason set"); 
@@ -264,6 +281,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         if(!_actualFrom) _actualFrom=_from;
         if(!_messageText) _messageText=_messagHTML;
         if(!_messageText) _messageText=_messageBuffer; 
+    }
+    
+    if([State isEqualToString:@"OOBUrl"] && [elementName isEqualToString:@"url"])
+    {
+        _oobURL=_messageBuffer;
+        _messageBuffer=nil;
     }
     
     if([State isEqualToString:@"AvatarData"])

@@ -1835,6 +1835,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                 body =[NSString stringWithFormat:@"%@ changed the subject to: %@", messageNode.actualFrom, messageNode.subject];
                                 messageType=kMessageTypeStatus;
                             }
+                            
+                            if(messageNode.oobURL)
+                            {
+                                messageType=kMessageTypeImage;
+                            }
+                            
                             BOOL encrypted=NO;
                             if(decrypted) encrypted=YES;
                             

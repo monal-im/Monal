@@ -42,6 +42,7 @@ NSString *const kMessageType =@"messageType";
 NSString *const kMessageTypeImage =@"Image";
 NSString *const kMessageTypeText =@"Text";
 NSString *const kMessageTypeStatus =@"Status";
+NSString *const kMessageTypeUrl =@"Url";
 
 // used for contact rows
 NSString *const kContactName =@"buddy_name";

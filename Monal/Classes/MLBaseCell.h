@@ -19,6 +19,7 @@
 @property (nonatomic, strong) IBOutlet UILabel* messageBody;
 @property (nonatomic, strong) IBOutlet UILabel* messageStatus;
 @property (nonatomic, strong) NSString* link;
+@property (nonatomic, strong) IBOutlet UIView* bubbleView;
 
 @property (nonatomic, weak) IBOutlet UIImageView *bubbleImage;
 

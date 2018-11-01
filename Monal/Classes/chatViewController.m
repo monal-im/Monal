@@ -8,6 +8,7 @@
 
 #import "chatViewController.h"
 #import "MLChatCell.h"
+#import "MLLinkCell.h"
 #import "MLChatImageCell.h"
 
 #import "MLConstants.h"
@@ -898,20 +899,40 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     {
         if([from isEqualToString:_jid])
         {
-            cell=[tableView dequeueReusableCellWithIdentifier:@"textOutCell"];
+            if([messageType isEqualToString:kMessageTypeUrl])
+            {
+                cell=[tableView dequeueReusableCellWithIdentifier:@"linkOutCell"];
+            } else  {
+                cell=[tableView dequeueReusableCellWithIdentifier:@"textOutCell"];
+            }
         }
         else
         {
-            cell=[tableView dequeueReusableCellWithIdentifier:@"textInCell"];
+            if([messageType isEqualToString:kMessageTypeUrl])
+            {
+                cell=[tableView dequeueReusableCellWithIdentifier:@"linkInCell"];
+            } else  {
+                cell=[tableView dequeueReusableCellWithIdentifier:@"textInCell"];
+            }
         }
     } else  {
         if([from isEqualToString:self.contactName])
         {
-            cell=[tableView dequeueReusableCellWithIdentifier:@"textInCell"];
+            if([messageType isEqualToString:kMessageTypeUrl])
+            {
+                cell=[tableView dequeueReusableCellWithIdentifier:@"linkInCell"];
+            }  else  {
+                cell=[tableView dequeueReusableCellWithIdentifier:@"textInCell"];
+            }
         }
         else
         {
-            cell=[tableView dequeueReusableCellWithIdentifier:@"textOutCell"];
+            if([messageType isEqualToString:kMessageTypeUrl])
+            {
+                cell=[tableView dequeueReusableCellWithIdentifier:@"linkOutCell"];
+            } else  {
+                cell=[tableView dequeueReusableCellWithIdentifier:@"textOutCell"];
+            }
         }
         
         NSNumber *received = [row objectForKey:@"message"];
@@ -920,9 +941,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         }
     }
 
-    
     NSDictionary *messageRow = [self.messageList objectAtIndex:indexPath.row];
-    
     NSString *messageString =[messageRow objectForKey:@"message"];
    
     if([messageType isEqualToString:kMessageTypeImage])
@@ -948,8 +967,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         }];
         cell=imageCell;
         
-    } else  {
-    
+    }
+    else {
+            
         NSString* lowerCase= [[row objectForKey:@"message"] lowercaseString];
         NSRange pos = [lowerCase rangeOfString:@"https://"];
         if(pos.location==NSNotFound) {
@@ -965,14 +985,22 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                 pos2= [urlString rangeOfString:@">"];
             }
             
-            
             if(pos2.location!=NSNotFound) {
                 urlString=[urlString substringToIndex:pos2.location];
             }
             
+            MLLinkCell *toreturn= (MLLinkCell *)[tableView dequeueReusableCellWithIdentifier:@"linkOutCell"];
             
             cell.link=[urlString stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-        
+            
+            toreturn.messageBody.text =cell.link;
+            toreturn.messageTitle.text =@"Giantbomb";
+            toreturn.link=cell.link;
+            toreturn.imageUrl=@"https://static.giantbomb.com/bundles/giantbombsite/images/logo.png";
+            [toreturn loadImageWithCompletion:^{
+                
+            }];
+            
             NSDictionary *underlineAttribute = @{NSUnderlineStyleAttributeName: @(NSUnderlineStyleSingle)};
             NSAttributedString* underlined = [[NSAttributedString alloc] initWithString:cell.link
                                                                              attributes:underlineAttribute];
@@ -980,7 +1008,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
             
             if ([underlined length]==[[row objectForKey:@"message"] length])
             {
-                cell.messageBody.attributedText=underlined;
+                cell=toreturn;
             }
             else
             {

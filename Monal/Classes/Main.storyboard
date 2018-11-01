@@ -1390,7 +1390,7 @@
                                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="XUY-AO-Shv">
                                                     <rect key="frame" x="143" y="1" width="256" height="199"/>
                                                     <subviews>
-                                                        <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="SZk-M8-aka">
+                                                        <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="SZk-M8-aka">
                                                             <rect key="frame" x="0.0" y="0.0" width="256" height="128"/>
                                                             <constraints>
                                                                 <constraint firstAttribute="height" constant="128" id="7Zh-fJ-wte"/>
@@ -1462,6 +1462,7 @@
                                             </constraints>
                                         </tableViewCellContentView>
                                         <connections>
+                                            <outlet property="bubbleView" destination="XUY-AO-Shv" id="Xme-V4-2os"/>
                                             <outlet property="date" destination="F48-Lg-vgK" id="hes-Fb-RYT"/>
                                             <outlet property="messageBody" destination="Vgy-m0-M8n" id="9op-R8-oUa"/>
                                             <outlet property="messageStatus" destination="vAj-sV-yOx" id="w4f-qO-ShE"/>

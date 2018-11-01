@@ -16,6 +16,9 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) NSString *imageUrl; 
 
 -(void) loadImageWithCompletion:(void (^)(void))completion;
+-(void) loadPreviewWithCompletion:(void (^)(void))completion;
+
+
 
 @end
 

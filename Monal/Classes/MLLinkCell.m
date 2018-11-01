@@ -8,6 +8,8 @@
 
 #import "MLLinkCell.h"
 #import "UIImageView+WebCache.h"
+@import SafariServices;
+
 
 @implementation MLLinkCell
 
@@ -27,6 +29,7 @@
 - (NSString *) ogContentWithTag:(NSString *) tag inHTML:(NSString *) body
 {
     NSRange titlePos = [body rangeOfString:tag];
+    if(titlePos.location==NSNotFound) return nil; 
     NSRange end = [body rangeOfString:@"/>" options:NSCaseInsensitiveSearch range:NSMakeRange(titlePos.location, body.length-titlePos.location)];
     NSString *subString = [body substringWithRange:NSMakeRange(titlePos.location, end.location-titlePos.location)];
     NSArray *parts = [subString componentsSeparatedByString:@"content="];
@@ -36,6 +39,20 @@
         text = [text substringWithRange:NSMakeRange(1, text.length-2)]; //quotes
     }
     return text;
+}
+
+-(void) openlink: (id) sender {
+    
+    if(self.link)
+    {
+        NSURL *url= [NSURL URLWithString:self.link];
+        
+        if ([url.scheme isEqualToString:@"http"] || [url.scheme isEqualToString:@"https"]) {
+            SFSafariViewController *safariView = [[ SFSafariViewController alloc] initWithURL:url];
+            [self.parent presentViewController:safariView animated:YES completion:nil];
+        }
+        
+    }
 }
 
 -(void) loadPreviewWithCompletion:(void (^)(void))completion

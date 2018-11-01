@@ -18,7 +18,7 @@ NS_ASSUME_NONNULL_BEGIN
 -(void) loadImageWithCompletion:(void (^)(void))completion;
 -(void) loadPreviewWithCompletion:(void (^)(void))completion;
 
-
+-(void) openlink: (id) sender;
 
 @end
 

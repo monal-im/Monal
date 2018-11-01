@@ -14,7 +14,8 @@
 - (void)awakeFromNib {
     [super awakeFromNib];
     // Initialization code
-    self.bubbleView.layer.cornerRadius=8.0f; 
+    self.bubbleView.layer.cornerRadius=16.0f;
+    self.bubbleView.clipsToBounds=YES;
 }
 
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated {

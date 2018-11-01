@@ -994,9 +994,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
             cell.link=[urlString stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
             
             toreturn.messageBody.text =cell.link;
-            toreturn.messageTitle.text =@"Giantbomb";
+            toreturn.messageTitle.text =@"Nintendo recommits to “keep the business going” for 3DS";
             toreturn.link=cell.link;
-            toreturn.imageUrl=@"https://static.giantbomb.com/bundles/giantbombsite/images/logo.png";
+            toreturn.imageUrl=@"https://cdn.arstechnica.net/wp-content/uploads/2016/09/3DS_SuperMarioMakerforNintendo3DS_char_01-760x380.jpg";
             [toreturn loadImageWithCompletion:^{
                 
             }];

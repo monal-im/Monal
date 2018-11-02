@@ -29,7 +29,7 @@
 - (NSString *) ogContentWithTag:(NSString *) tag inHTML:(NSString *) body
 {
     NSRange titlePos = [body rangeOfString:tag];
-    if(titlePos.location==NSNotFound) return nil; 
+    if(titlePos.location==NSNotFound) return nil;
     NSRange end = [body rangeOfString:@"/>" options:NSCaseInsensitiveSearch range:NSMakeRange(titlePos.location, body.length-titlePos.location)];
     NSString *subString = [body substringWithRange:NSMakeRange(titlePos.location, end.location-titlePos.location)];
     NSArray *parts = [subString componentsSeparatedByString:@"content="];
@@ -70,7 +70,7 @@
             NSString *body = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
             
             dispatch_async(dispatch_get_main_queue(), ^{
-                self.messageTitle.text=[self ogContentWithTag:@"og:title" inHTML:body];
+                self.messageTitle.text=[[self ogContentWithTag:@"og:title" inHTML:body] stringByRemovingPercentEncoding];
                 self.imageUrl=[self ogContentWithTag:@"og:image" inHTML:body];
                 [self loadImageWithCompletion:^{
                     if(completion) completion();

@@ -891,14 +891,17 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
         NSDictionary *accountDic = [row objectForKey:@"account"] ;
         if([[accountDic objectForKey:@"account_id"] integerValue] == [account integerValue])
         {
-            xmpp* xmpp =[self getConnectedAccountForID:account];
-            [xmpp sendMessage:[row objectForKey:@"url"] toContact:[row objectForKey:@"recipient"] isMUC:NO isEncrypted:NO andMessageId:[[NSUUID UUID] UUIDString]];
-            
-            if([row objectForKey:@"comment"]) {
-                [xmpp sendMessage:[row objectForKey:@"comment"] toContact:[row objectForKey:@"recipient"] isMUC:NO isEncrypted:NO andMessageId:[[NSUUID UUID] UUIDString]];
-            }
-            
-            [outboxClean removeObject:row];
+            [self sendMessage:[row objectForKey:@"url"] toContact:[row objectForKey:@"recipient"] fromAccount:[accountDic objectForKey:@"account_id"]  isEncrypted:NO isMUC:NO messageId:[[NSUUID UUID] UUIDString] withCompletionHandler:^(BOOL success, NSString *messageId) {
+                
+                if(success) {
+                if([row objectForKey:@"comment"]) {
+                    [self sendMessage:[row objectForKey:@"comment"] toContact:[row objectForKey:@"recipient"]  fromAccount:[accountDic objectForKey:@"account_id"]  isEncrypted:NO isMUC:NO messageId:[[NSUUID UUID] UUIDString] withCompletionHandler:^(BOOL success, NSString *messageId) {
+                        
+                    }];
+                }
+                       [outboxClean removeObject:row];
+                }
+            }];
         }
     }
     

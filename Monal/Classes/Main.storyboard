@@ -1292,7 +1292,7 @@
             <objects>
                 <navigationController id="PjQ-9S-4Zq" sceneMemberID="viewController">
                     <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="yG5-Vj-gyO">
-                        <rect key="frame" x="0.0" y="20" width="414" height="44"/>
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <connections>
@@ -1439,7 +1439,6 @@
                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <connections>
                                             <outlet property="bubbleView" destination="thO-n1-R59" id="LEu-0p-10D"/>
-                                            <outlet property="date" destination="F48-Lg-vgK" id="Y59-T3-wK3"/>
                                             <outlet property="messageBody" destination="BOF-N9-DXP" id="B1D-0A-ikT"/>
                                             <outlet property="messageTitle" destination="51H-Ae-jwz" id="LS5-O3-rP2"/>
                                             <outlet property="previewImage" destination="T5r-3Z-CiI" id="iq8-DP-DiR"/>

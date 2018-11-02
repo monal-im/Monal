@@ -1464,6 +1464,7 @@
                                                 <constraint firstItem="XUY-AO-Shv" firstAttribute="leading" secondItem="F48-Lg-vgK" secondAttribute="trailing" constant="8" symbolic="YES" id="sJq-Ti-IrE"/>
                                             </constraints>
                                         </tableViewCellContentView>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <connections>
                                             <outlet property="bubbleView" destination="XUY-AO-Shv" id="Xme-V4-2os"/>
                                             <outlet property="date" destination="F48-Lg-vgK" id="hes-Fb-RYT"/>
@@ -1526,6 +1527,7 @@
                                                 <constraint firstItem="W0m-OG-Q8V" firstAttribute="bottom" secondItem="uMC-3d-1aS" secondAttribute="bottomMargin" id="z7i-q9-uax"/>
                                             </constraints>
                                         </tableViewCellContentView>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <connections>
                                             <outlet property="date" destination="WlK-KG-Z5M" id="iEH-Xn-fH6"/>
                                             <outlet property="imageHeight" destination="RiZ-ui-Y0E" id="AGX-f4-SYW"/>
@@ -1597,6 +1599,7 @@
                                                 <constraint firstAttribute="trailingMargin" secondItem="0CY-WL-e75" secondAttribute="trailing" constant="5" id="vaj-uL-c46"/>
                                             </constraints>
                                         </tableViewCellContentView>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <connections>
                                             <outlet property="bubbleImage" destination="j3m-BP-DXG" id="mW6-sq-epF"/>
                                             <outlet property="date" destination="uDg-Hw-FvA" id="30Z-UY-yYy"/>
@@ -1671,6 +1674,7 @@
                                                 <constraint firstItem="DZU-Tx-2ba" firstAttribute="leading" secondItem="vWM-SI-3lf" secondAttribute="trailing" constant="8" id="sAF-A9-Nh9"/>
                                             </constraints>
                                         </tableViewCellContentView>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <connections>
                                             <outlet property="bubbleImage" destination="rLX-lr-DcJ" id="YsV-ui-ipQ"/>
                                             <outlet property="date" destination="vWM-SI-3lf" id="JSL-sS-NlZ"/>
@@ -1711,6 +1715,7 @@
                                                 <constraint firstItem="Xld-jv-Isd" firstAttribute="trailing" secondItem="GA8-Q5-xRV" secondAttribute="trailingMargin" id="lcg-Yi-F6F"/>
                                             </constraints>
                                         </tableViewCellContentView>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <connections>
                                             <outlet property="date" destination="Xld-jv-Isd" id="fls-q5-SPA"/>
                                             <outlet property="imageHeight" destination="T8s-TI-xbm" id="RII-N1-3Cn"/>
@@ -1741,6 +1746,7 @@
                                                 <constraint firstItem="15o-hp-DgI" firstAttribute="centerY" secondItem="xcN-0Z-bTD" secondAttribute="centerY" id="p2O-HD-LZA"/>
                                             </constraints>
                                         </tableViewCellContentView>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <connections>
                                             <outlet property="messageBody" destination="15o-hp-DgI" id="e4o-US-mPu"/>
                                         </connections>

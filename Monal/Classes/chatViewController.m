@@ -225,13 +225,12 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     }
 
     [self handleForeGround];
-    
- 
-    
     [self refreshButton:nil];
 
     UIEdgeInsets currentInset = self.messageTable.contentInset;
     self.messageTable.contentInset =UIEdgeInsetsMake(self.navigationController.navigationBar.frame.size.height+[UIApplication sharedApplication].statusBarFrame.size.height, currentInset.left, currentInset.bottom, currentInset.right);
+   
+    self.messageTable.backgroundView=[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"ios11"]];
     
 }
 

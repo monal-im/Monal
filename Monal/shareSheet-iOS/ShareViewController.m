@@ -10,6 +10,7 @@
 #import "MLSelectionController.h"
 @import Crashlytics;
 @import Fabric;
+#import "UIColor+Theme.h"
 
 @interface ShareViewController ()
 
@@ -24,20 +25,25 @@
 
 @implementation ShareViewController
 
+-(void)viewDidLoad {
+    [self.navigationController.navigationBar setTintColor:[UIColor whiteColor]];
+    [self.navigationController.navigationBar setBackgroundColor:[UIColor monaldarkGreen]];
+    self.navigationController.navigationItem.title=@"Monal";
+}
+
 - (void)presentationAnimationDidFinish {
-      [Fabric with:@[[Crashlytics class]]];
+    [Fabric with:@[[Crashlytics class]]];
     NSUserDefaults *groupDefaults= [[NSUserDefaults alloc] initWithSuiteName:@"group.monal"];
     self.accounts= [groupDefaults objectForKey:@"accounts"];
     self.recipients = [groupDefaults objectForKey:@"recipients"];
     
     self.recipient = [groupDefaults objectForKey:@"lastRecipient"];
     self.account = [groupDefaults objectForKey:@"lastAccount"];
-    
+    self.textView.text=@"";
     [self reloadConfigurationItems];
 }
 
 - (BOOL)isContentValid {
-
     if(self.recipient.length>0 && self.account!=nil)
     return YES;
     else return NO;

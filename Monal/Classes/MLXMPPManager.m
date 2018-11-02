@@ -894,18 +894,19 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
             [self sendMessage:[row objectForKey:@"url"] toContact:[row objectForKey:@"recipient"] fromAccount:[NSString stringWithFormat:@"%@", [accountDic objectForKey:@"account_id"]]  isEncrypted:NO isMUC:NO messageId:[[NSUUID UUID] UUIDString] withCompletionHandler:^(BOOL success, NSString *messageId) {
                 
                 if(success) {
-                if([row objectForKey:@"comment"]) {
-                    [self sendMessage:[row objectForKey:@"comment"] toContact:[row objectForKey:@"recipient"]  fromAccount:[NSString stringWithFormat:@"%@", [accountDic objectForKey:@"account_id"]]  isEncrypted:NO isMUC:NO messageId:[[NSUUID UUID] UUIDString] withCompletionHandler:^(BOOL success, NSString *messageId) {
-                        
-                    }];
-                }
-                       [outboxClean removeObject:row];
+                    if(((NSString *)[row objectForKey:@"comment"]).length>0) {
+                        [self sendMessage:[row objectForKey:@"comment"] toContact:[row objectForKey:@"recipient"]  fromAccount:[NSString stringWithFormat:@"%@", [accountDic objectForKey:@"account_id"]]  isEncrypted:NO isMUC:NO messageId:[[NSUUID UUID] UUIDString] withCompletionHandler:^(BOOL success, NSString *messageId) {
+                            
+                        }];
+                    }
+                    [outboxClean removeObject:row];
+                       [groupDefaults setObject:outboxClean forKey:@"outbox"];
                 }
             }];
         }
     }
     
-    [groupDefaults setObject:outboxClean forKey:@"outbox"];
+ 
 }
 
 -(void) sendMessageForConnectedAccounts

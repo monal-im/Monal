@@ -92,7 +92,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
  }
  
     _inboundImage=[[UIImage imageNamed:@"incoming"]
-                   resizableImageWithCapInsets:UIEdgeInsetsMake(20, 30, 20, 30)];
+                   resizableImageWithCapInsets:UIEdgeInsetsMake(6, 6, 6, 6)];
     
     return _inboundImage;
     
@@ -107,7 +107,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     }
     
     _outboundImage=[[UIImage imageNamed:@"outgoing"]
-                   resizableImageWithCapInsets:UIEdgeInsetsMake(20, 30, 20, 30)];
+                   resizableImageWithCapInsets:UIEdgeInsetsMake(6, 6, 6, 6)];
     
     return _outboundImage;
 }

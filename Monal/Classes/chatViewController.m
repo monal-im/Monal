@@ -988,7 +988,13 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                 urlString=[urlString substringToIndex:pos2.location];
             }
             
-            MLLinkCell *toreturn= (MLLinkCell *)[tableView dequeueReusableCellWithIdentifier:@"linkOutCell"];
+            MLLinkCell *toreturn;
+            if([from isEqualToString:self.contactName]) {
+                toreturn=(MLLinkCell *)[tableView dequeueReusableCellWithIdentifier:@"linkInCell"];
+            }
+            else  {
+                toreturn=(MLLinkCell *)[tableView dequeueReusableCellWithIdentifier:@"linkOutCell"];
+            }
             
             cell.link=[urlString stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
             

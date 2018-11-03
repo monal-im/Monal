@@ -1076,6 +1076,13 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     cell.date.text= [self formattedDateWithSource:[row objectForKey:@"thetime"]];
     cell.selectionStyle=UITableViewCellSelectionStyleNone;
     
+    if([[row objectForKey:@"encrypted"] boolValue])
+    {
+        cell.lockImage.hidden=NO;
+    } else  {
+         cell.lockImage.hidden=YES;
+    }
+    
     if([[row objectForKey:@"af"] isEqualToString:_jid])
     {
         cell.outBound=YES;

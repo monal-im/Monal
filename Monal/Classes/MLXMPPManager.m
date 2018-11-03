@@ -891,7 +891,12 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
         NSDictionary *accountDic = [row objectForKey:@"account"] ;
         if([[accountDic objectForKey:@"account_id"] integerValue] == [account integerValue])
         {
-            [self sendMessage:[row objectForKey:@"url"] toContact:[row objectForKey:@"recipient"] fromAccount:[NSString stringWithFormat:@"%@", [accountDic objectForKey:@"account_id"]]  isEncrypted:NO isMUC:NO messageId:[[NSUUID UUID] UUIDString] withCompletionHandler:^(BOOL success, NSString *messageId) {
+            NSString* msgid=[[NSUUID UUID] UUIDString];
+            [[DataLayer sharedInstance] addMessageHistoryFrom:[NSString stringWithFormat:@"%@", [accountDic objectForKey:@"account_id"]] to:[row objectForKey:@"recipient"] forAccount:[accountDic objectForKey:@"account_id"] withMessage:[row objectForKey:@"url"]  actuallyFrom:[NSString stringWithFormat:@"%@", [accountDic objectForKey:@"account_id"]]  withId:msgid encrypted:NO withCompletion:^(BOOL success, NSString *messageType) {
+                
+            }];
+            
+            [self sendMessage:[row objectForKey:@"url"] toContact:[row objectForKey:@"recipient"] fromAccount:[NSString stringWithFormat:@"%@", [accountDic objectForKey:@"account_id"]]  isEncrypted:NO isMUC:NO messageId:msgid withCompletionHandler:^(BOOL success, NSString *messageId) {
                 
                 if(success) {
                     if(((NSString *)[row objectForKey:@"comment"]).length>0) {

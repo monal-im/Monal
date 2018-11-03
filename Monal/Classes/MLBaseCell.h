@@ -22,7 +22,7 @@
 @property (nonatomic, strong) IBOutlet UIView* bubbleView;
 
 @property (nonatomic, weak) IBOutlet UIImageView *bubbleImage;
-
+@property (nonatomic, weak) IBOutlet UIImageView *lockImage;
 
 @property (nonatomic, assign) BOOL deliveryFailed;
 @property (nonatomic, strong) IBOutlet UIButton* retry;

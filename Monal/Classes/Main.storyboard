@@ -1292,7 +1292,7 @@
             <objects>
                 <navigationController id="PjQ-9S-4Zq" sceneMemberID="viewController">
                     <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="yG5-Vj-gyO">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="44"/>
+                        <rect key="frame" x="0.0" y="20" width="414" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <connections>
@@ -1647,13 +1647,22 @@
                                                         <constraint firstAttribute="bottom" secondItem="j3m-BP-DXG" secondAttribute="bottom" id="uIw-Je-hLU"/>
                                                     </constraints>
                                                 </view>
+                                                <imageView hidden="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="744-locked-selected" translatesAutoresizingMaskIntoConstraints="NO" id="VYo-Qc-SmT">
+                                                    <rect key="frame" x="96.666666666666671" y="80.666666666666671" width="23" height="11"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="width" constant="23" id="Fmp-e2-5f9"/>
+                                                        <constraint firstAttribute="height" constant="11" id="IKb-go-PcA"/>
+                                                    </constraints>
+                                                </imageView>
                                             </subviews>
                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                             <constraints>
+                                                <constraint firstItem="VYo-Qc-SmT" firstAttribute="bottom" secondItem="t2e-sA-RIo" secondAttribute="bottomMargin" id="202-Iy-057"/>
                                                 <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="96E-WC-l2C" secondAttribute="trailing" constant="59" id="2YQ-qe-HgE"/>
                                                 <constraint firstItem="uDg-Hw-FvA" firstAttribute="leading" secondItem="96E-WC-l2C" secondAttribute="trailing" constant="8" id="EnG-cv-LxO"/>
                                                 <constraint firstItem="uDg-Hw-FvA" firstAttribute="top" secondItem="t2e-sA-RIo" secondAttribute="topMargin" id="NaU-yY-Q2c"/>
                                                 <constraint firstItem="96E-WC-l2C" firstAttribute="leading" secondItem="t2e-sA-RIo" secondAttribute="leading" constant="15" id="Wmv-eF-Lgf"/>
+                                                <constraint firstItem="VYo-Qc-SmT" firstAttribute="leading" secondItem="96E-WC-l2C" secondAttribute="trailing" constant="8" id="Zhj-AN-7ok"/>
                                                 <constraint firstItem="uDg-Hw-FvA" firstAttribute="leading" secondItem="96E-WC-l2C" secondAttribute="trailing" constant="8" symbolic="YES" id="aO9-lF-agh"/>
                                                 <constraint firstItem="96E-WC-l2C" firstAttribute="top" secondItem="t2e-sA-RIo" secondAttribute="top" constant="4" id="gO8-fK-q4R"/>
                                                 <constraint firstAttribute="bottom" secondItem="96E-WC-l2C" secondAttribute="bottom" constant="4" id="tRD-qY-kP6"/>
@@ -1664,6 +1673,7 @@
                                         <connections>
                                             <outlet property="bubbleImage" destination="j3m-BP-DXG" id="mW6-sq-epF"/>
                                             <outlet property="date" destination="uDg-Hw-FvA" id="30Z-UY-yYy"/>
+                                            <outlet property="lockImage" destination="VYo-Qc-SmT" id="wWb-Rk-pd6"/>
                                             <outlet property="messageBody" destination="Ra0-Eo-cAh" id="9QE-i9-4oX"/>
                                         </connections>
                                     </tableViewCell>
@@ -1719,6 +1729,13 @@
                                                     <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
+                                                <imageView hidden="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="744-locked-selected" translatesAutoresizingMaskIntoConstraints="NO" id="PfJ-mR-xOa">
+                                                    <rect key="frame" x="240.66666666666666" y="88.666666666666671" width="22.999999999999972" height="11"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="height" constant="11" id="Vhg-OJ-P1w"/>
+                                                        <constraint firstAttribute="width" constant="23" id="oDn-0D-UEr"/>
+                                                    </constraints>
+                                                </imageView>
                                             </subviews>
                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                             <constraints>
@@ -1727,7 +1744,9 @@
                                                 <constraint firstItem="p0Q-oV-3Pb" firstAttribute="centerY" secondItem="dt0-Ax-p6m" secondAttribute="centerY" id="HeY-vR-Cfv"/>
                                                 <constraint firstItem="p0Q-oV-3Pb" firstAttribute="leading" secondItem="dt0-Ax-p6m" secondAttribute="leadingMargin" constant="9" id="T1a-v8-8FI"/>
                                                 <constraint firstItem="DZU-Tx-2ba" firstAttribute="top" secondItem="dt0-Ax-p6m" secondAttribute="top" constant="4" id="UCA-kZ-4d4"/>
+                                                <constraint firstAttribute="bottom" secondItem="PfJ-mR-xOa" secondAttribute="bottom" id="euO-rF-bDX"/>
                                                 <constraint firstItem="DZU-Tx-2ba" firstAttribute="leading" secondItem="mM6-k0-MKY" secondAttribute="trailing" constant="8" id="g0p-fk-AH6"/>
+                                                <constraint firstItem="mM6-k0-MKY" firstAttribute="leading" secondItem="PfJ-mR-xOa" secondAttribute="trailing" constant="8" id="glh-4a-pON"/>
                                                 <constraint firstAttribute="bottom" secondItem="mM6-k0-MKY" secondAttribute="bottom" id="p8O-is-dTu"/>
                                                 <constraint firstItem="DZU-Tx-2ba" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="p0Q-oV-3Pb" secondAttribute="trailing" constant="72" id="pNa-MY-XBh"/>
                                                 <constraint firstItem="vWM-SI-3lf" firstAttribute="top" secondItem="dt0-Ax-p6m" secondAttribute="topMargin" id="qh3-Wi-PcK"/>
@@ -1738,6 +1757,7 @@
                                         <connections>
                                             <outlet property="bubbleImage" destination="rLX-lr-DcJ" id="YsV-ui-ipQ"/>
                                             <outlet property="date" destination="vWM-SI-3lf" id="JSL-sS-NlZ"/>
+                                            <outlet property="lockImage" destination="PfJ-mR-xOa" id="pvq-JN-kSs"/>
                                             <outlet property="messageBody" destination="VFO-tq-wdS" id="Ham-7i-hdn"/>
                                             <outlet property="messageStatus" destination="mM6-k0-MKY" id="7Vy-3S-dUB"/>
                                             <outlet property="retry" destination="p0Q-oV-3Pb" id="2sQ-po-CC5"/>
@@ -1945,6 +1965,7 @@
     <resources>
         <image name="724-info" width="28" height="28"/>
         <image name="740-gear" width="28" height="28"/>
+        <image name="744-locked-selected" width="21" height="28"/>
         <image name="770-paper-clip" width="28" height="27"/>
         <image name="906-chat-3" width="28" height="26"/>
         <image name="973-user" width="28" height="24"/>

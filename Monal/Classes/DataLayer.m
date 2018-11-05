@@ -2390,7 +2390,14 @@ static DataLayer *sharedInstance=nil;
        
         [self executeNonQuery:@"  CREATE TABLE signalContactSession (account_id int NOT NULL, contactName text, contactDeviceId int not null, recordData BLOB)" withCompletion:nil];
         [self executeNonQuery:@"alter table message_history add column encrypted bool;" withCompletion:nil];
+        
+         [self executeNonQuery:@"alter table message_history add column previewText text;" withCompletion:nil];
+         [self executeNonQuery:@"alter table message_history add column previewImage text;" withCompletion:nil];
+        
+         [self executeNonQuery:@"alter table buddylist add column backgroundImage text;" withCompletion:nil];
+        
         [self executeNonQuery:@"update dbversion set dbversion='3.0'; " withCompletion:nil];
+        
         
         DDLogVerbose(@"Upgrade to 3.0 success ");
     }

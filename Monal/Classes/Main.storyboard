@@ -1415,6 +1415,7 @@
                                                                 <constraint firstItem="loD-fs-EW7" firstAttribute="top" secondItem="N2M-fq-qWy" secondAttribute="top" constant="8" id="FEU-8g-tSo"/>
                                                                 <constraint firstAttribute="trailing" secondItem="4KG-8d-uoj" secondAttribute="trailing" constant="8" id="SHG-1r-ieY"/>
                                                                 <constraint firstAttribute="bottom" secondItem="4KG-8d-uoj" secondAttribute="bottom" constant="8" id="Wen-EJ-xF3"/>
+                                                                <constraint firstAttribute="height" constant="72" id="kUZ-m9-g0n"/>
                                                             </constraints>
                                                         </view>
                                                     </subviews>
@@ -1508,6 +1509,7 @@
                                                                 <constraint firstAttribute="trailing" secondItem="WyS-w8-jKs" secondAttribute="trailing" constant="8" id="Q7h-kl-oCE"/>
                                                                 <constraint firstItem="WyS-w8-jKs" firstAttribute="top" secondItem="yOx-oc-nQQ" secondAttribute="top" constant="8" id="agK-d0-FsQ"/>
                                                                 <constraint firstAttribute="bottom" secondItem="Vgy-m0-M8n" secondAttribute="bottom" constant="8" id="llS-mu-4lQ"/>
+                                                                <constraint firstAttribute="height" constant="72" id="qpe-Ch-Aye"/>
                                                                 <constraint firstItem="Vgy-m0-M8n" firstAttribute="leading" secondItem="yOx-oc-nQQ" secondAttribute="leading" constant="8" id="tlP-oL-bAY"/>
                                                             </constraints>
                                                         </view>

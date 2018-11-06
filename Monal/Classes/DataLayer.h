@@ -196,6 +196,11 @@ extern NSString *const kMessageTypeUrl;
  */
 -(void) setMessageId:(NSString*) messageid received:(BOOL) received;
 
+/**
+ sets a preview info for a specified message
+ */
+-(void) setMessageId:(NSString*) messageid previewText:(NSString *) text andPreviewImage:(NSString *) image;
+
 -(void) clearMessages:(NSString*) accountNo;
 -(void) deleteMessageHistory:(NSString*) messageNo;
 

@@ -1567,7 +1567,7 @@ static DataLayer *sharedInstance=nil;
 -(void) setMessageId:(NSString*) messageid delivered:(BOOL) delivered
 {
     NSString* query=[NSString stringWithFormat:@"update message_history set delivered=%d where messageid='%@';",delivered, messageid];
-    DDLogInfo(@" setting delivered %@",query);
+    DDLogVerbose(@" setting delivered %@",query);
     [self executeNonQuery:query withCompletion:nil];
  
 }
@@ -1576,10 +1576,27 @@ static DataLayer *sharedInstance=nil;
 -(void) setMessageId:(NSString*) messageid received:(BOOL) received
 {
     NSString* query=[NSString stringWithFormat:@"update message_history set received=%d where messageid='%@';",received, messageid];
-    DDLogInfo(@" setting received confrmed %@",query);
+    DDLogVerbose(@" setting received confrmed %@",query);
     [self executeNonQuery:query withCompletion:nil];
     
 }
+
+
+-(void) setMessageId:(NSString*) messageid messageType:(NSString *) messageType
+{
+    NSString* query=[NSString stringWithFormat:@"update message_history set messageType=? where messageid=?"];
+    DDLogVerbose(@" setting message type %@",query);
+   [self executeNonQuery:query  andArguments:@[messageType, messageid]  withCompletion:nil];
+}
+
+
+-(void) setMessageId:(NSString*) messageid previewText:(NSString *) text andPreviewImage:(NSString *) image
+{
+    NSString* query=[NSString stringWithFormat:@"update message_history set previewText=?,  previewImage=? where messageid=?"];
+    DDLogVerbose(@" setting previews type %@",query);
+    [self executeNonQuery:query  andArguments:@[text, image, messageid]  withCompletion:nil];
+}
+
 
 
 
@@ -1636,7 +1653,7 @@ static DataLayer *sharedInstance=nil;
 -(NSArray*) messageHistoryDate:(NSString*) buddy forAccount:(NSString*) accountNo forDate:(NSString*) date
 {
     
-    NSString* query=[NSString stringWithFormat:@"select af, message, thetime, delivered, message_history_id from (select ifnull(actual_from, message_from) as af, message, delivered,    timestamp  as thetime, message_history_id from message_history where account_id=? and (message_from=? or message_to=?) and date(timestamp)=? order by message_history_id desc) order by message_history_id asc"];
+    NSString* query=[NSString stringWithFormat:@"select af, message, thetime, delivered, message_history_id from (select ifnull(actual_from, message_from) as af, message, delivered,    timestamp  as thetime, message_history_id, previewImage, previewText from message_history where account_id=? and (message_from=? or message_to=?) and date(timestamp)=? order by message_history_id desc) order by message_history_id asc"];
     NSArray *params=@[accountNo, buddy, buddy, date];
     
     DDLogVerbose(@"%@",query);
@@ -1663,7 +1680,7 @@ static DataLayer *sharedInstance=nil;
 {
     //returns a buddy's message history
     
-    NSString* query=[NSString stringWithFormat:@"select message_from, message, thetime from (select message_from, message, timestamp as thetime, message_history_id from message_history where account_id=? and (message_from=? or message_to=?) order by message_history_id desc) order by message_history_id asc "];
+    NSString* query=[NSString stringWithFormat:@"select message_from, message, thetime from (select message_from, message, timestamp as thetime, message_history_id, previewImage, previewText from message_history where account_id=? and (message_from=? or message_to=?) order by message_history_id desc) order by message_history_id asc "];
     NSArray *params=@[accountNo, buddy, buddy];
     //DDLogVerbose(query);
     NSArray* toReturn = [self executeReader:query andArguments:params];
@@ -1762,16 +1779,14 @@ static DataLayer *sharedInstance=nil;
 -(NSMutableArray*) messageHistory:(NSString*) buddy forAccount:(NSString*) accountNo
 {
     if(!accountNo ||! buddy) return nil; 
-    NSString* query=[NSString stringWithFormat:@"select af,message_from,  message, thetime, message_history_id, delivered, messageid, messageType, received,encrypted from (select ifnull(actual_from, message_from) as af, message_from,  message, received, encrypted,   timestamp  as thetime, message_history_id, delivered,messageid, messageType from message_history where account_id=? and (message_from=? or message_to=?) order by message_history_id desc limit 100) order by thetime asc"];
+    NSString* query=[NSString stringWithFormat:@"select af,message_from,  message, thetime, message_history_id, delivered, messageid, messageType, received,encrypted,previewImage, previewText  from (select ifnull(actual_from, message_from) as af, message_from,  message, received, encrypted,   timestamp  as thetime, message_history_id, delivered,messageid, messageType, previewImage, previewText from message_history where account_id=? and (message_from=? or message_to=?) order by message_history_id desc limit 100) order by thetime asc"];
     NSArray *params=@[accountNo, buddy, buddy];
-    DDLogVerbose(@"%@", query);
     NSMutableArray* toReturn = [[self executeReader:query andArguments:params] mutableCopy];
     
     if(toReturn!=nil)
     {
-        
         DDLogVerbose(@" message history count: %lu",  (unsigned long)[toReturn count] );
-        return toReturn; //[toReturn autorelease];
+        return toReturn;
     }
     else
     {

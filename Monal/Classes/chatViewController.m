@@ -997,12 +997,22 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
             }
             
             cell.link=[urlString stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-            
             toreturn.messageBody.text =cell.link;
             toreturn.link=cell.link;
-            [toreturn loadPreviewWithCompletion:^{
-                
-            }];
+            
+            if([(NSString *)[row objectForKey:@"previewImage"] length]>0 || [(NSString *)[row objectForKey:@"previewText"] length]>0)
+            {
+                toreturn.imageUrl = [row objectForKey:@"previewImage"];
+                toreturn.messageTitle.text = [row objectForKey:@"previewText"];
+                [toreturn loadImageWithCompletion:^{
+                    
+                }];
+            }
+            else {
+                [toreturn loadPreviewWithCompletion:^{
+                    [[DataLayer sharedInstance] setMessageId:[row objectForKey:@"messageid"] previewText:toreturn.messageTitle.text  andPreviewImage:toreturn.imageUrl];
+                      }];
+            }
             
             NSDictionary *underlineAttribute = @{NSUnderlineStyleAttributeName: @(NSUnderlineStyleSingle)};
             NSAttributedString* underlined = [[NSAttributedString alloc] initWithString:cell.link attributes:underlineAttribute];

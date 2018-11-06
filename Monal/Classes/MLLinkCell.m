@@ -48,7 +48,8 @@
         int trimLength=2;//quotes
         text = [text substringWithRange:NSMakeRange(1, text.length-trimLength)];
     }
-    return [[text stringByRemovingPercentEncoding] stringByReplacingOccurrencesOfString:@"&amp;" withString:@"&"];
+    NSString* toreturn= [text stringByReplacingOccurrencesOfString:@"&amp;" withString:@"&"];
+    return toreturn;
 }
 
 -(void) openlink: (id) sender {
@@ -84,7 +85,7 @@
             
             dispatch_async(dispatch_get_main_queue(), ^{
                 self.messageTitle.text=[self ogContentWithTag:@"og:title" inHTML:body] ;
-                self.imageUrl=[self ogContentWithTag:@"og:image" inHTML:body];
+                self.imageUrl=[[self ogContentWithTag:@"og:image" inHTML:body] stringByRemovingPercentEncoding];
                 [self loadImageWithCompletion:^{
                     if(completion) completion();
                 }];

@@ -1594,7 +1594,7 @@ static DataLayer *sharedInstance=nil;
 {
     NSString* query=[NSString stringWithFormat:@"update message_history set previewText=?,  previewImage=? where messageid=?"];
     DDLogVerbose(@" setting previews type %@",query);
-    [self executeNonQuery:query  andArguments:@[text, image, messageid]  withCompletion:nil];
+    [self executeNonQuery:query  andArguments:@[text?text:@"", image?image:@"", messageid]  withCompletion:nil];
 }
 
 

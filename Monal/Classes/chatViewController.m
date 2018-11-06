@@ -773,18 +773,23 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     return [self.sourceDateFormat stringFromDate:destinationDate];
 }
 
--(NSString*) formattedDateWithSource:(NSObject *) sourceDateString
+-(NSString*) formattedDateWithSource:(NSObject *) sourceDateString andPriorDate:(NSString *) priorDateString
 {
     NSString* dateString;
-    
     if(sourceDateString!=nil)
     {
-        
         NSDate* sourceDate;
         if([sourceDateString isKindOfClass:[NSDate class]]){
             sourceDate=(NSDate *)sourceDateString;
         } else  {
         sourceDate= [self.sourceDateFormat dateFromString: (NSString *)sourceDateString];
+        }
+        
+        NSDate* priorDate;
+        if([priorDateString isKindOfClass:[NSDate class]]){
+            priorDate=(NSDate *)priorDateString;
+        } else  {
+            priorDate= [self.sourceDateFormat dateFromString: (NSString *)priorDateString];
         }
         
         NSTimeZone* sourceTimeZone = [NSTimeZone timeZoneWithAbbreviation:@"GMT"];
@@ -798,9 +803,12 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         NSInteger msgmonth=[self.gregorian components:NSCalendarUnitMonth fromDate:destinationDate].month;
         NSInteger msgyear =[self.gregorian components:NSCalendarUnitYear fromDate:destinationDate].year;
         
-        if ((self.thisday!=msgday) || (self.thismonth!=msgmonth) || (self.thisyear!=msgyear))
+        BOOL showFullDate=YES;
+        
+        if([sourceDate timeIntervalSinceDate:priorDate]<60*60) showFullDate=NO;
+        
+        if (((self.thisday!=msgday) || (self.thismonth!=msgmonth) || (self.thisyear!=msgyear)) && showFullDate )
         {
-    
             //no more need for seconds
             [self.destinationDateFormat setTimeStyle:NSDateFormatterShortStyle];
             
@@ -876,7 +884,6 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     MLBaseCell* cell;
 
     NSDictionary* row= [self.messageList objectAtIndex:indexPath.row];
-    
     NSString *from =[row objectForKey:@"af"];
     
     //intended to correct for bad data. Can be removed later probably.
@@ -1058,8 +1065,6 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         }
     }
     
-  
-    
     NSNumber *received = [row objectForKey:kReceived];
     if(received.boolValue==YES) {
         NSDictionary *prior =nil;
@@ -1079,7 +1084,16 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     
     
     cell.messageHistoryId=[row objectForKey:@"message_history_id"];
-    cell.date.text= [self formattedDateWithSource:[row objectForKey:@"thetime"]];
+
+    NSString *priorDate;
+    if(indexPath.row>0)
+    {
+        NSDictionary *priorRow=[self.messageList objectAtIndex:indexPath.row-1];
+        priorDate =[priorRow objectForKey:@"thetime"];
+        
+    }
+    
+    cell.date.text= [self formattedDateWithSource:[row objectForKey:@"thetime"] andPriorDate:priorDate];
     cell.selectionStyle=UITableViewCellSelectionStyleNone;
     
     if([[row objectForKey:@"encrypted"] boolValue])

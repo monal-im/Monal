@@ -816,20 +816,17 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         
         //reset to remove any links
         cell.messageText.string=@"";
-        
         cell.messageText.editable=YES;
         cell.messageText.string =messageString;
         [cell.messageText checkTextInDocument:nil];
         cell.messageText.editable=NO;
         
         [accessibility appendString:messageString];
-      
-       
+
     }
     
      if([messageType isEqualToString:kMessageTypeImage])
     {
-      
         NSString* cellDirectionID = @"InboundImageCell";
         if([[messageRow objectForKey:@"af"] isEqualToString:self.jid]) {
             cellDirectionID=@"OutboundImageCell";

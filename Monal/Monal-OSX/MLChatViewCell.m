@@ -116,12 +116,8 @@
             self.retry.hidden=YES;
         }
     }
-    
     NSBezierPath *bezierPath= [NSBezierPath bezierPathWithRoundedRect:bubbleFrame xRadius:5.0 yRadius:5.0];
-    
-    
     [bezierPath fill];
-    
 }
 
 

@@ -2437,7 +2437,6 @@ static DataLayer *sharedInstance=nil;
     __block NSString *messageType=kMessageTypeText;
     if ([[NSUserDefaults standardUserDefaults] boolForKey: @"ShowImages"] &&  ([messageString hasPrefix:@"HTTPS://"]||[messageString hasPrefix:@"https://"]))
     {
-        
         NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:messageString]];
         request.HTTPMethod=@"HEAD";
         request.cachePolicy= NSURLRequestReturnCacheDataElseLoad;
@@ -2450,13 +2449,14 @@ static DataLayer *sharedInstance=nil;
             {
                 messageType=kMessageTypeImage;
             }
+            else  {
+                messageType=kMessageTypeUrl;
+            }
             
             if(completion) {
                 completion(messageType);
             }
-            
         }] resume];
-        
     }
     else
         if(completion) {

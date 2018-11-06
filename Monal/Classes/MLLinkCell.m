@@ -38,7 +38,7 @@
         text= [text stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
         text = [text substringWithRange:NSMakeRange(1, text.length-2)]; //quotes
     }
-    return text;
+    return [text stringByRemovingPercentEncoding];
 }
 
 -(void) openlink: (id) sender {
@@ -70,8 +70,8 @@
             NSString *body = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
             
             dispatch_async(dispatch_get_main_queue(), ^{
-                self.messageTitle.text=[[self ogContentWithTag:@"og:title" inHTML:body] stringByRemovingPercentEncoding];
-                self.imageUrl=[self ogContentWithTag:@"og:image" inHTML:body];
+                self.messageTitle.text=[self ogContentWithTag:@"og:title" inHTML:body] ;
+                self.imageUrl=[[self ogContentWithTag:@"og:image" inHTML:body] stringByReplacingOccurrencesOfString:@"&amp;" withString:@"&"];
                 [self loadImageWithCompletion:^{
                     if(completion) completion();
                 }];

@@ -968,7 +968,36 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         
     }
     else {
-            
+        
+      if([messageType isEqualToString:kMessageTypeUrl])
+      {
+          MLLinkCell *toreturn;
+          if([from isEqualToString:self.contactName]) {
+              toreturn=(MLLinkCell *)[tableView dequeueReusableCellWithIdentifier:@"linkInCell"];
+          }
+          else  {
+              toreturn=(MLLinkCell *)[tableView dequeueReusableCellWithIdentifier:@"linkOutCell"];
+          }
+          
+          cell.link=[[row objectForKey:@"message"]  stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+          toreturn.messageBody.text =cell.link;
+          toreturn.link=cell.link;
+          
+          if([(NSString *)[row objectForKey:@"previewImage"] length]>0 || [(NSString *)[row objectForKey:@"previewText"] length]>0)
+          {
+              toreturn.imageUrl = [row objectForKey:@"previewImage"];
+              toreturn.messageTitle.text = [row objectForKey:@"previewText"];
+              [toreturn loadImageWithCompletion:^{
+                  
+              }];
+          }  else {
+              [toreturn loadPreviewWithCompletion:^{
+                  [[DataLayer sharedInstance] setMessageId:[row objectForKey:@"messageid"] previewText:toreturn.messageTitle.text  andPreviewImage:toreturn.imageUrl];
+              }];
+          }
+          cell=toreturn;
+          
+      } else {
         NSString* lowerCase= [[row objectForKey:@"message"] lowercaseString];
         NSRange pos = [lowerCase rangeOfString:@"https://"];
         if(pos.location==NSNotFound) {
@@ -987,61 +1016,28 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
             if(pos2.location!=NSNotFound) {
                 urlString=[urlString substringToIndex:pos2.location];
             }
-            
-            MLLinkCell *toreturn;
-            if([from isEqualToString:self.contactName]) {
-                toreturn=(MLLinkCell *)[tableView dequeueReusableCellWithIdentifier:@"linkInCell"];
-            }
-            else  {
-                toreturn=(MLLinkCell *)[tableView dequeueReusableCellWithIdentifier:@"linkOutCell"];
-            }
-            
-            cell.link=[urlString stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-            toreturn.messageBody.text =cell.link;
-            toreturn.link=cell.link;
-            
-            if([(NSString *)[row objectForKey:@"previewImage"] length]>0 || [(NSString *)[row objectForKey:@"previewText"] length]>0)
-            {
-                toreturn.imageUrl = [row objectForKey:@"previewImage"];
-                toreturn.messageTitle.text = [row objectForKey:@"previewText"];
-                [toreturn loadImageWithCompletion:^{
-                    
-                }];
-            }
-            else {
-                [toreturn loadPreviewWithCompletion:^{
-                    [[DataLayer sharedInstance] setMessageId:[row objectForKey:@"messageid"] previewText:toreturn.messageTitle.text  andPreviewImage:toreturn.imageUrl];
-                      }];
-            }
+             cell.link=[[row objectForKey:@"message"]  stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
             
             NSDictionary *underlineAttribute = @{NSUnderlineStyleAttributeName: @(NSUnderlineStyleSingle)};
             NSAttributedString* underlined = [[NSAttributedString alloc] initWithString:cell.link attributes:underlineAttribute];
-            
-            
-            if ([underlined length]==[[row objectForKey:@"message"] length])
+            NSMutableAttributedString* stitchedString  = [[NSMutableAttributedString alloc] init];
+            [stitchedString appendAttributedString:
+             [[NSAttributedString alloc] initWithString:[[row objectForKey:@"message"] substringToIndex:pos.location] attributes:nil]];
+            [stitchedString appendAttributedString:underlined];
+            if(pos2.location!=NSNotFound)
             {
-                cell=toreturn;
+                NSString* remainder = [[row objectForKey:@"message"] substringFromIndex:pos.location+[underlined length]];
+                [stitchedString appendAttributedString:[[NSAttributedString alloc] initWithString:remainder attributes:nil]];
             }
-            else
-            {
-                NSMutableAttributedString* stitchedString  = [[NSMutableAttributedString alloc] init];
-                [stitchedString appendAttributedString:
-                 [[NSAttributedString alloc] initWithString:[[row objectForKey:@"message"] substringToIndex:pos.location] attributes:nil]];
-                [stitchedString appendAttributedString:underlined];
-                if(pos2.location!=NSNotFound)
-                {
-                    NSString* remainder = [[row objectForKey:@"message"] substringFromIndex:pos.location+[underlined length]];
-                    [stitchedString appendAttributedString:[[NSAttributedString alloc] initWithString:remainder attributes:nil]];
-                }
-                cell.messageBody.attributedText=stitchedString;
-            }
-            
+            cell.messageBody.attributedText=stitchedString;
         }
         else
         {
             cell.messageBody.text =[row objectForKey:@"message"];
             cell.link=nil;
         }
+          
+      }
         
     }
     

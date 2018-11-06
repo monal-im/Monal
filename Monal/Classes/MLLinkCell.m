@@ -36,7 +36,7 @@
     NSString *text = parts.lastObject;
     if(text.length>2) {
         
-        if([tag isEqualToString:@"og:image"]){ 
+        if([tag isEqualToString:@"og:image"]){
             NSArray *components = [text componentsSeparatedByString:@" "];// other attributes
             text=[components objectAtIndex:0];
         }
@@ -48,7 +48,7 @@
         int trimLength=2;//quotes
         text = [text substringWithRange:NSMakeRange(1, text.length-trimLength)];
     }
-    return [text stringByRemovingPercentEncoding];
+    return [[text stringByRemovingPercentEncoding] stringByReplacingOccurrencesOfString:@"&amp;" withString:@"&"];
 }
 
 -(void) openlink: (id) sender {
@@ -84,7 +84,7 @@
             
             dispatch_async(dispatch_get_main_queue(), ^{
                 self.messageTitle.text=[self ogContentWithTag:@"og:title" inHTML:body] ;
-                self.imageUrl=[[self ogContentWithTag:@"og:image" inHTML:body] stringByReplacingOccurrencesOfString:@"&amp;" withString:@"&"];
+                self.imageUrl=[self ogContentWithTag:@"og:image" inHTML:body];
                 [self loadImageWithCompletion:^{
                     if(completion) completion();
                 }];

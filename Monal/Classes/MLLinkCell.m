@@ -30,13 +30,17 @@
 {
     NSRange titlePos = [body rangeOfString:tag];
     if(titlePos.location==NSNotFound) return nil;
-    NSRange end = [body rangeOfString:@"/>" options:NSCaseInsensitiveSearch range:NSMakeRange(titlePos.location, body.length-titlePos.location)];
+    NSRange end = [body rangeOfString:@">" options:NSCaseInsensitiveSearch range:NSMakeRange(titlePos.location, body.length-titlePos.location)];
     NSString *subString = [body substringWithRange:NSMakeRange(titlePos.location, end.location-titlePos.location)];
     NSArray *parts = [subString componentsSeparatedByString:@"content="];
     NSString *text = parts.lastObject;
     if(text.length>2) {
+        if([text characterAtIndex:text.length-1]=='/') {
+         text = [text substringWithRange:NSMakeRange(0, text.length-1)];
+        }
         text= [text stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
-        text = [text substringWithRange:NSMakeRange(1, text.length-2)]; //quotes
+        int trimLength=2;//quotes
+        text = [text substringWithRange:NSMakeRange(1, text.length-trimLength)];
     }
     return [text stringByRemovingPercentEncoding];
 }
@@ -64,8 +68,11 @@
         /**
          <meta property="og:title" content="Nintendo recommits to “keep the business going” for 3DS">
          <meta property="og:image" content="https://cdn.arstechnica.net/wp-content/uploads/2016/09/3DS_SuperMarioMakerforNintendo3DS_char_01-760x380.jpg">
+         facebookexternalhit/1.1
          */
-        [[[NSURLSession sharedSession] dataTaskWithURL:[NSURL URLWithString:self.link] completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+        NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:self.link]];
+        [request setValue:@"facebookexternalhit/1.1" forHTTPHeaderField:@"User-Agent"]; //required on somesites for og tages e.g. youtube
+        [[[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
             
             NSString *body = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
             

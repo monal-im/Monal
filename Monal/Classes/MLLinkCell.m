@@ -35,6 +35,12 @@
     NSArray *parts = [subString componentsSeparatedByString:@"content="];
     NSString *text = parts.lastObject;
     if(text.length>2) {
+        
+        if([tag isEqualToString:@"og:image"]){ 
+            NSArray *components = [text componentsSeparatedByString:@" "];// other attributes
+            text=[components objectAtIndex:0];
+        }
+        
         if([text characterAtIndex:text.length-1]=='/') {
          text = [text substringWithRange:NSMakeRange(0, text.length-1)];
         }

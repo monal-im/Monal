@@ -432,7 +432,7 @@ An array of Dics what have timers to make sure everything was sent
 
 
 #pragma mark -  XMPP commands
--(void)sendMessage:(NSString*) message toContact:(NSString*)contact fromAccount:(NSString*) accountNo isEncrypted:(BOOL) encrypted isMUC:(BOOL) isMUC messageId:(NSString *) messageId
+-(void)sendMessage:(NSString*) message toContact:(NSString*)contact fromAccount:(NSString*) accountNo isEncrypted:(BOOL) encrypted isMUC:(BOOL) isMUC  isUpload:(BOOL) isUpload messageId:(NSString *) messageId
 withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 {
     dispatch_async(_netQueue,
@@ -480,8 +480,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
                        if(account)
                        {
                            success=YES;
-                         
-                           [account sendMessage:message toContact:contact isMUC:isMUC isEncrypted:encrypted andMessageId:messageId];
+                           [account sendMessage:message toContact:contact isMUC:isMUC isEncrypted:encrypted isUpload:isUpload andMessageId:messageId];
                        }
                        
                        if(completion)
@@ -896,11 +895,11 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
                 
             }];
             
-            [self sendMessage:[row objectForKey:@"url"] toContact:[row objectForKey:@"recipient"] fromAccount:[NSString stringWithFormat:@"%@", [accountDic objectForKey:@"account_id"]]  isEncrypted:NO isMUC:NO messageId:msgid withCompletionHandler:^(BOOL success, NSString *messageId) {
+            [self sendMessage:[row objectForKey:@"url"] toContact:[row objectForKey:@"recipient"] fromAccount:[NSString stringWithFormat:@"%@", [accountDic objectForKey:@"account_id"]]  isEncrypted:NO isMUC:NO  isUpload:NO messageId:msgid withCompletionHandler:^(BOOL success, NSString *messageId) {
                 
                 if(success) {
                     if(((NSString *)[row objectForKey:@"comment"]).length>0) {
-                        [self sendMessage:[row objectForKey:@"comment"] toContact:[row objectForKey:@"recipient"]  fromAccount:[NSString stringWithFormat:@"%@", [accountDic objectForKey:@"account_id"]]  isEncrypted:NO isMUC:NO messageId:[[NSUUID UUID] UUIDString] withCompletionHandler:^(BOOL success, NSString *messageId) {
+                        [self sendMessage:[row objectForKey:@"comment"] toContact:[row objectForKey:@"recipient"]  fromAccount:[NSString stringWithFormat:@"%@", [accountDic objectForKey:@"account_id"]]  isEncrypted:NO isMUC:NO isUpload:YES messageId:[[NSUUID UUID] UUIDString] withCompletionHandler:^(BOOL success, NSString *messageId) {
                             
                         }];
                     }

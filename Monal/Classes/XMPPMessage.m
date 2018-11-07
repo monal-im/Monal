@@ -50,6 +50,8 @@
     url.data=link;
     [oob.children addObject:url];
     [self.children addObject:oob];
+    
+    [self setBody:link]; // fallback
 }
 
 -(void) setReceipt:(NSString*) messageId

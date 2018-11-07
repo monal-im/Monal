@@ -321,7 +321,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     DDLogVerbose(@"Sending message");
     NSString *newMessageID =[[NSUUID UUID] UUIDString];
  
-    [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:_contactName fromAccount:_accountNo isEncrypted:NO isMUC:_isMUC messageId:newMessageID
+    [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:_contactName fromAccount:_accountNo isEncrypted:NO isMUC:_isMUC isUpload:NO messageId:newMessageID
                                        withCompletionHandler:nil];
     
     //dont readd it, use the exisitng
@@ -389,7 +389,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 - (void)restClient:(DBRestClient*)restClient loadedSharableLink:(NSString*)link
            forFile:(NSString*)path{
-    self.chatInput.text= link;
+    NSString *newMessageID =[[NSUUID UUID] UUIDString];
+    [[MLXMPPManager sharedInstance] sendMessage:link toContact:_contactName fromAccount:_accountNo isEncrypted:NO isMUC:_isMUC isUpload:YES messageId:newMessageID
+                          withCompletionHandler:nil];
     self.uploadHUD.hidden=YES;
     self.uploadHUD=nil;
 }
@@ -471,7 +473,10 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                 self.uploadHUD.hidden=YES;
                 
                 if(url) {
-                    self.chatInput.text= url;
+                    NSString *newMessageID =[[NSUUID UUID] UUIDString];
+                    [[MLXMPPManager sharedInstance] sendMessage:url toContact:_contactName fromAccount:_accountNo isEncrypted:NO isMUC:_isMUC isUpload:YES messageId:newMessageID
+                                          withCompletionHandler:nil];
+                    
                 }
                 else  {
                     UIAlertView *addError = [[UIAlertView alloc]

@@ -375,7 +375,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         
                     }];
                     
-                    [[MLXMPPManager sharedInstance] sendMessage:message toContact:[notification.userInfo objectForKey:@"from"] fromAccount:[notification.userInfo objectForKey:@"accountNo"] isEncrypted:NO isMUC:NO messageId:messageID  withCompletionHandler:^(BOOL success, NSString *messageId) {
+                    [[MLXMPPManager sharedInstance] sendMessage:message toContact:[notification.userInfo objectForKey:@"from"] fromAccount:[notification.userInfo objectForKey:@"accountNo"] isEncrypted:NO isMUC:NO isUpload:NO messageId:messageID  withCompletionHandler:^(BOOL success, NSString *messageId) {
                         
                     }];
                     

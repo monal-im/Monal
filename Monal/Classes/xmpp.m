@@ -1839,7 +1839,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             if(messageNode.oobURL)
                             {
                                 messageType=kMessageTypeImage;
+                                body=messageNode.oobURL; 
                             }
+                            if(!body) body=@"";
                             
                             BOOL encrypted=NO;
                             if(decrypted) encrypted=YES;

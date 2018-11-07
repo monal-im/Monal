@@ -2329,26 +2329,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     [self sendInitalPresence];
                     [self setupSignal];
                     
-//                    __block BOOL queryInfo=YES;
-//
-//#if TARGET_OS_IPHONE
-//                    dispatch_sync(dispatch_get_main_queue(), ^{
-//                        if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
-//                        {
-//                            queryInfo=NO;
-//                            [self enablePush]; // since disco wont happen . This came from a push so no need to check
-//                        } else  {
-//                            self.pushEnabled=YES; // since this opened from a push
-//                        }
-//                    });
-//
-//#endif
-//
-//
-//                    if(queryInfo) {
-//                        [self queryInfo];
-//                    }
-                    
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"failed"]) // stream resume failed
                 {
@@ -2368,6 +2348,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         
                         //if resume failed. bind like normal
                         [self bindResource];
+                        
+#if TARGET_OS_IPHONE
+                        if(self.supportsPush && !self.pushEnabled)
+                        {
+                            [self enablePush];
+                        }
+#endif
                     }
                     else        //smacks enable failed
                     {

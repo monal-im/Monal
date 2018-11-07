@@ -392,6 +392,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     NSString *newMessageID =[[NSUUID UUID] UUIDString];
     [[MLXMPPManager sharedInstance] sendMessage:link toContact:_contactName fromAccount:_accountNo isEncrypted:NO isMUC:_isMUC isUpload:YES messageId:newMessageID
                           withCompletionHandler:nil];
+     [self addMessageto:_contactName withMessage:link andId:newMessageID];
+    
     self.uploadHUD.hidden=YES;
     self.uploadHUD=nil;
 }
@@ -476,6 +478,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                     NSString *newMessageID =[[NSUUID UUID] UUIDString];
                     [[MLXMPPManager sharedInstance] sendMessage:url toContact:_contactName fromAccount:_accountNo isEncrypted:NO isMUC:_isMUC isUpload:YES messageId:newMessageID
                                           withCompletionHandler:nil];
+                     [self addMessageto:_contactName withMessage:url andId:newMessageID];
                     
                 }
                 else  {

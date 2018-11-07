@@ -805,7 +805,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         
         BOOL showFullDate=YES;
         
-        if([sourceDate timeIntervalSinceDate:priorDate]<60*60) showFullDate=NO;
+        //if([sourceDate timeIntervalSinceDate:priorDate]<60*60) showFullDate=NO;
         
         if (((self.thisday!=msgday) || (self.thismonth!=msgmonth) || (self.thisyear!=msgyear)) && showFullDate )
         {

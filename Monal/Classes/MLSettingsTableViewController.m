@@ -38,9 +38,9 @@ NS_ENUM(NSInteger, kSettingSection)
     self.appRows=@[@"Accounts", @"Notifications", @"Display", @"Chat Logs"];  //@"Cloud Storage"
     self.supportRows=@[@"Email Support", @"Submit A Bug"];
 #ifdef DEBUG
-    self.aboutRows=@[@"Rate Monal", @"Open Source", @"About", @"Version",  @"Log" ];
+    self.aboutRows=@[@"Rate Monal", @"Open Source", @"Privacy", @"Crash Logging",  @"About", @"Version",  @"Log" ];
 #else
-    self.aboutRows=@[@"Rate Monal", @"Open Source", @"About", @"Version"];
+    self.aboutRows=@[@"Rate Monal", @"Open Source", @"Privacy", @"Crash Logging", @"About", @"Version"];
 #endif
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
     
@@ -190,7 +190,14 @@ NS_ENUM(NSInteger, kSettingSection)
                     [self performSegueWithIdentifier:@"showAbout" sender:self];
                     break;
                     
+                case 3:
+                   //load privacy web
+                    break;
                 case 4:
+                    // load opt out settings
+                    break;
+                    
+                case 6:
                     [self performSegueWithIdentifier:@"showLogs" sender:self];
                     break;
                

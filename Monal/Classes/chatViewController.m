@@ -1031,7 +1031,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
             if(pos2.location!=NSNotFound) {
                 urlString=[urlString substringToIndex:pos2.location];
             }
-             cell.link=[[row objectForKey:@"message"]  stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+            
+            cell.link=urlString;
             
             NSDictionary *underlineAttribute = @{NSUnderlineStyleAttributeName: @(NSUnderlineStyleSingle)};
             NSAttributedString* underlined = [[NSAttributedString alloc] initWithString:cell.link attributes:underlineAttribute];

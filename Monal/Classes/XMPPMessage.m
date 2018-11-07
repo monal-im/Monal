@@ -40,6 +40,18 @@
     [self.children addObject:body];
 }
 
+-(void) setOobUrl:(NSString*) link
+{
+    MLXMLNode* oob =[[MLXMLNode alloc] init];
+    oob.element=@"x";
+    [oob.attributes setValue:@"jabber:x:oob" forKey:@"xmlns"];
+    MLXMLNode* url =[[MLXMLNode alloc] init];
+    url.element=@"url";
+    url.data=link;
+    [oob.children addObject:url];
+    [self.children addObject:oob];
+}
+
 -(void) setReceipt:(NSString*) messageId
 {
     MLXMLNode* received =[[MLXMLNode alloc] init];

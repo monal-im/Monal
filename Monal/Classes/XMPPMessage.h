@@ -32,6 +32,12 @@ extern NSString* const kMessageNormalType;
 -(void) setBody:(NSString*) messageBody;
 
 /**
+ send image uploads out of band 
+ */
+-(void) setOobUrl:(NSString*) link;
+
+
+/**
  sets the receipt child element
  */
 -(void) setReceipt:(NSString*) messageId;

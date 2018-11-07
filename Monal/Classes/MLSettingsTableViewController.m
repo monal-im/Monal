@@ -8,7 +8,7 @@
 
 #import "MLSettingsTableViewController.h"
 #import "MLWebViewController.h"
-
+@import SafariServices;
 
 NS_ENUM(NSInteger, kSettingSection)
 {
@@ -191,7 +191,7 @@ NS_ENUM(NSInteger, kSettingSection)
                     break;
                     
                 case 3:
-                   //load privacy web
+                    [self openLink:@"https://monal.im/privacy-policy/"];
                     break;
                 case 4:
                     // load opt out settings
@@ -209,6 +209,16 @@ NS_ENUM(NSInteger, kSettingSection)
             break;
         }
             
+    }
+}
+
+-(void) openLink:(NSString *) link
+{
+    NSURL *url= [NSURL URLWithString:link];
+    
+    if ([url.scheme isEqualToString:@"http"] || [url.scheme isEqualToString:@"https"]) {
+        SFSafariViewController *safariView = [[ SFSafariViewController alloc] initWithURL:url];
+        [self presentViewController:safariView animated:YES completion:nil];
     }
 }
 

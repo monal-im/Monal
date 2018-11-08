@@ -6,13 +6,13 @@
 //  Copyright © 2017 Monal.im. All rights reserved.
 //
 
-#import "MLCloudSettingsViewController.h"
+#import "MLOptOutSettingsViewController.h"
 
-@interface MLCloudSettingsViewController ()
+@interface MLOptOutSettingsViewController ()
 
 @end
 
-@implementation MLCloudSettingsViewController
+@implementation MLOptOutSettingsViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];

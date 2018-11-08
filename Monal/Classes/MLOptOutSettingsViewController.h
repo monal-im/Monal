@@ -8,6 +8,6 @@
 
 #import <UIKit/UIKit.h>
 
-@interface MLCloudSettingsViewController : UITableViewController
+@interface MLOptOutSettingsViewController : UITableViewController
 
 @end

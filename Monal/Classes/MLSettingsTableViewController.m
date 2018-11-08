@@ -98,7 +98,7 @@ NS_ENUM(NSInteger, kSettingSection)
             break;
         }
         case kSettingSectionAbout: {
-            if(indexPath.row==3)
+            if(indexPath.row==5)
             {
                 NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
                 NSString* version = [infoDict objectForKey:@"CFBundleShortVersionString"];
@@ -194,7 +194,7 @@ NS_ENUM(NSInteger, kSettingSection)
                     [self openLink:@"https://monal.im/privacy-policy/"];
                     break;
                 case 4:
-                    // load opt out settings
+                    [self performSegueWithIdentifier:@"showOptOut" sender:self];
                     break;
                     
                 case 6:

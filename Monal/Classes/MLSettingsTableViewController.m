@@ -187,14 +187,14 @@ NS_ENUM(NSInteger, kSettingSection)
                     break;
                     
                 case 2:
-                    [self performSegueWithIdentifier:@"showAbout" sender:self];
-                    break;
-                    
-                case 3:
                     [self openLink:@"https://monal.im/privacy-policy/"];
                     break;
-                case 4:
+                case 3:
                     [self performSegueWithIdentifier:@"showOptOut" sender:self];
+                    break;
+                    
+                case 4:
+                    [self performSegueWithIdentifier:@"showAbout" sender:self];
                     break;
                     
                 case 6:

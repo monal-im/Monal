@@ -283,14 +283,16 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     
     [self setUISettings];
-
     
     [MLNotificationManager sharedInstance].window=self.window;
     
     // should any accounts connect?
     [[MLXMPPManager sharedInstance] connectIfNecessary];
     
-    [Fabric with:@[[Crashlytics class]]];
+    BOOL optout = [[NSUserDefaults standardUserDefaults] boolForKey:@"CrashlyticsOptOut"];
+    if(!optout) {
+        [Fabric with:@[[Crashlytics class]]];
+    }
     
     //update logs if needed
     if(! [[NSUserDefaults standardUserDefaults] boolForKey:@"Logging"])

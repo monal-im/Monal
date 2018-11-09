@@ -17,21 +17,19 @@
 -(void) updateCell
 {
     [super updateCell];
-    UIImage * buttonImage2;
-    if(!self.bubbleImage.image)
+
+    if(self.outBound)
     {
-        if(self.outBound)
-        {
-            self.textLabel.textColor=[UIColor whiteColor];
-            buttonImage2 = [[MLImageManager sharedInstance] outboundImage];
-        }
-        else
-        {
-            self.textLabel.textColor=[UIColor blackColor];
-            buttonImage2 = [[MLImageManager sharedInstance] inboundImage];
-        }
-        self.bubbleImage.image=buttonImage2;
+        self.textLabel.textColor=[UIColor whiteColor];
+       self.bubbleImage.image= [[MLImageManager sharedInstance] outboundImage];
     }
+    else
+    {
+        self.textLabel.textColor=[UIColor blackColor];
+       self.bubbleImage.image=[[MLImageManager sharedInstance] inboundImage];
+    }
+  
+    
 }
 
 

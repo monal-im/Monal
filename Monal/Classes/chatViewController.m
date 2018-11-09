@@ -558,7 +558,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                            if(bottom>=0) {
                                 path1 = [NSIndexPath indexPathForRow:bottom  inSection:0];
                                [_messageTable insertRowsAtIndexPaths:@[path1]
-                                                    withRowAnimation:UITableViewRowAnimationBottom];
+                                                    withRowAnimation:UITableViewRowAnimationFade];
                            }
                            [_messageTable endUpdates];
                            
@@ -1060,7 +1060,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     if(_isMUC)
     {
         cell.name.hidden=NO;
-        cell.name.text=[row objectForKey:@"af"];
+        cell.name.text=from;
     } else  {
         
         cell.name.text=@"";
@@ -1112,9 +1112,12 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
          cell.lockImage.hidden=YES;
     }
     
-    if([[row objectForKey:@"af"] isEqualToString:_jid])
+    if([from isEqualToString:_jid])
     {
         cell.outBound=YES;
+    }
+    else  {
+        cell.outBound=NO;
     }
     
     cell.parent=self; 

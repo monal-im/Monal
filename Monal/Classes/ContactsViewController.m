@@ -77,6 +77,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         tableView.tableHeaderView = self.searchController.searchBar;
     }
     
+   
+    
 }
 
 -(void) dealloc
@@ -868,6 +870,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     [cell setOrb];
     
+  //  [self registerForPreviewingWithDelegate:self sourceView:cell];
+    
     return cell;
 }
 
@@ -1018,7 +1022,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     _lastSelectedUser=row;
     
 }
-
 
 
 @end

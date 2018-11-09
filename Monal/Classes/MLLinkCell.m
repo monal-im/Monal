@@ -66,6 +66,21 @@
     }
 }
 
+-(BOOL) canPerformAction:(SEL)action withSender:(id)sender
+{
+    if(action == @selector(openlink:))
+    {
+        if(self.link)
+            return  YES;
+    }
+    return (action == @selector(copy:)) ;
+}
+
+-(void) copy:(id)sender {
+    UIPasteboard *pboard = [UIPasteboard generalPasteboard];
+    pboard.string =self.link;
+}
+
 -(void) loadPreviewWithCompletion:(void (^)(void))completion
 {
     self.messageTitle.text=nil;

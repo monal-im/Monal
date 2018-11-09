@@ -48,8 +48,15 @@
 
 -(BOOL) canPerformAction:(SEL)action withSender:(id)sender
 {
-    return NO;
+    return (action == @selector(copy:)) ;
 }
+
+-(void) copy:(id)sender {
+    UIPasteboard *pboard = [UIPasteboard generalPasteboard];
+    pboard.image = self.thumbnailImage.image; 
+}
+
+
 
 -(void)prepareForReuse{
     [super prepareForReuse];

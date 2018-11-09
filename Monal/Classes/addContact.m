@@ -162,27 +162,32 @@
         case 0: {
             MLTextInputCell *textCell =[tableView dequeueReusableCellWithIdentifier:@"TextCell"];
             if(indexPath.row ==0){
-                self.accountName =textCell.textInput;
-                self.accountName.placeholder = @"Account";
-                self.accountName.inputView=_accountPickerView;
-                self.accountName.delegate=self;
                 
                 if([[MLXMPPManager sharedInstance].connectedXMPP count]==1)
                 {
                     self.accountName.text=[[MLXMPPManager sharedInstance] getAccountNameForConnectedRow:0];
                 }
                 
+                if([[MLXMPPManager sharedInstance].connectedXMPP count]>1){
+                    self.accountName =textCell.textInput;
+                    self.accountName.placeholder = @"Account";
+                    self.accountName.inputView=_accountPickerView;
+                    self.accountName.delegate=self;
+                } else  {
+                    cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"blank"];
+                    cell.contentView.backgroundColor= [UIColor groupTableViewBackgroundColor];
+                    break;
+                }
                 
-            }
-            else   if(indexPath.row ==1){
-                self.contactName =textCell.textInput;
-                self.contactName.placeholder = @"Contact Name";
-                self.contactName.delegate=self;
-              
-            }
-            textCell.textInput.inputAccessoryView =_keyboardToolbar;
-            
-            cell= textCell;
+                }
+                else   if(indexPath.row ==1){
+                    self.contactName =textCell.textInput;
+                    self.contactName.placeholder = @"Contact Name";
+                    self.contactName.delegate=self;
+                }
+                textCell.textInput.inputAccessoryView =_keyboardToolbar;
+                
+                cell= textCell; 
             break;
         }
         case 1: {

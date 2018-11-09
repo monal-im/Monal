@@ -135,7 +135,11 @@
     {
         case 0:
         {
-            toreturn=@"Account To Use";
+            if([[MLXMPPManager sharedInstance].connectedXMPP count]==1){
+                toreturn=@"";
+            } else  {
+                toreturn=@"Account To Use";
+            }
             break;
         }
             
@@ -163,8 +167,9 @@
     {
         case 0:
         {
-            MLTextInputCell *textCell =[tableView dequeueReusableCellWithIdentifier:@"TextCell"];
-            
+            if([[MLXMPPManager sharedInstance].connectedXMPP count]>1){
+                MLTextInputCell *textCell =[tableView dequeueReusableCellWithIdentifier:@"TextCell"];
+                
                 self.accountName =textCell.textInput;
                 self.accountName.placeholder = @"Account";
                 self.accountName.inputView=_accountPickerView;
@@ -178,8 +183,11 @@
                 textCell.textInput.inputAccessoryView =self.keyboardToolbar;
                 self.accountsField= textCell.textInput;
                 toreturn=textCell;
-            
-                break;
+            } else  {
+                toreturn = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"blank"];
+                toreturn.contentView.backgroundColor= [UIColor groupTableViewBackgroundColor];
+            }
+            break;
         }
             
         case 1:

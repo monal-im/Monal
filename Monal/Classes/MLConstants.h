@@ -67,3 +67,8 @@
 #ifndef DEBUG
 #define DEBUG 1
 #endif
+
+//temp for  a release
+#ifndef DISABLE_OMEMO
+#define DISABLE_OMEMO 1
+#endif

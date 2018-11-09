@@ -45,7 +45,9 @@
 #import "NXOAuth2.h"
 #import "MLHTTPRequest.h"
 
+#ifndef DISABLE_OMEMO
 #import "SignalProtocolObjC.h"
+#endif
 
 #include <openssl/evp.h>
 #include <openssl/rand.h>
@@ -146,8 +148,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 @property (nonatomic, strong) NXOAuth2Account *oauthAccount;
 
+#ifndef DISABLE_OMEMO
 @property (nonatomic, strong) SignalContext *signalContext;
 @property (nonatomic, strong) MLSignalStore *monalSignalStore;
+#endif
 
 
 @end
@@ -1408,7 +1412,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         }
                         
                         //OMEMO
-                        
+ #ifndef DISABLE_OMEMO
                         if(iqNode.omemoDevices)
                         {
                             [iqNode.omemoDevices enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -1418,6 +1422,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             
                         }
                         
+
                         if(iqNode.signedPreKeyPublic && self.signalContext)
                         {
                             SignalAddress *address = [[SignalAddress alloc] initWithName:iqNode.from deviceId:0];
@@ -1443,6 +1448,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             }];
                             
                         }
+#endif
                         
                         
                         if([iqNode.idval isEqualToString:@"enableCarbons"])
@@ -1718,6 +1724,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     }
                     NSString *decrypted;
                     
+                    #ifndef DISABLE_OMEMO
                     if(messageNode.encryptedPayload)
                     {
                         SignalAddress *address = [[SignalAddress alloc] initWithName:messageNode.from deviceId:messageNode.sid.integerValue];
@@ -1800,6 +1807,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         }
                         
                     }
+#endif
                     
                     if(messageNode.hasBody || messageNode.subject||decrypted)
                     {
@@ -2327,7 +2335,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     #endif
                     
                     [self sendInitalPresence];
+                    #ifndef DISABLE_OMEMO
                     [self setupSignal];
+                    #endif
                     
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"failed"]) // stream resume failed
@@ -2698,12 +2708,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     XMPPMessage* messageNode =[[XMPPMessage alloc] init];
     [messageNode.attributes setObject:contact forKey:@"to"];
     [messageNode setXmppId:messageId ];
-    
+#ifndef DISABLE_OMEMO
     if(self.signalContext && !isMUC && encrypt) {
         
         NSArray *devices = [self.monalSignalStore allDeviceIdsForAddressName:contact];
         if(devices.count>0 ){
-        
+            
             NSData *messageBytes=[message dataUsingEncoding:NSUTF8StringEncoding];
             //aes encrypt message
             
@@ -2723,11 +2733,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             NSData *gcmKey = [[NSData alloc] initWithBytes:key length:16];
             
             NSData *gcmiv= [[NSData alloc] initWithBytes:iv length:16];
-        ;
+            ;
             
             NSMutableData *encryptedMessage;
             
-           
+            
             ctx = EVP_CIPHER_CTX_new();
             /* Set cipher type and mode */
             EVP_EncryptInit_ex(ctx, EVP_aes_128_gcm(), NULL, NULL, NULL);
@@ -2738,19 +2748,19 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             EVP_CIPHER_CTX_set_padding(ctx,1);
             /* Encrypt plaintext */
             EVP_EncryptUpdate(ctx, outbuf, &outlen,messageBytes.bytes,messageBytes.length);
-           
+            
             encryptedMessage = [NSMutableData dataWithBytes:outbuf length:outlen];
             
             /* Finalise: note get no output for GCM */
             EVP_EncryptFinal_ex(ctx, outbuf, &outlen);
             
-           
+            
             /* Get tag */
             EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_GET_TAG, 16, tag);
             [encryptedMessage appendBytes:tag length:16];
             
             EVP_CIPHER_CTX_free(ctx);
-           
+            
             
             MLXMLNode *encrypted =[[MLXMLNode alloc] initWithElement:@"encrypted"];
             [encrypted.attributes setObject:@"eu.siacs.conversations.axolotl" forKey:@"xmlns"];
@@ -2772,17 +2782,17 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             
             
             [devices enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                 NSNumber *device = (NSNumber *)obj;
+                NSNumber *device = (NSNumber *)obj;
                 SignalAddress *address = [[SignalAddress alloc] initWithName:contact deviceId:device.integerValue];
                 SignalSessionCipher *cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self.signalContext];
                 NSError *error;
                 SignalCiphertext* deviceEncryptedKey=[cipher encryptData:gcmKey error:&error];
                 
                 MLXMLNode *keyNode =[[MLXMLNode alloc] initWithElement:@"key"];
-                 [keyNode.attributes setObject:[NSString stringWithFormat:@"%@",device] forKey:@"rid"];
+                [keyNode.attributes setObject:[NSString stringWithFormat:@"%@",device] forKey:@"rid"];
                 if(deviceEncryptedKey.type==SignalCiphertextTypePreKeyMessage)
                 {
-                     [keyNode.attributes setObject:@"1" forKey:@"prekey"];
+                    [keyNode.attributes setObject:@"1" forKey:@"prekey"];
                 }
                 
                 [keyNode setData:[EncodingTools encodeBase64WithData:deviceEncryptedKey.data]];
@@ -2792,8 +2802,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         }
     }
     else  {
+#endif
+        
         [messageNode setBody:message];
+        
+#ifndef DISABLE_OMEMO
     }
+#endif
     
     if(isMUC)
     {
@@ -3072,8 +3087,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self queryDisco];
     [self fetchRoster];
     [self sendInitalPresence];
-    
+
+#ifndef DISABLE_OMEMO
     [self setupSignal];
+#endif
     
 if(!self.supportsSM3)
     {
@@ -3150,7 +3167,7 @@ if(!self.supportsSM3)
     
 }
 
-
+#ifndef DISABLE_OMEMO
 #pragma mark OMEMO
 
 -(void) setupSignal
@@ -3211,7 +3228,7 @@ if(!self.supportsSM3)
     [self send:query];
 
 }
-
+#endif
 
 #pragma mark vcard
 

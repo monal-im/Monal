@@ -76,9 +76,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         UITableView *tableView = (UITableView *)self.view;
         tableView.tableHeaderView = self.searchController.searchBar;
     }
-    
-   
-    
 }
 
 -(void) dealloc
@@ -104,6 +101,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     [[MLXMPPManager sharedInstance] handleNewMessage:nil];
     
+    if([[MLXMPPManager sharedInstance].connectedXMPP count]==0)
+    {
+        if(![[NSUserDefaults standardUserDefaults] boolForKey:@"HasSeenLogin"]) {
+            [self performSegueWithIdentifier:@"showLogin" sender:self];
+        }
+    }
+
 }
 
 

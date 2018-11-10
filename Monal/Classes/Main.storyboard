@@ -359,11 +359,20 @@
                         <segue destination="Dhn-Pm-OVk" kind="showDetail" identifier="showConversation" id="wmf-tk-2CN"/>
                         <segue destination="JoK-Lh-V0A" kind="presentation" identifier="showDetails" id="HKH-FB-LHe"/>
                         <segue destination="eWC-It-u2H" kind="presentation" identifier="showCall" id="pPJ-na-Dl3"/>
+                        <segue destination="DkD-PA-Cmm" kind="presentation" identifier="showLogin" id="0RU-Rt-FFr"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="vxj-qR-bK8" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1555" y="-810"/>
+        </scene>
+        <!--Login-->
+        <scene sceneID="VNB-KG-5f7">
+            <objects>
+                <viewControllerPlaceholder storyboardIdentifier="Login" storyboardName="Login" id="DkD-PA-Cmm" sceneMemberID="viewController"/>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Ccl-9E-t0H" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2276" y="-897"/>
         </scene>
         <!--Display Settings-->
         <scene sceneID="DAU-U7-XF4">

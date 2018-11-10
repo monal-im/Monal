@@ -400,6 +400,11 @@
 		26EE8B1C179B55D2006781F3 /* ParseChallenge.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EE8B1B179B55D2006781F3 /* ParseChallenge.m */; };
 		26EE8B1F179B67FA006781F3 /* MLNotificationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EE8B1E179B67FA006781F3 /* MLNotificationManager.m */; };
 		26EE8B22179B7B0E006781F3 /* SlidingMessageViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EE8B21179B7B0D006781F3 /* SlidingMessageViewController.m */; };
+		26F396D12196836700EF5720 /* MLLogInViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F396D02196836700EF5720 /* MLLogInViewController.m */; };
+		26F396D32196847C00EF5720 /* Login.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 26F396D22196847C00EF5720 /* Login.storyboard */; };
+		26F396D621968A4300EF5720 /* GLCapsuleView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F396D421968A4100EF5720 /* GLCapsuleView.m */; };
+		26F396D921968A8600EF5720 /* GLRoundedView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F396D821968A8600EF5720 /* GLRoundedView.m */; };
+		26F396DC2197507200EF5720 /* GLTintButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F396DA2197506F00EF5720 /* GLTintButton.m */; };
 		26F7BB431115F8DB00712672 /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F7BB411115F8DB00712672 /* Reachability.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		26F7BB451115F95000712672 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26F7BB441115F95000712672 /* SystemConfiguration.framework */; };
 		26F9794D1ACAC73A0008E005 /* MLContactCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26F9794C1ACAC73A0008E005 /* MLContactCell.xib */; };
@@ -902,6 +907,15 @@
 		26EE8B1E179B67FA006781F3 /* MLNotificationManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MLNotificationManager.m; path = Classes/MLNotificationManager.m; sourceTree = "<group>"; };
 		26EE8B20179B7B0D006781F3 /* SlidingMessageViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SlidingMessageViewController.h; sourceTree = "<group>"; };
 		26EE8B21179B7B0D006781F3 /* SlidingMessageViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SlidingMessageViewController.m; sourceTree = "<group>"; };
+		26F396CF2196836700EF5720 /* MLLogInViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLLogInViewController.h; sourceTree = "<group>"; };
+		26F396D02196836700EF5720 /* MLLogInViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLLogInViewController.m; sourceTree = "<group>"; };
+		26F396D22196847C00EF5720 /* Login.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Login.storyboard; sourceTree = "<group>"; };
+		26F396D421968A4100EF5720 /* GLCapsuleView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GLCapsuleView.m; sourceTree = "<group>"; };
+		26F396D521968A4200EF5720 /* GLCapsuleView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLCapsuleView.h; sourceTree = "<group>"; };
+		26F396D721968A8500EF5720 /* GLRoundedView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLRoundedView.h; sourceTree = "<group>"; };
+		26F396D821968A8600EF5720 /* GLRoundedView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GLRoundedView.m; sourceTree = "<group>"; };
+		26F396DA2197506F00EF5720 /* GLTintButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GLTintButton.m; sourceTree = "<group>"; };
+		26F396DB2197507100EF5720 /* GLTintButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLTintButton.h; sourceTree = "<group>"; };
 		26F7BB411115F8DB00712672 /* Reachability.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Reachability.m; sourceTree = "<group>"; };
 		26F7BB421115F8DB00712672 /* Reachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Reachability.h; sourceTree = "<group>"; };
 		26F7BB441115F95000712672 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
@@ -1327,6 +1341,7 @@
 		26715E5E17650AF900684F3D /* View Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				26F396CE2196830E00EF5720 /* OnBoard */,
 				26E2F7D817C6FD9400C3C8EF /* MLTabBarController.h */,
 				26E2F7D917C6FD9400C3C8EF /* MLTabBarController.m */,
 				26DB52111777C83100B50353 /* Modal views */,
@@ -1819,6 +1834,22 @@
 				26A6EE72208CC321005992E4 /* MLMAMPref.m */,
 			);
 			name = Account;
+			sourceTree = "<group>";
+		};
+		26F396CE2196830E00EF5720 /* OnBoard */ = {
+			isa = PBXGroup;
+			children = (
+				26F396DB2197507100EF5720 /* GLTintButton.h */,
+				26F396DA2197506F00EF5720 /* GLTintButton.m */,
+				26F396D721968A8500EF5720 /* GLRoundedView.h */,
+				26F396D821968A8600EF5720 /* GLRoundedView.m */,
+				26F396D521968A4200EF5720 /* GLCapsuleView.h */,
+				26F396D421968A4100EF5720 /* GLCapsuleView.m */,
+				26F396D22196847C00EF5720 /* Login.storyboard */,
+				26F396CF2196836700EF5720 /* MLLogInViewController.h */,
+				26F396D02196836700EF5720 /* MLLogInViewController.m */,
+			);
+			name = OnBoard;
 			sourceTree = "<group>";
 		};
 		26F7BB3A1115F8A300712672 /* tools */ = {
@@ -2337,6 +2368,7 @@
 				264A7E751AA7263600E860E3 /* MLSwitchCell.xib in Resources */,
 				26470F521835C4080069E3E0 /* Media.xcassets in Resources */,
 				26B2A4BB1B73061400272E63 /* Images.xcassets in Resources */,
+				26F396D32196847C00EF5720 /* Login.storyboard in Resources */,
 				2653EAE61C5B243400ED97F7 /* Main.storyboard in Resources */,
 				26158AF41FFA8A6A00E53BDC /* opensource.html in Resources */,
 				262E51981AD8CB7200788351 /* MLTextInputCell.xib in Resources */,
@@ -2720,6 +2752,7 @@
 				26761BF61804FBB700D94714 /* RoomListViewController.m in Sources */,
 				261A6281176C055400059090 /* ContactsViewController.m in Sources */,
 				261A6285176C156500059090 /* ActiveChatsViewController.m in Sources */,
+				26F396DC2197507200EF5720 /* GLTintButton.m in Sources */,
 				26D51CDC1E2674D700141E04 /* NXOAuth2FileStreamWrapper.m in Sources */,
 				26B2A4F31B73097500272E63 /* DDFileLogger.m in Sources */,
 				2609B5291FD5B26800F09FA1 /* MLSplitViewDelegate.m in Sources */,
@@ -2760,6 +2793,7 @@
 				2696EED21791245A00BC54B8 /* chatViewController.m in Sources */,
 				26B2A4FB1B73097500272E63 /* DDDispatchQueueLogFormatter.m in Sources */,
 				26B2A4F71B73097500272E63 /* DDTTYLogger.m in Sources */,
+				26F396D921968A8600EF5720 /* GLRoundedView.m in Sources */,
 				262D9EA717921169009292B4 /* ParseMessage.m in Sources */,
 				262D9EAA17921E82009292B4 /* XMPPMessage.m in Sources */,
 				260283861D8DEFC1001DD6B8 /* MLPreviewObject.m in Sources */,
@@ -2778,10 +2812,12 @@
 				26B2A4F51B73097500272E63 /* DDLog.m in Sources */,
 				26AAE285179F7B0200271345 /* MLSettingCell.m in Sources */,
 				26EC411317BDE39E0031304D /* MLImageManager.m in Sources */,
+				26F396D12196836700EF5720 /* MLLogInViewController.m in Sources */,
 				26A8ADD717C031BA0033990D /* ContactDetails.m in Sources */,
 				26DA16E017C302BC00D0065E /* RIButtonItem.m in Sources */,
 				26DA16E117C302BC00D0065E /* UIActionSheet+Blocks.m in Sources */,
 				2644D4921FF0064C00F46AB5 /* MLChatImageCell.m in Sources */,
+				26F396D621968A4300EF5720 /* GLCapsuleView.m in Sources */,
 				268821FA19B9233B00AEA46E /* NSString+SqlLite.m in Sources */,
 				2678A98B185A8320003AF53B /* ChatLogAccountDetailViewController.m in Sources */,
 				26D51CCC1E2674D700141E04 /* NSString+NXOAuth2.m in Sources */,

@@ -224,8 +224,7 @@ NSString *const kGtalk = @"Gtalk";
             self.server=[elements objectAtIndex:1];
         }
     }
-    
-    
+
     //if it is a JID
     if([elements count]>1)
     {
@@ -259,9 +258,7 @@ NSString *const kGtalk = @"Gtalk";
         return;
         
     }
-    
-   
-    
+
     if(self.port ) {
         [dic setObject:self.port forKey:kPort];
     } else {
@@ -553,15 +550,12 @@ NSString *const kGtalk = @"Gtalk";
         }
     }
     
-    
     thecell.textInputField.delegate=self;
     if(thecell.textInputField.hidden==YES)
     {
         [thecell.toggleSwitch addTarget:self action:@selector(toggleSwitch:) forControlEvents:UIControlEventValueChanged];
     }
-    
     thecell.selectionStyle= UITableViewCellSelectionStyleNone;
-    
     return thecell;
 }
 

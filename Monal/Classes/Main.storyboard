@@ -1906,7 +1906,7 @@
                                         <rect key="frame" x="62" y="8" width="300" height="25"/>
                                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                        <textInputTraits key="textInputTraits" autocapitalizationType="sentences" returnKeyType="send"/>
+                                        <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                                         <connections>
                                             <outlet property="delegate" destination="5nR-Q5-dQD" id="s6z-b4-uwm"/>
                                         </connections>
@@ -2038,7 +2038,7 @@
         <segue reference="ojB-Rp-nEa"/>
         <segue reference="qaB-BP-OcO"/>
         <segue reference="N41-wN-KNl"/>
-        <segue reference="wmf-tk-2CN"/>
+        <segue reference="RLU-kt-b8r"/>
         <segue reference="pPJ-na-Dl3"/>
         <segue reference="YJ5-aM-wEP"/>
         <segue reference="pZO-HH-rUP"/>

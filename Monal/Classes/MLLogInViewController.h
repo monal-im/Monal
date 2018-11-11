@@ -19,6 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, weak) IBOutlet UIImageView *topImage;
 
 -(IBAction) login:(id)sender;
+-(IBAction) registerAccount:(id)sender;
 -(IBAction) useWithoutAccount:(id)sender;
 
 

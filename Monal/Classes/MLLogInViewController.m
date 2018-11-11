@@ -13,12 +13,13 @@
 #import "SAMKeychain.h"
 @import QuartzCore;
 @import Crashlytics;
+@import SafariServices;
 
 @interface MLLogInViewController ()
 @property (nonatomic, strong) MBProgressHUD *loginHUD;
 @property (nonatomic, weak) UITextField *activeField;
 @property (nonatomic, strong) NSString *accountno;
-@property (nonatomic, strong)  MBProgressHUD *loginHUD;
+
 @end
 
 @implementation MLLogInViewController
@@ -37,6 +38,21 @@
 - (void) viewWillAppear:(BOOL)animated
 {
    
+}
+
+-(void) openLink:(NSString *) link
+{
+    NSURL *url= [NSURL URLWithString:link];
+    
+    if ([url.scheme isEqualToString:@"http"] || [url.scheme isEqualToString:@"https"]) {
+        SFSafariViewController *safariView = [[ SFSafariViewController alloc] initWithURL:url];
+        [self presentViewController:safariView animated:YES completion:nil];
+    }
+}
+
+-(IBAction) registerAccount:(id)sender;
+{
+    [self openLink:@"https://monal.im/welcome-to-xmpp/"];
 }
 
 -(IBAction) login:(id)sender
@@ -62,7 +78,7 @@
    
     if(!user || !domain)
     {
-        self.lloginHUD.hidden=YES;
+        self.loginHUD.hidden=YES;
         UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Invalid Credentails" message:@"Your XMPP account should be in in the format user@domain. For special configurations, use manual setup." preferredStyle:UIAlertControllerStyleAlert];
         [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             [alert dismissViewControllerAnimated:YES completion:nil];
@@ -73,7 +89,7 @@
     
     if(password.length==0)
     {
-        self.lloginHUD.hidden=YES;
+        self.loginHUD.hidden=YES;
         UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Invalid Credentails" message:@"Please enter a password." preferredStyle:UIAlertControllerStyleAlert];
         [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             [alert dismissViewControllerAnimated:YES completion:nil];
@@ -107,10 +123,6 @@
         }
     }];
     
-
-    //if failure return alert
-    //remove DB entry
-
 }
 
 -(void) connected
@@ -132,6 +144,9 @@
         [alert dismissViewControllerAnimated:YES completion:nil];
     }]];
     [self presentViewController:alert animated:YES completion:nil];
+    
+    [[DataLayer sharedInstance] removeAccount:self.accountno];
+     
 }
 
 -(IBAction) useWithoutAccount:(id)sender

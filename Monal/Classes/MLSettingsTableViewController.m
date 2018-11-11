@@ -35,7 +35,7 @@ NS_ENUM(NSInteger, kSettingSection)
     
     self.sections =@[@"App", @"Support", @"About"];
     
-    self.appRows=@[@"Accounts", @"Notifications", @"Display", @"Chat Logs"];  //@"Cloud Storage"
+    self.appRows=@[@"Quick Setup", @"Accounts", @"Notifications", @"Display", @"Chat Logs"];  //@"Cloud Storage"
     self.supportRows=@[@"Email Support", @"Submit A Bug"];
 #ifdef DEBUG
     self.aboutRows=@[@"Rate Monal", @"Open Source", @"Privacy", @"Crash Logging",  @"About", @"Version",  @"Log" ];
@@ -135,22 +135,26 @@ NS_ENUM(NSInteger, kSettingSection)
            
             switch ((indexPath.row)) {
                 case 0:
-                    [self performSegueWithIdentifier:@"showAccounts" sender:self];
+                    [self performSegueWithIdentifier:@"showLogin" sender:self];
                     break;
                     
                 case 1:
-                    [self performSegueWithIdentifier:@"showNotification" sender:self];
+                    [self performSegueWithIdentifier:@"showAccounts" sender:self];
                     break;
                     
                 case 2:
-                    [self performSegueWithIdentifier:@"showDisplay" sender:self];
+                    [self performSegueWithIdentifier:@"showNotification" sender:self];
                     break;
                     
                 case 3:
-                    [self performSegueWithIdentifier:@"showChatLog" sender:self];
+                    [self performSegueWithIdentifier:@"showDisplay" sender:self];
                     break;
                     
                 case 4:
+                    [self performSegueWithIdentifier:@"showChatLog" sender:self];
+                    break;
+                    
+                case 5:
                     [self performSegueWithIdentifier:@"showCloud" sender:self];
                     break;
                     

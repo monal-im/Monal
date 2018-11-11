@@ -965,6 +965,7 @@
                         <segue destination="eBx-3x-WaS" kind="showDetail" identifier="showChatLog" id="RMJ-9l-zbF"/>
                         <segue destination="v41-1Z-cuJ" kind="show" identifier="showLogs" id="2Ew-6e-Nd2"/>
                         <segue destination="yyb-Mj-ghD" kind="show" identifier="showOptOut" id="1yt-vv-ddN"/>
+                        <segue destination="DkD-PA-Cmm" kind="presentation" identifier="showLogin" id="qQE-ha-l4B"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="lLi-28-cfT" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -2039,8 +2040,9 @@
         <segue reference="N41-wN-KNl"/>
         <segue reference="wmf-tk-2CN"/>
         <segue reference="pPJ-na-Dl3"/>
-        <segue reference="fRw-7r-LxC"/>
+        <segue reference="YJ5-aM-wEP"/>
         <segue reference="pZO-HH-rUP"/>
-        <segue reference="RMJ-9l-zbF"/>
+        <segue reference="UsD-rI-G3a"/>
+        <segue reference="qQE-ha-l4B"/>
     </inferredMetricsTieBreakers>
 </document>

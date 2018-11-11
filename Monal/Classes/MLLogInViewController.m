@@ -127,12 +127,14 @@
 
 -(void) connected
 {
+     dispatch_async(dispatch_get_main_queue(), ^{
     self.loginHUD.hidden=YES;
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Success!" message:@"You are set up and connected." preferredStyle:UIAlertControllerStyleAlert];
     [alert addAction:[UIAlertAction actionWithTitle:@"Start Using Monal" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         [self dismissViewControllerAnimated:YES completion:nil];
     }]];
     [self presentViewController:alert animated:YES completion:nil];
+     });
 }
 
 

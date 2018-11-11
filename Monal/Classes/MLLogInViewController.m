@@ -138,15 +138,16 @@
 
 -(void) error
 {
-    self.loginHUD.hidden=YES;
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Error" message:@"We were not able to connect your account. Please check your credentials and make sure you are connected to the internet." preferredStyle:UIAlertControllerStyleAlert];
-    [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-        [alert dismissViewControllerAnimated:YES completion:nil];
-    }]];
-    [self presentViewController:alert animated:YES completion:nil];
-    
-    [[DataLayer sharedInstance] removeAccount:self.accountno];
-     
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.loginHUD.hidden=YES;
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Error" message:@"We were not able to connect your account. Please check your credentials and make sure you are connected to the internet." preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            [alert dismissViewControllerAnimated:YES completion:nil];
+        }]];
+        [self presentViewController:alert animated:YES completion:nil];
+        
+        [[DataLayer sharedInstance] removeAccount:self.accountno];
+    });
 }
 
 -(IBAction) useWithoutAccount:(id)sender

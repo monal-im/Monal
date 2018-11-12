@@ -1184,16 +1184,20 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 #pragma mark stanza handling
 
+-(void) enableCarbons
+{
+    XMPPIQ* carbons =[[XMPPIQ alloc] initWithId:@"enableCarbons" andType:kiqSetType];
+    MLXMLNode *enable =[[MLXMLNode alloc] initWithElement:@"enable"];
+    [enable setXMLNS:@"urn:xmpp:carbons:2"];
+    [carbons.children addObject:enable];
+    [self send:carbons];
+}
 -(void) parseFeatures
 {
     if([self.serverFeatures containsObject:@"urn:xmpp:carbons:2"])
     {
         if(!self.usingCarbons2){
-            XMPPIQ* carbons =[[XMPPIQ alloc] initWithId:@"enableCarbons" andType:kiqSetType];
-            MLXMLNode *enable =[[MLXMLNode alloc] initWithElement:@"enable"];
-            [enable setXMLNS:@"urn:xmpp:carbons:2"];
-            [carbons.children addObject:enable];
-            [self send:carbons];
+            [self enableCarbons];
         }
     }
     
@@ -2325,6 +2329,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     [self sendUnAckedMessages];
                    
                     //parse features
+                    self.usingCarbons2=NO; //ensure its done again 
                     [self parseFeatures];
                     
                     #if TARGET_OS_IPHONE

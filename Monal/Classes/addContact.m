@@ -41,7 +41,7 @@
             
             UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:@"Permission Requested" message:@"The new contact will be added to your contacts list when the person you've added has approved your request." preferredStyle:UIAlertControllerStyleAlert];
             UIAlertAction *closeAction =[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
-                
+                [self dismissViewControllerAnimated:YES completion:nil];
             }];
             [messageAlert addAction:closeAction];
             

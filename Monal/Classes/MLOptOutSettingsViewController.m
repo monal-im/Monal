@@ -42,7 +42,7 @@
 
 -(NSString *)tableView:(UITableView *)tableView titleForFooterInSection:(NSInteger)section
 {
-    return @"Monal uses Crashlytics to track crashes. These are anonymous, GDPR compliant and help debug issues. Per GDPR, you may opt out of this logging. Because I will not be able to see the cause of your crashes, opting out here effectlvely opts you out of receiving support if you encouter issues." ;
+    return @"Monal uses Crashlytics to track crashes. These are anonymous, GDPR compliant and help debug issues. Per GDPR, you may opt out of this logging. Because I will not be able to see the cause of your crashes, opting out here effectlvely opts you out of receiving support if you encounter issues." ;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {

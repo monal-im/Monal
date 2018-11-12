@@ -607,7 +607,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     DDLogVerbose(@"chat view got new message notice %@", notification.userInfo);
     
     if([[notification.userInfo objectForKey:@"accountNo"] isEqualToString:_accountNo]
-       &&( ( [[notification.userInfo objectForKey:@"from"] isEqualToString:_contactName]) || ([[notification.userInfo objectForKey:@"to"] isEqualToString:_contactName] ))
+       &&( ( [[notification.userInfo objectForKey:@"from"] isEqualToString:_contactName])
+          || ([[notification.userInfo objectForKey:@"to"] isEqualToString:_contactName] ))
        )
     {
         [[DataLayer sharedInstance] messageTypeForMessage: [notification.userInfo objectForKey:@"messageText"] withCompletion:^(NSString *messageType) {
@@ -627,7 +628,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                                {
                                    userInfo = @{@"af": [notification.userInfo objectForKey:@"actuallyfrom"],
                                                 @"message": [notification.userInfo objectForKey:@"messageText"],
-                                                @"thetime": [notification.userInfo objectForKey:@"delayTimeStamp"]?[notification.userInfo objectForKey:@"delayTimeStamp"]:[self currentGMTTime],
+                                                @"thetime": ((NSString *) [notification.userInfo objectForKey:@"delayTimeStamp"]).length>0?[notification.userInfo objectForKey:@"delayTimeStamp"]:[self currentGMTTime],
                                                 @"delivered":@YES,
                                                 kMessageType:finalMessageType
                                                 };

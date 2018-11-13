@@ -2391,7 +2391,7 @@ static DataLayer *sharedInstance=nil;
     }
     
     //OMEMO begins below
-    if([dbversion doubleValue]<3.0)
+    if([dbversion doubleValue]<3.1)
     {
         DDLogVerbose(@"Database version <3.0 detected. Performing upgrade . ");
         
@@ -2412,10 +2412,10 @@ static DataLayer *sharedInstance=nil;
         
          [self executeNonQuery:@"alter table buddylist add column backgroundImage text;" withCompletion:nil];
         
-        [self executeNonQuery:@"update dbversion set dbversion='3.0'; " withCompletion:nil];
+        [self executeNonQuery:@"update dbversion set dbversion='3.1'; " withCompletion:nil];
         
         
-        DDLogVerbose(@"Upgrade to 3.0 success ");
+        DDLogVerbose(@"Upgrade to 3.1 success ");
     }
     
    

@@ -243,7 +243,7 @@
                 
             }];
             
-            [[MLXMPPManager sharedInstance] sendMessage:notification.response.string toContact:[notification.userInfo objectForKey:@"from"] fromAccount:[notification.userInfo objectForKey:@"accountNo"] isEncrypted:NO isMUC:NO messageId:messageID  withCompletionHandler:^(BOOL success, NSString *messageId) {
+            [[MLXMPPManager sharedInstance] sendMessage:notification.response.string toContact:[notification.userInfo objectForKey:@"from"] fromAccount:[notification.userInfo objectForKey:@"accountNo"] isEncrypted:NO isMUC:NO isUpload:NO messageId:messageID  withCompletionHandler:^(BOOL success, NSString *messageId) {
                 
             }];
             

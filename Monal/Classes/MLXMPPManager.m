@@ -175,7 +175,6 @@ An array of Dics what have timers to make sure everything was sent
     {
         xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
         xmppAccount.hasShownAlert=NO;
-       
     }
 }
 
@@ -347,6 +346,7 @@ An array of Dics what have timers to make sure everything was sent
                 for (NSDictionary* account in _connectedXMPP)
                 {
                     xmpp* xmppAccount=[account objectForKey:@"xmppAccount"];
+                   
                    
                         DDLogVerbose(@"got account and cleaning up.. keeping stream ");
                         [xmppAccount disconnectToResume];

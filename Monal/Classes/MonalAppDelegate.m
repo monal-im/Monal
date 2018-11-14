@@ -140,10 +140,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type
 {
     DDLogInfo(@"incoming voip notfication: %@", [payload dictionaryPayload]);
+    if([UIApplication sharedApplication].applicationState=UIApplicationStateActive) return;
     
     dispatch_async(dispatch_get_main_queue(), ^{
         //reconenct and fetch messages
-        
        __block UIBackgroundTaskIdentifier tempTask= [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
            DDLogInfo(@"voip wake expiring");
            [[UIApplication sharedApplication] endBackgroundTask:tempTask];
@@ -160,18 +160,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 alarm.repeatInterval = 0;
                 alarm.alertBody =  @"DEBUG received push";
                 
-                [[UIApplication sharedApplication] scheduleLocalNotification:alarm]
-            ;
-            
-            
+                [[UIApplication sharedApplication] scheduleLocalNotification:alarm];
         }
 #endif
         
         [[MLXMPPManager sharedInstance] connectIfNecessary];
          DDLogInfo(@"voip wake compelte");
-        
-//        [[UIApplication sharedApplication] endBackgroundTask:tempTask];
-//        tempTask=UIBackgroundTaskInvalid;
     });
 }
 

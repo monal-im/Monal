@@ -419,7 +419,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     if(self.explicitLogout) return;
     if(self.accountState>=kStateLoggedIn )
     {
-        DDLogError(@"assymetrical call to login without a teardown loggedin");
+        DDLogError(@"assymetrical call to login without a teardown logout");
         return;
     }
     _loginStarted=YES;
@@ -499,8 +499,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     });
     
     dispatch_resume(loginCancelOperation);
-    
-    
 }
 
 -(void) disconnect
@@ -3524,7 +3522,7 @@ if(!self.supportsSM3)
 
 
 
-#pragma mark nsstream delegate
+#pragma mark - nsstream delegate
 
 - (void)stream:(NSStream *)stream handleEvent:(NSStreamEvent)eventCode
 {
@@ -3602,7 +3600,7 @@ if(!self.supportsSM3)
             
             [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, message, st_error]];
             
-            //everythign comes twice just use the input stream
+            //everythign comes twice. just use the input stream
             if(stream==_oStream){
                 return;
             }

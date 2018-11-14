@@ -99,16 +99,36 @@
     {
         bubbleFrame.size.height-=(kCellTimeStampHeight+kCellDefaultPadding);
     }
+    
+    BOOL isDark=NO;
+    
+    NSAppearance *appearance = NSAppearance.currentAppearance;
+    if (@available(*, macOS 10.14)) {
+        if(appearance.name == NSAppearanceNameDarkAqua) {
+            isDark=YES;
+        }
+    }
+    
+    
     bubbleFrame.size.width= self.messageRect.size.width+40+kCellDefaultPadding*3;
     if (self.isInbound)
     {
         bubbleFrame.origin.x=+self.senderIcon.frame.size.width+kCellDefaultPadding*3;
-       [[NSColor colorWithCalibratedRed:233.0/255 green:232.0f/255 blue:233.0/255 alpha:1.0] setFill];
+        if(isDark) {
+            [[NSColor colorWithCalibratedRed:84.0/255 green:84.0f/255 blue:84.0/255 alpha:1.0] setFill];
+        } else  {
+            [[NSColor colorWithCalibratedRed:233.0/255 green:232.0f/255 blue:233.0/255 alpha:1.0] setFill];
+        }
     }
     else  {
         bubbleFrame.origin.x= self.frame.size.width -bubbleFrame.size.width-20;
-
-        [[NSColor colorWithCalibratedRed:57.0/255 green:118.0f/255 blue:253.0/255 alpha:1.0] setFill];
+        
+        if(isDark) {
+            [[NSColor colorWithCalibratedRed:0.0/255 green:107.0f/255 blue:243.0/255 alpha:1.0] setFill];
+        }
+        else {
+            [[NSColor colorWithCalibratedRed:57.0/255 green:118.0f/255 blue:253.0/255 alpha:1.0] setFill];
+        }
         if(self.deliveryFailed) {
             self.retry.hidden=NO;
         }

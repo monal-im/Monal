@@ -916,7 +916,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     NSString* __block toReturn=nil;
     NSString* __block stanzaType=nil;
     
-    DDLogVerbose(@"maxPos %ld", _inputBuffer.length );
+ //   DDLogVerbose(@"maxPos %ld", _inputBuffer.length );
     
     if(_inputBuffer.length<2)
     {
@@ -930,12 +930,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         toReturn= nil;
         return nil;
     }
-    DDLogVerbose(@"input bufffer  %@", _inputBuffer);
+   // DDLogVerbose(@"input bufffer  %@", _inputBuffer);
     NSInteger finalstart=0;
     NSInteger finalend=0;
     
     NSInteger startpos=startrange.location;
-    DDLogVerbose(@"start pos%ld", (long)startpos);
+   DDLogVerbose(@"start pos%ld", (long)startpos);
     if(startpos!=0)
     {
         //this shoudlnt happen

@@ -56,12 +56,19 @@
 
 -(void) updateDisplay
 {
+     BOOL isDark=[self isDark];
     self.messageRect = [MLChatViewCell sizeWithMessage:self.messageText.string];
     if (self.isInbound)
     {
         self.messageText.alignment= kCTTextAlignmentLeft;
+        if(isDark) {
+            self.messageText.textColor = [NSColor whiteColor];
+        } else  {
+            self.messageText.textColor = [NSColor blackColor];
+        }
         
     } else  {
+        self.messageText.textColor = [NSColor whiteColor];
         if( self.messageRect.size.width<kCellMaxWidth )//&& self.messageRect.size.height<=kCellMinHeight)
         {
             self.messageText.alignment= kCTTextAlignmentRight;
@@ -77,6 +84,18 @@
          self.messageText.font =[NSFont systemFontOfSize:38.0f];
      }
 }
+
+-(BOOL) isDark {
+    NSAppearance *appearance = NSAppearance.currentAppearance;
+    BOOL isDark=NO;
+    if (@available(*, macOS 10.14)) {
+        if(appearance.name == NSAppearanceNameDarkAqua) {
+            isDark=YES;
+        }
+    }
+    return isDark;
+}
+
 
 - (void)drawRect:(NSRect)dirtyRect {
     [super drawRect:dirtyRect];
@@ -100,15 +119,7 @@
         bubbleFrame.size.height-=(kCellTimeStampHeight+kCellDefaultPadding);
     }
     
-    BOOL isDark=NO;
-    
-    NSAppearance *appearance = NSAppearance.currentAppearance;
-    if (@available(*, macOS 10.14)) {
-        if(appearance.name == NSAppearanceNameDarkAqua) {
-            isDark=YES;
-        }
-    }
-    
+    BOOL isDark=[self isDark];
     
     bubbleFrame.size.width= self.messageRect.size.width+40+kCellDefaultPadding*3;
     if (self.isInbound)

@@ -33,7 +33,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 @property (nonatomic , weak)  MLPresenceSettings *presenceVC;
 @property (nonatomic , weak)  MLDisplaySettings *displayVC;
 @property (nonatomic , weak)  MLCloudStorageSettings *cloudVC;
-@property (nonatomic , strong) id <NSObject> _activity;
+@property (nonatomic , strong) id <NSObject> activity;
 
 @end
 
@@ -84,7 +84,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
     [[MLXMPPManager sharedInstance] logoutAll];
     [[NSProcessInfo processInfo] endActivity:self.activity];
-    self.ctivity = nil;
+    self.activity = nil;
 }
 
 - (BOOL)applicationShouldHandleReopen:(NSApplication *)theApplication hasVisibleWindows:(BOOL)flag{

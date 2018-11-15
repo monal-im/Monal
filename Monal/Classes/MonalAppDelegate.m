@@ -140,7 +140,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type
 {
     DDLogInfo(@"incoming voip notfication: %@", [payload dictionaryPayload]);
-    if([UIApplication sharedApplication].applicationState=UIApplicationStateActive) return;
+    if([UIApplication sharedApplication].applicationState==UIApplicationStateActive) return;
     
     dispatch_async(dispatch_get_main_queue(), ^{
         //reconenct and fetch messages

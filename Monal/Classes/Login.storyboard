@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14313.18" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="6sv-dL-UsN">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14460.31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="6sv-dL-UsN">
     <device id="retina5_9" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14283.14"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14460.20"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -190,7 +190,13 @@
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="D5I-O1-Ds7"/>
                     </view>
-                    <navigationItem key="navigationItem" title="Welcome" id="yxA-wa-jGH"/>
+                    <navigationItem key="navigationItem" title="Welcome" id="yxA-wa-jGH">
+                        <barButtonItem key="rightBarButtonItem" title="Close" id="0Tx-nj-jHi">
+                            <connections>
+                                <action selector="useWithoutAccount:" destination="vXZ-lx-hvc" id="iNg-4u-Kdx"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                     <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
                     <connections>
                         <outlet property="contentView" destination="9KO-5L-PvL" id="QxA-3L-kwE"/>
@@ -229,6 +235,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="AppLogo" width="341" height="341"/>
+        <image name="AppLogo" width="1024" height="1024"/>
     </resources>
 </document>

@@ -33,6 +33,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 @property (nonatomic , weak)  MLPresenceSettings *presenceVC;
 @property (nonatomic , weak)  MLDisplaySettings *displayVC;
 @property (nonatomic , weak)  MLCloudStorageSettings *cloudVC;
+@property (nonatomic , strong) id <NSObject> _activity;
 
 @end
 
@@ -74,11 +75,16 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [DBSession setSharedSession:dbSession];
 
 
-    
+    NSActivityOptions options = NSActivityUserInitiatedAllowingIdleSystemSleep;
+    NSString *reason = @"Monal needs it's network connection. No napping.";
+    self.activity = [[NSProcessInfo processInfo] beginActivityWithOptions:options reason:reason];
 }
 
+
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
-     [[MLXMPPManager sharedInstance] logoutAll];
+    [[MLXMPPManager sharedInstance] logoutAll];
+    [[NSProcessInfo processInfo] endActivity:self.activity];
+    self.ctivity = nil;
 }
 
 - (BOOL)applicationShouldHandleReopen:(NSApplication *)theApplication hasVisibleWindows:(BOOL)flag{
@@ -226,8 +232,5 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     
 }
-
-
-
 
 @end

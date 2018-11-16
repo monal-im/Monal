@@ -1473,10 +1473,14 @@ static DataLayer *sharedInstance=nil;
 
 -(void) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom delivered:(BOOL) delivered unread:(BOOL) unread serverMessageId:(NSString *) messageid messageType:(NSString *) messageType andOverrideDate:(NSDate *) messageDate encrypted:(BOOL) encrypted  withCompletion: (void (^)(BOOL))completion
 {
+    if(!from || !to) {
+        if(completion) completion(NO);
+        return;
+    }
+    
     [self hasMessageForId:messageid toContact:actualfrom onAccount:accountNo andCompletion:^(BOOL exists) {
         if(!exists)
         {
-          
             //this is always from a contact
             NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
             [formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];

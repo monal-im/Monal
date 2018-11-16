@@ -2436,7 +2436,15 @@ static DataLayer *sharedInstance=nil;
 -(void) messageTypeForMessage:(NSString *) messageString withCompletion:(void(^)(NSString *messageType)) completion
 {
     __block NSString *messageType=kMessageTypeText;
-    if ([[NSUserDefaults standardUserDefaults] boolForKey: @"ShowImages"] &&  ([messageString hasPrefix:@"HTTPS://"]||[messageString hasPrefix:@"https://"]))
+    if([messageString rangeOfString:@" "].location!=NSNotFound) {
+        if(completion) {
+            completion(messageType);
+        }
+        return;
+    }
+    
+    if ([[NSUserDefaults standardUserDefaults] boolForKey: @"ShowImages"]
+        &&  ([messageString hasPrefix:@"HTTPS://"] || [messageString hasPrefix:@"https://"]))
     {
         NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:messageString]];
         request.HTTPMethod=@"HEAD";

@@ -277,7 +277,7 @@
 
 - (void)windowWillClose:(NSNotification *)notification
 {
-        [[MLXMPPManager sharedInstance] setClientsInactive];
+    [[MLXMPPManager sharedInstance] setClientsInactive];
 }
 
 - (void)windowDidBecomeMain:(NSNotification *)notification

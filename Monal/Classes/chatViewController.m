@@ -953,7 +953,10 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         }
     }
 
-    NSDictionary *messageRow = [self.messageList objectAtIndex:indexPath.row];
+    NSDictionary *messageRow;
+    if(indexPath.row<self.messageList.count) {
+        messageRow = [self.messageList objectAtIndex:indexPath.row];
+    }
     NSString *messageString =[messageRow objectForKey:@"message"];
    
     if([messageType isEqualToString:kMessageTypeImage])

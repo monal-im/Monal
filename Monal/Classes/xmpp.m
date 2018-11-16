@@ -3021,7 +3021,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) disconnectToResume
 {
     [self closeSocket]; // just closing socket to simulate a unintentional disconnect
-    [self cleanUpState];
+    [self.networkQueue addOperationWithBlock:^{
+        [self cleanUpState];
+    }];
 }
 
 -(void) queryInfo

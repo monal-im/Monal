@@ -21,18 +21,12 @@
     UIView *containerView;
 	CGRect oldFrame;
 	NSString* _contactFullName;
-    
 	BOOL _firstmsg;
-	
 	BOOL wasaway;
 	BOOL wasoffline;
-    
     NSArray* activeChats;
-    
     NSDictionary* _contact;
-
     BOOL  _isMUC;
-
     BOOL _keyboardVisible; 
 }
 

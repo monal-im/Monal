@@ -1245,7 +1245,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 //-(BOOL) canBecomeFirstResponder
 //{
-//    return YES; 
+//    return YES;
 //}
 //
 //-(UIView *) inputAccessoryView
@@ -1354,7 +1354,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void) keyboardWillShow:(NSNotification *) notification
 {
-//    if(self.blockAnimations) return;
+    if(self.blockAnimations) return;
 //    CGRect keyboardframe =[[[notification userInfo] objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
 //    CGSize keyboardSize = keyboardframe.size;
 //
@@ -1368,7 +1368,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 //                         [self scrollToBottom];
 //                     }
 //     ];
-	
+//
 }
 
 

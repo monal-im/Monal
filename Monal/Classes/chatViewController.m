@@ -875,7 +875,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     
 }
 
-#pragma mark tableview datasource
+#pragma mark - tableview datasource
 
 -(NSInteger) numberOfSectionsInTableView:(UITableView *)tableView
 {
@@ -1251,7 +1251,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 //}
 
 
-# pragma mark Textview delegate functions
+# pragma mark - Textview delegate functions
 
 -(void) updateInputViewSize
 {

@@ -632,7 +632,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                                    }
                                    else  {
                                        NSObject *obj =[notification.userInfo objectForKey:@"delayTimeStamp"];
-                                       if(obj isKindOfClass:[NSDate class])
+                                       if([obj isKindOfClass:[NSDate class])
                                        {
                                            timeString =[self.sourceDateFormat stringFromDate:(NSDate *)obj];
                                        } else  {

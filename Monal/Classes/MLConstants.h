@@ -69,6 +69,6 @@
 //#endif
 
 //temp for  a release
-//#ifndef DISABLE_OMEMO
-//#define DISABLE_OMEMO 1
-//#endif
+#ifndef DISABLE_OMEMO
+#define DISABLE_OMEMO 1
+#endif

@@ -626,9 +626,26 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                                
                                if([[notification.userInfo objectForKey:@"to"] isEqualToString:_contactName])
                                {
+                                   NSString *timeString;
+                                   if(![notification.userInfo objectForKey:@"delayTimeStamp"]) {
+                                       timeString=[self currentGMTTime];
+                                   }
+                                   else  {
+                                       NSObject *obj =[notification.userInfo objectForKey:@"delayTimeStamp"];
+                                       if(obj isKindOfClass:[NSDate class])
+                                       {
+                                           timeString =[self.sourceDateFormat stringFromDate:(NSDate *)obj];
+                                       } else  {
+                                           timeString= [notification.userInfo objectForKey:@"delayTimeStamp"];
+                                       }
+                                   }
+                                   
+                                   ((NSString *) [notification.userInfo objectForKey:@"delayTimeStamp"]).length>0?:
+                                   
+                                   
                                    userInfo = @{@"af": [notification.userInfo objectForKey:@"actuallyfrom"],
                                                 @"message": [notification.userInfo objectForKey:@"messageText"],
-                                                @"thetime": ((NSString *) [notification.userInfo objectForKey:@"delayTimeStamp"]).length>0?[notification.userInfo objectForKey:@"delayTimeStamp"]:[self currentGMTTime],
+                                                @"thetime": timeString,
                                                 @"delivered":@YES,
                                                 kMessageType:finalMessageType
                                                 };

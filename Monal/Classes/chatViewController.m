@@ -77,7 +77,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     
 }
 
-#pragma mark view lifecycle
+#pragma mark -  view lifecycle
 
 -(void) viewDidLoad
 {
@@ -288,9 +288,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 -(void) refreshData
 {
     if(!_contactName) return;
-    
+    NSMutableArray *newList;
     if(!_day) {
-        self.messageList =[[DataLayer sharedInstance] messageHistory:_contactName forAccount: _accountNo];
+        newList =[[DataLayer sharedInstance] messageHistory:_contactName forAccount: _accountNo];
         [[DataLayer sharedInstance] countUserUnreadMessages:_contactName forAccount: _accountNo withCompletion:^(NSNumber *unread) {
             if([unread integerValue]==0) _firstmsg=YES;
             
@@ -300,10 +300,15 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     }
     else
     {
-        self.messageList =[[[DataLayer sharedInstance] messageHistoryDate:_contactName forAccount: _accountNo forDate:_day] mutableCopy];
+        newList =[[[DataLayer sharedInstance] messageHistoryDate:_contactName forAccount: _accountNo forDate:_day] mutableCopy];
         
     }
-    [_messageTable reloadData];
+    
+    if(newList.count!=self.messageList.count)
+    {
+        self.messageList = newList;
+        [_messageTable reloadData];
+    }
 }
 
 
@@ -740,8 +745,6 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     [self setMessageId:[dic objectForKey:kMessageId]  received:YES];
 }
 
-
-#pragma mark MUC display elements
 
 -(void) scrollToBottom
 {

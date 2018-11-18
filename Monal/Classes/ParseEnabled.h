@@ -17,7 +17,7 @@
 @property (nonatomic, strong, readonly) NSString *streamID;
 
 /**
- server's max resumption time -- not implemented
+ server's max resumption time 
  */
 @property (nonatomic, strong, readonly) NSNumber *max;
 

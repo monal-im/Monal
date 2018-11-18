@@ -14,11 +14,9 @@
 {
     _messageBuffer=nil;
     
-//    if([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:sm:3"])
-//    {
-//        
-//    }
-   
+    if([attributeDict objectForKey:@"max"] )    {
+        _max=[attributeDict objectForKey:@"max"];
+    }
     _streamID=[attributeDict objectForKey:@"id"];
     
     if([[attributeDict objectForKey:@"resume"] isEqualToString:@"true"])

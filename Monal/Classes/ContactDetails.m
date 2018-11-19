@@ -98,17 +98,17 @@
         }
         case 1: {
             thecell=  (MLDetailsTableViewCell *)[tableView dequeueReusableCellWithIdentifier:@"bottomCell"];
-            thecell.detailTextLabel.text=[_contact objectForKey:@"status"];
-            if([  thecell.detailTextLabel.text isEqualToString:@"(null)"])  thecell.detailTextLabel.text=@"";
+            thecell.cellDetails.text=[_contact objectForKey:@"status"];
+            if([  thecell.cellDetails.text isEqualToString:@"(null)"])  thecell.cellDetails.text=@"";
             break;
         }
         case 2: {
             thecell=  (MLDetailsTableViewCell *)[tableView dequeueReusableCellWithIdentifier:@"resourceCell"];
             NSArray* resources= [[DataLayer sharedInstance] resourcesForContact:[_contact objectForKey:@"buddy_name"]];
-            thecell.detailTextLabel.text=@"";
+            thecell.cellDetails.text=@"";
             for(NSDictionary* row in resources)
             {
-                thecell.detailTextLabel.text=[NSString stringWithFormat:@"%@\n%@\n", thecell.detailTextLabel.text, [row objectForKey:@"resource"]];
+                thecell.cellDetails.text=[NSString stringWithFormat:@"%@\n%@", thecell.cellDetails.text, [row objectForKey:@"resource"]];
             }
             break;
         }

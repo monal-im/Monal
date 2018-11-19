@@ -13,6 +13,11 @@
 - (void)awakeFromNib {
     [super awakeFromNib];
     // Initialization code
+    
+    //if ther eis abackground
+    self.name.textColor=[UIColor blackColor];
+    self.date.textColor=[UIColor blackColor];
+    self.messageStatus.textColor=[UIColor blackColor];
 }
 
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated {

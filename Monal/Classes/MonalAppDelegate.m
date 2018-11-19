@@ -159,7 +159,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 //                alarm.timeZone = [NSTimeZone defaultTimeZone];
 //                alarm.repeatInterval = 0;
 //                alarm.alertBody =  @"DEBUG received push";
-//                
+//
 //                [[UIApplication sharedApplication] scheduleLocalNotification:alarm];
 //        }
 //#endif
@@ -402,6 +402,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         UIApplicationState state = [[UIApplication sharedApplication] applicationState];
         if (state == UIApplicationStateInactive || state == UIApplicationStateBackground) {
             [[MLXMPPManager sharedInstance] setClientsInactive];
+        } else {
+             [[MLXMPPManager sharedInstance] setClientsActive];
         }
     });
 }

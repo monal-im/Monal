@@ -99,17 +99,21 @@
 #pragma mark - notifications
 -(void) handleConnect:(NSNotification *)notification
 {
-    NSString* nameToShow=[notification.object objectForKey:@"AccountName"];
-    NSUserNotification *alert =[[NSUserNotification alloc] init];
-    NSString* messageString =[NSString stringWithFormat:@"Account %@ has connected.", nameToShow];
-    alert.informativeText =messageString;
-    [[NSUserNotificationCenter defaultUserNotificationCenter] scheduleNotification:alert];
+    if(self.window.isKeyWindow) {
+         [[MLXMPPManager sharedInstance] setClientsActive]; 
+    }
+    else  {
+        NSString* nameToShow=[notification.object objectForKey:@"AccountName"];
+        NSUserNotification *alert =[[NSUserNotification alloc] init];
+        NSString* messageString =[NSString stringWithFormat:@"Account %@ has connected.", nameToShow];
+        alert.informativeText =messageString;
+        [[NSUserNotificationCenter defaultUserNotificationCenter] scheduleNotification:alert];
+    }
     
 }
 
 -(void) showConnectionStatus:(NSNotification *) notification
 {
-
     NSArray *payload= notification.object;
     
     NSString *message = payload[1]; // this is just the way i set it up a dic might better

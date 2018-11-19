@@ -201,8 +201,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     NSInteger bottom = [self.chatTable numberOfRows];
     if(bottom>0)
-    {
-        
+    {        
         [self.chatTable scrollRowToVisible:bottom-1];
     }
 }

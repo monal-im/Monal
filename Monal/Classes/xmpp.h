@@ -305,6 +305,7 @@ FOUNDATION_EXPORT NSString *const kCompletion;
 @property (nonatomic,strong)  NSString*  conferenceServer;
 @property (nonatomic,strong)  NSArray*  roomList;
 @property (nonatomic, strong) NSArray* rosterList;
+@property (nonatomic, assign) BOOL staleRoster; //roster is stale if it resumed in the background
 
 
 @property (nonatomic,strong)  NSString*  uploadServer;

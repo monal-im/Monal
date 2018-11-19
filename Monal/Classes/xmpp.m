@@ -564,6 +564,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         [_contactsVC clearContactsForAccount:_accountNo];
         [[DataLayer sharedInstance] resetContactsForAccount:_accountNo];
         _unAckedStanzas=nil;
+        self.discoveredServices=nil;
         [self persistState];
     }
     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountStatusChanged object:nil];
@@ -2278,7 +2279,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     ParseEnabled* enabledNode= [[ParseEnabled alloc]  initWithDictionary:stanzaToParse];
                     if(enabledNode.resume) {
                         self.streamID=enabledNode.streamID;
-                        self.streamExpireSeconds=enabledNode.max; 
+                        self.streamExpireSeconds=enabledNode.max;
                     }
                     else {
                         self.streamID=nil;
@@ -2319,6 +2320,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"resumed"])
                 {
                     self.resuming=NO;
+                    self.staleRoster=YES;
                     
                     //now we are bound again
                     self->_accountState=kStateBound;
@@ -2912,6 +2914,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         [values setObject:[NSNumber numberWithBool:self.supportsMam2] forKey:@"supportsMAM"];
     }
     
+    if(self.discoveredServices)
+    {
+        [values setObject:self.discoveredServices forKey:@"discoveredServices"];
+    }
+    
     //collect roster state
     [values setValue:self.rosterList forKey:@"rosterList"];
     
@@ -2958,6 +2965,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         }
         
         self.serverFeatures = [dic objectForKey:@"serverFeatures"];
+        self.discoveredServices=[dic objectForKey:@"discoveredServices"];
         
         
         self.uploadServer= [dic objectForKey:@"uploadServer"];
@@ -3023,6 +3031,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) queryPresence
 {
+    self.staleRoster=NO;
     for(NSDictionary* contact in self.rosterList)
     {
         if([[contact objectForKey:@"subscription"] isEqualToString:@"both"])
@@ -3045,7 +3054,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) queryInfo
 {
-    if(!self.hasDiscoAndRoster) {
+    if(!self.hasDiscoAndRoster || self.staleRoster) {
         [self queryPresence]; //No real way to cache this since it changes
         self.hasDiscoAndRoster=YES;
     }
@@ -3054,6 +3063,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) queryDisco
 
 {
+    if(self.discoveredServices) return;
+    
     XMPPIQ* discoItems =[[XMPPIQ alloc] initWithType:kiqGetType];
     [discoItems setiqTo:_domain];
     MLXMLNode* items = [[MLXMLNode alloc] initWithElement:@"query"];

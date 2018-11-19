@@ -113,10 +113,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     self.chatInput.layer.cornerRadius=3.0f;
     self.chatInput.layer.borderWidth=0.5f;
     self.chatInput.textContainerInset=UIEdgeInsetsMake(5, 0, 5, 0);
-    
-    
-    self.inputContainerView.layer.borderColor=[UIColor lightGrayColor].CGColor;
-    self.inputContainerView.layer.borderWidth=0.5f;
+        
+//    self.inputContainerView.layer.borderColor=[UIColor lightGrayColor].CGColor;
+//    self.inputContainerView.layer.borderWidth=0.5f;
     
     if ([DBSession sharedSession].isLinked) {
         self.restClient = [[DBRestClient alloc] initWithSession:[DBSession sharedSession]];

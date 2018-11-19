@@ -1402,9 +1402,16 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Tie_My_Boat_by_Ray_García" translatesAutoresizingMaskIntoConstraints="NO" id="SEk-WZ-Rcm">
+                                <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
+                            </imageView>
+                            <view alpha="0.40000000000000002" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="cUR-xM-Mq7">
+                                <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
+                                <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            </view>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" showsHorizontalScrollIndicator="NO" keyboardDismissMode="interactive" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="Kkq-aZ-5fP">
                                 <rect key="frame" x="0.0" y="0.0" width="414" height="636"/>
-                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <gestureRecognizers/>
                                 <constraints>
                                     <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="320" id="k1m-re-kKB"/>
@@ -1955,10 +1962,18 @@
                         <gestureRecognizers/>
                         <constraints>
                             <constraint firstItem="eXr-Xg-TCZ" firstAttribute="top" secondItem="Kkq-aZ-5fP" secondAttribute="bottom" constant="8" id="4Sb-Lk-rJw"/>
+                            <constraint firstItem="cUR-xM-Mq7" firstAttribute="top" secondItem="HiA-3m-fJs" secondAttribute="bottom" constant="-64" id="5fs-Nr-GdT"/>
+                            <constraint firstItem="eXr-Xg-TCZ" firstAttribute="top" secondItem="cUR-xM-Mq7" secondAttribute="bottom" constant="-92" id="6Ju-eQ-zRz"/>
+                            <constraint firstItem="SEk-WZ-Rcm" firstAttribute="leading" secondItem="Riz-2Q-bcU" secondAttribute="leadingMargin" constant="-20" id="FL9-Tl-rIX"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="SEk-WZ-Rcm" secondAttribute="trailing" constant="-20" id="Fwo-dk-iuw"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="cUR-xM-Mq7" secondAttribute="trailing" constant="-20" id="OyZ-VO-0b4"/>
                             <constraint firstItem="Kkq-aZ-5fP" firstAttribute="leading" secondItem="Riz-2Q-bcU" secondAttribute="leading" id="SIK-A8-KjT"/>
                             <constraint firstItem="Kkq-aZ-5fP" firstAttribute="top" secondItem="Riz-2Q-bcU" secondAttribute="top" id="T8K-jc-eWo"/>
+                            <constraint firstItem="eXr-Xg-TCZ" firstAttribute="top" secondItem="SEk-WZ-Rcm" secondAttribute="bottom" constant="-92" id="gRE-94-bO3"/>
                             <constraint firstItem="eXr-Xg-TCZ" firstAttribute="leading" secondItem="Riz-2Q-bcU" secondAttribute="leadingMargin" constant="-20" id="jVI-Df-58M"/>
                             <constraint firstItem="si5-od-Uah" firstAttribute="top" secondItem="eXr-Xg-TCZ" secondAttribute="bottom" id="lAt-Zq-pOz"/>
+                            <constraint firstItem="SEk-WZ-Rcm" firstAttribute="top" secondItem="HiA-3m-fJs" secondAttribute="bottom" constant="-64" id="n1F-vU-19M"/>
+                            <constraint firstItem="cUR-xM-Mq7" firstAttribute="leading" secondItem="Riz-2Q-bcU" secondAttribute="leadingMargin" constant="-20" id="nxB-c0-v3z"/>
                             <constraint firstAttribute="trailingMargin" secondItem="eXr-Xg-TCZ" secondAttribute="trailing" constant="-20" id="rOV-mz-x8F"/>
                             <constraint firstAttribute="trailing" secondItem="Kkq-aZ-5fP" secondAttribute="trailing" id="xwD-cC-ws0"/>
                             <constraint firstItem="eXr-Xg-TCZ" firstAttribute="top" secondItem="Kkq-aZ-5fP" secondAttribute="bottom" constant="8" id="zpH-ds-x47"/>
@@ -2032,13 +2047,14 @@
         <image name="906-chat-3" width="28" height="26"/>
         <image name="973-user" width="28" height="24"/>
         <image name="974-users" width="28" height="18"/>
+        <image name="Tie_My_Boat_by_Ray_García" width="563" height="1218"/>
         <image name="menu" width="28" height="22"/>
     </resources>
     <inferredMetricsTieBreakers>
         <segue reference="ojB-Rp-nEa"/>
         <segue reference="qaB-BP-OcO"/>
         <segue reference="N41-wN-KNl"/>
-        <segue reference="RLU-kt-b8r"/>
+        <segue reference="QlH-d5-Lhg"/>
         <segue reference="pPJ-na-Dl3"/>
         <segue reference="YJ5-aM-wEP"/>
         <segue reference="pZO-HH-rUP"/>

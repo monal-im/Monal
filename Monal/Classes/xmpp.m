@@ -110,6 +110,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 @property (nonatomic, assign) BOOL supportsSM3;
 @property (nonatomic, assign) BOOL resuming;
 @property (nonatomic, strong) NSString *streamID;
+@property (nonatomic, strong) NSNumber *streamExpireSeconds;
+
 @property (nonatomic, assign) BOOL hasDiscoAndRoster;
 
 // client state
@@ -2276,6 +2278,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     ParseEnabled* enabledNode= [[ParseEnabled alloc]  initWithDictionary:stanzaToParse];
                     if(enabledNode.resume) {
                         self.streamID=enabledNode.streamID;
+                        self.streamExpireSeconds=enabledNode.max; 
                     }
                     else {
                         self.streamID=nil;
@@ -2885,6 +2888,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [values setValue:self.lastOutboundStanza forKey:@"lastOutboundStanza"];
     [values setValue:self.unAckedStanzas forKey:@"unAckedStanzas"];
     [values setValue:self.streamID forKey:@"streamID"];
+    if(self.streamExpireSeconds ) {
+        [values setValue:self.streamExpireSeconds forKey:@"streamExpireSeconds"];
+        [values setValue:[NSDate date] forKey:@"streamLastTime"];
+    }
+    [values setValue:[NSDate date] forKey:@"streamTime"];
     
     [values setValue:self.serverFeatures forKey:@"serverFeatures"];
     if(self.uploadServer) {
@@ -2911,21 +2919,17 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [[NSUserDefaults standardUserDefaults] setObject:[NSKeyedArchiver archivedDataWithRootObject:values] forKey:[NSString stringWithFormat:@"stream_state_v1_%@",self.accountNo]];
     
     //debug output
-    DDLogVerbose(@"+++++++++++++++++++ persistState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%d%s,\n\tstreamID=%@\n\t#rosterList=%d",
+    DDLogVerbose(@"persistState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%d%s,\n\tstreamID=%@\nstreaexpire=%@\nt#rosterList=%d",
               self.lastHandledInboundStanza,
               self.lastHandledOutboundStanza,
               self.lastOutboundStanza,
               self.unAckedStanzas ? [self.unAckedStanzas count] : 0,
               self.unAckedStanzas ? "" : " (NIL)",
               self.streamID,
+                 self.streamExpireSeconds,
               self.rosterList ? [self.rosterList count] : 0
               );
     
-//    if(self.unAckedStanzas) {
-//        for(NSDictionary *dic in self.unAckedStanzas) {
-//            DDLogVerbose(@"+++++++++++++++++++ persistState unAckedStanza %@: %@", [dic objectForKey:kStanzaID], ((MLXMLNode*)[dic objectForKey:kStanza]).XMLString);
-//        }
-//    }
 }
 
 -(void) readState
@@ -2941,6 +2945,18 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         self.lastOutboundStanza=[dic objectForKey:@"lastOutboundStanza"];
         self.unAckedStanzas=[dic objectForKey:@"unAckedStanzas"];
         self.streamID=[dic objectForKey:@"streamID"];
+        self.streamExpireSeconds=[dic objectForKey:@"streamExpireSeconds"];
+        
+        NSDate *streamLastTime = [dic objectForKey:@"streamLastTime"];
+        if(streamLastTime && self.streamExpireSeconds)
+        {
+            if([[NSDate date] timeIntervalSinceDate:streamLastTime]>self.streamExpireSeconds.integerValue)
+            {
+                self.streamID=nil;
+                self.streamExpireSeconds=nil;
+            }
+        }
+        
         self.serverFeatures = [dic objectForKey:@"serverFeatures"];
         
         
@@ -2991,6 +3007,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     self.lastOutboundStanza=[NSNumber numberWithInteger:0];
     self.unAckedStanzas=[[NSMutableArray alloc] init];
     self.streamID=nil;
+    self.streamExpireSeconds=nil;
     DDLogDebug(@"initSM3 done");
 }
 

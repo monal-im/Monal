@@ -150,19 +150,19 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             tempTask=UIBackgroundTaskInvalid;
         }];
         
-#ifdef DEBUG
-        UILocalNotification* alarm = [[UILocalNotification alloc] init];
-        if (alarm)
-        {
-            //scehdule info
-                alarm.fireDate = [NSDate date];
-                alarm.timeZone = [NSTimeZone defaultTimeZone];
-                alarm.repeatInterval = 0;
-                alarm.alertBody =  @"DEBUG received push";
-                
-                [[UIApplication sharedApplication] scheduleLocalNotification:alarm];
-        }
-#endif
+//#ifdef DEBUG
+//        UILocalNotification* alarm = [[UILocalNotification alloc] init];
+//        if (alarm)
+//        {
+//            //scehdule info
+//                alarm.fireDate = [NSDate date];
+//                alarm.timeZone = [NSTimeZone defaultTimeZone];
+//                alarm.repeatInterval = 0;
+//                alarm.alertBody =  @"DEBUG received push";
+//                
+//                [[UIApplication sharedApplication] scheduleLocalNotification:alarm];
+//        }
+//#endif
         
         [[MLXMPPManager sharedInstance] connectIfNecessary];
          DDLogInfo(@"voip wake compelte");

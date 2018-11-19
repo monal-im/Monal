@@ -15,7 +15,7 @@
     _messageBuffer=nil;
     
     if([attributeDict objectForKey:@"max"] )    {
-        _max=[attributeDict objectForKey:@"max"];
+        _max= [[NSNumberFormatter alloc] numberFromString:[attributeDict objectForKey:@"max"]];
     }
     _streamID=[attributeDict objectForKey:@"id"];
     

@@ -103,7 +103,8 @@
     [dic setObject:user forKey:kUsername];
     [dic setObject:domain  forKey:kServer];
     [dic setObject:@"5222" forKey:kPort];
-    [dic setObject:@"Monal-iOS" forKey:kResource];
+    NSString *resource=[NSString stringWithFormat:@"Monal-iOS.%d",rand()%100];
+    [dic setObject:resource  forKey:kResource];
     [dic setObject:@YES forKey:kSSL];
     [dic setObject:@YES forKey:kEnabled];
     [dic setObject:@NO forKey:kSelfSigned];

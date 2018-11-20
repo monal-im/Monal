@@ -83,8 +83,8 @@
             thecell=  (MLDetailsTableViewCell *)[tableView dequeueReusableCellWithIdentifier:@"topCell"];
             
             thecell.buddyName.text=[self.contact objectForKey:@"buddy_name"];
-            thecell.fullName.text=[self.contact objectForKey:@"buddy_name"];
-            thecell.buddyStatus.text=[self.contact objectForKey:@"buddy_name"];
+            thecell.fullName.text=[self.contact objectForKey:@"full_name"];
+            thecell.buddyStatus.text=[self.contact objectForKey:@"state"];
             
             if([thecell.buddyStatus.text isEqualToString:@"(null)"])  thecell.buddyStatus.text=@"";
             if([thecell.fullName.text isEqualToString:@"(null)"])  thecell.fullName.text=@"";

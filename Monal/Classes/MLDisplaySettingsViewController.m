@@ -194,13 +194,19 @@
     switch (indexPath.section) {
         case 0:
         {
-            
-            cell.textInputField.placeholder=NSLocalizedString(@"Status Message", @"");
-            cell.textInputField.keyboardType=UIKeyboardTypeAlphabet;
-            cell.defaultKey=@"StatusMessage";
-            cell.textEnabled=YES;
-            return cell; 
-            break;
+            switch(indexPath.row)
+            {
+                case 0:
+                {
+                    cell.textInputField.placeholder=NSLocalizedString(@"Status Message", @"");
+                    cell.textInputField.keyboardType=UIKeyboardTypeAlphabet;
+                    cell.defaultKey=@"StatusMessage";
+                    cell.textEnabled=YES;
+                    return cell;
+                    break;
+                }
+                
+            }
         }
    
         case 1:
@@ -318,6 +324,9 @@
 
     return nil;
 }
+
+
+
 
 
 -(IBAction)close:(id)sender

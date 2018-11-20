@@ -264,8 +264,9 @@ NSString *const kGtalk = @"Gtalk";
     } else {
         
     }
+     NSString *resource=[NSString stringWithFormat:@"Monal-iOS.%d",rand()%100];
     
-    [dic setObject:@"Monal-iOS" forKey:kResource];
+    [dic setObject:resource forKey:kResource];
     
     [dic setObject:[NSNumber numberWithBool:self.useSSL] forKey:kSSL];
     [dic setObject:[NSNumber numberWithBool:self.enabled] forKey:kEnabled];

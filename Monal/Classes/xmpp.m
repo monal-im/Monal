@@ -2320,7 +2320,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"resumed"])
                 {
                     self.resuming=NO;
-                    self.staleRoster=YES;
                     
                     //now we are bound again
                     self->_accountState=kStateBound;
@@ -3029,35 +3028,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     self.hasDiscoAndRoster=YES;
 }
 
--(void) queryPresence
-{
-    self.staleRoster=NO;
-    for(NSDictionary* contact in self.rosterList)
-    {
-        if([[contact objectForKey:@"subscription"] isEqualToString:@"both"])
-        {
-            MLXMLNode* presenceProbe = [[MLXMLNode alloc] initWithElement:@"presence"];
-            NSDictionary *dic=@{@"to": [contact objectForKey:@"jid"], @"type": @"probe"};
-            presenceProbe.attributes = [dic mutableCopy];
-            [self send:presenceProbe];
-        }
-    }
-}
-
 -(void) disconnectToResume
 {
     [self closeSocket]; // just closing socket to simulate a unintentional disconnect
     [self.networkQueue addOperationWithBlock:^{
         [self cleanUpState];
     }];
-}
-
--(void) queryInfo
-{
-    if(!self.hasDiscoAndRoster || self.staleRoster) {
-        [self queryPresence]; //No real way to cache this since it changes
-        self.hasDiscoAndRoster=YES;
-    }
 }
 
 -(void) queryDisco
@@ -3384,8 +3360,6 @@ if(!self.supportsSM3)
     MLXMLNode *activeNode =[[MLXMLNode alloc] initWithElement:@"active" ];
     [activeNode setXMLNS:@"urn:xmpp:csi:0"];
     [self send:activeNode];
-    // will either query, or if it is not connected, the reconnect will be in the forground, doing the same thing
-    [self queryInfo];
 }
 
 -(void) setClientInactive

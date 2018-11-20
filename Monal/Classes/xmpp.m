@@ -2918,22 +2918,19 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         [values setObject:self.discoveredServices forKey:@"discoveredServices"];
     }
     
-    //collect roster state
-    [values setValue:self.rosterList forKey:@"rosterList"];
-    
     //save state dictionary
     [[NSUserDefaults standardUserDefaults] setObject:[NSKeyedArchiver archivedDataWithRootObject:values] forKey:[NSString stringWithFormat:@"stream_state_v1_%@",self.accountNo]];
     
     //debug output
-    DDLogVerbose(@"persistState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%d%s,\n\tstreamID=%@\nstreaexpire=%@\nt#rosterList=%d",
+    DDLogVerbose(@"persistState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%d%s,\n\tstreamID=%@\nstreaexpire=%@",
               self.lastHandledInboundStanza,
               self.lastHandledOutboundStanza,
               self.lastOutboundStanza,
               self.unAckedStanzas ? [self.unAckedStanzas count] : 0,
               self.unAckedStanzas ? "" : " (NIL)",
               self.streamID,
-                 self.streamExpireSeconds,
-              self.rosterList ? [self.rosterList count] : 0
+                 self.streamExpireSeconds
+             
               );
     
 }
@@ -2985,21 +2982,17 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             NSNumber *mamNumber = [dic objectForKey:@"supportsMAM"];
             self.supportsMam2 = mamNumber.boolValue;
         }
-        
-        
-        //collect roster state
-        self.rosterList=[dic objectForKey:@"rosterList"];
+
     }
     
     //debug output
-    DDLogDebug(@"readState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%d%s,\n\tstreamID=%@\n\t#rosterList=%d",
+    DDLogDebug(@"readState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%d%s,\n\tstreamID=%@",
               self.lastHandledInboundStanza,
               self.lastHandledOutboundStanza,
               self.lastOutboundStanza,
               self.unAckedStanzas ? [self.unAckedStanzas count] : 0,
               self.unAckedStanzas ? "" : " (NIL)",
-              self.streamID,
-              self.rosterList ? [self.rosterList count] : 0
+              self.streamID
               );
     if(self.unAckedStanzas)
         for(NSDictionary *dic in self.unAckedStanzas)

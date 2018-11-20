@@ -12,12 +12,13 @@
 
 - (void)awakeFromNib {
     [super awakeFromNib];
-    // Initialization code
     
-    //if ther eis abackground
-    self.name.textColor=[UIColor blackColor];
-    self.date.textColor=[UIColor blackColor];
-    self.messageStatus.textColor=[UIColor blackColor];
+    BOOL backgrounds = [[NSUserDefaults standardUserDefaults] boolForKey:@"ChatBackgrounds"];
+    if(backgrounds) {
+        self.name.textColor=[UIColor whiteColor];
+        self.date.textColor=[UIColor whiteColor];
+        self.messageStatus.textColor=[UIColor whiteColor];
+    }
 }
 
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated {

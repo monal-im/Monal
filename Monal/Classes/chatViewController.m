@@ -226,7 +226,16 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     UIEdgeInsets currentInset = self.messageTable.contentInset;
     self.messageTable.contentInset =UIEdgeInsetsMake(self.navigationController.navigationBar.frame.size.height+[UIApplication sharedApplication].statusBarFrame.size.height, currentInset.left, currentInset.bottom, currentInset.right);
    
-//    self.messageTable.backgroundView=[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"ios11"]];
+    BOOL backgrounds = [[NSUserDefaults standardUserDefaults] boolForKey:@"ChatBackgrounds"];
+    
+    if(backgrounds){
+        self.backgroundImage.hidden=NO;
+        self.transparentLayer.hidden=NO;
+    }else  {
+        self.backgroundImage.hidden=YES;
+        self.transparentLayer.hidden=YES;
+    }
+
     
 }
 

@@ -550,10 +550,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             DDLogError(@"Exception in ostream close");
         }
         
-//        self->_iStream=nil;
-//        self->_oStream=nil;
-        
-        
     }];
 }
 
@@ -561,12 +557,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     if(self.explicitLogout)
     {
-        [_contactsVC clearContactsForAccount:_accountNo];
-        [[DataLayer sharedInstance] resetContactsForAccount:_accountNo];
         _unAckedStanzas=nil;
         self.discoveredServices=nil;
         [self persistState];
     }
+    
+    [_contactsVC clearContactsForAccount:_accountNo];
+    [[DataLayer sharedInstance] resetContactsForAccount:_accountNo];
+    
     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountStatusChanged object:nil];
     
     DDLogInfo(@"Connections closed");
@@ -2377,6 +2375,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     {
                         self.supportsSM3=NO;
                         
+                      
                         //init session and query disco, roster etc.
                         [self initSession];
                         
@@ -2877,6 +2876,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     self.unAckedStanzas= toClean;
 }
 
+-(void) cleanStream
+{
+    NSMutableDictionary* values = [[NSMutableDictionary alloc] init];
+    [values removeObjectForKey:@"streamID"];
+    [[NSUserDefaults standardUserDefaults] setObject:[NSKeyedArchiver archivedDataWithRootObject:values] forKey:[NSString stringWithFormat:@"stream_state_v1_%@",self.accountNo]];
+}
 
 -(void) persistState
 {
@@ -3076,6 +3081,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) initSession
 {
+    [_contactsVC clearContactsForAccount:_accountNo];
+    [[DataLayer sharedInstance] resetContactsForAccount:_accountNo];
+    
     //now we are bound
     _accountState=kStateBound;
     [self postConnectNotification];
@@ -3435,7 +3443,7 @@ if(!self.supportsSM3)
 }
 
 
-#pragma mark XMPP add and remove contact
+#pragma mark- XMPP add and remove contact
 -(void) removeFromRoster:(NSString*) contact
 {
     XMPPIQ* iq = [[XMPPIQ alloc] initWithType:kiqSetType];
@@ -3478,7 +3486,7 @@ if(!self.supportsSM3)
     [self send:presence2];
 }
 
-#pragma mark Jingle calls
+#pragma mark - Jingle calls
 -(void)call:(NSDictionary*) contact
 {
     if(self.jingle) return;

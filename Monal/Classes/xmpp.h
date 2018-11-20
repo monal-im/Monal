@@ -344,4 +344,10 @@ extern NSString *const kSendTimer;
  */
 -(void) disconnectToResume;
 
+/**
+ To be used when there is a new object created to prevent a resume.
+ e.g app forced closed so that contacts dont go out of synch
+ */
+-(void) cleanStream;
+
 @end

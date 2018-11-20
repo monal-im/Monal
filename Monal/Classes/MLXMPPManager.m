@@ -268,6 +268,7 @@ An array of Dics what have timers to make sure everything was sent
         // ask fro temp pass if not oauth
     }
      xmppAccount.contactsVC=self.contactVC;
+    [xmppAccount cleanStream]; // dont resume if there was aorce close
     
     //sepcifically look for the server since we might not be online or behind firewall
     Reachability* hostReach = [Reachability reachabilityWithHostName:xmppAccount.server ] ;
@@ -343,16 +344,14 @@ An array of Dics what have timers to make sure everything was sent
         {
             if([[account objectForKey:@"enabled"] boolValue]==YES)
             {
-             
+                
                 for (NSDictionary* account in _connectedXMPP)
                 {
                     xmpp* xmppAccount=[account objectForKey:@"xmppAccount"];
-                   
-                   
-                        DDLogVerbose(@"got account and cleaning up.. keeping stream ");
-                        [xmppAccount disconnectToResume];
-                        DDLogVerbose(@"done cleaning up account. keeping stream ");
-
+                    DDLogVerbose(@"got account and cleaning up.. keeping stream ");
+                    [xmppAccount disconnectToResume];
+                    DDLogVerbose(@"done cleaning up account. keeping stream ");
+                    
                 }
                 
             }

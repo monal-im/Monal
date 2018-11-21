@@ -8,6 +8,7 @@
 
 #import "MLBackgroundSettings.h"
 #import "MLSettingCell.h"
+@import CoreServices;
 
 @interface MLBackgroundSettings ()
 @property (nonatomic, strong) NSMutableArray *photos;
@@ -78,7 +79,7 @@
             
         case 2: {
             UITableViewCell* cell=[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"SelectCell"];
-            cell.textLabel.text=@"Select Photo";
+            cell.textLabel.text=@"Select From Photos";
             toreturn=cell;
             break;
         }
@@ -100,12 +101,28 @@
             [self showImages];
             break;
         }
+        case 2: {
+            [self showPhotos];
+            break;
+        }
         default: break;
             
     }
     
 }
 
+-(void) showPhotos
+{
+    UIImagePickerController *imagePicker = [[UIImagePickerController alloc] init];
+    imagePicker.delegate =self;
+     imagePicker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+    [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
+        if(granted)
+        {
+            [self presentViewController:imagePicker animated:YES completion:nil];
+        }
+    }];
+}
 
 -(void) showImages
 {
@@ -147,6 +164,8 @@
 }
 
 
+#pragma mark - photo browser delegate
+
 - (NSUInteger)numberOfPhotosInPhotoBrowser:(MWPhotoBrowser *)photoBrowser {
     return self.photos.count;
 }
@@ -176,6 +195,30 @@
     [photoBrowser reloadData];
 }
 
+
+#pragma mark - image picker delegate
+- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<NSString *,id> *)info
+{
+    [self dismissViewControllerAnimated:YES completion:nil];
+    
+    NSString *mediaType = info[UIImagePickerControllerMediaType];
+    if([mediaType isEqualToString:(NSString *)kUTTypeImage]) {
+        UIImage *selectedImage= info[UIImagePickerControllerEditedImage];
+        if(!selectedImage) selectedImage= info[UIImagePickerControllerOriginalImage];
+        NSData *jpgData=  UIImageJPEGRepresentation(selectedImage, 0.5f);
+        if(jpgData)
+        {
+            //[self uploadData:jpgData];
+        }
+        
+    }
+    
+}
+
+- (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker
+{
+    [self dismissViewControllerAnimated:YES completion:nil];
+}
 
 
 @end

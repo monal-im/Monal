@@ -11,7 +11,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MLBackgroundSettings : UITableViewController <MWPhotoBrowserDelegate>
+@interface MLBackgroundSettings : UITableViewController <MWPhotoBrowserDelegate, UIImagePickerControllerDelegate>
 
 @end
 

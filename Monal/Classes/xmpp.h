@@ -342,7 +342,7 @@ extern NSString *const kSendTimer;
 /**
  An intentional disconnect to trigger APNS. does not close the stream. 
  */
--(void) disconnectToResume;
+-(void) disconnectToResumeWithCompletion:(void (^)(void))completion;
 
 /**
  To be used when there is a new object created to prevent a resume.

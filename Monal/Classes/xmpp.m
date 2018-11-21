@@ -3026,11 +3026,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     self.hasDiscoAndRoster=YES;
 }
 
--(void) disconnectToResume
+-(void) disconnectToResumeWithCompletion:(void (^)(void))completion
 {
     [self closeSocket]; // just closing socket to simulate a unintentional disconnect
     [self.networkQueue addOperationWithBlock:^{
         [self cleanUpState];
+        if(completion) completion();
     }];
 }
 

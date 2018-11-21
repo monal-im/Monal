@@ -224,7 +224,7 @@ Attempts to upload a file to the  HTTP upload service
 /**
  log out everything but doesnt destroy the stream id
  */
--(void)logoutAllKeepStream;
+-(void)logoutAllKeepStreamWithCompletion:(void (^)(void))completion;
 
 /**
  Iterates through set and compares with connected accounts. Removes them. useful for active chat. 

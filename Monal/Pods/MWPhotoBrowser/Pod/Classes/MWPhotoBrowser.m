@@ -1106,7 +1106,7 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
     NSUInteger numberOfPhotos = [self numberOfPhotos];
     if (_gridController) {
         if (_gridController.selectionMode) {
-            self.title = NSLocalizedString(@"Select Photos", nil);
+            self.title = NSLocalizedString(@"Select A Background", nil);
         } else {
             NSString *photosText;
             if (numberOfPhotos == 1) {

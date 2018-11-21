@@ -94,7 +94,16 @@
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     [tableView deselectRowAtIndexPath:indexPath animated:NO];
-    [self showImages];
+    switch(indexPath.row)
+    {
+        case 1: {
+            [self showImages];
+            break;
+        }
+        default: break;
+            
+    }
+    
 }
 
 
@@ -103,7 +112,7 @@
     self.photos = [NSMutableArray array];
 
     NSString *currentBackground = [[NSUserDefaults standardUserDefaults] objectForKey:@"BackgroundImage"];
-    self.selectedIndex=-1; 
+    self.selectedIndex=-1;
     // Add photos
     [self.imageList enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         NSString *name =(NSString *) obj;

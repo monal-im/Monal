@@ -71,10 +71,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                               alarm.category=@"Reply";
                               
                               
-                              if([[NSUserDefaults standardUserDefaults] boolForKey:@"MessagePreview"])
-                                  alarm.alertBody = [NSString stringWithFormat: @"%@: %@", nameToShow, [notification.userInfo objectForKey:@"messageText"]];
-                              else
-                                  alarm.alertBody =  nameToShow;
+                              if([[NSUserDefaults standardUserDefaults] boolForKey:@"MessagePreview"]) {
+                                  alarm.alertTitle  =nameToShow;
+                                  alarm.alertBody =[notification.userInfo objectForKey:@"messageText"];
+                              }  else {
+                                  alarm.alertTitle =  nameToShow;
+                              }
                               
                               if( [[NSUserDefaults standardUserDefaults] boolForKey:@"Sound"]==true)
                               {

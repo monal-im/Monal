@@ -23,6 +23,8 @@
  */
 @property (nonatomic, strong) UIImage* outboundImage;
 
+@property (nonatomic, strong) UIImage* chatBackground;
+
 #else
 
 #endif
@@ -36,12 +38,15 @@
  */
 -(void) setIconForContact:(NSString*) contact andAccount:(NSString*) accountNo WithData:(NSString*) data ;
 
+-(BOOL) saveBackgroundImageData:(NSData *) data;
 
 #if TARGET_OS_IPHONE
 /**
  retrieves a uiimage for the icon. returns noicon.png if nothing is found. never returns nil.
  */
 -(void) getIconForContact:(NSString*) contact andAccount:(NSString *) accountNo withCompletion:(void (^)(UIImage *))completion;
+
+-(UIImage *) getBackground;
 
 #else
 /**

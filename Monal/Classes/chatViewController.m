@@ -233,7 +233,12 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         NSString *imageName= [[NSUserDefaults standardUserDefaults] objectForKey:@"BackgroundImage"];
         if(imageName)
         {
-            self.backgroundImage.image=[UIImage imageNamed:imageName];
+            if([imageName isEqualToString:@"CUSTOM"])
+            {
+                self.backgroundImage.image=[[MLImageManager sharedInstance] getBackground];
+            } else  {
+                self.backgroundImage.image=[UIImage imageNamed:imageName];
+            }
         }
         self.transparentLayer.hidden=NO;
     }else  {

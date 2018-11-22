@@ -222,6 +222,35 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     }
     
 }
+
+
+-(BOOL) saveBackgroundImageData:(NSData *) data {
+    NSFileManager* fileManager = [NSFileManager defaultManager];
+    
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *documentsDirectory = [paths objectAtIndex:0];
+    NSString *writablePath = [documentsDirectory stringByAppendingPathComponent:@"background.jpg"];
+    
+    if([fileManager fileExistsAtPath:writablePath])
+    {
+        [fileManager removeItemAtPath:writablePath error:nil];
+    }
+    
+    return [data writeToFile:writablePath atomically:YES];
+}
+
+-(UIImage *) getBackground
+{
+    if(self.chatBackground) return self.chatBackground;
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *documentsDirectory = [paths objectAtIndex:0];
+    NSString *writablePath = [documentsDirectory stringByAppendingPathComponent:@"background.jpg"];
+    
+    self.chatBackground= [UIImage imageWithContentsOfFile:writablePath];
+    
+    return self.chatBackground;
+}
+
 #else
 
 + (NSImage*)circularImage:(NSImage *)image

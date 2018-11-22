@@ -8,6 +8,7 @@
 
 #import "MLBackgroundSettings.h"
 #import "MLSettingCell.h"
+#import "MLImageManager.h"
 @import CoreServices;
 
 @interface MLBackgroundSettings ()
@@ -73,6 +74,7 @@
         case 1: {
            UITableViewCell* cell=[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"SelectCell"];
             cell.textLabel.text=@"Select Background";
+            cell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
             toreturn=cell;
             break;
         }
@@ -80,6 +82,7 @@
         case 2: {
             UITableViewCell* cell=[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"SelectCell"];
             cell.textLabel.text=@"Select From Photos";
+            cell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
             toreturn=cell;
             break;
         }
@@ -208,12 +211,18 @@
         NSData *jpgData=  UIImageJPEGRepresentation(selectedImage, 0.5f);
         if(jpgData)
         {
-            //[self uploadData:jpgData];
+            
+            if([[MLImageManager sharedInstance] saveBackgroundImageData:jpgData]) {
+                [[NSUserDefaults standardUserDefaults] setObject:@"CUSTOM" forKey:@"BackgroundImage"];
+            }
+            
         }
         
     }
     
 }
+
+
 
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker
 {

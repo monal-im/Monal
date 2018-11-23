@@ -7,7 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <DZNEmptyDataSet/UIScrollView+EmptyDataSet.h>
 
-@interface MLGroupChatTableViewController : UITableViewController
+@interface MLGroupChatTableViewController : UITableViewController <DZNEmptyDataSetSource, DZNEmptyDataSetDelegate>
 
 @end

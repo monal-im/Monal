@@ -76,6 +76,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         UITableView *tableView = (UITableView *)self.view;
         tableView.tableHeaderView = self.searchController.searchBar;
     }
+    
+    self.tableView.emptyDataSetSource = self;
+    self.tableView.emptyDataSetDelegate = self;
+    
+    // A little trick for removing the cell separators
+    self.tableView.tableFooterView = [UIView new];
 }
 
 -(void) dealloc
@@ -1014,6 +1020,48 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     _lastSelectedUser=row;
     
+}
+
+#pragma mark - empty data set
+
+- (UIImage *)imageForEmptyDataSet:(UIScrollView *)scrollView
+{
+    return [UIImage imageNamed:@"toad"];
+}
+
+- (NSAttributedString *)titleForEmptyDataSet:(UIScrollView *)scrollView
+{
+    NSString *text = @"You need friends for this ride";
+    
+    NSDictionary *attributes = @{NSFontAttributeName: [UIFont boldSystemFontOfSize:18.0f],
+                                 NSForegroundColorAttributeName: [UIColor darkGrayColor]};
+    
+    return [[NSAttributedString alloc] initWithString:text attributes:attributes];
+}
+
+- (NSAttributedString *)descriptionForEmptyDataSet:(UIScrollView *)scrollView
+{
+    NSString *text = @"Add new contacts with the + button above. Your friends will pop up here when they can talk";
+    
+    NSMutableParagraphStyle *paragraph = [NSMutableParagraphStyle new];
+    paragraph.lineBreakMode = NSLineBreakByWordWrapping;
+    paragraph.alignment = NSTextAlignmentCenter;
+    
+    NSDictionary *attributes = @{NSFontAttributeName: [UIFont systemFontOfSize:14.0f],
+                                 NSForegroundColorAttributeName: [UIColor lightGrayColor],
+                                 NSParagraphStyleAttributeName: paragraph};
+    
+    return [[NSAttributedString alloc] initWithString:text attributes:attributes];
+}
+
+- (UIColor *)backgroundColorForEmptyDataSet:(UIScrollView *)scrollView
+{
+    return [UIColor colorWithRed:255/255.0 green:250/255.0 blue:226/255.0 alpha:1];
+}
+
+- (BOOL)emptyDataSetShouldDisplay:(UIScrollView *)scrollView
+{
+    return (self.contacts.count+self.offlineContacts.count)==0?YES:NO;
 }
 
 

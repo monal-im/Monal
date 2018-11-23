@@ -182,7 +182,7 @@
 
 - (NSAttributedString *)titleForEmptyDataSet:(UIScrollView *)scrollView
 {
-    NSString *text = @"No groups yet.";
+    NSString *text = @"No groups yet";
     
     NSDictionary *attributes = @{NSFontAttributeName: [UIFont boldSystemFontOfSize:18.0f],
                                  NSForegroundColorAttributeName: [UIColor darkGrayColor]};

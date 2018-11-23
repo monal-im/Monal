@@ -7,8 +7,9 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <DZNEmptyDataSet/UIScrollView+EmptyDataSet.h>
 
-@interface ActiveChatsViewController : UITableViewController 
+@interface ActiveChatsViewController : UITableViewController  <DZNEmptyDataSetSource, DZNEmptyDataSetDelegate>
 {
     NSArray* _contacts;
     NSDictionary* _lastSelectedUser;

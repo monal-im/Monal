@@ -56,6 +56,11 @@
     
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
     
+    self.chatListTable.emptyDataSetSource = self;
+    self.chatListTable.emptyDataSetDelegate = self;
+    
+    // A little trick for removing the cell separators
+    self.chatListTable.tableFooterView = [UIView new];
 }
 
 
@@ -248,5 +253,46 @@
 }
 
 
+#pragma mark - empty data set
+
+- (UIImage *)imageForEmptyDataSet:(UIScrollView *)scrollView
+{
+    return [UIImage imageNamed:@"pooh"];
+}
+
+- (NSAttributedString *)titleForEmptyDataSet:(UIScrollView *)scrollView
+{
+    NSString *text = @"No one is here";
+    
+    NSDictionary *attributes = @{NSFontAttributeName: [UIFont boldSystemFontOfSize:18.0f],
+                                 NSForegroundColorAttributeName: [UIColor darkGrayColor]};
+    
+    return [[NSAttributedString alloc] initWithString:text attributes:attributes];
+}
+
+- (NSAttributedString *)descriptionForEmptyDataSet:(UIScrollView *)scrollView
+{
+    NSString *text = @"When you start talking to someone from the contacts screen, they will show up here.";
+    
+    NSMutableParagraphStyle *paragraph = [NSMutableParagraphStyle new];
+    paragraph.lineBreakMode = NSLineBreakByWordWrapping;
+    paragraph.alignment = NSTextAlignmentCenter;
+    
+    NSDictionary *attributes = @{NSFontAttributeName: [UIFont systemFontOfSize:14.0f],
+                                 NSForegroundColorAttributeName: [UIColor lightGrayColor],
+                                 NSParagraphStyleAttributeName: paragraph};
+    
+    return [[NSAttributedString alloc] initWithString:text attributes:attributes];
+}
+
+- (UIColor *)backgroundColorForEmptyDataSet:(UIScrollView *)scrollView
+{
+    return [UIColor colorWithRed:239/255.0 green:238/255.0 blue:233/255.0 alpha:1];
+}
+
+- (BOOL)emptyDataSetShouldDisplay:(UIScrollView *)scrollView
+{
+    return _contacts.count==0?YES:NO;
+}
 
 @end

@@ -41,7 +41,7 @@ pod 'SDWebImage', '~> 4.3.3'
 pod 'SignalProtocolObjC'
 pod 'SignalProtocolC'
 pod 'OpenSSL-Universal'
-
+pod 'DZNEmptyDataSet'
   # Pods for Monal
 
   target 'Monal Tests' do

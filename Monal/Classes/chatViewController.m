@@ -18,6 +18,7 @@
 #import <DropBoxSDK/DropBoxSDK.h>
 
 #import "MWPhotoBrowser.h"
+#import "ContactDetails.h"
 
 @import QuartzCore;
 @import MobileCoreServices;
@@ -377,6 +378,16 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     [self resignTextView];
     [self updateInputViewSize];
 
+}
+
+-(void) prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+{
+    if([segue.identifier isEqualToString:@"showDetails"])
+    {
+        UINavigationController *nav = segue.destinationViewController;
+        ContactDetails* details = (ContactDetails *)nav.topViewController;
+        details.contact= _contact;
+    }
 }
 
 #pragma mark - Dropbox upload and delegate

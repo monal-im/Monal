@@ -42,6 +42,7 @@ pod 'SignalProtocolObjC'
 pod 'SignalProtocolC'
 pod 'OpenSSL-Universal'
 pod 'DZNEmptyDataSet'
+pod 'EAIntroView'
   # Pods for Monal
 
   target 'Monal Tests' do

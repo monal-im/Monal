@@ -17,11 +17,12 @@
 #import "CallViewController.h"
 
 
+
 #define kinfoSection 0
 #define konlineSection 1
 #define kofflineSection 2
 
-@interface ContactsViewController ()
+@interface ContactsViewController () 
 @property (nonatomic, strong) NSArray* searchResults ;
 @property (nonatomic, strong) UISearchController *searchController;
 
@@ -107,7 +108,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     [[MLXMPPManager sharedInstance] handleNewMessage:nil];
     
-    if([[MLXMPPManager sharedInstance].connectedXMPP count]==0)
+    
+    if(![[NSUserDefaults standardUserDefaults] boolForKey:@"HasSeenIntro"]) {
+        [self performSegueWithIdentifier:@"showIntro" sender:self];
+    }
+    
+   else if([[MLXMPPManager sharedInstance].connectedXMPP count]==0)
     {
         if(![[NSUserDefaults standardUserDefaults] boolForKey:@"HasSeenLogin"]) {
             [self performSegueWithIdentifier:@"showLogin" sender:self];
@@ -117,16 +123,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 }
 
 
--(void) upgradeNotice
-{
-
-}
-
-
 -(void) viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
-    [self upgradeNotice];
    
 }
 

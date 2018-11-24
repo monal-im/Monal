@@ -11,7 +11,6 @@
 #import "MLImageManager.h"
 #import <DZNEmptyDataSet/UIScrollView+EmptyDataSet.h>
 
-
 @interface ContactsViewController : UITableViewController  <UISearchResultsUpdating, UISearchControllerDelegate, UIViewControllerPreviewingDelegate,DZNEmptyDataSetSource, DZNEmptyDataSetDelegate>
 /**
  This may not be the tab bar (ipad) that this VC is in. But alerts should be shown from it.

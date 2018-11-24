@@ -56,7 +56,7 @@
     page3.desc = @"You are not trapped in a garden. Use your account to talk to anyone else using XMPP";
     page3.descColor=[UIColor blackColor];
     page3.titleIconView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"PeterRabbit23"]];
-     page3.titleIconPositionY=100.f;
+    page3.titleIconPositionY=100.f;
     page3.titlePositionY = self.view.bounds.size.height/2 - 30;
     page3.descPositionY = self.view.bounds.size.height/2 - 70;
     
@@ -66,7 +66,7 @@
     page4.desc = @"If you like Monal, please let others know and leave a review";
     page4.descColor=[UIColor blackColor];
     page4.titleIconView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"PeterRabbit24"]];
-      page4.titleIconPositionY=100.f;
+    page4.titleIconPositionY=100.f;
     page4.titlePositionY = self.view.bounds.size.height/2 - 30;
     page4.descPositionY = self.view.bounds.size.height/2 - 70;
     

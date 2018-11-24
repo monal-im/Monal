@@ -16,8 +16,6 @@
 #import "addContact.h"
 #import "CallViewController.h"
 
-
-
 #define kinfoSection 0
 #define konlineSection 1
 #define kofflineSection 2
@@ -1025,7 +1023,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 - (UIImage *)imageForEmptyDataSet:(UIScrollView *)scrollView
 {
-    return [UIImage imageNamed:@"toad"];
+    return [UIImage imageNamed:@"river"];
 }
 
 - (NSAttributedString *)titleForEmptyDataSet:(UIScrollView *)scrollView
@@ -1040,7 +1038,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 - (NSAttributedString *)descriptionForEmptyDataSet:(UIScrollView *)scrollView
 {
-    NSString *text = @"Add new contacts with the + button above. Your friends will pop up here when they can talk";
+      NSString *text = @"Add new contacts with the + button above. Your friends will pop up here when they can talk";
     
     NSMutableParagraphStyle *paragraph = [NSMutableParagraphStyle new];
     paragraph.lineBreakMode = NSLineBreakByWordWrapping;
@@ -1055,7 +1053,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 - (UIColor *)backgroundColorForEmptyDataSet:(UIScrollView *)scrollView
 {
-    return [UIColor colorWithRed:255/255.0 green:250/255.0 blue:226/255.0 alpha:1];
+    return [UIColor colorWithRed:228/255.0 green:222/255.0 blue:204/255.0 alpha:1];
 }
 
 - (BOOL)emptyDataSetShouldDisplay:(UIScrollView *)scrollView

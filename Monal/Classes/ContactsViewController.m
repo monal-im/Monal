@@ -104,24 +104,28 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     [[MLXMPPManager sharedInstance] handleNewMessage:nil];
     
-    
-    if(![[NSUserDefaults standardUserDefaults] boolForKey:@"HasSeenIntro"]) {
-        [self performSegueWithIdentifier:@"showIntro" sender:self];
-    }
-    
-   else if([[MLXMPPManager sharedInstance].connectedXMPP count]==0)
-    {
-        if(![[NSUserDefaults standardUserDefaults] boolForKey:@"HasSeenLogin"]) {
-            [self performSegueWithIdentifier:@"showLogin" sender:self];
-        }
-    }
-
 }
 
 
 -(void) viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
+    
+    if(![[NSUserDefaults standardUserDefaults] boolForKey:@"HasSeenIntro"]) {
+        [self performSegueWithIdentifier:@"showIntro" sender:self];
+    }
+    else if([[MLXMPPManager sharedInstance].connectedXMPP count]==0)
+    {
+        if(![[NSUserDefaults standardUserDefaults] boolForKey:@"HasSeenLogin"]) {
+            [self performSegueWithIdentifier:@"showLogin" sender:self];
+        }
+    }
+    
+  if(self.contacts.count+self.offlineContacts.count==0)
+  {
+      [self.tableView reloadData];
+  }
+    
    
 }
 

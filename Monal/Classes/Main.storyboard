@@ -346,8 +346,8 @@
                         <segue destination="Dhn-Pm-OVk" kind="showDetail" identifier="showConversation" id="wmf-tk-2CN"/>
                         <segue destination="JoK-Lh-V0A" kind="presentation" identifier="showDetails" id="HKH-FB-LHe"/>
                         <segue destination="eWC-It-u2H" kind="presentation" identifier="showCall" id="pPJ-na-Dl3"/>
-                        <segue destination="DkD-PA-Cmm" kind="presentation" identifier="showLogin" id="0RU-Rt-FFr"/>
-                        <segue destination="2g1-pP-Xxv" kind="presentation" identifier="showIntro" id="jaD-g8-KSk"/>
+                        <segue destination="DkD-PA-Cmm" kind="presentation" identifier="showLogin" modalPresentationStyle="formSheet" id="0RU-Rt-FFr"/>
+                        <segue destination="2g1-pP-Xxv" kind="presentation" identifier="showIntro" modalPresentationStyle="formSheet" id="jaD-g8-KSk"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="vxj-qR-bK8" userLabel="First Responder" sceneMemberID="firstResponder"/>

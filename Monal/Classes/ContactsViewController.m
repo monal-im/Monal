@@ -79,8 +79,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     self.tableView.emptyDataSetSource = self;
     self.tableView.emptyDataSetDelegate = self;
     
-    // A little trick for removing the cell separators
-    self.tableView.tableFooterView = [UIView new];
 }
 
 -(void) dealloc
@@ -1058,7 +1056,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 - (BOOL)emptyDataSetShouldDisplay:(UIScrollView *)scrollView
 {
-    return (self.contacts.count+self.offlineContacts.count)==0?YES:NO;
+   BOOL  toreturn=(self.contacts.count+self.offlineContacts.count==0)?YES:NO;
+    
+    if(toreturn)
+    {
+        // A little trick for removing the cell separators
+        self.tableView.tableFooterView = [UIView new];
+    }
+    
+    return toreturn;
 }
 
 

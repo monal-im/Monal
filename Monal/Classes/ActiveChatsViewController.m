@@ -59,8 +59,6 @@
     self.chatListTable.emptyDataSetSource = self;
     self.chatListTable.emptyDataSetDelegate = self;
     
-    // A little trick for removing the cell separators
-    self.chatListTable.tableFooterView = [UIView new];
 }
 
 
@@ -292,7 +290,13 @@
 
 - (BOOL)emptyDataSetShouldDisplay:(UIScrollView *)scrollView
 {
-    return _contacts.count==0?YES:NO;
+    BOOL toreturn = (_contacts.count==0)?YES:NO;
+    if(toreturn)
+    {
+        // A little trick for removing the cell separators
+        self.tableView.tableFooterView = [UIView new];
+    }
+    return toreturn;
 }
 
 @end

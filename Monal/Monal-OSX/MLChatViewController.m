@@ -123,6 +123,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     self.inputBar.hidden=NO;
     self.tableScroll.hidden=NO;
     self.messageList =[[DataLayer sharedInstance] messageHistory:self.contactName forAccount: self.accountNo];
+    if(!self.messageList)  {
+        self.messageList = [[NSMutableArray alloc] init];
+    }
     [self.chatTable reloadData];
     [self scrollToBottom];
 }

@@ -124,7 +124,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     }
     
     self.messageTable.rowHeight = UITableViewAutomaticDimension;
-    self.messageTable.estimatedRowHeight=75.0f;
+    self.messageTable.estimatedRowHeight= 75.0f;
   
 }
 
@@ -581,6 +581,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                                                       @"messageid": messageId,
                                                       kMessageType:messageType
                                                       };
+                           if(!self.messageList) self.messageList =[[NSMutableArray alloc] init];
                            [self.messageList addObject:[userInfo mutableCopy]];
                            
                            NSIndexPath *path1;

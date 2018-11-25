@@ -62,6 +62,8 @@ An array of Dics what have timers to make sure everything was sent
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"SetDefaults"];
         
         [[NSUserDefaults standardUserDefaults] setBool:YES  forKey: @"ShowImages"];
+        [[NSUserDefaults standardUserDefaults] setBool:YES  forKey: @"ChatBackgrounds"];
+        
         [[NSUserDefaults standardUserDefaults] synchronize];
     }
     
@@ -73,6 +75,15 @@ An array of Dics what have timers to make sure everything was sent
           [[NSUserDefaults standardUserDefaults] setBool:YES  forKey: @"ShowImages"];
           [[NSUserDefaults standardUserDefaults] synchronize];
     }
+    
+    //upgrade
+    NSNumber *background =   [[NSUserDefaults standardUserDefaults] objectForKey: @"ChatBackgrounds"];
+    if(!background)
+    {
+        [[NSUserDefaults standardUserDefaults] setBool:YES  forKey: @"ChatBackgrounds"];
+        [[NSUserDefaults standardUserDefaults] synchronize];
+    }
+   
 }
 
 + (MLXMPPManager* )sharedInstance

@@ -991,6 +991,7 @@
                         <segue destination="yyb-Mj-ghD" kind="show" identifier="showOptOut" id="1yt-vv-ddN"/>
                         <segue destination="DkD-PA-Cmm" kind="presentation" identifier="showLogin" id="qQE-ha-l4B"/>
                         <segue destination="GiN-QZ-yFq" kind="showDetail" identifier="showBackgrounds" id="8fD-KK-hBT"/>
+                        <segue destination="rxA-nN-Z6Z" kind="showDetail" identifier="showSounds" id="oQU-xT-ytM"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="lLi-28-cfT" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -2025,7 +2026,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="tvb-fM-fJc" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2376.811594202899" y="209.5108695652174"/>
+            <point key="canvasLocation" x="2877" y="210"/>
         </scene>
         <!--Pref Table View Controller-->
         <scene sceneID="Kc9-Da-MOI">
@@ -2100,6 +2101,51 @@
             </objects>
             <point key="canvasLocation" x="228" y="9308"/>
         </scene>
+        <!--Sounds-->
+        <scene sceneID="fyQ-Yz-vtu">
+            <objects>
+                <tableViewController id="5iz-YR-Z0b" customClass="MLSoundsTableViewController" sceneMemberID="viewController">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="QIs-jz-TFv">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <prototypes>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="1e0-W2-8As">
+                                <rect key="frame" x="0.0" y="28" width="414" height="44"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="1e0-W2-8As" id="b1j-Dv-2a6">
+                                    <rect key="frame" x="0.0" y="0.0" width="414" height="43.666666666666664"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </tableViewCellContentView>
+                            </tableViewCell>
+                        </prototypes>
+                        <connections>
+                            <outlet property="dataSource" destination="5iz-YR-Z0b" id="gc1-vc-cf0"/>
+                            <outlet property="delegate" destination="5iz-YR-Z0b" id="0Jm-q4-r8Z"/>
+                        </connections>
+                    </tableView>
+                    <navigationItem key="navigationItem" title="Sounds" id="Rum-Ee-xSZ"/>
+                </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="7md-h3-S1V" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="253" y="9986"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="oOn-Kh-wHD">
+            <objects>
+                <navigationController id="rxA-nN-Z6Z" sceneMemberID="viewController">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="11n-Es-2YQ">
+                        <rect key="frame" x="0.0" y="44" width="414" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="5iz-YR-Z0b" kind="relationship" relationship="rootViewController" id="rgp-g7-D38"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="jDv-BO-YDR" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-665" y="9986"/>
+        </scene>
         <!--Navigation Controller-->
         <scene sceneID="VX5-qj-d7d">
             <objects>
@@ -2136,7 +2182,7 @@
         <segue reference="pPJ-na-Dl3"/>
         <segue reference="pZO-HH-rUP"/>
         <segue reference="RMJ-9l-zbF"/>
-        <segue reference="0RU-Rt-FFr"/>
-        <segue reference="HKH-FB-LHe"/>
+        <segue reference="qQE-ha-l4B"/>
+        <segue reference="glk-qB-XGu"/>
     </inferredMetricsTieBreakers>
 </document>

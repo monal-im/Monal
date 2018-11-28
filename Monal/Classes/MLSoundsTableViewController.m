@@ -14,6 +14,7 @@
 @interface MLSoundsTableViewController ()
 @property (nonatomic, strong) NSArray *soundList;
 @property (nonatomic, assign) NSUInteger selectedIndex;
+@property (nonatomic, strong) AVAudioPlayer *audioPlayer;
 @end
 
 @implementation MLSoundsTableViewController
@@ -87,7 +88,8 @@
         case 1: {
             UITableViewCell* cell=[tableView dequeueReusableCellWithIdentifier:@"soundCell"];
             cell.textLabel.text= self.soundList[indexPath.row];
-            if([self.soundList[indexPath.row] isEqualToString:[[NSUserDefaults standardUserDefaults] objectForKey:@"AlertSoundFile"]]) {
+             NSString *filename =[NSString stringWithFormat:@"alert%ld", (long)indexPath.row+1];
+            if([filename isEqualToString:[[NSUserDefaults standardUserDefaults] objectForKey:@"AlertSoundFile"]]) {
                 cell.accessoryType=UITableViewCellAccessoryCheckmark;
                 self.selectedIndex= indexPath.row;
             } else  {
@@ -105,8 +107,8 @@
 {
     NSString *filename =[NSString stringWithFormat:@"alert%ld", (long)index+1];
     NSURL *url = [[NSBundle mainBundle] URLForResource:filename withExtension:@"aif" subdirectory:@"AlertSounds"];
-    AVAudioPlayer *audioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL: url error:NULL];
-    [audioPlayer play];
+    self.audioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL: url error:NULL];
+    [self.audioPlayer play];
 }
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
@@ -115,7 +117,8 @@
     if(indexPath.section==0) return;
     
     [self playSound:indexPath.row];
-    [[NSUserDefaults standardUserDefaults] setObject:self.soundList[indexPath.row] forKey:@"AlertSoundFile"];
+    NSString *filename =[NSString stringWithFormat:@"alert%ld", (long)indexPath.row+1];
+    [[NSUserDefaults standardUserDefaults] setObject:filename forKey:@"AlertSoundFile"];
     NSIndexPath *old = [NSIndexPath indexPathForRow:self.selectedIndex inSection:1];
     self.selectedIndex= indexPath.row;
     NSArray *rows =@[old,indexPath];

@@ -80,7 +80,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                               
                               if( [[NSUserDefaults standardUserDefaults] boolForKey:@"Sound"]==true)
                               {
-                                  alarm.soundName=UILocalNotificationDefaultSoundName; 
+                                  NSString *filename = [[NSUserDefaults standardUserDefaults] objectForKey:@"AlertSoundFile"];
+                                  if(filename) {
+                                      alarm.soundName=[NSString stringWithFormat:@"AlertSounds/%@.aif",filename];
+                                  } else  {
+                                      alarm.soundName=UILocalNotificationDefaultSoundName;
+                                  }
                               }
                               
                               alarm.userInfo=notification.userInfo;

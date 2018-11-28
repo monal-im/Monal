@@ -83,6 +83,14 @@ An array of Dics what have timers to make sure everything was sent
         [[NSUserDefaults standardUserDefaults] setBool:YES  forKey: @"ChatBackgrounds"];
         [[NSUserDefaults standardUserDefaults] synchronize];
     }
+    
+    NSNumber *sounds =  [[NSUserDefaults standardUserDefaults] objectForKey: @"AlertSoundFile"];
+    if(!sounds)
+    {
+        [[NSUserDefaults standardUserDefaults] setObject:@"alert2" forKey:@"AlertSoundFile"];
+        [[NSUserDefaults standardUserDefaults] synchronize];
+    }
+ 
    
 }
 

@@ -323,6 +323,7 @@
 		26AA70502146E43E00598605 /* shareSheet-OSX.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 26AA70422146E43E00598605 /* shareSheet-OSX.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		26AAE285179F7B0200271345 /* MLSettingCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 26AAE284179F7B0200271345 /* MLSettingCell.m */; };
 		26B0CA8921AE2E3C0080B133 /* MLSoundsTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B0CA8821AE2E3C0080B133 /* MLSoundsTableViewController.m */; };
+		26B0CA8B21AE410E0080B133 /* AlertSounds in Resources */ = {isa = PBXBuildFile; fileRef = 26B0CA8A21AE410E0080B133 /* AlertSounds */; };
 		26B2A4BB1B73061400272E63 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 26B2A4BA1B73061400272E63 /* Images.xcassets */; };
 		26B2A4BC1B7306C000272E63 /* sworim.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 2601D9CA0FBF25EF004DB939 /* sworim.sqlite */; };
 		26B2A4BE1B7306E500272E63 /* DataLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 2601D9A70FBF255D004DB939 /* DataLayer.m */; };
@@ -795,6 +796,7 @@
 		26AAE284179F7B0200271345 /* MLSettingCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLSettingCell.m; sourceTree = "<group>"; };
 		26B0CA8721AE2E3C0080B133 /* MLSoundsTableViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLSoundsTableViewController.h; sourceTree = "<group>"; };
 		26B0CA8821AE2E3C0080B133 /* MLSoundsTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLSoundsTableViewController.m; sourceTree = "<group>"; };
+		26B0CA8A21AE410E0080B133 /* AlertSounds */ = {isa = PBXFileReference; lastKnownFileType = folder; path = AlertSounds; sourceTree = "<group>"; };
 		26B2A4BA1B73061400272E63 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		26B2A4C81B73084100272E63 /* libsqlite3.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.0.dylib; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/usr/lib/libsqlite3.0.dylib; sourceTree = DEVELOPER_DIR; };
 		26B2A4CA1B73084800272E63 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/System/Library/Frameworks/AppKit.framework; sourceTree = DEVELOPER_DIR; };
@@ -1911,6 +1913,7 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				26B0CA8A21AE410E0080B133 /* AlertSounds */,
 				26158AF31FFA8A6A00E53BDC /* opensource.html */,
 				2644D48D1FEFAF2E00F46AB5 /* dsa_pub.pem */,
 				26470F511835C4080069E3E0 /* Media.xcassets */,
@@ -2381,6 +2384,7 @@
 				262E51931AD8CAC600788351 /* MLButtonCell.xib in Resources */,
 				2601D9CB0FBF25EF004DB939 /* sworim.sqlite in Resources */,
 				264A7E751AA7263600E860E3 /* MLSwitchCell.xib in Resources */,
+				26B0CA8B21AE410E0080B133 /* AlertSounds in Resources */,
 				26470F521835C4080069E3E0 /* Media.xcassets in Resources */,
 				26B2A4BB1B73061400272E63 /* Images.xcassets in Resources */,
 				26F396D32196847C00EF5720 /* Login.storyboard in Resources */,

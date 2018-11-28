@@ -116,17 +116,11 @@
             
         case 2:
         {
-            return @"Alerts";
-            break;
-        }
-            
-        case 3:
-        {
             return @"General";
             break;
         }
             
-        case 4:
+        case 3:
         {
             return @"Cloud Storage";
             break;
@@ -237,24 +231,13 @@
                     cell.textEnabled=YES;
                     break;
                 }
-               
-                    
-                  
+  
             }
              return cell; 
             break;
         }
-            
+    
         case 2:
-        {
-            cell.textLabel.text=NSLocalizedString(@"Sound Alerts", @"");
-               cell.defaultKey=@"Sound";
-            cell.switchEnabled=YES;
-              return cell;
-            break;
-        }
-            
-        case 3:
         {
             switch(indexPath.row)
             {
@@ -299,7 +282,7 @@
             break;
         }
            
-        case 4:
+        case 3:
         {
             switch(indexPath.row)
             {

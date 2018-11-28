@@ -7,87 +7,121 @@
 //
 
 #import "MLSoundsTableViewController.h"
+#import "MLSettingCell.h"
+#import "MLImageManager.h"
+@import AVFoundation;
 
 @interface MLSoundsTableViewController ()
-
+@property (nonatomic, strong) NSArray *soundList;
+@property (nonatomic, assign) NSUInteger selectedIndex;
 @end
 
 @implementation MLSoundsTableViewController
 
+
 - (void)viewDidLoad {
     [super viewDidLoad];
+    self.title=@"Sounds";
     
-    // Uncomment the following line to preserve selection between presentations.
-    // self.clearsSelectionOnViewWillAppear = NO;
+    self.soundList = @[@"Alert 1",
+                       @"Alert 2",
+                       @"Alert 3",
+                       @"Alert 4",
+                       @"Alert 5",
+                       @"Alert 6",
+                       @"Alert 7",
+                       @"Alert 8",
+                       @"Alert 9",
+                       @"Alert 10",
+                       @"Alert 11",
+                       @"Alert 12",
+                       ];
     
-    // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-    // self.navigationItem.rightBarButtonItem = self.editButtonItem;
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
 }
 
 #pragma mark - Table view data source
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-#warning Incomplete implementation, return the number of sections
-    return 0;
+    return 2;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-#warning Incomplete implementation, return the number of rows
-    return 0;
+    if(section==0)
+        return 1;
+    else
+        return self.soundList.count;
 }
 
-/*
+-(NSString *) tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
+{
+    if(section==1){
+        return @"Select sounds that are played with new message notificaitons. Default is Alert 2.";
+    } else return nil;
+}
+
+-(NSString *)tableView:(UITableView *)tableView titleForFooterInSection:(NSInteger)section
+{
+    if(section==1){
+        return @"Sounds courtesy Emrah" ;
+    } else return nil;
+}
+
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:<#@"reuseIdentifier"#> forIndexPath:indexPath];
     
-    // Configure the cell...
+    UITableViewCell* toreturn;
+    switch (indexPath.section) {
+        case 0: {
+            MLSettingCell* cell=[[MLSettingCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"AccountCell"];
+            cell.parent= self;
+            cell.switchEnabled=YES;
+            cell.defaultKey=@"Sound";
+            cell.textLabel.text=@"Play Sounds";
+            toreturn=cell;
+            break;
+        }
+        case 1: {
+            UITableViewCell* cell=[tableView dequeueReusableCellWithIdentifier:@"soundCell"];
+            cell.textLabel.text= self.soundList[indexPath.row];
+            if([self.soundList[indexPath.row] isEqualToString:[[NSUserDefaults standardUserDefaults] objectForKey:@"AlertSoundFile"]]) {
+                cell.accessoryType=UITableViewCellAccessoryCheckmark;
+                self.selectedIndex= indexPath.row;
+            } else  {
+                cell.accessoryType=UITableViewCellAccessoryNone;
+            }
+            toreturn=cell;
+            
+        }
+    }
+    return toreturn;
+}
+
+
+-(void) playSound:(NSInteger ) index
+{
+    NSString *filename =[NSString stringWithFormat:@"alert%ld", (long)index+1];
+    NSURL *url = [[NSBundle mainBundle] URLForResource:filename withExtension:@"aif" subdirectory:@"AlertSounds"];
+    AVAudioPlayer *audioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL: url error:NULL];
+    [audioPlayer play];
+}
+
+-(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    [tableView deselectRowAtIndexPath:indexPath animated:NO];
+    if(indexPath.section==0) return;
     
-    return cell;
+    [self playSound:indexPath.row];
+    [[NSUserDefaults standardUserDefaults] setObject:self.soundList[indexPath.row] forKey:@"AlertSoundFile"];
+    NSIndexPath *old = [NSIndexPath indexPathForRow:self.selectedIndex inSection:1];
+    self.selectedIndex= indexPath.row;
+    NSArray *rows =@[old,indexPath];
+    [tableView reloadRowsAtIndexPaths:rows withRowAnimation:UITableViewRowAnimationNone];
 }
-*/
 
-/*
-// Override to support conditional editing of the table view.
-- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
-    // Return NO if you do not want the specified item to be editable.
-    return YES;
-}
-*/
-
-/*
-// Override to support editing the table view.
-- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
-    if (editingStyle == UITableViewCellEditingStyleDelete) {
-        // Delete the row from the data source
-        [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
-    } else if (editingStyle == UITableViewCellEditingStyleInsert) {
-        // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-    }   
-}
-*/
-
-/*
-// Override to support rearranging the table view.
-- (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath {
-}
-*/
-
-/*
-// Override to support conditional rearranging of the table view.
-- (BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath {
-    // Return NO if you do not want the item to be re-orderable.
-    return YES;
-}
-*/
-
-/*
-#pragma mark - Navigation
-
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
-}
-*/
 
 @end
+

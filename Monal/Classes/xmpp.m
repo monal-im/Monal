@@ -1880,7 +1880,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                                   }
                                                                   
                                                                   [self.networkQueue addOperationWithBlock:^{
-                                                                      [[DataLayer sharedInstance] addActiveBuddies:messageNode.from forAccount:_accountNo withCompletion:nil];
+                                                                     
+                                                                      if(![messageNode.from isEqualToString:
+                                                                           [NSString stringWithFormat:@"%@@%@", self.username, self.domain]]) {
+                                                                          [[DataLayer sharedInstance] addActiveBuddies:messageNode.from forAccount:self->_accountNo withCompletion:nil];
+                                                                      } else  {
+                                                                            [[DataLayer sharedInstance] addActiveBuddies:messageNode.to forAccount:self->_accountNo withCompletion:nil];
+                                                                      }
                                                                       
                                                                       
                                                                       if(messageNode.from  ) {

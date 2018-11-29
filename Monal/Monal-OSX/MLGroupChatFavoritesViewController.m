@@ -25,6 +25,7 @@
 
 -(void) viewWillAppear
 {
+    self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
     [self refresh];
 }
 

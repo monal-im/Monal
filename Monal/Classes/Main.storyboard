@@ -716,7 +716,7 @@
             <objects>
                 <navigationController id="hMh-kj-2DY" sceneMemberID="viewController">
                     <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="vzd-J2-f8E">
-                        <rect key="frame" x="0.0" y="44" width="414" height="44"/>
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <connections>
@@ -1246,7 +1246,7 @@
                     <navigationItem key="navigationItem" title="Group Chat" id="k0T-5X-FQu">
                         <barButtonItem key="rightBarButtonItem" systemItem="add" id="dQ9-YY-e5J">
                             <connections>
-                                <segue destination="e3Q-T1-etu" kind="presentation" id="1d0-oX-Uzg"/>
+                                <segue destination="e3Q-T1-etu" kind="presentation" modalPresentationStyle="pageSheet" id="1d0-oX-Uzg"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
@@ -1334,7 +1334,7 @@
                 </toolbar>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="zeF-qp-qgY" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1780" y="1736"/>
+            <point key="canvasLocation" x="1080" y="2508"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="1eD-ET-APe">
@@ -1350,7 +1350,7 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Kbu-Vj-En3" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1051" y="1736"/>
+            <point key="canvasLocation" x="1191" y="1740"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="9Is-dX-ch3">
@@ -1371,10 +1371,10 @@
         <!--Group-->
         <scene sceneID="mxa-kE-ZjN">
             <objects>
-                <splitViewController id="cOc-T2-fy0" sceneMemberID="viewController">
+                <splitViewController presentsWithGesture="NO" id="cOc-T2-fy0" sceneMemberID="viewController">
                     <tabBarItem key="tabBarItem" title="Group" image="974-users" id="fre-oh-ysK"/>
                     <connections>
-                        <outlet property="delegate" destination="9w2-zK-zQT" id="pIz-To-Mb5"/>
+                        <outlet property="delegate" destination="9w2-zK-zQT" id="yKV-F1-4VF"/>
                         <segue destination="PjQ-9S-4Zq" kind="relationship" relationship="masterViewController" id="01i-T3-g3x"/>
                         <segue destination="RjC-T7-BwN" kind="relationship" relationship="detailViewController" id="mq9-9z-0ZK"/>
                     </connections>
@@ -1398,7 +1398,7 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="EU9-NC-JbV" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="93" y="2398"/>
+            <point key="canvasLocation" x="-781" y="2423"/>
         </scene>
         <!--Chats-->
         <scene sceneID="vAl-ec-NFW">
@@ -2177,7 +2177,7 @@
         <segue reference="8fD-KK-hBT"/>
         <segue reference="ojB-Rp-nEa"/>
         <segue reference="qaB-BP-OcO"/>
-        <segue reference="N41-wN-KNl"/>
+        <segue reference="K87-fm-axG"/>
         <segue reference="wmf-tk-2CN"/>
         <segue reference="pPJ-na-Dl3"/>
         <segue reference="pZO-HH-rUP"/>

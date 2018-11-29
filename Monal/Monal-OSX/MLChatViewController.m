@@ -970,6 +970,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self.destinationDateFormat setDoesRelativeDateFormatting:YES];
     
     self.sourceDateFormat = [[NSDateFormatter alloc] init];
+    [self.sourceDateFormat setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
     [self.sourceDateFormat setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
     
     self.gregorian = [[NSCalendar alloc]

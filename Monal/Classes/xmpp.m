@@ -2965,13 +2965,20 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         self.streamID=[dic objectForKey:@"streamID"];
         self.streamExpireSeconds=[dic objectForKey:@"streamExpireSeconds"];
         
-        NSDate *streamLastTime = [dic objectForKey:@"streamLastTime"];
-        if(streamLastTime && self.streamExpireSeconds)
+        if([dic objectForKey:@"supportsPush"])
         {
-            if([[NSDate date] timeIntervalSinceDate:streamLastTime]>self.streamExpireSeconds.integerValue)
+            NSNumber *pushNumber = [dic objectForKey:@"supportsPush"];
+            self.supportsPush = pushNumber.boolValue;
+        }
+        else  {
+            NSDate *streamLastTime = [dic objectForKey:@"streamLastTime"];
+            if(streamLastTime && self.streamExpireSeconds)
             {
-                self.streamID=nil;
-                self.streamExpireSeconds=nil;
+                if([[NSDate date] timeIntervalSinceDate:streamLastTime]>self.streamExpireSeconds.integerValue)
+                {
+                    self.streamID=nil;
+                    self.streamExpireSeconds=nil;
+                }
             }
         }
         
@@ -2986,11 +2993,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         }
         self.conferenceServer = [dic objectForKey:@"conferenceServer"];
         
-        if([dic objectForKey:@"supportsPush"])
-        {
-            NSNumber *pushNumber = [dic objectForKey:@"supportsPush"];
-            self.supportsPush = pushNumber.boolValue;
-        }
+      
         
         if([dic objectForKey:@"supportsMAM"])
         {

@@ -1866,7 +1866,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                         withCompletion:^(BOOL success) {
                                                               if(success)
                                                               {
-                                                                  if(messageNode.requestReceipt && !messageNode.mamResult)
+                                                                  if(messageNode.requestReceipt
+                                                                     && !messageNode.mamResult
+                                                                     && ![messageNode.from isEqualToString:
+                                                                          [NSString stringWithFormat:@"%@@%@", self.username, self.domain]]
+                                                                     )
                                                                   {
                                                                       XMPPMessage *receiptNode = [[XMPPMessage alloc] init];
                                                                       [receiptNode.attributes setObject:messageNode.from forKey:@"to"];

@@ -801,6 +801,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     [self.destinationDateFormat setDoesRelativeDateFormatting:YES];
     
     self.sourceDateFormat = [[NSDateFormatter alloc] init];
+    [self.sourceDateFormat setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
     [self.sourceDateFormat setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
    
     self.gregorian = [[NSCalendar alloc]
@@ -847,16 +848,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
             priorDate= [self.sourceDateFormat dateFromString: (NSString *)priorDateString];
         }
         
-        NSTimeZone* sourceTimeZone = [NSTimeZone timeZoneWithAbbreviation:@"GMT"];
-        NSTimeZone* destinationTimeZone = [NSTimeZone systemTimeZone];
-        NSInteger sourceGMTOffset = [sourceTimeZone secondsFromGMTForDate:sourceDate];
-        NSInteger destinationGMTOffset = [destinationTimeZone secondsFromGMTForDate:sourceDate];
-        NSTimeInterval interval = destinationGMTOffset - sourceGMTOffset;
-        NSDate* destinationDate = [[NSDate alloc] initWithTimeInterval:interval sinceDate:sourceDate];
-        
-        NSInteger msgday =[self.gregorian components:NSCalendarUnitDay fromDate:destinationDate].day;
-        NSInteger msgmonth=[self.gregorian components:NSCalendarUnitMonth fromDate:destinationDate].month;
-        NSInteger msgyear =[self.gregorian components:NSCalendarUnitYear fromDate:destinationDate].year;
+        NSInteger msgday =[self.gregorian components:NSCalendarUnitDay fromDate:sourceDate].day;
+        NSInteger msgmonth=[self.gregorian components:NSCalendarUnitMonth fromDate:sourceDate].month;
+        NSInteger msgyear =[self.gregorian components:NSCalendarUnitYear fromDate:sourceDate].year;
         
         BOOL showFullDate=YES;
         
@@ -880,7 +874,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
             [self.destinationDateFormat setTimeStyle:NSDateFormatterMediumStyle];
         }
       
-        dateString = [ self.destinationDateFormat stringFromDate:destinationDate];
+        dateString = [self.destinationDateFormat stringFromDate:sourceDate];
     }
     
     return dateString;

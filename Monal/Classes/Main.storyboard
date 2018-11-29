@@ -716,7 +716,7 @@
             <objects>
                 <navigationController id="hMh-kj-2DY" sceneMemberID="viewController">
                     <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="vzd-J2-f8E">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="44"/>
+                        <rect key="frame" x="0.0" y="44" width="414" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <connections>
@@ -1246,7 +1246,7 @@
                     <navigationItem key="navigationItem" title="Group Chat" id="k0T-5X-FQu">
                         <barButtonItem key="rightBarButtonItem" systemItem="add" id="dQ9-YY-e5J">
                             <connections>
-                                <segue destination="e3Q-T1-etu" kind="presentation" modalPresentationStyle="pageSheet" id="1d0-oX-Uzg"/>
+                                <segue destination="e3Q-T1-etu" kind="presentation" modalPresentationStyle="formSheet" id="1d0-oX-Uzg"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>

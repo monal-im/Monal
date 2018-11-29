@@ -30,6 +30,7 @@
     
     // A little trick for removing the cell separators
     self.tableView.tableFooterView = [UIView new];
+    self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
 
 }
 

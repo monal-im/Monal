@@ -20,12 +20,12 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-
+    
 }
 
 -(void) viewWillAppear
 {
-    self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
+    [super viewWillAppear];
     [self refresh];
 }
 

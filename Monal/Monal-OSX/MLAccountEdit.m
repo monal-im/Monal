@@ -241,6 +241,7 @@
             else
             {
                 [[MLXMPPManager sharedInstance] disconnectAccount:[NSString stringWithFormat:@"%@",[self.accountToEdit objectForKey:kAccountID]]];
+                 [[DataLayer sharedInstance] resetContactsForAccount:self.accountno];
             }
         }];
         

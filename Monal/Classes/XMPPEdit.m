@@ -333,6 +333,8 @@ NSString *const kGtalk = @"Gtalk";
             }
         }];
         
+        [[DataLayer sharedInstance] resetContactsForAccount:self.accountno];
+        
     }
     
     MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];

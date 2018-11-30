@@ -723,6 +723,7 @@ static DataLayer *sharedInstance=nil;
      ];
     
     [self executeNonQuery:query andArguments:params withCompletion:completion];
+    
 }
 
 -(void) addAccountWithDictionary:(NSDictionary *) dictionary andCompletion: (void (^)(BOOL))completion
@@ -2425,7 +2426,6 @@ static DataLayer *sharedInstance=nil;
     
    
     [dbversionCheck unlock];
-    [self resetContacts];
     return;
     
 }

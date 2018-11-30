@@ -2175,7 +2175,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             
                         }
                         
-                        if ((self->_SSL && self->_startTLSComplete) || (!self->_SSL && !self->_startTLSComplete) || (self->_SSL && self->_oldStyleSSL))
+                        if ((self->_SSL && self->_startTLSComplete)
+                            || (!self->_SSL && !self->_startTLSComplete)
+                            || (self->_SSL && self->_oldStyleSSL))
                         {
                             //look at menchanisms presented
                             
@@ -2249,6 +2251,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         if(streamNode.supportsSM3)
                         {
                             self.supportsSM3=YES;
+                        } else {
+                            [[DataLayer sharedInstance] resetContactsForAccount:_accountNo];
                         }
                         
                         if(streamNode.supportsRosterVer)
@@ -2360,6 +2364,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     
                     if(self.resuming)   //resume failed
                     {
+                        [[DataLayer sharedInstance] resetContactsForAccount:_accountNo];
+                        
                         self.resuming=NO;
                         
                         //invalidate stream id
@@ -2886,17 +2892,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     self.unAckedStanzas= toClean;
 }
 
--(void) cleanStream
-{
-    NSMutableDictionary* values = [[NSMutableDictionary alloc] init];
-    [values removeObjectForKey:@"streamID"];
-    [[NSUserDefaults standardUserDefaults] setObject:[NSKeyedArchiver archivedDataWithRootObject:values] forKey:[NSString stringWithFormat:@"stream_state_v1_%@",self.accountNo]];
-}
-
 -(void) persistState
 {
     
-    [self.processQueue addOperationWithBlock:^{
     //state dictionary
     NSMutableDictionary* values = [[NSMutableDictionary alloc] init];
     
@@ -2932,12 +2930,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     if(self.discoveredServices)
     {
-        [values setObject:[self.discoveredServices copy] forKey:@"discoveredServices"];
+     [values setObject:[self.discoveredServices copy] forKey:@"discoveredServices"];
     }
     
     //save state dictionary
     NSData *data =[NSKeyedArchiver archivedDataWithRootObject:values];
     [[NSUserDefaults standardUserDefaults] setObject:data forKey:[NSString stringWithFormat:@"stream_state_v1_%@",self.accountNo]];
+    [[NSUserDefaults standardUserDefaults] synchronize];
     
     //debug output
     DDLogVerbose(@"persistState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%d%s,\n\tstreamID=%@\nstreaexpire=%@",
@@ -2950,59 +2949,54 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                  self.streamExpireSeconds
              
               );
-    }];
 }
 
 -(void) readState
 {
-
-      [self.processQueue addOperationWithBlock:^{
-        NSData *data=[[NSUserDefaults standardUserDefaults] objectForKey:[NSString stringWithFormat:@"stream_state_v1_%@", self.accountNo]];
-        if(data)
+    NSData *data=[[NSUserDefaults standardUserDefaults] objectForKey:[NSString stringWithFormat:@"stream_state_v1_%@", self.accountNo]];
+    if(data)
+    {
+        NSMutableDictionary* dic=(NSMutableDictionary *) [NSKeyedUnarchiver unarchiveObjectWithData:data];
+        
+        //collect smacks state
+        self.lastHandledInboundStanza=[dic objectForKey:@"lastHandledInboundStanza"];
+        self.lastHandledOutboundStanza=[dic objectForKey:@"lastHandledOutboundStanza"];
+        self.lastOutboundStanza=[dic objectForKey:@"lastOutboundStanza"];
+        self.unAckedStanzas=[dic objectForKey:@"unAckedStanzas"];
+        self.streamID=[dic objectForKey:@"streamID"];
+        self.streamExpireSeconds=[dic objectForKey:@"streamExpireSeconds"];
+        
+        NSDate *streamLastTime = [dic objectForKey:@"streamLastTime"];
+        if(streamLastTime && self.streamExpireSeconds)
         {
-            NSMutableDictionary* dic=[NSKeyedUnarchiver unarchiveObjectWithData:data];
-            
-            //collect smacks state
-            self.lastHandledInboundStanza=[dic objectForKey:@"lastHandledInboundStanza"];
-            self.lastHandledOutboundStanza=[dic objectForKey:@"lastHandledOutboundStanza"];
-            self.lastOutboundStanza=[dic objectForKey:@"lastOutboundStanza"];
-            self.unAckedStanzas=[dic objectForKey:@"unAckedStanzas"];
-            self.streamID=[dic objectForKey:@"streamID"];
-            self.streamExpireSeconds=[dic objectForKey:@"streamExpireSeconds"];
-            
-            NSDate *streamLastTime = [dic objectForKey:@"streamLastTime"];
-            if(streamLastTime && self.streamExpireSeconds)
+            if([[NSDate date] timeIntervalSinceDate:streamLastTime]>self.streamExpireSeconds.integerValue)
             {
-                if([[NSDate date] timeIntervalSinceDate:streamLastTime]>self.streamExpireSeconds.integerValue)
-                {
-                    self.streamID=nil;
-                    self.streamExpireSeconds=nil;
-                }
+                self.streamID=nil;
+                self.streamExpireSeconds=nil;
             }
-            
-            self.serverFeatures = [dic objectForKey:@"serverFeatures"];
-            self.discoveredServices=[dic objectForKey:@"discoveredServices"];
-            
-            
-            self.uploadServer= [dic objectForKey:@"uploadServer"];
-            if(self.uploadServer)
-            {
-                self.supportsHTTPUpload=YES;
-            }
-            self.conferenceServer = [dic objectForKey:@"conferenceServer"];
-            
-            if([dic objectForKey:@"supportsPush"])
-            {
-                NSNumber *pushNumber = [dic objectForKey:@"supportsPush"];
-                self.supportsPush = pushNumber.boolValue;
-            }
-            
-            if([dic objectForKey:@"supportsMAM"])
-            {
-                NSNumber *mamNumber = [dic objectForKey:@"supportsMAM"];
-                self.supportsMam2 = mamNumber.boolValue;
-            }
-            
+        }
+        
+        self.serverFeatures = [dic objectForKey:@"serverFeatures"];
+        self.discoveredServices=[dic objectForKey:@"discoveredServices"];
+        
+        
+        self.uploadServer= [dic objectForKey:@"uploadServer"];
+        if(self.uploadServer)
+        {
+            self.supportsHTTPUpload=YES;
+        }
+        self.conferenceServer = [dic objectForKey:@"conferenceServer"];
+        
+        if([dic objectForKey:@"supportsPush"])
+        {
+            NSNumber *pushNumber = [dic objectForKey:@"supportsPush"];
+            self.supportsPush = pushNumber.boolValue;
+        }
+        
+        if([dic objectForKey:@"supportsMAM"])
+        {
+            NSNumber *mamNumber = [dic objectForKey:@"supportsMAM"];
+            self.supportsMam2 = mamNumber.boolValue;
         }
         
         //debug output
@@ -3017,7 +3011,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         if(self.unAckedStanzas)
             for(NSDictionary *dic in self.unAckedStanzas)
                 DDLogDebug(@"readState unAckedStanza %@: %@", [dic objectForKey:kStanzaID], ((MLXMLNode*)[dic objectForKey:kStanza]).XMLString);
-    }];
+    }
 }
 
 -(void) initSM3
@@ -3099,8 +3093,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) initSession
 {
     [_contactsVC clearContactsForAccount:_accountNo];
-    [[DataLayer sharedInstance] resetContactsForAccount:_accountNo];
-    
+ 
     //now we are bound
     _accountState=kStateBound;
     [self postConnectNotification];

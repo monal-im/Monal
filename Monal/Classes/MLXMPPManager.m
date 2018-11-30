@@ -287,7 +287,6 @@ An array of Dics what have timers to make sure everything was sent
         // ask fro temp pass if not oauth
     }
      xmppAccount.contactsVC=self.contactVC;
-    [xmppAccount cleanStream]; // dont resume if there was aorce close
     
     //sepcifically look for the server since we might not be online or behind firewall
     Reachability* hostReach = [Reachability reachabilityWithHostName:xmppAccount.server ] ;

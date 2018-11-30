@@ -2885,6 +2885,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) persistState
 {
+    
+    [self.processQueue addOperationWithBlock:^{
     //state dictionary
     NSMutableDictionary* values = [[NSMutableDictionary alloc] init];
     
@@ -2892,7 +2894,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [values setValue:self.lastHandledInboundStanza forKey:@"lastHandledInboundStanza"];
     [values setValue:self.lastHandledOutboundStanza forKey:@"lastHandledOutboundStanza"];
     [values setValue:self.lastOutboundStanza forKey:@"lastOutboundStanza"];
-    [values setValue:self.unAckedStanzas forKey:@"unAckedStanzas"];
+    [values setValue:[self.unAckedStanzas copy] forKey:@"unAckedStanzas"];
     [values setValue:self.streamID forKey:@"streamID"];
     if(self.streamExpireSeconds ) {
         [values setValue:self.streamExpireSeconds forKey:@"streamExpireSeconds"];
@@ -2900,7 +2902,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     [values setValue:[NSDate date] forKey:@"streamTime"];
     
-    [values setValue:self.serverFeatures forKey:@"serverFeatures"];
+    [values setValue:[self.serverFeatures copy] forKey:@"serverFeatures"];
     if(self.uploadServer) {
         [values setObject:self.uploadServer forKey:@"uploadServer"];
     }
@@ -2920,11 +2922,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     if(self.discoveredServices)
     {
-        [values setObject:self.discoveredServices forKey:@"discoveredServices"];
+        [values setObject:[self.discoveredServices copy] forKey:@"discoveredServices"];
     }
     
     //save state dictionary
-    [[NSUserDefaults standardUserDefaults] setObject:[NSKeyedArchiver archivedDataWithRootObject:values] forKey:[NSString stringWithFormat:@"stream_state_v1_%@",self.accountNo]];
+    NSData *data =[NSKeyedArchiver archivedDataWithRootObject:values];
+    [[NSUserDefaults standardUserDefaults] setObject:data forKey:[NSString stringWithFormat:@"stream_state_v1_%@",self.accountNo]];
     
     //debug output
     DDLogVerbose(@"persistState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%d%s,\n\tstreamID=%@\nstreaexpire=%@",
@@ -2937,71 +2940,73 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                  self.streamExpireSeconds
              
               );
-    
+    }];
 }
 
 -(void) readState
 {
-    NSData *data=[[NSUserDefaults standardUserDefaults] objectForKey:[NSString stringWithFormat:@"stream_state_v1_%@", self.accountNo]];
-    if(data)
-    {
-        NSMutableDictionary* dic=[NSKeyedUnarchiver unarchiveObjectWithData:data];
-        
-        //collect smacks state
-        self.lastHandledInboundStanza=[dic objectForKey:@"lastHandledInboundStanza"];
-        self.lastHandledOutboundStanza=[dic objectForKey:@"lastHandledOutboundStanza"];
-        self.lastOutboundStanza=[dic objectForKey:@"lastOutboundStanza"];
-        self.unAckedStanzas=[dic objectForKey:@"unAckedStanzas"];
-        self.streamID=[dic objectForKey:@"streamID"];
-        self.streamExpireSeconds=[dic objectForKey:@"streamExpireSeconds"];
-        
-        NSDate *streamLastTime = [dic objectForKey:@"streamLastTime"];
-        if(streamLastTime && self.streamExpireSeconds)
+      [self.processQueue addOperationWithBlock:^{
+        NSData *data=[[NSUserDefaults standardUserDefaults] objectForKey:[NSString stringWithFormat:@"stream_state_v1_%@", self.accountNo]];
+        if(data)
         {
-            if([[NSDate date] timeIntervalSinceDate:streamLastTime]>self.streamExpireSeconds.integerValue)
+            NSMutableDictionary* dic=[NSKeyedUnarchiver unarchiveObjectWithData:data];
+            
+            //collect smacks state
+            self.lastHandledInboundStanza=[dic objectForKey:@"lastHandledInboundStanza"];
+            self.lastHandledOutboundStanza=[dic objectForKey:@"lastHandledOutboundStanza"];
+            self.lastOutboundStanza=[dic objectForKey:@"lastOutboundStanza"];
+            self.unAckedStanzas=[dic objectForKey:@"unAckedStanzas"];
+            self.streamID=[dic objectForKey:@"streamID"];
+            self.streamExpireSeconds=[dic objectForKey:@"streamExpireSeconds"];
+            
+            NSDate *streamLastTime = [dic objectForKey:@"streamLastTime"];
+            if(streamLastTime && self.streamExpireSeconds)
             {
-                self.streamID=nil;
-                self.streamExpireSeconds=nil;
+                if([[NSDate date] timeIntervalSinceDate:streamLastTime]>self.streamExpireSeconds.integerValue)
+                {
+                    self.streamID=nil;
+                    self.streamExpireSeconds=nil;
+                }
             }
+            
+            self.serverFeatures = [dic objectForKey:@"serverFeatures"];
+            self.discoveredServices=[dic objectForKey:@"discoveredServices"];
+            
+            
+            self.uploadServer= [dic objectForKey:@"uploadServer"];
+            if(self.uploadServer)
+            {
+                self.supportsHTTPUpload=YES;
+            }
+            self.conferenceServer = [dic objectForKey:@"conferenceServer"];
+            
+            if([dic objectForKey:@"supportsPush"])
+            {
+                NSNumber *pushNumber = [dic objectForKey:@"supportsPush"];
+                self.supportsPush = pushNumber.boolValue;
+            }
+            
+            if([dic objectForKey:@"supportsMAM"])
+            {
+                NSNumber *mamNumber = [dic objectForKey:@"supportsMAM"];
+                self.supportsMam2 = mamNumber.boolValue;
+            }
+            
         }
         
-        self.serverFeatures = [dic objectForKey:@"serverFeatures"];
-        self.discoveredServices=[dic objectForKey:@"discoveredServices"];
-        
-        
-        self.uploadServer= [dic objectForKey:@"uploadServer"];
-        if(self.uploadServer)
-        {
-            self.supportsHTTPUpload=YES;
-        }
-        self.conferenceServer = [dic objectForKey:@"conferenceServer"];
-        
-        if([dic objectForKey:@"supportsPush"])
-        {
-            NSNumber *pushNumber = [dic objectForKey:@"supportsPush"];
-            self.supportsPush = pushNumber.boolValue;
-        }
-        
-        if([dic objectForKey:@"supportsMAM"])
-        {
-            NSNumber *mamNumber = [dic objectForKey:@"supportsMAM"];
-            self.supportsMam2 = mamNumber.boolValue;
-        }
-
-    }
-    
-    //debug output
-    DDLogDebug(@"readState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%d%s,\n\tstreamID=%@",
-              self.lastHandledInboundStanza,
-              self.lastHandledOutboundStanza,
-              self.lastOutboundStanza,
-              self.unAckedStanzas ? [self.unAckedStanzas count] : 0,
-              self.unAckedStanzas ? "" : " (NIL)",
-              self.streamID
-              );
-    if(self.unAckedStanzas)
-        for(NSDictionary *dic in self.unAckedStanzas)
-            DDLogDebug(@"readState unAckedStanza %@: %@", [dic objectForKey:kStanzaID], ((MLXMLNode*)[dic objectForKey:kStanza]).XMLString);
+        //debug output
+        DDLogDebug(@"readState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%d%s,\n\tstreamID=%@",
+                   self.lastHandledInboundStanza,
+                   self.lastHandledOutboundStanza,
+                   self.lastOutboundStanza,
+                   self.unAckedStanzas ? [self.unAckedStanzas count] : 0,
+                   self.unAckedStanzas ? "" : " (NIL)",
+                   self.streamID
+                   );
+        if(self.unAckedStanzas)
+            for(NSDictionary *dic in self.unAckedStanzas)
+                DDLogDebug(@"readState unAckedStanza %@: %@", [dic objectForKey:kStanzaID], ((MLXMLNode*)[dic objectForKey:kStanza]).XMLString);
+    }];
 }
 
 -(void) initSM3

@@ -104,9 +104,26 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
         [self showActiveChat:YES];
     }
     else {
-        [self.contactsTable reloadData];
+        if([[NSUserDefaults standardUserDefaults] boolForKey:@"SortContacts"]) //sort by status
+        {
+            [[DataLayer sharedInstance] onlineContactsSortedBy:@"Status" withCompeltion:^(NSMutableArray *results) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    _contacts= results;
+                    [self.contactsTable reloadData];
+                });
+            }];
+        }
+        else {
+            [[DataLayer sharedInstance] onlineContactsSortedBy:@"Name" withCompeltion:^(NSMutableArray *results) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    _contacts= results;
+                    [self.contactsTable reloadData];
+                });
+            }];
+        }
     }
     
+
     if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
     {
         [[DataLayer sharedInstance] offlineContactsWithCompletion:^(NSMutableArray *results) {

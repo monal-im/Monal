@@ -241,9 +241,14 @@
             else
             {
                 [[MLXMPPManager sharedInstance] disconnectAccount:[NSString stringWithFormat:@"%@",[self.accountToEdit objectForKey:kAccountID]]];
-                 [[DataLayer sharedInstance] resetContactsForAccount:[dic objectForKey:kAccountID]];
             }
         }];
+        
+        //out here to prevent a deadlocak on db queue
+        if (isEnabled)
+        {
+               [[DataLayer sharedInstance] resetContactsForAccount:[NSString stringWithFormat:@"%@",[self.accountToEdit objectForKey:kAccountID]]];
+        }
         
     }
 

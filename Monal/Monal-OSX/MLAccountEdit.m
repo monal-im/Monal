@@ -245,7 +245,7 @@
         }];
         
         //out here to prevent a deadlocak on db queue
-        if (isEnabled)
+        if (!isEnabled)
         {
                [[DataLayer sharedInstance] resetContactsForAccount:[NSString stringWithFormat:@"%@",[self.accountToEdit objectForKey:kAccountID]]];
         }

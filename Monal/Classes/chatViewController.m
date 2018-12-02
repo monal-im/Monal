@@ -171,25 +171,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void) fetchMoreMessages
 {
-    
-    dispatch_async(dispatch_get_main_queue(),
-                   ^{
-                       //this forces a new fetch if needed
-                       NSDictionary *lastMessage= [self.messageList lastObject];
-                       
-                       NSDate *last;
-                       if([[lastMessage objectForKey:@"thetime"] isKindOfClass:[NSDate class]])
-                       {
-                           last= (NSDate *)[lastMessage objectForKey:@"thetime"];
-                       } else if([[lastMessage objectForKey:@"thetime"] isKindOfClass:[NSString class]]) {
-                           last=[self.sourceDateFormat dateFromString:[lastMessage objectForKey:@"thetime"]];
-                       }
-                       
-                       if(last) {
-                           [[DataLayer sharedInstance] setSynchPoint:last ForContact:self.contactName andAccount:self.accountNo];
-                       }
-                       [self synchChat];
-                   });
+  [self synchChat];
 }
 
 

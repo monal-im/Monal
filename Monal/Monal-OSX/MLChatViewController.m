@@ -177,10 +177,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         
         //synch point
         // if synch point < login time
-        NSDate *synch = [[DataLayer sharedInstance] synchPointForContact:self.contactName andAccount:self.accountNo];
+       // NSDate *synch = [[DataLayer sharedInstance] synchPointForContact:self.contactName andAccount:self.accountNo];
         NSDate * connectedTime = [[MLXMPPManager sharedInstance] connectedTimeFor:self.accountNo];
         
-        if([synch timeIntervalSinceReferenceDate]<[connectedTime timeIntervalSinceReferenceDate])
+        if([last timeIntervalSinceReferenceDate]<[connectedTime timeIntervalSinceReferenceDate])
         {
             [xmppAccount setMAMQueryFromStart: last toDate:nil andJid:self.contactName];
             [[DataLayer sharedInstance] setSynchPoint:[NSDate date] ForContact:self.contactName andAccount:self.accountNo];

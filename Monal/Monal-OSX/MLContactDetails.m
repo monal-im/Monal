@@ -9,6 +9,7 @@
 #import "MLContactDetails.h"
 #import "MLImageManager.h"
 #import "DataLayer.h"
+#import "MLXMPPManager.h"
 
 @interface MLContactDetails ()
 
@@ -24,6 +25,7 @@
 -(void) viewWillAppear
 {
     [super viewWillAppear];
+     [[MLXMPPManager sharedInstance] getVCard:_contact];
     self.buddyName.stringValue =[_contact objectForKey:@"buddy_name"];
     
     self.buddyMessage.stringValue=[_contact objectForKey:@"status"];

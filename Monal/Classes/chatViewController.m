@@ -143,7 +143,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     dispatch_async(dispatch_get_main_queue(), ^{
         
         xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
-        if(xmppAccount.supportsMam2 & !self.isMUC) {
+        if(xmppAccount.supportsMam2 & !_isMUC) {
             
             NSDictionary *lastMessage= [self.messageList lastObject];
             NSDate *last =[self.sourceDateFormat dateFromString:[lastMessage objectForKey:@"thetime"]];

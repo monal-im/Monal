@@ -196,12 +196,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) fetchMoreMessages
 {
-    //this forces a new fetch if needed
-    NSDictionary *lastMessage= [self.messageList lastObject];
-    NSDate *last =[self.sourceDateFormat dateFromString:[lastMessage objectForKey:@"thetime"]];
-    if(last) {
-    [[DataLayer sharedInstance] setSynchPoint:last ForContact:self.contactName andAccount:self.accountNo];
-    }
     [self synchChat];
 }
 

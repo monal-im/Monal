@@ -139,33 +139,33 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 
 
--(void) synchChat
-{
-    dispatch_async(dispatch_get_main_queue(),
-                   ^{
-                       xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
-                       if(xmppAccount.supportsMam2 & !self->_isMUC) {
-                           
-                           NSDictionary *lastMessage= [self.messageList lastObject];
-                           NSDate *last;
-                           if([[lastMessage objectForKey:@"thetime"] isKindOfClass:[NSString class]]) {
-                               last=[self.sourceDateFormat dateFromString:[lastMessage objectForKey:@"thetime"]];
-                           }
-                           else {
-                               last = (NSDate*)[lastMessage objectForKey:@"thetime"];
-                           }
-                           //synch point
-                           // if synch point < login time
-                           NSDate *synch = [[DataLayer sharedInstance] synchPointForContact:self.contactName andAccount:self.accountNo];
-                           NSDate * connectedTime = [[MLXMPPManager sharedInstance] connectedTimeFor:self.accountNo];
-                           
-                           if([synch timeIntervalSinceReferenceDate]<[connectedTime timeIntervalSinceReferenceDate])
-                           {
-                               [xmppAccount setMAMQueryFromStart: last toDate:nil andJid:self.contactName];
-                               [[DataLayer sharedInstance] setSynchPoint:[NSDate date] ForContact:self.contactName andAccount:self.accountNo];
-                           }
-                       }
-                   });
+-(void) synchChat {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        
+        xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
+        if(xmppAccount.supportsMam2 & !self.isMUC) {
+            
+            NSDictionary *lastMessage= [self.messageList lastObject];
+            NSDate *last =[self.sourceDateFormat dateFromString:[lastMessage objectForKey:@"thetime"]];
+            
+            //synch point
+            // if synch point < login time
+            // NSDate *synch = [[DataLayer sharedInstance] synchPointForContact:self.contactName andAccount:self.accountNo];
+            NSDate * connectedTime = [[MLXMPPManager sharedInstance] connectedTimeFor:self.accountNo];
+            
+            if(!last)
+            {
+                last = [[NSDate date] dateByAddingTimeInterval:-3*24*60*60];
+            }
+            
+            if([last timeIntervalSinceReferenceDate]<[connectedTime timeIntervalSinceReferenceDate])
+            {
+                [xmppAccount setMAMQueryFromStart: last toDate:nil andJid:self.contactName];
+                [[DataLayer sharedInstance] setSynchPoint:[NSDate date] ForContact:self.contactName andAccount:self.accountNo];
+            }
+        }
+
+    });
 }
 
 

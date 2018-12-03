@@ -345,14 +345,14 @@
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" title="Contacts" id="qsR-dX-TO1">
-                        <barButtonItem key="leftBarButtonItem" title="Compose" id="Vb4-E0-HTo">
-                            <connections>
-                                <segue destination="c9l-5p-HeT" kind="presentation" identifier="showCompose" id="xeu-Qv-uKG"/>
-                            </connections>
-                        </barButtonItem>
-                        <barButtonItem key="rightBarButtonItem" systemItem="add" id="2ji-VW-Qvv">
+                        <barButtonItem key="leftBarButtonItem" systemItem="add" id="2ji-VW-Qvv">
                             <connections>
                                 <segue destination="elF-QS-Bpm" kind="presentation" modalPresentationStyle="formSheet" id="lpa-8n-0fe"/>
+                            </connections>
+                        </barButtonItem>
+                        <barButtonItem key="rightBarButtonItem" image="704-compose" id="Vb4-E0-HTo">
+                            <connections>
+                                <segue destination="c9l-5p-HeT" kind="presentation" identifier="showCompose" id="xeu-Qv-uKG"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
@@ -1416,12 +1416,27 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
                         <prototypes>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="0mW-Ez-sFD">
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="addButton" id="DD1-1q-KsC">
                                 <rect key="frame" x="0.0" y="55.333333333333343" width="414" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
-                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="0mW-Ez-sFD" id="TUh-St-kZI">
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="DD1-1q-KsC" id="HFV-P5-JCg">
                                     <rect key="frame" x="0.0" y="0.0" width="414" height="43.666666666666664"/>
                                     <autoresizingMask key="autoresizingMask"/>
+                                    <subviews>
+                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="jIW-zk-rUu">
+                                            <rect key="frame" x="189" y="7" width="36" height="30"/>
+                                            <state key="normal" title="Send">
+                                                <color key="titleColor" red="0.4541509151" green="0.72539824249999996" blue="0.68004375699999997" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                            </state>
+                                            <connections>
+                                                <action selector="addPress:" destination="aFU-Vb-8Jd" eventType="touchUpInside" id="wQZ-la-Glw"/>
+                                            </connections>
+                                        </button>
+                                    </subviews>
+                                    <constraints>
+                                        <constraint firstItem="jIW-zk-rUu" firstAttribute="centerX" secondItem="HFV-P5-JCg" secondAttribute="centerX" id="UDc-mG-DX0"/>
+                                        <constraint firstItem="jIW-zk-rUu" firstAttribute="centerY" secondItem="HFV-P5-JCg" secondAttribute="centerY" id="rKu-5a-nHX"/>
+                                    </constraints>
                                 </tableViewCellContentView>
                             </tableViewCell>
                         </prototypes>
@@ -1460,6 +1475,7 @@
         </scene>
     </scenes>
     <resources>
+        <image name="704-compose" width="28" height="28"/>
         <image name="724-info" width="28" height="28"/>
         <image name="744-locked-selected" width="21" height="28"/>
         <image name="770-paper-clip" width="28" height="27"/>
@@ -1473,6 +1489,6 @@
         <segue reference="K87-fm-axG"/>
         <segue reference="wmf-tk-2CN"/>
         <segue reference="pPJ-na-Dl3"/>
-        <segue reference="glk-qB-XGu"/>
+        <segue reference="HKH-FB-LHe"/>
     </inferredMetricsTieBreakers>
 </document>

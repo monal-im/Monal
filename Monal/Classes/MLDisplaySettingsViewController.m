@@ -154,18 +154,11 @@
             
         case 2:
         {
-            return 1;
+            return 5;
             break;
         }
             
         case 3:
-        {
-            return 5;
-            break;
-        }
-          
-            
-        case 4:
         {
             return 1;
             break;

@@ -72,6 +72,8 @@
                 
             }];
             
+            [[DataLayer sharedInstance] addActiveBuddies:self.contactName.text forAccount:account.accountNo withCompletion:nil];
+            
             //dismiss and go to conversation
             [self dismissViewControllerAnimated:YES completion:^{
                //push new conversation on view conroller

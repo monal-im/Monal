@@ -1430,6 +1430,7 @@
                                             </state>
                                             <connections>
                                                 <action selector="addPress:" destination="aFU-Vb-8Jd" eventType="touchUpInside" id="wQZ-la-Glw"/>
+                                                <action selector="send:" destination="WjA-je-Xez" eventType="touchUpInside" id="XRf-MC-KAb"/>
                                             </connections>
                                         </button>
                                     </subviews>
@@ -1455,7 +1456,7 @@
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Q5t-24-y4S" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="4074" y="998"/>
+            <point key="canvasLocation" x="4073.913043478261" y="997.76785714285711"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="Syg-Lv-SSZ">

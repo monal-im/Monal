@@ -11,6 +11,7 @@
 #import "MLXMPPManager.h"
 #import "MLButtonCell.h"
 #import "MLTextInputCell.h"
+#import  "DataLayer.h"
 
 @interface MLComposeViewController ()
 
@@ -21,6 +22,78 @@
 - (IBAction)close:(id)sender
 {
     [self dismissViewControllerAnimated:YES completion:nil];
+}
+
+- (IBAction)send:(id)sender
+{
+    if([[MLXMPPManager sharedInstance].connectedXMPP count]==0)
+    {
+        UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:@"No connected accounts" message:@"Please make sure at least one account has connected before trying to message someone." preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertAction *closeAction =[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+            
+        }];
+        [messageAlert addAction:closeAction];
+        
+        [self presentViewController:messageAlert animated:YES completion:nil];
+    }
+    else  {
+        
+        if(self.message.text.length==0)
+        {
+            UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:@"Error" message:@"Message can't be empty" preferredStyle:UIAlertControllerStyleAlert];
+            UIAlertAction *closeAction =[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+                
+            }];
+            [messageAlert addAction:closeAction];
+            
+            [self presentViewController:messageAlert animated:YES completion:nil];
+            return;
+            
+        }
+        
+        if(self.contactName.text.length>0)
+        {
+            xmpp* account;
+            
+            if(_selectedRow<[[MLXMPPManager sharedInstance].connectedXMPP count] && _selectedRow>=0) {
+                NSDictionary* datarow= [[MLXMPPManager sharedInstance].connectedXMPP objectAtIndex:_selectedRow];
+                account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
+
+            }
+            
+            NSString *messageID =[[NSUUID UUID] UUIDString];
+            
+            //TODO the encrypted value needs to be pulled from the DB for the chat
+            [[DataLayer sharedInstance] addMessageHistoryFrom:account.fulluser to:self.contactName.text forAccount:account.accountNo withMessage:self.message.text actuallyFrom:account.fulluser withId:messageID encrypted:NO withCompletion:^(BOOL success, NSString *messageType) {
+                
+            }];
+            
+            [[MLXMPPManager sharedInstance] sendMessage:self.message.text toContact:self.contactName.text fromAccount:account.accountNo isEncrypted:NO isMUC:NO isUpload:NO messageId:messageID  withCompletionHandler:^(BOOL success, NSString *messageId) {
+                
+            }];
+            
+            //dismiss and go to conversation
+            [self dismissViewControllerAnimated:YES completion:^{
+               //push new conversation on view conroller
+            }];
+            
+        }
+        else
+        {
+            UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:@"Error" message:@"Recipient name can't be empty" preferredStyle:UIAlertControllerStyleAlert];
+            UIAlertAction *closeAction =[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+                
+            }];
+            [messageAlert addAction:closeAction];
+            
+            [self presentViewController:messageAlert animated:YES completion:nil];
+            
+        }
+        
+        
+    }
+    
+    [self close:self];
 }
 
 #pragma mark - textfield delegate
@@ -89,7 +162,7 @@
 {
     if(section==0)
     {
-        return @"Contacts are usually in the format: username@domain.something";
+        return @"Recipients are usually in the format: username@domain.something";
     }
     else return nil;
 }
@@ -99,7 +172,7 @@
     NSInteger toreturn =0;
     switch (section) {
         case 0:
-            toreturn =2;
+            toreturn =3;
             break;
         case 1:
             toreturn=1;
@@ -140,8 +213,14 @@
             }
             else   if(indexPath.row ==1){
                 self.contactName =textCell.textInput;
-                self.contactName.placeholder = @"Contact Name";
+                self.contactName.placeholder = @"Recipient Name";
                 self.contactName.delegate=self;
+            }
+            
+            else   if(indexPath.row ==2){
+                self.message =textCell.textInput;
+                self.message.placeholder = @"Message";
+                self.message.delegate=self;
             }
             textCell.textInput.inputAccessoryView =_keyboardToolbar;
             

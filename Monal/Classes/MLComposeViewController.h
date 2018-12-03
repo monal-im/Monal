@@ -18,10 +18,12 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 @property (nonatomic, weak)  UITextField* contactName;
+@property (nonatomic, weak)  UITextField* message;
 @property (nonatomic, weak)  UITextField* accountName;
 @property (nonatomic, weak) IBOutlet UIToolbar* keyboardToolbar;
 
 - (IBAction)close:(id)sender;
+- (IBAction)send:(id)sender;
 
 - (IBAction)toolbarDone:(id)sender;
 - (IBAction)toolbarPrevious:(id)sender;

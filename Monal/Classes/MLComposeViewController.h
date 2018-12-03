@@ -12,6 +12,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MLComposeViewController : UITableViewController
 
+- (IBAction)close:(id)sender;
 @end
 
 NS_ASSUME_NONNULL_END

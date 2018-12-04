@@ -272,7 +272,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         
         NSMutableDictionary *settings = [ [NSMutableDictionary alloc ]
                                          initWithObjectsAndKeys:
-                                         [NSNull null],kCFStreamSSLPeerName,
                                          kCFStreamSocketSecurityLevelNegotiatedSSL,
                                          kCFStreamSSLLevel,
                                          nil ];
@@ -2416,9 +2415,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         if(streamNode.startTLSProceed)
                         {
                             NSMutableDictionary *settings = [ [NSMutableDictionary alloc ] init];
-//                                                             initWithObjectsAndKeys:
-//                                                             [NSNull null],kCFStreamSSLPeerName,
-//                                                             nil ];
+
                             
                             if(self->_brokenServerSSL)
                             {

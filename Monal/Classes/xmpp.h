@@ -19,50 +19,7 @@
 
 #import "MLConstants.h"
 #import "jingleCall.h"
-
-// networking objects
-#import <unistd.h>
-#import <sys/types.h>
-#import <sys/socket.h>
-#import <netinet/in.h>
-#import <arpa/inet.h>
-
-#import <nameser.h>
-#import <dns_sd.h>
-
-#ifndef T_SRV
-#define T_SRV 33
-#endif
-
-#ifndef T_PTR
-#define T_PTR 12
-#endif
-
-#ifndef T_A
-#define T_A 1
-#endif
-
-#ifndef T_TXT
-#define T_TXT 16
-#endif
-
-#define MAX_DOMAIN_LABEL 63
-#define MAX_DOMAIN_NAME 255
-#define MAX_CSTRING 2044
-
-typedef union { unsigned char b[2]; unsigned short NotAnInteger; } Opaque16;
-
-typedef struct { u_char c[ 64]; } domainlabel;
-typedef struct { u_char c[256]; } domainname;
-
-
-typedef struct
-{
-    uint16_t priority;
-    uint16_t weight;
-    uint16_t port;
-    domainname target;
-} srv_rdata;
+#import "MLDNSLookup.h"
 
 typedef NS_ENUM (NSInteger, xmppState) {
     kStateLoggedOut =-1,
@@ -300,7 +257,7 @@ FOUNDATION_EXPORT NSString *const kCompletion;
 @property (nonatomic, readonly) xmppState accountState;
 
 // discovered properties
-@property (nonatomic,strong)  NSMutableArray* discoveredServerList;
+@property (nonatomic,strong)  NSArray* discoveredServerList;
 @property (nonatomic,strong)  NSMutableArray*  discoveredServices;
 @property (nonatomic,strong)  NSString*  conferenceServer;
 @property (nonatomic,strong)  NSArray*  roomList;

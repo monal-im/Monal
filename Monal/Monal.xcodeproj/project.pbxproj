@@ -360,6 +360,8 @@
 		26C3EDF71A8072D5000E6331 /* ParseEnabled.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C3EDF61A8072D5000E6331 /* ParseEnabled.m */; };
 		26C3EDFD1A807E76000E6331 /* ParseA.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C3EDFC1A807E76000E6331 /* ParseA.m */; };
 		26C3EE001A819A38000E6331 /* ParseResumed.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C3EDFF1A819A38000E6331 /* ParseResumed.m */; };
+		26C4B22421B6B91300610282 /* MLDNSLookup.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C4B22321B6B91300610282 /* MLDNSLookup.m */; };
+		26C4B22521B6B91300610282 /* MLDNSLookup.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C4B22321B6B91300610282 /* MLDNSLookup.m */; };
 		26CF3EAA1780D6B7002B7085 /* XMPPIQ.m in Sources */ = {isa = PBXBuildFile; fileRef = 26CF3EA91780D6B7002B7085 /* XMPPIQ.m */; };
 		26CF3EAD1780DE5D002B7085 /* ParseIq.m in Sources */ = {isa = PBXBuildFile; fileRef = 26CF3EAC1780DE5C002B7085 /* ParseIq.m */; };
 		26CF3EB21780DFD9002B7085 /* XMPPParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 26CF3EB11780DFD9002B7085 /* XMPPParser.m */; };
@@ -841,6 +843,8 @@
 		26C3EDFC1A807E76000E6331 /* ParseA.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParseA.m; sourceTree = "<group>"; };
 		26C3EDFE1A819A38000E6331 /* ParseResumed.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParseResumed.h; sourceTree = "<group>"; };
 		26C3EDFF1A819A38000E6331 /* ParseResumed.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParseResumed.m; sourceTree = "<group>"; };
+		26C4B22221B6B91300610282 /* MLDNSLookup.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLDNSLookup.h; sourceTree = "<group>"; };
+		26C4B22321B6B91300610282 /* MLDNSLookup.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLDNSLookup.m; sourceTree = "<group>"; };
 		26CF3EA81780D6B7002B7085 /* XMPPIQ.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPIQ.h; sourceTree = "<group>"; };
 		26CF3EA91780D6B7002B7085 /* XMPPIQ.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPIQ.m; sourceTree = "<group>"; };
 		26CF3EAB1780DE5C002B7085 /* ParseIq.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParseIq.h; sourceTree = "<group>"; };
@@ -1101,6 +1105,8 @@
 				26CF3EAE1780DF86002B7085 /* Nodes */,
 				260C51CF177F08F50039634B /* xmpp.h */,
 				260C51D0177F08F50039634B /* xmpp.m */,
+				26C4B22221B6B91300610282 /* MLDNSLookup.h */,
+				26C4B22321B6B91300610282 /* MLDNSLookup.m */,
 			);
 			name = XMPP;
 			sourceTree = "<group>";
@@ -2831,6 +2837,7 @@
 				26DA16E217C302BC00D0065E /* UIAlertView+Blocks.m in Sources */,
 				26B2A4FD1B73097500272E63 /* DDMultiFormatter.m in Sources */,
 				262E51921AD8CAC600788351 /* MLButtonCell.m in Sources */,
+				26C4B22421B6B91300610282 /* MLDNSLookup.m in Sources */,
 				26C1EA6B1FF937320085547A /* MLNotificationSettingsViewController.m in Sources */,
 				2644D4951FF046E800F46AB5 /* MLBaseCell.m in Sources */,
 				26D51CE01E2674D700141E04 /* NXOAuth2PostBodyStream.m in Sources */,
@@ -2970,6 +2977,7 @@
 				26D56EE720B59FB000BF7C97 /* MLTextView.m in Sources */,
 				2661D3411B40765A00EC51BA /* MLContactsViewController.m in Sources */,
 				26B2A5021B730AE100272E63 /* Reachability.m in Sources */,
+				26C4B22521B6B91300610282 /* MLDNSLookup.m in Sources */,
 				2661D3501B407EDD00EC51BA /* MLChatViewCell.m in Sources */,
 				260499E81B7313DF00D11866 /* ParseA.m in Sources */,
 			);

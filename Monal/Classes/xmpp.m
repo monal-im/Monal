@@ -2407,7 +2407,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"proceed"])
                 {
-                    
                     ParseStream* streamNode= [[ParseStream alloc]  initWithDictionary:stanzaToParse];
                     //perform logic to handle proceed
                     if(!streamNode.error)
@@ -2415,8 +2414,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         if(streamNode.startTLSProceed)
                         {
                             NSMutableDictionary *settings = [ [NSMutableDictionary alloc ] init];
-
-                            
+ 
                             if(self->_brokenServerSSL)
                             {
                                 DDLogInfo(@"recovering from broken SSL implemtation limit to ss3-tl1");
@@ -2450,11 +2448,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             {
                                 DDLogError(@"not sure.. Could not confirm Set TLS properties on streams.");
                                 DDLogInfo(@"Set TLS properties on streams.security level %@", [self->_iStream propertyForKey:NSStreamSocketSecurityLevelKey]);
-                                
-                                //                        NSDictionary* info2=@{kaccountNameKey:_fulluser, kaccountNoKey:_accountNo,
-                                //                                              kinfoTypeKey:@"connect", kinfoStatusKey:@"Could not secure connection"};
-                                //                        [self.contactsVC updateConnecting:info2];
-                                
                             }
                             
                             [self startStream];

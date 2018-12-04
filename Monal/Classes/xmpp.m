@@ -240,26 +240,18 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     DDLogInfo(@"stream  creating to  server: %@ port: %d", _server, (UInt32)_port);
     
-    if([NSStream respondsToSelector:@selector(getStreamsToHostWithName: port: inputStream: outputStream:)]) {
-        NSInputStream *localIStream;
-        NSOutputStream *localOStream;
-        
-        [NSStream getStreamsToHostWithName:self.server port:self.port inputStream:&localIStream outputStream:&localOStream];
-        if(localIStream) {
-            _iStream=localIStream;
-        }
-        
-        if(localOStream) {
-            _oStream = localOStream;
-        }
+    NSInputStream *localIStream;
+    NSOutputStream *localOStream;
+    
+    [NSStream getStreamsToHostWithName:self.server port:self.port inputStream:&localIStream outputStream:&localOStream];
+    if(localIStream) {
+        _iStream=localIStream;
     }
-    else  {
-        CFReadStreamRef readRef= NULL;
-        CFWriteStreamRef writeRef= NULL;
-        CFStreamCreatePairWithSocketToHost(NULL, (__bridge CFStringRef)_server, (UInt32)_port , &readRef, &writeRef);
-        _iStream= (__bridge_transfer NSInputStream *)readRef;
-        _oStream= (__bridge_transfer NSOutputStream *) writeRef;
+    
+    if(localOStream) {
+        _oStream = localOStream;
     }
+    
     
     if((_iStream==nil) || (_oStream==nil))
     {
@@ -2423,10 +2415,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     {
                         if(streamNode.startTLSProceed)
                         {
-                            NSMutableDictionary *settings = [ [NSMutableDictionary alloc ]
-                                                             initWithObjectsAndKeys:
-                                                             [NSNull null],kCFStreamSSLPeerName,
-                                                             nil ];
+                            NSMutableDictionary *settings = [ [NSMutableDictionary alloc ] init];
+//                                                             initWithObjectsAndKeys:
+//                                                             [NSNull null],kCFStreamSSLPeerName,
+//                                                             nil ];
                             
                             if(self->_brokenServerSSL)
                             {
@@ -3579,6 +3571,10 @@ if(!self.supportsSM3)
             DDLogError(@"Stream error code=%ld domain=%@   local desc:%@ ",(long)st_error.code,st_error.domain,  st_error.localizedDescription);
             
             NSString *message =st_error.localizedDescription;
+            
+            SecTrustRef trust = (__bridge SecTrustRef)[_iStream propertyForKey:kCFStreamPropertySSLPeerTrust];
+          
+            SecCertificateRef cert=SecTrustGetCertificateAtIndex( trust,  0);
             
             switch(st_error.code)
             {

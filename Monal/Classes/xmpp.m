@@ -289,9 +289,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         {
             NSDictionary* secureOFF= [ [NSDictionary alloc ]
                                       initWithObjectsAndKeys:
-                                      [NSNumber numberWithBool:YES], kCFStreamSSLAllowsExpiredCertificates,
-                                      [NSNumber numberWithBool:YES], kCFStreamSSLAllowsExpiredRoots,
-                                      [NSNumber numberWithBool:YES], kCFStreamSSLAllowsAnyRoot,
                                       [NSNumber numberWithBool:NO], kCFStreamSSLValidatesCertificateChain, nil];
             
             [settings addEntriesFromDictionary:secureOFF];
@@ -2445,9 +2442,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             {
                                 NSDictionary* secureOFF= [ [NSDictionary alloc ]
                                                           initWithObjectsAndKeys:
-                                                          [NSNumber numberWithBool:YES], kCFStreamSSLAllowsExpiredCertificates,
-                                                          [NSNumber numberWithBool:YES], kCFStreamSSLAllowsExpiredRoots,
-                                                          [NSNumber numberWithBool:YES], kCFStreamSSLAllowsAnyRoot,
                                                           [NSNumber numberWithBool:NO], kCFStreamSSLValidatesCertificateChain, nil];
                                 
                                 [settings addEntriesFromDictionary:secureOFF];

@@ -7,6 +7,7 @@
 //
 
 #import "MLDNSLookup.h"
+@import Darwin.POSIX.sys.time; 
 
 @interface MLDNSLookup()
 

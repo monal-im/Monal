@@ -52,7 +52,6 @@
 #include <openssl/evp.h>
 #include <openssl/rand.h>
 
-@import Darwin.POSIX.sys.time; 
 
 #define kXMPPReadSize 5120 // bytes
 

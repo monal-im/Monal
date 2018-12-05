@@ -3553,10 +3553,10 @@ if(!self.supportsSM3)
             
             NSString *message =st_error.localizedDescription;
             
-            SecTrustRef trust = (__bridge SecTrustRef)[_iStream propertyForKey:kCFStreamPropertySSLPeerTrust];
-          
-            SecCertificateRef cert=SecTrustGetCertificateAtIndex( trust,  0);
-            
+//            SecTrustRef trust = (__bridge SecTrustRef)[_iStream propertyForKey:kCFStreamPropertySSLPeerTrust];
+//
+//            SecCertificateRef cert=SecTrustGetCertificateAtIndex( trust,  0);
+
             switch(st_error.code)
             {
                 case errSSLXCertChainInvalid: {

@@ -535,6 +535,19 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }];
 }
 
+-(void) resetValues
+{
+    _startTLSComplete=NO;
+    _streamHasSpace=NO;
+    _loginStarted=NO;
+    _loginStartTimeStamp=nil;
+    _loginError=NO;
+    _accountState=kStateDisconnected;
+    _reconnectScheduled =NO;
+    
+    self.httpUploadQueue =nil;
+}
+
 -(void) cleanUpState
 {
     if(self.explicitLogout)
@@ -550,15 +563,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountStatusChanged object:nil];
     
     DDLogInfo(@"Connections closed");
-    _startTLSComplete=NO;
-    _streamHasSpace=NO;
-    _loginStarted=NO;
-    _loginStartTimeStamp=nil;
-    _loginError=NO;
-    _accountState=kStateDisconnected;
-    _reconnectScheduled =NO;
-    
-    self.httpUploadQueue =nil;
+
+    [self resetValues];
     
     DDLogInfo(@"All closed and cleaned up");
     
@@ -3003,13 +3009,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     [self closeSocket]; // just closing socket to simulate a unintentional disconnect
     [self.networkQueue addOperationWithBlock:^{
-        [self cleanUpState];
+        [self resetValues];
         if(completion) completion();
     }];
 }
 
 -(void) queryDisco
-
 {
     if(self.discoveredServices) return;
     

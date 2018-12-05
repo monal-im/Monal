@@ -276,7 +276,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                          kCFStreamSSLLevel,
                                          nil ];
         
-         [settings setObject:self->_domain forKey:kCFStreamSSLPeerName];
         
         if(self.selfSigned)
         {

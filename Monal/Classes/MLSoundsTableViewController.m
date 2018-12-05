@@ -24,18 +24,18 @@
     [super viewDidLoad];
     self.title=@"Sounds";
     
-    self.soundList = @[@"Alert 1",
-                       @"Alert 2",
-                       @"Alert 3",
-                       @"Alert 4",
-                       @"Alert 5",
-                       @"Alert 6",
-                       @"Alert 7",
-                       @"Alert 8",
-                       @"Alert 9",
-                       @"Alert 10",
-                       @"Alert 11",
-                       @"Alert 12",
+    self.soundList = @[@"Morse",
+                       @"Xylophone",
+                       @"Bloop",
+                       @"Bing",
+                       @"Pipa",
+                       @"Water",
+                       @"Forest",
+                       @"Echo",
+                       @"Area 51",
+                       @"Wood",
+                       @"Chirp",
+                       @"Sonar",
                        ];
     
 }
@@ -61,7 +61,7 @@
 -(NSString *) tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
     if(section==1){
-        return @"Select sounds that are played with new message notificaitons. Default is Alert 2.";
+        return @"Select sounds that are played with new message notificaitons. Default is Xylophone.";
     } else return nil;
 }
 

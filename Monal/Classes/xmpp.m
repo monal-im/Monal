@@ -276,6 +276,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                          kCFStreamSSLLevel,
                                          nil ];
         
+         [settings setObject:self->_domain forKey:kCFStreamSSLPeerName];
+        
         if(self.selfSigned)
         {
             NSDictionary* secureOFF= [ [NSDictionary alloc ]
@@ -2407,7 +2409,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     {
                         if(streamNode.startTLSProceed)
                         {
-                            NSMutableDictionary *settings = [ [NSMutableDictionary alloc ] init];
+                            NSMutableDictionary *settings = [[NSMutableDictionary alloc] init];
+                            [settings setObject:self->_domain forKey:kCFStreamSSLPeerName];
  
                             if(self->_brokenServerSSL)
                             {
@@ -2421,12 +2424,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             
                             if(self.selfSigned)
                             {
-                                NSDictionary* secureOFF= [ [NSDictionary alloc ]
-                                                          initWithObjectsAndKeys:
-                                                          [NSNumber numberWithBool:NO], kCFStreamSSLValidatesCertificateChain, nil];
-                                
-                                [settings addEntriesFromDictionary:secureOFF];
-                                
+                                [settings  setObject:@NO forKey:kCFStreamSSLValidatesCertificateChain];
                             }
                             
                             if (CFReadStreamSetProperty((__bridge CFReadStreamRef)self->_iStream,

@@ -41,7 +41,8 @@
             NSString *body = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
             
             dispatch_async(dispatch_get_main_queue(), ^{
-                self.previewText.stringValue=[MLMetaInfo ogContentWithTag:@"og:title" inHTML:body] ;
+                NSString *preview = [MLMetaInfo ogContentWithTag:@"og:title" inHTML:body];
+                self.previewText.stringValue=preview!=nil?preview:@"";
                 self.imageUrl=[[MLMetaInfo ogContentWithTag:@"og:image" inHTML:body] stringByRemovingPercentEncoding];
                 [self loadImage:self.imageUrl WithCompletion:^{
                     if(completion) completion();

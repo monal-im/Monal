@@ -1716,7 +1716,7 @@ Gw
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" selectionHighlightStyle="none" columnReordering="NO" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" typeSelect="NO" rowHeight="235" rowSizeStyle="automatic" viewBased="YES" id="Rsm-HI-GDG">
-                                            <rect key="frame" x="0.0" y="0.0" width="493" height="1128"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="493" height="1101"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <size key="intercellSpacing" width="3" height="2"/>
                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -1812,7 +1812,7 @@ Gw
                                                                 <customView translatesAutoresizingMaskIntoConstraints="NO" id="WHN-5N-bic">
                                                                     <rect key="frame" x="226" y="10" width="256" height="200"/>
                                                                     <subviews>
-                                                                        <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="oAZ-Gv-fGN" customClass="MLImageView">
+                                                                        <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="oAZ-Gv-fGN">
                                                                             <rect key="frame" x="0.0" y="72" width="256" height="128"/>
                                                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                             <imageCell key="cell" refusesFirstResponder="YES" alignment="left" animates="YES" imageScaling="proportionallyUpOrDown" id="Ybi-V2-06Y">
@@ -1904,7 +1904,7 @@ Gw
                                                                 <customView translatesAutoresizingMaskIntoConstraints="NO" id="Ziv-yy-7Hq">
                                                                     <rect key="frame" x="51" y="10" width="256" height="200"/>
                                                                     <subviews>
-                                                                        <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="1KI-jN-5Y1" customClass="MLImageView">
+                                                                        <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="1KI-jN-5Y1">
                                                                             <rect key="frame" x="0.0" y="72" width="256" height="128"/>
                                                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                             <imageCell key="cell" refusesFirstResponder="YES" alignment="left" animates="YES" imageScaling="proportionallyUpOrDown" id="Je3-eF-her">
@@ -2389,7 +2389,7 @@ Gw
                                     <rect key="frame" x="1" y="119" width="223" height="15"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
-                                <scroller key="verticalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" doubleValue="0.48103792415169661" horizontal="NO" id="dZI-45-ZRw">
+                                <scroller key="verticalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="NO" id="dZI-45-ZRw">
                                     <rect key="frame" x="224" y="17" width="15" height="102"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>

@@ -162,8 +162,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     [self synchChat];
     
+#ifndef DISABLE_OMEMO
     xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
     [xmppAccount queryOMEMODevicesFrom:self.contactName];
+#endif
 }
 
 #pragma mark - MAM

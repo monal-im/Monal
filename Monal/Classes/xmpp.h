@@ -203,9 +203,10 @@ Decline a call request
  */
 -(void) getVCard:(NSString *) user;
 
-
+#ifndef DISABLE_OMEMO
 /** OMEMO */
 -(void) queryOMEMODevicesFrom:(NSString *) jid;
+#endif
 
 FOUNDATION_EXPORT NSString *const kFileName;
 FOUNDATION_EXPORT NSString *const kContentType;

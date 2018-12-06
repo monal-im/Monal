@@ -318,7 +318,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 [self endProgressUpdate];
                 if(url) {
                     self.messageBox.string= url;
-                    [self sendText:self];
+                    [self sendTextWithUpload:YES];
                 }
                 else  {
                     NSAlert *userAddAlert = [[NSAlert alloc] init];
@@ -616,12 +616,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                    });
 }
 
--(void) sendMessage:(NSString *) messageText andMessageID:(NSString *)messageID
+-(void) sendMessage:(NSString *) messageText andMessageID:(NSString *)messageID isUpload:(BOOL) isUpload
 {
     DDLogVerbose(@"Sending message %@", messageText);
     NSString *newMessageID =[[NSUUID UUID] UUIDString];
     [self.progressIndicator incrementBy:25];
-    [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:self.contactName fromAccount:self.accountNo isEncrypted:self.encryptChat isMUC:self.isMUC isUpload:NO messageId:newMessageID
+    [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:self.contactName fromAccount:self.accountNo isEncrypted:self.encryptChat isMUC:self.isMUC isUpload:isUpload messageId:newMessageID
      withCompletionHandler:^(BOOL success, NSString *messageId) {
          if(success)
          {
@@ -644,20 +644,26 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(IBAction)sendText:(id)sender
 {
+    [self sendTextWithUpload:NO];
+}
 
+-(IBAction)sendTextWithUpload:(BOOL) isUpload;
+{
+    
     self.progressIndicator.doubleValue=0;
     self.progressIndicator.hidden=NO;
+    __block BOOL upload =  isUpload;
     
     [self.messageBox.textStorage enumerateAttribute:NSAttachmentAttributeName
-                            inRange:NSMakeRange(0, self.messageBox.textStorage.length)
-                            options:0
-                         usingBlock:^(id value, NSRange range, BOOL *stop)
+                                            inRange:NSMakeRange(0, self.messageBox.textStorage.length)
+                                            options:0
+                                         usingBlock:^(id value, NSRange range, BOOL *stop)
      {
          NSTextAttachment* attachment = (NSTextAttachment*)value;
          NSData* attachmentData = attachment.fileWrapper.regularFileContents;
          
          NSString *filename = attachment.fileWrapper.preferredFilename;
-        
+         
          NSString *ext = [filename componentsSeparatedByString:@"."].lastObject;
          
          CFStringRef UTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (__bridge CFStringRef)ext, NULL);
@@ -667,47 +673,48 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
          if(attachmentData)
          {
              [self uploadFile:filename andType:mimeType withData:attachmentData];
+             upload=YES;
          }
-        
+         
      }];
     
     __block NSMutableString *message= [self.messageBox.string mutableCopy];
     [message replaceOccurrencesOfString:@"\U0000fffc" withString:@"" options:NSLiteralSearch range:NSMakeRange(0, message.length)];
     
     NSAttributedString *messageAttributedString = self.messageBox.attributedString;
-   
- [messageAttributedString enumerateAttribute:NSLinkAttributeName inRange:NSMakeRange(0, messageAttributedString.length) options:0 usingBlock:^(id  _Nullable value, NSRange range, BOOL * _Nonnull stop) {
-     if(value)
-     {
-         if(range.length == message.length)
-         {
-             message=[NSMutableString stringWithString:@""];
-         } else  {
-             [message appendString:@" "];
-         }
-         
-         NSString *valuetoAppend ;
-         if([value isKindOfClass:[NSString class]])
-         {
-             valuetoAppend= value;
-         }
-         else if([value isKindOfClass:[NSURL class]])
-         {
-             valuetoAppend = [value absoluteString];
-         }
-         else  {
-             DDLogWarn(@"non string or url in attributed text");
-         }
-         
-         if(valuetoAppend) {
-         [message appendString:valuetoAppend];
-         }
-     }
- }];
+    
+    [messageAttributedString enumerateAttribute:NSLinkAttributeName inRange:NSMakeRange(0, messageAttributedString.length) options:0 usingBlock:^(id  _Nullable value, NSRange range, BOOL * _Nonnull stop) {
+        if(value)
+        {
+            if(range.length == message.length)
+            {
+                message=[NSMutableString stringWithString:@""];
+            } else  {
+                [message appendString:@" "];
+            }
+            
+            NSString *valuetoAppend ;
+            if([value isKindOfClass:[NSString class]])
+            {
+                valuetoAppend= value;
+            }
+            else if([value isKindOfClass:[NSURL class]])
+            {
+                valuetoAppend = [value absoluteString];
+            }
+            else  {
+                DDLogWarn(@"non string or url in attributed text");
+            }
+            
+            if(valuetoAppend) {
+                [message appendString:valuetoAppend];
+            }
+        }
+    }];
     
     
     if(message.length>0) {
-        [self sendMessage:message andMessageID:nil];
+        [self sendMessage:message andMessageID:nil isUpload:upload];
     }
     self.messageBox.string=@"";
     self.messageBox.backgroundColor=[NSColor textBackgroundColor];
@@ -735,7 +742,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             NSArray *messageArray =[[DataLayer sharedInstance] messageForHistoryID:historyId];
             if([messageArray count]>0) {
                 NSDictionary *dic= [messageArray objectAtIndex:0];
-                [self sendMessage:[dic objectForKey:@"message"] andMessageID:[dic objectForKey:@"messageid"]];
+                [self sendMessage:[dic objectForKey:@"message"] andMessageID:[dic objectForKey:@"messageid"] isUpload:NO];
             }
             
         }

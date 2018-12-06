@@ -34,7 +34,7 @@
 
 -(IBAction)deliveryFailedMessage:(id)sender;
 
--(void) sendMessage:(NSString *) messageText andMessageID:(NSString *)messageID;
+-(void) sendMessage:(NSString *) messageText andMessageID:(NSString *)messageID isUpload:(BOOL) isUpload;
 
 -(void) showConversationForContact:(NSDictionary *)contact;
 

@@ -2794,8 +2794,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     else  {
 #endif
-        
-        [messageNode setBody:message];
+        if(isUpload){
+            [messageNode setOobUrl:message];
+        } else  {
+            [messageNode setBody:message];
+        }
         
 #ifndef DISABLE_OMEMO
     }

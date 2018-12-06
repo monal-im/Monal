@@ -1861,6 +1861,7 @@ Gw
                                                             <accessibility description="Image Sent"/>
                                                             <connections>
                                                                 <outlet property="attachmentImage" destination="oAZ-Gv-fGN" id="7eP-Fm-uNR"/>
+                                                                <outlet property="bubbleView" destination="WHN-5N-bic" id="dc6-T2-Vlr"/>
                                                                 <outlet property="lockImage" destination="JtI-1g-0hb" id="Net-RR-Yp1"/>
                                                                 <outlet property="messageStatus" destination="lZz-hu-Ueu" id="7Zy-Ni-298"/>
                                                                 <outlet property="retry" destination="eWX-2K-WOn" id="AoG-Jq-Y0n"/>
@@ -2970,6 +2971,18 @@ Gw
                 <customObject id="0kp-iY-dhW" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-182.5" y="-806"/>
+        </scene>
+        <!--View Controller-->
+        <scene sceneID="Ilu-g4-RnU">
+            <objects>
+                <viewController id="Hed-R7-Bhq" sceneMemberID="viewController">
+                    <view key="view" id="OEB-Xu-HLq">
+                        <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </view>
+                </viewController>
+                <customObject id="FT7-5Z-aVt" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
         </scene>
     </scenes>
     <resources>

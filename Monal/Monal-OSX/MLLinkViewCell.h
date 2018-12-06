@@ -15,6 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 //use messagetext
 //use previewImage
 @property (nonatomic, strong) NSString *imageUrl;
+@property (nonatomic, weak) IBOutlet NSView *bubbleView;
 
 -(void) loadPreviewWithCompletion:(void (^)(void))completion;
 

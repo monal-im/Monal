@@ -862,9 +862,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         cell.attachmentImage.image=nil;
         cell.attachmentImage.canDrawSubviewsIntoLayer=YES;
         linkCell.link=messageString;
-        [linkCell loadPreviewWithCompletion:^{
-            
-        }];
+//        [linkCell loadPreviewWithCompletion:^{
+//            
+//        }];
         
         cell=linkCell;
     }
@@ -966,6 +966,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     if([messageType isEqualToString:kMessageTypeImage])
     {
         return 230;
+    }
+    if([messageType isEqualToString:kMessageTypeUrl])
+    {
+        return 216;
     }
     else {
         

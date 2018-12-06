@@ -12,6 +12,16 @@
 @implementation MLLinkViewCell
 
 
+- (void)drawRect:(NSRect)dirtyRect {
+    [super drawRect:dirtyRect];
+    
+    self.bubbleView.wantsLayer=YES;
+    self.bubbleView.layer.cornerRadius=16.0f;
+    self.bubbleView.layer.backgroundColor = [NSColor colorWithRed:218/255.0 green:219/255. blue:222/255.0 alpha:1.0].CGColor;
+    
+}
+
+
 -(void) loadPreviewWithCompletion:(void (^)(void))completion
 {
     self.messageText.string=@"";

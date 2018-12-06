@@ -256,7 +256,8 @@
         
     }
     else  {
-        [[MLXMPPManager sharedInstance].contactVC highlightCellForCurrentContact];
+        [[MLXMPPManager sharedInstance].contactVC toggleActiveChatTab];
+        [[MLXMPPManager sharedInstance].contactVC showConversationForContact:notification.userInfo];
         [self showWindow:self];
     }
 }

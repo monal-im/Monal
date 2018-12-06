@@ -375,15 +375,27 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 
 -(void) highlightCellForCurrentContact
 {
+    if(self.currentSegment ==kActiveTab)
+    {
+        [self.activeChat enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop)
+         {
+             NSDictionary *row = (NSDictionary *) obj;
+             if([[row objectForKey:kContactName] caseInsensitiveCompare:[self.chatViewController.contactDic objectForKey:kContactName] ]==NSOrderedSame &&
+                [[row objectForKey:kAccountID]  integerValue]==[[self.chatViewController.contactDic objectForKey:kAccountID] integerValue] )
+             {
+                 NSIndexSet *indexSet = [NSIndexSet indexSetWithIndex:idx];
+                 [self.contactsTable selectRowIndexes:indexSet byExtendingSelection:NO];
+                 *stop=YES;
+             }
+         }];
+        return;
+    }
+    
     if(self.chatViewController.contactDic)
     {
         NSInteger offset=0;
        
-        if(self.currentSegment!=kActiveTab)
-        {
-            offset=1;//0 was root node and there are groups
-        }
-
+        offset=1;//0 was root node and there are groups
         
         NSInteger group=0;
         while(group < [self.contactsTable numberOfChildrenOfItem:0])
@@ -453,7 +465,6 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
         }
         counter++;
     }
-    
     
     
     if(pos>=0)

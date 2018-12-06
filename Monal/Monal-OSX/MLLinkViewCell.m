@@ -54,7 +54,19 @@
 
 -(void) openlink: (id) sender
 {
-        //launchbrowser
+     [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:self.link]];
+}
+
+- (void)mouseDown:(NSEvent *)theEvent
+{
+    if (theEvent.type != NSLeftMouseDown) {
+        [super mouseDown:theEvent];
+    }
+}
+
+
+- (void)mouseUp:(NSEvent *)theEvent {
+    [self openlink:self];
 }
 
 @end

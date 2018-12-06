@@ -80,8 +80,6 @@ extern NSString *const kMessageTypeUrl;
  called when an account goes offline. removes all of its contacts state info
  */
 -(BOOL) resetContactsForAccount:(NSString*) accountNo;
--(BOOL) resetContacts;
-
 
 -(NSArray*) searchContactsWithString:(NSString*) search;
 

@@ -871,24 +871,6 @@ static DataLayer *sharedInstance=nil;
 
 #pragma mark Buddy Property commands
 
--(BOOL) resetContacts
-{
-    NSString* query2=[NSString stringWithFormat:@"delete from  buddy_resources ;   "];
-    [self executeNonQuery:query2 andArguments:nil];
-    
-    
-    NSString* query=[NSString stringWithFormat:@"update buddylist set dirty=0, new=0, online=0, state='offline', status='';   "];
-    if([self executeNonQuery:query andArguments:nil]!=NO)
-    {
-        return YES;
-    }
-    else
-    {
-        return NO;
-    }
-    
-}
-
 -(BOOL) resetContactsForAccount:(NSString*) accountNo
 {
     NSString* query2=[NSString stringWithFormat:@"delete from  buddy_resources  where buddy_id in (select buddy_id from  buddylist where account_id=?)"];

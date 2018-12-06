@@ -28,6 +28,7 @@
     self.imageUrl=@"";
     
     if(self.link) {
+        self.website.stringValue=self.link;
         /**
          <meta property="og:title" content="Nintendo recommits to “keep the business going” for 3DS">
          <meta property="og:image" content="https://cdn.arstechnica.net/wp-content/uploads/2016/09/3DS_SuperMarioMakerforNintendo3DS_char_01-760x380.jpg">
@@ -40,9 +41,9 @@
             NSString *body = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
             
             dispatch_async(dispatch_get_main_queue(), ^{
-                self.messageText.string=[MLMetaInfo ogContentWithTag:@"og:title" inHTML:body] ;
+                self.previewText.stringValue=[MLMetaInfo ogContentWithTag:@"og:title" inHTML:body] ;
                 self.imageUrl=[[MLMetaInfo ogContentWithTag:@"og:image" inHTML:body] stringByRemovingPercentEncoding];
-                [self loadImageWithCompletion:^{
+                [self loadImage:self.imageUrl WithCompletion:^{
                     if(completion) completion();
                 }];
             });

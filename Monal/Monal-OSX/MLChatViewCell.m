@@ -28,9 +28,9 @@
     
 }
 
--(void) loadImageWithCompletion:(void (^)(void))completion
+-(void) loadImage:(NSString *) link WithCompletion:(void (^)(void))completion
 {
-    NSMutableURLRequest *imageRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:self.link]];
+    NSMutableURLRequest *imageRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:link]];
     imageRequest.cachePolicy= NSURLRequestReturnCacheDataElseLoad;
     [[[NSURLSession sharedSession] dataTaskWithRequest:imageRequest completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
         self.imageData= data;

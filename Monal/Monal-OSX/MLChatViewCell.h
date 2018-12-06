@@ -46,6 +46,6 @@
 + (NSRect) sizeWithMessage:(NSString *)messageString;
 
 -(void) updateDisplay;
--(void) loadImageWithCompletion:(void (^)(void))completion;
+-(void) loadImage:(NSString *) link WithCompletion:(void (^)(void))completion;
 
 @end

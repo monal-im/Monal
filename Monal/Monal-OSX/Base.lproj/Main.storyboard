@@ -1716,7 +1716,7 @@ Gw
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" selectionHighlightStyle="none" columnReordering="NO" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" typeSelect="NO" rowHeight="230" rowSizeStyle="automatic" viewBased="YES" id="Rsm-HI-GDG">
-                                            <rect key="frame" x="0.0" y="0.0" width="493" height="845"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="493" height="864"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <size key="intercellSpacing" width="3" height="2"/>
                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -1776,33 +1776,9 @@ Gw
                                                             </connections>
                                                         </tableCellView>
                                                         <tableCellView identifier="OutboundLinkCell" misplaced="YES" id="V6K-oX-nA9" userLabel="Chat View out Link Cell" customClass="MLLinkViewCell">
-                                                            <rect key="frame" x="1" y="48" width="490" height="216"/>
+                                                            <rect key="frame" x="1" y="48" width="490" height="235"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
-                                                                <customView translatesAutoresizingMaskIntoConstraints="NO" id="WHN-5N-bic">
-                                                                    <rect key="frame" x="226" y="-66" width="256" height="200"/>
-                                                                    <subviews>
-                                                                        <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="oAZ-Gv-fGN" customClass="MLImageView">
-                                                                            <rect key="frame" x="0.0" y="72" width="256" height="128"/>
-                                                                            <constraints>
-                                                                                <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="256" id="AqH-wi-OWn"/>
-                                                                                <constraint firstAttribute="height" constant="128" id="Y1v-3t-wk1"/>
-                                                                            </constraints>
-                                                                            <imageCell key="cell" refusesFirstResponder="YES" alignment="left" animates="YES" imageScaling="proportionallyUpOrDown" id="Ybi-V2-06Y">
-                                                                                <accessibility description="Picture Sent"/>
-                                                                            </imageCell>
-                                                                            <connections>
-                                                                                <outlet property="previewTarget" destination="qLp-oS-WKI" id="JE5-sq-0N5"/>
-                                                                            </connections>
-                                                                        </imageView>
-                                                                    </subviews>
-                                                                    <constraints>
-                                                                        <constraint firstItem="oAZ-Gv-fGN" firstAttribute="top" secondItem="WHN-5N-bic" secondAttribute="top" id="1Iv-d7-mAN"/>
-                                                                        <constraint firstAttribute="height" constant="200" id="cad-M8-otj"/>
-                                                                        <constraint firstAttribute="width" constant="256" id="pW1-XU-MtD"/>
-                                                                        <constraint firstItem="oAZ-Gv-fGN" firstAttribute="leading" secondItem="WHN-5N-bic" secondAttribute="leading" id="vhX-GR-UbH"/>
-                                                                    </constraints>
-                                                                </customView>
                                                                 <textField hidden="YES" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="lZz-hu-Ueu">
                                                                     <rect key="frame" x="21" y="0.0" width="54" height="28"/>
                                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Delivered" id="dhG-mN-mjs">
@@ -1825,10 +1801,11 @@ Gw
                                                                         <action selector="deliveryFailedMessage:" target="qLp-oS-WKI" id="UwW-dr-VUD"/>
                                                                     </connections>
                                                                 </button>
-                                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="bHl-c6-D8I">
-                                                                    <rect key="frame" x="366" y="123" width="104" height="14"/>
+                                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" misplaced="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="bHl-c6-D8I">
+                                                                    <rect key="frame" x="193" y="218" width="104" height="14"/>
                                                                     <constraints>
                                                                         <constraint firstAttribute="width" constant="100" id="YcB-ih-DGn"/>
+                                                                        <constraint firstAttribute="height" constant="14" id="haM-zP-rMr"/>
                                                                     </constraints>
                                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" placeholderString="Divider" id="PcH-nL-K6o">
                                                                         <font key="font" metaFont="smallSystem"/>
@@ -1843,20 +1820,69 @@ Gw
                                                                     </constraints>
                                                                     <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="744-locked-selected" id="LZl-qS-0oc"/>
                                                                 </imageView>
+                                                                <customView translatesAutoresizingMaskIntoConstraints="NO" id="WHN-5N-bic">
+                                                                    <rect key="frame" x="226" y="-148" width="256" height="200"/>
+                                                                    <subviews>
+                                                                        <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="oAZ-Gv-fGN" customClass="MLImageView">
+                                                                            <rect key="frame" x="0.0" y="72" width="256" height="128"/>
+                                                                            <constraints>
+                                                                                <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="256" id="AqH-wi-OWn"/>
+                                                                                <constraint firstAttribute="height" constant="128" id="Y1v-3t-wk1"/>
+                                                                            </constraints>
+                                                                            <imageCell key="cell" refusesFirstResponder="YES" alignment="left" animates="YES" imageScaling="proportionallyUpOrDown" id="Ybi-V2-06Y">
+                                                                                <accessibility description="Picture Sent"/>
+                                                                            </imageCell>
+                                                                            <connections>
+                                                                                <outlet property="previewTarget" destination="qLp-oS-WKI" id="JE5-sq-0N5"/>
+                                                                            </connections>
+                                                                        </imageView>
+                                                                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="B5t-aW-ecj">
+                                                                            <rect key="frame" x="6" y="30" width="244" height="34"/>
+                                                                            <textFieldCell key="cell" title="This is some text for a preview here that is typically two lines" id="MzG-pC-UFN">
+                                                                                <font key="font" metaFont="system"/>
+                                                                                <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                                                <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                                                            </textFieldCell>
+                                                                        </textField>
+                                                                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="jEi-yw-u8M">
+                                                                            <rect key="frame" x="6" y="8" width="244" height="17"/>
+                                                                            <textFieldCell key="cell" title="something.com" id="zc1-Mw-zd6">
+                                                                                <font key="font" metaFont="system"/>
+                                                                                <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                                                <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                                                            </textFieldCell>
+                                                                        </textField>
+                                                                    </subviews>
+                                                                    <constraints>
+                                                                        <constraint firstItem="oAZ-Gv-fGN" firstAttribute="top" secondItem="WHN-5N-bic" secondAttribute="top" id="1Iv-d7-mAN"/>
+                                                                        <constraint firstItem="B5t-aW-ecj" firstAttribute="leading" secondItem="WHN-5N-bic" secondAttribute="leading" constant="8" id="7Zr-6N-VeZ"/>
+                                                                        <constraint firstAttribute="trailing" secondItem="jEi-yw-u8M" secondAttribute="trailing" constant="8" id="9Ii-k0-2bM"/>
+                                                                        <constraint firstItem="B5t-aW-ecj" firstAttribute="top" secondItem="oAZ-Gv-fGN" secondAttribute="bottom" constant="8" id="Dmb-cC-0oU"/>
+                                                                        <constraint firstAttribute="trailing" secondItem="B5t-aW-ecj" secondAttribute="trailing" constant="8" id="JS3-QC-Ien"/>
+                                                                        <constraint firstItem="jEi-yw-u8M" firstAttribute="leading" secondItem="WHN-5N-bic" secondAttribute="leading" constant="8" id="R3a-vR-MZM"/>
+                                                                        <constraint firstItem="oAZ-Gv-fGN" firstAttribute="leading" secondItem="WHN-5N-bic" secondAttribute="leading" id="TJj-eL-XUA"/>
+                                                                        <constraint firstAttribute="height" constant="200" id="cad-M8-otj"/>
+                                                                        <constraint firstAttribute="trailing" secondItem="oAZ-Gv-fGN" secondAttribute="trailing" id="f6D-iw-BfM"/>
+                                                                        <constraint firstItem="oAZ-Gv-fGN" firstAttribute="top" secondItem="WHN-5N-bic" secondAttribute="top" id="jdw-ef-Hli"/>
+                                                                        <constraint firstAttribute="width" constant="256" id="pW1-XU-MtD"/>
+                                                                        <constraint firstItem="jEi-yw-u8M" firstAttribute="top" secondItem="B5t-aW-ecj" secondAttribute="bottom" constant="5" id="spB-U0-DuD"/>
+                                                                        <constraint firstItem="oAZ-Gv-fGN" firstAttribute="leading" secondItem="WHN-5N-bic" secondAttribute="leading" id="vhX-GR-UbH"/>
+                                                                    </constraints>
+                                                                </customView>
                                                             </subviews>
                                                             <constraints>
                                                                 <constraint firstItem="eWX-2K-WOn" firstAttribute="top" secondItem="V6K-oX-nA9" secondAttribute="top" constant="68" id="073-aV-2dr"/>
                                                                 <constraint firstItem="eWX-2K-WOn" firstAttribute="leading" secondItem="V6K-oX-nA9" secondAttribute="leading" constant="50" id="738-zn-Eot"/>
                                                                 <constraint firstItem="lZz-hu-Ueu" firstAttribute="top" secondItem="eWX-2K-WOn" secondAttribute="bottom" constant="25" id="9F9-SD-AjV"/>
                                                                 <constraint firstAttribute="trailing" secondItem="WHN-5N-bic" secondAttribute="trailing" constant="8" id="AMP-BD-AUK"/>
+                                                                <constraint firstItem="bHl-c6-D8I" firstAttribute="centerX" secondItem="V6K-oX-nA9" secondAttribute="centerX" id="DWn-5K-o3y"/>
                                                                 <constraint firstItem="JtI-1g-0hb" firstAttribute="leading" secondItem="V6K-oX-nA9" secondAttribute="leading" constant="-3" id="OtW-9Y-zEI"/>
                                                                 <constraint firstItem="JtI-1g-0hb" firstAttribute="bottom" secondItem="lZz-hu-Ueu" secondAttribute="bottom" id="Qdg-0y-sOT"/>
-                                                                <constraint firstItem="bHl-c6-D8I" firstAttribute="top" secondItem="V6K-oX-nA9" secondAttribute="top" constant="5" id="cLF-R0-XdN"/>
+                                                                <constraint firstItem="WHN-5N-bic" firstAttribute="top" secondItem="bHl-c6-D8I" secondAttribute="bottom" constant="71" id="akq-W2-zwV"/>
                                                                 <constraint firstItem="lZz-hu-Ueu" firstAttribute="leading" secondItem="JtI-1g-0hb" secondAttribute="trailing" constant="8" symbolic="YES" id="elQ-ru-642"/>
                                                                 <constraint firstItem="JtI-1g-0hb" firstAttribute="top" secondItem="lZz-hu-Ueu" secondAttribute="top" id="geo-Fq-ae4"/>
-                                                                <constraint firstItem="WHN-5N-bic" firstAttribute="top" secondItem="V6K-oX-nA9" secondAttribute="top" constant="8" id="hyM-i5-fxG"/>
-                                                                <constraint firstAttribute="trailing" secondItem="bHl-c6-D8I" secondAttribute="trailing" constant="22" id="iWe-hv-xAf"/>
                                                                 <constraint firstAttribute="bottom" secondItem="lZz-hu-Ueu" secondAttribute="bottom" id="oPp-RI-6AF"/>
+                                                                <constraint firstItem="bHl-c6-D8I" firstAttribute="top" secondItem="V6K-oX-nA9" secondAttribute="top" constant="5" id="rio-D3-rDv"/>
                                                             </constraints>
                                                             <accessibility description="Image Sent"/>
                                                             <connections>
@@ -1864,12 +1890,14 @@ Gw
                                                                 <outlet property="bubbleView" destination="WHN-5N-bic" id="dc6-T2-Vlr"/>
                                                                 <outlet property="lockImage" destination="JtI-1g-0hb" id="Net-RR-Yp1"/>
                                                                 <outlet property="messageStatus" destination="lZz-hu-Ueu" id="7Zy-Ni-298"/>
+                                                                <outlet property="previewText" destination="B5t-aW-ecj" id="ziT-AZ-lVF"/>
                                                                 <outlet property="retry" destination="eWX-2K-WOn" id="AoG-Jq-Y0n"/>
                                                                 <outlet property="timeStamp" destination="bHl-c6-D8I" id="Dts-o5-C65"/>
+                                                                <outlet property="website" destination="jEi-yw-u8M" id="Xpi-wv-XaG"/>
                                                             </connections>
                                                         </tableCellView>
                                                         <tableCellView identifier="OutboundTextCell" id="zUs-Dd-GH1" userLabel="Chat View out Cell" customClass="MLChatViewCell">
-                                                            <rect key="frame" x="1" y="266" width="490" height="56"/>
+                                                            <rect key="frame" x="1" y="285" width="490" height="56"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
                                                                 <scrollView borderType="none" horizontalLineScroll="0.0" horizontalPageScroll="0.0" verticalLineScroll="0.0" verticalPageScroll="0.0" hasHorizontalScroller="NO" hasVerticalScroller="NO" usesPredominantAxisScrolling="NO" horizontalScrollElasticity="none" verticalScrollElasticity="none" translatesAutoresizingMaskIntoConstraints="NO" id="c4f-GC-Hfe" customClass="MLDisabledScrollView">
@@ -1985,7 +2013,7 @@ Gw
                                                             </connections>
                                                         </tableCellView>
                                                         <tableCellView identifier="InboundTextCell" id="Rho-ef-n6l" userLabel="Chat View in Cell" customClass="MLChatViewCell">
-                                                            <rect key="frame" x="1" y="324" width="490" height="56"/>
+                                                            <rect key="frame" x="1" y="343" width="490" height="56"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
                                                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="1Jj-Uz-3W8">
@@ -2098,7 +2126,7 @@ Gw
                                                             </connections>
                                                         </tableCellView>
                                                         <tableCellView identifier="InboundImageCell" misplaced="YES" id="cX2-7P-kXI" userLabel="Chat View in image Cell" customClass="MLChatViewCell">
-                                                            <rect key="frame" x="1" y="382" width="490" height="230"/>
+                                                            <rect key="frame" x="1" y="401" width="490" height="230"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
                                                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="eQr-VP-pfh">
@@ -2181,7 +2209,7 @@ Gw
                                                             </connections>
                                                         </tableCellView>
                                                         <tableCellView identifier="OutboundImageCell" id="AA0-Za-mMq" userLabel="Chat View out image Cell" customClass="MLChatViewCell">
-                                                            <rect key="frame" x="1" y="614" width="490" height="230"/>
+                                                            <rect key="frame" x="1" y="633" width="490" height="230"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
                                                                 <textField hidden="YES" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Nco-oq-C1X">
@@ -2971,18 +2999,6 @@ Gw
                 <customObject id="0kp-iY-dhW" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-182.5" y="-806"/>
-        </scene>
-        <!--View Controller-->
-        <scene sceneID="Ilu-g4-RnU">
-            <objects>
-                <viewController id="Hed-R7-Bhq" sceneMemberID="viewController">
-                    <view key="view" id="OEB-Xu-HLq">
-                        <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                    </view>
-                </viewController>
-                <customObject id="FT7-5Z-aVt" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
-            </objects>
         </scene>
     </scenes>
     <resources>

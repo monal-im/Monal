@@ -18,6 +18,7 @@
 #import <DropboxOSX/DropboxOSX.h>
 
 #import "MLMainWindow.h"
+#import "MLLinkViewCell.h"
 
 @import Quartz;
 
@@ -849,6 +850,23 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             
         }];
  
+    }
+    
+    if([messageType isEqualToString:kMessageTypeUrl])
+    {
+        NSString* cellDirectionID = @"InboundLinkCell";
+        if([[messageRow objectForKey:@"af"] isEqualToString:self.jid]) {
+            cellDirectionID=@"OutboundLinkCell";
+        }
+        MLLinkViewCell *linkCell = [tableView makeViewWithIdentifier:cellDirectionID owner:self];
+        cell.attachmentImage.image=nil;
+        cell.attachmentImage.canDrawSubviewsIntoLayer=YES;
+        linkCell.link=messageString;
+        [linkCell loadPreviewWithCompletion:^{
+            
+        }];
+        
+        cell=linkCell;
     }
    
     if([[messageRow objectForKey:@"delivered"] boolValue]!=YES)

@@ -15,6 +15,9 @@
 		2601D9B00FBF255D004DB939 /* DataLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 2601D9A70FBF255D004DB939 /* DataLayer.m */; };
 		2601D9CB0FBF25EF004DB939 /* sworim.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 2601D9CA0FBF25EF004DB939 /* sworim.sqlite */; };
 		2601D9D40FBF262E004DB939 /* libsqlite3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2601D9D30FBF262E004DB939 /* libsqlite3.dylib */; };
+		26020B3421B9565C009A9735 /* MLLinkViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 26020B3321B9565C009A9735 /* MLLinkViewCell.m */; };
+		26020B3721B957A0009A9735 /* MLMetaInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 26020B3621B957A0009A9735 /* MLMetaInfo.m */; };
+		26020B3821B957A0009A9735 /* MLMetaInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 26020B3621B957A0009A9735 /* MLMetaInfo.m */; };
 		2602837D1D8DD30E001DD6B8 /* QuickLook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2602837C1D8DD30E001DD6B8 /* QuickLook.framework */; };
 		2602837F1D8DD56B001DD6B8 /* Quartz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2602837E1D8DD56B001DD6B8 /* Quartz.framework */; };
 		260283861D8DEFC1001DD6B8 /* MLPreviewObject.m in Sources */ = {isa = PBXBuildFile; fileRef = 260283851D8DEFC1001DD6B8 /* MLPreviewObject.m */; };
@@ -516,6 +519,10 @@
 		2601D9A80FBF255D004DB939 /* DataLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataLayer.h; sourceTree = "<group>"; };
 		2601D9CA0FBF25EF004DB939 /* sworim.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = sworim.sqlite; sourceTree = "<group>"; };
 		2601D9D30FBF262E004DB939 /* libsqlite3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.dylib; path = usr/lib/libsqlite3.dylib; sourceTree = SDKROOT; };
+		26020B3221B9565C009A9735 /* MLLinkViewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLLinkViewCell.h; sourceTree = "<group>"; };
+		26020B3321B9565C009A9735 /* MLLinkViewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLLinkViewCell.m; sourceTree = "<group>"; };
+		26020B3521B957A0009A9735 /* MLMetaInfo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLMetaInfo.h; sourceTree = "<group>"; };
+		26020B3621B957A0009A9735 /* MLMetaInfo.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLMetaInfo.m; sourceTree = "<group>"; };
 		2602837C1D8DD30E001DD6B8 /* QuickLook.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickLook.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk/System/Library/Frameworks/QuickLook.framework; sourceTree = DEVELOPER_DIR; };
 		2602837E1D8DD56B001DD6B8 /* Quartz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quartz.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk/System/Library/Frameworks/Quartz.framework; sourceTree = DEVELOPER_DIR; };
 		260283841D8DEFC1001DD6B8 /* MLPreviewObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLPreviewObject.h; sourceTree = "<group>"; };
@@ -1077,6 +1084,8 @@
 				26EC411217BDE39E0031304D /* MLImageManager.m */,
 				263AFDFA209B3B35007F9CEE /* MLSignalStore.h */,
 				263AFDFB209B3B35007F9CEE /* MLSignalStore.m */,
+				26020B3521B957A0009A9735 /* MLMetaInfo.h */,
+				26020B3621B957A0009A9735 /* MLMetaInfo.m */,
 			);
 			name = Shared;
 			path = Classes;
@@ -1515,6 +1524,8 @@
 				26AA41041D9FCBF6005A77ED /* MLImageView.m */,
 				26D56EE520B59FB000BF7C97 /* MLTextView.h */,
 				26D56EE620B59FB000BF7C97 /* MLTextView.m */,
+				26020B3221B9565C009A9735 /* MLLinkViewCell.h */,
+				26020B3321B9565C009A9735 /* MLLinkViewCell.m */,
 			);
 			name = Chatview;
 			sourceTree = "<group>";
@@ -2800,6 +2811,7 @@
 				26D51CDE1E2674D700141E04 /* NXOAuth2PostBodyPart.m in Sources */,
 				2678A98E185AB739003AF53B /* ChatLogContactViewController.m in Sources */,
 				26C3456E1C68F9F0007F4BEC /* MLHTTPRequest.m in Sources */,
+				26020B3721B957A0009A9735 /* MLMetaInfo.m in Sources */,
 				26C1EA681FF937040085547A /* MLOptOutSettingsViewController.m in Sources */,
 				2696EED21791245A00BC54B8 /* chatViewController.m in Sources */,
 				26B2A4FB1B73097500272E63 /* DDDispatchQueueLogFormatter.m in Sources */,
@@ -2911,6 +2923,7 @@
 				2638DAEB1B68F3D400DF05AC /* MLAccountSettings.m in Sources */,
 				260499F21B7314D600D11866 /* jingleCall.m in Sources */,
 				26B2A4BF1B73070F00272E63 /* NSString+SqlLite.m in Sources */,
+				26020B3821B957A0009A9735 /* MLMetaInfo.m in Sources */,
 				26D51CE11E2674D700141E04 /* NXOAuth2PostBodyStream.m in Sources */,
 				2661D34D1B407ED400EC51BA /* MLContactsCell.m in Sources */,
 				26B2A4F21B73097500272E63 /* DDASLLogger.m in Sources */,
@@ -2965,6 +2978,7 @@
 				26B2A4F61B73097500272E63 /* DDLog.m in Sources */,
 				26B2A4FE1B73097500272E63 /* DDMultiFormatter.m in Sources */,
 				267ECD691B7467B30025337F /* MLXMPPManager.m in Sources */,
+				26020B3421B9565C009A9735 /* MLLinkViewCell.m in Sources */,
 				260499E71B7313DB00D11866 /* ParseResumed.m in Sources */,
 				26B2A4EA1B73097500272E63 /* CLIColor.m in Sources */,
 				260499EF1B7313F300D11866 /* ParseIq.m in Sources */,

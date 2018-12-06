@@ -7,6 +7,7 @@
 //
 
 #import "MLLinkCell.h"
+#import "MLMetaInfo.h"
 #import "UIImageView+WebCache.h"
 @import SafariServices;
 
@@ -26,31 +27,7 @@
     // Configure the view for the selected state
 }
 
-- (NSString *) ogContentWithTag:(NSString *) tag inHTML:(NSString *) body
-{
-    NSRange titlePos = [body rangeOfString:tag];
-    if(titlePos.location==NSNotFound) return nil;
-    NSRange end = [body rangeOfString:@">" options:NSCaseInsensitiveSearch range:NSMakeRange(titlePos.location, body.length-titlePos.location)];
-    NSString *subString = [body substringWithRange:NSMakeRange(titlePos.location, end.location-titlePos.location)];
-    NSArray *parts = [subString componentsSeparatedByString:@"content="];
-    NSString *text = parts.lastObject;
-    if(text.length>2) {
-        
-        if([tag isEqualToString:@"og:image"]){
-            NSArray *components = [text componentsSeparatedByString:@" "];// other attributes
-            text=[components objectAtIndex:0];
-        }
-        
-        if([text characterAtIndex:text.length-1]=='/') {
-         text = [text substringWithRange:NSMakeRange(0, text.length-1)];
-        }
-        text= [text stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
-        int trimLength=2;//quotes
-        text = [text substringWithRange:NSMakeRange(1, text.length-trimLength)];
-    }
-    NSString* toreturn= [text stringByReplacingOccurrencesOfString:@"&amp;" withString:@"&"];
-    return toreturn;
-}
+
 
 -(void) openlink: (id) sender {
     
@@ -99,8 +76,8 @@
             NSString *body = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
             
             dispatch_async(dispatch_get_main_queue(), ^{
-                self.messageTitle.text=[self ogContentWithTag:@"og:title" inHTML:body] ;
-                self.imageUrl=[[self ogContentWithTag:@"og:image" inHTML:body] stringByRemovingPercentEncoding];
+                self.messageTitle.text=[MLMetaInfo ogContentWithTag:@"og:title" inHTML:body] ;
+                self.imageUrl=[[MLMetaInfo ogContentWithTag:@"og:image" inHTML:body] stringByRemovingPercentEncoding];
                 [self loadImageWithCompletion:^{
                     if(completion) completion();
                 }];

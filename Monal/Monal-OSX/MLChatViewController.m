@@ -994,14 +994,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     NSDate* sourceDate =[NSDate date];
     
-    NSTimeZone* sourceTimeZone = [NSTimeZone systemTimeZone];
-    NSTimeZone* destinationTimeZone = [NSTimeZone timeZoneWithAbbreviation:@"GMT"];
-    NSInteger sourceGMTOffset = [sourceTimeZone secondsFromGMTForDate:sourceDate];
-    NSInteger destinationGMTOffset = [destinationTimeZone secondsFromGMTForDate:sourceDate];
-    NSTimeInterval interval = destinationGMTOffset - sourceGMTOffset;
-    NSDate* destinationDate = [[NSDate alloc] initWithTimeInterval:interval sinceDate:sourceDate];
-    
-    return [self.sourceDateFormat stringFromDate:destinationDate];
+//    NSTimeZone* sourceTimeZone = [NSTimeZone systemTimeZone];
+//    NSTimeZone* destinationTimeZone = [NSTimeZone timeZoneWithAbbreviation:@"GMT"];
+//    NSInteger sourceGMTOffset = [sourceTimeZone secondsFromGMTForDate:sourceDate];
+//    NSInteger destinationGMTOffset = [destinationTimeZone secondsFromGMTForDate:sourceDate];
+//    NSTimeInterval interval = destinationGMTOffset - sourceGMTOffset;
+//    NSDate* destinationDate = [[NSDate alloc] initWithTimeInterval:interval sinceDate:sourceDate];
+//
+    return [self.sourceDateFormat stringFromDate:sourceDate];
 }
 
 -(NSString*) formattedDateWithSource:(NSString*) sourceDateString

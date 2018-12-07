@@ -464,13 +464,6 @@
 			remoteGlobalIDString = 26AA70102146BBB800598605;
 			remoteInfo = shareSheet;
 		};
-		26AA704E2146E43E00598605 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 26AA70412146E43E00598605;
-			remoteInfo = "shareSheet-OSX";
-		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -2172,7 +2165,6 @@
 				26E456CE1B8421AF004BD74C /* CopyFiles */,
 				2649CE501C4DE4A300CD1E80 /* Remove Build Number */,
 				2649CE511C4DE4A500CD1E80 /* Tag Git */,
-				F09A89DA9D14004C997BF0A9 /* [CP] Embed Pods Frameworks */,
 				85961DD6C0DB7B0B37F708BF /* [CP] Copy Pods Resources */,
 				26AA703A2146E2EB00598605 /* Embed App Extensions */,
 			);
@@ -2180,7 +2172,6 @@
 			);
 			dependencies = (
 				26049A551B73157D00D11866 /* PBXTargetDependency */,
-				26AA704F2146E43E00598605 /* PBXTargetDependency */,
 			);
 			name = "Monal-OSX";
 			productName = "Monal-OSX";
@@ -2725,26 +2716,6 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		F09A89DA9D14004C997BF0A9 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${SRCROOT}/Pods/Target Support Files/Pods-Monal-OSX/Pods-Monal-OSX-frameworks.sh",
-				"${PODS_ROOT}/Sparkle/Sparkle.framework",
-				"${PODS_ROOT}/Sparkle/Sparkle.framework.dSYM",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Sparkle.framework",
-				"${DWARF_DSYM_FOLDER_PATH}/Sparkle.framework.dSYM",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Monal-OSX/Pods-Monal-OSX-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -3092,11 +3063,6 @@
 			isa = PBXTargetDependency;
 			target = 26AA70102146BBB800598605 /* shareSheet */;
 			targetProxy = 26AA701A2146BBB900598605 /* PBXContainerItemProxy */;
-		};
-		26AA704F2146E43E00598605 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 26AA70412146E43E00598605 /* shareSheet-OSX */;
-			targetProxy = 26AA704E2146E43E00598605 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 

@@ -465,12 +465,6 @@
                                                 <action selector="orderFrontStandardAboutPanel:" target="Ady-hI-5gd" id="Exp-CZ-Vem"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Check for Updates..." id="h3N-PL-P7g">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                            <connections>
-                                                <action selector="checkForUpdates:" target="R3g-9a-MaB" id="rUf-Le-YCQ"/>
-                                            </connections>
-                                        </menuItem>
                                         <menuItem isSeparatorItem="YES" id="VOq-y0-SEH"/>
                                         <menuItem title="Preferences…" keyEquivalent="," id="BOF-NM-1cW">
                                             <connections>
@@ -1078,11 +1072,6 @@ CA
                                         <segue destination="kZp-r1-Nmw" kind="popover" identifier="ContactDetails" popoverAnchorView="VQp-eV-N8J" popoverBehavior="t" preferredEdge="maxX" id="1K6-5s-FVT"/>
                                     </connections>
                                 </toolbarItem>
-                                <toolbarItem implicitItemIdentifier="E1B1CE0B-423B-4596-9E09-E008ACF64276" label="Encrypt" paletteLabel="Encrypt" tag="-1" image="745-unlocked" id="eQS-Gt-mIg">
-                                    <connections>
-                                        <action selector="toggleEncryption:" target="Oky-zY-oP4" id="LLk-Mv-BaM"/>
-                                    </connections>
-                                </toolbarItem>
                             </allowedToolbarItems>
                             <defaultToolbarItems>
                                 <toolbarItem reference="ZSw-2Q-VnE"/>
@@ -1092,7 +1081,6 @@ CA
                                 <toolbarItem reference="7tw-2L-tfc"/>
                                 <toolbarItem reference="9TB-3c-nGe"/>
                                 <toolbarItem reference="VQp-eV-N8J"/>
-                                <toolbarItem reference="eQS-Gt-mIg"/>
                                 <toolbarItem reference="Dne-ym-5CJ"/>
                             </defaultToolbarItems>
                         </toolbar>
@@ -3078,7 +3066,6 @@ Gw
         <image name="724-info" width="28" height="28"/>
         <image name="735-phone" width="28" height="28"/>
         <image name="744-locked-selected" width="21" height="28"/>
-        <image name="745-unlocked" width="21" height="28"/>
         <image name="770-paper-clip" width="28" height="27"/>
         <image name="870-smile" width="28" height="28"/>
         <image name="907-plus-rounded-square" width="28" height="28"/>

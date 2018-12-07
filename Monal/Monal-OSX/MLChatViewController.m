@@ -75,7 +75,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     self.messageScroll.wantsLayer=YES;
     self.messageScroll.layer.cornerRadius=10.0f;
  
-    
+    [self updateLinguisticSettings];
 }
 
 -(void) viewWillAppear
@@ -91,6 +91,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self refreshData];
     [self updateWindowForContact:self.contactDic];
     [self updateInputViewSize];
+  
  
 }
 
@@ -1061,6 +1062,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     return YES;
 }
 
+-(BOOL)textShouldEndEditing:(NSText *)textObject
+{
+    [self saveLinguisticSettings];
+    return YES;
+}
+
 - (void)textDidChange:(NSNotification *)notification;
 {
      [self updateInputViewSize];
@@ -1085,8 +1092,23 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 }
 
 
+-(void) updateLinguisticSettings
+{
+    if([[NSUserDefaults standardUserDefaults] objectForKey:@"CotinuousSpellCheck"]) {
+        self.messageBox.continuousSpellCheckingEnabled= [[NSUserDefaults standardUserDefaults] boolForKey:@"CotinuousSpellCheck"];
+        self.messageBox.automaticSpellingCorrectionEnabled = [[NSUserDefaults standardUserDefaults] boolForKey:@"AutoSpellCheck"];
+        self.messageBox.grammarCheckingEnabled =[[NSUserDefaults standardUserDefaults] boolForKey:@"GrammarCheck"];
+    }
+}
 
 
+-(void) saveLinguisticSettings
+{
+    [[NSUserDefaults standardUserDefaults] setBool:self.messageBox.continuousSpellCheckingEnabled forKey:@"CotinuousSpellCheck"];
+    [[NSUserDefaults standardUserDefaults] setBool:self.messageBox.automaticSpellingCorrectionEnabled forKey:@"AutoSpellCheck"];
+    [[NSUserDefaults standardUserDefaults] setBool:self.messageBox.grammarCheckingEnabled forKey:@"GrammarCheck"];
+    
+}
 
 #pragma mark - quick look
 

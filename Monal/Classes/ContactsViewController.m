@@ -119,6 +119,20 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         if(![[NSUserDefaults standardUserDefaults] boolForKey:@"HasSeenLogin"]) {
             [self performSegueWithIdentifier:@"showLogin" sender:self];
         }
+    } else  {
+        //for 3.1->3.2 release remove later
+         if(![[NSUserDefaults standardUserDefaults] boolForKey:@"HasSeenSSLMessage"]) {
+             
+             UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:@"Security Upgrades" message:[NSString stringWithFormat:@"This version includes a security fix for the way SSL certificates are checked. It is possible settings that previously worked will not now. If you encouter this, you can temporarily disable certificate validation in your account settings while you figure out why iOS does not like your certificate."] preferredStyle:UIAlertControllerStyleAlert];
+             UIAlertAction *acceptAction =[UIAlertAction actionWithTitle:@"Got it!" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+                 [self dismissViewControllerAnimated:YES completion:nil];
+                 
+             }];
+        
+             [messageAlert addAction:acceptAction];
+             [self.tabBarController presentViewController:messageAlert animated:YES completion:nil];
+             [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"HasSeenSSLMessage"];
+         }
     }
     
   if(self.contacts.count+self.offlineContacts.count==0)

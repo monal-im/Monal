@@ -3770,13 +3770,13 @@ if(!self.supportsSM3)
     //_streamHasSpace=NO; // triggers more has space messages
     
     //we probably want to break these into chunks
-    DDLogVerbose(@"sending: %@ ", messageOut);
+   // DDLogVerbose(@"sending: %@ ", messageOut);
     const uint8_t * rawstring = (const uint8_t *)[messageOut UTF8String];
     NSInteger len= strlen((char*)rawstring);
-    DDLogVerbose(@"size : %ld",(long)len);
+   // DDLogVerbose(@"size : %ld",(long)len);
     if([_oStream write:rawstring maxLength:len]!=-1)
     {
-        DDLogVerbose(@"done writing ");
+       // DDLogVerbose(@"done writing ");
         return YES;
     }
     else

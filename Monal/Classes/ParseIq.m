@@ -67,8 +67,7 @@
             {
                 _roster=YES;
             }
-            else if([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"jabber:iq:auth"]) _legacyAuth=YES;
-            
+        
             if(!_features)  _features=[[NSMutableSet alloc] init];
             if([attributeDict objectForKey:@"var"]) {
                 [_features addObject:[attributeDict objectForKey:@"var"]];
@@ -77,6 +76,8 @@
         }
         
     }
+    
+    if([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"jabber:iq:auth"]) _legacyAuth=YES;
     
     //http upload
     

@@ -2217,10 +2217,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                     DDLogInfo(@"no auth mechanism. will try legacy auth");
                                     XMPPIQ* iqNode =[[XMPPIQ alloc] initWithElement:@"iq"];
                                     [iqNode getAuthwithUserName:self.username ];
-                                    
                                     [self send:iqNode];
-                                    
-                                    
                                 }
                         }
                         

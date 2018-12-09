@@ -28,6 +28,16 @@
 				<string>db-a134q2ecj1hqa59</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>CFBundleURLName</key>
+			<string>im.Monal.MonalOSX</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>xmpp</string>
+			</array>
+		</dict>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>0</string>

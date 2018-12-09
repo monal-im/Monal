@@ -2411,7 +2411,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         if(streamNode.startTLSProceed)
                         {
                             NSMutableDictionary *settings = [[NSMutableDictionary alloc] init];
-                            [settings setObject:self->_domain forKey:kCFStreamSSLPeerName];
+                            
+                            NSString *expectedDomain =self->_domain;
+                            if(self.oAuth) {
+                            //we only support oauth on gtalk
+                                expectedDomain = @"gmail.com";
+                            }
+                            
+                            [settings setObject:expectedDomain forKey:kCFStreamSSLPeerName];
  
                             if(self->_brokenServerSSL)
                             {

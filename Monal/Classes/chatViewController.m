@@ -1001,8 +1001,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         
         imageCell.link = messageString;
         [imageCell loadImageWithCompletion:^{
-            
-            [self.messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+            if(indexPath.row < self.messageList.count) {
+                [self.messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+            }
             
         }];
         cell=imageCell;

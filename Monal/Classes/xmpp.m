@@ -2938,7 +2938,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         self.lastHandledInboundStanza=[dic objectForKey:@"lastHandledInboundStanza"];
         self.lastHandledOutboundStanza=[dic objectForKey:@"lastHandledOutboundStanza"];
         self.lastOutboundStanza=[dic objectForKey:@"lastOutboundStanza"];
-        self.unAckedStanzas=[dic objectForKey:@"unAckedStanzas"];
+        NSArray *stanzas= [dic objectForKey:@"unAckedStanzas"];
+        self.unAckedStanzas=[stanzas mutableCopy];
         self.streamID=[dic objectForKey:@"streamID"];
         self.streamExpireSeconds=[dic objectForKey:@"streamExpireSeconds"];
         

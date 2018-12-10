@@ -215,10 +215,21 @@
                             <outlet property="delegate" destination="mHI-sq-Pqf" id="dgR-Y7-jRA"/>
                         </connections>
                     </tableView>
+                    <connections>
+                        <segue destination="1Mj-wI-z4C" kind="show" identifier="showDayHistory" id="3yC-Mf-jDF"/>
+                    </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="9fB-dB-wca" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="2303" y="8497"/>
+        </scene>
+        <!--chatViewController-->
+        <scene sceneID="TeN-Yq-Ovs">
+            <objects>
+                <viewControllerPlaceholder storyboardIdentifier="chatViewController" storyboardName="Main" referencedIdentifier="chatViewController" id="1Mj-wI-z4C" sceneMemberID="viewController"/>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="qbA-gi-oI5" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2987" y="8369"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="urU-pt-wbn">

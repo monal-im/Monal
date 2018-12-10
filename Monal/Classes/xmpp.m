@@ -2412,14 +2412,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         {
                             NSMutableDictionary *settings = [[NSMutableDictionary alloc] init];
                             
-                            NSString *expectedDomain =self->_domain;
                             if(self.oAuth) {
-                            //we only support oauth on gtalk
-                                expectedDomain = @"gmail.com";
+                                //we only support oauth on gtalk
+                                [settings setObject:[NSNull null] forKey:kCFStreamSSLPeerName];
+                            }
+                            else  {
+                                [settings setObject:self->_domain forKey:kCFStreamSSLPeerName];
                             }
                             
-                            [settings setObject:expectedDomain forKey:kCFStreamSSLPeerName];
- 
                             if(self->_brokenServerSSL)
                             {
                                 DDLogInfo(@"recovering from broken SSL implemtation limit to ss3-tl1");

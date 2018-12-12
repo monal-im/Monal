@@ -868,7 +868,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 {
     NSInteger historyId = ((UIButton*) sender).tag;
     
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Retry sending message?" message:@"It is possible this message may have failed to send." preferredStyle:UIAlertControllerStyleActionSheet];
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Retry sending message?" message:@"This message failed to send." preferredStyle:UIAlertControllerStyleActionSheet];
     [alert addAction:[UIAlertAction actionWithTitle:@"Retry" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
         NSArray *messageArray =[[DataLayer sharedInstance] messageForHistoryID:historyId];
         if([messageArray count]>0) {

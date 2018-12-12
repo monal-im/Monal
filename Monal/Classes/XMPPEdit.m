@@ -513,10 +513,10 @@ NSString *const kGtalk = @"Gtalk";
                 break;
             }
             case 4: {
-                thecell.cellLabel.text=@"Do not validate certificate";
+                thecell.cellLabel.text=@"Validate certificate";
                 thecell.textInputField.hidden=YES;
                 thecell.toggleSwitch.tag=4;
-                thecell.toggleSwitch.on=self.selfSignedSSL;
+                thecell.toggleSwitch.on=!self.selfSignedSSL;
                 break;
             }
             case 5: {

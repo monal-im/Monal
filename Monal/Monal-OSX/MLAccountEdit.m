@@ -69,7 +69,7 @@
         
         self.sslCheck.state =[[self.accountToEdit objectForKey:kSSL] boolValue];
         self.enabledCheck.state =[[self.accountToEdit objectForKey:kEnabled] boolValue];
-        self.selfSigned.state =[[self.accountToEdit objectForKey:kSelfSigned] boolValue];
+        self.selfSigned.state =![[self.accountToEdit objectForKey:kSelfSigned] boolValue];
         self.oldStyleSSL.state =[[self.accountToEdit objectForKey:kOldSSL] boolValue];
         
         if([[self.accountToEdit objectForKey:kOauth] boolValue] )

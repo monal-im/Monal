@@ -1291,7 +1291,6 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 - (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text
 {
     BOOL shouldinsert=YES;
-    
     if([text isEqualToString:@"\n"])
     {
         [self resignTextView];

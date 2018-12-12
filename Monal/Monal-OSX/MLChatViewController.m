@@ -1051,7 +1051,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 #pragma  mark - textview delegate
 - (BOOL)textView:(NSTextView *)view shouldChangeTextInRange:(NSRange)range replacementString:(NSString *)replacementString;
 {
-    if([replacementString isEqualToString:@"\n"])
+    NSUInteger flags = [[NSApp currentEvent] modifierFlags];
+    if([replacementString isEqualToString:@"\n"]   && !(flags & NSShiftKeyMask))
         {
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self sendText:self];

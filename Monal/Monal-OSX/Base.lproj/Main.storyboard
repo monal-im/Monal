@@ -2303,7 +2303,7 @@ Gw
                                                                 <outlet property="imageView" destination="kUM-jm-fPa" id="EQV-8j-2QO"/>
                                                                 <outlet property="lockImage" destination="rza-oc-alq" id="Abm-Th-N50"/>
                                                                 <outlet property="senderIcon" destination="kUM-jm-fPa" id="KqB-dQ-K5t"/>
-                                                                <outlet property="senderName" destination="7np-ZR-2J2" id="AXO-7j-JJu"/>
+                                                                <outlet property="senderName" destination="rTA-8D-toK" id="HQZ-Wi-iBl"/>
                                                                 <outlet property="timeStamp" destination="sWQ-oj-7zC" id="udu-UN-NwP"/>
                                                                 <outlet property="timeStampHeight" destination="gP3-GQ-xSr" id="9AN-2V-RYz"/>
                                                                 <outlet property="timeStampVeritcalOffset" destination="CGY-V2-u17" id="rTW-YA-gF6"/>

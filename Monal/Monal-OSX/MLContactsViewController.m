@@ -1287,6 +1287,16 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 
     NSString* accountNo=[NSString stringWithFormat:@"%ld", (long)cell.accountNo];
     NSString *cellUser = [contactRow objectForKey:kContactName];
+    
+    if(self.currentSegment==kActiveTab) {
+        NSMutableArray *message = [[DataLayer sharedInstance] lastMessageForContact:cell.username andAccount:accountNo];
+        if(message.count>0)
+        {
+            NSDictionary *row = message[0];
+            //TODO chek type Message, Image, Link
+            cell.status.stringValue =[row objectForKey:@"message"];
+        }
+    }
 
     [[MLImageManager sharedInstance] getIconForContact:cell.username andAccount:accountNo withCompletion:^(NSImage *image) {
         if([cell.username isEqualToString:cellUser]) {

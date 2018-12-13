@@ -319,10 +319,9 @@
         
         
         [[DataLayer sharedInstance] addContact:self.roomField.text forAccount:account.accountNo fullname:@"" nickname:self.nickField.text  withCompletion:^(BOOL success) {
-            if(!success)
-            {
+            
                 [[DataLayer sharedInstance] updateOwnNickName:nick forMuc:room forAccount:account.accountNo];
-            }
+            
         }];
         
         

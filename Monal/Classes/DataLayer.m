@@ -1785,6 +1785,26 @@ static DataLayer *sharedInstance=nil;
     
 }
 
+-(NSMutableArray *) lastMessageForContact:(NSString *) contact andAccount:(NSString *) accountNo
+{
+    if(!accountNo ||! contact) return nil;
+    NSString* query=[NSString stringWithFormat:@"select message, timestamp  as thetime, messageType from message_history where account_id=? and (message_from=? or message_to=?) order by message_history_id desc limit 1"];
+    NSArray *params=@[accountNo, contact, contact];
+    NSMutableArray* toReturn = [[self executeReader:query andArguments:params] mutableCopy];
+    
+    if(toReturn!=nil)
+    {
+        DDLogVerbose(@" message history count: %lu",  (unsigned long)[toReturn count] );
+        return toReturn;
+    }
+    else
+    {
+        DDLogError(@"message history is empty or failed to read");
+        return nil;
+    }
+}
+
+
 -(void) markAsReadBuddy:(NSString*) buddy forAccount:(NSString*) accountNo
 {
     

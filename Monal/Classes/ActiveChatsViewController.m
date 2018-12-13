@@ -64,19 +64,15 @@
 
 -(void) refreshDisplay
 {
-    
     [[DataLayer sharedInstance] activeContactsWithCompletion:^(NSMutableArray *cleanActive) {
-        [[MLXMPPManager sharedInstance] cleanArrayOfConnectedAccounts:cleanActive];
         dispatch_async(dispatch_get_main_queue(), ^{
             [[MLXMPPManager sharedInstance] cleanArrayOfConnectedAccounts:cleanActive];
-            
             self->_contacts=cleanActive;
             [self->_chatListTable reloadData];
             MonalAppDelegate* appDelegate= (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
             [appDelegate updateUnread];
         });
     }];
-    
 }
 
 -(void) viewWillAppear:(BOOL)animated
@@ -183,6 +179,14 @@
             cell.count=[unread integerValue];
         });
     }];
+    
+    NSMutableArray *message = [[DataLayer sharedInstance] lastMessageForContact:cell.username andAccount:accountNo];
+    if(message.count>0)
+    {
+        NSDictionary *row = message[0];
+        //TODO chek type Message, Image, Link
+        [cell showStatusText:[row objectForKey:@"message"]];
+    }
     
     [[MLImageManager sharedInstance] getIconForContact:[row objectForKey:@"buddy_name"] andAccount:accountNo withCompletion:^(UIImage *image) {
             cell.userImage.image=image;

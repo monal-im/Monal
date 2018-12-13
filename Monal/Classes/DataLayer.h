@@ -204,7 +204,8 @@ extern NSString *const kMessageTypeUrl;
 
 #pragma mark message history
 -(NSMutableArray*) messageHistory:(NSString*) buddy forAccount:(NSString*) accountNo;
--(NSArray*) messageHistoryAll:(NSString*) buddy forAccount:(NSString*) accountNo; 
+-(NSArray*) messageHistoryAll:(NSString*) buddy forAccount:(NSString*) accountNo;
+-(NSMutableArray*) lastMessageForContact:(NSString*) contact andAccount:(NSString*) accountNo;
 
 -(NSArray*) messageHistoryListDates:(NSString*) buddy forAccount: (NSString*) accountNo;
 -(NSArray*) messageHistoryDate:(NSString*) buddy forAccount:(NSString*) accountNo forDate:(NSString*) date;

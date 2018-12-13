@@ -1710,7 +1710,7 @@ Gw
                                     <rect key="frame" x="0.0" y="0.0" width="493" height="627"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
-                                        <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" selectionHighlightStyle="none" columnReordering="NO" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" typeSelect="NO" rowHeight="235" rowSizeStyle="automatic" viewBased="YES" id="Rsm-HI-GDG">
+                                        <tableView verticalHuggingPriority="750" ambiguous="YES" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" selectionHighlightStyle="none" columnReordering="NO" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" typeSelect="NO" rowHeight="235" rowSizeStyle="automatic" viewBased="YES" id="Rsm-HI-GDG">
                                             <rect key="frame" x="0.0" y="0.0" width="493" height="1101"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <size key="intercellSpacing" width="3" height="2"/>
@@ -1747,12 +1747,12 @@ Gw
                                                                     </textFieldCell>
                                                                 </textField>
                                                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="n4e-88-Xmr">
-                                                                    <rect key="frame" x="193" y="26" width="104" height="14"/>
+                                                                    <rect key="frame" x="14" y="26" width="462" height="14"/>
                                                                     <constraints>
                                                                         <constraint firstAttribute="height" relation="lessThanOrEqual" constant="14" id="1pf-32-Qsd"/>
                                                                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="cy1-pN-McG"/>
                                                                     </constraints>
-                                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="Status Message" id="vic-fi-Itw">
+                                                                    <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="center" title="Status Message" id="vic-fi-Itw">
                                                                         <font key="font" metaFont="systemSemibold" size="11"/>
                                                                         <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="calibratedWhite"/>
                                                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
@@ -1761,6 +1761,8 @@ Gw
                                                             </subviews>
                                                             <constraints>
                                                                 <constraint firstItem="n4e-88-Xmr" firstAttribute="centerX" secondItem="dIe-jK-UFl" secondAttribute="centerX" id="0gk-Nt-o3D"/>
+                                                                <constraint firstAttribute="trailing" secondItem="n4e-88-Xmr" secondAttribute="trailing" constant="16" id="HRi-5a-V5j"/>
+                                                                <constraint firstItem="n4e-88-Xmr" firstAttribute="leading" secondItem="dIe-jK-UFl" secondAttribute="leading" constant="16" id="Hdw-ME-zlm"/>
                                                                 <constraint firstItem="WpQ-8W-KBz" firstAttribute="centerX" secondItem="dIe-jK-UFl" secondAttribute="centerX" id="UQW-rP-Yq0"/>
                                                                 <constraint firstItem="n4e-88-Xmr" firstAttribute="top" secondItem="WpQ-8W-KBz" secondAttribute="bottom" constant="5" id="aX0-Zm-F2f"/>
                                                                 <constraint firstItem="WpQ-8W-KBz" firstAttribute="top" secondItem="dIe-jK-UFl" secondAttribute="top" constant="-14" id="nak-jJ-bQV"/>

@@ -314,22 +314,27 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 - (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey, id> *)options
 {
+    if([url.scheme isEqualToString:@"xmpp"])
+    {
+        
+        return YES;
+    }
     if([url.scheme isEqualToString:@"com.googleusercontent.apps.472865344000-invcngpma1psmiek5imc1gb8u7mef8l9"])
     {
         [[NXOAuth2AccountStore sharedStore] handleRedirectURL:url];
         return YES;
     }
     else  {
-    
-    if ([[DBSession sharedSession] handleOpenURL:url]) {
-        if ([[DBSession sharedSession] isLinked]) {
-            DDLogVerbose(@"App linked successfully!");
-            // At this point you can start making API calls
+        
+        if ([[DBSession sharedSession] handleOpenURL:url]) {
+            if ([[DBSession sharedSession] isLinked]) {
+                DDLogVerbose(@"App linked successfully!");
+                // At this point you can start making API calls
+            }
+            return YES;
         }
-        return YES;
     }
-    }
-    // Add whatever other url handling code your app requires here
+    
     return NO;
 }
 
@@ -345,10 +350,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     DDLogVerbose(@"entering app with %@", notification);
     
     //iphone
-    //make sure tab 0
+    //make sure tab 0 for chat
     if([notification.userInfo objectForKey:@"from"]) {
         [self.tabBarController setSelectedIndex:0];
-        [[MLXMPPManager sharedInstance].contactVC presentChatWithName:[notification.userInfo objectForKey:@"from"] account:[notification.userInfo objectForKey:@"accountNo"] ];
+       [[MLXMPPManager sharedInstance].contactVC presentChatWithName:[notification.userInfo objectForKey:@"from"] account:[notification.userInfo objectForKey:@"accountNo"] ];
     }
 }
 
@@ -386,6 +391,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     if(completionHandler) completionHandler();
 }
+
 
 
 #pragma mark - memory

@@ -15,6 +15,7 @@
 #import "UIActionSheet+Blocks.h"
 #import "addContact.h"
 #import "CallViewController.h"
+#import "MonalAppDelegate.h"
 
 #define kinfoSection 0
 #define konlineSection 1
@@ -79,6 +80,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     self.tableView.emptyDataSetSource = self;
     self.tableView.emptyDataSetDelegate = self;
     
+    MonalAppDelegate* appDelegate= (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
+    appDelegate.splitViewController= self.splitViewController;
+    appDelegate.tabBarController = (MLTabBarController *) self.tabBarController;
+    
+    [MLXMPPManager sharedInstance].contactVC=self;
+
 }
 
 -(void) dealloc

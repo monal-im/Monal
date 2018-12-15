@@ -732,6 +732,38 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     return toReturn;
 }
 
+-(NSArray<UITableViewRowAction *> *)tableView:(UITableView *)tableView editActionsForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    UITableViewRowAction *delete = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDestructive title:@"Delete" handler:^(UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath) {
+        [self deleteRowAtIndexPath:indexPath];
+    }];
+    
+    UITableViewRowAction *mute = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDefault title:@"Mute" handler:^(UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath) {
+        [self muteContactAtIndexPath:indexPath];
+        [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+    }];
+    [mute setBackgroundColor:[UIColor blueColor]];
+    
+    UITableViewRowAction *block = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleNormal title:@"Block" handler:^(UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath) {
+        [self blockContactAtIndexPath:indexPath];
+        [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+    }];
+    [block setBackgroundColor:[UIColor blackColor]];
+    
+    return @[delete, mute, block];
+    
+}
+
+-(void) muteContactAtIndexPath:(NSIndexPath *) indexPath
+{
+    
+}
+
+-(void) blockContactAtIndexPath:(NSIndexPath *) indexPath
+{
+    
+}
+
 -(NSInteger) numberOfSectionsInTableView:(UITableView *)tableView
 {
     NSInteger toreturn=0;
@@ -927,14 +959,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
 }
 
-- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
-    if (editingStyle == UITableViewCellEditingStyleDelete) {
+-(void) deleteRowAtIndexPath:(NSIndexPath *) indexPath
+{
         NSDictionary* contact;
         if ((indexPath.section==1) && (indexPath.row<=[_contacts count]) ) {
             contact=[_contacts objectAtIndex:indexPath.row];
         }
         else if((indexPath.section==2) && (indexPath.row<=[_offlineContacts count]) ) {
-                contact=[_offlineContacts objectAtIndex:indexPath.row];
+            contact=[_offlineContacts objectAtIndex:indexPath.row];
         }
         else {
             //we cannot delete here
@@ -948,7 +980,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         {
             messageString =@"Leave this converstion?";
         }
-  
+        
         
         RIButtonItem* cancelButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Cancel", nil) action:^{
             
@@ -985,6 +1017,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         
         UIActionSheet* sheet =[[UIActionSheet alloc] initWithTitle:messageString cancelButtonItem:cancelButton destructiveButtonItem:yesButton otherButtonItems: nil];
         [sheet showFromTabBar:self.presentationTabBarController.tabBar];
+}
+
+- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
+    if (editingStyle == UITableViewCellEditingStyleDelete) {
+        [self deleteRowAtIndexPath:indexPath];
     }
 }
 

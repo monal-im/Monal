@@ -18,7 +18,7 @@
 
 -(void) awakeFromNib
 {
-    
+    [super awakeFromNib];
 }
 
 -(void) setOrb
@@ -77,12 +77,12 @@
     if(_count>0)
     {
         self.badge.hidden=NO;
-        [self.badge setTitle:[NSString stringWithFormat:@"%d", _count] forState:UIControlStateNormal];
+        [self.badge setTitle:[NSString stringWithFormat:@"%ld", (long)_count] forState:UIControlStateNormal];
     }
     else
     {
         self.badge.hidden=YES;
-         [self.badge setTitle:@"" forState:UIControlStateNormal];
+        [self.badge setTitle:@"" forState:UIControlStateNormal];
     }
     
     

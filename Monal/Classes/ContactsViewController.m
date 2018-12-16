@@ -16,6 +16,7 @@
 #import "addContact.h"
 #import "CallViewController.h"
 #import "MonalAppDelegate.h"
+#import "UIColor+Theme.h"
 
 #define kinfoSection 0
 #define konlineSection 1
@@ -740,29 +741,50 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     UITableViewRowAction *mute = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDefault title:@"Mute" handler:^(UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath) {
         [self muteContactAtIndexPath:indexPath];
-        [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+        dispatch_async(dispatch_get_main_queue(), ^{
+             [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+        });
     }];
-    [mute setBackgroundColor:[UIColor blueColor]];
+    [mute setBackgroundColor:[UIColor monalGreen]];
     
     UITableViewRowAction *block = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleNormal title:@"Block" handler:^(UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath) {
         [self blockContactAtIndexPath:indexPath];
         [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
     }];
-    [block setBackgroundColor:[UIColor blackColor]];
+    [block setBackgroundColor:[UIColor darkGrayColor]];
     
     return @[delete, mute, block];
     
 }
 
+-(NSDictionary  *)contactAtIndexPath:(NSIndexPath *) indexPath
+{
+    NSDictionary* contact;
+    if ((indexPath.section==1) && (indexPath.row<=[_contacts count]) ) {
+        contact=[_contacts objectAtIndex:indexPath.row];
+    }
+    else if((indexPath.section==2) && (indexPath.row<=[_offlineContacts count]) ) {
+        contact=[_offlineContacts objectAtIndex:indexPath.row];
+    }
+    return contact;
+}
+
 -(void) muteContactAtIndexPath:(NSIndexPath *) indexPath
 {
-    
+    NSDictionary *contact = [self contactAtIndexPath:indexPath];
+    if(contact){
+        [[DataLayer sharedInstance] muteJid:[contact objectForKey:@"buddy_name"]];
+    }
 }
 
 -(void) blockContactAtIndexPath:(NSIndexPath *) indexPath
 {
-    
+    NSDictionary *contact = [self contactAtIndexPath:indexPath];
+    if(contact){
+        [[DataLayer sharedInstance] blockJid:[contact objectForKey:@"buddy_name"]];
+    }
 }
+    
 
 -(NSInteger) numberOfSectionsInTableView:(UITableView *)tableView
 {

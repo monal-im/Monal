@@ -249,5 +249,15 @@ extern NSString *const kMessageTypeUrl;
 -(void) messageTypeForMessage:(NSString *) messageString withCompletion:(void(^)(NSString *messageType)) completion;
 
 
+-(void) muteJid:(NSString*) jid;
+-(void) unMuteJid:(NSString*) jid;
+-(void) isMutedJid:(NSString*) jid withCompletion: (void (^)(BOOL))completion;
+
+
+-(void) blockJid:(NSString*) jid;
+-(void) unBlockJid:(NSString*) jid;
+-(void) isBlockedJid:(NSString*) jid withCompletion: (void (^)(BOOL))completion;
+
+
 
 @end

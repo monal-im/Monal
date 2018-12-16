@@ -2493,6 +2493,66 @@ static DataLayer *sharedInstance=nil;
 }
 
 
+#pragma mark mute and block
+-(void) muteJid:(NSString*) jid
+{
+    NSString* query=[NSString stringWithFormat:@"insert into muteList(jid) values(?) "];
+    NSArray *params=@[jid];
+    [self executeNonQuery:query andArguments:params];
+}
+
+-(void) unMuteJid:(NSString*) jid
+{
+    NSString* query=[NSString stringWithFormat:@"delete from muteList where jid=? "];
+    NSArray *params=@[jid];
+    [self executeNonQuery:query andArguments:params];
+}
+
+-(void) isMutedJid:(NSString*) jid withCompletion: (void (^)(BOOL))completion
+{
+    NSString* query=[NSString stringWithFormat:@"select count(jid) from muteList where jid=?"];
+    NSArray *params=@[jid];
+    [self executeScalar:query andArguments:params withCompletion:^(NSObject *val) {
+        NSNumber *count= (NSNumber *) val;
+        BOOL toreturn=NO;
+        if(count.integerValue>0)
+        {
+            toreturn=YES;
+        }
+         if(completion) completion(toreturn);
+    }];
+}
+
+
+-(void) blockJid:(NSString*) jid
+{
+    NSString* query=[NSString stringWithFormat:@"insert into blockList(jid) values(?) "];
+    NSArray *params=@[jid];
+    [self executeNonQuery:query andArguments:params];
+}
+
+-(void) unBlockJid:(NSString*) jid
+{
+    NSString* query=[NSString stringWithFormat:@"delete from blockList where jid=? "];
+    NSArray *params=@[jid];
+    [self executeNonQuery:query andArguments:params];
+}
+
+-(void) isBlockedJid:(NSString*) jid withCompletion: (void (^)(BOOL))completion
+{
+    NSString* query=[NSString stringWithFormat:@"select count(jid) from blockList where jid=?"];
+    NSArray *params=@[jid];
+    [self executeScalar:query andArguments:params withCompletion:^(NSObject *val) {
+        NSNumber *count= (NSNumber *) val;
+        BOOL toreturn=NO;
+        if(count.integerValue>0)
+        {
+            toreturn=YES;
+        }
+        if(completion) completion(toreturn);
+    }];
+}
+
 
 
 @end

@@ -738,14 +738,28 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     UITableViewRowAction *delete = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDestructive title:@"Delete" handler:^(UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath) {
         [self deleteRowAtIndexPath:indexPath];
     }];
-    
-    UITableViewRowAction *mute = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDefault title:@"Mute" handler:^(UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath) {
-        [self muteContactAtIndexPath:indexPath];
-        dispatch_async(dispatch_get_main_queue(), ^{
-             [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
-        });
-    }];
-    [mute setBackgroundColor:[UIColor monalGreen]];
+    UITableViewRowAction *mute;
+    MLContactCell *cell = (MLContactCell *)[tableView cellForRowAtIndexPath:indexPath];
+    if(cell.muteBadge.hidden)
+    {
+        mute = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDefault title:@"Mute" handler:^(UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath) {
+            [self muteContactAtIndexPath:indexPath];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+            });
+        }];
+        [mute setBackgroundColor:[UIColor monalGreen]];
+        
+    } else  {
+         mute = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDefault title:@"Unmute" handler:^(UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath) {
+            [self unMuteContactAtIndexPath:indexPath];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+            });
+        }];
+        [mute setBackgroundColor:[UIColor monalGreen]];
+        
+    }
     
     UITableViewRowAction *block = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleNormal title:@"Block" handler:^(UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath) {
         [self blockContactAtIndexPath:indexPath];
@@ -776,7 +790,16 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         [[DataLayer sharedInstance] muteJid:[contact objectForKey:@"buddy_name"]];
     }
 }
+   
+-(void) unMuteContactAtIndexPath:(NSIndexPath *) indexPath
+{
+    NSDictionary *contact = [self contactAtIndexPath:indexPath];
+    if(contact){
+        [[DataLayer sharedInstance] unMuteJid:[contact objectForKey:@"buddy_name"]];
+    }
+}
 
+                                      
 -(void) blockContactAtIndexPath:(NSIndexPath *) indexPath
 {
     NSDictionary *contact = [self contactAtIndexPath:indexPath];

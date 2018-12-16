@@ -943,7 +943,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     [cell setOrb];
     
-  //  [self registerForPreviewingWithDelegate:self sourceView:cell];
+    [[DataLayer sharedInstance] isMutedJid:[row objectForKey:@"buddy_name"]  withCompletion:^(BOOL muted) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            cell.muteBadge.hidden=!muted;
+        });
+    }];
     
     return cell;
 }

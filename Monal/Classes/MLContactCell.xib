@@ -1,9 +1,12 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="7531" systemVersion="14D131" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14460.31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="7520"/>
-        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14460.20"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
@@ -12,47 +15,55 @@
             <rect key="frame" x="0.0" y="0.0" width="320" height="50"/>
             <autoresizingMask key="autoresizingMask"/>
             <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="vJJ-6x-WMR" id="Qx8-80-HZA">
+                <rect key="frame" x="0.0" y="0.0" width="252" height="49.5"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="OhQ-Fk-Czf" userLabel="name">
-                        <rect key="frame" x="63" y="3" width="190" height="20"/>
+                        <rect key="frame" x="71" y="6" width="181" height="20"/>
                         <fontDescription key="fontDescription" type="system" pointSize="16"/>
                         <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                         <nil key="highlightedColor"/>
                     </label>
                     <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="WBM-UR-4hu" userLabel="status">
-                        <rect key="frame" x="63" y="25" width="190" height="18"/>
+                        <rect key="frame" x="71" y="28" width="181" height="18"/>
                         <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="15"/>
-                        <color key="textColor" red="0.49019607843137253" green="0.49019607843137253" blue="0.50980392156862742" alpha="1" colorSpace="calibratedRGB"/>
+                        <color key="textColor" red="0.49019607843137253" green="0.49019607843137253" blue="0.50980392156862742" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <nil key="highlightedColor"/>
                     </label>
                     <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="pGK-Ar-iBm" userLabel="usericon">
-                        <rect key="frame" x="0.0" y="1" width="48" height="48"/>
+                        <rect key="frame" x="8" y="1.5" width="48" height="48"/>
                         <constraints>
                             <constraint firstAttribute="height" constant="48" id="0m8-YI-N9A"/>
                             <constraint firstAttribute="width" constant="48" id="788-Js-K50"/>
                         </constraints>
                     </imageView>
-                    <button opaque="NO" contentMode="scaleToFill" misplaced="YES" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" adjustsImageWhenDisabled="NO" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="orC-ej-MKC">
-                        <rect key="frame" x="33" y="0.0" width="22" height="22"/>
+                    <button opaque="NO" contentMode="scaleToFill" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" adjustsImageWhenDisabled="NO" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="orC-ej-MKC">
+                        <rect key="frame" x="41" y="0.0" width="22" height="22"/>
                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                        <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <color key="tintColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <state key="normal" title="99" backgroundImage="NotificationBubble">
-                            <color key="titleColor" name="controlLightHighlightColor" catalog="System" colorSpace="catalog"/>
-                            <color key="titleShadowColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                            <color key="titleColor" red="1" green="0.99997437000274658" blue="0.99999129772186279" alpha="0.098039215686274508" colorSpace="custom" customColorSpace="sRGB"/>
+                            <color key="titleShadowColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
                         </state>
                     </button>
                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="IrL-yc-gYp" userLabel="name">
-                        <rect key="frame" x="63" y="15" width="190" height="20"/>
+                        <rect key="frame" x="71" y="15.5" width="181" height="20"/>
                         <fontDescription key="fontDescription" type="system" pointSize="16"/>
                         <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                         <nil key="highlightedColor"/>
                     </label>
                     <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Awx-9U-LWt" userLabel="statusOrb">
-                        <rect key="frame" x="37" y="34" width="15" height="15"/>
+                        <rect key="frame" x="45" y="34.5" width="15" height="15"/>
                         <constraints>
                             <constraint firstAttribute="height" constant="15" id="W9O-5a-SsY"/>
                             <constraint firstAttribute="width" constant="15" id="c2D-y5-Xhd"/>
+                        </constraints>
+                    </imageView>
+                    <imageView hidden="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="847-moon-selected" translatesAutoresizingMaskIntoConstraints="NO" id="IAx-7T-RJd">
+                        <rect key="frame" x="240" y="18" width="12" height="14"/>
+                        <constraints>
+                            <constraint firstAttribute="width" constant="12" id="AjH-c6-9Xp"/>
+                            <constraint firstAttribute="height" constant="14" id="Xbr-kc-Y3g"/>
                         </constraints>
                     </imageView>
                 </subviews>
@@ -70,23 +81,27 @@
                     <constraint firstItem="pGK-Ar-iBm" firstAttribute="centerY" secondItem="Awx-9U-LWt" secondAttribute="centerY" constant="-16.5" id="eJf-y1-bxH"/>
                     <constraint firstItem="WBM-UR-4hu" firstAttribute="top" secondItem="OhQ-Fk-Czf" secondAttribute="bottom" constant="2" id="evP-N4-lG7"/>
                     <constraint firstItem="Awx-9U-LWt" firstAttribute="leading" secondItem="pGK-Ar-iBm" secondAttribute="trailing" constant="-11" id="hLz-ze-trA"/>
+                    <constraint firstAttribute="trailing" secondItem="IAx-7T-RJd" secondAttribute="trailing" id="ixg-yO-j7e"/>
                     <constraint firstItem="IrL-yc-gYp" firstAttribute="centerY" secondItem="pGK-Ar-iBm" secondAttribute="centerY" id="jLf-5R-EL2"/>
                     <constraint firstItem="pGK-Ar-iBm" firstAttribute="leading" secondItem="Qx8-80-HZA" secondAttribute="leadingMargin" constant="-8" id="xPK-Tu-4TS"/>
                     <constraint firstAttribute="trailingMargin" secondItem="OhQ-Fk-Czf" secondAttribute="trailing" constant="-8" id="xaW-nX-mQG"/>
+                    <constraint firstItem="IAx-7T-RJd" firstAttribute="centerY" secondItem="Qx8-80-HZA" secondAttribute="centerY" id="zcz-Mc-ikN"/>
                 </constraints>
             </tableViewCellContentView>
             <connections>
                 <outlet property="badge" destination="orC-ej-MKC" id="q4c-Mc-9dg"/>
                 <outlet property="centeredDisplayName" destination="IrL-yc-gYp" id="Yxr-Z1-F71"/>
                 <outlet property="displayName" destination="OhQ-Fk-Czf" id="a5j-X5-Tvp"/>
+                <outlet property="muteBadge" destination="IAx-7T-RJd" id="JkV-KW-AJX"/>
                 <outlet property="statusOrb" destination="Awx-9U-LWt" id="ae5-pP-a8p"/>
                 <outlet property="statusText" destination="WBM-UR-4hu" id="cWb-pt-41n"/>
                 <outlet property="userImage" destination="pGK-Ar-iBm" id="ysI-Fi-czO"/>
             </connections>
-            <point key="canvasLocation" x="708" y="440"/>
+            <point key="canvasLocation" x="707.20000000000005" y="439.88005997001505"/>
         </tableViewCell>
     </objects>
     <resources>
+        <image name="847-moon-selected" width="24" height="28"/>
         <image name="NotificationBubble" width="22" height="22"/>
     </resources>
 </document>

@@ -26,6 +26,7 @@ typedef enum {
 @property (nonatomic, weak) IBOutlet UIImageView *statusOrb;
 @property (nonatomic, weak) IBOutlet UIImageView *userImage;
 @property (nonatomic, weak) IBOutlet UIButton *badge;
+@property (nonatomic, weak) IBOutlet UIImageView *muteBadge;
 
 -(void) setOrb;
 

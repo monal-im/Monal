@@ -323,7 +323,7 @@
 		26AA70452146E43E00598605 /* icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 26AA70442146E43E00598605 /* icon.icns */; };
 		26AA70482146E43E00598605 /* ShareViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26AA70472146E43E00598605 /* ShareViewController.m */; };
 		26AA704B2146E43E00598605 /* ShareViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26AA70492146E43E00598605 /* ShareViewController.xib */; };
-		26AA70502146E43E00598605 /* shareSheet-OSX.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 26AA70422146E43E00598605 /* shareSheet-OSX.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		26AA70502146E43E00598605 /* Share in Monal.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 26AA70422146E43E00598605 /* Share in Monal.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		26AAE285179F7B0200271345 /* MLSettingCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 26AAE284179F7B0200271345 /* MLSettingCell.m */; };
 		26B0CA8921AE2E3C0080B133 /* MLSoundsTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B0CA8821AE2E3C0080B133 /* MLSoundsTableViewController.m */; };
 		26B0CA8B21AE410E0080B133 /* AlertSounds in Resources */ = {isa = PBXBuildFile; fileRef = 26B0CA8A21AE410E0080B133 /* AlertSounds */; };
@@ -491,7 +491,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				26AA70502146E43E00598605 /* shareSheet-OSX.appex in Embed App Extensions */,
+				26AA70502146E43E00598605 /* Share in Monal.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -793,7 +793,7 @@
 		26AA70172146BBB900598605 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/iosShare.storyboard; sourceTree = "<group>"; };
 		26AA70192146BBB900598605 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		26AA70222146E2B900598605 /* shareSheet.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = shareSheet.entitlements; sourceTree = "<group>"; };
-		26AA70422146E43E00598605 /* shareSheet-OSX.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "shareSheet-OSX.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		26AA70422146E43E00598605 /* Share in Monal.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Share in Monal.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		26AA70442146E43E00598605 /* icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = icon.icns; sourceTree = "<group>"; };
 		26AA70462146E43E00598605 /* ShareViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShareViewController.h; sourceTree = "<group>"; };
 		26AA70472146E43E00598605 /* ShareViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ShareViewController.m; sourceTree = "<group>"; };
@@ -1101,7 +1101,7 @@
 				266272C61B27DB8100C1CD49 /* Monal-OSXTests.xctest */,
 				26049A501B7314F400D11866 /* libjrtplib-static-OSX.a */,
 				26AA70112146BBB800598605 /* shareSheet.appex */,
-				26AA70422146E43E00598605 /* shareSheet-OSX.appex */,
+				26AA70422146E43E00598605 /* Share in Monal.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -2242,9 +2242,9 @@
 			productReference = 26AA70112146BBB800598605 /* shareSheet.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
-		26AA70412146E43E00598605 /* shareSheet-OSX */ = {
+		26AA70412146E43E00598605 /* Share in Monal */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 26AA70512146E43E00598605 /* Build configuration list for PBXNativeTarget "shareSheet-OSX" */;
+			buildConfigurationList = 26AA70512146E43E00598605 /* Build configuration list for PBXNativeTarget "Share in Monal" */;
 			buildPhases = (
 				26AA703E2146E43E00598605 /* Sources */,
 				26AA703F2146E43E00598605 /* Frameworks */,
@@ -2254,9 +2254,9 @@
 			);
 			dependencies = (
 			);
-			name = "shareSheet-OSX";
+			name = "Share in Monal";
 			productName = "shareSheet-OSX";
-			productReference = 26AA70422146E43E00598605 /* shareSheet-OSX.appex */;
+			productReference = 26AA70422146E43E00598605 /* Share in Monal.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
@@ -2375,7 +2375,7 @@
 				266272C51B27DB8100C1CD49 /* Monal-OSXTests */,
 				260499F31B7314F400D11866 /* jrtplib-static-OSX */,
 				26AA70102146BBB800598605 /* shareSheet */,
-				26AA70412146E43E00598605 /* shareSheet-OSX */,
+				26AA70412146E43E00598605 /* Share in Monal */,
 			);
 		};
 /* End PBXProject section */
@@ -3098,7 +3098,7 @@
 		};
 		26AA704F2146E43E00598605 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 26AA70412146E43E00598605 /* shareSheet-OSX */;
+			target = 26AA70412146E43E00598605 /* Share in Monal */;
 			targetProxy = 26AA704E2146E43E00598605 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -4024,6 +4024,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon-3";
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -4067,6 +4068,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon-3";
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -4129,6 +4131,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon-3";
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -4425,7 +4428,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
-		26AA70512146E43E00598605 /* Build configuration list for PBXNativeTarget "shareSheet-OSX" */ = {
+		26AA70512146E43E00598605 /* Build configuration list for PBXNativeTarget "Share in Monal" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				26AA70522146E43E00598605 /* Debug */,

@@ -612,6 +612,11 @@ CA
                                                 <action selector="deleteItem:" target="Ady-hI-5gd" id="2Pd-CK-u0e"/>
                                             </connections>
                                         </menuItem>
+                                        <menuItem title="Mute" keyEquivalent="m" id="pc0-Pd-eIa">
+                                            <connections>
+                                                <action selector="muteItem:" target="Ady-hI-5gd" id="ozB-XV-Ypl"/>
+                                            </connections>
+                                        </menuItem>
                                         <menuItem title="Select All" keyEquivalent="a" id="Ruw-6m-B2m">
                                             <connections>
                                                 <action selector="selectAll:" target="Ady-hI-5gd" id="VNm-Mi-diN"/>
@@ -1201,14 +1206,22 @@ CA
                                                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                     </textFieldCell>
                                                                 </textField>
-                                                                <textField verticalHuggingPriority="749" horizontalCompressionResistancePriority="250" misplaced="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="SZE-Uv-IaF">
-                                                                    <rect key="frame" x="62" y="13" width="237" height="17"/>
+                                                                <textField verticalHuggingPriority="749" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="SZE-Uv-IaF">
+                                                                    <rect key="frame" x="58" y="13" width="230" height="17"/>
                                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Status Message" id="veq-qa-Y1Q">
                                                                         <font key="font" metaFont="titleBar"/>
                                                                         <color key="textColor" name="disabledControlTextColor" catalog="System" colorSpace="catalog"/>
                                                                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                                     </textFieldCell>
                                                                 </textField>
+                                                                <imageView hidden="YES" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="uoe-sr-pR6">
+                                                                    <rect key="frame" x="294" y="13" width="13" height="16"/>
+                                                                    <constraints>
+                                                                        <constraint firstAttribute="height" constant="16" id="bUZ-bw-Vxc"/>
+                                                                        <constraint firstAttribute="width" constant="13" id="sNM-y6-g6x"/>
+                                                                    </constraints>
+                                                                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="847-moon-selected" id="m36-al-9ui"/>
+                                                                </imageView>
                                                             </subviews>
                                                             <constraints>
                                                                 <constraint firstAttribute="bottom" secondItem="yCN-Uu-roF" secondAttribute="bottom" constant="2" id="AE2-r7-RgZ"/>
@@ -1220,17 +1233,20 @@ CA
                                                                 <constraint firstItem="OtE-Pn-e94" firstAttribute="top" secondItem="6kd-1k-jyH" secondAttribute="top" constant="5" id="Sk9-NN-vOt"/>
                                                                 <constraint firstAttribute="bottom" secondItem="SZE-Uv-IaF" secondAttribute="bottom" constant="13" id="W5k-ji-xzQ"/>
                                                                 <constraint firstItem="9lx-qw-VNs" firstAttribute="top" secondItem="6kd-1k-jyH" secondAttribute="top" priority="750" constant="8" id="W86-fp-1UE"/>
-                                                                <constraint firstAttribute="trailing" secondItem="SZE-Uv-IaF" secondAttribute="trailing" constant="16" id="Ywi-Dc-PGe"/>
                                                                 <constraint firstAttribute="trailing" secondItem="9lx-qw-VNs" secondAttribute="trailing" constant="14" id="ZDc-nk-tnX"/>
                                                                 <constraint firstItem="0gC-0h-Of5" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="6kd-1k-jyH" secondAttribute="leading" constant="37" id="c71-ia-hv1"/>
                                                                 <constraint firstItem="RZW-HH-7nJ" firstAttribute="leading" secondItem="6kd-1k-jyH" secondAttribute="leading" constant="5" id="crE-qw-pT2"/>
                                                                 <constraint firstItem="9lx-qw-VNs" firstAttribute="top" relation="lessThanOrEqual" secondItem="6kd-1k-jyH" secondAttribute="top" constant="3" id="kNd-Mm-jcU"/>
+                                                                <constraint firstItem="uoe-sr-pR6" firstAttribute="leading" secondItem="SZE-Uv-IaF" secondAttribute="trailing" constant="8" id="lrK-AW-Guz"/>
+                                                                <constraint firstAttribute="bottom" secondItem="uoe-sr-pR6" secondAttribute="bottom" constant="13" id="tJc-x1-HIV"/>
                                                                 <constraint firstItem="0gC-0h-Of5" firstAttribute="top" relation="greaterThanOrEqual" secondItem="6kd-1k-jyH" secondAttribute="top" constant="3" id="ujG-yh-omC"/>
                                                                 <constraint firstItem="9lx-qw-VNs" firstAttribute="leading" secondItem="OtE-Pn-e94" secondAttribute="trailing" constant="7" id="vSq-HT-InQ"/>
                                                                 <constraint firstItem="SZE-Uv-IaF" firstAttribute="leading" secondItem="yCN-Uu-roF" secondAttribute="trailing" constant="3" id="vaW-rH-FJt"/>
+                                                                <constraint firstAttribute="trailing" secondItem="uoe-sr-pR6" secondAttribute="trailing" constant="8" id="xST-X6-9Xx"/>
                                                             </constraints>
                                                             <connections>
                                                                 <outlet property="icon" destination="RZW-HH-7nJ" id="rPY-Ae-bVS"/>
+                                                                <outlet property="muteBadge" destination="uoe-sr-pR6" id="KZo-cK-nU7"/>
                                                                 <outlet property="name" destination="9lx-qw-VNs" id="J96-ve-Eze"/>
                                                                 <outlet property="status" destination="SZE-Uv-IaF" id="EK0-XO-enE"/>
                                                                 <outlet property="statusOrb" destination="yCN-Uu-roF" id="Pe8-vH-baB"/>
@@ -1244,6 +1260,7 @@ CA
                                             <connections>
                                                 <outlet property="dataSource" destination="0BB-CK-cBw" id="HSg-fi-AiJ"/>
                                                 <outlet property="delegate" destination="0BB-CK-cBw" id="Wvi-Ce-zaU"/>
+                                                <outlet property="menu" destination="4qi-2L-Fd3" id="5sA-Xf-NZo"/>
                                             </connections>
                                         </outlineView>
                                     </subviews>
@@ -1290,6 +1307,20 @@ CA
                     </connections>
                 </viewController>
                 <customObject id="N6A-8E-AoF" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+                <menu id="4qi-2L-Fd3">
+                    <items>
+                        <menuItem title="Mute" keyEquivalent="m" id="zxC-gC-ywi">
+                            <connections>
+                                <action selector="muteItem:" target="N6A-8E-AoF" id="MLg-6o-kxX"/>
+                            </connections>
+                        </menuItem>
+                        <menuItem title="Delete" keyEquivalent="d" id="MFg-X2-Has">
+                            <connections>
+                                <action selector="deleteItem:" target="N6A-8E-AoF" id="bGS-LI-ESg"/>
+                            </connections>
+                        </menuItem>
+                    </items>
+                </menu>
             </objects>
             <point key="canvasLocation" x="-371" y="1354.5"/>
         </scene>
@@ -3108,6 +3139,7 @@ Gw
         <image name="744-locked-selected" width="21" height="28"/>
         <image name="745-unlocked" width="21" height="28"/>
         <image name="770-paper-clip" width="28" height="27"/>
+        <image name="847-moon-selected" width="24" height="28"/>
         <image name="870-smile" width="28" height="28"/>
         <image name="907-plus-rounded-square" width="28" height="28"/>
         <image name="Disconnected" width="26" height="26"/>
@@ -3117,6 +3149,6 @@ Gw
         <image name="offline" width="15" height="15"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="Uwt-4d-Ui7"/>
+        <segue reference="Jkt-hW-Vlb"/>
     </inferredMetricsTieBreakers>
 </document>

@@ -28,6 +28,7 @@
 -(IBAction)segmentDidChange:(id)sender;
 
 -(IBAction)deleteItem:(id)sender;
+-(IBAction)muteItem:(id)sender;
 -(IBAction)startFind:(id)sender;
 
 -(void)toggleContactsTab;

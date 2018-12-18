@@ -369,6 +369,62 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
     
 }
 
+-(void) toggleMute:(NSDictionary *)contact
+{
+    [[DataLayer sharedInstance] isMutedJid:[contact objectForKey:kContactName] withCompletion:^(BOOL muted) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if(muted) {
+                [[DataLayer sharedInstance] unMuteJid:[contact objectForKey:kContactName]];
+            }
+            else {
+                [[DataLayer sharedInstance] muteJid:[contact objectForKey:kContactName]];
+            }
+            NSDictionary *user = @{kusernameKey:[contact objectForKey:kContactName],
+                                   kaccountNoKey:[contact objectForKey:kAccountID],
+                                   @"force":@YES
+                                   };
+            [self refreshRowWithUser:user];
+        });
+    }];
+}
+
+-(IBAction)muteItem:(id)sender
+{
+    if(self.searchResults)
+    {
+        if(self.contactsTable.selectedRow <self.searchResults.count) {
+            NSDictionary *contact =[self.searchResults objectAtIndex:self.contactsTable.selectedRow];
+            [[DataLayer sharedInstance] isMutedJid:[contact objectForKey:kContactName] withCompletion:^(BOOL muted) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if(muted) {
+                        [[DataLayer sharedInstance] unMuteJid:[contact objectForKey:kContactName]];
+                    }
+                    else {
+                        [[DataLayer sharedInstance] muteJid:[contact objectForKey:kContactName]];
+                    }
+                    [self.contactsTable reloadData];
+                });
+            }];
+        }
+    }
+    else if(self.activeChat)
+    {
+        if(self.contactsTable.selectedRow <self.activeChat.count) {
+            NSDictionary *contact =[self.activeChat objectAtIndex:self.contactsTable.selectedRow];
+            [self toggleMute:contact];
+        }
+    }
+    else  {
+        id item =[self.contactsTable itemAtRow:self.contactsTable.selectedRow];
+        
+        if([item isKindOfClass:[NSDictionary class]]) {
+            NSDictionary *contact =(NSDictionary *) item;
+            [self toggleMute:contact];
+        }
+    }
+    
+}
+
 -(IBAction)startFind:(id)sender
 {
     MLMainWindow *windowController =(MLMainWindow *)self.view.window.windowController;
@@ -485,29 +541,33 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 
 -(void) refreshContact:(NSNotification *) notification
 {
-    dispatch_async(dispatch_get_main_queue(), ^{
-
-    NSDictionary* user = notification.userInfo;
-    NSInteger initalPos=-1;
-    initalPos=[self positionOfOnlineContact:user];
-    if(initalPos>=0)
-    {
-        [self updateContactAt:initalPos withInfo:user];
-    }
-    else
-    {
-        //offline?
-        initalPos=[self positionOfOfflineContact:user];
-        
-        if(initalPos>=0)
-        {
-            [self updateOfflineContactAt:initalPos withInfo:user];
-        }
-        
-    }
-    });
+     NSDictionary* user = notification.userInfo;
+    [self refreshRowWithUser:user];
     
     [self updateAccessabilityCount];
+}
+
+
+-(void) refreshRowWithUser:(NSDictionary *) user
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSInteger initalPos=-1;
+        initalPos=[self positionOfOnlineContact:user];
+        if(initalPos>=0)
+        {
+            [self updateContactAt:initalPos withInfo:user];
+        }
+        else
+        {
+            //offline?
+            initalPos=[self positionOfOfflineContact:user];
+            
+            if(initalPos>=0)
+            {
+                [self updateOfflineContactAt:initalPos withInfo:user];
+            }
+        }
+    });
 }
 
 -(NSInteger) positionOfOnlineContact:(NSDictionary *) user
@@ -586,6 +646,8 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
         [contactrow setObject:[user objectForKey:kfullNameKey] forKey:@"full_name"];
         hasChange=YES;
     }
+    
+    if([user objectForKey:@"force"]) hasChange=YES;
     
     if(hasChange) {
         if(self.searchResults || self.activeChat){
@@ -1312,6 +1374,11 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
         });
     }];
 
+    [[DataLayer sharedInstance] isMutedJid:[contactRow objectForKey:@"buddy_name"]  withCompletion:^(BOOL muted) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            cell.muteBadge.hidden=!muted;
+        });
+    }];
     
     return cell;
 }

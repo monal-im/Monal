@@ -31,6 +31,8 @@ typedef enum {
 @property (nonatomic, weak) IBOutlet NSImageView *unreadBadge;
 @property (nonatomic, weak) IBOutlet NSTextField *unreadText;
 
+@property (nonatomic, weak) IBOutlet NSImageView *muteBadge;
+
 -(void) setOrb;
 -(void) setUnreadCount:(NSInteger) count;
 

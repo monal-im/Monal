@@ -714,6 +714,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 {
     xmpp* account= [self getConnectedAccountForID:accountId];
     [account leaveRoom:roomName];
+    [[DataLayer sharedInstance] removeBuddy:roomName forAccount:accountId];
 }
 
 -(void) autoJoinRoom:(NSNotification *) notification

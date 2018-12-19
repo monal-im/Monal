@@ -138,61 +138,65 @@
     NSNumber *showAlert =[notification.userInfo objectForKey:@"showAlert"];
     NSUserNotification *alert =[[NSUserNotification alloc] init];
     NSString* acctString =[NSString stringWithFormat:@"%ld", (long)[[notification.userInfo objectForKey:@"accountNo"] integerValue]];
-   
+    
     [[DataLayer sharedInstance] isMutedJid:[notification.userInfo objectForKey:@"from"] withCompletion:^(BOOL muted) {
         if(!muted){
-              BOOL showNotification = showAlert.boolValue;
-             NSString* nameToShow=[notification.userInfo objectForKey:@"from"];
-            if(self.window.occlusionState & NSWindowOcclusionStateVisible) {
-                if(self.window.isKeyWindow) {
-                    if([nameToShow isEqualToString:[self.contactInfo objectForKey:kContactName]])
-                    {
-                        showNotification= NO;
+            dispatch_async(dispatch_get_main_queue(), ^{
+                BOOL showNotification = showAlert.boolValue;
+                NSString* nameToShow=[notification.userInfo objectForKey:@"from"];
+                if(self.window.occlusionState & NSWindowOcclusionStateVisible) {
+                    if(self.window.isKeyWindow) {
+                        if([nameToShow isEqualToString:[self.contactInfo objectForKey:kContactName]])
+                        {
+                            showNotification= NO;
+                        }
                     }
                 }
-            }
-            
-            if([[notification.userInfo objectForKey:@"messageType"] isEqualToString:kMessageTypeStatus])
-            {
-                showNotification=NO;
-            }
-            
-            
-            if (showNotification) {
                 
-                NSString* fullName = [notification.userInfo objectForKey:@"actuallyfrom"];
-                
-                if([[notification.userInfo objectForKey:@"actuallyfrom"] isEqualToString:[notification.userInfo objectForKey:@"from"]]) {
-                    fullName=[[DataLayer sharedInstance] fullName:[notification.userInfo objectForKey:@"from"] forAccount:acctString];
-                    
-                }
-                if([fullName length]>0) nameToShow=fullName;
-                
-                alert.title= nameToShow;
-                if([[[NSUserDefaults standardUserDefaults] objectForKey:@"MessagePreview"] boolValue]) {
-                    alert.informativeText=[notification.userInfo objectForKey:@"messageText"];
-                } else  {
-                    alert.informativeText=@"Open app to see message";
-                }
-                
-                if([[[NSUserDefaults standardUserDefaults] objectForKey:@"Sound"] boolValue])
+                if([[notification.userInfo objectForKey:@"messageType"] isEqualToString:kMessageTypeStatus])
                 {
-                    alert.soundName= NSUserNotificationDefaultSoundName;
+                    showNotification=NO;
                 }
                 
-                [[MLImageManager sharedInstance] getIconForContact:[notification.userInfo objectForKey:@"from"] andAccount:[notification.userInfo objectForKey:@"accountNo"] withCompletion:^(NSImage *alertImage) {
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        alert.contentImage= alertImage;
-                        alert.hasReplyButton=YES;
-                        alert.userInfo= notification.userInfo;
-                        [[NSUserNotificationCenter defaultUserNotificationCenter] scheduleNotification:alert];
-                    });
-                    
-                    
-                }];
                 
-            }
-        }}];
+                if (showNotification) {
+                    
+                    NSString* fullName = [notification.userInfo objectForKey:@"actuallyfrom"];
+                    
+                    if([[notification.userInfo objectForKey:@"actuallyfrom"] isEqualToString:[notification.userInfo objectForKey:@"from"]]) {
+                        fullName=[[DataLayer sharedInstance] fullName:[notification.userInfo objectForKey:@"from"] forAccount:acctString];
+                        
+                    }
+                    if([fullName length]>0) nameToShow=fullName;
+                    
+                    alert.title= nameToShow;
+                    if([[[NSUserDefaults standardUserDefaults] objectForKey:@"MessagePreview"] boolValue]) {
+                        alert.informativeText=[notification.userInfo objectForKey:@"messageText"];
+                    } else  {
+                        alert.informativeText=@"Open app to see message";
+                    }
+                    
+                    if([[[NSUserDefaults standardUserDefaults] objectForKey:@"Sound"] boolValue])
+                    {
+                        alert.soundName= NSUserNotificationDefaultSoundName;
+                    }
+                    
+                    [[MLImageManager sharedInstance] getIconForContact:[notification.userInfo objectForKey:@"from"] andAccount:[notification.userInfo objectForKey:@"accountNo"] withCompletion:^(NSImage *alertImage) {
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            alert.contentImage= alertImage;
+                            alert.hasReplyButton=YES;
+                            alert.userInfo= notification.userInfo;
+                            [[NSUserNotificationCenter defaultUserNotificationCenter] scheduleNotification:alert];
+                        });
+                        
+                        
+                    }];
+                    
+                }
+            });
+        }
+        
+    }];
 
     [[DataLayer sharedInstance] countUnreadMessagesWithCompletion:^(NSNumber * result) {
         dispatch_async(dispatch_get_main_queue(), ^{

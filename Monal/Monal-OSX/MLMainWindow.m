@@ -193,21 +193,28 @@
                     }];
                     
                 }
+            
             });
         }
         
-    }];
-
-    [[DataLayer sharedInstance] countUnreadMessagesWithCompletion:^(NSNumber * result) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            if([result integerValue]>0) {
-                [[[NSApplication sharedApplication] dockTile] setBadgeLabel:[NSString stringWithFormat:@"%@", result]];
-                [[NSApplication sharedApplication] requestUserAttention:NSInformationalRequest];
-            }
+            [[DataLayer sharedInstance] countUnreadMessagesWithCompletion:^(NSNumber * result) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if([result integerValue]>0) {
+                        [[[NSApplication sharedApplication] dockTile] setBadgeLabel:[NSString stringWithFormat:@"%@", result]];
+                        if(!muted) {
+                            [[NSApplication sharedApplication] requestUserAttention:NSInformationalRequest];
+                        }
+                    }
+                });
+                
+            }];
         });
+        
         
     }];
 
+    
 
 }
 

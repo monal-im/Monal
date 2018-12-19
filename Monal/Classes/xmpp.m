@@ -2329,7 +2329,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     [self parseFeatures];
                     
                     #if TARGET_OS_IPHONE
-                    if(self.supportsPush && !self.pushEnabled)
+                    if(self.supportsPush)
                     {
                         [self enablePush];
                     }

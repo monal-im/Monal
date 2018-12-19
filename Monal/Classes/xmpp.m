@@ -1290,7 +1290,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         
                     }
                     
-                    if(iqNode.vCard)
+                    if(iqNode.vCard && iqNode.user)
                     {
                         NSString* fullname=iqNode.fullName;
                         if(!fullname) fullname= iqNode.user;

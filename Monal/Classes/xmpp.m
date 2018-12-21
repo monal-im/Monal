@@ -1294,21 +1294,24 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     {
                         NSString* fullname=iqNode.fullName;
                         if(!fullname) fullname= iqNode.user;
-                        [[DataLayer sharedInstance] setFullName:fullname forContact:iqNode.user andAccount:self->_accountNo];
                         
-                        if(iqNode.photoBinValue)
-                        {
-                            [[MLImageManager sharedInstance] setIconForContact:iqNode.user andAccount:self->_accountNo WithData:[iqNode.photoBinValue copy]];
+                        if([fullname stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].length>0 ) {
+                            [[DataLayer sharedInstance] setFullName:fullname forContact:iqNode.user andAccount:self->_accountNo];
                             
+                            if(iqNode.photoBinValue)
+                            {
+                                [[MLImageManager sharedInstance] setIconForContact:iqNode.user andAccount:self->_accountNo WithData:[iqNode.photoBinValue copy]];
+                                
+                            }
+                            
+                            if(!fullname) fullname=iqNode.user;
+                            
+                            NSDictionary* userDic=@{kusernameKey: iqNode.user,
+                                                    kfullNameKey: fullname,
+                                                    kaccountNoKey:self->_accountNo
+                                                    };
+                            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self userInfo:userDic];
                         }
-                        
-                        if(!fullname) fullname=iqNode.user;
-                        
-                        NSDictionary* userDic=@{kusernameKey: iqNode.user,
-                                                kfullNameKey: fullname,
-                                                kaccountNoKey:self->_accountNo
-                                                };
-                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self userInfo:userDic];
                         
                     }
                     

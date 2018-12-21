@@ -1314,7 +1314,10 @@ CA
                                 <action selector="muteItem:" target="N6A-8E-AoF" id="MLg-6o-kxX"/>
                             </connections>
                         </menuItem>
-                        <menuItem title="Delete" keyEquivalent="d" id="MFg-X2-Has">
+                        <menuItem title="Delete" id="MFg-X2-Has">
+                            <string key="keyEquivalent" base64-UTF8="YES">
+CA
+</string>
                             <connections>
                                 <action selector="deleteItem:" target="N6A-8E-AoF" id="bGS-LI-ESg"/>
                             </connections>

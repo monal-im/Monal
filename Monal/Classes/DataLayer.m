@@ -2429,7 +2429,7 @@ static DataLayer *sharedInstance=nil;
     
     if([dbversion doubleValue]<3.2)
     {
-        DDLogVerbose(@"Database version <3.1 detected. Performing upgrade . ");
+        DDLogVerbose(@"Database version <3.2 detected. Performing upgrade . ");
         
         [self executeNonQuery:@"update dbversion set dbversion='3.2'; " withCompletion:nil];
         
@@ -2437,6 +2437,15 @@ static DataLayer *sharedInstance=nil;
         [self executeNonQuery:@"CREATE TABLE blockList (jid varchar(50));" withCompletion:nil];
         
         DDLogVerbose(@"Upgrade to 3.2 success ");
+    }
+    
+    if([dbversion doubleValue]<3.3)
+    {
+        DDLogVerbose(@"Database version <3.3 detected. Performing upgrade . ");
+        
+        [self executeNonQuery:@"alter table buddylist add column encrypt bool;" withCompletion:nil];
+        
+        DDLogVerbose(@"Upgrade to 3.3 success ");
     }
    
     [dbversionCheck unlock];

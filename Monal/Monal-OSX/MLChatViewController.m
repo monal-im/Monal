@@ -517,6 +517,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         self.encryptChat=YES;
     }
     
+    
 }
 
 #pragma mark - sending

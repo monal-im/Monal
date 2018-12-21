@@ -31,6 +31,14 @@
         pos++;
     }
     
+    if([MLXMPPManager sharedInstance].connectedXMPP.count==1) {
+        self.accounts.hidden=YES;
+        [self.accounts selectItemAtIndex:0];
+    }
+    else {
+         self.accounts.hidden=NO;
+    }
+    
 }
 
 -(IBAction)add:(id)sender

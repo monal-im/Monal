@@ -10,6 +10,7 @@
 
 @interface MLGroupChatViewController : NSViewController
 
+@property  (nonatomic, weak) IBOutlet NSTextField *accountText;
 @property  (nonatomic, weak) IBOutlet NSComboBox *accounts;
 
 @property  (nonatomic, weak) IBOutlet NSTextField *room;

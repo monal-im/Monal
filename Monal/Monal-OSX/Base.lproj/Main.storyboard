@@ -332,6 +332,7 @@
                         </subviews>
                     </view>
                     <connections>
+                        <outlet property="accountText" destination="d1S-7u-tUi" id="c4k-6q-65F"/>
                         <outlet property="accounts" destination="4ph-eG-G9i" id="Ut3-2A-JEK"/>
                         <outlet property="autoJoin" destination="Erz-4h-KoR" id="X7q-xn-Z5e"/>
                         <outlet property="favorite" destination="4LX-Ez-0HV" id="tkE-vP-6VF"/>

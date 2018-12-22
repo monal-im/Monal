@@ -191,7 +191,7 @@
     
     [dic setObject:[NSNumber numberWithBool:self.sslCheck.state] forKey:kSSL];
     [dic setObject:[NSNumber numberWithBool:self.enabledCheck.state] forKey:kEnabled];
-    [dic setObject:[NSNumber numberWithBool:self.selfSigned.state] forKey:kSelfSigned];
+    [dic setObject:[NSNumber numberWithBool:!self.selfSigned.state] forKey:kSelfSigned];
     [dic setObject:[NSNumber numberWithBool:self.oldStyleSSL.state] forKey:kOldSSL];
     
     BOOL isGtalk=NO;

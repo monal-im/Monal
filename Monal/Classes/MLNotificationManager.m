@@ -29,6 +29,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     self=[super init];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
+    
     return self;
 }
 
@@ -69,6 +70,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     content.body =[notification.userInfo objectForKey:@"messageText"];
     content.userInfo= notification.userInfo;
     content.threadIdentifier =[self identifierWithNotification:notification];
+    content.categoryIdentifier=@"Reply";
     
     if( [[NSUserDefaults standardUserDefaults] boolForKey:@"Sound"]==true)
     {

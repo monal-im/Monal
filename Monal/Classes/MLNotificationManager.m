@@ -66,11 +66,20 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
     content.title =[notification.userInfo objectForKey:@"from"];
-    //TODO muc use subtitle
+    
+    if(![[notification.userInfo objectForKey:@"from"] isEqualToString:[notification.userInfo objectForKey:@"from"] ])
+    {
+        content.subtitle =[NSString stringWithFormat:@"%@ says:",[notification.userInfo objectForKey:@"actuallyfrom"]];
+    }
+    
     content.body =[notification.userInfo objectForKey:@"messageText"];
     content.userInfo= notification.userInfo;
     content.threadIdentifier =[self identifierWithNotification:notification];
     content.categoryIdentifier=@"Reply";
+    if (@available(iOS 12.0, *)) {
+        content.summaryArgument = [notification.userInfo objectForKey:@"from"];
+        content.summaryArgumentCount =2;
+    }
     
     if( [[NSUserDefaults standardUserDefaults] boolForKey:@"Sound"]==true)
     {

@@ -50,6 +50,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }];
 }
 
+-(NSString *) identifierWithNotification:(NSNotification *) notification
+{
+    return [NSString stringWithFormat:@"%@_%@",
+            [notification.userInfo objectForKey:@"accountNo"],
+            [notification.userInfo objectForKey:@"from"]];
+            
+}
+
 /**
  for io10 and up
  */
@@ -57,14 +65,26 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
     content.title =[notification.userInfo objectForKey:@"from"];
+    //TODO muc use subtitle
     content.body =[notification.userInfo objectForKey:@"messageText"];
-    content.sound = [UNNotificationSound defaultSound];
     content.userInfo= notification.userInfo;
+    content.threadIdentifier =[self identifierWithNotification:notification];
     
+    if( [[NSUserDefaults standardUserDefaults] boolForKey:@"Sound"]==true)
+    {
+        NSString *filename = [[NSUserDefaults standardUserDefaults] objectForKey:@"AlertSoundFile"];
+        if(filename) {
+            content.sound = [UNNotificationSound soundNamed:[NSString stringWithFormat:@"AlertSounds/%@.aif",filename]];
+        } else  {
+            content.sound = [UNNotificationSound defaultSound];
+        }
+    }
+
+    UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+    
+    //switch id
     UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:[NSUUID alloc].UUIDString
                                                                           content:content trigger:nil];
-    
-    UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
     
     [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
         

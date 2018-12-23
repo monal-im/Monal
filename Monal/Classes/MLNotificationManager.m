@@ -76,9 +76,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     content.userInfo= notification.userInfo;
     content.threadIdentifier =[self identifierWithNotification:notification];
     content.categoryIdentifier=@"Reply";
-    if (@available(iOS 12.0, *)) {
-        content.summaryArgument = [notification.userInfo objectForKey:@"from"];
-        content.summaryArgumentCount =2;
+   
+    if([[notification.userInfo objectForKey:@"messageType"] isEqualToString:kMessageTypeImage])
+    {
+        content.body =@"Sent an Image 📷";
+    }
+    
+    if([[notification.userInfo objectForKey:@"messageType"] isEqualToString:kMessageTypeUrl])
+    {
+        content.body =@"Sent a Link 🔗";
     }
     
     if( [[NSUserDefaults standardUserDefaults] boolForKey:@"Sound"]==true)
@@ -90,14 +96,17 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             content.sound = [UNNotificationSound defaultSound];
         }
     }
-
-    UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
     
-    //switch id
-    UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:[NSUUID alloc].UUIDString
+    NSString *idval = [NSString stringWithFormat:@"%@_%@", [self identifierWithNotification:notification],[notification.userInfo objectForKey:@"messageid"]];
+    UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+    UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:idval
                                                                           content:content trigger:nil];
     
     [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
+        
+    }];
+    
+    [center getDeliveredNotificationsWithCompletionHandler:^(NSArray<UNNotification *> * _Nonnull notifications) {
         
     }];
 }

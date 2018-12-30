@@ -7,44 +7,44 @@
 //
 
 #import "MLResourcesTableViewController.h"
+#import "DataLayer.h"
 
 @interface MLResourcesTableViewController ()
-
+@property (nonatomic, strong) NSArray *resources;
 @end
 
 @implementation MLResourcesTableViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+     self.navigationItem.title=@"Resources";
     
-    // Uncomment the following line to preserve selection between presentations.
-    // self.clearsSelectionOnViewWillAppear = NO;
-    
-    // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-    // self.navigationItem.rightBarButtonItem = self.editButtonItem;
+}
+
+-(void) viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    self.resources = [[DataLayer sharedInstance] resourcesForContact:[self.contact objectForKey:@"buddy_name"]];
 }
 
 #pragma mark - Table view data source
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-#warning Incomplete implementation, return the number of sections
-    return 0;
+    return 1;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-#warning Incomplete implementation, return the number of rows
-    return 0;
+   return self.resources.count;
 }
 
-/*
+
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:<#@"reuseIdentifier"#> forIndexPath:indexPath];
-    
-    // Configure the cell...
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"resource" forIndexPath:indexPath];
+    cell.textLabel.text = [[self.resources objectAtIndex:indexPath.row] objectForKey:@"resource"];
     
     return cell;
 }
-*/
+
 
 /*
 // Override to support conditional editing of the table view.

@@ -13,7 +13,8 @@
 #import "MLXMPPManager.h"
 #import "MLDetailsTableViewCell.h"
 #import "MLContactDetailHeader.h"
-
+#import "MLKeysTableViewController.h"
+#import "MLResourcesTableViewController.h"
 
 @implementation ContactDetails
 
@@ -34,22 +35,32 @@
 
 -(IBAction) callContact:(id)sender
 {
-    [self performSegueWithIdentifier:@"ShowCall" sender:self];
+    [self performSegueWithIdentifier:@"showCall" sender:self];
     [[MLXMPPManager sharedInstance] callContact:_contact];
 }
 
 
 -(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
-    if([segue.identifier isEqualToString:@"ShowCall"])
+    if([segue.identifier isEqualToString:@"showCall"])
     {
         CallViewController *callScreen = segue.destinationViewController;
         callScreen.contact=_contact; 
     }
+     else if([segue.identifier isEqualToString:@"showResources"])
+    {
+        MLResourcesTableViewController *resourcesVC = segue.destinationViewController;
+        resourcesVC.contact=_contact;
+    }
+    else if([segue.identifier isEqualToString:@"showKeys"])
+    {
+        MLKeysTableViewController *keysVC = segue.destinationViewController;
+        keysVC.contact=_contact;
+    }
 }
 
 
-#pragma mark tableview stuff
+#pragma mark -- tableview
 
 -(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
 {
@@ -130,12 +141,26 @@
 }
 
 
--(id) initWithContact:(NSDictionary*) contact
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    self=[super init];
-    _contact=contact;
-    return self;
+    [tableView deselectRowAtIndexPath:indexPath animated:NO];
+    
+    if(indexPath.section!=2) return;
+    
+    switch(indexPath.row)
+    {
+        case 0:  {
+            [self performSegueWithIdentifier:@"showKeys" sender:self];
+            break;
+        }
+        case 1:  {
+            [self performSegueWithIdentifier:@"showResources" sender:self];
+            break;
+        }
+    }
+    
 }
+
 
 -(IBAction)close:(id)sender
 {

@@ -28,12 +28,8 @@
     [super viewWillAppear:animated];
     [[MLXMPPManager sharedInstance] getVCard:_contact];
     self.tableView.rowHeight= UITableViewAutomaticDimension;
+    self.navigationItem.title=[self.contact objectForKey:@"full_name"];
     
-}
-
--(BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
-{
-	return YES;
 }
 
 -(IBAction) callContact:(id)sender
@@ -54,9 +50,16 @@
 
 
 #pragma mark tableview stuff
+-(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
+{
+    if(section==0) return 0;
+
+    return 30.0;
+}
 
 - (UIView *) tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
 {
+    if(section==0) return nil;
     UIView *headerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, tableView.bounds.size.width, 30)] ;
     
     UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(10, 3, tableView.bounds.size.width - 10, 18)] ;
@@ -135,7 +138,7 @@
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
-    NSString* toreturn=@"";
+    NSString* toreturn=nil; 
     if(section==1)
         toreturn= @"Status Message";
     
@@ -150,7 +153,6 @@
 {
     self=[super init];
     _contact=contact;
-    self.navigationItem.title=[self.contact objectForKey:@"full_name"];
     return self;
 }
 

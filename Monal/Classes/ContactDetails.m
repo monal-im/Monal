@@ -50,31 +50,12 @@
 
 
 #pragma mark tableview stuff
+
 -(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
 {
-    if(section==0) return 0;
+    if(section==0) return 2; // table view does not like <=1
 
     return 30.0;
-}
-
-- (UIView *) tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
-{
-    if(section==0) return nil;
-    UIView *headerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, tableView.bounds.size.width, 30)] ;
-    
-    UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(10, 3, tableView.bounds.size.width - 10, 18)] ;
-    label.text = [self tableView:self.tableView titleForHeaderInSection:section];
-    label.textColor = [UIColor whiteColor];
-    label.backgroundColor = [UIColor clearColor];
-    [headerView addSubview:label];
-    
-    label.textColor=[UIColor darkGrayColor];
-    label.text=  label.text.uppercaseString;
-    label.shadowColor =[UIColor clearColor];
-    label.font=[UIFont systemFontOfSize:[UIFont systemFontSize]];
-    
-    
-    return headerView;
 }
 
 

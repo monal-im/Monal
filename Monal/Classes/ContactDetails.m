@@ -12,6 +12,7 @@
 #import "CallViewController.h"
 #import "MLXMPPManager.h"
 #import "MLDetailsTableViewCell.h"
+#import "MLContactDetailHeader.h"
 
 
 @implementation ContactDetails
@@ -76,50 +77,54 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    MLDetailsTableViewCell* thecell;
+    UITableViewCell* thecell;
   
-    switch(indexPath.section) {
+   switch(indexPath.section) {
         case 0: {
-            thecell=  (MLDetailsTableViewCell *)[tableView dequeueReusableCellWithIdentifier:@"topCell"];
-            
-            thecell.buddyName.text=[self.contact objectForKey:@"buddy_name"];
-            thecell.fullName.text=[self.contact objectForKey:@"full_name"];
-            thecell.buddyStatus.text=[self.contact objectForKey:@"state"];
-            
-            if([thecell.buddyStatus.text isEqualToString:@"(null)"])  thecell.buddyStatus.text=@"";
-            if([thecell.fullName.text isEqualToString:@"(null)"])  thecell.fullName.text=@"";
-            
+            MLContactDetailHeader *detailCell=  (MLContactDetailHeader *)[tableView dequeueReusableCellWithIdentifier:@"headerCell"];
+
+            detailCell.jid.text=[self.contact objectForKey:@"buddy_name"];
+//            thecell.fullName.text=[self.contact objectForKey:@"full_name"];
+//            thecell.buddyStatus.text=[self.contact objectForKey:@"state"];
+
+//            if([thecell.buddyStatus.text isEqualToString:@"(null)"])  thecell.buddyStatus.text=@"";
+//            if([thecell.fullName.text isEqualToString:@"(null)"])  thecell.fullName.text=@"";
+
             NSString* accountNo=[NSString stringWithFormat:@"%@", [self.contact objectForKey:@"account_id"]];
             [[MLImageManager sharedInstance] getIconForContact:[self.contact objectForKey:@"buddy_name"] andAccount:accountNo withCompletion:^(UIImage *image) {
-                thecell.buddyIconView.image=image;
+                detailCell.buddyIconView.image=image;
+                detailCell.background.image=image;
             }];
-            
+
+            thecell=detailCell;
             break;
         }
         case 1: {
-            thecell=  (MLDetailsTableViewCell *)[tableView dequeueReusableCellWithIdentifier:@"bottomCell"];
-            thecell.cellDetails.text=[_contact objectForKey:@"status"];
-            if([  thecell.cellDetails.text isEqualToString:@"(null)"])  thecell.cellDetails.text=@"";
+            MLDetailsTableViewCell *cell=  (MLDetailsTableViewCell *)[tableView dequeueReusableCellWithIdentifier:@"MessageCell"];
+            cell.cellDetails.text=[_contact objectForKey:@"status"];
+            if([cell.cellDetails.text isEqualToString:@"(null)"])  cell.cellDetails.text=@"";
+            thecell=cell;
             break;
         }
         case 2: {
-            thecell=  (MLDetailsTableViewCell *)[tableView dequeueReusableCellWithIdentifier:@"resourceCell"];
-            NSArray* resources= [[DataLayer sharedInstance] resourcesForContact:[_contact objectForKey:@"buddy_name"]];
-            thecell.cellDetails.text=@"";
-            for(NSDictionary* row in resources)
-            {
-                thecell.cellDetails.text=[NSString stringWithFormat:@"%@\n%@", thecell.cellDetails.text, [row objectForKey:@"resource"]];
+            thecell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"Sub"];
+            if(indexPath.row==1) {
+                thecell.textLabel.text=@"Resources"; //if muc change to participants
+            } else  {
+                thecell.textLabel.text=@"Encryption Keys"; //if muc change to participants
             }
+            thecell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
             break;
         }
-    }
+   }
     return thecell;
     
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section;
 {
-	return 1;
+    if(section==2) return 2;
+    else  return 1;
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
@@ -132,10 +137,10 @@
 {
     NSString* toreturn=@"";
     if(section==1)
-        toreturn= @"Message";
+        toreturn= @"Status Message";
     
     if(section==2)
-        toreturn= @"Resources";
+        toreturn= @"Connection Details";
     
     return toreturn;
 }
@@ -143,36 +148,10 @@
 
 -(id) initWithContact:(NSDictionary*) contact
 {
-	
     self=[super init];
     _contact=contact;
-    
-    self.navigationItem.title=NSLocalizedString(@"Details", @"");
-    
-    
-	
-    // see if this user  has  jingle call
-    // check caps for audio
-    
-    //    BOOL hasAudio=NO;
-    //
-    //    hasAudio=[db checkCap:@"urn:xmpp:jingle:apps:rtp:audio" forUser:buddy accountNo:jabber.accountNumber];
-    //
-    //
-    //    if(!hasAudio)
-    //    {
-    //        // check legacy cap as well
-    //        hasAudio=[db checkLegacyCap:@"voice-v1"  forUser:buddy accountNo:jabber.accountNumber];
-    //
-    //    }
-    //
-    //    if(!hasAudio)
-    //    {
-    //        _callButton.hidden=YES;
-    //    }
-    
+    self.navigationItem.title=[self.contact objectForKey:@"full_name"];
     return self;
-    
 }
 
 -(IBAction)close:(id)sender

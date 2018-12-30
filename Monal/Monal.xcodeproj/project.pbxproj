@@ -293,6 +293,8 @@
 		266272C11B27DB8000C1CD49 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 266272BF1B27DB8000C1CD49 /* Main.storyboard */; };
 		266272CD1B27DB8100C1CD49 /* Monal_OSXTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 266272CC1B27DB8100C1CD49 /* Monal_OSXTests.m */; };
 		26724D9321B4C1E700F1F46F /* MLComposeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26724D9221B4C1E700F1F46F /* MLComposeViewController.m */; };
+		2673CABA21D851E600256507 /* ContactDetails.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2673CAB921D851E600256507 /* ContactDetails.storyboard */; };
+		2673CABD21D8617300256507 /* MLContactDetailHeader.m in Sources */ = {isa = PBXBuildFile; fileRef = 2673CABC21D8617300256507 /* MLContactDetailHeader.m */; };
 		267710241E21923600464002 /* MASPreferencesWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 267710201E21923600464002 /* MASPreferencesWindow.xib */; };
 		267710251E21923600464002 /* MASPreferencesWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 267710221E21923600464002 /* MASPreferencesWindowController.m */; };
 		267710261E21923600464002 /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = 267710231E21923600464002 /* README.md */; };
@@ -753,6 +755,9 @@
 		266272CC1B27DB8100C1CD49 /* Monal_OSXTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Monal_OSXTests.m; sourceTree = "<group>"; };
 		26724D9121B4C1E700F1F46F /* MLComposeViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLComposeViewController.h; sourceTree = "<group>"; };
 		26724D9221B4C1E700F1F46F /* MLComposeViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLComposeViewController.m; sourceTree = "<group>"; };
+		2673CAB921D851E600256507 /* ContactDetails.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = ContactDetails.storyboard; sourceTree = "<group>"; };
+		2673CABB21D8617300256507 /* MLContactDetailHeader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLContactDetailHeader.h; sourceTree = "<group>"; };
+		2673CABC21D8617300256507 /* MLContactDetailHeader.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLContactDetailHeader.m; sourceTree = "<group>"; };
 		2677101F1E21923600464002 /* MASPreferencesViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MASPreferencesViewController.h; sourceTree = "<group>"; };
 		267710201E21923600464002 /* MASPreferencesWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MASPreferencesWindow.xib; sourceTree = "<group>"; };
 		267710211E21923600464002 /* MASPreferencesWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MASPreferencesWindowController.h; sourceTree = "<group>"; };
@@ -1509,6 +1514,9 @@
 				26EC40FB17BDD8560031304D /* ContactDetails.m */,
 				268C1E481FDAD08700BD6921 /* MLDetailsTableViewCell.h */,
 				268C1E491FDAD08700BD6921 /* MLDetailsTableViewCell.m */,
+				2673CAB921D851E600256507 /* ContactDetails.storyboard */,
+				2673CABB21D8617300256507 /* MLContactDetailHeader.h */,
+				2673CABC21D8617300256507 /* MLContactDetailHeader.m */,
 			);
 			name = "Contact Details";
 			sourceTree = "<group>";
@@ -2393,6 +2401,7 @@
 				26B2A4BB1B73061400272E63 /* Images.xcassets in Resources */,
 				26F396D32196847C00EF5720 /* Login.storyboard in Resources */,
 				2653EAE61C5B243400ED97F7 /* Main.storyboard in Resources */,
+				2673CABA21D851E600256507 /* ContactDetails.storyboard in Resources */,
 				26158AF41FFA8A6A00E53BDC /* opensource.html in Resources */,
 				262E51981AD8CB7200788351 /* MLTextInputCell.xib in Resources */,
 				2649CE531C51B84C00CD1E80 /* Launch Screen.storyboard in Resources */,
@@ -2854,6 +2863,7 @@
 				262E51921AD8CAC600788351 /* MLButtonCell.m in Sources */,
 				26C4B22421B6B91300610282 /* MLDNSLookup.m in Sources */,
 				26C1EA6B1FF937320085547A /* MLNotificationSettingsViewController.m in Sources */,
+				2673CABD21D8617300256507 /* MLContactDetailHeader.m in Sources */,
 				2644D4951FF046E800F46AB5 /* MLBaseCell.m in Sources */,
 				26D51CE01E2674D700141E04 /* NXOAuth2PostBodyStream.m in Sources */,
 				268DD58617C4541000C673A9 /* MLChatCell.m in Sources */,

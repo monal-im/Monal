@@ -1089,9 +1089,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             contactDic=[_offlineContacts objectAtIndex:indexPath.row];
         }
     }
-    
-    
-    
+
     [self performSegueWithIdentifier:@"showDetails" sender:contactDic];
 }
 

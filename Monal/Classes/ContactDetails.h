@@ -15,5 +15,8 @@
 @property (nonatomic, strong) NSDictionary *contact;
 
 -(IBAction) callContact:(id)sender;
+-(IBAction) muteContact:(id)sender;
+-(IBAction) toggleEncryption:(id)sender;
+
 
 @end

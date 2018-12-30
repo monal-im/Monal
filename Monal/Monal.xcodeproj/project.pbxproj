@@ -295,6 +295,8 @@
 		26724D9321B4C1E700F1F46F /* MLComposeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26724D9221B4C1E700F1F46F /* MLComposeViewController.m */; };
 		2673CABA21D851E600256507 /* ContactDetails.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2673CAB921D851E600256507 /* ContactDetails.storyboard */; };
 		2673CABD21D8617300256507 /* MLContactDetailHeader.m in Sources */ = {isa = PBXBuildFile; fileRef = 2673CABC21D8617300256507 /* MLContactDetailHeader.m */; };
+		2673CAC021D9242E00256507 /* MLKeysTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2673CABF21D9242E00256507 /* MLKeysTableViewController.m */; };
+		2673CAC321D9244B00256507 /* MLResourcesTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2673CAC221D9244B00256507 /* MLResourcesTableViewController.m */; };
 		267710241E21923600464002 /* MASPreferencesWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 267710201E21923600464002 /* MASPreferencesWindow.xib */; };
 		267710251E21923600464002 /* MASPreferencesWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 267710221E21923600464002 /* MASPreferencesWindowController.m */; };
 		267710261E21923600464002 /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = 267710231E21923600464002 /* README.md */; };
@@ -758,6 +760,10 @@
 		2673CAB921D851E600256507 /* ContactDetails.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = ContactDetails.storyboard; sourceTree = "<group>"; };
 		2673CABB21D8617300256507 /* MLContactDetailHeader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLContactDetailHeader.h; sourceTree = "<group>"; };
 		2673CABC21D8617300256507 /* MLContactDetailHeader.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLContactDetailHeader.m; sourceTree = "<group>"; };
+		2673CABE21D9242E00256507 /* MLKeysTableViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLKeysTableViewController.h; sourceTree = "<group>"; };
+		2673CABF21D9242E00256507 /* MLKeysTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLKeysTableViewController.m; sourceTree = "<group>"; };
+		2673CAC121D9244A00256507 /* MLResourcesTableViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLResourcesTableViewController.h; sourceTree = "<group>"; };
+		2673CAC221D9244B00256507 /* MLResourcesTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLResourcesTableViewController.m; sourceTree = "<group>"; };
 		2677101F1E21923600464002 /* MASPreferencesViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MASPreferencesViewController.h; sourceTree = "<group>"; };
 		267710201E21923600464002 /* MASPreferencesWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MASPreferencesWindow.xib; sourceTree = "<group>"; };
 		267710211E21923600464002 /* MASPreferencesWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MASPreferencesWindowController.h; sourceTree = "<group>"; };
@@ -1517,6 +1523,10 @@
 				2673CAB921D851E600256507 /* ContactDetails.storyboard */,
 				2673CABB21D8617300256507 /* MLContactDetailHeader.h */,
 				2673CABC21D8617300256507 /* MLContactDetailHeader.m */,
+				2673CABE21D9242E00256507 /* MLKeysTableViewController.h */,
+				2673CABF21D9242E00256507 /* MLKeysTableViewController.m */,
+				2673CAC121D9244A00256507 /* MLResourcesTableViewController.h */,
+				2673CAC221D9244B00256507 /* MLResourcesTableViewController.m */,
 			);
 			name = "Contact Details";
 			sourceTree = "<group>";
@@ -2791,10 +2801,12 @@
 				26B2A4F31B73097500272E63 /* DDFileLogger.m in Sources */,
 				2609B5291FD5B26800F09FA1 /* MLSplitViewDelegate.m in Sources */,
 				261A6288176C157D00059090 /* MLDisplaySettingsViewController.m in Sources */,
+				2673CAC021D9242E00256507 /* MLKeysTableViewController.m in Sources */,
 				261A628B176C159000059090 /* AccountsViewController.m in Sources */,
 				261A628E176C15AD00059090 /* ChatLogsViewController.m in Sources */,
 				26FB468F18B2755A0043094F /* IPAddress.m in Sources */,
 				26FE3BCB1C61A6C3003CC230 /* MLResizingTextView.m in Sources */,
+				2673CAC321D9244B00256507 /* MLResourcesTableViewController.m in Sources */,
 				26B2A4ED1B73097500272E63 /* DDAbstractDatabaseLogger.m in Sources */,
 				26D51CD41E2674D700141E04 /* NXOAuth2AccountStore.m in Sources */,
 				26D51CD01E2674D700141E04 /* NXOAuth2AccessToken.m in Sources */,

@@ -58,7 +58,7 @@
 {
     NSString* toreturn=nil;
     if(section==0)
-        toreturn= @"These are keys associated with the devices this person is using.\n\nYou should trust a key when you have verified it.\n\nOne way to verify is to compare the values below with what is on the other person's screen.";
+        toreturn= @"You should trust a key when you have verified it. Verify by comparing the key below to the one on your contact's screen or scan their QR code.";
     
     return toreturn;
 }

@@ -31,6 +31,12 @@
     self.tableView.rowHeight= UITableViewAutomaticDimension;
     self.navigationItem.title=[self.contact objectForKey:@"full_name"];
     
+#ifndef DISABLE_OMEMO
+    NSString* accountNo=[NSString stringWithFormat:@"%@", [self.contact objectForKey:@"account_id"]];
+    xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:accountNo];
+    [xmppAccount queryOMEMODevicesFrom:[self.contact objectForKey:@"buddy_name"]];
+#endif
+    
 }
 
 -(IBAction) callContact:(id)sender

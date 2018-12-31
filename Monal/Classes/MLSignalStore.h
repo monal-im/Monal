@@ -16,6 +16,8 @@
 @property (nonatomic, strong) NSArray *preKeys;
 
 -(id) initWithAccountId:(NSString *) accountId;
--(void) saveValues; 
+-(void) saveValues;
+
+-(NSData *) getIdentityForAddress:(SignalAddress*)address;
 
 @end

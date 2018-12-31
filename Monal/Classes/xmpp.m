@@ -13,9 +13,6 @@
 #import "EncodingTools.h"
 #import "MLXMPPManager.h"
 
-#import "MLSignalStore.h"
-
-
 #if TARGET_OS_IPHONE
 #import "UIAlertView+Blocks.h"
 #endif
@@ -44,10 +41,6 @@
 
 #import "NXOAuth2.h"
 #import "MLHTTPRequest.h"
-
-#ifndef DISABLE_OMEMO
-#import "SignalProtocolObjC.h"
-#endif
 
 #include <openssl/evp.h>
 #include <openssl/rand.h>
@@ -149,10 +142,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 @property (nonatomic, strong) NXOAuth2Account *oauthAccount;
 
-#ifndef DISABLE_OMEMO
-@property (nonatomic, strong) SignalContext *signalContext;
-@property (nonatomic, strong) MLSignalStore *monalSignalStore;
-#endif
+
 
 
 @end

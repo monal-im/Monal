@@ -7,9 +7,12 @@
 //
 
 #import "MLKeysTableViewController.h"
+#import "MLXMPPManager.h"
+#import "MLKeyCell.h"
 
 @interface MLKeysTableViewController ()
-
+@property (nonatomic, weak) xmpp *account;
+@property (nonatomic, strong) NSArray * devices;
 @end
 
 @implementation MLKeysTableViewController
@@ -19,70 +22,54 @@
     self.navigationItem.title=@"Encryption Keys";
 }
 
+-(void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    self.account=[[MLXMPPManager sharedInstance] getConnectedAccountForID:[NSString stringWithFormat:@"%@",[self.contact objectForKey:@"account_id"]]];
+    self.devices= [self.account.monalSignalStore allDeviceIdsForAddressName:[self.contact objectForKey:@"buddy_name"]];
+}
+
 #pragma mark - Table view data source
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-#warning Incomplete implementation, return the number of sections
-    return 0;
+    return 1;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-#warning Incomplete implementation, return the number of rows
-    return 0;
+    return self.devices.count;
 }
 
-/*
+
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:<#@"reuseIdentifier"#> forIndexPath:indexPath];
+    MLKeyCell *cell = (MLKeyCell *) [tableView dequeueReusableCellWithIdentifier:@"key" forIndexPath:indexPath];
     
-    // Configure the cell...
+    NSNumber *device =[self.devices objectAtIndex:indexPath.row];
+    SignalAddress *address = [[SignalAddress alloc] initWithName:[self.contact objectForKey:@"buddy_name"] deviceId:device.integerValue];
+    
+    NSData *identity=[self.account.monalSignalStore getIdentityForAddress:address];
+    
+    cell.key.text = [EncodingTools hexadecimalString:identity];
+    cell.toggle.on = [self.account.monalSignalStore isTrustedIdentity:address identityKey:identity];
     
     return cell;
 }
-*/
 
-/*
-// Override to support conditional editing of the table view.
-- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
-    // Return NO if you do not want the specified item to be editable.
-    return YES;
+- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
+{
+    NSString* toreturn=nil;
+    if(section==0)
+        toreturn= @"These are keys associated with the devices this person is using.\n\nYou should trust a key when you have verified it.\n\nOne way to verify is to compare the values below with what is on the other person's screen.";
+    
+    return toreturn;
 }
-*/
 
-/*
-// Override to support editing the table view.
-- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
-    if (editingStyle == UITableViewCellEditingStyleDelete) {
-        // Delete the row from the data source
-        [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
-    } else if (editingStyle == UITableViewCellEditingStyleInsert) {
-        // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-    }   
+- (NSString *)tableView:(UITableView *)tableView titleForFooterInSection:(NSInteger)section
+{
+    NSString* toreturn=nil;
+    if(section==0)
+        toreturn= @"Monal uses OMEMO encryption to protect your conversations";
+    
+    return toreturn;
 }
-*/
-
-/*
-// Override to support rearranging the table view.
-- (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath {
-}
-*/
-
-/*
-// Override to support conditional rearranging of the table view.
-- (BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath {
-    // Return NO if you do not want the item to be re-orderable.
-    return YES;
-}
-*/
-
-/*
-#pragma mark - Navigation
-
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
-}
-*/
 
 @end

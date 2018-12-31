@@ -20,6 +20,10 @@
 #import "MLConstants.h"
 #import "jingleCall.h"
 #import "MLDNSLookup.h"
+#import "MLSignalStore.h"
+#ifndef DISABLE_OMEMO
+#import "SignalProtocolObjC.h"
+#endif
 
 typedef NS_ENUM (NSInteger, xmppState) {
     kStateLoggedOut =-1,
@@ -290,8 +294,12 @@ FOUNDATION_EXPORT NSString *const kCompletion;
 #endif
 //UI
 
-
 @property (nonatomic,strong) NSDate* connectedTime;
+
+#ifndef DISABLE_OMEMO
+@property (nonatomic, strong) SignalContext *signalContext;
+@property (nonatomic, strong) MLSignalStore *monalSignalStore;
+#endif
 
 extern NSString *const kId;
 extern NSString *const kMessageId;
@@ -301,6 +309,7 @@ extern NSString *const kSendTimer;
  An intentional disconnect to trigger APNS. does not close the stream. 
  */
 -(void) disconnectToResumeWithCompletion:(void (^)(void))completion;
+
 
 
 @end

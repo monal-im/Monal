@@ -297,6 +297,7 @@
 		2673CABD21D8617300256507 /* MLContactDetailHeader.m in Sources */ = {isa = PBXBuildFile; fileRef = 2673CABC21D8617300256507 /* MLContactDetailHeader.m */; };
 		2673CAC021D9242E00256507 /* MLKeysTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2673CABF21D9242E00256507 /* MLKeysTableViewController.m */; };
 		2673CAC321D9244B00256507 /* MLResourcesTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2673CAC221D9244B00256507 /* MLResourcesTableViewController.m */; };
+		2673CAC621D9D3F700256507 /* MLKeyCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2673CAC521D9D3F700256507 /* MLKeyCell.m */; };
 		267710241E21923600464002 /* MASPreferencesWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 267710201E21923600464002 /* MASPreferencesWindow.xib */; };
 		267710251E21923600464002 /* MASPreferencesWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 267710221E21923600464002 /* MASPreferencesWindowController.m */; };
 		267710261E21923600464002 /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = 267710231E21923600464002 /* README.md */; };
@@ -764,6 +765,8 @@
 		2673CABF21D9242E00256507 /* MLKeysTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLKeysTableViewController.m; sourceTree = "<group>"; };
 		2673CAC121D9244A00256507 /* MLResourcesTableViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLResourcesTableViewController.h; sourceTree = "<group>"; };
 		2673CAC221D9244B00256507 /* MLResourcesTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLResourcesTableViewController.m; sourceTree = "<group>"; };
+		2673CAC421D9D3F700256507 /* MLKeyCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLKeyCell.h; sourceTree = "<group>"; };
+		2673CAC521D9D3F700256507 /* MLKeyCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLKeyCell.m; sourceTree = "<group>"; };
 		2677101F1E21923600464002 /* MASPreferencesViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MASPreferencesViewController.h; sourceTree = "<group>"; };
 		267710201E21923600464002 /* MASPreferencesWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MASPreferencesWindow.xib; sourceTree = "<group>"; };
 		267710211E21923600464002 /* MASPreferencesWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MASPreferencesWindowController.h; sourceTree = "<group>"; };
@@ -1527,6 +1530,8 @@
 				2673CABF21D9242E00256507 /* MLKeysTableViewController.m */,
 				2673CAC121D9244A00256507 /* MLResourcesTableViewController.h */,
 				2673CAC221D9244B00256507 /* MLResourcesTableViewController.m */,
+				2673CAC421D9D3F700256507 /* MLKeyCell.h */,
+				2673CAC521D9D3F700256507 /* MLKeyCell.m */,
 			);
 			name = "Contact Details";
 			sourceTree = "<group>";
@@ -2815,6 +2820,7 @@
 				26EE1B0C21A8F3CE00264B95 /* MLWelcomeViewController.m in Sources */,
 				26352EA8177D222600E2C8FF /* MLXMPPManager.m in Sources */,
 				26E3ED871FEC0CB7008ABDA5 /* MLServerDetails.m in Sources */,
+				2673CAC621D9D3F700256507 /* MLKeyCell.m in Sources */,
 				260C51D1177F08F50039634B /* xmpp.m in Sources */,
 				263AFDFC209B3B35007F9CEE /* MLSignalStore.m in Sources */,
 				260C51D4177F44AD0039634B /* MLXMLNode.m in Sources */,

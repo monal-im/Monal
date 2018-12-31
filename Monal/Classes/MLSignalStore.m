@@ -288,7 +288,7 @@
  */
 - (BOOL) isTrustedIdentity:(SignalAddress*)address identityKey:(NSData*)identityKey;
 {
-    NSData *dbIdentity= (NSData *)[[DataLayer sharedInstance] executeScalar:@"select identity from signalContactIdentity where account_id=? and contactDeviceId=? and contactName=? and trusted=1" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
+    NSData *dbIdentity= [self getIdentityForAddress:address];
     BOOL toreturn=NO;
     
     if(!dbIdentity) {
@@ -303,6 +303,11 @@
     }
     
      return toreturn;
+}
+
+-(NSData *) getIdentityForAddress:(SignalAddress*)address
+{
+    return (NSData *)[[DataLayer sharedInstance] executeScalar:@"select identity from signalContactIdentity where account_id=? and contactDeviceId=? and contactName=? and trusted=1" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
 }
 
 /**

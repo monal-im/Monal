@@ -1890,7 +1890,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                                                                   @"actuallyfrom":actuallyFrom,
                                                                                                   @"messageText":body,
                                                                                                   @"to":messageNode.to?messageNode.to:recipient,
-                                                                                                  @"messageid":messageNode.idval,
+                                                                                                  @"messageid":messageNode.idval?messageNode.idval:@"",
                                                                                                   @"accountNo":_accountNo,
                                                                                                   @"showAlert":[NSNumber numberWithBool:showAlert],
                                                                                                   @"shouldRefresh":[NSNumber numberWithBool:shouldRefresh],

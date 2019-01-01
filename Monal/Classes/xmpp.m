@@ -1293,14 +1293,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                 [[MLImageManager sharedInstance] setIconForContact:iqNode.user andAccount:self->_accountNo WithData:[iqNode.photoBinValue copy]];
                                 
                             }
-                            
-                            if(!fullname) fullname=iqNode.user;
-                            
-                            NSDictionary* userDic=@{kusernameKey: iqNode.user,
-                                                    kfullNameKey: fullname,
-                                                    kaccountNoKey:self->_accountNo
-                                                    };
-                            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self userInfo:userDic];
+                            if(iqNode.user) {
+                                if(!fullname) fullname=iqNode.user;
+                                
+                                NSDictionary* userDic=@{kusernameKey: iqNode.user,
+                                                        kfullNameKey: fullname,
+                                                        kaccountNoKey:self->_accountNo
+                                                        };
+                                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self userInfo:userDic];
+                            }
                         }
                         
                     }

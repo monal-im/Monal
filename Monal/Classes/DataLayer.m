@@ -2505,6 +2505,7 @@ static DataLayer *sharedInstance=nil;
 #pragma mark mute and block
 -(void) muteJid:(NSString*) jid
 {
+     if(!jid) return;
     NSString* query=[NSString stringWithFormat:@"insert into muteList(jid) values(?) "];
     NSArray *params=@[jid];
     [self executeNonQuery:query andArguments:params];
@@ -2512,6 +2513,7 @@ static DataLayer *sharedInstance=nil;
 
 -(void) unMuteJid:(NSString*) jid
 {
+    if(!jid) return;
     NSString* query=[NSString stringWithFormat:@"delete from muteList where jid=? "];
     NSArray *params=@[jid];
     [self executeNonQuery:query andArguments:params];
@@ -2519,6 +2521,7 @@ static DataLayer *sharedInstance=nil;
 
 -(void) isMutedJid:(NSString*) jid withCompletion: (void (^)(BOOL))completion
 {
+    if(!jid) return; 
     NSString* query=[NSString stringWithFormat:@"select count(jid) from muteList where jid=?"];
     NSArray *params=@[jid];
     [self executeScalar:query andArguments:params withCompletion:^(NSObject *val) {

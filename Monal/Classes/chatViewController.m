@@ -39,6 +39,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 @property (nonatomic, strong) NSMutableArray* photos;
 
 @property (nonatomic, strong) DBRestClient *restClient;
+@property (nonatomic, assign) BOOL encryptChat;
 
 /**
  if set to yes will prevent scrolling and resizing. useful for resigning first responder just to set auto correct
@@ -177,22 +178,10 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void)viewWillAppear:(BOOL)animated
 {
-    
     [super viewWillAppear:animated];
     
     [MLNotificationManager sharedInstance].currentAccountNo=self.accountNo;
     [MLNotificationManager sharedInstance].currentContact=self.contactName;
-    
- 
-    if(![_contactFullName isEqualToString:@"(null)"] && [[_contactFullName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0)
-    {
-         self.navigationItem.title=_contactFullName;
-    }
-    else {
-         self.navigationItem.title=_contactName;
-    }
-    
-   
     
     if(self.day) {
         self.navigationItem.title=  [NSString stringWithFormat:@"%@(%@)", self.navigationItem.title, _day];
@@ -202,7 +191,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     else {
         self.inputContainerView.hidden=NO;
     }
-
+    self.encryptChat =[[DataLayer sharedInstance] shouldEncryptForJid:self.contactName andAccountNo:self.accountNo];
+    
     [self handleForeGround];
     [self refreshButton:nil];
 
@@ -229,7 +219,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         self.transparentLayer.hidden=YES;
     }
 
-    
+
 }
 
 -(void) viewDidAppear:(BOOL)animated
@@ -328,7 +318,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     DDLogVerbose(@"Sending message");
     NSString *newMessageID =[[NSUUID UUID] UUIDString];
  
-    [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:_contactName fromAccount:_accountNo isEncrypted:NO isMUC:_isMUC isUpload:NO messageId:newMessageID
+    [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:_contactName fromAccount:_accountNo isEncrypted:self.encryptChat isMUC:_isMUC isUpload:NO messageId:newMessageID
                                        withCompletionHandler:nil];
     
     //dont readd it, use the exisitng
@@ -407,7 +397,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 - (void)restClient:(DBRestClient*)restClient loadedSharableLink:(NSString*)link
            forFile:(NSString*)path{
     NSString *newMessageID =[[NSUUID UUID] UUIDString];
-    [[MLXMPPManager sharedInstance] sendMessage:link toContact:_contactName fromAccount:_accountNo isEncrypted:NO isMUC:_isMUC isUpload:YES messageId:newMessageID
+    [[MLXMPPManager sharedInstance] sendMessage:link toContact:_contactName fromAccount:_accountNo isEncrypted:self.encryptChat isMUC:_isMUC isUpload:YES messageId:newMessageID
                           withCompletionHandler:nil];
      [self addMessageto:_contactName withMessage:link andId:newMessageID];
     
@@ -493,7 +483,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                 
                 if(url) {
                     NSString *newMessageID =[[NSUUID UUID] UUIDString];
-                    [[MLXMPPManager sharedInstance] sendMessage:url toContact:_contactName fromAccount:_accountNo isEncrypted:NO isMUC:_isMUC isUpload:YES messageId:newMessageID
+                    [[MLXMPPManager sharedInstance] sendMessage:url toContact:_contactName fromAccount:_accountNo isEncrypted:self.encryptChat isMUC:_isMUC isUpload:YES messageId:newMessageID
                                           withCompletionHandler:nil];
                      [self addMessageto:_contactName withMessage:url andId:newMessageID];
                     
@@ -552,7 +542,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         return;
     }
     
-    [[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:_accountNo withMessage:message actuallyFrom:self.jid withId:messageId encrypted:NO withCompletion:^(BOOL result, NSString *messageType) {
+    [[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:_accountNo withMessage:message actuallyFrom:self.jid withId:messageId encrypted:self.encryptChat withCompletion:^(BOOL result, NSString *messageType) {
 		DDLogVerbose(@"added message");
         
         if(result) {
@@ -604,7 +594,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
     dispatch_async(dispatch_get_main_queue(), ^{
         NSString *title=_contactName;
-        if(![_contactFullName isEqualToString:@"(null)"] && [[_contactFullName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0)
+        if(![_contactFullName isEqualToString:@"(null)"]
+           && [[_contactFullName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0)
         {
             title=_contactFullName;
         }
@@ -619,6 +610,10 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
             self.sendButton.enabled=YES;
             self.navigationItem.title=title;
             
+        }
+        
+        if(self.encryptChat){
+            self.navigationItem.title = [NSString stringWithFormat:@"%@ 🔒", self.navigationItem.title];
         }
     });
 }

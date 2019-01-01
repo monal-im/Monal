@@ -2521,7 +2521,7 @@ static DataLayer *sharedInstance=nil;
 
 -(void) isMutedJid:(NSString*) jid withCompletion: (void (^)(BOOL))completion
 {
-    if(!jid) return; 
+    if(!jid) return;
     NSString* query=[NSString stringWithFormat:@"select count(jid) from muteList where jid=?"];
     NSArray *params=@[jid];
     [self executeScalar:query andArguments:params withCompletion:^(NSObject *val) {
@@ -2566,5 +2566,29 @@ static DataLayer *sharedInstance=nil;
 }
 
 
+-(BOOL) shouldEncryptForJid:(NSString*) jid andAccountNo:(NSString*) accountNo
+{
+    NSString* query=[NSString stringWithFormat:@"SELECT encrypt from buddylist where account_id=?  and buddy_name=? "];
+    NSArray *params=@[ accountNo, jid];
+    NSNumber* status=(NSNumber*)[self executeScalar:query andArguments:params];
+    return [status boolValue];
+}
+
+
+-(void) encryptForJid:(NSString*) jid andAccountNo:(NSString*) accountNo
+{
+    NSString* query=[NSString stringWithFormat:@"update buddylist set encrypt=1 where account_id=?  and buddy_name=? "];
+    NSArray *params=@[ accountNo, jid];
+    [self executeNonQuery:query andArguments:params];
+    return;
+}
+
+-(void) disableEncryptForJid:(NSString*) jid andAccountNo:(NSString*) accountNo
+{
+    NSString* query=[NSString stringWithFormat:@"update buddylist set encrypt=0 where account_id=?  and buddy_name=? "];
+    NSArray *params=@[ accountNo, jid];
+    [self executeNonQuery:query andArguments:params];
+    return;
+}
 
 @end

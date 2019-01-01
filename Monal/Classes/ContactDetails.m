@@ -18,6 +18,11 @@
 
 @interface ContactDetails()
 @property (nonatomic, assign) BOOL isMuted;
+@property (nonatomic, assign) BOOL isBlocked;
+@property (nonatomic, assign) BOOL isEncrypted;
+
+@property (nonatomic, strong) NSString *accountNo;
+
 @end
 
 @implementation ContactDetails
@@ -36,10 +41,12 @@
     self.navigationItem.title=[self.contact objectForKey:@"full_name"];
     
 #ifndef DISABLE_OMEMO
-    NSString* accountNo=[NSString stringWithFormat:@"%@", [self.contact objectForKey:@"account_id"]];
-    xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:accountNo];
+    self.accountNo=[NSString stringWithFormat:@"%@", [self.contact objectForKey:@"account_id"]];
+    xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
     [xmppAccount queryOMEMODevicesFrom:[self.contact objectForKey:@"buddy_name"]];
 #endif
+    
+    [self refreshLock];
     [self refreshMute];
     
 }
@@ -106,6 +113,12 @@
                 [detailCell.muteButton setImage:[UIImage imageNamed:@"847-moon-selected"] forState:UIControlStateNormal];
             } else  {
                 [detailCell.muteButton setImage:[UIImage imageNamed:@"847-moon"] forState:UIControlStateNormal];
+            }
+            
+            if(self.isEncrypted) {
+                [detailCell.lockButton setImage:[UIImage imageNamed:@"744-locked-selected"] forState:UIControlStateNormal];
+            } else  {
+                [detailCell.lockButton setImage:[UIImage imageNamed:@"745-unlocked"] forState:UIControlStateNormal];
             }
             
             thecell=detailCell;
@@ -209,6 +222,21 @@
 
 -(IBAction) toggleEncryption:(id)sender
 {
+    if(self.isEncrypted) {
+        [[DataLayer sharedInstance] disableEncryptForJid:[self.contact objectForKey:@"buddy_name"] andAccountNo:self.accountNo];
+    } else {
+        [[DataLayer sharedInstance] encryptForJid:[self.contact objectForKey:@"buddy_name"] andAccountNo:self.accountNo];
+    }
+    [self refreshLock];
+}
+
+-(void) refreshLock
+{
+    self.isEncrypted= [[DataLayer sharedInstance] shouldEncryptForJid:[self.contact objectForKey:@"buddy_name"] andAccountNo:self.accountNo];
     
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSIndexPath *path = [NSIndexPath indexPathForRow:0 inSection:0];
+        [self.tableView reloadRowsAtIndexPaths:@[path] withRowAnimation:UITableViewRowAnimationNone];
+    });
 }
 @end

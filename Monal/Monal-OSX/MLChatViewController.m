@@ -44,7 +44,7 @@
 
 @property (nonatomic, strong) DBRestClient *restClient;
 @property (nonatomic, assign) BOOL encryptChat;
-@property (nonatomic, weak) NSToolbarItem *encryptButton;
+@property (nonatomic, weak)  NSToolbarItem *encryptButton;
 
 
 @end
@@ -130,6 +130,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     [self.chatTable reloadData];
     [self scrollToBottom];
+    
+    self.encryptChat =[[DataLayer sharedInstance] shouldEncryptForJid:self.contactName andAccountNo:self.accountNo];
 }
 
 -(void) showConversationForContact:(NSDictionary *) contact
@@ -138,10 +140,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     {
         return;
     }
-    self.encryptChat=NO;
-      self.encryptButton .image = [NSImage imageNamed:@"745-unlocked"];
-    
-    
+  
 //    [MLNotificationManager sharedInstance].currentAccountNo=self.accountNo;
 //    [MLNotificationManager sharedInstance].currentContact=self.contactName;
 
@@ -509,15 +508,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     // ask if disabling encryption
     if(self.encryptChat==YES) {
-        
+        [[DataLayer sharedInstance] disableEncryptForJid:self.contactName andAccountNo:self.accountNo];
+        self.encryptButton =(NSToolbarItem *)sender;
+        self.encryptButton.image = [NSImage imageNamed:@"745-unlocked"];
     }
     else {
+        [[DataLayer sharedInstance] encryptForJid:self.contactName andAccountNo:self.accountNo];
         self.encryptButton =(NSToolbarItem *)sender;
         self.encryptButton.image = [NSImage imageNamed:@"744-locked-selected"];
-        self.encryptChat=YES;
     }
-    
-    
 }
 
 #pragma mark - sending

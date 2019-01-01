@@ -16,6 +16,10 @@
 #import "MLKeysTableViewController.h"
 #import "MLResourcesTableViewController.h"
 
+@interface ContactDetails()
+@property (nonatomic, assign) BOOL isMuted;
+@end
+
 @implementation ContactDetails
 
 #pragma mark view lifecycle
@@ -36,6 +40,7 @@
     xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:accountNo];
     [xmppAccount queryOMEMODevicesFrom:[self.contact objectForKey:@"buddy_name"]];
 #endif
+    [self refreshMute];
     
 }
 
@@ -97,6 +102,12 @@
                 detailCell.background.image=image;
             }];
 
+            if(self.isMuted) {
+                [detailCell.muteButton setImage:[UIImage imageNamed:@"847-moon-selected"] forState:UIControlStateNormal];
+            } else  {
+                [detailCell.muteButton setImage:[UIImage imageNamed:@"847-moon"] forState:UIControlStateNormal];
+            }
+            
             thecell=detailCell;
             break;
         }
@@ -173,4 +184,31 @@
     [self.presentingViewController dismissViewControllerAnimated:YES completion:nil];
 }
 
+
+-(IBAction) muteContact:(id)sender
+{
+    if(!self.isMuted) {
+        [[DataLayer sharedInstance] muteJid:[self.contact objectForKey:@"buddy_name"]];
+    } else {
+        [[DataLayer sharedInstance] unMuteJid:[self.contact objectForKey:@"buddy_name"]];
+    }
+    [self refreshMute];
+}
+
+-(void) refreshMute
+{
+    [[DataLayer sharedInstance] isMutedJid:[self.contact objectForKey:@"buddy_name"] withCompletion:^(BOOL muted) {
+        self.isMuted= muted;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NSIndexPath *path = [NSIndexPath indexPathForRow:0 inSection:0];
+            [self.tableView reloadRowsAtIndexPaths:@[path] withRowAnimation:UITableViewRowAnimationNone];
+        });
+        
+    }];
+}
+
+-(IBAction) toggleEncryption:(id)sender
+{
+    
+}
 @end

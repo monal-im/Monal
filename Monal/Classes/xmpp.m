@@ -1405,7 +1405,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         }
                         
 
-                        if(iqNode.signedPreKeyPublic && self.signalContext)
+                        if(iqNode.signedPreKeyPublic && self.signalContext && iqNode.from )
                         {
                             SignalAddress *address = [[SignalAddress alloc] initWithName:iqNode.from deviceId:0];
                             SignalSessionBuilder *builder = [[SignalSessionBuilder alloc] initWithAddress:address context:self.signalContext];
@@ -3181,6 +3181,8 @@ if(!self.supportsSM3)
         [self.monalSignalStore saveValues];
     }
     
+    //get device list first
+    [self queryOMEMODevicesFrom:self.jid];
     [self sendOMEMODevice];
     [self sendOMEMOBundle];
 }

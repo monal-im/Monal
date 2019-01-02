@@ -48,7 +48,7 @@
     
     NSData *identity=[self.account.monalSignalStore getIdentityForAddress:address];
     
-    cell.key.text = [EncodingTools hexadecimalString:identity];
+    cell.key.text = [EncodingTools signalHexKeyWithData:identity];
     cell.toggle.on = [self.account.monalSignalStore isTrustedIdentity:address identityKey:identity];
     cell.deviceid.text = [NSString stringWithFormat:@"%ld", (long)device.integerValue];
     

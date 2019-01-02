@@ -50,6 +50,7 @@
     
     cell.key.text = [EncodingTools hexadecimalString:identity];
     cell.toggle.on = [self.account.monalSignalStore isTrustedIdentity:address identityKey:identity];
+    cell.deviceid.text = [NSString stringWithFormat:@"%ld", (long)device.integerValue];
     
     return cell;
 }
@@ -58,7 +59,7 @@
 {
     NSString* toreturn=nil;
     if(section==0)
-        toreturn= @"You should trust a key when you have verified it. Verify by comparing the key below to the one on your contact's screen or scan their QR code.";
+        toreturn= @"You should trust a key when you have verified it. Verify by comparing the key below to the one on your contact's screen."; ///or scan their QR code
     
     return toreturn;
 }

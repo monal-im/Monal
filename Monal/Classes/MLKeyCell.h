@@ -12,6 +12,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MLKeyCell : UITableViewCell
 
+@property (nonatomic, weak) IBOutlet UILabel* deviceid;
 @property (nonatomic, weak) IBOutlet UILabel* key;
 @property (nonatomic, weak) IBOutlet UISwitch* toggle;
 

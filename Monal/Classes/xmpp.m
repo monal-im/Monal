@@ -2723,10 +2723,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             NSData *gcmKey = [[NSData alloc] initWithBytes:key length:16];
             
             NSData *gcmiv= [[NSData alloc] initWithBytes:iv length:16];
-            ;
-            
+        
             NSMutableData *encryptedMessage;
-            
             
             ctx = EVP_CIPHER_CTX_new();
             /* Set cipher type and mode */

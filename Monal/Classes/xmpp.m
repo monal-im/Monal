@@ -1397,9 +1397,25 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
  #ifndef DISABLE_OMEMO
                         if(iqNode.omemoDevices)
                         {
+                            NSString *source= iqNode.from;
+                            if(!source)
+                            {
+                                source=self.fulluser;
+                                NSMutableArray *devices= [iqNode.omemoDevices mutableCopy];
+                                NSSet *deviceSet = [NSSet setWithArray:iqNode.omemoDevices];
+                                
+                                NSString * deviceString=[NSString stringWithFormat:@"%d", self.monalSignalStore.deviceid];
+                                if(![deviceSet containsObject:deviceString])
+                                {
+                                    [devices addObject:deviceString];
+                                }
+                               
+                                [self sendOMEMODevices:devices];
+                            }
+                            
                             [iqNode.omemoDevices enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                                 NSString *device  =(NSString *)obj;
-                                [self queryOMEMOBundleFrom:iqNode.from andDevice:device];
+                                [self queryOMEMOBundleFrom:source andDevice:device];
                             }];
                             
                         }
@@ -3183,14 +3199,12 @@ if(!self.supportsSM3)
     
     //get device list first
     [self queryOMEMODevicesFrom:_fulluser];
-    [self sendOMEMODevice];
     [self sendOMEMOBundle];
 }
 
--(void) sendOMEMODevice {
-    NSString *deviceid=[NSString stringWithFormat:@"%d",self.monalSignalStore.deviceid];
+-(void) sendOMEMODevices:(NSArray *) devices {
     XMPPIQ *signalDevice = [[XMPPIQ alloc] initWithType:kiqSetType];
-    [signalDevice publishDevice:deviceid];
+    [signalDevice publishDevices:devices];
     [self send:signalDevice];
 }
 

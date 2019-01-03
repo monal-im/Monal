@@ -151,9 +151,8 @@ removes a contact from the roster
 #pragma mark Signal
 /**
  publishes a device.
- TODO: use device array
  */
--(void) publishDevice:(NSString*) deviceid;
+-(void) publishDevices:(NSArray*) devices;
 
 /**
  publishes signal keys and prekeys

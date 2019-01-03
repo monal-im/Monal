@@ -62,17 +62,19 @@
             }
             
             NSString *messageID =[[NSUUID UUID] UUIDString];
-            
-            //TODO the encrypted value needs to be pulled from the DB for the chat
-            [[DataLayer sharedInstance] addMessageHistoryFrom:account.fulluser to:self.contactName.text forAccount:account.accountNo withMessage:self.message.text actuallyFrom:account.fulluser withId:messageID encrypted:NO withCompletion:^(BOOL success, NSString *messageType) {
-                
-            }];
-            
-            [[MLXMPPManager sharedInstance] sendMessage:self.message.text toContact:self.contactName.text fromAccount:account.accountNo isEncrypted:NO isMUC:NO isUpload:NO messageId:messageID  withCompletionHandler:^(BOOL success, NSString *messageId) {
-                
-            }];
-            
             NSString *name =[self.contactName.text copy];
+            NSString *text =[self.message.text copy];
+            BOOL encryptChat =[[DataLayer sharedInstance] shouldEncryptForJid:name andAccountNo:account.accountNo];
+
+            [[DataLayer sharedInstance] addMessageHistoryFrom:account.fulluser to:name forAccount:account.accountNo withMessage:text actuallyFrom:account.fulluser withId:messageID encrypted:encryptChat withCompletion:^(BOOL success, NSString *messageType) {
+                
+            }];
+            
+            [[MLXMPPManager sharedInstance] sendMessage:text toContact:name fromAccount:account.accountNo isEncrypted:encryptChat isMUC:NO isUpload:NO messageId:messageID  withCompletionHandler:^(BOOL success, NSString *messageId) {
+                
+            }];
+            
+            
             [[DataLayer sharedInstance] addActiveBuddies:name forAccount:account.accountNo withCompletion:nil];
             
             //dismiss and go to conversation

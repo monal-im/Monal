@@ -780,7 +780,7 @@
 
 #pragma mark - signal
 
--(void) publishDevice:(NSString*) deviceid
+-(void) publishDevices:(NSArray*) devices
 {
     MLXMLNode* pubsubNode =[[MLXMLNode alloc] init];
     pubsubNode.element=@"pubsub";
@@ -797,11 +797,14 @@
     listNode.element=@"list";
     [listNode.attributes setObject:@"eu.siacs.conversations.axolotl" forKey:@"xmlns"];
     
-    MLXMLNode* device =[[MLXMLNode alloc] init];
-    device.element=@"device";
-    [device.attributes setObject:deviceid forKey:@"id"];
-    
-    [listNode.children addObject:device];
+    [devices enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        NSString *deviceid= (NSString *)obj;
+        MLXMLNode* device =[[MLXMLNode alloc] init];
+        device.element=@"device";
+        [device.attributes setObject:deviceid forKey:@"id"];
+        [listNode.children addObject:device];
+    }];
+  
     [itemNode.children addObject:listNode];
     
     [publish.children addObject:itemNode];

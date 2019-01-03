@@ -1429,7 +1429,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                 source=self.fulluser;
                             }
                             
-                            SignalAddress *address = [[SignalAddress alloc] initWithName:source deviceId:0];
+                            
+                            uint32_t device =(uint32_t)[iqNode.deviceid intValue];
+                            if(!iqNode.deviceid) return; 
+                            
+                            SignalAddress *address = [[SignalAddress alloc] initWithName:source deviceId:device];
                             SignalSessionBuilder *builder = [[SignalSessionBuilder alloc] initWithAddress:address context:self.signalContext];
                             NSError *error;
                             
@@ -1439,7 +1443,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                 NSString *keyid = (NSString *)[row objectForKey:@"preKeyId"];
                                 
                                 SignalPreKeyBundle *bundle = [[SignalPreKeyBundle alloc] initWithRegistrationId:0
-                                                                                                       deviceId:(uint32_t)[iqNode.deviceid intValue]
+                                                                                                       deviceId:device
                                                                                                        preKeyId:[keyid integerValue]
                                                                                                    preKeyPublic:[EncodingTools dataWithBase64EncodedString:[row objectForKey:@"preKey"]]
                                                                                                  signedPreKeyId:iqNode.signedPreKeyId.integerValue

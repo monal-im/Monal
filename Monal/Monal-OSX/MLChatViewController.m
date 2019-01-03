@@ -510,11 +510,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         [[DataLayer sharedInstance] disableEncryptForJid:self.contactName andAccountNo:self.accountNo];
         self.encryptButton =(NSToolbarItem *)sender;
         self.encryptButton.image = [NSImage imageNamed:@"745-unlocked"];
+        self.encryptChat=NO;
     }
     else {
         [[DataLayer sharedInstance] encryptForJid:self.contactName andAccountNo:self.accountNo];
         self.encryptButton =(NSToolbarItem *)sender;
         self.encryptButton.image = [NSImage imageNamed:@"744-locked-selected"];
+        self.encryptChat=YES; 
     }
 }
 

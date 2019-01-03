@@ -1431,7 +1431,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             
                             
                             uint32_t device =(uint32_t)[iqNode.deviceid intValue];
-                            if(!iqNode.deviceid) return; 
+                            if(!iqNode.deviceid) return;
                             
                             SignalAddress *address = [[SignalAddress alloc] initWithName:source deviceId:device];
                             SignalSessionBuilder *builder = [[SignalSessionBuilder alloc] initWithAddress:address context:self.signalContext];
@@ -1751,8 +1751,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             
                         }];
                         
-                        if(!messageKey) return;
-                        
+                        if(!messageKey)
+                        {
+                            decrypted=@"Message was not encrypted for this device";
+                        }
+                        else {
                         SignalSessionCipher *cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self.signalContext];
                         SignalCiphertextType messagetype;
                         
@@ -1813,7 +1816,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             EVP_CIPHER_CTX_free(ctx);
                                 
                         }
-                        
+                        }
                     }
 #endif
                     
@@ -2773,7 +2776,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             
             /* Get tag */
             EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_GET_TAG, 16, tag);
-            [encryptedMessage appendBytes:tag length:16];
+            //[encryptedMessage appendBytes:tag length:16];
+            
+            NSMutableData *combinedKey  = [NSMutableData dataWithData:gcmKey];
+            [combinedKey appendBytes:tag length:16];
             
             EVP_CIPHER_CTX_free(ctx);
             
@@ -2802,7 +2808,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 SignalAddress *address = [[SignalAddress alloc] initWithName:contact deviceId:device.integerValue];
                 SignalSessionCipher *cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self.signalContext];
                 NSError *error;
-                SignalCiphertext* deviceEncryptedKey=[cipher encryptData:gcmKey error:&error];
+                SignalCiphertext* deviceEncryptedKey=[cipher encryptData:combinedKey error:&error];
                 
                 MLXMLNode *keyNode =[[MLXMLNode alloc] initWithElement:@"key"];
                 [keyNode.attributes setObject:[NSString stringWithFormat:@"%@",device] forKey:@"rid"];
@@ -2821,7 +2827,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 SignalAddress *address = [[SignalAddress alloc] initWithName:self.fulluser deviceId:device.integerValue];
                 SignalSessionCipher *cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self.signalContext];
                 NSError *error;
-                SignalCiphertext* deviceEncryptedKey=[cipher encryptData:gcmKey error:&error];
+                SignalCiphertext* deviceEncryptedKey=[cipher encryptData:combinedKey error:&error];
                 
                 MLXMLNode *keyNode =[[MLXMLNode alloc] initWithElement:@"key"];
                 [keyNode.attributes setObject:[NSString stringWithFormat:@"%@",device] forKey:@"rid"];

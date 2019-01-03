@@ -207,7 +207,7 @@
     
     //OMEMO
     
-    if( [elementName isEqualToString:@"item"] )
+    if( [elementName isEqualToString:@"item"] || [elementName isEqualToString:@"items"] )
     {
         NSString *node = (NSString *) [attributeDict objectForKey:@"node"];
         if([node hasPrefix:@"eu.siacs.conversations.axolotl.bundles:"])
@@ -215,7 +215,7 @@
             NSArray *parts = [node componentsSeparatedByString:@":"];
             if(parts.count>1)
             {
-                _deviceid= parts[0];
+                _deviceid= parts[1];
             }
         }
         

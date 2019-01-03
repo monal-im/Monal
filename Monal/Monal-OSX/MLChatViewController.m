@@ -87,12 +87,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         return;
     }
  
-    
     [self refreshData];
     [self updateWindowForContact:self.contactDic];
     [self updateInputViewSize];
-  
- 
 }
 
 
@@ -105,8 +102,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     MLMainWindow *window =(MLMainWindow *)self.view.window.windowController;
     window.chatViewController= self;
-  
-
 }
 
 -(void) dealloc
@@ -132,6 +127,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self scrollToBottom];
     
     self.encryptChat =[[DataLayer sharedInstance] shouldEncryptForJid:self.contactName andAccountNo:self.accountNo];
+    
 }
 
 -(void) showConversationForContact:(NSDictionary *) contact
@@ -148,8 +144,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     self.contactName = [contact objectForKey:kContactName];
     self.contactDic= contact;
      self.isMUC = [[DataLayer sharedInstance] isBuddyMuc:self.contactName forAccount:self.accountNo];
-    [self updateWindowForContact:contact];
-    
+   
     NSArray* accountVals =[[DataLayer sharedInstance] accountVals:self.accountNo];
     if([accountVals count]>0)
     {
@@ -159,6 +154,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         [self markAsRead];
     }
     [self refreshData];
+    [self updateWindowForContact:contact];
     
     [self synchChat];
     
@@ -217,8 +213,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) updateWindowForContact:(NSDictionary *)contact
 {
+    NSMutableDictionary *dic = [contact mutableCopy];
+    [dic setObject:[NSNumber numberWithBool:self.encryptChat] forKey:@"encrypt"];
+  
     MLMainWindow *window =(MLMainWindow *)self.view.window.windowController;
-    [window updateCurrentContact:contact];
+    [window updateCurrentContact:dic];
     
     NSString *fullName= (NSString *) [contact objectForKey:kFullName];
     if(!fullName) fullName =(NSString *) [contact objectForKey:kContactName];

@@ -1104,6 +1104,7 @@ CA
                     <connections>
                         <outlet property="contactNameField" destination="FIC-Wz-kIR" id="col-XE-oz0"/>
                         <outlet property="contactSearchField" destination="W9v-xL-dQF" id="iu3-wi-rWF"/>
+                        <outlet property="lock" destination="eQS-Gt-mIg" id="Bth-oo-W6n"/>
                         <segue destination="m98-td-Hed" kind="relationship" relationship="window.shadowedContentViewController" id="v2m-Zl-5nK"/>
                     </connections>
                 </windowController>
@@ -3153,6 +3154,6 @@ Gw
         <image name="offline" width="15" height="15"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="Jkt-hW-Vlb"/>
+        <segue reference="Uwt-4d-Ui7"/>
     </inferredMetricsTieBreakers>
 </document>

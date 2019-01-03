@@ -45,9 +45,7 @@
 {
     self.contactInfo= contact;
     NSString *fullName= (NSString *) [self.contactInfo objectForKey:kFullName];
-
     NSNumber *muc=[self.contactInfo objectForKey:@"Muc"];
-    
     
     if(muc.boolValue ==YES)
     {
@@ -60,6 +58,14 @@
         if([self.contactInfo objectForKey:kContactName]){
             self.contactNameField.stringValue= [self.contactInfo objectForKey:kContactName];
         }
+    }
+    
+    BOOL encrypt = [(NSNumber *)[contact objectForKey:@"encrypt"] boolValue];
+    if(!encrypt) {
+        self.lock.image = [NSImage imageNamed:@"745-unlocked"];
+    }
+    else {
+        self.lock.image = [NSImage imageNamed:@"744-locked-selected"];
     }
 }
 

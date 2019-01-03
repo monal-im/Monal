@@ -1395,9 +1395,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         
                         //OMEMO
  #ifndef DISABLE_OMEMO
+                          NSString *source= iqNode.from;
                         if(iqNode.omemoDevices)
                         {
-                            NSString *source= iqNode.from;
+                          
                             if(!source)
                             {
                                 source=self.fulluser;
@@ -1421,9 +1422,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         }
                         
 
-                        if(iqNode.signedPreKeyPublic && self.signalContext && iqNode.from )
+                        if(iqNode.signedPreKeyPublic && self.signalContext )
                         {
-                            SignalAddress *address = [[SignalAddress alloc] initWithName:iqNode.from deviceId:0];
+                            if(!source)
+                            {
+                                source=self.fulluser;
+                            }
+                            
+                            SignalAddress *address = [[SignalAddress alloc] initWithName:source deviceId:0];
                             SignalSessionBuilder *builder = [[SignalSessionBuilder alloc] initWithAddress:address context:self.signalContext];
                             NSError *error;
                             
@@ -2718,6 +2724,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     if(self.signalContext && !isMUC && encrypt) {
         
         NSArray *devices = [self.monalSignalStore allDeviceIdsForAddressName:contact];
+        NSArray *myDevices = [self.monalSignalStore allDeviceIdsForAddressName:_fulluser];
         if(devices.count>0 ){
             
             NSData *messageBytes=[message dataUsingEncoding:NSUTF8StringEncoding];
@@ -2788,6 +2795,25 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             [devices enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                 NSNumber *device = (NSNumber *)obj;
                 SignalAddress *address = [[SignalAddress alloc] initWithName:contact deviceId:device.integerValue];
+                SignalSessionCipher *cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self.signalContext];
+                NSError *error;
+                SignalCiphertext* deviceEncryptedKey=[cipher encryptData:gcmKey error:&error];
+                
+                MLXMLNode *keyNode =[[MLXMLNode alloc] initWithElement:@"key"];
+                [keyNode.attributes setObject:[NSString stringWithFormat:@"%@",device] forKey:@"rid"];
+                if(deviceEncryptedKey.type==SignalCiphertextTypePreKeyMessage)
+                {
+                    [keyNode.attributes setObject:@"1" forKey:@"prekey"];
+                }
+                
+                [keyNode setData:[EncodingTools encodeBase64WithData:deviceEncryptedKey.data]];
+                [header.children addObject:keyNode];
+                
+            }];
+            
+            [myDevices enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                NSNumber *device = (NSNumber *)obj;
+                SignalAddress *address = [[SignalAddress alloc] initWithName:self.fulluser deviceId:device.integerValue];
                 SignalSessionCipher *cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self.signalContext];
                 NSError *error;
                 SignalCiphertext* deviceEncryptedKey=[cipher encryptData:gcmKey error:&error];

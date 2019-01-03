@@ -480,7 +480,9 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
                            for(NSDictionary *dic in  self.timerList) {
                                if([dic objectForKey:kSendTimer] == sendTimer) {
                                    [[DataLayer sharedInstance] setMessageId:[dic objectForKey:kMessageId] delivered:NO];
-                                   [[NSNotificationCenter defaultCenter] postNotificationName:kMonalSendFailedMessageNotice object:self userInfo:dic];
+                                   if(self) { // possible zombie 
+                                       [[NSNotificationCenter defaultCenter] postNotificationName:kMonalSendFailedMessageNotice object:self userInfo:dic];
+                                   }
                                    removalCounter=counter;
                                    break;
                                }

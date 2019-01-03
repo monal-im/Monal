@@ -555,6 +555,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                                                       @"thetime": messagetime,
                                                       @"delivered":@YES,
                                                       @"messageid": messageId,
+                                                      @"encrypted":[NSNumber numberWithBool:self.encryptChat],
                                                       kMessageType:messageType
                                                       };
                            if(!self.messageList) self.messageList =[[NSMutableArray alloc] init];

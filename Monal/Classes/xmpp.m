@@ -226,13 +226,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) createStreams
 {
-    
     DDLogInfo(@"stream  creating to  server: %@ port: %d", _server, (UInt32)_port);
     
     NSInputStream *localIStream;
     NSOutputStream *localOStream;
     
     [NSStream getStreamsToHostWithName:self.server port:self.port inputStream:&localIStream outputStream:&localOStream];
+   
     if(localIStream) {
         _iStream=localIStream;
     }
@@ -1861,7 +1861,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                                   [self.networkQueue addOperationWithBlock:^{
                                                                      
                                                                       if(![messageNode.from isEqualToString:
-                                                                           [NSString stringWithFormat:@"%@@%@", self.username, self.domain]]) {
+                                                                           self.fulluser]) {
                                                                           [[DataLayer sharedInstance] addActiveBuddies:messageNode.from forAccount:self->_accountNo withCompletion:nil];
                                                                       } else  {
                                                                             [[DataLayer sharedInstance] addActiveBuddies:messageNode.to forAccount:self->_accountNo withCompletion:nil];
@@ -3182,7 +3182,7 @@ if(!self.supportsSM3)
     }
     
     //get device list first
-    [self queryOMEMODevicesFrom:self.jid];
+    [self queryOMEMODevicesFrom:_fulluser];
     [self sendOMEMODevice];
     [self sendOMEMOBundle];
 }

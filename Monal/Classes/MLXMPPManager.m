@@ -46,7 +46,7 @@ An array of Dics what have timers to make sure everything was sent
     if(!setDefaults)
     {
         //  [[NSUserDefaults standardUserDefaults] setObject:@"" forKey:@"StatusMessage"]; // we dont want anything set
-        [[NSUserDefaults standardUserDefaults] setObject:@"0" forKey:@"XMPPPriority"];
+        [[NSUserDefaults standardUserDefaults] setObject:@"50" forKey:@"XMPPPriority"];
         [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"Away"];
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"Visible"];
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"MusicStatus"];
@@ -91,7 +91,11 @@ An array of Dics what have timers to make sure everything was sent
         [[NSUserDefaults standardUserDefaults] synchronize];
     }
  
-   
+     NSNumber *priority =  [[NSUserDefaults standardUserDefaults] objectForKey: @"XMPPPriority"];
+    
+    if(priority.integerValue==0) {
+        [[NSUserDefaults standardUserDefaults] setObject:@"50" forKey:@"XMPPPriority"];
+    }
 }
 
 + (MLXMPPManager* )sharedInstance

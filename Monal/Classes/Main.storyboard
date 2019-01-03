@@ -463,7 +463,7 @@
             <objects>
                 <navigationController id="PjQ-9S-4Zq" sceneMemberID="viewController">
                     <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="yG5-Vj-gyO">
-                        <rect key="frame" x="0.0" y="44" width="414" height="44"/>
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <connections>
@@ -1244,6 +1244,6 @@
         <segue reference="qaB-BP-OcO"/>
         <segue reference="K87-fm-axG"/>
         <segue reference="QlH-d5-Lhg"/>
-        <segue reference="0Dv-wk-JlQ"/>
+        <segue reference="hqW-lo-9tZ"/>
     </inferredMetricsTieBreakers>
 </document>

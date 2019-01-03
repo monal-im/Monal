@@ -72,7 +72,8 @@
                 
             }];
             
-            [[DataLayer sharedInstance] addActiveBuddies:self.contactName.text forAccount:account.accountNo withCompletion:nil];
+            NSString *name =[self.contactName.text copy];
+            [[DataLayer sharedInstance] addActiveBuddies:name forAccount:account.accountNo withCompletion:nil];
             
             //dismiss and go to conversation
             [self dismissViewControllerAnimated:YES completion:^{

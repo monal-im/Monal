@@ -245,7 +245,7 @@
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Trust" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="4kz-Xh-2Ui">
                                             <rect key="frame" x="79" y="119.5" width="39" height="20.5"/>
                                             <constraints>
-                                                <constraint firstAttribute="width" constant="39" id="0kz-qn-tI3"/>
+                                                <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="39" id="0kz-qn-tI3"/>
                                             </constraints>
                                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                             <nil key="textColor"/>

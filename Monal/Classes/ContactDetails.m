@@ -106,8 +106,10 @@
             NSString* accountNo=[NSString stringWithFormat:@"%@", [self.contact objectForKey:@"account_id"]];
             [[MLImageManager sharedInstance] getIconForContact:[self.contact objectForKey:@"buddy_name"] andAccount:accountNo withCompletion:^(UIImage *image) {
                 detailCell.buddyIconView.image=image;
-                detailCell.background.image=image;
+             //   detailCell.background.image=image;
             }];
+            
+            detailCell.background.image= [UIImage imageNamed:@"Tie_My_Boat_by_Ray_García"];
 
             if(self.isMuted) {
                 [detailCell.muteButton setImage:[UIImage imageNamed:@"847-moon-selected"] forState:UIControlStateNormal];

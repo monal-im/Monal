@@ -310,6 +310,6 @@ extern NSString *const kSendTimer;
  */
 -(void) disconnectToResumeWithCompletion:(void (^)(void))completion;
 
-
+-(void) setupSignal; 
 
 @end

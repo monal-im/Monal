@@ -299,6 +299,8 @@ An array of Dics what have timers to make sure everything was sent
     }
      xmppAccount.contactsVC=self.contactVC;
     
+    [xmppAccount setupSignal];
+    
     //sepcifically look for the server since we might not be online or behind firewall
     Reachability* hostReach = [Reachability reachabilityWithHostName:xmppAccount.server ] ;
     

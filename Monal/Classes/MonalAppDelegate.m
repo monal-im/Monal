@@ -446,22 +446,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     [self updateUnread];
     [[MLXMPPManager sharedInstance] setClientsInactive];
-   
-    __block UIBackgroundTaskIdentifier tempTask= [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
-        [[MLXMPPManager sharedInstance] logoutAllKeepStreamWithCompletion:^{
-            dispatch_async(dispatch_get_main_queue(), ^{
-                DDLogInfo(@"background wake expiring");
-                [[UIApplication sharedApplication] endBackgroundTask:tempTask];
-                tempTask=UIBackgroundTaskInvalid;
-            });
-        }];
-      
-    }];
+
 }
 
 -(void)applicationWillTerminate:(UIApplication *)application
 {
-    
     [self updateUnread];
     [[NSUserDefaults standardUserDefaults] synchronize];
 }

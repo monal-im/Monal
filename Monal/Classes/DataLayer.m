@@ -2442,6 +2442,7 @@ static DataLayer *sharedInstance=nil;
     if([dbversion doubleValue]<3.3)
     {
         DDLogVerbose(@"Database version <3.3 detected. Performing upgrade . ");
+        [self executeNonQuery:@"update dbversion set dbversion='3.3'; " withCompletion:nil];
         
         [self executeNonQuery:@"alter table buddylist add column encrypt bool;" withCompletion:nil];
         

@@ -206,7 +206,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         self.visibleState=YES;
     }
     
-
     return self;
 }
 
@@ -651,8 +650,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             wait=0;
         }
 #if TARGET_OS_IPHONE
-     
-        
+
         if(self.pushEnabled)
         {
             DDLogInfo(@"Using Push path for reconnct");
@@ -2279,6 +2277,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         }
                         else {
                             [self bindResource];
+#ifndef DISABLE_OMEMO
+                            [self sendSignalInitialStanzas];
+#endif
                         }
                         
                     }
@@ -2360,10 +2361,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     #endif
                     
                     [self sendInitalPresence];
-                    #ifndef DISABLE_OMEMO
-                    [self setupSignal];
-                    #endif
-                    
+            
+                  
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"failed"]) // stream resume failed
                 {
@@ -2391,6 +2390,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         {
                             [self enablePush];
                         }
+#endif
+                        
+#ifndef DISABLE_OMEMO
+                        [self sendSignalInitialStanzas];
 #endif
                     }
                     else        //smacks enable failed
@@ -3131,7 +3134,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self sendInitalPresence];
 
 #ifndef DISABLE_OMEMO
-    [self setupSignal];
+    [self sendSignalInitialStanzas];
 #endif
     
 if(!self.supportsSM3)
@@ -3234,10 +3237,17 @@ if(!self.supportsSM3)
         [self.monalSignalStore saveValues];
     }
     
-    //get device list first
-    [self queryOMEMODevicesFrom:_fulluser];
-    [self sendOMEMOBundle];
 }
+
+-(void) sendSignalInitialStanzas
+{
+    if(!self.pushEnabled) {
+        //get device list first
+        [self queryOMEMODevicesFrom:_fulluser];
+        [self sendOMEMOBundle];
+    }
+}
+
 
 -(void) sendOMEMODevices:(NSArray *) devices {
     XMPPIQ *signalDevice = [[XMPPIQ alloc] initWithType:kiqSetType];
@@ -3681,6 +3691,13 @@ if(!self.supportsSM3)
                 return;
             }
             
+            if(st_error.code==32)// Broken pipe
+            {
+                [self disconnectWithCompletion:^{
+                    [self reconnect:5];
+                }];
+                return;
+            }
             
             
             if(st_error.code==-9807)// Could not complete operation. SSL probably

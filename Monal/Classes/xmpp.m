@@ -1772,48 +1772,53 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         
                         NSData *key;
                         NSData *auth;
-                        
-                        if(decryptedKey.length==16*2)
-                        {
-                            key=[decryptedKey subdataWithRange:NSMakeRange(0,16)];
-                            auth=[decryptedKey subdataWithRange:NSMakeRange(16,16)];
-                        }
-                        else {
-                            key=decryptedKey;
-                        }
-                        
-                        if(key){
-                            NSData *iv = [EncodingTools dataWithBase64EncodedString:messageNode.iv];
-                            NSData *decodedPayload = [EncodingTools dataWithBase64EncodedString:messageNode.encryptedPayload];
-                         
-                            EVP_CIPHER_CTX *ctx =EVP_CIPHER_CTX_new();
-                            int outlen, rv;
-                            unsigned char outbuf[decodedPayload.length];
-                     
-                            /* Select cipher */
-                            EVP_DecryptInit_ex(ctx, EVP_aes_128_gcm(), NULL, NULL, NULL);
-                            /* Set IV length, omit for 96 bits */
-                            EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_IVLEN, (int)iv.length, NULL);
-                            /* Specify key and IV */
-                            EVP_DecryptInit_ex(ctx, NULL, NULL, key.bytes, iv.bytes);
-                            EVP_CIPHER_CTX_set_padding(ctx,1);
-                            /* Decrypt plaintext */
-                            EVP_DecryptUpdate(ctx, outbuf, &outlen, decodedPayload.bytes, (int)decodedPayload.length);
-                            /* Output decrypted block */
-                           
-                          if(auth) {
-                            /* Set expected tag value. */
-                            EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_TAG, (int)auth.length, auth.bytes);
-                          }
-                            /* Finalise: note get no output for GCM */
-                            rv = EVP_DecryptFinal_ex(ctx, outbuf, &outlen);
                             
-                            NSData *decdata = [[NSData alloc] initWithBytes:outbuf length:decodedPayload.length];
-                            decrypted= [[NSString alloc] initWithData:decdata encoding:NSUTF8StringEncoding];
-                            
-                            EVP_CIPHER_CTX_free(ctx);
+                            if(!decryptedKey){
+                                decrypted =@"There was an error decrypting this message.";
+                            }
+                            else  {
+                                if(decryptedKey.length==16*2)
+                                {
+                                    key=[decryptedKey subdataWithRange:NSMakeRange(0,16)];
+                                    auth=[decryptedKey subdataWithRange:NSMakeRange(16,16)];
+                                }
+                                else {
+                                    key=decryptedKey;
+                                }
                                 
-                        }
+                                if(key){
+                                    NSData *iv = [EncodingTools dataWithBase64EncodedString:messageNode.iv];
+                                    NSData *decodedPayload = [EncodingTools dataWithBase64EncodedString:messageNode.encryptedPayload];
+                                    
+                                    EVP_CIPHER_CTX *ctx =EVP_CIPHER_CTX_new();
+                                    int outlen, rv;
+                                    unsigned char outbuf[decodedPayload.length];
+                                    
+                                    /* Select cipher */
+                                    EVP_DecryptInit_ex(ctx, EVP_aes_128_gcm(), NULL, NULL, NULL);
+                                    /* Set IV length, omit for 96 bits */
+                                    EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_IVLEN, (int)iv.length, NULL);
+                                    /* Specify key and IV */
+                                    EVP_DecryptInit_ex(ctx, NULL, NULL, key.bytes, iv.bytes);
+                                    EVP_CIPHER_CTX_set_padding(ctx,1);
+                                    /* Decrypt plaintext */
+                                    EVP_DecryptUpdate(ctx, outbuf, &outlen, decodedPayload.bytes, (int)decodedPayload.length);
+                                    /* Output decrypted block */
+                                    
+                                    if(auth) {
+                                        /* Set expected tag value. */
+                                        EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_TAG, (int)auth.length, auth.bytes);
+                                    }
+                                    /* Finalise: note get no output for GCM */
+                                    rv = EVP_DecryptFinal_ex(ctx, outbuf, &outlen);
+                                    
+                                    NSData *decdata = [[NSData alloc] initWithBytes:outbuf length:decodedPayload.length];
+                                    decrypted= [[NSString alloc] initWithData:decdata encoding:NSUTF8StringEncoding];
+                                    
+                                    EVP_CIPHER_CTX_free(ctx);
+                                    
+                                }
+                            }
                         }
                     }
 #endif

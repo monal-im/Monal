@@ -1733,7 +1733,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     #ifndef DISABLE_OMEMO
                     if(messageNode.encryptedPayload)
                     {
-                        SignalAddress *address = [[SignalAddress alloc] initWithName:messageNode.from deviceId:messageNode.sid.integerValue];
+                        SignalAddress *address = [[SignalAddress alloc] initWithName:messageNode.from deviceId:(uint32_t)messageNode.sid.intValue];
                         if(!self.signalContext) return; 
                     
                         
@@ -2813,7 +2813,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             
             [devices enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                 NSNumber *device = (NSNumber *)obj;
-                SignalAddress *address = [[SignalAddress alloc] initWithName:contact deviceId:device.integerValue];
+                SignalAddress *address = [[SignalAddress alloc] initWithName:contact deviceId:(uint32_t)device.intValue];
                 SignalSessionCipher *cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self.signalContext];
                 NSError *error;
                 SignalCiphertext* deviceEncryptedKey=[cipher encryptData:combinedKey error:&error];
@@ -2832,7 +2832,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             
             [myDevices enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                 NSNumber *device = (NSNumber *)obj;
-                SignalAddress *address = [[SignalAddress alloc] initWithName:self.fulluser deviceId:device.intValue];
+                SignalAddress *address = [[SignalAddress alloc] initWithName:self.fulluser deviceId:(uint32_t)device.intValue];
                 SignalSessionCipher *cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self.signalContext];
                 NSError *error;
                 SignalCiphertext* deviceEncryptedKey=[cipher encryptData:combinedKey error:&error];

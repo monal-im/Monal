@@ -46,18 +46,26 @@
             return self;
         }
         
-        NSArray *keys= [[DataLayer sharedInstance] executeReader:@"select prekeyid, preKey from signalPreKey where account_id=?" andArguments:@[accountId]];
-        NSMutableArray *array = [[NSMutableArray alloc] initWithCapacity:keys.count];
-        
-        for (NSDictionary *row in keys)
-        {
-            SignalPreKey *key = [[SignalPreKey alloc] initWithSerializedData:[row objectForKey:@"preKey"] error:nil];
-            [array addObject:key];
-        }
+        NSMutableArray *array = [self readPreKeys];
+    
         self.preKeys=array;
     }
 
     return self; 
+}
+
+-(NSMutableArray *) readPreKeys
+{
+    NSArray *keys= [[DataLayer sharedInstance] executeReader:@"select prekeyid, preKey from signalPreKey where account_id=?" andArguments:@[self.accountId]];
+    NSMutableArray *array = [[NSMutableArray alloc] initWithCapacity:keys.count];
+    
+    for (NSDictionary *row in keys)
+    {
+        SignalPreKey *key = [[SignalPreKey alloc] initWithSerializedData:[row objectForKey:@"preKey"] error:nil];
+        [array addObject:key];
+    }
+    
+    return array; 
 }
 
 -(void) saveValues

@@ -19,5 +19,5 @@
 -(void) saveValues;
 
 -(NSData *) getIdentityForAddress:(SignalAddress*)address;
-
+-(NSMutableArray *) readPreKeys;
 @end

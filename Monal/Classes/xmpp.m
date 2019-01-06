@@ -2832,7 +2832,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             
             [myDevices enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                 NSNumber *device = (NSNumber *)obj;
-                SignalAddress *address = [[SignalAddress alloc] initWithName:self.fulluser deviceId:device.integerValue];
+                SignalAddress *address = [[SignalAddress alloc] initWithName:self.fulluser deviceId:device.intValue];
                 SignalSessionCipher *cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self.signalContext];
                 NSError *error;
                 SignalCiphertext* deviceEncryptedKey=[cipher encryptData:combinedKey error:&error];

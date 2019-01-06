@@ -270,7 +270,7 @@ NSString *const kGtalk = @"Gtalk";
     
     [dic setObject:[NSNumber numberWithBool:self.useSSL] forKey:kSSL];
     [dic setObject:[NSNumber numberWithBool:self.enabled] forKey:kEnabled];
-    [dic setObject:[NSNumber numberWithBool:!self.selfSignedSSL] forKey:kSelfSigned];
+    [dic setObject:[NSNumber numberWithBool:self.selfSignedSSL] forKey:kSelfSigned];
     [dic setObject:[NSNumber numberWithBool:self.oldStyleSSL] forKey:kOldSSL];
     [dic setObject:self.accountno forKey:kAccountID];
     

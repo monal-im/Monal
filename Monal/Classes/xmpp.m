@@ -3237,7 +3237,7 @@ if(!self.supportsSM3)
         
         self.monalSignalStore.identityKeyPair= [signalHelper generateIdentityKeyPair];
         self.monalSignalStore.signedPreKey= [signalHelper generateSignedPreKeyWithIdentity:self.monalSignalStore.identityKeyPair signedPreKeyId:1];
-        self.monalSignalStore.preKeys= [signalHelper generatePreKeysWithStartingPreKeyId:0 count:20];
+        self.monalSignalStore.preKeys= [signalHelper generatePreKeysWithStartingPreKeyId:0 count:100];
         
         [self.monalSignalStore saveValues];
     }

@@ -328,7 +328,6 @@
 		26AA70452146E43E00598605 /* icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 26AA70442146E43E00598605 /* icon.icns */; };
 		26AA70482146E43E00598605 /* ShareViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26AA70472146E43E00598605 /* ShareViewController.m */; };
 		26AA704B2146E43E00598605 /* ShareViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26AA70492146E43E00598605 /* ShareViewController.xib */; };
-		26AA70502146E43E00598605 /* Share in Monal.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 26AA70422146E43E00598605 /* Share in Monal.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		26AAE285179F7B0200271345 /* MLSettingCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 26AAE284179F7B0200271345 /* MLSettingCell.m */; };
 		26B0CA8921AE2E3C0080B133 /* MLSoundsTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B0CA8821AE2E3C0080B133 /* MLSoundsTableViewController.m */; };
 		26B0CA8B21AE410E0080B133 /* AlertSounds in Resources */ = {isa = PBXBuildFile; fileRef = 26B0CA8A21AE410E0080B133 /* AlertSounds */; };
@@ -489,7 +488,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				26AA70502146E43E00598605 /* Share in Monal.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
 			runOnlyForDeploymentPostprocessing = 0;

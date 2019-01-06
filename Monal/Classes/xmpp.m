@@ -1773,10 +1773,16 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         NSData *key;
                         NSData *auth;
                             
+                            if(messagetype==SignalCiphertextTypePreKeyMessage)
+                            {
+                                [self manageMyKeys];
+                            }
+                            
                             if(!decryptedKey){
                                 decrypted =@"There was an error decrypting this message.";
                             }
                             else  {
+                                
                                 if(decryptedKey.length==16*2)
                                 {
                                     key=[decryptedKey subdataWithRange:NSMakeRange(0,16)];
@@ -3267,6 +3273,24 @@ if(!self.supportsSM3)
     [signalKeys publishKeys:@{@"signedPreKeyPublic":self.monalSignalStore.signedPreKey.keyPair.publicKey, @"signedPreKeySignature":self.monalSignalStore.signedPreKey.signature, @"identityKey":self.monalSignalStore.identityKeyPair.publicKey, @"signedPreKeyId": [NSString stringWithFormat:@"%d",self.monalSignalStore.signedPreKey.preKeyId]} andPreKeys:self.monalSignalStore.preKeys withDeviceId:deviceid];
     [signalKeys.attributes setValue:[NSString stringWithFormat:@"%@/%@",_fulluser, _resource ] forKey:@"from"];
     [self send:signalKeys];
+}
+
+-(void) manageMyKeys
+{
+    //get current count. If less than 20
+    NSMutableArray *keys = [self.monalSignalStore readPreKeys];
+    if(keys.count<20) {
+        SignalKeyHelper *signalHelper = [[SignalKeyHelper alloc] initWithContext:self.signalContext];
+        
+        self.monalSignalStore.preKeys= [signalHelper generatePreKeysWithStartingPreKeyId:0 count:80];
+        [self.monalSignalStore saveValues];
+        
+        //load up from db (combined list)
+        keys= [self.monalSignalStore readPreKeys];
+    }
+    
+    self.monalSignalStore.preKeys = keys;
+    [self sendOMEMOBundle];
 }
 
 -(void) queryOMEMOBundleFrom:(NSString *) jid andDevice:(NSString *) deviceid

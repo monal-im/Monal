@@ -773,10 +773,10 @@ NSString *const kGtalk = @"Gtalk";
         case 4: {
             if(toggle.on)
             {
-                self.selfSignedSSL=YES;
+                self.selfSignedSSL=NO;
             }
             else {
-                self.selfSignedSSL=NO;
+                self.selfSignedSSL=YES;
             }
             
             break;

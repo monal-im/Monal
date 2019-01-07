@@ -1397,7 +1397,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         if(iqNode.omemoDevices)
                         {
                           
-                            if(!source)
+                            if(!source) //myself
                             {
                                 source=self.fulluser;
                                 NSMutableArray *devices= [iqNode.omemoDevices mutableCopy];
@@ -1412,9 +1412,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                 [self sendOMEMODevices:devices];
                             }
                             
+                            
+                            NSArray *existingDevices=[self.monalSignalStore allDeviceIdsForAddressName:source];
+                            NSSet *deviceSet = [NSSet setWithArray:existingDevices];
+                            //only query if the device doesnt exist
                             [iqNode.omemoDevices enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                                 NSString *device  =(NSString *)obj;
-                                [self queryOMEMOBundleFrom:source andDevice:device];
+                                if(![deviceSet containsObject:[NSNumber numberWithInt: device.integerValue]]) {
+                                    [self queryOMEMOBundleFrom:source andDevice:device];
+                                }
                             }];
                             
                         }

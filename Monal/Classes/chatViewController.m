@@ -191,8 +191,10 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     else {
         self.inputContainerView.hidden=NO;
     }
-    self.encryptChat =[[DataLayer sharedInstance] shouldEncryptForJid:self.contactName andAccountNo:self.accountNo];
     
+    if(self.contact && self.accountNo) {
+        self.encryptChat =[[DataLayer sharedInstance] shouldEncryptForJid:self.contactName andAccountNo:self.accountNo];
+    }
     [self handleForeGround];
     [self refreshButton:nil];
 

@@ -2570,7 +2570,7 @@ static DataLayer *sharedInstance=nil;
 -(BOOL) shouldEncryptForJid:(NSString*) jid andAccountNo:(NSString*) accountNo
 {
     NSString* query=[NSString stringWithFormat:@"SELECT encrypt from buddylist where account_id=?  and buddy_name=? "];
-    NSArray *params=@[ accountNo, jid];
+    NSArray *params=@[accountNo, jid];
     NSNumber* status=(NSNumber*)[self executeScalar:query andArguments:params];
     return [status boolValue];
 }

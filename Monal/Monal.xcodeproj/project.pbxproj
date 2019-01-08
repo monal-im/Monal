@@ -1269,6 +1269,7 @@
 				265BD14F21A2D15600A59251 /* MLBackgroundSettings.m */,
 				26B0CA8721AE2E3C0080B133 /* MLSoundsTableViewController.h */,
 				26B0CA8821AE2E3C0080B133 /* MLSoundsTableViewController.m */,
+				2678A987185A82BE003AF53B /* Chat Logs */,
 			);
 			name = Settings;
 			sourceTree = "<group>";
@@ -1834,7 +1835,6 @@
 				2644D48F1FF004B800F46AB5 /* ChatViews */,
 				268C1E471FDACDD300BD6921 /* Contact Details */,
 				2665C1191C4AA22700CC9A04 /* Accounts */,
-				2678A987185A82BE003AF53B /* Chat Logs */,
 				262797AC178A573F00B85D94 /* Tableviewcells */,
 				2636C440177BD595001CA71F /* Older UI code */,
 				261A627E176C055400059090 /* ContactsViewController.h */,

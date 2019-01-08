@@ -164,9 +164,7 @@ NS_ENUM(NSInteger, kSettingSection)
                 case 7:
                     [self performSegueWithIdentifier:@"showCloud" sender:self];
                     break;
-                    
-              
-                    
+       
                 default:
                     break;
             }

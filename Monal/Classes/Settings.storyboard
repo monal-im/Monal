@@ -486,9 +486,9 @@
                         <segue destination="eBx-3x-WaS" kind="showDetail" identifier="showChatLog" id="RMJ-9l-zbF"/>
                         <segue destination="v41-1Z-cuJ" kind="show" identifier="showLogs" id="2Ew-6e-Nd2"/>
                         <segue destination="yyb-Mj-ghD" kind="show" identifier="showOptOut" id="1yt-vv-ddN"/>
-                        <segue destination="GiN-QZ-yFq" kind="showDetail" identifier="showBackgrounds" id="8fD-KK-hBT"/>
                         <segue destination="rxA-nN-Z6Z" kind="showDetail" identifier="showSounds" id="oQU-xT-ytM"/>
                         <segue destination="WJO-2T-Dwn" kind="presentation" identifier="showLogin" modalPresentationStyle="formSheet" id="YJk-Fq-Ipq"/>
+                        <segue destination="NvL-Ob-NsV" kind="showDetail" identifier="showBackgrounds" id="x8n-Ay-hav"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="lLi-28-cfT" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -732,7 +732,7 @@
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="eVh-In-ePI" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="228" y="9308"/>
+            <point key="canvasLocation" x="252" y="9307"/>
         </scene>
         <!--Sounds-->
         <scene sceneID="fyQ-Yz-vtu">
@@ -793,14 +793,13 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ll7-UE-fuq" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-629" y="9307"/>
+            <point key="canvasLocation" x="-688" y="9307"/>
         </scene>
     </scenes>
     <resources>
         <image name="740-gear" width="28" height="28"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="8fD-KK-hBT"/>
         <segue reference="pZO-HH-rUP"/>
         <segue reference="RMJ-9l-zbF"/>
     </inferredMetricsTieBreakers>

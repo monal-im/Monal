@@ -2781,12 +2781,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             /* Set cipher type and mode */
             EVP_EncryptInit_ex(ctx, EVP_aes_128_gcm(), NULL, NULL, NULL);
             /* Set IV length if default 96 bits is not approp riate */
-            EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_IVLEN, gcmiv.length, NULL);
+            EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_IVLEN, (int) gcmiv.length, NULL);
             /* Initialise key and IV */
             EVP_EncryptInit_ex(ctx, NULL, NULL, gcmKey.bytes, gcmiv.bytes);
             EVP_CIPHER_CTX_set_padding(ctx,1);
             /* Encrypt plaintext */
-            EVP_EncryptUpdate(ctx, outbuf, &outlen,messageBytes.bytes,messageBytes.length);
+            EVP_EncryptUpdate(ctx, outbuf, &outlen,messageBytes.bytes,(int)messageBytes.length);
             
             encryptedMessage = [NSMutableData dataWithBytes:outbuf length:outlen];
             
@@ -2884,6 +2884,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         [request.attributes setObject:@"urn:xmpp:receipts" forKey:@"xmlns"];
         [messageNode.children addObject:request];
     }
+    
+    //for MAM
+    MLXMLNode *request =[[MLXMLNode alloc] initWithElement:@"store"];
+    [request.attributes setObject:@"urn:xmpp:hints" forKey:@"xmlns"];
+    [messageNode.children addObject:request];
     
     [self send:messageNode];
 }

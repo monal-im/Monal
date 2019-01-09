@@ -19,7 +19,11 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.navigationItem.title=@"Encryption Keys";
+    if(self.ownKeys) {
+        self.navigationItem.title=@"My Encryption Keys";
+    } else  {
+        self.navigationItem.title=@"Encryption Keys";
+    }
 }
 
 -(void)viewWillAppear:(BOOL)animated
@@ -44,14 +48,18 @@
     MLKeyCell *cell = (MLKeyCell *) [tableView dequeueReusableCellWithIdentifier:@"key" forIndexPath:indexPath];
     
     NSNumber *device =[self.devices objectAtIndex:indexPath.row];
-    SignalAddress *address = [[SignalAddress alloc] initWithName:[self.contact objectForKey:@"buddy_name"] deviceId:device.integerValue];
+    SignalAddress *address = [[SignalAddress alloc] initWithName:[self.contact objectForKey:@"buddy_name"] deviceId:(int) device.integerValue];
     
     NSData *identity=[self.account.monalSignalStore getIdentityForAddress:address];
     
     cell.key.text = [EncodingTools signalHexKeyWithData:identity];
     cell.toggle.on = [self.account.monalSignalStore isTrustedIdentity:address identityKey:identity];
-    cell.deviceid.text = [NSString stringWithFormat:@"%ld", (long)device.integerValue];
-    
+    if(device.integerValue == self.account.monalSignalStore.deviceid)
+    {
+        cell.deviceid.text = [NSString stringWithFormat:@"%ld (This device)", (long)device.integerValue];
+    } else  {
+        cell.deviceid.text = [NSString stringWithFormat:@"%ld", (long)device.integerValue];
+    }
     return cell;
 }
 
@@ -59,7 +67,13 @@
 {
     NSString* toreturn=nil;
     if(section==0)
-        toreturn= @"You should trust a key when you have verified it. Verify by comparing the key below to the one on your contact's screen."; ///or scan their QR code
+    {
+        if(self.ownKeys) {
+            toreturn= @"These are your encryption keys. Each device is a different place you have logged in. You should trust a key when you have verified it.";
+        } else {
+            toreturn= @"You should trust a key when you have verified it. Verify by comparing the key below to the one on your contact's screen."; ///or scan their QR code
+        }
+    }
     
     return toreturn;
 }

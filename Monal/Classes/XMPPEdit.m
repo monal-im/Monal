@@ -14,6 +14,7 @@
 #import "MBProgressHUD.h"
 #import "MLServerDetails.h"
 #import "MLMAMPrefTableViewController.h"
+#import "MLKeysTableViewController.h"
 
 #import "tools.h"
 
@@ -527,6 +528,14 @@ NSString *const kGtalk = @"Gtalk";
                 thecell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
                 break;
             }
+            case 6: {
+                thecell.cellLabel.text=@"My Keys";
+                thecell.toggleSwitch.hidden=YES;
+                
+                thecell.textInputField.hidden=YES;
+                thecell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
+                break;
+            }
                 
         }
         
@@ -605,7 +614,7 @@ NSString *const kGtalk = @"Gtalk";
         return 3;
     }
     else if( section ==1) {
-        return 6;
+        return 7;
     }
     else  if(section == 2&&  self.editMode==false)
     {
@@ -632,6 +641,8 @@ NSString *const kGtalk = @"Gtalk";
         {
             case 5:  {
                 [self performSegueWithIdentifier:@"showMAMPref" sender:self];
+            }case 6:  {
+                [self performSegueWithIdentifier:@"showKeyTrust" sender:self];
             }
         }
     }
@@ -672,6 +683,12 @@ NSString *const kGtalk = @"Gtalk";
     {
         MLMAMPrefTableViewController *mam= (MLMAMPrefTableViewController *)segue.destinationViewController;
         mam.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountno];
+    }
+    else if ([segue.identifier isEqualToString:@"showKeyTrust"])
+    {
+        MLKeysTableViewController *keys= (MLKeysTableViewController *)segue.destinationViewController;
+        keys.ownKeys = YES;
+        keys.contact =@{@"buddy_name":self.jid, @"account_id":self.accountno};
     }
 }
 

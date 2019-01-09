@@ -54,8 +54,12 @@
     
     cell.key.text = [EncodingTools signalHexKeyWithData:identity];
     cell.toggle.on = [self.account.monalSignalStore isTrustedIdentity:address identityKey:identity];
-    cell.deviceid.text = [NSString stringWithFormat:@"%ld", (long)device.integerValue];
-    
+    if(device.integerValue == self.account.monalSignalStore.deviceid)
+    {
+        cell.deviceid.text = [NSString stringWithFormat:@"%ld (This device)", (long)device.integerValue];
+    } else  {
+        cell.deviceid.text = [NSString stringWithFormat:@"%ld", (long)device.integerValue];
+    }
     return cell;
 }
 

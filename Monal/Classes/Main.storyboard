@@ -288,7 +288,7 @@
                     <navigationItem key="navigationItem" title="Chats" id="RRa-hC-xrf"/>
                     <connections>
                         <segue destination="Dhn-Pm-OVk" kind="showDetail" identifier="showConversation" id="RLU-kt-b8r"/>
-                        <segue destination="cC0-5a-Jvb" kind="presentation" identifier="ContactDetails" modalPresentationStyle="formSheet" id="RNX-bQ-8Zb"/>
+                        <segue destination="cC0-5a-Jvb" kind="presentation" identifier="showDetails" modalPresentationStyle="formSheet" id="RNX-bQ-8Zb"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ENC-uh-UXW" userLabel="First Responder" sceneMemberID="firstResponder"/>

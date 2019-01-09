@@ -11,6 +11,7 @@
 #import "MLContactCell.h"
 #import "chatViewController.h"
 #import "MonalAppDelegate.h"
+#import "ContactDetails.h"
 
 @interface ActiveChatsViewController ()
 @property (nonatomic, strong)  NSDateFormatter* destinationDateFormat;
@@ -37,7 +38,7 @@
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
-    self.navigationItem.title=NSLocalizedString(@"Active Chats",@"");
+    self.navigationItem.title=NSLocalizedString(@"Chats",@"");
     self.view.backgroundColor=[UIColor lightGrayColor];
     self.view.autoresizingMask=UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
     
@@ -113,6 +114,12 @@
         chatViewController *chatVC = (chatViewController *)nav.topViewController;
         [chatVC setupWithContact:sender];
     }
+    else if([segue.identifier isEqualToString:@"showDetails"])
+    {
+        UINavigationController *nav = segue.destinationViewController;
+        ContactDetails* details = (ContactDetails *)nav.topViewController;
+        details.contact= sender;
+    }
     
 }
 
@@ -172,8 +179,6 @@
     else if([state isEqualToString:@"(null)"] || [state isEqualToString:@""]) {
         cell.status=kStatusOnline;
     }
-    
-    cell.accessoryType = UITableViewCellAccessoryNone;
     
     cell.accountNo=[[row objectForKey:@"account_id"] integerValue];
     cell.username=[row objectForKey:@"buddy_name"] ;
@@ -267,6 +272,13 @@
 //    }
     
     
+}
+
+- (void)tableView:(UITableView *)tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath *)indexPath
+{
+    NSDictionary *contactDic = [_contacts objectAtIndex:indexPath.row];
+
+    [self performSegueWithIdentifier:@"showDetails" sender:contactDic];
 }
 
 

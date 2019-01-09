@@ -21,6 +21,7 @@ typedef enum {
 
 @property (nonatomic, weak) IBOutlet UILabel *displayName;
 @property (nonatomic, weak) IBOutlet UILabel *centeredDisplayName;
+@property (nonatomic, weak) IBOutlet UILabel *time;
 
 @property (nonatomic, weak) IBOutlet UILabel *statusText;
 @property (nonatomic, weak) IBOutlet UIImageView *statusOrb;

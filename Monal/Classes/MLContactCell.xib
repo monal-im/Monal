@@ -66,14 +66,22 @@
                             <constraint firstAttribute="height" constant="14" id="Xbr-kc-Y3g"/>
                         </constraints>
                     </imageView>
+                    <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="time" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="7IF-Xp-ziQ">
+                        <rect key="frame" x="217" y="1" width="27" height="16"/>
+                        <fontDescription key="fontDescription" type="system" weight="light" pointSize="13"/>
+                        <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <nil key="highlightedColor"/>
+                    </label>
                 </subviews>
                 <constraints>
                     <constraint firstItem="IrL-yc-gYp" firstAttribute="leading" secondItem="WBM-UR-4hu" secondAttribute="leading" id="0PX-kz-iXU"/>
                     <constraint firstItem="pGK-Ar-iBm" firstAttribute="centerY" secondItem="Qx8-80-HZA" secondAttribute="centerY" constant="0.5" id="23g-RQ-xlV"/>
                     <constraint firstItem="OhQ-Fk-Czf" firstAttribute="top" secondItem="Qx8-80-HZA" secondAttribute="topMargin" constant="-5" id="3IJ-Rx-MvT"/>
+                    <constraint firstItem="7IF-Xp-ziQ" firstAttribute="top" secondItem="Qx8-80-HZA" secondAttribute="top" constant="1" id="68P-wh-aeC"/>
                     <constraint firstItem="OhQ-Fk-Czf" firstAttribute="leading" secondItem="Awx-9U-LWt" secondAttribute="trailing" constant="11" id="A34-Th-lrX"/>
                     <constraint firstItem="orC-ej-MKC" firstAttribute="leading" secondItem="Qx8-80-HZA" secondAttribute="leadingMargin" constant="25" id="DlZ-Xq-SUj"/>
                     <constraint firstItem="WBM-UR-4hu" firstAttribute="leading" secondItem="Awx-9U-LWt" secondAttribute="trailing" constant="11" id="NLB-2x-gIU"/>
+                    <constraint firstAttribute="trailing" secondItem="7IF-Xp-ziQ" secondAttribute="trailing" constant="8" id="O80-bf-FqK"/>
                     <constraint firstItem="IrL-yc-gYp" firstAttribute="leading" secondItem="orC-ej-MKC" secondAttribute="trailing" constant="8" symbolic="YES" id="UjI-tr-Iz7"/>
                     <constraint firstItem="orC-ej-MKC" firstAttribute="top" secondItem="Qx8-80-HZA" secondAttribute="top" id="XS7-Wv-cqt"/>
                     <constraint firstAttribute="trailingMargin" secondItem="WBM-UR-4hu" secondAttribute="trailing" constant="-8" id="bdd-iy-yff"/>
@@ -95,6 +103,7 @@
                 <outlet property="muteBadge" destination="IAx-7T-RJd" id="JkV-KW-AJX"/>
                 <outlet property="statusOrb" destination="Awx-9U-LWt" id="ae5-pP-a8p"/>
                 <outlet property="statusText" destination="WBM-UR-4hu" id="cWb-pt-41n"/>
+                <outlet property="time" destination="7IF-Xp-ziQ" id="EID-qK-VgW"/>
                 <outlet property="userImage" destination="pGK-Ar-iBm" id="ysI-Fi-czO"/>
             </connections>
             <point key="canvasLocation" x="707.20000000000005" y="439.88005997001505"/>

@@ -1168,7 +1168,7 @@ CA
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
                                                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="9lx-qw-VNs">
-                                                                    <rect key="frame" x="62" y="40" width="239" height="17"/>
+                                                                    <rect key="frame" x="62" y="39" width="182" height="18"/>
                                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Name" drawsBackground="YES" id="21a-6j-uBR">
                                                                         <font key="font" metaFont="systemBold"/>
                                                                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -1224,20 +1224,35 @@ CA
                                                                     </constraints>
                                                                     <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="847-moon-selected" id="m36-al-9ui"/>
                                                                 </imageView>
+                                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="BfU-Cs-c3h">
+                                                                    <rect key="frame" x="247" y="41" width="65" height="14"/>
+                                                                    <constraints>
+                                                                        <constraint firstAttribute="width" constant="61" id="wk2-sW-ICn"/>
+                                                                    </constraints>
+                                                                    <textFieldCell key="cell" lineBreakMode="clipping" alignment="right" title="Today" id="wfh-cu-kaY">
+                                                                        <font key="font" metaFont="systemLight" size="11"/>
+                                                                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                                                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                                                    </textFieldCell>
+                                                                </textField>
                                                             </subviews>
                                                             <constraints>
+                                                                <constraint firstItem="BfU-Cs-c3h" firstAttribute="top" secondItem="OtE-Pn-e94" secondAttribute="top" id="17a-oW-lzN"/>
                                                                 <constraint firstAttribute="bottom" secondItem="yCN-Uu-roF" secondAttribute="bottom" constant="2" id="AE2-r7-RgZ"/>
                                                                 <constraint firstItem="0gC-0h-Of5" firstAttribute="leading" secondItem="6kd-1k-jyH" secondAttribute="leading" constant="37" id="AsB-Ei-9WJ"/>
                                                                 <constraint firstAttribute="centerY" secondItem="RZW-HH-7nJ" secondAttribute="centerY" id="DSi-Mx-0bj"/>
+                                                                <constraint firstAttribute="trailing" secondItem="BfU-Cs-c3h" secondAttribute="trailing" constant="5" id="Fp0-Sj-B3R"/>
                                                                 <constraint firstItem="0gC-0h-Of5" firstAttribute="top" secondItem="6kd-1k-jyH" secondAttribute="top" constant="3" id="G7l-c0-Rio"/>
+                                                                <constraint firstItem="SZE-Uv-IaF" firstAttribute="top" secondItem="BfU-Cs-c3h" secondAttribute="bottom" constant="11" id="GqU-ZW-XZn"/>
                                                                 <constraint firstItem="9lx-qw-VNs" firstAttribute="leading" secondItem="RZW-HH-7nJ" secondAttribute="trailing" constant="13" id="Gsg-fA-U6E"/>
                                                                 <constraint firstItem="yCN-Uu-roF" firstAttribute="leading" secondItem="6kd-1k-jyH" secondAttribute="leading" constant="35" id="PqH-hh-2fq"/>
                                                                 <constraint firstItem="OtE-Pn-e94" firstAttribute="top" secondItem="6kd-1k-jyH" secondAttribute="top" constant="5" id="Sk9-NN-vOt"/>
                                                                 <constraint firstAttribute="bottom" secondItem="SZE-Uv-IaF" secondAttribute="bottom" constant="13" id="W5k-ji-xzQ"/>
                                                                 <constraint firstItem="9lx-qw-VNs" firstAttribute="top" secondItem="6kd-1k-jyH" secondAttribute="top" priority="750" constant="8" id="W86-fp-1UE"/>
-                                                                <constraint firstAttribute="trailing" secondItem="9lx-qw-VNs" secondAttribute="trailing" constant="14" id="ZDc-nk-tnX"/>
                                                                 <constraint firstItem="0gC-0h-Of5" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="6kd-1k-jyH" secondAttribute="leading" constant="37" id="c71-ia-hv1"/>
+                                                                <constraint firstItem="BfU-Cs-c3h" firstAttribute="leading" secondItem="9lx-qw-VNs" secondAttribute="trailing" constant="5" id="cOX-WM-TMG"/>
                                                                 <constraint firstItem="RZW-HH-7nJ" firstAttribute="leading" secondItem="6kd-1k-jyH" secondAttribute="leading" constant="5" id="crE-qw-pT2"/>
+                                                                <constraint firstItem="BfU-Cs-c3h" firstAttribute="centerY" secondItem="9lx-qw-VNs" secondAttribute="centerY" id="ft5-Kk-h2f"/>
                                                                 <constraint firstItem="9lx-qw-VNs" firstAttribute="top" relation="lessThanOrEqual" secondItem="6kd-1k-jyH" secondAttribute="top" constant="3" id="kNd-Mm-jcU"/>
                                                                 <constraint firstItem="uoe-sr-pR6" firstAttribute="leading" secondItem="SZE-Uv-IaF" secondAttribute="trailing" constant="8" id="lrK-AW-Guz"/>
                                                                 <constraint firstAttribute="bottom" secondItem="uoe-sr-pR6" secondAttribute="bottom" constant="13" id="tJc-x1-HIV"/>
@@ -1252,6 +1267,7 @@ CA
                                                                 <outlet property="name" destination="9lx-qw-VNs" id="J96-ve-Eze"/>
                                                                 <outlet property="status" destination="SZE-Uv-IaF" id="EK0-XO-enE"/>
                                                                 <outlet property="statusOrb" destination="yCN-Uu-roF" id="Pe8-vH-baB"/>
+                                                                <outlet property="time" destination="BfU-Cs-c3h" id="zBO-D5-Wy8"/>
                                                                 <outlet property="unreadBadge" destination="0gC-0h-Of5" id="14e-g3-sze"/>
                                                                 <outlet property="unreadText" destination="OtE-Pn-e94" id="PO7-Fu-axE"/>
                                                             </connections>
@@ -3154,6 +3170,6 @@ Gw
         <image name="offline" width="15" height="15"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="Uwt-4d-Ui7"/>
+        <segue reference="Jkt-hW-Vlb"/>
     </inferredMetricsTieBreakers>
 </document>

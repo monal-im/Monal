@@ -30,6 +30,7 @@ typedef enum {
 @property (nonatomic, weak) IBOutlet NSImageView *statusOrb;
 @property (nonatomic, weak) IBOutlet NSImageView *unreadBadge;
 @property (nonatomic, weak) IBOutlet NSTextField *unreadText;
+@property (nonatomic, weak) IBOutlet NSTextField *time;
 
 @property (nonatomic, weak) IBOutlet NSImageView *muteBadge;
 

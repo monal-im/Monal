@@ -13,7 +13,12 @@
 #import "MonalAppDelegate.h"
 
 @interface ActiveChatsViewController ()
-
+@property (nonatomic, strong)  NSDateFormatter* destinationDateFormat;
+@property (nonatomic, strong)  NSDateFormatter* sourceDateFormat;
+@property (nonatomic, strong)  NSCalendar *gregorian;
+@property (nonatomic, assign)  NSInteger thisyear;
+@property (nonatomic, assign)  NSInteger thismonth;
+@property (nonatomic, assign)  NSInteger thisday;
 @end
 
 @implementation ActiveChatsViewController
@@ -58,6 +63,7 @@
     
     self.chatListTable.emptyDataSetSource = self;
     self.chatListTable.emptyDataSetDelegate = self;
+    [self setupDateObjects];
     
 }
 
@@ -191,6 +197,15 @@
     [[MLImageManager sharedInstance] getIconForContact:[row objectForKey:@"buddy_name"] andAccount:accountNo withCompletion:^(UIImage *image) {
             cell.userImage.image=image;
     }];
+    
+    if([row objectForKey:@"max_time"]) {
+        cell.time.text = [self formattedDateWithSource:[row objectForKey:@"max_time"]];
+        cell.time.hidden=NO;
+    } else  {
+        cell.time.hidden=YES;
+    }
+    
+    
     [cell setOrb];
     return cell;
 }
@@ -301,6 +316,60 @@
         self.tableView.tableFooterView = [UIView new];
     }
     return toreturn;
+}
+
+#pragma mark - date
+
+-(NSString*) formattedDateWithSource:(NSString*) sourceDateString
+{
+    NSString* dateString;
+    
+    NSDate* sourceDate=[self.sourceDateFormat dateFromString:sourceDateString];
+    
+    NSInteger msgday =[self.gregorian components:NSCalendarUnitDay fromDate:sourceDate].day;
+    NSInteger msgmonth=[self.gregorian components:NSCalendarUnitMonth fromDate:sourceDate].month;
+    NSInteger msgyear =[self.gregorian components:NSCalendarUnitYear fromDate:sourceDate].year;
+    
+    BOOL showFullDate=YES;
+    
+    //if([sourceDate timeIntervalSinceDate:priorDate]<60*60) showFullDate=NO;
+    
+    if (((self.thisday!=msgday) || (self.thismonth!=msgmonth) || (self.thisyear!=msgyear)) && showFullDate )
+    {
+        // note: if it isnt the same day we want to show the full  day
+        [self.destinationDateFormat setDateStyle:NSDateFormatterMediumStyle];
+        //no more need for seconds
+        [self.destinationDateFormat setTimeStyle:NSDateFormatterNoStyle];
+    }
+    else
+    {
+        //today just show time
+        [self.destinationDateFormat setDateStyle:NSDateFormatterNoStyle];
+        [self.destinationDateFormat setTimeStyle:NSDateFormatterShortStyle];
+    }
+    
+    dateString = [self.destinationDateFormat stringFromDate:sourceDate];
+    return dateString?dateString:@"";
+}
+
+-(void) setupDateObjects
+{
+    self.destinationDateFormat = [[NSDateFormatter alloc] init];
+    [self.destinationDateFormat setLocale:[NSLocale currentLocale]];
+    [self.destinationDateFormat setDoesRelativeDateFormatting:YES];
+    
+    self.sourceDateFormat = [[NSDateFormatter alloc] init];
+    [self.sourceDateFormat setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+    [self.sourceDateFormat setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+    
+    self.gregorian = [[NSCalendar alloc]
+                      initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
+    NSDate* now =[NSDate date];
+    self.thisday =[self.gregorian components:NSCalendarUnitDay fromDate:now].day;
+    self.thismonth =[self.gregorian components:NSCalendarUnitMonth fromDate:now].month;
+    self.thisyear =[self.gregorian components:NSCalendarUnitYear fromDate:now].year;
+    
+    
 }
 
 @end

@@ -10,6 +10,7 @@
 #import "MLImageManager.h"
 #import "DataLayer.h"
 #import "MLXMPPManager.h"
+@import QuartzCore; 
 
 @interface MLContactDetails ()
 
@@ -37,7 +38,11 @@
     self.fullName.stringValue=[_contact objectForKey:@"full_name"];
     if([self.fullName.stringValue isEqualToString:@"(null)"])  self.fullName.stringValue=@"";
     
-  
+    self.buddyIconView.wantsLayer=YES;
+    self.buddyIconView.layer.cornerRadius= self.buddyIconView.frame.size.height/2;
+    self.buddyIconView.layer.borderColor=[NSColor whiteColor].CGColor;
+    self.buddyIconView.layer.borderWidth=2.0f;
+    
      NSString* accountNo=[NSString stringWithFormat:@"%@", [_contact objectForKey:@"account_id"]];
 //    [[DataLayer sharedInstance] contactForUsername:[_contact objectForKey:@"buddy_name"] forAccount:accountNo withCompletion:^(NSArray *result) {
 //

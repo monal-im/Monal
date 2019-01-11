@@ -3103,10 +3103,10 @@ Gw
             </objects>
             <point key="canvasLocation" x="-182.5" y="-806"/>
         </scene>
-        <!--View Controller-->
+        <!--Key View Contoller-->
         <scene sceneID="oGi-MW-YAr">
             <objects>
-                <viewController id="lx4-TM-5ts" sceneMemberID="viewController">
+                <viewController id="lx4-TM-5ts" customClass="MLKeyViewContoller" sceneMemberID="viewController">
                     <view key="view" id="Mvq-ph-vO3">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="390"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -3208,10 +3208,10 @@ Gw
             </objects>
             <point key="canvasLocation" x="1085" y="482"/>
         </scene>
-        <!--View Controller-->
+        <!--Resources View Controller-->
         <scene sceneID="cPa-vm-AiJ">
             <objects>
-                <viewController id="gI6-ei-8VN" sceneMemberID="viewController">
+                <viewController id="gI6-ei-8VN" customClass="MLResourcesViewController" sceneMemberID="viewController">
                     <view key="view" id="zge-5G-EiM">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="390"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>

@@ -34,8 +34,14 @@
     self.devices= [self.account.monalSignalStore allDeviceIdsForAddressName:[self.contact objectForKey:@"buddy_name"]];
     self.jid.stringValue =[self.contact objectForKey:@"buddy_name"];
     [self.table reloadData];
+    
+    if(self.ownKeys) {
+        self.topText.stringValue= @"These are your encryption keys. Each device is a different place you have logged in. You should trust a key when you have verified it.";
+    } else {
+         self.topText.stringValue= @"You should trust a key when you have verified it. Verify by comparing the key below to the one on your contact's screen."; ///or scan their QR code
+    }
+        
 }
-
 
 
 #pragma mark  - tableview datasource
@@ -72,11 +78,11 @@
     return cell;
 }
 
-- (void)tableViewSelectionDidChange:(NSNotification *)notification;
+
+
+-(void) toggleTrust
 {
     
 }
-
-
 
 @end

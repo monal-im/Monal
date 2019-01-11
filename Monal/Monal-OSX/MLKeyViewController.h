@@ -15,6 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) NSDictionary *contact;
 @property (nonatomic, weak) IBOutlet NSTableView *table; 
 @property (nonatomic, weak) IBOutlet NSTextField *jid;
+@property (nonatomic, weak) IBOutlet NSTextField *topText;
 @end
 
 NS_ASSUME_NONNULL_END

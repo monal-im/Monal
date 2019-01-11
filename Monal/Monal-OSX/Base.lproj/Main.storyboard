@@ -3146,7 +3146,7 @@ Gw
                                                     </textFieldCell>
                                                     <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                     <prototypeCellViews>
-                                                        <tableCellView misplaced="YES" id="ykl-RA-zWx" customClass="MLKeyRow">
+                                                        <tableCellView identifier="KeyRow" misplaced="YES" id="ykl-RA-zWx" customClass="MLKeyRow">
                                                             <rect key="frame" x="1" y="1" width="372" height="120"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>

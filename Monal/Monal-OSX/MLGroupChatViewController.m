@@ -38,6 +38,7 @@
     else {
         self.accountText.hidden=NO;
         self.accounts.hidden=NO;
+        [self.accounts selectItemAtIndex:0]; //TODO update to remember last used 
     }
     
 }

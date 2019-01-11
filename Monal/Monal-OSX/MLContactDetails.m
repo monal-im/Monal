@@ -10,6 +10,8 @@
 #import "MLImageManager.h"
 #import "DataLayer.h"
 #import "MLXMPPManager.h"
+#import "MLKeyViewController.h"
+#import "MLResourcesViewController.h"
 @import QuartzCore; 
 
 @interface MLContactDetails ()
@@ -81,6 +83,20 @@
 
     }
 
+}
+
+-(void) prepareForSegue:(NSStoryboardSegue *)segue sender:(id)sender
+{
+    if([segue.identifier isEqualToString:@"showKeys"])
+    {
+        MLKeyViewController *keys = (MLKeyViewController *)segue.destinationController;
+        keys.contact= self.contact;
+    }
+    else if([segue.identifier isEqualToString:@"showResources"])
+    {
+          MLResourcesViewController *resources = (MLResourcesViewController *)segue.destinationController;
+          resources.contact= self.contact;
+    }
 }
 
 @end

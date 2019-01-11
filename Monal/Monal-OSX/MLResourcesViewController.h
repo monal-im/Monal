@@ -11,7 +11,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface MLResourcesViewController : NSViewController
-
+@property (nonatomic, strong) NSDictionary *contact;
 @end
 
 NS_ASSUME_NONNULL_END

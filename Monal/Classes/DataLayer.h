@@ -9,7 +9,6 @@
 #import <Foundation/Foundation.h>
 #import <sqlite3.h>
 #import "ParsePresence.h"
-#import "NSString+SqlLite.h"
 
 #define kMonalDBQueue "im.monal.dbQueue"
 #define kMonalContactQueue "im.monal.contactQueue"

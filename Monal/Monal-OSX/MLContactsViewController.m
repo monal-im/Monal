@@ -1561,6 +1561,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
     NSString* dateString;
   
     NSDate* sourceDate=[self.sourceDateFormat dateFromString:sourceDateString];
+    if(!sourceDate) return @"";
     
     NSInteger msgday =[self.gregorian components:NSCalendarUnitDay fromDate:sourceDate].day;
     NSInteger msgmonth=[self.gregorian components:NSCalendarUnitMonth fromDate:sourceDate].month;

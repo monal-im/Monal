@@ -58,12 +58,6 @@
 }
 
 
-
--(void) toggleTrust
-{
-    
-}
-
 @end
 
 

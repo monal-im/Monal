@@ -54,6 +54,8 @@
     
     cell.key.text = [EncodingTools signalHexKeyWithData:identity];
     cell.toggle.on = [self.account.monalSignalStore isTrustedIdentity:address identityKey:identity];
+    cell.toggle.tag= 100+indexPath.row;
+    [cell.toggle addTarget:self action:@selector(toggleTrust:) forControlEvents:UIControlEventValueChanged];
     if(device.integerValue == self.account.monalSignalStore.deviceid)
     {
         cell.deviceid.text = [NSString stringWithFormat:@"%ld (This device)", (long)device.integerValue];
@@ -85,6 +87,26 @@
         toreturn= @"Monal uses OMEMO encryption to protect your conversations";
     
     return toreturn;
+}
+
+-(void) toggleTrust:(id) sender
+{
+    UISwitch *button =(UISwitch *)sender;
+    NSInteger row = button.tag-100;
+    
+    NSNumber *device =[self.devices objectAtIndex:row];
+    SignalAddress *address = [[SignalAddress alloc] initWithName:[self.contact objectForKey:@"buddy_name"] deviceId:(int) device.integerValue];
+    
+    NSData *identity=[self.account.monalSignalStore getIdentityForAddress:address];
+    
+    BOOL newTrust;
+    if( [self.account.monalSignalStore isTrustedIdentity:address identityKey:identity]) {
+        newTrust=NO;
+    } else  {
+        newTrust=YES;
+    }
+    
+    [self.account.monalSignalStore updateTrust:newTrust forAddress:address];
 }
 
 @end

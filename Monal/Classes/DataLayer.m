@@ -2457,11 +2457,11 @@ static DataLayer *sharedInstance=nil;
         [self executeNonQuery:@" alter table activechats add COLUMN lastMessageTime defualt CURRENT_TIMESTAMP" withCompletion:nil];
         
         //iterate current active and set their times
-        NSArray *active = [self executeReader:@"select buddy_name, account_id from activeChats" andArguments:nil];
+        NSArray *active = [self executeReader:@"select distinct buddy_name, account_id from activeChats" andArguments:nil];
         [active enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             NSDictionary *row = (NSDictionary *)obj;
             //get max
-            NSNumber *max = (NSNumber *)[self executeScalar:@"select max(TIMESTAMP) from message_history where message_to=? or message_from=? " andArguments:@[[row objectForKey:@"buddy_name"]]];
+            NSNumber *max = (NSNumber *)[self executeScalar:@"select max(TIMESTAMP) from message_history where message_to=? or message_from=? and account_id=?" andArguments:@[[row objectForKey:@"buddy_name"],[row objectForKey:@"account_id"]]];
             
             [self executeNonQuery:@"update activechats set lastMessageTime=? where buddy_name=? and account_id=?" andArguments:@[max,[row objectForKey:@"buddy_name"], [row objectForKey:@"account_id"]]];
         }];

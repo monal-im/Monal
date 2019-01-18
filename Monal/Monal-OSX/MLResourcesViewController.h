@@ -10,8 +10,11 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MLResourcesViewController : NSViewController
+@interface MLResourcesViewController : NSViewController <NSTableViewDataSource, NSTableViewDelegate>
 @property (nonatomic, strong) NSDictionary *contact;
+@property (nonatomic, weak) IBOutlet NSTableView *table;
+@property (nonatomic, weak) IBOutlet NSTextField *jid;
+@property (nonatomic, weak) IBOutlet NSTextField *topText;
 @end
 
 NS_ASSUME_NONNULL_END

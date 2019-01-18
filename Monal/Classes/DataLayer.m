@@ -1888,7 +1888,7 @@ static DataLayer *sharedInstance=nil;
 #pragma mark active chats
 -(void) activeContactsWithCompletion: (void (^)(NSMutableArray *))completion
 {
-    NSString* query=[NSString stringWithFormat:@"SELECT    a.buddy_name,    state,    status,    filename,    ifnull(b.full_name, a.buddy_name) AS full_name,    a.account_id,    max_time,    0 AS 'count' FROM (    SELECT        DISTINCT X.*,        max(Y.max_time) AS max_time FROM (            SELECT                DISTINCT a.buddy_name,                a.account_id            FROM                activechats AS a) AS X        LEFT OUTER JOIN (            SELECT                account_id,                message_from,                message_to,                max(timestamp) AS max_time            FROM                message_history            GROUP BY                account_id,                message_from,                message_to) AS Y ON X.account_id = Y.account_id            AND (X.buddy_name = Y.message_from                OR X.buddy_name = Y.message_to)        GROUP BY            x.buddy_name,            x.account_id) AS a    LEFT OUTER JOIN buddylist AS b ON a.buddy_name = b.buddy_name    AND a.account_id = b.account_id ORDER BY    max_time DESC,    full_name COLLATE NOCASE ASC" ];
+    NSString* query=[NSString stringWithFormat:@"select  distinct a.buddy_name,  state, status,  filename, ifnull(b.full_name, a.buddy_name) AS full_name, a.account_id,lastMessageTime, 0 AS 'count' from activechats as a LEFT OUTER JOIN buddylist AS b ON a.buddy_name = b.buddy_name  AND a.account_id = b.account_id order by lastMessageTime desc" ];
     //	DDLogVerbose(query);
      [self executeReader:query withCompletion:^(NSMutableArray *results) {
          if(completion) completion(results);
@@ -2448,6 +2448,27 @@ static DataLayer *sharedInstance=nil;
         
         DDLogVerbose(@"Upgrade to 3.3 success ");
     }
+   
+    if([dbversion doubleValue]<3.4)
+    {
+        DDLogVerbose(@"Database version <3.4 detected. Performing upgrade . ");
+        [self executeNonQuery:@"update dbversion set dbversion='3.4'; " withCompletion:nil];
+        
+        [self executeNonQuery:@" alter table activechats add COLUMN lastMessageTime defualt CURRENT_TIMESTAMP" withCompletion:nil];
+        
+        //iterate current active and set their times
+        NSArray *active = [self executeReader:@"select buddy_name, account_id from activeChats" andArguments:nil];
+        [active enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            NSDictionary *row = (NSDictionary *)obj;
+            //get max
+            NSNumber *max = (NSNumber *)[self executeScalar:@"select max(TIMESTAMP) from message_history where message_to=? or message_from=? " andArguments:@[[row objectForKey:@"buddy_name"]]];
+            
+            [self executeNonQuery:@"update activechats set lastMessageTime=? where buddy_name=? and account_id=?" andArguments:@[max,[row objectForKey:@"buddy_name"], [row objectForKey:@"account_id"]]];
+        }];
+        
+        DDLogVerbose(@"Upgrade to 3.4 success ");
+    }
+    
    
     [dbversionCheck unlock];
     return;

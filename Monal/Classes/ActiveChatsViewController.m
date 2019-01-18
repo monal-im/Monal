@@ -203,8 +203,8 @@
             cell.userImage.image=image;
     }];
     
-    if([row objectForKey:@"max_time"]) {
-        cell.time.text = [self formattedDateWithSource:[row objectForKey:@"max_time"]];
+    if([row objectForKey:@"lastMessageTime"]) {
+        cell.time.text = [self formattedDateWithSource:[row objectForKey:@"lastMessageTime"]];
         cell.time.hidden=NO;
     } else  {
         cell.time.hidden=YES;

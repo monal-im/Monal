@@ -1367,8 +1367,8 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
         }
     }
     
-    if([contactRow objectForKey:@"max_time"]) {
-        cell.time.stringValue = [self formattedDateWithSource:[contactRow objectForKey:@"max_time"]];
+    if([contactRow objectForKey:@"lastMessageTime"]) {
+        cell.time.stringValue = [self formattedDateWithSource:[contactRow objectForKey:@"lastMessageTime"]];
         cell.time.hidden=NO;
     } else  {
         cell.time.hidden=YES;

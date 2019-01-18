@@ -2461,9 +2461,12 @@ static DataLayer *sharedInstance=nil;
         [active enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             NSDictionary *row = (NSDictionary *)obj;
             //get max
-            NSNumber *max = (NSNumber *)[self executeScalar:@"select max(TIMESTAMP) from message_history where message_to=? or message_from=? and account_id=?" andArguments:@[[row objectForKey:@"buddy_name"],[row objectForKey:@"account_id"]]];
-            
-            [self executeNonQuery:@"update activechats set lastMessageTime=? where buddy_name=? and account_id=?" andArguments:@[max,[row objectForKey:@"buddy_name"], [row objectForKey:@"account_id"]]];
+            NSNumber *max = (NSNumber *)[self executeScalar:@"select max(TIMESTAMP) from message_history where (message_to=? or message_from=?) and account_id=?" andArguments:@[[row objectForKey:@"buddy_name"],[row objectForKey:@"buddy_name"], [row objectForKey:@"account_id"]]];
+            if(max) {
+                [self executeNonQuery:@"update activechats set lastMessageTime=? where buddy_name=? and account_id=?" andArguments:@[max,[row objectForKey:@"buddy_name"], [row objectForKey:@"account_id"]]];
+            } else  {
+                
+            }
         }];
         
         DDLogVerbose(@"Upgrade to 3.4 success ");

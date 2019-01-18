@@ -1812,7 +1812,7 @@ static DataLayer *sharedInstance=nil;
 
 -(void) markAsReadBuddy:(NSString*) buddy forAccount:(NSString*) accountNo
 {
-    
+    if(!buddy || !accountNo) return;
     NSString* query2=[NSString stringWithFormat:@"  update message_history set unread=0 where account_id=? and message_from=?"];
     [self executeNonQuery:query2 andArguments:@[accountNo, buddy] withCompletion:nil];
 

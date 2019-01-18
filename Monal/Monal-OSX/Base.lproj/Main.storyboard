@@ -3120,13 +3120,13 @@ Gw
                                 </textFieldCell>
                             </textField>
                             <scrollView autohidesScrollers="YES" horizontalLineScroll="122" horizontalPageScroll="10" verticalLineScroll="122" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="McW-eO-Nsk">
-                                <rect key="frame" x="12" y="65" width="377" height="413"/>
+                                <rect key="frame" x="12" y="65" width="377" height="405"/>
                                 <clipView key="contentView" id="9lB-HX-8ea">
-                                    <rect key="frame" x="1" y="1" width="375" height="411"/>
+                                    <rect key="frame" x="1" y="1" width="375" height="403"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <tableView verticalHuggingPriority="750" ambiguous="YES" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" columnReordering="NO" columnSelection="YES" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" rowHeight="120" rowSizeStyle="automatic" viewBased="YES" id="8cR-N7-Oyp">
-                                            <rect key="frame" x="0.0" y="0.0" width="375" height="411"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="375" height="403"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <size key="intercellSpacing" width="3" height="2"/>
                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -3226,11 +3226,11 @@ Gw
                                 </scroller>
                             </scrollView>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="iVl-Yh-m2i">
-                                <rect key="frame" x="14" y="486" width="377" height="37"/>
+                                <rect key="frame" x="14" y="478" width="377" height="45"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="373" id="eRb-CN-l97"/>
                                     <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="373" id="fbr-ef-Sb4"/>
-                                    <constraint firstAttribute="height" constant="37" id="k4o-ox-ths"/>
+                                    <constraint firstAttribute="height" constant="45" id="k4o-ox-ths"/>
                                 </constraints>
                                 <textFieldCell key="cell" id="6dx-Lz-DWo">
                                     <font key="font" metaFont="system"/>

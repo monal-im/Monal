@@ -1502,6 +1502,7 @@ static DataLayer *sharedInstance=nil;
                 [self executeNonQuery:query andArguments:params withCompletion:^(BOOL success) {
                     if(completion)
                     {
+                        [self updateActiveBuddy:actualfrom setTime:dateString forAccount:accountNo withCompletion:nil];
                         completion(success);
                     }
                 }];
@@ -1523,6 +1524,7 @@ static DataLayer *sharedInstance=nil;
                         
                         if(completion)
                         {
+                            [self updateActiveBuddy:actualfrom setTime:dateString forAccount:accountNo withCompletion:nil];
                             completion(success);
                         }
                     }];
@@ -1840,6 +1842,7 @@ static DataLayer *sharedInstance=nil;
         DDLogVerbose(@"%@",query);
         [self executeNonQuery:query andArguments:params  withCompletion:^(BOOL result) {
             if (completion) {
+                 [self updateActiveBuddy:to setTime:dateTime forAccount:accountNo withCompletion:nil];
                 completion(result,messageType);
             }
         }];
@@ -1936,7 +1939,7 @@ static DataLayer *sharedInstance=nil;
             } else
             {
                 //no
-                NSString* query2=[NSString stringWithFormat:@"insert into activechats (buddy_name,account_id) values (?,?) "];
+                NSString* query2=[NSString stringWithFormat:@"insert into activechats (buddy_name,account_id, lastMessageTime) values (?,?, current_timestamp) "];
                 [self executeNonQuery:query2 andArguments:@[buddyname,accountNo] withCompletion:^(BOOL result) {
                     if (completion) {
                         completion(result);
@@ -1971,11 +1974,17 @@ static DataLayer *sharedInstance=nil;
     
 }
 
+-(void) updateActiveBuddy:(NSString*) buddyname setTime:(NSString *)timestamp forAccount:(NSString*) accountNo withCompletion: (void (^)(BOOL))completion
+{
+    NSString* query=[NSString stringWithFormat:@"update activechats set lastMessageTime=? where account_id=? and buddy_name=? "];
+    [self executeNonQuery:query andArguments:@[timestamp, accountNo, buddyname] withCompletion:^(BOOL success) {
+        if(completion) completion(success);
+    }];
+    
+}
+
 
 #pragma mark chat properties
-
-
-
 -(void) countUserUnreadMessages:(NSString*) buddy forAccount:(NSString*) accountNo withCompletion:(void (^)(NSNumber *))completion
 {
     // count # messages from a specific user in messages table
@@ -2457,7 +2466,7 @@ static DataLayer *sharedInstance=nil;
         DDLogVerbose(@"Database version <3.4 detected. Performing upgrade . ");
         [self executeNonQuery:@"update dbversion set dbversion='3.4'; " withCompletion:nil];
         
-        [self executeNonQuery:@" alter table activechats add COLUMN lastMessageTime defualt CURRENT_TIMESTAMP" withCompletion:nil];
+        [self executeNonQuery:@" alter table activechats add COLUMN lastMessageTime datetime " withCompletion:nil];
         
         //iterate current active and set their times
         NSArray *active = [self executeReader:@"select distinct buddy_name, account_id from activeChats" andArguments:nil];

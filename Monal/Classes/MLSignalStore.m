@@ -17,12 +17,10 @@
 @implementation MLSignalStore
 
 -(id) initWithAccountId:(NSString *) accountId{
-    
     self.accountId=accountId;
     NSArray *data= [[DataLayer sharedInstance] executeReader:@"select identityPrivateKey, deviceid,identityPublicKey from signalIdentity where account_id=?" andArguments:@[accountId]];
     NSDictionary *row = [data firstObject];
    
-    
     if(row)
     {
         self.deviceid=[(NSNumber *)[row objectForKey:@"deviceid"] unsignedIntValue];
@@ -300,7 +298,8 @@
     BOOL toreturn=NO;
     
     if(!dbIdentity) {
-        toreturn=YES;
+       NSData *untrusted= [self getUntrustedForAddress:address];
+        if(!untrusted) return YES; 
     }
     else {
         if([dbIdentity isEqualToData:identityKey])
@@ -316,6 +315,19 @@
 -(NSData *) getIdentityForAddress:(SignalAddress*)address
 {
     return (NSData *)[[DataLayer sharedInstance] executeScalar:@"select identity from signalContactIdentity where account_id=? and contactDeviceId=? and contactName=? and trusted=1" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
+}
+
+-(void) updateTrust:(BOOL) trust forAddress:(SignalAddress*)address
+{
+    [[DataLayer sharedInstance] executeNonQuery:@"update signalContactIdentity set trusted=?  where account_id=? and contactDeviceId=? and contactName=?" andArguments:@[[NSNumber numberWithBool:trust], self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
+}
+
+/**
+ is it explicity not trusted?
+ */
+-(NSData *) getUntrustedForAddress:(SignalAddress*)address
+{
+    return (NSData *)[[DataLayer sharedInstance] executeScalar:@"select identity from signalContactIdentity where account_id=? and contactDeviceId=? and contactName=? and trusted=0" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
 }
 
 /**

@@ -60,14 +60,16 @@
     SignalAddress *address = [[SignalAddress alloc] initWithName:[self.contact objectForKey:@"buddy_name"] deviceId:(int) device.integerValue];
     
     NSData *identity=[self.account.monalSignalStore getIdentityForAddress:address];
-    
+    if(identity) {
     cell.key.stringValue = [EncodingTools signalHexKeyWithData:identity];
+    }
     if( [self.account.monalSignalStore isTrustedIdentity:address identityKey:identity])
     {
         [cell.toggle setState:NSControlStateValueOn];
     } else  {
         [cell.toggle setState:NSControlStateValueOff];
     }
+    
     if(device.integerValue == self.account.monalSignalStore.deviceid)
     {
         cell.deviceid.stringValue = [NSString stringWithFormat:@"%ld (This device)", (long)device.integerValue];
@@ -75,14 +77,31 @@
         cell.deviceid.stringValue = [NSString stringWithFormat:@"%ld", (long)device.integerValue];
     }
     
+    [cell.toggle setTag:100+row];
+    [cell.toggle setAction:@selector(toggleTrust:)];
     return cell;
 }
 
 
 
--(void) toggleTrust
+-(void) toggleTrust:(id) sender
 {
+    NSButton *button =(NSButton *)sender;
+    NSInteger row = button.tag-100;
     
+    NSNumber *device =[self.devices objectAtIndex:row];
+    SignalAddress *address = [[SignalAddress alloc] initWithName:[self.contact objectForKey:@"buddy_name"] deviceId:(int) device.integerValue];
+    
+    NSData *identity=[self.account.monalSignalStore getIdentityForAddress:address];
+    
+    BOOL newTrust;
+    if( [self.account.monalSignalStore isTrustedIdentity:address identityKey:identity]) {
+        newTrust=NO;
+    } else  {
+        newTrust=YES;
+    }
+        
+    [self.account.monalSignalStore updateTrust:newTrust forAddress:address];
 }
 
 @end

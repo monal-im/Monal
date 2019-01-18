@@ -20,4 +20,5 @@
 
 -(NSData *) getIdentityForAddress:(SignalAddress*)address;
 -(NSMutableArray *) readPreKeys;
+-(void) updateTrust:(BOOL) trust forAddress:(SignalAddress*)address;
 @end

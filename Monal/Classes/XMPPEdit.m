@@ -686,9 +686,11 @@ NSString *const kGtalk = @"Gtalk";
     }
     else if ([segue.identifier isEqualToString:@"showKeyTrust"])
     {
-        MLKeysTableViewController *keys= (MLKeysTableViewController *)segue.destinationViewController;
-        keys.ownKeys = YES;
-        keys.contact =@{@"buddy_name":self.jid, @"account_id":self.accountno};
+        if(self.jid && self.accountno) {
+            MLKeysTableViewController *keys= (MLKeysTableViewController *)segue.destinationViewController;
+            keys.ownKeys = YES;
+            keys.contact =@{@"buddy_name":self.jid, @"account_id":self.accountno};
+        }
     }
 }
 

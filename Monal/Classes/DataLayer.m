@@ -2575,6 +2575,7 @@ static DataLayer *sharedInstance=nil;
 
 -(void) blockJid:(NSString*) jid
 {
+     if(!jid ) return;
     NSString* query=[NSString stringWithFormat:@"insert into blockList(jid) values(?) "];
     NSArray *params=@[jid];
     [self executeNonQuery:query andArguments:params];
@@ -2582,6 +2583,7 @@ static DataLayer *sharedInstance=nil;
 
 -(void) unBlockJid:(NSString*) jid
 {
+     if(!jid ) return;
     NSString* query=[NSString stringWithFormat:@"delete from blockList where jid=? "];
     NSArray *params=@[jid];
     [self executeNonQuery:query andArguments:params];
@@ -2589,6 +2591,7 @@ static DataLayer *sharedInstance=nil;
 
 -(void) isBlockedJid:(NSString*) jid withCompletion: (void (^)(BOOL))completion
 {
+     if(!jid) return completion(NO);
     NSString* query=[NSString stringWithFormat:@"select count(jid) from blockList where jid=?"];
     NSArray *params=@[jid];
     [self executeScalar:query andArguments:params withCompletion:^(NSObject *val) {
@@ -2605,6 +2608,7 @@ static DataLayer *sharedInstance=nil;
 
 -(BOOL) shouldEncryptForJid:(NSString*) jid andAccountNo:(NSString*) accountNo
 {
+    if(!jid || !accountNo) return NO;
     NSString* query=[NSString stringWithFormat:@"SELECT encrypt from buddylist where account_id=?  and buddy_name=? "];
     NSArray *params=@[accountNo, jid];
     NSNumber* status=(NSNumber*)[self executeScalar:query andArguments:params];
@@ -2614,6 +2618,7 @@ static DataLayer *sharedInstance=nil;
 
 -(void) encryptForJid:(NSString*) jid andAccountNo:(NSString*) accountNo
 {
+    if(!jid || !accountNo) return;
     NSString* query=[NSString stringWithFormat:@"update buddylist set encrypt=1 where account_id=?  and buddy_name=? "];
     NSArray *params=@[ accountNo, jid];
     [self executeNonQuery:query andArguments:params];
@@ -2622,6 +2627,7 @@ static DataLayer *sharedInstance=nil;
 
 -(void) disableEncryptForJid:(NSString*) jid andAccountNo:(NSString*) accountNo
 {
+     if(!jid || !accountNo) return ;
     NSString* query=[NSString stringWithFormat:@"update buddylist set encrypt=0 where account_id=?  and buddy_name=? "];
     NSArray *params=@[ accountNo, jid];
     [self executeNonQuery:query andArguments:params];

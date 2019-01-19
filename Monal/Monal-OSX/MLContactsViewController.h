@@ -30,9 +30,11 @@
 -(IBAction)deleteItem:(id)sender;
 -(IBAction)muteItem:(id)sender;
 -(IBAction)startFind:(id)sender;
+-(IBAction)toggleEncryption:(id)sender;
 
 -(void)toggleContactsTab;
 -(void)toggleActiveChatTab;
+
 
 -(void) highlightCellForCurrentContact;
 

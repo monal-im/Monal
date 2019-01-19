@@ -1609,4 +1609,9 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
     
 }
 
+-(IBAction)toggleEncryption:(id)sender
+{
+    [self.chatViewController toggleEncryption:sender];
+}
+
 @end

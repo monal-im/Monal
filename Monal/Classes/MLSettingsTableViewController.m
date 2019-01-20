@@ -178,7 +178,7 @@ NS_ENUM(NSInteger, kSettingSection)
                     break;
                     
                 case 1:
-                    [self performSegueWithIdentifier:@"showBug" sender:self];
+                     [self openLink:@"https://github.com/anurodhp/Monal/issues"];
                     break;
                 default:
                     break;
@@ -203,7 +203,7 @@ NS_ENUM(NSInteger, kSettingSection)
                     break;
                     
                 case 4:
-                    [self performSegueWithIdentifier:@"showAbout" sender:self];
+                    [self openLink:@"https://monal.im/about/"];
                     break;
                     
                 case 6:
@@ -293,13 +293,7 @@ NS_ENUM(NSInteger, kSettingSection)
 
 -(void)  prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
-    if([segue.identifier isEqualToString:@"showBug"])
-    {
-        UINavigationController *nav = (UINavigationController *)  segue.destinationViewController;
-        MLWebViewController *web = (MLWebViewController *) nav.topViewController;
-        web.urltoLoad=[NSURL URLWithString:@"https://github.com/anurodhp/Monal/issues"];
-    }
-    else if([segue.identifier isEqualToString:@"showOpenSource"])
+    if([segue.identifier isEqualToString:@"showOpenSource"])
     {
         UINavigationController *nav = (UINavigationController *)  segue.destinationViewController;
         MLWebViewController *web = (MLWebViewController *) nav.topViewController;
@@ -309,12 +303,7 @@ NS_ENUM(NSInteger, kSettingSection)
     
         web.urltoLoad=[NSURL fileURLWithPath:myFile];
     }
-    else if([segue.identifier isEqualToString:@"showAbout"])
-    {
-        UINavigationController *nav = (UINavigationController *)  segue.destinationViewController;
-        MLWebViewController *web = (MLWebViewController *) nav.topViewController;
-        web.urltoLoad=[NSURL URLWithString:@"https://monal.im/about/"];
-    }
+ 
 }
 
 

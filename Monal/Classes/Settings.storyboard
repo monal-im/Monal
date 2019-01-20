@@ -486,10 +486,10 @@
                         <segue destination="zlL-d1-5e0" kind="showDetail" identifier="showOpenSource" id="pZO-HH-rUP"/>
                         <segue destination="eBx-3x-WaS" kind="showDetail" identifier="showChatLog" id="RMJ-9l-zbF"/>
                         <segue destination="v41-1Z-cuJ" kind="show" identifier="showLogs" id="2Ew-6e-Nd2"/>
-                        <segue destination="yyb-Mj-ghD" kind="show" identifier="showOptOut" id="1yt-vv-ddN"/>
                         <segue destination="rxA-nN-Z6Z" kind="showDetail" identifier="showSounds" id="oQU-xT-ytM"/>
                         <segue destination="WJO-2T-Dwn" kind="presentation" identifier="showLogin" modalPresentationStyle="formSheet" id="YJk-Fq-Ipq"/>
                         <segue destination="NvL-Ob-NsV" kind="showDetail" identifier="showBackgrounds" id="x8n-Ay-hav"/>
+                        <segue destination="Htg-TY-tEg" kind="showDetail" identifier="showOptOut" id="9OK-6O-Kee"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="lLi-28-cfT" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -503,6 +503,22 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="vsp-E8-u9K" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-1334" y="3210"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="kOE-Pr-uST">
+            <objects>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Z4T-ab-Kyt" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <navigationController id="Htg-TY-tEg" sceneMemberID="viewController">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="OFm-V3-DVX">
+                        <rect key="frame" x="0.0" y="44" width="414" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="yyb-Mj-ghD" kind="relationship" relationship="rootViewController" id="FOO-Jp-W7a"/>
+                    </connections>
+                </navigationController>
+            </objects>
+            <point key="canvasLocation" x="-930" y="2991"/>
         </scene>
         <!--Opt Out Settings View Controller-->
         <scene sceneID="Md4-qE-6ap">
@@ -527,10 +543,11 @@
                             <outlet property="delegate" destination="yyb-Mj-ghD" id="HmT-OW-0Q4"/>
                         </connections>
                     </tableView>
+                    <navigationItem key="navigationItem" id="xDj-BC-BlI"/>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="C4U-QU-FXy" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-367" y="3139"/>
+            <point key="canvasLocation" x="-84" y="2991"/>
         </scene>
         <!--Log View Controller-->
         <scene sceneID="g88-aY-02X">

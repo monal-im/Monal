@@ -18,6 +18,7 @@
     [super viewDidLoad];
     WKWebViewConfiguration *theConfiguration = [[WKWebViewConfiguration alloc] init];
     self.webview = [[WKWebView alloc] initWithFrame:self.view.frame configuration:theConfiguration];
+    self.webview.contentMode=UIViewContentModeScaleAspectFill;
     self.webview.navigationDelegate=self;
     [self.view addSubview:self.webview];
    

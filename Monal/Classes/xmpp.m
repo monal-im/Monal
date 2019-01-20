@@ -2749,7 +2749,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [messageNode setXmppId:messageId ];
 #ifndef DISABLE_OMEMO
     if(self.signalContext && !isMUC && encrypt) {
-        [messageNode setBody:@"I sent you an OMEMO encrypted message but your client doesn’t seem to support that. Find more information on https://conversations.im/omemo"];
+        [messageNode setBody:@"[This message is OMEMO encrypted]"];
         
         NSArray *devices = [self.monalSignalStore allDeviceIdsForAddressName:contact];
         NSArray *myDevices = [self.monalSignalStore allDeviceIdsForAddressName:_fulluser];

@@ -1057,6 +1057,7 @@ static DataLayer *sharedInstance=nil;
 
 -(void) setResourceOnline:(ParsePresence *)presenceObj forAccount:(NSString *)accountNo
 {
+    if(!presenceObj.resource) return;
     //get buddyid for name and account
     NSString* query1=[NSString stringWithFormat:@" select buddy_id from buddylist where account_id=? and  buddy_name=?;"];
     [self executeScalar:query1 andArguments:@[accountNo, presenceObj.user] withCompletion:^(NSObject *buddyid) {

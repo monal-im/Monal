@@ -1041,6 +1041,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
               }];
           }  else {
               [toreturn loadPreviewWithCompletion:^{
+                  if(toreturn.messageTitle.text.length==0) toreturn.messageTitle.text=@" "; // prevent repeated calls
                   [[DataLayer sharedInstance] setMessageId:[row objectForKey:@"messageid"] previewText:toreturn.messageTitle.text  andPreviewImage:toreturn.imageUrl];
               }];
           }

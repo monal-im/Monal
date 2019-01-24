@@ -663,6 +663,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                                    
                                    userInfo = @{@"af": [notification.userInfo objectForKey:@"actuallyfrom"],
                                                 @"message": [notification.userInfo objectForKey:@"messageText"],
+                                                @"messageid": [notification.userInfo objectForKey:@"messageid"],
                                                 @"thetime": timeString,
                                                 @"delivered":@YES,
                                                 kMessageType:finalMessageType
@@ -671,6 +672,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                                } else  {
                                    userInfo = @{@"af": [notification.userInfo objectForKey:@"actuallyfrom"],
                                                 @"message": [notification.userInfo objectForKey:@"messageText"],
+                                                @"messageid": [notification.userInfo objectForKey:@"messageid"],
                                                 @"thetime": [self currentGMTTime],
                                                 kMessageType:finalMessageType
                                                 };
@@ -1029,7 +1031,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
           toreturn.messageBody.text =cell.link;
           toreturn.link=cell.link;
           
-          if([(NSString *)[row objectForKey:@"previewImage"] length]>0 || [(NSString *)[row objectForKey:@"previewText"] length]>0)
+          if([(NSString *)[row objectForKey:@"previewImage"] length]>0
+             || [(NSString *)[row objectForKey:@"previewText"] length]>0)
           {
               toreturn.imageUrl = [row objectForKey:@"previewImage"];
               toreturn.messageTitle.text = [row objectForKey:@"previewText"];

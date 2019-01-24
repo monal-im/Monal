@@ -427,11 +427,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                            {
                                userInfo = @{@"af": [notification.userInfo objectForKey:@"actuallyfrom"],
                                             @"message": [notification.userInfo objectForKey:@"messageText"],
+                                             @"messageid": [notification.userInfo objectForKey:@"messageid"],
                                             @"thetime": [self currentGMTTime],   @"delivered":@YES};
                                
                            } else  {
                                userInfo = @{@"af": [notification.userInfo objectForKey:@"actuallyfrom"],
                                             @"message": [notification.userInfo objectForKey:@"messageText"],
+                                             @"messageid": [notification.userInfo objectForKey:@"messageid"],
                                             @"thetime": [self currentGMTTime]
                                             };
                            }
@@ -866,9 +868,19 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         cell.attachmentImage.image=nil;
         cell.attachmentImage.canDrawSubviewsIntoLayer=YES;
         linkCell.link=messageString;
-        [linkCell loadPreviewWithCompletion:^{
-            
-        }];
+      
+        if([(NSString *)[messageRow objectForKey:@"previewImage"] length]>0
+           || [(NSString *)[messageRow objectForKey:@"previewText"] length]>0)
+        {
+           // linkCell.imageUrl = [row objectForKey:@"previewImage"];
+            linkCell.previewText.stringValue = [messageRow objectForKey:@"previewText"];
+            [linkCell loadImage:[messageRow objectForKey:@"previewImage"] WithCompletion:nil];
+        }  else {
+            [linkCell loadPreviewWithCompletion:^{
+                if(linkCell.previewText.stringValue.length==0) (linkCell.previewText.stringValue=@" "); // prevent repeated calls
+                [[DataLayer sharedInstance] setMessageId:[messageRow objectForKey:@"messageid"] previewText:linkCell.previewText.stringValue  andPreviewImage:linkCell.imageUrl];
+            }];
+        }
         
         cell=linkCell;
     }

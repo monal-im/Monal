@@ -107,32 +107,43 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 {
     [super viewWillAppear];
     
-    
     if(self.activeChat)
     {
         [self showActiveChat:YES];
     }
     else {
-        if([[NSUserDefaults standardUserDefaults] boolForKey:@"SortContacts"]) //sort by status
-        {
-            [[DataLayer sharedInstance] onlineContactsSortedBy:@"Status" withCompeltion:^(NSMutableArray *results) {
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    _contacts= results;
-                    [self.contactsTable reloadData];
-                });
-            }];
-        }
-        else {
-            [[DataLayer sharedInstance] onlineContactsSortedBy:@"Name" withCompeltion:^(NSMutableArray *results) {
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    _contacts= results;
-                    [self.contactsTable reloadData];
-                });
-            }];
-        }
+        [self refreshOnlineContacts];
+        [self refreshOfflineContacts];
     }
     
+    [self updateAppBadge];
+    [self highlightCellForCurrentContact];
+}
 
+
+-(void) refreshOnlineContacts
+{
+    if([[NSUserDefaults standardUserDefaults] boolForKey:@"SortContacts"]) //sort by status
+    {
+        [[DataLayer sharedInstance] onlineContactsSortedBy:@"Status" withCompeltion:^(NSMutableArray *results) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                _contacts= results;
+                [self.contactsTable reloadData];
+            });
+        }];
+    }
+    else {
+        [[DataLayer sharedInstance] onlineContactsSortedBy:@"Name" withCompeltion:^(NSMutableArray *results) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                _contacts= results;
+                [self.contactsTable reloadData];
+            });
+        }];
+    }
+}
+
+-(void) refreshOfflineContacts
+{
     if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
     {
         [[DataLayer sharedInstance] offlineContactsWithCompletion:^(NSMutableArray *results) {
@@ -143,11 +154,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
         }];
         
     }
-    [self updateAppBadge];
-    [self highlightCellForCurrentContact];
-  
 }
-
 
 -(void) dealloc
 {
@@ -723,109 +730,47 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
         {
             DDLogVerbose(@"user %@ already in list updating status and nothing else",[user objectForKey:kusernameKey]);
             [self updateContactAt:initalPos withInfo:user];
-   
-
+            
+            
         }
         else  {
-    //insert into tableview
-    // for now just online
-    [[DataLayer sharedInstance] contactForUsername:[user objectForKey:kusernameKey] forAccount:[user objectForKey:kaccountNoKey] withCompletion:^(NSArray * contactRow) {
-        
-        dispatch_async(dispatch_get_main_queue(),
-                       ^{
-                           //check if already there
-                           NSInteger pos=-1;
-                           NSInteger offlinepos=-1;
-                           pos = [self positionOfOnlineContact:user];
+            if(self.searchResults || self.activeChat) {
+                [self refreshDisplay];
+                return;
+            }
+             
+            [self refreshOnlineContacts];
+
+            //check if already there
+            NSInteger pos=-1;
+            NSInteger offlinepos=-1;
+            //position of contact in new online
+            pos = [self positionOfOnlineContact:user];
+            if (pos>=0)
+            {
+                [self.contactsTable beginUpdates];
+                
+                NSIndexSet *indexSet =[[NSIndexSet alloc] initWithIndex:pos] ;
+                [self.contactsTable insertItemsAtIndexes:indexSet inParent:@"Online" withAnimation:NSTableViewAnimationEffectFade];
+                
+                //position of contact in old offline
+                if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
+                {
+                    offlinepos = [self positionOfOfflineContact:user];
+                    if(offlinepos>=0 && offlinepos<[self->_offlineContacts count])
+                    {
+                        NSIndexSet *offlineSet =[[NSIndexSet alloc] initWithIndex:offlinepos];
+                          [self.contactsTable removeItemsAtIndexes:offlineSet inParent:@"Offline" withAnimation:NSTableViewAnimationEffectFade];
+                    }
+                    [self refreshOfflineContacts];
+                }
+                [self.contactsTable endUpdates];
                
-                           //offlinepos= [self positionOfOfflineContact:user];
-                           
-                           //not there
-                           if(pos<0)
-                           {
-                    
-                               if(!(contactRow.count>=1))
-                               {
-                                   DDLogError(@"ERROR:could not find contact row");
-                                   return;
-                               }
-                               
-                               NSInteger onlinepos= [self positionOfOnlineContact:user];
-                               if(onlinepos>=0)
-                               {
-                                   
-                                   DDLogVerbose(@"user %@ already in list",[user objectForKey:kusernameKey]);
-                                   return;
-                               }
-                               //insert into datasource
-                               [_contacts insertObject:[contactRow objectAtIndex:0] atIndex:0];
-                               
-                               if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
-                               {
-                                   offlinepos = [self positionOfOfflineContact:user];
-                                   if(offlinepos>=0 && offlinepos<[_offlineContacts count])
-                                   {
-                                       [_offlineContacts removeObjectAtIndex:offlinepos];
-                                   }
-                               }
-                               
-                               //sort
-                               NSSortDescriptor *descriptor = [[NSSortDescriptor alloc] initWithKey:kContactName  ascending:YES];
-                               NSArray* sortArray =[NSArray arrayWithObjects:descriptor,nil];
-                               [_contacts sortUsingDescriptors:sortArray];
-                               
-                               //find where it is
-                               int pos=0;
-                               int counter=0;
-                               for(NSDictionary* row in _contacts)
-                               {
-                                   if([[row objectForKey:kContactName] caseInsensitiveCompare:[user objectForKey:kusernameKey] ]==NSOrderedSame &&
-                                      [[row objectForKey:kAccountID]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
-                                   {
-                                       pos=counter;
-                                       break;
-                                   }
-                                   counter++;
-                               }
-                               DDLogVerbose(@"sorted contacts %@", _contacts);
-                               
-                               DDLogVerbose(@"inserting %@ at pos %d", [_contacts objectAtIndex:pos], pos);
-                               
-                               if(self.searchResults || self.activeChat) {
-                                   [self refreshDisplay];
-                               }
-                               else {
-                                   [_contactsTable beginUpdates];
-                                   NSIndexSet *indexSet =[[NSIndexSet alloc] initWithIndex:pos] ;
-                                 
-                                   [self.contactsTable insertItemsAtIndexes:indexSet inParent:@"Online" withAnimation:NSTableViewAnimationEffectFade];
-                                   
-                                   
-                                   if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
-                                   {
-                                       if(offlinepos>=0 && offlinepos<[_offlineContacts count])
-                                       {
-                                           NSIndexSet *offlineSet =[[NSIndexSet alloc] initWithIndex:offlinepos] ;
-                                           
-                                           [self.contactsTable removeItemsAtIndexes:offlineSet inParent:@"Offline" withAnimation:NSTableViewAnimationEffectFade];
-                                       }
-                                   }
-                                   [self.contactsTable endUpdates];
-                               }
-                           }else
-                           {
-                               DDLogVerbose(@"user %@ already in list %@",[user objectForKey:kusernameKey], self.contacts);
-                               if(pos<self.contacts.count) {
-                                     [self updateContactAt:pos withInfo:user];
-                               }
-                           }
-                           
-                           
-                       });
-        
-        
-    }];
-    
+            } else {
+                DDLogError(@"ERROR:could not find contact row");
+                return;
+            }
+            
         }
     });
 }

@@ -596,18 +596,20 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 {
     xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
     dispatch_async(dispatch_get_main_queue(), ^{
-        NSString *title=_contactName;
-        if(![_contactFullName isEqualToString:@"(null)"]
-           && [[_contactFullName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0)
+        NSString *title=self->_contactName;
+        if(![self->_contactFullName isEqualToString:@"(null)"]
+           && [[self->_contactFullName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0)
         {
-            title=_contactFullName;
+            title=self->_contactFullName;
         }
         
         if(xmppAccount.accountState<kStateLoggedIn)
         {
             self.sendButton.enabled=NO;
             if(!title) title=@"";
-            self.navigationItem.title=[NSString stringWithFormat:@"%@ [%@]", title, @"Logged Out"];
+            if(self.contactName.length>0){
+                self.navigationItem.title=[NSString stringWithFormat:@"%@ [%@]", title, @"Logged Out"];
+            }
         }
         else  {
             self.sendButton.enabled=YES;

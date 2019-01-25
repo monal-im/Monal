@@ -41,6 +41,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 @property (nonatomic, strong) DBRestClient *restClient;
 @property (nonatomic, assign) BOOL encryptChat;
 
+@property (nonatomic, strong) NSDate* lastMamDate;
+
 /**
  if set to yes will prevent scrolling and resizing. useful for resigning first responder just to set auto correct
  */
@@ -144,7 +146,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     dispatch_async(dispatch_get_main_queue(), ^{
         
         xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
-        if(xmppAccount.supportsMam2 & !_isMUC) {
+        if(xmppAccount.supportsMam2 & !self->_isMUC) {
             
             NSDictionary *lastMessage= [self.messageList lastObject];
             NSDate *last =[self.sourceDateFormat dateFromString:[lastMessage objectForKey:@"thetime"]];
@@ -159,8 +161,11 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                 last = [[NSDate date] dateByAddingTimeInterval:-3*24*60*60];
             }
             
+            if([self.lastMamDate isEqualToDate:last]) return;  // break an infinite loop
+            
             if([last timeIntervalSinceReferenceDate]<[connectedTime timeIntervalSinceReferenceDate])
             {
+                self.lastMamDate= last;
                 [xmppAccount setMAMQueryFromStart: last toDate:nil andJid:self.contactName];
                 [[DataLayer sharedInstance] setSynchPoint:[NSDate date] ForContact:self.contactName andAccount:self.accountNo];
             }

@@ -1504,22 +1504,23 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                 
                                 if([[contact objectForKey:@"subscription"] isEqualToString:@"both"])
                                 {
-                                    [[DataLayer sharedInstance] addContact:[contact objectForKey:@"jid"]?[contact objectForKey:@"jid"]:@"" forAccount:_accountNo fullname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@"" nickname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@"" withCompletion:^(BOOL success) {
-                                        
-                                        if(!success && ((NSString *)[contact objectForKey:@"name"]).length>0)
-                                        {
-                                            [[DataLayer sharedInstance] setFullName:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@"" forContact:[contact objectForKey:@"jid"]?[contact objectForKey:@"jid"]:@"" andAccount:_accountNo ] ;
-                                        }
-                                        
-                                    }];
-                                    
+                                    if([contact objectForKey:@"jid"]) {
+                                        [[DataLayer sharedInstance] addContact:[contact objectForKey:@"jid"]
+                                                                    forAccount:self->_accountNo
+                                                                      fullname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@""
+                                                                      nickname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@""
+                                                                withCompletion:^(BOOL success) {
+                                                                    
+                                                                    if(!success && ((NSString *)[contact objectForKey:@"name"]).length>0)
+                                                                    {
+                                                                        [[DataLayer sharedInstance] setFullName:[contact objectForKey:@"name"] forContact:[contact objectForKey:@"jid"] andAccount:self->_accountNo ] ;
+                                                                    }
+                                                                }];
+                                    }
                                 }
-                                else
-                                {
-                                    
-                                }
+                                
                             }
-                         
+                        
                             // iterate roster and get cards
                             [self getVcards];
                         }
@@ -2061,8 +2062,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             if((presenceNode.user!=nil) && ([[presenceNode.user stringByTrimmingCharactersInSet:
                                                               [NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0))
                             {
-                                
-                                
+
                                 [[DataLayer sharedInstance] addContact:[presenceNode.user copy] forAccount:self->_accountNo fullname:@"" nickname:@"" withCompletion:^(BOOL success) {
                                     if(!success)
                                     {

@@ -1674,20 +1674,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     }
                     
                     
-                    if(iqNode.roster)
-                    {
-                        for (NSDictionary *item in iqNode.items)
-                        {
-                            
-                            if(![[item objectForKey:@"subscription"] isEqualToString:@"none"]) {
-                                [[DataLayer sharedInstance] addContact:[item objectForKey:@"jid"] forAccount:self->_accountNo fullname:[item objectForKey:@"name"] nickname:@"" withCompletion:^(BOOL success){
-                                    
-                                    
-                                }];
-                            }
-                        }
-                    }
-                    
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"]  isEqualToString:@"message"])
                 {

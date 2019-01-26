@@ -2045,39 +2045,24 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         {
                             DDLogVerbose(@"presence priority notice from %@", presenceNode.user);
                             
-                            if((presenceNode.user!=nil) && ([[presenceNode.user stringByTrimmingCharactersInSet:
-                                                              [NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0))
+                            if((presenceNode.user!=nil) && (presenceNode.user.length >0))
                             {
-
-                                [[DataLayer sharedInstance] addContact:[presenceNode.user copy] forAccount:self->_accountNo fullname:@"" nickname:@"" withCompletion:^(BOOL success) {
-                                    if(!success)
-                                    {
-                                        DDLogVerbose(@"Contact already in list");
-                                    }
-                                    else
-                                    {
-                                        DDLogVerbose(@"Contact not already in list");
-                                    }
-                                    
-                                    DDLogVerbose(@" showing as online from presence");
-                                    
-                                    [[DataLayer sharedInstance] setOnlineBuddy:presenceNode forAccount:self->_accountNo];
-                                    [[DataLayer sharedInstance] setBuddyState:presenceNode forAccount:self->_accountNo];
-                                    [[DataLayer sharedInstance] setBuddyStatus:presenceNode forAccount:self->_accountNo];
-                                    
-                                    NSString* state=presenceNode.show;
-                                    if(!state) state=@"";
-                                    NSString* status=presenceNode.status;
-                                    if(!status) status=@"";
-                                    NSDictionary* userDic=@{kusernameKey: presenceNode.user,
-                                                            kaccountNoKey:self->_accountNo,
-                                                            kstateKey:state,
-                                                            kstatusKey:status
-                                                            };
-                                    
-                                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactOnlineNotice object:self userInfo:userDic];
-                                    
-                                }];
+                                [[DataLayer sharedInstance] setOnlineBuddy:presenceNode forAccount:self->_accountNo];
+                                [[DataLayer sharedInstance] setBuddyState:presenceNode forAccount:self->_accountNo];
+                                [[DataLayer sharedInstance] setBuddyStatus:presenceNode forAccount:self->_accountNo];
+                                
+                                NSString* state=presenceNode.show;
+                                if(!state) state=@"";
+                                NSString* status=presenceNode.status;
+                                if(!status) status=@"";
+                                NSDictionary* userDic=@{kusernameKey: presenceNode.user,
+                                                        kaccountNoKey:self->_accountNo,
+                                                        kstateKey:state,
+                                                        kstatusKey:status
+                                                        };
+                                
+                                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactOnlineNotice object:self userInfo:userDic];
+                                
                                 
                                 if(!presenceNode.MUC) {
                                     // do not do this in the background
@@ -2093,10 +2078,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                             checkChange=NO;
                                         }
                                     });
-                                    
-#else
 #endif
-                                    
                                     if(checkChange)
                                     {
                                         //check for vcard change
@@ -2109,7 +2091,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                 else
                                                 {
                                                     [[DataLayer sharedInstance]  setContactHash:presenceNode forAccount:self->_accountNo];
-                                              
+                                                    
                                                     [self getVCard:presenceNode.user];
                                                 }
                                                 
@@ -2124,9 +2106,21 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                     }
                                 }
                                 else {
+                                    [[DataLayer sharedInstance] addContact:[presenceNode.user copy] forAccount:self->_accountNo fullname:@"" nickname:@"" withCompletion:^(BOOL success) {
+                                        if(!success)
+                                        {
+                                            DDLogVerbose(@"Contact already in list");
+                                        }
+                                        else
+                                        {
+                                            DDLogVerbose(@"Contact not already in list");
+                                        }
+                                        
+                                        DDLogVerbose(@" showing as online from presence");
+                                        
                                     
+                                    }];
                                 }
-                                
                             }
                             else
                             {

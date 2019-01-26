@@ -91,8 +91,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
             _status=_messageBuffer;
             if(_status==nil)
                 _status=@"";
-            
-            
+
         }
         
         

@@ -62,9 +62,8 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     }
     
     //remove any  resource markers and get user
-    _user=[_user lowercaseString];
+    _user=[[_user lowercaseString] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     
-
 }
 
 - (void)parser:(NSXMLParser *)parser foundCharacters:(NSString *)string

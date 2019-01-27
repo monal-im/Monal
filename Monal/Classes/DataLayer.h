@@ -11,7 +11,6 @@
 #import "ParsePresence.h"
 
 #define kMonalDBQueue "im.monal.dbQueue"
-#define kMonalContactQueue "im.monal.contactQueue"
 
 @interface DataLayer : NSObject {
 
@@ -20,7 +19,6 @@
     NSLock* dbversionCheck;
     
     dispatch_queue_t _dbQueue ;
-    dispatch_queue_t _contactQueue ;
 }
 
 

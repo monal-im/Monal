@@ -12,8 +12,6 @@
 
 @interface DataLayer()
 
-@property (nonatomic, strong) NSMutableSet *contactMemory; // where contacts live before they are persisted
-
 @end
 
 @implementation DataLayer
@@ -792,54 +790,23 @@ static DataLayer *sharedInstance=nil;
 
 -(void) addContact:(NSString*) contact  forAccount:(NSString*) accountNo fullname:(NSString*)fullName nickname:(NSString*) nickName withCompletion: (void (^)(BOOL))completion
 {
-    //this needs to be one atomic operation
-    dispatch_sync(_contactQueue, ^{
-        if([self.contactMemory containsObject:contact])
+    // no blank full names
+    NSString *actualfull=fullName;
+    if([[actualfull  stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]==0) {
+        actualfull=contact;
+    }
+    
+    NSString *query=[NSString stringWithFormat:@"insert into buddylist ('account_id', 'buddy_name', 'full_name' , 'nick_name', 'new', 'online', 'dirty', 'Muc') values( ?, ?, ?,?,1, 0, 0, 0);"];
+    
+    NSArray *params=@[accountNo, contact, actualfull, nickName];
+    [self executeNonQuery:query  andArguments:params withCompletion:^(BOOL success) {
+       
+        if(completion)
         {
-            DDLogVerbose(@"contact waiting to persist");
-            return;
-        } else  {
-            [self.contactMemory addObject:contact];
-            
+            completion(success);
         }
         
-       [self isContactInList:contact forAccount:accountNo withCompletion:^(BOOL exists) {
-           if(!exists)
-           {
-                   // no blank full names
-                   NSString *actualfull;
-                   if([[fullName  stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]==0) {
-                       actualfull=contact;
-                   }
-                   else {
-                       actualfull=fullName;
-                   }
-                   
-               NSString *query=[NSString stringWithFormat:@"insert into buddylist ('account_id', 'buddy_name', 'full_name' , 'nick_name', 'new', 'online', 'dirty', 'Muc') values( ?, ?, ?,?,1, 0, 0, 0);"];
-                                    
-               NSArray *params=@[accountNo, contact, actualfull, nickName];
-               [self executeNonQuery:query  andArguments:params withCompletion:^(BOOL success) {
-                   dispatch_sync(self->_contactQueue, ^{
-                       [self.contactMemory removeObject:contact];
-                   });
-                   if(completion)
-                   {
-                       completion(success);
-                   }
-                   
-               }];
-       
-           }
-           else
-           {
-               dispatch_sync(self->_contactQueue, ^{
-                   [self.contactMemory removeObject:contact];
-               });
-               if(completion) completion(NO);
-           }
-       }];
-    });
-
+    }];
 }
 
 -(void) removeBuddy:(NSString*) buddy forAccount:(NSString*) accountNo
@@ -1059,18 +1026,11 @@ static DataLayer *sharedInstance=nil;
 {
     if(!presenceObj.resource) return;
     //get buddyid for name and account
-    NSString* query1=[NSString stringWithFormat:@" select buddy_id from buddylist where account_id=? and  buddy_name=?;"];
+    NSString* query1=[NSString stringWithFormat:@"select buddy_id from buddylist where account_id=? and  buddy_name=?;"];
     [self executeScalar:query1 andArguments:@[accountNo, presenceObj.user] withCompletion:^(NSObject *buddyid) {
         if(buddyid)  {
-            NSString* query3=[NSString stringWithFormat:@" select count(buddy_id) from buddy_resources where buddy_id=? and resource=?"];
-            [self executeScalar:query3  andArguments:@[buddyid, presenceObj.resource] withCompletion:^(NSObject * resourceCount) {
-                //do not duplicate resource
-                 if([(NSNumber *)resourceCount integerValue] ==0) {
-                     NSString* query=[NSString stringWithFormat:@"insert into buddy_resources ('buddy_id', 'resource', 'ver') values (?, ?, '')"];
-                     [self executeNonQuery:query andArguments:@[buddyid, presenceObj.resource] withCompletion:nil];
-                 }
-            }];
-    
+            NSString* query=[NSString stringWithFormat:@"insert into buddy_resources ('buddy_id', 'resource', 'ver') values (?, ?, '')"];
+            [self executeNonQuery:query andArguments:@[buddyid, presenceObj.resource] withCompletion:nil];
         }
     }];
 }
@@ -1103,7 +1063,6 @@ static DataLayer *sharedInstance=nil;
 
 -(BOOL) setOfflineBuddy:(ParsePresence *)presenceObj forAccount:(NSString *)accountNo
 {
-    
     NSString* query1=[NSString stringWithFormat:@" select buddy_id from buddylist where account_id=? and  buddy_name=?;"];
     NSArray *params=@[accountNo, presenceObj.user];
     NSString* buddyid = (NSString*)[self executeScalar:query1 andArguments:params];
@@ -2019,12 +1978,8 @@ static DataLayer *sharedInstance=nil;
 
 -(void) initDB
 {
-    
-     self.contactMemory = [[NSMutableSet alloc] init];
-    
+
     _dbQueue = dispatch_queue_create(kMonalDBQueue, DISPATCH_QUEUE_SERIAL);
-    _contactQueue = dispatch_queue_create(kMonalContactQueue, DISPATCH_QUEUE_SERIAL);
-    
     
     NSFileManager* fileManager = [NSFileManager defaultManager];
     
@@ -2483,6 +2438,18 @@ static DataLayer *sharedInstance=nil;
         }];
         
         DDLogVerbose(@"Upgrade to 3.4 success ");
+    }
+    
+    if([dbversion doubleValue]<3.5)
+    {
+        DDLogVerbose(@"Database version <3.5 detected. Performing upgrade . ");
+        [self executeNonQuery:@"update dbversion set dbversion='3.5'; " withCompletion:nil];
+        
+        [self executeNonQuery:@"CREATE UNIQUE INDEX uniqueContact on buddylist (buddy_name, account_id); " withCompletion:nil];
+        [self executeNonQuery:@"delete from buddy_resources" withCompletion:nil];
+        [self executeNonQuery:@"CREATE UNIQUE INDEX uniqueResource on buddy_resources (buddy_id, resource); " withCompletion:nil];
+        
+        DDLogVerbose(@"Upgrade to 3.5 success ");
     }
     
    

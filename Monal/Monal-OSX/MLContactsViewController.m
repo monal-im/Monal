@@ -735,14 +735,13 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
         {
             DDLogVerbose(@"user %@ already in list updating status and nothing else",[user objectForKey:kusernameKey]);
             [self updateContactAt:initalPos withInfo:user];
-            
-            
+            return;
         }
-        else  {
-            if(self.searchResults || self.activeChat) {
-                [self refreshDisplay];
-                return;
-            }
+        
+        if(self.searchResults || self.activeChat) {
+            [self refreshDisplay];
+            return;
+        }
             
             NSArray *oldContacts = [self.contacts copy];
             
@@ -794,7 +793,6 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                     }
                 });
             }];
-        }
     });
 }
 

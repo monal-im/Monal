@@ -659,6 +659,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) presentChatWithRow:(NSDictionary *)row
 {
+    if([[_lastSelectedUser objectForKey:@"buddy_name"] isEqualToString:[row objectForKey:@"buddy_name"]] &&
+       [[_lastSelectedUser objectForKey:@"account_id"] integerValue]==[[row objectForKey:@"account_id"]  integerValue]) {
+        return;
+    } 
+    
+    _lastSelectedUser=row;
     [self  performSegueWithIdentifier:@"showConversation" sender:row];
 }
 
@@ -1119,10 +1125,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         [row setObject:[NSNumber numberWithInt:0] forKey:@"count"];
     }
     
-
     [self presentChatWithRow:row];
-    
-    _lastSelectedUser=row;
     
 }
 

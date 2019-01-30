@@ -18,6 +18,7 @@
 @property (nonatomic , weak) NSWindowController* mainWindowController;
 @property (nonatomic, strong)  DDFileLogger *fileLogger;
 
+@property (nonatomic , weak) IBOutlet NSMenuItem *encryptionKeys;
 @property (nonatomic , weak) IBOutlet NSMenuItem *serverDetails;
 @property (nonatomic , weak) IBOutlet NSMenuItem *mamPrefs;
 

@@ -187,6 +187,26 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [[DataLayer sharedInstance] accountListWithCompletion:^(NSArray *result) {
         dispatch_async(dispatch_get_main_queue(), ^{
           
+            if(self.encryptionKeys.submenu.itemArray.count>0) {
+                NSMenuItem *template =[self.encryptionKeys.submenu.itemArray[0] copy];
+                [self.encryptionKeys.submenu removeAllItems ];
+                for(NSDictionary *account in result)
+                {
+                    
+                    NSNumber *accountId =[account objectForKey:@"account_id"];
+                    xmpp* xmppAccount= [[MLXMPPManager sharedInstance] getConnectedAccountForID:[NSString stringWithFormat:@"%@", accountId ]];
+                    if(xmppAccount) {
+                        NSMenuItem *item =[template copy];
+                        
+                        item.title=xmppAccount.fulluser;
+                        item.tag=3000+accountId.integerValue;
+                        
+                        [self.encryptionKeys.submenu addItem:item];
+                    }
+                }
+            }
+            
+            
             if(self.serverDetails.submenu.itemArray.count>0) {
                 NSMenuItem *template =[self.serverDetails.submenu.itemArray[0] copy];
                 [self.serverDetails.submenu removeAllItems ];

@@ -928,6 +928,22 @@ CA
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="wrZ-Tr-eIe"/>
+                                        <menuItem title="Encryption Keys" id="kIo-De-Ayo">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <menu key="submenu" title="Encryption Keys" id="PCX-Nl-9O1">
+                                                <items>
+                                                    <menuItem title="None" id="chi-g1-GyM">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="showKeys:" target="Ady-hI-5gd" id="pBr-mV-e15"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                </items>
+                                                <connections>
+                                                    <outlet property="delegate" destination="Voe-Tx-rLC" id="q3w-eD-lrO"/>
+                                                </connections>
+                                            </menu>
+                                        </menuItem>
                                         <menuItem title="Server Details" id="aYv-5E-bCb">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <menu key="submenu" title="Server Details" id="OXb-Ap-1dT">
@@ -1014,6 +1030,7 @@ CA
                 </application>
                 <customObject id="Voe-Tx-rLC" customClass="AppDelegate">
                     <connections>
+                        <outlet property="encryptionKeys" destination="kIo-De-Ayo" id="YCX-Bd-lVc"/>
                         <outlet property="mamPrefs" destination="B1k-ls-Svw" id="QSd-H1-LKG"/>
                         <outlet property="serverDetails" destination="aYv-5E-bCb" id="t6f-gO-qMI"/>
                     </connections>
@@ -1322,6 +1339,7 @@ CA
                         <segue destination="fLw-fN-usf" kind="show" identifier="showServerDetails" id="tKf-Kb-CWA"/>
                         <segue destination="MZJ-Lc-0ne" kind="show" identifier="CallScreen" id="Jkt-hW-Vlb"/>
                         <segue destination="1AF-Qt-d1H" kind="show" identifier="showMAMPref" id="UJz-NC-tez"/>
+                        <segue destination="lx4-TM-5ts" kind="show" identifier="showKeys" id="nMz-sO-VOj"/>
                     </connections>
                 </viewController>
                 <customObject id="N6A-8E-AoF" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
@@ -3300,7 +3318,7 @@ Gw
                                 <constraints>
                                     <constraint firstAttribute="height" constant="56" id="JHp-t5-Dg1"/>
                                 </constraints>
-                                <textFieldCell key="cell" selectable="YES" sendsActionOnEndEditing="YES" alignment="left" title="There are the differnt devices the person is logged into right now.  If this is a group chat this is a list of participants" id="EFd-aC-R0F">
+                                <textFieldCell key="cell" selectable="YES" sendsActionOnEndEditing="YES" alignment="left" title="These are the different devices the person is logged into right now.  If this is a group chat this is a list of participants" id="EFd-aC-R0F">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
@@ -3417,6 +3435,7 @@ Gw
         <image name="offline" width="15" height="15"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="Uwt-4d-Ui7"/>
+        <segue reference="nMz-sO-VOj"/>
+        <segue reference="Jkt-hW-Vlb"/>
     </inferredMetricsTieBreakers>
 </document>

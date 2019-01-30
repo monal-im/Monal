@@ -19,6 +19,8 @@
 #import "MLCallScreen.h"
 #import "MLMAMPref.h"
 
+#import "MLKeyViewController.h"
+
 #define kinfoSection 0
 #define konlineSection 1
 #define kofflineSection 2
@@ -1495,6 +1497,17 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
         
     }
     
+    if([segue.identifier isEqualToString:@"showKeys"])
+    {
+        NSMenuItem *item = (NSMenuItem *) sender;
+        NSInteger accountNo = item.tag-3000;
+        xmpp* xmppAccount= [[MLXMPPManager sharedInstance] getConnectedAccountForID:[NSString stringWithFormat:@"%ld", accountNo ]];
+        
+        MLKeyViewController *keys = (MLKeyViewController *)segue.destinationController;
+        keys.ownKeys=YES;
+        keys.contact =@{@"buddy_name":xmppAccount.fulluser, @"account_id":[NSNumber numberWithInt:accountNo]};
+    }
+    
     if([segue.identifier isEqualToString:@"CallScreen"])
     {
         NSDictionary *dic= (NSDictionary *) sender;
@@ -1513,6 +1526,12 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 {
     [self performSegueWithIdentifier:@"showMAMPref" sender:sender];
 }
+    
+-(IBAction) showKeys:(id) sender
+{
+    [self performSegueWithIdentifier:@"showKeys" sender:sender];
+}
+
 
 #pragma mark - date
 

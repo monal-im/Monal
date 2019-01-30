@@ -1324,8 +1324,15 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
         if(message.count>0)
         {
             NSDictionary *row = message[0];
-            //TODO chek type Message, Image, Link
-            cell.status.stringValue =[row objectForKey:@"message"];
+            if([[row objectForKey:@"messageType"] isEqualToString:kMessageTypeUrl])
+            {
+                cell.status.stringValue =@"🔗 A Link";
+            } else if([[row objectForKey:@"messageType"] isEqualToString:kMessageTypeImage])
+            {
+                cell.status.stringValue =@"📷 An Image";
+            } else  {
+                cell.status.stringValue =[row objectForKey:@"message"];
+            }
         }
     }
     

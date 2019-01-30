@@ -196,7 +196,15 @@
     {
         NSDictionary *row = message[0];
         //TODO chek type Message, Image, Link
+        if([[row objectForKey:@"messageType"] isEqualToString:kMessageTypeUrl])
+        {
+            [cell showStatusText:@"🔗 A Link"];
+        } else if([[row objectForKey:@"messageType"] isEqualToString:kMessageTypeImage])
+        {
+            [cell showStatusText:@"📷 An Image"];
+        } else  {
         [cell showStatusText:[row objectForKey:@"message"]];
+        }
     }
     
     [[MLImageManager sharedInstance] getIconForContact:[row objectForKey:@"buddy_name"] andAccount:accountNo withCompletion:^(UIImage *image) {

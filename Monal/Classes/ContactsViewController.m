@@ -103,7 +103,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self refreshDisplay];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(addOnlineUser:) name: kMonalContactOnlineNotice object:nil];
-    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshDisplay) name:kMonalAccountStatusChanged object:nil];
      [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshContact:) name: kMonalContactRefresh object:nil];
     
     

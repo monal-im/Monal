@@ -41,7 +41,7 @@
 
 - (NSImage *)toolbarItemImage
 {
-    return [NSImage imageNamed:@"1008-desktop"];
+    return [NSImage imageNamed:@"1040-checkmark"];
 }
 
 - (NSString *)toolbarItemLabel

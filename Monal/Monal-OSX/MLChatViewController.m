@@ -438,7 +438,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                             };
                            }
                            
-                           [self.messageList addObject:userInfo];
+                           [self.messageList addObject:[userInfo mutableCopy]];
                          
                            if((self.view.window.occlusionState & NSWindowOcclusionStateVisible)) {
                                [self refreshData];

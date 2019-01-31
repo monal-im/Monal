@@ -7,10 +7,11 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "MASPreferencesViewController.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MLOptOutSettings : NSViewController
+@interface MLOptOutSettings : NSViewController  <MASPreferencesViewController>
 @property (nonatomic, weak) IBOutlet NSButton *crashlytics;
 @end
 

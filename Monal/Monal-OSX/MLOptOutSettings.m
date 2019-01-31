@@ -31,4 +31,23 @@
 
 }
 
+
+#pragma mark - preferences delegate
+
+- (NSString *)identifier
+{
+    return self.title;
+}
+
+- (NSImage *)toolbarItemImage
+{
+    return [NSImage imageNamed:@"1008-desktop"];
+}
+
+- (NSString *)toolbarItemLabel
+{
+    return @"Opt Out";
+}
+
+
 @end

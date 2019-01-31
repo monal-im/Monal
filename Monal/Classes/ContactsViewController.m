@@ -585,7 +585,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     if(self.searchResults.count==0)
     {
-        [self.contactsTable reloadData];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.contactsTable reloadData];
+        });
     }
     
 }

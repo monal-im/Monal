@@ -893,7 +893,6 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                            {
                                DDLogVerbose(@"removing  pos %ld", counter);
                                [indexSet addIndex:counter];
-                               
                            }
                            counter++;
                        }
@@ -913,7 +912,6 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                                {
                                    DDLogVerbose(@"removing  offline pos %ld", counter);
                                    [offlineIndexSet addIndex:counter];
-                                   
                                }
                                counter++;
                            }
@@ -921,10 +919,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                            [self.offlineContacts removeObjectsAtIndexes:offlineIndexSet];
                        
                        }
-                       
-                       
-                       
-                       
+                     
                        if(self.searchResults || self.activeChat) {
                            return;
                            
@@ -937,12 +932,8 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                                [self.contactsTable insertItemsAtIndexes:offlineIndexSet inParent:@"Offline" withAnimation:NSTableViewAnimationEffectFade];
                            }
                            
-                           
                            [_contactsTable endUpdates];
                        }
-                       
-                       
-                       
                        
                    });
     

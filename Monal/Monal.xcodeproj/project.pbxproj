@@ -179,6 +179,7 @@
 		263AFDFC209B3B35007F9CEE /* MLSignalStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 263AFDFB209B3B35007F9CEE /* MLSignalStore.m */; };
 		263AFDFD209B3B35007F9CEE /* MLSignalStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 263AFDFB209B3B35007F9CEE /* MLSignalStore.m */; };
 		263BC64F218BEE9F00FA0203 /* UIColor+Theme.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D59D9220714F32006F1DEE /* UIColor+Theme.m */; };
+		263BFBCC22033CA80055A051 /* MLOptOutSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = 263BFBCB22033CA80055A051 /* MLOptOutSettings.m */; };
 		263DFAC02183D7160038E716 /* MLSelectionController.m in Sources */ = {isa = PBXBuildFile; fileRef = 263DFABE2183A59B0038E716 /* MLSelectionController.m */; };
 		263DFAC32187D0E00038E716 /* MLLinkCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 263DFAC22187D0E00038E716 /* MLLinkCell.m */; };
 		263F127A177F867B0025B235 /* ParseStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 263F1279177F867B0025B235 /* ParseStream.m */; };
@@ -615,6 +616,8 @@
 		2638DAEE1B68F3EF00DF05AC /* MLDisplaySettings.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLDisplaySettings.m; sourceTree = "<group>"; };
 		263AFDFA209B3B35007F9CEE /* MLSignalStore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLSignalStore.h; sourceTree = "<group>"; };
 		263AFDFB209B3B35007F9CEE /* MLSignalStore.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLSignalStore.m; sourceTree = "<group>"; };
+		263BFBCA22033CA80055A051 /* MLOptOutSettings.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLOptOutSettings.h; sourceTree = "<group>"; };
+		263BFBCB22033CA80055A051 /* MLOptOutSettings.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLOptOutSettings.m; sourceTree = "<group>"; };
 		263DFABD2183A59B0038E716 /* MLSelectionController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLSelectionController.h; sourceTree = "<group>"; };
 		263DFABE2183A59B0038E716 /* MLSelectionController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLSelectionController.m; sourceTree = "<group>"; };
 		263DFAC12187D0E00038E716 /* MLLinkCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLLinkCell.h; sourceTree = "<group>"; };
@@ -1231,6 +1234,8 @@
 				2638DAEE1B68F3EF00DF05AC /* MLDisplaySettings.m */,
 				265FF0D31C7FDAC100E2CCE1 /* MLCloudStorageSettings.h */,
 				265FF0D41C7FDAC100E2CCE1 /* MLCloudStorageSettings.m */,
+				263BFBCA22033CA80055A051 /* MLOptOutSettings.h */,
+				263BFBCB22033CA80055A051 /* MLOptOutSettings.m */,
 			);
 			name = Preferences;
 			sourceTree = "<group>";
@@ -3022,6 +3027,7 @@
 				260499EF1B7313F300D11866 /* ParseIq.m in Sources */,
 				26D51CDD1E2674D700141E04 /* NXOAuth2FileStreamWrapper.m in Sources */,
 				26C3456F1C68F9F0007F4BEC /* MLHTTPRequest.m in Sources */,
+				263BFBCC22033CA80055A051 /* MLOptOutSettings.m in Sources */,
 				26D51CD91E2674D700141E04 /* NXOAuth2Connection.m in Sources */,
 				26B2A4EE1B73097500272E63 /* DDAbstractDatabaseLogger.m in Sources */,
 				2626800A21E8406900DB7B54 /* MLKeyRow.m in Sources */,

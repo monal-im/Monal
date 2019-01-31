@@ -3419,6 +3419,67 @@ Gw
             </objects>
             <point key="canvasLocation" x="809" y="960"/>
         </scene>
+        <!--Preferences-Optout-->
+        <scene sceneID="8c2-xb-Rwr">
+            <objects>
+                <viewController title="Opt Out" storyboardIdentifier="optOutSettings" id="RZA-7q-EzU" userLabel="Preferences-Optout" customClass="MLOptOutSettings" sceneMemberID="viewController">
+                    <view key="view" id="5r0-ew-JMy">
+                        <rect key="frame" x="0.0" y="0.0" width="357" height="314"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <subviews>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="i5E-ko-hgG">
+                                <rect key="frame" x="18" y="192" width="321" height="102"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="317" id="E3k-0L-T8r"/>
+                                </constraints>
+                                <textFieldCell key="cell" id="Ytd-bb-Vze">
+                                    <font key="font" usesAppearanceFont="YES"/>
+                                    <string key="title">Monal uses Crashlytics to track crashes. These are anonymous, GDPR compliant and help debug issues. Per GDPR, you may opt out of this logging. Because I will not be able to see the cause of your crashes, opting out here effectlvely opts you out of receiving support if you encounter issues.</string>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <box autoresizesSubviews="NO" borderType="line" title="Crash Logging" translatesAutoresizingMaskIntoConstraints="NO" id="XY7-YD-MvC">
+                                <rect key="frame" x="17" y="118" width="315" height="66"/>
+                                <view key="contentView" id="gKj-hA-d2R">
+                                    <rect key="frame" x="3" y="3" width="309" height="48"/>
+                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                    <subviews>
+                                        <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="3Em-fw-cG7">
+                                            <rect key="frame" x="16" y="22" width="158" height="18"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                            <buttonCell key="cell" type="check" title="Opt Out of Crashlytics" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="85b-ek-y61">
+                                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                <font key="font" metaFont="system"/>
+                                            </buttonCell>
+                                        </button>
+                                    </subviews>
+                                </view>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="62" id="08H-oh-u6J"/>
+                                    <constraint firstAttribute="width" constant="309" id="6Fp-qc-UTe"/>
+                                </constraints>
+                            </box>
+                        </subviews>
+                        <constraints>
+                            <constraint firstAttribute="trailing" secondItem="i5E-ko-hgG" secondAttribute="trailing" constant="20" id="4ka-XJ-MRK"/>
+                            <constraint firstItem="XY7-YD-MvC" firstAttribute="top" secondItem="i5E-ko-hgG" secondAttribute="bottom" constant="8" id="5XO-ZP-PN1"/>
+                            <constraint firstAttribute="trailing" secondItem="XY7-YD-MvC" secondAttribute="trailing" constant="28" id="6Rv-GI-rrO"/>
+                            <constraint firstItem="i5E-ko-hgG" firstAttribute="leading" secondItem="5r0-ew-JMy" secondAttribute="leading" constant="20" id="6jI-wc-7me"/>
+                            <constraint firstItem="XY7-YD-MvC" firstAttribute="top" secondItem="i5E-ko-hgG" secondAttribute="bottom" constant="8" id="h5n-of-lLS"/>
+                            <constraint firstItem="XY7-YD-MvC" firstAttribute="leading" secondItem="5r0-ew-JMy" secondAttribute="leading" constant="20" id="mSk-3C-FhM"/>
+                            <constraint firstItem="i5E-ko-hgG" firstAttribute="top" secondItem="5r0-ew-JMy" secondAttribute="top" constant="20" id="xR8-fC-qc8"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="chatLogs" destination="3Em-fw-cG7" id="Ldn-Js-yO4"/>
+                        <outlet property="crashlytics" destination="3Em-fw-cG7" id="vVx-qZ-Rs8"/>
+                    </connections>
+                </viewController>
+                <customObject id="eiL-dO-O6Y" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-608.5" y="-806"/>
+        </scene>
     </scenes>
     <resources>
         <image name="724-info" width="28" height="28"/>

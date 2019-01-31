@@ -1867,9 +1867,16 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             BOOL encrypted=NO;
                             if(decrypted) encrypted=YES;
                             
+                            NSString *messageId=messageNode.idval;
+                            if(messageId.length==0)
+                            {
+                                NSLog(@"Empty ID using guid");
+                                messageId=[[NSUUID UUID] UUIDString];
+                            }
+                            
                             [[DataLayer sharedInstance] addMessageFrom:messageNode.from to:recipient
                                                             forAccount:_accountNo withBody:body
-                                                          actuallyfrom:messageNode.actualFrom delivered:YES  unread:unread  serverMessageId:messageNode.idval
+                                                          actuallyfrom:messageNode.actualFrom delivered:YES  unread:unread  serverMessageId:messageId
                                                            messageType:messageType
                                                        andOverrideDate:messageNode.delayTimeStamp
                                                              encrypted:encrypted

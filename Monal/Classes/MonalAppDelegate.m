@@ -142,6 +142,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     DDLogInfo(@"incoming voip notfication: %@", [payload dictionaryPayload]);
     if([UIApplication sharedApplication].applicationState==UIApplicationStateActive) return;
     
+    [[MLNotificationManager sharedInstance] addTempNotification];
     dispatch_async(dispatch_get_main_queue(), ^{
         //reconenct and fetch messages
        __block UIBackgroundTaskIdentifier tempTask= [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
@@ -150,26 +151,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             tempTask=UIBackgroundTaskInvalid;
         }];
         
-//#ifdef DEBUG
-//        UILocalNotification* alarm = [[UILocalNotification alloc] init];
-//        if (alarm)
-//        {
-//            //scehdule info
-//                alarm.fireDate = [NSDate date];
-//                alarm.timeZone = [NSTimeZone defaultTimeZone];
-//                alarm.repeatInterval = 0;
-//                alarm.alertBody =  @"DEBUG received push";
-//
-//                [[UIApplication sharedApplication] scheduleLocalNotification:alarm];
-//        }
-//#endif
-        
         [[MLXMPPManager sharedInstance] connectIfNecessary];
          DDLogInfo(@"voip wake compelte");
     });
 }
 
-#pragma mark notification actions
+#pragma mark - notification actions
 -(void) showCallScreen:(NSNotification*) userInfo
 {
 //    dispatch_async(dispatch_get_main_queue(),
@@ -211,8 +198,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
 }
 
-#pragma mark app life cycle
-
+#pragma mark - app life cycle
 
 - (void)userNotificationCenter:(UNUserNotificationCenter *)center
        willPresentNotification:(UNNotification *)notification
@@ -220,7 +206,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     completionHandler(UNNotificationPresentationOptionAlert);
 }
-
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {

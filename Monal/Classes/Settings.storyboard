@@ -70,7 +70,7 @@
         <scene sceneID="KnW-pH-rEH">
             <objects>
                 <tableViewController title="Notificaions" id="nPR-ET-sg3" customClass="MLNotificationSettingsViewController" sceneMemberID="viewController">
-                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" allowsSelection="NO" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" id="9jV-5R-tNK">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" id="9jV-5R-tNK">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
@@ -507,7 +507,6 @@
         <!--Navigation Controller-->
         <scene sceneID="kOE-Pr-uST">
             <objects>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="Z4T-ab-Kyt" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <navigationController id="Htg-TY-tEg" sceneMemberID="viewController">
                     <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="OFm-V3-DVX">
                         <rect key="frame" x="0.0" y="44" width="414" height="44"/>
@@ -517,6 +516,7 @@
                         <segue destination="yyb-Mj-ghD" kind="relationship" relationship="rootViewController" id="FOO-Jp-W7a"/>
                     </connections>
                 </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Z4T-ab-Kyt" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-930" y="2991"/>
         </scene>

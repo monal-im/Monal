@@ -41,6 +41,4 @@
  */
 -(void) handleNewMessage:(NSNotification *)notification;
 
--(void) addTempNotification; 
-
 @end

@@ -64,32 +64,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 }
 
 
--(void) addTempNotification
-{
-    if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"10.0")){
-        NSString *tempId=  [NSUUID UUID].UUIDString;
-        [self.tempNotificationIds addObject:tempId];
-        
-        UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
-        content.title =@"New Message!";
-        content.body =@"Open Monal to see your message";
-        UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:tempId
-                                                                              content:content trigger:nil];
-         UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
-        [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
-            
-        }];
-    }
-}
-
--(void) clearTempNotificaitons
-{
-    if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"10.0")){
-       UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
-        [center removeDeliveredNotificationsWithIdentifiers:self.tempNotificationIds];
-    }
-}
-
 /**
  for ios10 and up
  */
@@ -136,8 +110,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
         
     }];
-    
-    [self clearTempNotificaitons];
+
 }
 
 -(void) showLegacyNotification:(NSNotification *)notification

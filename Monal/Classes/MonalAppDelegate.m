@@ -142,7 +142,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     DDLogInfo(@"incoming voip notfication: %@", [payload dictionaryPayload]);
     if([UIApplication sharedApplication].applicationState==UIApplicationStateActive) return;
     
-    [[MLNotificationManager sharedInstance] addTempNotification];
     dispatch_async(dispatch_get_main_queue(), ^{
         //reconenct and fetch messages
        __block UIBackgroundTaskIdentifier tempTask= [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {

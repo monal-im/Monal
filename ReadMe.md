@@ -13,7 +13,7 @@ This is the Monal XMPP client as found in the app store.  If you want to  use th
 <img src="https://monal.im/wp-content/uploads/2018/12/Simulator-Screen-Shot-iPhone-X-2018-12-02-at-23.26.50.png" width="280"> <img src="https://monal.im/wp-content/uploads/2018/12/Simulator-Screen-Shot-iPhone-XR-2018-12-29-at-23.18.13-473x1024.png" width="280"> <img src="https://monal.im/wp-content/uploads/2018/12/Simulator-Screen-Shot-iPhone-X-2018-12-23-at-00.15.08-473x1024.png" width="280">
 
 
-### Impressions from the iOS version
+### Impressions from the MacOS version
 
 <img src="https://monal.im/wp-content/uploads/2018/04/Screen-Shot-2018-04-12-at-12.33.34-PM.png" width="600">
 <img src="https://monal.im/wp-content/uploads/2018/01/Screen-Shot-2018-01-16-at-12.11.44-AM.png" width="600">

@@ -92,10 +92,10 @@
     xNode.element=@"x";
     [xNode.attributes setObject:@"http://jabber.org/protocol/muc" forKey:@"xmlns"];
     
-//    MLXMLNode* historyNode =[[MLXMLNode alloc] init];
-//    historyNode.element=@"history";
-//    [historyNode.attributes setObject:@"5" forKey:@"maxstanzas"];
-//    [xNode.children addObject:historyNode];
+    MLXMLNode* historyNode =[[MLXMLNode alloc] init];
+    historyNode.element=@"history";
+    [historyNode.attributes setObject:@"0" forKey:@"maxstanzas"];
+    [xNode.children addObject:historyNode];
     
     if(password)
     {

@@ -19,6 +19,6 @@
  @param arguments 
  @param postedData optional
  */
-+ (void) sendWithVerb:(NSString *) verb  path:(NSString *)path withArguments:(NSDictionary *) arguments  data:(NSData *) postedData andCompletionHandler:(void (^)(NSError *error, id result)) completion;
++ (void) sendWithVerb:(NSString *) verb  path:(NSString *)path headers:(NSDictionary *) headers withArguments:(NSDictionary *) arguments  data:(NSData *) postedData andCompletionHandler:(void (^)(NSError *error, id result)) completion;
 
 @end

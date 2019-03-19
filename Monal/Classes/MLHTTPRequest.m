@@ -46,7 +46,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 }
 
 
-+ (void) sendWithVerb:(NSString *) verb  path:(NSString *)path withArguments:(NSDictionary *) arguments data:(NSData *) postedData andCompletionHandler:(void (^)(NSError *error, id result)) completion
++ (void) sendWithVerb:(NSString *) verb  path:(NSString *)path headers:(NSDictionary *) headers withArguments:(NSDictionary *) arguments  data:(NSData *) postedData andCompletionHandler:(void (^)(NSError *error, id result)) completion
 {
     NSMutableURLRequest *theRequest=[NSMutableURLRequest requestWithURL:[NSURL URLWithString:path]
                                                             cachePolicy:NSURLRequestReloadIgnoringCacheData
@@ -54,6 +54,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [theRequest setHTTPMethod:verb];
     
     NSData *dataToSubmit=postedData;
+    
+    [headers enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+        [theRequest addValue:obj forHTTPHeaderField:key];
+    }];
     
     if([verb isEqualToString:kPost]||[verb isEqualToString:kPut]) {
         if(arguments && !postedData) {

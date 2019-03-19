@@ -1334,7 +1334,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             
                             //upload to put
                             dispatch_async(dispatch_get_main_queue(), ^{
-                                [MLHTTPRequest sendWithVerb:kPut path:iqNode.putURL withArguments:nil data:[matchingRow objectForKey:kData] andCompletionHandler:^(NSError *error, id result) {
+                                [MLHTTPRequest sendWithVerb:kPut path:iqNode.putURL
+                                                    headers:@{kContentType:[matchingRow objectForKey:kContentType]}
+                                              withArguments:nil data:[matchingRow objectForKey:kData] andCompletionHandler:^(NSError *error, id result) {
                                     void (^completion) (NSString *url,  NSError *error)  = [matchingRow objectForKey:kCompletion];
                                     if(!error)
                                     {

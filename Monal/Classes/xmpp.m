@@ -2813,39 +2813,45 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             [devices enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                 NSNumber *device = (NSNumber *)obj;
                 SignalAddress *address = [[SignalAddress alloc] initWithName:contact deviceId:(uint32_t)device.intValue];
-                SignalSessionCipher *cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self.signalContext];
-                NSError *error;
-                SignalCiphertext* deviceEncryptedKey=[cipher encryptData:combinedKey error:&error];
-                
-                MLXMLNode *keyNode =[[MLXMLNode alloc] initWithElement:@"key"];
-                [keyNode.attributes setObject:[NSString stringWithFormat:@"%@",device] forKey:@"rid"];
-                if(deviceEncryptedKey.type==SignalCiphertextTypePreKeyMessage)
-                {
-                    [keyNode.attributes setObject:@"1" forKey:@"prekey"];
+                NSData *identity=[self.monalSignalStore getIdentityForAddress:address];
+                if([self.monalSignalStore isTrustedIdentity:address identityKey:identity]) {
+                    
+                    SignalSessionCipher *cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self.signalContext];
+                    NSError *error;
+                    SignalCiphertext* deviceEncryptedKey=[cipher encryptData:combinedKey error:&error];
+                    
+                    MLXMLNode *keyNode =[[MLXMLNode alloc] initWithElement:@"key"];
+                    [keyNode.attributes setObject:[NSString stringWithFormat:@"%@",device] forKey:@"rid"];
+                    if(deviceEncryptedKey.type==SignalCiphertextTypePreKeyMessage)
+                    {
+                        [keyNode.attributes setObject:@"1" forKey:@"prekey"];
+                    }
+                    
+                    [keyNode setData:[EncodingTools encodeBase64WithData:deviceEncryptedKey.data]];
+                    [header.children addObject:keyNode];
                 }
-                
-                [keyNode setData:[EncodingTools encodeBase64WithData:deviceEncryptedKey.data]];
-                [header.children addObject:keyNode];
                 
             }];
             
             [myDevices enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                 NSNumber *device = (NSNumber *)obj;
                 SignalAddress *address = [[SignalAddress alloc] initWithName:self.fulluser deviceId:(uint32_t)device.intValue];
-                SignalSessionCipher *cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self.signalContext];
-                NSError *error;
-                SignalCiphertext* deviceEncryptedKey=[cipher encryptData:combinedKey error:&error];
-                
-                MLXMLNode *keyNode =[[MLXMLNode alloc] initWithElement:@"key"];
-                [keyNode.attributes setObject:[NSString stringWithFormat:@"%@",device] forKey:@"rid"];
-                if(deviceEncryptedKey.type==SignalCiphertextTypePreKeyMessage)
-                {
-                    [keyNode.attributes setObject:@"1" forKey:@"prekey"];
+                NSData *identity=[self.monalSignalStore getIdentityForAddress:address];
+                if([self.monalSignalStore isTrustedIdentity:address identityKey:identity]) {
+                    SignalSessionCipher *cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self.signalContext];
+                    NSError *error;
+                    SignalCiphertext* deviceEncryptedKey=[cipher encryptData:combinedKey error:&error];
+                    
+                    MLXMLNode *keyNode =[[MLXMLNode alloc] initWithElement:@"key"];
+                    [keyNode.attributes setObject:[NSString stringWithFormat:@"%@",device] forKey:@"rid"];
+                    if(deviceEncryptedKey.type==SignalCiphertextTypePreKeyMessage)
+                    {
+                        [keyNode.attributes setObject:@"1" forKey:@"prekey"];
+                    }
+                    
+                    [keyNode setData:[EncodingTools encodeBase64WithData:deviceEncryptedKey.data]];
+                    [header.children addObject:keyNode];
                 }
-                
-                [keyNode setData:[EncodingTools encodeBase64WithData:deviceEncryptedKey.data]];
-                [header.children addObject:keyNode];
-                
             }];
         }
     }

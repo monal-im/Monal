@@ -3512,10 +3512,10 @@ if(!self.supportsSM3)
     [self send:presence];
 }
 
--(void) leaveRoom:(NSString*) room
+-(void) leaveRoom:(NSString*) room withNick:(NSString *) nick
 {
     XMPPPresence* presence =[[XMPPPresence alloc] init];
-    [presence leaveRoom:room onServer:nil withName:_username];
+    [presence leaveRoom:room onServer:nil withName:nick];
     [self send:presence];
 }
 

@@ -485,14 +485,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) clearContactsForAccount: (NSString*) accountNo
 {
-    if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
-    {
-        return;
-    }
-    
     //mutex to prevent others from modifying contacts at the same time
     dispatch_async(dispatch_get_main_queue(),
                    ^{
+                       if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
+                       {
+                           return;
+                       }
+                       
                        NSMutableArray* indexPaths =[[NSMutableArray alloc] init];
                        NSMutableIndexSet* indexSet = [[NSMutableIndexSet alloc] init];
                        
@@ -1046,7 +1046,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         
         RIButtonItem* yesButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Yes", nil) action:^{
             if(isMUC) {
-                [[MLXMPPManager sharedInstance] leaveRoom:[contact objectForKey:@"buddy_name"] forAccountId: [NSString stringWithFormat:@"%@",[contact objectForKey:@"account_id"]]];
+                [[MLXMPPManager sharedInstance] leaveRoom:[contact objectForKey:@"buddy_name"] withNick:[contact objectForKey:@"muc_nick"] forAccountId: [NSString stringWithFormat:@"%@",[contact objectForKey:@"account_id"]]];
             }
             else  {
                 [[MLXMPPManager sharedInstance] removeContact:contact];

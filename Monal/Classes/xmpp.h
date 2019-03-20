@@ -34,10 +34,11 @@ typedef NS_ENUM (NSInteger, xmppState) {
     kStateBound //is operating normally
 };
 
-
-extern NSString *const kXMPPError;
-extern NSString *const kXMPPSuccess;
-extern NSString *const kXMPPPresence;
+FOUNDATION_EXPORT NSString *const kFileName;
+FOUNDATION_EXPORT NSString *const kContentType;
+FOUNDATION_EXPORT NSString *const kData;
+FOUNDATION_EXPORT NSString *const kContact;
+FOUNDATION_EXPORT NSString *const kCompletion;
 
 @interface xmpp : NSObject <NSStreamDelegate>
 {
@@ -50,13 +51,107 @@ extern NSString *const kXMPPPresence;
     
     BOOL _startTLSComplete;
     BOOL _streamHasSpace;
-
+    
     //does not reset at disconnect
     BOOL _loggedInOnce;
     BOOL _hasRequestedServerInfo;
     
     BOOL _brokenServerSSL;
 }
+
+#pragma  mark properties
+
+@property (nonatomic,strong) NSString* pushNode;
+@property (nonatomic,strong) NSString* pushSecret;
+
+@property (nonatomic,readonly) NSString* fulluser; // combination of username@domain
+
+// connection attributes
+@property (nonatomic,strong) NSString* username;
+@property (nonatomic,strong) NSString* domain;
+@property (nonatomic,strong, readonly) NSString* jid;
+@property (nonatomic,strong) NSString* password;
+@property (nonatomic,strong) NSString* server;
+@property (nonatomic,assign) NSInteger port;
+@property (nonatomic,strong) NSString* resource;
+@property (nonatomic,assign) BOOL SSL;
+@property (nonatomic,assign) BOOL oldStyleSSL;
+@property (nonatomic,assign) BOOL selfSigned;
+@property (nonatomic,assign) BOOL oAuth;
+
+
+@property (nonatomic,strong) jingleCall* call;
+
+// state attributes
+@property (nonatomic,assign) NSInteger priority;
+@property (nonatomic,strong) NSString* statusMessage;
+@property (nonatomic,assign) BOOL awayState;
+@property (nonatomic,assign) BOOL visibleState;
+
+@property (nonatomic,assign) BOOL hasShownAlert;
+
+@property (nonatomic, strong) jingleCall *jingle;
+
+// DB info
+@property (nonatomic,strong) NSString* accountNo;
+
+//we should have an enumerator for this
+@property (nonatomic,assign) BOOL explicitLogout;
+@property (nonatomic,assign,readonly) BOOL loginError;
+
+@property (nonatomic, readonly) xmppState accountState;
+
+// discovered properties
+@property (nonatomic,strong)  NSArray* discoveredServerList;
+@property (nonatomic,strong)  NSMutableArray*  discoveredServices;
+@property (nonatomic,strong)  NSString*  conferenceServer;
+@property (nonatomic,strong)  NSArray*  roomList;
+@property (nonatomic, strong) NSArray* rosterList;
+@property (nonatomic, assign) BOOL staleRoster; //roster is stale if it resumed in the background
+
+
+@property (nonatomic,strong)  NSString*  uploadServer;
+@property (nonatomic, readonly) BOOL supportsHTTPUpload;
+// client state
+@property (nonatomic, readonly) BOOL supportsClientState;
+
+//message archive
+@property (nonatomic, readonly) BOOL supportsMam2;
+
+@property (nonatomic, readonly) BOOL supportsSM3;
+@property (nonatomic, readonly) BOOL supportsPush;
+@property (nonatomic, readonly) BOOL pushEnabled;
+@property (nonatomic, readonly) BOOL usingCarbons2;
+@property (nonatomic, readonly) BOOL supportsRosterVersion;
+
+//calculated
+@property (nonatomic,strong, readonly) NSString* versionHash;
+
+#if TARGET_OS_IPHONE
+@property (nonatomic,weak) ContactsViewController* contactsVC;
+#else
+@property (nonatomic,weak) MLContactsViewController* contactsVC;
+#endif
+//UI
+
+@property (nonatomic,strong) NSDate* connectedTime;
+
+#ifndef DISABLE_OMEMO
+@property (nonatomic, strong) SignalContext *signalContext;
+@property (nonatomic, strong) MLSignalStore *monalSignalStore;
+#endif
+
+extern NSString *const kId;
+extern NSString *const kMessageId;
+extern NSString *const kSendTimer;
+
+
+
+extern NSString *const kXMPPError;
+extern NSString *const kXMPPSuccess;
+extern NSString *const kXMPPPresence;
+
+
 
 -(void) connect;
 -(void) disconnect;
@@ -146,9 +241,10 @@ sets away xmpp call.
 -(void) joinRoom:(NSString*) room withNick:(NSString*) nick andPassword:(NSString *)password;
 
 /**
- leave specific room
+ leave specific room. the nick name is the name used in the room.
+ it is arbitrary and it may not match any other hame.
  */
--(void) leaveRoom:(NSString*) room;
+-(void) leaveRoom:(NSString*) room withNick:(NSString *) nick;
 
 #pragma mark Jingle
 /**
@@ -211,99 +307,6 @@ Decline a call request
 /** OMEMO */
 -(void) queryOMEMODevicesFrom:(NSString *) jid;
 #endif
-
-FOUNDATION_EXPORT NSString *const kFileName;
-FOUNDATION_EXPORT NSString *const kContentType;
-FOUNDATION_EXPORT NSString *const kData;
-FOUNDATION_EXPORT NSString *const kContact;
-FOUNDATION_EXPORT NSString *const kCompletion;
-
-
-#pragma  mark properties
-
-@property (nonatomic,strong) NSString* pushNode;
-@property (nonatomic,strong) NSString* pushSecret;
-
-@property (nonatomic,readonly) NSString* fulluser; // combination of username@domain
-
-// connection attributes
-@property (nonatomic,strong) NSString* username;
-@property (nonatomic,strong) NSString* domain;
-@property (nonatomic,strong, readonly) NSString* jid;
-@property (nonatomic,strong) NSString* password;
-@property (nonatomic,strong) NSString* server;
-@property (nonatomic,assign) NSInteger port;
-@property (nonatomic,strong) NSString* resource;
-@property (nonatomic,assign) BOOL SSL;
-@property (nonatomic,assign) BOOL oldStyleSSL;
-@property (nonatomic,assign) BOOL selfSigned;
-@property (nonatomic,assign) BOOL oAuth;
-
-
-@property (nonatomic,strong) jingleCall* call;
-
-// state attributes
-@property (nonatomic,assign) NSInteger priority;
-@property (nonatomic,strong) NSString* statusMessage;
-@property (nonatomic,assign) BOOL awayState;
-@property (nonatomic,assign) BOOL visibleState;
-
-@property (nonatomic,assign) BOOL hasShownAlert;
-
-@property (nonatomic, strong) jingleCall *jingle;
-
-// DB info
-@property (nonatomic,strong) NSString* accountNo;
-
-//we should have an enumerator for this
-@property (nonatomic,assign) BOOL explicitLogout;
-@property (nonatomic,assign,readonly) BOOL loginError;
-
-@property (nonatomic, readonly) xmppState accountState;
-
-// discovered properties
-@property (nonatomic,strong)  NSArray* discoveredServerList;
-@property (nonatomic,strong)  NSMutableArray*  discoveredServices;
-@property (nonatomic,strong)  NSString*  conferenceServer;
-@property (nonatomic,strong)  NSArray*  roomList;
-@property (nonatomic, strong) NSArray* rosterList;
-@property (nonatomic, assign) BOOL staleRoster; //roster is stale if it resumed in the background
-
-
-@property (nonatomic,strong)  NSString*  uploadServer;
-@property (nonatomic, readonly) BOOL supportsHTTPUpload;
-// client state
-@property (nonatomic, readonly) BOOL supportsClientState;
-
-//message archive
-@property (nonatomic, readonly) BOOL supportsMam2;
-
-@property (nonatomic, readonly) BOOL supportsSM3;
-@property (nonatomic, readonly) BOOL supportsPush;
-@property (nonatomic, readonly) BOOL pushEnabled;
-@property (nonatomic, readonly) BOOL usingCarbons2;
-@property (nonatomic, readonly) BOOL supportsRosterVersion;
-
-//calculated
-@property (nonatomic,strong, readonly) NSString* versionHash;
-
-#if TARGET_OS_IPHONE
-@property (nonatomic,weak) ContactsViewController* contactsVC;
-#else
-@property (nonatomic,weak) MLContactsViewController* contactsVC;
-#endif
-//UI
-
-@property (nonatomic,strong) NSDate* connectedTime;
-
-#ifndef DISABLE_OMEMO
-@property (nonatomic, strong) SignalContext *signalContext;
-@property (nonatomic, strong) MLSignalStore *monalSignalStore;
-#endif
-
-extern NSString *const kId;
-extern NSString *const kMessageId;
-extern NSString *const kSendTimer;
 
 /**
  An intentional disconnect to trigger APNS. does not close the stream. 

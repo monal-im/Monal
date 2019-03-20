@@ -482,7 +482,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
                            for(NSDictionary *dic in  self.timerList) {
                                if([dic objectForKey:kSendTimer] == sendTimer) {
                                    [[DataLayer sharedInstance] setMessageId:[dic objectForKey:kMessageId] delivered:NO];
-                                   if(self) { // possible zombie 
+                                   if(self) { // possible zombie
                                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalSendFailedMessageNotice object:self userInfo:dic];
                                    }
                                    removalCounter=counter;
@@ -708,20 +708,10 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
     }
 }
 
-
--(void)  leaveRoom:(NSString*) roomName forAccountRow:(NSInteger) row
-{
-    if(row<[_connectedXMPP count] && row>=0) {
-        NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
-        xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
-        [account leaveRoom:roomName];
-    }
-}
-
--(void)  leaveRoom:(NSString*) roomName forAccountId:(NSString*) accountId
+-(void)  leaveRoom:(NSString*) roomName withNick:(NSString *) nick forAccountId:(NSString*) accountId
 {
     xmpp* account= [self getConnectedAccountForID:accountId];
-    [account leaveRoom:roomName];
+    [account leaveRoom:roomName withNick:nick];
     [[DataLayer sharedInstance] removeBuddy:roomName forAccount:accountId];
 }
 

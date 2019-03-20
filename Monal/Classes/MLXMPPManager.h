@@ -115,20 +115,12 @@ Returns the server set name of the conencted account
 -(void)  joinRoom:(NSString*) roomName withNick:(NSString *)nick andPassword:(NSString*) password forAccountRow:(NSInteger) row;
 
 -(void)  joinRoom:(NSString*) roomName withNick:(NSString *)nick andPassword:(NSString*) password forAccounId:(NSInteger) accountId;
-
-/**
- leave the specific MUC room
- @param roomName
- @param row the row of the account in the connected accounts list
- */
--(void)  leaveRoom:(NSString*) roomName forAccountRow:(NSInteger) row;
-
 /**
  leaves a specified MUC room. 
  @param roomName
  @param accountID the accountid number from the database
  */
--(void)  leaveRoom:(NSString*) roomName forAccountId:(NSString*) accountId;
+-(void)  leaveRoom:(NSString*) roomName withNick:(NSString *) nick forAccountId:(NSString*) accountId;
 
 #pragma mark Jingle VOIP
 

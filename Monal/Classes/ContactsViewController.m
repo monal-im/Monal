@@ -616,39 +616,37 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             return;
         }
     }
-    dispatch_async(dispatch_get_main_queue(),
-                   ^{
-                       
-                       int pos=-1;
-                       int counter=0;
-                       for(NSDictionary* row in _contacts)
-                       {
-                           if([[row objectForKey:@"buddy_name"] caseInsensitiveCompare:[notification.userInfo objectForKey:@"from"] ]==NSOrderedSame &&
-                              [[row objectForKey:@"account_id"]  integerValue]==[[notification.userInfo objectForKey:kaccountNoKey] integerValue] )
-                           {
-                               pos=counter;
-                               break;
-                           }
-                           counter++;
-                       }
-                       
-                       if(pos>=0)
-                       {
-                           
-                           //                          int unreadCount=[[[_contacts objectAtIndex:pos] objectForKey:@"count"] integerValue];
-                           //                          unreadCount++;
-                           //                         int unreadCount= [[DataLayer sharedInstance] countUserUnreadMessages:[notification.userInfo objectForKey:@"from"] forAccount:[notification.userInfo objectForKey:kaccountNoKey]];
-                           //                          [[_contacts objectAtIndex:pos] setObject: [NSNumber numberWithInt:unreadCount] forKey:@"count"];
-                           
-                           
-                           
-                           NSIndexPath *path1 = [NSIndexPath indexPathForRow:pos inSection:konlineSection];
-                           [_contactsTable beginUpdates];
-                           [_contactsTable reloadRowsAtIndexPaths:@[path1]
-                                                 withRowAnimation:UITableViewRowAnimationNone];
-                           [_contactsTable endUpdates];
-                       }
-                   });
+    dispatch_async(dispatch_get_main_queue(), ^{
+        int pos=-1;
+        int counter=0;
+        for(NSDictionary* row in _contacts)
+        {
+            if([[row objectForKey:@"buddy_name"] caseInsensitiveCompare:[notification.userInfo objectForKey:@"from"] ]==NSOrderedSame &&
+               [[row objectForKey:@"account_id"]  integerValue]==[[notification.userInfo objectForKey:kaccountNoKey] integerValue] )
+            {
+                pos=counter;
+                break;
+            }
+            counter++;
+        }
+        
+        if(pos>=0)
+        {
+            
+            //                          int unreadCount=[[[_contacts objectAtIndex:pos] objectForKey:@"count"] integerValue];
+            //                          unreadCount++;
+            //                         int unreadCount= [[DataLayer sharedInstance] countUserUnreadMessages:[notification.userInfo objectForKey:@"from"] forAccount:[notification.userInfo objectForKey:kaccountNoKey]];
+            //                          [[_contacts objectAtIndex:pos] setObject: [NSNumber numberWithInt:unreadCount] forKey:@"count"];
+            
+            
+            
+            NSIndexPath *path1 = [NSIndexPath indexPathForRow:pos inSection:konlineSection];
+            [_contactsTable beginUpdates];
+            [_contactsTable reloadRowsAtIndexPaths:@[path1]
+                                  withRowAnimation:UITableViewRowAnimationNone];
+            [_contactsTable endUpdates];
+        }
+    });
     
 }
 

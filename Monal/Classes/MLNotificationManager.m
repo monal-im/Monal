@@ -41,6 +41,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) handleNewMessage:(NSNotification *)notification
 {
+    
+    if([[notification.userInfo objectForKey:@"messageType"] isEqualToString:kMessageTypeStatus]) return; 
+    
     DDLogVerbose(@"notificaiton manager got new message notice %@", notification.userInfo);
     [[DataLayer sharedInstance] isMutedJid:[notification.userInfo objectForKey:@"from"] withCompletion:^(BOOL muted) {
         if(!muted){

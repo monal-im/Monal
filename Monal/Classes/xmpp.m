@@ -1855,8 +1855,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             NSString *messageType=nil;
                             if(!body  && messageNode.subject)
                             {
-                                body =[NSString stringWithFormat:@"%@ changed the subject to: %@", messageNode.actualFrom, messageNode.subject];
+//                                body =[NSString stringWithFormat:@"%@ changed the subject to: %@", messageNode.actualFrom, messageNode.subject];
                                 messageType=kMessageTypeStatus;
+                                return;
                             }
                             
                             if(messageNode.oobURL)

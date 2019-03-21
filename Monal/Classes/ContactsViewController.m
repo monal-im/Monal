@@ -596,6 +596,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) handleNewMessage:(NSNotification *)notification
 {
+    if([[notification.userInfo objectForKey:@"messageType"] isEqualToString:kMessageTypeStatus]) return;
     NSNumber *showAlert =[notification.userInfo objectForKey:@"showAlert"];
     
     dispatch_sync(dispatch_get_main_queue(),^{

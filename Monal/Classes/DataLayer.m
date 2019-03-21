@@ -1342,6 +1342,22 @@ static DataLayer *sharedInstance=nil;
     
 }
 
+-(void) updateMucFavorite:(NSNumber *) mucid forAccountId:(NSInteger) accountNo autoJoin:(BOOL) autoJoin andCompletion:(void (^)(BOOL))completion
+{
+    NSString* query=[NSString stringWithFormat:@"update muc_favorites set autojoin=? where mucid=? and account_id=?"];
+    NSArray *params=@[mucid, [NSNumber numberWithInteger:accountNo]];
+    DDLogVerbose(@"%@", query);
+    
+    [self executeNonQuery:query andArguments:params withCompletion:^(BOOL success) {
+        
+        if(completion) {
+            completion(success);
+        }
+        
+    }];
+    
+}
+
 -(void) deleteMucFavorite:(NSNumber *) mucid forAccountId:(NSInteger) accountNo withCompletion:(void (^)(BOOL))completion
 {
     NSString* query=[NSString stringWithFormat:@"delete from muc_favorites where mucid=? and account_id=?"];

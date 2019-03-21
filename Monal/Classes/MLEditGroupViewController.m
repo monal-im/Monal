@@ -81,12 +81,8 @@
     [super viewWillAppear:animated];
     [_accountPicker reloadAllComponents];
     
-    if([[MLXMPPManager sharedInstance].connectedXMPP count]==1)
-    {
-        [[MLXMPPManager sharedInstance] getServiceDetailsForAccount:0 ];
-        [_accountPicker selectedRowInComponent:0];
-        
-    }
+    [[MLXMPPManager sharedInstance] getServiceDetailsForAccount:0 ];
+    [_accountPicker selectedRowInComponent:0];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -235,6 +231,7 @@
                     thecell.cellLabel.text=@"Favorite";
                     thecell.textInputField.hidden=YES;
                      self.favSwitch= thecell.toggleSwitch;
+                    [self.favSwitch addTarget:self action:@selector(toggleFav) forControlEvents:UIControlEventTouchUpInside];
                     if(self.groupData) self.favSwitch.on=YES;
                     toreturn=thecell;
                     break;
@@ -245,7 +242,7 @@
                     thecell.cellLabel.text=@"Auto Join";
                     thecell.textInputField.hidden=YES;
                     self.autoSwitch= thecell.toggleSwitch;
-                    
+                     [self.favSwitch addTarget:self action:@selector(toggleJoin) forControlEvents:UIControlEventTouchUpInside];
                     NSNumber *on=[_groupData objectForKey:@"autojoin"];
                     
                     if(on.intValue==1)
@@ -275,6 +272,26 @@
     return toreturn;
 }
 
+-(void) toggleFav {
+    if(self.groupData) {
+        NSNumber *account=[self.groupData objectForKey:@"account_id"];
+        
+        [[DataLayer sharedInstance] deleteMucFavorite:[self.groupData objectForKey:@"mucid"] forAccountId:account.integerValue withCompletion:^(BOOL success) {
+            
+        }];
+    }
+}
+
+-(void) toggleJoin {
+    if(self.groupData) {
+        NSNumber *account=[self.groupData objectForKey:@"account_id"];
+
+        [[DataLayer sharedInstance] updateMucFavorite:[self.groupData objectForKey:@"mucid"] forAccountId:account.integerValue autoJoin:self.autoSwitch.on andCompletion:^(BOOL success) {
+            
+        }];
+    }
+}
+
 #pragma mark actions
 
 -(void) closeView
@@ -295,9 +312,6 @@
         [self presentViewController:messageAlert animated:YES completion:nil];
     }
     else  {
-       
-        
-        
         if([MLXMPPManager sharedInstance].connectedXMPP.count<=[self.accountPicker selectedRowInComponent:0]) return;
         
         NSDictionary *accountrow = [MLXMPPManager sharedInstance].connectedXMPP[[self.accountPicker selectedRowInComponent:0]];
@@ -312,8 +326,6 @@
 
         [[MLXMPPManager sharedInstance] joinRoom:self.roomField.text withNick:self.nickField.text andPassword:self.passField.text forAccountRow:[self.accountPicker selectedRowInComponent:0]];
 
-      
-        
         NSString *nick=self.nickField.text;
         NSString *room =self.roomField.text;
         

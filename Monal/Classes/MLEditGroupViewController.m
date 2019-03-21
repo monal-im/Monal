@@ -242,7 +242,7 @@
                     thecell.cellLabel.text=@"Auto Join";
                     thecell.textInputField.hidden=YES;
                     self.autoSwitch= thecell.toggleSwitch;
-                     [self.favSwitch addTarget:self action:@selector(toggleJoin) forControlEvents:UIControlEventTouchUpInside];
+                     [self.autoSwitch addTarget:self action:@selector(toggleJoin) forControlEvents:UIControlEventTouchUpInside];
                     NSNumber *on=[_groupData objectForKey:@"autojoin"];
                     
                     if(on.intValue==1)
@@ -333,6 +333,9 @@
         [[DataLayer sharedInstance] addContact:self.roomField.text forAccount:account.accountNo fullname:@"" nickname:self.nickField.text  withCompletion:^(BOOL success) {
             
                 [[DataLayer sharedInstance] updateOwnNickName:nick forMuc:room forAccount:account.accountNo];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self dismissViewControllerAnimated:YES completion:nil];
+            });
             
         }];
         

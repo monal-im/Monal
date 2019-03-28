@@ -138,65 +138,69 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     {
         case kNotificationSettingSectionUser: {
             
-            MLSwitchCell *cell= [tableView dequeueReusableCellWithIdentifier:@"switchCell"];
-            cell.toggleSwitch.enabled=NO;
-            cell.cellLabel.text = self.user[0];
+            UITableViewCell *cell= [tableView dequeueReusableCellWithIdentifier:@"descriptionCell"];
+            cell.imageView.hidden=NO;
+            cell.textLabel.text = self.user[0];
             if(self.canShowNotifications) {
-                cell.toggleSwitch.on=YES;
+                cell.imageView.image=[UIImage imageNamed:@"888-checkmark"];
             }
             else  {
-                cell.toggleSwitch.on=NO;
+               cell.imageView.image=[UIImage imageNamed:@"disabled"];
             }
             toreturn=cell;
             break;
         }
         case kNotificationSettingSectionApplePush: {
-            MLSwitchCell *cell= [tableView dequeueReusableCellWithIdentifier:@"switchCell"];
-            cell.toggleSwitch.enabled=NO;
-            cell.cellLabel.text = self.apple[0];
+            UITableViewCell *cell= [tableView dequeueReusableCellWithIdentifier:@"descriptionCell"];
+           
+            cell.textLabel.text = self.apple[0];
             
             if([MLXMPPManager sharedInstance].hasAPNSToken) {
-                cell.toggleSwitch.on=YES;
+                 cell.imageView.image=[UIImage imageNamed:@"888-checkmark"];
             }
             else  {
-                cell.toggleSwitch.on=NO;
+                cell.imageView.image=[UIImage imageNamed:@"disabled"];
             }
-            
+            cell.imageView.hidden=NO;
             toreturn=cell;
             break;
         }
         case kNotificationSettingSectionMonalPush: {
-            MLSwitchCell *cell= [tableView dequeueReusableCellWithIdentifier:@"switchCell"];
-            cell.toggleSwitch.enabled=NO;
-         
+            UITableViewCell *cell= [tableView dequeueReusableCellWithIdentifier:@"descriptionCell"];
             if([MLXMPPManager sharedInstance].pushNode) {
-                cell.toggleSwitch.on=YES;
+                cell.imageView.image=[UIImage imageNamed:@"888-checkmark"];
             }
             else  {
-                cell.toggleSwitch.on=NO;
+               cell.imageView.image=[UIImage imageNamed:@"disabled"];
             }
-            cell.cellLabel.text = self.monal[0];
+            cell.imageView.hidden=NO;
+            cell.textLabel.text = self.monal[0];
             toreturn=cell;
             break;
         }
             
         case kNotificationSettingSectionAccounts: {
-            MLSwitchCell *cell= [tableView dequeueReusableCellWithIdentifier:@"switchCell"];
-            cell.toggleSwitch.enabled=NO;
+            UITableViewCell *cell= [tableView dequeueReusableCellWithIdentifier:@"descriptionCell"];
+            cell.imageView.hidden=NO;
             NSDictionary  *row = [MLXMPPManager sharedInstance].connectedXMPP[indexPath.row];
             xmpp *xmppAccount = [row objectForKey:@"xmppAccount"];
-            cell.cellLabel.text =xmppAccount.fulluser;
+            cell.textLabel.text =xmppAccount.fulluser;
             
-            cell.toggleSwitch.on = xmppAccount.pushEnabled; 
+            if(xmppAccount.pushEnabled) {
+                cell.imageView.image=[UIImage imageNamed:@"888-checkmark"];
+            }
+            else  {
+                cell.imageView.image=[UIImage imageNamed:@"disabled"];
+            }
             
             toreturn=cell;
             break;
         }
             
         case kNotificationSettingSectionAdvanced: {
-            MLSwitchCell *cell= [tableView dequeueReusableCellWithIdentifier:@"switchCell"];
-            cell.toggleSwitch.hidden=YES;
-            cell.cellLabel.text =@"Rebuild Tokens";
+            UITableViewCell *cell= [tableView dequeueReusableCellWithIdentifier:@"descriptionCell"];
+            cell.imageView.hidden=YES;
+            cell.textLabel.text =@"Rebuild Tokens";
             toreturn=cell;
             break;
         }

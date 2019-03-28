@@ -205,27 +205,33 @@
     NSString *passwordText =[self.password.stringValue copy] ;
     
     if(!self.accountToEdit) {
-        [[DataLayer sharedInstance] addAccountWithDictionary:dic andCompletion:^(BOOL result) {
-            if(result) {
-                [[DataLayer sharedInstance] executeScalar:@"select max(account_id) from account" withCompletion:^(NSObject * accountid) {
-                    if(accountid) {
-                        [SAMKeychain setPassword:passwordText forService:@"Monal" account:[NSString stringWithFormat:@"%@", accountid]];
-                        
-                        [self refreshPresenter];
-                        
-                        if(isEnabled)
-                        {
-                            [[MLXMPPManager sharedInstance] connectAccount:[NSString stringWithFormat:@"%@", accountid]];
-                        }
-                        else
-                        {
-                            [[MLXMPPManager sharedInstance] disconnectAccount:[NSString stringWithFormat:@"%@", accountid]];
-                        }
-                        
+        [[DataLayer sharedInstance] doesAccountExistUser:user andDomain:domain withCompletion:^(BOOL result) {
+            if(!result) {
+                [[DataLayer sharedInstance] addAccountWithDictionary:dic andCompletion:^(BOOL result) {
+                    if(result) {
+                        [[DataLayer sharedInstance] executeScalar:@"select max(account_id) from account" withCompletion:^(NSObject * accountid) {
+                            if(accountid) {
+                                [SAMKeychain setPassword:passwordText forService:@"Monal" account:[NSString stringWithFormat:@"%@", accountid]];
+                                
+                                [self refreshPresenter];
+                                
+                                if(isEnabled)
+                                {
+                                    [[MLXMPPManager sharedInstance] connectAccount:[NSString stringWithFormat:@"%@", accountid]];
+                                }
+                                else
+                                {
+                                    [[MLXMPPManager sharedInstance] disconnectAccount:[NSString stringWithFormat:@"%@", accountid]];
+                                }
+                                
+                            }
+                        }];
                     }
                 }];
             }
         }];
+        
+       
         
     }
     else

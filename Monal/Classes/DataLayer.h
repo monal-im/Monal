@@ -121,7 +121,7 @@ extern NSString *const kMessageTypeUrl;
 
 -(void) isBuddyOnline:(NSString*) buddy forAccount:(NSString*) accountNo withCompletion: (void (^)(BOOL))completion;
 
-#pragma mark MUC
+#pragma mark - MUC
 
 -(NSString *) ownNickNameforMuc:(NSString*) room forAccount:(NSString*) accountNo;
 -(void) updateOwnNickName:(NSString *) nick forMuc:(NSString*) room forAccount:(NSString*) accountNo;
@@ -144,14 +144,15 @@ extern NSString *const kMessageTypeUrl;
 -(void) isContactInList:(NSString*) buddy forAccount:(NSString*) accountNo withCompletion: (void (^)(BOOL))completion;
 
 
-#pragma mark vcard commands
+#pragma mark - vcard commands
 -(void) setNickName:(NSString*) nickName forBuddy:(NSString*) buddy andAccount:(NSString*) accountNo;
 
-#pragma mark account commands
+#pragma mark - account commands
 -(void) protocolListWithCompletion: (void (^)(NSArray* result))completion;
 -(void) accountListWithCompletion: (void (^)(NSArray* result))completion;
 -(NSArray*) enabledAccountList;
 -(BOOL) isAccountEnabled:(NSString*) accountNo;
+-(void) doesAccountExistUser:(NSString*) user andDomain:(NSString *) domain withCompletion:(void (^)(BOOL result))completion;
 
 -(NSArray*) accountVals:(NSString*) accountNo; 
 
@@ -166,7 +167,7 @@ extern NSString *const kMessageTypeUrl;
  */
 -(BOOL) disableEnabledAccount:(NSString*) accountNo;
 
-#pragma mark message Commands
+#pragma mark - message Commands
 /**
  returns messages with the provided local id number 
  */

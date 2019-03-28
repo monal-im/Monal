@@ -293,29 +293,44 @@ NSString *const kGtalk = @"Gtalk";
         }
         else
         {
-            
-            [[DataLayer sharedInstance] addAccountWithDictionary:dic andCompletion:^(BOOL result) {
-                if(result) {
-                    [[DataLayer sharedInstance] executeScalar:@"select max(account_id) from account" withCompletion:^(NSObject * accountid) {
-                        if(accountid) {
-                            self.accountno=[NSString stringWithFormat:@"%@",accountid];
-                            self.editMode=YES;
-                             [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
-                            [SAMKeychain setPassword:self.password forService:@"Monal" account:self.accountno];
-                            if(self.enabled)
-                            {
-                                DDLogVerbose(@"calling connect... ");
-                                [[MLXMPPManager sharedInstance] connectAccount:self.accountno];
-                            }
-                            else
-                            {
-                                [[MLXMPPManager sharedInstance] disconnectAccount:self.accountno];
-                            }
+            [[DataLayer sharedInstance] doesAccountExistUser:user andDomain:domain withCompletion:^(BOOL result) {
+                if(!result) {
+                    [[DataLayer sharedInstance] addAccountWithDictionary:dic andCompletion:^(BOOL result) {
+                        if(result) {
+                             [self showSuccessHUD];
+                            [[DataLayer sharedInstance] executeScalar:@"select max(account_id) from account" withCompletion:^(NSObject * accountid) {
+                                if(accountid) {
+                                    self.accountno=[NSString stringWithFormat:@"%@",accountid];
+                                    self.editMode=YES;
+                                    [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
+                                    [SAMKeychain setPassword:self.password forService:@"Monal" account:self.accountno];
+                                    if(self.enabled)
+                                    {
+                                        DDLogVerbose(@"calling connect... ");
+                                        [[MLXMPPManager sharedInstance] connectAccount:self.accountno];
+                                    }
+                                    else
+                                    {
+                                        [[MLXMPPManager sharedInstance] disconnectAccount:self.accountno];
+                                    }
+                                }
+                            }];
                         }
                     }];
+                } else  {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                   UIAlertController* alert= [UIAlertController alertControllerWithTitle:@"Account Exists" message:@"This account already exists in Monal." preferredStyle:UIAlertControllerStyleAlert];
+                    [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                        [alert dismissViewControllerAnimated:YES completion:nil];
+                    }]];
+                    
+                    [self presentViewController:alert animated:YES completion:^{
+                        
+                    }];
+                   
+                    });
                 }
             }];
-            
         }
     }
     else
@@ -332,23 +347,27 @@ NSString *const kGtalk = @"Gtalk";
             {
                 [[MLXMPPManager sharedInstance] disconnectAccount:self.accountno];
             }
+            [self showSuccessHUD];
         }];
         
         [[DataLayer sharedInstance] resetContactsForAccount:self.accountno];
         
     }
-    
-    MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-    hud.mode = MBProgressHUDModeCustomView;
-    hud.removeFromSuperViewOnHide=YES;
-    hud.label.text =@"Success";
-    hud.detailsLabel.text =@"The account has been saved";
-    UIImage *image = [[UIImage imageNamed:@"success"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
-    hud.customView = [[UIImageView alloc] initWithImage:image];
+}
 
-    [hud hideAnimated:YES afterDelay:1.0f];
-  
-    
+-(void) showSuccessHUD
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+        hud.mode = MBProgressHUDModeCustomView;
+        hud.removeFromSuperViewOnHide=YES;
+        hud.label.text =@"Success";
+        hud.detailsLabel.text =@"The account has been saved";
+        UIImage *image = [[UIImage imageNamed:@"success"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+        hud.customView = [[UIImageView alloc] initWithImage:image];
+        
+        [hud hideAnimated:YES afterDelay:1.0f];
+    });
 }
 
 - (IBAction) delClicked: (id) sender

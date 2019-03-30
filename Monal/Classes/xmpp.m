@@ -3259,11 +3259,8 @@ if(!self.supportsSM3)
 
 -(void) sendSignalInitialStanzas
 {
-    if(!self.pushEnabled) {
-        //get device list first
-        [self queryOMEMODevicesFrom:_fulluser];
-        [self sendOMEMOBundle];
-    }
+    [self queryOMEMODevicesFrom:_fulluser];
+    [self sendOMEMOBundle];
 }
 
 

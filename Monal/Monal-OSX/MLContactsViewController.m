@@ -365,7 +365,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                 {
                     
                     if(isMUC) {
-                        [[MLXMPPManager sharedInstance] leaveRoom:[contact objectForKey:@"buddy_name"] forAccountId: [NSString stringWithFormat:@"%@",[contact objectForKey:@"account_id"]]];
+                         [[MLXMPPManager sharedInstance] leaveRoom:[contact objectForKey:@"buddy_name"] withNick:[contact objectForKey:@"muc_nick"] forAccountId: [NSString stringWithFormat:@"%@",[contact objectForKey:@"account_id"]]];
                     } else {
                         [[MLXMPPManager sharedInstance] removeContact:contact];
                     }

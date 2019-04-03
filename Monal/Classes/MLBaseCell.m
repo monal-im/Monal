@@ -18,6 +18,7 @@
         self.name.textColor=[UIColor whiteColor];
         self.date.textColor=[UIColor whiteColor];
         self.messageStatus.textColor=[UIColor whiteColor];
+        self.dividerDate.textColor=[UIColor whiteColor];
     }
 }
 
@@ -30,7 +31,6 @@
 
 -(void) updateCell
 {
-    self.retry.tintColor=[UIColor redColor]; // not needed once everything uses prototype
     if([self.parent respondsToSelector:@selector(retry:)]) {
         [self.retry addTarget:self.parent action:@selector(retry:) forControlEvents:UIControlEventTouchUpInside];
     }
@@ -42,6 +42,18 @@
     }
     else{
         self.retry.hidden=YES;
+    }
+    
+    if(self.name.text.length==0) {
+        self.nameHeight.constant=0;
+    } else  {
+        self.nameHeight.constant= kDefaultTextHeight;
+    }
+    
+    if(self.dividerDate.text.length==0) {
+        self.dividerHeight.constant=0;
+    } else  {
+        self.dividerHeight.constant=kDefaultTextHeight;
     }
 }
 

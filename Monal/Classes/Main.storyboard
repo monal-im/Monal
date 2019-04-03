@@ -781,9 +781,12 @@
                                         <connections>
                                             <outlet property="bubbleImage" destination="j3m-BP-DXG" id="mW6-sq-epF"/>
                                             <outlet property="date" destination="uDg-Hw-FvA" id="30Z-UY-yYy"/>
+                                            <outlet property="dividerDate" destination="QYx-be-it3" id="0tg-qS-b3y"/>
+                                            <outlet property="dividerHeight" destination="KIg-nt-t3G" id="lNB-GC-34X"/>
                                             <outlet property="lockImage" destination="VYo-Qc-SmT" id="wWb-Rk-pd6"/>
                                             <outlet property="messageBody" destination="Ra0-Eo-cAh" id="9QE-i9-4oX"/>
                                             <outlet property="name" destination="lUi-Cp-nhg" id="zGj-p7-Okk"/>
+                                            <outlet property="nameHeight" destination="QHd-0x-LDa" id="yrn-It-o3L"/>
                                         </connections>
                                     </tableViewCell>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="none" indentationWidth="10" reuseIdentifier="textOutCell" rowHeight="100" id="TWD-0M-0Dn" userLabel="textOutCell" customClass="MLChatCell">

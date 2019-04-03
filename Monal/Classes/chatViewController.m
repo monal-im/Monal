@@ -820,7 +820,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     return [self.sourceDateFormat stringFromDate:sourceDate];
 }
 
--(NSString*) formattedDateWithSource:(NSObject *) sourceDateString andPriorDate:(NSString *) priorDateString
+-(NSString*) formattedDateWithSource:(NSObject *) sourceDateString andPriorDate:(NSObject *) priorDateString
 {
     NSString* dateString;
     if(sourceDateString!=nil)
@@ -829,8 +829,12 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         if([sourceDateString isKindOfClass:[NSDate class]]){
             sourceDate=(NSDate *)sourceDateString;
         } else  {
-        sourceDate= [self.sourceDateFormat dateFromString: (NSString *)sourceDateString];
+            sourceDate= [self.sourceDateFormat dateFromString: (NSString *)sourceDateString];
         }
+        
+        NSInteger msgday =[self.gregorian components:NSCalendarUnitDay fromDate:sourceDate].day;
+        NSInteger msgmonth=[self.gregorian components:NSCalendarUnitMonth fromDate:sourceDate].month;
+        NSInteger msgyear =[self.gregorian components:NSCalendarUnitYear fromDate:sourceDate].year;
         
         NSDate* priorDate;
         if([priorDateString isKindOfClass:[NSDate class]]){
@@ -839,32 +843,46 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
             priorDate= [self.sourceDateFormat dateFromString: (NSString *)priorDateString];
         }
         
-        NSInteger msgday =[self.gregorian components:NSCalendarUnitDay fromDate:sourceDate].day;
-        NSInteger msgmonth=[self.gregorian components:NSCalendarUnitMonth fromDate:sourceDate].month;
-        NSInteger msgyear =[self.gregorian components:NSCalendarUnitYear fromDate:sourceDate].year;
+        NSInteger priorDay =[self.gregorian components:NSCalendarUnitDay fromDate:priorDate].day;
+        NSInteger priorMonth=[self.gregorian components:NSCalendarUnitMonth fromDate:priorDate].month;
+        NSInteger priorYear =[self.gregorian components:NSCalendarUnitYear fromDate:priorDate].year;
         
-        BOOL showFullDate=YES;
+        
+        //divider, hide time
+        [self.destinationDateFormat setTimeStyle:NSDateFormatterNoStyle];
         
         //if([sourceDate timeIntervalSinceDate:priorDate]<60*60) showFullDate=NO;
+        // note: if it isnt the same day we want to show the full  day
+        [self.destinationDateFormat setDateStyle:NSDateFormatterMediumStyle];
         
-        if (((self.thisday!=msgday) || (self.thismonth!=msgmonth) || (self.thisyear!=msgyear)) && showFullDate )
+        if (((priorDay!=msgday) || (priorMonth!=msgmonth) || (priorYear!=msgyear))  )
         {
-            //no more need for seconds
-            [self.destinationDateFormat setTimeStyle:NSDateFormatterShortStyle];
-            
+            //divider, hide time
+            [self.destinationDateFormat setTimeStyle:NSDateFormatterNoStyle];
             // note: if it isnt the same day we want to show the full  day
             [self.destinationDateFormat setDateStyle:NSDateFormatterMediumStyle];
-            
-            //cache date
-           
+            dateString = [self.destinationDateFormat stringFromDate:sourceDate];
         }
-        else
-        {
-            //today just show time
-            [self.destinationDateFormat setDateStyle:NSDateFormatterNoStyle];
-            [self.destinationDateFormat setTimeStyle:NSDateFormatterMediumStyle];
+    }
+    
+    return dateString;
+}
+
+-(NSString*) formattedTimeStampWithSource:(NSObject *) sourceDateString
+{
+    NSString* dateString;
+    if(sourceDateString!=nil)
+    {
+        NSDate* sourceDate;
+        if([sourceDateString isKindOfClass:[NSDate class]]){
+            sourceDate=(NSDate *)sourceDateString;
+        } else  {
+            sourceDate= [self.sourceDateFormat dateFromString: (NSString *)sourceDateString];
         }
-      
+        
+        [self.destinationDateFormat setDateStyle:NSDateFormatterNoStyle];
+        [self.destinationDateFormat setTimeStyle:NSDateFormatterMediumStyle];
+        
         dateString = [self.destinationDateFormat stringFromDate:sourceDate];
     }
     
@@ -996,12 +1014,10 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     if([messageType isEqualToString:kMessageTypeImage])
     {
         MLChatImageCell* imageCell;
-      
         if([from isEqualToString:self.contactName])
         {
             imageCell= (MLChatImageCell *) [tableView dequeueReusableCellWithIdentifier:@"imageInCell"];
             imageCell.outBound=NO;
-           
         }
         else  {
             imageCell= (MLChatImageCell *) [tableView dequeueReusableCellWithIdentifier:@"imageOutCell"];
@@ -1100,7 +1116,6 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         cell.name.hidden=NO;
         cell.name.text=from;
     } else  {
-        
         cell.name.text=@"";
         cell.name.hidden=YES;
     }
@@ -1128,8 +1143,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     else  {
         cell.messageStatus.hidden=YES;
     }
-    
-    
+
     cell.messageHistoryId=[row objectForKey:@"message_history_id"];
 
     NSString *priorDate;
@@ -1137,11 +1151,12 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     {
         NSDictionary *priorRow=[self.messageList objectAtIndex:indexPath.row-1];
         priorDate =[priorRow objectForKey:@"thetime"];
-        
     }
     
-    cell.date.text= [self formattedDateWithSource:[row objectForKey:@"thetime"] andPriorDate:priorDate];
+    cell.date.text= [self formattedTimeStampWithSource:[row objectForKey:@"thetime"]];
     cell.selectionStyle=UITableViewCellSelectionStyleNone;
+    
+    cell.dividerDate.text = [self formattedDateWithSource:[row objectForKey:@"thetime"] andPriorDate:priorDate];
     
     if([[row objectForKey:@"encrypted"] boolValue])
     {

@@ -8,6 +8,8 @@
 
 #import <UIKit/UIKit.h>
 
+#define kDefaultTextHeight 12
+
 @interface MLBaseCell : UITableViewCell
 
 @property (nonatomic, strong) IBOutlet NSString* time;
@@ -15,9 +17,14 @@
 @property (nonatomic, assign) BOOL MUC;
 
 @property (nonatomic, strong) IBOutlet UILabel* name;
+@property (nonatomic, strong) IBOutlet NSLayoutConstraint *nameHeight;
+
 @property (nonatomic, strong) IBOutlet UILabel* date;
 @property (nonatomic, strong) IBOutlet UILabel* messageBody;
 @property (nonatomic, strong) IBOutlet UILabel* messageStatus;
+@property (nonatomic, strong) IBOutlet UILabel* dividerDate;
+@property (nonatomic, strong) IBOutlet NSLayoutConstraint *dividerHeight;
+
 @property (nonatomic, strong) NSString* link;
 @property (nonatomic, strong) IBOutlet UIView* bubbleView;
 

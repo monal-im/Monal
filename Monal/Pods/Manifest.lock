@@ -23,7 +23,7 @@ PODS:
   - SignalProtocolC (2.3.1)
   - SignalProtocolObjC (1.0.0):
     - SignalProtocolC (~> 2.3.1)
-  - Sparkle (1.19.0)
+  - Sparkle (1.21.3)
   - TPCircularBuffer (1.6.1)
 
 DEPENDENCIES:
@@ -85,7 +85,7 @@ SPEC CHECKSUMS:
   SDWebImage: de4d90b5bff3571eae7bd16202b1f43135409fa5
   SignalProtocolC: e61c89693515347df8ed97961160a36cbe55c441
   SignalProtocolObjC: f5f0c7dcbedf21490b7ec190b6dc5103910acb75
-  Sparkle: 8486d2493599665e466b5076e72b28849776e32f
+  Sparkle: 3f75576db8b0265adef36c43249d747f22d0b708
   TPCircularBuffer: c13243556527551c4d320709c7b14a6d20cdc30a
 
 PODFILE CHECKSUM: 35d25aea580e46a50ff71ea49e19b7dc6b30d7d9

@@ -667,6 +667,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                                    userInfo = @{@"af": [notification.userInfo objectForKey:@"actuallyfrom"],
                                                 @"message": [notification.userInfo objectForKey:@"messageText"],
                                                 @"messageid": [notification.userInfo objectForKey:@"messageid"],
+                                                 @"encrypted": [notification.userInfo objectForKey:@"encrypted"],
                                                 @"thetime": timeString,
                                                 @"delivered":@YES,
                                                 kMessageType:finalMessageType
@@ -676,6 +677,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                                    userInfo = @{@"af": [notification.userInfo objectForKey:@"actuallyfrom"],
                                                 @"message": [notification.userInfo objectForKey:@"messageText"],
                                                 @"messageid": [notification.userInfo objectForKey:@"messageid"],
+                                                @"encrypted": [notification.userInfo objectForKey:@"encrypted"],
                                                 @"thetime": [self currentGMTTime],
                                                 kMessageType:finalMessageType
                                                 };

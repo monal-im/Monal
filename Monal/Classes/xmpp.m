@@ -1938,6 +1938,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                                                                   @"shouldRefresh":[NSNumber numberWithBool:shouldRefresh],
                                                                                                   @"messageType":messageType?messageType:kMessageTypeText,
                                                                                                    @"muc_subject":messageNode.subject?messageNode.subject:@"",
+                                                                                        @"encrypted":[NSNumber numberWithBool:encrypted],
                                                                                                   @"delayTimeStamp":messageNode.delayTimeStamp?messageNode.delayTimeStamp:@""
                                                                                                   };
                                                                           

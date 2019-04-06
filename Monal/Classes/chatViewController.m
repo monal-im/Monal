@@ -1046,7 +1046,10 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
               toreturn=(MLLinkCell *)[tableView dequeueReusableCellWithIdentifier:@"linkOutCell"];
           }
           
-          cell.link=[[row objectForKey:@"message"]  stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+         NSString * cleanLink=[[row objectForKey:@"message"]  stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+          NSArray *parts = [cleanLink componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+          cell.link = parts[0];
+          
           toreturn.messageBody.text =cell.link;
           toreturn.link=cell.link;
           
@@ -1085,8 +1088,10 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
             if(pos2.location!=NSNotFound) {
                 urlString=[urlString substringToIndex:pos2.location];
             }
+            NSArray *parts = [urlString componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+            cell.link = parts[0];
             
-            cell.link=urlString;
+            
             
             NSDictionary *underlineAttribute = @{NSUnderlineStyleAttributeName: @(NSUnderlineStyleSingle)};
             NSAttributedString* underlined = [[NSAttributedString alloc] initWithString:cell.link attributes:underlineAttribute];

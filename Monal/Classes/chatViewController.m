@@ -843,10 +843,15 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
             priorDate= [self.sourceDateFormat dateFromString: (NSString *)priorDateString];
         }
         
-        NSInteger priorDay =[self.gregorian components:NSCalendarUnitDay fromDate:priorDate].day;
-        NSInteger priorMonth=[self.gregorian components:NSCalendarUnitMonth fromDate:priorDate].month;
-        NSInteger priorYear =[self.gregorian components:NSCalendarUnitYear fromDate:priorDate].year;
+        NSInteger priorDay=0;
+        NSInteger priorMonth=0;
+        NSInteger priorYear=0;
         
+        if(priorDate) {
+            priorDay =[self.gregorian components:NSCalendarUnitDay fromDate:priorDate].day;
+            priorMonth=[self.gregorian components:NSCalendarUnitMonth fromDate:priorDate].month;
+            priorYear =[self.gregorian components:NSCalendarUnitYear fromDate:priorDate].year;
+        }
         
         //divider, hide time
         [self.destinationDateFormat setTimeStyle:NSDateFormatterNoStyle];
@@ -855,7 +860,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         // note: if it isnt the same day we want to show the full  day
         [self.destinationDateFormat setDateStyle:NSDateFormatterMediumStyle];
         
-        if (((priorDay!=msgday) || (priorMonth!=msgmonth) || (priorYear!=msgyear))  )
+        if (priorDate && ((priorDay!=msgday) || (priorMonth!=msgmonth) || (priorYear!=msgyear))  )
         {
             //divider, hide time
             [self.destinationDateFormat setTimeStyle:NSDateFormatterNoStyle];

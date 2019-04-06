@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-#define kDefaultTextHeight 12
+#define kDefaultTextHeight 20
 
 @interface MLBaseCell : UITableViewCell
 

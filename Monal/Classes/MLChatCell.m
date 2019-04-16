@@ -14,9 +14,9 @@
 
 @implementation MLChatCell
 
--(void) updateCell
+-(void) updateCellWithNewSender:(BOOL)newSender
 {
-    [super updateCell];
+    [super updateCellWithNewSender:newSender];
 
     if(self.outBound)
     {

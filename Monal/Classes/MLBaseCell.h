@@ -39,7 +39,11 @@
 @property (nonatomic, strong) NSNumber* messageHistoryId;
 @property (nonatomic, weak) UIViewController *parent;
 
-
--(void) updateCell;
+/**
+ Updates ths cells spacing and display
+ @param newSender determines if the sender of this cell
+ is the same as the prior cell's sender
+ **/
+-(void) updateCellWithNewSender:(BOOL) newSender;
 
 @end

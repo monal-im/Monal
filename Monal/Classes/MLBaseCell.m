@@ -29,7 +29,7 @@
 }
 
 
--(void) updateCell
+-(void) updateCellWithNewSender:(BOOL) newSender
 {
     if([self.parent respondsToSelector:@selector(retry:)]) {
         [self.retry addTarget:self.parent action:@selector(retry:) forControlEvents:UIControlEventTouchUpInside];
@@ -68,6 +68,10 @@
             self.dayTop.constant=kDefaultTextOffset;
         }
         self.dividerHeight.constant=kDefaultTextHeight;
+    }
+    
+    if(newSender &&  self.dividerHeight.constant==0) {
+        self.dividerHeight.constant= kDefaultTextHeight/2;
     }
 }
 

@@ -1148,12 +1148,23 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     }
 
     cell.messageHistoryId=[row objectForKey:@"message_history_id"];
-
+    BOOL newSender=NO;
     NSString *priorDate;
     if(indexPath.row>0)
     {
         NSDictionary *priorRow=[self.messageList objectAtIndex:indexPath.row-1];
         priorDate =[priorRow objectForKey:@"thetime"];
+        NSString *priorSender =[priorRow objectForKey:@"af"];
+        
+        //intended to correct for bad data. Can be removed later probably.
+        if([priorSender isEqualToString:@"(null)"])
+        {
+            priorSender=[priorRow objectForKey:@"message_from"];;
+        }
+        if(![priorSender isEqualToString:from])
+        {
+            newSender=YES;
+        }
     }
     
     cell.date.text= [self formattedTimeStampWithSource:[row objectForKey:@"thetime"]];
@@ -1178,7 +1189,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     
     cell.parent=self; 
     
-    [cell updateCell];
+    [cell updateCellWithNewSender:newSender];
     
     return cell;
 }

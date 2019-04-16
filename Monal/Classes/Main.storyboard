@@ -300,7 +300,7 @@
             <objects>
                 <navigationController id="rFS-eK-Dxd" sceneMemberID="viewController">
                     <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="UpL-EY-XBr">
-                        <rect key="frame" x="0.0" y="44" width="414" height="44"/>
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <connections>
@@ -1180,7 +1180,7 @@
                     <navigationItem key="navigationItem" largeTitleDisplayMode="never" id="tgd-HR-Cbd">
                         <barButtonItem key="rightBarButtonItem" image="724-info" id="C9Q-7y-bRl">
                             <connections>
-                                <segue destination="cC0-5a-Jvb" kind="presentation" identifier="showDetails" id="0Dv-wk-JlQ"/>
+                                <segue destination="cC0-5a-Jvb" kind="presentation" identifier="showDetails" modalPresentationStyle="formSheet" id="0Dv-wk-JlQ"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
@@ -1194,7 +1194,7 @@
                         <outlet property="sendButton" destination="kYa-y4-X5Z" id="efC-cC-umG"/>
                         <outlet property="transparentLayer" destination="cUR-xM-Mq7" id="0Fl-vg-WUH"/>
                         <outlet property="view" destination="Riz-2Q-bcU" id="d0E-AR-8aA"/>
-                        <segue destination="cC0-5a-Jvb" kind="presentation" id="cuS-c5-MTy"/>
+                        <segue destination="cC0-5a-Jvb" kind="presentation" modalPresentationStyle="formSheet" id="cuS-c5-MTy"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="tvb-fM-fJc" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -1283,6 +1283,6 @@
         <segue reference="qaB-BP-OcO"/>
         <segue reference="K87-fm-axG"/>
         <segue reference="RLU-kt-b8r"/>
-        <segue reference="cuS-c5-MTy"/>
+        <segue reference="RNX-bQ-8Zb"/>
     </inferredMetricsTieBreakers>
 </document>

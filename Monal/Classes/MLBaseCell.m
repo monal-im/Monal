@@ -44,15 +44,29 @@
         self.retry.hidden=YES;
     }
     
-    if(self.name.text.length==0) {
-        self.nameHeight.constant=0;
-    } else  {
-        self.nameHeight.constant= kDefaultTextHeight;
+    if(self.name) {
+        if(self.name.text.length==0) {
+            self.nameHeight.constant=0;
+            self.bubbleTop.constant=0;
+            self.dayTop.constant=0;
+        } else  {
+            self.nameHeight.constant= kDefaultTextHeight;
+            self.bubbleTop.constant=kDefaultTextOffset;
+            self.dayTop.constant=kDefaultTextOffset;
+        }
     }
     
     if(self.dividerDate.text.length==0) {
         self.dividerHeight.constant=0;
+        if(!self.name) {
+            self.bubbleTop.constant=0;
+            self.dayTop.constant=0;
+        }
     } else  {
+        if(!self.name) {
+            self.bubbleTop.constant=kDefaultTextOffset;
+            self.dayTop.constant=kDefaultTextOffset;
+        }
         self.dividerHeight.constant=kDefaultTextHeight;
     }
 }

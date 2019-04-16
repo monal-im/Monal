@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 
 #define kDefaultTextHeight 20
+#define kDefaultTextOffset 5
 
 @interface MLBaseCell : UITableViewCell
 
@@ -24,6 +25,8 @@
 @property (nonatomic, strong) IBOutlet UILabel* messageStatus;
 @property (nonatomic, strong) IBOutlet UILabel* dividerDate;
 @property (nonatomic, strong) IBOutlet NSLayoutConstraint *dividerHeight;
+@property (nonatomic, strong) IBOutlet NSLayoutConstraint *bubbleTop;
+@property (nonatomic, strong) IBOutlet NSLayoutConstraint *dayTop;
 
 @property (nonatomic, strong) NSString* link;
 @property (nonatomic, strong) IBOutlet UIView* bubbleView;

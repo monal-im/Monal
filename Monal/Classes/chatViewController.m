@@ -804,8 +804,6 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     self.thisday =[self.gregorian components:NSCalendarUnitDay fromDate:now].day;
     self.thismonth =[self.gregorian components:NSCalendarUnitMonth fromDate:now].month;
     self.thisyear =[self.gregorian components:NSCalendarUnitYear fromDate:now].year;
-
-    
 }
 
 -(NSString*) currentGMTTime
@@ -855,13 +853,6 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
             priorYear =[self.gregorian components:NSCalendarUnitYear fromDate:priorDate].year;
         }
         
-        //divider, hide time
-        [self.destinationDateFormat setTimeStyle:NSDateFormatterNoStyle];
-        
-        //if([sourceDate timeIntervalSinceDate:priorDate]<60*60) showFullDate=NO;
-        // note: if it isnt the same day we want to show the full  day
-        [self.destinationDateFormat setDateStyle:NSDateFormatterMediumStyle];
-        
         if (priorDate && ((priorDay!=msgday) || (priorMonth!=msgmonth) || (priorYear!=msgyear))  )
         {
             //divider, hide time
@@ -888,7 +879,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         }
         
         [self.destinationDateFormat setDateStyle:NSDateFormatterNoStyle];
-        [self.destinationDateFormat setTimeStyle:NSDateFormatterMediumStyle];
+        [self.destinationDateFormat setTimeStyle:NSDateFormatterShortStyle];
         
         dateString = [self.destinationDateFormat stringFromDate:sourceDate];
     }

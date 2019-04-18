@@ -132,7 +132,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         //for 3.1->3.2 release remove later
          if(![[NSUserDefaults standardUserDefaults] boolForKey:@"HasSeenSSLMessage"]) {
              
-             UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:@"Security Upgrades" message:[NSString stringWithFormat:@"This version includes a security fix for the way SSL certificates are checked. It is possible settings that previously worked will not now. If you encouter this, you can temporarily disable certificate validation in your account settings while you figure out why iOS does not like your certificate."] preferredStyle:UIAlertControllerStyleAlert];
+             UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:@"Security Upgrades" message:[NSString stringWithFormat:@"This version includes a security fix for the way SSL certificates are checked. It is possible settings that previously worked will not now. If you encounter this, you can temporarily disable certificate validation in your account settings while you figure out why iOS does not like your certificate."] preferredStyle:UIAlertControllerStyleAlert];
              UIAlertAction *acceptAction =[UIAlertAction actionWithTitle:@"Got it!" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
                  [self dismissViewControllerAnimated:YES completion:nil];
                  

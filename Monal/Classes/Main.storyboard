@@ -663,7 +663,7 @@
                                             <outlet property="bubbleTop" destination="x8y-8B-FGo" id="Ct9-qq-Pec"/>
                                             <outlet property="bubbleView" destination="thO-n1-R59" id="LEu-0p-10D"/>
                                             <outlet property="date" destination="wce-ek-LTl" id="the-t8-NRl"/>
-                                            <outlet property="dayTop" destination="mZO-zf-95q" id="1hF-eb-skD"/>
+                                            <outlet property="dayTop" destination="8vg-DJ-u88" id="2AR-GT-8Du"/>
                                             <outlet property="dividerDate" destination="zsJ-nd-h6v" id="qRq-pb-Q5s"/>
                                             <outlet property="dividerHeight" destination="ntS-dH-vd9" id="u9Y-At-tYC"/>
                                             <outlet property="messageBody" destination="4KG-8d-uoj" id="EjQ-BD-Pwd"/>
@@ -745,7 +745,7 @@
                                         <connections>
                                             <outlet property="bubbleTop" destination="y3Q-RO-5OU" id="a85-ji-qYI"/>
                                             <outlet property="date" destination="Xld-jv-Isd" id="fls-q5-SPA"/>
-                                            <outlet property="dayTop" destination="i1o-Sr-eVy" id="Lee-HR-RFv"/>
+                                            <outlet property="dayTop" destination="Bqr-m5-ifW" id="OGu-K8-vMx"/>
                                             <outlet property="dividerDate" destination="h9a-ua-MIo" id="Q9G-tH-NFa"/>
                                             <outlet property="dividerHeight" destination="b2n-TS-d4M" id="r3Y-BD-k2L"/>
                                             <outlet property="imageHeight" destination="T8s-TI-xbm" id="RII-N1-3Cn"/>
@@ -1086,7 +1086,7 @@
                                             <outlet property="bubbleTop" destination="5dY-Ee-WDK" id="Wrl-CO-2u1"/>
                                             <outlet property="bubbleView" destination="XUY-AO-Shv" id="Xme-V4-2os"/>
                                             <outlet property="date" destination="F48-Lg-vgK" id="hes-Fb-RYT"/>
-                                            <outlet property="dayTop" destination="gcF-mF-Xfr" id="0AC-lR-Ud5"/>
+                                            <outlet property="dayTop" destination="lu2-Qq-DcJ" id="7yA-XB-1jq"/>
                                             <outlet property="dividerDate" destination="ZQL-lx-CcO" id="LoE-5Y-Qnq"/>
                                             <outlet property="dividerHeight" destination="HG0-FY-m2q" id="Zyk-me-0yM"/>
                                             <outlet property="messageBody" destination="Vgy-m0-M8n" id="9op-R8-oUa"/>
@@ -1175,7 +1175,7 @@
                                         <connections>
                                             <outlet property="bubbleTop" destination="EXy-7a-Ne7" id="K6N-La-fNL"/>
                                             <outlet property="date" destination="WlK-KG-Z5M" id="iEH-Xn-fH6"/>
-                                            <outlet property="dayTop" destination="j1W-Yd-KEV" id="Fip-CP-CZb"/>
+                                            <outlet property="dayTop" destination="y9y-s1-4N2" id="oP7-P1-WhO"/>
                                             <outlet property="dividerDate" destination="x5i-Ok-Bwi" id="bes-aj-7Oc"/>
                                             <outlet property="dividerHeight" destination="u3j-d0-YON" id="tuR-gt-4aN"/>
                                             <outlet property="imageHeight" destination="RiZ-ui-Y0E" id="AGX-f4-SYW"/>

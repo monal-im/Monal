@@ -2499,30 +2499,33 @@ static DataLayer *sharedInstance=nil;
         }
         return;
     }
-    
-    if ([[NSUserDefaults standardUserDefaults] boolForKey: @"ShowImages"]
-        &&  ([messageString hasPrefix:@"HTTPS://"] || [messageString hasPrefix:@"https://"]))
-    {
-        NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:messageString]];
-        request.HTTPMethod=@"HEAD";
-        request.cachePolicy= NSURLRequestReturnCacheDataElseLoad;
-        
-        NSURLSession *session = [NSURLSession sharedSession];
-        [[session dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
-            NSDictionary *headers= ((NSHTTPURLResponse *)response).allHeaderFields;
-            NSString *contentType = [headers objectForKey:@"Content-Type"];
-            if([contentType hasPrefix:@"image/"])
-            {
-                messageType=kMessageTypeImage;
-            }
-            else  {
-                messageType=kMessageTypeUrl;
-            }
+    if ([[NSUserDefaults standardUserDefaults] boolForKey: @"ShowImages"]) {
+       
+        if ([messageString hasPrefix:@"HTTPS://"] ||
+            [messageString hasPrefix:@"https://"] ||
+            [messageString hasPrefix:@"aesgcm://"])
+        {
+            NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:messageString]];
+            request.HTTPMethod=@"HEAD";
+            request.cachePolicy= NSURLRequestReturnCacheDataElseLoad;
             
-            if(completion) {
-                completion(messageType);
-            }
-        }] resume];
+            NSURLSession *session = [NSURLSession sharedSession];
+            [[session dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+                NSDictionary *headers= ((NSHTTPURLResponse *)response).allHeaderFields;
+                NSString *contentType = [headers objectForKey:@"Content-Type"];
+                if([contentType hasPrefix:@"image/"])
+                {
+                    messageType=kMessageTypeImage;
+                }
+                else  {
+                    messageType=kMessageTypeUrl;
+                }
+                
+                if(completion) {
+                    completion(messageType);
+                }
+            }] resume];
+        }
     }
     else
         if(completion) {

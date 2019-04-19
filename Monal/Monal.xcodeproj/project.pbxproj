@@ -307,6 +307,10 @@
 		267710261E21923600464002 /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = 267710231E21923600464002 /* README.md */; };
 		2678A98B185A8320003AF53B /* ChatLogAccountDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2678A98A185A8320003AF53B /* ChatLogAccountDetailViewController.m */; };
 		2678A98E185AB739003AF53B /* ChatLogContactViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2678A98D185AB739003AF53B /* ChatLogContactViewController.m */; };
+		267B671C226A200D003DB850 /* AESGcm.m in Sources */ = {isa = PBXBuildFile; fileRef = 267B671B226A200D003DB850 /* AESGcm.m */; };
+		267B671D226A200D003DB850 /* AESGcm.m in Sources */ = {isa = PBXBuildFile; fileRef = 267B671B226A200D003DB850 /* AESGcm.m */; };
+		267B6721226A222E003DB850 /* MLEncryptedPayload.m in Sources */ = {isa = PBXBuildFile; fileRef = 267B6720226A222E003DB850 /* MLEncryptedPayload.m */; };
+		267B6722226A222E003DB850 /* MLEncryptedPayload.m in Sources */ = {isa = PBXBuildFile; fileRef = 267B6720226A222E003DB850 /* MLEncryptedPayload.m */; };
 		267C99082067D7BE00AB876C /* MLGroupChatTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 267C99072067D7BE00AB876C /* MLGroupChatTableViewController.m */; };
 		267C9921206DE23100AB876C /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 267C9920206DE23100AB876C /* UserNotifications.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		267ECD691B7467B30025337F /* MLXMPPManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26352EA7177D222600E2C8FF /* MLXMPPManager.m */; };
@@ -777,6 +781,10 @@
 		2678A98A185A8320003AF53B /* ChatLogAccountDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChatLogAccountDetailViewController.m; sourceTree = "<group>"; };
 		2678A98C185AB739003AF53B /* ChatLogContactViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChatLogContactViewController.h; sourceTree = "<group>"; };
 		2678A98D185AB739003AF53B /* ChatLogContactViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChatLogContactViewController.m; sourceTree = "<group>"; };
+		267B671A226A200D003DB850 /* AESGcm.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AESGcm.h; sourceTree = "<group>"; };
+		267B671B226A200D003DB850 /* AESGcm.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AESGcm.m; sourceTree = "<group>"; };
+		267B671F226A222E003DB850 /* MLEncryptedPayload.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLEncryptedPayload.h; sourceTree = "<group>"; };
+		267B6720226A222E003DB850 /* MLEncryptedPayload.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLEncryptedPayload.m; sourceTree = "<group>"; };
 		267C99062067D7BE00AB876C /* MLGroupChatTableViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLGroupChatTableViewController.h; sourceTree = "<group>"; };
 		267C99072067D7BE00AB876C /* MLGroupChatTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLGroupChatTableViewController.m; sourceTree = "<group>"; };
 		267C9920206DE23100AB876C /* UserNotifications.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UserNotifications.framework; path = System/Library/Frameworks/UserNotifications.framework; sourceTree = SDKROOT; };
@@ -1083,6 +1091,7 @@
 		080E96DDFE201D6D7F000001 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				267B671E226A2208003DB850 /* Crypto */,
 				26C3456B1C68F9D9007F4BEC /* HTTP */,
 				26B2A4B51B73045500272E63 /* External */,
 				260C51CE177F08CF0039634B /* XMPP */,
@@ -1425,6 +1434,17 @@
 				2678A98D185AB739003AF53B /* ChatLogContactViewController.m */,
 			);
 			name = "Chat Logs";
+			sourceTree = "<group>";
+		};
+		267B671E226A2208003DB850 /* Crypto */ = {
+			isa = PBXGroup;
+			children = (
+				267B671A226A200D003DB850 /* AESGcm.h */,
+				267B671B226A200D003DB850 /* AESGcm.m */,
+				267B671F226A222E003DB850 /* MLEncryptedPayload.h */,
+				267B6720226A222E003DB850 /* MLEncryptedPayload.m */,
+			);
+			name = Crypto;
 			sourceTree = "<group>";
 		};
 		267C99052067D78900AB876C /* Group Chat */ = {
@@ -2813,6 +2833,7 @@
 				2642EBCA18693634006A6C12 /* jingleCall.m in Sources */,
 				26D51CD81E2674D700141E04 /* NXOAuth2Connection.m in Sources */,
 				26724D9321B4C1E700F1F46F /* MLComposeViewController.m in Sources */,
+				267B6721226A222E003DB850 /* MLEncryptedPayload.m in Sources */,
 				263DFAC32187D0E00038E716 /* MLLinkCell.m in Sources */,
 				261A6281176C055400059090 /* ContactsViewController.m in Sources */,
 				26B0CA8921AE2E3C0080B133 /* MLSoundsTableViewController.m in Sources */,
@@ -2876,6 +2897,7 @@
 				26EE8B22179B7B0E006781F3 /* SlidingMessageViewController.m in Sources */,
 				26D51CCA1E2674D700141E04 /* NSData+NXOAuth2.m in Sources */,
 				26D59D9320714F32006F1DEE /* UIColor+Theme.m in Sources */,
+				267B671C226A200D003DB850 /* AESGcm.m in Sources */,
 				262AEFE820AE756800498F82 /* MLMAMPrefTableViewController.m in Sources */,
 				261E672B179E27BE00CB493E /* ParseFailure.m in Sources */,
 				26B2A4F51B73097500272E63 /* DDLog.m in Sources */,
@@ -3025,12 +3047,14 @@
 				26B2A4F61B73097500272E63 /* DDLog.m in Sources */,
 				26B2A4FE1B73097500272E63 /* DDMultiFormatter.m in Sources */,
 				267ECD691B7467B30025337F /* MLXMPPManager.m in Sources */,
+				267B6722226A222E003DB850 /* MLEncryptedPayload.m in Sources */,
 				26020B3421B9565C009A9735 /* MLLinkViewCell.m in Sources */,
 				260499E71B7313DB00D11866 /* ParseResumed.m in Sources */,
 				26B2A4EA1B73097500272E63 /* CLIColor.m in Sources */,
 				260499EF1B7313F300D11866 /* ParseIq.m in Sources */,
 				26D51CDD1E2674D700141E04 /* NXOAuth2FileStreamWrapper.m in Sources */,
 				26C3456F1C68F9F0007F4BEC /* MLHTTPRequest.m in Sources */,
+				267B671D226A200D003DB850 /* AESGcm.m in Sources */,
 				263BFBCC22033CA80055A051 /* MLOptOutSettings.m in Sources */,
 				26D51CD91E2674D700141E04 /* NXOAuth2Connection.m in Sources */,
 				26B2A4EE1B73097500272E63 /* DDAbstractDatabaseLogger.m in Sources */,

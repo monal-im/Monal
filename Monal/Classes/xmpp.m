@@ -41,10 +41,7 @@
 
 #import "NXOAuth2.h"
 #import "MLHTTPRequest.h"
-
-#include <openssl/evp.h>
-#include <openssl/rand.h>
-
+#import "AESGcm.h"
 
 #define kXMPPReadSize 5120 // bytes
 
@@ -1791,32 +1788,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                     NSData *iv = [EncodingTools dataWithBase64EncodedString:messageNode.iv];
                                     NSData *decodedPayload = [EncodingTools dataWithBase64EncodedString:messageNode.encryptedPayload];
                                     
-                                    EVP_CIPHER_CTX *ctx =EVP_CIPHER_CTX_new();
-                                    int outlen, rv;
-                                    unsigned char outbuf[decodedPayload.length];
-                                    
-                                    /* Select cipher */
-                                    EVP_DecryptInit_ex(ctx, EVP_aes_128_gcm(), NULL, NULL, NULL);
-                                    /* Set IV length, omit for 96 bits */
-                                    EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_IVLEN, (int)iv.length, NULL);
-                                    /* Specify key and IV */
-                                    EVP_DecryptInit_ex(ctx, NULL, NULL, key.bytes, iv.bytes);
-                                    EVP_CIPHER_CTX_set_padding(ctx,1);
-                                    /* Decrypt plaintext */
-                                    EVP_DecryptUpdate(ctx, outbuf, &outlen, decodedPayload.bytes, (int)decodedPayload.length);
-                                    /* Output decrypted block */
-                                    
-                                    if(auth) {
-                                        /* Set expected tag value. */
-                                        EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_TAG, (int)auth.length, auth.bytes);
-                                    }
-                                    /* Finalise: note get no output for GCM */
-                                    rv = EVP_DecryptFinal_ex(ctx, outbuf, &outlen);
-                                    
-                                    NSData *decdata = [[NSData alloc] initWithBytes:outbuf length:decodedPayload.length];
-                                    decrypted= [[NSString alloc] initWithData:decdata encoding:NSUTF8StringEncoding];
-                                    
-                                    EVP_CIPHER_CTX_free(ctx);
+                                    NSData *decData = [AESGcm decrypt:decodedPayload withKey:key andIv:iv withAuth:auth];
+                                    decrypted= [[NSString alloc] initWithData:decData encoding:NSUTF8StringEncoding];
                                     
                                 }
                             }
@@ -2747,60 +2720,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         if(devices.count>0 ){
             
             NSData *messageBytes=[message dataUsingEncoding:NSUTF8StringEncoding];
-            //aes encrypt message
             
-            EVP_CIPHER_CTX *ctx =EVP_CIPHER_CTX_new();
-            int outlen;
-            unsigned char outbuf[messageBytes.length];
-            unsigned char tag[16];
-            
-            //genreate key and iv
-            
-            unsigned char key[16];
-            RAND_bytes(key, sizeof(key));
-            
-            unsigned char iv[16];
-            RAND_bytes(iv, sizeof(iv));
-            
-            NSData *gcmKey = [[NSData alloc] initWithBytes:key length:16];
-            
-            NSData *gcmiv= [[NSData alloc] initWithBytes:iv length:16];
+            MLEncryptedPayload *encryptedPayload = [AESGcm encrypt:messageBytes];
         
-            NSMutableData *encryptedMessage;
-            
-            ctx = EVP_CIPHER_CTX_new();
-            /* Set cipher type and mode */
-            EVP_EncryptInit_ex(ctx, EVP_aes_128_gcm(), NULL, NULL, NULL);
-            /* Set IV length if default 96 bits is not approp riate */
-            EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_IVLEN, (int) gcmiv.length, NULL);
-            /* Initialise key and IV */
-            EVP_EncryptInit_ex(ctx, NULL, NULL, gcmKey.bytes, gcmiv.bytes);
-            EVP_CIPHER_CTX_set_padding(ctx,1);
-            /* Encrypt plaintext */
-            EVP_EncryptUpdate(ctx, outbuf, &outlen,messageBytes.bytes,(int)messageBytes.length);
-            
-            encryptedMessage = [NSMutableData dataWithBytes:outbuf length:outlen];
-            
-            /* Finalise: note get no output for GCM */
-            EVP_EncryptFinal_ex(ctx, outbuf, &outlen);
-            
-            
-            /* Get tag */
-            EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_GET_TAG, 16, tag);
-            //[encryptedMessage appendBytes:tag length:16];
-            
-            NSMutableData *combinedKey  = [NSMutableData dataWithData:gcmKey];
-            [combinedKey appendBytes:tag length:16];
-            
-            EVP_CIPHER_CTX_free(ctx);
-            
-            
             MLXMLNode *encrypted =[[MLXMLNode alloc] initWithElement:@"encrypted"];
             [encrypted.attributes setObject:@"eu.siacs.conversations.axolotl" forKey:@"xmlns"];
             [messageNode.children addObject:encrypted];
             
             MLXMLNode *payload =[[MLXMLNode alloc] initWithElement:@"payload"];
-            [payload setData:[EncodingTools encodeBase64WithData:encryptedMessage]];
+            [payload setData:[EncodingTools encodeBase64WithData:encryptedPayload.body]];
             [encrypted.children addObject:payload];
             
             
@@ -2810,7 +2738,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             [encrypted.children addObject:header];
             
             MLXMLNode *ivNode =[[MLXMLNode alloc] initWithElement:@"iv"];
-            [ivNode setData:[EncodingTools encodeBase64WithData:gcmiv]];
+            [ivNode setData:[EncodingTools encodeBase64WithData:encryptedPayload.iv]];
             [header.children addObject:ivNode];
             
             
@@ -2822,7 +2750,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     
                     SignalSessionCipher *cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self.signalContext];
                     NSError *error;
-                    SignalCiphertext* deviceEncryptedKey=[cipher encryptData:combinedKey error:&error];
+                    SignalCiphertext* deviceEncryptedKey=[cipher encryptData:encryptedPayload.key error:&error];
                     
                     MLXMLNode *keyNode =[[MLXMLNode alloc] initWithElement:@"key"];
                     [keyNode.attributes setObject:[NSString stringWithFormat:@"%@",device] forKey:@"rid"];
@@ -2844,7 +2772,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 if([self.monalSignalStore isTrustedIdentity:address identityKey:identity]) {
                     SignalSessionCipher *cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self.signalContext];
                     NSError *error;
-                    SignalCiphertext* deviceEncryptedKey=[cipher encryptData:combinedKey error:&error];
+                    SignalCiphertext* deviceEncryptedKey=[cipher encryptData:encryptedPayload.key error:&error];
                     
                     MLXMLNode *keyNode =[[MLXMLNode alloc] initWithElement:@"key"];
                     [keyNode.attributes setObject:[NSString stringWithFormat:@"%@",device] forKey:@"rid"];

@@ -8,6 +8,7 @@
 
 #import "MLChatImageCell.h"
 #import "UIImageView+WebCache.h"
+#import "MLImageManager.h"
 @import QuartzCore; 
 
 @implementation MLChatImageCell
@@ -23,20 +24,27 @@
 {
     if(self.link)
     {
-        [self.thumbnailImage sd_setImageWithURL:[NSURL URLWithString:self.link] completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, NSURL *imageURL) {
-            if(error)
-            {
-                self.thumbnailImage.image=nil;
-            }
-            else  {
-                
-                if (image.size.height>image.size.width) {
-                    self.imageHeight.constant = 360;
-                     if(completion) completion();
+        if ([self.link hasPrefix:@"aesgcm://"]) {
+            [[MLImageManager sharedInstance] attachmentDataFromEncryptedLink:self.link withCompletion:^(NSData * _Nullable data) {
+                [self.thumbnailImage setImage:[UIImage imageWithData:data]];
+            }];
+        }
+        else  {
+            [self.thumbnailImage sd_setImageWithURL:[NSURL URLWithString:self.link] completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, NSURL *imageURL) {
+                if(error)
+                {
+                    self.thumbnailImage.image=nil;
                 }
-            }
-
-        }];
+                else  {
+                    
+                    if (image.size.height>image.size.width) {
+                        self.imageHeight.constant = 360;
+                        if(completion) completion();
+                    }
+                }
+                
+            }];
+        }
     }
 }
 

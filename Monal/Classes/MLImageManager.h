@@ -56,6 +56,8 @@
 
 #endif
 
+- (void) attachmentDataFromEncryptedLink:(NSString *) link withCompletion:(void (^)(NSData * _Nullable data)) completionHandler;
+
 /**
  Purge cache in the event of  a memory warning
  */

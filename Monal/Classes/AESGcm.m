@@ -99,40 +99,6 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     return  decdata;
 }
 
-+ (void) attachmentDataFrmLink:(NSString *) link withCompletion:(void (^)(NSData * _Nullable data)) completionHandler {
-    if ([link hasPrefix:@"aesgcm://"])
-    {
-        NSArray *parts = [link componentsSeparatedByString:@"#"];
-        if(parts.count>1) {
-            NSString *url = parts[0];
-            NSString *crypto = parts[1];
-            if(crypto.length>=88) {
-                NSString *ivHex =[crypto substringToIndex:24];
-                NSString *keyHex =[crypto substringWithRange:NSMakeRange(25, 64)];
-                
-                
-                NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:link]];
-                request.cachePolicy= NSURLRequestReturnCacheDataElseLoad;
-                
-                NSURLSession *session = [NSURLSession sharedSession];
-                [[session dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
-                  
-                    //decrypt
-                    NSData *key = [EncodingTools dataWithHexString:keyHex];
-                    NSData *iv = [EncodingTools dataWithHexString:ivHex];
-                    
-                    NSData *decrypted =[AESGcm decrypt:data withKey:key andIv:iv withAuth:nil];
-                    if(completionHandler) completionHandler(decrypted);
-                    
-                }] resume];
 
-            } else {
-                DDLogError(@"aesgcm key and iv too short %@", link);
-            }
-        } else  {
-            DDLogError(@"aesgcm url missing parts %@", link);
-        }
-    }
-}
 
 @end

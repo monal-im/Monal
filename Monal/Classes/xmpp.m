@@ -1396,7 +1396,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         if(iqNode.omemoDevices)
                         {
                           
-                            if(!source) //myself
+                            if(!source || [source isEqualToString:self.fulluser])
                             {
                                 source=self.fulluser;
                                 NSMutableArray *devices= [iqNode.omemoDevices mutableCopy];
@@ -1851,7 +1851,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             }
                             
                             [[DataLayer sharedInstance] addMessageFrom:messageNode.from to:recipient
-                                                            forAccount:_accountNo withBody:body
+                                                            forAccount:self->_accountNo withBody:body
                                                           actuallyfrom:messageNode.actualFrom delivered:YES  unread:unread  serverMessageId:messageId
                                                            messageType:messageType
                                                        andOverrideDate:messageNode.delayTimeStamp
@@ -1898,7 +1898,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                                           if([jidParts count]>1) {
                                                                               recipient= jidParts[0];
                                                                           }
-                                                                          if(!recipient) recipient= _fulluser;
+                                                                          if(!recipient) recipient= self->_fulluser;
                                                                           
                                                                           
                                                                           NSDictionary* userDic=@{@"from":messageNode.from,
@@ -1906,7 +1906,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                                                                   @"messageText":body,
                                                                                                   @"to":messageNode.to?messageNode.to:recipient,
                                                                                                   @"messageid":messageNode.idval?messageNode.idval:@"",
-                                                                                                  @"accountNo":_accountNo,
+                                                                                                  @"accountNo":self->_accountNo,
                                                                                                   @"showAlert":[NSNumber numberWithBool:showAlert],
                                                                                                   @"shouldRefresh":[NSNumber numberWithBool:shouldRefresh],
                                                                                                   @"messageType":messageType?messageType:kMessageTypeText,
@@ -1931,7 +1931,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     if(messageNode.avatarData)
                     {
                         
-                        [[MLImageManager sharedInstance] setIconForContact:messageNode.actualFrom andAccount:_accountNo WithData:messageNode.avatarData];
+                        [[MLImageManager sharedInstance] setIconForContact:messageNode.actualFrom andAccount:self->_accountNo WithData:messageNode.avatarData];
                         
                     }
                     

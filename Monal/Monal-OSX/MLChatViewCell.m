@@ -36,6 +36,7 @@
         [[MLImageManager sharedInstance] attachmentDataFromEncryptedLink:self.link withCompletion:^(NSData * _Nullable data) {
             if(data) {
                 dispatch_async(dispatch_get_main_queue(), ^{
+                    self.imageData=data; 
                     self.attachmentImage.image=[[NSImage alloc] initWithData:data];
                 });
             }

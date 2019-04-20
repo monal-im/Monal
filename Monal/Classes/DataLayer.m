@@ -2505,7 +2505,8 @@ static DataLayer *sharedInstance=nil;
             [messageString hasPrefix:@"https://"] ||
             [messageString hasPrefix:@"aesgcm://"])
         {
-            NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:messageString]];
+            NSString *cleaned = [messageString stringByReplacingOccurrencesOfString:@"aesgcm://" withString:@"https://"];
+            NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:cleaned]];
             request.HTTPMethod=@"HEAD";
             request.cachePolicy= NSURLRequestReturnCacheDataElseLoad;
             
@@ -2525,6 +2526,11 @@ static DataLayer *sharedInstance=nil;
                     completion(messageType);
                 }
             }] resume];
+        }
+        else {
+            if(completion) {
+                completion(messageType);
+            }
         }
     }
     else

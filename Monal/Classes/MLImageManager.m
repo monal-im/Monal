@@ -319,30 +319,33 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     
     if ([link hasPrefix:@"aesgcm://"])
     {
-        NSArray *parts = [link componentsSeparatedByString:@"#"];
+        NSString *cleanLink= [link stringByReplacingOccurrencesOfString:@"aesgcm://" withString:@"https://"];
+        NSArray *parts = [cleanLink componentsSeparatedByString:@"#"];
         if(parts.count>1) {
             NSString *url = parts[0];
             NSString *crypto = parts[1];
-            if(crypto.length>=88) {
-                NSString *ivHex =[crypto substringToIndex:24];
-                NSString *keyHex =[crypto substringWithRange:NSMakeRange(25, 64)];
-                
-                NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:url]];
-                request.cachePolicy= NSURLRequestReturnCacheDataElseLoad;
-                
-                NSURLSession *session = [NSURLSession sharedSession];
-                [[session dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
-                    
-                    //decrypt
-                    NSData *key = [EncodingTools dataWithHexString:keyHex];
-                    NSData *iv = [EncodingTools dataWithHexString:ivHex];
-                    
-                    NSData *decrypted =[AESGcm decrypt:data withKey:key andIv:iv withAuth:nil];
-                    //cache 
-                    if(completionHandler) completionHandler(decrypted);
-                    
-                }] resume];
-                
+            if(crypto.length>=96) {
+                NSString *ivHex =[crypto substringToIndex:32];
+                NSString *keyHex =[crypto substringWithRange:NSMakeRange(32, 64)];
+                    NSURLSession *session = [NSURLSession sharedSession];
+                    [[session downloadTaskWithURL:[NSURL URLWithString:url] completionHandler:^(NSURL * _Nullable location, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+                        
+                        //decrypt
+                        NSData *key = [EncodingTools dataWithHexString:keyHex];
+                        NSData *iv = [EncodingTools dataWithHexString:ivHex];
+                        
+                        NSData *decrypted;
+                        NSData *downloaded= [NSData dataWithContentsOfURL:location];
+                        if(downloaded && downloaded.length>0) {
+                            decrypted=[AESGcm decrypt:downloaded withKey:key andIv:iv withAuth:nil];
+                        } else {
+                            DDLogError(@"no data from aesgcm link, error %@", error);
+                        }
+                        //cache
+                        if(completionHandler) completionHandler(decrypted);
+                        
+                    }] resume];
+                                    
             } else {
                 DDLogError(@"aesgcm key and iv too short %@", link);
             }

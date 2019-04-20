@@ -25,8 +25,13 @@
     if(self.link)
     {
         if ([self.link hasPrefix:@"aesgcm://"]) {
+            self.thumbnailImage.image=nil; 
             [[MLImageManager sharedInstance] attachmentDataFromEncryptedLink:self.link withCompletion:^(NSData * _Nullable data) {
-                [self.thumbnailImage setImage:[UIImage imageWithData:data]];
+                if(data) {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [self.thumbnailImage setImage:[UIImage imageWithData:data]];
+                    });
+                }
             }];
         }
         else  {

@@ -22,6 +22,7 @@
 @property (nonatomic, assign) BOOL isEncrypted;
 
 @property (nonatomic, strong) NSString *accountNo;
+@property (nonatomic, strong) xmpp* xmppAccount;
 
 @end
 
@@ -42,8 +43,8 @@
     
 #ifndef DISABLE_OMEMO
     self.accountNo=[NSString stringWithFormat:@"%@", [self.contact objectForKey:@"account_id"]];
-    xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
-    [xmppAccount queryOMEMODevicesFrom:[self.contact objectForKey:@"buddy_name"]];
+    self.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
+    [self.xmppAccount queryOMEMODevicesFrom:[self.contact objectForKey:@"buddy_name"]];
 #endif
     
     [self refreshLock];
@@ -224,12 +225,22 @@
 
 -(IBAction) toggleEncryption:(id)sender
 {
-    if(self.isEncrypted) {
-        [[DataLayer sharedInstance] disableEncryptForJid:[self.contact objectForKey:@"buddy_name"] andAccountNo:self.accountNo];
-    } else {
-        [[DataLayer sharedInstance] encryptForJid:[self.contact objectForKey:@"buddy_name"] andAccountNo:self.accountNo];
+      NSArray *devices= [self.xmppAccount.monalSignalStore allDeviceIdsForAddressName:[self.contact objectForKey:@"buddy_name"]];
+    if(devices.count>0) {
+        if(self.isEncrypted) {
+            [[DataLayer sharedInstance] disableEncryptForJid:[self.contact objectForKey:@"buddy_name"] andAccountNo:self.accountNo];
+        } else {
+            [[DataLayer sharedInstance] encryptForJid:[self.contact objectForKey:@"buddy_name"] andAccountNo:self.accountNo];
+        }
+        [self refreshLock];
+    } else  {
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Encryption Not Supported" message:@"This contact does not appear to have any devices that support encryption." preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            [alert dismissViewControllerAnimated:YES completion:nil];
+        }]];
+        [self presentViewController:alert animated:YES completion:nil];
+        return;
     }
-    [self refreshLock];
 }
 
 -(void) refreshLock

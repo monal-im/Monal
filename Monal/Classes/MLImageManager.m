@@ -259,9 +259,16 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     NSImage *composedImage = [[NSImage alloc] initWithSize:image.size] ;
     
     [composedImage lockFocus];
-    NSBezierPath *clipPath = [NSBezierPath bezierPathWithOvalInRect:NSMakeRect(0, 0, image.size.width, image.size.height)];
+    CGFloat min;
+    if(image.size.width<image.size.height) {
+        min= image.size.width;
+    }
+    else {
+        min =image.size.height;
+    }
+    NSBezierPath *clipPath = [NSBezierPath bezierPathWithOvalInRect:NSMakeRect(0, 0, min, min)];
     [clipPath addClip];
-    [image drawAtPoint:NSZeroPoint fromRect:NSMakeRect(0, 0, image.size.width, image.size.height) operation:NSCompositeSourceOver fraction:1];
+    [image drawAtPoint:NSZeroPoint fromRect:NSMakeRect(0, 0, min,min) operation:NSCompositeSourceOver fraction:1];
     [composedImage unlockFocus];
     
     return composedImage;

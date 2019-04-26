@@ -74,7 +74,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     return  toreturn;
 }
 
-+ (NSData *) decrypt:(NSData *)body withKey:(NSData *) key andIv:(NSData *)iv withAuth:(NSData *) auth {
++ (NSData *) decrypt:(NSData *)body withKey:(NSData *) key andIv:(NSData *)iv withAuth:( NSData * _Nullable )  auth {
     int outlen, rv;
     unsigned char outbuf[key.length];
     EVP_CIPHER_CTX *ctx =EVP_CIPHER_CTX_new();

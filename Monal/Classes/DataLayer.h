@@ -264,4 +264,8 @@ extern NSString *const kMessageTypeUrl;
 -(void) encryptForJid:(NSString*) jid andAccountNo:(NSString*) accountNo;
 -(void) disableEncryptForJid:(NSString*) jid andAccountNo:(NSString*) accountNo;
 
+-(void) createImageCache:(NSString *) path forUrl:(NSString*) url;
+-(void) deleteImageCacheForUrl:(NSString*) url;
+-(void) imageCacheForUrl:(NSString*) url withCompletion: (void (^)(NSString *path))completion;
+
 @end

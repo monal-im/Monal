@@ -39,6 +39,13 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     static MLImageManager* sharedInstance;
     dispatch_once(&once, ^{
         sharedInstance = [[MLImageManager alloc] init] ;
+        NSFileManager* fileManager = [NSFileManager defaultManager];
+        
+        NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+        NSString *documentsDirectory = [paths objectAtIndex:0];
+        NSString *writablePath = [documentsDirectory stringByAppendingPathComponent:@"imagecache"];
+        NSError* error;
+        [fileManager createDirectoryAtPath:writablePath withIntermediateDirectories:YES attributes:nil error:&error];
     });
     return sharedInstance;
 }
@@ -321,9 +328,57 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 }
 #endif
 
-- (void) attachmentDataFromEncryptedLink:(NSString *) link withCompletion:(void (^)(NSData * _Nullable data)) completionHandler {
-    //check cache
+-(void) filePathForURL:(NSString *)url wuthCompletion:(void (^)(NSString * _Nullable path)) completionHandler {
+    [[DataLayer sharedInstance] imageCacheForUrl:url withCompletion:^(NSString *path) {
+        if(completionHandler) completionHandler(path);
+    }];
+}
+
+-(NSString *) savefilePathforURL:(NSString *)url {
+    NSString *filename = [NSUUID UUID].UUIDString;
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *documentsDirectory = [paths objectAtIndex:0];
+    NSString *writePath = [documentsDirectory stringByAppendingPathComponent:@"imagecache"];
+    writePath = [writePath stringByAppendingPathComponent:filename];
     
+    [[DataLayer sharedInstance] createImageCache:filename forUrl:url];
+    
+    return writePath;
+}
+
+
+-(void) imageForAttachmentLink:(NSString *) url withCompletion:(void (^)(NSData * _Nullable data)) completionHandler
+{
+    [self filePathForURL:url wuthCompletion:^(NSString * _Nullable path) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if(path) {
+                NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+                NSString *documentsDirectory = [paths objectAtIndex:0];
+                NSString *readPath = [documentsDirectory stringByAppendingPathComponent:@"imagecache"];
+                readPath = [readPath stringByAppendingPathComponent:path];
+                if(completionHandler) completionHandler([NSData dataWithContentsOfFile:readPath]);
+            } else  {
+                if ([url hasPrefix:@"aesgcm://"])
+                {
+                    [self attachmentDataFromEncryptedLink:url withCompletion:completionHandler];
+                } else  {
+                    NSURLSession *session = [NSURLSession sharedSession];
+                    [[session downloadTaskWithURL:[NSURL URLWithString:url] completionHandler:^(NSURL * _Nullable location, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+                        NSData *downloaded= [NSData dataWithContentsOfURL:location];
+                        //cache data
+                        NSString *path =  [self savefilePathforURL:url];
+                        [downloaded writeToFile:path atomically:YES];
+                        
+                        if(completionHandler) completionHandler(downloaded);
+                    }] resume];
+                }
+            }
+        });
+    }];
+}
+
+
+- (void) attachmentDataFromEncryptedLink:(NSString *) link withCompletion:(void (^)(NSData * _Nullable data)) completionHandler {
     if ([link hasPrefix:@"aesgcm://"])
     {
         NSString *cleanLink= [link stringByReplacingOccurrencesOfString:@"aesgcm://" withString:@"https://"];
@@ -348,7 +403,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                         } else {
                             DDLogError(@"no data from aesgcm link, error %@", error);
                         }
-                        //cache
+                        NSString *path =  [self savefilePathforURL:url];
+                        [downloaded writeToFile:path atomically:YES];
                         if(completionHandler) completionHandler(decrypted);
                         
                     }] resume];

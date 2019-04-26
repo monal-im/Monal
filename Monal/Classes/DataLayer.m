@@ -2476,7 +2476,17 @@ static DataLayer *sharedInstance=nil;
         DDLogVerbose(@"Upgrade to 3.5 success ");
     }
     
-   
+    
+    if([dbversion doubleValue]<3.6)
+    {
+        DDLogVerbose(@"Database version <3.6 detected. Performing upgrade . ");
+        [self executeNonQuery:@"update dbversion set dbversion='3.6'; " withCompletion:nil];
+        
+        [self executeNonQuery:@"CREATE TABLE imageCache (url varchar(255), path varchar(255) );" withCompletion:nil];
+        
+        DDLogVerbose(@"Upgrade to 3.6 success ");
+    }
+    
     [dbversionCheck unlock];
     return;
     
@@ -2603,6 +2613,30 @@ static DataLayer *sharedInstance=nil;
             toreturn=YES;
         }
         if(completion) completion(toreturn);
+    }];
+}
+
+-(void) createImageCache:(NSString *) path forUrl:(NSString*) url
+{
+    NSString* query=[NSString stringWithFormat:@"insert into imageCache(url, path) values(?, ?) "];
+    NSArray *params=@[url, path];
+    [self executeNonQuery:query andArguments:params];
+}
+
+-(void) deleteImageCacheForUrl:(NSString*) url
+{
+    NSString* query=[NSString stringWithFormat:@"delete from imageCache where url=? "];
+    NSArray *params=@[url];
+    [self executeNonQuery:query andArguments:params];
+}
+
+-(void) imageCacheForUrl:(NSString*) url withCompletion: (void (^)(NSString *path))completion
+{
+    NSString* query=[NSString stringWithFormat:@"select path from imageCache where url=?"];
+    NSArray *params=@[url];
+    [self executeScalar:query andArguments:params withCompletion:^(NSObject *val) {
+        NSString *path= (NSString *) val;
+        if(completion) completion(path);
     }];
 }
 

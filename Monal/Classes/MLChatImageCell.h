@@ -13,7 +13,7 @@
 
 @property (nonatomic, weak) IBOutlet UIImageView *thumbnailImage;
 @property (nonatomic, weak) IBOutlet NSLayoutConstraint *imageHeight;
-
+@property (nonatomic, assign)  BOOL loading;
 
 -(void) loadImageWithCompletion:(void (^)(void))completion;
 

@@ -7,7 +7,6 @@
 //
 
 #import "MLChatImageCell.h"
-#import "UIImageView+WebCache.h"
 #import "MLImageManager.h"
 @import QuartzCore; 
 
@@ -22,34 +21,25 @@
 
 -(void) loadImageWithCompletion:(void (^)(void))completion
 {
-    if(self.link)
+    if(self.link && self.thumbnailImage.image==nil && !self.loading)
     {
-        if ([self.link hasPrefix:@"aesgcm://"]) {
-            self.thumbnailImage.image=nil; 
-            [[MLImageManager sharedInstance] attachmentDataFromEncryptedLink:self.link withCompletion:^(NSData * _Nullable data) {
-                if(data) {
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        [self.thumbnailImage setImage:[UIImage imageWithData:data]];
-                    });
-                }
-            }];
-        }
-        else  {
-            [self.thumbnailImage sd_setImageWithURL:[NSURL URLWithString:self.link] completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, NSURL *imageURL) {
-                if(error)
-                {
+        self.loading=YES;
+        [[MLImageManager sharedInstance] imageForAttachmentLink:self.link withCompletion:^(NSData * _Nullable data) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if(!data) {
                     self.thumbnailImage.image=nil;
                 }
-                else  {
-                    
+                if(!self.thumbnailImage.image) {
+                    UIImage *image= [UIImage imageWithData:data];
+                    [self.thumbnailImage setImage:image];
                     if (image.size.height>image.size.width) {
                         self.imageHeight.constant = 360;
-                        if(completion) completion();
                     }
                 }
-                
-            }];
-        }
+                self.loading=NO;
+                if(completion) completion();
+            });
+        }];
     }
 }
 
@@ -68,8 +58,6 @@
     UIPasteboard *pboard = [UIPasteboard generalPasteboard];
     pboard.image = self.thumbnailImage.image; 
 }
-
-
 
 -(void)prepareForReuse{
     [super prepareForReuse];

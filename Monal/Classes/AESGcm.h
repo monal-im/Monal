@@ -13,7 +13,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface AESGcm : NSObject
 + (MLEncryptedPayload *) encrypt:(NSData *)body;
-+ (NSData *) decrypt:(NSData *)body withKey:(NSData *) key andIv:(NSData *)iv withAuth:(NSData *) auth;
++ (NSData *) decrypt:(NSData *)body withKey:(NSData *) key andIv:(NSData *)iv withAuth:(NSData * _Nullable )  auth;
 + (NSData *) attachmentDataFromEncryptedLink:(NSString *) link;
 @end
 

@@ -403,8 +403,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                         } else {
                             DDLogError(@"no data from aesgcm link, error %@", error);
                         }
-                        NSString *path =  [self savefilePathforURL:url];
-                        [downloaded writeToFile:path atomically:YES];
+                        NSString *path =  [self savefilePathforURL:link];
+                        [decrypted writeToFile:path atomically:YES];
                         if(completionHandler) completionHandler(decrypted);
                         
                     }] resume];

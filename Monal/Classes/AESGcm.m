@@ -69,7 +69,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     
     
     EVP_CIPHER_CTX_free(ctx);
-    MLEncryptedPayload *toreturn = [[MLEncryptedPayload alloc] initWithBody:encryptedMessage key:gcmKey iv:gcmiv];
+    MLEncryptedPayload *toreturn = [[MLEncryptedPayload alloc] initWithBody:encryptedMessage key:combinedKey iv:gcmiv];
     
     return  toreturn;
 }

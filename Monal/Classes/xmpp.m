@@ -3189,12 +3189,16 @@ if(!self.supportsSM3)
 -(void) sendSignalInitialStanzas
 {
 #if TARGET_OS_IPHONE
-    if([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground)
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground)
+        {
 #endif
-    {
-        [self queryOMEMODevicesFrom:_fulluser];
-        [self sendOMEMOBundle];
-    }
+            [self queryOMEMODevicesFrom:_fulluser];
+            [self sendOMEMOBundle];
+#if TARGET_OS_IPHONE
+        }
+    });
+#endif
 }
 
 

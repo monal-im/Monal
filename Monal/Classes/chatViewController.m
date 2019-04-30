@@ -307,6 +307,26 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         
     }
     
+    NSDictionary* unreadStatus = @{@"af": self.jid,
+                              @"message": @"Unread Messages Below" ,
+                              kMessageType:kMessageTypeStatus
+                              };
+    int unreadPos = newList.count-1;
+    while(unreadPos>=0)
+    {
+        NSDictionary *row = [newList objectAtIndex:unreadPos];
+        if([[row objectForKey:@"unread"] boolValue]==NO)
+        {
+            unreadPos++; 
+            break;
+        }
+        unreadPos--;
+    }
+    
+    if(unreadPos<newList.count-1){
+        [newList insertObject:unreadStatus atIndex:unreadPos];
+    }
+    
     if(newList.count!=self.messageList.count)
     {
         self.messageList = newList;

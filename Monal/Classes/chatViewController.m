@@ -42,6 +42,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 @property (nonatomic, assign) BOOL encryptChat;
 
 @property (nonatomic, strong) NSDate* lastMamDate;
+@property (nonatomic, assign) BOOL hardwareKeyboardPresent;
 
 /**
  if set to yes will prevent scrolling and resizing. useful for resigning first responder just to set auto correct
@@ -1326,7 +1327,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 - (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text
 {
     BOOL shouldinsert=YES;
-    if([text isEqualToString:@"\n"])
+    
+    if(self.hardwareKeyboardPresent &&  [text isEqualToString:@"\n"])
     {
         [self resignTextView];
         shouldinsert=NO;
@@ -1397,6 +1399,13 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void) keyboardWillShow:(NSNotification *) notification
 {
+    CGRect keyboardFrame = [[[notification userInfo] objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
+    keyboardFrame = [self.view convertRect:keyboardFrame fromView:nil]; // convert orientation
+    self.hardwareKeyboardPresent = NO;
+    if ((keyboardFrame.size.height ) < 100) {
+        self.hardwareKeyboardPresent = YES;
+    }
+   
     if(self.blockAnimations) return;
 //    CGRect keyboardframe =[[[notification userInfo] objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
 //    CGSize keyboardSize = keyboardframe.size;

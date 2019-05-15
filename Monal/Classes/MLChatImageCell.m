@@ -29,7 +29,7 @@
                 if(!data) {
                     self.thumbnailImage.image=nil;
                 }
-                if(!self.thumbnailImage.image) {
+               else if(!self.thumbnailImage.image) {
                     UIImage *image= [UIImage imageWithData:data];
                     [self.thumbnailImage setImage:image];
                     if (image.size.height>image.size.width) {
@@ -40,6 +40,9 @@
                 if(completion) completion();
             });
         }];
+    }
+    else  {
+        
     }
 }
 

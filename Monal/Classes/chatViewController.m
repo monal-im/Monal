@@ -1043,8 +1043,12 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
             imageCell.outBound=YES;
         }
         
-        imageCell.link = messageString;
-        [imageCell loadImageWithCompletion:^{}];
+        
+        if(![imageCell.link isEqualToString:messageString]){
+            imageCell.link = messageString;
+            imageCell.thumbnailImage.image=nil;
+            [imageCell loadImageWithCompletion:^{}];
+        }
         cell=imageCell;
         
     }

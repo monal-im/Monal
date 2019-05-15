@@ -148,7 +148,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     {
         [fileManager removeItemAtPath:writablePath error:nil];
     }
-    
+
     if([[EncodingTools dataWithBase64EncodedString:data] writeToFile:writablePath atomically:NO] )
     {
         DDLogVerbose(@"wrote file");

@@ -24,20 +24,24 @@
     if(self.link && self.thumbnailImage.image==nil && !self.loading)
     {
         self.loading=YES;
+        NSString *currentLink = self.link;
         [[MLImageManager sharedInstance] imageForAttachmentLink:self.link withCompletion:^(NSData * _Nullable data) {
             dispatch_async(dispatch_get_main_queue(), ^{
-                if(!data) {
-                    self.thumbnailImage.image=nil;
-                }
-               else if(!self.thumbnailImage.image) {
-                    UIImage *image= [UIImage imageWithData:data];
-                    [self.thumbnailImage setImage:image];
-                    if (image.size.height>image.size.width) {
-                        self.imageHeight.constant = 360;
+                if([currentLink isEqualToString:self.link]){
+                    if(!data) {
+                        self.thumbnailImage.image=nil;
                     }
+                    else if(!self.thumbnailImage.image) {
+                        UIImage *image= [UIImage imageWithData:data];
+                        [self.thumbnailImage setImage:image];
+                        if (image.size.height>image.size.width) {
+                            self.imageHeight.constant = 360;
+                        }
+                    }
+                    self.loading=NO;
+                    if(completion) completion();
                 }
-                self.loading=NO;
-                if(completion) completion();
+                
             });
         }];
     }

@@ -225,14 +225,21 @@
 
 -(IBAction) toggleEncryption:(id)sender
 {
-      NSArray *devices= [self.xmppAccount.monalSignalStore allDeviceIdsForAddressName:[self.contact objectForKey:@"buddy_name"]];
+      NSArray *devices= [self.xmppAccount.monalSignalStore knownDevicesForAddressName:[self.contact objectForKey:@"buddy_name"]];
     if(devices.count>0) {
         if(self.isEncrypted) {
             [[DataLayer sharedInstance] disableEncryptForJid:[self.contact objectForKey:@"buddy_name"] andAccountNo:self.accountNo];
+             [self refreshLock];
         } else {
-            [[DataLayer sharedInstance] encryptForJid:[self.contact objectForKey:@"buddy_name"] andAccountNo:self.accountNo];
+            //if not in buddylist, add.
+            [[DataLayer sharedInstance] addContact:[self.contact objectForKey:@"buddy_name"]  forAccount:self.accountNo  fullname:@"" nickname:@"" withCompletion:^(BOOL success) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [[DataLayer sharedInstance] encryptForJid:[self.contact objectForKey:@"buddy_name"] andAccountNo:self.accountNo];
+                    [self refreshLock];
+                });
+            }];
         }
-        [self refreshLock];
+       
     } else  {
         UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Encryption Not Supported" message:@"This contact does not appear to have any devices that support encryption." preferredStyle:UIAlertControllerStyleAlert];
         [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {

@@ -1412,7 +1412,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             }
                             
                             
-                            NSArray *existingDevices=[self.monalSignalStore allDeviceIdsForAddressName:source];
+                            NSArray *existingDevices=[self.monalSignalStore knownDevicesForAddressName:source];
                             NSSet *deviceSet = [NSSet setWithArray:existingDevices];
                             //only query if the device doesnt exist
                             [iqNode.omemoDevices enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {

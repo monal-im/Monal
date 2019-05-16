@@ -306,7 +306,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         newList =[[[DataLayer sharedInstance] messageHistoryDate:_contactName forAccount: _accountNo forDate:_day] mutableCopy];
         
     }
-    
+    if(!self.jid) return; 
     NSDictionary* unreadStatus = @{@"af": self.jid,
                               @"message": @"Unread Messages Below" ,
                               kMessageType:kMessageTypeStatus

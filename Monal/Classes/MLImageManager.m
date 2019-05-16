@@ -21,6 +21,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 @interface MLImageManager()
 
 @property  (nonatomic, strong) NSCache* iconCache;
+@property  (nonatomic, strong) NSCache* imageCache;
 #if TARGET_OS_IPHONE
 @property  (nonatomic, strong) UIImage* noIcon;
 #else
@@ -82,10 +83,17 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     return _iconCache;
 }
 
+-(NSCache*) imageCache
+{
+    if(!_imageCache) _imageCache=[[NSCache alloc] init];
+    return _iconCache;
+}
+
 -(void) purgeCache
 {
     _iconCache=nil;
     _noIcon=nil;
+    _imageCache=nil;
 }
 
 
@@ -349,6 +357,12 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void) imageForAttachmentLink:(NSString *) url withCompletion:(void (^)(NSData * _Nullable data)) completionHandler
 {
+    NSData *cachedData = [self.imageCache objectForKey:url];
+    if(cachedData) {
+        if(completionHandler) completionHandler(cachedData);
+        return;
+    }
+    
     [self filePathForURL:url wuthCompletion:^(NSString * _Nullable path) {
         dispatch_async(dispatch_get_main_queue(), ^{
             if(path) {
@@ -356,7 +370,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                 NSString *documentsDirectory = [paths objectAtIndex:0];
                 NSString *readPath = [documentsDirectory stringByAppendingPathComponent:@"imagecache"];
                 readPath = [readPath stringByAppendingPathComponent:path];
-                if(completionHandler) completionHandler([NSData dataWithContentsOfFile:readPath]);
+                NSData *data =[NSData dataWithContentsOfFile:readPath];
+                [self.imageCache setObject:data forKey:url];
+                if(completionHandler) completionHandler(data);
             } else  {
                 if ([url hasPrefix:@"aesgcm://"])
                 {
@@ -368,7 +384,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                         //cache data
                         NSString *path =  [self savefilePathforURL:url];
                         [downloaded writeToFile:path atomically:YES];
-                        
+                        [self.imageCache setObject:downloaded forKey:url];
                         if(completionHandler) completionHandler(downloaded);
                     }] resume];
                 }

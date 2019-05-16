@@ -30,7 +30,7 @@
 {
     [super viewWillAppear:animated];
     self.account=[[MLXMPPManager sharedInstance] getConnectedAccountForID:[NSString stringWithFormat:@"%@",[self.contact objectForKey:@"account_id"]]];
-    self.devices= [self.account.monalSignalStore allDeviceIdsForAddressName:[self.contact objectForKey:@"buddy_name"]];
+    self.devices= [self.account.monalSignalStore knownDevicesForAddressName:[self.contact objectForKey:@"buddy_name"]];
 }
 
 #pragma mark - Table view data source

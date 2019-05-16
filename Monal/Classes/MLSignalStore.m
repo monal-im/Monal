@@ -75,6 +75,7 @@
     {
         [self storePreKey:key.serializedData preKeyId:key.preKeyId];
     }
+    
 }
 
 /**
@@ -132,6 +133,21 @@
 {
     NSArray *rows= [[DataLayer sharedInstance] executeReader:@"select distinct contactDeviceId from signalContactSession where account_id=? and contactName=? " andArguments:@[self.accountId, addressName]];
 
+    NSMutableArray *devices = [[NSMutableArray alloc] initWithCapacity:rows.count];
+    
+    for(NSDictionary *row in rows)
+    {
+        NSNumber *number= [row objectForKey:@"contactDeviceId"];
+        [devices addObject:number];
+    }
+    
+    return devices;
+}
+
+- (NSArray<NSNumber*>*) knownDevicesForAddressName:(NSString*)addressName
+{
+    NSArray *rows= [[DataLayer sharedInstance] executeReader:@"select distinct contactDeviceId from signalContactIdentity where account_id=? and contactName=? " andArguments:@[self.accountId, addressName]];
+    
     NSMutableArray *devices = [[NSMutableArray alloc] initWithCapacity:rows.count];
     
     for(NSDictionary *row in rows)

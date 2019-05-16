@@ -3182,6 +3182,10 @@ if(!self.supportsSM3)
         self.monalSignalStore.preKeys= [signalHelper generatePreKeysWithStartingPreKeyId:0 count:100];
         
         [self.monalSignalStore saveValues];
+        
+        SignalAddress *address = [[SignalAddress alloc] initWithName:[NSString stringWithFormat:@"%@@%@", self.username, self.domain] deviceId:self.monalSignalStore.deviceid];
+        [self.monalSignalStore saveIdentity:address identityKey:self.monalSignalStore.identityKeyPair.publicKey];
+        
     }
     
 }

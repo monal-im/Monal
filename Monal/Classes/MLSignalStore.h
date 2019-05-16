@@ -19,6 +19,10 @@
 -(void) saveValues;
 
 -(NSData *) getIdentityForAddress:(SignalAddress*)address;
+/**
+ all devices even those without sessions
+ */
+- (NSArray<NSNumber*>*) knownDevicesForAddressName:(NSString*)addressName;
 -(NSMutableArray *) readPreKeys;
 -(void) updateTrust:(BOOL) trust forAddress:(SignalAddress*)address;
 @end

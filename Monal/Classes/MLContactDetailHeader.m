@@ -16,6 +16,7 @@
     self.buddyIconView.layer.cornerRadius= self.buddyIconView.frame.size.height/2;
     self.buddyIconView.layer.borderColor=[UIColor whiteColor].CGColor;
     self.buddyIconView.layer.borderWidth=2.0f;
+    self.buddyIconView.clipsToBounds=YES;
 }
 
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated {

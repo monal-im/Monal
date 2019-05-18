@@ -76,7 +76,7 @@
                                                         <rect key="frame" x="102.5" y="178" width="170" height="45"/>
                                                         <subviews>
                                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="LF0-E8-Mzg">
-                                                                <rect key="frame" x="73" y="8" width="16" height="29"/>
+                                                                <rect key="frame" x="73" y="8" width="28" height="29"/>
                                                                 <state key="normal" image="735-phone"/>
                                                                 <connections>
                                                                     <action selector="callContact:" destination="S9G-MN-HIG" eventType="touchUpInside" id="A1m-iT-dBj"/>
@@ -93,7 +93,7 @@
                                                                 </connections>
                                                             </button>
                                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Wab-aR-CcG">
-                                                                <rect key="frame" x="121" y="8" width="16" height="29"/>
+                                                                <rect key="frame" x="133" y="8" width="21" height="29"/>
                                                                 <state key="normal" image="745-unlocked"/>
                                                                 <connections>
                                                                     <action selector="toggleEncryption:" destination="S9G-MN-HIG" eventType="touchUpInside" id="QqE-YL-Ipn"/>
@@ -183,6 +183,14 @@
                                 <connections>
                                     <outlet property="cellDetails" destination="esK-jI-cAB" id="7VO-K8-piC"/>
                                 </connections>
+                            </tableViewCell>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" reuseIdentifier="TableCell" id="4sc-ms-Rr2">
+                                <rect key="frame" x="0.0" y="431.5" width="375" height="44"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="4sc-ms-Rr2" id="wbT-rZ-J7f">
+                                    <rect key="frame" x="0.0" y="0.0" width="341" height="43.5"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </tableViewCellContentView>
                             </tableViewCell>
                         </prototypes>
                         <connections>

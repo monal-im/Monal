@@ -60,7 +60,7 @@ static DataLayer *sharedInstance=nil;
     
 }
 
-#pragma mark  -- V1 low level
+#pragma mark  - V1 low level
 -(NSObject*) executeScalar:(NSString*) query andArguments:(NSArray *) args
 {
     if(!query) return nil;
@@ -314,7 +314,7 @@ static DataLayer *sharedInstance=nil;
 
 
 
-#pragma mark -- V2 low level
+#pragma mark - V2 low level
 -(void) executeScalar:(NSString*) query withCompletion: (void (^)(NSObject *))completion
 {
     [self executeScalar:query andArguments:nil withCompletion:completion];
@@ -2616,6 +2616,8 @@ static DataLayer *sharedInstance=nil;
     }];
 }
 
+#pragma mark - Images
+
 -(void) createImageCache:(NSString *) path forUrl:(NSString*) url
 {
     NSString* query=[NSString stringWithFormat:@"insert into imageCache(url, path) values(?, ?) "];
@@ -2639,6 +2641,31 @@ static DataLayer *sharedInstance=nil;
         if(completion) completion(path);
     }];
 }
+
+
+-(NSMutableArray*) allAttachmentsFromContact:(NSString*) contact forAccount:(NSString*) accountNo
+{
+    if(!accountNo ||! contact) return nil;
+    NSString* query=[NSString stringWithFormat:@"select A.* from imageCache as A inner join  message_history as B on message = a.url where account_id=? and actual_from=? order by message_history_id desc"];
+    NSArray *params=@[accountNo, contact];
+    NSMutableArray* toReturn = [[self executeReader:query andArguments:params] mutableCopy];
+    
+    if(toReturn!=nil)
+    {
+        DDLogVerbose(@"attachment  count: %lu",  (unsigned long)[toReturn count] );
+        return toReturn;
+    }
+    else
+    {
+        DDLogError(@"attachment list  is empty or failed to read");
+        return nil;
+    }
+    
+}
+
+
+
+#pragma mark -  encryption
 
 
 -(BOOL) shouldEncryptForJid:(NSString*) jid andAccountNo:(NSString*) accountNo

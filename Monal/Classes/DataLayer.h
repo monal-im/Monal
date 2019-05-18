@@ -267,5 +267,6 @@ extern NSString *const kMessageTypeUrl;
 -(void) createImageCache:(NSString *) path forUrl:(NSString*) url;
 -(void) deleteImageCacheForUrl:(NSString*) url;
 -(void) imageCacheForUrl:(NSString*) url withCompletion: (void (^)(NSString *path))completion;
+-(NSMutableArray*) allAttachmentsFromContact:(NSString*) contact forAccount:(NSString*) accountNo;
 
 @end

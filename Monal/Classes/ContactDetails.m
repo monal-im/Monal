@@ -17,6 +17,7 @@
 #import "MLResourcesTableViewController.h"
 #import "MLTextInputCell.h"
 
+
 @interface ContactDetails()
 @property (nonatomic, assign) BOOL isMuted;
 @property (nonatomic, assign) BOOL isBlocked;
@@ -25,6 +26,7 @@
 @property (nonatomic, strong) NSString *accountNo;
 @property (nonatomic, strong) xmpp* xmppAccount;
 @property (nonatomic, weak) UITextField* currentTextField;
+@property (nonatomic, strong) NSMutableArray * photos;
 
 @end
 
@@ -142,10 +144,15 @@
                cell.textInput.delegate=self;
                thecell=cell;
            }
-           else {
+           else if(indexPath.row==1) {
                MLDetailsTableViewCell *cell=  (MLDetailsTableViewCell *)[tableView dequeueReusableCellWithIdentifier:@"MessageCell"];
                cell.cellDetails.text=[_contact objectForKey:@"status"];
                if([cell.cellDetails.text isEqualToString:@"(null)"])  cell.cellDetails.text=@"";
+               thecell=cell;
+           }
+           else {
+               UITableViewCell *cell=  (UITableViewCell *)[tableView dequeueReusableCellWithIdentifier:@"TableCell"];
+               cell.textLabel.text = @"View Images Received";
                thecell=cell;
            }
            break;
@@ -168,7 +175,9 @@
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section;
 {
     if(section==0)   return 1;
-    else  return 2;
+    if(section==1)  return 3;
+    
+    return 2;
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
@@ -192,22 +201,64 @@
 {
     [tableView deselectRowAtIndexPath:indexPath animated:NO];
     
-    if(indexPath.section!=2) return;
+    if(indexPath.section==0) return;
     
-    switch(indexPath.row)
-    {
-        case 0:  {
-            [self performSegueWithIdentifier:@"showKeys" sender:self];
-            break;
+    if(indexPath.section==1){
+        if(indexPath.row<2) return;
+        [self showChatImges];
+        
+    }
+    else  {
+        switch(indexPath.row)
+        {
+            case 0:  {
+                [self performSegueWithIdentifier:@"showKeys" sender:self];
+                break;
+            }
+            case 1:  {
+                [self performSegueWithIdentifier:@"showResources" sender:self];
+                break;
+            }
         }
-        case 1:  {
-            [self performSegueWithIdentifier:@"showResources" sender:self];
-            break;
+    }
+}
+
+-(void) showChatImges{
+    NSMutableArray *images = [[DataLayer sharedInstance] allAttachmentsFromContact:[self.contact objectForKey:@"buddy_name"] forAccount:self.accountNo];
+    
+    if(!self.photos)
+    {   self.photos =[[NSMutableArray alloc] init];
+        for (NSDictionary *imagePath  in images) {
+            NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+            NSString *documentsDirectory = [paths objectAtIndex:0];
+            NSString *readPath = [documentsDirectory stringByAppendingPathComponent:@"imagecache"];
+            readPath = [readPath stringByAppendingPathComponent:[imagePath objectForKey:@"path"]];
+            UIImage *image=[UIImage imageWithContentsOfFile:readPath];
+            MWPhoto* photo=[MWPhoto photoWithImage:image];
+            [self.photos addObject:photo];
         }
     }
     
+dispatch_async(dispatch_get_main_queue(), ^{
+    
+    MWPhotoBrowser *browser = [[MWPhotoBrowser alloc] initWithDelegate:self];
+    
+    browser.displayActionButton = YES; // Show action button to allow sharing, copying, etc (defaults to YES)
+    browser.displayNavArrows = NO; // Whether to display left and right nav arrows on toolbar (defaults to NO)
+    browser.displaySelectionButtons = NO; // Whether selection buttons are shown on each image (defaults to NO)
+    browser.zoomPhotosToFill = YES; // Images that almost fill the screen will be initially zoomed to fill (defaults to YES)
+    browser.alwaysShowControls = YES; // Allows to control whether the bars and controls are always visible or whether they fade away to show the photo full (defaults to NO)
+    browser.enableGrid = YES; // Whether to allow the viewing of all the photo thumbnails on a grid (defaults to YES)
+    browser.startOnGrid = YES; // Whether to start on the grid of thumbnails instead of the first photo (defaults to NO)
+    
+    UINavigationController *nav =[[UINavigationController alloc] initWithRootViewController:browser];
+    
+    
+    [self presentViewController:nav animated:YES completion:nil];
+    
+});
+    
 }
-
 
 -(IBAction)close:(id)sender
 {
@@ -302,6 +353,18 @@
 - (BOOL)textFieldShouldBeginEditing:(UITextField *)textField {
     self.currentTextField=textField;
     return YES;
+}
+
+#pragma mark - photo browser delegate
+- (NSUInteger)numberOfPhotosInPhotoBrowser:(MWPhotoBrowser *)photoBrowser {
+    return self.photos.count;
+}
+
+- (id <MWPhoto>)photoBrowser:(MWPhotoBrowser *)photoBrowser photoAtIndex:(NSUInteger)index {
+    if (index < self.photos.count) {
+        return [self.photos objectAtIndex:index];
+    }
+    return nil;
 }
 
 @end

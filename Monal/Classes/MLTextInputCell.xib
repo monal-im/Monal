@@ -20,15 +20,18 @@
                 <subviews>
                     <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Placeholder" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="zJf-y1-VYa">
                         <rect key="frame" x="8" y="0.0" width="304" height="43"/>
+                        <constraints>
+                            <constraint firstAttribute="height" constant="43" id="2h5-Zl-Tye"/>
+                        </constraints>
                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                         <textInputTraits key="textInputTraits"/>
                     </textField>
                 </subviews>
                 <constraints>
-                    <constraint firstItem="zJf-y1-VYa" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="8" id="3JR-Ll-syL"/>
-                    <constraint firstAttribute="bottom" secondItem="zJf-y1-VYa" secondAttribute="bottom" constant="0.5" id="LPt-io-6ly"/>
-                    <constraint firstAttribute="trailing" secondItem="zJf-y1-VYa" secondAttribute="trailing" constant="8" id="gKL-cd-WoN"/>
-                    <constraint firstItem="zJf-y1-VYa" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" id="tlt-nz-sac"/>
+                    <constraint firstAttribute="trailing" secondItem="zJf-y1-VYa" secondAttribute="trailing" constant="8" id="YaF-nw-62t"/>
+                    <constraint firstItem="zJf-y1-VYa" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="8" id="kW5-UV-gv3"/>
+                    <constraint firstAttribute="bottom" secondItem="zJf-y1-VYa" secondAttribute="bottom" constant="0.5" id="mIe-wW-tAg"/>
+                    <constraint firstItem="zJf-y1-VYa" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" id="y8Z-Vy-E9R"/>
                 </constraints>
             </tableViewCellContentView>
             <connections>

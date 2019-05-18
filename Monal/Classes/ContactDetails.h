@@ -10,7 +10,7 @@
 #import "DataLayer.h"
 
 
-@interface ContactDetails : UITableViewController
+@interface ContactDetails : UITableViewController <UITextFieldDelegate>
 
 @property (nonatomic, strong) NSDictionary *contact;
 

@@ -24,6 +24,7 @@
 
 @property (nonatomic, strong) NSString *accountNo;
 @property (nonatomic, strong) xmpp* xmppAccount;
+@property (nonatomic, weak) UITextField* currentTextField;
 
 @end
 
@@ -138,6 +139,7 @@
                cell.textInput.text=[_contact objectForKey:@"full_name"];
                if([cell.textInput.text isEqualToString:@"(null)"])  cell.textInput.text=@"";
                cell.textInput.placeholder=@"Set a nickname";
+               cell.textInput.delegate=self;
                thecell=cell;
            }
            else {
@@ -271,4 +273,35 @@
         [self.tableView reloadRowsAtIndexPaths:@[path] withRowAnimation:UITableViewRowAnimationNone];
     });
 }
+
+
+#pragma mark - textfield delegate
+
+- (BOOL)textFieldShouldReturn:(UITextField *)textField
+{
+    [textField resignFirstResponder];
+    return YES;
+}
+
+
+-(BOOL) textFieldShouldEndEditing:(UITextField *)textField {
+    [[DataLayer sharedInstance] setFullName:textField.text forContact:[self.contact objectForKey:@"buddy_name"] andAccount:self.accountNo];
+  
+    if(textField.text.length>0)
+        self.navigationItem.title = textField.text;
+    else
+        self.navigationItem.title=[self.contact objectForKey:@"full_name"];
+    
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self userInfo:self.contact];
+    
+    return YES;
+}
+
+
+- (BOOL)textFieldShouldBeginEditing:(UITextField *)textField {
+    self.currentTextField=textField;
+    return YES;
+}
+
 @end

@@ -13,6 +13,7 @@
 - (void)awakeFromNib {
     [super awakeFromNib];
     // Initialization code
+    self.textInput.clearButtonMode=UITextFieldViewModeUnlessEditing; 
 }
 
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated {

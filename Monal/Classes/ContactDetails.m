@@ -15,6 +15,7 @@
 #import "MLContactDetailHeader.h"
 #import "MLKeysTableViewController.h"
 #import "MLResourcesTableViewController.h"
+#import "MLTextInputCell.h"
 
 @interface ContactDetails()
 @property (nonatomic, assign) BOOL isMuted;
@@ -32,6 +33,9 @@
 -(void) viewDidLoad
 {
     [super viewDidLoad];
+    [self.tableView registerNib:[UINib nibWithNibName:@"MLTextInputCell"
+                                               bundle:[NSBundle mainBundle]]
+         forCellReuseIdentifier:@"TextCell"];
 }
 
 -(void) viewWillAppear:(BOOL)animated
@@ -79,7 +83,7 @@
 }
 
 
-#pragma mark -- tableview
+#pragma mark - tableview
 
 -(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
 {
@@ -127,14 +131,24 @@
             thecell=detailCell;
             break;
         }
-        case 1: {
-            MLDetailsTableViewCell *cell=  (MLDetailsTableViewCell *)[tableView dequeueReusableCellWithIdentifier:@"MessageCell"];
-            cell.cellDetails.text=[_contact objectForKey:@"status"];
-            if([cell.cellDetails.text isEqualToString:@"(null)"])  cell.cellDetails.text=@"";
-            thecell=cell;
-            break;
-        }
-        case 2: {
+       case 1: {
+           if(indexPath.row==0)
+           {
+               MLTextInputCell *cell=  (MLTextInputCell *)[tableView dequeueReusableCellWithIdentifier:@"TextCell"];
+               cell.textInput.text=[_contact objectForKey:@"full_name"];
+               if([cell.textInput.text isEqualToString:@"(null)"])  cell.textInput.text=@"";
+               cell.textInput.placeholder=@"Set a nickname";
+               thecell=cell;
+           }
+           else {
+               MLDetailsTableViewCell *cell=  (MLDetailsTableViewCell *)[tableView dequeueReusableCellWithIdentifier:@"MessageCell"];
+               cell.cellDetails.text=[_contact objectForKey:@"status"];
+               if([cell.cellDetails.text isEqualToString:@"(null)"])  cell.cellDetails.text=@"";
+               thecell=cell;
+           }
+           break;
+       }
+       case 2: {
             thecell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"Sub"];
             if(indexPath.row==1) {
                 thecell.textLabel.text=@"Resources"; //if muc change to participants
@@ -151,21 +165,19 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section;
 {
-    if(section==2) return 2;
-    else  return 1;
+    if(section==0)   return 1;
+    else  return 2;
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    
 	return 3;
-	
 }
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
     NSString* toreturn=nil; 
     if(section==1)
-        toreturn= @"Status Message";
+        toreturn= @"About";
     
     if(section==2)
         toreturn= @"Connection Details";

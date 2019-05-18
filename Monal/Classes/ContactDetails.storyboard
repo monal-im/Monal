@@ -76,7 +76,7 @@
                                                         <rect key="frame" x="102.5" y="178" width="170" height="45"/>
                                                         <subviews>
                                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="LF0-E8-Mzg">
-                                                                <rect key="frame" x="73" y="8" width="28" height="29"/>
+                                                                <rect key="frame" x="73" y="8" width="16" height="29"/>
                                                                 <state key="normal" image="735-phone"/>
                                                                 <connections>
                                                                     <action selector="callContact:" destination="S9G-MN-HIG" eventType="touchUpInside" id="A1m-iT-dBj"/>
@@ -93,7 +93,7 @@
                                                                 </connections>
                                                             </button>
                                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Wab-aR-CcG">
-                                                                <rect key="frame" x="133" y="8" width="21" height="29"/>
+                                                                <rect key="frame" x="121" y="8" width="16" height="29"/>
                                                                 <state key="normal" image="745-unlocked"/>
                                                                 <connections>
                                                                     <action selector="toggleEncryption:" destination="S9G-MN-HIG" eventType="touchUpInside" id="QqE-YL-Ipn"/>

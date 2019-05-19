@@ -145,7 +145,7 @@ extern NSString *const kMessageTypeUrl;
 
 
 #pragma mark - vcard commands
--(void) setNickName:(NSString*) nickName forBuddy:(NSString*) buddy andAccount:(NSString*) accountNo;
+-(void) setNickName:(NSString*) nickName forContact:(NSString*) buddy andAccount:(NSString*) accountNo;
 
 #pragma mark - account commands
 -(void) protocolListWithCompletion: (void (^)(NSArray* result))completion;

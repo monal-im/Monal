@@ -1172,7 +1172,7 @@ static DataLayer *sharedInstance=nil;
     
 }
 
--(void) setNickName:(NSString*) nickName forBuddy:(NSString*) buddy andAccount:(NSString*) accountNo
+-(void) setNickName:(NSString*) nickName forContact:(NSString*) buddy andAccount:(NSString*) accountNo
 {
     NSString* toPass;
     //data length check

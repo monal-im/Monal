@@ -1047,6 +1047,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         if(![imageCell.link isEqualToString:messageString]){
             imageCell.link = messageString;
             imageCell.thumbnailImage.image=nil;
+            imageCell.loading=NO;
             [imageCell loadImageWithCompletion:^{}];
         }
         cell=imageCell;

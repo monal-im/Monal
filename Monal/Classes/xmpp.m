@@ -1116,23 +1116,20 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     DDLogInfo(@"sending unacked messages" );
     [self.networkQueue addOperation:
      [NSBlockOperation blockOperationWithBlock:^{
-        if(self.unAckedStanzas)
+        for (NSDictionary *dic in self.unAckedStanzas)
         {
-            for (NSDictionary *dic in self.unAckedStanzas)
-            {
-                [self send:(MLXMLNode*)[dic objectForKey:kStanza]];
-            }
+            [self send:(MLXMLNode*)[dic objectForKey:kStanza]];
         }
     }]];
 }
 /**
- This is actuall less than or equal to since it is the last handled stanza
+ This is actually less than or equal to since it is the last handled stanza
  */
 -(void) removeUnAckedMessagesLessThan:(NSNumber*) hvalue
 {
     [self.networkQueue addOperation:
      [NSBlockOperation blockOperationWithBlock:^{
-        if(self.unAckedStanzas)
+        if(self.unAckedStanzas.count>0)
         {
             NSMutableArray *iterationArray = [self.unAckedStanzas mutableCopy];
             DDLogDebug(@"removeUnAckedMessagesLessThan: hvalue %@, lastOutboundStanza %@", hvalue, self.lastOutboundStanza);

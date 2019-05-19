@@ -1113,6 +1113,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 #pragma mark message ACK
 -(void) sendUnAckedMessages
 {
+    DDLogInfo(@"sending unacked messages" );
     [self.networkQueue addOperation:
      [NSBlockOperation blockOperationWithBlock:^{
         if(self.unAckedStanzas)
@@ -1124,7 +1125,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         }
     }]];
 }
-
+/**
+ This is actuall less than or equal to since it is the last handled stanza
+ */
 -(void) removeUnAckedMessagesLessThan:(NSNumber*) hvalue
 {
     [self.networkQueue addOperation:
@@ -1137,7 +1140,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             for(NSDictionary *dic in iterationArray)
             {
                 NSNumber *stanzaNumber = [dic objectForKey:kStanzaID];
-                if([stanzaNumber integerValue]<[hvalue integerValue])
+                if([stanzaNumber integerValue]<=[hvalue integerValue])
                 {
                     [discard addObject:dic];
                 }
@@ -1189,7 +1192,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         while (stanzaToParse)
         {
             [self.processQueue addOperationWithBlock:^{
-                DDLogDebug(@"got stanza %@", stanzaToParse);
+                NSLog(@"got stanza %@", stanzaToParse);
                 
                 if([[stanzaToParse objectForKey:@"stanzaType"]  isEqualToString:@"iq"])
                 {
@@ -2682,11 +2685,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         [self.networkQueue addOperation:
          [NSBlockOperation blockOperationWithBlock:^{
             //only count stanzas, not nonzas
-            if([stanza.element isEqualToString:@"iq"] || [stanza.element isEqualToString:@"message"] || [stanza.element isEqualToString:@"presence"])
+            if([stanza.element isEqualToString:@"iq"]
+               || [stanza.element isEqualToString:@"message"]
+               || [stanza.element isEqualToString:@"presence"])
             {
                 DDLogVerbose(@"adding to unAckedStanzas %@: %@", self.lastOutboundStanza, stanza.XMLString);
-                NSDictionary *dic =@{kStanzaID:[NSNumber numberWithInteger: [self.lastOutboundStanza integerValue]], kStanza:stanza};
+                NSDictionary *dic =@{kStanzaID:self.lastOutboundStanza, kStanza:stanza};
                 [self.unAckedStanzas addObject:dic];
+                //increment for next call
                 self.lastOutboundStanza=[NSNumber numberWithInteger:[self.lastOutboundStanza integerValue]+1];
                 
                 //persist these changes

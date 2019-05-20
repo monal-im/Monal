@@ -718,6 +718,10 @@
                                                         <constraint firstAttribute="width" constant="11" id="xyJ-nN-uwq"/>
                                                     </constraints>
                                                 </imageView>
+                                                <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" hidesWhenStopped="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="hbE-2h-gWQ">
+                                                    <rect key="frame" x="248" y="212" width="20" height="20"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                </activityIndicatorView>
                                             </subviews>
                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                             <constraints>
@@ -749,8 +753,10 @@
                                             <outlet property="dividerDate" destination="h9a-ua-MIo" id="Q9G-tH-NFa"/>
                                             <outlet property="dividerHeight" destination="b2n-TS-d4M" id="r3Y-BD-k2L"/>
                                             <outlet property="imageHeight" destination="T8s-TI-xbm" id="RII-N1-3Cn"/>
+                                            <outlet property="lockImage" destination="vGy-8U-lGI" id="B7B-Gh-pEV"/>
                                             <outlet property="name" destination="1wW-PP-jdj" id="cEt-sh-dVc"/>
                                             <outlet property="nameHeight" destination="Z1Z-lQ-7He" id="RlP-tV-VkZ"/>
+                                            <outlet property="spinner" destination="hbE-2h-gWQ" id="S8d-sV-c2v"/>
                                             <outlet property="thumbnailImage" destination="GlC-dn-bvj" id="iHP-Iz-z5V"/>
                                         </connections>
                                     </tableViewCell>
@@ -1100,7 +1106,7 @@
                                         <rect key="frame" x="0.0" y="977" width="414" height="234"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" ambiguous="YES" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="2cR-0H-YA2" id="uMC-3d-1aS">
-                                            <rect key="frame" x="0.0" y="0.0" width="414" height="234"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="414" height="233.66666666666666"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="W0m-OG-Q8V">
@@ -1191,7 +1197,7 @@
                                         <rect key="frame" x="0.0" y="1211" width="414" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="M9Q-xT-4Bd" id="xcN-0Z-bTD">
-                                            <rect key="frame" x="0.0" y="0.0" width="414" height="44"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="414" height="43.666666666666664"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="A Status message would go here. That is correct, a status message. " textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="15o-hp-DgI">

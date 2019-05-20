@@ -23,9 +23,10 @@
 {
     if(self.link && self.thumbnailImage.image==nil && !self.loading)
     {
+        [self.spinner startAnimating];
         self.loading=YES;
         NSString *currentLink = self.link;
-        [[MLImageManager sharedInstance] imageForAttachmentLink:self.link withCompletion:^(NSData * _Nullable data) {
+       [[MLImageManager sharedInstance] imageForAttachmentLink:self.link withCompletion:^(NSData * _Nullable data) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 if([currentLink isEqualToString:self.link]){
                     if(!data) {
@@ -39,11 +40,13 @@
                         }
                     }
                     self.loading=NO;
+                     [self.spinner stopAnimating];
                     if(completion) completion();
                 }
                 
             });
         }];
+        
     }
     else  {
         
@@ -69,6 +72,7 @@
 -(void)prepareForReuse{
     [super prepareForReuse];
     self.imageHeight.constant=200;
+    [self.spinner stopAnimating];
 }
 
 

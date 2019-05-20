@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 
 
-@interface MLImageManager : NSObject
+@interface MLImageManager : NSObject  <NSURLSessionDownloadDelegate>
 
 
 

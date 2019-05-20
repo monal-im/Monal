@@ -374,7 +374,6 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     NSData *cachedData = [self.imageCache objectForKey:url];
     if(cachedData) {
         if(completionHandler) completionHandler(cachedData);
-        return;
     }
     
     [self filePathForURL:url wuthCompletion:^(NSString * _Nullable path) {
@@ -393,18 +392,25 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                     [self attachmentDataFromEncryptedLink:url withCompletion:completionHandler];
                 } else  {
                     NSURLSession *session = [NSURLSession sharedSession];
-                    [[session downloadTaskWithURL:[NSURL URLWithString:url] completionHandler:^(NSURL * _Nullable location, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+                    NSURLSessionDownloadTask *task=[session downloadTaskWithURL:[NSURL URLWithString:url] completionHandler:^(NSURL * _Nullable location, NSURLResponse * _Nullable response, NSError * _Nullable error) {
                         NSData *downloaded= [NSData dataWithContentsOfURL:location];
                         //cache data
                         NSString *path =  [self savefilePathforURL:url];
                         [downloaded writeToFile:path atomically:YES];
                        if(downloaded)  [self.imageCache setObject:downloaded forKey:url];
                         if(completionHandler) completionHandler(downloaded);
-                    }] resume];
+                    }];
+                    
+                    [task resume];
                 }
             }
         });
     }];
+    
+//    if (@available(iOS 11.0, *)) {
+//        return task.progress;
+//
+//    }
 }
 
 /**
@@ -495,5 +501,13 @@ Provides temp url
     }
 }
 
+
+- (void)URLSession:(NSURLSession *)session
+      downloadTask:(NSURLSessionDownloadTask *)downloadTask
+      didWriteData:(int64_t)bytesWritten
+ totalBytesWritten:(int64_t)totalBytesWritten
+totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite{
+    
+}
 
 @end

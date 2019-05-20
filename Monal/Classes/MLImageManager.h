@@ -56,7 +56,8 @@
 
 #endif
 
--(void) imageForAttachmentLink:(NSString *) url withCompletion:(void (^)(NSData * _Nullable data)) completionHandler;
+-(void) imageForAttachmentLink:(NSString *) url withCompletion:(void (^_Nullable)(NSData * _Nullable data)) completionHandler;
+-(void) imageURLForAttachmentLink:(NSString *) url withCompletion:(void (^_Nullable)(NSURL * _Nullable url)) completionHandler;
 
 /**
  Purge cache in the event of  a memory warning

@@ -1442,10 +1442,10 @@ static DataLayer *sharedInstance=nil;
 }
 
 
--(void) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom delivered:(BOOL) delivered unread:(BOOL) unread serverMessageId:(NSString *) messageid messageType:(NSString *) messageType andOverrideDate:(NSDate *) messageDate encrypted:(BOOL) encrypted  withCompletion: (void (^)(BOOL))completion
+-(void) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom delivered:(BOOL) delivered unread:(BOOL) unread serverMessageId:(NSString *) messageid messageType:(NSString *) messageType andOverrideDate:(NSDate *) messageDate encrypted:(BOOL) encrypted  withCompletion: (void (^)(BOOL, NSString*))completion
 {
     if(!from || !to) {
-        if(completion) completion(NO);
+        if(completion) completion(NO,nil);
         return;
     }
     
@@ -1487,7 +1487,7 @@ static DataLayer *sharedInstance=nil;
                     if(completion)
                     {
                         [self updateActiveBuddy:actualfrom setTime:dateString forAccount:accountNo withCompletion:nil];
-                        completion(success);
+                        completion(success, messageType);
                     }
                 }];
             }
@@ -1509,7 +1509,7 @@ static DataLayer *sharedInstance=nil;
                         if(completion)
                         {
                             [self updateActiveBuddy:actualfrom setTime:dateString forAccount:accountNo withCompletion:nil];
-                            completion(success);
+                            completion(success, foundMessageType);
                         }
                     }];
                 }];

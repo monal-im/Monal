@@ -1856,7 +1856,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                            messageType:messageType
                                                        andOverrideDate:messageNode.delayTimeStamp
                                                              encrypted:encrypted
-                                                        withCompletion:^(BOOL success) {
+                                                        withCompletion:^(BOOL success, NSString *newMessageType) {
                                                               if(success)
                                                               {
                                                                   if(messageNode.requestReceipt
@@ -1909,7 +1909,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                                                                   @"accountNo":self->_accountNo,
                                                                                                   @"showAlert":[NSNumber numberWithBool:showAlert],
                                                                                                   @"shouldRefresh":[NSNumber numberWithBool:shouldRefresh],
-                                                                                                  @"messageType":messageType?messageType:kMessageTypeText,
+                                                                                                  @"messageType":newMessageType?newMessageType:kMessageTypeText,
                                                                                                    @"muc_subject":messageNode.subject?messageNode.subject:@"",
                                                                                         @"encrypted":[NSNumber numberWithBool:encrypted],
                                                                                                   @"delayTimeStamp":messageNode.delayTimeStamp?messageNode.delayTimeStamp:@""

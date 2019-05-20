@@ -7,7 +7,9 @@
 //
 
 #import "MLNotificationManager.h"
+#import "MLImageManager.h"
 @import UserNotifications;
+@import CoreServices;
 
 @interface MLNotificationManager ()
 @property (nonatomic, strong) NSMutableArray *tempNotificationIds;
@@ -73,27 +75,23 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) showModernNotificaion:(NSNotification *)notification
 {
     UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
-    content.title =[notification.userInfo objectForKey:@"from"];
+    NSString* acctString =[NSString stringWithFormat:@"%ld", (long)[[notification.userInfo objectForKey:@"accountNo"] integerValue]];
     
+    NSString *displayName = [[DataLayer sharedInstance] fullName:[notification.userInfo objectForKey:@"from"] forAccount:acctString];
+    
+    content.title = displayName.length>0?displayName:[notification.userInfo objectForKey:@"from"];
+
     if(![[notification.userInfo objectForKey:@"from"] isEqualToString:[notification.userInfo objectForKey:@"from"] ])
     {
         content.subtitle =[NSString stringWithFormat:@"%@ says:",[notification.userInfo objectForKey:@"actuallyfrom"]];
     }
     
+    NSString *idval = [NSString stringWithFormat:@"%@_%@", [self identifierWithNotification:notification],[notification.userInfo objectForKey:@"messageid"]];
+    
     content.body =[notification.userInfo objectForKey:@"messageText"];
     content.userInfo= notification.userInfo;
     content.threadIdentifier =[self identifierWithNotification:notification];
     content.categoryIdentifier=@"Reply";
-   
-    if([[notification.userInfo objectForKey:@"messageType"] isEqualToString:kMessageTypeImage])
-    {
-        content.body =@"Sent an Image 📷";
-    }
-    
-    if([[notification.userInfo objectForKey:@"messageType"] isEqualToString:kMessageTypeUrl])
-    {
-        content.body =@"Sent a Link 🔗";
-    }
     
     if( [[NSUserDefaults standardUserDefaults] boolForKey:@"Sound"]==true)
     {
@@ -105,15 +103,44 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         }
     }
     
-    NSString *idval = [NSString stringWithFormat:@"%@_%@", [self identifierWithNotification:notification],[notification.userInfo objectForKey:@"messageid"]];
-    UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
-    UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:idval
-                                                                          content:content trigger:nil];
+     UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+    if([[notification.userInfo objectForKey:@"messageType"] isEqualToString:kMessageTypeImage])
+    {
+        [[MLImageManager sharedInstance] imageURLForAttachmentLink:[notification.userInfo objectForKey:@"messageText"] withCompletion:^(NSURL * _Nullable url) {
+            if(url) {
+                NSError *error;
+                UNNotificationAttachment* attachment= [UNNotificationAttachment attachmentWithIdentifier:idval URL:url options:@{UNNotificationAttachmentOptionsTypeHintKey:(NSString*) kUTTypePNG} error:&error];
+                if(attachment) content.attachments=@[attachment];
+                if(error) {
+                    DDLogError(@"Error %@", error);
+                }
+            }
+            
+            if(!content.attachments)  {
+                content.body =@"Sent an Image 📷";
+            }else  {
+                content.body=@"";
+            }
+            UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:idval
+                                                                                  content:content trigger:nil];
+            [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
+                
+            }];
+            
+        }];
+        return;
+        
+    }
+    else if([[notification.userInfo objectForKey:@"messageType"] isEqualToString:kMessageTypeUrl])
+    {
+        content.body =@"Sent a Link 🔗";
+    }
     
+    UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:idval
+                                                                        content:content trigger:nil];
     [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
         
     }];
-
 }
 
 -(void) showLegacyNotification:(NSNotification *)notification

@@ -75,4 +75,10 @@
     }
 }
 
+-(void)prepareForReuse{
+    [super prepareForReuse];
+    self.deliveryFailed=NO;
+    self.outBound=NO;
+}
+
 @end

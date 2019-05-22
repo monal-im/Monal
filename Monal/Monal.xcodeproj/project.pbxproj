@@ -335,6 +335,9 @@
 		26AA70452146E43E00598605 /* icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 26AA70442146E43E00598605 /* icon.icns */; };
 		26AA70482146E43E00598605 /* ShareViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26AA70472146E43E00598605 /* ShareViewController.m */; };
 		26AA704B2146E43E00598605 /* ShareViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26AA70492146E43E00598605 /* ShareViewController.xib */; };
+		26AAAADA2295742400200433 /* MLPasswordChangeTableViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 26AAAAD82295742400200433 /* MLPasswordChangeTableViewController.h */; };
+		26AAAADB2295742400200433 /* MLPasswordChangeTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26AAAAD92295742400200433 /* MLPasswordChangeTableViewController.m */; };
+		26AAAADC2295742500200433 /* MLPasswordChangeTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26AAAAD92295742400200433 /* MLPasswordChangeTableViewController.m */; };
 		26AAE285179F7B0200271345 /* MLSettingCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 26AAE284179F7B0200271345 /* MLSettingCell.m */; };
 		26B0CA8921AE2E3C0080B133 /* MLSoundsTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B0CA8821AE2E3C0080B133 /* MLSoundsTableViewController.m */; };
 		26B0CA8B21AE410E0080B133 /* AlertSounds in Resources */ = {isa = PBXBuildFile; fileRef = 26B0CA8A21AE410E0080B133 /* AlertSounds */; };
@@ -821,6 +824,8 @@
 		26AA704A2146E43E00598605 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/ShareViewController.xib; sourceTree = "<group>"; };
 		26AA704C2146E43E00598605 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		26AA704D2146E43E00598605 /* shareSheet_OSX.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = shareSheet_OSX.entitlements; sourceTree = "<group>"; };
+		26AAAAD82295742400200433 /* MLPasswordChangeTableViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLPasswordChangeTableViewController.h; sourceTree = "<group>"; };
+		26AAAAD92295742400200433 /* MLPasswordChangeTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLPasswordChangeTableViewController.m; sourceTree = "<group>"; };
 		26AAE283179F7B0200271345 /* MLSettingCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLSettingCell.h; sourceTree = "<group>"; };
 		26AAE284179F7B0200271345 /* MLSettingCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLSettingCell.m; sourceTree = "<group>"; };
 		26B0CA8721AE2E3C0080B133 /* MLSoundsTableViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLSoundsTableViewController.h; sourceTree = "<group>"; };
@@ -1391,6 +1396,8 @@
 				26E3ED861FEC0CB7008ABDA5 /* MLServerDetails.m */,
 				262AEFE620AE756800498F82 /* MLMAMPrefTableViewController.h */,
 				262AEFE720AE756800498F82 /* MLMAMPrefTableViewController.m */,
+				26AAAAD82295742400200433 /* MLPasswordChangeTableViewController.h */,
+				26AAAAD92295742400200433 /* MLPasswordChangeTableViewController.m */,
 			);
 			name = Accounts;
 			sourceTree = "<group>";
@@ -2117,6 +2124,7 @@
 				26400735140B43BB00CF1107 /* rtperrors.hh in Headers */,
 				26400737140B43BB00CF1107 /* rtpexternaltransmitter.hh in Headers */,
 				26400738140B43BB00CF1107 /* rtphashtable.hh in Headers */,
+				26AAAADA2295742400200433 /* MLPasswordChangeTableViewController.h in Headers */,
 				2640073A140B43BB00CF1107 /* rtpinternalsourcedata.hh in Headers */,
 				2640073C140B43BB00CF1107 /* rtpipv4address.hh in Headers */,
 				2640073D140B43BB00CF1107 /* rtpipv4destination.hh in Headers */,
@@ -2911,6 +2919,7 @@
 				2644D4921FF0064C00F46AB5 /* MLChatImageCell.m in Sources */,
 				26F396D621968A4300EF5720 /* GLCapsuleView.m in Sources */,
 				2678A98B185A8320003AF53B /* ChatLogAccountDetailViewController.m in Sources */,
+				26AAAADC2295742500200433 /* MLPasswordChangeTableViewController.m in Sources */,
 				26D51CCC1E2674D700141E04 /* NSString+NXOAuth2.m in Sources */,
 				26B2A4EF1B73097500272E63 /* DDASLLogCapture.m in Sources */,
 				26DA16E217C302BC00D0065E /* UIAlertView+Blocks.m in Sources */,
@@ -3115,6 +3124,7 @@
 				2640075B140B43BB00CF1107 /* rtpsourcedata.cpp in Sources */,
 				2640075D140B43BB00CF1107 /* rtpsources.cpp in Sources */,
 				26400760140B43BB00CF1107 /* rtptimeutilities.cpp in Sources */,
+				26AAAADB2295742400200433 /* MLPasswordChangeTableViewController.m in Sources */,
 				26400765140B43BB00CF1107 /* rtpudpv4transmitter.cpp in Sources */,
 				26400767140B43BB00CF1107 /* rtpudpv6transmitter.cpp in Sources */,
 			);

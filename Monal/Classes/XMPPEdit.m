@@ -558,6 +558,14 @@ NSString *const kGtalk = @"Gtalk";
                 thecell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
                 break;
             }
+            case 7: {
+                thecell.cellLabel.text=@"Change Password";
+                thecell.toggleSwitch.hidden=YES;
+                
+                thecell.textInputField.hidden=YES;
+                thecell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
+                break;
+            }
                 
         }
         
@@ -636,7 +644,7 @@ NSString *const kGtalk = @"Gtalk";
         return 3;
     }
     else if( section ==1) {
-        return 7;
+        return 8;
     }
     else  if(section == 2&&  self.editMode==false)
     {
@@ -665,6 +673,9 @@ NSString *const kGtalk = @"Gtalk";
                 [self performSegueWithIdentifier:@"showMAMPref" sender:self];
             }case 6:  {
                 [self performSegueWithIdentifier:@"showKeyTrust" sender:self];
+            }
+            case 7:  {
+                [self performSegueWithIdentifier:@"showPassChange" sender:self];
             }
         }
     }

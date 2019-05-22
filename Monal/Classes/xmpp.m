@@ -139,7 +139,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 @property (nonatomic, strong) NXOAuth2Account *oauthAccount;
 
-
+@property (nonatomic, strong) dispatch_source_t loginCancelOperation;
 
 
 @end
@@ -228,7 +228,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     NSOutputStream *localOStream;
     
     [NSStream getStreamsToHostWithName:self.server port:self.port inputStream:&localIStream outputStream:&localOStream];
-   
+
     if(localIStream) {
         _iStream=localIStream;
     }
@@ -405,15 +405,17 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self connectionTask];
     
     dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-    dispatch_source_t loginCancelOperation = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,
+    if(self.loginCancelOperation)  dispatch_source_cancel(self.loginCancelOperation);
+    
+    self.loginCancelOperation = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,
                                                                     q_background);
     
-    dispatch_source_set_timer(loginCancelOperation,
+    dispatch_source_set_timer(self.loginCancelOperation,
                               dispatch_time(DISPATCH_TIME_NOW, kConnectTimeout* NSEC_PER_SEC),
                               DISPATCH_TIME_FOREVER,
                               1ull * NSEC_PER_SEC);
     
-    dispatch_source_set_event_handler(loginCancelOperation, ^{
+    dispatch_source_set_event_handler(self.loginCancelOperation, ^{
         DDLogInfo(@"login cancel op");
         
         self->_loginStarted=NO;
@@ -450,11 +452,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         }
         
     });
-    
-    dispatch_source_cancel(loginCancelOperation);
-    
-    
-    dispatch_source_set_cancel_handler(loginCancelOperation, ^{
+
+    dispatch_source_set_cancel_handler(self.loginCancelOperation, ^{
         DDLogInfo(@"login timer cancelled");
         if(self.accountState<kStateHasStream)
         {
@@ -468,11 +467,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         }
     });
     
-    dispatch_resume(loginCancelOperation);
+    dispatch_resume(self.loginCancelOperation);
 }
 
 -(void) disconnect
 {
+    if(self.loginCancelOperation)  dispatch_source_cancel(self.loginCancelOperation);
     [self disconnectWithCompletion:nil];
 }
 
@@ -517,6 +517,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         {
             DDLogError(@"Exception in ostream close");
         }
+        
+        self->_iStream=nil;
+        self->_oStream=nil;
         
     }];
 }
@@ -637,7 +640,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             return;
         }
         
-        DDLogVerbose(@"Login started is %d timestamp diff %f",self->_loginStarted, [[NSDate date] timeIntervalSinceDate:self.loginStartTimeStamp]);
+        DDLogVerbose(@"Login started state: %d timestamp diff from start point %f",self->_loginStarted, [[NSDate date] timeIntervalSinceDate:self.loginStartTimeStamp]);
       
         
         self->_loginStarted=YES;
@@ -1391,74 +1394,85 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         }
                         
                         //OMEMO
- #ifndef DISABLE_OMEMO
-                          NSString *source= iqNode.from;
-                        if(iqNode.omemoDevices)
-                        {
-                          
-                            if(!source || [source isEqualToString:self.fulluser])
+#ifndef DISABLE_OMEMO
+#if TARGET_OS_IPHONE
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            if([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground)
                             {
-                                source=self.fulluser;
-                                NSMutableArray *devices= [iqNode.omemoDevices mutableCopy];
-                                NSSet *deviceSet = [NSSet setWithArray:iqNode.omemoDevices];
-                                
-                                NSString * deviceString=[NSString stringWithFormat:@"%d", self.monalSignalStore.deviceid];
-                                if(![deviceSet containsObject:deviceString])
-                                {
-                                    [devices addObject:deviceString];
-                                }
-                               
-                                [self sendOMEMODevices:devices];
+#endif
+                                [self.processQueue addOperationWithBlock:^{
+                                    NSString *source= iqNode.from;
+                                    if(iqNode.omemoDevices)
+                                    {
+                                        
+                                        if(!source || [source isEqualToString:self.fulluser])
+                                        {
+                                            source=self.fulluser;
+                                            NSMutableArray *devices= [iqNode.omemoDevices mutableCopy];
+                                            NSSet *deviceSet = [NSSet setWithArray:iqNode.omemoDevices];
+                                            
+                                            NSString * deviceString=[NSString stringWithFormat:@"%d", self.monalSignalStore.deviceid];
+                                            if(![deviceSet containsObject:deviceString])
+                                            {
+                                                [devices addObject:deviceString];
+                                            }
+                                            
+                                            [self sendOMEMODevices:devices];
+                                        }
+                                        
+                                        
+                                        NSArray *existingDevices=[self.monalSignalStore knownDevicesForAddressName:source];
+                                        NSSet *deviceSet = [NSSet setWithArray:existingDevices];
+                                        //only query if the device doesnt exist
+                                        [iqNode.omemoDevices enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                                            NSString *device  =(NSString *)obj;
+                                            if(![deviceSet containsObject:[NSNumber numberWithInt: device.integerValue]]) {
+                                                [self queryOMEMOBundleFrom:source andDevice:device];
+                                            }
+                                        }];
+                                        
+                                    }
+                                    
+                                    
+                                    if(iqNode.signedPreKeyPublic && self.signalContext )
+                                    {
+                                        if(!source)
+                                        {
+                                            source=self.fulluser;
+                                        }
+                                        
+                                        
+                                        uint32_t device =(uint32_t)[iqNode.deviceid intValue];
+                                        if(!iqNode.deviceid) return;
+                                        
+                                        SignalAddress *address = [[SignalAddress alloc] initWithName:source deviceId:device];
+                                        SignalSessionBuilder *builder = [[SignalSessionBuilder alloc] initWithAddress:address context:self.signalContext];
+                                        NSError *error;
+                                        
+                                        [iqNode.preKeys enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                                            
+                                            NSDictionary *row = (NSDictionary *) obj;
+                                            NSString *keyid = (NSString *)[row objectForKey:@"preKeyId"];
+                                            
+                                            SignalPreKeyBundle *bundle = [[SignalPreKeyBundle alloc] initWithRegistrationId:0
+                                                                                                                   deviceId:device
+                                                                                                                   preKeyId:[keyid integerValue]
+                                                                                                               preKeyPublic:[EncodingTools dataWithBase64EncodedString:[row objectForKey:@"preKey"]]
+                                                                                                             signedPreKeyId:iqNode.signedPreKeyId.integerValue
+                                                                                                         signedPreKeyPublic:[EncodingTools dataWithBase64EncodedString:iqNode.signedPreKeyPublic]
+                                                                                                                  signature:[EncodingTools dataWithBase64EncodedString:iqNode.signedPreKeySignature]
+                                                                                                                identityKey:[EncodingTools dataWithBase64EncodedString:iqNode.identityKey]
+                                                                          ];
+                                            
+                                            [builder processPreKeyBundle:bundle error:nil];
+                                        }];
+                                        
+                                    }
+                                }];
+#if TARGET_OS_IPHONE
                             }
-                            
-                            
-                            NSArray *existingDevices=[self.monalSignalStore knownDevicesForAddressName:source];
-                            NSSet *deviceSet = [NSSet setWithArray:existingDevices];
-                            //only query if the device doesnt exist
-                            [iqNode.omemoDevices enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                                NSString *device  =(NSString *)obj;
-                                if(![deviceSet containsObject:[NSNumber numberWithInt: device.integerValue]]) {
-                                    [self queryOMEMOBundleFrom:source andDevice:device];
-                                }
-                            }];
-                            
-                        }
-                        
-
-                        if(iqNode.signedPreKeyPublic && self.signalContext )
-                        {
-                            if(!source)
-                            {
-                                source=self.fulluser;
-                            }
-                            
-                            
-                            uint32_t device =(uint32_t)[iqNode.deviceid intValue];
-                            if(!iqNode.deviceid) return;
-                            
-                            SignalAddress *address = [[SignalAddress alloc] initWithName:source deviceId:device];
-                            SignalSessionBuilder *builder = [[SignalSessionBuilder alloc] initWithAddress:address context:self.signalContext];
-                            NSError *error;
-                            
-                            [iqNode.preKeys enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                                
-                                NSDictionary *row = (NSDictionary *) obj;
-                                NSString *keyid = (NSString *)[row objectForKey:@"preKeyId"];
-                                
-                                SignalPreKeyBundle *bundle = [[SignalPreKeyBundle alloc] initWithRegistrationId:0
-                                                                                                       deviceId:device
-                                                                                                       preKeyId:[keyid integerValue]
-                                                                                                   preKeyPublic:[EncodingTools dataWithBase64EncodedString:[row objectForKey:@"preKey"]]
-                                                                                                 signedPreKeyId:iqNode.signedPreKeyId.integerValue
-                                                                                             signedPreKeyPublic:[EncodingTools dataWithBase64EncodedString:iqNode.signedPreKeyPublic]
-                                                                                                      signature:[EncodingTools dataWithBase64EncodedString:iqNode.signedPreKeySignature]
-                                                                                                    identityKey:[EncodingTools dataWithBase64EncodedString:iqNode.identityKey]
-                                                                                                          ];
-                             
-                                [builder processPreKeyBundle:bundle error:nil];
-                            }];
-                            
-                        }
+                        });
+#endif
 #endif
                         
                         

@@ -1543,19 +1543,18 @@ static DataLayer *sharedInstance=nil;
 
 -(void) setMessageId:(NSString*) messageid delivered:(BOOL) delivered
 {
-    NSString* query=[NSString stringWithFormat:@"update message_history set delivered=%d where messageid='%@';",delivered, messageid];
+    NSString* query=[NSString stringWithFormat:@"update message_history set delivered=? where messageid=?"];
     DDLogVerbose(@" setting delivered %@",query);
-    [self executeNonQuery:query withCompletion:nil];
- 
+    [self executeNonQuery:query  andArguments:@[[NSNumber numberWithBool:delivered], messageid]  withCompletion:nil];
 }
 
 
 -(void) setMessageId:(NSString*) messageid received:(BOOL) received
 {
-    NSString* query=[NSString stringWithFormat:@"update message_history set received=%d where messageid='%@';",received, messageid];
+    NSString* query=[NSString stringWithFormat:@"update message_history set received=? where messageid=?"];
     DDLogVerbose(@" setting received confrmed %@",query);
+    [self executeNonQuery:query  andArguments:@[[NSNumber numberWithBool:received], messageid]  withCompletion:nil];
     [self executeNonQuery:query withCompletion:nil];
-    
 }
 
 
@@ -2646,7 +2645,7 @@ static DataLayer *sharedInstance=nil;
 -(NSMutableArray*) allAttachmentsFromContact:(NSString*) contact forAccount:(NSString*) accountNo
 {
     if(!accountNo ||! contact) return nil;
-    NSString* query=[NSString stringWithFormat:@"select A.* from imageCache as A inner join  message_history as B on message = a.url where account_id=? and actual_from=? order by message_history_id desc"];
+    NSString* query=[NSString stringWithFormat:@"select distinct A.* from imageCache as A inner join  message_history as B on message = a.url where account_id=? and actual_from=? order by message_history_id desc"];
     NSArray *params=@[accountNo, contact];
     NSMutableArray* toReturn = [[self executeReader:query andArguments:params] mutableCopy];
     

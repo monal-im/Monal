@@ -19,6 +19,7 @@
 
 static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 static const int pingFreqencyMinutes =1;
+static const int sendMessageTimeoutSeconds =10;
 
 NSString *const kXmppAccount= @"xmppAccount";
 
@@ -466,14 +467,12 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 {
     dispatch_async(_netQueue,
                    ^{
-                       dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-                       dispatch_source_t sendTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,q_background
-                                                                              );
+                       dispatch_source_t sendTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,self->_netQueue);
                        
                        dispatch_source_set_timer(sendTimer,
-                                                 dispatch_time(DISPATCH_TIME_NOW, 5ull * NSEC_PER_SEC),
-                                                 1ull * NSEC_PER_SEC
-                                                 , 1ull * NSEC_PER_SEC);
+                                                 dispatch_time(DISPATCH_TIME_NOW, sendMessageTimeoutSeconds*NSEC_PER_SEC),
+                                                  DISPATCH_TIME_FOREVER,
+                                                 5ull * NSEC_PER_SEC);
                        
                        dispatch_source_set_event_handler(sendTimer, ^{
                            DDLogError(@"send message  timed out");
@@ -482,7 +481,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
                            for(NSDictionary *dic in  self.timerList) {
                                if([dic objectForKey:kSendTimer] == sendTimer) {
                                    [[DataLayer sharedInstance] setMessageId:[dic objectForKey:kMessageId] delivered:NO];
-                                   if(self) { // possible zombie
+                                   if(self) { // chekcing for possible zombie
                                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalSendFailedMessageNotice object:self userInfo:dic];
                                    }
                                    removalCounter=counter;

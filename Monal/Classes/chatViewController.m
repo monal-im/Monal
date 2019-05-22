@@ -344,7 +344,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 -(void) sendMessage:(NSString *) messageText andMessageID:(NSString *)messageID
 {
     DDLogVerbose(@"Sending message");
-    NSString *newMessageID =[[NSUUID UUID] UUIDString];
+    NSString *newMessageID =messageID?messageID:[[NSUUID UUID] UUIDString];
  
     [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:_contactName fromAccount:_accountNo isEncrypted:self.encryptChat isMUC:_isMUC isUpload:NO messageId:newMessageID
                                        withCompletionHandler:nil];
@@ -920,7 +920,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         if([messageArray count]>0) {
             NSDictionary *dic= [messageArray objectAtIndex:0];
             [self sendMessage:[dic objectForKey:@"message"] andMessageID:[dic objectForKey:@"messageid"]];
-            [self setMessageId:[dic objectForKey:@"messageid"] delivered:YES];
+            [self setMessageId:[dic objectForKey:@"messageid"] delivered:YES]; // for the UI, db will be set in the notification
         }
     }]];
     [alert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {

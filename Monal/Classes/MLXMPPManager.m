@@ -813,7 +813,6 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 
 -(void) handleSentMessage:(NSNotification *)notification
 {
-
     NSDictionary *info = notification.userInfo;
     NSString *messageId = [info objectForKey:kMessageId];
     [[DataLayer sharedInstance] setMessageId:messageId delivered:YES];

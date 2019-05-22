@@ -3063,6 +3063,18 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     if(!self.visibleState) [presence setInvisible];
     
     [self send:presence];
+    
+#if TARGET_OS_IPHONE
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground)
+        {
+#endif
+            [self setClientInactive];
+#if TARGET_OS_IPHONE
+        }
+    });
+#endif
+    
 }
 
 -(void) fetchRoster

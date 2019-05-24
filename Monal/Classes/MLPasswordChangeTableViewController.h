@@ -10,7 +10,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MLPasswordChangeTableViewController : UITableViewController
+@interface MLPasswordChangeTableViewController : UITableViewController <UITextFieldDelegate>
 
 @end
 

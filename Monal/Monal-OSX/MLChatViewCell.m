@@ -31,14 +31,18 @@
 
 -(void) loadImage:(NSString *) link WithCompletion:(void (^)(void))completion
 {
+    if([self.link isEqualToString:link] &&  self.attachmentImage.image) {
+        if(completion) completion();
+        return;
+    }
     self.link=link;
     NSString *currentLink = link;
     [[MLImageManager sharedInstance] imageForAttachmentLink:self.link withCompletion:^(NSData * _Nullable data) {
+        NSImage *image=[[NSImage alloc] initWithData:data];
         dispatch_async(dispatch_get_main_queue(), ^{
             if([currentLink isEqualToString:self.link]){
-                dispatch_async(dispatch_get_main_queue(), ^{
                     if(data) {
-                        self.attachmentImage.image = [[NSImage alloc] initWithData:data];
+                        self.attachmentImage.image = image;
                         
                         if (  self.attachmentImage.image.size.height>  self.attachmentImage.image.size.width) {
                             self.imageHeight.constant = 360;
@@ -52,9 +56,8 @@
                         self.attachmentImage.image=nil;
                     }
                     if(completion) completion();
-                });
             }
-                 if(completion) completion();
+            else  if(completion) completion();
             
         });
     }];

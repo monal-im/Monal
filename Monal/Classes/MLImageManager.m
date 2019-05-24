@@ -20,12 +20,13 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 @interface MLImageManager()
 
-@property  (nonatomic, strong) NSCache* iconCache;
-@property  (nonatomic, strong) NSCache* imageCache;
+@property  (nonatomic, strong) NSCache *iconCache;
+@property  (nonatomic, strong) NSCache *imageCache;
+@property  (nonatomic, strong) NSOperationQueue *fileQueue;
 #if TARGET_OS_IPHONE
-@property  (nonatomic, strong) UIImage* noIcon;
+@property  (nonatomic, strong) UIImage *noIcon;
 #else
-@property  (nonatomic, strong) NSImage* noIcon;
+@property  (nonatomic, strong) NSImage *noIcon;
 #endif
 
 
@@ -45,13 +46,14 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
         NSString *documentsDirectory = [paths objectAtIndex:0];
         NSString *writablePath = [documentsDirectory stringByAppendingPathComponent:@"imagecache"];
-        NSError* error;
+        NSError *error;
         [fileManager createDirectoryAtPath:writablePath withIntermediateDirectories:YES attributes:nil error:&error];
         
         //for notifications
         NSString *writablePath2 = [documentsDirectory stringByAppendingPathComponent:@"tempImage"];
-        NSError* error2;
+        NSError *error2;
         [fileManager createDirectoryAtPath:writablePath2 withIntermediateDirectories:YES attributes:nil error:&error2];
+        
     });
     return sharedInstance;
 }
@@ -60,6 +62,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 -(id) init
 {
     self=[super init];
+    self.fileQueue = [[NSOperationQueue alloc] init];
    return self;
 }
 
@@ -377,8 +380,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     }
     
     [self filePathForURL:url wuthCompletion:^(NSString * _Nullable path) {
-        dispatch_async(dispatch_get_main_queue(), ^{
+       
             if(path) {
+                [self.fileQueue addOperationWithBlock:^{
                 NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
                 NSString *documentsDirectory = [paths objectAtIndex:0];
                 NSString *readPath = [documentsDirectory stringByAppendingPathComponent:@"imagecache"];
@@ -386,25 +390,30 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                 NSData *data =[NSData dataWithContentsOfFile:readPath];
                 if(data) [self.imageCache setObject:data forKey:url];
                 if(completionHandler) completionHandler(data);
+                }];
             } else  {
                 if ([url hasPrefix:@"aesgcm://"])
                 {
                     [self attachmentDataFromEncryptedLink:url withCompletion:completionHandler];
                 } else  {
-                    NSURLSession *session = [NSURLSession sharedSession];
-                    NSURLSessionDownloadTask *task=[session downloadTaskWithURL:[NSURL URLWithString:url] completionHandler:^(NSURL * _Nullable location, NSURLResponse * _Nullable response, NSError * _Nullable error) {
-                        NSData *downloaded= [NSData dataWithContentsOfURL:location];
-                        //cache data
-                        NSString *path =  [self savefilePathforURL:url];
-                        [downloaded writeToFile:path atomically:YES];
-                       if(downloaded)  [self.imageCache setObject:downloaded forKey:url];
-                        if(completionHandler) completionHandler(downloaded);
-                    }];
-                    
-                    [task resume];
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        NSURLSession *session = [NSURLSession sharedSession];
+                        NSURLSessionDownloadTask *task=[session downloadTaskWithURL:[NSURL URLWithString:url] completionHandler:^(NSURL * _Nullable location, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+                            NSData *downloaded= [NSData dataWithContentsOfURL:location];
+                            //cache data
+                             [self.fileQueue addOperationWithBlock:^{
+                            NSString *path =  [self savefilePathforURL:url];
+                            [downloaded writeToFile:path atomically:YES];
+                            if(downloaded)  [self.imageCache setObject:downloaded forKey:url];
+                            if(completionHandler) completionHandler(downloaded);
+                             }];
+                        }];
+                        
+                        [task resume];
+                    });
                 }
             }
-        });
+      
     }];
     
 //    if (@available(iOS 11.0, *)) {
@@ -469,28 +478,32 @@ Provides temp url
             NSString *url = parts[0];
             NSString *crypto = parts[1];
             if(crypto.length>=96) {
-                NSString *ivHex =[crypto substringToIndex:32];
-                NSString *keyHex =[crypto substringWithRange:NSMakeRange(32, 64)];
-                NSURLSession *session = [NSURLSession sharedSession];
-                [[session downloadTaskWithURL:[NSURL URLWithString:url] completionHandler:^(NSURL * _Nullable location, NSURLResponse * _Nullable response, NSError * _Nullable error) {
-                    
-                    //decrypt
-                    NSData *key = [EncodingTools dataWithHexString:keyHex];
-                    NSData *iv = [EncodingTools dataWithHexString:ivHex];
-                    
-                    NSData *decrypted;
-                    NSData *downloaded= [NSData dataWithContentsOfURL:location];
-                    if(downloaded && downloaded.length>0) {
-                        decrypted=[AESGcm decrypt:downloaded withKey:key andIv:iv withAuth:nil];
-                    } else {
-                        DDLogError(@"no data from aesgcm link, error %@", error);
-                    }
-                    NSString *path =  [self savefilePathforURL:link];
-                    [decrypted writeToFile:path atomically:YES];
-                     if(downloaded) [self.imageCache setObject:downloaded forKey:link];
-                    if(completionHandler) completionHandler(decrypted);
-                    
-                }] resume];
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    NSString *ivHex =[crypto substringToIndex:32];
+                    NSString *keyHex =[crypto substringWithRange:NSMakeRange(32, 64)];
+                    NSURLSession *session = [NSURLSession sharedSession];
+                    [[session downloadTaskWithURL:[NSURL URLWithString:url] completionHandler:^(NSURL * _Nullable location, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+                        
+                        //decrypt
+                        NSData *key = [EncodingTools dataWithHexString:keyHex];
+                        NSData *iv = [EncodingTools dataWithHexString:ivHex];
+                        
+                        NSData *decrypted;
+                        NSData *downloaded= [NSData dataWithContentsOfURL:location];
+                        if(downloaded && downloaded.length>0) {
+                            decrypted=[AESGcm decrypt:downloaded withKey:key andIv:iv withAuth:nil];
+                        } else {
+                            DDLogError(@"no data from aesgcm link, error %@", error);
+                        }
+                         [self.fileQueue addOperationWithBlock:^{
+                        NSString *path =  [self savefilePathforURL:link];
+                        [decrypted writeToFile:path atomically:YES];
+                        if(downloaded) [self.imageCache setObject:downloaded forKey:link];
+                        if(completionHandler) completionHandler(decrypted);
+                         }];
+                        
+                    }] resume];
+                });
                 
             } else {
                 DDLogError(@"aesgcm key and iv too short %@", link);

@@ -315,4 +315,9 @@ Decline a call request
 
 -(void) setupSignal; 
 
+
+
+-(void)changePassword:(NSString *) newPass;
+
+
 @end

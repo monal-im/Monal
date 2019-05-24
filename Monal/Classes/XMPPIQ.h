@@ -13,6 +13,9 @@
 #define kiqResultType @"result"
 #define kiqErrorType @"error"
 
+#define kRegisterNameSpace @"jabber:iq:register"
+
+
 @interface XMPPIQ : MLXMLNode
 
 -(id) initWithId:(NSString*) sessionid andType:(NSString*) iqType;
@@ -167,5 +170,8 @@ removes a contact from the roster
 
 
 -(void) requestNode:(NSString*) node;
+
+#pragma mark - account
+-(void) changePasswordForUser:(NSString *) user newPassword:(NSString *)newPsss;
 
 @end

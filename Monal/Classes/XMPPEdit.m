@@ -15,6 +15,7 @@
 #import "MLServerDetails.h"
 #import "MLMAMPrefTableViewController.h"
 #import "MLKeysTableViewController.h"
+#import "MLPasswordChangeTableViewController.h"
 
 #import "tools.h"
 
@@ -725,6 +726,15 @@ NSString *const kGtalk = @"Gtalk";
             keys.contact =@{@"buddy_name":self.jid, @"account_id":self.accountno};
         }
     }
+    else if ([segue.identifier isEqualToString:@"showPassChange"])
+    {
+        if(self.jid && self.accountno) {
+            MLPasswordChangeTableViewController *pwchange= (MLPasswordChangeTableViewController *)segue.destinationViewController;
+           pwchange.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountno];
+        }
+    }
+    
+    
 }
 
 #pragma mark -  text input  fielddelegate

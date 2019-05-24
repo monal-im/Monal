@@ -3571,6 +3571,17 @@ if(!self.supportsSM3)
     self.jingle=nil;
 }
 
+#pragma mark - account management
+
+-(void)changePassword:(NSString *) newPass
+{
+    XMPPIQ* iq =[[XMPPIQ alloc] initWithType:kiqSetType];
+    [iq setiqTo:self.domain];
+    [iq changePasswordForUser:self.username newPassword:newPass];
+     [self send:iq];
+}
+
+
 
 
 #pragma mark - nsstream delegate

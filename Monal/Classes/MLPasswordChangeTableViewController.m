@@ -20,9 +20,9 @@
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
--(IBAction) addPress:(id)sender
+-(IBAction) changePress:(id)sender
 {
-    if([[MLXMPPManager sharedInstance].connectedXMPP count]==0)
+    if(!self.xmppAccount)
     {
         UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:@"No connected accounts" message:@"Please make sure you are connected before chaning your password." preferredStyle:UIAlertControllerStyleAlert];
         UIAlertAction *closeAction =[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
@@ -36,17 +36,7 @@
         
         if(self.password.text.length>0)
         {
-//            NSDictionary* contact =@{@"row":[NSNumber numberWithInteger:_selectedRow],@"buddy_name":self.contactName.text};
-//            [[MLXMPPManager sharedInstance] addContact:contact];
-//
-//            UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:@"Permission Requested" message:@"The new contact will be added to your contacts list when the person you've added has approved your request." preferredStyle:UIAlertControllerStyleAlert];
-//            UIAlertAction *closeAction =[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
-//                [self dismissViewControllerAnimated:YES completion:nil];
-//            }];
-//            [messageAlert addAction:closeAction];
-//
-//            [self presentViewController:messageAlert animated:YES completion:nil];
-//
+            [self.xmppAccount changePassword:self.password.text];
         }
         else
         {
@@ -142,17 +132,14 @@
                 self.password =textCell.textInput;
                 self.password.placeholder = @"New Password";
                 self.password.delegate=self;
+                self.password.secureTextEntry=YES;
             }
            
             cell= textCell;
             break;
         }
         case 1: {
-            
             cell =[tableView dequeueReusableCellWithIdentifier:@"addButton"];
-            
-            
-            
             break;
         }
         default:
@@ -170,16 +157,6 @@
 }
 
 
-#pragma mark picker view datasource
-- (NSInteger)numberOfComponentsInPickerView:(UIPickerView *)pickerView
-{
-    return 1;
-}
-
-- (NSInteger)pickerView:(UIPickerView *)pickerView numberOfRowsInComponent:(NSInteger)component
-{
-    return [[MLXMPPManager sharedInstance].connectedXMPP count];
-}
 
 
 @end

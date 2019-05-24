@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "MLConstants.h"
-#import "MLXMPPManager.h"
+#import "xmpp.h"
 #import "MLButtonCell.h"
 #import "MLTextInputCell.h"
 
@@ -16,6 +16,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MLPasswordChangeTableViewController : UITableViewController <UITextFieldDelegate>
 
+@property (nonatomic, strong) xmpp *xmppAccount;
+-(IBAction) changePress:(id)sender;
+
 @end
+
 
 NS_ASSUME_NONNULL_END

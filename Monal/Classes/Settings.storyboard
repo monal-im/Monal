@@ -809,6 +809,9 @@
                                             <state key="normal" title="Change Password">
                                                 <color key="titleColor" red="0.4541509151" green="0.72539824249999996" blue="0.68004375699999997" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                             </state>
+                                            <connections>
+                                                <action selector="changePress:" destination="hjV-um-Y0a" eventType="touchUpInside" id="huz-rG-hO7"/>
+                                            </connections>
                                         </button>
                                     </subviews>
                                     <constraints>

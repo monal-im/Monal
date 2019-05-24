@@ -31,41 +31,35 @@
 
 -(void) loadImage:(NSString *) link WithCompletion:(void (^)(void))completion
 {
-    if ([self.link hasPrefix:@"aesgcm://"]) {
-        self.attachmentImage.image=nil;
-        [[MLImageManager sharedInstance] attachmentDataFromEncryptedLink:self.link withCompletion:^(NSData * _Nullable data) {
-            if(data) {
+    self.link=link;
+    NSString *currentLink = link;
+    [[MLImageManager sharedInstance] imageForAttachmentLink:self.link withCompletion:^(NSData * _Nullable data) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if([currentLink isEqualToString:self.link]){
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    self.imageData=data; 
-                    self.attachmentImage.image=[[NSImage alloc] initWithData:data];
+                    if(data) {
+                        self.attachmentImage.image = [[NSImage alloc] initWithData:data];
+                        
+                        if (  self.attachmentImage.image.size.height>  self.attachmentImage.image.size.width) {
+                            self.imageHeight.constant = 360;
+                            
+                        }
+                        else
+                        {
+                            self.imageHeight.constant= 200;
+                        }
+                    } else  {
+                        self.attachmentImage.image=nil;
+                    }
+                    if(completion) completion();
                 });
             }
-        }];
-    }
-    else  {
-        NSMutableURLRequest *imageRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:link]];
-        imageRequest.cachePolicy= NSURLRequestReturnCacheDataElseLoad;
-        [[[NSURLSession sharedSession] dataTaskWithRequest:imageRequest completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
-            self.imageData= data;
-            dispatch_async(dispatch_get_main_queue(), ^{
-                if(data) {
-                    self.attachmentImage.image = [[NSImage alloc] initWithData:data];
-                    
-                    if (  self.attachmentImage.image.size.height>  self.attachmentImage.image.size.width) {
-                        self.imageHeight.constant = 360;
-                        
-                    }
-                    else
-                    {
-                        self.imageHeight.constant= 200;
-                    }
-                } else  {
-                    self.attachmentImage.image=nil;
-                }
-                if(completion) completion();
-            });
-        }] resume];
-    }
+                 if(completion) completion();
+            
+        });
+    }];
+    
+  
 }
 
 -(void) updateDisplay

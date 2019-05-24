@@ -2633,6 +2633,7 @@ static DataLayer *sharedInstance=nil;
 
 -(void) imageCacheForUrl:(NSString*) url withCompletion: (void (^)(NSString *path))completion
 {
+    if(!url) return;
     NSString* query=[NSString stringWithFormat:@"select path from imageCache where url=?"];
     NSArray *params=@[url];
     [self executeScalar:query andArguments:params withCompletion:^(NSObject *val) {

@@ -9,12 +9,6 @@
 #import "MLPasswordChangeTableViewController.h"
 
 
-#import "MLConstants.h"
-#import "MLXMPPManager.h"
-#import "MLButtonCell.h"
-#import "MLTextInputCell.h"
-
-
 @interface MLPasswordChangeTableViewController ()
 @property (nonatomic, weak)  UITextField* password;
 @end
@@ -156,6 +150,7 @@
         case 1: {
             
             cell =[tableView dequeueReusableCellWithIdentifier:@"addButton"];
+            
             
             
             break;

@@ -7,6 +7,10 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "MLConstants.h"
+#import "MLXMPPManager.h"
+#import "MLButtonCell.h"
+#import "MLTextInputCell.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

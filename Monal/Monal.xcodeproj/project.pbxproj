@@ -335,8 +335,6 @@
 		26AA70452146E43E00598605 /* icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 26AA70442146E43E00598605 /* icon.icns */; };
 		26AA70482146E43E00598605 /* ShareViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26AA70472146E43E00598605 /* ShareViewController.m */; };
 		26AA704B2146E43E00598605 /* ShareViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26AA70492146E43E00598605 /* ShareViewController.xib */; };
-		26AAAADA2295742400200433 /* MLPasswordChangeTableViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 26AAAAD82295742400200433 /* MLPasswordChangeTableViewController.h */; };
-		26AAAADB2295742400200433 /* MLPasswordChangeTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26AAAAD92295742400200433 /* MLPasswordChangeTableViewController.m */; };
 		26AAAADC2295742500200433 /* MLPasswordChangeTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26AAAAD92295742400200433 /* MLPasswordChangeTableViewController.m */; };
 		26AAE285179F7B0200271345 /* MLSettingCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 26AAE284179F7B0200271345 /* MLSettingCell.m */; };
 		26B0CA8921AE2E3C0080B133 /* MLSoundsTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B0CA8821AE2E3C0080B133 /* MLSoundsTableViewController.m */; };
@@ -2124,7 +2122,6 @@
 				26400735140B43BB00CF1107 /* rtperrors.hh in Headers */,
 				26400737140B43BB00CF1107 /* rtpexternaltransmitter.hh in Headers */,
 				26400738140B43BB00CF1107 /* rtphashtable.hh in Headers */,
-				26AAAADA2295742400200433 /* MLPasswordChangeTableViewController.h in Headers */,
 				2640073A140B43BB00CF1107 /* rtpinternalsourcedata.hh in Headers */,
 				2640073C140B43BB00CF1107 /* rtpipv4address.hh in Headers */,
 				2640073D140B43BB00CF1107 /* rtpipv4destination.hh in Headers */,
@@ -3124,7 +3121,6 @@
 				2640075B140B43BB00CF1107 /* rtpsourcedata.cpp in Sources */,
 				2640075D140B43BB00CF1107 /* rtpsources.cpp in Sources */,
 				26400760140B43BB00CF1107 /* rtptimeutilities.cpp in Sources */,
-				26AAAADB2295742400200433 /* MLPasswordChangeTableViewController.m in Sources */,
 				26400765140B43BB00CF1107 /* rtpudpv4transmitter.cpp in Sources */,
 				26400767140B43BB00CF1107 /* rtpudpv6transmitter.cpp in Sources */,
 			);

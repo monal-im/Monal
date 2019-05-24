@@ -39,6 +39,7 @@
     NSString *currentLink = link;
     [[MLImageManager sharedInstance] imageForAttachmentLink:self.link withCompletion:^(NSData * _Nullable data) {
         NSImage *image=[[NSImage alloc] initWithData:data];
+        self.imageData=data; 
         dispatch_async(dispatch_get_main_queue(), ^{
             if([currentLink isEqualToString:self.link]){
                     if(data) {

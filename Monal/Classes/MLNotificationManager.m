@@ -149,7 +149,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     NSString* acctString =[NSString stringWithFormat:@"%ld", (long)[[notification.userInfo objectForKey:@"accountNo"] integerValue]];
     NSString* fullName =[[DataLayer sharedInstance] fullName:[notification.userInfo objectForKey:@"from"] forAccount:acctString];
     
-     NSString* fullName =[[DataLayer sharedInstance] nickName:[notification.userInfo objectForKey:@"from"] forAccount:acctString];
+     NSString* nickName =[[DataLayer sharedInstance] nickName:[notification.userInfo objectForKey:@"from"] forAccount:acctString];
     
     NSString* nameToShow=[notification.userInfo objectForKey:@"from"];
     if([nickName length]>0) nameToShow=nickName;

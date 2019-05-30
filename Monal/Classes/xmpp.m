@@ -94,6 +94,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 //ping
 @property (nonatomic, assign) BOOL supportsPing;
+@property (nonatomic, assign) BOOL supportsPubSub;
 
 //stream resumption
 @property (nonatomic, assign) BOOL supportsSM3;
@@ -1179,6 +1180,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     if([self.serverFeatures containsObject:@"urn:xmpp:ping"])
     {
         self.supportsPing=YES;
+    }
+    
+    if([self.serverFeatures containsObject:@"http://jabber.org/protocol/pubsub"])
+    {
+        self.supportsPubSub=YES;
     }
     
 }
@@ -3236,6 +3242,7 @@ if(!self.supportsSM3)
 
 
 -(void) sendOMEMODevices:(NSArray *) devices {
+    if(!self.supportsPubSub) return;
     XMPPIQ *signalDevice = [[XMPPIQ alloc] initWithType:kiqSetType];
     [signalDevice publishDevices:devices];
     [self send:signalDevice];
@@ -3243,6 +3250,7 @@ if(!self.supportsSM3)
 
 -(void) sendOMEMOBundle
 {
+    if(!self.supportsPubSub) return;
     NSString *deviceid=[NSString stringWithFormat:@"%d",self.monalSignalStore.deviceid];
     XMPPIQ *signalKeys = [[XMPPIQ alloc] initWithType:kiqSetType];
     [signalKeys publishKeys:@{@"signedPreKeyPublic":self.monalSignalStore.signedPreKey.keyPair.publicKey, @"signedPreKeySignature":self.monalSignalStore.signedPreKey.signature, @"identityKey":self.monalSignalStore.identityKeyPair.publicKey, @"signedPreKeyId": [NSString stringWithFormat:@"%d",self.monalSignalStore.signedPreKey.preKeyId]} andPreKeys:self.monalSignalStore.preKeys withDeviceId:deviceid];
@@ -3270,6 +3278,7 @@ if(!self.supportsSM3)
 
 -(void) queryOMEMOBundleFrom:(NSString *) jid andDevice:(NSString *) deviceid
 {
+    if(!self.supportsPubSub) return;
     XMPPIQ* query2 =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqGetType];
     [query2 setiqTo:jid];
     [query2 requestBundles:deviceid]; //[NSString stringWithFormat:@"%@", devicenum]
@@ -3278,6 +3287,7 @@ if(!self.supportsSM3)
 
 -(void) queryOMEMODevicesFrom:(NSString *) jid
 {
+     if(!self.supportsPubSub) return;
     XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqGetType];
     [query setiqTo:jid];
     [query requestDevices];
@@ -3404,6 +3414,7 @@ if(!self.supportsSM3)
 #pragma mark client state
 -(void) setClientActive
 {
+    if(!self.supportsClientState) return; 
     MLXMLNode *activeNode =[[MLXMLNode alloc] initWithElement:@"active" ];
     [activeNode setXMLNS:@"urn:xmpp:csi:0"];
     [self send:activeNode];
@@ -3411,6 +3422,7 @@ if(!self.supportsSM3)
 
 -(void) setClientInactive
 {
+    if(!self.supportsClientState) return;
     MLXMLNode *activeNode =[[MLXMLNode alloc] initWithElement:@"inactive" ];
     [activeNode setXMLNS:@"urn:xmpp:csi:0"];
     [self send:activeNode];

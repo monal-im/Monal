@@ -46,14 +46,32 @@
     [super viewWillAppear:animated];
     [[MLXMPPManager sharedInstance] getVCard:_contact];
     self.tableView.rowHeight= UITableViewAutomaticDimension;
-    self.navigationItem.title=[self.contact objectForKey:@"full_name"];
+ 
+    NSString* nickName=[self.contact  objectForKey:@"nick_name"];
+    if([[nickName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0) {
+        self.navigationItem.title=nickName;
+    } else  {
+        NSString* fullName=[self.contact  objectForKey:@"full_name"];
+        if([[fullName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0) {
+            self.navigationItem.title=fullName;
+        }
+        else {
+             self.navigationItem.title=[self.contact  objectForKey:@"buddy_name"];
+        }
+        
+    }
+  
+    self.accountNo=[NSString stringWithFormat:@"%@", [self.contact objectForKey:@"account_id"]];
+    //if not in buddylist, add.
+    [[DataLayer sharedInstance] addContact:[self.contact objectForKey:@"buddy_name"]  forAccount:self.accountNo  fullname:@"" nickname:@"" withCompletion:^(BOOL success) {
+    }];
+    
     
 #ifndef DISABLE_OMEMO
-    self.accountNo=[NSString stringWithFormat:@"%@", [self.contact objectForKey:@"account_id"]];
     self.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
     [self.xmppAccount queryOMEMODevicesFrom:[self.contact objectForKey:@"buddy_name"]];
 #endif
-    
+   
     [self refreshLock];
     [self refreshMute];
     
@@ -138,7 +156,12 @@
            if(indexPath.row==0)
            {
                MLTextInputCell *cell=  (MLTextInputCell *)[tableView dequeueReusableCellWithIdentifier:@"TextCell"];
+                   NSString* nickName=[self.contact  objectForKey:@"nick_name"];
+               if([[nickName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0) {
+                   cell.textInput.text=[_contact objectForKey:@"nick_name"];
+               } else {
                cell.textInput.text=[_contact objectForKey:@"full_name"];
+               }
                if([cell.textInput.text isEqualToString:@"(null)"])  cell.textInput.text=@"";
                cell.textInput.placeholder=@"Set a nickname";
                cell.textInput.delegate=self;
@@ -296,13 +319,8 @@ dispatch_async(dispatch_get_main_queue(), ^{
             [[DataLayer sharedInstance] disableEncryptForJid:[self.contact objectForKey:@"buddy_name"] andAccountNo:self.accountNo];
              [self refreshLock];
         } else {
-            //if not in buddylist, add.
-            [[DataLayer sharedInstance] addContact:[self.contact objectForKey:@"buddy_name"]  forAccount:self.accountNo  fullname:@"" nickname:@"" withCompletion:^(BOOL success) {
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [[DataLayer sharedInstance] encryptForJid:[self.contact objectForKey:@"buddy_name"] andAccountNo:self.accountNo];
-                    [self refreshLock];
-                });
-            }];
+            [[DataLayer sharedInstance] encryptForJid:[self.contact objectForKey:@"buddy_name"] andAccountNo:self.accountNo];
+            [self refreshLock];
         }
        
     } else  {
@@ -336,7 +354,7 @@ dispatch_async(dispatch_get_main_queue(), ^{
 
 
 -(BOOL) textFieldShouldEndEditing:(UITextField *)textField {
-    [[DataLayer sharedInstance] setFullName:textField.text forContact:[self.contact objectForKey:@"buddy_name"] andAccount:self.accountNo];
+    [[DataLayer sharedInstance] setNickName:textField.text forContact:[self.contact objectForKey:@"buddy_name"] andAccount:self.accountNo];
   
     if(textField.text.length>0)
         self.navigationItem.title = textField.text;

@@ -7,7 +7,7 @@
 //
 
 
-@import Foundation;
+#import <Foundation/Foundation.h>
 //#include "signal_protocol.h"
 #include "signal_protocol.h"
 

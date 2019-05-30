@@ -153,12 +153,18 @@
 
     NSDictionary* row = [_contacts objectAtIndex:indexPath.row];
     
-    NSString* fullName=[row objectForKey:@"full_name"];
-    if([[fullName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0) {
-        [cell showDisplayName:fullName];
-    }
-    else {
-        [cell showDisplayName:[row objectForKey:@"buddy_name"]];
+    NSString* nickName=[row objectForKey:@"nick_name"];
+    if([[nickName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0) {
+        [cell showDisplayName:nickName];
+    } else  {
+        NSString* fullName=[row objectForKey:@"full_name"];
+        if([[fullName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0) {
+            [cell showDisplayName:fullName];
+        }
+        else {
+            [cell showDisplayName:[row objectForKey:@"buddy_name"]];
+        }
+        
     }
     
     NSString *state= [[row objectForKey:@"state"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];

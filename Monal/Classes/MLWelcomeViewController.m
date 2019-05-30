@@ -33,7 +33,7 @@
     EAIntroPage *page1 = [EAIntroPage page];
     page1.title = @"Welcome to Monal";
     page1.titleColor=[UIColor darkGrayColor];
-    page1.desc = @"Chat with your friends and colleagues using XMPP!";
+    page1.desc = @"Chat for free with your friends and family!";
     page1.descColor=[UIColor blackColor];
     page1.titleIconView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"PeterRabbit7"]];
     page1.titleIconPositionY=100.f;
@@ -43,7 +43,7 @@
     EAIntroPage *page2 = [EAIntroPage page];
     page2.title = @"Choices Galore";
     page2.titleColor=[UIColor darkGrayColor];
-    page2.desc = @"Use your existing address or make a new one on the many servers around the world";
+    page2.desc = @"Use your existing account or make a new one on the many servers around the world";
     page2.titleIconView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"PeterRabbit8"]];
     page2.descColor=[UIColor blackColor];
     page2.titleIconPositionY=100.f;
@@ -53,7 +53,7 @@
     EAIntroPage *page3 = [EAIntroPage page];
     page3.title = @"Escape The Garden";
     page3.titleColor=[UIColor darkGrayColor];
-    page3.desc = @"You are not trapped in a garden. Use your account to talk to anyone else using XMPP";
+    page3.desc = @"You are not trapped in a garden. Talk to anyone else without anyone tracking you.";
     page3.descColor=[UIColor blackColor];
     page3.titleIconView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"PeterRabbit23"]];
     page3.titleIconPositionY=100.f;

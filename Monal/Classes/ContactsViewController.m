@@ -909,13 +909,19 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     cell.count=0;
     cell.userImage.image=nil;
     cell.statusText.text=@"";
-  
-    NSString* fullName=[row objectForKey:@"full_name"];
-    if([[fullName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0) {
-        [cell showDisplayName:fullName];
-    }
-    else {
-        [cell showDisplayName:[row objectForKey:@"buddy_name"]];
+    
+    NSString* nickName=[row objectForKey:@"nick_name"];
+    if([[nickName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0) {
+        [cell showDisplayName:nickName];
+    } else  {
+        NSString* fullName=[row objectForKey:@"full_name"];
+        if([[fullName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0) {
+            [cell showDisplayName:fullName];
+        }
+        else {
+            [cell showDisplayName:[row objectForKey:@"buddy_name"]];
+        }
+        
     }
     
     if(![[row objectForKey:@"status"] isEqualToString:@"(null)"] && ![[row objectForKey:@"status"] isEqualToString:@""]) {

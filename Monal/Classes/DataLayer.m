@@ -868,7 +868,7 @@ static DataLayer *sharedInstance=nil;
 
 -(void) contactForUsername:(NSString*) username forAccount: (NSString*) accountNo withCompletion: (void (^)(NSArray *))completion
 {
-    NSString* query= query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, ifnull(full_name, buddy_name) as full_name, account_id, MUC, muc_subject, muc_nick , full_name as raw_full from buddylist where buddy_name=? and account_id=?"];
+    NSString* query= query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, ifnull(full_name, buddy_name) as full_name, nick_name, account_id, MUC, muc_subject, muc_nick , full_name as raw_full from buddylist where buddy_name=? and account_id=?"];
      NSArray *params= @[username, accountNo];
  
     [self executeReader:query andArguments:params  withCompletion:^(NSArray * toReturn) {
@@ -920,12 +920,12 @@ static DataLayer *sharedInstance=nil;
     
     if([sort isEqualToString:@"Name"])
     {
-        query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0 as 'count' , ifnull(full_name, buddy_name) as full_name, MUC, muc_subject, muc_nick, account_id from buddylist where online=1    order by full_name COLLATE NOCASE asc "];
+        query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0 as 'count' , ifnull(full_name, buddy_name) as full_name,nick_name,  MUC, muc_subject, muc_nick, account_id from buddylist where online=1    order by full_name COLLATE NOCASE asc "];
     }
     
     if([sort isEqualToString:@"Status"])
     {
-        query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0 as 'count', ifnull(full_name, buddy_name) as full_name, MUC, muc_subject, muc_nick, account_id from buddylist where   online=1   order by state,full_name COLLATE NOCASE  asc "];
+        query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0 as 'count', ifnull(full_name, buddy_name) as full_name,nick_name,  MUC, muc_subject, muc_nick, account_id from buddylist where   online=1   order by state,full_name COLLATE NOCASE  asc "];
     }
     
     [self executeReader:query withCompletion:^(NSMutableArray *results) {
@@ -936,7 +936,7 @@ static DataLayer *sharedInstance=nil;
 
 -(void) offlineContactsWithCompletion: (void (^)(NSMutableArray *))completion
 {
-    NSString* query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, ifnull(full_name, buddy_name) as full_name, a.account_id, MUC, muc_subject, muc_nick from buddylist  as A inner join account as b  on a.account_id=b.account_id  where  online=0 and enabled=1 order by full_name COLLATE NOCASE "];
+    NSString* query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, ifnull(full_name, buddy_name) as full_name,nick_name,  a.account_id, MUC, muc_subject, muc_nick from buddylist  as A inner join account as b  on a.account_id=b.account_id  where  online=0 and enabled=1 order by full_name COLLATE NOCASE "];
     [self executeReader:query withCompletion:^(NSMutableArray *results) {
         if(completion) completion(results);
     }];
@@ -1183,6 +1183,14 @@ static DataLayer *sharedInstance=nil;
    
     [self executeNonQuery:query andArguments:params withCompletion:nil];
     
+}
+
+-(NSString*) nickName:(NSString*) buddy forAccount:(NSString*) accountNo;
+{
+    NSString* query=[NSString stringWithFormat:@"select nick_name from buddylist where account_id=? and buddy_name=?"];
+    NSArray * params=@[accountNo, buddy];
+    NSString* fullname= (NSString*)[self executeScalar:query andArguments:params];
+    return fullname;
 }
 
 -(NSString*) fullName:(NSString*) buddy forAccount:(NSString*) accountNo;
@@ -1728,7 +1736,7 @@ static DataLayer *sharedInstance=nil;
     if([user count]>0)
     {
       
-        NSString* query=[NSString stringWithFormat:@"select x.* from(select distinct message_from,'', ifnull(full_name, message_from) as full_name, filename from message_history as a left outer join buddylist as b on a.message_from=b.buddy_name and a.account_id=b.account_id where a.account_id=?  union select distinct message_to  ,'', ifnull(full_name, message_to) as full_name, filename from message_history as a left outer join buddylist as b on a.message_to=b.buddy_name and a.account_id=b.account_id where a.account_id=?  and message_to!=\"(null)\" )  as x where message_from!=? and message_from!=?  order by full_name COLLATE NOCASE "];
+        NSString* query=[NSString stringWithFormat:@"select x.* from(select distinct message_from,'', ifnull(full_name, message_from) as full_name, nick_name, filename from message_history as a left outer join buddylist as b on a.message_from=b.buddy_name and a.account_id=b.account_id where a.account_id=?  union select distinct message_to  ,'', ifnull(full_name, message_to) as full_name,nick_name,  filename from message_history as a left outer join buddylist as b on a.message_to=b.buddy_name and a.account_id=b.account_id where a.account_id=?  and message_to!=\"(null)\" )  as x where message_from!=? and message_from!=?  order by full_name COLLATE NOCASE "];
         NSArray *params=@[accountNo, accountNo,
                           ((NSString *)[[user objectAtIndex:0] objectForKey:@"username"]),
                          // ((NSString *)[[user objectAtIndex:0] objectForKey:@"username"]),
@@ -1877,7 +1885,7 @@ static DataLayer *sharedInstance=nil;
 #pragma mark active chats
 -(void) activeContactsWithCompletion: (void (^)(NSMutableArray *))completion
 {
-    NSString* query=[NSString stringWithFormat:@"select  distinct a.buddy_name,  state, status,  filename, ifnull(b.full_name, a.buddy_name) AS full_name, a.account_id,lastMessageTime, 0 AS 'count' from activechats as a LEFT OUTER JOIN buddylist AS b ON a.buddy_name = b.buddy_name  AND a.account_id = b.account_id order by lastMessageTime desc" ];
+    NSString* query=[NSString stringWithFormat:@"select  distinct a.buddy_name,  state, status,  filename, ifnull(b.full_name, a.buddy_name) AS full_name, nick_name,  a.account_id,lastMessageTime, 0 AS 'count' from activechats as a LEFT OUTER JOIN buddylist AS b ON a.buddy_name = b.buddy_name  AND a.account_id = b.account_id order by lastMessageTime desc" ];
     //	DDLogVerbose(query);
      [self executeReader:query withCompletion:^(NSMutableArray *results) {
          if(completion) completion(results);

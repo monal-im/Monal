@@ -1233,7 +1233,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                       
                         if([iqNode.features containsObject:@"urn:xmpp:push:0"])
                         {
-                            self.supportsPush=true;
+                            self.supportsPush=YES;
                             [self enablePush];
                         }
                         
@@ -2918,6 +2918,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         [values setObject:[NSNumber numberWithBool:self.supportsPush] forKey:@"supportsPush"];
     }
     
+    if(self.supportsClientState)
+    {
+        [values setObject:[NSNumber numberWithBool:self.supportsClientState] forKey:@"supportsClientState"];
+    }
+    
     if(self.supportsMam2)
     {
         [values setObject:[NSNumber numberWithBool:self.supportsMam2] forKey:@"supportsMAM"];
@@ -2987,6 +2992,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         {
             NSNumber *pushNumber = [dic objectForKey:@"supportsPush"];
             self.supportsPush = pushNumber.boolValue;
+        }
+        
+        if([dic objectForKey:@"supportsClientState"])
+        {
+            NSNumber *csiNumber = [dic objectForKey:@"supportsClientState"];
+            self.supportsClientState = csiNumber.boolValue;
         }
         
         if([dic objectForKey:@"supportsMAM"])

@@ -3250,7 +3250,7 @@ if(!self.supportsSM3)
 
 -(void) sendOMEMOBundle
 {
-    if(!self.supportsPubSub) return; 
+    if(!self.supportsPubSub) return;
     NSString *deviceid=[NSString stringWithFormat:@"%d",self.monalSignalStore.deviceid];
     XMPPIQ *signalKeys = [[XMPPIQ alloc] initWithType:kiqSetType];
     [signalKeys publishKeys:@{@"signedPreKeyPublic":self.monalSignalStore.signedPreKey.keyPair.publicKey, @"signedPreKeySignature":self.monalSignalStore.signedPreKey.signature, @"identityKey":self.monalSignalStore.identityKeyPair.publicKey, @"signedPreKeyId": [NSString stringWithFormat:@"%d",self.monalSignalStore.signedPreKey.preKeyId]} andPreKeys:self.monalSignalStore.preKeys withDeviceId:deviceid];
@@ -3414,6 +3414,7 @@ if(!self.supportsSM3)
 #pragma mark client state
 -(void) setClientActive
 {
+    if(!self.supportsClientState) return; 
     MLXMLNode *activeNode =[[MLXMLNode alloc] initWithElement:@"active" ];
     [activeNode setXMLNS:@"urn:xmpp:csi:0"];
     [self send:activeNode];
@@ -3421,6 +3422,7 @@ if(!self.supportsSM3)
 
 -(void) setClientInactive
 {
+    if(!self.supportsClientState) return;
     MLXMLNode *activeNode =[[MLXMLNode alloc] initWithElement:@"inactive" ];
     [activeNode setXMLNS:@"urn:xmpp:csi:0"];
     [self send:activeNode];

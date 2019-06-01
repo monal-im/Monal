@@ -38,12 +38,23 @@
         {
             [self.xmppAccount changePassword:self.password.text withCompletion:^(BOOL success, NSString *message) {
                 dispatch_async(dispatch_get_main_queue(), ^{
-                   if(!success) {
-                        //alert with message
-                    } else  {
-                        //alert with message
+                    NSString *title =@"Error";
+                    NSString *displayMessage =message;
+                    if(success) {
+                        title=@"Success";
+                        displayMessage=@"The password has been changed";
                         //update keychain, memory cache .
+                    } else  {
+                        if(displayMessage.length==0) displayMessage=@"Could not change the password";
                     }
+                    
+                    UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:title message:displayMessage preferredStyle:UIAlertControllerStyleAlert];
+                    UIAlertAction *closeAction =[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+                        
+                    }];
+                    [messageAlert addAction:closeAction];
+                    
+                    [self presentViewController:messageAlert animated:YES completion:nil];
                 });
             }];
         }

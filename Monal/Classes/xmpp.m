@@ -565,6 +565,18 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
 }
 
+-(void) sendLastAck
+{
+     //send last smacks ack as required by smacks revision 1.5.2
+    if(self.supportsSM3)
+    {
+        MLXMLNode *aNode = [[MLXMLNode alloc] initWithElement:@"a"];
+        NSDictionary *dic= @{@"xmlns":@"urn:xmpp:sm:3",@"h":[NSString stringWithFormat:@"%@",self.lastHandledInboundStanza] };
+        aNode.attributes = [dic mutableCopy];
+        [self writeToStream:aNode.XMLString]; // dont even bother queueing
+    }
+}
+
 -(void) disconnectWithCompletion:(void(^)(void))completion
 {
     if(self.explicitLogout && _accountState>=kStateHasStream)
@@ -578,17 +590,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 [disable setPushDisableWithNode:self.pushNode];
                 [self writeToStream:disable.XMLString]; // dont even bother queueing
             }
-            
-            //send last smacks ack as required by smacks revision 1.5.2
-            if(self.supportsSM3)
-            {
-                MLXMLNode *aNode = [[MLXMLNode alloc] initWithElement:@"a"];
-                NSDictionary *dic= @{@"xmlns":@"urn:xmpp:sm:3",@"h":[NSString stringWithFormat:@"%@",self.lastHandledInboundStanza] };
-                aNode.attributes = [dic mutableCopy];
-                [self writeToStream:aNode.XMLString]; // dont even bother queueing
-            }
-            
-            
+        
+            [self sendLastAck];
         }
         
         //close stream

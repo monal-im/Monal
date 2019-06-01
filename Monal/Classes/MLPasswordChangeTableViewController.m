@@ -7,6 +7,7 @@
 //
 
 #import "MLPasswordChangeTableViewController.h"
+#import "MLXMPPManager.h"
 
 
 @interface MLPasswordChangeTableViewController ()
@@ -43,7 +44,8 @@
                     if(success) {
                         title=@"Success";
                         displayMessage=@"The password has been changed";
-                        //update keychain, memory cache .
+               
+                       [[MLXMPPManager sharedInstance] updatePassword:self.password.text forAccount:self.xmppAccount.accountNo];
                     } else  {
                         if(displayMessage.length==0) displayMessage=@"Could not change the password";
                     }

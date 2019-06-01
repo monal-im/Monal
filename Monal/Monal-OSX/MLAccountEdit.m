@@ -211,8 +211,8 @@
                     if(result) {
                         [[DataLayer sharedInstance] executeScalar:@"select max(account_id) from account" withCompletion:^(NSObject * accountid) {
                             if(accountid) {
-                                [SAMKeychain setPassword:passwordText forService:@"Monal" account:[NSString stringWithFormat:@"%@", accountid]];
-                                
+                               
+                                   [[MLXMPPManager sharedInstance] updatePassword:passwordText forAccount:[NSString stringWithFormat:@"%@", accountid]];
                                 [self refreshPresenter];
                                 
                                 if(isEnabled)

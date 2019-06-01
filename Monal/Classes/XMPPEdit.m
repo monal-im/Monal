@@ -338,8 +338,7 @@ NSString *const kGtalk = @"Gtalk";
     {
         [[DataLayer sharedInstance] updateAccounWithDictionary:dic andCompletion:^(BOOL result) {
           
-            [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
-             [SAMKeychain setPassword:self.password forService:@"Monal" account:self.accountno];
+            [[MLXMPPManager sharedInstance] updatePassword:self.password forAccount:self.accountno];
             if(self.enabled)
             {
                 [[MLXMPPManager sharedInstance] connectAccount:self.accountno];

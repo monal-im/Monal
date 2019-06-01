@@ -96,6 +96,12 @@ Returns the server set name of the conencted account
  */
 -(NSDate *) connectedTimeFor:(NSString*) accountNo;
 
+/**
+ update the password in the keychan and update memory cache
+ */
+-(void) updatePassword:(NSString *) password forAccount:(NSString *) accountNo;
+
+
 #pragma mark MUC commands
 /**
  Gets a list of rooms on the confernce server

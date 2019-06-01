@@ -418,6 +418,15 @@ An array of Dics what have timers to make sure everything was sent
     
 }
 
+-(void) updatePassword:(NSString *) password forAccount:(NSString *) accountNo
+{
+    [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
+     [SAMKeychain setPassword:password forService:@"Monal" account:accountNo];
+    xmpp* xmpp =[self getConnectedAccountForID:accountNo];
+    xmpp.password=password;
+    
+}
+
 -(void) reachabilityChanged
 {
     for (NSDictionary* row in _connectedXMPP)

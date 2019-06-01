@@ -48,4 +48,6 @@
  */
 @property (nonatomic,strong) NSString* data;
 
+- (NSString *)stanzaID;
+
 @end

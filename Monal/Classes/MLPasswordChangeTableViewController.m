@@ -36,7 +36,16 @@
         
         if(self.password.text.length>0)
         {
-            [self.xmppAccount changePassword:self.password.text];
+            [self.xmppAccount changePassword:self.password.text withCompletion:^(BOOL success, NSString *message) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                   if(!success) {
+                        //alert with message
+                    } else  {
+                        //alert with message
+                        //update keychain, memory cache .
+                    }
+                });
+            }];
         }
         else
         {

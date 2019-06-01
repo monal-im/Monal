@@ -902,17 +902,45 @@
     
 }
 
+#pragma mark - Account Management
+-(void) getRegistrationFields
+{
+    MLXMLNode* query =[[MLXMLNode alloc] init];
+    query.element=@"query";
+    [query setXMLNS:kRegisterNameSpace];
+    [self.children addObject:query];
+}
+
+/*
+ This is really hardcoded for blabber.im might work for others
+ */
+-(void) registerUser:(NSString *) user withPassword:(NSString *) newPass andCaptcha:(NSString *) captcha
+{
+    MLXMLNode* query =[[MLXMLNode alloc] init];
+    query.element=@"query";
+    [query setXMLNS:kRegisterNameSpace];
+    
+    MLXMLNode* username =[[MLXMLNode alloc] init];
+    username.element=@"username";
+    username.data=user;
+    
+    MLXMLNode* password =[[MLXMLNode alloc] init];
+    password.element=@"password";
+    password.data=newPass;
+    
+    MLXMLNode* ocr =[[MLXMLNode alloc] init];
+    ocr.element=@"ocr";
+    ocr.data=captcha;
+    
+    [query.children addObject:username];
+    [query.children addObject:password];
+    [query.children addObject:ocr];
+    
+    [self.children addObject:query];
+}
+
 -(void) changePasswordForUser:(NSString *) user newPassword:(NSString *)newPass
 {
-    /*
-     <iq type='set' to='shakespeare.lit' id='change1'>
-     <query xmlns='jabber:iq:register'>
-     <username>bill</username>
-     <password>newpass</password>
-     </query>
-     </iq>
-     */
-    
     MLXMLNode* query =[[MLXMLNode alloc] init];
     query.element=@"query";
     [query setXMLNS:kRegisterNameSpace];

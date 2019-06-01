@@ -7,14 +7,7 @@
 //
 
 #import "MLXMLNode.h"
-
-#define kiqGetType @"get"
-#define kiqSetType @"set"
-#define kiqResultType @"result"
-#define kiqErrorType @"error"
-
-#define kRegisterNameSpace @"jabber:iq:register"
-
+#import "MLXMPPConstants.h"
 
 @interface XMPPIQ : MLXMLNode
 
@@ -173,5 +166,7 @@ removes a contact from the roster
 
 #pragma mark - account
 -(void) changePasswordForUser:(NSString *) user newPassword:(NSString *)newPsss;
+-(void) getRegistrationFields;
+-(void) registerUser:(NSString *) user withPassword:(NSString *) newPass andCaptcha:(NSString *) captcha;
 
 @end

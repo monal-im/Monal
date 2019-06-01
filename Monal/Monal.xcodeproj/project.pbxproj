@@ -882,6 +882,7 @@
 		26CF3EAC1780DE5C002B7085 /* ParseIq.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParseIq.m; sourceTree = "<group>"; };
 		26CF3EB01780DFD9002B7085 /* XMPPParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPParser.h; sourceTree = "<group>"; };
 		26CF3EB11780DFD9002B7085 /* XMPPParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPParser.m; sourceTree = "<group>"; };
+		26D0940622A14D03009C7AEF /* MLXMPPConstants.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLXMPPConstants.h; sourceTree = "<group>"; };
 		26D51CA91E2674D700141E04 /* NSData+NXOAuth2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+NXOAuth2.h"; sourceTree = "<group>"; };
 		26D51CAA1E2674D700141E04 /* NSData+NXOAuth2.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+NXOAuth2.m"; sourceTree = "<group>"; };
 		26D51CAB1E2674D700141E04 /* NSString+NXOAuth2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+NXOAuth2.h"; sourceTree = "<group>"; };
@@ -1139,6 +1140,7 @@
 				260C51D0177F08F50039634B /* xmpp.m */,
 				26C4B22221B6B91300610282 /* MLDNSLookup.h */,
 				26C4B22321B6B91300610282 /* MLDNSLookup.m */,
+				26D0940622A14D03009C7AEF /* MLXMPPConstants.h */,
 			);
 			name = XMPP;
 			sourceTree = "<group>";

@@ -143,6 +143,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 @property (nonatomic, strong) dispatch_source_t loginCancelOperation;
 
 
+@property (nonatomic, strong) NSMutableDictionary *xmppCompletionHandlers;
 @end
 
 
@@ -203,6 +204,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     else  {
         self.visibleState=YES;
     }
+    
+    self.xmppCompletionHandlers = [[NSMutableDictionary alloc] init];
     
     return self;
 }
@@ -404,6 +407,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self readState];
     
     [self connectionTask];
+    
+    if(self.registration) return;
     
     dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
     if(self.loginCancelOperation)  dispatch_source_cancel(self.loginCancelOperation);
@@ -1692,6 +1697,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                          postNotificationName: kMLHasRoomsNotice object: self];
                     }
                     
+                    BOOL success= YES;
+                    if([iqNode.type isEqualToString:kiqErrorType]) success=NO;
+                    
+                        xmppCompletion completion = [self.xmppCompletionHandlers objectForKey:iqNode.idval];
+                        if(completion) completion(success, @"");
+                    
                     
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"]  isEqualToString:@"message"])
@@ -2154,7 +2165,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     [self disconnectWithCompletion:^{
                         [self reconnect:5];
                     }];
-                   
+                    
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"stream:stream"])
                 {
@@ -2187,63 +2198,67 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             || (!self->_SSL && !self->_startTLSComplete)
                             || (self->_SSL && self->_oldStyleSSL))
                         {
-                            //look at menchanisms presented
-                            
-                            if(streamNode.SASLX_OAUTH2 && self.oAuth)
-                            {
-                                NSString* saslplain=[EncodingTools encodeBase64WithString: [NSString stringWithFormat:@"\0%@\0%@",  self->_username, self.oauthAccount.accessToken.accessToken ]];
-                                
-                                MLXMLNode* saslXML= [[MLXMLNode alloc]init];
-                                saslXML.element=@"auth";
-                                [saslXML.attributes setObject: @"urn:ietf:params:xml:ns:xmpp-sasl"  forKey:@"xmlns"];
-                                [saslXML.attributes setObject: @"X-OAUTH2"forKey: @"mechanism"];
-                                [saslXML.attributes setObject: @"auth:service"forKey: @"oauth2"];
-                                
-                                [saslXML.attributes setObject:@"http://www.google.com/talk/protocol/auth" forKey: @"xmlns:auth"];
-                                
-                                saslXML.data=saslplain;
-                                [self send:saslXML];
-                                
+                            if(self.registration){
+                                [self requestRegFormWithCompletion:nil];
                             }
-                            else if (streamNode.SASLPlain)
-                            {
-                                NSString* saslplain=[EncodingTools encodeBase64WithString: [NSString stringWithFormat:@"\0%@\0%@",  self->_username, self->_password ]];
+                            else {
+                                //look at menchanisms presented
                                 
-                                MLXMLNode* saslXML= [[MLXMLNode alloc]init];
-                                saslXML.element=@"auth";
-                                [saslXML.attributes setObject: @"urn:ietf:params:xml:ns:xmpp-sasl"  forKey:@"xmlns"];
-                                [saslXML.attributes setObject: @"PLAIN"forKey: @"mechanism"];
-                                
-                                
-                                [saslXML.attributes setObject:@"http://www.google.com/talk/protocol/auth" forKey: @"xmlns:ga"];
-                                [saslXML.attributes setObject:@"true" forKey: @"ga:client-uses-full-bind-result"];
-                                
-                                saslXML.data=saslplain;
-                                [self send:saslXML];
-                                
-                            }
-                            else
-                                if(streamNode.SASLDIGEST_MD5)
+                                if(streamNode.SASLX_OAUTH2 && self.oAuth)
                                 {
+                                    NSString* saslplain=[EncodingTools encodeBase64WithString: [NSString stringWithFormat:@"\0%@\0%@",  self->_username, self.oauthAccount.accessToken.accessToken ]];
+                                    
                                     MLXMLNode* saslXML= [[MLXMLNode alloc]init];
                                     saslXML.element=@"auth";
                                     [saslXML.attributes setObject: @"urn:ietf:params:xml:ns:xmpp-sasl"  forKey:@"xmlns"];
-                                    [saslXML.attributes setObject: @"DIGEST-MD5"forKey: @"mechanism"];
+                                    [saslXML.attributes setObject: @"X-OAUTH2"forKey: @"mechanism"];
+                                    [saslXML.attributes setObject: @"auth:service"forKey: @"oauth2"];
                                     
+                                    [saslXML.attributes setObject:@"http://www.google.com/talk/protocol/auth" forKey: @"xmlns:auth"];
+                                    
+                                    saslXML.data=saslplain;
                                     [self send:saslXML];
+                                    
+                                }
+                                else if (streamNode.SASLPlain)
+                                {
+                                    NSString* saslplain=[EncodingTools encodeBase64WithString: [NSString stringWithFormat:@"\0%@\0%@",  self->_username, self->_password ]];
+                                    
+                                    MLXMLNode* saslXML= [[MLXMLNode alloc]init];
+                                    saslXML.element=@"auth";
+                                    [saslXML.attributes setObject: @"urn:ietf:params:xml:ns:xmpp-sasl"  forKey:@"xmlns"];
+                                    [saslXML.attributes setObject: @"PLAIN"forKey: @"mechanism"];
+                                    
+                                    
+                                    [saslXML.attributes setObject:@"http://www.google.com/talk/protocol/auth" forKey: @"xmlns:ga"];
+                                    [saslXML.attributes setObject:@"true" forKey: @"ga:client-uses-full-bind-result"];
+                                    
+                                    saslXML.data=saslplain;
+                                    [self send:saslXML];
+                                    
                                 }
                                 else
-                                {
-                                    
-                                    //no supported auth mechanism try legacy
-                                    //[self disconnect];
-                                    DDLogInfo(@"no auth mechanism. will try legacy auth");
-                                    XMPPIQ* iqNode =[[XMPPIQ alloc] initWithElement:@"iq"];
-                                    [iqNode getAuthwithUserName:self.username ];
-                                    [self send:iqNode];
-                                }
+                                    if(streamNode.SASLDIGEST_MD5)
+                                    {
+                                        MLXMLNode* saslXML= [[MLXMLNode alloc]init];
+                                        saslXML.element=@"auth";
+                                        [saslXML.attributes setObject: @"urn:ietf:params:xml:ns:xmpp-sasl"  forKey:@"xmlns"];
+                                        [saslXML.attributes setObject: @"DIGEST-MD5"forKey: @"mechanism"];
+                                        
+                                        [self send:saslXML];
+                                    }
+                                    else
+                                    {
+                                        
+                                        //no supported auth mechanism try legacy
+                                        //[self disconnect];
+                                        DDLogInfo(@"no auth mechanism. will try legacy auth");
+                                        XMPPIQ* iqNode =[[XMPPIQ alloc] initWithElement:@"iq"];
+                                        [iqNode getAuthwithUserName:self.username ];
+                                        [self send:iqNode];
+                                    }
+                            }
                         }
-                        
                         
                     }
                     else
@@ -3596,14 +3611,37 @@ if(!self.supportsSM3)
 
 #pragma mark - account management
 
--(void)changePassword:(NSString *) newPass
+-(void) changePassword:(NSString *) newPass withCompletion:(xmppCompletion) completion
 {
     XMPPIQ* iq =[[XMPPIQ alloc] initWithType:kiqSetType];
     [iq setiqTo:self.domain];
     [iq changePasswordForUser:self.username newPassword:newPass];
-     [self send:iq];
+    if(completion) {
+        [self.xmppCompletionHandlers setObject:completion forKey:iq.stanzaID];
+    }
+    [self send:iq];
 }
 
+-(void) requestRegFormWithCompletion:(void(^)(NSData *captchaImage)) completion
+{
+    XMPPIQ* iq =[[XMPPIQ alloc] initWithType:kiqGetType];
+    [iq setiqTo:self.domain];
+    [iq getRegistrationFields];
+    if(completion) {
+      //completion
+    }
+    [self send:iq];
+}
+
+-(void) registerUser:(NSString *) username withPassword:(NSString *) password andCaptcha:(NSString *) captcha withCompletion:(xmppCompletion) completion
+{
+    XMPPIQ* iq =[[XMPPIQ alloc] initWithType:kiqSetType];
+    [iq setiqTo:self.domain];
+    [iq registerUser:username withPassword:password andCaptcha:captcha];
+    if(completion) {
+        [self.xmppCompletionHandlers setObject:completion forKey:iq.stanzaID];
+    }
+}
 
 
 

@@ -185,7 +185,6 @@ An array of Dics what have timers to make sure everything was sent
         xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
         if(xmppAccount.supportsClientState && xmppAccount.accountState>=kStateLoggedIn) {
             [xmppAccount setClientActive];
-           
         }
         
         if(xmppAccount.accountState>=kStateLoggedIn)
@@ -299,6 +298,7 @@ An array of Dics what have timers to make sure everything was sent
         // ask fro temp pass if not oauth
     }
      xmppAccount.contactsVC=self.contactVC;
+   // xmppAccount.registration=YES;
     
     [xmppAccount setupSignal];
     

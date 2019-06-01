@@ -8,6 +8,7 @@
 
 #import "ParseIq.h"
 #import "SignalPreKey.h"
+#import "EncodingTools.h"
 
 @interface ParseIq()
 
@@ -48,6 +49,8 @@
         _queryXMLNS=[attributeDict objectForKey:@"xmlns"];
         if([_queryXMLNS isEqualToString:@"http://jabber.org/protocol/disco#info"]) _discoInfo=YES;
         if([_queryXMLNS isEqualToString:@"http://jabber.org/protocol/disco#items"]) _discoItems=YES;
+        if([_queryXMLNS isEqualToString:kRegisterNameSpace]) _registration=YES;
+        
         
         if([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"jabber:iq:roster"])  {
             State=@"RosterQuery";
@@ -255,6 +258,22 @@
         _signedPreKeyId = [attributeDict objectForKey:@"signedPreKeyId"];
     }
     
+ 
+    //register
+    if([[attributeDict objectForKey:kXMLNS] isEqualToString:kDataNameSpace] && self.registration) {
+        if([elementName isEqualToString:@"form"]) {
+            State = @"RegistrationForm";
+           
+        }
+    }
+    
+    if([State isEqualToString:@"RegistrationForm"])
+    {
+         if([elementName isEqualToString:@"data"]) {
+             State = @"RegistrationFormData";
+         }
+    }
+    
     
 }
 
@@ -374,6 +393,14 @@
         _mam2Last=[_messageBuffer copy];
         return;
     }
+    
+    if(([elementName isEqualToString:@"data"]) && [State isEqualToString:@"RegistrationFormData"]
+       )
+    {
+        _captchaData=[EncodingTools dataWithBase64EncodedString:_messageBuffer];
+        return;
+    }
+    
 
 }
 

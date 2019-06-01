@@ -121,4 +121,9 @@
 }
 
 
+-(NSString *)stanzaID
+{
+    return  [self.attributes objectForKey:@"id"];
+}
+
 @end

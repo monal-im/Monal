@@ -40,6 +40,8 @@ FOUNDATION_EXPORT NSString *const kData;
 FOUNDATION_EXPORT NSString *const kContact;
 FOUNDATION_EXPORT NSString *const kCompletion;
 
+typedef void (^xmppCompletion)(BOOL success, NSString *message);
+
 @interface xmpp : NSObject <NSStreamDelegate>
 {
     NSInputStream *_iStream;
@@ -78,7 +80,7 @@ FOUNDATION_EXPORT NSString *const kCompletion;
 @property (nonatomic,assign) BOOL oldStyleSSL;
 @property (nonatomic,assign) BOOL selfSigned;
 @property (nonatomic,assign) BOOL oAuth;
-
+@property (nonatomic,assign) BOOL registration;
 
 @property (nonatomic,strong) jingleCall* call;
 
@@ -316,8 +318,12 @@ Decline a call request
 -(void) setupSignal; 
 
 
+#pragma mark - account management 
 
--(void)changePassword:(NSString *) newPass;
+-(void) changePassword:(NSString *) newPass withCompletion:(xmppCompletion) completion;
 
+-(void) requestRegFormWithCompletion:(void(^)(NSData *captchaImage)) completion;
+
+-(void) registerUser:(NSString *) username withPassword:(NSString *) password andCaptcha:(NSString *) captcha withCompletion:(xmppCompletion) completion;
 
 @end

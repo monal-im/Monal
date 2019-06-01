@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "XMPPParser.h"
-#import "XMPPIQ.h" // for the constants
+#import "MLXMPPConstants.h" 
 
 @interface ParseIq : XMPPParser
 {
@@ -21,6 +21,7 @@
 @property (nonatomic, assign, readonly) BOOL ping;
 @property (nonatomic, assign, readonly) BOOL legacyAuth;
 @property (nonatomic, assign, readonly) BOOL httpUpload;
+@property (nonatomic, assign, readonly) BOOL registration;
 
 @property (nonatomic, assign, readonly) BOOL shouldSetBind;
 @property (nonatomic, strong, readonly) NSString* jid;
@@ -67,5 +68,10 @@
 @property (nonatomic, strong, readonly) NSString* identityKey;
 @property (nonatomic, strong, readonly) NSString* deviceid; //sending device id
 @property (nonatomic, strong, readonly) NSMutableArray* omemoDevices; //array of device ids
+
+//registration
+@property (nonatomic, strong, readonly) NSData* captchaData;
+
+//pass change
 
 @end

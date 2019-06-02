@@ -232,7 +232,7 @@
                                         <rect key="frame" x="0.0" y="0.0" width="375" height="717"/>
                                         <subviews>
                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="nIY-Zh-Y3h" customClass="GLRoundedView">
-                                                <rect key="frame" x="16" y="97.333333333333371" width="343" height="450"/>
+                                                <rect key="frame" x="16" y="165.33333333333337" width="343" height="450"/>
                                                 <subviews>
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="9rn-gF-7f0" customClass="GLCapsuleView">
                                                         <rect key="frame" x="32" y="8" width="279" height="46"/>
@@ -255,7 +255,7 @@
                                                         </constraints>
                                                     </view>
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="fnI-Qh-1ok" customClass="GLCapsuleView">
-                                                        <rect key="frame" x="32" y="62" width="279" height="46"/>
+                                                        <rect key="frame" x="32" y="61.999999999999972" width="279" height="46"/>
                                                         <subviews>
                                                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Password" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="rHr-ew-oBM">
                                                                 <rect key="frame" x="8" y="8" width="263" height="30"/>
@@ -281,7 +281,7 @@
                                                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Enter the code you see above" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="nRE-Ax-qd6">
                                                                 <rect key="frame" x="8" y="8" width="263" height="30"/>
                                                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                                                <textInputTraits key="textInputTraits" autocorrectionType="no" secureTextEntry="YES"/>
+                                                                <textInputTraits key="textInputTraits" autocorrectionType="no"/>
                                                                 <connections>
                                                                     <outlet property="delegate" destination="vXZ-lx-hvc" id="SSB-sR-hTa"/>
                                                                 </connections>
@@ -315,6 +315,22 @@
                                                             <action selector="registerAccount:" destination="0z4-cM-T8Y" eventType="touchUpInside" id="q2J-Ro-c4X"/>
                                                         </connections>
                                                     </button>
+                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="hyG-BH-GJV">
+                                                        <rect key="frame" x="61" y="420" width="201" height="30"/>
+                                                        <constraints>
+                                                            <constraint firstAttribute="width" constant="201" id="4mA-Vl-Z0b"/>
+                                                            <constraint firstAttribute="height" constant="30" id="oZj-1g-XPd"/>
+                                                        </constraints>
+                                                        <fontDescription key="fontDescription" type="system" pointSize="19"/>
+                                                        <state key="normal" title="Terms of service">
+                                                            <color key="titleColor" red="0.4541509151" green="0.72539824249999996" blue="0.68004375699999997" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                            <color key="titleShadowColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
+                                                        </state>
+                                                        <connections>
+                                                            <action selector="openTos:" destination="0z4-cM-T8Y" eventType="touchUpInside" id="d0u-Xo-vk0"/>
+                                                            <action selector="useWithoutAccount:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="W6R-BG-ehI"/>
+                                                        </connections>
+                                                    </button>
                                                 </subviews>
                                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 <constraints>
@@ -331,16 +347,25 @@
                                                     <constraint firstItem="7rH-jb-dRr" firstAttribute="leading" secondItem="nIY-Zh-Y3h" secondAttribute="leading" constant="32" id="Wg4-P6-Giy"/>
                                                     <constraint firstAttribute="trailing" secondItem="9rn-gF-7f0" secondAttribute="trailing" constant="32" id="YpG-BY-gQj"/>
                                                     <constraint firstItem="fnI-Qh-1ok" firstAttribute="top" secondItem="9rn-gF-7f0" secondAttribute="bottom" constant="8" id="ZlW-RS-9xH"/>
+                                                    <constraint firstItem="hyG-BH-GJV" firstAttribute="centerX" secondItem="nIY-Zh-Y3h" secondAttribute="centerX" constant="-10" id="aa6-py-BNX"/>
                                                     <constraint firstAttribute="trailing" secondItem="fnI-Qh-1ok" secondAttribute="trailing" constant="32" id="avC-6h-R2H"/>
                                                     <constraint firstItem="fnI-Qh-1ok" firstAttribute="leading" secondItem="nIY-Zh-Y3h" secondAttribute="leading" constant="32" id="da2-RV-gYx"/>
                                                     <constraint firstAttribute="trailing" secondItem="vVj-Ir-R3d" secondAttribute="trailing" constant="32" id="eD0-Jm-ylA"/>
+                                                    <constraint firstItem="hyG-BH-GJV" firstAttribute="top" secondItem="dpn-up-7bR" secondAttribute="bottom" constant="14" id="h9u-JT-pbF"/>
                                                     <constraint firstAttribute="bottom" secondItem="dpn-up-7bR" secondAttribute="bottom" constant="44" id="pmf-vu-NPn"/>
                                                     <constraint firstItem="7rH-jb-dRr" firstAttribute="top" secondItem="vVj-Ir-R3d" secondAttribute="bottom" constant="34" id="rpc-4U-ocF"/>
                                                     <constraint firstItem="vVj-Ir-R3d" firstAttribute="top" secondItem="fnI-Qh-1ok" secondAttribute="bottom" constant="34" id="zuC-7e-G4T"/>
                                                 </constraints>
                                             </view>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Register an account on blabber.im below.  You will be reachable at &lt;yourusername&gt;@blabber.im." textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="DfQ-Vo-v2C">
-                                                <rect key="frame" x="32" y="8.0000000000000036" width="311" height="57.333333333333343"/>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="DfQ-Vo-v2C">
+                                                <rect key="frame" x="32" y="7.9999999999999929" width="311" height="125.33333333333331"/>
+                                                <string key="text">Like email, you can make your account on many sites and talk to anyone. You can use this form to make an account with blabber.im below.  </string>
+                                                <fontDescription key="fontDescription" type="system" pointSize="21"/>
+                                                <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Blabber.im is a public server, not affiliated with Monal. This page is provided for convenience. " textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="arw-q8-u8I">
+                                                <rect key="frame" x="16" y="623.33333333333337" width="343" height="38.333333333333371"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="16"/>
                                                 <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 <nil key="highlightedColor"/>
@@ -350,10 +375,14 @@
                                         <constraints>
                                             <constraint firstAttribute="trailing" secondItem="nIY-Zh-Y3h" secondAttribute="trailing" constant="16" id="Hsc-FD-QPm"/>
                                             <constraint firstItem="DfQ-Vo-v2C" firstAttribute="top" secondItem="n4p-Hz-bDB" secondAttribute="top" constant="8" id="Jz4-Uv-xnN"/>
+                                            <constraint firstItem="arw-q8-u8I" firstAttribute="centerX" secondItem="n4p-Hz-bDB" secondAttribute="centerX" id="L6i-m2-dfE"/>
                                             <constraint firstAttribute="trailing" secondItem="DfQ-Vo-v2C" secondAttribute="trailing" constant="32" id="Nbd-SD-fwx"/>
+                                            <constraint firstItem="arw-q8-u8I" firstAttribute="leading" secondItem="n4p-Hz-bDB" secondAttribute="leading" constant="16" id="WYj-VP-lPE"/>
                                             <constraint firstItem="DfQ-Vo-v2C" firstAttribute="leading" secondItem="n4p-Hz-bDB" secondAttribute="leading" constant="32" id="icU-Tz-XHS"/>
+                                            <constraint firstItem="arw-q8-u8I" firstAttribute="top" secondItem="nIY-Zh-Y3h" secondAttribute="bottom" constant="8" id="jKt-mJ-gNL"/>
                                             <constraint firstItem="nIY-Zh-Y3h" firstAttribute="top" secondItem="DfQ-Vo-v2C" secondAttribute="bottom" constant="32" id="rwN-kJ-4Zf"/>
                                             <constraint firstItem="nIY-Zh-Y3h" firstAttribute="leading" secondItem="n4p-Hz-bDB" secondAttribute="leading" constant="16" id="wye-DG-f0Z"/>
+                                            <constraint firstAttribute="trailing" secondItem="arw-q8-u8I" secondAttribute="trailing" constant="16" id="xin-Ow-fQy"/>
                                         </constraints>
                                     </view>
                                 </subviews>
@@ -372,20 +401,23 @@
                             <constraint firstItem="nuU-XP-Twl" firstAttribute="bottom" secondItem="tT2-oH-OMx" secondAttribute="bottom" id="8V6-bt-Rjo"/>
                             <constraint firstItem="tT2-oH-OMx" firstAttribute="leading" secondItem="nuU-XP-Twl" secondAttribute="leading" id="MHY-Rn-vNu"/>
                             <constraint firstItem="tT2-oH-OMx" firstAttribute="trailing" secondItem="nuU-XP-Twl" secondAttribute="trailing" id="bbu-ZU-Mz3"/>
-                            <constraint firstItem="tT2-oH-OMx" firstAttribute="top" secondItem="EY5-se-S4y" secondAttribute="top" constant="61" id="mlM-F5-klq"/>
+                            <constraint firstItem="tT2-oH-OMx" firstAttribute="top" secondItem="nuU-XP-Twl" secondAttribute="top" constant="-27" id="mlM-F5-klq"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="nuU-XP-Twl"/>
                     </view>
                     <navigationItem key="navigationItem" title="Register" id="xCl-CO-aFW">
                         <barButtonItem key="rightBarButtonItem" title="Close" id="29t-GS-Yof">
                             <connections>
-                                <action selector="useWithoutAccount:" destination="vXZ-lx-hvc" id="Sll-me-hIK"/>
+                                <action selector="useWithoutAccount:" destination="0z4-cM-T8Y" id="jxS-6A-izh"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
                     <connections>
+                        <outlet property="captcha" destination="nRE-Ax-qd6" id="Yy3-0s-gtE"/>
                         <outlet property="captchaImage" destination="vVj-Ir-R3d" id="oVd-ml-lvy"/>
                         <outlet property="contentView" destination="n4p-Hz-bDB" id="uwl-Ky-RWl"/>
+                        <outlet property="jid" destination="Tjb-kj-Z5d" id="wG9-Sk-XbF"/>
+                        <outlet property="password" destination="rHr-ew-oBM" id="AVY-to-hFy"/>
                         <outlet property="view" destination="EY5-se-S4y" id="AoK-S7-YuA"/>
                     </connections>
                 </viewController>

@@ -581,6 +581,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) disconnectWithCompletion:(void(^)(void))completion
 {
+    [self.xmppCompletionHandlers enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+        xmppCompletion completion = (xmppCompletion) obj;
+        completion(NO,@"");
+    }];
+    [self.xmppCompletionHandlers removeAllObjects];
+    
     if(self.explicitLogout && _accountState>=kStateHasStream)
     {
         if(_accountState>=kStateBound)
@@ -1215,11 +1221,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     if(self.accountState>=kStateBound)
                         self.lastHandledInboundStanza=[NSNumber numberWithInteger: [self.lastHandledInboundStanza integerValue]+1];
                     ParseIq* iqNode= [[ParseIq alloc]  initWithDictionary:stanzaToParse];
-                    if ([iqNode.type isEqualToString:kiqErrorType])
-                    {
-                        return;
-                    }
-                    
+                 
                     if(iqNode.discoInfo) {
                         [self cleanDisco];
                     }
@@ -1706,7 +1708,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     if([iqNode.type isEqualToString:kiqErrorType]) success=NO;
                     
                     xmppCompletion completion = [self.xmppCompletionHandlers objectForKey:iqNode.idval];
-                    if(completion) completion(success, @"");
+                    if(completion)  {
+                        completion(success, @"");
+                        [self.xmppCompletionHandlers removeObjectForKey:iqNode.idval];
+                    }
                     
                     if(self.registration && [iqNode.queryXMLNS isEqualToString:kRegisterNameSpace])
                     {
@@ -3648,6 +3653,7 @@ if(!self.supportsSM3)
     if(completion) {
         [self.xmppCompletionHandlers setObject:completion forKey:iq.stanzaID];
     }
+    [self send:iq];
 }
 
 

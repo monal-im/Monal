@@ -144,6 +144,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 
 @property (nonatomic, strong) NSMutableDictionary *xmppCompletionHandlers;
+
+
 @end
 
 
@@ -1703,8 +1705,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     BOOL success= YES;
                     if([iqNode.type isEqualToString:kiqErrorType]) success=NO;
                     
-                        xmppCompletion completion = [self.xmppCompletionHandlers objectForKey:iqNode.idval];
-                        if(completion) completion(success, @"");
+                    xmppCompletion completion = [self.xmppCompletionHandlers objectForKey:iqNode.idval];
+                    if(completion) completion(success, @"");
+                    
+                    if(self.registration && [iqNode.queryXMLNS isEqualToString:kRegisterNameSpace])
+                    {
+                        if(self.regFormCompletion) self.regFormCompletion(iqNode.captchaData);
+                    }
                     
                     
                 }
@@ -2202,7 +2209,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             || (self->_SSL && self->_oldStyleSSL))
                         {
                             if(self.registration){
-                                [self requestRegFormWithCompletion:nil];
+                                [self requestRegForm];
                             }
                             else {
                                 //look at menchanisms presented
@@ -3625,14 +3632,11 @@ if(!self.supportsSM3)
     [self send:iq];
 }
 
--(void) requestRegFormWithCompletion:(void(^)(NSData *captchaImage)) completion
+-(void) requestRegForm
 {
     XMPPIQ* iq =[[XMPPIQ alloc] initWithType:kiqGetType];
     [iq setiqTo:self.domain];
     [iq getRegistrationFields];
-    if(completion) {
-      //completion
-    }
     [self send:iq];
 }
 

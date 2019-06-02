@@ -30,8 +30,8 @@
     self.topImage.clipsToBounds=YES;
     
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
-    [nc addObserver:self selector:@selector(connected) name:kMonalAccountStatusChanged object:nil];
-    [nc addObserver:self selector:@selector(error) name:kXMPPError object:nil];
+//    [nc addObserver:self selector:@selector(connected) name:kMonalAccountStatusChanged object:nil];
+//    [nc addObserver:self selector:@selector(error) name:kXMPPError object:nil];
     
 }
 

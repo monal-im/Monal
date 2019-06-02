@@ -848,6 +848,7 @@ static DataLayer *sharedInstance=nil;
 
 -(BOOL) resetContactsForAccount:(NSString*) accountNo
 {
+    if(!accountNo) return NO;
     NSString* query2=[NSString stringWithFormat:@"delete from  buddy_resources  where buddy_id in (select buddy_id from  buddylist where account_id=?)"];
     NSArray *params=@[accountNo];
     [self executeNonQuery:query2 andArguments:params];

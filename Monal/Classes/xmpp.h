@@ -41,6 +41,7 @@ FOUNDATION_EXPORT NSString *const kContact;
 FOUNDATION_EXPORT NSString *const kCompletion;
 
 typedef void (^xmppCompletion)(BOOL success, NSString *message);
+typedef void (^xmppDataCompletion)(NSData *captchaImage);
 
 @interface xmpp : NSObject <NSStreamDelegate>
 {
@@ -125,6 +126,8 @@ typedef void (^xmppCompletion)(BOOL success, NSString *message);
 @property (nonatomic, readonly) BOOL pushEnabled;
 @property (nonatomic, readonly) BOOL usingCarbons2;
 @property (nonatomic, readonly) BOOL supportsRosterVersion;
+
+@property (nonatomic, strong) xmppDataCompletion regFormCompletion;
 
 //calculated
 @property (nonatomic,strong, readonly) NSString* versionHash;
@@ -322,7 +325,7 @@ Decline a call request
 
 -(void) changePassword:(NSString *) newPass withCompletion:(xmppCompletion) completion;
 
--(void) requestRegFormWithCompletion:(void(^)(NSData *captchaImage)) completion;
+-(void) requestRegFormWithCompletion:(xmppDataCompletion) completion;
 
 -(void) registerUser:(NSString *) username withPassword:(NSString *) password andCaptcha:(NSString *) captcha withCompletion:(xmppCompletion) completion;
 

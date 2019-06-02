@@ -379,6 +379,7 @@
 		26CF3EAA1780D6B7002B7085 /* XMPPIQ.m in Sources */ = {isa = PBXBuildFile; fileRef = 26CF3EA91780D6B7002B7085 /* XMPPIQ.m */; };
 		26CF3EAD1780DE5D002B7085 /* ParseIq.m in Sources */ = {isa = PBXBuildFile; fileRef = 26CF3EAC1780DE5C002B7085 /* ParseIq.m */; };
 		26CF3EB21780DFD9002B7085 /* XMPPParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 26CF3EB11780DFD9002B7085 /* XMPPParser.m */; };
+		26D0940C22A33E9B009C7AEF /* MLRegisterViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D0940A22A33E9A009C7AEF /* MLRegisterViewController.m */; };
 		26D51CCA1E2674D700141E04 /* NSData+NXOAuth2.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CAA1E2674D700141E04 /* NSData+NXOAuth2.m */; };
 		26D51CCB1E2674D700141E04 /* NSData+NXOAuth2.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CAA1E2674D700141E04 /* NSData+NXOAuth2.m */; };
 		26D51CCC1E2674D700141E04 /* NSString+NXOAuth2.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CAC1E2674D700141E04 /* NSString+NXOAuth2.m */; };
@@ -883,6 +884,8 @@
 		26CF3EB01780DFD9002B7085 /* XMPPParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPParser.h; sourceTree = "<group>"; };
 		26CF3EB11780DFD9002B7085 /* XMPPParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPParser.m; sourceTree = "<group>"; };
 		26D0940622A14D03009C7AEF /* MLXMPPConstants.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLXMPPConstants.h; sourceTree = "<group>"; };
+		26D0940A22A33E9A009C7AEF /* MLRegisterViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLRegisterViewController.m; sourceTree = "<group>"; };
+		26D0940B22A33E9B009C7AEF /* MLRegisterViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLRegisterViewController.h; sourceTree = "<group>"; };
 		26D51CA91E2674D700141E04 /* NSData+NXOAuth2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+NXOAuth2.h"; sourceTree = "<group>"; };
 		26D51CAA1E2674D700141E04 /* NSData+NXOAuth2.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+NXOAuth2.m"; sourceTree = "<group>"; };
 		26D51CAB1E2674D700141E04 /* NSString+NXOAuth2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+NXOAuth2.h"; sourceTree = "<group>"; };
@@ -1918,6 +1921,8 @@
 		26F396CE2196830E00EF5720 /* OnBoard */ = {
 			isa = PBXGroup;
 			children = (
+				26D0940B22A33E9B009C7AEF /* MLRegisterViewController.h */,
+				26D0940A22A33E9A009C7AEF /* MLRegisterViewController.m */,
 				26F396DB2197507100EF5720 /* GLTintButton.h */,
 				26F396DA2197506F00EF5720 /* GLTintButton.m */,
 				26F396D721968A8500EF5720 /* GLRoundedView.h */,
@@ -2921,6 +2926,7 @@
 				26AAAADC2295742500200433 /* MLPasswordChangeTableViewController.m in Sources */,
 				26D51CCC1E2674D700141E04 /* NSString+NXOAuth2.m in Sources */,
 				26B2A4EF1B73097500272E63 /* DDASLLogCapture.m in Sources */,
+				26D0940C22A33E9B009C7AEF /* MLRegisterViewController.m in Sources */,
 				26DA16E217C302BC00D0065E /* UIAlertView+Blocks.m in Sources */,
 				26B2A4FD1B73097500272E63 /* DDMultiFormatter.m in Sources */,
 				262E51921AD8CAC600788351 /* MLButtonCell.m in Sources */,

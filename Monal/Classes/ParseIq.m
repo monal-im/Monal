@@ -49,7 +49,10 @@
         _queryXMLNS=[attributeDict objectForKey:@"xmlns"];
         if([_queryXMLNS isEqualToString:@"http://jabber.org/protocol/disco#info"]) _discoInfo=YES;
         if([_queryXMLNS isEqualToString:@"http://jabber.org/protocol/disco#items"]) _discoItems=YES;
-        if([_queryXMLNS isEqualToString:kRegisterNameSpace]) _registration=YES;
+        if([_queryXMLNS isEqualToString:kRegisterNameSpace])
+        {
+            _registration=YES;
+        }
         
         
         if([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"jabber:iq:roster"])  {
@@ -261,9 +264,9 @@
  
     //register
     if([[attributeDict objectForKey:kXMLNS] isEqualToString:kDataNameSpace] && self.registration) {
-        if([elementName isEqualToString:@"form"]) {
+        if([elementName isEqualToString:@"x"]) {
             State = @"RegistrationForm";
-           
+            return;
         }
     }
     
@@ -271,6 +274,7 @@
     {
          if([elementName isEqualToString:@"data"]) {
              State = @"RegistrationFormData";
+             return;
          }
     }
     

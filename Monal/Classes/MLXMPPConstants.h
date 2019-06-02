@@ -17,6 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 #define kRegisterNameSpace @"jabber:iq:register"
 #define kDataNameSpace @"jabber:x:data"
+#define kBobNameSpace @"urn:xmpp:bob"
 
 
 

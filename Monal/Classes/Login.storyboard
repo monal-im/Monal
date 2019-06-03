@@ -175,7 +175,6 @@
                                     <constraint firstAttribute="bottom" secondItem="9KO-5L-PvL" secondAttribute="bottom" id="G8j-bI-9je"/>
                                     <constraint firstItem="9KO-5L-PvL" firstAttribute="leading" secondItem="uEV-8J-3dB" secondAttribute="leading" id="NJZ-NQ-Ydq"/>
                                     <constraint firstItem="9KO-5L-PvL" firstAttribute="top" secondItem="uEV-8J-3dB" secondAttribute="top" id="PZ7-bI-DHr"/>
-                                    <constraint firstItem="9KO-5L-PvL" firstAttribute="top" secondItem="uEV-8J-3dB" secondAttribute="top" id="S8L-nc-LQ3"/>
                                     <constraint firstAttribute="trailing" secondItem="9KO-5L-PvL" secondAttribute="trailing" id="nEq-TO-yV4"/>
                                 </constraints>
                             </scrollView>
@@ -226,7 +225,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" keyboardDismissMode="onDrag" translatesAutoresizingMaskIntoConstraints="NO" id="tT2-oH-OMx">
-                                <rect key="frame" x="0.0" y="61" width="375" height="717"/>
+                                <rect key="frame" x="0.0" y="88" width="375" height="690"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="n4p-Hz-bDB">
                                         <rect key="frame" x="0.0" y="0.0" width="375" height="717"/>
@@ -235,10 +234,10 @@
                                                 <rect key="frame" x="16" y="165.33333333333337" width="343" height="450"/>
                                                 <subviews>
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="9rn-gF-7f0" customClass="GLCapsuleView">
-                                                        <rect key="frame" x="32" y="8" width="279" height="46"/>
+                                                        <rect key="frame" x="32" y="7.9999999999999716" width="279" height="46"/>
                                                         <subviews>
                                                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Username" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Tjb-kj-Z5d">
-                                                                <rect key="frame" x="8" y="14.666666666666657" width="263" height="17"/>
+                                                                <rect key="frame" x="8" y="14.666666666666686" width="263" height="17"/>
                                                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                                 <textInputTraits key="textInputTraits" autocorrectionType="no" keyboardType="emailAddress"/>
                                                                 <connections>
@@ -378,6 +377,7 @@
                                             <constraint firstItem="arw-q8-u8I" firstAttribute="centerX" secondItem="n4p-Hz-bDB" secondAttribute="centerX" id="L6i-m2-dfE"/>
                                             <constraint firstAttribute="trailing" secondItem="DfQ-Vo-v2C" secondAttribute="trailing" constant="32" id="Nbd-SD-fwx"/>
                                             <constraint firstItem="arw-q8-u8I" firstAttribute="leading" secondItem="n4p-Hz-bDB" secondAttribute="leading" constant="16" id="WYj-VP-lPE"/>
+                                            <constraint firstAttribute="height" constant="717" id="huH-rE-iGZ"/>
                                             <constraint firstItem="DfQ-Vo-v2C" firstAttribute="leading" secondItem="n4p-Hz-bDB" secondAttribute="leading" constant="32" id="icU-Tz-XHS"/>
                                             <constraint firstItem="arw-q8-u8I" firstAttribute="top" secondItem="nIY-Zh-Y3h" secondAttribute="bottom" constant="8" id="jKt-mJ-gNL"/>
                                             <constraint firstItem="nIY-Zh-Y3h" firstAttribute="top" secondItem="DfQ-Vo-v2C" secondAttribute="bottom" constant="32" id="rwN-kJ-4Zf"/>
@@ -388,7 +388,6 @@
                                 </subviews>
                                 <constraints>
                                     <constraint firstAttribute="bottom" secondItem="n4p-Hz-bDB" secondAttribute="bottom" id="1Qr-xN-Szl"/>
-                                    <constraint firstItem="n4p-Hz-bDB" firstAttribute="centerY" secondItem="tT2-oH-OMx" secondAttribute="centerY" id="6Oo-yc-hEi"/>
                                     <constraint firstItem="n4p-Hz-bDB" firstAttribute="top" secondItem="tT2-oH-OMx" secondAttribute="top" id="Fen-BN-ztP"/>
                                     <constraint firstItem="n4p-Hz-bDB" firstAttribute="leading" secondItem="tT2-oH-OMx" secondAttribute="leading" id="HEi-ZK-wWR"/>
                                     <constraint firstItem="n4p-Hz-bDB" firstAttribute="centerX" secondItem="tT2-oH-OMx" secondAttribute="centerX" id="iWW-ru-wEH"/>
@@ -401,7 +400,7 @@
                             <constraint firstItem="nuU-XP-Twl" firstAttribute="bottom" secondItem="tT2-oH-OMx" secondAttribute="bottom" id="8V6-bt-Rjo"/>
                             <constraint firstItem="tT2-oH-OMx" firstAttribute="leading" secondItem="nuU-XP-Twl" secondAttribute="leading" id="MHY-Rn-vNu"/>
                             <constraint firstItem="tT2-oH-OMx" firstAttribute="trailing" secondItem="nuU-XP-Twl" secondAttribute="trailing" id="bbu-ZU-Mz3"/>
-                            <constraint firstItem="tT2-oH-OMx" firstAttribute="top" secondItem="nuU-XP-Twl" secondAttribute="top" constant="-27" id="mlM-F5-klq"/>
+                            <constraint firstItem="tT2-oH-OMx" firstAttribute="top" secondItem="nuU-XP-Twl" secondAttribute="top" id="mlM-F5-klq"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="nuU-XP-Twl"/>
                     </view>

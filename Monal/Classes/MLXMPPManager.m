@@ -137,7 +137,7 @@ An array of Dics what have timers to make sure everything was sent
                               , 1ull * NSEC_PER_SEC);
     
     dispatch_source_set_event_handler(_pinger, ^{
-        for(NSDictionary* row in self->_connectedXMPP)
+        for(NSDictionary* row in _connectedXMPP)
         {
             xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
             if(xmppAccount.accountState>=kStateBound) {

@@ -22,6 +22,7 @@
 		2602837F1D8DD56B001DD6B8 /* Quartz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2602837E1D8DD56B001DD6B8 /* Quartz.framework */; };
 		260283861D8DEFC1001DD6B8 /* MLPreviewObject.m in Sources */ = {isa = PBXBuildFile; fileRef = 260283851D8DEFC1001DD6B8 /* MLPreviewObject.m */; };
 		260283871D8DEFC1001DD6B8 /* MLPreviewObject.m in Sources */ = {isa = PBXBuildFile; fileRef = 260283851D8DEFC1001DD6B8 /* MLPreviewObject.m */; };
+		2602A70922A5431B006D3E72 /* MLRegSuccessViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2602A70822A5431A006D3E72 /* MLRegSuccessViewController.m */; };
 		260499E21B730E9000D11866 /* xmpp.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D0177F08F50039634B /* xmpp.m */; };
 		260499E31B730E9500D11866 /* MLXMLNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D3177F44AD0039634B /* MLXMLNode.m */; };
 		260499E41B730E9800D11866 /* XMPPIQ.m in Sources */ = {isa = PBXBuildFile; fileRef = 26CF3EA91780D6B7002B7085 /* XMPPIQ.m */; };
@@ -531,6 +532,8 @@
 		2602837E1D8DD56B001DD6B8 /* Quartz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quartz.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk/System/Library/Frameworks/Quartz.framework; sourceTree = DEVELOPER_DIR; };
 		260283841D8DEFC1001DD6B8 /* MLPreviewObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLPreviewObject.h; sourceTree = "<group>"; };
 		260283851D8DEFC1001DD6B8 /* MLPreviewObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLPreviewObject.m; sourceTree = "<group>"; };
+		2602A70722A5431A006D3E72 /* MLRegSuccessViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLRegSuccessViewController.h; sourceTree = "<group>"; };
+		2602A70822A5431A006D3E72 /* MLRegSuccessViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLRegSuccessViewController.m; sourceTree = "<group>"; };
 		26049A501B7314F400D11866 /* libjrtplib-static-OSX.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libjrtplib-static-OSX.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		26049A5A1B73163300D11866 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/System/Library/Frameworks/AVFoundation.framework; sourceTree = DEVELOPER_DIR; };
 		26049A5C1B73164500D11866 /* AVKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVKit.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/System/Library/Frameworks/AVKit.framework; sourceTree = DEVELOPER_DIR; };
@@ -1934,6 +1937,8 @@
 				26F396D02196836700EF5720 /* MLLogInViewController.m */,
 				26EE1B0A21A8F3CE00264B95 /* MLWelcomeViewController.h */,
 				26EE1B0B21A8F3CE00264B95 /* MLWelcomeViewController.m */,
+				2602A70722A5431A006D3E72 /* MLRegSuccessViewController.h */,
+				2602A70822A5431A006D3E72 /* MLRegSuccessViewController.m */,
 			);
 			name = OnBoard;
 			sourceTree = "<group>";
@@ -2850,6 +2855,7 @@
 				261A6281176C055400059090 /* ContactsViewController.m in Sources */,
 				26B0CA8921AE2E3C0080B133 /* MLSoundsTableViewController.m in Sources */,
 				261A6285176C156500059090 /* ActiveChatsViewController.m in Sources */,
+				2602A70922A5431B006D3E72 /* MLRegSuccessViewController.m in Sources */,
 				26F396DC2197507200EF5720 /* GLTintButton.m in Sources */,
 				26D51CDC1E2674D700141E04 /* NXOAuth2FileStreamWrapper.m in Sources */,
 				26B2A4F31B73097500272E63 /* DDFileLogger.m in Sources */,

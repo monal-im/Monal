@@ -3075,6 +3075,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) disconnectToResumeWithCompletion:(void (^)(void))completion
 {
+    [self sendLastAck];
     [self closeSocket]; // just closing socket to simulate a unintentional disconnect
     [self.networkQueue addOperationWithBlock:^{
         [self resetValues];

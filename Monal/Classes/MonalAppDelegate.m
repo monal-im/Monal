@@ -148,6 +148,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
            DDLogInfo(@"voip wake expiring");
            [[UIApplication sharedApplication] endBackgroundTask:tempTask];
             tempTask=UIBackgroundTaskInvalid;
+           [[MLXMPPManager sharedInstance] logoutAllKeepStreamWithCompletion:nil];
         }];
         
         [[MLXMPPManager sharedInstance] connectIfNecessary];

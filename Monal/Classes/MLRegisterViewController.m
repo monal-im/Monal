@@ -37,10 +37,10 @@
     self.xmppAccount.explicitLogout=NO;
     
     self.xmppAccount.username=@"nothing";
-    self.xmppAccount.domain=@"blabber.im";
+    self.xmppAccount.domain=kRegServer;
     
     self.xmppAccount.resource=@"MonalReg";
-    self.xmppAccount.server=@"blabber.im";
+    self.xmppAccount.server=kRegServer;
     self.xmppAccount.port=5222;
     self.xmppAccount.SSL=YES;
     self.xmppAccount.selfSigned=NO;
@@ -104,9 +104,9 @@
             } else {
                     [self.xmppAccount disconnect];
                     NSMutableDictionary *dic  = [[NSMutableDictionary alloc] init];
-                    [dic setObject:@"blabber.im" forKey:kDomain];
+                [dic setObject:kRegServer forKey:kDomain];
                     [dic setObject:self.jid.text forKey:kUsername];
-                    [dic setObject:@"blabber.im"  forKey:kServer];
+                    [dic setObject:kRegServer  forKey:kServer];
                     [dic setObject:@"5222" forKey:kPort];
                     NSString *resource=[NSString stringWithFormat:@"Monal-iOS.%d",rand()%100];
                     [dic setObject:resource  forKey:kResource];

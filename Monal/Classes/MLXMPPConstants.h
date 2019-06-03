@@ -8,6 +8,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+#define kRegServer @"blabber.im"
+
 #define kXMLNS @"xmlns"
 
 #define kiqGetType @"get"

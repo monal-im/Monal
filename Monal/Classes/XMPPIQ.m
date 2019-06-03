@@ -913,7 +913,6 @@
 
 /*
  This is really hardcoded for blabber.im might work for others
-  <x xmlns='jabber:x:data' type='submit'>
  */
 -(void) registerUser:(NSString *) user withPassword:(NSString *) newPass captcha:(NSString *) captcha andHiddenFields:(NSDictionary *)hiddenFields
 {

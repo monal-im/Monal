@@ -1715,7 +1715,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     
                     if(self.registration && [iqNode.queryXMLNS isEqualToString:kRegisterNameSpace])
                     {
-                        if(self.regFormCompletion) self.regFormCompletion(iqNode.captchaData);
+                        if(self.regFormCompletion) self.regFormCompletion(iqNode.captchaData, iqNode.hiddenFormFields);
                     }
                     
                     
@@ -3645,11 +3645,10 @@ if(!self.supportsSM3)
     [self send:iq];
 }
 
--(void) registerUser:(NSString *) username withPassword:(NSString *) password andCaptcha:(NSString *) captcha withCompletion:(xmppCompletion) completion
+-(void) registerUser:(NSString *) username withPassword:(NSString *) password captcha:(NSString *) captcha andHiddenFields:(NSDictionary *)hiddenFields withCompletion:(xmppCompletion) completion
 {
     XMPPIQ* iq =[[XMPPIQ alloc] initWithType:kiqSetType];
-    [iq setiqTo:self.domain];
-    [iq registerUser:username withPassword:password andCaptcha:captcha];
+    [iq registerUser:username withPassword:password captcha:captcha andHiddenFields:hiddenFields];
     if(completion) {
         [self.xmppCompletionHandlers setObject:completion forKey:iq.stanzaID];
     }

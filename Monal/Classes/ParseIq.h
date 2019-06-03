@@ -71,6 +71,7 @@
 
 //registration
 @property (nonatomic, strong, readonly) NSData* captchaData;
+@property (nonatomic, strong) NSMutableDictionary *hiddenFormFields;
 
 //pass change
 

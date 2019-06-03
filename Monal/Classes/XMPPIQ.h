@@ -167,6 +167,6 @@ removes a contact from the roster
 #pragma mark - account
 -(void) changePasswordForUser:(NSString *) user newPassword:(NSString *)newPsss;
 -(void) getRegistrationFields;
--(void) registerUser:(NSString *) user withPassword:(NSString *) newPass andCaptcha:(NSString *) captcha;
+-(void) registerUser:(NSString *) user withPassword:(NSString *) newPass captcha:(NSString *) captcha andHiddenFields:(NSDictionary *)hiddenFields;
 
 @end

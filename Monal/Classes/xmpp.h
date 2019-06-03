@@ -41,7 +41,7 @@ FOUNDATION_EXPORT NSString *const kContact;
 FOUNDATION_EXPORT NSString *const kCompletion;
 
 typedef void (^xmppCompletion)(BOOL success, NSString *message);
-typedef void (^xmppDataCompletion)(NSData *captchaImage);
+typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFields);
 
 @interface xmpp : NSObject <NSStreamDelegate>
 {
@@ -327,6 +327,6 @@ Decline a call request
 
 -(void) requestRegFormWithCompletion:(xmppDataCompletion) completion;
 
--(void) registerUser:(NSString *) username withPassword:(NSString *) password andCaptcha:(NSString *) captcha withCompletion:(xmppCompletion) completion;
+-(void) registerUser:(NSString *) username withPassword:(NSString *) password captcha:(NSString *) captcha andHiddenFields:(NSDictionary *)hiddenFields withCompletion:(xmppCompletion) completion;
 
 @end

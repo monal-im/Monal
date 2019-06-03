@@ -913,28 +913,63 @@
 
 /*
  This is really hardcoded for blabber.im might work for others
+  <x xmlns='jabber:x:data' type='submit'>
  */
--(void) registerUser:(NSString *) user withPassword:(NSString *) newPass andCaptcha:(NSString *) captcha
+-(void) registerUser:(NSString *) user withPassword:(NSString *) newPass captcha:(NSString *) captcha andHiddenFields:(NSDictionary *)hiddenFields
 {
     MLXMLNode* query =[[MLXMLNode alloc] init];
     query.element=@"query";
     [query setXMLNS:kRegisterNameSpace];
     
+    MLXMLNode* x =[[MLXMLNode alloc] init];
+    x.element=@"x";
+    [x setXMLNS:kDataNameSpace];
+    [x.attributes setValue:@"submit" forKey:@"type"];
+    
+    
     MLXMLNode* username =[[MLXMLNode alloc] init];
-    username.element=@"username";
-    username.data=user;
+    username.element=@"field";
+    [username.attributes setValue:@"username" forKey:@"var"];
+    MLXMLNode* usernameValue =[[MLXMLNode alloc] init];
+    usernameValue.element=@"value";
+    usernameValue.data=user;
+    [username.children addObject:usernameValue];
     
     MLXMLNode* password =[[MLXMLNode alloc] init];
-    password.element=@"password";
-    password.data=newPass;
+    password.element=@"field";
+    [password.attributes setValue:@"password" forKey:@"var"];
+    MLXMLNode* passwordValue =[[MLXMLNode alloc] init];
+    passwordValue.element=@"value";
+    passwordValue.data=newPass;
+     [password.children addObject:passwordValue];
     
     MLXMLNode* ocr =[[MLXMLNode alloc] init];
-    ocr.element=@"ocr";
-    ocr.data=captcha;
+    ocr.element=@"field";
+     [ocr.attributes setValue:@"ocr" forKey:@"var"];
+    MLXMLNode* ocrValue =[[MLXMLNode alloc] init];
+    ocrValue.element=@"value";
+    ocrValue.data=captcha;
+    [ocr.children addObject:ocrValue];
     
-    [query.children addObject:username];
-    [query.children addObject:password];
-    [query.children addObject:ocr];
+    [hiddenFields enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+       
+        MLXMLNode* field =[[MLXMLNode alloc] init];
+        field.element=@"field";
+        [field.attributes setValue:key forKey:@"var"];
+        MLXMLNode* fieldValue =[[MLXMLNode alloc] init];
+        fieldValue.element=@"value";
+        fieldValue.data=obj;
+        [field.children addObject:fieldValue];
+        
+        [x.children addObject:field];
+        
+    }];
+    
+    [x.children addObject:username];
+    [x.children addObject:password];
+    [x.children addObject:ocr];
+    
+    [query.children addObject:x];
     
     [self.children addObject:query];
 }

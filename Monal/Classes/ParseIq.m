@@ -14,6 +14,7 @@
 
 @property (nonatomic, strong) NSMutableArray* omemoDevices;
 @property (nonatomic, strong) NSMutableDictionary *currentPreKey;
+@property (nonatomic, strong) NSString *currentFormField;
 
 @end
 
@@ -272,6 +273,11 @@
     
     if([State isEqualToString:@"RegistrationForm"])
     {
+        if([elementName isEqualToString:@"field"] && [[attributeDict objectForKey:@"type"] isEqualToString:@"hidden"]) {
+            self.currentFormField =[attributeDict objectForKey:@"var"];
+            if(!self.hiddenFormFields) self.hiddenFormFields = [[NSMutableDictionary alloc] init];
+        }
+        
          if([elementName isEqualToString:@"data"]) {
              State = @"RegistrationFormData";
              return;
@@ -284,6 +290,16 @@
 
 - (void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName
 {
+    if(([elementName isEqualToString:@"value"]) && [State isEqualToString:@"RegistrationForm"]
+       )
+    {
+        if(self.currentFormField && _messageBuffer) {
+            [self.hiddenFormFields setObject:[_messageBuffer copy] forKey:self.currentFormField];
+        }
+        self.currentFormField=nil;
+        return;
+    }
+    
     if(([elementName isEqualToString:@"jid"]) && [State isEqualToString:@"Bind"]
 	   )
     {

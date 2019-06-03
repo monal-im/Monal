@@ -845,16 +845,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) sendPing
 {
-    
 #if TARGET_OS_IPHONE
-    dispatch_sync(dispatch_get_main_queue(), ^{
+    dispatch_async(dispatch_get_main_queue(), ^{
         if(([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
            || ([UIApplication sharedApplication].applicationState==UIApplicationStateInactive )) {
             return;
         }
-    });
 #endif
-    
+        
     if(self.accountState<kStateReconnecting  && !_reconnectScheduled)
     {
         DDLogInfo(@" ping calling reconnect");
@@ -896,6 +894,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             }
         }
     }
+#if TARGET_OS_IPHONE
+    });
+#endif
 }
 
 -(void) sendWhiteSpacePing

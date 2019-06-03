@@ -18,7 +18,13 @@
 #import "SAMKeychain.h"
 
 static const int ddLogLevel = LOG_LEVEL_VERBOSE;
-static const int pingFreqencyMinutes =1;
+
+#if TARGET_OS_IPHONE
+static const int pingFreqencyMinutes =10;
+#else
+static const int pingFreqencyMinutes =3;
+#endif
+
 static const int sendMessageTimeoutSeconds =10;
 
 NSString *const kXmppAccount= @"xmppAccount";
@@ -131,7 +137,7 @@ An array of Dics what have timers to make sure everything was sent
                               , 1ull * NSEC_PER_SEC);
     
     dispatch_source_set_event_handler(_pinger, ^{
-        for(NSDictionary* row in _connectedXMPP)
+        for(NSDictionary* row in self->_connectedXMPP)
         {
             xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
             if(xmppAccount.accountState>=kStateBound) {

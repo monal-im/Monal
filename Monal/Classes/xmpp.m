@@ -567,7 +567,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
 }
 
--(void) sendLastAck
+-(void) sendLastAck:(BOOL) disconnecting
 {
      //send last smacks ack as required by smacks revision 1.5.2
     if(self.supportsSM3)
@@ -575,7 +575,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         MLXMLNode *aNode = [[MLXMLNode alloc] initWithElement:@"a"];
         NSDictionary *dic= @{@"xmlns":@"urn:xmpp:sm:3",@"h":[NSString stringWithFormat:@"%@",self.lastHandledInboundStanza] };
         aNode.attributes = [dic mutableCopy];
-        [self writeToStream:aNode.XMLString]; // dont even bother queueing
+        if(!disconnecting) {
+            [self send:aNode];
+        } else  {
+            [self writeToStream:aNode.XMLString]; // dont even bother queueing
+        }
     }
 }
 
@@ -599,7 +603,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 [self writeToStream:disable.XMLString]; // dont even bother queueing
             }
         
-            [self sendLastAck];
+            [self sendLastAck:YES];
         }
         
         //close stream
@@ -3086,7 +3090,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) disconnectToResumeWithCompletion:(void (^)(void))completion
 {
-    [self sendLastAck];
+    [self sendLastAck:YES];
     [self closeSocket]; // just closing socket to simulate a unintentional disconnect
     [self.networkQueue addOperationWithBlock:^{
         [self resetValues];

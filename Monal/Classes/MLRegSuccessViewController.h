@@ -12,9 +12,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MLRegSuccessViewController : UIViewController
 
-@property (nonatomic, weak) IBOutlet UITextView *jid;
+@property (nonatomic, weak) IBOutlet UILabel *jid;
 @property (nonatomic, weak) IBOutlet UIImageView *QRCode;
 
+
+-(IBAction) close:(id)sender;
 
 @end
 

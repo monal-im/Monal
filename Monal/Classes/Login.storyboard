@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14490.70" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="6sv-dL-UsN">
-    <device id="retina5_9" orientation="portrait">
-        <adaptation id="fullscreen"/>
-    </device>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14810.11" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="6sv-dL-UsN">
+    <device id="retina5_9" orientation="portrait" appearance="dark"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14490.49"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14766.13"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+        <capability name="iOS 13.0 system colors" minToolsVersion="11.0"/>
     </dependencies>
     <scenes>
         <!--Login View Controller-->
@@ -46,7 +45,7 @@
                                                                 </connections>
                                                             </textField>
                                                         </subviews>
-                                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                        <color key="backgroundColor" cocoaTouchSystemColor="secondarySystemBackgroundColor"/>
                                                         <constraints>
                                                             <constraint firstItem="ktr-DL-MYt" firstAttribute="leading" secondItem="j1s-TP-Gbh" secondAttribute="leading" constant="8" id="0bn-h8-71g"/>
                                                             <constraint firstItem="ktr-DL-MYt" firstAttribute="centerY" secondItem="j1s-TP-Gbh" secondAttribute="centerY" id="U1A-RS-p81"/>
@@ -66,7 +65,7 @@
                                                                 </connections>
                                                             </textField>
                                                         </subviews>
-                                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                        <color key="backgroundColor" cocoaTouchSystemColor="secondarySystemBackgroundColor"/>
                                                         <constraints>
                                                             <constraint firstItem="Qrh-pK-XJH" firstAttribute="leading" secondItem="UsC-wr-MFj" secondAttribute="leading" constant="8" id="FNo-pu-Unk"/>
                                                             <constraint firstAttribute="trailing" secondItem="Qrh-pK-XJH" secondAttribute="trailing" constant="8" id="IFz-NI-okF"/>
@@ -108,7 +107,7 @@
                                                         </connections>
                                                     </button>
                                                 </subviews>
-                                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                <color key="backgroundColor" cocoaTouchSystemColor="tertiarySystemBackgroundColor"/>
                                                 <constraints>
                                                     <constraint firstAttribute="height" constant="275" id="0FA-kn-ANs"/>
                                                     <constraint firstItem="UsC-wr-MFj" firstAttribute="centerX" secondItem="LhW-wJ-Trm" secondAttribute="centerX" id="3yN-gD-Fpk"/>
@@ -149,7 +148,7 @@
                                                 <nil key="highlightedColor"/>
                                             </label>
                                         </subviews>
-                                        <color key="backgroundColor" red="0.96854275469999995" green="0.96868163350000003" blue="0.96851247549999997" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
                                         <gestureRecognizers/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="690" id="1gd-LY-bNd"/>
@@ -245,7 +244,7 @@
                                                                 </connections>
                                                             </textField>
                                                         </subviews>
-                                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                        <color key="backgroundColor" cocoaTouchSystemColor="secondarySystemBackgroundColor"/>
                                                         <constraints>
                                                             <constraint firstItem="Tjb-kj-Z5d" firstAttribute="leading" secondItem="9rn-gF-7f0" secondAttribute="leading" constant="8" id="7pR-2Q-AFz"/>
                                                             <constraint firstAttribute="trailing" secondItem="Tjb-kj-Z5d" secondAttribute="trailing" constant="8" id="9Na-dA-9wB"/>
@@ -265,7 +264,7 @@
                                                                 </connections>
                                                             </textField>
                                                         </subviews>
-                                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                        <color key="backgroundColor" cocoaTouchSystemColor="secondarySystemBackgroundColor"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="46" id="9pG-DL-QDL"/>
                                                             <constraint firstAttribute="trailing" secondItem="rHr-ew-oBM" secondAttribute="trailing" constant="8" id="EKI-It-BlM"/>
@@ -286,7 +285,7 @@
                                                                 </connections>
                                                             </textField>
                                                         </subviews>
-                                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                        <color key="backgroundColor" cocoaTouchSystemColor="secondarySystemBackgroundColor"/>
                                                         <constraints>
                                                             <constraint firstAttribute="trailing" secondItem="nRE-Ax-qd6" secondAttribute="trailing" constant="8" id="61S-tf-tvG"/>
                                                             <constraint firstAttribute="bottom" secondItem="nRE-Ax-qd6" secondAttribute="bottom" constant="8" id="ETc-g4-Pi2"/>
@@ -331,7 +330,7 @@
                                                         </connections>
                                                     </button>
                                                 </subviews>
-                                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                <color key="backgroundColor" cocoaTouchSystemColor="tertiarySystemBackgroundColor"/>
                                                 <constraints>
                                                     <constraint firstItem="dpn-up-7bR" firstAttribute="leading" secondItem="nIY-Zh-Y3h" secondAttribute="leading" constant="32" id="24V-SM-Cny"/>
                                                     <constraint firstAttribute="trailing" secondItem="dpn-up-7bR" secondAttribute="trailing" constant="32" id="6C8-gl-uZW"/>
@@ -370,7 +369,7 @@
                                                 <nil key="highlightedColor"/>
                                             </label>
                                         </subviews>
-                                        <color key="backgroundColor" red="0.96854275465011597" green="0.96868163347244263" blue="0.96851247549057007" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
                                         <constraints>
                                             <constraint firstAttribute="trailing" secondItem="nIY-Zh-Y3h" secondAttribute="trailing" constant="16" id="Hsc-FD-QPm"/>
                                             <constraint firstItem="DfQ-Vo-v2C" firstAttribute="top" secondItem="n4p-Hz-bDB" secondAttribute="top" constant="8" id="Jz4-Uv-xnN"/>
@@ -436,7 +435,7 @@
                     <view key="view" contentMode="scaleToFill" id="0mo-Eh-yZt">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
                         <viewLayoutGuide key="safeArea" id="c0g-te-PPH"/>
                     </view>
                     <navigationItem key="navigationItem" id="Esl-Pl-T97"/>

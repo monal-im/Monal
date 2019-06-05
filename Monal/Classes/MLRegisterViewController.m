@@ -11,6 +11,8 @@
 #import "DataLayer.h"
 #import "MLXMPPManager.h"
 #import "SAMKeychain.h"
+#import "MLRegSuccessViewController.h"
+
 @import QuartzCore;
 @import Crashlytics;
 @import SafariServices;
@@ -130,9 +132,20 @@
                             }];
                         }
                     }];
+                
+                [self performSegueWithIdentifier:@"showSuccess" sender:nil];
             }
         });
     }];
+}
+
+-(void) prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+{
+    if([segue.identifier isEqualToString:@"showSuccess"])
+    {
+        MLRegSuccessViewController *dest = (MLRegSuccessViewController *) segue.destinationViewController;
+        dest.jid.text = self.jid.text;
+    }
 }
 
 -(IBAction) useWithoutAccount:(id)sender

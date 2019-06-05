@@ -3753,7 +3753,9 @@ if(!self.supportsSM3)
                     
             }
             
-            [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, message, st_error]];
+            if(!self.registration) {
+                [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, message, st_error]];
+            }
             
             //everythign comes twice. just use the input stream
             if(stream==_oStream){

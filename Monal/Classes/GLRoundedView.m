@@ -36,7 +36,7 @@
 
 -(void) update {
     self.layer.cornerRadius=20;
-    self.backgroundColor=[UIColor whiteColor];
+  //  self.backgroundColor=[UIColor whiteColor];
 }
 
 

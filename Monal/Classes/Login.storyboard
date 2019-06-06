@@ -178,7 +178,7 @@
                                 </constraints>
                             </scrollView>
                         </subviews>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="D5I-O1-Ds7" firstAttribute="bottom" secondItem="uEV-8J-3dB" secondAttribute="bottom" id="RXk-DS-AXM"/>
                             <constraint firstItem="uEV-8J-3dB" firstAttribute="top" secondItem="D5I-O1-Ds7" secondAttribute="top" id="Rhf-cV-Ndy"/>
@@ -394,7 +394,7 @@
                                 </constraints>
                             </scrollView>
                         </subviews>
-                        <color key="backgroundColor" red="0.96854275465011597" green="0.96868163347244263" blue="0.96851247549057007" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="nuU-XP-Twl" firstAttribute="bottom" secondItem="tT2-oH-OMx" secondAttribute="bottom" id="8V6-bt-Rjo"/>
                             <constraint firstItem="tT2-oH-OMx" firstAttribute="leading" secondItem="nuU-XP-Twl" secondAttribute="leading" id="MHY-Rn-vNu"/>

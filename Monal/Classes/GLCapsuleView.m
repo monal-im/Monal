@@ -39,7 +39,7 @@
 -(void) update {
     self.layer.cornerRadius=self.frame.size.height/2;
     self.layer.borderColor=[UIColor monalGreen].CGColor;
-    self.backgroundColor=[UIColor whiteColor];
+    //self.backgroundColor=[UIColor whiteColor];
     self.layer.borderWidth=1.0;
 }
 

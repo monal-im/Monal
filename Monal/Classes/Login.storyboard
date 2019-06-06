@@ -417,6 +417,7 @@
                         <outlet property="contentView" destination="n4p-Hz-bDB" id="uwl-Ky-RWl"/>
                         <outlet property="jid" destination="Tjb-kj-Z5d" id="wG9-Sk-XbF"/>
                         <outlet property="password" destination="rHr-ew-oBM" id="AVY-to-hFy"/>
+                        <outlet property="scrollView" destination="tT2-oH-OMx" id="BXf-Ce-GoE"/>
                         <outlet property="view" destination="EY5-se-S4y" id="AoK-S7-YuA"/>
                         <segue destination="iOy-Fr-h6X" kind="show" identifier="showWelcome" id="2Ua-AK-nzQ"/>
                     </connections>

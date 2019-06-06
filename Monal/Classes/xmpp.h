@@ -157,7 +157,7 @@ extern NSString *const kXMPPSuccess;
 extern NSString *const kXMPPPresence;
 
 
-
+-(void) connectWithCompletion:(xmppCompletion) completion;
 -(void) connect;
 -(void) disconnect;
 

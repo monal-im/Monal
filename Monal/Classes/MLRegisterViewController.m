@@ -57,11 +57,13 @@
         dispatch_async(dispatch_get_main_queue(), ^{
             if(captchaImage) {
                 weakself.captchaImage.image= [UIImage imageWithData:captchaImage];
-                self.hiddenFields = hiddenFields;
+                weakself.hiddenFields = hiddenFields;
             } else {
                 //show error image
                 //self.captchaImage.image=
             }
+            weakself.xmppAccount.explicitLogout=YES;
+            [weakself.xmppAccount disconnect];//we dont want to see any time out errors
         });
     };
     [self.xmppAccount connect];
@@ -94,52 +96,63 @@
         self.loginHUD.label.text=@"Signing Up";
         self.loginHUD.mode=MBProgressHUDModeIndeterminate;
         self.loginHUD.removeFromSuperViewOnHide=YES;
-    [self.xmppAccount registerUser:self.jid.text withPassword:self.password.text captcha:self.captcha.text andHiddenFields: self.hiddenFields withCompletion:^(BOOL success, NSString *message) {
+    __weak MLRegisterViewController *weakself= self;
+    NSString *jid = [self.jid.text copy];
+    NSString *pass =[self.password.text copy];
+    NSString *code =[self.captcha.text copy];
+    self.xmppAccount.explicitLogout=NO;
+    self.xmppAccount.regFormCompletion=^(NSData *captchaImage, NSDictionary *hiddenFields) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            self.loginHUD.hidden=YES;
-            if(!success) {
-                NSString *displayMessage = message;
-                if(displayMessage.length==0) displayMessage = @"Could not register your username. Please check your code or change the username and try again.";
-                UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Error" message:displayMessage preferredStyle:UIAlertControllerStyleAlert];
-                [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-                    [alert dismissViewControllerAnimated:YES completion:nil];
-                }]];
-                [self presentViewController:alert animated:YES completion:nil];
-                
-            } else {
-                    [self.xmppAccount disconnect];
-                    NSMutableDictionary *dic  = [[NSMutableDictionary alloc] init];
-                [dic setObject:kRegServer forKey:kDomain];
-                    [dic setObject:self.jid.text forKey:kUsername];
-                    [dic setObject:kRegServer  forKey:kServer];
-                    [dic setObject:@"5222" forKey:kPort];
-                    NSString *resource=[NSString stringWithFormat:@"Monal-iOS.%d",rand()%100];
-                    [dic setObject:resource  forKey:kResource];
-                    [dic setObject:@YES forKey:kSSL];
-                    [dic setObject:@YES forKey:kEnabled];
-                    [dic setObject:@NO forKey:kSelfSigned];
-                    [dic setObject:@NO forKey:kOldSSL];
-                    [dic setObject:@NO forKey:kOauth];
-                
-                    NSString *passwordText = [self.password.text copy];
-                
-                    [[DataLayer sharedInstance] addAccountWithDictionary:dic andCompletion:^(BOOL result) {
-                        if(result) {
-                            [[DataLayer sharedInstance] executeScalar:@"select max(account_id) from account" withCompletion:^(NSObject * accountid) {
-                                if(accountid) {
-                                    NSString *accountno=[NSString stringWithFormat:@"%@",accountid];
-                                    [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
-                                    [SAMKeychain setPassword:passwordText forService:@"Monal" account:accountno];
-                                    [[MLXMPPManager sharedInstance] connectAccount:accountno];
-                                }
-                            }];
-                        }
-                    }];
-                
-                [self performSegueWithIdentifier:@"showSuccess" sender:nil];
-            }
+            weakself.loginHUD.hidden=YES;
         });
-    }];
+            [weakself.xmppAccount registerUser:jid withPassword:pass captcha:code andHiddenFields: weakself.hiddenFields withCompletion:^(BOOL success, NSString *message) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if(!success) {
+                        NSString *displayMessage = message;
+                        if(displayMessage.length==0) displayMessage = @"Could not register your username. Please check your code or change the username and try again.";
+                        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Error" message:displayMessage preferredStyle:UIAlertControllerStyleAlert];
+                        [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                            [alert dismissViewControllerAnimated:YES completion:nil];
+                        }]];
+                        [weakself presentViewController:alert animated:YES completion:nil];
+                        
+                    } else {
+                       
+                        NSMutableDictionary *dic  = [[NSMutableDictionary alloc] init];
+                        [dic setObject:kRegServer forKey:kDomain];
+                        [dic setObject:weakself.jid.text forKey:kUsername];
+                        [dic setObject:kRegServer  forKey:kServer];
+                        [dic setObject:@"5222" forKey:kPort];
+                        NSString *resource=[NSString stringWithFormat:@"Monal-iOS.%d",rand()%100];
+                        [dic setObject:resource  forKey:kResource];
+                        [dic setObject:@YES forKey:kSSL];
+                        [dic setObject:@YES forKey:kEnabled];
+                        [dic setObject:@NO forKey:kSelfSigned];
+                        [dic setObject:@NO forKey:kOldSSL];
+                        [dic setObject:@NO forKey:kOauth];
+                        
+                        NSString *passwordText = [weakself.password.text copy];
+                        
+                        [[DataLayer sharedInstance] addAccountWithDictionary:dic andCompletion:^(BOOL result) {
+                            if(result) {
+                                [[DataLayer sharedInstance] executeScalar:@"select max(account_id) from account" withCompletion:^(NSObject * accountid) {
+                                    if(accountid) {
+                                        NSString *accountno=[NSString stringWithFormat:@"%@",accountid];
+                                        [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
+                                        [SAMKeychain setPassword:passwordText forService:@"Monal" account:accountno];
+                                        [[MLXMPPManager sharedInstance] connectAccount:accountno];
+                                    }
+                                }];
+                            }
+                        }];
+                        
+                            [weakself performSegueWithIdentifier:@"showSuccess" sender:nil];
+                    }
+                });
+            }];
+    };
+    [self.xmppAccount connect];
+  
 }
 
 -(void) prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
@@ -147,7 +160,7 @@
     if([segue.identifier isEqualToString:@"showSuccess"])
     {
         MLRegSuccessViewController *dest = (MLRegSuccessViewController *) segue.destinationViewController;
-        dest.jid.text = self.jid.text;
+        dest.registeredAccount = [NSString stringWithFormat:@"%@@%@",self.jid.text,kRegServer];
     }
 }
 

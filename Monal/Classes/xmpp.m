@@ -144,6 +144,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 
 @property (nonatomic, strong) NSMutableDictionary *xmppCompletionHandlers;
+@property (nonatomic, strong) xmppCompletion loginCompletion;
 
 
 @end
@@ -247,7 +248,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     if((_iStream==nil) || (_oStream==nil))
     {
         DDLogError(@"Connection failed");
-        [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, @"Unable to connect to server"]];
+        NSString *message=@"Unable to connect to server";
+        [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, message]];
+        if(self.loginCompletion)  {
+            self.loginCompletion(NO, message);
+            self.loginCompletion=nil;
+        }
         
         return;
     }
@@ -389,6 +395,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self createStreams];
 }
 
+-(void) connectWithCompletion:(xmppCompletion) completion
+{
+    [self connect];
+    if(completion) self.loginCompletion = completion;
+}
 
 -(void) connect
 {
@@ -591,6 +602,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }];
     [self.xmppCompletionHandlers removeAllObjects];
     
+    if(self.regFormCompletion) {
+        self.regFormCompletion(nil, nil);
+        self.regFormCompletion=nil;
+    }
+    
     if(self.explicitLogout && _accountState>=kStateHasStream)
     {
         if(_accountState>=kStateBound)
@@ -641,6 +657,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) reconnect:(NSInteger) scheduleWait
 {
+    if(self.registration) return;  //we never want to 
     [self.networkQueue cancelAllOperations];
     
     [self.networkQueue addOperationWithBlock: ^{
@@ -1724,13 +1741,17 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     
                     xmppCompletion completion = [self.xmppCompletionHandlers objectForKey:iqNode.idval];
                     if(completion)  {
+                        [self.xmppCompletionHandlers removeObjectForKey:iqNode.idval]; // remove first to prevent an infinite loop
                         completion(success, @"");
-                        [self.xmppCompletionHandlers removeObjectForKey:iqNode.idval];
                     }
+                
                     
                     if(self.registration && [iqNode.queryXMLNS isEqualToString:kRegisterNameSpace])
                     {
-                        if(self.regFormCompletion) self.regFormCompletion(iqNode.captchaData, iqNode.hiddenFormFields);
+                        if(self.regFormCompletion) {
+                            self.regFormCompletion(iqNode.captchaData, iqNode.hiddenFormFields);
+                            self.regFormCompletion=nil;
+                        }
                     }
                     
                     
@@ -2190,7 +2211,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"stream:error"])
                 {
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, @"XMPP stream error"]];
+                    NSString *message=@"XMPP stream error";
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self,message ]];
+                    if(self.loginCompletion)  {
+                        self.loginCompletion(NO, message);
+                        self.loginCompletion=nil;
+                    }
                     
                     [self disconnectWithCompletion:^{
                         [self reconnect:5];
@@ -2326,6 +2352,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 #ifndef DISABLE_OMEMO
                             [self sendSignalInitialStanzas];
 #endif
+                            if(self.loginCompletion) {
+                                self.loginCompletion(YES, @"");
+                                self.loginCompletion=nil;
+                            }
                         }
                         
                     }
@@ -2407,6 +2437,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     #endif
                     
                     [self sendInitalPresence];
+                    if(self.loginCompletion) {
+                        self.loginCompletion(YES, @"");
+                         self.loginCompletion=nil;
+                    }
             
                   
                 }
@@ -2467,6 +2501,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                 [self persistState];
                             }
                         }]];
+                    }
+                    
+                    if(self.loginCompletion) {
+                        self.loginCompletion(YES, @"");
+                        self.loginCompletion=nil;
                     }
                     
                 }
@@ -2544,7 +2583,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     }
                     
                     [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, message]];
-                    
+                    if(self.loginCompletion)  {
+                        self.loginCompletion(NO, message);
+                        self.loginCompletion=nil;
+                    }
                     
                     if(failure.saslError || failure.notAuthorized)
                     {
@@ -3755,6 +3797,10 @@ if(!self.supportsSM3)
             
             if(!self.registration) {
                 [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, message, st_error]];
+                if(self.loginCompletion)  {
+                    self.loginCompletion(NO, message);
+                    self.loginCompletion=nil;
+                }
             }
             
             //everythign comes twice. just use the input stream
@@ -3825,7 +3871,9 @@ if(!self.supportsSM3)
                
                
                DDLogInfo(@"unhandled stream error");
-              
+                [self disconnectWithCompletion:^{
+                [self reconnect:5];
+                }];
             
             break;
             

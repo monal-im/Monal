@@ -38,15 +38,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     UIColor *monalGreen = [UIColor monalGreen];
     UIColor *monaldarkGreen =[UIColor monaldarkGreen];
-    
-    [[UINavigationBar appearance] setBarTintColor:monalGreen];
-    [[UINavigationBar appearance] setTintColor:[UIColor whiteColor]];
-    [[UINavigationBar appearance] setTitleTextAttributes:@{
-                                                           NSForegroundColorAttributeName: [UIColor darkGrayColor]
-                                                           }];
+
+   // [[UINavigationBar appearance] setBarTintColor:monalGreen];
+    [[UINavigationBar appearance] setTintColor:monalGreen];
+//    [[UINavigationBar appearance] setTitleTextAttributes:@{
+//                                                           NSForegroundColorAttributeName: [UIColor darkGrayColor]
+//                                                           }];
     if (@available(iOS 11.0, *)) {
         [[UINavigationBar appearance] setPrefersLargeTitles:YES];
-        [[UINavigationBar appearance] setLargeTitleTextAttributes:@{NSForegroundColorAttributeName: [UIColor whiteColor]}];
+//        [[UINavigationBar appearance] setLargeTitleTextAttributes:@{NSForegroundColorAttributeName: [UIColor whiteColor]}];
     }
     
     [[UITabBar appearance] setTintColor:monaldarkGreen];

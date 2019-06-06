@@ -21,7 +21,8 @@
 
 -(void) viewWillAppear:(BOOL)animated
 {
- //set QR code 
+ //set QR code
+    self.jid.text= self.registeredAccount; 
 }
 
 -(IBAction) close:(id)sender

@@ -28,17 +28,14 @@
     [super viewDidLoad];
     self.topImage.layer.cornerRadius=5.0;
     self.topImage.clipsToBounds=YES;
-    
-    NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
-    [nc addObserver:self selector:@selector(connected) name:kMonalAccountStatusChanged object:nil];
-    [nc addObserver:self selector:@selector(error) name:kXMPPError object:nil];
-    [self registerForKeyboardNotifications];
-    
 }
 
 - (void) viewWillAppear:(BOOL)animated
 {
-   
+    NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+    [nc addObserver:self selector:@selector(connected) name:kMonalAccountStatusChanged object:nil];
+    [nc addObserver:self selector:@selector(error) name:kXMPPError object:nil];
+    [self registerForKeyboardNotifications];
 }
 
 -(void) openLink:(NSString *) link
@@ -224,10 +221,19 @@
 
 -(void) dealloc
 {
+    [self removeObservers];
+}
+
+
+-(void) removeObservers {
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
     [nc removeObserver:self];
 }
 
+-(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+{
+     [self removeObservers];
+}
 
 
 @end

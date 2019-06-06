@@ -3911,9 +3911,12 @@ if(!self.supportsSM3)
             }
         }
         //only react to stanzas, not nonzas
-        if(success && ([node.element isEqualToString:@"iq"] || [node.element isEqualToString:@"message"] || [node.element isEqualToString:@"presence"])) {
-            requestAck=YES;
-        }
+        if(success
+           && ([node.element isEqualToString:@"iq"]
+               || [node.element isEqualToString:@"message"]
+               || [node.element isEqualToString:@"presence"])) {
+               requestAck=YES;
+           }
     }
     
     DDLogVerbose(@"removing all objs from output ");

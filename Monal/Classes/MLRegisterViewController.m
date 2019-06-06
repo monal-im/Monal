@@ -179,11 +179,13 @@
 - (void)textFieldDidBeginEditing:(UITextField *)textField
 {
     self.activeField= textField;
+    self.scrollView.contentOffset = CGPointMake(0, self.activeField.frame.origin.y);
 }
 
 - (void)textFieldDidEndEditing:(UITextField *)textField
 {
     self.activeField=nil;
+    self.scrollView.contentOffset = CGPointZero;
 }
 
 

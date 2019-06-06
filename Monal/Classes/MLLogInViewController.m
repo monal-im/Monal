@@ -30,8 +30,8 @@
     self.topImage.clipsToBounds=YES;
     
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
-//    [nc addObserver:self selector:@selector(connected) name:kMonalAccountStatusChanged object:nil];
-//    [nc addObserver:self selector:@selector(error) name:kXMPPError object:nil];
+    [nc addObserver:self selector:@selector(connected) name:kMonalAccountStatusChanged object:nil];
+    [nc addObserver:self selector:@selector(error) name:kXMPPError object:nil];
     
 }
 
@@ -171,11 +171,18 @@
 - (void)textFieldDidBeginEditing:(UITextField *)textField
 {
     self.activeField= textField;
+    CGRect rect = [textField bounds];
+    rect = [textField convertRect:rect toView:self.scrollView];
+    rect.origin.x = 0 ;
+    rect.origin.y -= 60 ;
+    
+    [self.scrollView scrollRectToVisible:rect animated:YES];
 }
 
 - (void)textFieldDidEndEditing:(UITextField *)textField
 {
     self.activeField=nil;
+  //  self.scrollView.contentOffset=CGPointZero;
 }
 
 

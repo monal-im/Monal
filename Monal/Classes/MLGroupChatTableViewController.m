@@ -207,7 +207,7 @@
 
 - (UIColor *)backgroundColorForEmptyDataSet:(UIScrollView *)scrollView
 {
-    return [UIColor colorWithRed:255/255.0 green:250/255.0 blue:226/255.0 alpha:1];
+    return  [UIColor colorWithRed:255/255.0 green:250/255.0 blue:226/255.0 alpha:1];
 }
 
 - (BOOL)emptyDataSetShouldDisplay:(UIScrollView *)scrollView

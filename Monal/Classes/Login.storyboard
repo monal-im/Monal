@@ -445,28 +445,34 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Congratulations!" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="eEG-v1-Mb2">
-                                <rect key="frame" x="53" y="95" width="214" height="51"/>
+                                <rect key="frame" x="53" y="95" width="214" height="36"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="36" id="4SJ-u7-4lc"/>
+                                </constraints>
                                 <fontDescription key="fontDescription" style="UICTFontTextStyleTitle0"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="You are all ready to chat. People can message you  at:" textAlignment="center" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Trj-ps-nO8">
-                                <rect key="frame" x="16" y="188" width="288" height="50"/>
+                                <rect key="frame" x="16" y="166" width="288" height="41"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="50" id="CUy-4o-mv7"/>
+                                    <constraint firstAttribute="height" constant="60" id="CUy-4o-mv7"/>
                                 </constraints>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="someone@blabber.im" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0IG-5n-3XF">
-                                <rect key="frame" x="37.5" y="262" width="245" height="32"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="someone@blabber.im" textAlignment="center" lineBreakMode="characterWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0IG-5n-3XF">
+                                <rect key="frame" x="38" y="231" width="244.5" height="80"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="80" id="C9i-s4-OCy"/>
+                                </constraints>
                                 <fontDescription key="fontDescription" style="UICTFontTextStyleTitle1"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="c04-pS-Uoi" customClass="GLTintButton">
-                                <rect key="frame" x="20.5" y="339" width="279" height="46"/>
+                                <rect key="frame" x="20.5" y="340" width="279" height="46"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="46" id="dT9-oS-siW"/>
                                     <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="gcF-fD-BOL"/>
@@ -486,16 +492,16 @@
                         </subviews>
                         <color key="backgroundColor" red="0.96854275469999995" green="0.96868163350000003" blue="0.96851247549999997" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
-                            <constraint firstItem="0IG-5n-3XF" firstAttribute="top" secondItem="GAW-TI-wdw" secondAttribute="top" constant="262" id="2gh-3i-Ert"/>
                             <constraint firstItem="eEG-v1-Mb2" firstAttribute="centerX" secondItem="GAW-TI-wdw" secondAttribute="centerX" id="48d-wz-Ply"/>
-                            <constraint firstItem="0IG-5n-3XF" firstAttribute="centerX" secondItem="GAW-TI-wdw" secondAttribute="centerX" id="Dvs-ay-xeH"/>
+                            <constraint firstItem="0IG-5n-3XF" firstAttribute="leading" secondItem="Yoq-ju-vYy" secondAttribute="leading" constant="38" id="6gF-CK-T1W"/>
                             <constraint firstItem="Trj-ps-nO8" firstAttribute="leading" secondItem="Yoq-ju-vYy" secondAttribute="leading" constant="16" id="Fur-Ue-3QZ"/>
                             <constraint firstItem="c04-pS-Uoi" firstAttribute="centerX" secondItem="GAW-TI-wdw" secondAttribute="centerX" id="Kj5-n9-xRc"/>
                             <constraint firstItem="0IG-5n-3XF" firstAttribute="top" secondItem="Trj-ps-nO8" secondAttribute="bottom" constant="24" id="VHD-DN-VOp"/>
-                            <constraint firstItem="c04-pS-Uoi" firstAttribute="top" secondItem="0IG-5n-3XF" secondAttribute="bottom" constant="45" id="YLC-Rv-6Ca"/>
                             <constraint firstItem="eEG-v1-Mb2" firstAttribute="top" secondItem="Yoq-ju-vYy" secondAttribute="top" constant="31" id="aeX-WQ-Na3"/>
                             <constraint firstItem="Yoq-ju-vYy" firstAttribute="trailing" secondItem="Trj-ps-nO8" secondAttribute="trailing" constant="16" id="bZb-wI-cmc"/>
-                            <constraint firstItem="Trj-ps-nO8" firstAttribute="top" secondItem="eEG-v1-Mb2" secondAttribute="bottom" constant="42" id="iFF-xF-258"/>
+                            <constraint firstItem="Trj-ps-nO8" firstAttribute="top" secondItem="eEG-v1-Mb2" secondAttribute="bottom" constant="35" id="iFF-xF-258"/>
+                            <constraint firstItem="c04-pS-Uoi" firstAttribute="top" secondItem="0IG-5n-3XF" secondAttribute="bottom" constant="29" id="jPB-0N-7w9"/>
+                            <constraint firstItem="Yoq-ju-vYy" firstAttribute="trailing" secondItem="0IG-5n-3XF" secondAttribute="trailing" constant="37.5" id="p8o-SQ-uC7"/>
                             <constraint firstItem="Yoq-ju-vYy" firstAttribute="bottom" secondItem="c04-pS-Uoi" secondAttribute="bottom" constant="183" id="w5R-R7-nAR"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="Yoq-ju-vYy"/>
@@ -507,7 +513,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="lKk-ho-wVI" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-32.799999999999997" y="-2626.1083743842364"/>
+            <point key="canvasLocation" x="-33.75" y="-2627.1126760563379"/>
         </scene>
         <!--Welcome View Controller-->
         <scene sceneID="uOB-o2-0a1">

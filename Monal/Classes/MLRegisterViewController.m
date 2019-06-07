@@ -96,61 +96,60 @@
         self.loginHUD.label.text=@"Signing Up";
         self.loginHUD.mode=MBProgressHUDModeIndeterminate;
         self.loginHUD.removeFromSuperViewOnHide=YES;
-    __weak MLRegisterViewController *weakself= self;
+    
     NSString *jid = [self.jid.text copy];
     NSString *pass =[self.password.text copy];
     NSString *code =[self.captcha.text copy];
     self.xmppAccount.explicitLogout=NO;
-    self.xmppAccount.regFormCompletion=^(NSData *captchaImage, NSDictionary *hiddenFields) {
+
+    self.loginHUD.hidden=YES;
+    
+    [self.xmppAccount registerUser:jid withPassword:pass captcha:code andHiddenFields: self.hiddenFields withCompletion:^(BOOL success, NSString *message) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            weakself.loginHUD.hidden=YES;
-        });
-            [weakself.xmppAccount registerUser:jid withPassword:pass captcha:code andHiddenFields: weakself.hiddenFields withCompletion:^(BOOL success, NSString *message) {
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    if(!success) {
-                        NSString *displayMessage = message;
-                        if(displayMessage.length==0) displayMessage = @"Could not register your username. Please check your code or change the username and try again.";
-                        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Error" message:displayMessage preferredStyle:UIAlertControllerStyleAlert];
-                        [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-                            [alert dismissViewControllerAnimated:YES completion:nil];
-                        }]];
-                        [weakself presentViewController:alert animated:YES completion:nil];
-                        
-                    } else {
-                       
-                        NSMutableDictionary *dic  = [[NSMutableDictionary alloc] init];
-                        [dic setObject:kRegServer forKey:kDomain];
-                        [dic setObject:weakself.jid.text forKey:kUsername];
-                        [dic setObject:kRegServer  forKey:kServer];
-                        [dic setObject:@"5222" forKey:kPort];
-                        NSString *resource=[NSString stringWithFormat:@"Monal-iOS.%d",rand()%100];
-                        [dic setObject:resource  forKey:kResource];
-                        [dic setObject:@YES forKey:kSSL];
-                        [dic setObject:@YES forKey:kEnabled];
-                        [dic setObject:@NO forKey:kSelfSigned];
-                        [dic setObject:@NO forKey:kOldSSL];
-                        [dic setObject:@NO forKey:kOauth];
-                        
-                        NSString *passwordText = [weakself.password.text copy];
-                        
-                        [[DataLayer sharedInstance] addAccountWithDictionary:dic andCompletion:^(BOOL result) {
-                            if(result) {
-                                [[DataLayer sharedInstance] executeScalar:@"select max(account_id) from account" withCompletion:^(NSObject * accountid) {
-                                    if(accountid) {
-                                        NSString *accountno=[NSString stringWithFormat:@"%@",accountid];
-                                        [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
-                                        [SAMKeychain setPassword:passwordText forService:@"Monal" account:accountno];
-                                        [[MLXMPPManager sharedInstance] connectAccount:accountno];
-                                    }
-                                }];
+            if(!success) {
+                NSString *displayMessage = message;
+                if(displayMessage.length==0) displayMessage = @"Could not register your username. Please check your code or change the username and try again.";
+                UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Error" message:displayMessage preferredStyle:UIAlertControllerStyleAlert];
+                [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                    [alert dismissViewControllerAnimated:YES completion:nil];
+                }]];
+                [self presentViewController:alert animated:YES completion:nil];
+                
+            } else {
+                
+                NSMutableDictionary *dic  = [[NSMutableDictionary alloc] init];
+                [dic setObject:kRegServer forKey:kDomain];
+                [dic setObject:self.jid.text forKey:kUsername];
+                [dic setObject:kRegServer  forKey:kServer];
+                [dic setObject:@"5222" forKey:kPort];
+                NSString *resource=[NSString stringWithFormat:@"Monal-iOS.%d",rand()%100];
+                [dic setObject:resource  forKey:kResource];
+                [dic setObject:@YES forKey:kSSL];
+                [dic setObject:@YES forKey:kEnabled];
+                [dic setObject:@NO forKey:kSelfSigned];
+                [dic setObject:@NO forKey:kOldSSL];
+                [dic setObject:@NO forKey:kOauth];
+                
+                NSString *passwordText = [self.password.text copy];
+                
+                [[DataLayer sharedInstance] addAccountWithDictionary:dic andCompletion:^(BOOL result) {
+                    if(result) {
+                        [[DataLayer sharedInstance] executeScalar:@"select max(account_id) from account" withCompletion:^(NSObject * accountid) {
+                            if(accountid) {
+                                NSString *accountno=[NSString stringWithFormat:@"%@",accountid];
+                                [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
+                                [SAMKeychain setPassword:passwordText forService:@"Monal" account:accountno];
+                                [[MLXMPPManager sharedInstance] connectAccount:accountno];
                             }
                         }];
-                        
-                            [weakself performSegueWithIdentifier:@"showSuccess" sender:nil];
                     }
-                });
-            }];
-    };
+                }];
+                
+                [self performSegueWithIdentifier:@"showSuccess" sender:nil];
+            }
+        });
+    }];
+    
     [self.xmppAccount connect];
   
 }

@@ -145,7 +145,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 @property (nonatomic, strong) NSMutableDictionary *xmppCompletionHandlers;
 @property (nonatomic, strong) xmppCompletion loginCompletion;
-
+@property (nonatomic, strong) xmppCompletion regFormSubmitCompletion;
 
 @end
 
@@ -607,6 +607,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         self.regFormCompletion=nil;
     }
     
+    if(self.regFormSubmitCompletion) {
+        self.regFormSubmitCompletion(NO, @"");
+        self.regFormSubmitCompletion=nil;
+    }
+    
     if(self.explicitLogout && _accountState>=kStateHasStream)
     {
         if(_accountState>=kStateBound)
@@ -657,7 +662,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) reconnect:(NSInteger) scheduleWait
 {
-    if(self.registration) return;  //we never want to 
+    if(self.registration || self.registrationSubmission) return;  //we never want to
     [self.networkQueue cancelAllOperations];
     
     [self.networkQueue addOperationWithBlock: ^{
@@ -1753,7 +1758,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             self.regFormCompletion=nil;
                         }
                     }
-                    
+                  
                     
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"]  isEqualToString:@"message"])
@@ -2257,6 +2262,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             if(self.registration){
                                 [self requestRegForm];
                             }
+                            else if(self.registrationSubmission) {
+                                [self submitRegForm];
+                            }
+                            
                             else {
                                 //look at menchanisms presented
                                 
@@ -3703,14 +3712,29 @@ if(!self.supportsSM3)
     [self send:iq];
 }
 
--(void) registerUser:(NSString *) username withPassword:(NSString *) password captcha:(NSString *) captcha andHiddenFields:(NSDictionary *)hiddenFields withCompletion:(xmppCompletion) completion
+-(void) submitRegForm
 {
     XMPPIQ* iq =[[XMPPIQ alloc] initWithType:kiqSetType];
-    [iq registerUser:username withPassword:password captcha:captcha andHiddenFields:hiddenFields];
-    if(completion) {
-        [self.xmppCompletionHandlers setObject:completion forKey:iq.stanzaID];
-    }
+    [iq registerUser:self.regUser withPassword:self.regPass captcha:self.regCode andHiddenFields:self.regHidden];
+    
+    if(self.regFormSubmitCompletion) [self.xmppCompletionHandlers setObject:self.regFormSubmitCompletion forKey:iq.stanzaID];
     [self send:iq];
+}
+
+
+-(void) registerUser:(NSString *) username withPassword:(NSString *) password captcha:(NSString *) captcha andHiddenFields:(NSDictionary *)hiddenFields withCompletion:(xmppCompletion) completion
+{
+    self.registrationSubmission=YES;
+    self.registration=NO;
+    self.regUser=username;
+    self.regPass=password;
+    self.regCode=captcha;
+    self.regHidden= hiddenFields;
+    
+    if(completion) {
+        self.regFormSubmitCompletion = completion;
+    }
+
 }
 
 

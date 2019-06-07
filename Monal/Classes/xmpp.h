@@ -81,7 +81,16 @@ typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFie
 @property (nonatomic,assign) BOOL oldStyleSSL;
 @property (nonatomic,assign) BOOL selfSigned;
 @property (nonatomic,assign) BOOL oAuth;
+
+//reg
+@property (nonatomic,assign) BOOL registrationSubmission;
 @property (nonatomic,assign) BOOL registration;
+@property (nonatomic,strong) NSString *regUser;
+@property (nonatomic,strong) NSString *regPass;
+@property (nonatomic,strong) NSString *regCode;
+@property (nonatomic,strong) NSDictionary *regHidden;
+@property (nonatomic, strong) xmppDataCompletion regFormCompletion;
+
 
 @property (nonatomic,strong) jingleCall* call;
 
@@ -127,7 +136,7 @@ typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFie
 @property (nonatomic, readonly) BOOL usingCarbons2;
 @property (nonatomic, readonly) BOOL supportsRosterVersion;
 
-@property (nonatomic, strong) xmppDataCompletion regFormCompletion;
+
 
 //calculated
 @property (nonatomic,strong, readonly) NSString* versionHash;

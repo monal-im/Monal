@@ -454,7 +454,7 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="You are all ready to chat. People can message you  at:" textAlignment="center" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Trj-ps-nO8">
-                                <rect key="frame" x="16" y="166" width="288" height="41"/>
+                                <rect key="frame" x="16" y="166" width="288" height="60"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="60" id="CUy-4o-mv7"/>
                                 </constraints>
@@ -463,7 +463,7 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="someone@blabber.im" textAlignment="center" lineBreakMode="characterWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0IG-5n-3XF">
-                                <rect key="frame" x="38" y="231" width="244.5" height="80"/>
+                                <rect key="frame" x="38" y="250" width="244.5" height="80"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="80" id="C9i-s4-OCy"/>
                                 </constraints>
@@ -472,7 +472,7 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="c04-pS-Uoi" customClass="GLTintButton">
-                                <rect key="frame" x="20.5" y="340" width="279" height="46"/>
+                                <rect key="frame" x="20.5" y="359" width="279" height="46"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="46" id="dT9-oS-siW"/>
                                     <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="gcF-fD-BOL"/>
@@ -502,7 +502,6 @@
                             <constraint firstItem="Trj-ps-nO8" firstAttribute="top" secondItem="eEG-v1-Mb2" secondAttribute="bottom" constant="35" id="iFF-xF-258"/>
                             <constraint firstItem="c04-pS-Uoi" firstAttribute="top" secondItem="0IG-5n-3XF" secondAttribute="bottom" constant="29" id="jPB-0N-7w9"/>
                             <constraint firstItem="Yoq-ju-vYy" firstAttribute="trailing" secondItem="0IG-5n-3XF" secondAttribute="trailing" constant="37.5" id="p8o-SQ-uC7"/>
-                            <constraint firstItem="Yoq-ju-vYy" firstAttribute="bottom" secondItem="c04-pS-Uoi" secondAttribute="bottom" constant="183" id="w5R-R7-nAR"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="Yoq-ju-vYy"/>
                     </view>

@@ -74,7 +74,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
    
     self.messageScroll.wantsLayer=YES;
     self.messageScroll.layer.cornerRadius=10.0f;
- 
+    
+  
     [self updateLinguisticSettings];
 }
 
@@ -848,13 +849,16 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         }
         
         cell = [tableView makeViewWithIdentifier:cellDirectionID owner:self];
-        cell.attachmentImage.image=nil;
         cell.attachmentImage.canDrawSubviewsIntoLayer=YES;
-        cell.link=messageString;
+        if(![cell.link isEqualToString:messageString]) {
+            cell.attachmentImage.image=nil;
+            cell.link=messageString;
+            [cell loadImage:cell.link WithCompletion:^{
+                
+            }];
+        }
         
-        [cell loadImage:cell.link WithCompletion:^{
-            
-        }];
+        
  
     }
     

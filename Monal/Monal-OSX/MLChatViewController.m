@@ -876,8 +876,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         if([(NSString *)[messageRow objectForKey:@"previewImage"] length]>0
            || [(NSString *)[messageRow objectForKey:@"previewText"] length]>0)
         {
-           // linkCell.imageUrl = [row objectForKey:@"previewImage"];
+            linkCell.link=messageString;
+            linkCell.webURL=messageString;
             linkCell.previewText.stringValue = [messageRow objectForKey:@"previewText"];
+            linkCell.website.stringValue=messageString; 
             [linkCell loadImage:[messageRow objectForKey:@"previewImage"] WithCompletion:nil];
         }  else {
             [linkCell loadPreviewWithCompletion:^{

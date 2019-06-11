@@ -29,6 +29,7 @@
     
     if(self.link) {
         self.website.stringValue=self.link;
+        self.webURL=self.link;
         /**
          <meta property="og:title" content="Nintendo recommits to “keep the business going” for 3DS">
          <meta property="og:image" content="https://cdn.arstechnica.net/wp-content/uploads/2016/09/3DS_SuperMarioMakerforNintendo3DS_char_01-760x380.jpg">
@@ -55,7 +56,7 @@
 
 -(void) openlink: (id) sender
 {
-     [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:self.link]];
+     [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:self.webURL]];
 }
 
 - (void)mouseDown:(NSEvent *)theEvent

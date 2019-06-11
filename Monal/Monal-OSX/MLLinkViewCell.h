@@ -13,6 +13,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface MLLinkViewCell : MLChatViewCell
 
 @property (nonatomic, strong) NSString *imageUrl;
+@property (nonatomic, strong) NSString *webURL;
 @property (nonatomic, weak) IBOutlet NSView *bubbleView;
 @property (nonatomic, strong) IBOutlet NSTextField *website;
 @property (nonatomic, strong) IBOutlet NSTextField *previewText;

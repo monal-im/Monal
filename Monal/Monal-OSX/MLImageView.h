@@ -11,5 +11,5 @@
 @interface MLImageView : NSImageView
 
 @property (nonatomic, weak) IBOutlet id previewTarget;
-
+- (void) updateLayerWithImage:(NSImage *) image ;
 @end

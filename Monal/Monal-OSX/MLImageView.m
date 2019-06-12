@@ -30,6 +30,16 @@
     }
 }
 
+- (void) updateLayerWithImage:(NSImage *) image {
+    CGFloat desiredScaleFactor = [self.window backingScaleFactor];
+    CGFloat actualScaleFactor = [image recommendedLayerContentsScale:desiredScaleFactor];
+    
+    id layerContents = [image layerContentsForContentsScale:actualScaleFactor];
+    
+    self.layer.contentsGravity=kCAGravityResizeAspectFill;
+    [self.layer setContents:layerContents];
+    [self.layer setContentsScale:actualScaleFactor];
+}
 
 
 @end

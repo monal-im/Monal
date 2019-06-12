@@ -43,7 +43,7 @@
         dispatch_async(dispatch_get_main_queue(), ^{
             if([currentLink isEqualToString:self.link]){
                     if(data) {
-                        self.attachmentImage.image = image;
+                        [self.attachmentImage updateLayerWithImage: image];
                         
                         if (  self.attachmentImage.image.size.height>  self.attachmentImage.image.size.width) {
                             self.imageHeight.constant = 360;

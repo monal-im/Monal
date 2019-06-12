@@ -596,20 +596,22 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) disconnectWithCompletion:(void(^)(void))completion
 {
-    [self.xmppCompletionHandlers enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
-        xmppCompletion completion = (xmppCompletion) obj;
-        completion(NO,@"");
-    }];
-    [self.xmppCompletionHandlers removeAllObjects];
-    
-    if(self.regFormCompletion) {
-        self.regFormCompletion(nil, nil);
-        self.regFormCompletion=nil;
-    }
-    
-    if(self.regFormSubmitCompletion) {
-        self.regFormSubmitCompletion(NO, @"");
-        self.regFormSubmitCompletion=nil;
+    if (!(self.regFormCompletion && self.registrationState<kStateFormResponseReceived)) {
+        [self.xmppCompletionHandlers enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+            xmppCompletion completion = (xmppCompletion) obj;
+            completion(NO,@"");
+        }];
+        [self.xmppCompletionHandlers removeAllObjects];
+        
+        if(self.regFormCompletion) {
+            self.regFormCompletion(nil, nil);
+            self.regFormCompletion=nil;
+        }
+        
+        if(self.regFormSubmitCompletion) {
+            self.regFormSubmitCompletion(NO, @"");
+            self.regFormSubmitCompletion=nil;
+        }
     }
     
     if(self.explicitLogout && _accountState>=kStateHasStream)
@@ -1747,7 +1749,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     xmppCompletion completion = [self.xmppCompletionHandlers objectForKey:iqNode.idval];
                     if(completion)  {
                         [self.xmppCompletionHandlers removeObjectForKey:iqNode.idval]; // remove first to prevent an infinite loop
-                        completion(success, @"");
+                        completion(success, iqNode.errorMessage);
                     }
                 
                     
@@ -3709,6 +3711,7 @@ if(!self.supportsSM3)
     XMPPIQ* iq =[[XMPPIQ alloc] initWithType:kiqGetType];
     [iq setiqTo:self.domain];
     [iq getRegistrationFields];
+    self.registrationState=kStateRequestingForm;
     [self send:iq];
 }
 
@@ -3716,6 +3719,7 @@ if(!self.supportsSM3)
 {
     XMPPIQ* iq =[[XMPPIQ alloc] initWithType:kiqSetType];
     [iq registerUser:self.regUser withPassword:self.regPass captcha:self.regCode andHiddenFields:self.regHidden];
+    self.registrationState=kStateSubmittingForm;
     
     if(self.regFormSubmitCompletion) [self.xmppCompletionHandlers setObject:self.regFormSubmitCompletion forKey:iq.stanzaID];
     [self send:iq];

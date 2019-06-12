@@ -38,19 +38,7 @@
     [super viewWillAppear:animated];
     [self registerForKeyboardNotifications];
     
-    self.xmppAccount=[[xmpp alloc] init];
-    self.xmppAccount.explicitLogout=NO;
-    
-    self.xmppAccount.username=@"nothing";
-    self.xmppAccount.domain=kRegServer;
-    
-    self.xmppAccount.resource=@"MonalReg";
-    self.xmppAccount.server=kRegServer;
-    self.xmppAccount.port=5222;
-    self.xmppAccount.SSL=YES;
-    self.xmppAccount.selfSigned=NO;
-    self.xmppAccount.oldStyleSSL=NO;
-    self.xmppAccount.registration=YES;
+    [self makeXMPPConnection];
     
     __weak MLRegisterViewController *weakself = self;
     self.xmppAccount.regFormCompletion=^(NSData *captchaImage, NSDictionary *hiddenFields) {
@@ -68,6 +56,21 @@
     };
     [self.xmppAccount connect];
 
+}
+-(void) makeXMPPConnection {
+    self.xmppAccount=[[xmpp alloc] init];
+    self.xmppAccount.explicitLogout=NO;
+    
+    self.xmppAccount.username=@"nothing";
+    self.xmppAccount.domain=kRegServer;
+    
+    self.xmppAccount.resource=@"MonalReg";
+    self.xmppAccount.server=kRegServer;
+    self.xmppAccount.port=5222;
+    self.xmppAccount.SSL=YES;
+    self.xmppAccount.selfSigned=NO;
+    self.xmppAccount.oldStyleSSL=NO;
+    self.xmppAccount.registration=YES;
 }
 
 -(IBAction)registerAccount:(id)sender {
@@ -100,12 +103,16 @@
     NSString *jid = [self.jid.text copy];
     NSString *pass =[self.password.text copy];
     NSString *code =[self.captcha.text copy];
-    self.xmppAccount.explicitLogout=NO;
+    [self makeXMPPConnection];
 
-    self.loginHUD.hidden=YES;
+    self.loginHUD.hidden=NO;
     
     [self.xmppAccount registerUser:jid withPassword:pass captcha:code andHiddenFields: self.hiddenFields withCompletion:^(BOOL success, NSString *message) {
         dispatch_async(dispatch_get_main_queue(), ^{
+             self.loginHUD.hidden=YES;
+            self.xmppAccount.explicitLogout=YES;
+            [self.xmppAccount disconnect];
+            
             if(!success) {
                 NSString *displayMessage = message;
                 if(displayMessage.length==0) displayMessage = @"Could not register your username. Please check your code or change the username and try again.";

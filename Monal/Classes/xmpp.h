@@ -34,6 +34,12 @@ typedef NS_ENUM (NSInteger, xmppState) {
     kStateBound //is operating normally
 };
 
+typedef NS_ENUM (NSInteger, xmppRegistrationState) {
+    kStateRequestingForm =-1,
+    kStateSubmittingForm,
+    kStateFormResponseReceived
+};
+
 FOUNDATION_EXPORT NSString *const kFileName;
 FOUNDATION_EXPORT NSString *const kContentType;
 FOUNDATION_EXPORT NSString *const kData;
@@ -85,6 +91,8 @@ typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFie
 //reg
 @property (nonatomic,assign) BOOL registrationSubmission;
 @property (nonatomic,assign) BOOL registration;
+@property (nonatomic,assign) xmppRegistrationState registrationState;
+
 @property (nonatomic,strong) NSString *regUser;
 @property (nonatomic,strong) NSString *regPass;
 @property (nonatomic,strong) NSString *regCode;

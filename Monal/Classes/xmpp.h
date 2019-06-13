@@ -37,7 +37,8 @@ typedef NS_ENUM (NSInteger, xmppState) {
 typedef NS_ENUM (NSInteger, xmppRegistrationState) {
     kStateRequestingForm =-1,
     kStateSubmittingForm,
-    kStateFormResponseReceived
+    kStateFormResponseReceived,
+    kStateRegistered
 };
 
 FOUNDATION_EXPORT NSString *const kFileName;

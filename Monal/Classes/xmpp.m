@@ -1745,6 +1745,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     
                     BOOL success= YES;
                     if([iqNode.type isEqualToString:kiqErrorType]) success=NO;
+                    if(success && self.registrationState==kStateSubmittingForm)
+                    {
+                        self.registrationState=kStateRegistered;
+                    }
                     
                     xmppCompletion completion = [self.xmppCompletionHandlers objectForKey:iqNode.idval];
                     if(completion)  {

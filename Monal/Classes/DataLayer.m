@@ -806,15 +806,21 @@ static DataLayer *sharedInstance=nil;
     
     NSString *query=[NSString stringWithFormat:@"insert into buddylist ('account_id', 'buddy_name', 'full_name' , 'nick_name', 'new', 'online', 'dirty', 'Muc') values( ?, ?, ?,?,1, 0, 0, 0);"];
     
-    NSArray *params=@[accountNo, contact, actualfull, nickName];
-    [self executeNonQuery:query  andArguments:params withCompletion:^(BOOL success) {
-       
+    if(!(accountNo && contact && actualfull && nickName)) {
         if(completion)
         {
-            completion(success);
+            completion(NO);
         }
-        
-    }];
+    } else  {
+        NSArray *params=@[accountNo, contact, actualfull, nickName];
+        [self executeNonQuery:query  andArguments:params withCompletion:^(BOOL success) {
+            if(completion)
+            {
+                completion(success);
+            }
+            
+        }];
+    }
 }
 
 -(void) removeBuddy:(NSString*) buddy forAccount:(NSString*) accountNo

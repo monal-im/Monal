@@ -596,8 +596,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) disconnectWithCompletion:(void(^)(void))completion
 {
-    if (!(self.regFormCompletion && self.registrationState<kStateFormResponseReceived)) {
-        [self.xmppCompletionHandlers enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+    [self.xmppCompletionHandlers enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
             xmppCompletion completion = (xmppCompletion) obj;
             completion(NO,@"");
         }];
@@ -612,8 +611,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             self.regFormSubmitCompletion(NO, @"");
             self.regFormSubmitCompletion=nil;
         }
-    }
-    
+   
     if(self.explicitLogout && _accountState>=kStateHasStream)
     {
         if(_accountState>=kStateBound)
@@ -1745,9 +1743,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     
                     BOOL success= YES;
                     if([iqNode.type isEqualToString:kiqErrorType]) success=NO;
-                    if(success && self.registrationState==kStateSubmittingForm)
+                    if(self.registrationState==kStateSubmittingForm && self.regFormSubmitCompletion)
                     {
                         self.registrationState=kStateRegistered;
+                        self.regFormSubmitCompletion(success, iqNode.errorMessage);
+                        self.regFormSubmitCompletion=nil;
                     }
                     
                     xmppCompletion completion = [self.xmppCompletionHandlers objectForKey:iqNode.idval];
@@ -3725,7 +3725,6 @@ if(!self.supportsSM3)
     [iq registerUser:self.regUser withPassword:self.regPass captcha:self.regCode andHiddenFields:self.regHidden];
     self.registrationState=kStateSubmittingForm;
     
-    if(self.regFormSubmitCompletion) [self.xmppCompletionHandlers setObject:self.regFormSubmitCompletion forKey:iq.stanzaID];
     [self send:iq];
 }
 

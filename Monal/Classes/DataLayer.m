@@ -1925,6 +1925,13 @@ static DataLayer *sharedInstance=nil;
 
 -(void) addActiveBuddies:(NSString*) buddyname forAccount:(NSString*) accountNo withCompletion: (void (^)(BOOL))completion
 {
+    if(!buddyname)
+    {
+        if (completion) {
+            completion(NO);
+        }
+        return;
+    }
     NSString* query=[NSString stringWithFormat:@"select count(buddy_name) from activechats where account_id=? and buddy_name=? "];
    [self executeScalar:query  andArguments:@[accountNo, buddyname] withCompletion:^(NSObject * count) {
         if(count!=nil)

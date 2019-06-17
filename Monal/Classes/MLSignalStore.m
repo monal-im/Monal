@@ -146,6 +146,8 @@
 
 - (NSArray<NSNumber*>*) knownDevicesForAddressName:(NSString*)addressName
 {
+    if(!addressName) return nil;
+    
     NSArray *rows= [[DataLayer sharedInstance] executeReader:@"select distinct contactDeviceId from signalContactIdentity where account_id=? and contactName=? " andArguments:@[self.accountId, addressName]];
     
     NSMutableArray *devices = [[NSMutableArray alloc] initWithCapacity:rows.count];

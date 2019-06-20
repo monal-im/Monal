@@ -26,7 +26,7 @@
 {
     self.messageText.string=@"";
     self.imageUrl=@"";
-    
+    self.attachmentImage.webURL=self.link;
     if(self.link) {
         self.website.stringValue=self.link;
         self.webURL=self.link;

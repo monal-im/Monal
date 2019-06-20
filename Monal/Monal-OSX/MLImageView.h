@@ -9,7 +9,9 @@
 #import <Cocoa/Cocoa.h>
 
 @interface MLImageView : NSImageView
-
+@property (nonatomic, strong) NSString *webURL;
 @property (nonatomic, weak) IBOutlet id previewTarget;
-- (void) updateLayerWithImage:(NSImage *) image ;
+
+- (void) updateLayerWithImage:(NSImage *) image;
+
 @end

@@ -17,7 +17,7 @@
 #import "UIActionSheet+Blocks.h"
 #import <DropBoxSDK/DropBoxSDK.h>
 
-#import "MWPhotoBrowser.h"
+#import "IDMPhotoBrowser.h"
 #import "ContactDetails.h"
 
 @import QuartzCore;
@@ -25,7 +25,7 @@
 
 static const int ddLogLevel = LOG_LEVEL_ERROR;
 
-@interface chatViewController()<DBRestClientDelegate, MWPhotoBrowserDelegate>
+@interface chatViewController()<DBRestClientDelegate, IDMPhotoBrowserDelegate>
 
 @property (nonatomic, strong)  NSDateFormatter* destinationDateFormat;
 @property (nonatomic, strong)  NSDateFormatter* sourceDateFormat;
@@ -1234,7 +1234,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
             
             MLChatImageCell *imageCell = (MLChatImageCell *) cell;
             
-            MWPhoto* photo=[MWPhoto photoWithImage:imageCell.thumbnailImage.image];
+            IDMPhoto* photo=[IDMPhoto photoWithImage:imageCell.thumbnailImage.image];
             // photo.caption=[row objectForKey:@"caption"];
             [self.photos addObject:photo];
             
@@ -1242,16 +1242,17 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
             
             dispatch_async(dispatch_get_main_queue(), ^{
                 
-                MWPhotoBrowser *browser = [[MWPhotoBrowser alloc] initWithDelegate:self];
+                IDMPhotoBrowser *browser = [[IDMPhotoBrowser alloc] initWithPhotos:self.photos];
+                browser.delegate=self;
                 
-                browser.displayActionButton = YES; // Show action button to allow sharing, copying, etc (defaults to YES)
-                browser.displayNavArrows = NO; // Whether to display left and right nav arrows on toolbar (defaults to NO)
-                browser.displaySelectionButtons = NO; // Whether selection buttons are shown on each image (defaults to NO)
-                browser.zoomPhotosToFill = YES; // Images that almost fill the screen will be initially zoomed to fill (defaults to YES)
-                browser.alwaysShowControls = NO; // Allows to control whether the bars and controls are always visible or whether they fade away to show the photo full (defaults to NO)
-                browser.enableGrid = YES; // Whether to allow the viewing of all the photo thumbnails on a grid (defaults to YES)
-                browser.startOnGrid = NO; // Whether to start on the grid of thumbnails instead of the first photo (defaults to NO)
-              
+//                browser.displayActionButton = YES; // Show action button to allow sharing, copying, etc (defaults to YES)
+//                browser.displayNavArrows = NO; // Whether to display left and right nav arrows on toolbar (defaults to NO)
+//                browser.displaySelectionButtons = NO; // Whether selection buttons are shown on each image (defaults to NO)
+//                browser.zoomPhotosToFill = YES; // Images that almost fill the screen will be initially zoomed to fill (defaults to YES)
+//                browser.alwaysShowControls = NO; // Allows to control whether the bars and controls are always visible or whether they fade away to show the photo full (defaults to NO)
+//                browser.enableGrid = YES; // Whether to allow the viewing of all the photo thumbnails on a grid (defaults to YES)
+//                browser.startOnGrid = NO; // Whether to start on the grid of thumbnails instead of the first photo (defaults to NO)
+//
                 UINavigationController *nav =[[UINavigationController alloc] initWithRootViewController:browser];
                 
                 
@@ -1374,11 +1375,11 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 
 #pragma mark - photo browser delegate
-- (NSUInteger)numberOfPhotosInPhotoBrowser:(MWPhotoBrowser *)photoBrowser {
+- (NSUInteger)numberOfPhotosInPhotoBrowser:(IDMPhotoBrowser *)photoBrowser {
     return self.photos.count;
 }
 
-- (id <MWPhoto>)photoBrowser:(MWPhotoBrowser *)photoBrowser photoAtIndex:(NSUInteger)index {
+- (id <IDMPhoto>)photoBrowser:(IDMPhotoBrowser *)photoBrowser photoAtIndex:(NSUInteger)index {
     if (index < self.photos.count) {
         return [self.photos objectAtIndex:index];
     }

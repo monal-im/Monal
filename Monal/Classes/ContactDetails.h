@@ -8,10 +8,10 @@
 
 #import <Foundation/Foundation.h>
 #import "DataLayer.h"
-#import "MWPhotoBrowser.h"
+#import "IDMPhotoBrowser.h"
 
 
-@interface ContactDetails : UITableViewController <UITextFieldDelegate, MWPhotoBrowserDelegate>
+@interface ContactDetails : UITableViewController <UITextFieldDelegate, IDMPhotoBrowserDelegate>
 
 @property (nonatomic, strong) NSDictionary *contact;
 

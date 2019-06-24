@@ -257,27 +257,28 @@
             NSString *readPath = [documentsDirectory stringByAppendingPathComponent:@"imagecache"];
             readPath = [readPath stringByAppendingPathComponent:[imagePath objectForKey:@"path"]];
             UIImage *image=[UIImage imageWithContentsOfFile:readPath];
-            MWPhoto* photo=[MWPhoto photoWithImage:image];
+            IDMPhoto* photo=[IDMPhoto photoWithImage:image];
             [self.photos addObject:photo];
         }
     }
     
 dispatch_async(dispatch_get_main_queue(), ^{
-    
-    MWPhotoBrowser *browser = [[MWPhotoBrowser alloc] initWithDelegate:self];
-    
-    browser.displayActionButton = YES; // Show action button to allow sharing, copying, etc (defaults to YES)
-    browser.displayNavArrows = NO; // Whether to display left and right nav arrows on toolbar (defaults to NO)
-    browser.displaySelectionButtons = NO; // Whether selection buttons are shown on each image (defaults to NO)
-    browser.zoomPhotosToFill = YES; // Images that almost fill the screen will be initially zoomed to fill (defaults to YES)
-    browser.alwaysShowControls = YES; // Allows to control whether the bars and controls are always visible or whether they fade away to show the photo full (defaults to NO)
-    browser.enableGrid = YES; // Whether to allow the viewing of all the photo thumbnails on a grid (defaults to YES)
-    browser.startOnGrid = YES; // Whether to start on the grid of thumbnails instead of the first photo (defaults to NO)
-    
+    if(self.photos.count>0) {
+    IDMPhotoBrowser *browser = [[IDMPhotoBrowser alloc] initWithPhotos:self.photos];
+    browser.delegate=self;
+    browser.displayDoneButton=YES;
+
     UINavigationController *nav =[[UINavigationController alloc] initWithRootViewController:browser];
     
     
     [self presentViewController:nav animated:YES completion:nil];
+    } else  {
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Nothing to see" message:@"You have not received any images in this conversation." preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            [alert dismissViewControllerAnimated:YES completion:nil];
+        }]];
+        [self presentViewController:alert animated:YES completion:nil];
+    }
     
 });
     
@@ -374,11 +375,11 @@ dispatch_async(dispatch_get_main_queue(), ^{
 }
 
 #pragma mark - photo browser delegate
-- (NSUInteger)numberOfPhotosInPhotoBrowser:(MWPhotoBrowser *)photoBrowser {
+- (NSUInteger)numberOfPhotosInPhotoBrowser:(IDMPhotoBrowser *)photoBrowser {
     return self.photos.count;
 }
 
-- (id <MWPhoto>)photoBrowser:(MWPhotoBrowser *)photoBrowser photoAtIndex:(NSUInteger)index {
+- (id <IDMPhoto>)photoBrowser:(IDMPhotoBrowser *)photoBrowser photoAtIndex:(NSUInteger)index {
     if (index < self.photos.count) {
         return [self.photos objectAtIndex:index];
     }

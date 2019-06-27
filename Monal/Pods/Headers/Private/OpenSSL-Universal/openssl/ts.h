@@ -1,1 +1,1 @@
-../../../../OpenSSL-Universal/include-macos/openssl/ts.h
+../../../../OpenSSL-Universal/macos/include/openssl/ts.h

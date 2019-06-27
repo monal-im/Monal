@@ -1,1 +1,1 @@
-../../../../OpenSSL-Universal/include-macos/openssl/ecdsa.h
+../../../../OpenSSL-Universal/Frameworks/macos/OpenSSL.framework/Versions/A/Headers/ecdsa.h

@@ -1,1 +1,1 @@
-../../../../OpenSSL-Universal/include-macos/openssl/conf.h
+../../../../OpenSSL-Universal/Frameworks/macos/OpenSSL.framework/Versions/A/Headers/conf.h

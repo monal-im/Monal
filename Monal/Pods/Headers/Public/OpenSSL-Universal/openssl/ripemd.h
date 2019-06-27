@@ -1,1 +1,1 @@
-../../../../OpenSSL-Universal/include-macos/openssl/ripemd.h
+../../../../OpenSSL-Universal/Frameworks/macos/OpenSSL.framework/Versions/A/Headers/ripemd.h

@@ -1,1 +1,1 @@
-../../../../OpenSSL-Universal/include-macos/openssl/srp.h
+../../../../OpenSSL-Universal/Frameworks/macos/OpenSSL.framework/Versions/A/Headers/srp.h

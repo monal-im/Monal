@@ -1,1 +1,1 @@
-../../../../OpenSSL-Universal/include-macos/openssl/ebcdic.h
+../../../../OpenSSL-Universal/Frameworks/macos/OpenSSL.framework/Versions/A/Headers/ebcdic.h

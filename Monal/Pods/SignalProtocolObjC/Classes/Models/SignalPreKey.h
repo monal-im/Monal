@@ -10,9 +10,11 @@
 #import "SignalSerializable.h"
 #import "SignalKeyPair.h"
 
+NS_ASSUME_NONNULL_BEGIN
 @interface SignalPreKey : NSObject <SignalSerializable, NSSecureCoding>
 
-- (uint32_t) preKeyId;
-- (SignalKeyPair*) keyPair;
+@property (nonatomic, readonly) uint32_t preKeyId;
+@property (nonatomic, readonly, nullable)  SignalKeyPair* keyPair;
 
 @end
+NS_ASSUME_NONNULL_END

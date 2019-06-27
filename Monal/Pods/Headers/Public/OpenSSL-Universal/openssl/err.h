@@ -1,1 +1,1 @@
-../../../../OpenSSL-Universal/include-macos/openssl/err.h
+../../../../OpenSSL-Universal/Frameworks/macos/OpenSSL.framework/Versions/A/Headers/err.h

@@ -1,1 +1,1 @@
-../../../../OpenSSL-Universal/include-macos/openssl/x509.h
+../../../../OpenSSL-Universal/Frameworks/macos/OpenSSL.framework/Versions/A/Headers/x509.h

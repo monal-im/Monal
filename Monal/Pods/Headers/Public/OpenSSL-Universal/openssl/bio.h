@@ -1,1 +1,1 @@
-../../../../OpenSSL-Universal/include-macos/openssl/bio.h
+../../../../OpenSSL-Universal/Frameworks/macos/OpenSSL.framework/Versions/A/Headers/bio.h

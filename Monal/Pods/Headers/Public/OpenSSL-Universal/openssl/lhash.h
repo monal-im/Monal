@@ -1,1 +1,1 @@
-../../../../OpenSSL-Universal/include-macos/openssl/lhash.h
+../../../../OpenSSL-Universal/Frameworks/macos/OpenSSL.framework/Versions/A/Headers/lhash.h

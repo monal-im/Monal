@@ -1,1 +1,1 @@
-../../../../OpenSSL-Universal/include-macos/openssl/asn1_mac.h
+../../../../OpenSSL-Universal/Frameworks/macos/OpenSSL.framework/Versions/A/Headers/asn1_mac.h

@@ -42,13 +42,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSArray<SignalPreKey*>*)generatePreKeysWithStartingPreKeyId:(NSUInteger)startingPreKeyId
                                                          count:(NSUInteger)count;
 
-
-/**
- * Generate the last resort pre key.  Clients should do this only once, at
- * install time, and durably store it for the length of the install.
- */
-- (nullable SignalPreKey*)generateLastResortPreKey;
-
 /**
  * Generate a signed pre key
  */

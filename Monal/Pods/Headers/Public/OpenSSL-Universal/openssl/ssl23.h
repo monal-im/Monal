@@ -1,1 +1,1 @@
-../../../../OpenSSL-Universal/include-macos/openssl/ssl23.h
+../../../../OpenSSL-Universal/Frameworks/macos/OpenSSL.framework/Versions/A/Headers/ssl23.h

@@ -1,1 +1,1 @@
-../../../../OpenSSL-Universal/include-macos/openssl/pkcs12.h
+../../../../OpenSSL-Universal/Frameworks/macos/OpenSSL.framework/Versions/A/Headers/pkcs12.h

@@ -1510,14 +1510,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                             NSString *keyid = (NSString *)[row objectForKey:@"preKeyId"];
                                             
                                             SignalPreKeyBundle *bundle = [[SignalPreKeyBundle alloc] initWithRegistrationId:0
-                                                                                                                   deviceId:device
-                                                                                                                   preKeyId:[keyid integerValue]
-                                                                                                               preKeyPublic:[EncodingTools dataWithBase64EncodedString:[row objectForKey:@"preKey"]]
-                                                                                                             signedPreKeyId:iqNode.signedPreKeyId.integerValue
-                                                                                                         signedPreKeyPublic:[EncodingTools dataWithBase64EncodedString:iqNode.signedPreKeyPublic]
-                                                                                                                  signature:[EncodingTools dataWithBase64EncodedString:iqNode.signedPreKeySignature]
-                                                                                                                identityKey:[EncodingTools dataWithBase64EncodedString:iqNode.identityKey]
-                                                                          ];
+                                                                                                                    deviceId:device
+                                                                                                                    preKeyId:[keyid integerValue]
+                                                                                                                preKeyPublic:[EncodingTools dataWithBase64EncodedString:[row objectForKey:@"preKey"]]
+                                                                                                              signedPreKeyId:iqNode.signedPreKeyId.integerValue
+                                                                                                          signedPreKeyPublic:[EncodingTools dataWithBase64EncodedString:iqNode.signedPreKeyPublic]
+                                                                                                                   signature:[EncodingTools dataWithBase64EncodedString:iqNode.signedPreKeySignature]
+                                                                                                                 identityKey:[EncodingTools dataWithBase64EncodedString:iqNode.identityKey]
+                                                                                                                       error:nil];
                                             
                                             [builder processPreKeyBundle:bundle error:nil];
                                         }];

@@ -15,7 +15,7 @@
 @import QuartzCore; 
 
 @interface MLContactDetails ()
-
+@property (nonatomic, strong) xmpp* xmppAccount;
 @end
 
 @implementation MLContactDetails
@@ -69,7 +69,12 @@
             _protocolImage.image=[NSImage imageNamed:@"XMPP"];
         
     }
- ;
+ 
+#ifndef DISABLE_OMEMO
+    self.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:accountNo];
+    [self.xmppAccount queryOMEMODevicesFrom:[self.contact objectForKey:@"buddy_name"]];
+#endif
+    
   [[MLImageManager sharedInstance] getIconForContact:[_contact objectForKey:@"buddy_name"] andAccount:accountNo withCompletion:^(NSImage *contactImage) {
         self.buddyIconView.image=contactImage;
   }];

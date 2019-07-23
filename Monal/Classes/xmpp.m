@@ -2486,11 +2486,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         DDLogInfo(@"++++++++++++++++++++++++ failed resume: h=%@", failedNode.h);
                         [self removeUnAckedMessagesLessThan:failedNode.h];
                         
-                        //if resume failed. bind like normal
+                        //if resume failed. bind  a nee resource like normal
                         [self bindResource];
+                        self.pushEnabled=NO; 
                         
 #if TARGET_OS_IPHONE
-                        if(self.supportsPush && !self.pushEnabled)
+                        if(self.supportsPush)
                         {
                             [self enablePush];
                         }

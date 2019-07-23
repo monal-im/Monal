@@ -902,12 +902,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     else {
         //always use smacks pings if supported (they are shorter and better than whitespace pings)
-        if(self.supportsSM3)
+        if(self.supportsSM3 && self.unAckedStanzas.count>0 )
         {
-            MLXMLNode* rNode =[[MLXMLNode alloc] initWithElement:@"r"];
-            NSDictionary *dic=@{@"xmlns":@"urn:xmpp:sm:3"};
-            rNode.attributes =[dic mutableCopy];
-            [self send:rNode];
+            [self requestSMAck];
         }
         else  {
             if(self.supportsPing) {
@@ -1210,6 +1207,17 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }]];
 }
 
+-(void) requestSMAck {
+    if(self.unAckedStanzas.count>0 ) {
+        DDLogVerbose(@"requesting smacks ack...");
+        MLXMLNode* rNode =[[MLXMLNode alloc] initWithElement:@"r"];
+        NSDictionary *dic=@{@"xmlns":@"urn:xmpp:sm:3"};
+        rNode.attributes =[dic mutableCopy];
+        [self send:rNode];
+    } else  {
+        DDLogDebug(@"no smacks ack when there is nothing pending...");
+    }
+}
 
 #pragma mark stanza handling
 
@@ -4004,11 +4012,8 @@ if(!self.supportsSM3)
     
     if(self.accountState>=kStateBound && self.supportsSM3 && requestAck)
     {
-        DDLogVerbose(@"requesting smacks ack...");
-        MLXMLNode* rNode =[[MLXMLNode alloc] initWithElement:@"r"];
-        NSDictionary *dic=@{@"xmlns":@"urn:xmpp:sm:3"};
-        rNode.attributes =[dic mutableCopy];
-        [self send:rNode];
+        [self requestSMAck];
+       
     } else  {
         DDLogVerbose(@"NOT requesting smacks ack...");
     }

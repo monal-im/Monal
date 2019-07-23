@@ -416,7 +416,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     DDLogInfo(@"XMPP connnect  start");
     _outputQueue=[[NSMutableArray alloc] init];
     
-    //read persistent state
+    //read persisted state
     [self readState];
     
     [self connectionTask];
@@ -1218,6 +1218,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         DDLogDebug(@"no smacks ack when there is nothing pending...");
     }
 }
+
+-(void) sendSMAck {
+    MLXMLNode *aNode=[[MLXMLNode alloc] initWithElement:@"a"];
+    NSDictionary *dic=@{@"xmlns": @"urn:xmpp:sm:3", @"h": [NSString stringWithFormat:@"%@", self.lastHandledInboundStanza]};
+    aNode.attributes=[dic mutableCopy];
+    [self send:aNode];
+}
+
 
 #pragma mark stanza handling
 
@@ -2423,10 +2431,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"r"] && self.supportsSM3 && self.accountState>=kStateBound)
                 {
-                    MLXMLNode *aNode=[[MLXMLNode alloc] initWithElement:@"a"];
-                    NSDictionary *dic=@{@"xmlns": @"urn:xmpp:sm:3", @"h": [NSString stringWithFormat:@"%@", self.lastHandledInboundStanza]};
-                    aNode.attributes=[dic mutableCopy];
-                    [self send:aNode];
+                    [self sendSMAck];
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"a"] && self.supportsSM3 && self.accountState>=kStateBound)
                 {

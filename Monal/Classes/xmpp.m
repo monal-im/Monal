@@ -1324,7 +1324,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         if((iqNode.discoInfo))
                         {
                             XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
-                            [discoInfo setiqTo:iqNode.from];
+                            if(iqNode.resource) {
+                                [discoInfo setiqTo:[NSString stringWithFormat:@"%@/%@", iqNode.user, iqNode.resource]];
+                            } else  {
+                                [discoInfo setiqTo:iqNode.user];
+                            }
                             [discoInfo setDiscoInfoWithFeaturesAndNode:iqNode.queryNode];
                             [self send:discoInfo];
                             
@@ -1549,7 +1553,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                             {
                                 for (NSDictionary* item in iqNode.items)
                                 {
-                                    if(!self->_discoveredServices) _discoveredServices=[[NSMutableArray alloc] init];
+                                    if(!self->_discoveredServices) self->_discoveredServices=[[NSMutableArray alloc] init];
                                     [self->_discoveredServices addObject:item];
                                     
                                     if((![[item objectForKey:@"jid"] isEqualToString:self.server]  &&  ![[item objectForKey:@"jid"] isEqualToString:self.domain])) {
@@ -1597,11 +1601,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         if([iqNode.idval isEqualToString:self.jingle.idval])
                         {
                             NSArray* nameParts= [iqNode.from componentsSeparatedByString:@"/"];
-                            NSString* from;
-                            if([nameParts count]>1) {
-                                from=[nameParts objectAtIndex:0];
-                            } else from = iqNode.from;
-                            
+                            NSString* from= iqNode.user;
+                           
                             NSString* fullName;
                             fullName=[[DataLayer sharedInstance] fullName:from forAccount:self->_accountNo];
                             if(!fullName) fullName=from;

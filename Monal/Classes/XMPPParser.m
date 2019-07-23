@@ -46,15 +46,19 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     
     if([attributeDict objectForKey:@"from"])
     {
-    _user =[[(NSString*)[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
-    if([[(NSString*)[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/" ] count]>1)
-        _resource=[[(NSString*)[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/" ] objectAtIndex:1];
-    _from =[attributeDict objectForKey:@"from"] ;
-    _from=[_from lowercaseString];
+        _from =[attributeDict objectForKey:@"from"];
+        NSArray *parts=[_from componentsSeparatedByString:@"/"];
+        _user =[parts objectAtIndex:0];
+        
+        if([parts count]>1) {
+            _resource=[parts objectAtIndex:1];
+        }
+        
+        _from = [_from lowercaseString]; // intedned to not break code that expects lowercase
     }
     
     _idval =[attributeDict objectForKey:@"id"] ;
-   
+    
     if([attributeDict objectForKey:@"to"])
     {
         _to =[[(NSString*)[attributeDict objectForKey:@"to"] componentsSeparatedByString:@"/" ] objectAtIndex:0];

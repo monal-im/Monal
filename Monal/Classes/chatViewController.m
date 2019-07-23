@@ -185,6 +185,33 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
   [self synchChat];
 }
 
+-(void) refreshButton:(NSNotification *) notificaiton
+{
+    xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSString *title = [[DataLayer sharedInstance] fullName:self.contactName forAccount:self.accountNo];
+        if(title.length==0) title=self.contactName;
+        
+        if(xmppAccount.accountState<kStateLoggedIn)
+        {
+            self.sendButton.enabled=NO;
+            if(!title) title=@"";
+            if(self.contactName.length>0){
+                self.navigationItem.title=[NSString stringWithFormat:@"%@ [%@]", title, @"Logged Out"];
+            }
+        }
+        else  {
+            self.sendButton.enabled=YES;
+            self.navigationItem.title=title;
+            
+        }
+        
+        if(self.encryptChat){
+            self.navigationItem.title = [NSString stringWithFormat:@"%@ 🔒", self.navigationItem.title];
+        }
+    });
+}
+
 
 -(void)viewWillAppear:(BOOL)animated
 {
@@ -194,6 +221,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     [MLNotificationManager sharedInstance].currentContact=self.contactName;
     
     if(self.day) {
+        NSString *title = [[DataLayer sharedInstance] fullName:self.contactName forAccount:self.accountNo];
+        if(title.length==0) title=self.contactName;
         self.navigationItem.title=  [NSString stringWithFormat:@"%@(%@)", self.navigationItem.title, _day];
         [[NSNotificationCenter defaultCenter] removeObserver:self];
         self.inputContainerView.hidden=YES;
@@ -622,36 +651,6 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 }
 
--(void) refreshButton:(NSNotification *) notificaiton
-{
-    xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
-    dispatch_async(dispatch_get_main_queue(), ^{
-        NSString *title=self->_contactName;
-        if(![self->_contactFullName isEqualToString:@"(null)"]
-           && [[self->_contactFullName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0)
-        {
-            title=self->_contactFullName;
-        }
-        
-        if(xmppAccount.accountState<kStateLoggedIn)
-        {
-            self.sendButton.enabled=NO;
-            if(!title) title=@"";
-            if(self.contactName.length>0){
-                self.navigationItem.title=[NSString stringWithFormat:@"%@ [%@]", title, @"Logged Out"];
-            }
-        }
-        else  {
-            self.sendButton.enabled=YES;
-            self.navigationItem.title=title;
-            
-        }
-        
-        if(self.encryptChat){
-            self.navigationItem.title = [NSString stringWithFormat:@"%@ 🔒", self.navigationItem.title];
-        }
-    });
-}
 
 -(void) handleNewMessage:(NSNotification *)notification
 {

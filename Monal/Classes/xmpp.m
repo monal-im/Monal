@@ -2454,8 +2454,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     [self removeUnAckedMessagesLessThan:resumeNode.h];
                     [self sendUnAckedMessages];
                    
-                    //parse features
-                    self.usingCarbons2=NO; //ensure its done again 
                     [self parseFeatures];
                     
                     #if TARGET_OS_IPHONE

@@ -133,6 +133,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     
     self.messageTable.rowHeight = UITableViewAutomaticDimension;
     self.messageTable.estimatedRowHeight= 75.0f;
+    self.messageTable.transform = CGAffineTransformMakeScale(1, -1);
   
 }
 
@@ -238,7 +239,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     [self refreshButton:nil];
 
     UIEdgeInsets currentInset = self.messageTable.contentInset;
-    self.messageTable.contentInset =UIEdgeInsetsMake(self.navigationController.navigationBar.frame.size.height+[UIApplication sharedApplication].statusBarFrame.size.height, currentInset.left, currentInset.bottom, currentInset.right);
+    self.messageTable.contentInset =UIEdgeInsetsMake(-(self.navigationController.navigationBar.frame.size.height+[UIApplication sharedApplication].statusBarFrame.size.height), currentInset.left, currentInset.bottom, currentInset.right);
    
     BOOL backgrounds = [[NSUserDefaults standardUserDefaults] boolForKey:@"ChatBackgrounds"];
     
@@ -624,12 +625,12 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                            
                            NSIndexPath *path1;
                            [_messageTable beginUpdates];
-                           NSInteger bottom = [self.messageList count]-1;
-                           if(bottom>=0) {
+                           NSInteger bottom = 0;
+                        
                                 path1 = [NSIndexPath indexPathForRow:bottom  inSection:0];
                                [_messageTable insertRowsAtIndexPaths:@[path1]
                                                     withRowAnimation:UITableViewRowAnimationFade];
-                           }
+                           
                            [_messageTable endUpdates];
                            
                            [self scrollToBottom];
@@ -713,14 +714,13 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                                
                                [_messageTable beginUpdates];
                                NSIndexPath *path1;
-                               NSInteger bottom =  self.messageList.count-1;
-                               if(bottom>=0) {
-                                   
-                                   path1 = [NSIndexPath indexPathForRow:bottom  inSection:0];
-                                   [_messageTable insertRowsAtIndexPaths:@[path1]
-                                                        withRowAnimation:UITableViewRowAnimationBottom];
-                                   
-                               } 
+                               NSInteger bottom =  0;
+                               
+                               path1 = [NSIndexPath indexPathForRow:bottom  inSection:0];
+                               [_messageTable insertRowsAtIndexPaths:@[path1]
+                                                    withRowAnimation:UITableViewRowAnimationBottom];
+                               
+                               
                                [_messageTable endUpdates];
                                
                                [self scrollToBottom];
@@ -798,17 +798,11 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 -(void) scrollToBottom
 {
     dispatch_async(dispatch_get_main_queue(), ^{
-        NSInteger bottom = [self.messageTable numberOfRowsInSection:0];
-        if(bottom>0)
-        {
-            NSIndexPath *path1 = [NSIndexPath indexPathForRow:bottom-1  inSection:0];
-            if(![self.messageTable.indexPathsForVisibleRows containsObject:path1])
-            {
-                [self.messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:NO];
-            }
-        }
+        NSIndexPath *path1 = [NSIndexPath indexPathForRow:0 inSection:0];
+        [self.messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:NO];
     });
 }
+
 #pragma mark date time
 
 -(void) setupDateObjects
@@ -962,8 +956,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     MLBaseCell* cell;
-
-    NSDictionary* row= [self.messageList objectAtIndex:indexPath.row];
+    
+    NSDictionary* row= [self.messageList objectAtIndex:self.messageList.count-indexPath.row-1]; //flipped table
     NSString *from =[row objectForKey:@"af"];
     
     //intended to correct for bad data. Can be removed later probably.
@@ -1214,7 +1208,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     cell.parent=self; 
     
     [cell updateCellWithNewSender:newSender];
-    
+    cell.transform = CGAffineTransformMakeScale(1, -1);
     return cell;
 }
 

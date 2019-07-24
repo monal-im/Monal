@@ -626,7 +626,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                                                       kMessageType:messageType
                                                       };
                            if(!self.messageList) self.messageList =[[NSMutableArray alloc] init];
-                           [self.messageList addObject:[userInfo mutableCopy]];
+                           [self.messageList insertObject:[userInfo mutableCopy] atIndex:0];
                            
                            NSIndexPath *path1;
                            [_messageTable beginUpdates];
@@ -715,7 +715,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                                
                                
                                if(!self.messageList) self.messageList=[[NSMutableArray alloc] init];
-                               [self.messageList addObject:[userInfo mutableCopy]];
+                                [self.messageList insertObject:[userInfo mutableCopy] atIndex:0];
                                
                                [_messageTable beginUpdates];
                                NSIndexPath *path1;

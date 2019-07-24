@@ -188,6 +188,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void) refreshButton:(NSNotification *) notificaiton
 {
+    if(!self.accountNo) return; 
     xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
     dispatch_async(dispatch_get_main_queue(), ^{
         NSString *title = [[DataLayer sharedInstance] fullName:self.contactName forAccount:self.accountNo];
@@ -267,6 +268,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 -(void) viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
+    if(!self.contactName || !self.accountNo) return; 
+    
     [self scrollToBottom];
     [self refreshCounter];
     [self synchChat];
@@ -342,7 +345,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     }
     newList = [[[newList reverseObjectEnumerator] allObjects] mutableCopy];
     
-    if(!self.jid) return; 
+    if(!self.jid || newList.count==0) return; 
     NSDictionary* unreadStatus = @{@"af": self.jid,
                               @"message": @"Unread Messages Below" ,
                               kMessageType:kMessageTypeStatus
@@ -799,6 +802,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void) scrollToBottom
 {
+    if(self.messageList.count==0) return; 
     dispatch_async(dispatch_get_main_queue(), ^{
         NSIndexPath *path1 = [NSIndexPath indexPathForRow:0 inSection:0];
         [self.messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:NO];

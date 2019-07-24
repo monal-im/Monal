@@ -1194,6 +1194,7 @@ static DataLayer *sharedInstance=nil;
 
 -(NSString*) nickName:(NSString*) buddy forAccount:(NSString*) accountNo;
 {
+    if(!accountNo  || !buddy) return nil;
     NSString* query=[NSString stringWithFormat:@"select nick_name from buddylist where account_id=? and buddy_name=?"];
     NSArray * params=@[accountNo, buddy];
     NSString* fullname= (NSString*)[self executeScalar:query andArguments:params];
@@ -1202,6 +1203,7 @@ static DataLayer *sharedInstance=nil;
 
 -(NSString*) fullName:(NSString*) buddy forAccount:(NSString*) accountNo;
 {
+    if(!accountNo  || !buddy) return nil;
     NSString* query=[NSString stringWithFormat:@"select full_name from buddylist where account_id=? and buddy_name=?"];
     NSArray * params=@[accountNo, buddy];
     NSString* fullname= (NSString*)[self executeScalar:query andArguments:params];

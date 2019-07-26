@@ -133,7 +133,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     
     self.messageTable.rowHeight = UITableViewAutomaticDimension;
     self.messageTable.estimatedRowHeight=UITableViewAutomaticDimension;
-  
+   
 }
 
 -(void) handleForeGround {
@@ -239,7 +239,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     [self refreshButton:nil];
 
     [self updateBackground];
-     [self.messageTable setContentOffset:CGPointMake(0, CGFLOAT_MAX) animated:NO];
+  
 
 }
 
@@ -255,6 +255,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
     [xmppAccount queryOMEMODevicesFrom:self.contactName];
 #endif
+  //  [self scrollToBottom];
     
 }
 
@@ -270,6 +271,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 - (void)viewDidLayoutSubviews {
     [super viewDidLayoutSubviews];
+    [self.messageTable setContentOffset:CGPointMake(0, self.messageTable.contentSize.height- self.messageTable.bounds.size.height) animated:NO];
     
 }
 

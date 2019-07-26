@@ -238,9 +238,6 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     [self handleForeGround];
     [self refreshButton:nil];
 
-    UIEdgeInsets currentInset = self.messageTable.contentInset;
-    self.messageTable.contentInset =UIEdgeInsetsMake(self.navigationController.navigationBar.frame.size.height+[UIApplication sharedApplication].statusBarFrame.size.height, currentInset.left, currentInset.bottom, currentInset.right);
-   
     BOOL backgrounds = [[NSUserDefaults standardUserDefaults] boolForKey:@"ChatBackgrounds"];
     
     if(backgrounds){
@@ -261,6 +258,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         self.transparentLayer.hidden=YES;
     }
 
+     [self.messageTable setContentOffset:CGPointMake(0, CGFLOAT_MAX) animated:NO];
 
 }
 
@@ -269,13 +267,13 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     [super viewDidAppear:animated];
     if(!self.contactName || !self.accountNo) return; 
     
-    [self scrollToBottom];
     [self refreshCounter];
     [self synchChat];
 #ifndef DISABLE_OMEMO
     xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
     [xmppAccount queryOMEMODevicesFrom:self.contactName];
 #endif
+   
  
 }
 
@@ -367,8 +365,6 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     if(newList.count!=self.messageList.count)
     {
         self.messageList = newList;
-        [self.messageTable setContentOffset:CGPointMake(0, CGFLOAT_MAX) animated:NO];
-        [_messageTable reloadData];
     }
 }
 

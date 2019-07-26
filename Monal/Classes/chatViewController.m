@@ -238,6 +238,47 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     [self handleForeGround];
     [self refreshButton:nil];
 
+    [self updateBackground];
+     [self.messageTable setContentOffset:CGPointMake(0, CGFLOAT_MAX) animated:NO];
+
+}
+
+
+-(void) viewDidAppear:(BOOL)animated
+{
+    [super viewDidAppear:animated];
+    if(!self.contactName || !self.accountNo) return; 
+    
+    [self refreshCounter];
+    [self synchChat];
+#ifndef DISABLE_OMEMO
+    xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
+    [xmppAccount queryOMEMODevicesFrom:self.contactName];
+#endif
+    
+}
+
+-(void) viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+    [MLNotificationManager sharedInstance].currentAccountNo=nil;
+    [MLNotificationManager sharedInstance].currentContact=nil;
+    
+    [self refreshCounter];
+
+}
+
+- (void)viewDidLayoutSubviews {
+    [super viewDidLayoutSubviews];
+    
+}
+
+-(void) dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+-(void) updateBackground {
     BOOL backgrounds = [[NSUserDefaults standardUserDefaults] boolForKey:@"ChatBackgrounds"];
     
     if(backgrounds){
@@ -257,39 +298,6 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         self.backgroundImage.hidden=YES;
         self.transparentLayer.hidden=YES;
     }
-
-     [self.messageTable setContentOffset:CGPointMake(0, CGFLOAT_MAX) animated:NO];
-
-}
-
--(void) viewDidAppear:(BOOL)animated
-{
-    [super viewDidAppear:animated];
-    if(!self.contactName || !self.accountNo) return; 
-    
-    [self refreshCounter];
-    [self synchChat];
-#ifndef DISABLE_OMEMO
-    xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
-    [xmppAccount queryOMEMODevicesFrom:self.contactName];
-#endif
-   
- 
-}
-
--(void) viewWillDisappear:(BOOL)animated
-{
-    [super viewWillDisappear:animated];
-    [MLNotificationManager sharedInstance].currentAccountNo=nil;
-    [MLNotificationManager sharedInstance].currentContact=nil;
-    
-    [self refreshCounter];
-
-}
-
--(void) dealloc
-{
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 

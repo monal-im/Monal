@@ -271,7 +271,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 - (void)viewDidLayoutSubviews {
     [super viewDidLayoutSubviews];
-    [self.messageTable setContentOffset:CGPointMake(0, self.messageTable.contentSize.height- self.messageTable.bounds.size.height) animated:NO];
+    if(self.messageTable.contentSize.height>self.messageTable.bounds.size.height)
+        [self.messageTable setContentOffset:CGPointMake(0, self.messageTable.contentSize.height- self.messageTable.bounds.size.height) animated:NO];
     
 }
 

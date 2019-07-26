@@ -343,26 +343,25 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         newList =[[[DataLayer sharedInstance] messageHistoryDate:_contactName forAccount: _accountNo forDate:_day] mutableCopy];
         
     }
-    newList = [[[newList reverseObjectEnumerator] allObjects] mutableCopy];
-    
-    if(!self.jid || newList.count==0) return; 
+
+    if(!self.jid) return;
     NSDictionary* unreadStatus = @{@"af": self.jid,
                               @"message": @"Unread Messages Below" ,
                               kMessageType:kMessageTypeStatus
                               };
-    int unreadPos = 0;
-    while(unreadPos<=newList.count-1)
+    int unreadPos = newList.count-1;
+    while(unreadPos>=0)
     {
         NSDictionary *row = [newList objectAtIndex:unreadPos];
-        if([[row objectForKey:@"unread"] boolValue]==YES)
+        if([[row objectForKey:@"unread"] boolValue]==NO)
         {
-            unreadPos++;
+            unreadPos++; 
             break;
         }
-        unreadPos++;
+        unreadPos--;
     }
     
-    if(unreadPos!=0){
+    if(unreadPos<newList.count-1){
         [newList insertObject:unreadStatus atIndex:unreadPos];
     }
     
@@ -963,7 +962,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 {
     MLBaseCell* cell;
     
-    NSDictionary* row= [self.messageList objectAtIndex:indexPath.row];
+    NSDictionary* row= [self.messageList objectAtIndex:self.messageList.count-indexPath.row-1]; //flipped table
     NSString *from =[row objectForKey:@"af"];
     
     //intended to correct for bad data. Can be removed later probably.
@@ -978,7 +977,6 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         cell=[tableView dequeueReusableCellWithIdentifier:@"StatusCell"];
         cell.messageBody.text =[row objectForKey:@"message"];
         cell.link=nil;
-        cell.transform = CGAffineTransformMakeScale(1, -1);
         return cell;
     }
     
@@ -1175,9 +1173,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     cell.messageHistoryId=[row objectForKey:@"message_history_id"];
     BOOL newSender=NO;
     NSString *priorDate;
-    if(indexPath.row<self.messageList.count-1)
+    if(indexPath.row>0)
     {
-        NSDictionary *priorRow=[self.messageList objectAtIndex:indexPath.row+1];
+        NSDictionary *priorRow=[self.messageList objectAtIndex:indexPath.row-1];
         priorDate =[priorRow objectForKey:@"thetime"];
         NSString *priorSender =[priorRow objectForKey:@"af"];
         

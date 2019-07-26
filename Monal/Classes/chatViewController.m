@@ -132,7 +132,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     }
     
     self.messageTable.rowHeight = UITableViewAutomaticDimension;
-    self.messageTable.estimatedRowHeight= 75.0f;
+    self.messageTable.estimatedRowHeight=UITableViewAutomaticDimension;
   
 }
 
@@ -367,6 +367,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     if(newList.count!=self.messageList.count)
     {
         self.messageList = newList;
+        [self.messageTable setContentOffset:CGPointMake(0, CGFLOAT_MAX) animated:NO];
         [_messageTable reloadData];
     }
 }

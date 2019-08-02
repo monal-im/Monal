@@ -56,7 +56,7 @@
  Receives the new message notice and will update if it is this user. 
  */
 -(void) handleNewMessage:(NSNotification *)notification;
--(void) addMessageto:(NSString*)to withMessage:(NSString*) message andId:(NSString *) messageId;
+-(void) addMessageto:(NSString*)to withMessage:(NSString*) message andId:(NSString *) messageId withCompletion:(void (^)(BOOL success))completion;
 
 //notification
 -(void) keyboardWillShow:(NSNotification *) note;

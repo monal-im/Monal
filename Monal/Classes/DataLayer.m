@@ -1773,7 +1773,7 @@ static DataLayer *sharedInstance=nil;
 -(NSMutableArray*) messageHistory:(NSString*) buddy forAccount:(NSString*) accountNo
 {
     if(!accountNo ||! buddy) return nil; 
-    NSString* query=[NSString stringWithFormat:@"select af,message_from,  message, thetime, message_history_id, delivered, messageid, messageType, received,encrypted,previewImage, previewText, unread  from (select ifnull(actual_from, message_from) as af, message_from,  message, received, encrypted,   timestamp  as thetime, message_history_id, delivered,messageid, messageType, previewImage, previewText, unread from message_history where account_id=? and (message_from=? or message_to=?) order by message_history_id desc limit 100) order by thetime asc"];
+    NSString* query=[NSString stringWithFormat:@"select af,message_from,  message, thetime, message_history_id, delivered, messageid, messageType, received,encrypted,previewImage, previewText, unread  from (select ifnull(actual_from, message_from) as af, message_from,  message, received, encrypted,   timestamp  as thetime, message_history_id, delivered,messageid, messageType, previewImage, previewText, unread from message_history where account_id=? and (message_from=? or message_to=?) order by message_history_id desc limit 250) order by thetime asc"];
     NSArray *params=@[accountNo, buddy, buddy];
     NSMutableArray* toReturn = [[self executeReader:query andArguments:params] mutableCopy];
     

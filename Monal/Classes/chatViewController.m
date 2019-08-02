@@ -138,6 +138,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void) handleForeGround {
     [self refreshData];
+    [self reloadTable];
 }
 
 
@@ -987,7 +988,11 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 {
     MLBaseCell* cell;
 
-    NSDictionary* row= [self.messageList objectAtIndex:indexPath.row];
+    NSDictionary* row;
+    if(indexPath.row<self.messageList.count) {
+    row= [self.messageList objectAtIndex:indexPath.row];
+    }
+    
     NSString *from =[row objectForKey:@"af"];
     
     //intended to correct for bad data. Can be removed later probably.
@@ -1137,20 +1142,21 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
             NSArray *parts = [urlString componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
             cell.link = parts[0];
             
-            
-            
-            NSDictionary *underlineAttribute = @{NSUnderlineStyleAttributeName: @(NSUnderlineStyleSingle)};
-            NSAttributedString* underlined = [[NSAttributedString alloc] initWithString:cell.link attributes:underlineAttribute];
-            NSMutableAttributedString* stitchedString  = [[NSMutableAttributedString alloc] init];
-            [stitchedString appendAttributedString:
-             [[NSAttributedString alloc] initWithString:[[row objectForKey:@"message"] substringToIndex:pos.location] attributes:nil]];
-            [stitchedString appendAttributedString:underlined];
-            if(pos2.location!=NSNotFound)
-            {
-                NSString* remainder = [[row objectForKey:@"message"] substringFromIndex:pos.location+[underlined length]];
-                [stitchedString appendAttributedString:[[NSAttributedString alloc] initWithString:remainder attributes:nil]];
+            if(cell.link) {
+                
+                NSDictionary *underlineAttribute = @{NSUnderlineStyleAttributeName: @(NSUnderlineStyleSingle)};
+                NSAttributedString* underlined = [[NSAttributedString alloc] initWithString:cell.link attributes:underlineAttribute];
+                NSMutableAttributedString* stitchedString  = [[NSMutableAttributedString alloc] init];
+                [stitchedString appendAttributedString:
+                 [[NSAttributedString alloc] initWithString:[[row objectForKey:@"message"] substringToIndex:pos.location] attributes:nil]];
+                [stitchedString appendAttributedString:underlined];
+                if(pos2.location!=NSNotFound)
+                {
+                    NSString* remainder = [[row objectForKey:@"message"] substringFromIndex:pos.location+[underlined length]];
+                    [stitchedString appendAttributedString:[[NSAttributedString alloc] initWithString:remainder attributes:nil]];
+                }
+                cell.messageBody.attributedText=stitchedString;
             }
-            cell.messageBody.attributedText=stitchedString;
         }
         else
         {

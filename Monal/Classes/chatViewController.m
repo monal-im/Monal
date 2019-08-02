@@ -390,17 +390,19 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 {
     DDLogVerbose(@"Sending message");
     NSString *newMessageID =messageID?messageID:[[NSUUID UUID] UUIDString];
- 
-    [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:_contactName fromAccount:_accountNo isEncrypted:self.encryptChat isMUC:_isMUC isUpload:NO messageId:newMessageID
-                                       withCompletionHandler:nil];
-    
     //dont readd it, use the exisitng
+    
     if(!messageID) {
-        [self addMessageto:_contactName withMessage:messageText andId:newMessageID];
+        [self addMessageto:_contactName withMessage:messageText andId:newMessageID withCompletion:^(BOOL success) {
+            [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:_contactName fromAccount:_accountNo isEncrypted:self.encryptChat isMUC:_isMUC isUpload:NO messageId:newMessageID
+                                  withCompletionHandler:nil];
+        }];
     }
     else  {
-        
+        [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:_contactName fromAccount:_accountNo isEncrypted:self.encryptChat isMUC:_isMUC isUpload:NO messageId:newMessageID
+                              withCompletionHandler:nil];
     }
+    
 }
 
 -(void)resignTextView
@@ -470,9 +472,11 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 - (void)restClient:(DBRestClient*)restClient loadedSharableLink:(NSString*)link
            forFile:(NSString*)path{
     NSString *newMessageID =[[NSUUID UUID] UUIDString];
-    [[MLXMPPManager sharedInstance] sendMessage:link toContact:_contactName fromAccount:_accountNo isEncrypted:self.encryptChat isMUC:_isMUC isUpload:YES messageId:newMessageID
-                          withCompletionHandler:nil];
-     [self addMessageto:_contactName withMessage:link andId:newMessageID];
+ 
+    [self addMessageto:_contactName withMessage:link andId:newMessageID withCompletion:^(BOOL success) {
+        [[MLXMPPManager sharedInstance] sendMessage:link toContact:_contactName fromAccount:_accountNo isEncrypted:self.encryptChat isMUC:_isMUC isUpload:YES messageId:newMessageID
+                              withCompletionHandler:nil];
+    }];
     
     self.uploadHUD.hidden=YES;
     self.uploadHUD=nil;
@@ -556,9 +560,12 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                 
                 if(url) {
                     NSString *newMessageID =[[NSUUID UUID] UUIDString];
-                    [[MLXMPPManager sharedInstance] sendMessage:url toContact:_contactName fromAccount:_accountNo isEncrypted:self.encryptChat isMUC:_isMUC isUpload:YES messageId:newMessageID
-                                          withCompletionHandler:nil];
-                     [self addMessageto:_contactName withMessage:url andId:newMessageID];
+                   
+                    [self addMessageto:_contactName withMessage:url andId:newMessageID withCompletion:^(BOOL success) {
+                        [[MLXMPPManager sharedInstance] sendMessage:url toContact:_contactName fromAccount:_accountNo isEncrypted:self.encryptChat isMUC:_isMUC isUpload:YES messageId:newMessageID
+                                              withCompletionHandler:nil];
+                        
+                    }];
                     
                 }
                 else  {
@@ -608,7 +615,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 }
 
 //always messages going out
--(void) addMessageto:(NSString*)to withMessage:(NSString*) message andId:(NSString *) messageId
+-(void) addMessageto:(NSString*)to withMessage:(NSString*) message andId:(NSString *) messageId withCompletion:(void (^)(BOOL success))completion
 {
 	if(!self.jid || !message)  {
         DDLogError(@" not ready to send messages");
@@ -635,18 +642,22 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                            [self.messageList addObject:[userInfo mutableCopy]];
                            
                            NSIndexPath *path1;
-                           [_messageTable beginUpdates];
+                           [self->_messageTable beginUpdates];
                            NSInteger bottom = [self.messageList count]-1;
                            if(bottom>=0) {
                                 path1 = [NSIndexPath indexPathForRow:bottom  inSection:0];
-                               [_messageTable insertRowsAtIndexPaths:@[path1]
+                               [self->_messageTable insertRowsAtIndexPaths:@[path1]
                                                     withRowAnimation:UITableViewRowAnimationFade];
                            }
-                           [_messageTable endUpdates];
+                           [self->_messageTable endUpdates];
+                            if(completion) completion(result);
                            
                            [self scrollToBottom];
                            
+                           
                        });
+            
+          
         
     }
 	else {

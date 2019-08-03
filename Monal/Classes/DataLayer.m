@@ -875,6 +875,7 @@ static DataLayer *sharedInstance=nil;
 
 -(void) contactForUsername:(NSString*) username forAccount: (NSString*) accountNo withCompletion: (void (^)(NSArray *))completion
 {
+    if(!username || !accountNo) return;
     NSString* query= query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, ifnull(full_name, buddy_name) as full_name, nick_name, account_id, MUC, muc_subject, muc_nick , full_name as raw_full from buddylist where buddy_name=? and account_id=?"];
      NSArray *params= @[username, accountNo];
  
@@ -1539,7 +1540,7 @@ static DataLayer *sharedInstance=nil;
 
 -(void) hasMessageForId:(NSString*) messageid toContact:(NSString *) contact onAccount:(NSString *) accountNo andCompletion: (void (^)(BOOL))completion
 {
-    if(!accountNo || !contact) return; 
+    if(!accountNo || !contact) return;
     NSString* query=[NSString stringWithFormat:@"select messageid from  message_history where account_id=? and message_from=? and messageid=? limit 1"];
     NSArray *params=@[accountNo, contact, messageid?messageid:@""];
     

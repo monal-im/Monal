@@ -762,19 +762,24 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 {
     dispatch_async(dispatch_get_main_queue(),
                    ^{
+                       if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground) return;
+                       
                        int row=0;
-                       [_messageTable beginUpdates];
+                       NSIndexPath *indexPath;
                        for(NSMutableDictionary *rowDic in self.messageList)
                        {
                            if([[rowDic objectForKey:@"messageid"] isEqualToString:messageId]) {
                                [rowDic setObject:[NSNumber numberWithBool:delivered] forKey:@"delivered"];
-                               NSIndexPath *indexPath =[NSIndexPath indexPathForRow:row inSection:0];
-                                   [_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+                               indexPath =[NSIndexPath indexPathForRow:row inSection:0];
                                break;
                            }
                            row++;
                        }
-                       [_messageTable endUpdates];
+                       if(indexPath) {
+                           [self->_messageTable beginUpdates];
+                           [self->_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+                           [self->_messageTable endUpdates];
+                       }
                    });
 }
 
@@ -782,19 +787,26 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 {
     dispatch_async(dispatch_get_main_queue(),
                    ^{
+                       if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground) return;
+                       
                        int row=0;
-                       [_messageTable beginUpdates];
+                       NSIndexPath *indexPath;
                        for(NSMutableDictionary *rowDic in self.messageList)
                        {
                            if([[rowDic objectForKey:@"messageid"] isEqualToString:messageId]) {
                                [rowDic setObject:[NSNumber numberWithBool:received] forKey:@"received"];
-                               NSIndexPath *indexPath =[NSIndexPath indexPathForRow:row inSection:0];
-                               [_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+                               indexPath =[NSIndexPath indexPathForRow:row inSection:0];
+                               
                                break;
                            }
                            row++;
                        }
-                       [_messageTable endUpdates];
+                       
+                       if(indexPath) {
+                           [self->_messageTable beginUpdates];
+                           [self->_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+                           [self->_messageTable endUpdates];
+                       }
                    });
 }
 

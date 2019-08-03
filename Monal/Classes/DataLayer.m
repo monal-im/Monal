@@ -1539,6 +1539,7 @@ static DataLayer *sharedInstance=nil;
 
 -(void) hasMessageForId:(NSString*) messageid toContact:(NSString *) contact onAccount:(NSString *) accountNo andCompletion: (void (^)(BOOL))completion
 {
+    if(!accountNo || !contact) return; 
     NSString* query=[NSString stringWithFormat:@"select messageid from  message_history where account_id=? and message_from=? and messageid=? limit 1"];
     NSArray *params=@[accountNo, contact, messageid?messageid:@""];
     

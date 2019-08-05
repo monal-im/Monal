@@ -1895,7 +1895,7 @@ static DataLayer *sharedInstance=nil;
 
 -(void) lastMessageSanzaForAccount:(NSString*) accountNo withCompletion: (void (^)(NSString *))completion
 {
-    NSString* query=[NSString stringWithFormat:@"select messageid from  message_history where account_id=? order by timestamp desc limit 1"];
+    NSString* query=[NSString stringWithFormat:@"select stanzaid from  message_history where account_id=? order by timestamp desc limit 1"];
     
     [self executeScalar:query andArguments:@[accountNo] withCompletion:^(NSObject* result) {
         if(completion)
@@ -2523,6 +2523,17 @@ static DataLayer *sharedInstance=nil;
         
         DDLogVerbose(@"Upgrade to 3.6 success ");
     }
+    
+    if([dbversion doubleValue]<3.7)
+    {
+        DDLogVerbose(@"Database version <3.7 detected. Performing upgrade . ");
+        [self executeNonQuery:@"update dbversion set dbversion='3.7'; " withCompletion:nil];
+        
+        [self executeNonQuery:@"alter table message_history add column stanzaid text;" withCompletion:nil];
+        
+        DDLogVerbose(@"Upgrade to 3.7 success ");
+    }
+    
     
     [dbversionCheck unlock];
     return;

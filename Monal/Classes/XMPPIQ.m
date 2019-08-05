@@ -306,7 +306,7 @@
         
         MLXMLNode* max =[[MLXMLNode alloc] init];
         max.element=@"max";
-        max.data=@"100"; 
+        max.data=@"50";
         [set.children addObject:max];
         [queryNode.children addObject:set];
         
@@ -425,7 +425,7 @@
     
     MLXMLNode* max =[[MLXMLNode alloc] init];
     max.element=@"max";
-    max.data=@"100"; 
+    max.data=@"50"; 
     [field3.children addObject:max];
     
     if(uid) {

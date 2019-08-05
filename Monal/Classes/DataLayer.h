@@ -216,10 +216,16 @@ extern NSString *const kMessageTypeUrl;
 -(NSDate*) synchPointForContact:(NSString*) contact andAccount:(NSString*) accountNo;
 -(void) setSynchPoint:(NSDate *) synchPoint ForContact:(NSString*) contact andAccount:(NSString*) accountNo;
 
+
 /**
  retrieves the date of the the last message to or from this contact
  */
 -(void) lastMessageDateForContact:(NSString*) contact andAccount:(NSString*) accountNo withCompletion: (void (^)(NSDate *))completion;;
+
+/**
+ retrieves the stanzaid of the last message
+ */
+-(void) lastMessageSanzaForAccount:(NSString*) accountNo withCompletion: (void (^)(NSString *))completion;;
 
 
 -(BOOL) messageHistoryClean:(NSString*) buddy :(NSString*) accountNo;

@@ -2469,8 +2469,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         self.loginCompletion(YES, @"");
                          self.loginCompletion=nil;
                     }
-            
-                  
+                    
+                    [self queryMAMSinceLastStanza];
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"failed"]) // stream resume failed
                 {
@@ -3262,6 +3262,8 @@ if(!self.supportsSM3)
             }
         }]];
     }
+    
+    [self queryMAMSinceLastStanza];
 }
 
 -(void) setStatusMessageText:(NSString*) message
@@ -3556,7 +3558,7 @@ if(!self.supportsSM3)
     [self send:activeNode];
 }
 
-#pragma mark Message archive
+#pragma mark - Message archive
 
 
 -(void) setMAMPrefs:(NSString *) preference
@@ -3582,6 +3584,8 @@ if(!self.supportsSM3)
     [self send:query];
 }
 
+/* query everything after a certain sanza id
+ */
 -(void) setMAMQueryFromStart:(NSDate *) startDate after:(NSString *) after  andJid:(NSString *)jid
 {
     XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
@@ -3589,7 +3593,18 @@ if(!self.supportsSM3)
     [self send:query];
 }
 
-#pragma mark  MUC
+-(void) queryMAMSinceLastStanza
+{
+    [[DataLayer sharedInstance] lastMessageSanzaForAccount:_accountNo withCompletion:^(NSString *lastStanza) {
+        if(self.supportsMam2 && lastStanza) {
+            [self setMAMQueryFromStart:nil after:lastStanza andJid:nil];
+        }
+    }];
+   
+}
+
+
+#pragma mark - MUC
 
 -(void) getConferenceRooms
 {

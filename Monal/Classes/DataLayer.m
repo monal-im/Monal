@@ -1893,6 +1893,18 @@ static DataLayer *sharedInstance=nil;
     }];
 }
 
+-(void) lastMessageSanzaForAccount:(NSString*) accountNo withCompletion: (void (^)(NSString *))completion
+{
+    NSString* query=[NSString stringWithFormat:@"select messageid from  message_history where account_id=? order by timestamp desc limit 1"];
+    
+    [self executeScalar:query andArguments:@[accountNo] withCompletion:^(NSObject* result) {
+        if(completion)
+        {
+            completion((NSString *) result);
+        }
+    }];
+}
+
 #pragma mark active chats
 -(void) activeContactsWithCompletion: (void (^)(NSMutableArray *))completion
 {

@@ -420,12 +420,12 @@
     
     MLXMLNode* field3 =[[MLXMLNode alloc] init];
     field3.element=@"set";
-    [field3.attributes setObject:@"xmlns" forKey:@"http://jabber.org/protocol/rsm"];
+    [field3.attributes setObject:@"http://jabber.org/protocol/rsm" forKey:@"xmlns"];
     
     
     MLXMLNode* max =[[MLXMLNode alloc] init];
     max.element=@"max";
-    max.data=@"20"; // initally set to 100 but things didnt like it
+    max.data=@"100"; 
     [field3.children addObject:max];
     
     if(uid) {

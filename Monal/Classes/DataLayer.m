@@ -1460,13 +1460,13 @@ static DataLayer *sharedInstance=nil;
 }
 
 
--(void) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom delivered:(BOOL) delivered unread:(BOOL) unread serverMessageId:(NSString *) messageid messageType:(NSString *) messageType andOverrideDate:(NSDate *) messageDate encrypted:(BOOL) encrypted  withCompletion: (void (^)(BOOL, NSString*))completion
+-(void) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom delivered:(BOOL) delivered unread:(BOOL) unread messageId:(NSString *) messageid serverMessageId:(NSString *) stanzaid messageType:(NSString *) messageType andOverrideDate:(NSDate *) messageDate encrypted:(BOOL) encrypted  withCompletion: (void (^)(BOOL, NSString*))completion
 {
     if(!from || !to) {
         if(completion) completion(NO,nil);
         return;
     }
-    
+    //TODO messageid vs stanzaid .
     [self hasMessageForId:messageid toContact:actualfrom onAccount:accountNo andCompletion:^(BOOL exists) {
         if(!exists)
         {
@@ -1498,8 +1498,8 @@ static DataLayer *sharedInstance=nil;
             
             if(messageType)
             {
-                NSString* query=[NSString stringWithFormat:@"insert into message_history (account_id, message_from, message_to, timestamp, message, actual_from, unread, delivered, messageid, messageType, encrypted) values (?, ?, ?, ?, ?, ?,?,?,?, ?, ?);"];
-                NSArray *params=@[accountNo, from, to, dateString, message, actualfrom, [NSNumber numberWithInteger:unread], [NSNumber numberWithInteger:delivered], messageid?messageid:@"",messageType,[NSNumber numberWithInteger:encrypted] ];
+                NSString* query=[NSString stringWithFormat:@"insert into message_history (account_id, message_from, message_to, timestamp, message, actual_from, unread, delivered, messageid, messageType, encrypted, stanzaid) values (?, ?, ?, ?, ?, ?,?,?,?, ?, ?, ?);"];
+                NSArray *params=@[accountNo, from, to, dateString, message, actualfrom, [NSNumber numberWithInteger:unread], [NSNumber numberWithInteger:delivered], messageid?messageid:@"",messageType,[NSNumber numberWithInteger:encrypted], stanzaid?stanzaid:@"" ];
                 DDLogVerbose(@"%@",query);
                 [self executeNonQuery:query andArguments:params withCompletion:^(BOOL success) {
                     if(completion)
@@ -1514,8 +1514,8 @@ static DataLayer *sharedInstance=nil;
                 [self messageTypeForMessage:message withCompletion:^(NSString *foundMessageType) {
                     
                     //all messages default to unread
-                    NSString* query=[NSString stringWithFormat:@"insert into message_history (account_id, message_from, message_to, timestamp, message, actual_from, unread, delivered, messageid, messageType, encrypted) values (?,?,?,?,?,?,?,?,?,?,?);"];
-                    NSArray *params=@[accountNo, from, to, 	dateString, message, actualfrom,[NSNumber numberWithInteger:unread], [NSNumber numberWithInteger:delivered], messageid?messageid:@"",foundMessageType, [NSNumber numberWithInteger:encrypted]];
+                    NSString* query=[NSString stringWithFormat:@"insert into message_history (account_id, message_from, message_to, timestamp, message, actual_from, unread, delivered, messageid, messageType, encrypted, stanzaid) values (?,?,?,?,?,?,?,?,?,?,?, ?);"];
+                    NSArray *params=@[accountNo, from, to, 	dateString, message, actualfrom,[NSNumber numberWithInteger:unread], [NSNumber numberWithInteger:delivered], messageid?messageid:@"",foundMessageType, [NSNumber numberWithInteger:encrypted], stanzaid?stanzaid:@""];
                     DDLogVerbose(@"%@",query);
                     [self executeNonQuery:query andArguments:params  withCompletion:^(BOOL success) {
                         
@@ -1893,10 +1893,21 @@ static DataLayer *sharedInstance=nil;
     }];
 }
 
-//TODO using messageid for now, will use stanzaid seperately later
 -(void) lastMessageSanzaForAccount:(NSString*) accountNo withCompletion: (void (^)(NSString *))completion
 {
-    NSString* query=[NSString stringWithFormat:@"select messageid from  message_history where account_id=? order by timestamp desc limit 1"];
+    NSString* query=[NSString stringWithFormat:@"select stanzaid from  message_history where account_id=? and stanzaid not null and stanzaid!='' order by timestamp desc limit 1"];
+    
+    [self executeScalar:query andArguments:@[accountNo] withCompletion:^(NSObject* result) {
+        if(completion)
+        {
+            completion((NSString *) result);
+        }
+    }];
+}
+
+-(void) lastMessageTimeStampForAccount:(NSString*) accountNo withCompletion: (void (^)(NSString *))completion
+{
+    NSString* query=[NSString stringWithFormat:@"select timestamp from  message_history where account_id=? order by timestamp desc limit 1"];
     
     [self executeScalar:query andArguments:@[accountNo] withCompletion:^(NSObject* result) {
         if(completion)

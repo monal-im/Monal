@@ -1968,7 +1968,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                                           actuallyfrom:messageNode.actualFrom
                                                              delivered:YES
                                                                 unread:unread
-                                                       serverMessageId:messageNode.stanzaId?messageNode.stanzaId:messageId
+                                                             messageId:messageId
+                                                       serverMessageId:messageNode.stanzaId
                                                            messageType:messageType
                                                        andOverrideDate:messageNode.delayTimeStamp
                                                              encrypted:encrypted
@@ -3600,12 +3601,23 @@ if(!self.supportsSM3)
 
 -(void) queryMAMSinceLastStanza
 {
-    [[DataLayer sharedInstance] lastMessageSanzaForAccount:_accountNo withCompletion:^(NSString *lastStanza) {
-        if(self.supportsMam2 && lastStanza) {
-            [self setMAMQueryFromStart:nil after:lastStanza andJid:nil];
-        }
-    }];
-   
+    if(self.supportsMam2) {
+        [[DataLayer sharedInstance] lastMessageSanzaForAccount:_accountNo withCompletion:^(NSString *lastStanza) {
+            if(lastStanza) {
+                [self setMAMQueryFromStart:nil after:lastStanza andJid:nil];
+            } else
+            {
+                [[DataLayer sharedInstance] lastMessageTimeStampForAccount:self->_accountNo withCompletion:^(NSString *timeString) {
+                    
+                    NSDateFormatter *sourceDateFormat = [[NSDateFormatter alloc] init];
+                    [sourceDateFormat setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+                    [sourceDateFormat setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+                    NSDate *date = [sourceDateFormat dateFromString:timeString];
+                    [self setMAMQueryFromStart:date after:nil andJid:nil];
+                }];
+            }
+        }];
+    }
 }
 
 

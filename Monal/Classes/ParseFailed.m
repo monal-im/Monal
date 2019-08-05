@@ -14,11 +14,6 @@
 {
     _messageBuffer=nil;
     
-    //    if([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:sm:3"])
-    //    {
-    //
-    //    }
-    
     _h=[NSNumber numberWithInteger:[(NSString*)[attributeDict objectForKey:@"h"] integerValue]];
     
 }

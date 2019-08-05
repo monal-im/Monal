@@ -698,10 +698,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         {
             DDLogInfo(@"Using Push path for reconnct");
     
-            if(!_reconnectScheduled)
+            if(!self->_reconnectScheduled)
             {
-                _reconnectScheduled=YES;
-                DDLogInfo(@"Trying to connect again in %d seconds. ", wait);
+                self->_reconnectScheduled=YES;
+                DDLogInfo(@"Trying to connect again in %f seconds. ", wait);
                 dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
                 dispatch_after(dispatch_time(DISPATCH_TIME_NOW, wait * NSEC_PER_SEC), q_background,  ^{
                     //there may be another login operation freom reachability or another timer
@@ -718,7 +718,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         __block UIBackgroundTaskIdentifier reconnectBackgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
             
             if((([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
-                || ([UIApplication sharedApplication].applicationState==UIApplicationStateInactive )) && _accountState<kStateHasStream)
+                || ([UIApplication sharedApplication].applicationState==UIApplicationStateInactive )) && self->_accountState<kStateHasStream)
             {
                 //present notification
                 NSDate* theDate=[NSDate dateWithTimeIntervalSinceNow:0]; //immediate fire

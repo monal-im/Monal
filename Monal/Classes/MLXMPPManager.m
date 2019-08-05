@@ -407,10 +407,10 @@ An array of Dics what have timers to make sure everything was sent
 {
     
     [[DataLayer sharedInstance] accountListWithCompletion:^(NSArray *result) {
-        dispatch_async(_netQueue,
+        dispatch_async(self->_netQueue,
                        ^{
-                           _accountList=result;
-                           for (NSDictionary* account in _accountList)
+                           self->_accountList=result;
+                           for (NSDictionary* account in self->_accountList)
                            {
                                if([[account objectForKey:@"enabled"] boolValue]==YES)
                                {

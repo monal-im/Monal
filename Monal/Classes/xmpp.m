@@ -409,6 +409,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         DDLogError(@"assymetrical call to login without a teardown logout");
         return;
     }
+    self->_accountState=kStateReconnecting;
     _loginStarted=YES;
     self.loginStartTimeStamp=[NSDate date];
     self.pingID=nil;

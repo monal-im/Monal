@@ -1893,9 +1893,10 @@ static DataLayer *sharedInstance=nil;
     }];
 }
 
+//TODO using messageid for now, will use stanzaid seperately later
 -(void) lastMessageSanzaForAccount:(NSString*) accountNo withCompletion: (void (^)(NSString *))completion
 {
-    NSString* query=[NSString stringWithFormat:@"select stanzaid from  message_history where account_id=? order by timestamp desc limit 1"];
+    NSString* query=[NSString stringWithFormat:@"select messageid from  message_history where account_id=? order by timestamp desc limit 1"];
     
     [self executeScalar:query andArguments:@[accountNo] withCompletion:^(NSObject* result) {
         if(completion)

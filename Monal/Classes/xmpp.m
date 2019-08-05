@@ -1908,7 +1908,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     }
 #endif
                     
-                    if(messageNode.hasBody || messageNode.subject||decrypted)
+                    if(messageNode.hasBody || messageNode.subject|| decrypted)
                     {
                         NSString *ownNick;
                         //TODO if muc find own nick to see if echo
@@ -1961,9 +1961,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                 messageId=[[NSUUID UUID] UUIDString];
                             }
                             
-                            [[DataLayer sharedInstance] addMessageFrom:messageNode.from to:recipient
-                                                            forAccount:self->_accountNo withBody:body
-                                                          actuallyfrom:messageNode.actualFrom delivered:YES  unread:unread  serverMessageId:messageId
+                            [[DataLayer sharedInstance] addMessageFrom:messageNode.from
+                                                                    to:recipient
+                                                            forAccount:self->_accountNo
+                                                              withBody:body
+                                                          actuallyfrom:messageNode.actualFrom
+                                                             delivered:YES
+                                                                unread:unread
+                                                       serverMessageId:messageNode.stanzaId?messageNode.stanzaId:messageId
                                                            messageType:messageType
                                                        andOverrideDate:messageNode.delayTimeStamp
                                                              encrypted:encrypted

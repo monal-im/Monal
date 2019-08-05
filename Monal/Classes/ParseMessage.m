@@ -71,6 +71,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     if([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:sid:0"])
     {
         _stanzaId = [attributeDict objectForKey:@"id"];
+        return;
     }
     
    

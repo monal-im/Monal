@@ -1167,13 +1167,20 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 #pragma mark message ACK
 -(void) sendUnAckedMessages
 {
+    /**
+     Send appends to the unacked stanzas. Not removing it now will create an infinite loop.
+     It may also result in mutation on iteration
+     */
+    
     DDLogInfo(@"sending unacked messages" );
     [self.networkQueue addOperation:
      [NSBlockOperation blockOperationWithBlock:^{
-        for (NSDictionary *dic in self.unAckedStanzas)
-        {
+        NSMutableArray *sendCopy = [self.unAckedStanzas mutableCopy];
+        [sendCopy enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            NSDictionary *dic= (NSDictionary *) obj;
+            [self.unAckedStanzas removeObjectAtIndex:idx]; // do not grow
             [self send:(MLXMLNode*)[dic objectForKey:kStanza]];
-        }
+        }];
     }]];
 }
 /**
@@ -1191,7 +1198,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
             for(NSDictionary *dic in iterationArray)
             {
                 NSNumber *stanzaNumber = [dic objectForKey:kStanzaID];
-                if([stanzaNumber integerValue]<[hvalue integerValue])
+                if([stanzaNumber integerValue]<=[hvalue integerValue])
                 {
                     [discard addObject:dic];
                 }
@@ -2524,8 +2531,9 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                          [NSBlockOperation blockOperationWithBlock:^{
                             if(self.unAckedStanzas)
                             {
-                                for(NSDictionary *dic in self.unAckedStanzas)
+                                for(NSDictionary *dic in self.unAckedStanzas) {
                                     [self send:(MLXMLNode*)[dic objectForKey:kStanza]];
+                                }
                                 
                                 //clear queue afterwards (we don't want to repeat this)
                                 [self.unAckedStanzas removeAllObjects];
@@ -2813,6 +2821,10 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 }
 
 
+static NSMutableArray *extracted(xmpp *object) {
+    return object->_outputQueue;
+}
+
 -(void) send:(MLXMLNode*) stanza
 {
     if(!stanza) return;
@@ -2826,7 +2838,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                || [stanza.element isEqualToString:@"message"]
                || [stanza.element isEqualToString:@"presence"])
             {
-                DDLogVerbose(@"adding to unAckedStanzas %@: %@", self.lastOutboundStanza, stanza.XMLString);
+                DDLogVerbose(@"ADD UNACKED STANZA: %@: %@", self.lastOutboundStanza, stanza.XMLString);
                 NSDictionary *dic =@{kStanzaID:self.lastOutboundStanza, kStanza:stanza};
                 [self.unAckedStanzas addObject:dic];
                 //increment for next call
@@ -2840,8 +2852,8 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
     
     [self.networkQueue addOperation:
      [NSBlockOperation blockOperationWithBlock:^{
-        DDLogVerbose(@"adding to send %@", stanza.XMLString);
-        [self->_outputQueue addObject:stanza];
+        DDLogDebug(@"SEND: %@", stanza.XMLString);
+        [extracted(self) addObject:stanza];
         [self writeFromQueue];  // try to send if there is space
     }]];
 }

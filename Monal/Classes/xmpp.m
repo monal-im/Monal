@@ -1167,6 +1167,11 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 #pragma mark message ACK
 -(void) sendUnAckedMessages
 {
+#if TARGET_OS_IPHONE
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground)
+        {
+#endif
     /**
      Send appends to the unacked stanzas. Not removing it now will create an infinite loop.
      It may also result in mutation on iteration
@@ -1183,6 +1188,10 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
         }];
           [self persistState];
     }]];
+#if TARGET_OS_IPHONE
+        }
+    });
+#endif
 }
 /**
  This is actually less than or equal to since it is the last handled stanza

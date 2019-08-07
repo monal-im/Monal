@@ -13,7 +13,9 @@
 {
     _messageBuffer=nil;
 
-    _h=[NSNumber numberWithInteger:[(NSString*)[attributeDict objectForKey:@"h"] integerValue]];
+    if([attributeDict objectForKey:@"h"]) {
+        _h=[NSNumber numberWithInteger:[(NSString*)[attributeDict objectForKey:@"h"] integerValue]];
+    }
     
 }
 

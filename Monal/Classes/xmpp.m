@@ -70,7 +70,7 @@ NSString *const kXMPPSuccess =@"success";
 NSString *const kXMPPPresence = @"presence";
 
 
-static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+static const int ddLogLevel = LOG_LEVEL_DEBUG;
 
 @interface xmpp()
 {
@@ -1191,7 +1191,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             for(NSDictionary *dic in iterationArray)
             {
                 NSNumber *stanzaNumber = [dic objectForKey:kStanzaID];
-                if([stanzaNumber integerValue]<=[hvalue integerValue])
+                if([stanzaNumber integerValue]<[hvalue integerValue])
                 {
                     [discard addObject:dic];
                 }
@@ -1267,7 +1267,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         while (stanzaToParse)
         {
             [self.processQueue addOperationWithBlock:^{
-                DDLogVerbose(@"got stanza %@", stanzaToParse);
+                DDLogDebug(@"got stanza %@", stanzaToParse);
                 
                 if([[stanzaToParse objectForKey:@"stanzaType"]  isEqualToString:@"iq"])
                 {
@@ -2475,7 +2475,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                          self.loginCompletion=nil;
                     }
                     
-                    [self queryMAMSinceLastStanza];
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"failed"]) // stream resume failed
                 {
@@ -3111,7 +3110,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         }
         
         //debug output
-        DDLogDebug(@"readState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%d%s,\n\tstreamID=%@",
+        DDLogVerbose(@"readState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%d%s,\n\tstreamID=%@",
                    self.lastHandledInboundStanza,
                    self.lastHandledOutboundStanza,
                    self.lastOutboundStanza,
@@ -4040,7 +4039,7 @@ if(!self.supportsSM3)
 -(BOOL) writeToStream:(NSString*) messageOut
 {
     if(!messageOut) {
-        DDLogVerbose(@" tried to send empty message. returning");
+        DDLogInfo(@" tried to send empty message. returning");
         return NO;
     }
     //_streamHasSpace=NO; // triggers more has space messages
@@ -4058,7 +4057,7 @@ if(!self.supportsSM3)
     else
     {
         NSError* error= [_oStream streamError];
-        DDLogVerbose(@"sending: failed with error %ld domain %@ message %@",(long)error.code, error.domain, error.userInfo);
+        DDLogError(@"sending: failed with error %ld domain %@ message %@",(long)error.code, error.domain, error.userInfo);
     }
     
     return NO;

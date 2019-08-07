@@ -1181,6 +1181,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
             [self.unAckedStanzas removeObjectAtIndex:idx]; // do not grow
             [self send:(MLXMLNode*)[dic objectForKey:kStanza]];
         }];
+          [self persistState];
     }]];
 }
 /**

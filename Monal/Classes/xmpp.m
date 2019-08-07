@@ -583,6 +583,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
      //send last smacks ack as required by smacks revision 1.5.2
     if(self.supportsSM3)
     {
+        DDLogInfo(@"sending last ack");
         MLXMLNode *aNode = [[MLXMLNode alloc] initWithElement:@"a"];
         NSDictionary *dic= @{@"xmlns":@"urn:xmpp:sm:3",@"h":[NSString stringWithFormat:@"%@",self.lastHandledInboundStanza] };
         aNode.attributes = [dic mutableCopy];
@@ -872,7 +873,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 -(void) sendPing
 {
 #if TARGET_OS_IPHONE
-    dispatch_async(dispatch_get_main_queue(), ^{
+    dispatch_sync(dispatch_get_main_queue(), ^{
         if(([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
            || ([UIApplication sharedApplication].applicationState==UIApplicationStateInactive )) {
             return;
@@ -1167,6 +1168,15 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 #pragma mark message ACK
 -(void) sendUnAckedMessages
 {
+
+    //This addresses a bug in Aug 2019. Remove later if seen fit
+    //something is wrogn if it grows this big
+    if(self.unAckedStanzas.count>25)
+    {
+        [self.unAckedStanzas removeAllObjects];
+        [self persistState];
+    }
+    
 #if TARGET_OS_IPHONE
     dispatch_async(dispatch_get_main_queue(), ^{
         if([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground)
@@ -1181,9 +1191,9 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
     [self.networkQueue addOperation:
      [NSBlockOperation blockOperationWithBlock:^{
         NSMutableArray *sendCopy = [self.unAckedStanzas mutableCopy];
+        [self.unAckedStanzas removeAllObjects]; // do not grow
         [sendCopy enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             NSDictionary *dic= (NSDictionary *) obj;
-            [self.unAckedStanzas removeObjectAtIndex:idx]; // do not grow
             [self send:(MLXMLNode*)[dic objectForKey:kStanza]];
         }];
           [self persistState];
@@ -3169,9 +3179,9 @@ static NSMutableArray *extracted(xmpp *object) {
 
 -(void) disconnectToResumeWithCompletion:(void (^)(void))completion
 {
-    [self sendLastAck:YES];
-    [self closeSocket]; // just closing socket to simulate a unintentional disconnect
+    if(_accountState==kStateLoggedIn) [self sendLastAck:YES]; // race condition. socket may be closed so dont trigger a reconnect
     [self.networkQueue addOperationWithBlock:^{
+        [self closeSocket]; // just closing socket to simulate a unintentional disconnect
         [self resetValues];
         if(completion) completion();
     }];
@@ -3873,6 +3883,18 @@ if(!self.supportsSM3)
                 }
                     
             }
+#if TARGET_OS_IPHONE
+            if(self.accountState==kStateLoggedIn) {
+                dispatch_sync(dispatch_get_main_queue(), ^{
+                    if(([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
+                       || ([UIApplication sharedApplication].applicationState==UIApplicationStateInactive )) {
+                        DDLogInfo(@" Stream error in the background. Ignoring");
+                        return;
+                    }
+                });
+            }
+#endif
+                               
             
             if(!self.registration) {
                 [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, message, st_error]];
@@ -3886,6 +3908,8 @@ if(!self.supportsSM3)
             if(stream==_oStream){
                 return;
             }
+            
+            
             
             if(_loggedInOnce)
             {

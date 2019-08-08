@@ -873,28 +873,28 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 -(void) sendPing
 {
 #if TARGET_OS_IPHONE
-    dispatch_sync(dispatch_get_main_queue(), ^{
+    dispatch_async(dispatch_get_main_queue(), ^{
         if(([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
            || ([UIApplication sharedApplication].applicationState==UIApplicationStateInactive )) {
             return;
         }
 #endif
         
-    if(self.accountState<kStateReconnecting  && !_reconnectScheduled)
+        if(self.accountState<kStateReconnecting  && !self->_reconnectScheduled)
     {
         DDLogInfo(@" ping calling reconnect");
-        _accountState=kStateReconnecting;
+        self->_accountState=kStateReconnecting;
         [self reconnect:0];
         return;
     }
     
     if(self.accountState<kStateBound)
     {
-        if(_loginStarted && [[NSDate date] timeIntervalSinceDate:self.loginStartTimeStamp]<=10) {
+        if(self->_loginStarted && [[NSDate date] timeIntervalSinceDate:self.loginStartTimeStamp]<=10) {
             DDLogInfo(@"ping attempt before logged in and bound. returning.");
             return;
         }
-        else if (_loginStarted && [[NSDate date] timeIntervalSinceDate:self.loginStartTimeStamp]>10)
+        else if (self->_loginStarted && [[NSDate date] timeIntervalSinceDate:self.loginStartTimeStamp]>10)
         {
             DDLogVerbose(@"ping called while one already in progress that took more than 10 seconds. disconnect before reconnect.");
             [self reconnect:0];
@@ -910,7 +910,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
         else  {
             if(self.supportsPing) {
                 XMPPIQ* ping =[[XMPPIQ alloc] initWithType:kiqGetType];
-                [ping setiqTo:_domain];
+                [ping setiqTo:self->_domain];
                 [ping setPing];
                 [self send:ping];
             } else  {
@@ -3883,18 +3883,6 @@ if(!self.supportsSM3)
                 }
                     
             }
-#if TARGET_OS_IPHONE
-            if(self.accountState==kStateLoggedIn) {
-                dispatch_sync(dispatch_get_main_queue(), ^{
-                    if(([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
-                       || ([UIApplication sharedApplication].applicationState==UIApplicationStateInactive )) {
-                        DDLogInfo(@" Stream error in the background. Ignoring");
-                        return;
-                    }
-                });
-            }
-#endif
-                               
             
             if(!self.registration) {
                 [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, message, st_error]];
@@ -3908,16 +3896,27 @@ if(!self.supportsSM3)
             if(stream==_oStream){
                 return;
             }
-            
-            
-            
+       
             if(_loggedInOnce)
             {
-                DDLogInfo(@" stream error calling reconnect for account that logged in once before");
-                [self disconnectWithCompletion:^{
-                    [self reconnect:5];
-                }];
-                return;
+#if TARGET_OS_IPHONE
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if(([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
+                       || ([UIApplication sharedApplication].applicationState==UIApplicationStateInactive )
+                       && (self.accountState>=kStateLoggedIn)){
+                        DDLogInfo(@" Stream error in the background. Ignoring");
+                        return;
+                    } else  {
+#endif
+                        DDLogInfo(@" stream error calling reconnect for account that logged in once before");
+                        [self disconnectWithCompletion:^{
+                            [self reconnect:5];
+                        }];
+                        return;
+#if TARGET_OS_IPHONE
+                    }
+                });
+#endif
             }
             
             

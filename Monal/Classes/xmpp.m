@@ -3595,6 +3595,13 @@ if(!self.supportsSM3)
 }
 
 
+-(void) setMAMQueryMostRecentForJid:(NSString *)jid
+{
+    XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
+    [query setMAMQueryLatestMessagesForJid:jid];
+    [self send:query];
+}
+
 -(void) setMAMQueryFromStart:(NSDate *) startDate toDate:(NSDate *) endDate  andJid:(NSString *)jid
 {
     XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];

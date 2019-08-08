@@ -146,12 +146,11 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     [self refreshCounter];
 }
 
-
 -(void) synchChat {
     dispatch_async(dispatch_get_main_queue(), ^{
         
         xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
-        if(xmppAccount.supportsMam2 & !self.isMUC) {
+        if(xmppAccount.supportsMam2 & !self->_isMUC) {
             
             //synch point
             // if synch point < login time
@@ -167,7 +166,6 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
     });
 }
-
 
 -(void) fetchMoreMessages
 {

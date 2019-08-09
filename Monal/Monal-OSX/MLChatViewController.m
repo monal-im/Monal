@@ -179,8 +179,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
         if([synch timeIntervalSinceReferenceDate]<[connectedTime timeIntervalSinceReferenceDate])
         {
-            [xmppAccount setMAMQueryMostRecentForJid:self.contactName];
+            if(self.messageList.count==0) {
+                [xmppAccount setMAMQueryMostRecentForJid:self.contactName];
+            } else  {
+                [xmppAccount setMAMQueryFromStart:synch toDate:nil andJid:self.contactName];
+            }
+            
             [[DataLayer sharedInstance] setSynchPoint:[NSDate date] ForContact:self.contactName andAccount:self.accountNo];
+            
         }
     }
 }

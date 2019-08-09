@@ -2508,7 +2508,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                     
                     if(self.resuming)   //resume failed
                     {
-                        [[DataLayer sharedInstance] resetContactsForAccount:_accountNo];
+                        [[DataLayer sharedInstance] resetContactsForAccount:self->_accountNo];
                         
                         self.resuming=NO;
                         
@@ -3915,7 +3915,7 @@ if(!self.supportsSM3)
                         return;
                     } else  {
 #endif
-                        DDLogInfo(@" stream error calling reconnect for account that logged in once before");
+                        DDLogInfo(@" stream error calling reconnect for account that logged in once ");
                         [self disconnectWithCompletion:^{
                             [self reconnect:5];
                         }];

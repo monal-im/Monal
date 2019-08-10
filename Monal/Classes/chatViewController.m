@@ -1260,35 +1260,31 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         if([cell respondsToSelector:@selector(openlink:)]) {
             [(MLChatCell *)cell openlink:self];
         } else  {
-            
             self.photos =[[NSMutableArray alloc] init];
-            
             MLChatImageCell *imageCell = (MLChatImageCell *) cell;
-            
             IDMPhoto* photo=[IDMPhoto photoWithImage:imageCell.thumbnailImage.image];
             // photo.caption=[row objectForKey:@"caption"];
             [self.photos addObject:photo];
-            
-            }
+        }
             
             dispatch_async(dispatch_get_main_queue(), ^{
-                
-                IDMPhotoBrowser *browser = [[IDMPhotoBrowser alloc] initWithPhotos:self.photos];
-                browser.delegate=self;
-                
-//                browser.displayActionButton = YES; // Show action button to allow sharing, copying, etc (defaults to YES)
-//                browser.displayNavArrows = NO; // Whether to display left and right nav arrows on toolbar (defaults to NO)
-//                browser.displaySelectionButtons = NO; // Whether selection buttons are shown on each image (defaults to NO)
-//                browser.zoomPhotosToFill = YES; // Images that almost fill the screen will be initially zoomed to fill (defaults to YES)
-//                browser.alwaysShowControls = NO; // Allows to control whether the bars and controls are always visible or whether they fade away to show the photo full (defaults to NO)
-//                browser.enableGrid = YES; // Whether to allow the viewing of all the photo thumbnails on a grid (defaults to YES)
-//                browser.startOnGrid = NO; // Whether to start on the grid of thumbnails instead of the first photo (defaults to NO)
-//
-                UINavigationController *nav =[[UINavigationController alloc] initWithRootViewController:browser];
-                
-                
-                [self presentViewController:nav animated:YES completion:nil];
-                
+                if(self.photos.count>0) {
+                    IDMPhotoBrowser *browser = [[IDMPhotoBrowser alloc] initWithPhotos:self.photos];
+                    browser.delegate=self;
+                    
+                    //                browser.displayActionButton = YES; // Show action button to allow sharing, copying, etc (defaults to YES)
+                    //                browser.displayNavArrows = NO; // Whether to display left and right nav arrows on toolbar (defaults to NO)
+                    //                browser.displaySelectionButtons = NO; // Whether selection buttons are shown on each image (defaults to NO)
+                    //                browser.zoomPhotosToFill = YES; // Images that almost fill the screen will be initially zoomed to fill (defaults to YES)
+                    //                browser.alwaysShowControls = NO; // Allows to control whether the bars and controls are always visible or whether they fade away to show the photo full (defaults to NO)
+                    //                browser.enableGrid = YES; // Whether to allow the viewing of all the photo thumbnails on a grid (defaults to YES)
+                    //                browser.startOnGrid = NO; // Whether to start on the grid of thumbnails instead of the first photo (defaults to NO)
+                    //
+                    UINavigationController *nav =[[UINavigationController alloc] initWithRootViewController:browser];
+                    
+                    
+                    [self presentViewController:nav animated:YES completion:nil];
+                }
             });
             
     }

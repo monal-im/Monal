@@ -171,6 +171,9 @@
 		2632EA4220040D2C00191EEB /* MLCallScreen.m in Sources */ = {isa = PBXBuildFile; fileRef = 2632EA4120040D2C00191EEB /* MLCallScreen.m */; };
 		2632EA472006ADFE00191EEB /* MLGroupChatViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2632EA452006ADFD00191EEB /* MLGroupChatViewController.m */; };
 		2632EA4B20080C2C00191EEB /* MLGroupChatFavoritesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2632EA4A20080C2C00191EEB /* MLGroupChatFavoritesViewController.m */; };
+		2633CB3B231C8E2E006D0277 /* Icon-80.png in Resources */ = {isa = PBXBuildFile; fileRef = 2633CB3A231C8E2E006D0277 /* Icon-80.png */; };
+		2633CB3D231C8E41006D0277 /* Icon-80.png in Resources */ = {isa = PBXBuildFile; fileRef = 2633CB3C231C8E40006D0277 /* Icon-80.png */; };
+		2633CB3F231C8E4F006D0277 /* Icon-80.png in Resources */ = {isa = PBXBuildFile; fileRef = 2633CB3E231C8E4F006D0277 /* Icon-80.png */; };
 		26347D861790FFDE006FF64F /* MLInfoCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 26347D851790FFDE006FF64F /* MLInfoCell.m */; };
 		26352EA8177D222600E2C8FF /* MLXMPPManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26352EA7177D222600E2C8FF /* MLXMPPManager.m */; };
 		2636C43F177BD58C001CA71F /* XMPPEdit.m in Sources */ = {isa = PBXBuildFile; fileRef = 2636C43E177BD58C001CA71F /* XMPPEdit.m */; };
@@ -611,6 +614,9 @@
 		2632EA452006ADFD00191EEB /* MLGroupChatViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLGroupChatViewController.m; sourceTree = "<group>"; };
 		2632EA4920080C2C00191EEB /* MLGroupChatFavoritesViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLGroupChatFavoritesViewController.h; sourceTree = "<group>"; };
 		2632EA4A20080C2C00191EEB /* MLGroupChatFavoritesViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLGroupChatFavoritesViewController.m; sourceTree = "<group>"; };
+		2633CB3A231C8E2E006D0277 /* Icon-80.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon-80.png"; path = "Images.xcassets/AppIcon.appiconset/Icon-80.png"; sourceTree = "<group>"; };
+		2633CB3C231C8E40006D0277 /* Icon-80.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon-80.png"; path = "Images.xcassets/AppIcon.appiconset/Icon-80.png"; sourceTree = "<group>"; };
+		2633CB3E231C8E4F006D0277 /* Icon-80.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon-80.png"; path = "Images.xcassets/AppIcon.appiconset/Icon-80.png"; sourceTree = "<group>"; };
 		26347D841790FFDE006FF64F /* MLInfoCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLInfoCell.h; sourceTree = "<group>"; };
 		26347D851790FFDE006FF64F /* MLInfoCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLInfoCell.m; sourceTree = "<group>"; };
 		26352EA6177D222600E2C8FF /* MLXMPPManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLXMPPManager.h; sourceTree = "<group>"; };
@@ -1957,6 +1963,9 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
+				2633CB3A231C8E2E006D0277 /* Icon-80.png */,
+				2633CB3C231C8E40006D0277 /* Icon-80.png */,
+				2633CB3E231C8E4F006D0277 /* Icon-80.png */,
 				26AA70222146E2B900598605 /* shareSheet.entitlements */,
 				26FDB4341DC16A9800A129E0 /* Monal.entitlements */,
 				29B97315FDCFA39411CA2CEA /* Root Sources */,
@@ -2469,7 +2478,10 @@
 				2673CABA21D851E600256507 /* ContactDetails.storyboard in Resources */,
 				26158AF41FFA8A6A00E53BDC /* opensource.html in Resources */,
 				262E51981AD8CB7200788351 /* MLTextInputCell.xib in Resources */,
+				2633CB3B231C8E2E006D0277 /* Icon-80.png in Resources */,
+				2633CB3D231C8E41006D0277 /* Icon-80.png in Resources */,
 				2649CE531C51B84C00CD1E80 /* Launch Screen.storyboard in Resources */,
+				2633CB3F231C8E4F006D0277 /* Icon-80.png in Resources */,
 				260C20C021B4D02F0031399F /* Settings.storyboard in Resources */,
 				26F9794D1ACAC73A0008E005 /* MLContactCell.xib in Resources */,
 			);

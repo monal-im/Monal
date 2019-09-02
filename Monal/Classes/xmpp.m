@@ -18,11 +18,9 @@
 #endif
 
 #import "SAMKeychain.h"
-
-
 #import "MLImageManager.h"
 
-//objects
+//XMPP objects
 #import "XMPPIQ.h"
 #import "XMPPPresence.h"
 #import "XMPPMessage.h"
@@ -38,6 +36,9 @@
 #import "ParseA.h"
 #import "ParseResumed.h"
 #import "ParseFailed.h"
+
+//processors
+#import "MLMessageProcessor.h"
 
 #import "NXOAuth2.h"
 #import "MLHTTPRequest.h"
@@ -1816,11 +1817,81 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                     if(self.accountState>=kStateBound)
                         self.lastHandledInboundStanza=[NSNumber numberWithInteger: [self.lastHandledInboundStanza integerValue]+1];
                     ParseMessage* messageNode= [[ParseMessage alloc]  initWithDictionary:stanzaToParse];
-                    if([messageNode.type isEqualToString:kMessageErrorType])
-                    {
-                        //TODO: mark message as error
-                        return;
-                    }
+                    
+                    MLMessageProcessor *messageProcessor = [[MLMessageProcessor alloc] initWithAccount:self.accountNo jid:self.jid signalContex:self.signalContext andSignalStore:self.monalSignalStore];
+                    messageProcessor.postPersistAction = ^(BOOL success, BOOL encrypted, BOOL showAlert,  NSString *body, NSString *newMessageType) {
+                        if(success)
+                        {
+                            if(messageNode.requestReceipt
+                               && !messageNode.mamResult
+                               && ![messageNode.from isEqualToString:
+                                    self.jid]
+                               )
+                            {
+                                XMPPMessage *receiptNode = [[XMPPMessage alloc] init];
+                                [receiptNode.attributes setObject:messageNode.from forKey:@"to"];
+                                [receiptNode setXmppId:[[NSUUID UUID] UUIDString]];
+                                [receiptNode setReceipt:messageNode.idval];
+                                [self send:receiptNode];
+                            }
+                            
+                            [self.networkQueue addOperationWithBlock:^{
+                                
+                                if(![messageNode.from isEqualToString:
+                                     self.fulluser]) {
+                                    [[DataLayer sharedInstance] addActiveBuddies:messageNode.from forAccount:self->_accountNo withCompletion:nil];
+                                } else  {
+                                    [[DataLayer sharedInstance] addActiveBuddies:messageNode.to forAccount:self->_accountNo withCompletion:nil];
+                                }
+                                
+                                
+                                if(messageNode.from  ) {
+                                    NSString* actuallyFrom= messageNode.actualFrom;
+                                    if(!actuallyFrom) actuallyFrom=messageNode.from;
+                                    
+                                    NSString* messageText=messageNode.messageText;
+                                    if(!messageText) messageText=@"";
+                                    
+                                    BOOL shouldRefresh = NO;
+                                    if(messageNode.delayTimeStamp)  shouldRefresh =YES;
+                                    
+                                    NSArray *jidParts= [self.jid componentsSeparatedByString:@"/"];
+                                    
+                                    NSString *recipient;
+                                    if([jidParts count]>1) {
+                                        recipient= jidParts[0];
+                                    }
+                                    if(!recipient) recipient= self->_fulluser;
+                                    
+                                    
+                                    NSDictionary* userDic=@{@"from":messageNode.from,
+                                                            @"actuallyfrom":actuallyFrom,
+                                                            @"messageText":body,
+                                                            @"to":messageNode.to?messageNode.to:recipient,
+                                                            @"messageid":messageNode.idval?messageNode.idval:@"",
+                                                            @"accountNo":self->_accountNo,
+                                                            @"showAlert":[NSNumber numberWithBool:showAlert],
+                                                            @"shouldRefresh":[NSNumber numberWithBool:shouldRefresh],
+                                                            @"messageType":newMessageType?newMessageType:kMessageTypeText,
+                                                            @"muc_subject":messageNode.subject?messageNode.subject:@"",
+                                                            @"encrypted":[NSNumber numberWithBool:encrypted],
+                                                            @"delayTimeStamp":messageNode.delayTimeStamp?messageNode.delayTimeStamp:@""
+                                                            };
+                                    
+                                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:userDic];
+                                }
+                            }];
+                        }
+                        else {
+                            DDLogError(@"error adding message");
+                        }
+                    };
+                    
+                    messageProcessor.signalAction = ^(void) {
+                       [self manageMyKeys];
+                    };
+                    
+                    [messageProcessor processMessage:messageNode];
                     
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"]  isEqualToString:@"presence"])

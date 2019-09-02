@@ -13,7 +13,13 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+typedef void (^messageCompletion)(BOOL success, BOOL encrypted, BOOL showAlert,  NSString *body, NSString *newMessageType);
+typedef void (^signalCompletion)(void);
+
 @interface MLMessageProcessor : NSObject
+@property (nonatomic, strong) messageCompletion postPersistAction;
+@property (nonatomic, strong) signalCompletion signalAction;
+
 -(MLMessageProcessor *) initWithAccount:(NSString *) accountNo jid:(NSString *) jid signalContex:(SignalContext *)signalContext andSignalStore:(MLSignalStore *) monalSignalStore;
 
 /**

@@ -100,6 +100,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     [nc addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
     [nc addObserver:self selector:@selector(handleSendFailedMessage:) name:kMonalSendFailedMessageNotice object:nil];
     [nc addObserver:self selector:@selector(handleSentMessage:) name:kMonalSentMessageNotice object:nil];
+  
+    
     
     [nc addObserver:self selector:@selector(dismissKeyboard:) name:UIApplicationDidEnterBackgroundNotification object:nil];
     [nc addObserver:self selector:@selector(handleForeGround) name:UIApplicationWillEnterForegroundNotification object:nil];
@@ -110,7 +112,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 	[nc addObserver:self selector:@selector(keyboardDidShow:) name: UIKeyboardDidShowNotification object:nil];
   
     [nc addObserver:self selector:@selector(refreshMessage:) name:kMonalMessageReceivedNotice object:nil];
-    
+    [nc addObserver:self selector:@selector(presentMucInvite:) name:kMonalReceivedMucInviteNotice object:nil];
 
     [nc addObserver:self selector:@selector(refreshButton:) name:kMonalAccountStatusChanged object:nil];
     [nc addObserver:self selector:@selector(fetchMoreMessages) name:kMLMAMMore object:nil];
@@ -369,6 +371,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         self.messageList = newList;
     }
 }
+
+
 
 
 #pragma mark textview
@@ -663,6 +667,27 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         _firstmsg=NO;
 	}
 
+}
+
+-(void) presentMucInvite:(NSNotification *)notification
+{
+     xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
+    NSDictionary *userDic = notification.userInfo;
+    NSString *from = [userDic objectForKey:@"from"];
+    dispatch_async(dispatch_get_main_queue(), ^{
+          NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"You have been invited to a conversation %@?", nil), from ];
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Group Chat Invite" message:messageString preferredStyle:UIAlertControllerStyleAlert];
+        
+        [alert addAction:[UIAlertAction actionWithTitle:@"Join" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+              [xmppAccount joinRoom:from withNick:xmppAccount.username andPassword:nil];
+            [alert dismissViewControllerAnimated:YES completion:nil];
+        }]];
+        [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+            [alert dismissViewControllerAnimated:YES completion:nil];
+        }]];
+        [self presentViewController:alert animated:YES completion:nil];
+        
+    });
 }
 
 

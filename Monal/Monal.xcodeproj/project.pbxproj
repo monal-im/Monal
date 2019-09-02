@@ -174,6 +174,8 @@
 		2633CB3B231C8E2E006D0277 /* Icon-80.png in Resources */ = {isa = PBXBuildFile; fileRef = 2633CB3A231C8E2E006D0277 /* Icon-80.png */; };
 		2633CB3D231C8E41006D0277 /* Icon-80.png in Resources */ = {isa = PBXBuildFile; fileRef = 2633CB3C231C8E40006D0277 /* Icon-80.png */; };
 		2633CB3F231C8E4F006D0277 /* Icon-80.png in Resources */ = {isa = PBXBuildFile; fileRef = 2633CB3E231C8E4F006D0277 /* Icon-80.png */; };
+		2633CB43231CB816006D0277 /* MLMessageProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 2633CB42231CB816006D0277 /* MLMessageProcessor.m */; };
+		2633CB44231CB816006D0277 /* MLMessageProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 2633CB42231CB816006D0277 /* MLMessageProcessor.m */; };
 		26347D861790FFDE006FF64F /* MLInfoCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 26347D851790FFDE006FF64F /* MLInfoCell.m */; };
 		26352EA8177D222600E2C8FF /* MLXMPPManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26352EA7177D222600E2C8FF /* MLXMPPManager.m */; };
 		2636C43F177BD58C001CA71F /* XMPPEdit.m in Sources */ = {isa = PBXBuildFile; fileRef = 2636C43E177BD58C001CA71F /* XMPPEdit.m */; };
@@ -617,6 +619,8 @@
 		2633CB3A231C8E2E006D0277 /* Icon-80.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon-80.png"; path = "Images.xcassets/AppIcon.appiconset/Icon-80.png"; sourceTree = "<group>"; };
 		2633CB3C231C8E40006D0277 /* Icon-80.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon-80.png"; path = "Images.xcassets/AppIcon.appiconset/Icon-80.png"; sourceTree = "<group>"; };
 		2633CB3E231C8E4F006D0277 /* Icon-80.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon-80.png"; path = "Images.xcassets/AppIcon.appiconset/Icon-80.png"; sourceTree = "<group>"; };
+		2633CB41231CB816006D0277 /* MLMessageProcessor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLMessageProcessor.h; sourceTree = "<group>"; };
+		2633CB42231CB816006D0277 /* MLMessageProcessor.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLMessageProcessor.m; sourceTree = "<group>"; };
 		26347D841790FFDE006FF64F /* MLInfoCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLInfoCell.h; sourceTree = "<group>"; };
 		26347D851790FFDE006FF64F /* MLInfoCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLInfoCell.m; sourceTree = "<group>"; };
 		26352EA6177D222600E2C8FF /* MLXMPPManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLXMPPManager.h; sourceTree = "<group>"; };
@@ -1145,6 +1149,7 @@
 		260C51CE177F08CF0039634B /* XMPP */ = {
 			isa = PBXGroup;
 			children = (
+				2633CB40231CB7F5006D0277 /* Processors */,
 				2642EBC418693615006A6C12 /* Jingle */,
 				26CF3EAF1780DF8B002B7085 /* Parsers */,
 				26CF3EAE1780DF86002B7085 /* Nodes */,
@@ -1230,6 +1235,15 @@
 				2632EA4A20080C2C00191EEB /* MLGroupChatFavoritesViewController.m */,
 			);
 			name = "Group chat";
+			sourceTree = "<group>";
+		};
+		2633CB40231CB7F5006D0277 /* Processors */ = {
+			isa = PBXGroup;
+			children = (
+				2633CB41231CB816006D0277 /* MLMessageProcessor.h */,
+				2633CB42231CB816006D0277 /* MLMessageProcessor.m */,
+			);
+			name = Processors;
 			sourceTree = "<group>";
 		};
 		26352EA5177D21FC00E2C8FF /* Managers */ = {
@@ -2884,6 +2898,7 @@
 				26158AF21FFA6E4500E53BDC /* MLWebViewController.m in Sources */,
 				26F7BB431115F8DB00712672 /* Reachability.m in Sources */,
 				26D51CD61E2674D700141E04 /* NXOAuth2Client.m in Sources */,
+				2633CB43231CB816006D0277 /* MLMessageProcessor.m in Sources */,
 				26B51C4918654D98002134C3 /* LogViewController.m in Sources */,
 				2642EBC718693626006A6C12 /* RTP.mm in Sources */,
 				26B2A4F11B73097500272E63 /* DDASLLogger.m in Sources */,
@@ -3053,6 +3068,7 @@
 				26D51CD51E2674D700141E04 /* NXOAuth2AccountStore.m in Sources */,
 				2638DAEB1B68F3D400DF05AC /* MLAccountSettings.m in Sources */,
 				260499F21B7314D600D11866 /* jingleCall.m in Sources */,
+				2633CB44231CB816006D0277 /* MLMessageProcessor.m in Sources */,
 				26020B3821B957A0009A9735 /* MLMetaInfo.m in Sources */,
 				26D51CE11E2674D700141E04 /* NXOAuth2PostBodyStream.m in Sources */,
 				2661D34D1B407ED400EC51BA /* MLContactsCell.m in Sources */,

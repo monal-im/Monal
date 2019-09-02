@@ -17,6 +17,7 @@
 #define kMonalSendFailedMessageNotice @"kMonalSendFailedMessageNotice"
 
 #define kMonalMessageReceivedNotice @"kMonalMessageReceivedNotice"
+#define kMonalReceivedMucInviteNotice @"kMonalReceivedMucInviteNotice"
 
 #define kMonalContactOnlineNotice @"kMLContactOnlineNotice"
 #define kMonalContactOfflineNotice @"kMLContactOfflineNotice"

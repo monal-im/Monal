@@ -9,6 +9,8 @@
 #import "MLXMPPManager.h"
 #import "DataLayer.h"
 
+#import "MLMessageProcessor.h"
+#import "ParseMessage.h"
 
 #if TARGET_OS_IPHONE
 #import "MonalAppDelegate.h"
@@ -957,6 +959,73 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
     {
          xmpp* xmppAccount=[account objectForKey:@"xmppAccount"];
         [self sendOutboxForAccount:xmppAccount.accountNo];
+    }
+}
+
+
+#pragma mark - handling air drop
+-(void) parseMessageForData:(NSData *) data
+{
+    //parse message
+    ParseMessage *messageNode = [[ParseMessage alloc] initWithData:data];
+    NSArray *cleanParts= [messageNode.tocomponentsSeparatedByString:@"/"];
+    NSString *jid= cleanParts[0];
+    
+    NSArray *parts =[jid componentsSeparatedByString:@"@"];
+    NSString* user =parts[0];
+    
+    if(parts.count>1){
+        NSString *domain= parts[1];
+        
+        [[DataLayer sharedInstance] accountForUser:user andDomain:domain withCompletion:^(NSString *accountNo) {
+            if(accountNo) {
+                //process message
+                MLMessageProcessor *messageProcessor = [[MLMessageProcessor alloc] initWithAccount:accountNo jid:jid signalContex:self.signalContext andSignalStore:self.monalSignalStore];
+                messageProcessor.postPersistAction = ^(BOOL success, BOOL encrypted, BOOL showAlert,  NSString *body, NSString *newMessageType) {
+                    if(success)
+                    {
+                        [[DataLayer sharedInstance] addActiveBuddies:messageNode.from forAccount:accountNo withCompletion:nil];
+                        
+                        if(messageNode.from  ) {
+                            NSString* actuallyFrom= messageNode.actualFrom;
+                            if(!actuallyFrom) actuallyFrom=messageNode.from;
+                            
+                            NSString* messageText=messageNode.messageText;
+                            if(!messageText) messageText=@"";
+                            
+                            BOOL shouldRefresh = NO;
+                            if(messageNode.delayTimeStamp)  shouldRefresh =YES;
+                            
+                            NSArray *jidParts= [jid componentsSeparatedByString:@"/"];
+                            
+                            NSString *recipient;
+                            if([jidParts count]>1) {
+                                recipient= jidParts[0];
+                            }
+                            
+                            NSDictionary* userDic=@{@"from":messageNode.from,
+                                                    @"actuallyfrom":actuallyFrom,
+                                                    @"messageText":body,
+                                                    @"to":messageNode.to?messageNode.to:recipient,
+                                                    @"messageid":messageNode.idval?messageNode.idval:@"",
+                                                    @"accountNo":accountNo,
+                                                    @"showAlert":[NSNumber numberWithBool:showAlert],
+                                                    @"shouldRefresh":[NSNumber numberWithBool:shouldRefresh],
+                                                    @"messageType":newMessageType?newMessageType:kMessageTypeText,
+                                                    @"muc_subject":messageNode.subject?messageNode.subject:@"",
+                                                    @"encrypted":[NSNumber numberWithBool:encrypted],
+                                                    @"delayTimeStamp":messageNode.delayTimeStamp?messageNode.delayTimeStamp:@""
+                                                    };
+                            
+                            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:userDic];
+                        }
+                    }
+                    else {
+                        DDLogError(@"error adding message from data");
+                    }
+                };
+            }
+        }];
     }
 }
 

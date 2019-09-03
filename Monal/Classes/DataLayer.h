@@ -154,6 +154,7 @@ extern NSString *const kMessageTypeUrl;
 -(NSArray*) enabledAccountList;
 -(BOOL) isAccountEnabled:(NSString*) accountNo;
 -(void) doesAccountExistUser:(NSString*) user andDomain:(NSString *) domain withCompletion:(void (^)(BOOL result))completion;
+-(void) accountForUser:(NSString*) user andDomain:(NSString *) domain withCompletion:(void (^)(NSString* result))completion;
 
 -(NSArray*) accountVals:(NSString*) accountNo; 
 

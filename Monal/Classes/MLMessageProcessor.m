@@ -224,10 +224,17 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                     NSData *decData = [AESGcm decrypt:decodedPayload withKey:key andIv:iv withAuth:auth];
                     return [[NSString alloc] initWithData:decData encoding:NSUTF8StringEncoding];
                     
+                } else  {
+                    DDLogError(@"Could not get key");
+                    return @"Could not decrypt message";
                 }
             }
         }
+    } else {
+        return nil;
     }
+#else
+    return nil;
 #endif
 }
 

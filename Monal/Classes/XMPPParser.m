@@ -13,23 +13,30 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 
 @implementation XMPPParser
 
+- (id) initWithData:(NSData *) data
+{
+    self=[super init];
+    [self parseData:data];
+    return self;
+}
+
 - (id) initWithDictionary:(NSDictionary*) dictionary
 {
     self=[super init];
-    
     NSData* stanzaData= [[dictionary objectForKey:@"stanzaString"] dataUsingEncoding:NSUTF8StringEncoding];
-	
-    //xml parsing
-	NSXMLParser* parser = [[NSXMLParser alloc] initWithData:stanzaData];
-	[parser setShouldProcessNamespaces:NO];
+    [self parseData:stanzaData];
+    return  self;
+}
+
+-(void) parseData:(NSData *) data
+{
+    NSXMLParser* parser = [[NSXMLParser alloc] initWithData:data];
+    [parser setShouldProcessNamespaces:NO];
     [parser setShouldReportNamespacePrefixes:NO];
     [parser setShouldResolveExternalEntities:NO];
-	[parser setDelegate:self];
-	
-	[parser parse];
+    [parser setDelegate:self];
     
-    return  self;
-    
+    [parser parse];
 }
  
 

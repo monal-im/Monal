@@ -299,6 +299,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(BOOL) openFile:(NSURL *) file {
     NSData *data = [NSData dataWithContentsOfURL:file];
+    [[MLXMPPManager sharedInstance] parseMessageForData:data];
     return data?YES:NO;
 }
 

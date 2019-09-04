@@ -979,58 +979,63 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
         
         [[DataLayer sharedInstance] accountForUser:user andDomain:domain withCompletion:^(NSString *accountNo) {
             if(accountNo) {
-               MLSignalStore *monalSignalStore = [[MLSignalStore alloc] initWithAccountId:accountNo];
-                
-                //signal store
-                SignalStorage *signalStorage = [[SignalStorage alloc] initWithSignalStore:monalSignalStore];
-                //signal context
-                SignalContext *signalContext= [[SignalContext alloc] initWithStorage:signalStorage];
-                
-                //process message
-                MLMessageProcessor *messageProcessor = [[MLMessageProcessor alloc] initWithAccount:accountNo jid:jid signalContex:signalContext andSignalStore:monalSignalStore];
-                messageProcessor.postPersistAction = ^(BOOL success, BOOL encrypted, BOOL showAlert,  NSString *body, NSString *newMessageType) {
-                    if(success)
-                    {
-                        [[DataLayer sharedInstance] addActiveBuddies:messageNode.from forAccount:accountNo withCompletion:nil];
-                        
-                        if(messageNode.from  ) {
-                            NSString* actuallyFrom= messageNode.actualFrom;
-                            if(!actuallyFrom) actuallyFrom=messageNode.from;
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    
+                    MLSignalStore *monalSignalStore = [[MLSignalStore alloc] initWithAccountId:accountNo];
+                    
+                    //signal store
+                    SignalStorage *signalStorage = [[SignalStorage alloc] initWithSignalStore:monalSignalStore];
+                    //signal context
+                    SignalContext *signalContext= [[SignalContext alloc] initWithStorage:signalStorage];
+                    
+                    //process message
+                    MLMessageProcessor *messageProcessor = [[MLMessageProcessor alloc] initWithAccount:accountNo jid:jid signalContex:signalContext andSignalStore:monalSignalStore];
+                    messageProcessor.postPersistAction = ^(BOOL success, BOOL encrypted, BOOL showAlert,  NSString *body, NSString *newMessageType) {
+                        if(success)
+                        {
+                            [[DataLayer sharedInstance] addActiveBuddies:messageNode.from forAccount:accountNo withCompletion:nil];
                             
-                            NSString* messageText=messageNode.messageText;
-                            if(!messageText) messageText=@"";
-                            
-                            BOOL shouldRefresh = NO;
-                            if(messageNode.delayTimeStamp)  shouldRefresh =YES;
-                            
-                            NSArray *jidParts= [jid componentsSeparatedByString:@"/"];
-                            
-                            NSString *recipient;
-                            if([jidParts count]>1) {
-                                recipient= jidParts[0];
+                            if(messageNode.from  ) {
+                                NSString* actuallyFrom= messageNode.actualFrom;
+                                if(!actuallyFrom) actuallyFrom=messageNode.from;
+                                
+                                NSString* messageText=messageNode.messageText;
+                                if(!messageText) messageText=@"";
+                                
+                                BOOL shouldRefresh = NO;
+                                if(messageNode.delayTimeStamp)  shouldRefresh =YES;
+                                
+                                NSArray *jidParts= [jid componentsSeparatedByString:@"/"];
+                                
+                                NSString *recipient;
+                                if([jidParts count]>1) {
+                                    recipient= jidParts[0];
+                                }
+                                
+                                NSDictionary* userDic=@{@"from":messageNode.from,
+                                                        @"actuallyfrom":actuallyFrom,
+                                                        @"messageText":body,
+                                                        @"to":messageNode.to?messageNode.to:recipient,
+                                                        @"messageid":messageNode.idval?messageNode.idval:@"",
+                                                        @"accountNo":accountNo,
+                                                        @"showAlert":[NSNumber numberWithBool:showAlert],
+                                                        @"shouldRefresh":[NSNumber numberWithBool:shouldRefresh],
+                                                        @"messageType":newMessageType?newMessageType:kMessageTypeText,
+                                                        @"muc_subject":messageNode.subject?messageNode.subject:@"",
+                                                        @"encrypted":[NSNumber numberWithBool:encrypted],
+                                                        @"delayTimeStamp":messageNode.delayTimeStamp?messageNode.delayTimeStamp:@""
+                                                        };
+                                
+                                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:userDic];
                             }
-                            
-                            NSDictionary* userDic=@{@"from":messageNode.from,
-                                                    @"actuallyfrom":actuallyFrom,
-                                                    @"messageText":body,
-                                                    @"to":messageNode.to?messageNode.to:recipient,
-                                                    @"messageid":messageNode.idval?messageNode.idval:@"",
-                                                    @"accountNo":accountNo,
-                                                    @"showAlert":[NSNumber numberWithBool:showAlert],
-                                                    @"shouldRefresh":[NSNumber numberWithBool:shouldRefresh],
-                                                    @"messageType":newMessageType?newMessageType:kMessageTypeText,
-                                                    @"muc_subject":messageNode.subject?messageNode.subject:@"",
-                                                    @"encrypted":[NSNumber numberWithBool:encrypted],
-                                                    @"delayTimeStamp":messageNode.delayTimeStamp?messageNode.delayTimeStamp:@""
-                                                    };
-                            
-                            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:userDic];
                         }
-                    }
-                    else {
-                        DDLogError(@"error adding message from data");
-                    }
-                };
+                        else {
+                            DDLogError(@"error adding message from data");
+                        }
+                    };
+                    [messageProcessor processMessage:messageNode];
+                    
+                });
             }
         }];
     }

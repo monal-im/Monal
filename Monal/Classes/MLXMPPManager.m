@@ -968,7 +968,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 {
     //parse message
     ParseMessage *messageNode = [[ParseMessage alloc] initWithData:data];
-    NSArray *cleanParts= [messageNode.tocomponentsSeparatedByString:@"/"];
+    NSArray *cleanParts= [messageNode.to componentsSeparatedByString:@"/"];
     NSString *jid= cleanParts[0];
     
     NSArray *parts =[jid componentsSeparatedByString:@"@"];
@@ -979,8 +979,15 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
         
         [[DataLayer sharedInstance] accountForUser:user andDomain:domain withCompletion:^(NSString *accountNo) {
             if(accountNo) {
+               MLSignalStore *monalSignalStore = [[MLSignalStore alloc] initWithAccountId:accountNo];
+                
+                //signal store
+                SignalStorage *signalStorage = [[SignalStorage alloc] initWithSignalStore:monalSignalStore];
+                //signal context
+                SignalContext *signalContext= [[SignalContext alloc] initWithStorage:signalStorage];
+                
                 //process message
-                MLMessageProcessor *messageProcessor = [[MLMessageProcessor alloc] initWithAccount:accountNo jid:jid signalContex:self.signalContext andSignalStore:self.monalSignalStore];
+                MLMessageProcessor *messageProcessor = [[MLMessageProcessor alloc] initWithAccount:accountNo jid:jid signalContex:signalContext andSignalStore:monalSignalStore];
                 messageProcessor.postPersistAction = ^(BOOL success, BOOL encrypted, BOOL showAlert,  NSString *body, NSString *newMessageType) {
                     if(success)
                     {

@@ -297,11 +297,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 #pragma mark - handling urls
 
--(BOOL) opneFile:(NSURL *) file {
-    
+-(BOOL) openFile:(NSURL *) file {
     NSData *data = [NSData dataWithContentsOfURL:file];
-    
-    
     return data?YES:NO;
 }
 

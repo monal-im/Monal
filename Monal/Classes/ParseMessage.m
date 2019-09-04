@@ -139,7 +139,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         if([elementName isEqualToString:@"message"])
         {
             _from=[[(NSString*)[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
-            DDLogVerbose(@"message from %@", _from);
+            _to=[[(NSString*)[attributeDict objectForKey:@"to"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
+            DDLogVerbose(@"message from %@ to %@", _from, _to);
             return;
         }
     

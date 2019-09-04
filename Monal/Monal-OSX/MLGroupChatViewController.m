@@ -33,13 +33,13 @@
     if([MLXMPPManager sharedInstance].connectedXMPP.count==1) {
         self.accounts.hidden=YES;
         self.accountText.hidden=YES;
-        if(self.acccount.count>0)
+        if(self.accounts.count>0)
             [self.accounts selectItemAtIndex:0];
     }
     else {
         self.accountText.hidden=NO;
         self.accounts.hidden=NO;
-        if(self.acccount.count>0)
+        if(self.accounts.count>0)
             [self.accounts selectItemAtIndex:0]; //TODO update to remember last used
     }
     

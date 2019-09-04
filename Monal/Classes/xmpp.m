@@ -1280,11 +1280,14 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
         self.supportsPing=YES;
     }
     
-    if([self.serverFeatures containsObject:@"http://jabber.org/protocol/pubsub"])
-    {
-        self.supportsPubSub=YES;
-    }
-    
+    [self.serverFeatures.allObjects enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        NSString *feature = (NSString *)obj;
+        if([feature hasPrefix:@"http://jabber.org/protocol/pubsub"]) {
+             self.supportsPubSub=YES;
+            *stop=YES;
+        }
+    }];
+ 
 }
 
 -(void) processInput
@@ -1312,6 +1315,10 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                         if([iqNode.from isEqualToString:self.server] || [iqNode.from isEqualToString:self.domain]) {
                             self.serverFeatures=[iqNode.features copy];
                             [self parseFeatures];
+                            
+#ifndef DISABLE_OMEMO
+                            [self sendSignalInitialStanzas];
+#endif
                         }
                         
                         if([iqNode.features containsObject:@"urn:xmpp:http:upload"])
@@ -2218,9 +2225,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                         }
                         else {
                             [self bindResource];
-#ifndef DISABLE_OMEMO
-                            [self sendSignalInitialStanzas];
-#endif
+
                             if(self.loginCompletion) {
                                 self.loginCompletion(YES, @"");
                                 self.loginCompletion=nil;

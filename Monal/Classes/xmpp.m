@@ -1265,6 +1265,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
     [carbons.children addObject:enable];
     [self send:carbons];
 }
+
 -(void) parseFeatures
 {
     if([self.serverFeatures containsObject:@"urn:xmpp:carbons:2"])
@@ -3146,7 +3147,7 @@ if(!self.supportsSM3)
 }
 
 #ifndef DISABLE_OMEMO
-#pragma mark OMEMO
+#pragma mark - OMEMO
 
 -(void) setupSignal
 {
@@ -3183,7 +3184,7 @@ if(!self.supportsSM3)
         if([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground)
         {
 #endif
-            [self queryOMEMODevicesFrom:_fulluser];
+            [self queryOMEMODevicesFrom:self->_fulluser];
             [self sendOMEMOBundle];
 #if TARGET_OS_IPHONE
         }

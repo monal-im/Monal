@@ -188,14 +188,14 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         
         if(xmppAccount.accountState<kStateLoggedIn)
         {
-            self.sendButton.enabled=NO;
+         //   self.sendButton.enabled=NO;
             if(!title) title=@"";
             if(self.contactName.length>0){
                 self.navigationItem.title=[NSString stringWithFormat:@"%@ [%@]", title, @"Logged Out"];
             }
         }
         else  {
-            self.sendButton.enabled=YES;
+           // self.sendButton.enabled=YES;
             self.navigationItem.title=title;
             
         }
@@ -381,15 +381,42 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     [self sendMessage:messageText andMessageID:nil];
 }
 
+-(void) sendWithShareSheet {
+    NSURL *url = [NSURL URLWithString:@"http://monal.im"];
+    NSArray *items =@[@"Message in Monal", url];
+    NSArray *exclude =  @[UIActivityTypePostToTwitter, UIActivityTypePostToFacebook,
+                          UIActivityTypePostToWeibo,
+                          UIActivityTypeMessage, UIActivityTypeMail,
+                          UIActivityTypePrint, UIActivityTypeCopyToPasteboard,
+                          UIActivityTypeAssignToContact, UIActivityTypeSaveToCameraRoll,
+                          UIActivityTypeAddToReadingList, UIActivityTypePostToFlickr,
+                          UIActivityTypePostToVimeo, UIActivityTypePostToTencentWeibo];
+    UIActivityViewController *share = [[UIActivityViewController alloc] initWithActivityItems:items applicationActivities:nil];
+    share.excludedActivityTypes = exclude; 
+    [self presentViewController:share animated:YES completion:nil];
+}
+
 -(void) sendMessage:(NSString *) messageText andMessageID:(NSString *)messageID
 {
     DDLogVerbose(@"Sending message");
     NSString *newMessageID =messageID?messageID:[[NSUUID UUID] UUIDString];
     //dont readd it, use the exisitng
-    
+    xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
+    if(xmppAccount.accountState<kStateLoggedIn)
+    {
+        DDLogInfo(@"Sending Via share sheet");
+        [self sendWithShareSheet];
+        
+    } else  {
     if(!messageID) {
+        NSString *contactNameCopy =_contactName; //prevent retail cycle
+        NSString *accountNoCopy = _accountNo;
+        BOOL isMucCopy = _isMUC;
+        BOOL encryptChatCopy = self.encryptChat;
+        
+    
         [self addMessageto:_contactName withMessage:messageText andId:newMessageID withCompletion:^(BOOL success) {
-            [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:_contactName fromAccount:_accountNo isEncrypted:self.encryptChat isMUC:_isMUC isUpload:NO messageId:newMessageID
+            [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:contactNameCopy fromAccount:accountNoCopy isEncrypted:encryptChatCopy isMUC:isMucCopy isUpload:NO messageId:newMessageID
                                   withCompletionHandler:nil];
         }];
     }
@@ -397,7 +424,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:_contactName fromAccount:_accountNo isEncrypted:self.encryptChat isMUC:_isMUC isUpload:NO messageId:newMessageID
                               withCompletionHandler:nil];
     }
-    
+    }
 }
 
 -(void)resignTextView

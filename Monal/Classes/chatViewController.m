@@ -19,6 +19,7 @@
 
 #import "IDMPhotoBrowser.h"
 #import "ContactDetails.h"
+#import "MLXMPPActivityItem.h"
 
 @import QuartzCore;
 @import MobileCoreServices;
@@ -382,8 +383,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 }
 
 -(void) sendWithShareSheet {
-    NSURL *url = [NSURL URLWithString:@"http://monal.im"];
-    NSArray *items =@[@"Message in Monal", url];
+    MLXMPPActivityItem *item = [MLXMPPActivityItem alloc]; 
+    NSArray *items =@[item];
     NSArray *exclude =  @[UIActivityTypePostToTwitter, UIActivityTypePostToFacebook,
                           UIActivityTypePostToWeibo,
                           UIActivityTypeMessage, UIActivityTypeMail,
@@ -392,7 +393,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                           UIActivityTypeAddToReadingList, UIActivityTypePostToFlickr,
                           UIActivityTypePostToVimeo, UIActivityTypePostToTencentWeibo];
     UIActivityViewController *share = [[UIActivityViewController alloc] initWithActivityItems:items applicationActivities:nil];
-    share.excludedActivityTypes = exclude; 
+   // share.excludedActivityTypes = exclude; 
     [self presentViewController:share animated:YES completion:nil];
 }
 

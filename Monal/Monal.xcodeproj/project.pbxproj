@@ -173,6 +173,7 @@
 		2632EA4B20080C2C00191EEB /* MLGroupChatFavoritesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2632EA4A20080C2C00191EEB /* MLGroupChatFavoritesViewController.m */; };
 		2633CB43231CB816006D0277 /* MLMessageProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 2633CB42231CB816006D0277 /* MLMessageProcessor.m */; };
 		2633CB44231CB816006D0277 /* MLMessageProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 2633CB42231CB816006D0277 /* MLMessageProcessor.m */; };
+		2633CB4723215558006D0277 /* MLXMPPActivityItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 2633CB4623215558006D0277 /* MLXMPPActivityItem.m */; };
 		26347D861790FFDE006FF64F /* MLInfoCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 26347D851790FFDE006FF64F /* MLInfoCell.m */; };
 		26352EA8177D222600E2C8FF /* MLXMPPManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26352EA7177D222600E2C8FF /* MLXMPPManager.m */; };
 		2636C43F177BD58C001CA71F /* XMPPEdit.m in Sources */ = {isa = PBXBuildFile; fileRef = 2636C43E177BD58C001CA71F /* XMPPEdit.m */; };
@@ -615,6 +616,8 @@
 		2632EA4A20080C2C00191EEB /* MLGroupChatFavoritesViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLGroupChatFavoritesViewController.m; sourceTree = "<group>"; };
 		2633CB41231CB816006D0277 /* MLMessageProcessor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLMessageProcessor.h; sourceTree = "<group>"; };
 		2633CB42231CB816006D0277 /* MLMessageProcessor.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLMessageProcessor.m; sourceTree = "<group>"; };
+		2633CB4523215558006D0277 /* MLXMPPActivityItem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLXMPPActivityItem.h; sourceTree = "<group>"; };
+		2633CB4623215558006D0277 /* MLXMPPActivityItem.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLXMPPActivityItem.m; sourceTree = "<group>"; };
 		26347D841790FFDE006FF64F /* MLInfoCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLInfoCell.h; sourceTree = "<group>"; };
 		26347D851790FFDE006FF64F /* MLInfoCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLInfoCell.m; sourceTree = "<group>"; };
 		26352EA6177D222600E2C8FF /* MLXMPPManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLXMPPManager.h; sourceTree = "<group>"; };
@@ -1654,6 +1657,8 @@
 				8D1107310486CEB800E47090 /* Monal-Info.plist */,
 				26D59D9120714F32006F1DEE /* UIColor+Theme.h */,
 				26D59D9220714F32006F1DEE /* UIColor+Theme.m */,
+				2633CB4523215558006D0277 /* MLXMPPActivityItem.h */,
+				2633CB4623215558006D0277 /* MLXMPPActivityItem.m */,
 			);
 			name = "Monal-iOS";
 			sourceTree = "<group>";
@@ -2962,6 +2967,7 @@
 				26D51CCA1E2674D700141E04 /* NSData+NXOAuth2.m in Sources */,
 				26D59D9320714F32006F1DEE /* UIColor+Theme.m in Sources */,
 				267B671C226A200D003DB850 /* AESGcm.m in Sources */,
+				2633CB4723215558006D0277 /* MLXMPPActivityItem.m in Sources */,
 				262AEFE820AE756800498F82 /* MLMAMPrefTableViewController.m in Sources */,
 				261E672B179E27BE00CB493E /* ParseFailure.m in Sources */,
 				26B2A4F51B73097500272E63 /* DDLog.m in Sources */,

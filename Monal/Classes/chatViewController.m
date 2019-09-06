@@ -383,8 +383,22 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 }
 
 -(void) sendWithShareSheet {
-    MLXMPPActivityItem *item = [MLXMPPActivityItem alloc]; 
-    NSArray *items =@[item];
+   // MLXMPPActivityItem *item = [[MLXMPPActivityItem alloc] initWithPlaceholderItem:@""];
+    
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
+    NSString *documentsDirectory = [paths objectAtIndex:0]; // Get documents directory
+    
+    NSString  *myString =@"<message></message>";
+    NSError *error;
+    NSString *path =[documentsDirectory stringByAppendingPathComponent:@"message.xmpp"];
+    BOOL succeed = [myString writeToFile:path
+                              atomically:YES encoding:NSUTF8StringEncoding error:&error];
+    if (!succeed){
+        // Handle error here
+    }
+    
+    NSURL *url = [NSURL fileURLWithPath:path];
+    NSArray *items =@[url];
     NSArray *exclude =  @[UIActivityTypePostToTwitter, UIActivityTypePostToFacebook,
                           UIActivityTypePostToWeibo,
                           UIActivityTypeMessage, UIActivityTypeMail,

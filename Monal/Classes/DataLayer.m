@@ -2508,6 +2508,17 @@ static DataLayer *sharedInstance=nil;
         DDLogVerbose(@"Upgrade to 3.6 success ");
     }
     
+    if([dbversion doubleValue]<3.7)
+    {
+        DDLogVerbose(@"Database version <3.7 detected. Performing upgrade on accounts. ");
+        
+        [self executeNonQuery:@"alter table account add column airdrop bool;" andArguments:nil];
+
+        [self executeNonQuery:@"update dbversion set dbversion='3.7'; " andArguments:nil];
+        DDLogVerbose(@"Upgrade to 3.7  success ");
+        
+    }
+    
     [dbversionCheck unlock];
     return;
     

@@ -32,6 +32,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
  NSString *const kOldSSL =@"oldstyleSSL";
  NSString *const kOauth =@"oauth";
  NSString *const kSelfSigned =@"selfsigned";
+NSString *const kAirdrop =@"airdrop";
 
 NSString *const kUsername =@"username";
 NSString *const kFullName =@"full_name";
@@ -720,7 +721,7 @@ static DataLayer *sharedInstance=nil;
 -(void) updateAccounWithDictionary:(NSDictionary *) dictionary andCompletion:(void (^)(BOOL))completion;
 {
     NSString* query=
-    [NSString stringWithFormat:@"update account  set account_name=?,  server=?, other_port=?, username=?, secure=?, resource=?, domain=?, enabled=?, selfsigned=?, oldstyleSSL=? where account_id=?"];
+    [NSString stringWithFormat:@"update account  set account_name=?,  server=?, other_port=?, username=?, secure=?, resource=?, domain=?, enabled=?, selfsigned=?, oldstyleSSL=?, airdrop=? where account_id=?"];
 
      NSArray * params=@[((NSString *)[dictionary objectForKey:kUsername]),
 
@@ -734,6 +735,7 @@ static DataLayer *sharedInstance=nil;
      [dictionary objectForKey:kEnabled],
      [dictionary objectForKey:kSelfSigned],
      [dictionary objectForKey:kOldSSL],
+     [dictionary objectForKey:kAirdrop],
      [dictionary objectForKey:kAccountID]
      ];
 
@@ -743,7 +745,7 @@ static DataLayer *sharedInstance=nil;
 
 -(void) addAccountWithDictionary:(NSDictionary *) dictionary andCompletion: (void (^)(BOOL))completion
 {
-    NSString* query= [NSString stringWithFormat:@"insert into account (account_name, protocol_id, server,other_port, secure,resource,domain, enabled, selfsigned, oldstyleSSL,oauth, username  ) values( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?) "];
+    NSString* query= [NSString stringWithFormat:@"insert into account (account_name, protocol_id, server,other_port, secure,resource,domain, enabled, selfsigned, oldstyleSSL,oauth, username, airdrop   ) values( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?, ?) "];
 
     NSString *username = [((NSString *)[dictionary objectForKey:kUsername]) copy];
     NSArray *params= @[((NSString *)[dictionary objectForKey:kUsername]),
@@ -757,7 +759,8 @@ static DataLayer *sharedInstance=nil;
                       [dictionary objectForKey:kEnabled] ,
                       [dictionary objectForKey:kSelfSigned],
                       [dictionary objectForKey:kOldSSL],
-                      [dictionary objectForKey:kOauth], username
+                      [dictionary objectForKey:kOauth], username,
+                      [dicitonary objectForKey:kAirdrop]
                       ];
 
     [self executeNonQuery:query andArguments:params withCompletion:completion];

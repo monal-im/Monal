@@ -13,12 +13,11 @@
 #define kMonalDBQueue "im.monal.dbQueue"
 
 @interface DataLayer : NSObject {
-
 	NSString* dbPath;
 	sqlite3* database;
-    NSLock* dbversionCheck;
-    
-    dispatch_queue_t _dbQueue ;
+  NSLock* dbversionCheck;
+
+  dispatch_queue_t _dbQueue ;
 }
 
 
@@ -70,7 +69,7 @@ extern NSString *const kMessageTypeUrl;
 // Buddy Commands
 -(void) addContact:(NSString*) contact  forAccount:(NSString*) accountNo fullname:(NSString*)fullName nickname:(NSString*) nickName withCompletion: (void (^)(BOOL))completion;
 -(void) removeBuddy:(NSString*) buddy forAccount:(NSString*) accountNo;
--(BOOL) clearBuddies:(NSString*) accountNo; 
+-(BOOL) clearBuddies:(NSString*) accountNo;
 -(void) contactForUsername:(NSString*) username forAccount: (NSString*) accountNo withCompletion: (void (^)(NSArray *))completion;
 
 /**
@@ -113,7 +112,7 @@ extern NSString *const kMessageTypeUrl;
 #pragma mark Contact info
 
 -(void) setFullName:(NSString*) fullName forContact:(NSString*) contact andAccount:(NSString*) accountNo;
--(NSString*) fullName:(NSString*) buddy forAccount:(NSString*) accountNo; 
+-(NSString*) fullName:(NSString*) buddy forAccount:(NSString*) accountNo;
 //-(BOOL) setFileName:(NSString*) fileName forBuddy:(NSString*) buddy andAccount:(NSString*) accountNo;
 
 -(void) setContactHash:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
@@ -156,13 +155,13 @@ extern NSString *const kMessageTypeUrl;
 -(void) doesAccountExistUser:(NSString*) user andDomain:(NSString *) domain withCompletion:(void (^)(BOOL result))completion;
 -(void) accountForUser:(NSString*) user andDomain:(NSString *) domain withCompletion:(void (^)(NSString* result))completion;
 
--(NSArray*) accountVals:(NSString*) accountNo; 
+-(NSArray*) accountVals:(NSString*) accountNo;
 
 -(void) updateAccounWithDictionary:(NSDictionary *) dictionary andCompletion:(void (^)(BOOL))completion;
 -(void) addAccountWithDictionary:(NSDictionary *) dictionary andCompletion: (void (^)(BOOL))completion;
 
 
--(BOOL) removeAccount:(NSString*) accountNo; 
+-(BOOL) removeAccount:(NSString*) accountNo;
 
 /**
  disables account
@@ -171,7 +170,7 @@ extern NSString *const kMessageTypeUrl;
 
 #pragma mark - message Commands
 /**
- returns messages with the provided local id number 
+ returns messages with the provided local id number
  */
 -(NSArray *) messageForHistoryID:(NSInteger) historyID;
 

@@ -297,11 +297,21 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 #pragma mark - handling urls
 
+-(BOOL) openFile:(NSURL *) file {
+    NSData *data = [NSData dataWithContentsOfURL:file];
+    [[MLXMPPManager sharedInstance] parseMessageForData:data];
+    return data?YES:NO;
+}
+
+
 - (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey, id> *)options
 {
+    if([url.scheme isEqualToString:@"file"])
+    {
+        return [self openFile:url];
+    }
     if([url.scheme isEqualToString:@"xmpp"])
     {
-        
         return YES;
     }
     if([url.scheme isEqualToString:@"com.googleusercontent.apps.472865344000-invcngpma1psmiek5imc1gb8u7mef8l9"])
@@ -322,6 +332,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     return NO;
 }
+
+
 
 
 #pragma mark  - user notifications

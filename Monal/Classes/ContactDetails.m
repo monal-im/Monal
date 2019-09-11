@@ -264,14 +264,14 @@
     
 dispatch_async(dispatch_get_main_queue(), ^{
     if(self.photos.count>0) {
-    IDMPhotoBrowser *browser = [[IDMPhotoBrowser alloc] initWithPhotos:self.photos];
-    browser.delegate=self;
-    browser.displayDoneButton=YES;
-
-    UINavigationController *nav =[[UINavigationController alloc] initWithRootViewController:browser];
-    
-    
-    [self presentViewController:nav animated:YES completion:nil];
+        IDMPhotoBrowser *browser = [[IDMPhotoBrowser alloc] initWithPhotos:self.photos];
+        browser.delegate=self;
+        browser.displayDoneButton=YES;
+        
+        UINavigationController *nav =[[UINavigationController alloc] initWithRootViewController:browser];
+        
+        
+        [self presentViewController:nav animated:YES completion:nil];
     } else  {
         UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Nothing to see" message:@"You have not received any images in this conversation." preferredStyle:UIAlertControllerStyleAlert];
         [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {

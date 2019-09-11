@@ -235,4 +235,7 @@ Attempts to upload a file to the  HTTP upload service
 
 -(void) sendMessageForConnectedAccounts;
 
+-(void) parseMessageForData:(NSData *) data;
+
+
 @end

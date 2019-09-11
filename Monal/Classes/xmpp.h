@@ -312,6 +312,9 @@ Decline a call request
 */
  -(void) requestHTTPSlotWithParams:(NSDictionary *)params andCompletion:(void(^)(NSString *url,  NSError *error)) completion;
 
+
+-(void) setMAMQueryMostRecentForJid:(NSString *)jid;
+
 /*
  query message archive.
  */

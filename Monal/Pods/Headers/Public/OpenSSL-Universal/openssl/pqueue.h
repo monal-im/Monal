@@ -1,1 +1,1 @@
-../../../../OpenSSL-Universal/include-macos/openssl/pqueue.h
+../../../../OpenSSL-Universal/Frameworks/macos/OpenSSL.framework/Versions/A/Headers/pqueue.h

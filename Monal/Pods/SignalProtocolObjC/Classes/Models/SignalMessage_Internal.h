@@ -8,7 +8,6 @@
 
 #import "SignalMessage.h"
 #include "signal_protocol.h"
-
 NS_ASSUME_NONNULL_BEGIN
 @interface SignalMessage ()
 

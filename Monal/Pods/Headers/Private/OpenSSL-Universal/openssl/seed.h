@@ -1,1 +1,1 @@
-../../../../OpenSSL-Universal/include-macos/openssl/seed.h
+../../../../OpenSSL-Universal/macos/include/openssl/seed.h

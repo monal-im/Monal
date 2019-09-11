@@ -9,7 +9,6 @@
 #import "SignalContext.h"
 #import "SignalCommonCryptoProvider.h"
 #include "signal_protocol.h"
-
 @interface SignalContext ()
 @property (nonatomic, readonly) signal_context *context;
 @property (nonatomic, strong, readonly) SignalCommonCryptoProvider *cryptoProvider;

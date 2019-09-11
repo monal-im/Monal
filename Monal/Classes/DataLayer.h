@@ -154,6 +154,7 @@ extern NSString *const kMessageTypeUrl;
 -(NSArray*) enabledAccountList;
 -(BOOL) isAccountEnabled:(NSString*) accountNo;
 -(void) doesAccountExistUser:(NSString*) user andDomain:(NSString *) domain withCompletion:(void (^)(BOOL result))completion;
+-(void) accountForUser:(NSString*) user andDomain:(NSString *) domain withCompletion:(void (^)(NSString* result))completion;
 
 -(NSArray*) accountVals:(NSString*) accountNo; 
 
@@ -177,7 +178,7 @@ extern NSString *const kMessageTypeUrl;
 /*
  adds a specified message to the database
  */
--(void) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom delivered:(BOOL) delivered unread:(BOOL) unread serverMessageId:(NSString *) messageid messageType:(NSString *) messageType andOverrideDate:(NSDate *) messageDate encrypted:(BOOL) encrypted  withCompletion: (void (^)(BOOL, NSString *))completion;
+-(void) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom delivered:(BOOL) delivered unread:(BOOL) unread messageId:(NSString *) messageid serverMessageId:(NSString *) stanzaid messageType:(NSString *) messageType andOverrideDate:(NSDate *) messageDate encrypted:(BOOL) encrypted  withCompletion: (void (^)(BOOL, NSString*))completion;
 
 /**
   checks to see if there is a message with the provided messageid. will return YES if the messageid exists for this account and contact
@@ -216,11 +217,18 @@ extern NSString *const kMessageTypeUrl;
 -(NSDate*) synchPointForContact:(NSString*) contact andAccount:(NSString*) accountNo;
 -(void) setSynchPoint:(NSDate *) synchPoint ForContact:(NSString*) contact andAccount:(NSString*) accountNo;
 
+
 /**
  retrieves the date of the the last message to or from this contact
  */
 -(void) lastMessageDateForContact:(NSString*) contact andAccount:(NSString*) accountNo withCompletion: (void (^)(NSDate *))completion;;
 
+/**
+ retrieves the stanzaid of the last message
+ */
+-(void) lastMessageSanzaForAccount:(NSString*) accountNo withCompletion: (void (^)(NSString *))completion;;
+
+-(void) lastMessageTimeStampForAccount:(NSString*) accountNo withCompletion: (void (^)(NSString *))completion;
 
 -(BOOL) messageHistoryClean:(NSString*) buddy :(NSString*) accountNo;
 -(BOOL) messageHistoryCleanAll;

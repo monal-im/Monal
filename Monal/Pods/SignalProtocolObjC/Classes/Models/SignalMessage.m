@@ -12,6 +12,7 @@
 #import "SignalContext_Internal.h"
 #import "protocol.h"
 
+
 @implementation SignalMessage
 
 - (instancetype) initWithData:(NSData*)data

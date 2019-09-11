@@ -12,6 +12,8 @@ extern "C" {
 #define CURVE_SIGNATURE_LEN 64
 #define VRF_SIGNATURE_LEN 96
 
+int curve_internal_fast_tests(int silent);
+
 int curve_decode_point(ec_public_key **public_key, const uint8_t *key_data, size_t key_len, signal_context *global_context);
 int ec_public_key_compare(const ec_public_key *key1, const ec_public_key *key2);
 int ec_public_key_memcmp(const ec_public_key *key1, const ec_public_key *key2);
@@ -124,7 +126,7 @@ void ec_public_key_list_free(ec_public_key_list *list);
  * @param shared_key_data Set to a 32-byte shared secret on success.
  * @param public_key The Curve25519 (typically remote party's) public key.
  * @param private_key The Curve25519 (typically yours) private key.
- * @return 0 on success, negative on failure
+ * @return length of the shared secret on success, negative on failure
  */
 int curve_calculate_agreement(uint8_t **shared_key_data, const ec_public_key *public_key, const ec_private_key *private_key);
 

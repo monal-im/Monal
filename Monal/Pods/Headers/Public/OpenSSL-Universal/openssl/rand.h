@@ -1,1 +1,1 @@
-../../../../OpenSSL-Universal/include-macos/openssl/rand.h
+../../../../OpenSSL-Universal/Frameworks/macos/OpenSSL.framework/Versions/A/Headers/rand.h

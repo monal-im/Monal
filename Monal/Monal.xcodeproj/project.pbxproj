@@ -171,6 +171,9 @@
 		2632EA4220040D2C00191EEB /* MLCallScreen.m in Sources */ = {isa = PBXBuildFile; fileRef = 2632EA4120040D2C00191EEB /* MLCallScreen.m */; };
 		2632EA472006ADFE00191EEB /* MLGroupChatViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2632EA452006ADFD00191EEB /* MLGroupChatViewController.m */; };
 		2632EA4B20080C2C00191EEB /* MLGroupChatFavoritesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2632EA4A20080C2C00191EEB /* MLGroupChatFavoritesViewController.m */; };
+		2633CB43231CB816006D0277 /* MLMessageProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 2633CB42231CB816006D0277 /* MLMessageProcessor.m */; };
+		2633CB44231CB816006D0277 /* MLMessageProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 2633CB42231CB816006D0277 /* MLMessageProcessor.m */; };
+		2633CB4723215558006D0277 /* MLXMPPActivityItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 2633CB4623215558006D0277 /* MLXMPPActivityItem.m */; };
 		26347D861790FFDE006FF64F /* MLInfoCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 26347D851790FFDE006FF64F /* MLInfoCell.m */; };
 		26352EA8177D222600E2C8FF /* MLXMPPManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26352EA7177D222600E2C8FF /* MLXMPPManager.m */; };
 		2636C43F177BD58C001CA71F /* XMPPEdit.m in Sources */ = {isa = PBXBuildFile; fileRef = 2636C43E177BD58C001CA71F /* XMPPEdit.m */; };
@@ -611,6 +614,10 @@
 		2632EA452006ADFD00191EEB /* MLGroupChatViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLGroupChatViewController.m; sourceTree = "<group>"; };
 		2632EA4920080C2C00191EEB /* MLGroupChatFavoritesViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLGroupChatFavoritesViewController.h; sourceTree = "<group>"; };
 		2632EA4A20080C2C00191EEB /* MLGroupChatFavoritesViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLGroupChatFavoritesViewController.m; sourceTree = "<group>"; };
+		2633CB41231CB816006D0277 /* MLMessageProcessor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLMessageProcessor.h; sourceTree = "<group>"; };
+		2633CB42231CB816006D0277 /* MLMessageProcessor.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLMessageProcessor.m; sourceTree = "<group>"; };
+		2633CB4523215558006D0277 /* MLXMPPActivityItem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLXMPPActivityItem.h; sourceTree = "<group>"; };
+		2633CB4623215558006D0277 /* MLXMPPActivityItem.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLXMPPActivityItem.m; sourceTree = "<group>"; };
 		26347D841790FFDE006FF64F /* MLInfoCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLInfoCell.h; sourceTree = "<group>"; };
 		26347D851790FFDE006FF64F /* MLInfoCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLInfoCell.m; sourceTree = "<group>"; };
 		26352EA6177D222600E2C8FF /* MLXMPPManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLXMPPManager.h; sourceTree = "<group>"; };
@@ -1139,6 +1146,7 @@
 		260C51CE177F08CF0039634B /* XMPP */ = {
 			isa = PBXGroup;
 			children = (
+				2633CB40231CB7F5006D0277 /* Processors */,
 				2642EBC418693615006A6C12 /* Jingle */,
 				26CF3EAF1780DF8B002B7085 /* Parsers */,
 				26CF3EAE1780DF86002B7085 /* Nodes */,
@@ -1224,6 +1232,15 @@
 				2632EA4A20080C2C00191EEB /* MLGroupChatFavoritesViewController.m */,
 			);
 			name = "Group chat";
+			sourceTree = "<group>";
+		};
+		2633CB40231CB7F5006D0277 /* Processors */ = {
+			isa = PBXGroup;
+			children = (
+				2633CB41231CB816006D0277 /* MLMessageProcessor.h */,
+				2633CB42231CB816006D0277 /* MLMessageProcessor.m */,
+			);
+			name = Processors;
 			sourceTree = "<group>";
 		};
 		26352EA5177D21FC00E2C8FF /* Managers */ = {
@@ -1640,6 +1657,8 @@
 				8D1107310486CEB800E47090 /* Monal-Info.plist */,
 				26D59D9120714F32006F1DEE /* UIColor+Theme.h */,
 				26D59D9220714F32006F1DEE /* UIColor+Theme.m */,
+				2633CB4523215558006D0277 /* MLXMPPActivityItem.h */,
+				2633CB4623215558006D0277 /* MLXMPPActivityItem.m */,
 			);
 			name = "Monal-iOS";
 			sourceTree = "<group>";
@@ -1954,7 +1973,7 @@
 			name = tools;
 			sourceTree = "<group>";
 		};
-		29B97314FDCFA39411CA2CEA = {
+		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
 				26AA70222146E2B900598605 /* shareSheet.entitlements */,
@@ -2183,6 +2202,7 @@
 				2665C11D1C4ABFB500CC9A04 /* Tag Git */,
 				009C719E4F0BF68E742BA67B /* [CP] Copy Pods Resources */,
 				26AA70212146BBB900598605 /* Embed App Extensions */,
+				66E6DB0F289867F3AEBE249E /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -2435,7 +2455,7 @@
 				"zh-Hant",
 				Base,
 			);
-			mainGroup = 29B97314FDCFA39411CA2CEA;
+			mainGroup = 29B97314FDCFA39411CA2CEA /* CustomTemplate */;
 			productRefGroup = 19C28FACFE9D520D11CA2CBB /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -2713,6 +2733,30 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
+		66E6DB0F289867F3AEBE249E /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${SRCROOT}/Pods/Target Support Files/Pods-Monal/Pods-Monal-frameworks.sh",
+				"${PODS_ROOT}/OpenSSL-Universal/Frameworks/ios/OpenSSL.framework",
+				"${PODS_ROOT}/OpenSSL-Universal/Frameworks/ios/OpenSSL.framework.dSYM",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/OpenSSL.framework",
+				"${DWARF_DSYM_FOLDER_PATH}/OpenSSL.framework.dSYM",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Monal/Pods-Monal-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 		70921ECBDF172CEC71CF4732 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -2758,6 +2802,8 @@
 			);
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-Monal-OSX/Pods-Monal-OSX-frameworks.sh",
+				"${PODS_ROOT}/OpenSSL-Universal/Frameworks/macos/OpenSSL.framework",
+				"${PODS_ROOT}/OpenSSL-Universal/Frameworks/macos/OpenSSL.framework.dSYM",
 				"${PODS_ROOT}/Sparkle/Sparkle.framework",
 				"${PODS_ROOT}/Sparkle/Sparkle.framework.dSYM",
 			);
@@ -2765,6 +2811,8 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/OpenSSL.framework",
+				"${DWARF_DSYM_FOLDER_PATH}/OpenSSL.framework.dSYM",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Sparkle.framework",
 				"${DWARF_DSYM_FOLDER_PATH}/Sparkle.framework.dSYM",
 			);
@@ -2843,6 +2891,7 @@
 				26158AF21FFA6E4500E53BDC /* MLWebViewController.m in Sources */,
 				26F7BB431115F8DB00712672 /* Reachability.m in Sources */,
 				26D51CD61E2674D700141E04 /* NXOAuth2Client.m in Sources */,
+				2633CB43231CB816006D0277 /* MLMessageProcessor.m in Sources */,
 				26B51C4918654D98002134C3 /* LogViewController.m in Sources */,
 				2642EBC718693626006A6C12 /* RTP.mm in Sources */,
 				26B2A4F11B73097500272E63 /* DDASLLogger.m in Sources */,
@@ -2918,6 +2967,7 @@
 				26D51CCA1E2674D700141E04 /* NSData+NXOAuth2.m in Sources */,
 				26D59D9320714F32006F1DEE /* UIColor+Theme.m in Sources */,
 				267B671C226A200D003DB850 /* AESGcm.m in Sources */,
+				2633CB4723215558006D0277 /* MLXMPPActivityItem.m in Sources */,
 				262AEFE820AE756800498F82 /* MLMAMPrefTableViewController.m in Sources */,
 				261E672B179E27BE00CB493E /* ParseFailure.m in Sources */,
 				26B2A4F51B73097500272E63 /* DDLog.m in Sources */,
@@ -3012,6 +3062,7 @@
 				26D51CD51E2674D700141E04 /* NXOAuth2AccountStore.m in Sources */,
 				2638DAEB1B68F3D400DF05AC /* MLAccountSettings.m in Sources */,
 				260499F21B7314D600D11866 /* jingleCall.m in Sources */,
+				2633CB44231CB816006D0277 /* MLMessageProcessor.m in Sources */,
 				26020B3821B957A0009A9735 /* MLMetaInfo.m in Sources */,
 				26D51CE11E2674D700141E04 /* NXOAuth2PostBodyStream.m in Sources */,
 				2661D34D1B407ED400EC51BA /* MLContactsCell.m in Sources */,

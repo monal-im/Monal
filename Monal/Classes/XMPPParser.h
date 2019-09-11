@@ -55,5 +55,7 @@
 
 - (id) initWithDictionary:(NSDictionary*) dictionary;
 
+- (id) initWithData:(NSData *) data; 
+
 
 @end

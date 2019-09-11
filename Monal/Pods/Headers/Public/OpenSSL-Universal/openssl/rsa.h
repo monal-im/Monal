@@ -1,1 +1,1 @@
-../../../../OpenSSL-Universal/include-macos/openssl/rsa.h
+../../../../OpenSSL-Universal/Frameworks/macos/OpenSSL.framework/Versions/A/Headers/rsa.h

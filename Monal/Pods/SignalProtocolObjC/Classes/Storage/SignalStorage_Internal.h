@@ -8,7 +8,6 @@
 
 #import "SignalStorage.h"
 #include "signal_protocol.h"
-
 @interface SignalStorage ()
 @property (nonatomic, strong, readonly) id<SignalSessionStore> sessionStore;
 @property (nonatomic, strong, readonly) id<SignalPreKeyStore> preKeyStore;

@@ -671,11 +671,14 @@ NSString *const kGtalk = @"Gtalk";
         {
             case 5:  {
                 [self performSegueWithIdentifier:@"showMAMPref" sender:self];
+                break;
             }case 6:  {
                 [self performSegueWithIdentifier:@"showKeyTrust" sender:self];
+                break;
             }
             case 7:  {
                 [self performSegueWithIdentifier:@"showPassChange" sender:self];
+                break;
             }
         }
     }

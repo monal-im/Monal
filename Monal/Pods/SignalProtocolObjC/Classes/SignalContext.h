@@ -6,7 +6,7 @@
 //
 //
 
-#import <Foundation/Foundation.h>;
+@import Foundation;
 #import "SignalStorage.h"
 
 NS_ASSUME_NONNULL_BEGIN

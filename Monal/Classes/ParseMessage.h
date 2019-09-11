@@ -15,6 +15,7 @@
 {
     
 }
+@property (nonatomic, strong, readonly) NSString* stanzaId;
 
 /**
  In the event of MUC this is ths user who really sent the message and from is the group name.

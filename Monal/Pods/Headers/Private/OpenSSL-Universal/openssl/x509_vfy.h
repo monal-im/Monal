@@ -1,1 +1,1 @@
-../../../../OpenSSL-Universal/include-macos/openssl/x509_vfy.h
+../../../../OpenSSL-Universal/macos/include/openssl/x509_vfy.h

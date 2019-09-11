@@ -1,0 +1,1 @@
+../../../IDMPhotoBrowser/Classes/IDMPhoto.h

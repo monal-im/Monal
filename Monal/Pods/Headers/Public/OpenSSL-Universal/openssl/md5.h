@@ -1,1 +1,1 @@
-../../../../OpenSSL-Universal/include-macos/openssl/md5.h
+../../../../OpenSSL-Universal/Frameworks/macos/OpenSSL.framework/Versions/A/Headers/md5.h

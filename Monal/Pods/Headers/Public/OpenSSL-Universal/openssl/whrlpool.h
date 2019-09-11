@@ -1,1 +1,1 @@
-../../../../OpenSSL-Universal/include-macos/openssl/whrlpool.h
+../../../../OpenSSL-Universal/Frameworks/macos/OpenSSL.framework/Versions/A/Headers/whrlpool.h

@@ -134,7 +134,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
     {
         [[DataLayer sharedInstance] onlineContactsSortedBy:@"Status" withCompeltion:^(NSMutableArray *results) {
             dispatch_async(dispatch_get_main_queue(), ^{
-                self->_contacts= results;
+                self.contacts= results;
                 if(completion) completion();
             });
         }];
@@ -142,7 +142,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
     else {
         [[DataLayer sharedInstance] onlineContactsSortedBy:@"Name" withCompeltion:^(NSMutableArray *results) {
             dispatch_async(dispatch_get_main_queue(), ^{
-                self->_contacts= results;
+                self.contacts= results;
                  if(completion) completion();
             });
         }];
@@ -155,7 +155,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
     {
         [[DataLayer sharedInstance] offlineContactsWithCompletion:^(NSMutableArray *results) {
             dispatch_async(dispatch_get_main_queue(), ^{
-                self->_offlineContacts= results;
+                self.offlineContacts= results;
                  if(completion) completion();
             });
         }];
@@ -887,7 +887,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                        NSMutableIndexSet* indexSet = [[NSMutableIndexSet alloc] init];
                        
                        NSInteger counter=0;
-                       for(NSDictionary* row in self->_contacts)
+                       for(NSDictionary* row in self.contacts)
                        {
                            if([[row objectForKey:@"account_id"]  integerValue]==[accountNo integerValue] )
                            {
@@ -897,7 +897,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                            counter++;
                        }
                        
-                       [self->_contacts removeObjectsAtIndexes:indexSet];
+                       [self.contacts removeObjectsAtIndexes:indexSet];
                        
                        NSMutableIndexSet* offlineIndexSet;
                     
@@ -925,11 +925,13 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                            
                        } else {
                            [self->_contactsTable beginUpdates];
-                           [self.contactsTable removeItemsAtIndexes:indexSet inParent:@"Online" withAnimation:NSTableViewAnimationEffectFade];
+                           if([self.contactsTable numberOfChildrenOfItem:@"Online"]>=indexSet.count)
+                               [self.contactsTable removeItemsAtIndexes:indexSet inParent:@"Online" withAnimation:NSTableViewAnimationEffectFade];
                            
                            if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
                            {
-                               [self.contactsTable insertItemsAtIndexes:offlineIndexSet inParent:@"Offline" withAnimation:NSTableViewAnimationEffectFade];
+                               if([self.contactsTable numberOfChildrenOfItem:@"Offline"]>=offlineIndexSet.count)
+                                   [self.contactsTable removeItemsAtIndexes:offlineIndexSet inParent:@"Offline" withAnimation:NSTableViewAnimationEffectFade];
                            }
                            
                            [self->_contactsTable endUpdates];

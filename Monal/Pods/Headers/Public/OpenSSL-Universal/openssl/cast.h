@@ -1,1 +1,1 @@
-../../../../OpenSSL-Universal/include-macos/openssl/cast.h
+../../../../OpenSSL-Universal/Frameworks/macos/OpenSSL.framework/Versions/A/Headers/cast.h

@@ -2804,7 +2804,25 @@ static NSMutableArray *extracted(xmpp *object) {
     [request.attributes setObject:@"urn:xmpp:hints" forKey:@"xmlns"];
     [messageNode.children addObject:request];
 
+if(self.airDrop) {
+  DDLogInfo("Writing to file for Airdop");
+
+  NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
+  NSString *documentsDirectory = [paths objectAtIndex:0]; // Get documents directory
+
+  NSString  *myString =[request UTF8String];
+  NSError *error;
+  NSString *path =[documentsDirectory stringByAppendingPathComponent:@"message.xmpp"];
+  BOOL succeed = [myString writeToFile:path
+                            atomically:YES encoding:NSUTF8StringEncoding error:&error];
+  if (!succeed){
+      // Handle error here
+      DDLogError("Error writing to airdrop file");
+  }
+
+} else  {
     [self send:messageNode];
+  }
 }
 
 

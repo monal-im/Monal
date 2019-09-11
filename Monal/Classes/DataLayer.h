@@ -33,6 +33,7 @@ extern NSString *const kSSL;
 extern NSString *const kOldSSL;
 extern NSString *const kSelfSigned;
 extern NSString *const kOauth;
+extern NSString *const kAirdrop;
 
 extern NSString *const kUsername;
 extern NSString *const kFullName;

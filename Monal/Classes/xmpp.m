@@ -404,7 +404,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 -(void) connect
 {
     if(self.airDrop){
-     DDLogInfo("using airdrop. No XMPP connection.")
+        DDLogInfo(@"using airdrop. No XMPP connection.");
      return;
     }
 
@@ -2805,19 +2805,19 @@ static NSMutableArray *extracted(xmpp *object) {
     [messageNode.children addObject:request];
 
 if(self.airDrop) {
-  DDLogInfo("Writing to file for Airdop");
+    DDLogInfo(@"Writing to file for Airdop");
 
   NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
   NSString *documentsDirectory = [paths objectAtIndex:0]; // Get documents directory
 
-  NSString  *myString =[request UTF8String];
+  NSString  *myString =[request XMLString];
   NSError *error;
   NSString *path =[documentsDirectory stringByAppendingPathComponent:@"message.xmpp"];
   BOOL succeed = [myString writeToFile:path
                             atomically:YES encoding:NSUTF8StringEncoding error:&error];
   if (!succeed){
-      // Handle error here
-      DDLogError("Error writing to airdrop file");
+      // Handle e@rror here
+      DDLogError(@"Error writing to airdrop file");
   }
 
 } else  {

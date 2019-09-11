@@ -32,7 +32,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
  NSString *const kOldSSL =@"oldstyleSSL";
  NSString *const kOauth =@"oauth";
  NSString *const kSelfSigned =@"selfsigned";
-NSString *const kAirdrop =@"airdrop";
+ NSString *const kAirdrop =@"airdrop";
 
 NSString *const kUsername =@"username";
 NSString *const kFullName =@"full_name";
@@ -760,7 +760,7 @@ static DataLayer *sharedInstance=nil;
                       [dictionary objectForKey:kSelfSigned],
                       [dictionary objectForKey:kOldSSL],
                       [dictionary objectForKey:kOauth], username,
-                      [dicitonary objectForKey:kAirdrop]
+                      [dictionary objectForKey:kAirdrop]
                       ];
 
     [self executeNonQuery:query andArguments:params withCompletion:completion];

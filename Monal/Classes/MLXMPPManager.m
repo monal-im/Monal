@@ -296,7 +296,7 @@ An array of Dics what have timers to make sure everything was sent
     xmppAccount.oldStyleSSL=[[account objectForKey:kOldSSL] boolValue];
     xmppAccount.selfSigned=[[account objectForKey:kSelfSigned] boolValue];
     xmppAccount.oAuth=[[account objectForKey:kOauth] boolValue];
-    xmppAccount.airdrop=[[account objectForKey:kAirdrop] boolValue];
+    xmppAccount.airDrop=[[account objectForKey:kAirdrop] boolValue];
     if(xmppAccount.oldStyleSSL && !xmppAccount.SSL ) xmppAccount.SSL=YES; //tehcnically a config error but  understandable
 
     xmppAccount.accountNo=[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]];

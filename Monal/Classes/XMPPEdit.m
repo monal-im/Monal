@@ -76,7 +76,6 @@ NSString *const kGtalk = @"Gtalk";
 
     DDLogVerbose(@"got account number %@", _accountno);
 
-
     UITapGestureRecognizer *gestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(hideKeyboard)]; // hides the kkyeboard when you tap outside the editing area
     gestureRecognizer.cancelsTouchesInView=false; //this prevents it from blocking the button
     [self.tableView addGestureRecognizer:gestureRecognizer];

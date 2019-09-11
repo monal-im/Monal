@@ -62,21 +62,21 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         _contactName=[_contact objectForKey:@"message_from"];
     }
     _contactFullName=[[DataLayer sharedInstance] nickName:_contactName forAccount:[NSString stringWithFormat:@"%@",[_contact objectForKey:@"account_id"]]];
-   
+
     if (!_contactFullName) {
     _contactFullName=[[DataLayer sharedInstance] fullName:_contactName forAccount:[NSString stringWithFormat:@"%@",[_contact objectForKey:@"account_id"]]];
     }
     if (!_contactFullName) _contactFullName=_contactName;
-    
+
     self.accountNo=[NSString stringWithFormat:@"%ld",[[_contact objectForKey:@"account_id"] integerValue]];
     self.hidesBottomBarWhenPushed=YES;
-    
+
     NSArray* accountVals =[[DataLayer sharedInstance] accountVals:self.accountNo];
     if([accountVals count]>0)
     {
         self.jid=[NSString stringWithFormat:@"%@@%@",[[accountVals objectAtIndex:0] objectForKey:@"username"], [[accountVals objectAtIndex:0] objectForKey:@"domain"]];
     }
-    
+
 
 }
 
@@ -84,7 +84,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 {
     _contact=contact;
     [self setup];
-    
+
 }
 
 #pragma mark -  view lifecycle
@@ -96,47 +96,47 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     containerView= self.view;
     self.messageTable.scrollsToTop=YES;
     self.chatInput.scrollsToTop=NO;
-    
+
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
     [nc addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
     [nc addObserver:self selector:@selector(handleSendFailedMessage:) name:kMonalSendFailedMessageNotice object:nil];
     [nc addObserver:self selector:@selector(handleSentMessage:) name:kMonalSentMessageNotice object:nil];
-  
-    
-    
+
+
+
     [nc addObserver:self selector:@selector(dismissKeyboard:) name:UIApplicationDidEnterBackgroundNotification object:nil];
     [nc addObserver:self selector:@selector(handleForeGround) name:UIApplicationWillEnterForegroundNotification object:nil];
     [nc addObserver:self selector:@selector(handleBackground) name:UIApplicationWillResignActiveNotification object:nil];
-    
+
 	[nc addObserver:self selector:@selector(keyboardWillShow:) name: UIKeyboardWillShowNotification object:nil];
 	[nc addObserver:self selector:@selector(keyboardWillHide:) name: UIKeyboardWillHideNotification object:nil];
 	[nc addObserver:self selector:@selector(keyboardDidShow:) name: UIKeyboardDidShowNotification object:nil];
-  
+
     [nc addObserver:self selector:@selector(refreshMessage:) name:kMonalMessageReceivedNotice object:nil];
     [nc addObserver:self selector:@selector(presentMucInvite:) name:kMonalReceivedMucInviteNotice object:nil];
 
     [nc addObserver:self selector:@selector(refreshButton:) name:kMonalAccountStatusChanged object:nil];
     [nc addObserver:self selector:@selector(fetchMoreMessages) name:kMLMAMMore object:nil];
-    
-    
+
+
     self.hidesBottomBarWhenPushed=YES;
-    
+
     self.chatInput.layer.borderColor=[UIColor lightGrayColor].CGColor;
     self.chatInput.layer.cornerRadius=3.0f;
     self.chatInput.layer.borderWidth=0.5f;
     self.chatInput.textContainerInset=UIEdgeInsetsMake(5, 0, 5, 0);
-        
+
 //    self.inputContainerView.layer.borderColor=[UIColor lightGrayColor].CGColor;
 //    self.inputContainerView.layer.borderWidth=0.5f;
-    
+
     if ([DBSession sharedSession].isLinked) {
         self.restClient = [[DBRestClient alloc] initWithSession:[DBSession sharedSession]];
         self.restClient.delegate = self;
     }
-    
+
     self.messageTable.rowHeight = UITableViewAutomaticDimension;
     self.messageTable.estimatedRowHeight=UITableViewAutomaticDimension;
-   
+
 }
 
 -(void) handleForeGround {
@@ -151,15 +151,15 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void) synchChat {
     dispatch_async(dispatch_get_main_queue(), ^{
-        
+
         xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
         if(xmppAccount.supportsMam2 & !self->_isMUC) {
-            
+
             //synch point
             // if synch point < login time
             NSDate *synch = [[DataLayer sharedInstance] synchPointForContact:self.contactName andAccount:self.accountNo];
             NSDate * connectedTime = [[MLXMPPManager sharedInstance] connectedTimeFor:self.accountNo];
-            
+
             if([synch timeIntervalSinceReferenceDate]<[connectedTime timeIntervalSinceReferenceDate])
             {
                 if(self.messageList.count==0) {
@@ -181,12 +181,12 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void) refreshButton:(NSNotification *) notificaiton
 {
-    if(!self.accountNo) return; 
+    if(!self.accountNo) return;
     xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
     dispatch_async(dispatch_get_main_queue(), ^{
         NSString *title = [[DataLayer sharedInstance] fullName:self.contactName forAccount:self.accountNo];
         if(title.length==0) title=self.contactName;
-        
+
         if(xmppAccount.accountState<kStateLoggedIn)
         {
          //   self.sendButton.enabled=NO;
@@ -198,9 +198,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         else  {
            // self.sendButton.enabled=YES;
             self.navigationItem.title=title;
-            
+
         }
-        
+
         if(self.encryptChat){
             self.navigationItem.title = [NSString stringWithFormat:@"%@ 🔒", self.navigationItem.title];
         }
@@ -211,10 +211,10 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 -(void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    
+
     [MLNotificationManager sharedInstance].currentAccountNo=self.accountNo;
     [MLNotificationManager sharedInstance].currentContact=self.contactName;
-    
+
     if(self.day) {
         NSString *title = [[DataLayer sharedInstance] fullName:self.contactName forAccount:self.accountNo];
         if(title.length==0) title=self.contactName;
@@ -225,7 +225,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     else {
         self.inputContainerView.hidden=NO;
     }
-    
+
     if(self.contactName && self.accountNo) {
         self.encryptChat =[[DataLayer sharedInstance] shouldEncryptForJid:self.contactName andAccountNo:self.accountNo];
     }
@@ -233,7 +233,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     [self refreshButton:nil];
 
     [self updateBackground];
-  
+
 
 }
 
@@ -241,8 +241,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 -(void) viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
-    if(!self.contactName || !self.accountNo) return; 
-    
+    if(!self.contactName || !self.accountNo) return;
+
     [self refreshCounter];
     [self synchChat];
 #ifndef DISABLE_OMEMO
@@ -250,7 +250,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     [xmppAccount queryOMEMODevicesFrom:self.contactName];
 #endif
   //  [self scrollToBottom];
-    
+
 }
 
 -(void) viewWillDisappear:(BOOL)animated
@@ -258,7 +258,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     [super viewWillDisappear:animated];
     [MLNotificationManager sharedInstance].currentAccountNo=nil;
     [MLNotificationManager sharedInstance].currentContact=nil;
-    
+
     [self refreshCounter];
 
 }
@@ -267,7 +267,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     [super viewDidLayoutSubviews];
     if(self.messageTable.contentSize.height>self.messageTable.bounds.size.height)
         [self.messageTable setContentOffset:CGPointMake(0, self.messageTable.contentSize.height- self.messageTable.bounds.size.height) animated:NO];
-    
+
 }
 
 -(void) dealloc
@@ -277,7 +277,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void) updateBackground {
     BOOL backgrounds = [[NSUserDefaults standardUserDefaults] boolForKey:@"ChatBackgrounds"];
-    
+
     if(backgrounds){
         self.backgroundImage.hidden=NO;
         NSString *imageName= [[NSUserDefaults standardUserDefaults] objectForKey:@"BackgroundImage"];
@@ -320,11 +320,11 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 {
     if(!_day) {
         [[DataLayer sharedInstance] markAsReadBuddy:self.contactName forAccount:self.accountNo];
-        
+
         MonalAppDelegate* appDelegate= (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
         [appDelegate updateUnread];
     }
-    
+
 }
 
 -(void) refreshData
@@ -335,15 +335,15 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         newList =[[DataLayer sharedInstance] messageHistory:_contactName forAccount: _accountNo];
         [[DataLayer sharedInstance] countUserUnreadMessages:_contactName forAccount: _accountNo withCompletion:^(NSNumber *unread) {
             if([unread integerValue]==0) _firstmsg=YES;
-            
+
         }];
         _isMUC=[[DataLayer sharedInstance] isBuddyMuc:_contactName forAccount: _accountNo];
-        
+
     }
     else
     {
         newList =[[[DataLayer sharedInstance] messageHistoryDate:_contactName forAccount: _accountNo forDate:_day] mutableCopy];
-        
+
     }
 
     if(!self.jid) return;
@@ -357,16 +357,16 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         NSDictionary *row = [newList objectAtIndex:unreadPos];
         if([[row objectForKey:@"unread"] boolValue]==NO)
         {
-            unreadPos++; 
+            unreadPos++;
             break;
         }
         unreadPos--;
     }
-    
+
     if(unreadPos<newList.count-1){
         [newList insertObject:unreadStatus atIndex:unreadPos];
     }
-    
+
     if(newList.count!=self.messageList.count)
     {
         self.messageList = newList;
@@ -384,10 +384,10 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void) sendWithShareSheet {
    // MLXMPPActivityItem *item = [[MLXMPPActivityItem alloc] initWithPlaceholderItem:@""];
-    
+
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
     NSString *documentsDirectory = [paths objectAtIndex:0]; // Get documents directory
-    
+
     NSString  *myString =@"<message></message>";
     NSError *error;
     NSString *path =[documentsDirectory stringByAppendingPathComponent:@"message.xmpp"];
@@ -396,7 +396,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     if (!succeed){
         // Handle error here
     }
-    
+
     NSURL *url = [NSURL fileURLWithPath:path];
     NSArray *items =@[url];
     NSArray *exclude =  @[UIActivityTypePostToTwitter, UIActivityTypePostToFacebook,
@@ -407,7 +407,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                           UIActivityTypeAddToReadingList, UIActivityTypePostToFlickr,
                           UIActivityTypePostToVimeo, UIActivityTypePostToTencentWeibo];
     UIActivityViewController *share = [[UIActivityViewController alloc] initWithActivityItems:items applicationActivities:nil];
-   // share.excludedActivityTypes = exclude; 
+   // share.excludedActivityTypes = exclude;
     [self presentViewController:share animated:YES completion:nil];
 }
 
@@ -417,19 +417,19 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     NSString *newMessageID =messageID?messageID:[[NSUUID UUID] UUIDString];
     //dont readd it, use the exisitng
     xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
-    if(xmppAccount.accountState<kStateLoggedIn)
+    if(xmppAccount.airDrop)
     {
         DDLogInfo(@"Sending Via share sheet");
         [self sendWithShareSheet];
-        
+
     } else  {
     if(!messageID) {
         NSString *contactNameCopy =_contactName; //prevent retail cycle
         NSString *accountNoCopy = _accountNo;
         BOOL isMucCopy = _isMUC;
         BOOL encryptChatCopy = self.encryptChat;
-        
-    
+
+
         [self addMessageto:_contactName withMessage:messageText andId:newMessageID withCompletion:^(BOOL success) {
             [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:contactNameCopy fromAccount:accountNoCopy isEncrypted:encryptChatCopy isMUC:isMucCopy isUpload:NO messageId:newMessageID
                                   withCompletionHandler:nil];
@@ -486,7 +486,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     NSString *tempDir = NSTemporaryDirectory();
     NSString *imagePath = [tempDir stringByAppendingPathComponent:fileName];
     [imageData writeToFile:imagePath atomically:YES];
-    
+
     [self.restClient uploadFile:fileName toPath:@"/" withParentRev:nil fromPath:imagePath];
 }
 
@@ -509,12 +509,12 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 - (void)restClient:(DBRestClient*)restClient loadedSharableLink:(NSString*)link
            forFile:(NSString*)path{
     NSString *newMessageID =[[NSUUID UUID] UUIDString];
- 
+
     [self addMessageto:_contactName withMessage:link andId:newMessageID withCompletion:^(BOOL success) {
         [[MLXMPPManager sharedInstance] sendMessage:link toContact:_contactName fromAccount:_accountNo isEncrypted:self.encryptChat isMUC:_isMUC isUpload:YES messageId:newMessageID
                               withCompletionHandler:nil];
     }];
-    
+
     self.uploadHUD.hidden=YES;
     self.uploadHUD=nil;
 }
@@ -533,29 +533,29 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     xmpp* account=[[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
     if(!account.supportsHTTPUpload && !self.restClient)
     {
-        
+
         UIAlertView *addError = [[UIAlertView alloc]
                                  initWithTitle:@"Error"
                                  message:@"This server does not appear to support HTTP file uploads (XEP-0363). Please ask the administrator to enable it. You can also link to DropBox in settings and use that to share files."
                                  delegate:nil cancelButtonTitle:@"Close"
                                  otherButtonTitles: nil] ;
         [addError show];
-        
+
         return;
     }
-    
+
     UIImagePickerController *imagePicker = [[UIImagePickerController alloc] init];
     imagePicker.delegate =self;
-    
+
     RIButtonItem* cancelButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Cancel", nil) action:^{
-        
+
     }];
-    
+
     RIButtonItem* cameraButton = [RIButtonItem itemWithLabel:@"Camera" action:^{
         imagePicker.sourceType = UIImagePickerControllerSourceTypeCamera;
         [self presentViewController:imagePicker animated:YES completion:nil];
     }];
-    
+
     RIButtonItem* photosButton = [RIButtonItem itemWithLabel:@"Photos" action:^{
           imagePicker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
         [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
@@ -566,7 +566,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         }];
 
     }];
-    
+
     UIActionSheet* sheet =[[UIActionSheet alloc] initWithTitle:@"Select Image Source" cancelButtonItem:cancelButton destructiveButtonItem:nil otherButtonItems: cameraButton, photosButton,nil];
     [sheet showFromTabBar:self.tabBarController.tabBar];
 
@@ -580,9 +580,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         self.uploadHUD.removeFromSuperViewOnHide=YES;
         self.uploadHUD.label.text =@"Uploding";
         self.uploadHUD.detailsLabel.text =@"Upoading file to server";
-        
+
     }
-    
+
     //if you have configured it, defer to dropbox
     if(self.restClient)
     {
@@ -594,16 +594,16 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         [[MLXMPPManager sharedInstance]  httpUploadJpegData:data toContact:self.contactName onAccount:self.accountNo withCompletionHandler:^(NSString *url, NSError *error) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 self.uploadHUD.hidden=YES;
-                
+
                 if(url) {
                     NSString *newMessageID =[[NSUUID UUID] UUIDString];
-                   
+
                     [self addMessageto:_contactName withMessage:url andId:newMessageID withCompletion:^(BOOL success) {
                         [[MLXMPPManager sharedInstance] sendMessage:url toContact:_contactName fromAccount:_accountNo isEncrypted:self.encryptChat isMUC:_isMUC isUpload:YES messageId:newMessageID
                                               withCompletionHandler:nil];
-                        
+
                     }];
-                    
+
                 }
                 else  {
                     UIAlertView *addError = [[UIAlertView alloc]
@@ -614,7 +614,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                     [addError show];
                 }
             });
-            
+
         }];
     }
 
@@ -634,9 +634,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         {
             [self uploadData:jpgData];
         }
-        
+
     }
-    
+
 }
 
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker
@@ -658,15 +658,15 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         DDLogError(@" not ready to send messages");
         return;
     }
-    
+
     [[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:_accountNo withMessage:message actuallyFrom:self.jid withId:messageId encrypted:self.encryptChat withCompletion:^(BOOL result, NSString *messageType) {
 		DDLogVerbose(@"added message");
-        
+
         if(result) {
         dispatch_async(dispatch_get_main_queue(),
                        ^{
                            NSString *messagetime = [self currentGMTTime];
-                           
+
                            NSDictionary* userInfo = @{@"af": self.jid,
                                                       @"message": message ,
                                                       @"thetime": messagetime,
@@ -677,7 +677,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                                                       };
                            if(!self.messageList) self.messageList =[[NSMutableArray alloc] init];
                            [self.messageList addObject:[userInfo mutableCopy]];
-                           
+
                            NSIndexPath *path1;
                            [self->_messageTable beginUpdates];
                            NSInteger bottom = [self.messageList count]-1;
@@ -688,20 +688,20 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                            }
                            [self->_messageTable endUpdates];
                             if(completion) completion(result);
-                           
+
                            [self scrollToBottom];
-                           
-                           
+
+
                        });
-            
-          
-        
+
+
+
     }
 	else {
 		DDLogVerbose(@"failed to add message");
     }
     }];
-	
+
 	// make sure its in active
 	if(_firstmsg==YES)
 	{
@@ -719,7 +719,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     dispatch_async(dispatch_get_main_queue(), ^{
           NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"You have been invited to a conversation %@?", nil), from ];
         UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Group Chat Invite" message:messageString preferredStyle:UIAlertControllerStyleAlert];
-        
+
         [alert addAction:[UIAlertAction actionWithTitle:@"Join" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
               [xmppAccount joinRoom:from withNick:xmppAccount.username andPassword:nil];
             [alert dismissViewControllerAnimated:YES completion:nil];
@@ -728,7 +728,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
             [alert dismissViewControllerAnimated:YES completion:nil];
         }]];
         [self presentViewController:alert animated:YES completion:nil];
-        
+
     });
 }
 
@@ -736,14 +736,14 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 -(void) handleNewMessage:(NSNotification *)notification
 {
     DDLogVerbose(@"chat view got new message notice %@", notification.userInfo);
-    
+
     if([[notification.userInfo objectForKey:@"accountNo"] isEqualToString:_accountNo]
        &&( ( [[notification.userInfo objectForKey:@"from"] isEqualToString:_contactName])
           || ([[notification.userInfo objectForKey:@"to"] isEqualToString:_contactName] ))
        )
     {
         [[DataLayer sharedInstance] messageTypeForMessage: [notification.userInfo objectForKey:@"messageText"] withCompletion:^(NSString *messageType) {
-            
+
             dispatch_async(dispatch_get_main_queue(),
                            ^{
                                NSString *finalMessageType=messageType;
@@ -752,7 +752,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                                {
                                    finalMessageType =kMessageTypeStatus;
                                }
-                           
+
                                if([[notification.userInfo objectForKey:@"to"] isEqualToString:_contactName])
                                {
                                    NSString *timeString;
@@ -768,7 +768,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                                            timeString= [notification.userInfo objectForKey:@"delayTimeStamp"];
                                        }
                                    }
-                                   
+
                                    userInfo = @{@"af": [notification.userInfo objectForKey:@"actuallyfrom"],
                                                 @"message": [notification.userInfo objectForKey:@"messageText"],
                                                 @"messageid": [notification.userInfo objectForKey:@"messageid"],
@@ -777,7 +777,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                                                 @"delivered":@YES,
                                                 kMessageType:finalMessageType
                                                 };
-                                   
+
                                } else  {
                                    userInfo = @{@"af": [notification.userInfo objectForKey:@"actuallyfrom"],
                                                 @"message": [notification.userInfo objectForKey:@"messageText"],
@@ -787,29 +787,29 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                                                 kMessageType:finalMessageType
                                                 };
                                }
-                               
-                               
+
+
                                if(!self.messageList) self.messageList=[[NSMutableArray alloc] init];
                                [self.messageList addObject:[userInfo mutableCopy]];
-                               
+
                                [_messageTable beginUpdates];
                                NSIndexPath *path1;
                                NSInteger bottom =  self.messageList.count-1;
                                if(bottom>=0) {
-                                   
+
                                    path1 = [NSIndexPath indexPathForRow:bottom  inSection:0];
                                    [_messageTable insertRowsAtIndexPaths:@[path1]
                                                         withRowAnimation:UITableViewRowAnimationBottom];
-                                   
-                               } 
+
+                               }
                                [_messageTable endUpdates];
-                               
+
                                [self scrollToBottom];
-                               
+
                                //mark as read
                                // [[DataLayer sharedInstance] markAsReadBuddy:_contactName forAccount:_accountNo];
                            });
-        
+
         }];
 
     }
@@ -820,7 +820,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     dispatch_async(dispatch_get_main_queue(),
                    ^{
                        if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground) return;
-                       
+
                        int row=0;
                        NSIndexPath *indexPath;
                        for(NSMutableDictionary *rowDic in self.messageList)
@@ -845,7 +845,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     dispatch_async(dispatch_get_main_queue(),
                    ^{
                        if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground) return;
-                       
+
                        int row=0;
                        NSIndexPath *indexPath;
                        for(NSMutableDictionary *rowDic in self.messageList)
@@ -853,12 +853,12 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                            if([[rowDic objectForKey:@"messageid"] isEqualToString:messageId]) {
                                [rowDic setObject:[NSNumber numberWithBool:received] forKey:@"received"];
                                indexPath =[NSIndexPath indexPathForRow:row inSection:0];
-                               
+
                                break;
                            }
                            row++;
                        }
-                       
+
                        if(indexPath) {
                            [self->_messageTable beginUpdates];
                            [self->_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
@@ -890,7 +890,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void) scrollToBottom
 {
-    if(self.messageList.count==0) return; 
+    if(self.messageList.count==0) return;
     dispatch_async(dispatch_get_main_queue(), ^{
         NSInteger bottom = [self.messageTable numberOfRowsInSection:0];
         if(bottom>0)
@@ -910,14 +910,14 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     self.destinationDateFormat = [[NSDateFormatter alloc] init];
     [self.destinationDateFormat setLocale:[NSLocale currentLocale]];
     [self.destinationDateFormat setDoesRelativeDateFormatting:YES];
-    
+
     self.sourceDateFormat = [[NSDateFormatter alloc] init];
     [self.sourceDateFormat setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
     [self.sourceDateFormat setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
-   
+
     self.gregorian = [[NSCalendar alloc]
                              initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
-    
+
     NSDate* now =[NSDate date];
     self.thisday =[self.gregorian components:NSCalendarUnitDay fromDate:now].day;
     self.thismonth =[self.gregorian components:NSCalendarUnitMonth fromDate:now].month;
@@ -927,7 +927,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 -(NSString*) currentGMTTime
 {
     NSDate* sourceDate =[NSDate date];
-    
+
 //    NSTimeZone* sourceTimeZone = [NSTimeZone systemTimeZone];
 //    NSTimeZone* destinationTimeZone = [NSTimeZone timeZoneWithAbbreviation:@"GMT"];
 //    NSInteger sourceGMTOffset = [sourceTimeZone secondsFromGMTForDate:sourceDate];
@@ -949,28 +949,28 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         } else  {
             sourceDate= [self.sourceDateFormat dateFromString: (NSString *)sourceDateString];
         }
-        
+
         NSInteger msgday =[self.gregorian components:NSCalendarUnitDay fromDate:sourceDate].day;
         NSInteger msgmonth=[self.gregorian components:NSCalendarUnitMonth fromDate:sourceDate].month;
         NSInteger msgyear =[self.gregorian components:NSCalendarUnitYear fromDate:sourceDate].year;
-        
+
         NSDate* priorDate;
         if([priorDateString isKindOfClass:[NSDate class]]){
             priorDate=(NSDate *)priorDateString;
         } else  {
             priorDate= [self.sourceDateFormat dateFromString: (NSString *)priorDateString];
         }
-        
+
         NSInteger priorDay=0;
         NSInteger priorMonth=0;
         NSInteger priorYear=0;
-        
+
         if(priorDate) {
             priorDay =[self.gregorian components:NSCalendarUnitDay fromDate:priorDate].day;
             priorMonth=[self.gregorian components:NSCalendarUnitMonth fromDate:priorDate].month;
             priorYear =[self.gregorian components:NSCalendarUnitYear fromDate:priorDate].year;
         }
-        
+
         if (priorDate && ((priorDay!=msgday) || (priorMonth!=msgmonth) || (priorYear!=msgyear))  )
         {
             //divider, hide time
@@ -980,7 +980,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
             dateString = [self.destinationDateFormat stringFromDate:sourceDate];
         }
     }
-    
+
     return dateString;
 }
 
@@ -995,13 +995,13 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         } else  {
             sourceDate= [self.sourceDateFormat dateFromString: (NSString *)sourceDateString];
         }
-        
+
         [self.destinationDateFormat setDateStyle:NSDateFormatterNoStyle];
         [self.destinationDateFormat setTimeStyle:NSDateFormatterShortStyle];
-        
+
         dateString = [self.destinationDateFormat stringFromDate:sourceDate];
     }
-    
+
     return dateString;
 }
 
@@ -1010,7 +1010,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 -(void) retry:(id) sender
 {
     NSInteger historyId = ((UIButton*) sender).tag;
-    
+
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Retry sending message?" message:@"This message failed to send." preferredStyle:UIAlertControllerStyleActionSheet];
     [alert addAction:[UIAlertAction actionWithTitle:@"Retry" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
         NSArray *messageArray =[[DataLayer sharedInstance] messageForHistoryID:historyId];
@@ -1024,9 +1024,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         [self dismissViewControllerAnimated:YES completion:nil];
     }]];
     alert.popoverPresentationController.sourceView=sender;
-    
+
     [self presentViewController:alert animated:YES completion:nil];
-    
+
 }
 
 #pragma mark - tableview datasource
@@ -1039,7 +1039,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     NSInteger toReturn=0;
-    
+
     switch (section) {
         case 0:
         {
@@ -1049,7 +1049,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         default:
             break;
     }
-    
+
     return toReturn;
 }
 
@@ -1061,16 +1061,16 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     if(indexPath.row<self.messageList.count) {
     row= [self.messageList objectAtIndex:indexPath.row];
     }
-    
+
     NSString *from =[row objectForKey:@"af"];
-    
+
     //intended to correct for bad data. Can be removed later probably.
     if([from isEqualToString:@"(null)"])
     {
         from=[row objectForKey:@"message_from"];;
     }
       NSString *messageType =[row objectForKey:kMessageType];
-    
+
     if([messageType isEqualToString:kMessageTypeStatus])
     {
         cell=[tableView dequeueReusableCellWithIdentifier:@"StatusCell"];
@@ -1078,7 +1078,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         cell.link=nil;
         return cell;
     }
-    
+
     if(_isMUC)
     {
         if([from isEqualToString:_jid])
@@ -1118,10 +1118,10 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                 cell=[tableView dequeueReusableCellWithIdentifier:@"textOutCell"];
             }
         }
-        
+
         NSNumber *received = [row objectForKey:@"message"];
         if(received){
-           
+
         }
     }
 
@@ -1130,7 +1130,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         messageRow = [self.messageList objectAtIndex:indexPath.row];
     }
     NSString *messageString =[messageRow objectForKey:@"message"];
-   
+
     if([messageType isEqualToString:kMessageTypeImage])
     {
         MLChatImageCell* imageCell;
@@ -1143,8 +1143,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
             imageCell= (MLChatImageCell *) [tableView dequeueReusableCellWithIdentifier:@"imageOutCell"];
             imageCell.outBound=YES;
         }
-        
-        
+
+
         if(![imageCell.link isEqualToString:messageString]){
             imageCell.link = messageString;
             imageCell.thumbnailImage.image=nil;
@@ -1152,10 +1152,10 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
             [imageCell loadImageWithCompletion:^{}];
         }
         cell=imageCell;
-        
+
     }
     else {
-        
+
       if([messageType isEqualToString:kMessageTypeUrl])
       {
           MLLinkCell *toreturn;
@@ -1165,21 +1165,21 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
           else  {
               toreturn=(MLLinkCell *)[tableView dequeueReusableCellWithIdentifier:@"linkOutCell"];
           }
-          
+
          NSString * cleanLink=[[row objectForKey:@"message"]  stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
           NSArray *parts = [cleanLink componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
           cell.link = parts[0];
-          
+
           toreturn.messageBody.text =cell.link;
           toreturn.link=cell.link;
-          
+
           if([(NSString *)[row objectForKey:@"previewImage"] length]>0
              || [(NSString *)[row objectForKey:@"previewText"] length]>0)
           {
               toreturn.imageUrl = [row objectForKey:@"previewImage"];
               toreturn.messageTitle.text = [row objectForKey:@"previewText"];
               [toreturn loadImageWithCompletion:^{
-                  
+
               }];
           }  else {
               [toreturn loadPreviewWithCompletion:^{
@@ -1188,14 +1188,14 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
               }];
           }
           cell=toreturn;
-          
+
       } else {
         NSString* lowerCase= [[row objectForKey:@"message"] lowercaseString];
         NSRange pos = [lowerCase rangeOfString:@"https://"];
         if(pos.location==NSNotFound) {
             pos=[lowerCase rangeOfString:@"http://"];
         }
-        
+
         NSRange pos2;
         if(pos.location!=NSNotFound)
         {
@@ -1204,15 +1204,15 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
             if(pos2.location==NSNotFound) {
                 pos2= [urlString rangeOfString:@">"];
             }
-            
+
             if(pos2.location!=NSNotFound) {
                 urlString=[urlString substringToIndex:pos2.location];
             }
             NSArray *parts = [urlString componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
             cell.link = parts[0];
-            
+
             if(cell.link) {
-                
+
                 NSDictionary *underlineAttribute = @{NSUnderlineStyleAttributeName: @(NSUnderlineStyleSingle)};
                 NSAttributedString* underlined = [[NSAttributedString alloc] initWithString:cell.link attributes:underlineAttribute];
                 NSMutableAttributedString* stitchedString  = [[NSMutableAttributedString alloc] init];
@@ -1232,11 +1232,11 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
             cell.messageBody.text =[row objectForKey:@"message"];
             cell.link=nil;
         }
-          
+
       }
-        
+
     }
-    
+
     if(_isMUC)
     {
         cell.name.hidden=NO;
@@ -1252,7 +1252,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
             cell.deliveryFailed=YES;
         }
     }
-    
+
     NSNumber *received = [row objectForKey:kReceived];
     if(received.boolValue==YES) {
         NSDictionary *prior =nil;
@@ -1278,7 +1278,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         NSDictionary *priorRow=[self.messageList objectAtIndex:indexPath.row-1];
         priorDate =[priorRow objectForKey:@"thetime"];
         NSString *priorSender =[priorRow objectForKey:@"af"];
-        
+
         //intended to correct for bad data. Can be removed later probably.
         if([priorSender isEqualToString:@"(null)"])
         {
@@ -1289,19 +1289,19 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
             newSender=YES;
         }
     }
-    
+
     cell.date.text= [self formattedTimeStampWithSource:[row objectForKey:@"thetime"]];
     cell.selectionStyle=UITableViewCellSelectionStyleNone;
-    
+
     cell.dividerDate.text = [self formattedDateWithSource:[row objectForKey:@"thetime"] andPriorDate:priorDate];
-    
+
     if([[row objectForKey:@"encrypted"] boolValue])
     {
         cell.lockImage.hidden=NO;
     } else  {
          cell.lockImage.hidden=YES;
     }
-    
+
     if([from isEqualToString:_jid])
     {
         cell.outBound=YES;
@@ -1309,11 +1309,11 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     else  {
         cell.outBound=NO;
     }
-    
-    cell.parent=self; 
-    
+
+    cell.parent=self;
+
     [cell updateCellWithNewSender:newSender];
-    
+
     return cell;
 }
 
@@ -1333,12 +1333,12 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
             // photo.caption=[row objectForKey:@"caption"];
             [self.photos addObject:photo];
         }
-            
+
             dispatch_async(dispatch_get_main_queue(), ^{
                 if(self.photos.count>0) {
                     IDMPhotoBrowser *browser = [[IDMPhotoBrowser alloc] initWithPhotos:self.photos];
                     browser.delegate=self;
-                    
+
                     //                browser.displayActionButton = YES; // Show action button to allow sharing, copying, etc (defaults to YES)
                     //                browser.displayNavArrows = NO; // Whether to display left and right nav arrows on toolbar (defaults to NO)
                     //                browser.displaySelectionButtons = NO; // Whether selection buttons are shown on each image (defaults to NO)
@@ -1348,12 +1348,12 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                     //                browser.startOnGrid = NO; // Whether to start on the grid of thumbnails instead of the first photo (defaults to NO)
                     //
                     UINavigationController *nav =[[UINavigationController alloc] initWithRootViewController:browser];
-                    
-                    
+
+
                     [self presentViewController:nav animated:YES completion:nil];
                 }
             });
-            
+
     }
 }
 
@@ -1373,9 +1373,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
     if (editingStyle == UITableViewCellEditingStyleDelete) {
         NSDictionary* message= [self.messageList objectAtIndex:indexPath.row];
-        
+
         DDLogVerbose(@"%@", message);
-        
+
         if([message objectForKey:@"message_history_id"])
         {
             [[DataLayer sharedInstance] deleteMessageHistory:[NSString stringWithFormat:@"%@",[message objectForKey:@"message_history_id"]]];
@@ -1386,8 +1386,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         }
         [self.messageList removeObjectAtIndex:indexPath.row];
         [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationRight];
-        
-        
+
+
     }
 }
 
@@ -1403,12 +1403,12 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 //dummy function needed to remove warnign
 -(void) openlink: (id) sender {
-    
+
 }
 
 - (void)tableView:(UITableView *)tableView performAction:(SEL)action forRowAtIndexPath:(NSIndexPath *)indexPath withSender:(id)sender
 {
-    
+
 }
 
 
@@ -1427,7 +1427,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void) updateInputViewSize
 {
-    
+
     if(self.chatInput.intrinsicContentSize.height>43) {
         self.inputContainerHeight.constant= self.chatInput.intrinsicContentSize.height+16+10;
           self.chatInput.contentInset = UIEdgeInsetsMake(5, 0, 5, 0);
@@ -1451,15 +1451,15 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 - (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text
 {
     BOOL shouldinsert=YES;
-    
+
     if(self.hardwareKeyboardPresent &&  [text isEqualToString:@"\n"])
     {
         [self resignTextView];
         shouldinsert=NO;
         [self updateInputViewSize];
     }
-    
-    return shouldinsert; 
+
+    return shouldinsert;
 }
 
 - (void)textViewDidChange:(UITextView *)textView
@@ -1491,22 +1491,22 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 -(void) keyboardWillHide:(NSNotification *) notification
 {
     if(self.blockAnimations) return;
-    
+
     NSTimeInterval animationDuration =[[[notification userInfo] objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
 	[UIView animateWithDuration:animationDuration
                      animations:^{
-                         self.inputContainerBottom.constant=0; 
+                         self.inputContainerBottom.constant=0;
                          if([self.messageList count]>0)
                          {
                              [self scrollToBottom];
                          }
-                         
+
                      } completion:^(BOOL finished) {
-                         
-                         
+
+
                      }
      ];
-    
+
     _keyboardVisible=NO;
 	DDLogVerbose(@"kbd will hide scroll: %f", oldFrame.size.height);
 }
@@ -1518,7 +1518,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     CGSize keyboardSize = keyboardframe.size;
     self.inputContainerBottom.constant= keyboardSize.height-self.tabBarController.tabBar.frame.size.height;
     [self scrollToBottom];
-    
+
 }
 
 -(void) keyboardWillShow:(NSNotification *) notification
@@ -1529,7 +1529,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     if ((keyboardFrame.size.height ) < 100) {
         self.hardwareKeyboardPresent = YES;
     }
-   
+
     if(self.blockAnimations) return;
 //    CGRect keyboardframe =[[[notification userInfo] objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
 //    CGSize keyboardSize = keyboardframe.size;

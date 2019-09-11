@@ -56,16 +56,16 @@ typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFie
     NSOutputStream *_oStream;
     NSMutableString* _inputBuffer;
     NSMutableArray* _outputQueue;
-    
+
     NSArray* _stanzaTypes;
-    
+
     BOOL _startTLSComplete;
     BOOL _streamHasSpace;
-    
+
     //does not reset at disconnect
     BOOL _loggedInOnce;
     BOOL _hasRequestedServerInfo;
-    
+
     BOOL _brokenServerSSL;
 }
 
@@ -145,7 +145,7 @@ typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFie
 @property (nonatomic, readonly) BOOL usingCarbons2;
 @property (nonatomic, readonly) BOOL supportsRosterVersion;
 
-
+@property (nonatomic,assign) BOOL airDrop;
 
 //calculated
 @property (nonatomic,strong, readonly) NSString* versionHash;
@@ -226,7 +226,7 @@ extern NSString *const kXMPPPresence;
 -(void) reconnect;
 
 /**
- reconnect called with a specified wait. if never logged in then wait is 0. 
+ reconnect called with a specified wait. if never logged in then wait is 0.
  */
 -(void) reconnect:(NSInteger) scheduleWait;
 
@@ -340,14 +340,14 @@ Decline a call request
 #endif
 
 /**
- An intentional disconnect to trigger APNS. does not close the stream. 
+ An intentional disconnect to trigger APNS. does not close the stream.
  */
 -(void) disconnectToResumeWithCompletion:(void (^)(void))completion;
 
--(void) setupSignal; 
+-(void) setupSignal;
 
 
-#pragma mark - account management 
+#pragma mark - account management
 
 -(void) changePassword:(NSString *) newPass withCompletion:(xmppCompletion) completion;
 

@@ -355,11 +355,7 @@ NSString *const kGtalk = @"Gtalk";
             
             if(self.airDrop != [[self.initialSettings objectForKey:kAirdrop] boolValue])
             {
-                if(self.airDrop){
-                    [[MLXMPPManager sharedInstance] disconnectAccount:self.accountno];
-                } else {
-                     [[MLXMPPManager sharedInstance] connectAccount:self.accountno];
-                }
+                 [[MLXMPPManager sharedInstance] disconnectAccount:self.accountno];
             }
             
             [self showSuccessHUD];

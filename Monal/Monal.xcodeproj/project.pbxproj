@@ -3305,6 +3305,7 @@
 					"$(PROJECT_DIR)/Pods/OpenSSL-Universal/lib-macos",
 				);
 				LLVM_LTO = NO;
+				MARKETING_VERSION = 4.0;
 				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM;
 				PRODUCT_NAME = Monal;
@@ -3912,6 +3913,7 @@
 					"$(PROJECT_DIR)/Pods/OpenSSL-Universal/lib-macos",
 				);
 				LLVM_LTO = NO;
+				MARKETING_VERSION = 4.0;
 				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM;
 				PRODUCT_NAME = Monal;
@@ -4018,6 +4020,7 @@
 				INFOPLIST_FILE = "$(SRCROOT)/shareSheet-iOS/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = 4.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.shareSheet;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -4081,6 +4084,7 @@
 				INFOPLIST_FILE = "$(SRCROOT)/shareSheet-iOS/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = 4.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.shareSheet;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -4146,6 +4150,7 @@
 				INFOPLIST_FILE = "$(SRCROOT)/shareSheet-iOS/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = 4.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.shareSheet;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -4406,6 +4411,7 @@
 					"$(PROJECT_DIR)/Pods/OpenSSL-Universal/lib-macos",
 				);
 				LLVM_LTO = NO;
+				MARKETING_VERSION = 4.0;
 				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM;
 				PRODUCT_NAME = Monal;

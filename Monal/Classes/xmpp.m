@@ -2815,6 +2815,8 @@ if(self.airDrop) {
   NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
   NSString *documentsDirectory = [paths objectAtIndex:0]; // Get documents directory
 
+    [messageNode.attributes setObject:_fulluser forKey:@"from"];
+    
   NSString  *myString =[messageNode XMLString];
   NSError *error;
   NSString *path =[documentsDirectory stringByAppendingPathComponent:@"message.xmpp"];

@@ -189,7 +189,10 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
         if(xmppAccount.accountState<kStateLoggedIn)
         {
-         //   self.sendButton.enabled=NO;
+            if(xmppAccount.airDrop) {
+                self.sendButton.enabled=NO;
+            }
+            
             if(!title) title=@"";
             if(self.contactName.length>0){
                 self.navigationItem.title=[NSString stringWithFormat:@"%@ [%@]", title, @"Logged Out"];
@@ -410,33 +413,29 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     //dont readd it, use the exisitng
     NSDictionary* settings=[[[DataLayer sharedInstance] accountVals:_accountNo] objectAtIndex:0];
     
+    if(!messageID) {
+        NSString *contactNameCopy =_contactName; //prevent retail cycle
+        NSString *accountNoCopy = _accountNo;
+        BOOL isMucCopy = _isMUC;
+        BOOL encryptChatCopy = self.encryptChat;
+        
+        
+        [self addMessageto:_contactName withMessage:messageText andId:newMessageID withCompletion:^(BOOL success) {
+            [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:contactNameCopy fromAccount:accountNoCopy isEncrypted:encryptChatCopy isMUC:isMucCopy isUpload:NO messageId:newMessageID
+                                  withCompletionHandler:nil];
+        }];
+    }
+    else  {
+        [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:_contactName fromAccount:_accountNo isEncrypted:self.encryptChat isMUC:_isMUC isUpload:NO messageId:newMessageID
+                              withCompletionHandler:nil];
+    }
+    
+    
     if([[settings objectForKey:kAirdrop] boolValue])
     {
         DDLogInfo(@"Sending Via share sheet");
         [self sendWithShareSheet];
         
-        [self addMessageto:_contactName withMessage:messageText andId:newMessageID withCompletion:^(BOOL success) {
-            
-        }];
-        
-    } else  {
-        
-        if(!messageID) {
-            NSString *contactNameCopy =_contactName; //prevent retail cycle
-            NSString *accountNoCopy = _accountNo;
-            BOOL isMucCopy = _isMUC;
-            BOOL encryptChatCopy = self.encryptChat;
-            
-            
-            [self addMessageto:_contactName withMessage:messageText andId:newMessageID withCompletion:^(BOOL success) {
-                [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:contactNameCopy fromAccount:accountNoCopy isEncrypted:encryptChatCopy isMUC:isMucCopy isUpload:NO messageId:newMessageID
-                                      withCompletionHandler:nil];
-            }];
-        }
-        else  {
-            [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:_contactName fromAccount:_accountNo isEncrypted:self.encryptChat isMUC:_isMUC isUpload:NO messageId:newMessageID
-                                  withCompletionHandler:nil];
-        }
     }
 }
 

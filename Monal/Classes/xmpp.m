@@ -1836,7 +1836,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                         self.lastHandledInboundStanza=[NSNumber numberWithInteger: [self.lastHandledInboundStanza integerValue]+1];
                     ParseMessage* messageNode= [[ParseMessage alloc]  initWithDictionary:stanzaToParse];
 
-                    MLMessageProcessor *messageProcessor = [[MLMessageProcessor alloc] initWithAccount:self.accountNo jid:self.jid signalContex:self.signalContext andSignalStore:self.monalSignalStore];
+                    MLMessageProcessor *messageProcessor = [[MLMessageProcessor alloc] initWithAccount:self.accountNo jid:self.jid?self.jid:self->_fulluser signalContex:self.signalContext andSignalStore:self.monalSignalStore];
                     messageProcessor.postPersistAction = ^(BOOL success, BOOL encrypted, BOOL showAlert,  NSString *body, NSString *newMessageType) {
                         if(success)
                         {

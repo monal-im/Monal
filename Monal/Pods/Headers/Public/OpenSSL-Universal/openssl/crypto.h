@@ -1,1 +1,1 @@
-../../../../OpenSSL-Universal/include-macos/openssl/crypto.h
+../../../../OpenSSL-Universal/Frameworks/macos/OpenSSL.framework/Versions/A/Headers/crypto.h

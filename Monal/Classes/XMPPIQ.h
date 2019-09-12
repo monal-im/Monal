@@ -49,11 +49,19 @@
 -(void) updateMamArchivePrefDefault:(NSString *) pref;
 
 /**
+Queries the last page of messages (most recent) for a recipient
+ */
+-(void) setMAMQueryLatestMessagesForJid:(NSString *)jid;
+
+/**
  makes iq for mam query since a date and time for jid. If no date is provided, will query all. If no jid is provided it will query all
  */
 -(void) setMAMQueryFromStart:(NSDate *) startDate toDate:(NSDate *) endDate  andJid:(NSString *)jid;
 
--(void) setMAMQueryFromStart:(NSDate *) startDate after:(NSString *) uid  andJid:(NSString *)jid;
+/*
+ @param after  stanza id (uid)
+*/
+ -(void) setMAMQueryFromStart:(NSDate *) startDate after:(NSString *) uid  andJid:(NSString *)jid;
 
 
 #pragma mark disco

@@ -1,1 +1,1 @@
-../../../../OpenSSL-Universal/include-macos/openssl/ossl_typ.h
+../../../../OpenSSL-Universal/Frameworks/macos/OpenSSL.framework/Versions/A/Headers/ossl_typ.h

@@ -284,12 +284,32 @@
          }
     }
     
+    if([elementName isEqualToString:@"error"]) {
+        State = @"Error";
+        return;
+    }
+    
+  if([[attributeDict objectForKey:kXMLNS] isEqualToString:kStanzasNameSpace]
+       &&  [State isEqualToString:@"Error"] ) {
+        if([elementName isEqualToString:@"text"]) {
+            State = @"ErrorText";
+            return;
+        }
+    }
+    
     
 }
 
 
 - (void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName
 {
+    
+    if(([elementName isEqualToString:@"text"]) && [State isEqualToString:@"ErrorText"])
+    {
+        _errorMessage=[_messageBuffer copy];
+        return;
+    }
+    
     if(([elementName isEqualToString:@"value"]) && [State isEqualToString:@"RegistrationForm"]
        )
     {

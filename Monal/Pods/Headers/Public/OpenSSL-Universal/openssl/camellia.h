@@ -1,1 +1,1 @@
-../../../../OpenSSL-Universal/include-macos/openssl/camellia.h
+../../../../OpenSSL-Universal/Frameworks/macos/OpenSSL.framework/Versions/A/Headers/camellia.h

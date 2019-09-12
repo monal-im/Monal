@@ -297,11 +297,21 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 #pragma mark - handling urls
 
+-(BOOL) openFile:(NSURL *) file {
+    NSData *data = [NSData dataWithContentsOfURL:file];
+    [[MLXMPPManager sharedInstance] parseMessageForData:data];
+    return data?YES:NO;
+}
+
+
 - (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey, id> *)options
 {
+    if([url.scheme isEqualToString:@"file"])
+    {
+        return [self openFile:url];
+    }
     if([url.scheme isEqualToString:@"xmpp"])
     {
-        
         return YES;
     }
     if([url.scheme isEqualToString:@"com.googleusercontent.apps.472865344000-invcngpma1psmiek5imc1gb8u7mef8l9"])
@@ -322,6 +332,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     return NO;
 }
+
+
 
 
 #pragma mark  - user notifications
@@ -356,12 +368,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     
                     NSString *messageID =[[NSUUID UUID] UUIDString];
                     
-                    //TODO the encrypted value needs to be pulled from the DB for the chat
-                    [[DataLayer sharedInstance] addMessageHistoryFrom:replyingAccount to:[notification.userInfo objectForKey:@"from"] forAccount:[notification.userInfo objectForKey:@"accountNo"] withMessage:message actuallyFrom:replyingAccount withId:messageID encrypted:NO withCompletion:^(BOOL success, NSString *messageType) {
+                    BOOL encryptChat =[[DataLayer sharedInstance] shouldEncryptForJid:[notification.userInfo objectForKey:@"from"] andAccountNo:[notification.userInfo objectForKey:@"accountNo"]];
+                    
+                    [[DataLayer sharedInstance] addMessageHistoryFrom:replyingAccount to:[notification.userInfo objectForKey:@"from"] forAccount:[notification.userInfo objectForKey:@"accountNo"] withMessage:message actuallyFrom:replyingAccount withId:messageID encrypted:encryptChat withCompletion:^(BOOL success, NSString *messageType) {
                         
                     }];
                     
-                    [[MLXMPPManager sharedInstance] sendMessage:message toContact:[notification.userInfo objectForKey:@"from"] fromAccount:[notification.userInfo objectForKey:@"accountNo"] isEncrypted:NO isMUC:NO isUpload:NO messageId:messageID  withCompletionHandler:^(BOOL success, NSString *messageId) {
+                    [[MLXMPPManager sharedInstance] sendMessage:message toContact:[notification.userInfo objectForKey:@"from"] fromAccount:[notification.userInfo objectForKey:@"accountNo"] isEncrypted:encryptChat isMUC:NO isUpload:NO messageId:messageID  withCompletionHandler:^(BOOL success, NSString *messageId) {
                         
                     }];
                     

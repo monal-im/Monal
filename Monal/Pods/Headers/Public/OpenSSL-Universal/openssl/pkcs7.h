@@ -1,1 +1,1 @@
-../../../../OpenSSL-Universal/include-macos/openssl/pkcs7.h
+../../../../OpenSSL-Universal/Frameworks/macos/OpenSSL.framework/Versions/A/Headers/pkcs7.h

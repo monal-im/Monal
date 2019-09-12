@@ -243,6 +243,71 @@
 }
 
 /**
+ Get last 50 messages
+ */
+-(void) setMAMQueryLatestMessagesForJid:(NSString *)jid
+{
+    
+    MLXMLNode* queryNode =[[MLXMLNode alloc] init];
+    queryNode.element=@"query";
+    [queryNode.attributes setObject:@"urn:xmpp:mam:2" forKey:@"xmlns"];
+    
+    
+    MLXMLNode* xnode =[[MLXMLNode alloc] init];
+    xnode.element=@"x";
+    [xnode.attributes setObject:@"jabber:x:data" forKey:@"xmlns"];
+    [xnode.attributes setObject:@"submit" forKey:@"type"];
+    
+    MLXMLNode* field1 =[[MLXMLNode alloc] init];
+    field1.element=@"field";
+    [field1.attributes setObject:@"FORM_TYPE" forKey:@"var"];
+    [field1.attributes setObject:@"hidden" forKey:@"type"];
+    
+    MLXMLNode* value =[[MLXMLNode alloc] init];
+    value.element=@"value";
+    value.data=@"urn:xmpp:mam:2";
+    [field1.children addObject:value];
+    
+    [xnode.children addObject:field1];
+    
+
+    
+    //if we are fetching "all" limit with RSM to 100 for now
+    MLXMLNode* set =[[MLXMLNode alloc] init];
+    set.element=@"set";
+    [set.attributes setObject:@"http://jabber.org/protocol/rsm" forKey:@"xmlns"];
+    
+    MLXMLNode* max =[[MLXMLNode alloc] init];
+    max.element=@"max";
+    max.data=@"50";
+    [set.children addObject:max];
+    
+    MLXMLNode* before =[[MLXMLNode alloc] init];
+    before.element=@"before";
+    [set.children addObject:before];
+    
+    [queryNode.children addObject:set];
+
+    if(jid) {
+        MLXMLNode* field3 =[[MLXMLNode alloc] init];
+        field3.element=@"field";
+        [field3.attributes setObject:@"with" forKey:@"var"];
+        
+        MLXMLNode* value3 =[[MLXMLNode alloc] init];
+        value3.element=@"value";
+        value3.data=jid;
+        [field3.children addObject:value3];
+        
+        [xnode.children addObject:field3];
+    }
+    
+    
+    [queryNode.children addObject:xnode];
+    
+    [self.children addObject:queryNode];
+    
+}
+/**
  You can send just start or just jid. End alone doesnt make sense
  */
 -(void) setMAMQueryFromStart:(NSDate *) startDate toDate:(NSDate *) endDate  andJid:(NSString *)jid
@@ -306,7 +371,7 @@
         
         MLXMLNode* max =[[MLXMLNode alloc] init];
         max.element=@"max";
-        max.data=@"100"; 
+        max.data=@"50";
         [set.children addObject:max];
         [queryNode.children addObject:set];
         
@@ -420,12 +485,12 @@
     
     MLXMLNode* field3 =[[MLXMLNode alloc] init];
     field3.element=@"set";
-    [field3.attributes setObject:@"xmlns" forKey:@"http://jabber.org/protocol/rsm"];
+    [field3.attributes setObject:@"http://jabber.org/protocol/rsm" forKey:@"xmlns"];
     
     
     MLXMLNode* max =[[MLXMLNode alloc] init];
     max.element=@"max";
-    max.data=@"20"; // initally set to 100 but things didnt like it
+    max.data=@"50"; 
     [field3.children addObject:max];
     
     if(uid) {

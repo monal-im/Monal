@@ -6,6 +6,25 @@
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
 	<string>${PRODUCT_NAME}</string>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeIconFiles</key>
+			<array>
+				<string>/Users/anurodhp/Development/monalxmpp/Monal/Images.xcassets/AppIcon.appiconset/Icon-80.png</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>XMPP Message</string>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>im.monal.xmpp</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleExecutable</key>
 	<string>${EXECUTABLE_NAME}</string>
 	<key>CFBundleIdentifier</key>
@@ -17,7 +36,7 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>3.8</string>
+	<string>3.8.3</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleURLTypes</key>
@@ -58,6 +77,8 @@
 		<string>dbapi-2</string>
 	</array>
 	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>
 	<dict>
@@ -102,5 +123,29 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>UTExportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.xml</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>XMPP Message</string>
+			<key>UTTypeIconFiles</key>
+			<array>
+				<string>/Users/anurodhp/Development/monalxmpp/Monal/Images.xcassets/AppIcon.appiconset/Icon-80.png</string>
+			</array>
+			<key>UTTypeIdentifier</key>
+			<string>im.monal.xmpp</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>xmpp</string>
+				</array>
+			</dict>
+		</dict>
+	</array>
 </dict>
 </plist>

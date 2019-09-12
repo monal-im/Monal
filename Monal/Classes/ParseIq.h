@@ -30,6 +30,7 @@
 @property (nonatomic, strong, readonly) NSString* queryNode;
 @property (nonatomic, strong, readonly) NSMutableSet* features;
 @property (nonatomic, strong, readonly) NSMutableArray* items;
+@property (nonatomic, strong, readonly) NSString* errorMessage;
 
 // vcard releated
 

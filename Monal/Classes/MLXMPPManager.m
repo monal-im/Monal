@@ -9,6 +9,8 @@
 #import "MLXMPPManager.h"
 #import "DataLayer.h"
 
+#import "MLMessageProcessor.h"
+#import "ParseMessage.h"
 
 #if TARGET_OS_IPHONE
 #import "MonalAppDelegate.h"
@@ -60,29 +62,29 @@ An array of Dics what have timers to make sure everything was sent
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"Sound"];
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"MessagePreview"];
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"Logging"];
-        
+
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"OfflineContact"];
         [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"SortContacts"];
-        
+
         [[NSUserDefaults standardUserDefaults] setObject:[[NSUUID UUID] UUIDString] forKey:@"DeviceUUID"];
-        
+
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"SetDefaults"];
-        
+
         [[NSUserDefaults standardUserDefaults] setBool:YES  forKey: @"ShowImages"];
         [[NSUserDefaults standardUserDefaults] setBool:YES  forKey: @"ChatBackgrounds"];
-        
+
         [[NSUserDefaults standardUserDefaults] synchronize];
     }
-    
+
     //on upgrade this one needs to be set to yes. Can be removed later.
     NSNumber *imagesTest= [[NSUserDefaults standardUserDefaults] objectForKey: @"ShowImages"];
-   
+
     if(!imagesTest)
     {
           [[NSUserDefaults standardUserDefaults] setBool:YES  forKey: @"ShowImages"];
           [[NSUserDefaults standardUserDefaults] synchronize];
     }
-    
+
     //upgrade
     NSNumber *background =   [[NSUserDefaults standardUserDefaults] objectForKey: @"ChatBackgrounds"];
     if(!background)
@@ -90,16 +92,16 @@ An array of Dics what have timers to make sure everything was sent
         [[NSUserDefaults standardUserDefaults] setBool:YES  forKey: @"ChatBackgrounds"];
         [[NSUserDefaults standardUserDefaults] synchronize];
     }
-    
+
     NSNumber *sounds =  [[NSUserDefaults standardUserDefaults] objectForKey: @"AlertSoundFile"];
     if(!sounds)
     {
         [[NSUserDefaults standardUserDefaults] setObject:@"alert2" forKey:@"AlertSoundFile"];
         [[NSUserDefaults standardUserDefaults] synchronize];
     }
- 
+
      NSNumber *priority =  [[NSUserDefaults standardUserDefaults] objectForKey: @"XMPPPriority"];
-    
+
     if(priority.integerValue==0) {
         [[NSUserDefaults standardUserDefaults] setObject:@"50" forKey:@"XMPPPriority"];
     }
@@ -121,21 +123,21 @@ An array of Dics what have timers to make sure everything was sent
     self=[super init];
 
     _connectedXMPP=[[NSMutableArray alloc] init];
-   
+
     _netQueue = dispatch_queue_create(kMonalNetQueue, DISPATCH_QUEUE_SERIAL);
-    
+
     [self defaultSettings];
-    
+
     //set up regular ping
     dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
     _pinger = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,
                                      q_background);
-    
+
     dispatch_source_set_timer(_pinger,
                               DISPATCH_TIME_NOW,
                               60ull * NSEC_PER_SEC *pingFreqencyMinutes
                               , 1ull * NSEC_PER_SEC);
-    
+
     dispatch_source_set_event_handler(_pinger, ^{
         for(NSDictionary* row in self->_connectedXMPP)
         {
@@ -146,21 +148,21 @@ An array of Dics what have timers to make sure everything was sent
             }
         }
     });
-    
+
     dispatch_source_set_cancel_handler(_pinger, ^{
         DDLogInfo(@"pinger canceled");
     });
-    
+
     dispatch_resume(_pinger);
 
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleSentMessage:) name:kMonalSentMessageNotice object:nil];
-    
+
      [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(autoJoinRoom:) name:kMLHasConnectedNotice object:nil];
-    
+
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sendOutbox:) name:kMLHasConnectedNotice object:nil];
-    
-        
+
+
     return self;
 }
 
@@ -173,7 +175,7 @@ An array of Dics what have timers to make sure everything was sent
 
 
 
-#pragma mark - client state 
+#pragma mark - client state
 
 -(void) setClientsInactive {
     for(NSDictionary* row in _connectedXMPP)
@@ -193,7 +195,7 @@ An array of Dics what have timers to make sure everything was sent
         if(xmppAccount.supportsClientState && xmppAccount.accountState>=kStateLoggedIn) {
             [xmppAccount setClientActive];
         }
-        
+
         if(xmppAccount.accountState>=kStateLoggedIn)
         {
             [xmppAccount sendPing];
@@ -219,7 +221,7 @@ An array of Dics what have timers to make sure everything was sent
 {
     xmpp* account = [self getConnectedAccountForID:accountNo];
     if(account.accountState>=kStateBound) return YES;
-    
+
     return NO;
 }
 
@@ -236,7 +238,7 @@ An array of Dics what have timers to make sure everything was sent
     for (NSDictionary* account in _connectedXMPP)
     {
         xmpp* xmppAccount=[account objectForKey:@"xmppAccount"];
-        
+
         if([xmppAccount.accountNo isEqualToString:accountNo] )
         {
             toReturn= xmppAccount;
@@ -261,7 +263,7 @@ An array of Dics what have timers to make sure everything was sent
                 }
             }
         });
-        
+
     }];
 }
 
@@ -273,62 +275,63 @@ An array of Dics what have timers to make sure everything was sent
          DDLogVerbose(@"existing account just reconnecitng.");
         existing.explicitLogout=NO;
         [existing reconnect:0];
-        
+
         return;
     }
     DDLogVerbose(@"connecting account %@",[account objectForKey:kAccountName] );
-    
+
     xmpp* xmppAccount=[[xmpp alloc] init];
     xmppAccount.explicitLogout=NO;
     xmppAccount.pushNode=self.pushNode;
     xmppAccount.pushSecret=self.pushSecret;
-    
+
     xmppAccount.username=[account objectForKey:kUsername];
     xmppAccount.domain=[account objectForKey:kDomain];
-    
+
     xmppAccount.resource=[account objectForKey:kResource];
-    
+
     xmppAccount.server=[account objectForKey:kServer];
     xmppAccount.port=[[account objectForKey:kPort] integerValue];
     xmppAccount.SSL=[[account objectForKey:kSSL] boolValue];
     xmppAccount.oldStyleSSL=[[account objectForKey:kOldSSL] boolValue];
     xmppAccount.selfSigned=[[account objectForKey:kSelfSigned] boolValue];
     xmppAccount.oAuth=[[account objectForKey:kOauth] boolValue];
+    xmppAccount.airDrop=[[account objectForKey:kAirdrop] boolValue];
     if(xmppAccount.oldStyleSSL && !xmppAccount.SSL ) xmppAccount.SSL=YES; //tehcnically a config error but  understandable
-    
+
     xmppAccount.accountNo=[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]];
 
     xmppAccount.password = [SAMKeychain passwordForService:@"Monal" account:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
-    
+
     if([xmppAccount.password length]==0 && !xmppAccount.oAuth) //&& ([tempPass length]==0)
     {
         // ask fro temp pass if not oauth
     }
      xmppAccount.contactsVC=self.contactVC;
    // xmppAccount.registration=YES;
-    
+
     [xmppAccount setupSignal];
-    
+
     //sepcifically look for the server since we might not be online or behind firewall
     Reachability* hostReach = [Reachability reachabilityWithHostName:xmppAccount.server ] ;
-    
-    
+
+
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reachabilityChanged) name:kReachabilityChangedNotification object:nil];
     [hostReach startNotifier];
-    
+
     if(xmppAccount && hostReach) {
         NSDictionary* accountDic= [[NSDictionary alloc] initWithObjects:@[xmppAccount, hostReach] forKeys:@[@"xmppAccount", @"hostReach"]];
         [_connectedXMPP addObject:accountDic];
          DDLogVerbose(@"reachability starting reconnect");
         [xmppAccount reconnect:0];
     }
-    
+
 }
 
 
 -(void) disconnectAccount:(NSString*) accountNo
 {
-    
+
     dispatch_async(dispatch_get_main_queue(), ^{
         int index=0;
         int pos=-1;
@@ -348,19 +351,19 @@ An array of Dics what have timers to make sure everything was sent
             }
             index++;
         }
-        
+
         if((pos>=0) && (pos<[self->_connectedXMPP count])) {
             [self->_connectedXMPP removeObjectAtIndex:pos];
             DDLogVerbose(@"removed account at pos  %d", pos);
         }
     });
-    
+
 }
 
 
 -(void)logoutAll
 {
-    
+
     [[DataLayer sharedInstance] accountListWithCompletion:^(NSArray *result) {
         self->_accountList=result;
         for (NSDictionary* account in self->_accountList)
@@ -368,11 +371,11 @@ An array of Dics what have timers to make sure everything was sent
             if([[account objectForKey:@"enabled"] boolValue]==YES)
             {
                 [self disconnectAccount:[NSString stringWithFormat:@"%@",[account objectForKey:@ "account_id"]]];
-                
+
             }
         }
     }];
- 
+
 }
 
 -(void)logoutAllKeepStreamWithCompletion:(void (^)(void))completion
@@ -383,7 +386,7 @@ An array of Dics what have timers to make sure everything was sent
         {
             if([[account objectForKey:@"enabled"] boolValue]==YES)
             {
-                
+
                 [_connectedXMPP enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                     NSDictionary* account=(NSDictionary *) obj;
                     xmpp* xmppAccount=[account objectForKey:@"xmppAccount"];
@@ -395,22 +398,22 @@ An array of Dics what have timers to make sure everything was sent
                     }
                     DDLogVerbose(@"done cleaning up account. ");
                 }];
-                
+
             }
         }
     }];
-    
+
 }
 
 
 -(void)connectIfNecessary
 {
-    
+
     [[DataLayer sharedInstance] accountListWithCompletion:^(NSArray *result) {
-        dispatch_async(_netQueue,
+        dispatch_async(self->_netQueue,
                        ^{
-                           _accountList=result;
-                           for (NSDictionary* account in _accountList)
+                           self->_accountList=result;
+                           for (NSDictionary* account in self->_accountList)
                            {
                                if([[account objectForKey:@"enabled"] boolValue]==YES)
                                {
@@ -422,16 +425,18 @@ An array of Dics what have timers to make sure everything was sent
                            }
                        });
     }];
-    
+
 }
 
 -(void) updatePassword:(NSString *) password forAccount:(NSString *) accountNo
 {
+#if TARGET_OS_IPHONE
     [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
+#endif
      [SAMKeychain setPassword:password forService:@"Monal" account:accountNo];
     xmpp* xmpp =[self getConnectedAccountForID:accountNo];
     xmpp.password=password;
-    
+
 }
 
 -(void) reachabilityChanged
@@ -446,34 +451,34 @@ An array of Dics what have timers to make sure everything was sent
             if(xmppAccount.accountState>=kStateBound)
             {
                 DDLogVerbose(@"There will be a ping soon to test. ");
-                
+
                 //dont explicitly disconnect since it might be that there was a network inteepution
                 //ie moving through cells.  schedule a ping for 1 min and see if that results in a TCP or XMPP error
-                
-                
+
+
                 //                dispatch_async(_netQueue,
                 //                               ^{
                 //                                  [xmppAccount disconnect];
                 //
                 //
                 //                               });
-                
-                
+
+
             }
         }
         else
         {
             DDLogVerbose(@"reachable");
             DDLogVerbose(@"pinging ");
-            
+
             //try to send a ping. if it fails, it will reconnect
             [xmppAccount sendPing];
-            
-            
-            
+
+
+
         }
     }
-    
+
 }
 
 
@@ -484,12 +489,12 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
     dispatch_async(_netQueue,
                    ^{
                        dispatch_source_t sendTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,self->_netQueue);
-                       
+
                        dispatch_source_set_timer(sendTimer,
                                                  dispatch_time(DISPATCH_TIME_NOW, sendMessageTimeoutSeconds*NSEC_PER_SEC),
                                                   DISPATCH_TIME_FOREVER,
                                                  5ull * NSEC_PER_SEC);
-                       
+
                        dispatch_source_set_event_handler(sendTimer, ^{
                            DDLogError(@"send message  timed out");
                            int counter=0;
@@ -505,22 +510,22 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
                                }
                                counter++;
                            }
-                           
+
                            if(removalCounter>=0) {
                                [self.timerList removeObjectAtIndex:removalCounter];
                            }
-                           
+
                            dispatch_source_cancel(sendTimer);
                        });
-                       
+
                        dispatch_source_set_cancel_handler(sendTimer, ^{
                            DDLogError(@"send message timer cancelled");
                        });
-                       
+
                        dispatch_resume(sendTimer);
                        NSDictionary *dic = @{kSendTimer:sendTimer,kMessageId:messageId};
                        [self.timerList addObject:dic];
-                       
+
                        BOOL success=NO;
                        xmpp* account=[self getConnectedAccountForID:accountNo];
                        if(account)
@@ -528,7 +533,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
                            success=YES;
                            [account sendMessage:message toContact:contact isMUC:isMUC isEncrypted:encrypted isUpload:isUpload andMessageId:messageId];
                        }
-                       
+
                        if(completion)
                            completion(success, messageId);
                    });
@@ -538,19 +543,19 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 #pragma  mark - HTTP upload
 
 -(void)httpUploadJpegData:(NSData*) fileData   toContact:(NSString*)contact onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(NSString *url,  NSError *error)) completion{
-    
+
     NSString *fileName = [NSString stringWithFormat:@"%@.jpg",[NSUUID UUID].UUIDString];
-    
+
     //get file type
     CFStringRef UTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (__bridge CFStringRef)@"jpg", NULL);
     NSString *mimeType = (__bridge NSString *)(UTTypeCopyPreferredTagWithClass (UTI, kUTTagClassMIMEType));
-    
+
     [self httpUploadData:fileData withFilename:fileName andType:mimeType toContact:contact onAccount:accountNo withCompletionHandler:completion];
-    
+
 }
 
 -(void)httpUploadFileURL:(NSURL*) fileURL  toContact:(NSString*)contact onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(NSString *url,  NSError *error)) completion{
-    
+
     //get file name
     NSString *fileName =  fileURL.pathComponents.lastObject;
 
@@ -560,9 +565,9 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 
     //get data
     NSData *fileData = [[NSData alloc] initWithContentsOfURL:fileURL];
-    
+
     [self httpUploadData:fileData withFilename:fileName andType:mimeType toContact:contact onAccount:accountNo withCompletionHandler:completion];
-    
+
 }
 
 
@@ -574,15 +579,15 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
         if(completion) completion(nil, error);
         return;
     }
-    
+
     xmpp* account=[self getConnectedAccountForID:accountNo];
     if(account)
     {
         NSDictionary *params =@{kData:data,kFileName:filename, kContentType:contentType, kContact:contact};
         [account requestHTTPSlotWithParams:params andCompletion:completion];
     }
-    
-    
+
+
 }
 
 
@@ -590,7 +595,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 
 -(void) getServiceDetailsForAccount:(NSInteger) row
 {
-    
+
     if(row < [_connectedXMPP count] && row>=0) {
     NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
     dispatch_async(_netQueue,
@@ -651,12 +656,12 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
         //if not MUC
         [account removeFromRoster:[contact objectForKey:@"buddy_name"]];
         //if MUC
-        
+
         //remove from DB
         [[DataLayer sharedInstance] removeBuddy:[contact objectForKey:@"buddy_name"] forAccount:[contact objectForKey:@"account_id"]];
-        
+
     }
-    
+
 }
 
 -(void) addContact:(NSDictionary*) contact
@@ -688,7 +693,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
         xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
         [account getConferenceRooms];
     }
-    
+
 }
 
 
@@ -701,14 +706,14 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
         return account.roomList;
     }
     else return  nil;
-    
+
 }
 
 -(void)  joinRoom:(NSString*) roomName  withNick:(NSString *)nick andPassword:(NSString*) password forAccounId:(NSInteger) accountId
 {
     xmpp* account= [self getConnectedAccountForID:[NSString stringWithFormat:@"%ld",accountId]];
     [account joinRoom:roomName withNick:nick andPassword:password];
-    
+
 }
 
 
@@ -735,7 +740,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
     NSDictionary *dic = notification.object;
 
     [[DataLayer sharedInstance] mucFavoritesForAccount:[dic objectForKey:@"AccountNo"] withCompletion:^(NSMutableArray *results) {
-        
+
         for(NSDictionary *row in results)
         {
             NSNumber *autoJoin =[row objectForKey:@"autojoin"] ;
@@ -743,7 +748,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
                 [self joinRoom:[row objectForKey:@"room"] withNick:[row objectForKey:@"nick"] andPassword:[row objectForKey:@""] forAccounId:[[row objectForKey:@"account_id"] integerValue]];
             }
         }
-        
+
     }];
 }
 
@@ -765,14 +770,14 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 {
     //find account
      xmpp* account =[self getConnectedAccountForID:[NSString stringWithFormat:@"%@",[userDic objectForKey:kAccountID]]];
-    
+
     if(accept) {
         [account acceptCall:userDic];
     }
     else  {
          [account declineCall:userDic];
     }
-    
+
 }
 
 
@@ -821,7 +826,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
     dispatch_async(dispatch_get_main_queue(), ^{
     MonalAppDelegate* appDelegate= (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
     [appDelegate updateUnread];
-    }); 
+    });
 #else
 #endif
 }
@@ -833,7 +838,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
     NSString *messageId = [info objectForKey:kMessageId];
     [[DataLayer sharedInstance] setMessageId:messageId delivered:YES];
     DDLogInfo(@"message %@ sent, removing timer",messageId);
-    
+
     int counter=0;
     int removalCounter=-1;
     for (NSDictionary * dic in self.timerList)
@@ -847,7 +852,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
         }
         counter++;
     }
-    
+
     if(removalCounter>=0) {
         [self.timerList removeObjectAtIndex:removalCounter];
     }
@@ -880,9 +885,9 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
             }
             pos++;
         }
-        
+
     }
-    
+
     [dirtySet removeObjectsAtIndexes:indexSet];
 }
 
@@ -893,10 +898,10 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 {
     self.pushNode=node;
     self.pushSecret=secret;
-    
+
     [[NSUserDefaults standardUserDefaults] setObject:node forKey:@"pushNode"];
     [[NSUserDefaults standardUserDefaults] setObject:secret forKey:@"pushSecret"];
-    
+
     for(NSDictionary  *row in _connectedXMPP)
     {
         xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
@@ -911,7 +916,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 -(void) sendOutbox: (NSNotification *) notification {
     NSDictionary *dic = notification.object;
     NSString *account= [dic objectForKey:@"AccountNo"];
-    
+
     [self sendOutboxForAccount:account];
 }
 
@@ -920,7 +925,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
     NSUserDefaults *groupDefaults= [[NSUserDefaults alloc] initWithSuiteName:@"group.monal"];
     NSMutableArray *outbox=[[groupDefaults objectForKey:@"outbox"] mutableCopy];
     NSMutableArray *outboxClean=[[groupDefaults objectForKey:@"outbox"] mutableCopy];
-    
+
     for (NSDictionary *row in outbox)
     {
         NSDictionary *accountDic = [row objectForKey:@"account"] ;
@@ -928,15 +933,15 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
         {
             NSString* msgid=[[NSUUID UUID] UUIDString];
             [[DataLayer sharedInstance] addMessageHistoryFrom:[NSString stringWithFormat:@"%@", [accountDic objectForKey:@"account_id"]] to:[row objectForKey:@"recipient"] forAccount:[accountDic objectForKey:@"account_id"] withMessage:[row objectForKey:@"url"]  actuallyFrom:[NSString stringWithFormat:@"%@", [accountDic objectForKey:@"account_id"]]  withId:msgid encrypted:NO withCompletion:^(BOOL success, NSString *messageType) {
-                
+
             }];
-            
+
             [self sendMessage:[row objectForKey:@"url"] toContact:[row objectForKey:@"recipient"] fromAccount:[NSString stringWithFormat:@"%@", [accountDic objectForKey:@"account_id"]]  isEncrypted:NO isMUC:NO  isUpload:NO messageId:msgid withCompletionHandler:^(BOOL success, NSString *messageId) {
-                
+
                 if(success) {
                     if(((NSString *)[row objectForKey:@"comment"]).length>0) {
                         [self sendMessage:[row objectForKey:@"comment"] toContact:[row objectForKey:@"recipient"]  fromAccount:[NSString stringWithFormat:@"%@", [accountDic objectForKey:@"account_id"]]  isEncrypted:NO isMUC:NO isUpload:YES messageId:[[NSUUID UUID] UUIDString] withCompletionHandler:^(BOOL success, NSString *messageId) {
-                            
+
                         }];
                     }
                     [outboxClean removeObject:row];
@@ -945,8 +950,8 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
             }];
         }
     }
-    
- 
+
+
 }
 
 -(void) sendMessageForConnectedAccounts
@@ -955,6 +960,85 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
     {
          xmpp* xmppAccount=[account objectForKey:@"xmppAccount"];
         [self sendOutboxForAccount:xmppAccount.accountNo];
+    }
+}
+
+
+#pragma mark - handling air drop
+-(void) parseMessageForData:(NSData *) data
+{
+    //parse message
+    ParseMessage *messageNode = [[ParseMessage alloc] initWithData:data];
+    NSArray *cleanParts= [messageNode.to componentsSeparatedByString:@"/"];
+    NSString *jid= cleanParts[0];
+
+    NSArray *parts =[jid componentsSeparatedByString:@"@"];
+    NSString* user =parts[0];
+
+    if(parts.count>1){
+        NSString *domain= parts[1];
+
+        [[DataLayer sharedInstance] accountForUser:user andDomain:domain withCompletion:^(NSString *accountNo) {
+            if(accountNo) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+
+                    MLSignalStore *monalSignalStore = [[MLSignalStore alloc] initWithAccountId:accountNo];
+
+                    //signal store
+                    SignalStorage *signalStorage = [[SignalStorage alloc] initWithSignalStore:monalSignalStore];
+                    //signal context
+                    SignalContext *signalContext= [[SignalContext alloc] initWithStorage:signalStorage];
+
+                    //process message
+                    MLMessageProcessor *messageProcessor = [[MLMessageProcessor alloc] initWithAccount:accountNo jid:jid signalContex:signalContext andSignalStore:monalSignalStore];
+                    messageProcessor.postPersistAction = ^(BOOL success, BOOL encrypted, BOOL showAlert,  NSString *body, NSString *newMessageType) {
+                        if(success)
+                        {
+                            [[DataLayer sharedInstance] addActiveBuddies:messageNode.from forAccount:accountNo withCompletion:nil];
+
+                            if(messageNode.from  ) {
+                                NSString* actuallyFrom= messageNode.actualFrom;
+                                if(!actuallyFrom) actuallyFrom=messageNode.from;
+
+                                NSString* messageText=messageNode.messageText;
+                                if(!messageText) messageText=@"";
+
+                                BOOL shouldRefresh = NO;
+                                if(messageNode.delayTimeStamp)  shouldRefresh =YES;
+
+                                NSArray *jidParts= [jid componentsSeparatedByString:@"/"];
+
+                                NSString *recipient;
+                                if([jidParts count]>1) {
+                                    recipient= jidParts[0];
+                                }
+
+                                NSDictionary* userDic=@{@"from":messageNode.from,
+                                                        @"actuallyfrom":actuallyFrom,
+                                                        @"messageText":body,
+                                                        @"to":messageNode.to?messageNode.to:recipient,
+                                                        @"messageid":messageNode.idval?messageNode.idval:@"",
+                                                        @"accountNo":accountNo,
+                                                        @"showAlert":[NSNumber numberWithBool:showAlert],
+                                                        @"shouldRefresh":[NSNumber numberWithBool:shouldRefresh],
+                                                        @"messageType":newMessageType?newMessageType:kMessageTypeText,
+                                                        @"muc_subject":messageNode.subject?messageNode.subject:@"",
+                                                        @"encrypted":[NSNumber numberWithBool:encrypted],
+                                                        @"delayTimeStamp":messageNode.delayTimeStamp?messageNode.delayTimeStamp:@""
+                                                        };
+
+                                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:userDic];
+                            }
+                        }
+                        else {
+                            DDLogError(@"error adding message from data");
+                        }
+                    };
+                    [messageProcessor processMessage:messageNode];
+
+                });
+            }
+        }];
     }
 }
 

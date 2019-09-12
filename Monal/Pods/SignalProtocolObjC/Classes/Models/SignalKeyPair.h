@@ -6,7 +6,7 @@
 //
 //
 
-#import <Foundation/Foundation.h>
+@import Foundation;
 
 NS_ASSUME_NONNULL_BEGIN
 @interface SignalKeyPair : NSObject <NSSecureCoding>
@@ -14,8 +14,9 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong, readonly) NSData *publicKey;
 @property (nonatomic, strong, readonly) NSData *privateKey;
 
-- (instancetype) initWithPublicKey:(NSData*)publicKey
-                        privateKey:(NSData*)privateKey;
+- (nullable instancetype) initWithPublicKey:(NSData*)publicKey
+                                 privateKey:(NSData*)privateKey
+                                      error:(NSError**)error;
 
 @end
 NS_ASSUME_NONNULL_END

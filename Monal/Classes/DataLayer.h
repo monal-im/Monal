@@ -13,12 +13,11 @@
 #define kMonalDBQueue "im.monal.dbQueue"
 
 @interface DataLayer : NSObject {
-
 	NSString* dbPath;
 	sqlite3* database;
-    NSLock* dbversionCheck;
-    
-    dispatch_queue_t _dbQueue ;
+  NSLock* dbversionCheck;
+
+  dispatch_queue_t _dbQueue ;
 }
 
 
@@ -34,6 +33,7 @@ extern NSString *const kSSL;
 extern NSString *const kOldSSL;
 extern NSString *const kSelfSigned;
 extern NSString *const kOauth;
+extern NSString *const kAirdrop;
 
 extern NSString *const kUsername;
 extern NSString *const kFullName;
@@ -70,7 +70,7 @@ extern NSString *const kMessageTypeUrl;
 // Buddy Commands
 -(void) addContact:(NSString*) contact  forAccount:(NSString*) accountNo fullname:(NSString*)fullName nickname:(NSString*) nickName withCompletion: (void (^)(BOOL))completion;
 -(void) removeBuddy:(NSString*) buddy forAccount:(NSString*) accountNo;
--(BOOL) clearBuddies:(NSString*) accountNo; 
+-(BOOL) clearBuddies:(NSString*) accountNo;
 -(void) contactForUsername:(NSString*) username forAccount: (NSString*) accountNo withCompletion: (void (^)(NSArray *))completion;
 
 /**
@@ -113,7 +113,7 @@ extern NSString *const kMessageTypeUrl;
 #pragma mark Contact info
 
 -(void) setFullName:(NSString*) fullName forContact:(NSString*) contact andAccount:(NSString*) accountNo;
--(NSString*) fullName:(NSString*) buddy forAccount:(NSString*) accountNo; 
+-(NSString*) fullName:(NSString*) buddy forAccount:(NSString*) accountNo;
 //-(BOOL) setFileName:(NSString*) fileName forBuddy:(NSString*) buddy andAccount:(NSString*) accountNo;
 
 -(void) setContactHash:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
@@ -154,14 +154,15 @@ extern NSString *const kMessageTypeUrl;
 -(NSArray*) enabledAccountList;
 -(BOOL) isAccountEnabled:(NSString*) accountNo;
 -(void) doesAccountExistUser:(NSString*) user andDomain:(NSString *) domain withCompletion:(void (^)(BOOL result))completion;
+-(void) accountForUser:(NSString*) user andDomain:(NSString *) domain withCompletion:(void (^)(NSString* result))completion;
 
--(NSArray*) accountVals:(NSString*) accountNo; 
+-(NSArray*) accountVals:(NSString*) accountNo;
 
 -(void) updateAccounWithDictionary:(NSDictionary *) dictionary andCompletion:(void (^)(BOOL))completion;
 -(void) addAccountWithDictionary:(NSDictionary *) dictionary andCompletion: (void (^)(BOOL))completion;
 
 
--(BOOL) removeAccount:(NSString*) accountNo; 
+-(BOOL) removeAccount:(NSString*) accountNo;
 
 /**
  disables account
@@ -170,14 +171,14 @@ extern NSString *const kMessageTypeUrl;
 
 #pragma mark - message Commands
 /**
- returns messages with the provided local id number 
+ returns messages with the provided local id number
  */
 -(NSArray *) messageForHistoryID:(NSInteger) historyID;
 
 /*
  adds a specified message to the database
  */
--(void) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom delivered:(BOOL) delivered unread:(BOOL) unread serverMessageId:(NSString *) messageid messageType:(NSString *) messageType andOverrideDate:(NSDate *) messageDate encrypted:(BOOL) encrypted  withCompletion: (void (^)(BOOL, NSString *))completion;
+-(void) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom delivered:(BOOL) delivered unread:(BOOL) unread messageId:(NSString *) messageid serverMessageId:(NSString *) stanzaid messageType:(NSString *) messageType andOverrideDate:(NSDate *) messageDate encrypted:(BOOL) encrypted  withCompletion: (void (^)(BOOL, NSString*))completion;
 
 /**
   checks to see if there is a message with the provided messageid. will return YES if the messageid exists for this account and contact
@@ -216,11 +217,18 @@ extern NSString *const kMessageTypeUrl;
 -(NSDate*) synchPointForContact:(NSString*) contact andAccount:(NSString*) accountNo;
 -(void) setSynchPoint:(NSDate *) synchPoint ForContact:(NSString*) contact andAccount:(NSString*) accountNo;
 
+
 /**
  retrieves the date of the the last message to or from this contact
  */
 -(void) lastMessageDateForContact:(NSString*) contact andAccount:(NSString*) accountNo withCompletion: (void (^)(NSDate *))completion;;
 
+/**
+ retrieves the stanzaid of the last message
+ */
+-(void) lastMessageSanzaForAccount:(NSString*) accountNo withCompletion: (void (^)(NSString *))completion;;
+
+-(void) lastMessageTimeStampForAccount:(NSString*) accountNo withCompletion: (void (^)(NSString *))completion;
 
 -(BOOL) messageHistoryClean:(NSString*) buddy :(NSString*) accountNo;
 -(BOOL) messageHistoryCleanAll;

@@ -1,1 +1,1 @@
-../../../../OpenSSL-Universal/include-macos/openssl/ui.h
+../../../../OpenSSL-Universal/Frameworks/macos/OpenSSL.framework/Versions/A/Headers/ui.h

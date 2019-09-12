@@ -13,23 +13,30 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
 
 @implementation XMPPParser
 
+- (id) initWithData:(NSData *) data
+{
+    self=[super init];
+    [self parseData:data];
+    return self;
+}
+
 - (id) initWithDictionary:(NSDictionary*) dictionary
 {
     self=[super init];
-    
     NSData* stanzaData= [[dictionary objectForKey:@"stanzaString"] dataUsingEncoding:NSUTF8StringEncoding];
-	
-    //xml parsing
-	NSXMLParser* parser = [[NSXMLParser alloc] initWithData:stanzaData];
-	[parser setShouldProcessNamespaces:NO];
+    [self parseData:stanzaData];
+    return  self;
+}
+
+-(void) parseData:(NSData *) data
+{
+    NSXMLParser* parser = [[NSXMLParser alloc] initWithData:data];
+    [parser setShouldProcessNamespaces:NO];
     [parser setShouldReportNamespacePrefixes:NO];
     [parser setShouldResolveExternalEntities:NO];
-	[parser setDelegate:self];
-	
-	[parser parse];
+    [parser setDelegate:self];
     
-    return  self;
-    
+    [parser parse];
 }
  
 
@@ -46,15 +53,19 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     
     if([attributeDict objectForKey:@"from"])
     {
-    _user =[[(NSString*)[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
-    if([[(NSString*)[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/" ] count]>1)
-        _resource=[[(NSString*)[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/" ] objectAtIndex:1];
-    _from =[attributeDict objectForKey:@"from"] ;
-    _from=[_from lowercaseString];
+        _from =[attributeDict objectForKey:@"from"];
+        NSArray *parts=[_from componentsSeparatedByString:@"/"];
+        _user =[parts objectAtIndex:0];
+        
+        if([parts count]>1) {
+            _resource=[parts objectAtIndex:1];
+        }
+        
+        _from = [_from lowercaseString]; // intedned to not break code that expects lowercase
     }
     
     _idval =[attributeDict objectForKey:@"id"] ;
-   
+    
     if([attributeDict objectForKey:@"to"])
     {
         _to =[[(NSString*)[attributeDict objectForKey:@"to"] componentsSeparatedByString:@"/" ] objectAtIndex:0];

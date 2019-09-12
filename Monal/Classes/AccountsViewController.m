@@ -73,7 +73,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [super viewWillAppear:animated];
     [[DataLayer sharedInstance] accountListWithCompletion:^(NSArray *result) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            _accountList=result;
+            self->_accountList=result;
             [self.accountsTable reloadData];
         });
         

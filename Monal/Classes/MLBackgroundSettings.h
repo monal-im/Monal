@@ -7,11 +7,11 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "MWPhotoBrowser.h"
+#import "IDMPhotoBrowser.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MLBackgroundSettings : UITableViewController <MWPhotoBrowserDelegate, UIImagePickerControllerDelegate>
+@interface MLBackgroundSettings : UITableViewController <IDMPhotoBrowserDelegate, UIImagePickerControllerDelegate>
 
 @end
 

@@ -12,6 +12,7 @@
 #import "SignalError.h"
 #import "protocol.h"
 
+
 @implementation SignalPreKeyMessage
 
 - (void) dealloc {

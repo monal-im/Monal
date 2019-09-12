@@ -34,6 +34,13 @@ typedef NS_ENUM (NSInteger, xmppState) {
     kStateBound //is operating normally
 };
 
+typedef NS_ENUM (NSInteger, xmppRegistrationState) {
+    kStateRequestingForm =-1,
+    kStateSubmittingForm,
+    kStateFormResponseReceived,
+    kStateRegistered
+};
+
 FOUNDATION_EXPORT NSString *const kFileName;
 FOUNDATION_EXPORT NSString *const kContentType;
 FOUNDATION_EXPORT NSString *const kData;
@@ -49,16 +56,16 @@ typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFie
     NSOutputStream *_oStream;
     NSMutableString* _inputBuffer;
     NSMutableArray* _outputQueue;
-    
+
     NSArray* _stanzaTypes;
-    
+
     BOOL _startTLSComplete;
     BOOL _streamHasSpace;
-    
+
     //does not reset at disconnect
     BOOL _loggedInOnce;
     BOOL _hasRequestedServerInfo;
-    
+
     BOOL _brokenServerSSL;
 }
 
@@ -81,7 +88,18 @@ typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFie
 @property (nonatomic,assign) BOOL oldStyleSSL;
 @property (nonatomic,assign) BOOL selfSigned;
 @property (nonatomic,assign) BOOL oAuth;
+
+//reg
+@property (nonatomic,assign) BOOL registrationSubmission;
 @property (nonatomic,assign) BOOL registration;
+@property (nonatomic,assign) xmppRegistrationState registrationState;
+
+@property (nonatomic,strong) NSString *regUser;
+@property (nonatomic,strong) NSString *regPass;
+@property (nonatomic,strong) NSString *regCode;
+@property (nonatomic,strong) NSDictionary *regHidden;
+@property (nonatomic, strong) xmppDataCompletion regFormCompletion;
+
 
 @property (nonatomic,strong) jingleCall* call;
 
@@ -127,7 +145,7 @@ typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFie
 @property (nonatomic, readonly) BOOL usingCarbons2;
 @property (nonatomic, readonly) BOOL supportsRosterVersion;
 
-@property (nonatomic, strong) xmppDataCompletion regFormCompletion;
+@property (nonatomic,assign) BOOL airDrop;
 
 //calculated
 @property (nonatomic,strong, readonly) NSString* versionHash;
@@ -208,7 +226,7 @@ extern NSString *const kXMPPPresence;
 -(void) reconnect;
 
 /**
- reconnect called with a specified wait. if never logged in then wait is 0. 
+ reconnect called with a specified wait. if never logged in then wait is 0.
  */
 -(void) reconnect:(NSInteger) scheduleWait;
 
@@ -294,6 +312,9 @@ Decline a call request
 */
  -(void) requestHTTPSlotWithParams:(NSDictionary *)params andCompletion:(void(^)(NSString *url,  NSError *error)) completion;
 
+
+-(void) setMAMQueryMostRecentForJid:(NSString *)jid;
+
 /*
  query message archive.
  */
@@ -319,14 +340,14 @@ Decline a call request
 #endif
 
 /**
- An intentional disconnect to trigger APNS. does not close the stream. 
+ An intentional disconnect to trigger APNS. does not close the stream.
  */
 -(void) disconnectToResumeWithCompletion:(void (^)(void))completion;
 
--(void) setupSignal; 
+-(void) setupSignal;
 
 
-#pragma mark - account management 
+#pragma mark - account management
 
 -(void) changePassword:(NSString *) newPass withCompletion:(xmppCompletion) completion;
 

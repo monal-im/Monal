@@ -29,7 +29,7 @@
         NSData *idKeyPrivate = [row objectForKey:@"identityPrivateKey"];
         
         NSError *error;
-        self.identityKeyPair=[[SignalIdentityKeyPair alloc] initWithPublicKey:idKeyPub privateKey:idKeyPrivate];
+        self.identityKeyPair=[[SignalIdentityKeyPair alloc] initWithPublicKey:idKeyPub privateKey:idKeyPrivate error:nil];
         if(error)
         {
             NSLog(@"prekey error %@", error);
@@ -146,6 +146,8 @@
 
 - (NSArray<NSNumber*>*) knownDevicesForAddressName:(NSString*)addressName
 {
+    if(!addressName) return nil;
+    
     NSArray *rows= [[DataLayer sharedInstance] executeReader:@"select distinct contactDeviceId from signalContactIdentity where account_id=? and contactName=? " andArguments:@[self.accountId, addressName]];
     
     NSMutableArray *devices = [[NSMutableArray alloc] initWithCapacity:rows.count];

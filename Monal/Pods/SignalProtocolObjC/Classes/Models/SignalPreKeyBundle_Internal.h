@@ -8,7 +8,6 @@
 
 #import "SignalPreKeyBundle.h"
 #include "signal_protocol.h"
-
 @interface SignalPreKeyBundle ()
 
 @property (nonatomic, readonly) session_pre_key_bundle *bundle;

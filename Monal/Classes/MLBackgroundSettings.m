@@ -10,6 +10,7 @@
 #import "MLSettingCell.h"
 #import "MLImageManager.h"
 @import CoreServices;
+@import AVFoundation;
 
 @interface MLBackgroundSettings ()
 @property (nonatomic, strong) NSMutableArray *photos;
@@ -136,7 +137,7 @@
     // Add photos
     [self.imageList enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         NSString *name =(NSString *) obj;
-        MWPhoto *photo= [MWPhoto photoWithImage:[UIImage imageNamed:name]];
+        IDMPhoto *photo= [IDMPhoto photoWithImage:[UIImage imageNamed:name]];
         photo.caption = [name stringByReplacingOccurrencesOfString:@"_" withString:@" "];
         [self.photos addObject:photo];
         
@@ -148,17 +149,9 @@
  
     // Create browser (must be done each time photo browser is
     // displayed. Photo browser objects cannot be re-used)
-    MWPhotoBrowser *browser = [[MWPhotoBrowser alloc] initWithDelegate:self];
-    
-    // Set options
-    browser.displayActionButton = NO; // Show action button to allow sharing, copying, etc (defaults to YES)
-    browser.displayNavArrows = NO; // Whether to display left and right nav arrows on toolbar (defaults to NO)
-    browser.displaySelectionButtons = YES; // Whether selection buttons are shown on each image (defaults to NO)
-    browser.zoomPhotosToFill = YES; // Images that almost fill the screen will be initially zoomed to fill (defaults to YES)
-    browser.alwaysShowControls = YES; // Allows to control whether the bars and controls are always visible or whether they fade away to show the photo full (defaults to NO)
-    browser.enableGrid = YES; // Whether to allow the viewing of all the photo thumbnails on a grid (defaults to YES)
-    browser.startOnGrid = YES; // Whether to start on the grid of thumbnails instead of the first photo (defaults to NO)
-    browser.autoPlayOnAppear = NO; // Auto-play first video
+    IDMPhotoBrowser *browser = [[IDMPhotoBrowser alloc] initWithPhotos:self.photos];
+    browser.navigationItem.title=@"Select a Background";
+    browser.delegate=self;
     
     UINavigationController *nav =[[UINavigationController alloc] initWithRootViewController:browser];
 
@@ -169,18 +162,18 @@
 
 #pragma mark - photo browser delegate
 
-- (NSUInteger)numberOfPhotosInPhotoBrowser:(MWPhotoBrowser *)photoBrowser {
+- (NSUInteger)numberOfPhotosInPhotoBrowser:(IDMPhotoBrowser *)photoBrowser {
     return self.photos.count;
 }
 
-- (id <MWPhoto>)photoBrowser:(MWPhotoBrowser *)photoBrowser photoAtIndex:(NSUInteger)index {
+- (id <IDMPhoto>)photoBrowser:(IDMPhotoBrowser *)photoBrowser photoAtIndex:(NSUInteger)index {
     if (index < self.photos.count) {
         return [self.photos objectAtIndex:index];
     }
     return nil;
 }
 
-- (id <MWPhoto>)photoBrowser:(MWPhotoBrowser *)photoBrowser thumbPhotoAtIndex:(NSUInteger)index;
+- (id <IDMPhoto>)photoBrowser:(IDMPhotoBrowser *)photoBrowser thumbPhotoAtIndex:(NSUInteger)index;
 {
     if (index < self.photos.count) {
         return [self.photos objectAtIndex:index];
@@ -188,16 +181,10 @@
     return nil;
 }
 
-- (BOOL)photoBrowser:(MWPhotoBrowser *)photoBrowser isPhotoSelectedAtIndex:(NSUInteger)index {
-    return index==self.selectedIndex?YES:NO;
-}
-
-- (void)photoBrowser:(MWPhotoBrowser *)photoBrowser photoAtIndex:(NSUInteger)index selectedChanged:(BOOL)selected {
-    self.selectedIndex=index;
+- (void)photoBrowser:(IDMPhotoBrowser *)photoBrowser didDismissAtPageIndex:(NSUInteger)index
+{
     [[NSUserDefaults standardUserDefaults] setObject:[self.imageList objectAtIndex:index] forKey:@"BackgroundImage"];
-    [photoBrowser reloadData];
 }
-
 
 #pragma mark - image picker delegate
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<NSString *,id> *)info

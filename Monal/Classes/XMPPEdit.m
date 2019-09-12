@@ -40,6 +40,8 @@ NSString *const kGtalk = @"Gtalk";
 @property (nonatomic, weak) UITextField *currentTextField;
 @property (nonatomic, strong) NSURL *oAuthURL;
 
+@property (nonatomic, strong) NSDictionary *initialSettings;
+
 
 @end
 
@@ -92,7 +94,8 @@ NSString *const kGtalk = @"Gtalk";
 
         }
         NSDictionary* settings=[[_db accountVals:_accountno] objectAtIndex:0]; //only one row
-
+        self.initialSettings=settings;
+        
         //allow blank domains.. dont show @ if so
         if([[settings objectForKey:@"domain"] length]>0) {
             self.jid=[NSString stringWithFormat:@"%@@%@",[settings objectForKey:@"username"],[settings objectForKey:@"domain"]];
@@ -315,6 +318,7 @@ NSString *const kGtalk = @"Gtalk";
                                     {
                                         [[MLXMPPManager sharedInstance] disconnectAccount:self.accountno];
                                     }
+                                    
                                 }
                             }];
                         }
@@ -348,6 +352,16 @@ NSString *const kGtalk = @"Gtalk";
             {
                 [[MLXMPPManager sharedInstance] disconnectAccount:self.accountno];
             }
+            
+            if(self.airDrop != [[self.initialSettings objectForKey:kAirdrop] boolValue])
+            {
+                if(self.airDrop){
+                    [[MLXMPPManager sharedInstance] disconnectAccount:self.accountno];
+                } else {
+                     [[MLXMPPManager sharedInstance] connectAccount:self.accountno];
+                }
+            }
+            
             [self showSuccessHUD];
         }];
 

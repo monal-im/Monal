@@ -408,29 +408,35 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     DDLogVerbose(@"Sending message");
     NSString *newMessageID =messageID?messageID:[[NSUUID UUID] UUIDString];
     //dont readd it, use the exisitng
-    xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
-    if(xmppAccount.airDrop)
+    NSDictionary* settings=[[[DataLayer sharedInstance] accountVals:_accountNo] objectAtIndex:0];
+    
+    if([[settings objectForKey:kAirdrop] boolValue])
     {
         DDLogInfo(@"Sending Via share sheet");
         [self sendWithShareSheet];
-
-    } else  {
-    if(!messageID) {
-        NSString *contactNameCopy =_contactName; //prevent retail cycle
-        NSString *accountNoCopy = _accountNo;
-        BOOL isMucCopy = _isMUC;
-        BOOL encryptChatCopy = self.encryptChat;
-
-
+        
         [self addMessageto:_contactName withMessage:messageText andId:newMessageID withCompletion:^(BOOL success) {
-            [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:contactNameCopy fromAccount:accountNoCopy isEncrypted:encryptChatCopy isMUC:isMucCopy isUpload:NO messageId:newMessageID
-                                  withCompletionHandler:nil];
+            
         }];
-    }
-    else  {
-        [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:_contactName fromAccount:_accountNo isEncrypted:self.encryptChat isMUC:_isMUC isUpload:NO messageId:newMessageID
-                              withCompletionHandler:nil];
-    }
+        
+    } else  {
+        
+        if(!messageID) {
+            NSString *contactNameCopy =_contactName; //prevent retail cycle
+            NSString *accountNoCopy = _accountNo;
+            BOOL isMucCopy = _isMUC;
+            BOOL encryptChatCopy = self.encryptChat;
+            
+            
+            [self addMessageto:_contactName withMessage:messageText andId:newMessageID withCompletion:^(BOOL success) {
+                [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:contactNameCopy fromAccount:accountNoCopy isEncrypted:encryptChatCopy isMUC:isMucCopy isUpload:NO messageId:newMessageID
+                                      withCompletionHandler:nil];
+            }];
+        }
+        else  {
+            [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:_contactName fromAccount:_accountNo isEncrypted:self.encryptChat isMUC:_isMUC isUpload:NO messageId:newMessageID
+                                  withCompletionHandler:nil];
+        }
     }
 }
 

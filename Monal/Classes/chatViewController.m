@@ -753,7 +753,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                                if([[notification.userInfo objectForKey:@"to"] isEqualToString:_contactName])
                                {
                                    NSString *timeString;
-                                   if(![notification.userInfo objectForKey:@"delayTimeStamp"]) {
+                                   if([[notification.userInfo objectForKey:@"delayTimeStamp"] length]==0) {
                                        timeString=[self currentGMTTime];
                                    }
                                    else  {

@@ -189,7 +189,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
         if(xmppAccount.accountState<kStateLoggedIn)
         {
-            if(xmppAccount.airDrop) {
+            if(!xmppAccount.airDrop) {
                 self.sendButton.enabled=NO;
             }
             

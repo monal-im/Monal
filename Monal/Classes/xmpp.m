@@ -331,15 +331,19 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 
 }
 
--(void) connectionTask
-{
-
+-(void) updateFullUser {
     if([_domain length]>0) {
         _fulluser=[NSString stringWithFormat:@"%@@%@", _username, _domain];
     }
     else {
         _fulluser=_username;
     }
+}
+
+-(void) connectionTask
+{
+
+    [self updateFullUser];
 
     if(self.oAuth) {
 
@@ -404,6 +408,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 -(void) connect
 {
     if(self.airDrop){
+         [self updateFullUser];
         DDLogInfo(@"using airdrop. No XMPP connection.");
      return;
     }

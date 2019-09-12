@@ -682,8 +682,15 @@ static DataLayer *sharedInstance=nil;
 
 -(void) accountForUser:(NSString *) user andDomain:(NSString *) domain withCompletion:(void (^)(NSString *result))completion
 {
+    if(!user && !domain) return;
+    NSString *cleanUser =user;
+    NSString *cleanDomain = domain;
+    
+    if(!cleanDomain) cleanDomain=@"";
+    if(!cleanUser) cleanUser=@"";
+    
     NSString *query=[NSString stringWithFormat:@"select account_id from account where domain=? and username=?"];
-    [self executeReader:query andArguments:@[domain,user] withCompletion:^(NSMutableArray * result) {
+    [self executeReader:query andArguments:@[cleanDomain,cleanUser] withCompletion:^(NSMutableArray * result) {
         NSNumber *account =[result[0] objectForKey:@"account_id"];
         if(completion) completion([NSString stringWithFormat:@"%@",account]);
     }];

@@ -117,7 +117,7 @@ NSString *const kGtalk = @"Gtalk";
 
         self.oldStyleSSL=[[settings objectForKey:@"oldstyleSSL"] boolValue];
         self.selfSignedSSL=[[settings objectForKey:@"selfsigned"] boolValue];
-        self.airDrop = [[settings objectForKey:@"airdrop"] boolValue];
+        self.airDrop = [[settings objectForKey:kAirdrop] boolValue];
 
         if([[settings objectForKey:@"domain"] isEqualToString:@"gmail.com"])
         {
@@ -848,10 +848,10 @@ NSString *const kGtalk = @"Gtalk";
         case 5: {
             if(toggle.on)
             {
-                self.airDrop=NO;
+                self.airDrop=YES;
             }
             else {
-                self.airDrop=YES;
+                self.airDrop=NO;
             }
 
             break;

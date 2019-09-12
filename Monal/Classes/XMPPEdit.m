@@ -117,7 +117,7 @@ NSString *const kGtalk = @"Gtalk";
 
         self.oldStyleSSL=[[settings objectForKey:@"oldstyleSSL"] boolValue];
         self.selfSignedSSL=[[settings objectForKey:@"selfsigned"] boolValue];
-        self.airDrop = [[settings objectForKey:kAirdrop] boolValue];
+        self.airDrop = [[settings objectForKey:@"airdrop"] boolValue];
 
         if([[settings objectForKey:@"domain"] isEqualToString:@"gmail.com"])
         {
@@ -562,7 +562,7 @@ NSString *const kGtalk = @"Gtalk";
                 thecell.cellLabel.text=@"Use AirDrop";
                 thecell.textInputField.hidden=YES;
                 thecell.toggleSwitch.tag=5;
-                thecell.toggleSwitch.on=!self.airDrop;
+                thecell.toggleSwitch.on=self.airDrop;
                 break;
             }
 

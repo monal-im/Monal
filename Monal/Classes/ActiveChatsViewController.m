@@ -335,7 +335,12 @@
 
 - (UIColor *)backgroundColorForEmptyDataSet:(UIScrollView *)scrollView
 {
-    return [UIColor colorWithRed:239/255.0 green:238/255.0 blue:233/255.0 alpha:1];
+    if (@available(iOS 11.0, *)) {
+        return [UIColor colorNamed:@"chats"];
+    } else {
+       return [UIColor colorWithRed:239/255.0 green:238/255.0 blue:233/255.0 alpha:1];
+    }
+    
 }
 
 - (BOOL)emptyDataSetShouldDisplay:(UIScrollView *)scrollView

@@ -1171,7 +1171,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 - (UIColor *)backgroundColorForEmptyDataSet:(UIScrollView *)scrollView
 {
-    return [UIColor colorWithRed:228/255.0 green:222/255.0 blue:204/255.0 alpha:1];
+    if (@available(iOS 11.0, *)) {
+        return [UIColor colorNamed:@"contacts"];
+    } else {
+        return [UIColor colorWithRed:228/255.0 green:222/255.0 blue:204/255.0 alpha:1];
+    }
 }
 
 - (BOOL)emptyDataSetShouldDisplay:(UIScrollView *)scrollView

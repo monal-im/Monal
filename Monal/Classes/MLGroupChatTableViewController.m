@@ -207,7 +207,11 @@
 
 - (UIColor *)backgroundColorForEmptyDataSet:(UIScrollView *)scrollView
 {
+    if (@available(iOS 11.0, *)) {
+          return [UIColor colorNamed:@"groups"];
+      } else {
     return  [UIColor colorWithRed:255/255.0 green:250/255.0 blue:226/255.0 alpha:1];
+      }
 }
 
 - (BOOL)emptyDataSetShouldDisplay:(UIScrollView *)scrollView

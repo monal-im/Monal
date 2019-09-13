@@ -575,7 +575,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     if(!self.uploadHUD) {
         self.uploadHUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
         self.uploadHUD.removeFromSuperViewOnHide=YES;
-        self.uploadHUD.label.text =@"Uplaoding";
+        self.uploadHUD.label.text =@"Uploading";
         self.uploadHUD.detailsLabel.text =@"Uploading file to server";
 
     }

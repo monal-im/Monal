@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14868" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="6sv-dL-UsN">
-    <device id="retina4_0" orientation="portrait" appearance="light"/>
+    <device id="retina4_0" orientation="portrait" appearance="dark"/>
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14824"/>
@@ -169,6 +169,7 @@
                                         </connections>
                                     </view>
                                 </subviews>
+                                <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
                                 <constraints>
                                     <constraint firstAttribute="bottom" secondItem="9KO-5L-PvL" secondAttribute="bottom" id="G8j-bI-9je"/>
                                     <constraint firstItem="9KO-5L-PvL" firstAttribute="leading" secondItem="uEV-8J-3dB" secondAttribute="leading" id="NJZ-NQ-Ydq"/>
@@ -177,7 +178,7 @@
                                 </constraints>
                             </scrollView>
                         </subviews>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="D5I-O1-Ds7" firstAttribute="bottom" secondItem="uEV-8J-3dB" secondAttribute="bottom" id="RXk-DS-AXM"/>
                             <constraint firstItem="uEV-8J-3dB" firstAttribute="top" secondItem="D5I-O1-Ds7" secondAttribute="top" id="Rhf-cV-Ndy"/>
@@ -396,7 +397,7 @@
                                 </constraints>
                             </scrollView>
                         </subviews>
-                        <color key="backgroundColor" red="0.96854275465011597" green="0.96868163347244263" blue="0.96851247549057007" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
                         <gestureRecognizers/>
                         <constraints>
                             <constraint firstItem="nuU-XP-Twl" firstAttribute="bottom" secondItem="tT2-oH-OMx" secondAttribute="bottom" id="8V6-bt-Rjo"/>

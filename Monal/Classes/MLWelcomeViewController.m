@@ -34,7 +34,11 @@
     page1.title = @"Welcome to Monal";
     page1.titleColor=[UIColor darkGrayColor];
     page1.desc = @"Chat for free with your friends and family!";
-    page1.descColor=[UIColor blackColor];
+    if (@available(iOS 13.0, *)) {
+        page1.descColor=[UIColor labelColor];
+    } else {
+       page1.descColor=[UIColor blackColor];
+    }
     page1.titleIconView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"PeterRabbit7"]];
     page1.titleIconPositionY=100.f;
     page1.titlePositionY = self.view.bounds.size.height/2 - 30;
@@ -45,7 +49,11 @@
     page2.titleColor=[UIColor darkGrayColor];
     page2.desc = @"Use your existing account or make a new one on the many servers around the world";
     page2.titleIconView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"PeterRabbit8"]];
-    page2.descColor=[UIColor blackColor];
+    if (@available(iOS 13.0, *)) {
+        page2.descColor=[UIColor labelColor];
+    } else {
+       page2.descColor=[UIColor blackColor];
+    }
     page2.titleIconPositionY=100.f;
     page2.titlePositionY = self.view.bounds.size.height/2 - 30;
     page2.descPositionY = self.view.bounds.size.height/2 - 70;
@@ -54,7 +62,11 @@
     page3.title = @"Escape The Garden";
     page3.titleColor=[UIColor darkGrayColor];
     page3.desc = @"You are not trapped in a garden. Talk to anyone else without anyone tracking you.";
-    page3.descColor=[UIColor blackColor];
+    if (@available(iOS 13.0, *)) {
+        page3.descColor=[UIColor labelColor];
+    } else {
+        page3.descColor=[UIColor blackColor];
+    }
     page3.titleIconView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"PeterRabbit23"]];
     page3.titleIconPositionY=100.f;
     page3.titlePositionY = self.view.bounds.size.height/2 - 30;
@@ -64,7 +76,11 @@
     page4.title = @"Spread The Word";
     page4.titleColor=[UIColor darkGrayColor];
     page4.desc = @"If you like Monal, please let others know and leave a review";
-    page4.descColor=[UIColor blackColor];
+    if (@available(iOS 13.0, *)) {
+        page4.descColor=[UIColor labelColor];
+    } else {
+        // Fallback on earlier versions
+    }
     page4.titleIconView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"PeterRabbit24"]];
     page4.titleIconPositionY=100.f;
     page4.titlePositionY = self.view.bounds.size.height/2 - 30;
@@ -74,7 +90,7 @@
     intro.skipButtonAlignment = EAViewAlignmentCenter;
     intro.skipButtonY = 100.f;
     intro.pageControlY = 120.0f;
-    intro.backgroundColor = [UIColor whiteColor];
+    intro.backgroundColor = [UIColor groupTableViewBackgroundColor];
     [intro.skipButton setTitleColor:[UIColor monaldarkGreen] forState:UIControlStateNormal];
     [intro setDelegate:self];
     intro.pageControl.currentPageIndicatorTintColor= [UIColor monaldarkGreen];

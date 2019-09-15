@@ -753,14 +753,16 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                                if([[notification.userInfo objectForKey:@"to"] isEqualToString:_contactName])
                                {
                                    NSString *timeString;
-                                   if([[notification.userInfo objectForKey:@"delayTimeStamp"] length]==0) {
+                                   
+                                   NSObject *delayTimeStamp = [notification.userInfo objectForKey:@"delayTimeStamp"];
+                                   
+                                   if(delayTimeStamp==nil || [delayTimeStamp isKindOfClass:[NSString class]]) {
                                        timeString=[self currentGMTTime];
                                    }
                                    else  {
-                                       NSObject *obj =[notification.userInfo objectForKey:@"delayTimeStamp"];
-                                       if([obj isKindOfClass:[NSDate class]])
+                                       if([delayTimeStamp isKindOfClass:[NSDate class]])
                                        {
-                                           timeString =[self.sourceDateFormat stringFromDate:(NSDate *)obj];
+                                           timeString =[self.sourceDateFormat stringFromDate:(NSDate *)delayTimeStamp];
                                        } else  {
                                            timeString= [notification.userInfo objectForKey:@"delayTimeStamp"];
                                        }

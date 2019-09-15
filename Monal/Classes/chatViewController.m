@@ -791,17 +791,17 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                                if(!self.messageList) self.messageList=[[NSMutableArray alloc] init];
                                [self.messageList addObject:[userInfo mutableCopy]];
 
-                               [_messageTable beginUpdates];
+                [self->_messageTable beginUpdates];
                                NSIndexPath *path1;
                                NSInteger bottom =  self.messageList.count-1;
                                if(bottom>=0) {
 
                                    path1 = [NSIndexPath indexPathForRow:bottom  inSection:0];
-                                   [_messageTable insertRowsAtIndexPaths:@[path1]
+                                   [self->_messageTable insertRowsAtIndexPaths:@[path1]
                                                         withRowAnimation:UITableViewRowAnimationBottom];
 
                                }
-                               [_messageTable endUpdates];
+                [self->_messageTable endUpdates];
 
                                [self scrollToBottom];
 

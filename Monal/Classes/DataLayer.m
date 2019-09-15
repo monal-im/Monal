@@ -770,8 +770,9 @@ static DataLayer *sharedInstance=nil;
                       [dictionary objectForKey:kEnabled] ,
                       [dictionary objectForKey:kSelfSigned],
                       [dictionary objectForKey:kOldSSL],
-                      [dictionary objectForKey:kOauth], username,
-                      [dictionary objectForKey:kAirdrop]
+                      [dictionary objectForKey:kOauth],
+                       username,
+                       [dictionary objectForKey:kAirdrop]?[dictionary objectForKey:kAirdrop]:@"0"
                       ];
 
     [self executeNonQuery:query andArguments:params withCompletion:completion];

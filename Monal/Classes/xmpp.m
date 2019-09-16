@@ -455,21 +455,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
             DDLogInfo(@"trying to login again");
             //make sure we are enabled still.
             if([[DataLayer sharedInstance] isAccountEnabled:[NSString stringWithFormat:@"%@",self.accountNo]]) {
-#if TARGET_OS_IPHONE
-                //temp background task while a new one is created
-                __block UIBackgroundTaskIdentifier tempTask= [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
-                    [[UIApplication sharedApplication] endBackgroundTask:tempTask];
-                    tempTask=UIBackgroundTaskInvalid;
-                }];
-
-#endif
                 [self reconnect];
-
-#if TARGET_OS_IPHONE
-                [[UIApplication sharedApplication] endBackgroundTask:tempTask];
-                tempTask=UIBackgroundTaskInvalid;
-#endif
-
             }
         }
         else if (self.accountState>=kStateLoggedIn ) {

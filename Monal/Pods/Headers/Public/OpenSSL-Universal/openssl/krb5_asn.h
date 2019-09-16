@@ -1,1 +1,1 @@
-../../../../OpenSSL-Universal/Frameworks/macos/OpenSSL.framework/Versions/A/Headers/krb5_asn.h
+../../../../OpenSSL-Universal/macos/include/openssl/krb5_asn.h

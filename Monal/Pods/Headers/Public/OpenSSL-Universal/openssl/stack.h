@@ -1,1 +1,1 @@
-../../../../OpenSSL-Universal/Frameworks/macos/OpenSSL.framework/Versions/A/Headers/stack.h
+../../../../OpenSSL-Universal/macos/include/openssl/stack.h

@@ -1,1 +1,1 @@
-../../../../OpenSSL-Universal/Frameworks/macos/OpenSSL.framework/Versions/A/Headers/cms.h
+../../../../OpenSSL-Universal/macos/include/openssl/cms.h

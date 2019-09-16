@@ -1,1 +1,1 @@
-../../../../OpenSSL-Universal/Frameworks/macos/OpenSSL.framework/Versions/A/Headers/mdc2.h
+../../../../OpenSSL-Universal/macos/include/openssl/mdc2.h

@@ -1,1 +1,1 @@
-../../../../OpenSSL-Universal/Frameworks/macos/OpenSSL.framework/Versions/A/Headers/dtls1.h
+../../../../OpenSSL-Universal/macos/include/openssl/dtls1.h

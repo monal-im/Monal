@@ -1,1 +1,1 @@
-../../../../OpenSSL-Universal/Frameworks/macos/OpenSSL.framework/Versions/A/Headers/kssl.h
+../../../../OpenSSL-Universal/macos/include/openssl/kssl.h

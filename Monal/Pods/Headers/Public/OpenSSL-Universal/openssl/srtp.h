@@ -1,1 +1,1 @@
-../../../../OpenSSL-Universal/Frameworks/macos/OpenSSL.framework/Versions/A/Headers/srtp.h
+../../../../OpenSSL-Universal/macos/include/openssl/srtp.h

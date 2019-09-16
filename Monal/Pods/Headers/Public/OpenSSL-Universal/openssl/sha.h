@@ -1,1 +1,1 @@
-../../../../OpenSSL-Universal/Frameworks/macos/OpenSSL.framework/Versions/A/Headers/sha.h
+../../../../OpenSSL-Universal/macos/include/openssl/sha.h

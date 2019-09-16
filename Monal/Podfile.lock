@@ -1,5 +1,5 @@
 PODS:
-  - Crashlytics (3.13.2):
+  - Crashlytics (3.14.0):
     - Fabric (~> 1.10.2)
   - CWStatusBarNotification (2.3.5)
   - DACircularProgress (2.3.1)
@@ -16,8 +16,8 @@ PODS:
     - SDWebImage
   - MBProgressHUD (1.1.0)
   - OpenSSL-Universal (1.0.2.18):
-    - OpenSSL-Universal/Framework (= 1.0.2.18)
-  - OpenSSL-Universal/Framework (1.0.2.18)
+    - OpenSSL-Universal/Static (= 1.0.2.18)
+  - OpenSSL-Universal/Static (1.0.2.18)
   - pop (1.0.12)
   - SAMKeychain (1.5.3)
   - SDWebImage (4.3.3):
@@ -70,7 +70,7 @@ SPEC REPOS:
     - TPCircularBuffer
 
 SPEC CHECKSUMS:
-  Crashlytics: 611738c7847f8291a1a51084e35987b86ba6b3ee
+  Crashlytics: 540b7e5f5da5a042647227a5e3ac51d85eed06df
   CWStatusBarNotification: 3d2738b25c3207f60cc50201388d3c96182545ff
   DACircularProgress: 4dd437c0fc3da5161cb289e07ac449493d41db71
   Dropbox-iOS-SDK: e0c9b08d1604b39cb78c1d0333251de0f6bdec60
@@ -81,7 +81,7 @@ SPEC CHECKSUMS:
   Fabric: 706c8b8098fff96c33c0db69cbf81f9c551d0d74
   IDMPhotoBrowser: 4bb459b1faffc228e92bccdf7c54ad6d6b7e8c37
   MBProgressHUD: e7baa36a220447d8aeb12769bf0585582f3866d9
-  OpenSSL-Universal: 84719162fd0bd0417a8e170415b45dc6727d3604
+  OpenSSL-Universal: d10ab08e0b258023e5184f77660b1b9f4ec93926
   pop: d582054913807fd11fd50bfe6a539d91c7e1a55a
   SAMKeychain: 483e1c9f32984d50ca961e26818a534283b4cd5c
   SDWebImage: de4d90b5bff3571eae7bd16202b1f43135409fa5

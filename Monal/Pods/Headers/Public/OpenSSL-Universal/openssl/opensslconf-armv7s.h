@@ -1,1 +1,1 @@
-../../../../OpenSSL-Universal/Frameworks/ios/OpenSSL.framework/Headers/opensslconf-armv7s.h
+../../../../OpenSSL-Universal/ios/include/openssl/opensslconf-armv7s.h

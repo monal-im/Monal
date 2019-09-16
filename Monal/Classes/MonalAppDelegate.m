@@ -63,6 +63,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     // Set the registry's delegate to self
     voipRegistry.delegate = self;
     // Set the push type to VoIP
+    
     voipRegistry.desiredPushTypes = [NSSet setWithObject:PKPushTypeVoIP];
 }
 
@@ -80,6 +81,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         [token appendString:[NSString stringWithFormat:@"%02x", (unsigned char) tokenBytes[counter]]];
         counter++;
     }
+    DDLogDebug(@"voip APNS token string: %@", token);
     
     NSString *node = [[[UIDevice currentDevice] identifierForVendor] UUIDString];
     

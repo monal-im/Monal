@@ -1,1 +1,1 @@
-../../../../OpenSSL-Universal/Frameworks/macos/OpenSSL.framework/Versions/A/Headers/hmac.h
+../../../../OpenSSL-Universal/macos/include/openssl/hmac.h

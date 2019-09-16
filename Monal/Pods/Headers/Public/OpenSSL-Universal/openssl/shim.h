@@ -1,1 +1,1 @@
-../../../../OpenSSL-Universal/Frameworks/macos/OpenSSL.framework/Versions/A/Headers/shim.h
+../../../../OpenSSL-Universal/macos/include/openssl/shim.h

@@ -713,43 +713,8 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
         }
         else  {
              DDLogInfo(@"Using non push path for reconnct");
-        __block UIBackgroundTaskIdentifier reconnectBackgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
-
-            if((([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
-                || ([UIApplication sharedApplication].applicationState==UIApplicationStateInactive )) && self->_accountState<kStateHasStream)
-            {
-                //present notification
-                NSDate* theDate=[NSDate dateWithTimeIntervalSinceNow:0]; //immediate fire
-                UIApplication* app = [UIApplication sharedApplication];
-                // Create a new notification
-                UILocalNotification* alarm = [[UILocalNotification alloc] init];
-                if (alarm)
-                {
-                    if(!_hasShownAlert ) {
-                        _hasShownAlert=YES;
-                        //scehdule info
-                        alarm.fireDate = theDate;
-                        alarm.timeZone = [NSTimeZone defaultTimeZone];
-                        alarm.repeatInterval = 0;
-                        alarm.alertBody =  @"Could not reconnect and fetch messages. Please reopen and make sure you are connected.";
-
-                        [app scheduleLocalNotification:alarm];
-
-                        DDLogVerbose(@"Scheduled local disconnect alert ");
-                        [self disconnect];
-                    }
-
-                }
-            }
-
-            DDLogVerbose(@"Reconnect bgtask took too long. closing");
-            [[UIApplication sharedApplication] endBackgroundTask:reconnectBackgroundTask];
-            reconnectBackgroundTask=UIBackgroundTaskInvalid;
-
-        }];
-
-        if (reconnectBackgroundTask != UIBackgroundTaskInvalid) {
-            if(_accountState>=kStateReconnecting) {
+            
+            if(self->_accountState>=kStateReconnecting) {
                 DDLogInfo(@" account sate >=reconencting, disconnecting first" );
                 [self disconnectWithCompletion:^{
                     [self reconnect:0];
@@ -757,24 +722,21 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                 return;
             }
 
-            if(!_reconnectScheduled)
+            if(!self->_reconnectScheduled)
             {
-                _reconnectScheduled=YES;
+                self->_reconnectScheduled=YES;
                 DDLogInfo(@"Trying to connect again in %f seconds. ", wait);
                 dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
                 dispatch_after(dispatch_time(DISPATCH_TIME_NOW, wait * NSEC_PER_SEC), q_background,  ^{
                     //there may be another login operation freom reachability or another timer
                     if(self.accountState<kStateReconnecting) {
                         [self connect];
-                        [[UIApplication sharedApplication] endBackgroundTask:reconnectBackgroundTask];
-                        reconnectBackgroundTask=UIBackgroundTaskInvalid;
                     }
                 });
             } else  {
                 DDLogInfo(@"reconnect scheduled already" );
             }
         }
-    }
 #else
         if(_accountState>=kStateReconnecting) {
             DDLogInfo(@" account sate >=reconencting, disconnecting first" );

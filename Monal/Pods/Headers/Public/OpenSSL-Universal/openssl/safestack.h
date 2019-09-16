@@ -1,1 +1,1 @@
-../../../../OpenSSL-Universal/Frameworks/macos/OpenSSL.framework/Versions/A/Headers/safestack.h
+../../../../OpenSSL-Universal/macos/include/openssl/safestack.h

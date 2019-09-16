@@ -1,1 +1,1 @@
-../../../../OpenSSL-Universal/Frameworks/macos/OpenSSL.framework/Versions/A/Headers/dso.h
+../../../../OpenSSL-Universal/macos/include/openssl/dso.h

@@ -1,1 +1,1 @@
-../../../../OpenSSL-Universal/Frameworks/macos/OpenSSL.framework/Versions/A/Headers/pem.h
+../../../../OpenSSL-Universal/macos/include/openssl/pem.h

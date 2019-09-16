@@ -1,1 +1,1 @@
-../../../../OpenSSL-Universal/Frameworks/macos/OpenSSL.framework/Versions/A/Headers/ocsp.h
+../../../../OpenSSL-Universal/macos/include/openssl/ocsp.h

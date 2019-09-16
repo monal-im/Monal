@@ -1,1 +1,1 @@
-../../../../OpenSSL-Universal/Frameworks/macos/OpenSSL.framework/Versions/A/Headers/x509v3.h
+../../../../OpenSSL-Universal/macos/include/openssl/x509v3.h

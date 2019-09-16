@@ -1,1 +1,1 @@
-../../../../OpenSSL-Universal/Frameworks/macos/OpenSSL.framework/Versions/A/Headers/symhacks.h
+../../../../OpenSSL-Universal/macos/include/openssl/symhacks.h

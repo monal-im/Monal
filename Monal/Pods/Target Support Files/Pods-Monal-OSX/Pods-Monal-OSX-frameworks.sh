@@ -143,20 +143,14 @@ strip_invalid_archs() {
 
 
 if [[ "$CONFIGURATION" == "Debug" ]]; then
-  install_framework "${PODS_ROOT}/OpenSSL-Universal/Frameworks/macos/OpenSSL.framework"
-  install_dsym "${PODS_ROOT}/OpenSSL-Universal/Frameworks/macos/OpenSSL.framework.dSYM"
   install_framework "${PODS_ROOT}/Sparkle/Sparkle.framework"
   install_dsym "${PODS_ROOT}/Sparkle/Sparkle.framework.dSYM"
 fi
 if [[ "$CONFIGURATION" == "Adhoc" ]]; then
-  install_framework "${PODS_ROOT}/OpenSSL-Universal/Frameworks/macos/OpenSSL.framework"
-  install_dsym "${PODS_ROOT}/OpenSSL-Universal/Frameworks/macos/OpenSSL.framework.dSYM"
   install_framework "${PODS_ROOT}/Sparkle/Sparkle.framework"
   install_dsym "${PODS_ROOT}/Sparkle/Sparkle.framework.dSYM"
 fi
 if [[ "$CONFIGURATION" == "AppStore" ]]; then
-  install_framework "${PODS_ROOT}/OpenSSL-Universal/Frameworks/macos/OpenSSL.framework"
-  install_dsym "${PODS_ROOT}/OpenSSL-Universal/Frameworks/macos/OpenSSL.framework.dSYM"
   install_framework "${PODS_ROOT}/Sparkle/Sparkle.framework"
   install_dsym "${PODS_ROOT}/Sparkle/Sparkle.framework.dSYM"
 fi

@@ -1,1 +1,1 @@
-../../../../OpenSSL-Universal/Frameworks/macos/OpenSSL.framework/Versions/A/Headers/e_os2.h
+../../../../OpenSSL-Universal/macos/include/openssl/e_os2.h

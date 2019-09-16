@@ -1,1 +1,1 @@
-../../../../OpenSSL-Universal/Frameworks/macos/OpenSSL.framework/Versions/A/Headers/modes.h
+../../../../OpenSSL-Universal/macos/include/openssl/modes.h

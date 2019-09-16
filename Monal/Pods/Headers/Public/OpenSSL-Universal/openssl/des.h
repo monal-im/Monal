@@ -1,1 +1,1 @@
-../../../../OpenSSL-Universal/Frameworks/macos/OpenSSL.framework/Versions/A/Headers/des.h
+../../../../OpenSSL-Universal/macos/include/openssl/des.h

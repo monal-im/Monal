@@ -1,1 +1,1 @@
-../../../../OpenSSL-Universal/Frameworks/macos/OpenSSL.framework/Versions/A/Headers/dh.h
+../../../../OpenSSL-Universal/macos/include/openssl/dh.h

@@ -63,8 +63,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     // Set the registry's delegate to self
     voipRegistry.delegate = self;
     // Set the push type to VoIP
-    
-    voipRegistry.desiredPushTypes = [NSSet setWithObject:PKPushTypeVoIP];
+    if (@available(iOS 13.0, *)) {
+    //no more voip mode after ios 13
+    }
+    else {
+        voipRegistry.desiredPushTypes = [NSSet setWithObject:PKPushTypeVoIP];
+    }
 }
 
 // Handle updated APNS tokens

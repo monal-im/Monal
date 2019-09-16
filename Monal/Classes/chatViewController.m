@@ -199,7 +199,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
             }
         }
         else  {
-           // self.sendButton.enabled=YES;
+            self.sendButton.enabled=YES;
             self.navigationItem.title=title;
 
         }

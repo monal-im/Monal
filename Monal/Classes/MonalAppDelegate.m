@@ -261,9 +261,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         UIMutableUserNotificationCategory *actionCategory = [[UIMutableUserNotificationCategory alloc] init];
         actionCategory.identifier = @"Reply";
         [actionCategory setActions:@[replyAction] forContext:UIUserNotificationActionContextDefault];
-        categories = [NSSet setWithObject:actionCategory];
         
-        UIUserNotificationSettings *settings = [UIUserNotificationSettings settingsForTypes:UIUserNotificationTypeAlert|UIUserNotificationTypeSound|UIUserNotificationTypeBadge categories:categories];
+        UIMutableUserNotificationCategory *extensionCategory = [[UIMutableUserNotificationCategory alloc] init];
+        extensionCategory.identifier = @"Extension";
+             
+        categories = [NSSet setWithObjects:actionCategory,extensionCategory,nil];
+        
+        UIUserNotificationSettings *settings = [UIUserNotificationSettings settingsForTypes:UIUserNotificationTypeAlert|UIUserNotificationTypeSound|UIUserNotificationTypeBadge categories:nil];
         [[UIApplication sharedApplication] registerUserNotificationSettings:settings];
     }
     

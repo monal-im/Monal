@@ -47,38 +47,26 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [[UITabBar appearance] setTintColor:monaldarkGreen];
 }
 
-#pragma mark - VOIP APNS notificaion
 
--(void) voipRegistration
-{
-    DDLogInfo(@"registering for voip APNS...");
-    dispatch_queue_t mainQueue = dispatch_get_main_queue();
-    PKPushRegistry * voipRegistry = [[PKPushRegistry alloc] initWithQueue: mainQueue];
-    voipRegistry.delegate = self;
-    if (@available(iOS 13.0, *)) {
-    //no more voip mode after ios 13
-    }
-    else {
-        voipRegistry.desiredPushTypes = [NSSet setWithObject:PKPushTypeVoIP];
-    }
-}
+#pragma mark - Push utilities
 
-// Handle updated APNS tokens
--(void)pushRegistry:(PKPushRegistry *)registry didUpdatePushCredentials: (PKPushCredentials *)credentials forType:(NSString *)type
-{
-    DDLogInfo(@"APNS token: %@", credentials.token);
+-(NSString *) stringFromToken:(NSData *) tokenIn {
+    unsigned char *tokenBytes = (unsigned char *)[tokenIn bytes];
     
-    unsigned char *tokenBytes = (unsigned char *)[credentials.token bytes];
     NSMutableString *token = [[NSMutableString alloc] init];
     [MLXMPPManager sharedInstance].hasAPNSToken=YES;
     NSInteger counter=0;
-    while(counter< credentials.token.length)
+    while(counter< tokenIn.length)
     {
         [token appendString:[NSString stringWithFormat:@"%02x", (unsigned char) tokenBytes[counter]]];
         counter++;
     }
-    DDLogDebug(@"APNS token string: %@", token);
     
+    return token;
+}
+
+
+-(void) postToPushServer:(NSString *) token {
     NSString *node = [[[UIDevice currentDevice] identifierForVendor] UUIDString];
     
     NSString *post = [NSString stringWithFormat:@"type=apns&node=%@&token=%@", [node stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]],
@@ -126,7 +114,41 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             
         }] resume];
     });
+}
+
+
+#pragma mark -  APNS notificaion
+
+- (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken{
     
+    NSString *token=[self stringFromToken:deviceToken];
+    DDLogInfo(@"APNS token string: %@", token);
+    [self postToPushServer:token];
+}
+
+- (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
+    DDLogError(@"push reg error %@", error);
+    
+}
+
+
+#pragma mark - VOIP notification
+
+-(void) voipRegistration
+{
+    DDLogInfo(@"registering for voip APNS...");
+    dispatch_queue_t mainQueue = dispatch_get_main_queue();
+    PKPushRegistry * voipRegistry = [[PKPushRegistry alloc] initWithQueue: mainQueue];
+    voipRegistry.delegate = self;
+    voipRegistry.desiredPushTypes = [NSSet setWithObject:PKPushTypeVoIP];
+}
+
+// Handle updated APNS tokens
+-(void)pushRegistry:(PKPushRegistry *)registry didUpdatePushCredentials: (PKPushCredentials *)credentials forType:(NSString *)type
+{
+    NSString *token=[self stringFromToken:credentials.token];
+    DDLogInfo(@"APNS voip token string: %@", token);
+    [self postToPushServer:token];
 }
 
 -(void)pushRegistry:(PKPushRegistry *)registry didInvalidatePushTokenForType:(NSString *)type
@@ -137,19 +159,19 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 // Handle incoming pushes
 -(void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type
 {
-    DDLogInfo(@"incoming push notfication: %@", [payload dictionaryPayload]);
+    DDLogInfo(@"incoming voip push notfication: %@", [payload dictionaryPayload]);
     if([UIApplication sharedApplication].applicationState==UIApplicationStateActive) return;
     
     dispatch_async(dispatch_get_main_queue(), ^{
        __block UIBackgroundTaskIdentifier tempTask= [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
-           DDLogInfo(@"push wake expiring");
+           DDLogInfo(@"voip push wake expiring");
            [[UIApplication sharedApplication] endBackgroundTask:tempTask];
             tempTask=UIBackgroundTaskInvalid;
            [[MLXMPPManager sharedInstance] logoutAllKeepStreamWithCompletion:nil];
         }];
         
         [[MLXMPPManager sharedInstance] connectIfNecessary];
-         DDLogInfo(@"push wake complete");
+         DDLogInfo(@"voip push wake complete");
     });
 }
 
@@ -247,9 +269,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     //register for voip push using pushkit
     if([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground) {
-       // if we are launched in the background, it was from a push. dont do this again.
-        [self voipRegistration];
- 
+          // if we are launched in the background, it was from a push. dont do this again.
+        if (@available(iOS 13.0, *)) {
+           //no more voip mode after ios 13
+            [[UIApplication sharedApplication] registerForRemoteNotifications];
+           }
+           else {
+                      [self voipRegistration];
+           }
     }
     else  {
         [MLXMPPManager sharedInstance].pushNode = [[NSUserDefaults standardUserDefaults] objectForKey:@"pushNode"];

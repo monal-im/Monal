@@ -38,15 +38,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     UIColor *monalGreen = [UIColor monalGreen];
     UIColor *monaldarkGreen =[UIColor monaldarkGreen];
-
-   // [[UINavigationBar appearance] setBarTintColor:monalGreen];
     [[UINavigationBar appearance] setTintColor:monalGreen];
-//    [[UINavigationBar appearance] setTitleTextAttributes:@{
-//                                                           NSForegroundColorAttributeName: [UIColor darkGrayColor]
-//                                                           }];
+
     if (@available(iOS 11.0, *)) {
         [[UINavigationBar appearance] setPrefersLargeTitles:YES];
-//        [[UINavigationBar appearance] setLargeTitleTextAttributes:@{NSForegroundColorAttributeName: [UIColor whiteColor]}];
     }
     
     [[UITabBar appearance] setTintColor:monaldarkGreen];
@@ -58,11 +53,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     DDLogInfo(@"registering for voip APNS...");
     dispatch_queue_t mainQueue = dispatch_get_main_queue();
-    // Create a push registry object
     PKPushRegistry * voipRegistry = [[PKPushRegistry alloc] initWithQueue: mainQueue];
-    // Set the registry's delegate to self
     voipRegistry.delegate = self;
-    // Set the push type to VoIP
     if (@available(iOS 13.0, *)) {
     //no more voip mode after ios 13
     }
@@ -74,7 +66,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 // Handle updated APNS tokens
 -(void)pushRegistry:(PKPushRegistry *)registry didUpdatePushCredentials: (PKPushCredentials *)credentials forType:(NSString *)type
 {
-    DDLogInfo(@"voip APNS token: %@", credentials.token);
+    DDLogInfo(@"APNS token: %@", credentials.token);
     
     unsigned char *tokenBytes = (unsigned char *)[credentials.token bytes];
     NSMutableString *token = [[NSMutableString alloc] init];
@@ -85,7 +77,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         [token appendString:[NSString stringWithFormat:@"%02x", (unsigned char) tokenBytes[counter]]];
         counter++;
     }
-    DDLogDebug(@"voip APNS token string: %@", token);
+    DDLogDebug(@"APNS token string: %@", token);
     
     NSString *node = [[[UIDevice currentDevice] identifierForVendor] UUIDString];
     
@@ -145,20 +137,19 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 // Handle incoming pushes
 -(void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type
 {
-    DDLogInfo(@"incoming voip notfication: %@", [payload dictionaryPayload]);
+    DDLogInfo(@"incoming push notfication: %@", [payload dictionaryPayload]);
     if([UIApplication sharedApplication].applicationState==UIApplicationStateActive) return;
     
     dispatch_async(dispatch_get_main_queue(), ^{
-        //reconenct and fetch messages
        __block UIBackgroundTaskIdentifier tempTask= [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
-           DDLogInfo(@"voip wake expiring");
+           DDLogInfo(@"push wake expiring");
            [[UIApplication sharedApplication] endBackgroundTask:tempTask];
             tempTask=UIBackgroundTaskInvalid;
            [[MLXMPPManager sharedInstance] logoutAllKeepStreamWithCompletion:nil];
         }];
         
         [[MLXMPPManager sharedInstance] connectIfNecessary];
-         DDLogInfo(@"voip wake compelte");
+         DDLogInfo(@"push wake complete");
     });
 }
 

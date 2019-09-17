@@ -8,12 +8,12 @@
 
 #import "MonalAppDelegate.h"
 
-
 #import "CallViewController.h"
 
 #import "MLNotificationManager.h"
 #import "DataLayer.h"
 #import "NXOAuth2AccountStore.h"
+#import "MLPush.h"
 
 @import Crashlytics;
 @import Fabric;
@@ -48,82 +48,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 }
 
 
-#pragma mark - Push utilities
-
--(NSString *) stringFromToken:(NSData *) tokenIn {
-    unsigned char *tokenBytes = (unsigned char *)[tokenIn bytes];
-    
-    NSMutableString *token = [[NSMutableString alloc] init];
-    [MLXMPPManager sharedInstance].hasAPNSToken=YES;
-    NSInteger counter=0;
-    while(counter< tokenIn.length)
-    {
-        [token appendString:[NSString stringWithFormat:@"%02x", (unsigned char) tokenBytes[counter]]];
-        counter++;
-    }
-    
-    return token;
-}
-
-
--(void) postToPushServer:(NSString *) token {
-    NSString *node = [[[UIDevice currentDevice] identifierForVendor] UUIDString];
-    
-    NSString *post = [NSString stringWithFormat:@"type=apns&node=%@&token=%@", [node stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]],
-                      [token stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]]];
-    NSData *postData = [post dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
-    NSString *postLength = [NSString stringWithFormat:@"%luld",[postData length]];
-    
-    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
-    //this is the hardcoded push api endpoint
-    [request setURL:[NSURL URLWithString:@"https://push.monal.im:5281/push_appserver/v1/register"]];
-    [request setHTTPMethod:@"POST"];
-    [request setValue:postLength forHTTPHeaderField:@"Content-Length"];
-    [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
-    [request setHTTPBody:postData];
-    
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [[[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
-            
-            NSHTTPURLResponse *httpresponse= (NSHTTPURLResponse *) response;
-            
-            if(!error && httpresponse.statusCode<400)
-            {
-                DDLogInfo(@"connection to push api successful");
-                
-                NSString *responseBody = [[NSString alloc] initWithData:data  encoding:NSUTF8StringEncoding];
-                DDLogInfo(@"push api returned: %@", responseBody);
-                NSArray *responseParts=[responseBody componentsSeparatedByString:@"\n"];
-                if(responseParts.count>0){
-                    if([responseParts[0] isEqualToString:@"OK"] && [responseParts count]==3)
-                    {
-                        DDLogInfo(@"push api: node='%@', secret='%@'", responseParts[1], responseParts[2]);
-                        [[MLXMPPManager sharedInstance] setPushNode:responseParts[1] andSecret:responseParts[2]];
-                    }
-                    else {
-                        DDLogError(@" push api returned invalid data: %@", [responseParts componentsJoinedByString: @" | "]);
-                    }
-                } else {
-                    DDLogError(@"push api could  not be broken into parts");
-                }
-                
-            } else
-            {
-                DDLogError(@" connection to push api NOT successful");
-            }
-            
-        }] resume];
-    });
-}
-
 
 #pragma mark -  APNS notificaion
 
 - (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken{
     
-    NSString *token=[self stringFromToken:deviceToken];
+    NSString *token=[MLPush stringFromToken:deviceToken];
+     [MLXMPPManager sharedInstance].hasAPNSToken=YES;
     DDLogInfo(@"APNS token string: %@", token);
-    [self postToPushServer:token];
+    [[[MLPush alloc] init] postToPushServer:token];
 }
 
 - (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
@@ -146,9 +79,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 // Handle updated APNS tokens
 -(void)pushRegistry:(PKPushRegistry *)registry didUpdatePushCredentials: (PKPushCredentials *)credentials forType:(NSString *)type
 {
-    NSString *token=[self stringFromToken:credentials.token];
+    NSString *token=[MLPush stringFromToken:credentials.token];
+     [MLXMPPManager sharedInstance].hasAPNSToken=YES;
     DDLogInfo(@"APNS voip token string: %@", token);
-    [self postToPushServer:token];
+    [[[MLPush alloc] init] postToPushServer:token];
 }
 
 -(void)pushRegistry:(PKPushRegistry *)registry didInvalidatePushTokenForType:(NSString *)type

@@ -373,6 +373,7 @@
 		26B51C4918654D98002134C3 /* LogViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B51C4718654D98002134C3 /* LogViewController.m */; };
 		26B69A75131C522F002FCBEB /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26B69A74131C522F002FCBEB /* Security.framework */; };
 		26BDECDC1867B7790018670D /* CallViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26BDECDA1867B7790018670D /* CallViewController.m */; };
+		26C01307233025DA001D411D /* MLPush.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C01306233025DA001D411D /* MLPush.m */; };
 		26C1EA681FF937040085547A /* MLOptOutSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C1EA671FF937040085547A /* MLOptOutSettingsViewController.m */; };
 		26C1EA6B1FF937320085547A /* MLNotificationSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C1EA6A1FF937320085547A /* MLNotificationSettingsViewController.m */; };
 		26C3456E1C68F9F0007F4BEC /* MLHTTPRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C3456D1C68F9F0007F4BEC /* MLHTTPRequest.m */; };
@@ -888,6 +889,8 @@
 		26B69A74131C522F002FCBEB /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		26BDECD91867B7790018670D /* CallViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CallViewController.h; sourceTree = "<group>"; };
 		26BDECDA1867B7790018670D /* CallViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CallViewController.m; sourceTree = "<group>"; };
+		26C01305233025DA001D411D /* MLPush.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLPush.h; sourceTree = "<group>"; };
+		26C01306233025DA001D411D /* MLPush.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLPush.m; sourceTree = "<group>"; };
 		26C1EA661FF937040085547A /* MLOptOutSettingsViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLOptOutSettingsViewController.h; sourceTree = "<group>"; };
 		26C1EA671FF937040085547A /* MLOptOutSettingsViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLOptOutSettingsViewController.m; sourceTree = "<group>"; };
 		26C1EA691FF937320085547A /* MLNotificationSettingsViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLNotificationSettingsViewController.h; sourceTree = "<group>"; };
@@ -1680,6 +1683,8 @@
 		26B2A4B41B73040000272E63 /* Monal-iOS */ = {
 			isa = PBXGroup;
 			children = (
+				26C01305233025DA001D411D /* MLPush.h */,
+				26C01306233025DA001D411D /* MLPush.m */,
 				2649CE521C51B84C00CD1E80 /* Launch Screen.storyboard */,
 				26B2A4BA1B73061400272E63 /* Images.xcassets */,
 				26B2A4B71B7304DD00272E63 /* Managers */,
@@ -2935,6 +2940,7 @@
 				26529F5217FA7B260057F199 /* addContact.m in Sources */,
 				262E51971AD8CB7200788351 /* MLTextInputCell.m in Sources */,
 				26C3EDFD1A807E76000E6331 /* ParseA.m in Sources */,
+				26C01307233025DA001D411D /* MLPush.m in Sources */,
 				2642EBCA18693634006A6C12 /* jingleCall.m in Sources */,
 				26D51CD81E2674D700141E04 /* NXOAuth2Connection.m in Sources */,
 				26724D9321B4C1E700F1F46F /* MLComposeViewController.m in Sources */,

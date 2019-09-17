@@ -33,7 +33,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     if (@available(iOS 13.0, *)) {
         return @"push.monal.im";
     } else {
-        return @"ios13.push.monal.im"; // for ios13 onwards
+        return @"ios13push.monal.im"; // for ios13 onwards
     }
     
 }

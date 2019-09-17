@@ -29,7 +29,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     return token;
 }
 
--(NSString *)pushServer {
++ (NSString *)pushServer {
     if (@available(iOS 13.0, *)) {
         return @"push.monal.im";
     } else {
@@ -37,7 +37,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     
 }
-
 
 -(void) postToPushServer:(NSString *) token {
     NSString *node = [[[UIDevice currentDevice] identifierForVendor] UUIDString];
@@ -50,7 +49,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
     //this is the hardcoded push api endpoint
     
-    NSString *path =[NSString stringWithFormat:@"https://%@:5281/push_appserver/v1/register", self.pushServer];
+    NSString *path =[NSString stringWithFormat:@"https://%@:5281/push_appserver/v1/register", [MLPush pushServer]];
     [request setURL:[NSURL URLWithString:path]];
     [request setHTTPMethod:@"POST"];
     [request setValue:postLength forHTTPHeaderField:@"Content-Length"];

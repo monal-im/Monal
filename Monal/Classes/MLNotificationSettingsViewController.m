@@ -9,6 +9,8 @@
 #import "MLNotificationSettingsViewController.h"
 #import "MLSwitchCell.h"
 #import "MLXMPPManager.h"
+#import "MLPush.h"
+
 @import UserNotificationsUI;
 
 NS_ENUM(NSInteger, kNotificationSettingSection)
@@ -227,7 +229,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             
             NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
             //this is the hardcoded push api endpoint
-            [request setURL:[NSURL URLWithString:@"https://push.monal.im:5281/push_appserver/v1/unregister"]];
+            NSString *path =[NSString stringWithFormat:@"https://%@:5281/push_appserver/v1/unregister", [MLPush pushServer]];
+            [request setURL:[NSURL URLWithString:path]];
             [request setHTTPMethod:@"POST"];
             [request setValue:postLength forHTTPHeaderField:@"Content-Length"];
             [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];

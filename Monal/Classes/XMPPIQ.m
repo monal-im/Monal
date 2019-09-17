@@ -9,6 +9,7 @@
 #import "XMPPIQ.h"
 #import "EncodingTools.h"
 #import "SignalPreKey.h"
+#import "MLPush.h"
 
 @implementation XMPPIQ
 
@@ -73,7 +74,7 @@
     enableNode.element=@"enable";
     [enableNode.attributes setObject:@"urn:xmpp:push:0" forKey:@"xmlns"];
     //this push jid is hardcoded and does not have to be the same hostname as the api endpoint set in MonalAppDelegate.m
-    [enableNode.attributes setObject:@"push.monal.im" forKey:@"jid"];
+    [enableNode.attributes setObject:[MLPush pushServer] forKey:@"jid"];
     [enableNode.attributes setObject:node forKey:@"node"];
     [self.children addObject:enableNode];
     

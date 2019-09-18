@@ -750,7 +750,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                                    finalMessageType =kMessageTypeStatus;
                                }
 
-                               if([[notification.userInfo objectForKey:@"to"] isEqualToString:_contactName])
+                if([[notification.userInfo objectForKey:@"to"] isEqualToString:self->_contactName])
                                {
                                    NSString *timeString;
                                    

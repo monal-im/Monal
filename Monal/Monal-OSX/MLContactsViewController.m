@@ -970,21 +970,21 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 
 -(void) showSSLUpgradeSheet
 {
-    if(![[NSUserDefaults standardUserDefaults] boolForKey:@"HasSeenSSLMessage"]) {
-        
-        NSAlert *userAddAlert = [[NSAlert alloc] init];
-        userAddAlert.messageText=@"Security Upgrades";
-        userAddAlert.informativeText =[NSString stringWithFormat:@"This version includes a security fix for the way SSL certificates are checked. It is possible settings that previously worked will not now. If you encouter this, you can temporarily disable certificate validation in your account settings while you figure out why macOS does not like your certificate."];
-        userAddAlert.alertStyle=NSInformationalAlertStyle;
-        [userAddAlert addButtonWithTitle:@"Got it!"];
-     
-    
-        [userAddAlert beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse returnCode) {
-        
-        }];
-        
-        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"HasSeenSSLMessage"];
-    }
+//    if(![[NSUserDefaults standardUserDefaults] boolForKey:@"HasSeenSSLMessage"]) {
+//        
+//        NSAlert *userAddAlert = [[NSAlert alloc] init];
+//        userAddAlert.messageText=@"Security Upgrades";
+//        userAddAlert.informativeText =[NSString stringWithFormat:@"This version includes a security fix for the way SSL certificates are checked. It is possible settings that previously worked will not now. If you encouter this, you can temporarily disable certificate validation in your account settings while you figure out why macOS does not like your certificate."];
+//        userAddAlert.alertStyle=NSInformationalAlertStyle;
+//        [userAddAlert addButtonWithTitle:@"Got it!"];
+//     
+//    
+//        [userAddAlert beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse returnCode) {
+//        
+//        }];
+//        
+//        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"HasSeenSSLMessage"];
+//    }
 }
 
 

@@ -15,6 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 +(NSString *) pushServer;
 
 -(void) postToPushServer:(NSString *) token;
+-(void) unregisterPush;
 
 @end
 

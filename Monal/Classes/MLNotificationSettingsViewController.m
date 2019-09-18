@@ -220,54 +220,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     switch(indexPath.section)
     {
         case kNotificationSettingSectionAdvanced: {
-            
-            NSString *node = [[[UIDevice currentDevice] identifierForVendor] UUIDString];
-            
-            NSString *post = [NSString stringWithFormat:@"type=apns&node=%@", [node stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]]];
-            NSData *postData = [post dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
-            NSString *postLength = [NSString stringWithFormat:@"%luld",[postData length]];
-            
-            NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
-            //this is the hardcoded push api endpoint
-            NSString *path =[NSString stringWithFormat:@"https://%@:5281/push_appserver/v1/unregister", [MLPush pushServer]];
-            [request setURL:[NSURL URLWithString:path]];
-            [request setHTTPMethod:@"POST"];
-            [request setValue:postLength forHTTPHeaderField:@"Content-Length"];
-            [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
-            [request setHTTPBody:postData];
-            
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [[[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
-                    
-                    NSHTTPURLResponse *httpresponse= (NSHTTPURLResponse *) response;
-                    
-                    if(!error && httpresponse.statusCode<400)
-                    {
-                        DDLogInfo(@"connection to push api successful");
-                        
-                        NSString *responseBody = [[NSString alloc] initWithData:data  encoding:NSUTF8StringEncoding];
-                        DDLogInfo(@"push api returned: %@", responseBody);
-                        NSArray *responseParts=[responseBody componentsSeparatedByString:@"\n"];
-                        if(responseParts.count>0){
-                            if([responseParts[0] isEqualToString:@"OK"] )
-                            {
-                                DDLogInfo(@"push api: unregistered");
-                            }
-                            else {
-                                DDLogError(@" push api returned invalid data: %@", [responseParts componentsJoinedByString: @" | "]);
-                            }
-                        } else {
-                            DDLogError(@"push api could  not be broken into parts");
-                        }
-                        
-                    } else
-                    {
-                        DDLogError(@" connection to push api NOT successful");
-                    }
-                    
-                }] resume];
-            });
-            
+          
+            MLPush *push =[[MLPush alloc] init];
+            [push unregisterPush];
             break;
         }
     }

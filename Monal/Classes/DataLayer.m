@@ -710,7 +710,7 @@ static DataLayer *sharedInstance=nil;
 
 -(NSArray*) accountVals:(NSString*) accountNo
 {
-    if(!accountNo) return; 
+    if(!accountNo) return nil; 
     NSString* query=[NSString stringWithFormat:@"select * from account where  account_id=? "];
     NSArray *params=@[accountNo];
     NSArray* toReturn = [self executeReader:query andArguments:params];

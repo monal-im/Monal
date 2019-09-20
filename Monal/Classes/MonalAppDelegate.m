@@ -208,19 +208,19 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     //register for voip push using pushkit
     if([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground) {
           // if we are launched in the background, it was from a push. dont do this again.
-        if (@available(iOS 13.0, *)) {
-            //no more voip mode after ios 13
-            if(![[NSUserDefaults standardUserDefaults] boolForKey:@"HasUpgradedPushiOS13"]) {
-                MLPush *push = [[MLPush alloc] init];
-                [push unregisterPush];
-                [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"HasUpgradedPushiOS13"];
-            }
-            
-            [[UIApplication sharedApplication] registerForRemoteNotifications];
-           }
-           else {
+//        if (@available(iOS 13.0, *)) {
+//            //no more voip mode after ios 13
+//            if(![[NSUserDefaults standardUserDefaults] boolForKey:@"HasUpgradedPushiOS13"]) {
+//                MLPush *push = [[MLPush alloc] init];
+//                [push unregisterPush];
+//                [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"HasUpgradedPushiOS13"];
+//            }
+//
+//            [[UIApplication sharedApplication] registerForRemoteNotifications];
+//           }
+//           else {
                       [self voipRegistration];
-           }
+   //        }
     }
     else  {
         [MLXMPPManager sharedInstance].pushNode = [[NSUserDefaults standardUserDefaults] objectForKey:@"pushNode"];

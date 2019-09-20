@@ -130,7 +130,6 @@
 		26049A571B7315C800D11866 /* IPAddress.m in Sources */ = {isa = PBXBuildFile; fileRef = 26FB468E18B2755A0043094F /* IPAddress.m */; };
 		26049A5B1B73163300D11866 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26049A5A1B73163300D11866 /* AVFoundation.framework */; };
 		260773C4232FC4E800BFD50F /* NotificationService.m in Sources */ = {isa = PBXBuildFile; fileRef = 260773C3232FC4E800BFD50F /* NotificationService.m */; };
-		260773C8232FC4E800BFD50F /* NotificaionService.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 260773C0232FC4E800BFD50F /* NotificaionService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		260870D81B7034460036539B /* MLAccountEdit.m in Sources */ = {isa = PBXBuildFile; fileRef = 260870D71B7034460036539B /* MLAccountEdit.m */; };
 		2609B5291FD5B26800F09FA1 /* MLSplitViewDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 2609B5281FD5B26800F09FA1 /* MLSplitViewDelegate.m */; };
 		260C20C021B4D02F0031399F /* Settings.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 260C20BF21B4D02F0031399F /* Settings.storyboard */; };
@@ -455,13 +454,6 @@
 			remoteGlobalIDString = 260499F31B7314F400D11866;
 			remoteInfo = "jrtplib-static-OSX";
 		};
-		260773C6232FC4E800BFD50F /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 260773BF232FC4E800BFD50F;
-			remoteInfo = NotificaionService;
-		};
 		2630FE351AD550C00079F5C0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
@@ -499,7 +491,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				260773C8232FC4E800BFD50F /* NotificaionService.appex in Embed App Extensions */,
 				26AA701C2146BBB900598605 /* shareSheet.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
@@ -2248,7 +2239,6 @@
 			dependencies = (
 				2675EF5818B989170059C5C3 /* PBXTargetDependency */,
 				26AA701B2146BBB900598605 /* PBXTargetDependency */,
-				260773C7232FC4E800BFD50F /* PBXTargetDependency */,
 			);
 			name = Monal;
 			productName = SworIM;
@@ -3269,11 +3259,6 @@
 			isa = PBXTargetDependency;
 			target = 260499F31B7314F400D11866 /* jrtplib-static-OSX */;
 			targetProxy = 26049A541B73157D00D11866 /* PBXContainerItemProxy */;
-		};
-		260773C7232FC4E800BFD50F /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 260773BF232FC4E800BFD50F /* NotificaionService */;
-			targetProxy = 260773C6232FC4E800BFD50F /* PBXContainerItemProxy */;
 		};
 		2630FE361AD550C00079F5C0 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;

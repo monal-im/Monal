@@ -9,7 +9,10 @@
 #import "XMPPIQ.h"
 #import "EncodingTools.h"
 #import "SignalPreKey.h"
+
+#if TARGET_OS_IPHONE
 #import "MLPush.h"
+#endif
 
 @implementation XMPPIQ
 
@@ -67,7 +70,7 @@
 
 
 #pragma mark iq set
-
+ #if TARGET_OS_IPHONE
 -(void) setPushEnableWithNode:(NSString *)node andSecret:(NSString *)secret
 {
     MLXMLNode* enableNode =[[MLXMLNode alloc] init];
@@ -102,6 +105,7 @@
     [secretFieldNode.children addObject:secretValueNode];
     [xNode.children addObject:secretFieldNode];
 }
+#endif
 
 -(void) setPushDisableWithNode:(NSString *)node
 {

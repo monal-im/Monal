@@ -547,7 +547,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
     //get file type
     CFStringRef UTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (__bridge CFStringRef)@"jpg", NULL);
     NSString *mimeType = (__bridge_transfer NSString *)(UTTypeCopyPreferredTagWithClass (UTI, kUTTagClassMIMEType));
-
+    CFRelease(UTI);
     [self httpUploadData:fileData withFilename:fileName andType:mimeType toContact:contact onAccount:accountNo withCompletionHandler:completion];
 
 }
@@ -560,7 +560,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
     //get file type
     CFStringRef UTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (__bridge CFStringRef)fileURL.pathExtension, NULL);
     NSString *mimeType = (__bridge NSString *)(UTTypeCopyPreferredTagWithClass (UTI, kUTTagClassMIMEType));
-
+    CFRelease(UTI);
     //get data
     NSData *fileData = [[NSData alloc] initWithContentsOfURL:fileURL];
 

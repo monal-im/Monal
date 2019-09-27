@@ -562,10 +562,11 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
         [self persistState];
     }
 
-    [_contactsVC clearContactsForAccount:_accountNo];
     [[DataLayer sharedInstance] resetContactsForAccount:_accountNo];
 
     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountStatusChanged object:nil];
+    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountClearContacts object:_accountNo];
+
 
     DDLogInfo(@"Connections closed");
 
@@ -1610,7 +1611,6 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                         //confirmation of set call after we accepted
                         if([iqNode.idval isEqualToString:self.jingle.idval])
                         {
-                            NSArray* nameParts= [iqNode.from componentsSeparatedByString:@"/"];
                             NSString* from= iqNode.user;
 
                             NSString* fullName;
@@ -1727,7 +1727,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                                                              @"user":iqNode.user,
                                                              @"resource":iqNode.resource,
                                                              @"id": iqNode.idval,
-                                                             kAccountID:_accountNo,
+                                                             kAccountID:self->_accountNo,
                                                              kAccountName: self.fulluser
                                                              };
 
@@ -1870,49 +1870,17 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 
                     if(!recipient)
                     {
-                        recipient= _fulluser;
+                        recipient= self->_fulluser;
                     }
 
 
-                    if([presenceNode.user isEqualToString:_fulluser]) {
+                    if([presenceNode.user isEqualToString:self->_fulluser]) {
                         //ignore self
                     }
                     else {
                         if([presenceNode.type isEqualToString:kpresencesSubscribe])
                         {
-
-                            dispatch_async(dispatch_get_main_queue(), ^{
-#if TARGET_OS_IPHONE
-
-                                NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"Do you wish to allow %@ to add you to their contacts?", nil), presenceNode.from ];
-                                RIButtonItem* cancelButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"No", nil) action:^{
-                                    [self rejectFromRoster:presenceNode.from];
-
-                                }];
-
-                                RIButtonItem* yesButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Yes", nil) action:^{
-                                    [self approveToRoster:presenceNode.from];
-                                    [self addToRoster:presenceNode.from];
-
-                                }];
-
-                                UIAlertView* alert =[[UIAlertView alloc] initWithTitle:@"Approve Contact" message:messageString cancelButtonItem:cancelButton otherButtonItems:yesButton, nil];
-                                [alert show];
-#else
-                                [self.contactsVC showAuthRequestForContact:presenceNode.from  withCompletion:^(BOOL allowed) {
-
-                                    if(allowed)
-                                    {
-                                        [self approveToRoster:presenceNode.from];
-                                        [self addToRoster:presenceNode.from];
-                                    } else {
-                                        [self rejectFromRoster:presenceNode.from];
-                                    }
-
-                                }];
-
-#endif
-                            });
+                            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountClearContacts object:@{@"account":[self->_accountNo copy], @"from":[presenceNode.from copy]}];
 
                         }
 
@@ -3032,8 +3000,8 @@ if(self.airDrop) {
 
 -(void) initSession
 {
-    [_contactsVC clearContactsForAccount:_accountNo];
-
+    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountClearContacts object:_accountNo];
+    
     //now we are bound
     _accountState=kStateBound;
     [self postConnectNotification];

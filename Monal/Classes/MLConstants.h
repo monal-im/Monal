@@ -27,11 +27,12 @@
 #define kMLMAMPref @"kMLMAMPref"
 #define kMLMAMMore @"kMLMAMMore"
 
-
 #define kMonalCallStartedNotice @"kMonalCallStartedNotice"
 #define kMonalCallRequestNotice @"kMonalCallRequestNotice"
 
 #define kMonalAccountStatusChanged @"kMonalAccountStatusChanged"
+#define kMonalAccountClearContacts @"kMonalAccountClearContacts"
+#define kMonalAccountAuthRequest @"kMonalAccountAuthRequest"
 
 #define kMonalContactRefresh @"kMonalContactRefresh"
 #define kMonalRefreshContacts @"kMonalRefreshContacts"

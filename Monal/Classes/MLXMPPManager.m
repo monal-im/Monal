@@ -252,9 +252,9 @@ An array of Dics what have timers to make sure everything was sent
 -(void) connectAccount:(NSString*) accountNo
 {
     [[DataLayer sharedInstance] accountListWithCompletion:^(NSArray *result) {
-        dispatch_async(_netQueue, ^{
-            _accountList=result;
-            for (NSDictionary* account in _accountList)
+        dispatch_async(self->_netQueue, ^{
+            self->_accountList=result;
+            for (NSDictionary* account in self->_accountList)
             {
                 if([[account objectForKey:kAccountID] integerValue]==[accountNo integerValue])
                 {

@@ -307,8 +307,6 @@ An array of Dics what have timers to make sure everything was sent
     {
         // ask fro temp pass if not oauth
     }
-     xmppAccount.contactsVC=self.contactVC;
-   // xmppAccount.registration=YES;
 
     [xmppAccount setupSignal];
 

@@ -150,13 +150,6 @@ typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFie
 //calculated
 @property (nonatomic,strong, readonly) NSString* versionHash;
 
-#if TARGET_OS_IPHONE
-@property (nonatomic,weak) ContactsViewController* contactsVC;
-#else
-@property (nonatomic,weak) MLContactsViewController* contactsVC;
-#endif
-//UI
-
 @property (nonatomic,strong) NSDate* connectedTime;
 
 #ifndef DISABLE_OMEMO

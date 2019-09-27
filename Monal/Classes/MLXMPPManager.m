@@ -546,7 +546,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 
     //get file type
     CFStringRef UTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (__bridge CFStringRef)@"jpg", NULL);
-    NSString *mimeType = (__bridge NSString *)(UTTypeCopyPreferredTagWithClass (UTI, kUTTagClassMIMEType));
+    NSString *mimeType = (__bridge_transfer NSString *)(UTTypeCopyPreferredTagWithClass (UTI, kUTTagClassMIMEType));
 
     [self httpUploadData:fileData withFilename:fileName andType:mimeType toContact:contact onAccount:accountNo withCompletionHandler:completion];
 
@@ -1010,6 +1010,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
                                 if([jidParts count]>1) {
                                     recipient= jidParts[0];
                                 }
+                                if(!recipient) return; // this shouldnt happen
 
                                 NSDictionary* userDic=@{@"from":messageNode.from,
                                                         @"actuallyfrom":actuallyFrom,

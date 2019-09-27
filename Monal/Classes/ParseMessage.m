@@ -318,7 +318,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         _messageBuffer=nil;
     }
 
-    if([State isEqualToString:@"OMEMO"] && [elementName isEqualToString:@"key"])
+    if([State isEqualToString:@"OMEMO"] && [elementName isEqualToString:@"key"] &&_messageBuffer)
     {
         [self.currentKey setObject:[_messageBuffer copy] forKey:@"key"];
         [self.signalKeys addObject:self.currentKey];

@@ -346,9 +346,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     NSString *ext = [filename componentsSeparatedByString:@"."].lastObject;
 
     CFStringRef UTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (__bridge CFStringRef)ext, NULL);
-    NSString *mimeType = (__bridge NSString *)(UTTypeCopyPreferredTagWithClass (UTI, kUTTagClassMIMEType));
+    NSString *mimeType = (__bridge_transfer NSString *)(UTTypeCopyPreferredTagWithClass (UTI, kUTTagClassMIMEType));
     if(!mimeType) mimeType=@"application/octet-stream";
-    
     
     [self uploadFile:filename andType:mimeType withData:data];
 }
@@ -673,7 +672,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
          NSString *ext = [filename componentsSeparatedByString:@"."].lastObject;
          
          CFStringRef UTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (__bridge CFStringRef)ext, NULL);
-         NSString *mimeType = (__bridge NSString *)(UTTypeCopyPreferredTagWithClass (UTI, kUTTagClassMIMEType));
+         NSString *mimeType = (__bridge_transfer NSString *)(UTTypeCopyPreferredTagWithClass (UTI, kUTTagClassMIMEType));
          if(!mimeType) mimeType=@"application/octet-stream";
          
          if(attachmentData)

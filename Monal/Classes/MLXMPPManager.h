@@ -10,11 +10,6 @@
 #import "Reachability.h"
 #import "xmpp.h"
 
-#if TARGET_OS_IPHONE
-#import "ContactsViewController.h"
-#else
-#endif
-
 #define kMonalNetQueue "im.monal.netQueue"
 #define kMonalConnectedListQueue "im.monal.connectedListQueue"
 

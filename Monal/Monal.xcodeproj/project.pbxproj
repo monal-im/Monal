@@ -178,6 +178,7 @@
 		26347D861790FFDE006FF64F /* MLInfoCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 26347D851790FFDE006FF64F /* MLInfoCell.m */; };
 		26352EA8177D222600E2C8FF /* MLXMPPManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26352EA7177D222600E2C8FF /* MLXMPPManager.m */; };
 		2636C43F177BD58C001CA71F /* XMPPEdit.m in Sources */ = {isa = PBXBuildFile; fileRef = 2636C43E177BD58C001CA71F /* XMPPEdit.m */; };
+		2638008B2374816D00144929 /* NotificaionService.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 260773C0232FC4E800BFD50F /* NotificaionService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		2638DAE71B68F3AB00DF05AC /* MLPresenceSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = 2638DAE61B68F3AB00DF05AC /* MLPresenceSettings.m */; };
 		2638DAEB1B68F3D400DF05AC /* MLAccountSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = 2638DAE91B68F3D400DF05AC /* MLAccountSettings.m */; };
 		2638DAEF1B68F3EF00DF05AC /* MLDisplaySettings.m in Sources */ = {isa = PBXBuildFile; fileRef = 2638DAEE1B68F3EF00DF05AC /* MLDisplaySettings.m */; };
@@ -461,6 +462,13 @@
 			remoteGlobalIDString = 1D6058900D05DD3D006BFB54;
 			remoteInfo = Monal;
 		};
+		263800892374814000144929 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 260773BF232FC4E800BFD50F;
+			remoteInfo = NotificaionService;
+		};
 		266272C71B27DB8100C1CD49 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
@@ -491,6 +499,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
+				2638008B2374816D00144929 /* NotificaionService.appex in Embed App Extensions */,
 				26AA701C2146BBB900598605 /* shareSheet.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
@@ -2237,6 +2246,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				2638008A2374814000144929 /* PBXTargetDependency */,
 				2675EF5818B989170059C5C3 /* PBXTargetDependency */,
 				26AA701B2146BBB900598605 /* PBXTargetDependency */,
 			);
@@ -3264,6 +3274,11 @@
 			isa = PBXTargetDependency;
 			target = 1D6058900D05DD3D006BFB54 /* Monal */;
 			targetProxy = 2630FE351AD550C00079F5C0 /* PBXContainerItemProxy */;
+		};
+		2638008A2374814000144929 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 260773BF232FC4E800BFD50F /* NotificaionService */;
+			targetProxy = 263800892374814000144929 /* PBXContainerItemProxy */;
 		};
 		266272C81B27DB8100C1CD49 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;

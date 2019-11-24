@@ -17,6 +17,11 @@ NS_ASSUME_NONNULL_BEGIN
 -(void) postToPushServer:(NSString *) token;
 -(void) unregisterPush;
 
+/**
+ Only for upgrade to ios 13. To be removed later
+ */
+-(void) unregisterVOIPPush;
+
 @end
 
 NS_ASSUME_NONNULL_END

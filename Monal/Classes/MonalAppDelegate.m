@@ -212,7 +212,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             //no more voip mode after ios 13
             if(![[NSUserDefaults standardUserDefaults] boolForKey:@"HasUpgradedPushiOS13"]) {
                 MLPush *push = [[MLPush alloc] init];
-                [push unregisterPush];
+                [push unregisterVOIPPush];
                 [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"HasUpgradedPushiOS13"];
             }
 

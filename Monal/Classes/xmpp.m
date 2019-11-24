@@ -561,7 +561,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
     [[DataLayer sharedInstance] resetContactsForAccount:_accountNo];
 
     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountStatusChanged object:nil];
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountClearContacts object:_accountNo];
+    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountClearContacts object:nil userInfo:@{kAccountID:_accountNo}];
 
 
     DDLogInfo(@"Connections closed");
@@ -1876,7 +1876,8 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                     else {
                         if([presenceNode.type isEqualToString:kpresencesSubscribe])
                         {
-                            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountClearContacts object:@{@"account":[self->_accountNo copy], @"from":[presenceNode.from copy]}];
+                            //TODO notify the sub screen
+//                            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountClearContacts object:@{@"account":[self->_accountNo copy], @"from":[presenceNode.from copy]}];
 
                         }
 
@@ -2996,7 +2997,7 @@ if(self.airDrop) {
 
 -(void) initSession
 {
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountClearContacts object:_accountNo];
+    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountClearContacts object:self userInfo:@{kAccountID:self.accountNo}];
     
     //now we are bound
     _accountState=kStateBound;

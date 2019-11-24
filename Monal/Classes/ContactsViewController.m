@@ -111,6 +111,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(addOnlineUser:) name: kMonalContactOnlineNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshDisplay) name:kMonalAccountStatusChanged object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(clearAccount:) name:kMonalAccountClearContacts object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshContact:) name: kMonalContactRefresh object:nil];
     
     
@@ -480,6 +481,16 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }];
     });
     
+}
+
+-(void) clearAccount:(NSNotification *) notification
+{
+    NSDictionary* user = notification.userInfo;
+    NSString *accountNo = [user objectForKey:kAccountID];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self clearContactsForAccount:accountNo];
+    });
+                   
 }
 
 -(void) clearContactsForAccount: (NSString*) accountNo

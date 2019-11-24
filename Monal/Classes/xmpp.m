@@ -13,10 +13,6 @@
 #import "EncodingTools.h"
 #import "MLXMPPManager.h"
 
-#if TARGET_OS_IPHONE
-#import "UIAlertView+Blocks.h"
-#endif
-
 #import "SAMKeychain.h"
 #import "MLImageManager.h"
 

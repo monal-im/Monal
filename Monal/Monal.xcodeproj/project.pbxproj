@@ -417,9 +417,6 @@
 		26D59D9020711969006F1DEE /* MLEditGroupViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D59D8F20711969006F1DEE /* MLEditGroupViewController.m */; };
 		26D59D9320714F32006F1DEE /* UIColor+Theme.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D59D9220714F32006F1DEE /* UIColor+Theme.m */; };
 		26D89F061A890672009B147C /* MLSwitchCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D89F051A890672009B147C /* MLSwitchCell.m */; };
-		26DA16E017C302BC00D0065E /* RIButtonItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 26DA16DB17C302BC00D0065E /* RIButtonItem.m */; };
-		26DA16E117C302BC00D0065E /* UIActionSheet+Blocks.m in Sources */ = {isa = PBXBuildFile; fileRef = 26DA16DD17C302BC00D0065E /* UIActionSheet+Blocks.m */; };
-		26DA16E217C302BC00D0065E /* UIAlertView+Blocks.m in Sources */ = {isa = PBXBuildFile; fileRef = 26DA16DF17C302BC00D0065E /* UIAlertView+Blocks.m */; };
 		26E2F7DA17C6FD9400C3C8EF /* MLTabBarController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26E2F7D917C6FD9400C3C8EF /* MLTabBarController.m */; };
 		26E3ED871FEC0CB7008ABDA5 /* MLServerDetails.m in Sources */ = {isa = PBXBuildFile; fileRef = 26E3ED861FEC0CB7008ABDA5 /* MLServerDetails.m */; };
 		26E3ED8B1FEC395D008ABDA5 /* MLServerDetailsVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 26E3ED8A1FEC395D008ABDA5 /* MLServerDetailsVC.m */; };
@@ -954,12 +951,6 @@
 		26D59D9220714F32006F1DEE /* UIColor+Theme.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "UIColor+Theme.m"; sourceTree = "<group>"; };
 		26D89F041A890672009B147C /* MLSwitchCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLSwitchCell.h; sourceTree = "<group>"; };
 		26D89F051A890672009B147C /* MLSwitchCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLSwitchCell.m; sourceTree = "<group>"; };
-		26DA16DA17C302BC00D0065E /* RIButtonItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RIButtonItem.h; sourceTree = "<group>"; };
-		26DA16DB17C302BC00D0065E /* RIButtonItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RIButtonItem.m; sourceTree = "<group>"; };
-		26DA16DC17C302BC00D0065E /* UIActionSheet+Blocks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIActionSheet+Blocks.h"; sourceTree = "<group>"; };
-		26DA16DD17C302BC00D0065E /* UIActionSheet+Blocks.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIActionSheet+Blocks.m"; sourceTree = "<group>"; };
-		26DA16DE17C302BC00D0065E /* UIAlertView+Blocks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIAlertView+Blocks.h"; sourceTree = "<group>"; };
-		26DA16DF17C302BC00D0065E /* UIAlertView+Blocks.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIAlertView+Blocks.m"; sourceTree = "<group>"; };
 		26DE9C050FEEFD00000596F6 /* DB definitions */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "DB definitions"; sourceTree = "<group>"; };
 		26E2F7D817C6FD9400C3C8EF /* MLTabBarController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MLTabBarController.h; path = ../MLTabBarController.h; sourceTree = "<group>"; };
 		26E2F7D917C6FD9400C3C8EF /* MLTabBarController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MLTabBarController.m; path = ../MLTabBarController.m; sourceTree = "<group>"; };
@@ -1690,7 +1681,6 @@
 				1D3623240D0F684500981E51 /* MonalAppDelegate.h */,
 				1D3623250D0F684500981E51 /* MonalAppDelegate.m */,
 				26715E5E17650AF900684F3D /* View Controllers */,
-				26DFD4A615666B6C007A1621 /* External */,
 				8D1107310486CEB800E47090 /* Monal-Info.plist */,
 				26D59D9120714F32006F1DEE /* UIColor+Theme.h */,
 				26D59D9220714F32006F1DEE /* UIColor+Theme.m */,
@@ -1916,19 +1906,6 @@
 			path = OAuth2Client;
 			sourceTree = "<group>";
 		};
-		26DA16D917C302BC00D0065E /* UIAlertView-Blocks */ = {
-			isa = PBXGroup;
-			children = (
-				26DA16DA17C302BC00D0065E /* RIButtonItem.h */,
-				26DA16DB17C302BC00D0065E /* RIButtonItem.m */,
-				26DA16DC17C302BC00D0065E /* UIActionSheet+Blocks.h */,
-				26DA16DD17C302BC00D0065E /* UIActionSheet+Blocks.m */,
-				26DA16DE17C302BC00D0065E /* UIAlertView+Blocks.h */,
-				26DA16DF17C302BC00D0065E /* UIAlertView+Blocks.m */,
-			);
-			path = "UIAlertView-Blocks";
-			sourceTree = "<group>";
-		};
 		26DB52111777C83100B50353 /* Modal views */ = {
 			isa = PBXGroup;
 			children = (
@@ -1958,14 +1935,6 @@
 				2609B5281FD5B26800F09FA1 /* MLSplitViewDelegate.m */,
 			);
 			name = "Tab views";
-			sourceTree = "<group>";
-		};
-		26DFD4A615666B6C007A1621 /* External */ = {
-			isa = PBXGroup;
-			children = (
-				26DA16D917C302BC00D0065E /* UIAlertView-Blocks */,
-			);
-			name = External;
 			sourceTree = "<group>";
 		};
 		26E3ED881FEC3920008ABDA5 /* Account */ = {
@@ -3019,8 +2988,6 @@
 				265BD15021A2D15600A59251 /* MLBackgroundSettings.m in Sources */,
 				26F396D12196836700EF5720 /* MLLogInViewController.m in Sources */,
 				26A8ADD717C031BA0033990D /* ContactDetails.m in Sources */,
-				26DA16E017C302BC00D0065E /* RIButtonItem.m in Sources */,
-				26DA16E117C302BC00D0065E /* UIActionSheet+Blocks.m in Sources */,
 				2644D4921FF0064C00F46AB5 /* MLChatImageCell.m in Sources */,
 				26F396D621968A4300EF5720 /* GLCapsuleView.m in Sources */,
 				2678A98B185A8320003AF53B /* ChatLogAccountDetailViewController.m in Sources */,
@@ -3028,7 +2995,6 @@
 				26D51CCC1E2674D700141E04 /* NSString+NXOAuth2.m in Sources */,
 				26B2A4EF1B73097500272E63 /* DDASLLogCapture.m in Sources */,
 				26D0940C22A33E9B009C7AEF /* MLRegisterViewController.m in Sources */,
-				26DA16E217C302BC00D0065E /* UIAlertView+Blocks.m in Sources */,
 				26B2A4FD1B73097500272E63 /* DDMultiFormatter.m in Sources */,
 				262E51921AD8CAC600788351 /* MLButtonCell.m in Sources */,
 				26C4B22421B6B91300610282 /* MLDNSLookup.m in Sources */,

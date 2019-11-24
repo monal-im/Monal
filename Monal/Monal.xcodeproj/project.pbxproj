@@ -1683,11 +1683,9 @@
 		26B2A4B41B73040000272E63 /* Monal-iOS */ = {
 			isa = PBXGroup;
 			children = (
-				26C01305233025DA001D411D /* MLPush.h */,
-				26C01306233025DA001D411D /* MLPush.m */,
 				2649CE521C51B84C00CD1E80 /* Launch Screen.storyboard */,
 				26B2A4BA1B73061400272E63 /* Images.xcassets */,
-				26B2A4B71B7304DD00272E63 /* Managers */,
+				26B2A4B71B7304DD00272E63 /* Notifications */,
 				26B2A4B61B73049B00272E63 /* tools */,
 				1D3623240D0F684500981E51 /* MonalAppDelegate.h */,
 				1D3623250D0F684500981E51 /* MonalAppDelegate.m */,
@@ -1722,13 +1720,15 @@
 			name = tools;
 			sourceTree = "<group>";
 		};
-		26B2A4B71B7304DD00272E63 /* Managers */ = {
+		26B2A4B71B7304DD00272E63 /* Notifications */ = {
 			isa = PBXGroup;
 			children = (
+				26C01305233025DA001D411D /* MLPush.h */,
+				26C01306233025DA001D411D /* MLPush.m */,
 				26EE8B1D179B67FA006781F3 /* MLNotificationManager.h */,
 				26EE8B1E179B67FA006781F3 /* MLNotificationManager.m */,
 			);
-			name = Managers;
+			name = Notifications;
 			sourceTree = "<group>";
 		};
 		26B2A4CC1B73097500272E63 /* DDLog */ = {

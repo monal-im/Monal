@@ -1024,62 +1024,62 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) deleteRowAtIndexPath:(NSIndexPath *) indexPath
 {
-        NSDictionary* contact;
-        if ((indexPath.section==1) && (indexPath.row<=[_contacts count]) ) {
-            contact=[_contacts objectAtIndex:indexPath.row];
+    NSDictionary* contact;
+    if ((indexPath.section==1) && (indexPath.row<=[_contacts count]) ) {
+        contact=[_contacts objectAtIndex:indexPath.row];
+    }
+    else if((indexPath.section==2) && (indexPath.row<=[_offlineContacts count]) ) {
+        contact=[_offlineContacts objectAtIndex:indexPath.row];
+    }
+    else {
+        //we cannot delete here
+        return;
+    }
+    
+    NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"Remove %@ from contacts?", nil),[contact objectForKey:@"full_name"] ];
+    
+    BOOL isMUC=[[DataLayer sharedInstance] isBuddyMuc:[contact objectForKey:@"buddy_name"] forAccount:[contact objectForKey:@"account_id"]];
+    if(isMUC)
+    {
+        messageString =@"Leave this converstion?";
+    }
+    
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:messageString
+                                                                   message:nil preferredStyle:UIAlertControllerStyleActionSheet];
+    [alert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+        [alert dismissViewControllerAnimated:YES completion:nil];
+    }]];
+    
+    [alert addAction:[UIAlertAction actionWithTitle:@"Yes" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
+        if(isMUC) {
+            [[MLXMPPManager sharedInstance] leaveRoom:[contact objectForKey:@"buddy_name"] withNick:[contact objectForKey:@"muc_nick"] forAccountId: [NSString stringWithFormat:@"%@",[contact objectForKey:@"account_id"]]];
         }
-        else if((indexPath.section==2) && (indexPath.row<=[_offlineContacts count]) ) {
-            contact=[_offlineContacts objectAtIndex:indexPath.row];
-        }
-        else {
-            //we cannot delete here
-            return;
+        else  {
+            [[MLXMPPManager sharedInstance] removeContact:contact];
         }
         
-        NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"Remove %@ from contacts?", nil),[contact objectForKey:@"full_name"] ];
-        
-        BOOL isMUC=[[DataLayer sharedInstance] isBuddyMuc:[contact objectForKey:@"buddy_name"] forAccount:[contact objectForKey:@"account_id"]];
-        if(isMUC)
-        {
-            messageString =@"Leave this converstion?";
-        }
-        
-        
-        RIButtonItem* cancelButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Cancel", nil) action:^{
-            
-        }];
-        
-        RIButtonItem* yesButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Yes", nil) action:^{
-            if(isMUC) {
-                [[MLXMPPManager sharedInstance] leaveRoom:[contact objectForKey:@"buddy_name"] withNick:[contact objectForKey:@"muc_nick"] forAccountId: [NSString stringWithFormat:@"%@",[contact objectForKey:@"account_id"]]];
+        if(self.searchResults.count==0) {
+            [self.contactsTable beginUpdates];
+            if ((indexPath.section==1) && (indexPath.row<=[self.contacts count]) ) {
+                [self.contacts removeObjectAtIndex:indexPath.row];
             }
-            else  {
-                [[MLXMPPManager sharedInstance] removeContact:contact];
+            else if((indexPath.section==2) && (indexPath.row<=[self.offlineContacts count]) ) {
+                [self.offlineContacts removeObjectAtIndex:indexPath.row];
             }
-            
-            if(self.searchResults.count==0) {
-                [self.contactsTable beginUpdates];
-                if ((indexPath.section==1) && (indexPath.row<=[self.contacts count]) ) {
-                    [self.contacts removeObjectAtIndex:indexPath.row];
-                }
-                else if((indexPath.section==2) && (indexPath.row<=[self.offlineContacts count]) ) {
-                    [self.offlineContacts removeObjectAtIndex:indexPath.row];
-                }
-                else {
-                    //nothing to delete just end
-                    [self.contactsTable endUpdates];
-                    return;
-                }
-                
-                [self.contactsTable deleteRowsAtIndexPaths:@[indexPath]
-                                      withRowAnimation:UITableViewRowAnimationAutomatic];
+            else {
+                //nothing to delete just end
                 [self.contactsTable endUpdates];
+                return;
             }
             
-        }];
+            [self.contactsTable deleteRowsAtIndexPaths:@[indexPath]
+                                      withRowAnimation:UITableViewRowAnimationAutomatic];
+            [self.contactsTable endUpdates];
+        }
         
-        UIActionSheet* sheet =[[UIActionSheet alloc] initWithTitle:messageString cancelButtonItem:cancelButton destructiveButtonItem:yesButton otherButtonItems: nil];
-        [sheet showFromTabBar:self.presentationTabBarController.tabBar];
+    }]];
+    
+    [self presentViewController:alert animated:YES completion:nil];
 }
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {

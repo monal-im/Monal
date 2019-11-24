@@ -530,43 +530,46 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     xmpp* account=[[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
     if(!account.supportsHTTPUpload && !self.restClient)
     {
-
-        UIAlertView *addError = [[UIAlertView alloc]
-                                 initWithTitle:@"Error"
-                                 message:@"This server does not appear to support HTTP file uploads (XEP-0363). Please ask the administrator to enable it. You can also link to DropBox in settings and use that to share files."
-                                 delegate:nil cancelButtonTitle:@"Close"
-                                 otherButtonTitles: nil] ;
-        [addError show];
-
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Error"
+                                                                       message:@"This server does not appear to support HTTP file uploads (XEP-0363). Please ask the administrator to enable it. You can also link to DropBox in settings and use that to share files." preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            [alert dismissViewControllerAnimated:YES completion:nil];
+        }]];
+        [self presentViewController:alert animated:YES completion:nil];
+        
         return;
     }
-
+    
     UIImagePickerController *imagePicker = [[UIImagePickerController alloc] init];
     imagePicker.delegate =self;
-
-    RIButtonItem* cancelButton = [RIButtonItem itemWithLabel:NSLocalizedString(@"Cancel", nil) action:^{
-
-    }];
-
-    RIButtonItem* cameraButton = [RIButtonItem itemWithLabel:@"Camera" action:^{
+    
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Select Image Source"
+                                                                   message:nil preferredStyle:UIAlertControllerStyleActionSheet];
+    
+    [alert addAction:[UIAlertAction actionWithTitle:@"Camera" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         imagePicker.sourceType = UIImagePickerControllerSourceTypeCamera;
         [self presentViewController:imagePicker animated:YES completion:nil];
-    }];
-
-    RIButtonItem* photosButton = [RIButtonItem itemWithLabel:@"Photos" action:^{
-          imagePicker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+    }]];
+    
+    [alert addAction:[UIAlertAction actionWithTitle:@"Photos" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        imagePicker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
         [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
             if(granted)
             {
-                [self presentViewController:imagePicker animated:YES completion:nil];
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self presentViewController:imagePicker animated:YES completion:nil];
+                });
             }
         }];
-
-    }];
-
-    UIActionSheet* sheet =[[UIActionSheet alloc] initWithTitle:@"Select Image Source" cancelButtonItem:cancelButton destructiveButtonItem:nil otherButtonItems: cameraButton, photosButton,nil];
-    [sheet showFromTabBar:self.tabBarController.tabBar];
-
+        
+    }]];
+    
+    
+    [alert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+        [alert dismissViewControllerAnimated:YES completion:nil];
+    }]];
+    [self presentViewController:alert animated:YES completion:nil];
+    
 }
 
 

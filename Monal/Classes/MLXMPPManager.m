@@ -12,8 +12,12 @@
 #import "MLMessageProcessor.h"
 #import "ParseMessage.h"
 
+#ifndef TARGET_IS_EXTENSION
 #if TARGET_OS_IPHONE
 #import "MonalAppDelegate.h"
+@import MobileCoreServices;
+#endif
+#else
 @import MobileCoreServices;
 #endif
 
@@ -820,12 +824,14 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 #pragma mark message signals
 -(void) handleNewMessage:(NSNotification *)notification
 {
+#ifndef TARGET_IS_EXTENSION
 #if TARGET_OS_IPHONE
     dispatch_async(dispatch_get_main_queue(), ^{
     MonalAppDelegate* appDelegate= (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
     [appDelegate updateUnread];
     });
 #else
+#endif
 #endif
 }
 

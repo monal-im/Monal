@@ -623,6 +623,7 @@
 		26158AF31FFA8A6A00E53BDC /* opensource.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = opensource.html; sourceTree = "<group>"; };
 		26189C89238A526500EAD70C /* MLSubscriptionTableViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLSubscriptionTableViewController.h; sourceTree = "<group>"; };
 		26189C8A238A526500EAD70C /* MLSubscriptionTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLSubscriptionTableViewController.m; sourceTree = "<group>"; };
+		26189D04238B9E9F00EAD70C /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
 		261A627E176C055400059090 /* ContactsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContactsViewController.h; sourceTree = "<group>"; };
 		261A627F176C055400059090 /* ContactsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ContactsViewController.m; sourceTree = "<group>"; };
 		261A6283176C156500059090 /* ActiveChatsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActiveChatsViewController.h; sourceTree = "<group>"; };
@@ -2086,6 +2087,7 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				26189D04238B9E9F00EAD70C /* CoreServices.framework */,
 				262265D521441FA300B18F83 /* libssl.a */,
 				262265D12144156A00B18F83 /* libcrypto.a */,
 				262265CF2144148A00B18F83 /* libapple_crypto.tbd */,

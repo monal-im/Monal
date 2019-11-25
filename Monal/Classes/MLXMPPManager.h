@@ -171,12 +171,6 @@ Attempts to upload a file to the  HTTP upload service
 
 -(void) setPriority:(NSInteger) priority;
 
-#if TARGET_OS_IPHONE
-@property (nonatomic, weak) ContactsViewController* contactVC;
-#else
-@property (nonatomic, weak) MLContactsViewController* contactVC;
-#endif
-
 @property (nonatomic, strong, readonly) NSMutableArray* connectedXMPP;
 
 

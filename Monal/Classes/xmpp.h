@@ -10,13 +10,6 @@
 #import "MLXMLNode.h"
 #import "EncodingTools.h"
 
-
-#if TARGET_OS_IPHONE
-#import "ContactsViewController.h"
-#else
-#import "MLContactsViewController.h"
-#endif
-
 #import "MLConstants.h"
 #import "jingleCall.h"
 #import "MLDNSLookup.h"

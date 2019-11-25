@@ -39,6 +39,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 }
 
 -(void) postToPushServer:(NSString *) token {
+    #ifndef TARGET_IS_EXTENSION
     NSString *node = [[[UIDevice currentDevice] identifierForVendor] UUIDString];
     
     NSString *post = [NSString stringWithFormat:@"type=apns&node=%@&token=%@", [node stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]],
@@ -88,11 +89,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             
         }] resume];
     });
+#endif
 }
 
 
 -(void) unregisterPush
 {
+    #ifndef TARGET_IS_EXTENSION
     NSString *node = [[[UIDevice currentDevice] identifierForVendor] UUIDString];
     
     NSString *post = [NSString stringWithFormat:@"type=apns&node=%@", [node stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]]];
@@ -138,6 +141,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             
         }] resume];
     });
+#endif
     
 }
 
@@ -148,6 +152,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
  */
 -(void) unregisterVOIPPush
 {
+    #ifndef TARGET_IS_EXTENSION
     NSString *node = [[[UIDevice currentDevice] identifierForVendor] UUIDString];
     
     NSString *post = [NSString stringWithFormat:@"type=apns&node=%@", [node stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]]];
@@ -194,6 +199,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             
         }] resume];
     });
-    
+#endif
 }
 @end

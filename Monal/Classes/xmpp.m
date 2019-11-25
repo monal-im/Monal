@@ -828,12 +828,14 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 
 -(void) sendPing
 {
+    #ifndef TARGET_IS_EXTENSION
 #if TARGET_OS_IPHONE
     dispatch_async(dispatch_get_main_queue(), ^{
         if(([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
            || ([UIApplication sharedApplication].applicationState==UIApplicationStateInactive )) {
             return;
         }
+#endif
 #endif
 
         if(self.accountState<kStateReconnecting  && !self->_reconnectScheduled)
@@ -874,8 +876,10 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
             }
         }
     }
+        #ifndef TARGET_IS_EXTENSION
 #if TARGET_OS_IPHONE
     });
+#endif
 #endif
 }
 
@@ -1132,11 +1136,12 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
         [self.unAckedStanzas removeAllObjects];
         [self persistState];
     }
-
+#ifndef TARGET_IS_EXTENSION
 #if TARGET_OS_IPHONE
     dispatch_async(dispatch_get_main_queue(), ^{
         if([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground)
         {
+#endif
 #endif
     /**
      Send appends to the unacked stanzas. Not removing it now will create an infinite loop.
@@ -1154,9 +1159,12 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
         }];
           [self persistState];
     }]];
+            
+            #ifndef TARGET_IS_EXTENSION
 #if TARGET_OS_IPHONE
         }
     });
+#endif
 #endif
 }
 /**
@@ -1461,10 +1469,12 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 
                         //OMEMO
 #ifndef DISABLE_OMEMO
+                        #ifndef TARGET_IS_EXTENSION
 #if TARGET_OS_IPHONE
                         dispatch_async(dispatch_get_main_queue(), ^{
                             if([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground)
                             {
+#endif
 #endif
                                 [self.processQueue addOperationWithBlock:^{
                                     NSString *source= iqNode.from;
@@ -1535,9 +1545,11 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 
                                     }
                                 }];
+                                #ifndef TARGET_IS_EXTENSION
 #if TARGET_OS_IPHONE
                             }
                         });
+#endif
 #endif
 #endif
 
@@ -1929,7 +1941,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                                     // do not do this in the background
 
                                     __block  BOOL checkChange = YES;
-
+#ifndef TARGET_IS_EXTENSION
 
 #if TARGET_OS_IPHONE
                                     //TODO maybe not a good idea to do this. but bad to crash as well.  fix later.
@@ -1939,6 +1951,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                                             checkChange=NO;
                                         }
                                     });
+#endif
 #endif
                                     if(checkChange)
                                     {
@@ -2256,13 +2269,15 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                         //if resume failed. bind  a nee resource like normal
                         [self bindResource];
                         self.pushEnabled=NO;
-
+#ifndef TARGET_IS_EXTENSION
 #if TARGET_OS_IPHONE
                         if(self.supportsPush)
                         {
                             [self enablePush];
                         }
 #endif
+#endif
+                        
 
 #ifndef DISABLE_OMEMO
                         [self sendSignalInitialStanzas];
@@ -3233,7 +3248,7 @@ if(!self.supportsSM3)
     NSString* unhashed=[NSString stringWithFormat:@"client/phone//Monal %@<%@", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"], [XMPPIQ featuresString]];
 
     NSData* hashed;
-    //<http://jabber.org/protocol/offline<
+    // <http://jabber.org/protocol/offline<
     unsigned char digest[CC_SHA1_DIGEST_LENGTH];
     NSData *stringBytes = [unhashed dataUsingEncoding: NSUTF8StringEncoding]; /* or some other encoding */
     if (CC_SHA1([stringBytes bytes], (UInt32)[stringBytes length], digest)) {

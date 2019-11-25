@@ -11,10 +11,14 @@
 //  the full licence.
 //
 
+#ifndef TARGET_IS_EXTENSION
 #if TARGET_OS_IPHONE
 #import <UIKit/UIKit.h>
 #else
 #import <Cocoa/Cocoa.h>
+#endif
+#else
+#import <UIKit/UIKit.h>
 #endif
 
 
@@ -518,12 +522,14 @@ NSString * const kNXOAuth2AccountStoreAccountType = @"kNXOAuth2AccountStoreAccou
     NSURL *redirectURL = [configuration objectForKey:kNXOAuth2AccountStoreConfigurationRedirectURL];
     NSURL *preparedURL = [client authorizationURLWithRedirectURL:redirectURL];
 
+#ifndef TARGET_IS_EXTENSION
 #if TARGET_OS_IPHONE
         [[UIApplication sharedApplication] openURL:preparedURL];
 #else
         [[NSWorkspace sharedWorkspace] openURL:preparedURL];
 #endif
 #endif
+#endif 
 }
 
 - (void)oauthClientDidGetAccessToken:(NXOAuth2Client *)client

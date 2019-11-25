@@ -2967,7 +2967,7 @@ if(self.airDrop) {
     if(!self.visibleState) [presence setInvisible];
 
     [self send:presence];
-
+#ifndef TARGET_IS_EXTENSION
 #if TARGET_OS_IPHONE
     dispatch_async(dispatch_get_main_queue(), ^{
         if([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground)
@@ -2977,6 +2977,7 @@ if(self.airDrop) {
 #if TARGET_OS_IPHONE
         }
     });
+#endif
 #endif
 
 }
@@ -3127,6 +3128,7 @@ if(!self.supportsSM3)
 
 -(void) sendSignalInitialStanzas
 {
+#ifndef TARGET_IS_EXTENSION
 #if TARGET_OS_IPHONE
     dispatch_async(dispatch_get_main_queue(), ^{
         if([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground)
@@ -3137,6 +3139,7 @@ if(!self.supportsSM3)
 #if TARGET_OS_IPHONE
         }
     });
+#endif
 #endif
 }
 
@@ -3648,6 +3651,7 @@ if(!self.supportsSM3)
 
             if(_loggedInOnce)
             {
+#ifndef TARGET_IS_EXTENSION
 #if TARGET_OS_IPHONE
                 dispatch_async(dispatch_get_main_queue(), ^{
                     if(([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
@@ -3657,14 +3661,20 @@ if(!self.supportsSM3)
                         return;
                     } else  {
 #endif
+#endif
+                        
+                        
                         DDLogInfo(@" stream error calling reconnect for account that logged in once ");
                         [self disconnectWithCompletion:^{
                             [self reconnect:5];
                         }];
                         return;
+                        
+#ifndef TARGET_IS_EXTENSION
 #if TARGET_OS_IPHONE
                     }
                 });
+#endif
 #endif
             }
 

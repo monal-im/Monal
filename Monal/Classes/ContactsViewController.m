@@ -85,7 +85,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     appDelegate.splitViewController= self.splitViewController;
     appDelegate.tabBarController = (MLTabBarController *) self.tabBarController;
     
-    [MLXMPPManager sharedInstance].contactVC=self;
 
 }
 

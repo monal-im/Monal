@@ -19,6 +19,7 @@
 #import "IDMPhotoBrowser.h"
 #import "ContactDetails.h"
 #import "MLXMPPActivityItem.h"
+#import "MLImageManager.h"
 
 @import QuartzCore;
 @import MobileCoreServices;

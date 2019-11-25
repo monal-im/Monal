@@ -8,6 +8,10 @@
 
 #import <Foundation/Foundation.h>
 
+#if TARGET_OS_IPHONE
+@import UIKit;
+#endif
+
 
 @interface MLImageManager : NSObject  <NSURLSessionDownloadDelegate>
 

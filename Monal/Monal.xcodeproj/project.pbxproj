@@ -194,6 +194,10 @@
 		26189D06238C790C00EAD70C /* MLPush.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C01306233025DA001D411D /* MLPush.m */; };
 		26189D07238C792800EAD70C /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F7BB411115F8DB00712672 /* Reachability.m */; };
 		26189D08238C793100EAD70C /* EncodingTools.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C6C93178080730004E2E1 /* EncodingTools.m */; };
+		26189D0B238C7BFF00EAD70C /* libjrtplib-static.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */; };
+		26189D0C238C7C5300EAD70C /* DataLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 2601D9A70FBF255D004DB939 /* DataLayer.m */; };
+		26189D0D238C7C5C00EAD70C /* MLImageManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EC411217BDE39E0031304D /* MLImageManager.m */; };
+		26189D0E238C7C8100EAD70C /* MLSignalStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 263AFDFB209B3B35007F9CEE /* MLSignalStore.m */; };
 		261A6281176C055400059090 /* ContactsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A627F176C055400059090 /* ContactsViewController.m */; };
 		261A6285176C156500059090 /* ActiveChatsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A6284176C156500059090 /* ActiveChatsViewController.m */; };
 		261A6288176C157D00059090 /* MLDisplaySettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A6287176C157D00059090 /* MLDisplaySettingsViewController.m */; };
@@ -503,6 +507,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 260499F31B7314F400D11866;
 			remoteInfo = "jrtplib-static-OSX";
+		};
+		26189D09238C7BC200EAD70C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 268BCD55140B25CC0025E4D1;
+			remoteInfo = "jrtplib-static";
 		};
 		2630FE351AD550C00079F5C0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -1116,6 +1127,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				26189D0B238C7BFF00EAD70C /* libjrtplib-static.a in Frameworks */,
 				7B0741173BCE3577462F5625 /* libPods-NotificaionService.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2322,6 +2334,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				26189D0A238C7BC200EAD70C /* PBXTargetDependency */,
 			);
 			name = NotificaionService;
 			productName = NotificaionService;
@@ -3162,6 +3175,7 @@
 				26189CE2238B987D00EAD70C /* NXOAuth2PostBodyPart.m in Sources */,
 				26189CE7238B989400EAD70C /* DDASLLogger.m in Sources */,
 				26189CDD238B987D00EAD70C /* NXOAuth2AccountStore.m in Sources */,
+				26189D0D238C7C5C00EAD70C /* MLImageManager.m in Sources */,
 				26189CE4238B987D00EAD70C /* NXOAuth2Request.m in Sources */,
 				26189CFB238B98C300EAD70C /* ParseA.m in Sources */,
 				26189D02238B98D300EAD70C /* MLDNSLookup.m in Sources */,
@@ -3179,6 +3193,8 @@
 				26189CEC238B989B00EAD70C /* DDDispatchQueueLogFormatter.m in Sources */,
 				26189CF3238B98C300EAD70C /* ParseStream.m in Sources */,
 				26189CE8238B989400EAD70C /* DDFileLogger.m in Sources */,
+				26189D0E238C7C8100EAD70C /* MLSignalStore.m in Sources */,
+				26189D0C238C7C5300EAD70C /* DataLayer.m in Sources */,
 				260773C4232FC4E800BFD50F /* NotificationService.m in Sources */,
 				26189CE0238B987D00EAD70C /* NXOAuth2Constants.m in Sources */,
 				26189CE1238B987D00EAD70C /* NXOAuth2FileStreamWrapper.m in Sources */,
@@ -3383,6 +3399,11 @@
 			isa = PBXTargetDependency;
 			target = 260499F31B7314F400D11866 /* jrtplib-static-OSX */;
 			targetProxy = 26049A541B73157D00D11866 /* PBXContainerItemProxy */;
+		};
+		26189D0A238C7BC200EAD70C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 268BCD55140B25CC0025E4D1 /* jrtplib-static */;
+			targetProxy = 26189D09238C7BC200EAD70C /* PBXContainerItemProxy */;
 		};
 		2630FE361AD550C00079F5C0 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;

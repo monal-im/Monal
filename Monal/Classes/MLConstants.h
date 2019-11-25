@@ -24,6 +24,8 @@
 #define kMLHasRoomsNotice @"kMLHasRoomsNotice"
 #define kMLHasConnectedNotice @"kMLHasConnectedNotice"
 
+#define kMonalPresentChat @"kMonalPresentChat"
+
 #define kMLMAMPref @"kMLMAMPref"
 #define kMLMAMMore @"kMLMAMMore"
 

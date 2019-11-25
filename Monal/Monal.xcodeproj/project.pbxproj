@@ -191,6 +191,9 @@
 		26189D01238B98D300EAD70C /* xmpp.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D0177F08F50039634B /* xmpp.m */; };
 		26189D02238B98D300EAD70C /* MLDNSLookup.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C4B22321B6B91300610282 /* MLDNSLookup.m */; };
 		26189D03238B9A9300EAD70C /* MLXMPPManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26352EA7177D222600E2C8FF /* MLXMPPManager.m */; };
+		26189D06238C790C00EAD70C /* MLPush.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C01306233025DA001D411D /* MLPush.m */; };
+		26189D07238C792800EAD70C /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F7BB411115F8DB00712672 /* Reachability.m */; };
+		26189D08238C793100EAD70C /* EncodingTools.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C6C93178080730004E2E1 /* EncodingTools.m */; };
 		261A6281176C055400059090 /* ContactsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A627F176C055400059090 /* ContactsViewController.m */; };
 		261A6285176C156500059090 /* ActiveChatsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A6284176C156500059090 /* ActiveChatsViewController.m */; };
 		261A6288176C157D00059090 /* MLDisplaySettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A6287176C157D00059090 /* MLDisplaySettingsViewController.m */; };
@@ -3155,6 +3158,7 @@
 				26189CD8238B986800EAD70C /* NSData+NXOAuth2.m in Sources */,
 				26189CD7238B985C00EAD70C /* MLHTTPRequest.m in Sources */,
 				26189D03238B9A9300EAD70C /* MLXMPPManager.m in Sources */,
+				26189D07238C792800EAD70C /* Reachability.m in Sources */,
 				26189CE2238B987D00EAD70C /* NXOAuth2PostBodyPart.m in Sources */,
 				26189CE7238B989400EAD70C /* DDASLLogger.m in Sources */,
 				26189CDD238B987D00EAD70C /* NXOAuth2AccountStore.m in Sources */,
@@ -3198,7 +3202,9 @@
 				26189CD9238B986800EAD70C /* NSString+NXOAuth2.m in Sources */,
 				26189CEE238B98C300EAD70C /* MLMessageProcessor.m in Sources */,
 				26189CDC238B987D00EAD70C /* NXOAuth2Account.m in Sources */,
+				26189D08238C793100EAD70C /* EncodingTools.m in Sources */,
 				26189CD5238B985500EAD70C /* AESGcm.m in Sources */,
+				26189D06238C790C00EAD70C /* MLPush.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

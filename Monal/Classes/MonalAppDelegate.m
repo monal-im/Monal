@@ -14,6 +14,7 @@
 #import "DataLayer.h"
 #import "NXOAuth2AccountStore.h"
 #import "MLPush.h"
+#import "MLImageManager.h"
 
 @import Crashlytics;
 @import Fabric;
@@ -322,7 +323,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     //make sure tab 0 for chat
     if([notification.userInfo objectForKey:@"from"]) {
         [self.tabBarController setSelectedIndex:0];
-       [[MLXMPPManager sharedInstance].contactVC presentChatWithName:[notification.userInfo objectForKey:@"from"] account:[notification.userInfo objectForKey:@"accountNo"] ];
+
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalPresentChat object:nil  userInfo:notification.userInfo];
+        
     }
 }
 

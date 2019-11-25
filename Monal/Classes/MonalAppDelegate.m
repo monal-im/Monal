@@ -95,18 +95,22 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     DDLogInfo(@"incoming voip push notfication: %@", [payload dictionaryPayload]);
     if([UIApplication sharedApplication].applicationState==UIApplicationStateActive) return;
-    
-    dispatch_async(dispatch_get_main_queue(), ^{
-       __block UIBackgroundTaskIdentifier tempTask= [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
-           DDLogInfo(@"voip push wake expiring");
-           [[UIApplication sharedApplication] endBackgroundTask:tempTask];
-            tempTask=UIBackgroundTaskInvalid;
-           [[MLXMPPManager sharedInstance] logoutAllKeepStreamWithCompletion:nil];
-        }];
-        
-        [[MLXMPPManager sharedInstance] connectIfNecessary];
-         DDLogInfo(@"voip push wake complete");
-    });
+    if (@available(iOS 13.0, *)) {
+        DDLogError(@"Voip push shouldnt arrive on ios13.");
+    }
+    else  {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            __block UIBackgroundTaskIdentifier tempTask= [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
+                DDLogInfo(@"voip push wake expiring");
+                [[UIApplication sharedApplication] endBackgroundTask:tempTask];
+                tempTask=UIBackgroundTaskInvalid;
+                [[MLXMPPManager sharedInstance] logoutAllKeepStreamWithCompletion:nil];
+            }];
+            
+            [[MLXMPPManager sharedInstance] connectIfNecessary];
+            DDLogInfo(@"voip push wake complete");
+        });
+    }
 }
 
 #pragma mark - notification actions

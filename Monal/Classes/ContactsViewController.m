@@ -112,7 +112,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshDisplay) name:kMonalAccountStatusChanged object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(clearAccount:) name:kMonalAccountClearContacts object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshContact:) name: kMonalContactRefresh object:nil];
-    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(presentChat:) name:kMonalPresentChat object:nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(removeOnlineUser:) name: kMonalContactOfflineNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showCallRequest:) name:kMonalCallRequestNotice object:nil];
@@ -661,9 +661,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 }
 
 #pragma mark chat presentation
--(void) presentChatWithName:(NSString *)buddyname account:(NSNumber *) account 
+-(void) presentChat:(NSNotification *)notification
 {
-    NSDictionary *row =@{@"buddy_name":buddyname, @"account_id": account};
+    NSDictionary *userinfo = notification.userInfo;
+    
+    NSDictionary *row =@{@"buddy_name":[userinfo objectForKey:@"from"], @"account_id": [userinfo objectForKey:@"accountNo"]};
     [self presentChatWithRow:row];
     
 }

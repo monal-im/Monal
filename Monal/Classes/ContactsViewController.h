@@ -34,10 +34,6 @@
  */
 -(void) handleNewMessage:(NSNotification *)notification;
 
-/**
- Presents a specific chat
- */
--(void) presentChatWithName:(NSString *)buddyname account:(NSNumber *) account ;
 
 
 @end 

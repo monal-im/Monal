@@ -62,9 +62,10 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshDisplay) name:kMonalWindowVisible object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshDisplay) name:kMonalAccountStatusChanged object:nil];
-     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshDisplay) name:kMonalRefreshContacts object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshDisplay) name:kMonalRefreshContacts object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(presentChat:) name:kMonalPresentChat object:nil];
     
-     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(addOnlineUser:) name: kMonalContactOnlineNotice object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(addOnlineUser:) name: kMonalContactOnlineNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(removeOnlineUser:) name: kMonalContactOfflineNotice object:nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showCallRequest:) name:kMonalCallRequestNotice object:nil];
@@ -75,7 +76,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
     self.contacts=[[NSMutableArray alloc] init] ;
     self.offlineContacts=[[NSMutableArray alloc] init] ;
     self.infoCells=[[NSMutableArray alloc] init] ;
-        
+    
     [MLXMPPManager sharedInstance].contactVC=self;
     self.currentSegment= kContactTab;
     

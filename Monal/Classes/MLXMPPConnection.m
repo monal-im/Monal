@@ -8,6 +8,15 @@
 
 #import "MLXMPPConnection.h"
 
+@interface MLXMPPConnection ()
+
+@property (nonatomic) MLXMPPServer *server;
+@property (nonatomic) MLXMPPIdentity *identity;
+@property (nonatomic) NSString* resource;
+@property (nonatomic) NSString* boundJid;
+
+@end
+
 @implementation MLXMPPConnection
 
 @end

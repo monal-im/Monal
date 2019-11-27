@@ -10,7 +10,18 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+/**
+ Imutable class to contain the specifics of an XMPP user
+ */
 @interface MLXMPPIdentity : NSObject
+
+
+@property (nonatomic, readonly) NSString *jid;
+
+-(NSString *) user;
+-(NSString *) domain;
+
+-(id) initWithJid:(NSString *)jid;
 
 @end
 

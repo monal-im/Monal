@@ -8,6 +8,27 @@
 
 #import "MLXMPPIdentity.h"
 
+ 
+@interface MLXMPPIdentity ()
+
+@property (nonatomic) NSString *jid;
+
+@end
+
 @implementation MLXMPPIdentity
 
+-(id) initWithJid:(NSString *)jid
+{
+    self=[super init];
+    self.jid=jid;
+    return self;
+}
+
+-(NSString *) user {
+    return nil;
+}
+
+-(NSString *) domain {
+    return nil;
+}
 @end

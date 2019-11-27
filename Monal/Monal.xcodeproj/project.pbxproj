@@ -358,6 +358,12 @@
 		26611017238F08AC0030A4EE /* MLXMPPConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 26611016238F08AC0030A4EE /* MLXMPPConnection.m */; };
 		26611018238F08AC0030A4EE /* MLXMPPConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 26611016238F08AC0030A4EE /* MLXMPPConnection.m */; };
 		26611019238F08AC0030A4EE /* MLXMPPConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 26611016238F08AC0030A4EE /* MLXMPPConnection.m */; };
+		2661101C238F10360030A4EE /* MLIQProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661101B238F10360030A4EE /* MLIQProcessor.m */; };
+		2661101D238F10360030A4EE /* MLIQProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661101B238F10360030A4EE /* MLIQProcessor.m */; };
+		2661101E238F10360030A4EE /* MLIQProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661101B238F10360030A4EE /* MLIQProcessor.m */; };
+		26611021238F104B0030A4EE /* MLPresenceProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 26611020238F104B0030A4EE /* MLPresenceProcessor.m */; };
+		26611022238F104B0030A4EE /* MLPresenceProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 26611020238F104B0030A4EE /* MLPresenceProcessor.m */; };
+		26611023238F104B0030A4EE /* MLPresenceProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 26611020238F104B0030A4EE /* MLPresenceProcessor.m */; };
 		2661D3411B40765A00EC51BA /* MLContactsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661D3401B40765A00EC51BA /* MLContactsViewController.m */; };
 		2661D3441B40766F00EC51BA /* MLChatViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661D3431B40766F00EC51BA /* MLChatViewController.m */; };
 		2661D34D1B407ED400EC51BA /* MLContactsCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661D34C1B407ED400EC51BA /* MLContactsCell.m */; };
@@ -850,6 +856,10 @@
 		26611011238F08980030A4EE /* MLXMPPIdentity.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLXMPPIdentity.m; sourceTree = "<group>"; };
 		26611015238F08AC0030A4EE /* MLXMPPConnection.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLXMPPConnection.h; sourceTree = "<group>"; };
 		26611016238F08AC0030A4EE /* MLXMPPConnection.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLXMPPConnection.m; sourceTree = "<group>"; };
+		2661101A238F10360030A4EE /* MLIQProcessor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLIQProcessor.h; sourceTree = "<group>"; };
+		2661101B238F10360030A4EE /* MLIQProcessor.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLIQProcessor.m; sourceTree = "<group>"; };
+		2661101F238F104B0030A4EE /* MLPresenceProcessor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLPresenceProcessor.h; sourceTree = "<group>"; };
+		26611020238F104B0030A4EE /* MLPresenceProcessor.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLPresenceProcessor.m; sourceTree = "<group>"; };
 		2661D33F1B40765A00EC51BA /* MLContactsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLContactsViewController.h; sourceTree = "<group>"; };
 		2661D3401B40765A00EC51BA /* MLContactsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLContactsViewController.m; sourceTree = "<group>"; };
 		2661D3421B40766F00EC51BA /* MLChatViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLChatViewController.h; sourceTree = "<group>"; };
@@ -1360,6 +1370,10 @@
 			children = (
 				2633CB41231CB816006D0277 /* MLMessageProcessor.h */,
 				2633CB42231CB816006D0277 /* MLMessageProcessor.m */,
+				2661101A238F10360030A4EE /* MLIQProcessor.h */,
+				2661101B238F10360030A4EE /* MLIQProcessor.m */,
+				2661101F238F104B0030A4EE /* MLPresenceProcessor.h */,
+				26611020238F104B0030A4EE /* MLPresenceProcessor.m */,
 			);
 			name = Processors;
 			sourceTree = "<group>";
@@ -3024,6 +3038,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				26611021238F104B0030A4EE /* MLPresenceProcessor.m in Sources */,
 				26D89F061A890672009B147C /* MLSwitchCell.m in Sources */,
 				26D51CDA1E2674D700141E04 /* NXOAuth2Constants.m in Sources */,
 				1D60589B0D05DD56006BFB54 /* main.m in Sources */,
@@ -3093,6 +3108,7 @@
 				26C3456E1C68F9F0007F4BEC /* MLHTTPRequest.m in Sources */,
 				26020B3721B957A0009A9735 /* MLMetaInfo.m in Sources */,
 				26C1EA681FF937040085547A /* MLOptOutSettingsViewController.m in Sources */,
+				2661101C238F10360030A4EE /* MLIQProcessor.m in Sources */,
 				2696EED21791245A00BC54B8 /* chatViewController.m in Sources */,
 				26B2A4FB1B73097500272E63 /* DDDispatchQueueLogFormatter.m in Sources */,
 				26B2A4F71B73097500272E63 /* DDTTYLogger.m in Sources */,
@@ -3194,6 +3210,7 @@
 				26189CE6238B989400EAD70C /* DDASLLogCapture.m in Sources */,
 				26189CD8238B986800EAD70C /* NSData+NXOAuth2.m in Sources */,
 				26189CD7238B985C00EAD70C /* MLHTTPRequest.m in Sources */,
+				26611023238F104B0030A4EE /* MLPresenceProcessor.m in Sources */,
 				26189D03238B9A9300EAD70C /* MLXMPPManager.m in Sources */,
 				26189D07238C792800EAD70C /* Reachability.m in Sources */,
 				26189CE2238B987D00EAD70C /* NXOAuth2PostBodyPart.m in Sources */,
@@ -3234,6 +3251,7 @@
 				26189CF2238B98C300EAD70C /* ParseFailed.m in Sources */,
 				26189CFC238B98C300EAD70C /* ParseResumed.m in Sources */,
 				26189CF5238B98C300EAD70C /* XMPPParser.m in Sources */,
+				2661101E238F10360030A4EE /* MLIQProcessor.m in Sources */,
 				26189CF0238B98C300EAD70C /* RTP.mm in Sources */,
 				26189CFD238B98CD00EAD70C /* MLXMLNode.m in Sources */,
 				26189CED238B989B00EAD70C /* DDMultiFormatter.m in Sources */,
@@ -3267,6 +3285,8 @@
 				26B2A4F01B73097500272E63 /* DDASLLogCapture.m in Sources */,
 				260499E21B730E9000D11866 /* xmpp.m in Sources */,
 				26611018238F08AC0030A4EE /* MLXMPPConnection.m in Sources */,
+				26611022238F104B0030A4EE /* MLPresenceProcessor.m in Sources */,
+				2661101D238F10360030A4EE /* MLIQProcessor.m in Sources */,
 				260499E51B730E9B00D11866 /* XMPPPresence.m in Sources */,
 				26D51CD51E2674D700141E04 /* NXOAuth2AccountStore.m in Sources */,
 				2638DAEB1B68F3D400DF05AC /* MLAccountSettings.m in Sources */,

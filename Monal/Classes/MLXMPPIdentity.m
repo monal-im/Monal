@@ -12,6 +12,7 @@
 @interface MLXMPPIdentity ()
 
 @property (nonatomic) NSString *jid;
+@property (nonatomic) NSString *password;
 
 @end
 

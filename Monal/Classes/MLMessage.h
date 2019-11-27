@@ -57,7 +57,10 @@ typedef NS_ENUM (NSInteger, MessageType) {
  */
 @property (nonatomic, assign) BOOL encrypted;
 
-@property (nonatomic, assign) BOOL delivered;
+/**
+ whether the text was sent out on the wire not if it was delivered to the recipient
+ */
+@property (nonatomic, assign) BOOL sent;
 
 
 

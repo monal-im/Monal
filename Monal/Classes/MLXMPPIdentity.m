@@ -18,10 +18,11 @@
 
 @implementation MLXMPPIdentity
 
--(id) initWithJid:(NSString *)jid
+-(id) initWithJid:(NSString *)jid andPassword:(NSString *) password
 {
     self=[super init];
     self.jid=jid;
+    self.password=password;
     return self;
 }
 

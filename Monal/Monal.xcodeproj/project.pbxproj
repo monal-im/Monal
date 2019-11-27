@@ -349,6 +349,15 @@
 		265F0B631B75719E00A63F20 /* MLAccountRow.m in Sources */ = {isa = PBXBuildFile; fileRef = 265F0B621B75719E00A63F20 /* MLAccountRow.m */; };
 		265F6BA21B7B0040006B8EBA /* MLImageManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EC411217BDE39E0031304D /* MLImageManager.m */; };
 		265FF0D51C7FDAC100E2CCE1 /* MLCloudStorageSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = 265FF0D41C7FDAC100E2CCE1 /* MLCloudStorageSettings.m */; };
+		2661100D238F08820030A4EE /* MLXMPPServer.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661100C238F08820030A4EE /* MLXMPPServer.m */; };
+		2661100E238F08820030A4EE /* MLXMPPServer.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661100C238F08820030A4EE /* MLXMPPServer.m */; };
+		2661100F238F08820030A4EE /* MLXMPPServer.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661100C238F08820030A4EE /* MLXMPPServer.m */; };
+		26611012238F08980030A4EE /* MLXMPPIdentity.m in Sources */ = {isa = PBXBuildFile; fileRef = 26611011238F08980030A4EE /* MLXMPPIdentity.m */; };
+		26611013238F08980030A4EE /* MLXMPPIdentity.m in Sources */ = {isa = PBXBuildFile; fileRef = 26611011238F08980030A4EE /* MLXMPPIdentity.m */; };
+		26611014238F08980030A4EE /* MLXMPPIdentity.m in Sources */ = {isa = PBXBuildFile; fileRef = 26611011238F08980030A4EE /* MLXMPPIdentity.m */; };
+		26611017238F08AC0030A4EE /* MLXMPPConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 26611016238F08AC0030A4EE /* MLXMPPConnection.m */; };
+		26611018238F08AC0030A4EE /* MLXMPPConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 26611016238F08AC0030A4EE /* MLXMPPConnection.m */; };
+		26611019238F08AC0030A4EE /* MLXMPPConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 26611016238F08AC0030A4EE /* MLXMPPConnection.m */; };
 		2661D3411B40765A00EC51BA /* MLContactsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661D3401B40765A00EC51BA /* MLContactsViewController.m */; };
 		2661D3441B40766F00EC51BA /* MLChatViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661D3431B40766F00EC51BA /* MLChatViewController.m */; };
 		2661D34D1B407ED400EC51BA /* MLContactsCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661D34C1B407ED400EC51BA /* MLContactsCell.m */; };
@@ -835,6 +844,12 @@
 		265F0B621B75719E00A63F20 /* MLAccountRow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLAccountRow.m; sourceTree = "<group>"; };
 		265FF0D31C7FDAC100E2CCE1 /* MLCloudStorageSettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLCloudStorageSettings.h; sourceTree = "<group>"; };
 		265FF0D41C7FDAC100E2CCE1 /* MLCloudStorageSettings.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLCloudStorageSettings.m; sourceTree = "<group>"; };
+		2661100B238F08820030A4EE /* MLXMPPServer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLXMPPServer.h; sourceTree = "<group>"; };
+		2661100C238F08820030A4EE /* MLXMPPServer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLXMPPServer.m; sourceTree = "<group>"; };
+		26611010238F08980030A4EE /* MLXMPPIdentity.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLXMPPIdentity.h; sourceTree = "<group>"; };
+		26611011238F08980030A4EE /* MLXMPPIdentity.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLXMPPIdentity.m; sourceTree = "<group>"; };
+		26611015238F08AC0030A4EE /* MLXMPPConnection.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLXMPPConnection.h; sourceTree = "<group>"; };
+		26611016238F08AC0030A4EE /* MLXMPPConnection.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLXMPPConnection.m; sourceTree = "<group>"; };
 		2661D33F1B40765A00EC51BA /* MLContactsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLContactsViewController.h; sourceTree = "<group>"; };
 		2661D3401B40765A00EC51BA /* MLContactsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLContactsViewController.m; sourceTree = "<group>"; };
 		2661D3421B40766F00EC51BA /* MLChatViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLChatViewController.h; sourceTree = "<group>"; };
@@ -1255,6 +1270,12 @@
 				26C4B22221B6B91300610282 /* MLDNSLookup.h */,
 				26C4B22321B6B91300610282 /* MLDNSLookup.m */,
 				26D0940622A14D03009C7AEF /* MLXMPPConstants.h */,
+				2661100B238F08820030A4EE /* MLXMPPServer.h */,
+				2661100C238F08820030A4EE /* MLXMPPServer.m */,
+				26611010238F08980030A4EE /* MLXMPPIdentity.h */,
+				26611011238F08980030A4EE /* MLXMPPIdentity.m */,
+				26611015238F08AC0030A4EE /* MLXMPPConnection.h */,
+				26611016238F08AC0030A4EE /* MLXMPPConnection.m */,
 			);
 			name = XMPP;
 			sourceTree = "<group>";
@@ -3044,6 +3065,7 @@
 				26D51CD41E2674D700141E04 /* NXOAuth2AccountStore.m in Sources */,
 				26D51CD01E2674D700141E04 /* NXOAuth2AccessToken.m in Sources */,
 				268C1E4A1FDAD08700BD6921 /* MLDetailsTableViewCell.m in Sources */,
+				26611017238F08AC0030A4EE /* MLXMPPConnection.m in Sources */,
 				2636C43F177BD58C001CA71F /* XMPPEdit.m in Sources */,
 				26EE1B0C21A8F3CE00264B95 /* MLWelcomeViewController.m in Sources */,
 				26352EA8177D222600E2C8FF /* MLXMPPManager.m in Sources */,
@@ -3086,6 +3108,7 @@
 				26B2A4F91B73097500272E63 /* DDContextFilterLogFormatter.m in Sources */,
 				26EE8B1F179B67FA006781F3 /* MLNotificationManager.m in Sources */,
 				26D51CE21E2674D700141E04 /* NXOAuth2Request.m in Sources */,
+				26611012238F08980030A4EE /* MLXMPPIdentity.m in Sources */,
 				26EE8B22179B7B0E006781F3 /* SlidingMessageViewController.m in Sources */,
 				26D51CCA1E2674D700141E04 /* NSData+NXOAuth2.m in Sources */,
 				26D59D9320714F32006F1DEE /* UIColor+Theme.m in Sources */,
@@ -3102,6 +3125,7 @@
 				2644D4921FF0064C00F46AB5 /* MLChatImageCell.m in Sources */,
 				26F396D621968A4300EF5720 /* GLCapsuleView.m in Sources */,
 				2678A98B185A8320003AF53B /* ChatLogAccountDetailViewController.m in Sources */,
+				2661100D238F08820030A4EE /* MLXMPPServer.m in Sources */,
 				26AAAADC2295742500200433 /* MLPasswordChangeTableViewController.m in Sources */,
 				26D51CCC1E2674D700141E04 /* NSString+NXOAuth2.m in Sources */,
 				26B2A4EF1B73097500272E63 /* DDASLLogCapture.m in Sources */,
@@ -3190,6 +3214,7 @@
 				26189CDF238B987D00EAD70C /* NXOAuth2Connection.m in Sources */,
 				26189CDA238B986800EAD70C /* NSURL+NXOAuth2.m in Sources */,
 				26189D00238B98CD00EAD70C /* XMPPMessage.m in Sources */,
+				26611019238F08AC0030A4EE /* MLXMPPConnection.m in Sources */,
 				26189CEC238B989B00EAD70C /* DDDispatchQueueLogFormatter.m in Sources */,
 				26189CF3238B98C300EAD70C /* ParseStream.m in Sources */,
 				26189CE8238B989400EAD70C /* DDFileLogger.m in Sources */,
@@ -3216,7 +3241,9 @@
 				26189D01238B98D300EAD70C /* xmpp.m in Sources */,
 				26189CE5238B989400EAD70C /* DDAbstractDatabaseLogger.m in Sources */,
 				26189CD9238B986800EAD70C /* NSString+NXOAuth2.m in Sources */,
+				2661100F238F08820030A4EE /* MLXMPPServer.m in Sources */,
 				26189CEE238B98C300EAD70C /* MLMessageProcessor.m in Sources */,
+				26611014238F08980030A4EE /* MLXMPPIdentity.m in Sources */,
 				26189CDC238B987D00EAD70C /* NXOAuth2Account.m in Sources */,
 				26189D08238C793100EAD70C /* EncodingTools.m in Sources */,
 				26189CD5238B985500EAD70C /* AESGcm.m in Sources */,
@@ -3239,6 +3266,7 @@
 				265FF0D51C7FDAC100E2CCE1 /* MLCloudStorageSettings.m in Sources */,
 				26B2A4F01B73097500272E63 /* DDASLLogCapture.m in Sources */,
 				260499E21B730E9000D11866 /* xmpp.m in Sources */,
+				26611018238F08AC0030A4EE /* MLXMPPConnection.m in Sources */,
 				260499E51B730E9B00D11866 /* XMPPPresence.m in Sources */,
 				26D51CD51E2674D700141E04 /* NXOAuth2AccountStore.m in Sources */,
 				2638DAEB1B68F3D400DF05AC /* MLAccountSettings.m in Sources */,
@@ -3248,6 +3276,7 @@
 				26D51CE11E2674D700141E04 /* NXOAuth2PostBodyStream.m in Sources */,
 				2661D34D1B407ED400EC51BA /* MLContactsCell.m in Sources */,
 				26B2A4F21B73097500272E63 /* DDASLLogger.m in Sources */,
+				2661100E238F08820030A4EE /* MLXMPPServer.m in Sources */,
 				2632EA472006ADFE00191EEB /* MLGroupChatViewController.m in Sources */,
 				2638DAEF1B68F3EF00DF05AC /* MLDisplaySettings.m in Sources */,
 				260499EE1B7313F000D11866 /* XMPPParser.m in Sources */,
@@ -3318,6 +3347,7 @@
 				26D56EE720B59FB000BF7C97 /* MLTextView.m in Sources */,
 				2661D3411B40765A00EC51BA /* MLContactsViewController.m in Sources */,
 				26B2A5021B730AE100272E63 /* Reachability.m in Sources */,
+				26611013238F08980030A4EE /* MLXMPPIdentity.m in Sources */,
 				26C4B22521B6B91300610282 /* MLDNSLookup.m in Sources */,
 				2661D3501B407EDD00EC51BA /* MLChatViewCell.m in Sources */,
 				260499E81B7313DF00D11866 /* ParseA.m in Sources */,

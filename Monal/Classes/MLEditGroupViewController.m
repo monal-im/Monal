@@ -74,6 +74,8 @@
     [self.tableView registerNib:[UINib nibWithNibName:@"MLButtonCell"
                                                bundle:[NSBundle mainBundle]]
          forCellReuseIdentifier:@"ButtonCell"];
+    
+      self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
 }
 
 -(void) viewWillAppear:(BOOL)animated

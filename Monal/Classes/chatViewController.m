@@ -117,7 +117,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     [nc addObserver:self selector:@selector(refreshButton:) name:kMonalAccountStatusChanged object:nil];
     [nc addObserver:self selector:@selector(fetchMoreMessages) name:kMLMAMMore object:nil];
 
-
+    self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
+    
     self.hidesBottomBarWhenPushed=YES;
 
     self.chatInput.layer.borderColor=[UIColor lightGrayColor].CGColor;
